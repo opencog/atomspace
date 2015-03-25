@@ -11,6 +11,7 @@ module OpenCog.AtomSpace.Api (
 import Foreign
 import Foreign.C.Types
 import Foreign.C.String
+import Control.Exception
 import OpenCog.AtomSpace.Types
 
 foreign import ccall "AtomSpace_CWrapper.h AtomSpace_new" c_atomspace_new :: IO AtomSpace
@@ -31,9 +32,4 @@ atomspace_print :: AtomSpace -> IO ()
 atomspace_print = c_atomspace_print
 
 withNewAtomSpace :: (AtomSpace -> IO a) -> IO a
-withNewAtomSpace f = do
-          at <- atomspace_new
-          res <- f at
-          atomspace_delete at
-          return res
-
+withNewAtomSpace f = bracket atomspace_new atomspace_delete f

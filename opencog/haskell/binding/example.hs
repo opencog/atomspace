@@ -4,8 +4,7 @@ import OpenCog.AtomSpace.Types
 import Data.Default
 
 main :: IO ()
-main = do 
-          at <- atomspace_new
+main = withNewAtomSpace $ \at -> do 
           putStrLn "Let's add some new nodes:"
           putStrLn "-------- Atomspace Before --------"
           atomspace_print at
@@ -14,5 +13,4 @@ main = do
           putStrLn "-------- Atomspace After  --------"
           atomspace_print at
           putStrLn "----------------------------------"
-          atomspace_delete at
 
