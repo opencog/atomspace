@@ -11,6 +11,20 @@ Going that way, I developed a simple initial example interface
 for the atomspace with some functions to create/delete a new atomspace 
 and add new nodes.
 
+The main idea is to build programs that work on an AtomSpace on the Monad 'AtomSpace'.
+Then, we can run this programs with the function runOnNewAtomSpace, that crates a new
+C++ atomspace behind, does all the computation, and finally deletes it.
+
+In the future, when developing a Haskell shell plugin for CogServer (using GHCI), I plan to offer a similar
+function runOnCogServerAtomSpace that will enable us to ran programs on the specific
+instance of the AtomSpace running on the CogServer. This seems to be a simple task, something like
+
+    runOnCogServerAtomSpace :: AtomSpace a -> IO a
+    runOnCogServerAtomSpace m = run m cogServerAtomSpaceRef
+
+Where cogServerAtomSpaceRef is a reference to the actual instance of the AtomSpace in the CogServer,
+that I will provide to GHCi. (something like: AtomSpaceRef pointerToAtomSpaceObjectInMemory)
+
 To try example.hs, I assume a "build" directory exists, and that the library  
 libatomspace.so was compiled on the folder: build/opencog/atomspace/
 So, to compile, and run the example:
