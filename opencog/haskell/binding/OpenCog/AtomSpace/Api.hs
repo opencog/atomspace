@@ -36,23 +36,27 @@ instance MonadIO AtomSpace where
     liftIO m = AtomSpace (\_ -> m)
 
 -- Internal Functions new and delete, to create and delete C++ instances of the AtomSpace class.
-foreign import ccall "AtomSpace_CWrapper.h AtomSpace_new" c_atomspace_new :: IO AtomSpaceRef
+foreign import ccall "AtomSpace_CWrapper.h AtomSpace_new"
+               c_atomspace_new :: IO AtomSpaceRef
 asNew :: IO AtomSpaceRef
 asNew = c_atomspace_new
 
-foreign import ccall "AtomSpace_CWrapper.h AtomSpace_delete" c_atomspace_delete :: AtomSpaceRef -> IO ()
+foreign import ccall "AtomSpace_CWrapper.h AtomSpace_delete"
+               c_atomspace_delete :: AtomSpaceRef -> IO ()
 asDelete :: AtomSpaceRef -> IO ()
 asDelete = c_atomspace_delete
 
 -- 'asAddNode' This function calls to the addNode method of the AtomSpace C++ class.
-foreign import ccall "AtomSpace_CWrapper.h AtomSpace_addNode" c_atomspace_addnode :: AtomSpaceRef -> CShort -> CString -> IO ()
+foreign import ccall "AtomSpace_CWrapper.h AtomSpace_addNode"
+               c_atomspace_addnode :: AtomSpaceRef -> CShort -> CString -> IO ()
 asAddNode :: Node -> AtomSpace ()
 asAddNode nod = AtomSpace (\asRef -> let ntype = fromIntegral $ fromEnum $ nodeType nod
                                          fun = \str -> c_atomspace_addnode asRef ntype str
                                       in withCString (nodeName nod) fun)
 
 -- 'asPrint' calls to the print method of the AtomSpace C++ class.
-foreign import ccall "AtomSpace_CWrapper.h AtomSpace_print" c_atomspace_print :: AtomSpaceRef -> IO ()
+foreign import ccall "AtomSpace_CWrapper.h AtomSpace_print"
+               c_atomspace_print :: AtomSpaceRef -> IO ()
 asPrint :: AtomSpace ()
 asPrint = AtomSpace $ \asRef -> c_atomspace_print asRef
 
