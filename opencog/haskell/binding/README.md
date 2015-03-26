@@ -16,7 +16,7 @@ Then, we can run this programs with the function runOnNewAtomSpace, that crates 
 C++ atomspace behind, does all the computation, and finally deletes it.
 
 In the future, when developing a Haskell shell plugin for CogServer (using GHCI), I plan to offer a similar
-function runOnCogServerAtomSpace that will enable us to ran programs on the specific
+function runOnCogServerAtomSpace that will enable us to run programs on the specific
 instance of the AtomSpace running on the CogServer. This seems to be a simple task, something like
 
     runOnCogServerAtomSpace :: AtomSpace a -> IO a
@@ -24,6 +24,9 @@ instance of the AtomSpace running on the CogServer. This seems to be a simple ta
 
 Where cogServerAtomSpaceRef is a reference to the actual instance of the AtomSpace in the CogServer,
 that I will provide to GHCi. (something like: AtomSpaceRef pointerToAtomSpaceObjectInMemory)
+
+We have to use the IO monad because of the use of FFI for calling c functions for working
+on a mutable instance of the atomspace, so we have side effects.
 
 To try example.hs, I assume a "build" directory exists, and that the library  
 libatomspace.so was compiled on the folder: build/opencog/atomspace/
