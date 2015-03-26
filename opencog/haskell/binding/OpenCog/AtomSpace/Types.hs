@@ -31,19 +31,19 @@ data Atom = CLink Link | CNode Node
     deriving Show
 
 data Link = Link{
-    link_type  :: LinkType
-,   link_name  :: String
-,   link_tv    :: TruthValue
-,   link_atoms :: [Atom]
+    linkType  :: LinkType
+,   linkName  :: String
+,   linkTv    :: TruthValue
+,   linkAtoms :: [Atom]
 }   deriving Show
 
 instance Default Link where
     def = Link LinkType1 "" def []
 
 data Node = Node{
-    node_type  :: NodeType
-,   node_name  :: String
-,   node_tv    :: TruthValue
+    nodeType  :: NodeType
+,   nodeName  :: String
+,   nodeTv    :: TruthValue
 }   deriving Show
 
 instance Default Node where

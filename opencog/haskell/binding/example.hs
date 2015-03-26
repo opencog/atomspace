@@ -12,8 +12,8 @@ program = do
               liftIO $ putStrLn "Let's add some new nodes:"
               liftIO $ putStrLn "---Before:--"
               asPrint
-              asAddNode def{node_name="NewNode", node_type = ConceptNode}
-              asAddNode def{node_name="AnotherNewNode", node_type = ConceptNode}
+              asAddNode def{nodeName="NewNode", nodeType = ConceptNode}
+              asAddNode def{nodeName="AnotherNewNode", nodeType = ConceptNode}
               liftIO $ putStrLn "---After:---"
               asPrint
               liftIO $ putStrLn "------------"

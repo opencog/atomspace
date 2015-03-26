@@ -46,9 +46,9 @@ asDelete = c_atomspace_delete
 -- 'asAddNode' This function calls to the addNode method of the AtomSpace C++ class.
 foreign import ccall "AtomSpace_CWrapper.h AtomSpace_addNode" c_atomspace_addnode :: AtomSpaceRef -> CShort -> CString -> IO ()
 asAddNode :: Node -> AtomSpace ()
-asAddNode nod = AtomSpace (\asRef -> let ntype = fromIntegral $ fromEnum $ node_type nod
+asAddNode nod = AtomSpace (\asRef -> let ntype = fromIntegral $ fromEnum $ nodeType nod
                                          fun = \str -> c_atomspace_addnode asRef ntype str
-                                      in withCString (node_name nod) fun)
+                                      in withCString (nodeName nod) fun)
 
 -- 'asPrint' calls to the print method of the AtomSpace C++ class.
 foreign import ccall "AtomSpace_CWrapper.h AtomSpace_print" c_atomspace_print :: AtomSpaceRef -> IO ()
