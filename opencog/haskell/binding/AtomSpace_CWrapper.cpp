@@ -11,6 +11,16 @@ void AtomSpace_delete(AtomSpace* this_ptr)
     delete this_ptr;
 }
 
+void AtomSpace_addNode(AtomSpace* this_ptr, Type t, const char* name)
+{
+    this_ptr->addNode(t,std::string(name));
+}
+
+void AtomSpace_print(AtomSpace* this_ptr)
+{
+    this_ptr->print();
+}
+/*
 int AtomSpace_getSize(AtomSpace* this_ptr)
 {
     this_ptr->getSize();
@@ -30,18 +40,8 @@ void AtomSpace_addAtom(AtomSpace* this_ptr, AtomPtr atom)
 {
     this_ptr->addAtom(atom);
 }
-
-void AtomSpace_addNode(AtomSpace* this_ptr, Type t, const char* name)
-{
-    this_ptr->addNode(t,std::string(name));
-}
-
 bool AtomSpace_removeAtom(AtomSpace* this_ptr, Handle h)
 {
     this_ptr->removeAtom(h);
 }
-
-void AtomSpace_print(AtomSpace* this_ptr)
-{
-    this_ptr->print();
-}
+*/
