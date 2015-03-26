@@ -56,7 +56,8 @@ foreign import ccall "AtomSpace_CWrapper.h AtomSpace_print" c_atomspace_print ::
 asPrint :: AtomSpace ()
 asPrint = AtomSpace $ \asRef -> c_atomspace_print asRef
 
--- 'runOnNewAtomSpace' creates a new AtomSpace (C++ object), does some computation f over it, and then deletes the AtomSpace.
+-- 'runOnNewAtomSpace' creates a new AtomSpace (C++ object), does some computation f over it,
+-- and then deletes the AtomSpace.
 -- By using bracket, I ensure properly freeing memory in case of exceptions in the computation f.
 runOnNewAtomSpace :: AtomSpace a -> IO a
 runOnNewAtomSpace (AtomSpace f) = bracket asNew asDelete f
