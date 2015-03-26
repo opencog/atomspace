@@ -3,43 +3,49 @@ module OpenCog.AtomSpace.Types(
     NodeType (..)
   , LinkType (..)
   , TruthValue (..)
-  , CogAtom (..)
-  , CogLink (..)
-  , CogNode (..)
-  , AtomSpace (..)
+  , Atom (..)
+  , Link (..)
+  , Node (..)
   ) where
 
 import Data.Default
 import Foreign
 
+-- I should add more options here, this is just an example.
 data NodeType = NodeType1 | ConceptNode
     deriving (Enum,Show)
 
+-- I should add more options here, this is just an example.
 data LinkType = LinkType1 | LinkType2
     deriving (Enum,Show)
 
-type TruthValue = (Double,Double)
-
-data CogAtom = CLink CogLink | CNode CogNode 
+data TruthValue = SimpleTruthValue Double Double
+                | CountTruthValue Double Double Double
+                | IndefiniteTruthValue Double Double Double Double
     deriving Show
 
-data CogLink = CogLink {
+instance Default TruthValue where
+    def = SimpleTruthValue 1 0
+
+data Atom = CLink Link | CNode Node
+    deriving Show
+
+data Link = Link{
     link_type  :: LinkType
 ,   link_name  :: String
 ,   link_tv    :: TruthValue
+,   link_atoms :: [Atom]
 }   deriving Show
 
-instance Default CogLink where
-    def = CogLink LinkType1 "" (1,0)
+instance Default Link where
+    def = Link LinkType1 "" def []
 
-data CogNode = CogNode{
+data Node = Node{
     node_type  :: NodeType
 ,   node_name  :: String
 ,   node_tv    :: TruthValue
 }   deriving Show
 
-instance Default CogNode where
-    def = CogNode ConceptNode "" (0,0)
-
-newtype AtomSpace = AtomSpace (Ptr AtomSpace)
+instance Default Node where
+    def = Node ConceptNode "" def
 

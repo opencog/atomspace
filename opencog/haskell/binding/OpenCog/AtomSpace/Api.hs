@@ -1,35 +1,62 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
 
 module OpenCog.AtomSpace.Api (
-      atomspace_new
-    , atomspace_delete
-    , atomspace_addnode
-    , atomspace_print
-    , withNewAtomSpace
+      asAddNode
+    , asPrint
+    , runOnNewAtomSpace
+    , AtomSpace
     ) where
+
+--Note that I don't export the AtomSpace data constructors nor the asDelete/asNew functions.
 
 import Foreign
 import Foreign.C.Types
 import Foreign.C.String
 import Control.Exception
 import OpenCog.AtomSpace.Types
+import Control.Monad.IO.Class
 
-foreign import ccall "AtomSpace_CWrapper.h AtomSpace_new" c_atomspace_new :: IO AtomSpace
-atomspace_new :: IO AtomSpace
-atomspace_new = c_atomspace_new
+-- Internal AtomSpace reference to a mutable C++ instance of the AtomSpace class.
+newtype AtomSpaceRef = AtomSpaceRef (Ptr AtomSpaceRef)
 
-foreign import ccall "AtomSpace_CWrapper.h AtomSpace_delete" c_atomspace_delete :: AtomSpace -> IO ()
-atomspace_delete :: AtomSpace -> IO ()
-atomspace_delete as = c_atomspace_delete as
+-- Main Data Type for representing programs working on an AtomSpace.
+-- The run function inside means: "Once you have a reference to an AtomSpace in memory, working on it reduces to performing IO actions"
+-- We have to use the IO monad because of the use of FFI for calling c functions for working on a mutable instance of the
+-- atomspace, so we have side effects.
+data AtomSpace a = AtomSpace {run :: AtomSpaceRef -> IO a}
 
-foreign import ccall "AtomSpace_CWrapper.h AtomSpace_addNode" c_atomspace_addnode :: AtomSpace -> CShort -> CString -> IO ()
-atomspace_addnode :: AtomSpace -> CogNode -> IO ()
-atomspace_addnode as nod = withCString (node_name nod)
-                                       (\str -> c_atomspace_addnode as (fromIntegral $ fromEnum $ node_type nod) str)
+instance Monad AtomSpace where
+    m1 >>= f = AtomSpace $ \asRef -> do
+                                       a <- run m1 asRef
+                                       run (f a) asRef
+    return a = AtomSpace (\_ -> return a)
 
-foreign import ccall "AtomSpace_CWrapper.h AtomSpace_print" c_atomspace_print :: AtomSpace -> IO ()
-atomspace_print :: AtomSpace -> IO ()
-atomspace_print = c_atomspace_print
+instance MonadIO AtomSpace where
+    liftIO m = AtomSpace (\_ -> m)
 
-withNewAtomSpace :: (AtomSpace -> IO a) -> IO a
-withNewAtomSpace f = bracket atomspace_new atomspace_delete f
+-- Internal Functions new and delete, to create and delete C++ instances of the AtomSpace class.
+foreign import ccall "AtomSpace_CWrapper.h AtomSpace_new" c_atomspace_new :: IO AtomSpaceRef
+asNew :: IO AtomSpaceRef
+asNew = c_atomspace_new
+
+foreign import ccall "AtomSpace_CWrapper.h AtomSpace_delete" c_atomspace_delete :: AtomSpaceRef -> IO ()
+asDelete :: AtomSpaceRef -> IO ()
+asDelete = c_atomspace_delete
+
+-- 'asAddNode' This function calls to the addNode method of the AtomSpace C++ class.
+foreign import ccall "AtomSpace_CWrapper.h AtomSpace_addNode" c_atomspace_addnode :: AtomSpaceRef -> CShort -> CString -> IO ()
+asAddNode :: Node -> AtomSpace ()
+asAddNode nod = AtomSpace (\asRef -> let ntype = fromIntegral $ fromEnum $ node_type nod
+                                         fun = \str -> c_atomspace_addnode asRef ntype str
+                                      in withCString (node_name nod) fun)
+
+-- 'asPrint' calls to the print method of the AtomSpace C++ class.
+foreign import ccall "AtomSpace_CWrapper.h AtomSpace_print" c_atomspace_print :: AtomSpaceRef -> IO ()
+asPrint :: AtomSpace ()
+asPrint = AtomSpace $ \asRef -> c_atomspace_print asRef
+
+-- 'runOnNewAtomSpace' creates a new AtomSpace (C++ object), does some computation f over it, and then deletes the AtomSpace.
+-- By using bracket, I ensure properly freeing memory in case of exceptions in the computation f.
+runOnNewAtomSpace :: AtomSpace a -> IO a
+runOnNewAtomSpace (AtomSpace f) = bracket asNew asDelete f
+
