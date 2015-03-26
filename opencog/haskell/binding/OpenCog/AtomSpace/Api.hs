@@ -20,9 +20,10 @@ import Control.Monad.IO.Class
 newtype AtomSpaceRef = AtomSpaceRef (Ptr AtomSpaceRef)
 
 -- Main Data Type for representing programs working on an AtomSpace.
--- The run function inside means: "Once you have a reference to an AtomSpace in memory, working on it reduces to performing IO actions"
--- We have to use the IO monad because of the use of FFI for calling c functions for working on a mutable instance of the
--- atomspace, so we have side effects.
+-- The run function inside means: "Once you have a reference to an AtomSpace in memory,
+-- working on it reduces to performing IO actions"
+-- We have to use the IO monad because of the use of FFI for calling c functions for working
+-- on a mutable instance of the atomspace, so we have side effects.
 data AtomSpace a = AtomSpace {run :: AtomSpaceRef -> IO a}
 
 instance Monad AtomSpace where
