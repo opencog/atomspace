@@ -58,11 +58,11 @@ asAddNode nod = AtomSpace (\asRef -> let ntype = fromIntegral $ fromEnum $ nodeT
 foreign import ccall "AtomSpace_CWrapper.h AtomSpace_print"
                c_atomspace_print :: AtomSpaceRef -> IO ()
 asPrint :: AtomSpace ()
-asPrint = AtomSpace $ \asRef -> c_atomspace_print asRef
+asPrint = AtomSpace c_atomspace_print
 
--- 'runOnNewAtomSpace' creates a new AtomSpace (C++ object), does some computation f over it,
+-- 'runOnNewAtomSpace' creates a new AtomSpace (C++ object), does some computation run_ over it,
 -- and then deletes the AtomSpace.
--- By using bracket, I ensure properly freeing memory in case of exceptions in the computation f.
+-- By using bracket, I ensure properly freeing memory in case of exceptions in the computation run_.
 runOnNewAtomSpace :: AtomSpace a -> IO a
-runOnNewAtomSpace (AtomSpace f) = bracket asNew asDelete f
+runOnNewAtomSpace (AtomSpace run_) = bracket asNew asDelete run_
 
