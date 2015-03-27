@@ -11,9 +11,9 @@ void AtomSpace_delete(AtomSpace* this_ptr)
     delete this_ptr;
 }
 
-void AtomSpace_addNode(AtomSpace* this_ptr, Type t, const char* name)
+long AtomSpace_addNode(AtomSpace* this_ptr, Type t, const char* name)
 {
-    this_ptr->addNode(t,std::string(name));
+    return this_ptr->addNode(t,std::string(name)).value();
 }
 
 void AtomSpace_print(AtomSpace* this_ptr)

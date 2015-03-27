@@ -7,7 +7,7 @@ extern "C"
 
     AtomSpace* AtomSpace_new();
     void AtomSpace_delete(AtomSpace* this_ptr);
-    void AtomSpace_addNode(AtomSpace* this_ptr, Type t, const char* name);
+    long AtomSpace_addNode(AtomSpace* this_ptr, Type t, const char* name);
     void AtomSpace_print(AtomSpace* this_ptr);
 /*
     int AtomSpace_getSize(AtomSpace* this_ptr);

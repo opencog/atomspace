@@ -6,6 +6,7 @@ module OpenCog.AtomSpace.Types(
   , Atom (..)
   , Link (..)
   , Node (..)
+  , Handle (..)
   ) where
 
 import Data.Default
@@ -26,6 +27,8 @@ data TruthValue = SimpleTruthValue Double Double
 
 instance Default TruthValue where
     def = SimpleTruthValue 1 0
+
+type Handle = Int
 
 data Atom = CLink Link | CNode Node
     deriving Show

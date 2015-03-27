@@ -12,8 +12,9 @@ program = do
               liftIO $ putStrLn "Let's add some new nodes:"
               liftIO $ putStrLn "---Before:--"
               asPrint
-              asAddNode def{nodeName="NewNode", nodeType = ConceptNode}
-              asAddNode def{nodeName="AnotherNewNode", nodeType = ConceptNode}
+              h1 <- asAddNode def{nodeName="NewNode", nodeType = ConceptNode}
+              h2 <- asAddNode def{nodeName="AnotherNewNode", nodeType = ConceptNode}
+              liftIO $ putStrLn $ "---Added with handles " ++ show(h1) ++ " and " ++ show(h2)
               liftIO $ putStrLn "---After:---"
               asPrint
               liftIO $ putStrLn "------------"

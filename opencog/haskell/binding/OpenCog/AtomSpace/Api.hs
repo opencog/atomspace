@@ -15,6 +15,7 @@ import Foreign.C.String
 import Control.Exception
 import OpenCog.AtomSpace.Types
 import Control.Monad.IO.Class
+import Data.Functor
 
 -- Internal AtomSpace reference to a mutable C++ instance of the AtomSpace class.
 newtype AtomSpaceRef = AtomSpaceRef (Ptr AtomSpaceRef)
@@ -48,10 +49,10 @@ asDelete = c_atomspace_delete
 
 -- 'asAddNode' This function calls to the addNode method of the AtomSpace C++ class.
 foreign import ccall "AtomSpace_CWrapper.h AtomSpace_addNode"
-               c_atomspace_addnode :: AtomSpaceRef -> CShort -> CString -> IO ()
-asAddNode :: Node -> AtomSpace ()
+               c_atomspace_addnode :: AtomSpaceRef -> CShort -> CString -> IO CLong
+asAddNode :: Node -> AtomSpace Handle
 asAddNode nod = AtomSpace (\asRef -> let ntype = fromIntegral $ fromEnum $ nodeType nod
-                                         fun = \str -> c_atomspace_addnode asRef ntype str
+                                         fun = \str -> fromEnum <$> c_atomspace_addnode asRef ntype str
                                       in withCString (nodeName nod) fun)
 
 -- 'asPrint' calls to the print method of the AtomSpace C++ class.
