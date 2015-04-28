@@ -63,7 +63,6 @@ IF (HAVE_ATOMSPACE)
 		"../../atomspace/TruthValue.h" "../../atomspace/SimpleTruthValue.h"
 		"../../atomspace/ClassServer.h" "../../atomspace/Handle.h"
 		"../../atomspace/AtomSpace.h"
-		"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
 	)
 
 	# list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace.cpp")
@@ -78,19 +77,11 @@ IF (HAVE_ATOMSPACE)
 	# but should instead dynamic-load them, as needed.
 	ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
 	ADD_DEPENDENCIES(atomspace_cython nlp_atom_types)
-	ADD_DEPENDENCIES(atomspace_cython attention_atom_types)
-	ADD_DEPENDENCIES(atomspace_cython spacetime_atom_types)
 	ADD_DEPENDENCIES(atomspace_cython pln_atom_types)
-	ADD_DEPENDENCIES(atomspace_cython embodiment_atom_types)
-	ADD_DEPENDENCIES(atomspace_cython spacetime_atom_types)
 
 	TARGET_LINK_LIBRARIES(atomspace_cython
 		atomspace
 		atomspaceutils
-		attention-types
-		embodiment-types
-		nlp-types
-		spacetime-types
 		${COGUTIL_LIBRARY}
 		${PYTHON_LIBRARIES}
 		${Boost_THREAD_LIBRARY}
@@ -206,107 +197,10 @@ IF (HAVE_ATOMSPACE AND HAVE_GUILE)
 ENDIF (HAVE_ATOMSPACE AND HAVE_GUILE)
 
 
-IF (HAVE_SERVER)
-	############################ cogserver #########################
-	CYTHON_ADD_MODULE_PYX(cogserver
-		"request.pyx" "agent.pyx" "atomspace.pxd" opencog_atom_types
-		"agent_finder_types.h"
-		"../../atomspace/TruthValue.h" "../../atomspace/SimpleTruthValue.h"
-		"../../atomspace/ClassServer.h" "../../atomspace/Handle.h"
-		"../../atomspace/AtomSpace.h"
-		"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
-	)
-
-	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "cogserver.cpp")
-
-	# opencog.cogserver Python bindings
-	ADD_LIBRARY(cogserver_cython SHARED
-		cogserver.cpp
-	)
-
-	TARGET_LINK_LIBRARIES(cogserver_cython
-		server
-		${PYTHON_LIBRARIES}
-	)
-
-	SET_TARGET_PROPERTIES(cogserver_cython PROPERTIES
-		PREFIX ""
-		OUTPUT_NAME cogserver)
-
-	####################### agent finder ########################
-	CYTHON_ADD_MODULE_PYX(agent_finder
-		"atomspace.pxd" "cogserver.pxd"
-		"../../server/Agent.h" "../../server/Request.h"
-		"../../atomspace/TruthValue.h" "../../atomspace/SimpleTruthValue.h"
-		"../../atomspace/ClassServer.h" "../../atomspace/Handle.h"
-		"../../atomspace/AtomSpace.h"
-		"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
-	)
-
-	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES
-		"agent_finder.cpp" "agent_finder_api.h")
-
-	# utility library for PythonModule
-	ADD_LIBRARY(agent_finder SHARED
-		agent_finder.cpp
-	)
-
-	TARGET_LINK_LIBRARIES(agent_finder
-		${PYTHON_LIBRARIES}
-		${Boost_THREAD_LIBRARY}
-		${Boost_SYSTEM_LIBRARY}
-	)
-
-	ADD_DEPENDENCIES(agent_finder atomspace_cython)
-
-	SET_TARGET_PROPERTIES(agent_finder PROPERTIES
-		PREFIX ""
-		OUTPUT_NAME agent_finder)
-
-ENDIF(HAVE_SERVER)
-
-IF (HAVE_MOSES)
-	CYTHON_ADD_MODULE_PYX(pymoses
-		# "<moses/moses/main/moses_exec.h>"
-	)
-
-	# opencog.pymoses Python bindings
-	ADD_LIBRARY(moses_cython SHARED
-		pymoses.cpp
-	)
-
-	TARGET_LINK_LIBRARIES(moses_cython
-		moses_exec
-		moses
-		${COGUTIL_LIBRARY}
-		comboreduct
-		feature_selection
-		${PYTHON_LIBRARIES}
-		${Boost_PROGRAM_OPTIONS_LIBRARY}
-		${Boost_THREAD_LIBRARY}
-	)
-
-	IF (HAVE_MPI)
-		TARGET_LINK_LIBRARIES (moses_cython
-			# These two work for both MPICH2 and OpenMPI, for me.
-			${MPI_LIBRARY}
-			${MPI_EXTRA_LIBRARY}
-		)
-	ENDIF (HAVE_MPI)
-
-	SET_TARGET_PROPERTIES(moses_cython PROPERTIES
-		PREFIX ""
-		OUTPUT_NAME pymoses)
-
-ENDIF (HAVE_MOSES)
-
-
 IF (WIN32)
-	INSTALL (TARGETS agent_finder DESTINATION "${DATADIR}/python")
-	INSTALL (TARGETS atomspace_cython cogserver_cython DESTINATION "${DATADIR}/python/opencog")
+	INSTALL (TARGETS atomspace_cython DESTINATION "${DATADIR}/python/opencog")
 ELSE (WIN32)
-	INSTALL (TARGETS agent_finder LIBRARY DESTINATION "${DATADIR}/python")
-	INSTALL (TARGETS atomspace_cython cogserver_cython LIBRARY DESTINATION "${DATADIR}/python/opencog")
+	INSTALL (TARGETS atomspace_cython LIBRARY DESTINATION "${DATADIR}/python/opencog")
 ENDIF (WIN32)
 
 INSTALL (FILES 

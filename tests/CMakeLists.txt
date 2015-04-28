@@ -19,7 +19,7 @@ IF (CXXTEST_FOUND)
 
 	IF (HAVE_ATOMSPACE)
 		ADD_SUBDIRECTORY (atomspace)
-        ADD_SUBDIRECTORY (atomutils)
+		ADD_SUBDIRECTORY (atomutils)
 
 		# Persistence is for saving/restoring atomspace to disk.
 		ADD_SUBDIRECTORY (persist)
@@ -36,15 +36,6 @@ IF (CXXTEST_FOUND)
 		# Currently, reasoning depends on query, above.
 		ADD_SUBDIRECTORY (reasoning)
 
-		# The cogserver exposes the atomspace to outside users.
-		IF (HAVE_SERVER)
-			ADD_SUBDIRECTORY (server)
-		ENDIF (HAVE_SERVER)
-
- 		ADD_SUBDIRECTORY (spatial)
-
-		ADD_SUBDIRECTORY (nlp)
-
 		ADD_SUBDIRECTORY (pln)
 
 	ENDIF (HAVE_ATOMSPACE)
@@ -53,18 +44,5 @@ IF (CXXTEST_FOUND)
 		ADD_SUBDIRECTORY (cython)
 		ADD_SUBDIRECTORY (python)
 	ENDIF (HAVE_CYTHON AND PYTHONINTERP_FOUND)
-
-	IF (HAVE_ATTENTION)
-		ADD_SUBDIRECTORY (dynamics)
-	ENDIF (HAVE_ATTENTION)
-
-	# learning requires a working comboreduct.
-	ADD_SUBDIRECTORY (learning)
-
-	# Embodiment requires that learning, spatial, etc.
-	# all works fine. So run this last.
-	IF (HAVE_EMBODIMENT)
-		ADD_SUBDIRECTORY (embodiment)
-	ENDIF (HAVE_EMBODIMENT)
 
 ENDIF (CXXTEST_FOUND)

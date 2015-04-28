@@ -266,86 +266,8 @@ ELSE (HYPERTABLE_FOUND)
 ENDIF (HYPERTABLE_FOUND)
 
 
-# Lapack is needed for BLOPEX
-FIND_PACKAGE(LAPACK)
-IF (LAPACK_FOUND)
-	# MESSAGE(STATUS "LAPACK found.")
-	ADD_DEFINITIONS(-DHAVE_LAPACK)
-	SET(HAVE_LAPACK 1)
-ELSE (LAPACK_FOUND)
-	MESSAGE(STATUS "LAPACK missing: needed for blopex-based clustering.")
-ENDIF (LAPACK_FOUND)
-
-
-# Link-Gramar is needed for the Viterbi parser
-# Only 4.7.12 or newer has the required read-dict API in it.
-FIND_PACKAGE(LinkGrammar 4.7.12)
-IF (LINK_GRAMMAR_FOUND)
-	SET(HAVE_LINK_GRAMMAR 1)
-	INCLUDE_DIRECTORIES(${LINK_GRAMMAR_INCLUDE_DIRS})
-ELSE (LINK_GRAMMAR_FOUND)
-	MESSAGE(STATUS "Link Grammar missing: needed for the Viterbi parser.")
-ENDIF (LINK_GRAMMAR_FOUND)
-
-
-# MOSES needed for visualization...
-FIND_PACKAGE(MOSES)
-
-IF (MOSES_FOUND)
-	MESSAGE(STATUS "MOSES was found.")
-	ADD_DEFINITIONS(-DHAVE_MOSES)
-	SET(HAVE_MOSES 1)
-	SET(HAVE_COMBOREDUCT 1)
-	SET(HAVE_FEATURE_SELECTION 1)
-ELSE (MOSES_FOUND)
-	MESSAGE(STATUS "MOSES missing: needed for embodiment.")
-ENDIF (MOSES_FOUND)
-
-
-# OpenGL needed for visualization...
-FIND_PACKAGE(OpenGL)
-
-IF (OPENGL_FOUND)
-	MESSAGE(STATUS "OpenGL was found.")
-ELSE (OPENGL_FOUND)
-	MESSAGE(STATUS "OpenGL missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")
-ENDIF (OPENGL_FOUND)
-
 # At this time, there is no reason to build with memcached for
 # FIND_PACKAGE(LibMemCached)
-
-# Google Protobuf library
-# The protocol buffer compiler is a separately installable package, and
-# it is also needed for building embodiment PAI. So check for that, too.
-FIND_PACKAGE(Protobuf)
-IF (PROTOBUF_FOUND
-		AND PROTOBUF_LIBRARY
-		AND PROTOBUF_INCLUDE_DIR
-		AND PROTOBUF_PROTOC_EXECUTABLE)
-
-	ADD_DEFINITIONS(-DHAVE_PROTOBUF)
-	SET(HAVE_PROTOBUF 1)
-	SET(PROTOBUF_DIR_MESSAGE "Protobuf was found.")
-
-ELSE (PROTOBUF_FOUND
-		AND PROTOBUF_LIBRARY
-		AND PROTOBUF_INCLUDE_DIR
-		AND PROTOBUF_PROTOC_EXECUTABLE)
-
-	# If we are here, then we are missing either the libraries, or the
-	# compiler. React appropriately.
-	IF (PROTOBUF_PROTOC_EXECUTABLE)
-		SET(PROTOBUF_DIR_MESSAGE "Protobuf was not found; the new message decoding functions would not work.\n   To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
-	ELSE (PROTOBUF_PROTOC_EXECUTABLE)
-		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; embodiment PAI can't be built without it.\n   To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
-	ENDIF (PROTOBUF_PROTOC_EXECUTABLE)
-
-ENDIF (PROTOBUF_FOUND
-		AND PROTOBUF_LIBRARY
-		AND PROTOBUF_INCLUDE_DIR
-		AND PROTOBUF_PROTOC_EXECUTABLE)
-
-MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
 
 # Python needed for embodiment (!?) and for PLN
 FIND_PACKAGE(PythonInterp)
@@ -387,23 +309,6 @@ IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND PYTHONLIBS_FOUND)
 	SET(HAVE_NOSETESTS 1)
 ENDIF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND PYTHONLIBS_FOUND)
 
-# SDL needed for the spatial tools
-FIND_PACKAGE(SDL)
-
-IF (SDL_FOUND)
-	MESSAGE(STATUS "SDL was found.")
-ELSE (SDL_FOUND)
-	MESSAGE(STATUS "SDL missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")
-ENDIF (SDL_FOUND)
-
-FIND_PACKAGE(SDL_gfx)
-
-IF (SDLGFX_FOUND)
-	MESSAGE(STATUS "SDL_gfx was found")
-ELSE (SDLGFX_FOUND)
-	MESSAGE(STATUS "SDL_gfx missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")
-ENDIF (SDLGFX_FOUND)
-
 # Threaded Building Blocks (Intel TBB) library
 FIND_PACKAGE(TBB)
 IF (TBB_FOUND)
@@ -412,16 +317,6 @@ ELSE (TBB_FOUND)
 	SET(TBB_DIR_MESSAGE "Intel TBB (Threaded Building Blocks) was not found; the AtomSpace Publisher module will not be built. Installation instructions: https://www.threadingbuildingblocks.org/download")
 ENDIF (TBB_FOUND)
 MESSAGE(STATUS "${TBB_DIR_MESSAGE}")
-
-FIND_PACKAGE(TCL)
-
-# /usr/bin/tclsh is expected for some embodiment tests, but is
-# not otherwise important for anything...
-IF (TCL_TCLSH)
-	MESSAGE(STATUS "TCL shell was found here: ${TCL_TCLSH}")
-ELSE (TCL_TCLSH)
-	MESSAGE(STATUS "TCL shell missing: needed for some embodiment tests.")
-ENDIF (TCL_TCLSH)
 
 # Enable the hypergraph persistence module, if unixodbc is found.
 # In principle, iODBC could be used; however, iODBC is buggy when
@@ -464,37 +359,12 @@ ELSE (VALGRIND_FOUND)
 	MESSAGE(STATUS "VALGRIND missing: needed for thread debugging.")
 ENDIF (VALGRIND_FOUND)
 
-# These are required for building the embodiment code
-FIND_PACKAGE(XercesC)
-IF (XERCESC_FOUND)
-	IF ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
-		MESSAGE(WARNING "Xerces ${XERCESC_VERSION} not supported. Only versions 3.* are supported. Embodiment won't be built.")
-		SET(XERCESC_VERSION_OK FALSE)
-	ELSE ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
-		MESSAGE(STATUS "Found Xerces ${XERCESC_VERSION} -- ${XERCESC_LIBRARIES}")
-		INCLUDE_DIRECTORIES(${XERCESC_INCLUDE})
-		SET(XERCESC_VERSION_OK TRUE)
-	ENDIF ("${XERCESC_VERSION}" VERSION_LESS "3.0.0")
-ELSE (XERCESC_FOUND)
-	MESSAGE(STATUS "Xerces-C missing: needed for embodiment")
-ENDIF (XERCESC_FOUND)
-
 # XML-RPC, used by the ubigraph module
 FIND_PACKAGE(XMLRPC COMPONENTS client)
 IF (NOT XMLRPC_FOUND)
 	MESSAGE(STATUS "libxmlrpc missing: needed for ubigraph module.")
 ENDIF (NOT XMLRPC_FOUND)
 
-# ZeroMQ
-FIND_PACKAGE(ZMQ 3.2.4)
-IF (ZMQ_FOUND AND ZMQ_LIBRARY)
-	ADD_DEFINITIONS(-DHAVE_ZMQ)
-	SET(HAVE_ZMQ 1)
-	SET(ZMQ_DIR_MESSAGE "ZeroMQ was found.")
-ELSE (ZMQ_FOUND AND ZMQ_LIBRARY)
-	SET(ZMQ_DIR_MESSAGE "ZeroMQ was not found; the AtomSpace Publisher module, and the message system used by GUI monitor for OAC will not be built.\nTo over-ride, make sure that the environment variable ZMQ_LIBRARY is set.\nInstallation instructions: http://zeromq.org/intro:get-the-software")
-ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY)
-MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
 
 # ==========================================================
 # Decide what to build, based on the packages found.
@@ -512,22 +382,9 @@ IF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
 	SET(HAVE_SPATIAL_TOOLS 1)
 ENDIF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
 
-# FYI, at this time, no part of opencog depends on expat being installed!
-IF(EXPAT_FOUND AND HAVE_ATOMSPACE)
-	SET(HAVE_XML 1)
-ENDIF(EXPAT_FOUND AND HAVE_ATOMSPACE)
-
-IF(HAVE_ATOMSPACE)
-	SET(HAVE_SERVER 1)
-ENDIF(HAVE_ATOMSPACE)
-
 IF(HAVE_ATOMSPACE AND ODBC_FOUND) # SQL persistance
 	SET(HAVE_PERSIST 1)
 ENDIF(HAVE_ATOMSPACE AND ODBC_FOUND)
-
-IF(XERCESC_VERSION_OK)
-	SET(HAVE_EMBODIMENT 1)
-ENDIF(XERCESC_VERSION_OK)
 
 IF (CURL_FOUND AND XMLRPC_FOUND)
 	ADD_DEFINITIONS(-DHAVE_UBIGRAPH)
@@ -622,8 +479,8 @@ IF (CXXTEST_FOUND)
 	ADD_CUSTOM_TARGET(test_python
 		DEPENDS PythonModuleUTest PyEvalUTest PythonEvalUTest CogServerUTest
 				PythonUtilitiesUTest
-				bindlink_cython cogserver_cython atomspace_cython
-				moses_cython scheme_wrapper logger_cython utilities_cython
+				bindlink_cython atomspace_cython
+				scheme_wrapper logger_cython utilities_cython
 		WORKING_DIRECTORY tests/cython
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
 		COMMENT "Running Python and Cython tests..."
@@ -747,23 +604,14 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 
 # Show a summary of what we got
 SUMMARY_ADD("AtomSpace" "A weighted and typed hypergraph database" HAVE_ATOMSPACE)
-SUMMARY_ADD("Attention" "Agents for attention allocation dynamics" HAVE_ATTENTION)
-SUMMARY_ADD("Blopex" "BLOPEX block eigenvalue solver" HAVE_LAPACK)
 SUMMARY_ADD("Cython bindings" "Cython (python) bindings" HAVE_CYTHON)
-SUMMARY_ADD("Dim. Embedding" "Compute dimensional embedding of the AtomSpace" HAVE_DIMEMBED)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
-SUMMARY_ADD("Embodiment" "Architecture for embodiment" HAVE_EMBODIMENT)
-SUMMARY_ADD("Learning Server" "Embodiment Learning" HAVE_MOSES)
 SUMMARY_ADD("GTK Visualizer" "GTK3-based Atomspace Visualizer" HAVE_GTK)
 SUMMARY_ADD("Hypertable" "HyperTable for scalable persistance (experimental)" HAVE_HYPERTABLE)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
-SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
-SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS)
 SUMMARY_ADD("SQL persistance" "Save/Restore of AtomSpace to database" HAVE_PERSIST)
+SUMMARY_ADD("TBB" "Intel TBB (Threaded Building Blocks) for multithreading" HAVE_TBB)
 SUMMARY_ADD("Ubigraph" "Visualisation of the AtomSpace" HAVE_UBIGRAPH)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
-SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)
-SUMMARY_ADD("ZMQ" "ZMQ-based OAC GUI reports, AtomSpace publisher module" HAVE_ZMQ)
-SUMMARY_ADD("TBB" "Intel TBB (Threaded Building Blocks) for multithreading" HAVE_TBB)
 SUMMARY_SHOW()
