@@ -30,7 +30,6 @@ ADD_EXECUTABLE(PrimitiveExample
 TARGET_LINK_LIBRARIES(PrimitiveExample
 	smob
 	atomspace
-	server
 )
 
 IF (WIN32)

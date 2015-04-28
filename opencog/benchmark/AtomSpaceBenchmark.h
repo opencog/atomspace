@@ -18,8 +18,6 @@ namespace opencog
 
 typedef boost::tuple<clock_t,clock_t> timepair_t;
 
-class CogServer;
-class PythonModule;
 class PythonEval;
 class SchemeEval;
 
@@ -58,8 +56,6 @@ class AtomSpaceBenchmark
     SchemeEval* scm;
 #endif
 #if HAVE_CYTHON
-    CogServer* cogs;
-    PythonModule* pymo;
     PythonEval* pyev;
 #endif
 

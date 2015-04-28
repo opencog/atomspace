@@ -10,5 +10,3 @@ include "handle.pyx"
 include "truth_value.pyx"
 include "atomspace_details.pyx"
 include "atom.pyx"
-include "spacetime.pyx"
-

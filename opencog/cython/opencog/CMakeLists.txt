@@ -59,7 +59,7 @@ IF (HAVE_ATOMSPACE)
 	###################### atomspace ####################################
 	CYTHON_ADD_MODULE_PYX(atomspace
 		"atom.pyx" "classserver.pyx" "handle.pyx" "truth_value.pyx"
-		"atomspace_details.pyx" "spacetime.pyx" opencog_atom_types
+		"atomspace_details.pyx" opencog_atom_types
 		"../../atomspace/TruthValue.h" "../../atomspace/SimpleTruthValue.h"
 		"../../atomspace/ClassServer.h" "../../atomspace/Handle.h"
 		"../../atomspace/AtomSpace.h"
@@ -76,7 +76,6 @@ IF (HAVE_ATOMSPACE)
 	# XXX FIXME Cython should not static link the atom-types, but
 	# but should instead dynamic-load them, as needed.
 	ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
-	ADD_DEPENDENCIES(atomspace_cython nlp_atom_types)
 	ADD_DEPENDENCIES(atomspace_cython pln_atom_types)
 
 	TARGET_LINK_LIBRARIES(atomspace_cython

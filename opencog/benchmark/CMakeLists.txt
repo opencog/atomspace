@@ -12,23 +12,17 @@ ADD_EXECUTABLE (atomspace_bm
 )
 
 IF (HAVE_GUILE)
-	TARGET_LINK_LIBRARIES (atomspace_bm smob server)
+	TARGET_LINK_LIBRARIES (atomspace_bm smob)
 ENDIF(HAVE_GUILE)
 
 IF (HAVE_CYTHON)
 	TARGET_LINK_LIBRARIES (atomspace_bm
-		PythonModule
 		atomspace_cython
 		${PYTHON_LIBRARIES}
 	)
 ENDIF(HAVE_CYTHON)
 
 TARGET_LINK_LIBRARIES (atomspace_bm
-	server
 	atomspace
 	${COGUTIL_LIBRARY}
 )
-
-IF (HAVE_SERVER)
-    ADD_SUBDIRECTORY(module)
-ENDIF (HAVE_SERVER)

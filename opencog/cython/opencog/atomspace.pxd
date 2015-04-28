@@ -183,16 +183,6 @@ cdef class AtomSpace:
     cdef cAtomSpace *atomspace
     cdef bint owns_atomspace
 
-# SpaceServer
-cdef extern from "opencog/spacetime/SpaceServer.h" namespace "opencog":
-    cdef cppclass cSpaceServer "opencog::SpaceServer":
-        SpaceServer()
-
-# TimeServer
-cdef extern from "opencog/spacetime/TimeServer.h" namespace "opencog":
-    cdef cppclass cTimeServer "opencog::TimeServer":
-        TimeServer()
-
 
 cdef extern from "opencog/atomutils/AtomUtils.h" namespace "opencog":
     # C++: 

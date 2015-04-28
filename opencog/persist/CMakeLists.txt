@@ -1,4 +1,3 @@
-ADD_SUBDIRECTORY (file)
 
 # The hypertable code never worked, and according to bug #567,
 # it doesn't compile either.
@@ -17,4 +16,3 @@ ENDIF (ODBC_FOUND)
 IF (HAVE_ZMQ)
     ADD_SUBDIRECTORY (zmq)
 ENDIF (HAVE_ZMQ)
-

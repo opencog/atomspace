@@ -45,13 +45,12 @@
 #include <opencog/util/misc.h>
 #include <opencog/util/oc_assert.h>
 
-#include <opencog/server/CogServer.h>
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/Link.h>
 
 #include "PythonEval.h"
 
 #include "opencog/atomspace_api.h"
-#include "opencog/agent_finder_types.h"
-#include "opencog/agent_finder_api.h"
 
 using std::string;
 using std::vector;
@@ -186,7 +185,6 @@ void opencog::global_python_initialize()
     // Initialize the auto-generated Cython api. Do this AFTER the python
     // sys.path is updated so the imports can find the cython modules.
     import_opencog__atomspace();
-    import_opencog__agent_finder();
 
     // Now we can use get_path_as_string() to get 'sys.path'
     logger().info("Python 'sys.path' after OpenCog config adds is: " +

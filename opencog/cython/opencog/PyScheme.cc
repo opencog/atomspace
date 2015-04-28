@@ -23,7 +23,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/server/CogServer.h>
 
 using std::string;
 

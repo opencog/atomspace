@@ -33,12 +33,6 @@ IF (HAVE_GUILE)
 ENDIF (HAVE_GUILE)
 
 
-# Build the query cogserver module
-ADD_LIBRARY(QueryModule SHARED
-	QueryModule.cc
-)
-TARGET_LINK_LIBRARIES(QueryModule query server)
-
 IF (WIN32)
    INSTALL (TARGETS query DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 ELSEIF (CYGWIN)

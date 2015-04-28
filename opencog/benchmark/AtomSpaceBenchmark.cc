@@ -20,9 +20,7 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/cython/PythonEval.h>
-#include <opencog/cython/PythonModule.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/server/CogServer.h>  // Ugh. Needed for python to work right.
 
 #include "AtomSpaceBenchmark.h"
 
@@ -75,10 +73,6 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
 
     asp = NULL;
     atab = NULL;
-#if HAVE_CYTHON
-    cogs = NULL;
-    pymo = NULL;
-#endif
     rng = NULL;
 }
 
@@ -406,7 +400,7 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
             atab = new AtomTable();
         }
         else {
-#if HAVE_CYTHON
+#if HAVE_CYTHONX
             cogs = new CogServer();
             if (pymo == NULL) pymo = new PythonModule(*cogs);
             pymo->init();
@@ -443,9 +437,7 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
 #if HAVE_GUILE
             delete scm;
 #endif
-#if HAVE_CYTHON
-            delete cogs;
-#else
+#if not HAVE_CYTHON
             delete asp;
 #endif
         }

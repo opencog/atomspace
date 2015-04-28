@@ -365,6 +365,17 @@ IF (NOT XMLRPC_FOUND)
 	MESSAGE(STATUS "libxmlrpc missing: needed for ubigraph module.")
 ENDIF (NOT XMLRPC_FOUND)
 
+# ZeroMQ
+FIND_PACKAGE(ZMQ 3.2.4)
+IF (ZMQ_FOUND AND ZMQ_LIBRARY)
+	ADD_DEFINITIONS(-DHAVE_ZMQ)
+	SET(HAVE_ZMQ 1)
+	SET(ZMQ_DIR_MESSAGE "ZeroMQ was found.")
+ELSE (ZMQ_FOUND AND ZMQ_LIBRARY)
+	SET(ZMQ_DIR_MESSAGE "ZeroMQ was not found; \nTo over-ride, make sure that the environment variable ZMQ_LIBRARY is set.\nInstallation instructions: http://zeromq.org/intro:get-the-software")
+ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY)
+MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
+
 
 # ==========================================================
 # Decide what to build, based on the packages found.

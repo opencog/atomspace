@@ -24,7 +24,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/BackingStore.h>
 #include <opencog/guile/SchemePrimitive.h>
-#include <opencog/nlp/types/atom_types.h>
 
 #include "SQLPersistSCM.h"
 #include "AtomStorage.h"
@@ -114,8 +113,8 @@ SQLPersistSCM::SQLPersistSCM(AtomSpace *as)
 	// and documents and sentences will not be stored in the database.
 	// Thus, we don't even try to fetch these.
 
-#define NLP_HACK 1
-#ifdef NLP_HACK
+#define NLP_HACK 0
+#if NLP_HACK
 	_backing->_ignored_types.insert(VARIABLE_NODE);
 	_backing->_ignored_types.insert(TYPE_NODE);
 	_backing->_ignored_types.insert(TYPED_VARIABLE_LINK);
