@@ -1,12 +1,12 @@
-OpenCog
-=======
+OpenCog AtomSpace - UNDER CONSTRUCTION - DO NOT USE
+=================
 
-OpenCog is a framework for developing AI systems, especially appropriate
-for integrative multi-algorithm systems, and artificial general intelligence
-systems.  Though much work remains to be done, it currently contains a
-functional core framework, and a number of cognitive agents at varying levels
-of completion, some already displaying interesting and useful functionalities
-alone and in combination.
+UNDER CONSTRUCTION!!   DOES NOT COMPILE!!
+
+If you want to use opencog, go to the opencog/opencog github repo!!
+
+The OpenCog Atomspace is the hypergraph database and query/reasoning
+engine used by OpenCog to hold data and perform reasoning on it.
 
 The main project site is at http://opencog.org
 
@@ -61,42 +61,10 @@ the build, will be more precise as to which parts will not be built.
 > Used by opencog/ubigraph
 > http://curl.haxx.se/ | libcurl4-gnutls-dev
 
-###### expat
-> an XML parsing library
-> Used by Embodiment subsystem
-> http://expat.sourceforge.net/ | http://www.jclark.com/xml/expat.html (version 1.2) | libexpat1-dev
-
 ###### HyperTable
 > Distributed storage
 > http://hypertable.org
 > This requires SIGAR as well
-
-###### Link Grammar
-> Natural Language Parser for English, Russian, other languages.
-> Required for experimental Viterbi parser.
-> http://www.abisource.com/projects/link-grammar/
-
-###### MOSES
-> MOSES Machine Learning
-> http://github/opencog/moses
-> It uses exactly the same build proceedure as this pakcage. Be sure
-  to `sudo make install` at the end.
-
-###### OpenGL
-> Open Graphics Library
-> Used by opencog/spatial/MapTool
-> http://www.opengl.org
-> Commonly provided with your video card driver
-
-###### SDL
-> Simple DirectMedia Layer
-> Used by opencog/spatial/MapTool
-> http://www.libsdl.org | libsdl1.2-dev
-
-###### SDL_gfx
-> Simple DirectMedia Layer extension
-> Used by opencog/spatial/MapTool
-> http://www.ferzkopp.net/joomla/content/view/19/14/ | libsdl-gfx1.2-dev
 
 ###### Threading Building Blocks
 > C++ template library for parallel programming
@@ -106,11 +74,6 @@ the build, will be more precise as to which parts will not be built.
 > Generic SQL Database client access libraries
 > Required for the distributed-processing atomspace.
 > http://www.unixodbc.org/ | unixodbc-dev
-
-###### xercesc
-> Apache Xerces-C++ XML Parser
-> Required for embodiment
-> http://xerces.apache.org/xerces-c/ | libxerces-c-dev
 
 ###### xmlrpc
 > XML-RPC support
@@ -164,23 +127,6 @@ it offers another way of intrfacing to the atomspace. See the
 The cogserver provides a network server interface to OpenCog. It is
 requires for running embodiment, some of the reasoning agents, and some
 of the natural-language processing agents.
-
-Running the server
-------------------
-The cogserver provides a network server interface to the various
-components and agents.  After building everything, change directory
-to your `opencog/build` folder and execute `opencog/server/cogserver`.
-Then, from another terminal, run `rlwrap telnet localhost 17001`
-The `help` command will list all of the other available commands.
-Notable among these are teh commands to attach to a (Postgres) database,
-and networked scheme and python interfaces (i.e. scheme and python
-shells that are usable over the network, if you are logged in remotely
-to the cogserver).
-
-The operation of the server can be altered by means of a config file.
-This config file is in `lib/opencog.conf`. To make use of it, say
-`cogserver -c <config-filename>` when starting the server.
-
 
 CMake notes
 -----------
