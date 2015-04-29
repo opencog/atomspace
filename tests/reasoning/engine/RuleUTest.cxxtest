@@ -111,6 +111,8 @@ void RuleUTest::test_deduction()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
     
+    eval->eval("(use-modules (opencog))");
+    eval->eval("(use-modules (opencog query))");
     config().set("SCM_PRELOAD",
                  "tests/reasoning/engine/simple-assertions.scm, "
                  "reasoning/pln/rules/deduction.scm");

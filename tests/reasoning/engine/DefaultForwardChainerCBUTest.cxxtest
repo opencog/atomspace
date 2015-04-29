@@ -20,17 +20,20 @@ public:
 	DefaultForwardChainerCBUTest(void)
 	{
 		as = new AtomSpace();
-		eval = new SchemeEval(as);
 		config().set("SCM_PRELOAD",
-		      "opencog/atomspace/core_types.scm,"
+		      "opencog/atomspace/core_types.scm, "
 		      "opencog/scm/utilities.scm");
 		load_scm_files_from_config(*as);
+
+		eval = new SchemeEval(as);
 	}
 
 	~DefaultForwardChainerCBUTest()
 	{
-		delete as;
 		delete eval;
+		eval = NULL;
+		delete as;
+		as = NULL;
 	}
 
 	void setUp(void);
