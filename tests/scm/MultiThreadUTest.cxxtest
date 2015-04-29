@@ -30,6 +30,9 @@ using namespace opencog;
 
 class MultiThreadUTest :  public CxxTest::TestSuite
 {
+	private:
+		AtomSpace* as;
+
 	public:
 
 		MultiThreadUTest(void)
@@ -92,7 +95,7 @@ void MultiThreadUTest::test_three_evals_one_thread(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Three evaluators all touching one atomspace.
-	AtomSpace* as = new AtomSpace();
+	as = new AtomSpace();
 	load_scm_files_from_config(*as);
 	SchemeEval* ev1 = new SchemeEval(as);
 	SchemeEval* ev2 = new SchemeEval(as);
@@ -132,6 +135,7 @@ void MultiThreadUTest::test_three_evals_one_thread(void)
 
 	printf ("h1 = %lu %p\n", h1.value(), h1.operator->());
 
+	delete as;
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -141,7 +145,6 @@ void MultiThreadUTest::test_three_evals_one_thread(void)
 // Use a unique evaluator for this thread.
 void MultiThreadUTest::threadedAdd(int thread_id, int N)
 {
-	AtomSpace* as = new AtomSpace();
 	load_scm_files_from_config(*as);
 	SchemeEval* ev = new SchemeEval(as);
 	int counter = 0;
@@ -168,7 +171,7 @@ void MultiThreadUTest::threadedAdd(int thread_id, int N)
 void MultiThreadUTest::test_multi_threads(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	AtomSpace* as = new AtomSpace();
+	as = new AtomSpace();
 	load_scm_files_from_config(*as);
 	as->clear();
 
@@ -191,5 +194,3 @@ void MultiThreadUTest::test_multi_threads(void)
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
-
-
