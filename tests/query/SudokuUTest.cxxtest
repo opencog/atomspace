@@ -63,6 +63,7 @@ class SudokuPuzzle :  public CxxTest::TestSuite
 		~SudokuPuzzle()
 		{
 			delete eval;
+			delete as;
 
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
