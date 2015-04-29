@@ -1,3 +1,2 @@
-IF(HAVE_ATOMSPACE)
-    ADD_SUBDIRECTORY (atomtypes)
-ENDIF(HAVE_ATOMSPACE)
+
+# Empty, nothing to do at this time.
