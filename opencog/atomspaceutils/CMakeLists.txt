@@ -22,5 +22,5 @@ ADD_DEPENDENCIES(atomspaceutils opencog_atom_types)
 
 INSTALL (FILES
     AtomSpaceUtils.h
-    DESTINATION "include/${PROJECT_NAME}/atomutils"
+    DESTINATION "include/${PROJECT_NAME}/atomspaceutils"
 )
