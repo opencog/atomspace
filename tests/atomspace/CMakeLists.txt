@@ -6,9 +6,8 @@ LINK_LIBRARIES(
 
 IF(HAVE_GUILE)
 	ADD_CXXTEST(AtomTableUTest HandleEntry.cc)
-	TARGET_LINK_LIBRARIES(AtomTableUTest smob spacetime-types)
+	TARGET_LINK_LIBRARIES(AtomTableUTest smob)
 ENDIF(HAVE_GUILE)
-ADD_DEPENDENCIES(AtomTableUTest spacetime_atom_types)
 
 ADD_CXXTEST(ClassServerUTest)
 ADD_CXXTEST(AtomUTest)

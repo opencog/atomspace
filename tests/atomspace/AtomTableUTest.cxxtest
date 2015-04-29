@@ -39,12 +39,12 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/spacetime/atom_types.h>
 #include <opencog/guile/load-file.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 #include <opencog/util/mt19937ar.h>
+#include "../query/test-types.h"
 
 
 #include "HandleEntry.h"
@@ -54,10 +54,6 @@ using namespace std;
 
 const char* gpnNames[] = {"GPN1", "GPN2", "GPN3", "GPN4", "GNP5", "GNP6"};
 int numberOfExpectedMatches[] = {26, 26, 26, 1, 1, 1};
-
-extern "C" {
-void spacetime_types_init(void);
-};
 
 class AtomTableUTest : public CxxTest::TestSuite
 {
@@ -74,8 +70,6 @@ public:
         //logger().setLevel(Logger::DEBUG);
         //logger().setPrintToStdoutFlag(true);
 
-        spacetime_types_init();
-
         atomSpace = new AtomSpace();
         table = (AtomTable*) & (atomSpace->getAtomTable());
     }
@@ -88,7 +82,7 @@ public:
         atomSpace->clear();
         /* load scm files with all necessary nodes and links  */
         load_scm_file(*atomSpace, "opencog/atomspace/core_types.scm");
-        load_scm_file(*atomSpace, "opencog/spacetime/spacetime_types.scm");
+        load_scm_file(*atomSpace, "tests/query/test_types.scm");
         // load_scm_file(*atomSpace, ATOM_TABLE_TEST_SCM_FILE);
     }
 

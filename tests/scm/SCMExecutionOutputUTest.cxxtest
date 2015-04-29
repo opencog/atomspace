@@ -24,10 +24,10 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
+#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemePrimitive.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
@@ -58,9 +58,7 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 		logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
 		logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 
-        config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm");
-
-        cogserver().loadSCMModules();
+		config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm");
 	}
 
 	~SCMExecutionOutputUTest()
@@ -88,8 +86,8 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 
 void SCMExecutionOutputUTest::setUp(void)
 {
-	server(CogServer::createInstance);
-	as = &cogserver().getAtomSpace();
+	as = new AtomSpace();
+	load_scm_files_from_config(*as);
 	eval = new SchemeEval(as);
 }
 
@@ -97,6 +95,7 @@ void SCMExecutionOutputUTest::tearDown(void)
 {
 	delete eval;
 	eval = NULL;
+	delete as;
 }
 
 #define CHKEV(ev) \
@@ -136,7 +135,6 @@ void SCMExecutionOutputUTest::test_execute(void)
 // Use a unique evaluator for this thread.
 void SCMExecutionOutputUTest::threadedAdd(int thread_id, int N)
 {
-	AtomSpace* as = &cogserver().getAtomSpace();
 	SchemeEval* ev = SchemeEval::get_evaluator(as);
 	int counter = 0;
 
@@ -184,7 +182,6 @@ void SCMExecutionOutputUTest::threadedAdd(int thread_id, int N)
 void SCMExecutionOutputUTest::test_multi_threads(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	AtomSpace* as = &cogserver().getAtomSpace();
 	as->clear();
 
 	std::vector<std::thread> thread_pool;

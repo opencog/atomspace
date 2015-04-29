@@ -20,9 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -31,6 +31,7 @@ using namespace opencog;
 class SCMUtilsUTest :  public CxxTest::TestSuite
 {
 	private:
+		AtomSpace* as;
 		SchemeEval* evaluator;
 		Handle disorder;
 		Handle disordered;
@@ -76,12 +77,8 @@ class SCMUtilsUTest :  public CxxTest::TestSuite
 #define al as->addLink
 void SCMUtilsUTest::setUp(void)
 {
-	server(CogServer::createInstance);
-	evaluator = new SchemeEval(&cogserver().getAtomSpace());
-
-	// Load the required data
-	config().set("MODULES",
-		"opencog/nlp/types/libnlp-types.so");
+	as = new AtomSpace();
+	evaluator = new SchemeEval(as);
 
 	config().set("SCM_PRELOAD",
 		"opencog/atomspace/core_types.scm, "
@@ -89,15 +86,15 @@ void SCMUtilsUTest::setUp(void)
 		"opencog/scm/utilities.scm, "
 		"tests/scm/utils-test.scm");
 
-	cogserver().loadModules();
-	cogserver().loadSCMModules();
-
+	load_scm_files_from_config(*as);
 }
 
 void SCMUtilsUTest::tearDown(void)
 {
 	delete evaluator;
 	evaluator = NULL;
+	delete as;
+	as = NULL;
 }
 
 #define CHKERR \

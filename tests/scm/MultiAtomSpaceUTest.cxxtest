@@ -23,7 +23,6 @@
 #include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -32,6 +31,7 @@ using namespace opencog;
 class MultiAtomSpace :  public CxxTest::TestSuite
 {
 	private:
+		AtomSpace* main_as;
 		SchemeEval* evaluator;
 		Handle disorder;
 		Handle disordered;
@@ -55,8 +55,6 @@ class MultiAtomSpace :  public CxxTest::TestSuite
 
 			// logger().setLevel(Logger::DEBUG);
 			// logger().setPrintToStdoutFlag(true);
-
-			cogserver().loadModules();
 		}
 
 		~MultiAtomSpace()
@@ -84,19 +82,21 @@ class MultiAtomSpace :  public CxxTest::TestSuite
 #define al as->addLink
 void MultiAtomSpace::setUp(void)
 {
-	server(CogServer::createInstance);
-	evaluator = new SchemeEval(&cogserver().getAtomSpace());
+	main_as = new AtomSpace();
+	evaluator = new SchemeEval(main_as);
 
 	config().set("SCM_PRELOAD",
 		"opencog/atomspace/core_types.scm");
 
-	cogserver().loadSCMModules();
+	load_scm_files_from_config(*main_as);
 }
 
 void MultiAtomSpace::tearDown(void)
 {
 	delete evaluator;
 	evaluator = NULL;
+	delete main_as;
+	main_as = NULL;
 }
 
 #define CHKERR \
@@ -311,9 +311,8 @@ void MultiAtomSpace::test_load(void)
 // Test the operation of nested atomspaces
 void MultiAtomSpace::test_nest(void)
 {
-	AtomSpace& main = cogserver().getAtomSpace();
-	main.clear();
-	AtomSpace* locas = new AtomSpace(&main);
+	main_as->clear();
+	AtomSpace* locas = new AtomSpace(main_as);
 	SchemeEval* lev = new SchemeEval(locas);
 
 	// Push some atoms into the main space
@@ -327,9 +326,9 @@ void MultiAtomSpace::test_nest(void)
 	Handle hl = lev->eval_h("(ListLink a b)");
 
 	// The atomspace sizes should be as expected ...
-	TSM_ASSERT("Expect two atoms in main atomspace", 2 == main.getSize());
-	TSM_ASSERT("Expect two nodes in main atomspace", 2 == main.getNumNodes());
-	TSM_ASSERT("Expect zero links in main atomspace", 0 == main.getNumLinks());
+	TSM_ASSERT("Expect two atoms in main atomspace", 2 == main_as->getSize());
+	TSM_ASSERT("Expect two nodes in main atomspace", 2 == main_as->getNumNodes());
+	TSM_ASSERT("Expect zero links in main atomspace", 0 == main_as->getNumLinks());
 
 	TSM_ASSERT("Expect one atoms in local atomspace", 1 == locas->getSize());
 	TSM_ASSERT("Expect zero nodes in local atomspace", 0 == locas->getNumNodes());
@@ -344,9 +343,9 @@ void MultiAtomSpace::test_nest(void)
 	delete locas;
 
 	// Above deletion should not affect the main atomspace
-	TSM_ASSERT("Still two atoms in main atomspace", 2 == main.getSize());
-	TSM_ASSERT("Still two nodes in main atomspace", 2 == main.getNumNodes());
-	TSM_ASSERT("Still zero links in main atomspace", 0 == main.getNumLinks());
+	TSM_ASSERT("Still two atoms in main atomspace", 2 == main_as->getSize());
+	TSM_ASSERT("Still two nodes in main atomspace", 2 == main_as->getNumNodes());
+	TSM_ASSERT("Still zero links in main atomspace", 0 == main_as->getNumLinks());
 
 	// The pointer lll should still be alive, even though the atomspace
 	// is gone.

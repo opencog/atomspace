@@ -72,8 +72,6 @@ class ImplicationUTest :  public CxxTest::TestSuite
 		void test_exec(void);
 };
 
-extern "C" { void nlp_types_init(void); };
-
 /*
  * This function sets up an implication link, and some data.
  *
@@ -100,9 +98,6 @@ void ImplicationUTest::setUp(void)
 {
 	as = new AtomSpace();
 	eval = new SchemeEval(as);
-
-	// Load the atom types
-	nlp_types_init();
 
 	load_scm_files_from_config(*as);
 

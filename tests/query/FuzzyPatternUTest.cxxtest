@@ -23,13 +23,13 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/nlp/types/atom_types.h>
 #include <opencog/query/FuzzyMatch/FuzzyPatternMatchCB.h>
 #include <opencog/query/FuzzyMatch/FuzzyPatternMatch.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 #include "imply.h"
+#include "test-types.h"
 
 using namespace opencog;
 

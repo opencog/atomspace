@@ -2,7 +2,6 @@
 LINK_LIBRARIES(
 	ruleengine
 	query
-	server
 	atomspace
 )
 

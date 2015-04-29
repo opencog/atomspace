@@ -81,12 +81,6 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		void test_exhaust(void);
 };
 
-extern "C" {
-	void nlp_types_init(void);
-	void attention_types_init(void);
-	void embodiment_types_init(void);
-};
-
 /*
  * This function sets up an implication link, and some data.
  */
@@ -96,17 +90,9 @@ void UnorderedUTest::setUp(void)
 {
 	as = new AtomSpace();
 
-	// Load the required data
-	nlp_types_init();
-	attention_types_init();
-	embodiment_types_init();
-
 	config().set("SCM_PRELOAD",
 		"opencog/atomspace/core_types.scm, "
-      "opencog/nlp/types/nlp_types.scm, "
-      "opencog/spacetime/spacetime_types.scm, "
-      "opencog/dynamics/attention/attention_types.scm, "
-      "opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm, "
+      "tests/query/test_types.scm, "
 		"tests/query/unordered.scm, "
 		"tests/query/unordered-more.scm, "
 		"tests/query/unordered-exhaust.scm");

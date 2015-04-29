@@ -23,7 +23,6 @@
 #include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -49,8 +48,6 @@ class MultiThreadUTest :  public CxxTest::TestSuite
 
 			// logger().setLevel(Logger::DEBUG);
 			// logger().setPrintToStdoutFlag(true);
-
-			cogserver().loadModules();
 		}
 
 		~MultiThreadUTest()
@@ -75,12 +72,8 @@ class MultiThreadUTest :  public CxxTest::TestSuite
 #define al as->addLink
 void MultiThreadUTest::setUp(void)
 {
-	server(CogServer::createInstance);
-
 	config().set("SCM_PRELOAD",
 		"opencog/atomspace/core_types.scm");
-
-	cogserver().loadSCMModules();
 }
 
 void MultiThreadUTest::tearDown(void)
@@ -99,7 +92,8 @@ void MultiThreadUTest::test_three_evals_one_thread(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Three evaluators all touching one atomspace.
-	AtomSpace* as = &cogserver().getAtomSpace();
+	AtomSpace* as = new AtomSpace();
+	load_scm_files_from_config(*as);
 	SchemeEval* ev1 = new SchemeEval(as);
 	SchemeEval* ev2 = new SchemeEval(as);
 	SchemeEval* ev3 = new SchemeEval(as);
@@ -147,7 +141,8 @@ void MultiThreadUTest::test_three_evals_one_thread(void)
 // Use a unique evaluator for this thread.
 void MultiThreadUTest::threadedAdd(int thread_id, int N)
 {
-	AtomSpace* as = &cogserver().getAtomSpace();
+	AtomSpace* as = new AtomSpace();
+	load_scm_files_from_config(*as);
 	SchemeEval* ev = new SchemeEval(as);
 	int counter = 0;
 	for (int i = 0; i < N; i++) {
@@ -173,7 +168,8 @@ void MultiThreadUTest::threadedAdd(int thread_id, int N)
 void MultiThreadUTest::test_multi_threads(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	AtomSpace* as = &cogserver().getAtomSpace();
+	AtomSpace* as = new AtomSpace();
+	load_scm_files_from_config(*as);
 	as->clear();
 
 	std::vector<std::thread> thread_pool;

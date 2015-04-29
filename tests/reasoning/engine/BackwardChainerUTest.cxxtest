@@ -9,7 +9,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/guile/load-file.h>
 
@@ -22,13 +21,10 @@ private:
 	BackwardChainer * bc_;
 public:
 	BackwardChainerUTest() {
-		server(CogServer::createInstance);
-		as_ = &cogserver().getAtomSpace();
+		as_ = new AtomSpace();
 		eval_ = new SchemeEval(as_);
 
-		cogserver().loadModules();
-		cogserver().loadSCMModules();
-		config().set("MODULES", "opencog/query/libQueryModule.so");
+		load_scm_files_from_config(*as_);
 
 		logger().setLevel(Logger::DEBUG);
 	}

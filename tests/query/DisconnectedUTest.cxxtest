@@ -68,8 +68,6 @@ class Disconnected :  public CxxTest::TestSuite
 		void test_exec(void);
 };
 
-extern "C" { void nlp_types_init(void); };
-
 /*
  * This function sets up an implication link, and some data.
  */
@@ -79,12 +77,9 @@ void Disconnected::setUp(void)
 {
 	as = new AtomSpace();
 
-	// Load the required data
-	nlp_types_init();
-
 	config().set("SCM_PRELOAD",
 		"opencog/atomspace/core_types.scm, "
-		"opencog/nlp/types/nlp_types.scm, "
+		"tests/query/test_types.scm, "
 		"tests/query/disconnected.scm");
 
 	load_scm_files_from_config(*as);

@@ -4,14 +4,15 @@
  *  Created on: Sep 2, 2014
  *      Author: misgana
  */
+#include <boost/range/algorithm/find.hpp>
+
+#include <opencog/util/Config.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/load-file.h>
 
 #include <opencog/reasoning/engine/forwardchainer/ForwardChainer.h>
 #include <opencog/reasoning/engine/forwardchainer/DefaultForwardChainerCB.h>
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/server/CogServer.h>
-#include <opencog/util/Config.h>
 
-#include <boost/range/algorithm/find.hpp>
 
 using namespace opencog;
 
@@ -24,8 +25,7 @@ private:
 public:
 	ForwardChainerUTest()
 	{
-		server(CogServer::createInstance);
-		as_ = &cogserver().getAtomSpace();
+		as_ = new AtomSpace();
 		eval_ = new SchemeEval(as_);
 
 		// Disable the AF mechanism during testing!
@@ -34,7 +34,7 @@ public:
 		             "opencog/atomspace/core_types.scm, "
 		             "opencog/scm/utilities.scm, "
 		             "opencog/scm/av-tv.scm");
-		cogserver().loadSCMModules();
+		load_scm_files_from_config(*as_);
 		fc_ = new ForwardChainer(as_);
 	}
 	~ForwardChainerUTest() {

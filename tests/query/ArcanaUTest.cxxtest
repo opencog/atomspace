@@ -80,7 +80,7 @@ void ArcanaUTest::setUp(void)
     as->clear();
     config().set("SCM_PRELOAD",
         "opencog/atomspace/core_types.scm, "
-        "opencog/nlp/types/nlp_types.scm, "
+        "tests/query/test_types.scm, "
         "opencog/scm/utilities.scm,"
         "opencog/scm/opencog/query.scm");
 

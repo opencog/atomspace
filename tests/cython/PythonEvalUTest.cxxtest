@@ -6,7 +6,7 @@
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/server/CogServer.h>
+#include <opencog/guile/load-file.h>
 
 using std::string;
 
@@ -264,14 +264,14 @@ public:
 
     void testApplyAndApplyTV() {
 
-        CogServer cogServer;
         bool error;
 
         config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm");
-        cogServer.loadSCMModules();
-
-        // Get the python eval instance which the CogServer will have created.
+        AtomSpace *as = new AtomSpace();
+        PythonEval::create_singleton_instance(as);
         PythonEval* python = &PythonEval::instance();
+        load_scm_files_from_config(*as);
+
 
         // Define python functions for use by scheme.
         python->eval(
@@ -287,7 +287,7 @@ public:
             );
 
         // Create a scheme evaluator to trigger cog-evaluate and cog-execute.
-        SchemeEval* scheme = new SchemeEval(&cogServer.getAtomSpace());
+        SchemeEval* scheme = new SchemeEval(as);
        
         // Test execute -> PythonEval::apply
         scheme->eval(

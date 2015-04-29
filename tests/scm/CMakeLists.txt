@@ -11,9 +11,9 @@ LINK_DIRECTORIES(
 )
 
 LINK_LIBRARIES(
-	nlp-types
 	atomspace
-	server
+	smob
+	${GUILE_LIBRARIES}
 )
 
 ADD_CXXTEST(BasicSCMUTest)

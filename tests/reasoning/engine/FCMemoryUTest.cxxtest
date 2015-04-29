@@ -2,7 +2,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/reasoning/engine/JsonicControlPolicyParamLoader.h>
@@ -18,8 +17,7 @@ private:
 
 public:
 	FCMemoryUTest(void) {
-		server(CogServer::createInstance);
-		as = &cogserver().getAtomSpace();
+		as = new AtomSpace();
 		eval = new SchemeEval(as);
 		config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
 				"opencog/scm/utilities.scm, ");

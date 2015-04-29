@@ -21,13 +21,13 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/nlp/types/atom_types.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/atoms/bind/SatisfactionLink.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 #include "imply.h"
+#include "test-types.h"
 
 using namespace opencog;
 

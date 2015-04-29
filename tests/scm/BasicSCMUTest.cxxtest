@@ -34,9 +34,8 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/load-file.h>
 
-#include <opencog/nlp/types/atom_types.h>
+#include "../query/test-types.h"
 
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
 
@@ -110,8 +109,7 @@ class BasicSCMUTest :  public CxxTest::TestSuite
  */
 void BasicSCMUTest::setUp(void)
 {
-	server(CogServer::createInstance);
-	as = &cogserver().getAtomSpace();
+	as = new AtomSpace();
 	eval = new SchemeEval(as);
 
 	// Proper UTF-8 behaviour requires the right locale.
