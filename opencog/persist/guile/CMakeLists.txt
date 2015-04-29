@@ -11,3 +11,8 @@ TARGET_LINK_LIBRARIES(persist
 INSTALL (TARGETS persist
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
+
+INSTALL (FILES
+	PersistSCM.h
+	DESTINATION "include/${PROJECT_NAME}/persist/guile"
+)

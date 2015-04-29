@@ -40,10 +40,15 @@ ELSEIF (CYGWIN)
 ENDIF (WIN32)
 
 INSTALL (FILES
+	AttentionalFocusCB.h
+	BindLink.h
+	DefaultImplicator.h
+	DefaultPatternMatchCB.h
 	Implicator.h
 	Instantiator.h
 	Pattern.h
 	PatternMatchCallback.h
+	PatternMatchEngine.h
 	Satisfier.h
 	DESTINATION "include/${PROJECT_NAME}/query"
 )

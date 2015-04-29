@@ -36,3 +36,9 @@ TARGET_LINK_LIBRARIES(sniff
 INSTALL (TARGETS persist-sql
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
+
+INSTALL (FILES
+	AtomStorage.h
+	SQLPersistSCM.h
+	DESTINATION "include/${PROJECT_NAME}/persist/sql"
+)

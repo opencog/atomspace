@@ -31,3 +31,12 @@ ELSE (CYGWIN)
 		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 	)
 ENDIF (CYGWIN)
+
+INSTALL (FILES
+	BindLink.h
+	ConcreteLink.h
+	PatternUtils.h
+	SatisfactionLink.h
+	VariableList.h
+	DESTINATION "include/${PROJECT_NAME}/atoms/bind"
+)
