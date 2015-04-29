@@ -1,3 +1,7 @@
+
+(use-modules (opencog))
+(use-modules (opencog query))
+
 ; Define the concepts
 
 (ConceptNode "Socrates" (stv .001 0.9))
