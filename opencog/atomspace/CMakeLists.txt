@@ -69,6 +69,7 @@ INSTALL (FILES
 	AtomSpace.h
 	AtomTable.h
 	${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
+	atom_types.cc
 	AttentionValue.h
 	AttentionBank.h
 	BackingStore.h

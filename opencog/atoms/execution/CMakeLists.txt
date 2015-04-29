@@ -24,6 +24,8 @@ IF (HAVE_CYTHON)
 	TARGET_LINK_LIBRARIES(execution ${PYTHON_LIBRARIES})
 ENDIF (HAVE_CYTHON)
 
+INSTALL (TARGETS execution DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+
 INSTALL (FILES
 	EvaluationLink.h
 	ExecutionOutputLink.h

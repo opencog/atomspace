@@ -32,9 +32,7 @@ TARGET_LINK_LIBRARIES(PrimitiveExample
 	atomspace
 )
 
-IF (WIN32)
-	INSTALL (TARGETS smob DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-ENDIF (WIN32)
+INSTALL (TARGETS smob DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	SchemeEval.h
