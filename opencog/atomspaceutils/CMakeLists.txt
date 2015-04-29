@@ -10,17 +10,17 @@ ADD_DEPENDENCIES(atomspaceutils opencog_atom_types)
 # 	${COGUTIL_LIBRARY}
 # )
 
-#IF (CYGWIN)
-#	INSTALL (TARGETS atomspaceutils
-#		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-#	)
-#ELSE (CYGWIN)
-#	INSTALL (TARGETS atomspaceutils
-#		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-#	)
-#ENDIF (CYGWIN)
+IF (CYGWIN)
+	INSTALL (TARGETS atomspaceutils
+		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	)
+ELSE (CYGWIN)
+	INSTALL (TARGETS atomspaceutils
+		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	)
+ENDIF (CYGWIN)
 
 INSTALL (FILES
-    AtomSpaceUtils.h
-    DESTINATION "include/${PROJECT_NAME}/atomspaceutils"
+	AtomSpaceUtils.h
+	DESTINATION "include/${PROJECT_NAME}/atomspaceutils"
 )
