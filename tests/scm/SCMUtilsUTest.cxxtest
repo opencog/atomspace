@@ -26,6 +26,8 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
+#include "../query/test-types.h"
+
 using namespace opencog;
 
 class SCMUtilsUTest :  public CxxTest::TestSuite
@@ -82,7 +84,7 @@ void SCMUtilsUTest::setUp(void)
 
 	config().set("SCM_PRELOAD",
 		"opencog/atomspace/core_types.scm, "
-		"opencog/nlp/types/nlp_types.scm, "
+		"tests/query/test_types.scm, "
 		"opencog/scm/utilities.scm, "
 		"tests/scm/utils-test.scm");
 

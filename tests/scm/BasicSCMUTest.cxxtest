@@ -165,6 +165,7 @@ void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float t
 	eval->eval(buff);
 	bool eval_err = eval->eval_error();
 	eval->clear_pending();
+	printf("check node %s\n", buff);
 	TSM_ASSERT("Failed to create a node", !eval_err);
 
 	Type t = classserver().getType(tipo);
@@ -303,6 +304,7 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 	eval->eval(buff);
 	bool eval_err = eval->eval_error();
 	eval->clear_pending();
+	printf("check_link %s\n", buff);
 	TSM_ASSERT("Failed to create a link", !eval_err);
 
 	HandleSeq links;

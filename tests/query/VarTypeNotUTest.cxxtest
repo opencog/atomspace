@@ -27,6 +27,8 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
+#include "test-types.h"
+
 using namespace opencog;
 
 class VarTypeNot :  public CxxTest::TestSuite
@@ -79,7 +81,7 @@ void VarTypeNot::setUp(void)
 
 	config().set("SCM_PRELOAD",
 		"opencog/atomspace/core_types.scm, "
-		"test/query/test_types.scm, "
+		"tests/query/test_types.scm, "
 		"tests/query/var-type-not.scm");
 
 	load_scm_files_from_config(*as);

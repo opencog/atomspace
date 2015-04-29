@@ -27,6 +27,8 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
+#include "test-types.h"
+
 using namespace opencog;
 
 class Disconnected :  public CxxTest::TestSuite
