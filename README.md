@@ -1,9 +1,5 @@
-OpenCog AtomSpace - UNDER CONSTRUCTION - DO NOT USE
+OpenCog AtomSpace
 =================
-
-UNDER CONSTRUCTION!!   DOES NOT COMPILE!!
-
-If you want to use opencog, go to the opencog/opencog github repo!!
 
 The OpenCog Atomspace is the hypergraph database and query/reasoning
 engine used by OpenCog to hold data and perform reasoning on it.
@@ -15,7 +11,7 @@ https://github.com/opencog/opencog/blob/master/TUTORIAL.md
 
 Prerequisites
 -------------
-To build and run OpenCog, the packages listed below are required.
+To build the OpenCog AtomSpace, the packages listed below are required.
 With a few exceptions, most Linux distributions will provide these
 packages. Users of Ubuntu 14.04 "Trusty Tahr" may use the dependency
 installer at `/scripts/octool`.  Users of any version of Linux may
@@ -56,11 +52,6 @@ The following packages are optional. If they are not installed, some
 optional parts of OpenCog will not be built.  The CMake command, during
 the build, will be more precise as to which parts will not be built.
 
-###### curl
-> cURL groks URLs
-> Used by opencog/ubigraph
-> http://curl.haxx.se/ | libcurl4-gnutls-dev
-
 ###### HyperTable
 > Distributed storage
 > http://hypertable.org
@@ -75,17 +66,12 @@ the build, will be more precise as to which parts will not be built.
 > Required for the distributed-processing atomspace.
 > http://www.unixodbc.org/ | unixodbc-dev
 
-###### xmlrpc
-> XML-RPC support
-> Required by opencog/ubigraph
-> http://www.xmlrpc.com | libxmlrpc-c-dev
-
 ###### ZeroMQ (version 3.2.4 or higher)
 > Asynchronous messaging library
 > http://zeromq.org/intro:get-the-software | libzmq3-dev
 
-Building OpenCog
-----------------
+Building AtomSpace
+------------------
 Peform the following steps at the shell prompt:
 ```
     cd to project root dir
@@ -109,11 +95,11 @@ To build and run the unit tests, from the `./build` directory enter
     make test
 ```
 
-Using OpenCog
--------------
-OpenCog can be used in one of three ways, or a mixture of all three:
+Using the AtomSpace
+-------------------
+The AtomSpace can be used in one of three ways, or a mixture of all three:
 By using the GNU Guile scheme interface, by using Python, or by running
-the cogserver.
+the OpenCog cogserver.
 
 Guile provides the easiest interface for creating atoms, loading them
 into the AtomSpace, and performing various processing operations on
@@ -122,11 +108,13 @@ them.  For examples, see the `/examples/guile` and the
 
 Python is more familiar than scheme (guile) to most programmers, and
 it offers another way of intrfacing to the atomspace. See the
-`/examples/python` directory for how to use python with OpenCog.
+`/examples/python` directory for how to use python with the AtomSpace.
 
-The cogserver provides a network server interface to OpenCog. It is
-requires for running embodiment, some of the reasoning agents, and some
-of the natural-language processing agents.
+The OpenCog cogserver provides a network server interface to OpenCog.
+It is required for running embodiment, some of the reasoning agents,
+and some of the natural-language processing agents.  The cogserver is
+only available in the main OpenCog project; it is not a part of the
+AtomSpace.
 
 CMake notes
 -----------
