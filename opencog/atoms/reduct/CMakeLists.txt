@@ -31,5 +31,5 @@ INSTALL (FILES
 	FreeLink.h
 	PlusLink.h
 	TimesLink.h
-	DESTINATION "include/${PROJECT_NAME}/atomspace"
+	DESTINATION "include/${PROJECT_NAME}/atoms/reduct"
 )

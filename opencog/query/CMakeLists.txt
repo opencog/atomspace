@@ -43,6 +43,7 @@ INSTALL (FILES
 	Implicator.h
 	Instantiator.h
 	Pattern.h
+	PatternSCM.h
 	PatternMatchCallback.h
 	PatternMatchEngine.h
 	Satisfier.h

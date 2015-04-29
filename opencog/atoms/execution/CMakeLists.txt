@@ -29,5 +29,5 @@ INSTALL (TARGETS execution DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 INSTALL (FILES
 	EvaluationLink.h
 	ExecutionOutputLink.h
-	DESTINATION "include/${PROJECT_NAME}/atomspace"
+	DESTINATION "include/${PROJECT_NAME}/atoms/execution"
 )
