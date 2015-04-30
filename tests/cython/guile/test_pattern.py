@@ -29,9 +29,6 @@ class SchemeTest(TestCase):
         status = load_scm(self.space, "opencog/atomspace/core_types.scm")
         self.assertTrue(status)
 
-        status = load_scm(self.space, "opencog/nlp/types/nlp_types.scm")
-        self.assertTrue(status)
-
         status = load_scm(self.space, "opencog/scm/utilities.scm")
         self.assertTrue(status)
 

@@ -3,6 +3,11 @@
 ;
 ; Create some misc atoms.
 
+(add-to-load-path "./opencog/scm")
+(use-modules (opencog))
+
+(define (stv mean conf) (cog-new-stv mean conf))
+
 (ListLink
 	(ConceptNode "hello" (stv 0.5 0.5))
 	(ConceptNode "world")
@@ -15,43 +20,43 @@
 (EvaluationLink
 	(PredicateNode "of")
 	(ListLink
-		(WordNode "capital@ggg")
-		(WordNode "Germany")
+		(ConceptNode "capital@ggg")
+		(ConceptNode "Germany")
 	)
 )
 (EvaluationLink
 	(PredicateNode "of")
 	(ListLink
-		(WordNode "capital@fff")
-		(WordNode "France")
+		(ConceptNode "capital@fff")
+		(ConceptNode "France")
 	)
 )
 (EvaluationLink
 	(PredicateNode "_subj")
 	(ListLink
-		(WordNode "be@fff")
-		(WordNode "capital@fff")
+		(ConceptNode "be@fff")
+		(ConceptNode "capital@fff")
 	)
 )
 (EvaluationLink
 	(PredicateNode "_obj")
 	(ListLink
-		(WordNode "be@fff")
-		(WordNode "Paris")
+		(ConceptNode "be@fff")
+		(ConceptNode "Paris")
 	)
 )
 (EvaluationLink
 	(PredicateNode "_subj")
 	(ListLink
-		(WordNode "be@ggg")
-		(WordNode "capital@ggg")
+		(ConceptNode "be@ggg")
+		(ConceptNode "capital@ggg")
 	)
 )
 (EvaluationLink
 	(PredicateNode "_obj")
 	(ListLink
-		(WordNode "be@ggg")
-		(WordNode "Berlin")
+		(ConceptNode "be@ggg")
+		(ConceptNode "Berlin")
 	)
 )
 
