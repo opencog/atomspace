@@ -28,11 +28,11 @@
 ; (define-module (opencog atomtypes core-types))
 ; (define-module (opencog atomtypes nlp-types))
 ; and so on, but I don't see the point of that either, at the moment...
-(load-from-path "./opencog/atomspace/core_types.scm")
-(load-from-path "./opencog/nlp/types/nlp_types.scm")
-(load-from-path "./opencog/spacetime/spacetime_types.scm")
-(load-from-path "./opencog/dynamics/attention/attention_types.scm")
-(load-from-path "./opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm")
+(load-from-path "core_types.scm")
+; (load-from-path "nlp_types.scm")
+; (load-from-path "spacetime_types.scm")
+; (load-from-path "attention_types.scm")
+; (load-from-path "embodiment_types.scm")
 
 ; Load other grunge too
 ; Lots of these things should probably be modules ...
