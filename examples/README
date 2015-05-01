@@ -1,10 +1,7 @@
-This directory contains various examples that use the OpenCog framework.
+This directory contains various examples that use the AtomSpace
 
 guile           - Guile (scheme) usage examples
 python          - Python usage examples
 
 pattern-matcher - Provides example scheme code that defines a search
                   pattern (using BindLink and SatisfactionLink).
-
-visual_demos    - A number of demos to visually represent the dynamics
-                  of OpenCog.
