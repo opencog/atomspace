@@ -28,6 +28,8 @@ public:
 		as_ = new AtomSpace();
 		eval_ = new SchemeEval(as_);
 
+		logger().setLevel(Logger::DEBUG);
+
 		// Disable the AF mechanism during testing!
 		as_->setAttentionalFocusBoundary(AttentionValue::MINSTI);
 		config().set("SCM_PRELOAD",
