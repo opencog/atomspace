@@ -8,6 +8,12 @@
 ; (load-modules (opencog))
 ;
 
+; libsmob won't be found unless we setenv where to find it!
+(setenv "LTDL_LIBRARY_PATH" "/usr/local/lib/opencog")
+
+; Work-around another common usability issue...
+(add-to-load-path "/usr/local/share/opencog/scm")
+
 (define-module (opencog))
 (load-extension "libsmob" "opencog_guile_init")
 

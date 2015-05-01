@@ -38,6 +38,8 @@ TARGET_LINK_LIBRARIES(PythonEval
 	${PYTHON_LIBRARIES}
 )
 
+INSTALL (TARGETS PythonEval DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+
 INSTALL (FILES 
 	opencog/__init__.py
 	DESTINATION "${DATADIR}/python/opencog")
