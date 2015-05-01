@@ -1,7 +1,7 @@
 Pattern Matcher Examples
 ------------------------
 
-See `../guile/README` for for an intro on running the guile shell needed
+See `../guile/README` for an intro on running the guile shell needed
 to run the demos here.
 
 The first set of demos provide a basic introduction to various
