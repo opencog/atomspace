@@ -54,23 +54,21 @@ void ForwardChainerUTest::test_do_chain()
 	// InheritanceLink B C
 	// |-
 	// InheritanceLink A C
-	Handle A = eval_->eval_h("(ConceptNode \"A\" (stv 0.2 0.9))"),
-		B = eval_->eval_h("(ConceptNode \"B\" (stv 0.3 0.9))"),
-		C = eval_->eval_h("(ConceptNode \"C\" (stv 0.1 0.9))"),
-		AB = eval_->eval_h("(InheritanceLink (stv 0.9 0.9)"
-		                   "    (ConceptNode \"A\")"
-		                   "    (ConceptNode \"B\"))"),
-		BC = eval_->eval_h("(InheritanceLink (stv 0.8 0.9)"
-		                   "    (ConceptNode \"B\")"
-		                   "    (ConceptNode \"C\"))");
+	Handle A = eval_->eval_h("(PredicateNode \"A\" (stv 1 1))"),
+		B = eval_->eval_h("(PredicateNode \"B\" (stv 1 1))"),
+		C = eval_->eval_h("(PredicateNode \"C\" (stv 1 1))"),
+		AB = eval_->eval_h("(ImplicationLink (stv 1 1)"
+		                   "    (PredicateNode \"A\")"
+		                   "    (PredicateNode \"B\"))"),
+		BC = eval_->eval_h("(ImplicationLink (stv 1 1)"
+		                   "    (PredicateNode \"B\")"
+		                   "    (PredicateNode \"C\"))");
 
 	// Run forward chainer (and remove problematic rules)
 	DefaultForwardChainerCB dfc(as_);
 	vector<Rule*>& rules = fc_->_fcmem.get_rules();
 	vector<std::string> ignore = {
-		"pln-rule-create-and-as-1st-arg-of-inheritance",
-		"pln-rule-create-and-as-2nd-arg-of-inheritance",
-		"pln-rule-contextualize-inheritance"
+		"crisp-modus-ponens"
 	};
 	for (auto it = rules.begin(); it != rules.end();) {
 		if (boost::find(ignore, (*it)->get_name()) != ignore.end())
@@ -87,6 +85,6 @@ void ForwardChainerUTest::test_do_chain()
 		std::cout << h->toString() << std::endl;
 
 	// Check that AC is in the results
-	Handle AC = as_->addLink(INHERITANCE_LINK, A, C);
+	Handle AC = as_->addLink(IMPLICATION_LINK, A, C);
 	TS_ASSERT_DIFFERS(find(results.begin(), results.end(), AC), results.end());
 }
