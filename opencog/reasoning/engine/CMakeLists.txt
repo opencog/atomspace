@@ -33,6 +33,7 @@ INSTALL (FILES
 	InferenceSCM.h
 	forwardchainer/DefaultForwardChainerCB.h
 	forwardchainer/ForwardChainer.h
+	forwardchainer/ForwardChainerCallBack.h
 	forwardchainer/ForwardChainInputMatchCB.h
 	forwardchainer/ForwardChainPatternMatchCB.h
 	backwardchainer/BCPatternMatch.h
