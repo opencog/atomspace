@@ -24,10 +24,6 @@ public:
         as_ = new AtomSpace();
         eval_ = new SchemeEval(as_);
         commons_ = new URECommons(as_);
-
-        config().set("MODULES", "opencog/query/libQueryModule.so");
-        cogserver().loadModules();
-        cogserver().loadSCMModules();
     }
     ~URECommonsUTest()
     {
