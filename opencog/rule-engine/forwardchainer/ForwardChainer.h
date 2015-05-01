@@ -43,7 +43,9 @@ private:
     URECommons _rec; //utility class
 
     JsonicControlPolicyParamLoader* _cpolicy_loader;
-    string _conf_path = "rule-engine/default_cpolicy.json";
+
+	// TODO: this is wrong, we need a more flexible way to define that
+    string _conf_path = "examples/rule-engine/cpolicy.json";
 
     FCMemory _fcmem; //Stores history
     Logger * _log;
