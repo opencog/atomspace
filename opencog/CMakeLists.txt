@@ -31,6 +31,3 @@ ENDIF (HAVE_CYTHON)
 IF (HAVE_GHC)
 	ADD_SUBDIRECTORY (haskell)
 ENDIF (HAVE_GHC)
-
-# Graphics and visualization subsystems
-ADD_SUBDIRECTORY (visualization)

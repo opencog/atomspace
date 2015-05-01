@@ -166,18 +166,6 @@ IF(Boost_FOUND_SAVE)
 	SET(Boost_FOUND 1)
 ENDIF(Boost_FOUND_SAVE)
 
-IF(Boost_PROGRAM_OPTIONS_FOUND)
-	MESSAGE(STATUS "Found Boost::program_options")
-ELSE(Boost_PROGRAM_OPTIONS_FOUND)
-	MESSAGE(STATUS "Boost program_options missing: needed for Spatial tools (MapTools).")
-ENDIF(Boost_PROGRAM_OPTIONS_FOUND)
-
-IF(Boost_MATH_C99_FOUND)
-	MESSAGE(STATUS "Found Boost::math")
-ELSE(Boost_MATH_C99_FOUND)
-	MESSAGE(STATUS "Boost math missing: needed to run combo learning tests.")
-ENDIF(Boost_MATH_C99_FOUND)
-
 # Cogutils
 FIND_PACKAGE(CogUtil)
 IF (COGUTIL_FOUND)
@@ -187,11 +175,6 @@ IF (COGUTIL_FOUND)
 ELSE (COGUTIL_FOUND)
 	MESSAGE(FATAL_ERROR "CogUtil missing: it is needed for everything!")
 ENDIF (COGUTIL_FOUND)
-
-FIND_PACKAGE(CURL)
-IF (NOT CURL_FOUND)
-	MESSAGE(STATUS "libcurl missing: needed for ubigraph module.")
-ENDIF (NOT CURL_FOUND)
 
 FIND_PACKAGE(Cxxtest)
 IF (NOT CXXTEST_FOUND)
@@ -221,16 +204,6 @@ ENDIF (GSL_FOUND)
 # This is required for Guile
 FIND_LIBRARY(GMP_LIBRARY gmp)
 FIND_PATH(GMP_INCLUDE_DIR gmp.h)
-
-# Gtk-3 required for visualization
-FIND_PACKAGE(GTK3)
-IF (GTK3_FOUND)
-	# MESSAGE(STATUS "GTK3 found.")
-	ADD_DEFINITIONS(-DHAVE_GTK)
-	SET(HAVE_GTK 1)
-ELSE (GTK3_FOUND)
-	MESSAGE(STATUS "GTK missing: needed for the the gtk-visualizer.")
-ENDIF (GTK3_FOUND)
 
 # Gnu Guile scheme interpreter
 # Version 2.0.0 is needed for mrs io ports, compilation, etc.
@@ -359,12 +332,6 @@ ELSE (VALGRIND_FOUND)
 	MESSAGE(STATUS "VALGRIND missing: needed for thread debugging.")
 ENDIF (VALGRIND_FOUND)
 
-# XML-RPC, used by the ubigraph module
-FIND_PACKAGE(XMLRPC COMPONENTS client)
-IF (NOT XMLRPC_FOUND)
-	MESSAGE(STATUS "libxmlrpc missing: needed for ubigraph module.")
-ENDIF (NOT XMLRPC_FOUND)
-
 # ZeroMQ
 FIND_PACKAGE(ZMQ 3.2.4)
 IF (ZMQ_FOUND AND ZMQ_LIBRARY)
@@ -380,31 +347,13 @@ MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
 # ==========================================================
 # Decide what to build, based on the packages found.
 
-IF(Boost_FOUND)
-ENDIF(Boost_FOUND)
-
 IF(GSL_FOUND AND HAVE_COGUTIL)
 	SET(HAVE_ATOMSPACE 1)
-	SET(HAVE_ATTENTION 1)
-	SET(HAVE_DIMEMBED 1)
 ENDIF(GSL_FOUND AND HAVE_COGUTIL)
-
-IF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
-	SET(HAVE_SPATIAL_TOOLS 1)
-ENDIF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
 
 IF(HAVE_ATOMSPACE AND ODBC_FOUND) # SQL persistance
 	SET(HAVE_PERSIST 1)
 ENDIF(HAVE_ATOMSPACE AND ODBC_FOUND)
-
-IF (CURL_FOUND AND XMLRPC_FOUND)
-	ADD_DEFINITIONS(-DHAVE_UBIGRAPH)
-	SET(HAVE_UBIGRAPH 1)
-ENDIF (CURL_FOUND AND XMLRPC_FOUND)
-
-IF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR)
-	SET(HAVE_VITERBI 1)
-ENDIF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 
 # At this time, there is no reason to build with memcached for
 # any "normal" use, so just stub it out.
@@ -617,12 +566,10 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 SUMMARY_ADD("AtomSpace" "A weighted and typed hypergraph database" HAVE_ATOMSPACE)
 SUMMARY_ADD("Cython bindings" "Cython (python) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
-SUMMARY_ADD("GTK Visualizer" "GTK3-based Atomspace Visualizer" HAVE_GTK)
 SUMMARY_ADD("Hypertable" "HyperTable for scalable persistance (experimental)" HAVE_HYPERTABLE)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("SQL persistance" "Save/Restore of AtomSpace to database" HAVE_PERSIST)
 SUMMARY_ADD("TBB" "Intel TBB (Threaded Building Blocks) for multithreading" HAVE_TBB)
-SUMMARY_ADD("Ubigraph" "Visualisation of the AtomSpace" HAVE_UBIGRAPH)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_SHOW()
