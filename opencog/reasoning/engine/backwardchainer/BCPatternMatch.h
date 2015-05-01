@@ -1,5 +1,5 @@
 /*
- *BCPatternMatch.h
+ * BCPatternMatch.h
  *
  * Copyright (C) 2014 Misgana Bayetta
  *
@@ -29,8 +29,8 @@ namespace opencog
 {
 
 /**
- * Given a rule(i.e a bindLink handle), find all the premises that satisfy the rule.
- * by pattern matching.
+ * Given a rule(i.e a bindLink handle), find all the premises that
+ * satisfy the rule.  by pattern matching.
  */
 class BCPatternMatch  : public DefaultPatternMatchCB // : public virtual PLNImplicator
 {
@@ -44,19 +44,21 @@ public:
 	BCPatternMatch(AtomSpace*);
 	virtual ~BCPatternMatch();
 
-	//the follwing callbacks are used for guiding the PM to look only the target list
-	//based on step 3 of http://wiki.opencog.org/w/New_PLN_Chainer_Design#Overall_Forward_Chaining_Process
+	// The following callbacks are used for guiding the PM to look
+	// only the target list based on step 3 of
+	// http://wiki.opencog.org/w/New_PLN_Chainer_Design#Overall_Forward_Chaining_Process
 	bool node_match(Handle& node1, Handle& node2);
 	bool link_match(LinkPtr& lpat, LinkPtr& lsoln);
 
 	/**
-	 * A callback handler of the Pattern matcher used to store references to new conclusion the target list
+	 * A callback handler of the Pattern matcher used to store
+	 * references to new conclusion the target list
 	 */
 	bool grounding(const std::map<Handle, Handle> &var_soln,
 			const std::map<Handle, Handle> &pred_soln);
 
     /**
-     * return list of matching results found by the pattern matcher
+     * Return list of matching results found by the pattern matcher
      * @return
      */
 	std::vector<std::map<Handle, Handle>> get_var_list();

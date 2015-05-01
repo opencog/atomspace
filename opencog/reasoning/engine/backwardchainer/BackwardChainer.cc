@@ -136,7 +136,8 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 	std::vector<VarMap> kb_vmap;
 
 	// Else, either try to ground, or backward chain
-	HandleSeq kb_match = match_knowledge_base(hgoal, Handle::UNDEFINED, true, kb_vmap);
+	HandleSeq kb_match = match_knowledge_base(hgoal, Handle::UNDEFINED,
+	                                          true, kb_vmap);
 
 	if (kb_match.empty())
 	{
@@ -202,7 +203,8 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		}
 
 		for (auto& p : implicand_mapping)
-			logger().debug("[BackwardChainer] mapping is " + p.first->toShortString()
+			logger().debug("[BackwardChainer] mapping is "
+			               + p.first->toShortString()
 			               + " to " + p.second->toShortString());
 
 		// Reverse ground the implicant with the grounding we found from
@@ -210,11 +212,13 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		Instantiator inst(_garbage_superspace);
 		himplicant = inst.instantiate(himplicant, implicand_mapping);
 
-		logger().debug("[BackwardChainer] Reverse grounded as " + himplicant->toShortString());
+		logger().debug("[BackwardChainer] Reverse grounded as "
+		               + himplicant->toShortString());
 
 		// Find all matching premises
 		std::vector<VarMap> vmap_list;
-		HandleSeq possible_premises = match_knowledge_base(himplicant, hvardecl, false, vmap_list);
+		HandleSeq possible_premises =
+			match_knowledge_base(himplicant, hvardecl, false, vmap_list);
 
 		logger().debug("%d possible permises", possible_premises.size());
 
@@ -241,7 +245,8 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 				Handle& g = grounded_premises[i];
 				VarMap& m = vmap_list[i];
 
-				logger().debug("Checking possible permises grounding " + g->toShortString());
+				logger().debug("Checking possible permises grounding "
+				               + g->toShortString());
 
 				FindAtoms fv(VARIABLE_NODE);
 				fv.search_set(g);
@@ -282,7 +287,8 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 				to_be_added_to_targets.push(h);
 		}
 
-		logger().debug("[BackwardChainer] %d new targets to be added", to_be_added_to_targets.size());
+		logger().debug("[BackwardChainer] %d new targets to be added",
+		               to_be_added_to_targets.size());
 
 		if (not to_be_added_to_targets.empty())
 		{
@@ -409,7 +415,8 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
 
 	logger().debug("[BackwardChainer] Matching knowledge base with "
 	               " %s and variables %s",
-	               htarget->toShortString().c_str(), htarget_vardecl->toShortString().c_str());
+	               htarget->toShortString().c_str(),
+	               htarget_vardecl->toShortString().c_str());
 
 	// Pattern Match on _garbage_superspace since some atoms in htarget could
 	// be in the _garbage space
@@ -438,8 +445,8 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
 		for (auto& p : pred_solns[i])
 		{
 			// don't want matched clause that is part of a rule
-			if (std::any_of(_rules_set.begin(), _rules_set.end(),
-			                [&](Rule& r) { return is_atom_in_tree(r.get_handle(), p.second); }))
+			if (std::any_of(_rules_set.begin(), _rules_set.end(), [&](Rule& r) {
+						return is_atom_in_tree(r.get_handle(), p.second); }))
 			{
 				logger().debug("[BackwardChainer] matched clause in rule");
 				break;
@@ -473,7 +480,8 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
 		// XXX TODO preserve htarget's order
 		Handle this_result;
 		if (_logical_link_types.count(htarget->getType()) == 1)
-			this_result = _garbage_superspace->addLink(htarget->getType(), i_pred_soln);
+			this_result = _garbage_superspace->addLink(htarget->getType(),
+			                                           i_pred_soln);
 		else
 			this_result = i_pred_soln[0];
 
@@ -484,7 +492,8 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
 	return results;
 }
 
-HandleSeq BackwardChainer::ground_premises(const Handle& htarget, std::vector<VarMap>& vmap)
+HandleSeq BackwardChainer::ground_premises(const Handle& htarget,
+                                           std::vector<VarMap>& vmap)
 {
 	Handle premises = htarget;
 
@@ -505,7 +514,8 @@ HandleSeq BackwardChainer::ground_premises(const Handle& htarget, std::vector<Va
 		if (sub_premises.size() == 1)
 			premises = sub_premises[0];
 		else
-			premises = _garbage_superspace->addLink(htarget->getType(), sub_premises);
+			premises = _garbage_superspace->addLink(htarget->getType(),
+			                                        sub_premises);
 	}
 
 	logger().debug("[BackwardChainer] Grounding " + premises->toShortString());
@@ -557,7 +567,8 @@ bool BackwardChainer::unify(const Handle& htarget,
 		temp_vardecl = temp_space.addAtom(createVariableList(vars));
 	}
 	else
-		temp_vardecl = temp_space.addAtom(gen_sub_varlist(htarget_vardecl, fv.varset));
+		temp_vardecl = temp_space.addAtom(gen_sub_varlist(htarget_vardecl,
+		                                                  fv.varset));
 
 	SatisfactionLinkPtr sl(createSatisfactionLink(temp_vardecl, temp_htarget));
 	BCPatternMatch bcpm(&temp_space);
@@ -600,10 +611,11 @@ bool BackwardChainer::unify(const Handle& htarget,
 		logger().debug("[BackwardChainer] unified temp "
 		               + var->toShortString() + " to " + grn->toShortString());
 
-		// XXX FIXME multiple atomspace is fubar here, it should be possible to do
-		// _garbage_superspace->getAtom(var), but it is returning Handle::UNDEFINED!!!
-		// so using addAtom instead
-		result[_garbage_superspace->addAtom(var)] = _garbage_superspace->addAtom(grn);
+		// XXX FIXME multiple atomspace is fubar here, it should be
+		// possible to do _garbage_superspace->getAtom(var), but it is
+		// returning Handle::UNDEFINED!!!  so using addAtom instead
+		result[_garbage_superspace->addAtom(var)] =
+			_garbage_superspace->addAtom(grn);
 	}
 
 	return true;
@@ -643,7 +655,8 @@ Handle BackwardChainer::gen_sub_varlist(const Handle& parent_varlist,
 	{
 		Type t = h->getType();
 		if ((VARIABLE_NODE == t && varset.count(h) == 1)
-			or (TYPED_VARIABLE_LINK == t && varset.count(LinkCast(h)->getOutgoingSet()[0]) == 1))
+			or (TYPED_VARIABLE_LINK == t
+			    and varset.count(LinkCast(h)->getOutgoingSet()[0]) == 1))
 			final_oset.push_back(h);
 	}
 

@@ -26,7 +26,7 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/reasoning/engine/JsonicControlPolicyParamLoader.h>
-#include <opencog/reasoning/engine/RECommons.h>
+#include <opencog/reasoning/engine/URECommons.h>
 #include "FCMemory.h"
 
 class ForwardChainerUTest;
@@ -40,7 +40,7 @@ private:
     friend class ::ForwardChainerUTest;
 
     AtomSpace * _as;
-    RECommons _rec; //utility class
+    URECommons _rec; //utility class
 
     JsonicControlPolicyParamLoader* _cpolicy_loader;
     string _conf_path = "reasoning/engine/default_cpolicy.json";

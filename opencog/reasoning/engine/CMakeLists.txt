@@ -1,7 +1,9 @@
-#rule engine lib build
+#
+# Rule engine lib build
+#
 ADD_LIBRARY(ruleengine SHARED
 	backwardchainer/BackwardChainer.cc
-	RECommons.cc
+	URECommons.cc
 	forwardchainer/ForwardChainer.cc
 	backwardchainer/BCPatternMatch.cc
 	forwardchainer/ForwardChainInputMatchCB.cc
@@ -32,7 +34,7 @@ INSTALL (TARGETS ruleengine DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 INSTALL (FILES
 	InferenceSCM.h
 	JsonicControlPolicyParamLoader.h
-	RECommons.h
+	URECommons.h
 	Rule.h
 	forwardchainer/DefaultForwardChainerCB.h
 	forwardchainer/FCMemory.h
