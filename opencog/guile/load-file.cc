@@ -70,8 +70,13 @@ int load_scm_file (AtomSpace& as, const std::string& filename)
 int load_scm_file_relative (AtomSpace& as, const std::string& filename,
                             std::vector<std::string> search_paths)
 {
-    if (search_paths.empty())
-        search_paths = DEFAULT_MODULE_PATHS;
+    if (search_paths.empty()) {
+        // Sometimes paths are given without the "opencog" part.
+        for (auto p : DEFAULT_MODULE_PATHS) {
+            search_paths.push_back(p);
+            search_paths.push_back(p + "/opencog");
+        }
+    }
 
     int rc = 2;
     for (const std::string& search_path : search_paths) {
