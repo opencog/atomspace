@@ -5,7 +5,7 @@
  *      Author: misgana
  */
 
-#include <opencog/unified-rule-engine/URECommons.h>
+#include <opencog/rule-engine/URECommons.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>

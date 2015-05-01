@@ -5,7 +5,7 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
-#include <opencog/unified-rule-engine/JsonicControlPolicyParamLoader.h>
+#include <opencog/rule-engine/JsonicControlPolicyParamLoader.h>
 
 using namespace opencog;
 //#define DEBUG 1
@@ -33,7 +33,7 @@ void JsonicControlPolicyParamLoaderUTest::setUp() {
 void JsonicControlPolicyParamLoaderUTest::tearDown() {
 }
 void JsonicControlPolicyParamLoaderUTest::test_load_config() {
-	JsonicControlPolicyParamLoader jcpl(as_, "tests/unified-rule-engine/test_cpolicy.json");
+	JsonicControlPolicyParamLoader jcpl(as_, "tests/rule-engine/test_cpolicy.json");
 	jcpl.load_config();
 	vector<Rule*> rules = jcpl.get_rules();
 	TS_ASSERT_EQUALS(1, rules.size());

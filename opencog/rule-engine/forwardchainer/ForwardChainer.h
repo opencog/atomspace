@@ -25,8 +25,8 @@
 #define FORWARDCHAINERX_H_
 
 #include <opencog/util/Logger.h>
-#include <opencog/unified-rule-engine/JsonicControlPolicyParamLoader.h>
-#include <opencog/unified-rule-engine/URECommons.h>
+#include <opencog/rule-engine/JsonicControlPolicyParamLoader.h>
+#include <opencog/rule-engine/URECommons.h>
 #include "FCMemory.h"
 
 class ForwardChainerUTest;
@@ -43,7 +43,7 @@ private:
     URECommons _rec; //utility class
 
     JsonicControlPolicyParamLoader* _cpolicy_loader;
-    string _conf_path = "unified-rule-engine/default_cpolicy.json";
+    string _conf_path = "rule-engine/default_cpolicy.json";
 
     FCMemory _fcmem; //Stores history
     Logger * _log;

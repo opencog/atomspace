@@ -10,8 +10,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/load-file.h>
 
-#include <opencog/unified-rule-engine/forwardchainer/ForwardChainer.h>
-#include <opencog/unified-rule-engine/forwardchainer/DefaultForwardChainerCB.h>
+#include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
+#include <opencog/rule-engine/forwardchainer/DefaultForwardChainerCB.h>
 
 
 using namespace opencog;

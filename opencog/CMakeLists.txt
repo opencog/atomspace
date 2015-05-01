@@ -6,7 +6,7 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 # dependencies: the later parts depend on, or may
 # someday depend on the earlier parts.
 #
-ADD_SUBDIRECTORY (unified-rule-engine)
+ADD_SUBDIRECTORY (rule-engine)
 
 IF (HAVE_ATOMSPACE)
     ADD_SUBDIRECTORY (atoms)
