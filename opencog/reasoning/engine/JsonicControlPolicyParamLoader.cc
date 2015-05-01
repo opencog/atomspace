@@ -283,8 +283,17 @@ Rule* JsonicControlPolicyParamLoader::get_rule(const string& name)
 const string JsonicControlPolicyParamLoader::get_working_path(
         const string& filename, vector<string> search_paths)
 {
-    if (search_paths.empty())
-        search_paths = DEFAULT_MODULE_PATHS;
+    if (search_paths.empty()) {
+        // Sometimes paths are given without the "opencog" part.
+        // Also check the build directory for autogen'ed files.
+        // XXX This is fairly tacky/broken, and needs a better fix.
+        for (auto p : DEFAULT_MODULE_PATHS) {
+            search_paths.push_back(p);
+            search_paths.push_back(p + "/opencog");
+            search_paths.push_back(p + "/build");
+            search_paths.push_back(p + "/build/opencog");
+        }
+    }
 
     for (auto search_path : search_paths) {
         boost::filesystem::path modulePath(search_path);
