@@ -24,9 +24,9 @@
 #ifndef FORWARDCHAINERX_H_
 #define FORWARDCHAINERX_H_
 
-#include <opencog/reasoning/engine/JsonicControlPolicyParamLoader.h>
 #include <opencog/util/Logger.h>
-#include "../RECommons.h"
+#include <opencog/reasoning/engine/JsonicControlPolicyParamLoader.h>
+#include <opencog/reasoning/engine/RECommons.h>
 #include "FCMemory.h"
 
 class ForwardChainerUTest;

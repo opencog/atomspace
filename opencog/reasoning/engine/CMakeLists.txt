@@ -31,7 +31,11 @@ INSTALL (TARGETS ruleengine DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	InferenceSCM.h
+	JsonicControlPolicyParamLoader.h
+	RECommons.h
+	Rule.h
 	forwardchainer/DefaultForwardChainerCB.h
+	forwardchainer/FCMemory.h
 	forwardchainer/ForwardChainer.h
 	forwardchainer/ForwardChainerCallBack.h
 	forwardchainer/ForwardChainInputMatchCB.h
