@@ -27,17 +27,14 @@ TARGET_LINK_LIBRARIES(ruleengine
 	atomspace
 )
 
-IF (WIN32)
-   INSTALL (TARGETS query DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-ELSEIF (CYGWIN)
-   INSTALL (TARGETS query DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-ENDIF (WIN32)
+INSTALL (TARGETS ruleengine DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
+	InferenceSCM.h
+	forwardchainer/DefaultForwardChainerCB.h
 	forwardchainer/ForwardChainer.h
 	forwardchainer/ForwardChainInputMatchCB.h
 	forwardchainer/ForwardChainPatternMatchCB.h
 	backwardchainer/BCPatternMatch.h
 	DESTINATION "include/${PROJECT_NAME}/reasoning/engine"
 )
-
