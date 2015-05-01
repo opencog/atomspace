@@ -4,9 +4,9 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
-#include <opencog/reasoning/engine/JsonicControlPolicyParamLoader.h>
-#include <opencog/reasoning/engine/forwardchainer/FCMemory.h>
-#include <opencog/reasoning/engine/forwardchainer/DefaultForwardChainerCB.h>
+#include <opencog/unified-rule-engine/JsonicControlPolicyParamLoader.h>
+#include <opencog/unified-rule-engine/forwardchainer/FCMemory.h>
+#include <opencog/unified-rule-engine/forwardchainer/DefaultForwardChainerCB.h>
 
 using namespace opencog;
 

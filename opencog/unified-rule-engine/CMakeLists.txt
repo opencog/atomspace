@@ -43,5 +43,5 @@ INSTALL (FILES
 	forwardchainer/ForwardChainInputMatchCB.h
 	forwardchainer/ForwardChainPatternMatchCB.h
 	backwardchainer/BCPatternMatch.h
-	DESTINATION "include/${PROJECT_NAME}/reasoning/engine"
+	DESTINATION "include/${PROJECT_NAME}/unified-rule-engine"
 )

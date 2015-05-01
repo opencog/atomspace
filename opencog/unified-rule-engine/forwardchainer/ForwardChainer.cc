@@ -25,7 +25,7 @@
 #include <opencog/atoms/bind/SatisfactionLink.h>
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/query/DefaultImplicator.h>
-#include <opencog/reasoning/engine/Rule.h>
+#include <opencog/unified-rule-engine/Rule.h>
 #include <opencog/atoms/bind/BindLink.h>
 #include "ForwardChainer.h"
 #include "ForwardChainerCallBack.h"

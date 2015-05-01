@@ -34,7 +34,7 @@ IF (CXXTEST_FOUND)
 		ADD_SUBDIRECTORY (query)
 
 		# Currently, reasoning depends on query, above.
-		ADD_SUBDIRECTORY (reasoning)
+		ADD_SUBDIRECTORY (unified-rule-engine)
 
 		ADD_SUBDIRECTORY (pln)
 

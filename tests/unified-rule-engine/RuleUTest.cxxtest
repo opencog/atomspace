@@ -1,5 +1,5 @@
 /*
- * tests/reasoning/engine/RuleUTest.cxxtest
+ * tests/unified-rule-engine/RuleUTest.cxxtest
  *
  * Copyright (C) 2014 Cosmo Harrigan
  * All Rights Reserved
@@ -114,7 +114,7 @@ void RuleUTest::test_deduction()
     eval->eval("(use-modules (opencog))");
     eval->eval("(use-modules (opencog query))");
     config().set("SCM_PRELOAD",
-                 "tests/reasoning/engine/simple-assertions.scm, "
+                 "tests/unified-rule-engine/simple-assertions.scm, "
                  "reasoning/pln/rules/deduction.scm");
     load_scm_files_from_config(*as);
     
@@ -142,7 +142,7 @@ void RuleUTest::test_and()
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
     
     config().set("SCM_PRELOAD",
-                 "tests/reasoning/engine/simple-predicates.scm, "
+                 "tests/unified-rule-engine/simple-predicates.scm, "
                  "reasoning/pln/rules/and.scm");
     load_scm_files_from_config(*as);
 
@@ -162,7 +162,7 @@ void RuleUTest::test_not()
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
     
     config().set("SCM_PRELOAD",
-                 "tests/reasoning/engine/simple-predicates.scm, "
+                 "tests/unified-rule-engine/simple-predicates.scm, "
                  "reasoning/pln/rules/not.scm");
     load_scm_files_from_config(*as);
 
