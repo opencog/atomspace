@@ -76,6 +76,7 @@ int load_scm_file_relative (AtomSpace& as, const std::string& filename,
         // XXX This is fairly tacky/broken, and needs a better fix.
         for (auto p : DEFAULT_MODULE_PATHS) {
             search_paths.push_back(p);
+            search_paths.push_back(p + "/examples/rule-engine");
             search_paths.push_back(p + "/opencog");
             search_paths.push_back(p + "/build");
             search_paths.push_back(p + "/build/opencog");

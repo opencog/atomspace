@@ -5,3 +5,6 @@ python          - Python usage examples
 
 pattern-matcher - Provides example scheme code that defines a search
                   pattern (using BindLink and SatisfactionLink).
+
+rule-engine     - Provide example of a simple crisp inference system
+                  using the unified rule engine.
