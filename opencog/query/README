@@ -830,6 +830,13 @@ D) The foreach abstraction allows complex iterators to be implemented.
 
 TODO
 ----
+ * Atomspaces are done wrong. Grounding whould always be performed
+   in the atomspace of the bindlink.  Thus should be fetched directly
+   from the bind-link, and not passed as a third-party parameter.
+
+ * Need a nested ChoiceLink unit test... or is this done in the
+   StackMoreUTest alrady ???
+
  * Enhancement: Add support for VariableLink, so that, for example,
    (VariableLink $R (VariableNode $A) (VariableNode $B)) matches
    any arity-2 link (as long as the type constraints are obeyed).
@@ -844,7 +851,8 @@ TODO
    get_next_untried_clause(); there is a XXX note in there about this.
 
  * Invent a callback so that ChoiceLink can become a random-choice
-	or a Bayesian-probability-choice, etc.
+	or a Bayesian-probability-choice, etc. This is sort-of done, already,
+   but more additional/experimental callbacks are needed.
 
  * Enhancement: Add support for IfLink, which would have the semantics
    'if (some-condition-during-search) then match-this else match-that'
@@ -852,10 +860,23 @@ TODO
    the semantics of 'if (some-condition-during-search) then
    trivial-always-match else trivial-impossible-match.'
 
+ * Enhancement: Allow variable type declarations to occur anywhere in
+   the body, not just at the top. This is because variable-type
+   restirctions are essentially a kind-of special-case GPN, restrictiing
+   the accept or reject... except that it is applied immediately, upon
+   the initial attempt at variable grounding.
+
+ * Enhancement: Add support for ExecutionOutputLink in the body of the
+   pattern. Thus, given a specific groundings, the EOL is evaluated,
+   resulting in a new sub-pattern to be grounded, until backtracking.
+
  * Enhancement: allow user to bind a handle name to a subset of the
    match. This would be handy to reduce the verbosity of writing down
    the consequent part (e.g. if we matched clauses a,b,c, then the
    output could be just clause b only, and it would be nice to just say
    'clause b' instead of spelling it out.)
+
+ * Study the following some more: prolog, minikanren, mercury, curry
+   (logic programming languague), godel (logic programming langauge)
 
  -------------------------- END OF FILE ------------------------
