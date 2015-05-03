@@ -36,12 +36,8 @@ INSTALL (FILES
 	JsonicControlPolicyParamLoader.h
 	URECommons.h
 	Rule.h
-	forwardchainer/DefaultForwardChainerCB.h
-	forwardchainer/FCMemory.h
-	forwardchainer/ForwardChainer.h
-	forwardchainer/ForwardChainerCallBack.h
-	forwardchainer/ForwardChainInputMatchCB.h
-	forwardchainer/ForwardChainPatternMatchCB.h
-	backwardchainer/BCPatternMatch.h
 	DESTINATION "include/${PROJECT_NAME}/rule-engine"
 )
+
+ADD_SUBDIRECTORY(forwardchainer)
+ADD_SUBDIRECTORY(backwardchainer)
