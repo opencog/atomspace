@@ -56,4 +56,4 @@ scheme_eval_h(atomspace, scheme_query)
 
 # Run the above pattern and print the result
 result = scheme_eval_h(atomspace, '(cog-bind find-animals)')
-print atomspace[result]
+print "The result of pattern matching is:\n\n" + str(atomspace[result])
