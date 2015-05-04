@@ -6,20 +6,13 @@ opencog cython build directory.  In most cases, the following will
 suffice:
 
 ```
-export PYTHONPATH=$PYTHONPATH:../../build/opencog/cython
+export PYTHONPATH=$PYTHONPATH:/usr/local/share/opencog/python
 ```
 
-
-## bindlink 
-
-Example of how to use the pattern matcher BindLink functionality from Python
-
-## atom_type_names 
+## atom_type_names
 
 Example of how to obtain atom type names and atom type IDs in Python
 
-## moses
+## bindlink
 
-Example usage of the Python wrapper for the MOSES evolutionary program
-learning system
-
+Example of how to use the pattern matcher BindLink functionality from Python
