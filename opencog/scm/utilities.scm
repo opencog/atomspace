@@ -60,12 +60,24 @@
 (define (ftv mean conf) (cog-new-ftv mean conf))
 
 ; Fetch the mean, confidence and count of a TV.
-(define (tv-mean tv) (assoc-ref (cog-tv->alist tv) 'mean))
-(define (tv-conf tv) (assoc-ref (cog-tv->alist tv) 'confidence))
+(define (tv-mean tv)
+"
+  Return the mean (strength) of a TruthValue.
+"
+	(assoc-ref (cog-tv->alist tv) 'mean))
+
+(define (tv-conf tv)
+"
+  Return the confidence of a TruthValue.
+"
+	(assoc-ref (cog-tv->alist tv) 'confidence))
 ;
 ; Simple truth values won't have a count. Its faster to just check
 ; for #f than to call (cog-ctv? tv)
 (define (tv-count tv)
+"
+  Return the count of a CountTruthValue.
+"
 	(define cnt (assoc-ref (cog-tv->alist tv) 'count))
 	(if (eq? cnt #f) 0 cnt)
 )
