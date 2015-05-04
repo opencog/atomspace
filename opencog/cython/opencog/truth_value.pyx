@@ -64,7 +64,7 @@ cdef class TruthValue:
         return self._ptr().toString().c_str()
 
     def confidence_to_count(self, float conf):
-        return (<cSimpleTruthValue*>self._ptr()).confidenceToCount(conf)
+        return (<cSimpleTruthValue*> 0).confidenceToCount(conf)
 
     def count_to_confidence(self, float count):
-        return (<cSimpleTruthValue*>self._ptr()).countToConfidence(count)
+        return (<cSimpleTruthValue*> 0).countToConfidence(count)
