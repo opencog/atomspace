@@ -25,36 +25,78 @@
 #define FUZZYPATTERNMATCHCB_H
 
 #include <opencog/query/DefaultPatternMatchCB.h>
-#include "GraphEditDist.h"
 
 namespace opencog
 {
     class FuzzyPatternMatchCB : public DefaultPatternMatchCB
     {
         public:
-            // Storing the hypergraphs that are similar to the input one
+            // The solutions -- hypergraphs that are similar to the pattern
             HandleSeq solns;
 
             FuzzyPatternMatchCB(AtomSpace* as);
 
-            virtual bool initiate_search(PatternMatchEngine*,
-                                        const Variables&,
-                                        const Pattern&);
+            virtual bool neighbor_search(PatternMatchEngine* pme,
+                                         const Variables& vars,
+                                         const Pattern& pat);
+
+            virtual bool fuzzy_match(const Handle& h1, const Handle& h2)
+            {
+                return true;
+            }
+
             virtual bool link_match(const LinkPtr& pLink, const LinkPtr& gLink);
-            virtual bool node_match(const Handle& pNode, const Handle& gNode);
+
+            virtual bool node_match(const Handle& pNode, const Handle& gNode)
+            {
+                return true;
+            }
+
             virtual bool grounding(const std::map<Handle, Handle>& var_soln,
-                                   const std::map<Handle, Handle>& term_soln);
+                                   const std::map<Handle, Handle>& term_soln)
+            {
+                return true;
+            }
 
         private:
-            // Min. edit distance of the query hypergraph and the candidate
-            double cand_edit_dist = 0;
+            struct Starter
+            {
+                UUID uuid;
+                Handle handle;
+                Handle term;
+                size_t clause_idx;
+                size_t width;
+                size_t depth;
+            };
 
-            // Min. edit distance among all the candidates
-            double min_edit_dist = SIZE_MAX;
+            // How many nodes are there in the pattern
+            size_t pat_size = 0;
 
-            GraphEditDist ged;
-            bool check_if_accept(const Handle& ph, const Handle& gh);
+            // How many VariableNodes are there in the pattern
+            size_t var_size = 0;
+
+            // Potential starters that can be used to initiate the search
+            std::vector<Starter> potential_starters;
+
+            // Links that have previously been compared
+            std::vector<std::pair<UUID, UUID>> prev_compared;
+
+            // How many times should we initiate a search by a different starter
+            const size_t MAX_SEARCHES = 5;
+
+            // How similar the potential solution and the pattern are
+            double similarity = 0;
+
+            // The maximum similarity of all the potential solutions we found
+            double max_similarity = -std::numeric_limits<double>::max();
+
+            void find_starters(const Handle& hg, const size_t& depth,
+                               const size_t& clause_idx, const Handle& term,
+                               std::vector<Starter>& rtn);
+
+            void check_if_accept(const Handle& ph, const Handle& gh);
     };
 }
 
 #endif // FUZZYPATTERNMATCHCB_H
+

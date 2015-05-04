@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomutils/AtomUtils.h>
 #include "FuzzyPatternMatchCB.h"
 
 using namespace opencog;
@@ -33,170 +34,258 @@ FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as)
 }
 
 /**
- * Implement the initiate_search calllback.
+ * Find the starters that can be used to initiate a fuzzy-search. Currently the
+ * starters has to be a node that is not an instance nor a variable.
  *
- * For a fuzzy match, it starts with a full atomspace search to find candidates.
- *
- * @param pme        The pointer of the PatternMatchEngine
- * @param vars       A set of nodes that are considered as variables
- * @param clauses    The clauses for the query
- * @param negations  The negative clauses
+ * @param hp          The pattern (the hypergraph in the query)
+ * @param depth       The depth of the starter in the pattern
+ * @param clause_idx  The index of the clause, i.e. which clause the starter
+ *                    is in among all input clauses
+ * @param term        The term that the starter is located in the pattern
+ * @param rtn         A list of potential starters found in the pattern
  */
-bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme,
+void FuzzyPatternMatchCB::find_starters(const Handle& hp, const size_t& depth,
+                                        const size_t& clause_idx,
+                                        const Handle& term,
+                                        std::vector<Starter>& rtn)
+{
+    // Traverse its outgoing set if it is a link
+    LinkPtr lp(LinkCast(hp));
+    if (lp)
+    {
+        for (Handle h : lp->getOutgoingSet())
+        {
+            // Blow past the QuoteLinks
+            if (QUOTE_LINK == h->getType()) h = LinkCast(h)->getOutgoingAtom(0);
+
+            find_starters(h, depth + 1, clause_idx, hp, rtn);
+        }
+    }
+
+    // Get the nodes that are not an instance nor a variable
+    else
+    {
+        NodePtr np(NodeCast(hp));
+
+        if (hp != Handle::UNDEFINED and np)
+        {
+            pat_size++;
+
+            if ((np->getType() != VARIABLE_NODE) and
+                (np->getName().find("@") == std::string::npos))
+            {
+                Starter sn;
+                sn.uuid = hp.value();
+                sn.handle = hp;
+                sn.term = term;
+                sn.clause_idx = clause_idx;
+                sn.width = hp->getIncomingSetSize();
+                sn.depth = depth;
+
+                rtn.push_back(sn);
+            }
+
+            else if (np->getType() == VARIABLE_NODE) var_size++;
+        }
+    }
+}
+
+/**
+ * Implement the neighbor_search method in the Pattern Matcher. The main
+ * different between this method and the default one is that this initiates
+ * multiple searches using differnt nodes as starters, explores the 
+ * neighborhood of each of them, and captures the partial matches in the
+ * callbacks. It stops when there are no more available starters in the
+ * pattern, or the number of searches it has done equals to MAX_SEARCH.
+ *
+ * @param pme   The PatternMatchEngine object
+ * @param vars  Variables for the Pattern Matcher
+ * @param pat   The pattern we are looking for
+ * @return      True if one or more solutions are found, false otherwise
+ */
+bool FuzzyPatternMatchCB::neighbor_search(PatternMatchEngine* pme,
                                           const Variables& vars,
                                           const Pattern& pat)
 {
-    const HandleSeq& clauses = pat.mandatory;
+    init(vars, pat);
 
-    _root = clauses[0];
-    _starter_term = _root;
-    // XXX FIXME  I'm pretty sure that this search is not going to be
-    // complete, probably missing lots of similar patterns, simply
-    // because it starts out with just the type of the very first
-    // clause, and thus missing things that are fuzzily close to it.
-    //
-    // I know that this is the case, because when I substitute the
-    // below with link_type_search(), which normally would be
-    // equivalent but faster, the FuzzyUTest failed. Tis means that
-    // if the "equivalent" search is missing answers, then the search
-    // below is missing them too.
-    //
-    // So, instead of using the type of clause[0], you probably want
-    // look at several types ???  There is a high risk that the
-    // resulting search will be very inefficeint: this inefficiency
-    // is exactly what link_type_search() was trying to avoid...
-    Type ptype = _root->getType();
-    HandleSeq handle_set;
-    _as->getHandlesByType(handle_set, ptype);
-    for (const Handle& h : handle_set)
+    // Find potential starters from all the clauses
+    const HandleSeq& clauses = pat.mandatory;
+    for (size_t i = 0; i < clauses.size(); i++)
     {
-        bool found = pme->explore_neighborhood(_root, _starter_term, h);
-        if (found) return found;
+        // Skip evaluatable clause
+        if (0 < pat.evaluatable_holders.count(clauses[i])) continue;
+
+        find_starters(clauses[i], 0, i, Handle::UNDEFINED, potential_starters);
     }
-    return false;
+
+    // For removing duplicates, if any, form the list of potential starters,
+    // as we want to have a different starters for each of the searches
+    auto check_uniqueness = [](const Starter& s1, const Starter& s2)
+    {
+        return s1.uuid == s2.uuid;
+    };
+
+    auto sort_by_uuid = [](const Starter& s1, const Starter& s2)
+    {
+        return s1.uuid < s2.uuid;
+    };
+
+    std::sort(potential_starters.begin(), potential_starters.end(), sort_by_uuid);
+    potential_starters.erase(std::unique(potential_starters.begin(),
+                                         potential_starters.end(),
+                                         check_uniqueness),
+                             potential_starters.end());
+
+    // Sort the potential starters according to their "width" and "depth"
+    auto sort_by_wd = [](const Starter& s1, const Starter& s2)
+    {
+        if (s1.width == s2.width) return s1.depth > s2.depth;
+        else return s1.width < s2.width;
+    };
+
+    std::sort(potential_starters.begin(), potential_starters.end(), sort_by_wd);
+
+    // Start the searches
+    size_t search_cnt = 0;
+    while (MAX_SEARCHES > search_cnt)
+    {
+        if (potential_starters.size() == search_cnt)
+        {
+            std::cout << "No available starter to continue the fuzzy match.\n";
+            break;
+        }
+
+        _root = clauses[potential_starters[search_cnt].clause_idx];
+        _starter_term = potential_starters[search_cnt].term;
+        const Handle& best_start = potential_starters[search_cnt].handle;
+        search_cnt++;
+
+#ifdef DEBUG
+        std::cout << "\n========================================\n";
+        std::cout << "Initiating the fuzzy match... (" << search_cnt << "/" <<
+                     MAX_SEARCHES << ")\n";
+        std::cout << "Starter:\n" << best_start->toShortString() << "\n";
+        std::cout << "Start term:\n" << _starter_term->toShortString();
+        std::cout << "========================================\n\n";
+#endif
+
+        IncomingSet iset = best_start->getIncomingSet();
+        size_t iset_size = iset.size();
+        for (size_t i = 0; i < iset_size; i++)
+        {
+            Handle h(iset[i]);
+
+#ifdef DEBUG
+            std::cout << "Loop candidate (" << (i + 1) << "/" << iset_size << "):\n"
+                         << h->toShortString() << "\n";
+#endif
+
+            pme->explore_neighborhood(_root, _starter_term, h);
+        }
+    }
+
+    // Let's end the search here if there are solutions, continue could be costly
+    if (solns.size() > 0)
+    {
+        std::cout << "Fuzzy match is finished.\n";
+        return true;
+    }
+
+    // Return false to use other methods to find matches
+    else
+    {
+        _search_fail = true;
+        return false;
+    }
 }
 
+
 /**
- * Override the link_match callback.
+ * Implement the link_match callback.
  *
- * This is for finding similar links/hypergraphs in the atomspace. The possible
- * grounding link (gLink) will be compared with the pattern link (pLink) and see
- * if it should be accepted, based on the similarity between them.
+ * It compares and estimates the similarity between the two input links, if they
+ * haven't been compared previously.
  *
- * @param pLink  The link from the query
- * @param gLink  A possible grounding link found by the Pattern Matcher
- * @return       Always return false to search for more solutions
+ * @param pLink  A link in the pattern
+ * @param gLink  A link in the potential solution
+ * @return       Always return true to accept it, and keep the matching going
  */
 bool FuzzyPatternMatchCB::link_match(const LinkPtr& pLink, const LinkPtr& gLink)
 {
-    // If two links are identical, skip it
-    if (pLink == gLink) return false;
-
-    // Check if the types of the links are the same before going further into
-    // the similarity estimation.
-    // This is mainly for reducing the amount of hypergraphs being processed
-    // as the content of two links with different types are likely to be quite
-    // different.
-    if (pLink->getType() != gLink->getType()) return false;
-
-    check_if_accept(pLink->getHandle(), gLink->getHandle());
-
-    return false;
-}
-
-/**
- * Override the node_match callback.
- *
- * This is for finding similar nodes in the atomspace. The possible grounding
- * node (gNode) will be compared with the pattern node (pNode) and see if it
- * should be accepted, based on the similarity between them.
- *
- * @param pNode  A handle of the node form the query
- * @param gNode  A handle of a possible grounding node
- * @return       Always return false to search for more solutions
- */
-bool FuzzyPatternMatchCB::node_match(const Handle& pNode, const Handle& gNode)
-{
-    // If two handles are identical, skip it
-    if (pNode == gNode) return false;
-
-    check_if_accept(pNode, gNode);
-
-    return false;
-}
-
-/**
- * Implement the grounding callback.
- *
- * Always return false to search for more solutions.
- *
- * @param var_soln   The variable & links mapping
- * @param term_soln  The clause mapping
- * @return           Always return false to search for more solutions
- */
-bool FuzzyPatternMatchCB::grounding(const std::map<Handle, Handle>& var_soln,
-                                    const std::map<Handle, Handle>& term_soln)
-{
-    return false;
-}
-
-/**
- * Check how similar the two hypergraphs are by computing the edit distance. If
- * the edit distance is smaller than or equals to the previous minimum, then
- * it will be accepted.
- *
- * @param ph  A handle of the hypergraph from the query
- * @param gh  A handle of a possible grounding hypergraph
- * @return    True if it is accepted, false otherwise
- */
-bool FuzzyPatternMatchCB::check_if_accept(const Handle& ph, const Handle& gh)
-{
-    // Compute the edit distance
-    cand_edit_dist = ged.compute(ph, gh);
-
-    // Skip identical hypergraphs, if any
-    if (cand_edit_dist == 0)
+    // Avoid comparing the same pair of atoms again, this in turn avoid
+    // giving duplicated solutions
+    std::pair<UUID, UUID> p = std::make_pair(pLink->getHandle().value(),
+                                             gLink->getHandle().value());
+    if (std::find(prev_compared.begin(), prev_compared.end(), p) == prev_compared.end())
     {
-#ifdef DEBUG
-        printf("Cost = %.3f\nSkipped!\n\n", cand_edit_dist);
-#endif
-        return false;
+        check_if_accept(pLink->getHandle(), gLink->getHandle());
+        prev_compared.push_back(p);
     }
 
-    // If the edit distance of the current hypergraph is smaller than the
-    // previous minimum, it becomes the new minimum
-    else if (cand_edit_dist < min_edit_dist)
+    return true;
+}
+
+/**
+ * Compare and estimate the similarity between the two inputs, and decide
+ * whether or not to accept it. The potential solution will be accepted if
+ * it has a similarity greater than or equals to the maximum similarity that we
+ * know, rejected otherwise.
+ *
+ * @param ph  The pattern
+ * @param gh  The potential solution
+ */
+void FuzzyPatternMatchCB::check_if_accept(const Handle& ph, const Handle& gh)
+{
+    HandleSeq pnodes = getAllNodes(ph);
+    HandleSeq gnodes = getAllNodes(gh);
+
+    // Reject the candidate if it contains any VariableNode
+    auto check_vars = [](const Handle& h)
     {
+        return h->getType() == VARIABLE_NODE;
+    };
+
+    if (std::find_if(gnodes.begin(), gnodes.end(), check_vars) != gnodes.end())
+        return;
+
+    // Estimate the similarity by comparing how many nodes the potential
+    // solution has in common with the pattern, also the number of extra and
+    // missing nodes in it will also be taken in consideration
+    HandleSeq common_nodes;
+    std::sort(pnodes.begin(), pnodes.end());
+    std::sort(gnodes.begin(), gnodes.end());
+    std::set_intersection(pnodes.begin(), pnodes.end(),
+                          gnodes.begin(), gnodes.end(),
+                          std::back_inserter(common_nodes));
+
+    // Do a rough estimation here
+    double common = 1.0 * (common_nodes.size() + var_size) / pat_size;
+    double diff = 0.5 * std::abs((int) pat_size - (int) gnodes.size()) /
+                  (pat_size + gnodes.size());
+    similarity = common - diff;
+
 #ifdef DEBUG
-        printf("Cost = %.3f\nMin. Cost = %.3f\nAccepted!\n\n",
-               cand_edit_dist, min_edit_dist);
+    std::cout << "\n========================================\n";
+    std::cout << "Compaing:\n" << ph->toShortString() << "--- and:\n"
+              << gh->toShortString() << "\n";
+    std::cout << "Common nodes = " << common << "\n";
+    std::cout << "Missing/Extra nodes = " << diff << "\n";
+    std::cout << "similarity = " << similarity << "\n";
+    std::cout << "max_similarity = " << max_similarity << "\n";
+    std::cout << "========================================\n\n";
 #endif
-        min_edit_dist = cand_edit_dist;
+
+    // Decide if we should accept the potential solutions or not
+    if (similarity > max_similarity)
+    {
+        max_similarity = similarity;
         solns.clear();
         solns.push_back(gh);
-        return true;
     }
 
-    // If the edit distance of the current hypergraph is the same as the
-    // previous minimum, add it to the solution-list
-    else if (cand_edit_dist == min_edit_dist)
-    {
-#ifdef DEBUG
-        printf("Cost = %.3f\nMin. Cost = %.3f\nAccepted!\n\n",
-               cand_edit_dist, min_edit_dist);
-#endif
-        solns.push_back(gh);
-        return true;
-    }
+    else if (similarity == max_similarity) solns.push_back(gh);
 
-    // If the edit distance of the current hypergraph is greater than the
-    // previous minimum, reject it
-    else
-    {
-#ifdef DEBUG
-        printf("Cost = %.3f\nMin. Cost = %.3f\nRejected!\n\n",
-               cand_edit_dist, min_edit_dist);
-#endif
-        return false;
-    }
+    return;
 }
+
