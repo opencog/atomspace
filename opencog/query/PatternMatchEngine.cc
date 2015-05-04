@@ -238,8 +238,12 @@ bool PatternMatchEngine::ordered_compare(const Handle& hp,
 	const HandleSeq &osp = lp->getOutgoingSet();
 	const HandleSeq &osg = lg->getOutgoingSet();
 
-	size_t oset_sz = osp.size();
-	if (oset_sz != osg.size()) return false;
+//	size_t oset_sz = osp.size();
+//	if (oset_sz != osg.size()) return false;
+
+	size_t osg_size = osg.size();
+	size_t osp_size = osp.size();
+	size_t max_size = std::max(osg.size(), osp.size());
 
 	// The recursion step: traverse down the tree.
 	// In principle, we could/should push the current groundings
@@ -256,9 +260,18 @@ bool PatternMatchEngine::ordered_compare(const Handle& hp,
 	depth ++;
 
 	bool match = true;
-	for (size_t i=0; i<oset_sz; i++)
+	for (size_t i=0; i<max_size; i++)
 	{
-		if (not tree_compare(osp[i], osg[i], CALL_ORDER))
+		bool tc = false;
+		if (i < osp_size and i < osg_size)
+			tc = tree_compare(osp[i], osg[i], CALL_UNORDER);
+
+		else if (i < osp_size)
+			tc = tree_compare(osp[i], Handle::UNDEFINED, CALL_UNORDER);
+
+		else tc = tree_compare(Handle::UNDEFINED, osg[i], CALL_UNORDER);
+
+		if (not tc)
 		{
 			match = false;
 			break;
@@ -530,10 +543,13 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 {
 	const HandleSeq& osg = lg->getOutgoingSet();
 	const HandleSeq& osp = lp->getOutgoingSet();
-	size_t arity = osp.size();
+//	size_t arity = osp.size();
+	size_t osg_size = osg.size();
+	size_t osp_size = osp.size();
+	size_t max_size = std::max(osg.size(), osp.size());
 
 	// They've got to be the same size, at the least!
-	if (osg.size() != arity) return false;
+//	if (osg.size() != arity) return false;
 
 	// Test for case A, described above.
 	OC_ASSERT (not (take_step and have_more),
@@ -560,9 +576,18 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 
 		solution_push();
 		bool match = true;
-		for (size_t i=0; i<arity; i++)
+		for (size_t i=0; i<max_size; i++)
 		{
-			if (not tree_compare(mutation[i], osg[i], CALL_UNORDER))
+			bool tc = false;
+			if (i < osp_size and i < osg_size)
+				tc = tree_compare(mutation[i], osg[i], CALL_UNORDER);
+
+			else if (i < osp_size)
+				tc = tree_compare(mutation[i], Handle::UNDEFINED, CALL_UNORDER);
+
+			else tc = tree_compare(Handle::UNDEFINED, osg[i], CALL_UNORDER);
+
+			if (not tc)
 			{
 				match = false;
 				break;
@@ -723,6 +748,12 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
                                       const Handle& hg,
                                       Caller caller)
 {
+	// This could happen when the arity of the two hypergraphs are different.
+	// It's clearly a mismatch so we should always return false here unless
+	// we are looking for a non-exact match
+	if (Handle::UNDEFINED == hp or Handle::UNDEFINED == hg)
+		return _pmc.fuzzy_match(hp, hg);
+
 	// If the pattern link is a quote, then we compare the quoted
 	// contents. This is done recursively, of course.  The QuoteLink
 	// must have only one child; anything else beyond that is ignored
@@ -757,7 +788,7 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 	// If they're not both are links, then it is clearly a mismatch.
 	LinkPtr lp(LinkCast(hp));
 	LinkPtr lg(LinkCast(hg));
-	if (not (lp and lg)) return false;
+	if (not (lp and lg)) return _pmc.fuzzy_match(hp, hg);
 
 #ifdef NO_SELF_GROUNDING
 	// The proposed grounding must NOT contain any bound variables!
@@ -1797,3 +1828,4 @@ void PatternMatchEngine::print_term(
 }
 
 /* ===================== END OF FILE ===================== */
+

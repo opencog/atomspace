@@ -119,6 +119,18 @@ class PatternMatchCallback
 		}
 
 		/**
+		 * Called when the template pattern and the candidate grounding
+		 * are not having the same type, or one of them are undefined.
+		 * It is obviously a mismatch so it returns false by default,
+		 * but it would be useful if we are not looking for an exact match.
+		 * It gives the Pattern Matcher more flexibility.
+		 */
+		virtual bool fuzzy_match(const Handle& ph, const Handle& gh)
+		{
+			return false;
+		}
+
+		/**
 		 * Invoked to confirm or deny a candidate grounding for term that
 		 * consistes entirely of connectives and evaluatable terms.
 		 *
@@ -276,3 +288,4 @@ class PatternMatchCallback
 } // namespace opencog
 
 #endif // _OPENCOG_PATTERN_MATCH_CALLBACK_H
+
