@@ -197,6 +197,10 @@ public:
      */
     float getNormalisedSTI(AttentionValuePtr, bool average, bool clip) const;
 
+    /**
+     * @see getNormalisedSTI()
+     */
+    float getNormalisedSTI(AttentionValuePtr) const;
     /** Retrieve the linearly normalised Short-Term Importance between 0..1
      * for a given AttentionValue.
      *
@@ -214,4 +218,3 @@ public:
 } //namespace opencog
 
 #endif // _OPENCOG_ATTENTION_BANK_H
-

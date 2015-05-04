@@ -187,6 +187,15 @@ float AttentionBank::getNormalisedSTI(AttentionValuePtr av, bool average, bool c
     }
 }
 
+float AttentionBank::getNormalisedSTI(AttentionValuePtr av) const
+{
+    AttentionValue::sti_t s = av->getSTI();
+    auto normaliser =
+            s > getAttentionalFocusBoundary() ? getMaxSTI() : getMinSTI();
+
+    return (s / normaliser);
+}
+
 float AttentionBank::getNormalisedZeroToOneSTI(AttentionValuePtr av, bool average, bool clip) const
 {
     int normaliser;
