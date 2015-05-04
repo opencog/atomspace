@@ -8,9 +8,38 @@ from opencog.bindlink import    stub_bindlink, bindlink, single_bindlink,\
 
 from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.type_constructors import *
-from test_helpers.bind_helpers import green_count, red_count, initialize_counts, increment_green, increment_red
 
 __author__ = 'Curtis Faith'
+
+
+green = 0
+red = 0
+
+def initialize_counts():
+    global red
+    global green
+    green = 0
+    red = 0
+
+def green_count():
+    global green
+    return green
+
+def red_count():
+    global red
+    return red
+
+def increment_green():
+    global green
+    green += 1
+
+def increment_red():
+    global red
+    red += 1
+
+
+def bogus_tv(atom_one, atom_two):
+    return TruthValue(0.6, 0.234)
 
 
 class BindlinkTest(TestCase):
@@ -184,7 +213,7 @@ class BindlinkTest(TestCase):
     def test_evaluate_atom(self):
         result = evaluate_atom(self.atomspace,
                 EvaluationLink( 
-                    GroundedPredicateNode("py: test_functions.bogus_tv"),
+                    GroundedPredicateNode("py: bogus_tv"),
                     ListLink(
                         ConceptNode("one"),
                         ConceptNode("two") 

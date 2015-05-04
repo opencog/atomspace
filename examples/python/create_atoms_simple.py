@@ -3,14 +3,13 @@
 # create_atoms_simple.py
 #
 """
-A nicer way of creating atoms in the AtomSpace.
+A simple way of creating atoms in the AtomSpace.
+See also create_stoms_by_type.py for an alternate API for atoms.
 """
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom
 from opencog.atomspace import types
-from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.type_constructors import *
-
 
 a = AtomSpace()
 

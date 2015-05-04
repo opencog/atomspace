@@ -1,14 +1,10 @@
 #! /usr/bin/env python
 #
-# bindlink.py
+# stop_go.py
 #
 """
-Example of how to use the pattern matcher.
-Based on the following example in the wiki:
-http://wiki.opencog.org/w/Pattern_matching#The_Simplified_API
+Example of how to use the pattern matcher to callback into Python.
 """
-
-__author__ = 'Cosmo Harrigan'
 
 from opencog.atomspace import AtomSpace, TruthValue, types, get_type_name
 from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h, __init__
