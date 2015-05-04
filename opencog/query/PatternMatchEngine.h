@@ -224,4 +224,3 @@ class PatternMatchEngine
 } // namespace opencog
 
 #endif // _OPENCOG_PATTERN_MATCH_ENGINE_H
-
