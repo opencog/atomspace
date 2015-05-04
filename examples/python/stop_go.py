@@ -9,6 +9,28 @@ Example of how to use the pattern matcher to callback into Python.
 from opencog.atomspace import AtomSpace, TruthValue, types, get_type_name
 from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h, __init__
 
+
+green = 0
+red = 0
+
+def initialize_counts():
+    global red
+    global green
+    green = 0
+    red = 0
+
+def increment_green():
+    global green
+    green += 1
+    print "green light"
+
+def increment_red():
+    global red
+    red += 1
+    print "red light"
+
+
+
 atomspace = AtomSpace()
 __init__(atomspace)
 
