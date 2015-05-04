@@ -9,9 +9,12 @@ suffice:
 export PYTHONPATH=$PYTHONPATH:/usr/local/share/opencog/python
 ```
 
-## create_atoms
+## create_atoms_by_type, create_atoms_simple
 
-Simple example of how to create atoms in an atomspace.
+Simple examples of how to create atoms in an atomspace.
+These demonstrate two different ways in which the API can be used;
+one creates atoms according to thier types, the other creates them
+directly.
 
 ## bindlink
 
