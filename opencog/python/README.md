@@ -1,9 +1,9 @@
-Using Python with OpenCog
-=========================
+Using Python with the AtomSpace
+===============================
 
 Add these lines to the end of your ~/.bashrc file:
 ```
-PYTHONPATH="$PYTHONPATH:$HOME/opencog/opencog/python:$HOME/opencog/build/opencog/cython"
+PYTHONPATH="$PYTHONPATH:/usr/local/share/opencog/python
 export PYTHONPATH
 ```
 
