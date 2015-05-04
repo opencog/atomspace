@@ -33,3 +33,4 @@ namespace opencog
 };
 
 #endif // FUZZYPATTERNMATCH_H
+
