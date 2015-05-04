@@ -197,12 +197,17 @@ ENDIF (HAVE_ATOMSPACE AND HAVE_GUILE)
 
 
 IF (WIN32)
-	INSTALL (TARGETS atomspace_cython DESTINATION "${DATADIR}/python/opencog")
+	INSTALL (TARGETS
+		atomspace_cython
+		scheme_wrapper
+		DESTINATION "${DATADIR}/python/opencog")
 ELSE (WIN32)
-	INSTALL (TARGETS atomspace_cython LIBRARY DESTINATION "${DATADIR}/python/opencog")
+	INSTALL (TARGETS
+		atomspace_cython
+		scheme_wrapper
+		LIBRARY DESTINATION "${DATADIR}/python/opencog")
 ENDIF (WIN32)
 
 INSTALL (FILES 
 	__init__.py
 	DESTINATION "${DATADIR}/python/opencog")
-
