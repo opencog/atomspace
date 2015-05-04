@@ -13,12 +13,15 @@ from opencog.type_constructors import *
 
 
 a = AtomSpace()
+set_atomspace(a)
 
 # Create a truth value asserting true and confident.
 TV = TruthValue(1,1)
 
 # Add three nodes
-A = a.add_node(t.ConceptNode, 'Apple', TV)
+# A = a.add_node(t.ConceptNode, 'Apple', TV)
+A = ConceptNode("Apple", TV)
+
 B = a.add_node(t.ConceptNode, 'Berry', TruthValue(0.5,1))
 C = a.add_node(t.ConceptNode, 'Comestible', TV)
 

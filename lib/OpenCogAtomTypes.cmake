@@ -81,6 +81,7 @@ FILE(APPEND "${PYTHON_FILE}" "# definitions in types.script by the macro OPENCOG
 FILE(APPEND "${PYTHON_FILE}" "#\n")
 FILE(APPEND "${PYTHON_FILE}" "# This file contains basic python wrappers for atom creation.\n")
 FILE(APPEND "${PYTHON_FILE}" "#\n")
+FILE(APPEND "${PYTHON_FILE}" "from opencog.atomspace import TruthValue\n")
 FILE(APPEND "${PYTHON_FILE}" "\n")
 
 FILE(STRINGS "${SCRIPT_FILE}" TYPE_SCRIPT_CONTENTS)
@@ -165,8 +166,8 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
 
         # Print out the python definitions
         IF (ISNODE STREQUAL "NODE")
-            FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(node_name):\n")
-            FILE(APPEND "${PYTHON_FILE}" "    return atomspace.add_node(types.${TYPE_NAME}, node_name)\n")
+            FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(node_name, tv=None):\n")
+            FILE(APPEND "${PYTHON_FILE}" "    return atomspace.add_node(types.${TYPE_NAME}, node_name, tv)\n")
         ENDIF (ISNODE STREQUAL "NODE")
         IF (ISLINK STREQUAL "LINK")
             FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(*args):\n")
