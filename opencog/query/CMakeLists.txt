@@ -12,7 +12,6 @@ ADD_LIBRARY(query SHARED
 	Satisfier.cc
 	FuzzyMatch/FuzzyPatternMatch.cc
 	FuzzyMatch/FuzzyPatternMatchCB.cc
-	FuzzyMatch/GraphEditDist.cc
 )
 
 ADD_DEPENDENCIES(query
