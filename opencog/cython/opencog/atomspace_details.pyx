@@ -111,6 +111,8 @@ cdef class AtomSpace:
                 handle_vector.push_back(deref((<Handle>h).h))
             elif isinstance(h, Atom):
                 handle_vector.push_back(deref((<Handle>(h.h)).h))
+            elif isinstance(h, TruthValue):
+                tv = h
         cdef cHandle result
         result = self.atomspace.addLink(t, handle_vector)
         if result == result.UNDEFINED: return None

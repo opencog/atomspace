@@ -17,15 +17,15 @@ a = AtomSpace()
 # Tell the type constructors which atomspace to use.
 set_atomspace(a)
 
-# Create a truth value asserting true and confident.
-TV = TruthValue(1,1)
+# Create a truth value asserting true and mostly confident.
+TV = TruthValue(1, 0.8)
 
 # Add three nodes
 # A = a.add_node(t.ConceptNode, 'Apple', TV)
 # B = a.add_node(t.ConceptNode, 'Berry', TruthValue(0.5,1))
 # C = a.add_node(t.ConceptNode, 'Comestible', TV)
 A = ConceptNode('Apple', TV)
-B = ConceptNode('Berry', TruthValue(0.5,1))
+B = ConceptNode('Berry', TruthValue(0.5, 0.75))
 C = ConceptNode('Comestible', TV)
 
 # Add three inhertance links, asserting that apples are berries
