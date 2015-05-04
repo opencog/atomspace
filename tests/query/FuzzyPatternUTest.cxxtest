@@ -167,6 +167,7 @@ void FuzzyPatternUTest::test_fuzzy_match(void)
 	FuzzyPatternMatchCB fpmcb(as);
 
 	std::set<Handle> vars;
+	vars.insert(var);
 
 	HandleSeq preds;
 	preds.push_back(query);
@@ -198,6 +199,7 @@ void FuzzyPatternUTest::test_exact_match(void)
 	FuzzyPatternMatchCB fpmcb(as);
 
 	std::set<Handle> vars;
+	vars.insert(var);
 
 	HandleSeq preds;
 	preds.push_back(query);

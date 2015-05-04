@@ -93,10 +93,11 @@ void FuzzyPatternMatchCB::find_starters(const Handle& hp, const size_t& depth,
 /**
  * Implement the neighbor_search method in the Pattern Matcher. The main
  * different between this method and the default one is that this initiates
- * multiple searches using differnt nodes as starters, explores the 
- * neighborhood of each of them, and captures the partial matches in the
- * callbacks. It stops when there are no more available starters in the
- * pattern, or the number of searches it has done equals to MAX_SEARCH.
+ * multiple searches using differnt nodes as starters instead of one,
+ * explores the neighborhood of each of them, and captures the partial
+ * matches in the callbacks. It stops when there are no more available
+ * starters in the pattern, or the number of searches it has done
+ * equals to MAX_SEARCH.
  *
  * @param pme   The PatternMatchEngine object
  * @param vars  Variables for the Pattern Matcher
@@ -152,7 +153,9 @@ bool FuzzyPatternMatchCB::neighbor_search(PatternMatchEngine* pme,
     {
         if (potential_starters.size() == search_cnt)
         {
+#ifdef DEBUG
             std::cout << "No available starter to continue the fuzzy match.\n";
+#endif
             break;
         }
 

@@ -28,14 +28,14 @@
 
 using namespace opencog;
 
-#define DEBUG
+//#define DEBUG
 
 /**
  * Implement the "cog-fuzzy-match" scheme primitive.
  * It uses the Pattern Matcher to find hypergraphs in the atomspace that are
  * similar to the query hypergraph, and returns the most similar ones.
  *
- * @param hp  The query hypergraph (the pattern)
+ * @param hp  The query hypergraph
  * @return    One or more similar hypergraphs
  */
 Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp)
