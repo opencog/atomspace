@@ -225,6 +225,10 @@ void QuoteUTest::test_impossible(void)
     Handle imp = eval->eval_h("imp");
 
     TruthValuePtr tv = satisfaction_link(as, imp);
+
+    // Mostly we expect the above to not throw or assert.
+    // Getting back false tv (no groundings at all) is a bonus.
+    TS_ASSERT_EQUALS(TruthValue::FALSE_TV(), tv);
 }
 
 /*

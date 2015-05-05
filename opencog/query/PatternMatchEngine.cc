@@ -1141,6 +1141,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 	}
 
 	FindAtoms fa(hp);
+	fa.stop_at_quote = false;
 	fa.search_set(clause_root);
 
 	// It is almost always the case, but not necessarily, that
@@ -1153,6 +1154,10 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 	// lie below an ChoiceLink.  For ChoiceLinks, we really have to
 	// examine all the different holders, they correspond to the
 	// different choices.
+	//
+	// least_holders could be empty if hp is inside a quote link.
+	// This can happen if the explore callback gives us a bad
+	// starting point.
 	OC_ASSERT(0 < fa.least_holders.size(), "Impossible situation");
 
 	bool found = false;
