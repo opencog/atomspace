@@ -71,6 +71,7 @@ static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
     "/usr/local/share/opencog/python",
     "/usr/share/opencog/python",
     #endif // !WIN32
+    ".",
     NULL
 };
 
@@ -981,6 +982,7 @@ void PythonEval::add_modules_from_path(std::string pathString)
         return;
     }
 
+    bool did_load = false;
     const char** config_paths = DEFAULT_PYTHON_MODULE_PATHS;
     for (int i = 0; config_paths[i] != NULL; ++i) {
         std::string abspath = config_paths[i];
@@ -990,9 +992,22 @@ void PythonEval::add_modules_from_path(std::string pathString)
         // If the resulting path is a directory or a regular file,
         // then load it.
         struct stat finfo;
-        stat(pathString.c_str(), &finfo);
-        if (S_ISDIR(finfo.st_mode) or S_ISREG(finfo.st_mode))
+        stat(abspath.c_str(), &finfo);
+        if (S_ISDIR(finfo.st_mode) or S_ISREG(finfo.st_mode)) {
             add_modules_from_abspath(abspath);
+            did_load = true;
+        }
+    }
+
+    if (not did_load) {
+        Logger::Level btl = logger().getBackTraceLevel();
+        logger().setBackTraceLevel(Logger::Level::NONE);
+        logger().error() << "Failed to load python module \'" << pathString
+                         << "\', searched directories:";
+        for (int i = 0; config_paths[i] != NULL; ++i) {
+            logger().error() << "Directory: " << config_paths[i];
+        }
+        logger().setBackTraceLevel(btl);
     }
 }
 
