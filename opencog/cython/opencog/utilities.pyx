@@ -4,7 +4,17 @@ from opencog.type_constructors import set_atomspace as set_type_atomspace
 cdef extern from "Python.h":
     char *PyString_AsString(object)
 
+# Avoid recursive intialization
+is_initialized = False
+
 def initialize_opencog(AtomSpace atomspace, object config = None):
+
+    # Avoid recursive intialization
+    global is_initialized
+    if (is_initialized):
+        return
+    is_initialized = True
+
     cdef char *configFileString
     if (config == None):
         configFileString = NULL

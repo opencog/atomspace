@@ -99,6 +99,7 @@ void opencog::global_python_initialize()
 
     // Throw an exception if this is called more than once.
     if (already_initialized) {
+        return;
         throw opencog::RuntimeException(TRACE_INFO,
                 "Python initializer global_python_init() called twice.");
     }
