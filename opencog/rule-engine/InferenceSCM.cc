@@ -94,7 +94,7 @@ Handle InferenceSCM::do_backward_chaining(Handle h)
 #ifdef HAVE_GUILE
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
 
-    JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as, "rule-engine/default_cpolicy.json"));
+    JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as, "reasoning/default_cpolicy.json"));
     cpolicy_loader.load_config();
 
     std::vector<Rule> rules;
