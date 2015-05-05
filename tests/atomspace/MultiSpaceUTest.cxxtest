@@ -498,5 +498,31 @@ public:
 		TS_ASSERT(hnd3->getTruthValue() == h3n3->getTruthValue());
 	}
 
+	// This tests bug report #9
+	void testCrash()
+	{
+		AtomSpace* ex1 = new AtomSpace(&as1);
+
+		// Create mixed nodes.
+		Handle n1 = as1.addNode(CONCEPT_NODE, "aaa");
+		Handle n2 = ex1->addNode(CONCEPT_NODE, "bbb");
+
+		// Create a link
+		Handle h1 = ex1->addAtom(createLink(LIST_LINK, n1, n2));
+		delete ex1;
+
+		// cogserver crashes at this point; no crash == pass
+
+		AtomSpace* ex2 = new AtomSpace(&as2);
+
+		// Create mixed nodes.
+		n2 = ex2->addNode(CONCEPT_NODE, "bbb");
+
+		// Create a link
+		h1 = ex2->addAtom(createLink(LIST_LINK, n1, n2));
+		delete ex2;
+
+		// cogserver crashes at this point; no crash == pass
+	}
 };
 
