@@ -27,8 +27,9 @@ class BindlinkTest(TestCase):
 
         # Initialize Python
         initialize_opencog(self.atomspace, config_file_name)
-        
+
         # Define several animals and something of a different type as well
+        set_atomspace(self.atomspace)
         InheritanceLink( ConceptNode("Frog"),       ConceptNode("animal"))
         InheritanceLink( ConceptNode("Zebra"),      ConceptNode("animal"))
         InheritanceLink( ConceptNode("Deer"),       ConceptNode("animal"))

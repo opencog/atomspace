@@ -281,6 +281,8 @@ PythonEval::~PythonEval()
 */
 void PythonEval::create_singleton_instance(AtomSpace* atomspace)
 {
+    if (singletonInstance) return;
+
     // Create the single instance of a PythonEval object.
     singletonInstance = new PythonEval(atomspace);
 }
@@ -301,10 +303,8 @@ void PythonEval::delete_singleton_instance()
 PythonEval& PythonEval::instance(AtomSpace* atomspace)
 {
     // Make sure we have a singleton.
-    if (!singletonInstance) {
-        throw (RuntimeException(TRACE_INFO, 
-                "Null singletonInstance! Did you create a CogServer?"));
-    }
+    if (!singletonInstance)
+        create_singleton_instance(atomspace);
 
     // Make sure the atom space is the same as the one in the singleton.
     if (atomspace and singletonInstance->_atomspace != atomspace) {
