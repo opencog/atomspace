@@ -67,12 +67,13 @@ public:
     void setUp(void);
     void tearDown(void);
 
-    void test_numeric_greater(void);
     void test_quoted_variable(void);
     void test_nest(void);
     void test_throw(void);
     void test_gpn(void);
     void test_double_quote(void);
+    void test_impossible(void);
+    void test_numeric_greater(void);
 };
 
 void QuoteUTest::tearDown(void)
@@ -88,35 +89,6 @@ void QuoteUTest::setUp(void)
         "opencog/scm/utilities.scm");
 
     load_scm_files_from_config(*as);
-}
-
-/*
- * QuoteLink unit test.  Derivative of the GreaterThanUTest,
- * this one differs by explicitly quoting the GroundedSchemaNode,
- * so that it is explicitly matched, instead of being treated as
- * a virtual.
- */
-void QuoteUTest::test_numeric_greater(void)
-{
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-    config().set("SCM_PRELOAD", "tests/query/quote-greater.scm");
-    load_scm_files_from_config(*as);
-
-    Handle richer_than_george = eval->eval_h("(richer-than-george)");
-    Handle richer_than_susan = eval->eval_h("(richer-than-susan)");
-    Handle richer_than_obama = eval->eval_h("(richer-than-obama)");
-    Handle richer_than_gates = eval->eval_h("(richer-than-gates)");
-
-    Handle people_richer_than_george = bindlink(as, richer_than_george);
-    Handle people_richer_than_susan = bindlink(as, richer_than_susan);
-    Handle people_richer_than_obama = bindlink(as, richer_than_obama);
-    Handle people_richer_than_gates = bindlink(as, richer_than_gates);
-
-    TS_ASSERT_EQUALS(0, as->getArity(people_richer_than_gates));
-    TS_ASSERT_EQUALS(0, as->getArity(people_richer_than_obama));
-    TS_ASSERT_EQUALS(1, as->getArity(people_richer_than_george));
-    TS_ASSERT_EQUALS(2, as->getArity(people_richer_than_susan));
 }
 
 /*
@@ -242,3 +214,48 @@ void QuoteUTest::test_double_quote(void)
     TS_ASSERT_EQUALS(0, strcmp("banana", as->getName(banana).c_str()));
 }
 
+// Test bug bug #1531
+void QuoteUTest::test_impossible(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/quote-impossible.scm");
+    load_scm_files_from_config(*as);
+
+    Handle imp = eval->eval_h("imp");
+
+    TruthValuePtr tv = satisfaction_link(as, imp);
+
+    // Mostly we expect the above to not throw or assert.
+    // Getting back false tv (no groundings at all) is a bonus.
+    TS_ASSERT_EQUALS(TruthValue::FALSE_TV(), tv);
+}
+
+/*
+ * QuoteLink unit test.  Derivative of the GreaterThanUTest,
+ * this one differs by explicitly quoting the GroundedSchemaNode,
+ * so that it is explicitly matched, instead of being treated as
+ * a virtual.
+ */
+void QuoteUTest::test_numeric_greater(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/quote-greater.scm");
+    load_scm_files_from_config(*as);
+
+    Handle richer_than_george = eval->eval_h("(richer-than-george)");
+    Handle richer_than_susan = eval->eval_h("(richer-than-susan)");
+    Handle richer_than_obama = eval->eval_h("(richer-than-obama)");
+    Handle richer_than_gates = eval->eval_h("(richer-than-gates)");
+
+    Handle people_richer_than_george = bindlink(as, richer_than_george);
+    Handle people_richer_than_susan = bindlink(as, richer_than_susan);
+    Handle people_richer_than_obama = bindlink(as, richer_than_obama);
+    Handle people_richer_than_gates = bindlink(as, richer_than_gates);
+
+    TS_ASSERT_EQUALS(0, as->getArity(people_richer_than_gates));
+    TS_ASSERT_EQUALS(0, as->getArity(people_richer_than_obama));
+    TS_ASSERT_EQUALS(1, as->getArity(people_richer_than_george));
+    TS_ASSERT_EQUALS(2, as->getArity(people_richer_than_susan));
+}

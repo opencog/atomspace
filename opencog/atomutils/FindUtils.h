@@ -84,12 +84,13 @@ namespace opencog {
 class FindAtoms
 {
 	public:
+		bool stop_at_quote;
 		std::set<Handle> varset;
 		std::set<Handle> holders;
 		std::set<Handle> least_holders;
 
 		inline FindAtoms(Type t, bool subclass = false)
-			: _target_types({t})
+			: stop_at_quote(true), _target_types({t})
 		{
 			if (subclass)
 			{
@@ -98,7 +99,7 @@ class FindAtoms
 		}
 
 		inline FindAtoms(Type ta, Type tb, bool subclass = false)
-			: _target_types({ta, tb})
+			: stop_at_quote(true), _target_types({ta, tb})
 		{
 			if (subclass)
 			{
@@ -108,12 +109,16 @@ class FindAtoms
 		}
 
 		inline FindAtoms(const Handle& atom)
-			: _target_types(),
-			 _target_atoms() { _target_atoms.insert(atom); }
+			: stop_at_quote(true),
+			  _target_types(),
+			  _target_atoms()
+		{ _target_atoms.insert(atom); }
 
 		inline FindAtoms(const std::set<Handle>& selection)
-			: _target_types(),
-			 _target_atoms(selection) {}
+			: stop_at_quote(true),
+			  _target_types(),
+			  _target_atoms(selection)
+			{}
 
 		/**
 		 * Given a handle to be searched, create a set of all of the
@@ -146,7 +151,7 @@ class FindAtoms
 				return IMM; //! Don't explore link-typed vars!
 			}
 
-			if (QUOTE_LINK == t) return NOPE;
+			if (stop_at_quote and QUOTE_LINK == t) return NOPE;
 
 			LinkPtr l(LinkCast(h));
 			if (l)
