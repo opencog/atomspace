@@ -40,6 +40,12 @@ TARGET_LINK_LIBRARIES(PythonEval
 
 INSTALL (TARGETS PythonEval DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
+INSTALL (FILES
+	PythonEval.h
+	DESTINATION "include/${PROJECT_NAME}/cython"
+)
+
 INSTALL (FILES 
 	opencog/__init__.py
-	DESTINATION "${DATADIR}/python/opencog")
+	DESTINATION "${DATADIR}/python/opencog"
+)
