@@ -740,8 +740,6 @@ TruthValuePtr PythonEval::apply_tv(const std::string& func, Handle varargs)
     TruthValuePtr* tvpPtr = static_cast<TruthValuePtr*>
             (PyLong_AsVoidPtr(pyTruthValuePtrPtr));
 
-printf("duuuude wwada %p\n", tvpPtr);
-
     // Assign the truth value pointer using this pointer before
     // we decrement the reference to pyTruthValue since that
     // will delete this pointer.

@@ -25,7 +25,7 @@ class BindlinkTest(TestCase):
         # Get the config file name in a manner not dependent on the
         # starting working directory.
         full_path = os.path.realpath(__file__)
-        config_file_name = os.path.dirname(full_path) + "/bindlink_test.conf" 
+        config_file_name = os.path.dirname(full_path) + "/bindlink_test.conf"
 
         # Initialize Python
         initialize_opencog(self.atomspace, config_file_name)
@@ -55,7 +55,7 @@ class BindlinkTest(TestCase):
                     )
                 # bindlink needs a handle
                 ).h
-    
+
     def tearDown(self):
         finalize_opencog()
         del self.atomspace
@@ -161,19 +161,19 @@ class BindlinkTest(TestCase):
                 )
             )
         ).h
- 
+
         result = satisfaction_link(self.atomspace, satisfaction_handle)
         self.assertTrue(result is not None and result.mean <= 0.5)
         self.assertEquals(green_count(), 2)
         self.assertEquals(red_count(), 1)
 
     def test_execute_atom(self):
-        result = execute_atom(self.atomspace, 
-                ExecutionOutputLink( 
+        result = execute_atom(self.atomspace,
+                ExecutionOutputLink(
                     GroundedSchemaNode("py: test_functions.add_link"),
                     ListLink(
                         ConceptNode("one"),
-                        ConceptNode("two") 
+                        ConceptNode("two")
                     )
                 )
             )
@@ -185,11 +185,11 @@ class BindlinkTest(TestCase):
 
     def test_evaluate_atom(self):
         result = evaluate_atom(self.atomspace,
-                EvaluationLink( 
+                EvaluationLink(
                     GroundedPredicateNode("py: test_functions.bogus_tv"),
                     ListLink(
                         ConceptNode("one"),
-                        ConceptNode("two") 
+                        ConceptNode("two")
                     )
                 )
             )
