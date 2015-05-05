@@ -71,6 +71,7 @@ static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
     "/usr/local/share/opencog/python",
     "/usr/share/opencog/python",
     #endif // !WIN32
+    ".",
     NULL
 };
 
@@ -99,14 +100,15 @@ void opencog::global_python_initialize()
 
     // Throw an exception if this is called more than once.
     if (already_initialized) {
+        return;
         throw opencog::RuntimeException(TRACE_INFO,
                 "Python initializer global_python_init() called twice.");
     }
 
     // Remember this initialization.
     already_initialized = true;
-   
-    // Start up Python. 
+
+    // Start up Python.
     if (Py_IsInitialized())  {
         // If we were already initialized then someone else did it.
         initialized_outside_opencog = true;
@@ -120,7 +122,7 @@ void opencog::global_python_initialize()
 
         // Initialize Python (InitThreads grabs GIL implicitly)
         Py_InitializeEx(NO_SIGNAL_HANDLERS);
-        PyEval_InitThreads();        
+        PyEval_InitThreads();
     }
 
     logger().debug("[global_python_initialize] Adding OpenCog sys.path "
@@ -149,7 +151,7 @@ void opencog::global_python_initialize()
     if (config().has("PYTHON_EXTENSION_DIRS")) {
         std::vector<string> pythonpaths;
         // For debugging current path
-        tokenize(config()["PYTHON_EXTENSION_DIRS"], 
+        tokenize(config()["PYTHON_EXTENSION_DIRS"],
                 std::back_inserter(pythonpaths), ", ");
         for (std::vector<string>::const_iterator it = pythonpaths.begin();
              it != pythonpaths.end(); ++it) {
@@ -179,7 +181,7 @@ void opencog::global_python_initialize()
             logger().debug("    %2d > %s", pathIndex, sysPathCString);
             // NOTE: PyList_GetItem returns borrowed reference so don't do this:
             // Py_DECREF(pySysPathLine);
-        } 
+        }
     }
 
     // Initialize the auto-generated Cython api. Do this AFTER the python
@@ -280,17 +282,15 @@ PythonEval::~PythonEval()
 */
 void PythonEval::create_singleton_instance(AtomSpace* atomspace)
 {
+    if (singletonInstance) return;
+
     // Create the single instance of a PythonEval object.
     singletonInstance = new PythonEval(atomspace);
 }
 
 void PythonEval::delete_singleton_instance()
 {
-    // This should only be called once after having created one.
-    if (!singletonInstance) {
-        throw (RuntimeException(TRACE_INFO, 
-                "Null singletonInstance in delete_singleton_instance()"));
-    }
+    if (!singletonInstance) return;
 
     // Delete the singleton PythonEval instance.
     delete singletonInstance;
@@ -300,10 +300,8 @@ void PythonEval::delete_singleton_instance()
 PythonEval& PythonEval::instance(AtomSpace* atomspace)
 {
     // Make sure we have a singleton.
-    if (!singletonInstance) {
-        throw (RuntimeException(TRACE_INFO, 
-                "Null singletonInstance! Did you create a CogServer?"));
-    }
+    if (!singletonInstance)
+        create_singleton_instance(atomspace);
 
     // Make sure the atom space is the same as the one in the singleton.
     if (atomspace and singletonInstance->_atomspace != atomspace) {
@@ -322,7 +320,7 @@ void PythonEval::initialize_python_objects_and_imports(void)
     // Grab the GIL
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
- 
+
     // Get sys.path and keep the reference, used in this->add_to_sys_path()
     // NOTE: We have to promote the reference here with Py_INCREF because
     // PySys_GetObject returns a borrowed reference and we don't want it to
@@ -330,7 +328,7 @@ void PythonEval::initialize_python_objects_and_imports(void)
     this->pySysPath = PySys_GetObject((char*)"path");
     Py_INCREF(this->pySysPath);
 
-    // Get the __main__ module. NOTE: As above, PyImport_AddModule returns 
+    // Get the __main__ module. NOTE: As above, PyImport_AddModule returns
     // a borrowed reference so we must promote it with an increment.
     this->pyRootModule = PyImport_AddModule("__main__");
     Py_INCREF(this->pyRootModule);
@@ -344,8 +342,8 @@ void PythonEval::initialize_python_objects_and_imports(void)
 
     // PyModule_GetDict returns a borrowed reference, so don't do this:
     // Py_DECREF(pyRootDictionary);
-    
-    // These are needed for calling Python/C API functions, define 
+
+    // These are needed for calling Python/C API functions, define
     // them once here so we can reuse them.
     this->pyGlobal = PyDict_New();
     this->pyLocal = PyDict_New();
@@ -401,7 +399,7 @@ void PythonEval::print_dictionary(PyObject* obj)
         pyKey = PyList_GetItem(pyKeys, i);
         char* c_name = PyBytes_AsString(pyKey);
         printf("%s\n", c_name);
- 
+
         // PyList_GetItem returns a borrowed reference, so don't do this:
         // Py_DECREF(pyKey);
     }
@@ -411,7 +409,7 @@ void PythonEval::print_dictionary(PyObject* obj)
 }
 
 /**
- * Build the Python error message for the current error. 
+ * Build the Python error message for the current error.
  *
  * Only call this when PyErr_Occurred() returns a non-null PyObject*.
  */
@@ -423,7 +421,7 @@ void PythonEval::build_python_error_message(    const char* function_name,
 
     // Get the error from Python.
     PyErr_Fetch(&pyErrorType, &pyError, &pyTraceback);
-    
+
     // Construct the error message string.
     errorStringStream << "Python error ";
     if (function_name != NO_FUNCTION_NAME)
@@ -436,7 +434,7 @@ void PythonEval::build_python_error_message(    const char* function_name,
         } else {
             errorStringStream << ": Undefined Error";
         }
-        
+
         // Cleanup the references. NOTE: The traceback can be NULL even
         // when the others aren't.
         Py_DECREF(pyErrorType);
@@ -452,7 +450,7 @@ void PythonEval::build_python_error_message(    const char* function_name,
 }
 
 /**
- * Execute the python string at the __main__ module context. 
+ * Execute the python string at the __main__ module context.
  *
  * This replaces a call to PyRun_SimpleString which clears errors so
  * that a subsequent call to Py_Error() returns false. This version
@@ -500,7 +498,7 @@ int PythonEval::argument_count(PyObject* pyFunction)
 /**
  * Get the Python module and stripped function name given the identifer of
  * the form 'module.function'.
- * 
+ *
  */
 PyObject* PythonEval::module_for_function(  const std::string& moduleFunction,
                                             std::string& functionName)
@@ -526,10 +524,10 @@ PyObject* PythonEval::module_for_function(  const std::string& moduleFunction,
 /**
  * Call the user defined function with the arguments passed in the
  * ListLink handle 'arguments'.
- * 
+ *
  * On error throws an exception.
  */
-PyObject* PythonEval::call_user_function(   const std::string& moduleFunction, 
+PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
                                             Handle arguments)
 {
     PyObject *pyError, *pyModule, *pyUserFunc, *pyReturnValue = NULL;
@@ -551,7 +549,7 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
         throw (RuntimeException(TRACE_INFO, "Python module for '%s' not found!",
                 moduleFunction.c_str()));
     }
-        
+
     // Get a reference to the user function.
     pyDict = PyModule_GetDict(pyModule);
     pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
@@ -566,7 +564,7 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
         throw (RuntimeException(TRACE_INFO, "Python function '%s' not found!",
                 moduleFunction.c_str()));
     }
-        
+
     // Promote the borrowed reference for pyUserFunc since it will
     // be passed to a Python C API function later that "steals" it.
     Py_INCREF(pyUserFunc);
@@ -631,7 +629,7 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
 
     // Execute the user function and store its return value.
     pyReturnValue = PyObject_CallObject(pyUserFunc, pyArguments);
-    
+
     // Cleanup the reference counts for Python objects we no longer reference.
     // Since we promoted the borrowed pyExecuteUserFunc reference, we need
     // to decrement it here. Do this before error checking below since we'll
@@ -682,7 +680,7 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
         pyError = PyErr_Occurred();
         if (pyError || !pyAtomUUID) {
             PyGILState_Release(gstate);
-            throw RuntimeException(TRACE_INFO, 
+            throw RuntimeException(TRACE_INFO,
                 "Python function '%s' did not return Atom!", func.c_str());
         }
 
@@ -698,7 +696,7 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
 
     } else {
 
-        throw RuntimeException(TRACE_INFO, 
+        throw RuntimeException(TRACE_INFO,
                 "Python function '%s' did not return Atom!", func.c_str());
     }
 
@@ -711,59 +709,49 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
  */
 TruthValuePtr PythonEval::apply_tv(const std::string& func, Handle varargs)
 {
-    PyObject *pyTruthValue = NULL;
-    PyObject *pyError, *pyTruthValuePtrPtr = NULL;
-    TruthValuePtr* tvpPtr;
-    TruthValuePtr tvp;
-
     // Get the python truth value object returned by this user function.
-    pyTruthValue = this->call_user_function(func, varargs);
+    PyObject *pyTruthValue = call_user_function(func, varargs);
 
     // If we got a non-null truth value there were no errors.
-    if (pyTruthValue) {
-
-        // Grab the GIL.
-        PyGILState_STATE gstate;
-        gstate = PyGILState_Ensure();
-
-        // Get the truth value pointer from the object (will be encoded
-        // as a long by PyVoidPtr_asLong)
-        pyTruthValuePtrPtr = PyObject_CallMethod(pyTruthValue, 
-                (char*) "truth_value_ptr_object", NULL);
-
-        // Make sure we got a truth value pointer.
-        pyError = PyErr_Occurred();
-        if (pyError || !pyTruthValuePtrPtr) {
-            PyGILState_Release(gstate);
-            throw RuntimeException(TRACE_INFO, 
-                "Python function '%s' did not return TruthValue!",
-                func.c_str());
-        }
-
-        // Get the pointer to the truth value pointer. Yes, it does
-        // contain a pointer to the shared_ptr not the underlying.
-        tvpPtr = static_cast<TruthValuePtr*>
-                (PyLong_AsVoidPtr(pyTruthValuePtrPtr));
-
-        // Assign the truth value pointer using this pointer before
-        // we decrement the reference to pyTruthValue since that
-        // will delete this pointer.
-        tvp = *tvpPtr;
-
-        // Cleanup the reference counts.
-        Py_DECREF(pyTruthValuePtrPtr);
-        Py_DECREF(pyTruthValue);
-
-        // Release the GIL. No Python API allowed beyond this point.
-        PyGILState_Release(gstate);
-
-    } else {
-
-        throw RuntimeException(TRACE_INFO, 
+    if (NULL == pyTruthValue) {
+        throw RuntimeException(TRACE_INFO,
                 "Python function '%s' did not return TruthValue!",
                 func.c_str());
     }
 
+    // Grab the GIL.
+    PyGILState_STATE gstate = PyGILState_Ensure();
+
+    // Get the truth value pointer from the object (will be encoded
+    // as a long by PyVoidPtr_asLong)
+    PyObject *pyTruthValuePtrPtr = PyObject_CallMethod(pyTruthValue,
+            (char*) "truth_value_ptr_object", NULL);
+
+    // Make sure we got a truth value pointer.
+    PyObject *pyError = PyErr_Occurred();
+    if (pyError or !pyTruthValuePtrPtr) {
+        PyGILState_Release(gstate);
+        throw RuntimeException(TRACE_INFO,
+            "Python function '%s' did not return TruthValue!",
+            func.c_str());
+    }
+
+    // Get the pointer to the truth value pointer. Yes, it does
+    // contain a pointer to the shared_ptr not the underlying.
+    TruthValuePtr* tvpPtr = static_cast<TruthValuePtr*>
+            (PyLong_AsVoidPtr(pyTruthValuePtrPtr));
+
+    // Assign the truth value pointer using this pointer before
+    // we decrement the reference to pyTruthValue since that
+    // will delete this pointer.
+    TruthValuePtr tvp = *tvpPtr;
+
+    // Cleanup the reference counts.
+    Py_DECREF(pyTruthValuePtrPtr);
+    Py_DECREF(pyTruthValue);
+
+    // Release the GIL. No Python API allowed beyond this point.
+    PyGILState_Release(gstate);
     return tvp;
 }
 
@@ -785,9 +773,9 @@ std::string PythonEval::apply_script(const std::string& script)
                        "sys.stdout = _opencog_output_stream\n"
                        "sys.stderr = _opencog_output_stream\n");
 
-    // Execute the script. NOTE: This call replaces PyRun_SimpleString 
+    // Execute the script. NOTE: This call replaces PyRun_SimpleString
     // which was masking errors because it calls PyErr_Clear() so the
-    // call to PyErr_Occurred below was returning false even when there 
+    // call to PyErr_Occurred below was returning false even when there
     // was an error.
     this->execute_string(script.c_str());
 
@@ -820,7 +808,7 @@ std::string PythonEval::apply_script(const std::string& script)
     PyRun_SimpleString("sys.stdout = _python_output_stream\n"
                        "sys.stderr = _python_output_stream\n"
                        "_opencog_output_stream.close()\n");
- 
+
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
 
@@ -844,7 +832,7 @@ void PythonEval::add_to_sys_path(std::string path)
     // not "steal" the reference we pass to it. So this:
     //
     // PyList_Append(this->pySysPath, PyBytes_FromString(path.c_str()));
-    // 
+    //
     // leaks memory. So we need to save the reference as above and
     // decrement it, as below.
     //
@@ -883,7 +871,7 @@ void PythonEval::import_module( const boost::filesystem::path &file,
     // If the import succeeded...
     if (pyModule) {
         PyObject* pyModuleDictionary = PyModule_GetDict(pyModule);
-        
+
         // Add the ATOMSPACE object to this module
         PyObject* pyAtomSpaceObject = this->atomspace_py_object();
         PyDict_SetItemString(pyModuleDictionary,"ATOMSPACE",
@@ -989,23 +977,58 @@ void PythonEval::add_module_file(const boost::filesystem::path &file)
 */
 void PythonEval::add_modules_from_path(std::string pathString)
 {
-    boost::filesystem::path modulePath(pathString);
+    if ('/' == pathString[0]) {
+        add_modules_from_abspath(pathString);
+        return;
+    }
 
-    logger().info("Adding Python module (or directory): " + modulePath.string());
+    bool did_load = false;
+    const char** config_paths = DEFAULT_PYTHON_MODULE_PATHS;
+    for (int i = 0; config_paths[i] != NULL; ++i) {
+        std::string abspath = config_paths[i];
+        abspath += "/";
+        abspath += pathString;
+
+        // If the resulting path is a directory or a regular file,
+        // then load it.
+        struct stat finfo;
+        stat(abspath.c_str(), &finfo);
+        if (S_ISDIR(finfo.st_mode) or S_ISREG(finfo.st_mode)) {
+            add_modules_from_abspath(abspath);
+            did_load = true;
+        }
+    }
+
+    if (not did_load) {
+        Logger::Level btl = logger().getBackTraceLevel();
+        logger().setBackTraceLevel(Logger::Level::NONE);
+        logger().error() << "Failed to load python module \'" << pathString
+                         << "\', searched directories:";
+        for (int i = 0; config_paths[i] != NULL; ++i) {
+            logger().error() << "Directory: " << config_paths[i];
+        }
+        logger().setBackTraceLevel(btl);
+    }
+}
+
+void PythonEval::add_modules_from_abspath(std::string pathString)
+{
+    logger().info("Adding Python module (or directory): " + pathString);
 
     // Grab the GIL
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
 
-    if(boost::filesystem::exists(modulePath)){
-        if(boost::filesystem::is_directory(modulePath))
-            this->add_module_directory(modulePath);
-        else
-            this->add_module_file(modulePath);
-    }
-    else{
-        logger().error() << modulePath << " doesn't exists";
-    }
+    struct stat finfo;
+    stat(pathString.c_str(), &finfo);
+
+    if (S_ISDIR(finfo.st_mode))
+        add_module_directory(pathString);
+    else if (S_ISREG(finfo.st_mode))
+        add_module_file(pathString);
+    else
+        logger().error() << "Python module path \'" << pathString
+                         << "\' can't be found";
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);

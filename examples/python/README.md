@@ -2,24 +2,29 @@ Python Examples
 ===============
 
 To run these examples, you must first set the `PYTHONPATH` to the
-opencog cython build directory.  In most cases, the following will
+atomspace python install directory.  In most cases, the following will
 suffice:
 
 ```
-export PYTHONPATH=$PYTHONPATH:../../build/opencog/cython
+export PYTHONPATH=$PYTHONPATH:/usr/local/share/opencog/python
 ```
 
+## create_atoms_by_type, create_atoms_simple
 
-## bindlink 
+Simple examples of how to create atoms in an atomspace.
+These demonstrate two different ways in which the API can be used;
+one creates atoms according to thier types, the other creates them
+directly.
 
-Example of how to use the pattern matcher BindLink functionality from Python
+## bindlink
 
-## atom_type_names 
+Example of how to use the pattern matcher BindLink functionality.
 
-Example of how to obtain atom type names and atom type IDs in Python
+## atom_type_names
 
-## moses
+Example of how to obtain atom type names and atom type IDs.
 
-Example usage of the Python wrapper for the MOSES evolutionary program
-learning system
+## scheme_timer
 
+Simple measurement of the performance of invoking the scheme
+(guile) interpreter.

@@ -7,10 +7,10 @@
 # This imports all the python wrappers for atom creation.
 #
 
-from opencog.atomspace import AtomSpace, types
+from opencog.atomspace import AtomSpace, TruthValue, types
 
 atomspace = None
-def set_atomspace(new_atomspace):
+def set_type_ctor_atomspace(new_atomspace):
     global atomspace
     atomspace = new_atomspace
 

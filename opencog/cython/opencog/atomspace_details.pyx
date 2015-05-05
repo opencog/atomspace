@@ -73,35 +73,24 @@ cdef class AtomSpace:
         elif op == 3: # !=
             return not is_equal
 
-    def add(self, Type t, name=None, out=None, TruthValue tv=None, prefixed=False):
+    def add(self, Type t, name=None, out=None, TruthValue tv=None):
         """ add method that determines exact method to call from type """
-        if is_a(t,types.Node):
+        if is_a(t, types.Node):
             assert out is None, "Nodes can't have outgoing sets"
-            atom = self.add_node(t, name, tv, prefixed)
+            atom = self.add_node(t, name, tv)
         else:
             assert name is None, "Links can't have names"
             atom = self.add_link(t, out, tv)
         return atom
 
-    def add_node(self, Type t, atom_name, TruthValue tv=None, prefixed=False):
+    def add_node(self, Type t, atom_name, TruthValue tv=None):
         """ Add Node to AtomSpace
         @todo support [0.5,0.5] format for TruthValue.
         @todo support type name for type.
         @returns the newly created Atom
         """
         cdef string name = atom_name.encode('UTF-8')
-        cdef cHandle result
-# XXX fix this prefixed thing -- the code should be clling the atomspace
-# utility for this.  How does one call a utility function here ??
-        prefixed = False
-        if prefixed:
-            # prefixed nodes ALWAYS generate a new atom using atom_name
-            # as the prefix
-            # Need to call the utility that does prefixing, here.
-            # result = self.addPrefixedNode(atromspace, t, name)
-            pass
-        else:
-            result = self.atomspace.addNode(t, name)
+        cdef cHandle result = self.atomspace.addNode(t, name)
 
         if result == result.UNDEFINED: return None
         atom = Atom(Handle(result.value()), self);
@@ -109,7 +98,7 @@ cdef class AtomSpace:
             self.set_tv(atom.h, tv)
         return atom
 
-    def add_link(self,Type t,outgoing,TruthValue tv=None):
+    def add_link(self, Type t, outgoing, TruthValue tv=None):
         """ Add Link to AtomSpace
         @todo support [0.5,0.5] format for TruthValue.
         @todo support type name for type.
@@ -122,6 +111,8 @@ cdef class AtomSpace:
                 handle_vector.push_back(deref((<Handle>h).h))
             elif isinstance(h, Atom):
                 handle_vector.push_back(deref((<Handle>(h.h)).h))
+            elif isinstance(h, TruthValue):
+                tv = h
         cdef cHandle result
         result = self.atomspace.addLink(t, handle_vector)
         if result == result.UNDEFINED: return None

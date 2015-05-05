@@ -29,26 +29,15 @@ class AtomSpaceTest(TestCase):
         self.assertEquals(caught, True)
 
         # test adding with a truthvalue
-        a3 = self.space.add_node(types.Node, "test_w_tv", TruthValue(0.5, 100))
+        a3 = self.space.add_node(types.Node, "test_w_tv", TruthValue(0.5, 0.8))
         self.assertEquals(self.space.size(), 2)
-
-        ### FIXME TODO -- re-enable this test after the prefixing code is
-        ###
-        ### # test adding with prefixed node
-        ### a1 = self.space.add_node(types.Node, "test", prefixed=True)
-        ### a2 = self.space.add_node(types.Node, "test", prefixed=True)
-        ### self.assertNotEqual(a1, a2)
-        ### self.assertEquals(self.space.size(), 4)
-        ###
-        ### a3 = self.space.add_node(types.Node, "test", TruthValue(0.5, 100), prefixed=True)
-        ### self.assertNotEqual(a1, a3)
-        ### self.assertEquals(self.space.size(), 5)
 
         # tests with bad parameters
         # test with not a proper truthvalue
         self.assertRaises(TypeError, self.space.add_node, types.Node, "test", 0, True)
         # test with bad type
-        self.assertRaises(TypeError, self.space.add_node, "ConceptNode", "test", TruthValue(0.5, 100))
+        self.assertRaises(TypeError, self.space.add_node, "ConceptNode",
+"test", TruthValue(0.5, 0.8))
 
     def test_add_link(self):
         n1 = self.space.add_node(types.Node, "test1")
@@ -60,10 +49,10 @@ class AtomSpaceTest(TestCase):
         self.assertTrue(l2 == l1)
 
         n3 = self.space.add_node(types.Node, "test3")
-        l3 = self.space.add_link(types.Link, [n1, n3], TruthValue(0.5, 100))
+        l3 = self.space.add_link(types.Link, [n1, n3], TruthValue(0.5, 0.8))
         self.assertTrue(l3 is not None)
         # Test with a handle instead of atom
-        l4 = self.space.add_link(types.Link, [n2.h, n3], TruthValue(0.5, 100))
+        l4 = self.space.add_link(types.Link, [n2.h, n3], TruthValue(0.5, 0.8))
         self.assertTrue(l4 is not None)
 
         # Should fail when adding an intentionally bad type
@@ -87,17 +76,15 @@ class AtomSpaceTest(TestCase):
 
     def test_truth_value(self):
         # check attributes come back as assigned
-        tv = TruthValue(0.5, 100)
+        tv = TruthValue(0.5, 0.8)
         self.assertEqual(tv.mean, 0.5)
-        self.assertEqual(tv.count, 100)
-        # test confidence
-        self.assertAlmostEqual(tv.confidence, 0.1111, places=4)
+        self.assertAlmostEqual(tv.confidence, 0.8, places=4)
         # test string representation
-        self.assertEqual(str(tv), "(stv 0.500000 0.111111)")
+        self.assertEqual(str(tv), "(stv 0.500000 0.800000)")
 
         # check equality
-        tv2 = TruthValue(0.5, 100)
-        tv3 = TruthValue(0.6, 100)
+        tv2 = TruthValue(0.5, 0.8)
+        tv3 = TruthValue(0.6, 0.8)
         self.assertTrue(tv == tv2)
         self.assertFalse(tv == tv3)
 
@@ -394,24 +381,24 @@ class AtomTest(TestCase):
 
     def test_strings(self):
         # set up a link and atoms
-        tv = TruthValue(0.5, 100)
+        tv = TruthValue(0.5, 0.8)
         a1 = self.space.add_node(types.Node, "test1", tv)
 
         a2 = self.space.add_node(types.Node, "test2")
         a2.av = {"sti": 10, "lti": 1, "vlti": True}
-        a2.tv = TruthValue(0.1, 10)
+        a2.tv = TruthValue(0.1, 0.3)
 
         l = self.space.add_link(types.Link, [a1, a2])
 
         # test string representation
         a1_expected = "(Node \"test1\") ; [{0}]\n".format(str(a1.h.value()))
         a1_expected_long = \
-            "(Node \"test1\" (av 0 0 0) (stv 0.500000 0.111111)) ; [{0}]\n"\
+            "(Node \"test1\" (av 0 0 0) (stv 0.500000 0.800000)) ; [{0}]\n"\
             .format(str(a1.h.value()))
 
         a2_expected = "(Node \"test2\") ; [{0}]\n".format(str(a2.h.value()))
         a2_expected_long = \
-            "(Node \"test2\" (av 10 1 1) (stv 0.100000 0.012346)) ; [{0}]\n"\
+            "(Node \"test2\" (av 10 1 1) (stv 0.100000 0.300000)) ; [{0}]\n"\
             .format(str(a2.h.value()))
 
         l_expected = \

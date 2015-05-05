@@ -17,4 +17,3 @@ class UtilitiesTest(TestCase):
     def test_initialize_finalize(self):
         initialize_opencog(self.atomspace)
         finalize_opencog()
-        

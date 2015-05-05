@@ -89,6 +89,7 @@ class PythonEval : public GenericEval
         void add_module_directory(const boost::filesystem::path &directory);
         void add_module_file(const boost::filesystem::path &file);
         void add_modules_from_path(std::string path);
+        void add_modules_from_abspath(std::string path);
 
         // Python utility functions
         PyObject* call_user_function(   const std::string& func,

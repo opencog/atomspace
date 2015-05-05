@@ -12,9 +12,9 @@ cdef class TruthValue:
     # Declared in atomspace.pxd
     # cdef tv_ptr *cobj
 
-    def __cinit__(self, strength=0.0, count=0.0):
+    def __cinit__(self, strength=1.0, confidence=0.0):
         # By default create a SimpleTruthValue
-        self.cobj = new tv_ptr(new cSimpleTruthValue(strength, count))
+        self.cobj = new tv_ptr(new cSimpleTruthValue(strength, self.confidence_to_count(confidence))) 
 
     def __dealloc__(self):
         # This deletes the *smart pointer*, not the actual pointer
@@ -38,11 +38,11 @@ cdef class TruthValue:
     cdef _count(self):
         return self._ptr().getCount()
 
-    cdef _init(self, float mean, float count):
-        deref((<cSimpleTruthValue*>self._ptr())).initialize(mean, count)
+    cdef _init(self, float mean, float confidence):
+        deref((<cSimpleTruthValue*>self._ptr())).initialize(mean, self.confidence_to_count(confidence))
 
-    def set_value(self, mean, count):
-        self._init(mean, count)
+    def set_value(self, mean, confidence):
+        self._init(mean, confidence)
 
     def __richcmp__(TruthValue h1, TruthValue h2, int op):
         " @todo support the rest of the comparison operators"
@@ -64,7 +64,7 @@ cdef class TruthValue:
         return self._ptr().toString().c_str()
 
     def confidence_to_count(self, float conf):
-        return (<cSimpleTruthValue*>self._ptr()).confidenceToCount(conf)
+        return (<cSimpleTruthValue*> 0).confidenceToCount(conf)
 
     def count_to_confidence(self, float count):
-        return (<cSimpleTruthValue*>self._ptr()).countToConfidence(count)
+        return (<cSimpleTruthValue*> 0).countToConfidence(count)

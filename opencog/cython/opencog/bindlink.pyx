@@ -32,8 +32,8 @@ def satisfaction_link(AtomSpace atomspace, Handle handle):
                                                  deref(handle.h))
     cdef cTruthValue* result_tv = result_tv_ptr.get()
     cdef strength_t strength = deref(result_tv).getMean()
-    cdef count_t count = deref(result_tv).getCount()
-    return TruthValue(strength, count)
+    cdef strength_t confidence = deref(result_tv).getConfidence()
+    return TruthValue(strength, confidence)
 
 def execute_atom(AtomSpace atomspace, Atom atom):
     cdef Handle atom_h = atom.h
@@ -48,5 +48,5 @@ def evaluate_atom(AtomSpace atomspace, Atom atom):
                                                 deref(atom_h.h))
     cdef cTruthValue* result_tv = result_tv_ptr.get()
     cdef strength_t strength = deref(result_tv).getMean()
-    cdef count_t count = deref(result_tv).getCount()
-    return TruthValue(strength, count)
+    cdef strength_t confidence = deref(result_tv).getConfidence()
+    return TruthValue(strength, confidence)
