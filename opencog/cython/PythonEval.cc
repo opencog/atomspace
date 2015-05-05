@@ -289,11 +289,7 @@ void PythonEval::create_singleton_instance(AtomSpace* atomspace)
 
 void PythonEval::delete_singleton_instance()
 {
-    // This should only be called once after having created one.
-    if (!singletonInstance) {
-        throw (RuntimeException(TRACE_INFO, 
-                "Null singletonInstance in delete_singleton_instance()"));
-    }
+    if (!singletonInstance) return;
 
     // Delete the singleton PythonEval instance.
     delete singletonInstance;
