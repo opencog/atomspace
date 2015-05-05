@@ -20,14 +20,7 @@ Currently the package structure looks like this:
 
  opencog.atomspace
  opencog.atomspace.types
- opencog.cogserver
- opencog.pymoses
  opencog.scheme_wrapper
-
-Eventually, when other components of OpenCog are accessible, they'll
-follow a similar pattern:
-
- opencog.rules
 
 == Tutorial ==
 
@@ -45,7 +38,7 @@ default, the opencog python module lives at
 environment variable to ensure Python checks that location. If you
 just want to use your build dir you can use something like:
 
- $ export PYTHONPATH=$PYTHONPATH:~/src/opencog/build/opencog/cython
+ $ export PYTHONPATH=$PYTHONPATH:/usr/local/share/opencog/python
 
 === AtomSpace API ===
 
@@ -193,87 +186,3 @@ True
                   # if handle not in AtomSpace
 Atom(Handle(4),<opencog.atomspace.AtomSpace object at 0x14b2918>)
 </source>
-
-I'm very interested in making this Pythonic as possible, so if you notice
-aberrations please [mailto:joel@opencog.org email me].
-
-=== MindAgents in Python ===
-
-MindAgents modify the AtomSpace autonomously. Adding and removing atoms,
-updating TruthValues or anything else. The most important part for now is
-the "run" method, which gets called with the CogServer AtomSpace as a parameter
-(In the past, C++ MindAgents would be passed the CogServer itself, but it
-wasn't obvious to me why this is necessary).
-
-<source lang="python">
->>> import opencog.cogserver
->>> from opencog.atomspace import types
->>> class MyMindAgent(opencog.cogserver.MindAgent):
-...    def run(self,atomspace):
-...        atomspace.add_node(types.ConceptNode, "test")
-</source>
-
-This will try, every CogServer cycle, to add the ConceptNode called "test".
-
-''Warning'': Note the opencog.cogserver.MindAgent is subclassed using the full
-path. If you use:
-
-<source lang="python">
->>> from opencog.cogserver import MindAgent # wrong
-</source>
-
-Then you'll get MindAgent showing up in the cogserver too. I'm not currently
-sure why, but supporting this is another improvement to add eventually.
-
-To actually allow the CogServer to use this MindAgent there are several things to check:
-
-# Place the module containing the MindAgent within one of these place:
-#* <your OpenCog data directory>/python
-#* a directory specified in the configuration parameter PYTHON_EXTENSION_DIRS,
-#* somewhere on your PYTHONPATH.
-# Ensure you are loading the libPythonModule.so CogServer plugin.
-# Either use the CogServer loadpy command to load the module (you should leave off the .py extension, e.g. "loadpy my_module") or place the module name in  the configuration parameter PYTHON_PRELOAD.
-
-Note: Yet another thing to do is allow all modules in the OpenCog Python
-directories to be loaded automatically and scanned for MindAgents.
-
-=== CogServer Requests in Python ===
-
-CogServer Requests are commands that can be issued in the shell or by other
-modules in C++ code. If save the follow to a file myrequest.py:
-
-<source lang="python">
-import opencog.cogserver
-from opencog.atomspace import types
-class MyRequest(opencog.cogserver.Request):
-    def run(self,args,atomspace):
-        # args is a list of strings
-        atomspace.add_node(types.ConceptNode, args[0])
-</source>
-
-And you telnet to a running CogServer, you can run the request:
-
- $ telnet localhost 17001
- opencog> loadpy myrequest
- opencog> myrequest.MyRequest blah
-
-Then the request will have added a ConceptNode with the name "blah"
-
-== Improving the bindings ==
-
-There is more that can be added to the Python bindings.
-
-See the Cython documentation, and then check out the source code in
-SOURCE_ROOT/opencog/cython/opencog. Note the use of Cython .pxd
-definition files which show how to make C++ classes and functions
-available to cython code.
-
-=== TODO ===
-
-* Support add/remove signals (but depends on changing from boost::signals
-  to ZeroMQ messaging first)
-  (Why? ZMQ messgng is about 50x-200x slower than boost::signals ... )
-
-* It'd also be nice to somehow import types using
-  `from opencog.atomspace.types import ConceptNode`
-  (or use a * import)
