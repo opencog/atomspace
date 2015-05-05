@@ -976,32 +976,44 @@ void PythonEval::add_module_file(const boost::filesystem::path &file)
 */
 void PythonEval::add_modules_from_path(std::string pathString)
 {
+    if ('/' == pathString[0]) {
+        add_modules_from_abspath(pathString);
+        return;
+    }
+
+    const char** config_paths = DEFAULT_PYTHON_MODULE_PATHS;
+    for (int i = 0; config_paths[i] != NULL; ++i) {
+        std::string abspath = config_paths[i];
+        abspath += "/";
+        abspath += pathString;
+
+        // If the resulting path is a directory or a regular file,
+        // then load it.
+        struct stat finfo;
+        stat(pathString.c_str(), &finfo);
+        if (S_ISDIR(finfo.st_mode) or S_ISREG(finfo.st_mode))
+            add_modules_from_abspath(abspath);
+    }
+}
+
+void PythonEval::add_modules_from_abspath(std::string pathString)
+{
     logger().info("Adding Python module (or directory): " + pathString);
 
     // Grab the GIL
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
 
-    std::string abspath;
-    if ('/' != pathString[0]) {
-        char * cwd = getcwd(NULL, 0);
-        abspath = cwd;
-        free(cwd);
-        abspath += "/";
-    }
-
-    abspath += pathString;
     struct stat finfo;
-    stat(abspath.c_str(), &finfo);
+    stat(pathString.c_str(), &finfo);
 
     if (S_ISDIR(finfo.st_mode))
-        add_module_directory(abspath);
+        add_module_directory(pathString);
     else if (S_ISREG(finfo.st_mode))
-        add_module_file(abspath);
+        add_module_file(pathString);
     else
         logger().error() << "Python module path \'" << pathString
-                         << "\' can't be found; looked for it here: "
-                         << abspath;
+                         << "\' can't be found";
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
