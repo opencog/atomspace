@@ -196,8 +196,8 @@ void opencog::global_python_initialize()
     // it by a hard-to-debug error message.
     if (NULL == py_atomspace) {
         PyErr_Print();
-        logger().error("PythonEval::%s Failed to load"
-                       "the opencog.atomspace module", __FUNCTION__);
+        logger().error("PythonEval::%s Failed to load the "
+                       "opencog.atomspace module", __FUNCTION__);
     }
 
     // Now we can use get_path_as_string() to get 'sys.path'
