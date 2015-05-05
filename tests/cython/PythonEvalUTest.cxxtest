@@ -23,8 +23,8 @@ private:
 
 public:
 
-    PythonEvalUTest() {
-
+    PythonEvalUTest()
+    {
         // Load special config file for the test
         string configFile = PROJECT_BINARY_DIR"/tests/cython/pythoneval.conf";
         try {
@@ -43,17 +43,14 @@ public:
         logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
     }
 
-    ~PythonEvalUTest() {
-    }
+    ~PythonEvalUTest() {}
 
-    void setUp() {
-    }
+    void setUp() {}
 
-    void tearDown() {
-    }
+    void tearDown() {}
 
-    void testRawPythonInitialization() {
-
+    void testRawPythonInitialization()
+    {
         logger().debug("[PythonEvalUTest] testRawPythonInitialization()");
 
         // Start up Python.
@@ -68,7 +65,7 @@ public:
 
 
         // Try it again to make sure the Python library cleans up properly.
-     
+
         // Start up Python.
         Py_InitializeEx(NO_SIGNAL_HANDLERS);
         PyEval_InitThreads();
@@ -81,7 +78,7 @@ public:
 
 
         // And again...
-     
+
         // Start up Python.
         Py_InitializeEx(NO_SIGNAL_HANDLERS);
         PyEval_InitThreads();
@@ -91,12 +88,12 @@ public:
 
         // Stop Python.
         Py_Finalize();
- 
+
          logger().debug("[PythonEvalUTest] testRawPythonInitialization() DONE");
    }
 
-    void testRawPythonInitializeWithGetSys(){
-
+    void testRawPythonInitializeWithGetSys()
+    {
         logger().debug("[PythonEvalUTest] testRawPythonInitializeWithGetSys()");
 
         PyObject* pySysPath = NULL;
@@ -120,7 +117,7 @@ public:
                 logger().debug("        %2d > %s", pathIndex, sysPathCString);
                 // NOTE: PyList_GetItem returns borrowed reference so don't do this:
                 // Py_DECREF(pySysPathLine);
-            } 
+            }
         }
 
         // NOTE: PySys_GetObject returns a borrowed reference so don't do this:
@@ -148,23 +145,23 @@ public:
         logger().debug("[PythonEvalUTest] testRawPythonInitializeWithGetSys() DONE");
     }
 
-    void testGlobalPythonInitializationFinalization() {
-
+    void testGlobalPythonInitializationFinalization()
+    {
         logger().debug("[PythonEvalUTest] testGlobalPythonInitializationFinalization()");
 
-         // Initialize and finalize Python.
+        // Initialize and finalize Python.
         global_python_initialize();
         global_python_finalize();
 
-         // Initialize and finalize Python.
+        // Initialize and finalize Python.
         global_python_initialize();
         global_python_finalize();
 
         logger().debug("[PythonEvalUTest] testGlobalPythonInitializationFinalization() DONE");
     }
 
-    void testPythonEvalSingletonCreationDeletion() {
-
+    void testPythonEvalSingletonCreationDeletion()
+    {
         logger().debug("[PythonEvalUTest] testPythonEvalSingletonCreationDeletion()");
 
         AtomSpace* atomSpace = NULL;
@@ -231,17 +228,15 @@ public:
         logger().debug("[PythonEvalUTest] testPythonEvalSingletonCreationDeletion() DONE");
     }
 
-    void testPythonEvalEvalExpr() {
-
+    void testPythonEvalEvalExpr()
+    {
         logger().debug("[PythonEvalUTest] testPythonEvalEvalExpr()");
-
-        AtomSpace* atomSpace = NULL;
 
         // Initialize Python.
         global_python_initialize();
 
         // Create an atomspace and singleton instance to use it.
-        atomSpace = new AtomSpace();
+        AtomSpace* atomSpace = new AtomSpace();
         PythonEval::create_singleton_instance(atomSpace);
         PythonEval* evaluator = &PythonEval::instance();
 
@@ -262,16 +257,16 @@ public:
         logger().debug("[PythonEvalUTest] testPythonEvalEvalExpr() DONE");
     }
 
-    void testApplyAndApplyTV() {
-
-        bool error;
+    void testApplyAndApplyTV()
+    {
+        // Initialize Python.
+        global_python_initialize();
 
         config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm");
         AtomSpace *as = new AtomSpace();
         PythonEval::create_singleton_instance(as);
         PythonEval* python = &PythonEval::instance();
         load_scm_files_from_config(*as);
-
 
         // Define python functions for use by scheme.
         python->eval(
@@ -288,7 +283,7 @@ public:
 
         // Create a scheme evaluator to trigger cog-evaluate and cog-execute.
         SchemeEval* scheme = new SchemeEval(as);
-       
+
         // Test execute -> PythonEval::apply
         scheme->eval(
                 "(cog-execute! "
@@ -301,7 +296,7 @@ public:
                 "   )"
                 ")"
                 );
-        error = scheme->eval_error();
+        bool error = scheme->eval_error();
         scheme->clear_pending();
         TSM_ASSERT("Failed cog-execute!", !error);
 
@@ -320,6 +315,8 @@ public:
         error = scheme->eval_error();
         scheme->clear_pending();
         TSM_ASSERT("Failed cog-evaluate!", !error);
-    }
 
+        // Cleanup Python.
+        global_python_finalize();
+    }
 };
