@@ -708,29 +708,23 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
  */
 TruthValuePtr PythonEval::apply_tv(const std::string& func, Handle varargs)
 {
-    PyObject *pyTruthValue = NULL;
-    PyObject *pyError, *pyTruthValuePtrPtr = NULL;
-    TruthValuePtr* tvpPtr;
-    TruthValuePtr tvp;
-
     // Get the python truth value object returned by this user function.
-    pyTruthValue = this->call_user_function(func, varargs);
+    PyObject *pyTruthValue = call_user_function(func, varargs);
 
     // If we got a non-null truth value there were no errors.
     if (pyTruthValue) {
 
         // Grab the GIL.
-        PyGILState_STATE gstate;
-        gstate = PyGILState_Ensure();
+        PyGILState_STATE gstate = PyGILState_Ensure();
 
         // Get the truth value pointer from the object (will be encoded
         // as a long by PyVoidPtr_asLong)
-        pyTruthValuePtrPtr = PyObject_CallMethod(pyTruthValue, 
+        PyObject *pyTruthValuePtrPtr = PyObject_CallMethod(pyTruthValue, 
                 (char*) "truth_value_ptr_object", NULL);
 
         // Make sure we got a truth value pointer.
-        pyError = PyErr_Occurred();
-        if (pyError || !pyTruthValuePtrPtr) {
+        PyObject *pyError = PyErr_Occurred();
+        if (pyError or !pyTruthValuePtrPtr) {
             PyGILState_Release(gstate);
             throw RuntimeException(TRACE_INFO, 
                 "Python function '%s' did not return TruthValue!",
@@ -739,13 +733,15 @@ TruthValuePtr PythonEval::apply_tv(const std::string& func, Handle varargs)
 
         // Get the pointer to the truth value pointer. Yes, it does
         // contain a pointer to the shared_ptr not the underlying.
-        tvpPtr = static_cast<TruthValuePtr*>
+        TruthValuePtr* tvpPtr = static_cast<TruthValuePtr*>
                 (PyLong_AsVoidPtr(pyTruthValuePtrPtr));
+
+printf("duuuude wwada %p\n", tvpPtr);
 
         // Assign the truth value pointer using this pointer before
         // we decrement the reference to pyTruthValue since that
         // will delete this pointer.
-        tvp = *tvpPtr;
+        TruthValuePtr tvp = *tvpPtr;
 
         // Cleanup the reference counts.
         Py_DECREF(pyTruthValuePtrPtr);
@@ -753,15 +749,12 @@ TruthValuePtr PythonEval::apply_tv(const std::string& func, Handle varargs)
 
         // Release the GIL. No Python API allowed beyond this point.
         PyGILState_Release(gstate);
-
-    } else {
-
-        throw RuntimeException(TRACE_INFO, 
-                "Python function '%s' did not return TruthValue!",
-                func.c_str());
+        return tvp;
     }
 
-    return tvp;
+    throw RuntimeException(TRACE_INFO, 
+                "Python function '%s' did not return TruthValue!",
+                func.c_str());
 }
 
 std::string PythonEval::apply_script(const std::string& script)
