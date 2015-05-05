@@ -73,6 +73,7 @@ public:
     void test_throw(void);
     void test_gpn(void);
     void test_double_quote(void);
+    void test_impossible(void);
 };
 
 void QuoteUTest::tearDown(void)
@@ -242,3 +243,15 @@ void QuoteUTest::test_double_quote(void)
     TS_ASSERT_EQUALS(0, strcmp("banana", as->getName(banana).c_str()));
 }
 
+// Test bug bug #1531
+void QuoteUTest::test_impossible(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/quote-impossible.scm");
+    load_scm_files_from_config(*as);
+
+    Handle imp = eval->eval_h("imp");
+
+    TruthValuePtr tv = satisfaction_link(as, imp);
+}
