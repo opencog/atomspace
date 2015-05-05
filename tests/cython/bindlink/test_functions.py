@@ -3,7 +3,6 @@
 
 from opencog.atomspace import types, Atom, TruthValue
 from opencog.type_constructors import *
-from test_helpers.bind_helpers import increment_green, increment_red
 
 def print_arguments(argOne, argTwo):
     print "argOne = ", argOne
@@ -18,6 +17,25 @@ def add_link(atom_one, atom_two):
 
 def bogus_tv(atom_one, atom_two):
     return TruthValue(0.6, 0.234)
+
+green = 0
+red = 0
+
+def initialize_counts():
+    global red
+    global green
+    green = 0
+    red = 0
+
+def increment_green():
+    global green
+    green += 1
+    print "green light"
+
+def increment_red():
+    global red
+    red += 1
+    print "red light"
 
 def stop_go(atom):
     compare_green = ConceptNode("green light")

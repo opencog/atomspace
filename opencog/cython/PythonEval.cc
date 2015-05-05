@@ -989,23 +989,32 @@ void PythonEval::add_module_file(const boost::filesystem::path &file)
 */
 void PythonEval::add_modules_from_path(std::string pathString)
 {
-    boost::filesystem::path modulePath(pathString);
-
-    logger().info("Adding Python module (or directory): " + modulePath.string());
+    logger().info("Adding Python module (or directory): " + pathString);
 
     // Grab the GIL
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
 
-    if(boost::filesystem::exists(modulePath)){
-        if(boost::filesystem::is_directory(modulePath))
-            this->add_module_directory(modulePath);
-        else
-            this->add_module_file(modulePath);
+    std::string abspath;
+    if ('/' != pathString[0]) {
+        char * cwd = getcwd(NULL, 0);
+        abspath = cwd;
+        free(cwd);
+        abspath += "/";
     }
-    else{
-        logger().error() << modulePath << " doesn't exists";
-    }
+
+    abspath += pathString;
+    struct stat finfo;
+    stat(abspath.c_str(), &finfo);
+
+    if (S_ISDIR(finfo.st_mode))
+        add_module_directory(abspath);
+    else if (S_ISREG(finfo.st_mode))
+        add_module_file(abspath);
+    else
+        logger().error() << "Python module path \'" << pathString
+                         << "\' can't be found; looked for it here: "
+                         << abspath;
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
