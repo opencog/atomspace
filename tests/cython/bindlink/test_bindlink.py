@@ -9,6 +9,8 @@ from opencog.bindlink import    stub_bindlink, bindlink, single_bindlink,\
 from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.type_constructors import *
 
+from test_functions import green_count, red_count
+
 __author__ = 'Curtis Faith'
 
 

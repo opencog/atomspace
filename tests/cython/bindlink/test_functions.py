@@ -30,22 +30,28 @@ def initialize_counts():
 def increment_green():
     global green
     green += 1
-    print "green light"
 
 def increment_red():
     global red
     red += 1
-    print "red light"
+
+def green_count():
+    global green
+    return green
+
+def red_count():
+    global red
+    return red
 
 def stop_go(atom):
     compare_green = ConceptNode("green light")
     compare_red = ConceptNode("red light")
     if atom == compare_green:
-        print "got green"
+        print "got a green light!"
         increment_green()
         return TruthValue(1,1)
     elif atom == compare_red:
-        print "got red"
+        print "got a red light"
         increment_red()
         return TruthValue(0,1)
     else:
