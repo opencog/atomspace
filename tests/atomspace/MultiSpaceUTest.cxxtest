@@ -511,6 +511,8 @@ public:
 		Handle h1 = ex1->addAtom(createLink(LIST_LINK, n1, n2));
 		delete ex1;
 
+		std::list<Handle> handle_set;
+		as1.getHandlesByType(back_inserter(handle_set), ATOM, false);
 		// cogserver crashes at this point; no crash == pass
 
 		AtomSpace* ex2 = new AtomSpace(&as2);
@@ -522,6 +524,8 @@ public:
 		h1 = ex2->addAtom(createLink(LIST_LINK, n1, n2));
 		delete ex2;
 
+		handle_set.clear();
+		as1.getHandlesByType(back_inserter(handle_set), ATOM, false);
 		// cogserver crashes at this point; no crash == pass
 	}
 };
