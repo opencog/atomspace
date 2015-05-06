@@ -246,6 +246,15 @@ PythonEval::PythonEval(AtomSpace* atomspace)
     _atomspace = atomspace;
 
     // Initialize Python objects and imports.
+    //
+    // Strange but true: one can use the atomspace, and put atoms
+    // in it .. useing the type constructors and everything (e.g.
+    // the demos in the /examples/python directory) and never ever
+    // actually call global_python_initialize() ... it might never
+    // be called, if the python evaluator (i.e. this object) is
+    // never used or needed.  I thought this was unexpected, so I
+    // mention it here.
+    global_python_initialize();
     this->initialize_python_objects_and_imports();
 
     // Add the preload functions
@@ -264,14 +273,14 @@ PythonEval::~PythonEval()
     gstate = PyGILState_Ensure();
 
     // Decrement reference counts for instance Python object references.
-    Py_DECREF(this->pyGlobal);
-    Py_DECREF(this->pyLocal);
+    Py_DECREF(_pyGlobal);
+    Py_DECREF(_pyLocal);
 
     // NOTE: The following come from Python C api calls that return borrowed
     // references. However, we have called Py_INCREF( x ) to promote them
     // to full references so we can and must decrement them here.
-    Py_DECREF(this->pySysPath);
-    Py_DECREF(this->pyRootModule);
+    Py_DECREF(_pySysPath);
+    Py_DECREF(_pyRootModule);
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
@@ -325,17 +334,17 @@ void PythonEval::initialize_python_objects_and_imports(void)
     // NOTE: We have to promote the reference here with Py_INCREF because
     // PySys_GetObject returns a borrowed reference and we don't want it to
     // go away behind the scenes.
-    this->pySysPath = PySys_GetObject((char*)"path");
-    Py_INCREF(this->pySysPath);
+    _pySysPath = PySys_GetObject((char*)"path");
+    Py_INCREF(_pySysPath);
 
     // Get the __main__ module. NOTE: As above, PyImport_AddModule returns
     // a borrowed reference so we must promote it with an increment.
-    this->pyRootModule = PyImport_AddModule("__main__");
-    Py_INCREF(this->pyRootModule);
-    PyModule_AddStringConstant(this->pyRootModule, "__file__", "");
+    _pyRootModule = PyImport_AddModule("__main__");
+    Py_INCREF(_pyRootModule);
+    PyModule_AddStringConstant(_pyRootModule, "__file__", "");
 
     // Add ATOMSPACE to __main__ module.
-    PyObject* pyRootDictionary = PyModule_GetDict(this->pyRootModule);
+    PyObject* pyRootDictionary = PyModule_GetDict(_pyRootModule);
     PyObject* pyAtomSpaceObject = this->atomspace_py_object();
     PyDict_SetItemString(pyRootDictionary, "ATOMSPACE", pyAtomSpaceObject);
     Py_DECREF(pyAtomSpaceObject);
@@ -345,8 +354,8 @@ void PythonEval::initialize_python_objects_and_imports(void)
 
     // These are needed for calling Python/C API functions, define
     // them once here so we can reuse them.
-    this->pyGlobal = PyDict_New();
-    this->pyLocal = PyDict_New();
+    _pyGlobal = PyDict_New();
+    _pyLocal = PyDict_New();
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
@@ -460,7 +469,7 @@ void PythonEval::build_python_error_message(    const char* function_name,
 void PythonEval::execute_string(const char* command)
 {
     PyObject *pyRootDictionary, *pyResult;
-    pyRootDictionary = PyModule_GetDict(this->pyRootModule);
+    pyRootDictionary = PyModule_GetDict(_pyRootModule);
     pyResult = PyRun_StringFlags(command, Py_file_input, pyRootDictionary,
             pyRootDictionary, NO_COMPILER_FLAGS);
     if (pyResult)
@@ -509,12 +518,12 @@ PyObject* PythonEval::module_for_function(  const std::string& moduleFunction,
     // Get the correct module and extract the function name.
     int index = moduleFunction.find_first_of('.');
     if (index < 0){
-        pyModule = this->pyRootModule;
+        pyModule = _pyRootModule;
         functionName = moduleFunction;
         moduleName = "__main__";
     } else {
         moduleName = moduleFunction.substr(0, index);
-        pyModule = this->modules[moduleName];
+        pyModule = _modules[moduleName];
         functionName = moduleFunction.substr(index+1);
     }
 
@@ -786,7 +795,7 @@ std::string PythonEval::apply_script(const std::string& script)
     if (!pyError) {
         // Get the output stream as a string so we can return it.
         errorRunningScript = false;
-        pyCatcher = PyObject_GetAttrString(this->pyRootModule,
+        pyCatcher = PyObject_GetAttrString(_pyRootModule,
                 "_opencog_output_stream");
         pyOutput = PyObject_CallMethod(pyCatcher, (char*)"getvalue", NULL);
         result = PyBytes_AsString(pyOutput);
@@ -826,7 +835,7 @@ std::string PythonEval::apply_script(const std::string& script)
 void PythonEval::add_to_sys_path(std::string path)
 {
     PyObject* pyPathString = PyBytes_FromString(path.c_str());
-    PyList_Append(this->pySysPath, pyPathString);
+    PyList_Append(_pySysPath, pyPathString);
 
     // We must decrement because, unlike PyList_SetItem, PyList_Append does
     // not "steal" the reference we pass to it. So this:
@@ -865,7 +874,7 @@ void PythonEval::import_module( const boost::filesystem::path &file,
 
     // Import the entire module into the current Python environment.
     PyObject* pyModule = PyImport_ImportModuleLevel((char*) moduleName.c_str(),
-            this->pyGlobal, this->pyLocal, pyFromList,
+            _pyGlobal, _pyLocal, pyFromList,
             ABSOLUTE_IMPORTS_ONLY);
 
     // If the import succeeded...
@@ -887,11 +896,11 @@ void PythonEval::import_module( const boost::filesystem::path &file,
         Py_INCREF(pyModule);
 
         // Add the module name to the root module.
-        PyModule_AddObject(this->pyRootModule, moduleName.c_str(), pyModule);
+        PyModule_AddObject(_pyRootModule, moduleName.c_str(), pyModule);
 
         // Add the module to our modules list. So don't decrement the
         // Python reference in this function.
-        this->modules[moduleName] = pyModule;
+        _modules[moduleName] = pyModule;
 
     // otherwise, handle the error.
     } else {

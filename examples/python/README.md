@@ -24,6 +24,10 @@ Example of how to use the pattern matcher BindLink functionality.
 
 Example of how to obtain atom type names and atom type IDs.
 
+## stop_go
+
+A simple example of a "behavior tree" implemented in the AtomSpace.
+
 ## scheme_timer
 
 Simple measurement of the performance of invoking the scheme

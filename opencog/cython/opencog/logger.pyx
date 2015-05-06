@@ -41,19 +41,19 @@ def create_logger(filename):
     # create temporary cpp string
     cdef string *c_filename = new string(py_byte_string)
     l.clog = new cLogger(deref(c_filename))
-    l.owns_atomspace = True
+    l.not_singleton_logger = True
     # delete temporary string
-    del c_filename 
+    del c_filename
     return l
 
 cdef class Logger:
     cdef cLogger *clog
-    cdef owns_atomspace
-    
+    cdef not_singleton_logger
+
     def __cinit__(self):
-        self.owns_atomspace = False
+        self.not_singleton_logger = False
     def __dealloc__(self):
-        if self.owns_atomspace: del self.clog
+        if self.not_singleton_logger: del self.clog
     def __init__(self):
         self.clog = &logger()
     property NONE:
@@ -71,6 +71,8 @@ cdef class Logger:
     cdef _set_level(self,int lvl):
         self.clog.setLevel(<loglevel>lvl)
     def set_level(self,level_name):
+        if type(level_name) is not str:
+            raise TypeError("Expecting a string")
         level_name = level_name.upper()
         py_byte_string = level_name.encode('UTF-8')
         # create temporary cpp string
@@ -125,10 +127,5 @@ cdef class Logger:
     def use_stdout(self,use_it=True):
         self.clog.setPrintToStdoutFlag(use_it)
 
+# This is the singlton instance created by cogutils.
 log = Logger()
-        
-
-
-
-
-

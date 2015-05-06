@@ -200,6 +200,7 @@ IF (WIN32)
 	INSTALL (TARGETS
 		atomspace_cython
 		bindlink_cython
+		logger_cython
 		scheme_wrapper
 		type_constructors
 		utilities_cython
@@ -208,6 +209,7 @@ ELSE (WIN32)
 	INSTALL (TARGETS
 		atomspace_cython
 		bindlink_cython
+		logger_cython
 		scheme_wrapper
 		type_constructors
 		utilities_cython

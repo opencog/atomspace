@@ -233,7 +233,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args
 		size_t pos = 3;
 		while (' ' == schema[pos]) pos++;
 
-		PythonEval &applier = PythonEval::instance();
+		PythonEval &applier = PythonEval::instance(as);
 		// std::string rc = applier.apply(schema.substr(pos), args);
 		// if (rc.compare("None") or rc.compare("False")) return false;
 		return applier.apply_tv(schema.substr(pos), args);
