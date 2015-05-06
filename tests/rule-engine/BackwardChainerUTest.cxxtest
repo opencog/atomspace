@@ -20,15 +20,24 @@ private:
 	AtomSpace *as_;
 	SchemeEval* eval_;
 	BackwardChainer * bc_;
+
 public:
 	BackwardChainerUTest()
     {
 		as_ = new AtomSpace();
 		eval_ = new SchemeEval(as_);
 
-		load_scm_files_from_config(*as_);
-
-		logger().setLevel(Logger::DEBUG);
+		try
+		{
+			config().load("opencog-test.conf");
+		}
+		catch (RuntimeException &e)
+		{
+			std::cerr << e.getMessage() << std::endl;
+		}
+		logger().setFilename(config()["LOG_FILE"]);
+		logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+		logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 	}
 
 	~BackwardChainerUTest()
@@ -41,6 +50,9 @@ public:
 
 	void test_unify();
 	void test_filter_rules();
+
+	void test_basic_bc();
+
 	// void test_match_knowledge_base();
 	// void test_simple_deduction_bc();
 
@@ -52,36 +64,25 @@ void BackwardChainerUTest::setUp()
 {
 	config().set("SCM_PRELOAD",
 	             "opencog/atomspace/core_types.scm, "
-	             "opencog/scm/utilities.scm, "
-	             "opencog/python/pln_old/examples/backward_chaining/criminal.scm, "
-	             "tests/rule-engine/bc-test/bc-example.scm");
+	             "opencog/scm/utilities.scm"
+//	             "opencog/python/pln_old/examples/backward_chaining/criminal.scm, "
+//	             "tests/rule-engine/bc-example.scm"
+	             );
 	load_scm_files_from_config(*as_);
-
-	// Setup the Backward Chainer
-	JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as_, PROJECT_SOURCE_DIR"/examples/rule-engine/cpolicy.json"));
-	cpolicy_loader.load_config();
-
-    std::vector<Rule> rules;
-
-	for (Rule* pr : cpolicy_loader.get_rules()) {
-		// Ignore some rules for now
-		if (pr->get_name() != "pln-rule-create-and-as-1st-arg-of-inheritance"
-		    and
-		    pr->get_name() != "pln-rule-create-and-as-2nd-arg-of-inheritance")
-			rules.push_back(*pr);
-	}
-
-	bc_ = new BackwardChainer(as_, rules);
 }
 
 void BackwardChainerUTest::tearDown()
 {
 	as_->clear();
-	delete bc_;
 }
 
 void BackwardChainerUTest::test_unify()
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// empty BackwardChainer without rules
+	BackwardChainer bc(as_, std::vector<Rule>());
+
 	Handle x = as_->addNode(VARIABLE_NODE, "$x"),
 		y = as_->addNode(VARIABLE_NODE, "$y"),
 		z = as_->addNode(VARIABLE_NODE, "$z"),
@@ -108,7 +109,7 @@ void BackwardChainerUTest::test_unify()
 
 	Handle hmatch = eval_->eval_h(match);
 	VarMap result;
-	bc_->unify(htarget, hmatch, Handle::UNDEFINED, result);
+	bc.unify(htarget, hmatch, Handle::UNDEFINED, result);
 
 	for (const auto& kv : result) {
 		std::cout << "Key = " << kv.first->toString()
@@ -119,10 +120,25 @@ void BackwardChainerUTest::test_unify()
 	TS_ASSERT_EQUALS(result[x], west);
 	TS_ASSERT_EQUALS(result[y], a);
 	TS_ASSERT_EQUALS(result[z], nono);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 void BackwardChainerUTest::test_filter_rules()
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// load 2 rules
+	JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as_, "tests/rule-engine/bc_cpolicy_2.json"));
+	cpolicy_loader.load_config();
+
+	std::vector<Rule> rules;
+
+	for (Rule* pr : cpolicy_loader.get_rules())
+		rules.push_back(*pr);
+
+	BackwardChainer bc(as_, rules);
+
 	string kb_imp_str =
 		"(ImplicationLink (stv .99 .99)"
 		"    (AndLink"
@@ -151,19 +167,57 @@ void BackwardChainerUTest::test_filter_rules()
 		              "    (VariableNode \"$x\")"
 		              "    (ConceptNode \"criminal\"))");
 
-	vector<Rule> rules = bc_->filter_rules(target);
+	vector<Rule> filtered_rules = bc.filter_rules(target);
 
-	for (const Rule& r : rules)
+	for (const Rule& r : filtered_rules)
 		std::cout << "rule = " << r.get_name() << std::endl;
 
-	// At least modus ponens should be in, but others could as well
-	// (especially true as more rules are gonna get added)
+	// At least modus ponens should be in
 	auto modus_ponens_it =
-		std::find_if(rules.begin(), rules.end(),
+	        std::find_if(filtered_rules.begin(), filtered_rules.end(),
 		             [](const Rule& r) {
 			             return r.get_name() == "crisp-modus-ponens";
 		             });
 	TS_ASSERT_DIFFERS(modus_ponens_it, rules.end());
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void BackwardChainerUTest::test_basic_bc()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD",
+	             "tests/rule-engine/bc-example.scm");
+	load_scm_files_from_config(*as_);
+
+	// load 1 modus ponens rules
+	JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as_, "tests/rule-engine/bc_cpolicy_1.json"));
+	cpolicy_loader.load_config();
+
+	std::vector<Rule> rules;
+
+	for (Rule* pr : cpolicy_loader.get_rules())
+		rules.push_back(*pr);
+
+	BackwardChainer bc(as_, rules);
+
+	Handle target_var = eval_->eval_h("(VariableNode \"$Z\")");
+	Handle target =
+	    eval_->eval_h("(InheritanceLink"
+	                  "   (VariableNode \"$Z\")"
+					  "   (ConceptNode \"green\"))");
+	Handle soln = eval_->eval_h("(ConceptNode \"Fritz\")");
+
+	bc.set_target(target);
+	bc.do_full_chain(10);
+
+	VarMultimap results = bc.get_chaining_result();
+
+	TSM_ASSERT("Incorrect number of solution found!", results[target_var].size() == 1);
+	TSM_ASSERT("Getting incorrect solution!", results[target_var].count(soln) == 1);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 // void BackwardChainerUTest::test_match_knowledge_base() {
