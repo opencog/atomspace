@@ -108,13 +108,13 @@ class PythonEval : public GenericEval
 
         AtomSpace* _atomspace;
 
-        PyObject* pyGlobal;
-        PyObject* pyLocal;
-        PyObject* pyRootModule;
+        PyObject* _pyGlobal;
+        PyObject* _pyLocal;
+        PyObject* _pyRootModule;
 
-        PyObject* pySysPath;
+        PyObject* _pySysPath;
 
-        std::map <std::string, PyObject*> modules;
+        std::map <std::string, PyObject*> _modules;
 
         std::string _result;
 
@@ -165,7 +165,7 @@ class PythonEval : public GenericEval
          *
          */
         void print_root_dictionary()
-            { this->print_dictionary(PyModule_GetDict(this->pyRootModule)); }
+            { this->print_dictionary(PyModule_GetDict(_pyRootModule)); }
 
 };
 
