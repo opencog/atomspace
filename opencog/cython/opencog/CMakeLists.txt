@@ -199,6 +199,7 @@ ENDIF (HAVE_ATOMSPACE AND HAVE_GUILE)
 IF (WIN32)
 	INSTALL (TARGETS
 		atomspace_cython
+		bindlink_cython
 		scheme_wrapper
 		type_constructors
 		utilities_cython
@@ -206,6 +207,7 @@ IF (WIN32)
 ELSE (WIN32)
 	INSTALL (TARGETS
 		atomspace_cython
+		bindlink_cython
 		scheme_wrapper
 		type_constructors
 		utilities_cython
