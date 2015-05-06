@@ -1076,7 +1076,19 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     // Process the evaluation buffer if more input is not pending.
     if (not _pending_input)
     {
-        _result = this->apply_script(_input_line);
+        // This is the cogserver shell-freindly evaluator. We must
+        // stop all exceptions thrown in other layers, or else we
+        // will crash the cogserver. Pass the exception message to
+        // the user, who can read and contemplate it: it is almost
+        // surely a syntax error in the python code.
+        try
+        {
+            _result = this->apply_script(_input_line);
+        }
+        catch (const RuntimeException &e)
+        {
+            _result = e.getMessage() + "\n";
+        }
         _input_line = "";
     }
 }
