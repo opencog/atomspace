@@ -167,14 +167,7 @@ void BackwardChainerUTest::test_filter_rules()
 }
 
 // void BackwardChainerUTest::test_match_knowledge_base() {
-// 	/**
-// 	   TODO: take what makes
 
-// 	   HandleSeq possible_premises = match_knowledge_base(himplicant, vmap_list);
-
-// 	   line 198 of the backward chainer return only undefined handles
-// 	   and debug here why.
-// 	*/
 // }
 
 // void BackwardChainerUTest::test_simple_deduction_bc() {
