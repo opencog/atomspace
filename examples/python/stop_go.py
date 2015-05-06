@@ -7,71 +7,69 @@ Example of how to use the pattern matcher to callback into Python.
 """
 
 from opencog.atomspace import AtomSpace, TruthValue, types, get_type_name
-from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h, __init__
+from opencog.bindlink import satisfaction_link
+from opencog.type_constructors import *
+
+atomspace = AtomSpace()
+set_type_ctor_atomspace(atomspace)
 
 
 green = 0
 red = 0
 
-def initialize_counts():
-    global red
-    global green
-    green = 0
-    red = 0
+def stop_go(atom):
 
-def increment_green():
-    global green
-    green += 1
-    print "green light"
+    if atom == ConceptNode("green light"):
+        print "Got a green light..."
+        global green
+        green += 1
+        return TruthValue(1,1)
 
-def increment_red():
-    global red
-    red += 1
-    print "red light"
+    elif atom == ConceptNode("red light"):
+        print "Got a red light!"
+        increment_red()
+        global red
+        red += 1
+        return TruthValue(0,1)
+
+    else:
+        print "Oh No!! Car wreck!"
+        assert(false)
+
+    return TruthValue(0,0)
 
 
 
-atomspace = AtomSpace()
-__init__(atomspace)
-
-data = ["opencog/atomspace/core_types.scm",
-        "opencog/scm/utilities.scm"]
-
-for item in data:
-    load_scm(atomspace, item)
-
-# Define several animals and something of a different type as well
-scheme_animals = \
-    '''
-    (InheritanceLink (ConceptNode "Frog") (ConceptNode "animal"))
-    (InheritanceLink (ConceptNode "Zebra") (ConceptNode "animal"))
-    (InheritanceLink (ConceptNode "Deer") (ConceptNode "animal"))
-    (InheritanceLink (ConceptNode "Spaceship") (ConceptNode "machine"))
-    '''
-scheme_eval_h(atomspace, scheme_animals)
-
-# Define a graph search query
-scheme_query = \
-    '''
-    (define find-animals
-      (BindLink
-        ;; The variable to be bound
-        (VariableNode "$var")
-        (ImplicationLink
-          ;; The pattern to be searched for
-          (InheritanceLink
-             (VariableNode "$var")
-             (ConceptNode "animal")
-          )
-
-          ;; The value to be returned.
-          (VariableNode "$var")
+satisfaction_handle = SatisfactionLink(
+    SequentialAndLink(
+        EvaluationLink(
+            GroundedPredicateNode("py: stop_go"),
+            ListLink(
+                ConceptNode("green light")
+            )
+        ),
+        EvaluationLink(
+            GroundedPredicateNode("py: stop_go"),
+            ListLink(
+                ConceptNode("green light")
+            )
+        ),
+        EvaluationLink(
+            GroundedPredicateNode("py: stop_go"),
+            ListLink(
+                ConceptNode("red light")
+            )
+        ),
+        EvaluationLink(
+            GroundedPredicateNode("py: stop_go"),
+            ListLink(
+                ConceptNode("traffic ticket")
+            )
         )
-      )
     )
-    '''
-scheme_eval_h(atomspace, scheme_query)
+).h
 
-# Run the above pattern and print the result
-result = scheme_eval_h(atomspace, '(cog-bind find-animals)')
-print "The result of pattern matching is:\n\n" + str(atomspace[result])
+result = satisfaction_link(atomspace, satisfaction_handle)
+
+print "Number of green lights:",  green
+print "Number of red lights:",  red
