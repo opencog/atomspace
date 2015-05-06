@@ -43,13 +43,13 @@ def create_logger(filename):
     l.clog = new cLogger(deref(c_filename))
     l.owns_atomspace = True
     # delete temporary string
-    del c_filename 
+    del c_filename
     return l
 
 cdef class Logger:
     cdef cLogger *clog
     cdef owns_atomspace
-    
+
     def __cinit__(self):
         self.owns_atomspace = False
     def __dealloc__(self):
@@ -126,9 +126,3 @@ cdef class Logger:
         self.clog.setPrintToStdoutFlag(use_it)
 
 log = Logger()
-        
-
-
-
-
-
