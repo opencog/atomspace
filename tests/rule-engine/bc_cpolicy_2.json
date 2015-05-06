@@ -1,0 +1,32 @@
+{
+	"rules": 
+	[
+		{
+			"name": "crisp-deduction",
+			"file_path": "rules/crisp-deduction.scm",
+			"priority": 1,
+			"mutex": 
+			[
+				
+			],
+
+			"category": "crisp-deduction-modus-ponens-example"
+		},
+
+		{
+			"name": "crisp-modus-ponens",
+			"file_path": "rules/crisp-modus-ponens.scm",
+			"priority": 1,
+			"mutex": 
+			[
+				
+			],
+
+			"category": "crisp-deduction-modus-ponens-example"
+		}
+	],
+
+	"attention_allocation": false,
+	"max_iter": 20,
+	"log_level": "debug"
+}
