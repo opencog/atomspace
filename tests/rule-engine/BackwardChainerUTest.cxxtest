@@ -14,13 +14,15 @@
 
 using namespace opencog;
 //#define DEBUG 1
-class BackwardChainerUTest: public CxxTest::TestSuite {
+class BackwardChainerUTest: public CxxTest::TestSuite
+{
 private:
 	AtomSpace *as_;
 	SchemeEval* eval_;
 	BackwardChainer * bc_;
 public:
-	BackwardChainerUTest() {
+	BackwardChainerUTest()
+    {
 		as_ = new AtomSpace();
 		eval_ = new SchemeEval(as_);
 
@@ -28,9 +30,12 @@ public:
 
 		logger().setLevel(Logger::DEBUG);
 	}
-	~BackwardChainerUTest() {
+
+	~BackwardChainerUTest()
+    {
 		delete eval_;
 	}
+
 	void setUp();
 	void tearDown();
 
@@ -43,7 +48,8 @@ public:
 	// void test_do_bc();
 };
 
-void BackwardChainerUTest::setUp() {
+void BackwardChainerUTest::setUp()
+{
 	config().set("SCM_PRELOAD",
 	             "opencog/atomspace/core_types.scm, "
 	             "opencog/scm/utilities.scm, "
@@ -54,7 +60,9 @@ void BackwardChainerUTest::setUp() {
 	// Setup the Backward Chainer
 	JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as_, PROJECT_SOURCE_DIR"/examples/rule-engine/cpolicy.json"));
 	cpolicy_loader.load_config();
-	std::vector<Rule> rules;
+
+    std::vector<Rule> rules;
+
 	for (Rule* pr : cpolicy_loader.get_rules()) {
 		// Ignore some rules for now
 		if (pr->get_name() != "pln-rule-create-and-as-1st-arg-of-inheritance"
@@ -62,15 +70,18 @@ void BackwardChainerUTest::setUp() {
 		    pr->get_name() != "pln-rule-create-and-as-2nd-arg-of-inheritance")
 			rules.push_back(*pr);
 	}
+
 	bc_ = new BackwardChainer(as_, rules);
 }
 
-void BackwardChainerUTest::tearDown() {
+void BackwardChainerUTest::tearDown()
+{
 	as_->clear();
 	delete bc_;
 }
 
-void BackwardChainerUTest::test_unify() {
+void BackwardChainerUTest::test_unify()
+{
 	Handle x = as_->addNode(VARIABLE_NODE, "$x"),
 		y = as_->addNode(VARIABLE_NODE, "$y"),
 		z = as_->addNode(VARIABLE_NODE, "$z"),
@@ -110,7 +121,8 @@ void BackwardChainerUTest::test_unify() {
 	TS_ASSERT_EQUALS(result[z], nono);
 }
 
-void BackwardChainerUTest::test_filter_rules() {
+void BackwardChainerUTest::test_filter_rules()
+{
 	string kb_imp_str =
 		"(ImplicationLink (stv .99 .99)"
 		"    (AndLink"
