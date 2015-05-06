@@ -246,6 +246,7 @@ PythonEval::PythonEval(AtomSpace* atomspace)
     _atomspace = atomspace;
 
     // Initialize Python objects and imports.
+    global_python_initialize();
     this->initialize_python_objects_and_imports();
 
     // Add the preload functions
