@@ -24,8 +24,6 @@
 #ifndef FUZZYPATTERNMATCH_H
 #define FUZZYPATTERNMATCH_H
 
-#include <opencog/atomspace/Handle.h>
-
 namespace opencog
 {
     class AtomSpace;

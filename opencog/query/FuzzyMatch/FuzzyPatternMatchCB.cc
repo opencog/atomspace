@@ -154,7 +154,7 @@ bool FuzzyPatternMatchCB::neighbor_search(PatternMatchEngine* pme,
         if (potential_starters.size() == search_cnt)
         {
 #ifdef DEBUG
-            std::cout << "No available starter to continue the fuzzy match.\n";
+            std::cout << "No more available starters for the neighbor search.\n";
 #endif
             break;
         }
@@ -216,7 +216,7 @@ bool FuzzyPatternMatchCB::neighbor_search(PatternMatchEngine* pme,
  */
 bool FuzzyPatternMatchCB::link_match(const LinkPtr& pLink, const LinkPtr& gLink)
 {
-    // Avoid comparing the same pair of atoms again, this in turn avoid
+    // Avoid comparing the same pair of atoms again, this can also avoid
     // giving duplicated solutions
     std::pair<UUID, UUID> p = std::make_pair(pLink->getHandle().value(),
                                              gLink->getHandle().value());
@@ -262,7 +262,7 @@ void FuzzyPatternMatchCB::check_if_accept(const Handle& ph, const Handle& gh)
                           gnodes.begin(), gnodes.end(),
                           std::back_inserter(common_nodes));
 
-    // Do a rough estimation here
+    // A rough estimation
     double common = 1.0 * (common_nodes.size() + var_size) / pat_size;
     double diff = 0.5 * std::abs((int) pat_size - (int) gnodes.size()) /
                   (pat_size + gnodes.size());

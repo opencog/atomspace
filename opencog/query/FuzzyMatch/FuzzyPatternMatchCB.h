@@ -31,7 +31,7 @@ namespace opencog
     class FuzzyPatternMatchCB : public DefaultPatternMatchCB
     {
         public:
-            // The solutions -- hypergraphs that are similar to the pattern
+            // The solutions
             HandleSeq solns;
 
             FuzzyPatternMatchCB(AtomSpace* as);
@@ -81,7 +81,7 @@ namespace opencog
             // Links that have previously been compared
             std::vector<std::pair<UUID, UUID>> prev_compared;
 
-            // How many times should we initiate a search by a different starter
+            // How many searches should we do by using a different starter
             const size_t MAX_SEARCHES = 5;
 
             // How similar the potential solution and the pattern are
