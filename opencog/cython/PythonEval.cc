@@ -824,7 +824,7 @@ std::string PythonEval::apply_script(const std::string& script)
     // If there was an error throw an exception so the user knows the
     // script had a problem.
     if (errorRunningScript) {
-        logger().error() << errorString;
+        logger().warn() << errorString;
         throw (RuntimeException(TRACE_INFO, errorString.c_str()));
     }
 
