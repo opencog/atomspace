@@ -71,6 +71,8 @@ cdef class Logger:
     cdef _set_level(self,int lvl):
         self.clog.setLevel(<loglevel>lvl)
     def set_level(self,level_name):
+        if type(level_name) is not str:
+            raise TypeError("Expecting a string")
         level_name = level_name.upper()
         py_byte_string = level_name.encode('UTF-8')
         # create temporary cpp string
