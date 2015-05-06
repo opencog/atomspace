@@ -246,6 +246,14 @@ PythonEval::PythonEval(AtomSpace* atomspace)
     _atomspace = atomspace;
 
     // Initialize Python objects and imports.
+    //
+    // Strange but true: one can use the atomspace, and put atoms
+    // in it .. useing the type constructors and everything (e.g.
+    // the demos in the /examples/python directory) and never ever
+    // actually call global_python_initialize() ... it might never
+    // be called, if the python evaluator (i.e. this object) is
+    // never used or needed.  I thought this was unexpected, so I
+    // mention it here.
     global_python_initialize();
     this->initialize_python_objects_and_imports();
 
