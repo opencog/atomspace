@@ -825,6 +825,7 @@ std::string PythonEval::apply_script(const std::string& script)
     // script had a problem.
     if (errorRunningScript) {
         logger().warn() << errorString;
+        errorString += "\n";
         throw (RuntimeException(TRACE_INFO, errorString.c_str()));
     }
 
@@ -1087,7 +1088,8 @@ void PythonEval::eval_expr(const std::string& partial_expr)
         }
         catch (const RuntimeException &e)
         {
-            _result = e.getMessage() + "\n";
+            _result = e.getMessage();
+            _result += "\n";
         }
         _input_line = "";
     }
