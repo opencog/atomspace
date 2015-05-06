@@ -9,6 +9,10 @@ Example of how to use the pattern matcher to callback into Python.
 from opencog.atomspace import AtomSpace, TruthValue, types, get_type_name
 from opencog.bindlink import satisfaction_link
 from opencog.type_constructors import *
+from opencog.logger import Logger, log
+
+log.set_level('DEBUG')
+log.info("Starting the stop-go demo")
 
 atomspace = AtomSpace()
 set_type_ctor_atomspace(atomspace)
@@ -27,7 +31,6 @@ def stop_go(atom):
 
     elif atom == ConceptNode("red light"):
         print "Got a red light!"
-        increment_red()
         global red
         red += 1
         return TruthValue(0,1)
@@ -37,7 +40,6 @@ def stop_go(atom):
         assert(false)
 
     return TruthValue(0,0)
-
 
 
 satisfaction_handle = SatisfactionLink(
