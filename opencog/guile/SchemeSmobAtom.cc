@@ -163,12 +163,9 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-incoming-set");
 
-	IncomingSet iset = h->getIncomingSet();
-	size_t isz = iset.size();
-	if (0 == isz) return SCM_EOL;
-
 	// This reverses the order of the incoming set, but so what ...
 	SCM head = SCM_EOL;
+	IncomingSet iset = h->getIncomingSet();
 	for (const LinkPtr& l : iset)
 	{
 		SCM smob = handle_to_scm(l->getHandle());
