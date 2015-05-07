@@ -90,6 +90,12 @@ SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
 	PREFIX ""
 	OUTPUT_NAME atomspace)
 
+# The cogserver needs the atomspace pxd file to get the Handle, Atom and
+# AtomSpace defintions.
+INSTALL (FILES
+	atomspace.pxd
+   DESTINATION "include/${PROJECT_NAME}/cython"
+)
 
 ############################## type constructors #####################
 CYTHON_ADD_MODULE_PYX(type_constructors
