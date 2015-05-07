@@ -141,6 +141,7 @@ private:
 
 	// XXX TODO will want a list to allow target selection in the future
 	std::stack<Handle> _targets_stack;
+	UnorderedHandleSet _targets_set;
 	std::vector<Rule> _rules_set;
 
 	// XXX any additional link should be reflected

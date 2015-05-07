@@ -62,6 +62,8 @@ void BackwardChainer::set_target(Handle init_target)
 
 	_targets_stack = std::stack<Handle>();
 	_targets_stack.push(_init_target);
+	_targets_set = UnorderedHandleSet();
+	_targets_set.insert(_init_target);
 }
 
 /**
