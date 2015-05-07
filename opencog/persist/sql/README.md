@@ -199,11 +199,15 @@ Install, Setup and Usage HOWTO
 ==============================
 There are many steps needed to install and use this. Sorry!
 
+07-05-2015: Updated instructions below to be slightly more instructive
+	    and up to date for PostgreSQL 9.3 and Ubuntu 14.04.
+
 Compiling
 ---------
 Download and install UnixODBC devel packages. Run cmake; make.
 Do NOT use IODBC, it fails to support UTF-8.
 
+sudo apt-get install unixodbc-dev
 
 Database Setup
 --------------
@@ -214,7 +218,7 @@ Each step discussed below.
 
 Database Install
 ----------------
-Download and install Postgres version 8.3 or newer.  The current design
+Download and install Postgres version 9.3 or newer.  The current design
 simply won't work with MySQL, because of a lack of array support.
 Same holds true for SQLite.  Sorry. There is some work in the
 code-base to support these other databases, but the work-arounds for
@@ -223,6 +227,7 @@ the missing features are kind-of complicated, and likely to be slow.
 Be sure to install the postgres server, the postgres client, and the
 odbc-postgresql device driver.
 
+sudo apt-get install postgresql-9.3
 
 Device Driver Setup
 -------------------
@@ -231,20 +236,23 @@ contains the stanza below (or something similar).  If it is missing,
 then edit this file (as root) and add the stanza.  Notice that it uses
 the Unicode drivers, and NOT the ANSI (ASCII) drivers.  Opencog uses
 unicode!
+
+sudo gedit /etc/odbcinst.ini &
+
 ```
-    [PostgreSQL]
+    [PostgreSQL Unicode]
     Description = PostgreSQL ODBC driver (Unicode version)
     Driver      = psqlodbcw.so
     Setup       = libodbcpsqlS.so
     Debug       = 0
     CommLog     = 0
 ```
-The above stanza associates the name `PostgreSQL ODBC driver (Unicode
-version)`  with a particular driver. This name is needed for later
-steps.  Notice that this is a really long name, with spaces!  You can
-change the name, (e.g. to shorten it) if you wish, however, it **MUST**
-be consistent with the name given in the `.odbc.ini` file (explained
-below).
+
+The above stanza associates the name `PostgreSQL Unicode` with a particular 
+driver. This name is needed for later steps.  Notice that this is a quite 
+long name, with spaces!  You can change the name, (e.g. to shorten it) if 
+you wish, however, it **MUST** be consistent with the name given in the 
+`.odbc.ini` file (explained below in 'ODBC Setup, Part the Second').
 
 MySQL users need the stanza below; the `/etc/odbcinst.ini` file can
 safely contain multiple stanzas defining other drivers.
@@ -316,37 +324,81 @@ Multiple databases can be created.  In this example, the daatabase
 name will be "mycogdata".  Change this as desired.
 
 So, at the Unix command line:
+
 ```
    $ createdb mycogdata
 ```
+
 If you get an error message `FATAL:  role "<user>" does not exist`, then
-try doing this:
+try doing this, replacing 'alex' with your username.
+
 ```
-   $ su - postgres; createuser <your-unix-username>
+   $ sudo su - postgres
+   $ psql template1
+   template1=# CREATE ROLE alex superuser;
+   template1=# ALTER ROLE alex WITH LOGIN;
+
 ```
-Answer the question (yes, you want to be superuser) and exit. Under
-rare circumstances, you may need to edit `pg_hba.conf`. Google for
-additional help.
+
+Verify that worked out by typing \dg to see:
+
+                             List of roles
+ Role name |                   Attributes                   | Member of 
+-----------+------------------------------------------------+-----------
+ alex      | Superuser                                      | {}
+ postgres  | Superuser, Create role, Create DB, Replication | {}
+
+Then do Ctrl+D to exit, ignoring any message about psql_history, and return to
+your own account:
+
+```
+   $ exit
+```
+
+If you ran into the error above you still need to create the database of
+course (no output if succesful):
+
+```
+   $ createdb mycogdata
+```
 
 Next, create a database user named `opencog_user` with password `cheese`.
 You can pick a different username and password, but it must be consistent
 with the `~/.odbc.ini` file. Do NOT use your unix login password!  Pick
 something else! Create the user at the shell prompt:
+
 ```
    $ psql -c "CREATE USER opencog_user WITH PASSWORD 'cheese'" -d mycogdata
 ```
+
 Check that the above worked, by manually logging in:
+
 ```
    $  psql mycogdata -U opencog_user -W -h localhost
 ```
+
 If you can't login, something up above failed.
 
-Next, create the database tables:
+Navigate to the atomspace folder you cloned from GitHub:
+
+```
+   $  cd ~/atomspace
+```
+
+So we can create the database tables:
+
 ```
    $ cat opencog/persist/sql/atom.sql | psql mycogdata -U opencog_user -W -h localhost
 ```
-Verify that the tables were created. Login as before, then enter `\d`
-at the postgres prompt.  You should see this:
+
+Verify that the tables were created. Login as before:
+
+```
+   $  psql mycogdata -U opencog_user -W -h localhost
+```
+
+Then enter `\d` at the postgres prompt.  You should see this:
+
 ```
     mycogdata=> \d
                   List of relations
@@ -354,21 +406,27 @@ at the postgres prompt.  You should see this:
     --------+-----------+-------+----------------
      public | atoms     | table | opencog_user
      public | global    | table | opencog_user
+     public | spaces    | table | opencog_user
      public | typecodes | table | opencog_user
-    (3 rows)
+    (4 rows)
 ```
+
 If the above doesn't work, go back, and try again.
 
 Verify that `opencog_user` has write permissions to the tables. Do this
 entering the below.
+
 ```
     mycogdata=> INSERT INTO TypeCodes (type, typename) VALUES (97, 'SemanticRelationNode');
 ```
+
 You should see the appropriate respone:
+
 ```
     INSERT 0 1
 ```
-If the above doesn't work, go back, and try again.
+
+If the above doesn't work, go back, and try again. Exit with Ctrl+D.
 
 
 ODBC Setup, Part the Second
@@ -376,9 +434,9 @@ ODBC Setup, Part the Second
 Edit `~/.odbc.ini` in your home directory to add a stanza of the form
 below. You MUST create one of these for EACH repository you plan to
 use! The name of the stanza, and of the database, can be whatever you
-wish. The name given for `Driver`, here `PostgreSQL`, **must** match
-a stanza name in `/etc/odbcinst.ini`.  Failure to have it match will
-cause an error message:
+wish. The name given for `Driver`, here `PostgreSQL Unicode`, **must** 
+match a stanza name in `/etc/odbcinst.ini`.  Failure to have it match 
+will cause an error message:
 
 ```
 Can't perform SQLConnect rc=-1(0) [unixODBC][Driver Manager]Data source name not found, and no default driver specified
@@ -394,10 +452,14 @@ Pay special attention to the name given for the `Database`.  This should
 correspond to a database created with postgres. In the examples above,
 it was `mycogdata`.
 
+IMPORTANT: MAKE SURE THERE ARE NO SPACES AT THE START OF EVERY LINE!
+           IF YOU COPY PASTE THE TEXT BELOW YOU WILL HAVE SPACES!
+           REMOVE THEM! OR YOU WILL ALSO GET THE ERROR ABOVE!
+
 ```
    [mycogdata]
    Description       = My Favorite Database
-   Driver            = PostgreSQL
+   Driver            = PostgreSQL Unicode
    Trace             = No
    TraceFile         =
    Database          = mycogdata
@@ -415,27 +477,38 @@ it was `mycogdata`.
 
 Opencog Setup
 -------------
-Edit `lib/opencog.conf` and set the `STORAGE`, `STORAGE_USERNAME` and
-`STORAGE_PASSWD` there to the same values as in `~/.odbc.ini`.  Better
-yet, copy lib/opencog.conf to your build directory, edit the copy, and
-start the opencog server as:
+Edit `~/opencog/build/lib/opencog.conf` and set the `STORAGE`, 
+`STORAGE_USERNAME` and `STORAGE_PASSWD` there to the same values as 
+in `~/.odbc.ini`. 
+
+```
+STORAGE               = "mycogdata"
+STORAGE_USERNAME      = "opencog_user"
+STORAGE_PASSWD        = "cheese"
+```
+
+Or copy lib/opencog.conf to your build directory, edit the copy, and
+start the opencog server from your build folder as:
 
 ```
    $ ./opencog/server/cogserver -c my.conf
 ```
 
-Verify that everything works. Start the cogserver, and bulk-save:
+Verify that everything works. Start the cogserver, and bulk-save. 
+(Actually this didn't work for me, I had to do sql-open before sql-store
+worked, as shown below, even though my opencog.conf was correct and when
+using a custom my.conf file.)
 
 ```
    $ telnet localhost 17001
    opencog> sql-store
 ```
 
-Some output should be printed in the cogserver window:
+Some output should be printed in the COGSERVER window:
 
 ```
-   Max UUID is 278
-   Finished storing 277 atoms total.
+   Max UUID is 57
+   Finished storing 55 atoms total.
 ```
 
 The typical nuber of atoms stored will differ from this.
