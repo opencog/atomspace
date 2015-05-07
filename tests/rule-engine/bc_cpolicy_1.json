@@ -1,0 +1,20 @@
+{
+	"rules": 
+	[
+		{
+			"name": "pln-rule-modus-ponens",
+			"file_path": "tests/rule-engine/bc-modus-ponens.scm",
+			"priority": 1,
+			"mutex": 
+			[
+				
+			],
+
+			"category": "PLN"
+		}
+	],
+
+	"attention_allocation": false,
+	"max_iter": 20,
+	"log_level": "debug"
+}

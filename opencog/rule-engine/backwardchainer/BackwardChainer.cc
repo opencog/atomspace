@@ -67,18 +67,17 @@ void BackwardChainer::set_target(Handle init_target)
 /**
  * The public entry point for full backward chaining.
  */
-void BackwardChainer::do_full_chain()
+void BackwardChainer::do_full_chain(uint max_steps)
 {
-	int i = 0;
+	uint i = 0;
 
 	while (not _targets_stack.empty())
 	{
-		do_step();
-
-		i++;
-		// debug quit
-		if (i == 20)
+		if (max_steps != 0 && i >= max_steps)
 			break;
+
+		do_step();
+		i++;
 	}
 }
 
