@@ -1046,9 +1046,7 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
 
 void PythonEval::eval_expr(const std::string& partial_expr)
 {
-    if (partial_expr == "\n")
-        logger().info("[PythonEval] eval_expr: '\\n'");
-    else
+    if (partial_expr != "\n")
         logger().info("[PythonEval] eval_expr:\n%s\n", partial_expr.c_str());
 
     _result = "";
