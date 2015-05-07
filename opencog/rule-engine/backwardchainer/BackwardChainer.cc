@@ -215,7 +215,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		logger().debug("[BackwardChainer] Reverse grounded as "
 		               + himplicant->toShortString());
 
-		// Find all matching premises
+		// Find all matching premises matching the implicant
 		std::vector<VarMap> vmap_list;
 		HandleSeq possible_premises =
 			match_knowledge_base(himplicant, hvardecl, false, vmap_list);
@@ -234,8 +234,12 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 			logger().debug("Checking permises " + h->toShortString());
 
 			bool need_bc = false;
+
+			// use pattern matcher to try to ground the variables in the
+			// selected premises
 			HandleSeq grounded_premises = ground_premises(h, vmap_list);
 
+			// matched nothing? need to backward chain on this premise
 			if (grounded_premises.size() == 0)
 				need_bc = true;
 
@@ -259,7 +263,12 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 				}
 
 				// This is a grounding that can solve the goal, so apply it
-				// and add it to _as since this is not garbage
+				// by using the mapping to ground the goal target, and add
+				// it to _as since this is not garbage
+				//
+				// XXX TODO this is not really applying the rule since other
+				// unrelated output of the rule are not added to the
+				// atomspace; might need to do something with "HandleSeq outputs"
 				Instantiator inst(_as);
 				inst.instantiate(hgoal, m);
 
@@ -389,9 +398,11 @@ std::vector<Rule> BackwardChainer::filter_rules(Handle htarget)
  *
  * @param htarget          the atom to pattern match against
  * @param htarget_vardecl  the typed VariableList of the variables in htarget
+ * @param check_history    flag to indicate whether to match stuff in history
  * @param vmap             an output list of mapping for variables in htarget
- *
  * @return                 a vector of matched atoms
+ *
+ * XXX TODO double check the check_history usage is a good idea or not
  */
 HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
                                                 Handle htarget_vardecl,
@@ -492,6 +503,13 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
 	return results;
 }
 
+/**
+ * Try to ground any free variables in the input target.
+ *
+ * @param htarget  the input atom to be grounded
+ * @param vmap     the output mapping of the variables
+ * @return         the mapping of the target
+ */
 HandleSeq BackwardChainer::ground_premises(const Handle& htarget,
                                            std::vector<VarMap>& vmap)
 {
@@ -611,11 +629,8 @@ bool BackwardChainer::unify(const Handle& htarget,
 		logger().debug("[BackwardChainer] unified temp "
 		               + var->toShortString() + " to " + grn->toShortString());
 
-		// XXX FIXME multiple atomspace is fubar here, it should be
-		// possible to do _garbage_superspace->getAtom(var), but it is
-		// returning Handle::UNDEFINED!!!  so using addAtom instead
-		result[_garbage_superspace->addAtom(var)] =
-			_garbage_superspace->addAtom(grn);
+		result[_garbage_superspace->getAtom(var)] =
+			_garbage_superspace->getAtom(grn);
 	}
 
 	return true;

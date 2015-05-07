@@ -79,9 +79,10 @@ typedef std::map<Handle, Handle> VarMap;
  * Anatomy of current implementation
  * =================================
  *
- * 1. First check if it matches to something in the knowledge base already
+ * 1. First check if the target matches to something in the knowledge base
+ *    already
  *
- * 2. If not, choose a inference Rule R (using some Rule selection criteria)
+ * 2. If not, choose an inference Rule R (using some Rule selection criteria)
  *    whose output can unify to the target
  *
  * 3. Reverse ground R's input to restrict the permises search
@@ -89,8 +90,8 @@ typedef std::map<Handle, Handle> VarMap;
  * 4. Find all permises that matches the restricted R's input by Pattern
  *    Matching
  *
- * 5. For each set of permies, Forward Chain (or Pattern Matcher) on the R
- *    to see if it can solve the target.
+ * 5. For each set of permies, Forward Chain (a.k.a apply the rule, or
+ *    Pattern Matching) on the R to see if it can solve the target.
  *
  * 6. If not, add the permises to the targets list (in addition to some
  *    permise selection criteria)
