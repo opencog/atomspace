@@ -16,6 +16,7 @@ INSTALL (FILES
 	opencog/persist.scm
 	opencog/persist-sql.scm
 	opencog/query.scm
+	opencog/rule-engine.scm
 	DESTINATION "${DATADIR}/scm/opencog"
 )
 # No CMakeLists.txt in dir:
