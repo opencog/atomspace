@@ -1,5 +1,5 @@
 ;
-; OpenCog Pattern matcher module
+; OpenCog Rule Engine module
 ;
 
 (define-module (opencog rule-engine))

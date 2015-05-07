@@ -35,7 +35,7 @@ using namespace opencog;
 
 InferenceSCM::InferenceSCM()
 {
-	static bool is_init = false;
+    static bool is_init = false;
     if (is_init) return;
     is_init = true;
     scm_with_guile(init_in_guile, this);
@@ -51,7 +51,7 @@ InferenceSCM::InferenceSCM()
  */
 void* InferenceSCM::init_in_guile(void* self)
 {
-	scm_c_define_module("opencog rule-engine", init_in_module, self);
+    scm_c_define_module("opencog rule-engine", init_in_module, self);
     scm_c_use_module("opencog rule-engine");
     return NULL;
 }
@@ -63,7 +63,7 @@ void* InferenceSCM::init_in_guile(void* self)
  */
 void InferenceSCM::init_in_module(void* data)
 {
-	InferenceSCM* self = (InferenceSCM*) data;
+    InferenceSCM* self = (InferenceSCM*) data;
     self->init();
 }
 
