@@ -63,18 +63,83 @@ using namespace opencog;
 
 static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
 {
-    PROJECT_BINARY_DIR"/opencog/cython", // bindings
-    PROJECT_SOURCE_DIR"/opencog/python", // opencog modules written in python
-    PROJECT_SOURCE_DIR"/tests/cython",   // for testing
     DATADIR"/python",                    // install directory
     #ifndef WIN32
     "/usr/local/share/opencog/python",
     "/usr/share/opencog/python",
     #endif // !WIN32
-    ".",
     NULL
 };
 
+static const char* PROJECT_PYTHON_MODULE_PATHS[] =
+{
+    PROJECT_BINARY_DIR"/opencog/cython", // bindings
+    PROJECT_SOURCE_DIR"/opencog/python", // opencog modules written in python
+    PROJECT_SOURCE_DIR"/tests/cython",   // for testing
+    NULL
+};
+
+// Weird hack to work-around nutty python behavior.  Python sucks.
+// I spent three effing 12 hour-days tracking this down. Cython sucks.
+// The python bug this is working around is this: python does not
+// know how to load modules unless there is an __init__.py in the
+// directory. However, once it finds this, then it stops looking,
+// and just assumes that everything is in that directory. Of course,
+// this is a bad assumption: python modules can be in a variety of
+// directories. In particular, they can be in the local build
+// directories.  If we put the local build directories in the search
+// path first, then the modules are found. But if we then install this
+// code into the system (i.e. into /usr or /usr/local) then python will
+// still look in these build directories, even though they are bogus
+// when the system version is installed. This, of course, results in the
+// build directories "hiding" the install directories, causing only
+// some, but not all of the modules to be found. This ends up being
+// terribly confusing, because you get "ImportError: No module named
+// blah" errors, even though you can be staring the module right in the
+// face, and there it is!
+//
+// So the ugly work-around implemented here is this: If code is
+// executing in the project source or project build directories, then
+// add the project source and build directories to the search path, and
+// place them first, so that they are searched before the system
+// directories. Otherwise, do not search the build directories.
+// This is just plain fucked up, but I cannot find a better solution.
+static const char** get_module_paths()
+{
+    unsigned nproj = sizeof(PROJECT_PYTHON_MODULE_PATHS) / sizeof(char**);
+    unsigned ndefp = sizeof(DEFAULT_PYTHON_MODULE_PATHS) / sizeof(char**);
+    // static const char* paths[ndefp + nproj];
+    static const char* paths[
+        (sizeof(DEFAULT_PYTHON_MODULE_PATHS) / sizeof(char**)) +
+        (sizeof(PROJECT_PYTHON_MODULE_PATHS) / sizeof(char**))];
+
+    // Get current working directory.
+    char* cwd = getcwd(NULL, 0);
+    bool in_project = false;
+    if (0 == strncmp(PROJECT_SOURCE_DIR, cwd, sizeof(PROJECT_SOURCE_DIR)) or
+        0 == strncmp(PROJECT_BINARY_DIR, cwd, sizeof(PROJECT_BINARY_DIR)))
+        in_project = true;
+    free(cwd);
+
+    // The the currrent working directory is the projet build or source
+    // directory, then search those first.
+    int ip=0;
+    if (in_project) {
+        for (unsigned i=0; i < nproj-1; i++) {
+            paths[ip] = PROJECT_PYTHON_MODULE_PATHS[i];
+            ip++;
+        }
+    }
+
+    // Search the usual locations next.
+    for (unsigned i=0; i < ndefp-1; i++) {
+        paths[ip] = DEFAULT_PYTHON_MODULE_PATHS[i];
+        ip++;
+    }
+    paths[ip] = NULL;
+
+    return paths;
+}
 
 PythonEval* PythonEval::singletonInstance = NULL;
 
@@ -142,7 +207,7 @@ void opencog::global_python_initialize()
     PyObject* pySysPath = PySys_GetObject((char*)"path");
 
     // Add default OpenCog module directories to the Python interprator's path.
-    const char** config_paths = DEFAULT_PYTHON_MODULE_PATHS;
+    const char** config_paths = get_module_paths();
     for (int i = 0; config_paths[i] != NULL; ++i) {
         boost::filesystem::path modulePath(config_paths[i]);
         if (boost::filesystem::exists(modulePath)) {
@@ -999,7 +1064,7 @@ void PythonEval::add_modules_from_path(std::string pathString)
     }
 
     bool did_load = false;
-    const char** config_paths = DEFAULT_PYTHON_MODULE_PATHS;
+    const char** config_paths = get_module_paths();
     for (int i = 0; config_paths[i] != NULL; ++i) {
         std::string abspath = config_paths[i];
         abspath += "/";

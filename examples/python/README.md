@@ -9,6 +9,23 @@ suffice:
 export PYTHONPATH=$PYTHONPATH:/usr/local/share/opencog/python
 ```
 
+The opencog atomspace cython modules are installed here:
+```
+/usr/local/share/opencog/python/opencog
+```
+
+From the python prompt, the following should list the python
+opencog modules:
+```
+help('opencog')
+```
+The contents of a single module can be viewed by saying, for example:
+```
+import opencog.atomspace
+print dir(opencog.atomspace)
+```
+
+
 ## create_atoms_by_type, create_atoms_simple
 
 Simple examples of how to create atoms in an atomspace.
