@@ -195,4 +195,3 @@ cdef extern from "opencog/atomutils/AtomUtils.h" namespace "opencog":
     #
     cdef vector[cHandle] c_get_predicates "get_predicates" (cHandle& target, Type t, bint subclass)
     cdef vector[cHandle] c_get_predicates_for "get_predicates_for" (cHandle& target, cHandle& predicate)
-

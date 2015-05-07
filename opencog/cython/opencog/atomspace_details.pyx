@@ -33,7 +33,6 @@ cdef AtomSpace_factory(cAtomSpace *to_wrap):
 cdef class AtomSpace:
     # these are defined in atomspace.pxd:
     #cdef cAtomSpace *atomspace
-    #cdef cTimeServer *timeserver
     #cdef bint owns_atomspace
 
     # TODO how do we do a copy constructor that shares the AtomSpaceImpl?
