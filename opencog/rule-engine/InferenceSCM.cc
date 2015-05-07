@@ -2,6 +2,7 @@
  * InferenceSCM.cc
  *
  * Copyright (C) 2014 Misgana Bayetta
+ * Copyright (C) 2015 OpenCog Foundation
  *
  * Author: Misgana Bayetta <misgana.bayetta@gmail.com>  Sept 2014
  *
@@ -20,6 +21,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #include "InferenceSCM.h"
 
 #include <opencog/guile/SchemePrimitive.h>
@@ -31,30 +33,49 @@
 
 using namespace opencog;
 
-InferenceSCM* InferenceSCM::_inst = NULL;
-
 InferenceSCM::InferenceSCM()
 {
-    if (NULL == _inst) {
-        _inst = this;
-        init();
-    }
+    static bool is_init = false;
+    if (is_init) return;
+    is_init = true;
+    scm_with_guile(init_in_guile, this);
 }
 
-InferenceSCM::~InferenceSCM()
+/**
+ * Init function for using with scm_with_guile.
+ *
+ * Creates the scheme module and uses it by default.
+ *
+ * @param self   pointer to the InferenceSCM object
+ * @return       null
+ */
+void* InferenceSCM::init_in_guile(void* self)
 {
-
+    scm_c_define_module("opencog rule-engine", init_in_module, self);
+    scm_c_use_module("opencog rule-engine");
+    return NULL;
 }
+
+/**
+ * The main function for defining stuff in the scheme module.
+ *
+ * @param data   pointer to the InferenceSCM object
+ */
+void InferenceSCM::init_in_module(void* data)
+{
+    InferenceSCM* self = (InferenceSCM*) data;
+    self->init();
+}
+
 
 void InferenceSCM::init(void)
 {
-    _inst = new InferenceSCM();
 #ifdef HAVE_GUILE
     //all commands for invoking the rule engine from scm shell should be declared here
     define_scheme_primitive("cog-fc", &InferenceSCM::do_forward_chaining,
-                            _inst); //eg. from scm shell (cog-fc (InheritanceLink (ConceptNode "cat")(ConceptNode "animal"))
+                            this, "rule-engine");
     define_scheme_primitive("cog-bc", &InferenceSCM::do_backward_chaining,
-                            _inst); //backward chaining
+                            this, "rule-engine");
 #endif
 }
 
@@ -98,7 +119,6 @@ Handle InferenceSCM::do_backward_chaining(Handle h)
     cpolicy_loader.load_config();
 
     std::vector<Rule> rules;
-
     for (Rule* pr : cpolicy_loader.get_rules())
         rules.push_back(*pr);
 
@@ -125,4 +145,10 @@ Handle InferenceSCM::do_backward_chaining(Handle h)
 #else
     return Handle::UNDEFINED;
 #endif
+}
+
+
+void opencog_ruleengine_init(void)
+{
+    static InferenceSCM inference;
 }

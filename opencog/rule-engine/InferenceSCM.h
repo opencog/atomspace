@@ -2,6 +2,7 @@
  * InferenceSCM.h
  *
  * Copyright (C) 2014 Misgana Bayetta
+ * Copyright (C) 2015 OpenCog Foundation
  *
  * Author: Misgana Bayetta <misgana.bayetta@gmail.com>  Sept 2014
  *
@@ -20,17 +21,22 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef CHAINERSCM_H_
-#define CHAINERSCM_H_
+
+#ifndef _OPENCOG_INFERENCE_SCM_H
+#define _OPENCOG_INFERENCE_SCM_H
 
 #include <opencog/atomspace/Handle.h>
 
 namespace opencog {
 
-class InferenceSCM {
+class InferenceSCM
+{
 private:
-	static InferenceSCM* _inst;
+	static void* init_in_guile(void*);
+	static void init_in_module(void*);
+
 	void init(void);
+
 	Handle do_forward_chaining(Handle h);
 	/**
 	 * @return a handle to a ListLink  of ListLinks holding a variable followed by all grounding nodes.
@@ -38,7 +44,12 @@ private:
 	Handle do_backward_chaining(Handle h);
 public:
 	InferenceSCM();
-	virtual ~InferenceSCM();
 };
+
 } /*end of namespace opencog*/
-#endif /* CHAINERSCM_H_ */
+
+extern "C" {
+void opencog_ruleengine_init(void);
+};
+
+#endif /* _OPENCOG_INFERENCE_SCM_H */
