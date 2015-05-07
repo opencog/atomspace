@@ -123,6 +123,12 @@ void opencog::global_python_initialize()
         // Initialize Python (InitThreads grabs GIL implicitly)
         Py_InitializeEx(NO_SIGNAL_HANDLERS);
         PyEval_InitThreads();
+
+        // Many python libraries (e.g. ROS) expect sys.argv to be set.
+        // So, avoid the error print, and let them know who we are.
+        // We must do this *before* the module pre-loading, done below.
+        static const char *argv0 = "cogserver";
+        PySys_SetArgv(1, (char **) &argv0);
     }
 
     logger().debug("[global_python_initialize] Adding OpenCog sys.path "
