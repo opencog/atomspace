@@ -6,20 +6,6 @@
  *         Curtis Faith <curtis.m.faith@gmail.com>
  * @date 2011-09-20
  *
- * @todo When can we remove the singleton instance?
- *
- * NOTE: The Python C API reference counting is very tricky and the
- * API inconsistently handles PyObject* object ownership.
- * DO NOT change the reference count calls below using Py_INCREF
- * and the corresponding Py_DECREF until you completely understand
- * the Python API concepts of "borrowed" and "stolen" references.
- * Make absolutely NO assumptions about the type of reference the API
- * will return. Instead, verify if it returns a "new" or "borrowed"
- * reference. When you pass PyObject* objects to the API, don't assume
- * you still need to decrement the reference count until you verify
- * that the exact API call you are making does not "steal" the
- * reference: SEE: https://docs.python.org/2/c-api/intro.html?highlight=steals#reference-count-details
- * Remember to look to verify the behavior of each and every Py_ API call.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -60,6 +46,36 @@ using namespace opencog;
 //#define DPRINTF printf
 #define DPRINTF(...)
 
+PythonEval* PythonEval::singletonInstance = NULL;
+
+const int NO_SIGNAL_HANDLERS = 0;
+const char* NO_FUNCTION_NAME = NULL;
+const int SIMPLE_STRING_SUCCESS = 0;
+const int SIMPLE_STRING_FAILURE = -1;
+const int MISSING_FUNC_CODE = -1;
+
+// The Python functions can't take const flags.
+#define NO_COMPILER_FLAGS NULL
+
+static bool already_initialized = false;
+static bool initialized_outside_opencog = false;
+
+/*
+ * @todo When can we remove the singleton instance?
+ *
+ * NOTE: The Python C API reference counting is very tricky and the
+ * API inconsistently handles PyObject* object ownership.
+ * DO NOT change the reference count calls below using Py_INCREF
+ * and the corresponding Py_DECREF until you completely understand
+ * the Python API concepts of "borrowed" and "stolen" references.
+ * Make absolutely NO assumptions about the type of reference the API
+ * will return. Instead, verify if it returns a "new" or "borrowed"
+ * reference. When you pass PyObject* objects to the API, don't assume
+ * you still need to decrement the reference count until you verify
+ * that the exact API call you are making does not "steal" the
+ * reference: SEE: https://docs.python.org/2/c-api/intro.html?highlight=steals#reference-count-details
+ * Remember to look to verify the behavior of each and every Py_ API call.
+ */
 
 static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
 {
@@ -141,19 +157,107 @@ static const char** get_module_paths()
     return paths;
 }
 
-PythonEval* PythonEval::singletonInstance = NULL;
 
-const int NO_SIGNAL_HANDLERS = 0;
-const char* NO_FUNCTION_NAME = NULL;
-const int SIMPLE_STRING_SUCCESS = 0;
-const int SIMPLE_STRING_FAILURE = -1;
-const int MISSING_FUNC_CODE = -1;
+/**
+ * Ongoing python nuttiness. Because we never know in advance whether
+ * python will be able to find a module or not, until it actually does,
+ * we have to proceed by trial and error, trying different path
+ * combinations, until it finally works.  The sequence of paths
+ * that leads to success will then be delcared the official system
+ * path, henceforth. Woe unto those try to defy the will of the python
+ * gods.
+ *
+ * Return true if the load worked, else return false.
+ */
+static bool try_to_load_modules(const char ** config_paths)
+{
+    PyObject* pySysPath = PySys_GetObject((char*)"path");
 
-// The Python functions can't take const flags.
-#define NO_COMPILER_FLAGS NULL
+    // Add default OpenCog module directories to the Python interprator's path.
+    for (int i = 0; config_paths[i] != NULL; ++i)
+    {
+        struct stat finfo;
+        stat(config_paths[i], &finfo);
 
-static bool already_initialized = false;
-static bool initialized_outside_opencog = false;
+        if (S_ISDIR(finfo.st_mode))
+        {
+            PyObject* pyModulePath = PyBytes_FromString(config_paths[i]);
+            PyList_Append(pySysPath, pyModulePath);
+            Py_DECREF(pyModulePath);
+        }
+    }
+
+    // Add custom paths for python modules from the config file.
+    if (config().has("PYTHON_EXTENSION_DIRS"))
+    {
+        std::vector<string> pythonpaths;
+        // For debugging current path
+        tokenize(config()["PYTHON_EXTENSION_DIRS"],
+                std::back_inserter(pythonpaths), ", ");
+
+        for (std::vector<string>::const_iterator it = pythonpaths.begin();
+             it != pythonpaths.end(); ++it)
+        {
+            struct stat finfo;
+            stat(it->c_str(), &finfo);
+            if (S_ISDIR(finfo.st_mode))
+            {
+                PyObject* pyModulePath = PyBytes_FromString(it->c_str());
+                PyList_Append(pySysPath, pyModulePath);
+                Py_DECREF(pyModulePath);
+            } else {
+                logger().warn("%s: "
+                    "Could not find custom python extension directory: %s ",
+                    __FUNCTION__, it->c_str() );
+            }
+        }
+    }
+
+    // NOTE: Can't use get_path_as_string() yet because it is defined in a
+    // Cython api which we can't import unless the sys.path is correct. So
+    // we'll write it out before the imports below to aid in debugging.
+    if (logger().isDebugEnabled())
+    {
+        logger().debug("Python 'sys.path' after OpenCog config adds is:");
+        Py_ssize_t pathSize = PyList_Size(pySysPath);
+        for (int i = 0; i < pathSize; i++)
+        {
+            PyObject* pySysPathLine = PyList_GetItem(pySysPath, i);
+            const char* sysPathCString = PyString_AsString(pySysPathLine);
+            logger().debug("    %2d > %s", i, sysPathCString);
+            // NOTE: PyList_GetItem returns borrowed reference so don't do this:
+            // Py_DECREF(pySysPathLine);
+        }
+    }
+
+    // Initialize the auto-generated Cython api. Do this AFTER the python
+    // sys.path is updated so the imports can find the cython modules.
+    import_opencog__atomspace();
+
+    // The import_opencog__atomspace() call above sets the
+    // py_atomspace() function pointer if the cython module load
+    // succeeded. But the function pointer will be NULL if the
+    // opencopg.atomspace cython module failed to load. Avert
+    // a hard-to-debug crash on null-pointer-deref, and replace
+    // it by a hard-to-debug error message.
+    if (NULL == py_atomspace) {
+        PyErr_Print();
+        logger().warn("PythonEval::%s Failed to load the "
+                       "opencog.atomspace module", __FUNCTION__);
+    }
+
+    // Now we can use get_path_as_string() to get 'sys.path'
+    // But only if import_opencog__atomspace() suceeded without error.
+    // When it fails, it fails silently, leaving get_path_as_string with
+    // a NULL PLT/GOT entry
+    if (NULL != get_path_as_string)
+        logger().info("Python 'sys.path' after OpenCog config adds is: " +
+               get_path_as_string());
+
+    // NOTE: PySys_GetObject returns a borrowed reference so don't do this:
+    // Py_DECREF(pySysPath);
+    return (NULL != py_atomspace);
+}
 
 void opencog::global_python_initialize()
 {
@@ -204,83 +308,13 @@ void opencog::global_python_initialize()
                 "import sys\n"
                 "import StringIO\n"
                 );
-    PyObject* pySysPath = PySys_GetObject((char*)"path");
 
     // Add default OpenCog module directories to the Python interprator's path.
-    const char** config_paths = get_module_paths();
-    for (int i = 0; config_paths[i] != NULL; ++i) {
-        boost::filesystem::path modulePath(config_paths[i]);
-        if (boost::filesystem::exists(modulePath)) {
-            const char* modulePathCString = modulePath.string().c_str();
-            PyObject* pyModulePath = PyBytes_FromString(modulePathCString);
-            PyList_Append(pySysPath, pyModulePath);
-            Py_DECREF(pyModulePath);
-        }
-    }
+    try_to_load_modules(get_module_paths());
 
-    // Add custom paths for python modules from the config file.
-    if (config().has("PYTHON_EXTENSION_DIRS")) {
-        std::vector<string> pythonpaths;
-        // For debugging current path
-        tokenize(config()["PYTHON_EXTENSION_DIRS"],
-                std::back_inserter(pythonpaths), ", ");
-        for (std::vector<string>::const_iterator it = pythonpaths.begin();
-             it != pythonpaths.end(); ++it) {
-            boost::filesystem::path modulePath(*it);
-            if (boost::filesystem::exists(modulePath)) {
-                const char* modulePathCString = modulePath.string().c_str();
-                PyObject* pyModulePath = PyBytes_FromString(modulePathCString);
-                PyList_Append(pySysPath, pyModulePath);
-                Py_DECREF(pyModulePath);
-            } else {
-                logger().warn("PythonEval::%s Could not find custom python"
-                        " extension directory: %s ",
-                        __FUNCTION__, (*it).c_str() );
-            }
-        }
-    }
-
-    // NOTE: Can't use get_path_as_string() yet because it is defined in a
-    // Cython api which we can't import unless the sys.path is correct. So
-    // we'll write it out before the imports below to aid in debugging.
-    if (logger().isDebugEnabled()) {
-        logger().debug("Python 'sys.path' after OpenCog config adds is:");
-        Py_ssize_t pathSize = PyList_Size(pySysPath);
-        for (int pathIndex = 0; pathIndex < pathSize; pathIndex++) {
-            PyObject* pySysPathLine = PyList_GetItem(pySysPath, pathIndex);
-            const char* sysPathCString = PyString_AsString(pySysPathLine);
-            logger().debug("    %2d > %s", pathIndex, sysPathCString);
-            // NOTE: PyList_GetItem returns borrowed reference so don't do this:
-            // Py_DECREF(pySysPathLine);
-        }
-    }
-
-    // Initialize the auto-generated Cython api. Do this AFTER the python
-    // sys.path is updated so the imports can find the cython modules.
-    import_opencog__atomspace();
-
-    // The import_opencog__atomspace() call above sets the
-    // py_atomspace() function pointer if the cython module load
-    // succeeded. But the function pointer will be NULL if the
-    // opencopg.atomspace cython module failed to load. Avert
-    // a hard-to-debug crash on null-pointer-deref, and replace
-    // it by a hard-to-debug error message.
-    if (NULL == py_atomspace) {
-        PyErr_Print();
-        logger().error("PythonEval::%s Failed to load the "
-                       "opencog.atomspace module", __FUNCTION__);
-    }
-
-    // Now we can use get_path_as_string() to get 'sys.path'
-    // But only if import_opencog__atomspace() suceeded without error.
-    // When it fails, it fails silently, leaving get_path_as_string with
-    // a NULL PLT/GOT entry
-    if (NULL != get_path_as_string)
-        logger().info("Python 'sys.path' after OpenCog config adds is: " +
-               get_path_as_string());
-
-    // NOTE: PySys_GetObject returns a borrowed reference so don't do this:
-    // Py_DECREF(pySysPath);
+    // Hmm. If the above returned false, we should try a different
+    // permuation of the config paths.  I'm confused, though, different
+    // users are reporting conflicting symptoms.  What to do?
 
     // Release the GIL, otherwise the Python shell hangs on startup.
     if (initialized_outside_opencog)
@@ -442,8 +476,8 @@ PyObject* PythonEval::atomspace_py_object(AtomSpace* atomspace)
     // a hard-to-debug crash on null-pointer-deref, and replace
     // it by a hard-to-debug error message.
     if (NULL == py_atomspace) {
-        logger().error("PythonEval::%s Failed to load"
-                       "the opencog.atomspace module", __FUNCTION__);
+        logger().error("PythonEval::%s Failed to load the"
+                       "opencog.atomspace module", __FUNCTION__);
         return NULL;
     }
 
