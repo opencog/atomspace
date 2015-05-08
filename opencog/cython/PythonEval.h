@@ -117,6 +117,7 @@ class PythonEval : public GenericEval
         std::map <std::string, PyObject*> _modules;
 
         std::string _result;
+        int _paren_count;
 
     public:
         PythonEval(AtomSpace* atomspace);
