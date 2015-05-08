@@ -70,6 +70,9 @@ class PMCGroundings : public PatternMatchCallback
 		bool post_link_match(const LinkPtr& link1, const LinkPtr& link2) {
 			return _cb.post_link_match(link1, link2);
 		}
+		bool fuzzy_match(const Handle& h1, const Handle& h2) {
+			return _cb.fuzzy_match(h1, h2);
+		}
 		bool evaluate_sentence(const Handle& link_h,
 		                       const std::map<Handle, Handle> &gnds) {
 			throw InvalidParamException(TRACE_INFO,
@@ -404,3 +407,4 @@ bool SatisfactionLink::satisfy(PatternMatchCallback& pmcb) const
 }
 
 /* ===================== END OF FILE ===================== */
+

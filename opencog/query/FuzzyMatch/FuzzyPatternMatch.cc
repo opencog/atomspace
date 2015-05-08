@@ -21,41 +21,47 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/bind/SatisfactionLink.h>
+
 #include "FuzzyPatternMatchCB.h"
 #include "FuzzyPatternMatch.h"
 
 using namespace opencog;
 
+//#define DEBUG
+
 /**
  * Implement the "cog-fuzzy-match" scheme primitive.
+ * It uses the Pattern Matcher to find hypergraphs in the atomspace that are
+ * similar to the query hypergraph, and returns the most similar ones.
  *
- * Use Pattern Matcher to find the candidates, estimate the similarity by
- * computing the edit distance for each of the candidate, eventually return one
- * or more of the candidates that are the most similar to the query hypergraph.
- *
- * @param hg  The query hypergraph
+ * @param hp  The query hypergraph
  * @return    One or more similar hypergraphs
  */
-Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hg)
+Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp)
 {
 #ifdef HAVE_GUILE
     FuzzyPatternMatchCB fpmcb(as);
 
     HandleSeq terms;
-    terms.push_back(hg);
+    terms.push_back(hp);
 
     std::set<Handle> no_vars;
 
     SatisfactionLinkPtr slp(createSatisfactionLink(no_vars, terms));
     slp->satisfy(fpmcb);
 
+#ifdef DEBUG
+    std::cout << "\n---------- solns ----------\n";
+    for (Handle h : fpmcb.solns) std::cout << h->toShortString();
+#endif
+
     // The result_list contains a list of the grounded expressions.
     // Turn it into a true list, and return it.
-    Handle gl = as->addLink(LIST_LINK,  fpmcb.solns);
+    Handle gl = as->addLink(LIST_LINK, fpmcb.solns);
     return gl;
 #else
     return Handle::UNDEFINED;
 #endif
 }
+
