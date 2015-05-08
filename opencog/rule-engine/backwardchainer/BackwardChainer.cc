@@ -133,6 +133,14 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		return VarMultimap();
 	}
 
+	// Check whether this goal is a virtual link and is useless to explore
+	if (classserver().isA(hgoal->getType(), VIRTUAL_LINK))
+	{
+		logger().debug("[BackwardChainer] Boring virtual link goal, "
+		               "skipping " + hgoal->toShortString());
+		return VarMultimap();
+	}
+
 	std::vector<VarMap> kb_vmap;
 
 	// Else, either try to ground, or backward chain
@@ -594,12 +602,12 @@ bool BackwardChainer::unify(const Handle& htarget,
 
 	sl->satisfy(bcpm);
 
+	logger().debug("[BackwardChainer] unify found %d mapping",
+	               bcpm.get_var_list().size());
+
 	// if no grounding
 	if (bcpm.get_var_list().size() == 0)
 		return false;
-
-	logger().debug("[BackwardChainer] unify found %d mapping",
-	               bcpm.get_var_list().size());
 
 	std::vector<std::map<Handle, Handle>> pred_list = bcpm.get_pred_list();
 	std::vector<std::map<Handle, Handle>> var_list = bcpm.get_var_list();
@@ -626,9 +634,6 @@ bool BackwardChainer::unify(const Handle& htarget,
 	{
 		Handle var = p.first;
 		Handle grn = p.second;
-
-		logger().debug("[BackwardChainer] unified temp "
-		               + var->toShortString() + " to " + grn->toShortString());
 
 		result[_garbage_superspace->getAtom(var)] =
 			_garbage_superspace->getAtom(grn);
