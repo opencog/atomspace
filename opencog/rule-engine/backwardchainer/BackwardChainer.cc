@@ -60,8 +60,8 @@ void BackwardChainer::set_target(Handle init_target)
 
 	_inference_history.clear();
 
-	_targets_stack = std::stack<Handle>();
-	_targets_stack.push(_init_target);
+	_targets_set = UnorderedHandleSet();
+	_targets_set.insert(_init_target);
 }
 
 /**
@@ -71,10 +71,13 @@ void BackwardChainer::do_full_chain(uint max_steps)
 {
 	uint i = 0;
 
-	while (not _targets_stack.empty())
+	while (not _targets_set.empty())
 	{
 		if (max_steps != 0 && i >= max_steps)
+		{
+			logger().debug("[BackwardChainer] Stopping from reaching max steps");
 			break;
+		}
 
 		do_step();
 		i++;
@@ -86,16 +89,14 @@ void BackwardChainer::do_full_chain(uint max_steps)
  */
 void BackwardChainer::do_step()
 {
-	// XXX TODO targets selection should be done here, by first changing
-	// the stack to other data types
-
-	Handle top = _targets_stack.top();
-	_targets_stack.pop();
+	// XXX TODO do proper target selection here using some fitness function
+	Handle selected_target = rand_element(_targets_set);
+	_targets_set.erase(selected_target);
 
 	logger().debug("[BackwardChainer] Before do_step_bc");
 
-	VarMultimap subt = do_bc(top);
-	VarMultimap& old_subt = _inference_history[top];
+	VarMultimap subt = do_bc(selected_target);
+	VarMultimap& old_subt = _inference_history[selected_target];
 
 	logger().debug("[BackwardChainer] After do_step_bc");
 
@@ -147,7 +148,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 			HandleSeq sub_premises = LinkCast(hgoal)->getOutgoingSet();
 
 			for (Handle& h : sub_premises)
-				_targets_stack.push(h);
+				_targets_set.insert(h);
 
 			return VarMultimap();
 		}
@@ -301,11 +302,11 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		if (not to_be_added_to_targets.empty())
 		{
 			// Add itself back to target, since this is not completely solved
-			_targets_stack.push(hgoal);
+			_targets_set.insert(hgoal);
 
 			while (not to_be_added_to_targets.empty())
 			{
-				_targets_stack.push(to_be_added_to_targets.top());
+				_targets_set.insert(to_be_added_to_targets.top());
 				to_be_added_to_targets.pop();
 			}
 		}
@@ -338,11 +339,11 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 				// solution has variables inside
 				if (not goal_readded)
 				{
-					_targets_stack.push(hgoal);
+					_targets_set.insert(hgoal);
 					goal_readded = true;
 				}
 
-				_targets_stack.push(soln);
+				_targets_set.insert(soln);
 			}
 
 			// Construct the hgoal to all mappings here to be returned
@@ -476,8 +477,9 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
 				break;
 			}
 
-			// XXX don't want clause that are already in _targets_stack?
-			// no need? since things on targets stack are in inference history
+			// XXX don't want clause that are already in _targets_set?
+			// no need? since things on targets set are in inference history
+			// but only if the target is been inferenced upon...
 
 			i_pred_soln.push_back(p.second);
 		}

@@ -140,11 +140,11 @@ private:
 	map<Handle, VarMultimap> _inference_history;
 
 	// XXX TODO will want a list to allow target selection in the future
-	std::stack<Handle> _targets_stack;
+	UnorderedHandleSet _targets_set;
 	std::vector<Rule> _rules_set;
 
 	// XXX any additional link should be reflected
-	unordered_set<Type> _logical_link_types = { AND_LINK, OR_LINK };
+	unordered_set<Type> _logical_link_types = { AND_LINK, OR_LINK, NOT_LINK };
 
 };
 
