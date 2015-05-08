@@ -174,34 +174,41 @@ static bool try_to_load_modules(const char ** config_paths)
     PyObject* pySysPath = PySys_GetObject((char*)"path");
 
     // Add default OpenCog module directories to the Python interprator's path.
-    for (int i = 0; config_paths[i] != NULL; ++i) {
-        boost::filesystem::path modulePath(config_paths[i]);
-        if (boost::filesystem::exists(modulePath)) {
-            const char* modulePathCString = modulePath.string().c_str();
-            PyObject* pyModulePath = PyBytes_FromString(modulePathCString);
+    for (int i = 0; config_paths[i] != NULL; ++i)
+    {
+        struct stat finfo;
+        stat(config_paths[i], &finfo);
+
+        if (S_ISDIR(finfo.st_mode))
+        {
+            PyObject* pyModulePath = PyBytes_FromString(config_paths[i]);
             PyList_Append(pySysPath, pyModulePath);
             Py_DECREF(pyModulePath);
         }
     }
 
     // Add custom paths for python modules from the config file.
-    if (config().has("PYTHON_EXTENSION_DIRS")) {
+    if (config().has("PYTHON_EXTENSION_DIRS"))
+    {
         std::vector<string> pythonpaths;
         // For debugging current path
         tokenize(config()["PYTHON_EXTENSION_DIRS"],
                 std::back_inserter(pythonpaths), ", ");
+
         for (std::vector<string>::const_iterator it = pythonpaths.begin();
-             it != pythonpaths.end(); ++it) {
-            boost::filesystem::path modulePath(*it);
-            if (boost::filesystem::exists(modulePath)) {
-                const char* modulePathCString = modulePath.string().c_str();
-                PyObject* pyModulePath = PyBytes_FromString(modulePathCString);
+             it != pythonpaths.end(); ++it)
+        {
+            struct stat finfo;
+            stat(it->c_str(), &finfo);
+            if (S_ISDIR(finfo.st_mode))
+            {
+                PyObject* pyModulePath = PyBytes_FromString(it->c_str());
                 PyList_Append(pySysPath, pyModulePath);
                 Py_DECREF(pyModulePath);
             } else {
-                logger().warn("PythonEval::%s Could not find custom python"
-                        " extension directory: %s ",
-                        __FUNCTION__, (*it).c_str() );
+                logger().warn("%s: "
+                    "Could not find custom python extension directory: %s ",
+                    __FUNCTION__, it->c_str() );
             }
         }
     }
@@ -209,13 +216,15 @@ static bool try_to_load_modules(const char ** config_paths)
     // NOTE: Can't use get_path_as_string() yet because it is defined in a
     // Cython api which we can't import unless the sys.path is correct. So
     // we'll write it out before the imports below to aid in debugging.
-    if (logger().isDebugEnabled()) {
+    if (logger().isDebugEnabled())
+    {
         logger().debug("Python 'sys.path' after OpenCog config adds is:");
         Py_ssize_t pathSize = PyList_Size(pySysPath);
-        for (int pathIndex = 0; pathIndex < pathSize; pathIndex++) {
-            PyObject* pySysPathLine = PyList_GetItem(pySysPath, pathIndex);
+        for (int i = 0; i < pathSize; i++)
+        {
+            PyObject* pySysPathLine = PyList_GetItem(pySysPath, i);
             const char* sysPathCString = PyString_AsString(pySysPathLine);
-            logger().debug("    %2d > %s", pathIndex, sysPathCString);
+            logger().debug("    %2d > %s", i, sysPathCString);
             // NOTE: PyList_GetItem returns borrowed reference so don't do this:
             // Py_DECREF(pySysPathLine);
         }
