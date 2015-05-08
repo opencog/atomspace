@@ -312,6 +312,10 @@ void opencog::global_python_initialize()
     // Add default OpenCog module directories to the Python interprator's path.
     try_to_load_modules(get_module_paths());
 
+    // Hmm. If the above returned false, we should try a different
+    // permuation of the config paths.  I'm confused, though, different
+    // users are reporting conflicting symptoms.  What to do?
+
     // Release the GIL, otherwise the Python shell hangs on startup.
     if (initialized_outside_opencog)
         PyGILState_Release(gstate);
