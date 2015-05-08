@@ -349,6 +349,7 @@ PythonEval::PythonEval(AtomSpace* atomspace)
 
     // Remember our atomspace.
     _atomspace = atomspace;
+    _paren_count = 0;
 
     // Initialize Python objects and imports.
     //
@@ -1159,22 +1160,27 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     // If we get a newline by itself, then we are finished.
     if (partial_expr == "\n")
     {
-        _pending_input = false;
+        if (_paren_count <= 0) _pending_input = false;
     }
     else
     {
-        // XXX FIXME TODO: Need to check if there was an open
-        // parenthesis, and no close parentheis.
+        // Check if there are open parentheses. If so, then we must
+        // assume there will be more input that closes them off.
+
+        // Trim whitespace, first! Otherwise, the check for the
+        // trailing colon fails.
+        std::string part = partial_expr.substr(0,
+                         partial_expr.find_last_not_of(" \t\n\r") + 1);
 
         // If the line ends with a colon, its not a complete expression,
         // and we must wait for more input, i.e. more input is pending.
-        size_t expression_size = partial_expr.size();
-        size_t colon_position = partial_expr.find_last_of(':');
-        if (colon_position == (expression_size - 2))
+        size_t expression_size = part.size();
+        size_t colon_position = part.find_last_of(":\\");
+        if (colon_position == (expression_size - 1))
             _pending_input = true;
 
         // Add this expression to our evaluation buffer.
-        _input_line += partial_expr;
+        _input_line += part;
     }
 
     // Process the evaluation buffer if more input is not pending.
@@ -1195,6 +1201,7 @@ void PythonEval::eval_expr(const std::string& partial_expr)
             _result += "\n";
         }
         _input_line = "";
+        _paren_count = 0;
     }
 }
 
