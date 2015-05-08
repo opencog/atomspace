@@ -6,20 +6,6 @@
  *         Curtis Faith <curtis.m.faith@gmail.com>
  * @date 2011-09-20
  *
- * @todo When can we remove the singleton instance?
- *
- * NOTE: The Python C API reference counting is very tricky and the
- * API inconsistently handles PyObject* object ownership.
- * DO NOT change the reference count calls below using Py_INCREF
- * and the corresponding Py_DECREF until you completely understand
- * the Python API concepts of "borrowed" and "stolen" references.
- * Make absolutely NO assumptions about the type of reference the API
- * will return. Instead, verify if it returns a "new" or "borrowed"
- * reference. When you pass PyObject* objects to the API, don't assume
- * you still need to decrement the reference count until you verify
- * that the exact API call you are making does not "steal" the
- * reference: SEE: https://docs.python.org/2/c-api/intro.html?highlight=steals#reference-count-details
- * Remember to look to verify the behavior of each and every Py_ API call.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -60,6 +46,36 @@ using namespace opencog;
 //#define DPRINTF printf
 #define DPRINTF(...)
 
+PythonEval* PythonEval::singletonInstance = NULL;
+
+const int NO_SIGNAL_HANDLERS = 0;
+const char* NO_FUNCTION_NAME = NULL;
+const int SIMPLE_STRING_SUCCESS = 0;
+const int SIMPLE_STRING_FAILURE = -1;
+const int MISSING_FUNC_CODE = -1;
+
+// The Python functions can't take const flags.
+#define NO_COMPILER_FLAGS NULL
+
+static bool already_initialized = false;
+static bool initialized_outside_opencog = false;
+
+/*
+ * @todo When can we remove the singleton instance?
+ *
+ * NOTE: The Python C API reference counting is very tricky and the
+ * API inconsistently handles PyObject* object ownership.
+ * DO NOT change the reference count calls below using Py_INCREF
+ * and the corresponding Py_DECREF until you completely understand
+ * the Python API concepts of "borrowed" and "stolen" references.
+ * Make absolutely NO assumptions about the type of reference the API
+ * will return. Instead, verify if it returns a "new" or "borrowed"
+ * reference. When you pass PyObject* objects to the API, don't assume
+ * you still need to decrement the reference count until you verify
+ * that the exact API call you are making does not "steal" the
+ * reference: SEE: https://docs.python.org/2/c-api/intro.html?highlight=steals#reference-count-details
+ * Remember to look to verify the behavior of each and every Py_ API call.
+ */
 
 static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
 {
@@ -141,73 +157,23 @@ static const char** get_module_paths()
     return paths;
 }
 
-PythonEval* PythonEval::singletonInstance = NULL;
 
-const int NO_SIGNAL_HANDLERS = 0;
-const char* NO_FUNCTION_NAME = NULL;
-const int SIMPLE_STRING_SUCCESS = 0;
-const int SIMPLE_STRING_FAILURE = -1;
-const int MISSING_FUNC_CODE = -1;
-
-// The Python functions can't take const flags.
-#define NO_COMPILER_FLAGS NULL
-
-static bool already_initialized = false;
-static bool initialized_outside_opencog = false;
-
-void opencog::global_python_initialize()
+/**
+ * Ongoing python nuttiness. Because we never know in advance whether
+ * python will be able to find a module or not, until it actually does,
+ * we have to proceed by trial and error, trying different path
+ * combinations, until it finally works.  The sequence of paths
+ * that leads to success will then be delcared the official system
+ * path, henceforth. Woe unto those try to defy the will of the python
+ * gods.
+ *
+ * Return true if the load worked, else return false.
+ */
+static bool try_to_load_modules(const char ** config_paths)
 {
-    // We don't really know the gstate yet but we'll set it here to avoid
-    // compiler warnings below.
-    PyGILState_STATE gstate = PyGILState_UNLOCKED;
-
-    logger().debug("[global_python_initialize] Start");
-
-    // Throw an exception if this is called more than once.
-    if (already_initialized) {
-        return;
-        throw opencog::RuntimeException(TRACE_INFO,
-                "Python initializer global_python_init() called twice.");
-    }
-
-    // Remember this initialization.
-    already_initialized = true;
-
-    // Start up Python.
-    if (Py_IsInitialized())  {
-        // If we were already initialized then someone else did it.
-        initialized_outside_opencog = true;
-
-        // Just grab the GIL
-        gstate = PyGILState_Ensure();
-
-    } else {
-        // We are doing the initialization.
-        initialized_outside_opencog = false;
-
-        // Initialize Python (InitThreads grabs GIL implicitly)
-        Py_InitializeEx(NO_SIGNAL_HANDLERS);
-        PyEval_InitThreads();
-
-        // Many python libraries (e.g. ROS) expect sys.argv to be set.
-        // So, avoid the error print, and let them know who we are.
-        // We must do this *before* the module pre-loading, done below.
-        static const char *argv0 = "cogserver";
-        PySys_SetArgv(1, (char **) &argv0);
-    }
-
-    logger().debug("[global_python_initialize] Adding OpenCog sys.path "
-            "directories");
-
-    // Get starting "sys.path".
-    PyRun_SimpleString(
-                "import sys\n"
-                "import StringIO\n"
-                );
     PyObject* pySysPath = PySys_GetObject((char*)"path");
 
     // Add default OpenCog module directories to the Python interprator's path.
-    const char** config_paths = get_module_paths();
     for (int i = 0; config_paths[i] != NULL; ++i) {
         boost::filesystem::path modulePath(config_paths[i]);
         if (boost::filesystem::exists(modulePath)) {
@@ -267,7 +233,7 @@ void opencog::global_python_initialize()
     // it by a hard-to-debug error message.
     if (NULL == py_atomspace) {
         PyErr_Print();
-        logger().error("PythonEval::%s Failed to load the "
+        logger().warn("PythonEval::%s Failed to load the "
                        "opencog.atomspace module", __FUNCTION__);
     }
 
@@ -281,6 +247,61 @@ void opencog::global_python_initialize()
 
     // NOTE: PySys_GetObject returns a borrowed reference so don't do this:
     // Py_DECREF(pySysPath);
+    return (NULL != py_atomspace);
+}
+
+void opencog::global_python_initialize()
+{
+    // We don't really know the gstate yet but we'll set it here to avoid
+    // compiler warnings below.
+    PyGILState_STATE gstate = PyGILState_UNLOCKED;
+
+    logger().debug("[global_python_initialize] Start");
+
+    // Throw an exception if this is called more than once.
+    if (already_initialized) {
+        return;
+        throw opencog::RuntimeException(TRACE_INFO,
+                "Python initializer global_python_init() called twice.");
+    }
+
+    // Remember this initialization.
+    already_initialized = true;
+
+    // Start up Python.
+    if (Py_IsInitialized())  {
+        // If we were already initialized then someone else did it.
+        initialized_outside_opencog = true;
+
+        // Just grab the GIL
+        gstate = PyGILState_Ensure();
+
+    } else {
+        // We are doing the initialization.
+        initialized_outside_opencog = false;
+
+        // Initialize Python (InitThreads grabs GIL implicitly)
+        Py_InitializeEx(NO_SIGNAL_HANDLERS);
+        PyEval_InitThreads();
+
+        // Many python libraries (e.g. ROS) expect sys.argv to be set.
+        // So, avoid the error print, and let them know who we are.
+        // We must do this *before* the module pre-loading, done below.
+        static const char *argv0 = "cogserver";
+        PySys_SetArgv(1, (char **) &argv0);
+    }
+
+    logger().debug("[global_python_initialize] Adding OpenCog sys.path "
+            "directories");
+
+    // Get starting "sys.path".
+    PyRun_SimpleString(
+                "import sys\n"
+                "import StringIO\n"
+                );
+
+    // Add default OpenCog module directories to the Python interprator's path.
+    try_to_load_modules(get_module_paths());
 
     // Release the GIL, otherwise the Python shell hangs on startup.
     if (initialized_outside_opencog)
@@ -442,8 +463,8 @@ PyObject* PythonEval::atomspace_py_object(AtomSpace* atomspace)
     // a hard-to-debug crash on null-pointer-deref, and replace
     // it by a hard-to-debug error message.
     if (NULL == py_atomspace) {
-        logger().error("PythonEval::%s Failed to load"
-                       "the opencog.atomspace module", __FUNCTION__);
+        logger().error("PythonEval::%s Failed to load the"
+                       "opencog.atomspace module", __FUNCTION__);
         return NULL;
     }
 
