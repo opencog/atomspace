@@ -1164,13 +1164,17 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     }
     else
     {
-        // Check if there are open parentheses. If so, then we must
-        // assume there will be more input that closes them off.
-
         // Trim whitespace, first! Otherwise, the check for the
         // trailing colon fails.
         std::string part = partial_expr.substr(0,
                          partial_expr.find_last_not_of(" \t\n\r") + 1);
+
+        // Check if there are open parentheses. If so, then we must
+        // assume there will be more input that closes them off.
+        size_t open = std::count(part.begin(), part.end(), '(');
+        size_t clos = std::count(part.begin(), part.end(), ')');
+        _paren_count += open - clos;
+        if (0 < _paren_count) _pending_input = true;
 
         // If the line ends with a colon, its not a complete expression,
         // and we must wait for more input, i.e. more input is pending.
@@ -1182,6 +1186,9 @@ void PythonEval::eval_expr(const std::string& partial_expr)
         // Add this expression to our evaluation buffer.
         _input_line += part;
     }
+
+    // If there are more closes than opens, then fail.
+    if (_paren_count < 0) _pending_input = false;
 
     // Process the evaluation buffer if more input is not pending.
     if (not _pending_input)
