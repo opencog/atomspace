@@ -1185,6 +1185,7 @@ void PythonEval::eval_expr(const std::string& partial_expr)
 
         // Add this expression to our evaluation buffer.
         _input_line += part;
+        _input_line += '\n';  // we stripped this off, above
     }
 
     // If there are more closes than opens, then fail.
