@@ -92,6 +92,13 @@ To build and run the unit tests, from the `./build` directory enter
     make test
 ```
 
+Install
+-------
+After building, you MUST install the atomspace.
+```
+    sudo make install
+```
+
 Using the AtomSpace
 -------------------
 The AtomSpace can be used in one of three ways, or a mixture of all three:
