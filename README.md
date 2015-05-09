@@ -28,8 +28,8 @@ be built and run.
 
 ###### cogutil
 > Common OpenCog C++ utilities
-> http://github/opencog/cogutils
-> It uses exactly the same build proceedure as this pakcage. Be sure
+> http://github.com/opencog/cogutils
+> It uses exactly the same build procedure as this package. Be sure
   to `sudo make install` at the end.
 
 ###### cxxtest
