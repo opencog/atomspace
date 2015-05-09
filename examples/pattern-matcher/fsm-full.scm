@@ -51,7 +51,7 @@
 ;; of green goint to yellow going to red going back to green.
 ;; The intial state transitions into green (and is never visted again).
 ;;
-;; Each rule is labelled with the "my-fsm", so that rules for
+;; Each rule is labelled with the "my-trans", so that rules for
 ;; different FSM's do not clash with one-another.  A ConextLink is used
 ;; because that will allow this example to generalize: Context's are
 ;; usually used to  express conditional probabilities, so that 
