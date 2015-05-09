@@ -64,7 +64,7 @@ ELSE (CYGWIN)
 ENDIF (CYGWIN)
 
 INSTALL (FILES
-	atomspace.h
+	atomspace_install.h
 	Atom.h
 	AtomSpace.h
 	AtomTable.h
