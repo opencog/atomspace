@@ -156,10 +156,10 @@
 (define my-fsm (create-fsm my-trans my-state))
 
 ;;; Take one step.
-;(cog-bind my-fsm)
+;(cog-bind-single my-fsm)
 
 ;;; Take three steps.
 ;;; Try it!
-;(cog-bind my-fsm)
-;(cog-bind my-fsm)
-;(cog-bind my-fsm)
+;(cog-bind-single my-fsm)
+;(cog-bind-single my-fsm)
+;(cog-bind-single my-fsm)

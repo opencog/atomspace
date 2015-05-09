@@ -123,10 +123,10 @@
 )
 
 ;; Take on step of the FSM
-;(cog-bind take-one-step)
+;(cog-bind-single take-one-step)
 ;
 ;;; Take three more steps;
 ;;; Try it!  See what appens!
-;(cog-bind take-one-step)
-;(cog-bind take-one-step)
-;(cog-bind take-one-step)
+;(cog-bind-single take-one-step)
+;(cog-bind-single take-one-step)
+;(cog-bind-single take-one-step)

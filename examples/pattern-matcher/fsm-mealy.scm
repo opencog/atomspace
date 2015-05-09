@@ -125,17 +125,17 @@
 				)
 			)
 			(AndLink
-				;; ... then transistion to the next state ...
-				(ListLink
-					fsm-state
-					(VariableNode "$next-state")
-				)
 				;; ... and leave the current state ...
 				(DeleteLink
 					(ListLink
 						fsm-state
 						(VariableNode "$curr-state")
 					)
+				)
+				;; ... then transistion to the next state.
+				(ListLink
+					fsm-state
+					(VariableNode "$next-state")
 				)
 			)
 		)
@@ -146,7 +146,7 @@
 (define my-fsm (create-fsm my-trans my-state extern-anchor))
 
 ;;; A utility to take a step, and display the new state
-(define (take-step) (gar (gar (cog-bind my-fsm))))
+(define (take-step) (gar (gar (cog-bind-single my-fsm))))
 
 ;;; A utility to show the current FSM state
 (define (show-fsm-state)
@@ -169,15 +169,22 @@
 (define (move-halt) (move-dir halt))
 
 ;;; Take one step.
-;(cog-bind my-fsm)
+;(take-step)
 
 ; View the current state:
 (show-fsm-state)
 
 ;;; Take three steps.
 ;;; Try it!
-; (cog-bind my-fsm) (show-fsm-state)
-;
+; (take-step)
+; (take-step)
+; (take-step)
 ; (move-forward)
-; (cog-bind my-fsm) (show-fsm-state)
-; (cog-bind my-fsm) (show-fsm-state)
+; (take-step)
+; (take-step)
+; (take-step)
+; (move-reverse)
+; (take-step)
+; (take-step)
+; (take-step)
+; (move-halt)
