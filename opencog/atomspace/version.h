@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/atomspace.h
+ * opencog/atomspace/version.h
  *
  * Copyright (C) 2015 by OpenCog Foundation
  * All Rights Reserved
@@ -25,9 +25,9 @@
 
 #define ATOMSPACE_MAJOR_VERSION 5
 #define ATOMSPACE_MINOR_VERSION 0
-#define ATOMSPACE_MICRO_VERSION 1
+#define ATOMSPACE_MICRO_VERSION 2
 
-#define ATOMSPACE_VERSION_STRING "5.0.1"
+#define ATOMSPACE_VERSION_STRING "5.0.2"
 
 
 #endif // _OPENCOG_ATOMSPACE_VER_H

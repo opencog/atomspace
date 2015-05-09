@@ -64,7 +64,6 @@ ELSE (CYGWIN)
 ENDIF (CYGWIN)
 
 INSTALL (FILES
-	atomspace.h
 	Atom.h
 	AtomSpace.h
 	AtomTable.h
@@ -96,6 +95,7 @@ INSTALL (FILES
 	TruthValue.h
 	TypeIndex.h
 	types.h
+	version.h
 	DESTINATION "include/${PROJECT_NAME}/atomspace"
 )
 
