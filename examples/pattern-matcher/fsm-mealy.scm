@@ -4,8 +4,16 @@
 ; Based on fsm-full.scm, this alters the general FSM defintion to
 ; include a dependency on the external state.
 ;
+; To run this demo, load this file:
+; (add-to-load-path ".")
+; (load-from-path "fsm-mealy.scm")
+;
+; Then, scroll to the bottom, and try some of the commented-out examples.
+
 (use-modules (opencog))
 (use-modules (opencog query))
+
+(load-from-path "utilities.scm")
 
 (define my-trans (ConceptNode "My FSM's Transition Rule"))
 (define my-state (AnchorNode "My FSM's Current State"))
@@ -29,6 +37,9 @@
 ;; The inital state of the FSM
 (ListLink my-state halt-state)
 
+;; The current envoronment
+(EvaluationLink extern-anchor halt)
+
 ;; The set of allowed state transistions.  The transitions depend on
 ;; both the current state, and the external state; thus, this is
 ;; effectively a Mealy machine.
@@ -50,10 +61,10 @@
 (ContextLink (AndLink yellow-state halt) (ListLink my-trans halt-state))
 
 ; The forward cycle
-(ContextLink (AndLink halt-state go-foreward) (ListLink my-trans red-state))
-(ContextLink (AndLink red-state go-foreward) (ListLink my-trans green-state))
-(ContextLink (AndLink green-state go-foreward) (ListLink my-trans blue-state))
-(ContextLink (AndLink blue-state go-foreward) (ListLink my-trans red-state))
+(ContextLink (AndLink halt-state go-forward) (ListLink my-trans red-state))
+(ContextLink (AndLink red-state go-forward) (ListLink my-trans green-state))
+(ContextLink (AndLink green-state go-forward) (ListLink my-trans blue-state))
+(ContextLink (AndLink blue-state go-forward) (ListLink my-trans red-state))
 
 ; A reversed state halts before moving forward
 (ContextLink (AndLink cyan-state go-forward) (ListLink my-trans halt-state))
@@ -119,7 +130,7 @@
 					fsm-state
 					(VariableNode "$next-state")
 				)
-				;; ... and leave the current state.
+				;; ... and leave the current state ...
 				(DeleteLink
 					(ListLink
 						fsm-state
@@ -134,11 +145,39 @@
 ;;; Create "my-fsm"
 (define my-fsm (create-fsm my-trans my-state extern-anchor))
 
+;;; A utility to take a step, and display the new state
+(define (take-step) (gar (gar (cog-bind my-fsm))))
+
+;;; A utility to show the current FSM state
+(define (show-fsm-state)
+	(car (cog-chase-link 'ListLink 'ConceptNode my-state)))
+
+;;; As above, but show the environment
+(define (show-environment-state)
+	(car (cog-chase-link 'EvaluationLink 'ConceptNode extern-anchor)))
+
+; Set the direction
+(define (move-dir dir)
+	; First, delete the current external state
+	(cog-delete (EvaluationLink extern-anchor (show-environment-state)))
+	; Next, set the new direction
+	(EvaluationLink extern-anchor dir))
+
+; Set the direction
+(define (move-forward) (move-dir go-forward))
+(define (move-reverse) (move-dir go-reverse))
+(define (move-halt) (move-dir halt))
+
 ;;; Take one step.
 ;(cog-bind my-fsm)
 
+; View the current state:
+(show-fsm-state)
+
 ;;; Take three steps.
 ;;; Try it!
-;(cog-bind my-fsm)
-;(cog-bind my-fsm)
-;(cog-bind my-fsm)
+; (cog-bind my-fsm) (show-fsm-state)
+;
+; (move-forward)
+; (cog-bind my-fsm) (show-fsm-state)
+; (cog-bind my-fsm) (show-fsm-state)

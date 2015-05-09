@@ -15,6 +15,7 @@ main features.
 Some simpler applications showing some things one can do, and how to do
 them.
 
-* fsm-basic.scm: A simple Finite State Machine demo.
-* fsm-full.scm: A generic finite-state-machine constructor
-* markov-chain.scm: A Markov chain (probabilistic FSM) based on above.
+* fsm-basic.scm: A simple Deterministic Finite State Machine demo.
+* fsm-full.scm: A generic deterministic finite-state-machine constructor
+* fsm-mealy.scm: A generic Mealy machine constructor
+* markov-chain.scm: A Markov chain (probabilistic FSM) based on fsm-full.

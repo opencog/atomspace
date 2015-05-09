@@ -22,7 +22,7 @@
 ; and then load this file:
 ; (load-from-path "fsm-full.scm")
 ;
-; Then, scroll to the bottom, and some of the commented-out
+; Then, scroll to the bottom, and try some of the commented-out
 ; examples.
 
 (use-modules (opencog))
