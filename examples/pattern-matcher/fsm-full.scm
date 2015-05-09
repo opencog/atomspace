@@ -101,11 +101,11 @@
 )
 
 
-;;; A Universal Finite State Machine Constructor.
+;;; A Universal Deterministic Finite State Machine Constructor.
 ;;;
-;;; This will create an FSM; that is, a rule that will transition
-;;; any arbitrary FSM from state to state, given only its name, and
-;;; the name given to the transition rules.
+;;; This will create a deterministic FSM; that is, a rule that will
+;;; transition any arbitrary deterministic FSM from state to state,
+;;; given only its name, and the name given to the transition rules.
 ;;;
 ;;; Create a BindLink that can take an FSM with the name `fsm-name`
 ;;; and stores it's state in `fsm-state`.  After the BindLink is
