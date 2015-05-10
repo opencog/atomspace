@@ -25,6 +25,7 @@
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/NumberNode.h>
+#include <opencog/atoms/bind/CreateLink.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 
@@ -100,6 +101,11 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, const Handle& h)
 	   or (TIMES_LINK == t))
 	{
 		return do_execute(as, t, lll->getOutgoingSet());
+	}
+
+	if (CREATE_LINK == t)
+	{
+		return as->addAtom(CreateLinkCast(h)->create());
 	}
 
 	// Search for additional execution links, and execute them too.

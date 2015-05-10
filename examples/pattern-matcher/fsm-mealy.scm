@@ -125,14 +125,14 @@
 				)
 			)
 			(AndLink
-				;; ... and leave the current state ...
+				;; ... Then, leave the current state ...
 				(DeleteLink
 					(ListLink
 						fsm-state
 						(VariableNode "$curr-state")
 					)
 				)
-				;; ... then transistion to the next state.
+				;; ... and transistion to the next state.
 				(ListLink
 					fsm-state
 					(VariableNode "$next-state")

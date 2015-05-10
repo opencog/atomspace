@@ -79,6 +79,7 @@ class Atom
     friend class Handle;          // Needs to view _uuid
     friend class SavingLoading;   // Needs to set _uuid
     friend class TLB;             // Needs to view _uuid
+    friend class CreateLink;      // Needs to call getAtomTable();
     friend class DeleteLink;      // Needs to call getAtomTable();
 
 private:
