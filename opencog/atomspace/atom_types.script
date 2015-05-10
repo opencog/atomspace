@@ -246,3 +246,4 @@ TIMES_LINK <- FOLD_LINK
 // grounded term is deleted.
 //
 DELETE_LINK <- FUNCTION_LINK
+CREATE_LINK <- FUNCTION_LINK

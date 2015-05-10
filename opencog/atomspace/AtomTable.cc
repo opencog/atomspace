@@ -41,6 +41,7 @@
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/BindLink.h>
+#include <opencog/atoms/bind/CreateLink.h>
 #include <opencog/atoms/bind/DefineLink.h>
 #include <opencog/atoms/bind/DeleteLink.h>
 #include <opencog/atoms/bind/ScopeLink.h>
@@ -300,6 +301,9 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     } else if (BETA_REDEX == atom_type) {
         if (NULL == BetaRedexCast(atom))
             atom = createBetaRedex(*LinkCast(atom));
+    } else if (CREATE_LINK == atom_type) {
+        if (NULL == CreateLinkCast(atom))
+            atom = createCreateLink(*LinkCast(atom));
     } else if (DEFINE_LINK == atom_type) {
         if (NULL == DefineLinkCast(atom))
             atom = createDefineLink(*LinkCast(atom));
@@ -359,6 +363,8 @@ Handle AtomTable::add(AtomPtr atom, bool async)
                 atom = createBindLink(*lll);
             } else if (BETA_REDEX == atom_type) {
                 atom = createBetaRedex(*lll);
+            } else if (CREATE_LINK == atom_type) {
+                atom = createCreateLink(*lll);
             } else if (DEFINE_LINK == atom_type) {
                 atom = createDefineLink(*lll);
             } else if (DELETE_LINK == atom_type) {

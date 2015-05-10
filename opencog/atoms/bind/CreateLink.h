@@ -54,8 +54,7 @@ namespace opencog
 ///         SomeAtom
 ///         OtherAtom
 ///
-/// Upon execution, this will result in the following being created (and
-/// placed in the same atomspace as in which the CreateLink lives)
+/// Upon execution, this will result in the following being created:
 ///
 ///    SomeLink
 ///         SomeAtom
@@ -65,6 +64,9 @@ class CreateLink : public Link
 {
 protected:
 	void init(const HandleSeq&);
+	Type _link_type;
+	HandleSeq _outset;
+
 public:
 	CreateLink(const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
@@ -76,8 +78,8 @@ public:
 
 	CreateLink(Link &l);
 
-	void cre(AtomSpace*) const;
-	void cre(AtomSpace*, const HandleSeq&) const;
+	// Return a poointer to the atom being specified.
+	LinkPtr create(void) const;
 };
 
 typedef std::shared_ptr<CreateLink> CreateLinkPtr;
