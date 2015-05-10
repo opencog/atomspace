@@ -3,9 +3,9 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (lambda SHARED
+	AssignLink.cc
 	BetaRedex.cc
 	BindLink.cc
-	CreateLink.cc
 	ConcreteLink.cc
 	DefineLink.cc
 	DeleteLink.cc

@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/CreateLink.h
+ * opencog/atoms/AssignLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_CREATE_LINK_H
-#define _OPENCOG_CREATE_LINK_H
+#ifndef _OPENCOG_ASSIGN_LINK_H
+#define _OPENCOG_ASSIGN_LINK_H
 
 #include <map>
 
@@ -35,21 +35,21 @@ namespace opencog
  *  @{
  */
 
-/// The CreateLink is used to create atoms at some defered time in the
+/// The AssignLink is used to create atoms at some defered time in the
 /// future, while still being able to describe and talk about them at
 /// the present time. The issue that it is solving is this: when an
 /// atom is explicitly named, it also becomes a member of the AtomSpace;
 /// that is, it is brought into existance by naming it.  The usual
 /// mechanism for deferring the creation of an atom is to place a
 /// VariableNode in it; theatom is then created later, when the Variable
-/// is given a value. The CreateLink provides an alternative mechanism,
+/// is given a value. The AssignLink provides an alternative mechanism,
 /// without requiring the use of VariableNodes.
 ///
-/// The CreateLink is a kind of executable link; that it, upon
+/// The AssignLink is a kind of executable link; that it, upon
 /// execution, it transforms into another link.  It should have the
 /// following form:
 ///
-///    CreateLink
+///    AssignLink
 ///         TypeNode "SomeLink"
 ///         SomeAtom
 ///         OtherAtom
@@ -60,7 +60,7 @@ namespace opencog
 ///         SomeAtom
 ///         OtherAtom
 ///
-class CreateLink : public Link
+class AssignLink : public Link
 {
 protected:
 	void init(const HandleSeq&);
@@ -68,30 +68,30 @@ protected:
 	HandleSeq _outset;
 
 public:
-	CreateLink(const HandleSeq&,
+	AssignLink(const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	CreateLink(const Handle& varcdecls, const Handle& body,
+	AssignLink(const Handle& varcdecls, const Handle& body,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	CreateLink(Link &l);
+	AssignLink(Link &l);
 
-	// Return a poointer to the atom being specified.
-	LinkPtr create(void) const;
+	// Return a pointer to the atom being specified.
+	virtual AtomPtr execute(void) const;
 };
 
-typedef std::shared_ptr<CreateLink> CreateLinkPtr;
-static inline CreateLinkPtr CreateLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<CreateLink>(a); }
-static inline CreateLinkPtr CreateLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<CreateLink>(a); }
+typedef std::shared_ptr<AssignLink> AssignLinkPtr;
+static inline AssignLinkPtr AssignLinkCast(const Handle& h)
+	{ AtomPtr a(h); return std::dynamic_pointer_cast<AssignLink>(a); }
+static inline AssignLinkPtr AssignLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<AssignLink>(a); }
 
 // XXX temporary hack ...
-#define createCreateLink std::make_shared<CreateLink>
+#define createAssignLink std::make_shared<AssignLink>
 
 /** @}*/
 }
 
-#endif // _OPENCOG_CREATE_LINK_H
+#endif // _OPENCOG_ASSIGN_LINK_H
