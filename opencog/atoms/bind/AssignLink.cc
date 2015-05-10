@@ -1,5 +1,5 @@
 /*
- * CreateLink.cc
+ * AssignLink.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  *
@@ -28,28 +28,28 @@
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomutils/FindUtils.h>
 
-#include "CreateLink.h"
+#include "AssignLink.h"
 
 using namespace opencog;
 
-void CreateLink::init(const HandleSeq& oset)
+void AssignLink::init(const HandleSeq& oset)
 {
 	// The first member of the handleset must be a TypeNode, and it must
 	// name a valid atom type.
 
 	if (0 == oset.size())
 		throw InvalidParamException(TRACE_INFO,
-			"CreateLinks must have members!");
+			"AssignLinks must have members!");
 
 	Type t = oset[0]->getType();
 	if (TYPE_NODE != t)
 		throw InvalidParamException(TRACE_INFO,
-			"Invalid format for a CreateLink! First member must be a type node!");
+			"Invalid format for a AssignLink! First member must be a type node!");
 
 	const std::string& name = NodeCast(oset[0])->getName();
 	if (not classserver().isDefined(name))
 		throw InvalidParamException(TRACE_INFO,
-			"Invalid format for a CreateLink! Not a defined type!");
+			"Invalid format for a AssignLink! Not a defined type!");
 
 	// Cache the type and the oset
 	_link_type = classserver().getType(name);
@@ -58,35 +58,71 @@ void CreateLink::init(const HandleSeq& oset)
 		_outset.push_back(oset[j]);
 } 
 
-LinkPtr CreateLink::create(void) const
+AtomPtr AssignLink::execute(void) const
 {
 	return createLink(_link_type, _outset);
 }
 
-CreateLink::CreateLink(const HandleSeq& oset,
+AssignLink::AssignLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: Link(CREATE_LINK, oset, tv, av)
+	: Link(ASSIGN_LINK, oset, tv, av)
 {
 	init(oset);
 }
 
-CreateLink::CreateLink(const Handle& name, const Handle& defn,
+AssignLink::AssignLink(Type t, const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: Link(CREATE_LINK, HandleSeq({name, defn}), tv, av)
+	: Link(t, oset, tv, av)
 {
-	init(getOutgoingSet());
+	if (not classserver().isA(t, ASSIGN_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an AssignLink, got %s", tname.c_str());
+	}
+
+	init(oset);
 }
 
-CreateLink::CreateLink(Link &l)
+AssignLink::AssignLink(Link &l)
 	: Link(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
-	if (not classserver().isA(tscope, CREATE_LINK))
+	if (not classserver().isA(tscope, ASSIGN_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting a CreateLink, got %s", tname.c_str());
+			"Expecting an AssignLink, got %s", tname.c_str());
+	}
+
+	init(l.getOutgoingSet());
+}
+
+// ============================================================
+
+AtomPtr AddLink::execute(void) const
+{
+	return createLink(_link_type, _outset);
+}
+
+AddLink::AddLink(const HandleSeq& oset,
+                       TruthValuePtr tv, AttentionValuePtr av)
+	: AssignLink(ADD_LINK, oset, tv, av)
+{
+	init(oset);
+}
+
+AddLink::AddLink(Link &l)
+	: AssignLink(l)
+{
+	// Type must be as expected
+	Type tscope = l.getType();
+	if (not classserver().isA(tscope, ADD_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(tscope);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a AddLink, got %s", tname.c_str());
 	}
 
 	init(l.getOutgoingSet());
