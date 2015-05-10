@@ -86,14 +86,14 @@ void DeleteLink::del(AtomSpace * as) const
 
 DeleteLink::DeleteLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: Link(DEFINE_LINK, oset, tv, av)
+	: Link(DELETE_LINK, oset, tv, av)
 {
 	init(oset);
 }
 
 DeleteLink::DeleteLink(const Handle& name, const Handle& defn,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: Link(DEFINE_LINK, HandleSeq({name, defn}), tv, av)
+	: Link(DELETE_LINK, HandleSeq({name, defn}), tv, av)
 {
 	init(getOutgoingSet());
 }
