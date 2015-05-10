@@ -91,13 +91,6 @@ DeleteLink::DeleteLink(const HandleSeq& oset,
 	init(oset);
 }
 
-DeleteLink::DeleteLink(const Handle& name, const Handle& defn,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: Link(DELETE_LINK, HandleSeq({name, defn}), tv, av)
-{
-	init(getOutgoingSet());
-}
-
 DeleteLink::DeleteLink(Link &l)
 	: Link(l)
 {

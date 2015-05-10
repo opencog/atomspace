@@ -52,10 +52,6 @@ public:
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	DeleteLink(const Handle& varcdecls, const Handle& body,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
 	DeleteLink(Link &l);
 
 	void del(AtomSpace*) const;
