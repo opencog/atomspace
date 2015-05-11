@@ -103,6 +103,7 @@ protected:
 	void init(const HandleSeq&);
 	Type _link_type;
 	HandleSeq _outset;
+	size_t _osetz;
 
 public:
 	AssignLink(const HandleSeq&,

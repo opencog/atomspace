@@ -56,11 +56,14 @@ void AssignLink::init(const HandleSeq& oset)
 
 	for (size_t j=1; j< oset.size(); j++)
 		_outset.push_back(oset[j]);
+
+	_osetz = _outset.size();
 } 
 
 Handle AssignLink::execute(AtomSpace * as) const
 {
-	return createLink(_link_type, _outset);
+	// return Handle(createLink(_link_type, _outset));
+	return Handle::UNDEFINED;
 }
 
 AssignLink::AssignLink(const HandleSeq& oset,
@@ -104,7 +107,7 @@ AssignLink::AssignLink(Link &l)
 Handle AddLink::execute(AtomSpace* as) const
 {
 	if (NULL == as)
-		return createLink(_link_type, _outset);
+		return Handle(createLink(_link_type, _outset));
 	return as->addAtom(createLink(_link_type, _outset));
 }
 
@@ -132,17 +135,89 @@ AddLink::AddLink(Link &l)
 
 // ============================================================
 
-Handler RemoveLink::execute(AtomSpace* as) const
+
+Handle RemoveLink::execute(AtomSpace* as) const
 {
 	// Are there *any* constants in the outgoing set?
+	// narrowst will be -1 if they're all free variables.
+	// narrowest helps make the next loop small...
 	int narrowest = -1;
-	size_t sz = SIZE_T_MAX;
-	for (int i=0; i< _outset.size(); i++)
+	size_t narsz = SIZE_MAX;
+	for (size_t i=0; i < _osetz; i++)
 	{
+		if (VARIABLE_NODE == _outset[i]->getType()) continue;
+		size_t isz = _outset[i]->getIncomingSetSize();
+		if (isz < narsz)
+		{
+			narsz = isz;
+			narrowest = i;
+		}
 	}
 
-	as->getHandlesByType(seq, _link_type)
-	return createLink(_link_type, _outset);
+	// Delete matching constant (closed) links
+	if (0 <= narrowest)
+	{
+		IncomingSet iset = _outset[narrowest]->getIncomingSet();
+		for (const LinkPtr& lp : iset)
+		{
+			// Wrong type, can't delete that!
+			if (_link_type != lp->getType()) continue;
+			// Wrong Arity, too!
+			if (_osetz != lp->getArity()) continue;
+
+			const HandleSeq& hs = lp->getOutgoingSet();
+			bool match = true;
+			for (size_t i=0; i < _osetz; i++)
+			{
+				if (VARIABLE_NODE == _outset[i]->getType()) continue;
+
+				// Contains a variable, or doesn't match -- don't delete.
+				if (VARIABLE_NODE == hs[i]->getType() or
+				    _outset[i] != hs[i])
+				{
+					match = false;
+					break;
+				}
+			}
+
+			if (match)
+			{
+				as->removeAtom(Handle(lp));
+			}
+		}
+		return Handle::UNDEFINED;
+	}
+
+	// If we are here, then the entire outset consisted of fre variables.
+	// In this case, deleted everything that has the same arity, and does
+	// not contain variables.
+	HandleSeq seq;
+	as->getHandlesByType(seq, _link_type);
+	for (const Handle& h : seq)
+	{
+		LinkPtr lp = LinkCast(h);
+
+		// Wrong Arity, cannot delete that.
+		if (_osetz != lp->getArity()) continue;
+
+		const HandleSeq& hs = lp->getOutgoingSet();
+		bool match = true;
+		for (size_t i=0; i < _osetz; i++)
+		{
+			// Contains a variable -- don't delete.
+			if (VARIABLE_NODE == hs[i]->getType())
+			{
+				match = false;
+				break;
+			}
+		}
+
+		if (match)
+		{
+			as->removeAtom(h);
+		}
+	}
+	return Handle::UNDEFINED;
 }
 
 RemoveLink::RemoveLink(const HandleSeq& oset,
