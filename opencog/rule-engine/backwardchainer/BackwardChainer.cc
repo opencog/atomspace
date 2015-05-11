@@ -307,7 +307,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		logger().debug("[BackwardChainer] %d new targets to be added",
 		               to_be_added_to_targets.size());
 
-		if (not to_be_added_to_targets.empty())
+		if (possible_premises.size() == 0 || not to_be_added_to_targets.empty())
 		{
 			// Add itself back to target, since this is not completely solved
 			_targets_set.insert(hgoal);

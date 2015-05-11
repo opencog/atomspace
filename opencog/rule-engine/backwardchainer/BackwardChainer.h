@@ -139,7 +139,8 @@ private:
 	// a map of a premise, to a map of its variables mapping
 	map<Handle, VarMultimap> _inference_history;
 
-	// XXX TODO will want a list to allow target selection in the future
+	// XXX TODO add information to each target stating what rules were applied
+	// and how often the target was chosen?
 	UnorderedHandleSet _targets_set;
 	std::vector<Rule> _rules_set;
 
