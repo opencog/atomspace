@@ -108,4 +108,3 @@ cat - << XXX | /usr/bin/env guile
 (make-link-tree niter)
 (define stop (current-time))
 (report-perf "binary tree, second time:" start stop niter)
-

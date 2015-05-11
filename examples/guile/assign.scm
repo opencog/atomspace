@@ -1,12 +1,9 @@
 ;
-; Guile ExecutionOutputLink example.
-; An example of using the cog-execute! function to trigger the execution
-; of ExecutationOutputLink's.  This example illustrates usig both scheme
-; and python callbacks as the black-box executables.
+; Guile assert/retract example.
+; The cog-execute! function is used to assert facts, or retract them
+; from the AtomSpace
 ;
-; See also the except.scm example to see what happens when exceptions
-; are thrown.
-;
+
 (use-modules (opencog))
 
 ; Using python code in an execution link. Be sure to set the PYTHONPATH
@@ -40,3 +37,5 @@
       (ListLink
          (ConceptNode "1")
          (ConceptNode "2"))))
+
+
