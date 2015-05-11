@@ -1,41 +1,57 @@
 ;
 ; Guile assert/retract example.
 ; The cog-execute! function is used to assert facts, or retract them
-; from the AtomSpace
+; from the AtomSpace.  The idea of asserting and retracting facts is
+; taken from ProLog, where the system as a whole behave like a database,
+; and there must be a way of adding records, or removing them from the
+; database.  So, likewise, in the AtomSpace: the AtomSpace is a database,
+; and the AddLink and RemoveLink provide a way to add and remove
+; statements when they are executed.
 ;
-
 (use-modules (opencog))
 
-; Using python code in an execution link. Be sure to set the PYTHONPATH
-; environment varialbe first, so that the cython and python libraries
-; can be found. Something similar to this should do:
-;
-; export PYTHONPATH=build/opencog/cython:./opencog/python:./opencog/python/opencog:./examples/guile
-;
-; Also, be sure that my_py_func.py is loaded.
-; XXX FIXME -- this doesn't work!???  Don't know how to fix.
-;
-(cog-execute!
-   (ExecutionOutputLink
-      (GroundedSchemaNode "py:my_py_func")
-      (ListLink
-         (ConceptNode "1")
-         (ConceptNode "2"))))
+; A utility function to print all EvaluationLinks in the AtomSpace.
+(define (show-eval-links)
+	(cog-map-type (lambda (h) (display h) #f) 'EvaluationLink))
 
-; Similar example, for embedded scheme code
-;
-(define (my-scm-func atoma atomb)
-	(display "My func called with atom arguments\n")
-	(display atoma) (display atomb)
-	(newline)
-	(ConceptNode "I'm returning this atom")
-)
-	
-(cog-execute!
-   (ExecutionOutputLink
-      (GroundedSchemaNode "scm:my-scm-func")
-      (ListLink
-         (ConceptNode "1")
-         (ConceptNode "2"))))
+; The EvaluationLink won't be added until this is executed.
+(define to-be-added
+	(AddLink
+		(TypeNode "EvaluationLink")
+		(PredicateNode "some property")
+		(ListLink
+			(ConceptNode "thing A")
+			(ConceptNode "B-dom-ness"))))
 
+; Verify that the atomspace contains no EvaluationLinks:
+(show-eval-links)
 
+; Now, actually create the EvaluationLink
+(cog-execute! to-be-added)
+
+; Take a look again:
+(show-eval-links)
+
+(define to-be-removed
+	(RemoveLink
+		(TypeNode "EvaluationLink")
+		(PredicateNode "some property")
+		(ListLink
+			(ConceptNode "thing A")
+			(ConceptNode "B-dom-ness"))))
+
+; Now, remove the EvaluationLink
+(cog-execute! to-be-removed)
+(show-eval-links)
+
+; We can now add and remove over and over:
+(cog-execute! to-be-added)
+(show-eval-links)
+
+(cog-execute! to-be-removed)
+(show-eval-links)
+
+(cog-execute! to-be-added)
+(show-eval-links)
+(cog-execute! to-be-removed)
+(show-eval-links)
