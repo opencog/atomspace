@@ -56,6 +56,7 @@ public:
 	FoldLink(Link& l);
 
    virtual Handle reduce(void);
+	virtual handle execute(AtomSpace* as) const;
 };
 
 typedef std::shared_ptr<FoldLink> FoldLinkPtr;
