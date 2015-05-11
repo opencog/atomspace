@@ -103,9 +103,10 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, const Handle& h)
 		return do_execute(as, t, lll->getOutgoingSet());
 	}
 
-	if (ADD_LINK == t)
+	// This handles both AddLink and RemoveLink
+	if (classserver().isA(t, ASSIGN_LINK))
 	{
-		return as->addAtom(AddLinkCast(h)->execute());
+		return AssignLinkCast(h)->execute(as);
 	}
 
 	// Search for additional execution links, and execute them too.
