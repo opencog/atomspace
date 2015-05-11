@@ -43,9 +43,10 @@ public:
 	void tearDown() {}
 
 	void testAdd();
+	void testRemove();
 };
 
-// Simple test 
+// Test AddLink
 void AssignUTest::testAdd()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -85,6 +86,63 @@ void AssignUTest::testAdd()
 			an(CONCEPT_NODE, "faddle"));	
 
 	TS_ASSERT(lp->getOutgoingAtom(1) == ll);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test RemoveLink
+void AssignUTest::testRemove()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+	AtomSpace as;
+
+	TS_ASSERT(as.getSize() == 0);
+
+	// Crea some links
+	al(EVALUATION_LINK,
+		an(PREDICATE_NODE, "bogosity"),
+		al(LIST_LINK,
+			an(CONCEPT_NODE, "fiddle"),		
+			an(CONCEPT_NODE, "faddle")));	
+
+	al(EVALUATION_LINK,
+		an(PREDICATE_NODE, "bogosity"),
+		al(LIST_LINK,
+			an(CONCEPT_NODE, "major"),		
+			an(CONCEPT_NODE, "minor")));	
+
+	al(EVALUATION_LINK,
+		an(PREDICATE_NODE, "bogosity"),
+		al(LIST_LINK,
+			an(CONCEPT_NODE, "quintuplets"),		
+			an(CONCEPT_NODE, "misdemenor")));	
+
+	TS_ASSERT(as.getSize() == 1+4+4+4);
+
+	// Create an RemoveLink
+	Handle hna = al(REMOVE_LINK,
+		an(TYPE_NODE, "EvaluationLink"),
+		an(PREDICATE_NODE, "bogosity"),
+		al(LIST_LINK,
+			an(CONCEPT_NODE, "quintuplets"),		
+			an(CONCEPT_NODE, "misdemenor")));	
+
+	TS_ASSERT(as.getSize() == 1+4+4+4+2);
+
+	RemoveLinkPtr rlp = RemoveLinkCast(hna);
+	TS_ASSERT(rlp != NULL);
+
+	rlp->execute(&as);
+	TS_ASSERT(as.getSize() == 1+4+4+3+2);
+printf("duude wtf %d\n", as.getSize());
+
+	HandleSeq hs;
+	as.getHandlesByType(hs, LINK, true);
+
+	for (Handle h : hs)
+	{
+		printf("Have %s\n", h->toShortString().c_str());
+	}
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
