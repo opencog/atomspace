@@ -63,7 +63,6 @@ public:
 	virtual ~FreeLink() {}
 
 	const HandleSeq& get_vars(void) { return _free_vars; }
-	virtual Handle reduce(void);
 };
 
 typedef std::shared_ptr<FreeLink> FreeLinkPtr;

@@ -5,6 +5,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 ADD_LIBRARY (clearbox SHARED
 	FoldLink.cc
 	FreeLink.cc
+	FunctionLink.cc
 	PlusLink.cc
 	TimesLink.cc
 )
@@ -29,6 +30,7 @@ ENDIF (CYGWIN)
 INSTALL (FILES
 	FoldLink.h
 	FreeLink.h
+	FunctionLink.h
 	PlusLink.h
 	TimesLink.h
 	DESTINATION "include/${PROJECT_NAME}/atoms/reduct"
