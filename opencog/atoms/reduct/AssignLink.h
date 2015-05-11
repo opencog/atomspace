@@ -25,9 +25,7 @@
 
 #include <map>
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atoms/bind/ScopeLink.h>
+#include <opencog/atoms/reduct/FunctionLink.h>
 
 namespace opencog
 {
@@ -96,8 +94,7 @@ namespace opencog
 ///         SomeAtom
 ///         OtherAtom
 ///
-class AssignLink : public Link
-// This probably should inherit from ExecutionOutputLink ...
+class AssignLink : public FunctionLink
 {
 protected:
 	void init(const HandleSeq&);
