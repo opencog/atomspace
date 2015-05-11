@@ -54,7 +54,7 @@ void AssignLink::init(const HandleSeq& oset)
 	// Cache the type and the oset
 	_link_type = classserver().getType(name);
 
-	for (size_t j=1; j< oset.size(); j++)
+	for (size_t j=1; j < oset.size(); j++)
 		_outset.push_back(oset[j]);
 
 	_osetz = _outset.size();
@@ -146,9 +146,7 @@ Handle AddLink::execute(AtomSpace* as) const
 AddLink::AddLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: AssignLink(ADD_LINK, oset, tv, av)
-{
-	init(oset);
-}
+{}
 
 AddLink::AddLink(Link &l)
 	: AssignLink(l)
@@ -161,8 +159,6 @@ AddLink::AddLink(Link &l)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a AddLink, got %s", tname.c_str());
 	}
-
-	init(l.getOutgoingSet());
 }
 
 // ============================================================
@@ -251,9 +247,7 @@ Handle RemoveLink::execute(AtomSpace* as) const
 RemoveLink::RemoveLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: AssignLink(REMOVE_LINK, oset, tv, av)
-{
-	init(oset);
-}
+{}
 
 RemoveLink::RemoveLink(Link &l)
 	: AssignLink(l)
@@ -266,8 +260,6 @@ RemoveLink::RemoveLink(Link &l)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a RemoveLink, got %s", tname.c_str());
 	}
-
-	init(l.getOutgoingSet());
 }
 
 /* ===================== END OF FILE ===================== */
