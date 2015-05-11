@@ -120,7 +120,7 @@ void AssignUTest::testRemove()
 
 	TS_ASSERT(as.getSize() == 1+4+4+4);
 
-	// Create an RemoveLink
+	// Create a RemoveLink
 	Handle hna = al(REMOVE_LINK,
 		an(TYPE_NODE, "EvaluationLink"),
 		an(PREDICATE_NODE, "bogosity"),
@@ -178,6 +178,11 @@ void AssignUTest::testAssign()
 
 	TS_ASSERT(as.getSize() == 1+4+4+4+5);
 
+	// There are three, not four eval links
+	HandleSeq evhs;
+	as.getHandlesByType(evhs, EVALUATION_LINK);
+	TS_ASSERT(evhs.size() == 3);
+
 	AssignLinkPtr rlp = AssignLinkCast(hna);
 	TS_ASSERT(rlp != NULL);
 
@@ -190,6 +195,21 @@ void AssignUTest::testAssign()
 	for (Handle h : hs)
 		printf("Have %s\n", h->toShortString().c_str());
 *****/
+
+	HandleSeq pehs;
+	as.getHandlesByType(pehs, EVALUATION_LINK);
+	TS_ASSERT(pehs.size() == 1);
+
+	LinkPtr lp = LinkCast(pehs[0]);
+
+	TS_ASSERT(lp->getOutgoingAtom(0) == an(PREDICATE_NODE, "bogosity"));
+
+	Handle ll =
+		al(LIST_LINK,
+			an(CONCEPT_NODE, "trans"),
+			an(CONCEPT_NODE, "neptunium"));
+
+	TS_ASSERT(lp->getOutgoingAtom(1) == ll);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
