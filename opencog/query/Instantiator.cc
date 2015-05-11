@@ -61,8 +61,8 @@ Handle Instantiator::walk_tree(const Handle& expr)
 
 	// Fire execution links, if found.
 	if ((EXECUTION_OUTPUT_LINK == t)
-	   or (PLUS_LINK == t)
-	   or (TIMES_LINK == t))
+	   or classserver().isA(t, FOLD_LINK)    // PlusLink, TimesLink
+	   or classserver().isA(t, ASSIGN_LINK)) // AddLink, RemoveLink
 	{
 		// The atoms being created above might not all be in the
 		// atomspace, just yet. Because we have no clue what the

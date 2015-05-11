@@ -94,22 +94,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, const Handle& h)
 	LinkPtr lll(LinkCast(h));
 	if (NULL == lll) return h;
 
-	// If its an execution link, execute it.
-	Type t = lll->getType();
-	if ((EXECUTION_OUTPUT_LINK == t)
-	   or (PLUS_LINK == t)
-	   or (TIMES_LINK == t))
-	{
-		return do_execute(as, t, lll->getOutgoingSet());
-	}
-
-	// This handles both AddLink and RemoveLink
-	if (classserver().isA(t, ASSIGN_LINK))
-	{
-		return AssignLinkCast(h)->execute(as);
-	}
-
-	// Search for additional execution links, and execute them too.
+	// Search for execution links in the oset, and execute them first.
 	// We will know that happend if the returned handle differs from
 	// the input handle.
 	std::vector<Handle> new_oset;
@@ -120,8 +105,41 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, const Handle& h)
 		new_oset.push_back(nh);
 		if (nh != ho) changed = true;
 	}
-	if (not changed) return h;
-	return as->addLink(t, new_oset);
+
+	// If the result of executing the stuff below is NOT executable,
+	// then just add return the results.  Right now, of the results
+	// are different, we add the new results to that atomspace but,
+	// XXX FIXME this is NOT obviously the right thing to do; it can
+	// lead to garbage being pumped into the atomspace, and never
+	// deleted.  Hwever, there are multiple issues that make "fixing
+	// this" difficult, so we pnt on this for now.
+	Type t = lll->getType();
+	if (not classserver().isA(t, EXECUTION_OUTPUT_LINK))
+	{
+		if (not changed) return h;
+		return as->addLink(t, new_oset);
+	}
+
+	// If we are here, then its executable.
+	if ((EXECUTION_OUTPUT_LINK == t)
+	   or (PLUS_LINK == t)
+	   or (TIMES_LINK == t))
+	{
+		return do_execute(as, t, lll->getOutgoingSet());
+	}
+
+	if (classserver().isA(t, ASSIGN_LINK))
+	{
+		// It is ever-so-slightly faster to use the unchanged
+		// version, as it caches some values ...
+		if (not changed)
+			return AssignLinkCast(h)->execute(as);
+		return do_execute(as, t, lll->getOutgoingSet());
+	}
+
+	OC_ASSERT (false,
+		"Error: Exeuction of link type %s not implemented!\n",
+		classserver().getTypeName(t).c_str());
 }
 
 // handle->double conversion
@@ -185,6 +203,21 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Type t,
 			sum += get_double(as, h);
 		}
 		return as->addAtom(createNumberNode(sum));
+	}
+	else if (ADD_LINK == t)
+	{
+		AddLinkPtr alp(createAddLink(sna));
+		return alp->execute(as);
+	}
+	else if (ASSIGN_LINK == t)
+	{
+		AssignLinkPtr alp(createAssignLink(sna));
+		return alp->execute(as);
+	}
+	else if (REMOVE_LINK == t)
+	{
+		RemoveLinkPtr alp(createRemoveLink(sna));
+		return alp->execute(as);
 	}
 
 	throw RuntimeException(TRACE_INFO,
