@@ -69,11 +69,6 @@ FunctionLink::FunctionLink(Link& l)
 	init();
 }
 
-Handle FunctionLink::reduce(void)
-{
-	throw RuntimeException(TRACE_INFO, "Not reducible!");
-}
-
 Handle FunctionLink::execute(AtomSpace* as) const
 {
 	throw RuntimeException(TRACE_INFO, "Not executable!");

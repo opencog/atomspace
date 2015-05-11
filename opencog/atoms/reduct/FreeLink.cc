@@ -109,3 +109,8 @@ void FreeLink::init(void)
 	std::set<Handle> varset;
 	find_vars(varset, _outgoing);
 }
+
+Handle FreeLink::reduce(void)
+{
+   throw RuntimeException(TRACE_INFO, "Not reducible!");
+}

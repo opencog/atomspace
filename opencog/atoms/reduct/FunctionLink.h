@@ -33,27 +33,21 @@ namespace opencog
  */
 
 /**
- * The FunctionLink provides a base class with two important methods:
- * reduce() and execute().
- *
- * The reduce() method takes the given expression, and applies
- * term reduction rules to obtain a smaller but equivalent expression.
- * There is no guarantee that reduce is normalizing or strongly
- * normalizing, but that does seem like a desirable goal.
+ * The FunctionLink provides a base class with an important method:
+ * execute().
  *
  * The execute() method executes the given expression, and returns
  * a Handle resulting from the execution.
  *
  * The difference between execution and reduction is this: an expression
  * that contains free variables will contain the same free variables (or
- * a subset of them) after reduction.  By contrast, it is not valid to
- * execute an expression that contains free variables; an error will be
- * thrown. Thus, reduction is for open sentences, execution is for
- * closed sentences.
+ * a subset of them) after reduction.  By contrast, it is (usually) not
+ * valid to execute an expression that contains free variables; usually,
+ * an error will be thrown. Thus, reduction is for open sentences,
+ * execution is for closed sentences.
  *
- * If this distinction seems a bit arbitrary, well, it is.  Right now,
- * maintaining this distinction leads to a convenient implementation,
- * but that may change.
+ * Note also: EvaluationLinks can be reduced, but they can never be
+ * executed (they can only be evaluated).
  */
 class FunctionLink : public FreeLink
 {
@@ -76,7 +70,6 @@ public:
 	FunctionLink(Link& l);
 	virtual ~FunctionLink() {}
 
-	virtual Handle reduce(void);
 	virtual Handle execute(AtomSpace* = NULL) const;
 };
 
