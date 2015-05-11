@@ -1,0 +1,90 @@
+/*
+ * tests/atomspace/AssignUTest.cxxtest
+ *
+ * Copyright (C) 2015 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/bind/AssignLink.h>
+
+using namespace opencog;
+
+// Test the assert/retract links.
+//
+class AssignUTest :  public CxxTest::TestSuite
+{
+private:
+
+public:
+	AssignUTest()
+	{
+		logger().setPrintToStdoutFlag(true);
+	}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void testAdd();
+};
+
+// Simple test 
+void AssignUTest::testAdd()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+	AtomSpace as;
+
+	TS_ASSERT(as.getSize() == 0);
+
+#define an as.addNode
+#define al as.addLink
+
+	// Create an AddLink
+	Handle hna = al(ADD_LINK,
+		an(TYPE_NODE, "EvaluationLink"),
+		an(PREDICATE_NODE, "bogosity"),
+		al(LIST_LINK,
+			an(CONCEPT_NODE, "fiddle"),		
+			an(CONCEPT_NODE, "faddle")));	
+
+	TS_ASSERT(as.getSize() == 6);
+
+	AddLinkPtr alp = AddLinkCast(hna);
+	TS_ASSERT(alp != NULL);
+
+	alp->execute(&as);
+
+	HandleSeq hs;
+	as.getHandlesByType(hs, EVALUATION_LINK);
+
+	TS_ASSERT(hs.size() == 1);
+	LinkPtr lp = LinkCast(hs[0]);
+	
+	TS_ASSERT(lp->getOutgoingAtom(0) == an(PREDICATE_NODE, "bogosity"));
+
+	Handle ll =
+		al(LIST_LINK,
+			an(CONCEPT_NODE, "fiddle"),		
+			an(CONCEPT_NODE, "faddle"));	
+
+	TS_ASSERT(lp->getOutgoingAtom(1) == ll);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}

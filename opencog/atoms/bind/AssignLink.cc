@@ -58,7 +58,7 @@ void AssignLink::init(const HandleSeq& oset)
 		_outset.push_back(oset[j]);
 
 	_osetz = _outset.size();
-} 
+}
 
 Handle AssignLink::execute(AtomSpace * as) const
 {
