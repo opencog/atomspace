@@ -172,8 +172,6 @@ FREE_LINK <- ORDERED_LINK
 // To be used with PredicateNode
 EVALUATION_LINK <- FREE_LINK
 
-EXECUTION_OUTPUT_LINK <- FREE_LINK
-
 EXECUTION_LINK <- ORDERED_LINK
 
 // Procedure, schema and predicate nodes.
@@ -224,16 +222,22 @@ GREATER_THAN_LINK <- VIRTUAL_LINK
 EQUAL_LINK <- VIRTUAL_LINK
 
 // Same idea as the VirtualLink, but for ExecutionOutputLinks.
-// Again, the only reason that this link types exists is so that the
-// pattern matcher can find them and treat them as needed.
-FUNCTION_LINK <- EXECUTION_OUTPUT_LINK
+// Recall: FreeLink simply keeps track of the free variables in an
+// ordered link.  A FunctionLink is a link that can be executed,
+// with the result of execution being some atom.  There
+// ExecutionOutPutLink is a specific kind of function: it must
+// have a GroundedSchemeNode as its first argument.  The other
+// kinds of FunctionLinks do not have this restriction: indeed,
+// the actual function they perform is implicit in the link type.
+FUNCTION_LINK <- FREE_LINK
+EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
 
 // Basic arithmetic operators
 FOLD_LINK <- FUNCTION_LINK
 PLUS_LINK <- FOLD_LINK
 TIMES_LINK <- FOLD_LINK
 
-// This is an interesting one. Its a link that must never be grounded!
+// This is an interesting one. It is a link that must never be grounded!
 // It must contain at least one VariableNode somewhere within it; that
 // is, it must be an "open sentence" and never a "closed sentence".
 // (as it would be called, if we were using the termiology of ordinary
@@ -248,7 +252,9 @@ TIMES_LINK <- FOLD_LINK
 DELETE_LINK <- FUNCTION_LINK
 
 // The Add, Assign and RemoveLink's all expect at TypeNode as the first
-// member of thier outgoing set.
+// member of thier outgoing set.  When these execute, they add or remove
+// the named type to the atomsapce.  Thus, they are like ProLog's assert
+// and retract predicates.
 ASSIGN_LINK <- FUNCTION_LINK
 ADD_LINK <- ASSIGN_LINK
 REMOVE_LINK <- ASSIGN_LINK
