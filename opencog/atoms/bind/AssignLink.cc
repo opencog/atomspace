@@ -58,7 +58,7 @@ void AssignLink::init(const HandleSeq& oset)
 		_outset.push_back(oset[j]);
 } 
 
-AtomPtr AssignLink::execute(void) const
+Handle AssignLink::execute(AtomSpace * as) const
 {
 	return createLink(_link_type, _outset);
 }
@@ -101,9 +101,11 @@ AssignLink::AssignLink(Link &l)
 
 // ============================================================
 
-AtomPtr AddLink::execute(void) const
+Handle AddLink::execute(AtomSpace* as) const
 {
-	return createLink(_link_type, _outset);
+	if (NULL == as)
+		return createLink(_link_type, _outset);
+	return as->addAtom(createLink(_link_type, _outset));
 }
 
 AddLink::AddLink(const HandleSeq& oset,
@@ -123,6 +125,43 @@ AddLink::AddLink(Link &l)
 		const std::string& tname = classserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a AddLink, got %s", tname.c_str());
+	}
+
+	init(l.getOutgoingSet());
+}
+
+// ============================================================
+
+Handler RemoveLink::execute(AtomSpace* as) const
+{
+	// Are there *any* constants in the outgoing set?
+	int narrowest = -1;
+	size_t sz = SIZE_T_MAX;
+	for (int i=0; i< _outset.size(); i++)
+	{
+	}
+
+	as->getHandlesByType(seq, _link_type)
+	return createLink(_link_type, _outset);
+}
+
+RemoveLink::RemoveLink(const HandleSeq& oset,
+                       TruthValuePtr tv, AttentionValuePtr av)
+	: AssignLink(REMOVE_LINK, oset, tv, av)
+{
+	init(oset);
+}
+
+RemoveLink::RemoveLink(Link &l)
+	: AssignLink(l)
+{
+	// Type must be as expected
+	Type tscope = l.getType();
+	if (not classserver().isA(tscope, REMOVE_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(tscope);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a RemoveLink, got %s", tname.c_str());
 	}
 
 	init(l.getOutgoingSet());

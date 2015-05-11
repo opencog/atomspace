@@ -97,6 +97,7 @@ namespace opencog
 ///         OtherAtom
 ///
 class AssignLink : public Link
+// This probably should inherit from ExecutionOutputLink ...
 {
 protected:
 	void init(const HandleSeq&);
@@ -115,7 +116,7 @@ public:
 	AssignLink(Link &l);
 
 	// Return a pointer to the atom being specified.
-	virtual AtomPtr execute(void) const;
+	virtual Handle execute(AtomSpace* = NULL) const;
 };
 
 typedef std::shared_ptr<AssignLink> AssignLinkPtr;
@@ -139,7 +140,7 @@ public:
 	AddLink(Link &l);
 
 	// Return a pointer to the atom being specified.
-	virtual AtomPtr execute(void) const;
+	virtual Handle execute(AtomSpace* = NULL) const;
 };
 
 typedef std::shared_ptr<AddLink> AddLinkPtr;
@@ -163,7 +164,7 @@ public:
 	RemoveLink(Link &l);
 
 	// Return a pointer to the atom being specified.
-	virtual AtomPtr execute(void) const;
+	virtual Handle execute(AtomSpace* = NULL) const;
 };
 
 typedef std::shared_ptr<RemoveLink> RemoveLinkPtr;
