@@ -71,3 +71,30 @@ void PlusLink::init(void)
 	knil = 0.0;
 	kons = plus;
 }
+
+static inline double get_double(AtomSpace *as, Handle h)
+{
+	// Recurse, and execute anything below...
+	FunctionLinkPtr flp(FunctionLinkCast(h));
+	if (flp)
+		h = flp->execute(as);
+
+	NumberNodePtr nnn(NumberNodeCast(h));
+	if (nnn == NULL)
+		throw RuntimeException(TRACE_INFO,
+			  "Not a number!");
+
+	return nnn->getValue();
+}
+
+Handle PlusLink::execute(AtomSpace* as) const
+{
+	double sum = 0.0;
+	for (Handle h: _outgoing)
+	{
+		sum += get_double(as, h);
+	}
+
+	if (as) return as->addAtom(createNumberNode(sum));
+	return Handle(createNumberNode(sum));
+}

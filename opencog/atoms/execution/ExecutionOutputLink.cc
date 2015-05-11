@@ -26,6 +26,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/reduct/AssignLink.h>
+#include <opencog/atoms/reduct/PlusLink.h>
+#include <opencog/atoms/reduct/TimesLink.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 
@@ -114,7 +116,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, const Handle& h)
 	// deleted.  Hwever, there are multiple issues that make "fixing
 	// this" difficult, so we pnt on this for now.
 	Type t = lll->getType();
-	if (not classserver().isA(t, EXECUTION_OUTPUT_LINK))
+	if (not classserver().isA(t, FUNCTION_LINK))
 	{
 		if (not changed) return h;
 		return as->addLink(t, new_oset);
@@ -140,26 +142,6 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, const Handle& h)
 	OC_ASSERT (false,
 		"Error: Exeuction of link type %s not implemented!\n",
 		classserver().getTypeName(t).c_str());
-}
-
-// handle->double conversion
-static inline double get_double(AtomSpace *as, const Handle& ha)
-{
-	Handle h(ha);
-
-	// Recurse, if needed: handle may be another numeric operator.
-	if (NUMBER_NODE != h->getType())
-		h = ExecutionOutputLink::do_execute(as, h);
-
-	if (NUMBER_NODE != h->getType())
-		throw RuntimeException(TRACE_INFO,
-		     "Not a number!");
-
-	NumberNodePtr nnn(NumberNodeCast(h));
-	OC_ASSERT (nnn != NULL,
-		"This should never happen; there's a bug in the code!");
-
-	return nnn->getValue();
 }
 
 /// do_execute -- execute the GroundedSchemaNode of the ExecutionOutputLink
@@ -188,21 +170,13 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Type t,
 	}
 	else if (TIMES_LINK == t)
 	{
-		double prod = 1.0;
-		for (Handle h: sna)
-		{
-			prod *= get_double(as, h);
-		}
-		return as->addAtom(createNumberNode(prod));
+		TimesLinkPtr flp(createTimesLink(sna));
+		return flp->execute(as);
 	}
 	else if (PLUS_LINK == t)
 	{
-		double sum = 0.0;
-		for (Handle h: sna)
-		{
-			sum += get_double(as, h);
-		}
-		return as->addAtom(createNumberNode(sum));
+		PlusLinkPtr flp(createPlusLink(sna));
+		return flp->execute(as);
 	}
 	else if (ADD_LINK == t)
 	{

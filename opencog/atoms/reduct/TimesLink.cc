@@ -71,3 +71,30 @@ void TimesLink::init(void)
 	knil = 1.0;
 	kons = times;
 }
+
+static inline double get_double(AtomSpace *as, Handle h)
+{
+   // Recurse, and execute anything below...
+   FunctionLinkPtr flp(FunctionLinkCast(h));
+   if (flp)
+      h = flp->execute(as);
+
+   NumberNodePtr nnn(NumberNodeCast(h));
+   if (nnn == NULL)
+      throw RuntimeException(TRACE_INFO,
+           "Not a number!");
+
+   return nnn->getValue();
+}
+
+Handle TimesLink::execute(AtomSpace* as) const
+{
+   double prod = 1.0;
+   for (Handle h: _outgoing)
+   {
+      prod *= get_double(as, h);
+   }
+
+   if (as) return as->addAtom(createNumberNode(prod));
+   return Handle(createNumberNode(prod));
+}
