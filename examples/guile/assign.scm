@@ -55,3 +55,32 @@
 (show-eval-links)
 (cog-execute! to-be-removed)
 (show-eval-links)
+
+; ------------------------------------------------
+; The AssignLink combines the add and remove into one.
+(define assign-b
+	(AssignLink
+		(TypeNode "EvaluationLink")
+		(PredicateNode "some property")
+		(ListLink
+			(ConceptNode "thing A")
+			(ConceptNode "alternative B"))))
+
+(define assign-v
+	(AssignLink
+		(TypeNode "EvaluationLink")
+		(PredicateNode "some property")
+		(ListLink
+			(ConceptNode "thing A")
+			(ConceptNode "The V alternative"))))
+
+(cog-execute! assign-b)
+(show-eval-links)
+
+(cog-execute! assign-v)
+(show-eval-links)
+
+(cog-execute! assign-b)
+(show-eval-links)
+
+; ... and so on, ad infinitum
