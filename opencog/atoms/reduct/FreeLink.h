@@ -48,6 +48,10 @@ protected:
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
+	FreeLink(Type, const Handle& a,
+	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
 	FreeLink(Type, const Handle& a, const Handle& b,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());

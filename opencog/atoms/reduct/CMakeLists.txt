@@ -3,6 +3,7 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (clearbox SHARED
+	AssignLink.cc
 	FoldLink.cc
 	FreeLink.cc
 	FunctionLink.cc
@@ -28,6 +29,7 @@ ELSE (CYGWIN)
 ENDIF (CYGWIN)
 
 INSTALL (FILES
+	AssignLink.h
 	FoldLink.h
 	FreeLink.h
 	FunctionLink.h

@@ -39,7 +39,6 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/TypeNode.h>
-#include <opencog/atoms/bind/AssignLink.h>
 #include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/DefineLink.h>
@@ -48,6 +47,7 @@
 #include <opencog/atoms/bind/VariableList.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
+#include <opencog/atoms/reduct/AssignLink.h>
 #include <opencog/atoms/reduct/PlusLink.h>
 #include <opencog/atoms/reduct/TimesLink.h>
 #include <opencog/util/exceptions.h>
