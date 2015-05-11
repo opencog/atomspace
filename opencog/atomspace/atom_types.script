@@ -246,4 +246,9 @@ TIMES_LINK <- FOLD_LINK
 // grounded term is deleted.
 //
 DELETE_LINK <- FUNCTION_LINK
-CREATE_LINK <- FUNCTION_LINK
+
+// The Add, Assign and RemoveLink's all expect at TypeNode as the first
+// member of thier outgoing set.
+ASSIGN_LINK <- FUNCTION_LINK
+ADD_LINK <- ASSIGN_LINK
+REMOVE_LINK <- ASSIGN_LINK

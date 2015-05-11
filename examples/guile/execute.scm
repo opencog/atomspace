@@ -1,9 +1,12 @@
 ;
 ; Guile ExecutionOutputLink example.
-; The cog-execute! function is demonstrated.  See also the except.scm
-; example to see what happens when things
+; An example of using the cog-execute! function to trigger the execution
+; of ExecutationOutputLink's.  This example illustrates usig both scheme
+; and python callbacks as the black-box executables.
 ;
-
+; See also the except.scm example to see what happens when exceptions
+; are thrown.
+;
 (use-modules (opencog))
 
 ; Using python code in an execution link. Be sure to set the PYTHONPATH
@@ -37,5 +40,3 @@
       (ListLink
          (ConceptNode "1")
          (ConceptNode "2"))))
-
-

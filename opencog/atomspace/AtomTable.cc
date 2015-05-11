@@ -39,9 +39,9 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/TypeNode.h>
+#include <opencog/atoms/bind/AssignLink.h>
 #include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/BindLink.h>
-#include <opencog/atoms/bind/CreateLink.h>
 #include <opencog/atoms/bind/DefineLink.h>
 #include <opencog/atoms/bind/DeleteLink.h>
 #include <opencog/atoms/bind/ScopeLink.h>
@@ -295,15 +295,18 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     } else if (TYPE_NODE == atom_type) {
         if (NULL == TypeNodeCast(atom))
             atom = createTypeNode(*NodeCast(atom));
+    } else if (ADD_LINK == atom_type) {
+        if (NULL == AddLinkCast(atom))
+            atom = createAddLink(*LinkCast(atom));
+    } else if (ASSIGN_LINK == atom_type) {
+        if (NULL == AssignLinkCast(atom))
+            atom = createAssignLink(*LinkCast(atom));
     } else if (BIND_LINK == atom_type) {
         if (NULL == BindLinkCast(atom))
             atom = createBindLink(*LinkCast(atom));
     } else if (BETA_REDEX == atom_type) {
         if (NULL == BetaRedexCast(atom))
             atom = createBetaRedex(*LinkCast(atom));
-    } else if (CREATE_LINK == atom_type) {
-        if (NULL == CreateLinkCast(atom))
-            atom = createCreateLink(*LinkCast(atom));
     } else if (DEFINE_LINK == atom_type) {
         if (NULL == DefineLinkCast(atom))
             atom = createDefineLink(*LinkCast(atom));
@@ -321,6 +324,9 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         if (NULL == ExecutionOutputLinkCast(atom))
             atom = createExecutionOutputLink(*LinkCast(atom));
 */
+    } else if (REMOVE_LINK == atom_type) {
+        if (NULL == RemoveLinkCast(atom))
+            atom = createRemoveLink(*LinkCast(atom));
     } else if (SATISFACTION_LINK == atom_type) {
         if (NULL == SatisfactionLinkCast(atom))
             atom = createSatisfactionLink(*LinkCast(atom));
@@ -359,12 +365,14 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             }
         } else {
             LinkPtr lll(LinkCast(atom));
-            if (BIND_LINK == atom_type) {
+            if (ADD_LINK == atom_type) {
+                atom = createAddLink(*lll);
+            } else if (ASSIGN_LINK == atom_type) {
+                atom = createAssignLink(*lll);
+            } else if (BIND_LINK == atom_type) {
                 atom = createBindLink(*lll);
             } else if (BETA_REDEX == atom_type) {
                 atom = createBetaRedex(*lll);
-            } else if (CREATE_LINK == atom_type) {
-                atom = createCreateLink(*lll);
             } else if (DEFINE_LINK == atom_type) {
                 atom = createDefineLink(*lll);
             } else if (DELETE_LINK == atom_type) {
@@ -377,6 +385,8 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             } else if (EXECUTION_OUTPUT_LINK == atom_type) {
                 atom = createExecutionOutputLink(*lll);
 */
+            } else if (REMOVE_LINK == atom_type) {
+                atom = createRemoveLink(*lll);
             } else if (SATISFACTION_LINK == atom_type) {
                 atom = createSatisfactionLink(*lll);
             } else if (SCOPE_LINK == atom_type) {

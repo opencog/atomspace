@@ -403,4 +403,3 @@ void RemoveUTest::testTails()
 	as2.clear();
 	logger().info("END TEST: %s", __FUNCTION__);
 }
-
