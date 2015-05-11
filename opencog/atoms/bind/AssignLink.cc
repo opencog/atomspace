@@ -62,8 +62,40 @@ void AssignLink::init(const HandleSeq& oset)
 
 Handle AssignLink::execute(AtomSpace * as) const
 {
-	// return Handle(createLink(_link_type, _outset));
-	return Handle::UNDEFINED;
+	// XXX This is probably wrong ... if the as is null, we should
+	// probably use the atomspace that this link is in, right?
+	// We need to make a decision here and in many other places...
+	if (NULL == as)
+		return Handle(createLink(_link_type, _outset));
+
+	// First, remove everything resembling this pattern.
+	IncomingSet iset = _outset[0]->getIncomingSet();
+	for (const LinkPtr& lp : iset)
+	{
+		// Wrong type, can't delete that!
+		if (_link_type != lp->getType()) continue;
+		// Wrong Arity, can't delete that either!
+		if (_osetz != lp->getArity()) continue;
+
+		const HandleSeq& hs = lp->getOutgoingSet();
+		if (hs[0] != _outset[0]) continue;
+
+		bool match = true;
+		for (size_t i=1; i < _osetz; i++)
+		{
+			// Contains a variable, or doesn't match -- don't delete.
+			if (VARIABLE_NODE == hs[i]->getType())
+			{
+				match = false;
+				break;
+			}
+		}
+		if (not match) continue;
+
+		as->removeAtom(Handle(lp));
+	}
+
+	return as->addAtom(createLink(_link_type, _outset));
 }
 
 AssignLink::AssignLink(const HandleSeq& oset,
@@ -162,7 +194,7 @@ Handle RemoveLink::execute(AtomSpace* as) const
 		{
 			// Wrong type, can't delete that!
 			if (_link_type != lp->getType()) continue;
-			// Wrong Arity, too!
+			// Wrong Arity, can't delete that either!
 			if (_osetz != lp->getArity()) continue;
 
 			const HandleSeq& hs = lp->getOutgoingSet();
@@ -179,11 +211,9 @@ Handle RemoveLink::execute(AtomSpace* as) const
 					break;
 				}
 			}
+			if (not match) continue;
 
-			if (match)
-			{
-				as->removeAtom(Handle(lp));
-			}
+			as->removeAtom(Handle(lp));
 		}
 		return Handle::UNDEFINED;
 	}
@@ -212,10 +242,8 @@ Handle RemoveLink::execute(AtomSpace* as) const
 			}
 		}
 
-		if (match)
-		{
-			as->removeAtom(h);
-		}
+		if (not match) continue;
+		as->removeAtom(h);
 	}
 	return Handle::UNDEFINED;
 }
