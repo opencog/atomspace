@@ -1,11 +1,12 @@
 ;
 ; Guile assert/retract example.
+;
 ; The cog-execute! function is used to assert facts, or retract them
 ; from the AtomSpace.  The idea of asserting and retracting facts is
 ; taken from ProLog, where the system as a whole behave like a database,
 ; and there must be a way of adding records, or removing them from the
 ; database.  So, likewise, in the AtomSpace: the AtomSpace is a database,
-; and the AddLink and RemoveLink provide a way to add and remove
+; and the InsertLink and RemoveLink provide a way to add and remove
 ; statements when they are executed.
 ;
 (use-modules (opencog))
@@ -16,7 +17,7 @@
 
 ; The EvaluationLink won't be added until this is executed.
 (define to-be-added
-	(AddLink
+	(InsertLink
 		(TypeNode "EvaluationLink")
 		(PredicateNode "some property")
 		(ListLink
