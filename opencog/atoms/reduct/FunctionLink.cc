@@ -82,22 +82,21 @@ Handle FunctionLink::do_execute(AtomSpace* as, const Handle& h)
 {
 	// If h is of the right form already, its just a matter of calling
 	// it.  Otherwise, we have to create
-	FunctionLinkPtr flp(FunctionLinkCast(factory(h)));
+	FunctionLinkPtr flp(FunctionLinkCast(factory(LinkCast(h))));
 	if (NULL == flp)
 		throw RuntimeException(TRACE_INFO, "Not executable!");
 
 	return flp->execute(as);
 }
 
-Handle FunctionLink::factory(Handle h)
+LinkPtr FunctionLink::factory(LinkPtr lp)
 {
 	// If h is of the right form already, its just a matter of calling
 	// it.  Otherwise, we have to create
-	FunctionLinkPtr flp(FunctionLinkCast(h));
-	if (flp) return h;
+	FunctionLinkPtr flp(FunctionLinkCast(lp));
+	if (flp) return lp;
 
-	LinkPtr lp(LinkCast(h));
-	return factory(lp->getType(), lp->getOutgoingSet());
+	return LinkCast(factory(lp->getType(), lp->getOutgoingSet()));
 }
 
 // Basic type factory.
