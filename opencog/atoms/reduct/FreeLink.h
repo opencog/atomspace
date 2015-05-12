@@ -36,6 +36,24 @@ namespace opencog
  * The FreeLink records all of the free variables that occur within
  * (underneath) it, in traversal order. The names of those variables
  * are placed in _free_vars.
+ *
+ * The FreeLink, as a base class, also provides an important method:
+ * reduce()
+ *
+ * The reduce() method takes the given expression, and applies
+ * term reduction rules to obtain a smaller but equivalent expression.
+ * Ideally, the reduced expression is the "minimal" such expression.
+ * There is no guarantee that reduce is normalizing or strongly
+ * normalizing, but that does seem like a desirable goal.
+ *
+ * An expression that contains free variables will contain the same
+ * free variables (or a subset of them) after reduction.
+ *
+ * Note that both EvaluationLinks and ExecutionOutputLinks are
+ * reducible, and the result of reduction is always another Atom.
+ * This is in contrast to the concept of evaluation/execution:
+ * EvaluationLinks, when evaluated, yield truth values, while
+ * ExecutionOutputLinks, when executed, yield Atoms.
  */
 class FreeLink : public Link
 {
@@ -45,6 +63,10 @@ protected:
 	HandleSeq _free_vars;
 	void init(void);
 	FreeLink(Type, const HandleSeq& oset,
+	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
+	FreeLink(Type, const Handle& a,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
@@ -63,6 +85,7 @@ public:
 	virtual ~FreeLink() {}
 
 	const HandleSeq& get_vars(void) { return _free_vars; }
+
 	virtual Handle reduce(void);
 };
 

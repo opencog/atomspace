@@ -24,7 +24,7 @@
 #define _OPENCOG_FOLD_LINK_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/reduct/FreeLink.h>
+#include <opencog/atoms/reduct/FunctionLink.h>
 
 namespace opencog
 {
@@ -36,7 +36,7 @@ namespace opencog
  * The FoldLink implements the arithmetic operations of plus and times.
  * (Its not currently a general fold; it only works with numbers.)
  */
-class FoldLink : public FreeLink
+class FoldLink : public FunctionLink
 {
 protected:
 	double knil;
@@ -56,6 +56,7 @@ public:
 	FoldLink(Link& l);
 
    virtual Handle reduce(void);
+	virtual Handle execute(AtomSpace* as) const;
 };
 
 typedef std::shared_ptr<FoldLink> FoldLinkPtr;

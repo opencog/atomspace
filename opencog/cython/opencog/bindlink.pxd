@@ -5,6 +5,7 @@ cdef extern from "opencog/cython/opencog/BindlinkStub.h" namespace "opencog":
     #   Handle stub_bindlink(AtomSpace*, Handle);
     #
     cdef cHandle c_stub_bindlink "stub_bindlink" (cAtomSpace*, cHandle)
+    cdef cHandle c_execute_atom "do_execute"(cAtomSpace*, cHandle)
 
 
 cdef extern from "opencog/query/BindLink.h" namespace "opencog":
@@ -22,6 +23,3 @@ cdef extern from "opencog/query/BindLink.h" namespace "opencog":
 
 cdef extern from "opencog/atoms/execution/EvaluationLink.h" namespace "opencog":
     tv_ptr c_evaluate_atom "opencog::EvaluationLink::do_evaluate"(cAtomSpace*, cHandle)
-
-cdef extern from "opencog/atoms/execution/ExecutionOutputLink.h" namespace "opencog":
-    cHandle c_execute_atom "opencog::ExecutionOutputLink::do_execute"(cAtomSpace*, cHandle)

@@ -52,6 +52,16 @@ FreeLink::FreeLink(Type t, const HandleSeq& oset,
 	init();
 }
 
+FreeLink::FreeLink(Type t, const Handle& a,
+                   TruthValuePtr tv,
+                   AttentionValuePtr av)
+    : Link(t, a, tv, av)
+{
+	if (not classserver().isA(t, FREE_LINK))
+		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
+	init();
+}
+
 FreeLink::FreeLink(Type t, const Handle& a, const Handle& b,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
@@ -102,5 +112,5 @@ void FreeLink::init(void)
 
 Handle FreeLink::reduce(void)
 {
-	throw RuntimeException(TRACE_INFO, "Not reducible!");
+   throw RuntimeException(TRACE_INFO, "Not reducible!");
 }

@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/reduct/FunctionLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 
 #include "Instantiator.h"
@@ -59,31 +60,43 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			oset_results.push_back(hg);
 	}
 
+	if (DELETE_LINK == t)
+	{
+		for (Handle h: oset_results)
+			_as->removeAtom(h, true);
+
+		return Handle::UNDEFINED;
+	}
+
 	// Fire execution links, if found.
-	if ((EXECUTION_OUTPUT_LINK == t)
-	   or (PLUS_LINK == t)
-	   or (TIMES_LINK == t))
+	if (classserver().isA(t, FUNCTION_LINK))
 	{
 		// The atoms being created above might not all be in the
 		// atomspace, just yet. Because we have no clue what the
 		// ExecutionOutputLink might do, we had best put them
 		// there now. Just as well, because it seems the scheme
 		// (and python) bindings get tripped up by the UUID==-1
-		// of uninserted atoms.
+		// of uninserted atoms.  XXX Well, this arguably means that
+		// scheme and python are broken.  We shouldn't have to do
+		// this, as it leaves garbage littered in the atomspace.
+		// XXX FIXME later.
 		size_t sz = oset_results.size();
 		for (size_t i=0; i< sz; i++)
 			oset_results[i] = _as->addAtom(oset_results[i]);
 
+		// ExecutionOutputLinks are not handled by the factory below.
+		// This is due to a circular shared-libarary dependency..
+		if (EXECUTION_OUTPUT_LINK == t)
+		{
+			ExecutionOutputLinkPtr eolp(createExecutionOutputLink(oset_results));
+			return eolp->execute(_as);
+		}
+
 		// This throws if it can't figure out the schema ...
 		// Let the throw pass right on up the stack.
-		return ExecutionOutputLink::do_execute(_as, t, oset_results);
-	}
-	else if (DELETE_LINK == t)
-	{
-		for (Handle h: oset_results)
-			_as->removeAtom(h, true);
-
-		return Handle::UNDEFINED;
+		Handle hl(FunctionLink::factory(t, oset_results));
+		FunctionLinkPtr flp(FunctionLinkCast(hl));
+		return flp->execute(_as);
 	}
 
 	// Now create a duplicate link, but with an outgoing set where
