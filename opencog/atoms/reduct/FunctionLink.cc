@@ -102,11 +102,11 @@ LinkPtr FunctionLink::factory(LinkPtr lp)
 // Basic type factory.
 Handle FunctionLink::factory(Type t, const HandleSeq& seq)
 {
-	if (ADD_LINK == t)
-		return Handle(createAddLink(seq));
-
 	if (ASSIGN_LINK == t)
 		return Handle(createAssignLink(seq));
+
+	if (INSERT_LINK == t)
+		return Handle(createInsertLink(seq));
 
 	if (PLUS_LINK == t)
 		return Handle(createPlusLink(seq));

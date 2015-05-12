@@ -42,13 +42,13 @@ public:
 
 	void tearDown() {}
 
-	void testAdd();
+	void testInsert();
 	void testRemove();
 	void testAssign();
 };
 
-// Test AddLink
-void AssignUTest::testAdd()
+// Test InsertLink
+void AssignUTest::testInsert()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 	AtomSpace as;
@@ -58,8 +58,8 @@ void AssignUTest::testAdd()
 #define an as.addNode
 #define al as.addLink
 
-	// Create an AddLink
-	Handle hna = al(ADD_LINK,
+	// Create an InsertLink
+	Handle hna = al(INSERT_LINK,
 		an(TYPE_NODE, "EvaluationLink"),
 		an(PREDICATE_NODE, "bogosity"),
 		al(LIST_LINK,
@@ -68,7 +68,7 @@ void AssignUTest::testAdd()
 
 	TS_ASSERT(as.getSize() == 6);
 
-	AddLinkPtr alp = AddLinkCast(hna);
+	InsertLinkPtr alp = InsertLinkCast(hna);
 	TS_ASSERT(alp != NULL);
 
 	alp->execute(&as);

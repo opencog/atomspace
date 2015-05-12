@@ -33,21 +33,21 @@ namespace opencog
  *  @{
  */
 
-/// The AddLink is used to create atoms at some defered time in the
+/// The InsertLink is used to create atoms at some defered time in the
 /// future, while still being able to describe and talk about them at
 /// the present time. The issue that it is solving is this: when an
 /// atom is explicitly named, it also becomes a member of the AtomSpace;
 /// that is, it is brought into existance by naming it.  The usual
 /// mechanism for deferring the creation of an atom is to place a
 /// VariableNode in it; theatom is then created later, when the Variable
-/// is given a value. The AddLink provides an alternative mechanism,
+/// is given a value. The InsertLink provides an alternative mechanism,
 /// without requiring the use of VariableNodes.
 ///
-/// The AddLink is a kind of executable link; that it, upon
+/// The InsertLink is a kind of executable link; that it, upon
 /// execution, it transforms into another link.  It should have the
 /// following form:
 ///
-///    AddLink
+///    InsertLink
 ///         TypeNode "SomeLink"
 ///         SomeAtom
 ///         OtherAtom
@@ -58,22 +58,22 @@ namespace opencog
 ///         SomeAtom
 ///         OtherAtom
 ///
-/// The RemoveLink is like the AddLink, except that it causes the
+/// The RemoveLink is like the InsertLink, except that it causes the
 /// indicated form to be deleted (removed from the atomspace). If the
 /// RemoveLink contains variables, and those variables are free, then
 /// all matching paterns will be deleted from the AtomSpace.
 ///
-/// The AddLink vaguely resembles the ProLog predicate "assert()" with
+/// The InsertLink vaguely resembles the ProLog predicate "assert()" with
 /// respect to what it does to the atomspace database.  The RemoveLink
 /// behaves like the ProLog "retract()" predicate.
 ///
-/// The AssignLink combines the Add and Remove into one.  Since the
+/// The AssignLink combines the Insert and Remove into one.  Since the
 /// format does not allow a close specification of the exact link to be
 /// removed, it will remove all atoms fitting the general pattern,
 /// i.e. those links having the indicated link type, the same first
 /// atom (SomeAtom, above), and the same arity.  It will not remove
 /// those links containing variables, as these are not concrete
-/// (closed), but open.  It will do this before performing the Add.
+/// (closed), but open.  It will do this before performing the Insert.
 ///
 /// To be precise:
 ///
@@ -89,7 +89,7 @@ namespace opencog
 ///         SomeAtom
 ///         VariableNode "$free"
 ///
-///     AddLink
+///     InsertLink
 ///         TypeNode "SomeLink"
 ///         SomeAtom
 ///         OtherAtom
@@ -126,29 +126,29 @@ static inline AssignLinkPtr AssignLinkCast(AtomPtr a)
 // XXX temporary hack ...
 #define createAssignLink std::make_shared<AssignLink>
 
-class AddLink : public AssignLink
+class InsertLink : public AssignLink
 {
 protected:
 
 public:
-	AddLink(const HandleSeq&,
+	InsertLink(const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	AddLink(Link &l);
+	InsertLink(Link &l);
 
 	// Return a pointer to the atom being specified.
 	virtual Handle execute(AtomSpace* = NULL) const;
 };
 
-typedef std::shared_ptr<AddLink> AddLinkPtr;
-static inline AddLinkPtr AddLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<AddLink>(a); }
-static inline AddLinkPtr AddLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<AddLink>(a); }
+typedef std::shared_ptr<InsertLink> InsertLinkPtr;
+static inline InsertLinkPtr InsertLinkCast(const Handle& h)
+	{ AtomPtr a(h); return std::dynamic_pointer_cast<InsertLink>(a); }
+static inline InsertLinkPtr InsertLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<InsertLink>(a); }
 
 // XXX temporary hack ...
-#define createAddLink std::make_shared<AddLink>
+#define createInsertLink std::make_shared<InsertLink>
 
 class RemoveLink : public AssignLink
 {

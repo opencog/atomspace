@@ -140,28 +140,28 @@ Handle AssignLink::execute(AtomSpace * as) const
 
 // ============================================================
 
-Handle AddLink::execute(AtomSpace* as) const
+Handle InsertLink::execute(AtomSpace* as) const
 {
 	if (NULL == as)
 		return Handle(createLink(_link_type, _outset));
 	return as->addAtom(createLink(_link_type, _outset));
 }
 
-AddLink::AddLink(const HandleSeq& oset,
+InsertLink::InsertLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: AssignLink(ADD_LINK, oset, tv, av)
+	: AssignLink(INSERT_LINK, oset, tv, av)
 {}
 
-AddLink::AddLink(Link &l)
+InsertLink::InsertLink(Link &l)
 	: AssignLink(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
-	if (not classserver().isA(tscope, ADD_LINK))
+	if (not classserver().isA(tscope, INSERT_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting a AddLink, got %s", tname.c_str());
+			"Expecting a InsertLink, got %s", tname.c_str());
 	}
 }
 

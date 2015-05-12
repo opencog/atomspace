@@ -256,5 +256,5 @@ DELETE_LINK <- FUNCTION_LINK
 // the named type to the atomsapce.  Thus, they are like ProLog's assert
 // and retract predicates.
 ASSIGN_LINK <- FUNCTION_LINK
-ADD_LINK <- ASSIGN_LINK
+INSERT_LINK <- ASSIGN_LINK
 REMOVE_LINK <- ASSIGN_LINK
