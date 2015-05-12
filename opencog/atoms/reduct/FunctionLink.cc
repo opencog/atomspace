@@ -30,24 +30,20 @@
 
 using namespace opencog;
 
-FunctionLink::FunctionLink(const HandleSeq& oset,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : FreeLink(FUNCTION_LINK, oset, tv, av)
-{
-}
-
-FunctionLink::FunctionLink(const Handle& a,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : FreeLink(FUNCTION_LINK, a, tv, av)
-{
-}
-
 FunctionLink::FunctionLink(Type t, const HandleSeq& oset,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
     : FreeLink(t, oset, tv, av)
+{
+	if (not classserver().isA(t, FUNCTION_LINK))
+		throw InvalidParamException(TRACE_INFO, "Expecting a FunctionLink");
+	init();
+}
+
+FunctionLink::FunctionLink(Type t, const Handle& a,
+                   TruthValuePtr tv,
+                   AttentionValuePtr av)
+    : FreeLink(t, a, tv, av)
 {
 	if (not classserver().isA(t, FUNCTION_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FunctionLink");

@@ -56,17 +56,15 @@ protected:
 	             TruthValuePtr tv = TruthValue::NULL_TV(),
 	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	FunctionLink(Type, const Handle& a, const Handle& b,
-	             TruthValuePtr tv = TruthValue::NULL_TV(),
-	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-public:
-	FunctionLink(const HandleSeq& oset,
-	             TruthValuePtr tv = TruthValue::NULL_TV(),
-	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-	FunctionLink(const Handle& a,
+	FunctionLink(Type, const Handle& a,
 	             TruthValuePtr tv = TruthValue::NULL_TV(),
 	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
+	FunctionLink(Type, const Handle& a, const Handle& b,
+	             TruthValuePtr tv = TruthValue::NULL_TV(),
+	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
+public:
 	FunctionLink(Link& l);
 	virtual ~FunctionLink() {}
 
