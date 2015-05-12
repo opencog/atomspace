@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atoms/reduct/FunctionLink.h>
+#include <opencog/atoms/execution/ExecutionOutputLink.h>
 
 #include "Instantiator.h"
 
@@ -82,6 +83,14 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		size_t sz = oset_results.size();
 		for (size_t i=0; i< sz; i++)
 			oset_results[i] = _as->addAtom(oset_results[i]);
+
+		// ExecutionOutputLinks are not handled by the factory below.
+		// This is due to a circular shared-libarary dependency..
+		if (EXECUTION_OUTPUT_LINK == t)
+		{
+			ExecutionOutputLinkPtr eolp(createExecutionOutputLink(oset_results));
+			return eolp->execute(_as);
+		}
 
 		// This throws if it can't figure out the schema ...
 		// Let the throw pass right on up the stack.
