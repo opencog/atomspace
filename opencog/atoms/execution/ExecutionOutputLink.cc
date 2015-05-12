@@ -124,8 +124,12 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 			if (EXECUTION_OUTPUT_LINK == ho->getType())
 			{
 				ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(ho));
-				if (eolp)
-					nh = eolp->execute(as);
+				if (NULL == eolp)
+				{
+					LinkPtr lp(LinkCast(ho));
+					eolp = createExecutionOutputLink(*lp);
+				}
+				nh = eolp->execute(as);
 			}
 			else
 			{
