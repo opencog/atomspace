@@ -44,8 +44,7 @@ private:
 
     JsonicControlPolicyParamLoader* _cpolicy_loader;
 
-	// TODO: this is wrong, we need a more flexible way to define that
-    string _conf_path = "examples/rule-engine/cpolicy.json";
+	string _conf_path;
 
     FCMemory _fcmem; //Stores history
     Logger * _log;

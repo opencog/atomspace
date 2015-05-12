@@ -33,7 +33,7 @@
 using namespace opencog;
 
 ForwardChainer::ForwardChainer(AtomSpace * as, const string& conf_path) :
-        _as(as), _rec(_as), _fcmem(_as)
+	_as(as), _rec(_as), _conf_path(conf_path), _fcmem(_as)
 {
     init();
 }
