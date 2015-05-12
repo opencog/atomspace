@@ -117,9 +117,22 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		for (Handle ho : largs->getOutgoingSet())
 		{
 			Handle nh(ho);
-			FunctionLinkPtr flp(FunctionLinkCast(ho));
-			if (flp)
-				nh = flp->execute(as);
+
+			// Special-case, to avoid a circular share library dependency
+			// with the python libraries. XXX FIXME the FunctionLink should
+			// be handling this, instead of the special case.
+			if (EXECUTION_OUTPUT_LINK == ho->getType())
+			{
+				ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(ho));
+				if (eolp)
+					nh = eolp->execute(as);
+			}
+			else
+			{
+				FunctionLinkPtr flp(FunctionLinkCast(ho));
+				if (flp)
+					nh = flp->execute(as);
+			}
 			new_oset.push_back(nh);
 			if (nh != ho) changed = true;
 		}
