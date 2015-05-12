@@ -86,7 +86,7 @@ ExecutionOutputLink::ExecutionOutputLink(Link& l)
 /// This method will then invoke "func_name" on the provided ListLink
 /// of arguments to the function.
 ///
-Handle ExecutionOutputLink::execute(AtomSpace* as)
+Handle ExecutionOutputLink::execute(AtomSpace* as) const
 {
 	return do_execute(as, _outgoing[0], _outgoing[1]);
 }

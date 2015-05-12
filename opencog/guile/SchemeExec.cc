@@ -9,7 +9,7 @@
 
 #include <cstddef>
 #include <libguile.h>
-#include <opencog/atoms/execution/ExecutionOutputLink.h>
+#include <opencog/atoms/reduct/FunctionLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 
 #include "SchemeEval.h"
@@ -83,9 +83,9 @@ SCM SchemeSmob::ss_execute (SCM satom)
 	// with syntax errors.
 	try
 	{
-		FreeLinkPtr fff(FreeLinkCast(h));
+		FunctionLinkPtr fff(FunctionLinkCast(h));
 		if (NULL == fff)
-			fff = createFreeLink(h);
+			fff = createFunctionLink(h);
 		Handle h(fff->execute(atomspace));
 		return handle_to_scm(h);
 	}

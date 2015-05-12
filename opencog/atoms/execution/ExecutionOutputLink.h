@@ -48,7 +48,7 @@ public:
 
 	ExecutionOutputLink(Link& l);
 
-	virtual Handle execute(AtomSpace* as) const;
+	virtual Handle execute(AtomSpace* = NULL) const;
 };
 
 typedef std::shared_ptr<ExecutionOutputLink> ExecutionOutputLinkPtr;

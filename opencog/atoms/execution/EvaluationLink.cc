@@ -24,10 +24,10 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atoms/NumberNode.h>
+#include <opencog/atoms/reduct/FunctionLink.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 #include "EvaluationLink.h"
-#include "ExecutionOutputLink.h"
 
 using namespace opencog;
 
@@ -74,10 +74,10 @@ static TruthValuePtr greater(AtomSpace* as, LinkPtr ll)
 	Handle h1(ll->getOutgoingAtom(0));
 	Handle h2(ll->getOutgoingAtom(1));
 	if (NUMBER_NODE != h1->getType())
-		h1 = ExecutionOutputLink::do_execute(as, h1);
+		h1 = FunctionLink::do_execute(as, h1);
 
 	if (NUMBER_NODE != h2->getType())
-		h2 = ExecutionOutputLink::do_execute(as, h2);
+		h2 = FunctionLink::do_execute(as, h2);
 
 	NumberNodePtr n1(NumberNodeCast(h1));
 	NumberNodePtr n2(NumberNodeCast(h2));

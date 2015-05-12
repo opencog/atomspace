@@ -23,5 +23,5 @@ cdef extern from "opencog/query/BindLink.h" namespace "opencog":
 cdef extern from "opencog/atoms/execution/EvaluationLink.h" namespace "opencog":
     tv_ptr c_evaluate_atom "opencog::EvaluationLink::do_evaluate"(cAtomSpace*, cHandle)
 
-cdef extern from "opencog/atoms/execution/ExecutionOutputLink.h" namespace "opencog":
-    cHandle c_execute_atom "opencog::ExecutionOutputLink::do_execute"(cAtomSpace*, cHandle)
+cdef extern from "opencog/atoms/reduct/FunctionLink.h" namespace "opencog":
+    cHandle c_execute_atom "opencog::FunctionLink::do_execute"(cAtomSpace*, cHandle)
