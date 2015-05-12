@@ -117,5 +117,14 @@ Handle FunctionLink::factory(Type t, const HandleSeq& seq)
 	if (TIMES_LINK == t)
 		return Handle(createTimesLink(seq));
 
+	// XXX FIXME In principle, we should manufacture the
+	// ExecutionOutputLink as well. In practice, we can't, due to a
+	// circular shared library dependency between python and itself.
+	// (Python depends on ExecutionOutputLink and ExecutionOutputLink
+	// depends on python. Whoops!)
+	if (EXECUTION_OUTPUT_LINK == t)
+		// return Handle(createExecutionOutputLink(seq));
+		throw RuntimeException(TRACE_INFO, "Can't be a factory for this!");
+
 	throw RuntimeException(TRACE_INFO, "Not executable!");
 }

@@ -306,11 +306,17 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     } else if (DELETE_LINK == atom_type) {
         if (NULL == DeleteLinkCast(atom))
             atom = createDeleteLink(*LinkCast(atom));
-/*
     } else if (EVALUATION_LINK == atom_type) {
+/*
         if (NULL == EvaluationLinkCast(atom))
             atom = createEvaluationLink(*LinkCast(atom));
+*/
     } else if (EXECUTION_OUTPUT_LINK == atom_type) {
+/*
+        XXX FIXME: cannot do this, due to a circular chared library
+        dependency between python and itself: python depends on
+        ExecutionOutputLink, and ExecutionOutputLink depends on python.
+        Boo.  I tried fixing this, but it is hard, somehow.
         if (NULL == ExecutionOutputLinkCast(atom))
             atom = createExecutionOutputLink(*LinkCast(atom));
 */
@@ -360,19 +366,19 @@ Handle AtomTable::add(AtomPtr atom, bool async)
                 atom = createDefineLink(*lll);
             } else if (DELETE_LINK == atom_type) {
                 atom = createDeleteLink(*lll);
-/*
             } else if (EVALUATION_LINK == atom_type) {
-                atom = createEvaluationLink(*lll);
+                // atom = createEvaluationLink(*lll);
+                atom = createLink(*lll);
             } else if (EXECUTION_OUTPUT_LINK == atom_type) {
-                atom = createExecutionOutputLink(*lll);
-*/
+                // atom = createExecutionOutputLink(*lll);
+                atom = createLink(*lll);
             } else if (SATISFACTION_LINK == atom_type) {
                 atom = createSatisfactionLink(*lll);
             } else if (SCOPE_LINK == atom_type) {
                 atom = createScopeLink(*lll);
             } else if (VARIABLE_LIST == atom_type) {
                 atom = createVariableList(*lll);
-             } else if (classserver().isA(atom_type, FUNCTION_LINK)) {
+            } else if (classserver().isA(atom_type, FUNCTION_LINK)) {
                 atom = FunctionLink::factory(lll);
             } else {
                 atom = createLink(*lll);
