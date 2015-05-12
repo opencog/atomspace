@@ -38,10 +38,11 @@ using namespace opencog;
 ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset,
                                          TruthValuePtr tv,
                                          AttentionValuePtr av)
-	: FreeLink(EXECUTION_OUTPUT_LINK, oset, tv, av)
+	: FunctionLink(EXECUTION_OUTPUT_LINK, oset, tv, av)
 {
-	if ((2 != oset.size()) or
-	   (LIST_LINK != oset[1]->getType()))
+	if (2 != oset.size() or
+	   GROUNDED_SCHEMA_NODE != oset[0]->getType() or
+	   LIST_LINK != oset[1]->getType())
 	{
 		throw RuntimeException(TRACE_INFO,
 			"ExecutionOutputLink must have schema and args!");
@@ -52,32 +53,26 @@ ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
                                          const Handle& args,
                                          TruthValuePtr tv,
                                          AttentionValuePtr av)
-	: FreeLink(EXECUTION_OUTPUT_LINK, schema, args, tv, av)
+	: FunctionLink(EXECUTION_OUTPUT_LINK, schema, args, tv, av)
 {
+	if (GROUNDED_SCHEMA_NODE != schema->getType())
+		throw RuntimeException(TRACE_INFO, "Expecting GroundedSchemaNode!");
+
 	if (LIST_LINK != args->getType())
-	{
 		throw RuntimeException(TRACE_INFO,
 			"ExecutionOutputLink must have schema and args!");
-	}
 }
 
 ExecutionOutputLink::ExecutionOutputLink(Link& l)
-	: FreeLink(l)
+	: FunctionLink(l)
 {
 	Type tscope = l.getType();
 	if (EXECUTION_OUTPUT_LINK != tscope)
-	{
 		throw RuntimeException(TRACE_INFO,
 			"Expection an ExecutionOutputLink!");
-	}
 }
 
-/// do_execute -- Find all occurances of ExecutionOutputLink or
-/// PlusLink or TimesLink, or etc... and execute them. Then create
-/// a new atom, where all occurances of ExecutionOutputLink have been
-/// replaced by the returned value -- by the atom that was returned
-/// by the execution.  The execution is recursive: such links can be
-/// nested arbitrarily.
+/// execute -- execute the function defined in an ExecutionOutputLink
 ///
 /// Each ExecutionOutputLink should have the form:
 ///
@@ -91,111 +86,9 @@ ExecutionOutputLink::ExecutionOutputLink(Link& l)
 /// This method will then invoke "func_name" on the provided ListLink
 /// of arguments to the function.
 ///
-Handle ExecutionOutputLink::do_execute(AtomSpace* as, const Handle& h)
+Handle ExecutionOutputLink::execute(AtomSpace* as)
 {
-	LinkPtr lll(LinkCast(h));
-	if (NULL == lll) return h;
-
-	// Search for execution links in the oset, and execute them first.
-	// We will know that happend if the returned handle differs from
-	// the input handle.
-	std::vector<Handle> new_oset;
-	bool changed = false;
-	for (Handle ho : lll->getOutgoingSet())
-	{
-		Handle nh(do_execute(as, ho));
-		new_oset.push_back(nh);
-		if (nh != ho) changed = true;
-	}
-
-	// If the result of executing the stuff below is NOT executable,
-	// then just add return the results.  Right now, of the results
-	// are different, we add the new results to that atomspace but,
-	// XXX FIXME this is NOT obviously the right thing to do; it can
-	// lead to garbage being pumped into the atomspace, and never
-	// deleted.  Hwever, there are multiple issues that make "fixing
-	// this" difficult, so we pnt on this for now.
-	Type t = lll->getType();
-	if (not classserver().isA(t, FUNCTION_LINK))
-	{
-		if (not changed) return h;
-		return as->addLink(t, new_oset);
-	}
-
-	// If we are here, then its executable.
-	if ((EXECUTION_OUTPUT_LINK == t)
-	   or (PLUS_LINK == t)
-	   or (TIMES_LINK == t))
-	{
-		return do_execute(as, t, lll->getOutgoingSet());
-	}
-
-	if (classserver().isA(t, ASSIGN_LINK))
-	{
-		// It is ever-so-slightly faster to use the unchanged
-		// version, as it caches some values ...
-		if (not changed)
-			return AssignLinkCast(h)->execute(as);
-		return do_execute(as, t, lll->getOutgoingSet());
-	}
-
-	OC_ASSERT (false,
-		"Error: Exeuction of link type %s not implemented!\n",
-		classserver().getTypeName(t).c_str());
-}
-
-/// do_execute -- execute the GroundedSchemaNode of the ExecutionOutputLink
-///
-/// If the type t is an EXECUTION_OUTPUTLINK, then:
-/// Expects the sequence to be exactly two atoms long.
-/// Expects the first handle of the sequence to be a GroundedSchemaNode
-/// Expects the second handle of the sequence to be a ListLink
-/// Executes the GroundedSchemaNode, supplying the second handle as argument
-///
-/// If the type t is either PLUS_LINK or TIMES_LINK, then:
-/// Exepects the atoms to be either NumberNodes, or executable links
-/// that end up being valued as NumberNodes.
-///
-Handle ExecutionOutputLink::do_execute(AtomSpace* as, Type t,
-                                       const HandleSeq& sna)
-{
-	if (EXECUTION_OUTPUT_LINK == t)
-	{
-		if (2 != sna.size())
-		{
-			throw RuntimeException(TRACE_INFO,
-			     "Incorrect arity for an ExecutionOutputLink!");
-		}
-		return do_execute(as, sna[0], sna[1]);
-	}
-	else if (TIMES_LINK == t)
-	{
-		TimesLinkPtr flp(createTimesLink(sna));
-		return flp->execute(as);
-	}
-	else if (PLUS_LINK == t)
-	{
-		PlusLinkPtr flp(createPlusLink(sna));
-		return flp->execute(as);
-	}
-	else if (ADD_LINK == t)
-	{
-		AddLinkPtr alp(createAddLink(sna));
-		return alp->execute(as);
-	}
-	else if (ASSIGN_LINK == t)
-	{
-		AssignLinkPtr alp(createAssignLink(sna));
-		return alp->execute(as);
-	}
-	else if (REMOVE_LINK == t)
-	{
-		RemoveLinkPtr alp(createRemoveLink(sna));
-		return alp->execute(as);
-	}
-
-	throw RuntimeException(TRACE_INFO,
-	      "Expecting to get an ExecutionOutputLink!");
+	return do_execute(as, _outgoing[0], _outgoing[1]);
 }
 
 /// do_execute -- execute the GroundedSchemaNode of the ExecutionOutputLink
@@ -207,20 +100,14 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as, Type t,
 Handle ExecutionOutputLink::do_execute(AtomSpace* as,
                          const Handle& gsn, const Handle& cargs)
 {
-	if (GROUNDED_SCHEMA_NODE != gsn->getType())
-	{
-		throw RuntimeException(TRACE_INFO, "Expecting GroundedSchemaNode!");
-	}
-
-	if (LIST_LINK != cargs->getType())
-	{
-		throw RuntimeException(TRACE_INFO,
-		     "Expecting arguments to ExecutionOutputLink!");
-	}
-
 	// Search for additional execution links, and execute them too.
 	// We will know that happend if the returned handle differs from
-	// the input handle.
+	// the input handle. If the results are different, add the new
+	// results to the atomspace. We need to do this, because scheme,
+	// and python expects to find thier arguments in the atomspace,
+	// but this is arguably broken, as it pollutes the atomspace with
+	// junk that is never cleaned up.  We punt for now, but something
+	// should be done about this. XXX FIXME ...
 	LinkPtr largs(LinkCast(cargs));
 	Handle args(cargs);
 	if (largs)
@@ -229,7 +116,10 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		bool changed = false;
 		for (Handle ho : largs->getOutgoingSet())
 		{
-			Handle nh(do_execute(as, ho));
+			Handle nh(ho);
+			FunctionLinkPtr flp(FunctionLinkCast(ho));
+			if (flp)
+				nh = flp->execute(as);
 			new_oset.push_back(nh);
 			if (nh != ho) changed = true;
 		}

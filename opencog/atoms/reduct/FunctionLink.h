@@ -71,6 +71,7 @@ public:
 	virtual ~FunctionLink() {}
 
 	virtual Handle execute(AtomSpace* = NULL) const;
+	static Handle do_execute(AtomSpace*, const Handle&);
 };
 
 typedef std::shared_ptr<FunctionLink> FunctionLinkPtr;

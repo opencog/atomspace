@@ -70,12 +70,24 @@ SCM SchemeSmob::ss_execute (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-execute!");
 	AtomSpace* atomspace = ss_get_env_as("cog-execute!");
-	// do_execute() may throw a C++ exception in various cases:
+
+	Type t = h->getType();
+	if (not classserver().isA(t, FUNCTION_LINK))
+	{
+		scm_wrong_type_arg_msg("cog-execute!", 1, satom,
+			"FunctionLink (ExecuationOutputLink, PlusLink, TimesLink, etc.)");
+	}
+
+	// execute() may throw a C++ exception in various cases:
 	// e.g. if it names a non-existant function, or a function
 	// with syntax errors.
 	try
 	{
-		return handle_to_scm(ExecutionOutputLink::do_execute(atomspace, h));
+		FreeLinkPtr fff(FreeLinkCast(h));
+		if (NULL == fff)
+			fff = createFreeLink(h);
+		Handle h(fff->execute(atomspace));
+		return handle_to_scm(h);
 	}
 	catch (const std::exception& ex)
 	{
