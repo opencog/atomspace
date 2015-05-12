@@ -22,7 +22,7 @@
 
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/bind/AssignLink.h>
+#include <opencog/atoms/reduct/AssignLink.h>
 
 using namespace opencog;
 

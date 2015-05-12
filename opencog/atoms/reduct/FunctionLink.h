@@ -72,7 +72,9 @@ public:
 
 	virtual Handle execute(AtomSpace* = NULL) const;
 	static Handle do_execute(AtomSpace*, const Handle&);
-	static Handle do_execute(AtomSpace*, Type, const HandleSeq&);
+
+	static Handle factory(Handle);
+	static Handle factory(Type, const HandleSeq&);
 };
 
 typedef std::shared_ptr<FunctionLink> FunctionLinkPtr;

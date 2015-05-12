@@ -24,6 +24,10 @@
 #include <opencog/atomspace/ClassServer.h>
 #include "FunctionLink.h"
 
+#include "AssignLink.h"
+#include "PlusLink.h"
+#include "TimesLink.h"
+
 using namespace opencog;
 
 FunctionLink::FunctionLink(const HandleSeq& oset,
@@ -71,5 +75,48 @@ FunctionLink::FunctionLink(Link& l)
 
 Handle FunctionLink::execute(AtomSpace* as) const
 {
+	throw RuntimeException(TRACE_INFO, "Not executable!");
+}
+
+Handle FunctionLink::do_execute(AtomSpace* as, const Handle& h)
+{
+	// If h is of the right form already, its just a matter of calling
+	// it.  Otherwise, we have to create
+	FunctionLinkPtr flp(FunctionLinkCast(factory(h)));
+	if (NULL == flp)
+		throw RuntimeException(TRACE_INFO, "Not executable!");
+
+	return flp->execute(as);
+}
+
+Handle FunctionLink::factory(Handle h)
+{
+	// If h is of the right form already, its just a matter of calling
+	// it.  Otherwise, we have to create
+	FunctionLinkPtr flp(FunctionLinkCast(h));
+	if (flp) return h;
+
+	LinkPtr lp(LinkCast(h));
+	return factory(lp->getType(), lp->getOutgoingSet());
+}
+
+// Basic type factory.
+Handle FunctionLink::factory(Type t, const HandleSeq& seq)
+{
+	if (ADD_LINK == t)
+		return Handle(createAddLink(seq));
+
+	if (ASSIGN_LINK == t)
+		return Handle(createAssignLink(seq));
+
+	if (PLUS_LINK == t)
+		return Handle(createPlusLink(seq));
+
+	if (REMOVE_LINK == t)
+		return Handle(createRemoveLink(seq));
+
+	if (TIMES_LINK == t)
+		return Handle(createTimesLink(seq));
+
 	throw RuntimeException(TRACE_INFO, "Not executable!");
 }

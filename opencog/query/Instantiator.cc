@@ -85,7 +85,9 @@ Handle Instantiator::walk_tree(const Handle& expr)
 
 		// This throws if it can't figure out the schema ...
 		// Let the throw pass right on up the stack.
-		return FunctionLink::do_execute(_as, t, oset_results);
+		Handle hl(FunctionLink::factory(t, oset_results));
+		FunctionLinkPtr flp(FunctionLinkCast(hl));
+		return flp->execute(_as);
 	}
 
 	// Now create a duplicate link, but with an outgoing set where
