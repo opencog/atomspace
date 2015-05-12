@@ -71,7 +71,8 @@ void InferenceSCM::init_in_module(void* data)
 void InferenceSCM::init(void)
 {
 #ifdef HAVE_GUILE
-    //all commands for invoking the rule engine from scm shell should be declared here
+    // All commands for invoking the rule engine from scm shell should
+    // be declared here
     define_scheme_primitive("cog-fc", &InferenceSCM::do_forward_chaining,
                             this, "rule-engine");
     define_scheme_primitive("cog-bc", &InferenceSCM::do_backward_chaining,
@@ -79,16 +80,17 @@ void InferenceSCM::init(void)
 #endif
 }
 
-Handle InferenceSCM::do_forward_chaining(Handle h)
+Handle InferenceSCM::do_forward_chaining(Handle h, const string& conf_path)
 {
 #ifdef HAVE_GUILE
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fc");
     DefaultForwardChainerCB dfc(as);
-    ForwardChainer fc(as);
+    ForwardChainer fc(as, conf_path);
     /**
-     * Parse (cog-fc ListLink()) as forward chaining with Handle::UNDEFINED which  does
-     * pattern matching on the atomspace using the rules declared in the config.A similar
-     * functionality with the python version of the  forward chainer.
+     * Parse (cog-fc ListLink()) as forward chaining with
+     * Handle::UNDEFINED which does pattern matching on the atomspace
+     * using the rules declared in the config. A similar functionality
+     * with the python version of the forward chainer.
      */
     if (h->getType() == LIST_LINK and as->getIncoming(h).empty())
         fc.do_chain(dfc, Handle::UNDEFINED);
