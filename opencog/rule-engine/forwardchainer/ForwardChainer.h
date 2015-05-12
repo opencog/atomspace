@@ -65,7 +65,7 @@ protected:
         TV_FITNESS_BASED, STI_BASED
     };
 public:
-    ForwardChainer(AtomSpace * as, string conf_path = "");
+    ForwardChainer(AtomSpace * as, const string& conf_path);
     virtual ~ForwardChainer();
     bool step(ForwardChainerCallBack& fcb);
     void do_chain(ForwardChainerCallBack& fcb, Handle hsource =

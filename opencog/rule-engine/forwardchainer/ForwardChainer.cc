@@ -32,11 +32,9 @@
 
 using namespace opencog;
 
-ForwardChainer::ForwardChainer(AtomSpace * as, string conf_path /*=""*/) :
+ForwardChainer::ForwardChainer(AtomSpace * as, const string& conf_path) :
         _as(as), _rec(_as), _fcmem(_as)
 {
-    if (conf_path != "")
-        _conf_path = conf_path;
     init();
 }
 
