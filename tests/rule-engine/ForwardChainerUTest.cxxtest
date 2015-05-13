@@ -28,6 +28,7 @@ public:
 		as_ = new AtomSpace();
 		eval_ = new SchemeEval(as_);
 
+#undef DEBUG
 		logger().setLevel(Logger::DEBUG);
 
 		// Disable the AF mechanism during testing!
