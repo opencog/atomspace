@@ -33,8 +33,9 @@ using namespace opencog;
 
 /**
  * This callback takes the reported grounding, runs it through the
- * instantiator, to create the implicand, and then records the result in
- * the public member `result_list`.  It then returns false, to search
+ * instantiator, to create the implicand, and then records the result
+ * in the public member `result_list`.  If the number of results so
+ * far is less than `max_results`, it then returns false, to search
  * for more groundings.  (The engine will halt its search for a
  * grounding once an acceptable one has been found; so, to continue
  * hunting for more, we return `false` here. We want to find all
@@ -46,27 +47,14 @@ bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
 	// PatternMatchEngine::print_solution(term_soln,var_soln);
 	Handle h = inst.instantiate(implicand, var_soln);
 	if (Handle::UNDEFINED != h)
-	{
 		result_list.push_back(h);
-	}
-	return false;
-}
 
-/**
- * The single implicator behaves like the default implicator, except that
- * it terminates after the first solution is found.
- */
-bool SingleImplicator::grounding(const std::map<Handle, Handle> &var_soln,
-                                 const std::map<Handle, Handle> &term_soln)
-{
-	Handle h = inst.instantiate(implicand, var_soln);
-
-	if (h != Handle::UNDEFINED)
-	{
-		result_list.push_back(h);
-	}
+	// If we found as many as we want, then stop looking for more.
+	if (result_list.size() < max_results)
+		return false;
 	return true;
 }
+
 
 namespace opencog
 {
@@ -120,7 +108,8 @@ Handle bindlink(AtomSpace* as, const Handle& hbindlink)
 Handle single_bindlink (AtomSpace* as, const Handle& hbindlink)
 {
 	// Now perform the search.
-	SingleImplicator impl(as);
+	DefaultImplicator impl(as);
+	impl.max_results = 1;
 	return do_imply(as, hbindlink, impl);
 }
 

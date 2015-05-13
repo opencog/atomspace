@@ -56,9 +56,10 @@ class Implicator :
 		AtomSpace *_as;
 		Instantiator inst;
 	public:
-		Implicator(AtomSpace* as) : _as(as), inst(as) {}
+		Implicator(AtomSpace* as) : _as(as), inst(as), max_results(SIZE_MAX) {}
 		Handle implicand;
 		std::vector<Handle> result_list;
+		size_t max_results;
 
 		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
 		                       const std::map<Handle, Handle> &term_soln);

@@ -41,17 +41,6 @@ class DefaultImplicator:
 			Implicator(asp), DefaultPatternMatchCB(asp) {}
 };
 
-class SingleImplicator:
-	public virtual Implicator,
-	public virtual DefaultPatternMatchCB
-{
-	public:
-		SingleImplicator(AtomSpace* asp) :
-			Implicator(asp), DefaultPatternMatchCB(asp) {}
-		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-		                       const std::map<Handle, Handle> &term_soln);
-};
-
 
 /**
  * PLN specific PatternMatchCallback implementation
