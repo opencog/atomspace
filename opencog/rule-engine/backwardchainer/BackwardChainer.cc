@@ -200,7 +200,8 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 	Handle himplicant = standardized_rule.get_implicant();
 	Handle hvardecl = standardized_rule.get_vardecl();
 	HandleSeq outputs = standardized_rule.get_implicand();
-	VarMap implicand_mapping;
+	VarMap implicand_normal_mapping;
+	VarMap implicand_quoted_mapping;
 
 	std::vector<VarMap> all_mappings;
 
@@ -223,9 +224,15 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 	// same target is visited, and the same rule is selected, it is
 	// possible to select a different output to map to)
 	//
+	// XXX TODO use all possible output mapping instead; ie visit them
+	// all, and add all resulting new targets to targets list; this will
+	// avoid having to visit the target multiple times to get all
+	// possible output mappings
+	implicand_normal_mapping = rand_element(all_mappings);
+
 	// Wrap all the mapped result inside QuoteLink, so that variables
 	// will be handled correctly for the next BC step
-	for (auto& p : rand_element(all_mappings))
+	for (auto& p : implicand_normal_mapping)
 	{
 		// find all variables
 		FindAtoms fv(VARIABLE_NODE);
@@ -237,14 +244,14 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 			quote_mapping[h] = _garbage_superspace->addAtom(createLink(QUOTE_LINK, h));
 
 		Instantiator inst(_garbage_superspace);
-		implicand_mapping[p.first] = inst.instantiate(p.second, quote_mapping);;
+		implicand_quoted_mapping[p.first] = inst.instantiate(p.second, quote_mapping);
 
 		logger().debug("[BackwardChainer] Added "
-					   + implicand_mapping[p.first]->toShortString()
+					   + implicand_quoted_mapping[p.first]->toShortString()
 					   + " to garbage space");
 	}
 
-	for (auto& p : implicand_mapping)
+	for (auto& p : implicand_normal_mapping)
 		logger().debug("[BackwardChainer] mapping is "
 					   + p.first->toShortString()
 					   + " to " + p.second->toShortString());
@@ -252,15 +259,28 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 	// Reverse ground the implicant with the grounding we found from
 	// unifying the implicand
 	Instantiator inst(_garbage_superspace);
-	himplicant = inst.instantiate(himplicant, implicand_mapping);
+	Handle himplicant_quoted = inst.instantiate(himplicant, implicand_quoted_mapping);
 
 	logger().debug("[BackwardChainer] Reverse grounded as "
-				   + himplicant->toShortString());
+				   + himplicant_quoted->toShortString());
 
 	// Find all matching premises matching the implicant
 	std::vector<VarMap> vmap_list;
 	HandleSeq possible_premises =
-		match_knowledge_base(himplicant, hvardecl, false, vmap_list);
+		match_knowledge_base(himplicant_quoted, hvardecl, false, vmap_list);
+
+	// Reverse ground 2nd version, try it without QuoteLink around variables
+	Handle himplicant_normal = inst.instantiate(himplicant, implicand_normal_mapping);
+
+	logger().debug("[BackwardChainer] Alternative reverse grounded as "
+				   + himplicant_normal->toShortString());
+
+	HandleSeq possible_premises_alt =
+	    match_knowledge_base(himplicant_normal, hvardecl, false, vmap_list);
+	possible_premises.insert(possible_premises.end(),
+	                         possible_premises_alt.begin(),
+	                         possible_premises_alt.end());
+
 
 	logger().debug("%d possible permises", possible_premises.size());
 
