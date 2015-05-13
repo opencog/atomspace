@@ -80,6 +80,8 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		{
 			return _connectives;
 		}
+
+		bool optionals_present(void) { return _optionals_present; }
 	protected:
 
 		ClassServer& _classserver;

@@ -88,14 +88,37 @@ static Handle do_imply(AtomSpace* as,
 		return gl;
 	}
 
-	// If we are here, there were no groundings, no results. This might
-	// be a desirable outcome, e.g. if the pattern was an absence check.
-	// In this case, we answer affirmatively: the implicand runs because
-	// there were no results! ... Well, the implican had also be
-	// variable-free in this case, since it cannot be grounded.
-// XXX this is not rgith ...
+	// OK, there are two ways to explain what is happening here; the
+	// fancy way and the pedestrian day.  Lets try the fancy way first...
+	//
+	// The code below struggles to handle a conversion of the
+	// intuitionistic logic used during the course of pattern matching
+	// into a final classical logic form, by implementing "Reductio ad
+	// absurdum" (RAA). RAA says "If something is not not false, then
+	// it must be true".  See Dirk van Dalen, "Logic and Structure",
+	// (2003) Springer; chapter 5 for an explantion, or the Stanford
+	// Encyclopedia of Philosophy article on Intuitionistic Logic
+	// http://plato.stanford.edu/entries/logic-intuitionistic/
+	//
+	// So: the pattern matcher uses intuitionistic logic to avoid the
+	// the Turing machine halting problem: either a pattern is in the
+	// atomspace (i.e. it is "provable") or it is absent (it may be
+	// provable, but we do not know of either a proof or a dis-proof).
+	// Think of the atomspace as a Kripke semantics database; it holds
+	// everything that we know at time t.
+	//
+	// However, there are certain useful queries, where the goal of
+	// the query is to determine that some clause or set of clauses
+	// are absent in the AtomSpace. If the clauses are jointly not
+	// found, after a full and exhaustive search, then we want to run
+	// the implicator, and perform some action. Easier said than done,
+	// this code is currently a hack.
+
 	const Pattern& pat = bl->get_pattern();
-	if (0 == pat.mandatory.size() and 0 < pat.optionals.size())
+	DefaultPatternMatchCB* intu =
+		dynamic_cast<DefaultPatternMatchCB*>(&impl);
+	if (0 == pat.mandatory.size() and 0 < pat.optionals.size()
+	    and intu->optionals_present())
 	{
 		std::map<Handle, Handle> empty_map;
 		Handle h = impl.inst.instantiate(impl.implicand, empty_map);
