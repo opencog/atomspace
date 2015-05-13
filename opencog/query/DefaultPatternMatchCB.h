@@ -35,13 +35,21 @@ namespace opencog {
 
 /**
  * Callback mixin class, used to provide a default node and link
- * matching behaviour. This class is still a pure virtual class,
- * since it does not implement the solution method.
+ * matching behaviour. This class is a pure virtual class, since
+ * it does not implement either the `initiate_search()` method,
+ * nor the `solution()` method.
  *
- * The *only* thing it provides is node and link matching; it does
- * not consider any truth values in establishing a match.
+ * It provides is node and link matching, assuming the canonical
+ * meaning of VariableNodes and QuoteLinks. It also implements
+ * crisp-logic handling of AndLink, OrLink, NotLink when these
+ * are combined with AbsentLink, EqualLink, GreaterThanLink, and
+ * other clear-box evaluatable link types.
  *
- * Well, OK, it also provide search initiation via callback...
+ * It handles AbsentLink using standard intuitionist logic,
+ * except at the very end of the search, when the presence of
+ * non-absent terms is converted into an explicit classical
+ * logic "present" boolean flag.  See notes in the code for
+ * details.
  */
 class DefaultPatternMatchCB : public virtual PatternMatchCallback
 {
@@ -91,6 +99,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		bool eval_sentence(const Handle& pat,
 		             const std::map<Handle,Handle>& gnds);
 
+		bool _optionals_present;
 		AtomSpace* _as;
 };
 
