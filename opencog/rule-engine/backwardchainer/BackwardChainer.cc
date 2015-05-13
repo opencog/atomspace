@@ -275,28 +275,32 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 	logger().debug("[BackwardChainer] Alternative reverse grounded as "
 				   + himplicant_normal->toShortString());
 
+	std:: vector<VarMap> vmap_list_alt;
 	HandleSeq possible_premises_alt =
-	    match_knowledge_base(himplicant_normal, hvardecl, false, vmap_list);
+	    match_knowledge_base(himplicant_normal, hvardecl, false, vmap_list_alt);
 	possible_premises.insert(possible_premises.end(),
 	                         possible_premises_alt.begin(),
 	                         possible_premises_alt.end());
-
+	vmap_list.insert(vmap_list.end(), vmap_list_alt.begin(),
+	                 vmap_list_alt.end());
 
 	logger().debug("%d possible permises", possible_premises.size());
 
 	// For each set of possible premises, check if they already
 	// satisfy the goal
-	for (Handle& h : possible_premises)
+	for (size_t i = 0; i < possible_premises.size(); i++)
 	{
-		vmap_list.clear();
+		Handle h = possible_premises[i];
+		VarMap vm = vmap_list[i];
 
 		logger().debug("Checking permises " + h->toShortString());
 
 		bool need_bc = false;
+		std::vector<VarMap> vm_list;
 
 		// use pattern matcher to try to ground the variables in the
 		// selected premises
-		HandleSeq grounded_premises = ground_premises(h, vmap_list);
+		HandleSeq grounded_premises = ground_premises(h, vm, vm_list);
 
 		// matched nothing? need to backward chain on this premise
 		if (grounded_premises.size() == 0)
@@ -306,7 +310,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		for (size_t i = 0; i < grounded_premises.size(); ++i)
 		{
 			Handle& g = grounded_premises[i];
-			VarMap& m = vmap_list[i];
+			VarMap& m = vm_list[i];
 
 			logger().debug("Checking possible permises grounding "
 						   + g->toShortString());
@@ -342,7 +346,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 
 
 		// XXX TODO premise selection would be done here to
-		// determine wheter to BC on a premise
+		// determine whether to BC on a premise
 
 
 
@@ -515,13 +519,29 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
 /**
  * Try to ground any free variables in the input target.
  *
- * @param htarget  the input atom to be grounded
- * @param vmap     the output mapping of the variables
- * @return         the mapping of the target
+ * @param htarget    the input atom to be grounded
+ * @param vmap       the original mapping to the variables in htarget
+ * @param vmap_list  the output mapping of the variables
+ * @return           the mapping of the target
  */
 HandleSeq BackwardChainer::ground_premises(const Handle& htarget,
-                                           std::vector<VarMap>& vmap)
+                                           const VarMap& vmap,
+                                           std::vector<VarMap>& vmap_list)
 {
+	FindAtoms fv(VARIABLE_NODE);
+	fv.search_set(htarget);
+
+	// if the target is already fully grounded
+	if (fv.varset.empty())
+	{
+		vmap_list.push_back(vmap);
+
+		HandleSeq results;
+		results.push_back(htarget);
+
+		return results;
+	}
+
 	Handle premises = htarget;
 
 	if (_logical_link_types.count(premises->getType()) == 1)
@@ -547,7 +567,7 @@ HandleSeq BackwardChainer::ground_premises(const Handle& htarget,
 
 	logger().debug("[BackwardChainer] Grounding " + premises->toShortString());
 
-	return match_knowledge_base(premises, Handle::UNDEFINED, false, vmap);
+	return match_knowledge_base(premises, Handle::UNDEFINED, false, vmap_list);
 }
 
 /**

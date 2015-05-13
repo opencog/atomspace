@@ -125,7 +125,7 @@ private:
 	                               Handle htarget_vardecl,
 	                               bool check_history,
 	                               std::vector<VarMap>& vmap);
-	HandleSeq ground_premises(const Handle& htarget, std::vector<VarMap>& vmap);
+	HandleSeq ground_premises(const Handle& htarget, const VarMap& vmap, std::vector<VarMap>& vmap_list);
 	bool unify(const Handle& htarget, const Handle& hmatch,
 	           Handle htarget_vardecl, VarMap& result);
 
