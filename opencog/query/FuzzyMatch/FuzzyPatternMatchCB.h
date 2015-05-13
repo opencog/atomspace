@@ -42,6 +42,7 @@ namespace opencog
             virtual void set_pattern(const Variables& vars,
                                      const Pattern& pat)
             {
+                DefaultPatternMatchCB::set_pattern(vars, pat);
                 _pattern = &pat;
             }
 
