@@ -659,14 +659,16 @@ Rule BackwardChainer::select_rule(const std::vector<Rule>& rules)
 }
 
 /**
- * Given a VariableList, generate a new VariableList of only the specific vars
+ * Given a VariableList, generate a new VariableList of only the specific vars.
+ *
+ * Also put any variables not inside the original VariableList in the new list.
  *
  * @param parent_varlist  the original VariableList
  * @param varset          a set of VariableNodes to be included
  * @return                the new sublist
  */
 Handle BackwardChainer::gen_sub_varlist(const Handle& parent_varlist,
-                                        const std::set<Handle>& varset)
+                                        std::set<Handle> varset)
 {
 	HandleSeq oset = LinkCast(parent_varlist)->getOutgoingSet();
 	HandleSeq final_oset;
@@ -675,11 +677,22 @@ Handle BackwardChainer::gen_sub_varlist(const Handle& parent_varlist,
 	for (const Handle& h : oset)
 	{
 		Type t = h->getType();
-		if ((VARIABLE_NODE == t && varset.count(h) == 1)
-			or (TYPED_VARIABLE_LINK == t
-			    and varset.count(LinkCast(h)->getOutgoingSet()[0]) == 1))
+		if (VARIABLE_NODE == t && varset.count(h) == 1)
+		{
 			final_oset.push_back(h);
+			varset.erase(h);
+		}
+		else if (TYPED_VARIABLE_LINK == t
+			     and varset.count(LinkCast(h)->getOutgoingSet()[0]) == 1)
+		{
+			final_oset.push_back(h);
+			varset.erase(LinkCast(h)->getOutgoingSet()[0]);
+		}
 	}
+
+	// add any leftover variables into the list
+	for (const Handle& h : varset)
+		final_oset.push_back(h);
 
 	return Handle(createVariableList(final_oset));
 }

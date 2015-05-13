@@ -130,7 +130,7 @@ private:
 	           Handle htarget_vardecl, VarMap& result);
 
 	Handle gen_sub_varlist(const Handle& parent_varlist,
-	                       const std::set<Handle>& varset);
+	                       std::set<Handle> varset);
 
 	AtomSpace* _as;
 	AtomSpace* _garbage_superspace;
