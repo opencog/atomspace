@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/bind/SatisfactionLink.h>
 
 #include "FuzzyPatternMatchCB.h"

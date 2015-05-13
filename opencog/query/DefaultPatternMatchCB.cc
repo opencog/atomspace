@@ -354,7 +354,11 @@ bool DefaultPatternMatchCB::neighbor_search(PatternMatchEngine *pme,
                                             const Pattern& pat)
 {
 	init(vars, pat);  // call again; derived class may call us directly
-	const HandleSeq& clauses = pat.mandatory;
+
+	// Sometimes, the number of mandatory clauses can be zero...
+	// We still want to search, though.
+	const HandleSeq& clauses =
+		(0 < pat.mandatory.size()) ? pat.mandatory : pat.clauses;
 
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by
@@ -796,6 +800,13 @@ bool DefaultPatternMatchCB::variable_search(PatternMatchEngine *pme,
 	if (Handle::UNDEFINED == _root)
 	{
 		dbgprt("There were no type restrictions! That must be wrong!\n");
+		if (0 == clauses.size())
+		{
+			// This is kind-of weird, it can happen if all clauses
+			// are optional.
+			_search_fail = true;
+			return false;
+		}
 		_root = _starter_term = clauses[0];
 	}
 
