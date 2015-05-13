@@ -86,16 +86,18 @@ void BackwardChainer::do_until(uint max_steps)
  * Do a single step of backward chaining.
  */
 void BackwardChainer::do_step()
-{
+{	
+	logger().debug("[BackwardChainer] ==========================================");
+	logger().debug("[BackwardChainer] Start of a single BC step");
+	logger().debug("[BackwardChainer] %d potential targets", _targets_set.size());
+
 	// XXX TODO do proper target selection here using some fitness function
 	Handle selected_target = rand_element(_targets_set);
-
-	logger().debug("[BackwardChainer] Before do_step_bc");
 
 	VarMultimap subt = do_bc(selected_target);
 	VarMultimap& old_subt = _inference_history[selected_target];
 
-	logger().debug("[BackwardChainer] After do_step_bc");
+	logger().debug("[BackwardChainer] End of a single BC step");
 
 	// add the substitution to inference history
 	for (auto& p : subt)
@@ -327,8 +329,8 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		// Break out any logical link and add to targets
 		HandleSeq sub_premises = LinkCast(h)->getOutgoingSet();
 
-		for (Handle& h : sub_premises)
-			_targets_set.insert(h);
+		for (Handle& s : sub_premises)
+			_targets_set.insert(s);
 	}
 
 	return results;
@@ -413,7 +415,7 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
 	SatisfactionLinkPtr sl(createSatisfactionLink(htarget_vardecl, htarget));
 	BCPatternMatch bcpm(_garbage_superspace);
 
-	logger().debug("[BackwardChainer] Before satisfy");
+	logger().debug("[BackwardChainer] Before patterm matcher");
 
 	sl->satisfy(bcpm);
 
