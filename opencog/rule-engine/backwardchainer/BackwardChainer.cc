@@ -202,8 +202,10 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 	HandleSeq outputs = standardized_rule.get_implicand();
 	VarMap implicand_mapping;
 
+	std::vector<VarMap> all_mappings;
+
 	// A rule can have multiple outputs, and only one will unify
-	// to our goal so try to find the one output that works
+	// to our goal so try to all outputs that works
 	for (Handle h : outputs)
 	{
 		VarMap temp_mapping;
@@ -211,30 +213,35 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		if (not unify(h, hgoal, hvardecl, temp_mapping))
 			continue;
 
-		// Wrap all the mapped result inside QuoteLink, so that variables
-		// will be handled correctly for the next BC step
-		for (auto& p : temp_mapping)
-		{
-			// find all variables
-			FindAtoms fv(VARIABLE_NODE);
-			fv.search_set(p.second);
+		all_mappings.push_back(temp_mapping);
+	}
 
-			// wrap a QuoteLink on each variable
-			VarMap quote_mapping;
-			for (auto& h: fv.varset)
-				quote_mapping[h] = _garbage_superspace->addAtom(createLink(QUOTE_LINK, h));
+	logger().debug("[BackwardChainer] Found %d implicand's output unifiable",
+	               all_mappings.size());
 
-			Instantiator inst(_garbage_superspace);
-			implicand_mapping[p.first] = inst.instantiate(p.second, quote_mapping);;
+	// Randomly select one of the mapping (so that each time the
+	// same target is visited, and the same rule is selected, it is
+	// possible to select a different output to map to)
+	//
+	// Wrap all the mapped result inside QuoteLink, so that variables
+	// will be handled correctly for the next BC step
+	for (auto& p : rand_element(all_mappings))
+	{
+		// find all variables
+		FindAtoms fv(VARIABLE_NODE);
+		fv.search_set(p.second);
 
-			logger().debug("[BackwardChainer] Added "
-						   + implicand_mapping[p.first]->toShortString()
-						   + " to garbage space");
-		}
+		// wrap a QuoteLink on each variable
+		VarMap quote_mapping;
+		for (auto& h: fv.varset)
+			quote_mapping[h] = _garbage_superspace->addAtom(createLink(QUOTE_LINK, h));
 
-		logger().debug("[BackwardChainer] Found one implicand's output "
-					   "unifiable " + h->toShortString());
-		break;
+		Instantiator inst(_garbage_superspace);
+		implicand_mapping[p.first] = inst.instantiate(p.second, quote_mapping);;
+
+		logger().debug("[BackwardChainer] Added "
+					   + implicand_mapping[p.first]->toShortString()
+					   + " to garbage space");
 	}
 
 	for (auto& p : implicand_mapping)
