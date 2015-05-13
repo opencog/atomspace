@@ -89,7 +89,7 @@ public:
 	SatisfactionLink(const std::set<Handle> &vars,
 	                 const HandleSeq& clauses);
 
-	// XXX temp hack till thigs get sorted out; remove this method later.
+	// XXX temp hack till things get sorted out; remove this method later.
 	const Pattern& get_pattern(void) { return _pat; }
 
 	bool satisfy(PatternMatchCallback&) const;

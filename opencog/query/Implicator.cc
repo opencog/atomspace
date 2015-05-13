@@ -59,7 +59,13 @@ bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
 namespace opencog
 {
 
-/* Simplified utility */
+/**
+ * Simplified utility
+ *
+ * The `do_conn_check` flag stands for "do connectivity check";
+ * if the flag is set, and the pattern is disconnected, then an
+ * error will be thrown. PLN explicitly allows disconnected graphs.
+ */
 static Handle do_imply(AtomSpace* as,
                        const Handle& hbindlink,
                        Implicator& impl,
@@ -73,11 +79,31 @@ static Handle do_imply(AtomSpace* as,
 
 	bl->imply(impl, do_conn_check);
 
-	// The result_list contains a list of the grounded expressions.
-	// (The order of the list has no significance, so it's really a set.)
-	// Put the set into a SetLink, and return that.
-	Handle gl = as->addLink(SET_LINK, impl.result_list);
-	return gl;
+	if (0 < impl.result_list.size())
+	{
+		// The result_list contains a list of the grounded expressions.
+		// (The order of the list has no significance, so it's really a set.)
+		// Put the set into a SetLink, and return that.
+		Handle gl = as->addLink(SET_LINK, impl.result_list);
+		return gl;
+	}
+
+	// If we are here, there were no groundings, no results. This might
+	// be a desirable outcome, e.g. if the pattern was an absence check.
+	// In this case, we answer affirmatively: the implicand runs because
+	// there were no results! ... Well, the implican had also be
+	// variable-free in this case, since it cannot be grounded.
+// XXX this is not rgith ...
+	const Pattern& pat = bl->get_pattern();
+	if (0 == pat.mandatory.size() and 0 < pat.optionals.size())
+	{
+		std::map<Handle, Handle> empty_map;
+		Handle h = impl.inst.instantiate(impl.implicand, empty_map);
+		if (Handle::UNDEFINED != h)
+			impl.result_list.push_back(h);
+	}
+
+	return as->addLink(SET_LINK, impl.result_list);
 }
 
 /**

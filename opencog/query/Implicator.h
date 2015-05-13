@@ -52,11 +52,9 @@ namespace opencog {
 class Implicator :
 	public virtual PatternMatchCallback
 {
-	protected:
-		AtomSpace *_as;
-		Instantiator inst;
 	public:
-		Implicator(AtomSpace* as) : _as(as), inst(as), max_results(SIZE_MAX) {}
+		Implicator(AtomSpace* as) : inst(as), max_results(SIZE_MAX) {}
+		Instantiator inst;
 		Handle implicand;
 		std::vector<Handle> result_list;
 		size_t max_results;
