@@ -98,10 +98,17 @@ void AbsentUTest::test_repeats(void)
 	config().set("SCM_PRELOAD", "tests/query/absent.scm");
 	load_scm_files_from_config(*as);
 
-
 	Handle empty = eval->eval_h("(ConceptNode \"room empty\")");
 	Handle full = eval->eval_h("(ConceptNode \"room nonempty\")");
 
+	// Verify the intial state, room should be empty
 	Handle state = eval->eval_h("(show-room-state)");
 	TS_ASSERT_EQUALS(state, empty);
+
+	eval->eval_h("(cog-bind create)");
+	eval->eval_h("(cog-bind is-visible)");
+	eval->eval_h("(cog-bind is-invisible)");
+
+	state = eval->eval_h("(show-room-state)");
+	TS_ASSERT_EQUALS(state, full);
 }

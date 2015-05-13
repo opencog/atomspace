@@ -28,6 +28,7 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/Instantiator.h>
+#include <opencog/query/InitiateSearchCB.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/PatternMatchEngine.h>
 
@@ -40,8 +41,10 @@ namespace opencog {
  *
  * The *only* thing it provides is node and link matching; it does
  * not consider any truth values in establishing a match.
+ *
+ * Well, OK, it also provide search initiation via callback...
  */
-class DefaultPatternMatchCB : public virtual PatternMatchCallback
+class DefaultPatternMatchCB : public virtual InitiateSearchCB
 {
 	public:
 		DefaultPatternMatchCB(AtomSpace*);
@@ -65,15 +68,6 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		                           const std::map<Handle,Handle>& gnds)
 		{ return eval_sentence(pat, gnds); }
 
-		/**
-		 * Called to perform the actual search. This makes some default
-		 * assumptions about the kind of things that might be matched,
-		 * in order to drive a reasonably-fast search.
-		 */
-		virtual bool initiate_search(PatternMatchEngine *,
-		                             const Variables&,
-		                             const Pattern&);
-
 		virtual const std::set<Type>& get_connectives(void)
 		{
 			return _connectives;
@@ -83,7 +77,6 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		// Temp atomspace used for test-groundings of virtual links.
 		AtomSpace _temp_aspace;
 		Instantiator _instor;
-		ClassServer& _classserver;
 
 		// Crisp-logic evaluation of evaluatable terms
 		std::set<Type> _connectives;
@@ -91,39 +84,6 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		             const std::map<Handle,Handle>& gnds);
 		bool eval_sentence(const Handle& pat,
 		             const std::map<Handle,Handle>& gnds);
-
-		// All the state below is for finding a good place to start
-		// searches.
-		void init(const Variables&, const Pattern&);
-		Handle _root;
-		Handle _starter_term;
-		const VariableTypeMap* _type_restrictions;
-		const std::set<Handle>* _dynamic;
-		bool _have_evaluatables;
-
-		virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
-		virtual Handle find_thinnest(const HandleSeq&,
-		                             const std::set<Handle>&,
-		                             Handle&, size_t&);
-		virtual void find_rarest(const Handle&, Handle&, size_t&);
-
-		bool _search_fail;
-		virtual bool neighbor_search(PatternMatchEngine *,
-		                             const Variables&,
-		                             const Pattern&);
-
-		virtual bool disjunct_search(PatternMatchEngine *,
-		                             const Variables&,
-		                             const Pattern&);
-
-		virtual bool link_type_search(PatternMatchEngine *,
-		                             const Variables&,
-		                             const Pattern&);
-
-		virtual bool variable_search(PatternMatchEngine *,
-		                             const Variables&,
-		                             const Pattern&);
-		AtomSpace *_as;
 };
 
 } // namespace opencog
