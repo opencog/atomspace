@@ -28,7 +28,6 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/Instantiator.h>
-#include <opencog/query/InitiateSearchCB.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/PatternMatchEngine.h>
 
@@ -44,10 +43,11 @@ namespace opencog {
  *
  * Well, OK, it also provide search initiation via callback...
  */
-class DefaultPatternMatchCB : public virtual InitiateSearchCB
+class DefaultPatternMatchCB : public virtual PatternMatchCallback
 {
 	public:
 		DefaultPatternMatchCB(AtomSpace*);
+		virtual void set_pattern(const Variables&, const Pattern&);
 
 		virtual bool node_match(const Handle&, const Handle&);
 		virtual bool variable_match(const Handle&, const Handle&);
@@ -74,6 +74,12 @@ class DefaultPatternMatchCB : public virtual InitiateSearchCB
 		}
 	protected:
 
+		ClassServer& _classserver;
+
+		const VariableTypeMap* _type_restrictions;
+		const std::set<Handle>* _dynamic;
+		bool _have_evaluatables;
+
 		// Temp atomspace used for test-groundings of virtual links.
 		AtomSpace _temp_aspace;
 		Instantiator _instor;
@@ -84,6 +90,8 @@ class DefaultPatternMatchCB : public virtual InitiateSearchCB
 		             const std::map<Handle,Handle>& gnds);
 		bool eval_sentence(const Handle& pat,
 		             const std::map<Handle,Handle>& gnds);
+
+		AtomSpace* _as;
 };
 
 } // namespace opencog

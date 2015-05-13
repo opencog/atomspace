@@ -26,7 +26,7 @@
 using namespace opencog;
 
 BCPatternMatch::BCPatternMatch(AtomSpace * as)
-    : DefaultPatternMatchCB(as), as_(as)
+    : InitiateSearchCB(as), DefaultPatternMatchCB(as), as_(as)
  //       : Implicator(as), DefaultPatternMatchCB(as), AttentionalFocusCB(as), PLNImplicator(as), as_(as)
 {
 }

@@ -28,7 +28,9 @@
 
 namespace opencog {
 
-class ForwardChainInputMatchCB: public virtual PLNImplicator {
+class ForwardChainInputMatchCB:
+	public virtual PLNImplicator
+{
 private:
 	AtomSpace* _as;
 	HandleSeq _input_match;

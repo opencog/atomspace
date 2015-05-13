@@ -27,6 +27,7 @@
 #include "AttentionalFocusCB.h"
 #include "DefaultPatternMatchCB.h"
 #include "Implicator.h"
+#include "InitiateSearchCB.h"
 #include "PatternMatchCallback.h"
 
 
@@ -34,11 +35,21 @@ namespace opencog {
 
 class DefaultImplicator:
 	public virtual Implicator,
+	public virtual InitiateSearchCB,
 	public virtual DefaultPatternMatchCB
 {
 	public:
 		DefaultImplicator(AtomSpace* asp) :
-			Implicator(asp), DefaultPatternMatchCB(asp) {}
+			Implicator(asp),
+			InitiateSearchCB(asp),
+			DefaultPatternMatchCB(asp) {}
+
+	virtual void set_pattern(const Variables& vars,
+	                         const Pattern& pat)
+	{
+		InitiateSearchCB::set_pattern(vars, pat);
+		DefaultPatternMatchCB::set_pattern(vars, pat);
+	}
 };
 
 
@@ -47,12 +58,23 @@ class DefaultImplicator:
  */
 class PLNImplicator:
 	public virtual Implicator,
+	public virtual InitiateSearchCB,
 	public virtual AttentionalFocusCB
 {
 	public:
 		PLNImplicator(AtomSpace* asp) :
-			Implicator(asp), DefaultPatternMatchCB(asp), AttentionalFocusCB(asp)
+			Implicator(asp),
+			InitiateSearchCB(asp),
+			DefaultPatternMatchCB(asp),
+			AttentionalFocusCB(asp)
 		{}
+
+	virtual void set_pattern(const Variables& vars,
+	                         const Pattern& pat)
+	{
+		InitiateSearchCB::set_pattern(vars, pat);
+		DefaultPatternMatchCB::set_pattern(vars, pat);
+	}
 };
 
 }; // namespace opencog

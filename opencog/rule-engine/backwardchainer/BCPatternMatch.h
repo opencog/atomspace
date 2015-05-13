@@ -32,7 +32,9 @@ namespace opencog
  * Given a rule(i.e a bindLink handle), find all the premises that
  * satisfy the rule.  by pattern matching.
  */
-class BCPatternMatch  : public DefaultPatternMatchCB // : public virtual PLNImplicator
+class BCPatternMatch :
+	public InitiateSearchCB,
+	public DefaultPatternMatchCB // : public virtual PLNImplicator
 {
 private:
 	AtomSpace* as_;
@@ -43,6 +45,13 @@ private:
 public:
 	BCPatternMatch(AtomSpace*);
 	virtual ~BCPatternMatch();
+
+	virtual void set_pattern(const Variables& vars,
+	                         const Pattern& pat)
+	{
+		InitiateSearchCB::set_pattern(vars, pat);
+		DefaultPatternMatchCB::set_pattern(vars, pat);
+	}
 
 	// The following callbacks are used for guiding the PM to look
 	// only the target list based on step 3 of

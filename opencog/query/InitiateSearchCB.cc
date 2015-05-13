@@ -42,6 +42,8 @@ using namespace opencog;
 
 InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
 	_classserver(classserver()),
+	_variables(NULL),
+	_pattern(NULL),
 	_type_restrictions(NULL),
 	_dynamic(NULL),
 	_as(as)
@@ -97,7 +99,7 @@ InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
 //
 Handle
 InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
-                                    Handle& start, size_t& width)
+                               Handle& start, size_t& width)
 {
 	// If its a node, then we are done. Don't modify either depth or
 	// start.
@@ -227,16 +229,12 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
  * if the search was not performed, due to a failure to find a sutiable
  * starting point.
  */
-bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme,
-                                            const Variables& vars,
-                                            const Pattern& pat)
+bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 {
-	init(vars, pat);  // call again; derived class may call us directly
-
 	// Sometimes, the number of mandatory clauses can be zero...
 	// We still want to search, though.
 	const HandleSeq& clauses =
-		(0 < pat.mandatory.size()) ? pat.mandatory : pat.clauses;
+		(0 < _pattern->mandatory.size()) ? _pattern->mandatory : _pattern->clauses;
 
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by
@@ -251,7 +249,7 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme,
 	// no constants in them at all.  In this case, the search is
 	// performed by looping over all links of the given types.
 	size_t bestclause;
-	Handle best_start = find_thinnest(clauses, pat.evaluatable_holders,
+	Handle best_start = find_thinnest(clauses, _pattern->evaluatable_holders,
 	                                  _starter_term, bestclause);
 
 	// Cannot find a starting point! This can happen if all of the
@@ -380,21 +378,19 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme,
  * probably *not* be modified, since it is quite efficient for the
  * "standard, canonical" case.
  */
-bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme,
-                                            const Variables& vars,
-                                            const Pattern& pat)
+bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 {
-	init(vars, pat);  // call again; derived class may call us directly
-	return disjunct_search(pme, vars, pat);
+	return disjunct_search(pme);
 }
 
-void InitiateSearchCB::init(const Variables& vars,
-                                 const Pattern& pat)
+void InitiateSearchCB::set_pattern(const Variables& vars,
+                                   const Pattern& pat)
 {
 	_search_fail = false;
+	_variables = &vars;
+	_pattern = &pat;
 	_type_restrictions = &vars.typemap;
 	_dynamic = &pat.evaluatable_terms;
-	_have_evaluatables = (0 < _dynamic->size());
 }
 
 /* ======================================================== */
@@ -454,16 +450,14 @@ void InitiateSearchCB::init(const Variables& vars,
  * starting at `Hunt`, and a second, starting at `Zebra`.  So... that
  * is what we do here, with the ChoiceLink loop.
  */
-bool InitiateSearchCB::disjunct_search(PatternMatchEngine *pme,
-                                            const Variables& vars,
-                                            const Pattern& pat)
+bool InitiateSearchCB::disjunct_search(PatternMatchEngine *pme)
 {
-	init(vars, pat);  // call again; derived class may call us directly
-	const HandleSeq& clauses = pat.mandatory;
+	const HandleSeq& clauses = _pattern->mandatory;
 
 	if (1 == clauses.size() and clauses[0]->getType() == CHOICE_LINK)
 	{
-		Pattern pcpy = pat;
+		const Pattern* porig = _pattern;
+		Pattern pcpy = *_pattern;
 		LinkPtr orl(LinkCast(clauses[0]));
 		const HandleSeq& oset = orl->getOutgoingSet();
 		for (const Handle& h : oset)
@@ -471,7 +465,9 @@ bool InitiateSearchCB::disjunct_search(PatternMatchEngine *pme,
 			HandleSeq hs;
 			hs.push_back(h);
 			pcpy.mandatory = hs;
-			bool found = disjunct_search(pme, vars, pcpy);
+			_pattern = &pcpy;
+			bool found = disjunct_search(pme);
+			_pattern = porig;
 			if (found) return true;
 		}
 		if (not _search_fail) return false;
@@ -479,7 +475,7 @@ bool InitiateSearchCB::disjunct_search(PatternMatchEngine *pme,
 
 	dbgprt("Attempt to use node-neighbor search\n");
 	_search_fail = false;
-	bool found = neighbor_search(pme, vars, pat);
+	bool found = neighbor_search(pme);
 	if (found) return true;
 	if (not _search_fail) return false;
 
@@ -490,7 +486,7 @@ bool InitiateSearchCB::disjunct_search(PatternMatchEngine *pme,
 	// types that occur in the atomspace.
 	dbgprt("Cannot use node-neighbor search, use link-type search\n");
 	_search_fail = false;
-	found = link_type_search(pme, vars, pat);
+	found = link_type_search(pme);
 	if (found) return true;
 	if (not _search_fail) return false;
 
@@ -502,7 +498,7 @@ bool InitiateSearchCB::disjunct_search(PatternMatchEngine *pme,
 	// method.
 	dbgprt("Cannot use link-type search, use variable-type search\n");
 	_search_fail = false;
-	found = variable_search(pme, vars, pat);
+	found = variable_search(pme);
 	return found;
 }
 
@@ -513,8 +509,8 @@ bool InitiateSearchCB::disjunct_search(PatternMatchEngine *pme,
  * a Quotelink, must be ignored.
  */
 void InitiateSearchCB::find_rarest(const Handle& clause,
-                                        Handle& rarest,
-                                        size_t& count)
+                                   Handle& rarest,
+                                   size_t& count)
 {
 	Type t = clause->getType();
 	if (QUOTE_LINK == t) return;
@@ -542,12 +538,9 @@ void InitiateSearchCB::find_rarest(const Handle& clause,
  * type which has the smallest number of atoms of that type in the
  * AtomSpace.
  */
-bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme,
-                                            const Variables& vars,
-                                            const Pattern& pat)
+bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 {
-	init(vars, pat);  // call again; derived class may call us directly
-	const HandleSeq& clauses = pat.mandatory;
+	const HandleSeq& clauses = _pattern->mandatory;
 
 	_search_fail = false;
 	_root = Handle::UNDEFINED;
@@ -558,7 +551,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme,
 	{
 		// Evaluatables don't exist in the atomspace, in general.
 		// Cannot start a search wtih them.
-		if (0 < pat.evaluatable_holders.count(cl)) continue;
+		if (0 < _pattern->evaluatable_holders.count(cl)) continue;
 		size_t prev = count;
 		find_rarest(cl, _starter_term, count);
 		if (count < prev)
@@ -616,21 +609,18 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme,
  * variables, then you probably don't want to use this metod, either;
  * you should create somethnig more clever.
  */
-bool InitiateSearchCB::variable_search(PatternMatchEngine *pme,
-                                            const Variables& vars,
-                                            const Pattern& pat)
+bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 {
-	init(vars, pat);  // call again; derived class may call us directly
-	const HandleSeq& clauses = pat.mandatory;
+	const HandleSeq& clauses = _pattern->mandatory;
 
 	// Find the rarest variable type;
 	size_t count = SIZE_MAX;
 	Type ptype = ATOM;
 
-	dbgprt("varset size = %lu\n", vars.varset.size());
+	dbgprt("varset size = %lu\n", _variables->varset.size());
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
-	for (const Handle& var: vars.varset)
+	for (const Handle& var: _variables->varset)
 	{
 		dbgprt("Examine variable %s\n", var->toShortString().c_str());
 		auto tit = _type_restrictions->find(var);
@@ -648,7 +638,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme,
 				{
 					// Evaluatables dont' exist in the atomspace, in general.
 					// Cannot start a search wtih them.
-					if (0 < pat.evaluatable_holders.count(cl)) continue;
+					if (0 < _pattern->evaluatable_holders.count(cl)) continue;
 					FindAtoms fa(var);
 					fa.search_set(cl);
 					if (cl == var)

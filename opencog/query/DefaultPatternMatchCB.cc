@@ -42,17 +42,26 @@ using namespace opencog;
 /* ======================================================== */
 
 DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
-	_temp_aspace(NULL),
-	_instor(&_temp_aspace),
 	_classserver(classserver()),
 	_type_restrictions(NULL),
 	_dynamic(NULL),
+	_temp_aspace(NULL),
+	_instor(&_temp_aspace),
 	_as(as)
 {
 	_connectives.insert(AND_LINK);
 	_connectives.insert(OR_LINK);
 	_connectives.insert(NOT_LINK);
 }
+
+void DefaultPatternMatchCB::set_pattern(const Variables& vars,
+                                        const Pattern& pat)
+{
+	_type_restrictions = &vars.typemap;
+	_dynamic = &pat.evaluatable_terms;
+	_have_evaluatables = (0 < _dynamic->size());
+}
+
 
 /* ======================================================== */
 
@@ -168,14 +177,6 @@ bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
 {
 	if (Handle::UNDEFINED == grnd) return true;
 	return false;
-}
-
-void DefaultPatternMatchCB::init(const Variables& vars,
-                                 const Pattern& pat)
-{
-	_type_restrictions = &vars.typemap;
-	_dynamic = &pat.evaluatable_terms;
-	_have_evaluatables = (0 < _dynamic->size());
 }
 
 /* ======================================================== */

@@ -50,22 +50,20 @@ class InitiateSearchCB : public virtual PatternMatchCallback
 		 * assumptions about the kind of things that might be matched,
 		 * in order to drive a reasonably-fast search.
 		 */
-		virtual bool initiate_search(PatternMatchEngine *,
-		                             const Variables&,
-		                             const Pattern&);
+		virtual void set_pattern(const Variables&, const Pattern&);
+		virtual bool initiate_search(PatternMatchEngine *);
 
 	protected:
 
 		ClassServer& _classserver;
 
-		// All the state below is for finding a good place to start
-		// searches.
-		void init(const Variables&, const Pattern&);
-		Handle _root;
-		Handle _starter_term;
+		const Variables* _variables;
+		const Pattern* _pattern;
 		const VariableTypeMap* _type_restrictions;
 		const std::set<Handle>* _dynamic;
-		bool _have_evaluatables;
+
+		Handle _root;
+		Handle _starter_term;
 
 		virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
 		virtual Handle find_thinnest(const HandleSeq&,
@@ -74,21 +72,11 @@ class InitiateSearchCB : public virtual PatternMatchCallback
 		virtual void find_rarest(const Handle&, Handle&, size_t&);
 
 		bool _search_fail;
-		virtual bool neighbor_search(PatternMatchEngine *,
-		                             const Variables&,
-		                             const Pattern&);
+		virtual bool neighbor_search(PatternMatchEngine *);
+		virtual bool disjunct_search(PatternMatchEngine *);
+		virtual bool link_type_search(PatternMatchEngine *);
+		virtual bool variable_search(PatternMatchEngine *);
 
-		virtual bool disjunct_search(PatternMatchEngine *,
-		                             const Variables&,
-		                             const Pattern&);
-
-		virtual bool link_type_search(PatternMatchEngine *,
-		                             const Variables&,
-		                             const Pattern&);
-
-		virtual bool variable_search(PatternMatchEngine *,
-		                             const Variables&,
-		                             const Pattern&);
 		AtomSpace *_as;
 };
 

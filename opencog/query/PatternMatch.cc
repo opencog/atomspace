@@ -89,11 +89,15 @@ class PMCGroundings : public PatternMatchCallback
 		}
 		void push(void) { _cb.push(); }
 		void pop(void) { _cb.pop(); }
-		bool initiate_search(PatternMatchEngine* pme,
-	                        const Variables& vars,
-	                        const Pattern& pat)
+		void set_pattern(const Variables& vars,
+	                    const Pattern& pat)
 		{
-			return _cb.initiate_search(pme, vars, pat);
+			_cb.set_pattern(vars, pat);
+		}
+
+		bool initiate_search(PatternMatchEngine* pme)
+		{
+			return _cb.initiate_search(pme);
 		}
 
 		// This one we don't pass through. Instead, we collect the
@@ -333,7 +337,8 @@ bool ConcreteLink::satisfy(PatternMatchCallback& pmcb) const
 	debug_print();
 #endif
 
-	bool found = pmcb.initiate_search(&pme, _varlist, _pat);
+	pmcb.set_pattern(_varlist, _pat);
+	bool found = pmcb.initiate_search(&pme);
 
 #ifdef DEBUG
 	printf("==================== Done with Search ==================\n");
