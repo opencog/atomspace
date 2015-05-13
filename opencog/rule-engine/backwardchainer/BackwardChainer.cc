@@ -91,7 +91,7 @@ void BackwardChainer::do_step()
 {
 	// XXX TODO do proper target selection here using some fitness function
 	Handle selected_target = rand_element(_targets_set);
-	_targets_set.erase(selected_target);
+	//_targets_set.erase(selected_target);
 
 	logger().debug("[BackwardChainer] Before do_step_bc");
 
@@ -230,7 +230,6 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 
 		logger().debug("%d possible permises", possible_premises.size());
 
-		std::stack<Handle> to_be_added_to_targets;
 		VarMultimap results;
 
 		// For each set of possible premises, check if they already
@@ -288,35 +287,25 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 			if (not need_bc)
 				continue;
 
+
+
 			// XXX TODO premise selection would be done here to
 			// determine wheter to BC on a premise
 
-			// Break out any logical link and add to targets
+
+
+			// non-logical link can be added straight to targets list
 			if (_logical_link_types.count(h->getType()) == 0)
 			{
-				to_be_added_to_targets.push(h);
+				_targets_set.insert(h);
 				continue;
 			}
 
+			// Break out any logical link and add to targets
 			HandleSeq sub_premises = LinkCast(h)->getOutgoingSet();
 
 			for (Handle& h : sub_premises)
-				to_be_added_to_targets.push(h);
-		}
-
-		logger().debug("[BackwardChainer] %d new targets to be added",
-		               to_be_added_to_targets.size());
-
-		if (possible_premises.size() == 0 || not to_be_added_to_targets.empty())
-		{
-			// Add itself back to target, since this is not completely solved
-			_targets_set.insert(hgoal);
-
-			while (not to_be_added_to_targets.empty())
-			{
-				_targets_set.insert(to_be_added_to_targets.top());
-				to_be_added_to_targets.pop();
-			}
+				_targets_set.insert(h);
 		}
 
 		return results;
@@ -327,7 +316,6 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		               "storying the grounding");
 
 		VarMultimap results;
-		bool goal_readded = false;
 
 		for (size_t i = 0; i < kb_match.size(); ++i)
 		{
@@ -342,17 +330,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 
 			// If there are free variables, add this soln to the target stack
 			if (not free_vars.empty())
-			{
-				// Add the goal back in target list since one of the
-				// solution has variables inside
-				if (not goal_readded)
-				{
-					_targets_set.insert(hgoal);
-					goal_readded = true;
-				}
-
 				_targets_set.insert(soln);
-			}
 
 			// Construct the hgoal to all mappings here to be returned
 			for (auto it = vgm.begin(); it != vgm.end(); ++it)
