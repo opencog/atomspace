@@ -109,7 +109,7 @@ public:
 
 	void set_target(Handle init_target);
 
-	void do_full_chain(uint max_steps = 0);
+	void do_until(uint max_steps);
 	void do_step();
 
 	VarMultimap& get_chaining_result();

@@ -66,19 +66,17 @@ void BackwardChainer::set_target(Handle init_target)
 
 /**
  * The public entry point for full backward chaining.
+ *
+ * @param max_steps   The maximum number of backward chain steps
+ *
+ * XXX TODO add more stopping param like fitness criterion, etc
  */
-void BackwardChainer::do_full_chain(uint max_steps)
+void BackwardChainer::do_until(uint max_steps)
 {
 	uint i = 0;
 
-	while (not _targets_set.empty())
+	while (i < max_steps)
 	{
-		if (max_steps != 0 && i >= max_steps)
-		{
-			logger().debug("[BackwardChainer] Stopping from reaching max steps");
-			break;
-		}
-
 		do_step();
 		i++;
 	}
@@ -91,7 +89,6 @@ void BackwardChainer::do_step()
 {
 	// XXX TODO do proper target selection here using some fitness function
 	Handle selected_target = rand_element(_targets_set);
-	//_targets_set.erase(selected_target);
 
 	logger().debug("[BackwardChainer] Before do_step_bc");
 
@@ -123,6 +120,8 @@ VarMultimap& BackwardChainer::get_chaining_result()
  */
 VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 {
+	VarMultimap results;
+
 	HandleSeq free_vars = get_free_vars_in_tree(hgoal);
 
 	// Check whether this goal has free variables and worth exploring
@@ -130,7 +129,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 	{
 		logger().debug("[BackwardChainer] Boring goal with no free var, "
 		               "skipping " + hgoal->toShortString());
-		return VarMultimap();
+		return results;
 	}
 
 	// Check whether this goal is a virtual link and is useless to explore
@@ -138,16 +137,17 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 	{
 		logger().debug("[BackwardChainer] Boring virtual link goal, "
 		               "skipping " + hgoal->toShortString());
-		return VarMultimap();
+		return results;
 	}
 
 	std::vector<VarMap> kb_vmap;
-	VarMultimap results;
 
 	// Else, try to ground, and backward chain
 	HandleSeq kb_match = match_knowledge_base(hgoal, Handle::UNDEFINED,
 	                                          true, kb_vmap);
 
+	// Matched something in the knowledge base? Then need to store
+	// any grounding as a possible solution for this target
 	if (not kb_match.empty())
 	{
 		logger().debug("[BackwardChainer] Matched something in knowledge base, "
