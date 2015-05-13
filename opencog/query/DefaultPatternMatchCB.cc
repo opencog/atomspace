@@ -43,9 +43,6 @@ using namespace opencog;
 
 DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
 	_classserver(classserver()),
-	_type_restrictions(NULL),
-	_dynamic(NULL),
-	_temp_aspace(NULL),
 	_instor(&_temp_aspace),
 	_as(as)
 {
@@ -176,6 +173,7 @@ bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
                                                   const Handle& grnd)
 {
 	if (Handle::UNDEFINED == grnd) return true;
+	_optionals_present = true;
 	return false;
 }
 

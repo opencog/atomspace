@@ -46,10 +46,10 @@ namespace opencog {
  * other clear-box evaluatable link types.
  *
  * It handles AbsentLink using standard intuitionist logic,
- * except at the very end of the search, when the presence of
- * non-absent terms is converted into an explicit classical
- * logic "present" boolean flag.  See notes in the code for
- * details.
+ * and provides tracking of an _optionals_present flag, so that
+ * conversion to explicit classical logic can be performed at the
+ * conclusion of the search.  The default implicator performs
+ * conversion; see the notes there for details.
  */
 class DefaultPatternMatchCB : public virtual PatternMatchCallback
 {
@@ -84,9 +84,9 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 
 		ClassServer& _classserver;
 
-		const VariableTypeMap* _type_restrictions;
-		const std::set<Handle>* _dynamic;
-		bool _have_evaluatables;
+		const VariableTypeMap* _type_restrictions = NULL;
+		const std::set<Handle>* _dynamic = NULL;
+		bool _have_evaluatables = false;
 
 		// Temp atomspace used for test-groundings of virtual links.
 		AtomSpace _temp_aspace;
@@ -99,7 +99,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		bool eval_sentence(const Handle& pat,
 		             const std::map<Handle,Handle>& gnds);
 
-		bool _optionals_present;
+		bool _optionals_present = false;
 		AtomSpace* _as;
 };
 
