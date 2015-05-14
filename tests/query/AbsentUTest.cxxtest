@@ -155,7 +155,7 @@ void AbsentUTest::test_double(void)
 	Handle state = eval->eval_h("(show-ufo-state)");
 	TS_ASSERT_EQUALS(state, exists);
 
-	// Mulder and sculy not around; UFO should be.
+	// Mulder and Scully not around; UFO should be.
 	eval->eval_h("(cog-bind is-visible)");
 	eval->eval_h("(cog-bind is-invisible)");
 	eval->eval_h("(cog-bind is-proven)");

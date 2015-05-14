@@ -1,6 +1,11 @@
 ;
 ; Unit testing for absence of multiple terms
 ;
+; This implements a kind-of Schroedingers-UFO: the UFO exists only
+; if Mulder and Scully are not around. If just one is around, its
+; existence is denied; if both are around, then there is definitive
+; proof.
+;
 (use-modules (opencog))
 (use-modules (opencog query))
 
