@@ -210,7 +210,7 @@ void BackwardChainerUTest::test_basic_bc()
 	Handle soln = eval_->eval_h("(ConceptNode \"Fritz\")");
 
 	bc.set_target(target);
-	bc.do_full_chain(10);
+	bc.do_until(10);
 
 	VarMultimap results = bc.get_chaining_result();
 
