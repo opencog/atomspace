@@ -10,8 +10,9 @@
 #
 include(lib/Summary.cmake)
 
-# Seems to work fine with cmake-2.6
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+# Need to have cmake-2.8.8 in order to be able to check the compiler
+# version.
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
 IF (COMMAND CMAKE_POLICY)
 	CMAKE_POLICY(SET CMP0003 NEW)
 	CMAKE_POLICY(SET CMP0005 OLD)
@@ -55,11 +56,11 @@ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 # Detect different compilers and OS'es, tweak flags as necessary.
 
 IF (CMAKE_COMPILER_IS_GNUCXX)
-	# aiiee cmake version 2.8.8 or newer is needed for below to
-	# work...
-	# IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6.4)
-	#	MESSAGE(FATAL_ERROR "GCC version must be at least 4.6.4!")
-	# ENDIF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6.4)
+	# gcc before version 4.8 does not support the c++11 definition
+	# of thread_local.
+	IF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8.0)
+		MESSAGE(FATAL_ERROR "GCC version must be at least 4.8.0!")
+	ENDIF (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8.0)
 
 	IF (APPLE)
 		SET(CMAKE_C_FLAGS "-Wall -Wno-long-long -Wno-conversion")

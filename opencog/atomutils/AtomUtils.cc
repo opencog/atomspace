@@ -132,7 +132,7 @@ UnorderedHandleSet get_outgoing_nodes(const Handle& hinput,
             if (it != types.end())
                 return {hinput};
             else
-                return {};
+                return UnorderedHandleSet();
         }
     }
 }

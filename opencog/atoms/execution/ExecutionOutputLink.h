@@ -24,7 +24,7 @@
 #define _OPENCOG_EXECUTION_OUTPUT_LINK_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/reduct/FreeLink.h>
+#include <opencog/atoms/reduct/FunctionLink.h>
 
 namespace opencog
 {
@@ -32,8 +32,11 @@ namespace opencog
  *  @{
  */
 
-class ExecutionOutputLink : public FreeLink
+class ExecutionOutputLink : public FunctionLink
 {
+private:
+	static Handle do_execute(AtomSpace*, const Handle& schema,
+	                                     const Handle& args);
 public:
 	ExecutionOutputLink(const HandleSeq& oset,
 	     TruthValuePtr tv = TruthValue::NULL_TV(),
@@ -45,14 +48,7 @@ public:
 
 	ExecutionOutputLink(Link& l);
 
-	Handle execute(AtomSpace* as) {
-	    return do_execute(as, Handle(shared_from_this()));
-	}
-
-	static Handle do_execute(AtomSpace*, const Handle&);
-	static Handle do_execute(AtomSpace*, Type, const HandleSeq& schema_and_args);
-	static Handle do_execute(AtomSpace*, const Handle& schema,
-	                                     const Handle& args);
+	virtual Handle execute(AtomSpace* = NULL) const;
 };
 
 typedef std::shared_ptr<ExecutionOutputLink> ExecutionOutputLinkPtr;

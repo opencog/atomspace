@@ -109,7 +109,7 @@ public:
 
 	void set_target(Handle init_target);
 
-	void do_full_chain(uint max_steps = 0);
+	void do_until(uint max_steps);
 	void do_step();
 
 	VarMultimap& get_chaining_result();
@@ -125,12 +125,12 @@ private:
 	                               Handle htarget_vardecl,
 	                               bool check_history,
 	                               std::vector<VarMap>& vmap);
-	HandleSeq ground_premises(const Handle& htarget, std::vector<VarMap>& vmap);
+	HandleSeq ground_premises(const Handle& htarget, const VarMap& vmap, std::vector<VarMap>& vmap_list);
 	bool unify(const Handle& htarget, const Handle& hmatch,
 	           Handle htarget_vardecl, VarMap& result);
 
 	Handle gen_sub_varlist(const Handle& parent_varlist,
-	                       const std::set<Handle>& varset);
+	                       std::set<Handle> varset);
 
 	AtomSpace* _as;
 	AtomSpace* _garbage_superspace;
@@ -139,7 +139,8 @@ private:
 	// a map of a premise, to a map of its variables mapping
 	map<Handle, VarMultimap> _inference_history;
 
-	// XXX TODO will want a list to allow target selection in the future
+	// XXX TODO add information to each target stating what rules were applied
+	// and how often the target was chosen?
 	UnorderedHandleSet _targets_set;
 	std::vector<Rule> _rules_set;
 

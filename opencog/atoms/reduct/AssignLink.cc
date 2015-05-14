@@ -32,6 +32,44 @@
 
 using namespace opencog;
 
+AssignLink::AssignLink(const HandleSeq& oset,
+                       TruthValuePtr tv, AttentionValuePtr av)
+	: FunctionLink(ASSIGN_LINK, oset, tv, av)
+{
+	init(oset);
+}
+
+AssignLink::AssignLink(Type t, const HandleSeq& oset,
+                       TruthValuePtr tv, AttentionValuePtr av)
+	: FunctionLink(t, oset, tv, av)
+{
+	if (not classserver().isA(t, ASSIGN_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an AssignLink, got %s", tname.c_str());
+	}
+
+	init(oset);
+}
+
+AssignLink::AssignLink(Link &l)
+	: FunctionLink(l)
+{
+	// Type must be as expected
+	Type tscope = l.getType();
+	if (not classserver().isA(tscope, ASSIGN_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(tscope);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an AssignLink, got %s", tname.c_str());
+	}
+
+	init(l.getOutgoingSet());
+}
+
+// ---------------------------------------------------------------
+
 void AssignLink::init(const HandleSeq& oset)
 {
 	// The first member of the handleset must be a TypeNode, and it must
@@ -59,6 +97,8 @@ void AssignLink::init(const HandleSeq& oset)
 
 	_osetz = _outset.size();
 }
+
+// ---------------------------------------------------------------
 
 Handle AssignLink::execute(AtomSpace * as) const
 {
@@ -98,66 +138,30 @@ Handle AssignLink::execute(AtomSpace * as) const
 	return as->addAtom(createLink(_link_type, _outset));
 }
 
-AssignLink::AssignLink(const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: Link(ASSIGN_LINK, oset, tv, av)
-{
-	init(oset);
-}
-
-AssignLink::AssignLink(Type t, const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: Link(t, oset, tv, av)
-{
-	if (not classserver().isA(t, ASSIGN_LINK))
-	{
-		const std::string& tname = classserver().getTypeName(t);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an AssignLink, got %s", tname.c_str());
-	}
-
-	init(oset);
-}
-
-AssignLink::AssignLink(Link &l)
-	: Link(l)
-{
-	// Type must be as expected
-	Type tscope = l.getType();
-	if (not classserver().isA(tscope, ASSIGN_LINK))
-	{
-		const std::string& tname = classserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an AssignLink, got %s", tname.c_str());
-	}
-
-	init(l.getOutgoingSet());
-}
-
 // ============================================================
 
-Handle AddLink::execute(AtomSpace* as) const
+Handle InsertLink::execute(AtomSpace* as) const
 {
 	if (NULL == as)
 		return Handle(createLink(_link_type, _outset));
 	return as->addAtom(createLink(_link_type, _outset));
 }
 
-AddLink::AddLink(const HandleSeq& oset,
+InsertLink::InsertLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: AssignLink(ADD_LINK, oset, tv, av)
+	: AssignLink(INSERT_LINK, oset, tv, av)
 {}
 
-AddLink::AddLink(Link &l)
+InsertLink::InsertLink(Link &l)
 	: AssignLink(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
-	if (not classserver().isA(tscope, ADD_LINK))
+	if (not classserver().isA(tscope, INSERT_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting a AddLink, got %s", tname.c_str());
+			"Expecting a InsertLink, got %s", tname.c_str());
 	}
 }
 

@@ -39,7 +39,6 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/TypeNode.h>
-#include <opencog/atoms/bind/AssignLink.h>
 #include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/DefineLink.h>
@@ -48,8 +47,7 @@
 #include <opencog/atoms/bind/VariableList.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
-#include <opencog/atoms/reduct/PlusLink.h>
-#include <opencog/atoms/reduct/TimesLink.h>
+#include <opencog/atoms/reduct/FunctionLink.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
@@ -288,6 +286,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         return atom->getHandle();
 
     // Experimental C++ atom types support code
+    // This could be encapsulated in a factory...
     Type atom_type = atom->getType();
     if (NUMBER_NODE == atom_type) {
         if (NULL == NumberNodeCast(atom))
@@ -295,12 +294,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     } else if (TYPE_NODE == atom_type) {
         if (NULL == TypeNodeCast(atom))
             atom = createTypeNode(*NodeCast(atom));
-    } else if (ADD_LINK == atom_type) {
-        if (NULL == AddLinkCast(atom))
-            atom = createAddLink(*LinkCast(atom));
-    } else if (ASSIGN_LINK == atom_type) {
-        if (NULL == AssignLinkCast(atom))
-            atom = createAssignLink(*LinkCast(atom));
     } else if (BIND_LINK == atom_type) {
         if (NULL == BindLinkCast(atom))
             atom = createBindLink(*LinkCast(atom));
@@ -313,32 +306,32 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     } else if (DELETE_LINK == atom_type) {
         if (NULL == DeleteLinkCast(atom))
             atom = createDeleteLink(*LinkCast(atom));
-    } else if (PLUS_LINK == atom_type) {
-        if (NULL == PlusLinkCast(atom))
-            atom = createPlusLink(*LinkCast(atom));
-/*
     } else if (EVALUATION_LINK == atom_type) {
+/*
         if (NULL == EvaluationLinkCast(atom))
             atom = createEvaluationLink(*LinkCast(atom));
+*/
     } else if (EXECUTION_OUTPUT_LINK == atom_type) {
+/*
+        XXX FIXME: cannot do this, due to a circular chared library
+        dependency between python and itself: python depends on
+        ExecutionOutputLink, and ExecutionOutputLink depends on python.
+        Boo.  I tried fixing this, but it is hard, somehow.
         if (NULL == ExecutionOutputLinkCast(atom))
             atom = createExecutionOutputLink(*LinkCast(atom));
 */
-    } else if (REMOVE_LINK == atom_type) {
-        if (NULL == RemoveLinkCast(atom))
-            atom = createRemoveLink(*LinkCast(atom));
     } else if (SATISFACTION_LINK == atom_type) {
         if (NULL == SatisfactionLinkCast(atom))
             atom = createSatisfactionLink(*LinkCast(atom));
     } else if (SCOPE_LINK == atom_type) {
         if (NULL == ScopeLinkCast(atom))
             atom = createScopeLink(*LinkCast(atom));
-    } else if (TIMES_LINK == atom_type) {
-        if (NULL == TimesLinkCast(atom))
-            atom = createTimesLink(*LinkCast(atom));
     } else if (VARIABLE_LIST == atom_type) {
         if (NULL == VariableListCast(atom))
             atom = createVariableList(*LinkCast(atom));
+    } else if (classserver().isA(atom_type, FUNCTION_LINK)) {
+        if (NULL == FunctionLinkCast(atom))
+            atom = FunctionLink::factory(LinkCast(atom));
     }
 
     // Is the equivalent of this atom already in the table?
@@ -365,11 +358,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             }
         } else {
             LinkPtr lll(LinkCast(atom));
-            if (ADD_LINK == atom_type) {
-                atom = createAddLink(*lll);
-            } else if (ASSIGN_LINK == atom_type) {
-                atom = createAssignLink(*lll);
-            } else if (BIND_LINK == atom_type) {
+            if (BIND_LINK == atom_type) {
                 atom = createBindLink(*lll);
             } else if (BETA_REDEX == atom_type) {
                 atom = createBetaRedex(*lll);
@@ -377,24 +366,20 @@ Handle AtomTable::add(AtomPtr atom, bool async)
                 atom = createDefineLink(*lll);
             } else if (DELETE_LINK == atom_type) {
                 atom = createDeleteLink(*lll);
-            } else if (PLUS_LINK == atom_type) {
-                atom = createPlusLink(*lll);
-/*
             } else if (EVALUATION_LINK == atom_type) {
-                atom = createEvaluationLink(*lll);
+                // atom = createEvaluationLink(*lll);
+                atom = createLink(*lll);
             } else if (EXECUTION_OUTPUT_LINK == atom_type) {
-                atom = createExecutionOutputLink(*lll);
-*/
-            } else if (REMOVE_LINK == atom_type) {
-                atom = createRemoveLink(*lll);
+                // atom = createExecutionOutputLink(*lll);
+                atom = createLink(*lll);
             } else if (SATISFACTION_LINK == atom_type) {
                 atom = createSatisfactionLink(*lll);
             } else if (SCOPE_LINK == atom_type) {
                 atom = createScopeLink(*lll);
-            } else if (TIMES_LINK == atom_type) {
-                atom = createTimesLink(*lll);
             } else if (VARIABLE_LIST == atom_type) {
                 atom = createVariableList(*lll);
+            } else if (classserver().isA(atom_type, FUNCTION_LINK)) {
+                atom = FunctionLink::factory(lll);
             } else {
                 atom = createLink(*lll);
             }

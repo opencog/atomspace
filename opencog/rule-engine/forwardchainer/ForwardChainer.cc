@@ -168,6 +168,8 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         //! Choose next source.
         _log->info("[ForwardChainer] setting next source");
         _fcmem.set_source(fcb.choose_next_source(_fcmem));
+        
+       _iteration++;
     }
 
     _log->info("[ForwardChainer] finished do_chain.");

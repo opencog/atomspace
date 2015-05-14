@@ -32,7 +32,7 @@ using namespace opencog;
 FoldLink::FoldLink(const HandleSeq& oset,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
-    : FreeLink(FOLD_LINK, oset, tv, av)
+    : FunctionLink(FOLD_LINK, oset, tv, av)
 {
 	init();
 }
@@ -40,7 +40,7 @@ FoldLink::FoldLink(const HandleSeq& oset,
 FoldLink::FoldLink(Type t, const HandleSeq& oset,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
-    : FreeLink(t, oset, tv, av)
+    : FunctionLink(t, oset, tv, av)
 {
 	if (not classserver().isA(t, FOLD_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FoldLink");
@@ -50,7 +50,7 @@ FoldLink::FoldLink(Type t, const HandleSeq& oset,
 FoldLink::FoldLink(Type t, const Handle& a, const Handle& b,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
-    : FreeLink(t, a, b, tv, av)
+    : FunctionLink(t, a, b, tv, av)
 {
 	if (not classserver().isA(t, FOLD_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FoldLink");
@@ -58,7 +58,7 @@ FoldLink::FoldLink(Type t, const Handle& a, const Handle& b,
 }
 
 FoldLink::FoldLink(Link& l)
-    : FreeLink(l)
+    : FunctionLink(l)
 {
 	Type tscope = l.getType();
 	if (not classserver().isA(tscope, FOLD_LINK))
@@ -95,17 +95,17 @@ Handle FoldLink::reduce(void)
 		Type t = h->getType();
 		if (NUMBER_NODE != t and
 		    VARIABLE_NODE != t and
-		    (not classserver().isA(t, FREE_LINK))
+		    (not classserver().isA(t, FUNCTION_LINK))
 		)
 			throw RuntimeException(TRACE_INFO,
 				"Don't know how to reduce %s", h->toShortString().c_str());
 
 		Handle redh(h);
-		if (classserver().isA(t, FREE_LINK))
+		if (classserver().isA(t, FUNCTION_LINK))
 		{
-			FreeLinkPtr fff(FreeLinkCast(h));
+			FunctionLinkPtr fff(FunctionLinkCast(h));
 			if (NULL == fff)
-				fff = createFreeLink(*LinkCast(h));
+				fff = createFunctionLink(*LinkCast(h));
 
 			redh = fff->reduce();
 			t = redh->getType();
@@ -149,4 +149,40 @@ Handle FoldLink::reduce(void)
 	}
 
 	return result;
+}
+
+// ===========================================================
+
+/// execute() -- Execute the expression, returning a number
+///
+/// Similar to reduce(), above, except that this can only work
+/// on fully grounded (closed) sentences: after executation,
+/// everything must be a number, and there can be no variables
+/// in sight.
+static inline double get_double(AtomSpace *as, Handle h)
+{
+	// Recurse, and execute anything below...
+	FunctionLinkPtr flp(FunctionLinkCast(h));
+	if (flp)
+		h = flp->execute(as);
+
+	NumberNodePtr nnn(NumberNodeCast(h));
+	if (nnn == NULL)
+		throw RuntimeException(TRACE_INFO,
+			  "Expecting a NumberNode, got %s",
+		     classserver().getTypeName(h->getType()).c_str());
+
+	return nnn->getValue();
+}
+
+Handle FoldLink::execute(AtomSpace* as) const
+{
+	double sum = knil;
+	for (Handle h: _outgoing)
+	{
+		sum = kons(sum, get_double(as, h));
+	}
+
+	if (as) return as->addAtom(createNumberNode(sum));
+	return Handle(createNumberNode(sum));
 }

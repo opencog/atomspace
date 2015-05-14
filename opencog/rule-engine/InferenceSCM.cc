@@ -129,7 +129,7 @@ Handle InferenceSCM::do_backward_chaining(Handle h)
 
 	logger().debug("[BackwardChainer] Before do_chain");
 
-    bc.do_full_chain();
+    bc.do_until(cpolicy_loader.get_max_iter());
 
 	logger().debug("[BackwardChainer] After do_chain");
     map<Handle, UnorderedHandleSet> soln = bc.get_chaining_result();
