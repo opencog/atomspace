@@ -1395,7 +1395,7 @@ bool PatternMatchEngine::do_next_clause(void)
  * quickly, and those that require a "black-box" evaluation of some
  * scheme or python code. Of the two, we save "black-box" for last.
  *
- * Then afer grounding all of the mandatory clauses (virtual or not),
+ * Then, after grounding all of the mandatory clauses (virtual or not),
  * we look for optional clauses, if any. Again, these might be virtual,
  * and they might be black...
  *
@@ -1639,12 +1639,19 @@ void PatternMatchEngine::clause_stacks_pop(void)
 void PatternMatchEngine::clause_stacks_clear(void)
 {
 	_clause_stack_depth = 0;
+#if 0
+	OC_ASSERT(0 == term_solutn_stack.size());
+	OC_ASSERT(0 == var_solutn_stack.size());
+	OC_ASSERT(0 == issued_stack.size());
+	OC_ASSERT(0 == choice_stack.size());
+	OC_ASSERT(0 == perm_stack.size());
+#else
 	while (!term_solutn_stack.empty()) term_solutn_stack.pop();
 	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
 	while (!issued_stack.empty()) issued_stack.pop();
 	while (!choice_stack.empty()) choice_stack.pop();
-
 	while (!perm_stack.empty()) perm_stack.pop();
+#endif
 }
 
 void PatternMatchEngine::solution_push(void)
@@ -1828,4 +1835,3 @@ void PatternMatchEngine::print_term(
 }
 
 /* ===================== END OF FILE ===================== */
-
