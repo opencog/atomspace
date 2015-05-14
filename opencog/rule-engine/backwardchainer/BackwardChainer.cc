@@ -197,16 +197,16 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 
 	Rule standardized_rule = select_rule(acceptable_rules).gen_standardize_apart(_garbage_superspace);
 
+	logger().debug("[BackwardChainer] Selected rule " + standardized_rule.get_handle()->toShortString());
+
 	Handle himplicant = standardized_rule.get_implicant();
 	Handle hvardecl = standardized_rule.get_vardecl();
 	HandleSeq outputs = standardized_rule.get_implicand();
-	VarMap implicand_normal_mapping;
-	VarMap implicand_quoted_mapping;
 
 	std::vector<VarMap> all_mappings;
 
 	// A rule can have multiple outputs, and only one will unify
-	// to our goal so try to all outputs that works
+	// to our goal so try all outputs that works
 	for (Handle h : outputs)
 	{
 		VarMap temp_mapping;
@@ -228,10 +228,15 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 	// all, and add all resulting new targets to targets list; this will
 	// avoid having to visit the target multiple times to get all
 	// possible output mappings
-	implicand_normal_mapping = rand_element(all_mappings);
+	VarMap implicand_normal_mapping = rand_element(all_mappings);
+	for (auto& p : implicand_normal_mapping)
+		logger().debug("[BackwardChainer] mapping is "
+					   + p.first->toShortString()
+					   + " to " + p.second->toShortString());
 
-	// Wrap all the mapped result inside QuoteLink, so that variables
-	// will be handled correctly for the next BC step
+	// Generate another version where each variables are inside QuoteLink;
+	// this is mostly to handle where PM cannot map a variable to itself
+	VarMap implicand_quoted_mapping;
 	for (auto& p : implicand_normal_mapping)
 	{
 		// find all variables
@@ -250,11 +255,6 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 					   + implicand_quoted_mapping[p.first]->toShortString()
 					   + " to garbage space");
 	}
-
-	for (auto& p : implicand_normal_mapping)
-		logger().debug("[BackwardChainer] mapping is "
-					   + p.first->toShortString()
-					   + " to " + p.second->toShortString());
 
 	// Reverse ground the implicant with the grounding we found from
 	// unifying the implicand
@@ -284,16 +284,28 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 	vmap_list.insert(vmap_list.end(), vmap_list_alt.begin(),
 	                 vmap_list_alt.end());
 
+
 	logger().debug("%d possible permises", possible_premises.size());
 
 	// For each set of possible premises, check if they already
-	// satisfy the goal
+	// satisfy the goal, so that we can apply the rule while
+	// we are looking at it in the same step
 	for (size_t i = 0; i < possible_premises.size(); i++)
 	{
 		Handle h = possible_premises[i];
 		VarMap vm = vmap_list[i];
+		vm.insert(implicand_normal_mapping.begin(), implicand_normal_mapping.end());
+
+		HandleSeq outputs_grounded;
+
+		// reverse ground the outputs
+		for (const Handle& ho : outputs)
+			outputs_grounded.push_back(inst.instantiate(ho, vm));
+
 
 		logger().debug("Checking permises " + h->toShortString());
+
+
 
 		bool need_bc = false;
 		std::vector<VarMap> vm_list;
@@ -332,8 +344,27 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 			// XXX TODO this is not really applying the rule since other
 			// unrelated output of the rule are not added to the
 			// atomspace; might need to do something with "HandleSeq outputs"
-			Instantiator inst(_as);
-			inst.instantiate(hgoal, m);
+			for (const Handle& ho : outputs_grounded)
+			{
+				// XXX TODO check! ho is not in _as, can Instantiator handle this?
+
+				Instantiator inst(_as);
+				Handle hho = inst.instantiate(ho, m);
+
+				logger().debug("[BackwardChainer] Instantiated " + ho->toShortString() + " to " + hho->toShortString());
+			}
+
+			for (const Handle& ho : outputs)
+				logger().debug("[BackwardChainer] rule output include " + ho->toShortString());
+
+			for (const Handle& ho : outputs_grounded)
+				logger().debug("[BackwardChainer] grounded rule output include " + ho->toShortString());
+
+			for (auto& p : vm)
+				logger().debug("[BackwardChainer] original mapping here is " + p.first->toShortString() + " to " + p.second->toShortString());
+
+			for (auto& p : m)
+				logger().debug("[BackwardChainer] the mapping here is " + p.first->toShortString() + " to " + p.second->toShortString());
 
 			// Add the grounding to the return results
 			for (Handle& h : free_vars)
@@ -528,6 +559,8 @@ HandleSeq BackwardChainer::ground_premises(const Handle& htarget,
                                            const VarMap& vmap,
                                            std::vector<VarMap>& vmap_list)
 {
+	HandleSeq results;
+
 	FindAtoms fv(VARIABLE_NODE);
 	fv.search_set(htarget);
 
@@ -535,8 +568,6 @@ HandleSeq BackwardChainer::ground_premises(const Handle& htarget,
 	if (fv.varset.empty())
 	{
 		vmap_list.push_back(vmap);
-
-		HandleSeq results;
 		results.push_back(htarget);
 
 		return results;
@@ -567,7 +598,35 @@ HandleSeq BackwardChainer::ground_premises(const Handle& htarget,
 
 	logger().debug("[BackwardChainer] Grounding " + premises->toShortString());
 
-	return match_knowledge_base(premises, Handle::UNDEFINED, false, vmap_list);
+	std::vector<VarMap> temp_vmap_list;
+
+	results = match_knowledge_base(premises, Handle::UNDEFINED, false, temp_vmap_list);
+
+	// convert the temp_vmap_list to be based on the varables in vmap
+	for (VarMap& tvm : temp_vmap_list)
+	{
+		VarMap this_map;
+
+		for (const auto& p : vmap)
+		{
+			// the original map maps to variable that map to another value?
+			if (tvm.count(p.second) == 1)
+			{
+				this_map[p.first] = tvm[p.second];
+				this_map[p.second] = tvm[p.second];
+				tvm.erase(p.second);
+			}
+			else
+				this_map[p.first] = p.second;
+		}
+
+		// add any leftover mapping into final ouput
+		this_map.insert(tvm.begin(), tvm.end());
+
+		vmap_list.push_back(this_map);
+	}
+
+	return results;
 }
 
 /**
@@ -577,6 +636,7 @@ HandleSeq BackwardChainer::ground_premises(const Handle& htarget,
  * specific atom to another, let it handles UnorderedLink, VariableNode in
  * QuoteLink, etc.
  *
+ * XXX TODO allow typed variable to unify to a variable
  * XXX TODO unify in both direction? (maybe not)
  * XXX Should (Link (Node A)) be unifiable to (Node A))?  BC literature never
  * unify this way, but in AtomSpace context, (Link (Node A)) does contain (Node A)
