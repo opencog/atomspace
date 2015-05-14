@@ -234,7 +234,8 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 	// Sometimes, the number of mandatory clauses can be zero...
 	// We still want to search, though.
 	const HandleSeq& clauses =
-		(0 < _pattern->mandatory.size()) ? _pattern->mandatory : _pattern->clauses;
+		(0 < _pattern->mandatory.size()) ?
+			 _pattern->mandatory : _pattern->cnf_clauses;
 
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by
@@ -266,6 +267,7 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 	_root = clauses[bestclause];
 	dbgprt("Search start node: %s\n", best_start->toShortString().c_str());
 	dbgprt("Start term is: %s\n", _starter_term->toShortString().c_str());
+	dbgprt("Root clause is: %s\n", _root->toShortString().c_str());
 
 	// This should be calling the over-loaded virtual method
 	// get_incoming_set(), so that, e.g. it gets sorted by attentional
