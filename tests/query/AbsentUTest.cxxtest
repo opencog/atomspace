@@ -209,5 +209,23 @@ void AbsentUTest::test_double(void)
 	state = eval->eval_h("(show-ufo-state)");
 	TS_ASSERT_EQUALS(state, proven);
 
+	// Discredit Scully
+	eval->eval_h("(cog-bind discredit-scully)");
+	eval->eval_h("(cog-bind is-visible)");
+	eval->eval_h("(cog-bind is-invisible)");
+	eval->eval_h("(cog-bind is-proven)");
+
+	state = eval->eval_h("(show-ufo-state)");
+	TS_ASSERT_EQUALS(state, denied);
+
+	// Discredit Mulder too
+	eval->eval_h("(cog-bind discredit-mulder)");
+	eval->eval_h("(cog-bind is-visible)");
+	eval->eval_h("(cog-bind is-invisible)");
+	eval->eval_h("(cog-bind is-proven)");
+
+	state = eval->eval_h("(show-ufo-state)");
+	TS_ASSERT_EQUALS(state, exists);
+
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

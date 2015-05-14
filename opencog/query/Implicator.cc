@@ -65,11 +65,15 @@ namespace opencog
  * The `do_conn_check` flag stands for "do connectivity check";
  * if the flag is set, and the pattern is disconnected, then an
  * error will be thrown. PLN explicitly allows disconnected graphs.
+ *
+ * Set the default to always allow disconnected graphs. This will
+ * get naive users into trouble, but there are legit uses, not just
+ * in PLN, for doing disconnected searches.
  */
 static Handle do_imply(AtomSpace* as,
                        const Handle& hbindlink,
                        Implicator& impl,
-                       bool do_conn_check=true)
+                       bool do_conn_check=false)
 {
 	BindLinkPtr bl(BindLinkCast(hbindlink));
 	if (NULL == bl)
@@ -88,32 +92,17 @@ static Handle do_imply(AtomSpace* as,
 		return gl;
 	}
 
-	// OK, there are two ways to explain what is happening here; the
-	// fancy way and the pedestrian day.  Lets try the fancy way first...
+	// There are certain useful queries, where the goal of the query
+	// is to determine that some clause or set of clauses are absent
+	// from the AtomSpace. If the clauses are jointly not found, after
+	// a full and exhaustive search, then we want to run the implicator,
+	// and perform some action. Easier said than done, this code is
+	// currently a bit of a hack. It seems to work, per the AbsentUTest
+	// but is perhaps a bit fragile in its assumptions.
 	//
-	// The code below struggles to handle a conversion of the
-	// intuitionistic logic used during the course of pattern matching
-	// into a final classical logic form, by implementing "Reductio ad
-	// absurdum" (RAA). RAA says "If something is not not false, then
-	// it must be true".  See Dirk van Dalen, "Logic and Structure",
-	// (2003) Springer; chapter 5 for an explantion, or the Stanford
-	// Encyclopedia of Philosophy article on Intuitionistic Logic
-	// http://plato.stanford.edu/entries/logic-intuitionistic/
-	//
-	// So: the pattern matcher uses intuitionistic logic to avoid the
-	// the Turing machine halting problem: either a pattern is in the
-	// atomspace (i.e. it is "provable") or it is absent (it may be
-	// provable, but we do not know of either a proof or a dis-proof).
-	// Think of the atomspace as a Kripke semantics database; it holds
-	// everything that we know at time t.
-	//
-	// However, there are certain useful queries, where the goal of
-	// the query is to determine that some clause or set of clauses
-	// are absent in the AtomSpace. If the clauses are jointly not
-	// found, after a full and exhaustive search, then we want to run
-	// the implicator, and perform some action. Easier said than done,
-	// this code is currently a hack.
-
+	// Theoretical background: the atomspace can be thought of as a
+	// Kripke frame: it holds everything we know "right now". The
+	// AbsentLink is a check for what we don't know, right now.
 	const Pattern& pat = bl->get_pattern();
 	DefaultPatternMatchCB* intu =
 		dynamic_cast<DefaultPatternMatchCB*>(&impl);

@@ -15,7 +15,7 @@
 (define scully
 	(EvaluationLink
 		(PredicateNode "Agent Scully")
-		(ListLink (VariableNode "$x"))))
+		(ListLink (VariableNode "$y"))))
 
 ; Call in the agents
 (define call-mulder
