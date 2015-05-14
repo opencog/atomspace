@@ -118,7 +118,7 @@ static Handle do_imply(AtomSpace* as,
 	DefaultPatternMatchCB* intu =
 		dynamic_cast<DefaultPatternMatchCB*>(&impl);
 	if (0 == pat.mandatory.size() and 0 < pat.optionals.size()
-	    and intu->optionals_present())
+	    and not intu->optionals_present())
 	{
 		std::map<Handle, Handle> empty_map;
 		Handle h = impl.inst.instantiate(impl.implicand, empty_map);
