@@ -149,6 +149,7 @@ void AbsentUTest::test_double(void)
 
 	Handle denied = eval->eval_h("(get-denied)");
 	Handle exists = eval->eval_h("(get-exists)");
+	Handle proven = eval->eval_h("(get-proven)");
 
 	// Verify the intial state, UFO should exist
 	Handle state = eval->eval_h("(show-ufo-state)");
@@ -157,6 +158,7 @@ void AbsentUTest::test_double(void)
 	// Mulder and sculy not around; UFO should be.
 	eval->eval_h("(cog-bind is-visible)");
 	eval->eval_h("(cog-bind is-invisible)");
+	eval->eval_h("(cog-bind is-proven)");
 
 	state = eval->eval_h("(show-ufo-state)");
 	TS_ASSERT_EQUALS(state, exists);
@@ -165,6 +167,7 @@ void AbsentUTest::test_double(void)
 	eval->eval_h("(cog-execute! call-mulder)");
 	eval->eval_h("(cog-bind is-visible)");
 	eval->eval_h("(cog-bind is-invisible)");
+	eval->eval_h("(cog-bind is-proven)");
 
 	state = eval->eval_h("(show-ufo-state)");
 	TS_ASSERT_EQUALS(state, denied);
@@ -173,6 +176,7 @@ void AbsentUTest::test_double(void)
 	eval->eval_h("(cog-bind discredit-mulder)");
 	eval->eval_h("(cog-bind is-visible)");
 	eval->eval_h("(cog-bind is-invisible)");
+	eval->eval_h("(cog-bind is-proven)");
 
 	state = eval->eval_h("(show-ufo-state)");
 	TS_ASSERT_EQUALS(state, exists);
@@ -181,6 +185,7 @@ void AbsentUTest::test_double(void)
 	eval->eval_h("(cog-execute! call-scully)");
 	eval->eval_h("(cog-bind is-visible)");
 	eval->eval_h("(cog-bind is-invisible)");
+	eval->eval_h("(cog-bind is-proven)");
 
 	state = eval->eval_h("(show-ufo-state)");
 	TS_ASSERT_EQUALS(state, denied);
@@ -189,18 +194,20 @@ void AbsentUTest::test_double(void)
 	eval->eval_h("(cog-bind discredit-scully)");
 	eval->eval_h("(cog-bind is-visible)");
 	eval->eval_h("(cog-bind is-invisible)");
+	eval->eval_h("(cog-bind is-proven)");
 
 	state = eval->eval_h("(show-ufo-state)");
 	TS_ASSERT_EQUALS(state, exists);
 
-	// Get Mulder and Scully on the job
+	// Get both Mulder and Scully on the job
 	eval->eval_h("(cog-execute! call-mulder)");
 	eval->eval_h("(cog-execute! call-scully)");
 	eval->eval_h("(cog-bind is-visible)");
 	eval->eval_h("(cog-bind is-invisible)");
+	eval->eval_h("(cog-bind is-proven)");
 
 	state = eval->eval_h("(show-ufo-state)");
-	TS_ASSERT_EQUALS(state, denied);
+	TS_ASSERT_EQUALS(state, proven);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

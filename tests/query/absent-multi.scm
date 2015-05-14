@@ -41,8 +41,10 @@
 (define ufo-state (AnchorNode "UFO"))
 (define ufo-denied (ConceptNode "Government denies knowledge"))
 (define ufo-exists (ConceptNode "Located at Area 51"))
+(define ufo-proven (ConceptNode "Undeniable evidence for UFO's"))
 (define (get-denied) ufo-denied)
 (define (get-exists) ufo-exists)
+(define (get-proven) ufo-proven)
 
 ; Initial state: UFO exists
 (ListLink ufo-state ufo-exists)
@@ -63,6 +65,16 @@
 		(ImplicationLink
 			(ChoiceLink mulder scully)
 			(AssignLink (TypeNode "ListLink") ufo-state ufo-denied)
+		)
+	)
+)
+
+; There is undeniable evidence when both of them are working.
+(define is-proven
+	(BindLink
+		(ImplicationLink
+			(AndLink mulder scully)
+			(AssignLink (TypeNode "ListLink") ufo-state ufo-proven)
 		)
 	)
 )
