@@ -1,7 +1,26 @@
 ;
-; Unit testing for absence
+; Unit testing for absence of a single term.
 ;
-;;; Populate the atomspace with two things
+; Repeatedly create and destroy an EvaluationLink. Then test to see if the
+; EvaluationLink is present in the atomspace. If it is, then set a state
+; atom that indicates whether it is present or not.
+;
+; The state atom is called "Room State", and it will be linked either to
+; (ConceptNode "empty") or to (ConceptNode "full"). The (show-room-state)
+; function will display the current state, when called.
+;
+; The room state is set by invoking two patterns: is-visible and
+; is-invisibile.  The first checks for the presence of the EvaluationLink
+; and, if found, sets the room state to full.  The second checks for it's
+; absense, and if it is absent, sets the state to "empty".
+;
+; The EvaluationLink is created and destroyed by running one of two
+; patterns, `create` or `destroy`.  The first one uses a `golem`, an
+; InsertLink that will create the actual EvaluationLink when it is
+; executed.  That is, the InsertLink defines a potential link, one that
+; is not yet in the Atomspace, but whose description is. When it is
+; triggered, the description is turned into the actual link.
+;
 (use-modules (opencog))
 (use-modules (opencog query))
 
