@@ -67,7 +67,8 @@ public:
 	void setUp(void);
 	void tearDown(void);
 
-	void test_repeats(void);
+	void test_single(void);
+	void test_double(void);
 };
 
 void AbsentUTest::tearDown(void)
@@ -91,7 +92,7 @@ void AbsentUTest::setUp(void)
  * Single AbsentLink used to trigger an action that takes
  * place only when the atomspace is commpletely lacking something!
  */
-void AbsentUTest::test_repeats(void)
+void AbsentUTest::test_single(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -135,4 +136,31 @@ void AbsentUTest::test_repeats(void)
 
 	state = eval->eval_h("(show-room-state)");
 	TS_ASSERT_EQUALS(state, empty);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void AbsentUTest::test_double(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD", "tests/query/absent-multi.scm");
+	load_scm_files_from_config(*as);
+
+	Handle denied = eval->eval_h("(get-denied)");
+	Handle exists = eval->eval_h("(get-exists)");
+
+	// Verify the intial state, UFO should exist
+	Handle state = eval->eval_h("(show-ufo-state)");
+	TS_ASSERT_EQUALS(state, exists);
+
+	// Get Mulder on the scene
+	eval->eval_h("(cog-execute! call-mulder)");
+	eval->eval_h("(cog-bind is-visible)");
+	eval->eval_h("(cog-bind is-invisible)");
+
+	state = eval->eval_h("(show-ufo-state)");
+	TS_ASSERT_EQUALS(state, denied);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }

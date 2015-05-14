@@ -41,6 +41,8 @@
 (define ufo-state (AnchorNode "UFO"))
 (define ufo-denied (ConceptNode "Government denies knowledge"))
 (define ufo-exists (ConceptNode "Located at Area 51"))
+(define (get-denied) ufo-denied)
+(define (get-exists) ufo-exists)
 
 ; Initial state: UFO exists
 (ListLink ufo-state ufo-exists)
