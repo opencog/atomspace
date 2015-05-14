@@ -302,10 +302,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		for (const Handle& ho : outputs)
 			outputs_grounded.push_back(inst.instantiate(ho, vm));
 
-
 		logger().debug("Checking permises " + h->toShortString());
-
-
 
 		bool need_bc = false;
 		std::vector<VarMap> vm_list;
@@ -339,32 +336,13 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 
 			// This is a grounding that can solve the goal, so apply it
 			// by using the mapping to ground the goal target, and add
-			// it to _as since this is not garbage
-			//
-			// XXX TODO this is not really applying the rule since other
-			// unrelated output of the rule are not added to the
-			// atomspace; might need to do something with "HandleSeq outputs"
+			// it to _as since this is not garbage; this should generate
+			// all the outputs of the rule
 			for (const Handle& ho : outputs_grounded)
 			{
-				// XXX TODO check! ho is not in _as, can Instantiator handle this?
-
 				Instantiator inst(_as);
-				Handle hho = inst.instantiate(ho, m);
-
-				logger().debug("[BackwardChainer] Instantiated " + ho->toShortString() + " to " + hho->toShortString());
+				inst.instantiate(ho, m);
 			}
-
-			for (const Handle& ho : outputs)
-				logger().debug("[BackwardChainer] rule output include " + ho->toShortString());
-
-			for (const Handle& ho : outputs_grounded)
-				logger().debug("[BackwardChainer] grounded rule output include " + ho->toShortString());
-
-			for (auto& p : vm)
-				logger().debug("[BackwardChainer] original mapping here is " + p.first->toShortString() + " to " + p.second->toShortString());
-
-			for (auto& p : m)
-				logger().debug("[BackwardChainer] the mapping here is " + p.first->toShortString() + " to " + p.second->toShortString());
 
 			// Add the grounding to the return results
 			for (Handle& h : free_vars)
