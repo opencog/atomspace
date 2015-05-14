@@ -38,7 +38,7 @@ public:
 		             "opencog/scm/utilities.scm, "
 		             "opencog/scm/av-tv.scm");
 		load_scm_files_from_config(*as_);
-		fc_ = new ForwardChainer(as_);
+		fc_ = new ForwardChainer(as_, "examples/rule-engine/cpolicy.json");
 	}
 	~ForwardChainerUTest() {
 		delete as_;

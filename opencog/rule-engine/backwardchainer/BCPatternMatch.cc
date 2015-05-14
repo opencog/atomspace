@@ -37,9 +37,6 @@ BCPatternMatch::~BCPatternMatch()
 
 bool BCPatternMatch::node_match(Handle& node1, Handle& node2)
 {
-	logger().debug("[BackwardChainer] In node_match looking at %s and %s",
-	               node1->toShortString().c_str(),
-	               node2->toShortString().c_str());
 	return DefaultPatternMatchCB::node_match(node1, node2);
 
 	//return AttentionalFocusCB::node_match(node1, node2);
@@ -47,9 +44,6 @@ bool BCPatternMatch::node_match(Handle& node1, Handle& node2)
 
 bool BCPatternMatch::link_match(LinkPtr& lpat, LinkPtr& lsoln)
 {
-	logger().debug("[BackwardChainer] In link_match looking at %s and %s",
-	               lpat->toShortString().c_str(),
-	               lsoln->toShortString().c_str());
 	return DefaultPatternMatchCB::link_match(lpat, lsoln);
 
 	//return AttentionalFocusCB::link_match(lpat, lsoln);
@@ -58,9 +52,9 @@ bool BCPatternMatch::link_match(LinkPtr& lpat, LinkPtr& lsoln)
 bool BCPatternMatch::grounding(const std::map<Handle, Handle> &var_soln,
                                const std::map<Handle, Handle> &pred_soln)
 {
-	for (auto& p : pred_soln)
-		logger().debug("PM pred: " + p.first->toShortString()
-		               + " map to " + p.second->toShortString());
+//	for (auto& p : pred_soln)
+//		logger().debug("PM pred: " + p.first->toShortString()
+//		               + " map to " + p.second->toShortString());
 
 	std::map<Handle, Handle> true_var_soln;
 
@@ -70,8 +64,8 @@ bool BCPatternMatch::grounding(const std::map<Handle, Handle> &var_soln,
 		if (p.first->getType() == VARIABLE_NODE)
 		{
 			true_var_soln[p.first] = p.second;
-			logger().debug("PM var: " + p.first->toShortString()
-			               + " map to " + p.second->toShortString());
+//			logger().debug("PM var: " + p.first->toShortString()
+//			               + " map to " + p.second->toShortString());
 		}
 	}
 

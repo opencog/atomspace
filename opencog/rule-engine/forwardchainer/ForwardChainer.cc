@@ -32,11 +32,9 @@
 
 using namespace opencog;
 
-ForwardChainer::ForwardChainer(AtomSpace * as, string conf_path /*=""*/) :
-        _as(as), _rec(_as), _fcmem(_as)
+ForwardChainer::ForwardChainer(AtomSpace * as, const string& conf_path) :
+	_as(as), _rec(_as), _conf_path(conf_path), _fcmem(_as)
 {
-    if (conf_path != "")
-        _conf_path = conf_path;
     init();
 }
 
@@ -170,6 +168,8 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         //! Choose next source.
         _log->info("[ForwardChainer] setting next source");
         _fcmem.set_source(fcb.choose_next_source(_fcmem));
+        
+       _iteration++;
     }
 
     _log->info("[ForwardChainer] finished do_chain.");

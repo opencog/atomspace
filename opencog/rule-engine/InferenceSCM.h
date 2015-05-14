@@ -35,9 +35,12 @@ private:
 	static void* init_in_guile(void*);
 	static void init_in_module(void*);
 
+	static const std::string default_cpolicy_path;
+
 	void init(void);
 
-	Handle do_forward_chaining(Handle h);
+	Handle do_forward_chaining(Handle h,
+		const std::string& conf_path = default_cpolicy_path);
 	/**
 	 * @return a handle to a ListLink  of ListLinks holding a variable followed by all grounding nodes.
 	 */
@@ -45,6 +48,9 @@ private:
 public:
 	InferenceSCM();
 };
+
+const std::string InferenceSCM::default_cpolicy_path =
+	"reasoning/default_cpolicy.json";
 
 } /*end of namespace opencog*/
 
