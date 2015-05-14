@@ -446,7 +446,7 @@ void InitiateSearchCB::set_pattern(const Variables& vars,
  * some other clause, thus establishing connectivity from that clause to
  * the subgraphs of the ChoiceLink.
  *
- * The practical side-effect, here, with regards to satsifcation, is
+ * The practical side-effect, here, with regards to satisfcation, is
  * this: if both groundings are to be found in the above example, then
  * two efforts must be made: One effort, with the initial grounding
  * starting at `Hunt`, and a second, starting at `Zebra`.  So... that
@@ -552,7 +552,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 	for (const Handle& cl: clauses)
 	{
 		// Evaluatables don't exist in the atomspace, in general.
-		// Cannot start a search wtih them.
+		// Cannot start a search with them.
 		if (0 < _pattern->evaluatable_holders.count(cl)) continue;
 		size_t prev = count;
 		find_rarest(cl, _starter_term, count);
@@ -639,7 +639,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 				for (const Handle& cl : clauses)
 				{
 					// Evaluatables dont' exist in the atomspace, in general.
-					// Cannot start a search wtih them.
+					// Cannot start a search with them.
 					if (0 < _pattern->evaluatable_holders.count(cl)) continue;
 					FindAtoms fa(var);
 					fa.search_set(cl);
