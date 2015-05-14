@@ -23,7 +23,7 @@
 (define AB (ImplicationLink (stv 1 1) A B))
 (define BC (ImplicationLink (stv 1 1) B C))
 
-; (cog-fc AB)
+; (cog-fc AB "examples/rule-engine/cpolicy.json")
 
 ; Expected output should be
 ; TODO
