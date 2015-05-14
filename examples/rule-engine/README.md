@@ -4,15 +4,19 @@ Unified Rule Engine examples
 Overview
 --------
 
-Here is a collection of examples (for now one) using the unified rule
-engine.
+Collection of examples (for now one) using the unified rule engine.
 
 Usage
 -----
 
-TODO: Something that looks like what is described in examples/guile or
-examples/pattern-matcher. Unfortunately I wasn't able to run any so I
-can't provide specific instructions yet.
+First, you need to be able to run the examples in examples/guile and
+examples/pattern-matcher. Have a look at examples/guile/README.md and
+then examples/pattern-matcher/simple.scm.
+
+The first set of demos provide a basic introduction to various main
+features.
+
+* simple-deduction.scm: Example of a simple URE based crisp deduction.
 
 Crisp deduction and modus ponens chainer
 ----------------------------------------

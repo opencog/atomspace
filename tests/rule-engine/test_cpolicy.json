@@ -2,8 +2,8 @@
 	"rules": 
 	[
 		{
-			"name": "pln-rule-deduction",
-			"file_path": "reasoning/pln/rules/deduction.scm",
+			"name": "pln-rule-modus-ponens",
+			"file_path": "tests/rule-engine/bc-modus-ponens.scm",
 			"priority": 1,
 			"mutex": 
 			[
