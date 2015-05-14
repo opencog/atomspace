@@ -35,16 +35,27 @@ namespace opencog {
 
 /**
  * Callback mixin class, used to provide a default node and link
- * matching behaviour. This class is still a pure virtual class,
- * since it does not implement the solution method.
+ * matching behaviour. This class is a pure virtual class, since
+ * it does not implement either the `initiate_search()` method,
+ * nor the `solution()` method.
  *
- * The *only* thing it provides is node and link matching; it does
- * not consider any truth values in establishing a match.
+ * It provides is node and link matching, assuming the canonical
+ * meaning of VariableNodes and QuoteLinks. It also implements
+ * crisp-logic handling of AndLink, OrLink, NotLink when these
+ * are combined with AbsentLink, EqualLink, GreaterThanLink, and
+ * other clear-box evaluatable link types.
+ *
+ * It handles AbsentLink using standard intuitionist logic,
+ * and provides tracking of an _optionals_present flag, so that
+ * conversion to explicit classical logic can be performed at the
+ * conclusion of the search.  The default implicator performs
+ * conversion; see the notes there for details.
  */
 class DefaultPatternMatchCB : public virtual PatternMatchCallback
 {
 	public:
 		DefaultPatternMatchCB(AtomSpace*);
+		virtual void set_pattern(const Variables&, const Pattern&);
 
 		virtual bool node_match(const Handle&, const Handle&);
 		virtual bool variable_match(const Handle&, const Handle&);
@@ -65,25 +76,23 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		                           const std::map<Handle,Handle>& gnds)
 		{ return eval_sentence(pat, gnds); }
 
-		/**
-		 * Called to perform the actual search. This makes some default
-		 * assumptions about the kind of things that might be matched,
-		 * in order to drive a reasonably-fast search.
-		 */
-		virtual bool initiate_search(PatternMatchEngine *,
-		                             const Variables&,
-		                             const Pattern&);
-
 		virtual const std::set<Type>& get_connectives(void)
 		{
 			return _connectives;
 		}
+
+		bool optionals_present(void) { return _optionals_present; }
 	protected:
+
+		ClassServer& _classserver;
+
+		const VariableTypeMap* _type_restrictions = NULL;
+		const std::set<Handle>* _dynamic = NULL;
+		bool _have_evaluatables = false;
 
 		// Temp atomspace used for test-groundings of virtual links.
 		AtomSpace _temp_aspace;
 		Instantiator _instor;
-		ClassServer& _classserver;
 
 		// Crisp-logic evaluation of evaluatable terms
 		std::set<Type> _connectives;
@@ -92,38 +101,8 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		bool eval_sentence(const Handle& pat,
 		             const std::map<Handle,Handle>& gnds);
 
-		// All the state below is for finding a good place to start
-		// searches.
-		void init(const Variables&, const Pattern&);
-		Handle _root;
-		Handle _starter_term;
-		const VariableTypeMap* _type_restrictions;
-		const std::set<Handle>* _dynamic;
-		bool _have_evaluatables;
-
-		virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
-		virtual Handle find_thinnest(const HandleSeq&,
-		                             const std::set<Handle>&,
-		                             Handle&, size_t&);
-		virtual void find_rarest(const Handle&, Handle&, size_t&);
-
-		bool _search_fail;
-		virtual bool neighbor_search(PatternMatchEngine *,
-		                             const Variables&,
-		                             const Pattern&);
-
-		virtual bool disjunct_search(PatternMatchEngine *,
-		                             const Variables&,
-		                             const Pattern&);
-
-		virtual bool link_type_search(PatternMatchEngine *,
-		                             const Variables&,
-		                             const Pattern&);
-
-		virtual bool variable_search(PatternMatchEngine *,
-		                             const Variables&,
-		                             const Pattern&);
-		AtomSpace *_as;
+		bool _optionals_present = false;
+		AtomSpace* _as;
 };
 
 } // namespace opencog

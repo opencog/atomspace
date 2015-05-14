@@ -132,7 +132,13 @@ Handle AssignLink::execute(AtomSpace * as) const
 		}
 		if (not match) continue;
 
-		as->removeAtom(Handle(lp));
+		// Hit it with a hammer. We have to set the recursive flag
+		// to true, to break out of any links that might contain us.
+		// This is pretty nasty behavior, and condemns assignable
+		// atoms to always live at the very top of the atomspace.
+		// However, I don't see any plausable alternatives to this,
+		// right now.
+		as->removeAtom(Handle(lp), true);
 	}
 
 	return as->addAtom(createLink(_link_type, _outset));
@@ -167,7 +173,14 @@ InsertLink::InsertLink(Link &l)
 
 // ============================================================
 
-
+/// RemoveLink -- remove an atom from the atomspace.
+///
+/// Hit it with a hammer. Set the recursive removal flag to true, to
+/// break out of any links that might contain the atom being removed.
+/// This is pretty nasty behavior, and condemns assignable atoms to
+/// always live at the very top of the atomspace. However, I don't see
+/// any plausable alternatives to this, right now.
+///
 Handle RemoveLink::execute(AtomSpace* as) const
 {
 	// Are there *any* constants in the outgoing set?
@@ -213,12 +226,12 @@ Handle RemoveLink::execute(AtomSpace* as) const
 			}
 			if (not match) continue;
 
-			as->removeAtom(Handle(lp));
+			as->removeAtom(Handle(lp), true);
 		}
 		return Handle::UNDEFINED;
 	}
 
-	// If we are here, then the entire outset consisted of fre variables.
+	// If we are here, then the entire outset consisted of free variables.
 	// In this case, deleted everything that has the same arity, and does
 	// not contain variables.
 	HandleSeq seq;
@@ -243,7 +256,7 @@ Handle RemoveLink::execute(AtomSpace* as) const
 		}
 
 		if (not match) continue;
-		as->removeAtom(h);
+		as->removeAtom(h, true);
 	}
 	return Handle::UNDEFINED;
 }

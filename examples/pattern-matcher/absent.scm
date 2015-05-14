@@ -1,0 +1,147 @@
+;
+; Demo illustrating use of AbsentLink, AssignLink
+;
+; Repeatedly create and destroy an EvaluationLink. Then test to see if
+; the EvaluationLink is present in the atomspace. If it is, then set a
+; state atom that indicates whether it is present or not.
+;
+; The state atom is set using the AssignLink, which provides a device
+; that "sets state" in the AtomSpace.  It does not actually set state,
+; in the sense of changing some atom; this is impossible.  Instead, it
+; just adds and removes links; however, the net effect is as if the
+; linked atom was a state variable; as its linkage changes, it looks
+; as if it's state is changing.
+;
+; The presence or absence of an atom in the AtomSpace can be determined
+; by using the AbsentLink. When evaluated by the pattern matcher, the
+; AbsentLink evaluates to "true" only when the atom that it wraps is
+; absent from the atomspace.  This makes the AbsentLink a rather
+; strange link type; roughly speaking, it can be thought of as
+; implementing the concept of "reductio ad absurdum" (RAA) or the "law
+; of the excluded middle" (LEM) for the AtomSpace.  The AtomSpace can
+; be thought as a Kripke frame: it holds all knowledge that is known,
+; up to this point in time. The AbsentLink provides a way of checking
+; to see if something is currently unknown.  That is, in classical
+; logic, everything is assumed to be knowable, and that which is not
+; true must be false; this is the law of the excluded middle. By
+; contrast, the AtomSpace only contains those sentences known to be
+; either true or false (according to thier TruthValue); it implements
+; a form in Intuitionist Logic.  The AbsentLink is used to determine
+; those things that are not yet known.
+;
+; ----
+;
+; The state atom is called "Room State", and it will be linked either to
+; (ConceptNode "empty") or to (ConceptNode "full"). The (show-room-state)
+; function will display the current state, when called.
+;
+; The room state is set by invoking two patterns: is-visible and
+; is-invisibile.  The first checks for the presence of the EvaluationLink
+; and, if found, sets the room state to full.  The second checks for it's
+; absense, and if it is absent, sets the state to "empty".
+;
+; The EvaluationLink is created and destroyed by running one of two
+; patterns, `create` or `destroy`.  The first one uses a `golem`, an
+; InsertLink that will create the actual EvaluationLink when it is
+; executed.  That is, the InsertLink defines a potential link, one that
+; is not yet in the Atomspace, but whose description is. When it is
+; triggered, the description is turned into the actual link.
+;
+(use-modules (opencog))
+(use-modules (opencog query))
+
+(load-from-path "utilities.scm")
+
+; Clause to match during query.  This is the EvaluiationLink whose
+; presence or absence we will be testing for.
+(define query
+	(EvaluationLink
+		(PredicateNode "visiblity")
+		(ListLink (VariableNode "$x"))))
+
+; Create a golem; the golem is brought to life when its executed.
+; i.e. this creates the EvaluationLink when it is executed.
+(define golem
+	(InsertLink
+		(TypeNode "EvaluationLink")
+		(PredicateNode "visiblity")
+		(ListLink (ConceptNode "item 42"))))
+
+; If an item is visible, delete it, kill it.
+(define destroy
+	(BindLink
+		(ImplicationLink query (DeleteLink query))
+	)
+)
+
+; If nothing is visible, then hallucinate the golem into existance.
+(define create
+	(BindLink
+		(ImplicationLink (AbsentLink query) golem)
+	)
+)
+
+; The state variable, and it's two states.
+(define room-state (AnchorNode "Room State"))
+(define room-empty (ConceptNode "room empty"))
+(define room-nonempty (ConceptNode "room nonempty"))
+
+; Initial state: room is empty.
+(ListLink room-state room-empty)
+
+; Set the current state if an item is visible.
+(define is-visible
+	(BindLink
+		(ImplicationLink
+			query
+			(AssignLink (TypeNode "ListLink") room-state room-nonempty)
+		)
+	)
+)
+
+; This has an absent link in it; the link is assigned only when
+; the atomspace does not have a visible item.
+(define is-invisible
+	(BindLink
+		(ImplicationLink
+			(AbsentLink query)
+			(AssignLink (TypeNode "ListLink") room-state room-empty)
+		)
+	)
+)
+
+;; Display the current room state
+(define (show-room-state)
+   (car (cog-chase-link 'ListLink 'ConceptNode room-state)))
+
+; Now, for the actual demonstration.
+; First, verify that the room is empty.
+(show-room-state)
+
+; Now, create the EvaluationLink.
+(cog-bind create)
+
+; Set the room state. We check for both visibility and invisibility,
+; we don't want to assume either case in advance.
+(cog-bind is-visible)
+(cog-bind is-invisible)
+
+; Show the room state.  The room should be full.
+(show-room-state)
+
+; Destroy the EvaluationLink, and set the room state.
+(cog-bind destroy)
+(cog-bind is-visible)
+(cog-bind is-invisible)
+(show-room-state)
+
+; Do it again, for good luck.
+(cog-bind create)
+(cog-bind is-visible)
+(cog-bind is-invisible)
+(show-room-state)
+
+(cog-bind destroy)
+(cog-bind is-visible)
+(cog-bind is-invisible)
+(show-room-state)

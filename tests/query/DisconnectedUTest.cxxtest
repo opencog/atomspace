@@ -121,7 +121,12 @@ void Disconnected::test_exec(void)
 		logger().debug("Caught exception, just as expected: %s", ex.getMessage());
 		caught = true;
 	}
-	TSM_ASSERT("Failed to catch expected exception", caught);
+	logger().info("Caught exception? %d\n", caught);
+
+	// Disable the test, for now. There are legitimate uses of
+	// disconnected queries. Yes, naive users will shoot themselves
+	// in the foot because of this, but wise users need this.
+	// TSM_ASSERT("Failed to catch expected exception", caught);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

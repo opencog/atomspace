@@ -73,7 +73,7 @@ struct Variables
 struct Pattern
 {
 	// Private, locally scoped typedefs, not used outside of this class.
-	// XX TODO Replace by unordered multimap...
+	// XXX TODO Replace by unordered multimap...
 	typedef std::vector<Handle> RootList;
 	typedef std::map<Handle, RootList> ConnectMap;
 	typedef std::pair<Handle, RootList> ConnectPair;

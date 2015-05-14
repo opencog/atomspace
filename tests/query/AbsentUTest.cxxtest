@@ -1,0 +1,231 @@
+/*
+ * tests/query/AbsentUTest.cxxtest
+ *
+ * Copyright (C) 2015 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/BindLink.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class AbsentUTest: public CxxTest::TestSuite
+{
+private:
+		AtomSpace *as;
+		SchemeEval* eval;
+
+public:
+	AbsentUTest(void)
+	{
+		try
+		{
+			 config().load("opencog-test.conf");
+		}
+		catch (RuntimeException &e)
+		{
+			std::cerr << e.getMessage() << std::endl;
+		}
+		logger().setFilename(config()["LOG_FILE"]);
+		logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+		logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+	}
+
+	~AbsentUTest()
+	{
+		delete eval;
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void ytest_single(void);
+	void test_double(void);
+};
+
+void AbsentUTest::tearDown(void)
+{
+	as->clear();
+}
+
+void AbsentUTest::setUp(void)
+{
+	as->clear();
+	config().set("SCM_PRELOAD",
+		"opencog/atomspace/core_types.scm, "
+		"tests/query/test_types.scm, "
+		"opencog/scm/utilities.scm,"
+		"opencog/scm/opencog/query.scm");
+
+	load_scm_files_from_config(*as);
+}
+
+/*
+ * Single AbsentLink used to trigger an action that takes
+ * place only when the atomspace is commpletely lacking something!
+ */
+void AbsentUTest::ytest_single(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD", "tests/query/absent.scm");
+	load_scm_files_from_config(*as);
+
+	Handle empty = eval->eval_h("(ConceptNode \"room empty\")");
+	Handle full = eval->eval_h("(ConceptNode \"room nonempty\")");
+
+	// Verify the intial state, room should be empty
+	Handle state = eval->eval_h("(show-room-state)");
+	TS_ASSERT_EQUALS(state, empty);
+
+	// Make the golem come alive
+	eval->eval_h("(cog-bind create)");
+	eval->eval_h("(cog-bind is-visible)");
+	eval->eval_h("(cog-bind is-invisible)");
+
+	state = eval->eval_h("(show-room-state)");
+	TS_ASSERT_EQUALS(state, full);
+
+	// Kill the golem
+	eval->eval_h("(cog-bind destroy)");
+	eval->eval_h("(cog-bind is-visible)");
+	eval->eval_h("(cog-bind is-invisible)");
+
+	state = eval->eval_h("(show-room-state)");
+	TS_ASSERT_EQUALS(state, empty);
+
+	// Once more, for good luck.
+	eval->eval_h("(cog-bind create)");
+	eval->eval_h("(cog-bind is-visible)");
+	eval->eval_h("(cog-bind is-invisible)");
+
+	state = eval->eval_h("(show-room-state)");
+	TS_ASSERT_EQUALS(state, full);
+
+	eval->eval_h("(cog-bind destroy)");
+	eval->eval_h("(cog-bind is-visible)");
+	eval->eval_h("(cog-bind is-invisible)");
+
+	state = eval->eval_h("(show-room-state)");
+	TS_ASSERT_EQUALS(state, empty);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void AbsentUTest::test_double(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD", "tests/query/absent-multi.scm");
+	load_scm_files_from_config(*as);
+
+	Handle denied = eval->eval_h("(get-denied)");
+	Handle exists = eval->eval_h("(get-exists)");
+	Handle proven = eval->eval_h("(get-proven)");
+
+	// Verify the intial state, UFO should exist
+	Handle state = eval->eval_h("(show-ufo-state)");
+	TS_ASSERT_EQUALS(state, exists);
+
+	// Mulder and Scully not around; UFO should be.
+	eval->eval_h("(cog-bind is-visible)");
+	eval->eval_h("(cog-bind is-invisible)");
+	eval->eval_h("(cog-bind is-proven)");
+
+	state = eval->eval_h("(show-ufo-state)");
+	TS_ASSERT_EQUALS(state, exists);
+
+	// Get Mulder on the scene
+	eval->eval_h("(cog-execute! call-mulder)");
+	eval->eval_h("(cog-bind is-visible)");
+	eval->eval_h("(cog-bind is-invisible)");
+	eval->eval_h("(cog-bind is-proven)");
+
+	state = eval->eval_h("(show-ufo-state)");
+	TS_ASSERT_EQUALS(state, denied);
+
+	// Discredit Mulder
+	eval->eval_h("(cog-bind discredit-mulder)");
+	eval->eval_h("(cog-bind is-visible)");
+	eval->eval_h("(cog-bind is-invisible)");
+	eval->eval_h("(cog-bind is-proven)");
+
+	state = eval->eval_h("(show-ufo-state)");
+	TS_ASSERT_EQUALS(state, exists);
+
+	// Get Scully on the scene
+	eval->eval_h("(cog-execute! call-scully)");
+	eval->eval_h("(cog-bind is-visible)");
+	eval->eval_h("(cog-bind is-invisible)");
+	eval->eval_h("(cog-bind is-proven)");
+
+	state = eval->eval_h("(show-ufo-state)");
+	TS_ASSERT_EQUALS(state, denied);
+
+	// Discredit Scully
+	eval->eval_h("(cog-bind discredit-scully)");
+	eval->eval_h("(cog-bind is-visible)");
+	eval->eval_h("(cog-bind is-invisible)");
+	eval->eval_h("(cog-bind is-proven)");
+
+	state = eval->eval_h("(show-ufo-state)");
+	TS_ASSERT_EQUALS(state, exists);
+
+	// Get both Mulder and Scully on the job
+	eval->eval_h("(cog-execute! call-mulder)");
+	eval->eval_h("(cog-execute! call-scully)");
+	eval->eval_h("(cog-bind is-visible)");
+	eval->eval_h("(cog-bind is-invisible)");
+	eval->eval_h("(cog-bind is-proven)");
+
+	state = eval->eval_h("(show-ufo-state)");
+	TS_ASSERT_EQUALS(state, proven);
+
+	// Discredit Scully
+	eval->eval_h("(cog-bind discredit-scully)");
+	eval->eval_h("(cog-bind is-visible)");
+	eval->eval_h("(cog-bind is-invisible)");
+	eval->eval_h("(cog-bind is-proven)");
+
+	state = eval->eval_h("(show-ufo-state)");
+	TS_ASSERT_EQUALS(state, denied);
+
+	// Discredit Mulder too
+	eval->eval_h("(cog-bind discredit-mulder)");
+	eval->eval_h("(cog-bind is-visible)");
+	eval->eval_h("(cog-bind is-invisible)");
+	eval->eval_h("(cog-bind is-proven)");
+
+	state = eval->eval_h("(show-ufo-state)");
+	TS_ASSERT_EQUALS(state, exists);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

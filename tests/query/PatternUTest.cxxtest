@@ -22,6 +22,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/query/InitiateSearchCB.h>
 #include <opencog/atoms/bind/SatisfactionLink.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -102,10 +103,19 @@ class PatternUTest: public CxxTest::TestSuite
 		void test_implication(void);
 };
 
-class PMCB : public DefaultPatternMatchCB
+class PMCB : public InitiateSearchCB, public DefaultPatternMatchCB
 {
 	public:
-		PMCB(AtomSpace* as) : DefaultPatternMatchCB(as), found(0) {}
+		PMCB(AtomSpace* as) :
+			InitiateSearchCB(as), DefaultPatternMatchCB(as), found(0) {}
+
+		virtual void set_pattern(const Variables& vars,
+		                         const Pattern& pat)
+		{
+			InitiateSearchCB::set_pattern(vars, pat);
+			DefaultPatternMatchCB::set_pattern(vars, pat);
+		}
+
 		virtual bool node_match(Node *, Node *);
 		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
 		                       const std::map<Handle, Handle> &pred_soln);

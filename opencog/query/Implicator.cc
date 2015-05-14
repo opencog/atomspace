@@ -33,8 +33,9 @@ using namespace opencog;
 
 /**
  * This callback takes the reported grounding, runs it through the
- * instantiator, to create the implicand, and then records the result in
- * the public member `result_list`.  It then returns false, to search
+ * instantiator, to create the implicand, and then records the result
+ * in the public member `result_list`.  If the number of results so
+ * far is less than `max_results`, it then returns false, to search
  * for more groundings.  (The engine will halt its search for a
  * grounding once an acceptable one has been found; so, to continue
  * hunting for more, we return `false` here. We want to find all
@@ -46,36 +47,33 @@ bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
 	// PatternMatchEngine::print_solution(term_soln,var_soln);
 	Handle h = inst.instantiate(implicand, var_soln);
 	if (Handle::UNDEFINED != h)
-	{
 		result_list.push_back(h);
-	}
-	return false;
-}
 
-/**
- * The single implicator behaves like the default implicator, except that
- * it terminates after the first solution is found.
- */
-bool SingleImplicator::grounding(const std::map<Handle, Handle> &var_soln,
-                                 const std::map<Handle, Handle> &term_soln)
-{
-	Handle h = inst.instantiate(implicand, var_soln);
-
-	if (h != Handle::UNDEFINED)
-	{
-		result_list.push_back(h);
-	}
+	// If we found as many as we want, then stop looking for more.
+	if (result_list.size() < max_results)
+		return false;
 	return true;
 }
+
 
 namespace opencog
 {
 
-/* Simplified utility */
+/**
+ * Simplified utility
+ *
+ * The `do_conn_check` flag stands for "do connectivity check";
+ * if the flag is set, and the pattern is disconnected, then an
+ * error will be thrown. PLN explicitly allows disconnected graphs.
+ *
+ * Set the default to always allow disconnected graphs. This will
+ * get naive users into trouble, but there are legit uses, not just
+ * in PLN, for doing disconnected searches.
+ */
 static Handle do_imply(AtomSpace* as,
                        const Handle& hbindlink,
                        Implicator& impl,
-                       bool do_conn_check=true)
+                       bool do_conn_check=false)
 {
 	BindLinkPtr bl(BindLinkCast(hbindlink));
 	if (NULL == bl)
@@ -85,11 +83,39 @@ static Handle do_imply(AtomSpace* as,
 
 	bl->imply(impl, do_conn_check);
 
-	// The result_list contains a list of the grounded expressions.
-	// (The order of the list has no significance, so it's really a set.)
-	// Put the set into a SetLink, and return that.
-	Handle gl = as->addLink(SET_LINK, impl.result_list);
-	return gl;
+	if (0 < impl.result_list.size())
+	{
+		// The result_list contains a list of the grounded expressions.
+		// (The order of the list has no significance, so it's really a set.)
+		// Put the set into a SetLink, and return that.
+		Handle gl = as->addLink(SET_LINK, impl.result_list);
+		return gl;
+	}
+
+	// There are certain useful queries, where the goal of the query
+	// is to determine that some clause or set of clauses are absent
+	// from the AtomSpace. If the clauses are jointly not found, after
+	// a full and exhaustive search, then we want to run the implicator,
+	// and perform some action. Easier said than done, this code is
+	// currently a bit of a hack. It seems to work, per the AbsentUTest
+	// but is perhaps a bit fragile in its assumptions.
+	//
+	// Theoretical background: the atomspace can be thought of as a
+	// Kripke frame: it holds everything we know "right now". The
+	// AbsentLink is a check for what we don't know, right now.
+	const Pattern& pat = bl->get_pattern();
+	DefaultPatternMatchCB* intu =
+		dynamic_cast<DefaultPatternMatchCB*>(&impl);
+	if (0 == pat.mandatory.size() and 0 < pat.optionals.size()
+	    and not intu->optionals_present())
+	{
+		std::map<Handle, Handle> empty_map;
+		Handle h = impl.inst.instantiate(impl.implicand, empty_map);
+		if (Handle::UNDEFINED != h)
+			impl.result_list.push_back(h);
+	}
+
+	return as->addLink(SET_LINK, impl.result_list);
 }
 
 /**
@@ -120,7 +146,8 @@ Handle bindlink(AtomSpace* as, const Handle& hbindlink)
 Handle single_bindlink (AtomSpace* as, const Handle& hbindlink)
 {
 	// Now perform the search.
-	SingleImplicator impl(as);
+	DefaultImplicator impl(as);
+	impl.max_results = 1;
 	return do_imply(as, hbindlink, impl);
 }
 

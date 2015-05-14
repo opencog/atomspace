@@ -21,6 +21,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/InitiateSearchCB.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/util/Logger.h>
 
@@ -59,13 +60,23 @@ class StackUTest :  public CxxTest::TestSuite
 };
 
 class TestPMCB :
+	public virtual InitiateSearchCB,
 	public virtual DefaultPatternMatchCB
 {
 	public:
 	int lcnt;
 	int scnt;
 	Handle anch;
-	TestPMCB(AtomSpace* as) : DefaultPatternMatchCB(as), lcnt(0), scnt(0) {}
+	TestPMCB(AtomSpace* as) :
+		InitiateSearchCB(as),
+		DefaultPatternMatchCB(as), lcnt(0), scnt(0) {}
+
+	virtual void set_pattern(const Variables& vars,
+	                         const Pattern& pat)
+	{
+		InitiateSearchCB::set_pattern(vars, pat);
+		DefaultPatternMatchCB::set_pattern(vars, pat);
+	}
 
 	virtual bool clause_match(const Handle& pattrn, const Handle& grnd)
 	{

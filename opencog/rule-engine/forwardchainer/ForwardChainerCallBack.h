@@ -35,7 +35,8 @@ enum source_selection_mode {
 
 class Rule;
 class FCMemory;
-class ForwardChainerCallBack {
+class ForwardChainerCallBack
+{
 private:
     AtomSpace* as_;
 public:

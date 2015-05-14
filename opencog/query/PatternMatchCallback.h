@@ -280,12 +280,17 @@ class PatternMatchCallback
 		 * values on all the other callbacks; it summarizes (passes
 		 * through) the return values of all the others.
 		 */
-		virtual bool initiate_search(PatternMatchEngine *,
-		                             const Variables&,
-		                             const Pattern&) = 0;
+		virtual bool initiate_search(PatternMatchEngine *) = 0;
+
+		/**
+		 * Called before search initiation, to indicate the pattern
+		 * that will be searched for, and the variables to be grounded
+		 * during the search.
+		 */
+		virtual void set_pattern(const Variables& vars,
+		                         const Pattern& pat) = 0;
 };
 
 } // namespace opencog
 
 #endif // _OPENCOG_PATTERN_MATCH_CALLBACK_H
-

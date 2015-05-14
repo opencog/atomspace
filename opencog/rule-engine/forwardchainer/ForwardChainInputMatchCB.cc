@@ -28,8 +28,9 @@
 using namespace opencog;
 
 ForwardChainInputMatchCB::ForwardChainInputMatchCB(AtomSpace * as)
-	: Implicator(as), DefaultPatternMatchCB(as),
-	  AttentionalFocusCB(as), PLNImplicator(as), _as(as) {}
+	: Implicator(as), InitiateSearchCB(as), DefaultPatternMatchCB(as),
+	  AttentionalFocusCB(as), PLNImplicator(as), _as(as)
+{}
 
 ForwardChainInputMatchCB::~ForwardChainInputMatchCB() {}
 

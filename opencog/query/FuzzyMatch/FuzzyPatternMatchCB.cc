@@ -104,18 +104,14 @@ void FuzzyPatternMatchCB::find_starters(const Handle& hp, const size_t& depth,
  * @param pat   The pattern we are looking for
  * @return      True if one or more solutions are found, false otherwise
  */
-bool FuzzyPatternMatchCB::neighbor_search(PatternMatchEngine* pme,
-                                          const Variables& vars,
-                                          const Pattern& pat)
+bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
 {
-    init(vars, pat);
-
     // Find potential starters from all the clauses
-    const HandleSeq& clauses = pat.mandatory;
+    const HandleSeq& clauses = _pattern->mandatory;
     for (size_t i = 0; i < clauses.size(); i++)
     {
         // Skip evaluatable clause
-        if (0 < pat.evaluatable_holders.count(clauses[i])) continue;
+        if (0 < _pattern->evaluatable_holders.count(clauses[i])) continue;
 
         find_starters(clauses[i], 0, i, Handle::UNDEFINED, potential_starters);
     }
@@ -159,8 +155,8 @@ bool FuzzyPatternMatchCB::neighbor_search(PatternMatchEngine* pme,
             break;
         }
 
-        _root = clauses[potential_starters[search_cnt].clause_idx];
-        _starter_term = potential_starters[search_cnt].term;
+        Handle root = clauses[potential_starters[search_cnt].clause_idx];
+        Handle starter_term = potential_starters[search_cnt].term;
         const Handle& best_start = potential_starters[search_cnt].handle;
         search_cnt++;
 
@@ -169,7 +165,7 @@ bool FuzzyPatternMatchCB::neighbor_search(PatternMatchEngine* pme,
         std::cout << "Initiating the fuzzy match... (" << search_cnt << "/" <<
                      MAX_SEARCHES << ")\n";
         std::cout << "Starter:\n" << best_start->toShortString() << "\n";
-        std::cout << "Start term:\n" << _starter_term->toShortString();
+        std::cout << "Start term:\n" << starter_term->toShortString();
         std::cout << "========================================\n\n";
 #endif
 
@@ -184,7 +180,7 @@ bool FuzzyPatternMatchCB::neighbor_search(PatternMatchEngine* pme,
                          << h->toShortString() << "\n";
 #endif
 
-            pme->explore_neighborhood(_root, _starter_term, h);
+            pme->explore_neighborhood(root, starter_term, h);
         }
     }
 
@@ -198,7 +194,6 @@ bool FuzzyPatternMatchCB::neighbor_search(PatternMatchEngine* pme,
     // Return false to use other methods to find matches
     else
     {
-        _search_fail = true;
         return false;
     }
 }
@@ -291,4 +286,3 @@ void FuzzyPatternMatchCB::check_if_accept(const Handle& ph, const Handle& gh)
 
     return;
 }
-

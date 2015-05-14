@@ -28,7 +28,8 @@
 
 namespace opencog
 {
-    class FuzzyPatternMatchCB : public DefaultPatternMatchCB
+    class FuzzyPatternMatchCB :
+		public DefaultPatternMatchCB
     {
         public:
             // The solutions
@@ -36,9 +37,14 @@ namespace opencog
 
             FuzzyPatternMatchCB(AtomSpace* as);
 
-            virtual bool neighbor_search(PatternMatchEngine* pme,
-                                         const Variables& vars,
-                                         const Pattern& pat);
+            virtual bool initiate_search(PatternMatchEngine* pme);
+
+            virtual void set_pattern(const Variables& vars,
+                                     const Pattern& pat)
+            {
+                DefaultPatternMatchCB::set_pattern(vars, pat);
+                _pattern = &pat;
+            }
 
             virtual bool fuzzy_match(const Handle& h1, const Handle& h2)
             {
@@ -59,6 +65,8 @@ namespace opencog
             }
 
         private:
+            const Pattern* _pattern = NULL;
+
             struct Starter
             {
                 UUID uuid;

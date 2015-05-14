@@ -26,8 +26,11 @@
 using namespace opencog;
 
 ForwardChainPatternMatchCB::ForwardChainPatternMatchCB(AtomSpace * as) :
-        Implicator(as), DefaultPatternMatchCB(as), AttentionalFocusCB(as),
-                _as(as)
+        Implicator(as),
+        InitiateSearchCB(as),
+        DefaultPatternMatchCB(as),
+        AttentionalFocusCB(as),
+        _as(as)
 {
     _fcmem = nullptr;
 }

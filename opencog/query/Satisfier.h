@@ -29,6 +29,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/TruthValue.h>
 
+#include <opencog/query/InitiateSearchCB.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 
 namespace opencog {
@@ -45,13 +46,22 @@ namespace opencog {
  */
 
 class Satisfier :
+	public virtual InitiateSearchCB,
 	public virtual DefaultPatternMatchCB
 {
 	public:
 		Satisfier(AtomSpace* as) :
+			InitiateSearchCB(as),
 			DefaultPatternMatchCB(as),
 			_result(TruthValue::FALSE_TV()) {}
 		TruthValuePtr _result;
+
+		virtual void set_pattern(const Variables& vars,
+		                         const Pattern& pat)
+		{
+			InitiateSearchCB::set_pattern(vars, pat);
+			DefaultPatternMatchCB::set_pattern(vars, pat);
+		}
 
 		// Return true if a satisfactory grounding has been
 		// found. Note that in case where you want all possible
@@ -75,13 +85,21 @@ class Satisfier :
  */
 
 class SatisfactionSet :
+	public virtual InitiateSearchCB,
 	public virtual DefaultPatternMatchCB
 {
 	public:
 		SatisfactionSet(AtomSpace* as) :
-			DefaultPatternMatchCB(as) {}
+			InitiateSearchCB(as), DefaultPatternMatchCB(as) {}
 		Handle _body;
 		HandleSeq _satisfying_set;
+
+		virtual void set_pattern(const Variables& vars,
+		                         const Pattern& pat)
+		{
+			InitiateSearchCB::set_pattern(vars, pat);
+			DefaultPatternMatchCB::set_pattern(vars, pat);
+		}
 
 		// Return true if a satisfactory grounding has been
 		// found. Note that in case where you want all possible
