@@ -566,7 +566,7 @@ void DefaultPatternMatchCB::init(const Variables& vars,
  * some other clause, thus establishing connectivity from that clause to
  * the subgraphs of the ChoiceLink.
  *
- * The practical side-effect, here, with regards to satsifcation, is
+ * The practical side-effect, here, with regards to satisfaction, is
  * this: if both groundings are to be found in the above example, then
  * two efforts must be made: One effort, with the initial grounding
  * starting at `Hunt`, and a second, starting at `Zebra`.  So... that
@@ -675,7 +675,7 @@ bool DefaultPatternMatchCB::link_type_search(PatternMatchEngine *pme,
 	for (const Handle& cl: clauses)
 	{
 		// Evaluatables don't exist in the atomspace, in general.
-		// Cannot start a search wtih them.
+		// Cannot start a search with them.
 		if (0 < pat.evaluatable_holders.count(cl)) continue;
 		size_t prev = count;
 		find_rarest(cl, _starter_term, count);

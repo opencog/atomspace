@@ -44,7 +44,12 @@ using namespace opencog;
  */
 /* ======================================================== */
 
-// Uncomment below to enable debug print
+// To enable debug print you must
+//
+// 1. Uncomment #define DEBUG below
+//
+// 2. Comment out #ifdef DEBUG and #endif in PatternMatchEngine.h in
+// order to have perm_count and perm_count_stack defined.
 // #define DEBUG
 #ifdef WIN32
 #ifdef DEBUG
@@ -900,8 +905,8 @@ bool PatternMatchEngine::explore_up_branches(const Handle& hp,
 ///
 /// There are two ways to understand this method. In the "simple" case,
 /// where there are no unordered links, and no ChoiceLinks, this becomes
-/// a simple wrapper around tree_compare(), and it just returns true of
-/// false to indicate if the suggested grounding `hsoln` actually is a
+/// a simple wrapper around tree_compare(), and it just returns true or
+/// false to indicate if the suggested grounding `hg` actually is a
 /// match for the current term being grounded. Before calling
 /// tree_compare(), it pushes all current state, and then pops it upon
 /// return. In other words, this encapsulates a single up-branch
@@ -918,7 +923,7 @@ bool PatternMatchEngine::explore_up_branches(const Handle& hp,
 /// possible permuations, each of which must be explored. This method
 /// controls the exploration of these different branches. For each
 /// possible branch, it saves state, explores the branch, and pops the
-/// state. If the exploration yielded nothing, then the next bracnh is
+/// state. If the exploration yielded nothing, then the next branch is
 /// explored, until exhaustion of the possibilities.  Upon exhaustion, it
 /// returns to the caller.
 ///
@@ -963,7 +968,7 @@ bool PatternMatchEngine::explore_link_branches(const Handle& hp,
 
 /// See explore_link_branches() for a general explanation. This method
 /// handles the ChoiceLink branch alternatives only.  It assumes
-/// that the caller had handles the unordered-link alternative branches.
+/// that the caller had handled the unordered-link alternative branches.
 bool PatternMatchEngine::explore_choice_branches(const Handle& hp,
                                                  const Handle& hg,
                                                  const Handle& clause_root)

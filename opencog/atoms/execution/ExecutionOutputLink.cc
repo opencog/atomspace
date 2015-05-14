@@ -146,14 +146,14 @@ static inline double get_double(AtomSpace *as, const Handle& ha)
 
 /// do_execute -- execute the GroundedSchemaNode of the ExecutionOutputLink
 ///
-/// If the type t is an EXECUTION_OUTPUTLINK, then:
+/// If the type t is an EXECUTION_OUTPUT_LINK, then:
 /// Expects the sequence to be exactly two atoms long.
 /// Expects the first handle of the sequence to be a GroundedSchemaNode
 /// Expects the second handle of the sequence to be a ListLink
 /// Executes the GroundedSchemaNode, supplying the second handle as argument
 ///
 /// If the type t is either PLUS_LINK or TIMES_LINK, then:
-/// Exepects the atoms to be either NumberNodes, or executable links
+/// Expects the atoms to be either NumberNodes, or executable links
 /// that end up being valued as NumberNodes.
 ///
 Handle ExecutionOutputLink::do_execute(AtomSpace* as, Type t,
