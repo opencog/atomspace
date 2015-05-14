@@ -105,10 +105,34 @@ void AbsentUTest::test_repeats(void)
 	Handle state = eval->eval_h("(show-room-state)");
 	TS_ASSERT_EQUALS(state, empty);
 
+	// Make the golem come alive
 	eval->eval_h("(cog-bind create)");
 	eval->eval_h("(cog-bind is-visible)");
 	eval->eval_h("(cog-bind is-invisible)");
 
 	state = eval->eval_h("(show-room-state)");
 	TS_ASSERT_EQUALS(state, full);
+
+	// Kill the golem
+	eval->eval_h("(cog-bind destroy)");
+	eval->eval_h("(cog-bind is-visible)");
+	eval->eval_h("(cog-bind is-invisible)");
+
+	state = eval->eval_h("(show-room-state)");
+	TS_ASSERT_EQUALS(state, empty);
+
+	// Once more, for good luck.
+	eval->eval_h("(cog-bind create)");
+	eval->eval_h("(cog-bind is-visible)");
+	eval->eval_h("(cog-bind is-invisible)");
+
+	state = eval->eval_h("(show-room-state)");
+	TS_ASSERT_EQUALS(state, full);
+
+	eval->eval_h("(cog-bind destroy)");
+	eval->eval_h("(cog-bind is-visible)");
+	eval->eval_h("(cog-bind is-invisible)");
+
+	state = eval->eval_h("(show-room-state)");
+	TS_ASSERT_EQUALS(state, empty);
 }
