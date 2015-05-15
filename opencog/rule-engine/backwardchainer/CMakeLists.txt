@@ -1,4 +1,4 @@
 INSTALL (FILES
-	BCPatternMatch.h
+	BackwardChainerPMCB.h
 	DESTINATION "include/${PROJECT_NAME}/rule-engine/backwardchainer"
 )

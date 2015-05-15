@@ -1,7 +1,8 @@
 /*
- * BCPatternMatch.h
+ * BackwardChainerPMCB.h
  *
  * Copyright (C) 2014 Misgana Bayetta
+ * Copyright (C) 2015 OpenCog Foundation
  *
  * Author: Misgana Bayetta <misgana.bayetta@gmail.com>  October 2014
  *
@@ -20,19 +21,16 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BCPATTERNMATCH_H_
-#define BCPATTERNMATCH_H_
+
+#ifndef _OPENCOG_BACKWARDCHAINERPMCB_H_
+#define _OPENCOG_BACKWARDCHAINERPMCB_H_
 
 #include <opencog/query/DefaultImplicator.h>
 
 namespace opencog
 {
 
-/**
- * Given a rule(i.e a bindLink handle), find all the premises that
- * satisfy the rule.  by pattern matching.
- */
-class BCPatternMatch :
+class BackwardChainerPMCB :
 	public InitiateSearchCB,
 	public DefaultPatternMatchCB // : public virtual PLNImplicator
 {
@@ -43,8 +41,8 @@ private:
 	std::vector<std::map<Handle, Handle>> pred_solns_;
 
 public:
-	BCPatternMatch(AtomSpace*);
-	virtual ~BCPatternMatch();
+	BackwardChainerPMCB(AtomSpace*);
+	virtual ~BackwardChainerPMCB();
 
 	virtual void set_pattern(const Variables& vars,
 	                         const Pattern& pat)
@@ -53,17 +51,9 @@ public:
 		DefaultPatternMatchCB::set_pattern(vars, pat);
 	}
 
-	// The following callbacks are used for guiding the PM to look
-	// only the target list based on step 3 of
-	// http://wiki.opencog.org/w/New_PLN_Chainer_Design#Overall_Forward_Chaining_Process
-	bool node_match(Handle& node1, Handle& node2);
-	bool link_match(LinkPtr& lpat, LinkPtr& lsoln);
-
-	/**
-	 * A callback handler of the Pattern matcher used to store
-	 * references to new conclusion the target list
-	 */
-	bool grounding(const std::map<Handle, Handle> &var_soln,
+	virtual bool node_match(Handle& node1, Handle& node2);
+	virtual bool link_match(LinkPtr& lpat, LinkPtr& lsoln);
+	virtual bool grounding(const std::map<Handle, Handle> &var_soln,
 			const std::map<Handle, Handle> &pred_soln);
 
     /**
@@ -76,4 +66,4 @@ public:
 
 } // ~namespace opencog
 
-#endif /* BCPATTERNMATCH_H_ */
+#endif /* _OPENCOG_BACKWARDCHAINERPMCB_H_ */

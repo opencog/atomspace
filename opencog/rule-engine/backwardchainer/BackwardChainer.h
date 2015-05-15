@@ -2,8 +2,10 @@
  * BackwardChainer.h
  *
  * Copyright (C) 2014 Misgana Bayetta
+ * Copyright (C) 2015 OpenCog Foundation
  *
  * Author: Misgana Bayetta <misgana.bayetta@gmail.com>  October 2014
+ *         William Ma <https://github.com/williampma>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -116,7 +118,7 @@ public:
 
 private:
 
-	VarMultimap do_bc(Handle& htarget);
+	VarMultimap process_target(Handle& htarget);
 
 	std::vector<Rule> filter_rules(Handle htarget);
 	Rule select_rule(const std::vector<Rule>& rules);

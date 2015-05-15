@@ -1,7 +1,8 @@
 /*
- * BCPatternMatch.cc
+ * BackwardChainerPMCB.cc
  *
  * Copyright (C) 2014 Misgana Bayetta
+ * Copyright (C) 2015 OpenCog Foundation
  *
  * Author: Misgana Bayetta <misgana.bayetta@gmail.com>  October 2014
  *
@@ -21,54 +22,43 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "BCPatternMatch.h"
+#include "BackwardChainerPMCB.h"
 
 using namespace opencog;
 
-BCPatternMatch::BCPatternMatch(AtomSpace * as)
+BackwardChainerPMCB::BackwardChainerPMCB(AtomSpace * as)
     : InitiateSearchCB(as), DefaultPatternMatchCB(as), as_(as)
- //       : Implicator(as), DefaultPatternMatchCB(as), AttentionalFocusCB(as), PLNImplicator(as), as_(as)
+ // : Implicator(as), DefaultPatternMatchCB(as), AttentionalFocusCB(as), PLNImplicator(as), as_(as)
 {
 }
 
-BCPatternMatch::~BCPatternMatch()
+BackwardChainerPMCB::~BackwardChainerPMCB()
 {
 }
 
-bool BCPatternMatch::node_match(Handle& node1, Handle& node2)
+bool BackwardChainerPMCB::node_match(Handle& node1, Handle& node2)
 {
 	return DefaultPatternMatchCB::node_match(node1, node2);
-
 	//return AttentionalFocusCB::node_match(node1, node2);
 }
 
-bool BCPatternMatch::link_match(LinkPtr& lpat, LinkPtr& lsoln)
+bool BackwardChainerPMCB::link_match(LinkPtr& lpat, LinkPtr& lsoln)
 {
 	return DefaultPatternMatchCB::link_match(lpat, lsoln);
-
 	//return AttentionalFocusCB::link_match(lpat, lsoln);
 }
 
-bool BCPatternMatch::grounding(const std::map<Handle, Handle> &var_soln,
+bool BackwardChainerPMCB::grounding(const std::map<Handle, Handle> &var_soln,
                                const std::map<Handle, Handle> &pred_soln)
 {
-//	for (auto& p : pred_soln)
-//		logger().debug("PM pred: " + p.first->toShortString()
-//		               + " map to " + p.second->toShortString());
-
 	std::map<Handle, Handle> true_var_soln;
 
 	// get rid of non-var mapping
 	for (auto& p : var_soln)
 	{
 		if (p.first->getType() == VARIABLE_NODE)
-		{
 			true_var_soln[p.first] = p.second;
-//			logger().debug("PM var: " + p.first->toShortString()
-//			               + " map to " + p.second->toShortString());
-		}
 	}
-
 
 	// XXX TODO if a variable match to itself, reject?
 
@@ -79,11 +69,11 @@ bool BCPatternMatch::grounding(const std::map<Handle, Handle> &var_soln,
 	return false;
 }
 
-std::vector<std::map<Handle, Handle>> BCPatternMatch::get_var_list()
+std::vector<std::map<Handle, Handle>> BackwardChainerPMCB::get_var_list()
 {
 	return var_solns_;
 }
-std::vector<std::map<Handle, Handle>> BCPatternMatch::get_pred_list()
+std::vector<std::map<Handle, Handle>> BackwardChainerPMCB::get_pred_list()
 {
 	return pred_solns_;
 }
