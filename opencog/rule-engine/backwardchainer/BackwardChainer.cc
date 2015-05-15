@@ -25,6 +25,7 @@
 
 #include "BackwardChainer.h"
 #include "BackwardChainerPMCB.h"
+#include "UnifyPMCB.h"
 
 #include <opencog/util/random.h>
 
@@ -627,7 +628,7 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
  * specific atom to another, let it handles UnorderedLink, VariableNode in
  * QuoteLink, etc.
  *
- * XXX TODO allow typed variable to unify to a variable
+ * XXX TODO check if the UnifyPMCB solution is correct
  * XXX TODO unify in both direction? (maybe not)
  * XXX Should (Link (Node A)) be unifiable to (Node A))?  BC literature never
  * unify this way, but in AtomSpace context, (Link (Node A)) does contain (Node A)
@@ -669,7 +670,7 @@ bool BackwardChainer::unify(const Handle& htarget,
 		                                                  fv.varset));
 
 	SatisfactionLinkPtr sl(createSatisfactionLink(temp_vardecl, temp_htarget));
-	BackwardChainerPMCB pmcb(&temp_space);
+	UnifyPMCB pmcb(&temp_space);
 
 	sl->satisfy(pmcb);
 

@@ -51,9 +51,9 @@ public:
 		DefaultPatternMatchCB::set_pattern(vars, pat);
 	}
 
-	bool node_match(Handle& node1, Handle& node2);
-	bool link_match(LinkPtr& lpat, LinkPtr& lsoln);
-	bool grounding(const std::map<Handle, Handle> &var_soln,
+	virtual bool node_match(Handle& node1, Handle& node2);
+	virtual bool link_match(LinkPtr& lpat, LinkPtr& lsoln);
+	virtual bool grounding(const std::map<Handle, Handle> &var_soln,
 			const std::map<Handle, Handle> &pred_soln);
 
     /**
