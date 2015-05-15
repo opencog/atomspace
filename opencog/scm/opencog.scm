@@ -27,18 +27,9 @@
 ;
 (cog-set-atomspace! (cog-new-atomspace))
 
-; Load a bunch of atom types too ...
-; I suppose we could put all this into (define-module (opencog atomtypes))
-; but I don't see a strong reason for doing this, at the moment.
-; Alternately, we could also have
-; (define-module (opencog atomtypes core-types))
-; (define-module (opencog atomtypes nlp-types))
-; and so on, but I don't see the point of that either, at the moment...
+; Load core atom types
+; The remaining atom types from the cogserver are in (opencog atom-types)
 (load-from-path "core_types.scm")
-; (load-from-path "nlp_types.scm")
-; (load-from-path "spacetime_types.scm")
-; (load-from-path "attention_types.scm")
-; (load-from-path "embodiment_types.scm")
 
 ; Load other grunge too
 ; Lots of these things should probably be modules ...
@@ -49,4 +40,3 @@
 (load-from-path "av-tv.scm")
 (load-from-path "file-utils.scm")
 (load-from-path "persistence.scm")
-
