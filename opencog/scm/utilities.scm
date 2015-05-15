@@ -42,6 +42,8 @@
 ; -- cartesian-prod-list-only -- Alternative version of cartesian-prod.
 ; -- approx-eq? -- Test equality of 2 floats up to an epsilon
 ; -- cog-equal? -- Test equality of 2 atoms and returns TRUE_TV/FALSE_TV
+; -- max-element-by-key -- Get maximum element in a list
+; -- min-element-by-key -- Get maximum element in a list
 ;
 ;;; Code:
 ; Copyright (c) 2008, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
@@ -949,6 +951,58 @@
 
 ; ---------------------------------------------------------------------
 
+; Given a list l and function k (from element to number) return the
+; element so that k(e) is the lowest.
+(define (min-element-by-key l k)
+ (let ((head-element (car l)))
+  (if (eq? (length l) 1)
+
+   ; Base case
+   head-element
+
+   ; Recursive case
+   (let* ((tail (cdr l))
+          (head-key (k head-element))
+          (tail-min-element (min-element-by-key tail k))
+          (tail-min-key (k tail-min-element))
+          )
+    (if (< head-key tail-min-key)
+     head-element
+     tail-min-element
+     )
+    )
+   )
+  )
+ )
+
+; ---------------------------------------------------------------------
+
+; Given a list l and function k (from element to number) return the
+; element so that k(e) is the highest.
+(define (max-element-by-key l k)
+ (let ((head-element (car l)))
+  (if (eq? (length l) 1)
+
+   ; Base case
+   head-element
+
+   ; Recursive case
+   (let* ((tail (cdr l))
+          (head-key (k head-element))
+          (tail-max-element (max-element-by-key tail k))
+          (tail-max-key (k tail-max-element))
+          )
+    (if (< head-key tail-max-key)
+     head-element
+     tail-max-element
+     )
+    )
+   )
+  )
+ )
+
+; ---------------------------------------------------------------------
+
 
 ; A list of all the public (exported) utilities in this file
 (define cog-utilities (list
@@ -998,6 +1052,8 @@
 'cartesian-prod-list-only
 'approx-eq?
 'cog-equal?
+'min-element-by-key
+'max-element-by-key
 ))
 
 ; Compile 'em all.  This should improve performance a bit.
