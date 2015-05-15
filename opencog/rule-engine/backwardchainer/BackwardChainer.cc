@@ -94,7 +94,7 @@ void BackwardChainer::do_step()
 	// XXX TODO do proper target selection here using some fitness function
 	Handle selected_target = rand_element(_targets_set);
 
-	VarMultimap subt = do_bc(selected_target);
+	VarMultimap subt = process_target(selected_target);
 	VarMultimap& old_subt = _inference_history[selected_target];
 
 	logger().debug("[BackwardChainer] End of a single BC step");
@@ -117,35 +117,35 @@ VarMultimap& BackwardChainer::get_chaining_result()
 /**
  * The main recursive backward chaining method.
  *
- * @param hgoal  the atom to do backward chaining on
- * @return       the solution found for this goal, if any
+ * @param htarget  the atom to do backward chaining on
+ * @return         the solution found for this target, if any
  */
-VarMultimap BackwardChainer::do_bc(Handle& hgoal)
+VarMultimap BackwardChainer::process_target(Handle& htarget)
 {
 	VarMultimap results;
 
-	HandleSeq free_vars = get_free_vars_in_tree(hgoal);
+	HandleSeq free_vars = get_free_vars_in_tree(htarget);
 
 	// Check whether this goal has free variables and worth exploring
 	if (free_vars.empty())
 	{
 		logger().debug("[BackwardChainer] Boring goal with no free var, "
-		               "skipping " + hgoal->toShortString());
+		               "skipping " + htarget->toShortString());
 		return results;
 	}
 
 	// Check whether this goal is a virtual link and is useless to explore
-	if (classserver().isA(hgoal->getType(), VIRTUAL_LINK))
+	if (classserver().isA(htarget->getType(), VIRTUAL_LINK))
 	{
 		logger().debug("[BackwardChainer] Boring virtual link goal, "
-		               "skipping " + hgoal->toShortString());
+		               "skipping " + htarget->toShortString());
 		return results;
 	}
 
 	std::vector<VarMap> kb_vmap;
 
 	// Else, try to ground, and backward chain
-	HandleSeq kb_match = match_knowledge_base(hgoal, Handle::UNDEFINED,
+	HandleSeq kb_match = match_knowledge_base(htarget, Handle::UNDEFINED,
 	                                          true, kb_vmap);
 
 	// Matched something in the knowledge base? Then need to store
@@ -170,7 +170,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 			if (not free_vars.empty())
 				_targets_set.insert(soln);
 
-			// Construct the hgoal to all mappings here to be returned
+			// Construct the htarget to all mappings here to be returned
 			for (auto it = vgm.begin(); it != vgm.end(); ++it)
 				results[it->first].emplace(it->second);
 		}
@@ -178,9 +178,9 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 
 	// If logical link, break it up, add each to the targets
 	// stack, and return
-	if (_logical_link_types.count(hgoal->getType()) == 1)
+	if (_logical_link_types.count(htarget->getType()) == 1)
 	{
-		HandleSeq sub_premises = LinkCast(hgoal)->getOutgoingSet();
+		HandleSeq sub_premises = LinkCast(htarget)->getOutgoingSet();
 
 		for (Handle& h : sub_premises)
 			_targets_set.insert(h);
@@ -188,8 +188,12 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 		return results;
 	}
 
-	// Find all rules whose implicand can be unified to hgoal
-	std::vector<Rule> acceptable_rules = filter_rules(hgoal);
+	/*************************************************/
+	/**** This is where the actual BC step starts ****/
+	/*************************************************/
+
+	// Find all rules whose implicand can be unified to htarget
+	std::vector<Rule> acceptable_rules = filter_rules(htarget);
 
 	// If no rules to backward chain on, no way to solve this goal
 	if (acceptable_rules.empty())
@@ -205,13 +209,13 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 
 	std::vector<VarMap> all_mappings;
 
-	// A rule can have multiple outputs, and only one will unify
-	// to our goal so try all outputs that works
+	// A rule can have multiple outputs, and more than one output will unify
+	// to our goal, so get all outputs that works
 	for (Handle h : outputs)
 	{
 		VarMap temp_mapping;
 
-		if (not unify(h, hgoal, hvardecl, temp_mapping))
+		if (not unify(h, htarget, hvardecl, temp_mapping))
 			continue;
 
 		all_mappings.push_back(temp_mapping);
@@ -230,7 +234,7 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 	// possible output mappings
 	VarMap implicand_normal_mapping = rand_element(all_mappings);
 	for (auto& p : implicand_normal_mapping)
-		logger().debug("[BackwardChainer] mapping is "
+		logger().debug("[BackwardChainer] Chosen mapping is "
 					   + p.first->toShortString()
 					   + " to " + p.second->toShortString());
 
@@ -259,31 +263,31 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 	// Reverse ground the implicant with the grounding we found from
 	// unifying the implicand
 	Instantiator inst(_garbage_superspace);
-	Handle himplicant_quoted = inst.instantiate(himplicant, implicand_quoted_mapping);
-
-	logger().debug("[BackwardChainer] Reverse grounded as "
-				   + himplicant_quoted->toShortString());
-
-	// Find all matching premises matching the implicant
-	std::vector<VarMap> vmap_list;
-	HandleSeq possible_premises =
-		match_knowledge_base(himplicant_quoted, hvardecl, false, vmap_list);
-
-	// Reverse ground 2nd version, try it without QuoteLink around variables
+	std::vector<VarMap> premises_vmap_list, premises_vmap_list_alt;
 	Handle himplicant_normal = inst.instantiate(himplicant, implicand_normal_mapping);
 
-	logger().debug("[BackwardChainer] Alternative reverse grounded as "
+	logger().debug("[BackwardChainer] Reverse grounded as "
 				   + himplicant_normal->toShortString());
 
-	std:: vector<VarMap> vmap_list_alt;
+	// Find all matching premises matching the implicant
+	HandleSeq possible_premises =
+		match_knowledge_base(himplicant_normal, hvardecl, false, premises_vmap_list);
+
+	// Reverse ground 2nd version, try it with QuoteLink around variables
+	Handle himplicant_quoted = inst.instantiate(himplicant, implicand_quoted_mapping);
+
+	logger().debug("[BackwardChainer] Alternative everse grounded as "
+				   + himplicant_quoted->toShortString());
+
 	HandleSeq possible_premises_alt =
-	    match_knowledge_base(himplicant_normal, hvardecl, false, vmap_list_alt);
+	    match_knowledge_base(himplicant_quoted, hvardecl, false, premises_vmap_list_alt);
+
+	// collect the possible premises from the two verions of mapping
 	possible_premises.insert(possible_premises.end(),
 	                         possible_premises_alt.begin(),
 	                         possible_premises_alt.end());
-	vmap_list.insert(vmap_list.end(), vmap_list_alt.begin(),
-	                 vmap_list_alt.end());
-
+	premises_vmap_list.insert(premises_vmap_list.end(), premises_vmap_list_alt.begin(),
+	                 premises_vmap_list_alt.end());
 
 	logger().debug("%d possible permises", possible_premises.size());
 
@@ -292,24 +296,30 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 	// we are looking at it in the same step
 	for (size_t i = 0; i < possible_premises.size(); i++)
 	{
-		Handle h = possible_premises[i];
-		VarMap vm = vmap_list[i];
+		Handle hp = possible_premises[i];
+		VarMap vm = premises_vmap_list[i];
+
+		// include the implicand_normal_mapping because the variables are not quoted
+		// and we will be matching the variables in there as well
 		vm.insert(implicand_normal_mapping.begin(), implicand_normal_mapping.end());
 
 		HandleSeq outputs_grounded;
 
-		// reverse ground the outputs
+		// reverse ground the rule's outputs the mapping to the premise
+		// so that when we ground the premise, we know how to generate
+		// the final output
 		for (const Handle& ho : outputs)
 			outputs_grounded.push_back(inst.instantiate(ho, vm));
 
-		logger().debug("Checking permises " + h->toShortString());
+		logger().debug("Checking permises " + hp->toShortString());
 
 		bool need_bc = false;
 		std::vector<VarMap> vm_list;
 
 		// use pattern matcher to try to ground the variables in the
-		// selected premises
-		HandleSeq grounded_premises = ground_premises(h, vm, vm_list);
+		// selected premises, so we can use this grounding to "apply"
+		// the rule to generate the rule's final output
+		HandleSeq grounded_premises = ground_premises(hp, vm, vm_list);
 
 		// matched nothing? need to backward chain on this premise
 		if (grounded_premises.size() == 0)
@@ -334,8 +344,8 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 				continue;
 			}
 
-			// This is a grounding that can solve the goal, so apply it
-			// by using the mapping to ground the goal target, and add
+			// This is a premise grounding that can solve the target, so
+			// apply it by using the mapping to ground the target, and add
 			// it to _as since this is not garbage; this should generate
 			// all the outputs of the rule
 			for (const Handle& ho : outputs_grounded)
@@ -360,14 +370,14 @@ VarMultimap BackwardChainer::do_bc(Handle& hgoal)
 
 
 		// non-logical link can be added straight to targets list
-		if (_logical_link_types.count(h->getType()) == 0)
+		if (_logical_link_types.count(hp->getType()) == 0)
 		{
-			_targets_set.insert(h);
+			_targets_set.insert(hp);
 			continue;
 		}
 
-		// Break out any logical link and add to targets
-		HandleSeq sub_premises = LinkCast(h)->getOutgoingSet();
+		// Else break out any logical link and add to targets
+		HandleSeq sub_premises = LinkCast(hp)->getOutgoingSet();
 
 		for (Handle& s : sub_premises)
 			_targets_set.insert(s);
@@ -528,35 +538,35 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
 /**
  * Try to ground any free variables in the input target.
  *
- * @param htarget    the input atom to be grounded
- * @param vmap       the original mapping to the variables in htarget
- * @param vmap_list  the output mapping of the variables
- * @return           the mapping of the target
+ * @param hpremise      the input atom to be grounded
+ * @param premise_vmap  the original mapping to the variables in hpremise
+ * @param vmap_list     the final output mapping of the variables
+ * @return              the mapping of the hpremise
  */
-HandleSeq BackwardChainer::ground_premises(const Handle& htarget,
-                                           const VarMap& vmap,
+HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
+                                           const VarMap& premise_vmap,
                                            std::vector<VarMap>& vmap_list)
 {
 	HandleSeq results;
 
 	FindAtoms fv(VARIABLE_NODE);
-	fv.search_set(htarget);
+	fv.search_set(hpremise);
 
 	// if the target is already fully grounded
 	if (fv.varset.empty())
 	{
-		vmap_list.push_back(vmap);
-		results.push_back(htarget);
+		vmap_list.push_back(premise_vmap);
+		results.push_back(hpremise);
 
 		return results;
 	}
 
-	Handle premises = htarget;
+	Handle premises = hpremise;
 
 	if (_logical_link_types.count(premises->getType()) == 1)
 	{
 		HandleSeq sub_premises;
-		HandleSeq oset = LinkCast(htarget)->getOutgoingSet();
+		HandleSeq oset = LinkCast(hpremise)->getOutgoingSet();
 
 		for (const Handle& h : oset)
 		{
@@ -570,7 +580,7 @@ HandleSeq BackwardChainer::ground_premises(const Handle& htarget,
 		if (sub_premises.size() == 1)
 			premises = sub_premises[0];
 		else
-			premises = _garbage_superspace->addLink(htarget->getType(),
+			premises = _garbage_superspace->addLink(hpremise->getType(),
 			                                        sub_premises);
 	}
 
@@ -580,14 +590,15 @@ HandleSeq BackwardChainer::ground_premises(const Handle& htarget,
 
 	results = match_knowledge_base(premises, Handle::UNDEFINED, false, temp_vmap_list);
 
-	// convert the temp_vmap_list to be based on the varables in vmap
+	// chase the variables so that if a variable A were mapped to another
+	// variable B in premise_vmap, and after pattern matching, B now map
+	// to some solution, change A to map to the same solution
 	for (VarMap& tvm : temp_vmap_list)
 	{
 		VarMap this_map;
 
-		for (const auto& p : vmap)
+		for (const auto& p : premise_vmap)
 		{
-			// the original map maps to variable that map to another value?
 			if (tvm.count(p.second) == 1)
 			{
 				this_map[p.first] = tvm[p.second];

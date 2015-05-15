@@ -116,7 +116,7 @@ public:
 
 private:
 
-	VarMultimap do_bc(Handle& htarget);
+	VarMultimap process_target(Handle& htarget);
 
 	std::vector<Rule> filter_rules(Handle htarget);
 	Rule select_rule(const std::vector<Rule>& rules);
