@@ -16,6 +16,7 @@
 (use-modules (opencog rule-engine))
 
 (load-from-path "utilities.scm")
+(load-from-path "av-tv.scm")
 
 (define A (ConceptNode "A"))
 (define B (ConceptNode "B"))
