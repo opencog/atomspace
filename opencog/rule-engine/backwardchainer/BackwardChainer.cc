@@ -2,8 +2,10 @@
  * BackwardChainer.cc
  *
  * Copyright (C) 2014 Misgana Bayetta
+ * Copyright (C) 2015 OpenCog Foundation
  *
  * Author: Misgana Bayetta <misgana.bayetta@gmail.com>  October 2014
+ *         William Ma <https://github.com/williampma>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -22,7 +24,7 @@
  */
 
 #include "BackwardChainer.h"
-#include "BCPatternMatch.h"
+#include "BackwardChainerPMCB.h"
 
 #include <opencog/util/random.h>
 
@@ -463,16 +465,16 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
 	// Pattern Match on _garbage_superspace since some atoms in htarget could
 	// be in the _garbage space
 	SatisfactionLinkPtr sl(createSatisfactionLink(htarget_vardecl, htarget));
-	BCPatternMatch bcpm(_garbage_superspace);
+	BackwardChainerPMCB pmcb(_garbage_superspace);
 
 	logger().debug("[BackwardChainer] Before patterm matcher");
 
-	sl->satisfy(bcpm);
+	sl->satisfy(pmcb);
 
 	logger().debug("[BackwardChainer] After running pattern matcher");
 
-	vector<map<Handle, Handle>> var_solns = bcpm.get_var_list();
-	vector<map<Handle, Handle>> pred_solns = bcpm.get_pred_list();
+	vector<map<Handle, Handle>> var_solns = pmcb.get_var_list();
+	vector<map<Handle, Handle>> pred_solns = pmcb.get_pred_list();
 
 	HandleSeq results;
 
@@ -667,24 +669,26 @@ bool BackwardChainer::unify(const Handle& htarget,
 		                                                  fv.varset));
 
 	SatisfactionLinkPtr sl(createSatisfactionLink(temp_vardecl, temp_htarget));
-	BCPatternMatch bcpm(&temp_space);
+	BackwardChainerPMCB pmcb(&temp_space);
 
-	sl->satisfy(bcpm);
+	sl->satisfy(pmcb);
 
 	logger().debug("[BackwardChainer] unify found %d mapping",
-	               bcpm.get_var_list().size());
+	               pmcb.get_var_list().size());
 
 	// if no grounding
-	if (bcpm.get_var_list().size() == 0)
+	if (pmcb.get_var_list().size() == 0)
 		return false;
 
-	std::vector<std::map<Handle, Handle>> pred_list = bcpm.get_pred_list();
-	std::vector<std::map<Handle, Handle>> var_list = bcpm.get_var_list();
+	std::vector<std::map<Handle, Handle>> pred_list = pmcb.get_pred_list();
+	std::vector<std::map<Handle, Handle>> var_list = pmcb.get_var_list();
 
 	VarMap good_map;
 
 	// go thru each solution, and get the first one that map the whole temp_hmatch
-	// XXX TODO branch on the various groundings?
+	//
+	// XXX TODO branch on the various groundings?  how to properly handle
+	// multiple possible unify option????
 	for (size_t i = 0; i < pred_list.size(); ++i)
 	{
 		for (const auto& p : pred_list[i])

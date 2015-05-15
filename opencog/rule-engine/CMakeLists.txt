@@ -3,9 +3,9 @@
 #
 ADD_LIBRARY(ruleengine SHARED
 	backwardchainer/BackwardChainer.cc
+	backwardchainer/BackwardChainerPMCB.cc
 	URECommons.cc
 	forwardchainer/ForwardChainer.cc
-	backwardchainer/BCPatternMatch.cc
 	forwardchainer/ForwardChainInputMatchCB.cc
 	forwardchainer/ForwardChainPatternMatchCB.cc
 	forwardchainer/ForwardChainerCallBack.h
