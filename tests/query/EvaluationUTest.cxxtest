@@ -168,8 +168,14 @@ void EvaluationUTest::test_varval(void)
 	config().set("SCM_PRELOAD", "tests/query/eval-var.scm");
 	load_scm_files_from_config(*as);
 
-	Handle four = eval->eval_h("(cog-bind (do-things))");
-	printf ("do-things: \n%s\n", four->toShortString().c_str());
+	Handle dostuff = eval->eval_h("(cog-bind (do-things))");
+	printf ("do-things: \n%s\n", dostuff->toShortString().c_str());
+
+	// Of the two possibilities, we only expect one to pass.
+	Handle expected = eval->eval_h(
+		"(SetLink (ImplicationLink (ConceptNode \"acceptance\")))");
+
+	TS_ASSERT_EQUALS(expected, dostuff);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

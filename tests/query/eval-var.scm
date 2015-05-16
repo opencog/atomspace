@@ -16,6 +16,7 @@
 	(ImplicationLink x)
 )
 
+; The bind link will accept this
 (ContextLink
 	(ConceptNode "situation")
 	(EvaluationLink
@@ -28,6 +29,7 @@
 	)
 )
 
+; The bind link will reject this
 (ContextLink
 	(ConceptNode "predicament")
 	(EvaluationLink
@@ -40,6 +42,7 @@
 	)
 )
 
+; This pattern will accept one of the two above, reject the other.
 (define (do-things)
 	(BindLink
 		(VariableList
@@ -49,16 +52,16 @@
 		)
 		(ImplicationLink
 			(AndLink
-				; If there is a plan
+				; If there is a plan ...
 				(ContextLink
 					(VariableNode "$cxt")
 					(VariableNode "$condition")
 					(VariableNode "$action")
 				)
-				; and the precondition holds true
+				; ... and the precondition holds true ...
 				(VariableNode "$condition")
 			)
-			; then perform the action
+			; ...  then perform the action.
 			(VariableNode "$action")
 		)
 	)
