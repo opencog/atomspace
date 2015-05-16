@@ -62,6 +62,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		virtual bool link_match(const LinkPtr&, const LinkPtr&);
 		virtual bool post_link_match(const LinkPtr&, const LinkPtr&);
 
+		virtual bool clause_match(const Handle&, const Handle&);
 		/**
 		 * Typically called for AbsentLink
 		 */

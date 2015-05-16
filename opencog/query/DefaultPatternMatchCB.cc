@@ -164,6 +164,48 @@ bool DefaultPatternMatchCB::post_link_match(const LinkPtr& lpat,
 }
 
 /**
+ * Called to accept of reject a top-level clause.
+ *
+ * This is straight-forward, except when the pattern is a VariableNode,
+ * and the proposed grounding is evaluatable.  In this case, we want to
+ * treat the grounding term as if it was a regular evaluatable clause,
+ * and evaluate it, and use that to determine if the match is accepted.
+ *
+ * This allows a clause to implement a (pre-)condition on the match.
+ * If we didn't implement this here, the user could still work around
+ * this by saying (NotLink (NotLink (VariableNode $x))), thus forcing
+ * the "normal" path to evaluate_sentence(). So may as well do it here.
+ */
+bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
+                                         const Handle& grnd)
+{
+	if (ptrn == grnd) return false;
+	if (ptrn->getType() == VARIABLE_NODE and
+	    grnd->getType() == EVALUATION_LINK)
+	{
+		dbgprt("Evaluate the grounding clause=\n%s\n",
+		        grnd->toShortString().c_str());
+		// We make two awkard asumptions here: the ground term itself
+		// does not contain any variables, and so does not need any
+		// further grounding. This actuall seems reasonable. The second
+		// assumption is that the EvaluationLink is actually evaluatable,
+		// which seems reasonable, except that everything else in the
+		// default callback ignores the TV on EvaluationLinks. So this
+		// is kind-of schizophrenic here.  Not sure what else to do.
+		TruthValuePtr tvp(EvaluationLink::do_evaluate(&_temp_aspace, grnd));
+
+		dbgprt("clause_match evaluation yeilded tv=%s\n", tvp->toString().c_str());
+
+		// XXX FIXME: we are making a crsip-logic go/no-go decision
+		// based on the TV strength. Perhaps something more subtle might be
+		// wanted, here.
+		bool relation_holds = tvp->getMean() > 0.5;
+		return relation_holds;
+	}
+	return true;
+}
+
+/**
  * The default semantics here is to reject a match if the option
  * clauses are detected.  This is in keeping with the semantics
  * AbsentLink: a match is possible only if the indicated clauses
