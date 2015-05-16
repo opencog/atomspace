@@ -43,6 +43,7 @@ using namespace opencog;
 
 DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
 	_classserver(classserver()),
+	_temp_aspace(as),
 	_instor(&_temp_aspace),
 	_as(as)
 {
