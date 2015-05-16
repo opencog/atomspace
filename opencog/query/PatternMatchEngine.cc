@@ -170,9 +170,10 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 #endif
 
 	// Else, we have a candidate grounding for this variable.
-	// The node_match may implement some tighter variable check,
-	// e.g. making sure that grounding is of some certain type.
-	if (not _pmc.variable_match (hp,hg)) return false;
+	// The variable_match() callback may implement some tighter
+	// variable check, e.g. to make sure that the grounding is
+	// of some certain type.
+	if (not _pmc.variable_match (hp, hg)) return false;
 
 	// Make a record of it.
 	dbgprt("Found grounding of variable:\n");
