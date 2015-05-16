@@ -92,7 +92,7 @@ Handle InferenceSCM::do_forward_chaining(Handle h, const string& conf_path)
      * using the rules declared in the config. A similar functionality
      * with the python version of the forward chainer.
      */
-    if (h->getType() == LIST_LINK and as->getIncoming(h).empty())
+    if (h->getType() == LIST_LINK and as->getOutgoing(h).empty())
         fc.do_chain(dfc, Handle::UNDEFINED);
     else
         /** Does variable fulfillment forward chaining or forward chaining based on
