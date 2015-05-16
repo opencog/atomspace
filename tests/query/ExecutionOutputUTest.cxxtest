@@ -65,6 +65,7 @@ class ExecutionOutputUTest :  public CxxTest::TestSuite
 		void tearDown(void);
 
 		void test_exec(void);
+		void test_varsub(void);
 };
 
 #define an as->addNode
@@ -182,6 +183,97 @@ void ExecutionOutputUTest::test_exec(void)
 
 	TSM_ASSERT_EQUALS("incorrect capital", hcapital, vcapital);
 	TSM_ASSERT_EQUALS("incorrect prep", hprep, vprep);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test execution of variables.
+ * During pattern matching, variables can bind to ExecutionOutputLinks
+ * If they are then repeated in the implcand, the ExecutionOutputLink
+ * must be exeucted there, with the resulting answer returned.
+ *
+ * Err. XXX maybe. Shouldn't the ExecutionOutputLink be executed when
+ * its found??  Well, for now, we're doing what we do here. This may need
+ * to change.
+ */
+void ExecutionOutputUTest::test_varsub(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	const char * str =
+	"(define (retarg x) x)\n";
+	SchemeEval* ev = new SchemeEval(as);
+	ev->eval(str);
+	delete ev;
+
+	Handle resolution;
+	// Raw data
+	al(CONTEXT_LINK,
+		an(CONCEPT_NODE, "situation"),
+		al(EXECUTION_OUTPUT_LINK,
+			an(GROUNDED_SCHEMA_NODE, "scm: retarg"),
+			al(LIST_LINK,
+				resolution = an(CONCEPT_NODE, "resolution")
+			)
+		)
+	);
+
+	Handle deliverance;
+	al(CONTEXT_LINK,
+		an(CONCEPT_NODE, "predicament"),
+		al(EXECUTION_OUTPUT_LINK,
+			an(GROUNDED_SCHEMA_NODE, "scm: retarg"),
+			al(LIST_LINK,
+				deliverance = an(CONCEPT_NODE, "deliverance")
+			)
+		)
+	);
+
+
+	Handle situ =
+	al(BIND_LINK,
+		al(IMPLICATION_LINK,
+			al(CONTEXT_LINK,
+				an(CONCEPT_NODE, "situation"),
+				an(VARIABLE_NODE, "$action")
+			),
+			an(VARIABLE_NODE, "$action")
+		)
+	);
+	BindLinkPtr situation(createBindLink(*LinkCast(situ)));
+
+	Handle pred =
+	al(BIND_LINK,
+		al(IMPLICATION_LINK,
+			al(CONTEXT_LINK,
+				an(CONCEPT_NODE, "predicament"),
+				an(VARIABLE_NODE, "$action")
+			),
+			an(VARIABLE_NODE, "$action")
+		)
+	);
+	BindLinkPtr predicament(createBindLink(*LinkCast(pred)));
+
+   // Now perform the search.
+   DefaultImplicator simpl(as);
+   simpl.implicand = situation->get_implicand();
+   situation->imply(simpl);
+
+   // The result_list contains a list of the grounded expressions.
+   Handle res = simpl.result_list[0];
+	printf("res is %s\n", res->toShortString().c_str());
+	TSM_ASSERT_EQUALS("incorrect resolution", res, resolution);
+
+   // Now perform the search.
+   DefaultImplicator pimpl(as);
+   pimpl.implicand = predicament->get_implicand();
+   predicament->imply(pimpl);
+
+   // The result_list contains a list of the grounded expressions.
+   Handle del = pimpl.result_list[0];
+	printf("del is %s\n", del->toShortString().c_str());
+	TSM_ASSERT_EQUALS("incorrect delivarance", del, deliverance);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
