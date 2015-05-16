@@ -37,6 +37,11 @@ URECommons::~URECommons()
 {
 }
 
+Handle URECommons::replace_nodes_with_varnode(Handle& himplication_link, Type t)
+{
+	return Handle::UNDEFINED;
+};
+
 Handle URECommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
     throw (opencog::InvalidParamException)
 {
