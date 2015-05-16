@@ -40,9 +40,14 @@ Handle Instantiator::walk_tree(const Handle& expr)
 
 		// If we are here, we found a variable. Look it up. Return a
 		// grounding if it has one, otherwise return the variable
-		// itself
+		// itself.
 		std::map<Handle,Handle>::const_iterator it = _vmap->find(expr);
-		return _vmap->end() != it ? it->second : Handle(expr);
+		if (_vmap->end() == it) return Handle(expr);
+
+		// Not so fast, pardner. VariableNodes can be grounded by
+		// links, and those links may be executable. In that case,
+		// we have to execute them.
+		return walk_tree(it->second);
 	}
 
 	// If we are here, then we have a link. Walk it.
