@@ -33,8 +33,6 @@ class ExecutionOutputUTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *as;
-		Handle implication;
-		Handle hcapital, hprep;
 
 	public:
 
@@ -69,12 +67,6 @@ class ExecutionOutputUTest :  public CxxTest::TestSuite
 		void test_exec(void);
 };
 
-/*
- * This function sets up the following structures:
- *  # IF _obj(be, $var1) ^ 
- *       $prep($var1, $var2) 
- *      THEN %ExecutionOutputLink("make-it", $var1, $prep)
- */
 #define an as->addNode
 #define al as->addLink
 void ExecutionOutputUTest::tearDown(void)
@@ -84,9 +76,34 @@ void ExecutionOutputUTest::tearDown(void)
 void ExecutionOutputUTest::setUp(void)
 {
 	as = new AtomSpace();
+}
 
-	// Create an implication link that will be tested.
-	implication = 
+/*
+ * preposition reasoning test.
+ *
+ * Expect to get the following result, given the above data:
+ *
+ *    EvaluationLink
+ *       DefinedLinguisticRelationshipNode "capital_of"
+ *       ListLink
+ *          WordNode "capital"
+ *          DefinedLinguisticRelationshipNode "of"
+ */
+#define getlink(hand,pos) as->getOutgoing(hand,pos)
+#define getarity(hand) as->getArity(hand)
+
+void ExecutionOutputUTest::test_exec(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	/*
+	 * Create an implication link that will be tested.
+	 * This sets up the following structures:
+	 *  # IF _obj(be, $var1) ^
+	 *       $prep($var1, $var2)
+	 *      THEN %ExecutionOutputLink("make-it", $var1, $prep)
+	 */
+	Handle implication =
 	al(IMPLICATION_LINK,
 		al(AND_LINK,
 			al(EVALUATION_LINK,
@@ -113,6 +130,7 @@ void ExecutionOutputUTest::setUp(void)
 		)
 	);
 
+	Handle hcapital;
 	// Create data on which the above pattern should match
 	al(EVALUATION_LINK,
 		an(PREDICATE_NODE, "_obj"),
@@ -122,6 +140,7 @@ void ExecutionOutputUTest::setUp(void)
 		)
 	)->setTruthValue(TruthValue::TRUE_TV());
 
+	Handle hprep;
 	al(EVALUATION_LINK,
 		hprep = an(PREDICATE_NODE, "of"),
 		al(LIST_LINK,
@@ -130,8 +149,7 @@ void ExecutionOutputUTest::setUp(void)
 		)
 	)->setTruthValue(TruthValue::TRUE_TV());
 
-#ifdef HAVE_GUILE
-	const char * str = 
+	const char * str =
 	"(define (make-verb-prep verb prep) \n"
 	"	(cog-new-link 'EvaluationLink \n"
 	"		(cog-new-node 'ConceptNode \n"
@@ -146,32 +164,12 @@ void ExecutionOutputUTest::setUp(void)
 	SchemeEval* ev = new SchemeEval(as);
 	ev->eval(str);
 	delete ev;
-#endif /* HAVE_GUILE */
-}
-
-/*
- * preposition reasoning test.
- *
- * Expect to get the following result, given the above data:
- *
- *    EvaluationLink
- *       DefinedLinguisticRelationshipNode "capital_of"
- *       ListLink
- *          WordNode "capital"
- *          DefinedLinguisticRelationshipNode "of"
- */
-#define getlink(hand,pos) as->getOutgoing(hand,pos)
-#define getarity(hand) as->getArity(hand)
-
-void ExecutionOutputUTest::test_exec(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
 	Handle result = imply(as, implication);
 
 	// There should be only one solution: the Berlin one.
-	// The Madrid graph should be rejected because of the 
+	// The Madrid graph should be rejected because of the
 	// NOT definite link.
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
