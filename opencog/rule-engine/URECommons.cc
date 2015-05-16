@@ -37,22 +37,6 @@ URECommons::~URECommons()
 {
 }
 
-Handle URECommons::create_quoted(Handle himplicant)
-{
-    Handle hquoted;
-    if (LinkCast(himplicant)) {
-        HandleSeq hs = as_->getOutgoing(himplicant);
-        HandleSeq hs_new;
-        for (Handle h : hs)
-            hs_new.push_back(create_quoted(h));
-        hquoted = as_->addLink(as_->getType(himplicant), hs_new);
-    } else if (as_->getType(himplicant) == VARIABLE_NODE)
-        hquoted = as_->addLink(QUOTE_LINK, himplicant);
-    else
-        hquoted = himplicant;
-    return hquoted;
-}
-
 Handle URECommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
     throw (opencog::InvalidParamException)
 {
@@ -105,67 +89,6 @@ bool URECommons::exists_in(Handle& hlink, Handle& h)
         }
         return false;
     }
-}
-
-void URECommons::clean_up_bind_link(Handle& hbind_link)
-        throw (opencog::InvalidParamException)
-{
-    if (as_->getType(hbind_link) != BIND_LINK) {
-        throw InvalidParamException(TRACE_INFO,
-                                    "Input must be a BIND_LINK type");
-    }
-    remove_vnode_containing_links(hbind_link);
-}
-
-void URECommons::remove_vnode_containing_links(Handle& h)
-{
-    if (LinkCast(h)) {
-        auto vnodes = get_outgoing_nodes(h, {VARIABLE_NODE});
-        if (not vnodes.empty()) {
-            HandleSeq outgoings = as_->getOutgoing(h);
-            as_->removeAtom(h);
-            for (Handle h : outgoings)
-                remove_vnode_containing_links(h);
-        }
-    } else if (NodeCast(h))
-        if (as_->getType(h) == VARIABLE_NODE)
-            as_->removeAtom(h);
-
-}
-
-void URECommons::clean_up_implication_link(Handle& himplication_link)
-        throw (opencog::InvalidParamException)
-{
-    if (as_->getType(himplication_link) != IMPLICATION_LINK)
-        throw InvalidParamException(TRACE_INFO,
-                                    "Input must be an ImplicationLink type ");
-    remove_vnode_containing_links(himplication_link);
-}
-
-string URECommons::get_unique_name(Handle& h)
-{
-//xxx temporary implementation. need to be replaced by uuid generation for making sure name is always unique
-    string name = as_->getName(h);
-    HandleSeq hs = as_->getIncoming(h);
-    if (!hs.empty())
-        name.append(to_string(hs[0].value()));
-    name.append("-bcgen");
-    return name;
-}
-
-Handle URECommons::replace_nodes_with_varnode(Handle& handle,
-                                              Type t /*=VARIABLE_NODE*/)
-{
-    UnorderedHandleSet hvars;
-    if (t == NODE)
-        hvars = get_outgoing_nodes(handle); // Get every node
-    else
-        hvars = get_outgoing_nodes(handle, {t});
-    map<Handle, Handle> node_unique_var_map;
-    for (Handle h : hvars)
-        node_unique_var_map[h] = as_->addNode(VARIABLE_NODE,
-                                              get_unique_name(h)); //TODO get_uuid is not implemented
-    return change_node_types(handle, node_unique_var_map);
 }
 
 Handle URECommons::change_node_types(Handle& h,
