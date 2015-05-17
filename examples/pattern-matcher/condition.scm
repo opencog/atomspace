@@ -23,7 +23,7 @@
 ; Its more or less trivial, printing it's argument and then returning
 ; it wrapped up in an ImplicationLink.
 (define (konsekwens x)
-	(dsiplay "Taken action on the atom ") (display x) (newline)
+	(display "Taken action on the atom ") (display x) (newline)
 	; Must return an atom, or undefined.
 	(ImplicationLink x)
 )
@@ -84,4 +84,4 @@
 
 ;; Performing the below should cause only the (ConcpetNode "acceptance")
 ;; to be printed.
-(cog-bind do-things)
+; (cog-bind do-things)
