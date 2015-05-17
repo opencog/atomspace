@@ -7,6 +7,13 @@ the SatisfactionLink and the BindLink.  This helps avoid having to
 unpack these links every time a pattern search is performed. It also
 verifies that the syntax is correct; that the links are well-formed.
 
+The SatisfactionLink and BindLink implicitly assume (have to assume)
+that they will run with the DefaultPatternMatchCB, or variants thereof.
+However, the current implementation does allow them to actually run
+with other callbacks as well, so weird stuff may happen due to this
+implicit assumption. By contrast, the ConcreteLink tries not to make
+such assumptions, or, at least, to make fewer of them.
+
 
 Basic Intro
 -----------
@@ -105,7 +112,7 @@ TO-DO List
 
 Type Restrictions
 -----------------
-It couold make sense to store type restrictions with a new VariableNode
+It could make sense to store type restrictions with a new VariableNode
 class. This would offer a minor performance improvement: type
 restrictions would not have to be looked up in a mp, as currently
 implemented.  On the other hand, this could e a major headache: every

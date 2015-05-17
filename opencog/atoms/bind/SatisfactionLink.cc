@@ -47,6 +47,11 @@ void SatisfactionLink::setup_sat_body(void)
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
                     _fixed, _virtual, _pat.black);
 
+	// unbundle_virtual does not handle connectives. Here, we assume that
+	// we are being run with the DefaultPatternMatchCB, and so we assume
+	// that the logical connectives are AndLink, OrLink and NotLink.
+	// Tweak the evaluatable_holders to reflect this.
+
 	// Split the non-virtual clauses into connected components
 	std::vector<HandleSeq> comps;
 	std::vector<std::set<Handle>> comp_vars;

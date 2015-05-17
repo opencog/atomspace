@@ -358,13 +358,13 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 /// enough, expect when an entire term is a variable.  Thus, for
 /// example, a term such as (NotLink (VariableNode $x)) needs to be
 /// evaluated at grounding-time, even though it does not currently
-/// cotnain a GPN or a VirtualLink: the grounding might contain it;
+/// contain a GPN or a VirtualLink: the grounding might contain it;
 /// We don't know yet.  However, there's a gotcha: we don't yet know
 /// what the connectives are. The actual connectives depend on the
 /// callback; the default callback uses AndLink, OrLink, NotLink, but
-/// other callbacks may pick something else.  Thus, the callback is
-/// given a chance to modify the evaluatable_holders before the pattern
-/// search starts.
+/// other callbacks may pick something else.  Thus, we cannot do this
+/// here. By contrast, SatisfactionLink and BindLink explicitly assume
+/// the default callback, so they do the additional unbundling there.
 ///
 /// A term is "executable" if it is an ExecutionOutputLink
 /// or if it inherits from one (such as PlusLink, TimesLink).
@@ -387,21 +387,6 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 /// arises when a virtual clause has two or more variables in it, and
 /// those variables are grounded by different disconnected graph
 /// components; the combinatoric explosino has to be handled...
-///
-/// If the evaluatable_holders combine multiple variables using
-/// connectives, then the entire clause can become virtual. Because we
-/// do not yet know what the connectives are (they are
-/// callback-dependent), the callback myst also modify the virtuals, as
-/// well.
-///
-/// XXX FIXME: the above design, where the callback is twerking the
-/// evaluatable_holders, seems mildly broken, to me.  It seems to me
-/// that we should assume a specific callback, and unbundle as
-/// approrpriate, for that callback. Easy to say, but hard to do:
-/// The various different users of the pattern matcher call this code
-/// to perform the unbundling, but then use thier own callbacks on it.
-/// Thus, we still need a layer of generic unbundling, somewhere, and
-/// here seems to be a good a spot as any...
 ///
 void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
                                     const HandleSeq& clauses,
