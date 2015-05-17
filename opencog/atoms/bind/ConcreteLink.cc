@@ -470,6 +470,23 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 }
 
 /* ================================================================= */
+
+void ConcreteLink::trace_connectives(const std::set<Type>& connectives,
+                                     const HandleSeq& oset)
+{
+	for (const Handle& term: oset)
+	{
+		Type t = term->getType();
+		if (connectives.find(t) == connectives.end()) continue;
+		_pat.evaluatable_holders.insert(term);
+		LinkPtr lp(LinkCast(term));
+		if (lp)
+			trace_connectives(connectives, lp->getOutgoingSet());
+		// XXX insert var into in_evaluatable...
+	}
+}
+
+/* ================================================================= */
 /**
  * Create a map that holds all of the clauses that a given atom
  * participates in.  In other words, it indicates all the places

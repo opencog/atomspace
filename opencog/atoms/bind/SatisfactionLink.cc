@@ -51,6 +51,8 @@ void SatisfactionLink::setup_sat_body(void)
 	// we are being run with the DefaultPatternMatchCB, and so we assume
 	// that the logical connectives are AndLink, OrLink and NotLink.
 	// Tweak the evaluatable_holders to reflect this.
+	std::set<Type> connectives({AND_LINK, OR_LINK, NOT_LINK});
+	trace_connectives(connectives, _pat.clauses);
 
 	// Split the non-virtual clauses into connected components
 	std::vector<HandleSeq> comps;
