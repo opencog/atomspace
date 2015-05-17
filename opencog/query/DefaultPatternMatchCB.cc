@@ -27,7 +27,6 @@
 
 #include "DefaultPatternMatchCB.h"
 #include "Instantiator.h"
-#include "PatternMatchEngine.h"
 
 using namespace opencog;
 
