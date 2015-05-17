@@ -69,6 +69,7 @@ public:
 
 	void test_eval(void);
 	void test_logic(void);
+	void test_varval(void);
 };
 
 void EvaluationUTest::tearDown(void)
@@ -152,6 +153,29 @@ void EvaluationUTest::test_logic(void)
 
 	// Both the searches should return the same two (the first two)
 	TS_ASSERT_EQUALS(two, fancy);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Make sure that variabvles get evaluated when they appear in an
+ * evaluatable location.
+ */
+void EvaluationUTest::test_varval(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD", "tests/query/eval-var.scm");
+	load_scm_files_from_config(*as);
+
+	Handle dostuff = eval->eval_h("(cog-bind (do-things))");
+	printf ("do-things: \n%s\n", dostuff->toShortString().c_str());
+
+	// Of the two possibilities, we only expect one to pass.
+	Handle expected = eval->eval_h(
+		"(SetLink (ImplicationLink (ConceptNode \"acceptance\")))");
+
+	TS_ASSERT_EQUALS(expected, dostuff);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

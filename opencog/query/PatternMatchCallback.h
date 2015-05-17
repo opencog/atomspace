@@ -190,11 +190,12 @@ class PatternMatchCallback
 		 * of the clause, as an intermediate stage for evaluating
 		 * the overall truth value of a solution (grounding).
 		 *
-		 * A clause match has occured if all calls to node_match()
-		 * and link_match() in that clause have returned true.
+		 * A clause match has occured if all calls to node_match(),
+		 * variable_match(), link_match() and post_link_match() in
+		 * that clause have returned true.
 		 *
-		 * Return false to discard the use of this clause as a possible
-		 * grounding, return true to use this grounding.
+		 * Return false to reject this clause as a valid grounding,
+		 * return true to accept this grounding.
 		 */
 		virtual bool clause_match(const Handle& pattrn_link_h,
 		                          const Handle& grnd_link_h)

@@ -34,7 +34,9 @@ IF (CXXTEST_FOUND)
 		ADD_SUBDIRECTORY (query)
 
 		# Currently, reasoning depends on query, above.
-		ADD_SUBDIRECTORY (rule-engine)
+		IF (HAVE_GUILE)
+			ADD_SUBDIRECTORY (rule-engine)
+		ENDIF (HAVE_GUILE)
 
 		ADD_SUBDIRECTORY (pln)
 
