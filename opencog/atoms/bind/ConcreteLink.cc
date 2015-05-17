@@ -479,6 +479,7 @@ void ConcreteLink::trace_connectives(const std::set<Type>& connectives,
 		Type t = term->getType();
 		if (connectives.find(t) == connectives.end()) continue;
 		_pat.evaluatable_holders.insert(term);
+		add_to_map(_pat.in_evaluatable, term, term);
 		LinkPtr lp(LinkCast(term));
 		if (lp)
 			trace_connectives(connectives, lp->getOutgoingSet());

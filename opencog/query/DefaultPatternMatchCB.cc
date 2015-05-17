@@ -294,6 +294,11 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 	dbgprt("Enter eval_sentence CB with top=\n%s\n",
 	        top->toShortString().c_str());
 
+	if (top->getType() == VARIABLE_NODE)
+	{
+		return eval_term(top, gnds);
+	}
+
 	LinkPtr ltop(LinkCast(top));
 	if (NULL == ltop)
 		throw InvalidParamException(TRACE_INFO,
