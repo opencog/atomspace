@@ -89,6 +89,9 @@ protected:
 	                      HandleSeq& virtual_clauses,
 	                      std::set<Handle>& black_clauses);
 
+	void trace_connectives(const std::set<Type>&,
+	                       const HandleSeq& clauses);
+
 	void check_connectivity(const std::vector<HandleSeq>&);
 
 	void make_connectivity_map(const HandleSeq&);

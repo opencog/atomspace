@@ -43,7 +43,7 @@
 )
 
 ; This pattern will accept one of the two above, reject the other.
-(define (do-things)
+(define (do-cond condi)
 	(BindLink
 		(VariableList
 			(VariableNode "$cxt")
@@ -59,10 +59,15 @@
 					(VariableNode "$action")
 				)
 				; ... and the precondition holds true ...
-				(VariableNode "$condition")
+				condi
 			)
 			; ...  then perform the action.
 			(VariableNode "$action")
 		)
 	)
 )
+
+; This pattern will accept one of the two above, reject the other.
+(define (do-things) (do-cond (VariableNode "$condition")))
+(define (do-nthings) (do-cond (NotLink (VariableNode "$condition"))))
+(define (do-nnthings) (do-cond (NotLink (NotLink (VariableNode "$condition")))))

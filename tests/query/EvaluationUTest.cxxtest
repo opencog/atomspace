@@ -177,5 +177,20 @@ void EvaluationUTest::test_varval(void)
 
 	TS_ASSERT_EQUALS(expected, dostuff);
 
+	Handle ndostuff = eval->eval_h("(cog-bind (do-nthings))");
+	printf ("do-nthings: \n%s\n", ndostuff->toShortString().c_str());
+
+	// Of the two possibilities, we only expect one to pass.
+	Handle rejected = eval->eval_h(
+		"(SetLink (ImplicationLink (ConceptNode \"rejection\")))");
+
+	TS_ASSERT_EQUALS(rejected, ndostuff);
+
+	Handle nndostuff = eval->eval_h("(cog-bind (do-nnthings))");
+	printf ("do-nnthings: \n%s\n", nndostuff->toShortString().c_str());
+
+	// Of the two possibilities, we only expect one to pass.
+	TS_ASSERT_EQUALS(expected, nndostuff);
+
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
