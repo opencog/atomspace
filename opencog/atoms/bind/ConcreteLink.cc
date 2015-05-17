@@ -398,6 +398,22 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 	{
 		bool is_virtual = false;
 		bool is_black = false;
+
+#ifdef BORKEN_DOESNT_WORK
+// The below should have worked to set things up, but it doesn't,
+// and I'm too lazy to investigate, because an alternate hack is
+// working, at the moment.
+		// If a clause is a variable, we have to make the worst-case
+		// assumption that it is evaulatable, so that we can evaluate
+		// it later.
+		if (VARIABLE_NODE == clause->getType())
+		{
+			_pat.evaluatable_terms.insert(clause);
+			add_to_map(_pat.in_evaluatable, clause, clause);
+			is_black = true;
+		}
+#endif
+
 		FindAtoms fgpn(GROUNDED_PREDICATE_NODE, true);
 		fgpn.search_set(clause);
 		for (const Handle& sh : fgpn.least_holders)
@@ -471,6 +487,14 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 
 /* ================================================================= */
 
+/// Starting from the top of a clause, trace down through the tree
+/// of connectives.  If a term appears under a connective, and there
+/// is a path of connectives all the way to the top, then we have to
+/// assume the term is evaluatable, as the whole point of connectives
+/// to to connect evaluatable terms.  Thus, for example, for a clause
+/// having the form (AndLink stuff (OrLink more-stuff (NotLink not-stuff)))
+/// we have to assume that stuff, more-stuff and not-stuff are all
+/// evaluatable.
 void ConcreteLink::trace_connectives(const std::set<Type>& connectives,
                                      const HandleSeq& oset)
 {
@@ -483,7 +507,6 @@ void ConcreteLink::trace_connectives(const std::set<Type>& connectives,
 		LinkPtr lp(LinkCast(term));
 		if (lp)
 			trace_connectives(connectives, lp->getOutgoingSet());
-		// XXX insert var into in_evaluatable...
 	}
 }
 
