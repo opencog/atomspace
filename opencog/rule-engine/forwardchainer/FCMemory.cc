@@ -47,43 +47,48 @@ vector<Rule*>& FCMemory::get_rules()
 {
     return _rules;
 }
-const vector<Rule*>& FCMemory::get_rules() const
-{
-    return _rules;
-}
+
 void FCMemory::set_rules(vector<Rule*> rules)
 {
     _rules = rules;
 }
+
 void FCMemory::set_source(Handle source)
 {
     _cur_source = source;
     _selected_sources.push_back(_cur_source);
 }
+
 HandleSeq FCMemory::get_selected_sources()
 {
     return _selected_sources;
 }
+
 HandleSeq FCMemory::get_potential_sources()
 {
     return _potential_sources;
 }
+
 void FCMemory::set_search_in_af(bool val)
 {
     _search_in_af = val;
 }
+
 bool FCMemory::is_search_in_af()
 {
     return _search_in_af;
 }
+
 Rule* FCMemory::get_cur_rule()
 {
     return _cur_rule;
 }
+
 void FCMemory::set_cur_rule(Rule* r)
 {
     _cur_rule = r;
 }
+
 void FCMemory::add_rules_product(int iteration, HandleSeq product)
 {
     for (Handle p : product) {
@@ -94,6 +99,7 @@ void FCMemory::add_rules_product(int iteration, HandleSeq product)
         _inf_history.push_back(inf);
     }
 }
+
 void FCMemory::add_inference(int iter_step, HandleSeq product,
                              HandleSeq matched_nodes)
 {
@@ -106,14 +112,17 @@ void FCMemory::add_inference(int iter_step, HandleSeq product,
         inf.matched_nodes.push_back(mn);
     _inf_history.push_back(inf);
 }
+
 Handle FCMemory::get_cur_source()
 {
     return _cur_source;
 }
+
 bool FCMemory::isin_selected_sources(Handle h)
 {
     return (boost::find(_selected_sources, h) != _selected_sources.end());
 }
+
 bool FCMemory::isin_potential_sources(Handle h)
 {
     for (Handle hi : _potential_sources) {

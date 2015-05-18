@@ -29,47 +29,56 @@
 namespace opencog {
 
 struct Inference {
-    int iter_step;
-    Rule* applied_rule;
-    HandleSeq inf_product;
-    HandleSeq matched_nodes; /**<matched nodes with the variables in the rule,useful during mutual exclusion checking*/
+	int iter_step;
+	Rule* applied_rule;
+	HandleSeq inf_product;
+	HandleSeq matched_nodes; /**<matched nodes with the variables in the rule,useful during mutual exclusion checking*/
 };
 
 class FCMemory {
 private:
-    bool _search_in_af;
-    vector<Rule*> _rules; /*<loaded rules*/
-    HandleSeq _selected_sources; /*<selected sources on each forward chaining steps*/
-	HandleSeq _potential_sources; /*<list of inference products and premises to select source from*/
+	bool _search_in_af;
+	vector<Rule*> _rules; /*<loaded rules*/
 	Rule* _cur_rule;
-    Handle _cur_source;
-    vector<Inference> _inf_history; /*<inference history*/
-    AtomSpace* _as;
-public:
-    FCMemory(AtomSpace* as);
-    ~FCMemory();
-    vector<Rule*>& get_rules();
-    const vector<Rule*>& get_rules() const;
-    void set_rules(vector<Rule*> rules);
-    void set_source(Handle source);
-    HandleSeq get_selected_sources();
-    HandleSeq get_potential_sources();
-    void update_potential_sources(HandleSeq input);
-    void set_search_in_af(bool val);
-    bool is_search_in_af();
-    Rule* get_cur_rule();
-    void add_rules_product(int iteration, HandleSeq product);
-    void set_cur_rule(Rule* r);
-    void add_inference(int iteration, HandleSeq product,
-                       HandleSeq matched_nodes);
-    Handle get_cur_source();
-    bool isin_selected_sources(Handle h);
-    bool isin_potential_sources(Handle h);
-    HandleSeq get_result();
-    vector<Inference>& get_inf_history();
+	Handle _cur_source;
 
-	// TODO: not used anywhere
-	vector<Rule*> get_applied_rules();
+	HandleSeq _selected_sources; /*<selected sources on each forward chaining steps*/
+	HandleSeq _potential_sources; /*<list of inference products and premises to select source from*/
+	vector<Inference> _inf_history; /*<inference history*/
+
+	AtomSpace* _as;
+public:
+	FCMemory(AtomSpace* as);
+	~FCMemory();
+
+	//Rules
+	vector<Rule*>& get_rules();
+	void set_rules(vector<Rule*> rules);
+	Rule* get_cur_rule();
+	void set_cur_rule(Rule* r);
+
+	//Source
+	void set_source(Handle source);
+	HandleSeq get_selected_sources(void);
+	bool isin_selected_sources(Handle h);
+
+	//Potential sources
+	HandleSeq get_potential_sources(void);
+	void update_potential_sources(HandleSeq input);
+	bool isin_potential_sources(Handle h);
+	Handle get_cur_source(void);
+
+    //Attentional focus flag
+	void set_search_in_af(bool val);
+	bool is_search_in_af();
+
+	//History
+	void add_rules_product(int iteration, HandleSeq product);
+	void add_inference(int iteration, HandleSeq product,
+			HandleSeq matched_nodes);
+	vector<Inference>& get_inf_history();
+	HandleSeq get_result();
+	vector<Rule*> get_applied_rules(void);
 
 };
 
