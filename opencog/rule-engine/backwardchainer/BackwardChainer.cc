@@ -635,31 +635,31 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
  * XXX Should (Link (Node A)) be unifiable to (Node A))?  BC literature never
  * unify this way, but in AtomSpace context, (Link (Node A)) does contain (Node A)
  *
- * @param htarget          the target with variable nodes
- * @param hmatch           a fully grounded matching handle with @param htarget
- * @param htarget_vardecl  the typed VariableList of the variables in htarget
- * @param result           an output VarMap mapping varibles from target to match
+ * @param hsource          the atom from which to unify
+ * @param hmatch           the atom to which hsource will be unified to
+ * @param htarget_vardecl  the typed VariableList of the variables in hsource
+ * @param result           an output VarMap mapping varibles from hsource to hmatch
  * @return                 true if the two atoms can be unified
  */
-bool BackwardChainer::unify(const Handle& htarget,
+bool BackwardChainer::unify(const Handle& hsource,
                             const Handle& hmatch,
-                            Handle htarget_vardecl,
+                            Handle hsource_vardecl,
                             VarMap& result)
 {
-	logger().debug("[BackwardChainer] starting unify " + htarget->toShortString()
+	logger().debug("[BackwardChainer] starting unify " + hsource->toShortString()
 	               + " to " + hmatch->toShortString());
 
 	// lazy way of restricting PM to be between two atoms
 	AtomSpace temp_space;
 
-	Handle temp_htarget = temp_space.addAtom(htarget);
+	Handle temp_hsource = temp_space.addAtom(hsource);
 	Handle temp_hmatch = temp_space.addAtom(hmatch);
 	Handle temp_vardecl;
 
 	FindAtoms fv(VARIABLE_NODE);
-	fv.search_set(htarget);
+	fv.search_set(hsource);
 
-	if (htarget_vardecl == Handle::UNDEFINED)
+	if (hsource_vardecl == Handle::UNDEFINED)
 	{
 		HandleSeq vars;
 		for (const Handle& h : fv.varset)
@@ -668,10 +668,10 @@ bool BackwardChainer::unify(const Handle& htarget,
 		temp_vardecl = temp_space.addAtom(createVariableList(vars));
 	}
 	else
-		temp_vardecl = temp_space.addAtom(gen_sub_varlist(htarget_vardecl,
+		temp_vardecl = temp_space.addAtom(gen_sub_varlist(hsource_vardecl,
 		                                                  fv.varset));
 
-	SatisfactionLinkPtr sl(createSatisfactionLink(temp_vardecl, temp_htarget));
+	SatisfactionLinkPtr sl(createSatisfactionLink(temp_vardecl, temp_hsource));
 	UnifyPMCB pmcb(&temp_space);
 
 	sl->satisfy(pmcb);
