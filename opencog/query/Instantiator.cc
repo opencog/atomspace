@@ -31,6 +31,11 @@ using namespace opencog;
 Handle Instantiator::walk_tree(const Handle& expr)
 {
 	Type t = expr->getType();
+
+	// Must not explore the insides of a QuoteLink.
+	if (QUOTE_LINK == t)
+		return Handle(expr);
+
 	LinkPtr lexpr(LinkCast(expr));
 	if (not lexpr)
 	{
@@ -54,7 +59,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 
 	// Walk the subtree, substituting values for variables.
 	HandleSeq oset_results;
-	for (Handle h : lexpr->getOutgoingSet())
+	for (const Handle& h : lexpr->getOutgoingSet())
 	{
 		Handle hg = walk_tree(h);
 		// It would be a NULL handle if it's deleted... Just skip
