@@ -74,6 +74,7 @@ public:
     void test_double_quote(void);
     void test_impossible(void);
     void test_numeric_greater(void);
+    void test_crash(void);
 };
 
 void QuoteUTest::tearDown(void)
@@ -131,6 +132,8 @@ void QuoteUTest::test_quoted_variable(void)
     banana = as->getOutgoing(banana, 0);
     TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
     TS_ASSERT_EQUALS(0, strcmp("banana", as->getName(banana).c_str()));
+
+    logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /*
@@ -151,6 +154,8 @@ void QuoteUTest::test_nest(void)
     allstar = as->getOutgoing(allstar, 0);
     TS_ASSERT_EQUALS(PREDICATE_NODE, allstar->getType());
     TS_ASSERT_EQUALS(0, strcmp("all-var", as->getName(allstar).c_str()));
+
+    logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 void QuoteUTest::test_throw(void)
@@ -172,6 +177,8 @@ void QuoteUTest::test_throw(void)
         did_throw = true;
     }
     TS_ASSERT_EQUALS(true, did_throw);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /*
@@ -192,6 +199,8 @@ void QuoteUTest::test_gpn(void)
     allstar = as->getOutgoing(allstar, 0);
     TS_ASSERT_EQUALS(LIST_LINK, allstar->getType());
     TS_ASSERT_EQUALS(2, as->getArity(allstar));
+
+    logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /*
@@ -212,6 +221,8 @@ void QuoteUTest::test_double_quote(void)
     banana = as->getOutgoing(banana, 0);
     TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
     TS_ASSERT_EQUALS(0, strcmp("banana", as->getName(banana).c_str()));
+
+    logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 // Test bug bug #1531
@@ -229,6 +240,8 @@ void QuoteUTest::test_impossible(void)
     // Mostly we expect the above to not throw or assert.
     // Getting back false tv (no groundings at all) is a bonus.
     TS_ASSERT_EQUALS(TruthValue::FALSE_TV(), tv);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /*
@@ -258,4 +271,22 @@ void QuoteUTest::test_numeric_greater(void)
     TS_ASSERT_EQUALS(0, as->getArity(people_richer_than_obama));
     TS_ASSERT_EQUALS(1, as->getArity(people_richer_than_george));
     TS_ASSERT_EQUALS(2, as->getArity(people_richer_than_susan));
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void QuoteUTest::test_crash(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "opencog/scm/opencog/query.scm, "
+                                "tests/query/quote-crash.scm");
+
+    load_scm_files_from_config(*as);
+
+    // If we can execute this without crashing, the test is suecesful.
+    Handle cr = eval->eval_h("(cog-bind crasher)");
+    printf("crasher is %s\n", cr->toShortString().c_str());
+
+    logger().debug("END TEST: %s", __FUNCTION__);
 }
