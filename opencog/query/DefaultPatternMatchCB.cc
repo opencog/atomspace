@@ -192,6 +192,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 		// which seems reasonable, except that everything else in the
 		// default callback ignores the TV on EvaluationLinks. So this
 		// is kind-of schizophrenic here.  Not sure what else to do.
+		_temp_aspace.clear();
 		TruthValuePtr tvp(EvaluationLink::do_evaluate(&_temp_aspace, grnd));
 
 		dbgprt("clause_match evaluation yeilded tv=%s\n", tvp->toString().c_str());
@@ -268,6 +269,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	// do_evaluate callback.  Alternately, perhaps the
 	// EvaluationLink::do_evaluate() method should do this ??? Its a toss-up.
 
+	_temp_aspace.clear();
 	TruthValuePtr tvp(EvaluationLink::do_evaluate(&_temp_aspace, gvirt));
 
 	dbgprt("eval_term evaluation yeilded tv=%s\n", tvp->toString().c_str());
