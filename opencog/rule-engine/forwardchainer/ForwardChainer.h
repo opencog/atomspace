@@ -66,7 +66,7 @@ protected:
 public:
     ForwardChainer(AtomSpace * as, const string& conf_path);
     virtual ~ForwardChainer();
-    bool step(ForwardChainerCallBack& fcb);
+    void step(ForwardChainerCallBack& fcb);
     void do_chain(ForwardChainerCallBack& fcb, Handle hsource =
             Handle::UNDEFINED);
     HandleSeq get_chaining_result(void);

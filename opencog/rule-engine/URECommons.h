@@ -59,6 +59,11 @@ public:
 	 */
 	bool exists_in(Handle& hlink, Handle& h);
 
+	/*
+	 * Generate UUID
+	 */
+	string get_unique_name(Handle& h);
+
 	/**
 	 * create a copy of the given implicatoin link with unique variables
 	 */
@@ -91,11 +96,12 @@ public:
 		// about half of the rules and return the best
 		// TODO change the way pick_size is calculated
 		size_t pick_size = std::max(static_cast<size_t>(1),
-		                            tfitnes_map.size() / 2);
+				tfitnes_map.size() / 2);
 		multimap<float, Type> winners;
-		dorepeat(pick_size) {
+		dorepeat(pick_size)
+		{
 			auto el = rand_element(tfitnes_map);
-			winners.insert({el.second, el.first});
+			winners.insert( { el.second, el.first });
 		}
 		return winners.rbegin()->second;
 	}
@@ -114,5 +120,5 @@ public:
 };
 
 } // ~namespace opencog
-	
+
 #endif /* PLNCOMMONS_H_ */
