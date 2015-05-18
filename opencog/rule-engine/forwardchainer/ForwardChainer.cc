@@ -67,74 +67,55 @@ Logger* ForwardChainer::getLogger() {
  * Does one step forward chaining
  * @return false if there is not target to explore
  */
-bool ForwardChainer::step(ForwardChainerCallBack& fcb) {
+void ForwardChainer::step(ForwardChainerCallBack& fcb) {
 
 	if (_fcmem.get_cur_source() == Handle::UNDEFINED) {
 		_log->info(
-				"[ForwardChainer] No current source, forward chaining aborted");
-		return false;
+				"[ForwardChainer] No current source, step forward chaining aborted.");
+		return;
 	}
 
 	_log->info("[ForwardChainer] Next source %s",
 			_fcmem.get_cur_source()->toString().c_str());
 
-	// Choose the best rule to apply.
-	vector<Rule*> rules = fcb.choose_rules(_fcmem);
-	map<Rule*, float> rule_weight;
+	// Choose matching rules whose input matches with the source.
+	vector<Rule*> matched_rules = fcb.choose_rules(_fcmem);
 
-	for (Rule* r : rules) {
-		_log->info("[ForwardChainer] Matching rule %s", r->get_name().c_str());
+	//! If no rules matches the pattern of the source,
+	//! set all rules for candidacy to be selected by the proceeding step.
+	//! xxx this decision is maded based on recent discussion.I
+	//! it might still face some changes.
+	if (matched_rules.empty()) {
+		_log->info(
+				"[ForwardChainer] No matching rule found. Setting all rules as candidates.");
+		matched_rules = _fcmem.get_rules();
+	}
+
+	// Select a rule amongst the matching rules by tournament selection
+	map<Rule*, float> rule_weight;
+	for (Rule* r : matched_rules) {
 		rule_weight[r] = r->get_cost();
 	}
 
+	_log->info(
+			"[ForwardChainer] Selecting a rule from the set of candidate rules.");
 	auto r = _rec.tournament_select(rule_weight);
-	//! If no rules matches the pattern of the source, choose
-	//! another source if there is, else end forward chaining.
-	if (not r) {
-		auto new_source = fcb.choose_next_source(_fcmem);
-		if (new_source == Handle::UNDEFINED) {
-			_log->info(
-					"[ForwardChainer] No chosen rule and no more target to choose.Aborting forward chaining.");
-			return false;
-		} else {
-			_log->info(
-					"[ForwardChainer] No matching rule,attempting with another target %s.",
-					new_source->toString().c_str());
-			//set source and try another step
-			_fcmem.set_source(new_source);
-			return step(fcb);
-		}
-	}
-
 	_fcmem.set_cur_rule(r);
+	_log->info("[ForwardChainer] Selected rule is %s", r->get_name().c_str());
 
-	// Add more premise to hcurrent_source by pattern matching.
-	_log->info("[ForwardChainer] Choose additional premises:");
-	HandleSeq input = fcb.choose_premises(_fcmem);
-	for (Handle h : input) {
-		if (not _fcmem.isin_potential_sources(h))
-			_log->info("%s \n", h->toString().c_str());
-	}
-
-	_fcmem.update_potential_sources(input);
+	//!TODO Find/add premises?
 
 	//! Apply rule.
 	_log->info("[ForwardChainer] Applying chosen rule %s",
 			r->get_name().c_str());
 	HandleSeq product = fcb.apply_rule(_fcmem);
 
-	_log->info("[ForwardChainer] Results of rule application");
-	for (auto p : product)
-		_log->info("%s", p->toString().c_str());
-
-	_log->info("[ForwardChainer] adding inference to history");
-	_fcmem.add_rules_product(_iteration, product);
-
 	_log->info(
 			"[ForwardChainer] updating premise list with the inference made");
 	_fcmem.update_potential_sources(product);
 
-	return true;
+	_log->info("[ForwardChainer] adding inference to history");
+	_fcmem.add_rules_product(_iteration, product);
 }
 
 void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
@@ -155,8 +136,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
 	while (_iteration < max_iter /*OR other termination criteria*/) {
 		_log->info("Iteration %d", _iteration);
 
-		if (not step(fcb))
-			break;
+		step(fcb);
 
 		//! Choose next source.
 		_log->info("[ForwardChainer] setting next source");

@@ -218,6 +218,10 @@ Handle DefaultForwardChainerCB::choose_next_source(FCMemory& fcmem)
         }
     }
 
+    // Incase of when all sources are selected
+    if(hchosen == Handle::UNDEFINED)
+    	return urec.tournament_select(tournament_elem);
+
     return hchosen;
 }
 
