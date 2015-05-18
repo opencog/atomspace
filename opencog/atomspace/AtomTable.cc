@@ -89,7 +89,7 @@ AtomTable::~AtomTable()
     // No one who shall look at these atoms ahall ever again
     // find a reference to this atomtable.
     UUID undef = Handle::UNDEFINED.value();
-    for (Handle h : _atom_set) {
+    for (const Handle& h : _atom_set) {
         h->_atomTable = NULL;
         h->_uuid = undef;
     }
