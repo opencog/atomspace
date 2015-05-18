@@ -30,10 +30,6 @@ using namespace opencog;
 
 Handle Instantiator::walk_tree(const Handle& expr)
 {
-	// halt infinite regress
-	if (_halt)
-		return Handle(expr);
-
 	Type t = expr->getType();
 
 	// Must not explore the insides of a QuoteLink.
@@ -56,6 +52,11 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		// Not so fast, pardner. VariableNodes can be grounded by
 		// links, and those links may be executable. In that case,
 		// we have to execute them.
+
+		// halt infinite regress
+		if (_halt)
+			return Handle(expr);
+
 		_halt = true;
 		Handle hgnd(walk_tree(it->second));
 		_halt = false;
