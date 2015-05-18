@@ -35,11 +35,11 @@ FCMemory::~FCMemory()
 {
 }
 
-void FCMemory::update_premise_list(HandleSeq input)
+void FCMemory::update_potential_sources(HandleSeq input)
 {
     for (Handle i : input) {
-        if (boost::find(_premise_list, i) == _premise_list.end())
-            _premise_list.push_back(i);
+        if (boost::find(_potential_sources, i) == _potential_sources.end())
+            _potential_sources.push_back(i);
     }
 }
 
@@ -58,15 +58,15 @@ void FCMemory::set_rules(vector<Rule*> rules)
 void FCMemory::set_source(Handle source)
 {
     _cur_source = source;
-    _source_list.push_back(_cur_source);
+    _selected_sources.push_back(_cur_source);
 }
-HandleSeq FCMemory::get_source_list()
+HandleSeq FCMemory::get_selected_sources()
 {
-    return _source_list;
+    return _selected_sources;
 }
-HandleSeq FCMemory::get_premise_list()
+HandleSeq FCMemory::get_potential_sources()
 {
-    return _premise_list;
+    return _potential_sources;
 }
 void FCMemory::set_search_in_af(bool val)
 {
@@ -110,13 +110,13 @@ Handle FCMemory::get_cur_source()
 {
     return _cur_source;
 }
-bool FCMemory::isin_source_list(Handle h)
+bool FCMemory::isin_selected_sources(Handle h)
 {
-    return (boost::find(_source_list, h) != _source_list.end());
+    return (boost::find(_selected_sources, h) != _selected_sources.end());
 }
-bool FCMemory::isin_premise_list(Handle h)
+bool FCMemory::isin_potential_sources(Handle h)
 {
-    for (Handle hi : _premise_list) {
+    for (Handle hi : _potential_sources) {
         if (hi.value() == h.value())
             return true;
         //recursive lookup

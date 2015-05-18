@@ -39,9 +39,9 @@ class FCMemory {
 private:
     bool _search_in_af;
     vector<Rule*> _rules; /*<loaded rules*/
-    HandleSeq _source_list; /*<selected sources on each forward chaining steps*/
-    HandleSeq _premise_list; /*<list of premises*/
-    Rule* _cur_rule;
+    HandleSeq _selected_sources; /*<selected sources on each forward chaining steps*/
+	HandleSeq _potential_sources; /*<list of inference products and premises to select source from*/
+	Rule* _cur_rule;
     Handle _cur_source;
     vector<Inference> _inf_history; /*<inference history*/
     AtomSpace* _as;
@@ -52,9 +52,9 @@ public:
     const vector<Rule*>& get_rules() const;
     void set_rules(vector<Rule*> rules);
     void set_source(Handle source);
-    HandleSeq get_source_list();
-    HandleSeq get_premise_list();
-    void update_premise_list(HandleSeq input);
+    HandleSeq get_selected_sources();
+    HandleSeq get_potential_sources();
+    void update_potential_sources(HandleSeq input);
     void set_search_in_af(bool val);
     bool is_search_in_af();
     Rule* get_cur_rule();
@@ -63,8 +63,8 @@ public:
     void add_inference(int iteration, HandleSeq product,
                        HandleSeq matched_nodes);
     Handle get_cur_source();
-    bool isin_source_list(Handle h);
-    bool isin_premise_list(Handle h);
+    bool isin_selected_sources(Handle h);
+    bool isin_potential_sources(Handle h);
     HandleSeq get_result();
     vector<Inference>& get_inf_history();
 

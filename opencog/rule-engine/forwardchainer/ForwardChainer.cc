@@ -112,11 +112,11 @@ bool ForwardChainer::step(ForwardChainerCallBack& fcb) {
 	_log->info("[ForwardChainer] Choose additional premises:");
 	HandleSeq input = fcb.choose_premises(_fcmem);
 	for (Handle h : input) {
-		if (not _fcmem.isin_premise_list(h))
+		if (not _fcmem.isin_potential_sources(h))
 			_log->info("%s \n", h->toString().c_str());
 	}
 
-	_fcmem.update_premise_list(input);
+	_fcmem.update_potential_sources(input);
 
 	//! Apply rule.
 	_log->info("[ForwardChainer] Applying chosen rule %s",
@@ -132,7 +132,7 @@ bool ForwardChainer::step(ForwardChainerCallBack& fcb) {
 
 	_log->info(
 			"[ForwardChainer] updating premise list with the inference made");
-	_fcmem.update_premise_list(product);
+	_fcmem.update_potential_sources(product);
 
 	return true;
 }

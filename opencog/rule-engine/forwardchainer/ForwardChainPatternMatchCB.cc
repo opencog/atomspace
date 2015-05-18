@@ -43,7 +43,7 @@ bool ForwardChainPatternMatchCB::node_match(const Handle& node1,
                                             const Handle& node2)
 {
     //constrain search within premise list
-    bool ret = _fcmem->isin_premise_list(node2)
+    bool ret = _fcmem->isin_potential_sources(node2)
             and (_fcmem->is_search_in_af() ?
                     AttentionalFocusCB::node_match(node1, node2) :
                     DefaultPatternMatchCB::node_match(node1, node2));
@@ -57,7 +57,7 @@ bool ForwardChainPatternMatchCB::link_match(const LinkPtr& lpat,
                                             const LinkPtr& lsoln)
 {
     //constrain search within premise list
-    bool ret = _fcmem->isin_premise_list(Handle(lsoln))
+    bool ret = _fcmem->isin_potential_sources(Handle(lsoln))
             and (_fcmem->is_search_in_af() ?
                     AttentionalFocusCB::link_match(lpat, lsoln) :
                     DefaultPatternMatchCB::link_match(lpat, lsoln));

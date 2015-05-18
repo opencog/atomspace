@@ -183,7 +183,7 @@ HandleSeq DefaultForwardChainerCB::choose_premises(FCMemory& fcmem)
 
 Handle DefaultForwardChainerCB::choose_next_source(FCMemory& fcmem)
 {
-    HandleSeq tlist = fcmem.get_premise_list();
+    HandleSeq tlist = fcmem.get_potential_sources();
     map<Handle, float> tournament_elem;
     URECommons urec(as_);
     Handle hchosen = Handle::UNDEFINED;
@@ -210,7 +210,7 @@ Handle DefaultForwardChainerCB::choose_next_source(FCMemory& fcmem)
     //!code doesn't guarantee all sources have been exhaustively looked.
     for (size_t i = 0; i < tournament_elem.size(); i++) {
         Handle hselected = urec.tournament_select(tournament_elem);
-        if (fcmem.isin_source_list(hselected)) {
+        if (fcmem.isin_selected_sources(hselected)) {
             continue;
         } else {
             hchosen = hselected;
@@ -232,7 +232,7 @@ HandleSeq DefaultForwardChainerCB::apply_rule(FCMemory& fcmem)
      * and premise_list for forward chaining
      * */
     AtomSpace temp;
-    for (Handle h : fcmem.get_premise_list())
+    for (Handle h : fcmem.get_potential_sources())
         temp.addAtom(h);
     temp.addAtom(cur_rule->get_handle());
 
@@ -249,7 +249,7 @@ HandleSeq DefaultForwardChainerCB::apply_rule(FCMemory& fcmem)
     HandleSeq new_product;
     for (auto h : product) {
         as_->addAtom(h);
-        if (not fcmem.isin_premise_list(h))
+        if (not fcmem.isin_potential_sources(h))
             new_product.push_back(h);
     }
 
