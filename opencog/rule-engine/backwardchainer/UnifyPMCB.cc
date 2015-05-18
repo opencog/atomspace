@@ -35,7 +35,6 @@ UnifyPMCB::~UnifyPMCB()
 
 }
 
-
 bool UnifyPMCB::variable_match(const Handle& npat_h,
                                const Handle& nsoln_h)
 {
@@ -45,4 +44,31 @@ bool UnifyPMCB::variable_match(const Handle& npat_h,
 	if (soltype == VARIABLE_NODE) return true;
 
 	return BackwardChainerPMCB::variable_match(npat_h, nsoln_h);
+}
+
+bool UnifyPMCB::grounding(const std::map<Handle, Handle> &var_soln,
+                          const std::map<Handle, Handle> &pred_soln)
+{
+	std::map<Handle, Handle> true_var_soln;
+
+	// get rid of non-var mapping
+	for (auto& p : var_soln)
+	{
+		if (p.first->getType() == VARIABLE_NODE)
+		{
+			// check if any typed variable map to a variable, and if so,
+			// store the reverse mapping
+			if (DefaultPatternMatchCB::_type_restrictions->count(p.first) == 1
+			    && DefaultPatternMatchCB::_type_restrictions->at(p.first).count(p.second->getType()) == 0)
+				true_var_soln[p.second] = p.first;
+			else
+				true_var_soln[p.first] = p.second;
+		}
+	}
+
+	// store the variable solution
+	var_solns_.push_back(true_var_soln);
+	pred_solns_.push_back(pred_soln);
+
+	return false;
 }

@@ -34,7 +34,7 @@ class BackwardChainerPMCB :
 	public InitiateSearchCB,
 	public DefaultPatternMatchCB // : public virtual PLNImplicator
 {
-private:
+protected:
 	AtomSpace* as_;
 
 	std::vector<std::map<Handle, Handle>> var_solns_;
@@ -51,8 +51,6 @@ public:
 		DefaultPatternMatchCB::set_pattern(vars, pat);
 	}
 
-	virtual bool node_match(Handle& node1, Handle& node2);
-	virtual bool link_match(LinkPtr& lpat, LinkPtr& lsoln);
 	virtual bool grounding(const std::map<Handle, Handle> &var_soln,
 			const std::map<Handle, Handle> &pred_soln);
 

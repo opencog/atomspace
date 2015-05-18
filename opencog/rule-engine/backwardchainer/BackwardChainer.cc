@@ -218,9 +218,7 @@ VarMultimap BackwardChainer::process_target(Handle& htarget)
 	{
 		VarMap temp_mapping;
 
-		// try unify in both direction
-		if (not unify(h, htarget, hvardecl, temp_mapping)
-		    && not unify(htarget, h, Handle::UNDEFINED, temp_mapping))
+		if (not unify(h, htarget, hvardecl, temp_mapping))
 			continue;
 
 		all_mappings.push_back(temp_mapping);
@@ -412,9 +410,7 @@ std::vector<Rule> BackwardChainer::filter_rules(Handle htarget)
 		{
 			VarMap mapping;
 
-			// try unify in both direction
-			if (not unify(h, htarget, vardecl, mapping)
-			    && not unify(htarget, h, Handle::UNDEFINED, mapping))
+			if (not unify(h, htarget, vardecl, mapping))
 				continue;
 
 			unifiable = true;
@@ -632,8 +628,10 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
  * specific atom to another, let it handles UnorderedLink, VariableNode in
  * QuoteLink, etc.
  *
- * XXX TODO check if the UnifyPMCB solution is correct
- * XXX TODO unify in both direction? (maybe not)
+ * This will in general unify htarget to hmatch in one direction.  However, it
+ * allows a typed variable A in htarget to map to another variable B in hmatch,
+ * in which case the mapping will be returned reverse (as B->A).
+ *
  * XXX Should (Link (Node A)) be unifiable to (Node A))?  BC literature never
  * unify this way, but in AtomSpace context, (Link (Node A)) does contain (Node A)
  *
@@ -674,7 +672,7 @@ bool BackwardChainer::unify(const Handle& htarget,
 		                                                  fv.varset));
 
 	SatisfactionLinkPtr sl(createSatisfactionLink(temp_vardecl, temp_htarget));
-	BackwardChainerPMCB pmcb(&temp_space);
+	UnifyPMCB pmcb(&temp_space);
 
 	sl->satisfy(pmcb);
 
