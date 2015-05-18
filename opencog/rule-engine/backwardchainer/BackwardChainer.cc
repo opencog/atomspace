@@ -218,7 +218,9 @@ VarMultimap BackwardChainer::process_target(Handle& htarget)
 	{
 		VarMap temp_mapping;
 
-		if (not unify(h, htarget, hvardecl, temp_mapping))
+		// try unify in both direction
+		if (not unify(h, htarget, hvardecl, temp_mapping)
+		    && not unify(htarget, h, Handle::UNDEFINED, temp_mapping))
 			continue;
 
 		all_mappings.push_back(temp_mapping);
@@ -410,7 +412,9 @@ std::vector<Rule> BackwardChainer::filter_rules(Handle htarget)
 		{
 			VarMap mapping;
 
-			if (not unify(h, htarget, vardecl, mapping))
+			// try unify in both direction
+			if (not unify(h, htarget, vardecl, mapping)
+			    && not unify(htarget, h, Handle::UNDEFINED, mapping))
 				continue;
 
 			unifiable = true;
@@ -670,7 +674,7 @@ bool BackwardChainer::unify(const Handle& htarget,
 		                                                  fv.varset));
 
 	SatisfactionLinkPtr sl(createSatisfactionLink(temp_vardecl, temp_htarget));
-	UnifyPMCB pmcb(&temp_space);
+	BackwardChainerPMCB pmcb(&temp_space);
 
 	sl->satisfy(pmcb);
 
