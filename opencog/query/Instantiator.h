@@ -39,6 +39,7 @@ class Instantiator
 private:
 		AtomSpace *_as;
 		const std::map<Handle, Handle> *_vmap;
+		bool _halt = false;
 
 		/**
 		 * Recursively walk a tree starting with the root of the

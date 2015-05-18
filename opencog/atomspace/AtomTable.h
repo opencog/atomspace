@@ -100,7 +100,7 @@ private:
     // the only index that actually holds the atom shared_ptr, and thus
     // increments the atom use count in a guaranteed fashion.  This is
     // the one true guaranteee that the atom will not be deleted while
-    // it s in the atom table.
+    // it is in the atom table.
     std::unordered_set<Handle, handle_hash> _atom_set;
 
     //!@{
