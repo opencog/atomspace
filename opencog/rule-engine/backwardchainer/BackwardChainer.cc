@@ -208,7 +208,7 @@ VarMultimap BackwardChainer::process_target(Handle& htarget)
 
 	Handle himplicant = standardized_rule.get_implicant();
 	Handle hvardecl = standardized_rule.get_vardecl();
-	HandleSeq outputs = standardized_rule.get_implicand();
+	HandleSeq outputs = standardized_rule.get_implicand_seq();
 
 	std::vector<VarMap> all_mappings;
 
@@ -279,7 +279,7 @@ VarMultimap BackwardChainer::process_target(Handle& htarget)
 	// Reverse ground 2nd version, try it with QuoteLink around variables
 	Handle himplicant_quoted = inst.instantiate(himplicant, implicand_quoted_mapping);
 
-	logger().debug("[BackwardChainer] Alternative everse grounded as "
+	logger().debug("[BackwardChainer] Alternative reverse grounded as "
 				   + himplicant_quoted->toShortString());
 
 	HandleSeq possible_premises_alt =
@@ -402,7 +402,7 @@ std::vector<Rule> BackwardChainer::filter_rules(Handle htarget)
 	for (Rule& r : _rules_set)
 	{
 		Handle vardecl = r.get_vardecl();
-		HandleSeq output = r.get_implicand();
+		HandleSeq output = r.get_implicand_seq();
 		bool unifiable = false;
 
 		// check if any of the implicand's output can be unified to target
