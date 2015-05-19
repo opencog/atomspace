@@ -116,12 +116,28 @@ Handle Rule::get_implicant()
 /**
  * Get the implicand (output) of the rule defined in a BindLink.
  *
+ * @return the Handle of the implicand
+ */
+Handle Rule::get_implicand()
+{
+	// if the rule's handle has not been set yet
+	if (rule_handle_ == Handle::UNDEFINED)
+		return Handle::UNDEFINED;
+
+	HandleSeq outgoing = LinkCast(rule_handle_)->getOutgoingSet();
+
+	return LinkCast(outgoing[1])->getOutgoingSet()[1];
+}
+
+/**
+ * Get the implicand (output) of the rule defined in a BindLink.
+ *
  * This function does extra processing to find the real output over an
  * ExecutionOutputLink.  ie, skip to the ListLink under the ExLink.
  *
- * @return the Handle of the implicand
+ * @return the HandleSeq of the implicand
  */
-HandleSeq Rule::get_implicand()
+HandleSeq Rule::get_implicand_seq()
 {
 	// if the rule's handle has not been set yet
 	if (rule_handle_ == Handle::UNDEFINED)

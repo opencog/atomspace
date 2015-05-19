@@ -36,6 +36,9 @@ public:
 	virtual ~UnifyPMCB();
 
 	virtual bool variable_match(const Handle&, const Handle&);
+	virtual bool grounding(const std::map<Handle, Handle> &var_soln,
+			const std::map<Handle, Handle> &pred_soln);
+
 };
 
 }

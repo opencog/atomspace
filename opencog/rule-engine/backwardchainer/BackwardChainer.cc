@@ -208,7 +208,7 @@ VarMultimap BackwardChainer::process_target(Handle& htarget)
 
 	Handle himplicant = standardized_rule.get_implicant();
 	Handle hvardecl = standardized_rule.get_vardecl();
-	HandleSeq outputs = standardized_rule.get_implicand();
+	HandleSeq outputs = standardized_rule.get_implicand_seq();
 
 	std::vector<VarMap> all_mappings;
 
@@ -279,7 +279,7 @@ VarMultimap BackwardChainer::process_target(Handle& htarget)
 	// Reverse ground 2nd version, try it with QuoteLink around variables
 	Handle himplicant_quoted = inst.instantiate(himplicant, implicand_quoted_mapping);
 
-	logger().debug("[BackwardChainer] Alternative everse grounded as "
+	logger().debug("[BackwardChainer] Alternative reverse grounded as "
 				   + himplicant_quoted->toShortString());
 
 	HandleSeq possible_premises_alt =
@@ -306,13 +306,10 @@ VarMultimap BackwardChainer::process_target(Handle& htarget)
 		// and we will be matching the variables in there as well
 		vm.insert(implicand_normal_mapping.begin(), implicand_normal_mapping.end());
 
-		HandleSeq outputs_grounded;
-
 		// reverse ground the rule's outputs the mapping to the premise
 		// so that when we ground the premise, we know how to generate
 		// the final output
-		for (const Handle& ho : outputs)
-			outputs_grounded.push_back(inst.instantiate(ho, vm));
+		Handle output_grounded = inst.instantiate(standardized_rule.get_implicand(), vm);
 
 		logger().debug("Checking permises " + hp->toShortString());
 
@@ -350,12 +347,9 @@ VarMultimap BackwardChainer::process_target(Handle& htarget)
 			// This is a premise grounding that can solve the target, so
 			// apply it by using the mapping to ground the target, and add
 			// it to _as since this is not garbage; this should generate
-			// all the outputs of the rule
-			for (const Handle& ho : outputs_grounded)
-			{
-				Instantiator inst(_as);
-				inst.instantiate(ho, m);
-			}
+			// all the outputs of the rule, and execute any evaluatable
+			Instantiator inst(_as);
+			inst.instantiate(output_grounded, m);
 
 			// Add the grounding to the return results
 			for (Handle& h : free_vars)
@@ -402,7 +396,7 @@ std::vector<Rule> BackwardChainer::filter_rules(Handle htarget)
 	for (Rule& r : _rules_set)
 	{
 		Handle vardecl = r.get_vardecl();
-		HandleSeq output = r.get_implicand();
+		HandleSeq output = r.get_implicand_seq();
 		bool unifiable = false;
 
 		// check if any of the implicand's output can be unified to target
@@ -628,36 +622,38 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
  * specific atom to another, let it handles UnorderedLink, VariableNode in
  * QuoteLink, etc.
  *
- * XXX TODO check if the UnifyPMCB solution is correct
- * XXX TODO unify in both direction? (maybe not)
+ * This will in general unify htarget to hmatch in one direction.  However, it
+ * allows a typed variable A in htarget to map to another variable B in hmatch,
+ * in which case the mapping will be returned reverse (as B->A).
+ *
  * XXX Should (Link (Node A)) be unifiable to (Node A))?  BC literature never
  * unify this way, but in AtomSpace context, (Link (Node A)) does contain (Node A)
  *
- * @param htarget          the target with variable nodes
- * @param hmatch           a fully grounded matching handle with @param htarget
- * @param htarget_vardecl  the typed VariableList of the variables in htarget
- * @param result           an output VarMap mapping varibles from target to match
+ * @param hsource          the atom from which to unify
+ * @param hmatch           the atom to which hsource will be unified to
+ * @param htarget_vardecl  the typed VariableList of the variables in hsource
+ * @param result           an output VarMap mapping varibles from hsource to hmatch
  * @return                 true if the two atoms can be unified
  */
-bool BackwardChainer::unify(const Handle& htarget,
+bool BackwardChainer::unify(const Handle& hsource,
                             const Handle& hmatch,
-                            Handle htarget_vardecl,
+                            Handle hsource_vardecl,
                             VarMap& result)
 {
-	logger().debug("[BackwardChainer] starting unify " + htarget->toShortString()
+	logger().debug("[BackwardChainer] starting unify " + hsource->toShortString()
 	               + " to " + hmatch->toShortString());
 
 	// lazy way of restricting PM to be between two atoms
 	AtomSpace temp_space;
 
-	Handle temp_htarget = temp_space.addAtom(htarget);
+	Handle temp_hsource = temp_space.addAtom(hsource);
 	Handle temp_hmatch = temp_space.addAtom(hmatch);
 	Handle temp_vardecl;
 
 	FindAtoms fv(VARIABLE_NODE);
-	fv.search_set(htarget);
+	fv.search_set(hsource);
 
-	if (htarget_vardecl == Handle::UNDEFINED)
+	if (hsource_vardecl == Handle::UNDEFINED)
 	{
 		HandleSeq vars;
 		for (const Handle& h : fv.varset)
@@ -666,10 +662,10 @@ bool BackwardChainer::unify(const Handle& htarget,
 		temp_vardecl = temp_space.addAtom(createVariableList(vars));
 	}
 	else
-		temp_vardecl = temp_space.addAtom(gen_sub_varlist(htarget_vardecl,
+		temp_vardecl = temp_space.addAtom(gen_sub_varlist(hsource_vardecl,
 		                                                  fv.varset));
 
-	SatisfactionLinkPtr sl(createSatisfactionLink(temp_vardecl, temp_htarget));
+	SatisfactionLinkPtr sl(createSatisfactionLink(temp_vardecl, temp_hsource));
 	UnifyPMCB pmcb(&temp_space);
 
 	sl->satisfy(pmcb);

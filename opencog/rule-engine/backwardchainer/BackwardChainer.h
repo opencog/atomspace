@@ -128,8 +128,8 @@ private:
 	                               bool check_history,
 	                               std::vector<VarMap>& vmap);
 	HandleSeq ground_premises(const Handle& htarget, const VarMap& vmap, std::vector<VarMap>& vmap_list);
-	bool unify(const Handle& htarget, const Handle& hmatch,
-	           Handle htarget_vardecl, VarMap& result);
+	bool unify(const Handle& hsource, const Handle& hmatch,
+	           Handle hsource_vardecl, VarMap& result);
 
 	Handle gen_sub_varlist(const Handle& parent_varlist,
 	                       std::set<Handle> varset);

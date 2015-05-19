@@ -36,18 +36,6 @@ BackwardChainerPMCB::~BackwardChainerPMCB()
 {
 }
 
-bool BackwardChainerPMCB::node_match(Handle& node1, Handle& node2)
-{
-	return DefaultPatternMatchCB::node_match(node1, node2);
-	//return AttentionalFocusCB::node_match(node1, node2);
-}
-
-bool BackwardChainerPMCB::link_match(LinkPtr& lpat, LinkPtr& lsoln)
-{
-	return DefaultPatternMatchCB::link_match(lpat, lsoln);
-	//return AttentionalFocusCB::link_match(lpat, lsoln);
-}
-
 bool BackwardChainerPMCB::grounding(const std::map<Handle, Handle> &var_soln,
                                const std::map<Handle, Handle> &pred_soln)
 {

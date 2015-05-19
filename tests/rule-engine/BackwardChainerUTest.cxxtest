@@ -51,7 +51,8 @@ public:
 	void test_unify();
 	void test_filter_rules();
 
-	void test_basic_bc();
+	void test_1rule_bc();
+	void test_2rules_bc();
 
 	// void test_match_knowledge_base();
 	// void test_simple_deduction_bc();
@@ -64,9 +65,8 @@ void BackwardChainerUTest::setUp()
 {
 	config().set("SCM_PRELOAD",
 	             "opencog/atomspace/core_types.scm, "
-	             "opencog/scm/utilities.scm"
-//	             "opencog/python/pln_old/examples/backward_chaining/criminal.scm, "
-//	             "tests/rule-engine/bc-example.scm"
+	             "opencog/scm/utilities.scm, "
+	             "opencog/scm/av-tv.scm"
 	             );
 	load_scm_files_from_config(*as_);
 }
@@ -183,7 +183,7 @@ void BackwardChainerUTest::test_filter_rules()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void BackwardChainerUTest::test_basic_bc()
+void BackwardChainerUTest::test_1rule_bc()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -196,7 +196,6 @@ void BackwardChainerUTest::test_basic_bc()
 	cpolicy_loader.load_config();
 
 	std::vector<Rule> rules;
-
 	for (Rule* pr : cpolicy_loader.get_rules())
 		rules.push_back(*pr);
 
@@ -211,6 +210,42 @@ void BackwardChainerUTest::test_basic_bc()
 
 	bc.set_target(target);
 	bc.do_until(10);
+
+	VarMultimap results = bc.get_chaining_result();
+
+	TSM_ASSERT("Incorrect number of solution found!", results[target_var].size() == 1);
+	TSM_ASSERT("Getting incorrect solution!", results[target_var].count(soln) == 1);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void BackwardChainerUTest::test_2rules_bc()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD",
+	             "tests/rule-engine/bc-criminal.scm");
+	load_scm_files_from_config(*as_);
+
+	// load modus ponens & deduction rules
+	JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as_, "tests/rule-engine/bc_cpolicy_2.json"));
+	cpolicy_loader.load_config();
+
+	std::vector<Rule> rules;
+	for (Rule* pr : cpolicy_loader.get_rules())
+		rules.push_back(*pr);
+
+	BackwardChainer bc(as_, rules);
+
+	Handle target_var = eval_->eval_h("(VariableNode \"$x\")");
+	Handle target =
+	    eval_->eval_h("(InheritanceLink"
+	                  "   (VariableNode \"$x\")"
+					  "   (ConceptNode \"criminal\"))");
+	Handle soln = eval_->eval_h("(ConceptNode \"West\")");
+
+	bc.set_target(target);
+	bc.do_until(100);
 
 	VarMultimap results = bc.get_chaining_result();
 
