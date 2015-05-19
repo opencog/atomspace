@@ -133,6 +133,8 @@ Handle PlusLink::reduce(void)
 	if (PLUS_LINK != fold->getType()) return fold;
 
 	PlusLinkPtr pfold(PlusLinkCast(fold));
+	if (NULL == pfold)
+		pfold = createPlusLink(*LinkCast(fold));
 	fold = pfold->reorder();
 
 	// Now, look for repeated atoms, two atoms that appear twice
