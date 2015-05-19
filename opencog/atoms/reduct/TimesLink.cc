@@ -55,6 +55,14 @@ TimesLink::TimesLink(Type t, const Handle& a, const Handle& b,
 	init();
 }
 
+TimesLink::TimesLink(const Handle& a, const Handle& b,
+                   TruthValuePtr tv,
+                   AttentionValuePtr av)
+    : FoldLink(TIMES_LINK, a, b, tv, av)
+{
+	init();
+}
+
 TimesLink::TimesLink(Link& l)
     : FoldLink(l)
 {
