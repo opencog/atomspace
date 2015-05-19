@@ -77,7 +77,7 @@ SCM SchemeSmob::ss_execute (SCM satom)
 	if (not classserver().isA(t, FUNCTION_LINK))
 	{
 		scm_wrong_type_arg_msg("cog-execute!", 1, satom,
-			"FunctionLink (ExecuationOutputLink, PlusLink, TimesLink, etc.)");
+			"FunctionLink (ExecutionOutputLink, PlusLink, TimesLink, etc.)");
 	}
 
 	// execute() may throw a C++ exception in various cases:
