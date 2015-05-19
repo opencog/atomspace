@@ -173,9 +173,10 @@ Handle PlusLink::reduce(void)
 
 				LinkPtr ilp = LinkCast(fi);
 				LinkPtr jlp = LinkCast(fj);
+				Handle exx = jlp->getOutgoingAtom(0);
 
 				// Handle the (a+1) case described above.
-				if (fi == jlp->getOutgoingAtom(0))
+				if (fi == exx)
 				{
 					Handle one(createNumberNode("1"));
 					rest.push_back(one);
@@ -183,7 +184,7 @@ Handle PlusLink::reduce(void)
 				}
 
 				// Handle the (a+b) case described above.
-				else if (ilp->getOutgoingAtom(0) == jlp->getOutgoingAtom(0))
+				else if (ilp->getOutgoingAtom(0) == exx)
 				{
 					const HandleSeq& ilpo = ilp->getOutgoingSet();
 					size_t ilpsz = ilpo.size();
@@ -203,7 +204,7 @@ Handle PlusLink::reduce(void)
 					PlusLinkPtr ap = createPlusLink(rest);
 					Handle a_plus(ap->reduce());
 
-					reduct = Handle(createTimesLink(fi, a_plus));
+					reduct = Handle(createTimesLink(exx, a_plus));
 					do_reduce = true;
 				}
 			}
