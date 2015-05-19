@@ -65,6 +65,7 @@ public:
 	Handle get_handle();
 	Handle get_vardecl();
 	Handle get_implicant();
+	Handle get_implicand();
 	HandleSeq get_implicand_seq();
 	int get_cost();
 
