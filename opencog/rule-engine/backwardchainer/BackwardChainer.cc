@@ -306,13 +306,10 @@ VarMultimap BackwardChainer::process_target(Handle& htarget)
 		// and we will be matching the variables in there as well
 		vm.insert(implicand_normal_mapping.begin(), implicand_normal_mapping.end());
 
-		HandleSeq outputs_grounded;
-
 		// reverse ground the rule's outputs the mapping to the premise
 		// so that when we ground the premise, we know how to generate
 		// the final output
-		for (const Handle& ho : outputs)
-			outputs_grounded.push_back(inst.instantiate(ho, vm));
+		Handle output_grounded = inst.instantiate(standardized_rule.get_implicand(), vm);
 
 		logger().debug("Checking permises " + hp->toShortString());
 
@@ -350,12 +347,9 @@ VarMultimap BackwardChainer::process_target(Handle& htarget)
 			// This is a premise grounding that can solve the target, so
 			// apply it by using the mapping to ground the target, and add
 			// it to _as since this is not garbage; this should generate
-			// all the outputs of the rule
-			for (const Handle& ho : outputs_grounded)
-			{
-				Instantiator inst(_as);
-				inst.instantiate(ho, m);
-			}
+			// all the outputs of the rule, and execute any evaluatable
+			Instantiator inst(_as);
+			inst.instantiate(output_grounded, m);
 
 			// Add the grounding to the return results
 			for (Handle& h : free_vars)
