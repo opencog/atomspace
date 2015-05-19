@@ -88,6 +88,8 @@ Handle PlusLink::reduce(void)
 	// First, let FoldLink do its stuff.
 	Handle fold = FoldLink::reduce();
 
+	if (PLUS_LINK != fold->getType()) return fold;
+
 	// Now, look for repeated atoms, two atoms that appear twice
 	// in the outgoing set. If they do, then can be mutliplied.
 	LinkPtr lfold(LinkCast(fold));
