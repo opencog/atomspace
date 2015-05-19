@@ -12,7 +12,7 @@
 
 			"category": "PLN"
 		},
-		
+
 		{
 			"name": "pln-rule-deduction",
 			"file_path": "tests/rule-engine/bc-deduction.scm",

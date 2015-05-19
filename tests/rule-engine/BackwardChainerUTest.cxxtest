@@ -67,8 +67,6 @@ void BackwardChainerUTest::setUp()
 	             "opencog/atomspace/core_types.scm, "
 	             "opencog/scm/utilities.scm, "
 	             "opencog/scm/av-tv.scm"
-//	             "opencog/python/pln_old/examples/backward_chaining/criminal.scm, "
-//	             "tests/rule-engine/bc-example.scm"
 	             );
 	load_scm_files_from_config(*as_);
 }
@@ -226,7 +224,7 @@ void BackwardChainerUTest::test_2rules_bc()
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	config().set("SCM_PRELOAD",
-	             "opencog/python/pln_old/examples/backward_chaining/criminal.scm");
+	             "tests/rule-engine/bc-criminal.scm");
 	load_scm_files_from_config(*as_);
 
 	// load modus ponens & deduction rules
