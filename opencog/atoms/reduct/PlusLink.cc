@@ -94,6 +94,9 @@ Handle PlusLink::reduce(void)
 	// in the outgoing set. If they do, then can be mutliplied.
 	LinkPtr lfold(LinkCast(fold));
 
+	bool do_reduce = false;
+	Handle reduct = Handle::UNDEFINED;
+
 	const HandleSeq& ofs = lfold->getOutgoingSet();
 	size_t fsz = ofs.size();
 	for (size_t i = 0; i < fsz; i++)
@@ -104,10 +107,14 @@ Handle PlusLink::reduce(void)
 			if (fi == ofs[j])
 			{
 				Handle two(createNumberNode("2"));
-				Handle tlp(createTimesLink(two, fi));
+				reduct = Handle(createTimesLink(two, fi));
+				do_reduce = true;
+			}
 
+			if (do_reduce)
+			{
 				HandleSeq norm;
-				norm.push_back(tlp);
+				norm.push_back(reduct);
 
 				// copy everything else, except for i and j.
 				for (size_t k = 0; k< fsz; k++)
@@ -121,6 +128,9 @@ Handle PlusLink::reduce(void)
 				Handle red(plp->reduce());
 
 				// Place the result into the same atomspace we are in.
+				// XXX this is bad, buggy, uncomfortable, icky: it pollutes
+				// the atomspace with intermediate results. This needs to
+				// be fixed somehow. Right now, I don't know how.
 				if (_atomTable)
 				{
 					AtomSpace* as = _atomTable->getAtomSpace();
