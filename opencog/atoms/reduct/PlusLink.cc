@@ -104,11 +104,40 @@ Handle PlusLink::reduce(void)
 		const Handle& fi = ofs[i];
 		for (size_t j=i+1; j < fsz; j++)
 		{
-			if (fi == ofs[j])
+			const Handle& fj = ofs[j];
+
+			// Is atom in position i identical to atom in position j?
+			// If so, then replace by 2*i
+			if (fi == fj)
 			{
 				Handle two(createNumberNode("2"));
-				reduct = Handle(createTimesLink(two, fi));
+				reduct = Handle(createTimesLink(fi, two));
 				do_reduce = true;
+			}
+
+			// If j is (TimesLink a b) and i is identical to a,
+			// then create (TimesLink a (b+1))
+			if (fj->getType() == TIMES_LINK)
+			{
+				LinkPtr jlp = LinkCast(fj);
+				if (fi == jlp->getOutgoingAtom(0))
+				{
+					Handle one(createNumberNode("1"));
+					HandleSeq rest;
+					rest.push_back(one);
+
+					const HandleSeq& jlpo = jlp->getOutgoingSet();
+					size_t jlpsz = jlpo.size();
+					for (size_t k=1; k<jlpsz; k++)
+						rest.push_back(jlpo[k]);
+
+					// b_plus_one is now (b+1)
+					PlusLinkPtr bpo = createPlusLink(rest);
+					Handle b_plus_one(bpo->reduce());
+
+					reduct = Handle(createTimesLink(fi, b_plus_one));
+					do_reduce = true;
+				}
 			}
 
 			if (do_reduce)
