@@ -73,6 +73,48 @@ void PlusLink::init(void)
 	kons = plus;
 }
 
+// ============================================================
+
+/// re-order the contents of a PlusLink into "lexicographic" order.
+///
+/// The goal of the re-ordering is to simplify the reduction code,
+/// by placing atoms where they are easily found.  For now, this
+/// means:
+/// first, all of the variables,
+/// next, all compound expressions,
+/// last, all number nodes (of which there should be only zero or one.)
+/// We do not currently sort the variables, but maybe we should...?
+/// The FoldLink::reduce() method already returns expressions that are
+/// almost in the correct order.
+Handle PlusLink::reorder(void)
+{
+	HandleSeq vars;
+	HandleSeq exprs;
+	HandleSeq numbers;
+
+	for (const Handle& h : _outgoing)
+	{
+		if (h->getType() == VARIABLE_NODE)
+			vars.push_back(h);
+		else if (h->getType() == NUMBER_NODE)
+			numbers.push_back(h);
+		else
+			exprs.push_back(h);
+	}
+
+	if (1 < numbers.size())
+		throw RuntimeException(TRACE_INFO,
+		      "Expecting the plus link to have already been reduced!");
+
+	HandleSeq result;
+	for (const Handle& h : vars) result.push_back(h);
+	for (const Handle& h : exprs) result.push_back(h);
+	for (const Handle& h : numbers) result.push_back(h);
+
+	return Handle(createPlusLink(result));
+}
+
+// ============================================================
 
 /// Handle normalization of addition into multiplication.
 /// aka "mutiplicattive reduction"
@@ -89,6 +131,9 @@ Handle PlusLink::reduce(void)
 	Handle fold = FoldLink::reduce();
 
 	if (PLUS_LINK != fold->getType()) return fold;
+
+	PlusLinkPtr pfold(PlusLinkCast(fold));
+	fold = pfold->reorder();
 
 	// Now, look for repeated atoms, two atoms that appear twice
 	// in the outgoing set. If they do, then can be mutliplied.
