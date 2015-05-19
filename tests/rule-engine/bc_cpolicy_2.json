@@ -2,27 +2,27 @@
 	"rules": 
 	[
 		{
-			"name": "crisp-deduction",
-			"file_path": "rules/crisp-deduction.scm",
+			"name": "pln-rule-modus-ponens",
+			"file_path": "tests/rule-engine/bc-modus-ponens.scm",
 			"priority": 1,
 			"mutex": 
 			[
 				
 			],
 
-			"category": "crisp-deduction-modus-ponens-example"
+			"category": "PLN"
 		},
-
+		
 		{
-			"name": "crisp-modus-ponens",
-			"file_path": "rules/crisp-modus-ponens.scm",
+			"name": "pln-rule-deduction",
+			"file_path": "tests/rule-engine/bc-deduction.scm",
 			"priority": 1,
 			"mutex": 
 			[
 				
 			],
 
-			"category": "crisp-deduction-modus-ponens-example"
+			"category": "PLN"
 		}
 	],
 
