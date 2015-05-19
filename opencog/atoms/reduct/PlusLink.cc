@@ -160,27 +160,50 @@ Handle PlusLink::reduce(void)
 				do_reduce = true;
 			}
 
-			// If j is (TimesLink a b) and i is identical to a,
-			// then create (TimesLink a (b+1))
-			if (fj->getType() == TIMES_LINK)
+			// If j is (TimesLink x a) and i is identical to x,
+			// then create (TimesLink x (a+1))
+			//
+			// If j is (TimesLink x a) and i is (TimesLink x b)
+			// then create (TimesLink x (a+b))
+			//
+			else if (fj->getType() == TIMES_LINK)
 			{
+				bool do_add = false;
+				HandleSeq rest;
+
+				LinkPtr ilp = LinkCast(fi);
 				LinkPtr jlp = LinkCast(fj);
+
+				// Handle the (a+1) case described above.
 				if (fi == jlp->getOutgoingAtom(0))
 				{
 					Handle one(createNumberNode("1"));
-					HandleSeq rest;
 					rest.push_back(one);
+					do_add = true;
+				}
 
+				// Handle the (a+b) case described above.
+				else if (ilp->getOutgoingAtom(0) == jlp->getOutgoingAtom(0))
+				{
+					const HandleSeq& ilpo = ilp->getOutgoingSet();
+					size_t ilpsz = ilpo.size();
+					for (size_t k=1; k<ilpsz; k++)
+						rest.push_back(ilpo[k]);
+					do_add = true;
+				}
+
+				if (do_add)
+				{
 					const HandleSeq& jlpo = jlp->getOutgoingSet();
 					size_t jlpsz = jlpo.size();
 					for (size_t k=1; k<jlpsz; k++)
 						rest.push_back(jlpo[k]);
 
-					// b_plus_one is now (b+1)
-					PlusLinkPtr bpo = createPlusLink(rest);
-					Handle b_plus_one(bpo->reduce());
+					// a_plus is now (a+1) or (a+b) as described above.
+					PlusLinkPtr ap = createPlusLink(rest);
+					Handle a_plus(ap->reduce());
 
-					reduct = Handle(createTimesLink(fi, b_plus_one));
+					reduct = Handle(createTimesLink(fi, a_plus));
 					do_reduce = true;
 				}
 			}
