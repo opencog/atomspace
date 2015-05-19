@@ -50,6 +50,11 @@ public:
 	TimesLink(const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
+	TimesLink(const Handle& a, const Handle& b,
+	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
 	TimesLink(Link& l);
 };
 
