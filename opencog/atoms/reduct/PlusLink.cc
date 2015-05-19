@@ -24,6 +24,7 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atoms/NumberNode.h>
 #include "PlusLink.h"
+#include "TimesLink.h"
 
 using namespace opencog;
 
@@ -70,4 +71,63 @@ void PlusLink::init(void)
 {
 	knil = 0.0;
 	kons = plus;
+}
+
+
+/// Handle normalization of addition into multiplication.
+/// aka "mutiplicattive reduction"
+///
+/// There are four cases handled here:
+/// x+x ==> 2x
+/// x + ax ==> (a+1) x
+/// ax + x ==> (a+1) x
+/// ax + bx ==> (a + b) x
+///
+Handle PlusLink::reduce(void)
+{
+	// First, let FoldLink do its stuff.
+	Handle fold = FoldLink::reduce();
+
+	// Now, look for repeated atoms, two atoms that appear twice
+	// in the outgoing set. If they do, then can be mutliplied.
+	LinkPtr lfold(LinkCast(fold));
+
+	const HandleSeq& ofs = lfold->getOutgoingSet();
+	size_t fsz = ofs.size();
+	for (size_t i = 0; i < fsz; i++)
+	{
+		const Handle& fi = ofs[i];
+		for (size_t j=i+1; j < fsz; j++)
+		{
+			if (fi == ofs[j])
+			{
+				Handle two(createNumberNode("2"));
+				Handle tlp(createTimesLink(two, fi));
+
+				HandleSeq norm;
+				norm.push_back(tlp);
+
+				// copy everything else, except for i and j.
+				for (size_t k = 0; k< fsz; k++)
+				{
+					if (k == i or k == j) continue;
+					norm.push_back(ofs[k]);
+				}
+
+				PlusLinkPtr plp = createPlusLink(norm);
+
+				Handle red(plp->reduce());
+
+				// Place the result into the same atomspace we are in.
+				if (_atomTable)
+				{
+					AtomSpace* as = _atomTable->getAtomSpace();
+					return as->addAtom(red);
+				}
+				return red;
+			}
+		}
+	}
+
+	return fold;
 }

@@ -51,6 +51,8 @@ public:
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 	PlusLink(Link& l);
+
+	virtual Handle reduce(void);
 };
 
 typedef std::shared_ptr<PlusLink> PlusLinkPtr;
