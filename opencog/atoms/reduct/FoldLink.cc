@@ -126,7 +126,12 @@ Handle FoldLink::reduce(void)
 	}
 
 	// If nothing reduced, nothing to do.
-	if (not did_reduce) return getHandle();
+	if (not did_reduce)
+	{
+		if (1 == _outgoing.size())
+			return _outgoing[0];
+		return getHandle();
+	}
 
 	// If it reduced to just one number:
 	if (0 == reduct.size())
