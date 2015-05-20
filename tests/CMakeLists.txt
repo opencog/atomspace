@@ -17,30 +17,28 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 # its is tested first.
 IF (CXXTEST_FOUND)
 
-	IF (HAVE_ATOMSPACE)
-		ADD_SUBDIRECTORY (atomspace)
-		ADD_SUBDIRECTORY (atomutils)
+	ADD_SUBDIRECTORY (atomspace)
+	ADD_SUBDIRECTORY (atoms)
+	ADD_SUBDIRECTORY (atomutils)
 
-		# Persistence is for saving/restoring atomspace to disk.
-		ADD_SUBDIRECTORY (persist)
+	# Persistence is for saving/restoring atomspace to disk.
+	ADD_SUBDIRECTORY (persist)
 
-		# guile provides scheme bindings for the atomspace.
-		IF (HAVE_GUILE)
-			ADD_SUBDIRECTORY (scm)
-		ENDIF (HAVE_GUILE)
+	# guile provides scheme bindings for the atomspace.
+	IF (HAVE_GUILE)
+		ADD_SUBDIRECTORY (scm)
+	ENDIF (HAVE_GUILE)
 
-		# Many of the query tests require a working guile, so run
-		# these only after guile has been tested.
-		ADD_SUBDIRECTORY (query)
+	# Many of the query tests require a working guile, so run
+	# these only after guile has been tested.
+	ADD_SUBDIRECTORY (query)
 
-		# Currently, reasoning depends on query, above.
-		IF (HAVE_GUILE)
-			ADD_SUBDIRECTORY (rule-engine)
-		ENDIF (HAVE_GUILE)
+	# Currently, reasoning depends on query, above.
+	IF (HAVE_GUILE)
+		ADD_SUBDIRECTORY (rule-engine)
+	ENDIF (HAVE_GUILE)
 
-		ADD_SUBDIRECTORY (pln)
-
-	ENDIF (HAVE_ATOMSPACE)
+	ADD_SUBDIRECTORY (pln)
 
 	IF (HAVE_CYTHON AND PYTHONINTERP_FOUND)
 		ADD_SUBDIRECTORY (cython)
