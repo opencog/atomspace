@@ -98,11 +98,6 @@ static inline double get_double(const Handle& h)
 
 Handle PlusLink::kons(const Handle& fi, const Handle& fj)
 {
-printf("duuude enter hplus!\nfi=%s\nfj=%s\n",
-fi->toShortString().c_str(),
-fj->toShortString().c_str()
-);
-
 	// Are they numbers?
 	if (NUMBER_NODE == fi->getType() and
 	    NUMBER_NODE == fj->getType())
@@ -160,7 +155,13 @@ fj->toShortString().c_str()
 				rest.push_back(jlpo[k]);
 
 			// a_plus is now (a+1) or (a+b) as described above.
-			PlusLinkPtr ap = createPlusLink(rest);
+			// We need to insert into the atomspace, else reduce() horks
+			// up the knil compares during reduction.
+			Handle foo(createLink(PLUS_LINK, rest));
+			if (_atomTable)
+				foo = _atomTable->getAtomSpace()->addAtom(foo);
+
+			PlusLinkPtr ap = PlusLinkCast(foo);
 			Handle a_plus(ap->reduce());
 
 			return Handle(createTimesLink(exx, a_plus));

@@ -114,12 +114,10 @@ Handle FoldLink::reduce(void)
 	// So fix it up now.
 	if (_atomTable)
 		knil = _atomTable->getAtomSpace()->addAtom(knil);
-	// Assume that the expression is a mixture of constants and variables.
-	// Sum the constants, and eliminate the nils.
+
 	HandleSeq reduct;
 	bool did_reduce = false;
 
-printf("duuude enter reduce at=%p w: %s\n", _atomTable, toShortString().c_str());
 	// First, reduce the outgoing set. Loop over the outgoing set,
 	// and call reduce on everything reducible.  Remove all occurances
 	// of knil, while we are at it.
@@ -151,6 +149,7 @@ printf("duuude enter reduce at=%p w: %s\n", _atomTable, toShortString().c_str())
 			did_reduce = true;
 	}
 
+	// If it reduced down to one element, we are done.
 	size_t osz = reduct.size();
 	if (1 == osz)
 	{
@@ -159,8 +158,9 @@ printf("duuude enter reduce at=%p w: %s\n", _atomTable, toShortString().c_str())
 		DO_RETURN(reduct[0]);
 	}
 
-	// Next, search for atoms of the same type. If two atoms of the same
-	// type are found, apply kons to them.
+	// Next, search for two neighboring atoms of the same type.
+	// If two atoms of the same type are found, apply kons to them.
+	// Also handle the distributive case.
 	for (size_t i = 0; i < osz-1; i++)
 	{
 		const Handle& hi = reduct[i];
