@@ -67,17 +67,30 @@ PlusLink::PlusLink(Link& l)
 
 static double plus(double a, double b) { return a+b; }
 
+static inline get_double(const Handle& h)
+{
+	NumberNodePtr nnn(NumberNodeCast(h));
+	if (NULL == nnn)
+		nnn = createNumerNode(*NodeCast(h));
+
+	return nnn->getValue();
+}
+
 static Handle hplus(const Handle& fi, const Handle& fj)
 {
-	bool do_reduce = false;
-	Handle reduct = Handle::UNDEFINED;
+	// Are they numbers?
+	if (NUMBER_NODE == fi->getType() and
+	    NUMBER_NODE == fj->getType())
+	{
+		double sum = get_double(fi) + get_double(fj);
+		return Handle(createNumberNode(sum));
+	}
 
 	// Is fi identical to fj? If so, then replace by 2*fi
 	if (fi == fj)
 	{
 		Handle two(createNumberNode("2"));
-		reduct = Handle(createTimesLink(fi, two));
-		do_reduce = true;
+		return Handle(createTimesLink(fi, two));
 	}
 
 	// If j is (TimesLink x a) and i is identical to x,
@@ -86,7 +99,7 @@ static Handle hplus(const Handle& fi, const Handle& fj)
 	// If j is (TimesLink x a) and i is (TimesLink x b)
 	// then create (TimesLink x (a+b))
 	//
-	else if (fj->getType() == TIMES_LINK)
+	if (fj->getType() == TIMES_LINK)
 	{
 		bool do_add = false;
 		HandleSeq rest;
@@ -124,22 +137,14 @@ static Handle hplus(const Handle& fi, const Handle& fj)
 			PlusLinkPtr ap = createPlusLink(rest);
 			Handle a_plus(ap->reduce());
 
-			reduct = Handle(createTimesLink(exx, a_plus));
-			do_reduce = true;
+			return Handle(createTimesLink(exx, a_plus));
 		}
 	}
 
-	if (do_reduce)
-	{
-		HandleSeq norm;
-		norm.push_back(reduct);
-
-		PlusLinkPtr plp = createPlusLink(norm);
-
-		return plp->reduce();
-
-	}
-	return Handle::UNDEFINED;
+	// If we are here, we've been asked to add two things of the same
+	// type, but they are not of a type that we know how to add.
+	// For example, fi anf fj might be two different VariableNodes.
+	return Handle(createPlusLink(fi, fj));
 }
 
 void PlusLink::init(void)
