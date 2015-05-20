@@ -94,6 +94,7 @@ void ReductUTest::test_arithmetic(void)
 	// config().set("SCM_PRELOAD", "tests/atoms/arithmetic.scm");
 	// load_scm_files_from_config(*as);
 
+	// ---------
 	Handle four = eval->eval_h(
 		"(cog-reduce! (PlusLink (NumberNode 2) (NumberNode 2)))"
 	);
@@ -102,5 +103,60 @@ void ReductUTest::test_arithmetic(void)
 	Handle efour = eval->eval_h("(NumberNode 4)");
 	TS_ASSERT_EQUALS(four, efour);
 
+	// ---------
+	Handle zero = eval->eval_h(
+		"(cog-reduce! (PlusLink (NumberNode 2) (NumberNode -2)))"
+	);
+	printf("expecting zero: %s\n", zero->toShortString().c_str());
+
+	Handle ezero = eval->eval_h("(NumberNode 0)");
+	TS_ASSERT_EQUALS(zero, ezero);
+
+	// ---------
+	Handle xplus5 = eval->eval_h(
+		"(cog-reduce! (PlusLink "
+		"	(NumberNode 2) (VariableNode \"$x\") (NumberNode 3)))"
+	);
+	printf("expecting x+5: %s\n", xplus5->toShortString().c_str());
+
+	Handle explus5 = eval->eval_h(
+		"(PlusLink (VariableNode \"$x\") (NumberNode 5))");
+	TS_ASSERT_EQUALS(xplus5, explus5);
+
+	// ---------
+	Handle x = eval->eval_h(
+		"(cog-reduce! (PlusLink "
+		"	(NumberNode 2) (VariableNode \"$x\") (NumberNode -2)))"
+	);
+	printf("expecting $x: %s\n", x->toShortString().c_str());
+
+	Handle ex = eval->eval_h("(VariableNode \"$x\")");
+	TS_ASSERT_EQUALS(x, ex);
+
+	// ---------
+	Handle twox = eval->eval_h(
+		"(cog-reduce! (PlusLink "
+		"	(VariableNode \"$x\") (VariableNode \"$x\")))"
+	);
+	printf("expecting 2x: %s\n", twox->toShortString().c_str());
+
+	Handle etwox = eval->eval_h(
+		"(TimesLink (VariableNode \"$x\") (NumberNode 2))");
+	TS_ASSERT_EQUALS(twox, etwox);
+
+	// ---------
+	Handle xplus42 = eval->eval_h(
+		"(cog-reduce! (PlusLink "
+		"	(VariableNode \"$x\")"
+		"	(TimesLink (NumberNode 38) (VariableNode \"$x\"))"
+		"	(TimesLink (VariableNode \"$x\") (NumberNode 3))))"
+	);
+	printf("expecting x+42: %s\n", xplus42->toShortString().c_str());
+
+	Handle explus42 = eval->eval_h(
+		"(TimesLink (VariableNode \"$x\") (NumberNode 42))");
+	TS_ASSERT_EQUALS(xplus42, explus42);
+
+	// ---------
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
