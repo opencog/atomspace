@@ -85,78 +85,7 @@ void ArithmeticLink::init(void)
 /// thing itself.
 Handle ArithmeticLink::reduce(void)
 {
-	// Assume that the expression is a mixture of constants and variables.
-	// Sum the constants, and eliminate the nils.
-	HandleSeq reduct;
-	bool did_reduce = false;
-	double sum = knild;
-	for (const Handle& h: _outgoing)
-	{
-		Type t = h->getType();
-		if (NUMBER_NODE != t and
-		    VARIABLE_NODE != t and
-		    (not classserver().isA(t, FUNCTION_LINK))
-		)
-			throw RuntimeException(TRACE_INFO,
-				"Don't know how to reduce %s", h->toShortString().c_str());
-
-		Handle redh(h);
-		if (classserver().isA(t, FUNCTION_LINK))
-		{
-			FunctionLinkPtr fff(FunctionLinkCast(h));
-			if (NULL == fff)
-				fff = createFunctionLink(*LinkCast(h));
-
-			redh = fff->reduce();
-			t = redh->getType();
-		}
-
-		if (h != redh) did_reduce = true;
-
-		if (NUMBER_NODE == t)
-		{
-			NumberNodePtr nnn(NumberNodeCast(redh));
-			if (NULL == nnn)
-				nnn = createNumberNode(*NodeCast(redh));
-			sum = konsd(sum, nnn->getValue());
-			did_reduce = true;
-			continue;
-		}
-		reduct.push_back(redh);
-	}
-
-	// If nothing reduced, nothing to do.
-	if (not did_reduce)
-	{
-		if (1 == _outgoing.size())
-			return _outgoing[0];
-		return getHandle();
-	}
-
-	// If it reduced to just one number:
-	if (0 == reduct.size())
-	{
-		Handle nsum(createNumberNode(sum));
-		if (not _atomTable) return nsum;
-
-		AtomSpace* as = _atomTable->getAtomSpace();
-		return as->addAtom(nsum);
-	}
-
-	// If it didn't sum to nil, then we have to keep it.
-	if (knild != sum)
-		reduct.push_back(Handle(createNumberNode(sum)));
-
-	// If it reduced to just one thing:	
-	if (1 == reduct.size()) return reduct[0];
-
-	Handle result(createLink(getType(), reduct));
-
-	// Place the result into the same atomspace we are in.
-	if (not _atomTable) return result;
-
-	AtomSpace* as = _atomTable->getAtomSpace();
-	return as->addAtom(result);
+	return FoldLink::reduce();
 }
 
 // ===========================================================
