@@ -158,5 +158,25 @@ void ReductUTest::test_arithmetic(void)
 	TS_ASSERT_EQUALS(xtimes42, extimes42);
 
 	// ---------
+	Handle six = eval->eval_h(
+		"(cog-reduce! (TimesLink (NumberNode 2) (NumberNode 3)))"
+	);
+	printf("expecting six: %s\n", six->toShortString().c_str());
+
+	Handle esix = eval->eval_h("(NumberNode 6)");
+	TS_ASSERT_EQUALS(six, esix);
+
+	// ---------
+	Handle sixex = eval->eval_h(
+		"(cog-reduce! (TimesLink "
+		"	(NumberNode 2) (VariableNode \"$x\") (NumberNode 3)))"
+	);
+	printf("expecting x * 6: %s\n", sixex->toShortString().c_str());
+
+	Handle esixex = eval->eval_h(
+		"(TimesLink (VariableNode \"$x\") (NumberNode 6))");
+	TS_ASSERT_EQUALS(sixex, esixex);
+
+	// ---------
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
