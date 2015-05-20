@@ -130,7 +130,8 @@ fj->toShortString().c_str()
 		}
 
 		// Handle the (a+b) case described above.
-		else if (ilp->getOutgoingAtom(0) == exx)
+		else if (fi->getType() == TIMES_LINK and
+		         ilp->getOutgoingAtom(0) == exx)
 		{
 			const HandleSeq& ilpo = ilp->getOutgoingSet();
 			size_t ilpsz = ilpo.size();

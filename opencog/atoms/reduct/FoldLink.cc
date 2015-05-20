@@ -91,6 +91,16 @@ void FoldLink::init(void) {}
 /// The reduct of (FoldLink (VariableNode "$x") (NumberNode 0)) is
 /// (VariableNode "$x"), because adding zero to anything yeilds the
 /// thing itself.
+///
+/// This routine is pretending to be more general, though, than simply
+/// reducing numeric expressions.  It makes the following assumptions
+/// and performs the following actions:
+///
+/// 1) It is always safe to remove knil from a list. That is, knil is
+///    always a unit.
+/// 2) Two neighboring elements of the same type can always be kons'ed
+///    together with each-other.  That is, kons is called on two
+///    neighbors that have the same type.
 Handle FoldLink::reduce(void)
 {
 	// The atom table is typically not set when the ctor runs.
@@ -104,7 +114,8 @@ Handle FoldLink::reduce(void)
 
 printf("duuude enter reduce at=%p w: %s\n", _atomTable, toShortString().c_str());
 	// First, reduce the outgoing set. Loop over the outgoing set,
-	// and call reduce on everything reducible.
+	// and call reduce on everything reducible.  Remove all occurances
+	// of knil, while we are at it.
 	for (const Handle& h: _outgoing)
 	{
 		Type t = h->getType();
@@ -143,49 +154,46 @@ printf("duuude enter reduce at=%p w: %s\n", _atomTable, toShortString().c_str())
 
 	// Next, search for atoms of the same type. If two atoms of the same
 	// type are found, apply kons to them.
-	for (size_t i = 0; i< osz; i++)
+	for (size_t i = 0; i < osz-1; i++)
 	{
 		const Handle& hi = reduct[i];
 		Type it = hi->getType();
 
-		for (size_t j = i+1; j < osz; j++)
+		size_t j = i+1;
+		const Handle& hj = reduct[j];
+		Type jt = hj->getType();
+
+		// Same type. Apply kons, and then recurse.
+		if (it == jt)
 		{
-			const Handle& hj = reduct[j];
-			Type jt = hj->getType();
+			Handle cons = kons(hi, hj);
 
-			// Same type. Apply kons, and then recurse.
-			if (it == jt)
+			// If there were only two things in total we are done.
+			if (2 == osz)
+				DO_RETURN(cons);
+
+			HandleSeq rere;
+			for (size_t k=0; k < osz; k++)
 			{
-				Handle cons = kons(hi, hj);
-
-				// If there were only two things in total we are done.
-				// I'm confused. Do we need to kons in knil, here?
-				// For arithmetic, we don't, since knil is a unit.
-				// viz. add zero, or multiply by one.
-				// Is knil always a unit?
-				if (2 == osz)
-					DO_RETURN(cons);
-
-				HandleSeq rere;
-				rere.push_back(cons);
-				for (size_t k=0; k < osz; k++)
-				{
-					if (i == k or j == k) continue;
+				if (k < i)
 					rere.push_back(reduct[k]);
-				}
-
-				// Create the reduced atom, and recurse.
-				// We need to insert it into the atomspace,
-				// so that knil gets placed into the atomspace
-				// when reduce is called; else the knil
-				// compares up above fail.
-				Handle foo(createLink(getType(), rere));
-				if (_atomTable)
-					foo = _atomTable->getAtomSpace()->addAtom(foo);
-
-				FunctionLinkPtr flp = FunctionLinkCast(foo);
-				DO_RETURN(Handle(flp->reduce()));
+				else if (k == i)
+					rere.push_back(cons);
+				else if (j < k)
+					rere.push_back(reduct[k]);
 			}
+
+			// Create the reduced atom, and recurse.
+			// We need to insert it into the atomspace,
+			// so that knil gets placed into the atomspace
+			// when reduce is called; else the knil
+			// compares up above fail.
+			Handle foo(createLink(getType(), rere));
+			if (_atomTable)
+				foo = _atomTable->getAtomSpace()->addAtom(foo);
+
+			FunctionLinkPtr flp = FunctionLinkCast(foo);
+			DO_RETURN(Handle(flp->reduce()));
 		}
 	}
 
