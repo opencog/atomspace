@@ -30,7 +30,7 @@ using namespace opencog;
 TimesLink::TimesLink(const HandleSeq& oset,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
-    : FoldLink(TIMES_LINK, oset, tv, av)
+    : ArithmeticLink(TIMES_LINK, oset, tv, av)
 {
 	init();
 }
@@ -38,7 +38,7 @@ TimesLink::TimesLink(const HandleSeq& oset,
 TimesLink::TimesLink(Type t, const HandleSeq& oset,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
-    : FoldLink(t, oset, tv, av)
+    : ArithmeticLink(t, oset, tv, av)
 {
 	if (not classserver().isA(t, TIMES_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a TimesLink");
@@ -48,7 +48,7 @@ TimesLink::TimesLink(Type t, const HandleSeq& oset,
 TimesLink::TimesLink(Type t, const Handle& a, const Handle& b,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
-    : FoldLink(t, a, b, tv, av)
+    : ArithmeticLink(t, a, b, tv, av)
 {
 	if (not classserver().isA(t, TIMES_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a TimesLink");
@@ -58,13 +58,13 @@ TimesLink::TimesLink(Type t, const Handle& a, const Handle& b,
 TimesLink::TimesLink(const Handle& a, const Handle& b,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
-    : FoldLink(TIMES_LINK, a, b, tv, av)
+    : ArithmeticLink(TIMES_LINK, a, b, tv, av)
 {
 	init();
 }
 
 TimesLink::TimesLink(Link& l)
-    : FoldLink(l)
+    : ArithmeticLink(l)
 {
 	Type tscope = l.getType();
 	if (not classserver().isA(tscope, TIMES_LINK))
@@ -76,6 +76,6 @@ static double times(double a, double b) { return a*b; }
 
 void TimesLink::init(void)
 {
-	knil = 1.0;
-	kons = times;
+	knild = 1.0;
+	konsd = times;
 }

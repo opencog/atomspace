@@ -31,7 +31,7 @@ using namespace opencog;
 PlusLink::PlusLink(const HandleSeq& oset,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
-    : FoldLink(PLUS_LINK, oset, tv, av)
+    : ArithmeticLink(PLUS_LINK, oset, tv, av)
 {
 	init();
 }
@@ -39,7 +39,7 @@ PlusLink::PlusLink(const HandleSeq& oset,
 PlusLink::PlusLink(Type t, const HandleSeq& oset,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
-    : FoldLink(t, oset, tv, av)
+    : ArithmeticLink(t, oset, tv, av)
 {
 	if (not classserver().isA(t, PLUS_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PlusLink");
@@ -49,7 +49,7 @@ PlusLink::PlusLink(Type t, const HandleSeq& oset,
 PlusLink::PlusLink(Type t, const Handle& a, const Handle& b,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
-    : FoldLink(t, a, b, tv, av)
+    : ArithmeticLink(t, a, b, tv, av)
 {
 	if (not classserver().isA(t, PLUS_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PlusLink");
@@ -57,7 +57,7 @@ PlusLink::PlusLink(Type t, const Handle& a, const Handle& b,
 }
 
 PlusLink::PlusLink(Link& l)
-    : FoldLink(l)
+    : ArithmeticLink(l)
 {
 	Type tscope = l.getType();
 	if (not classserver().isA(tscope, PLUS_LINK))
@@ -69,8 +69,8 @@ static double plus(double a, double b) { return a+b; }
 
 void PlusLink::init(void)
 {
-	knil = 0.0;
-	kons = plus;
+	knild = 0.0;
+	konsd = plus;
 }
 
 // ============================================================

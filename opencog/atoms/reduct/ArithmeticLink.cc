@@ -32,7 +32,7 @@ using namespace opencog;
 ArithmeticLink::ArithmeticLink(const HandleSeq& oset,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
-    : FunctionLink(ARITHMETIC_LINK, oset, tv, av)
+    : FoldLink(ARITHMETIC_LINK, oset, tv, av)
 {
 	init();
 }
@@ -40,7 +40,7 @@ ArithmeticLink::ArithmeticLink(const HandleSeq& oset,
 ArithmeticLink::ArithmeticLink(Type t, const HandleSeq& oset,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
-    : FunctionLink(t, oset, tv, av)
+    : FoldLink(t, oset, tv, av)
 {
 	if (not classserver().isA(t, ARITHMETIC_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a ArithmeticLink");
@@ -50,7 +50,7 @@ ArithmeticLink::ArithmeticLink(Type t, const HandleSeq& oset,
 ArithmeticLink::ArithmeticLink(Type t, const Handle& a, const Handle& b,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
-    : FunctionLink(t, a, b, tv, av)
+    : FoldLink(t, a, b, tv, av)
 {
 	if (not classserver().isA(t, ARITHMETIC_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a ArithmeticLink");
@@ -58,7 +58,7 @@ ArithmeticLink::ArithmeticLink(Type t, const Handle& a, const Handle& b,
 }
 
 ArithmeticLink::ArithmeticLink(Link& l)
-    : FunctionLink(l)
+    : FoldLink(l)
 {
 	Type tscope = l.getType();
 	if (not classserver().isA(tscope, ARITHMETIC_LINK))
@@ -89,7 +89,7 @@ Handle ArithmeticLink::reduce(void)
 	// Sum the constants, and eliminate the nils.
 	HandleSeq reduct;
 	bool did_reduce = false;
-	double sum = knil;
+	double sum = knild;
 	for (const Handle& h: _outgoing)
 	{
 		Type t = h->getType();
@@ -118,7 +118,7 @@ Handle ArithmeticLink::reduce(void)
 			NumberNodePtr nnn(NumberNodeCast(redh));
 			if (NULL == nnn)
 				nnn = createNumberNode(*NodeCast(redh));
-			sum = kons(sum, nnn->getValue());
+			sum = konsd(sum, nnn->getValue());
 			did_reduce = true;
 			continue;
 		}
@@ -138,7 +138,7 @@ Handle ArithmeticLink::reduce(void)
 		return Handle(createNumberNode(sum));
 
 	// If it didn't sum to nil, then we have to keep it.
-	if (knil != sum)
+	if (knild != sum)
 		reduct.push_back(Handle(createNumberNode(sum)));
 
 	// If it reduced to just one thing:	
