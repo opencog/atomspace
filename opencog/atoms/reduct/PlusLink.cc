@@ -67,10 +67,86 @@ PlusLink::PlusLink(Link& l)
 
 static double plus(double a, double b) { return a+b; }
 
+static Handle hplus(const Handle& fi, const Handle& fj)
+{
+	bool do_reduce = false;
+	Handle reduct = Handle::UNDEFINED;
+
+	// Is fi identical to fj? If so, then replace by 2*fi
+	if (fi == fj)
+	{
+		Handle two(createNumberNode("2"));
+		reduct = Handle(createTimesLink(fi, two));
+		do_reduce = true;
+	}
+
+	// If j is (TimesLink x a) and i is identical to x,
+	// then create (TimesLink x (a+1))
+	//
+	// If j is (TimesLink x a) and i is (TimesLink x b)
+	// then create (TimesLink x (a+b))
+	//
+	else if (fj->getType() == TIMES_LINK)
+	{
+		bool do_add = false;
+		HandleSeq rest;
+
+		LinkPtr ilp = LinkCast(fi);
+		LinkPtr jlp = LinkCast(fj);
+		Handle exx = jlp->getOutgoingAtom(0);
+
+		// Handle the (a+1) case described above.
+		if (fi == exx)
+		{
+			Handle one(createNumberNode("1"));
+			rest.push_back(one);
+			do_add = true;
+		}
+
+		// Handle the (a+b) case described above.
+		else if (ilp->getOutgoingAtom(0) == exx)
+		{
+			const HandleSeq& ilpo = ilp->getOutgoingSet();
+			size_t ilpsz = ilpo.size();
+			for (size_t k=1; k<ilpsz; k++)
+				rest.push_back(ilpo[k]);
+			do_add = true;
+		}
+
+		if (do_add)
+		{
+			const HandleSeq& jlpo = jlp->getOutgoingSet();
+			size_t jlpsz = jlpo.size();
+			for (size_t k=1; k<jlpsz; k++)
+				rest.push_back(jlpo[k]);
+
+			// a_plus is now (a+1) or (a+b) as described above.
+			PlusLinkPtr ap = createPlusLink(rest);
+			Handle a_plus(ap->reduce());
+
+			reduct = Handle(createTimesLink(exx, a_plus));
+			do_reduce = true;
+		}
+	}
+
+	if (do_reduce)
+	{
+		HandleSeq norm;
+		norm.push_back(reduct);
+
+		PlusLinkPtr plp = createPlusLink(norm);
+
+		return plp->reduce();
+
+	}
+	return Handle::UNDEFINED;
+}
+
 void PlusLink::init(void)
 {
 	knild = 0.0;
 	konsd = plus;
+	kons = hplus;
 }
 
 // ============================================================
