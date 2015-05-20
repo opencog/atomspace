@@ -239,5 +239,7 @@ Handle PlusLink::reduce(void)
 		}
 	}
 
-	return fold;
+	if (not _atomTable) return fold;
+	AtomSpace* as = _atomTable->getAtomSpace();
+	return as->addAtom(fold);
 }
