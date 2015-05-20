@@ -34,13 +34,12 @@ namespace opencog
 
 /**
  * The FoldLink implements the arithmetic operations of plus and times.
- * (Its not currently a general fold; it only works with numbers.)
  */
 class FoldLink : public FunctionLink
 {
 protected:
-	double knil;
-	double (*kons) (double, double);
+	Handle knil;
+	Handle (*kons) (const Handle&, const Handle&);
 	void init(void);
 	FoldLink(Type, const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),

@@ -68,7 +68,7 @@ FoldLink::FoldLink(Link& l)
 
 void FoldLink::init(void)
 {
-	knil = std::numeric_limits<double>::quiet_NaN();
+	knil = Handle::UNDEFINED;
 	kons = NULL;
 }
 
@@ -89,60 +89,70 @@ Handle FoldLink::reduce(void)
 	// Sum the constants, and eliminate the nils.
 	HandleSeq reduct;
 	bool did_reduce = false;
-	double sum = knil;
+
+	// First, reduce the outgoing set. Loop over the outgoing set,
+	// and call reduce on everything reducible.
 	for (const Handle& h: _outgoing)
 	{
 		Type t = h->getType();
-		if (NUMBER_NODE != t and
-		    VARIABLE_NODE != t and
-		    (not classserver().isA(t, FUNCTION_LINK))
-		)
-			throw RuntimeException(TRACE_INFO,
-				"Don't know how to reduce %s", h->toShortString().c_str());
 
-		Handle redh(h);
 		if (classserver().isA(t, FUNCTION_LINK))
 		{
 			FunctionLinkPtr fff(FunctionLinkCast(h));
 			if (NULL == fff)
 				fff = createFunctionLink(*LinkCast(h));
 
-			redh = fff->reduce();
-			t = redh->getType();
+			Handle redh = fff->reduce();
+			if (h != redh)
+			{
+				did_reduce = true;
+				reduct.push_back(redh);
+			}
+			else
+			{
+				reduct.push_back(h);
+			}
 		}
+	}
 
-		if (h != redh) did_reduce = true;
+	// Next, search for atoms of the same type. If two atoms of the same
+	// type are found, apply kons to them.
+	size_t osz = reduct.size();
+	for (size_t i = 0; i< osz; i++)
+	{
+		const Handle& hi = reduct[i];
+		Type it = hi->getType();
 
-		if (NUMBER_NODE == t)
+		for (size_t j = i+1; j < osz; j++)
 		{
-			NumberNodePtr nnn(NumberNodeCast(redh));
-			if (NULL == nnn)
-				nnn = createNumberNode(*NodeCast(redh));
-			sum = kons(sum, nnn->getValue());
-			did_reduce = true;
-			continue;
+			const Handle& hj = reduct[j];
+			Type jt = hj->getType();
+
+			// Same type. Apply kons, and then recurse.
+			if (it == jt)
+			{
+				Handle cons = kons(hi, hj);
+
+				HandleSeq rere;
+				rere.push_back(cons);
+				for (size_t k=0; k < osz; k++)
+				{
+					if (i == k or j == k) continue;
+					rere.push_back(reduct[k]);
+				}
+
+				// Create the reduced atom, and recurse.
+				FunctionLinkPtr flp = createFunctionLink(getType(), rere);
+				return flp->reduce();
+			}
 		}
-		reduct.push_back(redh);
 	}
 
 	// If nothing reduced, nothing to do.
 	if (not did_reduce)
 	{
-		if (1 == _outgoing.size())
-			return _outgoing[0];
 		return getHandle();
 	}
-
-	// If it reduced to just one number:
-	if (0 == reduct.size())
-		return Handle(createNumberNode(sum));
-
-	// If it didn't sum to nil, then we have to keep it.
-	if (knil != sum)
-		reduct.push_back(Handle(createNumberNode(sum)));
-
-	// If it reduced to just one thing:	
-	if (1 == reduct.size()) return reduct[0];
 
 	Handle result(createLink(getType(), reduct));
 
