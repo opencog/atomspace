@@ -89,7 +89,7 @@ Handle ArithmeticLink::reduce(void)
 	Handle red(FoldLink::reduce());
 	ArithmeticLinkPtr alp(ArithmeticLinkCast(red));
 	if (NULL == alp) return red;
-	return red->reduce();
+	return alp->reorder();
 }
 
 // ============================================================
@@ -130,7 +130,11 @@ Handle ArithmeticLink::reorder(void)
 	for (const Handle& h : exprs) result.push_back(h);
 	for (const Handle& h : numbers) result.push_back(h);
 
-	return Handle(FunctionLink::factory(getType(), result));
+	Handle h(FunctionLink::factory(getType(), result));
+	if (NULL == _atomTable) return h;
+
+	AtomSpace* as = _atomTable->getAtomSpace();
+	return as->addAtom(h);
 }
 
 // ===========================================================

@@ -81,7 +81,7 @@ void FoldLink::init(void)
 #define DO_RETURN(result) { \
 	if (not _atomTable) return (result); \
 	AtomSpace* as = _atomTable->getAtomSpace(); \
-		return as->addAtom(result); \
+	return as->addAtom(result); \
 }
 
 /// reduce() -- reduce the expression by summing constants, etc.
