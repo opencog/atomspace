@@ -90,11 +90,12 @@ printf("duuude enter hplus!\nfi=%s\nfj=%s\n",
 fi->toShortString().c_str(),
 fj->toShortString().c_str()
 );
+
 	// Are they numbers?
 	if (NUMBER_NODE == fi->getType() and
 	    NUMBER_NODE == fj->getType())
 	{
-		double sum = get_double(fi) + get_double(fj);
+		double sum = konsd(get_double(fi), get_double(fj));
 		return Handle(createNumberNode(sum));
 	}
 

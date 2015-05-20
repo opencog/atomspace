@@ -139,7 +139,13 @@ public:
     // Handles are equivalent when their uuid's compare. It may happen
     // that one has a null pointer, and the other one doesn't; we don't
     // care about that. It should never ever happen that we have two
-    // identical uuid's but inequivalent pointers!!
+    // identical uuid's but inequivalent pointers!! Well, unless both
+    // uuids are -1, in which case, we are comparing atoms that have
+    // not yet been inserted into the atomspace. We refuse to deal with
+    // this situation here, because it is a confusing mess to try to
+    // compare atoms that are not in the atomspace; the notion of
+    // equality and equivalence differ, and it depends strong on the
+    // atom type.
     inline bool operator==(const Handle& h) const noexcept { return _uuid == h._uuid; }
     inline bool operator!=(const Handle& h) const noexcept { return _uuid != h._uuid; }
     inline bool operator< (const Handle& h) const noexcept { return _uuid <  h._uuid; }
