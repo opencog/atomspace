@@ -24,7 +24,7 @@
 #define _OPENCOG_PLUS_LINK_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/reduct/FoldLink.h>
+#include <opencog/atoms/reduct/ArithmeticLink.h>
 
 namespace opencog
 {
@@ -35,7 +35,7 @@ namespace opencog
 /**
  * The PlusLink implements the mathematical operation of "plus"
  */
-class PlusLink : public FoldLink
+class PlusLink : public ArithmeticLink
 {
 protected:
 	void init(void);

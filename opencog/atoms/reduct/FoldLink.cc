@@ -167,37 +167,3 @@ Handle FoldLink::reduce(void)
 }
 
 // ===========================================================
-
-/// execute() -- Execute the expression, returning a number
-///
-/// Similar to reduce(), above, except that this can only work
-/// on fully grounded (closed) sentences: after executation,
-/// everything must be a number, and there can be no variables
-/// in sight.
-static inline double get_double(AtomSpace *as, Handle h)
-{
-	// Recurse, and execute anything below...
-	FunctionLinkPtr flp(FunctionLinkCast(h));
-	if (flp)
-		h = flp->execute(as);
-
-	NumberNodePtr nnn(NumberNodeCast(h));
-	if (nnn == NULL)
-		throw RuntimeException(TRACE_INFO,
-			  "Expecting a NumberNode, got %s",
-		     classserver().getTypeName(h->getType()).c_str());
-
-	return nnn->getValue();
-}
-
-Handle FoldLink::execute(AtomSpace* as) const
-{
-	double sum = knil;
-	for (Handle h: _outgoing)
-	{
-		sum = kons(sum, get_double(as, h));
-	}
-
-	if (as) return as->addAtom(createNumberNode(sum));
-	return Handle(createNumberNode(sum));
-}

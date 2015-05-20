@@ -1,12 +1,12 @@
 /*
- * opencog/atoms/reduct/FoldLink.h
+ * opencog/atoms/reduct/ArithmeticLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
- * published by the Fold Software Foundation and including the exceptions
+ * published by the Arithmetic Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
@@ -16,15 +16,15 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
- * Fold Software Foundation, Inc.,
+ * Arithmetic Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_FOLD_LINK_H
-#define _OPENCOG_FOLD_LINK_H
+#ifndef _OPENCOG_ARITHMETIC_LINK_H
+#define _OPENCOG_ARITHMETIC_LINK_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/reduct/FunctionLink.h>
+#include <opencog/atoms/reduct/FoldLink.h>
 
 namespace opencog
 {
@@ -33,43 +33,42 @@ namespace opencog
  */
 
 /**
- * The FoldLink implements the generic reduction of lists, by
- * cons'ing together elements of the same type. See
- * http://en.wikipedia.org/wiki/Fold_(higher-order_function)
- * for a general discussion.
+ * The ArithmeticLink implements the arithmetic operations of plus
+ * and times. It uses FoldLink to perform reduction.
  */
-class FoldLink : public FunctionLink
+class ArithmeticLink : public FoldLink
 {
 protected:
-	Handle knil;
-	Handle (*kons) (const Handle&, const Handle&);
+	double knild;
+	double (*konsd) (double, double);
 	void init(void);
-	FoldLink(Type, const HandleSeq& oset,
+	ArithmeticLink(Type, const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	FoldLink(Type, const Handle& a, const Handle& b,
+	ArithmeticLink(Type, const Handle& a, const Handle& b,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 public:
-	FoldLink(const HandleSeq& oset,
+	ArithmeticLink(const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-	FoldLink(Link& l);
+	ArithmeticLink(Link& l);
 
    virtual Handle reduce(void);
+	virtual Handle execute(AtomSpace* as) const;
 };
 
-typedef std::shared_ptr<FoldLink> FoldLinkPtr;
-static inline FoldLinkPtr FoldLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<FoldLink>(a); }
-static inline FoldLinkPtr FoldLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<FoldLink>(a); }
+typedef std::shared_ptr<ArithmeticLink> ArithmeticLinkPtr;
+static inline ArithmeticLinkPtr ArithmeticLinkCast(const Handle& h)
+   { AtomPtr a(h); return std::dynamic_pointer_cast<ArithmeticLink>(a); }
+static inline ArithmeticLinkPtr ArithmeticLinkCast(AtomPtr a)
+   { return std::dynamic_pointer_cast<ArithmeticLink>(a); }
 
 // XXX temporary hack ...
-#define createFoldLink std::make_shared<FoldLink>
+#define createArithmeticLink std::make_shared<ArithmeticLink>
 
 /** @}*/
 }
 
-#endif // _OPENCOG_FOLD_LINK_H
+#endif // _OPENCOG_ARITHMETIC_LINK_H
