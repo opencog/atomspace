@@ -109,10 +109,10 @@ Handle FoldLink::reduce(void)
 				reduct.push_back(redh);
 			}
 			else
-			{
 				reduct.push_back(h);
-			}
 		}
+		else
+			reduct.push_back(h);
 	}
 
 	// Next, search for atoms of the same type. If two atoms of the same
