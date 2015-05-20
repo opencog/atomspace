@@ -65,7 +65,8 @@ Logger* ForwardChainer::getLogger() {
 
 /**
  * Does one step forward chaining
- * @return false if there is not target to explore
+ *
+ * @param fcb a concrete implementation of of ForwardChainerCallBack class 
  */
 void ForwardChainer::step(ForwardChainerCallBack& fcb) {
 

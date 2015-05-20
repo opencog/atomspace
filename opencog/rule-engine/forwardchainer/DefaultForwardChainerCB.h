@@ -24,9 +24,8 @@
 #ifndef DEFAULTFORWARDCHAINERCB_H_
 #define DEFAULTFORWARDCHAINERCB_H_
 
+#include <opencog/rule-engine/forwardchainer/ForwardChainerPMCB.h>
 #include "ForwardChainerCallBack.h"
-#include "ForwardChainInputMatchCB.h"
-#include "ForwardChainPatternMatchCB.h"
 
 namespace opencog {
 
@@ -36,11 +35,11 @@ class DefaultForwardChainerCB: public virtual ForwardChainerCallBack
 {
 private:
     AtomSpace * as_;
-    ForwardChainInputMatchCB* fcim_;
-    ForwardChainPatternMatchCB* fcpm_;
+    ForwardChainerPMCB* fcpm_;
     HandleSeq get_rootlinks(Handle hsource, AtomSpace* as, Type link_type,
     bool subclasses = false);
     source_selection_mode ts_mode_;
+
 public:
     DefaultForwardChainerCB(AtomSpace* as, source_selection_mode ts_mode =
             TV_FITNESS_BASED);

@@ -24,6 +24,7 @@
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atoms/bind/BindLink.h>
+#include <opencog/query/DefaultImplicator.h>
 
 #include "DefaultForwardChainerCB.h"
 #include "../URECommons.h"
@@ -35,14 +36,12 @@ DefaultForwardChainerCB::DefaultForwardChainerCB(
         ForwardChainerCallBack(as)
 {
     as_ = as;
-    fcim_ = new ForwardChainInputMatchCB(as);
-    fcpm_ = new ForwardChainPatternMatchCB(as);
+    fcpm_ = new ForwardChainerPMCB(as);
     ts_mode_ = ts_mode;
 }
 
 DefaultForwardChainerCB::~DefaultForwardChainerCB()
 {
-    delete fcim_;
     delete fcpm_;
 }
 

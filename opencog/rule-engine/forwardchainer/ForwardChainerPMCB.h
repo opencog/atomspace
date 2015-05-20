@@ -33,7 +33,7 @@
 namespace opencog
 {
 
-class ForwardChainPatternMatchCB:
+class ForwardChainerPMCB:
         public virtual Implicator,
         public virtual InitiateSearchCB,
         public virtual DefaultPatternMatchCB,
@@ -43,8 +43,8 @@ private:
     AtomSpace* _as;
     FCMemory * _fcmem;
 public:
-    ForwardChainPatternMatchCB(AtomSpace * as);
-    virtual ~ForwardChainPatternMatchCB();
+    ForwardChainerPMCB(AtomSpace * as);
+    virtual ~ForwardChainerPMCB();
     virtual void set_pattern(const Variables& vars,
                              const Pattern& pat)
     {
