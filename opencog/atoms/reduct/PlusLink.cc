@@ -163,11 +163,7 @@ fj->toShortString().c_str()
 void PlusLink::init(void)
 {
 	knild = 0.0;
-
 	knil = Handle(createNumberNode("0"));
-	if (NULL == _atomTable) return;
-	AtomSpace* as = _atomTable->getAtomSpace();
-	knil = as->addAtom(knil);
 }
 
 // ============================================================

@@ -66,10 +66,7 @@ FoldLink::FoldLink(Link& l)
 	init();
 }
 
-void FoldLink::init(void)
-{
-	knil = Handle::UNDEFINED;
-}
+void FoldLink::init(void) {}
 
 // ===============================================================
 
@@ -96,11 +93,16 @@ void FoldLink::init(void)
 /// thing itself.
 Handle FoldLink::reduce(void)
 {
+	// The atom table is typically not set when the ctor runs.
+	// So fix it up now.
+	if (_atomTable)
+		knil = _atomTable->getAtomSpace()->addAtom(knil);
 	// Assume that the expression is a mixture of constants and variables.
 	// Sum the constants, and eliminate the nils.
 	HandleSeq reduct;
 	bool did_reduce = false;
 
+printf("duuude enter reduce at=%p w: %s\n", _atomTable, toShortString().c_str());
 	// First, reduce the outgoing set. Loop over the outgoing set,
 	// and call reduce on everything reducible.
 	for (const Handle& h: _outgoing)
@@ -117,18 +119,30 @@ Handle FoldLink::reduce(void)
 			if (h != redh)
 			{
 				did_reduce = true;
-				reduct.push_back(redh);
+				if (redh != knil)
+					reduct.push_back(redh);
 			}
-			else
+			else if (h != knil)
 				reduct.push_back(h);
+			else
+				did_reduce = true;
 		}
-		else
+		else if (h != knil)
 			reduct.push_back(h);
+		else
+			did_reduce = true;
+	}
+
+	size_t osz = reduct.size();
+	if (1 == osz)
+	{
+		if (not did_reduce)
+			return getHandle();
+		DO_RETURN(reduct[0]);
 	}
 
 	// Next, search for atoms of the same type. If two atoms of the same
 	// type are found, apply kons to them.
-	size_t osz = reduct.size();
 	for (size_t i = 0; i< osz; i++)
 	{
 		const Handle& hi = reduct[i];
@@ -161,9 +175,12 @@ Handle FoldLink::reduce(void)
 				}
 
 				// Create the reduced atom, and recurse.
-				Handle foo(FunctionLink::factory(getType(), rere));
+				Handle foo(createLink(getType(), rere));
+				if (_atomTable)
+					foo = _atomTable->getAtomSpace()->addAtom(foo);
+
 				FunctionLinkPtr flp = FunctionLinkCast(foo);
-				DO_RETURN(Handle (flp->reduce()));
+				DO_RETURN(Handle(flp->reduce()));
 			}
 		}
 	}

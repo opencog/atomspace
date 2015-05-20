@@ -77,4 +77,5 @@ double TimesLink::konsd(double a, double b) const { return a*b; }
 void TimesLink::init(void)
 {
 	knild = 1.0;
+	knil = Handle(createNumberNode("1"));
 }
