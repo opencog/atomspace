@@ -72,6 +72,18 @@ void FoldLink::init(void)
 	kons = NULL;
 }
 
+// ===============================================================
+
+// Place the result into the same atomspace we are in.
+// XXX this is bad, buggy, uncomfortable, icky: it pollutes
+// the atomspace with intermediate results. This needs to
+// be fixed somehow. Right now, I don't know how.
+#define DO_RETURN(result) { \
+	if (not _atomTable) return (result); \
+	AtomSpace* as = _atomTable->getAtomSpace(); \
+		return as->addAtom(result); \
+}
+
 /// reduce() -- reduce the expression by summing constants, etc.
 ///
 /// No actual black-box evaluation or execution is performed. Only
@@ -133,6 +145,14 @@ Handle FoldLink::reduce(void)
 			{
 				Handle cons = kons(hi, hj);
 
+				// If there were only two things in total we are done.
+				// I'm confused. Do we need to kons in knil, here?
+				// For arithmetic, we don't, since knil is a unit.
+				// viz. add zero, or multiply by one.
+				// Is knil always a unit?
+				if (2 == osz)
+					DO_RETURN(cons);
+
 				HandleSeq rere;
 				rere.push_back(cons);
 				for (size_t k=0; k < osz; k++)
@@ -142,28 +162,18 @@ Handle FoldLink::reduce(void)
 				}
 
 				// Create the reduced atom, and recurse.
-				FunctionLinkPtr flp = createFunctionLink(getType(), rere);
-				return flp->reduce();
+				Handle foo(FunctionLink::factory(getType(), rere));
+				FunctionLinkPtr flp = FunctionLinkCast(foo);
+				DO_RETURN(Handle (flp->reduce()));
 			}
 		}
 	}
 
 	// If nothing reduced, nothing to do.
 	if (not did_reduce)
-	{
 		return getHandle();
-	}
 
-	Handle result(createLink(getType(), reduct));
-
-	// Place the result into the same atomspace we are in.
-	// XXX this is bad, buggy, uncomfortable, icky: it pollutes
-	// the atomspace with intermediate results. This needs to
-	// be fixed somehow. Right now, I don't know how.
-	if (not _atomTable) return result;
-
-	AtomSpace* as = _atomTable->getAtomSpace();
-	return as->addAtom(result);
+	DO_RETURN(Handle(createLink(getType(), reduct)));
 }
 
 // ===========================================================
