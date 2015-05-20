@@ -108,6 +108,20 @@ void FoldLink::init(void) {}
 ///    that one neigboring element might distribute into the next.
 ///    This is vaguely hacky, and is used to implement distributivity
 ///    of multiplication over addition.
+///
+/// For something as simple as the above, the code below is
+/// annoyingly complicated.  This is certainly not an efficient,
+/// effective way to build a computer algebra system.  It works, its
+/// just barely good enough for single-variable arithmetic, but that's
+/// all.  For general reduction tasks, there are two choices:
+///
+/// A) Convert atoms to some other CAS format, reduce that, and then
+///    convert back to atoms.
+///
+/// B) Figure out why the atomspace is so ungainly, and fix it so that
+///    it is both easy (easier) to use, and also is high-performance.
+///
+/// Obviously, B) is much harder than A) but is probably more important.
 Handle FoldLink::reduce(void)
 {
 	// The atom table is typically not set when the ctor runs.
