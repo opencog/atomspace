@@ -45,7 +45,7 @@ public:
 		return _htarget < t._htarget;
 	}
 
-	void add_rule(const Rule& r) { }
+	void add_rule(const Rule& r) { _applied_rules.push_back(r); }
 
 	Handle get_handle() const { return _htarget; }
 	float get_weight() { return 1.0f; }
