@@ -85,8 +85,12 @@ void ArithmeticLink::init(void)
 /// thing itself.
 Handle ArithmeticLink::reduce(void)
 {
-	Handle red(FoldLink::reduce());
-	ArithmeticLinkPtr alp(ArithmeticLinkCast(red));
+	Handle road(reorder());
+	ArithmeticLinkPtr alp(ArithmeticLinkCast(road));
+
+	Handle red(alp->FoldLink::reduce());
+
+	alp = ArithmeticLinkCast(red);
 	if (NULL == alp) return red;
 	return alp->reorder();
 }
@@ -100,8 +104,9 @@ Handle ArithmeticLink::reduce(void)
 /// means:
 /// first, all of the variables,
 /// next, all compound expressions,
-/// last, all number nodes (of which there should be only zero or one.)
+/// last, all number nodes
 /// We do not currently sort the variables, but maybe we should...?
+/// Sorting by variable names would hold consilidate them...
 /// The FoldLink::reduce() method already returns expressions that are
 /// almost in the correct order.
 Handle ArithmeticLink::reorder(void)
@@ -120,10 +125,6 @@ Handle ArithmeticLink::reorder(void)
 			exprs.push_back(h);
 	}
 
-	if (1 < numbers.size())
-		throw RuntimeException(TRACE_INFO,
-		      "Expecting the plus link to have already been reduced!");
-
 	HandleSeq result;
 	for (const Handle& h : vars) result.push_back(h);
 	for (const Handle& h : exprs) result.push_back(h);
@@ -132,8 +133,7 @@ Handle ArithmeticLink::reorder(void)
 	Handle h(FunctionLink::factory(getType(), result));
 	if (NULL == _atomTable) return h;
 
-	AtomSpace* as = _atomTable->getAtomSpace();
-	return as->addAtom(h);
+	return _atomTable->getAtomSpace()->addAtom(h);
 }
 
 Handle ArithmeticLink::kons(const Handle& fi, const Handle& fj)
