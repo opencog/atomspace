@@ -175,6 +175,10 @@ printf("duuude enter reduce at=%p w: %s\n", _atomTable, toShortString().c_str())
 				}
 
 				// Create the reduced atom, and recurse.
+				// We need to insert it into the atomspace,
+				// so that knil gets placed into the atomspace
+				// when reduce is called; else the knil
+				// compares up above fail.
 				Handle foo(createLink(getType(), rere));
 				if (_atomTable)
 					foo = _atomTable->getAtomSpace()->addAtom(foo);
