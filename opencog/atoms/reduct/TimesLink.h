@@ -39,6 +39,8 @@ class TimesLink : public ArithmeticLink
 {
 protected:
 	double konsd(double, double) const;
+	Handle kons(const Handle&, const Handle&);
+
 	void init(void);
 	TimesLink(Type, const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),

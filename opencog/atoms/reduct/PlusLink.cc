@@ -73,6 +73,16 @@ PlusLink::PlusLink(Link& l)
 	init();
 }
 
+void PlusLink::init(void)
+{
+	knild = 0.0;
+	knil = Handle(createNumberNode("0"));
+
+	distributive_type = TIMES_LINK;
+}
+
+// ============================================================
+
 double PlusLink::konsd(double a, double b) const { return a+b; }
 
 static inline double get_double(const Handle& h)
@@ -83,6 +93,8 @@ static inline double get_double(const Handle& h)
 
 	return nnn->getValue();
 }
+
+// ============================================================
 
 Handle PlusLink::kons(const Handle& fi, const Handle& fj)
 {
@@ -95,7 +107,7 @@ fj->toShortString().c_str()
 	if (NUMBER_NODE == fi->getType() and
 	    NUMBER_NODE == fj->getType())
 	{
-		double sum = konsd(get_double(fi), get_double(fj));
+		double sum = get_double(fi) + get_double(fj);
 		return Handle(createNumberNode(sum));
 	}
 
@@ -157,14 +169,8 @@ fj->toShortString().c_str()
 
 	// If we are here, we've been asked to add two things of the same
 	// type, but they are not of a type that we know how to add.
-	// For example, fi anf fj might be two different VariableNodes.
+	// For example, fi and fj might be two different VariableNodes.
 	return Handle(createPlusLink(fi, fj)->reorder());
-}
-
-void PlusLink::init(void)
-{
-	knild = 0.0;
-	knil = Handle(createNumberNode("0"));
 }
 
 // ============================================================

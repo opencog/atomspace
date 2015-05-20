@@ -136,11 +136,6 @@ Handle ArithmeticLink::reorder(void)
 	return _atomTable->getAtomSpace()->addAtom(h);
 }
 
-Handle ArithmeticLink::kons(const Handle& fi, const Handle& fj)
-{
-	throw RuntimeException(TRACE_INFO, "not done yet");
-}
-
 // ===========================================================
 
 /// execute() -- Execute the expression, returning a number

@@ -72,10 +72,41 @@ TimesLink::TimesLink(Link& l)
 	init();
 }
 
-double TimesLink::konsd(double a, double b) const { return a*b; }
-
 void TimesLink::init(void)
 {
 	knild = 1.0;
 	knil = Handle(createNumberNode("1"));
 }
+
+// ============================================================
+
+double TimesLink::konsd(double a, double b) const { return a*b; }
+
+static inline double get_double(const Handle& h)
+{
+	NumberNodePtr nnn(NumberNodeCast(h));
+	if (NULL == nnn)
+		nnn = createNumberNode(*NodeCast(h));
+
+	return nnn->getValue();
+}
+
+/// Because there is no ExpLink or PowLink that can handle repeated
+/// products, or any distributive property, kons is very simple for
+/// the TimesLink.
+Handle TimesLink::kons(const Handle& fi, const Handle& fj)
+{
+	// Are they numbers?
+	if (NUMBER_NODE == fi->getType() and
+	    NUMBER_NODE == fj->getType())
+	{
+		double prod = get_double(fi) * get_double(fj);
+		return Handle(createNumberNode(prod));
+	}
+
+	// If we are here, we've been asked to multiply two things of the
+	// same type, but they are not of a type that we know how to multiply.
+	return Handle(createTimesLink(fi, fj)->reorder());
+}
+
+// ============================================================

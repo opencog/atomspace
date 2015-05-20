@@ -100,7 +100,14 @@ void FoldLink::init(void) {}
 ///    always a unit.
 /// 2) Two neighboring elements of the same type can always be kons'ed
 ///    together with each-other.  That is, kons is called on two
-///    neighbors that have the same type.
+///    neighbors that have the same type. That is, this assumes that
+///    the list has the associative property, so that neighboring
+///    elements can always be cons'ed together.
+/// 3) It does not asssume the commutative property.
+/// 4) If distributive_type is set, then kons is called when it seems
+///    that one neigboring element might distribute into the next.
+///    This is vaguely hacky, and is used to implement distributivity
+///    of multiplication over addition.
 Handle FoldLink::reduce(void)
 {
 	// The atom table is typically not set when the ctor runs.
@@ -163,8 +170,16 @@ printf("duuude enter reduce at=%p w: %s\n", _atomTable, toShortString().c_str())
 		const Handle& hj = reduct[j];
 		Type jt = hj->getType();
 
-		// Same type. Apply kons, and then recurse.
-		if (it == jt)
+		// Explore two cases.
+		// i and j are the same type. Apply kons, and then recurse.
+		bool do_kons = (it == jt);
+
+		// If j is (DistType x a) and i is identical to x,
+		// then call kons, because kons is distributive.
+		do_kons |= (jt == distributive_type and
+		            LinkCast(hj)->getOutgoingAtom(0) == hi);
+
+		if (do_kons)
 		{
 			Handle cons = kons(hi, hj);
 
