@@ -63,8 +63,8 @@ void BackwardChainer::set_target(Handle init_target)
 
 	_inference_history.clear();
 
-	_targets_set = UnorderedHandleSet();
-	_targets_set.insert(_init_target);
+	_targets_set = std::unordered_set<Target, target_hash>();
+	_targets_set.emplace(_init_target);
 }
 
 /**
@@ -95,10 +95,15 @@ void BackwardChainer::do_step()
 	logger().debug("[BackwardChainer] %d potential targets", _targets_set.size());
 
 	// XXX TODO do proper target selection here using some fitness function
-	Handle selected_target = rand_element(_targets_set);
-
+	Target selected_target = rand_element(_targets_set);
 	VarMultimap subt = process_target(selected_target);
-	VarMultimap& old_subt = _inference_history[selected_target];
+
+	// re-insert target since unordered_set obj are immutable
+	// XXX FIXME this is dumb
+	_targets_set.erase(selected_target);
+	_targets_set.insert(selected_target);
+
+	VarMultimap& old_subt = _inference_history[selected_target.get_handle()];
 
 	logger().debug("[BackwardChainer] End of a single BC step");
 
@@ -123,10 +128,11 @@ VarMultimap& BackwardChainer::get_chaining_result()
  * @param htarget  the atom to do backward chaining on
  * @return         the solution found for this target, if any
  */
-VarMultimap BackwardChainer::process_target(Handle& htarget)
+VarMultimap BackwardChainer::process_target(Target& target)
 {
 	VarMultimap results;
 
+	Handle htarget = target.get_handle();
 	HandleSeq free_vars = get_free_vars_in_tree(htarget);
 
 	// Check whether this target has free variables and worth exploring
@@ -174,7 +180,7 @@ VarMultimap BackwardChainer::process_target(Handle& htarget)
 
 			// If there are free variables, add this soln to the target stack
 			if (not free_vars.empty())
-				_targets_set.insert(soln);
+				_targets_set.emplace(soln);
 
 			// Construct the htarget to all mappings here to be returned
 			for (auto it = vgm.begin(); it != vgm.end(); ++it)
@@ -189,7 +195,7 @@ VarMultimap BackwardChainer::process_target(Handle& htarget)
 		HandleSeq sub_premises = LinkCast(htarget)->getOutgoingSet();
 
 		for (Handle& h : sub_premises)
-			_targets_set.insert(h);
+			_targets_set.emplace(h);
 
 		return results;
 	}
@@ -205,10 +211,12 @@ VarMultimap BackwardChainer::process_target(Handle& htarget)
 	if (acceptable_rules.empty())
 		return results;
 
-	Rule standardized_rule = select_rule(acceptable_rules).gen_standardize_apart(_garbage_superspace);
+	Rule selected_rule = select_rule(acceptable_rules);
+	Rule standardized_rule = selected_rule.gen_standardize_apart(_garbage_superspace);
 
 	logger().debug("[BackwardChainer] Selected rule " + standardized_rule.get_handle()->toShortString());
 
+	target.add_rule(selected_rule);
 	Handle himplicant = standardized_rule.get_implicant();
 	Handle hvardecl = standardized_rule.get_vardecl();
 	HandleSeq outputs = standardized_rule.get_implicand_seq();
@@ -372,7 +380,7 @@ VarMultimap BackwardChainer::process_target(Handle& htarget)
 		// non-logical link can be added straight to targets list
 		if (_logical_link_types.count(hp->getType()) == 0)
 		{
-			_targets_set.insert(hp);
+			_targets_set.emplace(hp);
 			continue;
 		}
 
@@ -380,7 +388,7 @@ VarMultimap BackwardChainer::process_target(Handle& htarget)
 		HandleSeq sub_premises = LinkCast(hp)->getOutgoingSet();
 
 		for (Handle& s : sub_premises)
-			_targets_set.insert(s);
+			_targets_set.emplace(s);
 	}
 
 	return results;
@@ -520,7 +528,7 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
 
 		// if the original htarget is multi-clause, wrap the solution with the
 		// same logical link
-		// XXX TODO preserve htarget's order
+		// XXX TODO preserve htarget's order (but logical link are unordered...)
 		Handle this_result;
 		if (_logical_link_types.count(htarget->getType()) == 1)
 			this_result = _garbage_superspace->addLink(htarget->getType(),
@@ -720,6 +728,7 @@ bool BackwardChainer::unify(const Handle& hsource,
  *
  * XXX TODO apply selection criteria to select one amongst the matching rules
  * XXX better implement target selection first before trying to implement this!
+ * XXX should these selection functions be in callbacks like the ForwardChainer?
  *
  * @param rules   a vector of rules to select from
  * @return        one of the rule

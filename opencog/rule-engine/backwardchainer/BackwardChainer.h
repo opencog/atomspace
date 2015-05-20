@@ -27,6 +27,8 @@
 
 #include <opencog/rule-engine/Rule.h>
 
+#include "Target.h"
+
 class BackwardChainerUTest;
 
 namespace opencog
@@ -118,7 +120,7 @@ public:
 
 private:
 
-	VarMultimap process_target(Handle& htarget);
+	VarMultimap process_target(Target& target);
 
 	std::vector<Rule> filter_rules(Handle htarget);
 	Rule select_rule(const std::vector<Rule>& rules);
@@ -145,7 +147,8 @@ private:
 
 	// XXX TODO add information to each target stating what rules were applied
 	// and how often the target was chosen?
-	UnorderedHandleSet _targets_set;
+	//UnorderedHandleSet _targets_set;
+	unordered_set<Target, target_hash> _targets_set;
 	std::vector<Rule> _rules_set;
 
 	// XXX any additional link should be reflected
