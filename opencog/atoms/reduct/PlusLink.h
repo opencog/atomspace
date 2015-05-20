@@ -47,8 +47,6 @@ protected:
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	virtual Handle reorder(void);
-
 public:
 	PlusLink(const Handle& a, const Handle& b,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),

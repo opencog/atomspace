@@ -86,6 +86,10 @@ static inline double get_double(const Handle& h)
 
 static Handle hplus(const Handle& fi, const Handle& fj)
 {
+printf("duuude enter hplus!\nfi=%s\nfj=%s\n",
+fi->toShortString().c_str(),
+fj->toShortString().c_str()
+);
 	// Are they numbers?
 	if (NUMBER_NODE == fi->getType() and
 	    NUMBER_NODE == fj->getType())
@@ -152,7 +156,7 @@ static Handle hplus(const Handle& fi, const Handle& fj)
 	// If we are here, we've been asked to add two things of the same
 	// type, but they are not of a type that we know how to add.
 	// For example, fi anf fj might be two different VariableNodes.
-	return Handle(createPlusLink(fi, fj));
+	return Handle(createPlusLink(fi, fj)->reorder());
 }
 
 void PlusLink::init(void)
@@ -160,47 +164,6 @@ void PlusLink::init(void)
 	knild = 0.0;
 	konsd = plus;
 	kons = hplus;
-}
-
-// ============================================================
-
-/// re-order the contents of a PlusLink into "lexicographic" order.
-///
-/// The goal of the re-ordering is to simplify the reduction code,
-/// by placing atoms where they are easily found.  For now, this
-/// means:
-/// first, all of the variables,
-/// next, all compound expressions,
-/// last, all number nodes (of which there should be only zero or one.)
-/// We do not currently sort the variables, but maybe we should...?
-/// The FoldLink::reduce() method already returns expressions that are
-/// almost in the correct order.
-Handle PlusLink::reorder(void)
-{
-	HandleSeq vars;
-	HandleSeq exprs;
-	HandleSeq numbers;
-
-	for (const Handle& h : _outgoing)
-	{
-		if (h->getType() == VARIABLE_NODE)
-			vars.push_back(h);
-		else if (h->getType() == NUMBER_NODE)
-			numbers.push_back(h);
-		else
-			exprs.push_back(h);
-	}
-
-	if (1 < numbers.size())
-		throw RuntimeException(TRACE_INFO,
-		      "Expecting the plus link to have already been reduced!");
-
-	HandleSeq result;
-	for (const Handle& h : vars) result.push_back(h);
-	for (const Handle& h : exprs) result.push_back(h);
-	for (const Handle& h : numbers) result.push_back(h);
-
-	return Handle(createPlusLink(result));
 }
 
 // ============================================================

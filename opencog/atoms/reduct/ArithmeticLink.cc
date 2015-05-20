@@ -72,6 +72,7 @@ void ArithmeticLink::init(void)
 	konsd = NULL;
 }
 
+// ===========================================================
 /// reduce() -- reduce the expression by summing constants, etc.
 ///
 /// No actual black-box evaluation or execution is performed. Only
@@ -85,7 +86,51 @@ void ArithmeticLink::init(void)
 /// thing itself.
 Handle ArithmeticLink::reduce(void)
 {
-	return FoldLink::reduce();
+	Handle red(FoldLink::reduce());
+	ArithmeticLinkPtr alp(ArithmeticLinkCast(red));
+	if (NULL == alp) return red;
+	return red->reduce();
+}
+
+// ============================================================
+
+/// re-order the contents of an ArithmeticLink into "lexicographic" order.
+///
+/// The goal of the re-ordering is to simplify the reduction code,
+/// by placing atoms where they are easily found.  For now, this
+/// means:
+/// first, all of the variables,
+/// next, all compound expressions,
+/// last, all number nodes (of which there should be only zero or one.)
+/// We do not currently sort the variables, but maybe we should...?
+/// The FoldLink::reduce() method already returns expressions that are
+/// almost in the correct order.
+Handle ArithmeticLink::reorder(void)
+{
+	HandleSeq vars;
+	HandleSeq exprs;
+	HandleSeq numbers;
+
+	for (const Handle& h : _outgoing)
+	{
+		if (h->getType() == VARIABLE_NODE)
+			vars.push_back(h);
+		else if (h->getType() == NUMBER_NODE)
+			numbers.push_back(h);
+		else
+			exprs.push_back(h);
+	}
+
+	if (1 < numbers.size())
+		throw RuntimeException(TRACE_INFO,
+		      "Expecting the plus link to have already been reduced!");
+
+	HandleSeq result;
+	for (const Handle& h : vars) result.push_back(h);
+	for (const Handle& h : exprs) result.push_back(h);
+	for (const Handle& h : numbers) result.push_back(h);
+
+	return Handle(FunctionLink::factory(getType(), result));
 }
 
 // ===========================================================
@@ -123,3 +168,4 @@ Handle ArithmeticLink::execute(AtomSpace* as) const
 	if (as) return as->addAtom(createNumberNode(sum));
 	return Handle(createNumberNode(sum));
 }
+// ===========================================================

@@ -55,6 +55,7 @@ public:
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 	ArithmeticLink(Link& l);
 
+	virtual Handle reorder(void);
    virtual Handle reduce(void);
 	virtual Handle execute(AtomSpace* as) const;
 };
