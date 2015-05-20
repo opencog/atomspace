@@ -5,6 +5,7 @@ ADD_LIBRARY(ruleengine SHARED
 	backwardchainer/BackwardChainer.cc
 	backwardchainer/BackwardChainerPMCB.cc
 	backwardchainer/UnifyPMCB.cc
+	backwardchainer/Target.cc
 	URECommons.cc
 	forwardchainer/ForwardChainer.cc
 	forwardchainer/ForwardChainInputMatchCB.cc
