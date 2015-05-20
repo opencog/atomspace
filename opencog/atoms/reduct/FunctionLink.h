@@ -52,10 +52,6 @@ namespace opencog
 class FunctionLink : public FreeLink
 {
 protected:
-	FunctionLink(Type, const HandleSeq& oset,
-	             TruthValuePtr tv = TruthValue::NULL_TV(),
-	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
 	FunctionLink(Type, const Handle& a,
 	             TruthValuePtr tv = TruthValue::NULL_TV(),
 	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
@@ -65,6 +61,10 @@ protected:
 	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 public:
+	FunctionLink(Type, const HandleSeq& oset,
+	             TruthValuePtr tv = TruthValue::NULL_TV(),
+	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
 	FunctionLink(Link& l);
 	virtual ~FunctionLink() {}
 

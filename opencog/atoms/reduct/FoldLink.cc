@@ -66,10 +66,18 @@ FoldLink::FoldLink(Link& l)
 	init();
 }
 
-void FoldLink::init(void)
-{
-	knil = std::numeric_limits<double>::quiet_NaN();
-	kons = NULL;
+void FoldLink::init(void) {}
+
+// ===============================================================
+
+// Place the result into the same atomspace we are in.
+// XXX this is bad, buggy, uncomfortable, icky: it pollutes
+// the atomspace with intermediate results. This needs to
+// be fixed somehow. Right now, I don't know how.
+#define DO_RETURN(result) { \
+	if (not _atomTable) return (result); \
+	AtomSpace* as = _atomTable->getAtomSpace(); \
+	return as->addAtom(result); \
 }
 
 /// reduce() -- reduce the expression by summing constants, etc.
@@ -83,111 +91,146 @@ void FoldLink::init(void)
 /// The reduct of (FoldLink (VariableNode "$x") (NumberNode 0)) is
 /// (VariableNode "$x"), because adding zero to anything yeilds the
 /// thing itself.
+///
+/// This routine is pretending to be more general, though, than simply
+/// reducing numeric expressions.  It makes the following assumptions
+/// and performs the following actions:
+///
+/// 1) It is always safe to remove knil from a list. That is, knil is
+///    always a unit.
+/// 2) Two neighboring elements of the same type can always be kons'ed
+///    together with each-other.  That is, kons is called on two
+///    neighbors that have the same type. That is, this assumes that
+///    the list has the associative property, so that neighboring
+///    elements can always be cons'ed together.
+/// 3) It does not asssume the commutative property.
+/// 4) If distributive_type is set, then kons is called when it seems
+///    that one neigboring element might distribute into the next.
+///    This is vaguely hacky, and is used to implement distributivity
+///    of multiplication over addition.
+///
+/// For something as simple as the above, the code below is
+/// annoyingly complicated.  This is certainly not an efficient,
+/// effective way to build a computer algebra system.  It works, its
+/// just barely good enough for single-variable arithmetic, but that's
+/// all.  For general reduction tasks, there are two choices:
+///
+/// A) Convert atoms to some other CAS format, reduce that, and then
+///    convert back to atoms.
+///
+/// B) Figure out why the atomspace is so ungainly, and fix it so that
+///    it is both easy (easier) to use, and also is high-performance.
+///
+/// Obviously, B) is much harder than A) but is probably more important.
 Handle FoldLink::reduce(void)
 {
-	// Assume that the expression is a mixture of constants and variables.
-	// Sum the constants, and eliminate the nils.
+	// The atom table is typically not set when the ctor runs.
+	// So fix it up now.
+	if (_atomTable)
+		knil = _atomTable->getAtomSpace()->addAtom(knil);
+
 	HandleSeq reduct;
 	bool did_reduce = false;
-	double sum = knil;
+
+	// First, reduce the outgoing set. Loop over the outgoing set,
+	// and call reduce on everything reducible.  Remove all occurances
+	// of knil, while we are at it.
 	for (const Handle& h: _outgoing)
 	{
 		Type t = h->getType();
-		if (NUMBER_NODE != t and
-		    VARIABLE_NODE != t and
-		    (not classserver().isA(t, FUNCTION_LINK))
-		)
-			throw RuntimeException(TRACE_INFO,
-				"Don't know how to reduce %s", h->toShortString().c_str());
 
-		Handle redh(h);
 		if (classserver().isA(t, FUNCTION_LINK))
 		{
 			FunctionLinkPtr fff(FunctionLinkCast(h));
 			if (NULL == fff)
 				fff = createFunctionLink(*LinkCast(h));
 
-			redh = fff->reduce();
-			t = redh->getType();
+			Handle redh = fff->reduce();
+			if (h != redh)
+			{
+				did_reduce = true;
+				if (redh != knil)
+					reduct.push_back(redh);
+			}
+			else if (h != knil)
+				reduct.push_back(h);
+			else
+				did_reduce = true;
 		}
-
-		if (h != redh) did_reduce = true;
-
-		if (NUMBER_NODE == t)
-		{
-			NumberNodePtr nnn(NumberNodeCast(redh));
-			if (NULL == nnn)
-				nnn = createNumberNode(*NodeCast(redh));
-			sum = kons(sum, nnn->getValue());
+		else if (h != knil)
+			reduct.push_back(h);
+		else
 			did_reduce = true;
-			continue;
+	}
+
+	// If it reduced down to one element, we are done.
+	size_t osz = reduct.size();
+	if (1 == osz)
+	{
+		if (not did_reduce)
+			return getHandle();
+		DO_RETURN(reduct[0]);
+	}
+
+	// Next, search for two neighboring atoms of the same type.
+	// If two atoms of the same type are found, apply kons to them.
+	// Also handle the distributive case.
+	for (size_t i = 0; i < osz-1; i++)
+	{
+		const Handle& hi = reduct[i];
+		Type it = hi->getType();
+
+		size_t j = i+1;
+		const Handle& hj = reduct[j];
+		Type jt = hj->getType();
+
+		// Explore two cases.
+		// i and j are the same type. Apply kons, and then recurse.
+		bool do_kons = (it == jt);
+
+		// If j is (DistType x a) and i is identical to x,
+		// then call kons, because kons is distributive.
+		do_kons |= (jt == distributive_type and
+		            LinkCast(hj)->getOutgoingAtom(0) == hi);
+
+		if (do_kons)
+		{
+			Handle cons = kons(hi, hj);
+
+			// If there were only two things in total we are done.
+			if (2 == osz)
+				DO_RETURN(cons);
+
+			HandleSeq rere;
+			for (size_t k=0; k < osz; k++)
+			{
+				if (k < i)
+					rere.push_back(reduct[k]);
+				else if (k == i)
+					rere.push_back(cons);
+				else if (j < k)
+					rere.push_back(reduct[k]);
+			}
+
+			// Create the reduced atom, and recurse.
+			// We need to insert it into the atomspace,
+			// so that knil gets placed into the atomspace
+			// when reduce is called; else the knil
+			// compares up above fail.
+			Handle foo(createLink(getType(), rere));
+			if (_atomTable)
+				foo = _atomTable->getAtomSpace()->addAtom(foo);
+
+			FunctionLinkPtr flp = FunctionLinkCast(foo);
+			DO_RETURN(Handle(flp->reduce()));
 		}
-		reduct.push_back(redh);
 	}
 
 	// If nothing reduced, nothing to do.
 	if (not did_reduce)
-	{
-		if (1 == _outgoing.size())
-			return _outgoing[0];
 		return getHandle();
-	}
 
-	// If it reduced to just one number:
-	if (0 == reduct.size())
-		return Handle(createNumberNode(sum));
-
-	// If it didn't sum to nil, then we have to keep it.
-	if (knil != sum)
-		reduct.push_back(Handle(createNumberNode(sum)));
-
-	// If it reduced to just one thing:	
-	if (1 == reduct.size()) return reduct[0];
-
-	Handle result(createLink(getType(), reduct));
-
-	// Place the result into the same atomspace we are in.
-	if (_atomTable)
-	{
-		AtomSpace* as = _atomTable->getAtomSpace();
-		return as->addAtom(result);
-	}
-
-	return result;
+	DO_RETURN(Handle(createLink(getType(), reduct)));
 }
 
 // ===========================================================
-
-/// execute() -- Execute the expression, returning a number
-///
-/// Similar to reduce(), above, except that this can only work
-/// on fully grounded (closed) sentences: after executation,
-/// everything must be a number, and there can be no variables
-/// in sight.
-static inline double get_double(AtomSpace *as, Handle h)
-{
-	// Recurse, and execute anything below...
-	FunctionLinkPtr flp(FunctionLinkCast(h));
-	if (flp)
-		h = flp->execute(as);
-
-	NumberNodePtr nnn(NumberNodeCast(h));
-	if (nnn == NULL)
-		throw RuntimeException(TRACE_INFO,
-			  "Expecting a NumberNode, got %s",
-		     classserver().getTypeName(h->getType()).c_str());
-
-	return nnn->getValue();
-}
-
-Handle FoldLink::execute(AtomSpace* as) const
-{
-	double sum = knil;
-	for (Handle h: _outgoing)
-	{
-		sum = kons(sum, get_double(as, h));
-	}
-
-	if (as) return as->addAtom(createNumberNode(sum));
-	return Handle(createNumberNode(sum));
-}

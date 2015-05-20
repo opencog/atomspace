@@ -1,12 +1,12 @@
 /*
- * opencog/atoms/reduct/PlusLink.h
+ * opencog/atoms/reduct/ArithmeticLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
- * published by the Plus Software Foundation and including the exceptions
+ * published by the Arithmetic Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
@@ -16,15 +16,15 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
- * Plus Software Foundation, Inc.,
+ * Arithmetic Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_PLUS_LINK_H
-#define _OPENCOG_PLUS_LINK_H
+#ifndef _OPENCOG_ARITHMETIC_LINK_H
+#define _OPENCOG_ARITHMETIC_LINK_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/reduct/ArithmeticLink.h>
+#include <opencog/atoms/reduct/FoldLink.h>
 
 namespace opencog
 {
@@ -33,44 +33,44 @@ namespace opencog
  */
 
 /**
- * The PlusLink implements the mathematical operation of "plus"
+ * The ArithmeticLink implements the arithmetic operations of plus
+ * and times. It uses FoldLink to perform reduction.
  */
-class PlusLink : public ArithmeticLink
+class ArithmeticLink : public FoldLink
 {
 protected:
-	virtual double konsd(double, double) const;
-	virtual Handle kons(const Handle&, const Handle&);
+	double knild;
+	virtual double konsd(double, double) const = 0;
 
 	void init(void);
-	PlusLink(Type, const HandleSeq& oset,
+	ArithmeticLink(Type, const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	PlusLink(Type, const Handle& a, const Handle& b,
+	ArithmeticLink(Type, const Handle& a, const Handle& b,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
 public:
-	PlusLink(const Handle& a, const Handle& b,
+	ArithmeticLink(const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	ArithmeticLink(Link& l);
 
-	PlusLink(const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-	PlusLink(Link& l);
+	virtual Handle reorder(void);
+   virtual Handle reduce(void);
+	virtual Handle execute(AtomSpace* as) const;
 };
 
-typedef std::shared_ptr<PlusLink> PlusLinkPtr;
-static inline PlusLinkPtr PlusLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<PlusLink>(a); }
-static inline PlusLinkPtr PlusLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<PlusLink>(a); }
+typedef std::shared_ptr<ArithmeticLink> ArithmeticLinkPtr;
+static inline ArithmeticLinkPtr ArithmeticLinkCast(const Handle& h)
+   { AtomPtr a(h); return std::dynamic_pointer_cast<ArithmeticLink>(a); }
+static inline ArithmeticLinkPtr ArithmeticLinkCast(AtomPtr a)
+   { return std::dynamic_pointer_cast<ArithmeticLink>(a); }
 
 // XXX temporary hack ...
-#define createPlusLink std::make_shared<PlusLink>
+#define createArithmeticLink std::make_shared<ArithmeticLink>
 
 /** @}*/
 }
 
-#endif // _OPENCOG_PLUS_LINK_H
+#endif // _OPENCOG_ARITHMETIC_LINK_H
