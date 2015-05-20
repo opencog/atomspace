@@ -138,7 +138,9 @@ private:
 	AtomSpace* _garbage_superspace;
 	Handle _init_target;
 
-	// a map of a premise, to a map of its variables mapping
+	// a map of a target, to a map of its variables mapping
+	// XXX TODO add a new kind of history that stores what actually happened on
+	// on each step, creating an inference tree?
 	map<Handle, VarMultimap> _inference_history;
 
 	// XXX TODO add information to each target stating what rules were applied

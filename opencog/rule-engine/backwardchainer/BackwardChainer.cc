@@ -129,7 +129,10 @@ VarMultimap BackwardChainer::process_target(Handle& htarget)
 
 	HandleSeq free_vars = get_free_vars_in_tree(htarget);
 
-	// Check whether this goal has free variables and worth exploring
+	// Check whether this target has free variables and worth exploring
+	// XXX TODO target with no free var will be "Truth Value Query", so need
+	// to do some special handling; the BC algorithm might still work, but
+	// the returned result will be different (not a VarMultimap)
 	if (free_vars.empty())
 	{
 		logger().debug("[BackwardChainer] Boring goal with no free var, "
@@ -137,7 +140,7 @@ VarMultimap BackwardChainer::process_target(Handle& htarget)
 		return results;
 	}
 
-	// Check whether this goal is a virtual link and is useless to explore
+	// Check whether this target is a virtual link and is useless to explore
 	if (classserver().isA(htarget->getType(), VIRTUAL_LINK))
 	{
 		logger().debug("[BackwardChainer] Boring virtual link goal, "
@@ -198,7 +201,7 @@ VarMultimap BackwardChainer::process_target(Handle& htarget)
 	// Find all rules whose implicand can be unified to htarget
 	std::vector<Rule> acceptable_rules = filter_rules(htarget);
 
-	// If no rules to backward chain on, no way to solve this goal
+	// If no rules to backward chain on, no way to solve this target
 	if (acceptable_rules.empty())
 		return results;
 
@@ -213,7 +216,7 @@ VarMultimap BackwardChainer::process_target(Handle& htarget)
 	std::vector<VarMap> all_mappings;
 
 	// A rule can have multiple outputs, and more than one output will unify
-	// to our goal, so get all outputs that works
+	// to our target, so get all outputs that works
 	for (Handle h : outputs)
 	{
 		VarMap temp_mapping;
@@ -295,7 +298,7 @@ VarMultimap BackwardChainer::process_target(Handle& htarget)
 	logger().debug("%d possible permises", possible_premises.size());
 
 	// For each set of possible premises, check if they already
-	// satisfy the goal, so that we can apply the rule while
+	// satisfy the target, so that we can apply the rule while
 	// we are looking at it in the same step
 	for (size_t i = 0; i < possible_premises.size(); i++)
 	{
@@ -507,7 +510,7 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
 
 			// XXX don't want clause that are already in _targets_set?
 			// no need? since things on targets set are in inference history
-			// but only if the target is been inferenced upon...
+			// but only if the target has been inferenced upon...
 
 			i_pred_soln.push_back(p.second);
 		}
