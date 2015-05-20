@@ -72,10 +72,9 @@ TimesLink::TimesLink(Link& l)
 	init();
 }
 
-static double times(double a, double b) { return a*b; }
+double TimesLink::konsd(double a, double b) const { return a*b; }
 
 void TimesLink::init(void)
 {
 	knild = 1.0;
-	konsd = times;
 }

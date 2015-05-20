@@ -73,7 +73,7 @@ PlusLink::PlusLink(Link& l)
 	init();
 }
 
-static double plus(double a, double b) { return a+b; }
+double PlusLink::konsd(double a, double b) const { return a+b; }
 
 static inline double get_double(const Handle& h)
 {
@@ -84,7 +84,7 @@ static inline double get_double(const Handle& h)
 	return nnn->getValue();
 }
 
-static Handle hplus(const Handle& fi, const Handle& fj)
+Handle PlusLink::kons(const Handle& fi, const Handle& fj)
 {
 printf("duuude enter hplus!\nfi=%s\nfj=%s\n",
 fi->toShortString().c_str(),
@@ -162,8 +162,11 @@ fj->toShortString().c_str()
 void PlusLink::init(void)
 {
 	knild = 0.0;
-	konsd = plus;
-	kons = hplus;
+
+	knil = Handle(createNumberNode("0"));
+	if (NULL == _atomTable) return;
+	AtomSpace* as = _atomTable->getAtomSpace();
+	knil = as->addAtom(knil);
 }
 
 // ============================================================

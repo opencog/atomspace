@@ -40,7 +40,10 @@ class ArithmeticLink : public FoldLink
 {
 protected:
 	double knild;
-	double (*konsd) (double, double);
+	virtual double konsd(double, double) const = 0;
+
+   virtual Handle kons(const Handle&, const Handle&);
+
 	void init(void);
 	ArithmeticLink(Type, const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),

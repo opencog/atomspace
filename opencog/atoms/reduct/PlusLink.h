@@ -38,6 +38,9 @@ namespace opencog
 class PlusLink : public ArithmeticLink
 {
 protected:
+	virtual double konsd(double, double) const;
+	virtual Handle kons(const Handle&, const Handle&);
+
 	void init(void);
 	PlusLink(Type, const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),

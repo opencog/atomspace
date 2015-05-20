@@ -38,6 +38,7 @@ namespace opencog
 class TimesLink : public ArithmeticLink
 {
 protected:
+	double konsd(double, double) const;
 	void init(void);
 	TimesLink(Type, const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),

@@ -69,7 +69,6 @@ ArithmeticLink::ArithmeticLink(Link& l)
 void ArithmeticLink::init(void)
 {
 	knild = std::numeric_limits<double>::quiet_NaN();
-	konsd = NULL;
 }
 
 // ===========================================================
@@ -135,6 +134,11 @@ Handle ArithmeticLink::reorder(void)
 
 	AtomSpace* as = _atomTable->getAtomSpace();
 	return as->addAtom(h);
+}
+
+Handle ArithmeticLink::kons(const Handle& fi, const Handle& fj)
+{
+	throw RuntimeException(TRACE_INFO, "not done yet");
 }
 
 // ===========================================================

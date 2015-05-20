@@ -69,7 +69,6 @@ FoldLink::FoldLink(Link& l)
 void FoldLink::init(void)
 {
 	knil = Handle::UNDEFINED;
-	kons = NULL;
 }
 
 // ===============================================================

@@ -42,7 +42,8 @@ class FoldLink : public FunctionLink
 {
 protected:
 	Handle knil;
-	Handle (*kons) (const Handle&, const Handle&);
+	virtual Handle kons(const Handle&, const Handle&) = 0;
+
 	void init(void);
 	FoldLink(Type, const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
