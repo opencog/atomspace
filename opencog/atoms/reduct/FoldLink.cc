@@ -157,13 +157,13 @@ Handle FoldLink::reduce(void)
 	Handle result(createLink(getType(), reduct));
 
 	// Place the result into the same atomspace we are in.
-	if (_atomTable)
-	{
-		AtomSpace* as = _atomTable->getAtomSpace();
-		return as->addAtom(result);
-	}
+	// XXX this is bad, buggy, uncomfortable, icky: it pollutes
+	// the atomspace with intermediate results. This needs to
+	// be fixed somehow. Right now, I don't know how.
+	if (not _atomTable) return result;
 
-	return result;
+	AtomSpace* as = _atomTable->getAtomSpace();
+	return as->addAtom(result);
 }
 
 // ===========================================================

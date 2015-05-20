@@ -77,10 +77,10 @@ void ArithmeticLink::init(void)
 /// No actual black-box evaluation or execution is performed. Only
 /// clearbox reductions are performed.
 ///
-/// Examples: the reduct of (ArithmeticLink (NumberNode 2) (NumberNode 2))
+/// Examples: the reduct of (PlusLink (NumberNode 2) (NumberNode 2))
 /// is (NumberNode 4) -- its just a constant.
 ///
-/// The reduct of (ArithmeticLink (VariableNode "$x") (NumberNode 0)) is
+/// The reduct of (PlusLink (VariableNode "$x") (NumberNode 0)) is
 /// (VariableNode "$x"), because adding zero to anything yeilds the
 /// thing itself.
 Handle ArithmeticLink::reduce(void)
@@ -135,7 +135,13 @@ Handle ArithmeticLink::reduce(void)
 
 	// If it reduced to just one number:
 	if (0 == reduct.size())
-		return Handle(createNumberNode(sum));
+	{
+		Handle nsum(createNumberNode(sum));
+		if (not _atomTable) return nsum;
+
+		AtomSpace* as = _atomTable->getAtomSpace();
+		return as->addAtom(nsum);
+	}
 
 	// If it didn't sum to nil, then we have to keep it.
 	if (knild != sum)
@@ -147,13 +153,10 @@ Handle ArithmeticLink::reduce(void)
 	Handle result(createLink(getType(), reduct));
 
 	// Place the result into the same atomspace we are in.
-	if (_atomTable)
-	{
-		AtomSpace* as = _atomTable->getAtomSpace();
-		return as->addAtom(result);
-	}
+	if (not _atomTable) return result;
 
-	return result;
+	AtomSpace* as = _atomTable->getAtomSpace();
+	return as->addAtom(result);
 }
 
 // ===========================================================

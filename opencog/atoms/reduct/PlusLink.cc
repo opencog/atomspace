@@ -128,7 +128,7 @@ Handle PlusLink::reorder(void)
 Handle PlusLink::reduce(void)
 {
 	// First, let FoldLink do its stuff.
-	Handle fold = FoldLink::reduce();
+	Handle fold = ArithmeticLink::reduce();
 
 	if (PLUS_LINK != fold->getType()) return fold;
 
@@ -231,12 +231,10 @@ Handle PlusLink::reduce(void)
 				// XXX this is bad, buggy, uncomfortable, icky: it pollutes
 				// the atomspace with intermediate results. This needs to
 				// be fixed somehow. Right now, I don't know how.
-				if (_atomTable)
-				{
-					AtomSpace* as = _atomTable->getAtomSpace();
-					return as->addAtom(red);
-				}
-				return red;
+				if (not _atomTable) return red;
+
+				AtomSpace* as = _atomTable->getAtomSpace();
+				return as->addAtom(red);
 			}
 		}
 	}
