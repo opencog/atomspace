@@ -32,6 +32,7 @@ namespace opencog
 class Target
 {
 public:
+	Target() {}
 	Target(const Handle& h);
 	~Target();
 
@@ -51,20 +52,27 @@ public:
 	float get_weight() { return 1.0f; }
 
 private:
-
 	Handle _htarget;
 	std::list<Rule> _applied_rules;
 };
 
-// allow the Target class to be used in unordered_set
-struct target_hash
+
+class TargetsSet
 {
-    size_t operator()(const Target& t ) const
-    {
-        return handle_hash()(t.get_handle());
-    }
+public:
+	TargetsSet();
+	~TargetsSet();
+
+	void insert(Target& t);
+	void emplace(Handle& h);
+	uint size();
+	Target& select();
+
+private:
+	std::unordered_map<Handle, Target> _targets_map;
 };
 
 }
+
 
 #endif // TARGET_H

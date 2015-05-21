@@ -147,8 +147,7 @@ private:
 
 	// XXX TODO add information to each target stating what rules were applied
 	// and how often the target was chosen?
-	//UnorderedHandleSet _targets_set;
-	unordered_set<Target, target_hash> _targets_set;
+	TargetsSet _targets_set;
 	std::vector<Rule> _rules_set;
 
 	// XXX any additional link should be reflected
