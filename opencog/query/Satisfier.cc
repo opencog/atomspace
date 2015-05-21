@@ -25,7 +25,7 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atoms/bind/SatisfactionLink.h>
 
-#include "BindLink.h"
+#include "BindLinkAPI.h"
 #include "Satisfier.h"
 
 using namespace opencog;

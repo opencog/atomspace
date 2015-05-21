@@ -1,5 +1,5 @@
 /*
- * BindLink.h
+ * BindLinkAPI.h
  *
  * Copyright (C) 2014 Linas Vepstas <linasvepstas@gmail.com>
  *
@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_BINDLINK_H
-#define _OPENCOG_BINDLINK_H
+#ifndef _OPENCOG_BINDLINK_API_H
+#define _OPENCOG_BINDLINK_API_H
 
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/TruthValue.h>
@@ -37,4 +37,4 @@ Handle satisfying_set(AtomSpace*, const Handle&);
 
 } // namespace opencog
 
-#endif // _OPENCOG_BINDLINK_H
+#endif // _OPENCOG_BINDLINK_API_H

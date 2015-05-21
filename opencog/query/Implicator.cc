@@ -25,7 +25,7 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atoms/bind/BindLink.h>
 
-#include "BindLink.h"
+#include "BindLinkAPI.h"
 #include "DefaultImplicator.h"
 #include "PatternMatch.h"
 

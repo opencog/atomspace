@@ -145,7 +145,7 @@ SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
 ############################## bindlink #####################
 CYTHON_ADD_MODULE_PYX(bindlink
 	"atomspace.pxd" opencog_atom_types
-	"../../query/BindLink.h")
+	"../../query/BindLinkAPI.h")
 
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "bindlink.cpp")
 
