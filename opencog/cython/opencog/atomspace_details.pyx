@@ -192,7 +192,7 @@ cdef class AtomSpace:
             pytv = TruthValue()
             pytv.cobj = new tv_ptr(tv) # make copy of smart pointer
             return pytv
-        return TruthValue(tv.get().getMean(),tv.get().getCount())
+        return TruthValue(tv.get().getMean(), tv.get().getConfidence())
 
     def set_tv(self, Handle h, TruthValue tv):
         """ Set the TruthValue of an Atom in the AtomSpace """
