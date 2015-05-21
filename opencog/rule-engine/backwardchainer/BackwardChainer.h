@@ -27,6 +27,8 @@
 
 #include <opencog/rule-engine/Rule.h>
 
+#include "Target.h"
+
 class BackwardChainerUTest;
 
 namespace opencog
@@ -118,7 +120,7 @@ public:
 
 private:
 
-	VarMultimap process_target(Handle& htarget);
+	VarMultimap process_target(Target& target);
 
 	std::vector<Rule> filter_rules(Handle htarget);
 	Rule select_rule(const std::vector<Rule>& rules);
@@ -138,12 +140,14 @@ private:
 	AtomSpace* _garbage_superspace;
 	Handle _init_target;
 
-	// a map of a premise, to a map of its variables mapping
+	// a map of a target, to a map of its variables mapping
+	// XXX TODO add a new kind of history that stores what actually happened on
+	// on each step, creating an inference tree?
 	map<Handle, VarMultimap> _inference_history;
 
 	// XXX TODO add information to each target stating what rules were applied
 	// and how often the target was chosen?
-	UnorderedHandleSet _targets_set;
+	TargetsSet _targets_set;
 	std::vector<Rule> _rules_set;
 
 	// XXX any additional link should be reflected
