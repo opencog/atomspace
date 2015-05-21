@@ -411,7 +411,9 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             for (const Handle& h : lll->getOutgoingSet()) {
                 closet.push_back(add(h, async));
             }
-            atom = createLink(atom_type, closet);
+            atom = createLink(atom_type, closet,
+                              atom->getTruthValue(),
+                              atom->getAttentionValue());
         }
         atom = clone_factory(atom_type, atom);
     }
