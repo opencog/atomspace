@@ -342,12 +342,13 @@ static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
     dependency between python and itself: python depends on
     ExecutionOutputLink, and ExecutionOutputLink depends on python.
     Boo.  I tried fixing this, but it is hard, somehow.
-
-    if (EVALUATION_LINK == atom_type)
-        return createEvaluationLink(*LinkCast(atom));
-    if (EXECUTION_OUTPUT_LINK == atom_type)
-        return createExecutionOutputLink(*LinkCast(atom));
 */
+    if (EVALUATION_LINK == atom_type)
+        // return createEvaluationLink(*LinkCast(atom));
+        return createLink(*LinkCast(atom));
+    if (EXECUTION_OUTPUT_LINK == atom_type)
+        //return createExecutionOutputLink(*LinkCast(atom));
+        return createLink(*LinkCast(atom));
     if (SATISFACTION_LINK == atom_type)
         return createSatisfactionLink(*LinkCast(atom));
     if (SCOPE_LINK == atom_type)
