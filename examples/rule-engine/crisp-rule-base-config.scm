@@ -18,11 +18,11 @@
 ; is currently undefined, we might settled with probabilities but it's
 ; not sure)
 (MemberLink (stv 0.4 1)
-   (ConceptNode "crisp-rule-base-modus-ponens-rule")
+   (Node "crisp-rule-base-modus-ponens-rule")
    (ConceptNode "crisp-rule-base")
 )
 (MemberLink (stv 0.6 1)
-   (ConceptNode "crisp-rule-base-deduction-rule")
+   (Node "crisp-rule-base-deduction-rule")
    (ConceptNode "crisp-rule-base")
 )
 
