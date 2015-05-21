@@ -63,7 +63,7 @@ void BackwardChainer::set_target(Handle init_target)
 
 	_inference_history.clear();
 
-	_targets_set = std::unordered_set<Target, target_hash>();
+	_targets_set = TargetsSet();
 	_targets_set.emplace(_init_target);
 }
 
@@ -95,14 +95,9 @@ void BackwardChainer::do_step()
 	logger().debug("[BackwardChainer] %d potential targets", _targets_set.size());
 
 	// XXX TODO do proper target selection here using some fitness function
-	Target selected_target = rand_element(_targets_set);
+	Target& selected_target = _targets_set.select();
+
 	VarMultimap subt = process_target(selected_target);
-
-	// re-insert target since unordered_set obj are immutable
-	// XXX FIXME this is dumb
-	_targets_set.erase(selected_target);
-	_targets_set.insert(selected_target);
-
 	VarMultimap& old_subt = _inference_history[selected_target.get_handle()];
 
 	logger().debug("[BackwardChainer] End of a single BC step");
