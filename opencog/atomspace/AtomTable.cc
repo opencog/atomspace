@@ -290,10 +290,14 @@ static AtomPtr factory(Type atom_type, AtomPtr atom)
     ExecutionOutputLink, and ExecutionOutputLink depends on python.
     Boo.  I tried fixing this, but it is hard, somehow.
 
+*/
     } else if (EVALUATION_LINK == atom_type) {
+/*
         if (NULL == EvaluationLinkCast(atom))
             return createEvaluationLink(*LinkCast(atom));
+*/
     } else if (EXECUTION_OUTPUT_LINK == atom_type) {
+/*
         if (NULL == ExecutionOutputLinkCast(atom))
             return createExecutionOutputLink(*LinkCast(atom));
 */
