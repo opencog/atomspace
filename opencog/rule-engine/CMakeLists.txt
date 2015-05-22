@@ -15,6 +15,7 @@ ADD_LIBRARY(ruleengine SHARED
 	InferenceSCM.cc
 	Rule.cc
 	JsonicControlPolicyParamLoader.cc
+    UREConfigReader.cc
 )
 
 ADD_DEPENDENCIES(ruleengine
