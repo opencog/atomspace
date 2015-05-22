@@ -114,12 +114,6 @@ protected:
 	void common_init(void);
 	void setup_components(void);
 
-	// Used only to set up multi-component links.
-	PatternLink(const std::set<Handle>& vars,
-	             const VariableTypeMap& typemap,
-	             const HandleSeq& component,
-	             const std::set<Handle>& optionals);
-
 	// Only derived classes can call this
 	PatternLink(Type, const HandleSeq&,
 	            TruthValuePtr tv = TruthValue::DEFAULT_TV(),
@@ -142,10 +136,21 @@ public:
 
 	PatternLink(Link &l);
 
+	// Used only to set up multi-component links.
+	// DO NOT call this!
+	PatternLink(const std::set<Handle>& vars,
+	             const VariableTypeMap& typemap,
+	             const HandleSeq& component,
+	             const std::set<Handle>& optionals);
+
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _varlist; }
 
 	const Handle& get_body(void) const { return _body; }
+
+	// XXX temp hack till things get sorted out; remove this method
+	// later.
+	const Pattern& get_pattern(void) { return _pat; }
 
 	bool satisfy(PatternMatchCallback&) const;
 

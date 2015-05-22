@@ -57,10 +57,7 @@ protected:
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	HandleSeq _component_patterns;
-
 	void init(void);
-	void setup_sat_body(void);
 
 public:
 	SatisfactionLink(const Handle& body,
@@ -79,9 +76,6 @@ public:
 
 	SatisfactionLink(const std::set<Handle> &vars,
 	                 const HandleSeq& clauses);
-
-	// XXX temp hack till things get sorted out; remove this method later.
-	const Pattern& get_pattern(void) { return _pat; }
 
 	bool satisfy(PatternMatchCallback&) const;
 };

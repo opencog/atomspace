@@ -23,14 +23,14 @@
 #ifndef _OPENCOG_BIND_LINK_H
 #define _OPENCOG_BIND_LINK_H
 
-#include <opencog/atoms/bind/SatisfactionLink.h>
+#include <opencog/atoms/bind/PatternLink.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
-class BindLink : public SatisfactionLink
+class BindLink : public PatternLink
 {
 protected:
 	void init(void);

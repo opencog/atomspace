@@ -26,7 +26,6 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomutils/FindUtils.h>
 
-#include "PatternUtils.h"
 #include "SatisfactionLink.h"
 
 using namespace opencog;
@@ -36,55 +35,32 @@ void SatisfactionLink::init(void)
 	extract_variables(_outgoing);
 	unbundle_clauses(_body);
 	common_init();
-	setup_sat_body();
-}
-
-/// The second half of the common initialization sequence
-void SatisfactionLink::setup_sat_body(void)
-{
-	_pat.redex_name = "anonymous SatisfactionLink";
-
-	// If we are here, then set up a ConcreteLink for each connected
-	// component.  Use emplace_back to avoid a copy.
-	//
-	// There is a pathological case where there are no virtuals, but
-	// there are multiple disconnected components.  I think that this is
-	// a user-error, but in fact PLN does have a rule which wants to
-	// explore that combinatoric explosion, on purpose. So we have to
-	// allow the multiple disconnected components for that case.
-	_component_patterns.reserve(_num_comps);
-	for (size_t i=0; i<_num_comps; i++)
-	{
-		Handle h(createConcreteLink(_component_vars[i], _varlist.typemap,
-		                            _components[i], _pat.optionals));
-		_component_patterns.push_back(h);
-	}
 }
 
 SatisfactionLink::SatisfactionLink(const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
-	: ConcreteLink(SATISFACTION_LINK, hseq, tv, av)
+	: PatternLink(SATISFACTION_LINK, hseq, tv, av)
 {
 	init();
 }
 
 SatisfactionLink::SatisfactionLink(const Handle& body,
                    TruthValuePtr tv, AttentionValuePtr av)
-	: ConcreteLink(SATISFACTION_LINK, HandleSeq({body}), tv, av)
+	: PatternLink(SATISFACTION_LINK, HandleSeq({body}), tv, av)
 {
 	init();
 }
 
 SatisfactionLink::SatisfactionLink(const Handle& vars, const Handle& body,
                    TruthValuePtr tv, AttentionValuePtr av)
-	: ConcreteLink(SATISFACTION_LINK, HandleSeq({vars, body}), tv, av)
+	: PatternLink(SATISFACTION_LINK, HandleSeq({vars, body}), tv, av)
 {
 	init();
 }
 
 SatisfactionLink::SatisfactionLink(Type t, const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
-	: ConcreteLink(t, hseq, tv, av)
+	: PatternLink(t, hseq, tv, av)
 {
 	// BindLink has a different clause initialization sequence
 	if (SATISFACTION_LINK != t) return;
@@ -92,7 +68,7 @@ SatisfactionLink::SatisfactionLink(Type t, const HandleSeq& hseq,
 }
 
 SatisfactionLink::SatisfactionLink(Link &l)
-	: ConcreteLink(l)
+	: PatternLink(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
@@ -111,15 +87,15 @@ SatisfactionLink::SatisfactionLink(Link &l)
 /// Constructor that takes a pre-determined set of variables, and
 /// a list of clauses to solve.  This is currently kind-of crippled,
 /// since no variable type restricions are possible, and no optionals,
-/// either.  By contrast, the ConcreteLink constructor does allow these
+/// either.  By contrast, the PatternLink constructor does allow these
 /// things, but it does not allow virtual links. Alas.
 SatisfactionLink::SatisfactionLink(const std::set<Handle>& vars,
                                    const HandleSeq& clauses)
-	: ConcreteLink(SATISFACTION_LINK, HandleSeq())
+	: PatternLink(SATISFACTION_LINK, HandleSeq())
 {
 	_varlist.varset = vars;
 	_pat.clauses = clauses;
-	setup_sat_body();
+	common_init();
 }
 
 /* ===================== END OF FILE ===================== */

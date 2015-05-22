@@ -58,7 +58,7 @@ void PatternLink::common_init(void)
 	_num_comps = _components.size();
 
 	// If there is only one connected component, then this can be
-	// handled during search by a single ConcreteLink. The multi-clause
+	// handled during search by a single PatternLink. The multi-clause
 	// grounding mechanism is not required for that case.
 	if (1 == _num_comps)
 	{
@@ -74,7 +74,7 @@ void PatternLink::common_init(void)
 /// The second half of the common initialization sequence
 void PatternLink::setup_components(void)
 {
-	// If we are here, then set up a PattrnLink for each connected
+	// If we are here, then set up a PatternLink for each connected
 	// component.  Use emplace_back to avoid a copy.
 	//
 	// There is a pathological case where there are no virtuals, but
@@ -85,8 +85,8 @@ void PatternLink::setup_components(void)
 	_component_patterns.reserve(_num_comps);
 	for (size_t i=0; i<_num_comps; i++)
 	{
-		Handle h(createConcreteLink(_component_vars[i], _varlist.typemap,
-		                            _components[i], _pat.optionals));
+		Handle h(createPatternLink(_component_vars[i], _varlist.typemap,
+		                           _components[i], _pat.optionals));
 		_component_patterns.push_back(h);
 	}
 }
@@ -149,7 +149,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
 	                 _fixed, _virtual, _pat.black);
 	_num_virts = _virtual.size();
-	OC_ASSERT (1 == _num_virts, "Number of virtuals should be exactly one");
+	OC_ASSERT (0 == _num_virts, "Must not have any virtuals!");
 
 	_components.push_back(compo);
 	_num_comps = 1;
