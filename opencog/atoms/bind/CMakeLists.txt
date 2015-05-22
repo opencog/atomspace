@@ -9,6 +9,7 @@ ADD_LIBRARY (lambda SHARED
 	DefineLink.cc
 	DeleteLink.cc
 	GetLink.cc
+	PatternLink.cc
 	PatternUtils.cc
 	SatisfactionLink.cc
 	ScopeLink.cc
@@ -37,6 +38,7 @@ INSTALL (FILES
 	BindLink.h
 	ConcreteLink.h
 	GetLink.h
+	PatternLink.h
 	PatternUtils.h
 	SatisfactionLink.h
 	VariableList.h

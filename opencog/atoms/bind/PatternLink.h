@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/ConcreteLink.h
+ * opencog/atoms/PatternLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -20,13 +20,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_CONCRETE_LINK_H
-#define _OPENCOG_CONCRETE_LINK_H
+#ifndef _OPENCOG_PATTERN_LINK_H
+#define _OPENCOG_PATTERN_LINK_H
 
 #include <unordered_map>
 
 #include <opencog/query/Pattern.h>
-#include <opencog/atoms/bind/PatternLink.h>
 #include <opencog/atoms/bind/VariableList.h>
 #include <opencog/query/PatternMatchCallback.h>
 
@@ -37,12 +36,12 @@ namespace opencog
  *  @{
  */
 
-/// The ConcreteLink specifies an (optional) list of variables, and a
+/// The PatternLink specifies an (optional) list of variables, and a
 /// pattern (containing those variables) that is to be grounded
 /// (satisfied).  If no list of variables is specified, then all free
 /// variables are extracted and used for grounding.
 ///
-/// The body of the ConcreteLink is assumed to collection of clauses
+/// The body of the PatternLink is assumed to collection of clauses
 /// to be satsified. Thus, the body is typically an AndLink, OrLink
 /// or a SequentialAnd, depending on how they are to be satsified.
 /// This is very much like a SatisfactionLink, with one exception:
@@ -64,45 +63,90 @@ namespace opencog
 ///
 /// The (cog-satisfy) scheme call can ground this link, and return
 /// a truth value.
-class ConcreteLink : public PatternLink
+class PatternLink : public Link
 {
 protected:
+	// The link to be grounded.
+	Handle _body;
+
+	// The variables to be grounded
+	Variables _varlist;
+
+	// The pattern that is specified by this link.
+	Pattern _pat;
+
+	void extract_variables(const HandleSeq& oset);
+	void unbundle_clauses(const Handle& body);
+	void validate_clauses(std::set<Handle>& vars,
+	                      HandleSeq& clauses);
+
+	void extract_optionals(const std::set<Handle> &vars,
+	                       const std::vector<Handle> &component);
+
+	void unbundle_virtual(const std::set<Handle>& vars,
+	                      const HandleSeq& clauses,
+	                      HandleSeq& concrete_clauses,
+	                      HandleSeq& virtual_clauses,
+	                      std::set<Handle>& black_clauses);
+
+	void trace_connectives(const std::set<Type>&,
+	                       const HandleSeq& clauses);
+
+	void check_connectivity(const std::vector<HandleSeq>&);
+
+	void make_connectivity_map(const HandleSeq&);
+	void make_map_recursive(const Handle&, const Handle&);
+
 	void init(void);
+	void common_init(void);
 
 	// Only derived classes can call this
-	ConcreteLink(Type, const HandleSeq&,
+	PatternLink(Type, const HandleSeq&,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
+	// utility debug print
+	static void prt(const Handle& h)
+	{
+		printf("%s\n", h->toShortString().c_str());
+	}
 
 public:
-	ConcreteLink(const HandleSeq&,
+	PatternLink(const HandleSeq&,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	ConcreteLink(const Handle& varcdecls, const Handle& body,
+	PatternLink(const Handle& varcdecls, const Handle& body,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	ConcreteLink(Link &l);
+	PatternLink(Link &l);
 
-	ConcreteLink(const std::set<Handle>& vars,
+	PatternLink(const std::set<Handle>& vars,
 	             const VariableTypeMap& typemap,
 	             const HandleSeq& component,
 	             const std::set<Handle>& optionals);
 
+	// Return the list of variables we are holding.
+	const Variables& get_variables(void) const { return _varlist; }
+
+	const Handle& get_body(void) const { return _body; }
+
 	bool satisfy(PatternMatchCallback&) const;
+
+	void debug_print(void) const;
 };
 
-typedef std::shared_ptr<ConcreteLink> ConcreteLinkPtr;
-static inline ConcreteLinkPtr ConcreteLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<ConcreteLink>(a); }
-static inline ConcreteLinkPtr ConcreteLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<ConcreteLink>(a); }
+typedef std::shared_ptr<PatternLink> PatternLinkPtr;
+static inline PatternLinkPtr PatternLinkCast(const Handle& h)
+	{ AtomPtr a(h); return std::dynamic_pointer_cast<PatternLink>(a); }
+static inline PatternLinkPtr PatternLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<PatternLink>(a); }
 
 // XXX temporary hack ...
-#define createConcreteLink std::make_shared<ConcreteLink>
+#define createPatternLink std::make_shared<PatternLink>
 
 /** @}*/
 }
 
-#endif // _OPENCOG_CONCRETE_LINK_H
+#endif // _OPENCOG_PATTERN_LINK_H

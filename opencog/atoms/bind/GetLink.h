@@ -31,14 +31,13 @@ namespace opencog
  *  @{
  */
 
-/// The GetLink is used to specify a list of variables, and a
-/// pattern (containing those variables) that is to be grounded
-/// (satisfied).  Thus, it resembles a ScopeLink, with the difference
-/// being that it has a very specific semantics: the pattern is to be
-/// grounded!
+/// The GetLink is used to specify a list of variables, and a pattern
+/// (containing those variables) that is to be grounded (satisfied).
+/// Thus, it resembles a ScopeLink, with the difference being that it
+/// has a very specific semantics: the pattern is to be grounded!
 ///
 /// The body of the ConcreteLink is assumed to collection of clauses
-/// to be satsified. Thus, the body is typically an AndLink, OrLink
+/// to be satsified. Thus, the body is typically an AndLink, ChoiceLink
 /// or a SequentialAnd, depending on how they are to be satsified.
 /// This is very much like a ConcreteLink, except that it may contain
 /// clauses that are virtual (e.g. GreaterThanLink, or EvaluationLinks

@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_SATISFACTION_LINK_H
 #define _OPENCOG_SATISFACTION_LINK_H
 
-#include <opencog/atoms/bind/ConcreteLink.h>
+#include <opencog/atoms/bind/GetLink.h>
 
 namespace opencog
 {
