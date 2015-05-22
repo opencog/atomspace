@@ -115,7 +115,6 @@ void GreaterThanUTest::test_numeric_greater(void)
     TSM_ASSERT("Failed to run test", people_richer_than_susan);
     TSM_ASSERT("Failed to run test", people_richer_than_obama);
     TSM_ASSERT("Failed to run test", people_richer_than_gates);
-printf("duude here ooo\n");
 
     TS_ASSERT_EQUALS(0, as->getArity(people_richer_than_gates));
     TS_ASSERT_EQUALS(1, as->getArity(people_richer_than_obama));
