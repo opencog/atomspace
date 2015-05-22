@@ -25,7 +25,6 @@
 #include <opencog/util/Logger.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atoms/bind/PatternUtils.h>
-#include <opencog/atoms/bind/SatisfactionLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>

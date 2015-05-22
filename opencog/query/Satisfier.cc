@@ -23,7 +23,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atoms/bind/SatisfactionLink.h>
+#include <opencog/atoms/bind/PatternLink.h>
 
 #include "BindLinkAPI.h"
 #include "Satisfier.h"
@@ -52,15 +52,15 @@ bool SatisfactionSet::grounding(const std::map<Handle, Handle> &var_soln,
 
 TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
 {
-	SatisfactionLinkPtr bl(SatisfactionLinkCast(hlink));
+	PatternLinkPtr bl(PatternLinkCast(hlink));
 	if (NULL == bl)
 	{
 		// If it is a BindLink (for example), we want to use that ctor
 		// instead of the default ctor.
 		if (classserver().isA(hlink->getType(), SATISFACTION_LINK))
-			bl = createSatisfactionLink(*LinkCast(hlink));
-		else
-			bl = createSatisfactionLink(hlink);
+			bl = createPatternLink(*LinkCast(hlink));
+		// else
+			// bl = createPatternLink(hlink);
 	}
 
 	Satisfier sater(as);
@@ -71,15 +71,15 @@ TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
 
 Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink)
 {
-	SatisfactionLinkPtr bl(SatisfactionLinkCast(hlink));
+	PatternLinkPtr bl(PatternLinkCast(hlink));
 	if (NULL == bl)
 	{
 		// If it is a BindLink (for example), we want to use that ctor
 		// instead of the default ctor.
-		if (classserver().isA(hlink->getType(), SATISFACTION_LINK))
-			bl = createSatisfactionLink(*LinkCast(hlink));
-		else
-			bl = createSatisfactionLink(hlink);
+		if (classserver().isA(hlink->getType(), GET_LINK))
+			bl = createPatternLink(*LinkCast(hlink));
+		// else
+			// bl = createPatternLink(hlink);
 	}
 
 	SatisfactionSet sater(as);

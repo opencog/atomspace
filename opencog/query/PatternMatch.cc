@@ -26,7 +26,6 @@
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/PatternLink.h>
-#include <opencog/atoms/bind/SatisfactionLink.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/ClassServer.h>

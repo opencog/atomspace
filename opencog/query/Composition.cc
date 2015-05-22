@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atoms/bind/BetaRedex.h>
-#include <opencog/atoms/bind/SatisfactionLink.h>
+#include <opencog/atoms/bind/PatternLink.h>
 
 #include "PatternMatchEngine.h"
 #include "PatternMatchCallback.h"
@@ -120,14 +120,14 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	BetaRedexPtr cpl(BetaRedexCast(lp));
 
 	// Get the variales and clauses that make up the redex.
-	// We expect the redex body to be a SatisfactionLink.
+	// We expect the redex body to be a PatternLink.
 	// XXX TODO perhaps we should create a special sat-redex-only
 	// link type?
 	Handle hsat(cpl->get_definition());
-	SatisfactionLinkPtr sat_link(SatisfactionLinkCast(hsat));
+	PatternLinkPtr sat_link(PatternLinkCast(hsat));
 	if (NULL == sat_link)
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting SatisfactionLink, got %s",
+			"Expecting PatternLink, got %s",
 				hsat->toString().c_str());
 
 	push_redex();
