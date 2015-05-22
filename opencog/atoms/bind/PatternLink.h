@@ -138,6 +138,10 @@ public:
 	            TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	            AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
+	PatternLink(const Handle& body,
+	            TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	            AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
 	PatternLink(const Handle& varcdecls, const Handle& body,
 	            TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	            AttentionValuePtr av = AttentionValue::DEFAULT_AV());
@@ -151,7 +155,7 @@ public:
 	            const HandleSeq& component,
 	            const std::set<Handle>& optionals);
 
-	// A backwards-compatibility contructor. Do not use.
+	// A backwards-compatibility constructor. Do not use.
 	PatternLink(const std::set<Handle>&,
 	            const HandleSeq&);
 

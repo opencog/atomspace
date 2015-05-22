@@ -184,6 +184,13 @@ PatternLink::PatternLink(const HandleSeq& hseq,
 	init();
 }
 
+PatternLink::PatternLink(const Handle& body,
+                         TruthValuePtr tv, AttentionValuePtr av)
+	: Link(PATTERN_LINK, HandleSeq({body}), tv, av)
+{
+	init();
+}
+
 PatternLink::PatternLink(const Handle& vars, const Handle& body,
                          TruthValuePtr tv, AttentionValuePtr av)
 	: Link(PATTERN_LINK, HandleSeq({vars, body}), tv, av)

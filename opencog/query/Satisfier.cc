@@ -59,8 +59,8 @@ TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
 		// instead of the default ctor.
 		if (classserver().isA(hlink->getType(), SATISFACTION_LINK))
 			bl = createPatternLink(*LinkCast(hlink));
-		// else
-			// bl = createPatternLink(hlink);
+		else
+			bl = createPatternLink(hlink);
 	}
 
 	Satisfier sater(as);
@@ -78,8 +78,8 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink)
 		// instead of the default ctor.
 		if (classserver().isA(hlink->getType(), GET_LINK))
 			bl = createPatternLink(*LinkCast(hlink));
-		// else
-			// bl = createPatternLink(hlink);
+		else
+			bl = createPatternLink(hlink);
 	}
 
 	SatisfactionSet sater(as);
