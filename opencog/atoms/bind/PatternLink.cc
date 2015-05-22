@@ -173,6 +173,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 	_varlist.varset = vars;
 	_pat.clauses = clauses;
 	common_init();
+	setup_components();
 }
 
 /* ================================================================= */
@@ -202,8 +203,8 @@ PatternLink::PatternLink(Type t, const HandleSeq& hseq,
                          TruthValuePtr tv, AttentionValuePtr av)
 	: Link(t, hseq, tv, av)
 {
-	// Derived link-types have other init sequences
-	if (PATTERN_LINK != t) return;
+	// BindLink has other init sequences
+	if (BIND_LINK == t) return;
 	init();
 }
 
@@ -219,8 +220,8 @@ PatternLink::PatternLink(Link &l)
 			"Expecting a PatternLink, got %s", tname.c_str());
 	}
 
-	// Derived link-types have other init sequences
-	if (PATTERN_LINK != tscope) return;
+	// BindLink has other init sequences
+	if (BIND_LINK == tscope) return;
 
 	init();
 }
