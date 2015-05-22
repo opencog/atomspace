@@ -33,10 +33,9 @@
    (NumberNode "20")
 )
 
-; Other parameters (enable attention allocation)
-(ExecutionLink
-   (SchemaNode "URE:attention-allocation")
+; Attention allocation (set the TV strength to 0 to disable it, 1 to
+; enable it)
+(EvaluationLink (stv 0 1)
+   (PredicateNode "URE:attention-allocation")
    (ConceptNode "crisp-rule-base")
-   (ConceptNode "False") ; "True" or "False", maybe we should create
-                         ; an Atomese Boolean Type
 )
