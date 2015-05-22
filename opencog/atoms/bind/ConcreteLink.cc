@@ -41,22 +41,10 @@ void ConcreteLink::init(void)
 	_pat.redex_name = "anonymous ConcreteLink";
 	extract_variables(_outgoing);
 	unbundle_clauses(_body);
-	validate_clauses(_varlist.varset, _pat.clauses);
-	extract_optionals(_varlist.varset, _pat.clauses);
-
-	// Locate the black-box clauses.
-	HandleSeq concs, virts;
-	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
-	                 concs, virts, _pat.black);
-
-	// Check to make sure the graph is connected. As a side-effect,
-	// the (only) component is sorted into connection-order.
-   std::vector<HandleSeq> comps;
-   std::vector<std::set<Handle>> comp_vars;
-	get_connected_components(_varlist.varset, _pat.cnf_clauses, comps, comp_vars);
+	common_init();
 
 	// Throw error if more than one component!
-	check_connectivity(comps);
+	check_connectivity(_components);
 
 	// This puts them into connection-order.
 	_pat.cnf_clauses = comps[0];
@@ -64,13 +52,40 @@ void ConcreteLink::init(void)
 	make_connectivity_map(_pat.cnf_clauses);
 }
 
+/* ================================================================= */
+/**
+ * Check that all clauses are connected
+ */
+void PatternLink::check_connectivity(
+	const std::vector<HandleSeq>& components)
+{
+	if (1 == components.size()) return;
+
+	// Users are going to be stumped by this one, so print
+	// out a verbose, user-freindly debug message to help
+	// them out.
+	std::stringstream ss;
+	ss << "Pattern is not connected! Found "
+	   << components.size() << " components:\n";
+	int cnt = 1;
+	for (const auto& comp : components)
+	{
+		ss << "Connected component " << cnt
+		   << " consists of ----------------: \n";
+		for (Handle h : comp) ss << h->toString();
+		cnt++;
+	}
+	throw InvalidParamException(TRACE_INFO, ss.str().c_str());
+}
+
+/* ================================================================= */
 // Special ctor for use by SatisfactionLink; we are given
 // the pre-computed components.
 ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
                            const VariableTypeMap& typemap,
                            const HandleSeq& compo,
                            const std::set<Handle>& opts)
-	: Link(CONCRETE_LINK, HandleSeq())
+	: PatternLink(CONCRETE_LINK, HandleSeq())
 {
 	// First, lets deal with the vars. We have discarded the original
 	// order of the variables, and I think that's OK, because we will
@@ -117,21 +132,21 @@ ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
 
 ConcreteLink::ConcreteLink(const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
-	: Link(CONCRETE_LINK, hseq, tv, av)
+	: PatternLink(CONCRETE_LINK, hseq, tv, av)
 {
 	init();
 }
 
 ConcreteLink::ConcreteLink(const Handle& vars, const Handle& body,
                    TruthValuePtr tv, AttentionValuePtr av)
-	: Link(CONCRETE_LINK, HandleSeq({vars, body}), tv, av)
+	: PatternLink(CONCRETE_LINK, HandleSeq({vars, body}), tv, av)
 {
 	init();
 }
 
 ConcreteLink::ConcreteLink(Type t, const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
-	: Link(t, hseq, tv, av)
+	: PatternLink(t, hseq, tv, av)
 {
 	// Derived link-types have other init sequences
 	if (CONCRETE_LINK != t) return;
@@ -139,7 +154,7 @@ ConcreteLink::ConcreteLink(Type t, const HandleSeq& hseq,
 }
 
 ConcreteLink::ConcreteLink(Link &l)
-	: Link(l)
+	: PatternLink(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();

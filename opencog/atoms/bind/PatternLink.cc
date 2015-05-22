@@ -41,23 +41,21 @@ void PatternLink::common_init(void)
 	extract_optionals(_varlist.varset, _pat.clauses);
 
 	// Locate the black-box clauses.
-	HandleSeq concs, virts;
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
-	                 concs, virts, _pat.black);
+	                 _fixed, _virtual, _pat.black);
+	_num_virts = _virtual.size();
 
-	// Check to make sure the graph is connected. As a side-effect,
-	// the (only) component is sorted into connection-order.
-   std::vector<HandleSeq> comps;
-   std::vector<std::set<Handle>> comp_vars;
-	get_connected_components(_varlist.varset, _pat.cnf_clauses, comps, comp_vars);
+	// unbundle_virtual does not handle connectives. Here, we assume that
+	// we are being run with the DefaultPatternMatchCB, and so we assume
+	// that the logical connectives are AndLink, OrLink and NotLink.
+	// Tweak the evaluatable_holders to reflect this.
+	std::set<Type> connectives({AND_LINK, OR_LINK, NOT_LINK});
+	trace_connectives(connectives, _pat.clauses);
 
-	// Throw error if more than one component!
-	check_connectivity(comps);
-
-	// This puts them into connection-order.
-	_pat.cnf_clauses = comps[0];
-
-	make_connectivity_map(_pat.cnf_clauses);
+	// Split the non-virtual clauses into connected components
+	get_connected_components(_varlist.varset, _fixed,
+	                         _components, _component_vars);
+	_num_comps = _components.size();
 }
 
 void PatternLink::init(void)
@@ -65,35 +63,15 @@ void PatternLink::init(void)
 	_pat.redex_name = "anonymous PatternLink";
 	extract_variables(_outgoing);
 	unbundle_clauses(_body);
-	validate_clauses(_varlist.varset, _pat.clauses);
-	extract_optionals(_varlist.varset, _pat.clauses);
-
-	// Locate the black-box clauses.
-	HandleSeq concs, virts;
-	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
-	                 concs, virts, _pat.black);
-
-	// Check to make sure the graph is connected. As a side-effect,
-	// the (only) component is sorted into connection-order.
-   std::vector<HandleSeq> comps;
-   std::vector<std::set<Handle>> comp_vars;
-	get_connected_components(_varlist.varset, _pat.cnf_clauses, comps, comp_vars);
-
-	// Throw error if more than one component!
-	check_connectivity(comps);
-
-	// This puts them into connection-order.
-	_pat.cnf_clauses = comps[0];
-
-	make_connectivity_map(_pat.cnf_clauses);
+	common_init();
 }
 
 // Special ctor for use by SatisfactionLink; we are given
 // the pre-computed components.
 PatternLink::PatternLink(const std::set<Handle>& vars,
-                           const VariableTypeMap& typemap,
-                           const HandleSeq& compo,
-                           const std::set<Handle>& opts)
+                         const VariableTypeMap& typemap,
+                         const HandleSeq& compo,
+                         const std::set<Handle>& opts)
 	: Link(PATTERN_LINK, HandleSeq())
 {
 	// First, lets deal with the vars. We have discarded the original
@@ -576,32 +554,6 @@ void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 		for (const Handle& ho: l->getOutgoingSet())
 			make_map_recursive(root, ho);
 	}
-}
-
-/* ================================================================= */
-/**
- * Check that all clauses are connected
- */
-void PatternLink::check_connectivity(
-	const std::vector<HandleSeq>& components)
-{
-	if (1 == components.size()) return;
-
-	// Users are going to be stumped by this one, so print
-	// out a verbose, user-freindly debug message to help
-	// them out.
-	std::stringstream ss;
-	ss << "Pattern is not connected! Found "
-	   << components.size() << " components:\n";
-	int cnt = 1;
-	for (const auto& comp : components)
-	{
-		ss << "Connected component " << cnt
-		   << " consists of ----------------: \n";
-		for (Handle h : comp) ss << h->toString();
-		cnt++;
-	}
-	throw InvalidParamException(TRACE_INFO, ss.str().c_str());
 }
 
 /* ================================================================= */

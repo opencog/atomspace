@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_SATISFACTION_LINK_H
 #define _OPENCOG_SATISFACTION_LINK_H
 
-#include <opencog/atoms/bind/GetLink.h>
+#include <opencog/atoms/bind/PatternLink.h>
 
 namespace opencog
 {
@@ -50,23 +50,14 @@ namespace opencog
 /// grounding.  The SatisfactionLink does not specify what should happen
 /// with the grounding, although the (cog-satisfy) scheme call returns
 /// a truth value.
-class SatisfactionLink : public ConcreteLink
+class SatisfactionLink : public PatternLink
 {
 protected:
-	/// The graph components. Set by validate_clauses()
-	/// "virtual" clauses are those that contain virtual links.
-	/// "fixed" clauses are those that do not.
-	/// The list of component_vars are the variables that appear
-	/// in the corresponding component.
-	HandleSeq _fixed;
-	size_t _num_virts;
-	HandleSeq _virtual;
-	size_t _num_comps;
-	HandleSeq _components;
-
 	SatisfactionLink(Type, const HandleSeq&,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
+	HandleSeq _component_patterns;
 
 	void init(void);
 	void setup_sat_body(void);

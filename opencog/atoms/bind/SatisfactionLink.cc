@@ -35,6 +35,7 @@ void SatisfactionLink::init(void)
 {
 	extract_variables(_outgoing);
 	unbundle_clauses(_body);
+	common_init();
 	setup_sat_body();
 }
 
@@ -42,28 +43,10 @@ void SatisfactionLink::init(void)
 void SatisfactionLink::setup_sat_body(void)
 {
 	_pat.redex_name = "anonymous SatisfactionLink";
-	validate_clauses(_varlist.varset, _pat.clauses);
-	extract_optionals(_varlist.varset, _pat.clauses);
-	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
-                    _fixed, _virtual, _pat.black);
-
-	// unbundle_virtual does not handle connectives. Here, we assume that
-	// we are being run with the DefaultPatternMatchCB, and so we assume
-	// that the logical connectives are AndLink, OrLink and NotLink.
-	// Tweak the evaluatable_holders to reflect this.
-	std::set<Type> connectives({AND_LINK, OR_LINK, NOT_LINK});
-	trace_connectives(connectives, _pat.clauses);
-
-	// Split the non-virtual clauses into connected components
-	std::vector<HandleSeq> comps;
-	std::vector<std::set<Handle>> comp_vars;
-	get_connected_components(_varlist.varset, _fixed, comps, comp_vars);
 
 	// If there is only one connected component, then this can be handled
 	// during search by a single Concrete link. The multi-clause grounding
 	// mechanism is not required for that case.
-	_num_comps = comps.size();
-	_num_virts = _virtual.size();
 	if (1 == _num_comps)
 	{
 		make_connectivity_map(_pat.cnf_clauses);
@@ -78,12 +61,12 @@ void SatisfactionLink::setup_sat_body(void)
 	// a user-error, but in fact PLN does have a rule which wants to
 	// explore that combinatoric explosion, on purpose. So we have to
 	// allow the multiple disconnected components for that case.
-	_components.reserve(_num_comps);
+	_component_patterns.reserve(_num_comps);
 	for (size_t i=0; i<_num_comps; i++)
 	{
-		Handle h(createConcreteLink(comp_vars[i], _varlist.typemap,
-		                            comps[i], _pat.optionals));
-		_components.push_back(h);
+		Handle h(createConcreteLink(_component_vars[i], _varlist.typemap,
+		                            _components[i], _pat.optionals));
+		_component_patterns.push_back(h);
 	}
 }
 

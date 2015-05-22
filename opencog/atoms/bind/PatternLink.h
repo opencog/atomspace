@@ -75,6 +75,19 @@ protected:
 	// The pattern that is specified by this link.
 	Pattern _pat;
 
+	/// The graph components. Set by validate_clauses()
+	/// "virtual" clauses are those that contain virtual links.
+	/// "fixed" clauses are those that do not.
+	/// The list of component_vars are the variables that appear
+	/// in the corresponding component.
+	HandleSeq _fixed;
+	size_t _num_virts;
+	HandleSeq _virtual;
+
+	size_t _num_comps;
+	std::vector<HandleSeq> _components;
+	std::vector<std::set<Handle>> _component_vars;
+
 	void extract_variables(const HandleSeq& oset);
 	void unbundle_clauses(const Handle& body);
 	void validate_clauses(std::set<Handle>& vars,
@@ -92,8 +105,6 @@ protected:
 	void trace_connectives(const std::set<Type>&,
 	                       const HandleSeq& clauses);
 
-	void check_connectivity(const std::vector<HandleSeq>&);
-
 	void make_connectivity_map(const HandleSeq&);
 	void make_map_recursive(const Handle&, const Handle&);
 
@@ -102,8 +113,8 @@ protected:
 
 	// Only derived classes can call this
 	PatternLink(Type, const HandleSeq&,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	            TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	            AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	// utility debug print
 	static void prt(const Handle& h)
