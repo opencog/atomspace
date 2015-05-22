@@ -87,6 +87,7 @@ protected:
 	size_t _num_comps;
 	std::vector<HandleSeq> _components;
 	std::vector<std::set<Handle>> _component_vars;
+	HandleSeq _component_patterns;
 
 	void extract_variables(const HandleSeq& oset);
 	void unbundle_clauses(const Handle& body);
@@ -106,10 +107,18 @@ protected:
 	                       const HandleSeq& clauses);
 
 	void make_connectivity_map(const HandleSeq&);
+	void check_connectivity(const std::vector<HandleSeq>&);
 	void make_map_recursive(const Handle&, const Handle&);
 
 	void init(void);
 	void common_init(void);
+	void setup_components(void);
+
+	// Used only to set up multi-component links.
+	PatternLink(const std::set<Handle>& vars,
+	             const VariableTypeMap& typemap,
+	             const HandleSeq& component,
+	             const std::set<Handle>& optionals);
 
 	// Only derived classes can call this
 	PatternLink(Type, const HandleSeq&,
@@ -132,11 +141,6 @@ public:
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	PatternLink(Link &l);
-
-	PatternLink(const std::set<Handle>& vars,
-	             const VariableTypeMap& typemap,
-	             const HandleSeq& component,
-	             const std::set<Handle>& optionals);
 
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _varlist; }

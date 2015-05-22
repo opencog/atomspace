@@ -70,16 +70,39 @@ void PatternLink::common_init(void)
 	}
 }
 
+
+/// The second half of the common initialization sequence
+void PatternLink::setup_components(void)
+{
+	// If we are here, then set up a PattrnLink for each connected
+	// component.  Use emplace_back to avoid a copy.
+	//
+	// There is a pathological case where there are no virtuals, but
+	// there are multiple disconnected components.  I think that this is
+	// a user-error, but in fact PLN does have a rule which wants to
+	// explore that combinatoric explosion, on purpose. So we have to
+	// allow the multiple disconnected components for that case.
+	_component_patterns.reserve(_num_comps);
+	for (size_t i=0; i<_num_comps; i++)
+	{
+		Handle h(createConcreteLink(_component_vars[i], _varlist.typemap,
+		                            _components[i], _pat.optionals));
+		_component_patterns.push_back(h);
+	}
+}
+
 void PatternLink::init(void)
 {
 	_pat.redex_name = "anonymous PatternLink";
 	extract_variables(_outgoing);
 	unbundle_clauses(_body);
 	common_init();
+	setup_components();
 }
 
-// Special ctor for use by SatisfactionLink; we are given
-// the pre-computed components.
+/// Special constructor used only to make single concrete pattern
+/// components.  We are given the pre-computed components; we only
+/// have to store them.
 PatternLink::PatternLink(const std::set<Handle>& vars,
                          const VariableTypeMap& typemap,
                          const HandleSeq& compo,
@@ -88,8 +111,9 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 {
 	// First, lets deal with the vars. We have discarded the original
 	// order of the variables, and I think that's OK, because we will
-	// not be using the substitute method, I don't think. If we need it,
-	// then the API will need to be changed...
+	// never have the substitute aka beta-redex aka putlink method
+	// called on us, not directly, at least.  If we need it, then the
+	// API will need to be changed...
 	// So all we need is the varset, and the subset of the typemap.
 	_varlist.varset = vars;
 	for (const Handle& v : vars)
@@ -122,9 +146,14 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 	}
 
 	// The rest is easy: the evaluatables and the connection map
-	HandleSeq concs, virts;
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
-	                 concs, virts, _pat.black);
+	                 _fixed, _virtual, _pat.black);
+	_num_virts = _virtual.size();
+	OC_ASSERT (1 == _num_virts, "Number of virtuals should be exactly one");
+
+	_components.push_back(compo);
+	_num_comps = 1;
+
 	make_connectivity_map(_pat.cnf_clauses);
 	_pat.redex_name = "Unpacked component of a virtual link";
 }
@@ -566,6 +595,31 @@ void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 		for (const Handle& ho: l->getOutgoingSet())
 			make_map_recursive(root, ho);
 	}
+}
+
+/* ================================================================= */
+/**
+ * Check that all clauses are connected
+ */
+void PatternLink::check_connectivity(const std::vector<HandleSeq>& components)
+{
+	if (1 == components.size()) return;
+
+	// Users are going to be stumped by this one, so print
+	// out a verbose, user-freindly debug message to help
+	// them out.
+	std::stringstream ss;
+	ss << "Pattern is not connected! Found "
+	   << components.size() << " components:\n";
+	int cnt = 1;
+	for (const auto& comp : components)
+	{
+		ss << "Connected component " << cnt
+		   << " consists of ----------------: \n";
+		for (Handle h : comp) ss << h->toString();
+		cnt++;
+	}
+	throw InvalidParamException(TRACE_INFO, ss.str().c_str());
 }
 
 /* ================================================================= */

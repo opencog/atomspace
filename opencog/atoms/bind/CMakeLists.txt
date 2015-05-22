@@ -5,7 +5,6 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 ADD_LIBRARY (lambda SHARED
 	BetaRedex.cc
 	BindLink.cc
-	ConcreteLink.cc
 	DefineLink.cc
 	DeleteLink.cc
 	GetLink.cc
@@ -36,7 +35,6 @@ ENDIF (CYGWIN)
 
 INSTALL (FILES
 	BindLink.h
-	ConcreteLink.h
 	GetLink.h
 	PatternLink.h
 	PatternUtils.h

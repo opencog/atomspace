@@ -112,8 +112,7 @@ DEFINE_LINK <- ORDERED_LINK     // Gives a scoped lambda a name
 BETA_REDEX <- ORDERED_LINK      // Beta reduction of bound variables
 
 // Scoping and Logical quantifiers
-PATTERN_LINK <- ORDERED_LINK       // A pattern.
-CONCRETE_LINK <- PATTERN_LINK      // A set of clauses with no virtuals
+PATTERN_LINK <- ORDERED_LINK       // A pattern encapsulated in a Link.
 GET_LINK <- PATTERN_LINK           // Finds all groundings
 SATISFACTION_LINK <- PATTERN_LINK  // Finds all groundings
 BIND_LINK <- GET_LINK              // Finds all groundings and executes
