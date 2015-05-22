@@ -24,8 +24,12 @@
 #ifndef _URE_CONFIG_READER_H
 #define _URE_CONFIG_READER_H
 
+#include "Rule.h"
+
+#include <opencog/atomspace/AtomSpace.h>
+
 namespace opencog {
-	
+
 /**
  * Read the URE configuration in the AtomSpace as described in
  * http://wiki.opencog.org/w/URE_Configuration_Format, and provide
@@ -38,15 +42,22 @@ public:
 	UREConfigReader(AtomSpace& as);
 
 	// Access methods, return parameters given a rule-based system
-	// name.
-	const std::vector<Rule*>& get_rules(const std::string& system) const;
-	bool get_attention_allocation(const std::string& system) const;
-	int get_maximum_iterations(const std::string& system) const;
+	const std::vector<Rule>& get_rules(Handle rbs) const;
+	bool get_attention_allocation(Handle rbs) const;
+	int get_maximum_iterations(Handle rbs) const;
 
 	// Name of the top rule base from which all rule-based systems
 	// inherit. It should corresponds to a ConceptNode in the
 	// AtomSpace.
-	static const URE_top_name = "URE";
+	static const std::string URE_top_name;
+
+	// Name of the PredicateNode outputing whether attention
+	// allocation is enabled or not
+	static const std::string attention_alloc_name;
+
+	// Name of the SchemaNode outputing the maximum iterations
+	// parameter
+	static const std::string max_iter_name;
 private:
 
 	// Fetch from the AtomSpace all rule based systems (i.e. inheriting
@@ -56,6 +67,50 @@ private:
 	// Fetch from the AtomSpace all rule names of a given system
 	// (i.e. members of that system).
 	HandleSeq fetch_rules(Handle rbsys);
+
+	// TODO: move the following 2 methods in some AtomUtils class
+	
+	// Given <label> in
+	//
+	// DefineLink
+	//    <label>
+	//    <body>
+	//
+	// Return <body>
+	Handle fetch_definition(Handle label);
+
+	// Given <schema> and <input> in
+	//
+	// ExecutionLink
+	//    <schema>
+	//    <input>
+	//    <output>
+	//
+	// Return <output>
+	Handle fetch_execution_output(Handle schema, Handle input);
+
+	// Similar to above but takes instead the schema name instead of
+	// the schema Handle, assumes that output value is a NumberNode,
+	// and return directly that number.
+	//
+	// That is, given <schema_name> and <input> in
+	//
+	// ExecutionLink
+	//    SchemaNode <schema_name>
+	//    <input>
+	//    NumberNode <num>
+	//
+	// Return the number associated to <num>
+	double fetch_num_param(const std::string& schema_name, Handle input);
+
+	// Given <pred_name> and <input> in
+	//
+	// EvaluationLink TV
+	//    PredicateNode <pred_name>
+	//    <input>
+	//
+	// Return TV.mean > 0.5
+	bool fetch_bool_param(const std::string& pred_name, Handle input);
 	
 	AtomSpace& _as;
 
@@ -66,13 +121,18 @@ private:
 	// subsystems, for now.
 	class RuleBaseParameters {
 	public:
-		std::vector<Rule*> rules;
+		std::vector<Rule> rules;
 		bool attention_alloc;
 		int max_iter;
 	};
-	map<std::string, RuleBaseParameters> _sys2params;
+	// Cache for fast access
+	map<Handle, RuleBaseParameters> _sys2params;
 };
-	
+
+const std::string UREConfigReader::URE_top_name = "URE";
+const std::string UREConfigReader::attention_alloc_name = "URE:attention-allocation";
+const std::string UREConfigReader::max_iter_name = "URE:maximum-iterations";
+
 } // ~namespace opencog
 
 
