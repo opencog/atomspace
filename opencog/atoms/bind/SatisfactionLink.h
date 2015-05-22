@@ -76,8 +76,6 @@ public:
 
 	SatisfactionLink(const std::set<Handle> &vars,
 	                 const HandleSeq& clauses);
-
-	bool satisfy(PatternMatchCallback&) const;
 };
 
 typedef std::shared_ptr<SatisfactionLink> SatisfactionLinkPtr;

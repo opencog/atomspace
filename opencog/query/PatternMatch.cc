@@ -25,7 +25,7 @@
 
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/BetaRedex.h>
-#include <opencog/atoms/bind/ConcreteLink.h>
+#include <opencog/atoms/bind/PatternLink.h>
 #include <opencog/atoms/bind/SatisfactionLink.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -318,44 +318,35 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
  */
 bool BindLink::imply(PatternMatchCallback& pmc, bool check_conn)
 {
-   if (check_conn and 0 == _virtual.size() and 0 < _components.size())
+   if (check_conn and 0 == _virtual.size() and 1 < _components.size())
 		throw InvalidParamException(TRACE_INFO,
 			"BindLink consists of multiple disconnected components!");
-			// ConcreteLink::check_connectivity(_comps);
+			// PatternLink::check_connectivity(_comps);
 
-	return SatisfactionLink::satisfy(pmc);
+	return PatternLink::satisfy(pmc);
 }
 
 /* ================================================================= */
 
-// All clauses of the Concrete link are connected, so this is easy.
-bool ConcreteLink::satisfy(PatternMatchCallback& pmcb) const
-{
-	PatternMatchEngine pme(pmcb, _varlist, _pat);
-
-#ifdef DEBUG
-	debug_print();
-#endif
-
-	pmcb.set_pattern(_varlist, _pat);
-	bool found = pmcb.initiate_search(&pme);
-
-#ifdef DEBUG
-	printf("==================== Done with Search ==================\n");
-#endif
-	return found;
-}
-
-/* ================================================================= */
-
-bool SatisfactionLink::satisfy(PatternMatchCallback& pmcb) const
+bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 {
 	// If there is just one connected component, we don't have to
 	// do anything special to find a grounding for it.  Proceed
-	// as normal.
+	// in a direct fashion.
 	if (1 == _num_comps)
 	{
-		return ConcreteLink::satisfy(pmcb);
+		PatternMatchEngine pme(pmcb, _varlist, _pat);
+
+#ifdef DEBUG
+		debug_print();
+#endif
+		pmcb.set_pattern(_varlist, _pat);
+		bool found = pmcb.initiate_search(&pme);
+
+#ifdef DEBUG
+		printf("==================== Done with Search ==================\n");
+#endif
+		return found;
 	}
 
 	// If we are here, then we've got a knot in the center of it all.
@@ -392,7 +383,7 @@ bool SatisfactionLink::satisfy(PatternMatchCallback& pmcb) const
 		       i, _num_comps);
 		// Pass through the callbacks, collect up answers.
 		PMCGroundings gcb(pmcb);
-		ConcreteLinkPtr clp(ConcreteLinkCast(_components.at(i)));
+		PatternLinkPtr clp(PatternLinkCast(_components.at(i)));
 		clp->satisfy(gcb);
 
 		comp_var_gnds.push_back(gcb._var_groundings);

@@ -43,6 +43,8 @@
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/DefineLink.h>
 #include <opencog/atoms/bind/DeleteLink.h>
+#include <opencog/atoms/bind/GetLink.h>
+#include <opencog/atoms/bind/SatisfactionLink.h>
 #include <opencog/atoms/bind/ScopeLink.h>
 #include <opencog/atoms/bind/VariableList.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
@@ -301,6 +303,9 @@ static AtomPtr factory(Type atom_type, AtomPtr atom)
         if (NULL == ExecutionOutputLinkCast(atom))
             return createExecutionOutputLink(*LinkCast(atom));
 */
+    } else if (GET_LINK == atom_type) {
+        if (NULL == GetLinkCast(atom))
+            return createGetLink(*LinkCast(atom));
     } else if (SATISFACTION_LINK == atom_type) {
         if (NULL == SatisfactionLinkCast(atom))
             return createSatisfactionLink(*LinkCast(atom));
@@ -349,6 +354,8 @@ static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
     if (EXECUTION_OUTPUT_LINK == atom_type)
         //return createExecutionOutputLink(*LinkCast(atom));
         return createLink(*LinkCast(atom));
+    if (GET_LINK == atom_type)
+        return createGetLink(*LinkCast(atom));
     if (SATISFACTION_LINK == atom_type)
         return createSatisfactionLink(*LinkCast(atom));
     if (SCOPE_LINK == atom_type)

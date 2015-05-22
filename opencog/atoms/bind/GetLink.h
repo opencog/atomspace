@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_GET_LINK_H
 #define _OPENCOG_GET_LINK_H
 
-#include <opencog/atoms/bind/ConcreteLink.h>
+#include <opencog/atoms/bind/PatternLink.h>
 
 namespace opencog
 {
@@ -49,26 +49,15 @@ namespace opencog
 /// grounding.  The GetLink does not specify what should happen
 /// with the grounding, although the (cog-satisfy) scheme call returns
 /// a truth value.
-class GetLink : public ConcreteLink
+class GetLink : public PatternLink
 {
 protected:
-	/// The graph components. Set by validate_clauses()
-	/// "virtual" clauses are those that contain virtual links.
-	/// "fixed" clauses are those that do not.
-	/// The list of component_vars are the variables that appear
-	/// in the corresponding component.
-	HandleSeq _fixed;
-	size_t _num_virts;
-	HandleSeq _virtual;
-	size_t _num_comps;
-	HandleSeq _components;
 
 	GetLink(Type, const HandleSeq&,
 	        TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	        AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	void init(void);
-	void setup_sat_body(void);
 
 public:
 	GetLink(const Handle& body,
@@ -84,12 +73,6 @@ public:
 	        AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	GetLink(Link &l);
-
-	GetLink(const std::set<Handle> &vars,
-	        const HandleSeq& clauses);
-
-	// XXX temp hack till things get sorted out; remove this method later.
-	// const Pattern& get_pattern(void) { return _pat; }
 
 	bool satisfy(PatternMatchCallback&) const;
 };

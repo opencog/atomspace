@@ -35,82 +35,34 @@ void GetLink::init(void)
 {
 	extract_variables(_outgoing);
 	unbundle_clauses(_body);
-	setup_sat_body();
-}
-
-/// The second half of the common initialization sequence
-void GetLink::setup_sat_body(void)
-{
+	common_init();
 	_pat.redex_name = "anonymous GetLink";
-	validate_clauses(_varlist.varset, _pat.clauses);
-	extract_optionals(_varlist.varset, _pat.clauses);
-	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
-                    _fixed, _virtual, _pat.black);
-
-	// unbundle_virtual does not handle connectives. Here, we assume that
-	// we are being run with the DefaultPatternMatchCB, and so we assume
-	// that the logical connectives are AndLink, OrLink and NotLink.
-	// Tweak the evaluatable_holders to reflect this.
-	std::set<Type> connectives({AND_LINK, OR_LINK, NOT_LINK});
-	trace_connectives(connectives, _pat.clauses);
-
-	// Split the non-virtual clauses into connected components
-	std::vector<HandleSeq> comps;
-	std::vector<std::set<Handle>> comp_vars;
-	get_connected_components(_varlist.varset, _fixed, comps, comp_vars);
-
-	// If there is only one connected component, then this can be handled
-	// during search by a single Concrete link. The multi-clause grounding
-	// mechanism is not required for that case.
-	_num_comps = comps.size();
-	_num_virts = _virtual.size();
-	if (1 == _num_comps)
-	{
-		make_connectivity_map(_pat.cnf_clauses);
-		return;
-	}
-
-	// If we are here, then set up a ConcreteLink for each connected
-	// component.  Use emplace_back to avoid a copy.
-	//
-	// There is a pathological case where there are no virtuals, but
-	// there are multiple disconnected components.  I think that this is
-	// a user-error, but in fact PLN does have a rule which wants to
-	// explore that combinatoric explosion, on purpose. So we have to
-	// allow the multiple disconnected components for that case.
-	_components.reserve(_num_comps);
-	for (size_t i=0; i<_num_comps; i++)
-	{
-		Handle h(createConcreteLink(comp_vars[i], _varlist.typemap,
-		                            comps[i], _pat.optionals));
-		_components.push_back(h);
-	}
 }
 
 GetLink::GetLink(const HandleSeq& hseq,
                  TruthValuePtr tv, AttentionValuePtr av)
-	: ConcreteLink(GET_LINK, hseq, tv, av)
+	: PatternLink(GET_LINK, hseq, tv, av)
 {
 	init();
 }
 
 GetLink::GetLink(const Handle& body,
                  TruthValuePtr tv, AttentionValuePtr av)
-	: ConcreteLink(GET_LINK, HandleSeq({body}), tv, av)
+	: PatternLink(GET_LINK, HandleSeq({body}), tv, av)
 {
 	init();
 }
 
 GetLink::GetLink(const Handle& vars, const Handle& body,
                  TruthValuePtr tv, AttentionValuePtr av)
-	: ConcreteLink(GET_LINK, HandleSeq({vars, body}), tv, av)
+	: PatternLink(GET_LINK, HandleSeq({vars, body}), tv, av)
 {
 	init();
 }
 
 GetLink::GetLink(Type t, const HandleSeq& hseq,
                  TruthValuePtr tv, AttentionValuePtr av)
-	: ConcreteLink(t, hseq, tv, av)
+	: PatternLink(t, hseq, tv, av)
 {
 	// BindLink has a different clause initialization sequence
 	if (GET_LINK != t) return;
@@ -118,7 +70,7 @@ GetLink::GetLink(Type t, const HandleSeq& hseq,
 }
 
 GetLink::GetLink(Link &l)
-	: ConcreteLink(l)
+	: PatternLink(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
@@ -132,20 +84,6 @@ GetLink::GetLink(Link &l)
 	// BindLink has a different initialization sequence
 	if (GET_LINK != tscope) return;
 	init();
-}
-
-/// Constructor that takes a pre-determined set of variables, and
-/// a list of clauses to solve.  This is currently kind-of crippled,
-/// since no variable type restricions are possible, and no optionals,
-/// either.  By contrast, the ConcreteLink constructor does allow these
-/// things, but it does not allow virtual links. Alas.
-GetLink::GetLink(const std::set<Handle>& vars,
-                 const HandleSeq& clauses)
-	: ConcreteLink(GET_LINK, HandleSeq())
-{
-	_varlist.varset = vars;
-	_pat.clauses = clauses;
-	setup_sat_body();
 }
 
 /* ===================== END OF FILE ===================== */
