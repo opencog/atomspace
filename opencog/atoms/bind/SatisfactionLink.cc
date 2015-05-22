@@ -44,15 +44,6 @@ void SatisfactionLink::setup_sat_body(void)
 {
 	_pat.redex_name = "anonymous SatisfactionLink";
 
-	// If there is only one connected component, then this can be handled
-	// during search by a single Concrete link. The multi-clause grounding
-	// mechanism is not required for that case.
-	if (1 == _num_comps)
-	{
-		make_connectivity_map(_pat.cnf_clauses);
-		return;
-	}
-
 	// If we are here, then set up a ConcreteLink for each connected
 	// component.  Use emplace_back to avoid a copy.
 	//

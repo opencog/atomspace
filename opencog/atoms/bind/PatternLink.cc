@@ -56,6 +56,18 @@ void PatternLink::common_init(void)
 	get_connected_components(_varlist.varset, _fixed,
 	                         _components, _component_vars);
 	_num_comps = _components.size();
+
+	// If there is only one connected component, then this can be
+	// handled during search by a single ConcreteLink. The multi-clause
+	// grounding mechanism is not required for that case.
+	if (1 == _num_comps)
+	{
+		// Each component is in connection-order. By re-assigning to
+		// _pat.cnf_clauses, they get placed in that order, this giving
+		// a minor performance boost during clause traversal.
+		_pat.cnf_clauses = _components[0];
+	   make_connectivity_map(_pat.cnf_clauses);
+	}
 }
 
 void PatternLink::init(void)

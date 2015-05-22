@@ -69,6 +69,8 @@ class ConcreteLink : public PatternLink
 protected:
 	void init(void);
 
+	void check_connectivity(const std::vector<HandleSeq>&);
+
 	// Only derived classes can call this
 	ConcreteLink(Type, const HandleSeq&,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
