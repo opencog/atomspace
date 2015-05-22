@@ -100,6 +100,8 @@ void PatternLink::init(void)
 	setup_components();
 }
 
+/* ================================================================= */
+
 /// Special constructor used only to make single concrete pattern
 /// components.  We are given the pre-computed components; we only
 /// have to store them.
@@ -158,22 +160,39 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 	_pat.redex_name = "Unpacked component of a virtual link";
 }
 
+/* ================================================================= */
+
+/// Constructor that takes a pre-determined set of variables, and
+/// a list of clauses to solve.  This is currently kind-of crippled,
+/// since no variable type restricions are possible, and no optionals,
+/// either.  This is used only for backwards-compatibility API's.
+PatternLink::PatternLink(const std::set<Handle>& vars,
+                         const HandleSeq& clauses)
+	: Link(PATTERN_LINK, HandleSeq())
+{
+	_varlist.varset = vars;
+	_pat.clauses = clauses;
+	common_init();
+}
+
+/* ================================================================= */
+
 PatternLink::PatternLink(const HandleSeq& hseq,
-                   TruthValuePtr tv, AttentionValuePtr av)
+                         TruthValuePtr tv, AttentionValuePtr av)
 	: Link(PATTERN_LINK, hseq, tv, av)
 {
 	init();
 }
 
 PatternLink::PatternLink(const Handle& vars, const Handle& body,
-                   TruthValuePtr tv, AttentionValuePtr av)
+                         TruthValuePtr tv, AttentionValuePtr av)
 	: Link(PATTERN_LINK, HandleSeq({vars, body}), tv, av)
 {
 	init();
 }
 
 PatternLink::PatternLink(Type t, const HandleSeq& hseq,
-                   TruthValuePtr tv, AttentionValuePtr av)
+                         TruthValuePtr tv, AttentionValuePtr av)
 	: Link(t, hseq, tv, av)
 {
 	// Derived link-types have other init sequences
@@ -346,7 +365,7 @@ void PatternLink::validate_clauses(std::set<Handle>& vars,
  * the mandatory and optional clauses.
  */
 void PatternLink::extract_optionals(const std::set<Handle> &vars,
-                                     const std::vector<Handle> &component)
+                                    const std::vector<Handle> &component)
 {
 	// Split in positive and negative clauses
 	for (const Handle& h : component)
@@ -433,10 +452,10 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 /// components; the combinatoric explosino has to be handled...
 ///
 void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
-                                    const HandleSeq& clauses,
-                                    HandleSeq& fixed_clauses,
-                                    HandleSeq& virtual_clauses,
-                                    std::set<Handle>& black_clauses)
+                                   const HandleSeq& clauses,
+                                   HandleSeq& fixed_clauses,
+                                   HandleSeq& virtual_clauses,
+                                   std::set<Handle>& black_clauses)
 {
 	for (const Handle& clause: clauses)
 	{
@@ -540,7 +559,7 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 /// we have to assume that stuff, more-stuff and not-stuff are all
 /// evaluatable.
 void PatternLink::trace_connectives(const std::set<Type>& connectives,
-                                     const HandleSeq& oset)
+                                    const HandleSeq& oset)
 {
 	for (const Handle& term: oset)
 	{

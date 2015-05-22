@@ -135,21 +135,25 @@ protected:
 
 public:
 	PatternLink(const HandleSeq&,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	            TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	            AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	PatternLink(const Handle& varcdecls, const Handle& body,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	            TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	            AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	PatternLink(Link &l);
 
 	// Used only to set up multi-component links.
 	// DO NOT call this!
 	PatternLink(const std::set<Handle>& vars,
-	             const VariableTypeMap& typemap,
-	             const HandleSeq& component,
-	             const std::set<Handle>& optionals);
+	            const VariableTypeMap& typemap,
+	            const HandleSeq& component,
+	            const std::set<Handle>& optionals);
+
+	// A backwards-compatibility contructor. Do not use.
+	PatternLink(const std::set<Handle>&,
+	            const HandleSeq&);
 
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _varlist; }

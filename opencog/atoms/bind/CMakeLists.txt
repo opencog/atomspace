@@ -7,10 +7,8 @@ ADD_LIBRARY (lambda SHARED
 	BindLink.cc
 	DefineLink.cc
 	DeleteLink.cc
-	GetLink.cc
 	PatternLink.cc
 	PatternUtils.cc
-	SatisfactionLink.cc
 	ScopeLink.cc
 	VariableList.cc
 )
@@ -35,10 +33,8 @@ ENDIF (CYGWIN)
 
 INSTALL (FILES
 	BindLink.h
-	GetLink.h
 	PatternLink.h
 	PatternUtils.h
-	SatisfactionLink.h
 	VariableList.h
 	DESTINATION "include/${PROJECT_NAME}/atoms/bind"
 )
