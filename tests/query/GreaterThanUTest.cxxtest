@@ -24,7 +24,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/BindLink.h>
+#include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -101,10 +101,21 @@ void GreaterThanUTest::test_numeric_greater(void)
     Handle richer_than_obama = eval->eval_h("(richer-than-obama)");
     Handle richer_than_gates = eval->eval_h("(richer-than-gates)");
 
+    TSM_ASSERT("Failed to load test data", richer_than_george);
+    TSM_ASSERT("Failed to load test data", richer_than_susan);
+    TSM_ASSERT("Failed to load test data", richer_than_obama);
+    TSM_ASSERT("Failed to load test data", richer_than_gates);
+
     Handle people_richer_than_george = bindlink(as, richer_than_george);
     Handle people_richer_than_susan = bindlink(as, richer_than_susan);
     Handle people_richer_than_obama = bindlink(as, richer_than_obama);
     Handle people_richer_than_gates = bindlink(as, richer_than_gates);
+
+    TSM_ASSERT("Failed to run test", people_richer_than_george);
+    TSM_ASSERT("Failed to run test", people_richer_than_susan);
+    TSM_ASSERT("Failed to run test", people_richer_than_obama);
+    TSM_ASSERT("Failed to run test", people_richer_than_gates);
+printf("duude here ooo\n");
 
     TS_ASSERT_EQUALS(0, as->getArity(people_richer_than_gates));
     TS_ASSERT_EQUALS(1, as->getArity(people_richer_than_obama));
