@@ -37,6 +37,7 @@ void BindLink::init(void)
 
 	// Remainder of the init is just like in the SatisfactionLink
 	common_init();
+	setup_components();
 	_pat.redex_name = "anonymous BindLink";
 }
 
