@@ -8,6 +8,7 @@ ADD_LIBRARY (lambda SHARED
 	ConcreteLink.cc
 	DefineLink.cc
 	DeleteLink.cc
+	GetLink.cc
 	PatternUtils.cc
 	SatisfactionLink.cc
 	ScopeLink.cc
@@ -35,6 +36,7 @@ ENDIF (CYGWIN)
 INSTALL (FILES
 	BindLink.h
 	ConcreteLink.h
+	GetLink.h
 	PatternUtils.h
 	SatisfactionLink.h
 	VariableList.h

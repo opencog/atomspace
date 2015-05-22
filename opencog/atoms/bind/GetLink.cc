@@ -1,5 +1,5 @@
 /*
- * SatisfactionLink.cc
+ * GetLink.cc
  *
  * Copyright (C) 2009, 2014, 2015 Linas Vepstas
  *
@@ -27,11 +27,11 @@
 #include <opencog/atomutils/FindUtils.h>
 
 #include "PatternUtils.h"
-#include "SatisfactionLink.h"
+#include "GetLink.h"
 
 using namespace opencog;
 
-void SatisfactionLink::init(void)
+void GetLink::init(void)
 {
 	extract_variables(_outgoing);
 	unbundle_clauses(_body);
@@ -39,9 +39,9 @@ void SatisfactionLink::init(void)
 }
 
 /// The second half of the common initialization sequence
-void SatisfactionLink::setup_sat_body(void)
+void GetLink::setup_sat_body(void)
 {
-	_pat.redex_name = "anonymous SatisfactionLink";
+	_pat.redex_name = "anonymous GetLink";
 	validate_clauses(_varlist.varset, _pat.clauses);
 	extract_optionals(_varlist.varset, _pat.clauses);
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
@@ -87,50 +87,50 @@ void SatisfactionLink::setup_sat_body(void)
 	}
 }
 
-SatisfactionLink::SatisfactionLink(const HandleSeq& hseq,
-                   TruthValuePtr tv, AttentionValuePtr av)
-	: ConcreteLink(SATISFACTION_LINK, hseq, tv, av)
+GetLink::GetLink(const HandleSeq& hseq,
+                 TruthValuePtr tv, AttentionValuePtr av)
+	: ConcreteLink(GET_LINK, hseq, tv, av)
 {
 	init();
 }
 
-SatisfactionLink::SatisfactionLink(const Handle& body,
-                   TruthValuePtr tv, AttentionValuePtr av)
-	: ConcreteLink(SATISFACTION_LINK, HandleSeq({body}), tv, av)
+GetLink::GetLink(const Handle& body,
+                 TruthValuePtr tv, AttentionValuePtr av)
+	: ConcreteLink(GET_LINK, HandleSeq({body}), tv, av)
 {
 	init();
 }
 
-SatisfactionLink::SatisfactionLink(const Handle& vars, const Handle& body,
-                   TruthValuePtr tv, AttentionValuePtr av)
-	: ConcreteLink(SATISFACTION_LINK, HandleSeq({vars, body}), tv, av)
+GetLink::GetLink(const Handle& vars, const Handle& body,
+                 TruthValuePtr tv, AttentionValuePtr av)
+	: ConcreteLink(GET_LINK, HandleSeq({vars, body}), tv, av)
 {
 	init();
 }
 
-SatisfactionLink::SatisfactionLink(Type t, const HandleSeq& hseq,
-                   TruthValuePtr tv, AttentionValuePtr av)
+GetLink::GetLink(Type t, const HandleSeq& hseq,
+                 TruthValuePtr tv, AttentionValuePtr av)
 	: ConcreteLink(t, hseq, tv, av)
 {
 	// BindLink has a different clause initialization sequence
-	if (SATISFACTION_LINK != t) return;
+	if (GET_LINK != t) return;
 	init();
 }
 
-SatisfactionLink::SatisfactionLink(Link &l)
+GetLink::GetLink(Link &l)
 	: ConcreteLink(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
-	if (not classserver().isA(tscope, SATISFACTION_LINK))
+	if (not classserver().isA(tscope, GET_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting a SatisfactionLink, got %s", tname.c_str());
+			"Expecting a GetLink, got %s", tname.c_str());
 	}
 
-	// Derived types willl have a different initialization sequence
-	if (SATISFACTION_LINK != tscope) return;
+	// BindLink has a different initialization sequence
+	if (GET_LINK != tscope) return;
 	init();
 }
 
@@ -139,9 +139,9 @@ SatisfactionLink::SatisfactionLink(Link &l)
 /// since no variable type restricions are possible, and no optionals,
 /// either.  By contrast, the ConcreteLink constructor does allow these
 /// things, but it does not allow virtual links. Alas.
-SatisfactionLink::SatisfactionLink(const std::set<Handle>& vars,
-                                   const HandleSeq& clauses)
-	: ConcreteLink(SATISFACTION_LINK, HandleSeq())
+GetLink::GetLink(const std::set<Handle>& vars,
+                 const HandleSeq& clauses)
+	: ConcreteLink(GET_LINK, HandleSeq())
 {
 	_varlist.varset = vars;
 	_pat.clauses = clauses;

@@ -54,7 +54,7 @@ public:
 	BindLink(Link &l);
 
 	bool imply(PatternMatchCallback&, bool check_connectivity=true);
-	Handle& get_implicand(void) { return _implicand; }
+	const Handle& get_implicand(void) { return _implicand; }
 };
 
 typedef std::shared_ptr<BindLink> BindLinkPtr;
