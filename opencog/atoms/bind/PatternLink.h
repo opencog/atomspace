@@ -38,28 +38,36 @@ namespace opencog
 
 /// The PatternLink specifies an (optional) list of variables, and a
 /// pattern (containing those variables) that is to be grounded
-/// (satisfied).  If no list of variables is specified, then all free
-/// variables are extracted and used for grounding.
+/// (satisfied).  If no list of variables is explicltly specified,
+/// then the pattner is searched for all (free) variables, and these
+/// then become implicitly bound.  When processed by the pattern
+/// matcher, these at the variables that get grounded.
 ///
 /// The body of the PatternLink is assumed to collection of clauses
-/// to be satsified. Thus, the body is typically an AndLink, OrLink
+/// to be satsified. Thus, the body is typically an AndLink, ChoiceLink
 /// or a SequentialAnd, depending on how they are to be satsified.
-/// This is very much like a SatisfactionLink, with one exception:
-/// NONE OF THE CLAUSES MAY BE VIRTUAL!! This restriction is
-/// "artificial", in that it simplfies how pattern matching is done.
-/// Thus, this class is not really intended for "general use", but
-/// is for internal use only.
+///
+/// The PatternLink is used as a base class for GetLink, BindLink
+/// and SatisfactionLink. It provides all the methods and tools needed
+/// to unpack the clauses, extract variables, check for connectivity,
+/// discover the evaluatable terms, and so on. The pattern matcher
+/// needs all of these different parts unpakced into C++ structures
+/// so that it can directly access them during traversal.  Thus, this
+/// class is really a "utility class", designed to pre-process
+/// everything that the pattern matcher will need to have later on.
 ///
 /// Given the initial list of variables and clauses, the constructors
 /// extract the optional clauses and the dynamically-evaluatable clauses.
 /// This also computes the connectivity diagram of the clauses.
-///
-/// It is assumed that the set of clauses form a single, connected
-/// component; i.e. that the clauses are pair-wise connected by common,
-/// shared variables, and that this pair-wise connection extends over
-/// the entire set of clauses. There is no other restriction on the
-/// connection topology; they can form any graph whatsoever (as long as
-/// it is connected).
+/// Two clauses are considered to be pair-wise connected if they both
+/// contain a common shared variable, AND that shared variable does
+/// not appear in a "virtual link" (e.g. a GreaterThanLink, or an
+/// EvaluationLink with a GroundedPredicateNode in it).  Virtual links
+/// cannot be directly grounded by the pattern matcher (because they
+/// don't actually "exist" as "real" atoms in the atomspace). Thus,
+/// the code here splits up the pattern into multiple connected
+/// components; the components themselves are connected only by
+/// virtual links.
 ///
 /// The (cog-satisfy) scheme call can ground this link, and return
 /// a truth value.

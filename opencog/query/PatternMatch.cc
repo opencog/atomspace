@@ -383,7 +383,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 		       i, _num_comps);
 		// Pass through the callbacks, collect up answers.
 		PMCGroundings gcb(pmcb);
-		PatternLinkPtr clp(PatternLinkCast(_components.at(i)));
+		PatternLinkPtr clp(PatternLinkCast(_component_patterns.at(i)));
 		clp->satisfy(gcb);
 
 		comp_var_gnds.push_back(gcb._var_groundings);
