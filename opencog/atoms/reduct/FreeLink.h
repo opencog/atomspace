@@ -34,8 +34,9 @@ namespace opencog
 
 /**
  * The FreeLink records all of the free variables that occur within
- * (underneath) it, in traversal order. The names of those variables
- * are placed in _free_vars.
+ * (underneath) it, in traversal order. Those variables are placed in
+ * sequential order in _varseq. An index is placed in _index. That is,
+ * given a variable, its ordinal number is placed in _index.
  *
  * The FreeLink, as a base class, also provides an important method:
  * reduce()
@@ -58,9 +59,12 @@ namespace opencog
 class FreeLink : public Link
 {
 protected:
-	HandleSeq _free_vars;
+	HandleSeq _varseq;
+	std::map<Handle, unsigned int> _index;
+
 	void init(void);
 	void find_vars(std::set<Handle>&, const HandleSeq&);
+	void build_index(void);
 
 	FreeLink(Type, const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
@@ -84,7 +88,7 @@ public:
 	FreeLink(Link& l);
 	virtual ~FreeLink() {}
 
-	const HandleSeq& get_vars(void) { return _free_vars; }
+	const HandleSeq& get_vars(void) { return _varseq; }
 
 	virtual Handle reduce(void);
 };

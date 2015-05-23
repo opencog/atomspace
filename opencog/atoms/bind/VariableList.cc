@@ -284,7 +284,7 @@ bool VariableList::is_type(const HandleSeq& hseq) const
 
 /* ================================================================= */
 /**
- * Build the reverse index from variable name, to its ordinal.
+ * Build the index from variable name, to its ordinal number.
  * The index is needed for variable substitution, i.e. for the
  * substitute method below.  The specific sequence order of the
  * variables is essential for making substitution work.

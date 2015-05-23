@@ -81,6 +81,7 @@ FreeLink::FreeLink(Link& l)
 	init();
 }
 
+/* ================================================================= */
 /// Create an ordered set of the free variables in this link.
 ///
 /// By "ordered set" it is meant: a list of variables, in traversal
@@ -94,7 +95,7 @@ void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 		if (VARIABLE_NODE == h->getType() and
 		    0 == varset.count(h))
 		{
-			_free_vars.push_back(h);
+			_varseq.push_back(h);
 			varset.insert(h);
 		}
 		LinkPtr lll(LinkCast(h));
@@ -104,10 +105,28 @@ void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 	}
 }
 
+/* ================================================================= */
+/**
+ * Build the index from variable name, to its ordinal number.
+ * The index is needed for variable substitution, i.e. for the
+ * reduce() method.  The specific sequence order of the variables
+ * is essential for making substitution work.
+ */
+void FreeLink::build_index(void)
+{
+	if (0 < _index.size()) return;
+	size_t sz = _varseq.size();
+	for (size_t i=0; i<sz; i++)
+		_index.insert(std::pair<Handle, unsigned int>(_varseq[i], i));
+}
+
+/* ================================================================= */
+
 void FreeLink::init(void)
 {
 	std::set<Handle> varset;
 	find_vars(varset, _outgoing);
+	build_index();
 }
 
 Handle FreeLink::reduce(void)

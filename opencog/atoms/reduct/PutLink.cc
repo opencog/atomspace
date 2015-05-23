@@ -118,7 +118,7 @@ void PutLink::init(void)
 	const Handle& body = _outgoing[0];
 	if (VARIABLE_NODE == body->getType())
 	{
-		_free_vars.push_back(body);
+		_varseq.push_back(body);
 	}
 	else
 	{
@@ -131,15 +131,15 @@ void PutLink::init(void)
 	}
 
 	// OK, now for the values.
-	if (_free_vars.size() == 1) return;
+	if (_varseq.size() == 1) return;
 
 	LinkPtr lval(LinkCast(_outgoing[1]));
 	if (lval->getType() == LIST_LINK)
 	{
-		if (lval->getArity() != _free_vars.size())
+		if (lval->getArity() != _varseq.size())
 			throw InvalidParamException(TRACE_INFO,
 				"PutLink has mismatched size! Expected %zu, got %zu\n",
-				_free_vars.size(), lval->getArity());
+				_varseq.size(), lval->getArity());
 		return;
 	}
 	if (lval->getType() != SET_LINK)
@@ -152,10 +152,10 @@ void PutLink::init(void)
 		if (lse->getType() != LIST_LINK)
 			throw InvalidParamException(TRACE_INFO,
 				"PutLink was expecting a ListLink here");
-		if (lse->getArity() != _free_vars.size())
+		if (lse->getArity() != _varseq.size())
 			throw InvalidParamException(TRACE_INFO,
 				"PutLink set element has mismatched size! Expected %zu, got %zu\n",
-				_free_vars.size(), lse->getArity());
+				_varseq.size(), lse->getArity());
 	}
 }
 
