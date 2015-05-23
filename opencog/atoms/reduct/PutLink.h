@@ -54,6 +54,8 @@ class PutLink : public FreeLink
 protected:
 	void init(void);
 	Handle substitute_nocheck(const Handle&, const HandleSeq&) const;
+	Handle do_reduce(void) const;
+
 	PutLink(Type, const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());

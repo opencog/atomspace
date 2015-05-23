@@ -131,6 +131,7 @@ void PutLink::init(void)
 			find_vars(varset, lll->getOutgoingSet());
 		}
 	}
+	build_index();
 
 	// OK, now for the values.
 	if (_varseq.size() == 1) return;
@@ -220,29 +221,41 @@ Handle PutLink::substitute_nocheck(const Handle& term,
 	return Handle(createLink(term->getType(), oset));
 }
 
-Handle PutLink::reduce(void)
+Handle PutLink::do_reduce(void) const
 {
 	const Handle& body = _outgoing[0];
 	const Handle& vals = _outgoing[1];
+
+	if (1 == _varseq.size())
+	{
+		HandleSeq oset;
+		oset.push_back(vals);
+		return substitute_nocheck(body, oset);
+	}
 	if (vals->getType() == LIST_LINK)
 	{
 		const HandleSeq& oset = LinkCast(vals)->getOutgoingSet();
 		return substitute_nocheck(body, oset);
 	}
-	if (vals->getType() == SET_LINK)
-	{
-		HandleSeq bset;
-		for (Handle h : LinkCast(vals)->getOutgoingSet())
-		{
-			const HandleSeq& oset = LinkCast(h)->getOutgoingSet();
-			bset.push_back(substitute_nocheck(body, oset));
-		}
-		return Handle(createLink(SET_LINK, bset));
-	}
 
-	HandleSeq oset;
-	oset.push_back(vals);
-	return substitute_nocheck(body, oset);
+	OC_ASSERT(vals->getType() == SET_LINK,
+		"Should have checked for this earlier, tin the ctor");
+
+	HandleSeq bset;
+	for (Handle h : LinkCast(vals)->getOutgoingSet())
+	{
+		const HandleSeq& oset = LinkCast(h)->getOutgoingSet();
+		bset.push_back(substitute_nocheck(body, oset));
+	}
+	return Handle(createLink(SET_LINK, bset));
+}
+
+Handle PutLink::reduce(void)
+{
+	Handle red(do_reduce());
+	if (_atomTable)
+		return _atomTable->getAtomSpace()->addAtom(red);
+	return red;
 }
 
 /* ===================== END OF FILE ===================== */

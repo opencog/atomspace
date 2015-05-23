@@ -17,7 +17,7 @@
 
 ; The EvaluationLink won't be added until this is reduced.
 ; When it is reduced, the ListLink will be substitited for the
-; variable $x, creating teh fully-assembled EvcaluationLink.
+; variable $x, creating the fully-assembled EvaluationLink.
 (define to-be-added
 	(PutLink
 		(EvaluationLink
