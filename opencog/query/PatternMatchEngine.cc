@@ -25,7 +25,6 @@
 #include <opencog/util/Logger.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atoms/bind/PatternUtils.h>
-#include <opencog/atoms/bind/SatisfactionLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
@@ -1783,7 +1782,7 @@ void PatternMatchEngine::print_solution(
 	const std::map<Handle, Handle> &vars,
 	const std::map<Handle, Handle> &clauses)
 {
-	printf("\nNode groundings:\n");
+	printf("\nVariable groundings:\n");
 
 	// Print out the bindings of solutions to variables.
 	std::map<Handle, Handle>::const_iterator j = vars.begin();

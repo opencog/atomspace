@@ -36,26 +36,27 @@ void BindLink::init(void)
 	unbundle_clauses(_hclauses);
 
 	// Remainder of the init is just like in the SatisfactionLink
-	setup_sat_body();
+	common_init();
+	setup_components();
 	_pat.redex_name = "anonymous BindLink";
 }
 
 BindLink::BindLink(const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
-	: SatisfactionLink(BIND_LINK, hseq, tv, av)
+	: PatternLink(BIND_LINK, hseq, tv, av)
 {
 	init();
 }
 
 BindLink::BindLink(Type t, const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
-	: SatisfactionLink(t, hseq, tv, av)
+	: PatternLink(t, hseq, tv, av)
 {
 	init();
 }
 
 BindLink::BindLink(Link &l)
-	: SatisfactionLink(l)
+	: PatternLink(l)
 {
 	Type t = l.getType();
 	if (not classserver().isA(t, BIND_LINK))

@@ -43,7 +43,7 @@ class SchemeTest(TestCase):
         self.assertTrue(a1)
 
         # Make sure the truth value is what's in the SCM file.
-        expected = TruthValue(0.5, 800)
+        expected = TruthValue(0.5, 0.5)
         self.assertEquals(a1.tv, expected)
         # print a1.tv, expected
 
@@ -56,7 +56,7 @@ class SchemeTest(TestCase):
         self.assertTrue(a1)
 
         # Make sure the truth value is what's in the SCM file.
-        expected = TruthValue(0.5, 800)
+        expected = TruthValue(0.5, 0.5)
         self.assertEquals(a1.tv, expected)
 
         # Actually, the atoms overall should compare.

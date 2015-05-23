@@ -58,7 +58,8 @@ struct Variables
 	///
 	/// The _index is a reversed index into _varseq: given a variable,
 	/// it returns the ordinal of that variable in the _varseq. It is
-	/// used to implement the variable substitution method.
+	/// used to implement the variable substitution (aka beta-reducation
+	/// aka "PutLink") method.
 	HandleSeq varseq;
 	std::set<Handle> varset;
 	VariableTypeMap typemap;

@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/bind/SatisfactionLink.h>
+#include <opencog/atoms/bind/PatternLink.h>
 
 #include "FuzzyPatternMatchCB.h"
 #include "FuzzyPatternMatch.h"
@@ -49,7 +49,7 @@ Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp)
 
     std::set<Handle> no_vars;
 
-    SatisfactionLinkPtr slp(createSatisfactionLink(no_vars, terms));
+    PatternLinkPtr slp(createPatternLink(no_vars, terms));
     slp->satisfy(fpmcb);
 
 #ifdef DEBUG

@@ -31,7 +31,7 @@
 
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atoms/bind/PatternUtils.h>
-#include <opencog/atoms/bind/SatisfactionLink.h>
+#include <opencog/atoms/bind/PatternLink.h>
 
 using namespace opencog;
 
@@ -459,7 +459,7 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& htarget,
 
 	// Pattern Match on _garbage_superspace since some atoms in htarget could
 	// be in the _garbage space
-	SatisfactionLinkPtr sl(createSatisfactionLink(htarget_vardecl, htarget));
+	PatternLinkPtr sl(createPatternLink(htarget_vardecl, htarget));
 	BackwardChainerPMCB pmcb(_garbage_superspace);
 
 	logger().debug("[BackwardChainer] Before patterm matcher");
@@ -665,7 +665,7 @@ bool BackwardChainer::unify(const Handle& hsource,
 		temp_vardecl = temp_space.addAtom(gen_sub_varlist(hsource_vardecl,
 		                                                  fv.varset));
 
-	SatisfactionLinkPtr sl(createSatisfactionLink(temp_vardecl, temp_hsource));
+	PatternLinkPtr sl(createPatternLink(temp_vardecl, temp_hsource));
 	UnifyPMCB pmcb(&temp_space);
 
 	sl->satisfy(pmcb);

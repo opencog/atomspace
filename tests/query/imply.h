@@ -51,12 +51,12 @@ static inline Handle imply(AtomSpace* as, Handle himplication)
 
 /**
  * Pattern Matcher. Just run the matcher against the indicated
- * variables and clauses, using eh indicated callback.
+ * variables and clauses, using the indicated callback.
  */
 static inline void match(PatternMatchCallback& pmcb,
                          const std::set<Handle> &vars,
                          const std::vector<Handle> &clauses)
 {
-	SatisfactionLinkPtr slp(createSatisfactionLink(vars, clauses));
+	PatternLinkPtr slp(createPatternLink(vars, clauses));
 	slp->satisfy(pmcb);
 }
