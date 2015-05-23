@@ -9,6 +9,7 @@ ADD_LIBRARY (clearbox SHARED
 	FreeLink.cc
 	FunctionLink.cc
 	PlusLink.cc
+	PutLink.cc
 	TimesLink.cc
 )
 
@@ -36,6 +37,7 @@ INSTALL (FILES
 	FreeLink.h
 	FunctionLink.h
 	PlusLink.h
+	PutLink.h
 	TimesLink.h
 	DESTINATION "include/${PROJECT_NAME}/atoms/reduct"
 )
