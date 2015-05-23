@@ -230,4 +230,3 @@ void SubstitutionUTest::test_bad_stuff(void)
 	}
 	TSM_ASSERT("failed to catch exception", caught == true);
 }
-

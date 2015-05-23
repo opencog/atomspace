@@ -42,6 +42,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(StackMoreUTest)
 	ADD_CXXTEST(ArcanaUTest)
 	ADD_CXXTEST(SubstitutionUTest)
+	ADD_CXXTEST(GetLinkUTest)
 
 	# Currently disabled, because these requireScopeLink, which is no
 	# longer used by the BindLink/SatsifactionLink
