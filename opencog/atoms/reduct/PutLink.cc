@@ -81,8 +81,82 @@ PutLink::PutLink(Link& l)
 	init();
 }
 
+// PutLink expects a very strict format: an arity-2 link, with
+// the first part being a pattern, and the second a list or set
+// of values. If the pattern has N variables, then the seccond
+// part must have N values.  The following formats are understood:
+//
+//    PutLink
+//       <pattern with 1 variable>
+//       <any single atom>
+//
+//    PutLink
+//       <pattern with N variables>
+//       ListLink     ;; must have arity N
+//          <atom 1>
+//          ...
+//          <atom N>
+//
+// The below is a handy-dandy easy-to-use form. When it is reduced,
+// it will result in the creation of a set of reduced forms, not
+// just one (the two sets haveing the same arity). Unfortunately,
+// this trick cannot work for N=1.
+//
+//    PutLink
+//       <pattern with N variables>
+//       SetLink        ;; Must hold a set of ListLinks
+//          ListLink    ;; must have arity N
+//             <atom 1>
+//             ...
+//             <atom N>
+//
 void PutLink::init(void)
 {
+	if (2 != _outgoing.size())
+		throw InvalidParamException(TRACE_INFO, "PutLinks should be arity 2!");
+
+	const Handle& body = _outgoing[0];
+	if (VARIABLE_NODE == body->getType())
+	{
+		_free_vars.push_back(body);
+	}
+	else
+	{
+		LinkPtr lll(LinkCast(body));
+		if (lll)
+		{
+			std::set<Handle> varset;
+			find_vars(varset, lll->getOutgoingSet());
+		}
+	}
+
+	// OK, now for the values.
+	if (_free_vars.size() == 1) return;
+
+	LinkPtr lval(LinkCast(_outgoing[1]));
+	if (lval->getType() == LIST_LINK)
+	{
+		if (lval->getArity() != _free_vars.size())
+			throw InvalidParamException(TRACE_INFO,
+				"PutLink has mismatched size! Expected %zu, got %zu\n",
+				_free_vars.size(), lval->getArity());
+		return;
+	}
+	if (lval->getType() != SET_LINK)
+		throw InvalidParamException(TRACE_INFO,
+			"PutLink was expecting a ListLink or SetLink!");
+
+	for (const Handle& h : lval->getOutgoingSet())
+	{
+		LinkPtr lse(LinkCast(h));
+		if (lse->getType() != LIST_LINK)
+			throw InvalidParamException(TRACE_INFO,
+				"PutLink was expecting a ListLink here");
+		if (lse->getArity() != _free_vars.size())
+			throw InvalidParamException(TRACE_INFO,
+				"PutLink set element has mismatched size! Expected %zu, got %zu\n",
+				_free_vars.size(), lse->getArity());
+	}
 }
 
 Handle PutLink::reduce(void)

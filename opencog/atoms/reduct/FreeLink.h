@@ -57,11 +57,11 @@ namespace opencog
  */
 class FreeLink : public Link
 {
-private:
-	void find_vars(std::set<Handle>&, const HandleSeq&);
 protected:
 	HandleSeq _free_vars;
 	void init(void);
+	void find_vars(std::set<Handle>&, const HandleSeq&);
+
 	FreeLink(Type, const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());

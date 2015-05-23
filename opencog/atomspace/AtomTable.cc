@@ -49,6 +49,7 @@
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/reduct/FunctionLink.h>
+#include <opencog/atoms/reduct/PutLink.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
@@ -305,6 +306,9 @@ static AtomPtr factory(Type atom_type, AtomPtr atom)
     } else if (GET_LINK == atom_type) {
         if (NULL == PatternLinkCast(atom))
             return createPatternLink(*LinkCast(atom));
+    } else if (PUT_LINK == atom_type) {
+        if (NULL == PutLinkCast(atom))
+            return createPutLink(*LinkCast(atom));
     } else if (SATISFACTION_LINK == atom_type) {
         if (NULL == PatternLinkCast(atom))
             return createPatternLink(*LinkCast(atom));
@@ -355,6 +359,8 @@ static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
         return createLink(*LinkCast(atom));
     if (GET_LINK == atom_type)
         return createPatternLink(*LinkCast(atom));
+    if (PUT_LINK == atom_type)
+        return createPutLink(*LinkCast(atom));
     if (SATISFACTION_LINK == atom_type)
         return createPatternLink(*LinkCast(atom));
     if (SCOPE_LINK == atom_type)
