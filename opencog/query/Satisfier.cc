@@ -31,20 +31,34 @@
 using namespace opencog;
 
 bool Satisfier::grounding(const std::map<Handle, Handle> &var_soln,
-                           const std::map<Handle, Handle> &term_soln)
+                          const std::map<Handle, Handle> &term_soln)
 {
-	// PatternMatchEngine::print_solution(term_soln, var_soln);
+	// PatternMatchEngine::print_solution(var_soln, term_soln);
 	_result = TruthValue::TRUE_TV();
 
 	// Look for more groundings.
 	return false;
 }
 
-bool SatisfactionSet::grounding(const std::map<Handle, Handle> &var_soln,
-                               const std::map<Handle, Handle> &term_soln)
+bool SatisfyingSet::grounding(const std::map<Handle, Handle> &var_soln,
+                              const std::map<Handle, Handle> &term_soln)
 {
-	// PatternMatchEngine::print_solution(term_soln, var_soln);
-	_satisfying_set.push_back(term_soln.at(_body));
+	// PatternMatchEngine::print_solution(var_soln, term_soln);
+
+	if (1 == _varseq.size())
+	{
+		_satisfying_set.push_back(var_soln.at(_varseq[0]));
+		return false;
+	}
+
+	// If more than one variable, encapsulate in sequential order,
+	// in a ListLink.
+	HandleSeq vargnds;
+	for (const Handle& hv : _varseq)
+	{
+		vargnds.push_back(var_soln.at(hv));
+	}
+	_satisfying_set.push_back(Handle(createLink(LIST_LINK, vargnds)));
 
 	// Look for more groundings.
 	return false;
@@ -82,8 +96,7 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink)
 			bl = createPatternLink(hlink);
 	}
 
-	SatisfactionSet sater(as);
-	sater._body = bl->get_body();
+	SatisfyingSet sater(as);
 	bl->satisfy(sater);
 
 	return as->addLink(SET_LINK, sater._satisfying_set);

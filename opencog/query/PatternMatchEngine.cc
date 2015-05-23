@@ -1782,7 +1782,7 @@ void PatternMatchEngine::print_solution(
 	const std::map<Handle, Handle> &vars,
 	const std::map<Handle, Handle> &clauses)
 {
-	printf("\nNode groundings:\n");
+	printf("\nVariable groundings:\n");
 
 	// Print out the bindings of solutions to variables.
 	std::map<Handle, Handle>::const_iterator j = vars.begin();
