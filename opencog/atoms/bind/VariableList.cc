@@ -345,7 +345,7 @@ void VariableList::build_index(void)
  * Type checking is performed before subsitution; if the args fail to
  * satisfy the type constraints, an exception is thrown.
  *
- * Again, only a substitution is performed, there is not evaluation.
+ * Again, only a substitution is performed, there is no evaluation.
  * Note also that the resulting tree is NOT placed into any atomspace!
  */
 Handle VariableList::substitute(const Handle& fun,
@@ -363,30 +363,30 @@ Handle VariableList::substitute(const Handle& fun,
 	return substitute_nocheck(fun, args);
 }
 
-Handle VariableList::substitute_nocheck(const Handle& fun,
+Handle VariableList::substitute_nocheck(const Handle& term,
                                         const HandleSeq& args) const
 {
 	// If it is a singleton, just return that singleton.
 	std::map<Handle, unsigned int>::const_iterator idx;
-	idx = _varlist.index.find(fun);
+	idx = _varlist.index.find(term);
 	if (idx != _varlist.index.end())
 		return args.at(idx->second);
 
 	// If its a node, and its not a variable, then it is a constant,
 	// and just return that.
-	LinkPtr lfun(LinkCast(fun));
-	if (NULL == lfun) return fun;
+	LinkPtr lterm(LinkCast(term));
+	if (NULL == lterm) return term;
 
 	// QuoteLinks halt the reursion
-	if (QUOTE_LINK == fun->getType()) return fun;
+	if (QUOTE_LINK == term->getType()) return term;
 
 	// Recursively fill out the subtrees.
 	HandleSeq oset;
-	for (const Handle& h : lfun->getOutgoingSet())
+	for (const Handle& h : lterm->getOutgoingSet())
 	{
 		oset.push_back(substitute_nocheck(h, args));
 	}
-	return Handle(createLink(fun->getType(), oset));
+	return Handle(createLink(term->getType(), oset));
 }
 
 /* ===================== END OF FILE ===================== */
