@@ -63,6 +63,10 @@ ABSENT_LINK <- UNORDERED_LINK
 // valued; they're simply options on a menu. Pick one.  It is an ordered
 // link, in the sense that the first choice might be preferable.
 //
+// The ChoiceLink is NOT semantically equivalent to the OrLink. The
+// OrLink of two sets is a set union. The ChoiceLink of two sets is
+// "pick one of these two sets but not both".
+//
 // Currently, the only reason this exists is for the pattern matcher;
 // you use it to say "match this graph or this graph or this graph".
 //
@@ -80,7 +84,7 @@ CHOICE_LINK <- ORDERED_LINK
 CONTEXT_LINK <- ORDERED_LINK
 
 // ---------------------------------------------------------
-// Basic first-order logic ungrounded terms and term types
+// Types and variables and signatures.
 
 // Type declarations
 TYPE_NODE <- NODE
@@ -234,7 +238,7 @@ QUANTITY_LINK <- ORDERED_LINK
 // VirtualLinks only need to be used for those GPN's that take 2 or
 // more arguments. If they take only one, then there is no reason
 // for them to be delcared as virtual (at least, as far as the pattern
-// matcher is concerned, with, right now, is the unly user of this
+// matcher is concerned, which, right now, is the only user of this
 // link type.)
 VIRTUAL_LINK <- EVALUATION_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK
@@ -271,10 +275,11 @@ TIMES_LINK <- ARITHMETIC_LINK
 //
 DELETE_LINK <- FUNCTION_LINK
 
-// The Add, Assign and RemoveLink's all expect at TypeNode as the first
+// The Insert, Assign and RemoveLink's all expect at TypeNode as the first
 // member of thier outgoing set.  When these execute, they add or remove
-// the named type to the atomsapce.  Thus, they are like ProLog's assert
-// and retract predicates.
+// the named type to the atomsapce.  Thus, they similar to Prolog's assert
+// and retract predicates.  But then, GetLink and PutLink are similar to
+// Prolog's assert and retract, too.
 ASSIGN_LINK <- FUNCTION_LINK
 INSERT_LINK <- ASSIGN_LINK
 REMOVE_LINK <- ASSIGN_LINK
