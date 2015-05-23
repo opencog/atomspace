@@ -65,7 +65,10 @@ void PatternLink::common_init(void)
 		// Each component is in connection-order. By re-assigning to
 		// _pat.cnf_clauses, they get placed in that order, this giving
 		// a minor performance boost during clause traversal.
-		_pat.cnf_clauses = _components[0];
+		// Gurk. This does not work currently; the evaluatables have been
+		// stripped out of the component. I think this is a bug ...
+		// Is this related to the other XXX for validate_clasues??
+		// _pat.cnf_clauses = _components[0];
 	   make_connectivity_map(_pat.cnf_clauses);
 	}
 }
