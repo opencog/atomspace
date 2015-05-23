@@ -72,6 +72,8 @@ public:
 	void tearDown(void);
 
 	void test_unary_get(void);
+	void test_binary_get(void);
+	void test_free_bound(void);
 };
 
 void GetLinkUTest::tearDown(void)
@@ -83,7 +85,7 @@ void GetLinkUTest::setUp(void)
 }
 
 /*
- * Basic GetLinkLink unit test.
+ * Basic single-variable GetLink unit test.
  */
 void GetLinkUTest::test_unary_get(void)
 {
@@ -95,6 +97,53 @@ void GetLinkUTest::test_unary_get(void)
 	Handle hgnd = eval->eval_h("(cog-satisfying-set is-human)");
 	Handle hans = eval->eval_h(
 		"(SetLink (ConceptNode \"Ben\") (ConceptNode \"Linas\"))");
+
+	printf("Expected this: %s\n", hans->toString().c_str());
+	printf("Found this answer: %s\n", hgnd->toString().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Two-variable GetLink unit test.
+ */
+void GetLinkUTest::test_binary_get(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD", "tests/query/get-link.scm");
+	load_scm_files_from_config(*as);
+
+	Handle hgnd = eval->eval_h("(cog-satisfying-set is-something)");
+	Handle hans = eval->eval_h(
+		"(SetLink "
+		"(ListLink (ConceptNode \"Ben\") (ConceptNode \"human\"))"
+		"(ListLink (ConceptNode \"Linas\") (ConceptNode \"human\"))"
+		"(ListLink (ConceptNode \"Sparky\") (ConceptNode \"dog\")))");
+
+	printf("Expected this: %s\n", hans->toString().c_str());
+	printf("Found this answer: %s\n", hgnd->toString().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Two-variable GetLink unit test; one is free one is bound.
+ */
+void GetLinkUTest::test_free_bound(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD", "tests/query/get-link.scm");
+	load_scm_files_from_config(*as);
+
+	Handle hgnd = eval->eval_h("(cog-satisfying-set is-query)");
+	Handle hans = eval->eval_h(
+		"(SetLink (ConceptNode \"human\"))");
 
 	printf("Expected this: %s\n", hans->toString().c_str());
 	printf("Found this answer: %s\n", hgnd->toString().c_str());
