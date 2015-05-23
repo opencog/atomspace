@@ -49,6 +49,9 @@ FreeLink::FreeLink(Type t, const HandleSeq& oset,
 {
 	if (not classserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
+
+	// Derived classes have thier own init routines.
+	if (FREE_LINK != t) return;
 	init();
 }
 
@@ -59,6 +62,9 @@ FreeLink::FreeLink(Type t, const Handle& a,
 {
 	if (not classserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
+
+	// Derived classes have thier own init routines.
+	if (FREE_LINK != t) return;
 	init();
 }
 
@@ -69,6 +75,9 @@ FreeLink::FreeLink(Type t, const Handle& a, const Handle& b,
 {
 	if (not classserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
+
+	// Derived classes have thier own init routines.
+	if (FREE_LINK != t) return;
 	init();
 }
 
@@ -78,6 +87,9 @@ FreeLink::FreeLink(Link& l)
 	Type tscope = l.getType();
 	if (not classserver().isA(tscope, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
+
+	// Derived classes have thier own init routines.
+	if (FREE_LINK != tscope) return;
 	init();
 }
 
