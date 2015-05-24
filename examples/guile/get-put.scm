@@ -36,13 +36,32 @@
 ; Take a look again:
 (show-eval-links)
 
-(define to-be-removed
-	(RemoveLink
-		(TypeNode "EvaluationLink")
-		(PredicateNode "some property")
+; The PutLink below causes the put-link above to be un-done.
+; It explicitly specifies the same parts as were specified above,
+; but when these are assembled, it causes the DeleteLink to
+; run and remove them.
+(define remove-thing-ab
+	(PutLink
+		(DeleteLink
+			(EvaluationLink
+				(PredicateNode "some property")
+				(VariableNode "$x")))
 		(ListLink
 			(ConceptNode "thing A")
 			(ConceptNode "B-dom-ness"))))
+
+(cog-reduce! remove-thing-ab)
+
+(define to-be-removed
+	(PutLink
+		(DeleteLink
+			(EvaluationLink
+				(PredicateNode "some property")
+				(VariableNode "$x")))
+		(GetLink
+			(EvaluationLink
+				(PredicateNode "some property")
+				(VariableNode "$x")))))
 
 ; Now, remove the EvaluationLink
 (cog-execute! to-be-removed)

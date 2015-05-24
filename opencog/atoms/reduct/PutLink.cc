@@ -252,9 +252,22 @@ Handle PutLink::do_reduce(void) const
 
 Handle PutLink::reduce(void)
 {
+	// XXX FIXME I don't really like this icky "stuff it into the same
+	// atomtable" business, which is almost as evil as passing around an
+	// atomspace everywhere. Something needs to be done about this.
 	Handle red(do_reduce());
 	if (_atomTable)
+	{
+		// DeleteLinks get handled specially, here. With the current
+		// AtomSpace design, they cannot auto-delete themselves.
+		if (DELETE_LINK == red->getType())
+		{
+			for (const Handle& h : LinkCast(red)->getOutgoingSet())
+				_atomTable->getAtomSpace()->removeAtom(h, true);
+			return Handle::UNDEFINED;
+		}
 		return _atomTable->getAtomSpace()->addAtom(red);
+	}
 	return red;
 }
 
