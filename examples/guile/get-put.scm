@@ -48,7 +48,8 @@
 			(VariableNode "$x"))))
 
 ; The cog-satisfying-set function will return the value(s) that
-; the GetLink finds.
+; the GetLink finds.  If only one value satsifies the query, then
+; that is returned. Else a SetLink is returned.
 (cog-satisfying-set get-value)
 
 ; The PutLink below causes the put-link above to be un-done.
@@ -68,9 +69,28 @@
 			(ConceptNode "thing A")
 			(ConceptNode "B-dom-ness"))))
 
+; Force its removal.
 (cog-reduce! remove-thing-ab)
 
-(define to-be-removed
+; Look for it.
+(cog-satisfying-set get-value)
+
+; Add it back in:
+(cog-reduce! to-be-added)
+(cog-satisfying-set get-value)
+
+; ... and so on. We can now continue to remove it and add it
+; back in repeatedly.
+
+
+; It is also useful to generically remove any atom matching
+; a pattern description. This can be done by combining the
+; PutLink with a GetLink performing a query. The below uses
+; the GetLink to find groundings for the variable $x, and then
+; passes those groundings to the PutLink/DeleteLink combination,
+; which removes them.
+;
+(define remove-some-property
 	(PutLink
 		(DeleteLink
 			(EvaluationLink
@@ -82,8 +102,8 @@
 				(VariableNode "$x")))))
 
 ; Now, remove the EvaluationLink
-(cog-execute! to-be-removed)
-(show-eval-links)
+(cog-reduce! remove-some-property)
+(cog-satisfying-set get-value)
 
 ; We can now add and remove over and over:
 (cog-execute! to-be-added)
