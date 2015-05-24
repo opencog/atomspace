@@ -36,10 +36,28 @@
 ; Take a look again:
 (show-eval-links)
 
+; One way to view the result of having run the PutLink is to
+; use the GetLink with the same pattern.  Thus, the GetLink
+; below has a satisfying set that corresponds to the PutLink
+; above.
+
+(define get-value
+	(GetLink
+		(EvaluationLink
+			(PredicateNode "some property")
+			(VariableNode "$x"))))
+
+; The cog-satisfying-set function will return the value(s) that
+; the GetLink finds.
+(cog-satisfying-set get-value)
+
 ; The PutLink below causes the put-link above to be un-done.
 ; It explicitly specifies the same parts as were specified above,
 ; but when these are assembled, it causes the DeleteLink to
-; run and remove them.
+; run and remove them.  That is, it is impossible to insert
+; a DeleteLink into the atomspace, if it does not have any
+; variables in it. Attempting such an insertion will cause the
+; body of the DeleteLink to be removed.
 (define remove-thing-ab
 	(PutLink
 		(DeleteLink
