@@ -2,7 +2,6 @@
 
 module OpenCog.AtomSpace.Api (
       asAddNode
-    , asPrint
     , runOnNewAtomSpace
     , AtomSpace
     ) where
@@ -54,12 +53,6 @@ asAddNode :: Node -> AtomSpace Handle
 asAddNode nod = AtomSpace (\asRef -> let ntype = fromIntegral $ fromEnum $ nodeType nod
                                          fun = \str -> fromEnum <$> c_atomspace_addnode asRef ntype str
                                       in withCString (nodeName nod) fun)
-
--- 'asPrint' calls to the print method of the AtomSpace C++ class.
-foreign import ccall "AtomSpace_CWrapper.h AtomSpace_print"
-               c_atomspace_print :: AtomSpaceRef -> IO ()
-asPrint :: AtomSpace ()
-asPrint = AtomSpace c_atomspace_print
 
 -- 'runOnNewAtomSpace' creates a new AtomSpace (C++ object), does some computation run_ over it,
 -- and then deletes the AtomSpace.

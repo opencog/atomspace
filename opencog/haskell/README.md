@@ -63,7 +63,7 @@ libatomspace.so was compiled on the folder: build/opencog/atomspace/
 So, to compile, and run the example:
 
     make all
-    export LD_LIBRARY_PATH=../../../build/opencog/atomspace/:.
+    export LD_LIBRARY_PATH=.
     ./example
 
 So, I think it won't be so difficult to complete a global binding including
