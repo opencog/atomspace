@@ -74,10 +74,19 @@ SCM SchemeSmob::ss_execute (SCM satom)
 	AtomSpace* atomspace = ss_get_env_as("cog-execute!");
 
 	Type t = h->getType();
+
+	// Reduce PutLinks first, and then execute them.
+	if (PUT_LINK == h->getType())
+	{
+		FreeLinkPtr fff(FreeLinkCast(h));
+		h = fff->reduce();
+		t = h->getType();
+	}
+
 	if (not classserver().isA(t, FUNCTION_LINK))
 	{
-		scm_wrong_type_arg_msg("cog-execute!", 1, satom,
-			"FunctionLink (ExecutionOutputLink, PlusLink, TimesLink, etc.)");
+		h = atomspace->addAtom(h);
+		return handle_to_scm(h);
 	}
 
 	// execute() may throw a C++ exception in various cases:
@@ -178,17 +187,18 @@ SCM SchemeSmob::ss_reduce (SCM satom)
 	// expression contains non-reducible atoms in it.
 	try
 	{
+		AtomSpace* atomspace = ss_get_env_as("reduce!");
 		FreeLinkPtr fff(FreeLinkCast(h));
-		Handle h(fff->reduce());
+		Handle hr(fff->reduce());
 
-		if (DELETE_LINK == h->getType())
+		if (DELETE_LINK == hr->getType())
 		{
-			AtomSpace* atomspace = ss_get_env_as("reduce!");
-			for (const Handle& h : LinkCast(h)->getOutgoingSet())
-				atomspace->removeAtom(h, true);
+			for (const Handle& ho : LinkCast(hr)->getOutgoingSet())
+				atomspace->removeAtom(ho, true);
 			return handle_to_scm(Handle::UNDEFINED);
 		}
-		return handle_to_scm(h);
+		hr = atomspace->addAtom(hr);
+		return handle_to_scm(hr);
 	}
 	catch (const std::exception& ex)
 	{

@@ -30,7 +30,11 @@
 ; Verify that the atomspace contains no EvaluationLinks:
 (show-eval-links)
 
-; Now, actually create the EvaluationLink
+; Now, actually create the EvaluationLink. Either cog-execute! or
+; cog-reduce! can be used for this. cog-reduce! will only perform
+; the reduction. cog-execute! will also execute any executable
+; links that result.
+(cog-execute! to-be-added)
 (cog-reduce! to-be-added)
 
 ; Take a look again:
