@@ -104,7 +104,9 @@ void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 {
 	for (const Handle& h : oset)
 	{
-		if (VARIABLE_NODE == h->getType() and
+		Type t = h->getType();
+		if (QUOTE_LINK == t) continue;
+		if (VARIABLE_NODE == t and
 		    0 == varset.count(h))
 		{
 			_varseq.push_back(h);
