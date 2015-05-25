@@ -180,6 +180,14 @@ SCM SchemeSmob::ss_reduce (SCM satom)
 	{
 		FreeLinkPtr fff(FreeLinkCast(h));
 		Handle h(fff->reduce());
+
+		if (DELETE_LINK == h->getType())
+		{
+			AtomSpace* atomspace = ss_get_env_as("reduce!");
+			for (const Handle& h : LinkCast(h)->getOutgoingSet())
+				atomspace->removeAtom(h, true);
+			return handle_to_scm(Handle::UNDEFINED);
+		}
 		return handle_to_scm(h);
 	}
 	catch (const std::exception& ex)

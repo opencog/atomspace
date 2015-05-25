@@ -81,6 +81,10 @@
 
 ; ... and so on. We can now continue to remove it and add it
 ; back in repeatedly.
+(cog-reduce! remove-thing-ab)
+(cog-satisfying-set get-value)
+(cog-reduce! to-be-added)
+(cog-satisfying-set get-value)
 
 
 ; It is also useful to generically remove any atom matching
