@@ -38,7 +38,7 @@ void DefineLink::init(const HandleSeq& oset)
 
 	// The name must not have been previously defined before.
 	HandleSeq ename;
-   oset[0]->getIncomingSetByType(std::back_inserter(ename), DEFINE_LINK);
+	oset[0]->getIncomingSetByType(std::back_inserter(ename), DEFINE_LINK);
 	if (0 < ename.size())
 		throw InvalidParamException(TRACE_INFO,
 			"This is already defined; remove before redfining!");

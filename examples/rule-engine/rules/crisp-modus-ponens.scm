@@ -44,3 +44,9 @@
          (cAB (cog-stv-confidence AB)))
       (if (and (>= sA 0.5) (>= cA 0.5) (>= sAB 0.5) (>= cAB 0.5))
           (cog-set-tv! B (stv 1 1)))))
+
+; Useful to set this rule as a member of a rule base
+(DefineLink
+   (Node "crisp-rule-base-modus-ponens-rule")
+   crisp-modus-ponens
+)

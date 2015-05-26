@@ -35,7 +35,7 @@
 namespace opencog {
 
 /**
- * class Satisfier -- pattern matching callback for checking satsifaction.
+ * class Satisfier -- pattern matching callback for checking satisfaction.
  *
  * This class is meant to be used with the pattern matcher. When the
  * pattern matcher calls the callback, it will do so with a particular

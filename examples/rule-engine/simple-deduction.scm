@@ -18,13 +18,17 @@
 (load-from-path "utilities.scm")
 (load-from-path "av-tv.scm")
 
+; Load URE configuration
+(load-from-path "crisp-rule-base-config.scm")
+
+; Define knowledge base
 (define A (ConceptNode "A"))
 (define B (ConceptNode "B"))
 (define C (ConceptNode "C"))
 (define AB (ImplicationLink (stv 1 1) A B))
 (define BC (ImplicationLink (stv 1 1) B C))
 
-; (cog-fc AB "examples/rule-engine/cpolicy.json")
+; (cog-fc AB "crisp-rule-base")
 
 ; Expected output should be
 ; TODO
