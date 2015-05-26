@@ -31,6 +31,11 @@
  * Given an ungrounded expression (i.e. an expression containing variables)
  * and a map between variables and ground terms, it will create a new
  * expression, with the ground terms substituted for the variables.
+ *
+ * This also implements generic execution: any executable links are
+ * executed as the variable substitution is performed.  In particular,
+ * execution is implemented as instantiation, with an empty variable
+ * map.
  */
 namespace opencog {
 
@@ -62,6 +67,10 @@ private:
 		Instantiator(AtomSpace* as) : _as(as) {}
 
 		Handle instantiate(const Handle& expr, const std::map<Handle, Handle> &vars);
+		Handle execute(const Handle& expr)
+		{
+			return instantiate(expr, std::map<Handle, Handle>());
+		}
 };
 
 } // namespace opencog

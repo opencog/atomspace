@@ -94,13 +94,21 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	{
 		// The atoms being created above might not all be in the
 		// atomspace, just yet. Because we have no clue what the
-		// ExecutionOutputLink might do, we had best put them
-		// there now. Just as well, because it seems the scheme
-		// (and python) bindings get tripped up by the UUID==-1
-		// of uninserted atoms.  XXX Well, this arguably means that
-		// scheme and python are broken.  We shouldn't have to do
-		// this, as it leaves garbage littered in the atomspace.
-		// XXX FIXME later.
+		// ExecutionOutputLink might do (its a black box), we had
+		// best put them there now. In particular, the black box
+		// may want to look at the atom TV's, and for that, they
+		// MUST be fetched from the atomspace, since only the
+		// atomspace knows the correct TV values.
+		//
+		// The problem here is that the insertion leaves garbage
+		// intermediate-result atoms littering the atomspace, with
+		// no effective way of removing them. XXX This needs fixing.
+		// Again, some kind of monda solution. XXX FIXME later.
+		//
+		// Just as well, because it seems the scheme (and python)
+		// bindings get tripped up by the UUID==-1 of uninserted atoms.
+		// XXX Well, this arguably means that scheme and python are
+		// broken.
 		size_t sz = oset_results.size();
 		for (size_t i=0; i< sz; i++)
 			oset_results[i] = _as->addAtom(oset_results[i]);

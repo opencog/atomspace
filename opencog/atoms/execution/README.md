@@ -70,6 +70,23 @@ Here is why execution is complex:
   inserted.
 
 
+Garbage Collection
+------------------
+There's an implementation flaw that is hard to fix, right now, but
+should be fixed.  When black-box links are encountered, thier
+arguments are placed into the atomspace.  This is required for the
+two reasons given above: TV values need to be fished out of the
+atomspace, and also, python/scheme can't work with atoms that are not
+in the atomspace.
+
+What this means is that execution/evaluation leaves the atomspace
+littered with partial results, and no effective way to clean them up
+or garbage collect them.  Perhaps attention allocation can eventually do
+this, but that is a very distant, abstract mechanism. Something more
+immediate, to get the correct TV's, and have scheme/python not fail,
+would be better.
+
+
 Performance
 -----------
 Some reasons why black-box execution/evaluation is slow, and ways to
