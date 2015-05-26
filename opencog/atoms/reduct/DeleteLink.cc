@@ -37,15 +37,19 @@ void DeleteLink::init(void)
 	// The handleset must contain a free variable in it, somewhere.
 	// If it doesn't, then the entire Handleset should be deleted
 	// (removed from the atomspace). We can't do this at constructor
-	// time, because we don't know the atomspace yet.
+	// time, because we don't know the atomspace yet.  So we hack
+	// around this by thowing at construtor time.
 	//
-	// It can only ever hold VariableNodes!
 	if (0 == _varseq.size())
 		// throw DeleteException();
 		throw InvalidParamException(TRACE_INFO,
-			"Cannot insert a fully grounded DeleteLink into the atomsapce!");
+			"Cannot create a fully grounded DeleteLink!");
 } 
 
+#if 0
+Well, we cannot really implement this here; but this is what
+it should actually do.  We can't implement it here, because
+fully-grounded DeleteLink's cannot exist.
 Handle DeleteLink::execute(AtomSpace * as) const
 {
 	const HandleSeq& oset = _outgoing;
@@ -57,6 +61,7 @@ Handle DeleteLink::execute(AtomSpace * as) const
 	}
 	return Handle::UNDEFINED;
 }
+#endif
 
 DeleteLink::DeleteLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)

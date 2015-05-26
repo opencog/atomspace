@@ -80,8 +80,9 @@ Handle Instantiator::walk_tree(const Handle& expr)
 
 	if (DELETE_LINK == t)
 	{
-		for (Handle h: oset_results)
-			_as->removeAtom(h, true);
+		for (const Handle& h: oset_results)
+			if (VARIABLE_NODE != h->getType())
+				_as->removeAtom(h, true);
 
 		return Handle::UNDEFINED;
 	}

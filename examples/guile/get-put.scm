@@ -75,20 +75,20 @@
 			(ConceptNode "B-dom-ness"))))
 
 ; Force its removal.
-(cog-reduce! remove-thing-ab)
+(cog-execute! remove-thing-ab)
 
 ; Look for it.
 (cog-satisfying-set get-value)
 
 ; Add it back in:
-(cog-reduce! to-be-added)
+(cog-execute! to-be-added)
 (cog-satisfying-set get-value)
 
 ; ... and so on. We can now continue to remove it and add it
 ; back in repeatedly.
-(cog-reduce! remove-thing-ab)
+(cog-execute! remove-thing-ab)
 (cog-satisfying-set get-value)
-(cog-reduce! to-be-added)
+(cog-execute! to-be-added)
 (cog-satisfying-set get-value)
 
 
@@ -111,7 +111,7 @@
 				(VariableNode "$x")))))
 
 ; Now, remove the EvaluationLink
-(cog-reduce! remove-some-property)
+(cog-execute! remove-some-property)
 (cog-satisfying-set get-value)
 
 ; We can now add and remove over and over:

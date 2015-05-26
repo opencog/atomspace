@@ -111,9 +111,19 @@ SCM SchemeSmob::ss_execute (SCM satom)
 			return handle_to_scm(h);
 		}
 
-		FunctionLinkPtr fff(FunctionLinkCast(lp));
-		if (NULL == fff)
-			fff = createFunctionLink(*lp);
+		// We do this here, because fully-grounded DeleteLinks must
+		// not exist, and we may have created one with the PutLink above.
+		if (DELETE_LINK == t)
+		{
+			for (const Handle& ho : lp->getOutgoingSet())
+			{
+				if (VARIABLE_NODE != ho->getType())
+					atomspace->removeAtom(ho, true);
+			}
+			return handle_to_scm(Handle::UNDEFINED);
+		}
+
+		FunctionLinkPtr fff(FunctionLinkCast(FunctionLink::factory(lp)));
 		Handle h(fff->execute(atomspace));
 		return handle_to_scm(h);
 	}

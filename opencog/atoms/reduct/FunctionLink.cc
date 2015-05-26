@@ -72,7 +72,8 @@ FunctionLink::FunctionLink(Link& l)
 
 Handle FunctionLink::execute(AtomSpace* as) const
 {
-	throw RuntimeException(TRACE_INFO, "Not executable!");
+	throw RuntimeException(TRACE_INFO, "Not executable: %s\n",
+		classserver().getTypeName(getType()).c_str());
 }
 
 Handle FunctionLink::do_execute(AtomSpace* as, const Handle& h)

@@ -53,8 +53,6 @@ public:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	DeleteLink(Link &l);
-
-	Handle execute(AtomSpace*) const;
 };
 
 typedef std::shared_ptr<DeleteLink> DeleteLinkPtr;
