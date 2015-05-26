@@ -32,67 +32,41 @@
 
 using namespace opencog;
 
-void DeleteLink::init(const HandleSeq& oset)
+void DeleteLink::init(void)
 {
-	// The handleset must contain an un-qutoed VariableNode in it,
-	// somewhere. If it doesn't, then the entire Handleset should be
-	// deleted (removed from the atomspace).
+	// The handleset must contain a free variable in it, somewhere.
+	// If it doesn't, then the entire Handleset should be deleted
+	// (removed from the atomspace). We can't do this at constructor
+	// time, because we don't know the atomspace yet.
 	//
-	// This removes from the atomspace, not the atomtable, so that the
-	// the atom is deleted from the backingstore as well.  This requires
-	// asking the AtomTable which AtomSpace it belongs to.
-
-	bool valid = false;
-	for (const Handle& h : oset)
-	{
-		if (contains_atomtype(h, VARIABLE_NODE)) valid = true;
-	}
-
-	if (not valid)
-	{
-		for (Handle h : oset)
-		{
-			AtomTable * at = h->getAtomTable();
-			if (NULL == at) continue;
-			AtomSpace * as = at->getAtomSpace();
-			if (NULL == as)
-				at->extract(h, true);
-			else
-				as->removeAtom(h, true);
-		}
-	}
-
 	// It can only ever hold VariableNodes!
-	if (not valid)
+	if (0 == _varseq.size())
 		// throw DeleteException();
 		throw InvalidParamException(TRACE_INFO,
 			"Cannot insert a fully grounded DeleteLink into the atomsapce!");
 } 
 
-void DeleteLink::del(AtomSpace * as, const HandleSeq& oset) const
+Handle DeleteLink::execute(AtomSpace * as) const
 {
+	const HandleSeq& oset = _outgoing;
 	for (const Handle& h : oset)
 	{
 		Type t = h->getType();
 		if (VARIABLE_NODE != t)
 			as->removeAtom(h, true);
 	}
-}
-
-void DeleteLink::del(AtomSpace * as) const
-{
-	del(as, _outgoing);
+	return Handle::UNDEFINED;
 }
 
 DeleteLink::DeleteLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: Link(DELETE_LINK, oset, tv, av)
+	: FunctionLink(DELETE_LINK, oset, tv, av)
 {
-	init(oset);
+	init();
 }
 
 DeleteLink::DeleteLink(Link &l)
-	: Link(l)
+	: FunctionLink(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
@@ -103,7 +77,7 @@ DeleteLink::DeleteLink(Link &l)
 			"Expecting a DeleteLink, got %s", tname.c_str());
 	}
 
-	init(l.getOutgoingSet());
+	init();
 }
 
 /* ===================== END OF FILE ===================== */

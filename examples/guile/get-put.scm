@@ -55,6 +55,7 @@
 ; the GetLink finds.  If only one value satsifies the query, then
 ; that is returned. Else a SetLink is returned.
 (cog-satisfying-set get-value)
+(cog-execute! get-value)
 
 ; The PutLink below causes the put-link above to be un-done.
 ; It explicitly specifies the same parts as were specified above,

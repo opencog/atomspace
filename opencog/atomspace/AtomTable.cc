@@ -42,12 +42,12 @@
 #include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/DefineLink.h>
-#include <opencog/atoms/bind/DeleteLink.h>
 #include <opencog/atoms/bind/PatternLink.h>
 #include <opencog/atoms/bind/ScopeLink.h>
 #include <opencog/atoms/bind/VariableList.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
+#include <opencog/atoms/reduct/DeleteLink.h>
 #include <opencog/atoms/reduct/FunctionLink.h>
 #include <opencog/atoms/reduct/PutLink.h>
 #include <opencog/util/exceptions.h>

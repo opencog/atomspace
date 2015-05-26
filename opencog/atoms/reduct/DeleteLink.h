@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/DeleteLink.h
+ * opencog/atoms/reduct/DeleteLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -27,7 +27,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atoms/bind/ScopeLink.h>
+#include <opencog/atoms/reduct/FunctionLink.h>
 
 namespace opencog
 {
@@ -43,10 +43,10 @@ namespace opencog
 /// atomspace!  In essence, the DeleteLink is a link that can never be
 /// grounded!
 ///
-class DeleteLink : public Link
+class DeleteLink : public FunctionLink
 {
 protected:
-	void init(const HandleSeq&);
+	void init(void);
 public:
 	DeleteLink(const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
@@ -54,8 +54,7 @@ public:
 
 	DeleteLink(Link &l);
 
-	void del(AtomSpace*) const;
-	void del(AtomSpace*, const HandleSeq&) const;
+	Handle execute(AtomSpace*) const;
 };
 
 typedef std::shared_ptr<DeleteLink> DeleteLinkPtr;

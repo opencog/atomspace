@@ -5,6 +5,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 ADD_LIBRARY (clearbox SHARED
 	ArithmeticLink.cc
 	AssignLink.cc
+	DeleteLink.cc
 	FoldLink.cc
 	FreeLink.cc
 	FunctionLink.cc
@@ -33,6 +34,7 @@ ENDIF (CYGWIN)
 INSTALL (FILES
 	ArithmeticLink.h
 	AssignLink.h
+	DeleteLink.h
 	FoldLink.h
 	FreeLink.h
 	FunctionLink.h

@@ -6,7 +6,6 @@ ADD_LIBRARY (lambda SHARED
 	BetaRedex.cc
 	BindLink.cc
 	DefineLink.cc
-	DeleteLink.cc
 	PatternLink.cc
 	PatternUtils.cc
 	ScopeLink.cc
