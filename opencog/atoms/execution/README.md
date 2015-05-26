@@ -46,6 +46,13 @@ Here is why execution is complex:
   the function can be executed.  That is, execution does NOT
   commute with substitution.
 
+* Substitution has to be done recursviely, but with care: Not all
+  variables are free; not all variables are bound. Thus, for example,
+  the PutLink has to parts: all variables in the body of the PutLink
+  are bound, but all variables in the value-list are free.  Thus,
+  if there is variable substitution outside of PutLink, only the
+  free variables can be subsituted!
+
 * The beta reduction of PutLink does commute with execution.
   That is, execution can be performed either before or after
   beta reduction. It is easier to handle execution of e.g.

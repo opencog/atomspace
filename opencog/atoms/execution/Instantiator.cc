@@ -63,14 +63,43 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		return hgnd;
 	}
 
-	// If we are here, then we have a link. Walk it.
+	// If we are here, then we have a link. Walk it. In general,
+	// links may contain both bound variables, and also free variables.
+	// We must be careful to subtitute only for free variables, and
+	// never for bound ones.
+	//
+	// Reduce PutLinks.
+	if (PUT_LINK == t)
+	{
+		PutLinkPtr ppp(PutLinkCast(h));
 
-	// Walk the subtree, substituting values for variables.
+		// PutLinks always have arity two. There are NO free vars in
+		// the body of the PutLink.  If there are free vars, they are
+		// in the argument.  Subsitute for them.  Do NOT execute the
+		// body until after the beta-reduction has been done.
+		const HandleSeq& oset = lexpr->getOutgoingSet();
+		Handle gargs = walk_tree(oset[1]);
+		if (gargs != oset[1])
+		{
+			HandleSeq groset;
+			groset.push_back(oset[0]);
+			groset.push_back(gargs);
+			ppp = createPutLink(groset);
+		}
+		// Step one: beta-reduce.
+		Handle red = ppp->reduce();
+		// Step two: execute the resulting body.
+		return walk_tree(red);
+	}
+
+	// If we are here, we assume that any/all variables that are in
+	// the outgoing set are free variables. Substitute the ground
+	// values for them. Do this by tree-walk.
 	HandleSeq oset_results;
 	for (const Handle& h : lexpr->getOutgoingSet())
 	{
 		Handle hg = walk_tree(h);
-		// It would be a NULL handle if it's deleted... Just skip
+		// It could be a NULL handle if it's deleted... Just skip
 		// over it. We test the pointer here, not the uuid, since
 		// the uuid's are all Handle::UNDEFINED until we put them
 		// into the atomspace.
@@ -92,31 +121,31 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// Fire execution links, if found.
 	if (classserver().isA(t, FUNCTION_LINK))
 	{
-		// The atoms being created above might not all be in the
-		// atomspace, just yet. Because we have no clue what the
-		// ExecutionOutputLink might do (its a black box), we had
-		// best put them there now. In particular, the black box
-		// may want to look at the atom TV's, and for that, they
-		// MUST be fetched from the atomspace, since only the
-		// atomspace knows the correct TV values.
-		//
-		// The problem here is that the insertion leaves garbage
-		// intermediate-result atoms littering the atomspace, with
-		// no effective way of removing them. XXX This needs fixing.
-		// Again, some kind of monda solution. XXX FIXME later.
-		//
-		// Just as well, because it seems the scheme (and python)
-		// bindings get tripped up by the UUID==-1 of uninserted atoms.
-		// XXX Well, this arguably means that scheme and python are
-		// broken.
-		size_t sz = oset_results.size();
-		for (size_t i=0; i< sz; i++)
-			oset_results[i] = _as->addAtom(oset_results[i]);
-
 		// ExecutionOutputLinks are not handled by the factory below.
-		// This is due to a circular shared-libarary dependency..
+		// This is due to a circular shared-libarary dependency.
 		if (EXECUTION_OUTPUT_LINK == t)
 		{
+			// The atoms being created above might not all be in the
+			// atomspace, just yet. Because we have no clue what the
+			// ExecutionOutputLink might do (its a black box), we had
+			// best put them there now. In particular, the black box
+			// may want to look at the atom TV's, and for that, they
+			// MUST be fetched from the atomspace, since only the
+			// atomspace knows the correct TV values.
+			//
+			// The problem here is that the insertion leaves garbage
+			// intermediate-result atoms littering the atomspace, with
+			// no effective way of removing them. XXX This needs fixing.
+			// Again, some kind of monda solution. XXX FIXME later.
+			//
+			// Just as well, because it seems the scheme (and python)
+			// bindings get tripped up by the UUID==-1 of uninserted atoms.
+			// XXX Well, this arguably means that scheme and python are
+			// broken.
+			size_t sz = oset_results.size();
+			for (size_t i=0; i< sz; i++)
+				oset_results[i] = _as->addAtom(oset_results[i]);
+
 			ExecutionOutputLinkPtr eolp(createExecutionOutputLink(oset_results));
 			return eolp->execute(_as);
 		}
