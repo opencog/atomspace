@@ -78,6 +78,8 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			oset_results.push_back(hg);
 	}
 
+	// Handle DeleteLink's before general FunctionLink's; they
+	// work differently.
 	if (DELETE_LINK == t)
 	{
 		for (const Handle& h: oset_results)
@@ -116,6 +118,18 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		Handle hl(FunctionLink::factory(t, oset_results));
 		FunctionLinkPtr flp(FunctionLinkCast(hl));
 		return flp->execute(_as);
+	}
+
+	// If there is a GetLink, we have to perform the get, and replace
+	// it with the results of the get. The get is implemented with the
+	// PatternLink::satisfy() method.
+	if (GET_LINK == t)
+	{
+printf("duude ola got get link.\n");
+		for (Handle h: oset_results)
+			printf("duude get got %s\n", h->toShortString().c_str());
+
+		return Handle::UNDEFINED;
 	}
 
 	// Now create a duplicate link, but with an outgoing set where

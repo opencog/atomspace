@@ -51,11 +51,10 @@ private:
 		 * of it, replacing the variables in its outgoing by their
 		 * respective groundings.
 		 *
-		 * If an execution occur then _did_exec is set to true.
-		 *
 		 * See also the related function VariableList::substitute(),
 		 * which will simply perform a substitution, without performing
-		 * any execution.
+		 * any execution. See also PutLink, which does substituion.
+		 * (actually, beta reduction).
 		 */
 		Handle walk_tree(const Handle& tree);
 
