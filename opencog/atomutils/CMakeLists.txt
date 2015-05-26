@@ -1,5 +1,5 @@
 
-ADD_LIBRARY (atomutils SHARED
+ADD_LIBRARY (atomutils STATIC
 	AtomUtils
 )
 
@@ -15,7 +15,7 @@ IF (CYGWIN)
 	)
 ELSE (CYGWIN)
 	INSTALL (TARGETS atomutils
-		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 	)
 ENDIF (CYGWIN)
 

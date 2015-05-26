@@ -2,7 +2,7 @@
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
-ADD_LIBRARY (clearbox SHARED
+ADD_LIBRARY (clearbox STATIC
 	ArithmeticLink.cc
 	AssignLink.cc
 	DeleteLink.cc
@@ -18,18 +18,13 @@ ADD_LIBRARY (clearbox SHARED
 ADD_DEPENDENCIES(clearbox opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(clearbox
+	execution
 	${COGUTIL_LIBRARY}
 )
 
-IF (CYGWIN)
-	INSTALL (TARGETS clearbox
-		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-	)
-ELSE (CYGWIN)
-	INSTALL (TARGETS clearbox
-		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-	)
-ENDIF (CYGWIN)
+INSTALL (TARGETS clearbox
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+)
 
 INSTALL (FILES
 	ArithmeticLink.h

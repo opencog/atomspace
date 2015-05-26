@@ -23,6 +23,7 @@ IF (HAVE_CYTHON)
 ENDIF(HAVE_CYTHON)
 
 TARGET_LINK_LIBRARIES (atomspace_bm
+	execution
 	atomspace
 	${COGUTIL_LIBRARY}
 )

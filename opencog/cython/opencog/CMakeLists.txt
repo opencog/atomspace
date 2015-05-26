@@ -78,7 +78,8 @@ ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
 ADD_DEPENDENCIES(atomspace_cython pln_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace_cython
-	atomspace
+#	atomspace
+	atomutils
 	atomspaceutils
 	${COGUTIL_LIBRARY}
 	${PYTHON_LIBRARIES}

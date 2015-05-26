@@ -47,9 +47,11 @@ void DeleteLink::init(void)
 } 
 
 #if 0
+/*****
 Well, we cannot really implement this here; but this is what
 it should actually do.  We can't implement it here, because
 fully-grounded DeleteLink's cannot exist.
+****/
 Handle DeleteLink::execute(AtomSpace * as) const
 {
 	const HandleSeq& oset = _outgoing;

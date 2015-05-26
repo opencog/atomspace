@@ -6,7 +6,7 @@ IF (HAVE_CYTHON)
 	INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 ENDIF (HAVE_CYTHON)
 
-ADD_LIBRARY (execution SHARED
+ADD_LIBRARY (execution STATIC
 	EvaluationLink.cc
 	ExecutionOutputLink.cc
 	Instantiator.cc
@@ -16,7 +16,9 @@ ADD_LIBRARY (execution SHARED
 ADD_DEPENDENCIES(execution opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(execution
+	smob
 	atomspace
+	${Boost_SYSTEM_LIBRARY}
 )
 
 IF (HAVE_CYTHON)

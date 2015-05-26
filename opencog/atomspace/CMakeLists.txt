@@ -11,7 +11,7 @@ ADD_CUSTOM_TARGET(opencog_atom_types DEPENDS atom_types.h)
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
-ADD_LIBRARY (atomspace SHARED
+ADD_LIBRARY (atomspace STATIC
 	atom_types.h
 	Atom.cc
 	AtomSpace.cc
@@ -47,21 +47,16 @@ ADD_DEPENDENCIES(atomspace opencog_atom_types atom_types.h)
 
 TARGET_LINK_LIBRARIES(atomspace
 	lambda
+	execution
 	clearbox
 	${COGUTIL_LIBRARY}
 	${GSL_LIBRARIES}
 	${Boost_THREAD_LIBRARY}
 )
 
-IF (CYGWIN)
-	INSTALL (TARGETS atomspace
-		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-	)
-ELSE (CYGWIN)
-	INSTALL (TARGETS atomspace
-		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-	)
-ENDIF (CYGWIN)
+INSTALL (TARGETS atomspace
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+)
 
 INSTALL (FILES
 	Atom.h

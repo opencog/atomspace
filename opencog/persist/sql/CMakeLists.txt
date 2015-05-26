@@ -30,6 +30,8 @@ ADD_EXECUTABLE(sniff
 TARGET_LINK_LIBRARIES(sniff
 	persist-sql
 	atomspace
+	execution
+	smob
 	${ODBC_LIBRARIES}
 )
 
