@@ -1,8 +1,9 @@
-# Attempts to use Haskell type checker for hypergraph type checking
+# Attempts to use Haskell type checker for deep type checking
 
-This folder contains one or more Haskell files to experiment with
-hypergraph functional type checking, as firstly described in
-https://github.com/opencog/opencog/issues/1311
+This folder contains one or more Haskell files to experiment with deep
+type checking, as firstly described in
+https://github.com/opencog/opencog/issues/1311 and
+http://wiki.opencog.org/w/Deep_types
 
 ## Experiment with 'data'
 
