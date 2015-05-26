@@ -16,7 +16,6 @@ ADD_LIBRARY (execution STATIC
 ADD_DEPENDENCIES(execution opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(execution
-	smob
 	atomspace
 	${Boost_SYSTEM_LIBRARY}
 )

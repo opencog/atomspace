@@ -13,56 +13,10 @@
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 
-#include "SchemeEval.h"
 #include "SchemeSmob.h"
 
 using namespace opencog;
 
-/**
- * do_apply -- apply named function func to arguments in ListLink
- * It is assumed that varargs is a ListLink, containing a list of
- * atom handles. This list is unpacked, and then the fuction func
- * is applied to them. If the function returns an atom handle, then
- * this is returned.
- */
-Handle SchemeEval::do_apply(const std::string &func, Handle& varargs)
-{
-	// Apply the function to the args
-	SCM sresult = do_apply_scm (func, varargs);
-
-	// If the result is a handle, return the handle.
-	return SchemeSmob::scm_to_handle(sresult);
-}
-
-static SCM thunk_scm_eval(void * expr)
-{
-	return scm_eval((SCM)expr, scm_interaction_environment());
-}
-
-/**
- * do_apply_scm -- apply named function func to arguments in ListLink
- * It is assumed that varargs is a ListLink, containing a list of
- * atom handles. This list is unpacked, and then the fuction func
- * is applied to them. The SCM value returned by the function is returned.
- */
-SCM SchemeEval::do_apply_scm(const std::string& func, Handle& varargs )
-{
-	SCM sfunc = scm_from_utf8_symbol(func.c_str());
-	SCM expr = SCM_EOL;
-
-	// If there were args, pass the args to the function.
-	const std::vector<Handle> &oset = atomspace->getOutgoing(varargs);
-
-	// Iterate in reverse, because cons chains in reverse.
-	size_t sz = oset.size();
-	for (int i=sz-1; i>=0; i--)
-	{
-		SCM sh = SchemeSmob::handle_to_scm(oset[i]);
-		expr = scm_cons(sh, expr);
-	}
-	expr = scm_cons(sfunc, expr);
-	return do_scm_eval(expr, thunk_scm_eval);
-}
 
 /**
  * Executes an ExecutionOutputLink

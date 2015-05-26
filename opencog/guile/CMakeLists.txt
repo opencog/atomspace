@@ -4,7 +4,7 @@ INCLUDE_DIRECTORIES(
 
 ADD_LIBRARY (smob SHARED
 	SchemeEval.cc
-	SchemeExec.cc
+#	SchemeExec.cc
 	SchemePrimitive.cc
 	SchemeSmob.cc
 	SchemeSmobAtom.cc
