@@ -235,6 +235,9 @@ PatternLink::PatternLink(Link &l)
 /// Find and unpack variable declarations, if any; otherwise, just
 /// find all free variables.
 ///
+/// On top of that initialize _body with the clauses of the
+/// PatternLink.
+///
 void PatternLink::extract_variables(const HandleSeq& oset)
 {
 	size_t sz = oset.size();
@@ -260,20 +263,29 @@ void PatternLink::extract_variables(const HandleSeq& oset)
 	// a variable declaration.
 	_body = oset[1];
 
-	// Either the first element is a VariableList, or its a naked
-	// variable, or its a typed variable.  Use the VariableList
-	// class as a tool to extract the variables for us.
-	Type t = oset[0]->getType();
+	// Initialize _varlist with the scoped variables
+	init_scoped_variables(oset[0]);
+}
+
+/* ================================================================= */
+///
+/// Initialize _varlist given a handle of either VariableList or a
+/// variable.
+///
+void PatternLink::init_scoped_variables(const Handle& hvar)
+{
+	// Either it is a VariableList, or its a naked variable, or its a
+	// typed variable.  Use the VariableList class as a tool to
+	// extract the variables for us.
+	Type t = hvar->getType();
 	if (VARIABLE_LIST == t)
 	{
-		VariableList vl(LinkCast(oset[0])->getOutgoingSet());
+		VariableList vl(LinkCast(hvar)->getOutgoingSet());
 		_varlist = vl.get_variables();
 	}
 	else
 	{
-		HandleSeq v;
-		v.push_back(oset[0]);
-		VariableList vl(v);
+		VariableList vl({hvar});
 		_varlist = vl.get_variables();
 	}
 }
