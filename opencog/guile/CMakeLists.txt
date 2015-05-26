@@ -4,7 +4,6 @@ INCLUDE_DIRECTORIES(
 
 ADD_LIBRARY (smob SHARED
 	SchemeEval.cc
-#	SchemeExec.cc
 	SchemePrimitive.cc
 	SchemeSmob.cc
 	SchemeSmobAtom.cc
@@ -28,6 +27,7 @@ ADD_EXECUTABLE(PrimitiveExample
 )
 TARGET_LINK_LIBRARIES(PrimitiveExample
 	smob
+	clearbox
 	atomspace
 )
 

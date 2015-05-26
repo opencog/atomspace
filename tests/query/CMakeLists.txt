@@ -13,6 +13,7 @@ LINK_DIRECTORIES (
 LINK_LIBRARIES (
 	query
 	atomspace
+	clearbox
 )
 
 # We want to run the tests in the order below;

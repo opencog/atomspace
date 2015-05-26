@@ -131,6 +131,7 @@ ADD_LIBRARY(utilities_cython SHARED
 
 TARGET_LINK_LIBRARIES(utilities_cython
 	PythonEval
+	clearbox
 	atomspace
 	type_constructors
 	${COGUTIL_LIBRARY}

@@ -31,6 +31,7 @@ TARGET_LINK_LIBRARIES(sniff
 	persist-sql
 	atomspace
 	execution
+	clearbox
 	smob
 	${ODBC_LIBRARIES}
 )

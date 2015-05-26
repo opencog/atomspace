@@ -13,6 +13,7 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/cython/pythoneval.conf
 
 TARGET_LINK_LIBRARIES(PythonEvalUTest
 	atomspace
+	clearbox
 	smob
 	PythonEval
 	atomspace_cython
