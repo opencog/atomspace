@@ -94,8 +94,24 @@ immediate, to get the correct TV's, and have scheme/python not fail,
 would be better.
 
 
-Performance
------------
+Clear-box performance
+---------------------
+The execution/evaluation of clear-box links is not as good as it could
+be.  Here's things that could be done:
+
+1) If a clear-box link has no black boxes under it, and also no free
+variables, and also does not depend on the TV, then the result of
+execution/evaluation could be cached. i.e. multiple executions won't
+change things.
+
+2) In various cases, the Instatiator::execute() method can be called
+twice: once to do the actual work, and a second time on the final
+values, where it should return trivially.  This is hard to avoid, as
+there are other call scenarios where this does not happen.
+
+
+Black-box performance
+---------------------
 Some reasons why black-box execution/evaluation is slow, and ways to
 speed that up.
 

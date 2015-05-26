@@ -28,8 +28,8 @@ SET_TESTS_PROPERTIES(PythonEvalUTest
 ADD_CXXTEST(PythonUtilitiesUTest)
 
 TARGET_LINK_LIBRARIES(PythonUtilitiesUTest
-	atomspace
 	PythonEval
+	atomspace
 	utilities_cython
 	atomspace_cython
 	${COGUTIL_LIBRARY}

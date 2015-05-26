@@ -25,6 +25,7 @@
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atoms/NumberNode.h>
+#include <opencog/atoms/execution/Instantiator.h>
 #include "ArithmeticLink.h"
 
 using namespace opencog;
@@ -146,11 +147,6 @@ Handle ArithmeticLink::reorder(void)
 /// in sight.
 static inline double get_double(AtomSpace *as, Handle h)
 {
-	// Recurse, and execute anything below...
-	FunctionLinkPtr flp(FunctionLinkCast(h));
-	if (flp)
-		h = flp->execute(as);
-
 	NumberNodePtr nnn(NumberNodeCast(h));
 	if (nnn == NULL)
 		throw RuntimeException(TRACE_INFO,
@@ -162,9 +158,11 @@ static inline double get_double(AtomSpace *as, Handle h)
 
 Handle ArithmeticLink::execute(AtomSpace* as) const
 {
+	Instantiator inst(as);
 	double sum = knild;
 	for (Handle h: _outgoing)
 	{
+		h = inst.execute(h);
 		sum = konsd(sum, get_double(as, h));
 	}
 
