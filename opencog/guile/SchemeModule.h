@@ -27,8 +27,10 @@ class FunctionWrap
 
 		const char *_name;  // scheme name of the c++ function.
 	public:
-		FunctionWrap(Handle (*)(AtomSpace*, const Handle&), const char*);
-		FunctionWrap(TruthValuePtr (*)(AtomSpace*, const Handle&), const char*);
+		FunctionWrap(Handle (*)(AtomSpace*, const Handle&),
+		             const char*, const char*);
+		FunctionWrap(TruthValuePtr (*)(AtomSpace*, const Handle&),
+		             const char*, const char*);
 };
 
 class ModuleWrap
@@ -36,17 +38,15 @@ class ModuleWrap
 	private:
 		static void* init_in_guile(void*);
 		static void init_in_module(void*);
-		static std::vector<FunctionWrap*> _binders;
+		const char* _modname;
+	protected:
+		virtual void init(void) = 0;
 	public:
-		ModuleWrap(void);
-		~ModuleWrap();
+		ModuleWrap(const char*);
+		virtual ~ModuleWrap();
 };
 
 }
-
-extern "C" {
-void opencog_query_init(void);
-};
 
 #endif // _OPENCOG_SCHEME_MODULE_H
 
