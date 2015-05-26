@@ -1,12 +1,12 @@
 /*
- * PatternSCM.h
+ * SchemeModule.h
  *
- * Guile scheme bindings for the pattern matcher
+ * Simplified wrapper for creating guile modules.
  * Copyright (c) 2008, 2014, 2015 Linas Vepstas <linas@linas.org>
  */
 
-#ifndef _OPENCOG_PATTERN_SCM_H
-#define _OPENCOG_PATTERN_SCM_H
+#ifndef _OPENCOG_SCHEME_MODULE_H
+#define _OPENCOG_SCHEME_MODULE_H
 
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/TruthValue.h>
@@ -15,8 +15,8 @@ namespace opencog {
 
 class AtomSpace;
 
-/// Wrapper class, to invoke pattern matcher from guile.
-class PatternWrap
+/// Wrapper class, to invoke misc extension code from guile.
+class FunctionWrap
 {
 	private:
 		Handle (*_func)(AtomSpace*, const Handle&);
@@ -27,19 +27,19 @@ class PatternWrap
 
 		const char *_name;  // scheme name of the c++ function.
 	public:
-		PatternWrap(Handle (*)(AtomSpace*, const Handle&), const char*);
-		PatternWrap(TruthValuePtr (*)(AtomSpace*, const Handle&), const char*);
+		FunctionWrap(Handle (*)(AtomSpace*, const Handle&), const char*);
+		FunctionWrap(TruthValuePtr (*)(AtomSpace*, const Handle&), const char*);
 };
 
-class PatternSCM
+class ModuleWrap
 {
 	private:
 		static void* init_in_guile(void*);
 		static void init_in_module(void*);
-		static std::vector<PatternWrap*> _binders;
+		static std::vector<FunctionWrap*> _binders;
 	public:
-		PatternSCM(void);
-		~PatternSCM();
+		ModuleWrap(void);
+		~ModuleWrap();
 };
 
 }
@@ -48,5 +48,5 @@ extern "C" {
 void opencog_query_init(void);
 };
 
-#endif // _OPENCOG_PATTERN_SCM_H
+#endif // _OPENCOG_SCHEME_MODULE_H
 

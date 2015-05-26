@@ -4,6 +4,7 @@ INCLUDE_DIRECTORIES(
 
 ADD_LIBRARY (smob SHARED
 	SchemeEval.cc
+	SchemeModule.cc
 	SchemePrimitive.cc
 	SchemeSmob.cc
 	SchemeSmobAtom.cc
@@ -35,6 +36,7 @@ INSTALL (TARGETS smob DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	SchemeEval.h
+	SchemeModule.h
 	SchemePrimitive.h
 	SchemeSmob.h
 	load-file.h
