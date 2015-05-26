@@ -1,5 +1,5 @@
 /*
- * ConcreteLink.cc
+ * PatternLink.cc
  *
  * Copyright (C) 2009, 2014, 2015 Linas Vepstas
  *
@@ -29,52 +29,96 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/atoms/reduct/FreeLink.h>
 
-#include "ConcreteLink.h"
+#include "PatternLink.h"
 #include "PatternUtils.h"
 #include "VariableList.h"
 
 using namespace opencog;
 
-void ConcreteLink::init(void)
+void PatternLink::common_init(void)
 {
-	_pat.redex_name = "anonymous ConcreteLink";
-	extract_variables(_outgoing);
-	unbundle_clauses(_body);
 	validate_clauses(_varlist.varset, _pat.clauses);
 	extract_optionals(_varlist.varset, _pat.clauses);
 
 	// Locate the black-box clauses.
-	HandleSeq concs, virts;
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
-	                 concs, virts, _pat.black);
+	                 _fixed, _virtual, _pat.black);
+	_num_virts = _virtual.size();
 
-	// Check to make sure the graph is connected. As a side-effect,
-	// the (only) component is sorted into connection-order.
-   std::vector<HandleSeq> comps;
-   std::vector<std::set<Handle>> comp_vars;
-	get_connected_components(_varlist.varset, _pat.cnf_clauses, comps, comp_vars);
+	// unbundle_virtual does not handle connectives. Here, we assume that
+	// we are being run with the DefaultPatternMatchCB, and so we assume
+	// that the logical connectives are AndLink, OrLink and NotLink.
+	// Tweak the evaluatable_holders to reflect this.
+	std::set<Type> connectives({AND_LINK, OR_LINK, NOT_LINK});
+	trace_connectives(connectives, _pat.clauses);
 
-	// Throw error if more than one component!
-	check_connectivity(comps);
+	// Split the non-virtual clauses into connected components
+	get_connected_components(_varlist.varset, _fixed,
+	                         _components, _component_vars);
+	_num_comps = _components.size();
 
-	// This puts them into connection-order.
-	_pat.cnf_clauses = comps[0];
-
-	make_connectivity_map(_pat.cnf_clauses);
+	// If there is only one connected component, then this can be
+	// handled during search by a single PatternLink. The multi-clause
+	// grounding mechanism is not required for that case.
+	if (1 == _num_comps)
+	{
+		// Each component is in connection-order. By re-assigning to
+		// _pat.cnf_clauses, they get placed in that order, this giving
+		// a minor performance boost during clause traversal.
+		// Gurk. This does not work currently; the evaluatables have been
+		// stripped out of the component. I think this is a bug ...
+		// Is this related to the other XXX for validate_clasues??
+		// _pat.cnf_clauses = _components[0];
+	   make_connectivity_map(_pat.cnf_clauses);
+	}
 }
 
-// Special ctor for use by SatisfactionLink; we are given
-// the pre-computed components.
-ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
-                           const VariableTypeMap& typemap,
-                           const HandleSeq& compo,
-                           const std::set<Handle>& opts)
-	: Link(CONCRETE_LINK, HandleSeq())
+
+/// The second half of the common initialization sequence
+void PatternLink::setup_components(void)
+{
+	// If we are here, then set up a PatternLink for each connected
+	// component.  Use emplace_back to avoid a copy.
+	//
+	// There is a pathological case where there are no virtuals, but
+	// there are multiple disconnected components.  I think that this is
+	// a user-error, but in fact PLN does have a rule which wants to
+	// explore that combinatoric explosion, on purpose. So we have to
+	// allow the multiple disconnected components for that case.
+	_component_patterns.reserve(_num_comps);
+	for (size_t i=0; i<_num_comps; i++)
+	{
+		Handle h(createPatternLink(_component_vars[i], _varlist.typemap,
+		                           _components[i], _pat.optionals));
+		_component_patterns.push_back(h);
+	}
+}
+
+void PatternLink::init(void)
+{
+	_pat.redex_name = "anonymous PatternLink";
+	extract_variables(_outgoing);
+	unbundle_clauses(_body);
+	common_init();
+	setup_components();
+}
+
+/* ================================================================= */
+
+/// Special constructor used only to make single concrete pattern
+/// components.  We are given the pre-computed components; we only
+/// have to store them.
+PatternLink::PatternLink(const std::set<Handle>& vars,
+                         const VariableTypeMap& typemap,
+                         const HandleSeq& compo,
+                         const std::set<Handle>& opts)
+	: Link(PATTERN_LINK, HandleSeq())
 {
 	// First, lets deal with the vars. We have discarded the original
 	// order of the variables, and I think that's OK, because we will
-	// not be using the substitute method, I don't think. If we need it,
-	// then the API will need to be changed...
+	// never have the substitute aka beta-redex aka putlink method
+	// called on us, not directly, at least.  If we need it, then the
+	// API will need to be changed...
 	// So all we need is the varset, and the subset of the typemap.
 	_varlist.varset = vars;
 	for (const Handle& v : vars)
@@ -107,50 +151,80 @@ ConcreteLink::ConcreteLink(const std::set<Handle>& vars,
 	}
 
 	// The rest is easy: the evaluatables and the connection map
-	HandleSeq concs, virts;
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
-	                 concs, virts, _pat.black);
+	                 _fixed, _virtual, _pat.black);
+	_num_virts = _virtual.size();
+	OC_ASSERT (0 == _num_virts, "Must not have any virtuals!");
+
+	_components.push_back(compo);
+	_num_comps = 1;
+
 	make_connectivity_map(_pat.cnf_clauses);
 	_pat.redex_name = "Unpacked component of a virtual link";
 }
 
-ConcreteLink::ConcreteLink(const HandleSeq& hseq,
-                   TruthValuePtr tv, AttentionValuePtr av)
-	: Link(CONCRETE_LINK, hseq, tv, av)
+/* ================================================================= */
+
+/// Constructor that takes a pre-determined set of variables, and
+/// a list of clauses to solve.  This is currently kind-of crippled,
+/// since no variable type restricions are possible, and no optionals,
+/// either.  This is used only for backwards-compatibility API's.
+PatternLink::PatternLink(const std::set<Handle>& vars,
+                         const HandleSeq& clauses)
+	: Link(PATTERN_LINK, HandleSeq())
+{
+	_varlist.varset = vars;
+	_pat.clauses = clauses;
+	common_init();
+	setup_components();
+}
+
+/* ================================================================= */
+
+PatternLink::PatternLink(const HandleSeq& hseq,
+                         TruthValuePtr tv, AttentionValuePtr av)
+	: Link(PATTERN_LINK, hseq, tv, av)
 {
 	init();
 }
 
-ConcreteLink::ConcreteLink(const Handle& vars, const Handle& body,
-                   TruthValuePtr tv, AttentionValuePtr av)
-	: Link(CONCRETE_LINK, HandleSeq({vars, body}), tv, av)
+PatternLink::PatternLink(const Handle& body,
+                         TruthValuePtr tv, AttentionValuePtr av)
+	: Link(PATTERN_LINK, HandleSeq({body}), tv, av)
 {
 	init();
 }
 
-ConcreteLink::ConcreteLink(Type t, const HandleSeq& hseq,
-                   TruthValuePtr tv, AttentionValuePtr av)
+PatternLink::PatternLink(const Handle& vars, const Handle& body,
+                         TruthValuePtr tv, AttentionValuePtr av)
+	: Link(PATTERN_LINK, HandleSeq({vars, body}), tv, av)
+{
+	init();
+}
+
+PatternLink::PatternLink(Type t, const HandleSeq& hseq,
+                         TruthValuePtr tv, AttentionValuePtr av)
 	: Link(t, hseq, tv, av)
 {
-	// Derived link-types have other init sequences
-	if (CONCRETE_LINK != t) return;
+	// BindLink has other init sequences
+	if (BIND_LINK == t) return;
 	init();
 }
 
-ConcreteLink::ConcreteLink(Link &l)
+PatternLink::PatternLink(Link &l)
 	: Link(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
-	if (not classserver().isA(tscope, CONCRETE_LINK))
+	if (not classserver().isA(tscope, PATTERN_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting a ConcreteLink, got %s", tname.c_str());
+			"Expecting a PatternLink, got %s", tname.c_str());
 	}
 
-	// Derived link-types have other init sequences
-	if (CONCRETE_LINK != tscope) return;
+	// BindLink has other init sequences
+	if (BIND_LINK == tscope) return;
 
 	init();
 }
@@ -161,7 +235,7 @@ ConcreteLink::ConcreteLink(Link &l)
 /// Find and unpack variable declarations, if any; otherwise, just
 /// find all free variables.
 ///
-void ConcreteLink::extract_variables(const HandleSeq& oset)
+void PatternLink::extract_variables(const HandleSeq& oset)
 {
 	size_t sz = oset.size();
 	if (2 < sz)
@@ -216,7 +290,7 @@ void ConcreteLink::extract_variables(const HandleSeq& oset)
 /// SequentialAnd's must not be unpacked. In the case of OrLinks, there
 /// is no flag to say that "these are disjoined", so again, that has to
 /// happen later.
-void ConcreteLink::unbundle_clauses(const Handle& hbody)
+void PatternLink::unbundle_clauses(const Handle& hbody)
 {
 	Type t = hbody->getType();
 	if (AND_LINK == t)
@@ -240,7 +314,7 @@ void ConcreteLink::unbundle_clauses(const Handle& hbody)
 XXX WTF, what about evaluatables? How did those not get removed???
 I don't get it... fixme
  */
-void ConcreteLink::validate_clauses(std::set<Handle>& vars,
+void PatternLink::validate_clauses(std::set<Handle>& vars,
                                     HandleSeq& clauses)
 
 {
@@ -301,8 +375,8 @@ void ConcreteLink::validate_clauses(std::set<Handle>& vars,
  * Given the initial list of variables and clauses, separate these into
  * the mandatory and optional clauses.
  */
-void ConcreteLink::extract_optionals(const std::set<Handle> &vars,
-                                     const std::vector<Handle> &component)
+void PatternLink::extract_optionals(const std::set<Handle> &vars,
+                                    const std::vector<Handle> &component)
 {
 	// Split in positive and negative clauses
 	for (const Handle& h : component)
@@ -388,11 +462,11 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 /// those variables are grounded by different disconnected graph
 /// components; the combinatoric explosino has to be handled...
 ///
-void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
-                                    const HandleSeq& clauses,
-                                    HandleSeq& fixed_clauses,
-                                    HandleSeq& virtual_clauses,
-                                    std::set<Handle>& black_clauses)
+void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
+                                   const HandleSeq& clauses,
+                                   HandleSeq& fixed_clauses,
+                                   HandleSeq& virtual_clauses,
+                                   std::set<Handle>& black_clauses)
 {
 	for (const Handle& clause: clauses)
 	{
@@ -495,8 +569,8 @@ void ConcreteLink::unbundle_virtual(const std::set<Handle>& vars,
 /// having the form (AndLink stuff (OrLink more-stuff (NotLink not-stuff)))
 /// we have to assume that stuff, more-stuff and not-stuff are all
 /// evaluatable.
-void ConcreteLink::trace_connectives(const std::set<Type>& connectives,
-                                     const HandleSeq& oset)
+void PatternLink::trace_connectives(const std::set<Type>& connectives,
+                                    const HandleSeq& oset)
 {
 	for (const Handle& term: oset)
 	{
@@ -520,7 +594,7 @@ void ConcreteLink::trace_connectives(const std::set<Type>& connectives,
  * This is used for only one purpose: to find the next unsolved
  * clause. Perhaps this could be simplied somehow ...
  */
-void ConcreteLink::make_connectivity_map(const HandleSeq& component)
+void PatternLink::make_connectivity_map(const HandleSeq& component)
 {
 	for (const Handle& h : _pat.cnf_clauses)
 	{
@@ -541,7 +615,7 @@ void ConcreteLink::make_connectivity_map(const HandleSeq& component)
 	}
 }
 
-void ConcreteLink::make_map_recursive(const Handle& root, const Handle& h)
+void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 {
 	_pat.connectivity_map[h].push_back(root);
 
@@ -557,8 +631,7 @@ void ConcreteLink::make_map_recursive(const Handle& root, const Handle& h)
 /**
  * Check that all clauses are connected
  */
-void ConcreteLink::check_connectivity(
-	const std::vector<HandleSeq>& components)
+void PatternLink::check_connectivity(const std::vector<HandleSeq>& components)
 {
 	if (1 == components.size()) return;
 
@@ -581,7 +654,7 @@ void ConcreteLink::check_connectivity(
 
 /* ================================================================= */
 
-void ConcreteLink::debug_print(void) const
+void PatternLink::debug_print(void) const
 {
 	// Print out the predicate ...
 	printf("\nRedex '%s' has following clauses:\n",

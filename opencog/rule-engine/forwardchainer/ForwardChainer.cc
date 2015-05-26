@@ -22,7 +22,7 @@
  */
 
 #include <opencog/util/Logger.h>
-#include <opencog/atoms/bind/SatisfactionLink.h>
+#include <opencog/atoms/bind/PatternLink.h>
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/query/DefaultImplicator.h>
 #include <opencog/rule-engine/Rule.h>
@@ -168,7 +168,7 @@ void ForwardChainer::do_pm(const Handle& hsource,
 
 	// Run the pattern matcher, find all patterns that satisfy the
 	// the clause, with the given variables in it.
-	SatisfactionLinkPtr sl(createSatisfactionLink(hvar_list, hclause));
+	PatternLinkPtr sl(createPatternLink(hvar_list, hclause));
 	sl->satisfy(impl);
 
 	// Update result

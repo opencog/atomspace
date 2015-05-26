@@ -23,16 +23,13 @@
 (load-from-path "utilities.scm")
 
 (define human
-  (BindLink
-     (VariableNode "$H") ; 
-     (ImplicationLink
-        ; This is the pattern that will be matched ...
-        (InheritanceLink
-           (VariableNode "$H")
-           (ConceptNode "human")
-        )
-        ; This is what is returned if the above pattern is found.
-        (VariableNode "$H")    
+  (GetLink
+     ; This is the pattern that will be matched ...
+     ; The result of grounding this will be all things
+     ; that could ever possibly be $H
+     (InheritanceLink
+        (VariableNode "$H")
+        (ConceptNode "human")
      )
   )
 )
@@ -40,14 +37,13 @@
 
 (define human-implies-animal
   (BindLink
-     (VariableNode "$H") ; 
      (ImplicationLink
         ; This is the pattern that will be matched ...
         (InheritanceLink
            (VariableNode "$H")
            (ConceptNode "human")
         )
-        ; This is the hypergraph that will be created if the 
+        ; This is the hypergraph that will be created if the
         ; above pattern is found.
         (InheritanceLink
            (VariableNode "$H")
@@ -60,7 +56,6 @@
 
 (define human-implies-animal-stv
   (BindLink
-     (VariableNode "$H") ; 
      (ImplicationLink
         ; This is the pattern that will be matched ...
         (InheritanceLink
@@ -98,7 +93,7 @@
     (cdr (assoc 'confidence (cog-tv->alist tv)))
   )
 )
- 
+
 ; Define a formula that computes a truth value for atom2 based on atom1's stv.
 (define (modify-stv atom1 atom2)
   ; Set the strength of the truth value on atom hb
@@ -119,17 +114,17 @@
 )
 
 ; Run the Pattern-Mather by invoking either of the following.
-; (cog-bind human)
+; (cog-satisfying-set human)
 ; (cog-bind human-implies-animal)
 ; (cog-bind human-implies-animal-stv)
 
 ;Expected output in the same order as the above invokation
 ; (SetLink
 ;    (ConceptNode "Ben")
-;    (ConceptNode "Linas") 
-; ) 
+;    (ConceptNode "Linas")
+; )
 
-; (SetLink 
+; (SetLink
 ;     (InheritanceLink (ConceptNode "Linas") (ConceptNode "animal"))
 ;     (InheritanceLink (ConceptNode "Ben") (ConceptNode "animal"))
 ; )

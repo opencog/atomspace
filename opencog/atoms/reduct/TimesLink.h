@@ -24,7 +24,7 @@
 #define _OPENCOG_TIMES_LINK_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/reduct/FoldLink.h>
+#include <opencog/atoms/reduct/ArithmeticLink.h>
 
 namespace opencog
 {
@@ -33,11 +33,14 @@ namespace opencog
  */
 
 /**
- * The TimesLink implements the mathematical operation of "plus"
+ * The TimesLink implements the mathematical operation of "times".
  */
-class TimesLink : public FoldLink
+class TimesLink : public ArithmeticLink
 {
 protected:
+	double konsd(double, double) const;
+	Handle kons(const Handle&, const Handle&);
+
 	void init(void);
 	TimesLink(Type, const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
@@ -50,6 +53,11 @@ public:
 	TimesLink(const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
+	TimesLink(const Handle& a, const Handle& b,
+	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
 	TimesLink(Link& l);
 };
 

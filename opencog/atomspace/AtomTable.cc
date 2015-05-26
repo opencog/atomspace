@@ -43,6 +43,7 @@
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/DefineLink.h>
 #include <opencog/atoms/bind/DeleteLink.h>
+#include <opencog/atoms/bind/PatternLink.h>
 #include <opencog/atoms/bind/ScopeLink.h>
 #include <opencog/atoms/bind/VariableList.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
@@ -259,6 +260,116 @@ bool AtomTable::inEnviron(AtomPtr atom)
     return false;
 }
 
+// Experimental C++ atom types support code
+// Try to cast, if possible.
+static AtomPtr factory(Type atom_type, AtomPtr atom)
+{
+    // Nodes of various kinds -----------
+    if (NUMBER_NODE == atom_type) {
+        if (NULL == NumberNodeCast(atom))
+            return createNumberNode(*NodeCast(atom));
+    } else if (TYPE_NODE == atom_type) {
+        if (NULL == TypeNodeCast(atom))
+            return createTypeNode(*NodeCast(atom));
+
+    // Links of various kinds -----------
+    } else if (BIND_LINK == atom_type) {
+        if (NULL == BindLinkCast(atom))
+            return createBindLink(*LinkCast(atom));
+    } else if (BETA_REDEX == atom_type) {
+        if (NULL == BetaRedexCast(atom))
+            return createBetaRedex(*LinkCast(atom));
+    } else if (DEFINE_LINK == atom_type) {
+        if (NULL == DefineLinkCast(atom))
+            return createDefineLink(*LinkCast(atom));
+    } else if (DELETE_LINK == atom_type) {
+        if (NULL == DeleteLinkCast(atom))
+            return createDeleteLink(*LinkCast(atom));
+/*
+    XXX FIXME: cannot do this, due to a circular shared library
+    dependency between python and itself: python depends on
+    ExecutionOutputLink, and ExecutionOutputLink depends on python.
+    Boo.  I tried fixing this, but it is hard, somehow.
+
+*/
+    } else if (EVALUATION_LINK == atom_type) {
+/*
+        if (NULL == EvaluationLinkCast(atom))
+            return createEvaluationLink(*LinkCast(atom));
+*/
+    } else if (EXECUTION_OUTPUT_LINK == atom_type) {
+/*
+        if (NULL == ExecutionOutputLinkCast(atom))
+            return createExecutionOutputLink(*LinkCast(atom));
+*/
+    } else if (GET_LINK == atom_type) {
+        if (NULL == PatternLinkCast(atom))
+            return createPatternLink(*LinkCast(atom));
+    } else if (SATISFACTION_LINK == atom_type) {
+        if (NULL == PatternLinkCast(atom))
+            return createPatternLink(*LinkCast(atom));
+    } else if (SCOPE_LINK == atom_type) {
+        if (NULL == ScopeLinkCast(atom))
+            return createScopeLink(*LinkCast(atom));
+    } else if (VARIABLE_LIST == atom_type) {
+        if (NULL == VariableListCast(atom))
+            return createVariableList(*LinkCast(atom));
+    } else if (classserver().isA(atom_type, FUNCTION_LINK)) {
+        if (NULL == FunctionLinkCast(atom))
+            return FunctionLink::factory(LinkCast(atom));
+    }
+    return atom;
+}
+
+// create a clone
+static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
+{
+    // Nodes of various kinds -----------
+    if (NUMBER_NODE == atom_type)
+        return createNumberNode(*NodeCast(atom));
+    if (TYPE_NODE == atom_type)
+        return createTypeNode(*NodeCast(atom));
+    if (classserver().isA(atom_type, NODE))
+        return createNode(*NodeCast(atom));
+
+    // Links of various kinds -----------
+    if (BIND_LINK == atom_type)
+        return createBindLink(*LinkCast(atom));
+    if (BETA_REDEX == atom_type)
+        return createBetaRedex(*LinkCast(atom));
+    if (DEFINE_LINK == atom_type)
+        return createDefineLink(*LinkCast(atom));
+    if (DELETE_LINK == atom_type)
+        return createDeleteLink(*LinkCast(atom));
+/*
+    XXX FIXME: cannot do this, due to a circular shared library
+    dependency between python and itself: python depends on
+    ExecutionOutputLink, and ExecutionOutputLink depends on python.
+    Boo.  I tried fixing this, but it is hard, somehow.
+*/
+    if (EVALUATION_LINK == atom_type)
+        // return createEvaluationLink(*LinkCast(atom));
+        return createLink(*LinkCast(atom));
+    if (EXECUTION_OUTPUT_LINK == atom_type)
+        //return createExecutionOutputLink(*LinkCast(atom));
+        return createLink(*LinkCast(atom));
+    if (GET_LINK == atom_type)
+        return createPatternLink(*LinkCast(atom));
+    if (SATISFACTION_LINK == atom_type)
+        return createPatternLink(*LinkCast(atom));
+    if (SCOPE_LINK == atom_type)
+        return createScopeLink(*LinkCast(atom));
+    if (VARIABLE_LIST == atom_type)
+        return createVariableList(*LinkCast(atom));
+    if (classserver().isA(atom_type, FUNCTION_LINK))
+        return FunctionLink::factory(LinkCast(atom));
+    if (classserver().isA(atom_type, LINK))
+        return createLink(*LinkCast(atom));
+
+    throw RuntimeException(TRACE_INFO,
+          "AtomTable - failed factory call!");
+}
+
 Handle AtomTable::add(AtomPtr atom, bool async)
 {
     // Is the atom already in this table, or one of its environments?
@@ -285,54 +396,9 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (inEnviron(atom))
         return atom->getHandle();
 
-    // Experimental C++ atom types support code
-    // This could be encapsulated in a factory...
+    // Factory implements experimental C++ atom types support code
     Type atom_type = atom->getType();
-    if (NUMBER_NODE == atom_type) {
-        if (NULL == NumberNodeCast(atom))
-            atom = createNumberNode(*NodeCast(atom));
-    } else if (TYPE_NODE == atom_type) {
-        if (NULL == TypeNodeCast(atom))
-            atom = createTypeNode(*NodeCast(atom));
-    } else if (BIND_LINK == atom_type) {
-        if (NULL == BindLinkCast(atom))
-            atom = createBindLink(*LinkCast(atom));
-    } else if (BETA_REDEX == atom_type) {
-        if (NULL == BetaRedexCast(atom))
-            atom = createBetaRedex(*LinkCast(atom));
-    } else if (DEFINE_LINK == atom_type) {
-        if (NULL == DefineLinkCast(atom))
-            atom = createDefineLink(*LinkCast(atom));
-    } else if (DELETE_LINK == atom_type) {
-        if (NULL == DeleteLinkCast(atom))
-            atom = createDeleteLink(*LinkCast(atom));
-    } else if (EVALUATION_LINK == atom_type) {
-/*
-        if (NULL == EvaluationLinkCast(atom))
-            atom = createEvaluationLink(*LinkCast(atom));
-*/
-    } else if (EXECUTION_OUTPUT_LINK == atom_type) {
-/*
-        XXX FIXME: cannot do this, due to a circular chared library
-        dependency between python and itself: python depends on
-        ExecutionOutputLink, and ExecutionOutputLink depends on python.
-        Boo.  I tried fixing this, but it is hard, somehow.
-        if (NULL == ExecutionOutputLinkCast(atom))
-            atom = createExecutionOutputLink(*LinkCast(atom));
-*/
-    } else if (SATISFACTION_LINK == atom_type) {
-        if (NULL == SatisfactionLinkCast(atom))
-            atom = createSatisfactionLink(*LinkCast(atom));
-    } else if (SCOPE_LINK == atom_type) {
-        if (NULL == ScopeLinkCast(atom))
-            atom = createScopeLink(*LinkCast(atom));
-    } else if (VARIABLE_LIST == atom_type) {
-        if (NULL == VariableListCast(atom))
-            atom = createVariableList(*LinkCast(atom));
-    } else if (classserver().isA(atom_type, FUNCTION_LINK)) {
-        if (NULL == FunctionLinkCast(atom))
-            atom = FunctionLink::factory(LinkCast(atom));
-    }
+    atom = factory(atom_type, atom);
 
     // Is the equivalent of this atom already in the table?
     // If so, then return the existing atom.  (Note that this 'existing'
@@ -346,53 +412,21 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // know that its not in this atomspace, or its environ.)
     AtomTable* at = atom->getAtomTable();
     if (at != NULL) {
-        NodePtr nnn(NodeCast(atom));
-        if (nnn) {
-            // Experimental support for atom types
-            if (NUMBER_NODE == atom_type) {
-                atom = createNumberNode(*nnn);
-            } else if (TYPE_NODE == atom_type) {
-                atom = createTypeNode(*nnn);
-            } else {
-                atom = createNode(*nnn);
-            }
-        } else {
-            LinkPtr lll(LinkCast(atom));
-            if (BIND_LINK == atom_type) {
-                atom = createBindLink(*lll);
-            } else if (BETA_REDEX == atom_type) {
-                atom = createBetaRedex(*lll);
-            } else if (DEFINE_LINK == atom_type) {
-                atom = createDefineLink(*lll);
-            } else if (DELETE_LINK == atom_type) {
-                atom = createDeleteLink(*lll);
-            } else if (EVALUATION_LINK == atom_type) {
-                // atom = createEvaluationLink(*lll);
-                atom = createLink(*lll);
-            } else if (EXECUTION_OUTPUT_LINK == atom_type) {
-                // atom = createExecutionOutputLink(*lll);
-                atom = createLink(*lll);
-            } else if (SATISFACTION_LINK == atom_type) {
-                atom = createSatisfactionLink(*lll);
-            } else if (SCOPE_LINK == atom_type) {
-                atom = createScopeLink(*lll);
-            } else if (VARIABLE_LIST == atom_type) {
-                atom = createVariableList(*lll);
-            } else if (classserver().isA(atom_type, FUNCTION_LINK)) {
-                atom = FunctionLink::factory(lll);
-            } else {
-                atom = createLink(*lll);
-            }
-
+        LinkPtr lll(LinkCast(atom));
+        if (lll) {
             // Well, if the link was in some other atomspace, then
-            // the outgoing set will be too. So we recursively clone
-            // that too.
-            const HandleSeq ogset(lll->getOutgoingSet());
-            size_t arity = ogset.size();
-            for (size_t i = 0; i < arity; i++) {
-                add(ogset[i], async);
+            // the outgoing set will probably be too. (It might not
+            // be if the other atomspace is a child of this one).
+            // So we recursively clone that too.
+            HandleSeq closet;
+            for (const Handle& h : lll->getOutgoingSet()) {
+                closet.push_back(add(h, async));
             }
+            atom = createLink(atom_type, closet,
+                              atom->getTruthValue(),
+                              atom->getAttentionValue());
         }
+        atom = clone_factory(atom_type, atom);
     }
 
     // Sometimes one inserts an atom that was previously deleted.
@@ -481,7 +515,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         }
 
         if (need_copy) {
-            atom = createLink(*lll);
+            atom = clone_factory(atom_type, atom);
         }
 
         // llc not lll, in case a copy was made.

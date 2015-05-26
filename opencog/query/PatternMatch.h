@@ -32,11 +32,11 @@
 
 namespace opencog {
 
-class SatisfactionLink;
+class PatternLink;
 
 class PatternMatch
 {
-	friend class SatisfactionLink;
+	friend class PatternLink;
 
 	protected:
 		static bool recursive_virtual(PatternMatchCallback& cb,

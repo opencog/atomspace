@@ -30,7 +30,7 @@ using namespace opencog;
 TimesLink::TimesLink(const HandleSeq& oset,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
-    : FoldLink(TIMES_LINK, oset, tv, av)
+    : ArithmeticLink(TIMES_LINK, oset, tv, av)
 {
 	init();
 }
@@ -38,7 +38,7 @@ TimesLink::TimesLink(const HandleSeq& oset,
 TimesLink::TimesLink(Type t, const HandleSeq& oset,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
-    : FoldLink(t, oset, tv, av)
+    : ArithmeticLink(t, oset, tv, av)
 {
 	if (not classserver().isA(t, TIMES_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a TimesLink");
@@ -48,15 +48,23 @@ TimesLink::TimesLink(Type t, const HandleSeq& oset,
 TimesLink::TimesLink(Type t, const Handle& a, const Handle& b,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
-    : FoldLink(t, a, b, tv, av)
+    : ArithmeticLink(t, a, b, tv, av)
 {
 	if (not classserver().isA(t, TIMES_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a TimesLink");
 	init();
 }
 
+TimesLink::TimesLink(const Handle& a, const Handle& b,
+                   TruthValuePtr tv,
+                   AttentionValuePtr av)
+    : ArithmeticLink(TIMES_LINK, a, b, tv, av)
+{
+	init();
+}
+
 TimesLink::TimesLink(Link& l)
-    : FoldLink(l)
+    : ArithmeticLink(l)
 {
 	Type tscope = l.getType();
 	if (not classserver().isA(tscope, TIMES_LINK))
@@ -64,10 +72,41 @@ TimesLink::TimesLink(Link& l)
 	init();
 }
 
-static double times(double a, double b) { return a*b; }
-
 void TimesLink::init(void)
 {
-	knil = 1.0;
-	kons = times;
+	knild = 1.0;
+	knil = Handle(createNumberNode("1"));
 }
+
+// ============================================================
+
+double TimesLink::konsd(double a, double b) const { return a*b; }
+
+static inline double get_double(const Handle& h)
+{
+	NumberNodePtr nnn(NumberNodeCast(h));
+	if (NULL == nnn)
+		nnn = createNumberNode(*NodeCast(h));
+
+	return nnn->getValue();
+}
+
+/// Because there is no ExpLink or PowLink that can handle repeated
+/// products, or any distributive property, kons is very simple for
+/// the TimesLink.
+Handle TimesLink::kons(const Handle& fi, const Handle& fj)
+{
+	// Are they numbers?
+	if (NUMBER_NODE == fi->getType() and
+	    NUMBER_NODE == fj->getType())
+	{
+		double prod = get_double(fi) * get_double(fj);
+		return Handle(createNumberNode(prod));
+	}
+
+	// If we are here, we've been asked to multiply two things of the
+	// same type, but they are not of a type that we know how to multiply.
+	return Handle(createTimesLink(fi, fj)->reorder());
+}
+
+// ============================================================

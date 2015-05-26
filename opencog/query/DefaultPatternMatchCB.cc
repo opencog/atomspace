@@ -181,7 +181,10 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 {
 	if (ptrn == grnd) return false;
 	if (ptrn->getType() == VARIABLE_NODE and
-	    grnd->getType() == EVALUATION_LINK)
+	    grnd->getType() == EVALUATION_LINK and
+	    0 < LinkCast(grnd)->getArity() and
+	    LinkCast(grnd)->getOutgoingAtom(0)->getType() ==
+	                                     GROUNDED_PREDICATE_NODE)
 	{
 		dbgprt("Evaluate the grounding clause=\n%s\n",
 		        grnd->toShortString().c_str());

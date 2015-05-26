@@ -1,0 +1,182 @@
+/*
+ * tests/query/ReductUTest.cxxtest
+ *
+ * Copyright (C) 2015 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class ReductUTest: public CxxTest::TestSuite
+{
+private:
+		AtomSpace *as;
+		SchemeEval* eval;
+
+public:
+	ReductUTest(void)
+	{
+		try
+		{
+			 config().load("opencog-test.conf");
+		}
+		catch (RuntimeException &e)
+		{
+			std::cerr << e.getMessage() << std::endl;
+		}
+		logger().setFilename(config()["LOG_FILE"]);
+		logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+		logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+	}
+
+	~ReductUTest()
+	{
+		delete as;
+		delete eval;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void test_arithmetic(void);
+};
+
+void ReductUTest::tearDown(void)
+{
+	as->clear();
+}
+
+void ReductUTest::setUp(void)
+{
+	as->clear();
+	config().set("SCM_PRELOAD",
+		"opencog/atomspace/core_types.scm, "
+		"opencog/scm/utilities.scm");
+
+	load_scm_files_from_config(*as);
+}
+
+/*
+ * ReductLink unit test.  Test arithmetic.
+ */
+void ReductUTest::test_arithmetic(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// config().set("SCM_PRELOAD", "tests/atoms/arithmetic.scm");
+	// load_scm_files_from_config(*as);
+
+	// ---------
+	Handle four = eval->eval_h(
+		"(cog-reduce! (PlusLink (NumberNode 2) (NumberNode 2)))"
+	);
+	printf("expecting four: %s\n", four->toShortString().c_str());
+
+	Handle efour = eval->eval_h("(NumberNode 4)");
+	TS_ASSERT_EQUALS(four, efour);
+
+	// ---------
+	Handle zero = eval->eval_h(
+		"(cog-reduce! (PlusLink (NumberNode 2) (NumberNode -2)))"
+	);
+	printf("expecting zero: %s\n", zero->toShortString().c_str());
+
+	Handle ezero = eval->eval_h("(NumberNode 0)");
+	TS_ASSERT_EQUALS(zero, ezero);
+
+	// ---------
+	Handle xplus5 = eval->eval_h(
+		"(cog-reduce! (PlusLink "
+		"	(NumberNode 2) (VariableNode \"$x\") (NumberNode 3)))"
+	);
+	printf("expecting x+5: %s\n", xplus5->toShortString().c_str());
+
+	Handle explus5 = eval->eval_h(
+		"(PlusLink (VariableNode \"$x\") (NumberNode 5))");
+	TS_ASSERT_EQUALS(xplus5, explus5);
+
+	// ---------
+	Handle x = eval->eval_h(
+		"(cog-reduce! (PlusLink "
+		"	(NumberNode 2) (VariableNode \"$x\") (NumberNode -2)))"
+	);
+	printf("expecting $x: %s\n", x->toShortString().c_str());
+
+	Handle ex = eval->eval_h("(VariableNode \"$x\")");
+	TS_ASSERT_EQUALS(x, ex);
+
+	// ---------
+	Handle twox = eval->eval_h(
+		"(cog-reduce! (PlusLink "
+		"	(VariableNode \"$x\") (VariableNode \"$x\")))"
+	);
+	printf("expecting 2x: %s\n", twox->toShortString().c_str());
+
+	Handle etwox = eval->eval_h(
+		"(TimesLink (VariableNode \"$x\") (NumberNode 2))");
+	TS_ASSERT_EQUALS(twox, etwox);
+
+	// ---------
+	Handle xtimes42 = eval->eval_h(
+		"(cog-reduce! (PlusLink "
+		"	(VariableNode \"$x\")"
+		"	(TimesLink (NumberNode 38) (VariableNode \"$x\"))"
+		"	(TimesLink (VariableNode \"$x\") (NumberNode 3))))"
+	);
+	printf("expecting x*42: %s\n", xtimes42->toShortString().c_str());
+
+	Handle extimes42 = eval->eval_h(
+		"(TimesLink (VariableNode \"$x\") (NumberNode 42))");
+	TS_ASSERT_EQUALS(xtimes42, extimes42);
+
+	// ---------
+	Handle six = eval->eval_h(
+		"(cog-reduce! (TimesLink (NumberNode 2) (NumberNode 3)))"
+	);
+	printf("expecting six: %s\n", six->toShortString().c_str());
+
+	Handle esix = eval->eval_h("(NumberNode 6)");
+	TS_ASSERT_EQUALS(six, esix);
+
+	// ---------
+	Handle sixex = eval->eval_h(
+		"(cog-reduce! (TimesLink "
+		"	(NumberNode 2) (VariableNode \"$x\") (NumberNode 3)))"
+	);
+	printf("expecting x * 6: %s\n", sixex->toShortString().c_str());
+
+	Handle esixex = eval->eval_h(
+		"(TimesLink (VariableNode \"$x\") (NumberNode 6))");
+	TS_ASSERT_EQUALS(sixex, esixex);
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

@@ -73,7 +73,7 @@ class Satisfier :
 };
 
 /**
- * class SatisfactionSet -- pattern matching callback for finding satsifaction.
+ * class SatisfyingSet -- pattern matching callback for finding satsifaction.
  *
  * This class is meant to be used with the pattern matcher. When the
  * pattern matcher calls the callback, it will do so with a particular
@@ -84,19 +84,20 @@ class Satisfier :
  * found.
  */
 
-class SatisfactionSet :
+class SatisfyingSet :
 	public virtual InitiateSearchCB,
 	public virtual DefaultPatternMatchCB
 {
 	public:
-		SatisfactionSet(AtomSpace* as) :
+		SatisfyingSet(AtomSpace* as) :
 			InitiateSearchCB(as), DefaultPatternMatchCB(as) {}
-		Handle _body;
+		HandleSeq _varseq;
 		HandleSeq _satisfying_set;
 
 		virtual void set_pattern(const Variables& vars,
 		                         const Pattern& pat)
 		{
+			_varseq = vars.varseq;
 			InitiateSearchCB::set_pattern(vars, pat);
 			DefaultPatternMatchCB::set_pattern(vars, pat);
 		}

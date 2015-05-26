@@ -1,0 +1,8 @@
+
+ADD_CXXTEST(AssignUTest)
+TARGET_LINK_LIBRARIES(AssignUTest atomspace)
+
+IF(HAVE_GUILE)
+	ADD_CXXTEST(ReductUTest)
+	TARGET_LINK_LIBRARIES(ReductUTest atomspace smob)
+ENDIF(HAVE_GUILE)

@@ -33,14 +33,18 @@ namespace opencog
  */
 
 /**
- * The FoldLink implements the arithmetic operations of plus and times.
- * (Its not currently a general fold; it only works with numbers.)
+ * The FoldLink implements the generic reduction of lists, by
+ * cons'ing together elements of the same type. See
+ * http://en.wikipedia.org/wiki/Fold_(higher-order_function)
+ * for a general discussion.
  */
 class FoldLink : public FunctionLink
 {
 protected:
-	double knil;
-	double (*kons) (double, double);
+	Handle knil;
+	virtual Handle kons(const Handle&, const Handle&) = 0;
+	Type distributive_type = NOTYPE;
+
 	void init(void);
 	FoldLink(Type, const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
@@ -56,7 +60,6 @@ public:
 	FoldLink(Link& l);
 
    virtual Handle reduce(void);
-	virtual Handle execute(AtomSpace* as) const;
 };
 
 typedef std::shared_ptr<FoldLink> FoldLinkPtr;

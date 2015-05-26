@@ -5,11 +5,10 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 ADD_LIBRARY (lambda SHARED
 	BetaRedex.cc
 	BindLink.cc
-	ConcreteLink.cc
 	DefineLink.cc
 	DeleteLink.cc
+	PatternLink.cc
 	PatternUtils.cc
-	SatisfactionLink.cc
 	ScopeLink.cc
 	VariableList.cc
 )
@@ -34,9 +33,8 @@ ENDIF (CYGWIN)
 
 INSTALL (FILES
 	BindLink.h
-	ConcreteLink.h
+	PatternLink.h
 	PatternUtils.h
-	SatisfactionLink.h
 	VariableList.h
 	DESTINATION "include/${PROJECT_NAME}/atoms/bind"
 )
