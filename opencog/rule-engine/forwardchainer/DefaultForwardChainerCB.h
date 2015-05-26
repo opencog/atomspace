@@ -35,7 +35,7 @@ class DefaultForwardChainerCB: public virtual ForwardChainerCallBack
 {
 private:
     AtomSpace * as_;
-    ForwardChainerPMCB* fcpm_;
+    ForwardChainerPMCB* _fcpm;
     HandleSeq get_rootlinks(Handle hsource, AtomSpace* as, Type link_type,
     bool subclasses = false);
     source_selection_mode ts_mode_;

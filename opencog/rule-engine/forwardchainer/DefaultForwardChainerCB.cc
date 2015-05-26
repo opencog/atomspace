@@ -36,13 +36,13 @@ DefaultForwardChainerCB::DefaultForwardChainerCB(
         ForwardChainerCallBack(as)
 {
     as_ = as;
-    fcpm_ = new ForwardChainerPMCB(as);
+    _fcpm = new ForwardChainerPMCB(as);
     ts_mode_ = ts_mode;
 }
 
 DefaultForwardChainerCB::~DefaultForwardChainerCB()
 {
-    delete fcpm_;
+    delete _fcpm;
 }
 
 /**
@@ -218,43 +218,34 @@ Handle DefaultForwardChainerCB::choose_next_source(FCMemory& fcmem)
     }
 
     // Incase of when all sources are selected
-    if(hchosen == Handle::UNDEFINED)
-    	return urec.tournament_select(tournament_elem);
+    if (hchosen == Handle::UNDEFINED)
+        return urec.tournament_select(tournament_elem);
 
     return hchosen;
 }
 
-//TODO applier shouand premise_list for forward chainingld check on atoms (Inference.matched_atoms when Inference.Rule =Cur_Rule), for mutex rules
 HandleSeq DefaultForwardChainerCB::apply_rule(FCMemory& fcmem)
 {
-    Rule * cur_rule = fcmem.get_cur_rule();
-    //fcpm_->set_fcmem(&fcmem);
+    _fcpm->set_fcmem(&fcmem);
 
-    /**
-     * Use temporary atomspace filled with only the source
-     * and premise_list for forward chaining
-     * */
-    AtomSpace temp;
-    for (Handle h : fcmem.get_potential_sources())
-        temp.addAtom(h);
-    temp.addAtom(cur_rule->get_handle());
+    auto rule_handle = fcmem.get_cur_rule()->get_handle();
+    BindLinkPtr bl(BindLinkCast(rule_handle));
+    if (NULL == bl) {
+        bl = createBindLink(*LinkCast(rule_handle));
+    }
+    _fcpm->implicand = bl->get_implicand();
+    bl->imply(*_fcpm);
+    // bl->satisfy(*_fcpm);
 
-    BindLinkPtr bl(BindLinkCast(cur_rule->get_handle()));
-    //fcpm_->implicand = bl->get_implicand();
-    DefaultImplicator impl(as_);
-    impl.implicand = bl->get_implicand();
-    //bl->imply(*fcpm_);
-    bl->imply(impl);
-    //HandleSeq product = fcpm_->get_products();
-    HandleSeq product = impl.result_list;
+    HandleSeq product = _fcpm->get_products();
 
     //! Make sure the inferences made are new.
-    HandleSeq new_product;
-    for (auto h : product) {
-        as_->addAtom(h);
-        if (not fcmem.isin_potential_sources(h))
-            new_product.push_back(h);
+    for (auto iter = product.begin(); iter != product.end();) {
+        if (fcmem.isin_potential_sources(*iter))
+            iter = product.erase(iter);
+        else
+            ++iter;
     }
 
-    return new_product;
+    return product;
 }

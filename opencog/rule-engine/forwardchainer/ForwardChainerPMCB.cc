@@ -21,66 +21,71 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/rule-engine/forwardchainer/ForwardChainerPMCB.h>
+#include "ForwardChainerPMCB.h"
+#include <opencog/rule-engine/URECommons.h>
 
 using namespace opencog;
 
+//TODO Enable attentional focus search
 ForwardChainerPMCB::ForwardChainerPMCB(AtomSpace * as) :
-		Implicator(as), InitiateSearchCB(as), DefaultPatternMatchCB(as), AttentionalFocusCB(
-				as), _as(as) {
-	_fcmem = nullptr;
+        Implicator(as), InitiateSearchCB(as), DefaultPatternMatchCB(as),
+        /*AttentionalFocusCB(as),*/_as(as)
+{
+    _fcmem = nullptr;
 }
 
-ForwardChainerPMCB::~ForwardChainerPMCB() {
+ForwardChainerPMCB::~ForwardChainerPMCB()
+{
 }
 
-bool ForwardChainerPMCB::node_match(const Handle& node1,
-		const Handle& node2) {
-	//constrain search within premise list
-	bool accept =
-			_fcmem->is_search_in_af() ?
-					AttentionalFocusCB::node_match(node1, node2) :
-					DefaultPatternMatchCB::node_match(node1, node2);
+bool ForwardChainerPMCB::node_match(const Handle& node1, const Handle& node2)
+{
+    //constrain search within premise list
+    bool accept =
+    /*_fcmem->is_search_in_af() ?
+     AttentionalFocusCB::node_match(node1, node2) :*/
+    DefaultPatternMatchCB::node_match(node1, node2);
 
-    return ret;
-
+    return accept;
 }
 
-bool ForwardChainerPMCB::link_match(const LinkPtr& lpat,
-		const LinkPtr& lsoln) {
-	//constrain search within premise list
-	bool accpet =
-			_fcmem->is_search_in_af() ?
-					AttentionalFocusCB::link_match(lpat, lsoln) :
-					DefaultPatternMatchCB::link_match(lpat, lsoln);
+bool ForwardChainerPMCB::link_match(const LinkPtr& lpat, const LinkPtr& lsoln)
+{
+    //constrain search within premise list
+    bool accept =
+    /*_fcmem->is_search_in_af() ?
+     AttentionalFocusCB::link_match(lpat, lsoln) :*/
+    DefaultPatternMatchCB::link_match(lpat, lsoln);
 
-    return ret;
+    return accept;
 }
 
-bool ForwardChainerPMCB::grounding(
-		const std::map<Handle, Handle> &var_soln,
-		const std::map<Handle, Handle> &pred_soln) {
-	Handle source = _fcmem->get_cur_source();
+bool ForwardChainerPMCB::grounding(const std::map<Handle, Handle> &var_soln,
+                                   const std::map<Handle, Handle> &pred_soln)
+{
+    Handle source = _fcmem->get_cur_source();
 
-	for (auto it = var_soln.begin(); it != var_soln.end(); ++it) {
-		//Accept solution if any one of the variables ground to the source
-		if (it->second == source) {
-			Handle h = inst.instantiate(implicand, var_soln);
-			if (Handle::UNDEFINED != h) {
-				result_list.push_back(h);
-			}
-			return true;
-		}
-	}
+    for (auto& vs : var_soln) {
+        if (vs.second == source) {
+            Handle h = inst.instantiate(implicand, var_soln);
+            if (Handle::UNDEFINED != h) {
+                result_list.push_back(h);
+                break;
+            }
+        }
+    }
 
-	return false;
+    return false;
 }
 
-void ForwardChainerPMCB::set_fcmem(FCMemory *fcmem) {
-	_fcmem = fcmem;
+void ForwardChainerPMCB::set_fcmem(FCMemory *fcmem)
+{
+    _fcmem = fcmem;
 }
-HandleSeq ForwardChainerPMCB::get_products() {
-	auto product = result_list;
-	result_list.clear();
-	return product;
+
+HandleSeq ForwardChainerPMCB::get_products()
+{
+    auto product = result_list;
+    result_list.clear();
+    return product;
 }

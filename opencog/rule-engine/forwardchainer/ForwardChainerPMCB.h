@@ -33,20 +33,18 @@
 namespace opencog
 {
 
-class ForwardChainerPMCB:
-        public virtual Implicator,
+class ForwardChainerPMCB: public virtual Implicator,
         public virtual InitiateSearchCB,
-        public virtual DefaultPatternMatchCB,
-        public virtual AttentionalFocusCB
-{
+        /*public AttentionalFocusCB,*/
+        public virtual DefaultPatternMatchCB {
 private:
     AtomSpace* _as;
     FCMemory * _fcmem;
 public:
     ForwardChainerPMCB(AtomSpace * as);
     virtual ~ForwardChainerPMCB();
-    virtual void set_pattern(const Variables& vars,
-                             const Pattern& pat)
+
+    virtual void set_pattern(const Variables& vars, const Pattern& pat)
     {
         InitiateSearchCB::set_pattern(vars, pat);
         DefaultPatternMatchCB::set_pattern(vars, pat);
@@ -58,14 +56,12 @@ public:
     // only at the source list.
     virtual bool node_match(const Handle& node1, const Handle& node2);
     virtual bool link_match(const LinkPtr& lpat, const LinkPtr& lsoln);
-
     /**
      * A callback handler of the Pattern matcher used to store
      * references to new conclusion the source list
      */
     virtual bool grounding(const std::map<Handle, Handle> &var_soln,
                            const std::map<Handle, Handle> &pred_soln);
-
 };
 
 } // ~namespace opencog
