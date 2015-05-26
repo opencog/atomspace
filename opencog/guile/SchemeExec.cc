@@ -10,9 +10,8 @@
 #include <cstddef>
 #include <libguile.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atoms/reduct/FunctionLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
-#include <opencog/atoms/execution/ExecutionOutputLink.h>
+#include <opencog/atoms/execution/Instantiator.h>
 
 #include "SchemeEval.h"
 #include "SchemeSmob.h"
@@ -72,60 +71,16 @@ SCM SchemeSmob::ss_execute (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-execute!");
 	AtomSpace* atomspace = ss_get_env_as("cog-execute!");
-
-	Type t = h->getType();
-
-	// Reduce PutLinks first, and then execute them.
-	if (PUT_LINK == h->getType())
-	{
-		FreeLinkPtr fff(FreeLinkCast(h));
-		h = fff->reduce();
-		t = h->getType();
-	}
-
-	if (not classserver().isA(t, FUNCTION_LINK))
-	{
-		// XXX this is wrong, we must go  downwards
-		h = atomspace->addAtom(h);
-		return handle_to_scm(h);
-	}
+	Instantiator inst(atomspace);
 
 	// execute() may throw a C++ exception in various cases:
 	// e.g. if it names a non-existant function, or a function
 	// with syntax errors.
 	try
 	{
-		LinkPtr lp(LinkCast(h));
-
-		// Arghh. Treat the ExecutionOutputLink as a special case.
-		// We do this because of a circular dependency in the python
-		// shared libs: python depends on ExecutionOutputLink and
-		// ExecutionOutputLink depends on python. So rather than having
-		// FunctionLink handle it all, we have to special-case here.
-		// XXX FIXME: python is buggy, and should be fixed.
-		if (EXECUTION_OUTPUT_LINK == t)
-		{
-			ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(lp));
-			if (NULL == eolp)
-				eolp = createExecutionOutputLink(*lp);
-			Handle h(eolp->execute(atomspace));
-			return handle_to_scm(h);
-		}
-
-		// We do this here, because fully-grounded DeleteLinks must
-		// not exist, and we may have created one with the PutLink above.
-		if (DELETE_LINK == t)
-		{
-			for (const Handle& ho : lp->getOutgoingSet())
-			{
-				if (VARIABLE_NODE != ho->getType())
-					atomspace->removeAtom(ho, true);
-			}
-			return handle_to_scm(Handle::UNDEFINED);
-		}
-
-		FunctionLinkPtr fff(FunctionLinkCast(FunctionLink::factory(lp)));
-		Handle h(fff->execute(atomspace));
+		h = inst.execute(h);
+		if (NULL != h)
+			h = atomspace->addAtom(h);
 		return handle_to_scm(h);
 	}
 	catch (const std::exception& ex)

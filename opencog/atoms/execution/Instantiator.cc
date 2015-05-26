@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atoms/reduct/FunctionLink.h>
+#include <opencog/atoms/reduct/PutLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 
 #include "Instantiator.h"
@@ -71,7 +72,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// Reduce PutLinks.
 	if (PUT_LINK == t)
 	{
-		PutLinkPtr ppp(PutLinkCast(h));
+		PutLinkPtr ppp(PutLinkCast(expr));
 
 		// PutLinks always have arity two. There are NO free vars in
 		// the body of the PutLink.  If there are free vars, they are
