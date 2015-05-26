@@ -6,7 +6,6 @@ ADD_LIBRARY(query SHARED
 	DefaultPatternMatchCB.cc
 	Implicator.cc
 	InitiateSearchCB.cc
-	Instantiator.cc
 	PatternMatch.cc
 	PatternMatchEngine.cc
 	PatternSCM.cc
@@ -42,7 +41,6 @@ INSTALL (FILES
 	DefaultPatternMatchCB.h
 	Implicator.h
 	InitiateSearchCB.h
-	Instantiator.h
 	Pattern.h
 	PatternSCM.h
 	PatternMatchCallback.h

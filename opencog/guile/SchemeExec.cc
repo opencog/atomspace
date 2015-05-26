@@ -85,6 +85,7 @@ SCM SchemeSmob::ss_execute (SCM satom)
 
 	if (not classserver().isA(t, FUNCTION_LINK))
 	{
+		// XXX this is wrong, we must go  downwards
 		h = atomspace->addAtom(h);
 		return handle_to_scm(h);
 	}

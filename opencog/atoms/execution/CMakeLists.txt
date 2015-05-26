@@ -9,6 +9,7 @@ ENDIF (HAVE_CYTHON)
 ADD_LIBRARY (execution SHARED
 	EvaluationLink.cc
 	ExecutionOutputLink.cc
+	Instantiator.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -29,5 +30,6 @@ INSTALL (TARGETS execution DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 INSTALL (FILES
 	EvaluationLink.h
 	ExecutionOutputLink.h
+	Instantiator.h
 	DESTINATION "include/${PROJECT_NAME}/atoms/execution"
 )

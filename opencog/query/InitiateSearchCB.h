@@ -27,6 +27,7 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/Instantiator.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/PatternMatchEngine.h>
 
