@@ -206,8 +206,6 @@ PatternLink::PatternLink(Type t, const HandleSeq& hseq,
                          TruthValuePtr tv, AttentionValuePtr av)
 	: Link(t, hseq, tv, av)
 {
-	// BindLink has other init sequences
-	if (BIND_LINK == t) return;
 	init();
 }
 

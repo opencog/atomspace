@@ -24,6 +24,7 @@
  */
 
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/reduct/FreeLink.h>
 
 #include "BindLink.h"
 
@@ -31,13 +32,6 @@ using namespace opencog;
 
 void BindLink::init(void)
 {
-	extract_variables(_outgoing);
-	validate_body(_body);
-	unbundle_clauses(_hclauses);
-
-	// Remainder of the init is just like in the SatisfactionLink
-	common_init();
-	setup_components();
 	_pat.redex_name = "anonymous BindLink";
 }
 
@@ -70,40 +64,42 @@ BindLink::BindLink(Link &l)
 }
 
 /* ================================================================= */
-/**
- * Validate the body for syntax correctness.
- *
- * Given an ImplicatioLink, this will check to make sure that
- * it is of the appropriate structure: that it consists of two
- * parts: a set of clauses, and an implicand.  That is, it must
- * have the structure:
- *
- *    ImplicationLink
- *       SomeLink
- *       AnotherLink
- *
- * The conents of "SomeLink" is not validated here, it is
- * validated by validate_clauses()
- *
- * As a side-effect, if SomeLink is an AndLink, the list of clauses
- * is unpacked.
- */
-void BindLink::validate_body(const Handle& hbody)
+///
+/// Find and unpack variable declarations, if any; otherwise, just
+/// find all free variables.
+///
+/// On top of that initialize _body and _implicand with the
+/// clauses and the rewrite rule.
+///
+void BindLink::extract_variables(const HandleSeq& oset)
 {
-	// Type must be as expected
-	if (IMPLICATION_LINK != hbody->getType())
+	size_t sz = oset.size();
+	if (3 < sz)
 		throw InvalidParamException(TRACE_INFO,
-			"Bindlink expects an ImplicationLink, got %s",
-			classserver().getTypeName(hbody->getType()).c_str());
+			"Expecting an outgoing set size of at most two, got %d", sz);
 
-	LinkPtr lbody(LinkCast(hbody));
-	const std::vector<Handle>& oset = lbody->getOutgoingSet();
-	if (2 != oset.size())
-		throw InvalidParamException(TRACE_INFO,
-			"ImplicationLink has wrong size: %d", oset.size());
+	// If the outgoing set size is one, then there are no variable
+	// declarations; extract all free variables.
+	if (2 == sz)
+	{
+		_body = oset[0];
+		_implicand = oset[1];
 
-	_hclauses = oset[0];
-	_implicand = oset[1];
+		// Use the FreeLink class to find all the variables;
+		// Use the VariableList class for build the Variables struct.
+		FreeLink fl(oset[0]);
+		VariableList vl(fl.get_vars());
+		_varlist = vl.get_variables();
+		return;
+	}
+
+	// If we are here, then the first outgoing set member should be
+	// a variable declaration.
+	_body = oset[1];
+	_implicand = oset[2];
+
+	// Initialize _varlist with the scoped variables
+	init_scoped_variables(oset[0]);
 }
 
 /* ===================== END OF FILE ===================== */
