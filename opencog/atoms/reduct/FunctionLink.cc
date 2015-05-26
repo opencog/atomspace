@@ -25,6 +25,7 @@
 #include "FunctionLink.h"
 
 #include "AssignLink.h"
+#include "DeleteLink.h"
 #include "PlusLink.h"
 #include "TimesLink.h"
 
@@ -100,6 +101,9 @@ Handle FunctionLink::factory(Type t, const HandleSeq& seq)
 {
 	if (ASSIGN_LINK == t)
 		return Handle(createAssignLink(seq));
+
+	if (DELETE_LINK == t)
+		return Handle(createDeleteLink(seq));
 
 	if (INSERT_LINK == t)
 		return Handle(createInsertLink(seq));

@@ -283,9 +283,6 @@ static AtomPtr factory(Type atom_type, AtomPtr atom)
     } else if (DEFINE_LINK == atom_type) {
         if (NULL == DefineLinkCast(atom))
             return createDefineLink(*LinkCast(atom));
-    } else if (DELETE_LINK == atom_type) {
-        if (NULL == DeleteLinkCast(atom))
-            return createDeleteLink(*LinkCast(atom));
 /*
     XXX FIXME: cannot do this, due to a circular shared library
     dependency between python and itself: python depends on
@@ -343,8 +340,6 @@ static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
         return createBetaRedex(*LinkCast(atom));
     if (DEFINE_LINK == atom_type)
         return createDefineLink(*LinkCast(atom));
-    if (DELETE_LINK == atom_type)
-        return createDeleteLink(*LinkCast(atom));
 /*
     XXX FIXME: cannot do this, due to a circular shared library
     dependency between python and itself: python depends on
