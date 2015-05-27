@@ -29,6 +29,8 @@
 namespace opencog
 {
 
+typedef std::map<Handle, UnorderedHandleSet> VarMultimap;
+
 class Target
 {
 	friend class TargetSet;
@@ -47,6 +49,7 @@ public:
 	}
 
 	void store_step(const Rule& r, const HandleSeq& premises);
+	void store_varmap(VarMultimap& vm);
 	uint rule_count(const Rule& r);
 
 	void increment_selection_count() { _selection_count++; }
@@ -63,8 +66,9 @@ private:
 
 	Handle _htarget_external;
 	Handle _htarget_internal;
-
 	uint _selection_count;
+
+	VarMultimap _varmap;
 
 	AtomSpace* _as;
 };

@@ -47,6 +47,12 @@ void Target::store_step(const Rule& r, const HandleSeq& premises)
 	             _as->addLink(LIST_LINK, premises));
 }
 
+void Target::store_varmap(VarMultimap& vm)
+{
+	for (auto& p : vm)
+		_varmap[p.first].insert(p.second.begin(), p.second.end());
+}
+
 uint Target::rule_count(const Rule& r)
 {
 	Handle hname = _as->addNode(CONCEPT_NODE, r.get_name());
