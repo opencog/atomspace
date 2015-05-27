@@ -6,10 +6,11 @@ IF (HAVE_CYTHON)
 	INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 ENDIF (HAVE_CYTHON)
 
-ADD_LIBRARY (execution STATIC
+ADD_LIBRARY (execution SHARED
 	EvaluationLink.cc
 	ExecutionOutputLink.cc
 	Instantiator.cc
+	ExecSCM.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.

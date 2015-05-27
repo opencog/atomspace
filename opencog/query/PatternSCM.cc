@@ -7,7 +7,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeModule.h>
-// #include <opencog/guile/SchemeSmob.h>
 
 #include "BindLinkAPI.h"
 #include "PatternMatch.h"
