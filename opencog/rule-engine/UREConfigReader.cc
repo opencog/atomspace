@@ -26,7 +26,7 @@
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/DefineLink.h>
 #include <opencog/atoms/NumberNode.h>
-#include <opencog/query/BindLink.h>
+#include <opencog/query/BindLinkAPI.h>
 
 using namespace opencog;
 
