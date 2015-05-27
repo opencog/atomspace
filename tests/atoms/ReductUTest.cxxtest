@@ -24,6 +24,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/ExecSCM.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -43,6 +44,8 @@ public:
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
+
+		opencog_exec_init();
 	}
 
 	~ReductUTest()
