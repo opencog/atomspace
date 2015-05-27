@@ -44,7 +44,7 @@ class Node : public Atom
 protected:
     // properties
     std::string _name;
-    void init(const std::string&) throw (InvalidParamException, AssertionException);
+    void init(const std::string&);
 
     Node(const Node &l) : Atom(0)
     { OC_ASSERT(false, "Node: bad use of copy ctor"); }

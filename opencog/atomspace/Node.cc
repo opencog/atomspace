@@ -31,13 +31,13 @@
 
 using namespace opencog;
 
-void Node::init( const std::string& cname)
-throw (InvalidParamException, AssertionException)
+void Node::init(const std::string& cname)
 {
-    if (not classserver().isA(_type, NODE)) {
+    if (not classserver().isA(_type, NODE))
+    {
         throw InvalidParamException(TRACE_INFO,
-        "Node - Invalid node type '%d' %s.", 
-        _type, classserver().getTypeName(_type).c_str());
+            "Node - Invalid node type '%d' %s.",
+            _type, classserver().getTypeName(_type).c_str());
     }
     _name = cname;
 }
@@ -49,17 +49,17 @@ std::string Node::toShortString(std::string indent)
         tmpname = "#" + _uuid;
 
     std::string nam = indent +
-        "(" + classserver().getTypeName(_type) + 
+        "(" + classserver().getTypeName(_type) +
         // + getTruthValue()->toString() + ")\n";
-        " \"" + tmpname + "\") ; [" + 
+        " \"" + tmpname + "\") ; [" +
         std::to_string(_uuid) + "]\n";
     return nam;
 }
 
 std::string Node::toString(std::string indent)
 {
-#define BUFSZ 1024
-    char buf[BUFSZ];
+#define BUFSZ 256
+    char buf[BUFSZ + _name.size()];
     std::string tmpname = _name;
     if (_name == "")
         tmpname = "#" + _uuid;
@@ -76,12 +76,11 @@ std::string Node::toString(std::string indent)
 
 bool Node::operator==(const Atom& other) const
 {
-    return (getType() == other.getType()) &&
+    return (getType() == other.getType()) and
            (getName() == dynamic_cast<const Node&>(other).getName());
 }
 
 bool Node::operator!=(const Atom& other) const
 {
-    return !(*this == other);
+    return not (*this == other);
 }
-

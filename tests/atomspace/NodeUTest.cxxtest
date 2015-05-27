@@ -34,18 +34,18 @@ class NodeUTest :  public CxxTest::TestSuite
 private:
 
 public:
-    NodeUTest() {
+    NodeUTest()
+    {
         logger().setLevel(Logger::DEBUG);
         logger().setPrintToStdoutFlag(true);
     }
 
-    void setUp() {
-    }
+    void setUp() {}
 
-    void tearDown() {
-    }
+    void tearDown() {}
 
-    void testEquals() {
+    void testEquals()
+    {
         Node* n1 = new Node(CONCEPT_NODE, "TEST");
         Node* n2 = new Node(CONCEPT_NODE, "TEST");
         Node* n3 = new Node(PREDICATE_NODE, "TEST");
