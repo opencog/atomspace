@@ -23,25 +23,16 @@ private:
 
 public:
 	BackwardChainerUTest()
-    {
+	{
+		logger().setLevel(Logger::DEBUG);
+		logger().setPrintToStdoutFlag(true);
+
 		as_ = new AtomSpace();
 		eval_ = new SchemeEval(as_);
-
-		try
-		{
-			config().load("opencog-test.conf");
-		}
-		catch (RuntimeException &e)
-		{
-			std::cerr << e.getMessage() << std::endl;
-		}
-		logger().setFilename(config()["LOG_FILE"]);
-		logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
-		logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 	}
 
 	~BackwardChainerUTest()
-    {
+	{
 		delete eval_;
 	}
 
