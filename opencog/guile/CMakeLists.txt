@@ -23,15 +23,6 @@ TARGET_LINK_LIBRARIES(smob
 	${GUILE_LIBRARIES}
 )
 
-ADD_EXECUTABLE(PrimitiveExample
-	PrimitiveExample.cc
-)
-TARGET_LINK_LIBRARIES(PrimitiveExample
-	smob
-	atomspace
-	clearbox
-)
-
 INSTALL (TARGETS smob DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES

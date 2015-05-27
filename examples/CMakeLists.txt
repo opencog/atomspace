@@ -1,2 +1,2 @@
 
-# Empty, nothing to do at this time.
+ADD_SUBDIRECTORY (c++-guile)

@@ -10,6 +10,7 @@
 ; statements when they are executed.
 ;
 (use-modules (opencog))
+(use-modules (opencog exec))
 
 ; A utility function to print all EvaluationLinks in the AtomSpace.
 (define (show-eval-links)
