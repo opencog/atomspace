@@ -23,8 +23,8 @@ IF (HAVE_CYTHON)
 ENDIF(HAVE_CYTHON)
 
 TARGET_LINK_LIBRARIES (atomspace_bm
+	atomspace
 	execution
 	clearbox
-	atomspace
 	${COGUTIL_LIBRARY}
 )
