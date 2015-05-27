@@ -5,11 +5,67 @@
  * Copyright (c) 2008, 2014, 2015 Linas Vepstas <linas@linas.org>
  */
 
+
+#include <cstddef>
+#include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/guile/SchemeModule.h>
 
+#include "ExecSCM.h"
+
+
+// ========================================================
 
 using namespace opencog;
+
+/**
+ * cog-execute! executes an ExecutionOutputLink
+ */
+static Handle ss_execute(AtomSpace* atomspace, const Handle& h)
+{
+	Instantiator inst(atomspace);
+	Handle rh(inst.execute(h));
+	if (NULL != rh)
+		rh = atomspace->addAtom(rh);
+	return rh;
+}
+
+/**
+ * cog-evaluate! evaluates an EvaluationLink with a GPN in it.
+ */
+static TruthValuePtr ss_evaluate(AtomSpace* atomspace, const Handle& h)
+{
+	return EvaluationLink::do_evaluate(atomspace, h);
+}
+
+/**
+ * cog-reduce! reduces a FreeLink with free variables in it.
+ */
+static Handle ss_reduce(AtomSpace* atomspace, const Handle& h)
+{
+	Type t = h->getType();
+	if (NUMBER_NODE == t) return Handle(h);
+
+	if (not classserver().isA(t, FREE_LINK))
+	{
+		throw InvalidParamException(TRACE_INFO,
+			"Expecteing a FreeLink (PlusLink, TimesLink, etc");
+	}
+
+	FreeLinkPtr fff(FreeLinkCast(h));
+	Handle hr(fff->reduce());
+
+	if (DELETE_LINK == hr->getType())
+	{
+		for (const Handle& ho : LinkCast(hr)->getOutgoingSet())
+			atomspace->removeAtom(ho, true);
+		return Handle::UNDEFINED;
+	}
+
+	return atomspace->addAtom(hr);
+}
 
 // ========================================================
 
@@ -28,15 +84,14 @@ ExecSCM::ExecSCM(void) :
 /// Thus, all the definitions below happen in that module.
 void ExecSCM::init(void)
 {
-	// Run implication, assuming that the argument is a handle to
-	// an BindLink containing variables and an ImplicationLink.
-	_binders.push_back(new FunctionWrap(bindlink, "cog-bind", "exec"));
+	_binders.push_back(new FunctionWrap(ss_execute,
+	                    "cog-execute!", "exec"));
 
-	// Identical to do_bindlink above, except that it only returns the
-	// first match.
-	_binders.push_back(new FunctionWrap(single_bindlink,
-	                   "cog-bind-single", "exec"));
+	_binders.push_back(new FunctionWrap(ss_evaluate,
+	                   "cog-evaluate!", "exec"));
 
+	_binders.push_back(new FunctionWrap(ss_reduce,
+	                   "cog-reduce!", "exec"));
 }
 
 ExecSCM::~ExecSCM()
