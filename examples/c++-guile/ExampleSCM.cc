@@ -78,4 +78,5 @@ ExampleSCM::~ExampleSCM()
 void opencog_example_init(void)
 {
 	static ExampleSCM example;
+	example.module_init();
 }

@@ -44,10 +44,10 @@ TruthValuePtr FunctionWrap::prapper(Handle h)
 
 ModuleWrap::ModuleWrap(const char* m) :
 	_modname(m)
+{}
+
+void ModuleWrap::module_init(void)
 {
-	static bool is_init = false;
-	if (is_init) return;
-	is_init = true;
 	scm_with_guile(init_in_guile, this);
 }
 

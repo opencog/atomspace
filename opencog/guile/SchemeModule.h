@@ -43,6 +43,7 @@ class ModuleWrap
 		virtual void init(void) = 0;
 	public:
 		ModuleWrap(const char*);
+		void module_init(void);
 		virtual ~ModuleWrap();
 };
 

@@ -106,4 +106,5 @@ ExecSCM::~ExecSCM()
 void opencog_exec_init(void)
 {
 	static ExecSCM exy;
+	exy.module_init();
 }
