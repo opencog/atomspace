@@ -1,0 +1,25 @@
+name:                opencog-atomspace
+version:             0.1.0.0
+synopsis:            -
+homepage:            github.com/opencog/atomspace/tree/master/opencog/haskell
+license:             OtherLicense
+license-file:        LICENSE
+author:              Marcos Pividori 
+maintainer:          -
+category:            Artificial Intelligence
+build-type:          Simple
+cabal-version:       >=1.8
+
+library
+  exposed-modules:   OpenCog.AtomSpace.Api
+                   , OpenCog.AtomSpace.Types
+
+  build-depends:     base         >=4.5
+                   , transformers >=0.4
+                   , data-default >=0.5
+
+  extra-libraries:   atomspace_wrapper
+                   , stdc++
+
+  extra-lib-dirs:    /usr/local/lib/opencog
+  include-dirs:      /usr/local/include/opencog
