@@ -32,6 +32,7 @@
 #include <opencog/util/Config.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/execution/ExecSCM.h>
 #include <opencog/atoms/NumberNode.h>
 
 using namespace opencog;
@@ -46,19 +47,12 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 
 	SCMExecutionOutputUTest(void)
 	{
-		try
-		{
-			config().load("opencog-test.conf");
-		}
-		catch (RuntimeException &e)
-		{
-			std::cerr << e.getMessage() << std::endl;
-		}
-		logger().setFilename(config()["LOG_FILE"]);
-		logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
-		logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+		logger().setLevel(Logger::DEBUG);
+		logger().setPrintToStdoutFlag(true);
 
-		config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm");
+		config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
+		                            "opencog/scm/opencog/exec.scm");
+		opencog_exec_init();
 	}
 
 	~SCMExecutionOutputUTest()

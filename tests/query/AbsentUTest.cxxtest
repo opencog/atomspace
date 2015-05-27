@@ -74,6 +74,7 @@ void AbsentUTest::setUp(void)
 		"opencog/atomspace/core_types.scm, "
 		"tests/query/test_types.scm, "
 		"opencog/scm/utilities.scm,"
+		"opencog/scm/opencog/exec.scm, "
 		"opencog/scm/opencog/query.scm");
 
 	load_scm_files_from_config(*as);

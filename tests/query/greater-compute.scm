@@ -5,6 +5,9 @@
 ; of programs to occur during the proccess
 ;
 
+(use-modules (opencog))
+(use-modules (opencog exec))
+
 ; Raw data to populate the search space
 ;
 ; TRC rower Ken Gates set a world record in 2015--
