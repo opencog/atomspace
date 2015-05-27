@@ -1,5 +1,5 @@
 ;
-; OpenCog Execuation module
+; OpenCog Execution module
 ;
 
 (define-module (opencog exec))

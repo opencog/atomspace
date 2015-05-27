@@ -1,7 +1,7 @@
 /*
  * ExecSCM.cc
  *
- * Guile Scheme bindings for the pattern matcher.
+ * Guile Scheme bindings for the execution links
  * Copyright (c) 2008, 2014, 2015 Linas Vepstas <linas@linas.org>
  */
 

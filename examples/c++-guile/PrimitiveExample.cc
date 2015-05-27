@@ -57,7 +57,7 @@ int main ()
 	// Need to access the atomspace to get it to initialize itself.
 	AtomSpace* as = new AtomSpace();
 
-	// Do this early, so that the scheme system is initialized.
+	// Do this early, so that guile is initialized.
 	SchemeEval* eval = new SchemeEval(as);
 
 	printf("\nInfo: Start creating a scheme call into C++\n");
