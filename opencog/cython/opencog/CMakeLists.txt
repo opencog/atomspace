@@ -93,8 +93,9 @@ SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
 # The cogserver needs the atomspace pxd file to get the Handle, Atom and
 # AtomSpace defintions.
 INSTALL (FILES
+	__init__.py
 	atomspace.pxd
-   DESTINATION "include/${PROJECT_NAME}/cython/opencog"
+	DESTINATION "include/${PROJECT_NAME}/cython/opencog"
 )
 
 ############################## type constructors #####################
