@@ -31,45 +31,58 @@ namespace opencog
 
 class Target
 {
+	friend class TargetSet;
+
 public:
-	Target() {}
-	Target(const Handle& h);
-	~Target();
+	~Target() {}
 
 	// Comparison
 	bool operator==(const Target& t) const
 	{
-		return _htarget == t._htarget;
+		return _htarget_internal == t._htarget_internal;
 	}
 	bool operator<(const Target& t) const
 	{
-		return _htarget < t._htarget;
+		return _htarget_internal < t._htarget_internal;
 	}
 
-	void add_rule(const Rule& r) { _applied_rules.push_back(r); }
+	void store_step(const Rule& r, const HandleSeq& premises);
+	uint rule_count(const Rule& r);
 
-	Handle get_handle() const { return _htarget; }
+	void increment_selection_count() { _selection_count++; }
+
+	Handle get_handle() const { return _htarget_external; }
 	float get_weight() { return 1.0f; }
 
+	// XXX TODO stores the rule applied, and its resulting targets
+	// and the change to its own TV
+	// actually, write the above information to a inference atom
+
 private:
-	Handle _htarget;
-	std::list<Rule> _applied_rules;
+	Target(AtomSpace* as, const Handle& h);
+
+	Handle _htarget_external;
+	Handle _htarget_internal;
+
+	uint _selection_count;
+
+	AtomSpace* _as;
 };
 
 
-class TargetsSet
+class TargetSet
 {
 public:
-	TargetsSet();
-	~TargetsSet();
+	TargetSet() {}
+	~TargetSet() {}
 
-	void insert(Target& t);
 	void emplace(Handle& h);
 	uint size();
 	Target& select();
 
 private:
 	std::unordered_map<Handle, Target> _targets_map;
+	AtomSpace _history_space;
 };
 
 }

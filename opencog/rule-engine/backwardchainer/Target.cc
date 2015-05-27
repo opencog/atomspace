@@ -23,51 +23,77 @@
 
 #include <opencog/util/random.h>
 
+#include <opencog/atomutils/AtomUtils.h>
+
 #include "Target.h"
 
 using namespace opencog;
 
-Target::Target(const Handle& h) : _htarget(h)
+Target::Target(AtomSpace* as, const Handle& h)
 {
+	_as = as;
+	_htarget_external = h;
+	_htarget_internal = _as->addAtom(h);
+	_selection_count = 0;
 }
 
-Target::~Target()
+void Target::store_step(const Rule& r, const HandleSeq& premises)
 {
+	// XXX TODO think of a good structure for storing the inference step
+	// XXX TODO if the rule was actually applied, store the change to the TV?
+	_as->addLink(REFERENCE_LINK,
+	             _htarget_internal,
+	             _as->addNode(CONCEPT_NODE, r.get_name()),
+	             _as->addLink(LIST_LINK, premises));
+}
+
+uint Target::rule_count(const Rule& r)
+{
+	Handle hname = _as->addNode(CONCEPT_NODE, r.get_name());
+	HandleSeq q = getNeighbors(_htarget_internal, false, true, REFERENCE_LINK, false);
+
+	return std::count(q.begin(), q.end(), hname);
 }
 
 
-TargetsSet::TargetsSet()
+//==================================================================
+
+
+TargetSet::TargetSet()
 {
+
 }
 
-TargetsSet::~TargetsSet()
+TargetSet::~TargetSet()
 {
+
 }
 
-void TargetsSet::insert(Target& t)
-{
-	// check if a target with same handle already exist, and if so, do nothing
-	if (_targets_map.count(t.get_handle()) == 1)
-		return;
-
-	_targets_map[t.get_handle()] = t;
-}
-
-void TargetsSet::emplace(Handle& h)
+void TargetSet::emplace(Handle& h)
 {
 	if (_targets_map.count(h) == 1)
 		return;
 
-	_targets_map.emplace(h, h);
+	_targets_map.emplace(h, &_history_space, h);
 }
 
-uint TargetsSet::size()
+uint TargetSet::size()
 {
 	return _targets_map.size();
 }
 
-Target& TargetsSet::select()
+/**
+ * Select a Target from the set using some fitness criteria.
+ *
+ * @return a reference to the selected Target
+ */
+Target& TargetSet::select()
 {
+	// XXX TODO do proper target selection here using some fitness function
 	auto& p = rand_element(_targets_map);
-	return _targets_map[p.first];
+
+	Target& t = _targets_map[p.first];
+	t.increment_selection_count();
+
+	return t;
 }
