@@ -26,6 +26,8 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 
+#include <opencog/atoms/bind/BindLink.h>
+
 #include "Rule.h"
 
 using namespace opencog;
@@ -139,7 +141,7 @@ HandleSeq Rule::get_implicand_seq()
 	if (rule_handle_ == Handle::UNDEFINED)
 		return HandleSeq();
 
-	Handle implicand = BindLinkCast(rule_handle_)->get_implicand;
+	Handle implicand = BindLinkCast(rule_handle_)->get_implicand();
 
 	std::queue<Handle> pre_output;
 	HandleSeq final_output;
