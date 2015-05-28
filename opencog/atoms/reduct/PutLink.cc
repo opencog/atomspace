@@ -22,7 +22,6 @@
 
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include "PutLink.h"
 
 using namespace opencog;
