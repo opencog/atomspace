@@ -22,7 +22,6 @@
 
 #include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/DefineLink.h>
@@ -42,17 +41,8 @@ private:
 public:
 	BetaRedexUTest(void)
 	{
-		try
-		{
-			 config().load("opencog-test.conf");
-		}
-		catch (RuntimeException &e)
-		{
-			std::cerr << e.getMessage() << std::endl;
-		}
-		logger().setFilename(config()["LOG_FILE"]);
-		logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
-		logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+		logger().setLevel(Logger::DEBUG);
+		logger().setPrintToStdoutFlag(true);
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);

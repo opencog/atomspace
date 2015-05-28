@@ -85,7 +85,7 @@ class PersistUTest :  public CxxTest::TestSuite
 				"want it or need it, just ignore this test failure.\n"
 				"Otherwise, please be sure to read opencong/persist/sql/README,\n"
 				"and create/configure the SQL database as described there.\n"
-				"Next, edit lib/opencog-test.conf appropriately, so as\n"
+				"Next, edit lib/atomspace-test.conf appropriately, so as\n"
 				"to indicate the location of your database. If this is\n"
 				"done correctly, then this test will pass.\n");
 			exit(1);
@@ -102,15 +102,14 @@ PersistUTest:: PersistUTest(void)
 {
 	try
 	{
-		config().load("opencog-test.conf");
+		config().load("atomspace-test.conf");
 	}
 	catch (RuntimeException &e)
 	{
 		std::cerr << e.getMessage() << std::endl;
 	}
-	logger().setFilename(config()["LOG_FILE"]);
-	logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
-	logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+	logger().setLevel(Logger::DEBUG);
+	logger().setPrintToStdoutFlag(true);
 
 	try {
 		// Get the database logins & etc from the config file.

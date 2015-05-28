@@ -3,11 +3,117 @@ Execution and Evaluation Support
 ================================
 
 The code here implements a very crude form of execution support for
-the AtomSpace. Its crude, because its mostly simple, straight-forward,
-and painfully slow and inefficient.
+the AtomSpace. Its crude and painfully slow and inefficient.
+Unfortunately, it is no longer simple, straight-forward.
 
-First, some reasons its slow, and ways to speed that up. Second,
-some more abstract thoughts about language design.
+Vocabulary
+----------
+Some vobabulary:
+
+* "Substitution" means the substitution of values for thier place holders.
+  There are several variants:
+  -- The substitution of grounded values for variables (done by look-up
+     in a map from variables to values)
+  -- The substitution of a function by the result of executing the
+     function.
+  -- The beta reduction performed by PutLink
+
+* "Execution" means executing a function that returns an atom as it's
+  return value. There are several variants:
+  -- Clear-box functions, such as PlusLink, which have an execute method
+     that must be called.
+  -- Black-box functions, such as ExecutionOutputLink, which require
+     scheme or python to be called.
+
+* "Evaluation" means evaluating a function that returns a truth value as
+  it's return value. There are black-box and clear-box variants of
+  these.
+
+The distinction between execution and evaluation is artificial, here:
+at some abstract level, its the same thing; we just use the word
+'evaluation' only when talking about functions that return TV's, and
+'execution' when talking about functions that return atoms.
+
+
+Design complexity
+-----------------
+The design has gotten complex due to mutiple reasons.  But first,
+Here is why execution is complex:
+
+* Execution must be done recursively, starting at the leafs.
+  That is, must (but not all) functions require the function
+  arguments to be in thier final reduced 'value' form, before
+  the function can be executed.  That is, execution does NOT
+  commute with substitution.
+
+* Substitution has to be done recursviely, but with care: Not all
+  variables are free; not all variables are bound. Thus, for example,
+  the PutLink has to parts: all variables in the body of the PutLink
+  are bound, but all variables in the value-list are free.  Thus,
+  if there is variable substitution outside of PutLink, only the
+  free variables can be subsituted!
+
+* The beta reduction of PutLink does commute with execution.
+  That is, execution can be performed either before or after
+  beta reduction. It is easier to handle execution of e.g.
+  delete links if execution is done before beta reduction.
+
+* The exeuction of black-box links requires that the argument atoms
+  be placed into the atomspace, first. This is for two reasons:
+  -- Both python and guile rely on the atomspace to find atoms.
+     If the argument to a scheme/python function is not in the
+     atomspace, bad things will probably happen.
+  -- Black-box functions potentially need to examine the TV on the
+     atom.  It is impossible to get an accurate TV value for an
+     atom, unless that atom has been fished out of the atomspace.
+
+* The execution of the Deletelink cannot be done by itself, i.e.
+  by it's own execute() method. This is because fully grounded
+  (fully closed) DeleteLinks are forbidden, and cannot be inserted
+  into the atomspace: thus, deletion needs to happen outside of
+  its own execute() method.  This could be avoided if the atomspace
+  told the atom when it was being inserted, but, right now, the
+  atomspace does not send an "insert" message to the atoms being
+  inserted.
+
+
+Garbage Collection
+------------------
+There's an implementation flaw that is hard to fix, right now, but
+should be fixed.  When black-box links are encountered, thier
+arguments are placed into the atomspace.  This is required for the
+two reasons given above: TV values need to be fished out of the
+atomspace, and also, python/scheme can't work with atoms that are not
+in the atomspace.
+
+What this means is that execution/evaluation leaves the atomspace
+littered with partial results, and no effective way to clean them up
+or garbage collect them.  Perhaps attention allocation can eventually do
+this, but that is a very distant, abstract mechanism. Something more
+immediate, to get the correct TV's, and have scheme/python not fail,
+would be better.
+
+
+Clear-box performance
+---------------------
+The execution/evaluation of clear-box links is not as good as it could
+be.  Here's things that could be done:
+
+1) If a clear-box link has no black boxes under it, and also no free
+variables, and also does not depend on the TV, then the result of
+execution/evaluation could be cached. i.e. multiple executions won't
+change things.
+
+2) In various cases, the Instatiator::execute() method can be called
+twice: once to do the actual work, and a second time on the final
+values, where it should return trivially.  This is hard to avoid, as
+there are other call scenarios where this does not happen.
+
+
+Black-box performance
+---------------------
+Some reasons why black-box execution/evaluation is slow, and ways to
+speed that up.
 
 The code is slow because function names are currently stored as strings.
 Thus, each time execution needs to be done, the string needs to be
@@ -35,6 +141,9 @@ calls such as this:
 SCM AtomSpace::getSCM(Handle);
 PyObject* AtomSpace::getPy(Handle);
 ```
+
+Map look-ups are slower than direct-access in an atom...
+
 
 Non-string values
 -----------------
@@ -76,7 +185,7 @@ Side effects
 ------------
 There is also another theoretical issue: the current design assumes
 that ExecutionOutputLink can have side effects, and thus, it needs
-to be run ever time that it is encountered.  This is a poor choice
+to be run every time that it is encountered.  This is a poor choice
 for good performance; we need to define a side-effect-free execution
 link, and we need to define a monad when the side effects are needed.
 

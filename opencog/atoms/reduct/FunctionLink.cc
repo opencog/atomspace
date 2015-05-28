@@ -25,6 +25,7 @@
 #include "FunctionLink.h"
 
 #include "AssignLink.h"
+#include "DeleteLink.h"
 #include "PlusLink.h"
 #include "TimesLink.h"
 
@@ -71,7 +72,8 @@ FunctionLink::FunctionLink(Link& l)
 
 Handle FunctionLink::execute(AtomSpace* as) const
 {
-	throw RuntimeException(TRACE_INFO, "Not executable!");
+	throw RuntimeException(TRACE_INFO, "Not executable: %s\n",
+		classserver().getTypeName(getType()).c_str());
 }
 
 Handle FunctionLink::do_execute(AtomSpace* as, const Handle& h)
@@ -100,6 +102,9 @@ Handle FunctionLink::factory(Type t, const HandleSeq& seq)
 {
 	if (ASSIGN_LINK == t)
 		return Handle(createAssignLink(seq));
+
+	if (DELETE_LINK == t)
+		return Handle(createDeleteLink(seq));
 
 	if (INSERT_LINK == t)
 		return Handle(createInsertLink(seq));

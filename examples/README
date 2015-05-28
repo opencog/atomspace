@@ -1,6 +1,9 @@
 This directory contains various examples that use the AtomSpace
 
+c++-guile       - Example of how to create a guile wrapper for C++ code.
+
 guile           - Guile (scheme) usage examples
+
 python          - Python usage examples
 
 pattern-matcher - Provides example scheme code that defines a search

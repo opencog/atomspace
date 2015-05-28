@@ -24,6 +24,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/ExecSCM.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -38,20 +39,13 @@ private:
 public:
 	ReductUTest(void)
 	{
-		try
-		{
-			 config().load("opencog-test.conf");
-		}
-		catch (RuntimeException &e)
-		{
-			std::cerr << e.getMessage() << std::endl;
-		}
-		logger().setFilename(config()["LOG_FILE"]);
-		logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
-		logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+		logger().setLevel(Logger::DEBUG);
+		logger().setPrintToStdoutFlag(true);
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
+
+		opencog_exec_init();
 	}
 
 	~ReductUTest()
@@ -79,6 +73,7 @@ void ReductUTest::setUp(void)
 	as->clear();
 	config().set("SCM_PRELOAD",
 		"opencog/atomspace/core_types.scm, "
+		"opencog/scm/opencog/exec.scm, "
 		"opencog/scm/utilities.scm");
 
 	load_scm_files_from_config(*as);

@@ -93,7 +93,7 @@ Type ClassServer::addType(const Type parent, const std::string& name)
     name2CodeMap[name]           = type;
     code2NameMap[type]           = &(name2CodeMap.find(name)->first);
 
-    // unlock mutex before sending signal which could call 
+    // unlock mutex before sending signal which could call
     l.unlock();
 
     // Emit add type signal.
@@ -162,3 +162,10 @@ ClassServer& opencog::classserver(ClassServerFactory* factory)
     return *instance;
 }
 
+// This runs when the shared lib is loaded.  We have to make
+// sure that all of the core types are initialized before
+// anything else happens, as otherwise weird symptoms manifest.
+static __attribute__ ((constructor)) void init(void)
+{
+	classserver();
+}

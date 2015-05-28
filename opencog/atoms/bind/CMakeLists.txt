@@ -6,7 +6,6 @@ ADD_LIBRARY (lambda SHARED
 	BetaRedex.cc
 	BindLink.cc
 	DefineLink.cc
-	DeleteLink.cc
 	PatternLink.cc
 	PatternUtils.cc
 	ScopeLink.cc
@@ -18,6 +17,7 @@ ADD_DEPENDENCIES(lambda opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(lambda
 	atomutils
+	atomcore
 	${COGUTIL_LIBRARY}
 )
 

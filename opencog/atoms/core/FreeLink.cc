@@ -49,6 +49,9 @@ FreeLink::FreeLink(Type t, const HandleSeq& oset,
 {
 	if (not classserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
+
+	// Derived classes have thier own init routines.
+	if (FREE_LINK != t) return;
 	init();
 }
 
@@ -59,6 +62,9 @@ FreeLink::FreeLink(Type t, const Handle& a,
 {
 	if (not classserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
+
+	// Derived classes have thier own init routines.
+	if (FREE_LINK != t) return;
 	init();
 }
 
@@ -69,6 +75,9 @@ FreeLink::FreeLink(Type t, const Handle& a, const Handle& b,
 {
 	if (not classserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
+
+	// Derived classes have thier own init routines.
+	if (FREE_LINK != t) return;
 	init();
 }
 
@@ -78,9 +87,13 @@ FreeLink::FreeLink(Link& l)
 	Type tscope = l.getType();
 	if (not classserver().isA(tscope, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
+
+	// Derived classes have thier own init routines.
+	if (FREE_LINK != tscope) return;
 	init();
 }
 
+/* ================================================================= */
 /// Create an ordered set of the free variables in this link.
 ///
 /// By "ordered set" it is meant: a list of variables, in traversal
@@ -91,10 +104,12 @@ void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 {
 	for (const Handle& h : oset)
 	{
-		if (VARIABLE_NODE == h->getType() and
+		Type t = h->getType();
+		if (QUOTE_LINK == t) continue;
+		if (VARIABLE_NODE == t and
 		    0 == varset.count(h))
 		{
-			_free_vars.push_back(h);
+			_varseq.push_back(h);
 			varset.insert(h);
 		}
 		LinkPtr lll(LinkCast(h));
@@ -104,10 +119,28 @@ void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 	}
 }
 
+/* ================================================================= */
+/**
+ * Build the index from variable name, to its ordinal number.
+ * The index is needed for variable substitution, i.e. for the
+ * reduce() method.  The specific sequence order of the variables
+ * is essential for making substitution work.
+ */
+void FreeLink::build_index(void)
+{
+	if (0 < _index.size()) return;
+	size_t sz = _varseq.size();
+	for (size_t i=0; i<sz; i++)
+		_index.insert(std::pair<Handle, unsigned int>(_varseq[i], i));
+}
+
+/* ================================================================= */
+
 void FreeLink::init(void)
 {
 	std::set<Handle> varset;
 	find_vars(varset, _outgoing);
+	build_index();
 }
 
 Handle FreeLink::reduce(void)

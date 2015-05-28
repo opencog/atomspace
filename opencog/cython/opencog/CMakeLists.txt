@@ -79,7 +79,10 @@ ADD_DEPENDENCIES(atomspace_cython pln_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace_cython
 	atomspace
+	clearbox
+	atomutils
 	atomspaceutils
+	atomcore
 	${COGUTIL_LIBRARY}
 	${PYTHON_LIBRARIES}
 	${Boost_THREAD_LIBRARY}
@@ -131,6 +134,7 @@ ADD_LIBRARY(utilities_cython SHARED
 
 TARGET_LINK_LIBRARIES(utilities_cython
 	PythonEval
+	clearbox
 	atomspace
 	type_constructors
 	${COGUTIL_LIBRARY}

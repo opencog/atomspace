@@ -13,6 +13,7 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/cython/pythoneval.conf
 
 TARGET_LINK_LIBRARIES(PythonEvalUTest
 	atomspace
+	clearbox
 	smob
 	PythonEval
 	atomspace_cython
@@ -28,10 +29,10 @@ SET_TESTS_PROPERTIES(PythonEvalUTest
 ADD_CXXTEST(PythonUtilitiesUTest)
 
 TARGET_LINK_LIBRARIES(PythonUtilitiesUTest
-	atomspace
 	PythonEval
 	utilities_cython
 	atomspace_cython
+	atomspace
 	${COGUTIL_LIBRARY}
 )
 SET_TESTS_PROPERTIES(PythonUtilitiesUTest

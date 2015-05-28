@@ -2,11 +2,12 @@
 LINK_LIBRARIES(
 	atomutils
 	atomspace
+	clearbox
 )
 
 IF(HAVE_GUILE)
 	ADD_CXXTEST(AtomTableUTest HandleEntry.cc)
-	TARGET_LINK_LIBRARIES(AtomTableUTest smob)
+	TARGET_LINK_LIBRARIES(AtomTableUTest smob clearbox)
 ENDIF(HAVE_GUILE)
 
 ADD_CXXTEST(ClassServerUTest)
@@ -25,3 +26,6 @@ ADD_CXXTEST(UseCountUTest)
 ADD_CXXTEST(MultiSpaceUTest)
 ADD_CXXTEST(RemoveUTest)
 ADD_CXXTEST(HandleMapUTest)
+
+TARGET_LINK_LIBRARIES(IndefiniteTruthValueUTest ${GSL_LIBRARIES})
+TARGET_LINK_LIBRARIES(TVMergeUTest ${GSL_LIBRARIES})
