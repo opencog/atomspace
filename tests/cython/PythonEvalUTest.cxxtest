@@ -262,7 +262,9 @@ public:
         // Initialize Python.
         global_python_initialize();
 
-        config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm");
+        config().set("SCM_PRELOAD",
+                     "opencog/atomspace/core_types.scm, "
+                     "opencog/scm/opencog/exec.scm");
         AtomSpace *as = new AtomSpace();
         PythonEval::create_singleton_instance(as);
         PythonEval* python = &PythonEval::instance();
@@ -284,8 +286,10 @@ public:
         // Create a scheme evaluator to trigger cog-evaluate and cog-execute.
         SchemeEval* scheme = new SchemeEval(as);
 
+        scheme->eval("(use-modules (opencog exec))");
+
         // Test execute -> PythonEval::apply
-        scheme->eval(
+        scheme->eval_h(
                 "(cog-execute! "
                 "   (ExecutionOutputLink"
                 "       (GroundedSchemaNode \"py: add_link\")"
@@ -301,7 +305,7 @@ public:
         TSM_ASSERT("Failed cog-execute!", !error);
 
         // Test cog-evaluate -> PythonEval::apply_tv
-        scheme->eval(
+        scheme->eval_tv(
                 "(cog-evaluate! "
                 "   (EvaluationLink"
                 "       (GroundedPredicateNode \"py: return_truth\")"
