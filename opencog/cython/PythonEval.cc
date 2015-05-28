@@ -424,8 +424,10 @@ PythonEval& PythonEval::instance(AtomSpace* atomspace)
         // Someone is trying to initialize the Python interpreter on a
         // different AtomSpace.  Because of the singleton design of the
         // the CosgServer+AtomSpace, there is no easy way to support this...
-        throw RuntimeException(TRACE_INFO, "Trying to re-initialize"
-                " python interpreter with different AtomSpace ptr!");
+        throw RuntimeException(TRACE_INFO,
+            "Trying to re-initialize python interpreter with different\n"
+            "AtomSpace ptr! Current ptr=%p New ptr=%p\n",
+            singletonInstance->_atomspace, atomspace);
     }
     return *singletonInstance;
 }
