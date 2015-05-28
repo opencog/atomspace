@@ -39,24 +39,22 @@
 ;;; Two clauses; they both connected with a common variable.
 (define (basic)
 	(BindLink
-		(ImplicationLink
-			(AndLink
+		(AndLink
+			(MemberLink
+				(VariableNode "$x")
+				(ConceptNode "ways and means")
+			)
+			(ChoiceLink
 				(MemberLink
 					(VariableNode "$x")
-					(ConceptNode "ways and means")
+					(ConceptNode "Senator")
 				)
-				(ChoiceLink
-					(MemberLink
-						(VariableNode "$x")
-						(ConceptNode "Senator")
-					)
-					(MemberLink
-						(VariableNode "$x")
-						(ConceptNode "Representative")
-					)
+				(MemberLink
+					(VariableNode "$x")
+					(ConceptNode "Representative")
 				)
 			)
-			(VariableNode "$x")
 		)
+		(VariableNode "$x")
 	)
 )

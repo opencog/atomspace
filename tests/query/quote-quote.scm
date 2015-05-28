@@ -64,16 +64,14 @@
 (define bindy
 	(BindLink
 		(VariableNode "$var-a")
-		(ImplicationLink
-			(EvaluationLink
-				(PredicateNode "similar")
-				(ListLink
-					(QuoteLink (QuoteLink (VariableNode "$var-a")))
-					(VariableNode "$var-a")
-				)
+		(EvaluationLink
+			(PredicateNode "similar")
+			(ListLink
+				(QuoteLink (QuoteLink (VariableNode "$var-a")))
+				(VariableNode "$var-a")
 			)
-			(VariableNode "$var-a")
 		)
+		(VariableNode "$var-a")
 	)
 )
 

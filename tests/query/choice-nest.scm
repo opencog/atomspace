@@ -132,81 +132,77 @@
 ;;; Nested clauses; all connected with a common variable.
 (define (nest)
 	(BindLink
-		(ImplicationLink
-			(AndLink
-				(MemberLink
-					(VariableNode "$x")
-					(ConceptNode "ways and means")
-				)
-				(ListLink
-					(ChoiceLink
-						(MemberLink
-							(VariableNode "$x")
-							(ConceptNode "Senator")
-						)
-						(MemberLink
-							(VariableNode "$x")
-							(ConceptNode "Representative")
-						)
-						(EvaluationLink
-							(PredicateNode "involved")
-							(ChoiceLink
-								(ListLink
-									(VariableNode "$x")
-									(ConceptNode "Business")
-								)
-								(ListLink
-									(VariableNode "$x")
-									(ConceptNode "Industry")
-								)
-								(ListLink
-									(VariableNode "$x")
-									(ConceptNode "Banking")
-								)
+		(AndLink
+			(MemberLink
+				(VariableNode "$x")
+				(ConceptNode "ways and means")
+			)
+			(ListLink
+				(ChoiceLink
+					(MemberLink
+						(VariableNode "$x")
+						(ConceptNode "Senator")
+					)
+					(MemberLink
+						(VariableNode "$x")
+						(ConceptNode "Representative")
+					)
+					(EvaluationLink
+						(PredicateNode "involved")
+						(ChoiceLink
+							(ListLink
+								(VariableNode "$x")
+								(ConceptNode "Business")
+							)
+							(ListLink
+								(VariableNode "$x")
+								(ConceptNode "Industry")
+							)
+							(ListLink
+								(VariableNode "$x")
+								(ConceptNode "Banking")
 							)
 						)
 					)
 				)
 			)
-			(VariableNode "$x")
 		)
+		(VariableNode "$x")
 	)
 )
 
 ;; Simple nesting -- Or within Or 
 (define (nest-bad)
 	(BindLink
-		(ImplicationLink
-			(AndLink
-				(MemberLink
-					(VariableNode "$x")
-					(ConceptNode "ways and means")
-				)
-				(ListLink
+		(AndLink
+			(MemberLink
+				(VariableNode "$x")
+				(ConceptNode "ways and means")
+			)
+			(ListLink
+				(ChoiceLink
+					(MemberLink
+						(VariableNode "$x")
+						(ConceptNode "Senator")
+					)
+					(MemberLink
+						(VariableNode "$x")
+						(ConceptNode "Representative")
+					)
+					;;  Note this Or within an Or
 					(ChoiceLink
 						(MemberLink
 							(VariableNode "$x")
-							(ConceptNode "Senator")
+							(ConceptNode "Page")
 						)
 						(MemberLink
 							(VariableNode "$x")
-							(ConceptNode "Representative")
-						)
-						;;  Note this Or within an Or
-						(ChoiceLink
-							(MemberLink
-								(VariableNode "$x")
-								(ConceptNode "Page")
-							)
-							(MemberLink
-								(VariableNode "$x")
-								(ConceptNode "Secretary")
-							)
+							(ConceptNode "Secretary")
 						)
 					)
 				)
 			)
-			(VariableNode "$x")
 		)
+		(VariableNode "$x")
 	)
 )

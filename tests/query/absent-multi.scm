@@ -37,7 +37,7 @@
 
 ; Make the agents go away.
 (define discredit-mulder
-	(BindLink (ImplicationLink mulder (DeleteLink mulder))))
+	(BindLink mulder (DeleteLink mulder)))
 
 (define discredit-scully
 	(BindLink (ImplicationLink scully (DeleteLink scully))))

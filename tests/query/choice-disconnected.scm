@@ -33,7 +33,30 @@
 ;;; be made.  Should find two of the three trees given above.
 (define (top-disco)
 	(BindLink
-		(ImplicationLink
+		(ChoiceLink
+			(EvaluationLink
+				(PredicateNode "this way")
+				(ListLink
+					(VariableNode "$x")
+					(ConceptNode "thing two")
+				)
+			)
+			(EvaluationLink
+				(PredicateNode "that way")
+				(ListLink
+					(ConceptNode "thing one")
+					(VariableNode "$x")
+				)
+			)
+		)
+		(VariableNode "$x")
+	)
+)
+
+;;; Same as above, but the tope-level ChoiceLink is wrapped.
+(define (wrapped-disco)
+	(BindLink
+		(AndLink
 			(ChoiceLink
 				(EvaluationLink
 					(PredicateNode "this way")
@@ -50,34 +73,7 @@
 					)
 				)
 			)
-			(VariableNode "$x")
 		)
-	)
-)
-
-;;; Same as above, but the tope-level ChoiceLink is wrapped.
-(define (wrapped-disco)
-	(BindLink
-		(ImplicationLink
-			(AndLink
-				(ChoiceLink
-					(EvaluationLink
-						(PredicateNode "this way")
-						(ListLink
-							(VariableNode "$x")
-							(ConceptNode "thing two")
-						)
-					)
-					(EvaluationLink
-						(PredicateNode "that way")
-						(ListLink
-							(ConceptNode "thing one")
-							(VariableNode "$x")
-						)
-					)
-				)
-			)
-			(VariableNode "$x")
-		)
+		(VariableNode "$x")
 	)
 )

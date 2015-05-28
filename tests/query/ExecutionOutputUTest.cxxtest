@@ -233,25 +233,21 @@ void ExecutionOutputUTest::test_varsub(void)
 
 	Handle situ =
 	al(BIND_LINK,
-		al(IMPLICATION_LINK,
-			al(CONTEXT_LINK,
-				an(CONCEPT_NODE, "situation"),
-				an(VARIABLE_NODE, "$action")
-			),
-			an(VARIABLE_NODE, "$action")
-		)
+	   al(CONTEXT_LINK,
+	      an(CONCEPT_NODE, "situation"),
+	      an(VARIABLE_NODE, "$action")
+	      ),
+	   an(VARIABLE_NODE, "$action")
 	);
 	BindLinkPtr situation(createBindLink(*LinkCast(situ)));
 
 	Handle pred =
 	al(BIND_LINK,
-		al(IMPLICATION_LINK,
-			al(CONTEXT_LINK,
-				an(CONCEPT_NODE, "predicament"),
-				an(VARIABLE_NODE, "$action")
-			),
-			an(VARIABLE_NODE, "$action")
-		)
+	   al(CONTEXT_LINK,
+	      an(CONCEPT_NODE, "predicament"),
+	      an(VARIABLE_NODE, "$action")
+	      ),
+	   an(VARIABLE_NODE, "$action")
 	);
 	BindLinkPtr predicament(createBindLink(*LinkCast(pred)));
 

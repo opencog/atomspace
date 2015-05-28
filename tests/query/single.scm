@@ -21,8 +21,7 @@
     (BindLink
         (VariableList
             (VariableNode "$X"))
-        (ImplicationLink
-            (InheritanceLink
-                (VariableNode "$X")
-                (ConceptNode "man"))
-            (VariableNode "$X"))))
+        (InheritanceLink
+            (VariableNode "$X")
+            (ConceptNode "man"))
+        (VariableNode "$X")))

@@ -28,21 +28,19 @@
 			(VariableNode "$var_one")
 			(VariableNode "$var_two")
 		)
-		(ImplicationLink
-			;; body
-			(SimilarityLink (stv 1.0 1.0)
-				(VariableNode "$var_one")
-				(VariableNode "$var_two")
-				(ExecutionOutputLink (stv 1.0 1.0)
-					(GroundedSchemaNode "ActivationModulatorUpdater")
-					(ListLink)
-				)
+		;; body
+		(SimilarityLink (stv 1.0 1.0)
+			(VariableNode "$var_one")
+			(VariableNode "$var_two")
+			(ExecutionOutputLink (stv 1.0 1.0)
+				(GroundedSchemaNode "ActivationModulatorUpdater")
+				(ListLink)
 			)
-			;; implicand -- result
-			(ListLink
-				(VariableNode "$var_one")
-				(VariableNode "$var_two")
-			)
+		)
+		;; implicand -- result
+		(ListLink
+			(VariableNode "$var_one")
+			(VariableNode "$var_two")
 		)
 	)
 )
@@ -58,21 +56,19 @@
 			(VariableNode "$var_number")
 			(VariableNode "$var_schema")
 		)
-		(ImplicationLink
-			;; body
-			(SimilarityLink (stv 1.0 1.0)
+		;; body
+		(SimilarityLink (stv 1.0 1.0)
+			(VariableNode "$var_schema")
+			(VariableNode "$var_number")
+			(ExecutionOutputLink (stv 1.0 1.0)
 				(VariableNode "$var_schema")
-				(VariableNode "$var_number")
-				(ExecutionOutputLink (stv 1.0 1.0)
-					(VariableNode "$var_schema")
-					(ListLink)
-				)
+				(ListLink)
 			)
-			;; implicand -- result
-			(ListLink
-				(VariableNode "$var_number")
-				(VariableNode "$var_schema")
-			)
+		)
+		;; implicand -- result
+		(ListLink
+			(VariableNode "$var_number")
+			(VariableNode "$var_schema")
 		)
 	)
 )
@@ -87,21 +83,19 @@
 			(VariableNode "$vbr_schema")
 			(VariableNode "$vbr_number")
 		)
-		(ImplicationLink
-			;; body
-			(SimilarityLink (stv 1.0 1.0)
+		;; body
+		(SimilarityLink (stv 1.0 1.0)
+			(VariableNode "$vbr_schema")
+			(VariableNode "$vbr_number")
+			(ExecutionOutputLink (stv 1.0 1.0)
 				(VariableNode "$vbr_schema")
-				(VariableNode "$vbr_number")
-				(ExecutionOutputLink (stv 1.0 1.0)
-					(VariableNode "$vbr_schema")
-					(ListLink)
-				)
+				(ListLink)
 			)
-			;; implicand -- result
-			(ListLink
-				(VariableNode "$vbr_number")
-				(VariableNode "$vbr_schema")
-			)
+		)
+		;; implicand -- result
+		(ListLink
+			(VariableNode "$vbr_number")
+			(VariableNode "$vbr_schema")
 		)
 	)
 )

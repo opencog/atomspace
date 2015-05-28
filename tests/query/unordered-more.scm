@@ -72,19 +72,17 @@
 				(TypeNode "NumberNode")
 			)
 		)
-		(ImplicationLink
-			;; body
-			(SimilarityLink
-				(VariableNode "$var_number_node_type")
-				(ExecutionOutputLink
-					(GroundedSchemaNode "ActivationModulatorUpdater")
-					(ListLink)
-				)
+		;; body
+		(SimilarityLink
+			(VariableNode "$var_number_node_type")
+			(ExecutionOutputLink
+				(GroundedSchemaNode "ActivationModulatorUpdater")
+				(ListLink)
 			)
-			;; implicand -- result
-			(ListLink
-				(VariableNode "$var_number_node_type")
-			)
+		)
+		;; implicand -- result
+		(ListLink
+			(VariableNode "$var_number_node_type")
 		)
 	)
 )

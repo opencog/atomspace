@@ -15,21 +15,19 @@
             (TypeNode "WordInstanceNode")
          )
       )
-      (ImplicationLink
-         (AndLink
-            (ListLink
-               (AnchorNode "Recent Unresolved references")
-               (VariableNode "$word-inst-anaphor")
-            )
-            (PartOfSpeechLink
-               (VariableNode "$word-inst-antecedent")
-               (DefinedLinguisticConceptNode "noun")
-            )
-         )
-         (ReferenceLink
-            (VariableNode "$word-inst-antecedent")
+     (AndLink
+         (ListLink
+            (AnchorNode "Recent Unresolved references")
             (VariableNode "$word-inst-anaphor")
          )
+         (PartOfSpeechLink
+            (VariableNode "$word-inst-antecedent")
+            (DefinedLinguisticConceptNode "noun")
+         )
+      )
+      (ReferenceLink
+         (VariableNode "$word-inst-antecedent")
+         (VariableNode "$word-inst-anaphor")
       )
    )
 )
@@ -47,21 +45,19 @@
            (VariableNode "$parse")
            (VariableNode "$word-inst")
       )
-      (ImplicationLink
-        (AndLink
-             (ListLink (AnchorNode "# New Parsed Sentence") (VariableNode "$sent"))
-             (ParseLink (VariableNode "$parse") (VariableNode "$sent"))
-             (WordInstanceLink (VariableNode "$word-inst") (VariableNode "$parse"))
-             (InheritanceLink
-                (VariableNode "$word-inst")
-                (DefinedLinguisticConceptNode "pronoun")
-             )
-        )
-        (ListLink
-             (AnchorNode "Recent Unresolved references")
+     (AndLink
+          (ListLink (AnchorNode "# New Parsed Sentence") (VariableNode "$sent"))
+          (ParseLink (VariableNode "$parse") (VariableNode "$sent"))
+          (WordInstanceLink (VariableNode "$word-inst") (VariableNode "$parse"))
+          (InheritanceLink
              (VariableNode "$word-inst")
-        )
-      )
+             (DefinedLinguisticConceptNode "pronoun")
+          )
+     )
+     (ListLink
+          (AnchorNode "Recent Unresolved references")
+          (VariableNode "$word-inst")
+     )
    )
 )
 

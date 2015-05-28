@@ -35,17 +35,15 @@
 (define (query_rule_bad)
     (BindLink (stv 1 1)
         (VariableNode "$x")
-        (ImplicationLink (stv 1 1)
-            (InheritanceLink
-                (QuoteLink
-                    (VariableNode "$x")
-                )
-                (ConceptNode "criminal")
-            )
-            (InheritanceLink
+        (InheritanceLink
+            (QuoteLink
                 (VariableNode "$x")
-                (ConceptNode "criminal")
             )
+            (ConceptNode "criminal")
+        )
+        (InheritanceLink
+            (VariableNode "$x")
+            (ConceptNode "criminal")
         )
     )
 )
@@ -65,15 +63,13 @@
 (define query_rule_good
     (BindLink (stv 1 1)
         (VariableNode "$zzz")
-        (ImplicationLink (stv 1 1)
-            (InheritanceLink
-                (VariableNode "$zzz")
-                (ConceptNode "criminal")
-            )
-            (InheritanceLink
-                (VariableNode "$zzz")
-                (ConceptNode "criminal")
-            )
+        (InheritanceLink
+            (VariableNode "$zzz")
+            (ConceptNode "criminal")
+        )
+        (InheritanceLink
+            (VariableNode "$zzz")
+            (ConceptNode "criminal")
         )
     )
 )

@@ -233,29 +233,27 @@
 			(VariableNode "$var_number")
 			(VariableNode "$var_schema")
 		)
-		(ImplicationLink
-			;; body
-			(MemberLink
+		;; body
+		(MemberLink
+			(VariableNode "$var_schema")
+			(VariableNode "$var_number")
+			(SetLink
+				(LemmaNode "thing3")
+				(LemmaNode "thing1")
 				(VariableNode "$var_schema")
-				(VariableNode "$var_number")
-				(SetLink
-					(LemmaNode "thing3")
-					(LemmaNode "thing1")
-					(VariableNode "$var_schema")
-					(LemmaNode "thing2")
-				)
-				(SetLink
-					(NumberNode "2.0")
-					(VariableNode "$var_number")
-					(NumberNode "3.0")
-					(NumberNode "1.0")
-				)
+				(LemmaNode "thing2")
 			)
-			;; implicand -- result
-			(ListLink
+			(SetLink
+				(NumberNode "2.0")
 				(VariableNode "$var_number")
-				(VariableNode "$var_schema")
+				(NumberNode "3.0")
+				(NumberNode "1.0")
 			)
+		)
+		;; implicand -- result
+		(ListLink
+			(VariableNode "$var_number")
+			(VariableNode "$var_schema")
 		)
 	)
 )

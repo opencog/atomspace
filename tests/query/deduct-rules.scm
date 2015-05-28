@@ -76,22 +76,20 @@
 			(decl-var "FeatureNode" "$person_b")
 			(decl-var "ConceptNode" "$attribute")
 		)
-		(ImplicationLink
-			;; body -- if all parts of AndLink hold true ... 
-			(AndLink
-				(clause VN "$predicate" VN "$person_a" VN "$attribute")
-				(clause VN "$predicate" VN "$person_b" VN "$attribute")
-				;; Avoid reporting things we already know.
-				;; Basically, if we already know that person A and B
-				;; are the same person, then lets not deduce it again.
-				;; This not link is identical to the conclusion below
-				(AbsentLink
-					(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
-				)
+		;; body -- if all parts of AndLink hold true ... 
+		(AndLink
+			(clause VN "$predicate" VN "$person_a" VN "$attribute")
+			(clause VN "$predicate" VN "$person_b" VN "$attribute")
+			;; Avoid reporting things we already know.
+			;; Basically, if we already know that person A and B
+			;; are the same person, then lets not deduce it again.
+			;; This not link is identical to the conclusion below
+			(AbsentLink
+				(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
 			)
-			;; implicand -- then the following is true too
-			(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
 		)
+		;; implicand -- then the following is true too
+		(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
 	)
 )
 

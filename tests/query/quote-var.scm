@@ -57,16 +57,14 @@
 			(VariableNode "$var-a")
 			(TypeNode "ConceptNode")
 		)
-		(ImplicationLink
-			(EvaluationLink
-				(PredicateNode "similar")
-				(ListLink
-					(QuoteLink (VariableNode "$var-a"))
-					(VariableNode "$var-a")
-				)
+		(EvaluationLink
+			(PredicateNode "similar")
+			(ListLink
+				(QuoteLink (VariableNode "$var-a"))
+				(VariableNode "$var-a")
 			)
-			(VariableNode "$var-a")
 		)
+		(VariableNode "$var-a")
 	)
 )
 
@@ -78,31 +76,27 @@
 			(VariableNode "$other")
 			(TypeNode "ConceptNode")
 		)
-		(ImplicationLink
-			(EvaluationLink
-				(PredicateNode "similar")
-				(ListLink
-					(QuoteLink (VariableNode "$var-a"))
-					(VariableNode "$other")
-				)
+		(EvaluationLink
+			(PredicateNode "similar")
+			(ListLink
+				(QuoteLink (VariableNode "$var-a"))
+				(VariableNode "$other")
 			)
-			(VariableNode "$other")
 		)
+		(VariableNode "$other")
 	)
 )
 
 (define bunbound
 	(BindLink
 		(VariableNode "$other")
-		(ImplicationLink
-			(EvaluationLink
-				(PredicateNode "similar")
-				(ListLink
-					(VariableNode "$var-a")
-					(VariableNode "$other")
-				)
+		(EvaluationLink
+			(PredicateNode "similar")
+			(ListLink
+				(VariableNode "$var-a")
+				(VariableNode "$other")
 			)
-			(VariableNode "$other")
 		)
+		(VariableNode "$other")
 	)
 )

@@ -37,9 +37,8 @@
 (define find-humans
     (BindLink
         (VariableNode "$X")
-        (ImplicationLink
-            (InheritanceLink
-                (VariableNode "$X")
-                (ConceptNode "human"))
-            (ListLink
-                (VariableNode "$X")))))
+        (InheritanceLink
+            (VariableNode "$X")
+            (ConceptNode "human"))
+        (ListLink
+            (VariableNode "$X"))))

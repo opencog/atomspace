@@ -19,12 +19,10 @@
 (define bindy
 	(BindLink
 		(VariableNode "$stuff")
-		(ImplicationLink
-			(EvaluationLink
-				(QuoteLink (GroundedPredicateNode "scm:do_stuff"))
-				(VariableNode "$stuff")
-			)
+		(EvaluationLink
+			(QuoteLink (GroundedPredicateNode "scm:do_stuff"))
 			(VariableNode "$stuff")
 		)
+		(VariableNode "$stuff")
 	)
 )

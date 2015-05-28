@@ -66,43 +66,41 @@
 			(VariableNode "$who")
 			(VariableNode "$how_much")
 		)
-		(ImplicationLink
-			(AndLink
-				(EvaluationLink
-					(PredicateNode "ergs")
-					(ListLink
-						(VariableNode "$who")
-						(VariableNode "$how_much")
-					)
-				)
-				;; GreaterThan links are TV-valued when evaluated
-				;; Evaluate the inequality
-				;; 142 < (1.4 * $how_much * $how_much) + f($how_much)
-				;; true: 142 < (1.4 * 10 * 10) + sqrt(10)
-				;; false: 142 < (1.4 * 8 * 8) + sqrt(8)
-				(GreaterThanLink
-					(PlusLink
-						(TimesLink
-							(NumberNode 1.4)
-							(VariableNode "$how_much")
-							(VariableNode "$how_much")
-						)
-						(ExecutionOutputLink
-							(GroundedSchemaNode "scm: eff")
-							(ListLink
-								(VariableNode "$how_much")
-							)
-						)
-					)
-					(NumberNode 142)
-				)
-			)
-			(ExecutionOutputLink
-				(GroundedSchemaNode "scm: crash-b")
+		(AndLink
+			(EvaluationLink
+				(PredicateNode "ergs")
 				(ListLink
 					(VariableNode "$who")
 					(VariableNode "$how_much")
 				)
+			)
+			;; GreaterThan links are TV-valued when evaluated
+			;; Evaluate the inequality
+			;; 142 < (1.4 * $how_much * $how_much) + f($how_much)
+			;; true: 142 < (1.4 * 10 * 10) + sqrt(10)
+			;; false: 142 < (1.4 * 8 * 8) + sqrt(8)
+			(GreaterThanLink
+				(PlusLink
+					(TimesLink
+						(NumberNode 1.4)
+						(VariableNode "$how_much")
+						(VariableNode "$how_much")
+					)
+					(ExecutionOutputLink
+						(GroundedSchemaNode "scm: eff")
+						(ListLink
+							(VariableNode "$how_much")
+						)
+					)
+				)
+				(NumberNode 142)
+			)
+		)
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: crash-b")
+			(ListLink
+				(VariableNode "$who")
+				(VariableNode "$how_much")
 			)
 		)
 	)

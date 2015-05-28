@@ -107,15 +107,13 @@
       (VariableList
          (VariableNode "$var")
       )
-      (ImplicationLink
-         (AndLink
-            (AssociativeLink (stv 1 0.99999988)
-               (ConceptNode "want-this")
-               (VariableNode "$var")
-            )
+      (AndLink
+         (AssociativeLink (stv 1 0.99999988)
+            (ConceptNode "want-this")
+            (VariableNode "$var")
          )
-         (VariableNode "$var")
       )
+      (VariableNode "$var")
    )
 )
 
@@ -128,15 +126,13 @@
             (TypeNode "MemberLink")
          )
       )
-      (ImplicationLink
-         (AndLink
-            (AssociativeLink (stv 1 0.99999988)
-               (ConceptNode "want-this")
-               (VariableNode "$var")
-            )
+      (AndLink
+         (AssociativeLink (stv 1 0.99999988)
+            (ConceptNode "want-this")
+            (VariableNode "$var")
          )
-         (VariableNode "$var")
       )
+      (VariableNode "$var")
    )
 )
 
@@ -147,17 +143,15 @@
          (VariableNode "$var-a")
          (VariableNode "$var-b")
       )
-      (ImplicationLink
-         (AndLink
-            (AssociativeLink (stv 1 0.99999988)
-               (VariableNode "$var-a")
-               (VariableNode "$var-b")
-            )
-         )
-         (ListLink
+      (AndLink
+         (AssociativeLink (stv 1 0.99999988)
             (VariableNode "$var-a")
             (VariableNode "$var-b")
          )
+      )
+      (ListLink
+         (VariableNode "$var-a")
+         (VariableNode "$var-b")
       )
    )
 )
@@ -172,17 +166,15 @@
             (TypeNode "MemberLink")
          )
       )
-      (ImplicationLink
-         (AndLink
-            (AssociativeLink (stv 1 0.99999988)
-               (VariableNode "$var-a")
-               (VariableNode "$var-b")
-            )
-         )
-         (ListLink
+      (AndLink
+         (AssociativeLink (stv 1 0.99999988)
             (VariableNode "$var-a")
             (VariableNode "$var-b")
          )
+      )
+      (ListLink
+         (VariableNode "$var-a")
+         (VariableNode "$var-b")
       )
    )
 )
@@ -196,18 +188,15 @@
             (TypeNode "FeatureNode")
          )
       )
-      (ImplicationLink
-         (AndLink
-            (AssociativeLink (stv 1 0.99999988)
-               (VariableNode "$var-b")
-               (VariableNode "$var-a")
-            )
-         )
-         (ListLink
+      (AndLink
+         (AssociativeLink (stv 1 0.99999988)
             (VariableNode "$var-b")
             (VariableNode "$var-a")
          )
       )
+      (ListLink
+         (VariableNode "$var-b")
+         (VariableNode "$var-a")
+      )
    )
 )
-

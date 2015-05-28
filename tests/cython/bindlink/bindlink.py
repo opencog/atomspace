@@ -44,19 +44,16 @@ bindlink_handle =  \
             VariableNode("$var"),
 
             # The pattern to be grounded.
-            ImplicationLink(
-                InheritanceLink(
-                    VariableNode("$var"),
-                    ConceptNode("animal")
-                ),
+            InheritanceLink(
+                VariableNode("$var"),
+                ConceptNode("animal")),
 
-                # The grounding to be returned.
-                VariableNode("$var")
-            )
+            # The grounding to be returned.
+            VariableNode("$var")
 
         # Bindlink needs a handle, not an atom.
         ).h
-    
+
 # Remember the starting atomspace size. This test should not
 # change the atomspace.
 starting_size = atomspace.size()

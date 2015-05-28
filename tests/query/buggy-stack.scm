@@ -84,63 +84,61 @@
      (TypeNode "WordInstanceNode")
      )
     )
-   (ImplicationLink
-    (AndLink
-     (InheritanceLink
-      (VariableNode "$framePredicateNode")
-      (WordSenseNode "#Manipulation")
-      )
-     (InheritanceLink
-      (VariableNode "$frameAgentPredicateNode")
-      (SemeNode "#Manipulation:Agent")
-      )
-     (InheritanceLink
-      (VariableNode "$frameDepictivePredicateNode")
-      (SemeNode "#Manipulation:Depictive")
-      )
-     (InheritanceLink
-      (VariableNode "$frameEntityPredicateNode")
-      (SemeNode "#Manipulation:Entity")
-      )
-      
-    
-     (FeatureLink
-      (VariableNode "$framePredicateNode")
-      (VariableNode "$frameEntityPredicateNode")
-      )            
-     (FeatureLink
-      (VariableNode "$framePredicateNode")
-      (VariableNode "$frameAgentPredicateNode")
-      )            
-     (FeatureLink
-      (VariableNode "$framePredicateNode")
-      (VariableNode "$frameDepictivePredicateNode")
-      )
-    
-     (EvaluationLink
-      (VariableNode "$frameAgentPredicateNode")
-      (VariableNode "$agent")
-      )
-     (EvaluationLink
-      (VariableNode "$frameDepictivePredicateNode")
-      (ConceptNode "#grab")
-      )     
-     (EvaluationLink
-      (VariableNode "$frameEntityPredicateNode")
-      (VariableNode "$targetEntity")
-      )
-    
+   (AndLink
+    (InheritanceLink
+     (VariableNode "$framePredicateNode")
+     (WordSenseNode "#Manipulation")
      )
-   
+    (InheritanceLink
+     (VariableNode "$frameAgentPredicateNode")
+     (SemeNode "#Manipulation:Agent")
+     )
+    (InheritanceLink
+     (VariableNode "$frameDepictivePredicateNode")
+     (SemeNode "#Manipulation:Depictive")
+     )
+    (InheritanceLink
+     (VariableNode "$frameEntityPredicateNode")
+     (SemeNode "#Manipulation:Entity")
+     )
+    
+    
+    (FeatureLink
+     (VariableNode "$framePredicateNode")
+     (VariableNode "$frameEntityPredicateNode")
+     )            
+    (FeatureLink
+     (VariableNode "$framePredicateNode")
+     (VariableNode "$frameAgentPredicateNode")
+     )            
+    (FeatureLink
+     (VariableNode "$framePredicateNode")
+     (VariableNode "$frameDepictivePredicateNode")
+     )
+    
     (EvaluationLink
-     (PredicateNode "grab")
-     (ListLink
-        (VariableNode "$targetEntity")
-        (VariableNode "$frameDepictivePredicateNode")
-      )
+     (VariableNode "$frameAgentPredicateNode")
+     (VariableNode "$agent")
+     )
+    (EvaluationLink
+     (VariableNode "$frameDepictivePredicateNode")
+     (ConceptNode "#grab")
+     )     
+    (EvaluationLink
+     (VariableNode "$frameEntityPredicateNode")
+     (VariableNode "$targetEntity")
+     )
+    
+    )
+   
+   (EvaluationLink
+    (PredicateNode "grab")
+    (ListLink
+     (VariableNode "$targetEntity")
+     (VariableNode "$frameDepictivePredicateNode")
      )
     )
-  )
+   )
 )
 
 ; Running the implication should return only one answer!
