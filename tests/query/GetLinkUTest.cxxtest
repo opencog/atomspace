@@ -134,8 +134,11 @@ void GetLinkUTest::test_free_bound(void)
 	load_scm_files_from_config(*as);
 
 	Handle hgnd = eval->eval_h("(cog-satisfying-set is-query)");
-	Handle hans = eval->eval_h(
-		"(SetLink (ConceptNode \"human\"))");
+
+	// XXX for better or for worse, satisfying-set skips using the
+	// Setlink if the Setlink only has one element in it.
+	// Handle hans = eval->eval_h("(SetLink (ConceptNode \"human\"))");
+	Handle hans = eval->eval_h("(ConceptNode \"human\")");
 
 	printf("Expected this: %s\n", hans->toString().c_str());
 	printf("Found this answer: %s\n", hgnd->toString().c_str());
