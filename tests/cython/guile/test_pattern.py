@@ -72,6 +72,10 @@ class SchemeTest(TestCase):
 
     # Run the pattern-matcher/unifier/query-engine.
     def test_unifier(self):
+        status = load_scm(self.space, "opencog/scm/opencog/query.scm")
+        self.assertTrue(status)
+
+        scheme_eval(self.space, "(use-modules (opencog query))")
         h = scheme_eval_h(self.space, "cap-deduce")
         self.assertTrue(h)
         print "\nThe question is:"
