@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/reduct/FreeLink.h
+ * opencog/atoms/core/FreeLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
