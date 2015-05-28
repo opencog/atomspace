@@ -41,7 +41,7 @@ void Target::store_step(const Rule& r, const HandleSeq& premises)
 {
 	// XXX TODO think of a good structure for storing the inference step
 	// XXX TODO if the rule was actually applied, store the change to the TV?
-	_as->addLink(REFERENCE_LINK,
+	_as->addLink(SET_LINK,
 	             _htarget_internal,
 	             _as->addNode(CONCEPT_NODE, r.get_name()),
 	             _as->addLink(LIST_LINK, premises));
@@ -53,10 +53,16 @@ void Target::store_varmap(VarMultimap& vm)
 		_varmap[p.first].insert(p.second.begin(), p.second.end());
 }
 
+void Target::store_varmap(VarMap& vm)
+{
+	for (auto& p : vm)
+		_varmap[p.first].insert(p.second);
+}
+
 uint Target::rule_count(const Rule& r)
 {
 	Handle hname = _as->addNode(CONCEPT_NODE, r.get_name());
-	HandleSeq q = getNeighbors(_htarget_internal, false, true, REFERENCE_LINK, false);
+	HandleSeq q = getNeighbors(_htarget_internal, false, true, SET_LINK, false);
 
 	return std::count(q.begin(), q.end(), hname);
 }
@@ -67,12 +73,12 @@ uint Target::rule_count(const Rule& r)
 
 TargetSet::TargetSet()
 {
-
+	_history_space = new AtomSpace();
 }
 
 TargetSet::~TargetSet()
 {
-
+	delete _history_space;
 }
 
 void TargetSet::emplace(Handle& h)
@@ -80,7 +86,7 @@ void TargetSet::emplace(Handle& h)
 	if (_targets_map.count(h) == 1)
 		return;
 
-	_targets_map.emplace(h, &_history_space, h);
+	_targets_map.insert(std::pair<Handle, Target>(h, Target(_history_space, h)));
 }
 
 uint TargetSet::size()
@@ -98,8 +104,14 @@ Target& TargetSet::select()
 	// XXX TODO do proper target selection here using some fitness function
 	auto& p = rand_element(_targets_map);
 
-	Target& t = _targets_map[p.first];
+	// dumb round-about way to avoid the const in p
+	Target& t = _targets_map.find(p.first)->second;
 	t.increment_selection_count();
 
 	return t;
+}
+
+Target& TargetSet::get(Handle& h)
+{
+	return _targets_map.find(h)->second;
 }

@@ -30,12 +30,14 @@ namespace opencog
 {
 
 typedef std::map<Handle, UnorderedHandleSet> VarMultimap;
+typedef std::map<Handle, Handle> VarMap;
 
 class Target
 {
 	friend class TargetSet;
 
 public:
+
 	~Target() {}
 
 	// Comparison
@@ -50,16 +52,14 @@ public:
 
 	void store_step(const Rule& r, const HandleSeq& premises);
 	void store_varmap(VarMultimap& vm);
+	void store_varmap(VarMap& vm);
 	uint rule_count(const Rule& r);
 
 	void increment_selection_count() { _selection_count++; }
 
 	Handle get_handle() const { return _htarget_external; }
+	const VarMultimap& get_varmap() const { return _varmap; }
 	float get_weight() { return 1.0f; }
-
-	// XXX TODO stores the rule applied, and its resulting targets
-	// and the change to its own TV
-	// actually, write the above information to a inference atom
 
 private:
 	Target(AtomSpace* as, const Handle& h);
@@ -77,16 +77,17 @@ private:
 class TargetSet
 {
 public:
-	TargetSet() {}
-	~TargetSet() {}
+	TargetSet();
+	~TargetSet();
 
 	void emplace(Handle& h);
 	uint size();
 	Target& select();
+	Target& get(Handle& h);
 
 private:
 	std::unordered_map<Handle, Target> _targets_map;
-	AtomSpace _history_space;
+	AtomSpace* _history_space;
 };
 
 }
