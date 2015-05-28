@@ -24,7 +24,7 @@ ENDIF(HAVE_CYTHON)
 
 TARGET_LINK_LIBRARIES (atomspace_bm
 	atomspace
-	clearbox
 	execution
+	clearbox
 	${COGUTIL_LIBRARY}
 )

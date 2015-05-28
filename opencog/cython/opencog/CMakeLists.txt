@@ -79,6 +79,7 @@ ADD_DEPENDENCIES(atomspace_cython pln_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace_cython
 	atomspace
+	clearbox
 	atomutils
 	atomspaceutils
 	atomcore
