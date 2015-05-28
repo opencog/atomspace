@@ -116,14 +116,14 @@ public:
 	void do_until(uint max_steps);
 	void do_step();
 
-	VarMultimap& get_chaining_result();
+	const VarMultimap& get_chaining_result();
 
 private:
 
-	VarMultimap process_target(Target& target);
+	void process_target(Target& target);
 
 	std::vector<Rule> filter_rules(Handle htarget);
-	Rule select_rule(const std::vector<Rule>& rules);
+	Rule select_rule(Target& target, const std::vector<Rule>& rules);
 
 	HandleSeq match_knowledge_base(const Handle& htarget,
 	                               Handle htarget_vardecl,
@@ -147,7 +147,7 @@ private:
 
 	// XXX TODO add information to each target stating what rules were applied
 	// and how often the target was chosen?
-	TargetsSet _targets_set;
+	TargetSet _targets_set;
 	std::vector<Rule> _rules_set;
 
 	// XXX any additional link should be reflected

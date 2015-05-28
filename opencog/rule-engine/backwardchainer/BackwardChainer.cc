@@ -62,8 +62,6 @@ void BackwardChainer::set_target(Handle init_target)
 	_init_target = init_target;
 
 	_inference_history.clear();
-
-	_targets_set = TargetsSet();
 	_targets_set.emplace(_init_target);
 }
 
@@ -94,17 +92,15 @@ void BackwardChainer::do_step()
 	logger().debug("[BackwardChainer] Start of a single BC step");
 	logger().debug("[BackwardChainer] %d potential targets", _targets_set.size());
 
-	// XXX TODO do proper target selection here using some fitness function
+	// do target selection using some criteria
+	// XXX for example, choose target with low TV 50% of the time
 	Target& selected_target = _targets_set.select();
 
-	VarMultimap subt = process_target(selected_target);
-	VarMultimap& old_subt = _inference_history[selected_target.get_handle()];
+	process_target(selected_target);
+
+	_inference_history[selected_target.get_handle()] = selected_target.get_varmap();
 
 	logger().debug("[BackwardChainer] End of a single BC step");
-
-	// add the substitution to inference history
-	for (auto& p : subt)
-		old_subt[p.first].insert(p.second.begin(), p.second.end());
 }
 
 /**
@@ -112,21 +108,19 @@ void BackwardChainer::do_step()
  *
  * @return a VarMultimap mapping each variable to all possible solutions
  */
-VarMultimap& BackwardChainer::get_chaining_result()
+const VarMultimap& BackwardChainer::get_chaining_result()
 {
-	return _inference_history[_init_target];
+	return _targets_set.get(_init_target).get_varmap();
 }
 
 /**
  * The main recursive backward chaining method.
  *
- * @param htarget  the atom to do backward chaining on
+ * @param target   the Target object containing the target atom
  * @return         the solution found for this target, if any
  */
-VarMultimap BackwardChainer::process_target(Target& target)
+void BackwardChainer::process_target(Target& target)
 {
-	VarMultimap results;
-
 	Handle htarget = target.get_handle();
 	HandleSeq free_vars = get_free_vars_in_tree(htarget);
 
@@ -138,7 +132,7 @@ VarMultimap BackwardChainer::process_target(Target& target)
 	{
 		logger().debug("[BackwardChainer] Boring goal with no free var, "
 		               "skipping " + htarget->toShortString());
-		return results;
+		return;
 	}
 
 	// Check whether this target is a virtual link and is useless to explore
@@ -146,7 +140,7 @@ VarMultimap BackwardChainer::process_target(Target& target)
 	{
 		logger().debug("[BackwardChainer] Boring virtual link goal, "
 		               "skipping " + htarget->toShortString());
-		return results;
+		return;
 	}
 
 	std::vector<VarMap> kb_vmap;
@@ -173,18 +167,15 @@ VarMultimap BackwardChainer::process_target(Target& target)
 			// Check if there is any free variables in soln
 			HandleSeq free_vars = get_free_vars_in_tree(soln);
 
-			// If there are free variables, add this soln to the target stack
+			// If there are free variables, add this soln as new target
 			if (not free_vars.empty())
 				_targets_set.emplace(soln);
 
-			// Construct the htarget to all mappings here to be returned
-			for (auto it = vgm.begin(); it != vgm.end(); ++it)
-				results[it->first].emplace(it->second);
+			target.store_varmap(vgm);
 		}
 	}
 
-	// If logical link, break it up, add each to the targets
-	// stack, and return
+	// If logical link, break it up, add each to new targets and return
 	if (_logical_link_types.count(htarget->getType()) == 1)
 	{
 		HandleSeq sub_premises = LinkCast(htarget)->getOutgoingSet();
@@ -192,7 +183,7 @@ VarMultimap BackwardChainer::process_target(Target& target)
 		for (Handle& h : sub_premises)
 			_targets_set.emplace(h);
 
-		return results;
+		return;
 	}
 
 	/*************************************************/
@@ -204,14 +195,13 @@ VarMultimap BackwardChainer::process_target(Target& target)
 
 	// If no rules to backward chain on, no way to solve this target
 	if (acceptable_rules.empty())
-		return results;
+		return;
 
-	Rule selected_rule = select_rule(acceptable_rules);
+	Rule selected_rule = select_rule(target, acceptable_rules);
 	Rule standardized_rule = selected_rule.gen_standardize_apart(_garbage_superspace);
 
 	logger().debug("[BackwardChainer] Selected rule " + standardized_rule.get_handle()->toShortString());
 
-	target.add_rule(selected_rule);
 	Handle himplicant = standardized_rule.get_implicant();
 	Handle hvardecl = standardized_rule.get_vardecl();
 	HandleSeq outputs = standardized_rule.get_implicand_seq();
@@ -241,6 +231,8 @@ VarMultimap BackwardChainer::process_target(Target& target)
 	// all, and add all resulting new targets to targets list; this will
 	// avoid having to visit the target multiple times to get all
 	// possible output mappings
+	// XXX TODO alternatively, use some heuristics to prioritize whole-Atom
+	// unification, or largest sub-atom unification
 	VarMap implicand_normal_mapping = rand_element(all_mappings);
 	for (auto& p : implicand_normal_mapping)
 		logger().debug("[BackwardChainer] Chosen mapping is "
@@ -334,6 +326,7 @@ VarMultimap BackwardChainer::process_target(Target& target)
 		// Check each grounding to see if any has no variable
 		for (size_t i = 0; i < grounded_premises.size(); ++i)
 		{
+			VarMultimap results;
 			Handle& g = grounded_premises[i];
 			VarMap& m = vm_list[i];
 
@@ -354,12 +347,16 @@ VarMultimap BackwardChainer::process_target(Target& target)
 			// apply it by using the mapping to ground the target, and add
 			// it to _as since this is not garbage; this should generate
 			// all the outputs of the rule, and execute any evaluatable
+			//
+			// XXX TODO the TV of the original target need to be changed here
 			Instantiator inst(_as);
 			inst.instantiate(output_grounded, m);
 
 			// Add the grounding to the return results
 			for (Handle& h : free_vars)
 				results[h].emplace(m[h]);
+
+			target.store_varmap(results);
 		}
 
 		if (not need_bc)
@@ -374,19 +371,21 @@ VarMultimap BackwardChainer::process_target(Target& target)
 
 		// non-logical link can be added straight to targets list
 		if (_logical_link_types.count(hp->getType()) == 0)
-		{
+		{			
+			target.store_step(selected_rule, { hp });
 			_targets_set.emplace(hp);
 			continue;
 		}
 
 		// Else break out any logical link and add to targets
 		HandleSeq sub_premises = LinkCast(hp)->getOutgoingSet();
+		target.store_step(selected_rule, sub_premises);
 
 		for (Handle& s : sub_premises)
 			_targets_set.emplace(s);
 	}
 
-	return results;
+	return;
 }
 
 /**
@@ -637,7 +636,7 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
  *
  * @param hsource          the atom from which to unify
  * @param hmatch           the atom to which hsource will be unified to
- * @param htarget_vardecl  the typed VariableList of the variables in hsource
+ * @param hsource_vardecl  the typed VariableList of the variables in hsource
  * @param result           an output VarMap mapping varibles from hsource to hmatch
  * @return                 true if the two atoms can be unified
  */
@@ -721,17 +720,21 @@ bool BackwardChainer::unify(const Handle& hsource,
 /**
  * Given a target, select a candidate rule.
  *
- * XXX TODO apply selection criteria to select one amongst the matching rules
- * XXX better implement target selection first before trying to implement this!
+ * XXX TODO improve selection criteria
  * XXX should these selection functions be in callbacks like the ForwardChainer?
  *
  * @param rules   a vector of rules to select from
  * @return        one of the rule
  */
-Rule BackwardChainer::select_rule(const std::vector<Rule>& rules)
+Rule BackwardChainer::select_rule(Target& target, const std::vector<Rule>& rules)
 {
-	//xxx return random for the purpose of integration testing before going
-	//for a complex implementation of this function
+	// store how many times each rule has been used for the target
+//	std::vector<uint> counts;
+//	std::for_each(rules.begin(), rules.end(), [&](Rule& r) { counts.push_back(target.rule_count(r)); });
+
+	// Select the rule that has been applied least
+	// XXX TODO use the rule cost
+
 	return rand_element(rules);
 }
 
