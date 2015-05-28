@@ -24,7 +24,7 @@
 #define _OPENCOG_PUT_LINK_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/reduct/FreeLink.h>
+#include <opencog/atoms/core/FreeLink.h>
 
 namespace opencog
 {

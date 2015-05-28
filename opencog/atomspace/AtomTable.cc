@@ -49,7 +49,7 @@
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/reduct/DeleteLink.h>
 #include <opencog/atoms/reduct/FunctionLink.h>
-#include <opencog/atoms/reduct/PutLink.h>
+#include <opencog/atoms/core/PutLink.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
