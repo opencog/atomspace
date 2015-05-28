@@ -81,6 +81,12 @@ TargetSet::~TargetSet()
 	delete _history_space;
 }
 
+void TargetSet::clear()
+{
+	_history_space->clear();
+	_targets_map.clear();
+}
+
 void TargetSet::emplace(Handle& h)
 {
 	if (_targets_map.count(h) == 1)

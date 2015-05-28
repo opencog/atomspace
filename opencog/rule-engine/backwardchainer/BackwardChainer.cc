@@ -62,6 +62,8 @@ void BackwardChainer::set_target(Handle init_target)
 	_init_target = init_target;
 
 	_inference_history.clear();
+	_targets_set.clear();
+
 	_targets_set.emplace(_init_target);
 }
 

@@ -80,6 +80,7 @@ public:
 	TargetSet();
 	~TargetSet();
 
+	void clear();
 	void emplace(Handle& h);
 	uint size();
 	Target& select();
