@@ -12,15 +12,13 @@
 (define human-implies-animal
 	(BindLink
 		(VariableNode "$H")
-		(ImplicationLink
-			(InheritanceLink
-				(VariableNode "$H")
-				(ConceptNode "human")
-			)
-			(InheritanceLink
-				(VariableNode "$H")
-				(ConceptNode "animal")
-			)
+		(InheritanceLink
+			(VariableNode "$H")
+			(ConceptNode "human")
+		)
+		(InheritanceLink
+			(VariableNode "$H")
+			(ConceptNode "animal")
 		)
 	)
 )

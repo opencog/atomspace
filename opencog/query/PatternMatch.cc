@@ -294,21 +294,19 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
 /* ================================================================= */
 /* ================================================================= */
 /**
- * Evaluate an ImplicationLink embedded in a BindLink
+ * Evaluate a BindLink
  *
- * Given a BindLink containing variable declarations and an
- * ImplicationLink, this method will "evaluate" the implication,
- * matching the predicate, and creating a grounded implicand,
- * assuming the predicate can be satisfied. Thus, for example,
- * given the structure
+ * Given a BindLink containing variable declarations, a predicate and
+ * an implicand, this method will "evaluate" the implication, matching
+ * the predicate, and creating a grounded implicand, assuming the
+ * predicate can be satisfied. Thus, for example, given the structure
  *
  *    BindLink
  *       ListLink
  *          VariableNode "$var0"
  *          VariableNode "$var1"
- *       ImplicationLink
- *          AndList
- *             etc ...
+ *       AndList
+ *          etc ...
  *
  * Evaluation proceeds as decribed in the "do_imply()" function below.
  * The whole point of the BindLink is to do nothing more than

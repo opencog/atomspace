@@ -176,15 +176,13 @@ def prep_bind_python(atomspace):
         (BindLink
             ;; The variable to be bound
             (VariableNode "$var")
-            (ImplicationLink
-                ;; The pattern to be searched for
-                (InheritanceLink
-                    (VariableNode "$var")
-                    (ConceptNode "animal")
-                )
-                ;; The value to be returned.
+            ;; The pattern to be searched for
+            (InheritanceLink
                 (VariableNode "$var")
+                (ConceptNode "animal")
             )
+            ;; The value to be returned.
+            (VariableNode "$var")
         )
         '''
     return scheme_eval_h(atomspace, bind_link_query)
@@ -199,16 +197,14 @@ def prep_bind_scheme(atomspace):
           (BindLink
             ;; The variable to be bound
             (VariableNode "$var")
-            (ImplicationLink
-              ;; The pattern to be searched for
-              (InheritanceLink
-                 (VariableNode "$var")
-                 (ConceptNode "animal")
-              )
-
-              ;; The value to be returned.
-              (VariableNode "$var")
+            ;; The pattern to be searched for
+            (InheritanceLink
+               (VariableNode "$var")
+               (ConceptNode "animal")
             )
+
+            ;; The value to be returned.
+            (VariableNode "$var")
           )
         )
         '''
