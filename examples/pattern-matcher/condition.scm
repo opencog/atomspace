@@ -65,20 +65,18 @@
 			(VariableNode "$condition")
 			(VariableNode "$action")
 		)
-		(ImplicationLink
-			(AndLink
-				; If there is a plan to do something ...
-				(ContextLink
-					(VariableNode "$cxt")
-					(VariableNode "$condition")
-					(VariableNode "$action")
-				)
-				; ... and the precondition holds true ...
+		(AndLink
+			; If there is a plan to do something ...
+			(ContextLink
+				(VariableNode "$cxt")
 				(VariableNode "$condition")
+				(VariableNode "$action")
 			)
-			; ...  then perform the action.
-			(VariableNode "$action")
+			; ... and the precondition holds true ...
+			(VariableNode "$condition")
 		)
+		; ...  then perform the action.
+		(VariableNode "$action")
 	)
 )
 

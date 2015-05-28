@@ -16,38 +16,36 @@
             (VariableNode "$B")
             (VariableNode "$C")
             )
-        (ImplicationLink
-            (AndLink
+        (AndLink
+            (ImplicationLink
+                (VariableNode "$A")
+                (VariableNode "$B")
+            )
+            (ImplicationLink
+                (VariableNode "$B")
+                (VariableNode "$C")
+            )
+            ; To avoid matching (Implication A B) and (Implication B A)
+            (NotLink
+                (EqualLink
+                    (VariableNode "$A")
+                    (VariableNode "$C")
+                )
+            )
+        )
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: crisp-deduction-formula")
+            (ListLink
                 (ImplicationLink
                     (VariableNode "$A")
-                    (VariableNode "$B")
-                )
+                    (VariableNode "$B"))
                 (ImplicationLink
                     (VariableNode "$B")
                     (VariableNode "$C")
                 )
-                ; To avoid matching (Implication A B) and (Implication B A)
-                (NotLink
-                    (EqualLink
-                        (VariableNode "$A")
-                        (VariableNode "$C")
-                    )
-                )
-            )
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: crisp-deduction-formula")
-                (ListLink
-                    (ImplicationLink
-                        (VariableNode "$A")
-                        (VariableNode "$B"))
-                    (ImplicationLink
-                        (VariableNode "$B")
-                        (VariableNode "$C")
-                    )
-                    (ImplicationLink
-                        (VariableNode "$A")
-                        (VariableNode "$C")
-                    )
+                (ImplicationLink
+                    (VariableNode "$A")
+                    (VariableNode "$C")
                 )
             )
         )

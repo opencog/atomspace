@@ -36,54 +36,50 @@
 
 
 (define human-implies-animal
-  (BindLink
-     (ImplicationLink
-        ; This is the pattern that will be matched ...
-        (InheritanceLink
-           (VariableNode "$H")
-           (ConceptNode "human")
-        )
-        ; This is the hypergraph that will be created if the
-        ; above pattern is found.
-        (InheritanceLink
-           (VariableNode "$H")
-           (ConceptNode "animal")
-        )
-     )
-  )
+   (BindLink
+      ; This is the pattern that will be matched ...
+      (InheritanceLink
+         (VariableNode "$H")
+         (ConceptNode "human")
+      )
+      ; This is the hypergraph that will be created if the
+      ; above pattern is found.
+      (InheritanceLink
+         (VariableNode "$H")
+         (ConceptNode "animal")
+      )
+   )
 )
 
 
 (define human-implies-animal-stv
-  (BindLink
-     (ImplicationLink
-        ; This is the pattern that will be matched ...
-        (InheritanceLink
-           (VariableNode "$H")
-           (ConceptNode "human")
-        )
-        (ExecutionOutputLink
-           (GroundedSchemaNode "scm: modify-stv")
-           ; This is the list of arguments to pass to the formula.
-           ; Notice that *two* arguments are passed.  The first
-           ; argument is a repeat of the pattern that was matched,
-           ; and the second argument is a hypergraph that will be
-           ; created.
-           (ListLink
-              ; The schema will take the truth value from this link ...
-              (InheritanceLink
-                 (VariableNode "$H")
-                 (ConceptNode "human")
-              )
-              ; and it will set the truth value here, after scaling by 0.3.
-              (InheritanceLink
-                 (VariableNode "$H")
-                 (ConceptNode "animal")
-              )
-           )
-        )
-     )
-  )
+   (BindLink
+      ; This is the pattern that will be matched ...
+      (InheritanceLink
+         (VariableNode "$H")
+         (ConceptNode "human")
+      )
+      (ExecutionOutputLink
+         (GroundedSchemaNode "scm: modify-stv")
+         ; This is the list of arguments to pass to the formula.
+         ; Notice that *two* arguments are passed.  The first
+         ; argument is a repeat of the pattern that was matched,
+         ; and the second argument is a hypergraph that will be
+         ; created.
+         (ListLink
+            ; The schema will take the truth value from this link ...
+            (InheritanceLink
+               (VariableNode "$H")
+               (ConceptNode "human")
+            )
+            ; and it will set the truth value here, after scaling by 0.3.
+            (InheritanceLink
+               (VariableNode "$H")
+               (ConceptNode "animal")
+            )
+         )
+      )
+   )
 )
 
 ; Return a truth value where the strength was multiplied by 'val'

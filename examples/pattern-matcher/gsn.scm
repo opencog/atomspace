@@ -88,22 +88,20 @@
 	(BindLink
 		;; Declare the variable to be grounded.
 		(VariableNode "$person")
-		(ImplicationLink
-			;; The pattern to be searched for.
-			(EvaluationLink
-		   	(PredicateNode "is-a")
-   			(ListLink
-					(VariableNode "$person")
-      			(ConceptNode "human")
-   			)
-			)
-			;; The proceedure to invoke when a grounding is found.
-			(ExecutionOutputLink
-		   	(GroundedSchemaNode "scm: say-hello")
-   			(ListLink
-					(VariableNode "$person")
-   			)
-			)
+		;; The pattern to be searched for.
+		(EvaluationLink
+	   	(PredicateNode "is-a")
+		(ListLink
+				(VariableNode "$person")
+  			(ConceptNode "human")
+		)
+		)
+		;; The proceedure to invoke when a grounding is found.
+		(ExecutionOutputLink
+	   	(GroundedSchemaNode "scm: say-hello")
+		(ListLink
+				(VariableNode "$person")
+		)
 		)
 	)
 )

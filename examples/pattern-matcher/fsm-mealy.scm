@@ -100,43 +100,41 @@
 			(VariableNode "$curr-state")
 			(VariableNode "$next-state")
 		)
-		(ImplicationLink
-			(AndLink
-				;; If we are in the current state ...
+		(AndLink
+			;; If we are in the current state ...
+			(ListLink
+				fsm-state
+				(VariableNode "$curr-state")
+			)
+			;; ... and the external environment is in the given state
+			(EvaluationLink
+				extern-state
+				(VariableNode "$extern-state")
+			)
+			;; ... and there is a transition to another state...
+			(ContextLink
+				(AndLink
+					(VariableNode "$curr-state")
+					(VariableNode "$extern-state")
+				)
+				(ListLink
+					fsm-name
+					(VariableNode "$next-state")
+				)
+			)
+		)
+		(AndLink
+			;; ... Then, leave the current state ...
+			(DeleteLink
 				(ListLink
 					fsm-state
 					(VariableNode "$curr-state")
 				)
-				;; ... and the external environment is in the given state
-				(EvaluationLink
-					extern-state
-					(VariableNode "$extern-state")
-				)
-				;; ... and there is a transition to another state...
-				(ContextLink
-					(AndLink
-						(VariableNode "$curr-state")
-						(VariableNode "$extern-state")
-					)
-					(ListLink
-						fsm-name
-						(VariableNode "$next-state")
-					)
-				)
 			)
-			(AndLink
-				;; ... Then, leave the current state ...
-				(DeleteLink
-					(ListLink
-						fsm-state
-						(VariableNode "$curr-state")
-					)
-				)
-				;; ... and transistion to the next state.
-				(ListLink
-					fsm-state
-					(VariableNode "$next-state")
-				)
+			;; ... and transistion to the next state.
+			(ListLink
+				fsm-state
+				(VariableNode "$next-state")
 			)
 		)
 	)

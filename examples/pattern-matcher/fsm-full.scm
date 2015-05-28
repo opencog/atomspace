@@ -118,34 +118,32 @@
 			(VariableNode "$curr-state")
 			(VariableNode "$next-state")
 		)
-		(ImplicationLink
-			(AndLink
-				;; If we are in the current state ...
-				(ListLink
-					fsm-state
-					(VariableNode "$curr-state")
-				)
-				;; ... and there is a transition to another state...
-				(ContextLink
-					(VariableNode "$curr-state")
-					(ListLink
-						fsm-name
-						(VariableNode "$next-state")
-					)
-				)
+		(AndLink
+			;; If we are in the current state ...
+			(ListLink
+				fsm-state
+				(VariableNode "$curr-state")
 			)
-			(AndLink
-				;; ... then transistion to the next state ...
+			;; ... and there is a transition to another state...
+			(ContextLink
+				(VariableNode "$curr-state")
 				(ListLink
-					fsm-state
+					fsm-name
 					(VariableNode "$next-state")
 				)
-				;; ... and leave the current state.
-				(DeleteLink
-					(ListLink
-						fsm-state
-						(VariableNode "$curr-state")
-					)
+			)
+		)
+		(AndLink
+			;; ... then transistion to the next state ...
+			(ListLink
+				fsm-state
+				(VariableNode "$next-state")
+			)
+			;; ... and leave the current state.
+			(DeleteLink
+				(ListLink
+					fsm-state
+					(VariableNode "$curr-state")
 				)
 			)
 		)

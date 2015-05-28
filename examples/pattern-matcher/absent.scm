@@ -69,16 +69,12 @@
 
 ; If an item is visible, delete it, kill it.
 (define destroy
-	(BindLink
-		(ImplicationLink query (DeleteLink query))
-	)
+	(BindLink query (DeleteLink query))
 )
 
 ; If nothing is visible, then hallucinate the golem into existance.
 (define create
-	(BindLink
-		(ImplicationLink (AbsentLink query) golem)
-	)
+	(BindLink (AbsentLink query) golem)
 )
 
 ; The state variable, and it's two states.
@@ -92,10 +88,8 @@
 ; Set the current state if an item is visible.
 (define is-visible
 	(BindLink
-		(ImplicationLink
-			query
-			(AssignLink (TypeNode "ListLink") room-state room-nonempty)
-		)
+		query
+		(AssignLink (TypeNode "ListLink") room-state room-nonempty)
 	)
 )
 
@@ -103,10 +97,8 @@
 ; the atomspace does not have a visible item.
 (define is-invisible
 	(BindLink
-		(ImplicationLink
-			(AbsentLink query)
-			(AssignLink (TypeNode "ListLink") room-state room-empty)
-		)
+		(AbsentLink query)
+		(AssignLink (TypeNode "ListLink") room-state room-empty)
 	)
 )
 

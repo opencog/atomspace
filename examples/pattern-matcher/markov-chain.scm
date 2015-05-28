@@ -202,21 +202,19 @@
 			(VariableNode "$curr-state")
 			(VariableNode "$next-state")
 		)
-		(ImplicationLink
-			(AndLink
-				;; If we are in the current state ...
-				curr-state
-				;; ... and there is a transition to another state...
+		(AndLink
+			;; If we are in the current state ...
+			curr-state
+			;; ... and there is a transition to another state...
+			state-trans
+		)
+		;; ... then adjust the probability...
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: accum-probability")
+			(ListLink
+				next-state
 				state-trans
-			)
-			;; ... then adjust the probability...
-			(ExecutionOutputLink
-				(GroundedSchemaNode "scm: accum-probability")
-				(ListLink
-					next-state
-					state-trans
-					curr-state
-				)
+				curr-state
 			)
 		)
 	)
