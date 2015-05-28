@@ -26,67 +26,61 @@
 using namespace opencog;
 
 ForwardChainPatternMatchCB::ForwardChainPatternMatchCB(AtomSpace * as) :
-        Implicator(as),
-        InitiateSearchCB(as),
-        DefaultPatternMatchCB(as),
-        AttentionalFocusCB(as),
-        _as(as)
-{
-    _fcmem = nullptr;
+		Implicator(as), InitiateSearchCB(as), DefaultPatternMatchCB(as), AttentionalFocusCB(
+				as), _as(as) {
+	_fcmem = nullptr;
 }
 
-ForwardChainPatternMatchCB::~ForwardChainPatternMatchCB()
-{
+ForwardChainPatternMatchCB::~ForwardChainPatternMatchCB() {
 }
 
 bool ForwardChainPatternMatchCB::node_match(const Handle& node1,
-                                            const Handle& node2)
-{
-    //constrain search within premise list
-    bool ret = _fcmem->isin_potential_sources(node2)
-            and (_fcmem->is_search_in_af() ?
-                    AttentionalFocusCB::node_match(node1, node2) :
-                    DefaultPatternMatchCB::node_match(node1, node2));
+		const Handle& node2) {
+	//constrain search within premise list
+	bool accept =
+			_fcmem->is_search_in_af() ?
+					AttentionalFocusCB::node_match(node1, node2) :
+					DefaultPatternMatchCB::node_match(node1, node2);
 
-    cout << "Node " << node2->toString() << "RET = " << ret << endl;
-    return ret;
+	return accept;
 
 }
 
 bool ForwardChainPatternMatchCB::link_match(const LinkPtr& lpat,
-                                            const LinkPtr& lsoln)
-{
-    //constrain search within premise list
-    bool ret = _fcmem->isin_potential_sources(Handle(lsoln))
-            and (_fcmem->is_search_in_af() ?
-                    AttentionalFocusCB::link_match(lpat, lsoln) :
-                    DefaultPatternMatchCB::link_match(lpat, lsoln));
+		const LinkPtr& lsoln) {
+	//constrain search within premise list
+	bool accpet =
+			_fcmem->is_search_in_af() ?
+					AttentionalFocusCB::link_match(lpat, lsoln) :
+					DefaultPatternMatchCB::link_match(lpat, lsoln);
 
-    cout << "Link " << ((Handle) lsoln)->toString() << "RET = " << ret << endl;
-    return ret;
+	return accpet;
 }
 
 bool ForwardChainPatternMatchCB::grounding(
-        const std::map<Handle, Handle> &var_soln,
-        const std::map<Handle, Handle> &pred_soln)
-{
-    cout << "[DEBUG] Grounding " << endl;
+		const std::map<Handle, Handle> &var_soln,
+		const std::map<Handle, Handle> &pred_soln) {
+	Handle source = _fcmem->get_cur_source();
 
-    Handle h = inst.instantiate(implicand, var_soln);
-    if (Handle::UNDEFINED != h) {
-        cout << "[DEBUG] adding grounding " << h->toString() << endl;
-        result_list.push_back(h);
-    }
-    return true;
+	for (auto it = var_soln.begin(); it != var_soln.end(); ++it) {
+		//Accept solution if any one of the variables ground to the source
+		if (it->second == source) {
+			Handle h = inst.instantiate(implicand, var_soln);
+			if (Handle::UNDEFINED != h) {
+				result_list.push_back(h);
+			}
+			return true;
+		}
+	}
+
+	return false;
 }
 
-void ForwardChainPatternMatchCB::set_fcmem(FCMemory *fcmem)
-{
-    _fcmem = fcmem;
+void ForwardChainPatternMatchCB::set_fcmem(FCMemory *fcmem) {
+	_fcmem = fcmem;
 }
-HandleSeq ForwardChainPatternMatchCB::get_products()
-{
-    auto product = result_list;
-    result_list.clear();
-    return product;
+HandleSeq ForwardChainPatternMatchCB::get_products() {
+	auto product = result_list;
+	result_list.clear();
+	return product;
 }
