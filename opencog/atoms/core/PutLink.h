@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/reduct/PutLink.h
+ * opencog/atoms/core/PutLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
