@@ -97,9 +97,7 @@ protected:
 	std::vector<std::set<Handle>> _component_vars;
 	HandleSeq _component_patterns;
 
-	/// It is virtual as BindLink needs to overwrite it to take more
-	/// one more outgoing link for the rewrite rule
-	virtual void extract_variables(const HandleSeq& oset);
+	void extract_variables(const HandleSeq& oset);
 	void init_scoped_variables(const Handle& hvar);
 	void unbundle_clauses(const Handle& body);
 	void validate_clauses(std::set<Handle>& vars,

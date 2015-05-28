@@ -32,6 +32,10 @@ using namespace opencog;
 
 void BindLink::init(void)
 {
+	extract_variables(_outgoing);
+	unbundle_clauses(_body);
+	common_init();
+	setup_components();
 	_pat.redex_name = "anonymous BindLink";
 }
 
