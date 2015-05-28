@@ -33,7 +33,7 @@ class BooleanUTest :  public CxxTest::TestSuite
 	private:
 		AtomSpace *as;
 
-		Handle implication, his_a, hberlin, hcity;
+		Handle clauses, implicand, his_a, hberlin, hcity;
 
 	public:
 
@@ -86,9 +86,8 @@ void BooleanUTest::setUp(void)
 {
 	as = new AtomSpace();
 
-	// Create an implication link that will be tested.
-	implication =
-	al(IMPLICATION_LINK,
+	// Create a clauses and implicand links that will be tested.
+	clauses =
 		al(AND_LINK,
 			al(EVALUATION_LINK,
 				an(PREDICATE_NODE, "_subj"),
@@ -119,15 +118,15 @@ void BooleanUTest::setUp(void)
 					an(CONCEPT_NODE, "definite")
 				)
 			)
-		),
+		);
+	implicand =
 		al(EVALUATION_LINK,
 			his_a = an(PREDICATE_NODE, "is_a"),
 			al(LIST_LINK,
 				an(VARIABLE_NODE, "$var1"),
 				an(VARIABLE_NODE, "$var2")
 			)
-		)
-	);
+		);
 
 	// Create data on which the above pattern should match
 	al(INHERITANCE_LINK,
@@ -220,7 +219,7 @@ void BooleanUTest::test_isa(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
-	Handle result = imply(as, implication);
+	Handle result = imply(as, clauses, implicand);
 
 	// There should be only one solution: the Berlin one.
 	// The Madrid graph should be rejected because of the

@@ -38,7 +38,7 @@ class ImplicationUTest :  public CxxTest::TestSuite
 		AtomSpace *as;
 		SchemeEval *eval;
 		Handle varscope, restrict, restrict2;
-		Handle implication, implication2;
+		Handle clauses1, implicand1, clauses2, implicand2;
 
 	public:
 
@@ -132,9 +132,8 @@ void ImplicationUTest::setUp(void)
 	eval->eval(setup);
 
 	// Create an implication link that will be tested.
-	const char * imp = 
-	"(define (imp)\n"
-	"(ImplicationLink\n"
+	const char * imp1 =
+	"(define (clauses1)\n"
 	"   (AndLink\n"
 	"      (InheritanceLink\n"
 	"         (PredicateNode \"grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation\")\n"
@@ -145,38 +144,39 @@ void ImplicationUTest::setUp(void)
 	"         (WordSenseNode \"#Manipulation\")\n"
 	"      )\n"
 	"   )\n"
-	"   (VariableNode \"$predNode\")\n"
 	")\n"
+	"(define (implicand1)\n"
+	"   (VariableNode \"$predNode\")\n"
 	")\n";
-	eval->eval(imp);
-	implication = eval->apply("imp", Handle::UNDEFINED);
+	eval->eval(imp1);
+	clauses1 = eval->apply("clauses1", Handle::UNDEFINED);
+	implicand1 = eval->apply("implicand1", Handle::UNDEFINED);
 
 	// Create an implication link without the conjunction (AndLink)
 	const char * imp2 =
-	"(define (imp2)\n"
-	"(ImplicationLink\n"
+	"(define (clauses2)\n"
 	"   (InheritanceLink (stv 1 1)\n"
 	"      (VariableNode \"$predNode\")\n"
 	"      (WordSenseNode \"#Manipulation\")\n"
 	"   )\n"
-	"   (VariableNode \"$predNode\")\n"
 	")\n"
+	"(define (implicand2)\n"
+	"   (VariableNode \"$predNode\")\n"
 	")\n";
 	eval->eval(imp2);
-	implication2 = eval->apply("imp2", Handle::UNDEFINED);
+	clauses2 = eval->apply("clauses2", Handle::UNDEFINED);
+	implicand2 = eval->apply("implicand2", Handle::UNDEFINED);
 
 	// Create a varscope link with just one variable
 	const char * scope =
 	"(define (varscope)\n"
 	"(BindLink\n"
 	"   (VariableNode \"$predNode\")\n"
-	"   (ImplicationLink\n"
-	"      (InheritanceLink (stv 1 1)\n"
-	"         (VariableNode \"$predNode\")\n"
-	"         (WordSenseNode \"#Manipulation\")\n"
-	"      )\n"
+	"   (InheritanceLink (stv 1 1)\n"
 	"      (VariableNode \"$predNode\")\n"
+	"      (WordSenseNode \"#Manipulation\")\n"
 	"   )\n"
+	"   (VariableNode \"$predNode\")\n"
 	")\n"
 	")\n";
 	eval->eval(scope);
@@ -190,13 +190,11 @@ void ImplicationUTest::setUp(void)
 	"      (VariableNode \"$predNode\")\n"
 	"      (TypeNode \"PredicateNode\")\n"
 	"   )\n"
-	"   (ImplicationLink\n"
-	"      (InheritanceLink (stv 1 1)\n"
-	"         (VariableNode \"$predNode\")\n"
-	"         (WordSenseNode \"#Manipulation\")\n"
-	"      )\n"
+	"   (InheritanceLink (stv 1 1)\n"
 	"      (VariableNode \"$predNode\")\n"
+	"      (WordSenseNode \"#Manipulation\")\n"
 	"   )\n"
+	"   (VariableNode \"$predNode\")\n"
 	")\n"
 	")\n";
 	eval->eval(strict);
@@ -220,21 +218,19 @@ void ImplicationUTest::setUp(void)
 	"         (TypeNode \"WordSenseNode\")\n"
 	"      )\n"
 	"   )\n"
-	"   (ImplicationLink\n"
-	"      (AndLink\n"
-	"         (InheritanceLink (stv 1 1)\n"
-	"            (VariableNode \"$predNode\")\n"
-	"            (VariableNode \"$framboise\")\n"
-	"         )\n"
-	"         (InheritanceLink (stv 1 1)\n"
-	"            (VariableNode \"$framNode\")\n"
-	"            (VariableNode \"$framboise\")\n"
-	"         )\n"
-	"      )\n"
-	"      (ListLink\n"
+	"   (AndLink\n"
+	"      (InheritanceLink (stv 1 1)\n"
 	"         (VariableNode \"$predNode\")\n"
-	"         (VariableNode \"$framNode\")\n"
+	"         (VariableNode \"$framboise\")\n"
 	"      )\n"
+	"      (InheritanceLink (stv 1 1)\n"
+	"         (VariableNode \"$framNode\")\n"
+	"         (VariableNode \"$framboise\")\n"
+	"      )\n"
+	"   )\n"
+	"   (ListLink\n"
+	"      (VariableNode \"$predNode\")\n"
+	"      (VariableNode \"$framNode\")\n"
 	"   )\n"
 	")\n"
 	")\n";
@@ -277,14 +273,14 @@ void ImplicationUTest::test_exec(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
-	Handle result = imply(as, implication);
+	Handle result = imply(as, clauses1, implicand2);
 	logger().debug("first result is %s\n", SchemeSmob::to_string(result).c_str());
 
 	// There should be two solutions: 
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 
 	// Result should be a ListLink w/ two solutions
-	result = imply(as, implication2);
+	result = imply(as, clauses2, implicand2);
 	logger().debug("second result is %s\n", SchemeSmob::to_string(result).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
 

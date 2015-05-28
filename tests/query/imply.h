@@ -11,35 +11,24 @@ using namespace opencog;
  * the truth value of any of the matched clauses; instead, looks
  * purely for a structural match.
  */
-static inline Handle imply(AtomSpace* as, Handle himplication)
+static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 {
-	LinkPtr limp(LinkCast(himplication));
-	OC_ASSERT(limp != NULL, "Bad implication link");
-
-	Handle hclauses = limp->getOutgoingAtom(0);
-
 	// Extract the variables; they were not specified.
 	FindAtoms fv(VARIABLE_NODE);
 	fv.search_set(hclauses);
 
-	HandleSeq vars;
-	for (Handle h : fv.varset)
-	{
-		vars.push_back(h);
-	}
+	HandleSeq vars(fv.varset.begin(), fv.varset.end());
 
 	// Stuff the variables into a proper variable list.
 	Handle hvars(createLink(VARIABLE_LIST, vars));
 
-	HandleSeq oset;
-	oset.push_back(hvars);
-	oset.push_back(himplication);
+	HandleSeq oset = {hvars, hclauses, himplicand};
 
 	BindLinkPtr bl(createBindLink(oset));
 
 	// Now perform the search.
 	DefaultImplicator impl(as);
-	impl.implicand = limp->getOutgoingAtom(1);
+	impl.implicand = himplicand;
 
 	bl->imply(impl);
 
