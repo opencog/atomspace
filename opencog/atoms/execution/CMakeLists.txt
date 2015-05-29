@@ -17,6 +17,7 @@ ADD_LIBRARY (execution SHARED
 ADD_DEPENDENCIES(execution opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(execution
+	query
 	clearbox
 	smob
 	${Boost_SYSTEM_LIBRARY}

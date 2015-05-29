@@ -54,7 +54,8 @@
 
 ; The cog-satisfying-set function will return the value(s) that
 ; the GetLink finds.  If only one value satsifies the query, then
-; that is returned. Else a SetLink is returned.
+; that is returned. Else a SetLink is returned. Equivalently,
+; the cog-execute! function will do the same thing.
 (cog-satisfying-set get-value)
 (cog-execute! get-value)
 
@@ -79,18 +80,18 @@
 (cog-execute! remove-thing-ab)
 
 ; Look for it.
-(cog-satisfying-set get-value)
+(cog-execute! get-value)
 
 ; Add it back in:
 (cog-execute! to-be-added)
-(cog-satisfying-set get-value)
+(cog-execute! get-value)
 
 ; ... and so on. We can now continue to remove it and add it
 ; back in repeatedly.
 (cog-execute! remove-thing-ab)
-(cog-satisfying-set get-value)
+(cog-execute! get-value)
 (cog-execute! to-be-added)
-(cog-satisfying-set get-value)
+(cog-execute! get-value)
 
 
 ; It is also useful to generically remove any atom matching
@@ -113,22 +114,29 @@
 
 ; Now, remove the EvaluationLink
 (cog-execute! remove-some-property)
-(cog-satisfying-set get-value)
+(cog-execute! get-value)
 
 ; We can now add and remove over and over:
 (cog-execute! to-be-added)
-(show-eval-links)
+(cog-execute! get-value)
 
-(cog-execute! to-be-removed)
-(show-eval-links)
+(cog-execute! remove-some-property)
+(cog-execute! get-value)
 
+; And do it again, for good luck:
 (cog-execute! to-be-added)
-(show-eval-links)
-(cog-execute! to-be-removed)
-(show-eval-links)
+(cog-execute! get-value)
+(cog-execute! remove-some-property)
+(cog-execute! get-value)
+
 
 ; ------------------------------------------------
 ; The AssignLink combines the add and remove into one.
+;
+; At this time, there is not Get/Put analog that works
+; in the same fashion thaat AssignLink does. So we copy
+; this part of the example from the assert/retract example.
+; This should probably be updated and fixed.
 (define assign-b
 	(AssignLink
 		(TypeNode "EvaluationLink")
@@ -146,12 +154,12 @@
 			(ConceptNode "The V alternative"))))
 
 (cog-execute! assign-b)
-(show-eval-links)
+(cog-execute! get-value)
 
 (cog-execute! assign-v)
-(show-eval-links)
+(cog-execute! get-value)
 
 (cog-execute! assign-b)
-(show-eval-links)
+(cog-execute! get-value)
 
 ; ... and so on, ad infinitum

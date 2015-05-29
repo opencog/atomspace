@@ -204,6 +204,7 @@ IF (HAVE_GUILE)
 
 	TARGET_LINK_LIBRARIES(scheme_wrapper
 		query
+		execution
 		smob
 		${PYTHON_LIBRARIES}
 	)

@@ -22,7 +22,7 @@ TARGET_LINK_LIBRARIES(query
 	atomutils
 	lambda
 	atomspace
-	execution
+#	execution
 )
 
 IF (HAVE_GUILE)

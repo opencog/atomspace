@@ -72,6 +72,8 @@ class SchemeTest(TestCase):
 
     # Run the pattern-matcher/unifier/query-engine.
     def test_unifier(self):
+        status = load_scm(self.space, "opencog/scm/opencog.scm")
+        self.assertTrue(status)
         status = load_scm(self.space, "opencog/scm/opencog/query.scm")
         self.assertTrue(status)
 
