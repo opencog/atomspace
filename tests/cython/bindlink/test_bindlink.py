@@ -44,15 +44,13 @@ class BindlinkTest(TestCase):
                     VariableNode("$var"),
 
                     # The pattern to be grounded.
-                    ImplicationLink(
-                        InheritanceLink(
-                            VariableNode("$var"),
-                            ConceptNode("animal")
-                        ),
+                    InheritanceLink(
+                        VariableNode("$var"),
+                        ConceptNode("animal")
+                    ),
 
-                        # The grounding to be returned.
-                        VariableNode("$var")
-                    )
+                    # The grounding to be returned.
+                    VariableNode("$var")
                 # bindlink needs a handle
                 ).h
 
