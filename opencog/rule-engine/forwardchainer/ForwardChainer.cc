@@ -117,6 +117,12 @@ void ForwardChainer::step(ForwardChainerCallBack& fcb)
                r->get_name().c_str());
     HandleSeq product = fcb.apply_rule(_fcmem);
 
+    _log->info("PRODUCTS...");
+    for(const auto& p:product)
+    {
+        _log->info("%s ", p->toShortString().c_str() );
+    }
+
     _log->info(
             "[ForwardChainer] updating premise list with the inference made");
     _fcmem.update_potential_sources(product);
@@ -140,6 +146,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
 
     auto max_iter = _cpolicy_loader->get_max_iter();
     _fcmem.set_source(hsource); //set initial source
+    _fcmem.update_potential_sources(HandleSeq{hsource});
 
     while (_iteration < max_iter /*OR other termination criteria*/) {
         _log->info("Iteration %d", _iteration);
