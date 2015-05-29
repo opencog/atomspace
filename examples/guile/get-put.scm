@@ -114,19 +114,21 @@
 
 ; Now, remove the EvaluationLink
 (cog-execute! remove-some-property)
-(cog-satisfying-set get-value)
+(cog-execute! get-value)
 
 ; We can now add and remove over and over:
 (cog-execute! to-be-added)
-(show-eval-links)
+(cog-execute! get-value)
 
-(cog-execute! to-be-removed)
-(show-eval-links)
+(cog-execute! remove-some-property)
+(cog-execute! get-value)
 
+; And do it again, for good luck:
 (cog-execute! to-be-added)
-(show-eval-links)
-(cog-execute! to-be-removed)
-(show-eval-links)
+(cog-execute! get-value)
+(cog-execute! remove-some-property)
+(cog-execute! get-value)
+
 
 ; ------------------------------------------------
 ; The AssignLink combines the add and remove into one.
