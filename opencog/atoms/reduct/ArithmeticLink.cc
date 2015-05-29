@@ -158,11 +158,28 @@ static inline double get_double(AtomSpace *as, Handle h)
 
 Handle ArithmeticLink::execute(AtomSpace* as) const
 {
+	// XXX FIXME, we really want the instantiator to do the work
+	// here, but there is a giant circular-shared-library mess
+	// that results if we do this. So i'm disablig for now.
+#ifdef CIRCULAR_SHARED_LIBS
 	Instantiator inst(as);
+#endif
 	double sum = knild;
 	for (Handle h: _outgoing)
 	{
+#ifdef CIRCULAR_SHARED_LIBS
 		h = inst.execute(h);
+#else
+		FunctionLinkPtr flp = FunctionLinkCast(h);
+
+		// Arghh.  The cast should have been enough, but we currently
+		// can't store these in the atomsapce, due to circular shared
+		// lib dependencies.
+		if (NULL == flp and classserver().isA(h->getType(), FUNCTION_LINK))
+			flp = FunctionLinkCast(FunctionLink::factory(LinkCast(h)));
+		if (NULL != flp)
+			h = flp->execute();
+#endif
 		sum = konsd(sum, get_double(as, h));
 	}
 

@@ -8,7 +8,14 @@ performance nor for extensibility, nor anything else. Its more of a
 proof-of-concept.  There are surely other ways of doing this, and some
 of them might be better.
 
-Anyway... try this at the guyile prompt:
+Caution:
+Some of the examples below used to work, but got broken during a
+reorganization.  The core problem is that there is a ciruclar
+dependency between all the various shared libraries that is
+relly hard to disentangle; untangling it cause breakage which is not
+fixed.
+
+Anyway... try this at the guile prompt:
 ```
 (cog-reduce! (PlusLink (NumberNode 2) (NumberNode 2)))
 ```
@@ -55,4 +62,4 @@ Using the same ideas:
          (PlusLink (NumberNode 1) (NumberNode 1))))
 ```
 
-Not yet implemented: something that can reduce x+2x to 3x and x+(-x) to 0.
+Not sure, but reduction of x+2x to 3x and x+(-x) to 0 should work.

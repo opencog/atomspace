@@ -4,5 +4,5 @@ TARGET_LINK_LIBRARIES(AssignUTest atomspace clearbox)
 
 IF(HAVE_GUILE)
 	ADD_CXXTEST(ReductUTest)
-	TARGET_LINK_LIBRARIES(ReductUTest atomspace smob clearbox)
+	TARGET_LINK_LIBRARIES(ReductUTest atomspace smob clearbox execution)
 ENDIF(HAVE_GUILE)

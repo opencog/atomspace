@@ -316,8 +316,10 @@ static AtomPtr factory(Type atom_type, AtomPtr atom)
         if (NULL == VariableListCast(atom))
             return createVariableList(*LinkCast(atom));
     } else if (classserver().isA(atom_type, FUNCTION_LINK)) {
+/* More circular-dependency heart-ache
         if (NULL == FunctionLinkCast(atom))
             return FunctionLink::factory(LinkCast(atom));
+*/
     }
     return atom;
 }
@@ -363,7 +365,9 @@ static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
     if (VARIABLE_LIST == atom_type)
         return createVariableList(*LinkCast(atom));
     if (classserver().isA(atom_type, FUNCTION_LINK))
-        return FunctionLink::factory(LinkCast(atom));
+        // XXX FIXME more circular-dependency heart-ache
+        // return FunctionLink::factory(LinkCast(atom));
+        return createLink(*LinkCast(atom));
     if (classserver().isA(atom_type, LINK))
         return createLink(*LinkCast(atom));
 

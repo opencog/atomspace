@@ -11,6 +11,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/reduct/FunctionLink.h>
 #include <opencog/guile/SchemeModule.h>
 
 #include "ExecSCM.h"
@@ -54,7 +55,12 @@ static Handle ss_reduce(AtomSpace* atomspace, const Handle& h)
 			"Expecteing a FreeLink (PlusLink, TimesLink, etc");
 	}
 
+	// Arghh.  The cast should have been enough, but we currently
+	// can't store these in the atomsapce, due to circular shared
+	// lib dependencies.
 	FreeLinkPtr fff(FreeLinkCast(h));
+	if (NULL == fff)
+		fff = FreeLinkCast(FunctionLink::factory(LinkCast(h)));
 	Handle hr(fff->reduce());
 
 	if (DELETE_LINK == hr->getType())

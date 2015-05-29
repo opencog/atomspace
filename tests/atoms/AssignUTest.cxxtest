@@ -68,7 +68,12 @@ void AssignUTest::testInsert()
 
 	TS_ASSERT(as.getSize() == 6);
 
+	// Arghh.  The cast should have been enough, but we currently
+	// can't store these in the atomsapce, due to circular shared
+	// lib dependencies.
 	InsertLinkPtr alp = InsertLinkCast(hna);
+	if (NULL == alp)
+		alp = createInsertLink(*LinkCast(hna));
 	TS_ASSERT(alp != NULL);
 
 	alp->execute(&as);
@@ -131,6 +136,8 @@ void AssignUTest::testRemove()
 	TS_ASSERT(as.getSize() == 1+4+4+4+2);
 
 	RemoveLinkPtr rlp = RemoveLinkCast(hna);
+	if (NULL == rlp)
+		rlp = createRemoveLink(*LinkCast(hna));
 	TS_ASSERT(rlp != NULL);
 
 	rlp->execute(&as);
@@ -184,6 +191,8 @@ void AssignUTest::testAssign()
 	TS_ASSERT(evhs.size() == 3);
 
 	AssignLinkPtr rlp = AssignLinkCast(hna);
+	if (NULL == rlp)
+		rlp = createAssignLink(*LinkCast(hna));
 	TS_ASSERT(rlp != NULL);
 
 	rlp->execute(&as);

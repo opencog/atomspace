@@ -47,7 +47,6 @@ ADD_DEPENDENCIES(atomspace opencog_atom_types atom_types.h)
 
 TARGET_LINK_LIBRARIES(atomspace
 	lambda
-	clearbox
 	${COGUTIL_LIBRARY}
 	${GSL_LIBRARIES}
 	${Boost_THREAD_LIBRARY}
