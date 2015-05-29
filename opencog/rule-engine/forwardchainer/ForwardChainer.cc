@@ -117,6 +117,12 @@ void ForwardChainer::step(ForwardChainerCallBack& fcb)
                r->get_name().c_str());
     HandleSeq product = fcb.apply_rule(_fcmem);
 
+    _log->info("PRODUCTS...");
+    for(const auto& p:product)
+    {
+        _log->info("%s ", p->toShortString().c_str() );
+    }
+
     _log->info(
             "[ForwardChainer] updating premise list with the inference made");
     _fcmem.update_potential_sources(product);
