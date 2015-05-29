@@ -54,7 +54,8 @@
 
 ; The cog-satisfying-set function will return the value(s) that
 ; the GetLink finds.  If only one value satsifies the query, then
-; that is returned. Else a SetLink is returned.
+; that is returned. Else a SetLink is returned. Equivalently,
+; the cog-execute! function will do the same thing.
 (cog-satisfying-set get-value)
 (cog-execute! get-value)
 
@@ -79,18 +80,18 @@
 (cog-execute! remove-thing-ab)
 
 ; Look for it.
-(cog-satisfying-set get-value)
+(cog-execute! get-value)
 
 ; Add it back in:
 (cog-execute! to-be-added)
-(cog-satisfying-set get-value)
+(cog-execute! get-value)
 
 ; ... and so on. We can now continue to remove it and add it
 ; back in repeatedly.
 (cog-execute! remove-thing-ab)
-(cog-satisfying-set get-value)
+(cog-execute! get-value)
 (cog-execute! to-be-added)
-(cog-satisfying-set get-value)
+(cog-execute! get-value)
 
 
 ; It is also useful to generically remove any atom matching

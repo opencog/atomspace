@@ -21,9 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/reduct/FunctionLink.h>
 #include <opencog/atoms/core/PutLink.h>
+#include <opencog/atoms/reduct/FunctionLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
+#include <opencog/query/BindLinkAPI.h>
 
 #include "Instantiator.h"
 
@@ -137,7 +138,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			// The problem here is that the insertion leaves garbage
 			// intermediate-result atoms littering the atomspace, with
 			// no effective way of removing them. XXX This needs fixing.
-			// Again, some kind of monda solution. XXX FIXME later.
+			// Again, some kind of monad solution. XXX FIXME later.
 			//
 			// Just as well, because it seems the scheme (and python)
 			// bindings get tripped up by the UUID==-1 of uninserted atoms.
@@ -163,11 +164,13 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// PatternLink::satisfy() method.
 	if (GET_LINK == t)
 	{
-printf("duude ola got get link.\n");
-		for (Handle h: oset_results)
-			printf("duude get got %s\n", h->toShortString().c_str());
+		size_t sz = oset_results.size();
+		for (size_t i=0; i< sz; i++)
+			oset_results[i] = _as->addAtom(oset_results[i]);
 
-		return Handle::UNDEFINED;
+		LinkPtr lp = createLink(GET_LINK, oset_results);
+
+		return satisfying_set(_as, Handle(lp));
 	}
 
 	// Now create a duplicate link, but with an outgoing set where
