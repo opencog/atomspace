@@ -12,11 +12,6 @@ INSTALL (TARGETS atomspace_wrapper
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
-INSTALL (FILES
-    AtomSpace_CWrapper.h
-	DESTINATION "include/${PROJECT_NAME}/atomspace_cwrapper"
-)
-
 INSTALL(CODE
      "execute_process(COMMAND cabal install   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/opencog/haskell OUTPUT_QUIET)"
 )
