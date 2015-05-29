@@ -30,6 +30,7 @@
 #include <opencog/util/random.h>
 
 #include <opencog/atomutils/FindUtils.h>
+#include <opencog/atomutils/Substitutor.h>
 #include <opencog/atoms/bind/PatternUtils.h>
 #include <opencog/atoms/bind/PatternLink.h>
 
@@ -255,8 +256,8 @@ void BackwardChainer::process_target(Target& target)
 		for (auto& h: fv.varset)
 			quote_mapping[h] = _garbage_superspace->addAtom(createLink(QUOTE_LINK, h));
 
-		Instantiator inst(_garbage_superspace);
-		implicand_quoted_mapping[p.first] = inst.instantiate(p.second, quote_mapping);
+		Substitutor subt(_garbage_superspace);
+		implicand_quoted_mapping[p.first] = subt.substitute(p.second, quote_mapping);
 
 		logger().debug("[BackwardChainer] Added "
 					   + implicand_quoted_mapping[p.first]->toShortString()
@@ -265,9 +266,9 @@ void BackwardChainer::process_target(Target& target)
 
 	// Reverse ground the implicant with the grounding we found from
 	// unifying the implicand
-	Instantiator inst(_garbage_superspace);
+	Substitutor subt(_garbage_superspace);
 	std::vector<VarMap> premises_vmap_list, premises_vmap_list_alt;
-	Handle himplicant_normal = inst.instantiate(himplicant, implicand_normal_mapping);
+	Handle himplicant_normal = subt.substitute(himplicant, implicand_normal_mapping);
 
 	logger().debug("[BackwardChainer] Reverse grounded as "
 				   + himplicant_normal->toShortString());
@@ -277,7 +278,7 @@ void BackwardChainer::process_target(Target& target)
 		match_knowledge_base(himplicant_normal, hvardecl, false, premises_vmap_list);
 
 	// Reverse ground 2nd version, try it with QuoteLink around variables
-	Handle himplicant_quoted = inst.instantiate(himplicant, implicand_quoted_mapping);
+	Handle himplicant_quoted = subt.substitute(himplicant, implicand_quoted_mapping);
 
 	logger().debug("[BackwardChainer] Alternative reverse grounded as "
 				   + himplicant_quoted->toShortString());
@@ -309,7 +310,7 @@ void BackwardChainer::process_target(Target& target)
 		// reverse ground the rule's outputs the mapping to the premise
 		// so that when we ground the premise, we know how to generate
 		// the final output
-		Handle output_grounded = inst.instantiate(standardized_rule.get_implicand(), vm);
+		Handle output_grounded = subt.substitute(standardized_rule.get_implicand(), vm);
 
 		logger().debug("Checking permises " + hp->toShortString());
 
