@@ -7,20 +7,19 @@ The unified rule engine project aims at building a generic opencog
 rule engine on top of the Pattern Matcher with a C++ PLN
 implementation where rules are put in a scheme representation. This
 will enable the reuse of PLN for any kind of Backward and Forward
-chaining inferences, as long as rules are represented as an
-ImplicationLinks or BindLinks which are decoupled from the PLN
-inference engine and are loaded dynamically from a scheme file.  In
-the new design of the rule engine, PLN uses the Pattern Matcher API
-for querying the atomspace to guarantee code reuse and no reinvention
-of the wheel.  The pattern matcher can be invoked implicitly with the
-default callbacks or explicitly using custom callback handlers for
-specialized cases.  All the above criteria and other issues has
-required a new implementation of PLN.
+chaining inferences, as long as rules are represented as BindLinks
+which are decoupled from the PLN inference engine and are loaded
+dynamically from a scheme file.  In the new design of the rule engine,
+PLN uses the Pattern Matcher API for querying the atomspace to
+guarantee code reuse and no reinvention of the wheel.  The pattern
+matcher can be invoked implicitly with the default callbacks or
+explicitly using custom callback handlers for specialized cases.  All
+the above criteria and other issues has required a new implementation
+of PLN.
 
 ## Overall requirement/objectives
 
-1. Rules should be specified as ImplicationLinks or BindLinks in a
-   scheme file.
+1. Rules should be specified as BindLinks in a scheme file.
 
 2. Mechanisms will be provided for backward chaining from a given
    target, or forward chaining from a set of premises.

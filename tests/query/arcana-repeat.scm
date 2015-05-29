@@ -145,28 +145,26 @@
 (define (repeat-same)
 	(BindLink
 		(VariableNode "$x")
-		(ImplicationLink
-			(ListLink
-				(EvaluationLink
-					(PredicateNode "this way")
-					(ListLink
-						(VariableNode "$x")
-						(ConceptNode "thing two")
-					)
-				)
-			)
-			(ListLink
-				(EvaluationLink
-					(PredicateNode "this way")
-					(ListLink
-						(VariableNode "$x")
-						(ConceptNode "thing two")
-					)
+		(ListLink
+			(EvaluationLink
+				(PredicateNode "this way")
+				(ListLink
+					(VariableNode "$x")
+					(ConceptNode "thing two")
 				)
 			)
 		)
-		(VariableNode "$x")
+		(ListLink
+			(EvaluationLink
+				(PredicateNode "this way")
+				(ListLink
+					(VariableNode "$x")
+					(ConceptNode "thing two")
+				)
+			)
+		)
 	)
+	(VariableNode "$x")
 )
 
 ;;; Note that the evaluationLink is repeated twice, inside of
@@ -174,28 +172,26 @@
 (define (repeat-different)
 	(BindLink
 		(VariableNode "$x")
-		(ImplicationLink
-			(ListLink
-				(EvaluationLink
-					(PredicateNode "this way")
-					(ListLink
-						(VariableNode "$x")
-						(ConceptNode "thing two")
-					)
-				)
-			)
-			(MemberLink
-				(EvaluationLink
-					(PredicateNode "this way")
-					(ListLink
-						(VariableNode "$x")
-						(ConceptNode "thing two")
-					)
+		(ListLink
+			(EvaluationLink
+				(PredicateNode "this way")
+				(ListLink
+					(VariableNode "$x")
+					(ConceptNode "thing two")
 				)
 			)
 		)
-		(VariableNode "$x")
+		(MemberLink
+			(EvaluationLink
+				(PredicateNode "this way")
+				(ListLink
+					(VariableNode "$x")
+					(ConceptNode "thing two")
+				)
+			)
+		)
 	)
+	(VariableNode "$x")
 )
 
 ;;; Note that the evaluationLink is repeated three times, inside of
@@ -203,37 +199,35 @@
 (define (repeat-diff-thrice)
 	(BindLink
 		(VariableNode "$x")
-		(ImplicationLink
-			(ListLink
-				(EvaluationLink
-					(PredicateNode "this way")
-					(ListLink
-						(VariableNode "$x")
-						(ConceptNode "thing two")
-					)
-				)
-			)
-			(MemberLink
-				(EvaluationLink
-					(PredicateNode "this way")
-					(ListLink
-						(VariableNode "$x")
-						(ConceptNode "thing two")
-					)
-				)
-			)
-			(SubsetLink
-				(EvaluationLink
-					(PredicateNode "this way")
-					(ListLink
-						(VariableNode "$x")
-						(ConceptNode "thing two")
-					)
+		(ListLink
+			(EvaluationLink
+				(PredicateNode "this way")
+				(ListLink
+					(VariableNode "$x")
+					(ConceptNode "thing two")
 				)
 			)
 		)
-		(VariableNode "$x")
+		(MemberLink
+			(EvaluationLink
+				(PredicateNode "this way")
+				(ListLink
+					(VariableNode "$x")
+					(ConceptNode "thing two")
+				)
+			)
+		)
+		(SubsetLink
+			(EvaluationLink
+				(PredicateNode "this way")
+				(ListLink
+					(VariableNode "$x")
+					(ConceptNode "thing two")
+				)
+			)
+		)
 	)
+	(VariableNode "$x")
 )
 
 ;;; Note that the evaluationLink is repeated three times, inside of
@@ -241,68 +235,64 @@
 (define (repeat-thrice)
 	(BindLink
 		(VariableNode "$x")
-		(ImplicationLink
-			(ListLink
-				(EvaluationLink
-					(PredicateNode "this way")
-					(ListLink
-						(VariableNode "$x")
-						(ConceptNode "thing two")
-					)
-				)
-			)
-			(ListLink
-				(EvaluationLink
-					(PredicateNode "this way")
-					(ListLink
-						(VariableNode "$x")
-						(ConceptNode "thing two")
-					)
-				)
-			)
-			(ListLink
-				(EvaluationLink
-					(PredicateNode "this way")
-					(ListLink
-						(VariableNode "$x")
-						(ConceptNode "thing two")
-					)
+		(ListLink
+			(EvaluationLink
+				(PredicateNode "this way")
+				(ListLink
+					(VariableNode "$x")
+					(ConceptNode "thing two")
 				)
 			)
 		)
-		(VariableNode "$x")
+		(ListLink
+			(EvaluationLink
+				(PredicateNode "this way")
+				(ListLink
+					(VariableNode "$x")
+					(ConceptNode "thing two")
+				)
+			)
+		)
+		(ListLink
+			(EvaluationLink
+				(PredicateNode "this way")
+				(ListLink
+					(VariableNode "$x")
+					(ConceptNode "thing two")
+				)
+			)
+		)
 	)
+	(VariableNode "$x")
 )
 ;;; Note that the evaluationLink is repeated three times, inside of
 ;;; just one ListLink, total.
 (define (repeat-once)
 	(BindLink
 		(VariableNode "$x")
-		(ImplicationLink
-			(ListLink
-				(EvaluationLink
-					(PredicateNode "this way")
-					(ListLink
-						(VariableNode "$x")
-						(ConceptNode "thing two")
-					)
+		(ListLink
+			(EvaluationLink
+				(PredicateNode "this way")
+				(ListLink
+					(VariableNode "$x")
+					(ConceptNode "thing two")
 				)
-				(EvaluationLink
-					(PredicateNode "this way")
-					(ListLink
-						(VariableNode "$x")
-						(ConceptNode "thing two")
-					)
+			)
+			(EvaluationLink
+				(PredicateNode "this way")
+				(ListLink
+					(VariableNode "$x")
+					(ConceptNode "thing two")
 				)
-				(EvaluationLink
-					(PredicateNode "this way")
-					(ListLink
-						(VariableNode "$x")
-						(ConceptNode "thing two")
-					)
+			)
+			(EvaluationLink
+				(PredicateNode "this way")
+				(ListLink
+					(VariableNode "$x")
+					(ConceptNode "thing two")
 				)
 			)
 		)
-		(VariableNode "$x")
 	)
+	(VariableNode "$x")
 )
