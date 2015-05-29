@@ -18,7 +18,6 @@ library
                    , data-default >=0.5
 
   extra-libraries:   atomspace_wrapper
-                   , stdc++
 
   extra-lib-dirs:    /usr/local/lib/opencog
-  include-dirs:      /usr/local/include/opencog
+
