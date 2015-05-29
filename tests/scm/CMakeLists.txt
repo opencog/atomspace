@@ -14,6 +14,7 @@ LINK_LIBRARIES(
 	atomspace
 	smob
 	clearbox
+	execution
 	${GUILE_LIBRARIES}
 )
 

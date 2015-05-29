@@ -29,6 +29,7 @@ SET_TESTS_PROPERTIES(PythonEvalUTest
 ADD_CXXTEST(PythonUtilitiesUTest)
 
 TARGET_LINK_LIBRARIES(PythonUtilitiesUTest
+	smob
 	PythonEval
 	utilities_cython
 	atomspace_cython
