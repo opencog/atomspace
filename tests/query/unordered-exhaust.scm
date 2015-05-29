@@ -75,7 +75,7 @@
 ;; another 36 for the abc-set.
 ;;
 ;; The goal of this test is to check nested unordered links: viz one
-;; unordered link inside another, so that proper state presevation and
+;; unordered link inside another, so that proper state preservation and
 ;; backtracking is needed to correctly handle the nesting.
 (define (exhaust-2)
 	(BindLink
@@ -91,15 +91,15 @@
 			(VariableNode "$f")
 		)
 		(AndLink
-			(SetLink ; sets are inherenetly unordered
+			(SetLink ; sets are inherently unordered
       			(VariableNode "$a")
        			(VariableNode "$b")
        			(VariableNode "$c")
-			)
-			(SetLink
-         		(VariableNode "$d")
-         		(VariableNode "$e")
-         		(VariableNode "$f")
+				(SetLink
+         			(VariableNode "$d")
+         			(VariableNode "$e")
+         			(VariableNode "$f")
+				)
 			)
 		)
 		; The result to report
