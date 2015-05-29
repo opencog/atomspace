@@ -26,13 +26,11 @@ newtype AtomSpaceRef = AtomSpaceRef (Ptr AtomSpaceRef)
 type AtomSpace = ReaderT AtomSpaceRef IO
 
 -- Internal functions new and delete, to create and delete C++ instances of the AtomSpace class.
-foreign import ccall "AtomSpace_CWrapper.h AtomSpace_new"
-               c_atomspace_new :: IO AtomSpaceRef
+foreign import ccall "AtomSpace_new" c_atomspace_new :: IO AtomSpaceRef
 asNew :: IO AtomSpaceRef
 asNew = c_atomspace_new
 
-foreign import ccall "AtomSpace_CWrapper.h AtomSpace_delete"
-               c_atomspace_delete :: AtomSpaceRef -> IO ()
+foreign import ccall "AtomSpace_delete" c_atomspace_delete :: AtomSpaceRef -> IO ()
 asDelete :: AtomSpaceRef -> IO ()
 asDelete = c_atomspace_delete
 
@@ -41,8 +39,7 @@ getAtomSpace :: AtomSpace AtomSpaceRef
 getAtomSpace = ask
 
 -- 'asAddNode' calls to the addNode method of the AtomSpace C++ class.
-foreign import ccall "AtomSpace_CWrapper.h AtomSpace_addNode"
-               c_atomspace_addnode :: AtomSpaceRef -> CShort -> CString -> IO CLong
+foreign import ccall "AtomSpace_addNode" c_atomspace_addnode :: AtomSpaceRef -> CShort -> CString -> IO CLong
 asAddNode :: Node -> AtomSpace Handle
 asAddNode nod = do
                     asRef <- getAtomSpace
