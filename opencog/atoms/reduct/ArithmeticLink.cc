@@ -171,7 +171,13 @@ Handle ArithmeticLink::execute(AtomSpace* as) const
 		h = inst.execute(h);
 #else
 		FunctionLinkPtr flp = FunctionLinkCast(h);
-		if (flp != NULL)
+
+		// Arghh.  The cast should have been enough, but we currently
+		// can't store these in the atomsapce, due to circular shared
+		// lib dependencies.
+		if (NULL == flp and classserver().isA(h->getType(), FUNCTION_LINK))
+			flp = FunctionLinkCast(FunctionLink::factory(LinkCast(h)));
+		if (NULL != flp)
 			h = flp->execute();
 #endif
 		sum = konsd(sum, get_double(as, h));
