@@ -40,7 +40,7 @@
 	(BindLink mulder (DeleteLink mulder)))
 
 (define discredit-scully
-	(BindLink (ImplicationLink scully (DeleteLink scully))))
+	(BindLink scully (DeleteLink scully)))
 
 ; Status of the UFO
 (define ufo-state (AnchorNode "UFO"))
@@ -57,30 +57,24 @@
 ; The UFO exists only if both Mulder and Scully are not around.
 (define is-visible
 	(BindLink
-		(ImplicationLink
-			(AndLink (AbsentLink mulder) (AbsentLink scully))
-			(AssignLink (TypeNode "ListLink") ufo-state ufo-exists)
-		)
+		(AndLink (AbsentLink mulder) (AbsentLink scully))
+		(AssignLink (TypeNode "ListLink") ufo-state ufo-exists)
 	)
 )
 
 ; The UFO is denied if either Mulder or Scully are around.
 (define is-invisible
 	(BindLink
-		(ImplicationLink
-			(ChoiceLink mulder scully)
-			(AssignLink (TypeNode "ListLink") ufo-state ufo-denied)
-		)
+		(ChoiceLink mulder scully)
+		(AssignLink (TypeNode "ListLink") ufo-state ufo-denied)
 	)
 )
 
 ; There is undeniable evidence when both of them are working.
 (define is-proven
 	(BindLink
-		(ImplicationLink
-			(AndLink mulder scully)
-			(AssignLink (TypeNode "ListLink") ufo-state ufo-proven)
-		)
+		(AndLink mulder scully)
+		(AssignLink (TypeNode "ListLink") ufo-state ufo-proven)
 	)
 )
 
