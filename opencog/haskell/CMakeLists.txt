@@ -18,8 +18,6 @@ INSTALL (FILES
 )
 
 INSTALL(CODE
-    "execute_process(COMMAND cabal configure WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/opencog/haskell OUTPUT_QUIET)
-     execute_process(COMMAND cabal build     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/opencog/haskell OUTPUT_QUIET)
-     execute_process(COMMAND cabal install   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/opencog/haskell OUTPUT_QUIET)"
+    "execute_process(COMMAND cabal install   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/opencog/haskell OUTPUT_QUIET)"
 )
 
