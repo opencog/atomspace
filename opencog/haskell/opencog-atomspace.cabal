@@ -3,7 +3,6 @@ version:             0.1.0.0
 synopsis:            -
 homepage:            github.com/opencog/atomspace/tree/master/opencog/haskell
 license:             OtherLicense
-license-file:        LICENSE
 author:              Marcos Pividori 
 maintainer:          -
 category:            Artificial Intelligence
