@@ -140,6 +140,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
 
     auto max_iter = _cpolicy_loader->get_max_iter();
     _fcmem.set_source(hsource); //set initial source
+    _fcmem.update_potential_sources(HandleSeq{hsource});
 
     while (_iteration < max_iter /*OR other termination criteria*/) {
         _log->info("Iteration %d", _iteration);
