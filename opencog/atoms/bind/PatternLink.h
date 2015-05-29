@@ -98,6 +98,7 @@ protected:
 	HandleSeq _component_patterns;
 
 	void extract_variables(const HandleSeq& oset);
+	void init_scoped_variables(const Handle& hvar);
 	void unbundle_clauses(const Handle& body);
 	void validate_clauses(std::set<Handle>& vars,
 	                      HandleSeq& clauses);

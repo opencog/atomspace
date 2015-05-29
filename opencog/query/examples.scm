@@ -12,15 +12,13 @@
 (define human-implies-animal
 	(BindLink
 		(VariableNode "$H")
-		(ImplicationLink
-			(InheritanceLink
-				(VariableNode "$H")
-				(ConceptNode "human")
-			)
-			(InheritanceLink
-				(VariableNode "$H")
-				(ConceptNode "animal")
-			)
+		(InheritanceLink
+			(VariableNode "$H")
+			(ConceptNode "human")
+		)
+		(InheritanceLink
+			(VariableNode "$H")
+			(ConceptNode "animal")
 		)
 	)
 )
@@ -51,13 +49,11 @@
 (define v
 	(BindLink
 	(VariableNode "$predicateNode")
-	(ImplicationLink
-		(InheritanceLink
-			(VariableNode "$predicateNode")
-			(DefinedFrameNode "#Manipulation")
-		)
+	(InheritanceLink
 		(VariableNode "$predicateNode")
-		)
+		(DefinedFrameNode "#Manipulation")
+	)
+	(VariableNode "$predicateNode")
 	)
 )
 
@@ -69,13 +65,11 @@
 			(VariableNode "$prNode")
 			(TypeNode "PredicateNode")
 		)
-		(ImplicationLink
-			(InheritanceLink
-				(VariableNode "$prNode")
-				(DefinedFrameNode "#Manipulation")
-			)
+		(InheritanceLink
 			(VariableNode "$prNode")
+			(DefinedFrameNode "#Manipulation")
 		)
+		(VariableNode "$prNode")
 	)
 )
 
@@ -84,13 +78,11 @@
 (define x
 	(BindLink
 		(VariableNode "$H")
-		(ImplicationLink
-			(InheritanceLink
-				(VariableNode "$predicateNode")
-				(DefinedFrameNode "#Manipulation")
-			)
+		(InheritanceLink
 			(VariableNode "$predicateNode")
+			(DefinedFrameNode "#Manipulation")
 		)
+		(VariableNode "$predicateNode")
 	)
 )
 

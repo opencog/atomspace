@@ -33,8 +33,8 @@ PatternSCM::PatternSCM(void) :
 /// Thus, all the definitions below happen in that module.
 void PatternSCM::init(void)
 {
-	// Run implication, assuming that the argument is a handle to
-	// an BindLink containing variables and an ImplicationLink.
+	// Run implication, assuming that the argument is a handle to an
+	// BindLink containing variables, a pattern and a rewrite rules.
 	_binders.push_back(new FunctionWrap(bindlink, "cog-bind", "query"));
 
 	// Identical to do_bindlink above, except that it only returns the

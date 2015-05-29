@@ -51,30 +51,28 @@
 				(TypeNode "NumberNode")
 			)
 		)
-		(ImplicationLink
-			(AndLink
-				(EvaluationLink
-					(PredicateNode "net-worth")
-					(ListLink
-						person-x
-						(VariableNode "$less-wealth")
-					)
+		(AndLink
+			(EvaluationLink
+				(PredicateNode "net-worth")
+				(ListLink
+					person-x
+					(VariableNode "$less-wealth")
 				)
-
-				(EvaluationLink
-					(PredicateNode "net-worth")
-					(ListLink
-						(VariableNode "$who")
-						(VariableNode "$more-wealth")
-					)
-				)
-
-				comp-link
 			)
 
-			;; output result: just the concept node of who it is.
-			(VariableNode "$who")
+			(EvaluationLink
+				(PredicateNode "net-worth")
+				(ListLink
+					(VariableNode "$who")
+					(VariableNode "$more-wealth")
+				)
+			)
+
+			comp-link
 		)
+
+		;; output result: just the concept node of who it is.
+		(VariableNode "$who")
 	)
 )
 

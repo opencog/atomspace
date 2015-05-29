@@ -184,25 +184,23 @@
 			(VariableNode "$var_number")
 			(VariableNode "$var_schema")
 		)
-		(ImplicationLink
-			;; body
-			(MemberLink (stv 1.0 1.0)
+		;; body
+		(MemberLink (stv 1.0 1.0)
+			(VariableNode "$var_schema")
+			(VariableNode "$var_number")
+			(ExecutionOutputLink (stv 1.0 1.0)
 				(VariableNode "$var_schema")
-				(VariableNode "$var_number")
-				(ExecutionOutputLink (stv 1.0 1.0)
-					(VariableNode "$var_schema")
-					(ListLink
-						(LemmaNode "thing1")
-						(LemmaNode "thing2")
-						(LemmaNode "thing3")
-					)
+				(ListLink
+					(LemmaNode "thing1")
+					(LemmaNode "thing2")
+					(LemmaNode "thing3")
 				)
 			)
-			;; implicand -- result
-			(ListLink
-				(VariableNode "$var_number")
-				(VariableNode "$var_schema")
-			)
+		)
+		;; implicand -- result
+		(ListLink
+			(VariableNode "$var_number")
+			(VariableNode "$var_schema")
 		)
 	)
 )

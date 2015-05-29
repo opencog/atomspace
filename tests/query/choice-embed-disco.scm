@@ -46,27 +46,25 @@
 ;;; parts are entirely disconnected from each-other.
 (define (embed-disco)
 	(BindLink
-		(ImplicationLink
-			(MemberLink
-				(ConceptNode "ways and means")
-				(ChoiceLink
-					(EvaluationLink
-						(PredicateNode "this way")
-						(ListLink
-							(VariableNode "$x")
-							(ConceptNode "thing two")
-						)
+		(MemberLink
+			(ConceptNode "ways and means")
+			(ChoiceLink
+				(EvaluationLink
+					(PredicateNode "this way")
+					(ListLink
+						(VariableNode "$x")
+						(ConceptNode "thing two")
 					)
-					(EvaluationLink
-						(PredicateNode "that way")
-						(ListLink
-							(ConceptNode "thing one")
-							(VariableNode "$x")
-						)
+				)
+				(EvaluationLink
+					(PredicateNode "that way")
+					(ListLink
+						(ConceptNode "thing one")
+						(VariableNode "$x")
 					)
 				)
 			)
-			(VariableNode "$x")
 		)
+		(VariableNode "$x")
 	)
 )

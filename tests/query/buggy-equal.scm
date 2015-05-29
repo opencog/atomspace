@@ -49,43 +49,41 @@
                 (TypeNode "ConceptNode")
             )
         )
-        (ImplicationLink
-            (AndLink
-                (InheritanceLink
-                    (VariableNode "$A")
-                    (VariableNode "$B")
-                )
-                (InheritanceLink
-                    (VariableNode "$B")
-                    (VariableNode "$C")
-                )
-                ; To avoid matching (Inheritance A B) and (Inheritance B A)
-                (NotLink
-                    (EvaluationLink
-                        (GroundedPredicateNode "scm: cog-equal?")
-                        (ListLink
-                            (VariableNode "$A")
-                            (VariableNode "$C")
-                        )
-                    )
-                )
+        (AndLink
+            (InheritanceLink
+                (VariableNode "$A")
+                (VariableNode "$B")
             )
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pln-xxx")
-                (ListLink
-                    (InheritanceLink
-                        (VariableNode "$A")
-                        (VariableNode "$B"))
-                    (InheritanceLink
-                        (VariableNode "$B")
-                        (VariableNode "$C")
-                    )
-                    ; Don't screw-up in-progress searches
-                    ; by using InheritanceLink here.
+            (InheritanceLink
+                (VariableNode "$B")
+                (VariableNode "$C")
+            )
+            ; To avoid matching (Inheritance A B) and (Inheritance B A)
+            (NotLink
+                (EvaluationLink
+                    (GroundedPredicateNode "scm: cog-equal?")
                     (ListLink
                         (VariableNode "$A")
                         (VariableNode "$C")
                     )
+                )
+            )
+        )
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pln-xxx")
+            (ListLink
+                (InheritanceLink
+                    (VariableNode "$A")
+                    (VariableNode "$B"))
+                (InheritanceLink
+                    (VariableNode "$B")
+                    (VariableNode "$C")
+                )
+                ; Don't screw-up in-progress searches
+                ; by using InheritanceLink here.
+                (ListLink
+                    (VariableNode "$A")
+                    (VariableNode "$C")
                 )
             )
         )
@@ -128,40 +126,38 @@
                 (TypeNode "ConceptNode")
             )
         )
-        (ImplicationLink
-            (AndLink
+        (AndLink
+            (InheritanceLink
+                (VariableNode "$A")
+                (VariableNode "$B")
+            )
+            (InheritanceLink
+                (VariableNode "$B")
+                (VariableNode "$C")
+            )
+            ; To avoid matching (Inheritance A B) and (Inheritance B A)
+            (NotLink
+                (EqualLink
+                    (VariableNode "$A")
+                    (VariableNode "$C")
+                )
+            )
+        )
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: pln-xxx")
+            (ListLink
                 (InheritanceLink
                     (VariableNode "$A")
-                    (VariableNode "$B")
-                )
+                    (VariableNode "$B"))
                 (InheritanceLink
                     (VariableNode "$B")
                     (VariableNode "$C")
                 )
-                ; To avoid matching (Inheritance A B) and (Inheritance B A)
-                (NotLink
-                    (EqualLink
-                        (VariableNode "$A")
-                        (VariableNode "$C")
-                    )
-                )
-            )
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: pln-xxx")
+                ; Don't screw-up in-progress searches
+                ; by using InheritanceLink here.
                 (ListLink
-                    (InheritanceLink
-                        (VariableNode "$A")
-                        (VariableNode "$B"))
-                    (InheritanceLink
-                        (VariableNode "$B")
-                        (VariableNode "$C")
-                    )
-                    ; Don't screw-up in-progress searches
-                    ; by using InheritanceLink here.
-                    (ListLink
-                        (VariableNode "$A")
-                        (VariableNode "$C")
-                    )
+                    (VariableNode "$A")
+                    (VariableNode "$C")
                 )
             )
         )

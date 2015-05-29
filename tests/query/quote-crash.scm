@@ -6,18 +6,16 @@
 ; to stop the recursion.
 (define crasher
 	(BindLink
-		(ImplicationLink
-			(VariableNode "$x")
-			(ListLink
-				(ConceptNode "And the answer is ...")
-				(QuoteLink (VariableNode "$x"))))))
+		(VariableNode "$x")
+		(ListLink
+			(ConceptNode "And the answer is ...")
+			(QuoteLink (VariableNode "$x")))))
 
 ;; This is an infinite loop, because there are no type restrictions on
-;; the variable, and the instantiaotor can get confused.
+;; the variable, and the instantiator can get confused.
 (define infloop
 	(BindLink
-		(ImplicationLink
-			(VariableNode "$x")
-			(ListLink
-				(ConceptNode "And the answer is ...")
-				(VariableNode "$x")))))
+		(VariableNode "$x")
+		(ListLink
+			(ConceptNode "And the answer is ...")
+			(VariableNode "$x"))))

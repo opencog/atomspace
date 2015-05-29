@@ -92,8 +92,7 @@ void ExecutionOutputUTest::test_exec(void)
 	 *       $prep($var1, $var2)
 	 *      THEN %ExecutionOutputLink("make-it", $var1, $prep)
 	 */
-	Handle implication =
-	al(IMPLICATION_LINK,
+	Handle clauses =
 		al(AND_LINK,
 			al(EVALUATION_LINK,
 				an(PREDICATE_NODE, "_obj"),
@@ -109,15 +108,15 @@ void ExecutionOutputUTest::test_exec(void)
 					an(VARIABLE_NODE, "$var2")
 				)
 			)
-		),
+		);
+	Handle implicand =
 		al(EXECUTION_OUTPUT_LINK,
 			an(GROUNDED_SCHEMA_NODE, "scm:make-verb-prep"),
 			al(LIST_LINK,
 				an(VARIABLE_NODE, "$var1"),
 				an(VARIABLE_NODE, "$prep")
 			)
-		)
-	);
+		);
 
 	Handle hcapital;
 	// Create data on which the above pattern should match
@@ -155,7 +154,7 @@ void ExecutionOutputUTest::test_exec(void)
 	delete ev;
 
 	// Result should be a ListLink
-	Handle result = imply(as, implication);
+	Handle result = imply(as, clauses, implicand);
 
 	// There should be only one solution: the Berlin one.
 	// The Madrid graph should be rejected because of the
@@ -221,25 +220,21 @@ void ExecutionOutputUTest::test_varsub(void)
 
 	Handle situ =
 	al(BIND_LINK,
-		al(IMPLICATION_LINK,
-			al(CONTEXT_LINK,
-				an(CONCEPT_NODE, "situation"),
-				an(VARIABLE_NODE, "$action")
-			),
-			an(VARIABLE_NODE, "$action")
-		)
+	   al(CONTEXT_LINK,
+	      an(CONCEPT_NODE, "situation"),
+	      an(VARIABLE_NODE, "$action")
+	      ),
+	   an(VARIABLE_NODE, "$action")
 	);
 	BindLinkPtr situation(createBindLink(*LinkCast(situ)));
 
 	Handle pred =
 	al(BIND_LINK,
-		al(IMPLICATION_LINK,
-			al(CONTEXT_LINK,
-				an(CONCEPT_NODE, "predicament"),
-				an(VARIABLE_NODE, "$action")
-			),
-			an(VARIABLE_NODE, "$action")
-		)
+	   al(CONTEXT_LINK,
+	      an(CONCEPT_NODE, "predicament"),
+	      an(VARIABLE_NODE, "$action")
+	      ),
+	   an(VARIABLE_NODE, "$action")
 	);
 	BindLinkPtr predicament(createBindLink(*LinkCast(pred)));
 

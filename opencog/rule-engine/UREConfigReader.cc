@@ -71,17 +71,16 @@ HandleSeq UREConfigReader::fetch_rule_based_systems()
     // Retrieve all rule-based systems inheriting URE_top_rulebase
 	Handle rbs_var = _as.addNode(VARIABLE_NODE, "__URE_RBS__");
 	BindLink bl({rbs_var,
-				_as.addLink(IMPLICATION_LINK,
-				            // Clause:
-				            // InheritanceLink
-				            //    VariableNode "__URE_SUB_SYSTEMS__"
-				            //    ConceptNode URE_top_name
-				            _as.addLink(INHERITANCE_LINK,
-				                        rbs_var,
-				                        _as.addNode(CONCEPT_NODE,
-				                                    URE_top_name)),
-				            // Rewrite: (all inherited rule-based systems)
-				            rbs_var)});
+				// Clause:
+				// InheritanceLink
+				//    VariableNode "__URE_SUB_SYSTEMS__"
+				//    ConceptNode URE_top_name
+				_as.addLink(INHERITANCE_LINK,
+				            rbs_var,
+				            _as.addNode(CONCEPT_NODE,
+				                        URE_top_name)),
+				// Rewrite: (all inherited rule-based systems)
+				rbs_var});
 	Handle bl_h = bl.getHandle();
 	Handle rule_based_systems = bindlink(&_as, bl_h);
 
@@ -96,14 +95,13 @@ HandleSeq UREConfigReader::fetch_rules(Handle rbs)
 	// Retrieve rules
 	Handle rule_var = _as.addNode(VARIABLE_NODE, "__URE_RULE__");
 	BindLink bl({rule_var,
-				_as.addLink(IMPLICATION_LINK,
-				            // Clause:
-				            // MemberLink
-				            //    VariableNode "__URE_RULE__"
-				            //    ConceptNode <RBS>
-				            _as.addLink(MEMBER_LINK, rule_var, rbs),
-				            // Rewrite: (all member rules)
-				            rule_var)});
+				// Clause:
+				// MemberLink
+				//    VariableNode "__URE_RULE__"
+				//    ConceptNode <RBS>
+				_as.addLink(MEMBER_LINK, rule_var, rbs),
+				// Rewrite: (all member rules)
+				rule_var});
 	Handle rule_names = bindlink(&_as, bl.getHandle());
 
 	return LinkCast(rule_names)->getOutgoingSet();
@@ -125,18 +123,17 @@ Handle UREConfigReader::fetch_execution_output(Handle schema, Handle input)
 	// Retrieve rules
 	Handle output_var = _as.addNode(VARIABLE_NODE, "__EXECUTION_OUTPUT_VAR__");
 	BindLink bl({output_var,
-				_as.addLink(IMPLICATION_LINK,
-				            // Clause:
-				            // ExecutionLink
-				            //    <schema>
-				            //    <input>
-				            //    output_var
-				            _as.addLink(EXECUTION_LINK,
-				                        schema,
-				                        input,
-				                        output_var),
-				            // Rewrite: (all outputs)
-				            output_var)});
+				// Clause:
+				// ExecutionLink
+				//    <schema>
+				//    <input>
+				//    output_var
+				_as.addLink(EXECUTION_LINK,
+				            schema,
+				            input,
+				            output_var),
+				// Rewrite: (all outputs)
+				output_var});
 	Handle bl_h = bl.getHandle();
 	Handle outputs = bindlink(&_as, bl_h);
 

@@ -14,20 +14,19 @@
         (VariableList
             (VariableNode "$A")
             (VariableNode "$B"))
-        (ImplicationLink
-            (AndLink
+        (AndLink
+            (ImplicationLink
+                (VariableNode "$A")
+                (VariableNode "$B"))
+            (VariableNode "$A"))
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm: crisp-modus-ponens-formula")
+            (ListLink
                 (ImplicationLink
                     (VariableNode "$A")
                     (VariableNode "$B"))
-                (VariableNode "$A"))
-            (ExecutionOutputLink
-                (GroundedSchemaNode "scm: crisp-modus-ponens-formula")
-                (ListLink
-                    (ImplicationLink
-                        (VariableNode "$A")
-                        (VariableNode "$B"))
-                    (VariableNode "$A")
-                    (VariableNode "$B"))))))
+                (VariableNode "$A")
+                (VariableNode "$B"))))))
 
 ; -----------------------------------------------------------------------------
 ; Crisp Modus Ponens Formula

@@ -33,7 +33,7 @@ class BigPatternUTest :  public CxxTest::TestSuite
 	private:
 		AtomSpace *as;
 
-		Handle imake, hmake_from, hpottery, hclay;
+		Handle clauses, implicand, hmake_from, hpottery, hclay;
 
 	public:
 
@@ -83,33 +83,32 @@ void BigPatternUTest::setUp(void)
 {
 	as = new AtomSpace();
 
-	// Create an implication link that will be tested.
-	imake = 
-	al(IMPLICATION_LINK,
+	// Create an clauses and implicand links that will be tested.
+	clauses =
 		al(AND_LINK,
-			al(EVALUATION_LINK,
-				an(PREDICATE_NODE, "_obj"),
-				al(LIST_LINK,
-					an(VARIABLE_NODE, "$verb"),
-					an(VARIABLE_NODE, "$var1")
-				)
-			),
-			al(EVALUATION_LINK,
-				an(PREDICATE_NODE, "from"),
-				al(LIST_LINK,
-					an(VARIABLE_NODE, "$verb"),
-					an(VARIABLE_NODE, "$var2")
-				)
-			)
-		),
+		   al(EVALUATION_LINK,
+		      an(PREDICATE_NODE, "_obj"),
+		      al(LIST_LINK,
+		         an(VARIABLE_NODE, "$verb"),
+		         an(VARIABLE_NODE, "$var1")
+		         )
+		      ),
+		   al(EVALUATION_LINK,
+		      an(PREDICATE_NODE, "from"),
+		      al(LIST_LINK,
+		         an(VARIABLE_NODE, "$verb"),
+		         an(VARIABLE_NODE, "$var2")
+		         )
+		      )
+		   );
+	implicand =
 		al(EVALUATION_LINK,
-			hmake_from = an(PREDICATE_NODE, "make_from"),
-			al(LIST_LINK,
-				an(VARIABLE_NODE, "$var1"),
-				an(VARIABLE_NODE, "$var2")
-			)
-		)
-	);
+		   hmake_from = an(PREDICATE_NODE, "make_from"),
+		   al(LIST_LINK,
+		      an(VARIABLE_NODE, "$var1"),
+		      an(VARIABLE_NODE, "$var2")
+		      )
+		   );
 
 	// Create data on which the above pattern should match
 	al(EVALUATION_LINK,
@@ -147,7 +146,7 @@ void BigPatternUTest::test_prep(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
-	Handle result = imply(as, imake);
+	Handle result = imply(as, clauses, implicand);
 	TSM_ASSERT_DIFFERS("no solutions found", 0, getarity(result));
 
 	// Then, evaluationLink, as above.

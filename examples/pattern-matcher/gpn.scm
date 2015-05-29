@@ -89,31 +89,29 @@
 	(BindLink
 		; Dfine the variable to be grounded
 		(VariableNode "$person")
-		(ImplicationLink
-			; Define a list of two clauses, both of which must be satsified
-			(AndLink
-				; The first clause: find a grounding for the variable, such
-				; that the variable is grounded by the name of a logician.
-				(EvaluationLink
-					(PredicateNode "is-a")
-					(ListLink
-						(VariableNode "$person")
-						(ConceptNode "logician")
-					)
-				)
-				; The second clause: the propsed grounding, from above,
-				; is randomly accepted or rejected.  Several of these can be
-				; combined using AndLink, OrLink and NotLink.
-				(EvaluationLink
-					(GroundedPredicateNode "scm: rand-ok")
-					(ListLink
-						(VariableNode "$person")
-					)
+		; Define a list of two clauses, both of which must be satsified
+		(AndLink
+			; The first clause: find a grounding for the variable, such
+			; that the variable is grounded by the name of a logician.
+			(EvaluationLink
+				(PredicateNode "is-a")
+				(ListLink
+					(VariableNode "$person")
+					(ConceptNode "logician")
 				)
 			)
-			; Return the grounding, if selected.
-			(VariableNode "$person")
+			; The second clause: the propsed grounding, from above,
+			; is randomly accepted or rejected.  Several of these can be
+			; combined using AndLink, OrLink and NotLink.
+			(EvaluationLink
+				(GroundedPredicateNode "scm: rand-ok")
+				(ListLink
+					(VariableNode "$person")
+				)
+			)
 		)
+		; Return the grounding, if selected.
+		(VariableNode "$person")
 	)
 )
 

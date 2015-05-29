@@ -124,7 +124,7 @@ BETA_REDEX <- ORDERED_LINK      // Beta reduction of bound variables
 // to at the moment (at least, not as a C++ class)
 //
 // The GetLink is probably exactly the same thing as a
-// SatsifyingSetLink, except that GetLink iis imperative, while
+// SatsifyingSetLink, except that GetLink is imperative, while
 // SatisfyingSetLink is declarative.  Likewise, BindLink is probably
 // exactly the same thing as an ImplicationLink, except that its
 // imperative, not declarative.

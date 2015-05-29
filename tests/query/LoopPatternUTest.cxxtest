@@ -35,7 +35,7 @@ class LoopPatternUTest :  public CxxTest::TestSuite
 	private:
 		AtomSpace *as;
 
-		Handle imlink;
+		Handle clauses, implicand;
 		Handle hone, htwo, hthree;
 
 	public:
@@ -75,28 +75,27 @@ void LoopPatternUTest::setUp(void)
 	as = new AtomSpace();
 
 	// Create an implication link that will be tested.
-	imlink = 
-	al(IMPLICATION_LINK,
+	clauses =
 		al(AND_LINK,
-			al(LIST_LINK,
-				an(VARIABLE_NODE, "$var0"),
-				an(VARIABLE_NODE, "$var1")
-			),
-			al(LIST_LINK,
-				an(VARIABLE_NODE, "$var1"),
-				an(VARIABLE_NODE, "$var2")
-			),
-			al(LIST_LINK,
-				an(VARIABLE_NODE, "$var2"),
-				an(VARIABLE_NODE, "$var0")
-			)
-		),
+		   al(LIST_LINK,
+		      an(VARIABLE_NODE, "$var0"),
+		      an(VARIABLE_NODE, "$var1")
+		      ),
+		   al(LIST_LINK,
+		      an(VARIABLE_NODE, "$var1"),
+		      an(VARIABLE_NODE, "$var2")
+		      ),
+		   al(LIST_LINK,
+		      an(VARIABLE_NODE, "$var2"),
+		      an(VARIABLE_NODE, "$var0")
+		      )
+		   );
+	implicand =
 		al(ORDERED_LINK,
-			an(VARIABLE_NODE, "$var0"),
-			an(VARIABLE_NODE, "$var1"),
-			an(VARIABLE_NODE, "$var2")
-		)
-	);
+		   an(VARIABLE_NODE, "$var0"),
+		   an(VARIABLE_NODE, "$var1"),
+		   an(VARIABLE_NODE, "$var2")
+		   );
 
 	// Create data on which the above pattern should match
 	al(LIST_LINK,
@@ -163,7 +162,7 @@ void LoopPatternUTest::test_prep(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
  
 	// Result should be a ListLink
-	Handle result = imply(as, imlink);
+	Handle result = imply(as, clauses, implicand);
 
 #define NO_SELF_GROUNDING 1
 #ifdef NO_SELF_GROUNDING

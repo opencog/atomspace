@@ -52,18 +52,16 @@
 			(VariableNode "$var-one")
 			(VariableNode "$var-two")
 		)
-		(ImplicationLink
-			(BetaRedex
-				(ConceptNode "two-argument-pattern")
-				(ListLink
-					(VariableNode "$var-one")
-					(VariableNode "$var-two")
-				)
-			)
-			(InheritanceLink
+		(BetaRedex
+			(ConceptNode "two-argument-pattern")
+			(ListLink
 				(VariableNode "$var-one")
 				(VariableNode "$var-two")
 			)
+		)
+		(InheritanceLink
+			(VariableNode "$var-one")
+			(VariableNode "$var-two")
 		)
 	)
 )

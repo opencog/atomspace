@@ -48,43 +48,41 @@
 				(TypeNode "ConceptNode")
 			)
 		)
-		(ImplicationLink
-			;; body -- if all parts of AndLink hold true ... then
-			(AndLink
+		;; body -- if all parts of AndLink hold true ... then
+		(AndLink
+			(EvaluationLink
+				(VariableNode "$predicate")
+				(ListLink
+					(VariableNode "$person_a")
+					(VariableNode "$property")
+				)
+			)
+			(EvaluationLink
+				(VariableNode "$predicate")
+				(ListLink
+					(VariableNode "$person_b")
+					(VariableNode "$property")
+				)
+			)
+			;; Avoid reporting things we already know.
+			;; Basically, if we already know that person A and B
+			;; are the same person, then lets not deduce it again.
+			(AbsentLink
 				(EvaluationLink
-					(VariableNode "$predicate")
+					(PredicateNode "IsSamePerson")
 					(ListLink
 						(VariableNode "$person_a")
-						(VariableNode "$property")
-					)
-				)
-				(EvaluationLink
-					(VariableNode "$predicate")
-					(ListLink
 						(VariableNode "$person_b")
-						(VariableNode "$property")
-					)
-				)
-				;; Avoid reporting things we already know.
-				;; Basically, if we already know that person A and B
-				;; are the same person, then lets not deduce it again.
-				(AbsentLink
-					(EvaluationLink
-						(PredicateNode "IsSamePerson")
-						(ListLink
-							(VariableNode "$person_a")
-							(VariableNode "$person_b")
-						)
 					)
 				)
 			)
-			;; implicand -- then the following is true too
-			(EvaluationLink
-				(PredicateNode "IsSamePerson")
-				(ListLink
-					(VariableNode "$person_a")
-					(VariableNode "$person_b")
-				)
+		)
+		;; implicand -- then the following is true too
+		(EvaluationLink
+			(PredicateNode "IsSamePerson")
+			(ListLink
+				(VariableNode "$person_a")
+				(VariableNode "$person_b")
 			)
 		)
 	)
@@ -103,22 +101,20 @@
 				(TypeNode "FeatureNode")
 			)
 		)
-		(ImplicationLink
-			;; body -- if all parts of AndLink hold true ... then
-			(AndLink
-				(EvaluationLink
-					(PredicateNode "IsSamePerson")
-					(ListLink
-						(VariableNode "$person_a")
-						(VariableNode "$person_b")
-					)
+		;; body -- if all parts of AndLink hold true ... then
+		(AndLink
+			(EvaluationLink
+				(PredicateNode "IsSamePerson")
+				(ListLink
+					(VariableNode "$person_a")
+					(VariableNode "$person_b")
 				)
 			)
-			;; implicand -- then the following is true too
-			(OrderedLink
-				(VariableNode "$person_a")
-				(VariableNode "$person_b")
-			)
+		)
+		;; implicand -- then the following is true too
+		(OrderedLink
+			(VariableNode "$person_a")
+			(VariableNode "$person_b")
 		)
 	)
 )

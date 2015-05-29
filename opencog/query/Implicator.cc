@@ -119,7 +119,7 @@ static Handle do_imply(AtomSpace* as,
 }
 
 /**
- * Evaluate an ImplicationLink embedded in a BindLink
+ * Evaluate a pattern and rewrite rule embedded in a BindLink
  *
  * Use the default implicator to find pattern-matches. Associated truth
  * values are completely ignored during pattern matching; if a set of
@@ -136,7 +136,7 @@ Handle bindlink(AtomSpace* as, const Handle& hbindlink)
 }
 
 /**
- * Evaluate an ImplicationLink embedded in a BindLink
+ * Evaluate an pattern and rewrite rule embedded in a BindLink
  *
  * Returns the first match only. Otherwise, the behavior is identical to
  * PatternMatch::bindlink above.

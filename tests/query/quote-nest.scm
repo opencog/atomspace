@@ -56,16 +56,14 @@
 (define bindy
 	(BindLink
 		(VariableNode "$var-a")
-		(ImplicationLink
-			(EvaluationLink
-				(VariableNode "$var-a")
-				(QuoteLink (ListLink
-					(VariableNode "$var-a")
-					(VariableNode "$var-b")
-				))
-			)
+		(EvaluationLink
 			(VariableNode "$var-a")
+			(QuoteLink (ListLink
+				(VariableNode "$var-a")
+				(VariableNode "$var-b")
+			))
 		)
+		(VariableNode "$var-a")
 	)
 )
 

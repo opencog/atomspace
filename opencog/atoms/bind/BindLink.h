@@ -35,12 +35,13 @@ class BindLink : public PatternLink
 protected:
 	void init(void);
 
-	/// The actual clauses. Set by validate_body()
-	Handle _hclauses;
+	/// The rewrite term
 	Handle _implicand;
 
-	// Validate the structure of the body
-	void validate_body(const Handle&);
+	// Overwrite PatternLink::extract_variables as BindLink has one
+	// more outgoing for the rewrite rule. In addition this method
+	// will initialize the rewrite term _implicand.
+	void extract_variables(const HandleSeq& oset);
 
 	BindLink(Type, const HandleSeq&,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),

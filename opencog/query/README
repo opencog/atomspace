@@ -677,7 +677,7 @@ Forward Chainer
 ---------------
 The PattnerMatch::imply() method implements a critical component for a
 forward chainer: it is able to accept, as input, an ImplicationLink, and
-return as output, a ListLink of the implicands. An ImplicationLink is
+return as output, a SetLink of the implicands. An ImplicationLink is
 basically an IF ... THEN ... statement, expressed as an OpenCog hypergraph.
 
 Properly, one writes "IF ... THEN ..." as "IF predicate THEN implicand".

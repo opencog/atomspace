@@ -33,7 +33,7 @@ class Boolean2NotUTest :  public CxxTest::TestSuite
 	private:
 		AtomSpace *as;
 
-		Handle implication, his_a, hberlin, hcity;
+		Handle clauses, implicand, his_a, hberlin, hcity;
 
 	public:
 
@@ -77,8 +77,7 @@ void Boolean2NotUTest::setUp(void)
 	as = new AtomSpace();
 
 	// Create an implication link that will be tested.
-	implication = 
-	al(IMPLICATION_LINK,
+	clauses =
 		al(AND_LINK,
 			al(EVALUATION_LINK,
 				an(PREDICATE_NODE, "_subj"),
@@ -123,15 +122,15 @@ void Boolean2NotUTest::setUp(void)
 					an(CONCEPT_NODE, "hyp")
 				)
 			)
-		),
+		);
+	implicand =
 		al(EVALUATION_LINK,
 			his_a = an(PREDICATE_NODE, "is_a"),
 			al(LIST_LINK,
 				an(VARIABLE_NODE, "$var1"),
 				an(VARIABLE_NODE, "$var2")
 			)
-		)
-	);
+		);
 
 	// Create data on which the above pattern should match
 	// This is an assertion "Berlin is a city"
@@ -237,7 +236,7 @@ void Boolean2NotUTest::test_isa(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Result should be a ListLink
-	Handle result = imply(as, implication);
+	Handle result = imply(as, clauses, implicand);
 
 	// There should be only one solution: the Berlin one.
 	// The Madrid graph should be rejected because of the 

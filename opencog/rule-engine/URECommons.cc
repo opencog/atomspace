@@ -61,10 +61,7 @@ Handle URECommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
 
 	Handle var_listLink = as_->addLink(VARIABLE_LIST, list_link_elem);
 
-	Handle implicationLink = as_->addLink(IMPLICATION_LINK, himplicant,
-			himplicant);
-
-	return as_->addLink(BIND_LINK, var_listLink, implicationLink);
+	return as_->addLink(BIND_LINK, var_listLink, himplicant, himplicant);
 }
 
 Handle URECommons::replace_nodes_with_varnode(Handle& handle,

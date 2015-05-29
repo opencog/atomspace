@@ -76,22 +76,20 @@
 			(decl-var "FeatureNode" "$person_b")
 			(decl-var "ConceptNode" "$attribute")
 		)
-		(ImplicationLink
-			;; body -- if all parts of AndLink hold true ... 
-			(AndLink
-				(clause VN "$predicate" VN "$person_a" VN "$attribute")
-				(clause VN "$predicate" VN "$person_b" VN "$attribute")
-				;; Avoid reporting things we already know.
-				;; Basically, if we already know that person A and B
-				;; are the same person, then lets not deduce it again.
-				;; This not link is identical to the conclusion below
-				(AbsentLink
-					(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
-				)
+		;; body -- if all parts of AndLink hold true ... 
+		(AndLink
+			(clause VN "$predicate" VN "$person_a" VN "$attribute")
+			(clause VN "$predicate" VN "$person_b" VN "$attribute")
+			;; Avoid reporting things we already know.
+			;; Basically, if we already know that person A and B
+			;; are the same person, then lets not deduce it again.
+			;; This not link is identical to the conclusion below
+			(AbsentLink
+				(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
 			)
-			;; implicand -- then the following is true too
-			(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
 		)
+		;; implicand -- then the following is true too
+		(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
 	)
 )
 
@@ -109,20 +107,18 @@
 			(decl-var "FeatureNode" "$person_b")
 			(decl-var "ConceptNode" "$attribute")
 		)
-		(ImplicationLink
-			;; body -- if all parts of AndLink hold true ... then
-			(AndLink
-				(clause VN "$predicate" VN "$person_a" VN "$attribute")
-				(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
-				;; Don't deduce thigs we already know...
-				;; i.e. this not link is identical to conclusion, below.
-				(AbsentLink
-					(clause VN "$predicate" VN "$person_b" VN "$attribute")
-				)
+		;; body -- if all parts of AndLink hold true ... then
+		(AndLink
+			(clause VN "$predicate" VN "$person_a" VN "$attribute")
+			(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
+			;; Don't deduce thigs we already know...
+			;; i.e. this not link is identical to conclusion, below.
+			(AbsentLink
+				(clause VN "$predicate" VN "$person_b" VN "$attribute")
 			)
-			;; implicand -- then the following is true too
-			(clause VN "$predicate" VN "$person_b" VN "$attribute")
 		)
+		;; implicand -- then the following is true too
+		(clause VN "$predicate" VN "$person_b" VN "$attribute")
 	)
 )
 
@@ -142,20 +138,18 @@
 			(decl-var "FeatureNode" "$person_b")
 			(decl-var "ConceptNode" "$attribute")
 		)
-		(ImplicationLink
-			;; body -- if all parts of AndLink hold true ... then
-			(AndLink
-				(not-clause VN "$predicate" VN "$person_a" VN "$attribute")
-				(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
-				;; Don't deduce thigs we already know...
-				;; i.e. this not link is identical to conclusion, below.
-				(AbsentLink
-					(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
-				)
+		;; body -- if all parts of AndLink hold true ... then
+		(AndLink
+			(not-clause VN "$predicate" VN "$person_a" VN "$attribute")
+			(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
+			;; Don't deduce thigs we already know...
+			;; i.e. this not link is identical to conclusion, below.
+			(AbsentLink
+				(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
 			)
-			;; implicand -- then the following is true too
-			(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
 		)
+		;; implicand -- then the following is true too
+		(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
 	)
 )
 
@@ -175,42 +169,40 @@
 			(decl-var "ConceptNode" "$attr_e")
 			(decl-var "ConceptNode" "$attr_type")
 		)
-		(ImplicationLink
-			;; body -- if all parts of AndLink hold true ... then
-			(AndLink
-				;; If person does NOT have atttribute a,b,c or d ...
-				(not-clause VN "$predicate" VN "$person" VN "$attr_a")
-				(not-clause VN "$predicate" VN "$person" VN "$attr_b")
-				(not-clause VN "$predicate" VN "$person" VN "$attr_c")
-				(not-clause VN "$predicate" VN "$person" VN "$attr_d")
-				;; and the attributes a,b,c,d,e are all of the same kind
-				(InheritanceLink (VN "$attr_a") (VN "$attr_type"))
-				(InheritanceLink (VN "$attr_b") (VN "$attr_type"))
-				(InheritanceLink (VN "$attr_c") (VN "$attr_type"))
-				(InheritanceLink (VN "$attr_d") (VN "$attr_type"))
-				(InheritanceLink (VN "$attr_e") (VN "$attr_type"))
-				;; and attributes a,b,c,d,e are all different from one-another
-				(EvaluationLink
-					(GroundedPredicateNode "c++:exclusive")
-					(ListLink
-						(VN "$attr_a")
-						(VN "$attr_b")
-						(VN "$attr_c")
-						(VN "$attr_d")
-						(VN "$attr_e")
-					)
+		;; body -- if all parts of AndLink hold true ... then
+		(AndLink
+			;; If person does NOT have atttribute a,b,c or d ...
+			(not-clause VN "$predicate" VN "$person" VN "$attr_a")
+			(not-clause VN "$predicate" VN "$person" VN "$attr_b")
+			(not-clause VN "$predicate" VN "$person" VN "$attr_c")
+			(not-clause VN "$predicate" VN "$person" VN "$attr_d")
+			;; and the attributes a,b,c,d,e are all of the same kind
+			(InheritanceLink (VN "$attr_a") (VN "$attr_type"))
+			(InheritanceLink (VN "$attr_b") (VN "$attr_type"))
+			(InheritanceLink (VN "$attr_c") (VN "$attr_type"))
+			(InheritanceLink (VN "$attr_d") (VN "$attr_type"))
+			(InheritanceLink (VN "$attr_e") (VN "$attr_type"))
+			;; and attributes a,b,c,d,e are all different from one-another
+			(EvaluationLink
+				(GroundedPredicateNode "c++:exclusive")
+				(ListLink
+					(VN "$attr_a")
+					(VN "$attr_b")
+					(VN "$attr_c")
+					(VN "$attr_d")
+					(VN "$attr_e")
 				)
-				;; Don't deduce thigs we already know...
-				;; i.e. this not link is identical to conclusion, below.
-				;(AbsentLink
-				;	(clause VN "$predicate" VN "$person" VN "$attr_e")
-				;)
 			)
-
-			;; implicand -- then the following is true too
-			;; Then by elimination, person must have attribute e.
-			(clause VN "$predicate" VN "$person" VN "$attr_e")
+			;; Don't deduce thigs we already know...
+			;; i.e. this not link is identical to conclusion, below.
+			;(AbsentLink
+			;	(clause VN "$predicate" VN "$person" VN "$attr_e")
+			;)
 		)
+
+		;; implicand -- then the following is true too
+		;; Then by elimination, person must have attribute e.
+		(clause VN "$predicate" VN "$person" VN "$attr_e")
 	)
 )
 
@@ -232,23 +224,21 @@
 			(decl-var "PredicateNode" "$predicate_exclusive")
 			(decl-var "ConceptNode" "$attribute_excl")
 		)
-		(ImplicationLink
-			;; body -- if all parts of AndLink hold true ... then
-			(AndLink
-				(clause VN "$predicate_common" VN "$person_a" VN "$attribute_comm_a")
-				(clause VN "$predicate_common" VN "$person_b" VN "$attribute_comm_b")
-				(differ VN "$attribute_comm_a" VN "$attribute_comm_b")
-				(clause VN "$predicate_exclusive" VN "$person_a" VN "$attribute_excl")
-				;; Don't deduce thigs we already know...
-				;; i.e. this not link is identical to conclusion, below.
-				;(AbsentLink
-				;	(not-clause VN "$predicate_exclusive" VN "$person_b" VN "$attribute_excl")
-				;)
-			)
-
-			;; implicand -- then the following is true too
-			(not-clause VN "$predicate_exclusive" VN "$person_b" VN "$attribute_excl")
+		;; body -- if all parts of AndLink hold true ... then
+		(AndLink
+			(clause VN "$predicate_common" VN "$person_a" VN "$attribute_comm_a")
+			(clause VN "$predicate_common" VN "$person_b" VN "$attribute_comm_b")
+			(differ VN "$attribute_comm_a" VN "$attribute_comm_b")
+			(clause VN "$predicate_exclusive" VN "$person_a" VN "$attribute_excl")
+			;; Don't deduce thigs we already know...
+			;; i.e. this not link is identical to conclusion, below.
+			;(AbsentLink
+			;	(not-clause VN "$predicate_exclusive" VN "$person_b" VN "$attribute_excl")
+			;)
 		)
+
+		;; implicand -- then the following is true too
+		(not-clause VN "$predicate_exclusive" VN "$person_b" VN "$attribute_excl")
 	)
 )
 
@@ -266,21 +256,19 @@
 			(decl-var "PredicateNode" "$predicate")
 			(decl-var "ConceptNode" "$attribute")
 		)
-		(ImplicationLink
-			;; body -- if all parts of AndLink hold true ... then
-			(AndLink
-				(clause VN "$predicate" VN "$person_a" VN "$attribute")
-				(clause PN "Neighbor" VN "$person_a" VN "$person_b")
-				;; Don't deduce thigs we already know...
-				;; i.e. this not link is identical to conclusion, below.
-				(AbsentLink
-					(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
-				)
+		;; body -- if all parts of AndLink hold true ... then
+		(AndLink
+			(clause VN "$predicate" VN "$person_a" VN "$attribute")
+			(clause PN "Neighbor" VN "$person_a" VN "$person_b")
+			;; Don't deduce thigs we already know...
+			;; i.e. this not link is identical to conclusion, below.
+			(AbsentLink
+				(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
 			)
-
-			;; implicand -- then the following is true too
-			(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
 		)
+
+		;; implicand -- then the following is true too
+		(not-clause VN "$predicate" VN "$person_b" VN "$attribute")
 	)
 )
 
@@ -299,24 +287,22 @@
 			(decl-var "ConceptNode" "$addr_a")
 			(decl-var "ConceptNode" "$addr_b")
 		)
-		(ImplicationLink
-			;; body -- if all parts of AndLink hold true ... 
-			(AndLink
-				;; if adress of personA is 1st house
-				(clause PN "Address" VN "$person_a" CN "101 Main Street")
-				(clause PN "Address" VN "$person_a" VN "$addr_a")
-				;; and A is neighbor of B
-				(clause PN "Neighbor" VN "$person_a" VN "$person_b")
-				;; and the next house is one over
-				(clause PN "Successor" VN "$addr_a" VN "$addr_b")
-				;; and we don't already know the conclusion
-				(AbsentLink
-					(clause PN "Address" VN "$person_b" VN "$addr_b")
-				)
+		;; body -- if all parts of AndLink hold true ... 
+		(AndLink
+			;; if adress of personA is 1st house
+			(clause PN "Address" VN "$person_a" CN "101 Main Street")
+			(clause PN "Address" VN "$person_a" VN "$addr_a")
+			;; and A is neighbor of B
+			(clause PN "Neighbor" VN "$person_a" VN "$person_b")
+			;; and the next house is one over
+			(clause PN "Successor" VN "$addr_a" VN "$addr_b")
+			;; and we don't already know the conclusion
+			(AbsentLink
+				(clause PN "Address" VN "$person_b" VN "$addr_b")
 			)
-			;; implicand -- then the B lives one house over.
-			(clause PN "Address" VN "$person_b" VN "$addr_b")
 		)
+		;; implicand -- then the B lives one house over.
+		(clause PN "Address" VN "$person_b" VN "$addr_b")
 	)
 )
 
@@ -334,20 +320,18 @@
 			(decl-var "ConceptNode" "$addr_a")
 			(decl-var "ConceptNode" "$addr_b")
 		)
-		(ImplicationLink
-			;; body -- if all parts of AndLink hold true ... then
-			(AndLink
-				(clause PN "Address" VN "$person_a" VN "$addr_a")
-				(clause PN "Address" VN "$person_b" VN "$addr_b")
-				(clause PN "Successor" VN "$addr_a" VN "$addr_b")
-				; Not interested in what we already know.
-				(AbsentLink
-					(clause PN "Neighbor" VN "$person_a" VN "$person_b")
-				)
+		;; body -- if all parts of AndLink hold true ... then
+		(AndLink
+			(clause PN "Address" VN "$person_a" VN "$addr_a")
+			(clause PN "Address" VN "$person_b" VN "$addr_b")
+			(clause PN "Successor" VN "$addr_a" VN "$addr_b")
+			; Not interested in what we already know.
+			(AbsentLink
+				(clause PN "Neighbor" VN "$person_a" VN "$person_b")
 			)
-			;; implicand -- then the following is true too
-			(clause PN "Neighbor" VN "$person_a" VN "$person_b")
 		)
+		;; implicand -- then the following is true too
+		(clause PN "Neighbor" VN "$person_a" VN "$person_b")
 	)
 )
 
@@ -362,18 +346,16 @@
 			(decl-var "FeatureNode" "$person_a")
 			(decl-var "FeatureNode" "$person_b")
 		)
-		(ImplicationLink
-			;; body -- if all parts of AndLink hold true ... then
-			(AndLink
-				(clause PN "Neighbor" VN "$person_a" VN "$person_b")
-				; Not interested in what we already know.
-				(AbsentLink
-					(clause PN "Neighbor" VN "$person_b" VN "$person_a")
-				)
+		;; body -- if all parts of AndLink hold true ... then
+		(AndLink
+			(clause PN "Neighbor" VN "$person_a" VN "$person_b")
+			; Not interested in what we already know.
+			(AbsentLink
+				(clause PN "Neighbor" VN "$person_b" VN "$person_a")
 			)
-			;; implicand -- then the following is true too
-			(clause PN "Neighbor" VN "$person_b" VN "$person_a")
 		)
+		;; implicand -- then the following is true too
+		(clause PN "Neighbor" VN "$person_b" VN "$person_a")
 	)
 )
 
@@ -393,40 +375,36 @@
 			(decl-var "ConceptNode" "$house")
 			(decl-var "ConceptNode" "$addr")
 		)
-		(ImplicationLink
-			;; body -- if all parts of AndLink hold true ... then
-			(AndLink
-				(clause PN "Nationality" VN "$person" VN "$nationality")
-				(clause PN "Drinks"      VN "$person" VN "$drink")
-				(clause PN "Smokes"      VN "$person" VN "$smoke")
-				(clause PN "Keeps"       VN "$person" VN "$pet")
-				(clause PN "LivesIn"     VN "$person" VN "$house")
-				(clause PN "Address"     VN "$person" VN "$addr")
+		;; body -- if all parts of AndLink hold true ... then
+		(AndLink
+			(clause PN "Nationality" VN "$person" VN "$nationality")
+			(clause PN "Drinks"      VN "$person" VN "$drink")
+			(clause PN "Smokes"      VN "$person" VN "$smoke")
+			(clause PN "Keeps"       VN "$person" VN "$pet")
+			(clause PN "LivesIn"     VN "$person" VN "$house")
+			(clause PN "Address"     VN "$person" VN "$addr")
 
-				;; Don't report a fact we already know.
-				(AbsentLink
-         		(OrderedLink
-						(VN "$nationality")
-						(VN "$drink")
-						(VN "$smoke")
-						(VN "$pet")
-						(VN "$house")
-						(VN "$addr")
-					)
+			;; Don't report a fact we already know.
+			(AbsentLink
+     		(OrderedLink
+					(VN "$nationality")
+					(VN "$drink")
+					(VN "$smoke")
+					(VN "$pet")
+					(VN "$house")
+					(VN "$addr")
 				)
 			)
-			;; implicand -- We're just going to use a plain-old ordered
-			;; link here to report the results. Why not ...
-         (OrderedLink
-				(VN "$nationality")
-				(VN "$drink")
-				(VN "$smoke")
-				(VN "$pet")
-				(VN "$house")
-				(VN "$addr")
-			)
+		)
+		;; implicand -- We're just going to use a plain-old ordered
+		;; link here to report the results. Why not ...
+     (OrderedLink
+			(VN "$nationality")
+			(VN "$drink")
+			(VN "$smoke")
+			(VN "$pet")
+			(VN "$house")
+			(VN "$addr")
 		)
 	)
 )
-
-

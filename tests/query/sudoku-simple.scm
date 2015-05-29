@@ -108,18 +108,16 @@
 (define (x2-puzzle)
 	(BindLink
 		(x2-variable-decls 'VariableList)
-		(ImplicationLink
-			(AndLink
-				; For this puzzle, 1 of the variables is fixed immediately.
-				(EvaluationLink (PredicateNode "x2-fix11") (VariableNode "$cell_11"))
+		(AndLink
+			; For this puzzle, 1 of the variables is fixed immediately.
+			(EvaluationLink (PredicateNode "x2-fix11") (VariableNode "$cell_11"))
 
-				; Aside from the above constraint, there are another
-				; 4 constraints.
-				(x2-sudoku-constraints)
-			)
-			; The solution
-			(x2-variable-decls 'ListLink)
+			; Aside from the above constraint, there are another
+			; 4 constraints.
+			(x2-sudoku-constraints)
 		)
+		; The solution
+		(x2-variable-decls 'ListLink)
 	)
 )
 
@@ -133,14 +131,12 @@
 (define (x2-any)
 	(BindLink
 		(x2-variable-decls 'VariableList)
-		(ImplicationLink
-			(AndLink
-				; There are 4 constraints. One is actually redundant...
-				(x2-sudoku-constraints)
-			)
-			; The solution
-			(x2-variable-decls 'ListLink)
+		(AndLink
+			; There are 4 constraints. One is actually redundant...
+			(x2-sudoku-constraints)
 		)
+		; The solution
+		(x2-variable-decls 'ListLink)
 	)
 )
 
@@ -275,17 +271,15 @@
 (define (x3-puzzle)
 	(BindLink
 		(x3-variable-decls 'VariableList)
-		(ImplicationLink
-			(AndLink
-				; For this puzzle, 1 of the variables is fixed immediately.
-				(EvaluationLink (PredicateNode "x3-fix11") (VariableNode "$cell_11"))
+		(AndLink
+			; For this puzzle, 1 of the variables is fixed immediately.
+			(EvaluationLink (PredicateNode "x3-fix11") (VariableNode "$cell_11"))
 
-				; Aside from the above constraints, there are another
-				; 6 constraints.
-				(x3-sudoku-constraints)
-			)
-			; The solution
-			(x3-variable-decls 'ListLink)
+			; Aside from the above constraints, there are another
+			; 6 constraints.
+			(x3-sudoku-constraints)
 		)
+		; The solution
+		(x3-variable-decls 'ListLink)
 	)
 )

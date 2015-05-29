@@ -34,7 +34,7 @@ namespace opencog {
 using namespace std;
 
 /**
- * Mainly wraps a BindLink/ImplicationLink but with other important attributes
+ * Mainly wraps a BindLink but with other important attributes
  */
 class Rule : public boost::less_than_comparable<Rule>,
              public boost::equality_comparable<Rule>

@@ -39,32 +39,30 @@
 ;; with 4! for the xyzw permuations, and (6+6+6)=18 for the pqr-set
 ;; permuations, and another (6+6+6)=18 for the abc-set.
 (define (exhaust)
-   (BindLink
-      ;; variable decls
-      (VariableList
-         (TypedVariableLink
-            (VariableNode "$a")
-            (TypeNode "ConceptNode"))
-         (VariableNode "$b")
-         (VariableNode "$c")
-         (VariableNode "$d")
-      )
-		(ImplicationLink
-			(AndLink
-				(SetLink ; sets are inherenetly unordered
-         		(VariableNode "$a")
+	(BindLink
+		;; variable decls
+		(VariableList
+			(TypedVariableLink
+				(VariableNode "$a")
+				(TypeNode "ConceptNode"))
+		(VariableNode "$b")
+		(VariableNode "$c")
+		(VariableNode "$d")
+		)
+		(AndLink
+			(SetLink ; sets are inherenetly unordered
+				(VariableNode "$a")
          		(VariableNode "$b")
          		(VariableNode "$c")
          		(VariableNode "$d")
-				)
 			)
-			; The result to report
-			(ListLink
-        		(VariableNode "$a")
-        		(VariableNode "$b")
-        		(VariableNode "$c")
-        		(VariableNode "$d")
-			)
+		)
+		; The result to report
+		(ListLink
+			(VariableNode "$a")
+			(VariableNode "$b")
+			(VariableNode "$c")
+			(VariableNode "$d")
 		)
 	)
 )
@@ -77,43 +75,41 @@
 ;; another 36 for the abc-set.
 ;;
 ;; The goal of this test is to check nested unordered links: viz one
-;; unordered link inside another, so that proper state presevation and
+;; unordered link inside another, so that proper state preservation and
 ;; backtracking is needed to correctly handle the nesting.
 (define (exhaust-2)
-   (BindLink
-      ;; variable decls
-      (VariableList
-         (TypedVariableLink
-            (VariableNode "$a")
-            (TypeNode "ConceptNode"))
-         (VariableNode "$b")
-         (VariableNode "$c")
-         (VariableNode "$d")
-         (VariableNode "$e")
-         (VariableNode "$f")
-      )
-		(ImplicationLink
-			(AndLink
-				(SetLink ; sets are inherenetly unordered
-         		(VariableNode "$a")
-         		(VariableNode "$b")
-         		(VariableNode "$c")
-					(SetLink
+	(BindLink
+		;; variable decls
+		(VariableList
+			(TypedVariableLink
+				(VariableNode "$a")
+				(TypeNode "ConceptNode"))
+			(VariableNode "$b")
+			(VariableNode "$c")
+			(VariableNode "$d")
+			(VariableNode "$e")
+			(VariableNode "$f")
+		)
+		(AndLink
+			(SetLink ; sets are inherently unordered
+      			(VariableNode "$a")
+       			(VariableNode "$b")
+       			(VariableNode "$c")
+				(SetLink
          			(VariableNode "$d")
          			(VariableNode "$e")
          			(VariableNode "$f")
-					)
 				)
 			)
-			; The result to report
-			(ListLink
-        		(VariableNode "$a")
-        		(VariableNode "$b")
-        		(VariableNode "$c")
-        		(VariableNode "$d")
-        		(VariableNode "$e")
-        		(VariableNode "$f")
-			)
+		)
+		; The result to report
+		(ListLink
+       		(VariableNode "$a")
+       		(VariableNode "$b")
+       		(VariableNode "$c")
+       		(VariableNode "$d")
+       		(VariableNode "$e")
+       		(VariableNode "$f")
 		)
 	)
 )
@@ -139,27 +135,25 @@
          (VariableNode "$d")
          (VariableNode "$e")
       )
-		(ImplicationLink
-			(AndLink
-				(SetLink ; sets are inherenetly unordered
-         		(VariableNode "$a")
-         		(VariableNode "$b")
-         		(VariableNode "$c")
-					(SetLink
-         			(VariableNode "$c")
-         			(VariableNode "$d")
-         			(VariableNode "$e")
-					)
+		(AndLink
+			(SetLink ; sets are inherenetly unordered
+     		(VariableNode "$a")
+     		(VariableNode "$b")
+     		(VariableNode "$c")
+				(SetLink
+     			(VariableNode "$c")
+     			(VariableNode "$d")
+     			(VariableNode "$e")
 				)
 			)
-			; The result to report
-			(ListLink
-        		(VariableNode "$a")
-        		(VariableNode "$b")
-        		(VariableNode "$c")
-        		(VariableNode "$d")
-        		(VariableNode "$e")
-			)
+		)
+		; The result to report
+		(ListLink
+    		(VariableNode "$a")
+    		(VariableNode "$b")
+    		(VariableNode "$c")
+    		(VariableNode "$d")
+    		(VariableNode "$e")
 		)
 	)
 )
@@ -185,26 +179,24 @@
          (VariableNode "$c")
          (VariableNode "$d")
       )
-		(ImplicationLink
-			(AndLink
-				(SetLink ; sets are inherenetly unordered
-         		(VariableNode "$a")
-         		(VariableNode "$b")
-         		(VariableNode "$c")
-					(SetLink
-         			(VariableNode "$b")
-         			(VariableNode "$c")
-         			(VariableNode "$d")
-					)
+		(AndLink
+			(SetLink ; sets are inherenetly unordered
+     		(VariableNode "$a")
+     		(VariableNode "$b")
+     		(VariableNode "$c")
+				(SetLink
+     			(VariableNode "$b")
+     			(VariableNode "$c")
+     			(VariableNode "$d")
 				)
 			)
-			; The result to report
-			(ListLink
-        		(VariableNode "$a")
-        		(VariableNode "$b")
-        		(VariableNode "$c")
-        		(VariableNode "$d")
-			)
+		)
+		; The result to report
+		(ListLink
+    		(VariableNode "$a")
+    		(VariableNode "$b")
+    		(VariableNode "$c")
+    		(VariableNode "$d")
 		)
 	)
 )
@@ -229,25 +221,23 @@
          (VariableNode "$b")
          (VariableNode "$c")
       )
-		(ImplicationLink
-			(AndLink
-				(SetLink ; sets are inherenetly unordered
-         		(VariableNode "$a")
-         		(VariableNode "$b")
-         		(VariableNode "$c")
-					(SetLink
-         			(VariableNode "$a")
-         			(VariableNode "$b")
-         			(VariableNode "$c")
-					)
+		(AndLink
+			(SetLink ; sets are inherenetly unordered
+     		(VariableNode "$a")
+     		(VariableNode "$b")
+     		(VariableNode "$c")
+				(SetLink
+     			(VariableNode "$a")
+     			(VariableNode "$b")
+     			(VariableNode "$c")
 				)
 			)
-			; The result to report
-			(ListLink
-        		(VariableNode "$a")
-        		(VariableNode "$b")
-        		(VariableNode "$c")
-			)
+		)
+		; The result to report
+		(ListLink
+    		(VariableNode "$a")
+    		(VariableNode "$b")
+    		(VariableNode "$c")
 		)
 	)
 )
@@ -299,37 +289,35 @@
          (VariableNode "$e")
          (VariableNode "$f")
       )
-		(ImplicationLink
-			(AndLink
-				(SetLink ; sets are inherenetly unordered
-         		(VariableNode "$a")
-         		(VariableNode "$b")
-         		(VariableNode "$c1")
-					(SetLink
-         			(VariableNode "$c2")
-         			(VariableNode "$e")
-         			(VariableNode "$f")
-					)
+		(AndLink
+			(SetLink ; sets are inherenetly unordered
+     		(VariableNode "$a")
+     		(VariableNode "$b")
+     		(VariableNode "$c1")
+				(SetLink
+     			(VariableNode "$c2")
+     			(VariableNode "$e")
+     			(VariableNode "$f")
 				)
+			)
 
-				; External clause enforcing equality relation
-				(EvaluationLink
-					(PredicateNode "equal")
-					(ListLink
-						(VariableNode "$c1")
-						(VariableNode "$c2")
-					)
+			; External clause enforcing equality relation
+			(EvaluationLink
+				(PredicateNode "equal")
+				(ListLink
+					(VariableNode "$c1")
+					(VariableNode "$c2")
 				)
 			)
-			; The result to report
-			(ListLink
-        		(VariableNode "$a")
-        		(VariableNode "$b")
-        		(VariableNode "$c1")
-        		(VariableNode "$c2")
-        		(VariableNode "$e")
-        		(VariableNode "$f")
-			)
+		)
+		; The result to report
+		(ListLink
+    		(VariableNode "$a")
+    		(VariableNode "$b")
+    		(VariableNode "$c1")
+    		(VariableNode "$c2")
+    		(VariableNode "$e")
+    		(VariableNode "$f")
 		)
 	)
 )
@@ -347,45 +335,42 @@
          (VariableNode "$c2")
          (VariableNode "$f")
       )
-		(ImplicationLink
-			(AndLink
-				(SetLink ; sets are inherenetly unordered
-         		(VariableNode "$a")
-         		(VariableNode "$b1")
-         		(VariableNode "$c1")
-					(SetLink
-         			(VariableNode "$c2")
-         			(VariableNode "$b2")
-         			(VariableNode "$f")
-					)
+		(AndLink
+			(SetLink ; sets are inherenetly unordered
+     		(VariableNode "$a")
+     		(VariableNode "$b1")
+     		(VariableNode "$c1")
+				(SetLink
+     			(VariableNode "$c2")
+     			(VariableNode "$b2")
+     			(VariableNode "$f")
 				)
+			)
 
-				; External clause enforcing equality relation
-				(EvaluationLink
-					(PredicateNode "equal")
-					(ListLink
-						(VariableNode "$b1")
-						(VariableNode "$b2")
-					)
-				)
-				(EvaluationLink
-					(PredicateNode "equal")
-					(ListLink
-						(VariableNode "$c1")
-						(VariableNode "$c2")
-					)
+			; External clause enforcing equality relation
+			(EvaluationLink
+				(PredicateNode "equal")
+				(ListLink
+					(VariableNode "$b1")
+					(VariableNode "$b2")
 				)
 			)
-			; The result to report
-			(ListLink
-        		(VariableNode "$a")
-        		(VariableNode "$b1")
-        		(VariableNode "$b2")
-        		(VariableNode "$c1")
-        		(VariableNode "$c2")
-        		(VariableNode "$f")
+			(EvaluationLink
+				(PredicateNode "equal")
+				(ListLink
+					(VariableNode "$c1")
+					(VariableNode "$c2")
+				)
 			)
+		)
+		; The result to report
+		(ListLink
+    		(VariableNode "$a")
+    		(VariableNode "$b1")
+    		(VariableNode "$b2")
+    		(VariableNode "$c1")
+    		(VariableNode "$c2")
+    		(VariableNode "$f")
 		)
 	)
 )
-

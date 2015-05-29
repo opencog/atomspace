@@ -48,29 +48,27 @@
 			(VariableNode "$var1")
 			(VariableNode "$verb")
 		)
-		(ImplicationLink 
-			(AndLink
-				(EvaluationLink
-					(PredicateNode "_obj")
-					(ListLink
-						(VariableNode "$verb") ; (ConceptNode "make")
-						(VariableNode "$var0") ; (ConceptNode "pottery")
-					)
-				)
-				(EvaluationLink
-					(PredicateNode "from")
-					(ListLink
-						(VariableNode "$verb") ; (ConceptNode "make")
-						(VariableNode "$var1") ; (ConceptNode "clay")
-					)
+		(AndLink
+			(EvaluationLink
+				(PredicateNode "_obj")
+				(ListLink
+					(VariableNode "$verb") ; (ConceptNode "make")
+					(VariableNode "$var0") ; (ConceptNode "pottery")
 				)
 			)
 			(EvaluationLink
-				(PredicateNode "make_from")
+				(PredicateNode "from")
 				(ListLink
-					(VariableNode "$var0")
-					(VariableNode "$var1")
+					(VariableNode "$verb") ; (ConceptNode "make")
+					(VariableNode "$var1") ; (ConceptNode "clay")
 				)
+			)
+		)
+		(EvaluationLink
+			(PredicateNode "make_from")
+			(ListLink
+				(VariableNode "$var0")
+				(VariableNode "$var1")
 			)
 		)
 	)

@@ -43,10 +43,8 @@
 (define (wrapper core)
 	(BindLink
 		(VariableNode "$x")
-		(ImplicationLink
-			(AndLink core)
-			(VariableNode "$x")
-		)
+		(AndLink core)
+		(VariableNode "$x")
 	)
 )
 

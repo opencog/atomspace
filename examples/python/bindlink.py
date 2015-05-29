@@ -39,16 +39,15 @@ scheme_query = \
       (BindLink
         ;; The variable to be bound
         (VariableNode "$var")
-        (ImplicationLink
-          ;; The pattern to be searched for
-          (InheritanceLink
-             (VariableNode "$var")
-             (ConceptNode "animal")
-          )
 
-          ;; The value to be returned.
-          (VariableNode "$var")
+        ;; The pattern to be searched for
+        (InheritanceLink
+           (VariableNode "$var")
+           (ConceptNode "animal")
         )
+
+        ;; The value to be returned.
+        (VariableNode "$var")
       )
     )
     '''
