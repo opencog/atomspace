@@ -39,17 +39,8 @@ private:
 public:
 	AbsentUTest(void)
 	{
-		try
-		{
-			 config().load("opencog-test.conf");
-		}
-		catch (RuntimeException &e)
-		{
-			std::cerr << e.getMessage() << std::endl;
-		}
-		logger().setFilename(config()["LOG_FILE"]);
-		logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
-		logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+		logger().setLevel(Logger::DEBUG);
+		logger().setPrintToStdoutFlag(true);
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
@@ -67,7 +58,7 @@ public:
 	void setUp(void);
 	void tearDown(void);
 
-	void ytest_single(void);
+	void test_single(void);
 	void test_double(void);
 };
 
@@ -83,6 +74,7 @@ void AbsentUTest::setUp(void)
 		"opencog/atomspace/core_types.scm, "
 		"tests/query/test_types.scm, "
 		"opencog/scm/utilities.scm,"
+		"opencog/scm/opencog/exec.scm, "
 		"opencog/scm/opencog/query.scm");
 
 	load_scm_files_from_config(*as);
@@ -92,7 +84,7 @@ void AbsentUTest::setUp(void)
  * Single AbsentLink used to trigger an action that takes
  * place only when the atomspace is commpletely lacking something!
  */
-void AbsentUTest::ytest_single(void)
+void AbsentUTest::test_single(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 

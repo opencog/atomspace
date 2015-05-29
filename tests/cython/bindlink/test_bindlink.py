@@ -17,9 +17,9 @@ __author__ = 'Curtis Faith'
 class BindlinkTest(TestCase):
 
     bindlink_handle = None
+    atomspace = AtomSpace()
 
     def setUp(self):
-        self.atomspace = AtomSpace()
         print "setUp - atomspace = ", self.atomspace
 
         # Get the config file name in a manner not dependent on the
@@ -55,8 +55,14 @@ class BindlinkTest(TestCase):
                 ).h
 
     def tearDown(self):
-        finalize_opencog()
-        del self.atomspace
+        print "tearDown - atomspace = ", self.atomspace
+
+        # Can't do this; finalize can be called only once, ever, and
+        # then never again.  The second call will never follow through.
+        # Also, cannot create and delete atomspaces here; this will
+        # confuse the PythonEval singletonInstance.
+        # finalize_opencog()
+        # del self.atomspace
 
     def test_stub_bindlink(self):
 

@@ -4,7 +4,7 @@ INCLUDE_DIRECTORIES(
 
 ADD_LIBRARY (smob SHARED
 	SchemeEval.cc
-	SchemeExec.cc
+	SchemeModule.cc
 	SchemePrimitive.cc
 	SchemeSmob.cc
 	SchemeSmobAtom.cc
@@ -19,23 +19,15 @@ ADD_LIBRARY (smob SHARED
 
 TARGET_LINK_LIBRARIES(smob
 	atomspace
-	execution
 	${COGUTIL_LIBRARY}
 	${GUILE_LIBRARIES}
-)
-
-ADD_EXECUTABLE(PrimitiveExample
-	PrimitiveExample.cc
-)
-TARGET_LINK_LIBRARIES(PrimitiveExample
-	smob
-	atomspace
 )
 
 INSTALL (TARGETS smob DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	SchemeEval.h
+	SchemeModule.h
 	SchemePrimitive.h
 	SchemeSmob.h
 	load-file.h

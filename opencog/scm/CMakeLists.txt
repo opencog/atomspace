@@ -12,6 +12,7 @@ INSTALL (FILES
 	DESTINATION "${DATADIR}/scm"
 )
 INSTALL (FILES
+	opencog/exec.scm
 	opencog/extension.scm
 	opencog/persist.scm
 	opencog/persist-sql.scm

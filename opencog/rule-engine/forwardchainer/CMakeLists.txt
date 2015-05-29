@@ -3,7 +3,6 @@ INSTALL (FILES
 	FCMemory.h
 	ForwardChainer.h
 	ForwardChainerCallBack.h
-	ForwardChainInputMatchCB.h
-	ForwardChainPatternMatchCB.h
+	ForwardChainerPMCB.h
 	DESTINATION "include/${PROJECT_NAME}/rule-engine/forwardchainer"
 )

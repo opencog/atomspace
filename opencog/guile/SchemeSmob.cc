@@ -246,11 +246,6 @@ void SchemeSmob::register_procs(void*)
 	register_proc("cog-set-af-boundary!",  1, 0, 0, C(ss_set_af_boundary));
 	register_proc("cog-af",                0, 0, 0, C(ss_af));
     
-	// ExecutionOutputLinks
-	register_proc("cog-execute!",          1, 0, 0, C(ss_execute));
-	register_proc("cog-evaluate!",         1, 0, 0, C(ss_evaluate));
-	register_proc("cog-reduce!",           1, 0, 0, C(ss_reduce));
-
 	// Atom types
 	register_proc("cog-get-types",         0, 0, 0, C(ss_get_types));
 	register_proc("cog-type->int",         1, 0, 0, C(ss_get_type));

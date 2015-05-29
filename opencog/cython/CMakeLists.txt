@@ -32,10 +32,11 @@ file(COPY opencog/__init__.py DESTINATION opencog)
 ADD_LIBRARY(PythonEval SHARED
 	PythonEval.cc
 )
-ADD_DEPENDENCIES(PythonEval atomspace_cython)
+# ADD_DEPENDENCIES(PythonEval atomspace_cython)
 
 TARGET_LINK_LIBRARIES(PythonEval
 	${PYTHON_LIBRARIES}
+	${Boost_FILESYSTEM_LIBRARY}
 )
 
 INSTALL (TARGETS PythonEval DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")

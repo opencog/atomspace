@@ -42,20 +42,8 @@ class StackMoreUTest :  public CxxTest::TestSuite
 
 		StackMoreUTest(void)
 		{
-			try
-			{
-				config().load("opencog-test.conf");
-			}
-			catch (RuntimeException &e)
-			{
-				std::cerr << e.getMessage() << std::endl;
-			}
-			logger().setFilename(config()["LOG_FILE"]);
-			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
-			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
-
-			// logger().setLevel(Logger::DEBUG);
-			// logger().setPrintToStdoutFlag(true);
+			logger().setLevel(Logger::DEBUG);
+			logger().setPrintToStdoutFlag(true);
 		}
 
 		~StackMoreUTest()

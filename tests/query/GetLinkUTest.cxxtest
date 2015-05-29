@@ -1,0 +1,149 @@
+/*
+ * tests/query/GetLinkUTest.cxxtest
+ *
+ * Copyright (C) 2015 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class GetLinkUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace *as;
+	SchemeEval* eval;
+
+public:
+	GetLinkUTest(void)
+	{
+		logger().setLevel(Logger::DEBUG);
+		logger().setPrintToStdoutFlag(true);
+
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+
+		config().set("SCM_PRELOAD",
+			"opencog/atomspace/core_types.scm, "
+			"opencog/scm/utilities.scm, "
+			"opencog/scm/opencog/exec.scm, "
+			"opencog/scm/opencog/query.scm");
+
+		load_scm_files_from_config(*as);
+	}
+
+	~GetLinkUTest()
+	{
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void test_unary_get(void);
+	void test_binary_get(void);
+	void test_free_bound(void);
+};
+
+void GetLinkUTest::tearDown(void)
+{
+}
+
+void GetLinkUTest::setUp(void)
+{
+}
+
+/*
+ * Basic single-variable GetLink unit test.
+ */
+void GetLinkUTest::test_unary_get(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD", "tests/query/get-link.scm");
+	load_scm_files_from_config(*as);
+
+	Handle hgnd = eval->eval_h("(cog-satisfying-set is-human)");
+	Handle hans = eval->eval_h(
+		"(SetLink (ConceptNode \"Ben\") (ConceptNode \"Linas\"))");
+
+	printf("Expected this: %s\n", hans->toString().c_str());
+	printf("Found this answer: %s\n", hgnd->toString().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Two-variable GetLink unit test.
+ */
+void GetLinkUTest::test_binary_get(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD", "tests/query/get-link.scm");
+	load_scm_files_from_config(*as);
+
+	Handle hgnd = eval->eval_h("(cog-satisfying-set is-something)");
+	Handle hans = eval->eval_h(
+		"(SetLink "
+		"(ListLink (ConceptNode \"Ben\") (ConceptNode \"human\"))"
+		"(ListLink (ConceptNode \"Linas\") (ConceptNode \"human\"))"
+		"(ListLink (ConceptNode \"Sparky\") (ConceptNode \"dog\")))");
+
+	printf("Expected this: %s\n", hans->toString().c_str());
+	printf("Found this answer: %s\n", hgnd->toString().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Two-variable GetLink unit test; one is free one is bound.
+ */
+void GetLinkUTest::test_free_bound(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD", "tests/query/get-link.scm");
+	load_scm_files_from_config(*as);
+
+	Handle hgnd = eval->eval_h("(cog-satisfying-set is-query)");
+
+	// XXX for better or for worse, satisfying-set skips using the
+	// Setlink if the Setlink only has one element in it.
+	// Handle hans = eval->eval_h("(SetLink (ConceptNode \"human\"))");
+	Handle hans = eval->eval_h("(ConceptNode \"human\")");
+
+	printf("Expected this: %s\n", hans->toString().c_str());
+	printf("Found this answer: %s\n", hgnd->toString().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

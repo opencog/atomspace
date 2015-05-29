@@ -48,7 +48,6 @@ static __attribute__ ((destructor)) void fini(void)
 
 #endif
 
-// namespace opencog {
 extern "C" {
 // Calling this forces this shared-lib to load, thus calling the 
 // constructor above, thus causing the atom types to be loaded into
@@ -58,4 +57,3 @@ void INITNAME(void)
 	/* No-op */
 }
 };
-// }

@@ -42,13 +42,14 @@
 #include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/DefineLink.h>
-#include <opencog/atoms/bind/DeleteLink.h>
 #include <opencog/atoms/bind/PatternLink.h>
 #include <opencog/atoms/bind/ScopeLink.h>
 #include <opencog/atoms/bind/VariableList.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
+#include <opencog/atoms/reduct/DeleteLink.h>
 #include <opencog/atoms/reduct/FunctionLink.h>
+#include <opencog/atoms/core/PutLink.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
@@ -282,9 +283,6 @@ static AtomPtr factory(Type atom_type, AtomPtr atom)
     } else if (DEFINE_LINK == atom_type) {
         if (NULL == DefineLinkCast(atom))
             return createDefineLink(*LinkCast(atom));
-    } else if (DELETE_LINK == atom_type) {
-        if (NULL == DeleteLinkCast(atom))
-            return createDeleteLink(*LinkCast(atom));
 /*
     XXX FIXME: cannot do this, due to a circular shared library
     dependency between python and itself: python depends on
@@ -305,6 +303,9 @@ static AtomPtr factory(Type atom_type, AtomPtr atom)
     } else if (GET_LINK == atom_type) {
         if (NULL == PatternLinkCast(atom))
             return createPatternLink(*LinkCast(atom));
+    } else if (PUT_LINK == atom_type) {
+        if (NULL == PutLinkCast(atom))
+            return createPutLink(*LinkCast(atom));
     } else if (SATISFACTION_LINK == atom_type) {
         if (NULL == PatternLinkCast(atom))
             return createPatternLink(*LinkCast(atom));
@@ -315,8 +316,10 @@ static AtomPtr factory(Type atom_type, AtomPtr atom)
         if (NULL == VariableListCast(atom))
             return createVariableList(*LinkCast(atom));
     } else if (classserver().isA(atom_type, FUNCTION_LINK)) {
+/* More circular-dependency heart-ache
         if (NULL == FunctionLinkCast(atom))
             return FunctionLink::factory(LinkCast(atom));
+*/
     }
     return atom;
 }
@@ -339,8 +342,6 @@ static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
         return createBetaRedex(*LinkCast(atom));
     if (DEFINE_LINK == atom_type)
         return createDefineLink(*LinkCast(atom));
-    if (DELETE_LINK == atom_type)
-        return createDeleteLink(*LinkCast(atom));
 /*
     XXX FIXME: cannot do this, due to a circular shared library
     dependency between python and itself: python depends on
@@ -355,6 +356,8 @@ static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
         return createLink(*LinkCast(atom));
     if (GET_LINK == atom_type)
         return createPatternLink(*LinkCast(atom));
+    if (PUT_LINK == atom_type)
+        return createPutLink(*LinkCast(atom));
     if (SATISFACTION_LINK == atom_type)
         return createPatternLink(*LinkCast(atom));
     if (SCOPE_LINK == atom_type)
@@ -362,7 +365,9 @@ static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
     if (VARIABLE_LIST == atom_type)
         return createVariableList(*LinkCast(atom));
     if (classserver().isA(atom_type, FUNCTION_LINK))
-        return FunctionLink::factory(LinkCast(atom));
+        // XXX FIXME more circular-dependency heart-ache
+        // return FunctionLink::factory(LinkCast(atom));
+        return createLink(*LinkCast(atom));
     if (classserver().isA(atom_type, LINK))
         return createLink(*LinkCast(atom));
 

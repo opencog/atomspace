@@ -27,7 +27,7 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atoms/reduct/FreeLink.h>
+#include <opencog/atoms/core/FreeLink.h>
 
 #include "PatternLink.h"
 #include "PatternUtils.h"

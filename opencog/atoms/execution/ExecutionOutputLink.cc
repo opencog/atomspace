@@ -32,6 +32,7 @@
 #include <opencog/guile/SchemeEval.h>
 
 #include "ExecutionOutputLink.h"
+#include "Instantiator.h"
 
 using namespace opencog;
 
@@ -108,6 +109,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	// but this is arguably broken, as it pollutes the atomspace with
 	// junk that is never cleaned up.  We punt for now, but something
 	// should be done about this. XXX FIXME ...
+	Instantiator inst(as);
 	LinkPtr largs(LinkCast(cargs));
 	Handle args(cargs);
 	if (largs)
@@ -116,28 +118,10 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		bool changed = false;
 		for (Handle ho : largs->getOutgoingSet())
 		{
-			Handle nh(ho);
-
-			// Special-case, to avoid a circular share library dependency
-			// with the python libraries. XXX FIXME the FunctionLink should
-			// be handling this, instead of the special case.
-			if (EXECUTION_OUTPUT_LINK == ho->getType())
-			{
-				ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(ho));
-				if (NULL == eolp)
-				{
-					LinkPtr lp(LinkCast(ho));
-					eolp = createExecutionOutputLink(*lp);
-				}
-				nh = eolp->execute(as);
-			}
-			else
-			{
-				FunctionLinkPtr flp(FunctionLinkCast(ho));
-				if (flp)
-					nh = flp->execute(as);
-			}
-			new_oset.push_back(nh);
+			Handle nh(inst.execute(ho));
+			// nh might be NULL if ho was a DeleteLink
+			if (nh != NULL)
+				new_oset.push_back(nh);
 			if (nh != ho) changed = true;
 		}
 		if (changed)

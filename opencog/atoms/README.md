@@ -9,7 +9,11 @@ improve performance of the system.  That is, the code here "memoizes"
 
 Subdirectories
 --------------
- * bind -- BindLink, LambdaLink,
+ * bind -- BindLink, LambdaLink, SatisfactionLink, SatisfactionSetLink,
+   GetLink
+
+ * core -- those C++ atoms that do not depend on other C++ subsystems
+   e.g. do not depend on scheme or python.
 
  * execute -- "black-box" executable/evaluatable links, e.g.
    ExecutionOutputLink, EvaluationLink, GroundedPredicateNode, etc.

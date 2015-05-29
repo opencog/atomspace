@@ -47,21 +47,14 @@ ADD_DEPENDENCIES(atomspace opencog_atom_types atom_types.h)
 
 TARGET_LINK_LIBRARIES(atomspace
 	lambda
-	clearbox
 	${COGUTIL_LIBRARY}
 	${GSL_LIBRARIES}
 	${Boost_THREAD_LIBRARY}
 )
 
-IF (CYGWIN)
-	INSTALL (TARGETS atomspace
-		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-	)
-ELSE (CYGWIN)
-	INSTALL (TARGETS atomspace
-		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-	)
-ENDIF (CYGWIN)
+INSTALL (TARGETS atomspace
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+)
 
 INSTALL (FILES
 	Atom.h

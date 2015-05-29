@@ -79,7 +79,10 @@ ADD_DEPENDENCIES(atomspace_cython pln_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace_cython
 	atomspace
+	clearbox
+	atomutils
 	atomspaceutils
+	atomcore
 	${COGUTIL_LIBRARY}
 	${PYTHON_LIBRARIES}
 	${Boost_THREAD_LIBRARY}
@@ -93,8 +96,9 @@ SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
 # The cogserver needs the atomspace pxd file to get the Handle, Atom and
 # AtomSpace defintions.
 INSTALL (FILES
+	__init__.py
 	atomspace.pxd
-   DESTINATION "include/${PROJECT_NAME}/cython/opencog"
+	DESTINATION "include/${PROJECT_NAME}/cython/opencog"
 )
 
 ############################## type constructors #####################
@@ -130,6 +134,7 @@ ADD_LIBRARY(utilities_cython SHARED
 
 TARGET_LINK_LIBRARIES(utilities_cython
 	PythonEval
+	clearbox
 	atomspace
 	type_constructors
 	${COGUTIL_LIBRARY}
@@ -199,6 +204,7 @@ IF (HAVE_GUILE)
 
 	TARGET_LINK_LIBRARIES(scheme_wrapper
 		query
+		execution
 		smob
 		${PYTHON_LIBRARIES}
 	)
