@@ -142,8 +142,11 @@ Handle FoldLink::reduce(void)
 		if (classserver().isA(t, FUNCTION_LINK))
 		{
 			FunctionLinkPtr fff(FunctionLinkCast(h));
+			// Arghh.  The cast should have been enough, but we currently
+			// can't store these in the atomsapce, due to circular shared
+			// lib dependencies.
 			if (NULL == fff)
-				fff = createFunctionLink(*LinkCast(h));
+				fff = FunctionLinkCast(FunctionLink::factory(LinkCast(h)));
 
 			Handle redh = fff->reduce();
 			if (h != redh)
@@ -222,6 +225,12 @@ Handle FoldLink::reduce(void)
 				foo = _atomTable->getAtomSpace()->addAtom(foo);
 
 			FunctionLinkPtr flp = FunctionLinkCast(foo);
+
+			// Arghh.  The cast should have been enough, but we currently
+			// can't store these in the atomsapce, due to circular shared
+			// lib dependencies.
+			if (NULL == flp)
+				flp = FunctionLinkCast(FunctionLink::factory(LinkCast(foo)));
 			DO_RETURN(Handle(flp->reduce()));
 		}
 	}
