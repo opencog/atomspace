@@ -132,6 +132,11 @@
 
 ; ------------------------------------------------
 ; The AssignLink combines the add and remove into one.
+;
+; At this time, there is not Get/Put analog that works
+; in the same fashion thaat AssignLink does. So we copy
+; this part of the example from the assert/retract example.
+; This should probably be updated and fixed.
 (define assign-b
 	(AssignLink
 		(TypeNode "EvaluationLink")
@@ -149,12 +154,12 @@
 			(ConceptNode "The V alternative"))))
 
 (cog-execute! assign-b)
-(show-eval-links)
+(cog-execute! get-value)
 
 (cog-execute! assign-v)
-(show-eval-links)
+(cog-execute! get-value)
 
 (cog-execute! assign-b)
-(show-eval-links)
+(cog-execute! get-value)
 
 ; ... and so on, ad infinitum
