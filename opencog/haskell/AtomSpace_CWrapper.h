@@ -13,7 +13,8 @@ extern "C"
     int AtomSpace_getNumNodes(AtomSpace* this_ptr);
     int AtomSpace_getNumLinks(AtomSpace* this_ptr);
     void AtomSpace_addAtom(AtomSpace* this_ptr, AtomPtr atom);
-    Handle AtomSpace_addLink(AtomSpace* this_ptr, Type t, const HandleSeq& outgoing);
+    Handle AtomSpace_addLink(AtomSpace* this_ptr, Type t,
+                             const HandleSeq& outgoing);
     bool AtomSpace_removeAtom(AtomSpace* this_ptr, Handle h);
 */
 }

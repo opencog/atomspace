@@ -13,6 +13,10 @@ INSTALL (TARGETS atomspace_wrapper
 )
 
 INSTALL(CODE
-     "execute_process(COMMAND cabal install   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/opencog/haskell OUTPUT_QUIET)"
+    "MESSAGE(STATUS \"Installing: opencog-atomspace haskell library...\")
+     execute_process(
+        COMMAND cabal install
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/opencog/haskell OUTPUT_QUIET
+     )"
 )
 
