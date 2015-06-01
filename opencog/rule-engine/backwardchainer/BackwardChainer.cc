@@ -102,6 +102,7 @@ void BackwardChainer::do_step()
 	process_target(selected_target);
 
 	_inference_history[selected_target.get_handle()] = selected_target.get_varmap();
+	_garbage_superspace->clear();
 
 	logger().debug("[BackwardChainer] End of a single BC step");
 }
