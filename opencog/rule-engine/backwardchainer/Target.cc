@@ -22,7 +22,7 @@
  */
 
 #include <opencog/util/random.h>
-
+#include <opencog/atoms/bind/PatternUtils.h>
 #include <opencog/atomutils/AtomUtils.h>
 
 #include "Target.h"
@@ -35,6 +35,11 @@ Target::Target(AtomSpace* as, const Handle& h)
 	_htarget_external = h;
 	_htarget_internal = _as->addAtom(h);
 	_selection_count = 0;
+
+	_vars = get_free_vars_in_tree(h);
+
+	for (auto hv : _vars)
+		_varmap[hv] = UnorderedHandleSet();
 }
 
 void Target::store_step(const Rule& r, const HandleSeq& premises)
@@ -50,13 +55,19 @@ void Target::store_step(const Rule& r, const HandleSeq& premises)
 void Target::store_varmap(VarMultimap& vm)
 {
 	for (auto& p : vm)
-		_varmap[p.first].insert(p.second.begin(), p.second.end());
+	{
+		if (_varmap.count(p.first) == 1)
+			_varmap[p.first].insert(p.second.begin(), p.second.end());
+	}
 }
 
 void Target::store_varmap(VarMap& vm)
 {
 	for (auto& p : vm)
-		_varmap[p.first].insert(p.second);
+	{
+		if (_varmap.count(p.first) == 1)
+			_varmap[p.first].insert(p.second);
+	}
 }
 
 uint Target::rule_count(const Rule& r)

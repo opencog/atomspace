@@ -58,6 +58,7 @@ public:
 	void increment_selection_count() { _selection_count++; }
 
 	Handle get_handle() const { return _htarget_external; }
+	HandleSeq get_vars() const { return _vars; }
 	const VarMultimap& get_varmap() const { return _varmap; }
 	float get_weight() { return 1.0f; }
 
@@ -68,6 +69,7 @@ private:
 	Handle _htarget_internal;
 	uint _selection_count;
 
+	HandleSeq _vars;
 	VarMultimap _varmap;
 
 	AtomSpace* _as;
