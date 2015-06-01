@@ -122,7 +122,7 @@ private:
 
 	void process_target(Target& target);
 
-	std::vector<Rule> filter_rules(Handle htarget);
+	std::vector<Rule> filter_rules(const Target& target);
 	Rule select_rule(Target& target, const std::vector<Rule>& rules);
 
 	HandleSeq match_knowledge_base(const Handle& htarget,
@@ -131,7 +131,7 @@ private:
 	                               std::vector<VarMap>& vmap);
 	HandleSeq ground_premises(const Handle& htarget, const VarMap& vmap, std::vector<VarMap>& vmap_list);
 	bool unify(const Handle& hsource, const Handle& hmatch,
-	           Handle hsource_vardecl, VarMap& result);
+	           Handle hsource_vardecl, Handle hmatch_vardecl, VarMap& result);
 
 	Handle gen_sub_varlist(const Handle& parent_varlist,
 	                       std::set<Handle> varset);

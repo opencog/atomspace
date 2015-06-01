@@ -25,7 +25,14 @@
 
 using namespace opencog;
 
-UnifyPMCB::UnifyPMCB(AtomSpace* as) : BackwardChainerPMCB(as)
+/**
+ * Constructor for the Unify PMCB.
+ *
+ * @param as        the AtomSpace pointer
+ * @param ext_vars  a VariableList of external variables that typed variables can map to
+ */
+UnifyPMCB::UnifyPMCB(AtomSpace* as, VariableListPtr ext_vars)
+    : BackwardChainerPMCB(as), _ext_vars(ext_vars)
 {
 
 }
@@ -41,7 +48,7 @@ bool UnifyPMCB::variable_match(const Handle& npat_h,
 	Type soltype = nsoln_h->getType();
 
 	// special case to allow any typed variable to match to a variable
-	if (soltype == VARIABLE_NODE) return true;
+	if (soltype == VARIABLE_NODE && _ext_vars->get_variables().varset.count(nsoln_h) == 1) return true;
 
 	return BackwardChainerPMCB::variable_match(npat_h, nsoln_h);
 }
