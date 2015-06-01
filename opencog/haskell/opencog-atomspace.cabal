@@ -17,7 +17,7 @@ library
                    , transformers >=0.4
                    , data-default >=0.5
 
-  extra-libraries:   atomspace_wrapper
+  extra-libraries:   haskell-atomspace
 
   extra-lib-dirs:    /usr/local/lib/opencog
 

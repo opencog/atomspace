@@ -1,14 +1,14 @@
-ADD_LIBRARY (atomspace_wrapper SHARED
+ADD_LIBRARY (haskell-atomspace SHARED
     AtomSpace_CWrapper.cpp
 )
 
-ADD_DEPENDENCIES(atomspace_wrapper atomspace)
+ADD_DEPENDENCIES(haskell-atomspace atomspace)
 
-TARGET_LINK_LIBRARIES(atomspace_wrapper
+TARGET_LINK_LIBRARIES(haskell-atomspace
 	atomspace
 )
 
-INSTALL (TARGETS atomspace_wrapper
+INSTALL (TARGETS haskell-atomspace
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
