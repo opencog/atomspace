@@ -9,8 +9,7 @@ module OpenCog.AtomSpace.Types(
   , Handle (..)
   ) where
 
-import Data.Default
-import Foreign
+import Data.Default     (Default(..))
 
 -- I should add more options here, this is just an example.
 data NodeType = NodeType1 | ConceptNode

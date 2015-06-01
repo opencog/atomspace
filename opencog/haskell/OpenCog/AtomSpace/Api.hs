@@ -9,14 +9,14 @@ module OpenCog.AtomSpace.Api (
 -- Note that I don't export the AtomSpace data constructors nor the
 -- asDelete/asNew functions.
 
-import Foreign
-import Foreign.C.Types
-import Foreign.C.String
-import Control.Exception
-import OpenCog.AtomSpace.Types
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Reader
-import Data.Functor
+import Foreign                      (Ptr)
+import Foreign.C.Types              (CShort(..),CLong(..))
+import Foreign.C.String             (CString,withCString)
+import Control.Exception            (bracket)
+import Control.Monad.IO.Class       (liftIO)
+import Control.Monad.Trans.Reader   (ReaderT,runReaderT,ask)
+import Data.Functor                 ((<$>))
+import OpenCog.AtomSpace.Types      (Node(..),Handle)
 
 -- Internal AtomSpace reference to a mutable C++ instance
 -- of the AtomSpace class.
