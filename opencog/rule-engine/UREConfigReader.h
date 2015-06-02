@@ -72,11 +72,14 @@ private:
 	
 	// Given <label> in
 	//
-	// DefineLink
+	// EquivalenceLink
 	//    <label>
 	//    <body>
 	//
 	// Return <body>
+	//
+	// Normally this would be using DefineLink, but till it is not
+	// fully supported we're using EquivalenceLink instead
 	Handle fetch_definition(Handle label);
 
 	// Given <schema> and <input> in

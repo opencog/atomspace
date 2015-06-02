@@ -45,7 +45,7 @@
           (cog-set-tv! B (stv 1 1)))))
 
 ; Useful to set this rule as a member of a rule base
-(DefineLink
+(EquivalenceLink
    (Node "crisp-rule-base-modus-ponens-rule")
    crisp-modus-ponens
 )

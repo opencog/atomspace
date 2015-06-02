@@ -110,12 +110,11 @@ HandleSeq UREConfigReader::fetch_rules(Handle rbs)
 Handle UREConfigReader::fetch_definition(Handle label)
 {
 	HandleSeq defines;
-	label->getIncomingSetByType(back_inserter(defines), DEFINE_LINK);
+	label->getIncomingSetByType(back_inserter(defines), EQUIVALENCE_LINK);
 	OC_ASSERT(defines.size() == 1, "There should be only one definition");
-	return Handle::UNDEFINED; // DefineLinkCast(defines.front())->get_definition();
-                              // commented out till get_definition is
-                              // extended to any object not just
-                              // functions.
+	// The following line is disabled till DefineLink is fully supported
+	// return Handle(DefineLinkCast(defines.front())->get_definition());
+	return LinkCast(defines.front())->getOutgoingAtom(1);
 }
 
 Handle UREConfigReader::fetch_execution_output(Handle schema, Handle input)

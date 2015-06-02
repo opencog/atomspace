@@ -70,7 +70,7 @@
           (cog-set-tv! AC (stv 1 1)))))
 
 ; Useful to set this rule as a member of a rule base
-(DefineLink
+(EquivalenceLink
    (Node "crisp-rule-base-deduction-rule")
    crisp-deduction
 )
