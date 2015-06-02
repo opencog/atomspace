@@ -26,7 +26,7 @@
                     (VariableNode "$A")
                     (VariableNode "$B"))
                 (VariableNode "$A")
-                (VariableNode "$B"))))))
+                (VariableNode "$B")))))
 
 ; -----------------------------------------------------------------------------
 ; Crisp Modus Ponens Formula
