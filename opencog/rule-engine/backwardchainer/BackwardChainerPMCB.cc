@@ -44,11 +44,14 @@ bool BackwardChainerPMCB::grounding(const std::map<Handle, Handle> &var_soln,
 	// get rid of non-var mapping
 	for (auto& p : var_soln)
 	{
-		if (p.first->getType() == VARIABLE_NODE)
+		if (_variables->varset.count(p.first) == 1)
 			true_var_soln[p.first] = p.second;
 	}
 
 	// XXX TODO if a variable match to itself, reject?
+
+	if (true_var_soln.size() == 0)
+		return false;
 
 	// store the variable solution
 	var_solns_.push_back(true_var_soln);
