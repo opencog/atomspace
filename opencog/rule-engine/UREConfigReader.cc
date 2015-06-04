@@ -30,64 +30,44 @@
 
 using namespace opencog;
 
-UREConfigReader::UREConfigReader(AtomSpace& as) : _as(as)
+const std::string UREConfigReader::URE_top_name = "URE";
+const std::string UREConfigReader::attention_alloc_name = "URE:attention-allocation";
+const std::string UREConfigReader::max_iter_name = "URE:maximum-iterations";
+
+UREConfigReader::UREConfigReader(AtomSpace& as, Handle rbs) : _as(as)
 {
-	// Iterate over all rule-based systems and retrieve their rules
-	// and parameters
-	for (Handle rbs : fetch_rule_based_systems()) {
-		// Retrieve rule names and instantiate them
-		for (Handle rn : fetch_rules(rbs)) {
-			// Build rule and cache it in _sys2params
-			Handle rule_h = fetch_definition(rn);
-			_sys2params[rbs].rules.emplace_back(rule_h);
-		}
-
-		// Fetch maximum number of iterations
-		_sys2params[rbs].max_iter = fetch_num_param(max_iter_name, rbs);
-
-		// Fetch attention allocation parameter and cache it
-		_sys2params[rbs].attention_alloc =
-			fetch_bool_param(attention_alloc_name, rbs);
+	// Retrieve rule names and instantiate them
+	for (Handle rn : fetch_rules(rbs)) {
+		// Build rule and store it
+		Handle rule_h = fetch_definition(rn);
+		_rbparams.rules.emplace_back(rule_h);
 	}
+
+	// Fetch maximum number of iterations
+	_rbparams.max_iter = fetch_num_param(max_iter_name, rbs);
+
+	// Fetch attention allocation parameter
+	_rbparams.attention_alloc = fetch_bool_param(attention_alloc_name, rbs);
 }
 
-const std::vector<Rule>& UREConfigReader::get_rules(Handle rbs) const
+const std::vector<Rule>& UREConfigReader::get_rules() const
 {
-	return _sys2params.at(rbs).rules;
+	return _rbparams.rules;
 }
 
-bool UREConfigReader::get_attention_allocation(Handle rbs) const
+std::vector<Rule>& UREConfigReader::get_rules()
 {
-	return _sys2params.at(rbs).attention_alloc;
+	return _rbparams.rules;
 }
 
-int UREConfigReader::get_maximum_iterations(Handle rbs) const
+bool UREConfigReader::get_attention_allocation() const
 {
-	return _sys2params.at(rbs).max_iter;
+	return _rbparams.attention_alloc;
 }
 
-HandleSeq UREConfigReader::fetch_rule_based_systems()
+int UREConfigReader::get_maximum_iterations() const
 {
-    // Retrieve all rule-based systems inheriting URE_top_rulebase
-	Handle rbs_var = _as.addNode(VARIABLE_NODE, "__URE_RBS__");
-	BindLink bl({rbs_var,
-				// Clause:
-				// InheritanceLink
-				//    VariableNode "__URE_SUB_SYSTEMS__"
-				//    ConceptNode URE_top_name
-				_as.addLink(INHERITANCE_LINK,
-				            rbs_var,
-				            _as.addNode(CONCEPT_NODE,
-				                        URE_top_name)),
-				// Rewrite: (all inherited rule-based systems)
-				rbs_var});
-	Handle bl_h = bl.getHandle();
-	Handle rule_based_systems = bindlink(&_as, bl_h);
-
-	// Remove the BindLink from the AtomSpace as it is no longer useful
-	_as.removeAtom(bl_h);
-
-	return LinkCast(rule_based_systems)->getOutgoingSet();
+	return _rbparams.max_iter;
 }
 
 HandleSeq UREConfigReader::fetch_rules(Handle rbs)
@@ -155,6 +135,7 @@ double UREConfigReader::fetch_num_param(const string& schema_name, Handle input)
 bool UREConfigReader::fetch_bool_param(const string& pred_name, Handle input)
 {
 	Handle pred = _as.addNode(PREDICATE_NODE, pred_name);
-	TruthValuePtr tv = _as.addLink(EVALUATION_LINK, pred, input)->getTruthValue();
+	TruthValuePtr tv =
+		_as.addLink(EVALUATION_LINK, pred, input)->getTruthValue();
 	return tv->getMean() > 0.5;
 }

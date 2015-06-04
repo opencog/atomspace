@@ -34,17 +34,25 @@ namespace opencog {
  * Read the URE configuration in the AtomSpace as described in
  * http://wiki.opencog.org/w/URE_Configuration_Format, and provide
  * parameter accessors for all rule-based systems.
+ *
+ * @todo: It doesn't support the hierarchical configuration structure
+ * described in
+ * http://wiki.opencog.org/w/URE_Configuration_Format#Rule-Based_System_Hierarchical_Structure,
+ * instead it assumes all parameters are duplicated for all systems
+ * and subsystems, for now.
  */
 class UREConfigReader
 {
 public:
 	// Ctor
-	UREConfigReader(AtomSpace& as);
+	// rbs is a Handle pointing to a rule-based system is as
+	UREConfigReader(AtomSpace& as, Handle rbs);
 
 	// Access methods, return parameters given a rule-based system
-	const std::vector<Rule>& get_rules(Handle rbs) const;
-	bool get_attention_allocation(Handle rbs) const;
-	int get_maximum_iterations(Handle rbs) const;
+	const std::vector<Rule>& get_rules() const;
+	std::vector<Rule>& get_rules();
+	bool get_attention_allocation() const;
+	int get_maximum_iterations() const;
 
 	// Name of the top rule base from which all rule-based systems
 	// inherit. It should corresponds to a ConceptNode in the
@@ -60,16 +68,10 @@ public:
 	static const std::string max_iter_name;
 private:
 
-	// Fetch from the AtomSpace all rule based systems (i.e. inheriting
-	// ConceptNode URE_top_name).
-	HandleSeq fetch_rule_based_systems();
+	// Fetch from the AtomSpace all rule names of a given rube-based
+	// system (i.e. rules members of that system).
+	HandleSeq fetch_rules(Handle rbs);
 
-	// Fetch from the AtomSpace all rule names of a given system
-	// (i.e. members of that system).
-	HandleSeq fetch_rules(Handle rbsys);
-
-	// TODO: move the following 2 methods in some AtomUtils class
-	
 	// Given <label> in
 	//
 	// EquivalenceLink
@@ -80,6 +82,8 @@ private:
 	//
 	// Normally this would be using DefineLink, but till it is not
 	// fully supported we're using EquivalenceLink instead
+	//
+	// TODO: this could be moved in a utility library
 	Handle fetch_definition(Handle label);
 
 	// Given <schema> and <input> in
@@ -90,6 +94,8 @@ private:
 	//    <output>
 	//
 	// Return <output>
+	//
+	// TODO: this could be moved in a utility library
 	Handle fetch_execution_output(Handle schema, Handle input);
 
 	// Similar to above but takes instead the schema name instead of
@@ -117,24 +123,14 @@ private:
 	
 	AtomSpace& _as;
 
-	// @todo: It doesn't support the hierarchical configuration
-	// structure described in
-	// http://wiki.opencog.org/w/URE_Configuration_Format#Rule-Based_System_Hierarchical_Structure,
-	// instead all parameters must be duplicated for all systems and
-	// subsystems, for now.
 	class RuleBaseParameters {
 	public:
 		std::vector<Rule> rules;
 		bool attention_alloc;
 		int max_iter;
 	};
-	// Cache for fast access
-	map<Handle, RuleBaseParameters> _sys2params;
+	RuleBaseParameters _rbparams;
 };
-
-const std::string UREConfigReader::URE_top_name = "URE";
-const std::string UREConfigReader::attention_alloc_name = "URE:attention-allocation";
-const std::string UREConfigReader::max_iter_name = "URE:maximum-iterations";
 
 } // ~namespace opencog
 
