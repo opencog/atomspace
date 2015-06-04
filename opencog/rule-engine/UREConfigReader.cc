@@ -23,8 +23,6 @@
 
 #include "UREConfigReader.h"
 
-#include <opencog/atoms/bind/BindLink.h>
-#include <opencog/atoms/bind/DefineLink.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/query/BindLinkAPI.h>
 
@@ -74,19 +72,15 @@ HandleSeq UREConfigReader::fetch_rules(Handle rbs)
 {
 	// Retrieve rules
 	Handle rule_var = _as.addNode(VARIABLE_NODE, "__URE_RULE__");
-	Handle bl = _as.addLink(BIND_LINK,
-	                        rule_var,
-	                        // Clause:
+	Handle gl = _as.addLink(GET_LINK,
 	                        // MemberLink
 	                        //    VariableNode "__URE_RULE__"
 	                        //    ConceptNode <RBS>
-	                        _as.addLink(MEMBER_LINK, rule_var, rbs),
-	                        // Rewrite: (all member rules)
-	                        rule_var);
-	Handle rule_names = bindlink(&_as, bl);
+	                        _as.addLink(MEMBER_LINK, rule_var, rbs));
+	Handle rule_names = satisfying_set(&_as, gl);
 
-	// Remove the BindLink from the AtomSpace as it is no longer useful
-	_as.removeAtom(bl);
+	// Remove the GetLink from the AtomSpace as it is no longer useful
+	_as.removeAtom(gl);
 
 	return LinkCast(rule_names)->getOutgoingSet();
 }
@@ -105,9 +99,7 @@ Handle UREConfigReader::fetch_execution_output(Handle schema, Handle input)
 {
 	// Retrieve rules
 	Handle output_var = _as.addNode(VARIABLE_NODE, "__EXECUTION_OUTPUT_VAR__");
-	Handle bl = _as.addLink(BIND_LINK,
-	                        output_var,
-	                        // Clause:
+	Handle gl = _as.addLink(GET_LINK,
 	                        // ExecutionLink
 	                        //    <schema>
 	                        //    <input>
@@ -115,13 +107,11 @@ Handle UREConfigReader::fetch_execution_output(Handle schema, Handle input)
 	                        _as.addLink(EXECUTION_LINK,
 	                                    schema,
 	                                    input,
-	                                    output_var),
-	                        // Rewrite: (all outputs)
-	                        output_var);
-	Handle outputs = bindlink(&_as, bl);
+	                                    output_var));
+	Handle outputs = satisfying_set(&_as, gl);
 
-	// Remove the BindLink from the AtomSpace as it is no longer useful
-	_as.removeAtom(bl);
+	// Remove the GetLink from the AtomSpace as it is no longer useful
+	_as.removeAtom(gl);
 
 	HandleSeq outputs_hs = LinkCast(outputs)->getOutgoingSet();
 	OC_ASSERT(outputs_hs.size() == 1, "There should be only one output");
