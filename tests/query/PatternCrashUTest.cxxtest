@@ -1,7 +1,7 @@
 /*
- * tests/query/PatternUTest.cxxtest
+ * tests/query/PatternCrashUTest.cxxtest
  *
- * Copyright (C) 2009,2011 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2015 OpenCog Foundation
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,13 +24,11 @@
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/InitiateSearchCB.h>
 #include <opencog/atoms/bind/PatternLink.h>
+#include <opencog/atomutils/FindUtils.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/guile/load-file.h>
-
-#include "imply.h"
-#include "test-types.h"
 
 using namespace opencog;
 
@@ -89,6 +87,8 @@ class PMCB : public InitiateSearchCB, public DefaultPatternMatchCB
 bool PMCB::grounding(const std::map<Handle, Handle> &var_soln,
                      const std::map<Handle, Handle> &pred_soln)
 {
+	logger().debug("Inside grounding with %d var_soln", var_soln.size());
+
 	for (auto& p : var_soln)
         logger().debug("var_soln map " + p.first->toShortString() + " to " + p.second->toShortString());
 
@@ -114,152 +114,150 @@ void PatternCrashUTest::test_one_thing(void)
 
 	// populate AtomSpace
 	_eval->eval(R"(
-
+	            (EvaluationLink
+	             (PredicateNode "chirps")
+	             (ConceptNode "Tweety")
+	             )
+	            (EvaluationLink
+	             (PredicateNode "eats_flies")
+	             (ConceptNode "Tweety")
+	             )
+	            (InheritanceLink
+	             (ConceptNode "Tweety")
+	             (ConceptNode "Yello")
+	             )
+	            (BindLink (av 0 0 0)
+	             (VariableList (av 0 0 0)
+	              (VariableNode "$A")
+	              (VariableNode "$B")
+	              )
+	             (AndLink
+	              (VariableNode "$A")
+	              (ImplicationLink
+	               (VariableNode "$A")
+	               (VariableNode "$B")
+	               )
+	              )
+	             (ExecutionOutputLink
+	              (GroundedSchemaNode "scm: pln-formula-simple-modus-ponens")
+	              (ListLink
+	               (VariableNode "$B")
+	               (ImplicationLink
+	                (VariableNode "$A")
+	                (VariableNode "$B")
+	                )
+	               )
+	              )
+	             )
+	            (ListLink
+	             (InheritanceLink
+	              (ConceptNode "Fritz")
+	              (ConceptNode "green")
+	              )
+	             (ImplicationLink
+	              (InheritanceLink
+	               (ConceptNode "Fritz")
+	               (ConceptNode "Frog")
+	               )
+	              (InheritanceLink
+	               (ConceptNode "Fritz")
+	               (ConceptNode "green")
+	               )
+	              )
+	             )
+	            (ListLink
+	             (InheritanceLink
+	              (ConceptNode "Fritz")
+	              (ConceptNode "Frog")
+	              )
+	             (ImplicationLink
+	              (AndLink
+	               (EvaluationLink
+	                (PredicateNode "croaks")
+	                (ConceptNode "Fritz")
+	                )
+	               (EvaluationLink
+	                (PredicateNode "eats_flies")
+	                (ConceptNode "Fritz")
+	                )
+	               )
+	              (InheritanceLink
+	               (ConceptNode "Fritz")
+	               (ConceptNode "Frog")
+	               )
+	              )
+	             )
+	            (ImplicationLink
+	             (AndLink
 	              (EvaluationLink
-				     (PredicateNode "chirps")
-				     (ConceptNode "Tweety")
-				  )
-				  (EvaluationLink
-				     (PredicateNode "eats_flies")
-				     (ConceptNode "Tweety")
-				  )
-				  (InheritanceLink
-				     (ConceptNode "Tweety")
-				     (ConceptNode "Yello")
-				  )
-				  (BindLink (av 0 0 0)
-				     (VariableList (av 0 0 0)
-				        (VariableNode "$A")
-				        (VariableNode "$B")
-				     )
-				     (AndLink
-				        (VariableNode "$A")
-				        (ImplicationLink
-				           (VariableNode "$A")
-				           (VariableNode "$B")
-				        )
-				     )
-				     (ExecutionOutputLink
-				        (GroundedSchemaNode "scm: pln-formula-simple-modus-ponens")
-				        (ListLink
-				           (VariableNode "$B")
-				           (ImplicationLink
-				              (VariableNode "$A")
-				              (VariableNode "$B")
-				           )
-				        )
-				     )
-				  )
-				  (ListLink
-				     (InheritanceLink
-				        (ConceptNode "Fritz")
-				        (ConceptNode "green")
-				     )
-				     (ImplicationLink
-				        (InheritanceLink
-				           (ConceptNode "Fritz")
-				           (ConceptNode "Frog")
-				        )
-				        (InheritanceLink
-				           (ConceptNode "Fritz")
-				           (ConceptNode "green")
-				        )
-				     )
-				  )
-				  (ListLink
-				     (InheritanceLink
-				        (ConceptNode "Fritz")
-				        (ConceptNode "Frog")
-				     )
-				     (ImplicationLink
-				        (AndLink
-				           (EvaluationLink
-				              (PredicateNode "croaks")
-				              (ConceptNode "Fritz")
-				           )
-				           (EvaluationLink
-				              (PredicateNode "eats_flies")
-				              (ConceptNode "Fritz")
-				           )
-				        )
-				        (InheritanceLink
-				           (ConceptNode "Fritz")
-				           (ConceptNode "Frog")
-				        )
-				     )
-				  )
-				  (ImplicationLink
-				     (AndLink
-				        (EvaluationLink
-				           (PredicateNode "chirps")
-				           (VariableNode "$Y")
-				        )
-				        (EvaluationLink
-				           (PredicateNode "sings")
-				           (VariableNode "$Y")
-				        )
-				     )
-				     (InheritanceLink
-				        (VariableNode "$Y")
-				        (ConceptNode "Canary")
-				     )
-				  )
-				  (ImplicationLink
-				     (AndLink
-				        (EvaluationLink
-				           (PredicateNode "croaks")
-				           (VariableNode "$X")
-				        )
-				        (EvaluationLink
-				           (PredicateNode "eats_flies")
-				           (VariableNode "$X")
-				        )
-				     )
-				     (InheritanceLink
-				        (VariableNode "$X")
-				        (ConceptNode "Frog")
-				     )
-				  )
-				  (ImplicationLink
-				     (InheritanceLink
-				        (VariableNode "$Z")
-				        (ConceptNode "Frog")
-				     )
-				     (InheritanceLink
-				        (VariableNode "$Z")
-				        (ConceptNode "green")
-				     )
-				  )
-				  (ImplicationLink
-				     (InheritanceLink
-				        (VariableNode "$A")
-				        (ConceptNode "Canary")
-				     )
-				     (InheritanceLink
-				        (VariableNode "$A")
-				        (ConceptNode "yellow")
-				     )
-				  )
-
-	              )");
+	               (PredicateNode "chirps")
+	               (VariableNode "$Y")
+	               )
+	              (EvaluationLink
+	               (PredicateNode "sings")
+	               (VariableNode "$Y")
+	               )
+	              )
+	             (InheritanceLink
+	              (VariableNode "$Y")
+	              (ConceptNode "Canary")
+	              )
+	             )
+	            (ImplicationLink
+	             (AndLink
+	              (EvaluationLink
+	               (PredicateNode "croaks")
+	               (VariableNode "$X")
+	               )
+	              (EvaluationLink
+	               (PredicateNode "eats_flies")
+	               (VariableNode "$X")
+	               )
+	              )
+	             (InheritanceLink
+	              (VariableNode "$X")
+	              (ConceptNode "Frog")
+	              )
+	             )
+	            (ImplicationLink
+	             (InheritanceLink
+	              (VariableNode "$Z")
+	              (ConceptNode "Frog")
+	              )
+	             (InheritanceLink
+	              (VariableNode "$Z")
+	              (ConceptNode "green")
+	              )
+	             )
+	            (ImplicationLink
+	             (InheritanceLink
+	              (VariableNode "$A")
+	              (ConceptNode "Canary")
+	              )
+	             (InheritanceLink
+	              (VariableNode "$A")
+	              (ConceptNode "yellow")
+	              )
+	             )
+	            )");
 
 	Handle htarget = _eval->eval_h(R"(
 	                               (AndLink (stv 1.000000 0.000000)
-								     (InheritanceLink (stv 1.000000 0.000000)
-								       (VariableNode "$Z")
-								       (ConceptNode "Frog")
-								     )
-								     (ImplicationLink (stv 1.000000 0.000000)
-								       (InheritanceLink (stv 1.000000 0.000000)
-								         (VariableNode "$Z")
-								         (ConceptNode "Frog")
-								       )
-								       (InheritanceLink (stv 1.000000 0.000000)
-								         (VariableNode "$Z")
-								         (ConceptNode "green")
-								       )
-								     )
-								   )
+	                                (InheritanceLink (stv 1.000000 0.000000)
+	                                 (VariableNode "$Z")
+	                                 (ConceptNode "Frog")
+	                                 )
+	                                (ImplicationLink (stv 1.000000 0.000000)
+	                                 (InheritanceLink (stv 1.000000 0.000000)
+	                                  (VariableNode "$Z")
+	                                  (ConceptNode "Frog")
+	                                  )
+	                                 (InheritanceLink (stv 1.000000 0.000000)
+	                                  (VariableNode "$Z")
+	                                  (ConceptNode "green")
+	                                  )
+	                                 )
+	                                )
 	                               )");
 
 	// Get all VariableNodes (unquoted)
@@ -271,10 +269,13 @@ void PatternCrashUTest::test_one_thing(void)
 	   vars.push_back(h);
 
 	Handle htarget_vardecl = _as->addAtom(createVariableList(vars));
+	Handle hpattern = _as->addAtom(createPatternLink(htarget_vardecl, htarget));
 
-
-	PatternLinkPtr sl(createPatternLink(htarget_vardecl, htarget));
+	PatternLinkPtr sl = PatternLinkCast(hpattern);
 	PMCB pmcb(_as);
+
+	logger().debug("Before Pattern Matching");
+
 	sl->satisfy(pmcb);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
