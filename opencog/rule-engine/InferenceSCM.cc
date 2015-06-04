@@ -80,12 +80,12 @@ void InferenceSCM::init(void)
 #endif
 }
 
-Handle InferenceSCM::do_forward_chaining(Handle h, const string& conf_path)
+Handle InferenceSCM::do_forward_chaining(Handle h, Handle rbs)
 {
 #ifdef HAVE_GUILE
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fc");
     DefaultForwardChainerCB dfc(as);
-    ForwardChainer fc(as, conf_path);
+    ForwardChainer fc(as, rbs);
     /**
      * Parse (cog-fc ListLink()) as forward chaining with
      * Handle::UNDEFINED which does pattern matching on the atomspace
@@ -117,19 +117,18 @@ Handle InferenceSCM::do_backward_chaining(Handle h)
 #ifdef HAVE_GUILE
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
 
-    JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as, "reasoning/default_cpolicy.json"));
-    cpolicy_loader.load_config();
+    // By default use the top rule-based system ConceptNode "URE"
+    Handle top_rbs = as->addNode(CONCEPT_NODE, UREConfigReader::URE_top_name);
+    UREConfigReader config_reader(*as, top_rbs);
 
-    std::vector<Rule> rules;
-    for (Rule* pr : cpolicy_loader.get_rules())
-        rules.push_back(*pr);
+    std::vector<Rule> rules = config_reader.get_rules();
 
     BackwardChainer bc(as, rules);
 	bc.set_target(h);
 
 	logger().debug("[BackwardChainer] Before do_chain");
 
-    bc.do_until(cpolicy_loader.get_max_iter());
+    bc.do_until(config_reader.get_maximum_iterations());
 
 	logger().debug("[BackwardChainer] After do_chain");
     map<Handle, UnorderedHandleSet> soln = bc.get_chaining_result();

@@ -32,23 +32,16 @@
 
 using namespace opencog;
 
-ForwardChainer::ForwardChainer(AtomSpace * as, const string& conf_path) :
-        _as(as), _rec(_as), _conf_path(conf_path), _fcmem(_as)
+ForwardChainer::ForwardChainer(AtomSpace * as, Handle rbs) :
+	_as(as), _rec(_as), _rbs(rbs), _configReader(*as, rbs), _fcmem(as)
 {
     init();
 }
 
-ForwardChainer::~ForwardChainer()
-{
-    delete _cpolicy_loader;
-}
-
 void ForwardChainer::init()
 {
-    _cpolicy_loader = new JsonicControlPolicyParamLoader(_as, _conf_path);
-    _cpolicy_loader->load_config();
-    _fcmem.set_search_in_af(_cpolicy_loader->get_attention_alloc());
-    _fcmem.set_rules(_cpolicy_loader->get_rules());
+    _fcmem.set_search_in_af(_configReader.get_attention_allocation());
+    _fcmem.set_rules(_configReader.get_rules());
     _fcmem.set_cur_rule(nullptr);
 
     // Provide a logger
@@ -77,8 +70,8 @@ void ForwardChainer::step(ForwardChainerCallBack& fcb)
 {
 
     if (_fcmem.get_cur_source() == Handle::UNDEFINED) {
-        _log->info(
-                "[ForwardChainer] No current source, step forward chaining aborted.");
+        _log->info("[ForwardChainer] No current source, step "
+                   "forward chaining aborted.");
         return;
     }
 
@@ -93,8 +86,8 @@ void ForwardChainer::step(ForwardChainerCallBack& fcb)
     //! xxx this decision is maded based on recent discussion.I
     //! it might still face some changes.
     if (matched_rules.empty()) {
-        _log->info(
-                "[ForwardChainer] No matching rule found. Setting all rules as candidates.");
+        _log->info("[ForwardChainer] No matching rule found. "
+                   "Setting all rules as candidates.");
         matched_rules = _fcmem.get_rules();
     }
 
@@ -104,8 +97,8 @@ void ForwardChainer::step(ForwardChainerCallBack& fcb)
         rule_weight[r] = r->get_cost();
     }
 
-    _log->info(
-            "[ForwardChainer] Selecting a rule from the set of candidate rules.");
+    _log->info("[ForwardChainer] Selecting a rule from the set of "
+               "candidate rules.");
     auto r = _rec.tournament_select(rule_weight);
     _fcmem.set_cur_rule(r);
     _log->info("[ForwardChainer] Selected rule is %s", r->get_name().c_str());
@@ -123,8 +116,8 @@ void ForwardChainer::step(ForwardChainerCallBack& fcb)
         _log->info("%s ", p->toShortString().c_str() );
     }
 
-    _log->info(
-            "[ForwardChainer] updating premise list with the inference made");
+    _log->info("[ForwardChainer] updating premise list with the "
+               "inference made");
     _fcmem.update_potential_sources(product);
 
     _log->info("[ForwardChainer] adding inference to history");
@@ -144,7 +137,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
     if (not var_nodes.empty())
         return do_pm(hsource, var_nodes, fcb);
 
-    auto max_iter = _cpolicy_loader->get_max_iter();
+    auto max_iter = _configReader.get_maximum_iterations();
     _fcmem.set_source(hsource); //set initial source
     _fcmem.update_potential_sources(HandleSeq{hsource});
 
@@ -212,9 +205,8 @@ void ForwardChainer::do_pm(const Handle& hsource,
 void ForwardChainer::do_pm()
 {
     //! Do pattern matching using the rules declared in the declaration file
-    _log->info(
-            "Forward chaining on the entire atomspace with rules declared in %s",
-            _conf_path.c_str());
+    _log->info("Forward chaining on the rule-based system %s "
+               "declared in %s", _rbs->toString().c_str());
     vector<Rule*> rules = _fcmem.get_rules();
     for (Rule* rule : rules) {
         _log->info("Applying rule %s on ", rule->get_name().c_str());

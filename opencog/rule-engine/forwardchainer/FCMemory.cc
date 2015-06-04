@@ -48,9 +48,16 @@ vector<Rule*>& FCMemory::get_rules()
     return _rules;
 }
 
-void FCMemory::set_rules(vector<Rule*> rules)
+void FCMemory::set_rules(const vector<Rule*>& rules)
 {
     _rules = rules;
+}
+
+void FCMemory::set_rules(vector<Rule>& rules)
+{
+	_rules.clear();
+	for (Rule& rule : rules)
+		_rules.push_back(&rule);
 }
 
 void FCMemory::set_source(Handle source)

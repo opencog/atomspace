@@ -53,7 +53,13 @@ public:
 
 	//Rules
 	vector<Rule*>& get_rules();
-	void set_rules(vector<Rule*> rules);
+	void set_rules(const vector<Rule*>& rules);
+
+	// Quick hack to have the new UREConfigReader compatible with
+	// FCMemory. Warning: don't destroy that container as FCMemory
+	// isn't gonna make a copy of it.
+	void set_rules(vector<Rule>& rules);
+
 	Rule* get_cur_rule();
 	void set_cur_rule(Rule* r);
 

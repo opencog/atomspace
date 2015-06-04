@@ -25,7 +25,7 @@
 #define FORWARDCHAINERX_H_
 
 #include <opencog/util/Logger.h>
-#include <opencog/rule-engine/JsonicControlPolicyParamLoader.h>
+#include <opencog/rule-engine/UREConfigReader.h>
 #include <opencog/rule-engine/URECommons.h>
 #include "FCMemory.h"
 
@@ -40,13 +40,13 @@ private:
     friend class ::ForwardChainerUTest;
 
     AtomSpace * _as;
-    URECommons _rec; //utility class
+    URECommons _rec;            // utility class
+	Handle _rbs;                // rule-based system
 
-    JsonicControlPolicyParamLoader* _cpolicy_loader;
+	UREConfigReader _configReader;
 
-	string _conf_path;
 
-    FCMemory _fcmem; //Stores history
+    FCMemory _fcmem;            // stores history
     Logger * _log;
     int _iteration = 0;
 
@@ -64,8 +64,10 @@ protected:
         TV_FITNESS_BASED, STI_BASED
     };
 public:
-    ForwardChainer(AtomSpace * as, const string& conf_path);
-    virtual ~ForwardChainer();
+	/**
+	 * Ctor. rbs is a Handle pointing to rule-based system.
+	 */
+    ForwardChainer(AtomSpace * as, Handle rbs);
     void step(ForwardChainerCallBack& fcb);
     void do_chain(ForwardChainerCallBack& fcb, Handle hsource =
             Handle::UNDEFINED);
