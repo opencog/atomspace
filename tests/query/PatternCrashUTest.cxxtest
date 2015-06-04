@@ -1,0 +1,281 @@
+/*
+ * tests/query/PatternUTest.cxxtest
+ *
+ * Copyright (C) 2009,2011 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/query/InitiateSearchCB.h>
+#include <opencog/atoms/bind/PatternLink.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+#include <opencog/guile/load-file.h>
+
+#include "imply.h"
+#include "test-types.h"
+
+using namespace opencog;
+
+// This implements the most basic, simplest test of the pattern matcher.
+class PatternCrashUTest: public CxxTest::TestSuite
+{
+	private:
+		AtomSpace *_as;
+		SchemeEval *_eval;
+
+	public:
+
+		PatternCrashUTest(void)
+		{
+			logger().setLevel(Logger::DEBUG);
+			logger().setPrintToStdoutFlag(true);
+			_as = new AtomSpace();
+			_eval = new SchemeEval(_as);
+		}
+
+		~PatternCrashUTest()
+		{
+			delete _eval;
+			delete _as;
+			// Erase the log file if no assertions failed.
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+		}
+
+		void setUp(void);
+		void tearDown(void);
+
+		void test_one_thing(void);
+};
+
+class PMCB : public InitiateSearchCB, public DefaultPatternMatchCB
+{
+	public:
+		PMCB(AtomSpace* as) :
+			InitiateSearchCB(as), DefaultPatternMatchCB(as) {}
+
+		virtual void set_pattern(const Variables& vars,
+		                         const Pattern& pat)
+		{
+			InitiateSearchCB::set_pattern(vars, pat);
+			DefaultPatternMatchCB::set_pattern(vars, pat);
+		}
+
+		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
+		                       const std::map<Handle, Handle> &pred_soln);
+
+		std::map<Handle, Handle> preds;
+		std::map<Handle, Handle> vars;
+};
+
+bool PMCB::grounding(const std::map<Handle, Handle> &var_soln,
+                     const std::map<Handle, Handle> &pred_soln)
+{
+	for (auto& p : var_soln)
+        logger().debug("var_soln map " + p.first->toShortString() + " to " + p.second->toShortString());
+
+	return true;
+}
+
+void PatternCrashUTest::tearDown(void)
+{
+}
+void PatternCrashUTest::setUp(void)
+{
+	config().set("SCM_PRELOAD",
+	             "opencog/atomspace/core_types.scm, "
+	             "opencog/scm/utilities.scm, "
+	             "opencog/scm/av-tv.scm"
+	             );
+	load_scm_files_from_config(*_as);
+}
+
+void PatternCrashUTest::test_one_thing(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// populate AtomSpace
+	_eval->eval(R"(
+
+	              (EvaluationLink
+				     (PredicateNode "chirps")
+				     (ConceptNode "Tweety")
+				  )
+				  (EvaluationLink
+				     (PredicateNode "eats_flies")
+				     (ConceptNode "Tweety")
+				  )
+				  (InheritanceLink
+				     (ConceptNode "Tweety")
+				     (ConceptNode "Yello")
+				  )
+				  (BindLink (av 0 0 0)
+				     (VariableList (av 0 0 0)
+				        (VariableNode "$A")
+				        (VariableNode "$B")
+				     )
+				     (AndLink
+				        (VariableNode "$A")
+				        (ImplicationLink
+				           (VariableNode "$A")
+				           (VariableNode "$B")
+				        )
+				     )
+				     (ExecutionOutputLink
+				        (GroundedSchemaNode "scm: pln-formula-simple-modus-ponens")
+				        (ListLink
+				           (VariableNode "$B")
+				           (ImplicationLink
+				              (VariableNode "$A")
+				              (VariableNode "$B")
+				           )
+				        )
+				     )
+				  )
+				  (ListLink
+				     (InheritanceLink
+				        (ConceptNode "Fritz")
+				        (ConceptNode "green")
+				     )
+				     (ImplicationLink
+				        (InheritanceLink
+				           (ConceptNode "Fritz")
+				           (ConceptNode "Frog")
+				        )
+				        (InheritanceLink
+				           (ConceptNode "Fritz")
+				           (ConceptNode "green")
+				        )
+				     )
+				  )
+				  (ListLink
+				     (InheritanceLink
+				        (ConceptNode "Fritz")
+				        (ConceptNode "Frog")
+				     )
+				     (ImplicationLink
+				        (AndLink
+				           (EvaluationLink
+				              (PredicateNode "croaks")
+				              (ConceptNode "Fritz")
+				           )
+				           (EvaluationLink
+				              (PredicateNode "eats_flies")
+				              (ConceptNode "Fritz")
+				           )
+				        )
+				        (InheritanceLink
+				           (ConceptNode "Fritz")
+				           (ConceptNode "Frog")
+				        )
+				     )
+				  )
+				  (ImplicationLink
+				     (AndLink
+				        (EvaluationLink
+				           (PredicateNode "chirps")
+				           (VariableNode "$Y")
+				        )
+				        (EvaluationLink
+				           (PredicateNode "sings")
+				           (VariableNode "$Y")
+				        )
+				     )
+				     (InheritanceLink
+				        (VariableNode "$Y")
+				        (ConceptNode "Canary")
+				     )
+				  )
+				  (ImplicationLink
+				     (AndLink
+				        (EvaluationLink
+				           (PredicateNode "croaks")
+				           (VariableNode "$X")
+				        )
+				        (EvaluationLink
+				           (PredicateNode "eats_flies")
+				           (VariableNode "$X")
+				        )
+				     )
+				     (InheritanceLink
+				        (VariableNode "$X")
+				        (ConceptNode "Frog")
+				     )
+				  )
+				  (ImplicationLink
+				     (InheritanceLink
+				        (VariableNode "$Z")
+				        (ConceptNode "Frog")
+				     )
+				     (InheritanceLink
+				        (VariableNode "$Z")
+				        (ConceptNode "green")
+				     )
+				  )
+				  (ImplicationLink
+				     (InheritanceLink
+				        (VariableNode "$A")
+				        (ConceptNode "Canary")
+				     )
+				     (InheritanceLink
+				        (VariableNode "$A")
+				        (ConceptNode "yellow")
+				     )
+				  )
+
+	              )");
+
+	Handle htarget = _eval->eval_h(R"(
+	                               (AndLink (stv 1.000000 0.000000)
+								     (InheritanceLink (stv 1.000000 0.000000)
+								       (VariableNode "$Z")
+								       (ConceptNode "Frog")
+								     )
+								     (ImplicationLink (stv 1.000000 0.000000)
+								       (InheritanceLink (stv 1.000000 0.000000)
+								         (VariableNode "$Z")
+								         (ConceptNode "Frog")
+								       )
+								       (InheritanceLink (stv 1.000000 0.000000)
+								         (VariableNode "$Z")
+								         (ConceptNode "green")
+								       )
+								     )
+								   )
+	                               )");
+
+	// Get all VariableNodes (unquoted)
+	FindAtoms fv(VARIABLE_NODE);
+	fv.search_set(htarget);
+
+	HandleSeq vars;
+	for (auto& h : fv.varset)
+	   vars.push_back(h);
+
+	Handle htarget_vardecl = _as->addAtom(createVariableList(vars));
+
+
+	PatternLinkPtr sl(createPatternLink(htarget_vardecl, htarget));
+	PMCB pmcb(_as);
+	sl->satisfy(pmcb);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
