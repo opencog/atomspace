@@ -144,10 +144,13 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 	// If we already have a grounding for this variable, the new
 	// proposed grounding must match the existing one. Such multiple
 	// groundings can occur when traversing graphs with loops in them.
-	Handle gnd(var_grounding[hp]);
-	if (Handle::UNDEFINED != gnd) {
-		return (gnd == hg);
+	try
+	{
+		Handle gnd(var_grounding.at(hp));
+		if (Handle::UNDEFINED != gnd)
+			return (gnd == hg);
 	}
+	catch(...) { }
 
 	// VariableNode had better be an actual node!
 	// If it's not then we are very very confused ...
@@ -1524,7 +1527,8 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_virtual,
 	{
 		const Pattern::RootList& rl(vk.second);
 		const Handle& pursue = vk.first;
-		if (Handle::UNDEFINED == var_grounding[pursue]) continue;
+		try { var_grounding.at(pursue); }
+		catch (...) { continue; }
 #else // OLD_LOOP
 	// Newloop might be slightly faster than old loop.
 	// ... but maybe not...

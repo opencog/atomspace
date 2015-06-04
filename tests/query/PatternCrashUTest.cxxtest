@@ -88,7 +88,7 @@ class PMCB : public InitiateSearchCB, public DefaultPatternMatchCB
 bool PMCB::grounding(const std::map<Handle, Handle> &var_soln,
                      const std::map<Handle, Handle> &pred_soln)
 {
-	logger().debug("Inside grounding with %d var_soln", var_soln.size());
+	logger().debug("Inside grounding with %z var_soln", var_soln.size());
 
 	for (auto& p : var_soln)
         logger().debug("var_soln map " + p.first->toShortString() + " to " + p.second->toShortString());
