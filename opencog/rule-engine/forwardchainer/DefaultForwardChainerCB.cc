@@ -132,7 +132,6 @@ HandleSeq DefaultForwardChainerCB::get_rootlinks(Handle hsource, AtomSpace* as,
                                                  Type link_type,
                                                  bool subclasses)
 {
-    auto outgoing = [as](Handle h) {return as->getOutgoing(h);};
     URECommons urec(as);
     HandleSeq chosen_roots;
     HandleSeq candidates_roots;
@@ -144,8 +143,9 @@ HandleSeq DefaultForwardChainerCB::get_rootlinks(Handle hsource, AtomSpace* as,
         auto type = as->getType(hr);
         bool subtype = (subclasses and classserver().isA(type, link_type));
         if (((type == link_type) or subtype) and notexist) {
-            //make sure matches are actually part of the premise list rather than the output of the bindLink
-            Handle hpremise = outgoing(outgoing(hr)[1])[0]; //extracting premise from (BindLink((ListLinK..)(ImpLink (premise) (..))))
+            // Make sure matches are actually part of the premise list
+            // rather than the output of the bindLink
+	        Handle hpremise = BindLinkCast(hr)->get_body();
             if (urec.exists_in(hpremise, hsource)) {
                 chosen_roots.push_back(hr);
             }
