@@ -275,7 +275,7 @@ performance.  Newer version of Postgress seem to be OK (??) but in
 some cases, performance will be a disaster if the database is not tuned.
 
 Edit `postgresql.conf` (a typical location is
-`/etc/postgresql/8.4/main/postgresql.conf`) and make the changes below.
+`/etc/postgresql/9.3/main/postgresql.conf`) and make the changes below.
 The first two changes are recommended by
 http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
 ```
@@ -320,7 +320,7 @@ created. The database user is NOT the same thing as a unix user:
 the user login is for the database, not the OS. Do NOT use the same
 login and password!
 
-Multiple databases can be created.  In this example, the daatabase
+Multiple databases can be created.  In this example, the database
 name will be "mycogdata".  Change this as desired.
 
 So, at the Unix command line:
