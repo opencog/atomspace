@@ -99,11 +99,6 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink)
 	SatisfyingSet sater(as);
 	bl->satisfy(sater);
 
-	// If there is only one item in the satisfying set, return
-	// that one item. Otherwise, wrap multiple items in a SetLink.
-	if (1 == sater._satisfying_set.size())
-		return sater._satisfying_set[0];
-
 	return as->addLink(SET_LINK, sater._satisfying_set);
 }
 
