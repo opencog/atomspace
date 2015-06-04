@@ -74,15 +74,19 @@ HandleSeq UREConfigReader::fetch_rules(Handle rbs)
 {
 	// Retrieve rules
 	Handle rule_var = _as.addNode(VARIABLE_NODE, "__URE_RULE__");
-	BindLink bl({rule_var,
-				// Clause:
-				// MemberLink
-				//    VariableNode "__URE_RULE__"
-				//    ConceptNode <RBS>
-				_as.addLink(MEMBER_LINK, rule_var, rbs),
-				// Rewrite: (all member rules)
-				rule_var});
-	Handle rule_names = bindlink(&_as, bl.getHandle());
+	Handle bl = _as.addLink(BIND_LINK,
+	                        rule_var,
+	                        // Clause:
+	                        // MemberLink
+	                        //    VariableNode "__URE_RULE__"
+	                        //    ConceptNode <RBS>
+	                        _as.addLink(MEMBER_LINK, rule_var, rbs),
+	                        // Rewrite: (all member rules)
+	                        rule_var);
+	Handle rule_names = bindlink(&_as, bl);
+
+	// Remove the BindLink from the AtomSpace as it is no longer useful
+	_as.removeAtom(bl);
 
 	return LinkCast(rule_names)->getOutgoingSet();
 }
@@ -101,23 +105,23 @@ Handle UREConfigReader::fetch_execution_output(Handle schema, Handle input)
 {
 	// Retrieve rules
 	Handle output_var = _as.addNode(VARIABLE_NODE, "__EXECUTION_OUTPUT_VAR__");
-	BindLink bl({output_var,
-				// Clause:
-				// ExecutionLink
-				//    <schema>
-				//    <input>
-				//    output_var
-				_as.addLink(EXECUTION_LINK,
-				            schema,
-				            input,
-				            output_var),
-				// Rewrite: (all outputs)
-				output_var});
-	Handle bl_h = bl.getHandle();
-	Handle outputs = bindlink(&_as, bl_h);
+	Handle bl = _as.addLink(BIND_LINK,
+	                        output_var,
+	                        // Clause:
+	                        // ExecutionLink
+	                        //    <schema>
+	                        //    <input>
+	                        //    output_var
+	                        _as.addLink(EXECUTION_LINK,
+	                                    schema,
+	                                    input,
+	                                    output_var),
+	                        // Rewrite: (all outputs)
+	                        output_var);
+	Handle outputs = bindlink(&_as, bl);
 
 	// Remove the BindLink from the AtomSpace as it is no longer useful
-	_as.removeAtom(bl_h);
+	_as.removeAtom(bl);
 
 	HandleSeq outputs_hs = LinkCast(outputs)->getOutgoingSet();
 	OC_ASSERT(outputs_hs.size() == 1, "There should be only one output");
