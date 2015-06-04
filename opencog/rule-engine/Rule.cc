@@ -26,6 +26,7 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/bind/BindLink.h>
 
 #include "Rule.h"

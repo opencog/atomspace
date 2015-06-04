@@ -20,15 +20,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/query/InitiateSearchCB.h>
 #include <opencog/atoms/bind/PatternLink.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/util/Config.h>
-#include <opencog/util/Logger.h>
 #include <opencog/guile/load-file.h>
+#include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/query/InitiateSearchCB.h>
 
 using namespace opencog;
 
@@ -43,6 +43,7 @@ class PatternCrashUTest: public CxxTest::TestSuite
 
 		PatternCrashUTest(void)
 		{
+#undef DEBUG
 			logger().setLevel(Logger::DEBUG);
 			logger().setPrintToStdoutFlag(true);
 			_as = new AtomSpace();

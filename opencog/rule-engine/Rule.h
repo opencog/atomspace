@@ -24,10 +24,10 @@
 #ifndef RULE_H_
 #define RULE_H_
 
-#include <opencog/atoms/bind/VariableList.h>
-#include <opencog/atomspace/AtomSpace.h>
-
 #include <boost/operators.hpp>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/bind/VariableList.h>
+
 
 namespace opencog {
 
