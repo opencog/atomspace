@@ -45,6 +45,8 @@ public:
 	void test_1rule_bc();
 	void test_2rules_bc();
 
+	void test_tvq_bc();
+
 	// void test_match_knowledge_base();
 	// void test_simple_deduction_bc();
 
@@ -242,6 +244,38 @@ void BackwardChainerUTest::test_2rules_bc()
 
 	TSM_ASSERT("Incorrect number of solution found!", results[target_var].size() == 1);
 	TSM_ASSERT("Getting incorrect solution!", results[target_var].count(soln) == 1);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void BackwardChainerUTest::test_tvq_bc()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD",
+	             "tests/rule-engine/bc-example.scm");
+	load_scm_files_from_config(*as_);
+
+	// load modus ponens
+	JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as_, "tests/rule-engine/bc_cpolicy_1.json"));
+	cpolicy_loader.load_config();
+
+	std::vector<Rule> rules;
+	for (Rule* pr : cpolicy_loader.get_rules())
+		rules.push_back(*pr);
+
+	BackwardChainer bc(as_, rules);
+
+	Handle target =
+	    eval_->eval_h("(InheritanceLink (stv 0.0 0.0)"
+	                  "   (ConceptNode \"Fritz\")"
+					  "   (ConceptNode \"green\"))");
+
+	bc.set_target(target);
+	bc.do_until(10);
+
+	TSM_ASSERT("Incorrect strength after BC!", target->getTruthValue()->getMean() > 0.9f);
+	TSM_ASSERT("Incorrect confidence after BC!", target->getTruthValue()->getConfidence() > 0.9f);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

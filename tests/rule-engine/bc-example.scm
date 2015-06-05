@@ -1,10 +1,10 @@
 (ImplicationLink (stv 1.0 1.0)
- (AndLink
+ (AndLink (stv 1.0 1.0)
   (EvaluationLink 
    (PredicateNode "croaks")
    (VariableNode "$X")
   )
-  (EvaluationLink     
+  (EvaluationLink 
     (PredicateNode "eats_flies")
     (VariableNode "$X")
   )
@@ -16,7 +16,7 @@
 )
 
 (ImplicationLink (stv 1.0 1.0)
- (AndLink
+ (AndLink (stv 1.0 1.0)
   (EvaluationLink 
    (PredicateNode "chirps")
    (VariableNode "$Y")
@@ -67,7 +67,7 @@
 
 (InheritanceLink (stv 1.0 1.0)
  (ConceptNode "Tweety")
- (ConceptNode "Yello")
+ (ConceptNode "yellow")
 )
 
 (EvaluationLink (stv 1.0 1.0)
