@@ -4,9 +4,9 @@
 ;
 ; Before running any inference you must load that file
 
-; Load the rules
-(load-from-path "rules/crisp-modus-ponens.scm")
-(load-from-path "rules/crisp-deduction.scm")
+; Load the rules (use load for relative path w.r.t. to that file)
+(load "rules/crisp-modus-ponens.scm")
+(load "rules/crisp-deduction.scm")
 
 ; Define a new rule base (aka rule-based system)
 (InheritanceLink

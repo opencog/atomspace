@@ -9,6 +9,7 @@
 #include <opencog/util/Config.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
 
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
 #include <opencog/rule-engine/forwardchainer/DefaultForwardChainerCB.h>
@@ -18,31 +19,34 @@ using namespace opencog;
 
 class ForwardChainerUTest: public CxxTest::TestSuite {
 private:
+	AtomSpace as_;
+	SchemeEval eval_;
 	ForwardChainer * fc_;
-	SchemeEval* eval_;
-	AtomSpace * as_;
 
 public:
-	ForwardChainerUTest()
+	ForwardChainerUTest() : eval_(&as_)
 	{
-		as_ = new AtomSpace();
-		eval_ = new SchemeEval(as_);
-
 #undef DEBUG
 		logger().setLevel(Logger::DEBUG);
 
 		// Disable the AF mechanism during testing!
-		as_->setAttentionalFocusBoundary(AttentionValue::MINSTI);
+		as_.setAttentionalFocusBoundary(AttentionValue::MINSTI);
 		config().set("SCM_PRELOAD",
-		             "opencog/atomspace/core_types.scm, "
-		             "opencog/scm/utilities.scm, "
-		             "opencog/scm/av-tv.scm");
-		load_scm_files_from_config(*as_);
-		fc_ = new ForwardChainer(as_, "examples/rule-engine/cpolicy.json");
-	}
-	~ForwardChainerUTest() {
-		delete as_;
-		delete eval_;
+		             "opencog/atomspace/core_types.scm");
+		load_scm_files_from_config(as_);
+
+		// add the following so that utilities.scm and av-tv.scm are
+		// correctly loaded from simple-deduction.scm
+		eval_.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm\")");
+
+		// Load the simple deduction example to test it
+		eval_.eval("(load-from-path \"" PROJECT_SOURCE_DIR
+		            "/examples/rule-engine/simple-deduction.scm\")");
+
+		// Get the ConceptNode corresponding to the rule-based system
+		// to test
+		Handle rbs = as_.getNode(CONCEPT_NODE, "crisp-rule-base");
+		fc_ = new ForwardChainer(&as_, rbs);
 	}
 	void test_do_chain();
 };
@@ -55,18 +59,18 @@ void ForwardChainerUTest::test_do_chain()
 	// InheritanceLink B C
 	// |-
 	// InheritanceLink A C
-	Handle A = eval_->eval_h("(PredicateNode \"A\" (stv 1 1))"),
-		B = eval_->eval_h("(PredicateNode \"B\" (stv 1 1))"),
-		C = eval_->eval_h("(PredicateNode \"C\" (stv 1 1))"),
-		AB = eval_->eval_h("(ImplicationLink (stv 1 1)"
-		                   "    (PredicateNode \"A\")"
-		                   "    (PredicateNode \"B\"))"),
-		BC = eval_->eval_h("(ImplicationLink (stv 1 1)"
-		                   "    (PredicateNode \"B\")"
-		                   "    (PredicateNode \"C\"))");
+	Handle A = eval_.eval_h("(PredicateNode \"A\" (stv 1 1))"),
+		B = eval_.eval_h("(PredicateNode \"B\" (stv 1 1))"),
+		C = eval_.eval_h("(PredicateNode \"C\" (stv 1 1))"),
+		AB = eval_.eval_h("(ImplicationLink (stv 1 1)"
+		                  "    (PredicateNode \"A\")"
+		                  "    (PredicateNode \"B\"))"),
+		BC = eval_.eval_h("(ImplicationLink (stv 1 1)"
+		                  "    (PredicateNode \"B\")"
+		                  "    (PredicateNode \"C\"))");
 
 	// Run forward chainer (and remove problematic rules)
-	DefaultForwardChainerCB dfc(as_);
+	DefaultForwardChainerCB dfc(&as_);
 	vector<Rule*>& rules = fc_->_fcmem.get_rules();
 	vector<std::string> ignore = {
 		"crisp-modus-ponens"
@@ -86,6 +90,6 @@ void ForwardChainerUTest::test_do_chain()
 		std::cout << h->toString() << std::endl;
 
 	// Check that AC is in the results
-	Handle AC = as_->addLink(IMPLICATION_LINK, A, C);
+	Handle AC = as_.addLink(IMPLICATION_LINK, A, C);
 	TS_ASSERT_DIFFERS(find(results.begin(), results.end(), AC), results.end());
 }
