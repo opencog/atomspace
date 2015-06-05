@@ -29,43 +29,21 @@
 
 using namespace opencog;
 
-/*
- * Note: I would like there to be a generic graph rewriting test framework,
- *       that loads data specified in atomspace notation from a Scheme file,
- *       and compares the replacement graph with the expected output for each
- *       given test case.
- * 
- *       In that framework, additionally, the exact TruthValue of each output
- *       must be verified, and the atomspace must also be examined to ensure
- *       there are no unexpected side effects or outputs produced.
- *
- *       That is still being discussed, so in the meantime, this unit test
- *       has been defined so that the existing functionality will have tests.
- *
- *       Once that generic framework is implemented, this test should be 
- *       eliminated.
- */
-
 class RuleUTest: public CxxTest::TestSuite
 {
 private:
-        AtomSpace *as;
-        SchemeEval* eval;
+        AtomSpace as;
+        SchemeEval eval;
 
 public:
-    RuleUTest()
+	RuleUTest() : eval(&as)
     {
         logger().setLevel(Logger::DEBUG);
         logger().setPrintToStdoutFlag(true);
-
-        as = new AtomSpace();
-        eval = new SchemeEval(as);
     }
 
     ~RuleUTest()
     {
-        delete eval;
-        delete as;
         // Erase the log file if no assertions failed.
         if (!CxxTest::TestTracker::tracker().suiteFailed())
                 std::remove(logger().getFilename().c_str());
@@ -91,7 +69,7 @@ void RuleUTest::setUp()
         "opencog/scm/av-tv.scm, "
         "opencog/scm/opencog/query.scm");
 
-    load_scm_files_from_config(*as);
+    load_scm_files_from_config(as);
 }
 
 /*
@@ -102,26 +80,26 @@ void RuleUTest::test_deduction()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
     
-    eval->eval("(use-modules (opencog))");
-    eval->eval("(use-modules (opencog query))");
+    eval.eval("(use-modules (opencog))");
+    eval.eval("(use-modules (opencog query))");
     config().set("SCM_PRELOAD",
                  "tests/rule-engine/simple-assertions.scm, "
                  "reasoning/pln/rules/deduction.scm");
-    load_scm_files_from_config(*as);
+    load_scm_files_from_config(as);
     
     Handle results;
     
     // To start with, it should only know that men are humans
-    results = eval->eval_h("(cog-bind find-humans)");
-    TS_ASSERT_EQUALS(1, as->getArity(results));
+    results = eval.eval_h("(cog-bind find-humans)");
+    TS_ASSERT_EQUALS(1, as.getArity(results));
     
     // Apply the deduction rule
-    eval->eval_h("(cog-bind pln-rule-deduction)");
+    eval.eval_h("(cog-bind pln-rule-deduction)");
        
     // After applying the deduction rule, it should know that all 3 of the
     // instances of men are also humans (Socrates, Einstein, and Peirce)
-    results = eval->eval_h("(cog-bind find-humans)");
-    TS_ASSERT_EQUALS(4, as->getArity(results));
+    results = eval.eval_h("(cog-bind find-humans)");
+    TS_ASSERT_EQUALS(4, as.getArity(results));
 }
 
 /*
@@ -135,13 +113,13 @@ void RuleUTest::test_and()
     config().set("SCM_PRELOAD",
                  "tests/rule-engine/simple-predicates.scm, "
                  "reasoning/pln/rules/and.scm");
-    load_scm_files_from_config(*as);
+    load_scm_files_from_config(as);
 
     // Apply the and rule
-    Handle results = eval->eval_h("(cog-bind-pln pln-rule-and)");
+    Handle results = eval.eval_h("(cog-bind-pln pln-rule-and)");
 
     // It should contain 4 groundings, (A, A), (A, B), (B, A), (B, B)
-    TS_ASSERT_EQUALS(4, as->getArity(results));
+    TS_ASSERT_EQUALS(4, as.getArity(results));
 }
 
 /*
@@ -155,11 +133,11 @@ void RuleUTest::test_not()
     config().set("SCM_PRELOAD",
                  "tests/rule-engine/simple-predicates.scm, "
                  "reasoning/pln/rules/not.scm");
-    load_scm_files_from_config(*as);
+    load_scm_files_from_config(as);
 
     // Apply the and rule
-    Handle results = eval->eval_h("(cog-bind-pln pln-rule-not)");
+    Handle results = eval.eval_h("(cog-bind-pln pln-rule-not)");
 
     // It should contain 2 groundings, not(A), not(B)
-    TS_ASSERT_EQUALS(2, as->getArity(results));
+    TS_ASSERT_EQUALS(2, as.getArity(results));
 }
