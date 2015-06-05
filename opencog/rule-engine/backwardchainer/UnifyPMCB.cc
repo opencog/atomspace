@@ -61,7 +61,7 @@ bool UnifyPMCB::grounding(const std::map<Handle, Handle> &var_soln,
 	// get rid of non-var mapping
 	for (auto& p : var_soln)
 	{
-		if (p.first->getType() == VARIABLE_NODE)
+		if (_variables->varset.count(p.first) == 1)
 		{
 			// check if any typed variable map to a variable, and if so,
 			// store the reverse mapping
@@ -71,6 +71,8 @@ bool UnifyPMCB::grounding(const std::map<Handle, Handle> &var_soln,
 			else
 				true_var_soln[p.first] = p.second;
 		}
+		else if (p.second->getType() == VARIABLE_NODE)
+			true_var_soln[p.second] = p.first;
 	}
 
 	// store the variable solution

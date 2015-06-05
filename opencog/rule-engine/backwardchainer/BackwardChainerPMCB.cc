@@ -36,6 +36,45 @@ BackwardChainerPMCB::~BackwardChainerPMCB()
 {
 }
 
+/**
+ * Override the node_match method.
+ *
+ * This is needed so that something like
+ *
+ *   InheritanceLink
+ *     ConceptNode "Fritz"
+ *     ConceptNode "green"
+ *
+ * can be matched to
+ *
+ *   InheritanceLink
+ *     VariableNode "$X"
+ *     ConceptNode "green"
+ *
+ * so that Truth Value Query can generate additional targets that are
+ * themselves Variable Fullfillment Query.
+ *
+ * XXX TODO if we are allowing this, then it should also be possible for a
+ * link to match to a VariableNode... there's no clear way to do this
+ * with just the callback.
+ *
+ * @param npat_h   same as default
+ * @param nsoln_h  same as default
+ * @return         true if matched
+ */
+bool BackwardChainerPMCB::node_match(const Handle& npat_h, const Handle& nsoln_h)
+{
+	if (npat_h == nsoln_h)
+		return true;
+
+	// allows any normal node to map to a VariableNode (assume untyped)
+	// XXX will it ever map to a typed VariableNode?  What would that mean?
+	if (nsoln_h->getType() == VARIABLE_NODE)
+		return true;
+
+	return false;
+}
+
 bool BackwardChainerPMCB::grounding(const std::map<Handle, Handle> &var_soln,
                                const std::map<Handle, Handle> &pred_soln)
 {
@@ -46,9 +85,9 @@ bool BackwardChainerPMCB::grounding(const std::map<Handle, Handle> &var_soln,
 	{
 		if (_variables->varset.count(p.first) == 1)
 			true_var_soln[p.first] = p.second;
+		else if (p.second->getType() == VARIABLE_NODE)
+			true_var_soln[p.second] = p.first;
 	}
-
-	// XXX TODO if a variable match to itself, reject?
 
 	if (true_var_soln.size() == 0)
 		return false;
