@@ -1,27 +1,86 @@
+Haskell Bindings for OpenCog:
+============================
 
-Haskell FFI for OpenCog
------------------------
+### Requirements
 
-Someday in the distant future, this directory will contain Haskell
-bindings for the OpenCog C++ AtomSpace, and other parts of OpenCog.
-Currently, it is a sandbox for toys and badly-implemented ideas.
+To use the Haskell bindings, it is necessary to have installed:
 
+* GHC (Glasgow Haskell Compiler https://www.haskell.org/ghc/)
+* Cabal (Haskell package manager https://www.haskell.org/cabal/)
 
-Notes:
-------
-There is going to be friction betweeen Cabal and CMake.
+For new users, the simplest option is to install the "Haskell Platform"
+(https://www.haskell.org/platform/)
+which includes the most important tools for Haskell environment.
 
-CMake infrastructure:
-https://bitbucket.org/arrowdodger/cmake-findcabal/src
-https://github.com/kvanberendonck/cmake-haskell
+### Installation
 
-The github version claims to be a better rewrite of the bitbucket
-version.
+Go through the normal process of 
+[building](https://github.com/opencog/atomspace#building-atomspace) and
+[installing](https://github.com/opencog/atomspace#install) the AtomSpace.
 
-Maybe should not use Cabal at first ... but, on the other hand, I cannot
-get CMake to figure out what the .hs extension means ...
+Then move to this directory (/opencog/haskell) and build and install the
+opencog-atomspace haskell library:
 
-Random quotes from the net:
-"Cabal is currently the only tool that can realistically be used to
-properly build and install Haskell packages due to the great complexity
-involved with getting all the details right"
+```
+ cabal configure
+ cabal build
+ cabal install
+```
+
+(It is necessary to previously build and install the AtomSpace, because the
+opencog-atomspace haskell library
+depends on the atomspace_wrapper library)
+
+### Usage
+
+To use the opencog-atomspace haskell library, we just import the modules like:
+```haskell
+import OpenCog.AtomSpace
+...
+```
+
+### AtomSpace API
+
+The main idea is to build programs that work on an AtomSpace on the
+Monad 'AtomSpace'.
+Then, we can run this programs with the function runOnNewAtomSpace:
+
+```haskell
+runOnNewAtomSpace :: AtomSpace a -> IO a
+```
+
+It creates a new C++ atomspace behind, does all the computation, and finally
+deletes it.
+
+The AtomSpace data type is defined as:
+
+```haskell
+type AtomSpace = ReaderT AtomSpaceRef IO
+```
+
+ReaderT is a monad transformer, so in fact:
+
+```haskell
+AtomSpace a = ReaderT { runReaderT :: AtomSpaceRef -> IO a }	 
+```
+
+The interpretation of runReaderT in this case is:  "given an atomspace in
+memory, it reduces to performing IO actions with a result of type a"
+
+Because of the use of the monad IO, we can lift IO actions inside the
+monad AtomSpace, through the use of liftIO. For example:
+
+```haskell
+import OpenCog.AtomSpace.Api
+import Control.Monad.IO.Class
+
+prog :: AtomSpace ()
+prog = do
+        liftIO $ putStrLn "hello world"
+        ...
+
+main :: IO ()
+main = runOnNewAtomSpace prog
+
+```
+
