@@ -35,13 +35,20 @@ public:
 		// Disable the AF mechanism during testing!
 		as_->setAttentionalFocusBoundary(AttentionValue::MINSTI);
 		config().set("SCM_PRELOAD",
-		             "opencog/atomspace/core_types.scm, "
-		             "opencog/scm/utilities.scm, "
-		             "opencog/scm/av-tv.scm");
+		             "opencog/atomspace/core_types.scm");
 		load_scm_files_from_config(*as_);
-		string result = eval_->eval("(load-from-path \"/home/nilg/OpenCog/atomspace/examples/rule-engine/simple-deduction.scm)\"");
-		std::cout << "result = " << result << std::endl;
-		Handle rbs = as_->addNode(CONCEPT_NODE, "crisp-rule-base");
+
+		// add the following so that utilities.scm and av-tv.scm are
+		// correctly loaded from simple-deduction.scm
+		eval_->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm\")");
+
+		// Load the simple deduction example to test it
+		eval_->eval("(load-from-path \"" PROJECT_SOURCE_DIR
+		            "/examples/rule-engine/simple-deduction.scm\")");
+
+		// Get the ConceptNode corresponding to the rule-based system
+		// to test
+		Handle rbs = as_->getNode(CONCEPT_NODE, "crisp-rule-base");
 		fc_ = new ForwardChainer(as_, rbs);
 	}
 	~ForwardChainerUTest() {
