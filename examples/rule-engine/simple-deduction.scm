@@ -18,7 +18,9 @@
 (load-from-path "utilities.scm")
 (load-from-path "av-tv.scm")
 
-; Load URE configuration
+; Load URE configuration (add the current file dir so it can be loaded
+; from anywhere)
+(add-to-load-path (dirname (current-filename)))
 (load-from-path "crisp-rule-base-config.scm")
 
 ; Define knowledge base
@@ -28,7 +30,7 @@
 (define AB (ImplicationLink (stv 1 1) A B))
 (define BC (ImplicationLink (stv 1 1) B C))
 
-; (cog-fc AB "crisp-rule-base")
+; (cog-fc AB (ConceptNode "crisp-rule-base"))
 
 ; Expected output should be
 ; TODO
