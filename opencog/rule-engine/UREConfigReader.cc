@@ -99,8 +99,7 @@ Handle UREConfigReader::fetch_execution_output(Handle schema, Handle input)
 {
 	// Retrieve rules
 	Handle output_var = _as.addNode(VARIABLE_NODE, "__EXECUTION_OUTPUT_VAR__");
-	Handle gl = _as.addLink(BIND_LINK,
-	                        output_var,
+	Handle gl = _as.addLink(GET_LINK,
 	                        // ExecutionLink
 	                        //    <schema>
 	                        //    <input>
@@ -108,9 +107,8 @@ Handle UREConfigReader::fetch_execution_output(Handle schema, Handle input)
 	                        _as.addLink(EXECUTION_LINK,
 	                                    schema,
 	                                    input,
-	                                    output_var),
-	                        output_var);
-	Handle outputs = bindlink(&_as, gl);
+	                                    output_var));
+	Handle outputs = satisfying_set(&_as, gl);
 
 	// Remove the GetLink from the AtomSpace as it is no longer useful
 	_as.removeAtom(gl);
