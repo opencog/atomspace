@@ -1,0 +1,42 @@
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/util/Config.h>
+
+#include <opencog/rule-engine/UREConfigReader.h>
+
+using namespace opencog;
+
+class UREConfigReaderUTest : public CxxTest::TestSuite {
+private:
+	AtomSpace _as;
+	SchemeEval _eval;
+
+public:
+	UREConfigReaderUTest() : _eval(&_as)
+	{
+		config().set("SCM_PRELOAD",
+		             "opencog/atomspace/core_types.scm");
+		load_scm_files_from_config(_as);
+
+		// add the following so that utilities.scm and av-tv.scm are
+		// correctly loaded from simple-deduction.scm
+		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm\")");
+
+		// Load the simple deduction example to test it
+		_eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
+		           "/examples/rule-engine/simple-deduction.scm\")");
+	}
+
+	void test_read_config() {
+		// Get the ConceptNode corresponding to the rule-based system
+		// to test
+		Handle rbs = _as.getNode(CONCEPT_NODE, "crisp-rule-base");
+
+		UREConfigReader cr(_as, rbs);
+
+		TS_ASSERT_EQUALS(cr.get_rules().size(), 2);
+		TS_ASSERT_EQUALS(cr.get_attention_allocation(), false);
+		TS_ASSERT_EQUALS(cr.get_maximum_iterations(), 20);
+	}
+};
