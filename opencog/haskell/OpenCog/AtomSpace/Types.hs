@@ -1,53 +1,42 @@
+{-# LANGUAGE GADTs , EmptyDataDecls #-}
 
-module OpenCog.AtomSpace.Types(
-    NodeType (..)
-  , LinkType (..)
-  , TruthValue (..)
+module OpenCog.AtomSpace.Types (
+    TruthVal (..)
+  , AtomName (..)
   , Atom (..)
-  , Link (..)
-  , Node (..)
-  , Handle (..)
+  , TNumberNode
+  , TConceptNode
   ) where
 
-import Data.Default     (Default(..))
+type AtomName = String
 
--- I should add more options here, this is just an example.
-data NodeType = NodeType1 | ConceptNode
-    deriving (Enum,Show)
-
--- I should add more options here, this is just an example.
-data LinkType = LinkType1 | LinkType2
-    deriving (Enum,Show)
-
-data TruthValue = SimpleTruthValue Double Double
-                | CountTruthValue Double Double Double
-                | IndefiniteTruthValue Double Double Double Double
+data TruthVal = SimpleTruthVal Double Double
+              | CountTruthVal Double Double Double
+              | IndefiniteTruthVal Double Double Double Double
     deriving Show
 
-instance Default TruthValue where
-    def = SimpleTruthValue 1 0
+data TConceptNode
+data TNumberNode
 
-type Handle = Int
+data Atom a where -- TODO: Review the types constraints, add Attention Values, etc.
+    -- Predicate
+    Predicate   :: AtomName -> Atom (Atom a -> TruthVal)
+    And         :: Atom a -> Atom a -> (Maybe TruthVal) -> Atom a
+    Or          :: Atom a -> Atom a -> (Maybe TruthVal) -> Atom a
+    Implication :: Atom a -> Atom a -> (Maybe TruthVal) -> Atom a
+    Equivalence :: Atom a -> Atom a -> (Maybe TruthVal) -> Atom a
+    Evaluation  :: (Atom (Atom a -> TruthVal))  ->
+                      Atom [Atom a] -> (Maybe TruthVal) -> Atom a
 
-data Atom = CLink Link | CNode Node
-    deriving Show
+    -- Concept
+    Concept       :: AtomName -> Atom TConceptNode
+    Inheritance   :: Atom TConceptNode -> Atom TConceptNode -> (Maybe TruthVal) -> Atom a
+    Similarity    :: Atom TConceptNode -> Atom TConceptNode -> (Maybe TruthVal) -> Atom a
+    Member        :: Atom TConceptNode -> Atom TConceptNode -> (Maybe TruthVal) -> Atom a
+    SatisfyingSet :: Atom (Atom a -> TruthVal) -> Atom TConceptNode
 
-data Link = Link{
-    linkType  :: LinkType
-,   linkName  :: String
-,   linkTv    :: TruthValue
-,   linkAtoms :: [Atom]
-}   deriving Show
+    -- Number
+    Number :: (Num a) => a -> Atom TNumberNode
 
-instance Default Link where
-    def = Link LinkType1 "" def []
-
-data Node = Node{
-    nodeType  :: NodeType
-,   nodeName  :: String
-,   nodeTv    :: TruthValue
-}   deriving Show
-
-instance Default Node where
-    def = Node ConceptNode "" def
-
+    -- List
+    List :: [Atom a] -> Atom [Atom a]
