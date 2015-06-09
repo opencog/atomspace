@@ -5,6 +5,11 @@
     (ConceptNode "URE")
 )
 
+(EquivalenceLink
+   (Node "pln-rule-modus-ponens")
+   pln-rule-modus-ponens
+)
+
 ; Termination criteria parameters
 (ExecutionLink
    (SchemaNode "URE:maximum-iterations")
