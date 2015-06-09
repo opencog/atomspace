@@ -37,6 +37,7 @@ INSTALL (FILES
 	JsonicControlPolicyParamLoader.h
 	URECommons.h
 	Rule.h
+	UREConfigReader.h
 	DESTINATION "include/${PROJECT_NAME}/rule-engine"
 )
 
