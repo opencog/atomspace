@@ -1152,23 +1152,26 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
     PyGILState_Release(gstate);
 }
 
-// The python interpreter chockes if we send it lines, instead of
-// blocks. Tghus we have to save up whole blocks.  A block consists
+// The python interpreter chokes if we send it lines, instead of
+// blocks. Thus, we have to save up whole blocks.  A block consists
 // of:
-// 1) something that starts unindented, and continues until the
-//    start of the next unindented line.
-// 2) anything surrounded by parenthesis, regardless of indentation.
+// 1) Something that starts unindented, and continues until the
+//    start of the next non-comment unindented line, or until
+//    end-of-file.
+// 2) Anything surrounded by parenthesis, regardless of indentation.
 //
 void PythonEval::eval_expr(const std::string& partial_expr)
 {
     // Trim whitespace, and comments before doing anything,
     // Otherwise, the various checks below fail.
     std::string part = partial_expr.substr(0,
-                     partial_expr.find_last_not_of("# \t\n\r") + 1);
+                     partial_expr.find_last_not_of(" \t\n\r") + 1);
+
+    size_t cmnt = part.find('#');
+    if (std::string::npos != cmnt)
+        part = part.substr(0, cmnt);
 
     // If we get a newline by itself, just ignore it.
-    if (part == "\n") return;
-
     // Ignore leading comments; don't ignore empty line.
     if (0 == part.size() and 0 < partial_expr.size()) return;
 
