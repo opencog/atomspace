@@ -1152,37 +1152,43 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
     PyGILState_Release(gstate);
 }
 
-// The python interpreter chockes if we send it lines, instead of
-// blocks. Tghus we have to save up whole blocks.  A block consists
+// The python interpreter chokes if we send it lines, instead of
+// blocks. Thus, we have to save up whole blocks.  A block consists
 // of:
-// 1) something that starts unindented, and continues until the
-//    start of the next unindented line.
-// 2) anything surrounded by parenthesis, regardless of indentation.
+// 1) Something that starts unindented, and continues until the
+//    start of the next non-comment unindented line, or until
+//    end-of-file.
+// 2) Anything surrounded by parenthesis, regardless of indentation.
 //
 void PythonEval::eval_expr(const std::string& partial_expr)
 {
     // Trim whitespace, and comments before doing anything,
     // Otherwise, the various checks below fail.
     std::string part = partial_expr.substr(0,
-                     partial_expr.find_last_not_of("# \t\n\r") + 1);
+                     partial_expr.find_last_not_of(" \t\n\r") + 1);
+
+    size_t cmnt = part.find('#');
+    if (std::string::npos != cmnt)
+        part = part.substr(0, cmnt);
 
     // If we get a newline by itself, just ignore it.
-    if (part == "\n") return;
-
     // Ignore leading comments; don't ignore empty line.
-    if (0 == part.size() and 0 < partial_expr.size()) return;
-
     int c = 0;
-    if (0 < part.size()) c = part[0];
+    size_t part_size = part.size();
+    if (0 == part_size and 0 < partial_expr.size()) goto wait_for_more;
+
+    if (0 < part_size) c = part[0];
 
     logger().debug("[PythonEval] get line:\n%s\n", partial_expr.c_str());
 
     // Check if there are open parentheses. If so, then we must
     // assume there will be more input that closes them off.
-    size_t open = std::count(part.begin(), part.end(), '(');
-    size_t clos = std::count(part.begin(), part.end(), ')');
-    _paren_count += open - clos;
-    if (0 < _paren_count) goto wait_for_more;
+    {
+        size_t open = std::count(part.begin(), part.end(), '(');
+        size_t clos = std::count(part.begin(), part.end(), ')');
+        _paren_count += open - clos;
+        if (0 < _paren_count) goto wait_for_more;
+    }
 
     // If the line starts with whitespace (tab or space) then assume
     // that it is standard indentation, and wait for the first
@@ -1191,16 +1197,8 @@ void PythonEval::eval_expr(const std::string& partial_expr)
 
     // If the line ends with a colon, its not a complete expression,
     // and we must wait for more input, i.e. more input is pending.
-    {
-        size_t expression_size = part.size();
-        size_t colon_position = part.find_last_of(":\\");
-        if (colon_position == (expression_size - 1)) {
-            goto wait_for_more;
-        }
-    }
-
-    // If there are more closes than opens, then fail.
-    if (_paren_count < 0) _pending_input = false;
+    if (0 < part_size and part.find_last_of(":\\") + 1 == part_size)
+        goto wait_for_more;
 
     _input_line += part;
     _input_line += '\n';  // we stripped this off, above
@@ -1223,6 +1221,7 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     }
     _input_line = "";
     _paren_count = 0;
+    _pending_input = false;
     return;
 
 wait_for_more:
