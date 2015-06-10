@@ -1152,67 +1152,85 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
     PyGILState_Release(gstate);
 }
 
+// The python interpreter chockes if we send it lines, instead of
+// blocks. Tghus we have to save up whole blocks.  A block consists
+// of:
+// 1) something that starts unindented, and continues until the
+//    start of the next unindented line.
+// 2) anything surrounded by parenthesis, regardless of indentation.
+//
 void PythonEval::eval_expr(const std::string& partial_expr)
 {
-    if (partial_expr != "\n")
-        logger().info("[PythonEval] eval_expr:\n%s\n", partial_expr.c_str());
+    // Trim whitespace, and comments before doing anything,
+    // Otherwise, the various checks below fail.
+    std::string part = partial_expr.substr(0,
+                     partial_expr.find_last_not_of("# \t\n\r") + 1);
 
-    _result = "";
+    // If we get a newline by itself, just ignore it.
+    if (part == "\n") return;
 
-    // If we get a newline by itself, then we are finished.
-    if (partial_expr == "\n")
+    // Ignore leading comments; don't ignore empty line.
+    if (0 == part.size() and 0 < partial_expr.size()) return;
+
+    int c = 0;
+    if (0 < part.size()) c = part[0];
+
+    logger().debug("[PythonEval] get line:\n%s\n", partial_expr.c_str());
+
+    // Check if there are open parentheses. If so, then we must
+    // assume there will be more input that closes them off.
+    size_t open = std::count(part.begin(), part.end(), '(');
+    size_t clos = std::count(part.begin(), part.end(), ')');
+    _paren_count += open - clos;
+    if (0 < _paren_count) goto wait_for_more;
+
+    // If the line starts with whitespace (tab or space) then assume
+    // that it is standard indentation, and wait for the first
+    // unindented line (or end-of-file).
+    if (' ' == c or '\t' == c) goto wait_for_more;
+
+    // If the line ends with a colon, its not a complete expression,
+    // and we must wait for more input, i.e. more input is pending.
     {
-        if (_paren_count <= 0) _pending_input = false;
-    }
-    else
-    {
-        // Trim whitespace, first! Otherwise, the check for the
-        // trailing colon fails.
-        std::string part = partial_expr.substr(0,
-                         partial_expr.find_last_not_of(" \t\n\r") + 1);
-
-        // Check if there are open parentheses. If so, then we must
-        // assume there will be more input that closes them off.
-        size_t open = std::count(part.begin(), part.end(), '(');
-        size_t clos = std::count(part.begin(), part.end(), ')');
-        _paren_count += open - clos;
-        if (0 < _paren_count) _pending_input = true;
-
-        // If the line ends with a colon, its not a complete expression,
-        // and we must wait for more input, i.e. more input is pending.
         size_t expression_size = part.size();
         size_t colon_position = part.find_last_of(":\\");
-        if (colon_position == (expression_size - 1))
-            _pending_input = true;
-
-        // Add this expression to our evaluation buffer.
-        _input_line += part;
-        _input_line += '\n';  // we stripped this off, above
+        if (colon_position == (expression_size - 1)) {
+            goto wait_for_more;
+        }
     }
 
     // If there are more closes than opens, then fail.
     if (_paren_count < 0) _pending_input = false;
 
-    // Process the evaluation buffer if more input is not pending.
-    if (not _pending_input)
+    _input_line += part;
+    _input_line += '\n';  // we stripped this off, above
+    logger().info("[PythonEval] eval_expr:\n%s", _input_line.c_str());
+
+    // This is the cogserver shell-freindly evaluator. We must
+    // stop all exceptions thrown in other layers, or else we
+    // will crash the cogserver. Pass the exception message to
+    // the user, who can read and contemplate it: it is almost
+    // surely a syntax error in the python code.
+    _result = "";
+    try
     {
-        // This is the cogserver shell-freindly evaluator. We must
-        // stop all exceptions thrown in other layers, or else we
-        // will crash the cogserver. Pass the exception message to
-        // the user, who can read and contemplate it: it is almost
-        // surely a syntax error in the python code.
-        try
-        {
-            _result = this->apply_script(_input_line);
-        }
-        catch (const RuntimeException &e)
-        {
-            _result = e.getMessage();
-            _result += "\n";
-        }
-        _input_line = "";
-        _paren_count = 0;
+        _result = this->apply_script(_input_line);
     }
+    catch (const RuntimeException &e)
+    {
+        _result = e.getMessage();
+        _result += "\n";
+    }
+    _input_line = "";
+    _paren_count = 0;
+    return;
+
+wait_for_more:
+    _result = "";
+    _pending_input = true;
+    // Add this expression to our evaluation buffer.
+    _input_line += part;
+    _input_line += '\n';  // we stripped this off, above
 }
 
 std::string PythonEval::poll_result()
