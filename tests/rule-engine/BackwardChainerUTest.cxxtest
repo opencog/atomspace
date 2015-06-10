@@ -181,7 +181,7 @@ void BackwardChainerUTest::test_1rule_bc()
 
 	// load 1 modus ponens rule
 	Handle top_rbs = as_->addNode(CONCEPT_NODE, UREConfigReader::URE_top_name);
-	UREConfigReader config_reader(*as, top_rbs);
+	UREConfigReader config_reader(*as_, top_rbs);
 
 	BackwardChainer bc(as_, config_reader.get_rules());
 
@@ -214,7 +214,7 @@ void BackwardChainerUTest::test_2rules_bc()
 
 	// load modus ponens & deduction rules
 	Handle top_rbs = as_->addNode(CONCEPT_NODE, UREConfigReader::URE_top_name);
-	UREConfigReader config_reader(*as, top_rbs);
+	UREConfigReader config_reader(*as_, top_rbs);
 
 	BackwardChainer bc(as_, config_reader.get_rules());
 
@@ -247,7 +247,7 @@ void BackwardChainerUTest::test_tvq_bc()
 
 	// load modus ponens
 	Handle top_rbs = as_->addNode(CONCEPT_NODE, UREConfigReader::URE_top_name);
-	UREConfigReader config_reader(*as, top_rbs);
+	UREConfigReader config_reader(*as_, top_rbs);
 
 	BackwardChainer bc(as_, config_reader.get_rules());
 

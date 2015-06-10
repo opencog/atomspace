@@ -499,11 +499,6 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
 	               hpattern->toShortString().c_str(),
 	               hpattern_vardecl->toShortString().c_str());
 
-	std::cout << "========================" << std::endl;
-	std::cout << *_as << std::endl;
-	std::cout << "------------------------" << std::endl;
-	std::cout << *(_garbage_superspace) << std::endl;
-
 	// Pattern Match on _garbage_superspace since some atoms in htarget could
 	// be in the _garbage space
 	PatternLinkPtr sl(createPatternLink(hpattern_vardecl, hpattern));
