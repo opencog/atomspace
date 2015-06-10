@@ -1162,6 +1162,7 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
 //
 void PythonEval::eval_expr(const std::string& partial_expr)
 {
+if(0==partial_expr.size())logger().info("duuude got python eof\n");
     // Trim whitespace, and comments before doing anything,
     // Otherwise, the various checks below fail.
     std::string part = partial_expr.substr(0,
@@ -1173,10 +1174,11 @@ void PythonEval::eval_expr(const std::string& partial_expr)
 
     // If we get a newline by itself, just ignore it.
     // Ignore leading comments; don't ignore empty line.
-    if (0 == part.size() and 0 < partial_expr.size()) return;
+    size_t part_size = part.size();
+    if (0 == part_size and 0 < partial_expr.size()) return;
 
     int c = 0;
-    if (0 < part.size()) c = part[0];
+    if (0 < part_size) c = part[0];
 
     logger().debug("[PythonEval] get line:\n%s\n", partial_expr.c_str());
 
@@ -1192,18 +1194,11 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     // unindented line (or end-of-file).
     if (' ' == c or '\t' == c) goto wait_for_more;
 
+if(0==partial_expr.size())logger().info("duuude goood so far the inline is >>%s<<\n", _input_line.c_str());
     // If the line ends with a colon, its not a complete expression,
     // and we must wait for more input, i.e. more input is pending.
-    {
-        size_t expression_size = part.size();
-        size_t colon_position = part.find_last_of(":\\");
-        if (colon_position == (expression_size - 1)) {
-            goto wait_for_more;
-        }
-    }
-
-    // If there are more closes than opens, then fail.
-    if (_paren_count < 0) _pending_input = false;
+    if (0 < part_size and part.find_last_of(":\\") + 1 == part_size)
+        goto wait_for_more;
 
     _input_line += part;
     _input_line += '\n';  // we stripped this off, above
@@ -1226,6 +1221,7 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     }
     _input_line = "";
     _paren_count = 0;
+    _pending_input = false;
     return;
 
 wait_for_more:
