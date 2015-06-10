@@ -67,6 +67,12 @@ bool BackwardChainerPMCB::node_match(const Handle& npat_h, const Handle& nsoln_h
 	if (npat_h == nsoln_h)
 		return true;
 
+	// if npat_h itself is a VariableNode, then this means it is QuoteLink-ed
+	// in this case we don't want other VariableNode to map to it, since
+	// the purpose was for npat_h to match to itself
+	if (npat_h->getType() == VARIABLE_NODE)
+		return false;
+
 	// allows any normal node to map to a VariableNode (assume untyped)
 	// XXX will it ever map to a typed VariableNode?  What would that mean?
 	if (nsoln_h->getType() == VARIABLE_NODE)
