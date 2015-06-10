@@ -1152,43 +1152,44 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
     PyGILState_Release(gstate);
 }
 
+// The python interpreter chockes if we send it lines, instead of
+// blocks. Tghus we have to save up whole blocks.  A block consists
+// of:
+// 1) something that starts unindented, and continues until the
+//    start of the next unindented line.
+// 2) anything surrounded by parenthesis, regardless of indentation.
+//
 void PythonEval::eval_expr(const std::string& partial_expr)
 {
-    if (partial_expr != "\n")
-        logger().info("[PythonEval] eval_expr:\n%s\n", partial_expr.c_str());
+    // If we get a newline by itself, just ignore it.
+    if (partial_expr == "\n") return;
+
+    logger().info("[PythonEval] eval_expr:\n%s\n", partial_expr.c_str());
 
     _result = "";
 
-    // If we get a newline by itself, then we are finished.
-    if (partial_expr == "\n")
-    {
-        if (_paren_count <= 0) _pending_input = false;
-    }
-    else
-    {
-        // Trim whitespace, first! Otherwise, the check for the
-        // trailing colon fails.
-        std::string part = partial_expr.substr(0,
-                         partial_expr.find_last_not_of(" \t\n\r") + 1);
+    // Trim whitespace, first! Otherwise, the check for the
+    // trailing colon fails.
+    std::string part = partial_expr.substr(0,
+                     partial_expr.find_last_not_of(" \t\n\r") + 1);
 
-        // Check if there are open parentheses. If so, then we must
-        // assume there will be more input that closes them off.
-        size_t open = std::count(part.begin(), part.end(), '(');
-        size_t clos = std::count(part.begin(), part.end(), ')');
-        _paren_count += open - clos;
-        if (0 < _paren_count) _pending_input = true;
+    // Check if there are open parentheses. If so, then we must
+    // assume there will be more input that closes them off.
+    size_t open = std::count(part.begin(), part.end(), '(');
+    size_t clos = std::count(part.begin(), part.end(), ')');
+    _paren_count += open - clos;
+    if (0 < _paren_count) _pending_input = true;
 
-        // If the line ends with a colon, its not a complete expression,
-        // and we must wait for more input, i.e. more input is pending.
-        size_t expression_size = part.size();
-        size_t colon_position = part.find_last_of(":\\");
-        if (colon_position == (expression_size - 1))
-            _pending_input = true;
+    // If the line ends with a colon, its not a complete expression,
+    // and we must wait for more input, i.e. more input is pending.
+    size_t expression_size = part.size();
+    size_t colon_position = part.find_last_of(":\\");
+    if (colon_position == (expression_size - 1))
+        _pending_input = true;
 
-        // Add this expression to our evaluation buffer.
-        _input_line += part;
-        _input_line += '\n';  // we stripped this off, above
-    }
+    // Add this expression to our evaluation buffer.
+    _input_line += part;
+    _input_line += '\n';  // we stripped this off, above
 
     // If there are more closes than opens, then fail.
     if (_paren_count < 0) _pending_input = false;
