@@ -1161,16 +1161,24 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
 //
 void PythonEval::eval_expr(const std::string& partial_expr)
 {
-    int c = 0;
+    // Trim whitespace, and comments before doing anything,
+    // Otherwise, the various checks below fail.
+    std::string part = partial_expr.substr(0,
+                     partial_expr.find_last_not_of("# \t\n\r") + 1);
 
     // If we get a newline by itself, just ignore it.
-    if (partial_expr == "\n") return;
+    if (part == "\n") return;
+
+    // Ignore leading comments; don't ignore empty line.
+    if (0 == part.size() and 0 < partial_expr.size()) return;
+
+    int c = 0;
+    if (0 < part.size()) c = part[0];
 
     logger().debug("[PythonEval] get line:\n%s\n", partial_expr.c_str());
 
     // Check if there are open parentheses. If so, then we must
     // assume there will be more input that closes them off.
-    std::string part = partial_expr;
     size_t open = std::count(part.begin(), part.end(), '(');
     size_t clos = std::count(part.begin(), part.end(), ')');
     _paren_count += open - clos;
@@ -1179,20 +1187,14 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     // If the line starts with whitespace (tab or space) then assume
     // that it is standard indentation, and wait for the first
     // unindented line (or end-of-file).
-    if (0 < part.size()) c = part[0];
     if (' ' == c or '\t' == c) goto wait_for_more;
 
     // If the line ends with a colon, its not a complete expression,
     // and we must wait for more input, i.e. more input is pending.
-    // Trim whitespace, first! Otherwise, the check for the trailing
-    // colon fails.
-    part = partial_expr.substr(0,
-                     partial_expr.find_last_not_of(" \t\n\r") + 1);
     {
         size_t expression_size = part.size();
         size_t colon_position = part.find_last_of(":\\");
         if (colon_position == (expression_size - 1)) {
-            part += '\n';  // we stripped this off, above
             goto wait_for_more;
         }
     }
@@ -1201,7 +1203,8 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     if (_paren_count < 0) _pending_input = false;
 
     _input_line += part;
-    logger().info("[PythonEval] eval_expr:\n%s\n", _input_line.c_str());
+    _input_line += '\n';  // we stripped this off, above
+    logger().info("[PythonEval] eval_expr:\n%s", _input_line.c_str());
 
     // This is the cogserver shell-freindly evaluator. We must
     // stop all exceptions thrown in other layers, or else we
@@ -1227,6 +1230,7 @@ wait_for_more:
     _pending_input = true;
     // Add this expression to our evaluation buffer.
     _input_line += part;
+    _input_line += '\n';  // we stripped this off, above
 }
 
 std::string PythonEval::poll_result()
