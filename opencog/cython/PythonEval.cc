@@ -1161,28 +1161,41 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
 //
 void PythonEval::eval_expr(const std::string& partial_expr)
 {
+    int c;
+
     // If we get a newline by itself, just ignore it.
     if (partial_expr == "\n") return;
 
     logger().info("[PythonEval] eval_expr:\n%s\n", partial_expr.c_str());
 
-    // Trim whitespace, first! Otherwise, the check for the
-    // trailing colon fails.
-    std::string part = partial_expr.substr(0,
-                     partial_expr.find_last_not_of(" \t\n\r") + 1);
-
     // Check if there are open parentheses. If so, then we must
     // assume there will be more input that closes them off.
+    std::string part = partial_expr;
     size_t open = std::count(part.begin(), part.end(), '(');
     size_t clos = std::count(part.begin(), part.end(), ')');
     _paren_count += open - clos;
     if (0 < _paren_count) goto wait_for_more;
 
+    // If the line starts with whitespace (tab or space) then assume
+    // that it is standard indentation, and wait for the first
+    // unindented line (or end-of-file).
+    c = part[0];
+    if (' ' == c or '\t' == c) goto wait_for_more;
+
     // If the line ends with a colon, its not a complete expression,
     // and we must wait for more input, i.e. more input is pending.
-    size_t expression_size = part.size();
-    size_t colon_position = part.find_last_of(":\\");
-    if (colon_position == (expression_size - 1)) goto wait_for_more;
+    // Trim whitespace, first! Otherwise, the check for the trailing
+    // colon fails.
+    part = partial_expr.substr(0,
+                     partial_expr.find_last_not_of(" \t\n\r") + 1);
+    {
+        size_t expression_size = part.size();
+        size_t colon_position = part.find_last_of(":\\");
+        if (colon_position == (expression_size - 1)) {
+            part += '\n';  // we stripped this off, above
+            goto wait_for_more;
+        }
+    }
 
     // If there are more closes than opens, then fail.
     if (_paren_count < 0) _pending_input = false;
@@ -1215,7 +1228,6 @@ wait_for_more:
     _pending_input = true;
     // Add this expression to our evaluation buffer.
     _input_line += part;
-    _input_line += '\n';  // we stripped this off, above
 }
 
 std::string PythonEval::poll_result()
