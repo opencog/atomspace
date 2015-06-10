@@ -1166,7 +1166,7 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     // If we get a newline by itself, just ignore it.
     if (partial_expr == "\n") return;
 
-    logger().info("[PythonEval] eval_expr:\n%s\n", partial_expr.c_str());
+    logger().debug("[PythonEval] get line:\n%s\n", partial_expr.c_str());
 
     // Check if there are open parentheses. If so, then we must
     // assume there will be more input that closes them off.
@@ -1201,28 +1201,28 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     if (_paren_count < 0) _pending_input = false;
 
     // Process the evaluation buffer if more input is not pending.
-    if (not _pending_input)
-    {
-        _result = "";
+    if (_pending_input) return;
 
-        // This is the cogserver shell-freindly evaluator. We must
-        // stop all exceptions thrown in other layers, or else we
-        // will crash the cogserver. Pass the exception message to
-        // the user, who can read and contemplate it: it is almost
-        // surely a syntax error in the python code.
-        try
-        {
-            _result = this->apply_script(_input_line);
-        }
-        catch (const RuntimeException &e)
-        {
-            _result = e.getMessage();
-            _result += "\n";
-        }
-        _input_line = "";
-        _paren_count = 0;
-        return;
+    logger().info("[PythonEval] eval_expr:\n%s\n", _input_line.c_str());
+
+    // This is the cogserver shell-freindly evaluator. We must
+    // stop all exceptions thrown in other layers, or else we
+    // will crash the cogserver. Pass the exception message to
+    // the user, who can read and contemplate it: it is almost
+    // surely a syntax error in the python code.
+    _result = "";
+    try
+    {
+        _result = this->apply_script(_input_line);
     }
+    catch (const RuntimeException &e)
+    {
+        _result = e.getMessage();
+        _result += "\n";
+    }
+    _input_line = "";
+    _paren_count = 0;
+    return;
 
 wait_for_more:
     _pending_input = true;
