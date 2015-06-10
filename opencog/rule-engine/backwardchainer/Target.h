@@ -58,7 +58,8 @@ public:
 	void increment_selection_count() { _selection_count++; }
 
 	Handle get_handle() const { return _htarget_external; }
-	HandleSeq get_vars() const { return _vars; }
+	HandleSeq get_varseq() const { return _vars; }
+	std::set<Handle> get_varset() const { return std::set<Handle>(_vars.begin(), _vars.end()); }
 	const VarMultimap& get_varmap() const { return _varmap; }
 	float get_weight() { return 1.0f; }
 
