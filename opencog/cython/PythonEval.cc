@@ -1162,7 +1162,6 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
 //
 void PythonEval::eval_expr(const std::string& partial_expr)
 {
-if(0==partial_expr.size())logger().info("duuude got python eof\n");
     // Trim whitespace, and comments before doing anything,
     // Otherwise, the various checks below fail.
     std::string part = partial_expr.substr(0,
@@ -1174,27 +1173,28 @@ if(0==partial_expr.size())logger().info("duuude got python eof\n");
 
     // If we get a newline by itself, just ignore it.
     // Ignore leading comments; don't ignore empty line.
-    size_t part_size = part.size();
-    if (0 == part_size and 0 < partial_expr.size()) return;
-
     int c = 0;
+    size_t part_size = part.size();
+    if (0 == part_size and 0 < partial_expr.size()) goto wait_for_more;
+
     if (0 < part_size) c = part[0];
 
     logger().debug("[PythonEval] get line:\n%s\n", partial_expr.c_str());
 
     // Check if there are open parentheses. If so, then we must
     // assume there will be more input that closes them off.
-    size_t open = std::count(part.begin(), part.end(), '(');
-    size_t clos = std::count(part.begin(), part.end(), ')');
-    _paren_count += open - clos;
-    if (0 < _paren_count) goto wait_for_more;
+    {
+        size_t open = std::count(part.begin(), part.end(), '(');
+        size_t clos = std::count(part.begin(), part.end(), ')');
+        _paren_count += open - clos;
+        if (0 < _paren_count) goto wait_for_more;
+    }
 
     // If the line starts with whitespace (tab or space) then assume
     // that it is standard indentation, and wait for the first
     // unindented line (or end-of-file).
     if (' ' == c or '\t' == c) goto wait_for_more;
 
-if(0==partial_expr.size())logger().info("duuude goood so far the inline is >>%s<<\n", _input_line.c_str());
     // If the line ends with a colon, its not a complete expression,
     // and we must wait for more input, i.e. more input is pending.
     if (0 < part_size and part.find_last_of(":\\") + 1 == part_size)
