@@ -1166,8 +1166,6 @@ void PythonEval::eval_expr(const std::string& partial_expr)
 
     logger().info("[PythonEval] eval_expr:\n%s\n", partial_expr.c_str());
 
-    _result = "";
-
     // Trim whitespace, first! Otherwise, the check for the
     // trailing colon fails.
     std::string part = partial_expr.substr(0,
@@ -1178,18 +1176,13 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     size_t open = std::count(part.begin(), part.end(), '(');
     size_t clos = std::count(part.begin(), part.end(), ')');
     _paren_count += open - clos;
-    if (0 < _paren_count) _pending_input = true;
+    if (0 < _paren_count) goto wait_for_more;
 
     // If the line ends with a colon, its not a complete expression,
     // and we must wait for more input, i.e. more input is pending.
     size_t expression_size = part.size();
     size_t colon_position = part.find_last_of(":\\");
-    if (colon_position == (expression_size - 1))
-        _pending_input = true;
-
-    // Add this expression to our evaluation buffer.
-    _input_line += part;
-    _input_line += '\n';  // we stripped this off, above
+    if (colon_position == (expression_size - 1)) goto wait_for_more;
 
     // If there are more closes than opens, then fail.
     if (_paren_count < 0) _pending_input = false;
@@ -1197,6 +1190,8 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     // Process the evaluation buffer if more input is not pending.
     if (not _pending_input)
     {
+        _result = "";
+
         // This is the cogserver shell-freindly evaluator. We must
         // stop all exceptions thrown in other layers, or else we
         // will crash the cogserver. Pass the exception message to
@@ -1213,7 +1208,14 @@ void PythonEval::eval_expr(const std::string& partial_expr)
         }
         _input_line = "";
         _paren_count = 0;
+        return;
     }
+
+wait_for_more:
+    _pending_input = true;
+    // Add this expression to our evaluation buffer.
+    _input_line += part;
+    _input_line += '\n';  // we stripped this off, above
 }
 
 std::string PythonEval::poll_result()
