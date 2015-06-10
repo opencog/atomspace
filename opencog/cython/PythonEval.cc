@@ -1161,7 +1161,7 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
 //
 void PythonEval::eval_expr(const std::string& partial_expr)
 {
-    int c;
+    int c = 0;
 
     // If we get a newline by itself, just ignore it.
     if (partial_expr == "\n") return;
@@ -1179,7 +1179,7 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     // If the line starts with whitespace (tab or space) then assume
     // that it is standard indentation, and wait for the first
     // unindented line (or end-of-file).
-    c = part[0];
+    if (0 < part.size()) c = part[0];
     if (' ' == c or '\t' == c) goto wait_for_more;
 
     // If the line ends with a colon, its not a complete expression,
@@ -1200,9 +1200,7 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     // If there are more closes than opens, then fail.
     if (_paren_count < 0) _pending_input = false;
 
-    // Process the evaluation buffer if more input is not pending.
-    if (_pending_input) return;
-
+    _input_line += part;
     logger().info("[PythonEval] eval_expr:\n%s\n", _input_line.c_str());
 
     // This is the cogserver shell-freindly evaluator. We must
@@ -1225,6 +1223,7 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     return;
 
 wait_for_more:
+    _result = "";
     _pending_input = true;
     // Add this expression to our evaluation buffer.
     _input_line += part;
