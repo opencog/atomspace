@@ -23,7 +23,8 @@ import Control.Exception            (bracket)
 import Control.Monad.IO.Class       (liftIO)
 import Control.Monad.Trans.Reader   (ReaderT,runReaderT,ask)
 import Data.Functor                 ((<$>))
-import OpenCog.AtomSpace.Types      (Atom(..),AtomName(..),TruthVal(..))
+import OpenCog.AtomSpace.Types      (Atom(..),AtomName(..),TruthVal(..),
+                                     appAtomGen,AtomGen(..))
 
 -- Internal AtomSpace reference to a mutable C++ instance
 -- of the AtomSpace class.
@@ -57,24 +58,38 @@ runOnNewAtomSpace as = bracket asNew asDelete $ runReaderT as
 getAtomSpace :: AtomSpace AtomSpaceRef
 getAtomSpace = ask
 
+--------------------------------------------------------------------------------
+
 type Handle = CULong
 type AtomType = String
-data AtomGen a = Link AtomType [a] (Maybe TruthVal) a
-               | Node AtomType AtomName (Maybe TruthVal) a
+data AtomRaw = Link AtomType [AtomRaw] (Maybe TruthVal)
+             | Node AtomType AtomName  (Maybe TruthVal)
 
-toAtomGen :: Atom a -> AtomGen (Atom a)
-toAtomGen i = case i of
-    Predicate n  -> Node "PredicateNode" n Nothing i
-    And a1 a2 tv -> Link "AndLink" [a1,a2] tv i
-    Concept n    -> Node "ConceptNode" n Nothing i
+toRaw :: Atom a -> AtomRaw
+toRaw i = case i of
+    Predicate n  -> Node "PredicateNode" n Nothing
+    And a1 a2 tv -> Link "AndLink" [toRaw a1,toRaw a2] tv
+    Concept n    -> Node "ConceptNode" n Nothing
+    List list    -> Link "ListLink" (map (appAtomGen toRaw) list) Nothing
     _            -> undefined
 
-fromAtomGen :: AtomGen (Atom a) -> Atom a
-fromAtomGen i = case i of
-    Node "ConceptNode" n _ (Concept _)     -> Concept n
-    Node "PredicateNode" n _ (Predicate _) -> Predicate n
-    Link "AndLink" [a1,a2] tv (And _ _ _)  -> And a1 a2 tv
-    _                                      -> undefined
+fromRaw :: AtomRaw -> Atom a -> Maybe (Atom a)
+fromRaw raw orig = case (raw,orig) of
+    (Node "ConceptNode" n _    , Concept _   ) -> Just $ Concept n
+    (Node "PredicateNode" n _  , Predicate _ ) -> Just $ Predicate n
+    (Link "AndLink" [ar,br] tv , And ao bo _ ) -> do
+        a <- fromRaw ar ao
+        b <- fromRaw br bo
+        Just $ And a b tv
+    (Link "ListLink" lraw _    , List lorig  ) -> do
+        lnew <- if length lraw == length lorig
+                 then sequence $ zipWith (\raw orig -> 
+                                    appAtomGen
+                                    ((<$>) AtomGen . fromRaw raw) orig)
+                                    lraw lorig
+                 else Nothing
+        Just $ List lnew
+    _                                               -> Nothing -- undefined
 
 --------------------------------------------------------------------------------
 
@@ -109,7 +124,7 @@ foreign import ccall "AtomSpace_addLink"
                       -> CInt
                       -> IO Handle
 
-insertLink :: AtomType -> [Atom a] -> AtomSpace Handle
+insertLink :: AtomType -> [AtomRaw] -> AtomSpace Handle
 insertLink aType aOutgoing = do
     list <- mapM insertAndGetHandle aOutgoing
     asRef <- getAtomSpace
@@ -117,16 +132,16 @@ insertLink aType aOutgoing = do
       \atype -> withArray list $
       \lptr -> c_atomspace_addlink asRef atype lptr (fromIntegral $ length list)
 
-insertAndGetHandle :: Atom a -> AtomSpace Handle
-insertAndGetHandle i = case toAtomGen i of
-    Node aType aName tv _     -> insertNode aType aName
-                                 -- TODO: After getting handler set truthvalue!
-    Link aType aOutgoing tv _ -> insertLink aType aOutgoing
-                                 -- TODO: After getting handler set truthvalue!
+insertAndGetHandle :: AtomRaw -> AtomSpace Handle
+insertAndGetHandle i = case i of
+    Node aType aName tv     -> insertNode aType aName
+                               -- TODO: After getting handler set truthvalue!
+    Link aType aOutgoing tv -> insertLink aType aOutgoing
+                               -- TODO: After getting handler set truthvalue!
 
 -- Function to insert an atom to the atomspace.
 insert :: Atom a -> AtomSpace ()
-insert i = insertAndGetHandle i >> return ()
+insert i = insertAndGetHandle (toRaw i) >> return ()
 
 --------------------------------------------------------------------------------
 
@@ -139,7 +154,7 @@ foreign import ccall "AtomSpace_removeAtom"
 remove :: Atom a -> AtomSpace Bool
 remove i = do
     asRef <- getAtomSpace
-    m <- getWithHandle i -- TODO: Make more efficiently this
+    m <- getWithHandle $ toRaw i -- TODO: Make more efficiently this
     case m of
       Just (_,handle) -> liftIO $ toBool <$> c_atomspace_remove asRef handle
       _               -> return False
@@ -205,41 +220,40 @@ getLink aType aOutgoing = do
       Just h  -> Just (undefined,h)
               -- TODO: After getting handler, get actual truthvalue!
 
-getWithHandle :: Atom a -> AtomSpace (Maybe (Atom a,Handle))
+getWithHandle :: AtomRaw -> AtomSpace (Maybe (AtomRaw,Handle))
 getWithHandle i = do
     let onLink :: AtomType
-               -> [Atom a]
-               -> AtomSpace (Maybe (TruthVal,Handle,[Atom a]))
+               -> [AtomRaw]
+               -> AtomSpace (Maybe (TruthVal,Handle,[AtomRaw]))
         onLink aType aOutgoing = do
-            list <- mapM getWithHandle aOutgoing -- :: [Maybe (Atom a,Handle)]
-            case sequence list of -- :: Maybe [(Atom a,Handle)]
+            ml <- sequence <$> mapM getWithHandle aOutgoing
+            case ml of -- ml :: Maybe [(AtomRaw,Handle)]
               Nothing -> return Nothing
-              Just l  -> do
+              Just l -> do
                 res <- getLink aType $ map snd l
                 case res of
                   Just (tv,h) -> return $ Just (tv,h,map fst l)
                   _           -> return Nothing
      in
-        case toAtomGen i of
-          Node aType aName _ n -> do
+        case i of
+          Node aType aName _ -> do
            m <- getNode aType aName
            return $ case m of
-             Just (tv,h) -> Just (fromAtomGen (Node aType aName (Just tv) n),h)
+             Just (tv,h) -> Just $ (Node aType aName (Just tv),h)
              _           -> Nothing
 
-          Link aType aOutgoing _ n -> do
+          Link aType aOutgoing _ -> do
            m <- onLink aType aOutgoing
            return $ case m of
-             Just (tv,h,newOutgoing) -> Just (fromAtomGen
-                                         (Link aType newOutgoing (Just tv) n),h)
+             Just (tv,h,newOutgoing) -> Just $ (Link aType newOutgoing (Just tv), h)
              _                       -> Nothing
 
 -- Function to get an atom from the atomspace.
 get :: Atom a -> AtomSpace (Maybe (Atom a))
 get i = do
-    m <- getWithHandle i
+    m <- getWithHandle $ toRaw i
     return $ case m of
-      Just (at,_) -> Just at
-      _           -> Nothing
+      Just (araw,_) -> fromRaw araw i
+      _             -> Nothing
 
 --------------------------------------------------------------------------------

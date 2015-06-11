@@ -1,9 +1,11 @@
-{-# LANGUAGE GADTs , EmptyDataDecls #-}
+{-# LANGUAGE GADTs , EmptyDataDecls , ExistentialQuantification , RankNTypes #-}
 
 module OpenCog.AtomSpace.Types (
     TruthVal (..)
   , AtomName (..)
   , Atom (..)
+  , AtomGen (..)
+  , appAtomGen
   , TNumberNode
   , TConceptNode
   ) where
@@ -18,6 +20,12 @@ data TruthVal = SimpleTruthVal Double Double
 data TConceptNode
 data TNumberNode
 
+data AtomGen where
+    AtomGen :: Atom a -> AtomGen
+
+appAtomGen :: (forall a. Atom a -> b) -> AtomGen -> b
+appAtomGen f (AtomGen at) = f at
+
 data Atom a where -- TODO: Review the types constraints, add Attention Values, etc.
     -- Predicate
     Predicate   :: AtomName -> Atom (Atom a -> TruthVal)
@@ -26,7 +34,7 @@ data Atom a where -- TODO: Review the types constraints, add Attention Values, e
     Implication :: Atom a -> Atom a -> (Maybe TruthVal) -> Atom a
     Equivalence :: Atom a -> Atom a -> (Maybe TruthVal) -> Atom a
     Evaluation  :: (Atom (Atom a -> TruthVal))  ->
-                      Atom [Atom a] -> (Maybe TruthVal) -> Atom a
+                      Atom [AtomGen] -> (Maybe TruthVal) -> Atom a
 
     -- Concept
     Concept       :: AtomName -> Atom TConceptNode
@@ -39,4 +47,5 @@ data Atom a where -- TODO: Review the types constraints, add Attention Values, e
     Number :: (Num a) => a -> Atom TNumberNode
 
     -- List
-    List :: [Atom a] -> Atom [Atom a]
+    List :: [AtomGen] -> Atom [AtomGen]
+

@@ -2,7 +2,7 @@
 
 import OpenCog.AtomSpace.Api   (AtomSpace,insert,get,remove,
                                 debug,runOnNewAtomSpace)
-import OpenCog.AtomSpace.Types (Atom(..),TruthVal(..))
+import OpenCog.AtomSpace.Types (Atom(..),TruthVal(..),AtomGen(..))
 import Control.Monad.IO.Class  (liftIO)
 
 main :: IO ()
@@ -21,14 +21,18 @@ program = let andLink = And (Concept "John")
         liftIO $ putStrLn "----------------------------------------"
         n <- get andLink
         case n of
-          Just (And _ _ _) -> liftIO $ print "AndLink found."
-          Nothing          -> liftIO $ print "No AndLink found."
+          Just (And _ _ _) -> liftIO $ putStrLn "AndLink found."
+          Nothing          -> liftIO $ putStrLn "No AndLink found."
         remove andLink
         liftIO $ putStrLn "-----------After Remove:----------------"
         debug
         liftIO $ putStrLn "----------------------------------------"
         n <- get andLink
         case n of
-          Just (And _ _ tv) -> liftIO $ print "AndLink found."
-          Nothing           -> liftIO $ print "No AndLink found."
+          Just (And _ _ _) -> liftIO $ putStrLn "AndLink found."
+          Nothing          -> liftIO $ putStrLn "No AndLink found."
+        insert $ List [ AtomGen $ Number 4
+                      , AtomGen $ Concept "hello"
+                      , AtomGen $ Number 4]
+
 
