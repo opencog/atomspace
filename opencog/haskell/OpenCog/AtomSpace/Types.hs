@@ -44,8 +44,29 @@ data Atom a where -- TODO: Review the types constraints, add Attention Values, e
     SatisfyingSet :: Atom (Atom a -> TruthVal) -> Atom TConceptNode
 
     -- Number
-    Number :: (Num a) => a -> Atom TNumberNode
+    Number :: (Num a,Show a) => a -> Atom TNumberNode
 
     -- List
     List :: [AtomGen] -> Atom [AtomGen]
 
+instance Show AtomGen where
+    show (AtomGen at) = concat' ["AtomGen",show at]
+
+instance Show (Atom a) where
+    show (Predicate n)         = concat' ["Predicate",show n]
+    show (And a1 a2 m)         = concat' ["And",show a1,show a2,show m]
+    show (Or a1 a2 m)          = concat' ["Or",show a1,show a2,show m]
+    show (Implication a1 a2 m) = concat' ["Implication",show a1,show a2,show m]
+    show (Equivalence a1 a2 m) = concat' ["Equivalence",show a1,show a2,show m]
+    show (Evaluation a1 a2 m)  = concat' ["Evaluation",show a1,show a2,show m]
+    show (Concept n)           = concat' ["Concept",show n]
+    show (Inheritance a1 a2 m) = concat' ["Inheritance",show a1,show a2,show m]
+    show (Similarity a1 a2 m)  = concat' ["Similarity",show a1,show a2,show m]
+    show (Member a1 a2 m)      = concat' ["Member",show a1,show a2,show m]
+    show (SatisfyingSet a)     = concat' ["SatisfyingSet",show a]
+    show (Number n)            = concat' ["Number",show n]
+    show (List l)              = concat' ["List",show l]
+
+concat' (a:b:xs) = a ++ " " ++ concat' (b:xs)
+concat' (b:[])   = b
+concat' []       = ""
