@@ -35,8 +35,6 @@ be built and run.
 ###### cxxtest
 > Test framework
 > http://cxxtest.sourceforge.net/ | https://launchpad.net/~opencog-dev/+archive/ppa
-> Currently, opencog requires cxxtest version 3, and is not compatible
-  with version 4.
 
 ###### guile
 > Embedded scheme interpreter (version 2.0.0 or newer is required)
