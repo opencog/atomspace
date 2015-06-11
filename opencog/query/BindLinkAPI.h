@@ -31,7 +31,7 @@ class AtomSpace;
 
 Handle bindlink(AtomSpace*, const Handle&);
 Handle single_bindlink (AtomSpace*, const Handle&);
-Handle pln_bindlink(AtomSpace*, const Handle&);
+Handle af_bindlink(AtomSpace*, const Handle&);
 TruthValuePtr satisfaction_link(AtomSpace*, const Handle&);
 Handle satisfying_set(AtomSpace*, const Handle&);
 

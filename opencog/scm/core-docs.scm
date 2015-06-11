@@ -772,11 +772,11 @@
     The search is terminated after the first match is found.
 ")
 
-(set-procedure-property! cog-bind-pln 'documentation
+(set-procedure-property! cog-bind-af 'documentation
 "
- cog-bind-pln handle
+ cog-bind-af handle
     Run pattern matcher on handle.  handle must be a BindLink.
-    A special-purpose pattern matcher used by PLN.
+    A special-purpose pattern matcher used by the URE.
 ")
 
 (set-procedure-property! cog-satisfy 'documentation
