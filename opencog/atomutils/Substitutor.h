@@ -33,7 +33,13 @@ namespace opencog
 
 /**
  * Like the Instantiator but does not execute stuff, and also
- * works for non-variable.
+ * works for non-VariableNode.
+ *
+ * Also a bit like VariableList's substitute, but again also
+ * works for non-VariableNode.
+ *
+ * Won't recurse into the atom substituted; so if the new atom
+ * also contains sub-atom to be subsituted, they will be ignored.
  */
 class Substitutor
 {
@@ -67,6 +73,13 @@ private:
 public:
 	Substitutor(AtomSpace* as) : _as(as) {}
 
+	/**
+	 * The main method to call to substitue sub-atoms.
+	 *
+	 * @param expr  the original atom
+	 * @param vars  an atom to atom mapping
+	 * @return      a new atom with sub-atoms replaced
+	 */
 	Handle substitute(const Handle& expr, const std::map<Handle, Handle> &vars)
 	{
 		// throw, not assert, because this is a user error ...

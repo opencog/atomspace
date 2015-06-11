@@ -55,12 +55,49 @@ public:
 	void store_varmap(VarMap& vm);
 	uint rule_count(const Rule& r);
 
+	/**
+	 * Increment the internal counter.
+	 *
+	 * Useful for storing how many times a Target is selected.
+	 */
 	void increment_selection_count() { _selection_count++; }
 
+	/**
+	 * Get the external Handle referred to be Target.
+	 *
+	 * @return the handle
+	 */
 	Handle get_handle() const { return _htarget_external; }
+
+	/**
+	 * Get the "free" variables list in HandleSeq.
+	 *
+	 * @return the HandleSeq
+	 */
 	HandleSeq get_varseq() const { return _vars; }
+
+	/**
+	 * Get the "free" variables list in set<Handle>
+	 *
+	 * @return the std::set<Handle>
+	 */
 	std::set<Handle> get_varset() const { return std::set<Handle>(_vars.begin(), _vars.end()); }
+
+	/**
+	 * Get the stored free variable mappings.
+	 *
+	 * @return a VarMultimap object of the mappings
+	 */
 	const VarMultimap& get_varmap() const { return _varmap; }
+
+	/**
+	 * Get the weight associated with this Target.
+	 *
+	 * Useful for perhaps target selection.
+	 * XXX TODO actually calculate something here
+	 *
+	 * @return the weight in float
+	 */
 	float get_weight() { return 1.0f; }
 
 private:

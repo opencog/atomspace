@@ -64,22 +64,6 @@ typedef std::map<Handle, Handle> VarMap;
  *    other compound example is what breathes and adds ANDLink
  *    InheritanceLink $X Breath InheritanceLink $X adds
  *
- * Anatomy of a single inferene
- * ============================
- * A single inference step may be viewed as follows
- *
- * 1. Choose inference Rule R and a tuple of Atoms that collectively
- *    match the input condition of the rule
- *
- * 2. Apply choosen rule R to the chosen input Atoms
- *
- * 3. Create an ExecutionLink recording the output found
- *
- * 4. In addition to retaining this ExecutionLink in the Atomspace,
- *    also save the copy of it in the InferenceRepository (this is not
- *    needed for the very first implementation, but will be very
- *    useful once PLN is in regular use.)
- *
  * Anatomy of current implementation
  * =================================
  *
@@ -141,12 +125,9 @@ private:
 	Handle _init_target;
 
 	// a map of a target, to a map of its variables mapping
-	// XXX TODO add a new kind of history that stores what actually happened on
-	// on each step, creating an inference tree?
+	// XXX TODO deprecate this in the future (use _targets_set instead)
 	map<Handle, VarMultimap> _inference_history;
 
-	// XXX TODO add information to each target stating what rules were applied
-	// and how often the target was chosen?
 	TargetSet _targets_set;
 	std::vector<Rule> _rules_set;
 
