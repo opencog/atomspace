@@ -102,9 +102,18 @@ void BackwardChainer::do_step()
 	// XXX for example, choose target with low TV 50% of the time
 	Target& selected_target = _targets_set.select();
 
+	logger().debug("[BackwardChainer] Selected target " + selected_target.get_handle()->toShortString());
+	if (selected_target.get_varseq().empty())
+		logger().debug("[BackwardChainer] Target is 'Truth Value Query'");
+	else
+		logger().debug("[BackwardChainer] Target is 'Variable Fullfillment Query'");
+
 	process_target(selected_target);
 
 	_inference_history[selected_target.get_handle()] = selected_target.get_varmap();
+
+	// clear out the _garbage space since the stuff inside shouldn't be needed
+	// for the next step
 	_garbage_superspace->clear();
 
 	logger().debug("[BackwardChainer] End of a single BC step");
@@ -117,17 +126,6 @@ void BackwardChainer::do_step()
  */
 const VarMultimap& BackwardChainer::get_chaining_result()
 {
-	logger().debug("[BackwardChainer] Returning the chaining result");
-
-	for (auto& p : _targets_set.get(_init_target).get_varmap())
-	{
-		logger().debug("Result for " + p.first->toShortString());
-		logger().debug("have size %d", p.second.size());
-
-		for (auto& h : p.second)
-			logger().debug("* " + h->toShortString());
-	}
-
 	return _targets_set.get(_init_target).get_varmap();
 }
 
@@ -148,16 +146,8 @@ void BackwardChainer::process_target(Target& target)
 		return;
 	}
 
-	// Check whether this target has free variables to determine if it's
-	// a "Variable Fullfillment Query" or "Truth Value Query"
-	if (target.get_varseq().empty())
-		logger().debug("[BackwardChainer] Goal with no free var, must be "
-		               "Truth Value Query: " + htarget->toShortString());
-
-	// Else, try to ground, and backward chain
-
-	// only want to try to ground if there are free variables (no point
-	// grounding if there's nothing to ground)
+	// before doing any real backward chaining, see if the free variables
+	// can already be grounded (no point grounding bound variables)
 	if (not target.get_varseq().empty())
 	{
 		std::vector<VarMap> kb_vmap;
@@ -195,6 +185,8 @@ void BackwardChainer::process_target(Target& target)
 	// If logical link, break it up, add each to new targets and return
 	if (_logical_link_types.count(htarget->getType()) == 1)
 	{
+		logger().debug("[BackwardChainer] Breaking into sub-targets");
+
 		HandleSeq sub_premises = LinkCast(htarget)->getOutgoingSet();
 
 		for (Handle& h : sub_premises)
@@ -234,7 +226,7 @@ void BackwardChainer::process_target(Target& target)
 		if (not unify(h,
 		              htarget,
 		              gen_sub_varlist(h, hrule_vardecl, std::set<Handle>()),
-		              _garbage_superspace->addAtom(createVariableList(target.get_varseq())),
+		              Handle(createVariableList(target.get_varseq())),
 		              temp_mapping))
 			continue;
 
@@ -252,6 +244,7 @@ void BackwardChainer::process_target(Target& target)
 	// all, and add all resulting new targets to targets list; this will
 	// avoid having to visit the target multiple times to get all
 	// possible output mappings
+	//
 	// XXX TODO alternatively, use some heuristics to prioritize whole-Atom
 	// unification, or largest sub-atom unification
 	VarMap implicand_normal_mapping = rand_element(all_implicand_to_target_mappings);
@@ -259,28 +252,6 @@ void BackwardChainer::process_target(Target& target)
 		logger().debug("[BackwardChainer] Chosen mapping is "
 					   + p.first->toShortString()
 					   + " to " + p.second->toShortString());
-
-	// Generate another version where each variables (free or bound) are inside
-	// QuoteLink; mostly to handle where PM cannot map a variable to itself
-	VarMap implicand_quoted_mapping;
-	for (auto& p : implicand_normal_mapping)
-	{
-		// find all variables
-		FindAtoms fv(VARIABLE_NODE);
-		fv.search_set(p.second);
-
-		// wrap a QuoteLink on each variable
-		VarMap quote_mapping;
-		for (auto& h: fv.varset)
-			quote_mapping[h] = _garbage_superspace->addAtom(createLink(QUOTE_LINK, h));
-
-		Substitutor subt(_garbage_superspace);
-		implicand_quoted_mapping[p.first] = subt.substitute(p.second, quote_mapping);
-
-		logger().debug("[BackwardChainer] Added "
-					   + implicand_quoted_mapping[p.first]->toShortString()
-					   + " to garbage space");
-	}
 
 	// Reverse ground the implicant with the grounding we found from
 	// unifying the implicand
@@ -292,63 +263,84 @@ void BackwardChainer::process_target(Target& target)
 				   + hrule_implicant_normal_grounded->toShortString());
 
 	// Find all matching premises matching the implicant, where premises_vmap_list
-	// will be the mapping from variables in himplicant to stuff in a premise
+	// will be the mapping from free variables in himplicant to stuff in a premise
 	HandleSeq possible_premises =
 		match_knowledge_base(hrule_implicant_normal_grounded,
 	                         _garbage_superspace->addAtom(gen_sub_varlist(hrule_implicant_normal_grounded, hrule_vardecl, target.get_varset())),
 	                         false, premises_vmap_list);
 
-	// Reverse ground 2nd version, try it with QuoteLink around variables
-	Handle hrule_implicant_quoted_grounded = subt.substitute(hrule_implicant, implicand_quoted_mapping);
+	// only need to generate QuoteLink version when there are free variables
+	if (not target.get_varseq().empty())
+	{
+		// Generate another version where each variables (free or bound) are inside
+		// QuoteLink; mostly to handle where PM cannot map a variable to itself
+		VarMap implicand_quoted_mapping;
+		for (auto& p : implicand_normal_mapping)
+		{
+			// find all variables
+			FindAtoms fv(VARIABLE_NODE);
+			fv.search_set(p.second);
 
-	logger().debug("[BackwardChainer] Alternative reverse grounded as "
-				   + hrule_implicant_quoted_grounded->toShortString());
+			// wrap a QuoteLink on each variable
+			VarMap quote_mapping;
+			for (auto& h: fv.varset)
+				quote_mapping[h] = _garbage_superspace->addAtom(createLink(QUOTE_LINK, h));
 
-	HandleSeq possible_premises_alt =
-	    match_knowledge_base(hrule_implicant_quoted_grounded,
-	                         _garbage_superspace->addAtom(gen_sub_varlist(hrule_implicant_quoted_grounded, hrule_vardecl, target.get_varset())),
-	                         false, premises_vmap_list_alt);
+			Substitutor subt(_garbage_superspace);
+			implicand_quoted_mapping[p.first] = subt.substitute(p.second, quote_mapping);
+		}
 
-	// collect the possible premises from the two verions of mapping
-	possible_premises.insert(possible_premises.end(),
-	                         possible_premises_alt.begin(),
-	                         possible_premises_alt.end());
-	premises_vmap_list.insert(premises_vmap_list.end(), premises_vmap_list_alt.begin(),
-	                 premises_vmap_list_alt.end());
+		// Reverse ground 2nd version, try it with QuoteLink around variables
+		Handle hrule_implicant_quoted_grounded = subt.substitute(hrule_implicant, implicand_quoted_mapping);
 
-	logger().debug("%d possible permises", possible_premises.size());
+		logger().debug("[BackwardChainer] Alternative reverse grounded as "
+					   + hrule_implicant_quoted_grounded->toShortString());
+
+		HandleSeq possible_premises_alt =
+			match_knowledge_base(hrule_implicant_quoted_grounded,
+								 _garbage_superspace->addAtom(gen_sub_varlist(hrule_implicant_quoted_grounded, hrule_vardecl, target.get_varset())),
+								 false, premises_vmap_list_alt);
+
+		// collect the possible premises from the two verions of mapping
+		possible_premises.insert(possible_premises.end(),
+								 possible_premises_alt.begin(),
+								 possible_premises_alt.end());
+		premises_vmap_list.insert(premises_vmap_list.end(), premises_vmap_list_alt.begin(),
+						 premises_vmap_list_alt.end());
+	}
+
+	// XXX TODO what to do when no possible premise?  shouldn't we then backward chain
+	// to the reverse grounded rule implicant?  but they contain standardized variables...
+
+	logger().debug("[BackwardChainer] %d possible permises", possible_premises.size());
 
 	// For each set of possible premises, check if they already satisfy the
-	// target (for "Variable Fullfillment Query"), so that we can apply the rule
-	// while we are looking at it in the same step
+	// target, so that we can apply the rule while we are looking at it in the
+	// same step
 	for (size_t i = 0; i < possible_premises.size(); i++)
 	{
 		Handle hp = possible_premises[i];
 		VarMap vm = premises_vmap_list[i];
 
+		logger().debug("[BackwardChainer] Checking permises " + hp->toShortString());
+
 		// include the implicand_normal_mapping because the variables are not quoted
-		// and we will be matching the variables in there as well
+		// and we will be matching the "free" variables in there as well
 		vm.insert(implicand_normal_mapping.begin(), implicand_normal_mapping.end());
 
 		// reverse ground the rule's outputs with the mapping to the premise
 		// so that when we ground the premise, we know how to generate
 		// the final output
 		Handle output_grounded = subt.substitute(standardized_rule.get_implicand(), vm);
-		logger().debug("[BackwardChainer] Output grounded as " + output_grounded->toShortString());
 
-		logger().debug("Checking permises " + hp->toShortString());
+		logger().debug("[BackwardChainer] Output reverse grounded as " + output_grounded->toShortString());
 
-//		bool need_bc = false;
 		std::vector<VarMap> vm_list;
 
 		// use pattern matcher to try to ground the variables (if any) in the
 		// selected premises, so we can use this grounding to "apply" the rule
 		// to generate the rule's final output
 		HandleSeq grounded_premises = ground_premises(hp, vm, vm_list);
-
-//		// matched nothing? need to backward chain on this premise
-//		if (grounded_premises.size() == 0)
-//			need_bc = true;
 
 		// Check each grounding to see if any has no variable
 		for (size_t i = 0; i < grounded_premises.size(); ++i)
@@ -357,7 +349,7 @@ void BackwardChainer::process_target(Target& target)
 			Handle& g = grounded_premises[i];
 			VarMap& m = vm_list.at(i);
 
-			logger().debug("Checking possible permises grounding "
+			logger().debug("[BackwardChainer] Checking possible permises grounding "
 						   + g->toShortString());
 
 			FindAtoms fv(VARIABLE_NODE);
@@ -365,10 +357,7 @@ void BackwardChainer::process_target(Target& target)
 
 			// If some grounding cannot solve the goal, will need to BC
 			if (not fv.varset.empty())
-			{
-//				need_bc = true;
 				continue;
-			}
 
 			// This is a premise grounding that can solve the target, so
 			// apply it by using the mapping to ground the target, and add
@@ -388,10 +377,6 @@ void BackwardChainer::process_target(Target& target)
 
 			target.store_varmap(results);
 		}
-
-//		if (not need_bc)
-//			continue;
-
 
 
 		// XXX TODO premise selection would be done here to
@@ -499,16 +484,12 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
 	               hpattern->toShortString().c_str(),
 	               hpattern_vardecl->toShortString().c_str());
 
-	// Pattern Match on _garbage_superspace since some atoms in htarget could
+	// Pattern Match on _garbage_superspace since some atoms in hpattern could
 	// be in the _garbage space
 	PatternLinkPtr sl(createPatternLink(hpattern_vardecl, hpattern));
 	BackwardChainerPMCB pmcb(_garbage_superspace);
 
-	logger().debug("[BackwardChainer] Before patterm matcher");
-
 	sl->satisfy(pmcb);
-
-	logger().debug("[BackwardChainer] After running pattern matcher");
 
 	vector<map<Handle, Handle>> var_solns = pmcb.get_var_list();
 	vector<map<Handle, Handle>> pred_solns = pmcb.get_pred_list();
@@ -588,6 +569,7 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 {
 	HandleSeq results;
 
+	// XXX are all variables in premises free?
 	FindAtoms fv(VARIABLE_NODE);
 	fv.search_set(hpremise);
 
@@ -684,35 +666,30 @@ bool BackwardChainer::unify(const Handle& hsource,
                             Handle hmatch_vardecl,
                             VarMap& result)
 {
-	logger().debug("[BackwardChainer] starting unify " + hsource->toShortString()
-	               + " to " + hmatch->toShortString());
-
 	// lazy way of restricting PM to be between two atoms
 	AtomSpace temp_space;
 
 	Handle temp_hsource = temp_space.addAtom(hsource);
 	Handle temp_hmatch = temp_space.addAtom(hmatch);
-	Handle temp_vardecl = temp_space.addAtom(hsource_vardecl);
+	Handle temp_hsource_vardecl = temp_space.addAtom(hsource_vardecl);
+	Handle temp_hmatch_vardecl = temp_space.addAtom(hmatch_vardecl);
 
 	FindAtoms fv(VARIABLE_NODE);
 	fv.search_set(hsource);
 
-	if (temp_vardecl == Handle::UNDEFINED)
+	if (temp_hsource_vardecl == Handle::UNDEFINED)
 	{
 		HandleSeq vars;
 		for (const Handle& h : fv.varset)
 			vars.push_back(h);
 
-		temp_vardecl = temp_space.addAtom(createVariableList(vars));
+		temp_hsource_vardecl = temp_space.addAtom(createVariableList(vars));
 	}
 
-	PatternLinkPtr sl(createPatternLink(temp_vardecl, temp_hsource));
-	UnifyPMCB pmcb(&temp_space, VariableListCast(hmatch_vardecl));
+	PatternLinkPtr sl(createPatternLink(temp_hsource_vardecl, temp_hsource));
+	UnifyPMCB pmcb(&temp_space, VariableListCast(temp_hmatch_vardecl));
 
 	sl->satisfy(pmcb);
-
-	logger().debug("[BackwardChainer] unify found %d mapping",
-	               pmcb.get_var_list().size());
 
 	// if no grounding
 	if (pmcb.get_var_list().size() == 0)
