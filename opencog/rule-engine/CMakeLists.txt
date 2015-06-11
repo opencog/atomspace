@@ -13,7 +13,6 @@ ADD_LIBRARY(ruleengine SHARED
 	forwardchainer/FCMemory.cc	
 	InferenceSCM.cc
 	Rule.cc
-	JsonicControlPolicyParamLoader.cc
     UREConfigReader.cc
 )
 
@@ -34,7 +33,7 @@ INSTALL (TARGETS ruleengine DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	InferenceSCM.h
-	JsonicControlPolicyParamLoader.h
+	UREConfigReader.h
 	URECommons.h
 	Rule.h
 	UREConfigReader.h
