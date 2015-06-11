@@ -15,7 +15,6 @@ library
 
   build-depends:     base         >=4.5
                    , transformers >=0.4
-                   , data-default >=0.5
 
   extra-libraries:   haskell-atomspace
 
