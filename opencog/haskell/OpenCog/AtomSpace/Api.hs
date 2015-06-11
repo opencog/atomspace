@@ -1,16 +1,11 @@
-{-# LANGUAGE ForeignFunctionInterface , GADTs #-}
+{-# LANGUAGE ForeignFunctionInterface #-}
 
 module OpenCog.AtomSpace.Api (
       insert
     , remove
     , get
     , debug
-    , runOnNewAtomSpace
-    , AtomSpace
     ) where
-
--- Note that I don't export the AtomSpace data constructors nor the
--- asDelete/asNew functions.
 
 import Foreign                      (Ptr)
 import Foreign.C.Types              (CULong(..),CInt(..))
@@ -19,77 +14,12 @@ import Foreign.Marshal.Array        (withArray)
 import Foreign.Marshal.Utils        (toBool)
 import Foreign.Marshal.Alloc        (alloca)
 import Foreign.Storable             (peek)
-import Control.Exception            (bracket)
-import Control.Monad.IO.Class       (liftIO)
-import Control.Monad.Trans.Reader   (ReaderT,runReaderT,ask)
 import Data.Functor                 ((<$>))
-import OpenCog.AtomSpace.Types      (Atom(..),AtomName(..),TruthVal(..),
-                                     appAtomGen,AtomGen(..))
-
--- Internal AtomSpace reference to a mutable C++ instance
--- of the AtomSpace class.
-newtype AtomSpaceRef = AtomSpaceRef (Ptr AtomSpaceRef)
-
--- Main Data Type for representing programs working on an AtomSpace.
--- We have to use the IO monad because of the use of FFI for calling c functions
--- for working on a mutable instance of the atomspace, so we have side effects.
-type AtomSpace = ReaderT AtomSpaceRef IO
-
--- Internal functions new and delete, to create and delete C++ instances
--- of the AtomSpace class.
-foreign import ccall "AtomSpace_new"
-  c_atomspace_new :: IO AtomSpaceRef
-asNew :: IO AtomSpaceRef
-asNew = c_atomspace_new
-
-foreign import ccall "AtomSpace_delete"
-  c_atomspace_delete :: AtomSpaceRef -> IO ()
-asDelete :: AtomSpaceRef -> IO ()
-asDelete = c_atomspace_delete
-
--- 'runOnNewAtomSpace' creates a new AtomSpace (C++ object), does some
--- computation over it, and then deletes it.
--- By using bracket, I ensure properly freeing memory in case of exceptions
--- during the computation.
-runOnNewAtomSpace :: AtomSpace a -> IO a
-runOnNewAtomSpace as = bracket asNew asDelete $ runReaderT as
-
--- Internal function getAtomSpace, to get the actual reference to the atomspace.
-getAtomSpace :: AtomSpace AtomSpaceRef
-getAtomSpace = ask
-
---------------------------------------------------------------------------------
-
-type Handle = CULong
-type AtomType = String
-data AtomRaw = Link AtomType [AtomRaw] (Maybe TruthVal)
-             | Node AtomType AtomName  (Maybe TruthVal)
-
-toRaw :: Atom a -> AtomRaw
-toRaw i = case i of
-    Predicate n  -> Node "PredicateNode" n Nothing
-    And a1 a2 tv -> Link "AndLink" [toRaw a1,toRaw a2] tv
-    Concept n    -> Node "ConceptNode" n Nothing
-    List list    -> Link "ListLink" (map (appAtomGen toRaw) list) Nothing
-    _            -> undefined
-
-fromRaw :: AtomRaw -> Atom a -> Maybe (Atom a)
-fromRaw raw orig = case (raw,orig) of
-    (Node "ConceptNode" n _    , Concept _   ) -> Just $ Concept n
-    (Node "PredicateNode" n _  , Predicate _ ) -> Just $ Predicate n
-    (Link "AndLink" [ar,br] tv , And ao bo _ ) -> do
-        a <- fromRaw ar ao
-        b <- fromRaw br bo
-        Just $ And a b tv
-    (Link "ListLink" lraw _    , List lorig  ) -> do
-        lnew <- if length lraw == length lorig
-                 then sequence $ zipWith (\raw orig -> 
-                                    appAtomGen
-                                    ((<$>) AtomGen . fromRaw raw) orig)
-                                    lraw lorig
-                 else Nothing
-        Just $ List lnew
-    _                                               -> Nothing -- undefined
+import Control.Monad.IO.Class       (liftIO)
+import OpenCog.AtomSpace.Env        (AtomSpaceRef(..),AtomSpace,getAtomSpace)
+import OpenCog.AtomSpace.Internal   (Handle,AtomType,AtomRaw(..),
+                                     toRaw,fromRaw)
+import OpenCog.AtomSpace.Types      (Atom(..),AtomName(..),TruthVal(..))
 
 --------------------------------------------------------------------------------
 

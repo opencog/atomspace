@@ -10,7 +10,11 @@ build-type:          Simple
 cabal-version:       >=1.8
 
 library
-  exposed-modules:   OpenCog.AtomSpace.Api
+  exposed-modules:   OpenCog.AtomSpace
+
+  other-modules:     OpenCog.AtomSpace.Env
+                   , OpenCog.AtomSpace.Internal
+                   , OpenCog.AtomSpace.Api
                    , OpenCog.AtomSpace.Types
 
   build-depends:     base         >=4.5

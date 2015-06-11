@@ -1,9 +1,9 @@
 {-# LANGUAGE GADTs #-}
 
-import OpenCog.AtomSpace.Api   (AtomSpace,insert,get,remove,
-                                debug,runOnNewAtomSpace)
-import OpenCog.AtomSpace.Types (Atom(..),TruthVal(..),AtomGen(..))
-import Control.Monad.IO.Class  (liftIO)
+import OpenCog.AtomSpace        (AtomSpace,insert,get,remove,
+                                 debug,runOnNewAtomSpace,
+                                 Atom(..),TruthVal(..),AtomGen(..))
+import Control.Monad.IO.Class   (liftIO)
 
 main :: IO ()
 main = runOnNewAtomSpace program
