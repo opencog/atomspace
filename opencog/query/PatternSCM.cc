@@ -42,9 +42,9 @@ void PatternSCM::init(void)
 	_binders.push_back(new FunctionWrap(single_bindlink,
 	                   "cog-bind-single", "query"));
 
-	// Mystery function
-	_binders.push_back(new FunctionWrap(pln_bindlink,
-	                   "cog-bind-pln", "query"));
+	// Attentional Focus function
+	_binders.push_back(new FunctionWrap(af_bindlink,
+	                   "cog-bind-af", "query"));
 
    // Fuzzy matching.
 	_binders.push_back(new FunctionWrap(find_approximate_match,

@@ -62,13 +62,13 @@ namespace opencog
 /**
  * Simplified utility
  *
- * The `do_conn_check` flag stands for "do connectivity check";
- * if the flag is set, and the pattern is disconnected, then an
- * error will be thrown. PLN explicitly allows disconnected graphs.
+ * The `do_conn_check` flag stands for "do connectivity check"; if the
+ * flag is set, and the pattern is disconnected, then an error will be
+ * thrown. The URE explicitly allows disconnected graphs.
  *
  * Set the default to always allow disconnected graphs. This will
  * get naive users into trouble, but there are legit uses, not just
- * in PLN, for doing disconnected searches.
+ * in the URE, for doing disconnected searches.
  */
 static Handle do_imply(AtomSpace* as,
                        const Handle& hbindlink,
@@ -152,12 +152,12 @@ Handle single_bindlink (AtomSpace* as, const Handle& hbindlink)
 }
 
 /**
- * PLN specific PatternMatchCallback implementation
+ * Attentional Focus specific PatternMatchCallback implementation
  */
-Handle pln_bindlink(AtomSpace* as, const Handle& hbindlink)
+Handle af_bindlink(AtomSpace* as, const Handle& hbindlink)
 {
 	// Now perform the search.
-	PLNImplicator impl(as);
+	AFImplicator impl(as);
 	return do_imply(as, hbindlink, impl, false);
 }
 

@@ -174,9 +174,9 @@ InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
  * exist in the atomspace, anyway.
  */
 Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
-                                            const std::set<Handle>& evl,
-                                            Handle& starter_term,
-                                            size_t& bestclause)
+                                       const std::set<Handle>& evl,
+                                       Handle& starter_term,
+                                       size_t& bestclause)
 {
 	size_t thinnest = SIZE_MAX;
 	size_t deepest = 0;
@@ -492,9 +492,9 @@ bool InitiateSearchCB::disjunct_search(PatternMatchEngine *pme)
 	if (found) return true;
 	if (not _search_fail) return false;
 
-	// The PLN Reasoning case: if we found nothing, then there are no
+	// The URE Reasoning case: if we found nothing, then there are no
 	// links!  Ergo, every clause must be a lone variable, all by
-	// itself. This is how some PLN rules start: the specify a single
+	// itself. This is how some URE rules may start: the specify a single
 	// variable, all by itself, and set some type restrictions on it,
 	// and that's all. We deal with this in the variable_search()
 	// method.
@@ -563,9 +563,9 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 		}
 	}
 
-	// The PLN Reasoning case: if we found nothing, then there are no
+	// The URE Reasoning case: if we found nothing, then there are no
 	// links!  Ergo, every clause must be a lone variable, all by
-	// itself. This is how some PLN rules start: the specify a single
+	// itself. This is how some URE rules may start: the specify a single
 	// variable, all by itself, and set some type restrictions on it,
 	// and that's all. We deal with this in the variable_search()
 	// method.

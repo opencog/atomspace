@@ -10,7 +10,7 @@ This directory contains code that implements a subgraph isomorphism
 algorithm, and then uses this algorithm to support several functions,
 including query processing, graph-rewriting, graph satisfiaibility and
 "satsifiability modulo theories".  Forward and backward chaining are
-implemented separately, in the PLN directory.
+implemented separately, in the rule-engine directory.
 
 The first part of the file describes the generic algorithm; the second
 part describes some of its applications to query processing, graph

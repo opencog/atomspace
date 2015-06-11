@@ -54,15 +54,15 @@ class DefaultImplicator:
 
 
 /**
- * PLN specific PatternMatchCallback implementation
+ * Attentional Focus specific PatternMatchCallback implementation
  */
-class PLNImplicator:
+class AFImplicator:
 	public virtual Implicator,
 	public virtual InitiateSearchCB,
 	public virtual AttentionalFocusCB
 {
 	public:
-		PLNImplicator(AtomSpace* asp) :
+		AFImplicator(AtomSpace* asp) :
 			Implicator(asp),
 			InitiateSearchCB(asp),
 			DefaultPatternMatchCB(asp),
