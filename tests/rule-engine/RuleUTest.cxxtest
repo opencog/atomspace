@@ -116,7 +116,7 @@ void RuleUTest::test_and()
     load_scm_files_from_config(as);
 
     // Apply the and rule
-    Handle results = eval.eval_h("(cog-bind-pln pln-rule-and)");
+    Handle results = eval.eval_h("(cog-bind-af pln-rule-and)");
 
     // It should contain 4 groundings, (A, A), (A, B), (B, A), (B, B)
     TS_ASSERT_EQUALS(4, as.getArity(results));
@@ -136,7 +136,7 @@ void RuleUTest::test_not()
     load_scm_files_from_config(as);
 
     // Apply the and rule
-    Handle results = eval.eval_h("(cog-bind-pln pln-rule-not)");
+    Handle results = eval.eval_h("(cog-bind-af pln-rule-not)");
 
     // It should contain 2 groundings, not(A), not(B)
     TS_ASSERT_EQUALS(2, as.getArity(results));
