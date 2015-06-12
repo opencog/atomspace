@@ -124,10 +124,6 @@ private:
 	AtomSpace* _garbage_superspace;
 	Handle _init_target;
 
-	// a map of a target, to a map of its variables mapping
-	// XXX TODO deprecate this in the future (use _targets_set instead)
-	map<Handle, VarMultimap> _inference_history;
-
 	TargetSet _targets_set;
 	std::vector<Rule> _rules_set;
 

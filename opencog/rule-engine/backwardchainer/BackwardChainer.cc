@@ -62,9 +62,7 @@ void BackwardChainer::set_target(Handle init_target)
 {
 	_init_target = init_target;
 
-	_inference_history.clear();
 	_targets_set.clear();
-
 	_targets_set.emplace(_init_target);
 }
 
@@ -109,8 +107,6 @@ void BackwardChainer::do_step()
 		logger().debug("[BackwardChainer] Target is 'Variable Fullfillment Query'");
 
 	process_target(selected_target);
-
-	_inference_history[selected_target.get_handle()] = selected_target.get_varmap();
 
 	// clear out the _garbage space since the stuff inside shouldn't be needed
 	// for the next step
