@@ -68,9 +68,3 @@
          (cBC (cog-stv-confidence BC)))
       (if (and (>= sAB 0.5) (>= cAB 0.5) (>= sBC 0.5) (>= cBC 0.5))
           (cog-set-tv! AC (stv 1 1)))))
-
-; Useful to set this rule as a member of a rule base
-(EquivalenceLink
-   (Node "crisp-rule-base-deduction-rule")
-   crisp-deduction
-)

@@ -72,20 +72,6 @@ private:
 	// system (i.e. rules members of that system).
 	HandleSeq fetch_rules(Handle rbs);
 
-	// Given <label> in
-	//
-	// EquivalenceLink
-	//    <label>
-	//    <body>
-	//
-	// Return <body>
-	//
-	// Normally this would be using DefineLink, but till it is not
-	// fully supported we're using EquivalenceLink instead
-	//
-	// TODO: this could be moved in a utility library
-	Handle fetch_definition(Handle label);
-
 	// Given <schema> and <input> in
 	//
 	// ExecutionLink
