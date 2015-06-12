@@ -32,7 +32,7 @@ using namespace opencog;
  * @param ext_vars  a VariableList of external variables that typed variables can map to
  */
 UnifyPMCB::UnifyPMCB(AtomSpace* as, VariableListPtr ext_vars)
-    : BackwardChainerPMCB(as), _ext_vars(ext_vars)
+    : BackwardChainerPMCB(as, false), _ext_vars(ext_vars)
 {
 
 }
@@ -71,8 +71,6 @@ bool UnifyPMCB::grounding(const std::map<Handle, Handle> &var_soln,
 			else
 				true_var_soln[p.first] = p.second;
 		}
-		else if (p.second->getType() == VARIABLE_NODE)
-			true_var_soln[p.second] = p.first;
 	}
 
 	// store the variable solution

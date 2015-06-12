@@ -26,9 +26,8 @@
 
 using namespace opencog;
 
-BackwardChainerPMCB::BackwardChainerPMCB(AtomSpace * as)
-    : InitiateSearchCB(as), DefaultPatternMatchCB(as), as_(as)
- // : Implicator(as), DefaultPatternMatchCB(as), AttentionalFocusCB(as), PLNImplicator(as), as_(as)
+BackwardChainerPMCB::BackwardChainerPMCB(AtomSpace* as, bool reverse)
+    : InitiateSearchCB(as), DefaultPatternMatchCB(as), as_(as), _reverse_node_match(reverse)
 {
 }
 
@@ -67,6 +66,9 @@ bool BackwardChainerPMCB::node_match(const Handle& npat_h, const Handle& nsoln_h
 	if (npat_h == nsoln_h)
 		return true;
 
+	if (not _reverse_node_match)
+		return false;
+
 	// if npat_h itself is a VariableNode, then this means it is QuoteLink-ed
 	// in this case we don't want other VariableNode to map to it, since
 	// the purpose was for npat_h to match to itself
@@ -92,7 +94,7 @@ bool BackwardChainerPMCB::grounding(const std::map<Handle, Handle> &var_soln,
 		if (_variables->varset.count(p.first) == 1)
 			true_var_soln[p.first] = p.second;
 		else if (p.second->getType() == VARIABLE_NODE)
-			true_var_soln[p.second] = p.first;
+			true_var_soln[p.first] = p.second;
 	}
 
 	if (true_var_soln.size() == 0)
