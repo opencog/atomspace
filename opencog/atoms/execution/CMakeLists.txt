@@ -34,5 +34,6 @@ INSTALL (FILES
 	EvaluationLink.h
 	ExecutionOutputLink.h
 	Instantiator.h
+	ExecSCM.h
 	DESTINATION "include/${PROJECT_NAME}/atoms/execution"
 )
