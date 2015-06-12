@@ -55,12 +55,12 @@ void DefaultForwardChainerCBUTest::test_choose_rule(void)
     logger().setPrintToStdoutFlag(true);
     logger().setLevel(Logger::DEBUG);
 
-    //XXX PATH IS NOT WORKING, HECK! TEST SHOULD PASS WHEN THIS IS SOLVED.
-    JsonicControlPolicyParamLoader jscp(as,
-                                        "tests/rule-engine/bc_cpolicy_2.json");
-    jscp.load_config();
+    // //XXX PATH IS NOT WORKING, HECK! TEST SHOULD PASS WHEN THIS IS SOLVED.
+    // JsonicControlPolicyParamLoader jscp(as,
+    //                                     "tests/rule-engine/bc_cpolicy_2.json");
+    // jscp.load_config();
     FCMemory fcmem(as);
-    fcmem.set_rules(jscp.get_rules());
+    // fcmem.set_rules(jscp.get_rules());
     TS_ASSERT_EQUALS(2, fcmem.get_rules().size());
     Handle h = eval->eval_h(
             "(InheritanceLink (ConceptNode \"cat\")(ConceptNode \"animal\"))");

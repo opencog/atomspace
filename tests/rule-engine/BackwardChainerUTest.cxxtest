@@ -120,13 +120,13 @@ void BackwardChainerUTest::test_filter_rules()
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// load 2 rules
-	JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as_, "tests/rule-engine/bc_cpolicy_2.json"));
-	cpolicy_loader.load_config();
+	// JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as_, "tests/rule-engine/bc_cpolicy_2.json"));
+	// cpolicy_loader.load_config();
 
 	std::vector<Rule> rules;
 
-	for (Rule* pr : cpolicy_loader.get_rules())
-		rules.push_back(*pr);
+	// for (Rule* pr : cpolicy_loader.get_rules())
+	// 	rules.push_back(*pr);
 
 	BackwardChainer bc(as_, rules);
 
@@ -183,12 +183,12 @@ void BackwardChainerUTest::test_1rule_bc()
 	load_scm_files_from_config(*as_);
 
 	// load 1 modus ponens rules
-	JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as_, "tests/rule-engine/bc_cpolicy_1.json"));
-	cpolicy_loader.load_config();
+	// JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as_, "tests/rule-engine/bc_cpolicy_1.json"));
+	// cpolicy_loader.load_config();
 
 	std::vector<Rule> rules;
-	for (Rule* pr : cpolicy_loader.get_rules())
-		rules.push_back(*pr);
+	// for (Rule* pr : cpolicy_loader.get_rules())
+	// 	rules.push_back(*pr);
 
 	BackwardChainer bc(as_, rules);
 
@@ -219,12 +219,12 @@ void BackwardChainerUTest::test_2rules_bc()
 	load_scm_files_from_config(*as_);
 
 	// load modus ponens & deduction rules
-	JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as_, "tests/rule-engine/bc_cpolicy_2.json"));
-	cpolicy_loader.load_config();
+	// JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as_, "tests/rule-engine/bc_cpolicy_2.json"));
+	// cpolicy_loader.load_config();
 
 	std::vector<Rule> rules;
-	for (Rule* pr : cpolicy_loader.get_rules())
-		rules.push_back(*pr);
+	// for (Rule* pr : cpolicy_loader.get_rules())
+	// 	rules.push_back(*pr);
 
 	BackwardChainer bc(as_, rules);
 
