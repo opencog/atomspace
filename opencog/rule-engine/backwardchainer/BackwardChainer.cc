@@ -149,14 +149,14 @@ void BackwardChainer::process_target(Target& target)
 		std::vector<VarMap> kb_vmap;
 
 		HandleSeq kb_match = match_knowledge_base(htarget, Handle::UNDEFINED,
-												  false, kb_vmap);
+		                                          false, kb_vmap);
 
 		// Matched something in the knowledge base? Then need to store
 		// any grounding as a possible solution for this target
 		if (not kb_match.empty())
 		{
 			logger().debug("[BackwardChainer] Matched something in knowledge base, "
-						   "storing the grounding");
+			               "storing the grounding");
 
 			for (size_t i = 0; i < kb_match.size(); ++i)
 			{
@@ -164,7 +164,7 @@ void BackwardChainer::process_target(Target& target)
 				VarMap& vgm = kb_vmap[i];
 
 				logger().debug("[BackwardChainer] Looking at grounding "
-							   + soln->toShortString());
+				               + soln->toShortString());
 
 				// Check if there is any free variables in soln
 				HandleSeq free_vars = get_free_vars_in_tree(soln);
@@ -246,8 +246,8 @@ void BackwardChainer::process_target(Target& target)
 	VarMap implicand_normal_mapping = rand_element(all_implicand_to_target_mappings);
 	for (auto& p : implicand_normal_mapping)
 		logger().debug("[BackwardChainer] Chosen mapping is "
-					   + p.first->toShortString()
-					   + " to " + p.second->toShortString());
+		               + p.first->toShortString()
+		               + " to " + p.second->toShortString());
 
 	// Reverse ground the implicant with the grounding we found from
 	// unifying the implicand
@@ -256,7 +256,7 @@ void BackwardChainer::process_target(Target& target)
 	Handle hrule_implicant_normal_grounded = subt.substitute(hrule_implicant, implicand_normal_mapping);
 
 	logger().debug("[BackwardChainer] Reverse grounded as "
-				   + hrule_implicant_normal_grounded->toShortString());
+	               + hrule_implicant_normal_grounded->toShortString());
 
 	// Find all matching premises matching the implicant, where premises_vmap_list
 	// will be the mapping from free variables in himplicant to stuff in a premise
@@ -290,7 +290,7 @@ void BackwardChainer::process_target(Target& target)
 		Handle hrule_implicant_quoted_grounded = subt.substitute(hrule_implicant, implicand_quoted_mapping);
 
 		logger().debug("[BackwardChainer] Alternative reverse grounded as "
-					   + hrule_implicant_quoted_grounded->toShortString());
+		               + hrule_implicant_quoted_grounded->toShortString());
 
 		HandleSeq possible_premises_alt =
 			match_knowledge_base(hrule_implicant_quoted_grounded,
@@ -299,10 +299,10 @@ void BackwardChainer::process_target(Target& target)
 
 		// collect the possible premises from the two verions of mapping
 		possible_premises.insert(possible_premises.end(),
-								 possible_premises_alt.begin(),
-								 possible_premises_alt.end());
+		                         possible_premises_alt.begin(),
+		                         possible_premises_alt.end());
 		premises_vmap_list.insert(premises_vmap_list.end(), premises_vmap_list_alt.begin(),
-						 premises_vmap_list_alt.end());
+		                          premises_vmap_list_alt.end());
 	}
 
 	// XXX TODO what to do when no possible premise?  shouldn't we then backward chain

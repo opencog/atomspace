@@ -193,7 +193,7 @@ void BackwardChainerUTest::test_1rule_bc()
 	Handle soln = eval_->eval_h("(ConceptNode \"Fritz\")");
 
 	bc.set_target(target);
-	bc.do_until(10);
+	bc.do_until(100);
 
 	VarMultimap results = bc.get_chaining_result();
 
@@ -226,7 +226,7 @@ void BackwardChainerUTest::test_2rules_bc()
 	Handle soln = eval_->eval_h("(ConceptNode \"West\")");
 
 	bc.set_target(target);
-	bc.do_until(100);
+	bc.do_until(300);
 
 	VarMultimap results = bc.get_chaining_result();
 
@@ -257,7 +257,7 @@ void BackwardChainerUTest::test_tvq_bc()
 					  "   (ConceptNode \"green\"))");
 
 	bc.set_target(target);
-	bc.do_until(10);
+	bc.do_until(100);
 
 	TSM_ASSERT("Incorrect strength after BC!", target->getTruthValue()->getMean() > 0.9f);
 	TSM_ASSERT("Incorrect confidence after BC!", target->getTruthValue()->getConfidence() > 0.9f);
