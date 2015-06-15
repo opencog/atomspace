@@ -27,6 +27,8 @@
 
 #include <opencog/rule-engine/Rule.h>
 
+#include "Target.h"
+
 class BackwardChainerUTest;
 
 namespace opencog
@@ -61,22 +63,6 @@ typedef std::map<Handle, Handle> VarMap;
  *    fill $X we will use fitness value measure to choose the best
  *    other compound example is what breathes and adds ANDLink
  *    InheritanceLink $X Breath InheritanceLink $X adds
- *
- * Anatomy of a single inferene
- * ============================
- * A single inference step may be viewed as follows
- *
- * 1. Choose inference Rule R and a tuple of Atoms that collectively
- *    match the input condition of the rule
- *
- * 2. Apply choosen rule R to the chosen input Atoms
- *
- * 3. Create an ExecutionLink recording the output found
- *
- * 4. In addition to retaining this ExecutionLink in the Atomspace,
- *    also save the copy of it in the InferenceRepository (this is not
- *    needed for the very first implementation, but will be very
- *    useful once PLN is in regular use.)
  *
  * Anatomy of current implementation
  * =================================
@@ -114,14 +100,14 @@ public:
 	void do_until(uint max_steps);
 	void do_step();
 
-	VarMultimap& get_chaining_result();
+	const VarMultimap& get_chaining_result();
 
 private:
 
-	VarMultimap process_target(Handle& htarget);
+	void process_target(Target& target);
 
-	std::vector<Rule> filter_rules(Handle htarget);
-	Rule select_rule(const std::vector<Rule>& rules);
+	std::vector<Rule> filter_rules(const Target& target);
+	Rule select_rule(Target& target, const std::vector<Rule>& rules);
 
 	HandleSeq match_knowledge_base(const Handle& htarget,
 	                               Handle htarget_vardecl,
@@ -129,21 +115,16 @@ private:
 	                               std::vector<VarMap>& vmap);
 	HandleSeq ground_premises(const Handle& htarget, const VarMap& vmap, std::vector<VarMap>& vmap_list);
 	bool unify(const Handle& hsource, const Handle& hmatch,
-	           Handle hsource_vardecl, VarMap& result);
+	           Handle hsource_vardecl, Handle hmatch_vardecl, VarMap& result);
 
-	Handle gen_sub_varlist(const Handle& parent_varlist,
-	                       std::set<Handle> varset);
+	Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist,
+	                       std::set<Handle> additional_free_varset);
 
 	AtomSpace* _as;
 	AtomSpace* _garbage_superspace;
 	Handle _init_target;
 
-	// a map of a premise, to a map of its variables mapping
-	map<Handle, VarMultimap> _inference_history;
-
-	// XXX TODO add information to each target stating what rules were applied
-	// and how often the target was chosen?
-	UnorderedHandleSet _targets_set;
+	TargetSet _targets_set;
 	std::vector<Rule> _rules_set;
 
 	// XXX any additional link should be reflected
