@@ -1,6 +1,12 @@
 
 #include "AtomSpace_CWrapper.h"
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/TruthValue.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/CountTruthValue.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
+#include <opencog/atomspace/FuzzyTruthValue.h>
+#include <opencog/atomspace/ProbabilisticTruthValue.h>
 
 AtomSpace* AtomSpace_new()
 {
@@ -69,3 +75,43 @@ void AtomSpace_debug( AtomSpace* this_ptr )
     std::cerr<<(*this_ptr);
 }
 
+int AtomSpace_getTruthValue( AtomSpace* this_ptr
+                           , long handle
+                           , double *parameters )
+{
+    Handle h(handle);
+    TruthValuePtr tv = h->getTruthValue();
+    switch(tv->getType())
+    {
+        case SIMPLE_TRUTH_VALUE: {
+            parameters[0]=tv->getMean();
+            parameters[1]=tv->getConfidence();
+            break; }
+        case COUNT_TRUTH_VALUE: {
+            parameters[0]=tv->getMean();
+            parameters[1]=tv->getCount();
+            parameters[2]=tv->getConfidence();
+            break; }
+        case INDEFINITE_TRUTH_VALUE: {
+            IndefiniteTruthValuePtr itv =
+                std::dynamic_pointer_cast<IndefiniteTruthValue>(tv);
+            parameters[0]=itv->getMean();
+            parameters[1]=itv->getL();
+            parameters[2]=itv->getU();
+            parameters[3]=itv->getConfidenceLevel();
+            parameters[4]=itv->getDiff();
+            break; }
+        case FUZZY_TRUTH_VALUE: {
+            parameters[0]=tv->getMean();
+            parameters[1]=tv->getConfidence();
+            break; }
+        case PROBABILISTIC_TRUTH_VALUE: {
+            parameters[0]=tv->getMean();
+            parameters[1]=tv->getCount();
+            parameters[2]=tv->getConfidence();
+            break; }
+        default:
+            break;
+    }
+    return tv->getType();
+}

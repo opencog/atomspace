@@ -27,5 +27,9 @@ extern "C"
     int AtomSpace_removeAtom( AtomSpace* this_ptr
                             , long handle );
     void AtomSpace_debug( AtomSpace* this_ptr );
+
+    int AtomSpace_getTruthValue( AtomSpace* this_ptr
+                                , long handle
+                                , double* parameters );
 }
 

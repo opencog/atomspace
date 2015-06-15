@@ -6,6 +6,8 @@ module OpenCog.AtomSpace.Internal (
     , AtomRaw(..)
     , toRaw
     , fromRaw
+    , TVTypeEnum(..)
+    , tvMAX_PARAMS
     ) where
 
 import Foreign.C.Types              (CULong(..))
@@ -44,3 +46,16 @@ fromRaw raw orig = case (raw,orig) of
         Just $ List lnew
     _                                               -> Nothing -- undefined
 
+--Constant with the maximum number of parameters in any type of TV.
+tvMAX_PARAMS :: Int
+tvMAX_PARAMS = 5
+
+--TV enum type to work with TruthValueTypes from
+-- <opencog/atomspace/TruthValue.h> definition.
+data TVTypeEnum = NULL_TRUTH_VALUE
+                | SIMPLE_TRUTH_VALUE
+                | COUNT_TRUTH_VALUE
+                | INDEFINITE_TRUTH_VALUE
+                | FUZZY_TRUTH_VALUE
+                | PROBABILISTIC_TRUTH_VALUE
+    deriving Enum

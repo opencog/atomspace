@@ -8,9 +8,9 @@ module OpenCog.AtomSpace.Api (
     ) where
 
 import Foreign                      (Ptr)
-import Foreign.C.Types              (CULong(..),CInt(..))
+import Foreign.C.Types              (CULong(..),CInt(..),CDouble(..))
 import Foreign.C.String             (CString,withCString)
-import Foreign.Marshal.Array        (withArray)
+import Foreign.Marshal.Array        (withArray,allocaArray,peekArray)
 import Foreign.Marshal.Utils        (toBool)
 import Foreign.Marshal.Alloc        (alloca)
 import Foreign.Storable             (peek)
@@ -18,7 +18,7 @@ import Data.Functor                 ((<$>))
 import Control.Monad.IO.Class       (liftIO)
 import OpenCog.AtomSpace.Env        (AtomSpaceRef(..),AtomSpace,getAtomSpace)
 import OpenCog.AtomSpace.Internal   (Handle,AtomType,AtomRaw(..),
-                                     toRaw,fromRaw)
+                                     toRaw,fromRaw,TVTypeEnum(..),tvMAX_PARAMS)
 import OpenCog.AtomSpace.Types      (Atom(..),AtomName(..),TruthVal(..))
 
 --------------------------------------------------------------------------------
@@ -114,10 +114,13 @@ getNodeHandle aType aName = do
 getNode :: AtomType -> AtomName -> AtomSpace (Maybe (TruthVal,Handle))
 getNode aType aName = do
     m <- getNodeHandle aType aName
-    return $ case m of
-      Nothing -> Nothing
-      Just h  -> Just (undefined,h)
-              -- TODO: After getting handler, get actual truthvalue!
+    case m of
+      Nothing -> return Nothing
+      Just h  -> do
+          mtv <- getTruthValue h
+          case mtv of
+            Nothing -> return Nothing
+            Just tv -> return $ Just (tv,h)
 
 
 foreign import ccall "AtomSpace_getLink"
@@ -145,10 +148,13 @@ getLinkHandle aType aOutgoing = do
 getLink :: AtomType -> [Handle] -> AtomSpace (Maybe (TruthVal,Handle))
 getLink aType aOutgoing = do
     m <- getLinkHandle aType aOutgoing
-    return $ case m of
-      Nothing -> Nothing
-      Just h  -> Just (undefined,h)
-              -- TODO: After getting handler, get actual truthvalue!
+    case m of
+      Nothing -> return Nothing
+      Just h  -> do
+          mtv <- getTruthValue h
+          case mtv of
+            Nothing -> return Nothing
+            Just tv -> return $ Just (tv,h)
 
 getWithHandle :: AtomRaw -> AtomSpace (Maybe (AtomRaw,Handle))
 getWithHandle i = do
@@ -187,3 +193,39 @@ get i = do
       _             -> Nothing
 
 --------------------------------------------------------------------------------
+
+foreign import ccall "AtomSpace_getTruthValue"
+  c_atomspace_getTruthValue :: AtomSpaceRef
+                            -> Handle
+                            -> Ptr CDouble
+                            -> IO CInt
+
+getTruthValue :: Handle -> AtomSpace (Maybe TruthVal)
+getTruthValue handle = do
+    asRef <- getAtomSpace
+    liftIO $ allocaArray tvMAX_PARAMS $
+      \lptr -> do
+          tvType <- c_atomspace_getTruthValue asRef handle lptr
+          case toEnum $ fromIntegral tvType of
+              SIMPLE_TRUTH_VALUE        -> do
+                  l <- peekArray 2 lptr
+                  case map realToFrac l  of
+                    (v1:v2:_) -> return $ Just $ SimpleTV v1 v2
+              COUNT_TRUTH_VALUE         -> do
+                  l <- peekArray 3 lptr
+                  case map realToFrac l of
+                    (v1:v2:v3:_) -> return $ Just $ CountTV v1 v2 v3
+              INDEFINITE_TRUTH_VALUE    -> do
+                  l <- peekArray 5 lptr
+                  case map realToFrac l of
+                    (v1:v2:v3:v4:v5:_) -> return $ Just $ IndefTV v1 v2 v3 v4 v5
+              FUZZY_TRUTH_VALUE         -> do
+                  l <- peekArray 2 lptr
+                  case map realToFrac l of
+                    (v1:v2:_) -> return $ Just $ FuzzyTV v1 v2
+              PROBABILISTIC_TRUTH_VALUE -> do
+                  l <- peekArray 3 lptr
+                  case map realToFrac l of
+                    (v1:v2:v3:_) -> return $ Just $ ProbTV v1 v2 v3
+              _                         -> return Nothing
+

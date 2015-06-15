@@ -12,9 +12,26 @@ module OpenCog.AtomSpace.Types (
 
 type AtomName = String
 
-data TruthVal = SimpleTruthVal Double Double
-              | CountTruthVal Double Double Double
-              | IndefiniteTruthVal Double Double Double Double
+data TruthVal = SimpleTV { tvMean       :: Double
+                         , tvConfidence :: Double
+                         }
+              | CountTV { tvMean       :: Double
+                        , tvCount      :: Double
+                        , tvConfidence :: Double
+                        }
+              | IndefTV { tvMean      :: Double
+                        , tvL         :: Double
+                        , tvU         :: Double
+                        , tvConfLevel :: Double
+                        , tvDiff      :: Double
+                        }
+              | FuzzyTV { tvMean       :: Double
+                        , tvConfidence :: Double
+                        }
+              | ProbTV { tvMean       :: Double
+                       , tvCount      :: Double
+                       , tvConfidence :: Double
+                       }
     deriving Show
 
 data TConceptNode
