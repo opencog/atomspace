@@ -36,9 +36,8 @@ class BackwardChainerPMCB :
 {
 protected:
 	AtomSpace* _as;
-	bool _reverse_node_match;
-
 	VariableListPtr _int_vars;
+	bool _reverse_node_match;
 
 	std::vector<std::map<Handle, Handle>> var_solns_;
 	std::vector<std::map<Handle, Handle>> pred_solns_;
