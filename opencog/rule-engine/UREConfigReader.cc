@@ -34,12 +34,11 @@ const std::string UREConfigReader::max_iter_name = "URE:maximum-iterations";
 
 UREConfigReader::UREConfigReader(AtomSpace& as, Handle rbs) : _as(as)
 {
-	// Retrieve rule names and instantiate them
-	for (Handle rn : fetch_rules(rbs)) {
-		// Build rule and store it
-		Handle rule_h = fetch_definition(rn);
-		_rbparams.rules.emplace_back(rule_h);
-	}
+	// Retrieve the rules (BindLinks) and instantiate them
+	// HandleSeq rules = fetch_rules(rbs);
+	// _rbparams.rules.insert(rules.begin(), rules.end());
+	for (Handle rule : fetch_rules(rbs))
+		_rbparams.rules.emplace_back(rule);
 
 	// Fetch maximum number of iterations
 	_rbparams.max_iter = fetch_num_param(max_iter_name, rbs);
@@ -85,17 +84,7 @@ HandleSeq UREConfigReader::fetch_rules(Handle rbs)
 	return LinkCast(rule_names)->getOutgoingSet();
 }
 
-Handle UREConfigReader::fetch_definition(Handle label)
-{
-	HandleSeq defines;
-	label->getIncomingSetByType(back_inserter(defines), EQUIVALENCE_LINK);
-	OC_ASSERT(defines.size() == 1, "There should be only one definition");
-	// The following line is disabled till DefineLink is fully supported
-	// return Handle(DefineLinkCast(defines.front())->get_definition());
-	return LinkCast(defines.front())->getOutgoingAtom(1);
-}
-
-Handle UREConfigReader::fetch_execution_output(Handle schema, Handle input)
+HandleSeq UREConfigReader::fetch_execution_outputs(Handle schema, Handle input)
 {
 	// Retrieve rules
 	Handle output_var = _as.addNode(VARIABLE_NODE, "__EXECUTION_OUTPUT_VAR__");
@@ -113,17 +102,30 @@ Handle UREConfigReader::fetch_execution_output(Handle schema, Handle input)
 	// Remove the GetLink from the AtomSpace as it is no longer useful
 	_as.removeAtom(gl);
 
-	HandleSeq outputs_hs = LinkCast(outputs)->getOutgoingSet();
-	OC_ASSERT(outputs_hs.size() == 1, "There should be only one output");
-	
-	return outputs_hs.front();
+	return LinkCast(outputs)->getOutgoingSet();
 }
 
 double UREConfigReader::fetch_num_param(const string& schema_name, Handle input)
 {
 	Handle param_schema = _as.addNode(SCHEMA_NODE, schema_name);
-	Handle output_h = fetch_execution_output(param_schema, input);
-	return NumberNodeCast(output_h)->getValue();
+	HandleSeq outputs = fetch_execution_outputs(param_schema, input);
+	{
+		string input_name = NodeCast(input)->getName();
+		Type input_type = input->getType();
+		string input_str =
+			classserver().getTypeName(input_type) + " \"" + input_name + "\"";
+		OC_ASSERT(outputs.size() == 1,
+		          "Could not retrieve parameter %s for rule-based system %s. "
+		          "There should be one and only one output for\n"
+		          "ExecutionLink\n"
+		          "   SchemaNode \"%s\"\n"
+		          "   %s\n"
+		          "   <N>\n"
+		          "instead there are %u",
+		          schema_name.c_str(), input_name.c_str(),
+		          schema_name.c_str(), input_str.c_str(), outputs.size());
+	}
+	return NumberNodeCast(outputs.front())->getValue();
 }
 
 bool UREConfigReader::fetch_bool_param(const string& pred_name, Handle input)

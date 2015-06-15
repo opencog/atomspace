@@ -36,11 +36,9 @@
 
 using namespace opencog;
 
-BackwardChainer::BackwardChainer(AtomSpace* as, std::vector<Rule> rs)
-    : _as(as)
+BackwardChainer::BackwardChainer(AtomSpace* as, const std::vector<Rule>& rs)
+	: _as(as), _rules_set(rs)
 {
-	_rules_set = rs;
-
 	// create a garbage superspace with _as as parent, so codes acting on
 	// _garbage will see stuff in _as, but codes acting on _as will not
 	// see stuff in _garbage

@@ -45,6 +45,7 @@ class UREConfigReader
 {
 public:
 	// Ctor
+
 	// rbs is a Handle pointing to a rule-based system is as
 	UREConfigReader(AtomSpace& as, Handle rbs);
 
@@ -72,19 +73,15 @@ private:
 	// system (i.e. rules members of that system).
 	HandleSeq fetch_rules(Handle rbs);
 
-	// Given <label> in
-	//
-	// EquivalenceLink
-	//    <label>
-	//    <body>
-	//
-	// Return <body>
-	//
-	// Normally this would be using DefineLink, but till it is not
-	// fully supported we're using EquivalenceLink instead
-	//
-	// TODO: this could be moved in a utility library
-	Handle fetch_definition(Handle label);
+	AtomSpace& _as;
+
+	class RuleBaseParameters {
+	public:
+		std::vector<Rule> rules;
+		bool attention_alloc;
+		int max_iter;
+	};
+	RuleBaseParameters _rbparams;
 
 	// Given <schema> and <input> in
 	//
@@ -94,9 +91,7 @@ private:
 	//    <output>
 	//
 	// Return <output>
-	//
-	// TODO: this could be moved in a utility library
-	Handle fetch_execution_output(Handle schema, Handle input);
+	HandleSeq fetch_execution_outputs(Handle schema, Handle input);
 
 	// Similar to above but takes instead the schema name instead of
 	// the schema Handle, assumes that output value is a NumberNode,
@@ -120,16 +115,6 @@ private:
 	//
 	// Return TV.mean > 0.5
 	bool fetch_bool_param(const std::string& pred_name, Handle input);
-	
-	AtomSpace& _as;
-
-	class RuleBaseParameters {
-	public:
-		std::vector<Rule> rules;
-		bool attention_alloc;
-		int max_iter;
-	};
-	RuleBaseParameters _rbparams;
 };
 
 } // ~namespace opencog

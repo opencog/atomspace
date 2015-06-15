@@ -17,23 +17,16 @@ using namespace opencog;
 class BackwardChainerUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace *as_;
-	SchemeEval* eval_;
+	AtomSpace as_;
+	SchemeEval eval_;
+	Handle rbs1_, rbs2_;
 	BackwardChainer * bc_;
 
 public:
-	BackwardChainerUTest()
+	BackwardChainerUTest() : eval_(&as_)
 	{
 		logger().setLevel(Logger::DEBUG);
 		logger().setPrintToStdoutFlag(true);
-
-		as_ = new AtomSpace();
-		eval_ = new SchemeEval(as_);
-	}
-
-	~BackwardChainerUTest()
-	{
-		delete eval_;
 	}
 
 	void setUp();
@@ -53,14 +46,22 @@ void BackwardChainerUTest::setUp()
 	config().set("SCM_PRELOAD",
 	             "opencog/atomspace/core_types.scm, "
 	             "opencog/scm/utilities.scm, "
-	             "opencog/scm/av-tv.scm"
-	             );
-	load_scm_files_from_config(*as_);
+	             "opencog/scm/av-tv.scm");
+	load_scm_files_from_config(as_);
+
+	// Load PLN-utest-1 and PLN-utest-2 rule-based systems
+	eval_.eval("(load-from-path \"" PROJECT_SOURCE_DIR
+	           "/tests/rule-engine/bc-cpolicy-1.scm\")");
+	rbs1_ = as_.getNode(CONCEPT_NODE, "PLN-utest-1");
+
+	eval_.eval("(load-from-path \"" PROJECT_SOURCE_DIR
+	           "/tests/rule-engine/bc-cpolicy-2.scm\")");
+	rbs2_ = as_.getNode(CONCEPT_NODE, "PLN-utest-2");
 }
 
 void BackwardChainerUTest::tearDown()
 {
-	as_->clear();
+	as_.clear();
 }
 /*
 void BackwardChainerUTest::test_unify()
@@ -68,14 +69,14 @@ void BackwardChainerUTest::test_unify()
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// empty BackwardChainer without rules
-	BackwardChainer bc(as_, std::vector<Rule>());
+	BackwardChainer bc(&as_, std::vector<Rule>());
 
-	Handle x = as_->addNode(VARIABLE_NODE, "$x"),
-		y = as_->addNode(VARIABLE_NODE, "$y"),
-		z = as_->addNode(VARIABLE_NODE, "$z"),
-		west = as_->addNode(CONCEPT_NODE, "west"),
-		a = as_->addNode(VARIABLE_NODE, "$a"),
-		nono = as_->addNode(CONCEPT_NODE, "nono");
+	Handle x = as_.addNode(VARIABLE_NODE, "$x"),
+		y = as_.addNode(VARIABLE_NODE, "$y"),
+		z = as_.addNode(VARIABLE_NODE, "$z"),
+		west = as_.addNode(CONCEPT_NODE, "west"),
+		a = as_.addNode(VARIABLE_NODE, "$a"),
+		nono = as_.addNode(CONCEPT_NODE, "nono");
 
 	string target =
 		"(EvaluationLink"
@@ -84,7 +85,7 @@ void BackwardChainerUTest::test_unify()
 		"        (VariableNode \"$x\")"
 		"        (VariableNode \"$y\")"
 		"        (VariableNode \"$z\")))";
-	Handle htarget = eval_->eval_h(target);
+	Handle htarget = eval_.eval_h(target);
 
 	string match =
 		"(EvaluationLink"
@@ -94,7 +95,7 @@ void BackwardChainerUTest::test_unify()
 		"        (VariableNode \"$a\")"
 		"        (ConceptNode \"nono\")))";
 
-	Handle hmatch = eval_->eval_h(match);
+	Handle hmatch = eval_.eval_h(match);
 	VarMap result;
 	bc.unify(htarget, hmatch, Handle::UNDEFINED, result);
 
@@ -115,16 +116,12 @@ void BackwardChainerUTest::test_filter_rules()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	// load 2 rules
-	JsonicControlPolicyParamLoader cpolicy_loader(JsonicControlPolicyParamLoader(as_, "tests/rule-engine/bc_cpolicy_2.json"));
-	cpolicy_loader.load_config();
+	// load PLN-utest-2 rule-based system
+	UREConfigReader cr2(as_, rbs2_);
+	std::vector<Rule> rules(cr2.get_rules());
 
-	std::vector<Rule> rules;
 
-	for (Rule* pr : cpolicy_loader.get_rules())
-		rules.push_back(*pr);
-
-	BackwardChainer bc(as_, rules);
+	BackwardChainer bc(&as_, rules);
 
 	string kb_imp_str =
 		"(ImplicationLink (stv .99 .99)"
@@ -147,10 +144,10 @@ void BackwardChainerUTest::test_filter_rules()
 		"    (InheritanceLink"
 		"        (VariableNode \"$x\")"
 		"        (ConceptNode \"criminal\")))";
-	Handle kb_imp = eval_->eval_h(kb_imp_str);
+	Handle kb_imp = eval_.eval_h(kb_imp_str);
 
 	Handle target =
-		eval_->eval_h("(InheritanceLink"
+		eval_.eval_h("(InheritanceLink"
 		              "    (VariableNode \"$x\")"
 		              "    (ConceptNode \"criminal\"))");
 
@@ -177,28 +174,30 @@ void BackwardChainerUTest::test_1rule_bc()
 	config().set("SCM_PRELOAD",
 	             "tests/rule-engine/bc-config-1.scm,"
 	             "tests/rule-engine/bc-example.scm");
-	load_scm_files_from_config(*as_);
+	load_scm_files_from_config(as_);
 
 	// load 1 modus ponens rule
-	Handle top_rbs = as_->addNode(CONCEPT_NODE, UREConfigReader::URE_top_name);
-	UREConfigReader config_reader(*as_, top_rbs);
+	Handle top_rbs = as_.getNode(CONCEPT_NODE, UREConfigReader::URE_top_name);
+	UREConfigReader config_reader(as_, top_rbs);
 
-	BackwardChainer bc(as_, config_reader.get_rules());
+	BackwardChainer bc(&as_, config_reader.get_rules());
 
-	Handle target_var = eval_->eval_h("(VariableNode \"$Z\")");
+	Handle target_var = eval_.eval_h("(VariableNode \"$Z\")");
 	Handle target =
-	    eval_->eval_h("(InheritanceLink"
+	    eval_.eval_h("(InheritanceLink"
 	                  "   (VariableNode \"$Z\")"
 					  "   (ConceptNode \"green\"))");
-	Handle soln = eval_->eval_h("(ConceptNode \"Fritz\")");
+	Handle soln = eval_.eval_h("(ConceptNode \"Fritz\")");
 
 	bc.set_target(target);
 	bc.do_until(100);
 
 	VarMultimap results = bc.get_chaining_result();
 
-	TSM_ASSERT("Incorrect number of solution found!", results[target_var].size() == 1);
-	TSM_ASSERT("Getting incorrect solution!", results[target_var].count(soln) == 1);
+	TSM_ASSERT("Incorrect number of solution found!",
+	           results[target_var].size() == 1);
+	TSM_ASSERT("Getting incorrect solution!",
+	           results[target_var].count(soln) == 1);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -210,28 +209,30 @@ void BackwardChainerUTest::test_2rules_bc()
 	config().set("SCM_PRELOAD",
 	             "tests/rule-engine/bc-config-2.scm,"
 	             "tests/rule-engine/bc-criminal.scm");
-	load_scm_files_from_config(*as_);
+	load_scm_files_from_config(as_);
 
 	// load modus ponens & deduction rules
-	Handle top_rbs = as_->addNode(CONCEPT_NODE, UREConfigReader::URE_top_name);
-	UREConfigReader config_reader(*as_, top_rbs);
+	Handle top_rbs = as_.getNode(CONCEPT_NODE, UREConfigReader::URE_top_name);
+	UREConfigReader config_reader(as_, top_rbs);
 
-	BackwardChainer bc(as_, config_reader.get_rules());
+	BackwardChainer bc(&as_, config_reader.get_rules());
 
-	Handle target_var = eval_->eval_h("(VariableNode \"$x\")");
+	Handle target_var = eval_.eval_h("(VariableNode \"$x\")");
 	Handle target =
-	    eval_->eval_h("(InheritanceLink"
+	    eval_.eval_h("(InheritanceLink"
 	                  "   (VariableNode \"$x\")"
 					  "   (ConceptNode \"criminal\"))");
-	Handle soln = eval_->eval_h("(ConceptNode \"West\")");
+	Handle soln = eval_.eval_h("(ConceptNode \"West\")");
 
 	bc.set_target(target);
 	bc.do_until(300);
 
 	VarMultimap results = bc.get_chaining_result();
 
-	TSM_ASSERT("Incorrect number of solution found!", results[target_var].size() == 1);
-	TSM_ASSERT("Getting incorrect solution!", results[target_var].count(soln) == 1);
+	TSM_ASSERT("Incorrect number of solution found!",
+	           results[target_var].size() == 1);
+	TSM_ASSERT("Getting incorrect solution!",
+	           results[target_var].count(soln) == 1);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -243,24 +244,26 @@ void BackwardChainerUTest::test_tvq_bc()
 	config().set("SCM_PRELOAD",
 	             "tests/rule-engine/bc-config-1.scm,"
 	             "tests/rule-engine/bc-example.scm");
-	load_scm_files_from_config(*as_);
+	load_scm_files_from_config(as_);
 
 	// load modus ponens
-	Handle top_rbs = as_->addNode(CONCEPT_NODE, UREConfigReader::URE_top_name);
-	UREConfigReader config_reader(*as_, top_rbs);
+	Handle top_rbs = as_.getNode(CONCEPT_NODE, UREConfigReader::URE_top_name);
+	UREConfigReader config_reader(as_, top_rbs);
 
-	BackwardChainer bc(as_, config_reader.get_rules());
+	BackwardChainer bc(&as_, config_reader.get_rules());
 
 	Handle target =
-	    eval_->eval_h("(InheritanceLink (stv 0.0 0.0)"
-	                  "   (ConceptNode \"Fritz\")"
-					  "   (ConceptNode \"green\"))");
+	    eval_.eval_h("(InheritanceLink (stv 0.0 0.0)"
+	                 "   (ConceptNode \"Fritz\")"
+	                 "   (ConceptNode \"green\"))");
 
 	bc.set_target(target);
 	bc.do_until(100);
 
-	TSM_ASSERT("Incorrect strength after BC!", target->getTruthValue()->getMean() > 0.9f);
-	TSM_ASSERT("Incorrect confidence after BC!", target->getTruthValue()->getConfidence() > 0.9f);
+	TSM_ASSERT("Incorrect strength after BC!",
+	           target->getTruthValue()->getMean() > 0.9f);
+	TSM_ASSERT("Incorrect confidence after BC!",
+	           target->getTruthValue()->getConfidence() > 0.9f);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

@@ -92,7 +92,7 @@ class BackwardChainer
     friend class ::BackwardChainerUTest;
 
 public:
-	BackwardChainer(AtomSpace* as, std::vector<Rule>);
+	BackwardChainer(AtomSpace* as, const std::vector<Rule>&);
 	~BackwardChainer();
 
 	void set_target(Handle init_target);
