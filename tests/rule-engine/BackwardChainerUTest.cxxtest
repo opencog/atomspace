@@ -53,10 +53,6 @@ void BackwardChainerUTest::setUp()
 	             "opencog/scm/av-tv.scm");
 	load_scm_files_from_config(as_);
 
-	// Load utilities.scm and av-tv.scm
-	eval_.eval("(load-from-path \"" PROJECT_SOURCE_DIR
-	           "/tests/rule-engine/bc-cpolicy-1.scm\")");
-
 	// Load PLN-utest-1 and PLN-utest-2 rule-based systems
 	eval_.eval("(load-from-path \"" PROJECT_SOURCE_DIR
 	           "/tests/rule-engine/bc-cpolicy-1.scm\")");
