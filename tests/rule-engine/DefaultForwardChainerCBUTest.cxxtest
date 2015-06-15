@@ -4,35 +4,29 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
-#include <opencog/rule-engine/JsonicControlPolicyParamLoader.h>
 #include <opencog/rule-engine/forwardchainer/FCMemory.h>
 #include <opencog/rule-engine/URECommons.h>
+#include <opencog/rule-engine/UREConfigReader.h>
 #include <opencog/rule-engine/forwardchainer/DefaultForwardChainerCB.h>
 
 using namespace opencog;
 
 class DefaultForwardChainerCBUTest: public CxxTest::TestSuite {
 private:
-    AtomSpace* as;
-    SchemeEval* eval;
+    AtomSpace as;
+    SchemeEval eval;
+    Handle rbs2;
 
 public:
-    DefaultForwardChainerCBUTest(void)
+    DefaultForwardChainerCBUTest(void) : eval(&as)
     {
-        as = new AtomSpace();
         config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
                      "opencog/scm/utilities.scm, opencog/scm/av-tv.scm");
-        load_scm_files_from_config(*as);
+        load_scm_files_from_config(as);
 
-        eval = new SchemeEval(as);
-    }
-
-    ~DefaultForwardChainerCBUTest()
-    {
-        delete eval;
-        eval = NULL;
-        delete as;
-        as = NULL;
+        eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
+                  "/tests/rule-engine/bc-cpolicy-2.scm\")");
+        rbs2 = as.getNode(CONCEPT_NODE, "PLN-utest-2");
     }
 
     void setUp(void);
@@ -55,22 +49,20 @@ void DefaultForwardChainerCBUTest::test_choose_rule(void)
     logger().setPrintToStdoutFlag(true);
     logger().setLevel(Logger::DEBUG);
 
-    // //XXX PATH IS NOT WORKING, HECK! TEST SHOULD PASS WHEN THIS IS SOLVED.
-    // JsonicControlPolicyParamLoader jscp(as,
-    //                                     "tests/rule-engine/bc_cpolicy_2.json");
-    // jscp.load_config();
-    FCMemory fcmem(as);
-    // fcmem.set_rules(jscp.get_rules());
+    UREConfigReader cr2(as, rbs2);
+
+    FCMemory fcmem(&as);
+    fcmem.set_rules(cr2.get_rules());
     TS_ASSERT_EQUALS(2, fcmem.get_rules().size());
-    Handle h = eval->eval_h(
-            "(InheritanceLink (ConceptNode \"cat\")(ConceptNode \"animal\"))");
+    Handle h = eval.eval_h(
+	    "(InheritanceLink (ConceptNode \"cat\")(ConceptNode \"animal\"))");
     TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
     fcmem.set_source(h);
-    DefaultForwardChainerCB dfcb(as);
+    DefaultForwardChainerCB dfcb(&as);
     vector<Rule*> rule = dfcb.choose_rules(fcmem);
     TS_ASSERT_EQUALS(1, rule.size());
     HandleSeq bindlinks;
-    as->getHandlesByType(back_inserter(bindlinks), BIND_LINK);
+    as.getHandlesByType(back_inserter(bindlinks), BIND_LINK);
     auto it = find(bindlinks.begin(), bindlinks.end(), rule[0]->get_handle());
     TS_ASSERT_DIFFERS(it, bindlinks.end());
 }
@@ -78,12 +70,12 @@ void DefaultForwardChainerCBUTest::test_choose_rule(void)
 void DefaultForwardChainerCBUTest::test_choose_source(void)
 {
     config().set("SCM_PRELOAD", "tests/rule-engine/simple-assertions.scm");
-    load_scm_files_from_config(*as);
+    load_scm_files_from_config(as);
 
-    Handle source = eval->eval_h("(ConceptNode \"Einstein\")");
-    FCMemory fcmem(as);
+    Handle source = eval.eval_h("(ConceptNode \"Einstein\")");
+    FCMemory fcmem(&as);
     fcmem.set_source(source);
-    DefaultForwardChainerCB dfcb(as);
+    DefaultForwardChainerCB dfcb(&as);
     HandleSeq hs = dfcb.choose_premises(fcmem);
     TS_ASSERT(5 == hs.size());
 }
@@ -94,27 +86,26 @@ void DefaultForwardChainerCBUTest::test_apply_rule(void)
     //are a direct result of source being part of input/premise
     config().set(
             "SCM_PRELOAD",
-            "tests/rule-engine/bc-deduction.scm,tests/rule-engine/simple-assertions.scm");
-    load_scm_files_from_config(*as);
+            "tests/rule-engine/bc-deduction.scm,"
+            "tests/rule-engine/simple-assertions.scm");
+    load_scm_files_from_config(as);
 
-    Handle rule_handle = eval->eval_h("pln-rule-deduction");
+    Handle rule_handle = eval.eval_h("pln-rule-deduction");
     vector<Rule*> rules { new Rule(rule_handle) };
-    Handle source =
-            eval->eval_h(
-                    R"((ConceptNode "Socrates"))");
+    Handle source = eval.eval_h(R"((ConceptNode "Socrates"))");
 
-    FCMemory fcmem(as);
+    FCMemory fcmem(&as);
     fcmem.set_search_in_af(false);
     fcmem.set_rules(rules);
     fcmem.set_cur_rule(rules[0]);
     fcmem.set_source(source);
 
-    DefaultForwardChainerCB dfcb(as);
+    DefaultForwardChainerCB dfcb(&as);
     HandleSeq hs = dfcb.apply_rule(fcmem);
 
     TS_ASSERT_EQUALS(1,hs.size());
 
-    URECommons urec(as);
+    URECommons urec(&as);
     TS_ASSERT(urec.exists_in(hs[0],source));
 
 }
