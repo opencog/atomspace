@@ -26,8 +26,12 @@
 
 using namespace opencog;
 
-BackwardChainerPMCB::BackwardChainerPMCB(AtomSpace* as, bool reverse)
-    : InitiateSearchCB(as), DefaultPatternMatchCB(as), as_(as), _reverse_node_match(reverse)
+BackwardChainerPMCB::BackwardChainerPMCB(AtomSpace* as, VariableListPtr int_vars, bool reverse)
+    : InitiateSearchCB(as),
+      DefaultPatternMatchCB(as),
+      _as(as),
+      _int_vars(int_vars),
+      _reverse_node_match(reverse)
 {
 }
 
@@ -91,7 +95,7 @@ bool BackwardChainerPMCB::grounding(const std::map<Handle, Handle> &var_soln,
 	// get rid of non-var mapping
 	for (auto& p : var_soln)
 	{
-		if (_variables->varset.count(p.first) == 1)
+		if (_int_vars->get_variables().varset.count(p.first) == 1)
 			true_var_soln[p.first] = p.second;
 		else if (p.second->getType() == VARIABLE_NODE)
 			true_var_soln[p.first] = p.second;

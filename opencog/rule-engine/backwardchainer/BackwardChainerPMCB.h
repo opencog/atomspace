@@ -35,14 +35,16 @@ class BackwardChainerPMCB :
 	public DefaultPatternMatchCB // : public virtual PLNImplicator
 {
 protected:
-	AtomSpace* as_;
+	AtomSpace* _as;
 	bool _reverse_node_match;
+
+	VariableListPtr _int_vars;
 
 	std::vector<std::map<Handle, Handle>> var_solns_;
 	std::vector<std::map<Handle, Handle>> pred_solns_;
 
 public:
-	BackwardChainerPMCB(AtomSpace*, bool);
+	BackwardChainerPMCB(AtomSpace*, VariableListPtr, bool reverse = false);
 	virtual ~BackwardChainerPMCB();
 
 	virtual void set_pattern(const Variables& vars,

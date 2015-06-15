@@ -32,7 +32,7 @@ namespace opencog
 class UnifyPMCB : public BackwardChainerPMCB
 {
 public:
-	UnifyPMCB(AtomSpace*, VariableListPtr);
+	UnifyPMCB(AtomSpace*, VariableListPtr, VariableListPtr);
 	virtual ~UnifyPMCB();
 
 	virtual bool variable_match(const Handle&, const Handle&);

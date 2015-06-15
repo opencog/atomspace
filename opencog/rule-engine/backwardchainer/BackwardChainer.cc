@@ -505,7 +505,7 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
 	// Pattern Match on _garbage_superspace since some atoms in hpattern could
 	// be in the _garbage space
 	PatternLinkPtr sl(createPatternLink(hpattern_vardecl, hpattern));
-	BackwardChainerPMCB pmcb(_garbage_superspace, alternate_mode);
+	BackwardChainerPMCB pmcb(_garbage_superspace, VariableListCast(hpattern_vardecl), alternate_mode);
 
 	sl->satisfy(pmcb);
 
@@ -713,7 +713,7 @@ bool BackwardChainer::unify(const Handle& hsource,
 	}
 
 	PatternLinkPtr sl(createPatternLink(temp_hsource_vardecl, temp_hsource));
-	UnifyPMCB pmcb(&temp_space, VariableListCast(temp_hmatch_vardecl));
+	UnifyPMCB pmcb(&temp_space, VariableListCast(temp_hsource_vardecl), VariableListCast(temp_hmatch_vardecl));
 
 	sl->satisfy(pmcb);
 
