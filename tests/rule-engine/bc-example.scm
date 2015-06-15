@@ -1,10 +1,10 @@
-(ImplicationLink
- (AndLink
+(ImplicationLink (stv 1.0 1.0)
+ (AndLink (stv 1.0 1.0)
   (EvaluationLink 
    (PredicateNode "croaks")
    (VariableNode "$X")
   )
-  (EvaluationLink     
+  (EvaluationLink 
     (PredicateNode "eats_flies")
     (VariableNode "$X")
   )
@@ -15,8 +15,8 @@
  )
 )
 
-(ImplicationLink
- (AndLink
+(ImplicationLink (stv 1.0 1.0)
+ (AndLink (stv 1.0 1.0)
   (EvaluationLink 
    (PredicateNode "chirps")
    (VariableNode "$Y")
@@ -32,7 +32,7 @@
  )
 )
 
-(ImplicationLink
+(ImplicationLink (stv 1.0 1.0)
  (InheritanceLink 
   (VariableNode "$Z")
   (ConceptNode "Frog")
@@ -43,7 +43,7 @@
  )
 )
 
-(ImplicationLink
+(ImplicationLink (stv 1.0 1.0)
  (InheritanceLink 
   (VariableNode "$A")
   (ConceptNode "Canary")
@@ -55,27 +55,27 @@
 )
 
 ;KB
-(EvaluationLink
+(EvaluationLink (stv 1.0 1.0)
  (PredicateNode "croaks")
  (ConceptNode "Fritz")
 )
 
-(EvaluationLink
+(EvaluationLink (stv 1.0 1.0)
  (PredicateNode "chirps")
  (ConceptNode "Tweety")
 )
 
-(InheritanceLink
+(InheritanceLink (stv 1.0 1.0)
  (ConceptNode "Tweety")
- (ConceptNode "Yello")
+ (ConceptNode "yellow")
 )
 
-(EvaluationLink 
+(EvaluationLink (stv 1.0 1.0)
  (PredicateNode "eats_flies")
  (ConceptNode "Tweety")
 )
 
-(EvaluationLink 
+(EvaluationLink (stv 1.0 1.0)
  (PredicateNode "eats_flies")
  (ConceptNode "Fritz")
 )

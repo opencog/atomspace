@@ -32,17 +32,13 @@ public:
 	void setUp();
 	void tearDown();
 
-	void test_unify();
-	void test_filter_rules();
+	//void test_unify();
+	//void test_filter_rules();
 
 	void test_1rule_bc();
 	void test_2rules_bc();
 
-	// void test_match_knowledge_base();
-	// void test_simple_deduction_bc();
-
-	// TODO this should probably be replaced by test_do_full_chain
-	// void test_do_bc();
+	void test_tvq_bc();
 };
 
 void BackwardChainerUTest::setUp()
@@ -67,7 +63,7 @@ void BackwardChainerUTest::tearDown()
 {
 	as_.clear();
 }
-
+/*
 void BackwardChainerUTest::test_unify()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -170,18 +166,21 @@ void BackwardChainerUTest::test_filter_rules()
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
-
+*/
 void BackwardChainerUTest::test_1rule_bc()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	config().set("SCM_PRELOAD",
+	             "tests/rule-engine/bc-config-1.scm,"
 	             "tests/rule-engine/bc-example.scm");
 	load_scm_files_from_config(as_);
 
-	// load 1 modus ponens rules
-	UREConfigReader cr1(as_, rbs1_);
-	BackwardChainer bc(&as_, cr1.get_rules());
+	// load 1 modus ponens rule
+	Handle top_rbs = as_.getNode(CONCEPT_NODE, UREConfigReader::URE_top_name);
+	UREConfigReader config_reader(as_, top_rbs);
+
+	BackwardChainer bc(&as_, config_reader.get_rules());
 
 	Handle target_var = eval_.eval_h("(VariableNode \"$Z\")");
 	Handle target =
@@ -191,7 +190,7 @@ void BackwardChainerUTest::test_1rule_bc()
 	Handle soln = eval_.eval_h("(ConceptNode \"Fritz\")");
 
 	bc.set_target(target);
-	bc.do_until(10);
+	bc.do_until(100);
 
 	VarMultimap results = bc.get_chaining_result();
 
@@ -208,12 +207,15 @@ void BackwardChainerUTest::test_2rules_bc()
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	config().set("SCM_PRELOAD",
+	             "tests/rule-engine/bc-config-2.scm,"
 	             "tests/rule-engine/bc-criminal.scm");
 	load_scm_files_from_config(as_);
 
 	// load modus ponens & deduction rules
-	UREConfigReader cr2(as_, rbs2_);
-	BackwardChainer bc(&as_, cr2.get_rules());
+	Handle top_rbs = as_.getNode(CONCEPT_NODE, UREConfigReader::URE_top_name);
+	UREConfigReader config_reader(as_, top_rbs);
+
+	BackwardChainer bc(&as_, config_reader.get_rules());
 
 	Handle target_var = eval_.eval_h("(VariableNode \"$x\")");
 	Handle target =
@@ -223,7 +225,7 @@ void BackwardChainerUTest::test_2rules_bc()
 	Handle soln = eval_.eval_h("(ConceptNode \"West\")");
 
 	bc.set_target(target);
-	bc.do_until(100);
+	bc.do_until(300);
 
 	VarMultimap results = bc.get_chaining_result();
 
@@ -235,148 +237,33 @@ void BackwardChainerUTest::test_2rules_bc()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-// void BackwardChainerUTest::test_match_knowledge_base() {
+void BackwardChainerUTest::test_tvq_bc()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-// }
+	config().set("SCM_PRELOAD",
+	             "tests/rule-engine/bc-config-1.scm,"
+	             "tests/rule-engine/bc-example.scm");
+	load_scm_files_from_config(as_);
 
-// void BackwardChainerUTest::test_simple_deduction_bc() {
-// 	// Test simple deduction
-// 	//
-// 	// InheritanceLink A B
-// 	// InheritanceLink B C
-// 	// |-
-// 	// InheritanceLink A C
-// 	Handle A = eval_.eval_h("(ConceptNode \"A\" (stv 0.2 0.9))"),
-// 		B = eval_.eval_h("(ConceptNode \"B\" (stv 0.3 0.9))"),
-// 		C = eval_.eval_h("(ConceptNode \"C\" (stv 0.1 0.9))"),
-// 		AB = eval_.eval_h("(InheritanceLink (stv 0.9 0.9)"
-// 		                   "    (ConceptNode \"A\")"
-// 		                   "    (ConceptNode \"B\"))"),
-// 		BC = eval_.eval_h("(InheritanceLink (stv 0.8 0.9)"
-// 		                   "    (ConceptNode \"B\")"
-// 		                   "    (ConceptNode \"C\"))"),
-// 		// The TV is missing cause it's the target
-// 		AC = eval_.eval_h("(InheritanceLink"
-// 		                   "    (ConceptNode \"A\")"
-// 		                   "    (ConceptNode \"C\"))");
+	// load modus ponens
+	Handle top_rbs = as_.getNode(CONCEPT_NODE, UREConfigReader::URE_top_name);
+	UREConfigReader config_reader(as_, top_rbs);
 
-// 	std::cout << "AtomSpace before do_bc = " << as_ << std::endl;
+	BackwardChainer bc(&as_, config_reader.get_rules());
 
-// 	VarMultimap result = bc_->do_bc(AC);
+	Handle target =
+	    eval_.eval_h("(InheritanceLink (stv 0.0 0.0)"
+	                 "   (ConceptNode \"Fritz\")"
+	                 "   (ConceptNode \"green\"))");
 
-// 	std::cout << "AtomSpace after do_bc = " << as_ << std::endl;
+	bc.set_target(target);
+	bc.do_until(100);
 
-// 	std::cout << "result:" << std::endl;
-// 	for (const auto& element : result) {
-// 		std::cout << "Key = " << element.first->toString() << std::endl;
-// 		std::cout << "{" << std::endl;
-// 		for (const auto& value : element.second)
-// 			std::cout << "  Value = " << value->toString() << std::endl;
-// 		std::cout << "}" << std::endl;
-// 	}
+	TSM_ASSERT("Incorrect strength after BC!",
+	           target->getTruthValue()->getMean() > 0.9f);
+	TSM_ASSERT("Incorrect confidence after BC!",
+	           target->getTruthValue()->getConfidence() > 0.9f);
 
-// 	// TODO: maybe check that the result is AC and that its confidence
-// 	// is above 0
-// 	TS_ASSERT(false);
-// }
-
-
-// void BackwardChainerUTest::test_do_bc() {
-// 	Handle htarget =
-// 		eval_.eval_h("(InheritanceLink (VariableNode \"$isCriminal\")"
-// 		              "                 (ConceptNode \"criminal\"))");
-// 	Handle htarget2 =
-// 		eval_.eval_h("(EvaluationLink"
-// 		              "    (PredicateNode \"sell\")"
-// 		              "    (ListLink"
-// 		              "        (ConceptNode \"West\")"
-// 		              "        (VariableNode \"$a\")"
-// 		              "        (ConceptNode \"Nono\")))");
-// 	Handle htarget3 =
-// 		eval_.eval_h("(EvaluationLink"
-// 		              "    (PredicateNode \"sell\")"
-// 		              "    (ListLink"
-// 		              "        (VariableNode \"$x\")"
-// 		              "        (VariableNode \"$y\")"
-// 		              "        (VariableNode \"$z\")))");
-// 	Handle htarget4 =
-// 		eval_.eval_h("(InheritanceLink (VariableNode \"$isAmerican\")"
-// 		              "                 (ConceptNode \"American\"))");
-// 	Handle htarget5 =
-// 		eval_.eval_h("(InheritanceLink (VariableNode \"$whosFrog\")"
-// 		              "                 (ConceptNode \"Frog\"))");
-// 	Handle htarget6 =
-// 		eval_.eval_h("(InheritanceLink (VariableNode \"$whosGreen\")"
-// 		              "                 (ConceptNode \"green\"))");
-// 	Handle htarget7 =
-// 		eval_.eval_h("(InheritanceLink (VariableNode \"$whosCanary\")"
-// 		              "                 (ConceptNode \"Canary\"))");
-
-// 	std::cout << "Atomspace = " << as_;
-	
-// 	map<Handle, HandleSeq> result = bc_->do_bc(htarget);
-// 	TS_ASSERT_EQUALS(result.size(), 1);
-// 	auto it = result.begin();
-// 	TS_ASSERT_EQUALS(it->second.size(), 1);
-// 	TS_ASSERT_EQUALS(it->second[0].value(),
-// 			eval_.eval_h("(ConceptNode \"West\")").value());
-
-// 	result = bc_->do_bc(htarget6);
-// 	TS_ASSERT_EQUALS(result.size(), 1);
-// 	it = result.begin();
-// 	TS_ASSERT_EQUALS(it->second.size(), 1);
-// 	TS_ASSERT_EQUALS(it->second[0].value(),
-// 			eval_.eval_h("(ConceptNode \"Fritz\")").value());
-
-// 	result = bc_->do_bc(htarget5);
-// 	TS_ASSERT_EQUALS(result.size(), 1);
-// 	it = result.begin();
-// 	TS_ASSERT_EQUALS(it->second.size(), 1);
-// 	TS_ASSERT_EQUALS(it->second[0].value(),
-// 			eval_.eval_h("(ConceptNode \"Fritz\")").value());
-
-// 	result = bc_->do_bc(htarget7);
-// 	TS_ASSERT_EQUALS(result.size(), 1);
-// 	it = result.begin();
-// 	TS_ASSERT_EQUALS(it->second.size(), 0);
-
-// 	result = bc_->do_bc(htarget4);
-// 	TS_ASSERT_EQUALS(result.size(), 1);
-// 	it = result.begin();
-// 	TS_ASSERT_EQUALS(it->second.size(), 1);
-// 	TS_ASSERT_EQUALS(it->second[0].value(),
-// 			eval_.eval_h("(ConceptNode \"West\")").value());
-
-// 	result = bc_->do_bc(htarget3);
-// 	TS_ASSERT_EQUALS(result.size(), 3);
-// 	it = result.begin();
-// 	TS_ASSERT_EQUALS(it->second.size(), 1);
-// 	TS_ASSERT_EQUALS(it->second[0].value(),
-// 			eval_.eval_h("(ConceptNode \"West\")").value());
-// 	++it;
-// 	TS_ASSERT_EQUALS(it->second.size(), 1);
-// 	TS_ASSERT_EQUALS(it->second[0].value(),
-// 			eval_.eval_h("(ConceptNode \"missile@123\")").value());
-// 	++it;
-// 	TS_ASSERT_EQUALS(it->second.size(), 1);
-// 	TS_ASSERT_EQUALS(it->second[0].value(),
-// 			eval_.eval_h("(ConceptNode \"Nono\")").value());
-
-// 	result = bc_->do_bc(htarget2);
-// 	TS_ASSERT_EQUALS(result.size(), 1);
-// 	it = result.begin();
-// 	TS_ASSERT_EQUALS(it->second.size(), 1);
-// 	TS_ASSERT_EQUALS(it->second[0].value(),
-// 			eval_.eval_h("(ConceptNode \"missile@123\")").value());
-
-// 	/*if (result.empty())
-// 	 cout << "EMPTY RESULT RETURNED" << endl;
-// 	 cout << "RESULT RETURNED" << endl;
-// 	 for (auto it = result.begin(); it != result.end(); ++it) {
-// 	 cout << endl << "VAR:" << SchemeSmob::to_string(it->first) << endl;
-// 	 HandleSeq values = it->second;
-// 	 for (Handle h : values)
-// 	 cout << "\t\tVALUE:" << SchemeSmob::to_string(h) << endl;
-// 	 }*/
-
-// }
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

@@ -25,5 +25,6 @@ INSTALL (FILES
     FollowLink.h
     ForeachChaseLink.h
     HandleMap.h
+    Substitutor.h
     DESTINATION "include/${PROJECT_NAME}/atomutils"
 )
