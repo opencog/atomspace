@@ -319,6 +319,29 @@ void BackwardChainer::process_target(Target& target)
 		VarMap vm = premises_vmap_list[i];
 
 		logger().debug("[BackwardChainer] Checking permises " + hp->toShortString());
+		for (auto& p : vm)
+			logger().debug("vm initial map " + p.first->toShortString() + " to " + p.second->toShortString());
+
+
+		// preliminary circular variable mapping check; unify could map a
+		// typed variable to a variable A in the target, and then the premises
+		// search could map a node to variable A...
+		bool bad_map = false;
+		for (auto& p : vm)
+		{
+			if (p.first->getType() != VARIABLE_NODE
+			    && implicand_normal_mapping.count(p.second) == 1
+			    && implicand_normal_mapping[p.second] != p.first)
+			{
+				logger().debug("[BackwardChainer] Discarding premises: " + hp->toShortString());
+
+				bad_map = true;
+				break;
+			}
+		}
+
+		if (bad_map)
+			continue;
 
 		// reverse ground the rule's outputs with the mapping to the premise
 		// so that when we ground the premise, we know how to generate
