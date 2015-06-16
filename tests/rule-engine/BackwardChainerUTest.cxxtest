@@ -260,24 +260,24 @@ void BackwardChainerUTest::test_tvq_impossible_bc()
 	config().set("SCM_PRELOAD",
 	             "tests/rule-engine/bc-config-1.scm,"
 	             "tests/rule-engine/bc-example.scm");
-	load_scm_files_from_config(*as_);
+	load_scm_files_from_config(as_);
 
 	// load modus ponens
-	Handle top_rbs = as_->addNode(CONCEPT_NODE, UREConfigReader::URE_top_name);
-	UREConfigReader config_reader(*as_, top_rbs);
+	Handle top_rbs = as_.addNode(CONCEPT_NODE, UREConfigReader::URE_top_name);
+	UREConfigReader config_reader(as_, top_rbs);
 
-	BackwardChainer bc(as_, config_reader.get_rules());
+	BackwardChainer bc(&as_, config_reader.get_rules());
 
 	// negative test, BC should not modify the TV of this impossible target
-	Handle target = eval_->eval_h("(InheritanceLink (stv 0.0 0.0)"
-	                              "   (ConceptNode \"RandomName\")"
-	                              "   (ConceptNode \"green\"))");
+	Handle target = eval_.eval_h("(InheritanceLink (stv 0.0 0.0)"
+	                             "   (ConceptNode \"RandomName\")"
+	                             "   (ConceptNode \"green\"))");
 
 	// this is not the target, but the inference path should still actually
 	// modify the TV
-	Handle hidden = eval_->eval_h("(InheritanceLink (stv 0.0 0.0)"
-	                              "   (ConceptNode \"Fritz\")"
-	                              "   (ConceptNode \"green\"))");
+	Handle hidden = eval_.eval_h("(InheritanceLink (stv 0.0 0.0)"
+	                             "   (ConceptNode \"Fritz\")"
+	                             "   (ConceptNode \"green\"))");
 
 	bc.set_target(target);
 	bc.do_until(100);
