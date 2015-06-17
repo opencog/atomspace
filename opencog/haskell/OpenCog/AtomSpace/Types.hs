@@ -45,44 +45,44 @@ appAtomGen f (AtomGen at) = f at
 
 data Atom a where -- TODO: Review the types constraints, add Attention Values, etc.
     -- Predicate
-    Predicate   :: AtomName -> Atom (Atom a -> TruthVal)
-    And         :: Atom a -> Atom a -> (Maybe TruthVal) -> Atom a
-    Or          :: Atom a -> Atom a -> (Maybe TruthVal) -> Atom a
-    Implication :: Atom a -> Atom a -> (Maybe TruthVal) -> Atom a
-    Equivalence :: Atom a -> Atom a -> (Maybe TruthVal) -> Atom a
-    Evaluation  :: (Atom (Atom a -> TruthVal))  ->
+    PredicateNode   :: AtomName -> Atom (Atom a -> TruthVal)
+    AndLink         :: Atom a -> Atom a -> (Maybe TruthVal) -> Atom a
+    OrLink          :: Atom a -> Atom a -> (Maybe TruthVal) -> Atom a
+    ImplicationLink :: Atom a -> Atom a -> (Maybe TruthVal) -> Atom a
+    EquivalenceLink :: Atom a -> Atom a -> (Maybe TruthVal) -> Atom a
+    EvaluationLink  :: (Atom (Atom a -> TruthVal))  ->
                       Atom [AtomGen] -> (Maybe TruthVal) -> Atom a
 
     -- Concept
-    Concept       :: AtomName -> Atom TConceptNode
-    Inheritance   :: Atom TConceptNode -> Atom TConceptNode -> (Maybe TruthVal) -> Atom a
-    Similarity    :: Atom TConceptNode -> Atom TConceptNode -> (Maybe TruthVal) -> Atom a
-    Member        :: Atom TConceptNode -> Atom TConceptNode -> (Maybe TruthVal) -> Atom a
-    SatisfyingSet :: Atom (Atom a -> TruthVal) -> Atom TConceptNode
+    ConceptNode       :: AtomName -> (Maybe TruthVal) -> Atom TConceptNode
+    InheritanceLink   :: Atom TConceptNode -> Atom TConceptNode -> (Maybe TruthVal) -> Atom a
+    SimilarityLink    :: Atom TConceptNode -> Atom TConceptNode -> (Maybe TruthVal) -> Atom a
+    MemberLink        :: Atom TConceptNode -> Atom TConceptNode -> (Maybe TruthVal) -> Atom a
+    SatisfyingSetLink :: Atom (Atom a -> TruthVal) -> Atom TConceptNode
 
     -- Number
-    Number :: (Num a,Show a) => a -> Atom TNumberNode
+    NumberNode :: (Num a,Show a) => a -> Atom TNumberNode
 
     -- List
-    List :: [AtomGen] -> Atom [AtomGen]
+    ListLink :: [AtomGen] -> Atom [AtomGen]
 
 instance Show AtomGen where
     show (AtomGen at) = concat' ["AtomGen",show at]
 
 instance Show (Atom a) where
-    show (Predicate n)         = concat' ["Predicate",show n]
-    show (And a1 a2 m)         = concat' ["And",show a1,show a2,show m]
-    show (Or a1 a2 m)          = concat' ["Or",show a1,show a2,show m]
-    show (Implication a1 a2 m) = concat' ["Implication",show a1,show a2,show m]
-    show (Equivalence a1 a2 m) = concat' ["Equivalence",show a1,show a2,show m]
-    show (Evaluation a1 a2 m)  = concat' ["Evaluation",show a1,show a2,show m]
-    show (Concept n)           = concat' ["Concept",show n]
-    show (Inheritance a1 a2 m) = concat' ["Inheritance",show a1,show a2,show m]
-    show (Similarity a1 a2 m)  = concat' ["Similarity",show a1,show a2,show m]
-    show (Member a1 a2 m)      = concat' ["Member",show a1,show a2,show m]
-    show (SatisfyingSet a)     = concat' ["SatisfyingSet",show a]
-    show (Number n)            = concat' ["Number",show n]
-    show (List l)              = concat' ["List",show l]
+    show (PredicateNode n)         = concat' ["Predicate",show n]
+    show (AndLink a1 a2 m)         = concat' ["And",show a1,show a2,show m]
+    show (OrLink a1 a2 m)          = concat' ["Or",show a1,show a2,show m]
+    show (ImplicationLink a1 a2 m) = concat' ["Implication",show a1,show a2,show m]
+    show (EquivalenceLink a1 a2 m) = concat' ["Equivalence",show a1,show a2,show m]
+    show (EvaluationLink a1 a2 m)  = concat' ["Evaluation",show a1,show a2,show m]
+    show (ConceptNode n)           = concat' ["Concept",show n]
+    show (InheritanceLink a1 a2 m) = concat' ["Inheritance",show a1,show a2,show m]
+    show (SimilarityLink a1 a2 m)  = concat' ["Similarity",show a1,show a2,show m]
+    show (MemberLink a1 a2 m)      = concat' ["Member",show a1,show a2,show m]
+    show (SatisfyingSetLink a)     = concat' ["SatisfyingSet",show a]
+    show (NumberNode n)            = concat' ["Number",show n]
+    show (ListLink l)              = concat' ["List",show l]
 
 concat' (a:b:xs) = a ++ " " ++ concat' (b:xs)
 concat' (b:[])   = b

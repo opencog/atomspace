@@ -9,9 +9,9 @@ main :: IO ()
 main = runOnNewAtomSpace program
 
 program :: AtomSpace ()
-program = let andLink = And (Concept "John")
-                            (Concept "Carlos")
-                            (Just $ SimpleTV 0.5 0.5)
+program = let andLink = AndLink (ConceptNode "John")
+                                (ConceptNode "Carlos")
+                                (Just $ SimpleTV 0.5 0.5)
            in do
         liftIO $ putStrLn "Let's insert some new nodes:"
         insert $ Concept "Tall"
@@ -21,18 +21,18 @@ program = let andLink = And (Concept "John")
         liftIO $ putStrLn "----------------------------------------"
         n <- get andLink
         case n of
-          Just (And _ _ _) -> liftIO $ putStrLn $ (show n) ++ " found."
-          Nothing          -> liftIO $ putStrLn "No AndLink found."
+          Just (AndLink _ _ _) -> liftIO $ putStrLn $ (show n) ++ " found."
+          Nothing              -> liftIO $ putStrLn "No AndLink found."
         remove andLink
         liftIO $ putStrLn "-----------After Remove:----------------"
         debug
         liftIO $ putStrLn "----------------------------------------"
         n <- get andLink
         case n of
-          Just (And _ _ _) -> liftIO $ putStrLn $ (show n) ++ " found."
-          Nothing          -> liftIO $ putStrLn "No AndLink found."
-        insert $ List [ AtomGen $ Number 4
-                      , AtomGen $ Concept "hello"
-                      , AtomGen $ Number 4]
+          Just (AndLink _ _ _) -> liftIO $ putStrLn $ (show n) ++ " found."
+          Nothing              -> liftIO $ putStrLn "No AndLink found."
+        insert $ ListLink [ AtomGen $ NumberNode 4
+                          , AtomGen $ ConceptNode "hello"
+                          , AtomGen $ NumberNode 4]
 
 
