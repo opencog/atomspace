@@ -18,8 +18,12 @@ Go through the normal process of
 [building](https://github.com/opencog/atomspace#building-atomspace) and
 [installing](https://github.com/opencog/atomspace#install) the AtomSpace.
 
-Then move to this directory (/opencog/haskell) and build and install the
-opencog-atomspace haskell library:
+This will install automatically the haskell library.
+
+If you want to install only the haskell library, for example a new version,
+move to this directory (/opencog/haskell), remove the dist folder, and 
+build and install the
+opencog-atomspace haskell library with these commands:
 
 ```
  cabal configure
@@ -84,3 +88,26 @@ main = runOnNewAtomSpace prog
 
 ```
 
+###Main functions:
+
+####insert:
+Function to insert atoms to the atomspace. To create new atoms or just to
+update the mutable information of a specific atom.
+```haskell
+insert :: Atom a -> AtomSpace ()
+```
+####get:
+Function to get an atom back from the atomspace.
+```haskell
+get :: Atom a -> AtomSpace (Maybe (Atom a))
+```
+####remove:
+Function to remove atoms from the atomspace.
+```haskell
+remove :: Atom a -> AtomSpace Bool
+```
+####debug:
+Debug function to print the state of the atomspace.
+```haskell
+debug :: AtomSpace ()
+```
