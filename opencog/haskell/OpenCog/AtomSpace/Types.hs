@@ -15,23 +15,23 @@ type AtomName = String
 data TruthVal = SimpleTV { tvMean       :: Double
                          , tvConfidence :: Double
                          }
-              | CountTV { tvMean       :: Double
-                        , tvCount      :: Double
-                        , tvConfidence :: Double
-                        }
-              | IndefTV { tvMean      :: Double
-                        , tvL         :: Double
-                        , tvU         :: Double
-                        , tvConfLevel :: Double
-                        , tvDiff      :: Double
-                        }
-              | FuzzyTV { tvMean       :: Double
-                        , tvConfidence :: Double
-                        }
-              | ProbTV { tvMean       :: Double
-                       , tvCount      :: Double
-                       , tvConfidence :: Double
-                       }
+              | CountTV  { tvMean       :: Double
+                         , tvCount      :: Double
+                         , tvConfidence :: Double
+                         }
+              | IndefTV  { tvMean      :: Double
+                         , tvL         :: Double
+                         , tvU         :: Double
+                         , tvConfLevel :: Double
+                         , tvDiff      :: Double
+                         }
+              | FuzzyTV  { tvMean       :: Double
+                         , tvConfidence :: Double
+                         }
+              | ProbTV   { tvMean       :: Double
+                         , tvCount      :: Double
+                         , tvConfidence :: Double
+                         }
     deriving Show
 
 data TConceptNode
@@ -76,7 +76,7 @@ instance Show (Atom a) where
     show (ImplicationLink a1 a2 m) = concat' ["Implication",show a1,show a2,show m]
     show (EquivalenceLink a1 a2 m) = concat' ["Equivalence",show a1,show a2,show m]
     show (EvaluationLink a1 a2 m)  = concat' ["Evaluation",show a1,show a2,show m]
-    show (ConceptNode n)           = concat' ["Concept",show n]
+    show (ConceptNode n m)         = concat' ["Concept",show n,show m]
     show (InheritanceLink a1 a2 m) = concat' ["Inheritance",show a1,show a2,show m]
     show (SimilarityLink a1 a2 m)  = concat' ["Similarity",show a1,show a2,show m]
     show (MemberLink a1 a2 m)      = concat' ["Member",show a1,show a2,show m]
