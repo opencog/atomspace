@@ -17,8 +17,8 @@ import Foreign.Storable             (peek)
 import Data.Functor                 ((<$>))
 import Control.Monad.IO.Class       (liftIO)
 import OpenCog.AtomSpace.Env        (AtomSpaceRef(..),AtomSpace,getAtomSpace)
-import OpenCog.AtomSpace.Internal   (Handle,AtomType,AtomRaw(..),
-                                     toRaw,fromRaw,TVTypeEnum(..),tvMAX_PARAMS)
+import OpenCog.AtomSpace.Internal   (Handle,AtomType,AtomRaw(..),TVRaw(..),
+                                     toRaw,fromRaw,tvMAX_PARAMS)
 import OpenCog.AtomSpace.Types      (Atom(..),AtomName(..),TruthVal(..))
 
 --------------------------------------------------------------------------------
@@ -64,10 +64,18 @@ insertLink aType aOutgoing = do
 
 insertAndGetHandle :: AtomRaw -> AtomSpace Handle
 insertAndGetHandle i = case i of
-    Node aType aName tv     -> insertNode aType aName
-                               -- TODO: After getting handler set truthvalue!
-    Link aType aOutgoing tv -> insertLink aType aOutgoing
-                               -- TODO: After getting handler set truthvalue!
+    Node aType aName mtv     -> do
+        h <- insertNode aType aName
+        case mtv of -- set truth value after inserting.
+            Just tv -> setTruthValue h tv
+            Nothing -> return ()
+        return h
+    Link aType aOutgoing mtv -> do
+        h <- insertLink aType aOutgoing
+        case mtv of -- set truth value after inserting.
+            Just tv -> setTruthValue h tv
+            Nothing -> return ()
+        return h
 
 -- Function to insert an atom to the atomspace.
 insert :: Atom a -> AtomSpace ()
@@ -111,16 +119,14 @@ getNodeHandle aType aName = do
                      then Just h
                      else Nothing
 
-getNode :: AtomType -> AtomName -> AtomSpace (Maybe (TruthVal,Handle))
+getNode :: AtomType -> AtomName -> AtomSpace (Maybe (TVRaw,Handle))
 getNode aType aName = do
     m <- getNodeHandle aType aName
     case m of
       Nothing -> return Nothing
       Just h  -> do
-          mtv <- getTruthValue h
-          case mtv of
-            Nothing -> return Nothing
-            Just tv -> return $ Just (tv,h)
+          tv <- getTruthValue h
+          return $ Just (tv,h)
 
 
 foreign import ccall "AtomSpace_getLink"
@@ -145,22 +151,20 @@ getLinkHandle aType aOutgoing = do
                      then Just h
                      else Nothing
 
-getLink :: AtomType -> [Handle] -> AtomSpace (Maybe (TruthVal,Handle))
+getLink :: AtomType -> [Handle] -> AtomSpace (Maybe (TVRaw,Handle))
 getLink aType aOutgoing = do
     m <- getLinkHandle aType aOutgoing
     case m of
       Nothing -> return Nothing
       Just h  -> do
-          mtv <- getTruthValue h
-          case mtv of
-            Nothing -> return Nothing
-            Just tv -> return $ Just (tv,h)
+          tv <- getTruthValue h
+          return $ Just (tv,h)
 
 getWithHandle :: AtomRaw -> AtomSpace (Maybe (AtomRaw,Handle))
 getWithHandle i = do
     let onLink :: AtomType
                -> [AtomRaw]
-               -> AtomSpace (Maybe (TruthVal,Handle,[AtomRaw]))
+               -> AtomSpace (Maybe (TVRaw,Handle,[AtomRaw]))
         onLink aType aOutgoing = do
             ml <- sequence <$> mapM getWithHandle aOutgoing
             case ml of -- ml :: Maybe [(AtomRaw,Handle)]
@@ -200,32 +204,26 @@ foreign import ccall "AtomSpace_getTruthValue"
                             -> Ptr CDouble
                             -> IO CInt
 
-getTruthValue :: Handle -> AtomSpace (Maybe TruthVal)
+getTruthValue :: Handle -> AtomSpace TVRaw
 getTruthValue handle = do
     asRef <- getAtomSpace
     liftIO $ allocaArray tvMAX_PARAMS $
       \lptr -> do
           tvType <- c_atomspace_getTruthValue asRef handle lptr
-          case toEnum $ fromIntegral tvType of
-              SIMPLE_TRUTH_VALUE        -> do
-                  l <- peekArray 2 lptr
-                  case map realToFrac l  of
-                    (v1:v2:_) -> return $ Just $ SimpleTV v1 v2
-              COUNT_TRUTH_VALUE         -> do
-                  l <- peekArray 3 lptr
-                  case map realToFrac l of
-                    (v1:v2:v3:_) -> return $ Just $ CountTV v1 v2 v3
-              INDEFINITE_TRUTH_VALUE    -> do
-                  l <- peekArray 5 lptr
-                  case map realToFrac l of
-                    (v1:v2:v3:v4:v5:_) -> return $ Just $ IndefTV v1 v2 v3 v4 v5
-              FUZZY_TRUTH_VALUE         -> do
-                  l <- peekArray 2 lptr
-                  case map realToFrac l of
-                    (v1:v2:_) -> return $ Just $ FuzzyTV v1 v2
-              PROBABILISTIC_TRUTH_VALUE -> do
-                  l <- peekArray 3 lptr
-                  case map realToFrac l of
-                    (v1:v2:v3:_) -> return $ Just $ ProbTV v1 v2 v3
-              _                         -> return Nothing
+          l <- peekArray tvMAX_PARAMS lptr
+          return $ TVRaw (toEnum $ fromIntegral tvType) (map realToFrac l)
+
+foreign import ccall "AtomSpace_setTruthValue"
+  c_atomspace_setTruthValue :: AtomSpaceRef
+                            -> Handle
+                            -> CInt
+                            -> Ptr CDouble
+                            -> IO ()
+
+setTruthValue :: Handle -> TVRaw -> AtomSpace ()
+setTruthValue handle (TVRaw tvtype list) = do
+    asRef <- getAtomSpace            
+    liftIO $ withArray (map realToFrac list) $
+      \lptr -> do
+          c_atomspace_setTruthValue asRef handle (fromIntegral $ fromEnum tvtype) lptr
 
