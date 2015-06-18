@@ -94,7 +94,7 @@ int AtomSpace_getTruthValue( AtomSpace* this_ptr
             break; }
         case INDEFINITE_TRUTH_VALUE: {
             IndefiniteTruthValuePtr itv =
-                std::dynamic_pointer_cast<IndefiniteTruthValue>(tv);
+                std::static_pointer_cast<IndefiniteTruthValue>(tv);
             parameters[0]=itv->getMean();
             parameters[1]=itv->getL();
             parameters[2]=itv->getU();
@@ -114,4 +114,44 @@ int AtomSpace_getTruthValue( AtomSpace* this_ptr
             break;
     }
     return tv->getType();
+}
+
+void AtomSpace_setTruthValue( AtomSpace* this_ptr
+                            , long handle
+                            , int type
+                            , double *parameters )
+{
+    Handle h(handle);
+    switch(type)
+    {
+        case SIMPLE_TRUTH_VALUE: {
+            double count = SimpleTruthValue::confidenceToCount(parameters[1]);
+            h->setTruthValue(SimpleTruthValue::createTV(parameters[0],count));
+            break; }
+        case COUNT_TRUTH_VALUE: {
+            h->setTruthValue(CountTruthValue::createTV(parameters[0]
+                                                      ,parameters[2]
+                                                      ,parameters[1]));
+            break; }
+        case INDEFINITE_TRUTH_VALUE: {
+            IndefiniteTruthValuePtr iptr =
+                IndefiniteTruthValue::createITV(parameters[1]
+                                               ,parameters[2]
+                                               ,parameters[3]);
+            iptr->setMean(parameters[0]);
+            iptr->setDiff(parameters[4]);
+            h->setTruthValue(std::static_pointer_cast<TruthValue>(iptr));
+            break; }
+        case FUZZY_TRUTH_VALUE: {
+            double count = FuzzyTruthValue::confidenceToCount(parameters[1]);
+            h->setTruthValue(FuzzyTruthValue::createTV(parameters[0],count));
+            break; }
+        case PROBABILISTIC_TRUTH_VALUE: {
+            h->setTruthValue(ProbabilisticTruthValue::createTV(parameters[0]
+                                                              ,parameters[2]
+                                                              ,parameters[1]));
+            break; }
+        default:
+            break;
+    }
 }
