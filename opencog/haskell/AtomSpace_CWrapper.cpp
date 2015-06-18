@@ -7,6 +7,7 @@
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/FuzzyTruthValue.h>
 #include <opencog/atomspace/ProbabilisticTruthValue.h>
+#include <opencog/util/exceptions.h>
 
 AtomSpace* AtomSpace_new()
 {
@@ -18,44 +19,56 @@ void AtomSpace_delete( AtomSpace* this_ptr )
     delete this_ptr;
 }
 
-long AtomSpace_addNode( AtomSpace* this_ptr
+UUID AtomSpace_addNode( AtomSpace* this_ptr
                       , const char* type
                       , const char* name )
 {
     Type t = classserver().getType(std::string(type));
+    if(t == NOTYPE)
+        throw InvalidParamException(TRACE_INFO,
+            "Invalid AtomType parameter '%s'.",type);
     return this_ptr->addNode(t,std::string(name)).value();
 }
 
-long AtomSpace_addLink( AtomSpace* this_ptr
+UUID AtomSpace_addLink( AtomSpace* this_ptr
                       , const char* type
-                      , const long* outgoing
+                      , const UUID* outgoing
                       , int size )
 {
     Type t = classserver().getType(std::string(type));
+    if(t == NOTYPE)
+        throw InvalidParamException(TRACE_INFO,
+            "Invalid AtomType parameter '%s'.",type);
     HandleSeq oset;
     for(int i=0;i<size;i++)
         oset.push_back(Handle(outgoing[i]));
     return this_ptr->addLink(t,oset).value();
 }
 
-long AtomSpace_getNode( AtomSpace* this_ptr
+UUID AtomSpace_getNode( AtomSpace* this_ptr
                       , const char* type
                       , const char* name
                       , int* found )
 {
     Type t = classserver().getType(std::string(type));
+    if(t == NOTYPE)
+        throw InvalidParamException(TRACE_INFO,
+            "Invalid AtomType parameter '%s'.",type);
     Handle h = this_ptr->getNode(t,std::string(name));
     *found = h != Handle::UNDEFINED;
     return h.value();
 }
 
-long AtomSpace_getLink( AtomSpace* this_ptr
+UUID AtomSpace_getLink( AtomSpace* this_ptr
                       , const char* type
-                      , const long* outgoing
+                      , const UUID* outgoing
                       , int size
                       , int* found )
 {
     Type t = classserver().getType(std::string(type));
+    if(t == NOTYPE)
+        throw InvalidParamException(TRACE_INFO,
+            "Invalid AtomType parameter '%s'.",type);
     HandleSeq oset;
     for(int i=0;i<size;i++)
         oset.push_back(Handle(outgoing[i]));
@@ -65,7 +78,7 @@ long AtomSpace_getLink( AtomSpace* this_ptr
 }
 
 int AtomSpace_removeAtom( AtomSpace* this_ptr
-                        , long handle )
+                        , UUID handle )
 {
     return this_ptr->removeAtom(Handle(handle));
 }
@@ -75,11 +88,14 @@ void AtomSpace_debug( AtomSpace* this_ptr )
     std::cerr<<(*this_ptr);
 }
 
-int AtomSpace_getTruthValue( AtomSpace* this_ptr
-                           , long handle
-                           , double *parameters )
+TruthValueType AtomSpace_getTruthValue( AtomSpace* this_ptr
+                                      , UUID handle
+                                      , double* parameters )
 {
     Handle h(handle);
+    if(!h)
+        throw InvalidParamException(TRACE_INFO,
+            "Invalid Handler parameter.");
     TruthValuePtr tv = h->getTruthValue();
     switch(tv->getType())
     {
@@ -111,17 +127,22 @@ int AtomSpace_getTruthValue( AtomSpace* this_ptr
             parameters[2]=tv->getConfidence();
             break; }
         default:
+            throw RuntimeException(TRACE_INFO,
+                "Invalid TruthValue Type.");
             break;
     }
     return tv->getType();
 }
 
 void AtomSpace_setTruthValue( AtomSpace* this_ptr
-                            , long handle
-                            , int type
-                            , double *parameters )
+                            , UUID handle
+                            , TruthValueType type
+                            , double* parameters )
 {
     Handle h(handle);
+    if(!h)
+        throw InvalidParamException(TRACE_INFO,
+            "Invalid Handler parameter.");
     switch(type)
     {
         case SIMPLE_TRUTH_VALUE: {
@@ -152,6 +173,8 @@ void AtomSpace_setTruthValue( AtomSpace* this_ptr
                                                               ,parameters[1]));
             break; }
         default:
+            throw InvalidParamException(TRACE_INFO,
+                "Invalid TruthValue Type parameter.");
             break;
     }
 }
