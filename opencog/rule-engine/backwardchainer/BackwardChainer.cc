@@ -73,11 +73,11 @@ const UREConfigReader& BackwardChainer::get_config() const
  *
  * XXX TODO add more stopping param like fitness criterion, etc
  */
-void BackwardChainer::do_until(uint max_steps)
+void BackwardChainer::do_chain()
 {
-	uint i = 0;
+	int i = 0;
 
-	while (i < max_steps)
+	while (i != _configReader.get_maximum_iterations())
 	{
 		do_step();
 

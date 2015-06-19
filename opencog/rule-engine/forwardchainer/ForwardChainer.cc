@@ -66,7 +66,7 @@ Logger* ForwardChainer::getLogger()
  *
  * @param fcb a concrete implementation of of ForwardChainerCallBack class 
  */
-void ForwardChainer::step(ForwardChainerCallBack& fcb)
+void ForwardChainer::do_step(ForwardChainerCallBack& fcb)
 {
 
     if (_fcmem.get_cur_source() == Handle::UNDEFINED) {
@@ -144,7 +144,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
     while (_iteration < max_iter /*OR other termination criteria*/) {
         _log->info("Iteration %d", _iteration);
 
-        step(fcb);
+        do_step(fcb);
 
         //! Choose next source.
         _log->info("[ForwardChainer] setting next source");
