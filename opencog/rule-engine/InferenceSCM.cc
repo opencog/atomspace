@@ -84,8 +84,8 @@ Handle InferenceSCM::do_forward_chaining(Handle h, Handle rbs)
 {
 #ifdef HAVE_GUILE
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fc");
-    DefaultForwardChainerCB dfc(as);
-    ForwardChainer fc(as, rbs);
+    DefaultForwardChainerCB dfc(*as);
+    ForwardChainer fc(*as, rbs);
     /**
      * Parse (cog-fc ListLink()) as forward chaining with
      * Handle::UNDEFINED which does pattern matching on the atomspace

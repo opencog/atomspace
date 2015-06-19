@@ -58,7 +58,7 @@ void DefaultForwardChainerCBUTest::test_choose_rule(void)
 	    "(InheritanceLink (ConceptNode \"cat\")(ConceptNode \"animal\"))");
     TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
     fcmem.set_source(h);
-    DefaultForwardChainerCB dfcb(&as);
+    DefaultForwardChainerCB dfcb(as);
     vector<Rule*> rule = dfcb.choose_rules(fcmem);
     TS_ASSERT_EQUALS(1, rule.size());
     HandleSeq bindlinks;
@@ -75,7 +75,7 @@ void DefaultForwardChainerCBUTest::test_choose_source(void)
     Handle source = eval.eval_h("(ConceptNode \"Einstein\")");
     FCMemory fcmem(&as);
     fcmem.set_source(source);
-    DefaultForwardChainerCB dfcb(&as);
+    DefaultForwardChainerCB dfcb(as);
     HandleSeq hs = dfcb.choose_premises(fcmem);
     TS_ASSERT(5 == hs.size());
 }
@@ -100,12 +100,12 @@ void DefaultForwardChainerCBUTest::test_apply_rule(void)
     fcmem.set_cur_rule(rules[0]);
     fcmem.set_source(source);
 
-    DefaultForwardChainerCB dfcb(&as);
+    DefaultForwardChainerCB dfcb(as);
     HandleSeq hs = dfcb.apply_rule(fcmem);
 
     TS_ASSERT_EQUALS(1,hs.size());
 
-    URECommons urec(&as);
+    URECommons urec(as);
     TS_ASSERT(urec.exists_in(hs[0],source));
 
 }

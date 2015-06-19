@@ -46,7 +46,7 @@ public:
 		// Get the ConceptNode corresponding to the rule-based system
 		// to test
 		Handle rbs = as_.getNode(CONCEPT_NODE, "crisp-rule-base");
-		fc_ = new ForwardChainer(&as_, rbs);
+		fc_ = new ForwardChainer(as_, rbs);
 	}
 	void test_do_chain();
 };
@@ -70,7 +70,7 @@ void ForwardChainerUTest::test_do_chain()
 		                  "    (PredicateNode \"C\"))");
 
 	// Run forward chainer (and remove problematic rules)
-	DefaultForwardChainerCB dfc(&as_);
+	DefaultForwardChainerCB dfc(as_);
 	vector<Rule*>& rules = fc_->_fcmem.get_rules();
 	vector<std::string> ignore = {
 		"crisp-modus-ponens"

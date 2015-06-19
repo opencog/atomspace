@@ -31,19 +31,10 @@
 
 using namespace opencog;
 
-DefaultForwardChainerCB::DefaultForwardChainerCB(
-        AtomSpace* as, source_selection_mode ts_mode /*=TV_FITNESS_BASED*/) :
-        ForwardChainerCallBack(as)
-{
-    as_ = as;
-    _fcpm = new ForwardChainerPMCB(as);
-    ts_mode_ = ts_mode;
-}
-
-DefaultForwardChainerCB::~DefaultForwardChainerCB()
-{
-    delete _fcpm;
-}
+DefaultForwardChainerCB::DefaultForwardChainerCB(AtomSpace& as,
+                                                 source_selection_mode ts_mode
+                                                 /*=TV_FITNESS_BASED*/)
+	: ForwardChainerCallBack(&as), _as(as), _fcpm(&as), _ts_mode(ts_mode) {}
 
 /**
  * choose rules based on premises of rule matching the source
@@ -71,7 +62,7 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
         }
 
         // Create bindlink with source as an implicant.
-        URECommons urec(&rule_atomspace);
+        URECommons urec(rule_atomspace);
         Handle copy = urec.replace_nodes_with_varnode(source_cpy, NODE);
         Handle bind_link = urec.create_bindLink(copy, false);
 
@@ -98,12 +89,12 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
 
         // Copy handles to main atomspace.
         for (Handle h : bindlinks) {
-            chosen_bindlinks.push_back(as_->addAtom(h));
+            chosen_bindlinks.push_back(_as.addAtom(h));
         }
     } else {
         // Try to find specialized rules that contain the source node.
         OC_ASSERT(NodeCast(source) != nullptr);
-        chosen_bindlinks = get_rootlinks(source, as_, BIND_LINK);
+        chosen_bindlinks = get_rootlinks(source, &_as, BIND_LINK);
     }
 
     // Find the rules containing the bindLink in copied_back.
@@ -132,7 +123,7 @@ HandleSeq DefaultForwardChainerCB::get_rootlinks(Handle hsource, AtomSpace* as,
                                                  Type link_type,
                                                  bool subclasses)
 {
-    URECommons urec(as);
+    URECommons urec(*as);
     HandleSeq chosen_roots;
     HandleSeq candidates_roots;
     urec.get_root_links(hsource, candidates_roots);
@@ -158,7 +149,7 @@ HandleSeq DefaultForwardChainerCB::get_rootlinks(Handle hsource, AtomSpace* as,
 HandleSeq DefaultForwardChainerCB::choose_premises(FCMemory& fcmem)
 {
     HandleSeq inputs;
-    URECommons urec(as_);
+    URECommons urec(_as);
     Handle hsource = fcmem.get_cur_source();
 
     // Get everything associated with the source handle.
@@ -184,11 +175,11 @@ Handle DefaultForwardChainerCB::choose_next_source(FCMemory& fcmem)
 {
     HandleSeq tlist = fcmem.get_potential_sources();
     map<Handle, float> tournament_elem;
-    URECommons urec(as_);
+    URECommons urec(_as);
     Handle hchosen = Handle::UNDEFINED;
 
     for (Handle t : tlist) {
-        switch (ts_mode_) {
+        switch (_ts_mode) {
         case TV_FITNESS_BASED: {
             float fitness = urec.tv_fitness(t);
             tournament_elem[t] = fitness;
@@ -226,18 +217,18 @@ Handle DefaultForwardChainerCB::choose_next_source(FCMemory& fcmem)
 
 HandleSeq DefaultForwardChainerCB::apply_rule(FCMemory& fcmem)
 {
-    _fcpm->set_fcmem(&fcmem);
+    _fcpm.set_fcmem(&fcmem);
 
     auto rule_handle = fcmem.get_cur_rule()->get_handle();
     BindLinkPtr bl(BindLinkCast(rule_handle));
     if (NULL == bl) {
         bl = createBindLink(*LinkCast(rule_handle));
     }
-    _fcpm->implicand = bl->get_implicand();
-    bl->imply(*_fcpm);
+    _fcpm.implicand = bl->get_implicand();
+    bl->imply(_fcpm);
     // bl->satisfy(*_fcpm);
 
-    HandleSeq product = _fcpm->get_products();
+    HandleSeq product = _fcpm.get_products();
 
     //! Make sure the inferences made are new.
     for (auto iter = product.begin(); iter != product.end();) {

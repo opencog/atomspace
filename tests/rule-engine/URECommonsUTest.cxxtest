@@ -15,18 +15,11 @@
 using namespace opencog;
 class URECommonsUTest: public CxxTest::TestSuite {
 private:
-	URECommons * commons_;
-	AtomSpace * as_;
-	SchemeEval * eval_;
+	AtomSpace as_;
+	URECommons commons_;
+	SchemeEval eval_;
 public:
-	URECommonsUTest() {
-		as_ = new AtomSpace();
-		eval_ = new SchemeEval(as_);
-		commons_ = new URECommons(as_);
-	}
-	~URECommonsUTest() {
-		delete as_;
-	}
+	URECommonsUTest() : commons_(as_), eval_(&as_) {}
 	void setUp();
 	void tearDown();
 
@@ -39,11 +32,11 @@ void URECommonsUTest::setUp() {
 	config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
 			"opencog/scm/utilities.scm, "
 			"opencog/python/pln_old/examples/deduction/atomspace_contents.scm");
-	load_scm_files_from_config(*as_);
+	load_scm_files_from_config(as_);
 }
 
 void URECommonsUTest::tearDown() {
-	as_->clear();
+	as_.clear();
 }
 
 void URECommonsUTest::test_get_root_links(void) {
@@ -75,10 +68,10 @@ void URECommonsUTest::test_get_root_links(void) {
 	string target = "(InheritanceLink"
 			"   (VariableNode \"$A\")"
 			"   (VariableNode \"$B\"))";
-	Handle hb = eval_->eval_h(bindlink);
-	Handle ht = eval_->eval_h(target);
+	Handle hb = eval_.eval_h(bindlink);
+	Handle ht = eval_.eval_h(target);
 	HandleSeq roots;
-	commons_->get_root_links(ht, roots);
+	commons_.get_root_links(ht, roots);
 	TS_ASSERT_EQUALS(1, roots.size());
 
 	//checking with multiple atomspace
@@ -86,7 +79,7 @@ void URECommonsUTest::test_get_root_links(void) {
 	SchemeEval sceval(&temp);
 	sceval.eval_h(bindlink);
 	auto ht_cpy = sceval.eval_h(target);
-	URECommons rec(&temp);
+	URECommons rec(temp);
 	HandleSeq rootsx;
 	rec.get_root_links(ht_cpy, rootsx);
 	TS_ASSERT_EQUALS(1, rootsx.size());
@@ -94,10 +87,10 @@ void URECommonsUTest::test_get_root_links(void) {
 
 void URECommonsUTest::test_create_bindLink() {
 //TODO expand this test
-	Handle himplicant =
-			eval_->eval_h(
-					"(InheritanceLink (VariableNode \"$var-rich\") (ConceptNode \"happy\"))");
-	Handle h = commons_->create_bindLink(himplicant, false);
+	Handle himplicant = eval_.eval_h("(InheritanceLink"
+	                                 "   (VariableNode \"$var-rich\")"
+	                                 "   (ConceptNode \"happy\"))");
+	Handle h = commons_.create_bindLink(himplicant, false);
 
 	TS_ASSERT_EQUALS(BIND_LINK, h->getType());
 }

@@ -39,7 +39,7 @@ class ForwardChainer {
 private:
     friend class ::ForwardChainerUTest;
 
-    AtomSpace * _as;
+    AtomSpace& _as;
     URECommons _rec;            // utility class
 	Handle _rbs;                // rule-based system
 
