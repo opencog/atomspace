@@ -200,10 +200,13 @@ public:
      */
     template <typename OutputIterator> OutputIterator
     getHandlesByType(OutputIterator result,
-                       Type type,
-                       bool subclass = false) const
+                     Type type,
+                     bool subclass = false,
+                     bool parent = true) const
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
+        if (parent && _environ)
+            _environ->getHandlesByType(result, type, subclass, parent);
         return std::copy(typeIndex.begin(type, subclass),
                          typeIndex.end(),
                          result);
@@ -213,9 +216,12 @@ public:
     template <typename Function> void
     foreachHandleByType(Function func,
                         Type type,
-                        bool subclass = false) const
+                        bool subclass = false,
+                        bool parent = true) const
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
+        if (parent && _environ)
+            _environ->foreachHandleByType(func, type, subclass);
         std::for_each(typeIndex.begin(type, subclass),
                       typeIndex.end(),
              [&](Handle h)->void {

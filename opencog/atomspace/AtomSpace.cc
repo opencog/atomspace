@@ -356,7 +356,7 @@ void AtomSpace::clear()
 {
     std::vector<Handle> allAtoms;
 
-    atomTable.getHandlesByType(back_inserter(allAtoms), ATOM, true);
+    atomTable.getHandlesByType(back_inserter(allAtoms), ATOM, true, false);
 
     DPRINTF("atoms in allAtoms: %lu\n", allAtoms.size());
 
@@ -371,7 +371,7 @@ void AtomSpace::clear()
     }
 
     allAtoms.clear();
-    atomTable.getHandlesByType(back_inserter(allAtoms), ATOM, true);
+    atomTable.getHandlesByType(back_inserter(allAtoms), ATOM, true, false);
     assert(allAtoms.size() == 0);
 
     logger().setLevel(save);
