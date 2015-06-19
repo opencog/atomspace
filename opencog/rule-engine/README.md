@@ -215,13 +215,12 @@ original target `(InheritanceLink $who criminal)` and finally solve
 
 ## Control policy
 
-The control policy is implemented as
-[json](https://github.com/opencog/opencog/blob/master/opencog/reasoning/engine/default_cpolicy.json)
-file containing what rules and other parameters to load (like the
-maximum number of iterations).  the configuration is being read in the
-`load_fc_conf()` method of the ForwardChainer.cc.  Admittedly this is
-the least properly done as an initial prototype.  I want to make it
-more robust and decoupled.  I am thinking about it.
+The control policy is directly defined in the the AtomSpace according
+to the following
+[format](http://wiki.opencog.org/w/URE_Configuration_Format). The node
+representing the rule-based system (rules + other parameters) is
+passed to the chainers (forward or backward) and loaded at
+construction time.
 
 ## Summary of current state of the implementation
 
