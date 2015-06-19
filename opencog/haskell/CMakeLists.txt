@@ -10,7 +10,7 @@ TARGET_LINK_LIBRARIES(haskell-atomspace
 
 ADD_CUSTOM_TARGET(haskell-atomspace-env ALL
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/CheckEnv.cmake
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/opencog/haskell
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 INSTALL (TARGETS haskell-atomspace
@@ -20,8 +20,8 @@ INSTALL (TARGETS haskell-atomspace
 INSTALL(CODE
     "MESSAGE(STATUS \"Installing: opencog-atomspace haskell library...\")
      execute_process(
-        COMMAND cabal install --global
-        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/opencog/haskell OUTPUT_QUIET
+        COMMAND cabal install --global --builddir=${CMAKE_CURRENT_BINARY_DIR}/dist
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_QUIET
      )"
 )
 
