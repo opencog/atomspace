@@ -28,7 +28,7 @@
 
 using namespace opencog;
 
-const std::string UREConfigReader::URE_top_name = "URE";
+const std::string UREConfigReader::top_rbs_name = "URE";
 const std::string UREConfigReader::attention_alloc_name = "URE:attention-allocation";
 const std::string UREConfigReader::max_iter_name = "URE:maximum-iterations";
 

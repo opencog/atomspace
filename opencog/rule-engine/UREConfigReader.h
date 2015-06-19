@@ -63,7 +63,7 @@ public:
 	// Name of the top rule base from which all rule-based systems
 	// inherit. It should corresponds to a ConceptNode in the
 	// AtomSpace.
-	static const std::string URE_top_name;
+	static const std::string top_rbs_name;
 
 	// Name of the PredicateNode outputing whether attention
 	// allocation is enabled or not
