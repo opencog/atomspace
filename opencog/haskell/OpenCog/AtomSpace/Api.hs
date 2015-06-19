@@ -1,5 +1,8 @@
+-- GSoC 2015 - Haskell bindings for OpenCog.
 {-# LANGUAGE ForeignFunctionInterface #-}
 
+-- | This Module defines the main functions to interact with the AtomSpace
+-- creating/removing/modifying atoms.
 module OpenCog.AtomSpace.Api (
       insert
     , remove
@@ -23,10 +26,11 @@ import OpenCog.AtomSpace.Types      (Atom(..),AtomName(..),TruthVal(..))
 
 --------------------------------------------------------------------------------
 
--- Debug function to print the atomspace on stderr.
 foreign import ccall "AtomSpace_debug"
   c_atomspace_debug :: AtomSpaceRef -> IO ()
 
+-- | 'debug' prints the state of the AtomSpace on stderr.
+-- (only for debugging purposes)
 debug :: AtomSpace ()
 debug = do
     asRef <- getAtomSpace
@@ -77,7 +81,7 @@ insertAndGetHandle i = case i of
             Nothing -> return ()
         return h
 
--- Function to insert an atom to the atomspace.
+-- | 'insert' creates a new atom on the atomspace or updates the existing one.
 insert :: Atom a -> AtomSpace ()
 insert i = insertAndGetHandle (toRaw i) >> return ()
 
@@ -88,7 +92,8 @@ foreign import ccall "AtomSpace_removeAtom"
                      -> Handle
                      -> IO CInt
 
--- Function to remove an atom from the atomspace.
+-- | 'remove' deletes an atom from the atomspace.
+-- Returns True in success or False if it couldn't locate the specified atom.
 remove :: Atom a -> AtomSpace Bool
 remove i = do
     asRef <- getAtomSpace
@@ -188,7 +193,8 @@ getWithHandle i = do
              Just (tv,h,newOutgoing) -> Just $ (Link aType newOutgoing (Just tv), h)
              _                       -> Nothing
 
--- Function to get an atom from the atomspace.
+-- | 'get' looks for an atom in the atomspace and returns it.
+-- (With updated mutable information)
 get :: Atom a -> AtomSpace (Maybe (Atom a))
 get i = do
     m <- getWithHandle $ toRaw i
@@ -204,6 +210,7 @@ foreign import ccall "AtomSpace_getTruthValue"
                             -> Ptr CDouble
                             -> IO CInt
 
+-- Internal function to get an atom's truth value.
 getTruthValue :: Handle -> AtomSpace TVRaw
 getTruthValue handle = do
     asRef <- getAtomSpace
@@ -220,6 +227,7 @@ foreign import ccall "AtomSpace_setTruthValue"
                             -> Ptr CDouble
                             -> IO ()
 
+-- Internal function to set an atom's truth value.
 setTruthValue :: Handle -> TVRaw -> AtomSpace ()
 setTruthValue handle (TVRaw tvtype list) = do
     asRef <- getAtomSpace

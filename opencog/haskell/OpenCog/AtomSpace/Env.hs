@@ -1,5 +1,7 @@
+-- GSoC 2015 - Haskell bindings for OpenCog.
 {-# LANGUAGE ForeignFunctionInterface #-}
 
+-- | This Module defines the main environment for the AtomSpace bindings.
 module OpenCog.AtomSpace.Env (
       AtomSpace
     , AtomSpaceRef(..)
@@ -18,7 +20,7 @@ import Control.Monad.Trans.Reader   (ReaderT,runReaderT,ask)
 -- of the AtomSpace class.
 newtype AtomSpaceRef = AtomSpaceRef (Ptr AtomSpaceRef)
 
--- Main Data Type for representing programs working on an AtomSpace.
+-- | Main Data Type for representing programs working on an AtomSpace.
 -- We have to use the IO monad because of the use of FFI for calling c functions
 -- for working on a mutable instance of the atomspace, so we have side effects.
 type AtomSpace = ReaderT AtomSpaceRef IO
@@ -35,7 +37,7 @@ foreign import ccall "AtomSpace_delete"
 asDelete :: AtomSpaceRef -> IO ()
 asDelete = c_atomspace_delete
 
--- 'runOnNewAtomSpace' creates a new AtomSpace (C++ object), does some
+-- | 'runOnNewAtomSpace' creates a new AtomSpace (C++ object), does some
 -- computation over it, and then deletes it.
 -- By using bracket, I ensure properly freeing memory in case of exceptions
 -- during the computation.

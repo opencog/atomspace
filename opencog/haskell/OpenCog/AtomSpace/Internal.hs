@@ -1,5 +1,9 @@
+-- GSoC 2015 - Haskell bindings for OpenCog.
 {-# LANGUAGE GADTs #-}
 
+-- | This Module defines some useful data types for proper interaction
+-- with the AtomSpace C wrapper library.
+-- Intended for internal use only.
 module OpenCog.AtomSpace.Internal (
       Handle(..)
     , AtomType(..)
@@ -18,11 +22,14 @@ import Data.Functor                 ((<$>))
 import OpenCog.AtomSpace.Types      (Atom(..),AtomName(..),TruthVal(..),
                                      appAtomGen,AtomGen(..))
 
+-- Data type to hold atoms's UUID.
 type Handle = CULong
 type AtomType = String
+-- Main general atom representation.
 data AtomRaw = Link AtomType [AtomRaw] (Maybe TVRaw)
              | Node AtomType AtomName  (Maybe TVRaw)
 
+-- Function to convert an Atom to its general representation.
 toRaw :: Atom a -> AtomRaw
 toRaw i = case i of
     PredicateNode n  -> Node "PredicateNode" n Nothing
@@ -31,9 +38,11 @@ toRaw i = case i of
     ListLink list    -> Link "ListLink" (map (appAtomGen toRaw) list) Nothing
     _            -> undefined
 
+-- Function to get an Atom back from its general representation (if possible).
 fromRaw :: AtomRaw -> Atom a -> Maybe (Atom a)
 fromRaw raw orig = case (raw,orig) of
-    (Node "ConceptNode" n tv   , ConceptNode _ _ ) -> Just $ ConceptNode n $ fromTVRaw <$> tv
+    (Node "ConceptNode" n tv   , ConceptNode _ _ ) -> Just $ ConceptNode n
+                                                           $ fromTVRaw <$> tv
     (Node "PredicateNode" n _  , PredicateNode _ ) -> Just $ PredicateNode n
     (Link "AndLink" [ar,br] tv , AndLink ao bo _ ) -> do
         a <- fromRaw ar ao
@@ -49,12 +58,14 @@ fromRaw raw orig = case (raw,orig) of
         Just $ ListLink lnew
     _                                               -> Nothing -- undefined
 
---Constant with the maximum number of parameters in any type of TV.
+-- Constant with the maximum number of parameters in any type of TV.
 tvMAX_PARAMS :: Int
 tvMAX_PARAMS = 5
 
---TV enum type to work with TruthValueTypes from
+-- TV enum type to work with TruthValueTypes from
 -- <opencog/atomspace/TruthValue.h> definition.
+-- Note: this data type must be always similar to the definition on ../TruthValue.h.
+-- The order of enum types MUST be exactly the same on both sites.
 data TVTypeEnum = NULL_TRUTH_VALUE
                 | SIMPLE_TRUTH_VALUE
                 | COUNT_TRUTH_VALUE

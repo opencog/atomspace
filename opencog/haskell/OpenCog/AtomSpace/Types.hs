@@ -1,5 +1,7 @@
+-- GSoC 2015 - Haskell bindings for OpenCog.
 {-# LANGUAGE GADTs , EmptyDataDecls , ExistentialQuantification , RankNTypes #-}
 
+-- | This Module defines the main data types for Haskell bindings.
 module OpenCog.AtomSpace.Types (
     TruthVal (..)
   , AtomName (..)
@@ -10,8 +12,10 @@ module OpenCog.AtomSpace.Types (
   , TConceptNode
   ) where
 
+-- | Atom name type.
 type AtomName = String
 
+-- | 'TruthVal' represent the different types of TruthValues.
 data TruthVal = SimpleTV { tvMean       :: Double
                          , tvConfidence :: Double
                          }
@@ -37,12 +41,18 @@ data TruthVal = SimpleTV { tvMean       :: Double
 data TConceptNode
 data TNumberNode
 
+-- | 'AtomGen' is a general atom type hiding the type variables.
+-- (necessary when working with many instances of different atoms,
+-- for example, for lists of atoms)
 data AtomGen where
     AtomGen :: Atom a -> AtomGen
 
+-- | 'appAtomGen' evaluates a given function with the atom instance
+-- wrapped inside the 'AtomGen' type.
 appAtomGen :: (forall a. Atom a -> b) -> AtomGen -> b
 appAtomGen f (AtomGen at) = f at
 
+-- | 'Atom' is the main data type to represent the different types of atoms.
 data Atom a where
     PredicateNode   :: AtomName -> Atom (Atom a -> TruthVal)
     AndLink         :: Atom a -> Atom b -> (Maybe TruthVal) -> Atom c
