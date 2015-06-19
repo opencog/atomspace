@@ -56,6 +56,16 @@ void BackwardChainer::set_target(Handle init_target)
 	_targets_set.emplace(_init_target);
 }
 
+UREConfigReader& BackwardChainer::get_config()
+{
+	return _configReader;
+}
+
+const UREConfigReader& BackwardChainer::get_config() const
+{
+	return _configReader;
+}
+
 /**
  * The public entry point for full backward chaining.
  *

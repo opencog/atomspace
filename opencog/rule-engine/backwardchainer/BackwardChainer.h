@@ -96,6 +96,8 @@ public:
 	~BackwardChainer();
 
 	void set_target(Handle init_target);
+	UREConfigReader& get_config();
+	const UREConfigReader& get_config() const;
 
 	void do_until(uint max_steps);
 	void do_step();
