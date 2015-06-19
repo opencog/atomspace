@@ -1,6 +1,6 @@
 module OpenCog.AtomSpace.Utils (
-      drawAtom
-    , showAtom
+      showAtom
+    , printAtom
     ) where
 
 import OpenCog.AtomSpace.Types      (Atom(..),TruthVal(..))
@@ -20,9 +20,9 @@ showTV' :: Maybe TruthVal -> String
 showTV' (Just tv) = showTV tv
 showTV' Nothing   = ""
 
--- Function to draw an atom in opencog notation (indented notation).
-drawAtom :: Atom a -> String
-drawAtom at = concatWNewline $ list 0 $ toRaw at
+-- Function to show an atom in opencog notation (indented notation).
+showAtom :: Atom a -> String
+showAtom at = concatWNewline $ list 0 $ toRaw at
   where
     list :: Int -> AtomRaw -> [String]
     list lv at = case at of
@@ -47,6 +47,6 @@ drawAtom at = concatWNewline $ list 0 $ toRaw at
     tab 0 s  = s
     tab lv s = "  "++ tab (lv-1) s
 
-showAtom :: Atom a -> IO ()
-showAtom at = putStrLn $ drawAtom at
+printAtom :: Atom a -> IO ()
+printAtom at = putStrLn $ showAtom at
 

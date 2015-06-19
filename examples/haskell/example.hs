@@ -1,7 +1,7 @@
 {-# LANGUAGE GADTs #-}
 
 import OpenCog.AtomSpace        (AtomSpace,insert,get,remove,
-                                 debug,runOnNewAtomSpace,showAtom,
+                                 debug,runOnNewAtomSpace,printAtom,
                                  Atom(..),TruthVal(..),AtomGen(..))
 import Control.Monad.IO.Class   (liftIO)
 
@@ -14,16 +14,16 @@ program = let a = AndLink (ConceptNode "John" Nothing)
                           (Just $ SimpleTV 0.5 0.5)
            in do
         liftIO $ putStrLn "Let's insert some new nodes:"
-        liftIO $ showAtom $ ConceptNode "Tall" Nothing
+        liftIO $ printAtom $ ConceptNode "Tall" Nothing
         insert $ ConceptNode "Tall" Nothing
         insert a
-        liftIO $ showAtom a
+        liftIO $ printAtom a
         liftIO $ putStrLn "-----------After Insert:----------------"
         debug
         liftIO $ putStrLn "----------------------------------------"
         n <- get a
         case n of
-          Just at -> liftIO $ putStrLn "AndLink found:" >> showAtom at
+          Just at -> liftIO $ putStrLn "AndLink found:" >> printAtom at
           Nothing -> liftIO $ putStrLn "No AndLink found."
         remove a
         liftIO $ putStrLn "-----------After Remove:----------------"
@@ -38,5 +38,5 @@ program = let a = AndLink (ConceptNode "John" Nothing)
                             , AtomGen $ NumberNode 4]
         insert list
         liftIO $ putStrLn "Inserted:"
-        liftIO $ showAtom list
+        liftIO $ printAtom list
 
