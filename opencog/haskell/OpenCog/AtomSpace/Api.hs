@@ -92,7 +92,7 @@ foreign import ccall "AtomSpace_removeAtom"
 remove :: Atom a -> AtomSpace Bool
 remove i = do
     asRef <- getAtomSpace
-    m <- getWithHandle $ toRaw i -- TODO: Make more efficiently this
+    m <- getWithHandle $ toRaw i
     case m of
       Just (_,handle) -> liftIO $ toBool <$> c_atomspace_remove asRef handle
       _               -> return False
@@ -222,7 +222,7 @@ foreign import ccall "AtomSpace_setTruthValue"
 
 setTruthValue :: Handle -> TVRaw -> AtomSpace ()
 setTruthValue handle (TVRaw tvtype list) = do
-    asRef <- getAtomSpace            
+    asRef <- getAtomSpace
     liftIO $ withArray (map realToFrac list) $
       \lptr -> do
           c_atomspace_setTruthValue asRef handle (fromIntegral $ fromEnum tvtype) lptr

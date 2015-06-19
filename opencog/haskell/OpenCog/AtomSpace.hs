@@ -6,6 +6,8 @@ module OpenCog.AtomSpace
     , remove
     , get
     , debug
+    , showAtom
+    , drawAtom
     , TruthVal (..)
     , AtomName (..)
     , Atom (..)
@@ -15,5 +17,6 @@ module OpenCog.AtomSpace
 
 import OpenCog.AtomSpace.Api
 import OpenCog.AtomSpace.Types
-import OpenCog.AtomSpace.Env    (AtomSpace,runOnNewAtomSpace)
+import OpenCog.AtomSpace.Env        (AtomSpace,runOnNewAtomSpace)
+import OpenCog.AtomSpace.Utils      (showAtom,drawAtom)
 

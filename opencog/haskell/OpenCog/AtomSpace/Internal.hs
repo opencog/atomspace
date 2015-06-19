@@ -7,6 +7,8 @@ module OpenCog.AtomSpace.Internal (
     , toRaw
     , fromRaw
     , TVRaw(..)
+    , fromTVRaw
+    , toTVRaw
     , TVTypeEnum(..)
     , tvMAX_PARAMS
     ) where
