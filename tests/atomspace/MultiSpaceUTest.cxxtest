@@ -528,5 +528,31 @@ public:
 		as1.getHandlesByType(back_inserter(handle_set), ATOM, false);
 		// cogserver crashes at this point; no crash == pass
 	}
+
+	// This tests bug report #97
+	void testGetType()
+	{
+		AtomSpace as;
+		AtomSpace ex(&as);
+
+		// Add nodes of same typ.
+		as.addNode(CONCEPT_NODE, "aaa");
+		ex.addNode(CONCEPT_NODE, "bbb");
+
+		HandleSeq handle_set;
+		ex.getHandlesByType(handle_set, CONCEPT_NODE);
+
+		TS_ASSERT(handle_set.size() == 2);
+
+		ex.clear();
+
+		TS_ASSERT(as.getSize() == 1);
+		TS_ASSERT(ex.getSize() == 0);
+
+		handle_set.clear();
+		ex.getHandlesByType(handle_set, CONCEPT_NODE);
+
+		TS_ASSERT(handle_set.size() == 1);
+	}
 };
 
