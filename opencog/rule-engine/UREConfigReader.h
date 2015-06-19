@@ -55,6 +55,11 @@ public:
 	bool get_attention_allocation() const;
 	int get_maximum_iterations() const;
 
+	// Modifiers. WARNING: Those changes are not reflected in the
+	// AtomSpace, only in the UREConfigReader object.
+	void set_attention_allocation(bool);
+	void set_maximum_iterations(int);
+
 	// Name of the top rule base from which all rule-based systems
 	// inherit. It should corresponds to a ConceptNode in the
 	// AtomSpace.
