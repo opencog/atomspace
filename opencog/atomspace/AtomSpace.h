@@ -363,6 +363,18 @@ public:
      *        the outgoing set of the link.
     */
     Handle getLink(Type t, const HandleSeq& outgoing);
+	Handle getLink(Type t, Handle ha) {
+		return getLink(t, HandleSeq({ha}));
+	}
+	Handle getLink(Type t, Handle ha, Handle hb) {
+		return getLink(t, {ha, hb});
+	}
+	Handle getLink(Type t, Handle ha, Handle hb, Handle hc) {
+		return getLink(t, {ha, hb, hc});
+	}
+	Handle getLink(Type t, Handle ha, Handle hb, Handle hc, Handle hd) {
+		return getLink(t, {ha, hb, hc, hd});
+	}
     Handle getHandle(Type t, const HandleSeq& outgoing) {
         return getLink(t, outgoing);
     }
