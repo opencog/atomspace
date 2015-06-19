@@ -21,7 +21,7 @@
 ; Load URE configuration (add the current file dir so it can be loaded
 ; from anywhere)
 (add-to-load-path (dirname (current-filename)))
-(load-from-path "simple-deduction-cpolicy.scm")
+(load-from-path "simple-deduction-config.scm")
 
 ; Define knowledge base
 (define A (ConceptNode "A"))

@@ -25,7 +25,7 @@ public:
         load_scm_files_from_config(as);
 
         eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
-                  "/tests/rule-engine/bc-cpolicy-2.scm\")");
+                  "/tests/rule-engine/bc-config-2.scm\")");
         rbs2 = as.getNode(CONCEPT_NODE, "PLN-utest-2");
     }
 
