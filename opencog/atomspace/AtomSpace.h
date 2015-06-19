@@ -125,108 +125,54 @@ public:
 
     inline Handle addLink(Type t, Handle h)
     {
-        HandleSeq oset;
-        oset.push_back(h);
-        return addLink(t, oset);
+	    return addLink(t, HandleSeq({h}));
     }
 
     inline Handle addLink(Type t, Handle ha, Handle hb)
     {
-        HandleSeq oset;
-        oset.push_back(ha);
-        oset.push_back(hb);
-        return addLink(t, oset);
+	    return addLink(t, {ha, hb});
     }
 
     inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc)
     {
-        HandleSeq oset;
-        oset.push_back(ha);
-        oset.push_back(hb);
-        oset.push_back(hc);
-        return addLink(t, oset);
+        return addLink(t, {ha, hb, hc});
     }
 
     inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc, Handle hd)
     {
-        HandleSeq oset;
-        oset.push_back(ha);
-        oset.push_back(hb);
-        oset.push_back(hc);
-        oset.push_back(hd);
-        return addLink(t, oset);
+        return addLink(t, {ha, hb, hc, hd});
     }
 
     inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
                           Handle hd, Handle he)
     {
-        HandleSeq oset;
-        oset.push_back(ha);
-        oset.push_back(hb);
-        oset.push_back(hc);
-        oset.push_back(hd);
-        oset.push_back(he);
-        return addLink(t, oset);
+	    return addLink(t, {ha, hb, hc, hd, he});
     }
 
     inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
                           Handle hd, Handle he, Handle hf)
     {
-        HandleSeq oset;
-        oset.push_back(ha);
-        oset.push_back(hb);
-        oset.push_back(hc);
-        oset.push_back(hd);
-        oset.push_back(he);
-        oset.push_back(hf);
-        return addLink(t, oset);
+	    return addLink(t, {ha, hb, hc, hd, he, hf});
     }
 
     inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
                           Handle hd, Handle he, Handle hf, Handle hg)
     {
-        HandleSeq oset;
-        oset.push_back(ha);
-        oset.push_back(hb);
-        oset.push_back(hc);
-        oset.push_back(hd);
-        oset.push_back(he);
-        oset.push_back(hf);
-        oset.push_back(hg);
-        return addLink(t, oset);
+	    return addLink(t, {ha, hb, hc, hd, he, hf, hg});
     }
 
     inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
                           Handle hd, Handle he, Handle hf, Handle hg,
                           Handle hh)
     {
-        HandleSeq oset;
-        oset.push_back(ha);
-        oset.push_back(hb);
-        oset.push_back(hc);
-        oset.push_back(hd);
-        oset.push_back(he);
-        oset.push_back(hf);
-        oset.push_back(hg);
-        oset.push_back(hh);
-        return addLink(t, oset);
+	    return addLink(t, {ha, hb, hc, hd, he, hf, hg, hh});
     }
 
     inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
                           Handle hd, Handle he, Handle hf, Handle hg,
                           Handle hh, Handle hi)
     {
-        HandleSeq oset;
-        oset.push_back(ha);
-        oset.push_back(hb);
-        oset.push_back(hc);
-        oset.push_back(hd);
-        oset.push_back(he);
-        oset.push_back(hf);
-        oset.push_back(hg);
-        oset.push_back(hh);
-        oset.push_back(hi);
-        return addLink(t, oset);
+	    return addLink(t, {ha, hb, hc, hd, he, hf, hg, hh, hi});
     }
 
     /**
@@ -379,15 +325,10 @@ public:
         return getLink(t, outgoing);
     }
     Handle getHandle(Type t, const Handle& ha) {
-        HandleSeq outgoing;
-        outgoing.push_back(ha);
-        return getLink(t, outgoing);
+	    return getLink(t, HandleSeq({ha}));
     }
     Handle getHandle(Type t, const Handle& ha, const Handle& hb) {
-        HandleSeq outgoing;
-        outgoing.push_back(ha);
-        outgoing.push_back(hb);
-        return getLink(t, outgoing);
+        return getLink(t, {ha, hb});
     }
 
     /**
