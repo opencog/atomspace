@@ -5,7 +5,6 @@
  *      Author: misgana
  */
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
-#include <opencog/rule-engine/UREConfigReader.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -178,9 +177,7 @@ void BackwardChainerUTest::test_1rule_bc()
 
 	// load 1 modus ponens rule
 	Handle top_rbs = as_.getNode(CONCEPT_NODE, UREConfigReader::URE_top_name);
-	UREConfigReader config_reader(as_, top_rbs);
-
-	BackwardChainer bc(&as_, config_reader.get_rules());
+	BackwardChainer bc(as_, top_rbs);
 
 	Handle target_var = eval_.eval_h("(VariableNode \"$Z\")");
 	Handle target =
@@ -190,7 +187,7 @@ void BackwardChainerUTest::test_1rule_bc()
 	Handle soln = eval_.eval_h("(ConceptNode \"Fritz\")");
 
 	bc.set_target(target);
-	bc.do_until(100);
+	bc.do_chain();
 
 	VarMultimap results = bc.get_chaining_result();
 
@@ -213,9 +210,7 @@ void BackwardChainerUTest::test_2rules_bc()
 
 	// load modus ponens & deduction rules
 	Handle top_rbs = as_.getNode(CONCEPT_NODE, UREConfigReader::URE_top_name);
-	UREConfigReader config_reader(as_, top_rbs);
-
-	BackwardChainer bc(&as_, config_reader.get_rules());
+	BackwardChainer bc(as_, top_rbs);
 
 	Handle target_var = eval_.eval_h("(VariableNode \"$x\")");
 	Handle target =
@@ -225,7 +220,8 @@ void BackwardChainerUTest::test_2rules_bc()
 	Handle soln = eval_.eval_h("(ConceptNode \"West\")");
 
 	bc.set_target(target);
-	bc.do_until(300);
+	bc.get_config().set_maximum_iterations(300);
+	bc.do_chain();
 
 	VarMultimap results = bc.get_chaining_result();
 
@@ -248,9 +244,7 @@ void BackwardChainerUTest::test_tvq_bc()
 
 	// load modus ponens
 	Handle top_rbs = as_.getNode(CONCEPT_NODE, UREConfigReader::URE_top_name);
-	UREConfigReader config_reader(as_, top_rbs);
-
-	BackwardChainer bc(&as_, config_reader.get_rules());
+	BackwardChainer bc(as_, top_rbs);
 
 	Handle target =
 	    eval_.eval_h("(InheritanceLink (stv 0.0 0.0)"
@@ -258,7 +252,8 @@ void BackwardChainerUTest::test_tvq_bc()
 	                 "   (ConceptNode \"green\"))");
 
 	bc.set_target(target);
-	bc.do_until(100);
+	bc.get_config().set_maximum_iterations(100);
+	bc.do_chain();
 
 	TSM_ASSERT("Incorrect strength after BC!",
 	           target->getTruthValue()->getMean() > 0.9f);

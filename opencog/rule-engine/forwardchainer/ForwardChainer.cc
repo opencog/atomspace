@@ -32,8 +32,8 @@
 
 using namespace opencog;
 
-ForwardChainer::ForwardChainer(AtomSpace * as, Handle rbs) :
-	_as(as), _rec(_as), _rbs(rbs), _configReader(*as, rbs), _fcmem(as)
+ForwardChainer::ForwardChainer(AtomSpace& as, Handle rbs) :
+	_as(as), _rec(_as), _rbs(rbs), _configReader(as, rbs), _fcmem(&as)
 {
     init();
 }
@@ -66,7 +66,7 @@ Logger* ForwardChainer::getLogger()
  *
  * @param fcb a concrete implementation of of ForwardChainerCallBack class 
  */
-void ForwardChainer::step(ForwardChainerCallBack& fcb)
+void ForwardChainer::do_step(ForwardChainerCallBack& fcb)
 {
 
     if (_fcmem.get_cur_source() == Handle::UNDEFINED) {
@@ -144,7 +144,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
     while (_iteration < max_iter /*OR other termination criteria*/) {
         _log->info("Iteration %d", _iteration);
 
-        step(fcb);
+        do_step(fcb);
 
         //! Choose next source.
         _log->info("[ForwardChainer] setting next source");
@@ -167,14 +167,14 @@ void ForwardChainer::do_pm(const Handle& hsource,
                            const UnorderedHandleSet& var_nodes,
                            ForwardChainerCallBack& fcb)
 {
-    DefaultImplicator impl(_as);
+    DefaultImplicator impl(&_as);
     impl.implicand = hsource;
     HandleSeq vars;
     for (auto h : var_nodes)
         vars.push_back(h);
     _fcmem.set_source(hsource);
-    Handle hvar_list = _as->addLink(VARIABLE_LIST, vars);
-    Handle hclause = _as->addLink(AND_LINK, hsource);
+    Handle hvar_list = _as.addLink(VARIABLE_LIST, vars);
+    Handle hclause = _as.addLink(AND_LINK, hsource);
 
     // Run the pattern matcher, find all patterns that satisfy the
     // the clause, with the given variables in it.
@@ -185,14 +185,14 @@ void ForwardChainer::do_pm(const Handle& hsource,
     _fcmem.add_rules_product(0, impl.result_list);
 
     // Delete the AND_LINK and LIST_LINK
-    _as->removeAtom(hvar_list);
-    _as->removeAtom(hclause);
+    _as.removeAtom(hvar_list);
+    _as.removeAtom(hclause);
 
     //!Additionally, find applicable rules and apply.
     vector<Rule*> rules = fcb.choose_rules(_fcmem);
     for (Rule* rule : rules) {
         BindLinkPtr bl(BindLinkCast(rule->get_handle()));
-        DefaultImplicator impl(_as);
+        DefaultImplicator impl(&_as);
         impl.implicand = bl->get_implicand();
         bl->imply(impl);
         _fcmem.set_cur_rule(rule);
@@ -211,7 +211,7 @@ void ForwardChainer::do_pm()
     for (Rule* rule : rules) {
         _log->info("Applying rule %s on ", rule->get_name().c_str());
         BindLinkPtr bl(BindLinkCast(rule->get_handle()));
-        DefaultImplicator impl(_as);
+        DefaultImplicator impl(&_as);
         impl.implicand = bl->get_implicand();
         bl->imply(impl);
         _fcmem.set_cur_rule(rule);

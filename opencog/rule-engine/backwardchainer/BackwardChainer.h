@@ -26,6 +26,7 @@
 #define BACKWARDCHAINER_H_
 
 #include <opencog/rule-engine/Rule.h>
+#include <opencog/rule-engine/UREConfigReader.h>
 
 #include "Target.h"
 
@@ -92,12 +93,13 @@ class BackwardChainer
     friend class ::BackwardChainerUTest;
 
 public:
-	BackwardChainer(AtomSpace* as, const std::vector<Rule>&);
-	~BackwardChainer();
+	BackwardChainer(AtomSpace& as, Handle rbs);
 
 	void set_target(Handle init_target);
+	UREConfigReader& get_config();
+	const UREConfigReader& get_config() const;
 
-	void do_until(uint max_steps);
+	void do_chain();
 	void do_step();
 
 	const VarMultimap& get_chaining_result();
@@ -113,15 +115,18 @@ private:
 	                               Handle htarget_vardecl,
 	                               bool check_history,
 	                               std::vector<VarMap>& vmap);
-	HandleSeq ground_premises(const Handle& htarget, const VarMap& vmap, std::vector<VarMap>& vmap_list);
+	HandleSeq ground_premises(const Handle& htarget, const VarMap& vmap,
+	                          std::vector<VarMap>& vmap_list);
 	bool unify(const Handle& hsource, const Handle& hmatch,
 	           Handle hsource_vardecl, Handle hmatch_vardecl, VarMap& result);
 
 	Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist,
 	                       std::set<Handle> additional_free_varset);
 
-	AtomSpace* _as;
-	AtomSpace* _garbage_superspace;
+	AtomSpace& _as;
+	Handle _rbs;                // rule-based system
+	UREConfigReader _configReader;
+	AtomSpace _garbage_superspace;
 	Handle _init_target;
 
 	TargetSet _targets_set;
@@ -129,7 +134,6 @@ private:
 
 	// XXX any additional link should be reflected
 	unordered_set<Type> _logical_link_types = { AND_LINK, OR_LINK, NOT_LINK };
-
 };
 
 

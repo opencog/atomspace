@@ -28,12 +28,7 @@
 
 using namespace opencog;
 
-URECommons::URECommons(AtomSpace * as) :
-		as_(as) {
-}
-
-URECommons::~URECommons() {
-}
+URECommons::URECommons(AtomSpace& as) : _as(as) {}
 
 Handle URECommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
 		throw (opencog::InvalidParamException) {
@@ -50,18 +45,18 @@ Handle URECommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
 
 	// For searching ImplicationLinks with variables.
 	if (vnode_is_typedv) {
-		Handle h = as_->addNode(TYPE_NODE, "VariableNode");
+		Handle h = _as.addNode(TYPE_NODE, "VariableNode");
 		for (Handle hvn : variable_nodes) {
-			Handle hi = as_->addLink(TYPED_VARIABLE_LINK, hvn, h);
+			Handle hi = _as.addLink(TYPED_VARIABLE_LINK, hvn, h);
 			list_link_elem.push_back(hi);
 		}
 	} else
 		list_link_elem.insert(list_link_elem.end(), variable_nodes.begin(),
 				variable_nodes.end());
 
-	Handle var_listLink = as_->addLink(VARIABLE_LIST, list_link_elem);
+	Handle var_listLink = _as.addLink(VARIABLE_LIST, list_link_elem);
 
-	return as_->addLink(BIND_LINK, var_listLink, himplicant, himplicant);
+	return _as.addLink(BIND_LINK, var_listLink, himplicant, himplicant);
 }
 
 Handle URECommons::replace_nodes_with_varnode(Handle& handle,
@@ -73,15 +68,15 @@ Handle URECommons::replace_nodes_with_varnode(Handle& handle,
 		hvars = get_outgoing_nodes(handle, { t });
 	map<Handle, Handle> node_unique_var_map;
 	for (Handle h : hvars)
-		node_unique_var_map[h] = as_->addNode(VARIABLE_NODE,
+		node_unique_var_map[h] = _as.addNode(VARIABLE_NODE,
 				get_unique_name(h)); //TODO get_uuid is not implemented
 	return change_node_types(handle, node_unique_var_map);
 }
 
 string URECommons::get_unique_name(Handle& h) {
 //xxx temporary implementation. need to be replaced by uuid generation for making sure name is always unique
-	string name = as_->getName(h);
-	HandleSeq hs = as_->getIncoming(h);
+	string name = _as.getName(h);
+	HandleSeq hs = _as.getIncoming(h);
 	if (!hs.empty())
 		name.append(to_string(hs[0].value()));
 	name.append("-bcgen");
@@ -95,7 +90,7 @@ bool URECommons::exists_in(Handle& hlink, Handle& h) {
 		if (not LinkCast(hlink))
 			throw InvalidParamException(TRACE_INFO,
 					"Need a LINK type to look in");
-		auto outg = as_->getOutgoing(hlink);
+		auto outg = _as.getOutgoing(hlink);
 		if (find(outg.begin(), outg.end(), h) != outg.end())
 			return true;
 		else {
@@ -113,7 +108,7 @@ Handle URECommons::change_node_types(Handle& h,
 	Handle hcpy;
 	if (LinkCast(h)) {
 		HandleSeq hs_cpy;
-		HandleSeq hs = as_->getOutgoing(h);
+		HandleSeq hs = _as.getOutgoing(h);
 		for (Handle hi : hs) {
 			if (NodeCast(hi)) {
 				if (replacement_map.find(hi) != replacement_map.end())
@@ -124,8 +119,8 @@ Handle URECommons::change_node_types(Handle& h,
 				hs_cpy.push_back(change_node_types(hi, replacement_map));
 			}
 		}
-		hcpy = as_->addLink(as_->getType(h), hs_cpy);
-		hcpy->setTruthValue(as_->getTV(h));
+		hcpy = _as.addLink(_as.getType(h), hs_cpy);
+		hcpy->setTruthValue(_as.getTV(h));
 	} else if (NodeCast(h)) {
 		if (replacement_map.find(h) != replacement_map.end())
 			hcpy = replacement_map[h];
@@ -137,12 +132,12 @@ Handle URECommons::change_node_types(Handle& h,
 }
 
 void URECommons::get_root_links(Handle h, HandleSeq& parents) {
-	auto incoming = as_->getIncoming(h);
+	auto incoming = _as.getIncoming(h);
 	if (incoming.empty())
 		return;
 	else {
 		for (Handle hi : incoming) {
-			auto i = as_->getIncoming(hi);
+			auto i = _as.getIncoming(hi);
 			if (i.empty()) {
 				if (find(parents.begin(), parents.end(), hi) == parents.end())
 					parents.push_back(hi);
@@ -154,7 +149,7 @@ void URECommons::get_root_links(Handle h, HandleSeq& parents) {
 }
 
 float URECommons::tv_fitness(Handle h) {
-	TruthValuePtr ptv = as_->getTV(h);
+	TruthValuePtr ptv = _as.getTV(h);
 	confidence_t c = ptv->getConfidence();
 	strength_t s = ptv->getMean();
 	return (pow((1 - s), FITNESS_PARAM) * (pow(c, (2 - FITNESS_PARAM))));

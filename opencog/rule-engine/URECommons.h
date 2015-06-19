@@ -38,11 +38,12 @@ using namespace std;
  * Reusable functions in the PLN module
  */
 class URECommons {
+	AtomSpace& _as;
+
 public:
-	AtomSpace * as_;
 	const float FITNESS_PARAM = 0.9;
-	URECommons(AtomSpace *as);
-	virtual ~URECommons();
+	URECommons(AtomSpace& as);
+
 	/**
 	 * creates a BindLink instance that could be passed to to
 	 * PatternMatching module

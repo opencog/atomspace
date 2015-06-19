@@ -39,7 +39,7 @@ class ForwardChainer {
 private:
     friend class ::ForwardChainerUTest;
 
-    AtomSpace * _as;
+    AtomSpace& _as;
     URECommons _rec;            // utility class
 	Handle _rbs;                // rule-based system
 
@@ -67,10 +67,10 @@ public:
 	/**
 	 * Ctor. rbs is a Handle pointing to rule-based system.
 	 */
-    ForwardChainer(AtomSpace * as, Handle rbs);
-    void step(ForwardChainerCallBack& fcb);
+    ForwardChainer(AtomSpace& as, Handle rbs);
     void do_chain(ForwardChainerCallBack& fcb, Handle hsource =
             Handle::UNDEFINED);
+    void do_step(ForwardChainerCallBack& fcb);
     HandleSeq get_chaining_result(void);
 
     void setLogger(Logger* log);

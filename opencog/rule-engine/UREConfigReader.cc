@@ -67,6 +67,16 @@ int UREConfigReader::get_maximum_iterations() const
 	return _rbparams.max_iter;
 }
 
+void UREConfigReader::set_attention_allocation(bool aa)
+{
+	_rbparams.attention_alloc = aa;
+}
+
+void UREConfigReader::set_maximum_iterations(int mi)
+{
+	_rbparams.max_iter = mi;
+}
+
 HandleSeq UREConfigReader::fetch_rules(Handle rbs)
 {
 	// Retrieve rules
