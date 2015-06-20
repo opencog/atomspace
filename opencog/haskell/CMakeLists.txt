@@ -24,6 +24,14 @@ ADD_CUSTOM_COMMAND(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+ADD_CUSTOM_TARGET(haskell-atomspace-doc
+    DEPENDS haskell-atomspace
+            ${CMAKE_CURRENT_BINARY_DIR}/dist
+    COMMENT "Generating haskell library documentation..."
+    COMMAND cabal haddock --builddir=${CMAKE_CURRENT_BINARY_DIR} --html
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
 INSTALL (TARGETS haskell-atomspace
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )

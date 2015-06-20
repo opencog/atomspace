@@ -21,6 +21,9 @@ IF (DOXYGEN_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		COMMENT "Generating documentation"
 	)
+    IF (GHC_FOUND)
+        ADD_DEPENDENCIES(doxygen haskell-atomspace-doc)
+    ENDIF (GHC_FOUND)
 ELSE (DOXYGEN_FOUND)
     MESSAGE(STATUS "Doxygen not found, you won't be able to generate API documentation.")
 ENDIF (DOXYGEN_FOUND)

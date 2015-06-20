@@ -1,0 +1,38 @@
+namespace opencog {
+/**
+
+\page libhaskell Haskell bindings library
+
+The library (<em>opencog/haskell</em>) implements Haskell bindings.
+Right now, it is automatically installed, but if you want to reinstall,
+go to opencog/haskell and run:
+@code
+cabal update
+cabal install
+@endcode
+
+For appropiate Haddock documentation on the haskell library look
+at: <a href="../../opencog/haskell/doc/html/opencog-atomspace/OpenCog-AtomSpace.html">
+     opencog-atomspace</a>
+
+
+Dependencies:
+- haskell-atomspace library
+
+The <a href="http://opencog.org/wiki/Haskell">wiki page</a> describes both
+how to run it and the core functions that are provided.
+
+\if MARKER_TREE_START
+ignored by doxygen; used as markers for update-links.py;
+\endif
+
+<TABLE width="100%" border="0"><TR>
+<TD>\ref libattention "Previous"</TD>
+<TD width="100%"></TD>
+<TD>\ref libpersist "Next"</TD>
+</TR></TABLE>
+\if MARKER_TREE_END
+ignored by doxygen; used as markers for update-links.py;
+\endif
+*/
+} //~namespace opencog
