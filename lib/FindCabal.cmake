@@ -1,0 +1,22 @@
+
+FIND_PROGRAM(CABAL_EXECUTABLE cabal)
+
+IF (DEFINED CABAL_EXECUTABLE)
+    EXECUTE_PROCESS(
+        COMMAND cabal list
+        OUTPUT_QUIET
+        ERROR_VARIABLE out
+    )
+
+    IF(out MATCHES "(.)*'hackage.haskell.org' does not exist(.)*")
+        MESSAGE(STATUS "Updating cabal package list...")
+        EXECUTE_PROCESS(
+            COMMAND cabal update
+        )
+    ENDIF(out MATCHES "(.)*'hackage.haskell.org' does not exist(.)*")
+
+    SET(CABAL_FOUND TRUE)
+ELSE (DEFINED CABAL_EXECUTABLE)
+	SET(CABAL_FOUND FALSE)
+ENDIF (DEFINED CABAL_EXECUTABLE)
+
