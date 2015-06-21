@@ -3,7 +3,7 @@ FIND_PROGRAM(CABAL_EXECUTABLE cabal)
 
 IF (CABAL_EXECUTABLE)
     EXECUTE_PROCESS(
-        COMMAND cabal list
+        COMMAND cabal list nothing
         OUTPUT_QUIET
         ERROR_VARIABLE out
     )
