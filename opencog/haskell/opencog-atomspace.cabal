@@ -23,5 +23,3 @@ library
 
   extra-libraries:   haskell-atomspace
 
-  extra-lib-dirs:    /usr/local/lib/opencog
-
