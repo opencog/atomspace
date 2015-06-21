@@ -1,6 +1,20 @@
 Haskell Bindings for OpenCog:
 ============================
 
+This directory contains the implementation of Haskell bindings for the AtomSpace.
+
+GSoC 2015 - Haskell Bindings.
+
+**Student:** Marcos Pividori
+
+**Mentor:** Nil Geisweiller
+
+For general information on haskell bindings you can visit the wiki page:
+[Haskell](http://wiki.opencog.org/w/Haskell)
+
+For in depth information on the implementation and project details:
+[Haskell Bindings - GSoC 2015](http://wiki.opencog.org/w/Haskell_Bindings_-_GSoC_2015)
+
 ### Requirements
 
 To use the Haskell bindings, it is necessary to have installed:
@@ -14,26 +28,23 @@ which includes the most important tools for Haskell environment.
 
 ### Installation
 
-Go through the normal process of 
+Go through the normal process of
 [building](https://github.com/opencog/atomspace#building-atomspace) and
 [installing](https://github.com/opencog/atomspace#install) the AtomSpace.
 
-This will install automatically the haskell library.
+This will automatically install the haskell library.
 
 If you want to install only the haskell library, for example a new version,
-move to this directory (/opencog/haskell), remove the dist folder, and 
-build and install the
-opencog-atomspace haskell library with these commands:
+move to this directory (/opencog/haskell), build and install the
+opencog-atomspace haskell library with this command:
 
 ```
- cabal configure
- cabal build
  cabal install
 ```
 
 (It is necessary to previously build and install the AtomSpace, because the
 opencog-atomspace haskell library
-depends on the atomspace_wrapper library)
+depends on the haskell-atomspace C wrapper library)
 
 ### Usage
 
@@ -43,7 +54,10 @@ import OpenCog.AtomSpace
 ...
 ```
 
-### AtomSpace API
+You can find many examples on the [examples/haskell](../../examples/haskell)
+directory.
+
+### AtomSpace Environment
 
 The main idea is to build programs that work on an AtomSpace on the
 Monad 'AtomSpace'.
@@ -65,7 +79,7 @@ type AtomSpace = ReaderT AtomSpaceRef IO
 ReaderT is a monad transformer, so in fact:
 
 ```haskell
-AtomSpace a = ReaderT { runReaderT :: AtomSpaceRef -> IO a }	 
+AtomSpace a = ReaderT { runReaderT :: AtomSpaceRef -> IO a }
 ```
 
 The interpretation of runReaderT in this case is:  "given an atomspace in
@@ -106,8 +120,14 @@ Function to remove atoms from the atomspace.
 ```haskell
 remove :: Atom a -> AtomSpace Bool
 ```
+####printAtom
+Function to show the given atom in opencog notation.
+```haskell
+printAtom :: Atom a -> IO ()
+```
 ####debug:
-Debug function to print the state of the atomspace.
+Debug function to print the state of the atomspace on stderr.
 ```haskell
 debug :: AtomSpace ()
 ```
+
