@@ -132,8 +132,8 @@ static const char** get_module_paths()
     // Get current working directory.
     char* cwd = getcwd(NULL, 0);
     bool in_project = false;
-    if (0 == strncmp(PROJECT_SOURCE_DIR, cwd, sizeof(PROJECT_SOURCE_DIR)) or
-        0 == strncmp(PROJECT_BINARY_DIR, cwd, sizeof(PROJECT_BINARY_DIR)))
+    if (0 == strncmp(PROJECT_SOURCE_DIR, cwd, strlen(PROJECT_SOURCE_DIR)) or
+        0 == strncmp(PROJECT_BINARY_DIR, cwd, strlen(PROJECT_BINARY_DIR)))
         in_project = true;
     free(cwd);
 
