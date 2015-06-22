@@ -264,9 +264,7 @@ void BackwardChainerUTest::test_tvq_impossible_bc()
 
 	// load modus ponens
 	Handle top_rbs = as_.addNode(CONCEPT_NODE, UREConfigReader::URE_top_name);
-	UREConfigReader config_reader(as_, top_rbs);
-
-	BackwardChainer bc(&as_, config_reader.get_rules());
+	BackwardChainer bc(as_, top_rbs);
 
 	// negative test, BC should not modify the TV of this impossible target
 	Handle target = eval_.eval_h("(InheritanceLink (stv 0.0 0.0)"
@@ -280,7 +278,8 @@ void BackwardChainerUTest::test_tvq_impossible_bc()
 	                             "   (ConceptNode \"green\"))");
 
 	bc.set_target(target);
-	bc.do_until(100);
+	bc.get_config().set_maximum_iterations(300);
+	bc.do_chain();
 
 	TSM_ASSERT("Incorrect strength of target after BC!", target->getTruthValue()->getMean() < 0.1f);
 	TSM_ASSERT("Incorrect confidence of target after BC!", target->getTruthValue()->getConfidence() < 0.1f);
