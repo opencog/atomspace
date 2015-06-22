@@ -37,7 +37,7 @@
 using namespace opencog;
 
 BackwardChainer::BackwardChainer(AtomSpace& as, Handle rbs)
-	: _as(as), _rbs(rbs), _configReader(as, rbs),
+	: _as(as), _configReader(as, rbs),
 	  // create a garbage superspace with _as as parent, so codes acting on
 	  // _garbage will see stuff in _as, but codes acting on _as will not
 	  // see stuff in _garbage
@@ -371,7 +371,7 @@ void BackwardChainer::process_target(Target& target)
 			VarMap& m = vm_list.at(i);
 
 			logger().debug("[BackwardChainer] Checking possible permises grounding "
-						   + g->toShortString());
+			               + g->toShortString());
 
 			FindAtoms fv(VARIABLE_NODE);
 			fv.search_set(g);

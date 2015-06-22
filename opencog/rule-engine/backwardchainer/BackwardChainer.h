@@ -124,7 +124,6 @@ private:
 	                       std::set<Handle> additional_free_varset);
 
 	AtomSpace& _as;
-	Handle _rbs;                // rule-based system
 	UREConfigReader _configReader;
 	AtomSpace _garbage_superspace;
 	Handle _init_target;
