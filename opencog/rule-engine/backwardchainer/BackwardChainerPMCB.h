@@ -37,7 +37,7 @@ class BackwardChainerPMCB :
 protected:
 	AtomSpace* _as;
 	VariableListPtr _int_vars;
-	bool _reverse_node_match;
+	bool _reverse_enabled;
 
 	std::vector<std::map<Handle, Handle>> var_solns_;
 	std::vector<std::map<Handle, Handle>> pred_solns_;
@@ -46,6 +46,7 @@ public:
 	BackwardChainerPMCB(AtomSpace*, VariableListPtr, bool reverse = false);
 	virtual ~BackwardChainerPMCB();
 
+	virtual bool initiate_search(PatternMatchEngine*);
 	virtual void set_pattern(const Variables& vars,
 	                         const Pattern& pat)
 	{
@@ -54,6 +55,7 @@ public:
 	}
 
 	virtual bool node_match(const Handle&, const Handle&);
+	virtual bool fuzzy_match(const Handle&, const Handle&);
 	virtual bool grounding(const std::map<Handle, Handle> &var_soln,
 			const std::map<Handle, Handle> &pred_soln);
 
