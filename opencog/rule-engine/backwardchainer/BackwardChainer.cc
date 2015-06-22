@@ -438,7 +438,7 @@ std::vector<Rule> BackwardChainer::filter_rules(const Target& target)
 	Handle htarget = target.get_handle();
 	Handle htarget_vardecl = _garbage_superspace.addAtom(createVariableList(target.get_varseq()));
 
-	for (Rule& r : _rules_set)
+	for (Rule& r : _configReader.get_rules())
 	{
 		Handle hrule_vardecl = r.get_vardecl();
 		HandleSeq output = r.get_implicand_seq();
@@ -529,7 +529,8 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
 		for (auto& p : pred_solns[i])
 		{
 			// don't want matched clause that is part of a rule
-			if (std::any_of(_rules_set.begin(), _rules_set.end(), [&](Rule& r) {
+			auto& rules = _configReader.get_rules();
+			if (std::any_of(rules.begin(), rules.end(), [&](Rule& r) {
 						return is_atom_in_tree(r.get_handle(), p.second); }))
 			{
 				logger().debug("[BackwardChainer] matched clause in rule");
