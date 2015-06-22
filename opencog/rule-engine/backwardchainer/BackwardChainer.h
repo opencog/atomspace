@@ -130,7 +130,6 @@ private:
 	Handle _init_target;
 
 	TargetSet _targets_set;
-	std::vector<Rule> _rules_set;
 
 	// XXX any additional link should be reflected
 	unordered_set<Type> _logical_link_types = { AND_LINK, OR_LINK, NOT_LINK };
