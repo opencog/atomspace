@@ -7,24 +7,18 @@
 ; Load the rules (use load for relative path w.r.t. to that file)
 (load "bc-modus-ponens.scm")
 
-; Define a new rule base (aka rule-based system)
-(InheritanceLink
-   (ConceptNode "PLN-utest-1")
-   (ConceptNode "URE")
-)
-
 ; Associate the rules to the rule base (with weights, their semantics
 ; is currently undefined, we might settled with probabilities but it's
 ; not sure)
 (MemberLink (stv 1 1)
    pln-rule-modus-ponens
-   (ConceptNode "PLN-utest-1")
+   (ConceptNode "URE")
 )
 
 ; Termination criteria parameters
 (ExecutionLink
    (SchemaNode "URE:maximum-iterations")
-   (ConceptNode "PLN-utest-1")
+   (ConceptNode "URE")
    (NumberNode "20")
 )
 
@@ -32,5 +26,5 @@
 ; enable it)
 (EvaluationLink (stv 0 1)
    (PredicateNode "URE:attention-allocation")
-   (ConceptNode "PLN-utest-1")
+   (ConceptNode "URE")
 )

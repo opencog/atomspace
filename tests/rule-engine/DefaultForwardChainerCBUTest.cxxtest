@@ -15,7 +15,6 @@ class DefaultForwardChainerCBUTest: public CxxTest::TestSuite {
 private:
     AtomSpace as;
     SchemeEval eval;
-    Handle rbs2;
 
 public:
     DefaultForwardChainerCBUTest(void) : eval(&as)
@@ -26,7 +25,6 @@ public:
 
         eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
                   "/tests/rule-engine/bc-config-2.scm\")");
-        rbs2 = as.getNode(CONCEPT_NODE, "PLN-utest-2");
     }
 
     void setUp(void);
@@ -49,10 +47,11 @@ void DefaultForwardChainerCBUTest::test_choose_rule(void)
     logger().setPrintToStdoutFlag(true);
     logger().setLevel(Logger::DEBUG);
 
-    UREConfigReader cr2(as, rbs2);
+    Handle top_rbs = as.getNode(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+    UREConfigReader cr(as, top_rbs);
 
     FCMemory fcmem(&as);
-    fcmem.set_rules(cr2.get_rules());
+    fcmem.set_rules(cr.get_rules());
     TS_ASSERT_EQUALS(2, fcmem.get_rules().size());
     Handle h = eval.eval_h(
 	    "(InheritanceLink (ConceptNode \"cat\")(ConceptNode \"animal\"))");
