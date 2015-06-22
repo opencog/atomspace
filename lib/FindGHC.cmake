@@ -10,7 +10,7 @@
 
 FIND_PROGRAM(GHC_EXECUTABLE ghc)
 
-IF (DEFINED GHC_EXECUTABLE)
+IF (GHC_EXECUTABLE)
 	SET(GHC_FOUND TRUE)
 
 	# Non-working attempt to tell CMake what the .hs extension means.
