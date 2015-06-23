@@ -1,19 +1,42 @@
+{-# LANGUAGE GADTs #-}
 
-import OpenCog.AtomSpace.Api    (AtomSpace,asAddNode,runOnNewAtomSpace)
-import OpenCog.AtomSpace.Types  (Node(..),NodeType(..))
+import OpenCog.AtomSpace        (AtomSpace,insert,get,remove,
+                                 debug,runOnNewAtomSpace,printAtom,
+                                 Atom(..),TruthVal(..),AtomGen(..))
 import Control.Monad.IO.Class   (liftIO)
-import Data.Default             (Default(..))
 
 main :: IO ()
 main = runOnNewAtomSpace program
 
 program :: AtomSpace ()
-program = do
-              liftIO $ putStrLn "Let's add some new nodes:"
-              h1 <- asAddNode def{ nodeName = "NewNode"
-                                 , nodeType = ConceptNode }
-              h2 <- asAddNode def{ nodeName = "AnotherNewNode"
-                                 , nodeType = ConceptNode}
-              liftIO $ putStrLn $ "Added with handles "
-                                  ++ show(h1) ++ " and " ++ show(h2)
+program = let a = AndLink (ConceptNode "John" Nothing)
+                          (ConceptNode "Carlos" Nothing)
+                          (Just $ SimpleTV 0.5 0.5)
+           in do
+        liftIO $ putStrLn "Let's insert some new nodes:"
+        liftIO $ printAtom $ ConceptNode "Tall" Nothing
+        insert $ ConceptNode "Tall" Nothing
+        insert a
+        liftIO $ printAtom a
+        liftIO $ putStrLn "-----------After Insert:----------------"
+        debug
+        liftIO $ putStrLn "----------------------------------------"
+        n <- get a
+        case n of
+          Just at -> liftIO $ putStrLn "AndLink found:" >> printAtom at
+          Nothing -> liftIO $ putStrLn "No AndLink found."
+        remove a
+        liftIO $ putStrLn "-----------After Remove:----------------"
+        debug
+        liftIO $ putStrLn "----------------------------------------"
+        n <- get a
+        case n of
+          Just (AndLink _ _ _) -> liftIO $ putStrLn "AndLink found:"
+          Nothing              -> liftIO $ putStrLn "No AndLink found."
+        let list = ListLink [ AtomGen $ NumberNode 4
+                            , AtomGen $ ConceptNode "hello" Nothing
+                            , AtomGen $ NumberNode 4]
+        insert list
+        liftIO $ putStrLn "Inserted:"
+        liftIO $ printAtom list
 

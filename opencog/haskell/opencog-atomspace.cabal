@@ -10,14 +10,16 @@ build-type:          Simple
 cabal-version:       >=1.8
 
 library
-  exposed-modules:   OpenCog.AtomSpace.Api
+  exposed-modules:   OpenCog.AtomSpace
+
+  other-modules:     OpenCog.AtomSpace.Env
+                   , OpenCog.AtomSpace.Internal
+                   , OpenCog.AtomSpace.Utils
+                   , OpenCog.AtomSpace.Api
                    , OpenCog.AtomSpace.Types
 
   build-depends:     base         >=4.5
                    , transformers >=0.4
-                   , data-default >=0.5
 
   extra-libraries:   haskell-atomspace
-
-  extra-lib-dirs:    /usr/local/lib/opencog
 
