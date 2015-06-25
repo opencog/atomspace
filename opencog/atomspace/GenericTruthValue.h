@@ -73,7 +73,7 @@ class GenericTruthValue
             return new GenericTruthValue(*this);
         }
 
-        virtual bool operator==(const TruthValue& rhs) const;
+        virtual bool operator==(const GenericTruthValue& rhs) const;
         std::string toString() const;
 
     protected:

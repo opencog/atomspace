@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <math.h>
 #include "GenericTruthValue.h"
 
 using namespace opencog;
@@ -77,9 +78,11 @@ entropy_t GenericTruthValue::getEntropy() const
     return entropy;
 }
 
+
 bool GenericTruthValue::operator==(const GenericTruthValue& rhs) const
 {
-    if (NULL == rhs) return false;
+    const GenericTruthValue *stv = static_cast<const GenericTruthValue *>(&rhs);
+    if (NULL == stv) return false;
 
 #define FLOAT_ACCEPTABLE_ERROR 0.000001
     if (FLOAT_ACCEPTABLE_ERROR < fabs(frequency - rhs.frequency))
