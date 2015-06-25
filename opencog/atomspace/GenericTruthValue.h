@@ -56,7 +56,7 @@ class GenericTruthValue
 
         count_t getPositiveEvidence() const;
         count_t getTotalEvidence() const;
-        strength_t getfrequency() const;
+        strength_t getFrequency() const;
         strength_t getFuzzyStrength() const;
         confidence_t getConfidence() const;
         entropy_t getEntropy() const;

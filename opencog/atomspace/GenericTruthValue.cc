@@ -26,6 +26,9 @@
 
 using namespace opencog;
 
+#define KKK 800.0f
+#define CVAL  0.2f
+
 GenericTruthValue::GenericTruthValue(count_t pe, count_t te,
                                      strength_t f, strength_t fs,
                                      confidence_t c, entropy_t e)
@@ -58,7 +61,7 @@ count_t GenericTruthValue::getTotalEvidence() const
     return totalEvidence;
 }
 
-strength_t GenericTruthValue::getfrequency() const
+strength_t GenericTruthValue::getFrequency() const
 {
     return frequency;
 }
@@ -76,6 +79,24 @@ confidence_t GenericTruthValue::getConfidence() const
 entropy_t GenericTruthValue::getEntropy() const
 {
     return entropy;
+}
+
+GenericTruthValuePtr GenericTruthValue::merge(GenericTruthValuePtr gtv) const
+{
+    auto other_te = gtv->getTotalEvidence();
+    auto new_pe = positiveEvidence + gtv->getPositiveEvidence();
+    auto new_te = totalEvidence + other_te
+                  - std::min(totalEvidence, other_te) * CVAL;
+    auto new_f = (frequency * totalEvidence + gtv->getFrequency() * other_te)
+                 / (totalEvidence + other_te);
+    auto new_fs = std::max(fuzzyStrength, gtv->getFuzzyStrength());
+    auto new_c = new_te / (new_te + KKK);
+
+    // XXX
+    auto new_e = std::max(entropy, gtv->getEntropy());
+
+    return std::make_shared<GenericTruthValue>(new_pe, new_te, new_f, new_fs,
+                                               new_c, new_e);
 }
 
 
@@ -109,7 +130,7 @@ std::string GenericTruthValue::toString() const
     sprintf(buf, "(gtv %f %f %f %f %f %f)",
             static_cast<double>(getPositiveEvidence()),
             static_cast<double>(getTotalEvidence()),
-            static_cast<float>(getfrequency()),
+            static_cast<float>(getFrequency()),
             static_cast<float>(getFuzzyStrength()),
             static_cast<float>(getConfidence()),
             static_cast<double>(getEntropy()));
