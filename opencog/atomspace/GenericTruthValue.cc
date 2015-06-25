@@ -127,8 +127,7 @@ GenericTruthValuePtr GenericTruthValue::merge(GenericTruthValuePtr gtv) const
 
 bool GenericTruthValue::operator==(const GenericTruthValue& rhs) const
 {
-    const GenericTruthValue *stv = static_cast<const GenericTruthValue *>(&rhs);
-    if (NULL == stv) return false;
+    if (NULL == &rhs) return false;
 
 #define FLOAT_ACCEPTABLE_ERROR 0.000001
     if (FLOAT_ACCEPTABLE_ERROR < fabs(frequency - rhs.frequency))
