@@ -56,9 +56,19 @@ count_t GenericTruthValue::getPositiveEvidence() const
     return positiveEvidence;
 }
 
+count_t GenericTruthValue::getLogPositiveEvidence() const
+{
+    return log(positiveEvidence);
+}
+
 count_t GenericTruthValue::getTotalEvidence() const
 {
     return totalEvidence;
+}
+
+count_t GenericTruthValue::getLogTotalEvidence() const
+{
+    return log(totalEvidence);
 }
 
 strength_t GenericTruthValue::getFrequency() const
@@ -66,14 +76,29 @@ strength_t GenericTruthValue::getFrequency() const
     return frequency;
 }
 
+strength_t GenericTruthValue::getLogFrequency() const
+{
+    return log(frequency);
+}
+
 strength_t GenericTruthValue::getFuzzyStrength() const
 {
     return fuzzyStrength;
 }
 
+strength_t GenericTruthValue::getLogFuzzyStrength() const
+{
+    return log(fuzzyStrength);
+}
+
 confidence_t GenericTruthValue::getConfidence() const
 {
     return confidence;
+}
+
+confidence_t GenericTruthValue::getLogConfidence() const
+{
+    return log(confidence);
 }
 
 entropy_t GenericTruthValue::getEntropy() const

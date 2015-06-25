@@ -55,10 +55,20 @@ class GenericTruthValue
         GenericTruthValue(GenericTruthValue const&);
 
         count_t getPositiveEvidence() const;
+        count_t getLogPositiveEvidence() const;
+
         count_t getTotalEvidence() const;
+        count_t getLogTotalEvidence() const;
+
         strength_t getFrequency() const;
+        strength_t getLogFrequency() const;
+
         strength_t getFuzzyStrength() const;
+        strength_t getLogFuzzyStrength() const;
+
         confidence_t getConfidence() const;
+        confidence_t getLogConfidence() const;
+
         entropy_t getEntropy() const;
 
         GenericTruthValuePtr merge(GenericTruthValuePtr) const;
