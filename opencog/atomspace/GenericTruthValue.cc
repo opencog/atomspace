@@ -25,8 +25,6 @@
 
 using namespace opencog;
 
-#define CVAL 0.2f
-
 GenericTruthValue::GenericTruthValue(count_t pe, count_t te,
                                      strength_t f, strength_t fs,
                                      confidence_t c, entropy_t e)
@@ -79,11 +77,28 @@ entropy_t GenericTruthValue::getEntropy() const
     return entropy;
 }
 
-// TODO
-//GenericTruthValuePtr merge(GenericTruthValuePtr gtv) const
-//{
+bool GenericTruthValue::operator==(const GenericTruthValue& rhs) const
+{
+    if (NULL == rhs) return false;
 
-//}
+#define FLOAT_ACCEPTABLE_ERROR 0.000001
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(frequency - rhs.frequency))
+        return false;
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(fuzzyStrength - rhs.fuzzyStrength))
+        return false;
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(confidence - rhs.confidence))
+        return false;
+
+#define DOUBLE_ACCEPTABLE_ERROR 1.0e-14
+    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (rhs.positiveEvidence/positiveEvidence)))
+        return false;
+    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (rhs.totalEvidence/totalEvidence)))
+        return false;
+    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (rhs.entropy/entropy)))
+        return false;
+
+    return true;
+}
 
 std::string GenericTruthValue::toString() const
 {

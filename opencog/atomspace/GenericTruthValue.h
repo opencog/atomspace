@@ -73,14 +73,23 @@ class GenericTruthValue
             return new GenericTruthValue(*this);
         }
 
+        virtual bool operator==(const TruthValue& rhs) const;
         std::string toString() const;
 
     protected:
         count_t positiveEvidence;
+
+        // PLN count
         count_t totalEvidence;
+
+        // Probabilistic strength
         strength_t frequency;
+
+        // Fuzzy set membership strength
         strength_t fuzzyStrength;
+
         confidence_t confidence;
+
         entropy_t entropy;
 
 };
