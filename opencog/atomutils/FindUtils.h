@@ -63,7 +63,7 @@ namespace opencog {
 /// that had one of these targets occuring somewhere, anywhere, within
 /// them is in the public member `holders`. This includes the holders of
 /// holders, etc, all the way up to the very top.  The `least_holders`
-/// member will contain only those links that contain a target in thier
+/// member will contain only those links that contain a target in their
 /// immediate outgoing set.  That is, the `least_holders` are the
 /// smallest links that contain the target.
 ///
