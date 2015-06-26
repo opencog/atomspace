@@ -237,7 +237,7 @@ QUANTITY_LINK <- ORDERED_LINK
 // 
 // VirtualLinks only need to be used for those GPN's that take 2 or
 // more arguments. If they take only one, then there is no reason
-// for them to be delcared as virtual (at least, as far as the pattern
+// for them to be declared as virtual (at least, as far as the pattern
 // matcher is concerned, which, right now, is the only user of this
 // link type.)
 VIRTUAL_LINK <- EVALUATION_LINK

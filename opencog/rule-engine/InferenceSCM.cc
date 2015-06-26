@@ -120,7 +120,7 @@ Handle InferenceSCM::do_backward_chaining(Handle h, Handle rbs)
     BackwardChainer bc(*as, rbs);
     bc.set_target(h);
 
-	logger().debug("[BackwardChainer] Before do_chain");
+    logger().debug("[BackwardChainer] Before do_chain");
 
     bc.do_chain();
 

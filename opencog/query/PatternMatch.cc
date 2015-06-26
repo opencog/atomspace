@@ -377,7 +377,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	for (size_t i=0; i<_num_comps; i++)
 	{
 		dbgprt("BEGIN COMPONENT GROUNDING %zu of %zu: ======================\n",
-		       i, _num_comps);
+		       i + 1, _num_comps);
 		// Pass through the callbacks, collect up answers.
 		PMCGroundings gcb(pmcb);
 		PatternLinkPtr clp(PatternLinkCast(_component_patterns.at(i)));

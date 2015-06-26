@@ -266,7 +266,8 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 
 	_root = clauses[bestclause];
 	dbgprt("Search start node: %s\n", best_start->toShortString().c_str());
-	dbgprt("Start term is: %s\n", _starter_term->toShortString().c_str());
+	dbgprt("Start term is: %s\n", _starter_term == Handle::UNDEFINED ?
+	       "UNDEFINED" : _starter_term->toShortString().c_str());
 	dbgprt("Root clause is: %s\n", _root->toShortString().c_str());
 
 	// This should be calling the over-loaded virtual method

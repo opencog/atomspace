@@ -81,7 +81,9 @@ public:
 	 *
 	 * @return the std::set<Handle>
 	 */
-	std::set<Handle> get_varset() const { return std::set<Handle>(_vars.begin(), _vars.end()); }
+	std::set<Handle> get_varset() const {
+		return std::set<Handle>(_vars.begin(), _vars.end());
+	}
 
 	/**
 	 * Get the stored free variable mappings.
