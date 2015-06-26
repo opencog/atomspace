@@ -37,6 +37,7 @@ public:
 	void test_2rules_bc();
 
 	void test_tvq_bc();
+	void test_tvq_impossible_bc();
 };
 
 void BackwardChainerUTest::setUp()
@@ -251,3 +252,40 @@ void BackwardChainerUTest::test_tvq_bc()
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
+
+void BackwardChainerUTest::test_tvq_impossible_bc()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD",
+	             "tests/rule-engine/bc-config-1.scm,"
+	             "tests/rule-engine/bc-example.scm");
+	load_scm_files_from_config(as_);
+
+	// load modus ponens
+	Handle top_rbs = as_.addNode(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	BackwardChainer bc(as_, top_rbs);
+
+	// negative test, BC should not modify the TV of this impossible target
+	Handle target = eval_.eval_h("(InheritanceLink (stv 0.0 0.0)"
+	                             "   (ConceptNode \"RandomName\")"
+	                             "   (ConceptNode \"green\"))");
+
+	// this is not the target, but the inference path should still actually
+	// modify the TV
+	Handle hidden = eval_.eval_h("(InheritanceLink (stv 0.0 0.0)"
+	                             "   (ConceptNode \"Fritz\")"
+	                             "   (ConceptNode \"Frog\"))");
+
+	bc.set_target(target);
+	bc.get_config().set_maximum_iterations(300);
+	bc.do_chain();
+
+	TSM_ASSERT("Incorrect strength of target after BC!", target->getTruthValue()->getMean() < 0.1f);
+	TSM_ASSERT("Incorrect confidence of target after BC!", target->getTruthValue()->getConfidence() < 0.1f);
+	TSM_ASSERT("Incorrect strength of sub-target after BC!", hidden->getTruthValue()->getMean() > 0.9f);
+	TSM_ASSERT("Incorrect confidence of sub-target after BC!", hidden->getTruthValue()->getConfidence() > 0.9f);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+

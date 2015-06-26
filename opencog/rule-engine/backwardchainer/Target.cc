@@ -46,7 +46,8 @@ Target::Target(AtomSpace* as, const Handle& h)
 
 	_vars = get_free_vars_in_tree(h);
 
-	for (auto hv : _vars)
+	// _varmap is a map that bases on the external space
+	for (auto& hv : _vars)
 		_varmap[hv] = UnorderedHandleSet();
 }
 
