@@ -99,6 +99,10 @@ AtomTable::~AtomTable()
 
 bool AtomTable::isCleared(void) const
 {
+    // XXX Currently only check if stuff in derived space is gone. No
+    // checking is done on the parent. This is inline with how clear()
+    // is expected to work.
+
     if (size != 0) {
         DPRINTF("AtomTable::size is not 0\n");
         return false;
@@ -626,7 +630,12 @@ size_t AtomTable::getNumLinks() const
 size_t AtomTable::getNumAtomsOfType(Type type, bool subclass) const
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    return typeIndex.getNumAtomsOfType(type, subclass);
+    size_t result = typeIndex.getNumAtomsOfType(type, subclass);
+
+    if (_environ)
+        result += _environ->getNumAtomsOfType(type, subclass);
+
+    return result;
 }
 
 Handle AtomTable::getRandom(RandGen *rng) const
