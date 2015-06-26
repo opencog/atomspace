@@ -263,7 +263,7 @@ void BackwardChainerUTest::test_tvq_impossible_bc()
 	load_scm_files_from_config(as_);
 
 	// load modus ponens
-	Handle top_rbs = as_.addNode(CONCEPT_NODE, UREConfigReader::URE_top_name);
+	Handle top_rbs = as_.addNode(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 	BackwardChainer bc(as_, top_rbs);
 
 	// negative test, BC should not modify the TV of this impossible target
@@ -275,7 +275,7 @@ void BackwardChainerUTest::test_tvq_impossible_bc()
 	// modify the TV
 	Handle hidden = eval_.eval_h("(InheritanceLink (stv 0.0 0.0)"
 	                             "   (ConceptNode \"Fritz\")"
-	                             "   (ConceptNode \"green\"))");
+	                             "   (ConceptNode \"Frog\"))");
 
 	bc.set_target(target);
 	bc.get_config().set_maximum_iterations(300);
