@@ -78,7 +78,7 @@ void PatternLink::common_init(void)
 void PatternLink::setup_components(void)
 {
 	// If we are here, then set up a PatternLink for each connected
-	// component.  Use emplace_back to avoid a copy.
+	// component.
 	//
 	// There is a pathological case where there are no virtuals, but
 	// there are multiple disconnected components.  I think that this is
