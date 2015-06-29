@@ -79,6 +79,53 @@ UnorderedHandleSet getAllUniqueNodes(Handle h)
     return results;
 }
 
+/**
+ * Get all the atoms within a link and its sublinks.
+ *
+ * @param h     the top level link
+ * @return      a HandleSeq of atoms
+ */
+HandleSeq getAllAtoms(Handle h)
+{
+    HandleSeq results;
+    results.push_back(h);
+
+    LinkPtr lll(LinkCast(h));
+    if (lll)
+        for (const Handle& o : lll->getOutgoingSet())
+        {
+            HandleSeq sub = getAllNodes(o);
+            results.insert(results.end(), sub.begin(), sub.end());
+        }
+
+    return results;
+}
+
+/**
+ * Get all unique atoms within a link and its sublinks.
+ *
+ * Similar to getAllAtoms except there will be no repetition.
+ *
+ * @param h     the top level link
+ * @return      a UnorderedHandleSet of atoms
+ */
+UnorderedHandleSet getAllUniqueAtoms(Handle h)
+{
+    UnorderedHandleSet results;
+    results.insert(h);
+
+    LinkPtr lll(LinkCast(h));
+    if (lll)
+        for (const Handle& o : lll->getOutgoingSet())
+        {
+            UnorderedHandleSet sub = getAllUniqueNodes(o);
+            results.insert(sub.begin(), sub.end());
+        }
+
+    return results;
+}
+
+
 HandleSeq getNeighbors(const Handle& h, bool fanin,
                        bool fanout, Type desiredLinkType,
                        bool subClasses)
