@@ -81,7 +81,7 @@ public:
 				"Not a valid typename: '%s'", str.c_str());
 	}
 
-	Type getValue(void) { return value; }
+	Type get_value(void) { return value; }
 };
 
 typedef std::shared_ptr<TypeNode> TypeNodePtr;

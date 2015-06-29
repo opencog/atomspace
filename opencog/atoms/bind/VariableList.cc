@@ -127,7 +127,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 	Type t = vartype->getType();
 	if (TYPE_NODE == t)
 	{
-		Type vt = TypeNodeCast(vartype)->getValue();
+		Type vt = TypeNodeCast(vartype)->get_value();
 		std::set<Type> ts = {vt};
 		_varlist.typemap.insert(ATPair(varname, ts));
 		_varlist.varset.insert(varname);
@@ -150,7 +150,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 				              "Expected TypeNode, got %s",
 				              classserver().getTypeName(h->getType()).c_str());
 			}
-			Type vt = TypeNodeCast(h)->getValue();
+			Type vt = TypeNodeCast(h)->get_value();
 			ts.insert(vt);
 		}
 

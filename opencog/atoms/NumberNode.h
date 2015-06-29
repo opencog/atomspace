@@ -70,7 +70,7 @@ public:
 		return std::to_string(std::stod(str));
 	}
 
-	double getValue(void) { return value; }
+	double get_value(void) { return value; }
 };
 
 typedef std::shared_ptr<NumberNode> NumberNodePtr;
