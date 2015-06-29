@@ -1,0 +1,21 @@
+
+                  AIML in the AtomSpace
+                  ---------------------
+
+Under development, very incomplete.
+
+Goal: map AIML expressions to equivalent atomspace graphs, in stuch a
+way that the OpenCog pattern matcher can perform all of the same
+funcitons that AIML currently performs.
+
+Examples:
+
+        Input               that     topic     result
+(R1) Hello                    *       *        Hi there
+(R2) Hi                       *       *        <srai>Hello</srai>
+(R3) I * you                  *       *        I <star/> you too.
+(R4) What time is it          *       *        The time is <syscall>
+(R5) *                        *       *        I don't get it.
+
+
+
