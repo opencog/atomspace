@@ -24,11 +24,13 @@
 (load-from-path "simple-deduction-config.scm")
 
 ; Define knowledge base
-(define A (ConceptNode "A"))
+(define A (ConceptNode "A" (stv 1 1)))
 (define B (ConceptNode "B"))
 (define C (ConceptNode "C"))
 (define AB (ImplicationLink (stv 1 1) A B))
 (define BC (ImplicationLink (stv 1 1) B C))
+
+; 1. Test forward chaining (based on the deduction rule)
 
 ; (cog-fc AB (ConceptNode "crisp-rule-base"))
 
@@ -39,3 +41,10 @@
 ;;       (ConceptNode "C")
 ;;    )
 ;; )
+
+; 2. Test backward chaining (based on the modus ponens rule)
+
+; (cog-bc B (ConceptNode "crisp-rule-base"))
+
+; Expected output should be
+;; ???
