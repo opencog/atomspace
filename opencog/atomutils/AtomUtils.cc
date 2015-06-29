@@ -88,7 +88,7 @@ UnorderedHandleSet getAllUniqueNodes(Handle h)
 HandleSeq getAllAtoms(Handle h)
 {
     HandleSeq results;
-	results.push_back(h);
+    results.push_back(h);
 
     LinkPtr lll(LinkCast(h));
     if (lll)
@@ -112,7 +112,7 @@ HandleSeq getAllAtoms(Handle h)
 UnorderedHandleSet getAllUniqueAtoms(Handle h)
 {
     UnorderedHandleSet results;
-	results.insert(h);
+    results.insert(h);
 
     LinkPtr lll(LinkCast(h));
     if (lll)
