@@ -31,6 +31,7 @@
 
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atomutils/Substitutor.h>
+#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atoms/bind/PatternUtils.h>
 #include <opencog/atoms/bind/PatternLink.h>
 
@@ -231,6 +232,34 @@ void BackwardChainer::process_target(Target& target)
 		all_implicand_to_target_mappings.push_back(temp_mapping);
 	}
 
+	// try sub-atom unification only if no whole output unification is possible
+	if (all_implicand_to_target_mappings.empty())
+	{
+		logger().debug("[BackwardChainer] Trying sub-atom unification");
+
+		UnorderedHandleSet output_expanded;
+		for (Handle h : qrule_outputs)
+		{
+			UnorderedHandleSet hs = getAllUniqueAtoms(h);
+			output_expanded.insert(hs.begin(), hs.end());
+			output_expanded.erase(h);
+		}
+
+		for (Handle h : output_expanded)
+		{
+			VarMap temp_mapping;
+
+			if (not unify(h,
+						  htarget,
+						  _garbage_superspace.addAtom(gen_sub_varlist(h, hrule_vardecl, std::set<Handle>())),
+						  _garbage_superspace.addAtom(createVariableList(target.get_varseq())),
+						  temp_mapping))
+				continue;
+
+			all_implicand_to_target_mappings.push_back(temp_mapping);
+		}
+	}
+
 	logger().debug("[BackwardChainer] Found %d implicand's output unifiable",
 	               all_implicand_to_target_mappings.size());
 
@@ -349,14 +378,19 @@ void BackwardChainer::process_target(Target& target)
 		// so that when we ground the premise, we know how to generate
 		// the final output
 		Handle output_grounded = subt.substitute(standardized_rule.get_implicand(), implicand_normal_mapping);
+
+		logger().debug("[BackwardChainer] Output reverse grounded step 1 as " + output_grounded->toShortString());
 		output_grounded = subt.substitute(output_grounded, vm);
 
-		logger().debug("[BackwardChainer] Output reverse grounded as " + output_grounded->toShortString());
+		logger().debug("[BackwardChainer] Output reverse grounded step 2 as " + output_grounded->toShortString());
 
 		std::vector<VarMap> vm_list;
 
 		// include the implicand mapping into vm so we can do variable chasing
 		vm.insert(implicand_normal_mapping.begin(), implicand_normal_mapping.end());
+
+		for (auto& p : vm)
+			logger().debug("vm map " + p.first->toShortString() + " to " + p.second->toShortString());
 
 		// use pattern matcher to try to ground the variables (if any) in the
 		// selected premises, so we can use this grounding to "apply" the rule
@@ -379,6 +413,9 @@ void BackwardChainer::process_target(Target& target)
 			// If some grounding cannot solve the goal, will need to BC
 			if (not fv.varset.empty())
 				continue;
+
+			for (auto& p : m)
+				logger().debug("m map " + p.first->toShortString() + " to " + p.second->toShortString());
 
 			// This is a premise grounding that can solve the target, so
 			// apply it by using the mapping to ground the target, and add
@@ -458,6 +495,33 @@ std::vector<Rule> BackwardChainer::filter_rules(const Target& target)
 
 			unifiable = true;
 			break;
+		}
+
+		// if not unifiable, try sub-atom unification
+		if (not unifiable)
+		{
+			UnorderedHandleSet output_expanded;
+			for (Handle h : output)
+			{
+				UnorderedHandleSet hs = getAllUniqueAtoms(h);
+				output_expanded.insert(hs.begin(), hs.end());
+				output_expanded.erase(h);
+			}
+
+			for (Handle h : output_expanded)
+			{
+				VarMap mapping;
+
+				if (not unify(h,
+				              htarget,
+				              _garbage_superspace.addAtom(gen_sub_varlist(h, hrule_vardecl, std::set<Handle>())),
+				              htarget_vardecl,
+				              mapping))
+					continue;
+
+				unifiable = true;
+				break;
+			}
 		}
 
 		// move on to next rule if htarget cannot map to the output
@@ -684,6 +748,9 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
  * XXX Should (Link (Node A)) be unifiable to (Node A))?  BC literature never
  * unify this way, but in AtomSpace context, (Link (Node A)) does contain (Node A)
  *
+ * XXX Sub-atom unification can be done by fully expanding the implcand into
+ * a full atoms list.
+ *
  * @param hsource          the atom from which to unify
  * @param hmatch           the atom to which hsource will be unified to
  * @param hsource_vardecl  the typed VariableList of the variables in hsource
@@ -762,12 +829,13 @@ bool BackwardChainer::unify(const Handle& hsource,
 }
 
 /**
- * Given a target, select a candidate rule.
+ * Select a candidate rule from the set of filtered rules.
  *
  * XXX TODO improve selection criteria
  * XXX should these selection functions be in callbacks like the ForwardChainer?
  *
- * @param rules   a vector of rules to select from
+ * @param target  the original target the set of filtered rules are unifiable to
+ * @param rules   a vector of filtered rules to select from
  * @return        one of the rule
  */
 Rule BackwardChainer::select_rule(Target& target, const std::vector<Rule>& rules)
