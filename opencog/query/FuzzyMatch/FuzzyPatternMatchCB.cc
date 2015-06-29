@@ -235,8 +235,8 @@ bool FuzzyPatternMatchCB::link_match(const LinkPtr& pLink, const LinkPtr& gLink)
  */
 void FuzzyPatternMatchCB::check_if_accept(const Handle& ph, const Handle& gh)
 {
-    HandleSeq pnodes = getAllNodes(ph);
-    HandleSeq gnodes = getAllNodes(gh);
+    HandleSeq pnodes = get_all_nodes(ph);
+    HandleSeq gnodes = get_all_nodes(gh);
 
     // Reject the candidate if it contains any VariableNode
     auto check_vars = [](const Handle& h)

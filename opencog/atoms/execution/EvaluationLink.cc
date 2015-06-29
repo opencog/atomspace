@@ -88,7 +88,7 @@ static TruthValuePtr greater(AtomSpace* as, LinkPtr ll)
 		    (h1==NULL)? "(invalid handle)" : h1->toShortString().c_str(),
 		    (h2==NULL)? "(invalid handle)" : h2->toShortString().c_str());
 
-	if (n1->getValue() > n2->getValue())
+	if (n1->get_value() > n2->get_value())
 		return TruthValue::TRUE_TV();
 	else
 		return TruthValue::FALSE_TV();

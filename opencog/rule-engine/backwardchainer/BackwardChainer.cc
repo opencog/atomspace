@@ -240,7 +240,7 @@ void BackwardChainer::process_target(Target& target)
 		UnorderedHandleSet output_expanded;
 		for (Handle h : qrule_outputs)
 		{
-			UnorderedHandleSet hs = getAllUniqueAtoms(h);
+			UnorderedHandleSet hs = get_all_unique_atoms(h);
 			output_expanded.insert(hs.begin(), hs.end());
 			output_expanded.erase(h);
 		}
@@ -494,7 +494,7 @@ std::vector<Rule> BackwardChainer::filter_rules(const Target& target)
 			UnorderedHandleSet output_expanded;
 			for (Handle h : output)
 			{
-				UnorderedHandleSet hs = getAllUniqueAtoms(h);
+				UnorderedHandleSet hs = get_all_unique_atoms(h);
 				output_expanded.insert(hs.begin(), hs.end());
 				output_expanded.erase(h);
 			}

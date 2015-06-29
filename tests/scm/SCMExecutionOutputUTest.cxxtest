@@ -374,8 +374,8 @@ void SCMExecutionOutputUTest::test_nested(void)
 
 	NumberNodePtr ne(NumberNodeCast(enine));
 	NumberNodePtr ni(NumberNodeCast(nine));
-	double dne = ne->getValue();
-	double dni = ni->getValue();
+	double dne = ne->get_value();
+	double dni = ni->get_value();
 	TS_ASSERT_LESS_THAN(fabs(dne - dni), 0.000001);
 	TS_ASSERT_LESS_THAN(fabs(9.0 - dne), 0.000001);
 }
@@ -431,8 +431,8 @@ void SCMExecutionOutputUTest::test_numeric(void)
 
 	NumberNodePtr ne(NumberNodeCast(nexp));
 	NumberNodePtr nt(NumberNodeCast(twntyfour));
-	double dne = ne->getValue();
-	double dnt = nt->getValue();
+	double dne = ne->get_value();
+	double dnt = nt->get_value();
 	TS_ASSERT_LESS_THAN(fabs(dne - dnt), 0.000001);
 	TS_ASSERT_LESS_THAN(fabs(24.0 - dne), 0.000001);
 }

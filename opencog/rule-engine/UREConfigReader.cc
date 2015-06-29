@@ -135,7 +135,7 @@ double UREConfigReader::fetch_num_param(const string& schema_name, Handle input)
 		          schema_name.c_str(), input_name.c_str(),
 		          schema_name.c_str(), input_str.c_str(), outputs.size());
 	}
-	return NumberNodeCast(outputs.front())->getValue();
+	return NumberNodeCast(outputs.front())->get_value();
 }
 
 bool UREConfigReader::fetch_bool_param(const string& pred_name, Handle input)

@@ -153,7 +153,7 @@ static inline double get_double(AtomSpace *as, Handle h)
 			  "Expecting a NumberNode, got %s",
 		     classserver().getTypeName(h->getType()).c_str());
 
-	return nnn->getValue();
+	return nnn->get_value();
 }
 
 Handle ArithmeticLink::execute(AtomSpace* as) const

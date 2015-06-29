@@ -88,7 +88,7 @@ static inline double get_double(const Handle& h)
 	if (NULL == nnn)
 		nnn = createNumberNode(*NodeCast(h));
 
-	return nnn->getValue();
+	return nnn->get_value();
 }
 
 /// Because there is no ExpLink or PowLink that can handle repeated

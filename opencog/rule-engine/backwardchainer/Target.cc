@@ -106,7 +106,8 @@ void Target::store_varmap(VarMap& vm)
 uint Target::rule_count(const Rule& r)
 {
 	Handle hname = _as->addNode(CONCEPT_NODE, r.get_name());
-	HandleSeq q = getNeighbors(_htarget_internal, false, true, SET_LINK, false);
+	HandleSeq q = get_neighbors(_htarget_internal, false, true,
+	                            SET_LINK, false);
 
 	return std::count(q.begin(), q.end(), hname);
 }

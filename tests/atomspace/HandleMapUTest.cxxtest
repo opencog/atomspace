@@ -68,7 +68,7 @@ public:
             handleMap->add(handles[i], content[i]);
             TS_ASSERT(handleMap->contains(handles[i]));
             TS_ASSERT(handleMap->get(handles[i]) == content[i]);
-            TS_ASSERT(handleMap->getCount() == i + 1);
+            TS_ASSERT(handleMap->get_count() == i + 1);
         }
     }
 
@@ -93,7 +93,7 @@ public:
         }
         HandleMapIterator<char*>* it = handleMap->keys();
         for (int i = 0; i < N_HANDLES; i++) {
-            TS_ASSERT(it->hasNext());
+            TS_ASSERT(it->has_next());
             Handle h = it->next();
             for (int j = 0; j < N_HANDLES; j++) {
                 if (!Handle::compare(h, handles[j])) {
@@ -104,7 +104,7 @@ public:
         for (int i = 0; i < N_HANDLES; i++) {
             TS_ASSERT(iterated[i]);
         }
-        TS_ASSERT(!it->hasNext());
+        TS_ASSERT(!it->has_next());
         TS_ASSERT_THROWS(it->next(), IndexErrorException&);
         delete(it);
     }
