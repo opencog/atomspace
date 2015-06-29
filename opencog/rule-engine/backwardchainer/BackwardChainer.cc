@@ -256,6 +256,11 @@ void BackwardChainer::process_target(Target& target)
 						  temp_mapping))
 				continue;
 
+			logger().debug("[BackwardChainer] Found sub-atom unification");
+			for (auto& p : temp_mapping)
+				logger().debug("[BackwardChainer] sub-mapping is "
+				               + p.first->toShortString()
+				               + " to " + p.second->toShortString());
 			all_implicand_to_target_mappings.push_back(temp_mapping);
 		}
 	}
@@ -814,6 +819,11 @@ bool BackwardChainer::unify(const Handle& hsource,
 			}
 		}
 	}
+
+	// if none of the mapping map the whole temp_hmatch (possible in the case
+	// of sub-atom unification that map a typed variable to another variable)
+	if (good_map.size() == 0)
+		return false;
 
 	// change the mapping from temp_atomspace to current atomspace
 	for (auto& p : good_map)
