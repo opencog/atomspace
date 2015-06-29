@@ -46,6 +46,10 @@ HandleSeq getAllNodes(Handle h);
 
 UnorderedHandleSet getAllUniqueNodes(Handle h);
 
+HandleSeq getAllAtoms(Handle h);
+
+UnorderedHandleSet getAllUniqueAtoms(Handle h);
+
 /**
  * Returns neighboring atoms, following incoming links and
  * returning their outgoing sets.
