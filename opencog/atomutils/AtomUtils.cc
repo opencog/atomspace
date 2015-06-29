@@ -36,7 +36,7 @@ namespace opencog
  * @param h     the top level link
  * @return      a HandleSeq of nodes
  */
-HandleSeq getAllNodes(Handle h)
+HandleSeq get_all_nodes(Handle h)
 {
     HandleSeq results;
 
@@ -44,7 +44,7 @@ HandleSeq getAllNodes(Handle h)
     if (lll)
         for (const Handle& o : lll->getOutgoingSet())
         {
-            HandleSeq sub = getAllNodes(o);
+            HandleSeq sub = get_all_nodes(o);
             results.insert(results.end(), sub.begin(), sub.end());
         }
     else
@@ -62,7 +62,7 @@ HandleSeq getAllNodes(Handle h)
  * @param h     the top level link
  * @return      a UnorderedHandleSet of nodes
  */
-UnorderedHandleSet getAllUniqueNodes(Handle h)
+UnorderedHandleSet get_all_unique_nodes(Handle h)
 {
     UnorderedHandleSet results;
 
@@ -70,7 +70,7 @@ UnorderedHandleSet getAllUniqueNodes(Handle h)
     if (lll)
         for (const Handle& o : lll->getOutgoingSet())
         {
-            UnorderedHandleSet sub = getAllUniqueNodes(o);
+            UnorderedHandleSet sub = get_all_unique_nodes(o);
             results.insert(sub.begin(), sub.end());
         }
     else
@@ -85,7 +85,7 @@ UnorderedHandleSet getAllUniqueNodes(Handle h)
  * @param h     the top level link
  * @return      a HandleSeq of atoms
  */
-HandleSeq getAllAtoms(Handle h)
+HandleSeq get_all_atoms(Handle h)
 {
     HandleSeq results;
     results.push_back(h);
@@ -94,7 +94,7 @@ HandleSeq getAllAtoms(Handle h)
     if (lll)
         for (const Handle& o : lll->getOutgoingSet())
         {
-            HandleSeq sub = getAllNodes(o);
+            HandleSeq sub = get_all_nodes(o);
             results.insert(results.end(), sub.begin(), sub.end());
         }
 
@@ -109,7 +109,7 @@ HandleSeq getAllAtoms(Handle h)
  * @param h     the top level link
  * @return      a UnorderedHandleSet of atoms
  */
-UnorderedHandleSet getAllUniqueAtoms(Handle h)
+UnorderedHandleSet get_all_unique_atoms(Handle h)
 {
     UnorderedHandleSet results;
     results.insert(h);
@@ -118,7 +118,7 @@ UnorderedHandleSet getAllUniqueAtoms(Handle h)
     if (lll)
         for (const Handle& o : lll->getOutgoingSet())
         {
-            UnorderedHandleSet sub = getAllUniqueNodes(o);
+            UnorderedHandleSet sub = get_all_unique_nodes(o);
             results.insert(sub.begin(), sub.end());
         }
 
@@ -126,9 +126,9 @@ UnorderedHandleSet getAllUniqueAtoms(Handle h)
 }
 
 
-HandleSeq getNeighbors(const Handle& h, bool fanin,
-                       bool fanout, Type desiredLinkType,
-                       bool subClasses)
+HandleSeq get_neighbors(const Handle& h, bool fanin,
+                        bool fanout, Type desiredLinkType,
+                        bool subClasses)
 {
     if (h == NULL) {
         throw InvalidParamException(TRACE_INFO,

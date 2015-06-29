@@ -172,7 +172,7 @@ public:
      *
      * @return Total number of elements in the hash table.
      */
-    int getCount()
+    int get_count()
     {
         std::lock_guard<std::mutex> lck(_mtx);
         return _handle_map.size();
@@ -184,7 +184,7 @@ public:
      *
      * @return Size of the hash table (number of possible collision lists).
      */
-    int getSize()
+    int get_size()
     {
         std::lock_guard<std::mutex> lck(_mtx);
 
@@ -243,7 +243,7 @@ public:
      *
      * @return Whether there still are elements to be iterated.
      */
-    bool hasNext()
+    bool has_next()
     {
         std::lock_guard<std::mutex> lck(map->_mtx);
         return current != map->_handle_map.end();
@@ -257,7 +257,7 @@ public:
      */
     Handle next() throw (IndexErrorException)
     {
-        if (!hasNext()) {
+        if (!has_next()) {
             throw IndexErrorException(TRACE_INFO, "HandleMapIterator out of bounds");
         }
 

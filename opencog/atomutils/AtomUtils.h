@@ -42,13 +42,13 @@ const bool NO_SUBCLASSES = false;
  *
  * Contains methods and algorithms which might be useful to other processes.
  */
-HandleSeq getAllNodes(Handle h);
+HandleSeq get_all_nodes(Handle h);
 
-UnorderedHandleSet getAllUniqueNodes(Handle h);
+UnorderedHandleSet get_all_unique_nodes(Handle h);
 
-HandleSeq getAllAtoms(Handle h);
+HandleSeq get_all_atoms(Handle h);
 
-UnorderedHandleSet getAllUniqueAtoms(Handle h);
+UnorderedHandleSet get_all_unique_atoms(Handle h);
 
 /**
  * Returns neighboring atoms, following incoming links and
@@ -62,8 +62,8 @@ UnorderedHandleSet getAllUniqueAtoms(Handle h);
  * @param linkType Follow only these types of links.
  * @param subClasses Follow subtypes of linkType too.
  */
-HandleSeq getNeighbors(const Handle&, bool fanin=true, bool fanout=true,
-                       Type linkType=LINK, bool subClasses=true);
+HandleSeq get_neighbors(const Handle&, bool fanin=true, bool fanout=true,
+                        Type linkType=LINK, bool subClasses=true);
 
 /**
  * Given an atom (a link or node), Return all its children nodes
