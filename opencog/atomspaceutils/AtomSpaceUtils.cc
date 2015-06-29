@@ -25,7 +25,7 @@
 
 namespace opencog {
 
-Handle addPrefixedNode(AtomSpace& as, Type t, const std::string& prefix)
+Handle add_prefixed_node(AtomSpace& as, Type t, const std::string& prefix)
 {
     static const char alphanum[] =
         "0123456789"

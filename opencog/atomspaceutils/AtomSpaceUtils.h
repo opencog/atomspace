@@ -36,7 +36,7 @@ namespace opencog
  * Add a new node to the AtomSpace. A random 16-character string
  * will be appended to the provided name.
  **/
-Handle addPrefixedNode(AtomSpace&, Type, const std::string& prefix = "");
+Handle add_prefixed_node(AtomSpace&, Type, const std::string& prefix = "");
 
 /** @}*/
 }
