@@ -24,6 +24,7 @@ ADD_LIBRARY (atomspace SHARED
 	CountTruthValue.cc
 	FixedIntegerIndex.cc
 	FuzzyTruthValue.cc
+	GenericTruthValue.cc
 	Handle.cc
 	HandleSeqIndex.cc
 	HandleSetIndex.cc
@@ -69,6 +70,7 @@ INSTALL (FILES
 	CountTruthValue.h
 	FixedIntegerIndex.h
 	FuzzyTruthValue.h
+	GenericTruthValue.h
 	Handle.h
 	HandleSeqIndex.h
 	HandleSetIndex.h
