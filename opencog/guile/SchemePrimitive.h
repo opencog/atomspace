@@ -101,7 +101,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			HandleSeq (T::*q_h)(Handle);
 			HandleSeq (T::*q_hti)(Handle, Type, int);
 			HandleSeq (T::*q_htib)(Handle, Type, int, bool);
-			HandleSeqSeq (T::*k_h)(Handle);
+			HandleSeqSeq (T::*k_hi)(Handle, int);
 			const std::string& (T::*s_s)(const std::string&);
 			const std::string& (T::*s_ss)(const std::string&,
 			                              const std::string&);
@@ -139,7 +139,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			Q_H,   // return HandleSeq, take handle
 			Q_HTI, // return HandleSeq, take handle, type, and int
 			Q_HTIB,// return HandleSeq, take handle, type, and bool
-			K_H,   // return HandleSeqSeq, take Handle
+			K_HI,  // return HandleSeqSeq, take Handle, int
 			S_S,   // return string, take string
 			S_SS,  // return string, take two strings
 			S_SSS, // return string, take three strings
@@ -327,11 +327,15 @@ class SchemePrimitive : public PrimitiveEnviron
 					}
 					break;
 				}
-				case K_H:
+				case K_HI:
 				{
-					// the only argument is a handle
-					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name));
-					HandleSeqSeq rHSS = (that->*method.k_h)(h);
+					// First arg is a handle
+					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
+
+					// Second arg is an int
+					int i = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
+
+					HandleSeqSeq rHSS = (that->*method.k_hi)(h, i);
 
 					rc = SCM_EOL;
 
@@ -550,7 +554,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_1(Q_H, q_h, HandleSeq, Handle)
 		DECLARE_CONSTR_3(Q_HTI, q_hti, HandleSeq, Handle, Type, int)
 		DECLARE_CONSTR_4(Q_HTIB, q_htib, HandleSeq, Handle, Type, int, bool)
-		DECLARE_CONSTR_1(K_H, k_h, HandleSeqSeq, Handle)
+		DECLARE_CONSTR_2(K_HI, k_hi, HandleSeqSeq, Handle, int)
 		DECLARE_CONSTR_1(S_S,  s_s,  const std::string&, const std::string&)
 		DECLARE_CONSTR_2(S_SS, s_ss, const std::string&, const std::string&,
 		                             const std::string&)
@@ -617,7 +621,6 @@ inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2,ARG
 
 DECLARE_DECLARE_1(Handle, Handle)
 DECLARE_DECLARE_1(HandleSeq, Handle)
-DECLARE_DECLARE_1(HandleSeqSeq, Handle)
 DECLARE_DECLARE_1(const std::string&, const std::string&)
 DECLARE_DECLARE_1(TruthValuePtr, Handle)
 DECLARE_DECLARE_1(void, Handle)
@@ -630,6 +633,7 @@ DECLARE_DECLARE_2(Handle, Handle, int)
 DECLARE_DECLARE_2(Handle, Handle, Handle)
 DECLARE_DECLARE_2(Handle, Handle, const std::string&)
 DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
+DECLARE_DECLARE_2(HandleSeqSeq, Handle, int)
 DECLARE_DECLARE_2(const std::string&, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, Type, int)
