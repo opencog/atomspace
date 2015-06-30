@@ -117,13 +117,13 @@ class BindlinkTest(TestCase):
         self.assertEquals(atom.type, types.SetLink)
 
 
-    def test_pln_bindlink(self):
+    def test_af_bindlink(self):
 
         # Remember the starting atomspace size.
         starting_size = self.atomspace.size()
 
         # Run bindlink.
-        result = pln_bindlink(self.atomspace, self.bindlink_handle)
+        result = af_bindlink(self.atomspace, self.bindlink_handle)
         self.assertTrue(result is not None and result.value() > 0)
 
         # Check the ending atomspace size, it should have added one SetLink.
