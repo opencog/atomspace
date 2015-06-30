@@ -56,8 +56,8 @@ class ExecutionOutputUTest :  public CxxTest::TestSuite
 		void test_varsub(void);
 };
 
-#define an as->addNode
-#define al as->addLink
+#define an as->add_node
+#define al as->add_link
 void ExecutionOutputUTest::tearDown(void)
 {
 	delete as;
@@ -78,8 +78,8 @@ void ExecutionOutputUTest::setUp(void)
  *          WordNode "capital"
  *          DefinedLinguisticRelationshipNode "of"
  */
-#define getlink(hand,pos) as->getOutgoing(hand,pos)
-#define getarity(hand) as->getArity(hand)
+#define getlink(hand,pos) as->get_outgoing(hand,pos)
+#define getarity(hand) as->get_arity(hand)
 
 void ExecutionOutputUTest::test_exec(void)
 {

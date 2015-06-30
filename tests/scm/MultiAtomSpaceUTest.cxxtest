@@ -66,8 +66,8 @@ class MultiAtomSpace :  public CxxTest::TestSuite
 /*
  * This function sets up .. whatever.
  */
-#define an as->addNode
-#define al as->addLink
+#define an as->add_node
+#define al as->add_link
 void MultiAtomSpace::setUp(void)
 {
 	main_as = new AtomSpace();
@@ -314,13 +314,13 @@ void MultiAtomSpace::test_nest(void)
 	Handle hl = lev->eval_h("(ListLink a b)");
 
 	// The atomspace sizes should be as expected ...
-	TSM_ASSERT("Expect two atoms in main atomspace", 2 == main_as->getSize());
-	TSM_ASSERT("Expect two nodes in main atomspace", 2 == main_as->getNumNodes());
-	TSM_ASSERT("Expect zero links in main atomspace", 0 == main_as->getNumLinks());
+	TSM_ASSERT("Expect two atoms in main atomspace", 2 == main_as->get_size());
+	TSM_ASSERT("Expect two nodes in main atomspace", 2 == main_as->get_num_nodes());
+	TSM_ASSERT("Expect zero links in main atomspace", 0 == main_as->get_num_links());
 
-	TSM_ASSERT("Expect one atoms in local atomspace", 1 == locas->getSize());
-	TSM_ASSERT("Expect zero nodes in local atomspace", 0 == locas->getNumNodes());
-	TSM_ASSERT("Expect one link in local atomspace", 1 == locas->getNumLinks());
+	TSM_ASSERT("Expect one atoms in local atomspace", 1 == locas->get_size());
+	TSM_ASSERT("Expect zero nodes in local atomspace", 0 == locas->get_num_nodes());
+	TSM_ASSERT("Expect one link in local atomspace", 1 == locas->get_num_links());
 
 	// The outgoing set should not be copied, but should be the original.
 	LinkPtr lll(LinkCast(hl));
@@ -331,9 +331,9 @@ void MultiAtomSpace::test_nest(void)
 	delete locas;
 
 	// Above deletion should not affect the main atomspace
-	TSM_ASSERT("Still two atoms in main atomspace", 2 == main_as->getSize());
-	TSM_ASSERT("Still two nodes in main atomspace", 2 == main_as->getNumNodes());
-	TSM_ASSERT("Still zero links in main atomspace", 0 == main_as->getNumLinks());
+	TSM_ASSERT("Still two atoms in main atomspace", 2 == main_as->get_size());
+	TSM_ASSERT("Still two nodes in main atomspace", 2 == main_as->get_num_nodes());
+	TSM_ASSERT("Still zero links in main atomspace", 0 == main_as->get_num_links());
 
 	// The pointer lll should still be alive, even though the atomspace
 	// is gone.

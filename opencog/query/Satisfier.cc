@@ -99,7 +99,7 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink)
 	SatisfyingSet sater(as);
 	bl->satisfy(sater);
 
-	return as->addLink(SET_LINK, sater._satisfying_set);
+	return as->add_link(SET_LINK, sater._satisfying_set);
 }
 
 /* ===================== END OF FILE ===================== */

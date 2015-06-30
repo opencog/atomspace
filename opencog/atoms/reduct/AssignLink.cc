@@ -138,10 +138,10 @@ Handle AssignLink::execute(AtomSpace * as) const
 		// atoms to always live at the very top of the atomspace.
 		// However, I don't see any plausable alternatives to this,
 		// right now.
-		as->removeAtom(Handle(lp), true);
+		as->remove_atom(Handle(lp), true);
 	}
 
-	return as->addAtom(createLink(_link_type, _outset));
+	return as->add_atom(createLink(_link_type, _outset));
 }
 
 // ============================================================
@@ -150,7 +150,7 @@ Handle InsertLink::execute(AtomSpace* as) const
 {
 	if (NULL == as)
 		return Handle(createLink(_link_type, _outset));
-	return as->addAtom(createLink(_link_type, _outset));
+	return as->add_atom(createLink(_link_type, _outset));
 }
 
 InsertLink::InsertLink(const HandleSeq& oset,
@@ -226,7 +226,7 @@ Handle RemoveLink::execute(AtomSpace* as) const
 			}
 			if (not match) continue;
 
-			as->removeAtom(Handle(lp), true);
+			as->remove_atom(Handle(lp), true);
 		}
 		return Handle::UNDEFINED;
 	}
@@ -235,7 +235,7 @@ Handle RemoveLink::execute(AtomSpace* as) const
 	// In this case, deleted everything that has the same arity, and does
 	// not contain variables.
 	HandleSeq seq;
-	as->getHandlesByType(seq, _link_type);
+	as->get_handles_by_type(seq, _link_type);
 	for (const Handle& h : seq)
 	{
 		LinkPtr lp = LinkCast(h);
@@ -256,7 +256,7 @@ Handle RemoveLink::execute(AtomSpace* as) const
 		}
 
 		if (not match) continue;
-		as->removeAtom(h, true);
+		as->remove_atom(h, true);
 	}
 	return Handle::UNDEFINED;
 }

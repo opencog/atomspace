@@ -125,7 +125,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 			if (nh != ho) changed = true;
 		}
 		if (changed)
-			args = as->addLink(LIST_LINK, new_oset);
+			args = as->add_link(LIST_LINK, new_oset);
 	}
 
 	// Get the schema name.

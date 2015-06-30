@@ -522,7 +522,7 @@ void InitiateSearchCB::find_rarest(const Handle& clause,
 	LinkPtr lll(LinkCast(clause));
 	if (NULL == lll) return;
 
-	size_t num = (size_t) _as->getNumAtomsOfType(t);
+	size_t num = (size_t) _as->get_num_atoms_of_type(t);
 	if (num < count)
 	{
 		count = num;
@@ -583,7 +583,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 	Type ptype = _starter_term->getType();
 
 	HandleSeq handle_set;
-	_as->getHandlesByType(handle_set, ptype);
+	_as->get_handles_by_type(handle_set, ptype);
 
 #ifdef DEBUG
 	size_t i = 0;
@@ -632,7 +632,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 		dbgprt("Type-restictions set size = %lu\n", typeset.size());
 		for (Type t : typeset)
 		{
-			size_t num = (size_t) _as->getNumAtomsOfType(t);
+			size_t num = (size_t) _as->get_num_atoms_of_type(t);
 			dbgprt("Type = %s has %lu atoms in the atomspace\n",
 			       _classserver.getTypeName(t).c_str(), num);
 			if (0 < num and num < count)
@@ -683,9 +683,9 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 
 	HandleSeq handle_set;
 	if (ptype == ATOM)
-		_as->getHandlesByType(handle_set, ptype, true);
+		_as->get_handles_by_type(handle_set, ptype, true);
 	else
-		_as->getHandlesByType(handle_set, ptype);
+		_as->get_handles_by_type(handle_set, ptype);
 
 	dbgprt("Atomspace reported %lu atoms\n", handle_set.size());
 

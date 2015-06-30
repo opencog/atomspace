@@ -66,8 +66,8 @@ class Boolean2NotUTest :  public CxxTest::TestSuite
  *      THEN ^3_isa($var1, $var2)
  * i.e. want to assure the *absence* of DEFINITE_FLAG, and of HYP.
  */
-#define an as->addNode
-#define al as->addLink
+#define an as->add_node
+#define al as->add_link
 void Boolean2NotUTest::tearDown(void)
 {
 	delete as;
@@ -228,8 +228,8 @@ void Boolean2NotUTest::setUp(void)
  *          ConceptNode "Berlin"
  *          ConceptNode "city"
  */
-#define getlink(hand,pos) as->getOutgoing(hand,pos)
-#define getarity(hand) as->getArity(hand)
+#define getlink(hand,pos) as->get_outgoing(hand,pos)
+#define getarity(hand) as->get_arity(hand)
 
 void Boolean2NotUTest::test_isa(void)
 {

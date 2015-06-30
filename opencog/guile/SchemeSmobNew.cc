@@ -314,7 +314,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	try
 	{
 		// Now, create the actual node... in the actual atom space.
-		h = atomspace->addNode(t, name);
+		h = atomspace->add_node(t, name);
 
 		// tv->clone is called here, because, for the atomspace, we want
 		// to use a use-counted std:shared_ptr, whereas in guile, we are
@@ -356,7 +356,7 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 	if (NULL == atomspace) atomspace = ss_get_env_as("cog-node");
 
 	// Now, look for the actual node... in the actual atom space.
-	Handle h(atomspace->getHandle(t, name));
+	Handle h(atomspace->get_handle(t, name));
 	if (Handle::UNDEFINED == h) return SCM_EOL;
 	if (NULL == h) return SCM_EOL;
 
@@ -448,7 +448,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	try
 	{
 		// Now, create the actual link... in the actual atom space.
-		h = atomspace->addLink(t, outgoing_set);
+		h = atomspace->add_link(t, outgoing_set);
 
 		// Fish out a truth value, if its there.
 		const TruthValue *tv = get_tv_from_list(satom_list);
@@ -487,7 +487,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 	if (NULL == atomspace) atomspace = ss_get_env_as("cog-link");
 
 	// Now, look to find the actual link... in the actual atom space.
-	Handle h(atomspace->getHandle(t, outgoing_set));
+	Handle h(atomspace->get_handle(t, outgoing_set));
 	if (Handle::UNDEFINED == h) return SCM_EOL;
 	if (NULL == h) return SCM_EOL;
 
@@ -527,7 +527,7 @@ SCM SchemeSmob::ss_delete (SCM satom, SCM kv_pairs)
 
 	// AtomSpace::removeAtom() returns true if atom was deleted,
 	// else returns false
-	bool rc = atomspace->removeAtom(h, false);
+	bool rc = atomspace->remove_atom(h, false);
 
 	// rc should always be true at this point ...
 	if (rc) return SCM_BOOL_T;
@@ -547,7 +547,7 @@ SCM SchemeSmob::ss_delete_recursive (SCM satom, SCM kv_pairs)
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
 	if (NULL == atomspace) atomspace = ss_get_env_as("cog-delete-recursive");
 
-	bool rc = atomspace->removeAtom(h, true);
+	bool rc = atomspace->remove_atom(h, true);
 
 	if (rc) return SCM_BOOL_T;
 	return SCM_BOOL_F;
@@ -577,7 +577,7 @@ SCM SchemeSmob::ss_purge (SCM satom, SCM kv_pairs)
 
 	// AtomSpace::purgeAtom() returns true if atom was purged,
 	// else returns false
-	bool rc = atomspace->purgeAtom(h, false);
+	bool rc = atomspace->purge_atom(h, false);
 
 	// rc should always be true at this point ...
 	if (rc) return SCM_BOOL_T;
@@ -597,7 +597,7 @@ SCM SchemeSmob::ss_purge_recursive (SCM satom, SCM kv_pairs)
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
 	if (NULL == atomspace) atomspace = ss_get_env_as("cog-purge-recursive");
 
-	bool rc = atomspace->purgeAtom(h, true);
+	bool rc = atomspace->purge_atom(h, true);
 
 	if (rc) return SCM_BOOL_T;
 	return SCM_BOOL_F;

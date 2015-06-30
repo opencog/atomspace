@@ -269,8 +269,8 @@ void PatternCrashUTest::test_one_thing(void)
 	for (auto& h : fv.varset)
 	   vars.push_back(h);
 
-	Handle htarget_vardecl = _as->addAtom(createVariableList(vars));
-	Handle hpattern = _as->addAtom(createPatternLink(htarget_vardecl, htarget));
+	Handle htarget_vardecl = _as->add_atom(createVariableList(vars));
+	Handle hpattern = _as->add_atom(createPatternLink(htarget_vardecl, htarget));
 
 	PatternLinkPtr sl = PatternLinkCast(hpattern);
 	PMCB pmcb(_as);

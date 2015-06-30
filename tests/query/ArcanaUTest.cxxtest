@@ -90,8 +90,8 @@ void ArcanaUTest::test_repeats(void)
     load_scm_files_from_config(*as);
 
     Handle same = eval->eval_h("(cog-bind (repeat-same))");
-    printf("same, num solutions=%d\n", as->getArity(same));
-    TS_ASSERT_EQUALS(1, as->getArity(same));
+    printf("same, num solutions=%d\n", as->get_arity(same));
+    TS_ASSERT_EQUALS(1, as->get_arity(same));
 
     Handle diff = eval->eval_h("(cog-bind (repeat-different))");
 
@@ -112,15 +112,15 @@ void ArcanaUTest::test_repeats(void)
     TS_ASSERT_EQUALS(true, pass);
 
     Handle d3d = eval->eval_h("(cog-bind (repeat-diff-thrice))");
-    printf("d3d, num solutions=%d\n", as->getArity(d3d));
-    TS_ASSERT(1 <= as->getArity(d3d));
-    TS_ASSERT(as->getArity(d3d) <= 3);
+    printf("d3d, num solutions=%d\n", as->get_arity(d3d));
+    TS_ASSERT(1 <= as->get_arity(d3d));
+    TS_ASSERT(as->get_arity(d3d) <= 3);
 
     Handle thrice = eval->eval_h("(cog-bind (repeat-thrice))");
-    printf("thrice, num solutions=%d\n", as->getArity(thrice));
-    TS_ASSERT_EQUALS(1, as->getArity(thrice));
+    printf("thrice, num solutions=%d\n", as->get_arity(thrice));
+    TS_ASSERT_EQUALS(1, as->get_arity(thrice));
 
     Handle once = eval->eval_h("(cog-bind (repeat-once))");
-    printf("once, num solutions=%d\n", as->getArity(once));
-    TS_ASSERT_EQUALS(1, as->getArity(once));
+    printf("once, num solutions=%d\n", as->get_arity(once));
+    TS_ASSERT_EQUALS(1, as->get_arity(once));
 }

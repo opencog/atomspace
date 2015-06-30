@@ -47,7 +47,7 @@ void DefaultForwardChainerCBUTest::test_choose_rule(void)
     logger().setPrintToStdoutFlag(true);
     logger().setLevel(Logger::DEBUG);
 
-    Handle top_rbs = as.getNode(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+    Handle top_rbs = as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
     UREConfigReader cr(as, top_rbs);
 
     FCMemory fcmem(&as);
@@ -61,7 +61,7 @@ void DefaultForwardChainerCBUTest::test_choose_rule(void)
     vector<Rule*> rule = dfcb.choose_rules(fcmem);
     TS_ASSERT_EQUALS(1, rule.size());
     HandleSeq bindlinks;
-    as.getHandlesByType(back_inserter(bindlinks), BIND_LINK);
+    as.get_handles_by_type(back_inserter(bindlinks), BIND_LINK);
     auto it = find(bindlinks.begin(), bindlinks.end(), rule[0]->get_handle());
     TS_ASSERT_DIFFERS(it, bindlinks.end());
 }

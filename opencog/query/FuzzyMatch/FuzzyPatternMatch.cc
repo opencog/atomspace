@@ -59,7 +59,7 @@ Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp)
 
     // The result_list contains a list of the grounded expressions.
     // Turn it into a true list, and return it.
-    Handle gl = as->addLink(LIST_LINK, fpmcb.solns);
+    Handle gl = as->add_link(LIST_LINK, fpmcb.solns);
     return gl;
 #else
     return Handle::UNDEFINED;

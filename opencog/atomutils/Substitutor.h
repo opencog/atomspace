@@ -92,7 +92,7 @@ public:
 		// The returned handle is not yet in the atomspace. Add it now.
 		Handle hn = walk_tree(expr);
 		if (NULL != hn)
-			return _as->addAtom(hn);
+			return _as->add_atom(hn);
 		return hn;
 	}
 };

@@ -64,8 +64,8 @@ class BooleanUTest :  public CxxTest::TestSuite
  *      THEN ^3_isa($var1, $var2)
  * i.e. want to assure the *absence* of DEFINITE_FLAG
  */
-#define an as->addNode
-#define al as->addLink
+#define an as->add_node
+#define al as->add_link
 void BooleanUTest::tearDown(void)
 {
 	delete as;
@@ -199,8 +199,8 @@ void BooleanUTest::setUp(void)
  *          ConceptNode "Berlin"
  *          ConceptNode "city"
  */
-#define getlink(hand,pos) as->getOutgoing(hand,pos)
-#define getarity(hand) as->getArity(hand)
+#define getlink(hand,pos) as->get_outgoing(hand,pos)
+#define getarity(hand) as->get_arity(hand)
 
 void BooleanUTest::test_isa(void)
 {

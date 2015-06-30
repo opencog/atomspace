@@ -40,10 +40,10 @@ Handle add_prefixed_node(AtomSpace& as, Type t, const std::string& prefix)
         for (int i = 0; i < len; ++i) {
             name += alphanum[rand() % (sizeof(alphanum) - 1)];
         }
-        result = as.getHandle(t, name);
-    } while (as.isValidHandle(result));
+        result = as.get_handle(t, name);
+    } while (as.is_valid_handle(result));
 
-    return as.addNode(t, name);
+    return as.add_node(t, name);
 }
 
 } // namespace opencog

@@ -69,8 +69,8 @@ class StackMoreUTest :  public CxxTest::TestSuite
 /*
  * This function sets up an implication link, and some data.
  */
-#define an as->addNode
-#define al as->addLink
+#define an as->add_node
+#define al as->add_link
 void StackMoreUTest::setUp(void)
 {
 	as = new AtomSpace();
@@ -104,8 +104,8 @@ void StackMoreUTest::setUp(void)
  * Test of pattern matching on multi-variable matches with
  * confounding intermediate data.
  */
-#define getlink(hand,pos) as->getOutgoing(hand,pos)
-#define getarity(hand) as->getArity(hand)
+#define getlink(hand,pos) as->get_outgoing(hand,pos)
+#define getarity(hand) as->get_arity(hand)
 
 void StackMoreUTest::test_oo(void)
 {

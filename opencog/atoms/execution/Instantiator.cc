@@ -115,7 +115,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	{
 		for (const Handle& h: oset_results)
 			if (VARIABLE_NODE != h->getType())
-				_as->removeAtom(h, true);
+				_as->remove_atom(h, true);
 
 		return Handle::UNDEFINED;
 	}
@@ -146,7 +146,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			// broken.
 			size_t sz = oset_results.size();
 			for (size_t i=0; i< sz; i++)
-				oset_results[i] = _as->addAtom(oset_results[i]);
+				oset_results[i] = _as->add_atom(oset_results[i]);
 
 			ExecutionOutputLinkPtr eolp(createExecutionOutputLink(oset_results));
 			return eolp->execute(_as);
@@ -166,7 +166,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	{
 		size_t sz = oset_results.size();
 		for (size_t i=0; i< sz; i++)
-			oset_results[i] = _as->addAtom(oset_results[i]);
+			oset_results[i] = _as->add_atom(oset_results[i]);
 
 		LinkPtr lp = createLink(GET_LINK, oset_results);
 
@@ -208,7 +208,7 @@ Handle Instantiator::instantiate(const Handle& expr,
 	// A null pointer means that we hit
 	Handle gnd = walk_tree(expr);
 	if (NULL != gnd)
-		return _as->addAtom(gnd);
+		return _as->add_atom(gnd);
 	return gnd;
 }
 

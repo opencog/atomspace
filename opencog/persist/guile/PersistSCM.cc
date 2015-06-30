@@ -68,7 +68,7 @@ void PersistSCM::init(void)
 Handle PersistSCM::fetch_atom(Handle h)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-atom");
-	h = as->fetchAtom(h);
+	h = as->fetch_atom(h);
 	return h;
 }
 
@@ -76,7 +76,7 @@ Handle PersistSCM::fetch_incoming_set(Handle h)
 {
 	// The "false" flag here means that the fetch is NOT recursive.
 	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-incoming-set");
-	h = as->fetchIncomingSet(h, false);
+	h = as->fetch_incoming_set(h, false);
 	return h;
 }
 
@@ -87,14 +87,14 @@ Handle PersistSCM::fetch_incoming_set(Handle h)
 Handle PersistSCM::store_atom(Handle h)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("store-atom");
-	as->storeAtom(h);
+	as->store_atom(h);
 	return h;
 }
 
 void PersistSCM::load_type(Type t)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("load-atoms-of-type");
-	as->fetchAllAtomsOfType(t);
+	as->fetch_all_atoms_of_type(t);
 }
 
 void PersistSCM::barrier(void)

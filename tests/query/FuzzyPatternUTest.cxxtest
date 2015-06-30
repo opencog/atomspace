@@ -100,8 +100,8 @@ void FuzzyPatternUTest::tearDown(void)
 
 }
 
-#define an as->addNode
-#define al as->addLink
+#define an as->add_node
+#define al as->add_link
 void FuzzyPatternUTest::setUp(void)
 {
 	// The solution of test_fuzzy_match

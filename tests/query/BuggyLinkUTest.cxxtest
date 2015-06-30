@@ -96,6 +96,6 @@ void BuggyLinkUTest::test_link(void)
     Handle lily = bindlink(as, bindy);
     logger().debug() << "Result is this:\n" << lily->toString();
 
-    TS_ASSERT_EQUALS(1, as->getArity(lily));
+    TS_ASSERT_EQUALS(1, as->get_arity(lily));
 }
 

@@ -89,7 +89,7 @@ cdef class AtomSpace:
         @returns the newly created Atom
         """
         cdef string name = atom_name.encode('UTF-8')
-        cdef cHandle result = self.atomspace.addNode(t, name)
+        cdef cHandle result = self.atomspace.add_node(t, name)
 
         if result == result.UNDEFINED: return None
         atom = Atom(Handle(result.value()), self);
@@ -113,7 +113,7 @@ cdef class AtomSpace:
             elif isinstance(h, TruthValue):
                 tv = h
         cdef cHandle result
-        result = self.atomspace.addLink(t, handle_vector)
+        result = self.atomspace.add_link(t, handle_vector)
         if result == result.UNDEFINED: return None
         #return Handle(result.value());
         atom = Atom(Handle(result.value()), self);
@@ -133,7 +133,7 @@ cdef class AtomSpace:
                 h = Handle(uuid)
             except ValueError, TypeError:
                 raise TypeError("Need UUID or Handle object")
-        if self.atomspace.isValidHandle(deref((<Handle>h).h)):
+        if self.atomspace.is_valid_handle(deref((<Handle>h).h)):
             return True
         return False
 
@@ -150,7 +150,7 @@ cdef class AtomSpace:
 
         """
         cdef bint recurse = recursive
-        return self.atomspace.removeAtom(deref((<Handle>(atom.h)).h),recurse)
+        return self.atomspace.remove_atom(deref((<Handle>(atom.h)).h),recurse)
 
     def clear(self):
         """ Remove all atoms from the AtomSpace """
@@ -182,12 +182,12 @@ cdef class AtomSpace:
 
     def size(self):
         """ Return the number of atoms in the AtomSpace """
-        return self.atomspace.getSize()
+        return self.atomspace.get_size()
 
     def get_tv(self, Handle h):
         """ Return the TruthValue of an Atom in the AtomSpace """
         cdef tv_ptr tv
-        tv = self.atomspace.getTV(deref(h.h))
+        tv = self.atomspace.get_TV(deref(h.h))
         if (not tv.get() or tv.get().isNullTv()):
             pytv = TruthValue()
             pytv.cobj = new tv_ptr(tv) # make copy of smart pointer
@@ -196,28 +196,28 @@ cdef class AtomSpace:
 
     def set_tv(self, Handle h, TruthValue tv):
         """ Set the TruthValue of an Atom in the AtomSpace """
-        self.atomspace.setTV(deref(h.h), deref(<tv_ptr*>(tv._tvptr())))
+        self.atomspace.set_TV(deref(h.h), deref(<tv_ptr*>(tv._tvptr())))
 
     def get_type(self, Handle h):
         """ Get the Type of an Atom in the AtomSpace """
-        return self.atomspace.getType(deref(h.h))
+        return self.atomspace.get_type(deref(h.h))
 
     def get_name(self, Handle h):
         """ Get the Name of a Node in the AtomSpace """
         cdef string name
-        name = self.atomspace.getName(deref(h.h))
+        name = self.atomspace.get_name(deref(h.h))
         return name.c_str()[:name.size()].decode('UTF-8')
 
     def get_outgoing(self, Handle handle):
         """ Get the outgoing set for a Link in the AtomSpace """
         cdef vector[cHandle] handle_vector
-        handle_vector = self.atomspace.getOutgoing(deref(handle.h))
+        handle_vector = self.atomspace.get_outgoing(deref(handle.h))
         return convert_handle_seq_to_python_list(handle_vector,self)
 
     def xget_outgoing(self, Handle handle):
         """ Get the outgoing set for a Link in the AtomSpace """
         cdef vector[cHandle] handle_vector
-        handle_vector = self.atomspace.getOutgoing(deref(handle.h))
+        handle_vector = self.atomspace.get_outgoing(deref(handle.h))
 
         # This code is the same for all the x iterators but there is no
         # way in Cython to yield out of a cdef function and no way to pass a 
@@ -234,13 +234,13 @@ cdef class AtomSpace:
     def get_incoming(self, Handle handle):
         """ Get the incoming set for an Atom in the AtomSpace """
         cdef vector[cHandle] handle_vector
-        handle_vector = self.atomspace.getIncoming(deref(handle.h))
+        handle_vector = self.atomspace.get_incoming(deref(handle.h))
         return convert_handle_seq_to_python_list(handle_vector,self)
 
     def xget_incoming(self, Handle handle):
         """ Get the incoming set for an Atom in the AtomSpace """
         cdef vector[cHandle] handle_vector
-        handle_vector = self.atomspace.getIncoming(deref(handle.h))
+        handle_vector = self.atomspace.get_incoming(deref(handle.h))
 
         # This code is the same for all the x iterators but there is no
         # way in Cython to yield out of a cdef function and no way to pass a 
@@ -257,14 +257,14 @@ cdef class AtomSpace:
     def is_source(self, Handle source, Handle h):
         # This logic could probably easily be implemented client side, but best to
         # keep it all in the C++ code for now
-        return self.atomspace.isSource(deref(source.h),deref(h.h))
+        return self.atomspace.is_source(deref(source.h),deref(h.h))
 
     def get_av(self, Handle h):
         # @todo this is the slow way. quicker way is to support the
         # AttentionValue object and get all values with one atomspace call
-        sti = self.atomspace.getSTI(deref(h.h))
-        lti = self.atomspace.getLTI(deref(h.h))
-        vlti = self.atomspace.getVLTI(deref(h.h))
+        sti = self.atomspace.get_STI(deref(h.h))
+        lti = self.atomspace.get_LTI(deref(h.h))
+        vlti = self.atomspace.get_VLTI(deref(h.h))
         return { "sti": sti, "lti": lti, "vlti": vlti }
 
     def set_av(self, Handle h,sti=None,lti=None,vlti=None,av_dict=None):
@@ -274,28 +274,28 @@ cdef class AtomSpace:
             if "sti" in av_dict: sti = av_dict["sti"]
             if "lti" in av_dict: lti = av_dict["lti"]
             if "vlti" in av_dict: vlti = av_dict["vlti"]
-        if sti: self.atomspace.setSTI(deref(h.h),sti)
-        if lti: self.atomspace.setLTI(deref(h.h),lti)
+        if sti: self.atomspace.set_STI(deref(h.h),sti)
+        if lti: self.atomspace.set_LTI(deref(h.h),lti)
         if vlti != None:
             if vlti >= 1: 
-                self.atomspace.incVLTI(deref(h.h))
+                self.atomspace.inc_VLTI(deref(h.h))
             if vlti < 1:
-                self.atomspace.decVLTI(deref(h.h))
+                self.atomspace.dec_VLTI(deref(h.h))
 
     def get_atom_string(self, Handle h, terse=False):
-        return self.atomspace.atomAsString(deref(h.h),terse).c_str()
+        return self.atomspace.atom_as_string(deref(h.h),terse).c_str()
 
     # query methods
     def get_atoms_by_type(self, Type t, subtype = True):
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
-        self.atomspace.getHandlesByType(back_inserter(handle_vector),t,subt)
+        self.atomspace.get_handles_by_type(back_inserter(handle_vector),t,subt)
         return convert_handle_seq_to_python_list(handle_vector,self)
 
     def xget_atoms_by_type(self, Type t, subtype = True):
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
-        self.atomspace.getHandlesByType(back_inserter(handle_vector),t,subt)
+        self.atomspace.get_handles_by_type(back_inserter(handle_vector),t,subt)
 
         # This code is the same for all the x iterators but there is no
         # way in Cython to yield out of a cdef function and no way to pass a 
@@ -313,14 +313,14 @@ cdef class AtomSpace:
         cdef vector[cHandle] handle_vector
         cdef string cname = name.encode('UTF-8')
         cdef bint subt = subtype
-        self.atomspace.getHandlesByName(back_inserter(handle_vector), cname, t, subt)
+        self.atomspace.get_handles_by_name(back_inserter(handle_vector), cname, t, subt)
         return convert_handle_seq_to_python_list(handle_vector,self)
 
     def xget_atoms_by_name(self, Type t, name, subtype = True):
         cdef vector[cHandle] handle_vector
         cdef string cname = name.encode('UTF-8')
         cdef bint subt = subtype
-        self.atomspace.getHandlesByName(back_inserter(handle_vector), cname, t, subt)
+        self.atomspace.get_handles_by_name(back_inserter(handle_vector), cname, t, subt)
 
         # This code is the same for all the x iterators but there is no
         # way in Cython to yield out of a cdef function and no way to pass a 
@@ -337,17 +337,17 @@ cdef class AtomSpace:
     def get_atoms_by_av(self, lower_bound, upper_bound=None):
         cdef vector[cHandle] handle_vector
         if upper_bound is not None:
-            self.atomspace.getHandlesByAV(back_inserter(handle_vector), lower_bound, upper_bound)
+            self.atomspace.get_handles_by_AV(back_inserter(handle_vector), lower_bound, upper_bound)
         else:
-            self.atomspace.getHandlesByAV(back_inserter(handle_vector), lower_bound)
+            self.atomspace.get_handles_by_AV(back_inserter(handle_vector), lower_bound)
         return convert_handle_seq_to_python_list(handle_vector, self)
 
     def xget_atoms_by_av(self, lower_bound, upper_bound=None):
         cdef vector[cHandle] handle_vector
         if upper_bound is not None:
-            self.atomspace.getHandlesByAV(back_inserter(handle_vector), lower_bound, upper_bound)
+            self.atomspace.get_handles_by_AV(back_inserter(handle_vector), lower_bound, upper_bound)
         else:
-            self.atomspace.getHandlesByAV(back_inserter(handle_vector), lower_bound)
+            self.atomspace.get_handles_by_AV(back_inserter(handle_vector), lower_bound)
 
         # This code is the same for all the x iterators but there is no
         # way in Cython to yield out of a cdef function and no way to pass a 
@@ -363,12 +363,12 @@ cdef class AtomSpace:
 
     def get_atoms_in_attentional_focus(self):
         cdef vector[cHandle] handle_vector
-        self.atomspace.getHandleSetInAttentionalFocus(back_inserter(handle_vector))
+        self.atomspace.get_handle_set_in_attentional_focus(back_inserter(handle_vector))
         return convert_handle_seq_to_python_list(handle_vector, self)
 
     def xget_atoms_in_attentional_focus(self):
         cdef vector[cHandle] handle_vector
-        self.atomspace.getHandleSetInAttentionalFocus(back_inserter(handle_vector))
+        self.atomspace.get_handle_set_in_attentional_focus(back_inserter(handle_vector))
 
         # This code is the same for all the x iterators but there is no
         # way in Cython to yield out of a cdef function and no way to pass a 
@@ -386,14 +386,14 @@ cdef class AtomSpace:
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
         cdef Handle target_h = target_atom.h
-        self.atomspace.getIncomingSetByType(back_inserter(handle_vector),deref(target_h.h),t,subt)
+        self.atomspace.get_incoming_set_by_type(back_inserter(handle_vector),deref(target_h.h),t,subt)
         return convert_handle_seq_to_python_list(handle_vector,self)
 
     def xget_atoms_by_target_atom(self, Type t, Atom target_atom, subtype = True):
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
         cdef Handle target_h = target_atom.h
-        self.atomspace.getIncomingSetByType(back_inserter(handle_vector),deref(target_h.h),t,subt)
+        self.atomspace.get_incoming_set_by_type(back_inserter(handle_vector),deref(target_h.h),t,subt)
 
         # This code is the same for all the x iterators but there is no
         # way in Cython to yield out of a cdef function and no way to pass a 

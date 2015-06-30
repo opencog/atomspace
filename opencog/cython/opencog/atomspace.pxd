@@ -126,56 +126,56 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
     cdef cppclass cAtomSpace "opencog::AtomSpace":
         AtomSpace()
 
-        cHandle addNode(Type t, string s) except +
-        cHandle addNode(Type t, string s, tv_ptr tvn) except +
+        cHandle add_node(Type t, string s) except +
+        cHandle add_node(Type t, string s, tv_ptr tvn) except +
 
-        cHandle addLink(Type t, vector[cHandle]) except +
-        cHandle addLink(Type t, vector[cHandle], tv_ptr tvn) except +
+        cHandle add_link(Type t, vector[cHandle]) except +
+        cHandle add_link(Type t, vector[cHandle], tv_ptr tvn) except +
 
-        cHandle getHandle(Type t, string s)
-        cHandle getHandle(Type t, vector[cHandle])
+        cHandle get_handle(Type t, string s)
+        cHandle get_handle(Type t, vector[cHandle])
 
-        bint isValidHandle(cHandle h)
-        int getSize()
-        string getName(cHandle h)
-        Type getType(cHandle h)
-        tv_ptr getTV(cHandle h)
-        void setTV(cHandle h, tv_ptr tvn)
+        bint is_valid_handle(cHandle h)
+        int get_size()
+        string get_name(cHandle h)
+        Type get_type(cHandle h)
+        tv_ptr get_TV(cHandle h)
+        void set_TV(cHandle h, tv_ptr tvn)
 
-        vector[cHandle] getOutgoing(cHandle h)
-        bint isSource(cHandle h, cHandle source)
-        vector[cHandle] getIncoming(cHandle h)
+        vector[cHandle] get_outgoing(cHandle h)
+        bint is_source(cHandle h, cHandle source)
+        vector[cHandle] get_incoming(cHandle h)
 
         # these should alias the proper types for sti/lti/vlti
-        short getSTI(cHandle h)
-        short getLTI(cHandle h)
-        bint getVLTI(cHandle h)
-        void setSTI(cHandle h, short)
-        void setLTI(cHandle h, short)
-        void incVLTI(cHandle h)
-        void decVLTI(cHandle h)
+        short get_STI(cHandle h)
+        short get_LTI(cHandle h)
+        bint get_VLTI(cHandle h)
+        void set_STI(cHandle h, short)
+        void set_LTI(cHandle h, short)
+        void inc_VLTI(cHandle h)
+        void dec_VLTI(cHandle h)
 
-        string atomAsString(cHandle h, bint)
+        string atom_as_string(cHandle h, bint)
 
         # ==== query methods ====
         # get by type
-        output_iterator getHandlesByType(output_iterator, Type t, bint subclass)
+        output_iterator get_handles_by_type(output_iterator, Type t, bint subclass)
         # XXX DEPRECATED, REMOVE ASAP XXX get by name
         # Just do the right thing, here...
-        output_iterator getHandlesByName(output_iterator, string& name, Type t, bint subclass)
+        output_iterator get_handles_by_name(output_iterator, string& name, Type t, bint subclass)
         # XXX DEPRECATED, REMOVE ASAP XXX get by target handle
-        output_iterator getIncomingSetByType(output_iterator,cHandle& h,Type t,bint subclass)
+        output_iterator get_incoming_set_by_type(output_iterator,cHandle& h,Type t,bint subclass)
         # get by STI range
-        output_iterator getHandlesByAV(output_iterator, short lowerBound, short upperBound)
-        output_iterator getHandlesByAV(output_iterator, short lowerBound)
+        output_iterator get_handles_by_AV(output_iterator, short lowerBound, short upperBound)
+        output_iterator get_handles_by_AV(output_iterator, short lowerBound)
         # get from AttentionalFocus
-        output_iterator getHandleSetInAttentionalFocus(output_iterator)
+        output_iterator get_handle_set_in_attentional_focus(output_iterator)
 
-        # vector[chandle].iterator getHandlesByName(output_iterator, Type t, string name, bint subclass)
-        # vector[chandle].iterator getHandlesByType(output_iterator, Type t, xxx bint subclass)
+        # vector[chandle].iterator get_handles_by_name(output_iterator, Type t, string name, bint subclass)
+        # vector[chandle].iterator get_handles_by_type(output_iterator, Type t, xxx bint subclass)
 
         void clear()
-        bint removeAtom(cHandle h, bint recursive) 
+        bint remove_atom(cHandle h, bint recursive) 
 
 cdef AtomSpace_factory(cAtomSpace *to_wrap)
 

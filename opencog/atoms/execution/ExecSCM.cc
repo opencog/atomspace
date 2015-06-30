@@ -29,7 +29,7 @@ static Handle ss_execute(AtomSpace* atomspace, const Handle& h)
 	Instantiator inst(atomspace);
 	Handle rh(inst.execute(h));
 	if (NULL != rh)
-		rh = atomspace->addAtom(rh);
+		rh = atomspace->add_atom(rh);
 	return rh;
 }
 
@@ -66,11 +66,11 @@ static Handle ss_reduce(AtomSpace* atomspace, const Handle& h)
 	if (DELETE_LINK == hr->getType())
 	{
 		for (const Handle& ho : LinkCast(hr)->getOutgoingSet())
-			atomspace->removeAtom(ho, true);
+			atomspace->remove_atom(ho, true);
 		return Handle::UNDEFINED;
 	}
 
-	return atomspace->addAtom(hr);
+	return atomspace->add_atom(hr);
 }
 
 // ========================================================

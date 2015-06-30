@@ -108,7 +108,7 @@ void SubstitutionUTest::test_simple_substitution(void)
 	TSM_ASSERT("Didn't get the arguent list", argl != NULL);
 
 	Handle hanswer = vlp->substitute(htemplate, argl->getOutgoingSet());
-	hanswer = as->getAtom(hanswer);
+	hanswer = as->get_atom(hanswer);
 
 	printf("Expected this: %s\n", hexpected->toString().c_str());
 	printf("Found this answer: %s\n", hanswer->toString().c_str());
@@ -140,7 +140,7 @@ void SubstitutionUTest::test_free_substitution(void)
 	TSM_ASSERT("Didn't get the arguent list", argl != NULL);
 
 	Handle hanswer = vlp->substitute(htemplate, argl->getOutgoingSet());
-	hanswer = as->getAtom(hanswer);
+	hanswer = as->get_atom(hanswer);
 
 	printf("Expected this: %s\n", hexpected->toString().c_str());
 	printf("Found this answer: %s\n", hanswer->toString().c_str());
@@ -172,7 +172,7 @@ void SubstitutionUTest::test_typed_substitution(void)
 	TSM_ASSERT("Didn't get the arguent list", argl != NULL);
 
 	Handle hanswer = vlp->substitute(htemplate, argl->getOutgoingSet());
-	hanswer = as->getAtom(hanswer);
+	hanswer = as->get_atom(hanswer);
 
 	printf("Expected this: %s\n", hexpected->toString().c_str());
 	printf("Found this answer: %s\n", hanswer->toString().c_str());

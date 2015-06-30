@@ -224,7 +224,7 @@ void SQLPersistSCM::do_load(void)
 		as = SchemeSmob::ss_get_env_as("sql-load");
 #endif
 	// XXX TODO: this should probably be done in a separate thread.
-	_store->load(const_cast<AtomTable&>(as->getAtomTable()));
+	_store->load(const_cast<AtomTable&>(as->get_atomtable()));
 }
 
 
@@ -240,7 +240,7 @@ void SQLPersistSCM::do_store(void)
 		as = SchemeSmob::ss_get_env_as("sql-store");
 #endif
 	// XXX TODO This should really be started in a new thread ...
-	_store->store(const_cast<AtomTable&>(as->getAtomTable()));
+	_store->store(const_cast<AtomTable&>(as->get_atomtable()));
 }
 
 void opencog_persist_sql_init(void)

@@ -77,7 +77,7 @@ void FoldLink::init(void) {}
 #define DO_RETURN(result) { \
 	if (not _atomTable) return (result); \
 	AtomSpace* as = _atomTable->getAtomSpace(); \
-	return as->addAtom(result); \
+	return as->add_atom(result); \
 }
 
 /// reduce() -- reduce the expression by summing constants, etc.
@@ -127,7 +127,7 @@ Handle FoldLink::reduce(void)
 	// The atom table is typically not set when the ctor runs.
 	// So fix it up now.
 	if (_atomTable)
-		knil = _atomTable->getAtomSpace()->addAtom(knil);
+		knil = _atomTable->getAtomSpace()->add_atom(knil);
 
 	HandleSeq reduct;
 	bool did_reduce = false;
@@ -222,7 +222,7 @@ Handle FoldLink::reduce(void)
 			// compares up above fail.
 			Handle foo(createLink(getType(), rere));
 			if (_atomTable)
-				foo = _atomTable->getAtomSpace()->addAtom(foo);
+				foo = _atomTable->getAtomSpace()->add_atom(foo);
 
 			FunctionLinkPtr flp = FunctionLinkCast(foo);
 

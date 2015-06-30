@@ -108,8 +108,8 @@ class TestPMCB :
  * One recent bug was triggered by the clause-matcher returning
  * "true", which resulted in it being invoked only half the time.
  */
-#define an as->addNode
-#define al as->addLink
+#define an as->add_node
+#define al as->add_link
 void StackUTest::tearDown(void)
 {
 	delete as;

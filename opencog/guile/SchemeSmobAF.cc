@@ -38,7 +38,7 @@ using namespace opencog;
 SCM SchemeSmob::ss_af_boundary (void)
 {
 	AtomSpace* atomspace = ss_get_env_as("cog-af-boundary");
-	return scm_from_short(atomspace->getAttentionalFocusBoundary());
+	return scm_from_short(atomspace->get_attentional_focus_boundary());
 }
 
 /**
@@ -52,7 +52,7 @@ SCM SchemeSmob::ss_set_af_boundary (SCM sboundary)
 			"integer opencog AttentionalFocus Boundary");
 
 	short bdy = scm_to_short(sboundary);
-	return scm_from_short(atomspace->setAttentionalFocusBoundary(bdy));
+	return scm_from_short(atomspace->set_attentional_focus_boundary(bdy));
 }
 
 /**
@@ -63,7 +63,7 @@ SCM SchemeSmob::ss_af (void)
     AtomSpace* atomspace = ss_get_env_as("cog-af");
     
     HandleSeq attentionalFocus;
-    atomspace->getHandleSetInAttentionalFocus(back_inserter(attentionalFocus));
+    atomspace->get_handle_set_in_attentional_focus(back_inserter(attentionalFocus));
     size_t isz = attentionalFocus.size();
 	if (0 == isz) return SCM_EOL;
     

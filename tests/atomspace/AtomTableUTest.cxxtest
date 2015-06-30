@@ -71,7 +71,7 @@ public:
         //logger().setPrintToStdoutFlag(true);
 
         atomSpace = new AtomSpace();
-        table = (AtomTable*) & (atomSpace->getAtomTable());
+        table = (AtomTable*) & (atomSpace->get_atomtable());
     }
     ~AtomTableUTest() {
         delete atomSpace;

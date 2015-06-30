@@ -46,7 +46,7 @@ public:
         for (int i = 0; i < N_HANDLES; i++) {
             ostringstream oss;
             oss << "hello " << i;
-            handles[i] = as.addNode(CONCEPT_NODE, oss.str());
+            handles[i] = as.add_node(CONCEPT_NODE, oss.str());
             content[i] = new char[1];
         }
     }

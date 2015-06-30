@@ -53,12 +53,12 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
 
     if (LinkCast(source)) {
         AtomSpace rule_atomspace;
-        Handle source_cpy = rule_atomspace.addAtom(source);
+        Handle source_cpy = rule_atomspace.add_atom(source);
 
         // Copy rules to the temporary atomspace.
         vector<Rule*> rules = fcmem.get_rules();
         for (Rule* r : rules) {
-            rule_atomspace.addAtom(r->get_handle());
+            rule_atomspace.add_atom(r->get_handle());
         }
 
         // Create bindlink with source as an implicant.
@@ -89,7 +89,7 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
 
         // Copy handles to main atomspace.
         for (Handle h : bindlinks) {
-            chosen_bindlinks.push_back(_as.addAtom(h));
+            chosen_bindlinks.push_back(_as.add_atom(h));
         }
     } else {
         // Try to find specialized rules that contain the source node.
@@ -131,7 +131,7 @@ HandleSeq DefaultForwardChainerCB::get_rootlinks(Handle hsource, AtomSpace* as,
     for (Handle hr : candidates_roots) {
         bool notexist = find(chosen_roots.begin(), chosen_roots.end(), hr)
                 == chosen_roots.end();
-        auto type = as->getType(hr);
+        auto type = as->get_type(hr);
         bool subtype = (subclasses and classserver().isA(type, link_type));
         if (((type == link_type) or subtype) and notexist) {
             // Make sure matches are actually part of the premise list

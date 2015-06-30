@@ -73,8 +73,8 @@ class BigPatternUTest :  public CxxTest::TestSuite
  * The above is a simplified example of a rule that deduces
  * a prepositional triple.
  */
-#define an as->addNode
-#define al as->addLink
+#define an as->add_node
+#define al as->add_link
 void BigPatternUTest::tearDown(void)
 {
 	delete as;
@@ -138,8 +138,8 @@ void BigPatternUTest::setUp(void)
  *          ConceptNode "pottery"
  *          ConceptNode "clay"
  */
-#define getlink(hand,pos) as->getOutgoing(hand,pos)
-#define getarity(hand) as->getArity(hand)
+#define getlink(hand,pos) as->get_outgoing(hand,pos)
+#define getarity(hand) as->get_arity(hand)
 
 void BigPatternUTest::test_prep(void)
 {

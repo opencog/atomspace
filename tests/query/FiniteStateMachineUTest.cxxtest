@@ -114,7 +114,7 @@ void FiniteStateMachineUTest::test_basic(void)
 	printf("Going to take one step\n");
 	Handle first = eval->eval_h("(cog-bind take-one-step)");
 	printf("First state found:\n%s\n", first->toShortString().c_str());
-	TS_ASSERT_EQUALS(1, as->getArity(first));
+	TS_ASSERT_EQUALS(1, as->get_arity(first));
 
 	// After the first step, we expect a green light.
 	TS_ASSERT_EQUALS(green, get_state(first));
@@ -128,7 +128,7 @@ void FiniteStateMachineUTest::test_basic(void)
 	{
 		printf("Going to take one step; %d\n", i);
 		Handle next = eval->eval_h("(cog-bind take-one-step)");
-		TS_ASSERT_EQUALS(1, as->getArity(next));
+		TS_ASSERT_EQUALS(1, as->get_arity(next));
 		TS_ASSERT_EQUALS(states[i%3], get_state(next));
 	}
 

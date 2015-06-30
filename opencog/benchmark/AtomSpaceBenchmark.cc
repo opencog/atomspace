@@ -109,7 +109,7 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
         total += sizeof(AttentionValue);
     }
 
-    if (asp->isNode(h))
+    if (asp->is_node(h))
     {
         NodePtr n(NodeCast(h));
         total = sizeof(Node);
@@ -333,7 +333,7 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
         if (testKind == BENCH_TABLE)
             atomspaceSize = atab->getSize();
         else
-            atomspaceSize = asp->getSize();
+            atomspaceSize = asp->get_size();
         timepair_t timeTaken = CALL_MEMBER_FN(*this, methodToCall)();
         sumAsyncTime += get<0>(timeTaken);
         counter++;
@@ -538,7 +538,7 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
     }
     case BENCH_AS: {
         clock_t t_begin = clock();
-        asp->addNode(t, scp);
+        asp->add_node(t, scp);
         return clock() - t_begin;
     }
 #if HAVE_GUILE
@@ -695,7 +695,7 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
     }
     case BENCH_AS: {
         clock_t tAddLinkStart = clock();
-        asp->addLink(t, outgoing);
+        asp->add_link(t, outgoing);
         return clock() - tAddLinkStart;
     }}
     return 0;
@@ -832,7 +832,7 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
     }
     case BENCH_AS: {
         t_begin = clock();
-        asp->removeAtom(h);
+        asp->remove_atom(h);
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }}
@@ -893,7 +893,7 @@ timepair_t AtomSpaceBenchmark::bm_getType()
     }
     case BENCH_AS: {
         t_begin = clock();
-        asp->getType(h);
+        asp->get_type(h);
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }}
@@ -940,7 +940,7 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
     }
     case BENCH_AS: {
         t_begin = clock();
-        asp->getTV(h);
+        asp->get_TV(h);
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }}
@@ -1009,7 +1009,7 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
     case BENCH_AS: {
         t_begin = clock();
         TruthValuePtr stv(SimpleTruthValue::createTV(strength, conf));
-        asp->setTV(h,stv);
+        asp->set_TV(h,stv);
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }}
@@ -1040,14 +1040,14 @@ timepair_t AtomSpaceBenchmark::bm_getHandlesByType()
     case BENCH_TABLE: {
         clock_t t_begin = clock();
         HandleSeq results;
-        asp->getHandlesByType(results, t, true);
+        asp->get_handles_by_type(results, t, true);
         clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
     case BENCH_AS: {
         HandleSeq results;
         clock_t t_begin = clock();
-        asp->getHandlesByType(back_inserter(results), t, true);
+        asp->get_handles_by_type(back_inserter(results), t, true);
         clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }}
@@ -1095,7 +1095,7 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
     }
     case BENCH_AS: {
         t_begin = clock();
-        asp->getOutgoing(h);
+        asp->get_outgoing(h);
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }}
@@ -1142,7 +1142,7 @@ timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
     }
     case BENCH_AS: {
         t_begin = clock();
-        asp->getIncoming(h);
+        asp->get_incoming(h);
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }}

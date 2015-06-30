@@ -75,8 +75,8 @@ void BuggyEqual::setUp(void)
 	load_scm_files_from_config(*as);
 }
 
-#define getlink(hand,pos) as->getOutgoing(hand,pos)
-#define getarity(hand) as->getArity(hand)
+#define getlink(hand,pos) as->get_outgoing(hand,pos)
+#define getarity(hand) as->get_arity(hand)
 
 /*
  * NotLink causing weird trouble.

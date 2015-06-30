@@ -80,16 +80,16 @@ void UREConfigReader::set_maximum_iterations(int mi)
 HandleSeq UREConfigReader::fetch_rules(Handle rbs)
 {
 	// Retrieve rules
-	Handle rule_var = _as.addNode(VARIABLE_NODE, "__URE_RULE__");
-	Handle gl = _as.addLink(GET_LINK,
-	                        // MemberLink
-	                        //    VariableNode "__URE_RULE__"
-	                        //    ConceptNode <RBS>
-	                        _as.addLink(MEMBER_LINK, rule_var, rbs));
+	Handle rule_var = _as.add_node(VARIABLE_NODE, "__URE_RULE__");
+	Handle gl = _as.add_link(GET_LINK,
+	                         // MemberLink
+	                         //    VariableNode "__URE_RULE__"
+	                         //    ConceptNode <RBS>
+	                         _as.add_link(MEMBER_LINK, rule_var, rbs));
 	Handle rule_names = satisfying_set(&_as, gl);
 
 	// Remove the GetLink from the AtomSpace as it is no longer useful
-	_as.removeAtom(gl);
+	_as.remove_atom(gl);
 
 	return LinkCast(rule_names)->getOutgoingSet();
 }
@@ -97,27 +97,27 @@ HandleSeq UREConfigReader::fetch_rules(Handle rbs)
 HandleSeq UREConfigReader::fetch_execution_outputs(Handle schema, Handle input)
 {
 	// Retrieve rules
-	Handle output_var = _as.addNode(VARIABLE_NODE, "__EXECUTION_OUTPUT_VAR__");
-	Handle gl = _as.addLink(GET_LINK,
-	                        // ExecutionLink
-	                        //    <schema>
-	                        //    <input>
-	                        //    output_var
-	                        _as.addLink(EXECUTION_LINK,
-	                                    schema,
-	                                    input,
-	                                    output_var));
+	Handle output_var = _as.add_node(VARIABLE_NODE, "__EXECUTION_OUTPUT_VAR__");
+	Handle gl = _as.add_link(GET_LINK,
+	                         // ExecutionLink
+	                         //    <schema>
+	                         //    <input>
+	                         //    output_var
+	                         _as.add_link(EXECUTION_LINK,
+	                                      schema,
+	                                      input,
+	                                      output_var));
 	Handle outputs = satisfying_set(&_as, gl);
 
 	// Remove the GetLink from the AtomSpace as it is no longer useful
-	_as.removeAtom(gl);
+	_as.remove_atom(gl);
 
 	return LinkCast(outputs)->getOutgoingSet();
 }
 
 double UREConfigReader::fetch_num_param(const string& schema_name, Handle input)
 {
-	Handle param_schema = _as.addNode(SCHEMA_NODE, schema_name);
+	Handle param_schema = _as.add_node(SCHEMA_NODE, schema_name);
 	HandleSeq outputs = fetch_execution_outputs(param_schema, input);
 	{
 		string input_name = NodeCast(input)->getName();
@@ -140,8 +140,8 @@ double UREConfigReader::fetch_num_param(const string& schema_name, Handle input)
 
 bool UREConfigReader::fetch_bool_param(const string& pred_name, Handle input)
 {
-	Handle pred = _as.addNode(PREDICATE_NODE, pred_name);
+	Handle pred = _as.add_node(PREDICATE_NODE, pred_name);
 	TruthValuePtr tv =
-		_as.addLink(EVALUATION_LINK, pred, input)->getTruthValue();
+		_as.add_link(EVALUATION_LINK, pred, input)->getTruthValue();
 	return tv->getMean() > 0.5;
 }

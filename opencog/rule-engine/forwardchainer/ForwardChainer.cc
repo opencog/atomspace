@@ -173,8 +173,8 @@ void ForwardChainer::do_pm(const Handle& hsource,
     for (auto h : var_nodes)
         vars.push_back(h);
     _fcmem.set_source(hsource);
-    Handle hvar_list = _as.addLink(VARIABLE_LIST, vars);
-    Handle hclause = _as.addLink(AND_LINK, hsource);
+    Handle hvar_list = _as.add_link(VARIABLE_LIST, vars);
+    Handle hclause = _as.add_link(AND_LINK, hsource);
 
     // Run the pattern matcher, find all patterns that satisfy the
     // the clause, with the given variables in it.
@@ -185,8 +185,8 @@ void ForwardChainer::do_pm(const Handle& hsource,
     _fcmem.add_rules_product(0, impl.result_list);
 
     // Delete the AND_LINK and LIST_LINK
-    _as.removeAtom(hvar_list);
-    _as.removeAtom(hclause);
+    _as.remove_atom(hvar_list);
+    _as.remove_atom(hclause);
 
     //!Additionally, find applicable rules and apply.
     vector<Rule*> rules = fcb.choose_rules(_fcmem);

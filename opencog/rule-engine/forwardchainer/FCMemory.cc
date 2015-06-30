@@ -138,7 +138,7 @@ bool FCMemory::isin_potential_sources(Handle h)
         //recursive lookup
         else if (LinkCast(hi)) {
             HandleSeqSeq hseqs;
-            hseqs.push_back(_as->getOutgoing(hi));
+            hseqs.push_back(_as->get_outgoing(hi));
             do {
                 HandleSeq iset = hseqs[hseqs.size() - 1];
                 hseqs.pop_back();
@@ -146,7 +146,7 @@ bool FCMemory::isin_potential_sources(Handle h)
                     if (i.value() == h.value())
                         return true;
                     else if (LinkCast(i))
-                        hseqs.push_back(_as->getOutgoing(i));
+                        hseqs.push_back(_as->get_outgoing(i));
                 }
             } while (not hseqs.empty());
         }

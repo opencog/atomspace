@@ -97,10 +97,10 @@ void SCMExecutionOutputUTest::tearDown(void)
 		(false == ev->eval_error()));
 void SCMExecutionOutputUTest::test_execute(void)
 {
-	Handle julian = as->addNode(CONCEPT_NODE, "julian");
-	Handle prince = as->addNode(CONCEPT_NODE, "prince");
-	Handle king = as->addNode(CONCEPT_NODE, "king");
-	as->addLink(INHERITANCE_LINK, julian, prince);
+	Handle julian = as->add_node(CONCEPT_NODE, "julian");
+	Handle prince = as->add_node(CONCEPT_NODE, "prince");
+	Handle king = as->add_node(CONCEPT_NODE, "king");
+	as->add_link(INHERITANCE_LINK, julian, prince);
 
 	// Define a Scheme procedure that will be used in the
 	// GroundedSchemaNode
@@ -109,7 +109,7 @@ void SCMExecutionOutputUTest::test_execute(void)
 	CHKEV(eval);
 
 	// There is no king yet
-	TS_ASSERT_EQUALS(as->getIncoming(king).size(), 0);
+	TS_ASSERT_EQUALS(as->get_incoming(king).size(), 0);
 
 	// Use the "cog-execute!" command to fire an ExecutionOutputLink directly
 	// from the Scheme shell, containing a GroundedSchemaNode referring to
@@ -120,7 +120,7 @@ void SCMExecutionOutputUTest::test_execute(void)
 	CHKEV(eval);
 
 	// Now there should be a king
-	TS_ASSERT_EQUALS(as->getIncoming(king).size(), 1);
+	TS_ASSERT_EQUALS(as->get_incoming(king).size(), 1);
 }
 
 
@@ -187,7 +187,7 @@ void SCMExecutionOutputUTest::test_multi_threads(void)
 			std::thread(&SCMExecutionOutputUTest::threadedAdd, this, i, num_atoms));
 	}
 	for (std::thread& t : thread_pool) t.join();
-	size_t size = as->getSize();
+	size_t size = as->get_size();
 	std::cout << "atomspace size:" << size << std::endl;
 
 	// we should get ... a total of ...
@@ -203,8 +203,8 @@ void SCMExecutionOutputUTest::test_multi_threads(void)
 	TS_ASSERT_EQUALS(size, 5 * num_atoms * n_threads + 3);
 
 	// Everyone gets to be a king!  Yayyyy!
-	Handle king = as->addNode(CONCEPT_NODE, "king");
-	TS_ASSERT_EQUALS(as->getIncoming(king).size(), num_atoms * n_threads);
+	Handle king = as->add_node(CONCEPT_NODE, "king");
+	TS_ASSERT_EQUALS(as->get_incoming(king).size(), num_atoms * n_threads);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -216,7 +216,7 @@ void SCMExecutionOutputUTest::test_recursive(void)
 {
 	// Empty out the atomspace
 	as->clear();
-	size_t size = as->getSize();
+	size_t size = as->get_size();
 	TS_ASSERT_EQUALS(size, 0);
 
 	// Define various generic utilities
@@ -284,7 +284,7 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	CHKEV(eval);
 
 	// Initially, atomspace has one atom: just julian
-	size = as->getSize();
+	size = as->get_size();
 	TS_ASSERT_EQUALS(size, 1);
 
 	eval->eval(
@@ -293,7 +293,7 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	CHKEV(eval);
 
 	// Now, the atomspace has three atoms (Inheritance julian king)
-	size = as->getSize();
+	size = as->get_size();
 	TS_ASSERT_EQUALS(size, 3);
 
 	// Start out with Anneliese a newborn princess.
@@ -301,7 +301,7 @@ void SCMExecutionOutputUTest::test_recursive(void)
 		"(define anne (ConceptNode \"Anneliese\" (stv 0 0)))"
 	);
 	CHKEV(eval);
-	size = as->getSize();
+	size = as->get_size();
 	TS_ASSERT_EQUALS(size, 4);
 
 	eval->eval(
@@ -313,10 +313,10 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	// 3:  (Inheritance julian king)
 	// 3:  (Inheritance anne queen)
 	// 3:  (ExecutionLink (GroundedSchemaNode) (ListLink anne))
-	size = as->getSize();
+	size = as->get_size();
 	TS_ASSERT_EQUALS(size, 9);
 
-	size = as->getSize();
+	size = as->get_size();
 }
 
 // Test nested execution links. github issue #1340
@@ -338,7 +338,7 @@ void SCMExecutionOutputUTest::test_nested(void)
 {
 	// Empty out the atomspace
 	as->clear();
-	size_t size = as->getSize();
+	size_t size = as->get_size();
 	TS_ASSERT_EQUALS(size, 0);
 
 	// Define various generic utilities

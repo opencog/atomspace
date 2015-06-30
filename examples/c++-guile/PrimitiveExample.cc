@@ -36,7 +36,7 @@ class MyTestClass
 				std::string name = n->getName();
 				printf("Info: my_func instance %d received the node: %s\n",
 				       _id, name.c_str());
-				hlist = _as->addLink(LIST_LINK, h);
+				hlist = _as->add_link(LIST_LINK, h);
 			}
 			else
 			{
