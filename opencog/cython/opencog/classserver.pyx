@@ -53,5 +53,11 @@ cdef generate_type_module():
         types[s.c_str()] = i
     types["NO_TYPE"] = NOTYPE
     return types
-
 types = type('atom_types', (), generate_type_module())
+
+#This function is for refreshing new types
+#ex. When you import a cython module which include non-core atom types in C++ 
+#And you can refresh these new types by this function
+
+def get_refreshed_types():    
+    return type('atom_types', (), generate_type_module())
