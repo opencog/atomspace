@@ -12,7 +12,7 @@ cabal install
 @endcode
 
 For appropiate Haddock documentation on the haskell library look
-at: <a href="../../opencog/haskell/doc/html/opencog-atomspace/OpenCog-AtomSpace.html">
+at: <a href="./haskell/OpenCog-AtomSpace.html">
      opencog-atomspace</a>
 
 

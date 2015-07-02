@@ -21,9 +21,16 @@ IF (DOXYGEN_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		COMMENT "Generating documentation"
 	)
-    IF (GHC_FOUND)
-        ADD_DEPENDENCIES(doxygen haskell-atomspace-doc)
-    ENDIF (GHC_FOUND)
+    IF (CABAL_FOUND)
+        ADD_DEPENDENCIES(doxygen haskell-doc)
+    ENDIF (CABAL_FOUND)
+    ADD_CUSTOM_TARGET(haskell-doc
+        DEPENDS haskell-atomspace-lib
+        COMMENT "Generating haskell library documentation..."
+        COMMAND cabal haddock --builddir=${HASKELL_BUILD_DIR} --html
+                    --haddock-option=-o${CMAKE_CURRENT_BINARY_DIR}/html/haskell
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/opencog/haskell/
+    )
 ELSE (DOXYGEN_FOUND)
     MESSAGE(STATUS "Doxygen not found, you won't be able to generate API documentation.")
 ENDIF (DOXYGEN_FOUND)
