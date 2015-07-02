@@ -8,9 +8,9 @@ module OpenCog.AtomSpace.Types (
   , Atom (..)
   , AtomGen (..)
   , appAtomGen
-  , TNumberNode
-  , TConceptNode
   ) where
+
+import OpenCog.AtomSpace.Inheritance
 
 -- | Atom name type.
 type AtomName = String
@@ -38,9 +38,6 @@ data TruthVal = SimpleTV { tvMean       :: Double
                          }
     deriving Show
 
-data TConceptNode
-data TNumberNode
-
 -- | 'AtomGen' is a general atom type hiding the type variables.
 -- (necessary when working with many instances of different atoms,
 -- for example, for lists of atoms)
@@ -54,23 +51,36 @@ appAtomGen f (AtomGen at) = f at
 
 -- | 'Atom' is the main data type to represent the different types of atoms.
 data Atom a where
-    PredicateNode   :: AtomName -> Atom (Atom a -> TruthVal)
-    AndLink         :: Atom a -> Atom b -> (Maybe TruthVal) -> Atom c
-    OrLink          :: Atom a -> Atom b -> (Maybe TruthVal) -> Atom c
-    ImplicationLink :: Atom a -> Atom b -> (Maybe TruthVal) -> Atom c
-    EquivalenceLink :: Atom a -> Atom b -> (Maybe TruthVal) -> Atom c
-    EvaluationLink  :: (Atom (Atom a -> TruthVal))  ->
-                      Atom [AtomGen] -> (Maybe TruthVal) -> Atom b
+    PredicateNode   :: AtomName -> Atom PredicateNodeT
+    AndLink         :: IsAtom a =>
+                       Atom a -> Atom a -> (Maybe TruthVal) -> Atom AndLinkT
+    OrLink          :: IsAtom a =>
+                       Atom a -> Atom a -> (Maybe TruthVal) -> Atom OrLinkT
+    ImplicationLink :: (IsAtom a,IsAtom b) =>
+                       Atom a -> Atom b -> (Maybe TruthVal) -> Atom ImplicationLinkT
+    EquivalenceLink :: IsAtom a =>
+                       Atom a -> Atom a -> (Maybe TruthVal) -> Atom EquivalenceLinkT
+    EvaluationLink  :: (IsPredicate p,IsList l) =>
+                       Atom p -> Atom l -> (Maybe TruthVal) -> Atom EvaluationLinkT
 
-    ConceptNode       :: AtomName -> (Maybe TruthVal) -> Atom TConceptNode
-    InheritanceLink   :: Atom TConceptNode -> Atom TConceptNode -> (Maybe TruthVal) -> Atom a
-    SimilarityLink    :: Atom TConceptNode -> Atom TConceptNode -> (Maybe TruthVal) -> Atom a
-    MemberLink        :: Atom TConceptNode -> Atom TConceptNode -> (Maybe TruthVal) -> Atom a
-    SatisfyingSetLink :: Atom (Atom a -> TruthVal) -> Atom TConceptNode
+    ConceptNode     :: AtomName -> (Maybe TruthVal) -> Atom ConceptNodeT
+    InheritanceLink :: (IsConcept c1,IsConcept c2) =>
+                       Atom c1 -> Atom c2 -> (Maybe TruthVal) -> Atom InheritanceLinkT
+    SimilarityLink  :: (IsConcept c1,IsConcept c2) =>
+                       Atom c1 -> Atom c2 -> (Maybe TruthVal) -> Atom SimilarityLinkT
+    MemberLink      :: (IsConcept c1,IsConcept c2) =>
+                       Atom c1 -> Atom c2 -> (Maybe TruthVal) -> Atom MemberLinkT
+    SatisfyingSetLink :: (IsPredicate p) =>
+                       Atom p -> Atom SatisfyingSetLinkT
 
-    NumberNode :: (Num a,Show a) => a -> Atom TNumberNode
+    NumberNode :: (Show a,Num a) => a -> Atom NumberNodeT
 
-    ListLink :: [AtomGen] -> Atom [AtomGen]
+    ListLink :: [AtomGen] -> Atom ListLinkT
+
+    SchemaNode :: AtomName -> Atom SchemaNodeT
+    GroundedSchemaNode :: AtomName -> Atom GroundedSchemaNodeT
+    ExecutionLink :: (IsSchema s,IsList l,IsAtom a) =>
+                     Atom s -> Atom l -> Atom a -> Atom ExecutionLinkT
 
 
 instance Show AtomGen where

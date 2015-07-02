@@ -22,6 +22,23 @@ li = (ListLink [ AtomGen $ ConceptNode "SomeConcept" someTv
                , AtomGen $ PredicateNode "SomePredicate"
                ])
 
+-- Type checking Ok.
+ex1 = ExecutionLink
+          (GroundedSchemaNode "some-fun")
+          (ListLink [ AtomGen $ ConceptNode "Arg1" someTv
+                    , AtomGen $ ConceptNode "Arg2" someTv
+                    ])
+          (ConceptNode "res" someTv)
+
+{- Type checking error.
+ex2 = ExecutionLink
+          (ConceptNode "some-fun") -- ConceptNodeT type isn't instance of IsSchema
+          (ListLink [ AtomGen $ ConceptNode "Arg1" someTv
+                    , AtomGen $ ConceptNode "Arg2" someTv
+                    ])
+          (ConceptNode "res" someTv)
+-}
+
 main :: IO ()
 main = runOnNewAtomSpace $ do
          p <- get $ PredicateNode "Pred"
