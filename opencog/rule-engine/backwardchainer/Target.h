@@ -53,7 +53,7 @@ public:
 	void store_step(const Rule& r, const HandleSeq& premises);
 	void store_varmap(VarMultimap& vm);
 	void store_varmap(VarMap& vm);
-	uint rule_count(const Rule& r);
+	unsigned int rule_count(const Rule& r);
 
 	/**
 	 * Increment the internal counter.
@@ -92,7 +92,7 @@ public:
 	 */
 	const VarMultimap& get_varmap() const { return _varmap; }
 
-	uint get_selection_count() const { return _selection_count; }
+	unsigned int get_selection_count() const { return _selection_count; }
 
 	/**
 	 * Get the weight associated with this Target.
@@ -109,7 +109,7 @@ private:
 
 	Handle _htarget_external;
 	Handle _htarget_internal;
-	uint _selection_count;
+	unsigned int _selection_count;
 
 	HandleSeq _vars;
 	VarMultimap _varmap;
@@ -126,14 +126,14 @@ public:
 
 	void clear();
 	void emplace(Handle& h);
-	uint size();
+	unsigned int size();
 	Target& select();
 	Target& get(Handle& h);
 
 private:
 	std::unordered_map<Handle, Target> _targets_map;
 	AtomSpace* _history_space;
-	uint _total_selection;
+	unsigned int _total_selection;
 };
 
 }

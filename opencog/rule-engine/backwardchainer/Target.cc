@@ -103,7 +103,7 @@ void Target::store_varmap(VarMap& vm)
  * @param r  the Rule to search
  * @return   the number of times applied
  */
-uint Target::rule_count(const Rule& r)
+unsigned int Target::rule_count(const Rule& r)
 {
 	Handle hname = _as->addNode(CONCEPT_NODE, r.get_name());
 	HandleSeq q = get_neighbors(_htarget_internal, false, true,
@@ -158,7 +158,7 @@ void TargetSet::emplace(Handle& h)
 /**
  * Get the size of the TargetSet.
  */
-uint TargetSet::size()
+unsigned int TargetSet::size()
 {
 	return _targets_map.size();
 }
@@ -178,7 +178,7 @@ uint TargetSet::size()
 Target& TargetSet::select()
 {
 	HandleSeq handles;
-	std::vector<uint> weights;
+	std::vector<unsigned int> weights;
 	for (auto& p : _targets_map)
 	{
 		handles.push_back(p.first);

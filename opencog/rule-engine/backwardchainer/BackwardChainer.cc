@@ -682,7 +682,7 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 	//
 	// also check if we have a node (non-variable) mapped to a variable B,
 	// make sure variable B ended up mapping to the same node
-	for (uint i = 0; i < temp_results.size(); ++i)
+	for (unsigned int i = 0; i < temp_results.size(); ++i)
 	{
 		VarMap& tvm = temp_vmap_list[i];
 		VarMap this_map;
