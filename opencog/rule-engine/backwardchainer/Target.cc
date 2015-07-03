@@ -37,11 +37,10 @@ using namespace opencog;
  * @param as  the AtomSpace in which to store temporary information
  * @param h   the original external Handle of the Target
  */
-Target::Target(AtomSpace* as, const Handle& h)
+Target::Target(AtomSpace& as, const Handle& h) : _as(as)
 {
-	_as = as;
 	_htarget_external = h;
-	_htarget_internal = _as->addAtom(h);
+	_htarget_internal = _as.addAtom(h);
 	_selection_count = 0;
 
 	_vars = get_free_vars_in_tree(h);
@@ -61,10 +60,10 @@ void Target::store_step(const Rule& r, const HandleSeq& premises)
 {
 	// XXX TODO think of a good structure for storing the inference step
 	// XXX TODO if the rule was actually applied, store the change to the TV?
-	_as->addLink(SET_LINK,
-	             _htarget_internal,
-	             _as->addNode(CONCEPT_NODE, r.get_name()),
-	             _as->addLink(LIST_LINK, premises));
+	_as.addLink(SET_LINK,
+	            _htarget_internal,
+	            _as.addNode(CONCEPT_NODE, r.get_name()),
+	            _as.addLink(LIST_LINK, premises));
 }
 
 /**
@@ -105,7 +104,7 @@ void Target::store_varmap(VarMap& vm)
  */
 unsigned int Target::rule_count(const Rule& r)
 {
-	Handle hname = _as->addNode(CONCEPT_NODE, r.get_name());
+	Handle hname = _as.addNode(CONCEPT_NODE, r.get_name());
 	HandleSeq q = get_neighbors(_htarget_internal, false, true,
 	                            SET_LINK, false);
 
@@ -119,10 +118,9 @@ unsigned int Target::rule_count(const Rule& r)
 /**
  * Constructor.
  */
-TargetSet::TargetSet()
+TargetSet::TargetSet() : _total_selection(0)
 {
-	_history_space = new AtomSpace();
-	_total_selection = 0;
+
 }
 
 /**
@@ -130,7 +128,7 @@ TargetSet::TargetSet()
  */
 TargetSet::~TargetSet()
 {
-	delete _history_space;
+
 }
 
 /**
@@ -138,7 +136,7 @@ TargetSet::~TargetSet()
  */
 void TargetSet::clear()
 {
-	_history_space->clear();
+	_history_space.clear();
 	_targets_map.clear();
 }
 

@@ -105,7 +105,7 @@ public:
 	float get_weight() { return 1.0f; }
 
 private:
-	Target(AtomSpace* as, const Handle& h);
+	Target(AtomSpace& as, const Handle& h);
 
 	Handle _htarget_external;
 	Handle _htarget_internal;
@@ -114,7 +114,7 @@ private:
 	HandleSeq _vars;
 	VarMultimap _varmap;
 
-	AtomSpace* _as;
+	AtomSpace& _as;
 };
 
 
@@ -132,7 +132,7 @@ public:
 
 private:
 	std::unordered_map<Handle, Target> _targets_map;
-	AtomSpace* _history_space;
+	AtomSpace _history_space;
 	unsigned int _total_selection;
 };
 
