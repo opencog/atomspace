@@ -122,6 +122,7 @@ uint Target::rule_count(const Rule& r)
 TargetSet::TargetSet()
 {
 	_history_space = new AtomSpace();
+	_total_selection = 0;
 }
 
 /**
@@ -165,9 +166,10 @@ uint TargetSet::size()
 /**
  * Select a Target from the set using some fitness criteria.
  *
+ * Currently uses the selection count to apply weighted random selection.
+ *
  * XXX TODO use criteria such as
  * - how many steps from the initial target
- * - how many times a target was chosen
  * - how much was gained on this target the last time it was chosen
  * etc
  *
@@ -175,12 +177,24 @@ uint TargetSet::size()
  */
 Target& TargetSet::select()
 {
-	// XXX TODO do proper target selection here using some fitness function
-	auto& p = rand_element(_targets_map);
+	HandleSeq handles;
+	std::vector<uint> weights;
+	for (auto& p : _targets_map)
+	{
+		handles.push_back(p.first);
 
-	// dumb round-about way to avoid the const in p
-	Target& t = _targets_map.at(p.first);
+		// XXX TODO add more criteria to the weight calculation
+		weights.push_back(_total_selection - p.second.get_selection_count() + 1);
+	}
+
+	// XXX use cogutil MT19937RandGen's intenal randomGen member possible?
+	std::mt19937 generator(std::chrono::system_clock::now().time_since_epoch().count());
+	std::discrete_distribution<int> distribution(weights.begin(), weights.end());
+
+	Target& t = _targets_map.at(handles[distribution(generator)]);
 	t.increment_selection_count();
+
+	_total_selection++;
 
 	return t;
 }

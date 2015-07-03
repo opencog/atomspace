@@ -92,6 +92,8 @@ public:
 	 */
 	const VarMultimap& get_varmap() const { return _varmap; }
 
+	uint get_selection_count() const { return _selection_count; }
+
 	/**
 	 * Get the weight associated with this Target.
 	 *
@@ -131,6 +133,7 @@ public:
 private:
 	std::unordered_map<Handle, Target> _targets_map;
 	AtomSpace* _history_space;
+	uint _total_selection;
 };
 
 }
