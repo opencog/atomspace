@@ -1,30 +1,35 @@
 -- GSoC 2015 - Haskell bindings for OpenCog.
-{-# LANGUAGE EmptyDataDecls #-}
-
+{-# LANGUAGE EmptyDataDecls, StandaloneDeriving, DeriveDataTypeable,
+             FlexibleInstances, DataKinds, KindSignatures #-}
 -- | This Module defines the relation between different atom types.
 module OpenCog.AtomSpace.Inheritance where
 
-data AtomT
-data NodeT
-data LinkT
-data PredicateNodeT
-data ConceptNodeT
-data SchemaNodeT
-data GroundedSchemaNodeT
-data NumberNodeT
-data AndLinkT
-data OrLinkT
-data ImplicationLinkT
-data EquivalenceLinkT
-data EvaluationLinkT
-data InheritanceLinkT
-data SimilarityLinkT
-data MemberLinkT
-data SatisfyingSetLinkT
-data ListLinkT
-data ExecutionLinkT
+import Data.Data    (Typeable,Data)
 
-class IsAtom a
+data AtomType = AtomT
+              | NodeT
+              | LinkT
+              | PredicateNodeT
+              | ConceptNodeT
+              | SchemaNodeT
+              | GroundedSchemaNodeT
+              | NumberNodeT
+              | AndLinkT
+              | OrLinkT
+              | ImplicationLinkT
+              | EquivalenceLinkT
+              | EvaluationLinkT
+              | InheritanceLinkT
+              | SimilarityLinkT
+              | MemberLinkT
+              | SatisfyingSetLinkT
+              | ListLinkT
+              | ExecutionLinkT
+
+deriving instance Typeable AtomType
+deriving instance Data AtomType
+
+class IsAtom (a :: AtomType)
 class IsAtom a => IsNode a
 class IsAtom a => IsLink a
 class IsLink a => IsAnd a
@@ -44,53 +49,54 @@ class IsNode a => IsConcept a
 class IsNode a => IsSchema a
 class IsSchema a => IsGroundedSchema a
 
-instance IsAtom AndLinkT
+instance IsAtom a
+
 instance IsLink AndLinkT
 instance IsAnd AndLinkT
-instance IsAtom OrLinkT
+
 instance IsLink OrLinkT
 instance IsOr OrLinkT
-instance IsAtom PredicateNodeT
+
 instance IsNode PredicateNodeT
 instance IsPredicate PredicateNodeT
-instance IsAtom ImplicationLinkT
+
 instance IsLink ImplicationLinkT
 instance IsImplication ImplicationLinkT
-instance IsAtom EquivalenceLinkT
+
 instance IsLink EquivalenceLinkT
 instance IsEquivalence EquivalenceLinkT
-instance IsAtom EvaluationLinkT
+
 instance IsLink EvaluationLinkT
 instance IsEvaluation EvaluationLinkT
-instance IsAtom ConceptNodeT
+
 instance IsNode ConceptNodeT
 instance IsConcept ConceptNodeT
-instance IsAtom InheritanceLinkT
+
 instance IsLink InheritanceLinkT
 instance IsInheritance InheritanceLinkT
-instance IsAtom SimilarityLinkT
+
 instance IsLink SimilarityLinkT
 instance IsSimilarity SimilarityLinkT
-instance IsAtom MemberLinkT
+
 instance IsLink MemberLinkT
 instance IsMember MemberLinkT
-instance IsAtom SatisfyingSetLinkT
+
 instance IsLink SatisfyingSetLinkT
 instance IsSatisfyingSet SatisfyingSetLinkT
-instance IsAtom NumberNodeT
+
 instance IsNode NumberNodeT
 instance IsNumber NumberNodeT
-instance IsAtom ListLinkT
+
 instance IsLink ListLinkT
 instance IsList ListLinkT
-instance IsAtom SchemaNodeT
+
 instance IsNode SchemaNodeT
 instance IsSchema SchemaNodeT
-instance IsAtom GroundedSchemaNodeT
+
 instance IsNode GroundedSchemaNodeT
 instance IsSchema GroundedSchemaNodeT
 instance IsGroundedSchema GroundedSchemaNodeT
-instance IsAtom ExecutionLinkT
+
 instance IsLink ExecutionLinkT
 instance IsExecution ExecutionLinkT
 
