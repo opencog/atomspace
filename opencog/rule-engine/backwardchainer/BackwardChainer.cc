@@ -682,7 +682,7 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 	//
 	// also check if we have a node (non-variable) mapped to a variable B,
 	// make sure variable B ended up mapping to the same node
-	for (uint i = 0; i < temp_results.size(); ++i)
+	for (unsigned int i = 0; i < temp_results.size(); ++i)
 	{
 		VarMap& tvm = temp_vmap_list[i];
 		VarMap this_map;
@@ -819,7 +819,7 @@ bool BackwardChainer::unify(const Handle& hsource,
 /**
  * Select a candidate rule from the set of filtered rules.
  *
- * XXX TODO improve selection criteria
+ * XXX TODO use the rule cost
  * XXX should these selection functions be in callbacks like the ForwardChainer?
  *
  * @param target  the original target the set of filtered rules are unifiable to
@@ -829,13 +829,17 @@ bool BackwardChainer::unify(const Handle& hsource,
 Rule BackwardChainer::select_rule(Target& target, const std::vector<Rule>& rules)
 {
 	// store how many times each rule has been used for the target
-//	std::vector<uint> counts;
-//	std::for_each(rules.begin(), rules.end(), [&](Rule& r) { counts.push_back(target.rule_count(r)); });
+	std::vector<unsigned int> weights;
+	std::for_each(rules.begin(), rules.end(),
+	              [&](const Rule& r)
+	              { weights.push_back(target.get_selection_count() - target.rule_count(r) + 1); });
 
 	// Select the rule that has been applied least
-	// XXX TODO use the rule cost
+	// XXX use cogutil MT19937RandGen's intenal randomGen member possible?
+	std::mt19937 generator(std::chrono::system_clock::now().time_since_epoch().count());
+	std::discrete_distribution<int> distribution(weights.begin(), weights.end());
 
-	return rand_element(rules);
+	return rules[distribution(generator)];
 }
 
 /**
