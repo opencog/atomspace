@@ -14,6 +14,7 @@ ignored by doxygen; used as markers for update-links.py;
 - \subpage libspacetime
 - \subpage libattention
 - \subpage libsmob
+- \subpage libhaskell
 - \subpage libpersist
 - \subpage libcomboreduct
 

@@ -105,6 +105,8 @@ the shell allows scheme code to manipulate the contents of
 an OpenCog AtomSpace.  The shell is
 implemented in <a href="http://www.gnu.org/software/guile/guile.html">guile</a>.
 </DD>
+<DT>haskell</DT>
+<DD>Haskell bindings for OpenCog</DD>
 
 <DT>implication (stub)</DT>
 <DD>
