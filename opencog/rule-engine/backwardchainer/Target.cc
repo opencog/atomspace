@@ -62,8 +62,8 @@ void Target::store_step(const Rule& r, const HandleSeq& premises)
 	// XXX TODO if the rule was actually applied, store the change to the TV?
 	_as.add_link(SET_LINK,
 	             _htarget_internal,
-	             _as.addNode(CONCEPT_NODE, r.get_name()),
-	             _as.addLink(LIST_LINK, premises));
+	             _as.add_node(CONCEPT_NODE, r.get_name()),
+	             _as.add_link(LIST_LINK, premises));
 }
 
 /**
