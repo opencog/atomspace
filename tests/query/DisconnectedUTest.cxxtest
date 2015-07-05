@@ -61,8 +61,8 @@ class Disconnected :  public CxxTest::TestSuite
 /*
  * This function sets up an implication link, and some data.
  */
-#define an as->addNode
-#define al as->addLink
+#define an as->add_node
+#define al as->add_link
 void Disconnected::setUp(void)
 {
 	as = new AtomSpace();

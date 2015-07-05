@@ -159,7 +159,7 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj)
 			// up the knil compares during reduction.
 			Handle foo(createLink(PLUS_LINK, rest));
 			if (_atomTable)
-				foo = _atomTable->getAtomSpace()->addAtom(foo);
+				foo = _atomTable->getAtomSpace()->add_atom(foo);
 
 			PlusLinkPtr ap = PlusLinkCast(foo);
 			Handle a_plus(ap->reduce());

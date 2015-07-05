@@ -27,7 +27,7 @@ UUID AtomSpace_addNode( AtomSpace* this_ptr
     if(t == NOTYPE)
         throw InvalidParamException(TRACE_INFO,
             "Invalid AtomType parameter '%s'.",type);
-    return this_ptr->addNode(t,std::string(name)).value();
+    return this_ptr->add_node(t,std::string(name)).value();
 }
 
 UUID AtomSpace_addLink( AtomSpace* this_ptr
@@ -42,7 +42,7 @@ UUID AtomSpace_addLink( AtomSpace* this_ptr
     HandleSeq oset;
     for(int i=0;i<size;i++)
         oset.push_back(Handle(outgoing[i]));
-    return this_ptr->addLink(t,oset).value();
+    return this_ptr->add_link(t,oset).value();
 }
 
 UUID AtomSpace_getNode( AtomSpace* this_ptr
@@ -54,7 +54,7 @@ UUID AtomSpace_getNode( AtomSpace* this_ptr
     if(t == NOTYPE)
         throw InvalidParamException(TRACE_INFO,
             "Invalid AtomType parameter '%s'.",type);
-    Handle h = this_ptr->getNode(t,std::string(name));
+    Handle h = this_ptr->get_node(t,std::string(name));
     *found = h != Handle::UNDEFINED;
     return h.value();
 }
@@ -72,7 +72,7 @@ UUID AtomSpace_getLink( AtomSpace* this_ptr
     HandleSeq oset;
     for(int i=0;i<size;i++)
         oset.push_back(Handle(outgoing[i]));
-    Handle h = this_ptr->getLink(t,oset);
+    Handle h = this_ptr->get_link(t,oset);
     *found = h != Handle::UNDEFINED;
     return h.value();
 }
@@ -80,7 +80,7 @@ UUID AtomSpace_getLink( AtomSpace* this_ptr
 int AtomSpace_removeAtom( AtomSpace* this_ptr
                         , UUID handle )
 {
-    return this_ptr->removeAtom(Handle(handle));
+    return this_ptr->remove_atom(Handle(handle));
 }
 
 void AtomSpace_debug( AtomSpace* this_ptr )

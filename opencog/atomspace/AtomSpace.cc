@@ -97,7 +97,7 @@ void AtomSpace::unregisterBackingStore(BackingStore *bs)
 
 // ====================================================================
 
-Handle AtomSpace::addAtom(AtomPtr atom, bool async)
+Handle AtomSpace::add_atom(AtomPtr atom, bool async)
 {
     // Is this atom already in the atom table?
     Handle hexist(atomTable.getHandle(atom));
@@ -132,8 +132,8 @@ Handle AtomSpace::addAtom(AtomPtr atom, bool async)
     return rh;
 }
 
-Handle AtomSpace::addNode(Type t, const string& name,
-                              bool async)
+Handle AtomSpace::add_node(Type t, const string& name,
+                           bool async)
 {
     // Is this atom already in the atom table?
     Handle hexist(atomTable.getHandle(t, name));
@@ -152,7 +152,7 @@ Handle AtomSpace::addNode(Type t, const string& name,
     return atomTable.add(createNode(t, name), async);
 }
 
-Handle AtomSpace::getNode(Type t, const string& name)
+Handle AtomSpace::get_node(Type t, const string& name)
 {
     // Is this atom already in the atom table?
     Handle hexist = atomTable.getHandle(t, name);
@@ -172,8 +172,8 @@ Handle AtomSpace::getNode(Type t, const string& name)
     return Handle::UNDEFINED;
 }
 
-Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing,
-                              bool async)
+Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing,
+                           bool async)
 {
     // Is this atom already in the atom table?
     Handle hexist = atomTable.getHandle(t, outgoing);
@@ -214,7 +214,7 @@ Handle AtomSpace::addLink(Type t, const HandleSeq& outgoing,
     return rh;
 }
 
-Handle AtomSpace::getLink(Type t, const HandleSeq& outgoing)
+Handle AtomSpace::get_link(Type t, const HandleSeq& outgoing)
 {
     // Is this atom already in the atom table?
     Handle hexist = atomTable.getHandle(t, outgoing);
@@ -242,7 +242,7 @@ Handle AtomSpace::getLink(Type t, const HandleSeq& outgoing)
     return Handle::UNDEFINED;
 }
 
-void AtomSpace::storeAtom(Handle h)
+void AtomSpace::store_atom(Handle h)
 {
     if (NULL == backing_store)
         throw RuntimeException(TRACE_INFO, "No backing store");
@@ -250,7 +250,7 @@ void AtomSpace::storeAtom(Handle h)
     backing_store->storeAtom(h);
 }
 
-Handle AtomSpace::fetchAtom(Handle h)
+Handle AtomSpace::fetch_atom(Handle h)
 {
     if (NULL == backing_store)
         throw RuntimeException(TRACE_INFO, "No backing store");
@@ -299,7 +299,7 @@ Handle AtomSpace::fetchAtom(Handle h)
        size_t arity = ogs.size();
        for (size_t i=0; i<arity; i++)
        {
-          Handle oh(fetchAtom(ogs[i]));
+          Handle oh(fetch_atom(ogs[i]));
           if (oh != ogs[i]) throw RuntimeException(TRACE_INFO,
               "Unexpected handle mismatch! Expected %lu got %lu\n",
               ogs[i].value(), oh.value());
@@ -309,21 +309,21 @@ Handle AtomSpace::fetchAtom(Handle h)
     return atomTable.add(h, false);
 }
 
-Handle AtomSpace::getAtom(Handle h)
+Handle AtomSpace::get_atom(Handle h)
 {
     Handle he(atomTable.getHandle(h));
     if (he) return he;
     if (backing_store)
-        return fetchAtom(h);
+        return fetch_atom(h);
     return Handle::UNDEFINED;
 }
 
-Handle AtomSpace::fetchIncomingSet(Handle h, bool recursive)
+Handle AtomSpace::fetch_incoming_set(Handle h, bool recursive)
 {
     if (NULL == backing_store)
         throw RuntimeException(TRACE_INFO, "No backing store");
 
-    h = getAtom(h);
+    h = get_atom(h);
 
     if (Handle::UNDEFINED == h) return Handle::UNDEFINED;
 
@@ -333,15 +333,15 @@ Handle AtomSpace::fetchIncomingSet(Handle h, bool recursive)
     for (size_t i=0; i<isz; i++) {
         Handle hi(iset[i]);
         if (recursive) {
-            fetchIncomingSet(hi, true);
+            fetch_incoming_set(hi, true);
         } else {
-            getAtom(hi);
+            get_atom(hi);
         }
     }
     return h;
 }
 
-bool AtomSpace::removeAtom(Handle h, bool recursive)
+bool AtomSpace::remove_atom(Handle h, bool recursive)
 {
     if (backing_store) {
         // Atom deletion has not been implemented in the backing store
@@ -367,7 +367,7 @@ void AtomSpace::clear()
     // atomspace! This will take minutes on any decent-sized atomspace!
     std::vector<Handle>::iterator i;
     for (i = allAtoms.begin(); i != allAtoms.end(); ++i) {
-        purgeAtom(*i, true);
+        purge_atom(*i, true);
     }
 
     allAtoms.clear();
@@ -381,7 +381,7 @@ namespace std {
 
 ostream& operator<<(ostream& out, const opencog::AtomSpace& as) {
     list<opencog::Handle> results;
-    as.getHandlesByType(back_inserter(results), opencog::ATOM, true);
+    as.get_handles_by_type(back_inserter(results), opencog::ATOM, true);
     for (const opencog::Handle& h : results)
         out << h->toString() << endl;
     return out;

@@ -42,13 +42,13 @@ AttentionalFocusCB::AttentionalFocusCB(AtomSpace* as) :
 bool AttentionalFocusCB::node_match(const Handle& node1, const Handle& node2)
 {
 	return node1 == node2 and
-		node2->getSTI() > _as->getAttentionalFocusBoundary();
+		node2->getSTI() > _as->get_attentional_focus_boundary();
 }
 
 bool AttentionalFocusCB::link_match(const LinkPtr& lpat, const LinkPtr& lsoln)
 {
 	return DefaultPatternMatchCB::link_match(lpat, lsoln)
-		and lsoln->getSTI() > _as->getAttentionalFocusBoundary();
+		and lsoln->getSTI() > _as->get_attentional_focus_boundary();
 }
 
 IncomingSet AttentionalFocusCB::get_incoming_set(const Handle& h)
@@ -61,7 +61,7 @@ IncomingSet AttentionalFocusCB::get_incoming_set(const Handle& h)
 	// parts of the hypergraph.
 	IncomingSet filtered_set;
 	for (const auto& l : incoming_set)
-		if (l->getSTI() > _as->getAttentionalFocusBoundary())
+		if (l->getSTI() > _as->get_attentional_focus_boundary())
 			filtered_set.push_back(l);
 
 	// If nothing is in AF

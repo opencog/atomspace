@@ -188,43 +188,43 @@ void PatternUTest::tearDown(void)
 void PatternUTest::setUp(void)
 {
 	// create a gnarly graph
-	hconst_1 = as->addNode(CONCEPT_NODE, "some const concept node 1");
-	hconst_2 = as->addNode(CONCEPT_NODE, "some const concept node 2");
-	hconst_3 = as->addNode(CONCEPT_NODE, "some const concept node 3");
-	hsoln_a = as->addNode(CONCEPT_NODE, "desired solution concept node a");
-	hsoln_b = as->addNode(CONCEPT_NODE, "desired solution concept node b");
-	hsoln_c = as->addNode(CONCEPT_NODE, "desired solution concept node c");
+	hconst_1 = as->add_node(CONCEPT_NODE, "some const concept node 1");
+	hconst_2 = as->add_node(CONCEPT_NODE, "some const concept node 2");
+	hconst_3 = as->add_node(CONCEPT_NODE, "some const concept node 3");
+	hsoln_a = as->add_node(CONCEPT_NODE, "desired solution concept node a");
+	hsoln_b = as->add_node(CONCEPT_NODE, "desired solution concept node b");
+	hsoln_c = as->add_node(CONCEPT_NODE, "desired solution concept node c");
 
-	hpred_1a = as->addLink(INHERITANCE_LINK, hconst_1, hsoln_a);
-	hpred_1b = as->addLink(LIST_LINK, hconst_1, hsoln_b);
-	hpred_1c = as->addLink(LIST_LINK, hconst_1, hsoln_c);
+	hpred_1a = as->add_link(INHERITANCE_LINK, hconst_1, hsoln_a);
+	hpred_1b = as->add_link(LIST_LINK, hconst_1, hsoln_b);
+	hpred_1c = as->add_link(LIST_LINK, hconst_1, hsoln_c);
 
-	hpred_2a = as->addLink(INHERITANCE_LINK, hconst_2, hsoln_a);
-	hpred_2b = as->addLink(LIST_LINK, hconst_2, hsoln_b);
-	hpred_2c = as->addLink(LIST_LINK, hconst_2, hsoln_c);
+	hpred_2a = as->add_link(INHERITANCE_LINK, hconst_2, hsoln_a);
+	hpred_2b = as->add_link(LIST_LINK, hconst_2, hsoln_b);
+	hpred_2c = as->add_link(LIST_LINK, hconst_2, hsoln_c);
 
 	// create a confounding link, like above, but different
-	Handle hwrong = as->addNode(CONCEPT_NODE, "incorrect solution concept node");
+	Handle hwrong = as->add_node(CONCEPT_NODE, "incorrect solution concept node");
 
-	as->addLink(ASSOCIATIVE_LINK, hconst_1, hwrong);
+	as->add_link(ASSOCIATIVE_LINK, hconst_1, hwrong);
 
 	// Create a standard-format opencog predicate
-	hitem_1 = as->addNode(CONCEPT_NODE, "concept kanjiru 1");
-	hitem_2 = as->addNode(CONCEPT_NODE, "concept kangaeru 2");
-	hitem_3 = as->addNode(CONCEPT_NODE, "concept nihongo 3");
+	hitem_1 = as->add_node(CONCEPT_NODE, "concept kanjiru 1");
+	hitem_2 = as->add_node(CONCEPT_NODE, "concept kangaeru 2");
+	hitem_3 = as->add_node(CONCEPT_NODE, "concept nihongo 3");
 
-	hlist = as->addLink(LIST_LINK, hitem_1, hitem_2, hitem_3);
+	hlist = as->add_link(LIST_LINK, hitem_1, hitem_2, hitem_3);
 
-	hprnode = as->addNode(PREDICATE_NODE, "relationship blaupunkt");
+	hprnode = as->add_node(PREDICATE_NODE, "relationship blaupunkt");
 
-	hoc = as->addLink(EVALUATION_LINK, hprnode, hlist);
+	hoc = as->add_link(EVALUATION_LINK, hprnode, hlist);
 
 	// Same as above, but with only two items in the list.
-	hshort_list = as->addLink(LIST_LINK, hitem_1, hitem_2);
+	hshort_list = as->add_link(LIST_LINK, hitem_1, hitem_2);
 
-	hshort_prnode = as->addNode(PREDICATE_NODE, "relationship weltanshaung");
+	hshort_prnode = as->add_node(PREDICATE_NODE, "relationship weltanshaung");
 
-	hshort_oc = as->addLink(EVALUATION_LINK, hshort_prnode, hshort_list);
+	hshort_oc = as->add_link(EVALUATION_LINK, hshort_prnode, hshort_list);
 }
 
 void PatternUTest::test_simple_link(void)
@@ -232,8 +232,8 @@ void PatternUTest::test_simple_link(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Define the pattern to match against.
-	Handle hvar = as->addNode(VARIABLE_NODE, "variable node");
-	Handle he = as->addLink(INHERITANCE_LINK, hconst_1, hvar);
+	Handle hvar = as->add_node(VARIABLE_NODE, "variable node");
+	Handle he = as->add_link(INHERITANCE_LINK, hconst_1, hvar);
 
 	std::set<Handle> vars;
 	vars.insert(hvar);
@@ -250,8 +250,8 @@ void PatternUTest::test_simple_link(void)
 	TSM_ASSERT("incorrect predicate", hpred_1a == pmcb.preds[he]);
 
 	// Remove garbage, just in case ...
-	as->removeAtom(he);
-	as->removeAtom(hvar);
+	as->remove_atom(he);
+	as->remove_atom(hvar);
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -279,14 +279,14 @@ void PatternUTest::test_two_links(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Define the pattern to match against.
-	Handle hx = as->addNode(VARIABLE_NODE, "variable node x");
+	Handle hx = as->add_node(VARIABLE_NODE, "variable node x");
 
-	Handle hl1 = as->addLink(LIST_LINK, hconst_1, hx);
-	Handle hl2 = as->addLink(LIST_LINK, hconst_2, hx);
+	Handle hl1 = as->add_link(LIST_LINK, hconst_1, hx);
+	Handle hl2 = as->add_link(LIST_LINK, hconst_2, hx);
 
-	Handle han = as->addLink(AND_LINK, hl1, hl2);
+	Handle han = as->add_link(AND_LINK, hl1, hl2);
 
-	Handle hv = as->addLink(VARIABLE_LIST, hx);
+	Handle hv = as->add_link(VARIABLE_LIST, hx);
 
 	std::set<Handle> vars;
 	vars.insert(hx);
@@ -337,15 +337,15 @@ void PatternUTest::test_eval(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Create a standard-format opencog predicate
-	Handle h1 = as->addNode(CONCEPT_NODE, "concept kanjiru 1");
-	Handle h2 = as->addNode(VARIABLE_NODE, "concept variable");
-	Handle h3 = as->addNode(CONCEPT_NODE, "concept nihongo 3");
+	Handle h1 = as->add_node(CONCEPT_NODE, "concept kanjiru 1");
+	Handle h2 = as->add_node(VARIABLE_NODE, "concept variable");
+	Handle h3 = as->add_node(CONCEPT_NODE, "concept nihongo 3");
 
-	Handle hl = as->addLink(LIST_LINK, h1, h2, h3);
+	Handle hl = as->add_link(LIST_LINK, h1, h2, h3);
 
-	Handle hprn = as->addNode(VARIABLE_NODE, "3-tuple relationship variable");
+	Handle hprn = as->add_node(VARIABLE_NODE, "3-tuple relationship variable");
 
-	heval = as->addLink(EVALUATION_LINK, hprn, hl);
+	heval = as->add_link(EVALUATION_LINK, hprn, hl);
 
 	std::set<Handle> vars;
 	vars.insert(hprn);
@@ -366,11 +366,11 @@ void PatternUTest::test_eval(void)
 	// ----------------------------------------
 	logger().debug("BEGIN second subtest: %s", __FUNCTION__);
 	// Do it again, but with a truncated list
-	Handle hls = as->addLink(LIST_LINK, h1, h2);
+	Handle hls = as->add_link(LIST_LINK, h1, h2);
 
-	Handle hprns = as->addNode(VARIABLE_NODE, "2-tuple relationship variable");
+	Handle hprns = as->add_node(VARIABLE_NODE, "2-tuple relationship variable");
 
-	hshort_eval = as->addLink(EVALUATION_LINK, hprns, hls);
+	hshort_eval = as->add_link(EVALUATION_LINK, hprns, hls);
 
 	std::set<Handle> svars;
 	svars.insert(hprns);
@@ -428,16 +428,16 @@ void PatternUTest::test_implication(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle han = as->addLink(AND_LINK, heval, hshort_eval);
+	Handle han = as->add_link(AND_LINK, heval, hshort_eval);
 
-	Handle h2 = as->addNode(VARIABLE_NODE, "concept variable");
+	Handle h2 = as->add_node(VARIABLE_NODE, "concept variable");
 
-	Handle hpa = as->addLink(PARSE_LINK, h2);
+	Handle hpa = as->add_link(PARSE_LINK, h2);
 
 	imply(as, han, hpa);
 
 	// Remove the parse link, so that the other one is easier to find.
-	as->removeAtom(hpa);
+	as->remove_atom(hpa);
 
 	// At this point, the AtomSpace should contain a structure
 	// that looks like the below. Look for it.
@@ -448,14 +448,14 @@ void PatternUTest::test_implication(void)
 	// Be sure to explicitly check that we got hitem_2 as the result
 
 	std::vector<Handle> ret;
-	as->getHandlesByType(back_inserter(ret), PARSE_LINK);
+	as->get_handles_by_type(back_inserter(ret), PARSE_LINK);
 
 	TSM_ASSERT_EQUALS("incorrect implication", ret.size(), 1);
 	if (0 < ret.size())
 	{
-		TSM_ASSERT("null pointer", as->isValidHandle(ret[0]));
+		TSM_ASSERT("null pointer", as->is_valid_handle(ret[0]));
 
-		Handle solution = as->getOutgoing(ret[0],0);
+		Handle solution = as->get_outgoing(ret[0],0);
 		TSM_ASSERT("incorrect solution", hitem_2 == solution);
 	}
 

@@ -55,9 +55,9 @@ private:
 
 public:
     AtomUTest() {
-        sortedHandles.push_back(as.addNode(CONCEPT_NODE, "0"));
-        sortedHandles.push_back(as.addNode(CONCEPT_NODE, "1"));
-        sortedHandles.push_back(as.addNode(CONCEPT_NODE, "2"));
+        sortedHandles.push_back(as.add_node(CONCEPT_NODE, "0"));
+        sortedHandles.push_back(as.add_node(CONCEPT_NODE, "1"));
+        sortedHandles.push_back(as.add_node(CONCEPT_NODE, "2"));
         std::sort(sortedHandles.begin(), sortedHandles.end(), std::less<Handle>());
     }
 

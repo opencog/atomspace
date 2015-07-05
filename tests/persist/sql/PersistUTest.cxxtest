@@ -219,17 +219,17 @@ void PersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 {
 	// Create an atom ... 
 	TruthValuePtr stv(SimpleTruthValue::createTV(0.11, 100+idx));
-	h1[idx] = as->addNode(WORD_NODE, id + "fromNode");
+	h1[idx] = as->add_node(WORD_NODE, id + "fromNode");
 	h1[idx]->setTruthValue(stv);
 	n1[idx] = NodeCast(h1[idx]);
 
 	TruthValuePtr stv2(SimpleTruthValue::createTV(0.22, 200+idx));
-	h2[idx] = as->addNode(WORD_NODE, id + "toNode");
+	h2[idx] = as->add_node(WORD_NODE, id + "toNode");
 	h2[idx]->setTruthValue(stv2);
 	n2[idx] = NodeCast(h2[idx]);
 
 	TruthValuePtr stv3(SimpleTruthValue::createTV(0.33, 300+idx));
-	h3[idx] = as->addNode(WORD_NODE, id + "third wheel");
+	h3[idx] = as->add_node(WORD_NODE, id + "third wheel");
 	h3[idx]->setTruthValue(stv3);
 	n3[idx] = NodeCast(h3[idx]);
 
@@ -238,7 +238,7 @@ void PersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 	hvec.push_back(h2[idx]);
 	hvec.push_back(h3[idx]);
 
-	hl[idx] = as->addLink(WORD_SENSE_LINK, hvec);
+	hl[idx] = as->add_link(WORD_SENSE_LINK, hvec);
 	l[idx] = LinkCast(hl[idx]);
 }
 
@@ -320,7 +320,7 @@ void PersistUTest::test_atomspace(void)
 	 */
 	_as->barrier();
 	_as->clear();
-	TSM_ASSERT("Non-empty atomspace", 0 == _as->getSize());
+	TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
 
 	/* Verify that the atoms can still be fetched from storage. */
 	idx = 0;
@@ -332,7 +332,7 @@ void PersistUTest::test_atomspace(void)
 
 	/* Do it again, for good luck.  */
 	_as->clear();
-	TSM_ASSERT("Non-empty atomspace", 0 == _as->getSize());
+	TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
 
 	/* Verify that the atoms can still be fetched from storage. */
 	idx = 0;
@@ -344,7 +344,7 @@ void PersistUTest::test_atomspace(void)
 
 	/* Kill data for good */
 	_as->clear();
-	TSM_ASSERT("Non-empty atomspace", 0 == _as->getSize());
+	TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
 	kill_data();
 
 	/* Verify that the atoms no longer being found. */

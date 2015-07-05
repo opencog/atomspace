@@ -47,13 +47,13 @@ void AtomUtilsUTest::test_get_distant_neighbors()
 {
 	// Fill atomspace
 	AtomSpace as;
-	Handle A = as.addNode(CONCEPT_NODE, "A"),
-		B = as.addNode(CONCEPT_NODE, "B"),
-		C = as.addNode(CONCEPT_NODE, "C"),
-		D = as.addNode(CONCEPT_NODE, "D"),
-		AB = as.addLink(INHERITANCE_LINK, A, B),
-		BC = as.addLink(INHERITANCE_LINK, B, C),
-		CD = as.addLink(INHERITANCE_LINK, C, D);
+	Handle A = as.add_node(CONCEPT_NODE, "A"),
+		B = as.add_node(CONCEPT_NODE, "B"),
+		C = as.add_node(CONCEPT_NODE, "C"),
+		D = as.add_node(CONCEPT_NODE, "D"),
+		AB = as.add_link(INHERITANCE_LINK, A, B),
+		BC = as.add_link(INHERITANCE_LINK, B, C),
+		CD = as.add_link(INHERITANCE_LINK, C, D);
 
 	// Test neighbors at distance 1 of A
 	TS_ASSERT_EQUALS(get_distant_neighbors(A, 1),
@@ -76,11 +76,11 @@ void AtomUtilsUTest::test_get_distant_neighbors()
 void AtomUtilsUTest::test_get_outgoing_nodes()
 {
 	AtomSpace as;
-	Handle A = as.addNode(CONCEPT_NODE, "A"),
-		B = as.addNode(CONCEPT_NODE, "B"),
-		P = as.addNode(PREDICATE_NODE, "P"),
-		AB = as.addLink(INHERITANCE_LINK, A, B),
-		ABP = as.addLink(LIST_LINK, AB, P);
+	Handle A = as.add_node(CONCEPT_NODE, "A"),
+		B = as.add_node(CONCEPT_NODE, "B"),
+		P = as.add_node(PREDICATE_NODE, "P"),
+		AB = as.add_link(INHERITANCE_LINK, A, B),
+		ABP = as.add_link(LIST_LINK, AB, P);
 
 	// Get all nodes from ABP
 	TS_ASSERT_EQUALS(get_outgoing_nodes(ABP),
@@ -100,17 +100,17 @@ void AtomUtilsUTest::test_get_predicates()
 {
 	AtomSpace as;
 	Handle
-		programmer = as.addNode(CONCEPT_NODE, "programmer"),
-		bacon = as.addNode(CONCEPT_NODE, "bacon"),
-		programmer_bacon = as.addLink(LIST_LINK, programmer, bacon),
-		eats = as.addNode(PREDICATE_NODE, "eats"),
-		programmerEatsBacon = as.addLink(EVALUATION_LINK, eats,
-										programmer_bacon),
-		lover = as.addNode(DEFINED_RELATIONSHIP_NODE, "lover"),
-		programmerBaconLover = as.addLink(EVALUATION_LINK, lover,
-										 programmer_bacon),
-		anotherNode = as.addNode(CONCEPT_NODE, "pigs"),
-		anotherLink = as.addLink(LIST_LINK, anotherNode, bacon);
+		programmer = as.add_node(CONCEPT_NODE, "programmer"),
+		bacon = as.add_node(CONCEPT_NODE, "bacon"),
+		programmer_bacon = as.add_link(LIST_LINK, programmer, bacon),
+		eats = as.add_node(PREDICATE_NODE, "eats"),
+		programmerEatsBacon = as.add_link(EVALUATION_LINK, eats,
+		                                  programmer_bacon),
+		lover = as.add_node(DEFINED_RELATIONSHIP_NODE, "lover"),
+		programmerBaconLover = as.add_link(EVALUATION_LINK, lover,
+		                                   programmer_bacon),
+		anotherNode = as.add_node(CONCEPT_NODE, "pigs"),
+		anotherLink = as.add_link(LIST_LINK, anotherNode, bacon);
 		
 	// Test get_predicates(default).
 	HandleSeq baconReferences {programmerEatsBacon, programmerBaconLover};
@@ -133,28 +133,28 @@ void AtomUtilsUTest::test_get_predicates_for()
 	AtomSpace as;
 	Handle
 		// Dog is a mammal, canine, animal.
-		dog = as.addNode(CONCEPT_NODE, "dog"),
-		mammal = as.addNode(CONCEPT_NODE, "mammal"),
-		dog_mammal = as.addLink(LIST_LINK, dog, mammal),
-		canine = as.addNode(CONCEPT_NODE, "canine"),
-		dog_canine = as.addLink(LIST_LINK, dog, canine),
-		animal = as.addNode(CONCEPT_NODE, "animal"),
-		dog_animal = as.addLink(LIST_LINK, dog, animal),
-		isA = as.addNode(PREDICATE_NODE, "IsA"),
-		dogIsAMammal = as.addLink(EVALUATION_LINK, isA, dog_mammal),
-		dogIsACanine = as.addLink(EVALUATION_LINK, isA, dog_canine),
-		dogIsAAnimal = as.addLink(EVALUATION_LINK, isA, dog_animal),
+		dog = as.add_node(CONCEPT_NODE, "dog"),
+		mammal = as.add_node(CONCEPT_NODE, "mammal"),
+		dog_mammal = as.add_link(LIST_LINK, dog, mammal),
+		canine = as.add_node(CONCEPT_NODE, "canine"),
+		dog_canine = as.add_link(LIST_LINK, dog, canine),
+		animal = as.add_node(CONCEPT_NODE, "animal"),
+		dog_animal = as.add_link(LIST_LINK, dog, animal),
+		isA = as.add_node(PREDICATE_NODE, "IsA"),
+		dogIsAMammal = as.add_link(EVALUATION_LINK, isA, dog_mammal),
+		dogIsACanine = as.add_link(EVALUATION_LINK, isA, dog_canine),
+		dogIsAAnimal = as.add_link(EVALUATION_LINK, isA, dog_animal),
 
 		// Dog eats bacon.
-		bacon = as.addNode(CONCEPT_NODE, "bacon"),
-		dog_bacon = as.addLink(LIST_LINK, dog, bacon),
-		eats = as.addNode(PREDICATE_NODE, "eats"),
-		dogEatsBacon = as.addLink(EVALUATION_LINK, eats, dog_bacon),
+		bacon = as.add_node(CONCEPT_NODE, "bacon"),
+		dog_bacon = as.add_link(LIST_LINK, dog, bacon),
+		eats = as.add_node(PREDICATE_NODE, "eats"),
+		dogEatsBacon = as.add_link(EVALUATION_LINK, eats, dog_bacon),
 
 		// Programmer eats bacon.
-		programmer = as.addNode(CONCEPT_NODE, "programmer"),
-		programmer_bacon = as.addLink(LIST_LINK, programmer, bacon),
-		programmerEatsBacon = as.addLink(EVALUATION_LINK, eats, programmer_bacon);
+		programmer = as.add_node(CONCEPT_NODE, "programmer"),
+		programmer_bacon = as.add_link(LIST_LINK, programmer, bacon),
+		programmerEatsBacon = as.add_link(EVALUATION_LINK, eats, programmer_bacon);
 		
 	// Test for dog IsA.
 	HandleSeq dogIsA {dogIsAMammal, dogIsACanine, dogIsAAnimal};

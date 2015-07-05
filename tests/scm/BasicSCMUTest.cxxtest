@@ -160,7 +160,7 @@ void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float t
 	TSM_ASSERT("Failed to create a node", !eval_err);
 
 	Type t = classserver().getType(tipo);
-	Handle h = as->getHandle(t, nodename);
+	Handle h = as->get_handle(t, nodename);
 	TSM_ASSERT("Failed to find handle", h != NULL);
 
 	NodePtr n = NodeCast(h);
@@ -197,7 +197,7 @@ void BasicSCMUTest::test_single_atom(void)
 	TSM_ASSERT("Failed to create the first atom!", !eval_err);
 
 	Type t = classserver().getType("Node");
-	Handle h = as->getHandle(t, "My First Node");
+	Handle h = as->get_handle(t, "My First Node");
 	TSM_ASSERT("Failed to find handle for first atom", h != NULL);
 
 	// Load the utility definitions
@@ -262,14 +262,14 @@ void BasicSCMUTest::check_truth_value(const TruthValue& tv)
 	TSM_ASSERT("Failed to eval", !eval_err);
 
 	// check that the atom has the right TV
-	Handle h = as->getHandle(NODE, node_str);
+	Handle h = as->get_handle(NODE, node_str);
 	TSM_ASSERT("Failed to get the handle", h != Handle::UNDEFINED);
 	// hack to avoid floating error
-	bool tv_eq = tv.toString() == as->getTV(h)->toString();
+	bool tv_eq = tv.toString() == as->get_TV(h)->toString();
 	TSM_ASSERT("TVs are different", tv_eq);
 
 	// remove Node so we can redo the test
-	as->removeAtom(h);
+	as->remove_atom(h);
 }
 
 void BasicSCMUTest::test_truth_value(void)
@@ -299,12 +299,12 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 	TSM_ASSERT("Failed to create a link", !eval_err);
 
 	HandleSeq links;
-	as->getHandlesByType(back_inserter(links), type, true);
+	as->get_handles_by_type(back_inserter(links), type, true);
 	//printf("Number of links found: %d\n",links.size());
 	HandleSeq::const_iterator i;
 	for (i = links.begin(); i != links.end(); ++i)
 	{
-		TruthValuePtr tv = as->getTV(*i);
+		TruthValuePtr tv = as->get_TV(*i);
 		float m = tv->getMean();
 		float c = tv->getConfidence();
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(m - truth), 1.0e-6);
@@ -313,14 +313,14 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 	}
 
 	Type t1 = classserver().getType(nodename1);
-	Handle h1 = as->getHandle(t1, value1);
+	Handle h1 = as->get_handle(t1, value1);
 	TSM_ASSERT("Failed to find handle", h1 != NULL);
 
 	NodePtr n1 = NodeCast(h1);
 	TSM_ASSERT("Failed to find node", n1 != NULL);
 
 	Type t2 = classserver().getType(nodename2);
-	Handle h2 = as->getHandle(t2, value2 );
+	Handle h2 = as->get_handle(t2, value2 );
 	TSM_ASSERT("Failed to find handle", h2 != NULL);
 
 	NodePtr n2 = NodeCast(h2);
@@ -400,7 +400,7 @@ void BasicSCMUTest::test_link_tv_setting(void)
 	eval->clear_pending();
 	TSM_ASSERT("Failed to create a link", !eval_err);
 
-	TruthValuePtr tv = as->getTV(inh);
+	TruthValuePtr tv = as->get_TV(inh);
 	float m = tv->getMean();
 	float c = tv->getConfidence();
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(m - 0.75), 1.0e-6);
@@ -413,7 +413,7 @@ void BasicSCMUTest::test_link_tv_setting(void)
 	eval->clear_pending();
 	TSM_ASSERT("Failed to update a link", !eval_err);
 
-	tv = as->getTV(inh);
+	tv = as->get_TV(inh);
 	m = tv->getMean();
 	c = tv->getConfidence();
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(m - 0.6), 1.0e-6);
@@ -440,12 +440,12 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 	TSM_ASSERT("Failed to create parse link", !eval_err);
 
 	HandleSeq links;
-	as->getHandlesByType(back_inserter(links), type, true);
+	as->get_handles_by_type(back_inserter(links), type, true);
 	//printf("Number of links found: %d\n",links.size());
 	HandleSeq::const_iterator i;
 	for (i = links.begin(); i != links.end(); ++i)
 	{
-		TruthValuePtr tv = as->getTV(*i);
+		TruthValuePtr tv = as->get_TV(*i);
 		float m = tv->getMean();
 		float c = tv->getConfidence();
 		//the link has TV 0.0
@@ -454,7 +454,7 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 	}
 
 	Type t1 = classserver().getType(nodename1);
-	Handle h1 = as->getHandle(t1, value1);
+	Handle h1 = as->get_handle(t1, value1);
 	TSM_ASSERT("Failed to find handle", h1 != NULL);
 
 	NodePtr n1 = NodeCast(h1);
@@ -470,7 +470,7 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 	}
 
 	Type t2 = classserver().getType(nodename2);
-	Handle h2 = as->getHandle(t2, value2 );
+	Handle h2 = as->get_handle(t2, value2 );
 	TSM_ASSERT("Failed to find handle", h2 != NULL);
 
 	NodePtr n2 = NodeCast(h2);

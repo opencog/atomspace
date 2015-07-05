@@ -99,28 +99,28 @@ public:
     // =================================================================
     void atomAdded1(Handle h)
     {
-        TS_ASSERT(atomSpace->getSize() == 1);
+        TS_ASSERT(atomSpace->get_size() == 1);
         logger().debug("atomAdded1: %s", h->toString().c_str());
         __testSignalsCounter += 1;
     }
 
     void atomAdded2(Handle h)
     {
-        TS_ASSERT(atomSpace->getSize() == 1);
+        TS_ASSERT(atomSpace->get_size() == 1);
         logger().debug("atomAdded2: %s", h->toString().c_str());
         __testSignalsCounter += 10;
     }
 
     void atomMerged1(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new)
     {
-        TS_ASSERT(atomSpace->getSize() == 1);
+        TS_ASSERT(atomSpace->get_size() == 1);
         logger().debug("atomMerged1: %s", h->toString().c_str());
         __testSignalsCounter += 100;
     }
 
     void atomMerged2(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new)
     {
-        TS_ASSERT(atomSpace->getSize() == 1);
+        TS_ASSERT(atomSpace->get_size() == 1);
         logger().debug("atomMerged2: %s", h->toString().c_str());
         __testSignalsCounter += 1000;
     }
@@ -128,7 +128,7 @@ public:
     void atomRemoved1(AtomPtr atom)
     {
         // Atom is not removed from table until AFTER callbacks are completed
-        TS_ASSERT(atomSpace->getSize() == 1);
+        TS_ASSERT(atomSpace->get_size() == 1);
         logger().debug("atomRemoved1: %s", atom->toString().c_str());
         __testSignalsCounter += 10000;
     }
@@ -136,7 +136,7 @@ public:
     void atomRemoved2(AtomPtr atom)
     {
         // Atom is not removed from table until AFTER callbacks are completed
-        TS_ASSERT(atomSpace->getSize() == 1);
+        TS_ASSERT(atomSpace->get_size() == 1);
         logger().debug("atomRemoved2: %s", atom->toString().c_str());
         __testSignalsCounter += 100000;
     }
@@ -160,41 +160,41 @@ public:
         /* Add and remove a simple node */
         __testSignalsCounter = 0;
         logger().debug("before first atom add");
-        Handle wnHandle = atomSpace->addNode(NUMBER_NODE, "1.41421356");
+        Handle wnHandle = atomSpace->add_node(NUMBER_NODE, "1.41421356");
         TS_ASSERT(__testSignalsCounter == 11);
-        TS_ASSERT(atomSpace->getSize() == 1);
+        TS_ASSERT(atomSpace->get_size() == 1);
 
         /* Since we're adding *exactly* the same atom, we should get a tv-merged signal */
         logger().debug("before second atom add");
         TruthValuePtr tv(SimpleTruthValue::createTV(0.5, 1.0));
-        atomSpace->addNode(NUMBER_NODE, "1.41421356")->setTruthValue(tv);
+        atomSpace->add_node(NUMBER_NODE, "1.41421356")->setTruthValue(tv);
         TS_ASSERT(__testSignalsCounter == 1111);
-        TS_ASSERT(atomSpace->getSize() == 1);
+        TS_ASSERT(atomSpace->get_size() == 1);
 
-        logger().debug("before atom remove, table size = %u", atomSpace->getSize());
-        atomSpace->purgeAtom(wnHandle, true);
+        logger().debug("before atom remove, table size = %u", atomSpace->get_size());
+        atomSpace->purge_atom(wnHandle, true);
         TS_ASSERT(__testSignalsCounter == 111111);
-        TS_ASSERT(atomSpace->getSize() == 0);
+        TS_ASSERT(atomSpace->get_size() == 0);
 
         // test disconnections
         __testSignalsCounter = 0;
         add1.disconnect();
         merge1.disconnect();
         remove1.disconnect();
-        wnHandle = atomSpace->addNode(NUMBER_NODE, "1.41421356");
-        atomSpace->addNode(NUMBER_NODE, "1.41421356");
+        wnHandle = atomSpace->add_node(NUMBER_NODE, "1.41421356");
+        atomSpace->add_node(NUMBER_NODE, "1.41421356");
         TS_ASSERT(__testSignalsCounter == 10);
-        atomSpace->purgeAtom(wnHandle, true);
+        atomSpace->purge_atom(wnHandle, true);
         TS_ASSERT(__testSignalsCounter == 100010);
 
         __testSignalsCounter = 0;
         add2.disconnect();
         merge2.disconnect();
         remove2.disconnect();
-        wnHandle = atomSpace->addNode(NUMBER_NODE, "1.41421356");
-        atomSpace->addNode(NUMBER_NODE, "1.41421356");
+        wnHandle = atomSpace->add_node(NUMBER_NODE, "1.41421356");
+        atomSpace->add_node(NUMBER_NODE, "1.41421356");
         TS_ASSERT(__testSignalsCounter == 0);
-        atomSpace->purgeAtom(wnHandle, true);
+        atomSpace->purge_atom(wnHandle, true);
         TS_ASSERT(__testSignalsCounter == 0);
     }
 
@@ -232,7 +232,7 @@ public:
             counter++;
 
             TruthValuePtr tv(SimpleTruthValue::createTV(((double) i) / ((double) N), i));
-            atomSpace->addNode(t, oss.str())->setTruthValue(tv);
+            atomSpace->add_node(t, oss.str())->setTruthValue(tv);
         }
     }
 
@@ -244,7 +244,7 @@ public:
                 std::thread(&AtomSpaceAsyncUTest::threadedAdd, this, i, num_atoms));
         }
         for (std::thread& t : thread_pool) t.join();
-        size_t size = atomSpace->getSize();
+        size_t size = atomSpace->get_size();
         std::cout << "unique atomspace size:" << size << std::endl;
 
         // we should get num_atoms * n_threads distinct atoms
@@ -259,7 +259,7 @@ public:
                 std::thread(&AtomSpaceAsyncUTest::threadedAdd, this, -1, num_atoms));
         }
         for (std::thread& t : thread_pool) t.join();
-        size_t size = atomSpace->getSize();
+        size_t size = atomSpace->get_size();
         std::cout << "duplicate atomspace size:" << size << std::endl;
 
         // We should get only num_atoms, because all threads are creating duplicates.
@@ -276,11 +276,11 @@ public:
             oss << "thread -1 node " << i;
             //std::cout << "removing " << oss.str() << std::endl;
             HandleSeq hs;
-            atomSpace->getHandlesByName(back_inserter(hs), oss.str(), NODE);
+            atomSpace->get_handles_by_name(back_inserter(hs), oss.str(), NODE);
             TS_ASSERT_EQUALS(hs.size(), 1);
             if (hs.size() != 0) {
                 //std::cout << " handle " << hs[0] << std::endl;
-                atomSpace->purgeAtom(hs[0], true);
+                atomSpace->purge_atom(hs[0], true);
             }
         }
     }
@@ -295,9 +295,9 @@ public:
                 std::thread(&AtomSpaceAsyncUTest::threadedRemove, this, i*interval, interval));
         }
         for (std::thread& t : thread_pool) t.join();
-        size_t size = atomSpace->getSize();
+        size_t size = atomSpace->get_size();
         TS_ASSERT_EQUALS(size, 0);
-        size = atomSpace->getSize();
+        size = atomSpace->get_size();
     }
 
 
@@ -346,7 +346,7 @@ public:
             oss << "thread -1 node " << i;
 
             HandleSeq hs;
-            atomSpace->getHandlesByName(back_inserter(hs), oss.str(), NODE);
+            atomSpace->get_handles_by_name(back_inserter(hs), oss.str(), NODE);
             TS_ASSERT_EQUALS(hs.size(), 1);
             Handle h = hs[0];
 
@@ -374,7 +374,7 @@ public:
                 std::thread(&AtomSpaceAsyncUTest::threadedSetTV, this, num_atoms));
         }
         for (std::thread& t : thread_pool) t.join();
-        size_t size = atomSpace->getSize();
+        size_t size = atomSpace->get_size();
         std::cout << "TV atomspace size:" << size << std::endl;
 
         // We should get only num_atoms, because all threads created duplicates.
@@ -410,7 +410,7 @@ public:
             oss << "thread -1 node " << i;
 
             HandleSeq hs;
-            atomSpace->getHandlesByName(back_inserter(hs), oss.str(), NODE);
+            atomSpace->get_handles_by_name(back_inserter(hs), oss.str(), NODE);
             TS_ASSERT_EQUALS(hs.size(), 1);
             Handle ha = hs[0];
 
@@ -418,7 +418,7 @@ public:
             ossb << "thread -1 node " << (2*i) % N;
 
             HandleSeq hsb;
-            atomSpace->getHandlesByName(back_inserter(hsb), ossb.str(), NODE);
+            atomSpace->get_handles_by_name(back_inserter(hsb), ossb.str(), NODE);
             TS_ASSERT_EQUALS(hsb.size(), 1);
 
             bogus ++;
@@ -428,7 +428,7 @@ public:
 
             Type t = LIST_LINK;
             hs.push_back(ha);
-            atomSpace->addLink(t, hs)->setTruthValue(tv);
+            atomSpace->add_link(t, hs)->setTruthValue(tv);
         }
     }
 
@@ -448,7 +448,7 @@ public:
                 std::thread(&AtomSpaceAsyncUTest::threadedLinkAdd, this, i, num_atoms));
         }
         for (std::thread& t : thread_pool) t.join();
-        size_t size = atomSpace->getSize();
+        size_t size = atomSpace->get_size();
         std::cout << "Link atomspace size:" << size << std::endl;
 
         // We should get only 2*num_atoms, because all threads created duplicates.
@@ -491,18 +491,18 @@ public:
                                 this, _1, _2, _3));
 
         __testAFSignalsCounter = 0;
-        atomSpace->setAttentionalFocusBoundary(100);
+        atomSpace->set_attentional_focus_boundary(100);
 
         // Add a node to the AttentionalFocus
-        Handle h = atomSpace->addNode(CONCEPT_NODE,
-                                      "test");
+        Handle h = atomSpace->add_node(CONCEPT_NODE,
+                                       "test");
         h->setTruthValue(SimpleTruthValue::createTV(0.01,
                          SimpleTruthValue::confidenceToCount(1)));
-        atomSpace->setSTI(h, 200);
+        atomSpace->set_STI(h, 200);
         TS_ASSERT(__testAFSignalsCounter == 1);
 
         // Remove the node from the AttentionalFocus
-        atomSpace->setSTI(h, 90);
+        atomSpace->set_STI(h, 90);
         TS_ASSERT(__testAFSignalsCounter == 2);
 
         addAFConnection.disconnect();
@@ -520,26 +520,26 @@ public:
             oss << "thread -1 concept node " << i;
 
             // First, a pair of concept nodes in a ListLink
-            Handle ha = atomSpace->addNode(CONCEPT_NODE, oss.str());
+            Handle ha = atomSpace->add_node(CONCEPT_NODE, oss.str());
 
             std::ostringstream ossb;
             ossb << "thread -1 concept node " << (2*i) % N;
 
-            Handle hb = atomSpace->addNode(CONCEPT_NODE, ossb.str());
+            Handle hb = atomSpace->add_node(CONCEPT_NODE, ossb.str());
 
-            Handle hl = atomSpace->addLink(LIST_LINK, ha, hb);
+            Handle hl = atomSpace->add_link(LIST_LINK, ha, hb);
 
             // The goal here is that each ListLink will have an
             // incoming set of size n_threads.  This should make a
             // later recursive remove somewhat contentious...
             std::ostringstream ossp;
             ossp << "thread " << thread_id << " predicate node ";
-            Handle hp = atomSpace->addNode(PREDICATE_NODE, ossp.str());
+            Handle hp = atomSpace->add_node(PREDICATE_NODE, ossp.str());
 
             bogus ++;
             bogus %= N;
             TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, bogus+i));
-            atomSpace->addLink(EVALUATION_LINK, hp, hl)->setTruthValue(tv);
+            atomSpace->add_link(EVALUATION_LINK, hp, hl)->setTruthValue(tv);
         }
     }
 
@@ -552,7 +552,7 @@ public:
                 std::thread(&AtomSpaceAsyncUTest::threadedEvalAdd, this, i, num_atoms));
         }
         for (std::thread& t : thread_pool) t.join();
-        size_t size = atomSpace->getSize();
+        size_t size = atomSpace->get_size();
         std::cout << "Eval atomspace size:" << size << std::endl;
 
         // We should get only n_thread*num_atoms + 2*num_atoms +
@@ -580,7 +580,7 @@ public:
             // size_t j = (i+111*thread_id) % nc;
             size_t j = (i+11*thread_id) % nc;
             // size_t j = i;
-            atomSpace->purgeAtom((*seq)[j], true);
+            atomSpace->purge_atom((*seq)[j], true);
         }
     }
 
@@ -601,7 +601,7 @@ public:
         // First, seetup the contents, and get all the concept nodes
         testEvalAdd();
         HandleSeq hs;
-        atomSpace->getHandlesByType(back_inserter(hs), CONCEPT_NODE);
+        atomSpace->get_handles_by_type(back_inserter(hs), CONCEPT_NODE);
 
         std::cout << "Num concept nodes:" << hs.size() << std::endl;
         TS_ASSERT_EQUALS(hs.size(), num_atoms);
@@ -624,7 +624,7 @@ public:
         TS_ASSERT_EQUALS((int) __totalPurged, (n_threads + 2)*num_atoms);
 
         // Only the predicate node should be left after the above.
-        size_t size = atomSpace->getSize();
+        size_t size = atomSpace->get_size();
 
         std::cout << "Final size:" << size << std::endl;
         TS_ASSERT_EQUALS(size, n_threads);
@@ -642,11 +642,11 @@ public:
             std::ostringstream oss;
             oss << "thread " << thread_id << " concept node " << i;
             //std::cout << "removing " << oss.str() << std::endl;
-            Handle h(atomSpace->getHandle(CONCEPT_NODE, oss.str()));
+            Handle h(atomSpace->get_handle(CONCEPT_NODE, oss.str()));
             TS_ASSERT(h != Handle::UNDEFINED);
             if (h) {
                 //std::cout << " handle " << h << std::endl;
-                atomSpace->purgeAtom(h, true);
+                atomSpace->purge_atom(h, true);
             }
         }
     }
@@ -667,7 +667,7 @@ public:
 
                 std::ostringstream oss;
                 oss << "thread " << j << " concept node " << i;
-                Handle ha = atomSpace->addNode(CONCEPT_NODE, oss.str());
+                Handle ha = atomSpace->add_node(CONCEPT_NODE, oss.str());
                 hs.push_back(ha);
             }
 
@@ -675,13 +675,13 @@ public:
             // trying to erase the links below.
 #define NEST 16
             for (int k=0; k<NEST; k++) {
-                Handle hl = atomSpace->addLink(LIST_LINK, hs);
+                Handle hl = atomSpace->add_link(LIST_LINK, hs);
                 hs.push_back(hl);
             }
         }
 
         // Shoud have lots
-        size_t size = atomSpace->getSize();
+        size_t size = atomSpace->get_size();
 
         std::cout << "Total created:" << size << std::endl;
         TS_ASSERT_EQUALS(size, (n_threads+NEST)*num_atoms);
@@ -708,7 +708,7 @@ public:
         TS_ASSERT_EQUALS((int) __altTotalPurged, (n_threads + NEST)*num_atoms);
 
         // Nothing should be left after the above.
-        size = atomSpace->getSize();
+        size = atomSpace->get_size();
 
         std::cout << "Final size:" << size << std::endl;
         TS_ASSERT_EQUALS(size, 0);

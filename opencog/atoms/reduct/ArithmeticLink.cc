@@ -134,7 +134,7 @@ Handle ArithmeticLink::reorder(void)
 	Handle h(FunctionLink::factory(getType(), result));
 	if (NULL == _atomTable) return h;
 
-	return _atomTable->getAtomSpace()->addAtom(h);
+	return _atomTable->getAtomSpace()->add_atom(h);
 }
 
 // ===========================================================
@@ -183,7 +183,7 @@ Handle ArithmeticLink::execute(AtomSpace* as) const
 		sum = konsd(sum, get_double(as, h));
 	}
 
-	if (as) return as->addAtom(createNumberNode(sum));
+	if (as) return as->add_atom(createNumberNode(sum));
 	return Handle(createNumberNode(sum));
 }
 // ===========================================================

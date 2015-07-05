@@ -74,11 +74,11 @@ class MyExampleClass
 		// with a ListLink.
 		Handle my_func(Handle h)
 		{
-			TSM_ASSERT("Failed to get a valid handle", as->isValidHandle(h))
+			TSM_ASSERT("Failed to get a valid handle", as->is_valid_handle(h))
 
 			logger().debug("Info: my_func instance %d received the node: %s\n",
-			               id, as->getName(h).c_str());
-			Handle hlist = as->addLink(LIST_LINK, h);
+			               id, as->get_name(h).c_str());
+			Handle hlist = as->add_link(LIST_LINK, h);
 			return hlist;
 		}
 
@@ -93,25 +93,25 @@ class MyExampleClass
 		Handle my_more_func_1(Handle h)
 		{
 			// if handle invalid, it just mean the same atom might have been deleted by another thread
-			if (not as->isValidHandle(h))
+			if (not as->is_valid_handle(h))
 			{
 				logger().debug("Info: my_more_func_1 got invalid handle %s", h->toShortString().c_str());
 				return Handle::UNDEFINED;
 			}
 
-			Handle hlist = as->addLink(LIST_LINK, h);
+			Handle hlist = as->add_link(LIST_LINK, h);
 			return hlist;
 		}
 
 		void my_more_func_2(Handle h)
 		{
-			if (not as->isValidHandle(h))
+			if (not as->is_valid_handle(h))
 			{
 				logger().debug("Info: my_more_func_2 got invalid handle %s", h->toShortString().c_str());
 				return;
 			}
 
-			as->removeAtom(h, false);
+			as->remove_atom(h, false);
 		}
 };
 
@@ -154,17 +154,17 @@ void SCMPrimitiveUTest::test_H_H(void)
 	// Now verify that the returned yyy is a ListLink which wraps the input node.
 	Handle nnn = eval->eval_h("nnn");
 	Handle yyy = eval->eval_h("yyy");
-	TSM_ASSERT ("undefined node handle ", as->isValidHandle(nnn));
-	TSM_ASSERT ("undefined list handle ", as->isValidHandle(yyy));
+	TSM_ASSERT ("undefined node handle ", as->is_valid_handle(nnn));
+	TSM_ASSERT ("undefined list handle ", as->is_valid_handle(yyy));
 
-	TSM_ASSERT ("Null handle for link ", as->isValidHandle(yyy));
-	TSM_ASSERT ("handle isn't a link ", as->isLink(yyy));
+	TSM_ASSERT ("Null handle for link ", as->is_valid_handle(yyy));
+	TSM_ASSERT ("handle isn't a link ", as->is_link(yyy));
 
-	const std::vector<Handle>& oset = as->getOutgoing(yyy);
+	const std::vector<Handle>& oset = as->get_outgoing(yyy);
 
 	TSM_ASSERT ("wrong outgoing set ", nnn == oset[0]);
 
-	Handle hn = as->addNode(CONCEPT_NODE, "Hello World!");
+	Handle hn = as->add_node(CONCEPT_NODE, "Hello World!");
 	TSM_ASSERT ("wrong atom entirely ", hn == nnn);
 
 	delete mtc;
@@ -241,7 +241,7 @@ void SCMPrimitiveUTest::test_parallel(void)
 	bool eval_err = eval->eval_error();
 	TSM_ASSERT("Evaluation error", !eval_err);
 
-	TSM_ASSERT("Atomspace size incorrect!", as->getSize() == 30001);
+	TSM_ASSERT("Atomspace size incorrect!", as->get_size() == 30001);
 
 	delete mtc;
 	logger().debug("END TEST: %s", __FUNCTION__);

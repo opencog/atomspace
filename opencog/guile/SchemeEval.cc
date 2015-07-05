@@ -1022,7 +1022,7 @@ SCM SchemeEval::do_apply_scm(const std::string& func, Handle& varargs )
 	SCM expr = SCM_EOL;
 
 	// If there were args, pass the args to the function.
-	const std::vector<Handle> &oset = atomspace->getOutgoing(varargs);
+	const std::vector<Handle> &oset = atomspace->get_outgoing(varargs);
 
 	// Iterate in reverse, because cons chains in reverse.
 	size_t sz = oset.size();

@@ -94,10 +94,10 @@ public:
             std::ostringstream oss;
             oss << "thread " << thread_id << " node " << i;
 
-            Handle n = atomSpace->addNode(CONCEPT_NODE, oss.str());
+            Handle n = atomSpace->add_node(CONCEPT_NODE, oss.str());
 
             Type t = LIST_LINK;
-            atomSpace->addLink(t, anchor, n);
+            atomSpace->add_link(t, anchor, n);
             __totalAdded += 2;
         }
         __finished ++;
@@ -123,8 +123,8 @@ public:
             for (size_t i = 0; i < isz; i++) {
                 Handle n = iset[i]->getOutgoingAtom(1);
 
-                atomSpace->removeAtom(n, true);
-                atomSpace->removeAtom(Handle(iset[i]), true);
+                atomSpace->remove_atom(n, true);
+                atomSpace->remove_atom(Handle(iset[i]), true);
                 rm_cnt[thread_id] += 2;
                 __totalRemoved += 2;
             }
@@ -147,13 +147,13 @@ public:
         __totalRemoved = 0;
         __finished = 0;
 
-        anchor = atomSpace->addNode(ANCHOR_NODE, "*** The Anchor ***");
+        anchor = atomSpace->add_node(ANCHOR_NODE, "*** The Anchor ***");
         __totalAdded++;
 
         long int initial_use_count = AtomPtr(anchor).use_count();
         std::cout << std::endl;
         std::cout << "Initial anchor use count=" << initial_use_count << std::endl;
-        size_t isize = atomSpace->getSize();
+        size_t isize = atomSpace->get_size();
         std::cout << "Initial atomspace size: " << isize << std::endl;
 
         // Add lotsa links
@@ -174,7 +174,7 @@ public:
 
         long int final_use_count = AtomPtr(anchor).use_count();
         std::cout << "Final anchor use count=" << final_use_count << std::endl;
-        size_t fsize = atomSpace->getSize();
+        size_t fsize = atomSpace->get_size();
         std::cout << "Final atomspace size: " << fsize << std::endl;
 
         std::cout << "Total addded: " << __totalAdded << std::endl;

@@ -88,7 +88,7 @@ static Handle do_imply(AtomSpace* as,
 		// The result_list contains a list of the grounded expressions.
 		// (The order of the list has no significance, so it's really a set.)
 		// Put the set into a SetLink, and return that.
-		Handle gl = as->addLink(SET_LINK, impl.result_list);
+		Handle gl = as->add_link(SET_LINK, impl.result_list);
 		return gl;
 	}
 
@@ -115,7 +115,7 @@ static Handle do_imply(AtomSpace* as,
 			impl.result_list.push_back(h);
 	}
 
-	return as->addLink(SET_LINK, impl.result_list);
+	return as->add_link(SET_LINK, impl.result_list);
 }
 
 /**

@@ -189,7 +189,7 @@ SCM SchemeSmob::ss_map_type (SCM proc, SCM stype)
 
 	// Get all of the handles of the indicated type
 	std::list<Handle> handle_set;
-	atomspace->getHandlesByType(back_inserter(handle_set), t, false);
+	atomspace->get_handles_by_type(back_inserter(handle_set), t, false);
 
 	// Loop over all handles in the handle set.
 	// Call proc on each handle, in turn.

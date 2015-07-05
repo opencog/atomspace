@@ -71,7 +71,7 @@ class AtomSpace
      */
     BackingStore *backing_store;
 
-    AtomTable& getAtomTable(void) { return atomTable; }
+    AtomTable& get_atomtable(void) { return atomTable; }
 protected:
 
     /**
@@ -87,10 +87,10 @@ public:
     /**
      * Return the number of atoms contained in the space.
      */
-    inline int getSize() const { return atomTable.getSize(); }
-    inline int getNumNodes() const { return atomTable.getNumNodes(); }
-    inline int getNumLinks() const { return atomTable.getNumLinks(); }
-    inline int getNumAtomsOfType(Type type, bool subclass = false) const
+    inline int get_size() const { return atomTable.getSize(); }
+    inline int get_num_nodes() const { return atomTable.getNumNodes(); }
+    inline int get_num_links() const { return atomTable.getNumLinks(); }
+    inline int get_num_atoms_of_type(Type type, bool subclass = false) const
         { return atomTable.getNumAtomsOfType(type, subclass); }
 
     //! Clear the atomspace, remove all atoms
@@ -101,7 +101,7 @@ public:
      * then new truth value is ignored, and the existing atom is
      * returned.
      */
-    Handle addAtom(AtomPtr atom, bool async=false);
+    Handle add_atom(AtomPtr atom, bool async=false);
 
     /**
      * Add a node to the Atom Table.  If the atom already exists
@@ -110,8 +110,8 @@ public:
      * \param t     Type of the node
      * \param name  Name of the node
      */
-    Handle addNode(Type t, const std::string& name = "",
-                   bool async = false);
+    Handle add_node(Type t, const std::string& name = "",
+                    bool async = false);
 
     /**
      * Add a link to the Atom Table. If the atom already exists, then
@@ -121,58 +121,58 @@ public:
      * @param outgoing  a const reference to a HandleSeq containing
      *                  the outgoing set of the link
      */
-    Handle addLink(Type t, const HandleSeq& outgoing, bool async = false);
+    Handle add_link(Type t, const HandleSeq& outgoing, bool async = false);
 
-    inline Handle addLink(Type t, Handle h)
+    inline Handle add_link(Type t, Handle h)
     {
-	    return addLink(t, HandleSeq({h}));
+	    return add_link(t, HandleSeq({h}));
     }
 
-    inline Handle addLink(Type t, Handle ha, Handle hb)
+    inline Handle add_link(Type t, Handle ha, Handle hb)
     {
-	    return addLink(t, {ha, hb});
+	    return add_link(t, {ha, hb});
     }
 
-    inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc)
+    inline Handle add_link(Type t, Handle ha, Handle hb, Handle hc)
     {
-        return addLink(t, {ha, hb, hc});
+        return add_link(t, {ha, hb, hc});
     }
 
-    inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc, Handle hd)
+    inline Handle add_link(Type t, Handle ha, Handle hb, Handle hc, Handle hd)
     {
-        return addLink(t, {ha, hb, hc, hd});
+        return add_link(t, {ha, hb, hc, hd});
     }
 
-    inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
-                          Handle hd, Handle he)
+    inline Handle add_link(Type t, Handle ha, Handle hb, Handle hc,
+                           Handle hd, Handle he)
     {
-	    return addLink(t, {ha, hb, hc, hd, he});
+	    return add_link(t, {ha, hb, hc, hd, he});
     }
 
-    inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
-                          Handle hd, Handle he, Handle hf)
+    inline Handle add_link(Type t, Handle ha, Handle hb, Handle hc,
+                           Handle hd, Handle he, Handle hf)
     {
-	    return addLink(t, {ha, hb, hc, hd, he, hf});
+	    return add_link(t, {ha, hb, hc, hd, he, hf});
     }
 
-    inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
-                          Handle hd, Handle he, Handle hf, Handle hg)
+    inline Handle add_link(Type t, Handle ha, Handle hb, Handle hc,
+                           Handle hd, Handle he, Handle hf, Handle hg)
     {
-	    return addLink(t, {ha, hb, hc, hd, he, hf, hg});
+	    return add_link(t, {ha, hb, hc, hd, he, hf, hg});
     }
 
-    inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
-                          Handle hd, Handle he, Handle hf, Handle hg,
-                          Handle hh)
+    inline Handle add_link(Type t, Handle ha, Handle hb, Handle hc,
+                           Handle hd, Handle he, Handle hf, Handle hg,
+                           Handle hh)
     {
-	    return addLink(t, {ha, hb, hc, hd, he, hf, hg, hh});
+	    return add_link(t, {ha, hb, hc, hd, he, hf, hg, hh});
     }
 
-    inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
-                          Handle hd, Handle he, Handle hf, Handle hg,
-                          Handle hh, Handle hi)
+    inline Handle add_link(Type t, Handle ha, Handle hb, Handle hc,
+                           Handle hd, Handle he, Handle hf, Handle hg,
+                           Handle hh, Handle hi)
     {
-	    return addLink(t, {ha, hb, hc, hd, he, hf, hg, hh, hi});
+	    return add_link(t, {ha, hb, hc, hd, he, hf, hg, hh, hi});
     }
 
     /**
@@ -203,20 +203,20 @@ public:
      * To avoid a fetch if the atom already is in the atomtable, use the
      * getAtom() method instead.
      */
-    Handle fetchAtom(Handle h);
+    Handle fetch_atom(Handle h);
 
     /**
      * Get an atom from the AtomTable. If not found there, get it from
      * the backingstore (and add it to the AtomTable).  If the atom is
      * not found in either place, return Handle::UNDEFINED.
      */
-    Handle getAtom(Handle);
+    Handle get_atom(Handle);
 
     /**
      * Load *all* atoms of the given type, but only if they are not
      * already in the AtomTable.
      */
-    void fetchAllAtomsOfType(Type t) {
+    void fetch_all_atoms_of_type(Type t) {
         if (NULL == backing_store)
             throw RuntimeException(TRACE_INFO, "No backing store");
         backing_store->loadType(atomTable, t);
@@ -231,14 +231,14 @@ public:
      * contain this one in their outgoing sets. All of these atoms are
      * then loaded into this atomtable/atomspace.
      */
-    Handle fetchIncomingSet(Handle, bool);
+    Handle fetch_incoming_set(Handle, bool);
 
     /**
      * Recursively store the atom to the backing store.
      * I.e. if the atom is a link, then store all of the atoms
      * in its outgoing set as well, recursively.
      */
-    void storeAtom(Handle h);
+    void store_atom(Handle h);
 
     /**
      * Purge an atom from the atomspace.  This only removes the atom
@@ -258,7 +258,7 @@ public:
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
      */
-    bool purgeAtom(Handle h, bool recursive = false) {
+    bool purge_atom(Handle h, bool recursive = false) {
         return 0 < atomTable.extract(h, recursive).size();
     }
 
@@ -278,7 +278,7 @@ public:
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
      */
-    bool removeAtom(Handle h, bool recursive = false);
+    bool remove_atom(Handle h, bool recursive = false);
 
     /**
      * Get a node from the AtomTable, if it's in there. If its not found
@@ -290,9 +290,9 @@ public:
      * @param t     Type of the node
      * @param str   Name of the node
     */
-    Handle getNode(Type t, const std::string& name = "");
-    inline Handle getHandle(Type t, const std::string& str) {
-        return getNode(t, str);
+    Handle get_node(Type t, const std::string& name = "");
+    inline Handle get_handle(Type t, const std::string& str) {
+        return get_node(t, str);
     }
 
     /**
@@ -302,33 +302,33 @@ public:
      * the atom can't be found in either place, Handle::UNDEFINED will be
      * returned.
      *
-     * See also the getAtom() method.
+     * See also the get_atom() method.
      *
      * @param t        Type of the node
      * @param outgoing a reference to a HandleSeq containing
      *        the outgoing set of the link.
     */
-    Handle getLink(Type t, const HandleSeq& outgoing);
-	Handle getLink(Type t, Handle ha) {
-		return getLink(t, HandleSeq({ha}));
+    Handle get_link(Type t, const HandleSeq& outgoing);
+	Handle get_link(Type t, Handle ha) {
+		return get_link(t, HandleSeq({ha}));
 	}
-	Handle getLink(Type t, Handle ha, Handle hb) {
-		return getLink(t, {ha, hb});
+	Handle get_link(Type t, Handle ha, Handle hb) {
+		return get_link(t, {ha, hb});
 	}
-	Handle getLink(Type t, Handle ha, Handle hb, Handle hc) {
-		return getLink(t, {ha, hb, hc});
+	Handle get_link(Type t, Handle ha, Handle hb, Handle hc) {
+		return get_link(t, {ha, hb, hc});
 	}
-	Handle getLink(Type t, Handle ha, Handle hb, Handle hc, Handle hd) {
-		return getLink(t, {ha, hb, hc, hd});
+	Handle get_link(Type t, Handle ha, Handle hb, Handle hc, Handle hd) {
+		return get_link(t, {ha, hb, hc, hd});
 	}
-    Handle getHandle(Type t, const HandleSeq& outgoing) {
-        return getLink(t, outgoing);
+    Handle get_handle(Type t, const HandleSeq& outgoing) {
+        return get_link(t, outgoing);
     }
-    Handle getHandle(Type t, const Handle& ha) {
-	    return getLink(t, HandleSeq({ha}));
+    Handle get_handle(Type t, const Handle& ha) {
+	    return get_handle(t, HandleSeq({ha}));
     }
-    Handle getHandle(Type t, const Handle& ha, const Handle& hb) {
-        return getLink(t, {ha, hb});
+    Handle get_handle(Type t, const Handle& ha, const Handle& hb) {
+	    return get_handle(t, HandleSeq({ha, hb}));
     }
 
     /**
@@ -352,8 +352,8 @@ public:
      * considered "invalid", even though it points to an atom that
      * exists in RAM (and is thus usable as a naked atom).
      */
-    bool isValidHandle(Handle h) const {
-        // The h->getHandle() maneuver below is a trick to get at the
+    bool is_valid_handle(Handle h) const {
+        // The h->get_handle() maneuver below is a trick to get at the
         // UUID of the actual atom, rather than the cached UUID in the
         // handle. Technically, this is not quite right, since, in
         // principle, a handle could have a valid UUID, but the atom
@@ -389,9 +389,9 @@ public:
      *         atomSpace.getHandlesByType(back_inserter(ret), ATOM, true);
      * @endcode
      */
-    void getHandlesByType(HandleSeq& appendToHandles,
-                          Type type,
-                          bool subclass = false) const
+    void get_handles_by_type(HandleSeq& appendToHandles,
+                             Type type,
+                             bool subclass = false) const
     {
         // Get the initial size of the handles vector.
         size_t initial_size = appendToHandles.size();
@@ -405,7 +405,7 @@ public:
         appendToHandles.reserve(initial_size + size_of_append);
 
         // Now defer to the output iterator call, eating the return.
-        getHandlesByType(back_inserter(appendToHandles), type, subclass);
+        get_handles_by_type(back_inserter(appendToHandles), type, subclass);
     }
 
     /**
@@ -429,9 +429,9 @@ public:
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
-    getHandlesByType(OutputIterator result,
-                     Type type,
-                     bool subclass = false) const
+    get_handles_by_type(OutputIterator result,
+                        Type type,
+                        bool subclass = false) const
     {
         return atomTable.getHandlesByType(result, type, subclass);
     }
@@ -454,7 +454,7 @@ public:
         std::list<Handle> handle_set;
         // The intended signatue is
         // getHandleSet(OutputIterator result, Type type, bool subclass)
-        getHandlesByType(back_inserter(handle_set), atype, subclass);
+        get_handles_by_type(back_inserter(handle_set), atype, subclass);
 
         // Loop over all handles in the handle set.
         std::list<Handle>::iterator i = handle_set.begin();
@@ -480,7 +480,7 @@ public:
      * range can be returned if average=true
      * @return normalised STI between -1..1
      */
-    float getNormalisedSTI(Handle h, bool average=true, bool clip=false) const {
+    float get_normalised_STI(Handle h, bool average=true, bool clip=false) const {
         return bank.getNormalisedSTI(h->getAttentionValue(), average, clip);
     }
 
@@ -494,7 +494,7 @@ public:
      * range can be returned if average=true
      * @return normalised STI between 0..1
      */
-    float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const {
+    float get_normalised_zero_to_one_STI(Handle h, bool average=true, bool clip=false) const {
         return bank.getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip);
     }
 
@@ -508,9 +508,9 @@ public:
      * @note: This method utilizes the ImportanceIndex
      */
     template <typename OutputIterator> OutputIterator
-    getHandlesByAV(OutputIterator result,
-                   AttentionValue::sti_t lowerBound,
-                   AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
+    get_handles_by_AV(OutputIterator result,
+                      AttentionValue::sti_t lowerBound,
+                      AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
     {
         UnorderedHandleSet hs = atomTable.getHandlesByAV(lowerBound, upperBound);
         return std::copy(hs.begin(), hs.end(), result);
@@ -523,9 +523,10 @@ public:
      * @note: This method utilizes the ImportanceIndex
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSetInAttentionalFocus(OutputIterator result) const
+    get_handle_set_in_attentional_focus(OutputIterator result) const
     {
-        return getHandlesByAV(result, getAttentionalFocusBoundary(), AttentionValue::AttentionValue::MAXSTI);
+        return get_handles_by_AV(result, get_attentional_focus_boundary(),
+                                 AttentionValue::AttentionValue::MAXSTI);
     }
 
     /** Get attentional focus boundary
@@ -534,7 +535,7 @@ public:
      *
      * @return Short Term Importance threshold value
      */
-    AttentionValue::sti_t getAttentionalFocusBoundary() const {
+    AttentionValue::sti_t get_attentional_focus_boundary() const {
         return bank.getAttentionalFocusBoundary();
     }
 
@@ -544,7 +545,7 @@ public:
      * @param s New threshold
      * @return Short Term Importance threshold value
      */
-    AttentionValue::sti_t setAttentionalFocusBoundary(
+    AttentionValue::sti_t set_attentional_focus_boundary(
         AttentionValue::sti_t s) {
         return bank.setAttentionalFocusBoundary(s);
     }
@@ -554,7 +555,7 @@ public:
      * maximum STI, otherwise return the actual maximum.
      * @return Maximum STI
      */
-    AttentionValue::sti_t getMaxSTI(bool average=true) const
+    AttentionValue::sti_t get_max_STI(bool average=true) const
     { return bank.getMaxSTI(average); }
 
     /** Get the minimum STI observed in the AtomSpace.
@@ -563,7 +564,7 @@ public:
      * minimum STI, otherwise return the actual maximum.
      * @return Minimum STI
      */
-    AttentionValue::sti_t getMinSTI(bool average=true) const
+    AttentionValue::sti_t get_min_STI(bool average=true) const
     { return bank.getMinSTI(average); }
 
     /** Update the minimum STI observed in the AtomSpace.
@@ -573,7 +574,7 @@ public:
      * @warning Should only be used by attention allocation system.
      * @param m New minimum STI
      */
-    void updateMinSTI(AttentionValue::sti_t m) { bank.updateMinSTI(m); }
+    void update_min_STI(AttentionValue::sti_t m) { bank.updateMinSTI(m); }
 
     /**
      * Update the maximum STI observed in the AtomSpace. Min/max are not updated
@@ -583,11 +584,11 @@ public:
      * @warning Should only be used by attention allocation system.
      * @param m New maximum STI
      */
-    void updateMaxSTI(AttentionValue::sti_t m) { bank.updateMaxSTI(m); }
-    void updateSTIFunds(AttentionValue::sti_t m) { bank.updateSTIFunds(m); }
-    void updateLTIFunds(AttentionValue::lti_t m) { bank.updateLTIFunds(m); }
-    long getSTIFunds() const { return bank.getSTIFunds(); }
-    long getLTIFunds() const { return bank.getLTIFunds(); }
+    void update_max_STI(AttentionValue::sti_t m) { bank.updateMaxSTI(m); }
+    void update_STI_funds(AttentionValue::sti_t m) { bank.updateSTIFunds(m); }
+    void update_LTI_funds(AttentionValue::lti_t m) { bank.updateLTIFunds(m); }
+    long get_STI_funds() const { return bank.getSTIFunds(); }
+    long get_LTI_funds() const { return bank.getLTIFunds(); }
 
     /* ----------------------------------------------------------- */
     // ---- Signals
@@ -626,23 +627,23 @@ public:
      * whatever you are doing!
      */
     template <typename OutputIterator> OutputIterator
-    getHandlesByName(OutputIterator result,
-                     const std::string& name,
-                     Type type = NODE,
-                     bool subclass = true)
+    get_handles_by_name(OutputIterator result,
+                        const std::string& name,
+                        Type type = NODE,
+                        bool subclass = true)
     {
         if (name.c_str()[0] == 0)
-            return getHandlesByType(result, type, subclass);
+            return get_handles_by_type(result, type, subclass);
 
         if (false == subclass) {
-            Handle h(getHandle(type, name));
+            Handle h(get_handle(type, name));
             if (h) *(result++) = h;
             return result;
         }
 
         classserver().foreachRecursive(
             [&](Type t)->void {
-                Handle h(getHandle(t, name));
+                Handle h(get_handle(t, name));
                 if (h) *(result++) = h; }, type);
 
         return result;
@@ -654,17 +655,17 @@ public:
      * XXX ONLY the python bindings use this. XXX kill that code.
      */
     template <typename OutputIterator> OutputIterator
-    getIncomingSetByType(OutputIterator result,
-                 Handle handle,
-                 Type type,
-                 bool subclass) const
+    get_incoming_set_by_type(OutputIterator result,
+                             Handle handle,
+                             Type type,
+                             bool subclass) const
     {
         return handle->getIncomingSetByType(result, type, subclass);
     }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    HandleSeq getIncoming(Handle h) const {
+    HandleSeq get_incoming(Handle h) const {
         HandleSeq hs;
         h->getIncomingSet(back_inserter(hs));
         return hs;
@@ -672,19 +673,19 @@ public:
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    bool isNode(Handle h) const { return NodeCast(h) != NULL; }
-    bool isLink(Handle h) const { return LinkCast(h) != NULL; }
+    bool is_node(Handle h) const { return NodeCast(h) != NULL; }
+    bool is_link(Handle h) const { return LinkCast(h) != NULL; }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    std::string atomAsString(Handle h, bool terse = true) const {
+    std::string atom_as_string(Handle h, bool terse = true) const {
         if (terse) return h->toShortString();
         return h->toString();
     }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    const std::string& getName(Handle h) const {
+    const std::string& get_name(Handle h) const {
         static std::string noname;
         NodePtr nnn(NodeCast(h));
         if (nnn) return nnn->getName();
@@ -693,45 +694,45 @@ public:
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    void setSTI(Handle h, AttentionValue::sti_t stiValue) const {
+    void set_STI(Handle h, AttentionValue::sti_t stiValue) const {
         h->setSTI(stiValue);
     }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    void setLTI(Handle h, AttentionValue::lti_t ltiValue) const {
+    void set_LTI(Handle h, AttentionValue::lti_t ltiValue) const {
         h->setLTI(ltiValue);
     }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    void incVLTI(Handle h) const { h->incVLTI(); }
+    void inc_VLTI(Handle h) const { h->incVLTI(); }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    void decVLTI(Handle h) const { h->decVLTI(); }
+    void dec_VLTI(Handle h) const { h->decVLTI(); }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    AttentionValue::sti_t getSTI(Handle h) const {
+    AttentionValue::sti_t get_STI(Handle h) const {
         return h->getAttentionValue()->getSTI();
     }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    AttentionValue::lti_t getLTI(Handle h) const {
+    AttentionValue::lti_t get_LTI(Handle h) const {
         return h->getAttentionValue()->getLTI();
     }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    AttentionValue::vlti_t getVLTI(Handle h) const {
+    AttentionValue::vlti_t get_VLTI(Handle h) const {
         return h->getAttentionValue()->getVLTI();
     }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    const HandleSeq& getOutgoing(Handle h) const {
+    const HandleSeq& get_outgoing(Handle h) const {
         static HandleSeq empty;
         LinkPtr lll(LinkCast(h));
         if (lll) return lll->getOutgoingSet();
@@ -740,7 +741,7 @@ public:
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    Handle getOutgoing(Handle h, Arity idx) const {
+    Handle get_outgoing(Handle h, Arity idx) const {
         LinkPtr lll = LinkCast(h);
         if (lll) return lll->getOutgoingAtom(idx);
         return Handle::UNDEFINED;
@@ -748,7 +749,7 @@ public:
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    Arity getArity(Handle h) const {
+    Arity get_arity(Handle h) const {
         LinkPtr lll(LinkCast(h));
         if (lll) return lll->getArity();
         return 0;
@@ -756,7 +757,7 @@ public:
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    bool isSource(Handle source, Handle link) const
+    bool is_source(Handle source, Handle link) const
     {
         LinkPtr l(LinkCast(link));
         if (l) return l->isSource(source);
@@ -765,44 +766,44 @@ public:
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    AttentionValuePtr getAV(Handle h) const {
+    AttentionValuePtr get_AV(Handle h) const {
         return h->getAttentionValue();
     }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    void setAV(Handle h, AttentionValuePtr av) const {
+    void set_AV(Handle h, AttentionValuePtr av) const {
         h->setAttentionValue(av);
     }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    Type getType(Handle h) const {
+    Type get_type(Handle h) const {
         return h->getType();
     }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    TruthValuePtr getTV(Handle h) const
+    TruthValuePtr get_TV(Handle h) const
     {
         return h->getTruthValue();
     }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    strength_t getMean(Handle h) const {
+    strength_t get_mean(Handle h) const {
         return h->getTruthValue()->getMean();
     }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    confidence_t getConfidence(Handle h) const {
+    confidence_t get_confidence(Handle h) const {
         return h->getTruthValue()->getConfidence();
     }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    void setTV(Handle h, TruthValuePtr tv) const {
+    void set_TV(Handle h, TruthValuePtr tv) const {
         h->setTruthValue(tv);
     }
 };

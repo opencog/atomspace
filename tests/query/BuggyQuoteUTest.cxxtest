@@ -129,5 +129,5 @@ void BuggyQuoteUTest::test_good_form(void)
     logger().debug() << "Result is this:\n" << rslt->toString();
 
     // See buggy-crime.scm for explanation for why this is 1 not 2
-    TS_ASSERT_EQUALS(1, as->getArity(rslt));
+    TS_ASSERT_EQUALS(1, as->get_arity(rslt));
 }

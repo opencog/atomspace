@@ -31,7 +31,7 @@ public:
 	void test_read_config() {
 		// Get the ConceptNode corresponding to the rule-based system
 		// to test
-		Handle rbs = _as.getNode(CONCEPT_NODE, "crisp-rule-base");
+		Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-rule-base");
 
 		UREConfigReader cr(_as, rbs);
 

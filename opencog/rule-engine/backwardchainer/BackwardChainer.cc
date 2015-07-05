@@ -224,8 +224,8 @@ void BackwardChainer::process_target(Target& target)
 
 		if (not unify(h,
 		              htarget,
-		              _garbage_superspace.addAtom(gen_sub_varlist(h, hrule_vardecl, std::set<Handle>())),
-		              _garbage_superspace.addAtom(createVariableList(target.get_varseq())),
+		              _garbage_superspace.add_atom(gen_sub_varlist(h, hrule_vardecl, std::set<Handle>())),
+		              _garbage_superspace.add_atom(createVariableList(target.get_varseq())),
 		              temp_mapping))
 			continue;
 
@@ -251,8 +251,8 @@ void BackwardChainer::process_target(Target& target)
 
 			if (not unify(h,
 			              htarget,
-			              _garbage_superspace.addAtom(gen_sub_varlist(h, hrule_vardecl, std::set<Handle>())),
-			              _garbage_superspace.addAtom(createVariableList(target.get_varseq())),
+			              _garbage_superspace.add_atom(gen_sub_varlist(h, hrule_vardecl, std::set<Handle>())),
+			              _garbage_superspace.add_atom(createVariableList(target.get_varseq())),
 			              temp_mapping))
 				continue;
 
@@ -290,7 +290,7 @@ void BackwardChainer::process_target(Target& target)
 	// will be the mapping from free variables in himplicant to stuff in a premise
 	HandleSeq possible_premises =
 		match_knowledge_base(hrule_implicant_normal_grounded,
-	                         _garbage_superspace.addAtom(gen_sub_varlist(hrule_implicant_normal_grounded, hrule_vardecl, target.get_varset())),
+	                         _garbage_superspace.add_atom(gen_sub_varlist(hrule_implicant_normal_grounded, hrule_vardecl, target.get_varset())),
 	                         true, premises_vmap_list);
 
 	// only need to generate QuoteLink version when there are free variables
@@ -308,7 +308,7 @@ void BackwardChainer::process_target(Target& target)
 			// wrap a QuoteLink on each variable
 			VarMap quote_mapping;
 			for (auto& h: fv.varset)
-				quote_mapping[h] = _garbage_superspace.addAtom(createLink(QUOTE_LINK, h));
+				quote_mapping[h] = _garbage_superspace.add_atom(createLink(QUOTE_LINK, h));
 
 			Substitutor subt(&_garbage_superspace);
 			implicand_quoted_mapping[p.first] = subt.substitute(p.second, quote_mapping);
@@ -322,7 +322,7 @@ void BackwardChainer::process_target(Target& target)
 
 		HandleSeq possible_premises_alt =
 			match_knowledge_base(hrule_implicant_quoted_grounded,
-								 _garbage_superspace.addAtom(gen_sub_varlist(hrule_implicant_quoted_grounded, hrule_vardecl, target.get_varset())),
+								 _garbage_superspace.add_atom(gen_sub_varlist(hrule_implicant_quoted_grounded, hrule_vardecl, target.get_varset())),
 								 false, premises_vmap_list_alt);
 
 		// collect the possible premises from the two verions of mapping
@@ -464,7 +464,7 @@ std::vector<Rule> BackwardChainer::filter_rules(const Target& target)
 	std::vector<Rule> rules;
 
 	Handle htarget = target.get_handle();
-	Handle htarget_vardecl = _garbage_superspace.addAtom(createVariableList(target.get_varseq()));
+	Handle htarget_vardecl = _garbage_superspace.add_atom(createVariableList(target.get_varseq()));
 
 	for (Rule& r : _configReader.get_rules())
 	{
@@ -479,7 +479,7 @@ std::vector<Rule> BackwardChainer::filter_rules(const Target& target)
 
 			if (not unify(h,
 			              htarget,
-			              _garbage_superspace.addAtom(gen_sub_varlist(h, hrule_vardecl, std::set<Handle>())),
+			              _garbage_superspace.add_atom(gen_sub_varlist(h, hrule_vardecl, std::set<Handle>())),
 			              htarget_vardecl,
 			              mapping))
 				continue;
@@ -505,7 +505,7 @@ std::vector<Rule> BackwardChainer::filter_rules(const Target& target)
 
 				if (not unify(h,
 				              htarget,
-				              _garbage_superspace.addAtom(gen_sub_varlist(h, hrule_vardecl, std::set<Handle>())),
+				              _garbage_superspace.add_atom(gen_sub_varlist(h, hrule_vardecl, std::set<Handle>())),
 				              htarget_vardecl,
 				              mapping))
 					continue;
@@ -549,7 +549,7 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
 		for (auto& h : fv.varset)
 			vars.push_back(h);
 
-		hpattern_vardecl = _garbage_superspace.addAtom(createVariableList(vars));
+		hpattern_vardecl = _garbage_superspace.add_atom(createVariableList(vars));
 	}
 
 	logger().debug("[BackwardChainer] Matching knowledge base with "
@@ -591,7 +591,7 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
 			}
 
 			// don't want matched clause that is not in the parent _as
-			if (_as.getAtom(p.second) == Handle::UNDEFINED)
+			if (_as.get_atom(p.second) == Handle::UNDEFINED)
 			{
 				logger().debug("[BackwardChainer] matched clause not in _as");
 				break;
@@ -608,8 +608,8 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
 		// XXX TODO preserve htarget's order (but logical link are unordered...)
 		Handle this_result;
 		if (_logical_link_types.count(hpattern->getType()) == 1)
-			this_result = _garbage_superspace.addLink(hpattern->getType(),
-			                                          i_pred_soln);
+			this_result = _garbage_superspace.add_link(hpattern->getType(),
+			                                           i_pred_soln);
 		else
 			this_result = i_pred_soln[0];
 
@@ -666,8 +666,8 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 		if (sub_premises.size() == 1)
 			premises = sub_premises[0];
 		else
-			premises = _garbage_superspace.addLink(hpremise->getType(),
-			                                       sub_premises);
+			premises = _garbage_superspace.add_link(hpremise->getType(),
+			                                        sub_premises);
 	}
 
 	logger().debug("[BackwardChainer] Grounding " + premises->toShortString());
@@ -750,10 +750,10 @@ bool BackwardChainer::unify(const Handle& hsource,
 	// lazy way of restricting PM to be between two atoms
 	AtomSpace temp_space;
 
-	Handle temp_hsource = temp_space.addAtom(hsource);
-	Handle temp_hmatch = temp_space.addAtom(hmatch);
-	Handle temp_hsource_vardecl = temp_space.addAtom(hsource_vardecl);
-	Handle temp_hmatch_vardecl = temp_space.addAtom(hmatch_vardecl);
+	Handle temp_hsource = temp_space.add_atom(hsource);
+	Handle temp_hmatch = temp_space.add_atom(hmatch);
+	Handle temp_hsource_vardecl = temp_space.add_atom(hsource_vardecl);
+	Handle temp_hmatch_vardecl = temp_space.add_atom(hmatch_vardecl);
 
 	FindAtoms fv(VARIABLE_NODE);
 	fv.search_set(hsource);
@@ -764,7 +764,7 @@ bool BackwardChainer::unify(const Handle& hsource,
 		for (const Handle& h : fv.varset)
 			vars.push_back(h);
 
-		temp_hsource_vardecl = temp_space.addAtom(createVariableList(vars));
+		temp_hsource_vardecl = temp_space.add_atom(createVariableList(vars));
 	}
 
 	PatternLinkPtr sl(createPatternLink(temp_hsource_vardecl, temp_hsource));
@@ -809,8 +809,8 @@ bool BackwardChainer::unify(const Handle& hsource,
 		Handle var = p.first;
 		Handle grn = p.second;
 
-		result[_garbage_superspace.getAtom(var)] =
-			_garbage_superspace.getAtom(grn);
+		result[_garbage_superspace.get_atom(var)] =
+			_garbage_superspace.get_atom(grn);
 	}
 
 	return true;

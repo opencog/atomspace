@@ -223,7 +223,7 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle h, std::map<Handle, 
 		for (auto ho : old_outgoing)
 			new_outgoing.push_back(standardize_helper(as, ho, dict));
 
-		return as->addAtom(createLink(h->getType(), new_outgoing, h->getTruthValue()));
+		return as->add_atom(createLink(h->getType(), new_outgoing, h->getTruthValue()));
 	}
 
 	// normal node does not need to be changed
@@ -236,7 +236,7 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle h, std::map<Handle, 
 
 	std::string new_name = NodeCast(h)->getName() + "-standardize_apart-" + to_string(boost::uuids::random_generator()());
 
-	Handle hcpy = as->addAtom(createNode(h->getType(), new_name, h->getTruthValue()));
+	Handle hcpy = as->add_atom(createNode(h->getType(), new_name, h->getTruthValue()));
 	dict[h] = hcpy;
 
 	return hcpy;

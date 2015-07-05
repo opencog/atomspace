@@ -71,8 +71,8 @@ class SudokuPuzzle :  public CxxTest::TestSuite
 /*
  * Clear the atomspace, load various atom types.
  */
-#define an as->addNode
-#define al as->addLink
+#define an as->add_node
+#define al as->add_link
 void SudokuPuzzle::setUp(void)
 {
 	as->clear();
@@ -85,8 +85,8 @@ void SudokuPuzzle::setUp(void)
 	load_scm_files_from_config(*as);
 }
 
-#define getlink(hand,pos) as->getOutgoing(hand,pos)
-#define getarity(hand) as->getArity(hand)
+#define getlink(hand,pos) as->get_outgoing(hand,pos)
+#define getarity(hand) as->get_arity(hand)
 
 /* ========================================================================
  * Extremely simple 2x2 puzzle solver

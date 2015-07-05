@@ -30,7 +30,7 @@ public:
 		logger().setLevel(Logger::DEBUG);
 
 		// Disable the AF mechanism during testing!
-		as_.setAttentionalFocusBoundary(AttentionValue::MINSTI);
+		as_.set_attentional_focus_boundary(AttentionValue::MINSTI);
 		config().set("SCM_PRELOAD",
 		             "opencog/atomspace/core_types.scm");
 		load_scm_files_from_config(as_);
@@ -45,7 +45,7 @@ public:
 
 		// Get the ConceptNode corresponding to the rule-based system
 		// to test
-		Handle rbs = as_.getNode(CONCEPT_NODE, "crisp-rule-base");
+		Handle rbs = as_.get_node(CONCEPT_NODE, "crisp-rule-base");
 		fc_ = new ForwardChainer(as_, rbs);
 	}
 	void test_do_chain();
@@ -90,6 +90,6 @@ void ForwardChainerUTest::test_do_chain()
 		std::cout << h->toString() << std::endl;
 
 	// Check that AC is in the results
-	Handle AC = as_.addLink(IMPLICATION_LINK, A, C);
+	Handle AC = as_.add_link(IMPLICATION_LINK, A, C);
 	TS_ASSERT_DIFFERS(find(results.begin(), results.end(), AC), results.end());
 }

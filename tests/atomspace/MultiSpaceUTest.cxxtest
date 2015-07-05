@@ -57,11 +57,11 @@ public:
 		TruthValuePtr tv3(SimpleTruthValue::createTV(0.5, 3.0));
 
 		// Create three atoms in three different atomspaces
-		Handle h1 = as1.addNode(CONCEPT_NODE, "1");
+		Handle h1 = as1.add_node(CONCEPT_NODE, "1");
 		h1->setTruthValue(tv1);
-		Handle h2 = as2.addNode(NUMBER_NODE, "2");
+		Handle h2 = as2.add_node(NUMBER_NODE, "2");
 		h2->setTruthValue(tv2);
-		Handle h3 = as3.addNode(VARIABLE_NODE, "3");
+		Handle h3 = as3.add_node(VARIABLE_NODE, "3");
 		h3->setTruthValue(tv3);
 
 		// Forget about the atoms, remember thier UUID's only
@@ -92,9 +92,9 @@ public:
 		TS_ASSERT(hu3->getTruthValue() == h3->getTruthValue());
 
 		// Fetch three atoms in three different atomspaces
-		Handle hn1 = as1.addNode(CONCEPT_NODE, "1");
-		Handle hn2 = as2.addNode(NUMBER_NODE, "2");
-		Handle hn3 = as3.addNode(VARIABLE_NODE, "3");
+		Handle hn1 = as1.add_node(CONCEPT_NODE, "1");
+		Handle hn2 = as2.add_node(NUMBER_NODE, "2");
+		Handle hn3 = as3.add_node(VARIABLE_NODE, "3");
 
 		// They should match the old handles
 		TS_ASSERT(h1 == hn1);
@@ -138,10 +138,10 @@ public:
 		TruthValuePtr tv(SimpleTruthValue::createTV(0.33, 3.0));
 
 		// Create three copies of this link in three atomspaces
-		Handle h1 = as1.addLink(LIST_LINK, hnd1, hnd2, hnd3);
+		Handle h1 = as1.add_link(LIST_LINK, hnd1, hnd2, hnd3);
 		h1->setTruthValue(tv);
-		Handle h2 = as2.addAtom(h1);
-		Handle h3 = as3.addAtom(h2);
+		Handle h2 = as2.add_atom(h1);
+		Handle h3 = as3.add_atom(h2);
 
 		// The truth value *pointers* should differ; they should
 		// have been copied on atom insertion.
@@ -182,17 +182,17 @@ public:
 		TS_ASSERT(hu3->getTruthValue() == h3->getTruthValue());
 
 		// Fetch three atoms in three different atomspaces
-		Handle h1n1 = as1.addNode(CONCEPT_NODE, "uni-1");
-		Handle h1n2 = as1.addNode(NUMBER_NODE, "2.2222");
-		Handle h1n3 = as1.addNode(VARIABLE_NODE, "uni-3");
+		Handle h1n1 = as1.add_node(CONCEPT_NODE, "uni-1");
+		Handle h1n2 = as1.add_node(NUMBER_NODE, "2.2222");
+		Handle h1n3 = as1.add_node(VARIABLE_NODE, "uni-3");
 
-		Handle h2n1 = as2.addNode(CONCEPT_NODE, "uni-1");
-		Handle h2n2 = as2.addNode(NUMBER_NODE, "2.2222");
-		Handle h2n3 = as2.addNode(VARIABLE_NODE, "uni-3");
+		Handle h2n1 = as2.add_node(CONCEPT_NODE, "uni-1");
+		Handle h2n2 = as2.add_node(NUMBER_NODE, "2.2222");
+		Handle h2n3 = as2.add_node(VARIABLE_NODE, "uni-3");
 
-		Handle h3n1 = as3.addNode(CONCEPT_NODE, "uni-1");
-		Handle h3n2 = as3.addNode(NUMBER_NODE, "2.2222");
-		Handle h3n3 = as3.addNode(VARIABLE_NODE, "uni-3");
+		Handle h3n1 = as3.add_node(CONCEPT_NODE, "uni-1");
+		Handle h3n2 = as3.add_node(NUMBER_NODE, "2.2222");
+		Handle h3n3 = as3.add_node(VARIABLE_NODE, "uni-3");
 
 		// They should NOT match one-another
 		// They should have become copies.
@@ -253,43 +253,43 @@ public:
 	void testCopyBack()
 	{
 		// Create a node, copy it back and forth.
-		Handle n1 = as1.addNode(CONCEPT_NODE, "backer");
-		Handle n2 = as2.addAtom(n1);
-		Handle n1copy = as1.addAtom(n2);
-		Handle n2copy = as2.addAtom(n1copy);
+		Handle n1 = as1.add_node(CONCEPT_NODE, "backer");
+		Handle n2 = as2.add_atom(n1);
+		Handle n1copy = as1.add_atom(n2);
+		Handle n2copy = as2.add_atom(n1copy);
 
 		TS_ASSERT(n1 == n1copy);
 		TS_ASSERT(n2 == n2copy);
 
 		// Create a link, copy it back and forth.
-		Handle h1 = as1.addLink(LIST_LINK, n1);
-		Handle h2 = as2.addAtom(h1);
-		Handle h1copy = as1.addAtom(h2);
-		Handle h2copy = as2.addAtom(h1copy);
+		Handle h1 = as1.add_link(LIST_LINK, n1);
+		Handle h2 = as2.add_atom(h1);
+		Handle h1copy = as1.add_atom(h2);
+		Handle h2copy = as2.add_atom(h1copy);
 
 		TS_ASSERT(h1 == h1copy);
 		TS_ASSERT(h2 == h2copy);
 
-		Handle h3 = as3.addAtom(h1);
-		Handle h3copy = as3.addAtom(h2);
+		Handle h3 = as3.add_atom(h1);
+		Handle h3copy = as3.add_atom(h2);
 
 		TS_ASSERT(h3 == h3copy);
 
 		// Do it again, this time with unordered links.
-		Handle ma = as1.addNode(CONCEPT_NODE, "hacker");
-		Handle mb = as1.addNode(CONCEPT_NODE, "cracker");
-		Handle mc = as1.addNode(CONCEPT_NODE, "jacker");
+		Handle ma = as1.add_node(CONCEPT_NODE, "hacker");
+		Handle mb = as1.add_node(CONCEPT_NODE, "cracker");
+		Handle mc = as1.add_node(CONCEPT_NODE, "jacker");
 
-		h1 = as1.addLink(UNORDERED_LINK, n1, mc, mb, n1, mc, ma);
-		h2 = as2.addAtom(h1);
-		h1copy = as1.addAtom(h2);
-		h2copy = as2.addAtom(h1copy);
+		h1 = as1.add_link(UNORDERED_LINK, n1, mc, mb, n1, mc, ma);
+		h2 = as2.add_atom(h1);
+		h1copy = as1.add_atom(h2);
+		h2copy = as2.add_atom(h1copy);
 
 		TS_ASSERT(h1 == h1copy);
 		TS_ASSERT(h2 == h2copy);
 
-		h3 = as3.addAtom(h1);
-		h3copy = as3.addAtom(h2);
+		h3 = as3.add_atom(h1);
+		h3copy = as3.add_atom(h2);
 
 		TS_ASSERT(h3 == h3copy);
 	}
@@ -299,43 +299,43 @@ public:
 	void testGet()
 	{
 		// Create a node, copy it back and forth.
-		Handle n1 = as1.addNode(CONCEPT_NODE, "Ziggy Stardust");
-		Handle n2 = as2.addAtom(n1);
-		Handle n1copy = as1.getAtom(n2);
-		Handle n2copy = as2.getAtom(n1copy);
+		Handle n1 = as1.add_node(CONCEPT_NODE, "Ziggy Stardust");
+		Handle n2 = as2.add_atom(n1);
+		Handle n1copy = as1.get_atom(n2);
+		Handle n2copy = as2.get_atom(n1copy);
 
 		TS_ASSERT(n1 == n1copy);
 		TS_ASSERT(n2 == n2copy);
 
 		// Create a link, copy it back and forth.
-		Handle h1 = as1.addLink(LIST_LINK, n1);
-		Handle h2 = as2.addAtom(h1);
-		Handle h1copy = as1.getAtom(h2);
-		Handle h2copy = as2.getAtom(h1copy);
+		Handle h1 = as1.add_link(LIST_LINK, n1);
+		Handle h2 = as2.add_atom(h1);
+		Handle h1copy = as1.get_atom(h2);
+		Handle h2copy = as2.get_atom(h1copy);
 
 		TS_ASSERT(h1 == h1copy);
 		TS_ASSERT(h2 == h2copy);
 
-		Handle h3 = as3.getAtom(h1);
-		Handle h3copy = as3.getAtom(h2);
+		Handle h3 = as3.get_atom(h1);
+		Handle h3copy = as3.get_atom(h2);
 
 		TS_ASSERT(h3 == h3copy);
 
 		// Do it again, this time with unordered links.
-		Handle ma = as1.addNode(CONCEPT_NODE, "ziggy");
-		Handle mb = as1.addNode(CONCEPT_NODE, "weird");
-		Handle mc = as1.addNode(CONCEPT_NODE, "gilly");
+		Handle ma = as1.add_node(CONCEPT_NODE, "ziggy");
+		Handle mb = as1.add_node(CONCEPT_NODE, "weird");
+		Handle mc = as1.add_node(CONCEPT_NODE, "gilly");
 
-		h1 = as1.addLink(UNORDERED_LINK, n1, mc, mb, n1, mc, ma);
-		h2 = as2.addAtom(h1);
-		h1copy = as1.getAtom(h2);
-		h2copy = as2.getAtom(h1copy);
+		h1 = as1.add_link(UNORDERED_LINK, n1, mc, mb, n1, mc, ma);
+		h2 = as2.add_atom(h1);
+		h1copy = as1.get_atom(h2);
+		h2copy = as2.get_atom(h1copy);
 
 		TS_ASSERT(h1 == h1copy);
 		TS_ASSERT(h2 == h2copy);
 
-		h3 = as3.addAtom(h1);
-		h3copy = as3.getAtom(h2);
+		h3 = as3.add_atom(h1);
+		h3copy = as3.get_atom(h2);
 
 		TS_ASSERT(h3 == h3copy);
 	}
@@ -348,43 +348,43 @@ public:
 		AtomSpace ex1(&as1);
 
 		// Create a node, copy it back and forth.
-		Handle n1 = ex1.addNode(CONCEPT_NODE, "Spiders from Mars");
-		Handle n2 = as2.addAtom(n1);
-		Handle n1copy = ex1.getAtom(n2);
-		Handle n2copy = as2.getAtom(n1copy);
+		Handle n1 = ex1.add_node(CONCEPT_NODE, "Spiders from Mars");
+		Handle n2 = as2.add_atom(n1);
+		Handle n1copy = ex1.get_atom(n2);
+		Handle n2copy = as2.get_atom(n1copy);
 
 		TS_ASSERT(n1 == n1copy);
 		TS_ASSERT(n2 == n2copy);
 
 		// Create a link, copy it back and forth.
-		Handle h1 = ex1.addLink(LIST_LINK, n1);
-		Handle h2 = as2.addAtom(h1);
-		Handle h1copy = ex1.getAtom(h2);
-		Handle h2copy = as2.getAtom(h1copy);
+		Handle h1 = ex1.add_link(LIST_LINK, n1);
+		Handle h2 = as2.add_atom(h1);
+		Handle h1copy = ex1.get_atom(h2);
+		Handle h2copy = as2.get_atom(h1copy);
 
 		TS_ASSERT(h1 == h1copy);
 		TS_ASSERT(h2 == h2copy);
 
-		Handle h3 = as3.getAtom(h1);
-		Handle h3copy = as3.getAtom(h2);
+		Handle h3 = as3.get_atom(h1);
+		Handle h3copy = as3.get_atom(h2);
 
 		TS_ASSERT(h3 == h3copy);
 
 		// Do it again, this time with unordered links.
-		Handle ma = ex1.addNode(CONCEPT_NODE, "wham");
-		Handle mb = ex1.addNode(CONCEPT_NODE, "bam");
-		Handle mc = ex1.addNode(CONCEPT_NODE, "thankyou, mam");
+		Handle ma = ex1.add_node(CONCEPT_NODE, "wham");
+		Handle mb = ex1.add_node(CONCEPT_NODE, "bam");
+		Handle mc = ex1.add_node(CONCEPT_NODE, "thankyou, mam");
 
-		h1 = ex1.addLink(UNORDERED_LINK, n1, mc, mb, n1, mc, ma);
-		h2 = as2.addAtom(h1);
-		h1copy = ex1.getAtom(h2);
-		h2copy = as2.getAtom(h1copy);
+		h1 = ex1.add_link(UNORDERED_LINK, n1, mc, mb, n1, mc, ma);
+		h2 = as2.add_atom(h1);
+		h1copy = ex1.get_atom(h2);
+		h2copy = as2.get_atom(h1copy);
 
 		TS_ASSERT(h1 == h1copy);
 		TS_ASSERT(h2 == h2copy);
 
-		h3 = as3.addAtom(h1);
-		h3copy = as3.getAtom(h2);
+		h3 = as3.add_atom(h1);
+		h3copy = as3.get_atom(h2);
 
 		TS_ASSERT(h3 == h3copy);
 	}
@@ -404,22 +404,22 @@ public:
 		TruthValuePtr tv3(SimpleTruthValue::createTV(0.4, 3.0));
 
 		// Create three nodes in the base atomspace
-		Handle hnd1 = nas1.addNode(CONCEPT_NODE, "nest-1");
+		Handle hnd1 = nas1.add_node(CONCEPT_NODE, "nest-1");
 		hnd1->setTruthValue(tv1);
-		Handle hnd2 = nas1.addNode(NUMBER_NODE, "2.34");
+		Handle hnd2 = nas1.add_node(NUMBER_NODE, "2.34");
 		hnd2->setTruthValue(tv2);
-		Handle hnd3 = nas1.addNode(VARIABLE_NODE, "nest-3");
+		Handle hnd3 = nas1.add_node(VARIABLE_NODE, "nest-3");
 		hnd3->setTruthValue(tv3);
 
 		// Create three links holding these three
 		TruthValuePtr tv(SimpleTruthValue::createTV(0.33, 3.0));
 
 		// Create a link in the middle atomspace
-		Handle h2 = nas2.addLink(LIST_LINK, hnd1, hnd2, hnd3);
+		Handle h2 = nas2.add_link(LIST_LINK, hnd1, hnd2, hnd3);
 		h2->setTruthValue(tv);
 
 		// Try to create a link in the grandchild atomspace
-		Handle h3 = nas3.addLink(LIST_LINK, hnd1, hnd2, hnd3);
+		Handle h3 = nas3.add_link(LIST_LINK, hnd1, hnd2, hnd3);
 		h3->setTruthValue(tv);
 
 		// The middle and grand-child links should be one and the same.
@@ -444,17 +444,17 @@ public:
 		TS_ASSERT(hu3->getTruthValue() == h3->getTruthValue());
 
 		// Fetch three atoms in three different atomspaces
-		Handle h1n1 = nas1.addNode(CONCEPT_NODE, "nest-1");
-		Handle h1n2 = nas1.addNode(NUMBER_NODE, "2.34");
-		Handle h1n3 = nas1.addNode(VARIABLE_NODE, "nest-3");
+		Handle h1n1 = nas1.add_node(CONCEPT_NODE, "nest-1");
+		Handle h1n2 = nas1.add_node(NUMBER_NODE, "2.34");
+		Handle h1n3 = nas1.add_node(VARIABLE_NODE, "nest-3");
 
-		Handle h2n1 = nas2.addNode(CONCEPT_NODE, "nest-1");
-		Handle h2n2 = nas2.addNode(NUMBER_NODE, "2.34");
-		Handle h2n3 = nas2.addNode(VARIABLE_NODE, "nest-3");
+		Handle h2n1 = nas2.add_node(CONCEPT_NODE, "nest-1");
+		Handle h2n2 = nas2.add_node(NUMBER_NODE, "2.34");
+		Handle h2n3 = nas2.add_node(VARIABLE_NODE, "nest-3");
 
-		Handle h3n1 = nas3.addNode(CONCEPT_NODE, "nest-1");
-		Handle h3n2 = nas3.addNode(NUMBER_NODE, "2.34");
-		Handle h3n3 = nas3.addNode(VARIABLE_NODE, "nest-3");
+		Handle h3n1 = nas3.add_node(CONCEPT_NODE, "nest-1");
+		Handle h3n2 = nas3.add_node(NUMBER_NODE, "2.34");
+		Handle h3n3 = nas3.add_node(VARIABLE_NODE, "nest-3");
 
 		// They should be identical
 		// They should NOT be copies.
@@ -504,28 +504,28 @@ public:
 		AtomSpace* ex1 = new AtomSpace(&as1);
 
 		// Create mixed nodes.
-		Handle n1 = as1.addNode(CONCEPT_NODE, "aaa");
-		Handle n2 = ex1->addNode(CONCEPT_NODE, "bbb");
+		Handle n1 = as1.add_node(CONCEPT_NODE, "aaa");
+		Handle n2 = ex1->add_node(CONCEPT_NODE, "bbb");
 
 		// Create a link
-		Handle h1 = ex1->addAtom(createLink(LIST_LINK, n1, n2));
+		Handle h1 = ex1->add_atom(createLink(LIST_LINK, n1, n2));
 		delete ex1;
 
 		std::list<Handle> handle_set;
-		as1.getHandlesByType(back_inserter(handle_set), ATOM, false);
+		as1.get_handles_by_type(back_inserter(handle_set), ATOM, false);
 		// cogserver crashes at this point; no crash == pass
 
 		AtomSpace* ex2 = new AtomSpace(&as2);
 
 		// Create mixed nodes.
-		n2 = ex2->addNode(CONCEPT_NODE, "bbb");
+		n2 = ex2->add_node(CONCEPT_NODE, "bbb");
 
 		// Create a link
-		h1 = ex2->addAtom(createLink(LIST_LINK, n1, n2));
+		h1 = ex2->add_atom(createLink(LIST_LINK, n1, n2));
 		delete ex2;
 
 		handle_set.clear();
-		as1.getHandlesByType(back_inserter(handle_set), ATOM, false);
+		as1.get_handles_by_type(back_inserter(handle_set), ATOM, false);
 		// cogserver crashes at this point; no crash == pass
 	}
 
@@ -536,21 +536,21 @@ public:
 		AtomSpace ex(&as);
 
 		// Add nodes of same typ.
-		as.addNode(CONCEPT_NODE, "aaa");
-		ex.addNode(CONCEPT_NODE, "bbb");
+		as.add_node(CONCEPT_NODE, "aaa");
+		ex.add_node(CONCEPT_NODE, "bbb");
 
 		HandleSeq handle_set;
-		ex.getHandlesByType(handle_set, CONCEPT_NODE);
+		ex.get_handles_by_type(handle_set, CONCEPT_NODE);
 
 		TS_ASSERT(handle_set.size() == 2);
 
 		ex.clear();
 
-		TS_ASSERT(as.getSize() == 1);
-		TS_ASSERT(ex.getSize() == 0);
+		TS_ASSERT(as.get_size() == 1);
+		TS_ASSERT(ex.get_size() == 0);
 
 		handle_set.clear();
-		ex.getHandlesByType(handle_set, CONCEPT_NODE);
+		ex.get_handles_by_type(handle_set, CONCEPT_NODE);
 
 		TS_ASSERT(handle_set.size() == 1);
 	}

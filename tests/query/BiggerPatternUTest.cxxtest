@@ -84,8 +84,8 @@ class BiggerPatternUTest :  public CxxTest::TestSuite
  *
  * Note that there is an implicit LemmaLink created for 'be'.
  */
-#define an as->addNode
-#define al as->addLink
+#define an as->add_node
+#define al as->add_link
 void BiggerPatternUTest::tearDown(void)
 {
 	delete as;
@@ -222,9 +222,9 @@ void BiggerPatternUTest::setUp(void)
  *      $prep   = DefinedLinguisticRelationshipNode "of"
  *      $phrase = DefinedLinguisticRelationshipNode "capital_of"
  */
-#define getlink(hand,pos) as->getOutgoing(hand,pos)
+#define getlink(hand,pos) as->get_outgoing(hand,pos)
 #define prtnode(str,hand) \
-	printf("%s %s\n", str, as->getName(hand).c_str());
+	printf("%s %s\n", str, as->get_name(hand).c_str());
 
 void BiggerPatternUTest::test_prep(void)
 {
@@ -235,7 +235,7 @@ void BiggerPatternUTest::test_prep(void)
 
 	// Expect two answers: Berlin is the capital of Germany,
 	// and of France. (just for this test case :-)
-	int arity = as->getArity(imlist);
+	int arity = as->get_arity(imlist);
 	TSM_ASSERT_EQUALS("incorrect arity", arity, 2);
 
 	// 0 has France, 1 has Germany

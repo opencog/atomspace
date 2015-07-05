@@ -59,8 +59,8 @@ class MultiThreadUTest :  public CxxTest::TestSuite
 /*
  * This function sets up .. whatever.
  */
-#define an as->addNode
-#define al as->addLink
+#define an as->add_node
+#define al as->add_link
 void MultiThreadUTest::setUp(void)
 {
 	config().set("SCM_PRELOAD",
@@ -174,7 +174,7 @@ void MultiThreadUTest::test_multi_threads(void)
 			std::thread(&MultiThreadUTest::threadedAdd, this, i, num_atoms));
 	}
 	for (std::thread& t : thread_pool) t.join();
-	size_t size = as->getSize();
+	size_t size = as->get_size();
 	std::cout << "atomspace size:" << size << std::endl;
 
 	// we should get num_atoms * n_threads distinct atoms

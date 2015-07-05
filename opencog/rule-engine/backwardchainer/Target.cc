@@ -40,7 +40,7 @@ using namespace opencog;
 Target::Target(AtomSpace& as, const Handle& h) : _as(as)
 {
 	_htarget_external = h;
-	_htarget_internal = _as.addAtom(h);
+	_htarget_internal = _as.add_atom(h);
 	_selection_count = 0;
 
 	_vars = get_free_vars_in_tree(h);
@@ -60,10 +60,10 @@ void Target::store_step(const Rule& r, const HandleSeq& premises)
 {
 	// XXX TODO think of a good structure for storing the inference step
 	// XXX TODO if the rule was actually applied, store the change to the TV?
-	_as.addLink(SET_LINK,
-	            _htarget_internal,
-	            _as.addNode(CONCEPT_NODE, r.get_name()),
-	            _as.addLink(LIST_LINK, premises));
+	_as.add_link(SET_LINK,
+	             _htarget_internal,
+	             _as.add_node(CONCEPT_NODE, r.get_name()),
+	             _as.add_link(LIST_LINK, premises));
 }
 
 /**
@@ -104,7 +104,7 @@ void Target::store_varmap(VarMap& vm)
  */
 unsigned int Target::rule_count(const Rule& r)
 {
-	Handle hname = _as.addNode(CONCEPT_NODE, r.get_name());
+	Handle hname = _as.add_node(CONCEPT_NODE, r.get_name());
 	HandleSeq q = get_neighbors(_htarget_internal, false, true,
 	                            SET_LINK, false);
 

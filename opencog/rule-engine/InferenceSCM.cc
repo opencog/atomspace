@@ -92,7 +92,7 @@ Handle InferenceSCM::do_forward_chaining(Handle h, Handle rbs)
      * using the rules declared in the config. A similar functionality
      * with the python version of the forward chainer.
      */
-    if (h->getType() == LIST_LINK and as->getOutgoing(h).empty())
+    if (h->getType() == LIST_LINK and as->get_outgoing(h).empty())
         fc.do_chain(dfc, Handle::UNDEFINED);
     else
         /** Does variable fulfillment forward chaining or forward chaining based on
@@ -106,7 +106,7 @@ Handle InferenceSCM::do_forward_chaining(Handle h, Handle rbs)
         fc.do_chain(dfc, h);
 
     HandleSeq result = fc.get_chaining_result();
-    return as->addLink(LIST_LINK, result);
+    return as->add_link(LIST_LINK, result);
 #else
     return Handle::UNDEFINED;
 #endif
@@ -133,10 +133,10 @@ Handle InferenceSCM::do_backward_chaining(Handle h, Handle rbs)
         hs.push_back(it->first);
         hs.insert(hs.end(), it->second.begin(), it->second.end());
 
-        soln_list_link.push_back(as->addLink(LIST_LINK, hs));
+        soln_list_link.push_back(as->add_link(LIST_LINK, hs));
     }
 
-    return as->addLink(LIST_LINK, soln_list_link);
+    return as->add_link(LIST_LINK, soln_list_link);
 #else
     return Handle::UNDEFINED;
 #endif
