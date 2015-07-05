@@ -47,6 +47,7 @@ ignored by doxygen; used as markers for update-links.py;
 	- \ref libspacetime
 	- \ref libattention
 	- \ref libsmob
+	- \ref libhaskell
 	- \ref libpersist
 	- \ref libcomboreduct
 - \subpage programs

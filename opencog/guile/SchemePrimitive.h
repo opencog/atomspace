@@ -102,6 +102,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			HandleSeq (T::*q_hti)(Handle, Type, int);
 			HandleSeq (T::*q_htib)(Handle, Type, int, bool);
 			HandleSeqSeq (T::*k_h)(Handle);
+			HandleSeqSeq (T::*k_hi)(Handle, int);
 			const std::string& (T::*s_s)(const std::string&);
 			const std::string& (T::*s_ss)(const std::string&,
 			                              const std::string&);
@@ -140,6 +141,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			Q_HTI, // return HandleSeq, take handle, type, and int
 			Q_HTIB,// return HandleSeq, take handle, type, and bool
 			K_H,   // return HandleSeqSeq, take Handle
+			K_HI,  // return HandleSeqSeq, take Handle, int
 			S_S,   // return string, take string
 			S_SS,  // return string, take two strings
 			S_SSS, // return string, take three strings
@@ -332,6 +334,32 @@ class SchemePrimitive : public PrimitiveEnviron
 					// the only argument is a handle
 					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name));
 					HandleSeqSeq rHSS = (that->*method.k_h)(h);
+
+					rc = SCM_EOL;
+
+					// reverse iteration to preserve order when doing cons
+					for (HandleSeqSeq::reverse_iterator rit = rHSS.rbegin(); rit != rHSS.rend(); ++rit)
+					{
+						HandleSeq rHS = *rit;
+						SCM rcTemp = SCM_EOL;
+
+						for (HandleSeq::reverse_iterator rrit = rHS.rbegin(); rrit != rHS.rend(); ++rrit)
+							rcTemp = scm_cons(SchemeSmob::handle_to_scm(*rrit), rcTemp);
+
+						rc = scm_cons(rcTemp, rc);
+					}
+
+					break;
+				}
+				case K_HI:
+				{
+					// First arg is a handle
+					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
+
+					// Second arg is an int
+					int i = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
+
+					HandleSeqSeq rHSS = (that->*method.k_hi)(h, i);
 
 					rc = SCM_EOL;
 
@@ -551,6 +579,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_3(Q_HTI, q_hti, HandleSeq, Handle, Type, int)
 		DECLARE_CONSTR_4(Q_HTIB, q_htib, HandleSeq, Handle, Type, int, bool)
 		DECLARE_CONSTR_1(K_H, k_h, HandleSeqSeq, Handle)
+		DECLARE_CONSTR_2(K_HI, k_hi, HandleSeqSeq, Handle, int)
 		DECLARE_CONSTR_1(S_S,  s_s,  const std::string&, const std::string&)
 		DECLARE_CONSTR_2(S_SS, s_ss, const std::string&, const std::string&,
 		                             const std::string&)
@@ -630,6 +659,7 @@ DECLARE_DECLARE_2(Handle, Handle, int)
 DECLARE_DECLARE_2(Handle, Handle, Handle)
 DECLARE_DECLARE_2(Handle, Handle, const std::string&)
 DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
+DECLARE_DECLARE_2(HandleSeqSeq, Handle, int)
 DECLARE_DECLARE_2(const std::string&, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, Type, int)

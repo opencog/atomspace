@@ -37,11 +37,10 @@ using namespace opencog;
  * @param as  the AtomSpace in which to store temporary information
  * @param h   the original external Handle of the Target
  */
-Target::Target(AtomSpace* as, const Handle& h)
+Target::Target(AtomSpace& as, const Handle& h) : _as(as)
 {
-	_as = as;
 	_htarget_external = h;
-	_htarget_internal = _as->add_atom(h);
+	_htarget_internal = _as.add_atom(h);
 	_selection_count = 0;
 
 	_vars = get_free_vars_in_tree(h);
@@ -61,10 +60,10 @@ void Target::store_step(const Rule& r, const HandleSeq& premises)
 {
 	// XXX TODO think of a good structure for storing the inference step
 	// XXX TODO if the rule was actually applied, store the change to the TV?
-	_as->add_link(SET_LINK,
-	              _htarget_internal,
-	              _as->add_node(CONCEPT_NODE, r.get_name()),
-	              _as->add_link(LIST_LINK, premises));
+	_as.add_link(SET_LINK,
+	             _htarget_internal,
+	             _as.addNode(CONCEPT_NODE, r.get_name()),
+	             _as.addLink(LIST_LINK, premises));
 }
 
 /**
@@ -103,9 +102,9 @@ void Target::store_varmap(VarMap& vm)
  * @param r  the Rule to search
  * @return   the number of times applied
  */
-uint Target::rule_count(const Rule& r)
+unsigned int Target::rule_count(const Rule& r)
 {
-	Handle hname = _as->add_node(CONCEPT_NODE, r.get_name());
+	Handle hname = _as.add_node(CONCEPT_NODE, r.get_name());
 	HandleSeq q = get_neighbors(_htarget_internal, false, true,
 	                            SET_LINK, false);
 
@@ -119,9 +118,9 @@ uint Target::rule_count(const Rule& r)
 /**
  * Constructor.
  */
-TargetSet::TargetSet()
+TargetSet::TargetSet() : _total_selection(0)
 {
-	_history_space = new AtomSpace();
+
 }
 
 /**
@@ -129,7 +128,7 @@ TargetSet::TargetSet()
  */
 TargetSet::~TargetSet()
 {
-	delete _history_space;
+
 }
 
 /**
@@ -137,7 +136,7 @@ TargetSet::~TargetSet()
  */
 void TargetSet::clear()
 {
-	_history_space->clear();
+	_history_space.clear();
 	_targets_map.clear();
 }
 
@@ -157,7 +156,7 @@ void TargetSet::emplace(Handle& h)
 /**
  * Get the size of the TargetSet.
  */
-uint TargetSet::size()
+unsigned int TargetSet::size()
 {
 	return _targets_map.size();
 }
@@ -165,9 +164,10 @@ uint TargetSet::size()
 /**
  * Select a Target from the set using some fitness criteria.
  *
+ * Currently uses the selection count to apply weighted random selection.
+ *
  * XXX TODO use criteria such as
  * - how many steps from the initial target
- * - how many times a target was chosen
  * - how much was gained on this target the last time it was chosen
  * etc
  *
@@ -175,12 +175,24 @@ uint TargetSet::size()
  */
 Target& TargetSet::select()
 {
-	// XXX TODO do proper target selection here using some fitness function
-	auto& p = rand_element(_targets_map);
+	HandleSeq handles;
+	std::vector<unsigned int> weights;
+	for (auto& p : _targets_map)
+	{
+		handles.push_back(p.first);
 
-	// dumb round-about way to avoid the const in p
-	Target& t = _targets_map.at(p.first);
+		// XXX TODO add more criteria to the weight calculation
+		weights.push_back(_total_selection - p.second.get_selection_count() + 1);
+	}
+
+	// XXX use cogutil MT19937RandGen's intenal randomGen member possible?
+	std::mt19937 generator(std::chrono::system_clock::now().time_since_epoch().count());
+	std::discrete_distribution<int> distribution(weights.begin(), weights.end());
+
+	Target& t = _targets_map.at(handles[distribution(generator)]);
 	t.increment_selection_count();
+
+	_total_selection++;
 
 	return t;
 }

@@ -22,6 +22,7 @@ class SchemeTest(TestCase):
     # Load several different scheme files, containing atom type
     # declarations, and utilities. They should load just fine.
     # These don't actually put any atoms into the atomspace.
+
     def test_a_load_core_types(self):
 
         # These relative paths are horridly ugly.
@@ -72,24 +73,23 @@ class SchemeTest(TestCase):
 
     # Run the pattern-matcher/unifier/query-engine.
     def test_unifier(self):
-        status = load_scm(self.space, "opencog/scm/opencog.scm")
-        self.assertTrue(status)
+
         status = load_scm(self.space, "opencog/scm/opencog/query.scm")
         self.assertTrue(status)
 
         scheme_eval(self.space, "(use-modules (opencog query))")
-        h = scheme_eval_h(self.space, "cap-deduce")
+        h = scheme_eval_h(self.space, "find-animals")
         self.assertTrue(h)
         print "\nThe question is:"
         print h
         question = Atom(h, self.space)
         print question
 
-        h = scheme_eval_h(self.space, "(cog-bind cap-deduce)")
+        h = scheme_eval_h(self.space, "(cog-bind find-animals)")
         self.assertTrue(h)
         print h
         answer = Atom(h, self.space)
         print "\nThe answer is:"
         print answer
         self.assertEqual(answer.type, types.SetLink)
-        self.assertEqual(answer.arity, 2)
+        self.assertEqual(answer.arity, 3)

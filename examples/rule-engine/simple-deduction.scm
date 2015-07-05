@@ -46,5 +46,7 @@
 
 ; (cog-bc B (ConceptNode "crisp-rule-base"))
 
-; Expected output should be
-;; ???
+; Expected output will be empty
+;; $1 = (ListLink
+;; )
+;; while the TV of B will be suitably updated.

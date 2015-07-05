@@ -46,7 +46,7 @@ std::string Node::toShortString(std::string indent)
 {
     std::string tmpname = _name;
     if (_name == "")
-        tmpname = "#" + _uuid;
+        tmpname = "#" + std::to_string(_uuid);
 
     std::string nam = indent +
         "(" + classserver().getTypeName(_type) +
@@ -62,7 +62,7 @@ std::string Node::toString(std::string indent)
     char buf[BUFSZ + _name.size()];
     std::string tmpname = _name;
     if (_name == "")
-        tmpname = "#" + _uuid;
+        tmpname = "#" + std::to_string(_uuid);
     snprintf(buf, BUFSZ, "(%s \"%s\" (av %d %d %d) %s) ; [%lu]\n",
              classserver().getTypeName(_type).c_str(),
              tmpname.c_str(),
