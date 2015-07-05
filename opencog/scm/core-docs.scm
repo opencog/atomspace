@@ -152,10 +152,7 @@
 
        ; Verify that there's an atom called x:
        guile> x
-       (Link
-          (ConceptNode \"abc\")
-          (ConceptNode \"def\")
-       )
+       (ConceptNode \"abc\")
 
        ; Try to delete x. This should fail, since there's a link
        ; containing x.
