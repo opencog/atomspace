@@ -4,6 +4,9 @@
 ;
 ; Before running any inference you must load that file
 
+; Contains functions to help to configure a rule-based system
+(load-from-path "rule-engine-utils.scm")
+
 ; Load the rules (use load for relative path w.r.t. to that file)
 (load "rules/crisp-modus-ponens.scm")
 (load "rules/crisp-deduction.scm")
@@ -23,25 +26,14 @@
 ; Associate the rules to the rule base (with weights, their semantics
 ; is currently undefined, we might settled with probabilities but it's
 ; not sure)
-(MemberLink (stv 0.4 1)
-   crisp-modus-ponens
-   simple-crisp-rbs
+(define crisp-rules (list (list crisp-modus-ponens 0.4)
+                          (list crisp-deduction 0.6))
 )
-(MemberLink (stv 0.6 1)
-   crisp-deduction
-   simple-crisp-rbs
-)
+(ure-add-rules simple-crisp-rbs crisp-rules)
 
 ; Termination criteria parameters
-(ExecutionLink
-   (SchemaNode "URE:maximum-iterations")
-   simple-crisp-rbs
-   (NumberNode "20")
-)
+(ure-set-num-parameter simple-crisp-rbs "URE:maximum-iterations" 20)
 
 ; Attention allocation (set the TV strength to 0 to disable it, 1 to
 ; enable it)
-(EvaluationLink (stv 0 1)
-   (PredicateNode "URE:attention-allocation")
-   simple-crisp-rbs
-)
+(ure-set-fuzzy-bool-parameter simple-crisp-rbs "URE:attention-allocation" 0)
