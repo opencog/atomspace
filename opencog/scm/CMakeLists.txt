@@ -9,6 +9,7 @@ INSTALL (FILES
 	persistence.scm
 	repl-shell.scm
 	utilities.scm
+	rule-engine-utils.scm
 	DESTINATION "${DATADIR}/scm"
 )
 INSTALL (FILES
