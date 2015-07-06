@@ -15,6 +15,8 @@
 ; Copyright (c) 2015, OpenCog Foundation
 ;
 
+(use-modules (opencog query))
+
 ; Given an rbs and a list of pairs (rule weight) create for each rule
 ;
 ; MemberLink (stv weight 1)
@@ -47,20 +49,19 @@
 ;
 ; to be sure there is ever only one value associated to that
 ; parameter. The value is automatically converted into string.
-;
-; TODO: fix the deletion of previous ExecutionLink
 (define (ure-set-num-parameter rbs name value)
-  ;; ; Delete any previous parameter
-  ;; (cog-bind (BindLink
-  ;;              (ExecutionLink
-  ;;                 (SchemaNode name)
-  ;;                 rbs
-  ;;                 (VariableNode "__VALUE__"))
-  ;;              (DeleteLink
-  ;;                 (ExecutionLink
-  ;;                    (SchemaNode name)
-  ;;                    rbs
-  ;;                    (VariableNode "__VALUE__")))))
+  ; Delete any previous parameter
+  (cog-bind (BindLink
+               (ExecutionLink
+                  (SchemaNode name)
+                  rbs
+                  (VariableNode "__VALUE__"))
+               (DeleteLink
+                  (ExecutionLink
+                     (SchemaNode name)
+                     rbs
+                     (VariableNode "__VALUE__")))))
+
   ; Set new value for that parameter
   (ExecutionLink
      (SchemaNode name)
