@@ -1,102 +1,75 @@
 -- GSoC 2015 - Haskell bindings for OpenCog.
 {-# LANGUAGE EmptyDataDecls, StandaloneDeriving, DeriveDataTypeable,
-             FlexibleInstances, DataKinds, KindSignatures #-}
--- | This Module defines the relation between different atom types.
-module OpenCog.AtomSpace.Inheritance where
+             FlexibleInstances, DataKinds, KindSignatures, TypeFamilies,
+             TypeOperators, ConstraintKinds, UndecidableInstances #-}
 
-import Data.Data    (Typeable,Data)
+-- | This Module defines the relation between different atom types.
+module OpenCog.AtomSpace.Inheritance (
+    AtomType(..)
+  , Is(..)
+  ) where
+
+import GHC.Exts
+
+type family Up a :: [AtomType] where
+    Up AtomT           = '[]
+    Up NodeT           = '[AtomT]
+    Up LinkT           = '[AtomT]
+    Up ConceptT        = '[NodeT]
+    Up SchemaT         = '[NodeT]
+    Up PredicateT      = '[NodeT]
+    Up NumberT         = '[NodeT]
+    Up GroundedSchemaT = '[SchemaT]
+    Up ExecutionT      = '[LinkT]
+    Up AndT            = '[LinkT]
+    Up OrT             = '[LinkT]
+    Up ImplicationT    = '[LinkT]
+    Up EquivalenceT    = '[LinkT]
+    Up EvaluationT     = '[LinkT]
+    Up InheritanceT    = '[LinkT]
+    Up SimilarityT     = '[LinkT]
+    Up MemberT         = '[LinkT]
+    Up SatisfyingSetT  = '[LinkT]
+    Up ListT           = '[LinkT]
+
+type family In a (b :: [AtomType]) :: Bool where
+    In a (a ': b) = 'True
+    In a (b ': c) = In a c
+    In a '[]      = 'False
+
+type family FUp a b :: [AtomType] where
+    FUp (x ': xs) a         = x ': FUp xs (x ': a)
+    FUp '[]       (x ': xs) = FUp (Up x) xs
+    FUp '[]       '[]       = '[]
+
+type family IsParent' a b :: Bool where
+    IsParent' a b = (In b (FUp '[a] '[]))
+
+type IsParent a b = IsParent' a b ~ 'True
+
+type family ParConst a (b :: [AtomType]) :: Constraint where
+    ParConst a '[]      = 'True ~ 'True
+    ParConst a (b ': c) = (IsParent a b,ParConst a c)
+
+type Is a b = ParConst a (FUp '[b] '[])
 
 data AtomType = AtomT
               | NodeT
               | LinkT
-              | PredicateNodeT
-              | ConceptNodeT
-              | SchemaNodeT
-              | GroundedSchemaNodeT
-              | NumberNodeT
-              | AndLinkT
-              | OrLinkT
-              | ImplicationLinkT
-              | EquivalenceLinkT
-              | EvaluationLinkT
-              | InheritanceLinkT
-              | SimilarityLinkT
-              | MemberLinkT
-              | SatisfyingSetLinkT
-              | ListLinkT
-              | ExecutionLinkT
-
-deriving instance Typeable AtomType
-deriving instance Data AtomType
-
-class IsAtom (a :: AtomType)
-class IsAtom a => IsNode a
-class IsAtom a => IsLink a
-class IsLink a => IsAnd a
-class IsLink a => IsOr a
-class IsLink a => IsImplication a
-class IsLink a => IsEquivalence a
-class IsLink a => IsEvaluation a
-class IsLink a => IsInheritance a
-class IsLink a => IsSimilarity a
-class IsLink a => IsMember a
-class IsLink a => IsSatisfyingSet a
-class IsLink a => IsList a
-class IsLink a => IsExecution a
-class IsNode a => IsPredicate a
-class IsNode a => IsNumber a
-class IsNode a => IsConcept a
-class IsNode a => IsSchema a
-class IsSchema a => IsGroundedSchema a
-
-instance IsAtom a
-
-instance IsLink AndLinkT
-instance IsAnd AndLinkT
-
-instance IsLink OrLinkT
-instance IsOr OrLinkT
-
-instance IsNode PredicateNodeT
-instance IsPredicate PredicateNodeT
-
-instance IsLink ImplicationLinkT
-instance IsImplication ImplicationLinkT
-
-instance IsLink EquivalenceLinkT
-instance IsEquivalence EquivalenceLinkT
-
-instance IsLink EvaluationLinkT
-instance IsEvaluation EvaluationLinkT
-
-instance IsNode ConceptNodeT
-instance IsConcept ConceptNodeT
-
-instance IsLink InheritanceLinkT
-instance IsInheritance InheritanceLinkT
-
-instance IsLink SimilarityLinkT
-instance IsSimilarity SimilarityLinkT
-
-instance IsLink MemberLinkT
-instance IsMember MemberLinkT
-
-instance IsLink SatisfyingSetLinkT
-instance IsSatisfyingSet SatisfyingSetLinkT
-
-instance IsNode NumberNodeT
-instance IsNumber NumberNodeT
-
-instance IsLink ListLinkT
-instance IsList ListLinkT
-
-instance IsNode SchemaNodeT
-instance IsSchema SchemaNodeT
-
-instance IsNode GroundedSchemaNodeT
-instance IsSchema GroundedSchemaNodeT
-instance IsGroundedSchema GroundedSchemaNodeT
-
-instance IsLink ExecutionLinkT
-instance IsExecution ExecutionLinkT
+              | PredicateT
+              | ConceptT
+              | SchemaT
+              | GroundedSchemaT
+              | NumberT
+              | AndT
+              | OrT
+              | ImplicationT
+              | EquivalenceT
+              | EvaluationT
+              | InheritanceT
+              | SimilarityT
+              | MemberT
+              | SatisfyingSetT
+              | ListT
+              | ExecutionT
 

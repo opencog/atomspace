@@ -1,6 +1,6 @@
 -- GSoC 2015 - Haskell bindings for OpenCog.
-{-# LANGUAGE GADTs, EmptyDataDecls, ExistentialQuantification, RankNTypes,
-    DeriveDataTypeable, DataKinds, KindSignatures, StandaloneDeriving #-}
+{-# LANGUAGE GADTs, ExistentialQuantification, RankNTypes,
+    DataKinds, ConstraintKinds, KindSignatures, StandaloneDeriving #-}
 
 -- | This Module defines the main data types for Haskell bindings.
 module OpenCog.AtomSpace.Types (
@@ -13,7 +13,6 @@ module OpenCog.AtomSpace.Types (
   ) where
 
 import OpenCog.AtomSpace.Inheritance
-import Data.Data                       (Typeable,Data)
 
 -- | Atom name type.
 type AtomName = String
@@ -39,7 +38,7 @@ data TruthVal = SimpleTV { tvMean       :: Double
                          , tvCount      :: Double
                          , tvConfidence :: Double
                          }
-    deriving (Show,Typeable,Data)
+    deriving (Show)
 
 -- | 'AtomGen' is a general atom type hiding the type variables.
 -- (necessary when working with many instances of different atoms,
@@ -47,7 +46,6 @@ data TruthVal = SimpleTV { tvMean       :: Double
 data AtomGen where
     AtomGen :: Atom a -> AtomGen
 
-deriving instance Typeable AtomGen
 deriving instance Show AtomGen
 
 -- | 'appAtomGen' evaluates a given function with the atom instance
@@ -57,32 +55,34 @@ appAtomGen f (AtomGen at) = f at
 
 -- | 'Atom' is the main data type to represent the different types of atoms.
 data Atom (a :: AtomType) where
-    PredicateNode   :: AtomName -> Atom PredicateNodeT
-    AndLink         :: Atom a -> Atom a -> (Maybe TruthVal) -> Atom AndLinkT
-    OrLink          :: Atom a -> Atom a -> (Maybe TruthVal) -> Atom OrLinkT
-    ImplicationLink :: Atom a -> Atom b -> (Maybe TruthVal) -> Atom ImplicationLinkT
-    EquivalenceLink :: Atom a -> Atom a -> (Maybe TruthVal) -> Atom EquivalenceLinkT
-    EvaluationLink  :: (IsPredicate p,IsList l) =>
-                       Atom p -> Atom l -> (Maybe TruthVal) -> Atom EvaluationLinkT
+    PredicateNode   :: AtomName -> Atom PredicateT
+    AndLink         :: Is a ConceptT =>
+                       Atom a -> Atom a -> (Maybe TruthVal) -> Atom AndT
+    OrLink          :: Is a ConceptT =>
+                       Atom a -> Atom a -> (Maybe TruthVal) -> Atom OrT
+    ImplicationLink :: Atom a -> Atom b -> (Maybe TruthVal) -> Atom ImplicationT
+    EquivalenceLink :: Atom a -> Atom a -> (Maybe TruthVal) -> Atom EquivalenceT
+    EvaluationLink  :: (Is p PredicateT,Is l ListT) =>
+                       Atom p -> Atom l -> (Maybe TruthVal) -> Atom EvaluationT
 
-    ConceptNode     :: AtomName -> (Maybe TruthVal) -> Atom ConceptNodeT
-    InheritanceLink :: (IsConcept c1,IsConcept c2) =>
-                       Atom c1 -> Atom c2 -> (Maybe TruthVal) -> Atom InheritanceLinkT
-    SimilarityLink  :: (IsConcept c1,IsConcept c2) =>
-                       Atom c1 -> Atom c2 -> (Maybe TruthVal) -> Atom SimilarityLinkT
-    MemberLink      :: (IsConcept c1,IsConcept c2) =>
-                       Atom c1 -> Atom c2 -> (Maybe TruthVal) -> Atom MemberLinkT
-    SatisfyingSetLink :: (IsPredicate p) =>
-                       Atom p -> Atom SatisfyingSetLinkT
+    ConceptNode     :: AtomName -> (Maybe TruthVal) -> Atom ConceptT
+    InheritanceLink :: (Is c1 ConceptT,Is c2 ConceptT) =>
+                       Atom c1 -> Atom c2 -> (Maybe TruthVal) -> Atom InheritanceT
+    SimilarityLink  :: (Is c1 ConceptT,Is c2 ConceptT) =>
+                       Atom c1 -> Atom c2 -> (Maybe TruthVal) -> Atom SimilarityT
+    MemberLink      :: (Is c1 ConceptT,Is c2 ConceptT) =>
+                       Atom c1 -> Atom c2 -> (Maybe TruthVal) -> Atom MemberT
+    SatisfyingSetLink :: (Is p PredicateT) =>
+                       Atom p -> Atom SatisfyingSetT
 
-    NumberNode :: Double -> Atom NumberNodeT
+    NumberNode :: Double -> Atom NumberT
 
-    ListLink :: [AtomGen] -> Atom ListLinkT
+    ListLink :: [AtomGen] -> Atom ListT
 
-    SchemaNode :: AtomName -> Atom SchemaNodeT
-    GroundedSchemaNode :: AtomName -> Atom GroundedSchemaNodeT
-    ExecutionLink :: (IsSchema s,IsList l,IsAtom a) =>
-                     Atom s -> Atom l -> Atom a -> Atom ExecutionLinkT
+    SchemaNode :: AtomName -> Atom SchemaT
+    GroundedSchemaNode :: AtomName -> Atom GroundedSchemaT
+    ExecutionLink :: (Is s SchemaT,Is l ListT,Is a AtomT) =>
+                     Atom s -> Atom l -> Atom a -> Atom ExecutionT
 
 showConstr :: Atom a -> String
 showConstr at = case at of
@@ -104,5 +104,4 @@ showConstr at = case at of
     ExecutionLink _ _ _   -> "ExecutionLink"
 
 deriving instance Show (Atom a)
-deriving instance Typeable Atom
 
