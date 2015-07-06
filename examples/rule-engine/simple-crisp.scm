@@ -8,7 +8,7 @@
 ;
 ; 2. The load this file
 ;
-; scheme@(guile-user)> (load-from-path "simple-deduction.scm")
+; scheme@(guile-user)> (load-from-path "simple-crisp.scm")
 ;
 ; 3. Scroll to the bottom, and run some of the commented-out examples.
 
@@ -21,7 +21,7 @@
 ; Load URE configuration (add the current file dir so it can be loaded
 ; from anywhere)
 (add-to-load-path (dirname (current-filename)))
-(load-from-path "simple-deduction-config.scm")
+(load-from-path "simple-crisp-config.scm")
 
 ; Define knowledge base
 (define A (ConceptNode "A" (stv 1 1)))
@@ -32,7 +32,7 @@
 
 ; 1. Test forward chaining (based on the deduction rule)
 
-; (cog-fc AB (ConceptNode "crisp-rule-base"))
+; (simple-crisp-fc AB)
 
 ; Expected output should be something like
 ;; $1 = (ListLink
@@ -44,7 +44,7 @@
 
 ; 2. Test backward chaining (based on the modus ponens rule)
 
-; (cog-bc B (ConceptNode "crisp-rule-base"))
+; (simple-crisp-bc B)
 
 ; Expected output will be empty
 ;; $1 = (ListLink
