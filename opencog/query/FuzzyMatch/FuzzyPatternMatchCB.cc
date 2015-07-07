@@ -155,7 +155,7 @@ bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
             break;
         }
 
-        Handle root = clauses[potential_starters[search_cnt].clause_idx];
+        root = clauses[potential_starters[search_cnt].clause_idx];
         Handle starter_term = potential_starters[search_cnt].term;
         const Handle& best_start = potential_starters[search_cnt].handle;
         search_cnt++;
@@ -215,7 +215,8 @@ bool FuzzyPatternMatchCB::link_match(const LinkPtr& pLink, const LinkPtr& gLink)
     // giving duplicated solutions
     std::pair<UUID, UUID> p = std::make_pair(pLink->getHandle().value(),
                                              gLink->getHandle().value());
-    if (std::find(prev_compared.begin(), prev_compared.end(), p) == prev_compared.end())
+    if ((pLink->getHandle() == root) and
+        (std::find(prev_compared.begin(), prev_compared.end(), p) == prev_compared.end()))
     {
         check_if_accept(pLink->getHandle(), gLink->getHandle());
         prev_compared.push_back(p);
