@@ -12,7 +12,7 @@ module OpenCog.AtomSpace.Types (
   , showConstr
   ) where
 
-import OpenCog.AtomSpace.Inheritance
+import OpenCog.AtomSpace.Inheritance    (Is,AtomType(..))
 
 -- | Atom name type.
 type AtomName = String
