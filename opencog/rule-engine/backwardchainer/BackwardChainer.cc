@@ -333,10 +333,22 @@ void BackwardChainer::process_target(Target& target)
 		                          premises_vmap_list_alt.end());
 	}
 
-	// XXX TODO what to do when no possible premise?  shouldn't we then backward chain
-	// to the reverse grounded rule implicant?  but they contain standardized variables...
-
 	logger().debug("[BackwardChainer] %d possible permises", possible_premises.size());
+
+	// If no possible premises, then the reverse grounded rule's implicant
+	// could be added as potential target.  Note that however, such target are
+	// not yet in the main atomspace, since whatever the grounded implicant
+	// is, it is possible that it is not valid (like the reverse of if-then
+	// is not always true).  It will require some future steps to see if
+	// another rule will generate the target and add it to the main atomspace.
+	// Also note that these targets could contain variables from standardized
+	// apart version of the rule, and should not be added to the main space.
+	if (possible_premises.size() == 0)
+	{
+		target.store_step(selected_rule, { hrule_implicant_normal_grounded });
+		_targets_set.emplace(hrule_implicant_normal_grounded);
+		return;
+	}
 
 	// For each set of possible premises, check if they already satisfy the
 	// target, so that we can apply the rule while we are looking at it in the
