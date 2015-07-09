@@ -37,13 +37,14 @@ using namespace opencog;
  * @param as  the AtomSpace in which to store temporary information
  * @param h   the original external Handle of the Target
  */
-Target::Target(AtomSpace& as, const Handle& h) : _as(as)
+Target::Target(AtomSpace& as, const Handle& h, const Handle& hvardecl) : _as(as)
 {
 	_htarget_external = h;
 	_htarget_internal = _as.add_atom(h);
 	_selection_count = 0;
 
 	_vars = get_free_vars_in_tree(h);
+	_vardecl = hvardecl;
 
 	// _varmap is a map that bases on the external space
 	for (auto& hv : _vars)
@@ -145,12 +146,12 @@ void TargetSet::clear()
  *
  * @param h  the atom to which the Target will be created
  */
-void TargetSet::emplace(Handle& h)
+void TargetSet::emplace(Handle h, Handle hvardecl)
 {
 	if (_targets_map.count(h) == 1)
 		return;
 
-	_targets_map.insert(std::pair<Handle, Target>(h, Target(_history_space, h)));
+	_targets_map.insert(std::pair<Handle, Target>(h, Target(_history_space, h, hvardecl)));
 }
 
 /**

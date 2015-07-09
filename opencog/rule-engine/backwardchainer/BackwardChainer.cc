@@ -54,7 +54,7 @@ void BackwardChainer::set_target(Handle init_target)
 	_init_target = init_target;
 
 	_targets_set.clear();
-	_targets_set.emplace(_init_target);
+	_targets_set.emplace(_init_target, Handle::UNDEFINED);
 }
 
 UREConfigReader& BackwardChainer::get_config()
@@ -149,7 +149,7 @@ void BackwardChainer::process_target(Target& target)
 	{
 		std::vector<VarMap> kb_vmap;
 
-		HandleSeq kb_match = match_knowledge_base(htarget, Handle::UNDEFINED,
+		HandleSeq kb_match = match_knowledge_base(htarget, target.get_vardecl(),
 		                                          false, kb_vmap);
 
 		// Matched something in the knowledge base? Then need to store
@@ -172,7 +172,7 @@ void BackwardChainer::process_target(Target& target)
 
 				// If there are free variables, add this soln as new target
 				if (not free_vars.empty())
-					_targets_set.emplace(soln);
+					_targets_set.emplace(soln, Handle::UNDEFINED);
 
 				target.store_varmap(vgm);
 			}
@@ -187,7 +187,7 @@ void BackwardChainer::process_target(Target& target)
 		HandleSeq sub_premises = LinkCast(htarget)->getOutgoingSet();
 
 		for (Handle& h : sub_premises)
-			_targets_set.emplace(h);
+			_targets_set.emplace(h, Handle::UNDEFINED);
 
 		return;
 	}
@@ -346,7 +346,8 @@ void BackwardChainer::process_target(Target& target)
 	if (possible_premises.size() == 0)
 	{
 		target.store_step(selected_rule, { hrule_implicant_normal_grounded });
-		_targets_set.emplace(hrule_implicant_normal_grounded);
+		_targets_set.emplace(hrule_implicant_normal_grounded,
+		                     _garbage_superspace.add_atom(gen_sub_varlist(hrule_implicant_normal_grounded, hrule_vardecl, target.get_varset())));
 		return;
 	}
 
@@ -445,7 +446,7 @@ void BackwardChainer::process_target(Target& target)
 		if (_logical_link_types.count(hp->getType()) == 0)
 		{			
 			target.store_step(selected_rule, { hp });
-			_targets_set.emplace(hp);
+			_targets_set.emplace(hp, Handle::UNDEFINED);
 			continue;
 		}
 
@@ -456,7 +457,7 @@ void BackwardChainer::process_target(Target& target)
 		target.store_step(selected_rule, sub_premises);
 
 		for (Handle& s : sub_premises)
-			_targets_set.emplace(s);
+			_targets_set.emplace(s, Handle::UNDEFINED);
 	}
 
 	return;
