@@ -32,10 +32,16 @@
 (load-from-path "core_types.scm")
 
 ; Load other grunge too
+;
 ; Lots of these things should probably be modules ...
-; Also they need to be defined "public" to be useable in guile...
+;
+; Also they need to be defined "public" to be useable in guile, except
+; for utilities that uses (export-utilities)
 (load-from-path "config.scm")
+
 (load-from-path "utilities.scm")
+(export-utilities)
+
 (load-from-path "apply.scm")
 (load-from-path "av-tv.scm")
 (load-from-path "file-utils.scm")
