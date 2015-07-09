@@ -4,9 +4,6 @@
 ;
 ; Before running any inference you must load that file
 
-; Contains functions to help to configure a rule-based system
-(load-from-path "rule-engine-utils.scm")
-
 ; Load the rules (use load for relative path w.r.t. to that file)
 (load "rules/crisp-modus-ponens.scm")
 (load "rules/crisp-deduction.scm")
