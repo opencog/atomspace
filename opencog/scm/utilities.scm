@@ -1064,3 +1064,22 @@
 	cog-utilities
 )
 ; ---------------------------------------------------------------------
+
+; Call that in case you want to export those functions in a module. It
+; is currently used by opencog.scm.
+;
+; TODO it would be better to use cog-utilities, however something like
+;
+; (for-each export cog-utilities)
+;
+; or
+;
+; (for-each (lambda (fun) (export fun)) cog-utilities)
+;
+; or
+;
+; (for-each (lambda (fun) (export (fun))) cog-utilities)
+;
+; Doesn't work, so till a fix is found I'm using this dedundant definition
+;
+(define (export-utilities) (export av stv itv ctv tv-mean tv-conf tv-count gar gdr gadr gddr gaddr gdddr for-each-except cog-atom-incr purge-hypergraph purge-type clear count-all cog-get-atoms cog-prt-atomspace cog-count-atoms cog-report-counts cog-get-root cog-get-all-nodes cog-get-partner cog-pred-get-partner cog-filter cog-chase-link cog-chase-link-chk cog-map-chase-link cog-par-chase-link cog-map-chase-links cog-par-chase-links cog-map-chase-links-chk cog-par-chase-links-chk cog-map-chase-link-dbg cog-map-apply-link cog-get-link cog-get-pred cog-get-reference filter-hypergraph cartesian-prod cartesian-prod-list-only approx-eq? cog-equal? min-element-by-key max-element-by-key))

@@ -11,10 +11,14 @@
 ; -- ure-set-num-parameter -- Set a numeric parameter of an rbs
 ; -- ure-set-fuzzy-bool-parameter -- Set a fuzzy boolean parameter of an rbs
 ;
+; If you add more utilities don't forget to add them in the
+; export-rule-engine-utils function.
+;
 ;;; Code:
 ; Copyright (c) 2015, OpenCog Foundation
 ;
 
+(use-modules (opencog))
 (use-modules (opencog query))
 
 ; Given an rbs and a list of pairs (rule weight) create for each rule
@@ -80,3 +84,5 @@
      (SchemaNode name)
      rbs)
 )
+
+(define (export-rule-engine-utils) (export ure-add-rules ure-set-num-parameter ure-set-fuzzy-bool-parameter export-rule-engine-utils))

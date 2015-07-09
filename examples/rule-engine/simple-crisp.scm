@@ -15,9 +15,6 @@
 (use-modules (opencog))
 (use-modules (opencog rule-engine))
 
-(load-from-path "utilities.scm")
-(load-from-path "av-tv.scm")
-
 ; Load URE configuration (add the current file dir so it can be loaded
 ; from anywhere)
 (add-to-load-path (dirname (current-filename)))
