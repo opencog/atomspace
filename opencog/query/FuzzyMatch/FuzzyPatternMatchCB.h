@@ -67,6 +67,9 @@ namespace opencog
         private:
             const Pattern* _pattern = NULL;
 
+            // The root of the clause
+            Handle root;
+
             struct Starter
             {
                 UUID uuid;
