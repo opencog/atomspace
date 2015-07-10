@@ -28,6 +28,7 @@ TARGET_LINK_LIBRARIES(ruleengine
 	execution
 	atomutils
 	atomspace
+	atomspaceutils
 )
 
 INSTALL (TARGETS ruleengine DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")

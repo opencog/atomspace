@@ -25,6 +25,7 @@
 
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/query/BindLinkAPI.h>
+#include <opencog/atomspaceutils/AtomSpaceUtils.h>
 
 using namespace opencog;
 
@@ -88,8 +89,9 @@ HandleSeq UREConfigReader::fetch_rules(Handle rbs)
 	                         _as.add_link(MEMBER_LINK, rule_var, rbs));
 	Handle rule_names = satisfying_set(&_as, gl);
 
-	// Remove the GetLink from the AtomSpace as it is no longer useful
-	_as.remove_atom(gl);
+	// Remove the GetLink pattern from the AtomSpace as it is no
+	// longer useful
+	remove_descendants(_as, gl);
 
 	return LinkCast(rule_names)->getOutgoingSet();
 }
@@ -117,8 +119,9 @@ HandleSeq UREConfigReader::fetch_execution_outputs(Handle schema,
 		                               var_node)),
 		outputs = satisfying_set(&_as, gl);
 
-	// Remove the GetLink from the AtomSpace as it is no longer useful
-	_as.remove_atom(gl);
+	// Remove the GetLink pattern from the AtomSpace as it is no
+	// longer useful
+	remove_descendants(_as, gl);
 
 	return LinkCast(outputs)->getOutgoingSet();
 }
