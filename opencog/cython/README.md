@@ -1,7 +1,7 @@
 Python bindings for OpenCog
 ---------------------------
 
-== Requirements ==
+## Requirements ##
 
 * Python 2.7 - these bindings may work with earlier versions, but they have not been tested at all.
 * Cython 0.14 or later. http://www.cython.org/
@@ -22,13 +22,13 @@ Currently the package structure looks like this:
  opencog.atomspace.types
  opencog.scheme_wrapper
 
-== Tutorial ==
+## Tutorial ##
 
 This tutorial is a first look at the Python bindings. It assumes that
 you've got a good grasp on the concept of the AtomSpace and the
 CogServer. Oh, and it helps to know a bit of Python too!
 
-=== Setting up ===
+### Setting up ###
 
 Go through the normal process of [[building OpenCog]]. Then ensure that
 the OpenCog data directory is in your Python `sys.path`. By
@@ -40,7 +40,7 @@ just want to use your build dir you can use something like:
 
  $ export PYTHONPATH=$PYTHONPATH:/usr/local/share/opencog/python
 
-=== AtomSpace API ===
+### AtomSpace API ###
 
 These bindings let you interact and instantiate [[Atom]]s interactively.
 The [http://ipython.scipy.org/ IPython] shell is recommended.
@@ -170,7 +170,7 @@ determines and checks the required arguments for the type:
 Atom(Handle(11),<opencog.atomspace.AtomSpace object at 0x203220a>)
 </source>
 
-==== The AtomSpace as a container ====
+#### The AtomSpace as a container ####
 
 The AtomSpace supports the container methods Python expects for
 a container-like object:
