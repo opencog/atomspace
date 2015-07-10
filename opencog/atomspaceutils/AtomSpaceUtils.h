@@ -42,8 +42,22 @@ Handle add_prefixed_node(AtomSpace&, Type, const std::string& prefix = "");
  * Given a Handle remove it and all its descendants (outgoings of
  * outgoings, etc). Atoms with incomings will not be removed. In case
  * not all atoms have been removed it return false, true otherwise.
+ *
+ * @param as The AtomSpace to the remove the atoms from
+ *
+ * @param h  The handle to remove (and its descendants)
+ *
+ * @return true if all atoms (h and its descendants) have been
+ * removed, false otherwise
+ *
+ * Example: remove_descendants(as, h) with
+ * h = InheritanceLink
+ *        ConceptNode "A"
+ *        ConceptNode "B"
+ *
+ * will remove the InheritanceLink, ConceptNode "A" and ConceptNode "B".
  */
-bool remove_descendants(AtomSpace&, Handle);
+bool remove_descendants(AtomSpace& as, Handle h);
 	
 /** @}*/
 }
