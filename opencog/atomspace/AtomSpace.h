@@ -814,7 +814,8 @@ public:
 namespace std {
 
 /**
-* Output the whole atomspace (useful for debugging)
+* Output the whole atomspace, actually all orphans as the others are
+* output by of their parents (incoming sets).
 */
 ostream& operator<<(ostream&, const opencog::AtomSpace&);
 

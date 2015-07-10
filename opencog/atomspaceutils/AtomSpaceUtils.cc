@@ -46,4 +46,23 @@ Handle add_prefixed_node(AtomSpace& as, Type t, const std::string& prefix)
     return as.add_node(t, name);
 }
 
+bool remove_descendants(AtomSpace& as, Handle h)
+{
+    LinkPtr link(LinkCast(h));
+
+    // Recursive case
+    if (link) {
+        HandleSeq oset = link->getOutgoingSet();
+        bool success = as.remove_atom(h);
+        if (success)
+            for (const Handle& oh : oset)
+                success &= remove_descendants(as, oh);
+        return success;
+    }
+    // Base case
+    else {
+        return as.remove_atom(h);
+    }
+}
+
 } // namespace opencog
