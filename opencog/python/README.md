@@ -3,7 +3,7 @@ Using Python with the AtomSpace
 
 Add these lines to the end of your ~/.bashrc file:
 ```
-PYTHONPATH="$PYTHONPATH:/usr/local/share/opencog/python
+PYTHONPATH="$PYTHONPATH:/usr/local/share/opencog/python"
 export PYTHONPATH
 ```
 
