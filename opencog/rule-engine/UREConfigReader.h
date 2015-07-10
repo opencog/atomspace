@@ -88,15 +88,21 @@ private:
 	};
 	RuleBaseParameters _rbparams;
 
-	// Given <schema> and <input> in
+	// Given <schema>, an <input> and optionally an output <type> (or
+	// subtype), return the <output>s in
 	//
 	// ExecutionLink
 	//    <schema>
 	//    <input>
 	//    <output>
 	//
-	// Return <output>
-	HandleSeq fetch_execution_outputs(Handle schema, Handle input);
+	// inheriting <type>.
+	//
+	// The type (or subtype) can be used to avoid fetching patterns
+	// (if <type> is choosen not to have VARIABLE_NODE inherit from
+	// it).
+	HandleSeq fetch_execution_outputs(Handle schema, Handle input,
+	                                  Type type = ATOM);
 
 	// Similar to above but takes instead the schema name instead of
 	// the schema Handle, assumes that output value is a NumberNode,
