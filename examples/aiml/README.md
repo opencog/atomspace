@@ -74,11 +74,13 @@ to specify the AIML patterns.
 
 == Globbing
 
-The default attern matcher
+The default pattern matcher does not glob.
 
 
 =OpenCog equivalents
 * R1 example.
+
+the below won't be efficient/work well as written, due to globbing ...
 ```
 PatternLink
    SequentailAndLink
@@ -97,3 +99,12 @@ PatternLink
             WordNode "Hi"
             WordNode "there"
 ```
+
+There is another approach:
+
+I really really * you, darling.
+I really really love you, darling.
+
+WordInstanceLink
+   WordNode "I"
+   Word
