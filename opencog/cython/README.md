@@ -47,23 +47,23 @@ The [http://ipython.scipy.org/ IPython] shell is recommended.
 
 Here's how to add a node:
 
-<source lang="python">
+```python
 >>> from opencog.atomspace import AtomSpace, types
 
 >>> a = AtomSpace()
 >>> a.add_node(types.ConceptNode, "My first python created node")
 <opencog.atomspace.Atom object at 0x203fa80>
-</source>
+```
 
 To make things more succinct when referring to types, you can
 alias stuff:
 
-<source lang="python">
+```
 >>> t=types
 >>> a.add_node(t.ConceptNode, "Ah, more concise")
 >>> ConceptNode = t.ConceptNode
 >>> a.add_node(ConceptNode, "Ah, a bit more concise")
-</source>
+```
 
 You'll notice these return opencog.atomspace.Atom objects, which
 internally store a Handle with a UUID and the AtomSpace it's
