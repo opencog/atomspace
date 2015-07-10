@@ -38,6 +38,13 @@ namespace opencog
  **/
 Handle add_prefixed_node(AtomSpace&, Type, const std::string& prefix = "");
 
+/**
+ * Given a Handle remove it and all its descendants (outgoings of
+ * outgoings, etc). Atoms with incomings will not be removed. In case
+ * not all atoms have been removed it return false, true otherwise.
+ */
+bool remove_descendants(AtomSpace&, Handle);
+	
 /** @}*/
 }
 
