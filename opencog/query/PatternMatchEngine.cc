@@ -353,7 +353,7 @@ bool PatternMatchEngine::choice_compare(const Handle& hp,
 			if (match)
 			{
 				// Even the stack, *without* erasing the discovered grounding.
-				var_solutn_stack.pop();
+				solution_drop();
 
 				// If the grounding is accepted, record it.
 				if (hp != hg) var_grounding[hp] = hg;
@@ -632,7 +632,7 @@ bool PatternMatchEngine::unorder_compare(const Handle& hp,
 			if (match)
 			{
 				// Even the stack, *without* erasing the discovered grounding.
-				var_solutn_stack.pop();
+				solution_drop();
 
 				// If the grounding is accepted, record it.
 				if (hp != hg) var_grounding[hp] = hg;
@@ -1341,7 +1341,10 @@ bool PatternMatchEngine::do_next_clause(void)
 			Handle undef(Handle::UNDEFINED);
 			bool match = _pmc.optional_clause_match(joiner, undef);
 			dbgprt ("Exhausted search for optional clause, cb=%d\n", match);
-			if (not match) return false;
+			if (not match) {
+				clause_stacks_pop();
+				return false;
+			}
 
 			// XXX Maybe should push n pop here? No, maybe not ...
 			clause_grounding[curr_root] = Handle::UNDEFINED;
@@ -1673,6 +1676,12 @@ void PatternMatchEngine::solution_pop(void)
 {
 	POPSTK(var_solutn_stack, var_grounding);
 	POPSTK(term_solutn_stack, clause_grounding);
+}
+
+void PatternMatchEngine::solution_drop(void)
+{
+	var_solutn_stack.pop();
+	term_solutn_stack.pop();
 }
 
 /* ======================================================== */

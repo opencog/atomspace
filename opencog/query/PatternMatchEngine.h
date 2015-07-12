@@ -148,6 +148,7 @@ class PatternMatchEngine
 		// traversal of that clause, where it was last left off.
 		void solution_push(void);
 		void solution_pop(void);
+		void solution_drop(void);
 
 		// Stacks containing partial groundings.
 		typedef std::map<Handle, Handle> SolnMap;
