@@ -1416,15 +1416,15 @@ void PatternMatchEngine::get_next_untried_clause(void)
 {
 	// First, try to ground all the mandatory clauses, only.
 	// no virtuals, no black boxes, no optionals.
-	if (get_next_untried_helper(false, false, false)) return;
+	if (gen_next_thinnest_clause(false, false, false)) return;
 
 	// Don't bother looking for evaluatables if they are not there.
 	if (not _pat->evaluatable_holders.empty())
 	{
-		if (get_next_untried_helper(true, false, false)) return;
+		if (gen_next_thinnest_clause(true, false, false)) return;
 		if (not _pat->black.empty())
 		{
-			if (get_next_untried_helper(true, true, false)) return;
+			if (gen_next_thinnest_clause(true, true, false)) return;
 		}
 	}
 
@@ -1438,13 +1438,13 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	}
 
 	// Try again, this time, considering the optional clauses.
-	if (get_next_untried_helper(false, false, true)) return;
+	if (gen_next_thinnest_clause(false, false, true)) return;
 	if (not _pat->evaluatable_holders.empty())
 	{
-		if (get_next_untried_helper(true, false, true)) return;
+		if (gen_next_thinnest_clause(true, false, true)) return;
 		if (not _pat->black.empty())
 		{
-			if (get_next_untried_helper(true, true, true)) return;
+			if (gen_next_thinnest_clause(true, true, true)) return;
 		}
 	}
 
@@ -1494,9 +1494,9 @@ unsigned int PatternMatchEngine::thickness(const Handle& clause,
 /// clauses are considered.
 ///
 /// Return true if we found the next ungrounded clause.
-bool PatternMatchEngine::get_next_untried_helper(bool search_virtual,
-                                                 bool search_black,
-                                                 bool search_optionals)
+bool PatternMatchEngine::gen_next_thinnest_clause(bool search_virtual,
+                                                  bool search_black,
+                                                  bool search_optionals)
 {
 	// Search for an as-yet ungrounded clause. Search for required
 	// clauses first; then, only if none of those are left, move on
@@ -1505,43 +1505,49 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_virtual,
 	// the root is grounded.  If its not, start working on that.
 	Handle joint(Handle::UNDEFINED);
 	Handle unsolved_clause(Handle::UNDEFINED);
+	unsigned int thinnest_joint = UINT_MAX;
+	unsigned int thinnest_clause = UINT_MAX;
 	bool unsolved = false;
-	unsigned int thinnest = UINT_MAX;
 
 	// Make a list of the as-yet ungrounded variables.
-	std::set<Handle> undead;
-	for (const Handle &v : _varlist->varseq)
+	std::set<Handle> ungrounded_vars;
+
+	// Grounded variables ordered by the size of their grounding incoming set
+	std::multimap<std::size_t, Handle> thick_vars;
+
+	for (const Handle &v : _varlist->varset)
 	{
-		try { var_grounding.at(v); }
-		catch(...) { undead.insert(v); }
+		try {
+			const Handle& gnd = var_grounding.at(v);
+			if (Handle::UNDEFINED != gnd)
+			{
+				std::size_t incoming_set_size = gnd->getIncomingSetSize();
+				thick_vars.insert(std::make_pair(incoming_set_size, v));
+			}
+			else ungrounded_vars.insert(v);
+		}
+		catch(...) { ungrounded_vars.insert(v); }
 	}
+
+	OC_ASSERT(0 < thick_vars.size(), "Empty set of grounded variables");
 
 	// We are looking for a joining atom, one that is shared in common
 	// with the a fully grounded clause, and an as-yet ungrounded clause.
 	// The joint is called "pursue", and the unsolved clause that it
-	// joins will become our next untried clause.  Note that the join
-	// is not necessarily a variable; it could be a constant atom.
-	// (wouldn't things be faster if they were variables only, that
-	// joined?) the problem is that var_grounding stores both grounded
-	// variables and "grounded" constants.
-#define OLD_LOOP
-#ifdef OLD_LOOP
-	for (const Pattern::ConnectPair& vk : _pat->connectivity_map)
+	// joins will become our next untried clause. We choose joining atom
+	// with smallest size of its incoming set. If there are many such
+	// atoms we choose one from clauses with minimal number of ungrounded
+	// yet variables.
+	for (auto tckvar : thick_vars)
 	{
-		const Pattern::RootList& rl(vk.second);
-		const Handle& pursue = vk.first;
-		try { var_grounding.at(pursue); }
-		catch (...) { continue; }
-#else // OLD_LOOP
-	// Newloop might be slightly faster than old loop.
-	// ... but maybe not...
-	for (auto gndpair : var_grounding)
-	{
-		const Handle& pursue = gndpair.first;
+		std::size_t pursue_thickness = tckvar.first;
+		const Handle& pursue = tckvar.second;
+
+		if (pursue_thickness > thinnest_joint) break;
+
 		try { _pat->connectivity_map.at(pursue); }
 		catch(...) { continue; }
-		const RootList& rl(_pat->connectivity_map.at(pursue));
-#endif
+		const Pattern::RootList& rl(_pat->connectivity_map.at(pursue));
 
 		for (const Handle& root : rl)
 		{
@@ -1550,19 +1556,17 @@ bool PatternMatchEngine::get_next_untried_helper(bool search_virtual,
 			        and (search_black or not is_black(root))
 			        and (search_optionals or not is_optional(root)))
 			{
-				unsigned int th = thickness(root, undead);
-				if (th < thinnest)
+				unsigned int root_thickness = thickness(root, ungrounded_vars);
+				if (root_thickness < thinnest_clause)
 				{
-					thinnest = th;
+					thinnest_clause = root_thickness;
+					thinnest_joint = pursue_thickness;
 					unsolved_clause = root;
 					joint = pursue;
 					unsolved = true;
 				}
 			}
-			if (unsolved and thinnest < 2) break;
 		}
-
-		if (unsolved and thinnest < 2) break;
 	}
 
 	if (unsolved)
