@@ -37,7 +37,7 @@ be built and run.
 > http://cxxtest.sourceforge.net/ | https://launchpad.net/~opencog-dev/+archive/ppa
 
 ###### guile
-> Embedded scheme interpreter (version 2.0.0 or newer is required)
+> Embedded scheme interpreter (version 2.0.9 or newer is required)
 > http://www.gnu.org/software/guile/guile.html | guile-2.0-dev
 
 ###### libgsl
