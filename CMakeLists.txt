@@ -214,8 +214,8 @@ FIND_LIBRARY(GMP_LIBRARY gmp)
 FIND_PATH(GMP_INCLUDE_DIR gmp.h)
 
 # Gnu Guile scheme interpreter
-# Version 2.0.0 is needed for mrs io ports, compilation, etc.
-FIND_PACKAGE(Guile 2.0.0)
+# Version 2.0.9 is needed for mrs io ports, compilation, etc.
+FIND_PACKAGE(Guile 2.0.9)
 IF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	ADD_DEFINITIONS(-DHAVE_GUILE)
 	SET(HAVE_GUILE 1)
