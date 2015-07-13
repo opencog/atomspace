@@ -1416,15 +1416,15 @@ void PatternMatchEngine::get_next_untried_clause(void)
 {
 	// First, try to ground all the mandatory clauses, only.
 	// no virtuals, no black boxes, no optionals.
-	if (gen_next_thinnest_clause(false, false, false)) return;
+	if (get_next_thinnest_clause(false, false, false)) return;
 
 	// Don't bother looking for evaluatables if they are not there.
 	if (not _pat->evaluatable_holders.empty())
 	{
-		if (gen_next_thinnest_clause(true, false, false)) return;
+		if (get_next_thinnest_clause(true, false, false)) return;
 		if (not _pat->black.empty())
 		{
-			if (gen_next_thinnest_clause(true, true, false)) return;
+			if (get_next_thinnest_clause(true, true, false)) return;
 		}
 	}
 
@@ -1438,13 +1438,13 @@ void PatternMatchEngine::get_next_untried_clause(void)
 	}
 
 	// Try again, this time, considering the optional clauses.
-	if (gen_next_thinnest_clause(false, false, true)) return;
+	if (get_next_thinnest_clause(false, false, true)) return;
 	if (not _pat->evaluatable_holders.empty())
 	{
-		if (gen_next_thinnest_clause(true, false, true)) return;
+		if (get_next_thinnest_clause(true, false, true)) return;
 		if (not _pat->black.empty())
 		{
-			if (gen_next_thinnest_clause(true, true, true)) return;
+			if (get_next_thinnest_clause(true, true, true)) return;
 		}
 	}
 
@@ -1494,7 +1494,7 @@ unsigned int PatternMatchEngine::thickness(const Handle& clause,
 /// clauses are considered.
 ///
 /// Return true if we found the next ungrounded clause.
-bool PatternMatchEngine::gen_next_thinnest_clause(bool search_virtual,
+bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
                                                   bool search_black,
                                                   bool search_optionals)
 {

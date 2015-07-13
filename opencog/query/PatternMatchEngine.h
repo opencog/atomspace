@@ -132,7 +132,7 @@ class PatternMatchEngine
 		bool do_next_clause(void);
 		bool clause_accepted;
 		void get_next_untried_clause(void);
-		bool gen_next_thinnest_clause(bool, bool, bool);
+		bool get_next_thinnest_clause(bool, bool, bool);
 		unsigned int thickness(const Handle&, const std::set<Handle>&);
 		Handle next_clause;
 		Handle next_joint;
