@@ -50,8 +50,9 @@ export STACK_YAML=...RelativePathToThisDirectory/stack.yaml
 stack ghc example.hs
 ```
 
-Or, to avoid this flag, you can include this library to your local environment,
-adding this library path to your package list in your local config file:
+Or, to avoid defining STACK_YAML every time, you can include this library to your
+local environment, adding this library path to your package
+list in your local config file:
 ~/.stack/global/stack.yaml ,and then running:
 
 ```
