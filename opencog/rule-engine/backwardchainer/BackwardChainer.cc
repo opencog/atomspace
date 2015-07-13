@@ -557,6 +557,9 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
 	               hpattern->toShortString().c_str(),
 	               hpattern_vardecl->toShortString().c_str());
 
+	if (VariableListCast(hpattern_vardecl)->get_variables().varseq.empty())
+		return HandleSeq();
+
 	// Pattern Match on _garbage_superspace since some atoms in hpattern could
 	// be in the _garbage space
 	PatternLinkPtr sl(createPatternLink(hpattern_vardecl, hpattern));
