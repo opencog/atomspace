@@ -82,7 +82,7 @@
 ;    rbs
 (define (ure-set-fuzzy-bool-parameter rbs name value)
   (EvaluationLink (stv value 1)
-     (SchemaNode name)
+     (PredicateNode name)
      rbs)
 )
 
