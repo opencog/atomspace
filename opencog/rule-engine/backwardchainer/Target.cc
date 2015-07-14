@@ -43,11 +43,12 @@ Target::Target(AtomSpace& as, const Handle& h, const Handle& hvardecl) : _as(as)
 	_htarget_internal = _as.add_atom(h);
 	_selection_count = 0;
 
-	_vars = get_free_vars_in_tree(h);
 	_vardecl = hvardecl;
 
+	HandleSeq vars = VariableListCast(_vardecl)->get_variables().varseq;
+
 	// _varmap is a map that bases on the external space
-	for (auto& hv : _vars)
+	for (auto& hv : vars)
 		_varmap[hv] = UnorderedHandleSet();
 }
 

@@ -74,7 +74,10 @@ public:
 	 *
 	 * @return the HandleSeq
 	 */
-	HandleSeq get_varseq() const { return _vars; }
+	HandleSeq get_varseq() const
+	{
+		return VariableListCast(_vardecl)->get_variables().varseq;
+	}
 
 	/**
 	 * Get the "free" variables list in set<Handle>
@@ -83,7 +86,7 @@ public:
 	 */
 	std::set<Handle> get_varset() const
 	{
-		return std::set<Handle>(_vars.begin(), _vars.end());
+		return VariableListCast(_vardecl)->get_variables().varset;
 	}
 
 	Handle get_vardecl() const { return _vardecl; }
@@ -114,7 +117,6 @@ private:
 	Handle _htarget_internal;
 	unsigned int _selection_count;
 
-	HandleSeq _vars;
 	Handle _vardecl;
 	VarMultimap _varmap;
 
