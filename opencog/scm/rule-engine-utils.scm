@@ -54,23 +54,24 @@
 ; to be sure there is ever only one value associated to that
 ; parameter. The value is automatically converted into string.
 (define (ure-set-num-parameter rbs name value)
-  ; Delete any previous parameter
-  (cog-bind (BindLink
-               (ExecutionLink
-                  (SchemaNode name)
-                  rbs
-                  (VariableNode "__VALUE__"))
-               (DeleteLink
-                  (ExecutionLink
-                     (SchemaNode name)
-                     rbs
-                     (VariableNode "__VALUE__")))))
+  (define (param-hypergraph value)
+    (ExecutionLink
+       (SchemaNode name)
+       rbs
+       value)
+  )
+  (let ((del-prev-val (BindLink 
+                          (param-hypergraph (VariableNode "__VALUE__"))
+                          (DeleteLink
+                             (param-hypergraph (VariableNode "__VALUE__"))))))
+       ; Delete any previous value for that parameter
+       (cog-bind del-prev-val)
+       ; Delete pattern to not create to much junk in the atomspace
+       (purge-hypergraph del-prev-val)
+  )
 
   ; Set new value for that parameter
-  (ExecutionLink
-     (SchemaNode name)
-     rbs
-     (NumberNode (number->string value)))
+  (param-hypergraph (NumberNode (number->string value)))
 )
 
 ; Set (fuzzy) bool parameters. Given an RBS, a parameter name and its
