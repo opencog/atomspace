@@ -20,7 +20,7 @@ import Foreign.Storable             (peek)
 import Data.Functor                 ((<$>))
 import Control.Monad.IO.Class       (liftIO)
 import OpenCog.AtomSpace.Env        (AtomSpaceRef(..),AtomSpace,getAtomSpace)
-import OpenCog.AtomSpace.Internal   (Handle,AtomType,AtomRaw(..),TVRaw(..),
+import OpenCog.AtomSpace.Internal   (Handle,AtomTypeRaw,AtomRaw(..),TVRaw(..),
                                      toRaw,fromRaw,tvMAX_PARAMS)
 import OpenCog.AtomSpace.Types      (Atom(..),AtomName(..),TruthVal(..))
 
@@ -44,7 +44,7 @@ foreign import ccall "AtomSpace_addNode"
                       -> CString
                       -> IO Handle
 
-insertNode :: AtomType -> AtomName -> AtomSpace Handle
+insertNode :: AtomTypeRaw -> AtomName -> AtomSpace Handle
 insertNode aType aName = do
     asRef <- getAtomSpace
     liftIO $ withCString aType $
@@ -58,7 +58,7 @@ foreign import ccall "AtomSpace_addLink"
                       -> CInt
                       -> IO Handle
 
-insertLink :: AtomType -> [AtomRaw] -> AtomSpace Handle
+insertLink :: AtomTypeRaw -> [AtomRaw] -> AtomSpace Handle
 insertLink aType aOutgoing = do
     list <- mapM insertAndGetHandle aOutgoing
     asRef <- getAtomSpace
@@ -111,7 +111,7 @@ foreign import ccall "AtomSpace_getNode"
                       -> Ptr CInt
                       -> IO Handle
 
-getNodeHandle :: AtomType -> AtomName -> AtomSpace (Maybe Handle)
+getNodeHandle :: AtomTypeRaw -> AtomName -> AtomSpace (Maybe Handle)
 getNodeHandle aType aName = do
     asRef <- getAtomSpace
     liftIO $ withCString aType $
@@ -124,7 +124,7 @@ getNodeHandle aType aName = do
                      then Just h
                      else Nothing
 
-getNode :: AtomType -> AtomName -> AtomSpace (Maybe (TVRaw,Handle))
+getNode :: AtomTypeRaw -> AtomName -> AtomSpace (Maybe (TVRaw,Handle))
 getNode aType aName = do
     m <- getNodeHandle aType aName
     case m of
@@ -142,7 +142,7 @@ foreign import ccall "AtomSpace_getLink"
                       -> Ptr CInt
                       -> IO Handle
 
-getLinkHandle :: AtomType -> [Handle] -> AtomSpace (Maybe Handle)
+getLinkHandle :: AtomTypeRaw -> [Handle] -> AtomSpace (Maybe Handle)
 getLinkHandle aType aOutgoing = do
     asRef <- getAtomSpace
     liftIO $ withCString aType $
@@ -156,7 +156,7 @@ getLinkHandle aType aOutgoing = do
                      then Just h
                      else Nothing
 
-getLink :: AtomType -> [Handle] -> AtomSpace (Maybe (TVRaw,Handle))
+getLink :: AtomTypeRaw -> [Handle] -> AtomSpace (Maybe (TVRaw,Handle))
 getLink aType aOutgoing = do
     m <- getLinkHandle aType aOutgoing
     case m of
@@ -167,7 +167,7 @@ getLink aType aOutgoing = do
 
 getWithHandle :: AtomRaw -> AtomSpace (Maybe (AtomRaw,Handle))
 getWithHandle i = do
-    let onLink :: AtomType
+    let onLink :: AtomTypeRaw
                -> [AtomRaw]
                -> AtomSpace (Maybe (TVRaw,Handle,[AtomRaw]))
         onLink aType aOutgoing = do

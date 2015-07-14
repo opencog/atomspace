@@ -6,7 +6,7 @@
 -- Intended for internal use only.
 module OpenCog.AtomSpace.Internal (
       Handle(..)
-    , AtomType(..)
+    , AtomTypeRaw(..)
     , AtomRaw(..)
     , toRaw
     , fromRaw
@@ -24,10 +24,10 @@ import OpenCog.AtomSpace.Types      (Atom(..),AtomName(..),TruthVal(..),
 
 -- Data type to hold atoms's UUID.
 type Handle = CULong
-type AtomType = String
+type AtomTypeRaw = String
 -- Main general atom representation.
-data AtomRaw = Link AtomType [AtomRaw] (Maybe TVRaw)
-             | Node AtomType AtomName  (Maybe TVRaw)
+data AtomRaw = Link AtomTypeRaw [AtomRaw] (Maybe TVRaw)
+             | Node AtomTypeRaw AtomName  (Maybe TVRaw)
 
 -- Function to convert an Atom to its general representation.
 toRaw :: Atom a -> AtomRaw
