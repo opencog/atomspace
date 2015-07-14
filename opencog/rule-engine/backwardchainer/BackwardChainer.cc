@@ -54,7 +54,8 @@ void BackwardChainer::set_target(Handle init_target)
 	_init_target = init_target;
 
 	_targets_set.clear();
-	_targets_set.emplace(_init_target, Handle::UNDEFINED);
+	_targets_set.emplace(_init_target,
+	                     _garbage_superspace.add_atom(createVariableList(get_free_vars_in_tree(init_target))));
 }
 
 UREConfigReader& BackwardChainer::get_config()
@@ -102,6 +103,10 @@ void BackwardChainer::do_step()
 	Target& selected_target = _targets_set.select();
 
 	logger().debug("[BackwardChainer] Selected target " + selected_target.get_handle()->toShortString());
+	if (selected_target.get_vardecl() == Handle::UNDEFINED)
+		logger().debug("[BackwardChainer] with var_decl UNDEFINED");
+	else
+		logger().debug("[BackwardChainer] with var_decl " + selected_target.get_vardecl()->toShortString());
 	if (selected_target.get_varseq().empty())
 		logger().debug("[BackwardChainer] Target is 'Truth Value Query'");
 	else
@@ -109,9 +114,10 @@ void BackwardChainer::do_step()
 
 	process_target(selected_target);
 
-	// clear out the _garbage space since the stuff inside shouldn't be needed
-	// for the next step
-	_garbage_superspace.clear();
+	// XXX Cannot clear since some target are reversed grounded rule's input
+	// and contain temp variables. Need a better clean that keep stuff used
+	// in the target set
+	//_garbage_superspace.clear();
 
 	logger().debug("[BackwardChainer] End of a single BC step");
 }
@@ -171,8 +177,10 @@ void BackwardChainer::process_target(Target& target)
 				HandleSeq free_vars = get_free_vars_in_tree(soln);
 
 				// If there are free variables, add this soln as new target
+				// XXX TODO even when no free variable, can still add as TVQ
 				if (not free_vars.empty())
-					_targets_set.emplace(soln, Handle::UNDEFINED);
+					_targets_set.emplace(soln,
+					                     _garbage_superspace.add_atom(createVariableList(free_vars)));
 
 				target.store_varmap(vgm);
 			}
@@ -187,7 +195,7 @@ void BackwardChainer::process_target(Target& target)
 		HandleSeq sub_premises = LinkCast(htarget)->getOutgoingSet();
 
 		for (Handle& h : sub_premises)
-			_targets_set.emplace(h, Handle::UNDEFINED);
+			_targets_set.emplace(h, _garbage_superspace.add_atom(gen_sub_varlist(h, target.get_vardecl(), std::set<Handle>())));
 
 		return;
 	}
@@ -198,6 +206,8 @@ void BackwardChainer::process_target(Target& target)
 
 	// Find all rules whose implicand can be unified to htarget
 	std::vector<Rule> acceptable_rules = filter_rules(target);
+
+	logger().debug("[BackwardChainer] %d rules unifiable", acceptable_rules.size());
 
 	// If no rules to backward chain on, no way to solve this target
 	if (acceptable_rules.empty())
@@ -225,7 +235,7 @@ void BackwardChainer::process_target(Target& target)
 		if (not unify(h,
 		              htarget,
 		              _garbage_superspace.add_atom(gen_sub_varlist(h, hrule_vardecl, std::set<Handle>())),
-		              _garbage_superspace.add_atom(createVariableList(target.get_varseq())),
+		              target.get_vardecl(),
 		              temp_mapping))
 			continue;
 
@@ -252,7 +262,7 @@ void BackwardChainer::process_target(Target& target)
 			if (not unify(h,
 			              htarget,
 			              _garbage_superspace.add_atom(gen_sub_varlist(h, hrule_vardecl, std::set<Handle>())),
-			              _garbage_superspace.add_atom(createVariableList(target.get_varseq())),
+			              target.get_vardecl(),
 			              temp_mapping))
 				continue;
 
@@ -291,7 +301,7 @@ void BackwardChainer::process_target(Target& target)
 	HandleSeq possible_premises =
 		match_knowledge_base(hrule_implicant_normal_grounded,
 	                         _garbage_superspace.add_atom(gen_sub_varlist(hrule_implicant_normal_grounded, hrule_vardecl, target.get_varset())),
-	                         true, premises_vmap_list);
+	                         false, premises_vmap_list);
 
 	// only need to generate QuoteLink version when there are free variables
 	if (not target.get_varseq().empty())
@@ -446,7 +456,7 @@ void BackwardChainer::process_target(Target& target)
 		if (_logical_link_types.count(hp->getType()) == 0)
 		{			
 			target.store_step(selected_rule, { hp });
-			_targets_set.emplace(hp, Handle::UNDEFINED);
+			_targets_set.emplace(hp, _garbage_superspace.add_atom(createVariableList(get_free_vars_in_tree(hp))));
 			continue;
 		}
 
@@ -457,7 +467,7 @@ void BackwardChainer::process_target(Target& target)
 		target.store_step(selected_rule, sub_premises);
 
 		for (Handle& s : sub_premises)
-			_targets_set.emplace(s, Handle::UNDEFINED);
+			_targets_set.emplace(s, _garbage_superspace.add_atom(createVariableList(get_free_vars_in_tree(s))));
 	}
 
 	return;
@@ -477,12 +487,16 @@ std::vector<Rule> BackwardChainer::filter_rules(const Target& target)
 	std::vector<Rule> rules;
 
 	Handle htarget = target.get_handle();
-	Handle htarget_vardecl = _garbage_superspace.add_atom(createVariableList(target.get_varseq()));
+	Handle htarget_vardecl = target.get_vardecl();
 
 	for (Rule& r : _configReader.get_rules())
 	{
-		Handle hrule_vardecl = r.get_vardecl();
-		HandleSeq output = r.get_implicand_seq();
+		// unify against the standardized version, so the result will match
+		// with what we will be applying against at later step
+		Rule standardized_rule = r.gen_standardize_apart(&_garbage_superspace);
+
+		Handle hrule_vardecl = standardized_rule.get_vardecl();
+		HandleSeq output = standardized_rule.get_implicand_seq();
 		bool unifiable = false;
 
 		// check if any of the implicand's output can be unified to target
@@ -603,6 +617,14 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
 						return is_atom_in_tree(r.get_handle(), p.second); }))
 			{
 				logger().debug("[BackwardChainer] matched clause in rule");
+				break;
+			}
+
+			// don't want matched stuff with some part of a rule inside
+			if (std::any_of(rules.begin(), rules.end(), [&](Rule& r) {
+						return is_atom_in_tree(p.second, r.get_handle()); }))
+			{
+				logger().debug("[BackwardChainer] matched clause wrapping rule");
 				break;
 			}
 
