@@ -20,12 +20,21 @@ public:
 		load_scm_files_from_config(_as);
 
 		// add the following so that utilities.scm and av-tv.scm are
-		// correctly loaded from simple-deduction.scm
+		// correctly loaded from simple-crisp.scm
 		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm\")");
 
-		// Load the simple deduction example to test it
-		_eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
-		           "/examples/rule-engine/simple-deduction.scm\")");
+		// Load utilities.scm and rule-engine-utils.scm. Apparently
+		// the modules' functions are not loaded
+		_eval.eval("(load-from-path \"utilities.scm\")");
+		_eval.eval("(load-from-path \"rule-engine-utils.scm\")");
+
+		// Load the simple crisp system example to test it
+		string eval_output =
+			_eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
+			           "/examples/rule-engine/simple-crisp.scm\")");
+		std::cout << "eval_output = " << eval_output << std::endl;
+
+		std::cout << "AtomSpace = " << _as << std::endl;
 	}
 
 	void test_read_config() {
