@@ -1529,8 +1529,6 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 		catch(...) { ungrounded_vars.insert(v); }
 	}
 
-	OC_ASSERT(0 < thick_vars.size(), "Empty set of grounded variables");
-
 	// We are looking for a joining atom, one that is shared in common
 	// with the a fully grounded clause, and an as-yet ungrounded clause.
 	// The joint is called "pursue", and the unsolved clause that it
