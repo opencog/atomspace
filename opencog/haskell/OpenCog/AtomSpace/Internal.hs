@@ -19,6 +19,7 @@ module OpenCog.AtomSpace.Internal (
 
 import Foreign.C.Types               (CULong(..))
 import Data.Functor                  ((<$>))
+import Data.Typeable                 (cast,Typeable)
 import OpenCog.AtomSpace.Filter      (Gen(..),FilterIsChild(..))
 import OpenCog.AtomSpace.AtomType    (AtomType(..),fromAtomTypeRaw,toAtomTypeRaw)
 import OpenCog.AtomSpace.Types       (Atom(..),AtomName(..),getType,TruthVal(..),
@@ -55,27 +56,8 @@ toRaw at = let atype = toAtomTypeRaw $ getType at
     _                        -> undefined
 
 -- Function to get an Atom back from its general representation (if possible).
--- TODO: reduce this bolierplate code.
-fromRaw :: AtomRaw -> Atom a -> Maybe (Atom a)
-fromRaw raw orig = case fromRaw' raw of
-    Just (AtomGen x) -> case (x,orig) of
-        (PredicateNode _        ,PredicateNode _       ) -> Just x
-        (ConceptNode _ _        ,ConceptNode _ _       ) -> Just x
-        (NumberNode _           ,NumberNode _          ) -> Just x
-        (SchemaNode _           ,SchemaNode _          ) -> Just x
-        (GroundedSchemaNode _   ,GroundedSchemaNode _  ) -> Just x
-        (AndLink _ _ _          ,AndLink _ _ _         ) -> Just x
-        (OrLink _ _ _           ,OrLink _ _ _          ) -> Just x
-        (ImplicationLink _ _ _  ,ImplicationLink _ _ _ ) -> Just x
-        (EquivalenceLink _ _ _  ,EquivalenceLink _ _ _ ) -> Just x
-        (EvaluationLink _ _ _   ,EvaluationLink _ _ _  ) -> Just x
-        (InheritanceLink _ _ _  ,InheritanceLink _ _ _ ) -> Just x
-        (SimilarityLink _ _ _   ,SimilarityLink _ _ _  ) -> Just x
-        (MemberLink _ _ _       ,MemberLink _ _ _      ) -> Just x
-        (SatisfyingSetLink _    ,SatisfyingSetLink _   ) -> Just x
-        (ExecutionLink _ _ _    ,ExecutionLink _ _ _   ) -> Just x
-        (ListLink _             ,ListLink _            ) -> Just x
-        _                                                -> Nothing
+fromRaw :: Typeable a => AtomRaw -> Atom a -> Maybe (Atom a)
+fromRaw raw orig = fromRaw' raw >>= appAtomGen cast
 
 -- Function to get an Atom back from its general representation (if possible).
 fromRaw' :: AtomRaw -> Maybe (AtomGen)

@@ -18,6 +18,7 @@ import Foreign.Marshal.Utils        (toBool)
 import Foreign.Marshal.Alloc        (alloca)
 import Foreign.Storable             (peek)
 import Data.Functor                 ((<$>))
+import Data.Typeable                (Typeable)
 import Control.Monad.IO.Class       (liftIO)
 import OpenCog.AtomSpace.Env        (AtomSpaceRef(..),AtomSpace,getAtomSpace)
 import OpenCog.AtomSpace.Internal   (Handle,AtomTypeRaw,AtomRaw(..),TVRaw(..),
@@ -195,7 +196,7 @@ getWithHandle i = do
 
 -- | 'get' looks for an atom in the atomspace and returns it.
 -- (With updated mutable information)
-get :: Atom a -> AtomSpace (Maybe (Atom a))
+get :: Typeable a => Atom a -> AtomSpace (Maybe (Atom a))
 get i = do
     m <- getWithHandle $ toRaw i
     return $ case m of
