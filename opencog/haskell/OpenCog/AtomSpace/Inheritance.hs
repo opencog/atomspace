@@ -5,35 +5,11 @@
 
 -- | This Module defines the relation between different atom types.
 module OpenCog.AtomSpace.Inheritance (
-    AtomType(..)
-  , Is
-  , fromAtomTypeRaw
-  , toAtomTypeRaw
+   Is
   ) where
 
-import GHC.Exts     (Constraint)
-
--- | 'Up' given an atom type returns a list with its parent atom types.
-type family Up a :: [AtomType] where
-    Up AtomT           = '[]
-    Up NodeT           = '[AtomT]
-    Up LinkT           = '[AtomT]
-    Up ConceptT        = '[NodeT]
-    Up SchemaT         = '[NodeT]
-    Up PredicateT      = '[NodeT]
-    Up NumberT         = '[NodeT]
-    Up GroundedSchemaT = '[SchemaT]
-    Up ExecutionT      = '[LinkT]
-    Up AndT            = '[LinkT]
-    Up OrT             = '[LinkT]
-    Up ImplicationT    = '[LinkT]
-    Up EquivalenceT    = '[LinkT]
-    Up EvaluationT     = '[LinkT]
-    Up InheritanceT    = '[LinkT]
-    Up SimilarityT     = '[LinkT]
-    Up MemberT         = '[LinkT]
-    Up SatisfyingSetT  = '[LinkT]
-    Up ListT           = '[LinkT]
+import GHC.Exts                     (Constraint)
+import OpenCog.AtomSpace.AtomType   (AtomType(..),Up(..))
 
 -- | 'In' type level function to check if a type belongs to a list.
 type family In a (b :: [AtomType]) :: Bool where
@@ -67,63 +43,3 @@ type family ParConst a (b :: [AtomType]) :: Constraint where
 -- (included b itself) are ancestors of a.
 type Is a b = ParConst a (FUp '[b] '[])
 
--- | 'AtomType' kind groups all atom types.
-data AtomType = AtomT
-              | NodeT
-              | LinkT
-              | PredicateT
-              | ConceptT
-              | SchemaT
-              | GroundedSchemaT
-              | NumberT
-              | AndT
-              | OrT
-              | ImplicationT
-              | EquivalenceT
-              | EvaluationT
-              | InheritanceT
-              | SimilarityT
-              | MemberT
-              | SatisfyingSetT
-              | ListT
-              | ExecutionT
-
-toAtomTypeRaw :: AtomType -> String
-toAtomTypeRaw at = case at of
-    PredicateT      -> "PredicateNode"
-    AndT            -> "AndLink"
-    OrT             -> "OrLink"
-    ImplicationT    -> "ImplicationLink"
-    EquivalenceT    -> "EquivalenceLink"
-    EvaluationT     -> "EvaluationLink"
-    ConceptT        -> "ConceptNode"
-    InheritanceT    -> "InheritanceLink"
-    SimilarityT     -> "SimilarityLink"
-    MemberT         -> "MemberLink"
-    SatisfyingSetT  -> "SatisfyingSetLink"
-    NumberT         -> "NumberNode"
-    ListT           -> "ListLink"
-    SchemaT         -> "SchemaNode"
-    GroundedSchemaT -> "GroundedSchemaNode"
-    ExecutionT      -> "ExecutionLink"
-
-
-fromAtomTypeRaw :: String -> Maybe AtomType
-fromAtomTypeRaw s = case s of
-    "PredicateNode"      -> Just PredicateT
-    "AndLink"            -> Just AndT
-    "OrLink"             -> Just OrT
-    "ImplicationLink"    -> Just ImplicationT
-    "EquivalenceLink"    -> Just EquivalenceT
-    "EvaluationLink"     -> Just EvaluationT
-    "ConceptNode"        -> Just ConceptT
-    "InheritanceLink"    -> Just InheritanceT
-    "SimilarityLink"     -> Just SimilarityT
-    "MemberLink"         -> Just MemberT
-    "SatisfyingSetLink"  -> Just SatisfyingSetT
-    "NumberNode"         -> Just NumberT
-    "ListLink"           -> Just ListT
-    "SchemaNode"         -> Just SchemaT
-    "GroundedSchemaNode" -> Just GroundedSchemaT
-    "ExecutionLink"      -> Just ExecutionT
-    _                    -> Nothing

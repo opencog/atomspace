@@ -19,8 +19,8 @@ module OpenCog.AtomSpace.Internal (
 
 import Foreign.C.Types               (CULong(..))
 import Data.Functor                  ((<$>))
-import OpenCog.AtomSpace.Inheritance (AtomType(..),fromAtomTypeRaw,toAtomTypeRaw)
 import OpenCog.AtomSpace.Filter      (Gen(..),FilterIsChild(..))
+import OpenCog.AtomSpace.AtomType    (AtomType(..),fromAtomTypeRaw,toAtomTypeRaw)
 import OpenCog.AtomSpace.Types       (Atom(..),AtomName(..),getType,TruthVal(..),
                                       appAtomGen,AtomGen(..))
 

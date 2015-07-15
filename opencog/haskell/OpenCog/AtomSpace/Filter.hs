@@ -9,7 +9,8 @@ module OpenCog.AtomSpace.Filter (
   , FilterIsChild(..)
   ) where
 
-import OpenCog.AtomSpace.Inheritance    (AtomType(..),Is)
+import OpenCog.AtomSpace.Inheritance    (Is)
+import OpenCog.AtomSpace.AtomType       (AtomType(..))
 import OpenCog.AtomSpace.Types          (Atom(..))
 
 -- | 'Gen' groups all the atoms that are children of the atom type a.

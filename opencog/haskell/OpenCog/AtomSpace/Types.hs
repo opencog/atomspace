@@ -12,7 +12,8 @@ module OpenCog.AtomSpace.Types (
   , getType
   ) where
 
-import OpenCog.AtomSpace.Inheritance    (Is,AtomType(..))
+import OpenCog.AtomSpace.Inheritance    (Is)
+import OpenCog.AtomSpace.AtomType       (AtomType(..))
 
 -- | Atom name type.
 type AtomName = String
