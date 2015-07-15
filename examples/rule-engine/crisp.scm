@@ -15,6 +15,12 @@
 (use-modules (opencog))
 (use-modules (opencog rule-engine))
 
+; I still don't understand this module thing, it still crashes so I
+; still need to have that
+(load-from-path "av-tv.scm")
+(load-from-path "utilities.scm")
+(load-from-path "rule-engine-utils.scm")
+
 ; Load URE configuration (add the current file dir so it can be loaded
 ; from anywhere)
 (add-to-load-path (dirname (current-filename)))
@@ -29,9 +35,7 @@
 
 ; 1. Test forward chaining (based on the deduction rule)
 
-; (crisp-fc AB)
-
-; Expected output should be something like
+;; scheme@(guile-user)> (crisp-fc AB)
 ;; $1 = (ListLink
 ;;    (ImplicationLink (stv 1 0.99999982)
 ;;       (ConceptNode "A")
@@ -41,9 +45,11 @@
 
 ; 2. Test backward chaining (based on the modus ponens rule)
 
-; (crisp-bc B)
-
-; Expected output will be empty
+;; scheme@(guile-user)> (crisp-bc C)
 ;; $1 = (ListLink
 ;; )
-;; while the TV of B will be suitably updated.
+
+; while the TV of C will be suitably updated.
+
+;; scheme@(guile-user)> C
+;; $2 = (ConceptNode "C" (stv 1 0.99999982))
