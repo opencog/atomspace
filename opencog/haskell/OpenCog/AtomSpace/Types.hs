@@ -56,12 +56,12 @@ appAtomGen f (AtomGen at) = f at
 -- | 'Atom' is the main data type to represent the different types of atoms.
 data Atom (a :: AtomType) where
     PredicateNode   :: AtomName -> Atom PredicateT
-    AndLink         :: Is a ConceptT =>
-                       Atom a -> Atom a -> (Maybe TruthVal) -> Atom AndT
+    AndLink         :: (Is a ConceptT,Is b ConceptT) =>
+                       Atom a -> Atom b -> (Maybe TruthVal) -> Atom AndT
     OrLink          :: Is a ConceptT =>
-                       Atom a -> Atom a -> (Maybe TruthVal) -> Atom OrT
+                       Atom a -> Atom b -> (Maybe TruthVal) -> Atom OrT
     ImplicationLink :: Atom a -> Atom b -> (Maybe TruthVal) -> Atom ImplicationT
-    EquivalenceLink :: Atom a -> Atom a -> (Maybe TruthVal) -> Atom EquivalenceT
+    EquivalenceLink :: Atom a -> Atom b -> (Maybe TruthVal) -> Atom EquivalenceT
     EvaluationLink  :: (Is p PredicateT,Is l ListT) =>
                        Atom p -> Atom l -> (Maybe TruthVal) -> Atom EvaluationT
 
