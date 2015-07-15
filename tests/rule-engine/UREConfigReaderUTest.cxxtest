@@ -20,7 +20,7 @@ public:
 		load_scm_files_from_config(_as);
 
 		// add the following so that utilities.scm and av-tv.scm are
-		// correctly loaded from simple-crisp.scm
+		// correctly loaded from crisp.scm
 		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm\")");
 
 		// Load utilities.scm and rule-engine-utils.scm. Apparently
@@ -31,7 +31,7 @@ public:
 		// Load the simple crisp system example to test it
 		string eval_output =
 			_eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
-			           "/examples/rule-engine/simple-crisp.scm\")");
+			           "/examples/rule-engine/crisp.scm\")");
 		std::cout << "eval_output = " << eval_output << std::endl;
 
 		std::cout << "AtomSpace = " << _as << std::endl;

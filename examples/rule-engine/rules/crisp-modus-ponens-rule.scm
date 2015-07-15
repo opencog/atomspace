@@ -9,7 +9,7 @@
 ; See examples/rule-engine/README.md for more details.
 ; -----------------------------------------------------------------------------
 
-(define crisp-modus-ponens
+(define crisp-modus-ponens-rule
     (BindLink
         (VariableList
             (VariableNode "$A")

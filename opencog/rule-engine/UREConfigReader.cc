@@ -36,8 +36,6 @@ const std::string UREConfigReader::max_iter_name = "URE:maximum-iterations";
 UREConfigReader::UREConfigReader(AtomSpace& as, Handle rbs) : _as(as)
 {
 	// Retrieve the rules (BindLinks) and instantiate them
-	// HandleSeq rules = fetch_rules(rbs);
-	// _rbparams.rules.insert(rules.begin(), rules.end());
 	for (Handle rule : fetch_rules(rbs))
 		_rbparams.rules.emplace_back(rule);
 

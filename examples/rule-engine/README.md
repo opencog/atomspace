@@ -16,7 +16,8 @@ then examples/pattern-matcher/simple.scm.
 The first set of demos provide a basic introduction to various main
 features.
 
-* simple-crisp.scm: Example of a simple URE based crisp deduction.
+* crisp.scm: Example of a simple URE based crisp system.
+* crisp-deduction.scm: Like crisp.scm but contains only the deduction rule
 
 Crisp deduction and modus ponens chainer
 ----------------------------------------

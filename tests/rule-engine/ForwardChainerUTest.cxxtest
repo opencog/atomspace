@@ -32,20 +32,27 @@ public:
 		// Disable the AF mechanism during testing!
 		as_.set_attentional_focus_boundary(AttentionValue::MINSTI);
 		config().set("SCM_PRELOAD",
-		             "opencog/atomspace/core_types.scm");
+		             "opencog/atomspace/core_types.scm, "
+		             "opencog/scm/utilities.scm, "
+		             "opencog/scm/av-tv.scm");
 		load_scm_files_from_config(as_);
 
 		// add the following so that utilities.scm and av-tv.scm are
-		// correctly loaded from simple-deduction.scm
+		// correctly loaded from crisp-deduction.scm
 		eval_.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm\")");
+
+		// Load utilities.scm and rule-engine-utils.scm. Apparently
+		// the modules' functions are not loaded
+		eval_.eval("(load-from-path \"utilities.scm\")");
+		eval_.eval("(load-from-path \"rule-engine-utils.scm\")");
 
 		// Load the simple deduction example to test it
 		eval_.eval("(load-from-path \"" PROJECT_SOURCE_DIR
-		            "/examples/rule-engine/simple-deduction.scm\")");
+		           "/examples/rule-engine/crisp-deduction.scm\")");
 
 		// Get the ConceptNode corresponding to the rule-based system
 		// to test
-		Handle rbs = as_.get_node(CONCEPT_NODE, "crisp-rule-base");
+		Handle rbs = as_.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
 		fc_ = new ForwardChainer(as_, rbs);
 	}
 	void test_do_chain();
@@ -69,18 +76,8 @@ void ForwardChainerUTest::test_do_chain()
 		                  "    (PredicateNode \"B\")"
 		                  "    (PredicateNode \"C\"))");
 
-	// Run forward chainer (and remove problematic rules)
+	// Run forward chainer
 	DefaultForwardChainerCB dfc(as_);
-	vector<Rule*>& rules = fc_->_fcmem.get_rules();
-	vector<std::string> ignore = {
-		"crisp-modus-ponens"
-	};
-	for (auto it = rules.begin(); it != rules.end();) {
-		if (boost::find(ignore, (*it)->get_name()) != ignore.end())
-			it = rules.erase(it);
-		else
-			++it;
-	}
 	fc_->do_chain(dfc, AB);
 
 	// Collect the results
