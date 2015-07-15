@@ -46,13 +46,13 @@ data TruthVal = SimpleTV { tvMean       :: Double
 -- (necessary when working with many instances of different atoms,
 -- for example, for lists of atoms)
 data AtomGen where
-    AtomGen :: Typeable a => Atom a -> AtomGen
+    AtomGen :: Is a AtomT => Atom a -> AtomGen
 
 deriving instance Show AtomGen
 
 -- | 'appAtomGen' evaluates a given function with the atom instance
 -- wrapped inside the 'AtomGen' type.
-appAtomGen :: (forall a. Typeable a => Atom a -> b) -> AtomGen -> b
+appAtomGen :: (forall a. Is a AtomT => Atom a -> b) -> AtomGen -> b
 appAtomGen f (AtomGen at) = f at
 
 -- | 'Atom' is the main data type to represent the different types of atoms.
@@ -62,8 +62,10 @@ data Atom (a :: AtomType) where
                        Atom a -> Atom b -> (Maybe TruthVal) -> Atom AndT
     OrLink          :: (Is a ConceptT,Is b ConceptT) =>
                        Atom a -> Atom b -> (Maybe TruthVal) -> Atom OrT
-    ImplicationLink :: Atom a -> Atom b -> (Maybe TruthVal) -> Atom ImplicationT
-    EquivalenceLink :: Atom a -> Atom b -> (Maybe TruthVal) -> Atom EquivalenceT
+    ImplicationLink :: (Is a AtomT,Is b AtomT) =>
+                       Atom a -> Atom b -> (Maybe TruthVal) -> Atom ImplicationT
+    EquivalenceLink :: (Is a AtomT,Is b AtomT) =>
+                       Atom a -> Atom b -> (Maybe TruthVal) -> Atom EquivalenceT
     EvaluationLink  :: (Is p PredicateT,Is l ListT) =>
                        Atom p -> Atom l -> (Maybe TruthVal) -> Atom EvaluationT
 

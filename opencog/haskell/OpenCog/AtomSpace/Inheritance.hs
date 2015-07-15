@@ -10,6 +10,7 @@ module OpenCog.AtomSpace.Inheritance (
 
 import GHC.Exts                     (Constraint)
 import OpenCog.AtomSpace.AtomType   (AtomType(..),Up(..))
+import Data.Typeable                (Typeable)
 
 -- | 'In' type level function to check if a type belongs to a list.
 type family In a (b :: [AtomType]) :: Bool where
@@ -35,7 +36,7 @@ type IsParent a b = IsParent' a b ~ 'True
 -- | 'ParConst' builds a list of constraints to assert that all the members of
 -- the list are ancestors of a.
 type family ParConst a (b :: [AtomType]) :: Constraint where
-    ParConst a '[]      = 'True ~ 'True
+    ParConst a '[]      = Typeable a
     ParConst a (b ': c) = (IsParent a b,ParConst a c)
 
 
