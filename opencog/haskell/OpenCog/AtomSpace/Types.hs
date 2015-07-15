@@ -9,7 +9,7 @@ module OpenCog.AtomSpace.Types (
   , Atom (..)
   , AtomGen (..)
   , appAtomGen
-  , showConstr
+  , getType
   ) where
 
 import OpenCog.AtomSpace.Inheritance    (Is,AtomType(..))
@@ -84,24 +84,24 @@ data Atom (a :: AtomType) where
     ExecutionLink :: (Is s SchemaT,Is l ListT,Is a AtomT) =>
                      Atom s -> Atom l -> Atom a -> Atom ExecutionT
 
-showConstr :: Atom a -> String
-showConstr at = case at of
-    PredicateNode _       -> "PredicateNode"
-    AndLink _ _ _         -> "AndLink"
-    OrLink _ _ _          -> "OrLink"
-    ImplicationLink _ _ _ -> "ImplicationLink"
-    EquivalenceLink _ _ _ -> "EquivalenceLink"
-    EvaluationLink _ _ _  -> "EvaluationLink"
-    ConceptNode _ _       -> "ConceptNode"
-    InheritanceLink _ _ _ -> "InheritanceLink"
-    SimilarityLink _ _ _  -> "SimilarityLink"
-    MemberLink _ _ _      -> "MemberLink"
-    SatisfyingSetLink _   -> "SatisfyingSetLink"
-    NumberNode _          -> "NumberNode"
-    ListLink _            -> "ListLink"
-    SchemaNode _          -> "SchemaNode"
-    GroundedSchemaNode _  -> "GroundedSchemaNode"
-    ExecutionLink _ _ _   -> "ExecutionLink"
-
 deriving instance Show (Atom a)
+
+getType :: Atom a -> AtomType
+getType at = case at of
+    PredicateNode _       -> PredicateT
+    AndLink _ _ _         -> AndT
+    OrLink _ _ _          -> OrT
+    ImplicationLink _ _ _ -> ImplicationT
+    EquivalenceLink _ _ _ -> EquivalenceT
+    EvaluationLink _ _ _  -> EvaluationT
+    ConceptNode _ _       -> ConceptT
+    InheritanceLink _ _ _ -> InheritanceT
+    SimilarityLink _ _ _  -> SimilarityT
+    MemberLink _ _ _      -> MemberT
+    SatisfyingSetLink _   -> SatisfyingSetT
+    NumberNode _          -> NumberT
+    ListLink _            -> ListT
+    SchemaNode _          -> SchemaT
+    GroundedSchemaNode _  -> GroundedSchemaT
+    ExecutionLink _ _ _   -> ExecutionT
 

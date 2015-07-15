@@ -7,6 +7,8 @@
 module OpenCog.AtomSpace.Inheritance (
     AtomType(..)
   , Is
+  , fromAtomTypeRaw
+  , toAtomTypeRaw
   ) where
 
 import GHC.Exts     (Constraint)
@@ -86,3 +88,42 @@ data AtomType = AtomT
               | ListT
               | ExecutionT
 
+toAtomTypeRaw :: AtomType -> String
+toAtomTypeRaw at = case at of
+    PredicateT      -> "PredicateNode"
+    AndT            -> "AndLink"
+    OrT             -> "OrLink"
+    ImplicationT    -> "ImplicationLink"
+    EquivalenceT    -> "EquivalenceLink"
+    EvaluationT     -> "EvaluationLink"
+    ConceptT        -> "ConceptNode"
+    InheritanceT    -> "InheritanceLink"
+    SimilarityT     -> "SimilarityLink"
+    MemberT         -> "MemberLink"
+    SatisfyingSetT  -> "SatisfyingSetLink"
+    NumberT         -> "NumberNode"
+    ListT           -> "ListLink"
+    SchemaT         -> "SchemaNode"
+    GroundedSchemaT -> "GroundedSchemaNode"
+    ExecutionT      -> "ExecutionLink"
+
+
+fromAtomTypeRaw :: String -> Maybe AtomType
+fromAtomTypeRaw s = case s of
+    "PredicateNode"      -> Just PredicateT
+    "AndLink"            -> Just AndT
+    "OrLink"             -> Just OrT
+    "ImplicationLink"    -> Just ImplicationT
+    "EquivalenceLink"    -> Just EquivalenceT
+    "EvaluationLink"     -> Just EvaluationT
+    "ConceptNode"        -> Just ConceptT
+    "InheritanceLink"    -> Just InheritanceT
+    "SimilarityLink"     -> Just SimilarityT
+    "MemberLink"         -> Just MemberT
+    "SatisfyingSetLink"  -> Just SatisfyingSetT
+    "NumberNode"         -> Just NumberT
+    "ListLink"           -> Just ListT
+    "SchemaNode"         -> Just SchemaT
+    "GroundedSchemaNode" -> Just GroundedSchemaT
+    "ExecutionLink"      -> Just ExecutionT
+    _                    -> Nothing
