@@ -9,7 +9,7 @@
 ; See examples/rule-engine/README.md for more details.
 ; -----------------------------------------------------------------------------
 
-(define crisp-deduction
+(define crisp-deduction-rule
     (BindLink
         (VariableList
             (VariableNode "$A")

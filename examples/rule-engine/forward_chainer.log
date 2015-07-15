@@ -1,0 +1,684 @@
+[INFO] Using config file found at: 
+[2015-07-06 09:27:47:340] [INFO] Iteration 0
+[2015-07-06 09:27:47:340] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [33]
+) ; [35]
+
+[2015-07-06 09:27:47:345] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 09:27:47:345] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 09:27:47:345] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 09:27:47:347] [INFO] PRODUCTS...
+[2015-07-06 09:27:47:347] [INFO] (ImplicationLink (stv 1.000000 1.000000)
+  (ConceptNode "A") ; [32]
+  (ConceptNode "C") ; [34]
+) ; [82]
+ 
+[2015-07-06 09:27:47:347] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 09:27:47:347] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 09:27:47:347] [INFO] [ForwardChainer] setting next source
+[2015-07-06 09:27:47:347] [INFO] Iteration 1
+[2015-07-06 09:27:47:347] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "C" (av 0 0 0) (stv 1.000000 0.000000)) ; [34]
+) ; [82]
+
+[2015-07-06 09:27:47:349] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 09:27:47:350] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 09:27:47:350] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 09:27:47:350] [INFO] PRODUCTS...
+[2015-07-06 09:27:47:350] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 09:27:47:350] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 09:27:47:350] [INFO] [ForwardChainer] setting next source
+[2015-07-06 09:27:47:350] [INFO] Iteration 2
+[2015-07-06 09:27:47:350] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "C" (av 0 0 0) (stv 1.000000 1.000000)) ; [34]
+) ; [82]
+
+[2015-07-06 09:27:47:352] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 09:27:47:352] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 09:27:47:352] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 09:27:47:353] [INFO] PRODUCTS...
+[2015-07-06 09:27:47:353] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 09:27:47:353] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 09:27:47:353] [INFO] [ForwardChainer] setting next source
+[2015-07-06 09:27:47:353] [INFO] Iteration 3
+[2015-07-06 09:27:47:353] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [33]
+) ; [35]
+
+[2015-07-06 09:27:47:355] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 09:27:47:355] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 09:27:47:355] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 09:27:47:356] [INFO] PRODUCTS...
+[2015-07-06 09:27:47:356] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 09:27:47:356] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 09:27:47:356] [INFO] [ForwardChainer] setting next source
+[2015-07-06 09:27:47:356] [INFO] Iteration 4
+[2015-07-06 09:27:47:356] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "C" (av 0 0 0) (stv 1.000000 1.000000)) ; [34]
+) ; [82]
+
+[2015-07-06 09:27:47:358] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 09:27:47:358] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 09:27:47:358] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 09:27:47:359] [INFO] PRODUCTS...
+[2015-07-06 09:27:47:359] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 09:27:47:359] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 09:27:47:359] [INFO] [ForwardChainer] setting next source
+[2015-07-06 09:27:47:359] [INFO] Iteration 5
+[2015-07-06 09:27:47:359] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "C" (av 0 0 0) (stv 1.000000 1.000000)) ; [34]
+) ; [82]
+
+[2015-07-06 09:27:47:361] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 09:27:47:361] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 09:27:47:361] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 09:27:47:362] [INFO] PRODUCTS...
+[2015-07-06 09:27:47:362] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 09:27:47:362] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 09:27:47:362] [INFO] [ForwardChainer] setting next source
+[2015-07-06 09:27:47:362] [INFO] Iteration 6
+[2015-07-06 09:27:47:362] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "C" (av 0 0 0) (stv 1.000000 1.000000)) ; [34]
+) ; [82]
+
+[2015-07-06 09:27:47:364] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 09:27:47:364] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 09:27:47:364] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 09:27:47:365] [INFO] PRODUCTS...
+[2015-07-06 09:27:47:365] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 09:27:47:365] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 09:27:47:365] [INFO] [ForwardChainer] setting next source
+[2015-07-06 09:27:47:365] [INFO] Iteration 7
+[2015-07-06 09:27:47:365] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [33]
+) ; [35]
+
+[2015-07-06 09:27:47:367] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 09:27:47:367] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 09:27:47:367] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 09:27:47:368] [INFO] PRODUCTS...
+[2015-07-06 09:27:47:368] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 09:27:47:368] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 09:27:47:368] [INFO] [ForwardChainer] setting next source
+[2015-07-06 09:27:47:368] [INFO] Iteration 8
+[2015-07-06 09:27:47:368] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 1.000000)) ; [33]
+) ; [35]
+
+[2015-07-06 09:27:47:370] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 09:27:47:370] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 09:27:47:370] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 09:27:47:371] [INFO] PRODUCTS...
+[2015-07-06 09:27:47:371] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 09:27:47:371] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 09:27:47:371] [INFO] [ForwardChainer] setting next source
+[2015-07-06 09:27:47:371] [INFO] Iteration 9
+[2015-07-06 09:27:47:371] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 1.000000)) ; [33]
+) ; [35]
+
+[2015-07-06 09:27:47:373] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 09:27:47:373] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 09:27:47:373] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 09:27:47:374] [INFO] PRODUCTS...
+[2015-07-06 09:27:47:374] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 09:27:47:374] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 09:27:47:374] [INFO] [ForwardChainer] setting next source
+[2015-07-06 09:27:47:374] [INFO] Iteration 10
+[2015-07-06 09:27:47:374] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 1.000000)) ; [33]
+) ; [35]
+
+[2015-07-06 09:27:47:376] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 09:27:47:376] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 09:27:47:376] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 09:27:47:376] [INFO] PRODUCTS...
+[2015-07-06 09:27:47:376] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 09:27:47:376] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 09:27:47:376] [INFO] [ForwardChainer] setting next source
+[2015-07-06 09:27:47:376] [INFO] Iteration 11
+[2015-07-06 09:27:47:376] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "C" (av 0 0 0) (stv 1.000000 1.000000)) ; [34]
+) ; [82]
+
+[2015-07-06 09:27:47:379] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 09:27:47:379] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 09:27:47:379] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 09:27:47:379] [INFO] PRODUCTS...
+[2015-07-06 09:27:47:379] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 09:27:47:379] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 09:27:47:379] [INFO] [ForwardChainer] setting next source
+[2015-07-06 09:27:47:379] [INFO] Iteration 12
+[2015-07-06 09:27:47:379] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 1.000000)) ; [33]
+) ; [35]
+
+[2015-07-06 09:27:47:381] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 09:27:47:381] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 09:27:47:381] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 09:27:47:382] [INFO] PRODUCTS...
+[2015-07-06 09:27:47:382] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 09:27:47:382] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 09:27:47:382] [INFO] [ForwardChainer] setting next source
+[2015-07-06 09:27:47:382] [INFO] Iteration 13
+[2015-07-06 09:27:47:382] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 1.000000)) ; [33]
+) ; [35]
+
+[2015-07-06 09:27:47:384] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 09:27:47:384] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 09:27:47:384] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 09:27:47:385] [INFO] PRODUCTS...
+[2015-07-06 09:27:47:385] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 09:27:47:385] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 09:27:47:385] [INFO] [ForwardChainer] setting next source
+[2015-07-06 09:27:47:385] [INFO] Iteration 14
+[2015-07-06 09:27:47:385] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "C" (av 0 0 0) (stv 1.000000 1.000000)) ; [34]
+) ; [82]
+
+[2015-07-06 09:27:47:387] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 09:27:47:387] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 09:27:47:387] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 09:27:47:387] [INFO] PRODUCTS...
+[2015-07-06 09:27:47:387] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 09:27:47:387] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 09:27:47:387] [INFO] [ForwardChainer] setting next source
+[2015-07-06 09:27:47:387] [INFO] Iteration 15
+[2015-07-06 09:27:47:387] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "C" (av 0 0 0) (stv 1.000000 1.000000)) ; [34]
+) ; [82]
+
+[2015-07-06 09:27:47:390] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 09:27:47:390] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 09:27:47:390] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 09:27:47:390] [INFO] PRODUCTS...
+[2015-07-06 09:27:47:390] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 09:27:47:390] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 09:27:47:390] [INFO] [ForwardChainer] setting next source
+[2015-07-06 09:27:47:390] [INFO] Iteration 16
+[2015-07-06 09:27:47:390] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 1.000000)) ; [33]
+) ; [35]
+
+[2015-07-06 09:27:47:392] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 09:27:47:392] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 09:27:47:392] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 09:27:47:393] [INFO] PRODUCTS...
+[2015-07-06 09:27:47:393] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 09:27:47:393] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 09:27:47:393] [INFO] [ForwardChainer] setting next source
+[2015-07-06 09:27:47:393] [INFO] Iteration 17
+[2015-07-06 09:27:47:393] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "C" (av 0 0 0) (stv 1.000000 1.000000)) ; [34]
+) ; [82]
+
+[2015-07-06 09:27:47:395] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 09:27:47:395] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 09:27:47:395] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 09:27:47:396] [INFO] PRODUCTS...
+[2015-07-06 09:27:47:396] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 09:27:47:396] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 09:27:47:396] [INFO] [ForwardChainer] setting next source
+[2015-07-06 09:27:47:396] [INFO] Iteration 18
+[2015-07-06 09:27:47:396] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 1.000000)) ; [33]
+) ; [35]
+
+[2015-07-06 09:27:47:398] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 09:27:47:398] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 09:27:47:398] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 09:27:47:398] [INFO] PRODUCTS...
+[2015-07-06 09:27:47:398] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 09:27:47:398] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 09:27:47:398] [INFO] [ForwardChainer] setting next source
+[2015-07-06 09:27:47:398] [INFO] Iteration 19
+[2015-07-06 09:27:47:398] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "C" (av 0 0 0) (stv 1.000000 1.000000)) ; [34]
+) ; [82]
+
+[2015-07-06 09:27:47:400] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 09:27:47:400] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 09:27:47:400] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 09:27:47:401] [INFO] PRODUCTS...
+[2015-07-06 09:27:47:401] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 09:27:47:401] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 09:27:47:401] [INFO] [ForwardChainer] setting next source
+[2015-07-06 09:27:47:401] [INFO] [ForwardChainer] finished do_chain.
+[INFO] Using config file found at: 
+[2015-07-06 12:55:56:507] [INFO] Iteration 0
+[2015-07-06 12:55:56:507] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [33]
+) ; [35]
+
+[2015-07-06 12:55:56:509] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 12:55:56:509] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 12:55:56:509] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 12:55:56:509] [INFO] PRODUCTS...
+[2015-07-06 12:55:56:509] [INFO] (ImplicationLink (stv 1.000000 1.000000)
+  (ConceptNode "A") ; [32]
+  (ConceptNode "C") ; [34]
+) ; [84]
+ 
+[2015-07-06 12:55:56:509] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 12:55:56:509] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 12:55:56:509] [INFO] [ForwardChainer] setting next source
+[2015-07-06 12:55:56:509] [INFO] Iteration 1
+[2015-07-06 12:55:56:510] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "C" (av 0 0 0) (stv 1.000000 0.000000)) ; [34]
+) ; [84]
+
+[2015-07-06 12:55:56:511] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 12:55:56:511] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 12:55:56:511] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 12:55:56:512] [INFO] PRODUCTS...
+[2015-07-06 12:55:56:512] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 12:55:56:512] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 12:55:56:512] [INFO] [ForwardChainer] setting next source
+[2015-07-06 12:55:56:512] [INFO] Iteration 2
+[2015-07-06 12:55:56:512] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "C" (av 0 0 0) (stv 1.000000 1.000000)) ; [34]
+) ; [84]
+
+[2015-07-06 12:55:56:513] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 12:55:56:513] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 12:55:56:513] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 12:55:56:514] [INFO] PRODUCTS...
+[2015-07-06 12:55:56:514] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 12:55:56:514] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 12:55:56:514] [INFO] [ForwardChainer] setting next source
+[2015-07-06 12:55:56:514] [INFO] Iteration 3
+[2015-07-06 12:55:56:514] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [33]
+) ; [35]
+
+[2015-07-06 12:55:56:515] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 12:55:56:515] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 12:55:56:515] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 12:55:56:516] [INFO] PRODUCTS...
+[2015-07-06 12:55:56:516] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 12:55:56:516] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 12:55:56:516] [INFO] [ForwardChainer] setting next source
+[2015-07-06 12:55:56:516] [INFO] Iteration 4
+[2015-07-06 12:55:56:516] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "C" (av 0 0 0) (stv 1.000000 1.000000)) ; [34]
+) ; [84]
+
+[2015-07-06 12:55:56:518] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 12:55:56:518] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 12:55:56:518] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 12:55:56:518] [INFO] PRODUCTS...
+[2015-07-06 12:55:56:518] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 12:55:56:518] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 12:55:56:518] [INFO] [ForwardChainer] setting next source
+[2015-07-06 12:55:56:518] [INFO] Iteration 5
+[2015-07-06 12:55:56:518] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "C" (av 0 0 0) (stv 1.000000 1.000000)) ; [34]
+) ; [84]
+
+[2015-07-06 12:55:56:520] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 12:55:56:520] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 12:55:56:520] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 12:55:56:520] [INFO] PRODUCTS...
+[2015-07-06 12:55:56:520] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 12:55:56:520] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 12:55:56:520] [INFO] [ForwardChainer] setting next source
+[2015-07-06 12:55:56:520] [INFO] Iteration 6
+[2015-07-06 12:55:56:520] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "C" (av 0 0 0) (stv 1.000000 1.000000)) ; [34]
+) ; [84]
+
+[2015-07-06 12:55:56:522] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 12:55:56:522] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 12:55:56:522] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 12:55:56:522] [INFO] PRODUCTS...
+[2015-07-06 12:55:56:522] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 12:55:56:522] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 12:55:56:522] [INFO] [ForwardChainer] setting next source
+[2015-07-06 12:55:56:522] [INFO] Iteration 7
+[2015-07-06 12:55:56:522] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [33]
+) ; [35]
+
+[2015-07-06 12:55:56:524] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 12:55:56:524] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 12:55:56:524] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 12:55:56:524] [INFO] PRODUCTS...
+[2015-07-06 12:55:56:524] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 12:55:56:524] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 12:55:56:524] [INFO] [ForwardChainer] setting next source
+[2015-07-06 12:55:56:524] [INFO] Iteration 8
+[2015-07-06 12:55:56:524] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 1.000000)) ; [33]
+) ; [35]
+
+[2015-07-06 12:55:56:526] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 12:55:56:526] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 12:55:56:526] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 12:55:56:526] [INFO] PRODUCTS...
+[2015-07-06 12:55:56:526] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 12:55:56:526] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 12:55:56:526] [INFO] [ForwardChainer] setting next source
+[2015-07-06 12:55:56:526] [INFO] Iteration 9
+[2015-07-06 12:55:56:526] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 1.000000)) ; [33]
+) ; [35]
+
+[2015-07-06 12:55:56:528] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 12:55:56:528] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 12:55:56:528] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 12:55:56:528] [INFO] PRODUCTS...
+[2015-07-06 12:55:56:528] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 12:55:56:528] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 12:55:56:528] [INFO] [ForwardChainer] setting next source
+[2015-07-06 12:55:56:528] [INFO] Iteration 10
+[2015-07-06 12:55:56:528] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 1.000000)) ; [33]
+) ; [35]
+
+[2015-07-06 12:55:56:530] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 12:55:56:530] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 12:55:56:530] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 12:55:56:530] [INFO] PRODUCTS...
+[2015-07-06 12:55:56:530] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 12:55:56:530] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 12:55:56:530] [INFO] [ForwardChainer] setting next source
+[2015-07-06 12:55:56:530] [INFO] Iteration 11
+[2015-07-06 12:55:56:530] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "C" (av 0 0 0) (stv 1.000000 1.000000)) ; [34]
+) ; [84]
+
+[2015-07-06 12:55:56:532] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 12:55:56:532] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 12:55:56:532] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 12:55:56:532] [INFO] PRODUCTS...
+[2015-07-06 12:55:56:532] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 12:55:56:532] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 12:55:56:532] [INFO] [ForwardChainer] setting next source
+[2015-07-06 12:55:56:532] [INFO] Iteration 12
+[2015-07-06 12:55:56:532] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 1.000000)) ; [33]
+) ; [35]
+
+[2015-07-06 12:55:56:534] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 12:55:56:534] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 12:55:56:534] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 12:55:56:534] [INFO] PRODUCTS...
+[2015-07-06 12:55:56:534] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 12:55:56:534] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 12:55:56:534] [INFO] [ForwardChainer] setting next source
+[2015-07-06 12:55:56:534] [INFO] Iteration 13
+[2015-07-06 12:55:56:534] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 1.000000)) ; [33]
+) ; [35]
+
+[2015-07-06 12:55:56:536] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 12:55:56:536] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 12:55:56:536] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 12:55:56:536] [INFO] PRODUCTS...
+[2015-07-06 12:55:56:536] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 12:55:56:536] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 12:55:56:536] [INFO] [ForwardChainer] setting next source
+[2015-07-06 12:55:56:536] [INFO] Iteration 14
+[2015-07-06 12:55:56:536] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "C" (av 0 0 0) (stv 1.000000 1.000000)) ; [34]
+) ; [84]
+
+[2015-07-06 12:55:56:538] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 12:55:56:538] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 12:55:56:538] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 12:55:56:538] [INFO] PRODUCTS...
+[2015-07-06 12:55:56:538] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 12:55:56:538] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 12:55:56:538] [INFO] [ForwardChainer] setting next source
+[2015-07-06 12:55:56:538] [INFO] Iteration 15
+[2015-07-06 12:55:56:538] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "C" (av 0 0 0) (stv 1.000000 1.000000)) ; [34]
+) ; [84]
+
+[2015-07-06 12:55:56:540] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 12:55:56:540] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 12:55:56:540] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 12:55:56:540] [INFO] PRODUCTS...
+[2015-07-06 12:55:56:540] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 12:55:56:540] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 12:55:56:540] [INFO] [ForwardChainer] setting next source
+[2015-07-06 12:55:56:540] [INFO] Iteration 16
+[2015-07-06 12:55:56:540] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 1.000000)) ; [33]
+) ; [35]
+
+[2015-07-06 12:55:56:542] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 12:55:56:542] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 12:55:56:542] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 12:55:56:542] [INFO] PRODUCTS...
+[2015-07-06 12:55:56:542] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 12:55:56:542] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 12:55:56:542] [INFO] [ForwardChainer] setting next source
+[2015-07-06 12:55:56:542] [INFO] Iteration 17
+[2015-07-06 12:55:56:542] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "C" (av 0 0 0) (stv 1.000000 1.000000)) ; [34]
+) ; [84]
+
+[2015-07-06 12:55:56:544] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 12:55:56:544] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 12:55:56:544] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 12:55:56:544] [INFO] PRODUCTS...
+[2015-07-06 12:55:56:544] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 12:55:56:544] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 12:55:56:544] [INFO] [ForwardChainer] setting next source
+[2015-07-06 12:55:56:544] [INFO] Iteration 18
+[2015-07-06 12:55:56:544] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 1.000000)) ; [33]
+) ; [35]
+
+[2015-07-06 12:55:56:545] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 12:55:56:545] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 12:55:56:545] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 12:55:56:546] [INFO] PRODUCTS...
+[2015-07-06 12:55:56:546] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 12:55:56:546] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 12:55:56:546] [INFO] [ForwardChainer] setting next source
+[2015-07-06 12:55:56:546] [INFO] Iteration 19
+[2015-07-06 12:55:56:546] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "C" (av 0 0 0) (stv 1.000000 1.000000)) ; [34]
+) ; [84]
+
+[2015-07-06 12:55:56:547] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-06 12:55:56:547] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-06 12:55:56:547] [INFO] [ForwardChainer] Applying chosen rule 
+[2015-07-06 12:55:56:548] [INFO] PRODUCTS...
+[2015-07-06 12:55:56:548] [INFO] [ForwardChainer] updating premise list with the inference made
+[2015-07-06 12:55:56:548] [INFO] [ForwardChainer] adding inference to history
+[2015-07-06 12:55:56:548] [INFO] [ForwardChainer] setting next source
+[2015-07-06 12:55:56:548] [INFO] [ForwardChainer] finished do_chain.
+[INFO] Using config file found at: 
+[2015-07-10 12:17:25:992] [INFO] Iteration 0
+[2015-07-10 12:17:25:992] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [38]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [39]
+) ; [41]
+
+[2015-07-10 12:17:25:998] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-10 12:17:25:998] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-10 12:17:25:998] [INFO] [ForwardChainer] Applying chosen rule 
+[INFO] Using config file found at: 
+[2015-07-10 12:19:53:822] [INFO] Iteration 0
+[2015-07-10 12:19:53:822] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [38]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [39]
+) ; [41]
+
+[2015-07-10 12:19:53:827] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-10 12:19:53:827] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-10 12:19:53:827] [INFO] [ForwardChainer] Applying chosen rule 
+[INFO] Using config file found at: 
+[2015-07-10 12:20:53:954] [INFO] Iteration 0
+[2015-07-10 12:20:53:954] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [38]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [39]
+) ; [41]
+
+[2015-07-10 12:20:53:960] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-10 12:20:53:960] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-10 12:20:53:960] [INFO] [ForwardChainer] Applying chosen rule 
+[INFO] Using config file found at: 
+[2015-07-10 12:25:28:840] [INFO] Iteration 0
+[2015-07-10 12:25:28:840] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [38]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [39]
+) ; [41]
+
+[2015-07-10 12:25:28:871] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-10 12:25:28:871] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-10 12:25:28:871] [INFO] [ForwardChainer] Applying chosen rule 
+[INFO] Using config file found at: 
+[2015-07-10 12:28:36:704] [INFO] Iteration 0
+[2015-07-10 12:28:36:704] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [38]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [39]
+) ; [41]
+
+[2015-07-10 12:28:36:744] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-10 12:28:36:744] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-10 12:28:36:744] [INFO] [ForwardChainer] Applying chosen rule 
+[INFO] Using config file found at: 
+[2015-07-10 12:29:23:007] [INFO] Iteration 0
+[2015-07-10 12:29:23:007] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [38]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [39]
+) ; [41]
+
+[2015-07-10 12:29:23:037] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-10 12:29:23:037] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-10 12:29:23:037] [INFO] [ForwardChainer] Applying chosen rule 
+[INFO] Using config file found at: 
+[2015-07-10 12:43:30:218] [INFO] Iteration 0
+[2015-07-10 12:43:30:218] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [38]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [39]
+) ; [41]
+
+[2015-07-10 12:43:30:225] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-10 12:43:30:225] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-10 12:43:30:225] [INFO] [ForwardChainer] Applying chosen rule 
+[INFO] Using config file found at: 
+[2015-07-10 12:52:02:486] [INFO] Iteration 0
+[2015-07-10 12:52:02:487] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [38]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [39]
+) ; [41]
+
+[2015-07-10 12:52:02:492] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-10 12:52:02:492] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-10 12:52:02:492] [INFO] [ForwardChainer] Applying chosen rule 
+[INFO] Using config file found at: 
+[2015-07-10 12:54:16:163] [INFO] Iteration 0
+[2015-07-10 12:54:16:164] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [38]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [39]
+) ; [41]
+
+[2015-07-10 12:54:16:171] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-10 12:54:16:171] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-10 12:54:16:171] [INFO] [ForwardChainer] Applying chosen rule 
+[INFO] Using config file found at: 
+[2015-07-10 12:56:06:681] [INFO] Iteration 0
+[2015-07-10 12:56:06:682] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [38]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [39]
+) ; [41]
+
+[2015-07-10 12:56:06:687] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-10 12:56:06:688] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-10 12:56:06:688] [INFO] [ForwardChainer] Applying chosen rule 
+[INFO] Using config file found at: 
+[2015-07-10 14:37:06:029] [INFO] Iteration 0
+[2015-07-10 14:37:06:030] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [38]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [39]
+) ; [41]
+
+[2015-07-10 14:37:06:038] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-10 14:37:06:038] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-10 14:37:06:038] [INFO] [ForwardChainer] Applying chosen rule 
+[INFO] Using config file found at: 
+[2015-07-15 09:31:45:867] [INFO] Iteration 0
+[2015-07-15 09:31:45:867] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [39]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [40]
+) ; [42]
+
+[2015-07-15 09:31:45:873] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-15 09:31:45:873] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-15 09:31:45:873] [INFO] [ForwardChainer] Applying chosen rule 
+[INFO] Using config file found at: 
+[2015-07-15 09:47:48:595] [INFO] Iteration 0
+[2015-07-15 09:47:48:595] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [39]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [40]
+) ; [42]
+
+[2015-07-15 09:47:48:604] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-15 09:47:48:604] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-15 09:47:48:604] [INFO] [ForwardChainer] Applying chosen rule 
+[INFO] Using config file found at: 
+[2015-07-15 09:49:59:519] [INFO] Iteration 0
+[2015-07-15 09:49:59:519] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [32]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [33]
+) ; [35]
+
+[2015-07-15 09:49:59:524] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-15 09:49:59:524] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-15 09:49:59:524] [INFO] [ForwardChainer] Applying chosen rule 
+[INFO] Using config file found at: 
+[2015-07-15 10:11:58:317] [INFO] Iteration 0
+[2015-07-15 10:11:58:317] [INFO] [ForwardChainer] Next source (ImplicationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (ConceptNode "A" (av 0 0 0) (stv 1.000000 1.000000)) ; [39]
+  (ConceptNode "B" (av 0 0 0) (stv 1.000000 0.000000)) ; [40]
+) ; [42]
+
+[2015-07-15 10:11:58:323] [INFO] [ForwardChainer] Selecting a rule from the set of candidate rules.
+[2015-07-15 10:11:58:323] [INFO] [ForwardChainer] Selected rule is 
+[2015-07-15 10:11:58:323] [INFO] [ForwardChainer] Applying chosen rule 
