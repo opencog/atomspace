@@ -36,22 +36,46 @@ data AtomRaw = Link AtomTypeRaw [AtomRaw] (Maybe TVRaw)
 toRaw :: Atom a -> AtomRaw
 toRaw at = let atype = toAtomTypeRaw $ getType at
            in case at of
-    PredicateNode n  -> Node atype n Nothing
-    AndLink a1 a2 tv -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
-    ConceptNode n tv -> Node atype n $ toTVRaw <$> tv
-    ListLink list    -> Link atype (map (appAtomGen toRaw) list) Nothing
-    _                -> undefined
+    PredicateNode n          -> Node atype n Nothing
+    ConceptNode n tv         -> Node atype n $ toTVRaw <$> tv
+    NumberNode d             -> Node atype (show d) Nothing
+    SchemaNode n             -> Node atype n Nothing
+    GroundedSchemaNode n     -> Node atype n Nothing
+    AndLink a1 a2 tv         -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    OrLink a1 a2 tv          -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    ImplicationLink a1 a2 tv -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    EquivalenceLink a1 a2 tv -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    EvaluationLink a1 a2 tv  -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    InheritanceLink a1 a2 tv -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    SimilarityLink a1 a2 tv  -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    MemberLink a1 a2 tv      -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    SatisfyingSetLink a1     -> Link atype [toRaw a1] Nothing
+    ExecutionLink a1 a2 a3   -> Link atype [toRaw a1,toRaw a2,toRaw a3] Nothing
+    ListLink list            -> Link atype (map (appAtomGen toRaw) list) Nothing
+    _                        -> undefined
 
 -- Function to get an Atom back from its general representation (if possible).
+-- TODO: reduce this bolierplate code.
 fromRaw :: AtomRaw -> Atom a -> Maybe (Atom a)
 fromRaw raw orig = case fromRaw' raw of
     Just (AtomGen x) -> case (x,orig) of
-        (ConceptNode n tv, ConceptNode _ _ ) -> Just x
-        (PredicateNode n , PredicateNode _ ) -> Just x
-        (AndLink ao bo tv, AndLink _ _ _   ) -> Just x
-        (ListLink l      , ListLink _      ) -> Just x
-        _                                    -> Nothing
-    Nothing -> Nothing
+        (PredicateNode _        ,PredicateNode _       ) -> Just x
+        (ConceptNode _ _        ,ConceptNode _ _       ) -> Just x
+        (NumberNode _           ,NumberNode _          ) -> Just x
+        (SchemaNode _           ,SchemaNode _          ) -> Just x
+        (GroundedSchemaNode _   ,GroundedSchemaNode _  ) -> Just x
+        (AndLink _ _ _          ,AndLink _ _ _         ) -> Just x
+        (OrLink _ _ _           ,OrLink _ _ _          ) -> Just x
+        (ImplicationLink _ _ _  ,ImplicationLink _ _ _ ) -> Just x
+        (EquivalenceLink _ _ _  ,EquivalenceLink _ _ _ ) -> Just x
+        (EvaluationLink _ _ _   ,EvaluationLink _ _ _  ) -> Just x
+        (InheritanceLink _ _ _  ,InheritanceLink _ _ _ ) -> Just x
+        (SimilarityLink _ _ _   ,SimilarityLink _ _ _  ) -> Just x
+        (MemberLink _ _ _       ,MemberLink _ _ _      ) -> Just x
+        (SatisfyingSetLink _    ,SatisfyingSetLink _   ) -> Just x
+        (ExecutionLink _ _ _    ,ExecutionLink _ _ _   ) -> Just x
+        (ListLink _             ,ListLink _            ) -> Just x
+        _                                                -> Nothing
 
 -- Function to get an Atom back from its general representation (if possible).
 fromRaw' :: AtomRaw -> Maybe (AtomGen)
