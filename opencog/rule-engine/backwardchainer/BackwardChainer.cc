@@ -156,7 +156,7 @@ void BackwardChainer::process_target(Target& target)
 		std::vector<VarMap> kb_vmap;
 
 		HandleSeq kb_match = match_knowledge_base(htarget, target.get_vardecl(),
-		                                          false, kb_vmap);
+		                                          kb_vmap);
 
 		// Matched something in the knowledge base? Then need to store
 		// any grounding as a possible solution for this target
@@ -301,7 +301,7 @@ void BackwardChainer::process_target(Target& target)
 	HandleSeq possible_premises =
 		match_knowledge_base(hrule_implicant_normal_grounded,
 	                         _garbage_superspace.add_atom(gen_sub_varlist(hrule_implicant_normal_grounded, hrule_vardecl, target.get_varset())),
-	                         false, premises_vmap_list);
+	                         premises_vmap_list);
 
 	// only need to generate QuoteLink version when there are free variables
 	if (not target.get_varseq().empty())
@@ -333,7 +333,7 @@ void BackwardChainer::process_target(Target& target)
 		HandleSeq possible_premises_alt =
 			match_knowledge_base(hrule_implicant_quoted_grounded,
 								 _garbage_superspace.add_atom(gen_sub_varlist(hrule_implicant_quoted_grounded, hrule_vardecl, target.get_varset())),
-								 false, premises_vmap_list_alt);
+								 premises_vmap_list_alt);
 
 		// collect the possible premises from the two verions of mapping
 		possible_premises.insert(possible_premises.end(),
@@ -370,26 +370,6 @@ void BackwardChainer::process_target(Target& target)
 		VarMap vm = premises_vmap_list[i];
 
 		logger().debug("[BackwardChainer] Checking permises " + hp->toShortString());
-
-		// preliminary circular variable mapping check; unify could map a
-		// typed variable to a variable A in the target, and then the premises
-		// search could map a node to variable A...
-		bool bad_map = false;
-		for (auto& p : vm)
-		{
-			if (p.first->getType() != VARIABLE_NODE
-			    && implicand_normal_mapping.count(p.second) == 1
-			    && implicand_normal_mapping[p.second] != p.first)
-			{
-				logger().debug("[BackwardChainer] Discarding premises: " + hp->toShortString());
-
-				bad_map = true;
-				break;
-			}
-		}
-
-		if (bad_map)
-			continue;
 
 		// reverse ground the rule's outputs with the mapping to the premise
 		// so that when we ground the premise, we know how to generate
@@ -557,13 +537,11 @@ std::vector<Rule> BackwardChainer::filter_rules(const Target& target)
  *
  * @param hpattern         the atom to pattern match against
  * @param hpattern_vardecl the typed VariableList of the variables in hpattern
- * @param alternate_mode   flag to indicate whether to do multi-direction node-match
  * @param vmap             an output list of mapping for variables in hpattern
  * @return                 a vector of matched atoms
  */
 HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
                                                 Handle hpattern_vardecl,
-                                                bool alternate_mode,
                                                 vector<VarMap>& vmap)
 {
 	// Get all VariableNodes (unquoted)
@@ -591,8 +569,7 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
 	// be in the _garbage space
 	PatternLinkPtr sl(createPatternLink(hpattern_vardecl, hpattern));
 	BackwardChainerPMCB pmcb(&_garbage_superspace,
-	                         VariableListCast(hpattern_vardecl),
-	                         alternate_mode);
+	                         VariableListCast(hpattern_vardecl));
 
 	sl->satisfy(pmcb);
 
@@ -712,7 +689,7 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 
 	std::vector<VarMap> temp_vmap_list;
 
-	HandleSeq temp_results = match_knowledge_base(premises, Handle::UNDEFINED, false, temp_vmap_list);
+	HandleSeq temp_results = match_knowledge_base(premises, Handle::UNDEFINED, temp_vmap_list);
 
 	// chase the variables so that if a variable A were mapped to another
 	// variable B in premise_vmap, and after pattern matching, B now map
@@ -725,21 +702,10 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 		VarMap& tvm = temp_vmap_list[i];
 		VarMap this_map;
 
-		bool bad_map = false;
-
 		for (const auto& p : premise_vmap)
 		{
 			if (tvm.count(p.second) == 1)
 			{
-				if (p.first->getType() != VARIABLE_NODE && tvm[p.second] != p.first)
-				{
-					logger().debug("[BackwardChainer] Found one grounding to be discarded: "
-					               + temp_results[i]->toShortString());
-
-					bad_map = true;
-					break;
-				}
-
 				this_map[p.first] = tvm[p.second];
 				this_map[p.second] = tvm[p.second];
 				tvm.erase(p.second);
@@ -747,9 +713,6 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 			else
 				this_map[p.first] = p.second;
 		}
-
-		if (bad_map)
-			continue;
 
 		// add any leftover mapping into final ouput
 		this_map.insert(tvm.begin(), tvm.end());
