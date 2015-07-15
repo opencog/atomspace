@@ -34,6 +34,7 @@ public:
 	//void test_filter_rules();
 
 	void test_1rule_bc();
+	void test_1rule_impossible_bc();
 	void test_2rules_bc();
 
 	void test_tvq_bc();
@@ -189,6 +190,40 @@ void BackwardChainerUTest::test_1rule_bc()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+void BackwardChainerUTest::test_1rule_impossible_bc()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD",
+	             "tests/rule-engine/bc-config-1.scm,"
+	             "tests/rule-engine/bc-criminal.scm");
+	load_scm_files_from_config(as_);
+
+	// load modus ponens rule
+	Handle top_rbs = as_.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	BackwardChainer bc(as_, top_rbs);
+
+	Handle target_var = eval_.eval_h("(VariableNode \"$x\")");
+	Handle target =
+	    eval_.eval_h("(InheritanceLink"
+	                  "   (VariableNode \"$x\")"
+					  "   (ConceptNode \"criminal\"))");
+	Handle soln = eval_.eval_h("(ConceptNode \"West\")");
+
+	bc.set_target(target);
+	bc.get_config().set_maximum_iterations(300);
+	bc.do_chain();
+
+	VarMultimap results = bc.get_chaining_result();
+
+	TSM_ASSERT("Incorrect number of solution found!",
+	           results[target_var].size() == 0);
+	TSM_ASSERT("Getting incorrect solution!",
+	           results[target_var].count(soln) == 0);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
 void BackwardChainerUTest::test_2rules_bc()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -278,7 +313,7 @@ void BackwardChainerUTest::test_tvq_impossible_bc()
 	                             "   (ConceptNode \"Frog\"))");
 
 	bc.set_target(target);
-	bc.get_config().set_maximum_iterations(300);
+	bc.get_config().set_maximum_iterations(100);
 	bc.do_chain();
 
 	TSM_ASSERT("Incorrect strength of target after BC!", target->getTruthValue()->getMean() < 0.1f);
