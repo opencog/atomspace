@@ -29,7 +29,7 @@ IF (HAVE_CYTHON)
 ENDIF (HAVE_CYTHON)
 
 
-# Haskell bindings.
-IF (HAVE_STACK)
-    ADD_SUBDIRECTORY (haskell)
-ENDIF (HAVE_STACK)
+# Currently, haskell breaks the build. See bug #135
+# IF (HAVE_GHC AND HAVE_CABAL)
+# 	ADD_SUBDIRECTORY (haskell)
+# ENDIF (HAVE_GHC AND HAVE_CABAL)

@@ -19,7 +19,7 @@ library
                    , OpenCog.AtomSpace.Types
 
   build-depends:     base         >=4.5
-                   , transformers >=0.3
+                   , transformers >=0.4
 
   extra-libraries:   haskell-atomspace
 

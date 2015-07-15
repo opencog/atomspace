@@ -21,16 +21,14 @@ IF (DOXYGEN_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		COMMENT "Generating documentation"
 	)
-    IF (STACK_FOUND)
+    IF (CABAL_FOUND)
         ADD_DEPENDENCIES(doxygen haskell-doc)
-    ENDIF (STACK_FOUND)
+    ENDIF (CABAL_FOUND)
     ADD_CUSTOM_TARGET(haskell-doc
-        COMMAND cabal configure --builddir=${CMAKE_BINARY_DIR}/opencog/haskell
-                      --extra-lib-dirs=${CMAKE_BINARY_DIR}/opencog/haskell
-        COMMAND cabal haddock --builddir=${CMAKE_BINARY_DIR}/opencog/haskell --html
-                      --haddock-option=-o${CMAKE_CURRENT_BINARY_DIR}/html/haskell
-        COMMENT "Generating haskell library documentation..."
         DEPENDS haskell-atomspace-lib
+        COMMENT "Generating haskell library documentation..."
+        COMMAND cabal haddock --builddir=${HASKELL_BUILD_DIR} --html
+                    --haddock-option=-o${CMAKE_CURRENT_BINARY_DIR}/html/haskell
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/opencog/haskell/
     )
 ELSE (DOXYGEN_FOUND)
