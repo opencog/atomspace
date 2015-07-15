@@ -55,28 +55,83 @@ fromRaw raw orig = case fromRaw' raw of
 
 -- Function to get an Atom back from its general representation (if possible).
 fromRaw' :: AtomRaw -> Maybe (AtomGen)
-fromRaw' (Node araw n tvraw) =
-    let tv = fromTVRaw <$> tvraw
-     in do
+fromRaw' (Node araw n tvraw) = let tv = fromTVRaw <$> tvraw in do
     atype <- fromAtomTypeRaw araw
     case atype of
-      ConceptT   -> Just $ AtomGen $ ConceptNode n tv
-      PredicateT -> Just $ AtomGen $ PredicateNode n
-      _          -> Nothing
-fromRaw' (Link araw out tvraw) =
-    let tv = fromTVRaw <$> tvraw
-     in do
+      ConceptT        -> Just $ AtomGen $ ConceptNode n tv
+      PredicateT      -> Just $ AtomGen $ PredicateNode n
+      SchemaT         -> Just $ AtomGen $ SchemaNode n
+      GroundedSchemaT -> Just $ AtomGen $ GroundedSchemaNode n
+      NumberT         -> readMaybe n >>= Just . AtomGen . NumberNode
+      _               -> Nothing
+    where
+        readMaybe :: (Read a) => String -> Maybe a
+        readMaybe s = case reads s of
+                        [(x, "")] -> Just x
+                        _ -> Nothing
+fromRaw' (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
     atype <- fromAtomTypeRaw araw
     case (atype,out) of
       (AndT ,[ar,br]) -> do
-        a <- fromRaw' ar >>= appAtomGen filtIsChild :: Maybe (Gen ConceptT)
-        b <- fromRaw' br >>= appAtomGen filtIsChild :: Maybe (Gen ConceptT)
+        a <- filt ar :: Maybe (Gen ConceptT)
+        b <- filt br :: Maybe (Gen ConceptT)
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ AtomGen $ AndLink a1 b1 tv
+      (OrT ,[ar,br]) -> do
+        a <- filt ar :: Maybe (Gen ConceptT)
+        b <- filt br :: Maybe (Gen ConceptT)
+        case (a,b) of
+          (Gen a1,Gen b1) -> Just $ AtomGen $ OrLink a1 b1 tv
+      (ImplicationT ,[ar,br]) -> do
+        a <- fromRaw' ar
+        b <- fromRaw' br
+        case (a,b) of
+          (AtomGen a1,AtomGen b1) -> Just $ AtomGen $ ImplicationLink a1 b1 tv
+      (EquivalenceT ,[ar,br]) -> do
+        a <- fromRaw' ar
+        b <- fromRaw' br
+        case (a,b) of
+          (AtomGen a1,AtomGen b1) -> Just $ AtomGen $ EquivalenceLink a1 b1 tv
+      (EvaluationT ,[ar,br]) -> do
+        a <- filt ar :: Maybe (Gen PredicateT)
+        b <- filt br :: Maybe (Gen ListT)
+        case (a,b) of
+          (Gen a1,Gen b1) -> Just $ AtomGen $ EvaluationLink a1 b1 tv
+      (InheritanceT ,[ar,br]) -> do
+        a <- filt ar :: Maybe (Gen ConceptT)
+        b <- filt br :: Maybe (Gen ConceptT)
+        case (a,b) of
+          (Gen a1,Gen b1) -> Just $ AtomGen $ InheritanceLink a1 b1 tv
+      (SimilarityT ,[ar,br]) -> do
+        a <- filt ar :: Maybe (Gen ConceptT)
+        b <- filt br :: Maybe (Gen ConceptT)
+        case (a,b) of
+          (Gen a1,Gen b1) -> Just $ AtomGen $ SimilarityLink a1 b1 tv
+      (MemberT ,[ar,br]) -> do
+        a <- filt ar :: Maybe (Gen ConceptT)
+        b <- filt br :: Maybe (Gen ConceptT)
+        case (a,b) of
+          (Gen a1,Gen b1) -> Just $ AtomGen $ MemberLink a1 b1 tv
+      (SatisfyingSetT ,[ar]) -> do
+        a <- filt ar :: Maybe (Gen PredicateT)
+        case a of
+          (Gen a1) -> Just $ AtomGen $ SatisfyingSetLink a1
+      (ExecutionT ,[ar,br,cr]) -> do
+        a <- filt ar :: Maybe (Gen SchemaT)
+        b <- filt br :: Maybe (Gen ListT)
+        c <- filt br :: Maybe (Gen AtomT)
+        case (a,b,c) of
+          (Gen a1,Gen b1,Gen c1) -> Just $ AtomGen $ ExecutionLink a1 b1 c1
       (ListT, _     ) -> do
         lnew <- mapM fromRaw' out
         Just $ AtomGen $ ListLink lnew
       _               -> Nothing
+
+filt :: FilterIsChild a => AtomRaw -> Maybe (Gen a)
+filt araw = do
+    agen <- fromRaw' araw
+    case agen of
+        (AtomGen at) -> filtIsChild at
 
 -- Constant with the maximum number of parameters in any type of TV.
 tvMAX_PARAMS :: Int
