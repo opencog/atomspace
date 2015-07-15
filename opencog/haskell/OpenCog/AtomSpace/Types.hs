@@ -58,7 +58,7 @@ data Atom (a :: AtomType) where
     PredicateNode   :: AtomName -> Atom PredicateT
     AndLink         :: (Is a ConceptT,Is b ConceptT) =>
                        Atom a -> Atom b -> (Maybe TruthVal) -> Atom AndT
-    OrLink          :: Is a ConceptT =>
+    OrLink          :: (Is a ConceptT,Is b ConceptT) =>
                        Atom a -> Atom b -> (Maybe TruthVal) -> Atom OrT
     ImplicationLink :: Atom a -> Atom b -> (Maybe TruthVal) -> Atom ImplicationT
     EquivalenceLink :: Atom a -> Atom b -> (Maybe TruthVal) -> Atom EquivalenceT
