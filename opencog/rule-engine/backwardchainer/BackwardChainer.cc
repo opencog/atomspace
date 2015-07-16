@@ -103,10 +103,8 @@ void BackwardChainer::do_step()
 	Target& selected_target = _targets_set.select();
 
 	logger().debug("[BackwardChainer] Selected target " + selected_target.get_handle()->toShortString());
-	if (selected_target.get_vardecl() == Handle::UNDEFINED)
-		logger().debug("[BackwardChainer] with var_decl UNDEFINED");
-	else
-		logger().debug("[BackwardChainer] with var_decl " + selected_target.get_vardecl()->toShortString());
+	logger().debug("[BackwardChainer] with var_decl " + selected_target.get_vardecl()->toShortString());
+
 	if (selected_target.get_varseq().empty())
 		logger().debug("[BackwardChainer] Target is 'Truth Value Query'");
 	else
@@ -173,14 +171,10 @@ void BackwardChainer::process_target(Target& target)
 				logger().debug("[BackwardChainer] Looking at grounding "
 				               + soln->toShortString());
 
-				// Check if there is any free variables in soln
-				HandleSeq free_vars = get_free_vars_in_tree(soln);
-
-				// If there are free variables, add this soln as new target
-				// XXX TODO even when no free variable, can still add as TVQ
-				if (not free_vars.empty())
-					_targets_set.emplace(soln,
-					                     _garbage_superspace.add_atom(createVariableList(free_vars)));
+				// add whatever it matched as Target (so new variables can be
+				// filled, and TV updated)
+				_targets_set.emplace(soln,
+					                 _garbage_superspace.add_atom(createVariableList(get_free_vars_in_tree(soln))));
 
 				target.store_varmap(vgm);
 			}
@@ -355,6 +349,8 @@ void BackwardChainer::process_target(Target& target)
 	// apart version of the rule, and should not be added to the main space.
 	if (possible_premises.size() == 0)
 	{
+		logger().debug("[BackwardChainer] Adding rule's grounded input as Target");
+
 		target.store_step(selected_rule, { hrule_implicant_normal_grounded });
 		_targets_set.emplace(hrule_implicant_normal_grounded,
 		                     _garbage_superspace.add_atom(gen_sub_varlist(hrule_implicant_normal_grounded, hrule_vardecl, target.get_varset())));
@@ -694,9 +690,6 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 	// chase the variables so that if a variable A were mapped to another
 	// variable B in premise_vmap, and after pattern matching, B now map
 	// to some solution, change A to map to the same solution
-	//
-	// also check if we have a node (non-variable) mapped to a variable B,
-	// make sure variable B ended up mapping to the same node
 	for (unsigned int i = 0; i < temp_results.size(); ++i)
 	{
 		VarMap& tvm = temp_vmap_list[i];
@@ -836,7 +829,7 @@ Rule BackwardChainer::select_rule(Target& target, const std::vector<Rule>& rules
 	              { weights.push_back(target.get_selection_count() - target.rule_count(r) + 1); });
 
 	// Select the rule that has been applied least
-	// XXX use cogutil MT19937RandGen's intenal randomGen member possible?
+	// XXX use cogutil MT19937RandGen's internal randomGen member possible?
 	std::mt19937 generator(std::chrono::system_clock::now().time_since_epoch().count());
 	std::discrete_distribution<int> distribution(weights.begin(), weights.end());
 
@@ -862,8 +855,8 @@ Handle BackwardChainer::gen_sub_varlist(const Handle& parent,
                                         const Handle& parent_varlist,
                                         std::set<Handle> additional_free_varset)
 {
-	FindAtoms fv(VARIABLE_NODE);
-	fv.search_set(parent);
+	HandleSeq varseq = get_free_vars_in_tree(parent);
+	std::set<Handle> varset(varseq.begin(), varseq.end());
 
 	HandleSeq oset = LinkCast(parent_varlist)->getOutgoingSet();
 	HandleSeq final_oset;
@@ -872,13 +865,13 @@ Handle BackwardChainer::gen_sub_varlist(const Handle& parent,
 	for (const Handle& h : oset)
 	{
 		Type t = h->getType();
-		if (VARIABLE_NODE == t && fv.varset.count(h) == 1)
+		if (VARIABLE_NODE == t && varset.count(h) == 1)
 		{
 			final_oset.push_back(h);
 			additional_free_varset.erase(h);
 		}
 		else if (TYPED_VARIABLE_LINK == t
-			     and fv.varset.count(LinkCast(h)->getOutgoingSet()[0]) == 1)
+			     and varset.count(LinkCast(h)->getOutgoingSet()[0]) == 1)
 		{
 			final_oset.push_back(h);
 			additional_free_varset.erase(LinkCast(h)->getOutgoingSet()[0]);
@@ -889,7 +882,7 @@ Handle BackwardChainer::gen_sub_varlist(const Handle& parent,
 	// if it is used in parent
 	for (const Handle& h : additional_free_varset)
 	{
-		if (fv.varset.count(h) == 1)
+		if (varset.count(h) == 1)
 			final_oset.push_back(h);
 	}
 
