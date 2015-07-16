@@ -61,7 +61,8 @@ class ODBCConnection
 
 		bool connected(void) const;
 
-		ODBCRecordSet *exec(const char * buff);
+		ODBCRecordSet *exec(const char *);
+		void extract_error(const char *);
 };
 
 class ODBCRecordSet

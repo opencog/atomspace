@@ -1,6 +1,6 @@
 /*
  * FUNCTION:
- * ODBC driver -- developed/tested with iODBC http://www.iodbc.org
+ * ODBC driver -- developed/tested with unixodbc http://www.unixodbc.org
  *
  * ODBC is basically brain-damaged, and so is this driver.
  * The problem is that ODBC forces you to guess how many columns there
@@ -88,16 +88,16 @@ ODBCConnection::ODBCConnection(const char * _dbname,
 
 	/* Allocate environment handle */
 	rc = SQLAllocEnv(&sql_henv);
-	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+	if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
 	{
 		PERR("Can't SQLAllocEnv, rc=%d", rc);
 		return;
 	}
 
-	/* set the ODBC version */
+	/* Set the ODBC version */
 	rc = SQLSetEnvAttr(sql_henv, SQL_ATTR_ODBC_VERSION,
 	                   (void*)SQL_OV_ODBC3, 0);
-	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+	if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
 	{
 		PERR("Can't SQLSetEnv, rc=%d", rc);
 		PRINT_SQLERR (SQL_HANDLE_ENV, sql_henv);
@@ -106,9 +106,9 @@ ODBCConnection::ODBCConnection(const char * _dbname,
 		return;
 	}
 
-	/* allocate the connection handle */
+	/* Allocate the connection handle */
 	rc = SQLAllocConnect(sql_henv, &sql_hdbc);
-	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+	if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
 	{
 		PERR ("Can't SQLAllocConnect handle rc=%d", rc);
 		PRINT_SQLERR (SQL_HANDLE_ENV, sql_henv);
@@ -126,7 +126,7 @@ ODBCConnection::ODBCConnection(const char * _dbname,
 	                (SQLCHAR*) _username, SQL_NTS,
 	                (SQLCHAR*) _authentication, SQL_NTS);
 
-	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+	if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
 	{
 		PERR ("Can't perform SQLConnect rc=%d", rc);
 		PRINT_SQLERR (SQL_HANDLE_DBC, sql_hdbc);
@@ -196,6 +196,25 @@ ODBCRecordSet * ODBCConnection::get_record_set(void)
 
 /* =========================================================== */
 
+void ODBCConnection::extract_error(const char *msg)
+{
+	SQLRETURN ret;
+	SQLINTEGER i = 0;
+	SQLINTEGER native;
+	SQLCHAR state[7];
+	SQLCHAR text[256];
+	SQLSMALLINT len;
+	do
+	{
+		ret = SQLGetDiagRec(SQL_HANDLE_ENV, sql_henv, ++i, state, &native, text,
+		       sizeof(text), &len);
+		if (SQL_SUCCEEDED(ret))
+			PERR("\t%s : %d : %d : %s\n", state, i, native, text);
+	} while (ret == SQL_SUCCESS);
+}
+
+/* =========================================================== */
+
 ODBCRecordSet *
 ODBCConnection::exec(const char * buff)
 {
@@ -218,12 +237,13 @@ ODBCConnection::exec(const char * buff)
 		return NULL;
 	}
 
-	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+	if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
 	{
 		PERR ("Can't perform query rc=%d ", rc);
 		PRINT_SQLERR (SQL_HANDLE_STMT, rs->sql_hstmt);
 		rs->release();
 		PERR ("\tQuery was: %s\n", buff);
+		extract_error("exec");
 		return NULL;
 	}
 
@@ -294,7 +314,7 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 	}
 
 	rc = SQLAllocStmt (conn->sql_hdbc, &sql_hstmt);
-	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+	if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
 	{
 		PERR("Can't allocate statement handle, rc=%d", rc);
 		PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
@@ -320,7 +340,7 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 		}
 		rc = SQLBindCol(sql_hstmt, i+1, SQL_C_CHAR,
 			values[i], vsizes[i], &bogus);
-		if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+		if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
 		{
 			PERR ("Can't bind col=%d rc=%d", i, rc);
 			PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
@@ -412,7 +432,7 @@ ODBCRecordSet::get_column_labels(void)
 	 */
 
 	rc = SQLNumResultCols(sql_hstmt, &_ncols);
-	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+	if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
 	{
 		PERR ("Can't get num columns rc=%d", rc);
 		PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
@@ -437,7 +457,7 @@ ODBCRecordSet::get_column_labels(void)
 		rc = SQLDescribeCol (sql_hstmt, i+1,
 		          (SQLCHAR *) namebuff, 299, &namelen,
 		          &datatype, &column_size, &decimal_digits, &nullable);
-		if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+		if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
 		{
 			PERR ("Can't describe col rc=%d", rc);
 			PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
@@ -476,7 +496,7 @@ ODBCRecordSet::fetch_row(void)
 	if (SQL_NO_DATA == rc) return 0;
 	if (SQL_NULL_DATA == rc) return 0;
 
-	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+	if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
 	{
 		PERR ("Can't fetch row rc=%d", rc);
 		PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
@@ -622,7 +642,7 @@ dui_odbc_connection_tables (DuiDBConnection *dbc)
 
 	rc = SQLTables (rs->sql_hstmt,NULL, 0, NULL, 0, NULL,0, NULL, 0);
 
-	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+	if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
 	{
 		PERR ("Can't perform query rc=%d", rc);
 		PRINT_SQLERR (SQL_HANDLE_STMT, rs->sql_hstmt);
@@ -656,7 +676,7 @@ dui_odbc_connection_table_columns (DuiDBConnection *dbc,
 	rc = SQLColumns (rs->sql_hstmt,NULL, 0, NULL, 0,
 	                 (char *) tablename, SQL_NTS, NULL, 0);
 
-	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
+	if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
 	{
 		PERR ("Can't perform query rc=%d", rc);
 		PRINT_SQLERR (SQL_HANDLE_STMT, rs->sql_hstmt);
@@ -665,7 +685,7 @@ dui_odbc_connection_table_columns (DuiDBConnection *dbc,
 	}
 
 	LEAVE ("(conn=%p, table=%s)", conn, tablename);
-	/* Use numbr of columns to indicate that the query hasn't
+	/* Use number of columns to indicate that the query hasn't
 	 * given results yet. */
 	rs->ncols = -1;
 	return &rs->recset;
