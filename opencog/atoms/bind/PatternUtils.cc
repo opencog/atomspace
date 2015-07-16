@@ -179,35 +179,39 @@ void get_connected_components(const std::set<Handle>& vars,
  * Currently assume any variables within a ScopeLink (and its subtype)
  * are bound, since some subtype does implicit binding.
  *
+ * Treat $A in something like (AndLink $A (ScopeLink $A ...)) as free.
+ *
  * XXX TODO when implicit binding is gone, this method should be changed
- * XXX What if we have (AndLink $A (BindLink $A ...)), is $A free or not?
  */
 HandleSeq get_free_vars_in_tree(const Handle& tree)
 {
-	FindAtoms fv(VARIABLE_NODE);
-	fv.search_set(tree);
+	std::set<Handle> varset;
 
-	HandleSeq lambdas;
-	HandleSeq free_vars;
-
-	for (const Handle& h : fv.holders)
+	std::function<void (const Handle&)> find_rec = [&](const Handle& h)
 	{
-		// check if any of the holder is a ScopeLink, and store it
-		if (classserver().isA(h->getType(), SCOPE_LINK))
-			lambdas.push_back(h);
-	}
+		Type t = h->getType();
+		if (t == VARIABLE_NODE)
+		{
+			varset.insert(h);
+			return;
+		}
 
-	// seperate out the free variables
-	for (const Handle& v : fv.varset)
-	{
-		// assume any variable inside a lambda is bound
-		if (is_atom_in_any_tree(lambdas, v))
-			continue;
+		if (classserver().isA(t, SCOPE_LINK))
+			return;
 
-		free_vars.push_back(v);
-	}
+		LinkPtr l(LinkCast(h));
+		if (l)
+		{
+			for (const Handle& oh : l->getOutgoingSet())
+				find_rec(oh);
+		}
 
-	return free_vars;
+		return;
+	};
+
+	find_rec(tree);
+
+	return HandleSeq(varset.begin(), varset.end());
 }
 
 } // namespace opencog
