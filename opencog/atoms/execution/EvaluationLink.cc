@@ -73,6 +73,9 @@ static TruthValuePtr greater(AtomSpace* as, LinkPtr ll)
 		     "GreaterThankLink expects two arguments");
 	Handle h1(ll->getOutgoingAtom(0));
 	Handle h2(ll->getOutgoingAtom(1));
+
+	// If they are not numbers, then we expect them to be something that
+	// can be executed, yeilding a number.
 	if (NUMBER_NODE != h1->getType())
 		h1 = FunctionLink::do_execute(as, h1);
 

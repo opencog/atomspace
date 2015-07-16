@@ -89,6 +89,9 @@ Handle FunctionLink::do_execute(AtomSpace* as, const Handle& h)
 
 LinkPtr FunctionLink::factory(LinkPtr lp)
 {
+	if (NULL == lp)
+		throw RuntimeException(TRACE_INFO, "Not executable!");
+
 	// If h is of the right form already, its just a matter of calling
 	// it.  Otherwise, we have to create
 	FunctionLinkPtr flp(FunctionLinkCast(lp));
