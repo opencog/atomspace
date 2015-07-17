@@ -101,42 +101,6 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
     return chosen_rules;
 }
 
-/**
- * Gets all top level links of certain types and subclasses that
- * contain @param hsource
- *
- * @param hsource handle whose top level links are to be searched
- * @param as the atomspace in which search is to be done
- * @param link_type the root link types to be searched
- * @param subclasses a flag that tells to look subclasses of @link_type
- */
-HandleSeq DefaultForwardChainerCB::get_rootlinks(Handle hsource, AtomSpace* as,
-                                                 Type link_type,
-                                                 bool subclasses)
-{
-    URECommons urec(*as);
-    HandleSeq chosen_roots;
-    HandleSeq candidates_roots;
-    urec.get_root_links(hsource, candidates_roots);
-
-    for (Handle hr : candidates_roots) {
-        bool notexist = find(chosen_roots.begin(), chosen_roots.end(), hr)
-                == chosen_roots.end();
-        auto type = as->get_type(hr);
-        bool subtype = (subclasses and classserver().isA(type, link_type));
-        if (((type == link_type) or subtype) and notexist) {
-            // Make sure matches are actually part of the premise list
-            // rather than the output of the bindLink
-            Handle hpremise = BindLinkCast(hr)->get_body();
-            if (urec.exists_in(hpremise, hsource)) {
-                chosen_roots.push_back(hr);
-            }
-        }
-
-    }
-
-    return chosen_roots;
-}
 HandleSeq DefaultForwardChainerCB::choose_premises(FCMemory& fcmem)
 {
     HandleSeq inputs;
