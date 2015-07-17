@@ -79,6 +79,7 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
             DefaultImplicator imp(&rule_atomspace);
             imp.implicand = bl->get_implicand();
             bl->imply(imp);
+
             for (const auto& hi : imp.result_list) {
                 if (hi == sourcecpy) {
                     match = true;

@@ -80,6 +80,7 @@ void ForwardChainer::do_step(ForwardChainerCallBack& fcb)
 
     // Choose matching rules whose input matches with the source.
     vector<Rule*> matched_rules = fcb.choose_rules(_fcmem);
+    _log->info("[ForwardChainer] Found matching rule");
 
     //! If no rules matches the pattern of the source,
     //! set all rules for candidacy to be selected by the proceeding step.
@@ -99,15 +100,15 @@ void ForwardChainer::do_step(ForwardChainerCallBack& fcb)
 
     _log->info("[ForwardChainer] Selecting a rule from the set of "
                "candidate rules.");
-    auto r = _rec.tournament_select(rule_weight);
+    Rule* r = _rec.tournament_select(rule_weight);
     _fcmem.set_cur_rule(r);
-    _log->info("[ForwardChainer] Selected rule is %s", r->get_name().c_str());
+    _log->info("[ForwardChainer] Selected rule is %s", (r->get_handle())->toShortString().c_str());
 
     //!TODO Find/add premises?
 
     //! Apply rule.
     _log->info("[ForwardChainer] Applying chosen rule %s",
-               r->get_name().c_str());
+               (r->get_handle())->toShortString().c_str());
     HandleSeq product = fcb.apply_rule(_fcmem);
 
     _log->info("PRODUCTS...");
