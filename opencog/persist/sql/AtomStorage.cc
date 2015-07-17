@@ -1312,7 +1312,9 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 			char *p = (char *) rp.outlist;
 			while (p)
 			{
-				if (*p == '}') break;
+				// Break if there is no more atom in the outgoing set
+				// or the outgoing set is empty in the first place
+				if (*p == '}' or *p == '\0') break;
 				Handle hout = (Handle) strtoul(p+1, &p, 10);
 				outvec.push_back(hout);
 			}
