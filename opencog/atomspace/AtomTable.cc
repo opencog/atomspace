@@ -267,7 +267,7 @@ bool AtomTable::inEnviron(AtomPtr atom)
 
 // Experimental C++ atom types support code
 // Try to cast, if possible.
-static AtomPtr factory(Type atom_type, AtomPtr atom)
+AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
 {
     // Nodes of various kinds -----------
     if (NUMBER_NODE == atom_type) {
