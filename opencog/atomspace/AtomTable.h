@@ -190,6 +190,8 @@ public:
     Handle getHandle(const AtomPtr&) const;
     Handle getHandle(Handle&) const;
 
+    static AtomPtr factory(Type atom_type, AtomPtr atom);
+
 public:
     /**
      * Returns the set of atoms of a given type (subclasses optionally).
