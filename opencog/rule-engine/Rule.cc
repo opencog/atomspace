@@ -115,6 +115,25 @@ Handle Rule::get_implicant()
 }
 
 /**
+ * Get the set of members of the implicant which are
+ * connected by a root logical link.
+ *
+ * @return HandleSeq of members of the implicant
+ */
+HandleSeq Rule::get_implicant_seq()
+{
+    Handle implicant= get_implicant();
+    Type t = implicant->getType();
+    HandleSeq hs;
+
+    if (t == AND_LINK or t == OR_LINK)
+        hs = LinkCast(implicant)->getOutgoingSet();
+    else
+        hs.push_back(implicant);
+
+    return hs;
+}
+/**
  * Get the implicand (output) of the rule defined in a BindLink.
  *
  * @return the Handle of the implicand

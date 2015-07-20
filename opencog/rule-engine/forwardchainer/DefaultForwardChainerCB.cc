@@ -63,8 +63,7 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
     vector<Rule*> chosen_rules;
     auto rules = fcmem.get_rules();
     for (Rule* rule : rules) {
-        Handle rimplicant = rule->get_implicant();
-        HandleSeq impl_members = get_implicant_seq(rimplicant);
+        HandleSeq impl_members = rule->get_implicant_seq();
         bool match = false;
 
         for (Handle h : impl_members) {
@@ -194,19 +193,6 @@ HandleSeq DefaultForwardChainerCB::apply_rule(FCMemory& fcmem)
     }
 
     return product;
-}
-
-HandleSeq DefaultForwardChainerCB::get_implicant_seq(Handle implicant)
-{
-    Type t = implicant->getType();
-    HandleSeq hs;
-
-    if (t == AND_LINK or t == OR_LINK)
-        hs = _as.get_outgoing(implicant);
-    else
-        hs.push_back(implicant);
-
-    return hs;
 }
 
 Handle DefaultForwardChainerCB::gen_sub_varlist(const Handle& parent,

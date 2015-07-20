@@ -39,7 +39,6 @@ private:
     bool subclasses = false;
     source_selection_mode _ts_mode;
 
-    HandleSeq get_implicant_seq(Handle implicant);
     Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);
 
 public:
