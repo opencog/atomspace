@@ -25,6 +25,9 @@
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/query/DefaultImplicator.h>
+#include <opencog/atoms/bind/PatternUtils.h>
+#include <opencog/atoms/bind/PatternLink.h>
+#include <opencog/atomutils/FindUtils.h>
 
 #include "DefaultForwardChainerCB.h"
 #include "../URECommons.h"
@@ -33,12 +36,20 @@ using namespace opencog;
 
 DefaultForwardChainerCB::DefaultForwardChainerCB(AtomSpace& as,
                                                  source_selection_mode ts_mode
-                                                 /*=TV_FITNESS_BASED*/)
-	: ForwardChainerCallBack(&as), _as(as), _fcpm(&as), _ts_mode(ts_mode) {}
+                                                 /*=TV_FITNESS_BASED*/) :
+        ForwardChainerCallBack(&as), _as(as), _fcpm(&as), _ts_mode(ts_mode)
+{
+}
 
 /**
- * choose rules based on premises of rule matching the source
- * uses temporary atomspace to limit the search space
+ * Choose rules based on premises of rule matching the source.
+ * Uses temporary atomspace to limit the search space. It adds
+ * each members of the implicant(members being identified by
+ * checking if they are wrapped in Logical links or not) and
+ * the source to a temporary atomspace and creates a bindLink
+ * for each implicants to match against the source;If they match,
+ * the rule in which the implicant was a member is considered as
+ *  a valid match and is  added to the return list.
  *
  * @param fcmem forward chainer's working memory
  * @return a vector of chosen rules
@@ -47,105 +58,49 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
 {
     Handle source = fcmem.get_cur_source();
     if (source == Handle::UNDEFINED)
-        throw InvalidParamException(TRACE_INFO,
-                                    "Needs a source atom of type LINK");
-    HandleSeq chosen_bindlinks;
+        throw InvalidParamException(TRACE_INFO, "Needs a valid source atom");
 
-    if (LinkCast(source)) {
-        AtomSpace rule_atomspace;
-        Handle source_cpy = rule_atomspace.add_atom(source);
+    vector<Rule*> chosen_rules;
+    auto rules = fcmem.get_rules();
+    for (Rule* rule : rules) {
+        Handle rimplicant = rule->get_implicant();
+        HandleSeq impl_members = get_implicant_seq(rimplicant);
+        bool match = false;
 
-        // Copy rules to the temporary atomspace.
-        vector<Rule*> rules = fcmem.get_rules();
-        for (Rule* r : rules) {
-            rule_atomspace.add_atom(r->get_handle());
-        }
+        for (Handle h : impl_members) {
+            AtomSpace rule_atomspace;
+            Handle hcpy = rule_atomspace.add_atom(h);
+            Handle implicant_vardecl = rule_atomspace.add_atom(
+                    gen_sub_varlist(h, rule->get_vardecl()));
+            Handle sourcecpy = rule_atomspace.add_atom(source);
 
-        // Create bindlink with source as an implicant.
-        URECommons urec(rule_atomspace);
-        Handle copy = urec.replace_nodes_with_varnode(source_cpy, NODE);
-        Handle bind_link = urec.create_bindLink(copy, false);
+            HandleSeq hx { implicant_vardecl, hcpy, hcpy };
+            BindLinkPtr bl = createBindLink(hx);
+            DefaultImplicator imp(&rule_atomspace);
+            imp.implicand = bl->get_implicand();
+            bl->imply(imp);
 
-        // Pattern match.
-        BindLinkPtr bl(BindLinkCast(bind_link));
-        DefaultImplicator imp(&rule_atomspace);
-        imp.implicand = bl->get_implicand();
-        bl->imply(imp);
-
-        // Get matched bindLinks.
-        HandleSeq matches = imp.result_list;
-        if (matches.empty()) {
-            logger().debug(
-                    "No matching BindLink was found. Returning empty vector");
-            return vector<Rule*> { };
-        }
-
-        UnorderedHandleSet bindlinks;
-        for (Handle hm : matches) {
-            //get all BindLinks whose part of their premise matches with hm
-            HandleSeq hs = get_rootlinks(hm, &rule_atomspace, BIND_LINK);
-            bindlinks.insert(hs.cbegin(), hs.cend());
-        }
-
-        // Copy handles to main atomspace.
-        for (Handle h : bindlinks) {
-            chosen_bindlinks.push_back(_as.add_atom(h));
-        }
-    } else {
-        // Try to find specialized rules that contain the source node.
-        OC_ASSERT(NodeCast(source) != nullptr);
-        chosen_bindlinks = get_rootlinks(source, &_as, BIND_LINK);
-    }
-
-    // Find the rules containing the bindLink in copied_back.
-    vector<Rule*> matched_rules;
-    for (Rule* r : fcmem.get_rules()) {
-        auto it = find(chosen_bindlinks.begin(), chosen_bindlinks.end(),
-                       r->get_handle()); //xxx not matching
-        if (it != chosen_bindlinks.end()) {
-            matched_rules.push_back(r);
-        }
-    }
-
-    return matched_rules;
-}
-
-/**
- * Gets all top level links of certain types and subclasses that
- * contain @param hsource
- *
- * @param hsource handle whose top level links are to be searched
- * @param as the atomspace in which search is to be done
- * @param link_type the root link types to be searched
- * @param subclasses a flag that tells to look subclasses of @link_type
- */
-HandleSeq DefaultForwardChainerCB::get_rootlinks(Handle hsource, AtomSpace* as,
-                                                 Type link_type,
-                                                 bool subclasses)
-{
-    URECommons urec(*as);
-    HandleSeq chosen_roots;
-    HandleSeq candidates_roots;
-    urec.get_root_links(hsource, candidates_roots);
-
-    for (Handle hr : candidates_roots) {
-        bool notexist = find(chosen_roots.begin(), chosen_roots.end(), hr)
-                == chosen_roots.end();
-        auto type = as->get_type(hr);
-        bool subtype = (subclasses and classserver().isA(type, link_type));
-        if (((type == link_type) or subtype) and notexist) {
-            // Make sure matches are actually part of the premise list
-            // rather than the output of the bindLink
-	        Handle hpremise = BindLinkCast(hr)->get_body();
-            if (urec.exists_in(hpremise, hsource)) {
-                chosen_roots.push_back(hr);
+            for (const auto& hi : imp.result_list) {
+                if (hi == sourcecpy) {
+                    match = true;
+                    break;
+                }
             }
+
+            if (match)
+                break;
         }
 
+        if (match) {
+            auto it = find(chosen_rules.begin(), chosen_rules.end(), rule);
+            if (it == chosen_rules.end()){
+                chosen_rules.push_back(rule);}
+        }
     }
 
-    return chosen_roots;
+    return chosen_rules;
 }
+
 HandleSeq DefaultForwardChainerCB::choose_premises(FCMemory& fcmem)
 {
     HandleSeq inputs;
@@ -239,4 +194,45 @@ HandleSeq DefaultForwardChainerCB::apply_rule(FCMemory& fcmem)
     }
 
     return product;
+}
+
+HandleSeq DefaultForwardChainerCB::get_implicant_seq(Handle implicant)
+{
+    Type t = implicant->getType();
+    HandleSeq hs;
+
+    if (t == AND_LINK or t == OR_LINK)
+        hs = _as.get_outgoing(implicant);
+    else
+        hs.push_back(implicant);
+
+    return hs;
+}
+
+Handle DefaultForwardChainerCB::gen_sub_varlist(const Handle& parent,
+                                                const Handle& parent_varlist)
+{
+    FindAtoms fv(VARIABLE_NODE);
+    fv.search_set(parent);
+
+    HandleSeq oset;
+    if (LinkCast(parent_varlist))
+        oset = LinkCast(parent_varlist)->getOutgoingSet();
+    else
+        oset.push_back(parent_varlist);
+
+    HandleSeq final_oset;
+
+    // for each var in varlist, check if it is used in parent
+    for (const Handle& h : oset) {
+        Type t = h->getType();
+
+        if (VARIABLE_NODE == t && fv.varset.count(h) == 1)
+            final_oset.push_back(h);
+        else if (TYPED_VARIABLE_LINK == t
+                and fv.varset.count(LinkCast(h)->getOutgoingSet()[0]) == 1)
+            final_oset.push_back(h);
+    }
+
+    return Handle(createVariableList(final_oset));
 }
