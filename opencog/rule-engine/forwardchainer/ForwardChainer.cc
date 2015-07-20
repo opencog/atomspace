@@ -138,9 +138,16 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
     if (not var_nodes.empty())
         return do_pm(hsource, var_nodes, fcb);
 
+    HandleSeq init_sources;
+    //Accept set of initial sources wrapped by a SET_LINK
+    if(LinkCast(hsource) and hsource->getType() == SET_LINK)
+     init_sources = _as.get_outgoing(hsource);
+    else
+        init_sources.push_back(hsource);
+    _fcmem.update_potential_sources(init_sources);
+
+    _fcmem.set_source(fcb.choose_next_source(_fcmem)); //set initial source
     auto max_iter = _configReader.get_maximum_iterations();
-    _fcmem.set_source(hsource); //set initial source
-    _fcmem.update_potential_sources(HandleSeq{hsource});
 
     while (_iteration < max_iter /*OR other termination criteria*/) {
         _log->info("Iteration %d", _iteration);
