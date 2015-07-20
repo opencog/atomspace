@@ -239,15 +239,6 @@ void FuzzyPatternMatchCB::check_if_accept(const Handle& ph, const Handle& gh)
     HandleSeq pnodes = get_all_nodes(ph);
     HandleSeq gnodes = get_all_nodes(gh);
 
-    // Reject the candidate if it contains any VariableNode
-    auto check_vars = [](const Handle& h)
-    {
-        return h->getType() == VARIABLE_NODE;
-    };
-
-    if (std::find_if(gnodes.begin(), gnodes.end(), check_vars) != gnodes.end())
-        return;
-
     // Estimate the similarity by comparing how many nodes the potential
     // solution has in common with the pattern, also the number of extra and
     // missing nodes in it will also be taken in consideration
