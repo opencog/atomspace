@@ -26,7 +26,7 @@
 
 using namespace opencog;
 
-//#define DEBUG
+#define DEBUG
 
 FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as)
 	: DefaultPatternMatchCB(as)
@@ -250,19 +250,18 @@ void FuzzyPatternMatchCB::check_if_accept(const Handle& ph, const Handle& gh)
                           std::back_inserter(common_nodes));
 
     // A rough estimation
-    double common = 1.0 * (common_nodes.size() + var_size) / pat_size;
-    double diff = 0.5 * std::abs((int) pat_size - (int) gnodes.size()) /
-                  (pat_size + gnodes.size());
-    similarity = common - diff;
+    size_t common = common_nodes.size();
+    size_t diff = std::abs((int)(pat_size - gnodes.size()));
+    similarity = (double) common - diff;
 
 #ifdef DEBUG
     std::cout << "\n========================================\n";
     std::cout << "Compaing:\n" << ph->toShortString() << "--- and:\n"
               << gh->toShortString() << "\n";
-    std::cout << "Common nodes = " << common << "\n";
-    std::cout << "Missing/Extra nodes = " << diff << "\n";
-    std::cout << "similarity = " << similarity << "\n";
-    std::cout << "max_similarity = " << max_similarity << "\n";
+    std::cout << "Common = " << common << "\n";
+    std::cout << "Size diff = " << diff << "\n";
+    std::cout << "Similarity = " << similarity << "\n";
+    std::cout << "Most similar = " << max_similarity << "\n";
     std::cout << "========================================\n\n";
 #endif
 
