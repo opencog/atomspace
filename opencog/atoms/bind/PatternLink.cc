@@ -482,7 +482,6 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 {
 	for (const Handle& clause: clauses)
 	{
-		bool is_virtual = false;
 		bool is_black = false;
 
 		// Check if all links from top to bottom are either VirtualLink,
@@ -509,7 +508,7 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 
 				// An ExecutionOutputLink must have the correct structure
 				// upon creation, so just need to check the type here
-				if (t == EXECUTION_OUTPUT_LINK || classserver().isA(t, VIRTUAL_LINK))
+				if (classserver().isA(t, EXECUTION_OUTPUT_LINK) || classserver().isA(t, VIRTUAL_LINK))
 					return true;
 
 				// An EvluationLink must have the correct structure upon
@@ -552,14 +551,8 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 		{
 			_pat.evaluatable_terms.insert(sh);
 			add_to_map(_pat.in_evaluatable, sh, sh);
-			// But they're virtual only if they have two or more
-			// unquoted, bound variables in them. Otherwise, they
-			// can be evaluated on the spot.
 			if (2 <= num_unquoted_in_tree(sh, vars))
-			{
-				is_virtual = true;
 				is_black = true;
-			}
 		}
 		for (const Handle& sh : fgpn.holders)
 			_pat.evaluatable_holders.insert(sh);
@@ -575,11 +568,6 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 			_pat.evaluatable_terms.insert(sh);
 			_pat.evaluatable_holders.insert(sh);
 			add_to_map(_pat.in_evaluatable, sh, sh);
-			// But they're virtual only if they have two or more
-			// unquoted, bound variables in them. Otherwise, they
-			// can be evaluated on the spot. Virtuals are not black.
-			if (2 <= num_unquoted_in_tree(sh, vars))
-				is_virtual = true;
 		}
 		for (const Handle& sh : fgtl.holders)
 			_pat.evaluatable_holders.insert(sh);
@@ -597,22 +585,13 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 			_pat.executable_terms.insert(sh);
 			_pat.executable_holders.insert(sh);
 			add_to_map(_pat.in_executable, sh, sh);
-			// But they're virtual only if they have two or more
-			// unquoted, bound variables in them. Otherwise, they
-			// can be evaluated on the spot.
 			if (2 <= num_unquoted_in_tree(sh, vars))
-			{
-				is_virtual = true;
 				is_black = true;
-			}
 		}
 		for (const Handle& sh : feol.holders)
 			_pat.executable_holders.insert(sh);
 
-		if (is_virtual)
-			virtual_clauses.push_back(clause);
-		else
-			fixed_clauses.push_back(clause);
+		virtual_clauses.push_back(clause);
 
 		if (is_black)
 			black_clauses.insert(clause);
