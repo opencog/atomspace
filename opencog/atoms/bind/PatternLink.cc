@@ -485,6 +485,52 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 		bool is_virtual = false;
 		bool is_black = false;
 
+		// Check if all links from top to bottom are either VirtualLink,
+		// logical links, EvaluationLink with GroundedPredicateNode, or
+		// ExecuationOutputLink; cause otherwise none of the evaluatable
+		// can be evaluated and must be matched directly.
+		std::function<bool (const Handle&)> is_virtualable = [&](const Handle& h)
+		{
+			Type t = h->getType();
+
+			LinkPtr l(LinkCast(h));
+			if (l)
+			{
+				if (t == AND_LINK || t == OR_LINK || t == NOT_LINK || t == SEQUENTIAL_AND_LINK)
+				{
+					for (const Handle& oh : l->getOutgoingSet())
+					{
+						if (not is_virtualable(oh))
+							return false;
+					}
+
+					return true;
+				}
+
+				// An ExecutionOutputLink must have the correct structure
+				// upon creation, so just need to check the type here
+				if (t == EXECUTION_OUTPUT_LINK || classserver().isA(t, VIRTUAL_LINK))
+					return true;
+
+				// An EvluationLink must have the correct structure upon
+				// creation, so just need to check for GroundedPredicateNode
+				if (t == EVALUATION_LINK
+				    && l->getOutgoingSet()[0]->getType() == GROUNDED_PREDICATE_NODE)
+						return true;
+
+				return false;
+			}
+
+			// a single node cannot be virtual
+			return false;
+		};
+
+		if (not is_virtualable(clause))
+		{
+			fixed_clauses.push_back(clause);
+			continue;
+		}
+
 #ifdef BORKEN_DOESNT_WORK
 // The below should have worked to set things up, but it doesn't,
 // and I'm too lazy to investigate, because an alternate hack is
@@ -541,6 +587,8 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 		// Subclasses of ExecutionOutputLink, e.g. PlusLink,
 		// TimesLink are executable. They get treated by the
 		// same virtual-graph algo as the virtual links.
+		// XXX What? PlusLink et al. are not subclasses of
+		// ExecutionOutputLink!!
 		FindAtoms feol(EXECUTION_OUTPUT_LINK, true);
 		feol.search_set(clause);
 
