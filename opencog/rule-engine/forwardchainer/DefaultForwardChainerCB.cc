@@ -67,6 +67,9 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
         bool match = false;
 
         for (Handle h : impl_members) {
+            //exceptions
+            if(h->getType() == ABSENT_LINK) continue;
+
             AtomSpace rule_atomspace;
             Handle hcpy = rule_atomspace.add_atom(h);
             Handle implicant_vardecl = rule_atomspace.add_atom(
