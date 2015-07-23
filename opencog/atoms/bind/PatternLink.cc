@@ -45,13 +45,6 @@ void PatternLink::common_init(void)
 	                 _fixed, _virtual, _pat.black);
 	_num_virts = _virtual.size();
 
-	// unbundle_virtual does not handle connectives. Here, we assume that
-	// we are being run with the DefaultPatternMatchCB, and so we assume
-	// that the logical connectives are AndLink, OrLink and NotLink.
-	// Tweak the evaluatable_holders to reflect this.
-	std::set<Type> connectives({AND_LINK, OR_LINK, NOT_LINK});
-	trace_connectives(connectives, _pat.clauses);
-
 	// Split the non-virtual clauses into connected components
 	get_connected_components(_varlist.varset, _fixed,
 	                         _components, _component_vars);
@@ -520,7 +513,11 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 				return false;
 			}
 
-			// a single node cannot be virtual
+			// a single node that is a VariableNode can be grounded
+			// to evaluatable (if the type allow it)
+			if (t == VARIABLE_NODE)
+				return true;
+
 			return false;
 		};
 
@@ -593,33 +590,14 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 
 		virtual_clauses.push_back(clause);
 
+		// insert the clause itself as holder, as it could be a VariableNode
+		// that can be matched to an evaluatable
+		_pat.evaluatable_terms.insert(clause);
+		_pat.evaluatable_holders.insert(clause);
+		add_to_map(_pat.in_evaluatable, clause, clause);
+
 		if (is_black)
 			black_clauses.insert(clause);
-	}
-}
-
-/* ================================================================= */
-
-/// Starting from the top of a clause, trace down through the tree
-/// of connectives.  If a term appears under a connective, and there
-/// is a path of connectives all the way to the top, then we have to
-/// assume the term is evaluatable, as the whole point of connectives
-/// to to connect evaluatable terms.  Thus, for example, for a clause
-/// having the form (AndLink stuff (OrLink more-stuff (NotLink not-stuff)))
-/// we have to assume that stuff, more-stuff and not-stuff are all
-/// evaluatable.
-void PatternLink::trace_connectives(const std::set<Type>& connectives,
-                                    const HandleSeq& oset)
-{
-	for (const Handle& term: oset)
-	{
-		Type t = term->getType();
-		if (connectives.find(t) == connectives.end()) continue;
-		_pat.evaluatable_holders.insert(term);
-		add_to_map(_pat.in_evaluatable, term, term);
-		LinkPtr lp(LinkCast(term));
-		if (lp)
-			trace_connectives(connectives, lp->getOutgoingSet());
 	}
 }
 
