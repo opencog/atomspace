@@ -147,7 +147,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
 	                 _fixed, _virtual, _pat.black);
 	_num_virts = _virtual.size();
-	OC_ASSERT (0 == _num_virts, "Must not have any virtuals!");
+	//OC_ASSERT (0 == _num_virts, "Must not have any virtuals!");
 
 	_components.push_back(compo);
 	_num_comps = 1;
@@ -598,6 +598,34 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 
 		if (is_black)
 			black_clauses.insert(clause);
+
+		// Check if there're any variables that are unique to the virtual
+		// clause, and if so, add the variables as new fixed clauses.
+		FindAtoms fv(vars);
+		fv.search_set(clause);
+
+		for (const Handle& v : fv.varset)
+		{
+			bool lone_var = true;
+
+			for (const Handle& other_clause : clauses)
+			{
+				if (other_clause == clause)
+					continue;
+
+				FindAtoms fo(v);
+				fo.search_set(other_clause);
+
+				if (fo.varset.size() != 0)
+				{
+					lone_var = false;
+					break;
+				}
+			}
+
+			if (lone_var)
+				fixed_clauses.push_back(v);
+		}
 	}
 }
 
