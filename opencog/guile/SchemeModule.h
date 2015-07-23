@@ -21,6 +21,8 @@ class FunctionWrap
 	private:
 		Handle (*_func)(AtomSpace*, const Handle&);
 		Handle wrapper(Handle);
+		Handle (*_func_hq)(AtomSpace*, const Handle&, const HandleSeq&);
+		Handle wrapper_hq(Handle, const HandleSeq&);
 
 		TruthValuePtr (*_pred)(AtomSpace*, const Handle&);
 		TruthValuePtr prapper(Handle);
@@ -28,6 +30,8 @@ class FunctionWrap
 		const char *_name;  // scheme name of the c++ function.
 	public:
 		FunctionWrap(Handle (*)(AtomSpace*, const Handle&),
+		             const char*, const char*);
+		FunctionWrap(Handle (*)(AtomSpace*, const Handle&, const HandleSeq&),
 		             const char*, const char*);
 		FunctionWrap(TruthValuePtr (*)(AtomSpace*, const Handle&),
 		             const char*, const char*);

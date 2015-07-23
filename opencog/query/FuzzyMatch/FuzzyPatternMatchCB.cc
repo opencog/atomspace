@@ -28,8 +28,8 @@ using namespace opencog;
 
 #define DEBUG
 
-FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as)
-	: DefaultPatternMatchCB(as)
+FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as, const HandleSeq& rl)
+        : DefaultPatternMatchCB(as), reject_list(rl)
 {
 }
 
@@ -155,15 +155,15 @@ bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
             break;
         }
 
-        root = clauses[potential_starters[search_cnt].clause_idx];
+        Handle root = clauses[potential_starters[search_cnt].clause_idx];
         Handle starter_term = potential_starters[search_cnt].term;
         const Handle& best_start = potential_starters[search_cnt].handle;
         search_cnt++;
 
 #ifdef DEBUG
         std::cout << "\n========================================\n";
-        std::cout << "Initiating the fuzzy match... (" << search_cnt << "/" <<
-                     MAX_SEARCHES << ")\n";
+        std::cout << "Initiating the fuzzy match... (" << search_cnt << "/"
+                  << MAX_SEARCHES << ")\n";
         std::cout << "Starter:\n" << best_start->toShortString() << "\n";
         std::cout << "Start term:\n" << starter_term->toShortString();
         std::cout << "========================================\n\n";
@@ -177,7 +177,7 @@ bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
 
 #ifdef DEBUG
             std::cout << "Loop candidate (" << (i + 1) << "/" << iset_size << "):\n"
-                         << h->toShortString() << "\n";
+                      << h->toShortString() << "\n";
 #endif
 
             pme->explore_neighborhood(root, starter_term, h);
@@ -198,27 +198,21 @@ bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
     }
 }
 
-
 /**
- * Implement the link_match callback.
+ * Implement the clause_match callback.
  *
- * It compares and estimates the similarity between the two input links, if they
- * haven't been compared previously.
- *
- * @param pLink  A link in the pattern
- * @param gLink  A link in the potential solution
- * @return       Always return true to accept it, and keep the matching going
+ * @param ph  The pattern
+ * @param gh  The potential solution found by the pattern matcher
+ * @return    Always return true???
  */
-bool FuzzyPatternMatchCB::link_match(const LinkPtr& pLink, const LinkPtr& gLink)
+bool FuzzyPatternMatchCB::clause_match(const Handle& ph, const Handle& gh)
 {
-    // Avoid comparing the same pair of atoms again, this can also avoid
-    // giving duplicated solutions
-    std::pair<UUID, UUID> p = std::make_pair(pLink->getHandle().value(),
-                                             gLink->getHandle().value());
-    if ((pLink->getHandle() == root) and
-        (std::find(prev_compared.begin(), prev_compared.end(), p) == prev_compared.end()))
+    std::pair<UUID, UUID> p = std::make_pair(ph.value(), gh.value());
+
+    // Avoid comparing the same pair of atoms again
+    if (std::find(prev_compared.begin(), prev_compared.end(), p) == prev_compared.end())
     {
-        check_if_accept(pLink->getHandle(), gLink->getHandle());
+        check_if_accept(ph, gh);
         prev_compared.push_back(p);
     }
 
@@ -236,29 +230,33 @@ bool FuzzyPatternMatchCB::link_match(const LinkPtr& pLink, const LinkPtr& gLink)
  */
 void FuzzyPatternMatchCB::check_if_accept(const Handle& ph, const Handle& gh)
 {
-    HandleSeq pnodes = get_all_nodes(ph);
-    HandleSeq gnodes = get_all_nodes(gh);
+    HandleSeq pn = get_all_nodes(ph);
+    HandleSeq gn = get_all_nodes(gh);
+
+    // Reject if any atoms in the reject list exist in the potential solution
+    for (const Handle& rh : reject_list)
+        if (std::find(gn.begin(), gn.end(), rh) != gn.end()) return;
 
     // Estimate the similarity by comparing how many nodes the potential
     // solution has in common with the pattern, also the number of extra and
     // missing nodes in it will also be taken in consideration
     HandleSeq common_nodes;
-    std::sort(pnodes.begin(), pnodes.end());
-    std::sort(gnodes.begin(), gnodes.end());
-    std::set_intersection(pnodes.begin(), pnodes.end(),
-                          gnodes.begin(), gnodes.end(),
+    std::sort(pn.begin(), pn.end());
+    std::sort(gn.begin(), gn.end());
+    std::set_intersection(pn.begin(), pn.end(),
+                          gn.begin(), gn.end(),
                           std::back_inserter(common_nodes));
 
     // A rough estimation
     size_t common = common_nodes.size();
-    size_t diff = std::abs((int)(pat_size - gnodes.size()));
+    size_t diff = std::abs((int)(pat_size - gn.size()));
     similarity = (double) common - diff;
 
 #ifdef DEBUG
     std::cout << "\n========================================\n";
     std::cout << "Compaing:\n" << ph->toShortString() << "--- and:\n"
               << gh->toShortString() << "\n";
-    std::cout << "Common = " << common << "\n";
+    std::cout << "Common nodes = " << common << "\n";
     std::cout << "Size diff = " << diff << "\n";
     std::cout << "Similarity = " << similarity << "\n";
     std::cout << "Most similar = " << max_similarity << "\n";

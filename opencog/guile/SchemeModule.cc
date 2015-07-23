@@ -19,6 +19,13 @@ FunctionWrap::FunctionWrap(Handle (f)(AtomSpace*, const Handle&),
 	define_scheme_primitive(_name, &FunctionWrap::wrapper, this, modname);
 }
 
+FunctionWrap::FunctionWrap(Handle (f)(AtomSpace*, const Handle&, const HandleSeq&),
+			   const char* funcname, const char* modname)
+	: _func_hq(f), _pred(NULL), _name(funcname)
+{
+	define_scheme_primitive(_name, &FunctionWrap::wrapper_hq, this, modname);
+}
+
 FunctionWrap::FunctionWrap(TruthValuePtr (p)(AtomSpace*, const Handle&),
                            const char* funcname, const char* modname)
 	: _func(NULL), _pred(p), _name(funcname)
@@ -31,6 +38,16 @@ Handle FunctionWrap::wrapper(Handle h)
 	// XXX we should also allow opt-args to be a list of handles
 	AtomSpace *as = SchemeSmob::ss_get_env_as(_name);
 	return _func(as, h);
+}
+
+Handle FunctionWrap::wrapper_hq(Handle h, const HandleSeq& hq)
+{
+	// TODO: Make the original wrapper to accept an optional HandleSeq?
+	//       But sometimes even if the input HandleSeq is empty, we may still
+	//       want the _func_hq to be called instead of _func... so how to decide
+	//       which function to go?
+	AtomSpace *as = SchemeSmob::ss_get_env_as(_name);
+	return _func_hq(as, h, hq);
 }
 
 TruthValuePtr FunctionWrap::prapper(Handle h)

@@ -27,7 +27,8 @@
 namespace opencog
 {
     class AtomSpace;
-    Handle find_approximate_match(AtomSpace*, const Handle&);
+    Handle find_approximate_match(AtomSpace*, const Handle&,
+                                  const HandleSeq& rl = {});
 };
 
 #endif // FUZZYPATTERNMATCH_H

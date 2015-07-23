@@ -36,13 +36,16 @@ using namespace opencog;
  * It uses the Pattern Matcher to find hypergraphs in the atomspace that are
  * similar to the query hypergraph, and returns the most similar ones.
  *
+ * @param as  The atomspace that we are using
  * @param hp  The query hypergraph
+ * @param rl  A list of atoms that we don't want any of them to exist in the results
  * @return    One or more similar hypergraphs
  */
-Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp)
+Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp,
+                                       const HandleSeq& rl)
 {
 #ifdef HAVE_GUILE
-    FuzzyPatternMatchCB fpmcb(as);
+    FuzzyPatternMatchCB fpmcb(as, rl);
 
     HandleSeq terms;
     terms.push_back(hp);
