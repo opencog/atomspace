@@ -27,7 +27,7 @@
 
 using namespace opencog;
 
-//#define DEBUG
+#define DEBUG
 
 FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as, const HandleSeq& rl)
         : DefaultPatternMatchCB(as),
@@ -57,12 +57,7 @@ void FuzzyPatternMatchCB::find_starters(const Handle& hp, const size_t& depth,
     if (lp)
     {
         for (Handle h : lp->getOutgoingSet())
-        {
-            // Blow past the QuoteLinks
-            if (QUOTE_LINK == h->getType()) h = LinkCast(h)->getOutgoingAtom(0);
-
             find_starters(h, depth + 1, clause_idx, hp, rtn);
-        }
     }
 
     // Get the nodes that are not an instance nor a variable
@@ -82,14 +77,11 @@ void FuzzyPatternMatchCB::find_starters(const Handle& hp, const size_t& depth,
                 sn.uuid = hp.value();
                 sn.handle = hp;
                 sn.term = term;
-                sn.clause_idx = clause_idx;
                 sn.width = hp->getIncomingSetSize();
                 sn.depth = depth;
 
                 rtn.push_back(sn);
             }
-
-            else if (np->getType() == VARIABLE_NODE) var_size++;
         }
     }
 }
@@ -110,27 +102,17 @@ void FuzzyPatternMatchCB::find_starters(const Handle& hp, const size_t& depth,
  */
 bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
 {
-    // Find potential starters from all the clauses
-    const HandleSeq& clauses = _pattern->mandatory;
-    for (size_t i = 0; i < clauses.size(); i++)
-    {
-        // Skip evaluatable clause
-        if (0 < _pattern->evaluatable_holders.count(clauses[i])) continue;
-
-        find_starters(clauses[i], 0, i, Handle::UNDEFINED, potential_starters);
-    }
+    // Find potential starters from the clause (the input pattern)
+    const Handle& clause = _pattern->mandatory[0];
+    find_starters(clause, 0, 0, Handle::UNDEFINED, potential_starters);
 
     // For removing duplicates, if any, form the list of potential starters,
     // as we want to have a different starters for each of the searches
     auto check_uniqueness = [](const Starter& s1, const Starter& s2)
-    {
-        return s1.uuid == s2.uuid;
-    };
+    { return s1.uuid == s2.uuid; };
 
     auto sort_by_uuid = [](const Starter& s1, const Starter& s2)
-    {
-        return s1.uuid < s2.uuid;
-    };
+    { return s1.uuid < s2.uuid; };
 
     std::sort(potential_starters.begin(), potential_starters.end(), sort_by_uuid);
     potential_starters.erase(std::unique(potential_starters.begin(),
@@ -149,25 +131,17 @@ bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
 
     // Start the searches
     size_t search_cnt = 0;
-    while (MAX_SEARCHES > search_cnt)
+    size_t num_starters = potential_starters.size();
+    while (num_starters > search_cnt)
     {
-        if (potential_starters.size() == search_cnt)
-        {
-#ifdef DEBUG
-            std::cout << "No more available starters for the neighbor search.\n";
-#endif
-            break;
-        }
-
-        Handle root = clauses[potential_starters[search_cnt].clause_idx];
-        Handle starter_term = potential_starters[search_cnt].term;
+        const Handle& starter_term = potential_starters[search_cnt].term;
         const Handle& best_start = potential_starters[search_cnt].handle;
         search_cnt++;
 
 #ifdef DEBUG
         std::cout << "\n========================================\n";
         std::cout << "Initiating the fuzzy match... (" << search_cnt << "/"
-                  << MAX_SEARCHES << ")\n";
+                  << num_starters << ")\n";
         std::cout << "Starter:\n" << best_start->toShortString() << "\n";
         std::cout << "Start term:\n" << starter_term->toShortString();
         std::cout << "========================================\n\n";
@@ -184,7 +158,7 @@ bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
                       << h->toShortString() << "\n";
 #endif
 
-            pme->explore_neighborhood(root, starter_term, h);
+            pme->explore_neighborhood(clause, starter_term, h);
         }
     }
 

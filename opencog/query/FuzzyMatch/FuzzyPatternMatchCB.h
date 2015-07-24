@@ -71,27 +71,21 @@ namespace opencog
                 UUID uuid;
                 Handle handle;
                 Handle term;
-                size_t clause_idx;
                 size_t width;
                 size_t depth;
             };
 
+            // Total number of links in the atomspace
             size_t num_links;
 
             // How many nodes are there in the pattern
             size_t pat_size = 0;
-
-            // How many VariableNodes are there in the pattern
-            size_t var_size = 0;
 
             // Potential starters that can be used to initiate the search
             std::vector<Starter> potential_starters;
 
             // Links that have previously been compared
             std::vector<std::pair<UUID, UUID>> prev_compared;
-
-            // How many searches should we do by using a different starter
-            const size_t MAX_SEARCHES = 5;
 
             // The maximum similarity of all the potential solutions we found
             double max_similarity = -std::numeric_limits<double>::max();
