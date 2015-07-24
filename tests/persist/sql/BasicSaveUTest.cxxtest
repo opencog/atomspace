@@ -29,14 +29,14 @@
  */
 
 #include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TLB.h>
-#include <opencog/nlp/types/atom_types.h>
+#include <opencog/atomspace/atom_types.h>
 #include <opencog/persist/sql/AtomStorage.h>
 
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
 
@@ -97,6 +97,7 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 		}
 
 		void setUp(void);
+		void tearDown(void);
 
 		void freindlyFailMessage(bool ts)
 		{
@@ -119,7 +120,6 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 		}
 
 		AtomStorage *astore;
-		void tearDown(void) { delete astore; }
 		void single_atom_save_restore(std::string id);
 		void add_to_table(int, AtomTable *, std::string id);
 		void check_table(int, AtomTable *, std::string id);
@@ -133,8 +133,7 @@ class BasicSaveUTest :  public CxxTest::TestSuite
  */
 void BasicSaveUTest::setUp(void)
 {
-	CogServer& cogserve = cogserver();
-	as = &cogserve.getAtomSpace();
+	as = new AtomSpace();
 
 	astore = new AtomStorage(dbname, username, passwd);
 	if (!astore->connected())
@@ -147,6 +146,13 @@ void BasicSaveUTest::setUp(void)
 
 	// Trash the contents of the database.
 	astore->kill_data();
+}
+
+void BasicSaveUTest::tearDown(void)
+{
+	astore->kill_data();
+	delete astore;
+	delete as;
 }
 
 // ============================================================
@@ -264,19 +270,19 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
 {
 	// Create an atom ... 
-	n1[idx] = createNode(WORD_NODE, id + "fromNode");
+	n1[idx] = createNode(SCHEMA_NODE, id + "fromNode");
 	TruthValuePtr stv(SimpleTruthValue::createTV(0.11, 100+idx));
 	n1[idx]->setTruthValue(stv);
 	a1[idx] = n1[idx];
 	table->add(a1[idx], false);
 
-	n2[idx] = createNode(WORD_NODE, id + "toNode");
+	n2[idx] = createNode(SCHEMA_NODE, id + "toNode");
 	TruthValuePtr stv2(SimpleTruthValue::createTV(0.22, 200+idx));
 	n2[idx]->setTruthValue(stv2);
 	a2[idx] = n2[idx];
 	table->add(a2[idx], false);
 
-	n3[idx] = createNode(WORD_NODE, id + "third wheel");
+	n3[idx] = createNode(SCHEMA_NODE, id + "third wheel");
 	TruthValuePtr stv3(SimpleTruthValue::createTV(0.33, 300+idx));
 	n3[idx]->setTruthValue(stv3);
 	a3[idx] = n3[idx];
@@ -287,7 +293,7 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
 	hvec.push_back(a2[idx]->getHandle());
 	hvec.push_back(a3[idx]->getHandle());
 
-	l[idx] = createLink(PARSE_LINK, hvec);
+	l[idx] = createLink(SET_LINK, hvec);
 	al[idx] = l[idx];
 	table->add(l[idx], false);
 }
@@ -308,7 +314,7 @@ void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
 	hvec.push_back(hb2);
 	hvec.push_back(hb3);
 
-	LinkPtr lb(createLink(PARSE_LINK, hvec));
+	LinkPtr lb(createLink(SET_LINK, hvec));
 	Handle hlb = table->getHandle(lb);
 	atomCompare(al[idx], hlb, "check_table hlb");
 }
