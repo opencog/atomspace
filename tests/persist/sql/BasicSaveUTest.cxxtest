@@ -85,7 +85,7 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 			}
 			catch (InvalidParamException &e)
 			{
-				freindlyFailMessage(false);
+				friendlyFailMessage(false);
 			}
 		}
 
@@ -99,7 +99,7 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 		void setUp(void);
 		void tearDown(void);
 
-		void freindlyFailMessage(bool ts)
+		void friendlyFailMessage(bool ts)
 		{
 			const char * fail = "The BasicSaveUTest failed.\n"
 				"This is probably because you do not have SQL installed\n"
@@ -139,7 +139,7 @@ void BasicSaveUTest::setUp(void)
 	if (!astore->connected())
 	{
 		logger().info("setUp: cannot connect to database");
-		freindlyFailMessage(true);
+		friendlyFailMessage(true);
 		exit(1);
 	}
 	logger().info("Connect to \"%s\" as \"%s\" passwd \"%s\"", dbname, username, passwd);
