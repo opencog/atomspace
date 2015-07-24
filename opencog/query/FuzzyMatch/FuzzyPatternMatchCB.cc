@@ -22,14 +22,17 @@
  */
 
 #include <opencog/atomutils/AtomUtils.h>
+#include <opencog/util/numeric.h>
 #include "FuzzyPatternMatchCB.h"
 
 using namespace opencog;
 
-#define DEBUG
+//#define DEBUG
 
 FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as, const HandleSeq& rl)
-        : DefaultPatternMatchCB(as), reject_list(rl)
+        : DefaultPatternMatchCB(as),
+          reject_list(rl),
+          num_links(as->get_num_links())
 {
 }
 
@@ -72,7 +75,8 @@ void FuzzyPatternMatchCB::find_starters(const Handle& hp, const size_t& depth,
             pat_size++;
 
             if ((np->getType() != VARIABLE_NODE) and
-                (np->getName().find("@") == std::string::npos))
+                (np->getName().find("@") == std::string::npos) and
+                (std::find(reject_list.begin(), reject_list.end(), hp) == reject_list.end()))
             {
                 Starter sn;
                 sn.uuid = hp.value();
@@ -192,10 +196,7 @@ bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
     }
 
     // Return false to use other methods to find matches
-    else
-    {
-        return false;
-    }
+    else return false;
 }
 
 /**
@@ -233,24 +234,37 @@ void FuzzyPatternMatchCB::check_if_accept(const Handle& ph, const Handle& gh)
     HandleSeq pn = get_all_nodes(ph);
     HandleSeq gn = get_all_nodes(gh);
 
-    // Reject if any atoms in the reject list exist in the potential solution
+    // Reject if the potential solution contains any atoms in the reject list
     for (const Handle& rh : reject_list)
         if (std::find(gn.begin(), gn.end(), rh) != gn.end()) return;
 
-    // Estimate the similarity by comparing how many nodes the potential
-    // solution has in common with the pattern, also the number of extra and
-    // missing nodes in it will also be taken in consideration
+    // How many nodes the potential solution has in common with the pattern
     HandleSeq common_nodes;
     std::sort(pn.begin(), pn.end());
     std::sort(gn.begin(), gn.end());
-    std::set_intersection(pn.begin(), pn.end(),
-                          gn.begin(), gn.end(),
+    std::set_intersection(pn.begin(), pn.end(), gn.begin(), gn.end(),
                           std::back_inserter(common_nodes));
-
-    // A rough estimation
     size_t common = common_nodes.size();
+
+    // The size different between the pattern and the potential solution
     size_t diff = std::abs((int)(pat_size - gn.size()));
-    similarity = (double) common - diff;
+
+    // Estimate how "rare" the common nodes are, by employing something like TFIDF
+    double rareness = 0;
+    for (const Handle& common_node : common_nodes)
+    {
+        // No. of times it appears in the pattern over the size of the pattern
+        double f1 = (double) std::count(pn.begin(), pn.end(), common_node) / pn.size();
+
+        // Total no. of links in the atomspace over the size of its incoming set
+        // TODO: Maybe better to use TV for this estimation
+        double f2 = log2(num_links / common_node->getIncomingSetSize());
+
+        rareness += f1 * f2;
+    }
+
+    // A rough estimation of how similar they are
+    double similarity = (10 * rareness) + common - diff;
 
 #ifdef DEBUG
     std::cout << "\n========================================\n";
@@ -258,6 +272,7 @@ void FuzzyPatternMatchCB::check_if_accept(const Handle& ph, const Handle& gh)
               << gh->toShortString() << "\n";
     std::cout << "Common nodes = " << common << "\n";
     std::cout << "Size diff = " << diff << "\n";
+    std::cout << "Rareness = " << rareness << "\n";
     std::cout << "Similarity = " << similarity << "\n";
     std::cout << "Most similar = " << max_similarity << "\n";
     std::cout << "========================================\n\n";

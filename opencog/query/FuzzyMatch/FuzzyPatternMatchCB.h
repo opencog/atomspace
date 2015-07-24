@@ -76,6 +76,8 @@ namespace opencog
                 size_t depth;
             };
 
+            size_t num_links;
+
             // How many nodes are there in the pattern
             size_t pat_size = 0;
 
@@ -90,9 +92,6 @@ namespace opencog
 
             // How many searches should we do by using a different starter
             const size_t MAX_SEARCHES = 5;
-
-            // How similar the potential solution and the pattern are
-            double similarity = 0;
 
             // The maximum similarity of all the potential solutions we found
             double max_similarity = -std::numeric_limits<double>::max();
