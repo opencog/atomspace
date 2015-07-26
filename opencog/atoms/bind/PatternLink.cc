@@ -71,6 +71,8 @@ void PatternLink::common_init(void)
 		// _pat.cnf_clauses = _components[0];
 	   make_connectivity_map(_pat.cnf_clauses);
 	}
+
+	make_term_trees();
 }
 
 
@@ -161,6 +163,8 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 
 	make_connectivity_map(_pat.cnf_clauses);
 	_pat.redex_name = "Unpacked component of a virtual link";
+
+	make_term_trees();
 }
 
 /* ================================================================= */
@@ -636,6 +640,35 @@ void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 	{
 		for (const Handle& ho: l->getOutgoingSet())
 			make_map_recursive(root, ho);
+	}
+}
+
+// Hack alert: Definitely it should not be here. Though some refactoring
+// regarding shared libraries circular dependencies (liblambda and libquery)
+// need to be done before fixing...
+const PatternTermPtr PatternTerm::UNDEFINED(std::make_shared<PatternTerm>());
+
+void PatternLink::make_term_trees()
+{
+	for (const Handle& clause : _pat.cnf_clauses)
+	{
+		PatternTermPtr root_term(std::make_shared<PatternTerm>());
+		make_term_tree_recursive(clause, clause, root_term);
+	}
+}
+
+void PatternLink::make_term_tree_recursive(const Handle& root,
+		                                   const Handle& h,
+		                                   PatternTermPtr& parent)
+{
+	PatternTermPtr ptm(std::make_shared<PatternTerm>(parent, h));
+	parent->addOutgoingTerm(ptm);
+	_pat.connected_terms_map[{h, root}].push_back(ptm);
+	LinkPtr l(LinkCast(h));
+	if (l)
+	{
+		for (const Handle& ho: l->getOutgoingSet())
+		     make_term_tree_recursive(root, ho, ptm);
 	}
 }
 
