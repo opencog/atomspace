@@ -42,6 +42,7 @@ INSTALL (FILES
 	Implicator.h
 	InitiateSearchCB.h
 	Pattern.h
+	PatternTerm.h
 	PatternSCM.h
 	PatternMatchCallback.h
 	PatternMatchEngine.h

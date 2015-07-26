@@ -30,6 +30,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <opencog/query/PatternTerm.h>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/types.h>  // for typedef Type
 
@@ -79,6 +80,15 @@ struct Pattern
 	typedef std::map<Handle, RootList> ConnectMap;
 	typedef std::pair<Handle, RootList> ConnectPair;
 
+	// Each atom of the pattern as well as their corresponding pattern terms
+	// may appear in many clauses. Moreover the same atom may be replicated
+	// under the same clause root in many instances. Each occurence has its
+	// own unique PatternTermPtr. We need to keep the mapping beetwen atoms
+	// and clause roots to the list of atoms occurences. Typically the list
+	// of PatternTermPtr has single element, but as said above when given atom
+	// is replicated under one root then the list has many elements.
+	typedef std::map<std::pair<Handle,Handle>, PatternTermSeq> ConnectTermMap;
+
 	// -------------------------------------------
 	// The current set of clauses (beta redex context) being grounded.
 	std::string redex_name;  // for debugging only!
@@ -127,6 +137,8 @@ struct Pattern
 	// after one clause is solved, we know what parts of the unsolved
 	// clauses already have a solution.
 	ConnectMap       connectivity_map;     // setup by make_connectivity_map()
+
+	ConnectTermMap   connected_terms_map;  // setup by make_term_trees()
 };
 
 /** @}*/

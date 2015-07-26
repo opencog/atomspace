@@ -163,7 +163,10 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	clause_accepted = false;
 
 	Handle hp(_pat->cnf_clauses[0]);
-	bool found = tree_compare(hp, Handle(lg), CALL_COMP);
+	throw RuntimeException(TRACE_INFO, "Unimplemented yet");
+	// TODO: wrap by PatternTermPtr
+	// bool found = tree_compare(hp, Handle(lg), CALL_COMP);
+	bool found = false;
 
 #if 0
 	Handle join;
