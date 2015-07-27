@@ -89,7 +89,7 @@ HandleSeq UREConfigReader::fetch_rules(Handle rbs)
 
 	// Remove the GetLink pattern from the AtomSpace as it is no
 	// longer useful
-	remove_descendants(_as, gl);
+	remove_hypergraph(_as, gl);
 
 	return LinkCast(rule_names)->getOutgoingSet();
 }
@@ -119,7 +119,7 @@ HandleSeq UREConfigReader::fetch_execution_outputs(Handle schema,
 
 	// Remove the GetLink pattern from the AtomSpace as it is no
 	// longer useful
-	remove_descendants(_as, gl);
+	remove_hypergraph(_as, gl);
 
 	return LinkCast(outputs)->getOutgoingSet();
 }

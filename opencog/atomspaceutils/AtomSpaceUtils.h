@@ -50,15 +50,15 @@ Handle add_prefixed_node(AtomSpace&, Type, const std::string& prefix = "");
  * @return true if all atoms (h and its descendants) have been
  * removed, false otherwise
  *
- * Example: remove_descendants(as, h) with
+ * Example: remove_hypergraph(as, h) with
  * h = InheritanceLink
  *        ConceptNode "A"
  *        ConceptNode "B"
  *
  * will remove the InheritanceLink, ConceptNode "A" and ConceptNode "B".
  */
-bool remove_descendants(AtomSpace& as, Handle h);
-	
+bool remove_hypergraph(AtomSpace& as, Handle h);
+
 /** @}*/
 }
 
