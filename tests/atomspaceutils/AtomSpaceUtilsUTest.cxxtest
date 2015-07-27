@@ -1,0 +1,65 @@
+/*
+ * tests/atomspace/AtomSpaceUtilsUTest.cxxtest
+ *
+ * Copyright (C) 2015 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspaceutils/AtomSpaceUtils.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class AtomSpaceUtilsUTest :  public CxxTest::TestSuite
+{
+private:
+
+public:
+    AtomSpaceUtilsUTest()
+    {
+        logger().setPrintToStdoutFlag(true);
+    }
+
+	void test_remove_hypergraph();
+};
+
+// Test remove_hypergraph()
+void AtomSpaceUtilsUTest::test_remove_hypergraph()
+{
+	// Fill atomspace
+	AtomSpace as;
+	Handle A = as.add_node(CONCEPT_NODE, "A"),
+		B = as.add_node(CONCEPT_NODE, "B"),
+		C = as.add_node(CONCEPT_NODE, "C"),
+		D = as.add_node(CONCEPT_NODE, "D"),
+		AB = as.add_link(INHERITANCE_LINK, A, B),
+		BC = as.add_link(INHERITANCE_LINK, B, C),
+		CD = as.add_link(INHERITANCE_LINK, C, D),
+		ABC = as.add_link(AND_LINK, AB, BC);
+
+	std::cout << "AB uuid = " << AB.value();
+	
+	// Test that remove hypergraph on ABC leaves only CD
+	remove_hypergraph(as, ABC);
+
+	std::cout << "AB uuid = " << AB.value();
+
+	// TS_ASSERT_EQUALS(get_distant_neighbors(A, 1),
+	//                  UnorderedHandleSet({AB}));
+}
