@@ -85,7 +85,10 @@ namespace opencog
             std::vector<Starter> potential_starters;
 
             // Links that have previously been compared
-            std::vector<std::pair<UUID, UUID>> prev_compared;
+            std::vector<UUID> prev_compared;
+
+            // Stores the incoming set sizes of nodes
+            std::unordered_map<Handle, size_t> in_set_size;
 
             // The maximum similarity of all the potential solutions we found
             double max_similarity = -std::numeric_limits<double>::max();

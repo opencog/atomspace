@@ -27,7 +27,7 @@
 
 using namespace opencog;
 
-#define DEBUG
+//#define DEBUG
 
 FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as, const HandleSeq& rl)
         : DefaultPatternMatchCB(as),
@@ -182,13 +182,13 @@ bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
  */
 bool FuzzyPatternMatchCB::clause_match(const Handle& ph, const Handle& gh)
 {
-    std::pair<UUID, UUID> p = std::make_pair(ph.value(), gh.value());
-
     // Avoid comparing the same pair of atoms again
-    if (std::find(prev_compared.begin(), prev_compared.end(), p) == prev_compared.end())
+    UUID gid = gh.value();
+
+    if (std::find(prev_compared.begin(), prev_compared.end(), gid) == prev_compared.end())
     {
         check_if_accept(ph, gh);
-        prev_compared.push_back(p);
+        prev_compared.push_back(gid);
     }
 
     return true;
@@ -210,7 +210,17 @@ void FuzzyPatternMatchCB::check_if_accept(const Handle& ph, const Handle& gh)
 
     // Reject if the potential solution contains any atoms in the reject list
     for (const Handle& rh : reject_list)
-        if (std::find(gn.begin(), gn.end(), rh) != gn.end()) return;
+    {
+        if (std::find(gn.begin(), gn.end(), rh) != gn.end())
+        {
+#ifdef DEBUG
+        std::cout << "Rejecting:\n" << gh->toShortString()
+                  << "because of the existance of:\n" << rh->toShortString()
+                  << "\n";
+#endif
+            return;
+        }
+    }
 
     // How many nodes the potential solution has in common with the pattern
     HandleSeq common_nodes;
@@ -223,22 +233,33 @@ void FuzzyPatternMatchCB::check_if_accept(const Handle& ph, const Handle& gh)
     // The size different between the pattern and the potential solution
     size_t diff = std::abs((int)(pat_size - gn.size()));
 
-    // Estimate how "rare" the common nodes are, by employing something like TFIDF
+    // Estimate how "rare" the common nodes are, by doing something like TFIDF
     double rareness = 0;
     for (const Handle& common_node : common_nodes)
     {
         // No. of times it appears in the pattern over the size of the pattern
         double f1 = (double) std::count(pn.begin(), pn.end(), common_node) / pn.size();
 
+        size_t iss;
+        auto it = in_set_size.find(common_node);
+        if (it == in_set_size.end())
+        {
+            iss = common_node->getIncomingSetSize();
+            in_set_size.insert({common_node, iss});
+        }
+        else iss = it->second;
+
         // Total no. of links in the atomspace over the size of its incoming set
         // TODO: Maybe better to use TV for this estimation
-        double f2 = log2(num_links / common_node->getIncomingSetSize());
+        double f2 = log2(num_links / iss);
 
         rareness += f1 * f2;
     }
 
     // A rough estimation of how similar they are
-    double similarity = (10 * rareness) + common - diff;
+    double similarity = (10.0 * rareness) +
+                        (1.0 * common) -
+                        (0.5 * diff);
 
 #ifdef DEBUG
     std::cout << "\n========================================\n";
