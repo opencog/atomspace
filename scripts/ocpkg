@@ -129,6 +129,7 @@ PACKAGES_BUILD="
 		libiberty-dev \
 		libicu-dev \
 		libbz2-dev \
+		stack \
 		cython \
 		python-dev \
 		python-zmq \
@@ -511,8 +512,14 @@ trap quit_trap  INT HUP QUIT TERM
 
 # SECTION 4: Function Definitions
 
+add_stack_repository() {
+wget -q -O- https://s3.amazonaws.com/download.fpcomplete.com/ubuntu/fpco.key | sudo apt-key add -
+echo 'deb http://download.fpcomplete.com/ubuntu/trusty stable main' | sudo tee /etc/apt/sources.list.d/fpco.list
+}
+
 add_repositories() {
 MESSAGE="Adding software repositories..." ; message
+add_stack_repository
 for REPO in $REPOSITORIES ; do
   sudo apt-add-repository -y $REPO
 done
@@ -624,6 +631,7 @@ source /etc/lsb-release
 if [ "$DISTRIB_CODENAME" == "trusty" ] ; then
   sudo sed -i s:"ansidecl.h":\<libiberty/ansidecl.h\>:g /usr/include/bfd.h || true
 fi
+install_ghc_global
 }
 
 update_opencog_source() {
@@ -668,6 +676,21 @@ case $PACKAGE_TYPE in
   dev)	exit 0;;
 esac
 
+}
+
+install_ghc_global() {
+if type -p ghc > /dev/null && [[ $(ghc --version) =~ "version 7.8.4" ]];
+then
+  echo "Ghc-7.8.4 found.";
+else
+  wget https://www.haskell.org/ghc/dist/7.8.4/ghc-7.8.4-x86_64-unknown-linux-centos65.tar.xz
+  tar xpvf ghc-7.8.4-x86_64-unknown-linux-centos65.tar.xz
+  cd ghc-7.8.4
+  (./configure && sudo make install) ||\
+  echo "Global ghc installation failed. It will be locally installed by Stack."
+  cd ..
+  rm -rf ghc-7.8.4-x86_64-unknown-linux-centos65.tar.xz ghc-7.8.4/
+fi
 }
 
 locate_live_iso() {
