@@ -37,7 +37,7 @@ package list on the project [stack.yaml](https://github.com/commercialhaskell/st
 ```yaml
 ...
 packages:
-- ...RelativePathToThisDirectory...
+- <ATOMSPACE_ROOT>/opencog/haskell
 ...
 ```
 
@@ -45,8 +45,15 @@ On the other hand, if you simply want to compile some code using this
 library, you should compile with:
 
 ```
-export STACK_YAML=...RelativePathToThisDirectory/stack.yaml
+export STACK_YAML=<ATOMSPACE_ROOT>/opencog/haskell/stack.yaml
 stack ghc example.hs
+```
+
+For using ghci:
+
+```
+export STACK_YAML=<ATOMSPACE_ROOT>/opencog/haskell/stack.yaml
+stack ghci --ghc-options -lhaskell-atomspace
 ```
 
 Or, to avoid defining STACK_YAML every time, you can include this library to your
