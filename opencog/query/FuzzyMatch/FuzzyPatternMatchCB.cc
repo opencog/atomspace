@@ -27,7 +27,7 @@
 
 using namespace opencog;
 
-//#define DEBUG
+// #define DEBUG
 
 FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as, const HandleSeq& rl)
         : DefaultPatternMatchCB(as),
@@ -54,25 +54,21 @@ void FuzzyPatternMatchCB::find_starters(const Handle& hp, const size_t& depth,
 {
     // Traverse its outgoing set if it is a link
     LinkPtr lp(LinkCast(hp));
-    if (lp)
-    {
+    if (lp) {
         for (Handle h : lp->getOutgoingSet())
             find_starters(h, depth + 1, clause_idx, hp, rtn);
     }
 
     // Get the nodes that are not an instance nor a variable
-    else
-    {
+    else {
         NodePtr np(NodeCast(hp));
 
-        if (hp != Handle::UNDEFINED and np)
-        {
+        if (hp != Handle::UNDEFINED and np) {
             pat_size++;
 
             if ((np->getType() != VARIABLE_NODE) and
                 (np->getName().find("@") == std::string::npos) and
-                (std::find(reject_list.begin(), reject_list.end(), hp) == reject_list.end()))
-            {
+                (std::find(reject_list.begin(), reject_list.end(), hp) == reject_list.end())) {
                 Starter sn;
                 sn.uuid = hp.value();
                 sn.handle = hp;
@@ -87,32 +83,33 @@ void FuzzyPatternMatchCB::find_starters(const Handle& hp, const size_t& depth,
 }
 
 /**
- * Implement the neighbor_search method in the Pattern Matcher. The main
- * different between this method and the default one is that this initiates
+ * Implement the initiate_search method in the Pattern Matcher. The main
+ * difference between this method and the default one is that this initiates
  * multiple searches using differnt nodes as starters instead of one,
  * explores the neighborhood of each of them, and captures the partial
  * matches in the callbacks. It stops when there are no more available
- * starters in the pattern, or the number of searches it has done
- * equals to MAX_SEARCH.
+ * starters in the pattern.
  *
  * @param pme   The PatternMatchEngine object
- * @param vars  Variables for the Pattern Matcher
- * @param pat   The pattern we are looking for
  * @return      True if one or more solutions are found, false otherwise
  */
 bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
 {
     // Find potential starters from the clause (the input pattern)
-    const Handle& clause = _pattern->mandatory[0];
+    clause = _pattern->mandatory[0];
     find_starters(clause, 0, 0, Handle::UNDEFINED, potential_starters);
 
     // For removing duplicates, if any, form the list of potential starters,
     // as we want to have a different starters for each of the searches
     auto check_uniqueness = [](const Starter& s1, const Starter& s2)
-    { return s1.uuid == s2.uuid; };
+    {
+        return s1.uuid == s2.uuid;
+    };
 
     auto sort_by_uuid = [](const Starter& s1, const Starter& s2)
-    { return s1.uuid < s2.uuid; };
+    {
+        return s1.uuid < s2.uuid;
+    };
 
     std::sort(potential_starters.begin(), potential_starters.end(), sort_by_uuid);
     potential_starters.erase(std::unique(potential_starters.begin(),
@@ -132,8 +129,7 @@ bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
     // Start the searches
     size_t search_cnt = 0;
     size_t num_starters = potential_starters.size();
-    while (num_starters > search_cnt)
-    {
+    while (num_starters > search_cnt) {
         const Handle& starter_term = potential_starters[search_cnt].term;
         const Handle& best_start = potential_starters[search_cnt].handle;
         search_cnt++;
@@ -149,8 +145,7 @@ bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
 
         IncomingSet iset = best_start->getIncomingSet();
         size_t iset_size = iset.size();
-        for (size_t i = 0; i < iset_size; i++)
-        {
+        for (size_t i = 0; i < iset_size; i++) {
             Handle h(iset[i]);
 
 #ifdef DEBUG
@@ -163,8 +158,7 @@ bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
     }
 
     // Let's end the search here if there are solutions, continue could be costly
-    if (solns.size() > 0)
-    {
+    if (solns.size() > 0) {
         std::cout << "Fuzzy match is finished.\n";
         return true;
     }
@@ -174,20 +168,23 @@ bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
 }
 
 /**
- * Implement the clause_match callback.
+ * Implement the link_match callback.
  *
- * @param ph  The pattern
- * @param gh  The potential solution found by the pattern matcher
- * @return    Always return true???
+ * It compares and estimates the similarity between the two input links, if they
+ * haven't been compared previously.
+ *
+ * @param pl  A link in the pattern
+ * @param gl  A link in the potential solution
+ * @return    Always return true to accept it, and keep the matching going
  */
-bool FuzzyPatternMatchCB::clause_match(const Handle& ph, const Handle& gh)
+bool FuzzyPatternMatchCB::link_match(const LinkPtr& pl, const LinkPtr& gl)
 {
-    // Avoid comparing the same pair of atoms again
+    const Handle& gh = gl->getHandle();
     UUID gid = gh.value();
 
-    if (std::find(prev_compared.begin(), prev_compared.end(), gid) == prev_compared.end())
-    {
-        check_if_accept(ph, gh);
+    // Avoid comparing the same pair of atoms again
+    if (std::find(prev_compared.begin(), prev_compared.end(), gid) == prev_compared.end()) {
+        check_if_accept(clause, gh);
         prev_compared.push_back(gid);
     }
 
@@ -209,10 +206,8 @@ void FuzzyPatternMatchCB::check_if_accept(const Handle& ph, const Handle& gh)
     HandleSeq gn = get_all_nodes(gh);
 
     // Reject if the potential solution contains any atoms in the reject list
-    for (const Handle& rh : reject_list)
-    {
-        if (std::find(gn.begin(), gn.end(), rh) != gn.end())
-        {
+    for (const Handle& rh : reject_list) {
+        if (std::find(gn.begin(), gn.end(), rh) != gn.end()) {
 #ifdef DEBUG
         std::cout << "Rejecting:\n" << gh->toShortString()
                   << "because of the existance of:\n" << rh->toShortString()
@@ -222,7 +217,7 @@ void FuzzyPatternMatchCB::check_if_accept(const Handle& ph, const Handle& gh)
         }
     }
 
-    // How many nodes the potential solution has in common with the pattern
+    // Find out how many nodes the potential solution has in common with the pattern
     HandleSeq common_nodes;
     std::sort(pn.begin(), pn.end());
     std::sort(gn.begin(), gn.end());
@@ -235,15 +230,13 @@ void FuzzyPatternMatchCB::check_if_accept(const Handle& ph, const Handle& gh)
 
     // Estimate how "rare" the common nodes are, by doing something like TFIDF
     double rareness = 0;
-    for (const Handle& common_node : common_nodes)
-    {
+    for (const Handle& common_node : common_nodes) {
         // No. of times it appears in the pattern over the size of the pattern
         double f1 = (double) std::count(pn.begin(), pn.end(), common_node) / pn.size();
 
         size_t iss;
         auto it = in_set_size.find(common_node);
-        if (it == in_set_size.end())
-        {
+        if (it == in_set_size.end()) {
             iss = common_node->getIncomingSetSize();
             in_set_size.insert({common_node, iss});
         }
@@ -274,14 +267,11 @@ void FuzzyPatternMatchCB::check_if_accept(const Handle& ph, const Handle& gh)
 #endif
 
     // Decide if we should accept the potential solutions or not
-    if (similarity > max_similarity)
-    {
+    if (similarity > max_similarity) {
         max_similarity = similarity;
         solns.clear();
         solns.push_back(gh);
     }
 
     else if (similarity == max_similarity) solns.push_back(gh);
-
-    return;
 }

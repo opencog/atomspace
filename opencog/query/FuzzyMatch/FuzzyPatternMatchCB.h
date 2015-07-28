@@ -35,7 +35,7 @@ namespace opencog
             // The solutions
             HandleSeq solns;
 
-            FuzzyPatternMatchCB(AtomSpace* as, const HandleSeq& rl = {});
+            FuzzyPatternMatchCB(AtomSpace* as, const HandleSeq& rl);
 
             virtual bool initiate_search(PatternMatchEngine* pme);
 
@@ -47,22 +47,27 @@ namespace opencog
             }
 
             virtual bool fuzzy_match(const Handle& h1, const Handle& h2)
-            { return true; }
+            {
+                return true;
+            }
 
-            virtual bool link_match(const LinkPtr& pLink, const LinkPtr& gLink)
-            { return true; }
+            virtual bool link_match(const LinkPtr& pLink, const LinkPtr& gLink);
 
             virtual bool node_match(const Handle& pNode, const Handle& gNode)
-            { return true; }
-
-            virtual bool clause_match(const Handle& ph, const Handle& gh);
+            {
+                return true;
+            }
 
             virtual bool grounding(const std::map<Handle, Handle>& var_soln,
                                    const std::map<Handle, Handle>& term_soln)
-            { return true; }
+            {
+                return true;
+            }
 
         private:
             const Pattern* _pattern = NULL;
+
+            Handle clause;
 
             HandleSeq reject_list;
 

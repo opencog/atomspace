@@ -42,10 +42,6 @@ Handle FunctionWrap::wrapper(Handle h)
 
 Handle FunctionWrap::wrapper_hq(Handle h, const HandleSeq& hq)
 {
-	// TODO: Make the original wrapper to accept an optional HandleSeq?
-	//       But sometimes even if the input HandleSeq is empty, we may still
-	//       want the _func_hq to be called instead of _func... so how to decide
-	//       which function to go?
 	AtomSpace *as = SchemeSmob::ss_get_env_as(_name);
 	return _func_hq(as, h, hq);
 }
