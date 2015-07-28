@@ -1,6 +1,6 @@
 -- GSoC 2015 - Haskell bindings for OpenCog.
 {-# LANGUAGE GADTs, ExistentialQuantification, RankNTypes, AutoDeriveTypeable,
-    DataKinds, ConstraintKinds, KindSignatures, StandaloneDeriving #-}
+    TypeOperators,DataKinds, ConstraintKinds, KindSignatures, StandaloneDeriving #-}
 
 -- | This Module defines the main data types for Haskell bindings.
 module OpenCog.AtomSpace.Types (
@@ -12,7 +12,7 @@ module OpenCog.AtomSpace.Types (
   , getType
   ) where
 
-import OpenCog.AtomSpace.Inheritance    (Is)
+import OpenCog.AtomSpace.Inheritance    (type (<~))
 import OpenCog.AtomSpace.AtomType       (AtomType(..))
 import Data.Typeable                    (Typeable)
 
@@ -46,37 +46,37 @@ data TruthVal = SimpleTV { tvMean       :: Double
 -- (necessary when working with many instances of different atoms,
 -- for example, for lists of atoms)
 data AtomGen where
-    AtomGen :: Is a AtomT => Atom a -> AtomGen
+    AtomGen :: (a <~ AtomT) => Atom a -> AtomGen
 
 deriving instance Show AtomGen
 
 -- | 'appAtomGen' evaluates a given function with the atom instance
 -- wrapped inside the 'AtomGen' type.
-appAtomGen :: (forall a. Is a AtomT => Atom a -> b) -> AtomGen -> b
+appAtomGen :: (forall a. (a <~ AtomT) => Atom a -> b) -> AtomGen -> b
 appAtomGen f (AtomGen at) = f at
 
 -- | 'Atom' is the main data type to represent the different types of atoms.
 data Atom (a :: AtomType) where
     PredicateNode   :: AtomName -> Atom PredicateT
-    AndLink         :: (Is a ConceptT,Is b ConceptT) =>
+    AndLink         :: (a <~ ConceptT,b <~ ConceptT) =>
                        Atom a -> Atom b -> (Maybe TruthVal) -> Atom AndT
-    OrLink          :: (Is a ConceptT,Is b ConceptT) =>
+    OrLink          :: (a <~ ConceptT,b <~ ConceptT) =>
                        Atom a -> Atom b -> (Maybe TruthVal) -> Atom OrT
-    ImplicationLink :: (Is a AtomT,Is b AtomT) =>
+    ImplicationLink :: (a <~ AtomT,b <~ AtomT) =>
                        Atom a -> Atom b -> (Maybe TruthVal) -> Atom ImplicationT
-    EquivalenceLink :: (Is a AtomT,Is b AtomT) =>
+    EquivalenceLink :: (a <~ AtomT,b <~ AtomT) =>
                        Atom a -> Atom b -> (Maybe TruthVal) -> Atom EquivalenceT
-    EvaluationLink  :: (Is p PredicateT,Is l ListT) =>
+    EvaluationLink  :: (p <~ PredicateT,l <~ ListT) =>
                        Atom p -> Atom l -> (Maybe TruthVal) -> Atom EvaluationT
 
     ConceptNode     :: AtomName -> (Maybe TruthVal) -> Atom ConceptT
-    InheritanceLink :: (Is c1 ConceptT,Is c2 ConceptT) =>
+    InheritanceLink :: (c1 <~ ConceptT,c2 <~ ConceptT) =>
                        Atom c1 -> Atom c2 -> (Maybe TruthVal) -> Atom InheritanceT
-    SimilarityLink  :: (Is c1 ConceptT,Is c2 ConceptT) =>
+    SimilarityLink  :: (c1 <~ ConceptT,c2 <~ ConceptT) =>
                        Atom c1 -> Atom c2 -> (Maybe TruthVal) -> Atom SimilarityT
-    MemberLink      :: (Is c1 ConceptT,Is c2 ConceptT) =>
+    MemberLink      :: (c1 <~ ConceptT,c2 <~ ConceptT) =>
                        Atom c1 -> Atom c2 -> (Maybe TruthVal) -> Atom MemberT
-    SatisfyingSetLink :: (Is p PredicateT) =>
+    SatisfyingSetLink :: (p <~ PredicateT) =>
                        Atom p -> Atom SatisfyingSetT
 
     NumberNode :: Double -> Atom NumberT
@@ -85,7 +85,7 @@ data Atom (a :: AtomType) where
 
     SchemaNode :: AtomName -> Atom SchemaT
     GroundedSchemaNode :: AtomName -> Atom GroundedSchemaT
-    ExecutionLink :: (Is s SchemaT,Is l ListT,Is a AtomT) =>
+    ExecutionLink :: (s <~ SchemaT,l <~ ListT,a <~ AtomT) =>
                      Atom s -> Atom l -> Atom a -> Atom ExecutionT
 
 deriving instance Show (Atom a)

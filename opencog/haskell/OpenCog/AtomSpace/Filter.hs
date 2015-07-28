@@ -9,17 +9,17 @@ module OpenCog.AtomSpace.Filter (
   , FilterIsChild(..)
   ) where
 
-import OpenCog.AtomSpace.Inheritance    (Is)
+import OpenCog.AtomSpace.Inheritance    (type (<~))
 import OpenCog.AtomSpace.AtomType       (AtomType(..))
 import OpenCog.AtomSpace.Types          (Atom(..))
 
 -- | 'Gen' groups all the atoms that are children of the atom type a.
 data Gen a where
-    Gen :: Is b a => Atom b -> Gen a
+    Gen :: (b <~ a) => Atom b -> Gen a
 
 -- | 'appGen' evaluates a given function with the atom type instance
 -- wrapped inside the 'Gen' type.
-appGen :: (forall b. Is b a => Atom b -> c) -> Gen a -> c
+appGen :: (forall b. (b <~ a) => Atom b -> c) -> Gen a -> c
 appGen f (Gen at) = f at
 
 -- | 'FilterIsChild' class defines a filter on the children of atom type 'a'.

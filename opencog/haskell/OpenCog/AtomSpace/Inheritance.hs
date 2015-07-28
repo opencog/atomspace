@@ -5,7 +5,7 @@
 
 -- | This Module defines the relation between different atom types.
 module OpenCog.AtomSpace.Inheritance (
-   Is
+  type (<~)
   ) where
 
 import GHC.Exts                     (Constraint)
@@ -40,7 +40,8 @@ type family ParConst a (b :: [AtomType]) :: Constraint where
     ParConst a (b ': c) = (IsParent a b,ParConst a c)
 
 
--- | 'Is' builds a list of constraints to assert that all the ancestors of b
+-- | '<~' builds a list of constraints to assert that all the ancestors of b
 -- (included b itself) are ancestors of a.
-type Is a b = ParConst a (FUp '[b] '[])
+infix 9 <~
+type a <~ b = ParConst a (FUp '[b] '[])
 

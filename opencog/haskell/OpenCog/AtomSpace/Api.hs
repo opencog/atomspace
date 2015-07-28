@@ -1,5 +1,5 @@
 -- GSoC 2015 - Haskell bindings for OpenCog.
-{-# LANGUAGE ForeignFunctionInterface,DataKinds,ConstraintKinds #-}
+{-# LANGUAGE ForeignFunctionInterface,TypeOperators,DataKinds,ConstraintKinds #-}
 
 -- | This Module defines the main functions to interact with the AtomSpace
 -- creating/removing/modifying atoms.
@@ -23,7 +23,7 @@ import OpenCog.AtomSpace.Env         (AtomSpaceRef(..),AtomSpace,getAtomSpace)
 import OpenCog.AtomSpace.Internal    (Handle,AtomTypeRaw,AtomRaw(..),TVRaw(..),
                                       toRaw,fromRaw,tvMAX_PARAMS)
 import OpenCog.AtomSpace.Types       (Atom(..),AtomName(..),TruthVal(..))
-import OpenCog.AtomSpace.Inheritance (Is)
+import OpenCog.AtomSpace.Inheritance (type (<~))
 import OpenCog.AtomSpace.AtomType    (AtomType(AtomT))
 
 --------------------------------------------------------------------------------
@@ -197,7 +197,7 @@ getWithHandle i = do
 
 -- | 'get' looks for an atom in the atomspace and returns it.
 -- (With updated mutable information)
-get :: Is a AtomT => Atom a -> AtomSpace (Maybe (Atom a))
+get :: (a <~ AtomT) => Atom a -> AtomSpace (Maybe (Atom a))
 get i = do
     m <- getWithHandle $ toRaw i
     return $ case m of

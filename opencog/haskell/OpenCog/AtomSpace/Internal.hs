@@ -57,7 +57,7 @@ toRaw at = let atype = toAtomTypeRaw $ getType at
 
 -- Function to get an Atom back from its general representation (if possible).
 fromRaw :: Typeable a => AtomRaw -> Atom a -> Maybe (Atom a)
-fromRaw raw orig = fromRaw' raw >>= appAtomGen cast
+fromRaw raw _ = fromRaw' raw >>= appAtomGen cast
 
 -- Function to get an Atom back from its general representation (if possible).
 fromRaw' :: AtomRaw -> Maybe (AtomGen)

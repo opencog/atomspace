@@ -3,7 +3,7 @@
              AutoDeriveTypeable, TypeFamilies, ScopedTypeVariables,
              TypeOperators, ConstraintKinds #-}
 
--- | This Module defines tha different Atom Types and some utils functions.
+-- | This Module defines the different Atom Types and some utils functions.
 module OpenCog.AtomSpace.AtomType (
     AtomType(..)
   , Up(..)
