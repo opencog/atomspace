@@ -1,3 +1,4 @@
+INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
 ADD_EXECUTABLE(PrimitiveExample
 	PrimitiveExample.cc
