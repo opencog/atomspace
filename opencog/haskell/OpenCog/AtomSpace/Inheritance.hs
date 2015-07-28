@@ -1,7 +1,14 @@
 -- GSoC 2015 - Haskell bindings for OpenCog.
-{-# LANGUAGE EmptyDataDecls, StandaloneDeriving, DeriveDataTypeable,
-             FlexibleInstances, DataKinds, KindSignatures, TypeFamilies,
-             TypeOperators, ConstraintKinds, UndecidableInstances #-}
+{-# LANGUAGE EmptyDataDecls       #-}
+{-# LANGUAGE StandaloneDeriving   #-}
+{-# LANGUAGE DeriveDataTypeable   #-}
+{-# LANGUAGE FlexibleInstances    #-}
+{-# LANGUAGE DataKinds            #-}
+{-# LANGUAGE KindSignatures       #-}
+{-# LANGUAGE TypeFamilies         #-}
+{-# LANGUAGE TypeOperators        #-}
+{-# LANGUAGE ConstraintKinds      #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- | This Module defines the relation between different atom types.
 module OpenCog.AtomSpace.Inheritance (

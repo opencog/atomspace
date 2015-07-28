@@ -1,5 +1,8 @@
 -- GSoC 2015 - Haskell bindings for OpenCog.
-{-# LANGUAGE ForeignFunctionInterface,TypeOperators,DataKinds,ConstraintKinds #-}
+{-# LANGUAGE ForeignFunctionInterface #-}
+{-# LANGUAGE ConstraintKinds          #-}
+{-# LANGUAGE TypeOperators            #-}
+{-# LANGUAGE DataKinds                #-}
 
 -- | This Module defines the main functions to interact with the AtomSpace
 -- creating/removing/modifying atoms.

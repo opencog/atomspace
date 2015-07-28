@@ -1,7 +1,13 @@
 -- GSoC 2015 - Haskell bindings for OpenCog.
-{-# LANGUAGE GADTs, ExistentialQuantification, DataKinds, Rank2Types,
-             AutoDeriveTypeable, TypeFamilies, ScopedTypeVariables,
-             TypeOperators, ConstraintKinds #-}
+{-# LANGUAGE GADTs                      #-}
+{-# LANGUAGE ExistentialQuantification  #-}
+{-# LANGUAGE DataKinds                  #-}
+{-# LANGUAGE Rank2Types                 #-}
+{-# LANGUAGE AutoDeriveTypeable         #-}
+{-# LANGUAGE ScopedTypeVariables        #-}
+{-# LANGUAGE TypeFamilies               #-}
+{-# LANGUAGE TypeOperators              #-}
+{-# LANGUAGE ConstraintKinds            #-}
 
 -- | This Module defines the different Atom Types and some utils functions.
 module OpenCog.AtomSpace.AtomType (

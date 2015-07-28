@@ -1,6 +1,11 @@
 -- GSoC 2015 - Haskell bindings for OpenCog.
-{-# LANGUAGE GADTs, ExistentialQuantification, DataKinds, Rank2Types,
-             ScopedTypeVariables, TypeOperators, ConstraintKinds #-}
+{-# LANGUAGE GADTs                     #-}
+{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE DataKinds                 #-}
+{-# LANGUAGE Rank2Types                #-}
+{-# LANGUAGE ScopedTypeVariables       #-}
+{-# LANGUAGE TypeOperators             #-}
+{-# LANGUAGE ConstraintKinds           #-}
 
 -- | This Module defines atom filters based on their hierarchy.
 module OpenCog.AtomSpace.Filter (

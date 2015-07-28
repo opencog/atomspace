@@ -1,5 +1,6 @@
 -- GSoC 2015 - Haskell bindings for OpenCog.
-{-# LANGUAGE GADTs,DataKinds #-}
+{-# LANGUAGE GADTs     #-}
+{-# LANGUAGE DataKinds #-}
 
 -- | This Module defines some useful data types for proper interaction
 -- with the AtomSpace C wrapper library.
