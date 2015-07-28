@@ -6,8 +6,11 @@ https://en.wikipedia.org/wiki/Forward_chaining
 In this example we have a black box for which we know there is something in it, and it makes croaking sounds and eats flies.
 The objective now is to find the color of the thing in black box.
 we have the following relations defined
+```
 1. If X croaks and X eats flies - Then X is a frog
 2. If X is a frog - Then X is green
+
+```
 Let's say the thing in black box is named fritz and from above relations we need to deduce its color.
 
 We define the first rule:
