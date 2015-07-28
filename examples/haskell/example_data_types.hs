@@ -32,7 +32,7 @@ ex1 = ExecutionLink
 
 {- Type checking error.
 ex2 = ExecutionLink
-          (ConceptNode "some-fun") -- ConceptNodeT type isn't instance of IsSchema
+          (ConceptNode "some-fun" someTv) -- ConceptNodeT type isn't instance of IsSchema
           (ListLink [ AtomGen $ ConceptNode "Arg1" someTv
                     , AtomGen $ ConceptNode "Arg2" someTv
                     ])
