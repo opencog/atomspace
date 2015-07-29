@@ -681,13 +681,14 @@ esac
 install_ghc_global() {
 if type -p ghc > /dev/null && [[ $(ghc --version) =~ "version 7.8.4" ]];
 then
-  echo "Ghc-7.8.4 found.";
+  MESSAGE="Ghc-7.8.4 found."; message
 else
+  MESSAGE="Installing ghc-7.8.4..."; message
   wget https://www.haskell.org/ghc/dist/7.8.4/ghc-7.8.4-x86_64-unknown-linux-centos65.tar.xz
   tar xpvf ghc-7.8.4-x86_64-unknown-linux-centos65.tar.xz
   cd ghc-7.8.4
   (./configure && sudo make install) ||\
-  echo "Global ghc installation failed. It will be locally installed by Stack."
+  MESSAGE="Global ghc installation failed. It will be locally installed by Stack."; message
   cd ..
   rm -rf ghc-7.8.4-x86_64-unknown-linux-centos65.tar.xz ghc-7.8.4/
 fi
