@@ -102,20 +102,13 @@ bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
 
     // For removing duplicates, if any, form the list of potential starters,
     // as we want to have a different starters for each of the searches
-    auto check_uniqueness = [](const Starter& s1, const Starter& s2)
-    {
-        return s1.uuid == s2.uuid;
-    };
-
-    auto sort_by_uuid = [](const Starter& s1, const Starter& s2)
-    {
-        return s1.uuid < s2.uuid;
-    };
-
-    std::sort(potential_starters.begin(), potential_starters.end(), sort_by_uuid);
+    std::sort(potential_starters.begin(), potential_starters.end(),
+              [](const Starter& s1, const Starter& s2)
+              { return s1.uuid < s2.uuid; });
     potential_starters.erase(std::unique(potential_starters.begin(),
                                          potential_starters.end(),
-                                         check_uniqueness),
+                                         [](const Starter& s1, const Starter& s2)
+                                         { return s1.uuid == s2.uuid; }),
                              potential_starters.end());
 
     // Sort the potential starters according to their "width" and "depth"
@@ -188,8 +181,8 @@ bool FuzzyPatternMatchCB::link_match(const LinkPtr& pl, const LinkPtr& gl)
 
     // Check if we have compared this atom previously
     if (std::find(prev_compared.begin(), prev_compared.end(), gid) == prev_compared.end()) {
-        // TODO: Pass all nodes instead of handles
-        check_if_accept(clause, gh);
+        if (pat_nodes.empty()) pat_nodes = get_all_nodes(clause);
+        check_if_accept(gh);
         prev_compared.push_back(gid);
     }
 
@@ -197,18 +190,16 @@ bool FuzzyPatternMatchCB::link_match(const LinkPtr& pl, const LinkPtr& gl)
 }
 
 /**
- * Compare and estimate the similarity between the two inputs, and decide
- * whether or not to accept it. The potential solution will be accepted if
- * it has a similarity greater than or equals to the maximum similarity that we
- * know, rejected otherwise.
+ * Compare and estimate the similarity between the pattern and the solution,
+ * and decide whether or not to accept it. The potential solution will be
+ * accepted if it has a similarity greater than or equals to the maximum
+ * similarity that we know, rejected otherwise.
  *
- * @param ph  The pattern
  * @param gh  The potential solution
  */
-void FuzzyPatternMatchCB::check_if_accept(const Handle& ph, const Handle& gh)
+void FuzzyPatternMatchCB::check_if_accept(const Handle& gh)
 {
-    // TODO: store as global
-    HandleSeq pn = get_all_nodes(ph);
+    // Get all the ndoes from the potential solution
     HandleSeq gn = get_all_nodes(gh);
 
     // Reject if the potential solution contains any atoms in the reject list
@@ -225,9 +216,9 @@ void FuzzyPatternMatchCB::check_if_accept(const Handle& ph, const Handle& gh)
 
     // Find out how many nodes the potential solution has in common with the pattern
     HandleSeq common_nodes;
-    std::sort(pn.begin(), pn.end());
+    std::sort(pat_nodes.begin(), pat_nodes.end());
     std::sort(gn.begin(), gn.end());
-    std::set_intersection(pn.begin(), pn.end(), gn.begin(), gn.end(),
+    std::set_intersection(pat_nodes.begin(), pat_nodes.end(), gn.begin(), gn.end(),
                           std::back_inserter(common_nodes));
     size_t common = common_nodes.size();
 
@@ -238,7 +229,8 @@ void FuzzyPatternMatchCB::check_if_accept(const Handle& ph, const Handle& gh)
     double rareness = 0;
     for (const Handle& common_node : common_nodes) {
         // No. of times it appears in the pattern over the size of the pattern
-        double f1 = (double) std::count(pn.begin(), pn.end(), common_node) / pn.size();
+        double f1 = (double) std::count(pat_nodes.begin(), pat_nodes.end(), common_node) /
+                    pat_nodes.size();
 
         size_t iss;
         auto it = in_set_size.find(common_node);

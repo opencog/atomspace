@@ -67,8 +67,11 @@ namespace opencog
         private:
             const Pattern* _pattern = NULL;
 
-            // The clause (input pattern)
+            // The input pattern
             Handle clause;
+
+            // The nodes in the pattern
+            HandleSeq pat_nodes;
 
             // Type of atom that we are looking for
             Type rtn_type;
@@ -107,7 +110,7 @@ namespace opencog
                                const size_t& clause_idx, const Handle& term,
                                std::vector<Starter>& rtn);
 
-            void check_if_accept(const Handle& ph, const Handle& gh);
+            void check_if_accept(const Handle& gh);
     };
 }
 

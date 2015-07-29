@@ -23,7 +23,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/bind/PatternLink.h>
-#include <time.h>
 
 #include "FuzzyPatternMatchCB.h"
 #include "FuzzyPatternMatch.h"
@@ -47,9 +46,7 @@ Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp,
                                        const HandleSeq& rej_list)
 {
 #ifdef HAVE_GUILE
-    std::cout << "!!!!! " << time(0) << "\n";
     FuzzyPatternMatchCB fpmcb(as, rtn_type, rej_list);
-    std::cout << "!!!!! " << time(0) << "\n";
 
     HandleSeq terms;
     terms.push_back(hp);
@@ -67,7 +64,6 @@ Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp,
     // The result_list contains a list of the grounded expressions.
     // Turn it into a true list, and return it.
     Handle gl = as->add_link(LIST_LINK, fpmcb.solns);
-    std::cout << "!!!!! " << time(0) << "\n";
     return gl;
 #else
     return Handle::UNDEFINED;
