@@ -19,11 +19,11 @@ FunctionWrap::FunctionWrap(Handle (f)(AtomSpace*, const Handle&),
 	define_scheme_primitive(_name, &FunctionWrap::wrapper, this, modname);
 }
 
-FunctionWrap::FunctionWrap(Handle (f)(AtomSpace*, const Handle&, const HandleSeq&),
+FunctionWrap::FunctionWrap(Handle (f)(AtomSpace*, const Handle&, Type, const HandleSeq&),
 			   const char* funcname, const char* modname)
-	: _func_hq(f), _pred(NULL), _name(funcname)
+	: _func_htq(f), _pred(NULL), _name(funcname)
 {
-	define_scheme_primitive(_name, &FunctionWrap::wrapper_hq, this, modname);
+	define_scheme_primitive(_name, &FunctionWrap::wrapper_htq, this, modname);
 }
 
 FunctionWrap::FunctionWrap(TruthValuePtr (p)(AtomSpace*, const Handle&),
@@ -40,10 +40,10 @@ Handle FunctionWrap::wrapper(Handle h)
 	return _func(as, h);
 }
 
-Handle FunctionWrap::wrapper_hq(Handle h, const HandleSeq& hq)
+Handle FunctionWrap::wrapper_htq(Handle h, Type t, const HandleSeq& seq)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as(_name);
-	return _func_hq(as, h, hq);
+	return _func_htq(as, h, t, seq);
 }
 
 TruthValuePtr FunctionWrap::prapper(Handle h)

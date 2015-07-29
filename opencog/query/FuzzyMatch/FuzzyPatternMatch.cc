@@ -23,6 +23,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/bind/PatternLink.h>
+#include <time.h>
 
 #include "FuzzyPatternMatchCB.h"
 #include "FuzzyPatternMatch.h"
@@ -36,16 +37,19 @@ using namespace opencog;
  * It uses the Pattern Matcher to find hypergraphs in the atomspace that are
  * similar to the query hypergraph, and returns the most similar ones.
  *
- * @param as  The atomspace that we are using
- * @param hp  The query hypergraph
- * @param rl  A list of atoms that we don't want any of them to exist in the results
+ * @param as        The atomspace that we are using
+ * @param hp        The query hypergraph
+ * @param rej_list  A list of atoms that we don't want any of them to exist in the results
  * @return    One or more similar hypergraphs
  */
 Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp,
-                                       const HandleSeq& rl)
+                                       Type rtn_type,
+                                       const HandleSeq& rej_list)
 {
 #ifdef HAVE_GUILE
-    FuzzyPatternMatchCB fpmcb(as, rl);
+    std::cout << "!!!!! " << time(0) << "\n";
+    FuzzyPatternMatchCB fpmcb(as, rtn_type, rej_list);
+    std::cout << "!!!!! " << time(0) << "\n";
 
     HandleSeq terms;
     terms.push_back(hp);
@@ -63,6 +67,7 @@ Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp,
     // The result_list contains a list of the grounded expressions.
     // Turn it into a true list, and return it.
     Handle gl = as->add_link(LIST_LINK, fpmcb.solns);
+    std::cout << "!!!!! " << time(0) << "\n";
     return gl;
 #else
     return Handle::UNDEFINED;

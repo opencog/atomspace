@@ -94,11 +94,11 @@ class SchemePrimitive : public PrimitiveEnviron
 			Handle (T::*h_h)(Handle);
 			Handle (T::*h_hi)(Handle, int);
 			Handle (T::*h_hh)(Handle, Handle);
-			Handle (T::*h_hq)(Handle, const HandleSeq&);
 			Handle (T::*h_hs)(Handle, const std::string&);
 			Handle (T::*h_sq)(const std::string&, const HandleSeq&);
 			Handle (T::*h_sqq)(const std::string&,
 			                   const HandleSeq&, const HandleSeq&);
+			Handle (T::*h_htq)(Handle, Type, const HandleSeq&);
 			HandleSeq (T::*q_h)(Handle);
 			HandleSeq (T::*q_hti)(Handle, Type, int);
 			HandleSeq (T::*q_htib)(Handle, Type, int, bool);
@@ -135,10 +135,10 @@ class SchemePrimitive : public PrimitiveEnviron
 			H_H,   // return handle, take handle
 			H_HI,  // return handle, take handle and int
 			H_HH,  // return handle, take handle and handle
-			H_HQ,  // return handle, take handle and HandleSeq
 			H_HS,  // return handle, take handle and string
 			H_SQ,  // return handle, take string and HandleSeq
 			H_SQQ, // return handle, take string, HandleSeq and HandleSeq
+			H_HTQ, // return handle, take handle, type, and HandleSeq
 			Q_H,   // return HandleSeq, take handle
 			Q_HTI, // return HandleSeq, take handle, type, and int
 			Q_HTIB,// return HandleSeq, take handle, type, and bool
@@ -230,17 +230,6 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
-				case H_HQ:
-				{
-					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
-
-					SCM list = scm_cadr(args);
-					HandleSeq seq = SchemeSmob::verify_handle_list(list, scheme_name, 2);
-
-					Handle rh((that->*method.h_hq)(h, seq));
-					rc = SchemeSmob::handle_to_scm(rh);
-					break;
-				}
 				case H_HS:
 				{
 					Handle h(SchemeSmob::verify_handle(scm_car(args),
@@ -278,6 +267,19 @@ class SchemePrimitive : public PrimitiveEnviron
 					HandleSeq seq2 = SchemeSmob::verify_handle_list(list2, scheme_name, 3);
 
 					Handle rh((that->*method.h_sqq)(str, seq1, seq2));
+					rc = SchemeSmob::handle_to_scm(rh);
+					break;
+				}
+				case H_HTQ:
+				{
+					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
+
+					Type t = SchemeSmob::verify_atom_type(scm_cadr(args), scheme_name, 2);
+
+					SCM list = scm_caddr(args);
+					HandleSeq seq = SchemeSmob::verify_handle_list(list, scheme_name, 3);
+
+					Handle rh((that->*method.h_htq)(h, t, seq));
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
@@ -585,10 +587,10 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_1(H_H,  h_h,  Handle, Handle)
 		DECLARE_CONSTR_2(H_HI, h_hi, Handle, Handle, int)
 		DECLARE_CONSTR_2(H_HH, h_hh, Handle, Handle, Handle)
-		DECLARE_CONSTR_2(H_HQ, h_hq, Handle, Handle, const HandleSeq&)
 		DECLARE_CONSTR_2(H_HS, h_hs, Handle, Handle, const std::string&)
 		DECLARE_CONSTR_2(H_SQ, h_sq, Handle, const std::string&, const HandleSeq&)
 		DECLARE_CONSTR_3(H_SQQ, h_sqq, Handle, const std::string&, const HandleSeq&, const HandleSeq&)
+		DECLARE_CONSTR_3(H_HTQ, h_htq, Handle, Handle, Type, const HandleSeq&)
 		DECLARE_CONSTR_1(Q_H, q_h, HandleSeq, Handle)
 		DECLARE_CONSTR_3(Q_HTI, q_hti, HandleSeq, Handle, Type, int)
 		DECLARE_CONSTR_4(Q_HTIB, q_htib, HandleSeq, Handle, Type, int, bool)
@@ -671,7 +673,6 @@ DECLARE_DECLARE_2(bool, Handle, int)
 DECLARE_DECLARE_2(bool, Handle, Handle)
 DECLARE_DECLARE_2(Handle, Handle, int)
 DECLARE_DECLARE_2(Handle, Handle, Handle)
-DECLARE_DECLARE_2(Handle, Handle, const HandleSeq&)
 DECLARE_DECLARE_2(Handle, Handle, const std::string&)
 DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
 DECLARE_DECLARE_2(HandleSeqSeq, Handle, int)
@@ -680,6 +681,7 @@ DECLARE_DECLARE_2(void, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, Type, int)
 DECLARE_DECLARE_3(double, Handle, Handle, Type)
 DECLARE_DECLARE_3(Handle, const std::string&, const HandleSeq&, const HandleSeq&)
+DECLARE_DECLARE_3(Handle, Handle, Type, const HandleSeq&)
 DECLARE_DECLARE_3(HandleSeq, Handle, Type, int)
 DECLARE_DECLARE_3(const std::string&, const std::string&,
                   const std::string&, const std::string&)

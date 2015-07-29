@@ -10,6 +10,7 @@
 
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/TruthValue.h>
+#include <opencog/atomspace/atom_types.h>
 
 namespace opencog {
 
@@ -20,9 +21,10 @@ class FunctionWrap
 {
 	private:
 		Handle (*_func)(AtomSpace*, const Handle&);
+		Handle (*_func_htq)(AtomSpace*, const Handle&, Type, const HandleSeq&);
+
 		Handle wrapper(Handle);
-		Handle (*_func_hq)(AtomSpace*, const Handle&, const HandleSeq&);
-		Handle wrapper_hq(Handle, const HandleSeq&);
+		Handle wrapper_htq(Handle, Type, const HandleSeq&);
 
 		TruthValuePtr (*_pred)(AtomSpace*, const Handle&);
 		TruthValuePtr prapper(Handle);
@@ -31,7 +33,7 @@ class FunctionWrap
 	public:
 		FunctionWrap(Handle (*)(AtomSpace*, const Handle&),
 		             const char*, const char*);
-		FunctionWrap(Handle (*)(AtomSpace*, const Handle&, const HandleSeq&),
+		FunctionWrap(Handle (*)(AtomSpace*, const Handle&, Type, const HandleSeq&),
 		             const char*, const char*);
 		FunctionWrap(TruthValuePtr (*)(AtomSpace*, const Handle&),
 		             const char*, const char*);

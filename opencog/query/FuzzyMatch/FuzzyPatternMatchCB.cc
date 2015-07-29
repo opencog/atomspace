@@ -29,9 +29,10 @@ using namespace opencog;
 
 // #define DEBUG
 
-FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as, const HandleSeq& rl)
+FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as, Type rt, const HandleSeq& rl)
         : DefaultPatternMatchCB(as),
-          reject_list(rl),
+          rtn_type(rt),
+          rej_list(rl),
           num_links(as->get_num_links())
 {
 }
@@ -68,7 +69,7 @@ void FuzzyPatternMatchCB::find_starters(const Handle& hp, const size_t& depth,
 
             if ((np->getType() != VARIABLE_NODE) and
                 (np->getName().find("@") == std::string::npos) and
-                (std::find(reject_list.begin(), reject_list.end(), hp) == reject_list.end())) {
+                (std::find(rej_list.begin(), rej_list.end(), hp) == rej_list.end())) {
                 Starter sn;
                 sn.uuid = hp.value();
                 sn.handle = hp;
@@ -95,7 +96,7 @@ void FuzzyPatternMatchCB::find_starters(const Handle& hp, const size_t& depth,
  */
 bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
 {
-    // Find potential starters from the clause (the input pattern)
+    // Find potential starters from the clause
     clause = _pattern->mandatory[0];
     find_starters(clause, 0, 0, Handle::UNDEFINED, potential_starters);
 
@@ -179,11 +180,15 @@ bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
  */
 bool FuzzyPatternMatchCB::link_match(const LinkPtr& pl, const LinkPtr& gl)
 {
+    // Check if the potential solution is having the type that we are looking for
+    if (rtn_type and gl->getType() != rtn_type) return true;
+
     const Handle& gh = gl->getHandle();
     UUID gid = gh.value();
 
-    // Avoid comparing the same pair of atoms again
+    // Check if we have compared this atom previously
     if (std::find(prev_compared.begin(), prev_compared.end(), gid) == prev_compared.end()) {
+        // TODO: Pass all nodes instead of handles
         check_if_accept(clause, gh);
         prev_compared.push_back(gid);
     }
@@ -202,11 +207,12 @@ bool FuzzyPatternMatchCB::link_match(const LinkPtr& pl, const LinkPtr& gl)
  */
 void FuzzyPatternMatchCB::check_if_accept(const Handle& ph, const Handle& gh)
 {
+    // TODO: store as global
     HandleSeq pn = get_all_nodes(ph);
     HandleSeq gn = get_all_nodes(gh);
 
     // Reject if the potential solution contains any atoms in the reject list
-    for (const Handle& rh : reject_list) {
+    for (const Handle& rh : rej_list) {
         if (std::find(gn.begin(), gn.end(), rh) != gn.end()) {
 #ifdef DEBUG
         std::cout << "Rejecting:\n" << gh->toShortString()

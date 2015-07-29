@@ -35,7 +35,7 @@ namespace opencog
             // The solutions
             HandleSeq solns;
 
-            FuzzyPatternMatchCB(AtomSpace* as, const HandleSeq& rl);
+            FuzzyPatternMatchCB(AtomSpace*, Type, const HandleSeq&);
 
             virtual bool initiate_search(PatternMatchEngine* pme);
 
@@ -67,9 +67,14 @@ namespace opencog
         private:
             const Pattern* _pattern = NULL;
 
+            // The clause (input pattern)
             Handle clause;
 
-            HandleSeq reject_list;
+            // Type of atom that we are looking for
+            Type rtn_type;
+
+            // Atoms that we don't want them to exist in the solutions
+            HandleSeq rej_list;
 
             struct Starter
             {
