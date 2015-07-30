@@ -13,9 +13,7 @@ LINK_DIRECTORIES(
 
 LINK_LIBRARIES(
 	atomspace
-	PersistModule
-	persist
-	server
+	persist-sql
 )
 
 # The two tests below currrently work and pass, as of 10 December 2013.
