@@ -1729,6 +1729,9 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
                                        const Handle& grnd,
                                        const Handle& first_clause)
 {
+	if (term == Handle::UNDEFINED)
+		return false;
+
 	// Cleanup
 	clear_current_state();
 

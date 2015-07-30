@@ -63,6 +63,7 @@ class PatternCrashUTest: public CxxTest::TestSuite
 		void tearDown(void);
 
 		void test_one_thing(void);
+		void test_empty_vars(void);
 };
 
 class PMCB : public InitiateSearchCB, public DefaultPatternMatchCB
@@ -276,6 +277,26 @@ void PatternCrashUTest::test_one_thing(void)
 	PMCB pmcb(_as);
 
 	logger().debug("Before Pattern Matching");
+
+	sl->satisfy(pmcb);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void PatternCrashUTest::test_empty_vars(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle hpattern = _eval->eval_h(R"(
+	            (SatisfactionLink
+	             (ConceptNode "ABC")
+	             )
+	            )");
+
+	logger().debug("Before Pattern Matching");
+
+	PatternLinkPtr sl = PatternLinkCast(hpattern);
+	PMCB pmcb(_as);
 
 	sl->satisfy(pmcb);
 
