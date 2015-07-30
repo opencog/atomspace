@@ -27,13 +27,12 @@
 
 using namespace opencog;
 
-// #define DEBUG
+//#define DEBUG
 
 FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as, Type rt, const HandleSeq& rl)
         : DefaultPatternMatchCB(as),
           rtn_type(rt),
-          rej_list(rl),
-          num_links(as->get_num_links())
+          rej_list(rl)
 {
 }
 
@@ -207,7 +206,7 @@ void FuzzyPatternMatchCB::check_if_accept(const Handle& gh)
         if (std::find(gn.begin(), gn.end(), rh) != gn.end()) {
 #ifdef DEBUG
         std::cout << "Rejecting:\n" << gh->toShortString()
-                  << "because of the existance of:\n" << rh->toShortString()
+                  << "due to the existance of:\n" << rh->toShortString()
                   << "\n";
 #endif
             return;
@@ -220,56 +219,47 @@ void FuzzyPatternMatchCB::check_if_accept(const Handle& gh)
     std::sort(gn.begin(), gn.end());
     std::set_intersection(pat_nodes.begin(), pat_nodes.end(), gn.begin(), gn.end(),
                           std::back_inserter(common_nodes));
-    size_t common = common_nodes.size();
 
     // The size different between the pattern and the potential solution
     size_t diff = std::abs((int)(pat_size - gn.size()));
 
-    // Estimate how "rare" the common nodes are, by doing something like TFIDF
-    double rareness = 0;
-    for (const Handle& common_node : common_nodes) {
-        // No. of times it appears in the pattern over the size of the pattern
-        double f1 = (double) std::count(pat_nodes.begin(), pat_nodes.end(), common_node) /
-                    pat_nodes.size();
+    double similarity = 0;
 
+    for (const Handle& common_node : common_nodes) {
         size_t iss;
-        auto it = in_set_size.find(common_node);
-        if (it == in_set_size.end()) {
+        auto it = in_set_sizes.find(common_node);
+        if (it == in_set_sizes.end()) {
             iss = common_node->getIncomingSetSize();
-            in_set_size.insert({common_node, iss});
+            in_set_sizes.insert({common_node, iss});
         }
         else iss = it->second;
 
-        // Total no. of links in the atomspace over the size of its incoming set
-        // TODO: Maybe better to use TV for this estimation
-        double f2 = log2(num_links / iss);
-
-        rareness += f1 * f2;
+        // Roughly estimate how "rare" the node is by using 1 / incoming set size
+        // TODO: May use Truth Value instead
+        similarity += 1.0 / iss;
     }
-
-    // A rough estimation of how similar they are
-    double similarity = (10.0 * rareness) +
-                        (1.0 * common) -
-                        (0.5 * diff);
 
 #ifdef DEBUG
     std::cout << "\n========================================\n";
-    std::cout << "Compaing:\n" << ph->toShortString() << "--- and:\n"
+    std::cout << "Compaing:\n" << clause->toShortString() << "--- and:\n"
               << gh->toShortString() << "\n";
-    std::cout << "Common nodes = " << common << "\n";
+    std::cout << "Common nodes = " << common_nodes.size() << "\n";
     std::cout << "Size diff = " << diff << "\n";
-    std::cout << "Rareness = " << rareness << "\n";
     std::cout << "Similarity = " << similarity << "\n";
     std::cout << "Most similar = " << max_similarity << "\n";
     std::cout << "========================================\n\n";
 #endif
 
     // Decide if we should accept the potential solutions or not
-    if (similarity > max_similarity) {
+    if ((similarity > max_similarity) or
+        (similarity == max_similarity and diff < min_size_diff)) {
         max_similarity = similarity;
+        min_size_diff = diff;
         solns.clear();
         solns.push_back(gh);
     }
 
-    else if (similarity == max_similarity) solns.push_back(gh);
+    else if (similarity == max_similarity and diff == min_size_diff) {
+        solns.push_back(gh);
+    }
 }

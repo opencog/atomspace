@@ -38,8 +38,9 @@ using namespace opencog;
  *
  * @param as        The atomspace that we are using
  * @param hp        The query hypergraph
+ * @param rtn_type  The type of atoms that we want
  * @param rej_list  A list of atoms that we don't want any of them to exist in the results
- * @return    One or more similar hypergraphs
+ * @return          One or more similar hypergraphs
  */
 Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp,
                                        Type rtn_type,

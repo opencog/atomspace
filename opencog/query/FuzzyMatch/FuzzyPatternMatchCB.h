@@ -88,9 +88,6 @@ namespace opencog
                 size_t depth;
             };
 
-            // Total number of links in the atomspace
-            size_t num_links;
-
             // How many nodes are there in the pattern
             size_t pat_size = 0;
 
@@ -101,7 +98,10 @@ namespace opencog
             std::vector<UUID> prev_compared;
 
             // Stores the incoming set sizes of nodes
-            std::unordered_map<Handle, size_t> in_set_size;
+            std::unordered_map<Handle, size_t> in_set_sizes;
+
+            // The minimum difference between the pattern and all the known solutions
+            size_t min_size_diff = SIZE_MAX;
 
             // The maximum similarity of all the potential solutions we found
             double max_similarity = -std::numeric_limits<double>::max();
