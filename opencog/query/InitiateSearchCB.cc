@@ -97,9 +97,29 @@ InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
 // If no constant is found, then the returned value is the undefnied
 // handle.
 //
+
 Handle
 InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
-                               Handle& start, size_t& width)
+                                     Handle& start, size_t& width)
+{
+	// If its a node, then we are done.
+	Type t = h->getType();
+	if (_classserver.isNode(t)) {
+		if (t != VARIABLE_NODE) {
+			width = h->getIncomingSetSize();
+			start = h;
+			return h;
+		}
+		return Handle::UNDEFINED;
+	}
+
+	// If its a link, then find recursively
+	return find_starter_recursive(h, depth, start, width);
+}
+
+Handle
+InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
+                                         Handle& start, size_t& width)
 {
 	// If its a node, then we are done. Don't modify either depth or
 	// start.
@@ -149,7 +169,7 @@ InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
 		if (QUOTE_LINK == hunt->getType())
 			hunt = LinkCast(hunt)->getOutgoingAtom(0);
 
-		Handle s(find_starter(hunt, brdepth, sbr, brwid));
+		Handle s(find_starter_recursive(hunt, brdepth, sbr, brwid));
 
 		if (s != Handle::UNDEFINED
 		    and (brwid < thinnest
@@ -206,7 +226,7 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
 		}
 	}
 
-    return best_start;
+	return best_start;
 }
 
 /* ======================================================== */

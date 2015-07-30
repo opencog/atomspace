@@ -65,6 +65,8 @@ class InitiateSearchCB : public virtual PatternMatchCallback
 		Handle _starter_term;
 
 		virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
+		virtual Handle find_starter_recursive(const Handle&, size_t&, Handle&,
+		                                      size_t&);
 		virtual Handle find_thinnest(const HandleSeq&,
 		                             const std::set<Handle>&,
 		                             Handle&, size_t&);
