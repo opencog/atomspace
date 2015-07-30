@@ -22,15 +22,18 @@
  */
 
 #include <opencog/atomutils/AtomUtils.h>
-#include <opencog/guile/SchemeSmob.h>
-#include <opencog/atoms/bind/BindLink.h>
-#include <opencog/query/DefaultImplicator.h>
+#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atomutils/Substitutor.h>
 #include <opencog/atoms/bind/PatternUtils.h>
 #include <opencog/atoms/bind/PatternLink.h>
-#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/bind/BindLink.h>
+#include <opencog/atoms/TypeNode.h>
+#include <opencog/query/DefaultImplicator.h>
+#include <opencog/query/PatternMatch.cc>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/rule-engine/URECommons.h>
 
 #include "DefaultForwardChainerCB.h"
-#include "../URECommons.h"
 
 using namespace opencog;
 
@@ -78,27 +81,24 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
                     gen_sub_varlist(h, rule->get_vardecl()));
             Handle sourcecpy = temp_pm_as.add_atom(source);
 
-            HandleSeq hx { implicant_vardecl, hcpy, hcpy };
-            BindLinkPtr bl = createBindLink(hx);
+            BindLinkPtr bl = createBindLink(HandleSeq { implicant_vardecl, hcpy,
+                                                        hcpy });
             DefaultImplicator imp(&temp_pm_as);
             imp.implicand = bl->get_implicand();
             PMCGroundings gcb(imp);
             bl->imply(gcb);
 
             FindAtoms fv(VARIABLE_NODE);
-
-            for (const std::map<Handle, Handle> termg_map : gcb._term_groundings) {
+            for (const auto& termg_map : gcb._term_groundings) {
                 for (const auto& it : termg_map) {
                     if (it.second == sourcecpy) {
                         match = true;
                         fv.search_set(it.first);
 
-                        //TODO where should we check? how to refactor this part?
                         HandleSeq new_rules = substitute_rule_part(
                                 temp_pm_as,
                                 temp_pm_as.add_atom(rule->get_handle()),
                                 fv.varset, gcb._var_groundings);
-                        //Push newly created valid rules
                         for (const auto& nr : new_rules)
                             if (find(new_rules.begin(), new_rules.end(),
                                      nr)
@@ -111,10 +111,8 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
 
         if (match) {
             auto it = find(chosen_rules.begin(), chosen_rules.end(), rule);
-            if (it == chosen_rules.end()) {
-                std::cout << "RULE-CHOSEN:\n" << rule->get_handle()->toShortString() << std::endl;
+            if (it == chosen_rules.end())
                 chosen_rules.push_back(rule);
-            }
         }
     }
 
@@ -258,33 +256,30 @@ HandleSeq DefaultForwardChainerCB::substitute_rule_part(
         AtomSpace& as, Handle hrule,const std::set<Handle>& vars,
         const std::vector<std::map<Handle, Handle>>& var_groundings)
 {
-    Substitutor st(&as);
-    BindLinkPtr blptr = BindLinkCast(hrule);
     std::vector<std::map<Handle, Handle>> filtered_vgmap_list;
 
-    //Get variable grounding map
-    for (const std::map<Handle, Handle>& varg_map : var_groundings) {
+    //Filter var-groundings with variables not listed in vars
+    for (const auto& varg_map : var_groundings) {
         std::map<Handle, Handle> filtered_vgmap;
         for (const auto& iv : varg_map) {
-            //add to our mapping list if this key/varNode is in our vars
-            //and if it is a node to node mapping.
+            //Should also be var node
             if (find(vars.begin(), vars.end(), iv.first) != vars.end()
-                and (NodeCast(iv.first) and NodeCast(iv.second))) {
-                filtered_vgmap[iv.first] = iv.second;
-            }
+                and (NodeCast(iv.first)))
+                     filtered_vgmap[iv.first] = iv.second;
         }
         filtered_vgmap_list.push_back(filtered_vgmap);
     }
 
-    //With all the above informations, create new bindLinks for each var-ground mapping
     HandleSeq derived_rules;
+    BindLinkPtr blptr = BindLinkCast(hrule);
+
+    //Construct new VariableList by removing grounded ones from the original
     for (auto& vgmap : filtered_vgmap_list) {
-        //Construct new VariableList by removing grounded ones from the original
         Variables var_struct = blptr->get_variables();
         HandleSeq var_seq = var_struct.varseq;
         VariableTypeMap vtype_map = var_struct.typemap;
 
-        for (const Handle& var : vars) {
+        for (const auto& var : vars) {
             auto it = find(var_seq.begin(), var_seq.end(), var);
             if (it != var_seq.end()) {
                 var_seq.erase(it);
@@ -292,15 +287,23 @@ HandleSeq DefaultForwardChainerCB::substitute_rule_part(
             }
         }
 
-        //Create the BindLink/Rule
-        Handle hvarlist = create_varlist(as,var_seq, vtype_map);
-        if(hvarlist == Handle::UNDEFINED) continue;
-
-        //TODO if implicand is executable, execute it?
-        Handle himplicant = st.substitute(blptr->get_body(), vgmap);
+        Substitutor st(&as);
         Handle himplicand = st.substitute(blptr->get_implicand(), vgmap);
-        Handle hderived_rule = Handle(LinkCast(createBindLink(HandleSeq{hvarlist,himplicant,himplicand})));
-        derived_rules.push_back(hderived_rule);
+
+        //Create the BindLink/Rule by substituting vars with groundings
+        if (contains_atomtype(himplicand, VARIABLE_NODE)) {
+            Handle hvarlist = create_varlist(as, var_seq, vtype_map);
+            if (hvarlist == Handle::UNDEFINED)
+                continue;
+            Handle himplicant = st.substitute(blptr->get_body(), vgmap);
+
+            Handle hderived_rule = Handle(LinkCast(createBindLink(HandleSeq {
+                    hvarlist, himplicant, himplicand })));
+            derived_rules.push_back(hderived_rule);
+        }
+        else{
+            //TODO Execute if executable and push to FC results
+        }
     }
 
     return derived_rules;
@@ -309,23 +312,24 @@ HandleSeq DefaultForwardChainerCB::substitute_rule_part(
 Handle DefaultForwardChainerCB::create_varlist(AtomSpace& as,HandleSeq& varseq,
                                                VariableTypeMap& vtype_map)
 {
+    Handle hvarlist = Handle::UNDEFINED;
     HandleSeq oset;
-    for (auto& var : varseq) {
 
+    for (auto& var : varseq) {
         if (vtype_map.count(var)) {
             HandleSeq tvarlist = { var };
             std::set<Type> types = vtype_map[var];
             for (auto& type : types)
                 tvarlist.push_back(TypeNode(type).getHandle());
-
             oset.push_back(as.add_link(TYPED_VARIABLE_LINK, tvarlist));
+
         } else {
             oset.push_back(var);
         }
     }
 
     if (not oset.empty())
-        return as.add_link(VARIABLE_LIST, oset);
+        hvarlist = as.add_link(VARIABLE_LIST, oset);
 
-    return Handle::UNDEFINED;
+    return hvarlist;
 }
