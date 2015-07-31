@@ -33,6 +33,7 @@
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/rule-engine/URECommons.h>
 
+#include "VarGroundingPMCB.h"
 #include "DefaultForwardChainerCB.h"
 
 using namespace opencog;
@@ -81,15 +82,14 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
                     gen_sub_varlist(h, rule->get_vardecl()));
             Handle sourcecpy = temp_pm_as.add_atom(source);
 
-            BindLinkPtr bl = createBindLink(HandleSeq { implicant_vardecl, hcpy,
-                                                        hcpy });
-            DefaultImplicator imp(&temp_pm_as);
-            imp.implicand = bl->get_implicand();
-            PMCGroundings gcb(imp);
+            BindLinkPtr bl = createBindLink(HandleSeq { implicant_vardecl,
+                                                         hcpy,hcpy });
+            VarGroundingPMCB gcb(&temp_pm_as);
+            gcb.implicand = bl->get_implicand();
             bl->imply(gcb);
 
             FindAtoms fv(VARIABLE_NODE);
-            for (const auto& termg_map : gcb._term_groundings) {
+            for (const auto& termg_map : gcb.term_groundings) {
                 for (const auto& it : termg_map) {
                     if (it.second == sourcecpy) {
                         match = true;
@@ -98,11 +98,10 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
                         HandleSeq new_rules = substitute_rule_part(
                                 temp_pm_as,
                                 temp_pm_as.add_atom(rule->get_handle()),
-                                fv.varset, gcb._var_groundings);
+                                fv.varset, gcb.var_groundings);
                         for (const auto& nr : new_rules)
                             if (find(new_rules.begin(), new_rules.end(),
-                                     nr)
-                                == new_rules.end())
+                                     nr) == new_rules.end())
                                 new_rules.push_back(nr);
                     }
                 }
