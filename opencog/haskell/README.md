@@ -19,12 +19,9 @@ For in depth information on the implementation and project details:
 
 To use the Haskell bindings, it is necessary to have installed:
 
-* GHC (Glasgow Haskell Compiler https://www.haskell.org/ghc/)
-* Cabal (Haskell package manager https://www.haskell.org/cabal/)
+* [Stack](https://github.com/commercialhaskell/stack/wiki) (Haskell development tool)
 
-For new users, the simplest option is to install the "Haskell Platform"
-(https://www.haskell.org/platform/)
-which includes the most important tools for Haskell environment.
+To install Stack, you should follow [Download instructions](https://github.com/commercialhaskell/stack/wiki/Downloads)
 
 ### Installation
 
@@ -32,19 +29,60 @@ Go through the normal process of
 [building](https://github.com/opencog/atomspace#building-atomspace) and
 [installing](https://github.com/opencog/atomspace#install) the AtomSpace.
 
-This will automatically install the haskell library.
+This will automatically build the haskell library.
 
-If you want to install only the haskell library, for example a new version,
-move to this directory (/opencog/haskell), build and install the
-opencog-atomspace haskell library with this command:
+If you want to use this library in some project you should include it to the
+package list on the project [stack.yaml](https://github.com/commercialhaskell/stack/wiki/stack.yaml) config file. For example:
+
+```yaml
+...
+packages:
+- <ATOMSPACE_ROOT>/opencog/haskell
+...
+```
+
+On the other hand, if you simply want to compile some code using this
+library, you should compile with:
 
 ```
- cabal install
+export STACK_YAML=<ATOMSPACE_ROOT>/opencog/haskell/stack.yaml
+stack ghc example.hs
+```
+
+For using ghci:
+
+```
+export STACK_YAML=<ATOMSPACE_ROOT>/opencog/haskell/stack.yaml
+stack ghci --ghc-options -lhaskell-atomspace
+```
+
+Or, to avoid defining STACK_YAML every time, you can include this library to your
+local environment, adding this library path to your package
+list in your local config file:
+~/.stack/global/stack.yaml ,and then running:
+
+```
+stack install opencog-atomspace
+```
+
+Then you can compile simple .hs files with:
+```
+stack ghc example.hs
 ```
 
 (It is necessary to previously build and install the AtomSpace, because the
 opencog-atomspace haskell library
 depends on the haskell-atomspace C wrapper library)
+
+### Documentation
+To generate proper [Haddock](https://www.haskell.org/haddock/) documentation,
+you should go to the build directory and execute:
+```
+make doxygen
+```
+Then you can open the OpenCog documentation (build/doc/html/index.html),
+go to "OpenCog source code documentation - Libraries - Haskell bindings
+library" and click on the "opencog-atomspace" link.
 
 ### Usage
 
