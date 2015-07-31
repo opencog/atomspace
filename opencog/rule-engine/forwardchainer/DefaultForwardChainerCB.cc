@@ -262,9 +262,7 @@ HandleSeq DefaultForwardChainerCB::substitute_rule_part(
     for (const auto& varg_map : var_groundings) {
         std::map<Handle, Handle> filtered_vgmap;
         for (const auto& iv : varg_map) {
-            //Should also be var node
-            if (find(vars.begin(), vars.end(), iv.first) != vars.end()
-                and (NodeCast(iv.first)))
+            if (find(vars.begin(), vars.end(), iv.first) != vars.end())
                      filtered_vgmap[iv.first] = iv.second;
         }
         filtered_vgmap_list.push_back(filtered_vgmap);
