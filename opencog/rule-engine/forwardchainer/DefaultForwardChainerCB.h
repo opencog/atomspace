@@ -40,7 +40,6 @@ private:
     source_selection_mode _ts_mode;
 
     Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);
-    Handle create_varlist(AtomSpace& as,HandleSeq& varseq,VariableTypeMap& vtype_map);
     HandleSeq substitute_rule_part(AtomSpace& as, Handle hrule,const std::set<Handle>& vars,const std::vector<std::map<Handle,Handle>>& var_groundings);
 
 

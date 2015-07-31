@@ -258,7 +258,7 @@ HandleSeq DefaultForwardChainerCB::substitute_rule_part(
 {
     std::vector<std::map<Handle, Handle>> filtered_vgmap_list;
 
-    //Filter var-groundings with variables not listed in vars
+    //Filter out variables not listed in vars from var-groundings
     for (const auto& varg_map : var_groundings) {
         std::map<Handle, Handle> filtered_vgmap;
         for (const auto& iv : varg_map) {
@@ -271,32 +271,20 @@ HandleSeq DefaultForwardChainerCB::substitute_rule_part(
     HandleSeq derived_rules;
     BindLinkPtr blptr = BindLinkCast(hrule);
 
-    //Construct new VariableList by removing grounded ones from the original
     for (auto& vgmap : filtered_vgmap_list) {
-        Variables var_struct = blptr->get_variables();
-        HandleSeq var_seq = var_struct.varseq;
-        VariableTypeMap vtype_map = var_struct.typemap;
-
-        for (const auto& var : vars) {
-            auto it = find(var_seq.begin(), var_seq.end(), var);
-            if (it != var_seq.end()) {
-                var_seq.erase(it);
-                vtype_map.erase(*it);
-            }
-        }
-
         Substitutor st(&as);
         Handle himplicand = st.substitute(blptr->get_implicand(), vgmap);
 
         //Create the BindLink/Rule by substituting vars with groundings
         if (contains_atomtype(himplicand, VARIABLE_NODE)) {
-            Handle hvarlist = create_varlist(as, var_seq, vtype_map);
-            if (hvarlist == Handle::UNDEFINED)
-                continue;
             Handle himplicant = st.substitute(blptr->get_body(), vgmap);
-
+            //Assuming himplicant's set of variables are superset for himplicand's,
+            //generate varlist from himplicant.
+            Handle hvarlist = gen_sub_varlist(
+                    himplicant, LinkCast(hrule)->getOutgoingSet()[0]);
             Handle hderived_rule = Handle(LinkCast(createBindLink(HandleSeq {
                     hvarlist, himplicant, himplicand })));
+
             derived_rules.push_back(hderived_rule);
         }
         else{
@@ -305,29 +293,4 @@ HandleSeq DefaultForwardChainerCB::substitute_rule_part(
     }
 
     return derived_rules;
-}
-
-Handle DefaultForwardChainerCB::create_varlist(AtomSpace& as,HandleSeq& varseq,
-                                               VariableTypeMap& vtype_map)
-{
-    Handle hvarlist = Handle::UNDEFINED;
-    HandleSeq oset;
-
-    for (auto& var : varseq) {
-        if (vtype_map.count(var)) {
-            HandleSeq tvarlist = { var };
-            std::set<Type> types = vtype_map[var];
-            for (auto& type : types)
-                tvarlist.push_back(TypeNode(type).getHandle());
-            oset.push_back(as.add_link(TYPED_VARIABLE_LINK, tvarlist));
-
-        } else {
-            oset.push_back(var);
-        }
-    }
-
-    if (not oset.empty())
-        hvarlist = as.add_link(VARIABLE_LIST, oset);
-
-    return hvarlist;
 }
