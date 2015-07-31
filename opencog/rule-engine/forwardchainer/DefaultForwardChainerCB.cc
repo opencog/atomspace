@@ -95,11 +95,11 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
                         match = true;
                         fv.search_set(it.first);
 
-                        HandleSeq new_rules = substitute_rule_part(
+                        HandleSeq new_candidate_rules = substitute_rule_part(
                                 temp_pm_as,
                                 temp_pm_as.add_atom(rule->get_handle()),
                                 fv.varset, gcb.var_groundings);
-                        for (const auto& nr : new_rules)
+                        for (const auto& nr : new_candidate_rules)
                             if (find(new_rules.begin(), new_rules.end(),
                                      nr) == new_rules.end())
                                 new_rules.push_back(nr);
