@@ -248,7 +248,7 @@ Handle DefaultForwardChainerCB::gen_sub_varlist(const Handle& parent,
  * @param as             The Atomspace where all the atoms are dwelling
  * @param hrule          A handle to BindLink instance
  * @param vars           The grounded var list in @param hrule
- * @param var_groundings the set of groundings to each var in @param vars
+ * @param var_groundings The set of groundings to each var in @param vars
  *
  * @return A HandleSeq of all possible derived rules
  */
@@ -260,19 +260,17 @@ HandleSeq DefaultForwardChainerCB::substitute_rule_part(
 
     //Filter out variables not listed in vars from var-groundings
     for (const auto& varg_map : var_groundings) {
-        std::map<Handle, Handle> filtered_vgmap;
-        for (const auto& iv : varg_map) {
+        for (const auto& iv : varg_map)
             if (find(vars.begin(), vars.end(), iv.first) != vars.end())
-                     filtered_vgmap[iv.first] = iv.second;
-        }
-        filtered_vgmap_list.push_back(filtered_vgmap);
+                filtered_vgmap_list.push_back(
+                        std::map<Handle, Handle> { { iv.first, iv.second } });
     }
 
     HandleSeq derived_rules;
     BindLinkPtr blptr = BindLinkCast(hrule);
+    Substitutor st(&as);
 
     for (auto& vgmap : filtered_vgmap_list) {
-        Substitutor st(&as);
         Handle himplicand = st.substitute(blptr->get_implicand(), vgmap);
 
         //Create the BindLink/Rule by substituting vars with groundings
