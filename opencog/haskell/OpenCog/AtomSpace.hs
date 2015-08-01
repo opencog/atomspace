@@ -26,4 +26,3 @@ import OpenCog.AtomSpace.Api
 import OpenCog.AtomSpace.Types
 import OpenCog.AtomSpace.Env         (AtomSpace,runOnNewAtomSpace)
 import OpenCog.AtomSpace.Utils       (printAtom,showAtom)
-

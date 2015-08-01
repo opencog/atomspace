@@ -13,10 +13,11 @@
 -- | This Module defines the relation between different atom types.
 module OpenCog.AtomSpace.Inheritance (
   type (<~)
-  ) where
+, Children
+) where
 
 import GHC.Exts                     (Constraint)
-import OpenCog.AtomSpace.AtomType   (AtomType(..),Up(..))
+import OpenCog.AtomSpace.AtomType   (AtomType(..),Up(..),Down(..))
 import Data.Typeable                (Typeable)
 
 -- | 'In' type level function to check if a type belongs to a list.
@@ -32,6 +33,15 @@ type family FUp a b :: [AtomType] where
     FUp '[]       (x ': xs) = FUp (Up x) xs
     FUp '[]       '[]       = '[]
 
+-- | 'FDown' type level function to get the list of all descendants
+-- of a given atom type.
+type family FDown a b :: [AtomType] where
+    FDown (x ': xs) a         = x ': FDown xs (x ': a)
+    FDown '[]       (x ': xs) = FDown (Down x) xs
+    FDown '[]       '[]       = '[]
+
+type Children a = FDown '[a] '[]
+
 -- | 'IsParent'' is a predicate to decide if atom type b is an ancestor
 -- of atom type a.
 type family IsParent' a b :: Bool where
@@ -45,7 +55,6 @@ type IsParent a b = IsParent' a b ~ 'True
 type family ParConst a (b :: [AtomType]) :: Constraint where
     ParConst a '[]      = Typeable a
     ParConst a (b ': c) = (IsParent a b,ParConst a c)
-
 
 -- | '<~' builds a list of constraints to assert that all the ancestors of b
 -- (included b itself) are ancestors of a.

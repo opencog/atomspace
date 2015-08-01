@@ -13,6 +13,7 @@
 module OpenCog.AtomSpace.AtomType (
     AtomType(..)
   , Up(..)
+  , Down(..)
   , fromAtomTypeRaw
   , toAtomTypeRaw
   ) where
@@ -99,4 +100,42 @@ type family Up a :: [AtomType] where
     Up MemberT         = '[LinkT]
     Up SatisfyingSetT  = '[LinkT]
     Up ListT           = '[LinkT]
+
+-- | 'Down' given an atom type returns a list with its children atom types.
+type family Down a :: [AtomType] where
+    Down AtomT           = '[NodeT,LinkT]
+    Down NodeT           = '[ ConceptT
+                            , SchemaT
+                            , PredicateT
+                            , NumberT
+                            , GroundedSchemaT
+                            ]
+    Down LinkT           = '[ ExecutionT
+                            , AndT
+                            , OrT
+                            , ImplicationT
+                            , EquivalenceT
+                            , EvaluationT
+                            , InheritanceT
+                            , SimilarityT
+                            , MemberT
+                            , SatisfyingSetT
+                            , ListT
+                            ]
+    Down ConceptT        = '[]
+    Down SchemaT         = '[GroundedSchemaT]
+    Down PredicateT      = '[]
+    Down NumberT         = '[]
+    Down GroundedSchemaT = '[]
+    Down ExecutionT      = '[]
+    Down AndT            = '[]
+    Down OrT             = '[]
+    Down ImplicationT    = '[]
+    Down EquivalenceT    = '[]
+    Down EvaluationT     = '[]
+    Down InheritanceT    = '[]
+    Down SimilarityT     = '[]
+    Down MemberT         = '[]
+    Down SatisfyingSetT  = '[]
+    Down ListT           = '[]
 

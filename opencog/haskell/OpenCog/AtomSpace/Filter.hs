@@ -1,11 +1,15 @@
 -- GSoC 2015 - Haskell bindings for OpenCog.
 {-# LANGUAGE GADTs                     #-}
-{-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE DataKinds                 #-}
 {-# LANGUAGE Rank2Types                #-}
 {-# LANGUAGE ScopedTypeVariables       #-}
 {-# LANGUAGE TypeOperators             #-}
 {-# LANGUAGE ConstraintKinds           #-}
+{-# LANGUAGE FlexibleInstances         #-}
+{-# LANGUAGE KindSignatures            #-}
+{-# LANGUAGE UndecidableInstances      #-}
+{-# LANGUAGE MultiParamTypeClasses     #-}
+{-# LANGUAGE FlexibleContexts          #-}
 
 -- | This Module defines atom filters based on their hierarchy.
 module OpenCog.AtomSpace.Filter (
@@ -14,9 +18,11 @@ module OpenCog.AtomSpace.Filter (
   , FilterIsChild(..)
   ) where
 
-import OpenCog.AtomSpace.Inheritance    (type (<~))
+import OpenCog.AtomSpace.Inheritance    (type (<~),Children)
 import OpenCog.AtomSpace.AtomType       (AtomType(..))
 import OpenCog.AtomSpace.Types          (Atom(..))
+import Data.Proxy                       (Proxy(..))
+import Data.Typeable                    (cast,Typeable)
 
 -- | 'Gen' groups all the atoms that are children of the atom type a.
 data Gen a where
@@ -27,119 +33,57 @@ data Gen a where
 appGen :: (forall b. (b <~ a) => Atom b -> c) -> Gen a -> c
 appGen f (Gen at) = f at
 
--- | 'FilterIsChild' class defines a filter on the children of atom type 'a'.
+-- | 'Filter' class defines a filter on the list 'b' of atom types.
+class Filter a (b::[AtomType]) where
+    filtChild :: Typeable c => Proxy b -> Atom c -> Maybe (Gen a)
+
+instance Filter e '[] where
+    filtChild _ _ = Nothing
+
+instance (Typeable x,x <~ e,Filter e xs) => Filter e (x ': xs) where
+    filtChild _ a = case cast a :: Maybe (Atom x) of
+        Just res -> return $ Gen res
+        Nothing  -> filtChild (Proxy :: Proxy xs) a
+
+-- | 'FilterIsChild' class defines a filter on the descendants of atom type 'a'.
 class FilterIsChild a where
-    filtIsChild :: Atom b -> Maybe (Gen a)
+    filtIsChild :: (b <~ AtomT) => Atom b -> Maybe (Gen a)
 
 instance FilterIsChild AtomT where
-    filtIsChild at = case filtIsChild at :: Maybe (Gen NodeT) of
-        Just (Gen at) -> return (Gen at)
-        Nothing       -> case filtIsChild at :: Maybe (Gen LinkT) of
-            Just (Gen at) -> return (Gen at)
-            Nothing       -> Nothing
-
+    filtIsChild = filtChild (Proxy :: Proxy (Children AtomT))
 instance FilterIsChild NodeT where
-    filtIsChild at = case at of
-        PredicateNode _      -> return $ Gen at
-        ConceptNode _ _      -> return $ Gen at
-        SchemaNode _         -> return $ Gen at
-        GroundedSchemaNode _ -> return $ Gen at
-        NumberNode _         -> return $ Gen at
-        _                    -> Nothing
-
+    filtIsChild = filtChild (Proxy :: Proxy (Children NodeT))
 instance FilterIsChild LinkT where
-    filtIsChild at = case at of
-        AndLink _ _ _         -> return $ Gen at
-        OrLink _ _ _          -> return $ Gen at
-        ImplicationLink _ _ _ -> return $ Gen at
-        EquivalenceLink _ _ _ -> return $ Gen at
-        EvaluationLink _ _ _  -> return $ Gen at
-        InheritanceLink _ _ _ -> return $ Gen at
-        SimilarityLink _ _ _  -> return $ Gen at
-        MemberLink _ _ _      -> return $ Gen at
-        SatisfyingSetLink _   -> return $ Gen at
-        ListLink _            -> return $ Gen at
-        ExecutionLink _ _ _   -> return $ Gen at
-        _                     -> Nothing
-
+    filtIsChild = filtChild (Proxy :: Proxy (Children LinkT))
 instance FilterIsChild PredicateT where
-    filtIsChild at = case at of
-        PredicateNode _ -> Just $ Gen at
-        _               -> Nothing
-
+    filtIsChild = filtChild (Proxy :: Proxy (Children PredicateT))
 instance FilterIsChild ConceptT where
-    filtIsChild at = case at of
-        ConceptNode _ _ -> Just $ Gen at
-        _               -> Nothing
-
-instance FilterIsChild NumberT where
-    filtIsChild at = case at of
-        NumberNode _ -> Just $ Gen at
-        _            -> Nothing
-
-instance FilterIsChild GroundedSchemaT where
-    filtIsChild at = case at of
-        GroundedSchemaNode _ -> Just $ Gen at
-        _                    -> Nothing
-
+    filtIsChild = filtChild (Proxy :: Proxy (Children ConceptT))
 instance FilterIsChild SchemaT where
-    filtIsChild at = case at of
-        SchemaNode _         -> Just $ Gen at
-        GroundedSchemaNode _ -> Just $ Gen at
-        _                    -> Nothing
-
+    filtIsChild = filtChild (Proxy :: Proxy (Children SchemaT))
+instance FilterIsChild GroundedSchemaT where
+    filtIsChild = filtChild (Proxy :: Proxy (Children GroundedSchemaT))
+instance FilterIsChild NumberT where
+    filtIsChild = filtChild (Proxy :: Proxy (Children NumberT))
 instance FilterIsChild AndT where
-    filtIsChild at = case at of
-        AndLink _ _ _ -> return $ Gen at
-        _             -> Nothing
-
+    filtIsChild = filtChild (Proxy :: Proxy (Children AndT))
 instance FilterIsChild OrT where
-    filtIsChild at = case at of
-        OrLink _ _ _ -> return $ Gen at
-        _            -> Nothing
-
+    filtIsChild = filtChild (Proxy :: Proxy (Children OrT))
 instance FilterIsChild ImplicationT where
-    filtIsChild at = case at of
-        ImplicationLink _ _ _ -> return $ Gen at
-        _                     -> Nothing
-
+    filtIsChild = filtChild (Proxy :: Proxy (Children ImplicationT))
 instance FilterIsChild EquivalenceT where
-    filtIsChild at = case at of
-        EquivalenceLink _ _ _ -> return $ Gen at
-        _                     -> Nothing
-
+    filtIsChild = filtChild (Proxy :: Proxy (Children EquivalenceT))
 instance FilterIsChild EvaluationT where
-    filtIsChild at = case at of
-        EvaluationLink _ _ _ -> return $ Gen at
-        _                    -> Nothing
-
+    filtIsChild = filtChild (Proxy :: Proxy (Children EvaluationT))
 instance FilterIsChild InheritanceT where
-    filtIsChild at = case at of
-        InheritanceLink _ _ _ -> return $ Gen at
-        _                     -> Nothing
-
+    filtIsChild = filtChild (Proxy :: Proxy (Children InheritanceT))
 instance FilterIsChild SimilarityT where
-    filtIsChild at = case at of
-        SimilarityLink _ _ _ -> return $ Gen at
-        _                    -> Nothing
-
+    filtIsChild = filtChild (Proxy :: Proxy (Children SimilarityT))
 instance FilterIsChild MemberT where
-    filtIsChild at = case at of
-        MemberLink _ _ _ -> return $ Gen at
-        _                -> Nothing
-
+    filtIsChild = filtChild (Proxy :: Proxy (Children MemberT))
 instance FilterIsChild SatisfyingSetT where
-    filtIsChild at = case at of
-        SatisfyingSetLink _ -> return $ Gen at
-        _                   -> Nothing
-
+    filtIsChild = filtChild (Proxy :: Proxy (Children SatisfyingSetT))
 instance FilterIsChild ListT where
-    filtIsChild at = case at of
-        ListLink _ -> return $ Gen at
-        _          -> Nothing
-
+    filtIsChild = filtChild (Proxy :: Proxy (Children ListT))
 instance FilterIsChild ExecutionT where
-    filtIsChild at = case at of
-        ExecutionLink _ _ _ -> return $ Gen at
-        _                   -> Nothing
-
+    filtIsChild = filtChild (Proxy :: Proxy (Children ExecutionT))
