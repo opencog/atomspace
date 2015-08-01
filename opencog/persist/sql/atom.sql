@@ -38,8 +38,9 @@ CREATE TABLE Atoms (
 );
 
 -- Indexes, needed for fast node and link lookup.
-CREATE INDEX nodeidx ON Atoms(type, name);
-CREATE INDEX linkidx ON Atoms(type, outgoing);
+-- Make them unique, to catch any errors early.
+CREATE UNIQUE INDEX nodeidx ON Atoms(type, name);
+CREATE UNIQUE INDEX linkidx ON Atoms(type, outgoing);
 
 -- -----------------------------------------------------------
 -- Edge table is not used by the postgres driver.  That is because

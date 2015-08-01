@@ -292,7 +292,7 @@ Handle AtomSpace::fetch_atom(Handle h)
     }
 
     // For links, must perform a recursive fetch, as otherwise
-    // the atomtable.add below will throw an error.
+    // the atomTable.add() below will throw an error.
     LinkPtr l(LinkCast(h));
     if (l) {
        const HandleSeq& ogs = l->getOutgoingSet();
