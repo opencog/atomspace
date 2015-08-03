@@ -45,7 +45,7 @@ private:
 
     AtomSpace as;
     std::vector<Handle> sortedHandles;
-
+    Handle inh01, inh12, l012;
 
 public:
     AtomUTest() {
@@ -53,6 +53,10 @@ public:
                           as.add_node(CONCEPT_NODE, "1"),
                           as.add_node(CONCEPT_NODE, "2") };
         std::sort(sortedHandles.begin(), sortedHandles.end(), std::less<Handle>());
+        inh01 = as.add_link(INHERITANCE_LINK, sortedHandles[0], sortedHandles[1]);
+        inh12 = as.add_link(INHERITANCE_LINK, sortedHandles[1], sortedHandles[2]);
+        l012 = as.add_link(LIST_LINK,
+                           sortedHandles[0], sortedHandles[1], sortedHandles[2]);
     }
 
     void setUp() {
@@ -83,5 +87,21 @@ public:
         TS_ASSERT(link->getOutgoingSet()[1] == sortedHandles[1]);
         TS_ASSERT(link->getOutgoingSet()[2] == sortedHandles[2]);
         delete atom;
+    }
+
+    void test_getIncomingSet() {
+        // We use an actual set to compare sorted objects
+
+        // {inh01, l012} is the incoming set of ConceptNode "0"
+        IncomingSet i0 = sortedHandles[0]->getIncomingSet();
+        std::set<LinkPtr> expected_i0 = {LinkCast(inh01), LinkCast(l012)};
+        TS_ASSERT_EQUALS(std::set<LinkPtr>(i0.begin(), i0.end()), expected_i0);
+
+        // {inh01, inh12, 012} is the incoming set of ConceptNode "1"
+        IncomingSet i1 = sortedHandles[0]->getIncomingSet();
+        std::set<LinkPtr> expected_i1 = { LinkCast(inh01),
+                                          LinkCast(inh12),
+                                          LinkCast(l012) };
+        TS_ASSERT_EQUALS(std::set<LinkPtr>(i1.begin(), i1.end()), expected_i1);
     }
 };
