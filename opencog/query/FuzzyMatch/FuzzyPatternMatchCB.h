@@ -76,8 +76,8 @@ namespace opencog
             // Type of atom that we are looking for
             Type rtn_type;
 
-            // Atoms that we don't want them to exist in the solutions
-            HandleSeq rej_list;
+            // List of atoms that we don't want them to exist in the solutions
+            HandleSeq excl_list;
 
             struct Starter
             {
@@ -92,7 +92,7 @@ namespace opencog
             size_t pat_size = 0;
 
             // Potential starters that can be used to initiate the search
-            std::vector<Starter> potential_starters;
+            std::vector<Starter> starters;
 
             // Links that have previously been compared
             std::vector<UUID> prev_compared;
