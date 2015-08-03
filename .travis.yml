@@ -9,8 +9,8 @@ sudo: required
 # Refer to http://docs.travis-ci.com/user/environment-variables/
 env:
     global:
-        - CXX="g++-4.9"
-        - CC="gcc-4.9"
+        - CXX="g++-4.8"
+        - CC="gcc-4.8"
 
 # With the exception of opencog's ppa the rest are required because travis vms
 # have Ubuntu 12.04 as os.
@@ -26,7 +26,7 @@ before_install:
     - chmod +x setup.sh
 
 install:
-    - sudo apt-get install -y -qq boost1.54 cxxtest cmake gcc-4.9 g++-4.9
+    - sudo apt-get install -y -qq boost1.54 cxxtest cmake gcc-4.8 g++-4.8
     - sudo apt-get install -y -qq cython libtbb-dev libgsl0-dev unixodbc-dev
     - sudo apt-get install -y -qq python-nose
     # The following is for compiling guile-2.0.9
