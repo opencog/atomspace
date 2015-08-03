@@ -333,3 +333,12 @@ IncomingSet Atom::getIncomingSet()
     }
     return iset;
 }
+
+IncomingSet Atom::getIncomingSetByType(Type type, bool subclass) {
+	HandleSeq inhs;
+	getIncomingSetByType(std::back_inserter(inhs), type, subclass);
+	IncomingSet inlinks;
+	for (const Handle& h : inhs)
+		inlinks.push_back(LinkCast(h));
+	return inlinks;
+}

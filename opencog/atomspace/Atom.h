@@ -369,6 +369,10 @@ public:
         return result;
     }
 
+	/**
+	 * Functional version of getIncomingSetByType
+	 */
+	IncomingSet getIncomingSetByType(Type type, bool subclass = false);
 
     /** Returns a string representation of the node.
      *

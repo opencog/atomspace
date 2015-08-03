@@ -37,12 +37,6 @@ class ConcreteAtom : public Link
 
 public:
     ConcreteAtom(Type t, const std::vector<Handle>& o) : Link(t, o) {}
-    std::string toString() {
-        return "toString not implemented yet";
-    }
-    std::string toShortString() {
-        return "toShortString not implemented yet";
-    }
 };
 
 class AtomUTest :  public CxxTest::TestSuite
@@ -51,14 +45,18 @@ private:
 
     AtomSpace as;
     std::vector<Handle> sortedHandles;
-
+    Handle inh01, inh12, l012;
 
 public:
     AtomUTest() {
-        sortedHandles.push_back(as.add_node(CONCEPT_NODE, "0"));
-        sortedHandles.push_back(as.add_node(CONCEPT_NODE, "1"));
-        sortedHandles.push_back(as.add_node(CONCEPT_NODE, "2"));
+        sortedHandles = { as.add_node(CONCEPT_NODE, "0"),
+                          as.add_node(CONCEPT_NODE, "1"),
+                          as.add_node(CONCEPT_NODE, "2") };
         std::sort(sortedHandles.begin(), sortedHandles.end(), std::less<Handle>());
+        inh01 = as.add_link(INHERITANCE_LINK, sortedHandles[0], sortedHandles[1]);
+        inh12 = as.add_link(INHERITANCE_LINK, sortedHandles[1], sortedHandles[2]);
+        l012 = as.add_link(LIST_LINK,
+                           sortedHandles[0], sortedHandles[1], sortedHandles[2]);
     }
 
     void setUp() {
@@ -68,10 +66,9 @@ public:
     }
 
     void testConstructor() {
-        std::vector<Handle> outgoing;
-        outgoing.push_back(sortedHandles[2]);
-        outgoing.push_back(sortedHandles[0]);
-        outgoing.push_back(sortedHandles[1]);
+        std::vector<Handle> outgoing = { sortedHandles[2],
+                                         sortedHandles[0],
+                                         sortedHandles[1] };
 
         Atom* atom = new ConcreteAtom(ORDERED_LINK, outgoing);
         Link *link = dynamic_cast<Link *>(atom);
@@ -81,6 +78,7 @@ public:
         TS_ASSERT(link->getOutgoingSet()[0] == sortedHandles[2]);
         TS_ASSERT(link->getOutgoingSet()[1] == sortedHandles[0]);
         TS_ASSERT(link->getOutgoingSet()[2] == sortedHandles[1]);
+        delete atom;
         // Unordered lists sort their outgoing sets
         atom = new ConcreteAtom(UNORDERED_LINK, outgoing);
         link = dynamic_cast<Link *>(atom);
@@ -89,5 +87,37 @@ public:
         TS_ASSERT(link->getOutgoingSet()[1] == sortedHandles[1]);
         TS_ASSERT(link->getOutgoingSet()[2] == sortedHandles[2]);
         delete atom;
+    }
+
+    void test_getIncomingSet() {
+        // We use an actual set to compare sorted objects
+
+        // {inh01, l012} is the incoming set of ConceptNode "0"
+        IncomingSet i0 = sortedHandles[0]->getIncomingSet();
+        std::set<LinkPtr> expected_i0 = {LinkCast(inh01), LinkCast(l012)};
+        TS_ASSERT_EQUALS(std::set<LinkPtr>(i0.begin(), i0.end()), expected_i0);
+
+        // {inh01, inh12, 012} is the incoming set of ConceptNode "1"
+        IncomingSet i1 = sortedHandles[1]->getIncomingSet();
+        std::set<LinkPtr> expected_i1 = { LinkCast(inh01),
+                                          LinkCast(inh12),
+                                          LinkCast(l012) };
+        TS_ASSERT_EQUALS(std::set<LinkPtr>(i1.begin(), i1.end()), expected_i1);
+    }
+
+    void test_getIncomingSetByType() {
+        // We use an actual set to compare sorted objects
+
+        // {inh01} is the incoming set of ConceptNode "0" by type
+        // InheritanceLink
+        IncomingSet i0 = sortedHandles[0]->getIncomingSetByType(INHERITANCE_LINK);
+        std::set<LinkPtr> expected_i0 = {LinkCast(inh01)};
+        TS_ASSERT_EQUALS(std::set<LinkPtr>(i0.begin(), i0.end()), expected_i0);
+
+        // {inh01, inh12} is the incoming set of ConceptNode "1" by
+        // type InheritanceLink
+        IncomingSet i1 = sortedHandles[1]->getIncomingSetByType(INHERITANCE_LINK);
+        std::set<LinkPtr> expected_i1 = {LinkCast(inh01), LinkCast(inh12)};
+        TS_ASSERT_EQUALS(std::set<LinkPtr>(i1.begin(), i1.end()), expected_i1);
     }
 };
