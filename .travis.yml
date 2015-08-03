@@ -28,11 +28,11 @@ before_install:
     - chmod +x setup.sh
 
 install:
-    - sudo apt-get install -y boost1.54 cxxtest cmake gcc-4.9 g++-4.9
+    - sudo apt-get install -y -qq boost1.54 cxxtest cmake gcc-4.9 g++-4.9
     # The following is for compiling guile-2.0.9
-    - sudo apt-get install -y autoconf automake libtool libgmp-dev \
-                              libunistring-dev pkg-config libffi-dev \
-                              libgc-dev libreadline6-dev
+    - sudo apt-get install -y -qq autoconf automake libtool libgmp-dev
+    - sudo apt-get install -y -qq libunistring-dev pkg-config libffi-dev
+    - sudo apt-get install -y -qq libgc-dev libreadline6-dev
     - wget ftp://ftp.gnu.org/pub/gnu/guile/guile-2.0.9.tar.xz
     - tar -xvf guile-2.0.9.tar.xz
     - cd guile-2.0.9
