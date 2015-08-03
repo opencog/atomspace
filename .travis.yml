@@ -11,8 +11,8 @@ cache: apt
 # Refer to http://docs.travis-ci.com/user/environment-variables/
 env:
     global:
-        - CXX="g++-4.8"
-        - CC="gcc-4.8"
+        - CXX="g++-4.9"
+        - CC="gcc-4.9"
 
 # With the exception of opencog's ppa the rest are required because travis vms
 # have Ubuntu 12.04 as os.
@@ -35,13 +35,8 @@ install:
     - sudo apt-get install -y -qq libgc-dev libreadline6-dev
     - wget ftp://ftp.gnu.org/pub/gnu/guile/guile-2.0.9.tar.xz
     - tar -xvf guile-2.0.9.tar.xz
-    - cd guile-2.0.9
-    - ./configure
-    - make -s
-    - sudo make install
-    - sudo ldconfig
-    # clean up
-    - cd .. ; rm -rf guile-2.0.9
+    - cd guile-2.0.9 &&  ./configure -q && make -s &&  sudo make install
+    - sudo ldconfig && cd ..
     # Install cogutils
     - sudo ./setup.sh -c
 
