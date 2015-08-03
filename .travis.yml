@@ -49,6 +49,6 @@ before_script:
 
 script:
     - make -j$(nproc)
-    - make -j$(nproc) examples
-    - make -j$(nproc) tests
+    - make examples
+    - make tests
     - make test
