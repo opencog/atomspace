@@ -305,19 +305,4 @@ HandleSeq get_predicates_for(const Handle& target,
     return answer;
 }
 
-Handle get_definition(const Handle& alias) {
-    IncomingSet defs = alias->getIncomingSetByType(DEFINE_LINK);
-
-    // Return the first (supposedly unique) definition
-    for (LinkPtr def : defs)
-        if (def->isSource(alias))
-            return DefineLinkCast(def->getHandle())->get_definition();
-
-    // There is no definition for that alias
-    throw InvalidParamException(TRACE_INFO,
-                                "Cannot find defined hypergraph for atom %s",
-                                alias->toString().c_str());
-    return Handle::UNDEFINED;
-}
-
 } // namespace OpenCog

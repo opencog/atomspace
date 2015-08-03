@@ -181,17 +181,6 @@ HandleSeq get_predicates(const Handle& target,
 HandleSeq get_predicates_for(const Handle& target, 
                              const Handle& predicate);
 
-/**
- * Given a Handle pointing to <name> in
- *
- * DefineLink
- *    <name>
- *    <body>
- *
- * return <body>
- */
-Handle get_definition(const Handle& name);
-
 /** @}*/
 }
 
