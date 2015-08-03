@@ -1,0 +1,65 @@
+/*
+ * tests/atomspace/DefineUTest.cxxtest
+ *
+ * Copyright (C) 2015 Nil Geisweiller
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/bind/DefineLink.h>
+
+using namespace opencog;
+
+// Test the DefineLink.
+//
+class DefineLinkUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+
+public:
+	DefineLinkUTest()
+	{
+		logger().setPrintToStdoutFlag(true);
+	}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void test_define_concept();
+	// void test_define_pattern();
+	// void test_define_function();
+};
+
+// Test DefineLink over a ConceptNode
+void DefineLinkUTest::test_define_concept()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create DefineLink over a concept node
+	// Handle define_concept =
+	// 	_as.add_link(DEFINE_LINK,
+	// 	             _as.add_node(CONCEPT_NODE, "new-alias-for-A"),
+	// 	             _as.add_node(CONCEPT_NODE, "A"));
+
+	TS_ASSERT(true);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
