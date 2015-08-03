@@ -30,7 +30,7 @@ install:
     - sudo apt-get install -y -qq cython libtbb-dev libgsl0-dev unixodbc-dev
     - sudo apt-get install -y -qq python-nose
     # The following is for compiling guile-2.0.9
-    # TODO: backport guile for faster bulds.
+    # TODO: backport guile for faster builds.
     - sudo apt-get install -y -qq autoconf automake libtool libgmp-dev
     - sudo apt-get install -y -qq libunistring-dev pkg-config libffi-dev
     - sudo apt-get install -y -qq libgc-dev libreadline6-dev

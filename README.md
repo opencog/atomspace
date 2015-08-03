@@ -1,5 +1,6 @@
 OpenCog AtomSpace
 =================
+[![Build Status](https://travis-ci.org/opencog/atomspace.svg?branch=master)](https://travis-ci.org/opencog/atomspace)
 
 The OpenCog Atomspace is the hypergraph database and query/reasoning
 engine used by OpenCog to hold data and perform reasoning on it.
