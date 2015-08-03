@@ -206,7 +206,8 @@ public:
     std::string toShortString(std::string indent = "");
 
     /**
-     * Returns whether a given handle is a source of this link.
+     * Returns whether a given handle is a source (the first outgoing
+     * if the link is ordered) of this link.
      *
      * @param Handle to be checked for being a link source.
      * @return Whether a given handle is a source of this link.
@@ -215,7 +216,8 @@ public:
 
     /**
      * Returns whether the element in a given position in the
-     * outgoing set of this link is a source.
+     * outgoing set of this link is a source (the first outgoing
+     * if the link is ordered).
      *
      * @param Position in the outgoing set.
      * @return Whether the element in a given position in the
@@ -224,7 +226,8 @@ public:
     bool isSource(size_t) const throw (IndexErrorException, InvalidParamException);
 
     /**
-     * Returns whether a given handle is a target of this link.
+     * Returns whether a given handle is a target (any but the first
+     * if the link is ordered) of this link.
      *
      * @param Handle to be checked for being a link target.
      * @return Whether a given handle is a target of this link.
@@ -233,7 +236,8 @@ public:
 
     /**
      * Returns whether the element in a given position in the
-     * outgoing set of this link is a target.
+     * outgoing set of this link is a target (any but the first
+     * if the link is ordered).
      *
      * @param Position in the outgoing set.
      * @return Whether the element in a given position in the
