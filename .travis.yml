@@ -1,0 +1,56 @@
+os:
+  - linux
+
+# TODO: one day when container infrastructure works better change to
+# sudo: false
+sudo: required
+
+cache: apt
+
+# sets the environment variable and can be use to set build matrix aswell
+# Refer to http://docs.travis-ci.com/user/environment-variables/
+env:
+    global:
+        - CXX="g++-4.8"
+        - CC="gcc-4.8"
+
+# With the exception of opencog's ppa the rest are required because travis vms
+# have Ubuntu 12.04 as os.
+before_install:
+    - sudo apt-add-repository -y ppa:opencog-dev/ppa
+    - sudo apt-add-repository -y ppa:boost-latest/ppa
+    - sudo apt-add-repository -y ppa:kalakris/cmake
+    - sudo apt-add-repository -y ppa:ubuntu-toolchain-r/test
+    # for atomspace only
+    - sudo apt-add-repository -y ppa:cython-dev/master-ppa
+    - sudo apt-get update
+    - wget -O setup.sh https://raw.githubusercontent.com/opencog/opencog/master/scripts/ocpkg
+    - chmod +x setup.sh
+
+install:
+    - sudo apt-get install -y boost1.54 cxxtest cmake gcc-4.9 g++-4.9
+    # The following is for compiling guile-2.0.9
+    - sudo apt-get install -y autoconf automake libtool libgmp-dev \
+                              libunistring-dev pkg-config libffi-dev \
+                              libgc-dev libreadline6-dev
+    - wget ftp://ftp.gnu.org/pub/gnu/guile/guile-2.0.9.tar.xz
+    - tar -xvf guile-2.0.9.tar.xz
+    - cd guile-2.0.9
+    - ./configure -q
+    - make -s
+    - sudo make install
+    - sudo ldconfig
+    # Install cogutils
+    - sudo ./setup.sh -c
+
+
+before_script:
+    - mkdir build
+    - cd build
+    - cmake ..
+
+script:
+    - make -j$(nproc)
+    - make -j$(nproc) examples
+    - make -j$(nproc) tests
+    - make test
