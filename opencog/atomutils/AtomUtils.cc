@@ -304,4 +304,8 @@ HandleSeq get_predicates_for(const Handle& target,
     return answer;
 }
 
+Handle get_definition(const Handle& name) {
+	return Handle::UNDEFINED;
+}
+
 } // namespace OpenCog
