@@ -36,10 +36,12 @@ install:
     - wget ftp://ftp.gnu.org/pub/gnu/guile/guile-2.0.9.tar.xz
     - tar -xvf guile-2.0.9.tar.xz
     - cd guile-2.0.9
-    - ./configure -q
+    - ./configure
     - make -s
     - sudo make install
     - sudo ldconfig
+    # clean up
+    - cd .. ; rm -rf guile-2.0.9
     # Install cogutils
     - sudo ./setup.sh -c
 
