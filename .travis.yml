@@ -48,7 +48,7 @@ before_script:
     - cmake ..
 
 script:
-    - make -j$(nproc)
+    - make
     - make examples
     - make tests
     - make test
