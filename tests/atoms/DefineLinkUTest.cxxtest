@@ -23,6 +23,7 @@
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/bind/DefineLink.h>
+#include <opencog/atomutils/AtomUtils.h>
 
 using namespace opencog;
 
@@ -54,12 +55,13 @@ void DefineLinkUTest::test_define_concept()
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	// Create DefineLink over a concept node
-	// Handle define_concept =
-	// 	_as.add_link(DEFINE_LINK,
-	// 	             _as.add_node(CONCEPT_NODE, "new-alias-for-A"),
-	// 	             _as.add_node(CONCEPT_NODE, "A"));
+	Handle A = _as.add_node(CONCEPT_NODE, "A"),
+		aliasA = _as.add_node(CONCEPT_NODE, "alias-A"),
+		def_concept = _as.add_link(DEFINE_LINK, aliasA, A);
 
-	TS_ASSERT(true);
+	// Test that aliasA returns A as definition
+	Handle body = get_definition(aliasA);
+	TS_ASSERT_EQUALS(A, body);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
