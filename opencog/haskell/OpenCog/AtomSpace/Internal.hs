@@ -33,6 +33,7 @@ type AtomTypeRaw = String
 -- Main general atom representation.
 data AtomRaw = Link AtomTypeRaw [AtomRaw] (Maybe TVRaw)
              | Node AtomTypeRaw AtomName  (Maybe TVRaw)
+        deriving Eq
 
 -- Function to convert an Atom to its general representation.
 toRaw :: Atom a -> AtomRaw
@@ -140,6 +141,12 @@ filt araw = do
     case agen of
         (AtomGen at) -> filtIsChild at
 
+instance Eq (Atom a) where
+    at1 == at2 = toRaw at1 == toRaw at2
+
+instance Eq AtomGen where
+    AtomGen at1 == AtomGen at2 = Just at1 == cast at2
+
 -- Constant with the maximum number of parameters in any type of TV.
 tvMAX_PARAMS :: Int
 tvMAX_PARAMS = 5
@@ -154,9 +161,9 @@ data TVTypeEnum = NULL_TRUTH_VALUE
                 | INDEFINITE_TRUTH_VALUE
                 | FUZZY_TRUTH_VALUE
                 | PROBABILISTIC_TRUTH_VALUE
-    deriving Enum
+    deriving (Enum,Eq)
 
-data TVRaw = TVRaw TVTypeEnum [Double]
+data TVRaw = TVRaw TVTypeEnum [Double] deriving Eq
 
 toTVRaw :: TruthVal -> TVRaw
 toTVRaw (SimpleTV a b     ) = TVRaw SIMPLE_TRUTH_VALUE [a,b]

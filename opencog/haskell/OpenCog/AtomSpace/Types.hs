@@ -47,7 +47,7 @@ data TruthVal = SimpleTV { tvMean       :: Double
                          , tvCount      :: Double
                          , tvConfidence :: Double
                          }
-    deriving (Show)
+    deriving (Show,Eq)
 
 -- | 'AtomGen' is a general atom type hiding the type variables.
 -- (necessary when working with many instances of different atoms,

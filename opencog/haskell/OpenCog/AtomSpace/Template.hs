@@ -73,8 +73,8 @@ declareAtomFilters ll = do
     let
       className     = mkName "FilterIsChild"
       classFnName   = mkName "filtIsChild"
-      constrNames   = map (\(nod,_) -> mkName (toTypeName nod)) ll
-      classDef      = (map createInstance constrNames)
+      constrNames   = map (mkName . toTypeName . fst) ll
+      classDef      = map createInstance constrNames
 
       createInstance n = InstanceD []
           (AppT (ConT className) (PromotedT n))
@@ -92,8 +92,11 @@ atomHierarchyFile :: QuasiQuoter
 atomHierarchyFile = quoteFile atomHierarchy
 
 atomHierarchy :: QuasiQuoter
-atomHierarchy = QuasiQuoter
-    { quoteExp = dataToExpQ (\x -> Nothing) . parser
+atomHierarchy = QuasiQuoter {
+      quoteExp  = dataToExpQ (\x -> Nothing) . parser
+    , quotePat  = undefined
+    , quoteDec  = undefined
+    , quoteType = undefined
     }
 
 -- | 'parser' reads the text of the atom_types.script file and generate a list
