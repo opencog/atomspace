@@ -15,32 +15,30 @@ env:
 # With the exception of opencog's ppa the rest are required because travis vms
 # have Ubuntu 12.04 as os.
 before_install:
-    - sudo apt-add-repository -y ppa:opencog-dev/ppa
     - sudo apt-add-repository -y ppa:boost-latest/ppa
     - sudo apt-add-repository -y ppa:kalakris/cmake
     - sudo apt-add-repository -y ppa:ubuntu-toolchain-r/test
     # for atomspace only
     - sudo apt-add-repository -y ppa:cython-dev/master-ppa
     - sudo apt-get update
+    - wget http://mirrors.kernel.org/ubuntu/pool/universe/c/cxxtest/cxxtest_4.3-1_all.deb
+    - wget http://buildbot.opencog.org/downloads/for-ci-only/guile-2.0.9-amd64.deb
     - wget -O setup.sh https://raw.githubusercontent.com/opencog/opencog/master/scripts/ocpkg
     - chmod +x setup.sh
 
 install:
-    - sudo apt-get install -y -qq boost1.54 cxxtest cmake gcc-4.8 g++-4.8
+    #  python-ply is needed for cxxtest
+    - sudo apt-get install -y -qq boost1.54 cmake gcc-4.8 g++-4.8
     - sudo apt-get install -y -qq cython libtbb-dev libgsl0-dev unixodbc-dev
-    - sudo apt-get install -y -qq python-nose
-    # The following is for compiling guile-2.0.9
-    # TODO: backport guile for faster builds.
-    - sudo apt-get install -y -qq autoconf automake libtool libgmp-dev
-    - sudo apt-get install -y -qq libunistring-dev pkg-config libffi-dev
-    - sudo apt-get install -y -qq libgc-dev libreadline6-dev
-    - wget ftp://ftp.gnu.org/pub/gnu/guile/guile-2.0.9.tar.xz
-    - tar -xvf guile-2.0.9.tar.xz
-    - cd guile-2.0.9 &&  ./configure -q && make -s &&  sudo make install
-    - sudo ldconfig && cd ..
-    # Install cogutils
+    - sudo apt-get install -y -qq python-nose  python-ply
+    # The following line installs dependencies required by guile-2.0.9
+    # TODO: imporve the guile package created
+    - sudo apt-get install -y -qq libgc-dev libunistring-dev
+    - sudo dpkg -i guile-2.0.9-amd64.deb
+    - sudo dpkg -i cxxtest_4.3-1_all.deb
+    - sudo ldconfig
+     # Install cogutils
     - sudo ./setup.sh -c
-
 
 before_script:
     - mkdir build
