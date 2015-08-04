@@ -7,6 +7,10 @@
 ; To use, say this from the guile prompt:
 ; (load-modules (opencog))
 ;
+;
+; This should result in a utf8 locale being used!
+; See https://github.com/opencog/opencog/issues/937
+(setlocale LC_CTYPE "")
 
 ; libsmob won't be found unless we setenv where to find it!
 (setenv "LTDL_LIBRARY_PATH" "/usr/local/lib/opencog")
