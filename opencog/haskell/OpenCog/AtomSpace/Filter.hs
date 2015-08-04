@@ -1,17 +1,17 @@
 -- GSoC 2015 - Haskell bindings for OpenCog.
-{-# LANGUAGE GADTs                     #-}
-{-# LANGUAGE DataKinds                 #-}
-{-# LANGUAGE Rank2Types                #-}
-{-# LANGUAGE ScopedTypeVariables       #-}
-{-# LANGUAGE TypeOperators             #-}
-{-# LANGUAGE ConstraintKinds           #-}
-{-# LANGUAGE FlexibleInstances         #-}
-{-# LANGUAGE KindSignatures            #-}
-{-# LANGUAGE UndecidableInstances      #-}
-{-# LANGUAGE MultiParamTypeClasses     #-}
-{-# LANGUAGE FlexibleContexts          #-}
-{-# LANGUAGE QuasiQuotes                #-}
-{-# LANGUAGE TemplateHaskell            #-}
+{-# LANGUAGE GADTs                 #-}
+{-# LANGUAGE DataKinds             #-}
+{-# LANGUAGE Rank2Types            #-}
+{-# LANGUAGE ScopedTypeVariables   #-}
+{-# LANGUAGE TypeOperators         #-}
+{-# LANGUAGE ConstraintKinds       #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE KindSignatures        #-}
+{-# LANGUAGE UndecidableInstances  #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE QuasiQuotes           #-}
+{-# LANGUAGE TemplateHaskell       #-}
 
 -- | This Module defines atom filters based on their hierarchy.
 module OpenCog.AtomSpace.Filter (
@@ -52,4 +52,6 @@ instance (Typeable x,x <~ e,Filter e xs) => Filter e (x ': xs) where
 class FilterIsChild a where
     filtIsChild :: (b <~ AtomT) => Atom b -> Maybe (Gen a)
 
+-- Usage of Template Haskell to generate instances of FilterIsChild for each
+-- Atom Type.
 $(declareAtomFilters [atomHierarchyFile|../atomspace/atom_types.script|])

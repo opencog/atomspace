@@ -1,6 +1,9 @@
+-- GSoC 2015 - Haskell bindings for OpenCog.
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE TemplateHaskell    #-}
 
+-- | This Module defines the main util functions to use Template Haskell
+-- in order to reduce as much boilerplate code as possible.
 module OpenCog.AtomSpace.Template (
   declareAtomType
 , declareAtomFilters
@@ -13,10 +16,12 @@ import Data.List                 (isSuffixOf,sortBy,(\\),groupBy)
 import Data.Char                 (toUpper,toLower)
 import Data.Data                 (Data,Typeable)
 
+-- | Simple Atom representation.
 data AT = NOD String
         | LNK String
     deriving (Typeable,Data,Eq,Ord,Show)
 
+-- | Template function to define AtomType and some util functions over it.
 declareAtomType :: [(AT,[AT])] -> Q [Dec]
 declareAtomType ll = do
     a <- newName "a"
@@ -62,6 +67,7 @@ declareAtomType ll = do
     genlist []     = PromotedNilT
     genlist (x:xs) = AppT (AppT PromotedConsT (PromotedT x)) (genlist xs)
 
+-- | Template function to declare Filter instances for each AtomType.
 declareAtomFilters :: [(AT,[AT])] -> Q [Dec]
 declareAtomFilters ll = do
     let
@@ -81,6 +87,7 @@ declareAtomFilters ll = do
           ]
      in return classDef
 
+-- | QuasiQuorter to read the atom_types.script file.
 atomHierarchyFile :: QuasiQuoter
 atomHierarchyFile = quoteFile atomHierarchy
 
@@ -89,6 +96,8 @@ atomHierarchy = QuasiQuoter
     { quoteExp = dataToExpQ (\x -> Nothing) . parser
     }
 
+-- | 'parser' reads the text of the atom_types.script file and generate a list
+-- of tuples (Atom, Parent of that Atom).
 parser :: String -> [(AT,[AT])]
 parser = map toATTuple
        . map toCamelTuple
@@ -150,6 +159,9 @@ toRawName (LNK "Link"  ) = "Link"
 toRawName (NOD n       ) = n ++ "Node"
 toRawName (LNK l       ) = l ++ "Link"
 
+-- | 'reverseTree' reverses the information provided in the atom_types.script file.
+-- From input: [(Atom, parent of Atom)]
+-- It gets as output: [(Atom, children of Atom)]
 reverseTree :: [(AT,[AT])] -> [(AT,[AT])]
 reverseTree t = let rt = reverseTree' t
                  in rt ++ map (\x -> (x,[])) (map fst t \\ map fst rt)

@@ -22,4 +22,7 @@ module OpenCog.AtomSpace.AtomType (
 
 import OpenCog.AtomSpace.Template       (atomHierarchyFile,declareAtomType)
 
+-- Usage of Template Haskell to generate definitions of AtomType,
+-- some util functions: fromAtomTypeRaw and toAtomTypeRaw,
+-- and type families: Up and Down.
 $(declareAtomType [atomHierarchyFile|../atomspace/atom_types.script|])
