@@ -1,4 +1,5 @@
 -- GSoC 2015 - Haskell bindings for OpenCog.
+{-# LANGUAGE TypeOperators        #-}
 
 -- | This library defines Haskell Bindings for the AtomSpace.
 module OpenCog.AtomSpace
@@ -20,9 +21,14 @@ module OpenCog.AtomSpace
     , Atom (..)
     , AtomGen (..)
     , appAtomGen
+    -- * AtomSpace Phantom Types
+    , AtomType(..)
+    , type (<~)
     ) where
 
 import OpenCog.AtomSpace.Api
 import OpenCog.AtomSpace.Types
 import OpenCog.AtomSpace.Env         (AtomSpace,runOnNewAtomSpace)
 import OpenCog.AtomSpace.Utils       (printAtom,showAtom)
+import OpenCog.AtomSpace.AtomType    (AtomType(..))
+import OpenCog.AtomSpace.Inheritance (type (<~))

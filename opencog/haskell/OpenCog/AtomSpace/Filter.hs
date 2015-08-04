@@ -54,4 +54,4 @@ class FilterIsChild a where
 
 -- Usage of Template Haskell to generate instances of FilterIsChild for each
 -- Atom Type.
-$(declareAtomFilters [atomHierarchyFile|../atomspace/atom_types.script|])
+declareAtomFilters [atomHierarchyFile|../atomspace/atom_types.script|]
