@@ -39,11 +39,11 @@ namespace opencog
  * be replaced by something completely different, someday ...
  */
 
-/// The DefineLink is used to give a name to a pattern, typically to
-/// a ScopeLink, a SatisfactionLink or a BindLink.  The DefineLink is
-/// unique, in that, if any other atoms exists with this same name, it
-/// will throw an error!  Thus, only ONE DefineLink with a given name
-/// can exist at a time.
+/// The DefineLink is used to give a name to a hypergraph (schema,
+/// pattern, concept, predicate, etc).  The DefineLink is unique, in
+/// that, if any other atoms exists with this same name, it will throw
+/// an error!  Thus, only ONE DefineLink with a given name can exist
+/// at a time.
 ///
 /// This class is intended to be used for anything that needs to be
 /// accessed by name: for, if there were two things with the same name,
@@ -67,8 +67,11 @@ namespace opencog
 class DefineLink : public Link
 {
 protected:
-	// The definition is the named object that this link is defining.
-	ScopeLinkPtr _definition;
+	// Reference to the definition body (typically a node)
+	Handle _alias;
+	// Definition body that this link is defining.
+	Handle _definition;
+
 	void init(const HandleSeq&);
 public:
 	DefineLink(const HandleSeq&,
@@ -80,7 +83,19 @@ public:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	DefineLink(Link &l);
-	ScopeLinkPtr get_definition(void) { return _definition; }
+	Handle get_alias(void) { return _alias; }
+	Handle get_definition(void) { return _definition; }
+
+	/**
+	 * Given a Handle pointing to <name> in
+	 *
+	 * DefineLink
+	 *    <name>
+	 *    <body>
+	 *
+	 * return <body>
+	 */
+	static Handle get_definition(const Handle& alias);
 };
 
 typedef std::shared_ptr<DefineLink> DefineLinkPtr;
