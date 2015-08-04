@@ -34,7 +34,11 @@ CREATE TABLE Atoms (
 	name    TEXT,
 
 	-- An array of the outgoing edges; non-empty only for links
-	outgoing BIGINT[]
+	outgoing BIGINT[],
+
+	-- Force the uniqueness of atoms!!
+	UNIQUE (type, name),
+	UNIQUE (type, outgoing)
 );
 
 -- Indexes, needed for fast node and link lookup.
