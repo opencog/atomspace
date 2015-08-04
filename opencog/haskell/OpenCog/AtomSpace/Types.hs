@@ -1,5 +1,13 @@
 -- GSoC 2015 - Haskell bindings for OpenCog.
-{-# LANGUAGE GADTs , EmptyDataDecls , ExistentialQuantification , RankNTypes #-}
+{-# LANGUAGE GADTs                     #-}
+{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE RankNTypes                #-}
+{-# LANGUAGE AutoDeriveTypeable        #-}
+{-# LANGUAGE TypeOperators             #-}
+{-# LANGUAGE DataKinds                 #-}
+{-# LANGUAGE ConstraintKinds           #-}
+{-# LANGUAGE KindSignatures            #-}
+{-# LANGUAGE StandaloneDeriving        #-}
 
 -- | This Module defines the main data types for Haskell bindings.
 module OpenCog.AtomSpace.Types (
@@ -8,9 +16,12 @@ module OpenCog.AtomSpace.Types (
   , Atom (..)
   , AtomGen (..)
   , appAtomGen
-  , TNumberNode
-  , TConceptNode
+  , getType
   ) where
+
+import OpenCog.AtomSpace.Inheritance    (type (<~))
+import OpenCog.AtomSpace.AtomType       (AtomType(..))
+import Data.Typeable                    (Typeable)
 
 -- | Atom name type.
 type AtomName = String
@@ -23,11 +34,11 @@ data TruthVal = SimpleTV { tvMean       :: Double
                          , tvCount      :: Double
                          , tvConfidence :: Double
                          }
-              | IndefTV  { tvMean      :: Double
-                         , tvL         :: Double
-                         , tvU         :: Double
-                         , tvConfLevel :: Double
-                         , tvDiff      :: Double
+              | IndefTV  { tvMean       :: Double
+                         , tvL          :: Double
+                         , tvU          :: Double
+                         , tvConfLevel  :: Double
+                         , tvDiff       :: Double
                          }
               | FuzzyTV  { tvMean       :: Double
                          , tvConfidence :: Double
@@ -36,64 +47,73 @@ data TruthVal = SimpleTV { tvMean       :: Double
                          , tvCount      :: Double
                          , tvConfidence :: Double
                          }
-    deriving Show
-
-data TConceptNode
-data TNumberNode
+    deriving (Show)
 
 -- | 'AtomGen' is a general atom type hiding the type variables.
 -- (necessary when working with many instances of different atoms,
 -- for example, for lists of atoms)
 data AtomGen where
-    AtomGen :: Atom a -> AtomGen
+    AtomGen :: (a <~ AtomT) => Atom a -> AtomGen
+
+deriving instance Show AtomGen
 
 -- | 'appAtomGen' evaluates a given function with the atom instance
 -- wrapped inside the 'AtomGen' type.
-appAtomGen :: (forall a. Atom a -> b) -> AtomGen -> b
+appAtomGen :: (forall a. (a <~ AtomT) => Atom a -> b) -> AtomGen -> b
 appAtomGen f (AtomGen at) = f at
 
 -- | 'Atom' is the main data type to represent the different types of atoms.
-data Atom a where
-    PredicateNode   :: AtomName -> Atom (Atom a -> TruthVal)
-    AndLink         :: Atom a -> Atom b -> (Maybe TruthVal) -> Atom c
-    OrLink          :: Atom a -> Atom b -> (Maybe TruthVal) -> Atom c
-    ImplicationLink :: Atom a -> Atom b -> (Maybe TruthVal) -> Atom c
-    EquivalenceLink :: Atom a -> Atom b -> (Maybe TruthVal) -> Atom c
-    EvaluationLink  :: (Atom (Atom a -> TruthVal))  ->
-                      Atom [AtomGen] -> (Maybe TruthVal) -> Atom b
+data Atom (a :: AtomType) where
+    PredicateNode   :: AtomName -> Atom PredicateT
+    AndLink         :: (a <~ ConceptT,b <~ ConceptT) =>
+                       Atom a -> Atom b -> (Maybe TruthVal) -> Atom AndT
+    OrLink          :: (a <~ ConceptT,b <~ ConceptT) =>
+                       Atom a -> Atom b -> (Maybe TruthVal) -> Atom OrT
+    ImplicationLink :: (a <~ AtomT,b <~ AtomT) =>
+                       Atom a -> Atom b -> (Maybe TruthVal) -> Atom ImplicationT
+    EquivalenceLink :: (a <~ AtomT,b <~ AtomT) =>
+                       Atom a -> Atom b -> (Maybe TruthVal) -> Atom EquivalenceT
+    EvaluationLink  :: (p <~ PredicateT,l <~ ListT) =>
+                       Atom p -> Atom l -> (Maybe TruthVal) -> Atom EvaluationT
 
-    ConceptNode       :: AtomName -> (Maybe TruthVal) -> Atom TConceptNode
-    InheritanceLink   :: Atom TConceptNode -> Atom TConceptNode -> (Maybe TruthVal) -> Atom a
-    SimilarityLink    :: Atom TConceptNode -> Atom TConceptNode -> (Maybe TruthVal) -> Atom a
-    MemberLink        :: Atom TConceptNode -> Atom TConceptNode -> (Maybe TruthVal) -> Atom a
-    SatisfyingSetLink :: Atom (Atom a -> TruthVal) -> Atom TConceptNode
+    ConceptNode     :: AtomName -> (Maybe TruthVal) -> Atom ConceptT
+    InheritanceLink :: (c1 <~ ConceptT,c2 <~ ConceptT) =>
+                       Atom c1 -> Atom c2 -> (Maybe TruthVal) -> Atom InheritanceT
+    SimilarityLink  :: (c1 <~ ConceptT,c2 <~ ConceptT) =>
+                       Atom c1 -> Atom c2 -> (Maybe TruthVal) -> Atom SimilarityT
+    MemberLink      :: (c1 <~ ConceptT,c2 <~ ConceptT) =>
+                       Atom c1 -> Atom c2 -> (Maybe TruthVal) -> Atom MemberT
+    SatisfyingSetLink :: (p <~ PredicateT) =>
+                       Atom p -> Atom SatisfyingSetT
 
-    NumberNode :: (Num a,Show a) => a -> Atom TNumberNode
+    NumberNode :: Double -> Atom NumberT
 
-    ListLink :: [AtomGen] -> Atom [AtomGen]
+    ListLink :: [AtomGen] -> Atom ListT
 
+    SchemaNode :: AtomName -> Atom SchemaT
+    GroundedSchemaNode :: AtomName -> Atom GroundedSchemaT
+    ExecutionLink :: (s <~ SchemaT,l <~ ListT,a <~ AtomT) =>
+                     Atom s -> Atom l -> Atom a -> Atom ExecutionT
 
-instance Show AtomGen where
-    show (AtomGen at) = concatWSpaces ["AtomGen",show at]
+deriving instance Show (Atom a)
+deriving instance Typeable Atom
 
-instance Show (Atom a) where
-    show (PredicateNode n)         = mix ["PredicateNode",show n]
-    show (AndLink a1 a2 m)         = mix ["AndLink",show a1,show a2,show m]
-    show (OrLink a1 a2 m)          = mix ["OrLink",show a1,show a2,show m]
-    show (ImplicationLink a1 a2 m) = mix ["ImplicationLink",show a1,show a2,show m]
-    show (EquivalenceLink a1 a2 m) = mix ["EquivalenceLink",show a1,show a2,show m]
-    show (EvaluationLink a1 a2 m)  = mix ["EvaluationLink",show a1,show a2,show m]
-    show (ConceptNode n m)         = mix ["ConceptNode",show n,show m]
-    show (InheritanceLink a1 a2 m) = mix ["InheritanceLink",show a1,show a2,show m]
-    show (SimilarityLink a1 a2 m)  = mix ["SimilarityLink",show a1,show a2,show m]
-    show (MemberLink a1 a2 m)      = mix ["MemberLink",show a1,show a2,show m]
-    show (SatisfyingSetLink a)     = mix ["SatisfyingSetLink",show a]
-    show (NumberNode n)            = mix ["NumberNode",show n]
-    show (ListLink l)              = mix ["ListLink",show l]
-
-mix :: [String] -> String
-mix xs = "( "++concatWSpaces xs++")"
-
-concatWSpaces :: [String] -> String
-concatWSpaces = foldr (\a b -> a++" "++b) []
+getType :: Atom a -> AtomType
+getType at = case at of
+    PredicateNode _       -> PredicateT
+    AndLink _ _ _         -> AndT
+    OrLink _ _ _          -> OrT
+    ImplicationLink _ _ _ -> ImplicationT
+    EquivalenceLink _ _ _ -> EquivalenceT
+    EvaluationLink _ _ _  -> EvaluationT
+    ConceptNode _ _       -> ConceptT
+    InheritanceLink _ _ _ -> InheritanceT
+    SimilarityLink _ _ _  -> SimilarityT
+    MemberLink _ _ _      -> MemberT
+    SatisfyingSetLink _   -> SatisfyingSetT
+    NumberNode _          -> NumberT
+    ListLink _            -> ListT
+    SchemaNode _          -> SchemaT
+    GroundedSchemaNode _  -> GroundedSchemaT
+    ExecutionLink _ _ _   -> ExecutionT
 

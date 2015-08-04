@@ -1,5 +1,8 @@
 -- GSoC 2015 - Haskell bindings for OpenCog.
 {-# LANGUAGE ForeignFunctionInterface #-}
+{-# LANGUAGE ConstraintKinds          #-}
+{-# LANGUAGE TypeOperators            #-}
+{-# LANGUAGE DataKinds                #-}
 
 -- | This Module defines the main functions to interact with the AtomSpace
 -- creating/removing/modifying atoms.
@@ -10,19 +13,21 @@ module OpenCog.AtomSpace.Api (
     , debug
     ) where
 
-import Foreign                      (Ptr)
-import Foreign.C.Types              (CULong(..),CInt(..),CDouble(..))
-import Foreign.C.String             (CString,withCString)
-import Foreign.Marshal.Array        (withArray,allocaArray,peekArray)
-import Foreign.Marshal.Utils        (toBool)
-import Foreign.Marshal.Alloc        (alloca)
-import Foreign.Storable             (peek)
-import Data.Functor                 ((<$>))
-import Control.Monad.IO.Class       (liftIO)
-import OpenCog.AtomSpace.Env        (AtomSpaceRef(..),AtomSpace,getAtomSpace)
-import OpenCog.AtomSpace.Internal   (Handle,AtomType,AtomRaw(..),TVRaw(..),
-                                     toRaw,fromRaw,tvMAX_PARAMS)
-import OpenCog.AtomSpace.Types      (Atom(..),AtomName(..),TruthVal(..))
+import Foreign                       (Ptr)
+import Foreign.C.Types               (CULong(..),CInt(..),CDouble(..))
+import Foreign.C.String              (CString,withCString)
+import Foreign.Marshal.Array         (withArray,allocaArray,peekArray)
+import Foreign.Marshal.Utils         (toBool)
+import Foreign.Marshal.Alloc         (alloca)
+import Foreign.Storable              (peek)
+import Data.Functor                  ((<$>))
+import Control.Monad.IO.Class        (liftIO)
+import OpenCog.AtomSpace.Env         (AtomSpaceRef(..),AtomSpace,getAtomSpace)
+import OpenCog.AtomSpace.Internal    (Handle,AtomTypeRaw,AtomRaw(..),TVRaw(..),
+                                      toRaw,fromRaw,tvMAX_PARAMS)
+import OpenCog.AtomSpace.Types       (Atom(..),AtomName(..),TruthVal(..))
+import OpenCog.AtomSpace.Inheritance (type (<~))
+import OpenCog.AtomSpace.AtomType    (AtomType(AtomT))
 
 --------------------------------------------------------------------------------
 
@@ -44,7 +49,7 @@ foreign import ccall "AtomSpace_addNode"
                       -> CString
                       -> IO Handle
 
-insertNode :: AtomType -> AtomName -> AtomSpace Handle
+insertNode :: AtomTypeRaw -> AtomName -> AtomSpace Handle
 insertNode aType aName = do
     asRef <- getAtomSpace
     liftIO $ withCString aType $
@@ -58,7 +63,7 @@ foreign import ccall "AtomSpace_addLink"
                       -> CInt
                       -> IO Handle
 
-insertLink :: AtomType -> [AtomRaw] -> AtomSpace Handle
+insertLink :: AtomTypeRaw -> [AtomRaw] -> AtomSpace Handle
 insertLink aType aOutgoing = do
     list <- mapM insertAndGetHandle aOutgoing
     asRef <- getAtomSpace
@@ -111,7 +116,7 @@ foreign import ccall "AtomSpace_getNode"
                       -> Ptr CInt
                       -> IO Handle
 
-getNodeHandle :: AtomType -> AtomName -> AtomSpace (Maybe Handle)
+getNodeHandle :: AtomTypeRaw -> AtomName -> AtomSpace (Maybe Handle)
 getNodeHandle aType aName = do
     asRef <- getAtomSpace
     liftIO $ withCString aType $
@@ -124,7 +129,7 @@ getNodeHandle aType aName = do
                      then Just h
                      else Nothing
 
-getNode :: AtomType -> AtomName -> AtomSpace (Maybe (TVRaw,Handle))
+getNode :: AtomTypeRaw -> AtomName -> AtomSpace (Maybe (TVRaw,Handle))
 getNode aType aName = do
     m <- getNodeHandle aType aName
     case m of
@@ -142,7 +147,7 @@ foreign import ccall "AtomSpace_getLink"
                       -> Ptr CInt
                       -> IO Handle
 
-getLinkHandle :: AtomType -> [Handle] -> AtomSpace (Maybe Handle)
+getLinkHandle :: AtomTypeRaw -> [Handle] -> AtomSpace (Maybe Handle)
 getLinkHandle aType aOutgoing = do
     asRef <- getAtomSpace
     liftIO $ withCString aType $
@@ -156,7 +161,7 @@ getLinkHandle aType aOutgoing = do
                      then Just h
                      else Nothing
 
-getLink :: AtomType -> [Handle] -> AtomSpace (Maybe (TVRaw,Handle))
+getLink :: AtomTypeRaw -> [Handle] -> AtomSpace (Maybe (TVRaw,Handle))
 getLink aType aOutgoing = do
     m <- getLinkHandle aType aOutgoing
     case m of
@@ -167,7 +172,7 @@ getLink aType aOutgoing = do
 
 getWithHandle :: AtomRaw -> AtomSpace (Maybe (AtomRaw,Handle))
 getWithHandle i = do
-    let onLink :: AtomType
+    let onLink :: AtomTypeRaw
                -> [AtomRaw]
                -> AtomSpace (Maybe (TVRaw,Handle,[AtomRaw]))
         onLink aType aOutgoing = do
@@ -195,7 +200,7 @@ getWithHandle i = do
 
 -- | 'get' looks for an atom in the atomspace and returns it.
 -- (With updated mutable information)
-get :: Atom a -> AtomSpace (Maybe (Atom a))
+get :: (a <~ AtomT) => Atom a -> AtomSpace (Maybe (Atom a))
 get i = do
     m <- getWithHandle $ toRaw i
     return $ case m of
