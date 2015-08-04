@@ -85,7 +85,7 @@ Handle DefineLink::get_definition(const Handle& alias) {
 
     // Return the first (supposedly unique) definition
     for (LinkPtr defl : defs) {
-	    DefineLinkPtr def(DefineLinkCast(def->getHandle()));
+	    DefineLinkPtr def(DefineLinkCast(defl->getHandle()));
 	    if (def->get_alias() == alias)
 		    return def->get_definition();
     }
