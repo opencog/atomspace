@@ -20,9 +20,11 @@ library
                    , OpenCog.AtomSpace.Inheritance
                    , OpenCog.AtomSpace.Filter
                    , OpenCog.AtomSpace.AtomType
+                   , OpenCog.AtomSpace.Template
 
   build-depends:     base         >=4.5
                    , transformers >=0.3
+                   , template-haskell
 
   extra-libraries:   haskell-atomspace
-
+  ghc-options:       -fcontext-stack=500

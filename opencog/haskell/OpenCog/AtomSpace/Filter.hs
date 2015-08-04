@@ -10,6 +10,8 @@
 {-# LANGUAGE UndecidableInstances      #-}
 {-# LANGUAGE MultiParamTypeClasses     #-}
 {-# LANGUAGE FlexibleContexts          #-}
+{-# LANGUAGE QuasiQuotes                #-}
+{-# LANGUAGE TemplateHaskell            #-}
 
 -- | This Module defines atom filters based on their hierarchy.
 module OpenCog.AtomSpace.Filter (
@@ -18,6 +20,7 @@ module OpenCog.AtomSpace.Filter (
   , FilterIsChild(..)
   ) where
 
+import OpenCog.AtomSpace.Template       (atomHierarchyFile,declareAtomFilters)
 import OpenCog.AtomSpace.Inheritance    (type (<~),Children)
 import OpenCog.AtomSpace.AtomType       (AtomType(..))
 import OpenCog.AtomSpace.Types          (Atom(..))
@@ -49,41 +52,4 @@ instance (Typeable x,x <~ e,Filter e xs) => Filter e (x ': xs) where
 class FilterIsChild a where
     filtIsChild :: (b <~ AtomT) => Atom b -> Maybe (Gen a)
 
-instance FilterIsChild AtomT where
-    filtIsChild = filtChild (Proxy :: Proxy (Children AtomT))
-instance FilterIsChild NodeT where
-    filtIsChild = filtChild (Proxy :: Proxy (Children NodeT))
-instance FilterIsChild LinkT where
-    filtIsChild = filtChild (Proxy :: Proxy (Children LinkT))
-instance FilterIsChild PredicateT where
-    filtIsChild = filtChild (Proxy :: Proxy (Children PredicateT))
-instance FilterIsChild ConceptT where
-    filtIsChild = filtChild (Proxy :: Proxy (Children ConceptT))
-instance FilterIsChild SchemaT where
-    filtIsChild = filtChild (Proxy :: Proxy (Children SchemaT))
-instance FilterIsChild GroundedSchemaT where
-    filtIsChild = filtChild (Proxy :: Proxy (Children GroundedSchemaT))
-instance FilterIsChild NumberT where
-    filtIsChild = filtChild (Proxy :: Proxy (Children NumberT))
-instance FilterIsChild AndT where
-    filtIsChild = filtChild (Proxy :: Proxy (Children AndT))
-instance FilterIsChild OrT where
-    filtIsChild = filtChild (Proxy :: Proxy (Children OrT))
-instance FilterIsChild ImplicationT where
-    filtIsChild = filtChild (Proxy :: Proxy (Children ImplicationT))
-instance FilterIsChild EquivalenceT where
-    filtIsChild = filtChild (Proxy :: Proxy (Children EquivalenceT))
-instance FilterIsChild EvaluationT where
-    filtIsChild = filtChild (Proxy :: Proxy (Children EvaluationT))
-instance FilterIsChild InheritanceT where
-    filtIsChild = filtChild (Proxy :: Proxy (Children InheritanceT))
-instance FilterIsChild SimilarityT where
-    filtIsChild = filtChild (Proxy :: Proxy (Children SimilarityT))
-instance FilterIsChild MemberT where
-    filtIsChild = filtChild (Proxy :: Proxy (Children MemberT))
-instance FilterIsChild SatisfyingSetT where
-    filtIsChild = filtChild (Proxy :: Proxy (Children SatisfyingSetT))
-instance FilterIsChild ListT where
-    filtIsChild = filtChild (Proxy :: Proxy (Children ListT))
-instance FilterIsChild ExecutionT where
-    filtIsChild = filtChild (Proxy :: Proxy (Children ExecutionT))
+$(declareAtomFilters [atomHierarchyFile|../atomspace/atom_types.script|])
