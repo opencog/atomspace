@@ -10,6 +10,4 @@ dependencies:
 test:
     override:
         - docker run --rm -v $PWD:/atomspace -it opencog/opencog-deps \
-         /bin/sh -c "sudo /tmp/setup.sh -c &&  mkdir /atomspace/bin && \
-         cd /atomspace/bin && cmake .. && make -j$(nproc) && make examples && \
-         make tests && make test"
+                    /bin/sh -c "cd /atomspace && /tmp/octool -cbet"
