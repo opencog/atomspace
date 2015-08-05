@@ -1,6 +1,9 @@
 OpenCog AtomSpace
 =================
 
+![Build Status](
+https://circleci.com/gh/opencog/atomspace/tree/master.png?circle-token=:circle-token)
+
 The OpenCog Atomspace is the hypergraph database and query/reasoning
 engine used by OpenCog to hold data and perform reasoning on it.
 
