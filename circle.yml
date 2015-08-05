@@ -6,6 +6,7 @@ dependencies:
     override:
         - docker info
         - docker pull opencog/opencog-deps
+        - docker images opencog/opencog-deps
 
 test:
     override:
