@@ -10,4 +10,3 @@ To use the script follow the following steps
 4. ./octool -b        # build the code
 5. ./octool -e        # build examples
 6. ./octool -t        # build tests
-7. ./octool -t        # build tests
