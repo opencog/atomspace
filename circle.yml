@@ -6,13 +6,10 @@ dependencies:
     override:
         - docker info
         - docker pull opencog/opencog-deps
-        - docker run --rm -v $PWD:/atomspace -it opencog/opencog-deps bash
-        - sudo /tmp/setup.sh -c
 
 test:
     override:
-        - cd /atomspace ; mkdir build ; cd build ; cmake ..
-        - make -j$(nproc)
-        - make examples
-        - make tests
-        - make test
+        - docker run --rm -v $PWD:/atomspace -it opencog/opencog-deps \
+         /bin/sh -c "sudo /tmp/setup.sh -c &&  mkdir /atomspace/bin && \
+         cd /atomspace/bin && cmake .. && make -j$(nproc) && make examples && \
+         make tests && make test"
