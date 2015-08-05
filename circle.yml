@@ -5,7 +5,7 @@ machine:
 dependencies:
     override:
         - docker info
-        - docker pull -t opencog/opencog-deps
+        - docker pull opencog/opencog-deps
         - docker run --rm -v $PWD:/atomspace -it opencog/opencog-deps bash
         - sudo /tmp/setup.sh -c
 
