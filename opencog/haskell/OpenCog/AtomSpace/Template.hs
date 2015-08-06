@@ -10,11 +10,15 @@ module OpenCog.AtomSpace.Template (
 , atomHierarchyFile
 ) where
 
-import Language.Haskell.TH.Quote (QuasiQuoter(..),dataToExpQ,quoteFile)
+import Language.Haskell.TH.Quote        (QuasiQuoter(..),dataToExpQ,quoteFile)
 import Language.Haskell.TH
-import Data.List                 (isSuffixOf,sortBy,(\\),groupBy)
-import Data.Char                 (toUpper,toLower)
-import Data.Data                 (Data,Typeable)
+import Data.List                        (isSuffixOf,sortBy,(\\),groupBy)
+import Data.Char                        (toUpper,toLower)
+import Data.Data                        (Data,Typeable)
+import Data.Map.Strict                  (Map,mapKeys,toList,fromList,insert,
+                                         empty,(!),keys,member)
+import qualified Data.Map.Strict as M   (map)
+import Control.Monad.State              (State,modify,get,execState)
 
 -- | Simple Atom representation.
 data AT = NOD String
@@ -23,7 +27,7 @@ data AT = NOD String
 
 -- | Template function to define AtomType and some util functions over it.
 declareAtomType :: [(AT,[AT])] -> Q [Dec]
-declareAtomType ll = do
+declareAtomType atomMap = do
     a <- newName "a"
     let
       atomType      = mkName "AtomType"
@@ -34,8 +38,8 @@ declareAtomType ll = do
       constrNames   = map (\(nod,parents) ->
                                 (mkName (toTypeName nod)
                                 ,toRawName nod
-                                ,map (mkName . toTypeName) parents)) ll
-      revTree       = reverseTree ll
+                                ,map (mkName . toTypeName) parents)) atomMap
+      revTree       = reverseTree atomMap
       constrNamesRev= map (\(nod,children) ->
                                 (mkName (toTypeName nod)
                                 ,map (mkName . toTypeName) children)) revTree
@@ -69,11 +73,11 @@ declareAtomType ll = do
 
 -- | Template function to declare Filter instances for each AtomType.
 declareAtomFilters :: [(AT,[AT])] -> Q [Dec]
-declareAtomFilters ll = do
+declareAtomFilters atomMap = do
     let
       className     = mkName "FilterIsChild"
       classFnName   = mkName "filtIsChild"
-      constrNames   = map (mkName . toTypeName . fst) ll
+      constrNames   = map (mkName . toTypeName . fst) atomMap
       classDef      = map createInstance constrNames
 
       createInstance n = InstanceD []
@@ -99,30 +103,64 @@ atomHierarchy = QuasiQuoter {
     , quoteType = undefined
     }
 
+type NameMap = Map String String
+type AtomMap = Map String [String]
+type PState = State (NameMap,AtomMap)
+
+onNameMap :: (NameMap -> NameMap) -> PState ()
+onNameMap f = modify (\(s1,s2) -> (f s1,s2))
+
+onAtomMap :: (AtomMap -> AtomMap) -> PState ()
+onAtomMap f = modify (\(s1,s2) -> (s1,f s2))
+
 -- | 'parser' reads the text of the atom_types.script file and generate a list
 -- of tuples (Atom, Parent of that Atom).
 parser :: String -> [(AT,[AT])]
-parser = map toATTuple
-       . map toCamelTuple
-       . concat
-       . map parseLine
-       . map removeComm
-       . lines
+parser s = ( toList
+           . M.map (map toAT)
+           . mapKeys toAT
+           . snd
+           ) $ execState (withState s) (empty,empty)
+  where
+    withState :: String -> PState ()
+    withState s = do
+          onLines s
+          mapToCamelCase
+    onLines :: String -> PState ()
+    onLines = mapM_ parseLine
+            . map removeComm
+            . lines
+    mapToCamelCase :: PState ()
+    mapToCamelCase = do
+        (nameMap,_) <- get
+        onAtomMap $ M.map $ map $ format nameMap
+        onAtomMap $ mapKeys $ format nameMap
+    format :: NameMap -> String -> String
+    format dict s = if member s dict
+                      then dict!s
+                      else toCamelCase s
 
 removeComm :: String -> String
 removeComm ('/':'/':_) = []
-removeComm ('"':_) = []
 removeComm (x:xs) = x : removeComm xs
 removeComm [] = []
 
-parseLine :: String -> [(String,[String])]
+parseLine :: String -> PState ()
 parseLine s = case words (map repl s) of
-    aname:[]      -> [(aname,[])]
-    aname:"<-":xs -> [(aname,xs)]
-    _             -> []
+    aname:[]          -> onAtomMap $ insert aname []
+    aname:"<-":(x:xs) -> case lookReName (x:xs) of
+        Nothing   -> onAtomMap $ insert aname (x:xs)
+        Just name -> do
+            onNameMap $ insert aname name
+            onAtomMap $ insert aname $ init (x:xs)
+    _                 -> return ()
   where
     repl ',' = ' '
     repl  x  = x
+    lookReName [] = Nothing
+    lookReName xs = case (last xs,last $ last xs) of
+        ('"':y:ys,'"') -> Just $ init (y:ys)
+        _              -> Nothing
 
 toCamelCase :: String -> String
 toCamelCase = concat
@@ -135,9 +173,6 @@ toCamelCase = concat
       capital (x:xs) = toUpper x : map toLower xs
       capital []     = []
 
-toCamelTuple :: (String,[String]) -> (String,[String])
-toCamelTuple (x,xs) = (toCamelCase x,map toCamelCase xs)
-
 toAT :: String -> AT
 toAT "Notype" = NOD "Notype"
 toAT "Atom"   = NOD "Atom"
@@ -146,9 +181,6 @@ toAT "Link"   = LNK "Link"
 toAT xs | isSuffixOf "Node" xs = NOD $ take (length xs - 4) xs
         | isSuffixOf "Link" xs = LNK $ take (length xs - 4) xs
         | otherwise            = LNK xs
-
-toATTuple :: (String,[String]) -> (AT,[AT])
-toATTuple (x,xs) = (toAT x,map toAT xs)
 
 toTypeName :: AT -> String
 toTypeName (NOD s) = s ++ "T"
