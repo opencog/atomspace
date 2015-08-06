@@ -10,7 +10,7 @@ CREATE TABLE Atoms (
 	uuid	BIGINT PRIMARY KEY,
 
 	-- The atomspace that this atom belongs to.
-	space BIGINT,
+	space BIGINT REFERENCES spaces(space),
 
 	-- Atom type, e.g. Link, Node, etc.
 	type  SMALLINT,
@@ -90,9 +90,11 @@ CREATE TABLE TypeCodes (
 -- atomspace as a parent.
 
 CREATE TABLE Spaces (
-	space  BIGINT,
+	space  BIGINT PRIMARY KEY,
 	parent BIGINT
 );
+
+INSERT INTO Spaces VALUES (1,1); -- default root
 
 -- -----------------------------------------------------------
 -- Global state
