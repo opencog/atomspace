@@ -1,6 +1,6 @@
 -- GSoC 2015 - Haskell bindings for OpenCog.
-{-# LANGUAGE GADTs     #-}
-{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE GADTs        #-}
+{-# LANGUAGE DataKinds    #-}
 
 -- | This Module defines some useful data types for proper interaction
 -- with the AtomSpace C wrapper library.
@@ -36,7 +36,7 @@ data AtomRaw = Link AtomTypeRaw [AtomRaw] (Maybe TVRaw)
         deriving Eq
 
 -- Function to convert an Atom to its general representation.
-toRaw :: Atom a -> AtomRaw
+toRaw :: (Typeable a) => Atom a -> AtomRaw
 toRaw at = let atype = toAtomTypeRaw $ getType at
            in case at of
     PredicateNode n tv       -> Node atype n $ toTVRaw <$> tv
@@ -62,7 +62,7 @@ toRaw at = let atype = toAtomTypeRaw $ getType at
     _                        -> undefined
 
 -- Function to get an Atom back from its general representation (if possible).
-fromRaw :: Typeable a => AtomRaw -> Atom a -> Maybe (Atom a)
+fromRaw :: (Typeable a) => AtomRaw -> Atom a -> Maybe (Atom a)
 fromRaw raw _ = fromRaw' raw >>= appAtomGen cast
 
 -- Function to get an Atom back from its general representation (if possible).
@@ -161,7 +161,7 @@ filt araw = do
     case agen of
         (AtomGen at) -> filtIsChild at
 
-instance Eq (Atom a) where
+instance (Typeable a) => Eq (Atom a) where
     at1 == at2 = toRaw at1 == toRaw at2
 
 instance Eq AtomGen where

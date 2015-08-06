@@ -21,6 +21,7 @@ import Foreign.Marshal.Utils         (toBool)
 import Foreign.Marshal.Alloc         (alloca)
 import Foreign.Storable              (peek)
 import Data.Functor                  ((<$>))
+import Data.Typeable                 (Typeable)
 import Control.Monad.IO.Class        (liftIO)
 import OpenCog.AtomSpace.Env         (AtomSpaceRef(..),AtomSpace,getAtomSpace)
 import OpenCog.AtomSpace.Internal    (Handle,AtomTypeRaw,AtomRaw(..),TVRaw(..),
@@ -87,7 +88,7 @@ insertAndGetHandle i = case i of
         return h
 
 -- | 'insert' creates a new atom on the atomspace or updates the existing one.
-insert :: Atom a -> AtomSpace ()
+insert :: Typeable a => Atom a -> AtomSpace ()
 insert i = insertAndGetHandle (toRaw i) >> return ()
 
 --------------------------------------------------------------------------------
@@ -99,7 +100,7 @@ foreign import ccall "AtomSpace_removeAtom"
 
 -- | 'remove' deletes an atom from the atomspace.
 -- Returns True in success or False if it couldn't locate the specified atom.
-remove :: Atom a -> AtomSpace Bool
+remove :: Typeable a => Atom a -> AtomSpace Bool
 remove i = do
     asRef <- getAtomSpace
     m <- getWithHandle $ toRaw i

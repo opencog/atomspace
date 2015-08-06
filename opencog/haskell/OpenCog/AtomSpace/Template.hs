@@ -44,7 +44,7 @@ declareAtomType atomMap = do
                                 (mkName (toTypeName nod)
                                 ,map (mkName . toTypeName) children)) revTree
       constr      = map (\(x,_,_) -> NormalC x []) constrNames
-      typeDef     = DataD [] atomType [] constr [''Eq, ''Show]
+      typeDef     = DataD [] atomType [] constr [''Eq, ''Show, ''Typeable, ''Read]
       funDef1     = FunD functionName1 (map createClause1 constrNames)
       funDef2     = FunD functionName2 (map createClause2 constrNames)
       typeFamDef1 = ClosedTypeFamilyD typeFamName1 [PlainTV a]

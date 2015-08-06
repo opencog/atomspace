@@ -23,7 +23,7 @@ module OpenCog.AtomSpace.Types (
 
 import OpenCog.AtomSpace.Inheritance    (type (<~))
 import OpenCog.AtomSpace.AtomType       (AtomType(..))
-import Data.Typeable                    (Typeable)
+import Data.Typeable                    (Typeable,typeRep)
 import Control.Monad                    (Functor,Monad)
 
 -- | Atom name type.
@@ -119,26 +119,5 @@ data Atom (a :: AtomType) where
 deriving instance Show (Atom a)
 deriving instance Typeable Atom
 
-getType :: Atom a -> AtomType
-getType at = case at of
-    PredicateNode _ _     -> PredicateT
-    AndLink _ _ _         -> AndT
-    OrLink _ _ _          -> OrT
-    ImplicationLink _ _ _ -> ImplicationT
-    EquivalenceLink _ _ _ -> EquivalenceT
-    EvaluationLink _ _ _  -> EvaluationT
-    ConceptNode _ _       -> ConceptT
-    InheritanceLink _ _ _ -> InheritanceT
-    SimilarityLink _ _ _  -> SimilarityT
-    MemberLink _ _ _      -> MemberT
-    SatisfyingSetLink _   -> SatisfyingSetT
-    NumberNode _          -> NumberT
-    ListLink _            -> ListT
-    SchemaNode _          -> SchemaT
-    GroundedSchemaNode _  -> GroundedSchemaT
-    ExecutionLink _ _ _   -> ExecutionT
-    VariableNode _        -> VariableT
-    SatisfactionLink _ _  -> SatisfactionT
-    ForAllLink _ _ _      -> ForAllT
-    AverageLink _ _ _     -> AverageT
-
+getType :: (Typeable a) => Atom a -> AtomType
+getType = read . show . typeRep
