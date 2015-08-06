@@ -82,7 +82,7 @@ HandleSeq UREConfigReader::fetch_rules(Handle rbs)
 	Handle rule_var = _as.add_node(VARIABLE_NODE, "__URE_RULE__"),
 		rule_pat = _as.add_link(MEMBER_LINK, rule_var, rbs),
 		gl = _as.add_link(BIND_LINK, rule_pat, rule_pat),
-		rule_names = satisfying_set(&_as, gl);
+		rule_names = bindlink(&_as, gl);
 
 	// Remove the GetLink pattern from the AtomSpace as it is no
 	// longer useful
