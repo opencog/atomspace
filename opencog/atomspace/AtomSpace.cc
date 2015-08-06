@@ -279,16 +279,16 @@ Handle AtomSpace::fetch_atom(Handle h)
     // Case 2 & 3:
     // If we don't have the atom for this UUID, then go get it.
     if (NULL == h.operator->()) {
-        Handle hb(backing_store->getAtom(h));
+        AtomPtr a(backing_store->getAtom(h));
 
         // If we still don't have an atom, then the requested UUID
         // was "insane", that is, unknown by either the atom table
         // (case 1) or the backend.
-        if (NULL == hb.operator->())
+        if (NULL == a.operator->())
             throw RuntimeException(TRACE_INFO,
                 "Asked backend for an unknown handle; UUID=%lu\n",
                 h.value());
-        h = hb;
+        h = a;
     }
 
     // For links, must perform a recursive fetch, as otherwise
