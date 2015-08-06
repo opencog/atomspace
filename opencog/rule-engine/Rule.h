@@ -40,7 +40,7 @@ class Rule : public boost::less_than_comparable<Rule>,
              public boost::equality_comparable<Rule>
 {
 public:
-	Rule(Handle rule);
+	Rule(Handle rule, float weight = 1);
 	virtual ~Rule();
 
 	// Comparison

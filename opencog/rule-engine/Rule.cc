@@ -33,10 +33,10 @@
 
 using namespace opencog;
 
-Rule::Rule(Handle rule)
+Rule::Rule(Handle rule, float weight)
 {
 	rule_handle_ = rule;
-	weight_ = -1;
+	weight_ = weight;
 }
 
 
