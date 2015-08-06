@@ -39,7 +39,7 @@ data AtomRaw = Link AtomTypeRaw [AtomRaw] (Maybe TVRaw)
 toRaw :: Atom a -> AtomRaw
 toRaw at = let atype = toAtomTypeRaw $ getType at
            in case at of
-    PredicateNode n          -> Node atype n Nothing
+    PredicateNode n tv       -> Node atype n $ toTVRaw <$> tv
     ConceptNode n tv         -> Node atype n $ toTVRaw <$> tv
     NumberNode d             -> Node atype (show d) Nothing
     SchemaNode n             -> Node atype n Nothing
@@ -58,6 +58,7 @@ toRaw at = let atype = toAtomTypeRaw $ getType at
     ListLink list            -> Link atype (map (appAtomGen toRaw) list) Nothing
     SatisfactionLink a1 a2   -> Link atype [toRaw a1,toRaw a2] Nothing
     ForAllLink tv a1 a2      -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    AverageLink tv a1 a2     -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
     _                        -> undefined
 
 -- Function to get an Atom back from its general representation (if possible).
@@ -70,7 +71,7 @@ fromRaw' (Node araw n tvraw) = let tv = fromTVRaw <$> tvraw in do
     atype <- fromAtomTypeRaw araw
     case atype of
       ConceptT        -> Just $ AtomGen $ ConceptNode n tv
-      PredicateT      -> Just $ AtomGen $ PredicateNode n
+      PredicateT      -> Just $ AtomGen $ PredicateNode n tv
       SchemaT         -> Just $ AtomGen $ SchemaNode n
       GroundedSchemaT -> Just $ AtomGen $ GroundedSchemaNode n
       VariableT       -> Just $ AtomGen $ VariableNode n
@@ -85,13 +86,13 @@ fromRaw' (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
     atype <- fromAtomTypeRaw araw
     case (atype,out) of
       (AndT ,[ar,br]) -> do
-        a <- filt ar :: Maybe (Gen ConceptT)
-        b <- filt br :: Maybe (Gen ConceptT)
+        a <- filt ar :: Maybe (Gen AtomT)
+        b <- filt br :: Maybe (Gen AtomT)
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ AtomGen $ AndLink tv a1 b1
       (OrT ,[ar,br]) -> do
-        a <- filt ar :: Maybe (Gen ConceptT)
-        b <- filt br :: Maybe (Gen ConceptT)
+        a <- filt ar :: Maybe (Gen AtomT)
+        b <- filt br :: Maybe (Gen AtomT)
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ AtomGen $ OrLink tv a1 b1
       (ImplicationT ,[ar,br]) -> do
@@ -120,8 +121,8 @@ fromRaw' (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ AtomGen $ SimilarityLink tv a1 b1
       (MemberT ,[ar,br]) -> do
-        a <- filt ar :: Maybe (Gen ConceptT)
-        b <- filt br :: Maybe (Gen ConceptT)
+        a <- filt ar :: Maybe (Gen NodeT)
+        b <- filt br :: Maybe (Gen NodeT)
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ AtomGen $ MemberLink tv a1 b1
       (SatisfyingSetT ,[ar]) -> do
@@ -147,6 +148,11 @@ fromRaw' (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
         b <- filt br :: Maybe (Gen ImplicationT)
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ AtomGen $ ForAllLink tv a1 b1
+      (AverageT ,[ar,br]) -> do
+        a <- filt ar :: Maybe (Gen VariableT)
+        b <- filt br :: Maybe (Gen AtomT)
+        case (a,b) of
+          (Gen a1,Gen b1) -> Just $ AtomGen $ AverageLink tv a1 b1
       _               -> Nothing
 
 filt :: FilterIsChild a => AtomRaw -> Maybe (Gen a)

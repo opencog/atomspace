@@ -72,7 +72,7 @@ appAtomGen f (AtomGen at) = f at
 
 -- | 'Atom' is the main data type to represent the different types of atoms.
 data Atom (a :: AtomType) where
-    PredicateNode       :: AtomName -> Atom PredicateT
+    PredicateNode       :: AtomName -> TVal -> Atom PredicateT
 
     AndLink             :: (a <~ AtomT,b <~ AtomT) =>
                            TVal -> Atom a -> Atom b -> Atom AndT
@@ -91,7 +91,7 @@ data Atom (a :: AtomType) where
                            TVal -> Atom c1 -> Atom c2 -> Atom InheritanceT
     SimilarityLink      :: (c1 <~ ConceptT,c2 <~ ConceptT) =>
                            TVal -> Atom c1 -> Atom c2 -> Atom SimilarityT
-    MemberLink          :: (c1 <~ ConceptT,c2 <~ ConceptT) =>
+    MemberLink          :: (c1 <~ NodeT,c2 <~ NodeT) =>
                            TVal -> Atom c1 -> Atom c2 -> Atom MemberT
     SatisfyingSetLink   :: (p <~ PredicateT) =>
                            Atom p -> Atom SatisfyingSetT
@@ -112,12 +112,16 @@ data Atom (a :: AtomType) where
     ForAllLink          :: (v <~ ListT,i <~ ImplicationT) =>
                            TVal -> Atom v -> Atom i -> Atom ForAllT
 
+    AverageLink         :: (v <~ VariableT,a <~ AtomT) =>
+                           TVal -> Atom v -> Atom a -> Atom AverageT
+
+
 deriving instance Show (Atom a)
 deriving instance Typeable Atom
 
 getType :: Atom a -> AtomType
 getType at = case at of
-    PredicateNode _       -> PredicateT
+    PredicateNode _ _     -> PredicateT
     AndLink _ _ _         -> AndT
     OrLink _ _ _          -> OrT
     ImplicationLink _ _ _ -> ImplicationT
@@ -136,4 +140,5 @@ getType at = case at of
     VariableNode _        -> VariableT
     SatisfactionLink _ _  -> SatisfactionT
     ForAllLink _ _ _      -> ForAllT
+    AverageLink _ _ _     -> AverageT
 
