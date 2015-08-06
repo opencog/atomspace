@@ -822,7 +822,7 @@ bool BackwardChainer::unify(const Handle& hsource,
 /**
  * Select a candidate rule from the set of filtered rules.
  *
- * XXX TODO use the rule cost
+ * XXX TODO use the rule weight
  * XXX should these selection functions be in callbacks like the ForwardChainer?
  *
  * @param target  the original target the set of filtered rules are unifiable to

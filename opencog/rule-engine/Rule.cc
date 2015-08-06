@@ -36,7 +36,7 @@ using namespace opencog;
 Rule::Rule(Handle rule)
 {
 	rule_handle_ = rule;
-	cost_ = -1;
+	weight_ = -1;
 }
 
 
@@ -45,9 +45,9 @@ Rule::~Rule()
 
 }
 
-int Rule::get_cost()
+float Rule::get_weight()
 {
-	return cost_;
+	return weight_;
 }
 
 void Rule::set_category(const string& name)
@@ -201,9 +201,9 @@ HandleSeq Rule::get_implicand_seq()
 	return final_output;
 }
 
-void Rule::set_cost(int p)
+void Rule::set_weight(float p)
 {
-	cost_ = p;
+	weight_ = p;
 }
 
 /**
