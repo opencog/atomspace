@@ -481,6 +481,7 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 		// logical links, EvaluationLink with GroundedPredicateNode, or
 		// ExecuationOutputLink; cause otherwise none of the evaluatable
 		// can be evaluated and must be matched directly.
+		std::set<Type> connectives({AND_LINK, OR_LINK, NOT_LINK, SEQUENTIAL_AND_LINK});
 		std::function<bool (const Handle&)> is_virtualable = [&](const Handle& h)
 		{
 			Type t = h->getType();
@@ -488,13 +489,11 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 			LinkPtr l(LinkCast(h));
 			if (l)
 			{
-				if (t == AND_LINK || t == OR_LINK || t == NOT_LINK || t == SEQUENTIAL_AND_LINK)
+				if (connectives.count(t) != 0)
 				{
 					for (const Handle& oh : l->getOutgoingSet())
-					{
 						if (not is_virtualable(oh))
 							return false;
-					}
 
 					return true;
 				}
