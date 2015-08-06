@@ -17,11 +17,14 @@ module OpenCog.AtomSpace.Types (
   , AtomGen (..)
   , appAtomGen
   , getType
+  , noTv
+  , withTv
   ) where
 
 import OpenCog.AtomSpace.Inheritance    (type (<~))
 import OpenCog.AtomSpace.AtomType       (AtomType(..))
 import Data.Typeable                    (Typeable)
+import Control.Monad                    (Functor,Monad)
 
 -- | Atom name type.
 type AtomName = String
@@ -49,6 +52,11 @@ data TruthVal = SimpleTV { tvMean       :: Double
                          }
     deriving (Show,Eq)
 
+type TVal = Maybe TruthVal
+
+noTv = Nothing
+withTv = Just
+
 -- | 'AtomGen' is a general atom type hiding the type variables.
 -- (necessary when working with many instances of different atoms,
 -- for example, for lists of atoms)
@@ -64,42 +72,45 @@ appAtomGen f (AtomGen at) = f at
 
 -- | 'Atom' is the main data type to represent the different types of atoms.
 data Atom (a :: AtomType) where
-    PredicateNode   :: AtomName -> Atom PredicateT
-    AndLink         :: (a <~ AtomT,b <~ AtomT) =>
-                       Atom a -> Atom b -> (Maybe TruthVal) -> Atom AndT
-    OrLink          :: (a <~ AtomT,b <~ AtomT) =>
-                       Atom a -> Atom b -> (Maybe TruthVal) -> Atom OrT
-    ImplicationLink :: (a <~ AtomT,b <~ AtomT) =>
-                       Atom a -> Atom b -> (Maybe TruthVal) -> Atom ImplicationT
-    EquivalenceLink :: (a <~ AtomT,b <~ AtomT) =>
-                       Atom a -> Atom b -> (Maybe TruthVal) -> Atom EquivalenceT
-    EvaluationLink  :: (p <~ PredicateT,l <~ ListT) =>
-                       Atom p -> Atom l -> (Maybe TruthVal) -> Atom EvaluationT
+    PredicateNode       :: AtomName -> Atom PredicateT
 
-    ConceptNode     :: AtomName -> (Maybe TruthVal) -> Atom ConceptT
-    InheritanceLink :: (c1 <~ ConceptT,c2 <~ ConceptT) =>
-                       Atom c1 -> Atom c2 -> (Maybe TruthVal) -> Atom InheritanceT
-    SimilarityLink  :: (c1 <~ ConceptT,c2 <~ ConceptT) =>
-                       Atom c1 -> Atom c2 -> (Maybe TruthVal) -> Atom SimilarityT
-    MemberLink      :: (c1 <~ ConceptT,c2 <~ ConceptT) =>
-                       Atom c1 -> Atom c2 -> (Maybe TruthVal) -> Atom MemberT
-    SatisfyingSetLink :: (p <~ PredicateT) =>
-                       Atom p -> Atom SatisfyingSetT
+    AndLink             :: (a <~ AtomT,b <~ AtomT) =>
+                           TVal -> Atom a -> Atom b -> Atom AndT
+    OrLink              :: (a <~ AtomT,b <~ AtomT) =>
+                           TVal -> Atom a -> Atom b -> Atom OrT
+    ImplicationLink     :: (a <~ AtomT,b <~ AtomT) =>
+                           TVal -> Atom a -> Atom b -> Atom ImplicationT
+    EquivalenceLink     :: (a <~ AtomT,b <~ AtomT) =>
+                           TVal -> Atom a -> Atom b -> Atom EquivalenceT
+    EvaluationLink      :: (p <~ PredicateT,l <~ ListT) =>
+                           TVal -> Atom p -> Atom l -> Atom EvaluationT
 
-    NumberNode :: Double -> Atom NumberT
+    ConceptNode         :: AtomName -> TVal -> Atom ConceptT
 
-    ListLink :: [AtomGen] -> Atom ListT
+    InheritanceLink     :: (c1 <~ ConceptT,c2 <~ ConceptT) =>
+                           TVal -> Atom c1 -> Atom c2 -> Atom InheritanceT
+    SimilarityLink      :: (c1 <~ ConceptT,c2 <~ ConceptT) =>
+                           TVal -> Atom c1 -> Atom c2 -> Atom SimilarityT
+    MemberLink          :: (c1 <~ ConceptT,c2 <~ ConceptT) =>
+                           TVal -> Atom c1 -> Atom c2 -> Atom MemberT
+    SatisfyingSetLink   :: (p <~ PredicateT) =>
+                           Atom p -> Atom SatisfyingSetT
 
-    SchemaNode :: AtomName -> Atom SchemaT
-    GroundedSchemaNode :: AtomName -> Atom GroundedSchemaT
-    ExecutionLink :: (s <~ SchemaT,l <~ ListT,a <~ AtomT) =>
-                     Atom s -> Atom l -> Atom a -> Atom ExecutionT
+    NumberNode          :: Double -> Atom NumberT
 
-    VariableNode :: AtomName -> Atom VariableT
-    SatisfactionLink :: (v <~ VariableT,l <~ LinkT) =>
-                        Atom v -> Atom l -> Atom SatisfactionT
-    ForAllLink :: (v <~ ListT,i <~ ImplicationT) =>
-                  Atom v -> Atom i -> Maybe TruthVal -> Atom ForAllT
+    ListLink            :: [AtomGen] -> Atom ListT
+
+    SchemaNode          :: AtomName -> Atom SchemaT
+    GroundedSchemaNode  :: AtomName -> Atom GroundedSchemaT
+    ExecutionLink       :: (s <~ SchemaT,l <~ ListT,a <~ AtomT) =>
+                           Atom s -> Atom l -> Atom a -> Atom ExecutionT
+
+    VariableNode        :: AtomName -> Atom VariableT
+
+    SatisfactionLink    :: (v <~ VariableT,l <~ LinkT) =>
+                           Atom v -> Atom l -> Atom SatisfactionT
+    ForAllLink          :: (v <~ ListT,i <~ ImplicationT) =>
+                           TVal -> Atom v -> Atom i -> Atom ForAllT
 
 deriving instance Show (Atom a)
 deriving instance Typeable Atom

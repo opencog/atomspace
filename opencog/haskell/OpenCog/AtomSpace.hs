@@ -17,6 +17,8 @@ module OpenCog.AtomSpace
     , showAtom
     -- * AtomSpace Main Data Types
     , TruthVal (..)
+    , noTv
+    , withTv
     , AtomName (..)
     , Atom (..)
     , AtomGen (..)

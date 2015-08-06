@@ -45,19 +45,19 @@ toRaw at = let atype = toAtomTypeRaw $ getType at
     SchemaNode n             -> Node atype n Nothing
     GroundedSchemaNode n     -> Node atype n Nothing
     VariableNode n           -> Node atype n Nothing
-    AndLink a1 a2 tv         -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
-    OrLink a1 a2 tv          -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
-    ImplicationLink a1 a2 tv -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
-    EquivalenceLink a1 a2 tv -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
-    EvaluationLink a1 a2 tv  -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
-    InheritanceLink a1 a2 tv -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
-    SimilarityLink a1 a2 tv  -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
-    MemberLink a1 a2 tv      -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    AndLink tv a1 a2         -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    OrLink tv a1 a2          -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    ImplicationLink tv a1 a2 -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    EquivalenceLink tv a1 a2 -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    EvaluationLink tv a1 a2  -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    InheritanceLink tv a1 a2 -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    SimilarityLink tv a1 a2  -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    MemberLink tv a1 a2      -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
     SatisfyingSetLink a1     -> Link atype [toRaw a1] Nothing
     ExecutionLink a1 a2 a3   -> Link atype [toRaw a1,toRaw a2,toRaw a3] Nothing
     ListLink list            -> Link atype (map (appAtomGen toRaw) list) Nothing
     SatisfactionLink a1 a2   -> Link atype [toRaw a1,toRaw a2] Nothing
-    ForAllLink a1 a2 tv      -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    ForAllLink tv a1 a2      -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
     _                        -> undefined
 
 -- Function to get an Atom back from its general representation (if possible).
@@ -88,42 +88,42 @@ fromRaw' (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
         a <- filt ar :: Maybe (Gen ConceptT)
         b <- filt br :: Maybe (Gen ConceptT)
         case (a,b) of
-          (Gen a1,Gen b1) -> Just $ AtomGen $ AndLink a1 b1 tv
+          (Gen a1,Gen b1) -> Just $ AtomGen $ AndLink tv a1 b1
       (OrT ,[ar,br]) -> do
         a <- filt ar :: Maybe (Gen ConceptT)
         b <- filt br :: Maybe (Gen ConceptT)
         case (a,b) of
-          (Gen a1,Gen b1) -> Just $ AtomGen $ OrLink a1 b1 tv
+          (Gen a1,Gen b1) -> Just $ AtomGen $ OrLink tv a1 b1
       (ImplicationT ,[ar,br]) -> do
         a <- fromRaw' ar
         b <- fromRaw' br
         case (a,b) of
-          (AtomGen a1,AtomGen b1) -> Just $ AtomGen $ ImplicationLink a1 b1 tv
+          (AtomGen a1,AtomGen b1) -> Just $ AtomGen $ ImplicationLink tv a1 b1
       (EquivalenceT ,[ar,br]) -> do
         a <- fromRaw' ar
         b <- fromRaw' br
         case (a,b) of
-          (AtomGen a1,AtomGen b1) -> Just $ AtomGen $ EquivalenceLink a1 b1 tv
+          (AtomGen a1,AtomGen b1) -> Just $ AtomGen $ EquivalenceLink tv a1 b1
       (EvaluationT ,[ar,br]) -> do
         a <- filt ar :: Maybe (Gen PredicateT)
         b <- filt br :: Maybe (Gen ListT)
         case (a,b) of
-          (Gen a1,Gen b1) -> Just $ AtomGen $ EvaluationLink a1 b1 tv
+          (Gen a1,Gen b1) -> Just $ AtomGen $ EvaluationLink tv a1 b1
       (InheritanceT ,[ar,br]) -> do
         a <- filt ar :: Maybe (Gen ConceptT)
         b <- filt br :: Maybe (Gen ConceptT)
         case (a,b) of
-          (Gen a1,Gen b1) -> Just $ AtomGen $ InheritanceLink a1 b1 tv
+          (Gen a1,Gen b1) -> Just $ AtomGen $ InheritanceLink tv a1 b1
       (SimilarityT ,[ar,br]) -> do
         a <- filt ar :: Maybe (Gen ConceptT)
         b <- filt br :: Maybe (Gen ConceptT)
         case (a,b) of
-          (Gen a1,Gen b1) -> Just $ AtomGen $ SimilarityLink a1 b1 tv
+          (Gen a1,Gen b1) -> Just $ AtomGen $ SimilarityLink tv a1 b1
       (MemberT ,[ar,br]) -> do
         a <- filt ar :: Maybe (Gen ConceptT)
         b <- filt br :: Maybe (Gen ConceptT)
         case (a,b) of
-          (Gen a1,Gen b1) -> Just $ AtomGen $ MemberLink a1 b1 tv
+          (Gen a1,Gen b1) -> Just $ AtomGen $ MemberLink tv a1 b1
       (SatisfyingSetT ,[ar]) -> do
         a <- filt ar :: Maybe (Gen PredicateT)
         case a of
@@ -146,7 +146,7 @@ fromRaw' (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
         a <- filt ar :: Maybe (Gen ListT)
         b <- filt br :: Maybe (Gen ImplicationT)
         case (a,b) of
-          (Gen a1,Gen b1) -> Just $ AtomGen $ ForAllLink a1 b1 tv
+          (Gen a1,Gen b1) -> Just $ AtomGen $ ForAllLink tv a1 b1
       _               -> Nothing
 
 filt :: FilterIsChild a => AtomRaw -> Maybe (Gen a)
