@@ -28,21 +28,22 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/bind/BindLink.h>
+#include <opencog/atoms/bind/DefineLink.h>
 
 #include "Rule.h"
 
 using namespace opencog;
 
-Rule::Rule(Handle rule, float weight)
+Rule::Rule(Handle rule)
 {
-	rule_handle_ = rule;
-	weight_ = weight;
-}
+	OC_ASSERT(rule->isType(MEMBER_LINK, true));
+	Handle name_h = LinkCast(rule)->getOutgoingAtom(0),
+		rbs_h = LinkCast(rule)->getOutgoingAtom(1);
 
-
-Rule::~Rule()
-{
-
+	rule_handle_ = DefineLink::get_definition(name_h);
+	name_ = NodeCast(name_h)->getName();
+	category_ = NodeCast(rbs_h)->getName();
+	weight_ = rule->getTruthValue()->getMean();
 }
 
 float Rule::get_weight()
@@ -97,7 +98,7 @@ Handle Rule::get_handle()
  */
 Handle Rule::get_vardecl()
 {
-	return LinkCast(rule_handle_)->getOutgoingSet()[0];
+	return LinkCast(rule_handle_)->getOutgoingAtom(0);
 }
 
 /**

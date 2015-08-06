@@ -40,8 +40,12 @@ class Rule : public boost::less_than_comparable<Rule>,
              public boost::equality_comparable<Rule>
 {
 public:
-	Rule(Handle rule, float weight = 1);
-	virtual ~Rule();
+	// rule is actually
+	//
+	// MemberLink <TV>
+	//    <rule name>
+	//    <rbs>
+	Rule(Handle rule);
 
 	// Comparison
 	bool operator==(const Rule& r) const {
@@ -73,9 +77,17 @@ public:
 	Rule gen_standardize_apart(AtomSpace* as);
 
 private:
+	// Rule handle, typically a BindLink
 	Handle rule_handle_;
+
+	// Rule name, the name of the node referring to the rule body
 	string name_;
+
+	// Rule base system name
 	string category_;
+
+	// Rule weight (indicated by the TV strength of the membership of
+	// the rule to the RBS)
 	float weight_;
 
 	Handle standardize_helper(AtomSpace* as, Handle, std::map<Handle, Handle>&);
