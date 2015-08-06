@@ -823,17 +823,13 @@ bool BackwardChainer::unify(const Handle& hsource,
 Rule BackwardChainer::select_rule(Target& target, const std::vector<Rule>& rules)
 {
 	// store how many times each rule has been used for the target
-	std::vector<unsigned int> weights;
+	std::vector<double> weights;
 	std::for_each(rules.begin(), rules.end(),
 	              [&](const Rule& r)
 	              { weights.push_back(target.get_selection_count() - target.rule_count(r) + 1); });
 
 	// Select the rule that has been applied least
-	// XXX use cogutil MT19937RandGen's internal randomGen member possible?
-	std::mt19937 generator(std::chrono::system_clock::now().time_since_epoch().count());
-	std::discrete_distribution<int> distribution(weights.begin(), weights.end());
-
-	return rules[distribution(generator)];
+	return rules[randGen().randDiscrete(weights)];
 }
 
 /**

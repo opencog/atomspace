@@ -178,7 +178,7 @@ unsigned int TargetSet::size()
 Target& TargetSet::select()
 {
 	HandleSeq handles;
-	std::vector<unsigned int> weights;
+	std::vector<double> weights;
 	for (auto& p : _targets_map)
 	{
 		handles.push_back(p.first);
@@ -187,11 +187,7 @@ Target& TargetSet::select()
 		weights.push_back(_total_selection - p.second.get_selection_count() + 1);
 	}
 
-	// XXX use cogutil MT19937RandGen's intenal randomGen member possible?
-	std::mt19937 generator(std::chrono::system_clock::now().time_since_epoch().count());
-	std::discrete_distribution<int> distribution(weights.begin(), weights.end());
-
-	Target& t = _targets_map.at(handles[distribution(generator)]);
+	Target& t = _targets_map.at(handles[randGen().randDiscrete(weights)]);
 	t.increment_selection_count();
 
 	_total_selection++;
