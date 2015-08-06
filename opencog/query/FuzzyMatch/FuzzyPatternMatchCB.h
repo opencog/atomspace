@@ -35,7 +35,7 @@ namespace opencog
             // The solutions
             HandleSeq solns;
 
-            FuzzyPatternMatchCB(AtomSpace* as);
+            FuzzyPatternMatchCB(AtomSpace*, Type, const HandleSeq&);
 
             virtual bool initiate_search(PatternMatchEngine* pme);
 
@@ -67,15 +67,23 @@ namespace opencog
         private:
             const Pattern* _pattern = NULL;
 
-            // The root of the clause
-            Handle root;
+            // The input pattern
+            Handle clause;
+
+            // The nodes in the pattern
+            HandleSeq pat_nodes;
+
+            // Type of atom that we are looking for
+            Type rtn_type;
+
+            // List of atoms that we don't want them to exist in the solutions
+            HandleSeq excl_list;
 
             struct Starter
             {
                 UUID uuid;
                 Handle handle;
                 Handle term;
-                size_t clause_idx;
                 size_t width;
                 size_t depth;
             };
@@ -83,20 +91,17 @@ namespace opencog
             // How many nodes are there in the pattern
             size_t pat_size = 0;
 
-            // How many VariableNodes are there in the pattern
-            size_t var_size = 0;
-
             // Potential starters that can be used to initiate the search
-            std::vector<Starter> potential_starters;
+            std::vector<Starter> starters;
 
             // Links that have previously been compared
-            std::vector<std::pair<UUID, UUID>> prev_compared;
+            std::vector<UUID> prev_compared;
 
-            // How many searches should we do by using a different starter
-            const size_t MAX_SEARCHES = 5;
+            // Stores the incoming set sizes of nodes
+            std::unordered_map<Handle, size_t> in_set_sizes;
 
-            // How similar the potential solution and the pattern are
-            double similarity = 0;
+            // The minimum difference between the pattern and all the known solutions
+            size_t min_size_diff = SIZE_MAX;
 
             // The maximum similarity of all the potential solutions we found
             double max_similarity = -std::numeric_limits<double>::max();
@@ -105,7 +110,7 @@ namespace opencog
                                const size_t& clause_idx, const Handle& term,
                                std::vector<Starter>& rtn);
 
-            void check_if_accept(const Handle& ph, const Handle& gh);
+            void check_if_accept(const Handle& gh);
     };
 }
 
