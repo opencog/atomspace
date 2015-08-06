@@ -37,16 +37,19 @@ void DefineLink::init(const HandleSeq& oset)
 			"Expecting name and definition, got size %d", oset.size());
 
 	_alias = oset[0];
+	_definition = oset[1];
 
-	// The name must not have been previously defined before.
+	// The name must not be used in another definition
 	IncomingSet defs = _alias->getIncomingSetByType(DEFINE_LINK);
 	for (LinkPtr def : defs)
-        if (def->isSource(_alias))
+		if (def->isSource(_alias))
 	        throw InvalidParamException(TRACE_INFO,
-	                                    "This is already defined; "
-	                                    "remove before redfining!");
-
-	_definition = oset[1];
+	                                    "Cannot define %s\n"
+	                                    "with alias %s\n"
+	                                    "as it is already defined in %s",
+	                                    _definition->toString().c_str(),
+	                                    _alias->toString().c_str(),
+	                                    def->toString().c_str());
 }
 
 DefineLink::DefineLink(const HandleSeq& oset,
