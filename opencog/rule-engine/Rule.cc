@@ -36,7 +36,11 @@ using namespace opencog;
 
 Rule::Rule(Handle rule)
 {
-	OC_ASSERT(rule->isType(MEMBER_LINK, true));
+	if (!rule->isType(MEMBER_LINK, true))
+		throw InvalidParamException(TRACE_INFO,
+		                            "Rule '%s' is expected to be a MemberLink",
+		                            rule->toString().c_str());
+
 	Handle name_h = LinkCast(rule)->getOutgoingAtom(0),
 		rbs_h = LinkCast(rule)->getOutgoingAtom(1);
 
