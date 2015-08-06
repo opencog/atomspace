@@ -259,7 +259,7 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle h, std::map<Handle, 
 		return dict[h];
 
 	std::stringstream ss;
-	ss << NodeCast(h)->getName() << "-" << rule_handle_ << "-standardize_apart";
+	ss << NodeCast(h)->getName() << "-rule_uuid_" << rule_handle_ << "-standardize_apart";
 
 	Handle hcpy = as->add_atom(createNode(h->getType(), ss.str(), h->getTruthValue()));
 	dict[h] = hcpy;
