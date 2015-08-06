@@ -2,24 +2,23 @@
 
 import OpenCog.AtomSpace            (TruthVal(..),Atom(..),AtomGen(..),
                                      runOnNewAtomSpace,get,insert,remove,
-                                     printAtom)
+                                     printAtom,withTv,noTv)
 import Control.Monad.IO.Class       (liftIO)
 
 someTv :: Maybe TruthVal
-someTv = Just $ SimpleTV 0.4 0.5
+someTv = withTv $ SimpleTV 0.4 0.5
 
 n = ConceptNode "Animal" someTv
 l = ListLink [AtomGen n]
 
-e = EvaluationLink
-   (PredicateNode "isFriend")
-   (ListLink [ AtomGen $ ConceptNode "Alan" Nothing
-             , AtomGen $ ConceptNode "Robert" Nothing
+e = EvaluationLink noTv
+   (PredicateNode "isFriend" noTv)
+   (ListLink [ AtomGen $ ConceptNode "Alan" noTv
+             , AtomGen $ ConceptNode "Robert" noTv
              ])
-   someTv
 
 li = (ListLink [ AtomGen $ ConceptNode "SomeConcept" someTv
-               , AtomGen $ PredicateNode "SomePredicate"
+               , AtomGen $ PredicateNode "SomePredicate" noTv
                ])
 
 -- Type checking Ok.
@@ -41,16 +40,16 @@ ex2 = ExecutionLink
 
 main :: IO ()
 main = runOnNewAtomSpace $ do
-         p <- get $ PredicateNode "Pred"
+         p <- get $ PredicateNode "Pred" noTv
          case p of
-            Just (PredicateNode _) -> liftIO $ print "Predicate found."
-            _                      -> liftIO $ print "No Predicate found."
+            Just (PredicateNode _ _) -> liftIO $ print "Predicate found."
+            _                        -> liftIO $ print "No Predicate found."
          liftIO $ printAtom li
          () <- case li of
            ListLink (x:_) -> case x of
-               AtomGen (ConceptNode c _)  -> liftIO $ print "First is Concept"
-               AtomGen (PredicateNode p ) -> liftIO $ print "First is Predicate"
-               _                          -> liftIO $ print "First is other type"
+               AtomGen (ConceptNode c _)    -> liftIO $ print "First is Concept"
+               AtomGen (PredicateNode p _ ) -> liftIO $ print "First is Predicate"
+               _                            -> liftIO $ print "First is other type"
          insert e
          get e
          remove e
