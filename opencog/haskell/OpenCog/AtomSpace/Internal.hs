@@ -44,6 +44,7 @@ toRaw at = let atype = toAtomTypeRaw $ getType at
     NumberNode d             -> Node atype (show d) Nothing
     SchemaNode n             -> Node atype n Nothing
     GroundedSchemaNode n     -> Node atype n Nothing
+    VariableNode n           -> Node atype n Nothing
     AndLink a1 a2 tv         -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
     OrLink a1 a2 tv          -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
     ImplicationLink a1 a2 tv -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
@@ -55,6 +56,8 @@ toRaw at = let atype = toAtomTypeRaw $ getType at
     SatisfyingSetLink a1     -> Link atype [toRaw a1] Nothing
     ExecutionLink a1 a2 a3   -> Link atype [toRaw a1,toRaw a2,toRaw a3] Nothing
     ListLink list            -> Link atype (map (appAtomGen toRaw) list) Nothing
+    SatisfactionLink a1 a2   -> Link atype [toRaw a1,toRaw a2] Nothing
+    ForAllLink a1 a2 tv      -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
     _                        -> undefined
 
 -- Function to get an Atom back from its general representation (if possible).
@@ -70,6 +73,7 @@ fromRaw' (Node araw n tvraw) = let tv = fromTVRaw <$> tvraw in do
       PredicateT      -> Just $ AtomGen $ PredicateNode n
       SchemaT         -> Just $ AtomGen $ SchemaNode n
       GroundedSchemaT -> Just $ AtomGen $ GroundedSchemaNode n
+      VariableT       -> Just $ AtomGen $ VariableNode n
       NumberT         -> readMaybe n >>= Just . AtomGen . NumberNode
       _               -> Nothing
     where
@@ -133,6 +137,16 @@ fromRaw' (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
       (ListT, _     ) -> do
         lnew <- mapM fromRaw' out
         Just $ AtomGen $ ListLink lnew
+      (SatisfactionT ,[ar,br]) -> do
+        a <- filt ar :: Maybe (Gen VariableT)
+        b <- filt br :: Maybe (Gen LinkT)
+        case (a,b) of
+          (Gen a1,Gen b1) -> Just $ AtomGen $ SatisfactionLink a1 b1
+      (ForAllT ,[ar,br]) -> do
+        a <- filt ar :: Maybe (Gen ListT)
+        b <- filt br :: Maybe (Gen ImplicationT)
+        case (a,b) of
+          (Gen a1,Gen b1) -> Just $ AtomGen $ ForAllLink a1 b1 tv
       _               -> Nothing
 
 filt :: FilterIsChild a => AtomRaw -> Maybe (Gen a)
