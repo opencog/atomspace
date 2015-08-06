@@ -23,8 +23,8 @@
 ; Associate the rules to the rule base (with weights, their semantics
 ; is currently undefined, we might settled with probabilities but it's
 ; not sure)
-(define crisp-rules (list (list crisp-modus-ponens-rule 0.4)
-                          (list crisp-deduction-rule 0.6))
+(define crisp-rules (list (list crisp-modus-ponens-rule-name 0.4)
+                          (list crisp-deduction-rule-name 0.6))
 )
 (ure-add-rules crisp-rbs crisp-rules)
 
