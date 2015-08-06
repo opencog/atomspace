@@ -851,8 +851,8 @@ Handle BackwardChainer::gen_sub_varlist(const Handle& parent,
                                         const Handle& parent_varlist,
                                         std::set<Handle> additional_free_varset)
 {
-	HandleSeq varseq = get_free_vars_in_tree(parent);
-	std::set<Handle> varset(varseq.begin(), varseq.end());
+	FindAtoms fv(VARIABLE_NODE);
+	fv.search_set(parent);
 
 	HandleSeq oset = LinkCast(parent_varlist)->getOutgoingSet();
 	HandleSeq final_oset;
@@ -861,13 +861,13 @@ Handle BackwardChainer::gen_sub_varlist(const Handle& parent,
 	for (const Handle& h : oset)
 	{
 		Type t = h->getType();
-		if (VARIABLE_NODE == t && varset.count(h) == 1)
+		if (VARIABLE_NODE == t && fv.varset.count(h) == 1)
 		{
 			final_oset.push_back(h);
 			additional_free_varset.erase(h);
 		}
 		else if (TYPED_VARIABLE_LINK == t
-			     and varset.count(LinkCast(h)->getOutgoingSet()[0]) == 1)
+			     and fv.varset.count(LinkCast(h)->getOutgoingSet()[0]) == 1)
 		{
 			final_oset.push_back(h);
 			additional_free_varset.erase(LinkCast(h)->getOutgoingSet()[0]);
@@ -878,7 +878,7 @@ Handle BackwardChainer::gen_sub_varlist(const Handle& parent,
 	// if it is used in parent
 	for (const Handle& h : additional_free_varset)
 	{
-		if (varset.count(h) == 1)
+		if (fv.varset.count(h) == 1)
 			final_oset.push_back(h);
 	}
 
