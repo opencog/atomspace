@@ -147,8 +147,8 @@ void BackwardChainer::process_target(Target& target)
 		return;
 	}
 
-	// before doing any real backward chaining, see if the free variables
-	// can already be grounded (no point grounding bound variables)
+	// before doing any real backward chaining, see if any variables in
+	// vardecl can already be grounded
 	if (not target.get_varseq().empty())
 	{
 		std::vector<VarMap> kb_vmap;
@@ -652,7 +652,26 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 	// if the target is already fully grounded
 	if (fv.varset.empty())
 	{
-		vmap_list.push_back(premise_vmap);
+		VarMap old_map = premise_vmap;
+		VarMap new_map;
+
+		// do variable chasing
+		for (const auto& p : premise_vmap)
+		{
+			if (old_map.count(p.second) == 1)
+			{
+				new_map[p.first] = old_map[p.second];
+				new_map[p.second] = old_map[p.second];
+				old_map.erase(p.second);
+			}
+			else
+				new_map[p.first] = p.second;
+		}
+
+		// add any leftover mapping into final ouput
+		new_map.insert(old_map.begin(), old_map.end());
+
+		vmap_list.push_back(new_map);
 		results.push_back(hpremise);
 
 		return results;
