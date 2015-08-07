@@ -15,7 +15,8 @@ module OpenCog.AtomSpace.Types (
   , AtomName (..)
   , Atom (..)
   , AtomGen (..)
-  , appAtomGen
+  , Gen (..)
+  , appGen
   , getType
   , noTv
   , withTv
@@ -57,18 +58,21 @@ type TVal = Maybe TruthVal
 noTv = Nothing
 withTv = Just
 
+-- | 'Gen' groups all the atoms that are children of the atom type a.
+data Gen a where
+    Gen :: (Typeable a,b <~ a) => Atom b -> Gen a
+
+-- | 'appGen' evaluates a given function with the atom type instance
+-- wrapped inside the 'Gen' type.
+appGen :: (forall b. (Typeable a,b <~ a) => Atom b -> c) -> Gen a -> c
+appGen f (Gen at) = f at
+
 -- | 'AtomGen' is a general atom type hiding the type variables.
 -- (necessary when working with many instances of different atoms,
--- for example, for lists of atoms)
-data AtomGen where
-    AtomGen :: (a <~ AtomT) => Atom a -> AtomGen
+-- for example, for lists of general atoms)
+type AtomGen = Gen AtomT
 
-deriving instance Show AtomGen
-
--- | 'appAtomGen' evaluates a given function with the atom instance
--- wrapped inside the 'AtomGen' type.
-appAtomGen :: (forall a. (a <~ AtomT) => Atom a -> b) -> AtomGen -> b
-appAtomGen f (AtomGen at) = f at
+deriving instance Show (Gen a)
 
 -- | 'Atom' is the main data type to represent the different types of atoms.
 data Atom (a :: AtomType) where

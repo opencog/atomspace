@@ -23,18 +23,9 @@ module OpenCog.AtomSpace.Filter (
 import OpenCog.AtomSpace.Template       (atomHierarchyFile,declareAtomFilters)
 import OpenCog.AtomSpace.Inheritance    (type (<~),Children)
 import OpenCog.AtomSpace.AtomType       (AtomType(..))
-import OpenCog.AtomSpace.Types          (Atom(..))
+import OpenCog.AtomSpace.Types          (Atom(..),Gen(..),appGen)
 import Data.Proxy                       (Proxy(..))
 import Data.Typeable                    (cast,Typeable)
-
--- | 'Gen' groups all the atoms that are children of the atom type a.
-data Gen a where
-    Gen :: (b <~ a) => Atom b -> Gen a
-
--- | 'appGen' evaluates a given function with the atom type instance
--- wrapped inside the 'Gen' type.
-appGen :: (forall b. (b <~ a) => Atom b -> c) -> Gen a -> c
-appGen f (Gen at) = f at
 
 -- | 'Filter' class defines a filter on the list 'b' of atom types.
 class Filter a (b::[AtomType]) where
@@ -43,7 +34,7 @@ class Filter a (b::[AtomType]) where
 instance Filter e '[] where
     filtChild _ _ = Nothing
 
-instance (Typeable x,x <~ e,Filter e xs) => Filter e (x ': xs) where
+instance (Typeable e,x <~ e,Filter e xs) => Filter e (x ': xs) where
     filtChild _ a = case cast a :: Maybe (Atom x) of
         Just res -> return $ Gen res
         Nothing  -> filtChild (Proxy :: Proxy xs) a

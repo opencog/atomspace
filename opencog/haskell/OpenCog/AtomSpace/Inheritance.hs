@@ -53,11 +53,11 @@ type IsParent a b = IsParent' a b ~ 'True
 -- | 'ParConst' builds a list of constraints to assert that all the members of
 -- the list are ancestors of a.
 type family ParConst a (b :: [AtomType]) :: Constraint where
-    ParConst a '[]      = Typeable a
+    ParConst a '[]      = 'True ~ 'True
     ParConst a (b ': c) = (IsParent a b,ParConst a c)
 
 -- | '<~' builds a list of constraints to assert that all the ancestors of b
 -- (included b itself) are ancestors of a.
 infix 9 <~
-type a <~ b = ParConst a (FUp '[b] '[])
+type a <~ b = (Typeable a,ParConst a (FUp '[b] '[]))
 

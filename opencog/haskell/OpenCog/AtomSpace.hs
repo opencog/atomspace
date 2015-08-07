@@ -21,8 +21,9 @@ module OpenCog.AtomSpace
     , withTv
     , AtomName (..)
     , Atom (..)
+    , Gen (..)
+    , appGen
     , AtomGen (..)
-    , appAtomGen
     -- * AtomSpace Phantom Types
     , AtomType(..)
     , type (<~)
