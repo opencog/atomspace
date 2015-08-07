@@ -98,18 +98,7 @@ const Variables& BetaRedex::get_local_args(void) const
 /// variables).
 ScopeLinkPtr BetaRedex::get_definition(void) const
 {
-	// Is the defined link actually defined?
-	// We cannot do this check when the ctor runs, since it might
-	// not yet be defined (or the definition may have changed!!)
-   HandleSeq ename;
-   _outgoing[0]->getIncomingSetByType(std::back_inserter(ename), DEFINE_LINK);
-   if (1 != ename.size())
-      throw InvalidParamException(TRACE_INFO,
-         "Cannot find defined function!");
-
-	// Get the the defined function
-	DefineLinkPtr ldefun(DefineLinkCast(ename[0]));
-	return ldefun->get_definition();
+	return ScopeLinkCast(DefineLink::get_definition(_outgoing[0]));
 }
 
 /// Compose this link with the defined link, and return the result.

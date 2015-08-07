@@ -28,6 +28,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/bind/BindLink.h>
+#include <opencog/atoms/bind/DefineLink.h>
 
 #include "Rule.h"
 
@@ -35,19 +36,23 @@ using namespace opencog;
 
 Rule::Rule(Handle rule)
 {
-	rule_handle_ = rule;
-	cost_ = -1;
+	if (!rule->isType(MEMBER_LINK, true))
+		throw InvalidParamException(TRACE_INFO,
+		                            "Rule '%s' is expected to be a MemberLink",
+		                            rule->toString().c_str());
+
+	Handle name_h = LinkCast(rule)->getOutgoingAtom(0),
+		rbs_h = LinkCast(rule)->getOutgoingAtom(1);
+
+	rule_handle_ = DefineLink::get_definition(name_h);
+	name_ = NodeCast(name_h)->getName();
+	category_ = NodeCast(rbs_h)->getName();
+	weight_ = rule->getTruthValue()->getMean();
 }
 
-
-Rule::~Rule()
+float Rule::get_weight()
 {
-
-}
-
-int Rule::get_cost()
-{
-	return cost_;
+	return weight_;
 }
 
 void Rule::set_category(const string& name)
@@ -97,7 +102,7 @@ Handle Rule::get_handle()
  */
 Handle Rule::get_vardecl()
 {
-	return LinkCast(rule_handle_)->getOutgoingSet()[0];
+	return LinkCast(rule_handle_)->getOutgoingAtom(0);
 }
 
 /**
@@ -201,9 +206,9 @@ HandleSeq Rule::get_implicand_seq()
 	return final_output;
 }
 
-void Rule::set_cost(int p)
+void Rule::set_weight(float p)
 {
-	cost_ = p;
+	weight_ = p;
 }
 
 /**

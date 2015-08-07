@@ -105,7 +105,7 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	// grounds. So, for these two reasons, the simple, "obvious" method
 	// A is out. Instead, we implement method B: we rename the variables
 	// that the match engine is carrying, to correspond with the variable
-	// names that are native to the definition. This way, insde the body
+	// names that are native to the definition. This way, inside the body
 	// of the definition, everything looks "normal", and should thus
 	// proceed as formal.  Of course, on exit, we have to unmasquerade.
 	//
@@ -114,7 +114,7 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	// empting to just create a new PME, and let it run. The problem with
 	// that is that we have no particularly good way of integrating the
 	// new pme state, with the existing pme state. So we don't.  Instead,
-	// we push all pme state, clear the decks, (almost as if strting from
+	// we push all pme state, clear the decks, (almost as if starting from
 	// scratch) and then pop all pme state when we are done.
 
 	BetaRedexPtr cpl(BetaRedexCast(lp));

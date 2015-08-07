@@ -74,8 +74,12 @@ public:
 	static const std::string max_iter_name;
 private:
 
-	// Fetch from the AtomSpace all rule names of a given rube-based
-	// system (i.e. rules members of that system).
+	// Fetch from the AtomSpace all rules of a given rube-based
+	// system. Specifically fetches patterns
+	//
+	// MemberLink <TV>
+	//    <rule name>
+	//    <rbs>
 	HandleSeq fetch_rules(Handle rbs);
 
 	AtomSpace& _as;

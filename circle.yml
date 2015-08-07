@@ -1,0 +1,14 @@
+machine:
+    services:
+        - docker
+
+dependencies:
+    override:
+        - docker info
+        - docker pull opencog/opencog-deps
+        - docker images opencog/opencog-deps
+
+test:
+    override:
+        - docker run -v $PWD:/atomspace -it opencog/opencog-deps /bin/sh -c "cd /atomspace && /tmp/octool -cbet":
+            parallel: true

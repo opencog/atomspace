@@ -3,7 +3,7 @@ version:             0.1.0.0
 synopsis:            -
 homepage:            github.com/opencog/atomspace/tree/master/opencog/haskell
 license:             OtherLicense
-author:              Marcos Pividori 
+author:              Marcos Pividori
 maintainer:          -
 category:            Artificial Intelligence
 build-type:          Simple
@@ -17,9 +17,12 @@ library
                    , OpenCog.AtomSpace.Utils
                    , OpenCog.AtomSpace.Api
                    , OpenCog.AtomSpace.Types
+                   , OpenCog.AtomSpace.Inheritance
+                   , OpenCog.AtomSpace.Filter
+                   , OpenCog.AtomSpace.AtomType
 
   build-depends:     base         >=4.5
-                   , transformers >=0.4
+                   , transformers >=0.3
 
   extra-libraries:   haskell-atomspace
 

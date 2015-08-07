@@ -1,12 +1,13 @@
 -- GSoC 2015 - Haskell bindings for OpenCog.
-{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GADTs     #-}
+{-# LANGUAGE DataKinds #-}
 
 -- | This Module defines some useful data types for proper interaction
 -- with the AtomSpace C wrapper library.
 -- Intended for internal use only.
 module OpenCog.AtomSpace.Internal (
       Handle(..)
-    , AtomType(..)
+    , AtomTypeRaw(..)
     , AtomRaw(..)
     , toRaw
     , fromRaw
@@ -17,46 +18,127 @@ module OpenCog.AtomSpace.Internal (
     , tvMAX_PARAMS
     ) where
 
-import Foreign.C.Types              (CULong(..))
-import Data.Functor                 ((<$>))
-import OpenCog.AtomSpace.Types      (Atom(..),AtomName(..),TruthVal(..),
-                                     appAtomGen,AtomGen(..))
+import Foreign.C.Types               (CULong(..))
+import Data.Functor                  ((<$>))
+import Data.Typeable                 (cast,Typeable)
+import OpenCog.AtomSpace.Filter      (Gen(..),FilterIsChild(..))
+import OpenCog.AtomSpace.AtomType    (AtomType(..),fromAtomTypeRaw,toAtomTypeRaw)
+import OpenCog.AtomSpace.Types       (Atom(..),AtomName(..),getType,TruthVal(..),
+                                      appAtomGen,AtomGen(..))
 
 -- Data type to hold atoms's UUID.
 type Handle = CULong
-type AtomType = String
+type AtomTypeRaw = String
+
 -- Main general atom representation.
-data AtomRaw = Link AtomType [AtomRaw] (Maybe TVRaw)
-             | Node AtomType AtomName  (Maybe TVRaw)
+data AtomRaw = Link AtomTypeRaw [AtomRaw] (Maybe TVRaw)
+             | Node AtomTypeRaw AtomName  (Maybe TVRaw)
 
 -- Function to convert an Atom to its general representation.
 toRaw :: Atom a -> AtomRaw
-toRaw i = case i of
-    PredicateNode n  -> Node "PredicateNode" n Nothing
-    AndLink a1 a2 tv -> Link "AndLink" [toRaw a1,toRaw a2] $ toTVRaw <$> tv
-    ConceptNode n tv -> Node "ConceptNode" n $ toTVRaw <$> tv
-    ListLink list    -> Link "ListLink" (map (appAtomGen toRaw) list) Nothing
-    _            -> undefined
+toRaw at = let atype = toAtomTypeRaw $ getType at
+           in case at of
+    PredicateNode n          -> Node atype n Nothing
+    ConceptNode n tv         -> Node atype n $ toTVRaw <$> tv
+    NumberNode d             -> Node atype (show d) Nothing
+    SchemaNode n             -> Node atype n Nothing
+    GroundedSchemaNode n     -> Node atype n Nothing
+    AndLink a1 a2 tv         -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    OrLink a1 a2 tv          -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    ImplicationLink a1 a2 tv -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    EquivalenceLink a1 a2 tv -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    EvaluationLink a1 a2 tv  -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    InheritanceLink a1 a2 tv -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    SimilarityLink a1 a2 tv  -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    MemberLink a1 a2 tv      -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    SatisfyingSetLink a1     -> Link atype [toRaw a1] Nothing
+    ExecutionLink a1 a2 a3   -> Link atype [toRaw a1,toRaw a2,toRaw a3] Nothing
+    ListLink list            -> Link atype (map (appAtomGen toRaw) list) Nothing
+    _                        -> undefined
 
 -- Function to get an Atom back from its general representation (if possible).
-fromRaw :: AtomRaw -> Atom a -> Maybe (Atom a)
-fromRaw raw orig = case (raw,orig) of
-    (Node "ConceptNode" n tv   , ConceptNode _ _ ) -> Just $ ConceptNode n
-                                                           $ fromTVRaw <$> tv
-    (Node "PredicateNode" n _  , PredicateNode _ ) -> Just $ PredicateNode n
-    (Link "AndLink" [ar,br] tv , AndLink ao bo _ ) -> do
-        a <- fromRaw ar ao
-        b <- fromRaw br bo
-        Just $ AndLink a b $ fromTVRaw <$> tv
-    (Link "ListLink" lraw _    , ListLink lorig  ) -> do
-        lnew <- if length lraw == length lorig
-                 then sequence $ zipWith (\raw orig -> 
-                                    appAtomGen
-                                    ((<$>) AtomGen . fromRaw raw) orig)
-                                    lraw lorig
-                 else Nothing
-        Just $ ListLink lnew
-    _                                               -> Nothing -- undefined
+fromRaw :: Typeable a => AtomRaw -> Atom a -> Maybe (Atom a)
+fromRaw raw _ = fromRaw' raw >>= appAtomGen cast
+
+-- Function to get an Atom back from its general representation (if possible).
+fromRaw' :: AtomRaw -> Maybe (AtomGen)
+fromRaw' (Node araw n tvraw) = let tv = fromTVRaw <$> tvraw in do
+    atype <- fromAtomTypeRaw araw
+    case atype of
+      ConceptT        -> Just $ AtomGen $ ConceptNode n tv
+      PredicateT      -> Just $ AtomGen $ PredicateNode n
+      SchemaT         -> Just $ AtomGen $ SchemaNode n
+      GroundedSchemaT -> Just $ AtomGen $ GroundedSchemaNode n
+      NumberT         -> readMaybe n >>= Just . AtomGen . NumberNode
+      _               -> Nothing
+    where
+        readMaybe :: (Read a) => String -> Maybe a
+        readMaybe s = case reads s of
+                        [(x, "")] -> Just x
+                        _ -> Nothing
+fromRaw' (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
+    atype <- fromAtomTypeRaw araw
+    case (atype,out) of
+      (AndT ,[ar,br]) -> do
+        a <- filt ar :: Maybe (Gen ConceptT)
+        b <- filt br :: Maybe (Gen ConceptT)
+        case (a,b) of
+          (Gen a1,Gen b1) -> Just $ AtomGen $ AndLink a1 b1 tv
+      (OrT ,[ar,br]) -> do
+        a <- filt ar :: Maybe (Gen ConceptT)
+        b <- filt br :: Maybe (Gen ConceptT)
+        case (a,b) of
+          (Gen a1,Gen b1) -> Just $ AtomGen $ OrLink a1 b1 tv
+      (ImplicationT ,[ar,br]) -> do
+        a <- fromRaw' ar
+        b <- fromRaw' br
+        case (a,b) of
+          (AtomGen a1,AtomGen b1) -> Just $ AtomGen $ ImplicationLink a1 b1 tv
+      (EquivalenceT ,[ar,br]) -> do
+        a <- fromRaw' ar
+        b <- fromRaw' br
+        case (a,b) of
+          (AtomGen a1,AtomGen b1) -> Just $ AtomGen $ EquivalenceLink a1 b1 tv
+      (EvaluationT ,[ar,br]) -> do
+        a <- filt ar :: Maybe (Gen PredicateT)
+        b <- filt br :: Maybe (Gen ListT)
+        case (a,b) of
+          (Gen a1,Gen b1) -> Just $ AtomGen $ EvaluationLink a1 b1 tv
+      (InheritanceT ,[ar,br]) -> do
+        a <- filt ar :: Maybe (Gen ConceptT)
+        b <- filt br :: Maybe (Gen ConceptT)
+        case (a,b) of
+          (Gen a1,Gen b1) -> Just $ AtomGen $ InheritanceLink a1 b1 tv
+      (SimilarityT ,[ar,br]) -> do
+        a <- filt ar :: Maybe (Gen ConceptT)
+        b <- filt br :: Maybe (Gen ConceptT)
+        case (a,b) of
+          (Gen a1,Gen b1) -> Just $ AtomGen $ SimilarityLink a1 b1 tv
+      (MemberT ,[ar,br]) -> do
+        a <- filt ar :: Maybe (Gen ConceptT)
+        b <- filt br :: Maybe (Gen ConceptT)
+        case (a,b) of
+          (Gen a1,Gen b1) -> Just $ AtomGen $ MemberLink a1 b1 tv
+      (SatisfyingSetT ,[ar]) -> do
+        a <- filt ar :: Maybe (Gen PredicateT)
+        case a of
+          (Gen a1) -> Just $ AtomGen $ SatisfyingSetLink a1
+      (ExecutionT ,[ar,br,cr]) -> do
+        a <- filt ar :: Maybe (Gen SchemaT)
+        b <- filt br :: Maybe (Gen ListT)
+        c <- filt br :: Maybe (Gen AtomT)
+        case (a,b,c) of
+          (Gen a1,Gen b1,Gen c1) -> Just $ AtomGen $ ExecutionLink a1 b1 c1
+      (ListT, _     ) -> do
+        lnew <- mapM fromRaw' out
+        Just $ AtomGen $ ListLink lnew
+      _               -> Nothing
+
+filt :: FilterIsChild a => AtomRaw -> Maybe (Gen a)
+filt araw = do
+    agen <- fromRaw' araw
+    case agen of
+        (AtomGen at) -> filtIsChild at
 
 -- Constant with the maximum number of parameters in any type of TV.
 tvMAX_PARAMS :: Int

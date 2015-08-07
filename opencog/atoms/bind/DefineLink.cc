@@ -36,23 +36,20 @@ void DefineLink::init(const HandleSeq& oset)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting name and definition, got size %d", oset.size());
 
-	// The name must not have been previously defined before.
-	HandleSeq ename;
-	oset[0]->getIncomingSetByType(std::back_inserter(ename), DEFINE_LINK);
-	if (0 < ename.size())
-		throw InvalidParamException(TRACE_INFO,
-			"This is already defined; remove before redfining!");
+	_alias = oset[0];
+	_definition = oset[1];
 
-	_definition = ScopeLinkCast(oset[1]);
-	if (NULL == _definition)
-		_definition = createScopeLink(*LinkCast(oset[1]));
-	if (NULL == _definition)
-	{
-		Type t = oset[1]->getType();
-		const std::string& tname = classserver().getTypeName(t);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a ScopeLink, got %s", tname.c_str());
-	}
+	// The name must not be used in another definition
+	IncomingSet defs = _alias->getIncomingSetByType(DEFINE_LINK);
+	for (LinkPtr def : defs)
+		if (def->isSource(_alias))
+	        throw InvalidParamException(TRACE_INFO,
+	                                    "Cannot define %s\n"
+	                                    "with alias %s\n"
+	                                    "as it is already defined in %s",
+	                                    _definition->toString().c_str(),
+	                                    _alias->toString().c_str(),
+	                                    def->toString().c_str());
 }
 
 DefineLink::DefineLink(const HandleSeq& oset,
@@ -82,6 +79,25 @@ DefineLink::DefineLink(Link &l)
 	}
 
 	init(l.getOutgoingSet());
+}
+
+Handle DefineLink::get_definition(const Handle& alias) {
+	// Get all DefineLinks associated with that alias, beware that it
+	// will also return DefineLink with that alias as definition body.
+    IncomingSet defs = alias->getIncomingSetByType(DEFINE_LINK);
+
+    // Return the first (supposedly unique) definition
+    for (LinkPtr defl : defs) {
+	    DefineLinkPtr def(DefineLinkCast(defl->getHandle()));
+	    if (def->get_alias() == alias)
+		    return def->get_definition();
+    }
+
+    // There is no definition for that alias
+    throw InvalidParamException(TRACE_INFO,
+                                "Cannot find defined hypergraph for atom %s",
+                                alias->toString().c_str());
+    return Handle::UNDEFINED;
 }
 
 /* ===================== END OF FILE ===================== */

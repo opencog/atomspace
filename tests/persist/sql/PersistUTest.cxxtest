@@ -33,11 +33,10 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TLB.h>
-#include <opencog/nlp/types/atom_types.h>
+#include <opencog/atomspace/atom_types.h>
 #include <opencog/persist/sql/AtomStorage.h>
-#include <opencog/persist/sql/PersistModule.h>
+#include <opencog/persist/sql/SQLPersistSCM.h>
 
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
 
@@ -49,7 +48,7 @@ class PersistUTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *_as;
-		PersistModule *_pm;
+		SQLPersistSCM *_pm;
 		const char * dbname;
 		const char * username;
 		const char * passwd;
@@ -74,9 +73,10 @@ class PersistUTest :  public CxxTest::TestSuite
 		}
 
 		void setUp(void);
+		void tearDown(void);
 		void kill_data(void);
 
-		void freindlyFailMessage()
+		void friendlyFailMessage()
 		{
 			TS_FAIL("The PersistUTest failed.\n"
 				"This is probably because you do not have SQL installed\n"
@@ -119,18 +119,8 @@ PersistUTest:: PersistUTest(void)
 	}
 	catch (InvalidParamException &e)
 	{
-		freindlyFailMessage();
+		friendlyFailMessage();
 	}
-
-	// Copy credential over to where cogserver can find them.
-	config().set("STORAGE", dbname);
-	config().set("STORAGE_USERNAME", username);
-	config().set("STORAGE_PASSWD", passwd);
-	cogserver().openDatabase();
-
-	Module* m = cogserver().getModule("opencog::PersistModule");
-	_pm = dynamic_cast<PersistModule*>(m);
-	_as = &cogserver().getAtomSpace();
 }
 
 /*
@@ -138,6 +128,30 @@ PersistUTest:: PersistUTest(void)
  */
 void PersistUTest::setUp(void)
 {
+	_as = new AtomSpace();
+	_pm = new SQLPersistSCM(_as);
+
+	try {
+		_pm->do_open(dbname, username, passwd);
+	}
+	catch (RuntimeException &e)
+	{
+		logger().info("setUp: SQLPersistSCM cannot connect to database");
+		friendlyFailMessage();
+		exit(1);
+	};
+
+	kill_data();
+}
+
+void PersistUTest::tearDown(void)
+{
+	/* Orderly shutdown avoids warning in Potgres log file */
+	_pm->do_close();
+
+	delete _pm;
+	delete _as;
+
 	kill_data();
 }
 
@@ -148,8 +162,8 @@ void PersistUTest::kill_data(void)
 	AtomStorage* astore = new AtomStorage(dbname, username, passwd);
 	if (!astore->connected())
 	{
-		logger().info("setUp: cannot connect to database");
-		freindlyFailMessage();
+		logger().info("setUp: AtomStorage cannot connect to database");
+		friendlyFailMessage();
 		exit(1);
 	}
 	logger().info("Connect to \"%s\" as \"%s\" passwd \"%s\"", dbname, username, passwd);
@@ -219,17 +233,17 @@ void PersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 {
 	// Create an atom ... 
 	TruthValuePtr stv(SimpleTruthValue::createTV(0.11, 100+idx));
-	h1[idx] = as->add_node(WORD_NODE, id + "fromNode");
+	h1[idx] = as->add_node(SCHEMA_NODE, id + "fromNode");
 	h1[idx]->setTruthValue(stv);
 	n1[idx] = NodeCast(h1[idx]);
 
 	TruthValuePtr stv2(SimpleTruthValue::createTV(0.22, 200+idx));
-	h2[idx] = as->add_node(WORD_NODE, id + "toNode");
+	h2[idx] = as->add_node(SCHEMA_NODE, id + "toNode");
 	h2[idx]->setTruthValue(stv2);
 	n2[idx] = NodeCast(h2[idx]);
 
 	TruthValuePtr stv3(SimpleTruthValue::createTV(0.33, 300+idx));
-	h3[idx] = as->add_node(WORD_NODE, id + "third wheel");
+	h3[idx] = as->add_node(SCHEMA_NODE, id + "third wheel");
 	h3[idx]->setTruthValue(stv3);
 	n3[idx] = NodeCast(h3[idx]);
 
@@ -238,19 +252,19 @@ void PersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 	hvec.push_back(h2[idx]);
 	hvec.push_back(h3[idx]);
 
-	hl[idx] = as->add_link(WORD_SENSE_LINK, hvec);
+	hl[idx] = as->add_link(SET_LINK, hvec);
 	l[idx] = LinkCast(hl[idx]);
 }
 
 void PersistUTest::check_space(int idx, AtomSpace *space)
 {
-	Handle hb1 = space->getHandle(n1[idx]->getType(), n1[idx]->getName());
+	Handle hb1 = space->get_handle(n1[idx]->getType(), n1[idx]->getName());
 	atomCompare(h1[idx], hb1);
 
-	Handle hb2 = space->getHandle(n2[idx]->getType(), n2[idx]->getName());
+	Handle hb2 = space->get_handle(n2[idx]->getType(), n2[idx]->getName());
 	atomCompare(h2[idx], hb2);
 
-	Handle hb3 = space->getHandle(n3[idx]->getType(), n3[idx]->getName());
+	Handle hb3 = space->get_handle(n3[idx]->getType(), n3[idx]->getName());
 	atomCompare(h3[idx], hb3);
 
 	std::vector<Handle> hvec;
@@ -258,19 +272,19 @@ void PersistUTest::check_space(int idx, AtomSpace *space)
 	hvec.push_back(hb2);
 	hvec.push_back(hb3);
 
-	Handle hlb = space->getHandle(hl[idx]->getType(), hvec);
+	Handle hlb = space->get_handle(hl[idx]->getType(), hvec);
 	atomCompare(hl[idx], hlb);
 }
 
 void PersistUTest::check_empty(int idx, AtomSpace *space)
 {
-	Handle hb1 = space->getHandle(n1[idx]->getType(), n1[idx]->getName());
+	Handle hb1 = space->get_handle(n1[idx]->getType(), n1[idx]->getName());
 	TSM_ASSERT("Should not find this atom", hb1 == Handle::UNDEFINED);
 
-	Handle hb2 = space->getHandle(n2[idx]->getType(), n2[idx]->getName());
+	Handle hb2 = space->get_handle(n2[idx]->getType(), n2[idx]->getName());
 	TSM_ASSERT("Should not find this atom", hb2 == Handle::UNDEFINED);
 
-	Handle hb3 = space->getHandle(n3[idx]->getType(), n3[idx]->getName());
+	Handle hb3 = space->get_handle(n3[idx]->getType(), n3[idx]->getName());
 	TSM_ASSERT("Should not find this atom", hb3 == Handle::UNDEFINED);
 
 	std::vector<Handle> hvec;
@@ -278,7 +292,7 @@ void PersistUTest::check_empty(int idx, AtomSpace *space)
 	hvec.push_back(h2[idx]);
 	hvec.push_back(h3[idx]);
 
-	Handle hlb = space->getHandle(hl[idx]->getType(), hvec);
+	Handle hlb = space->get_handle(hl[idx]->getType(), hvec);
 	TSM_ASSERT("Should not find this atom", hlb == Handle::UNDEFINED);
 }
 
@@ -310,9 +324,7 @@ void PersistUTest::test_atomspace(void)
 	check_space(idx++, _as);
 
 	/* Push all atoms out to the SQL DB */
-	Request* req = cogserver().createRequest("sql-store");
-	cogserver().pushRequest(req);
-	cogserver().processRequests();
+	_pm->do_store();
 
 	/* Purge atoms from the AtomSpace. This does not delete them from
 	 * the SQL storage, though; to do that, they must be deleted, not
@@ -354,11 +366,6 @@ void PersistUTest::test_atomspace(void)
 	check_empty(idx++, _as);
 	check_empty(idx++, _as);
 	check_empty(idx++, _as);
-
-	/* Orderly shutdown avoids warning in Potgres log file */
-	req = cogserver().createRequest("sql-close");
-	cogserver().pushRequest(req);
-	cogserver().processRequests();
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

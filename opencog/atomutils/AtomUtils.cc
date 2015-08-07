@@ -25,6 +25,7 @@
 
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
+#include <opencog/atoms/bind/DefineLink.h>
 #include "AtomUtils.h"
 
 namespace opencog

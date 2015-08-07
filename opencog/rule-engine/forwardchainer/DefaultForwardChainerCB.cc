@@ -22,15 +22,19 @@
  */
 
 #include <opencog/atomutils/AtomUtils.h>
-#include <opencog/guile/SchemeSmob.h>
-#include <opencog/atoms/bind/BindLink.h>
-#include <opencog/query/DefaultImplicator.h>
+#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atomutils/Substitutor.h>
 #include <opencog/atoms/bind/PatternUtils.h>
 #include <opencog/atoms/bind/PatternLink.h>
-#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/bind/BindLink.h>
+#include <opencog/atoms/TypeNode.h>
+#include <opencog/query/DefaultImplicator.h>
+#include <opencog/query/PatternMatch.cc>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/rule-engine/URECommons.h>
 
+#include "VarGroundingPMCB.h"
 #include "DefaultForwardChainerCB.h"
-#include "../URECommons.h"
 
 using namespace opencog;
 
@@ -56,47 +60,58 @@ DefaultForwardChainerCB::DefaultForwardChainerCB(AtomSpace& as,
  */
 vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
 {
+    new_rules.clear(); //empty vector before starting matching
     Handle source = fcmem.get_cur_source();
     if (source == Handle::UNDEFINED)
         throw InvalidParamException(TRACE_INFO, "Needs a valid source atom");
 
     vector<Rule*> chosen_rules;
     auto rules = fcmem.get_rules();
+    vector<Rule*> visited;
     for (Rule* rule : rules) {
         HandleSeq impl_members = rule->get_implicant_seq();
         bool match = false;
-
         for (Handle h : impl_members) {
             //exceptions
-            if(h->getType() == ABSENT_LINK) continue;
+            if (h->getType() == ABSENT_LINK)
+                continue;
 
-            AtomSpace rule_atomspace;
-            Handle hcpy = rule_atomspace.add_atom(h);
-            Handle implicant_vardecl = rule_atomspace.add_atom(
+            AtomSpace temp_pm_as;
+            Handle hcpy = temp_pm_as.add_atom(h);
+            Handle implicant_vardecl = temp_pm_as.add_atom(
                     gen_sub_varlist(h, rule->get_vardecl()));
-            Handle sourcecpy = rule_atomspace.add_atom(source);
+            Handle sourcecpy = temp_pm_as.add_atom(source);
 
-            HandleSeq hx { implicant_vardecl, hcpy, hcpy };
-            BindLinkPtr bl = createBindLink(hx);
-            DefaultImplicator imp(&rule_atomspace);
-            imp.implicand = bl->get_implicand();
-            bl->imply(imp);
+            BindLinkPtr bl = createBindLink(HandleSeq { implicant_vardecl,
+                                                         hcpy,hcpy });
+            VarGroundingPMCB gcb(&temp_pm_as);
+            gcb.implicand = bl->get_implicand();
+            bl->imply(gcb);
 
-            for (const auto& hi : imp.result_list) {
-                if (hi == sourcecpy) {
-                    match = true;
-                    break;
+            FindAtoms fv(VARIABLE_NODE);
+            for (const auto& termg_map : gcb.term_groundings) {
+                for (const auto& it : termg_map) {
+                    if (it.second == sourcecpy) {
+                        match = true;
+                        fv.search_set(it.first);
+
+                        HandleSeq new_candidate_rules = substitute_rule_part(
+                                temp_pm_as,
+                                temp_pm_as.add_atom(rule->get_handle()),
+                                fv.varset, gcb.var_groundings);
+                        for (const auto& nr : new_candidate_rules)
+                            if (find(new_rules.begin(), new_rules.end(),
+                                     nr) == new_rules.end())
+                                new_rules.push_back(nr);
+                    }
                 }
             }
-
-            if (match)
-                break;
         }
 
         if (match) {
             auto it = find(chosen_rules.begin(), chosen_rules.end(), rule);
-            if (it == chosen_rules.end()){
-                chosen_rules.push_back(rule);}
+            if (it == chosen_rules.end())
+                chosen_rules.push_back(rule);
         }
     }
 
@@ -224,4 +239,55 @@ Handle DefaultForwardChainerCB::gen_sub_varlist(const Handle& parent,
     }
 
     return Handle(createVariableList(final_oset));
+}
+
+/**
+ * Derives a new rule by replacing the grounded vars of @param hrule
+ *
+ * @param as             The Atomspace where all the atoms are dwelling
+ * @param hrule          A handle to BindLink instance
+ * @param vars           The grounded var list in @param hrule
+ * @param var_groundings The set of groundings to each var in @param vars
+ *
+ * @return A HandleSeq of all possible derived rules
+ */
+HandleSeq DefaultForwardChainerCB::substitute_rule_part(
+        AtomSpace& as, Handle hrule,const std::set<Handle>& vars,
+        const std::vector<std::map<Handle, Handle>>& var_groundings)
+{
+    std::vector<std::map<Handle, Handle>> filtered_vgmap_list;
+
+    //Filter out variables not listed in vars from var-groundings
+    for (const auto& varg_map : var_groundings) {
+        for (const auto& iv : varg_map)
+            if (find(vars.begin(), vars.end(), iv.first) != vars.end())
+                filtered_vgmap_list.push_back(
+                        std::map<Handle, Handle> { { iv.first, iv.second } });
+    }
+
+    HandleSeq derived_rules;
+    BindLinkPtr blptr = BindLinkCast(hrule);
+    Substitutor st(&as);
+
+    for (auto& vgmap : filtered_vgmap_list) {
+        Handle himplicand = st.substitute(blptr->get_implicand(), vgmap);
+
+        //Create the BindLink/Rule by substituting vars with groundings
+        if (contains_atomtype(himplicand, VARIABLE_NODE)) {
+            Handle himplicant = st.substitute(blptr->get_body(), vgmap);
+            //Assuming himplicant's set of variables are superset for himplicand's,
+            //generate varlist from himplicant.
+            Handle hvarlist = gen_sub_varlist(
+                    himplicant, LinkCast(hrule)->getOutgoingSet()[0]);
+            Handle hderived_rule = Handle(LinkCast(createBindLink(HandleSeq {
+                    hvarlist, himplicant, himplicand })));
+
+            derived_rules.push_back(hderived_rule);
+        }
+        else{
+            //TODO Execute if executable and push to FC results
+        }
+    }
+
+    return derived_rules;
 }

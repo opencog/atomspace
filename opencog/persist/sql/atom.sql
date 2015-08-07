@@ -10,7 +10,7 @@ CREATE TABLE Atoms (
 	uuid	BIGINT PRIMARY KEY,
 
 	-- The atomspace that this atom belongs to.
-	space BIGINT,
+	space BIGINT REFERENCES spaces(space),
 
 	-- Atom type, e.g. Link, Node, etc.
 	type  SMALLINT,
@@ -34,12 +34,20 @@ CREATE TABLE Atoms (
 	name    TEXT,
 
 	-- An array of the outgoing edges; non-empty only for links
-	outgoing BIGINT[]
+	outgoing BIGINT[],
+
+	-- Force the uniqueness of atoms!!
+	UNIQUE (type, name),
+	UNIQUE (type, outgoing)
 );
 
 -- Indexes, needed for fast node and link lookup.
-CREATE INDEX nodeidx ON Atoms(type, name);
-CREATE INDEX linkidx ON Atoms(type, outgoing);
+-- Make them unique, to catch any errors early.
+-- Actually, this is not needed; the unique constraints on the table
+-- defacto create indexes; creating them again just doubles the index.
+-- CREATE UNIQUE INDEX nodeidx ON Atoms(type, name);
+-- CREATE UNIQUE INDEX linkidx ON Atoms(type, outgoing);
+
 
 -- -----------------------------------------------------------
 -- Edge table is not used by the postgres driver.  That is because
@@ -82,9 +90,11 @@ CREATE TABLE TypeCodes (
 -- atomspace as a parent.
 
 CREATE TABLE Spaces (
-	space  BIGINT,
+	space  BIGINT PRIMARY KEY,
 	parent BIGINT
 );
+
+INSERT INTO Spaces VALUES (1,1); -- default root
 
 -- -----------------------------------------------------------
 -- Global state
