@@ -22,7 +22,7 @@
 ; Associate the rules to the rule base (with weights, their semantics
 ; is currently undefined, we might settled with probabilities but it's
 ; not sure)
-(ure-add-rules crisp-deduction-rbs (list (list crisp-deduction-rule 0.6)))
+(ure-add-rules crisp-deduction-rbs (list (list crisp-deduction-rule-name 0.6)))
 
 ; Termination criteria parameters
 (ure-set-num-parameter crisp-deduction-rbs "URE:maximum-iterations" 20)

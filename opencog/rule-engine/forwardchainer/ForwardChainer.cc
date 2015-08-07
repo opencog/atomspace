@@ -95,7 +95,7 @@ void ForwardChainer::do_step(ForwardChainerCallBack& fcb)
     // Select a rule amongst the matching rules by tournament selection
     map<Rule*, float> rule_weight;
     for (Rule* r : matched_rules) {
-        rule_weight[r] = r->get_cost();
+        rule_weight[r] = r->get_weight();
     }
 
     _log->info("[ForwardChainer] Selecting a rule from the set of "

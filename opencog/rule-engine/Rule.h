@@ -40,22 +40,26 @@ class Rule : public boost::less_than_comparable<Rule>,
              public boost::equality_comparable<Rule>
 {
 public:
+	// rule is actually
+	//
+	// MemberLink <TV>
+	//    <rule name>
+	//    <rbs>
 	Rule(Handle rule);
-	virtual ~Rule();
 
 	// Comparison
 	bool operator==(const Rule& r) const {
 		return r.rule_handle_ == rule_handle_;
 	}
 	bool operator<(const Rule& r) const {
-		return cost_ < r.cost_;
+		return weight_ < r.weight_;
 	}
 
 	// Modifiers
 	void set_handle(Handle h) throw (InvalidParamException);
 	void set_name(const string& name);
 	void set_category(const string& name);
-	void set_cost(int p);	
+	void set_weight(float p);
 
 	// Access
 	string& get_name();
@@ -68,18 +72,23 @@ public:
 	HandleSeq get_implicant_seq();
 	Handle get_implicand();
 	HandleSeq get_implicand_seq();
-	int get_cost();
+	float get_weight();
 
 	Rule gen_standardize_apart(AtomSpace* as);
 
 private:
+	// Rule handle, typically a BindLink
 	Handle rule_handle_;
+
+	// Rule name, the name of the node referring to the rule body
 	string name_;
+
+	// Rule base system name
 	string category_;
 
-	// TODO weird here it is called cost, but it seems it's actually a
-	// priority
-	int cost_;
+	// Rule weight (indicated by the TV strength of the membership of
+	// the rule to the RBS)
+	float weight_;
 
 	Handle standardize_helper(AtomSpace* as, Handle, std::map<Handle, Handle>&);
 };

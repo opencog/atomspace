@@ -43,3 +43,9 @@
          (cAB (cog-stv-confidence AB)))
       (if (and (>= sA 0.5) (>= cA 0.5) (>= sAB 0.5) (>= cAB 0.5))
           (cog-set-tv! B (stv 1 1)))))
+
+; Associate a name to the rule
+(define crisp-modus-ponens-rule-name (Node "crisp-modus-ponens-rule"))
+(DefineLink
+  crisp-modus-ponens-rule-name
+  crisp-modus-ponens-rule)

@@ -35,7 +35,7 @@ const std::string UREConfigReader::max_iter_name = "URE:maximum-iterations";
 
 UREConfigReader::UREConfigReader(AtomSpace& as, Handle rbs) : _as(as)
 {
-	// Retrieve the rules (BindLinks) and instantiate them
+	// Retrieve the rules (MemberLinks) and instantiate them
 	for (Handle rule : fetch_rules(rbs))
 		_rbparams.rules.emplace_back(rule);
 
@@ -79,13 +79,10 @@ void UREConfigReader::set_maximum_iterations(int mi)
 HandleSeq UREConfigReader::fetch_rules(Handle rbs)
 {
 	// Retrieve rules
-	Handle rule_var = _as.add_node(VARIABLE_NODE, "__URE_RULE__");
-	Handle gl = _as.add_link(GET_LINK,
-	                         // MemberLink
-	                         //    VariableNode "__URE_RULE__"
-	                         //    ConceptNode <RBS>
-	                         _as.add_link(MEMBER_LINK, rule_var, rbs));
-	Handle rule_names = satisfying_set(&_as, gl);
+	Handle rule_var = _as.add_node(VARIABLE_NODE, "__URE_RULE__"),
+		rule_pat = _as.add_link(MEMBER_LINK, rule_var, rbs),
+		gl = _as.add_link(BIND_LINK, rule_pat, rule_pat),
+		rule_names = bindlink(&_as, gl);
 
 	// Remove the GetLink pattern from the AtomSpace as it is no
 	// longer useful

@@ -7,7 +7,7 @@
 ; configure a rule-based system (rbs).
 ;
 ; Utilities include:
-; -- ure-add-weighed-rules -- Associate rules to an rbs
+; -- ure-add-rules -- Associate rules to an rbs
 ; -- ure-set-num-parameter -- Set a numeric parameter of an rbs
 ; -- ure-set-fuzzy-bool-parameter -- Set a fuzzy boolean parameter of an rbs
 ;

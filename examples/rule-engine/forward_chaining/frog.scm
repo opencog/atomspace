@@ -23,6 +23,9 @@
 	)
 )
 
+(define rule1-name (Node "rule1"))
+(DefineLink rule1-name rule1)
+
 (define rule2
 	(BindLink
 		(VariableNode "$x")
@@ -37,6 +40,8 @@
 	)
 )
 
+(define rule2-name (Node "rule2"))
+(DefineLink rule2-name rule2)
 
 (define source1
 	(InheritanceLink
@@ -70,11 +75,11 @@
 )
 
 (MemberLink (stv 0.9 1)
-	rule1
+	rule1-name
 	(ConceptNode "wikipedia-fc")
 )
 
 (MemberLink (stv 0.5 1)
-	rule2
+	rule2-name
 	(ConceptNode "wikipedia-fc")
 )

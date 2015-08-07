@@ -56,12 +56,19 @@ void DefineLinkUTest::test_define_concept()
 
 	// Create DefineLink over a concept node
 	Handle A = _as.add_node(CONCEPT_NODE, "A"),
-		alias = _as.add_node(CONCEPT_NODE, "alias-of-A"),
-		def_concept = _as.add_link(DEFINE_LINK, alias, A);
+		B = _as.add_node(CONCEPT_NODE, "B"),
+		aliasA = _as.add_node(CONCEPT_NODE, "alias-of-A"),
+		def_concept = _as.add_link(DEFINE_LINK, aliasA, A);
 
 	// Test that aliasA returns A as definition
-	Handle body = DefineLink::get_definition(alias);
+	Handle body = DefineLink::get_definition(aliasA);
 	TS_ASSERT_EQUALS(A, body);
+
+	// Reinserting the same definition doesn't raise an error
+	TS_ASSERT_THROWS_NOTHING(_as.add_link(DEFINE_LINK, aliasA, A));
+
+	// But inserting another one with the same alias does raise an error
+	TS_ASSERT_THROWS_ANYTHING(_as.add_link(DEFINE_LINK, aliasA, B));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

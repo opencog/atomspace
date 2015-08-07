@@ -12,11 +12,11 @@
 ; is currently undefined, we might settled with probabilities but it's
 ; not sure)
 (MemberLink
-   pln-rule-modus-ponens
+   pln-rule-modus-ponens-name
    (ConceptNode "URE")
 )
 (MemberLink (stv 1 1)
-   pln-rule-deduction
+   pln-rule-deduction-name
    (ConceptNode "URE")
 )
 
