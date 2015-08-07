@@ -89,7 +89,9 @@ void DefaultForwardChainerCBUTest::test_apply_rule(void)
             "tests/rule-engine/simple-assertions.scm");
     load_scm_files_from_config(as);
 
-    Handle rule_handle = eval.eval_h("pln-rule-deduction");
+    Handle rule_handle = eval.eval_h("(MemberLink"
+                                     "   pln-rule-deduction-name"
+                                     "   (ConceptNode \"URE\"))");
     vector<Rule*> rules { new Rule(rule_handle) };
     Handle source = eval.eval_h(R"((ConceptNode "Socrates"))");
 

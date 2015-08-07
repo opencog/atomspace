@@ -52,4 +52,11 @@
                     (cog-stv-confidence AB)
                     cA))))
 
+; Associate a name to the rule
+(define pln-rule-modus-ponens-name (Node "pln-rule-modus-ponens"))
+(DefineLink
+  pln-rule-modus-ponens-name
+  pln-rule-modus-ponens)
+
 ; =============================================================================
+
