@@ -1,6 +1,6 @@
 {-# LANGUAGE GADTs #-}
 
-import OpenCog.AtomSpace            (TruthVal(..),Atom(..),AtomGen(..),
+import OpenCog.AtomSpace            (TruthVal(..),Atom(..),Gen(..),
                                      runOnNewAtomSpace,get,insert,remove,
                                      printAtom,withTv,noTv)
 import Control.Monad.IO.Class       (liftIO)
@@ -9,31 +9,31 @@ someTv :: Maybe TruthVal
 someTv = withTv $ SimpleTV 0.4 0.5
 
 n = ConceptNode "Animal" someTv
-l = ListLink [AtomGen n]
+l = ListLink [Gen n]
 
 e = EvaluationLink noTv
    (PredicateNode "isFriend" noTv)
-   (ListLink [ AtomGen $ ConceptNode "Alan" noTv
-             , AtomGen $ ConceptNode "Robert" noTv
+   (ListLink [ Gen $ ConceptNode "Alan" noTv
+             , Gen $ ConceptNode "Robert" noTv
              ])
 
-li = (ListLink [ AtomGen $ ConceptNode "SomeConcept" someTv
-               , AtomGen $ PredicateNode "SomePredicate" noTv
+li = (ListLink [ Gen $ ConceptNode "SomeConcept" someTv
+               , Gen $ PredicateNode "SomePredicate" noTv
                ])
 
 -- Type checking Ok.
 ex1 = ExecutionLink
           (GroundedSchemaNode "some-fun")
-          (ListLink [ AtomGen $ ConceptNode "Arg1" someTv
-                    , AtomGen $ ConceptNode "Arg2" someTv
+          (ListLink [ Gen $ ConceptNode "Arg1" someTv
+                    , Gen $ ConceptNode "Arg2" someTv
                     ])
           (ConceptNode "res" someTv)
 
 {- Type checking error.
 ex2 = ExecutionLink
           (ConceptNode "some-fun" someTv) -- ConceptNodeT type isn't instance of IsSchema
-          (ListLink [ AtomGen $ ConceptNode "Arg1" someTv
-                    , AtomGen $ ConceptNode "Arg2" someTv
+          (ListLink [ Gen $ ConceptNode "Arg1" someTv
+                    , Gen $ ConceptNode "Arg2" someTv
                     ])
           (ConceptNode "res" someTv)
 -}
@@ -47,8 +47,8 @@ main = runOnNewAtomSpace $ do
          liftIO $ printAtom li
          () <- case li of
            ListLink (x:_) -> case x of
-               AtomGen (ConceptNode c _)    -> liftIO $ print "First is Concept"
-               AtomGen (PredicateNode p _ ) -> liftIO $ print "First is Predicate"
+               Gen (ConceptNode c _)    -> liftIO $ print "First is Concept"
+               Gen (PredicateNode p _ ) -> liftIO $ print "First is Predicate"
                _                            -> liftIO $ print "First is other type"
          insert e
          get e

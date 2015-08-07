@@ -2,7 +2,7 @@
 
 import OpenCog.AtomSpace        (AtomSpace,insert,get,remove,
                                  debug,runOnNewAtomSpace,printAtom,
-                                 Atom(..),TruthVal(..),AtomGen(..),noTv,withTv)
+                                 Atom(..),TruthVal(..),Gen(..),noTv,withTv)
 import Control.Monad.IO.Class   (liftIO)
 
 main :: IO ()
@@ -33,9 +33,9 @@ program = let a = AndLink (withTv $ SimpleTV 0.5 0.5)
         case n of
           Just (AndLink _ _ _) -> liftIO $ putStrLn "AndLink found:"
           Nothing              -> liftIO $ putStrLn "No AndLink found."
-        let list = ListLink [ AtomGen $ NumberNode 4
-                            , AtomGen $ ConceptNode "hello" noTv
-                            , AtomGen $ NumberNode 4]
+        let list = ListLink [ Gen $ NumberNode 4
+                            , Gen $ ConceptNode "hello" noTv
+                            , Gen $ NumberNode 4]
         insert list
         liftIO $ putStrLn "Inserted:"
         liftIO $ printAtom list
