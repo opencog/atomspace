@@ -18,8 +18,6 @@ module OpenCog.AtomSpace.Types (
   , Gen (..)
   , appGen
   , getType
-  , noTv
-  , withTv
   ) where
 
 import OpenCog.AtomSpace.Inheritance    (type (<~))
@@ -55,12 +53,11 @@ data TruthVal = SimpleTV { tvMean       :: Double
 
 type TVal = Maybe TruthVal
 
-noTv = Nothing
-withTv = Just
-
 -- | 'Gen' groups all the atoms that are children of the atom type a.
 data Gen a where
     Gen :: (Typeable a,b <~ a) => Atom b -> Gen a
+
+deriving instance Show (Gen a)
 
 -- | 'appGen' evaluates a given function with the atom type instance
 -- wrapped inside the 'Gen' type.
@@ -71,8 +68,6 @@ appGen f (Gen at) = f at
 -- (necessary when working with many instances of different atoms,
 -- for example, for lists of general atoms)
 type AtomGen = Gen AtomT
-
-deriving instance Show (Gen a)
 
 -- | 'Atom' is the main data type to represent the different types of atoms.
 data Atom (a :: AtomType) where

@@ -12,15 +12,16 @@ cabal-version:       >=1.8
 library
   exposed-modules:   OpenCog.AtomSpace
 
-  other-modules:     OpenCog.AtomSpace.Env
-                   , OpenCog.AtomSpace.Internal
-                   , OpenCog.AtomSpace.Utils
-                   , OpenCog.AtomSpace.Api
-                   , OpenCog.AtomSpace.Types
-                   , OpenCog.AtomSpace.Inheritance
-                   , OpenCog.AtomSpace.Filter
+  other-modules:     OpenCog.AtomSpace.Api
                    , OpenCog.AtomSpace.AtomType
+                   , OpenCog.AtomSpace.Env
+                   , OpenCog.AtomSpace.Filter
+                   , OpenCog.AtomSpace.Inheritance
+                   , OpenCog.AtomSpace.Internal
+                   , OpenCog.AtomSpace.Sugar
                    , OpenCog.AtomSpace.Template
+                   , OpenCog.AtomSpace.Types
+                   , OpenCog.AtomSpace.Utils
 
   build-depends:     base             >=4.5
                    , transformers     >=0.3

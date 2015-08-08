@@ -17,13 +17,13 @@ module OpenCog.AtomSpace
     , showAtom
     -- * AtomSpace Main Data Types
     , TruthVal (..)
-    , noTv
-    , withTv
     , AtomName (..)
     , Atom (..)
     , Gen (..)
     , appGen
     , AtomGen (..)
+    -- * AtomSpace Syntactic Sugar
+    , module OpenCog.AtomSpace.Sugar
     -- * AtomSpace Phantom Types
     , AtomType(..)
     , type (<~)
@@ -35,3 +35,4 @@ import OpenCog.AtomSpace.Env         (AtomSpace,runOnNewAtomSpace)
 import OpenCog.AtomSpace.Utils       (printAtom,showAtom)
 import OpenCog.AtomSpace.AtomType    (AtomType(..))
 import OpenCog.AtomSpace.Inheritance (type (<~))
+import OpenCog.AtomSpace.Sugar
