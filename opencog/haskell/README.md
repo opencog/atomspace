@@ -25,7 +25,13 @@ To install Stack, you should follow [Download instructions](https://github.com/c
 
 ### Installation
 
-Go through the normal process of
+To check if you have proper ghc version installed. Run:
+```
+cd <ATOMSPACE_ROOT>/opencog/haskell
+stack setup
+```
+
+Then, go through the normal process of
 [building](https://github.com/opencog/atomspace#building-atomspace) and
 [installing](https://github.com/opencog/atomspace#install) the AtomSpace.
 
