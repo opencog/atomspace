@@ -32,7 +32,7 @@ using namespace opencog;
  * @param ext_vars  a VariableList of external variables that typed variables can map to
  */
 UnifyPMCB::UnifyPMCB(AtomSpace* as, VariableListPtr int_vars, VariableListPtr ext_vars)
-    : BackwardChainerPMCB(as, int_vars, false), _ext_vars(ext_vars)
+    : BackwardChainerPMCB(as, int_vars), _ext_vars(ext_vars)
 {
 
 }
@@ -48,7 +48,20 @@ bool UnifyPMCB::variable_match(const Handle& npat_h,
 	Type soltype = nsoln_h->getType();
 
 	// special case to allow any typed variable to match to a variable
-	if (soltype == VARIABLE_NODE && _ext_vars->get_variables().varset.count(nsoln_h) == 1) return true;
+	if (soltype == VARIABLE_NODE && _ext_vars->get_variables().varset.count(nsoln_h) == 1)
+	{
+		// if the variable is untyped, match immediately
+		if (_ext_vars->get_variables().typemap.count(nsoln_h) == 0
+		    || _int_vars->get_variables().typemap.count(npat_h) == 0)
+			return true;
+
+		// otherwise the two variables type need to match
+		if (_int_vars->get_variables().typemap.at(npat_h)
+		    == _ext_vars->get_variables().typemap.at(nsoln_h))
+			return true;
+
+		return false;
+	}
 
 	return BackwardChainerPMCB::variable_match(npat_h, nsoln_h);
 }

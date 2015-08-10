@@ -74,16 +74,22 @@ public:
 	 *
 	 * @return the HandleSeq
 	 */
-	HandleSeq get_varseq() const { return _vars; }
+	HandleSeq get_varseq() const
+	{
+		return VariableListCast(_vardecl)->get_variables().varseq;
+	}
 
 	/**
 	 * Get the "free" variables list in set<Handle>
 	 *
 	 * @return the std::set<Handle>
 	 */
-	std::set<Handle> get_varset() const {
-		return std::set<Handle>(_vars.begin(), _vars.end());
+	std::set<Handle> get_varset() const
+	{
+		return VariableListCast(_vardecl)->get_variables().varset;
 	}
+
+	Handle get_vardecl() const { return _vardecl; }
 
 	/**
 	 * Get the stored free variable mappings.
@@ -105,13 +111,13 @@ public:
 	float get_weight() { return 1.0f; }
 
 private:
-	Target(AtomSpace& as, const Handle& h);
+	Target(AtomSpace& as, const Handle& h, const Handle& hvardecl);
 
 	Handle _htarget_external;
 	Handle _htarget_internal;
 	unsigned int _selection_count;
 
-	HandleSeq _vars;
+	Handle _vardecl;
 	VarMultimap _varmap;
 
 	AtomSpace& _as;
@@ -125,7 +131,7 @@ public:
 	~TargetSet();
 
 	void clear();
-	void emplace(Handle& h);
+	void emplace(Handle h, Handle hvardecl);
 	unsigned int size();
 	Target& select();
 	Target& get(Handle& h);
