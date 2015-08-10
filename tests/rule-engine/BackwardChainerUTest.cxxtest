@@ -9,6 +9,7 @@
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Config.h>
+#include <opencog/util/mt19937ar.h>
 #include <opencog/guile/load-file.h>
 
 using namespace opencog;
@@ -25,6 +26,7 @@ public:
 	{
 		logger().setLevel(Logger::DEBUG);
 		logger().setPrintToStdoutFlag(true);
+		randGen().seed(0);
 	}
 
 	void setUp();
@@ -48,6 +50,8 @@ void BackwardChainerUTest::setUp()
 	             "opencog/scm/utilities.scm, "
 	             "opencog/scm/av-tv.scm");
 	load_scm_files_from_config(as_);
+
+	randGen().seed(0);
 }
 
 void BackwardChainerUTest::tearDown()
