@@ -82,9 +82,9 @@ std::string Link::toShortString(std::string indent)
     // concatenated. If it's a link, all its properties are concatenated.
     for (const Handle& h : _outgoing) {
         if (h.operator->() != NULL)
-            answer += h->toShortString(more_indent);
+            answer << h->toShortString(more_indent);
         else
-            answer += indent + "Undefined Atom!\n";
+            answer << indent << "Undefined Atom!\n";
     }
 
     answer << indent << ") ; [" << _uuid << "]\n";
