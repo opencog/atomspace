@@ -11,6 +11,7 @@ module OpenCog.AtomSpace.Internal (
     , AtomRaw(..)
     , toRaw
     , fromRaw
+    , fromRawGen
     , TVRaw(..)
     , fromTVRaw
     , toTVRaw
@@ -63,11 +64,11 @@ toRaw at = let atype = toAtomTypeRaw $ getType at
 
 -- Function to get an Atom back from its general representation (if possible).
 fromRaw :: (Typeable a) => AtomRaw -> Atom a -> Maybe (Atom a)
-fromRaw raw _ = fromRaw' raw >>= appGen cast
+fromRaw raw _ = fromRawGen raw >>= appGen cast
 
 -- Function to get an Atom back from its general representation (if possible).
-fromRaw' :: AtomRaw -> Maybe AtomGen
-fromRaw' (Node araw n tvraw) = let tv = fromTVRaw <$> tvraw in do
+fromRawGen :: AtomRaw -> Maybe AtomGen
+fromRawGen (Node araw n tvraw) = let tv = fromTVRaw <$> tvraw in do
     atype <- fromAtomTypeRaw araw
     case atype of
       ConceptT        -> Just $ Gen $ ConceptNode n tv
@@ -82,7 +83,7 @@ fromRaw' (Node araw n tvraw) = let tv = fromTVRaw <$> tvraw in do
         readMaybe s = case reads s of
                         [(x, "")] -> Just x
                         _ -> Nothing
-fromRaw' (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
+fromRawGen (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
     atype <- fromAtomTypeRaw araw
     case (atype,out) of
       (AndT ,[ar,br]) -> do
@@ -96,13 +97,13 @@ fromRaw' (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ Gen $ OrLink tv a1 b1
       (ImplicationT ,[ar,br]) -> do
-        a <- fromRaw' ar
-        b <- fromRaw' br
+        a <- fromRawGen ar
+        b <- fromRawGen br
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ Gen $ ImplicationLink tv a1 b1
       (EquivalenceT ,[ar,br]) -> do
-        a <- fromRaw' ar
-        b <- fromRaw' br
+        a <- fromRawGen ar
+        b <- fromRawGen br
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ Gen $ EquivalenceLink tv a1 b1
       (EvaluationT ,[ar,br]) -> do
@@ -136,7 +137,7 @@ fromRaw' (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
         case (a,b,c) of
           (Gen a1,Gen b1,Gen c1) -> Just $ Gen $ ExecutionLink a1 b1 c1
       (ListT, _     ) -> do
-        lnew <- mapM fromRaw' out
+        lnew <- mapM fromRawGen out
         Just $ Gen $ ListLink lnew
       (SatisfactionT ,[ar,br]) -> do
         a <- filt ar :: Maybe (Gen VariableT)
@@ -157,7 +158,7 @@ fromRaw' (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
 
 filt :: FilterIsChild a => AtomRaw -> Maybe (Gen a)
 filt araw = do
-    agen <- fromRaw' araw
+    agen <- fromRawGen araw
     case agen of
         (Gen at) -> filtIsChild at
 

@@ -21,6 +21,7 @@ library
                    , OpenCog.AtomSpace.Sugar
                    , OpenCog.AtomSpace.Template
                    , OpenCog.AtomSpace.Types
+                   , OpenCog.AtomSpace.Query
                    , OpenCog.AtomSpace.Utils
 
   build-depends:     base             >=4.5

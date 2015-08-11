@@ -12,6 +12,8 @@ module OpenCog.AtomSpace
     , remove
     , get
     , debug
+    -- * AtomSpace Query
+    , module OpenCog.AtomSpace.Query
     -- * AtomSpace Printing
     , printAtom
     , showAtom
@@ -36,3 +38,4 @@ import OpenCog.AtomSpace.Utils       (printAtom,showAtom)
 import OpenCog.AtomSpace.AtomType    (AtomType(..))
 import OpenCog.AtomSpace.Inheritance (type (<~))
 import OpenCog.AtomSpace.Sugar
+import OpenCog.AtomSpace.Query
