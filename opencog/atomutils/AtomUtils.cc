@@ -95,7 +95,7 @@ HandleSeq get_all_atoms(Handle h)
     if (lll)
         for (const Handle& o : lll->getOutgoingSet())
         {
-            HandleSeq sub = get_all_nodes(o);
+            HandleSeq sub = get_all_atoms(o);
             results.insert(results.end(), sub.begin(), sub.end());
         }
 
@@ -119,7 +119,7 @@ UnorderedHandleSet get_all_unique_atoms(Handle h)
     if (lll)
         for (const Handle& o : lll->getOutgoingSet())
         {
-            UnorderedHandleSet sub = get_all_unique_nodes(o);
+            UnorderedHandleSet sub = get_all_unique_atoms(o);
             results.insert(sub.begin(), sub.end());
         }
 
