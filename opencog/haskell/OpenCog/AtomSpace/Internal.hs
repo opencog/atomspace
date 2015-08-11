@@ -38,7 +38,7 @@ data AtomRaw = Link AtomTypeRaw [AtomRaw] (Maybe TVRaw)
 
 -- Function to convert an Atom to its general representation.
 toRaw :: (Typeable a) => Atom a -> AtomRaw
-toRaw at = let atype = toAtomTypeRaw $ getType at
+toRaw at = let atype = getType at
            in case at of
     PredicateNode n tv       -> Node atype n $ toTVRaw <$> tv
     ConceptNode n tv         -> Node atype n $ toTVRaw <$> tv
@@ -60,6 +60,9 @@ toRaw at = let atype = toAtomTypeRaw $ getType at
     SatisfactionLink a1 a2   -> Link atype [toRaw a1,toRaw a2] Nothing
     ForAllLink tv a1 a2      -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
     AverageLink tv a1 a2     -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    QuoteLink a1             -> Link atype [toRaw a1] Nothing
+    VariableList list        -> Link atype (map (appGen toRaw) list) Nothing
+    BindLink a1 a2 a3        -> Link atype [toRaw a1,toRaw a2,toRaw a3] Nothing
     _                        -> undefined
 
 -- Function to get an Atom back from its general representation (if possible).
@@ -154,6 +157,19 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
         b <- filt br :: Maybe (Gen AtomT)
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ Gen $ AverageLink tv a1 b1
+      (QuoteT ,[ar]) -> do
+        a <- filt ar :: Maybe (Gen AtomT)
+        case a of
+          (Gen a1) -> Just $ Gen $ QuoteLink a1
+      (VariableListT ,_ ) -> do
+        lnew <- filtList out :: Maybe [Gen VariableT]
+        Just $ Gen $ VariableList lnew
+      (BindT ,[ar,br,cr]) -> do
+        a <- filt ar :: Maybe (Gen VariableT)
+        b <- filt br :: Maybe (Gen AtomT)
+        c <- filt cr :: Maybe (Gen AtomT)
+        case (a,b,c) of
+          (Gen a1,Gen b1,Gen c1) -> Just $ Gen $ BindLink a1 b1 c1
       _               -> Nothing
 
 filt :: FilterIsChild a => AtomRaw -> Maybe (Gen a)
@@ -161,6 +177,12 @@ filt araw = do
     agen <- fromRawGen araw
     case agen of
         (Gen at) -> filtIsChild at
+
+filtList :: FilterIsChild a => [AtomRaw] -> Maybe [Gen a]
+filtList = mapM (\raw -> do
+                     gen <- fromRawGen raw
+                     case gen of
+                       Gen g -> filtIsChild g)
 
 instance (Typeable a) => Eq (Atom a) where
     at1 == at2 = toRaw at1 == toRaw at2

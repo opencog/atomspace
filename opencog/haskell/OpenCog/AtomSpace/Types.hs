@@ -105,6 +105,7 @@ data Atom (a :: AtomType) where
                            Atom s -> Atom l -> Atom a -> Atom ExecutionT
 
     VariableNode        :: AtomName -> Atom VariableT
+    VariableList        :: [Gen VariableT] -> Atom VariableT
 
     SatisfactionLink    :: (v <~ VariableT,l <~ LinkT) =>
                            Atom v -> Atom l -> Atom SatisfactionT
@@ -114,9 +115,16 @@ data Atom (a :: AtomType) where
     AverageLink         :: (v <~ VariableT,a <~ AtomT) =>
                            TVal -> Atom v -> Atom a -> Atom AverageT
 
+    QuoteLink           :: (a <~ AtomT) =>
+                           Atom a -> Atom a
+
+    BindLink            :: (v <~ VariableT,p <~ AtomT,q <~ AtomT) =>
+                           Atom v -> Atom p -> Atom q -> Atom BindT
 
 deriving instance Show (Atom a)
 deriving instance Typeable Atom
 
-getType :: (Typeable a) => Atom a -> AtomType
-getType = read . show . typeRep
+-- TODO: improve this code, defining an instance of Data for Atom GADT
+-- and use the Data type class interface to get the constructor.
+getType :: (Typeable a) => Atom a -> String
+getType = head . words . show

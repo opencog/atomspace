@@ -178,21 +178,22 @@ toAT "Notype" = NOD "Notype"
 toAT "Atom"   = NOD "Atom"
 toAT "Node"   = NOD "Node"
 toAT "Link"   = LNK "Link"
-toAT xs | isSuffixOf "Node" xs = NOD $ take (length xs - 4) xs
-        | isSuffixOf "Link" xs = LNK $ take (length xs - 4) xs
-        | otherwise            = LNK xs
+toAT xs | isSuffixOf "Node" xs = NOD xs
+        | otherwise = LNK xs
 
 toTypeName :: AT -> String
-toTypeName (NOD s) = s ++ "T"
-toTypeName (LNK s) = s ++ "T"
+toTypeName (NOD "Node") = "NodeT"
+toTypeName (NOD s) = if isSuffixOf "Node" s
+                        then take (length s - 4) s ++ "T"
+                        else s ++ "T"
+toTypeName (LNK "Link") = "LinkT"
+toTypeName (LNK s) = if isSuffixOf "Link" s
+                        then take (length s - 4) s ++ "T"
+                        else s ++ "T"
 
 toRawName :: AT -> String
-toRawName (NOD "Notype") = "Notype"
-toRawName (NOD "Atom"  ) = "Atom"
-toRawName (NOD "Node"  ) = "Node"
-toRawName (LNK "Link"  ) = "Link"
-toRawName (NOD n       ) = n ++ "Node"
-toRawName (LNK l       ) = l ++ "Link"
+toRawName (NOD n) = n
+toRawName (LNK l) = l
 
 -- | 'reverseTree' reverses the information provided in the atom_types.script file.
 -- From input: [(Atom, parent of Atom)]
