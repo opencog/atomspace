@@ -201,9 +201,10 @@ public:
      * backing store are not used.
      *
      * To avoid a fetch if the atom already is in the atomtable, use the
-     * getAtom() method instead.
+     * get_atom() method instead.
      */
     Handle fetch_atom(Handle h);
+    Handle fetch_atom(UUID);
 
     /**
      * Get an atom from the AtomTable. If not found there, get it from
@@ -211,6 +212,7 @@ public:
      * not found in either place, return Handle::UNDEFINED.
      */
     Handle get_atom(Handle);
+    Handle get_atom(UUID);
 
     /**
      * Load *all* atoms of the given type, but only if they are not

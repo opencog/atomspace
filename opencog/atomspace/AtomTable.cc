@@ -251,6 +251,20 @@ Handle AtomTable::getHandle(Handle& h) const
     return Handle::UNDEFINED;
 }
 
+// If we have a uuid but no atom pointer, find the atom pointer.
+Handle AtomTable::getHandle(UUID uuid) const
+{
+    Handle h;
+    // Handle h(uuid);
+
+    // Read-lock for the _atom_set.
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+
+    auto hit = _atom_set.find(h);
+    if (hit != _atom_set.end())
+        return *hit;
+    return Handle::UNDEFINED;
+}
 
 /// Return true if the atom is in this atomtable, or in the
 /// environment for this atomtable.

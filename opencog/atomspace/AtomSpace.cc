@@ -309,12 +309,81 @@ Handle AtomSpace::fetch_atom(Handle h)
     return atomTable.add(h, false);
 }
 
+Handle AtomSpace::fetch_atom(UUID uuid)
+{
+    if (NULL == backing_store)
+        throw RuntimeException(TRACE_INFO, "No backing store");
+
+    // OK, we have to handle three distinct cases.
+    // 1) If atom table already knows about this uuid or atom, then
+    //    this function returns the atom-table's version of the atom.
+    //    In particular, no attempt is made to reconcile the possibly
+    //    differing truth values in the atomtable vs. backing store.
+    // 2) If the handle h holds a UUID but no atom pointer, then get
+    //    the corresponding atom from storage, and add it to the atom
+    //    table.
+    // 3) If the handle h contains a pointer to an atom (that is not
+    //    in the atom table), then assume that atom is from some previous
+    //    (recursive) query, and add it to the atomtable.
+    // For both case 2 & 3, if the atom is a link, then it's outgoing
+    // set is fetched as well, as currently, a link cannot be added to
+    // the atomtable, unless all of its outgoing set already is in the
+    // atomtable.
+
+    // Case 1:
+    Handle hb(atomTable.getHandle(uuid));
+    if (atomTable.holds(hb))
+        return hb;
+
+    // Case 2 & 3:
+    // We don't have the atom for this UUID, then go get it.
+Handle h;
+// xxxxxxxxxxxxxxxxxxxxxx
+    // Handle h(uuid);
+    AtomPtr a(backing_store->getAtom(h));
+
+    // If we still don't have an atom, then the requested UUID
+    // was "insane", that is, unknown by either the atom table
+    // (case 1) or the backend.
+    if (NULL == a.operator->())
+        throw RuntimeException(TRACE_INFO,
+            "Asked backend for an unknown handle; UUID=%lu\n",
+            uuid);
+    h = a;
+
+    // For links, must perform a recursive fetch, as otherwise
+    // the atomTable.add() below will throw an error.
+    LinkPtr l(LinkCast(h));
+    if (l) {
+       const HandleSeq& ogs = l->getOutgoingSet();
+       size_t arity = ogs.size();
+       for (size_t i=0; i<arity; i++)
+       {
+          Handle oh(fetch_atom(ogs[i]));
+          if (oh != ogs[i]) throw RuntimeException(TRACE_INFO,
+              "Unexpected handle mismatch! Expected %lu got %lu\n",
+              ogs[i].value(), oh.value());
+       }
+    }
+
+    return atomTable.add(h, false);
+}
+
 Handle AtomSpace::get_atom(Handle h)
 {
     Handle he(atomTable.getHandle(h));
     if (he) return he;
     if (backing_store)
         return fetch_atom(h);
+    return Handle::UNDEFINED;
+}
+
+Handle AtomSpace::get_atom(UUID uuid)
+{
+    Handle he(atomTable.getHandle(uuid));
+    if (he) return he;
+    if (backing_store)
+        return fetch_atom(uuid);
     return Handle::UNDEFINED;
 }
 

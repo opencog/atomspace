@@ -77,7 +77,7 @@ public:
     static const Handle UNDEFINED;
 
     explicit Handle(const AtomPtr& atom);
-    explicit Handle(const UUID u) : _uuid(u) {}
+    // explicit Handle(const UUID u) : _uuid(u) {}
     explicit Handle() : _uuid(ULONG_MAX) {}
     Handle(const Handle& h) : _uuid(h._uuid), _ptr(h._ptr) {}
     ~Handle() {}

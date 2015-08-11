@@ -188,6 +188,7 @@ public:
     Handle getHandle(Type, const HandleSeq&) const;
     Handle getHandle(const LinkPtr&) const;
     Handle getHandle(const AtomPtr&) const;
+    Handle getHandle(UUID) const;
     Handle getHandle(Handle&) const;
 
     static AtomPtr factory(Type atom_type, AtomPtr atom);

@@ -166,7 +166,8 @@ SCM SchemeSmob::ss_atom (SCM suuid)
 
 	// SCM_RETURN_NEWSMOB (cog_uuid_tag, suuid);
 	UUID uuid = scm_to_ulong(suuid);
-	return handle_to_scm(Handle(uuid));
+	// return handle_to_scm(Handle(uuid));
+return SCM_EOL;
 }
 
 /* ============================================================== */
