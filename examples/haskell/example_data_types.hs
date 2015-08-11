@@ -2,13 +2,10 @@
 
 import OpenCog.AtomSpace            (TruthVal(..),Atom(..),Gen(..),
                                      runOnNewAtomSpace,get,insert,remove,
-                                     printAtom,withTv,noTv,(|>),(\>))
+                                     printAtom,noTv,stv,(|>),(\>))
 import Control.Monad.IO.Class       (liftIO)
 
-someTv :: Maybe TruthVal
-someTv = withTv $ SimpleTV 0.4 0.5
-
-n = ConceptNode "Animal" someTv
+n = ConceptNode "Animal" (stv 1 1)
 
 l = ListLink \> n
 
@@ -27,17 +24,16 @@ li = ListLink |> ConceptNode   "SomeConcept" (stv 1 1)
 -- Type checking Ok.
 ex1 = ExecutionLink
           (GroundedSchemaNode "some-fun")
-          (ListLink |> ConceptNode "Arg1" someTv
-                    \> ConceptNode "Arg2" someTv )
-          (ConceptNode "res" someTv)
+          (ListLink |> ConceptNode "Arg1" (stv 1 1)
+                    \> ConceptNode "Arg2" (stv 1 1) )
+          (ConceptNode "res" (stv 1 1))
 
 {- Type checking error.
 ex2 = ExecutionLink
-          (ConceptNode "some-fun" someTv) -- ConceptNodeT type isn't instance of IsSchema
-          (ListLink [ Gen $ ConceptNode "Arg1" someTv
-                    , Gen $ ConceptNode "Arg2" someTv
-                    ])
-          (ConceptNode "res" someTv)
+          (ConceptNode "some-fun" (stv 1 1)) -- ConceptNodeT isn't a Schema.
+          (ListLink |> ConceptNode "Arg1" (stv 1 1)
+                    \> ConceptNode "Arg2" (stv 1 1) )
+          (ConceptNode "res" (stv 1 1))
 -}
 
 main :: IO ()

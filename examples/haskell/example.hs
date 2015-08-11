@@ -2,14 +2,14 @@
 
 import OpenCog.AtomSpace        (AtomSpace,insert,get,remove,
                                  debug,runOnNewAtomSpace,printAtom,
-                                 Atom(..),TruthVal(..),Gen(..),noTv,withTv)
+                                 Atom(..),TruthVal(..),Gen(..),noTv,stv)
 import Control.Monad.IO.Class   (liftIO)
 
 main :: IO ()
 main = runOnNewAtomSpace program
 
 program :: AtomSpace ()
-program = let a = AndLink (withTv $ SimpleTV 0.5 0.5)
+program = let a = AndLink (stv 0.5 0.5)
                           (ConceptNode "John" noTv)
                           (ConceptNode "Carlos" noTv)
            in do
