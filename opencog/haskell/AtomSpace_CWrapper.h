@@ -120,9 +120,9 @@ extern "C"
      */
     int AtomSpace_getAtomByHandle( AtomSpace* this_ptr
                                  , UUID handle
-                                 , char* type
-                                 , char* name
-                                 , UUID* out
+                                 , char** type
+                                 , char** name
+                                 , UUID** out
                                  , int* out_len);
 
     /**

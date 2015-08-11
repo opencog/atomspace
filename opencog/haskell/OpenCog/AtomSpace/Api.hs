@@ -215,9 +215,9 @@ get i = do
 foreign import ccall "AtomSpace_getAtomByHandle"
   c_atomspace_getAtomByHandle :: AtomSpaceRef
                               -> Handle
-                              -> CString
-                              -> CString
-                              -> Ptr Handle
+                              -> Ptr CString
+                              -> Ptr CString
+                              -> Ptr (Ptr Handle)
                               -> Ptr CInt
                               -> IO CInt
 
@@ -231,17 +231,20 @@ getByHandle h = do
       \hptr -> alloca $
       \iptr -> do
           isNode <- toBool <$> c_atomspace_getAtomByHandle asRef h tptr nptr hptr iptr
-          atype <- peekCString tptr
-          free tptr
+          ctptr <- peek tptr
+          atype <- peekCString ctptr
+          free ctptr
           if isNode
             then do
-                aname <- peekCString nptr
-                free nptr
+                cnptr <- peek nptr
+                aname <- peekCString cnptr
+                free cnptr
                 return $ Right (atype,aname)
             else do
                 outLen <- fromIntegral <$> peek iptr
-                outList <- peekArray outLen hptr
-                free hptr
+                chptr <- peek hptr
+                outList <- peekArray outLen chptr
+                free chptr
                 return $ Left (atype,outList)
     case res of
         Right (atype,aname)  -> return $ Node atype aname $ Just tv

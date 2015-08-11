@@ -31,4 +31,4 @@ cogBind at = do
             handleRes <- liftIO $ c_pmatcher_bindlink asRef handle
             raw <- getByHandle handleRes
             return $ fromRawGen raw
-
+      Nothing -> return Nothing
