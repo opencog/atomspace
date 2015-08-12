@@ -211,6 +211,7 @@ public:
     inline Handle getHandle() {
         return Handle(shared_from_this());
     }
+    inline UUID getUUID() { return _uuid; }
 
     /** Returns the AttentionValue object of the atom.
      *

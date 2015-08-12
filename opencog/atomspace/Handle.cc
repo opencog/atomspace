@@ -34,13 +34,13 @@ using namespace opencog;
 const Handle Handle::UNDEFINED;
 const AtomPtr Handle::NULL_POINTER;
 
-Handle::Handle(const AtomPtr& atom) : _uuid(atom->_uuid), _ptr(atom) {}
-
-Handle& Handle::operator=(const AtomPtr& a)
+Handle::Handle(const UUID u)
 {
-    this->_uuid = a->_uuid;
-    this->_ptr = a;
-    return *this;
+	_ptr = do_res(u);
+}
+
+UUID Handle::value(void) const {
+    return operator->()->getUUID();
 }
 
 // ===================================================
@@ -63,30 +63,11 @@ void Handle::clear_resolver(const AtomTable* tab)
 
 // Search several atomspaces, in order.  First one to come up with
 // the atom wins.  Seems to work, for now.
-inline AtomPtr Handle::do_res(const Handle* hp)
+inline AtomPtr Handle::do_res(UUID uuid)
 {
     for (const AtomTable* at : _resolver) {
-        AtomPtr a(at->getHandle((Handle&)(*hp))._ptr);
+        AtomPtr a(at->getHandle(uuid)._ptr);
         if (a.get()) return a;
     }
     return NULL;
-}
-
-Atom* Handle::resolve()
-{
-    AtomPtr a(do_res(this));
-    _ptr.swap(a);
-    return _ptr.get();
-}
-
-Atom* Handle::cresolve() const
-{
-    return do_res(this).get();
-}
-
-AtomPtr Handle::resolve_ptr()
-{
-    AtomPtr a(do_res(this));
-    _ptr.swap(a);
-    return _ptr;
 }

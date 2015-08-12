@@ -58,16 +58,11 @@ friend class AtomStorage;         // persistance
 friend class AtomspaceHTabler;    // persistance
 
 private:
-
-    UUID _uuid;
     AtomPtr _ptr;
 
-    Atom* resolve();
-    Atom* cresolve() const;
-    static AtomPtr do_res(const Handle*);
+    static AtomPtr do_res(UUID);
     static std::vector<const AtomTable*> _resolver;
 
-    AtomPtr resolve_ptr();
     static void set_resolver(const AtomTable*);
     static void clear_resolver(const AtomTable*);
 
@@ -76,82 +71,62 @@ public:
 
     static const Handle UNDEFINED;
 
-    explicit Handle(const AtomPtr& atom);
-    // explicit Handle(const UUID u) : _uuid(u) {}
-    explicit Handle() : _uuid(ULONG_MAX) {}
-    Handle(const Handle& h) : _uuid(h._uuid), _ptr(h._ptr) {}
+    explicit Handle(const AtomPtr& atom) : _ptr(atom) {}
+    explicit Handle(const UUID);
+    explicit Handle() {}
+    Handle(const Handle& h) : _ptr(h._ptr) {}
     ~Handle() {}
 
-    inline UUID value(void) const {
-        return _uuid;
-    }
+    UUID value(void) const;
 
     inline Handle& operator=(const Handle& h) {
-        if (this->_uuid == h._uuid) {
-            Atom* a = h._ptr.get();
-            // The 'typical' case here is where a isn't null,
-            // but this is.  The weirdo case is where both
-            // aren't null, and yet differ.
-            // Mostly, we want to avoid the CPU overhead of calling
-            // resolve(), it we can; so the goal of this if-stmt is
-            // to upgrade the ptr from null to non-null.
-            if (a != NULL and a != this->_ptr.get())
-                this->_ptr = h._ptr;
-            return *this;
-        }
-        this->_uuid = h._uuid;
-        this->_ptr = h._ptr;
+        Atom* a = h._ptr.get();
+        // The 'typical' case here is where a isn't null,
+        // but this is.  The weirdo case is where both
+        // aren't null, and yet differ.
+        // Mostly, we want to avoid the CPU overhead of calling
+        // resolve(), it we can; so the goal of this if-stmt is
+        // to upgrade the ptr from null to non-null.
+        if (a != NULL and a != this->_ptr.get())
+            this->_ptr = h._ptr;
         return *this;
     }
 
-    Handle& operator=(const AtomPtr& a);
+    Handle& operator=(const AtomPtr& a) {
+        this->_ptr = a;
+        return *this;
+    }
 
     inline Atom* operator->() {
-        Atom* ptr = _ptr.get();
-        if (ptr) return ptr;
-        if (ULONG_MAX == _uuid) return NULL;
-        return resolve();
+        return _ptr.get();
     }
 
     inline Atom* operator->() const {
-        Atom* ptr = _ptr.get();
-        if (ptr) return ptr;
-        if (ULONG_MAX == _uuid) return NULL;
-        return cresolve();
+        return _ptr.get();
     }
 
     // Allows expressions like "if(h)..." to work when h has a non-null pointer.
     explicit inline operator bool() const noexcept {
         if (_ptr.get()) return true;
-        return NULL != cresolve(); // might be null because we haven't resolved it yet!
+        return false;
     }
 
     inline bool operator==(std::nullptr_t) const noexcept {
         if (_ptr.get()) return false;
-        return NULL == cresolve(); // might be null because we haven't resolved it yet!
+        return true;
     }
 
     inline bool operator!=(std::nullptr_t) const noexcept {
         if (_ptr.get()) return true;
-        return NULL != cresolve(); // might be null because we haven't resolved it yet!
+        return false;
     }
 
-    // Handles are equivalent when their uuid's compare. It may happen
-    // that one has a null pointer, and the other one doesn't; we don't
-    // care about that. It should never ever happen that we have two
-    // identical uuid's but inequivalent pointers!! Well, unless both
-    // uuids are -1, in which case, we are comparing atoms that have
-    // not yet been inserted into the atomspace. We refuse to deal with
-    // this situation here, because it is a confusing mess to try to
-    // compare atoms that are not in the atomspace; the notion of
-    // equality and equivalence differ, and it depends strong on the
-    // atom type.
-    inline bool operator==(const Handle& h) const noexcept { return _uuid == h._uuid; }
-    inline bool operator!=(const Handle& h) const noexcept { return _uuid != h._uuid; }
-    inline bool operator< (const Handle& h) const noexcept { return _uuid <  h._uuid; }
-    inline bool operator> (const Handle& h) const noexcept { return _uuid >  h._uuid; }
-    inline bool operator<=(const Handle& h) const noexcept { return _uuid <= h._uuid; }
-    inline bool operator>=(const Handle& h) const noexcept { return _uuid >= h._uuid; }
+    inline bool operator==(const Handle& h) const noexcept { return _ptr == h._ptr; }
+    inline bool operator!=(const Handle& h) const noexcept { return _ptr != h._ptr; }
+    inline bool operator< (const Handle& h) const noexcept { return _ptr <  h._ptr; }
+    inline bool operator> (const Handle& h) const noexcept { return _ptr >  h._ptr; }
+    inline bool operator<=(const Handle& h) const noexcept { return _ptr <= h._ptr; }
+    inline bool operator>=(const Handle& h) const noexcept { return _ptr >= h._ptr; }
 
 
     /**
@@ -173,21 +148,14 @@ public:
     }
 
     operator AtomPtr() const {
-        if (_ptr.get()) return _ptr;
-        if (ULONG_MAX == _uuid) return NULL_POINTER;
-        Handle h(*this);
-        return h.resolve_ptr();
+        return _ptr;
     }
     operator AtomPtr() {
-        if (_ptr.get()) return _ptr;
-        if (ULONG_MAX == _uuid) return NULL_POINTER;
-        return resolve_ptr();
+        return _ptr;
     }
 /***
     operator const AtomPtr&() {
-        if (_ptr.get()) return _ptr;
-        if (ULONG_MAX == _uuid) return NULL_POINTER;
-        return resolve_ptr();
+        return _ptr;
     }
 ***/
 };
@@ -232,8 +200,6 @@ inline std::size_t hash_value(Handle const& h)
     return static_cast<std::size_t>(h.value());
 }
 
-/// Compare handle uuid's ONLY. Do not compare atom pointers
-/// (as one might be null, and the other one not null.)
 struct handle_less
 {
    bool operator()(const Handle& hl, const Handle& hr) const
