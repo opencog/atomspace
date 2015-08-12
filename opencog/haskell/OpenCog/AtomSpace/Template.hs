@@ -18,6 +18,7 @@ import Data.Data                        (Data,Typeable)
 import Data.Map.Strict                  (Map,mapKeys,toList,fromList,insert,
                                          empty,(!),keys,member)
 import qualified Data.Map.Strict as M   (map)
+import qualified Data.Set        as S   (Set,(\\),fromList,toList)
 import Control.Monad.State              (State,modify,get,execState)
 
 -- | Simple Atom representation.
@@ -29,42 +30,47 @@ data AT = NOD String
 declareAtomType :: [(AT,[AT])] -> Q [Dec]
 declareAtomType atomMap = do
     a <- newName "a"
+    b <- newName "b"
     let
       atomType      = mkName "AtomType"
       functionName1 = mkName "toAtomTypeRaw"
       functionName2 = mkName "fromAtomTypeRaw"
-      typeFamName1  = mkName "Up"
-      typeFamName2  = mkName "Down"
-      constrNames   = map (\(nod,parents) ->
-                                (mkName (toTypeName nod)
-                                ,toRawName nod
-                                ,map (mkName . toTypeName) parents)) atomMap
-      revTree       = reverseTree atomMap
-      constrNamesRev= map (\(nod,children) ->
-                                (mkName (toTypeName nod)
-                                ,map (mkName . toTypeName) children)) revTree
-      constr      = map (\(x,_,_) -> NormalC x []) constrNames
-      typeDef     = DataD [] atomType [] constr [''Eq, ''Show, ''Typeable, ''Read]
-      funDef1     = FunD functionName1 (map createClause1 constrNames)
-      funDef2     = FunD functionName2 (map createClause2 constrNames)
-      typeFamDef1 = ClosedTypeFamilyD typeFamName1 [PlainTV a]
-                    (Just (AppT ListT (ConT atomType)))
-                    (map createClause3 constrNames)
-      typeFamDef2 = ClosedTypeFamilyD typeFamName2 [PlainTV a]
-                    (Just (AppT ListT (ConT atomType)))
-                    (map createClause4 constrNamesRev)
+      typeFamName1  = mkName "Is"
+      typeFamName2  = mkName "Up"
 
-      createClause1 (n,s,_)  = Clause [ConP n []]
-                                 (NormalB (LitE (StringL s)))
-                                 []
+      constrNames   = map (\(nod,ancestors) ->
+                             (mkName (toTypeName nod)
+                             ,toRawName nod
+                             ,map (mkName . toTypeName) ancestors)) $
+                               getFullAncestors atomMap
+      constr        = map (\(x,_,_) -> NormalC x []) constrNames
+      typeDef       = DataD [] atomType [] constr [''Eq, ''Show, ''Typeable, ''Read]
+      funDef1       = FunD functionName1 (map createClause1 constrNames)
+      funDef2       = FunD functionName2 (map createClause2 constrNames)
 
-      createClause2 (n,s,_)  = Clause [LitP (StringL s)]
-                                 (NormalB (AppE (ConE $ mkName "Just") (ConE n)))
-                                 []
+      typeFamDef1 = ClosedTypeFamilyD typeFamName1
+                        [ KindedTV a (ConT atomType)
+                        , KindedTV b (ConT atomType) ]
+                        (Just (ConT $ mkName "Bool"))
+                        (concat $ map createClause3 constrNames)
 
-      createClause3 (n,_,p)  = TySynEqn [PromotedT n] (genlist p)
+      typeFamDef2 = ClosedTypeFamilyD typeFamName2
+                        [ PlainTV a ]
+                        (Just (AppT ListT (ConT atomType)))
+                        (map createClause4 constrNames)
 
-      createClause4 (n,p)    = TySynEqn [PromotedT n] (genlist p)
+      createClause1 (n,s,_) = Clause [ConP n []]
+                                (NormalB (LitE (StringL s)))
+                                []
+
+      createClause2 (n,s,_) = Clause [LitP (StringL s)]
+                                (NormalB (AppE (ConE $ mkName "Just") (ConE n)))
+                                []
+
+      createClause3 (n,_,p) = map (\x -> TySynEqn [PromotedT n,PromotedT x]
+                                                  (PromotedT $ mkName "True")) p
+
+      createClause4 (n,_,p) = TySynEqn [PromotedT n] (genlist p)
 
      in return [typeDef,funDef1,funDef2,typeFamDef1,typeFamDef2]
   where
@@ -74,21 +80,48 @@ declareAtomType atomMap = do
 -- | Template function to declare Filter instances for each AtomType.
 declareAtomFilters :: [(AT,[AT])] -> Q [Dec]
 declareAtomFilters atomMap = do
+    a <- newName "a"
     let
-      className     = mkName "FilterIsChild"
-      classFnName   = mkName "filtIsChild"
-      constrNames   = map (mkName . toTypeName . fst) atomMap
-      classDef      = map createInstance constrNames
+      className       = mkName "FilterIsChild"
+      classFnName     = mkName "filtIsChild"
+      phantTypeFnName = mkName "getPhantomType"
+      castFnName      = mkName "cast"
+      atomConst       = mkName "Atom"
+      genConst        = mkName "Gen"
+      nothing         = mkName "Nothing"
 
-      createInstance n = InstanceD []
+      revTree         = reverseTree atomMap
+      completeRevTree = getFullDescendants revTree
+      constrNames     = map (\(nod,children) ->
+                                (mkName (toTypeName nod)
+                                ,map (mkName . toTypeName) children)) completeRevTree
+      classDef        = map createInstance constrNames
+
+      createInstance (n,children) = InstanceD []
           (AppT (ConT className) (PromotedT n))
-          [ValD (VarP classFnName) (NormalB (AppE (VarE $ mkName "filtChild")
-            (SigE
-              (ConE $ mkName "Proxy")
-              (AppT (ConT $ mkName "Proxy")
-                    (AppT (ConT $ mkName "Children")
-                          (PromotedT n)))))) []
+          [FunD classFnName
+              [Clause [VarP a]
+                      (NormalB (CaseE (AppE (VarE phantTypeFnName) (VarE a))
+                                 ((map createClause children)
+                                  ++ [Match WildP (NormalB (ConE nothing)) []])
+                               ))
+                      []
+              ]
           ]
+
+      createClause n = Match (ConP n [])
+                             (NormalB
+                                (InfixE
+                                   (Just (ConE genConst))
+                                   (VarE $ mkName "<$>")
+                                   (Just (SigE
+                                          (AppE (VarE castFnName) (VarE a))
+                                          (AppT (ConT $ mkName "Maybe")
+                                          (AppT (ConT atomConst) (PromotedT n)))
+                                         )
+                                   )))
+                             []
+
      in return classDef
 
 -- | QuasiQuorter to read the atom_types.script file.
@@ -117,6 +150,7 @@ onAtomMap f = modify (\(s1,s2) -> (s1,f s2))
 -- of tuples (Atom, Parent of that Atom).
 parser :: String -> [(AT,[AT])]
 parser s = ( toList
+           . modifyVarNode
            . M.map (map toAT)
            . mapKeys toAT
            . snd
@@ -139,6 +173,14 @@ parser s = ( toList
     format dict s = if member s dict
                       then dict!s
                       else toCamelCase s
+    --This util functions are used to modify the parents of VariableNode.
+    --We will set VariableNode's parent to all leaf nodes.
+    --So, VariableNode will inherit from every atom type, and we can place it
+    --everywhere without type constraints.
+    varNode = NOD "VariableNode"
+    modifyVarNode :: Map AT [AT] -> Map AT [AT]
+    modifyVarNode m = let parents = filter ((/=)varNode) $ getNodesLeaf $ toList m
+                       in insert varNode parents m
 
 removeComm :: String -> String
 removeComm ('/':'/':_) = []
@@ -216,3 +258,28 @@ reverseTree' = concat
     aux2 []         = []
     aux2 ((x,y):ys) = [(x,y : map snd ys)]
 
+-- | 'getFullDescendants' get all the descendants of each node.
+-- (not only its next children).
+-- From input: [(Atom, children of Atom)]
+-- It gets as output: [(Atom, descendants of Atom)]
+getFullDescendants :: [(AT,[AT])] -> [(AT,[AT])]
+getFullDescendants l = let mAp = fromList l
+                           desc k = S.toList $
+                                    S.fromList $
+                                    (mAp ! k) ++ (concat $ map desc (mAp ! k))
+                        in map (\x -> (x,desc x)) (keys mAp)
+
+-- | 'getFullAncestors' get all the ancestors of each node.
+-- (not only its next parents).
+-- From input: [(Atom, parents of Atom)]
+-- It gets as output: [(Atom, ancestors of Atom)]
+getFullAncestors :: [(AT,[AT])] -> [(AT,[AT])]
+getFullAncestors = getFullDescendants
+
+-- | 'getNodesLeaf' get all nodes that have no children.
+-- From input: [(Atom, parents of Atom)]
+-- It gets as output: [Atom]
+getNodesLeaf :: [(AT,[AT])] -> [AT]
+getNodesLeaf l = let s1 = S.fromList $ concat $ map snd l
+                     s2 = S.fromList $ map fst l
+                  in S.toList $ s2 S.\\ s1

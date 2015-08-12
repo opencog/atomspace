@@ -21,27 +21,19 @@ module OpenCog.AtomSpace.Filter (
   ) where
 
 import OpenCog.AtomSpace.Template       (atomHierarchyFile,declareAtomFilters)
-import OpenCog.AtomSpace.Inheritance    (type (<~),Children)
+import OpenCog.AtomSpace.Inheritance    (type (<~))
 import OpenCog.AtomSpace.AtomType       (AtomType(..))
 import OpenCog.AtomSpace.Types          (Atom(..),Gen(..),appGen)
 import Data.Proxy                       (Proxy(..))
-import Data.Typeable                    (cast,Typeable)
-
--- | 'Filter' class defines a filter on the list 'b' of atom types.
-class Filter a (b::[AtomType]) where
-    filtChild :: Typeable c => Proxy b -> Atom c -> Maybe (Gen a)
-
-instance Filter e '[] where
-    filtChild _ _ = Nothing
-
-instance (Typeable e,x <~ e,Filter e xs) => Filter e (x ': xs) where
-    filtChild _ a = case cast a :: Maybe (Atom x) of
-        Just res -> return $ Gen res
-        Nothing  -> filtChild (Proxy :: Proxy xs) a
+import Data.Typeable                    (cast,Typeable,typeRep)
+import Data.Functor                     ((<$>))
 
 -- | 'FilterIsChild' class defines a filter on the descendants of atom type 'a'.
 class FilterIsChild a where
     filtIsChild :: (b <~ AtomT) => Atom b -> Maybe (Gen a)
+
+getPhantomType :: (Typeable a) => Atom a -> AtomType
+getPhantomType = read . show . typeRep
 
 -- Usage of Template Haskell to generate instances of FilterIsChild for each
 -- Atom Type.
