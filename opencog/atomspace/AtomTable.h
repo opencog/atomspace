@@ -92,16 +92,16 @@ private:
     size_t size;
 
     // Holds all atoms in the table.  Provides lookup between numeric
-    // handle uuid and the actual atom pointer (since they are stored
-    // together).  To some degree, this info is duplicated in the Node
-    // and LinkIndex below; we have this here for convenience.
+    // handle uuid and the actual atom pointer. To some degree, this info
+    // is duplicated in the Node and LinkIndex below; we have this here
+    // for convenience.
     //
     // This also plays a critical role for memory management: this is
     // the only index that actually holds the atom shared_ptr, and thus
     // increments the atom use count in a guaranteed fashion.  This is
     // the one true guaranteee that the atom will not be deleted while
     // it is in the atom table.
-    std::unordered_set<Handle, handle_hash> _atom_set;
+    std::unordered_map<UUID, Handle> _atom_set;
 
     //!@{
     //! Index for quick retreival of certain kinds of atoms.
@@ -189,7 +189,6 @@ public:
     Handle getHandle(const LinkPtr&) const;
     Handle getHandle(const AtomPtr&) const;
     Handle getHandle(UUID) const;
-    Handle getHandle(Handle&) const;
 
     static AtomPtr factory(Type atom_type, AtomPtr atom);
 
