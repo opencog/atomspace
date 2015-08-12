@@ -137,7 +137,7 @@ public:
 	Target& get(Handle& h);
 
 private:
-	std::unordered_map<Handle, Target> _targets_map;
+	std::map<Handle, Target> _targets_map;
 	AtomSpace _history_space;
 	unsigned int _total_selection;
 };
