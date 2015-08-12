@@ -130,8 +130,6 @@ std::string SchemeSmob::handle_to_string(SCM node)
 SCM SchemeSmob::handle_to_scm (Handle h)
 {
 	Handle* hp = new Handle(h); // so that the smart pointer increments!
-	// Force resolution to occur now, not later.
-	hp->operator->();
 	scm_gc_register_collectable_memory (hp,
 					sizeof(h), "opencog handle");
 
@@ -357,7 +355,6 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 
 	// Now, look for the actual node... in the actual atom space.
 	Handle h(atomspace->get_handle(t, name));
-	if (Handle::UNDEFINED == h) return SCM_EOL;
 	if (NULL == h) return SCM_EOL;
 
 	// If there was a truth value, change it.
