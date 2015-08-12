@@ -40,7 +40,9 @@ Handle::Handle(const UUID u)
 }
 
 UUID Handle::value(void) const {
-    return operator->()->getUUID();
+    const Atom* a = operator->();
+    if (a) return a->getUUID();
+    return ULONG_MAX;
 }
 
 // ===================================================
