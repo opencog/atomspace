@@ -34,7 +34,7 @@ type AtomTypeRaw = String
 -- Main general atom representation.
 data AtomRaw = Link AtomTypeRaw [AtomRaw] (Maybe TVRaw)
              | Node AtomTypeRaw AtomName  (Maybe TVRaw)
-        deriving Eq
+        deriving (Eq,Show)
 
 -- Function to convert an Atom to its general representation.
 toRaw :: (Typeable a) => Atom a -> AtomRaw
@@ -57,13 +57,15 @@ toRaw at = let atype = getType at
     SatisfyingSetLink a1     -> Link atype [toRaw a1] Nothing
     ExecutionLink a1 a2 a3   -> Link atype [toRaw a1,toRaw a2,toRaw a3] Nothing
     ListLink list            -> Link atype (map (appGen toRaw) list) Nothing
+    SetLink list             -> Link atype (map (appGen toRaw) list) Nothing
     SatisfactionLink a1 a2   -> Link atype [toRaw a1,toRaw a2] Nothing
     ForAllLink tv a1 a2      -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
     AverageLink tv a1 a2     -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
     QuoteLink a1             -> Link atype [toRaw a1] Nothing
     VariableList list        -> Link atype (map (appGen toRaw) list) Nothing
     BindLink a1 a2 a3        -> Link atype [toRaw a1,toRaw a2,toRaw a3] Nothing
-    _                        -> undefined
+    x                        -> error $ "You should complete the code of toRaw"
+                                      ++ " with an instance for: " ++ show x
 
 -- Function to get an Atom back from its general representation (if possible).
 fromRaw :: (Typeable a) => AtomRaw -> Atom a -> Maybe (Atom a)
@@ -80,7 +82,8 @@ fromRawGen (Node araw n tvraw) = let tv = fromTVRaw <$> tvraw in do
       GroundedSchemaT -> Just $ Gen $ GroundedSchemaNode n
       VariableT       -> Just $ Gen $ VariableNode n
       NumberT         -> readMaybe n >>= Just . Gen . NumberNode
-      _               -> Nothing
+      x               -> error $ "You should complete the code of fromRawGen"
+                               ++ " with an instance for: " ++ show x
     where
         readMaybe :: (Read a) => String -> Maybe a
         readMaybe s = case reads s of
@@ -142,6 +145,9 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
       (ListT, _     ) -> do
         lnew <- mapM fromRawGen out
         Just $ Gen $ ListLink lnew
+      (SetT, _     ) -> do
+        lnew <- mapM fromRawGen out
+        Just $ Gen $ SetLink lnew
       (SatisfactionT ,[ar,br]) -> do
         a <- filt ar :: Maybe (Gen VariableT)
         b <- filt br :: Maybe (Gen LinkT)
@@ -170,7 +176,8 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
         c <- filt cr :: Maybe (Gen AtomT)
         case (a,b,c) of
           (Gen a1,Gen b1,Gen c1) -> Just $ Gen $ BindLink a1 b1 c1
-      _               -> Nothing
+      x               -> error $ "You should complete the code of fromRawGen"
+                               ++ " with an instance for: " ++ show x
 
 filt :: FilterIsChild a => AtomRaw -> Maybe (Gen a)
 filt araw = do
@@ -204,9 +211,9 @@ data TVTypeEnum = NULL_TRUTH_VALUE
                 | INDEFINITE_TRUTH_VALUE
                 | FUZZY_TRUTH_VALUE
                 | PROBABILISTIC_TRUTH_VALUE
-    deriving (Enum,Eq)
+    deriving (Enum,Eq,Show)
 
-data TVRaw = TVRaw TVTypeEnum [Double] deriving Eq
+data TVRaw = TVRaw TVTypeEnum [Double] deriving (Eq,Show)
 
 toTVRaw :: TruthVal -> TVRaw
 toTVRaw (SimpleTV a b     ) = TVRaw SIMPLE_TRUTH_VALUE [a,b]

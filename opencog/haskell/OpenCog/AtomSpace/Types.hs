@@ -98,6 +98,7 @@ data Atom (a :: AtomType) where
     NumberNode          :: Double -> Atom NumberT
 
     ListLink            :: [AtomGen] -> Atom ListT
+    SetLink             :: [AtomGen] -> Atom SetT
 
     SchemaNode          :: AtomName -> Atom SchemaT
     GroundedSchemaNode  :: AtomName -> Atom GroundedSchemaT
