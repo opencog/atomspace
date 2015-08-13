@@ -1,10 +1,10 @@
 
 module BackgroundKnowledge (bkn) where
 
-import OpenCog.AtomSpace   (Atom(..),AtomGen,noTv,stv,(|>),(\>))
+import OpenCog.AtomSpace   (Atom(..),AtomGen,noTv,stv,(|>),(\>),atomList)
 
 bkn :: [AtomGen]
-bkn = id
+bkn = atomList
  |> ForAllLink (stv 1 1)
         (ListLink |> VariableNode "X"
                   |> VariableNode "Y"

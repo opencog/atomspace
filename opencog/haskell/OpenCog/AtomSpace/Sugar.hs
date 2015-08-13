@@ -13,6 +13,7 @@ module OpenCog.AtomSpace.Sugar (
   , ftv
   , ptv
   , noTv
+  , atomList
   , (|>)
   , (\>)
   ) where
@@ -38,6 +39,9 @@ ftv a b = Just $ FuzzyTV a b
 
 ptv :: Double -> Double -> Double -> Maybe TruthVal
 ptv a b c = Just $ ProbTV a b c
+
+atomList :: (Typeable c) => ([Gen c] -> [Gen c])
+atomList = id
 
 infixl 5 |>
 infixr 4 \>
