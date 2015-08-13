@@ -30,6 +30,9 @@ IF (PSQL_EXECUTABLE)
 			ERROR_VARIABLE ERR
 			RESULT_VARIABLE RC)
 	ELSE (PG_HOST)
+# Arghhhh. This is painfully wrong. Forcing -h locahost makes it use
+# tcpip instead of unix domain sockets; to get tcpip to work, users
+# have to alter pg_hba.conf.
 		EXECUTE_PROCESS(COMMAND ${PSQL_EXECUTABLE} -c "SELECT * from TypeCodes;" -d opencog_test -U opencog_tester -h localhost
 			OUTPUT_VARIABLE OUT
 			ERROR_VARIABLE ERR
