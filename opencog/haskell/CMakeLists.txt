@@ -10,7 +10,7 @@ TARGET_LINK_LIBRARIES(haskell-atomspace
 
 ADD_CUSTOM_TARGET(haskell-atomspace-lib ALL
     DEPENDS haskell-atomspace
-    COMMAND stack build --extra-lib-dirs=${CMAKE_CURRENT_BINARY_DIR}
+    COMMAND stack build --verbosity=error --extra-lib-dirs=${CMAKE_CURRENT_BINARY_DIR}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
