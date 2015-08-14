@@ -110,6 +110,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			const std::string& (T::*s_sss)(const std::string&,
 			                               const std::string&,
 			                               const std::string&);
+			const std::string& (T::*s_v)(void);
 			TruthValuePtr (T::*p_h)(Handle);
 			void (T::*v_h)(Handle);
 			void (T::*v_s)(const std::string&);
@@ -147,6 +148,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			S_S,   // return string, take string
 			S_SS,  // return string, take two strings
 			S_SSS, // return string, take three strings
+			S_V,   // return string, take void
 			P_H,   // return truth value, take Handle
 			V_H,   // return void, take Handle
 			V_S,   // return void, take string
@@ -422,6 +424,12 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = scm_from_utf8_string(rs.c_str());
 					break;
 				}
+				case S_V:
+				{
+					const std::string &rs = (that->*method.s_v)();
+					rc = scm_from_utf8_string(rs.c_str());
+					break;
+				}
 				case P_H:
 				{
 					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
@@ -531,6 +539,18 @@ class SchemePrimitive : public PrimitiveEnviron
 		virtual size_t get_size(void) { return sizeof (*this); }
 	public:
 
+#define DECLARE_CONSTR_0(SIG, LSIG, RET_TYPE) \
+	SchemePrimitive(const char* module, const char* name, \
+		 RET_TYPE (T::*cb)(void), T *data) \
+	{ \
+		that = data; \
+		method.LSIG = cb; \
+		scheme_module = module; \
+		scheme_name = name; \
+		signature = SIG; \
+		do_register(module, name, 0); /* cb has 0 args */ \
+	}
+
 #define DECLARE_CONSTR_1(SIG, LSIG, RET_TYPE, ARG_TYPE) \
 	SchemePrimitive(const char* module, const char* name, \
 		 RET_TYPE (T::*cb)(ARG_TYPE), T *data) \
@@ -601,6 +621,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		                             const std::string&)
 		DECLARE_CONSTR_3(S_SSS,s_sss,const std::string&, const std::string&,
 		                             const std::string&, const std::string&)
+		DECLARE_CONSTR_0(S_V,  s_v,  const std::string&)
 		DECLARE_CONSTR_1(P_H,  p_h,  TruthValuePtr, Handle)
 		DECLARE_CONSTR_1(V_H,  v_h,  void, Handle)
 		DECLARE_CONSTR_1(V_S,  v_s,  void, const std::string&)
@@ -612,17 +633,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_2(V_TI, v_ti, void, Type, int)
 		DECLARE_CONSTR_4(V_TIDI, v_tidi, void, Type, int, double, int)
 
-		// Below is DECLARE_CONSTR_0(V_V, v_v, void*, void);
-		SchemePrimitive(const char *module, const char *name,
-		                void (T::*cb)(void), T *data)
-		{
-			that = data;
-			method.v_v = cb;
-			scheme_module = module;
-			scheme_name = name;
-			signature = V_V;
-			do_register(module, name, 0); // cb has 0 args
-		}
+		DECLARE_CONSTR_0(V_V,  v_v,  void);
 };
 
 #define DECLARE_DECLARE_1(RET,ARG) \
@@ -664,6 +675,7 @@ DECLARE_DECLARE_1(Handle, Handle)
 DECLARE_DECLARE_1(HandleSeq, Handle)
 DECLARE_DECLARE_1(HandleSeqSeq, Handle)
 DECLARE_DECLARE_1(const std::string&, const std::string&)
+DECLARE_DECLARE_1(const std::string&, void)
 DECLARE_DECLARE_1(TruthValuePtr, Handle)
 DECLARE_DECLARE_1(void, Handle)
 DECLARE_DECLARE_1(void, const std::string&)
