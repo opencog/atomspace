@@ -94,6 +94,14 @@ class PatternTerm
 			}
 		}
 
+		inline std::string toString(std::string indent = ":") const
+		{
+			if (_handle == Handle::UNDEFINED) return "-";
+			std::string str = _parent->toString();
+			str += indent + std::to_string(_handle.value());
+			return str;
+		}
+
 };
 
 } // namespace opencog
@@ -110,7 +118,7 @@ namespace std {
 template<>
 struct less<PatternTermPtr>
 {
-	bool operator()(const PatternTermPtr& lhs, const PatternTermPtr& rhs)
+	bool operator()(const PatternTermPtr& lhs, const PatternTermPtr& rhs) const
 	{
 		const Handle& lHandle = lhs->getHandle();
 		const Handle& rHandle = rhs->getHandle();
@@ -121,6 +129,7 @@ struct less<PatternTermPtr>
 		}
 		return lHandle < rHandle;
 	}
+
 };
 
 }; // namespace std;
