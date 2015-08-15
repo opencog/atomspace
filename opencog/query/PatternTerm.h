@@ -82,18 +82,47 @@ class PatternTerm
 			return _outgoing.size();
 		}
 
-		inline PatternTermPtr getOutgoingTerm(Arity pos) const throw (RuntimeException)
+		inline PatternTermPtr getOutgoingTerm(Arity pos) const
+			throw (RuntimeException)
 		{
 			// Checks for a valid position
 			if (pos < getArity()) {
 				return _outgoing[pos];
 			} else {
-				throw RuntimeException(TRACE_INFO, "invalid outgoing set index %d", pos);
+				throw RuntimeException(TRACE_INFO,
+				                       "invalid outgoing set index %d", pos);
 			}
 		}
 
 };
 
 } // namespace opencog
+
+using namespace opencog;
+
+namespace std {
+
+// We need to overload standard comparison operator for PatternTerm pointers.
+// Now we do not care much about complexity of this comparison. The cases of
+// queries having repeated atoms that are deep should be very rare. So we just
+// traverse up towards root node. Typically we compare only the first level
+// handles on this path.
+template<>
+struct less<PatternTermPtr>
+{
+	bool operator()(const PatternTermPtr& lhs, const PatternTermPtr& rhs)
+	{
+		const Handle& lHandle = lhs->getHandle();
+		const Handle& rHandle = rhs->getHandle();
+		if (lHandle == rHandle)
+		{
+			if (lHandle == Handle::UNDEFINED) return false;
+			return lhs->getParent() < rhs->getParent();
+		}
+		return lHandle < rHandle;
+	}
+};
+
+}; // namespace std;
 
 #endif // _OPENCOG_PATTERN_TERM_H
