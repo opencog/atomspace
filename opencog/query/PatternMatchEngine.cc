@@ -326,9 +326,9 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 	size_t icurr = curr_choice(ptm, hg, fresh);
 	if (fresh) choose_next = false; // took a step, clear the flag
 
-	dbgprt("tree_comp resume choice search at %zu of %zu of UUID=%lu "
+	dbgprt("tree_comp resume choice search at %zu of %zu of term=%s, "
           "choose_next=%d\n",
-	       icurr, iend, hp.value(), choose_next);
+	       icurr, iend, ptm->toString().c_str(), choose_next);
 
 	// XXX This is almost surely wrong... if there are two
 	// nested choice links, then this will hog the steps,
@@ -575,15 +575,16 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	// If we are here, we've got possibilities to explore.
 #ifdef DEBUG
 	int num_perms = facto(mutation.size());
-	dbgprt("tree_comp resume unordered search at %d of %d of UUID=%lu "
+	dbgprt("tree_comp resume unordered search at %d of %d of term=%s "
 	       "take_step=%d have_more=%d\n",
-	       perm_count[Unorder(ptm, hg)], num_perms, hp.value(),
+	       perm_count[Unorder(ptm, hg)], num_perms, ptm->toString().c_str(),
 	       take_step, have_more);
 #endif
 	do
 	{
-		dbgprt("tree_comp explore unordered perm %d of %d of UUID=%lu\n",
-		       perm_count[Unorder(ptm, hg)], num_perms, hp.value());
+		dbgprt("tree_comp explore unordered perm %d of %d of term=%s\n",
+		       perm_count[Unorder(ptm, hg)], num_perms,
+		       ptm->toString().c_str());
 
 		solution_push();
 		bool match = true;
@@ -642,15 +643,16 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 
 				// Handle case 5&7 of description above.
 				have_more = true;
-				dbgprt("Good permutation %d for UUID=%lu have_more=%d\n",
-				       perm_count[Unorder(ptm, hg)], hp.value(), have_more);
+				dbgprt("Good permutation %d for term=%s have_more=%d\n",
+				       perm_count[Unorder(ptm, hg)], ptm->toString().c_str(),
+				       have_more);
 				_perm_state[Unorder(ptm, hg)] = mutation;
 				return true;
 			}
 		}
 		// If we are here, we are handling case 8.
-		dbgprt("Above permuation %d failed UUID=%lu\n",
-		       perm_count[Unorder(ptm, hg)], hp.value());
+		dbgprt("Above permuation %d failed term=%s\n",
+		       perm_count[Unorder(ptm, hg)], ptm->toString().c_str());
 
 take_next_step:
 		take_step = false; // we are taking a step, so clear the flag.
@@ -662,7 +664,7 @@ take_next_step:
 	} while (std::next_permutation(mutation.begin(), mutation.end()));
 
 	// If we are here, we've explored all the possibilities already
-	dbgprt("Exhausted all permuations of UUID=%lu\n", hp.value());
+	dbgprt("Exhausted all permuations of term=%s\n", ptm->toString().c_str());
 	_perm_state.erase(Unorder(ptm, hg));
 	have_more = false;
 	return false;
@@ -681,8 +683,8 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 	catch(...)
 	{
 #ifdef DEBUG
-		const Handle &hp = ptm->getHandle();
-		dbgprt("tree_comp fresh start unordered link UUID=%lu\n", hp.value());
+		dbgprt("tree_comp fresh start unordered link term=%s\n",
+		       ptm->toString().c_str());
 		perm_count[Unorder(ptm, hg)] = 0;
 #endif
 		perm = ptm->getOutgoingSet();
@@ -917,12 +919,12 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 	// Move up the solution graph, looking for a match.
 	IncomingSet iset = _pmc.get_incoming_set(hg);
 	size_t sz = iset.size();
-	dbgprt("Looking upward for pat-UUID=%lu have %zu branches\n",
-	        ptm->getHandle().value(), sz);
+	dbgprt("Looking upward for term=%s have %zu branches\n",
+	        ptm->toString().c_str(), sz);
 	bool found = false;
 	for (size_t i = 0; i < sz; i++) {
-		dbgprt("Try upward branch %zu of %zu for pat-UUID=%lu propose=%lu\n",
-		       i, sz, ptm->getHandle().value(), Handle(iset[i]).value());
+		dbgprt("Try upward branch %zu of %zu for term=%s propose=%lu\n",
+		       i, sz, ptm->toString().c_str(), Handle(iset[i]).value());
 		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
 		if (found) break;
 	}
@@ -1057,21 +1059,21 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 {
 	solution_push();
 
-	dbgprt("Checking pattern UUID=%lu for soln by %lu\n",
-	       ptm->getHandle().value(), hg.value());
+	dbgprt("Checking pattern term=%s for soln by %lu\n",
+	       ptm->toString().c_str(), hg.value());
 
 	bool match = tree_compare(ptm, hg, CALL_SOLN);
 
 	if (not match)
 	{
-		dbgprt("Pattern UUID=%lu NOT solved by %lu\n",
-		       ptm->getHandle().value(), hg.value());
+		dbgprt("Pattern term=%s NOT solved by %lu\n",
+		       ptm->toString().c_str(), hg.value());
 		solution_pop();
 		return false;
 	}
 
-	dbgprt("UUID=%lu solved by %lu move up\n",
-          ptm->getHandle().value(), hg.value());
+	dbgprt("Pattern term=%s solved by %lu move up\n",
+           ptm->toString().c_str(), hg.value());
 
 	// XXX should not do perm_push every time... only selectively.
 	// But when? This is very confusing ...
@@ -1141,8 +1143,8 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// find its parent in the clause. For an evaluatable term, we find
 	// the parent evaluatable in the clause, which may be many steps
 	// higher.
-	dbgprt("Term UUID = %lu of clause UUID = %lu has ground, move upwards.\n",
-	       hp.value(), clause_root.value());
+	dbgprt("Term = %s of clause UUID = %lu has ground, move upwards.\n",
+	       ptm->toString().c_str(), clause_root.value());
 
 	if (0 < _pat->in_evaluatable.count(hp))
 	{
