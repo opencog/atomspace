@@ -113,7 +113,6 @@ private:
 
 	HandleSeq match_knowledge_base(const Handle& htarget,
 	                               Handle htarget_vardecl,
-	                               bool check_history,
 	                               std::vector<VarMap>& vmap);
 	HandleSeq ground_premises(const Handle& htarget, const VarMap& vmap,
 	                          std::vector<VarMap>& vmap_list);

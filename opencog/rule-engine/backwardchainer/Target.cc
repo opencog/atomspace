@@ -37,16 +37,18 @@ using namespace opencog;
  * @param as  the AtomSpace in which to store temporary information
  * @param h   the original external Handle of the Target
  */
-Target::Target(AtomSpace& as, const Handle& h) : _as(as)
+Target::Target(AtomSpace& as, const Handle& h, const Handle& hvardecl) : _as(as)
 {
 	_htarget_external = h;
 	_htarget_internal = _as.add_atom(h);
 	_selection_count = 0;
 
-	_vars = get_free_vars_in_tree(h);
+	_vardecl = hvardecl;
+
+	HandleSeq vars = VariableListCast(_vardecl)->get_variables().varseq;
 
 	// _varmap is a map that bases on the external space
-	for (auto& hv : _vars)
+	for (auto& hv : vars)
 		_varmap[hv] = UnorderedHandleSet();
 }
 
@@ -145,12 +147,12 @@ void TargetSet::clear()
  *
  * @param h  the atom to which the Target will be created
  */
-void TargetSet::emplace(Handle& h)
+void TargetSet::emplace(Handle h, Handle hvardecl)
 {
 	if (_targets_map.count(h) == 1)
 		return;
 
-	_targets_map.insert(std::pair<Handle, Target>(h, Target(_history_space, h)));
+	_targets_map.insert(std::pair<Handle, Target>(h, Target(_history_space, h, hvardecl)));
 }
 
 /**
@@ -176,7 +178,7 @@ unsigned int TargetSet::size()
 Target& TargetSet::select()
 {
 	HandleSeq handles;
-	std::vector<unsigned int> weights;
+	std::vector<double> weights;
 	for (auto& p : _targets_map)
 	{
 		handles.push_back(p.first);
@@ -185,11 +187,7 @@ Target& TargetSet::select()
 		weights.push_back(_total_selection - p.second.get_selection_count() + 1);
 	}
 
-	// XXX use cogutil MT19937RandGen's intenal randomGen member possible?
-	std::mt19937 generator(std::chrono::system_clock::now().time_since_epoch().count());
-	std::discrete_distribution<int> distribution(weights.begin(), weights.end());
-
-	Target& t = _targets_map.at(handles[distribution(generator)]);
+	Target& t = _targets_map.at(handles[randGen().randDiscrete(weights)]);
 	t.increment_selection_count();
 
 	_total_selection++;

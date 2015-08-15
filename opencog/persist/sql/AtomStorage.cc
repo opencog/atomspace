@@ -42,6 +42,7 @@
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/ProbabilisticTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/TruthValue.h>
@@ -854,6 +855,7 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 			break;
 		case SIMPLE_TRUTH_VALUE:
 		case COUNT_TRUTH_VALUE:
+		case PROBABILISTIC_TRUTH_VALUE:
 			STMTF("stv_mean", tv->getMean());
 			STMTF("stv_confidence", tv->getConfidence());
 			STMTF("stv_count", tv->getCount());
@@ -1381,6 +1383,12 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 		{
 			TruthValuePtr itv(IndefiniteTruthValue::createTV(rp.mean, rp.count, rp.confidence));
 			atom->setTruthValue(itv);
+			break;
+		}
+		case PROBABILISTIC_TRUTH_VALUE:
+		{
+			TruthValuePtr ptv(ProbabilisticTruthValue::createTV(rp.mean, rp.confidence, rp.count));
+			atom->setTruthValue(ptv);
 			break;
 		}
 		default:

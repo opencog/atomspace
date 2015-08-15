@@ -258,9 +258,10 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle h, std::map<Handle, 
 	if (dict.count(h) == 1)
 		return dict[h];
 
-	std::string new_name = NodeCast(h)->getName() + "-standardize_apart-" + to_string(boost::uuids::random_generator()());
+	std::stringstream ss;
+	ss << NodeCast(h)->getName() << "-rule_uuid_" << rule_handle_ << "-standardize_apart";
 
-	Handle hcpy = as->add_atom(createNode(h->getType(), new_name, h->getTruthValue()));
+	Handle hcpy = as->add_atom(createNode(h->getType(), ss.str(), h->getTruthValue()));
 	dict[h] = hcpy;
 
 	return hcpy;

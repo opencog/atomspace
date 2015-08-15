@@ -379,6 +379,24 @@ static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
           "AtomTable - failed factory call!");
 }
 
+static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
+{
+    Logger::Level save = logger().getBackTraceLevel();
+    logger().setBackTraceLevel(Logger::Level::NONE);
+    logger().error() << "AtomTable - Insert link with "
+               "invalid outgoing members";
+    logger().error() << "Failing index i=" << i
+                    << " and arity=" << arity;
+    logger().error() << "Failing outset is this:";
+    for (unsigned int fk=0; fk<arity; fk++)
+        logger().error() << "outset i=" << fk
+                        << " uuid=" << ogs[fk].value();
+
+    logger().error() << "link is " << atom->toString();
+    logger().flush();
+    logger().setBackTraceLevel(save);
+}
+
 Handle AtomTable::add(AtomPtr atom, bool async)
 {
     // Is the atom already in this table, or one of its environments?
@@ -467,6 +485,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             // Please explain ...
             if (NULL == h._ptr.get()) {
                 if (Handle::UNDEFINED == h) {
+                    prt_diag(atom, i, arity, ogs);
                     throw RuntimeException(TRACE_INFO,
                                "AtomTable - Attempting to insert link with "
                                "invalid outgoing members");
@@ -505,13 +524,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
                     // should search the environmnet first, before
                     // throwing... (we did not search environmnet,
                     // above ... this may need fixing...)
-                    logger().info() << "Failing index i=" << i
-                                    << " and arity=" << arity;
-                    logger().info() << "Failing outset is this:";
-                    for (unsigned int fk=0; fk<arity; fk++)
-                        logger().info() << "outset i=" << fk
-                                        << " uuid=" << ogs[fk].value();
-
+                    prt_diag(atom, i, arity, ogs);
                     throw RuntimeException(TRACE_INFO,
                         "AtomTable - Atom in outgoing set isn't known!");
                 }

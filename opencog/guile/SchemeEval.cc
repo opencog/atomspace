@@ -40,6 +40,9 @@ std::mutex init_mtx;
  */
 void SchemeEval::init(void)
 {
+	// Arghhh!  Avoid ongoing utf8 fruitcake nutiness in guile-2.0
+	scm_c_eval_string ("(setlocale LC_ALL "")\n");
+
 	SchemeSmob::init();
 	PrimitiveEnviron::init();
 
@@ -325,6 +328,9 @@ void SchemeEval::per_thread_init(void)
 #ifdef WORK_AROUND_GUILE_185_BUG
 	scm_set_current_module(guile_user_module);
 #endif /* WORK_AROUND_GUILE_185_BUG */
+
+	// Arghhh!  Avoid ongoing utf8 fruitcake nutiness in guile-2.0
+	scm_c_eval_string ("(setlocale LC_ALL "")\n");
 }
 
 SchemeEval::~SchemeEval()
