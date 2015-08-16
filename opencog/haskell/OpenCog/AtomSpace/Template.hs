@@ -68,9 +68,10 @@ declareAtomType atomMap = do
                                 []
 
       createClause3 (n,_,p) = map (\x -> TySynEqn [PromotedT n,PromotedT x]
-                                                  (PromotedT $ mkName "True")) p
+                                                  (PromotedT $ mkName "True"))
+                                                  (n:p)
 
-      createClause4 (n,_,p) = TySynEqn [PromotedT n] (genlist p)
+      createClause4 (n,_,p) = TySynEqn [PromotedT n] (genlist (n:p))
 
      in return [typeDef,funDef1,funDef2,typeFamDef1,typeFamDef2]
   where
@@ -102,7 +103,7 @@ declareAtomFilters atomMap = do
           [FunD classFnName
               [Clause [VarP a]
                       (NormalB (CaseE (AppE (VarE phantTypeFnName) (VarE a))
-                                 ((map createClause children)
+                                 ((map createClause (n:children))
                                   ++ [Match WildP (NormalB (ConE nothing)) []])
                                ))
                       []
