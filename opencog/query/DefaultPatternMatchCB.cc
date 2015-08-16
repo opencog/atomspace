@@ -149,18 +149,7 @@ bool DefaultPatternMatchCB::link_match(const LinkPtr& lpat,
 bool DefaultPatternMatchCB::post_link_match(const LinkPtr& lpat,
                                             const LinkPtr& lgnd)
 {
-	if (not _have_evaluatables) return true;
-	Handle hp(lpat);
-	if (_dynamic->find(hp) == _dynamic->end()) return true;
-
-	// We will find ourselves here whenever the link contain
-	// a GroundedPredicateNode. In this case, execute the
-	// node, and declare a match, or no match, depending
-	// one how the evaluation turned out.  Its "crisp logic"
-	// because we use a greater-than-half for the TV.
-	// This is the same behavior as used in evaluate_term().
-	TruthValuePtr tv(EvaluationLink::do_evaluate(_as, lgnd->getHandle()));
-	return tv->getMean() >= 0.5;
+	return true;
 }
 
 /**
@@ -179,7 +168,20 @@ bool DefaultPatternMatchCB::post_link_match(const LinkPtr& lpat,
 bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
                                          const Handle& grnd)
 {
-	if (ptrn == grnd) return false;
+	if (ptrn == grnd)
+	{
+		// If the whole clause is evaluatable and has no variable, then
+		// we can evaluate here and now before matching the remaining
+		// clauses, like a pre-condition.
+		if (_have_evaluatables && _dynamic->count(ptrn) != 0)
+		{
+			std::map<Handle, Handle> empty_map;
+			return eval_sentence(grnd, empty_map);
+		}
+
+		return false;
+	}
+
 	if (ptrn->getType() == VARIABLE_NODE and
 	    grnd->getType() == EVALUATION_LINK and
 	    0 < LinkCast(grnd)->getArity() and
@@ -323,7 +325,7 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 
 		return false;
 	}
-	else if (AND_LINK == term_type)
+	else if (AND_LINK == term_type || SEQUENTIAL_AND_LINK == term_type)
 	{
 		for (const Handle& h : oset)
 			if (not eval_sentence(h, gnds)) return false;

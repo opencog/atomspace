@@ -1,0 +1,108 @@
+/*
+ * tests/query/EvaluateExactUTest.cxxtest
+ *
+ * Copyright (C) 2015 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class EvaluateExactUTest: public CxxTest::TestSuite
+{
+private:
+        AtomSpace *as;
+        SchemeEval* eval;
+
+public:
+    EvaluateExactUTest(void)
+    {
+        logger().setLevel(Logger::DEBUG);
+        logger().setPrintToStdoutFlag(true);
+
+        as = new AtomSpace();
+        eval = new SchemeEval(as);
+    }
+
+    ~EvaluateExactUTest()
+    {
+        delete as;
+        // Erase the log file if no assertions failed.
+        if (!CxxTest::TestTracker::tracker().suiteFailed())
+                std::remove(logger().getFilename().c_str());
+    }
+
+    void setUp(void);
+    void tearDown(void);
+
+    void test_match(void);
+};
+
+void EvaluateExactUTest::tearDown(void)
+{
+}
+
+void EvaluateExactUTest::setUp(void)
+{
+    config().set("SCM_PRELOAD",
+        "opencog/atomspace/core_types.scm, "
+        "opencog/scm/utilities.scm,"
+        "opencog/scm/opencog/query.scm");
+
+    load_scm_files_from_config(*as);
+}
+
+
+void EvaluateExactUTest::test_match(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/evaluate-exact.scm");
+    load_scm_files_from_config(*as);
+
+    Handle answer1 = bindlink(as, eval->eval_h("MatchAll"));
+    Handle expected1 = eval->eval_h(
+                "(SetLink "
+                "   (ListLink "
+                "      (ConceptNode \"dog\")"
+                "      (ConceptNode \"dog\")"
+                "   )"
+                "   (ListLink "
+                "      (ConceptNode \"dog\")"
+                "      (ConceptNode \"cat\")"
+                "   ))");
+
+    TS_ASSERT_EQUALS(answer1, expected1);
+
+    Handle answer2 = bindlink(as, eval->eval_h("MatchOne"));
+    Handle expected2 = eval->eval_h(
+                "(SetLink "
+                "   (ListLink "
+                "      (ConceptNode \"dog\")"
+                "      (ConceptNode \"cat\")"
+                "   ))");
+
+    TS_ASSERT_EQUALS(answer2, expected2);
+}

@@ -45,13 +45,6 @@ void PatternLink::common_init(void)
 	                 _fixed, _virtual, _pat.black);
 	_num_virts = _virtual.size();
 
-	// unbundle_virtual does not handle connectives. Here, we assume that
-	// we are being run with the DefaultPatternMatchCB, and so we assume
-	// that the logical connectives are AndLink, OrLink and NotLink.
-	// Tweak the evaluatable_holders to reflect this.
-	std::set<Type> connectives({AND_LINK, OR_LINK, NOT_LINK});
-	trace_connectives(connectives, _pat.clauses);
-
 	// Split the non-virtual clauses into connected components
 	get_connected_components(_varlist.varset, _fixed,
 	                         _components, _component_vars);
@@ -154,7 +147,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
 	                 _fixed, _virtual, _pat.black);
 	_num_virts = _virtual.size();
-	OC_ASSERT (0 == _num_virts, "Must not have any virtuals!");
+	//OC_ASSERT (0 == _num_virts, "Must not have any virtuals!");
 
 	_components.push_back(compo);
 	_num_comps = 1;
@@ -482,8 +475,56 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 {
 	for (const Handle& clause: clauses)
 	{
-		bool is_virtual = false;
 		bool is_black = false;
+
+		// Check if all links from top to bottom are either VirtualLink,
+		// logical links, EvaluationLink with GroundedPredicateNode, or
+		// ExecuationOutputLink; cause otherwise none of the evaluatable
+		// can be evaluated and must be matched directly.
+		std::set<Type> connectives({AND_LINK, OR_LINK, NOT_LINK, SEQUENTIAL_AND_LINK});
+		std::function<bool (const Handle&)> is_virtualable = [&](const Handle& h)
+		{
+			Type t = h->getType();
+
+			LinkPtr l(LinkCast(h));
+			if (l)
+			{
+				if (connectives.count(t) != 0)
+				{
+					for (const Handle& oh : l->getOutgoingSet())
+						if (not is_virtualable(oh))
+							return false;
+
+					return true;
+				}
+
+				// An ExecutionOutputLink must have the correct structure
+				// upon creation, so just need to check the type here
+				if (classserver().isA(t, EXECUTION_OUTPUT_LINK) || classserver().isA(t, VIRTUAL_LINK))
+					return true;
+
+				// An EvluationLink must have the correct structure upon
+				// creation, so just need to check for GroundedPredicateNode
+				if (t == EVALUATION_LINK
+				    && l->getOutgoingSet()[0]->getType() == GROUNDED_PREDICATE_NODE)
+						return true;
+
+				return false;
+			}
+
+			// a single node that is a VariableNode can be grounded
+			// to evaluatable (if the type allow it)
+			if (t == VARIABLE_NODE)
+				return true;
+
+			return false;
+		};
+
+		if (not is_virtualable(clause))
+		{
+			fixed_clauses.push_back(clause);
+			continue;
+		}
 
 #ifdef BORKEN_DOESNT_WORK
 // The below should have worked to set things up, but it doesn't,
@@ -506,14 +547,8 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 		{
 			_pat.evaluatable_terms.insert(sh);
 			add_to_map(_pat.in_evaluatable, sh, sh);
-			// But they're virtual only if they have two or more
-			// unquoted, bound variables in them. Otherwise, they
-			// can be evaluated on the spot.
 			if (2 <= num_unquoted_in_tree(sh, vars))
-			{
-				is_virtual = true;
 				is_black = true;
-			}
 		}
 		for (const Handle& sh : fgpn.holders)
 			_pat.evaluatable_holders.insert(sh);
@@ -529,11 +564,6 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 			_pat.evaluatable_terms.insert(sh);
 			_pat.evaluatable_holders.insert(sh);
 			add_to_map(_pat.in_evaluatable, sh, sh);
-			// But they're virtual only if they have two or more
-			// unquoted, bound variables in them. Otherwise, they
-			// can be evaluated on the spot. Virtuals are not black.
-			if (2 <= num_unquoted_in_tree(sh, vars))
-				is_virtual = true;
 		}
 		for (const Handle& sh : fgtl.holders)
 			_pat.evaluatable_holders.insert(sh);
@@ -541,6 +571,8 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 		// Subclasses of ExecutionOutputLink, e.g. PlusLink,
 		// TimesLink are executable. They get treated by the
 		// same virtual-graph algo as the virtual links.
+		// XXX What? PlusLink et al. are not subclasses of
+		// ExecutionOutputLink!!
 		FindAtoms feol(EXECUTION_OUTPUT_LINK, true);
 		feol.search_set(clause);
 
@@ -549,50 +581,50 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 			_pat.executable_terms.insert(sh);
 			_pat.executable_holders.insert(sh);
 			add_to_map(_pat.in_executable, sh, sh);
-			// But they're virtual only if they have two or more
-			// unquoted, bound variables in them. Otherwise, they
-			// can be evaluated on the spot.
 			if (2 <= num_unquoted_in_tree(sh, vars))
-			{
-				is_virtual = true;
 				is_black = true;
-			}
 		}
 		for (const Handle& sh : feol.holders)
 			_pat.executable_holders.insert(sh);
 
-		if (is_virtual)
-			virtual_clauses.push_back(clause);
-		else
-			fixed_clauses.push_back(clause);
+		virtual_clauses.push_back(clause);
+
+		// insert the clause itself as holder, as it could be a VariableNode
+		// that can be matched to an evaluatable
+		_pat.evaluatable_terms.insert(clause);
+		_pat.evaluatable_holders.insert(clause);
+		add_to_map(_pat.in_evaluatable, clause, clause);
 
 		if (is_black)
 			black_clauses.insert(clause);
-	}
-}
 
-/* ================================================================= */
+		// Check if there're any variables that are unique to the virtual
+		// clause, and if so, add the variables as new fixed clauses.
+		FindAtoms fv(vars);
+		fv.search_set(clause);
 
-/// Starting from the top of a clause, trace down through the tree
-/// of connectives.  If a term appears under a connective, and there
-/// is a path of connectives all the way to the top, then we have to
-/// assume the term is evaluatable, as the whole point of connectives
-/// to to connect evaluatable terms.  Thus, for example, for a clause
-/// having the form (AndLink stuff (OrLink more-stuff (NotLink not-stuff)))
-/// we have to assume that stuff, more-stuff and not-stuff are all
-/// evaluatable.
-void PatternLink::trace_connectives(const std::set<Type>& connectives,
-                                    const HandleSeq& oset)
-{
-	for (const Handle& term: oset)
-	{
-		Type t = term->getType();
-		if (connectives.find(t) == connectives.end()) continue;
-		_pat.evaluatable_holders.insert(term);
-		add_to_map(_pat.in_evaluatable, term, term);
-		LinkPtr lp(LinkCast(term));
-		if (lp)
-			trace_connectives(connectives, lp->getOutgoingSet());
+		for (const Handle& v : fv.varset)
+		{
+			bool lone_var = true;
+
+			for (const Handle& other_clause : clauses)
+			{
+				if (other_clause == clause)
+					continue;
+
+				FindAtoms fo(v);
+				fo.search_set(other_clause);
+
+				if (fo.varset.size() != 0)
+				{
+					lone_var = false;
+					break;
+				}
+			}
+
+			if (lone_var)
+				fixed_clauses.push_back(v);
+		}
 	}
 }
 
