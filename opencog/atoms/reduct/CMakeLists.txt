@@ -32,5 +32,5 @@ INSTALL (FILES
 	FunctionLink.h
 	PlusLink.h
 	TimesLink.h
-	DESTINATION "include/${PROJECT_NAME}/atoms/reduct"
+	DESTINATION "include/opencog/atoms/reduct"
 )

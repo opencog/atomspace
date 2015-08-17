@@ -38,5 +38,5 @@ INSTALL (FILES
 	PatternLink.h
 	PatternUtils.h
 	VariableList.h
-	DESTINATION "include/${PROJECT_NAME}/atoms/bind"
+	DESTINATION "include/opencog/atoms/bind"
 )

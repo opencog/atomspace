@@ -14,5 +14,5 @@ INSTALL (TARGETS persist
 
 INSTALL (FILES
 	PersistSCM.h
-	DESTINATION "include/${PROJECT_NAME}/persist/guile"
+	DESTINATION "include/opencog/persist/guile"
 )

@@ -44,5 +44,5 @@ INSTALL (FILES
 	AtomStorage.h
 	odbcxx.h
 	SQLPersistSCM.h
-	DESTINATION "include/${PROJECT_NAME}/persist/sql"
+	DESTINATION "include/opencog/persist/sql"
 )

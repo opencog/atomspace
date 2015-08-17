@@ -21,5 +21,5 @@ INSTALL (TARGETS atomcore
 INSTALL (FILES
 	FreeLink.h
 	PutLink.h
-	DESTINATION "include/${PROJECT_NAME}/atoms/core"
+	DESTINATION "include/opencog/atoms/core"
 )
