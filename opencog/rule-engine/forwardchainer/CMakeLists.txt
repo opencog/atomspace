@@ -4,5 +4,5 @@ INSTALL (FILES
 	ForwardChainer.h
 	ForwardChainerCallBack.h
 	ForwardChainerPMCB.h
-	DESTINATION "include/${PROJECT_NAME}/rule-engine/forwardchainer"
+	DESTINATION "include/opencog/rule-engine/forwardchainer"
 )

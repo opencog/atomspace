@@ -34,5 +34,5 @@ INSTALL (FILES
 	EvaluationLink.h
 	ExecutionOutputLink.h
 	Instantiator.h
-	DESTINATION "include/${PROJECT_NAME}/atoms/execution"
+	DESTINATION "include/opencog/atoms/execution"
 )

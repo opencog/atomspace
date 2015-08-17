@@ -44,7 +44,7 @@ INSTALL (TARGETS PythonEval DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 INSTALL (FILES
 	PythonEval.h
 	PyIncludeWrapper.h
-	DESTINATION "include/${PROJECT_NAME}/cython"
+	DESTINATION "include/opencog/cython"
 )
 
 INSTALL (FILES 

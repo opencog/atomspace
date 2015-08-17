@@ -91,7 +91,7 @@ INSTALL (FILES
 	TypeIndex.h
 	types.h
 	version.h
-	DESTINATION "include/${PROJECT_NAME}/atomspace"
+	DESTINATION "include/opencog/atomspace"
 )
 
 # Install the auto-genned atom types as well

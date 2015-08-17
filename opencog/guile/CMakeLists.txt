@@ -31,5 +31,5 @@ INSTALL (FILES
 	SchemePrimitive.h
 	SchemeSmob.h
 	load-file.h
-	DESTINATION "include/${PROJECT_NAME}/guile"
+	DESTINATION "include/opencog/guile"
 )
