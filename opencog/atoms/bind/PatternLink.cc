@@ -297,11 +297,11 @@ void PatternLink::init_scoped_variables(const Handle& hvar)
 /// The predicate is either an AndLink of clauses to be satisfied, or a
 /// single clause. Other link types, such as OrLink and SequentialAnd,
 /// are treated here as single clauses; unpacking them here would lead
-/// to confusion in the pattern matcher. This is patly because, after
+/// to confusion in the pattern matcher. This is partly because, after
 /// unpacking, clauses can be grounded in  an arbitrary order; thus,
-/// SequentialAnd's must not be unpacked. In the case of OrLinks, there
-/// is no flag to say that "these are disjoined", so again, that has to
-/// happen later.
+/// SequentialAnd's must be griounded and evaluated sequentially, and
+/// thus, not unpacked. In the case of OrLinks, there is no flag to say
+/// that "these are disjoined", so again, that has to happen later.
 void PatternLink::unbundle_clauses(const Handle& hbody)
 {
 	Type t = hbody->getType();
