@@ -22,6 +22,8 @@ foreign import ccall "PatternMatcher_BindLink"
                       -> Handle
                       -> IO Handle
 
+-- | 'cogBind' calls the pattern matcher with the given bindLink.
+-- (you should insert the bindlink to the atomspace before using this function).
 cogBind :: Atom BindT -> AtomSpace (Maybe AtomGen)
 cogBind at = do
     m <- getWithHandle $ toRaw at

@@ -22,6 +22,8 @@ import OpenCog.AtomSpace.Inheritance    (type (<~))
 import OpenCog.AtomSpace.Types          (TruthVal(..),Gen(..),Atom(..))
 import Data.Typeable                    (Typeable)
 
+
+-- | TruthVal syntactic sugar.
 noTv :: Maybe TruthVal
 noTv = Nothing
 
@@ -40,6 +42,13 @@ ftv a b = Just $ FuzzyTV a b
 ptv :: Double -> Double -> Double -> Maybe TruthVal
 ptv a b c = Just $ ProbTV a b c
 
+-- | 'atomList' is simple sugar notation for listing atoms, using operators '|>'
+-- and '\>'. For example, if you want to define a list of atoms:
+-- l :: [AtomGen]
+-- l = atomList
+--       |> ConceptNode "concept1" noTv
+--       |> PredicateNode "predicate2" noTv
+--       \> ConceptNode "lastconcept" noTv
 atomList :: (Typeable c) => ([Gen c] -> [Gen c])
 atomList = id
 

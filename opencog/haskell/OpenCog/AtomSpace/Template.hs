@@ -148,7 +148,7 @@ onAtomMap :: (AtomMap -> AtomMap) -> PState ()
 onAtomMap f = modify (\(s1,s2) -> (s1,f s2))
 
 -- | 'parser' reads the text of the atom_types.script file and generate a list
--- of tuples (Atom, Parent of that Atom).
+-- of tuples (Atom, Parents of that Atom).
 parser :: String -> [(AT,[AT])]
 parser s = ( toList
            . modifyVarNode
@@ -174,10 +174,10 @@ parser s = ( toList
     format dict s = if member s dict
                       then dict!s
                       else toCamelCase s
-    --This util functions are used to modify the parents of VariableNode.
-    --We will set VariableNode's parent to all leaf nodes.
-    --So, VariableNode will inherit from every atom type, and we can place it
-    --everywhere without type constraints.
+    -- This util function is used to modify the parents of VariableNode.
+    -- We will set VariableNode's parent to all leaf nodes.
+    -- So, VariableNode will inherit from every atom type, and we can place it
+    -- everywhere without type constraints.
     varNode = NOD "VariableNode"
     modifyVarNode :: Map AT [AT] -> Map AT [AT]
     modifyVarNode m = let parents = filter ((/=)varNode) $ getNodesLeaf $ toList m
@@ -224,6 +224,7 @@ toAT "Link"   = LNK "Link"
 toAT xs | isSuffixOf "Node" xs = NOD xs
         | otherwise = LNK xs
 
+-- | 'toTypeName' given an atomtype generates a phantom type notation for it.
 toTypeName :: AT -> String
 toTypeName (NOD "Node") = "NodeT"
 toTypeName (NOD s) = if isSuffixOf "Node" s
@@ -234,6 +235,7 @@ toTypeName (LNK s) = if isSuffixOf "Link" s
                         then take (length s - 4) s ++ "T"
                         else s ++ "T"
 
+-- | 'toRawName' simply gets the atomtype.
 toRawName :: AT -> String
 toRawName (NOD n) = n
 toRawName (LNK l) = l

@@ -11,7 +11,7 @@ import OpenCog.AtomSpace.Internal   (fromTVRaw,toRaw,AtomRaw(..))
 import Data.Functor                 ((<$>))
 import Data.Typeable                (Typeable)
 
--- Function to show a truth value in opencog notation.
+-- | 'showTV' shows a truth value in opencog notation.
 showTV :: TruthVal -> String
 showTV (SimpleTV a b     ) = "(stv "++show a++" "++show b++")"
 showTV (CountTV a b c    ) = "(ctv "++show a++" "++show b++" "++show c++")"
