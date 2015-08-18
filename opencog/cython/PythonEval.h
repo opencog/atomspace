@@ -97,12 +97,12 @@ class PythonEval : public GenericEval
         void build_python_error_message(const char* function_name,
                                         std::string& errorMessage);
         void add_to_sys_path(std::string path);
-        PyObject * atomspace_py_object(AtomSpace * atomspace = NULL);
-        void print_dictionary(PyObject* obj);
+        PyObject * atomspace_py_object(AtomSpace *);
+        void print_dictionary(PyObject*);
         void execute_string(const char* command);
         int argument_count(PyObject* pyFunction);
-        PyObject* module_for_function(  const std::string& moduleFunction,
-                                        std::string& functionName);
+        PyObject* module_for_function(const std::string& moduleFunction,
+                                      std::string& functionName);
 
         static PythonEval* singletonInstance;
 
@@ -120,13 +120,13 @@ class PythonEval : public GenericEval
         int _paren_count;
 
     public:
-        PythonEval(AtomSpace* atomspace);
+        PythonEval(AtomSpace*);
         ~PythonEval();
 
         /**
          * Create the singleton instance with the supplied atomspace.
          */
-        static void create_singleton_instance(AtomSpace * atomspace);
+        static void create_singleton_instance(AtomSpace *);
 
         /**
          * Delete the singleton instance.

@@ -453,7 +453,7 @@ void PythonEval::initialize_python_objects_and_imports(void)
 
     // Add ATOMSPACE to __main__ module.
     PyObject* pyRootDictionary = PyModule_GetDict(_pyRootModule);
-    PyObject* pyAtomSpaceObject = this->atomspace_py_object();
+    PyObject* pyAtomSpaceObject = this->atomspace_py_object(_atomspace);
     PyDict_SetItemString(pyRootDictionary, "ATOMSPACE", pyAtomSpaceObject);
     Py_DECREF(pyAtomSpaceObject);
 
@@ -484,11 +484,16 @@ PyObject* PythonEval::atomspace_py_object(AtomSpace* atomspace)
         return NULL;
     }
 
-    PyObject * pyAtomSpace;
-    if (atomspace)
-        pyAtomSpace = py_atomspace(atomspace);
-    else
-        pyAtomSpace = py_atomspace(this->_atomspace);
+/***********
+    Weird ... I guess NULL atomspaces are OK!?
+    if (NULL == atomspace) {
+        logger().error("PythonEval::%s No atomspace specified!",
+                        __FUNCTION__);
+        return NULL;
+    }
+************/
+
+    PyObject * pyAtomSpace = py_atomspace(atomspace);
 
     if (!pyAtomSpace) {
         if (PyErr_Occurred())
@@ -727,7 +732,7 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
     // Create the Python tuple for the function call with python
     // atoms for each of the atoms in the link arguments.
     PyObject* pyArguments = PyTuple_New(actualArgumentCount);
-    PyObject* pyAtomSpace = this->atomspace_py_object();
+    PyObject* pyAtomSpace = this->atomspace_py_object(_atomspace);
     const HandleSeq& argumentHandles = linkArguments->getOutgoingSet();
     int tupleItem = 0;
     for (HandleSeq::const_iterator it = argumentHandles.begin();
@@ -991,7 +996,7 @@ void PythonEval::import_module( const boost::filesystem::path &file,
         PyObject* pyModuleDictionary = PyModule_GetDict(pyModule);
 
         // Add the ATOMSPACE object to this module
-        PyObject* pyAtomSpaceObject = this->atomspace_py_object();
+        PyObject* pyAtomSpaceObject = this->atomspace_py_object(_atomspace);
         PyDict_SetItemString(pyModuleDictionary,"ATOMSPACE",
                 pyAtomSpaceObject);
 
