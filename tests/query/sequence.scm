@@ -66,3 +66,18 @@
 		)
 	)
 )
+
+;; Two green lights, and that is all.
+(define (all-green)
+	(SequentialAndLink
+		(EvaluationLink
+			(GroundedPredicateNode "scm: stop-go")
+			(ListLink green-light)
+		)
+
+		(EvaluationLink
+			(GroundedPredicateNode "scm: stop-go")
+			(ListLink green-light)
+		)
+	)
+)

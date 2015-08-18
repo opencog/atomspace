@@ -101,6 +101,7 @@ void SequenceUTest::test_sequence(void)
 
     // This should not throw any exceptions.
     TruthValuePtr tv = eval->eval_tv("(cog-satisfy (traffic-lights))");
+    TS_ASSERT_LESS_THAN_EQUALS(tv->getMean(), 0.5);
 
     // Check the number of green lights and red lights that were
     // evaluated. The pattern has two green lights and one red
@@ -113,5 +114,17 @@ void SequenceUTest::test_sequence(void)
     TS_ASSERT_EQUALS(2, ngreen);
     TS_ASSERT_EQUALS(1, nred);
 
-    TS_ASSERT_LESS_THAN_EQUALS(tv->getMean(), 0.5);
+    // ----------------------------------------------------------
+    // There are two green lights here; the TV should be "true".
+    tv = eval->eval_tv("(cog-satisfy (all-green))");
+    TS_ASSERT_LESS_THAN(0.5, tv->getMean());
+
+    // Should have seen two more green lights, and no reds.
+    sngreen = eval->eval("num-green");
+    snred = eval->eval("num-red");
+    ngreen = atoi(sngreen.c_str());
+    nred = atoi(snred.c_str());
+    TS_ASSERT_EQUALS(4, ngreen);
+    TS_ASSERT_EQUALS(1, nred);
+
 }
