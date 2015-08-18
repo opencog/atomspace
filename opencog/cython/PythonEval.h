@@ -108,7 +108,9 @@ class PythonEval : public GenericEval
         static PythonEval* singletonInstance;
 
         AtomSpace* _atomspace;
-        // Resource Acquisition is Allocatino, for the current AtomSpace.
+        // Resource Acquisition is Allocation, for the current AtomSpace.
+        // If anything throws an exception, then dtor runs and restores
+        // the old atomspace.
         struct RAII {
             RAII(PythonEval* pev, AtomSpace* as) : _pev(pev)
                { _save_as = pev->_atomspace; pev->_atomspace = as; }
