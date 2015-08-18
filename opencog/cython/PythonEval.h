@@ -126,7 +126,7 @@ class PythonEval : public GenericEval
         /**
          * Create the singleton instance with the supplied atomspace.
          */
-        static void create_singleton_instance(AtomSpace *);
+        static void create_singleton_instance(AtomSpace*);
 
         /**
          * Delete the singleton instance.
@@ -136,7 +136,8 @@ class PythonEval : public GenericEval
         /**
          * Get a reference to the singleton instance.
          */
-        static PythonEval & instance(AtomSpace * atomspace = NULL);
+        static PythonEval & instance(AtomSpace* atomspace = NULL);
+        AtomSpace* get_current_atomspace(void) { return _atomspace; }
 
         // The async-output interface.
         virtual void begin_eval() {}
