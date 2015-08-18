@@ -1,5 +1,7 @@
+-- GSoC 2015 - Haskell bindings for OpenCog.
 {-# LANGUAGE GADTs #-}
 
+-- | Simple example on inserting and removing many atoms in a new AtomSpace.
 import OpenCog.AtomSpace        (AtomSpace,insert,get,remove,
                                  debug,runOnNewAtomSpace,printAtom,
                                  Atom(..),TruthVal(..),Gen(..),noTv,stv)

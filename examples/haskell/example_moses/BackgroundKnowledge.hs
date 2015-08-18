@@ -1,3 +1,4 @@
+-- GSoC 2015 - Haskell bindings for OpenCog.
 
 module BackgroundKnowledge (bkn) where
 

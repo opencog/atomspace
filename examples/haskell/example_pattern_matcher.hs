@@ -1,6 +1,8 @@
+-- GSoC 2015 - Haskell bindings for OpenCog.
 {-# LANGUAGE GADTs     #-}
 {-# LANGUAGE DataKinds #-}
 
+-- | Simple example on using the Pattern Matcher.
 import OpenCog.AtomSpace        (AtomSpace,insert,get,remove,cogBind,
                                  debug,runOnNewAtomSpace,printAtom,
                                  Atom(..),AtomType(BindT),TruthVal(..),

@@ -1,4 +1,7 @@
+-- GSoC 2015 - Haskell bindings for OpenCog.
 
+-- | Simple example on using Haskell bindings and the Pattern Matcher.
+-- (Following this example: https://github.com/ngeiswei/moses-pln-example)
 import OpenCog.AtomSpace            (Atom(..),AtomGen(..),AtomSpace,appGen,cogBind,
                                      runOnNewAtomSpace,get,insert,remove,debug,
                                      printAtom,AtomType(..),noTv,stv,(|>),(\>))

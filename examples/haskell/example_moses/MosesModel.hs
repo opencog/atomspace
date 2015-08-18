@@ -1,4 +1,6 @@
+-- GSoC 2015 - Haskell bindings for OpenCog.
 {-# LANGUAGE DataKinds #-}
+
 module MosesModel (mosesModel) where
 
 import OpenCog.AtomSpace   (Atom(..),AtomType(ImplicationT),stv,noTv)
