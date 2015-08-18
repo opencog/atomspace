@@ -421,6 +421,7 @@ PythonEval& PythonEval::instance(AtomSpace* atomspace)
     // Make sure the atom space is the same as the one in the singleton.
     if (atomspace and singletonInstance->_atomspace != atomspace) {
 
+#ifdef CHECK_SINGLETON
         // Someone is trying to initialize the Python interpreter on a
         // different AtomSpace.  Because of the singleton design of the
         // the CosgServer+AtomSpace, there is no easy way to support this...
@@ -428,6 +429,19 @@ PythonEval& PythonEval::instance(AtomSpace* atomspace)
             "Trying to re-initialize python interpreter with different\n"
             "AtomSpace ptr! Current ptr=%p New ptr=%p\n",
             singletonInstance->_atomspace, atomspace);
+#else
+        // We need to be able to call the python interpreter with
+        // different atomspaces; for example, we need to use temporary
+        // atomspaces when evaluating virtual links.  So, just set it
+        // here.  Hopefully the user will set it back, after using the
+        // temp atomspace.   Cleary, this is not thread-safe, and will
+        // bust with multiple threads. But the whole singleton-instance
+        // design is fundamentally flawed, so there is not much we can
+        // do about it until someone takes the time to fix this class
+        // to allow multiple instances.
+        //
+        singletonInstance->_atomspace = atomspace;
+#endif
     }
     return *singletonInstance;
 }
