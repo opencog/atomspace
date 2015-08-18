@@ -46,8 +46,8 @@ toRaw at = let atype = getType at
     SchemaNode n             -> Node atype n Nothing
     GroundedSchemaNode n     -> Node atype n Nothing
     VariableNode n           -> Node atype n Nothing
-    AndLink tv a1 a2         -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
-    OrLink tv a1 a2          -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    AndLink tv list          -> Link atype (map (appGen toRaw) list) $ toTVRaw <$> tv
+    OrLink tv list           -> Link atype (map (appGen toRaw) list) $ toTVRaw <$> tv
     ImplicationLink tv a1 a2 -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
     EquivalenceLink tv a1 a2 -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
     EvaluationLink tv a1 a2  -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
@@ -92,16 +92,12 @@ fromRawGen (Node araw n tvraw) = let tv = fromTVRaw <$> tvraw in do
 fromRawGen (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
     atype <- fromAtomTypeRaw araw
     case (atype,out) of
-      (AndT ,[ar,br]) -> do
-        a <- filt ar :: Maybe (Gen AtomT)
-        b <- filt br :: Maybe (Gen AtomT)
-        case (a,b) of
-          (Gen a1,Gen b1) -> Just $ Gen $ AndLink tv a1 b1
-      (OrT ,[ar,br]) -> do
-        a <- filt ar :: Maybe (Gen AtomT)
-        b <- filt br :: Maybe (Gen AtomT)
-        case (a,b) of
-          (Gen a1,Gen b1) -> Just $ Gen $ OrLink tv a1 b1
+      (AndT, _     ) -> do
+        lnew <- mapM fromRawGen out
+        Just $ Gen $ AndLink tv lnew
+      (OrT, _     ) -> do
+        lnew <- mapM fromRawGen out
+        Just $ Gen $ OrLink tv lnew
       (ImplicationT ,[ar,br]) -> do
         a <- fromRawGen ar
         b <- fromRawGen br
