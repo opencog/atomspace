@@ -11,16 +11,19 @@ module OpenCog.AtomSpace.Api (
     , remove
     , get
     , debug
+    , getByHandle
+    , getWithHandle
     ) where
 
 import Foreign                       (Ptr)
 import Foreign.C.Types               (CULong(..),CInt(..),CDouble(..))
-import Foreign.C.String              (CString,withCString)
+import Foreign.C.String              (CString,withCString,peekCString)
 import Foreign.Marshal.Array         (withArray,allocaArray,peekArray)
 import Foreign.Marshal.Utils         (toBool)
-import Foreign.Marshal.Alloc         (alloca)
+import Foreign.Marshal.Alloc         (alloca,free)
 import Foreign.Storable              (peek)
 import Data.Functor                  ((<$>))
+import Data.Typeable                 (Typeable)
 import Control.Monad.IO.Class        (liftIO)
 import OpenCog.AtomSpace.Env         (AtomSpaceRef(..),AtomSpace,getAtomSpace)
 import OpenCog.AtomSpace.Internal    (Handle,AtomTypeRaw,AtomRaw(..),TVRaw(..),
@@ -87,7 +90,7 @@ insertAndGetHandle i = case i of
         return h
 
 -- | 'insert' creates a new atom on the atomspace or updates the existing one.
-insert :: Atom a -> AtomSpace ()
+insert :: Typeable a => Atom a -> AtomSpace ()
 insert i = insertAndGetHandle (toRaw i) >> return ()
 
 --------------------------------------------------------------------------------
@@ -99,7 +102,7 @@ foreign import ccall "AtomSpace_removeAtom"
 
 -- | 'remove' deletes an atom from the atomspace.
 -- Returns True in success or False if it couldn't locate the specified atom.
-remove :: Atom a -> AtomSpace Bool
+remove :: Typeable a => Atom a -> AtomSpace Bool
 remove i = do
     asRef <- getAtomSpace
     m <- getWithHandle $ toRaw i
@@ -206,6 +209,48 @@ get i = do
     return $ case m of
       Just (araw,_) -> fromRaw araw i
       _             -> Nothing
+
+--------------------------------------------------------------------------------
+
+foreign import ccall "AtomSpace_getAtomByHandle"
+  c_atomspace_getAtomByHandle :: AtomSpaceRef
+                              -> Handle
+                              -> Ptr CString
+                              -> Ptr CString
+                              -> Ptr (Ptr Handle)
+                              -> Ptr CInt
+                              -> IO CInt
+
+getByHandle :: Handle -> AtomSpace AtomRaw
+getByHandle h = do
+    asRef <- getAtomSpace
+    tv <- getTruthValue h
+    res <- liftIO $ alloca $
+      \tptr -> alloca $
+      \nptr -> alloca $
+      \hptr -> alloca $
+      \iptr -> do
+          isNode <- toBool <$> c_atomspace_getAtomByHandle asRef h tptr nptr hptr iptr
+          ctptr <- peek tptr
+          atype <- peekCString ctptr
+          free ctptr
+          if isNode
+            then do
+                cnptr <- peek nptr
+                aname <- peekCString cnptr
+                free cnptr
+                return $ Right (atype,aname)
+            else do
+                outLen <- fromIntegral <$> peek iptr
+                chptr <- peek hptr
+                outList <- peekArray outLen chptr
+                free chptr
+                return $ Left (atype,outList)
+    case res of
+        Right (atype,aname)  -> return $ Node atype aname $ Just tv
+        Left (atype,outList) -> do
+            out <- mapM getByHandle outList
+            return $ Link atype out $ Just tv
 
 --------------------------------------------------------------------------------
 

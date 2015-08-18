@@ -83,6 +83,47 @@ int AtomSpace_removeAtom( AtomSpace* this_ptr
     return this_ptr->remove_atom(Handle(handle));
 }
 
+int AtomSpace_getAtomByHandle( AtomSpace* this_ptr
+                             , UUID handle
+                             , char** type
+                             , char** name
+                             , UUID** out
+                             , int* out_len)
+{
+    Handle h(handle);
+    if(!h)
+        throw InvalidParamException(TRACE_INFO,
+            "Invalid Handler parameter.");
+
+    const std::string &str = classserver().getTypeName(h->getType());
+    (*type) = (char*) malloc(sizeof(char) * (str.length()+1));
+    if(!(*type))
+        throw RuntimeException(TRACE_INFO,"Failed malloc.");
+    std::strcpy(*type, str.c_str());
+
+    NodePtr ptr = NodeCast(h);
+    if(ptr){//It is a node.
+        const std::string &str = ptr->getName();
+        (*name) = (char*) malloc(sizeof(char) * (str.length()+1));
+        if(!(*name))
+            throw RuntimeException(TRACE_INFO,"Failed malloc.");
+        std::strcpy(*name, str.c_str());
+        return 1;
+    }else{//It is a link.
+        LinkPtr lnk = LinkCast(h);
+        if(!lnk)
+            throw RuntimeException(TRACE_INFO,"Error in cast Link.");
+        *out_len=lnk->getArity();
+        (*out) = (UUID*) malloc(sizeof(UUID) * (*out_len));
+        if(!(*out))
+            throw RuntimeException(TRACE_INFO,"Failed malloc.");
+        int i;
+        for(i=0;i<(*out_len);i++)
+            (*out)[i]=lnk->getOutgoingAtom(i).value();
+        return 0;
+    }
+}
+
 void AtomSpace_debug( AtomSpace* this_ptr )
 {
     std::cerr<<(*this_ptr);

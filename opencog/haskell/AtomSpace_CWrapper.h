@@ -101,6 +101,31 @@ extern "C"
                             , UUID handle );
 
     /**
+     * AtomSpace_getAtomByHandle Gets an atom back from the atomspace.
+     *
+     * @param      this_ptr  Pointer to AtomSpace instance.
+     * @param      handle    UUID of the atom.
+     * @param[out] type      String representation of atom type.
+     * @param[out] name      String representation of atom name (if node).
+     * @param[out] out       List of UUID of the outgoing set (if link).
+     * @param[out] out_len   Size of the outgoing list (if link).
+     *
+     * @return     flag      =1 if node, =0 if link.
+     *
+     * NOTE: Memory for output parameter is allocated with malloc. The caller
+     * should properly free memory in output parameters according to
+     * the return value:
+     *   If node -> free type and name fields.
+     *   If link -> free type and out field.
+     */
+    int AtomSpace_getAtomByHandle( AtomSpace* this_ptr
+                                 , UUID handle
+                                 , char** type
+                                 , char** name
+                                 , UUID** out
+                                 , int* out_len);
+
+    /**
      * AtomSpace_debug  Debug function to print the state
      *                  of the atomspace on stderr.
      *
