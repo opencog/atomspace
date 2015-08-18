@@ -59,6 +59,7 @@ const int MISSING_FUNC_CODE = -1;
 
 static bool already_initialized = false;
 static bool initialized_outside_opencog = false;
+std::recursive_mutex PythonEval::_mtx;
 
 /*
  * @todo When can we remove the singleton instance?
@@ -795,12 +796,13 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
 
 Handle PythonEval::apply(AtomSpace* as, const std::string& func, Handle varargs)
 {
-    PyObject *pyReturnAtom = NULL;
-    PyObject *pyError, *pyAtomUUID = NULL;
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    RAII raii(this, as);
+
     UUID uuid = 0;
 
     // Get the atom object returned by this user function.
-    pyReturnAtom = this->call_user_function(func, varargs);
+    PyObject* pyReturnAtom = this->call_user_function(func, varargs);
 
     // If we got a non-null atom were no errors.
     if (pyReturnAtom) {
@@ -810,11 +812,11 @@ Handle PythonEval::apply(AtomSpace* as, const std::string& func, Handle varargs)
         gstate = PyGILState_Ensure();
 
         // Get the handle UUID from the atom.
-        pyAtomUUID = PyObject_CallMethod(pyReturnAtom, (char*) "handle_uuid",
+        PyObject* pyAtomUUID = PyObject_CallMethod(pyReturnAtom, (char*) "handle_uuid",
                 NULL);
 
         // Make sure we got an atom UUID.
-        pyError = PyErr_Occurred();
+        PyObject* pyError = PyErr_Occurred();
         if (pyError || !pyAtomUUID) {
             PyGILState_Release(gstate);
             throw RuntimeException(TRACE_INFO,
@@ -846,6 +848,9 @@ Handle PythonEval::apply(AtomSpace* as, const std::string& func, Handle varargs)
  */
 TruthValuePtr PythonEval::apply_tv(AtomSpace *as, const std::string& func, Handle varargs)
 {
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    RAII raii(this, as);
+
     // Get the python truth value object returned by this user function.
     PyObject *pyTruthValue = call_user_function(func, varargs);
 

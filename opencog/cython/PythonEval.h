@@ -108,6 +108,14 @@ class PythonEval : public GenericEval
         static PythonEval* singletonInstance;
 
         AtomSpace* _atomspace;
+        // Resource Acquisition is Allocatino, for the current AtomSpace.
+        struct RAII {
+            RAII(PythonEval* pev, AtomSpace* as) : _pev(pev)
+               { _save_as = pev->_atomspace; pev->_atomspace = as; }
+            ~RAII() {_pev->_atomspace = _save_as; }
+            AtomSpace* _save_as;
+            PythonEval* _pev;
+        };
 
         // Single, global mutex for serializing access to the atomspace.
         // The singleton-instance design of this class forces us to
