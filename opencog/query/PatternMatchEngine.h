@@ -24,6 +24,7 @@
 #ifndef _OPENCOG_PATTERN_MATCH_ENGINE_H
 #define _OPENCOG_PATTERN_MATCH_ENGINE_H
 
+#include <map>
 #include <set>
 #include <stack>
 
@@ -67,6 +68,13 @@ class PatternMatchEngine
 		// Map of clauses to their current groundings
 		std::map<Handle, Handle> clause_grounding;
 
+		// TODO: write comment
+		std::stack<Handle> grounded_vars_stack;
+		std::stack<size_t> grounded_vars_markers_stack;
+		void ground_variable(const Handle&, const Handle&);
+		void push_groundings(void);
+		void pop_groundings(void);
+
 		// --------------------------------------------
 		// Methods and state that select the next clause to be grounded.
 
@@ -80,6 +88,7 @@ class PatternMatchEngine
 		// being attempted.
 		void push_next_clause(void);
 		void pop_clause(void);
+		void pop_optional_clauses(void);
 		typedef std::stack<Handle> IssuedStack;
 		typedef std::set<Handle> IssuedSet;
 		IssuedStack clauses_stack;
@@ -108,6 +117,10 @@ class PatternMatchEngine
 		                              const Handle&);
 		MatchStatus clause_match(const Handle&, const Handle&,
 		                         const Handle&);
+		MatchStatus optional_clause_match(const Handle&, const Handle&,
+		                                  const Handle&);
+		MatchStatus starter_term_match(const Handle&, const Handle&,
+		                               const Handle&);
 
 		bool clause_accept(const Handle&, const Handle&, const Handle&);
 

@@ -135,37 +135,6 @@ bool PatternMatchEngine::explore_redex(const Handle& starter_clause,
 
 	return found;
 }
-/*
-	PatternTermSeq starter_terms;
-	try {
-		starter_terms =
-			_pat->connected_terms_map.at({starter_atom, starter_clause});
-	} catch (...) {
-		dbgprt("Explore redex starter terms not found for atom=%s, "
-		       "clause=\n%s", starter_atom->toShortString().c_str(),
-		       starter_clause->toShortString().c_str());
-		return false;
-	};
-
-	bool found = false;
-	for (const PatternTermPtr& starter_term : starter_terms)
-	{
-		dbgprt("Explore redex for starter term=%s, clause=\n%s",
-		       starter_term->toString().c_str(),
-		       starter_clause->toShortString().c_str());		
-
-		MatchStatus match;
-		do {
-			match = all_clauses_match(starter_term, hgnd, starter_clause);
-			if (match != NOT_MATCHED)
-			{
-				found = true;
-			}
-		} while (match == MATCHED)
-	}
-	return found;
-}
-*/
 
 // TODO: write comment
 MatchStatus PatternMatchEngine::all_clauses_match(const Handle& starter_clause,
@@ -176,6 +145,8 @@ MatchStatus PatternMatchEngine::all_clauses_match(const Handle& starter_clause,
 	// otherwise we take up where we left off.
 	if (clauses_stack.empty())
 	{
+		OC_ASSERT(!is_optional(starter_clause),
+			"Error: starter_clause is optional!");
 		next_clause = starter_clause;
 		next_joint = starter_term;
 		push_next_clause();
@@ -183,27 +154,42 @@ MatchStatus PatternMatchEngine::all_clauses_match(const Handle& starter_clause,
 
 	while (!clauses_stack.empty())
 	{
+		// We continue our search at the atom that "joins" (is shared
+		// in common) between the previous (solved) clause, and the
+		// current clause from the top of the stack. If the "joint" is
+		// a variable, look up its grounding. Otherwise we must be
+		// at the starter clause, so check starter grounding (hgnd).
 		const Handle& current_clause = clauses_stack.top();
-		const Handle& current_term = joints_stack.top();
+		const Handle& current_joint = joints_stack.top();
 
-		MatchStatus match = clause_match(current_clause, current_term, hgnd);
+		Handle joint_hgnd = (current_joint == starter_term) ?
+		                    hgnd : var_grounding[current_joint];
 
-		// If current clause is matched then get next untried clause push it
-		// on stack and attempt to find a match for next clause.
-		// Otherwise pop current clause from the stack and continue to search
-		// the previous clause for another match. If there is no clause left
-		// on the stack then answer NOT_MATCHED because of exhaustion.
+		MatchStatus match =
+			clause_match(current_clause, current_joint, joint_hgnd);
+
+		// If current clause is not matched, pop it from the stack then
+		// continue to search the previous clause for another match.
+		// If current (not matched) clause is optional then pop all
+		// optional clauses until required clause is found on the top.
+		// If there is no clause left on the stack then answer NOT_MATCHED
+		// because of exhaustion.
 		if (match == NOT_MATCHED)
 		{
-			pop_clause();
-			if (!clauses_stack.empty())
-				_pmc.pop();
+			if (is_optional(current_clause))
+			{
+				pop_optional_clauses();
+			} else {
+				pop_clause();
+			}
 		}
 		else
 		{
-			_pmc.push();
+			// Else, start solving the next unsolved clause.
 			get_next_untried_clause();
 
+			// If there are no further clauses to solve,
+			// we are really done! Report the solution via callback.
 			if (Handle::UNDEFINED == next_clause)
 			{
 #ifdef DEBUG
@@ -227,6 +213,7 @@ MatchStatus PatternMatchEngine::all_clauses_match(const Handle& starter_clause,
 					"dynamically evaluatable" : "non-dynamic");
 				prtmsg("Joining variable  is", next_joint);
 				prtmsg("Joining grounding is", var_grounding[next_joint]);
+
 				push_next_clause();
 			}
 		}
@@ -235,23 +222,41 @@ MatchStatus PatternMatchEngine::all_clauses_match(const Handle& starter_clause,
 	return NOT_MATCHED;
 }
 
+// TODO: write comment
 MatchStatus PatternMatchEngine::clause_match(const Handle& clause_root,
                                              const Handle& starter_term,
                                              const Handle& hgnd)
 {
-	// TODO: optionals support, clause_accept support
+	if (is_optional(clause_root))
+	{
+		return optional_clause_match(clause_root, starter_term, hgnd);
+	}
 
-	// term_branch_match();
-	// bottom_up_branch_match();
+	MatchStatus match = starter_term_match(clause_root, starter_term, hgnd);
 
+	if (match == MATCHED && clause_accept(clause_root, starter_term, hgnd))
+	{
+		clause_grounding[clause_root] = hgnd;
+		return MATCHED;
+	}
+
+	clause_grounding.erase(clause_root);
 	return NOT_MATCHED;
+}
 
-/*
-	// TODO: change to stack..
-	clause_grounding[clause_root] = hg;
-	prtmsg("---------------------\nclause:\n", clause_root);
-	prtmsg("ground:", hg)
-*/
+// TODO: write comment
+MatchStatus
+PatternMatchEngine::optional_clause_match(const Handle& clause_root,
+                                          const Handle& starter_term,
+                                          const Handle& hgnd)
+{
+	MatchStatus match = starter_term_match(clause_root, starter_term, hgnd);
+
+	if (match == MATCHED && clause_accept(clause_root, starter_term, hgnd))
+	{
+		return NOT_MATCHED;
+	}
+	return MATCHED;
 }
 
 /*
@@ -280,6 +285,46 @@ bool PatternMatchEngine::clause_accept(const Handle& hp,
 	}
 	return match;
 }
+
+// TODO: write comment
+MatchStatus PatternMatchEngine::starter_term_match(const Handle& clause_root,
+                                                   const Handle& starter_term,
+                                                   const Handle& hgnd)
+{
+/*
+	PatternTermSeq starter_terms;
+	try {
+		starter_terms =
+			_pat->connected_terms_map.at({starter_atom, starter_clause});
+	} catch (...) {
+		dbgprt("Explore redex starter terms not found for atom=%s, "
+		       "clause=\n%s", starter_atom->toShortString().c_str(),
+		       starter_clause->toShortString().c_str());
+		return false;
+	};
+
+	bool found = false;
+	for (const PatternTermPtr& starter_term : starter_terms)
+	{
+		dbgprt("Explore redex for starter term=%s, clause=\n%s",
+		       starter_term->toString().c_str(),
+		       starter_clause->toShortString().c_str());
+
+		MatchStatus match;
+		do {
+			match = all_clauses_match(starter_term, hgnd, starter_clause);
+			if (match != NOT_MATCHED)
+			{
+				found = true;
+			}
+		} while (match == MATCHED)
+	}
+	return found;
+}
+*/
+	return NOT_MATCHED;
+}
+
 
 /* ======================================================== */
 
@@ -489,24 +534,60 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 	return false;
 }
 
+void PatternMatchEngine::ground_variable(const Handle& v, const Handle& hgnd)
+{
+}
+
+void PatternMatchEngine::push_groundings(void)
+{
+	grounded_vars_markers_stack.push(grounded_vars_stack.size());
+}
+
+void PatternMatchEngine::pop_groundings(void)
+{
+	size_t size = grounded_vars_markers_stack.top();
+	grounded_vars_markers_stack.pop();
+
+	while (grounded_vars_stack.size() > size)
+	{
+		const Handle& var = grounded_vars_stack.top();
+		grounded_vars_stack.pop();
+		var_grounding.erase(var);
+	}
+}
+
 void PatternMatchEngine::push_next_clause(void)
 {
+	// callback push if previous clause is not optional
+	if (!clauses_stack.empty() && !is_optional(clauses_stack.top()))
+		_pmc.push();
+
 	issued_clauses.insert(next_clause);
 	clauses_stack.push(next_clause);
 	joints_stack.push(next_joint);
 
-	// TODO: clause_grounding ...
-	// TODO: variable_grounding ...
+	push_groundings();
 }
 
 void PatternMatchEngine::pop_clause(void)
 {
-	// TODO: clause_grounding ...
-	// TODO: variable_grounding ...
+	pop_groundings();
 
 	issued_clauses.erase(clauses_stack.top());
 	clauses_stack.pop();
 	joints_stack.pop();
+
+	// callback pop if previous clause is not optional
+	if (!clauses_stack.empty() && !is_optional(clauses_stack.top()))
+		_pmc.pop();
+}
+
+void PatternMatchEngine::pop_optional_clauses(void)
+{
+	while (!clauses_stack.empty() && is_optional(clauses_stack.top()))
+	{
+		pop_clause();
+	}
 }
 
 /* ======================================================== */
