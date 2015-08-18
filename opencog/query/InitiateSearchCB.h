@@ -75,6 +75,7 @@ class InitiateSearchCB : public virtual PatternMatchCallback
 		virtual bool disjunct_search(PatternMatchEngine *);
 		virtual bool link_type_search(PatternMatchEngine *);
 		virtual bool variable_search(PatternMatchEngine *);
+		virtual bool no_search(PatternMatchEngine *);
 
 		AtomSpace *_as;
 };

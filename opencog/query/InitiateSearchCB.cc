@@ -483,6 +483,17 @@ bool InitiateSearchCB::disjunct_search(PatternMatchEngine *pme)
 	if (not _search_fail) return false;
 
 	// If we are here, then we could not find a clause at which to
+	// start, which can happen if the clauses hold no variables, and
+	// they are all evaluatable. This can happen for sequence links;
+	// we want to quickly rule out this case before moving to more
+	// complex searches, below.
+	dbgprt("Cannot use node-neighbor search, use no-var search\n");
+	_search_fail = false;
+	found = no_search(pme);
+	if (found) return true;
+	if (not _search_fail) return false;
+
+	// If we are here, then we could not find a clause at which to
 	// start, which can happen if the clauses consist entirely of
 	// variables! Which can happen (there is a unit test for this,
 	// the LoopUTest), and so instead, we search based on the link
@@ -609,7 +620,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
  * If the varset is empty, or if there are no variables, then the
  * entire atomspace will be searched.  Depending on the pattern,
  * many, many duplicates might be reported. If you are not using
- * variables, then you probably don't want to use this metod, either;
+ * variables, then you probably don't want to use this method, either;
  * you should create somethnig more clever.
  */
 bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
@@ -702,6 +713,43 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	}
 
 	return false;
+}
+
+/* ======================================================== */
+/**
+ * No search -- no variables, one evaluatable clause.
+ * The stop-go sequence demo falls in this category: no actual
+ * matching needs to be done; merely, the sequence needs to be
+ * evaluated.  Arguably, it is a user error to use the pattern
+ * matcher for this, as there is nothing that needs to be matched.
+ * But, for just right now, we gloss over this, and allow it, because
+ * it is "closely related" to sequences with variables. It is a
+ * bit inefficient to use the pattern matcher for this, so if you
+ * want it to run fast, re-work the below to not use the PME.
+ */
+bool InitiateSearchCB::no_search(PatternMatchEngine *pme)
+{
+	if (0 < _variables->varset.size() or
+	    1 != _pattern->mandatory.size())
+	{
+		_search_fail = true;
+		return false;
+	}
+
+	// The one-and-only clause must be evaluatable!
+	const HandleSeq& clauses = _pattern->mandatory;
+	const std::set<Handle>& evl = _pattern->evaluatable_holders;
+	if (0 == evl.count(clauses[0]))
+	{
+		_search_fail = true;
+		return false;
+	}
+
+	dbgprt("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww\n");
+	dbgprt("Non-search: no variables, no non-evaluatable clauses\n");
+	_root = _starter_term = clauses[0];
+	bool found = pme->explore_neighborhood(_root, _starter_term, _root);
+	return found;
 }
 
 /* ===================== END OF FILE ===================== */
