@@ -306,9 +306,10 @@ Handle DefaultForwardChainerCB::gen_sub_varlist(const Handle& parent,
 }
 
 /**
- * Derives a new rule by replacing the grounded vars of @param hrule
+ * Derives new rules from @param hrule by replacing variables
+ * with their groundings.
  *
- * @param as             The Atomspace where all the atoms are dwelling
+ * @param as             An atomspace where the handles dwell.
  * @param hrule          A handle to BindLink instance
  * @param vars           The grounded var list in @param hrule
  * @param var_groundings The set of groundings to each var in @param vars
@@ -323,10 +324,15 @@ HandleSeq DefaultForwardChainerCB::substitute_rule_part(
 
     //Filter out variables not listed in vars from var-groundings
     for (const auto& varg_map : var_groundings) {
-        for (const auto& iv : varg_map)
-            if (find(vars.begin(), vars.end(), iv.first) != vars.end())
-                filtered_vgmap_list.push_back(
-                        std::map<Handle, Handle> { { iv.first, iv.second } });
+        std::map<Handle, Handle> filtered;
+
+        for (const auto& iv : varg_map){
+            if (find(vars.begin(), vars.end(), iv.first) != vars.end()){
+                filtered[iv.first] = iv.second;
+            }
+        }
+
+        filtered_vgmap_list.push_back(filtered);
     }
 
     HandleSeq derived_rules;
@@ -335,17 +341,16 @@ HandleSeq DefaultForwardChainerCB::substitute_rule_part(
 
     for (auto& vgmap : filtered_vgmap_list) {
         Handle himplicand = st.substitute(blptr->get_implicand(), vgmap);
-
         //Create the BindLink/Rule by substituting vars with groundings
         if (contains_atomtype(himplicand, VARIABLE_NODE)) {
             Handle himplicant = st.substitute(blptr->get_body(), vgmap);
+
             //Assuming himplicant's set of variables are superset for himplicand's,
             //generate varlist from himplicant.
             Handle hvarlist = gen_sub_varlist(
                     himplicant, LinkCast(hrule)->getOutgoingSet()[0]);
             Handle hderived_rule = Handle(LinkCast(createBindLink(HandleSeq {
                     hvarlist, himplicant, himplicand })));
-
             derived_rules.push_back(hderived_rule);
         }
         else{
