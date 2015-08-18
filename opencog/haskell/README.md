@@ -21,7 +21,8 @@ To use the Haskell bindings, it is necessary to have installed:
 
 * [Stack](https://github.com/commercialhaskell/stack/wiki) (Haskell development tool)
 
-To install Stack, you should follow [Download instructions](https://github.com/commercialhaskell/stack/wiki/Downloads)
+To install Stack, you should follow
+[Download instructions](https://github.com/commercialhaskell/stack/wiki/Downloads)
 
 ### Installation
 
@@ -38,7 +39,9 @@ Then, go through the normal process of
 This will automatically build the haskell library.
 
 If you want to use this library in some project you should include it to the
-package list on the project [stack.yaml](https://github.com/commercialhaskell/stack/wiki/stack.yaml) config file. For example:
+package list on the project
+[stack.yaml](https://github.com/commercialhaskell/stack/wiki/stack.yaml)
+config file. For example:
 
 ```yaml
 ...
@@ -83,9 +86,11 @@ depends on the haskell-atomspace C wrapper library)
 ### Documentation
 To generate proper [Haddock](https://www.haskell.org/haddock/) documentation,
 you should go to the build directory and execute:
+
 ```
 make doxygen
 ```
+
 Then you can open the OpenCog documentation (build/doc/html/index.html),
 go to "OpenCog source code documentation - Libraries - Haskell bindings
 library" and click on the "opencog-atomspace" link.
@@ -93,6 +98,7 @@ library" and click on the "opencog-atomspace" link.
 ### Usage
 
 To use the opencog-atomspace haskell library, we just import the modules like:
+
 ```haskell
 import OpenCog.AtomSpace
 ...
@@ -174,4 +180,9 @@ Debug function to print the state of the atomspace on stderr.
 ```haskell
 debug :: AtomSpace ()
 ```
-
+####cogBind:
+Function to use the Pattern Matcher.
+(Note: Before using it, you should insert the bind link to the atomspace).
+```haskell
+cogBind :: Atom BindT -> AtomSpace (Maybe AtomGen)
+```
