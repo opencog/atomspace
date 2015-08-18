@@ -746,7 +746,7 @@ bool InitiateSearchCB::no_search(PatternMatchEngine *pme)
 	}
 
 	dbgprt("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww\n");
-	dbgprt("Non-search: no variables, no non-evaluatable calsues\n");
+	dbgprt("Non-search: no variables, no non-evaluatable clauses\n");
 	_root = _starter_term = clauses[0];
 	bool found = pme->explore_neighborhood(_root, _starter_term, _root);
 	return found;

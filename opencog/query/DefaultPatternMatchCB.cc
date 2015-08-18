@@ -179,7 +179,16 @@ bool DefaultPatternMatchCB::post_link_match(const LinkPtr& lpat,
 bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
                                          const Handle& grnd)
 {
-	if (ptrn == grnd) return false;
+	// Is the pattern same as the ground?
+	// if (ptrn == grnd) return false;
+	// Well, in a "normal" world, it intuitively makes sense to reject
+	// clauses that are grounded by themselves. In the real world, this
+	// runs afoul of several unusual situations. The one we care about
+	// is an evaluatable clause which contains no variables.  In this
+	// case, we need to accept the match in order for a SatisfactionLink
+	// to get valued correctly.
+	// if (ptrn == grnd) return false;
+
 	if (ptrn->getType() == VARIABLE_NODE and
 	    grnd->getType() == EVALUATION_LINK and
 	    0 < LinkCast(grnd)->getArity() and
