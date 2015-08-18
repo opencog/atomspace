@@ -55,7 +55,7 @@ public:
     virtual Handle choose_next_source(FCMemory& fcmem);
     virtual HandleSeq apply_rule(FCMemory& fcmem);
 
-    HandleSeq new_rules; // new_rules formed substituting source to matching implicant
+    std::map<Handle,std::vector<Handle> > rule_derivations; // new_rules formed substituting source to matching implicant
 };
 
 } // ~namespace opencog
