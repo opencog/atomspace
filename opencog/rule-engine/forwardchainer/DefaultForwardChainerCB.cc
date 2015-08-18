@@ -46,76 +46,140 @@ DefaultForwardChainerCB::DefaultForwardChainerCB(AtomSpace& as,
 }
 
 /**
- * Choose rules based on premises of rule matching the source.
- * Uses temporary atomspace to limit the search space. It adds
- * each members of the implicant(members being identified by
- * checking if they are wrapped in Logical links or not) and
- * the source to a temporary atomspace and creates a bindLink
- * for each implicants to match against the source;If they match,
- * the rule in which the implicant was a member is considered as
- *  a valid match and is  added to the return list.
+ * Choose rules based on implicant member of rule matching
+ * the source. Whenever a matching rule is found, it derives
+ * new rules by substituting bound variables of the rule with
+ * the source. All derived rules are then kept in the global
+ * variable @param rule_derivations.
  *
- * @param fcmem forward chainer's working memory
- * @return a vector of chosen rules
+ * @param fcmem Forward chainer's working memory
+ *
+ * @return      A vector of chosen rules
  */
 vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
 {
-    new_rules.clear(); //empty vector before starting matching
     Handle source = fcmem.get_cur_source();
     if (source == Handle::UNDEFINED)
         throw InvalidParamException(TRACE_INFO, "Needs a valid source atom");
 
+    rule_derivations.clear(); //clear previous mapping
+
     vector<Rule*> chosen_rules;
     auto rules = fcmem.get_rules();
     vector<Rule*> visited;
+
     for (Rule* rule : rules) {
-        HandleSeq impl_members = rule->get_implicant_seq();
-        bool match = false;
-        for (Handle h : impl_members) {
-            //exceptions
-            if (h->getType() == ABSENT_LINK)
-                continue;
+        HandleSeq derived_rules = { };
 
-            AtomSpace temp_pm_as;
-            Handle hcpy = temp_pm_as.add_atom(h);
-            Handle implicant_vardecl = temp_pm_as.add_atom(
-                    gen_sub_varlist(h, rule->get_vardecl()));
-            Handle sourcecpy = temp_pm_as.add_atom(source);
+        HandleSeq results = unify(source,rule);
+        derived_rules.insert(derived_rules.end(), results.begin(),
+                             results.end());
 
-            BindLinkPtr bl = createBindLink(HandleSeq { implicant_vardecl,
-                                                         hcpy,hcpy });
-            VarGroundingPMCB gcb(&temp_pm_as);
-            gcb.implicand = bl->get_implicand();
-            bl->imply(gcb);
-
-            FindAtoms fv(VARIABLE_NODE);
-            for (const auto& termg_map : gcb.term_groundings) {
-                for (const auto& it : termg_map) {
-                    if (it.second == sourcecpy) {
-                        match = true;
-                        fv.search_set(it.first);
-
-                        HandleSeq new_candidate_rules = substitute_rule_part(
-                                temp_pm_as,
-                                temp_pm_as.add_atom(rule->get_handle()),
-                                fv.varset, gcb.var_groundings);
-                        for (const auto& nr : new_candidate_rules)
-                            if (find(new_rules.begin(), new_rules.end(),
-                                     nr) == new_rules.end())
-                                new_rules.push_back(nr);
-                    }
-                }
-            }
-        }
-
-        if (match) {
-            auto it = find(chosen_rules.begin(), chosen_rules.end(), rule);
-            if (it == chosen_rules.end())
-                chosen_rules.push_back(rule);
+        //Chosen rule.
+        if (not (derived_rules.empty()))
+        {
+            chosen_rules.push_back(rule);
+            rule_derivations[rule->get_handle()] = derived_rules;
         }
     }
 
     return chosen_rules;
+}
+
+/**
+ * Tries to unify the @param source with implicant members of @param rule.
+ *
+ * @param source  An atom that might bind to variables of implicant members.
+ * @rule  rule    A rule object which contains all variables in @param target
+ *
+ * @return        HandleSeq of possible derivation of rules by substituting
+ *                variables in implicants members of @param rule with their
+ *                mapped bindings.
+ */
+HandleSeq DefaultForwardChainerCB::unify(Handle source,Rule* rule){
+    HandleSeq derived_rules={};
+
+    for (Handle target :rule->get_implicant_seq()) {
+        //exceptions
+        if (target->getType() == ABSENT_LINK)
+            return derived_rules;
+
+        AtomSpace temp_pm_as;
+        Handle hcpy = temp_pm_as.add_atom(target);
+        Handle implicant_vardecl = temp_pm_as.add_atom(
+                gen_sub_varlist(target, rule->get_vardecl()));
+        Handle sourcecpy = temp_pm_as.add_atom(source);
+
+        BindLinkPtr bl =
+        createBindLink(HandleSeq { implicant_vardecl, hcpy, hcpy });
+        VarGroundingPMCB gcb(&temp_pm_as);
+        gcb.implicand = bl->get_implicand();
+
+        bl->imply(gcb);
+
+        auto del_by_value =
+                [] (std::vector<std::map<Handle,Handle>>& vec_map,const Handle& h) {
+                    for (auto& map: vec_map)
+                       for(auto& it:map) { if (it.second == h) map.erase(it.first);}
+                };
+
+        //We don't want implicant_var list to be matched as
+        //in the case of free vars in modus-ponens rules.
+        del_by_value(gcb.term_groundings, implicant_vardecl);
+        del_by_value(gcb.var_groundings, implicant_vardecl);
+
+        FindAtoms fv(VARIABLE_NODE);
+        for (const auto& termg_map : gcb.term_groundings) {
+            for (const auto& it : termg_map) {
+                if (it.second == sourcecpy) {
+                    fv.search_set(it.first);
+
+                    Handle rhandle = rule->get_handle();
+                    HandleSeq new_candidate_rules = substitute_rule_part(
+                            temp_pm_as, temp_pm_as.add_atom(rhandle), fv.varset,
+                            gcb.var_groundings);
+
+                    for (Handle nr : new_candidate_rules) {
+                        if (find(derived_rules.begin(), derived_rules.end(), nr) == derived_rules.end()) {
+                            //Adding back to _as avoids UUID clashes.
+                            Handle h = _as.add_atom(nr);
+                            //Avoid adding original rule to derived rule list
+                            if (h != rhandle)
+                                derived_rules.push_back(h);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return derived_rules;
+}
+/**
+ *  Tries to unify sub atoms of implicant lists in @param rule with @param source.
+ *
+ *  @param source  An atom that might bind to variables in @param target.
+ *  @param rule    The rule object whose implicants are to be sub atom unified.
+ *
+ *  @return        HandleSeq of derived rules from sub atoms unification.
+ */
+HandleSeq DefaultForwardChainerCB::subatom_unify(Handle source,Rule* rule)
+{
+    HandleSeq derived_rules;
+    HandleSeq impl_members = rule->get_implicant_seq();
+
+    UnorderedHandleSet output_expanded;
+    for (Handle h : impl_members) {
+        UnorderedHandleSet hs = get_all_unique_atoms(h);
+        hs.erase(h); //Already tried to unify this.
+
+        HandleSeq result = unify(source, rule);
+        derived_rules.insert(derived_rules.begin(), result.begin(),
+                             result.end());
+
+    }
+
+        return derived_rules;
 }
 
 HandleSeq DefaultForwardChainerCB::choose_premises(FCMemory& fcmem)

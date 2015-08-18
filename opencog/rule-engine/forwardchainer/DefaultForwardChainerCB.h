@@ -27,23 +27,25 @@
 #include <opencog/rule-engine/forwardchainer/ForwardChainerPMCB.h>
 #include "ForwardChainerCallBack.h"
 
+class DefaultForwardChainerCBUTest;
+
 namespace opencog
 {
-
 class FCMemory;
 class Rule;
 class DefaultForwardChainerCB: public virtual ForwardChainerCallBack {
 private:
+    friend class ::DefaultForwardChainerCBUTest;
     AtomSpace& _as;
     ForwardChainerPMCB _fcpm;
-    bool subclasses = false;
     source_selection_mode _ts_mode;
 
     Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);
-    HandleSeq substitute_rule_part(AtomSpace& as, Handle hrule,const std::set<Handle>& vars,const std::vector<std::map<Handle,Handle>>& var_groundings);
-
+    HandleSeq unify(Handle source,Rule* rule);
+    HandleSeq subatom_unify(Handle source,Rule* rule);
 
 public:
+    HandleSeq substitute_rule_part(AtomSpace& as, Handle hrule,const std::set<Handle>& vars,const std::vector<std::map<Handle,Handle>>& var_groundings);
     DefaultForwardChainerCB(AtomSpace& as, source_selection_mode ts_mode =
             TV_FITNESS_BASED);
 
