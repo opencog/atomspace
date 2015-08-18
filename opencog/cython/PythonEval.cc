@@ -421,6 +421,7 @@ PythonEval& PythonEval::instance(AtomSpace* atomspace)
     // Make sure the atom space is the same as the one in the singleton.
     if (atomspace and singletonInstance->_atomspace != atomspace) {
 
+#define CHECK_SINGLETON
 #ifdef CHECK_SINGLETON
         // Someone is trying to initialize the Python interpreter on a
         // different AtomSpace.  Because of the singleton design of the
@@ -792,7 +793,7 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
     return pyReturnValue;
 }
 
-Handle PythonEval::apply(const std::string& func, Handle varargs)
+Handle PythonEval::apply(AtomSpace* as, const std::string& func, Handle varargs)
 {
     PyObject *pyReturnAtom = NULL;
     PyObject *pyError, *pyAtomUUID = NULL;
@@ -843,7 +844,7 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
  * Apply the user function to the arguments passed in varargs and return
  * the extracted truth value.
  */
-TruthValuePtr PythonEval::apply_tv(const std::string& func, Handle varargs)
+TruthValuePtr PythonEval::apply_tv(AtomSpace *as, const std::string& func, Handle varargs)
 {
     // Get the python truth value object returned by this user function.
     PyObject *pyTruthValue = call_user_function(func, varargs);

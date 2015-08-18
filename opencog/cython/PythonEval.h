@@ -41,6 +41,7 @@
 #include "PyIncludeWrapper.h"
 
 #include <map>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -108,6 +109,19 @@ class PythonEval : public GenericEval
 
         AtomSpace* _atomspace;
 
+        // Single, global mutex for serializing access to the atomspace.
+        // The singleton-instance design of this class forces us to
+        // serialize access (the GIL is not enough), because there is
+        // no way to guarantee that python won't accidentally be called
+        // from multiple threads.  That's because the EvaluationLink
+        // is called from scheme and from the pattern matcher, and its
+        // unknown how many threads those things might be running in.
+        // The lock is recursive, because we may need to use multiple
+        // different atomspaces with the evaluator, in some nested
+        // fashion. So this lock prevents other threads from using the
+        // wrong atomspace in some other thread.  Unfort
+        static std::recursive_mutex _mtx;
+
         PyObject* _pyGlobal;
         PyObject* _pyLocal;
         PyObject* _pyRootModule;
@@ -137,7 +151,6 @@ class PythonEval : public GenericEval
          * Get a reference to the singleton instance.
          */
         static PythonEval & instance(AtomSpace* atomspace = NULL);
-        AtomSpace* get_current_atomspace(void) { return _atomspace; }
 
         // The async-output interface.
         virtual void begin_eval() {}
@@ -156,12 +169,12 @@ class PythonEval : public GenericEval
         /**
          * Calls the Python function passed in 'func' returning a Handle.
          */
-        Handle apply(const std::string& func, Handle varargs);
+        Handle apply(AtomSpace*, const std::string& func, Handle varargs);
 
         /**
          * Calls the Python function passed in 'func' returning a TruthValuePtr.
          */
-        TruthValuePtr apply_tv(const std::string& func, Handle varargs);
+        TruthValuePtr apply_tv(AtomSpace*, const std::string& func, Handle varargs);
 
         /**
          *
