@@ -236,10 +236,9 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args
 		size_t pos = 3;
 		while (' ' == schema[pos]) pos++;
 
-		PythonEval &applier = PythonEval::instance(as);
-		// std::string rc = applier.apply(schema.substr(pos), args);
-		// if (rc.compare("None") or rc.compare("False")) return false;
-		return applier.apply_tv(schema.substr(pos), args);
+		// Be sure to specify the atomspace in which to work!
+		PythonEval &applier = PythonEval::instance();
+		return applier.apply_tv(as, schema.substr(pos), args);
 #else
 		throw RuntimeException(TRACE_INFO,
 			 "Cannot evaluate python GroundedPredicateNode!");

@@ -59,6 +59,7 @@ const int MISSING_FUNC_CODE = -1;
 
 static bool already_initialized = false;
 static bool initialized_outside_opencog = false;
+std::recursive_mutex PythonEval::_mtx;
 
 /*
  * @todo When can we remove the singleton instance?
@@ -421,6 +422,8 @@ PythonEval& PythonEval::instance(AtomSpace* atomspace)
     // Make sure the atom space is the same as the one in the singleton.
     if (atomspace and singletonInstance->_atomspace != atomspace) {
 
+#define CHECK_SINGLETON
+#ifdef CHECK_SINGLETON
         // Someone is trying to initialize the Python interpreter on a
         // different AtomSpace.  Because of the singleton design of the
         // the CosgServer+AtomSpace, there is no easy way to support this...
@@ -428,6 +431,19 @@ PythonEval& PythonEval::instance(AtomSpace* atomspace)
             "Trying to re-initialize python interpreter with different\n"
             "AtomSpace ptr! Current ptr=%p New ptr=%p\n",
             singletonInstance->_atomspace, atomspace);
+#else
+        // We need to be able to call the python interpreter with
+        // different atomspaces; for example, we need to use temporary
+        // atomspaces when evaluating virtual links.  So, just set it
+        // here.  Hopefully the user will set it back, after using the
+        // temp atomspace.   Cleary, this is not thread-safe, and will
+        // bust with multiple threads. But the whole singleton-instance
+        // design is fundamentally flawed, so there is not much we can
+        // do about it until someone takes the time to fix this class
+        // to allow multiple instances.
+        //
+        singletonInstance->_atomspace = atomspace;
+#endif
     }
     return *singletonInstance;
 }
@@ -453,7 +469,7 @@ void PythonEval::initialize_python_objects_and_imports(void)
 
     // Add ATOMSPACE to __main__ module.
     PyObject* pyRootDictionary = PyModule_GetDict(_pyRootModule);
-    PyObject* pyAtomSpaceObject = this->atomspace_py_object();
+    PyObject* pyAtomSpaceObject = this->atomspace_py_object(_atomspace);
     PyDict_SetItemString(pyRootDictionary, "ATOMSPACE", pyAtomSpaceObject);
     Py_DECREF(pyAtomSpaceObject);
 
@@ -484,11 +500,16 @@ PyObject* PythonEval::atomspace_py_object(AtomSpace* atomspace)
         return NULL;
     }
 
-    PyObject * pyAtomSpace;
-    if (atomspace)
-        pyAtomSpace = py_atomspace(atomspace);
-    else
-        pyAtomSpace = py_atomspace(this->_atomspace);
+/***********
+    Weird ... I guess NULL atomspaces are OK!?
+    if (NULL == atomspace) {
+        logger().error("PythonEval::%s No atomspace specified!",
+                        __FUNCTION__);
+        return NULL;
+    }
+************/
+
+    PyObject * pyAtomSpace = py_atomspace(atomspace);
 
     if (!pyAtomSpace) {
         if (PyErr_Occurred())
@@ -647,6 +668,8 @@ PyObject* PythonEval::module_for_function(  const std::string& moduleFunction,
 PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
                                             Handle arguments)
 {
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+
     PyObject *pyError, *pyModule, *pyUserFunc, *pyReturnValue = NULL;
     PyObject *pyDict;
     std::string functionName;
@@ -727,7 +750,7 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
     // Create the Python tuple for the function call with python
     // atoms for each of the atoms in the link arguments.
     PyObject* pyArguments = PyTuple_New(actualArgumentCount);
-    PyObject* pyAtomSpace = this->atomspace_py_object();
+    PyObject* pyAtomSpace = this->atomspace_py_object(_atomspace);
     const HandleSeq& argumentHandles = linkArguments->getOutgoingSet();
     int tupleItem = 0;
     for (HandleSeq::const_iterator it = argumentHandles.begin();
@@ -773,14 +796,15 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
     return pyReturnValue;
 }
 
-Handle PythonEval::apply(const std::string& func, Handle varargs)
+Handle PythonEval::apply(AtomSpace* as, const std::string& func, Handle varargs)
 {
-    PyObject *pyReturnAtom = NULL;
-    PyObject *pyError, *pyAtomUUID = NULL;
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    RAII raii(this, as);
+
     UUID uuid = 0;
 
     // Get the atom object returned by this user function.
-    pyReturnAtom = this->call_user_function(func, varargs);
+    PyObject* pyReturnAtom = this->call_user_function(func, varargs);
 
     // If we got a non-null atom were no errors.
     if (pyReturnAtom) {
@@ -790,11 +814,11 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
         gstate = PyGILState_Ensure();
 
         // Get the handle UUID from the atom.
-        pyAtomUUID = PyObject_CallMethod(pyReturnAtom, (char*) "handle_uuid",
+        PyObject* pyAtomUUID = PyObject_CallMethod(pyReturnAtom, (char*) "handle_uuid",
                 NULL);
 
         // Make sure we got an atom UUID.
-        pyError = PyErr_Occurred();
+        PyObject* pyError = PyErr_Occurred();
         if (pyError || !pyAtomUUID) {
             PyGILState_Release(gstate);
             throw RuntimeException(TRACE_INFO,
@@ -824,8 +848,11 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
  * Apply the user function to the arguments passed in varargs and return
  * the extracted truth value.
  */
-TruthValuePtr PythonEval::apply_tv(const std::string& func, Handle varargs)
+TruthValuePtr PythonEval::apply_tv(AtomSpace *as, const std::string& func, Handle varargs)
 {
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    RAII raii(this, as);
+
     // Get the python truth value object returned by this user function.
     PyObject *pyTruthValue = call_user_function(func, varargs);
 
@@ -874,6 +901,8 @@ TruthValuePtr PythonEval::apply_tv(const std::string& func, Handle varargs)
 
 std::string PythonEval::apply_script(const std::string& script)
 {
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+
     PyObject* pyError = NULL;
     PyObject *pyCatcher = NULL;
     PyObject *pyOutput = NULL;
@@ -991,7 +1020,7 @@ void PythonEval::import_module( const boost::filesystem::path &file,
         PyObject* pyModuleDictionary = PyModule_GetDict(pyModule);
 
         // Add the ATOMSPACE object to this module
-        PyObject* pyAtomSpaceObject = this->atomspace_py_object();
+        PyObject* pyAtomSpaceObject = this->atomspace_py_object(_atomspace);
         PyDict_SetItemString(pyModuleDictionary,"ATOMSPACE",
                 pyAtomSpaceObject);
 
