@@ -668,6 +668,8 @@ PyObject* PythonEval::module_for_function(  const std::string& moduleFunction,
 PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
                                             Handle arguments)
 {
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+
     PyObject *pyError, *pyModule, *pyUserFunc, *pyReturnValue = NULL;
     PyObject *pyDict;
     std::string functionName;
@@ -899,6 +901,8 @@ TruthValuePtr PythonEval::apply_tv(AtomSpace *as, const std::string& func, Handl
 
 std::string PythonEval::apply_script(const std::string& script)
 {
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+
     PyObject* pyError = NULL;
     PyObject *pyCatcher = NULL;
     PyObject *pyOutput = NULL;
