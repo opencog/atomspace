@@ -89,8 +89,8 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
 /**
  * Tries to unify the @param source with implicant members of @param rule.
  *
- * @param source  An atom that might bind to variables of implicant members.
- * @rule  rule    A rule object which contains all variables in @param target
+ * @param source  An atom that might bind to variables in @param rule.
+ * @rule  rule    The rule object whose implicants are to be unified.
  *
  * @return        HandleSeq of possible derivation of rules by substituting
  *                variables in implicants members of @param rule with their
@@ -158,7 +158,7 @@ HandleSeq DefaultForwardChainerCB::unify(Handle source,Rule* rule){
 /**
  *  Tries to unify sub atoms of implicant lists in @param rule with @param source.
  *
- *  @param source  An atom that might bind to variables in @param target.
+ *  @param source  An atom that might bind to variables in @param rule.
  *  @param rule    The rule object whose implicants are to be sub atom unified.
  *
  *  @return        HandleSeq of derived rules from sub atoms unification.
