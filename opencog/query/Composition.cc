@@ -73,12 +73,15 @@ TODO:
 
 /* ================================================================= */
 
+/*
 void PatternMatchEngine::push_redex(void)
 {
 	_stack_variables.push(_varlist);
 	_stack_pattern.push(_pat);
 }
+*/
 
+/*
 void PatternMatchEngine::pop_redex(void)
 {
 	_varlist = _stack_variables.top();
@@ -87,7 +90,9 @@ void PatternMatchEngine::pop_redex(void)
 	_pat = _stack_pattern.top();
 	_stack_pattern.pop();
 }
+*/
 
+/*
 bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
                                        const LinkPtr& lg)
 {
@@ -163,7 +168,10 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	clause_accepted = false;
 
 	Handle hp(_pat->cnf_clauses[0]);
-	bool found = tree_compare(hp, Handle(lg), CALL_COMP);
+	throw RuntimeException(TRACE_INFO, "Unimplemented yet");
+	// TODO: wrap by PatternTermPtr
+	// bool found = tree_compare(hp, Handle(lg), CALL_COMP);
+	bool found = false;
 
 #if 0
 	Handle join;
@@ -215,5 +223,6 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	pop_redex();
 	return true;
 }
+*/
 
 /* ===================== END OF FILE ===================== */
