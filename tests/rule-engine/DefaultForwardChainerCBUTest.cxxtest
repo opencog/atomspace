@@ -32,6 +32,8 @@ public:
     void test_choose_rule(void);
     void test_choose_source(void);
     void test_apply_rule(void);
+    void test_substitute_rule_part(void);
+    void test_unify(void);
 };
 
 void DefaultForwardChainerCBUTest::setUp()
@@ -54,7 +56,7 @@ void DefaultForwardChainerCBUTest::test_choose_rule(void)
     fcmem.set_rules(cr.get_rules());
     TS_ASSERT_EQUALS(2, fcmem.get_rules().size());
     Handle h = eval.eval_h(
-	    "(InheritanceLink (ConceptNode \"cat\")(ConceptNode \"animal\"))");
+        "(InheritanceLink (ConceptNode \"cat\")(ConceptNode \"animal\"))");
     TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
     fcmem.set_source(h);
     DefaultForwardChainerCB dfcb(as);
@@ -109,4 +111,66 @@ void DefaultForwardChainerCBUTest::test_apply_rule(void)
     URECommons urec(as);
     TS_ASSERT(urec.exists_in(hs[0],source));
 
+}
+
+void DefaultForwardChainerCBUTest::test_substitute_rule_part(void)
+{
+    config().set("SCM_PRELOAD",
+                     "tests/rule-engine/dfc-tests.scm");
+        load_scm_files_from_config(as);
+
+    Handle rule_handle = eval.eval_h("pln-rule-deduction");
+
+    Handle var_a = eval.eval_h("(VariableNode \"$A\")");
+    Handle var_b = eval.eval_h("(VariableNode \"$B\")");
+    Handle var_c = eval.eval_h("(VariableNode \"$C\")");
+
+    Handle grnd_1 = eval.eval_h("(ConceptNode \"Cat\")");
+    Handle grnd_2 = eval.eval_h("(ConceptNode \"Animal\")");
+
+    //When the first premise of deduction rule is matched
+    std::map<Handle, Handle> vg_map_1 = { { var_a, grnd_1 }, { var_b, grnd_2 } };
+    //Then the second premise of deduction rule is matched
+    std::map<Handle, Handle> vg_map_2 = { { var_b, grnd_1 }, { var_c, grnd_2 } };
+
+    std::vector<std::map<Handle, Handle>> var_groundings = { vg_map_1 };
+    std::set<Handle> vars_case_1 = { var_a, var_b };
+
+    DefaultForwardChainerCB dfcb(as);
+    HandleSeq rule_derivatives = dfcb.substitute_rule_part(as, rule_handle,
+                                                           vars_case_1,
+                                                           var_groundings);
+    TS_ASSERT_EQUALS(rule_derivatives.size(), 1);
+    Handle hx = as.add_atom(rule_derivatives[0]);
+    Handle hexpected = eval.eval_h("deduction-ab-substitute-1");
+    TS_ASSERT_EQUALS(hexpected, hx);
+
+    var_groundings =
+    {   vg_map_2};
+    std::set<Handle> vars_case_2 = { var_b, var_c };
+    rule_derivatives = dfcb.substitute_rule_part(as, rule_handle, vars_case_2,
+                                                 var_groundings);
+
+    TS_ASSERT_EQUALS(rule_derivatives.size(), 1);
+    hx = as.add_atom(rule_derivatives[0]);
+    hexpected = eval.eval_h("deduction-ab-substitute-2");
+    TS_ASSERT_EQUALS(hexpected, hx);
+
+}
+
+void DefaultForwardChainerCBUTest::test_unify(void)
+{
+    Handle source = eval.eval_h(
+                "(InheritanceLink (ConceptNode \"Cat\")(ConceptNode \"Animal\"))");
+
+    DefaultForwardChainerCB dfcb(as);
+    Handle rule_handle = eval.eval_h("(MemberLink"
+                                         "   pln-rule-modus-ponens-name"
+                                         "   (ConceptNode \"URE\"))");
+    Rule rule(rule_handle);
+    Handle target = eval.eval_h("(VariableNode \"$A\")");
+
+    HandleSeq hs = dfcb.unify(source, &rule);
+    TS_ASSERT_EQUALS(hs.size(), 3);
+    //TODO more test cases here
 }
