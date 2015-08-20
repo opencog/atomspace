@@ -187,9 +187,11 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 	// runs afoul of several unusual situations. The one we care about
 	// is an evaluatable clause which contains no variables.  In this
 	// case, we need to accept the match in order for a SatisfactionLink
-	// to get valued correctly.
+	// to get valued correctly. Tested in SequenceUTest.
 	// if (ptrn == grnd) return false;
 
+	// This if-statement handles the case given in the callback description.
+	// It is tested by EvaluationUTest.
 	if (ptrn->getType() == VARIABLE_NODE and
 	    grnd->getType() == EVALUATION_LINK and
 	    0 < LinkCast(grnd)->getArity() and
@@ -210,7 +212,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 
 		dbgprt("clause_match evaluation yeilded tv=%s\n", tvp->toString().c_str());
 
-		// XXX FIXME: we are making a crsip-logic go/no-go decision
+		// XXX FIXME: we are making a crisp-logic go/no-go decision
 		// based on the TV strength. Perhaps something more subtle might be
 		// wanted, here.
 		bool relation_holds = tvp->getMean() > 0.5;
