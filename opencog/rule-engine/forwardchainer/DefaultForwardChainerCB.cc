@@ -68,8 +68,14 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
     auto rules = fcmem.get_rules();
 
     for (Rule* rule : rules) {
-        HandleSeq derived_rules = unify(source,rule);
+        HandleSeq derived_rules = {};
 
+        HandleSeq hs = rule->get_implicand_seq();
+        for(Handle target: hs)
+        {
+            HandleSeq hs = unify(source,target,rule);
+            derived_rules.insert(derived_rules.end(),hs.begin(),hs.end());
+        }
         //Chosen rule.
         if (not derived_rules.empty())
         {
@@ -159,20 +165,22 @@ HandleSeq DefaultForwardChainerCB::unify(Handle source,Handle target,Rule* rule)
  */
 HandleSeq DefaultForwardChainerCB::subatom_unify(Handle source,Rule* rule)
 {
-    HandleSeq derived_rules;
+    HandleSeq derived_rules={};
     HandleSeq impl_members = rule->get_implicant_seq();
 
     for (Handle h : impl_members) {
         UnorderedHandleSet hs = get_all_unique_atoms(h);
         hs.erase(h); //Already tried to unify this.
 
-        HandleSeq result = unify(source, rule);
-        derived_rules.insert(derived_rules.begin(), result.begin(),
-                             result.end());
+        for (Handle h : hs) {
+            HandleSeq result = unify(source, h, rule);
+            derived_rules.insert(derived_rules.end(), result.begin(),
+                                 result.end());
+        }
 
     }
 
-        return derived_rules;
+    return derived_rules;
 }
 
 HandleSeq DefaultForwardChainerCB::choose_premises(FCMemory& fcmem)

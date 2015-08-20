@@ -170,7 +170,7 @@ void DefaultForwardChainerCBUTest::test_unify(void)
     Rule rule(rule_handle);
     Handle target = eval.eval_h("(VariableNode \"$A\")");
 
-    HandleSeq hs = dfcb.unify(source, &rule);
+    HandleSeq hs = dfcb.unify(source,target,&rule);
     TS_ASSERT_EQUALS(hs.size(), 3);
     //TODO more test cases here
 }
