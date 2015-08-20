@@ -1259,12 +1259,12 @@ bool PatternMatchEngine::clause_accept(const Handle& hp,
 	if (is_optional(clause_root))
 	{
 		clause_accepted = true;
-		match = _pmc.optional_clause_match(hp, hg);
+		match = _pmc.optional_clause_match(clause_root, hg);
 		dbgprt("optional clause match callback match=%d\n", match);
 	}
 	else
 	{
-		match = _pmc.clause_match(hp, hg);
+		match = _pmc.clause_match(clause_root, hg);
 		dbgprt("clause match callback match=%d\n", match);
 	}
 	if (not match) return false;
