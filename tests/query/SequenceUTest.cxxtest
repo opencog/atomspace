@@ -127,4 +127,18 @@ void SequenceUTest::test_sequence(void)
     TS_ASSERT_EQUALS(4, ngreen);
     TS_ASSERT_EQUALS(1, nred);
 
+    // ----------------------------------------------------------
+    // There are four green lights here; the third one is wrapped
+    // by a NotLink.  That should halt the pregression, and return
+    // false.
+    tv = eval->eval_tv("(cog-satisfy (anti-green))");
+    TS_ASSERT_LESS_THAN(tv->getMean(), 0.5);
+
+    // Should have seen three more green lights, and no reds.
+    sngreen = eval->eval("num-green");
+    snred = eval->eval("num-red");
+    ngreen = atoi(sngreen.c_str());
+    nred = atoi(snred.c_str());
+    TS_ASSERT_EQUALS(7, ngreen);
+    TS_ASSERT_EQUALS(1, nred);
 }
