@@ -168,16 +168,16 @@ HandleSeq DefaultForwardChainerCB::subatom_unify(Handle source,Rule* rule)
     HandleSeq derived_rules={};
     HandleSeq impl_members = rule->get_implicant_seq();
 
+    UnorderedHandleSet output_expanded;
     for (Handle h : impl_members) {
         UnorderedHandleSet hs = get_all_unique_atoms(h);
         hs.erase(h); //Already tried to unify this.
+        output_expanded.insert(hs.begin(), hs.end());
+    }
 
-        for (Handle h : hs) {
-            HandleSeq result = unify(source, h, rule);
-            derived_rules.insert(derived_rules.end(), result.begin(),
-                                 result.end());
-        }
-
+    for (Handle h : output_expanded) {
+        HandleSeq result = unify(source, h, rule);
+        derived_rules.insert(derived_rules.end(), result.begin(), result.end());
     }
 
     return derived_rules;
