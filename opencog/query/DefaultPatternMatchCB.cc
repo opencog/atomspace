@@ -46,6 +46,7 @@ DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
 	_instor(&_temp_aspace),
 	_as(as)
 {
+	_connectives.insert(SEQUENTIAL_AND_LINK);
 	_connectives.insert(AND_LINK);
 	_connectives.insert(OR_LINK);
 	_connectives.insert(NOT_LINK);
@@ -332,7 +333,7 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 
 		return false;
 	}
-	else if (AND_LINK == term_type)
+	else if (AND_LINK == term_type or SEQUENTIAL_AND_LINK == term_type)
 	{
 		for (const Handle& h : oset)
 			if (not eval_sentence(h, gnds)) return false;
