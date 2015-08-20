@@ -81,3 +81,35 @@
 		)
 	)
 )
+
+;; Not Links invert the meaning...
+(define (anti-green)
+	(SequentialAndLink
+		(EvaluationLink
+			(GroundedPredicateNode "scm: stop-go")
+			(ListLink green-light)
+		)
+
+		(EvaluationLink
+			(GroundedPredicateNode "scm: stop-go")
+			(ListLink green-light)
+		)
+
+		(NotLink
+			(EvaluationLink
+				(GroundedPredicateNode "scm: stop-go")
+				(ListLink green-light)
+			)
+		)
+
+		(EvaluationLink
+			(GroundedPredicateNode "scm: stop-go")
+			(ListLink green-light)
+		)
+
+		(EvaluationLink
+			(GroundedPredicateNode "scm: stop-go")
+			(ListLink (ConceptNode "traffic ticket"))
+		)
+	)
+)

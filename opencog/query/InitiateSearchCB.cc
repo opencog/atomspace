@@ -498,7 +498,7 @@ bool InitiateSearchCB::disjunct_search(PatternMatchEngine *pme)
 	// variables! Which can happen (there is a unit test for this,
 	// the LoopUTest), and so instead, we search based on the link
 	// types that occur in the atomspace.
-	dbgprt("Cannot use node-neighbor search, use link-type search\n");
+	dbgprt("Cannot use no-var search, use link-type search\n");
 	_search_fail = false;
 	found = link_type_search(pme);
 	if (found) return true;

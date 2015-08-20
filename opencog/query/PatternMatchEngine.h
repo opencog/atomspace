@@ -198,12 +198,13 @@ class PatternMatchEngine
 		// -------------------------------------------
 		// Upwards-walking and grounding of a single clause.
 		// See PatternMatchEngine.cc for descriptions
+		bool explore_clause(const Handle&, const Handle&, const Handle&);
 		bool explore_up_branches(const Handle&, const Handle&, const Handle&);
 		bool explore_link_branches(const Handle&, const Handle&, const Handle&);
 		bool explore_choice_branches(const Handle&, const Handle&, const Handle&);
 		bool explore_single_branch(const Handle&, const Handle&, const Handle&);
 		bool do_term_up(const Handle&, const Handle&, const Handle&);
-		bool clause_accept(const Handle&, const Handle&, const Handle&);
+		bool clause_accept(const Handle&, const Handle&);
 
 	public:
 		PatternMatchEngine(PatternMatchCallback&,
