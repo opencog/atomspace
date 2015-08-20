@@ -96,8 +96,7 @@ HandleSeq DefaultForwardChainerCB::unify(Handle source,Rule* rule){
 
     for (Handle target :rule->get_implicant_seq()) {
         //exceptions
-        if (target->getType() == ABSENT_LINK)
-            return derived_rules;
+        if(not is_valid_implicant(target)) continue;
 
         AtomSpace temp_pm_as;
         Handle hcpy = temp_pm_as.add_atom(target);
@@ -353,4 +352,25 @@ HandleSeq DefaultForwardChainerCB::substitute_rule_part(
     }
 
     return derived_rules;
+}
+
+/**
+ * Checks if an atom can be used as to generate a bindLink or not.
+ *
+ * @param h  The atom handle to be validated.
+ *
+ * @return   A boolean result of the check.
+ */
+bool DefaultForwardChainerCB::is_valid_implicant(const Handle& h)
+{
+    if (h->getType() == ABSENT_LINK)
+        return false;
+
+    FindAtoms fv(VARIABLE_NODE);
+    fv.search_set(h);
+
+    if (fv.varset.empty())
+       return false;
+
+    return true;
 }

@@ -43,6 +43,7 @@ private:
     Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);
     HandleSeq unify(Handle source,Rule* rule);
     HandleSeq subatom_unify(Handle source,Rule* rule);
+    bool is_valid_implicant(const Handle& h);
 
 public:
     HandleSeq substitute_rule_part(AtomSpace& as, Handle hrule,const std::set<Handle>& vars,const std::vector<std::map<Handle,Handle>>& var_groundings);
