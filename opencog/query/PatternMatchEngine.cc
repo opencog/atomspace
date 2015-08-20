@@ -481,7 +481,7 @@ then its truthiness holds only for a grounding that no longer exists.
 Thus, for case C, it is safer to always check.
 
 However, by the above reasoning: if the grounding wasn't recorded
-(because the link is not in te recursion path) then the permuation
+(because the link is not in the recursion path) then the permuation
 should not be recorded either. It should start with a permutation from
 nothing.  XXX FIXME ... except we have no test case that illustrates
 this failure mode.  It would require a peer unordered link that takes
@@ -1122,7 +1122,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 		//    to the bottom.
 		// 2) The evaluatable is the clause root. We evaluate it, and
 		//    consider the clause satisfied if the evaluation returns
-		//    true. In that case, we continue to te next clause, else we
+		//    true. In that case, we continue to the next clause, else we
 		//    backtrack.
 		// 3) The evaluatable is in the middle of a clause, in which case,
 		//    it's parent must be a logical connective: an AndLink, an
@@ -1321,7 +1321,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		Handle hgnd = var_grounding[joiner];
 		OC_ASSERT(hgnd != Handle::UNDEFINED,
 			"Error: joining handle has not been grounded yet!");
-		found = explore_link_branches(joiner, hgnd, curr_root);
+		found = explore_clause(joiner, hgnd, curr_root);
 
 		// If we are here, and found is false, then we've exhausted all
 		// of the search possibilities for the current clause. If this
@@ -1737,11 +1737,45 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
 
 	// Match the required clauses.
 	issued.insert(first_clause);
-	bool found = explore_link_branches(term, grnd, first_clause);
+	return explore_clause(term, grnd, first_clause);
+}
 
-	// If found is false, then there's no solution here.
-	// Bail out, return false to try again with the next candidate.
-	return found;
+/**
+ * Every clause in a pattern is one of two types:  it either
+ * specifies a pattern to be matched, or it specifies an evaluatable
+ * atom that must be evaluated to determine if it is to be accepted.
+ * (In the default callback, evaluatable atoms are always crisp
+ * boolean-logic formulas, although the infrastructure is designed
+ * to handle other situations as well, e.g. Bayesian formulas, etc.)
+ *
+ * This method simply dispatches a given clause to be eitther pattern
+ * matched, or to be evaluated.
+ */
+bool PatternMatchEngine::explore_clause(const Handle& term,
+                                        const Handle& grnd,
+                                        const Handle& clause)
+{
+	// If we are looking for a pattern to match, then ... look for it.
+	// Evaluatable clauses are not patterns; they are clauses that
+	// evaluate to true or false.
+	if (not is_evaluatable(clause))
+	{
+		dbgprt("Clause is matchable; start matching it.\n");
+		bool found = explore_link_branches(term, grnd, clause);
+
+		// If found is false, then there's no solution here.
+		// Bail out, return false to try again with the next candidate.
+		return found;
+	}
+
+	// If we are here, we have an evaluatable clause on our hands.
+	dbgprt("Clause is evaluatable; start evaluating it\n");
+	bool found = _pmc.evaluate_sentence(clause, var_grounding);
+	dbgprt("Post evaluating clause, found = %d\n", found);
+	if (found)
+		return clause_accept(term, grnd, clause);
+
+	return false;
 }
 
 /**
