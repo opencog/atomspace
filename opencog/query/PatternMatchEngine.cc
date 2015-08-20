@@ -1104,7 +1104,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 	// we are working on a term somewhere in the middle of a clause
 	// and need to walk upwards.
 	if (hp == clause_root)
-		return clause_accept(hp, hg, clause_root);
+		return clause_accept(clause_root, hg);
 
 	// Move upwards in the term, and hunt for a match, again.
 	// There are two ways to move upwards: for a normal term, we just
@@ -1173,7 +1173,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 			bool found = _pmc.evaluate_sentence(clause_root, var_grounding);
 			dbgprt("After evaluating clause, found = %d\n", found);
 			if (found)
-				return clause_accept(evit->second, hg, clause_root);
+				return clause_accept(clause_root, hg);
 
 			return false;
 		}
@@ -1217,7 +1217,7 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 		{
 			dbgprt("Exploring one possible ChoiceLink at root out of %zu\n",
 			       fa.least_holders.size());
-			if (clause_accept(hp, hg, clause_root)) found = true;
+			if (clause_accept(clause_root, hg)) found = true;
 		}
 		else
 		{
@@ -1248,9 +1248,8 @@ bool PatternMatchEngine::do_term_up(const Handle& hp,
 /// However, let the callbacks have the final say on whether to
 /// proceed onwards, or to backtrack.
 ///
-bool PatternMatchEngine::clause_accept(const Handle& hp,
-                                       const Handle& hg,
-                                       const Handle& clause_root)
+bool PatternMatchEngine::clause_accept(const Handle& clause_root,
+                                       const Handle& hg)
 {
 	// Is this clause a required clause? If so, then let the callback
 	// make the final decision; if callback rejects, then it's the
@@ -1773,7 +1772,7 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 	bool found = _pmc.evaluate_sentence(clause, var_grounding);
 	dbgprt("Post evaluating clause, found = %d\n", found);
 	if (found)
-		return clause_accept(term, grnd, clause);
+		return clause_accept(clause, grnd);
 
 	return false;
 }
