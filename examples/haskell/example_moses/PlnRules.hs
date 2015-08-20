@@ -41,20 +41,18 @@ plnRuleEliminateNeutralElementHack = BindLink
      (VariableList [])
      (ImplicationLink noTv
         (AndLink noTv
-           (EvaluationLink noTv
-              (PredicateNode "take" noTv)
-              (ListLink
-                 |> QuoteLink (VariableNode "X")
-                 \> PredicateNode "treatment-1" noTv
-              )
-           )
-           (EvaluationLink noTv
-              (PredicateNode "contain" noTv)
-              (ListLink
-                 |> PredicateNode "treatment-1" noTv
-                 \> PredicateNode "compound-A" noTv
-              )
-           )
+           |> EvaluationLink noTv
+                (PredicateNode "take" noTv)
+                (ListLink
+                   |> QuoteLink (VariableNode "X")
+                   \> PredicateNode "treatment-1" noTv
+                )
+           \> EvaluationLink noTv
+                (PredicateNode "contain" noTv)
+                (ListLink
+                   |> PredicateNode "treatment-1" noTv
+                   \> PredicateNode "compound-A" noTv
+                )
         )
         (EvaluationLink noTv
            (PredicateNode "take" noTv)
@@ -65,15 +63,14 @@ plnRuleEliminateNeutralElementHack = BindLink
         )
      )
      (ImplicationLink (stv 1 1)
---        (AndLink noTv
-           (EvaluationLink noTv
-              (PredicateNode "take" noTv)
-              (ListLink
-                 |> VariableNode "X"
-                 \> PredicateNode "treatment-1" noTv
-              )
-           )
---        )
+        (AndLink noTv
+           \> EvaluationLink noTv
+                (PredicateNode "take" noTv)
+                (ListLink
+                   |> VariableNode "X"
+                   \> PredicateNode "treatment-1" noTv
+                )
+        )
         (EvaluationLink noTv
            (PredicateNode "take" noTv)
            (ListLink
@@ -87,15 +84,14 @@ plnRuleEliminateDanglingJunctorHack :: Atom BindT
 plnRuleEliminateDanglingJunctorHack = BindLink
      (VariableList [])
      (ImplicationLink noTv
---        (AndLink noTv
-           (EvaluationLink noTv
-              (PredicateNode "take" noTv)
-              (ListLink
-                 |> QuoteLink (VariableNode "X")
-                 \> PredicateNode "treatment-1" noTv
-              )
-           )
---        )
+        (AndLink noTv
+           \> EvaluationLink noTv
+                (PredicateNode "take" noTv)
+                (ListLink
+                   |> QuoteLink (VariableNode "X")
+                   \> PredicateNode "treatment-1" noTv
+                )
+        )
         (EvaluationLink noTv
            (PredicateNode "take" noTv)
            (ListLink
@@ -125,36 +121,32 @@ plnRuleAndHack :: Atom BindT
 plnRuleAndHack = BindLink
    (VariableList [])
    (AndLink noTv
-      (EvaluationLink noTv
-         (PredicateNode "take" noTv)
-         (ListLink
-            |> QuoteLink (VariableNode "X")
-            \> VariableNode "Y"
-         )
-      )
-      (EvaluationLink noTv
-         (PredicateNode "contain" noTv)
-         (ListLink
-            |> VariableNode "Y"
-            \> VariableNode "Z"
-         )
-      )
+      |> EvaluationLink noTv
+           (PredicateNode "take" noTv)
+           (ListLink
+              |> QuoteLink (VariableNode "X")
+              \> VariableNode "Y"
+           )
+      \> EvaluationLink noTv
+           (PredicateNode "contain" noTv)
+           (ListLink
+              |> VariableNode "Y"
+              \> VariableNode "Z"
+           )
    )
    (AndLink (stv 1 1)
-      (EvaluationLink noTv
-         (PredicateNode "take" noTv)
-         (ListLink
-            |> VariableNode "X"
-            \> VariableNode "Y"
-         )
-      )
-      (EvaluationLink noTv
-         (PredicateNode "contain" noTv)
-         (ListLink
-            |> VariableNode "Y"
-            \> VariableNode "Z"
-         )
-      )
+      |> EvaluationLink noTv
+           (PredicateNode "take" noTv)
+           (ListLink
+              |> VariableNode "X"
+              \> VariableNode "Y"
+           )
+      \> EvaluationLink noTv
+           (PredicateNode "contain" noTv)
+           (ListLink
+              |> VariableNode "Y"
+              \> VariableNode "Z"
+           )
    )
 
 plnRuleForAllHack :: Atom BindT
@@ -168,20 +160,18 @@ plnRuleForAllHack = BindLink
             )
             (ImplicationLink noTv
                 (AndLink noTv
-                    (EvaluationLink noTv
+                   |> EvaluationLink noTv
                         (PredicateNode "take" noTv)
                         (ListLink
                             |> QuoteLink (VariableNode "X")
                             \> QuoteLink (VariableNode "Y")
                         )
-                    )
-                    (EvaluationLink noTv
+                   \> EvaluationLink noTv
                         (PredicateNode "contain" noTv)
                         (ListLink
                             |> QuoteLink (VariableNode "Y")
                             \> QuoteLink (VariableNode "Z")
                         )
-                    )
                 )
                 (EvaluationLink noTv
                     (PredicateNode "take" noTv)
@@ -194,20 +184,18 @@ plnRuleForAllHack = BindLink
         )
         (ImplicationLink (stv 1 1)
             (AndLink noTv
-                (EvaluationLink noTv
+               |> EvaluationLink noTv
                     (PredicateNode "take" noTv)
                     (ListLink
                         |> VariableNode "X"
                         \> PredicateNode "treatment-1" noTv
                     )
-                )
-                (EvaluationLink noTv
+               \> EvaluationLink noTv
                     (PredicateNode "contain" noTv)
                     (ListLink
                         |> PredicateNode "treatment-1" noTv
                         \> PredicateNode "compound-A" noTv
                     )
-                )
             )
             (EvaluationLink noTv
                 (PredicateNode "take" noTv)
