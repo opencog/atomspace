@@ -79,7 +79,7 @@ Then you can compile simple .hs files with:
 stack ghc example.hs
 ```
 
-### Possibles errors
+### Possible errors
 * It is necessary to previously build and install the AtomSpace, because the opencog-atomspace haskell library depends on the haskell-atomspace C wrapper library.
 So, if you have a problem like "haskell-atomspace library not found" , first of all, you should ensure it was properly installed when installing the AtomSpace.
 
