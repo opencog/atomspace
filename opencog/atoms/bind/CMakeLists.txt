@@ -7,7 +7,7 @@ ADD_LIBRARY (lambda SHARED
 	DefineLink.cc
 	PatternLink.cc
 	PatternUtils.cc
-	ScopeLink.cc
+	LambdaLink.cc
 	VariableList.cc
 )
 

@@ -41,8 +41,8 @@
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/DefineLink.h>
+#include <opencog/atoms/bind/LambdaLink.h>
 #include <opencog/atoms/bind/PatternLink.h>
-#include <opencog/atoms/bind/ScopeLink.h>
 #include <opencog/atoms/bind/VariableList.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
@@ -309,9 +309,9 @@ AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
     } else if (SATISFACTION_LINK == atom_type) {
         if (NULL == PatternLinkCast(atom))
             return createPatternLink(*LinkCast(atom));
-    } else if (SCOPE_LINK == atom_type) {
-        if (NULL == ScopeLinkCast(atom))
-            return createScopeLink(*LinkCast(atom));
+    } else if (LAMBDA_LINK == atom_type) {
+        if (NULL == LambdaLinkCast(atom))
+            return createLambdaLink(*LinkCast(atom));
     } else if (VARIABLE_LIST == atom_type) {
         if (NULL == VariableListCast(atom))
             return createVariableList(*LinkCast(atom));
@@ -358,8 +358,8 @@ static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
         return createPutLink(*LinkCast(atom));
     if (SATISFACTION_LINK == atom_type)
         return createPatternLink(*LinkCast(atom));
-    if (SCOPE_LINK == atom_type)
-        return createScopeLink(*LinkCast(atom));
+    if (LAMBDA_LINK == atom_type)
+        return createLambdaLink(*LinkCast(atom));
     if (VARIABLE_LIST == atom_type)
         return createVariableList(*LinkCast(atom));
     if (classserver().isA(atom_type, FUNCTION_LINK))
