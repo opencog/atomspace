@@ -10,10 +10,10 @@ INCLUDE_DIRECTORIES (
 # I'm disabling it until it is debugged and added to the unit tests or removed:
 #
 ADD_LIBRARY (zmqatoms SHARED
-    ProtocolBufferSerializer
-    ZMQClient
+#    ProtocolBufferSerializer
+#    ZMQClient
     ZMQMessages.pb
-    ZMQServer
+#    ZMQServer
 )
 
 TARGET_LINK_LIBRARIES(zmqatoms mq)
