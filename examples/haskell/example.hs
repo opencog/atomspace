@@ -20,17 +20,19 @@ program = let a = AndLink (stv 0.5 0.5)
         insert $ ConceptNode "Tall" noTv
         insert a
         liftIO $ printAtom a
-        liftIO $ putStrLn "-----------After Insert:----------------"
+        liftIO $ putStrLn $ replicate 60 '-'
+        liftIO $ putStrLn "After Insert:"
         debug
-        liftIO $ putStrLn "----------------------------------------"
+        liftIO $ putStrLn $ replicate 60 '-'
         n <- get a
         case n of
           Just at -> liftIO $ putStrLn "AndLink found:" >> printAtom at
           Nothing -> liftIO $ putStrLn "No AndLink found."
         remove a
-        liftIO $ putStrLn "-----------After Remove:----------------"
+        liftIO $ putStrLn $ replicate 60 '-'
+        liftIO $ putStrLn "After Remove:"
         debug
-        liftIO $ putStrLn "----------------------------------------"
+        liftIO $ putStrLn $ replicate 60 '-'
         n <- get a
         case n of
           Just (AndLink _ _) -> liftIO $ putStrLn "AndLink found:"

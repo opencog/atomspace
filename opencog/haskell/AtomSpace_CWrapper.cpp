@@ -9,9 +9,9 @@
 #include <opencog/atomspace/ProbabilisticTruthValue.h>
 #include <opencog/util/exceptions.h>
 
-AtomSpace* AtomSpace_new()
+AtomSpace* AtomSpace_new( AtomSpace* parent_ptr )
 {
-    return new AtomSpace();
+    return new AtomSpace(parent_ptr);
 }
 
 void AtomSpace_delete( AtomSpace* this_ptr )

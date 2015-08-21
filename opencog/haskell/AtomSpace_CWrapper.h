@@ -16,9 +16,12 @@ extern "C"
     /**
      * AtomSpace_new Creates a new instance of the AtomSpace class.
      *
+     * @param parent_ptr  Pointer to the parent atomspace
+     *                    (null if we want a new independent atomspace).
+     *
      * @return  Pointer to the AtomSpace instance created.
      */
-    AtomSpace* AtomSpace_new();
+    AtomSpace* AtomSpace_new( AtomSpace * parent_ptr );
 
     /**
      * AtomSpace_delete Deletes an AtomSpace object.
