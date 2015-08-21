@@ -29,7 +29,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Handle.h>
-#include <opencog/persist/zmq/atomspace/ZMQStorage.h>
+#include "ZMQStorage.h"
 
 namespace opencog
 {

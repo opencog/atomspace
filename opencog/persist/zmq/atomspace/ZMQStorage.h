@@ -51,6 +51,35 @@ class ZMQStorage
 	public:
 		ZMQStorage();
 		~ZMQStorage();
+
+		bool connected(void); // connection to DB is alive
+
+		// Store atoms to DB
+//		void storeSingleAtom(AtomPtr);
+		void storeAtom(AtomPtr, bool synchronous = false);
+		void flushStoreQueue();
+
+		// Fetch atoms from DB
+//		bool atomExists(Handle);
+		AtomPtr getAtom(Handle);
+		std::vector<Handle> getIncomingSet(Handle);
+		NodePtr getNode(Type, const char *);
+		NodePtr getNode(const Node &n)
+		{
+			return getNode(n.getType(), n.getName().c_str());
+		}
+		LinkPtr getLink(Type, const std::vector<Handle>&);
+		LinkPtr getLink(const Link &l)
+		{
+			return getLink(l.getType(), l.getOutgoingSet());
+		}
+
+		// Large-scale loads and saves
+		void loadType(AtomTable &, Type); // Load *all* atoms of type
+		void load(AtomTable &); // Load entire contents of DB
+		void store(const AtomTable &); // Store entire contents of AtomTable
+		void reserve(void);     // reserve range of UUID's
+
 };
 
 /** @}*/

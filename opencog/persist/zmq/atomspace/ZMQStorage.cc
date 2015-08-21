@@ -42,7 +42,7 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/TruthValue.h>
 
-#include <opencog/persist/zmq/atomspace/ZMQStorage.h>
+#include "ZMQStorage.h"
 
 using namespace opencog;
 
@@ -53,6 +53,78 @@ ZMQStorage::ZMQStorage() {
 ZMQStorage::~ZMQStorage() {
 
 }
+
+bool ZMQStorage::connected(void) {
+	return false;
+}
+
+void ZMQStorage::reserve() {
+
+}
+
+void ZMQStorage::store(const AtomTable &table) {
+
+}
+
+void ZMQStorage::load(AtomTable &table) {
+
+}
+
+/**
+ * Retreive the entire incoming set of the indicated atom.
+ */
+std::vector<Handle> ZMQStorage::getIncomingSet(Handle h)
+{
+
+}
+
+/**
+ * Fetch Node from database, with the indicated type and name.
+ * If there is no such node, NULL is returned.
+ * More properly speaking, the point of this routine is really
+ * to fetch the associated TruthValue for this node.
+ *
+ * This method does *not* register the atom with any atomtable/atomspace
+ * However, it does register with the TLB, as the SQL uuids and the
+ * TLB Handles must be kept in sync, or all hell breaks loose.
+ */
+NodePtr ZMQStorage::getNode(Type t, const char * str)
+{
+	return NULL;
+}
+
+/**
+ * Fetch Link from database, with the indicated type and outgoing set.
+ * If there is no such link, NULL is returned.
+ * More properly speaking, the point of this routine is really
+ * to fetch the associated TruthValue for this link.
+ *
+ * This method does *not* register the atom with any atomtable/atomspace
+ * However, it does register with the TLB, as the SQL uuids and the
+ * TLB Handles must be kept in sync, or all hell breaks loose.
+ */
+LinkPtr ZMQStorage::getLink(Type t, const std::vector<Handle>&oset)
+{
+	return NULL;
+}
+
+/**
+ * Create a new atom, retrieved from storage
+ *
+ * This method does *not* register the atom with any atomtable/atomspace
+ * However, it does register with the TLB, as the SQL uuids and the
+ * TLB Handles must be kept in sync, or all hell breaks loose.
+ */
+AtomPtr ZMQStorage::getAtom(Handle h)
+{
+	return NULL;
+}
+
+void ZMQStorage::flushStoreQueue()
+{
+
+}
+
 
 #endif /* HAVE_ZMQ_STORAGE */
 /* ============================= END OF FILE ================= */

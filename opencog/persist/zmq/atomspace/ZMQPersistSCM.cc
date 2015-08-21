@@ -24,8 +24,9 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/BackingStore.h>
 #include <opencog/guile/SchemePrimitive.h>
-#include <opencog/persist/zmq/atomspace/ZMQStorage.h>
-#include <opencog/persist/zmq/atomspace/ZMQPersistSCM.h>
+
+#include "ZMQPersistSCM.h"
+#include "ZMQStorage.h"
 
 using namespace opencog;
 
@@ -57,51 +58,47 @@ class ZMQBackingStore : public BackingStore
 
 ZMQBackingStore::ZMQBackingStore()
 {
-	//_store = NULL;
+	_store = NULL;
 }
 
-//void ZMQBackingStore::set_store(ZMQStorage *as)
-//{
-//	_store = as;
-//}
+void ZMQBackingStore::set_store(ZMQStorage *as)
+{
+	_store = as;
+}
 
 NodePtr ZMQBackingStore::getNode(Type t, const char *name) const
 {
-	return NULL;
-//	return _store->getNode(t, name);
+	return _store->getNode(t, name);
 }
 
 LinkPtr ZMQBackingStore::getLink(Type t, const std::vector<Handle>& oset) const
 {
-	return NULL;
-//	return _store->getLink(t, oset);
+	return _store->getLink(t, oset);
 }
 
 AtomPtr ZMQBackingStore::getAtom(Handle h) const
 {
-	return NULL;
-//	return _store->getAtom(h);
+	return _store->getAtom(h);
 }
 
 HandleSeq ZMQBackingStore::getIncomingSet(Handle h) const
 {
-	return NULL;
-//	return _store->getIncomingSet(h);
+	return _store->getIncomingSet(h);
 }
 
 void ZMQBackingStore::storeAtom(Handle h)
 {
-//	_store->storeAtom(h);
+	_store->storeAtom(h);
 }
 
 void ZMQBackingStore::loadType(AtomTable& at, Type t)
 {
-//	_store->loadType(at, t);
+	_store->loadType(at, t);
 }
 
 void ZMQBackingStore::barrier()
 {
-//	_store->flushStoreQueue();
+	_store->flushStoreQueue();
 }
 
 // ==================================================================
@@ -109,7 +106,7 @@ void ZMQBackingStore::barrier()
 ZMQPersistSCM::ZMQPersistSCM(AtomSpace *as)
 {
 	_as = as;
-	//_store = NULL;
+	_store = NULL;
 	_backing = new ZMQBackingStore();
 
 #ifdef HAVE_GUILE
@@ -175,7 +172,7 @@ void ZMQPersistSCM::do_open(const std::string& dbname,
 	if (NULL == as)
 		as = SchemeSmob::ss_get_env_as("zmq-open");
 #endif
-	as->registerBackingStore(_backing);
+	// as->registerBackingStore(_backing); // TODO: register
 }
 
 void ZMQPersistSCM::do_close(void)
@@ -189,7 +186,7 @@ void ZMQPersistSCM::do_close(void)
 	if (NULL == as)
 		as = SchemeSmob::ss_get_env_as("zmq-close");
 #endif
-	as->unregisterBackingStore(_backing);
+	// as->unregisterBackingStore(_backing); // TODO: unregister
 
 	_backing->set_store(NULL);
 	delete _store;
@@ -208,9 +205,8 @@ void ZMQPersistSCM::do_load(void)
 		as = SchemeSmob::ss_get_env_as("zmq-load");
 #endif
 	// XXX TODO: this should probably be done in a separate thread.
-	_store->load(const_cast<AtomTable&>(as->get_atomtable()));
+	 _store->load(const_cast<AtomTable&>(as->get_atomtable()));
 }
-
 
 void ZMQPersistSCM::do_store(void)
 {
