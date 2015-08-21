@@ -4,7 +4,7 @@ INCLUDE_DIRECTORIES (
 )
 
 # This code has not been maintained recently and currently doesn't compile.
-# Furthermore, proto should be part of the build process so that the .pb.h and .pb.c
+# Furthermore, proto should be part of the build process so that the .pb.h and .pb.cc
 # files are updated dynamically, rather than being included in the repository.
 #
 # I'm disabling it until it is debugged and added to the unit tests or removed:
@@ -16,5 +16,5 @@ ADD_LIBRARY (zmqatoms SHARED
 #    ZMQServer
 )
 
-TARGET_LINK_LIBRARIES(zmqatoms mq)
+TARGET_LINK_LIBRARIES(zmqatoms zmq)
 
