@@ -14,6 +14,8 @@ ADD_LIBRARY (zmqatoms SHARED
 #    ZMQClient
     ZMQMessages.pb
 #    ZMQServer
+	ZMQStorage
+	ZMQPersistSCM
 )
 
 TARGET_LINK_LIBRARIES(zmqatoms zmq)

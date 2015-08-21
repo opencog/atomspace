@@ -569,6 +569,7 @@ SUMMARY_ADD("Hypertable" "HyperTable for scalable persistance (experimental)" HA
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("SQL persistance" "Save/Restore of AtomSpace to database" HAVE_PERSIST)
+SUMMARY_ADD("ZeroMQ persistence" "Save/Restore of AtomSpace to ZeroMQ server" HAVE_ZMQ)
 SUMMARY_ADD("TBB" "Intel TBB (Threaded Building Blocks) for multithreading" HAVE_TBB)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_SHOW()
