@@ -24,7 +24,6 @@
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atomutils/FindUtils.h>
-#include <opencog/atoms/bind/BetaRedex.h>
 
 #include "DefaultPatternMatchCB.h"
 

@@ -828,10 +828,6 @@ bool PatternMatchEngine::tree_compare(const Handle& hp,
 		}
 	}
 #endif
-	// If the pattern is defined elsewhere, not here, then we have
-	// to go to where it is defined, and pattern match things there.
-	if (BETA_REDEX == tp)
-		return redex_compare(lp, lg);
 
 	// Let the callback perform basic checking.
 	bool match = _pmc.link_match(lp, lg);

@@ -3,12 +3,11 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (lambda SHARED
-	BetaRedex.cc
 	BindLink.cc
 	DefineLink.cc
 	PatternLink.cc
 	PatternUtils.cc
-	ScopeLink.cc
+	LambdaLink.cc
 	VariableList.cc
 )
 
