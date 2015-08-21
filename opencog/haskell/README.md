@@ -62,7 +62,7 @@ For using ghci:
 
 ```
 export STACK_YAML=<ATOMSPACE_ROOT>/opencog/haskell/stack.yaml
-stack ghci --ghc-options -lhaskell-atomspace
+stack ghci
 ```
 
 Or, to avoid defining STACK_YAML every time, you can include this library to your
@@ -79,9 +79,31 @@ Then you can compile simple .hs files with:
 stack ghc example.hs
 ```
 
-(It is necessary to previously build and install the AtomSpace, because the
-opencog-atomspace haskell library
-depends on the haskell-atomspace C wrapper library)
+### Possibles errors
+* It is necessary to previously build and install the AtomSpace, because the opencog-atomspace haskell library depends on the haskell-atomspace C wrapper library.
+So, if you have a problem like "haskell-atomspace library not found" , first of all, you should ensure it was properly installed when installing the AtomSpace.
+
+* If when running "stack ghc" or "stack build" you get an error about "Missing C library: haskell-atomspace", you should add the flag:
+ 
+  --extra-lib-dir=/usr/local/lib/opencog (with proper library location).
+
+* If when running "stack ghci" you get an error about "lhaskell-atomspace not found", you should add the flags: 
+
+  --ghc-options -lhaskell-atomspace
+
+* If when using "stack ghci" you see that ghci is interpreting the code: "[..] Compiling ... (..., interpreted )"
+Then, a better option is to compile the package to object code, so it is loaded, which runs faster. All you have to do is to execute only one time:
+
+ stack ghci --ghc-options -fobject-code
+
+ On future uses, ghci will automatically load the compiled package.
+
+* If you find problems when building haskell libraries. One good option is to remove the directory:
+
+ <ATOMSPACE_ROOT>/opencog/haskell/.stack-work
+
+ It is automatically created when building, and sometimes becomes inconsistent.
+
 
 ### Documentation
 To generate proper [Haddock](https://www.haskell.org/haddock/) documentation,
@@ -92,8 +114,14 @@ make doxygen
 ```
 
 Then you can open the OpenCog documentation (build/doc/html/index.html),
-go to "OpenCog source code documentation - Libraries - Haskell bindings
-library" and click on the "opencog-atomspace" link.
+go to:
+
+ "OpenCog source code documentation - Libraries - Haskell bindings library" 
+ and click on the "opencog-atomspace" link.
+
+**NOTE:** Documentation can be REALLY useful. There you can see the complete
+definition of Haskell bindings, including data types that are automatically generated
+by template haskell, and are not available in the code.
 
 ### Usage
 
