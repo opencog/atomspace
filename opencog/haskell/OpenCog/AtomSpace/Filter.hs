@@ -20,7 +20,7 @@ module OpenCog.AtomSpace.Filter (
   , FilterIsChild(..)
   ) where
 
-import OpenCog.AtomSpace.Template       (atomHierarchyFile,declareAtomFilters)
+import OpenCog.AtomSpace.Template       (declareAtomFilters)
 import OpenCog.AtomSpace.Inheritance    (type (<~))
 import OpenCog.AtomSpace.AtomType       (AtomType(..))
 import OpenCog.AtomSpace.Types          (Atom(..),Gen(..),appGen)
@@ -62,4 +62,4 @@ getPhantomType = read . show . typeRep
 --
 -- instance FilteIsChild ...
 --
-declareAtomFilters [atomHierarchyFile|../atomspace/atom_types.script|]
+declareAtomFilters "../../../atomspace/atom_types.script"
