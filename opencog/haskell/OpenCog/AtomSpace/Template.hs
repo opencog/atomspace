@@ -5,21 +5,24 @@
 -- | This Module defines the main util functions to use Template Haskell
 -- in order to reduce as much boilerplate code as possible.
 module OpenCog.AtomSpace.Template (
-  declareAtomType
-, declareAtomFilters
-, atomHierarchyFile
-) where
+    declareAtomType
+  , declareAtomFilters
+  ) where
 
 import Language.Haskell.TH.Quote        (QuasiQuoter(..),dataToExpQ,quoteFile)
+import Language.Haskell.TH.Syntax       (addDependentFile)
 import Language.Haskell.TH
 import Data.List                        (isSuffixOf,sortBy,(\\),groupBy)
 import Data.Char                        (toUpper,toLower)
 import Data.Data                        (Data,Typeable)
+import Data.Functor                     ((<$>))
 import Data.Map.Strict                  (Map,mapKeys,toList,fromList,insert,
                                          empty,(!),keys,member)
 import qualified Data.Map.Strict as M   (map)
 import qualified Data.Set        as S   (Set,(\\),fromList,toList)
 import Control.Monad.State              (State,modify,get,execState)
+import System.Directory                 (getCurrentDirectory)
+import System.FilePath                  ((</>),takeDirectory)
 
 -- | Simple Atom representation.
 data AT = NOD String
@@ -27,8 +30,10 @@ data AT = NOD String
     deriving (Typeable,Data,Eq,Ord,Show)
 
 -- | Template function to define AtomType and some util functions over it.
-declareAtomType :: [(AT,[AT])] -> Q [Dec]
-declareAtomType atomMap = do
+--   It takes as argument a relative path to the file "atom_types.script".
+declareAtomType :: FilePath -> Q [Dec]
+declareAtomType file = do
+    atomMap <- parseRelativeFile file
     a <- newName "a"
     b <- newName "b"
     let
@@ -79,8 +84,10 @@ declareAtomType atomMap = do
     genlist (x:xs) = AppT (AppT PromotedConsT (PromotedT x)) (genlist xs)
 
 -- | Template function to declare Filter instances for each AtomType.
-declareAtomFilters :: [(AT,[AT])] -> Q [Dec]
-declareAtomFilters atomMap = do
+--   It takes as argument a relative path to the file "atom_types.script".
+declareAtomFilters :: FilePath -> Q [Dec]
+declareAtomFilters file = do
+    atomMap <- parseRelativeFile file
     a <- newName "a"
     let
       className       = mkName "FilterIsChild"
@@ -125,17 +132,24 @@ declareAtomFilters atomMap = do
 
      in return classDef
 
--- | QuasiQuorter to read the atom_types.script file.
-atomHierarchyFile :: QuasiQuoter
-atomHierarchyFile = quoteFile atomHierarchy
+-- | 'getAbsFromRelPath' obtains an absolute path from a relative path to
+-- current file (where this template function is running).
+getAbsFromRelPath :: FilePath -> Q FilePath
+getAbsFromRelPath relative = do
+    actual <- runIO getCurrentDirectory
+    fileName <- loc_filename <$> location
+    let path = actual </> fileName
+        dir  = takeDirectory path
+    return $ dir </> relative
 
-atomHierarchy :: QuasiQuoter
-atomHierarchy = QuasiQuoter {
-      quoteExp  = dataToExpQ (\x -> Nothing) . parser
-    , quotePat  = undefined
-    , quoteDec  = undefined
-    , quoteType = undefined
-    }
+-- | 'parseRelativeFile' takes a relative path to a file, and executes the
+-- parser over it.
+parseRelativeFile :: FilePath -> Q [(AT,[AT])]
+parseRelativeFile fileName = do
+    file <- getAbsFromRelPath fileName
+    addDependentFile file
+    cont <- runIO $ readFile file
+    return $ parser cont
 
 type NameMap = Map String String
 type AtomMap = Map String [String]

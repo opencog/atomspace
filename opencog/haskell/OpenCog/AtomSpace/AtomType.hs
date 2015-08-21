@@ -20,7 +20,7 @@ module OpenCog.AtomSpace.AtomType (
   , toAtomTypeRaw
   ) where
 
-import OpenCog.AtomSpace.Template       (atomHierarchyFile,declareAtomType)
+import OpenCog.AtomSpace.Template       (declareAtomType)
 
 -- Usage of Template Haskell to generate definitions of AtomType,
 -- some util functions: fromAtomTypeRaw and toAtomTypeRaw,
@@ -54,4 +54,4 @@ import OpenCog.AtomSpace.Template       (atomHierarchyFile,declareAtomType)
 -- Up ConceptT = '[ConceptT, AtomT, NodeT]
 -- Up ...
 --
-declareAtomType [atomHierarchyFile|../atomspace/atom_types.script|]
+declareAtomType "../../../atomspace/atom_types.script"
