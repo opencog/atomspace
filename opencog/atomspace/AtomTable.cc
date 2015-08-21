@@ -39,7 +39,6 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/TypeNode.h>
-#include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/DefineLink.h>
 #include <opencog/atoms/bind/PatternLink.h>
@@ -281,9 +280,6 @@ AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
     } else if (BIND_LINK == atom_type) {
         if (NULL == BindLinkCast(atom))
             return createBindLink(*LinkCast(atom));
-    } else if (BETA_REDEX == atom_type) {
-        if (NULL == BetaRedexCast(atom))
-            return createBetaRedex(*LinkCast(atom));
     } else if (DEFINE_LINK == atom_type) {
         if (NULL == DefineLinkCast(atom))
             return createDefineLink(*LinkCast(atom));
@@ -342,8 +338,6 @@ static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
     // Links of various kinds -----------
     if (BIND_LINK == atom_type)
         return createBindLink(*LinkCast(atom));
-    if (BETA_REDEX == atom_type)
-        return createBetaRedex(*LinkCast(atom));
     if (DEFINE_LINK == atom_type)
         return createDefineLink(*LinkCast(atom));
 /*

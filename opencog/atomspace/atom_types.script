@@ -83,6 +83,9 @@ CHOICE_LINK <- ORDERED_LINK
 // Universe of discourse
 CONTEXT_LINK <- ORDERED_LINK
 
+// Naming things, tagging things.
+DEFINE_LINK <- ORDERED_LINK
+
 // ---------------------------------------------------------
 // Types and variables and signatures.
 
@@ -111,8 +114,6 @@ QUOTE_LINK <- ORDERED_LINK
 // variables within it; the ScopeLink need not bind all of them.
 // The FreeLink also has no type restrictions on the variables.
 SCOPE_LINK <- VARIABLE_LIST
-DEFINE_LINK <- ORDERED_LINK     // Gives a scoped lambda a name
-BETA_REDEX <- ORDERED_LINK      // Beta reduction of bound variables
 
 // Pattern definition, pattern grounding/satisfaction.
 // The PatternLink implements the base class holding a pattern that

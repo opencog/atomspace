@@ -23,7 +23,6 @@
 
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atomutils/FindUtils.h>
-#include <opencog/atoms/bind/BetaRedex.h>
 
 #include "InitiateSearchCB.h"
 #include "PatternMatchEngine.h"
@@ -130,15 +129,7 @@ InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
 	Handle hdeepest(Handle::UNDEFINED);
 	size_t thinnest = SIZE_MAX;
 
-	// If there is a ComposeLink, then search it's definition instead.
-	// but do this only at depth zero, so as to get us started; otherwise
-	// we risk infinite descent if the compose is recursive.
 	LinkPtr ll(LinkCast(h));
-	if (0 == depth and BETA_REDEX == ll->getType())
-	{
-		BetaRedexPtr cpl(BetaRedexCast(ll));
-		ll = LinkCast(cpl->beta_reduce());
-	}
 	for (Handle hunt : ll->getOutgoingSet())
 	{
 		size_t brdepth = depth + 1;
