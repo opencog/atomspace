@@ -24,10 +24,8 @@ import Control.Monad.State              (State,modify,get,execState)
 import System.Directory                 (getCurrentDirectory)
 import System.FilePath                  ((</>),takeDirectory)
 
--- | Simple Atom representation.
-data AT = NOD String
-        | LNK String
-    deriving (Typeable,Data,Eq,Ord,Show)
+-- | Simple Atom type.
+type AT = String
 
 -- | Template function to define AtomType and some util functions over it.
 --   It takes as argument a relative path to the file "atom_types.script".
@@ -45,7 +43,7 @@ declareAtomType file = do
 
       constrNames   = map (\(nod,ancestors) ->
                              (mkName (toTypeName nod)
-                             ,toRawName nod
+                             ,nod
                              ,map (mkName . toTypeName) ancestors)) $
                                getFullAncestors atomMap
       constr        = map (\(x,_,_) -> NormalC x []) constrNames
@@ -166,8 +164,6 @@ onAtomMap f = modify (\(s1,s2) -> (s1,f s2))
 parser :: String -> [(AT,[AT])]
 parser s = ( toList
            . modifyVarNode
-           . M.map (map toAT)
-           . mapKeys toAT
            . snd
            ) $ execState (withState s) (empty,empty)
   where
@@ -192,7 +188,7 @@ parser s = ( toList
     -- We will set VariableNode's parent to all leaf nodes.
     -- So, VariableNode will inherit from every atom type, and we can place it
     -- everywhere without type constraints.
-    varNode = NOD "VariableNode"
+    varNode = "VariableNode"
     modifyVarNode :: Map AT [AT] -> Map AT [AT]
     modifyVarNode m = let parents = filter ((/=)varNode) $ getNodesLeaf $ toList m
                        in insert varNode parents m
@@ -230,29 +226,14 @@ toCamelCase = concat
       capital (x:xs) = toUpper x : map toLower xs
       capital []     = []
 
-toAT :: String -> AT
-toAT "Notype" = NOD "Notype"
-toAT "Atom"   = NOD "Atom"
-toAT "Node"   = NOD "Node"
-toAT "Link"   = LNK "Link"
-toAT xs | isSuffixOf "Node" xs = NOD xs
-        | otherwise = LNK xs
-
 -- | 'toTypeName' given an atomtype generates a phantom type notation for it.
 toTypeName :: AT -> String
-toTypeName (NOD "Node") = "NodeT"
-toTypeName (NOD s) = if isSuffixOf "Node" s
-                        then take (length s - 4) s ++ "T"
-                        else s ++ "T"
-toTypeName (LNK "Link") = "LinkT"
-toTypeName (LNK s) = if isSuffixOf "Link" s
-                        then take (length s - 4) s ++ "T"
-                        else s ++ "T"
-
--- | 'toRawName' simply gets the atomtype.
-toRawName :: AT -> String
-toRawName (NOD n) = n
-toRawName (LNK l) = l
+toTypeName "Node" = "NodeT"
+toTypeName "Link" = "LinkT"
+toTypeName s
+    | isSuffixOf "Node" s = take (length s - 4) s ++ "T"
+    | isSuffixOf "Link" s = take (length s - 4) s ++ "T"
+    | otherwise           = s ++ "T"
 
 -- | 'reverseTree' reverses the information provided in the atom_types.script file.
 -- From input: [(Atom, parent of Atom)]
