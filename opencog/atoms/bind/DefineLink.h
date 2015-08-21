@@ -27,7 +27,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atoms/bind/ScopeLink.h>
 
 namespace opencog
 {
