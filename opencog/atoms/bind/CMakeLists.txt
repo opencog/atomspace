@@ -32,8 +32,8 @@ ENDIF (CYGWIN)
 
 INSTALL (FILES
 	BindLink.h
-	ScopeLink.h
 	DefineLink.h
+	LambdaLink.h
 	PatternLink.h
 	PatternUtils.h
 	VariableList.h
