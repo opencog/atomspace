@@ -83,9 +83,6 @@ CHOICE_LINK <- ORDERED_LINK
 // Universe of discourse
 CONTEXT_LINK <- ORDERED_LINK
 
-// Naming things, tagging things.
-DEFINE_LINK <- ORDERED_LINK
-
 // ---------------------------------------------------------
 // Types and variables and signatures.
 
@@ -114,6 +111,14 @@ QUOTE_LINK <- ORDERED_LINK
 // need not bind all of them.  The FreeLink also has no type
 // restrictions on the variables.
 LAMBDA_LINK <- ORDERED_LINK
+
+// Naming things, tagging things.
+DEFINE_LINK <- ORDERED_LINK
+
+// PutLinks perform a beta-reduction when executed; i.e. they get
+// beta-reduced when they are executed. The first atom in a PutLink
+// should be a LambdaLink... or I guess a FreeLink is OK, too?
+PUT_LINK <- ORDERED_LINK
 
 // Pattern definition, pattern grounding/satisfaction.
 // The PatternLink implements the base class holding a pattern that
@@ -184,10 +189,6 @@ ATTRACTION_LINK <- ORDERED_LINK
 // shared-library conflicts, the FreeLink cannot currently be used in
 // this way.  Thus, its half-finished ....
 FREE_LINK <- ORDERED_LINK
-
-// PutLinks perform a beta-reduction when executed; i.e. they get
-// beta-reduced when they are executed.
-PUT_LINK <- FREE_LINK
 
 // To be used with PredicateNode
 EVALUATION_LINK <- FREE_LINK

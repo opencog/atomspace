@@ -22,6 +22,8 @@
 
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
+#include "FreeLink.h"
+#include "LambdaLink.h"
 #include "PutLink.h"
 
 using namespace opencog;
@@ -29,7 +31,7 @@ using namespace opencog;
 PutLink::PutLink(const HandleSeq& oset,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : FreeLink(PUT_LINK, oset, tv, av)
+    : Link(PUT_LINK, oset, tv, av)
 {
 	init();
 }
@@ -37,7 +39,7 @@ PutLink::PutLink(const HandleSeq& oset,
 PutLink::PutLink(const Handle& a,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : FreeLink(PUT_LINK, a, tv, av)
+    : Link(PUT_LINK, a, tv, av)
 {
 	init();
 }
@@ -45,7 +47,7 @@ PutLink::PutLink(const Handle& a,
 PutLink::PutLink(Type t, const HandleSeq& oset,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : FreeLink(t, oset, tv, av)
+    : Link(t, oset, tv, av)
 {
 	if (not classserver().isA(t, PUT_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
@@ -55,7 +57,7 @@ PutLink::PutLink(Type t, const HandleSeq& oset,
 PutLink::PutLink(Type t, const Handle& a,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : FreeLink(t, a, tv, av)
+    : Link(t, a, tv, av)
 {
 	if (not classserver().isA(t, PUT_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
@@ -65,7 +67,7 @@ PutLink::PutLink(Type t, const Handle& a,
 PutLink::PutLink(Type t, const Handle& a, const Handle& b,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : FreeLink(t, a, b, tv, av)
+    : Link(t, a, b, tv, av)
 {
 	if (not classserver().isA(t, PUT_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
@@ -73,7 +75,7 @@ PutLink::PutLink(Type t, const Handle& a, const Handle& b,
 }
 
 PutLink::PutLink(Link& l)
-    : FreeLink(l)
+    : Link(l)
 {
 	Type tscope = l.getType();
 	if (not classserver().isA(tscope, PUT_LINK))
@@ -114,25 +116,30 @@ PutLink::PutLink(Link& l)
 ///
 void PutLink::init(void)
 {
-	if (2 != _outgoing.size())
-		throw InvalidParamException(TRACE_INFO, "PutLinks should be arity 2!");
+	size_t sz = _outgoing.size();
+	if (2 != sz)
+		throw InvalidParamException(TRACE_INFO, "Unexprected PutLink arity! Got %lu", sz);
 
 	const Handle& body = _outgoing[0];
-	if (VARIABLE_NODE == body->getType())
+	Type btype = body->getType();
+
+	// If the body is a LambdaLink, then use it's variable declarations;
+	// else use the FreeLink to find all the variables.
+	if (classserver().isA(btype, LAMBDA_LINK))
 	{
-		_varseq.push_back(body);
+		LambdaLinkPtr lam(LambdaLinkCast(body));
+		if (NULL == lam)
+			lam = createLambdaLink(*LinkCast(body));
+		_varlist = lam->get_variables();
 	}
 	else
 	{
-		LinkPtr lll(LinkCast(body));
-		if (lll)
-		{
-			std::set<Handle> varset;
-			find_vars(varset, lll->getOutgoingSet());
-		}
+		FreeLink fl(body);
+		VariableList vl(fl.get_vars());
+		_varlist = vl.get_variables();
 	}
-	build_index();
 
+#if LATER
 	// OK, now for the values.
 	if (_varseq.size() == 1) return;
 
@@ -160,6 +167,7 @@ void PutLink::init(void)
 				"PutLink set element has mismatched size! Expected %zu, got %zu\n",
 				_varseq.size(), lse->getArity());
 	}
+#endif
 }
 /* ================================================================= */
 
@@ -198,6 +206,7 @@ void PutLink::init(void)
 Handle PutLink::substitute_nocheck(const Handle& term,
                                    const HandleSeq& args) const
 {
+#if 0
 	// If it is a singleton, just return that singleton.
 	std::map<Handle, unsigned int>::const_iterator idx;
 	idx = _index.find(term);
@@ -219,6 +228,8 @@ Handle PutLink::substitute_nocheck(const Handle& term,
 		oset.push_back(substitute_nocheck(h, args));
 	}
 	return Handle(createLink(term->getType(), oset));
+#endif
+return Handle::UNDEFINED; // XXX tmp hack
 }
 
 Handle PutLink::do_reduce(void) const
@@ -226,6 +237,7 @@ Handle PutLink::do_reduce(void) const
 	const Handle& body = _outgoing[0];
 	const Handle& vals = _outgoing[1];
 
+#if 0
 	if (1 == _varseq.size())
 	{
 		HandleSeq oset;
@@ -240,6 +252,7 @@ Handle PutLink::do_reduce(void) const
 
 	OC_ASSERT(vals->getType() == SET_LINK,
 		"Should have checked for this earlier, tin the ctor");
+#endif
 
 	HandleSeq bset;
 	for (Handle h : LinkCast(vals)->getOutgoingSet())

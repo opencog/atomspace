@@ -33,6 +33,11 @@ using namespace opencog;
 
 void LambdaLink::init(void)
 {
+	size_t sz = _outgoing.size();
+	if (2 < sz)
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an outgoing set size of at most two, got %d", sz);
+
 	extract_variables(_outgoing);
 }
 
@@ -47,6 +52,15 @@ LambdaLink::LambdaLink(const Handle& vars, const Handle& body,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: Link(LAMBDA_LINK, HandleSeq({vars, body}), tv, av)
 {
+	init();
+}
+
+LambdaLink::LambdaLink(Type t, const Handle& body,
+                       TruthValuePtr tv, AttentionValuePtr av)
+	: Link(t, HandleSeq({body}), tv, av)
+{
+	// Derived classes have a different initialization sequence
+	if (LAMBDA_LINK != t) return;
 	init();
 }
 
@@ -81,19 +95,15 @@ LambdaLink::LambdaLink(Link &l)
 /// Find and unpack variable declarations, if any; otherwise, just
 /// find all free variables.
 ///
-/// On top of that initialize _body with the clauses of the
-/// PatternLink.
-///
 void LambdaLink::extract_variables(const HandleSeq& oset)
 {
-	size_t sz = oset.size();
-	if (2 < sz)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an outgoing set size of at most two, got %d", sz);
+	Type decls = oset[0]->getType();
 
-	// If the outgoing set size is one, then there are no variable
-	// declarations; extract all free variables.
-	if (1 == sz)
+	// If the first atom is not explicitly a variable declaration, then
+	// there are no variable declarations; extract all free variables.
+	if (VARIABLE_LIST != decls and
+	    VARIABLE_NODE != decls and
+	    TYPED_VARIABLE_LINK != decls)
 	{
 		_body = oset[0];
 

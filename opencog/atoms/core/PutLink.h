@@ -24,7 +24,7 @@
 #define _OPENCOG_PUT_LINK_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/core/FreeLink.h>
+#include <opencog/atoms/core/VariableList.h>
 
 namespace opencog
 {
@@ -37,21 +37,24 @@ namespace opencog
  * version of MemberLink, with argumets reversed. 
  *
  * A beta redex is a concatentation or composition of two expressions,
- * one with N free variables in it, and a list of N values for those
+ * one with N declared variables in it, and a list of N values for those
  * variables.  The natural form for a beta redex is in the unreduced
  * form: the values are not (yet) substituted for the variables; they
  * are simply sitting there, ready and waiting for that reduction to
- * happen.
+ * happen.  The PutLink makes use of the LambdaLink to identify the
+ * variables.
  *
- * Thus, the PutLink makes use of the FreeLink to identify the free
- * variables.  It also overloads it's reduce() method, which implements
- * the actual beta reduction.  The reduce() method only performs the
- * substitution; it does not attempt to execute or evaluate the
- * resulting expression.
+ * It defines a reduce() method, which implements the actual beta
+ * reduction.  The reduce() method only performs the substitution; it
+ * does not attempt to execute or evaluate the resulting expression.
  */
-class PutLink : public FreeLink
+class PutLink : public Link
 {
 protected:
+
+	/// Variables bound in the body.
+	Variables _varlist;
+
 	void init(void);
 	Handle substitute_nocheck(const Handle&, const HandleSeq&) const;
 	Handle do_reduce(void) const;

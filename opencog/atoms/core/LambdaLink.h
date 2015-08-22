@@ -51,11 +51,15 @@ class LambdaLink : public Link
 {
 protected:
 
+	/// Variables bound in the body.
+	Variables _varlist;
+
 	/// Handle of the body of the expression.
 	Handle _body;
 
-	/// Variables bound in the body.
-	Variables _varlist;
+	LambdaLink(Type, const Handle&,
+	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	LambdaLink(Type, const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
@@ -80,6 +84,9 @@ public:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	LambdaLink(Link &l);
+
+	// Return the list of variables we are holding.
+	const Variables& get_variables(void) const { return _varlist; }
 
 	// Take the list of values `vals`, and substitute them in for the
 	// variables in the body of this lambda. The values must satisfy all
