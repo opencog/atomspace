@@ -862,22 +862,59 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 /* ======================================================== */
 
-bool PatternMatchEngine::explore_term_branches(const Handle& hp,
+/*
+ * The input pattern may contain many repeated sub-patterns. For example:
+ *
+ * ImplicationLink
+ *   UnorderedLink
+ *     VariableNode "$x"
+ *     ConceptNode "this one"
+ *   UnorderedLink
+ *     VariableNode "$x"
+ *     ConceptNode "this one"
+ *
+ * Suppose that we start searching the clause from VariableNode "$x" that
+ * occures twice in the pattern under UnorderedLink. While we traverse
+ * the pattern recursively we need to keep current state of permutations
+ * of UnorderedLink-s. We do not know which permutation will match. It may
+ * be different permutation for each occurence of UnorderedLink-s.
+ * This is the reason why we use PatternTerm pointers instead of atom Handles
+ * while traversing pattern tree. We need to keep permutation states for
+ * each term pointer separately.
+ *
+ * Next suppose our joining atom repeates in many sub-branches of a single
+ * ChoiceLink. For example:
+ *
+ * ChoiceLink
+ *   UnorderedLink
+ *     VariableNode "$x"
+ *     ConceptNode "this one"
+ *   UnorderedLink
+ *     VariableNode "$x"
+ *     ConceptNode "this one"
+ *
+ * We start pattern exploration for each occurence of joining atom. This is
+ * because of pruning being done in explore_choice_branches() when the first
+ * match is found. It seems that it may be refactored later. For now we iterate
+ * over all pattern terms associated with given atom handle.
+ *
+ */
+bool PatternMatchEngine::explore_term_branches(const Handle& term,
                                                const Handle& hg,
                                                const Handle& clause_root)
 {
 	try
 	{
 		// The term may appear in the clause in many places.
-		// Start exploration at each occurence
+		// Start exploration for each occurence
 		for (const PatternTermPtr &ptm :
-			_pat->connected_terms_map.at({hp, clause_root}))
+			_pat->connected_terms_map.at({term, clause_root}))
 		{
 			if (explore_link_branches(ptm, hg, clause_root))
 				return true;
 		}
-	} catch (...) {
-		dbgprt("Term not found for hp=%s, clause=%s\n",
+	} catch (const std::out_of_range&) {
+		dbgprt("Pattern term not found for %s, clause=%s\n",
 		        hp->toShortString().c_str(),
 		        clause_root->toShortString().c_str());
 	}
