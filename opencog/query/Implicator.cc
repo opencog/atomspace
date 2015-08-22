@@ -34,7 +34,7 @@ using namespace opencog;
 /**
  * This callback takes the reported grounding, runs it through the
  * instantiator, to create the implicand, and then records the result
- * in the public member `result_list`.  If the number of results so
+ * in the public member `result_set`.  If the number of results so
  * far is less than `max_results`, it then returns false, to search
  * for more groundings.  (The engine will halt its search for a
  * grounding once an acceptable one has been found; so, to continue
@@ -46,13 +46,39 @@ bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
 {
 	// PatternMatchEngine::print_solution(term_soln,var_soln);
 	Handle h = inst.instantiate(implicand, var_soln);
-	if (Handle::UNDEFINED != h)
-		result_list.push_back(h);
+	insert_result(h);
 
 	// If we found as many as we want, then stop looking for more.
-	if (result_list.size() < max_results)
+	if (_result_set.size() < max_results)
 		return false;
 	return true;
+}
+
+void Implicator::insert_result(const Handle& h)
+{
+	if (Handle::UNDEFINED != h)
+	{
+		if (_result_set.end() == _result_set.find(h))
+		{
+			_result_set.insert(h);
+			_result_changed = true;
+		}
+	}
+}
+
+/**
+ * Returns unique results from 'result_set' converted to list.
+ */
+HandleSeq Implicator::get_result_list()
+{
+	if (_result_changed)
+	{
+		_result_list.clear();
+		std::copy(_result_set.begin(), _result_set.end(),
+		          std::back_inserter(_result_list));
+		_result_changed = false;
+	}
+	return _result_list;
 }
 
 
@@ -83,12 +109,12 @@ static Handle do_imply(AtomSpace* as,
 
 	bl->imply(impl, do_conn_check);
 
-	if (0 < impl.result_list.size())
+	if (0 < impl.get_result_list().size())
 	{
 		// The result_list contains a list of the grounded expressions.
 		// (The order of the list has no significance, so it's really a set.)
 		// Put the set into a SetLink, and return that.
-		Handle gl = as->add_link(SET_LINK, impl.result_list);
+		Handle gl = as->add_link(SET_LINK, impl.get_result_list());
 		return gl;
 	}
 
@@ -111,11 +137,10 @@ static Handle do_imply(AtomSpace* as,
 	{
 		std::map<Handle, Handle> empty_map;
 		Handle h = impl.inst.instantiate(impl.implicand, empty_map);
-		if (Handle::UNDEFINED != h)
-			impl.result_list.push_back(h);
+		impl.insert_result(h);
 	}
 
-	return as->add_link(SET_LINK, impl.result_list);
+	return as->add_link(SET_LINK, impl.get_result_list());
 }
 
 /**
