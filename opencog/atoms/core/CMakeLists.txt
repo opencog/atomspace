@@ -4,6 +4,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (atomcore SHARED
 	FreeLink.cc
+	LambdaLink.cc
 	PutLink.cc
 	VariableList.cc
 )
@@ -21,6 +22,7 @@ INSTALL (TARGETS atomcore
 
 INSTALL (FILES
 	FreeLink.h
+	LambdaLink.h
 	PutLink.h
 	VariableList.h
 	DESTINATION "include/opencog/atoms/core"

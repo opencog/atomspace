@@ -7,7 +7,6 @@ ADD_LIBRARY (lambda SHARED
 	DefineLink.cc
 	PatternLink.cc
 	PatternUtils.cc
-	LambdaLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -32,7 +31,6 @@ ENDIF (CYGWIN)
 INSTALL (FILES
 	BindLink.h
 	DefineLink.h
-	LambdaLink.h
 	PatternLink.h
 	PatternUtils.h
 	DESTINATION "include/opencog/atoms/bind"

@@ -41,8 +41,8 @@
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/DefineLink.h>
-#include <opencog/atoms/bind/LambdaLink.h>
 #include <opencog/atoms/bind/PatternLink.h>
+#include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
