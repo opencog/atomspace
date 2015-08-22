@@ -49,6 +49,17 @@ InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
 {
 }
 
+void InitiateSearchCB::set_pattern(const Variables& vars,
+                                   const Pattern& pat)
+{
+	_search_fail = false;
+	_variables = &vars;
+	_pattern = &pat;
+	_type_restrictions = &vars.typemap;
+	_dynamic = &pat.evaluatable_terms;
+}
+
+
 /* ======================================================== */
 
 // Find a good place to start the search.
@@ -374,99 +385,6 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
  */
 bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 {
-	return disjunct_search(pme);
-}
-
-void InitiateSearchCB::set_pattern(const Variables& vars,
-                                   const Pattern& pat)
-{
-	_search_fail = false;
-	_variables = &vars;
-	_pattern = &pat;
-	_type_restrictions = &vars.typemap;
-	_dynamic = &pat.evaluatable_terms;
-}
-
-/* ======================================================== */
-/**
- * This callback implements the handling of the special case where the
- * pattern consists of a single clause, at the top of which there is an
- * ChoiceLink. In this situation, one effectively has multiple, unrelated
- * grounding problems at hand, and they need to be treated as such.
- *
- * The core issue here is that, from the point of view of satisfiability,
- * each subgraph that occurs inside an ChoiceLink might be grounded by a
- * graph that is disconnected from the other subgraphs. There is no
- * a-priori way of knowing whether the groundings might be connected,
- * and thus, the worst-case must be assumed: each subgraph that occurs
- * inside an ChoiceLink must be considered to be a unique, independent
- * graph, which must be assumed to be disconnected from each of the
- * other subgraphs (even though they "accidentally" share a common
- * variable name).
- *
- * This is best understood through an example. Consider the clause
- *
- *   ChoiceLink
- *       ListLink
- *           ConceptNode Hunt
- *           VariableNode $X
- *       ListLink
- *           VariableNode $X
- *           ConceptNode Zebra
- *
- * Suppose that the Universe over which this is being grounded consists
- * of only two clauses:
- *
- *   ListLink
- *       ConceptNode Hunt
- *       ConceptNode RedOctober
- *
- *   ListLink
- *       ConceptNode IceStation
- *       ConceptNode Zebra
- *
- * Suppose that the search for a grounding is begun at `Hunt`. Then, the
- * `RedOctober` is found, so $X is grounded by `RedOctober`.  From here,
- * it is impossible to walk the graph in a connected manner to find the
- * alternative grounding: `IceStation`.  To find `IceStation`, a second
- * search needs to be launched, starting at `Zebra`.
- *
- * Since the pattern matcher is only able to walk over connected
- * graphs, it must be assumed a-priori that each subgraph in an ChoiceLink
- * is disconnected from the others. The only way that these two sub
- * graphs might prove to be connected is if the variable $X is used in
- * some other clause, thus establishing connectivity from that clause to
- * the subgraphs of the ChoiceLink.
- *
- * The practical side-effect, here, with regards to satisfcation, is
- * this: if both groundings are to be found in the above example, then
- * two efforts must be made: One effort, with the initial grounding
- * starting at `Hunt`, and a second, starting at `Zebra`.  So... that
- * is what we do here, with the ChoiceLink loop.
- */
-bool InitiateSearchCB::disjunct_search(PatternMatchEngine *pme)
-{
-	const HandleSeq& clauses = _pattern->mandatory;
-
-	if (1 == clauses.size() and clauses[0]->getType() == CHOICE_LINK)
-	{
-		const Pattern* porig = _pattern;
-		Pattern pcpy = *_pattern;
-		LinkPtr orl(LinkCast(clauses[0]));
-		const HandleSeq& oset = orl->getOutgoingSet();
-		for (const Handle& h : oset)
-		{
-			HandleSeq hs;
-			hs.push_back(h);
-			pcpy.mandatory = hs;
-			_pattern = &pcpy;
-			bool found = disjunct_search(pme);
-			_pattern = porig;
-			if (found) return true;
-		}
-		if (not _search_fail) return false;
-	}
-
 	dbgprt("Attempt to use node-neighbor search\n");
 	_search_fail = false;
 	bool found = neighbor_search(pme);
