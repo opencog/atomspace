@@ -5,7 +5,7 @@
 ; the opencog infrastructure, including a default atomspace.
 ;
 ; To use, say this from the guile prompt:
-; (load-modules (opencog))
+; (use-modules (opencog))
 ;
 ;
 ; This should result in a utf8 locale being used!
