@@ -31,7 +31,6 @@
 
 #include "PatternLink.h"
 #include "PatternUtils.h"
-#include "VariableList.h"
 
 using namespace opencog;
 

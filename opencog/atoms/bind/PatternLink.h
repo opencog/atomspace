@@ -26,7 +26,7 @@
 #include <unordered_map>
 
 #include <opencog/query/Pattern.h>
-#include <opencog/atoms/bind/VariableList.h>
+#include <opencog/atoms/core/VariableList.h>
 #include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog

@@ -27,13 +27,40 @@
 
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/query/Pattern.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
+
+typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
+
+/// The Variables struct defines a list of variables in a way that
+/// makes it easier and faster to work with in C++.  It implements 
+/// the data that is shared between the VariableList link atom
+/// and the pattern matcher.
+///
+struct Variables
+{
+	/// Unbundled variables and types for them.
+	/// _typemap is the (possibly empty) list of restrictions on
+	/// the variable types. The _varset contains exactly the same atoms
+	/// as the _varseq; it is used for fast lookup; (i.e. is some
+	/// some variable a part of this set?) whereas the _varseq list
+	/// preserves the original order of the variables.  Yes, the fast
+	/// lookup really is needed!
+	///
+	/// The _index is a reversed index into _varseq: given a variable,
+	/// it returns the ordinal of that variable in the _varseq. It is
+	/// used to implement the variable substitution (aka beta-reducation
+	/// aka "PutLink") method.
+	HandleSeq varseq;
+	std::set<Handle> varset;
+	VariableTypeMap typemap;
+	std::map<Handle, unsigned int> index;
+};
+
 
 /// The VariableList class records it's outgoing set in various ways
 /// that make it easier and faster to work with in C++.  It implements

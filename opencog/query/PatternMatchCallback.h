@@ -28,7 +28,8 @@
 #include <set>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atoms/bind/VariableList.h> // for VariableTypeMap
+#include <opencog/query/Pattern.h> // for VariableTypeMap
+#include <opencog/atoms/core/VariableList.h> // for VariableTypeMap
 
 // #define DEBUG 1
 

@@ -8,7 +8,6 @@ ADD_LIBRARY (lambda SHARED
 	PatternLink.cc
 	PatternUtils.cc
 	LambdaLink.cc
-	VariableList.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -36,6 +35,5 @@ INSTALL (FILES
 	LambdaLink.h
 	PatternLink.h
 	PatternUtils.h
-	VariableList.h
 	DESTINATION "include/opencog/atoms/bind"
 )
