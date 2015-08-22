@@ -90,7 +90,7 @@ protected:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	void build_index(void);
-	Handle substitute_nocheck(const Handle&, const HandleSeq&) const;
+	static Handle substitute_nocheck(const Handle&, const HandleSeq&, const Variables&);
 public:
 	VariableList(const HandleSeq& vardecls,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
@@ -104,18 +104,22 @@ public:
 	// Return true if we are holding a single variable, and the handle
 	// given as the argument satisfies the type restrictions (if any).
 	// Else return false.
-	bool is_type(const Handle&) const;
+	bool is_type(const Handle& h) const { return is_type(h, _varlist); }
+	static bool is_type(const Handle&, const Variables&);
 
 	// Return true if the sequence is of the same length as the variable
 	// declarations we are holding, and if they satisfy all of the type
 	// restrictions (if any).
-	bool is_type(const HandleSeq&) const;
+	bool is_type(const HandleSeq& hseq) const { return is_type(hseq, _varlist); }
+	static bool is_type(const HandleSeq&, const Variables&);
 
 	// Given the tree `tree` containing variables in it, create and
 	// return a new tree with the indicated values `vals` substituted
 	// for the variables. The vals must pass the typecheck, else an
 	// exception is thrown.
-	Handle substitute(const Handle& tree, const HandleSeq& vals) const;
+	static Handle substitute(const Handle& tree, const HandleSeq& vals, const Variables&);
+	Handle substitute(const Handle& tree, const HandleSeq& vals) const
+		{ return substitute(tree, vals, _varlist); }
 };
 
 typedef std::shared_ptr<VariableList> VariableListPtr;

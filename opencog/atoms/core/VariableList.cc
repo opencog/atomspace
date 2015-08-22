@@ -230,17 +230,17 @@ void VariableList::validate_vardecl(const Handle& hdecls)
  * be a TypeChoice, and so the handle must be one of the types in the
  * TypeChoice.
  */
-bool VariableList::is_type(const Handle& h) const
+bool VariableList::is_type(const Handle& h, const Variables& varlist)
 {
 	// The arity must be one for there to be a match.
-	if (1 != _varlist.varset.size()) return false;
+	if (1 != varlist.varset.size()) return false;
 
 	// No type restrictions.
-	if (0 == _varlist.typemap.size()) return true;
+	if (0 == varlist.typemap.size()) return true;
 
 	// Check the type restrictions.
 	VariableTypeMap::const_iterator it =
-		_varlist.typemap.find(_varlist.varseq[0]);
+		varlist.typemap.find(varlist.varseq[0]);
 	const std::set<Type> &tchoice = it->second;
 
 	Type htype = h->getType();
@@ -259,20 +259,21 @@ bool VariableList::is_type(const Handle& h) const
  * on the wiki; We would need the general pattern matcher to do type
  * checking, in that situation.
  */
-bool VariableList::is_type(const HandleSeq& hseq) const
+bool VariableList::is_type(const HandleSeq& hseq,
+                           const Variables& varlist)
 {
 	// The arity must be one for there to be a match.
 	size_t len = hseq.size();
-	if (_varlist.varset.size() != len) return false;
+	if (varlist.varset.size() != len) return false;
 	// No type restrictions.
-	if (0 == _varlist.typemap.size()) return true;
+	if (0 == varlist.typemap.size()) return true;
 
 	// Check the type restrictions.
 	for (size_t i=0; i<len; i++)
 	{
 		VariableTypeMap::const_iterator it =
-			_varlist.typemap.find(_varlist.varseq[i]);
-		if (it == _varlist.typemap.end()) continue;  // no restriction
+			varlist.typemap.find(varlist.varseq[i]);
+		if (it == varlist.typemap.end()) continue;  // no restriction
 
 		const std::set<Type> &tchoice = it->second;
 		Type htype = hseq[i]->getType();
@@ -305,7 +306,7 @@ void VariableList::build_index(void)
  * This is a lot like applying the function fun to the argument list
  * args, except that no actual evaluation is performed; only
  * substitution.  The resulting tree is NOT placed into any atomspace,
- * either. If you want that, you must do it youself.  If you want
+ * either. If you want that, you must do it yourself.  If you want
  * evaluation or execution to happen during sustitution, use either
  * the EvaluationLink, the ExecutionOutputLink, or the Instantiator.
  *
@@ -349,27 +350,29 @@ void VariableList::build_index(void)
  * Note also that the resulting tree is NOT placed into any atomspace!
  */
 Handle VariableList::substitute(const Handle& fun,
-                                const HandleSeq& args) const
+                                const HandleSeq& args,
+                                const Variables& varlist)
 {
-	if (args.size() != _varlist.varseq.size())
+	if (args.size() != varlist.varseq.size())
 		throw InvalidParamException(TRACE_INFO,
 			"Incorrect numer of arguments specified, expecting %lu got %lu",
-			_varlist.varseq.size(), args.size());
+			varlist.varseq.size(), args.size());
 
-	if (not is_type(args))
+	if (not is_type(args, varlist))
 		throw InvalidParamException(TRACE_INFO,
 			"Arguments fail to match variable declarations");
 
-	return substitute_nocheck(fun, args);
+	return substitute_nocheck(fun, args, varlist);
 }
 
 Handle VariableList::substitute_nocheck(const Handle& term,
-                                        const HandleSeq& args) const
+                                        const HandleSeq& args,
+                                        const Variables& varlist)
 {
 	// If it is a singleton, just return that singleton.
 	std::map<Handle, unsigned int>::const_iterator idx;
-	idx = _varlist.index.find(term);
-	if (idx != _varlist.index.end())
+	idx = varlist.index.find(term);
+	if (idx != varlist.index.end())
 		return args.at(idx->second);
 
 	// If its a node, and its not a variable, then it is a constant,
@@ -378,13 +381,14 @@ Handle VariableList::substitute_nocheck(const Handle& term,
 	if (NULL == lterm) return term;
 
 	// QuoteLinks halt the reursion
+	// XXX TODO -- support UnquoteLink
 	if (QUOTE_LINK == term->getType()) return term;
 
 	// Recursively fill out the subtrees.
 	HandleSeq oset;
 	for (const Handle& h : lterm->getOutgoingSet())
 	{
-		oset.push_back(substitute_nocheck(h, args));
+		oset.push_back(substitute_nocheck(h, args, varlist));
 	}
 	return Handle(createLink(term->getType(), oset));
 }
