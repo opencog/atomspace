@@ -34,7 +34,7 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
-	Handle gl = as->add_link(LIST_LINK, impl.result_list);
+	Handle gl = as->add_link(LIST_LINK, impl.get_result_list());
 	return gl;
 }
 

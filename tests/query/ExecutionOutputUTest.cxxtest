@@ -244,7 +244,7 @@ void ExecutionOutputUTest::test_varsub(void)
    situation->imply(simpl);
 
    // The result_list contains a list of the grounded expressions.
-   Handle res = simpl.result_list[0];
+   Handle res = simpl.get_result_list()[0];
 	printf("res is %s\n", res->toShortString().c_str());
 	TSM_ASSERT_EQUALS("incorrect resolution", res, resolution);
 
@@ -254,7 +254,7 @@ void ExecutionOutputUTest::test_varsub(void)
    predicament->imply(pimpl);
 
    // The result_list contains a list of the grounded expressions.
-   Handle del = pimpl.result_list[0];
+   Handle del = pimpl.get_result_list()[0];
 	printf("del is %s\n", del->toShortString().c_str());
 	TSM_ASSERT_EQUALS("incorrect delivarance", del, deliverance);
 

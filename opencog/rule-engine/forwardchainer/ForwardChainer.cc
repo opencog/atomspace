@@ -190,7 +190,7 @@ void ForwardChainer::do_pm(const Handle& hsource,
     sl->satisfy(impl);
 
     // Update result
-    _fcmem.add_rules_product(0, impl.result_list);
+    _fcmem.add_rules_product(0, impl.get_result_list());
 
     // Delete the AND_LINK and LIST_LINK
     _as.remove_atom(hvar_list);
@@ -204,7 +204,7 @@ void ForwardChainer::do_pm(const Handle& hsource,
         impl.implicand = bl->get_implicand();
         bl->imply(impl);
         _fcmem.set_cur_rule(rule);
-        _fcmem.add_rules_product(0, impl.result_list);
+        _fcmem.add_rules_product(0, impl.get_result_list());
     }
 }
 /**
@@ -225,10 +225,10 @@ void ForwardChainer::do_pm()
         _fcmem.set_cur_rule(rule);
 
         _log->info("OUTPUTS");
-        for (auto h : impl.result_list)
+        for (auto h : impl.get_result_list())
             _log->info("%s", h->toString().c_str());
 
-        _fcmem.add_rules_product(0, impl.result_list);
+        _fcmem.add_rules_product(0, impl.get_result_list());
     }
 
 }

@@ -47,20 +47,31 @@ namespace opencog {
  *
  * The 'var_soln' argument in the callback contains the map from variables
  * to ground terms. 'class Instantiator' is used to perform the actual
- * grounding.  A list of grounded expressions is created in 'result_list'.
+ * grounding.  A set of grounded expressions is created in 'result_set'.
+ * Note that the callback may be called many times reporting the same
+ * results. In that case the 'result_set' will contain unique solutions.
  */
 class Implicator :
 	public virtual PatternMatchCallback
 {
+	protected:
+		UnorderedHandleSet _result_set;
+		HandleSeq _result_list;
+		bool _result_changed;
+
 	public:
-		Implicator(AtomSpace* as) : inst(as), max_results(SIZE_MAX) {}
+		Implicator(AtomSpace* as) : _result_changed(false), inst(as),
+		                            max_results(SIZE_MAX) {}
 		Instantiator inst;
 		Handle implicand;
-		std::vector<Handle> result_list;
 		size_t max_results;
 
 		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
 		                       const std::map<Handle, Handle> &term_soln);
+
+		virtual void insert_result(const Handle&);
+		virtual UnorderedHandleSet get_result_set() { return _result_set; }
+		virtual HandleSeq get_result_list();
 };
 
 }; // namespace opencog
