@@ -758,7 +758,7 @@
 ;"
 ; cog-yield
 ;    The implementation uses a simple exception mechanism to allow
-;    scheme code to return to the opencog server from anywhere. To use
+;    scheme code to return to the guile prompt from anywhere. To use
 ;    this, simply throw 'cog-yield from anywhere.  The catch handler
 ;    will promptly return to the cogserver.  This can be used with
 ;    continuations to implement some simple multi-threading.
