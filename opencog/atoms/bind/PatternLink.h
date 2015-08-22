@@ -26,6 +26,7 @@
 #include <unordered_map>
 
 #include <opencog/query/Pattern.h>
+#include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/query/PatternMatchCallback.h>
 
@@ -71,15 +72,9 @@ namespace opencog
 ///
 /// The (cog-satisfy) scheme call can ground this link, and return
 /// a truth value.
-class PatternLink : public Link
+class PatternLink : public LambdaLink
 {
 protected:
-	// The link to be grounded.
-	Handle _body;
-
-	// The variables to be grounded
-	Variables _varlist;
-
 	// The pattern that is specified by this link.
 	Pattern _pat;
 
@@ -97,8 +92,6 @@ protected:
 	std::vector<std::set<Handle>> _component_vars;
 	HandleSeq _component_patterns;
 
-	void extract_variables(const HandleSeq& oset);
-	void init_scoped_variables(const Handle& hvar);
 	void unbundle_clauses(const Handle& body);
 	void validate_clauses(std::set<Handle>& vars,
 	                      HandleSeq& clauses);

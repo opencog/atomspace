@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/VariableList.h
+ * opencog/atoms/core/VariableList.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved

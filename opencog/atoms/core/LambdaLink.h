@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/LambdaLink.h
+ * opencog/atoms/core/LambdaLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved

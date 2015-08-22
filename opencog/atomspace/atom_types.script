@@ -120,16 +120,13 @@ LAMBDA_LINK <- ORDERED_LINK
 // the pattern matcher will traverse.  Its primary role in life is to
 // enable a C++ class that unpacks all the arguments and types, etc.
 // into assorted C++ structures. It does not have any semantics in and
-// of itself, it just holds machinery. PatternLink should probably
-// inherit from LambdaLink, but, for whatever reason, it doesn't need
-// to at the moment (at least, not as a C++ class)
+// of itself, it just holds machinery.
 //
-// The GetLink is probably exactly the same thing as a
-// SatsifyingSetLink, except that GetLink is imperative, while
-// SatisfyingSetLink is declarative.  Likewise, BindLink is probably
-// exactly the same thing as an ImplicationLink, except that its
-// imperative, not declarative.
-PATTERN_LINK <- ORDERED_LINK       // A pattern encapsulated in a Link.
+// The GetLink is almost exactly the same thing as a SatsifyingSetLink,
+// except that GetLink is imperative, while SatisfyingSetLink is
+// declarative.  Likewise, BindLink is exactly the same thing as an
+// ImplicationLink, except that its imperative, not declarative.
+PATTERN_LINK <- LAMBDA_LINK        // A pattern encapsulated in a Link.
 GET_LINK <- PATTERN_LINK           // Finds all groundings, return atoms
 SATISFACTION_LINK <- PATTERN_LINK  // Finds all groundings, return TV
 BIND_LINK <- GET_LINK              // Finds all groundings and executes
