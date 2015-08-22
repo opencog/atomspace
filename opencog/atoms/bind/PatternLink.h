@@ -119,6 +119,10 @@ protected:
 	void check_connectivity(const std::vector<HandleSeq>&);
 	void make_map_recursive(const Handle&, const Handle&);
 
+	void make_term_trees();
+	void make_term_tree_recursive(const Handle&, const Handle&,
+	                              PatternTermPtr&);
+
 	void init(void);
 	void common_init(void);
 	void setup_components(void);
