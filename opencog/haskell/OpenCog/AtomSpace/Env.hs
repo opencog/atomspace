@@ -48,8 +48,14 @@ getParent :: AtomSpaceObj -> Maybe AtomSpaceObj
 getParent = parentAS
 
 -- | Main Data Type for representing programs working on an AtomSpace.
--- We have to use the IO monad because of the use of FFI for calling c functions
--- for working on a mutable instance of the atomspace, so we have side effects.
+--
+-- Note that AtomSpace is an instance of the type class: MonadIO
+--
+-- (We have to use the IO monad because of the use of FFI for calling c functions
+-- for working on a mutable instance of the atomspace, so we have side effects).
+--
+-- So, you can lift IO actions inside the monad AtomSpace, through the use of liftIO.
+--
 newtype AtomSpace a = AtomSpace (ReaderT AtomSpaceRef IO a)
     deriving (Applicative,Functor,Monad,MonadIO)
 
@@ -82,12 +88,27 @@ onAtomSpace (AtomSpaceObj { actualAS = aref, parentAS = _ })
 
 -- | Syntactic sugar for calling the function 'onAtomSpace'.
 -- For example, we can write code like this:
---   a <- newAtomSpace
---   b <- newAtomSpace
 --
---   a <: insert (ConceptNode "concept1" noTv)
---   a <: debug
---   b <: remove (PredicateNode "predicate1" (stv 1 1))
+-- @
+-- main :: IO ()
+-- main = do
+--    parentAS <- newAtomSpace Nothing
+--    childAS <- newAtomSpace (Just parentAS)
+--
+--    parentAS <: insert (ConceptNode "GenConcept" noTv)
+--    childAS  <: do
+--        insert (ConceptNode "PrivateConcept1" (stv 1 1))
+--        insert (ConceptNode "PrivateConcept2" (stv 0.5 1))
+--    parentAS <: program
+--    childAS  <: debug
+--    parentAS <: remove (ConceptNode "GenConcept" noTv)
+--
+-- program :: AtomSpace ()
+-- program = do
+--     s <- get (ConceptNode "GenConcept" noTv)
+--     ...
+-- @
+--
 infixr 0 <:
 (<:) :: AtomSpaceObj -> AtomSpace a -> IO a
 (<:) = onAtomSpace

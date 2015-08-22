@@ -123,6 +123,40 @@ go to:
 definition of Haskell bindings, including data types that are automatically generated
 by template haskell, and are not available in the code.
 
+### Modifying the code
+
+If you are a developer working on this code, 
+when you only modify the Haskell code, you can build the library
+(working on: <ATOMSPACE_ROOT>/opencog/haskell/) with:
+```
+ stack build --extra-lib-dirs=/usr/local/lib/opencog
+```
+
+### Adding new Atom Types
+
+Because Haskell bindings does type checking on atoms, each atom type must be defined in the code.
+
+Right now, in actual implementation of Haskell bindings, we get some information from the
+[atom_types.script](../atomspace/atom_types.script)
+file using Template Haskell (this provides the hierarchical information), but you should update some part of
+the code providing information of the outgoing set of the new atom type
+(which is not provided in the file [atom_types.script](../atomspace/atom_types.script)).
+
+So, the steps to add a new atom type are:
+
+ - Ensure that it is properly included in the file:
+   [opencog/atomspace/atom_types.script](../atomspace/atom_types.script)
+
+ - Update the file:
+   [opencog/haskell/OpenCog/AtomSpace/Types.hs](./OpenCog/AtomSpace/Types.hs)
+
+   Add a new data type constructor to the GADT "Atom". There, you can find comments with proper information in how to do that.
+
+ - Update the file:
+   [opencog/haskell/OpenCog/AtomSpace/Internal.hs](./OpenCog/AtomSpace/Internal.hs)
+
+   Add proper case clauses for this new atom type to the functions "toRaw" and "fromRaw".
+
 ### Usage
 
 To use the opencog-atomspace haskell library, we just import the modules like:
@@ -139,7 +173,7 @@ directory.
 
 The main idea is to build programs that work on an AtomSpace on the
 Monad 'AtomSpace'.
-Then, we can run this programs with the function runOnNewAtomSpace:
+Then, we can run this programs on a new AtomSpace with the function runOnNewAtomSpace:
 
 ```haskell
 runOnNewAtomSpace :: AtomSpace a -> IO a
@@ -148,23 +182,9 @@ runOnNewAtomSpace :: AtomSpace a -> IO a
 It creates a new C++ atomspace behind, does all the computation, and finally
 deletes it.
 
-The AtomSpace data type is defined as:
-
-```haskell
-type AtomSpace = ReaderT AtomSpaceRef IO
-```
-
-ReaderT is a monad transformer, so in fact:
-
-```haskell
-AtomSpace a = ReaderT { runReaderT :: AtomSpaceRef -> IO a }
-```
-
-The interpretation of runReaderT in this case is:  "given an atomspace in
-memory, it reduces to performing IO actions with a result of type a"
-
-Because of the use of the monad IO, we can lift IO actions inside the
-monad AtomSpace, through the use of liftIO. For example:
+Note that AtomSpace is an instance of the type class: MonadIO.
+So, we can lift IO actions inside the monad AtomSpace,
+through the use of liftIO. For example:
 
 ```haskell
 import OpenCog.AtomSpace.Api
@@ -180,35 +200,72 @@ main = runOnNewAtomSpace prog
 
 ```
 
-###Main functions:
+### Multiple AtomSpaces
+The simplest option to work in an AtomSpace is to use "runOnNewAtomSpace" as mentioned before. By doing that, you can work freely in the monad AtomSpace and you don't have to specify the atomspace instance everytime, because it is implicit.
 
-####insert:
+But, sometimes, you want to work with multiples atomspaces, or maybe
+you want to do interactive evaluation using GHCi.
+
+For that, you can create new AtomSpaces (from a optionally given parent atomspace) with the function:
+```haskell
+newAtomSpace :: Maybe AtomSpaceObj -> IO AtomSpaceObj
+```
+
+To work over an atomspace, you can use the infix operator "<:"
+```haskell
+(<:) :: AtomSpaceObj -> AtomSpace a -> IO a
+```
+
+For example:
+```haskell
+main :: IO ()
+main = do
+    parentAS <- newAtomSpace Nothing
+    childAS  <- newAtomSpace (Just parentAS)
+    
+    parentAS <: insert (ConceptNode "GenConcept" noTv)
+    childAS  <: do
+        insert (ConceptNode "PrivateConcept1" (stv 1 1))
+        insert (ConceptNode "PrivateConcept2" (stv 0.5 1))
+    parentAS <: program
+    childAS  <: debug
+    parentAS <: remove (ConceptNode "GenConcept" noTv)
+
+program :: AtomSpace ()
+program = do
+    s <- get (ConceptNode "GenConcept" noTv)
+    ...
+```
+
+### Main functions
+
+#### insert
 Function to insert atoms to the atomspace. To create new atoms or just to
 update the mutable information of a specific atom.
 ```haskell
 insert :: Atom a -> AtomSpace ()
 ```
-####get:
-Function to get an atom back from the atomspace.
+#### get
+Function to get an atom back from the atomspace (With updated mutable information).
 ```haskell
 get :: Atom a -> AtomSpace (Maybe (Atom a))
 ```
-####remove:
+#### remove
 Function to remove atoms from the atomspace.
 ```haskell
 remove :: Atom a -> AtomSpace Bool
 ```
-####printAtom
+#### printAtom
 Function to show the given atom in opencog notation.
 ```haskell
 printAtom :: Atom a -> IO ()
 ```
-####debug:
+#### debug
 Debug function to print the state of the atomspace on stderr.
 ```haskell
 debug :: AtomSpace ()
 ```
-####cogBind:
+#### cogBind
 Function to use the Pattern Matcher.
 (Note: Before using it, you should insert the bind link to the atomspace).
 ```haskell
