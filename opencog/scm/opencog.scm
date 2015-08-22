@@ -43,6 +43,8 @@
 ; for utilities that uses (export-utilities)
 (load-from-path "config.scm")
 
+(load-from-path "core-docs.scm")
+
 (load-from-path "utilities.scm")
 (export-utilities)
 
