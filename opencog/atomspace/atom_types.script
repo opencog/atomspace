@@ -110,7 +110,7 @@ QUOTE_LINK <- ORDERED_LINK
 // body; those that are not bound remain free.
 //
 // The LambdaLink differs from the FreeLink in that the FreeLink
-// necessarily list ALL the (free) variables within it; the ScopeLink
+// necessarily list ALL the (free) variables within it; the LambdaLink
 // need not bind all of them.  The FreeLink also has no type
 // restrictions on the variables.
 LAMBDA_LINK <- ORDERED_LINK
@@ -121,7 +121,7 @@ LAMBDA_LINK <- ORDERED_LINK
 // enable a C++ class that unpacks all the arguments and types, etc.
 // into assorted C++ structures. It does not have any semantics in and
 // of itself, it just holds machinery. PatternLink should probably
-// inherit from ScopeLink, but, for whatever reason, it doesn't need
+// inherit from LambdaLink, but, for whatever reason, it doesn't need
 // to at the moment (at least, not as a C++ class)
 //
 // The GetLink is probably exactly the same thing as a
@@ -174,7 +174,7 @@ ATTRACTION_LINK <- ORDERED_LINK
 //
 // The variables are necessarily free: they to NOT have type
 // declarations or restrictions associated with them.  This is in sharp
-// contrast to ScopeLink, which binds variables by scoping them, and
+// contrast to LambdaLink, which binds variables by scoping them, and
 // then forcing type restrictions to them.
 //
 // FreeLinks may be open or closed; they are closed terms if they

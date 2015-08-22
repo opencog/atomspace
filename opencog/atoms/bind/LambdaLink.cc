@@ -25,47 +25,42 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atoms/TypeNode.h>
+#include <opencog/atoms/core/FreeLink.h>
 
 #include "LambdaLink.h"
 
 using namespace opencog;
 
-void LambdaLink::init(const HandleSeq& oset)
+void LambdaLink::init(void)
 {
-	// Must have variable decls and body
-	if (2 != oset.size())
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting variabe decls and body, got size %d", oset.size());
-
-	VariableList::validate_vardecl(oset[0]);
-	_body = oset[1];     // Body
+	extract_variables(_outgoing);
 }
 
 LambdaLink::LambdaLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: VariableList(LAMBDA_LINK, oset, tv, av)
+	: Link(LAMBDA_LINK, oset, tv, av)
 {
-	init(oset);
+	init();
 }
 
 LambdaLink::LambdaLink(const Handle& vars, const Handle& body,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: VariableList(LAMBDA_LINK, HandleSeq({vars, body}), tv, av)
+	: Link(LAMBDA_LINK, HandleSeq({vars, body}), tv, av)
 {
-	init(getOutgoingSet());
+	init();
 }
 
 LambdaLink::LambdaLink(Type t, const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: VariableList(t, oset, tv, av)
+	: Link(t, oset, tv, av)
 {
 	// Derived classes have a different initialization sequence
 	if (LAMBDA_LINK != t) return;
-	init(oset);
+	init();
 }
 
 LambdaLink::LambdaLink(Link &l)
-	: VariableList(l)
+	: Link(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
@@ -78,7 +73,67 @@ LambdaLink::LambdaLink(Link &l)
 
 	// Dervided types have a different initialization sequence
 	if (LAMBDA_LINK != tscope) return;
-	init(l.getOutgoingSet());
+	init();
+}
+
+/* ================================================================= */
+///
+/// Find and unpack variable declarations, if any; otherwise, just
+/// find all free variables.
+///
+/// On top of that initialize _body with the clauses of the
+/// PatternLink.
+///
+void LambdaLink::extract_variables(const HandleSeq& oset)
+{
+	size_t sz = oset.size();
+	if (2 < sz)
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an outgoing set size of at most two, got %d", sz);
+
+	// If the outgoing set size is one, then there are no variable
+	// declarations; extract all free variables.
+	if (1 == sz)
+	{
+		_body = oset[0];
+
+		// Use the FreeLink class to find all the variables;
+		// Use the VariableList class for build the Variables struct.
+		FreeLink fl(oset[0]);
+		VariableList vl(fl.get_vars());
+		_varlist = vl.get_variables();
+		return;
+	}
+
+	// If we are here, then the first outgoing set member should be
+	// a variable declaration.
+	_body = oset[1];
+
+	// Initialize _varlist with the scoped variables
+	init_scoped_variables(oset[0]);
+}
+
+/* ================================================================= */
+///
+/// Initialize _varlist given a handle of either VariableList or a
+/// variable.
+///
+void LambdaLink::init_scoped_variables(const Handle& hvar)
+{
+	// Either it is a VariableList, or its a naked variable, or its a
+	// typed variable.  Use the VariableList class as a tool to
+	// extract the variables for us.
+	Type t = hvar->getType();
+	if (VARIABLE_LIST == t)
+	{
+		VariableList vl(LinkCast(hvar)->getOutgoingSet());
+		_varlist = vl.get_variables();
+	}
+	else
+	{
+		VariableList vl({hvar});
+		_varlist = vl.get_variables();
+	}
 }
 
 /* ===================== END OF FILE ===================== */
