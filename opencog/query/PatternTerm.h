@@ -32,6 +32,26 @@
 
 namespace opencog {
 
+/*
+ * PatternTerm class is used by pattern matcher to navigate through the
+ * pattern query. PatternTerm is a node of tree data structure. Pattern
+ * matcher searches for solutions by traversing this tree structure.
+ *
+ * Each pattern term corresponds to one atom in the query. The relation
+ * beetween pattern terms and atoms is one-to-many, because atoms may repeat
+ * in the query in many positions. The _handle attribute points to the
+ * corresponding atom of the query. Roots of the pattern term trees reference
+ * to the roots of query clauses. Term tree roots have its _parent attributes
+ * UNDEFINED.
+ *
+ * Term trees are build in the course of preprocessing stage before
+ * pattern matcher starts searching for variable groundigns. Each clause
+ * is then recursively traversed from the root downwards through outgoing
+ * atoms. The _outgoing attribute stores a list of childs created during this
+ * traversal. They corresponds one-to-one to outgoing sets of referenced
+ * atoms.
+ */
+
 class PatternTerm;
 typedef std::shared_ptr<PatternTerm> PatternTermPtr;
 typedef std::vector<PatternTermPtr> PatternTermSeq;
@@ -110,11 +130,13 @@ using namespace opencog;
 
 namespace std {
 
-// We need to overload standard comparison operator for PatternTerm pointers.
-// Now we do not care much about complexity of this comparison. The cases of
-// queries having repeated atoms that are deep should be very rare. So we just
-// traverse up towards root node. Typically we compare only the first level
-// handles on this path.
+/*
+ * We need to overload standard comparison operator for PatternTerm pointers.
+ * Now we do not care much about complexity of this comparison. The cases of
+ * queries having repeated atoms that are deep should be very rare. So we just
+ * traverse up towards root node. Typically we compare only the first level
+ * handles on this path.
+ */
 template<>
 struct less<PatternTermPtr>
 {

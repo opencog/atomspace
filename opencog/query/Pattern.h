@@ -53,14 +53,23 @@ struct Pattern
 	typedef std::map<Handle, RootList> ConnectMap;
 	typedef std::pair<Handle, RootList> ConnectPair;
 
-	// Each atom of the pattern as well as their corresponding pattern terms
-	// may appear in many clauses. Moreover the same atom may be replicated
-	// under the same clause root in many instances. Each occurence has its
-	// own unique PatternTermPtr. We need to keep the mapping beetwen atoms
-	// and clause roots to the list of atoms occurences. Typically the list
-	// of PatternTermPtr has single element, but as said above when given atom
-	// is replicated under one root then the list has many elements.
-	typedef std::map<std::pair<Handle,Handle>, PatternTermSeq> ConnectTermMap;
+	// Each atom of the pattern may appear in many clauses. Moreover the same
+	// atom may be repeated under the same clause root in many positions.
+	// AndLink
+	//   FirstClauseLink
+	//     ConceptNode "$x"
+	//     ConceptNode "$x"
+	//     ConceptNode "$y"
+	//   SecondClauseLink
+	//     ConceptNode "$x"
+	//     ConceptNode "$x"
+	// We need to keep the mapping from atoms and clauses to the list of atom
+	// occurences which are referenced by PatternTermPtr pointers.
+	// Each pointer corresponds to unique position in the pattern. The list of
+	// pointers is stored in PatternTermSeq. Typically the list contains one
+	// element, but it might have more if atom repeats in the same clause.
+	typedef std::pair<Handle,Handle> AtomInClausePair;  // first is atom
+	typedef std::map<AtomInClausePair, PatternTermSeq> ConnectTermMap;
 
 	// -------------------------------------------
 	// The current set of clauses (beta redex context) being grounded.

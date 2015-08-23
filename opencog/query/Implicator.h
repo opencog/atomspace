@@ -57,11 +57,9 @@ class Implicator :
 	protected:
 		UnorderedHandleSet _result_set;
 		HandleSeq _result_list;
-		bool _result_changed;
 
 	public:
-		Implicator(AtomSpace* as) : _result_changed(false), inst(as),
-		                            max_results(SIZE_MAX) {}
+		Implicator(AtomSpace* as) : inst(as), max_results(SIZE_MAX) {}
 		Instantiator inst;
 		Handle implicand;
 		size_t max_results;
@@ -71,7 +69,7 @@ class Implicator :
 
 		virtual void insert_result(const Handle&);
 		virtual UnorderedHandleSet get_result_set() { return _result_set; }
-		virtual HandleSeq get_result_list();
+		virtual HandleSeq get_result_list() { return _result_list; }
 };
 
 }; // namespace opencog

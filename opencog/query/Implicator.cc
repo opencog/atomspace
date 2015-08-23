@@ -34,12 +34,12 @@ using namespace opencog;
 /**
  * This callback takes the reported grounding, runs it through the
  * instantiator, to create the implicand, and then records the result
- * in the public member `result_set`.  If the number of results so
- * far is less than `max_results`, it then returns false, to search
- * for more groundings.  (The engine will halt its search for a
- * grounding once an acceptable one has been found; so, to continue
- * hunting for more, we return `false` here. We want to find all
- * possible groundings.)
+ * in the `result_set`. Repeated solutions are skipped. If the number
+ * of unique results so far is less than `max_results`, it then returns
+ * false, to search for more groundings.  (The engine will halt its
+ * search for a grounding once an acceptable one has been found; so,
+ * to continue hunting for more, we return `false` here. We want to
+ * find all possible groundings.)
  */
 bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
                            const std::map<Handle, Handle> &term_soln)
@@ -61,26 +61,10 @@ void Implicator::insert_result(const Handle& h)
 		if (_result_set.end() == _result_set.find(h))
 		{
 			_result_set.insert(h);
-			_result_changed = true;
+			_result_list.push_back(h);
 		}
 	}
 }
-
-/**
- * Returns unique results from 'result_set' converted to list.
- */
-HandleSeq Implicator::get_result_list()
-{
-	if (_result_changed)
-	{
-		_result_list.clear();
-		std::copy(_result_set.begin(), _result_set.end(),
-		          std::back_inserter(_result_list));
-		_result_changed = false;
-	}
-	return _result_list;
-}
-
 
 namespace opencog
 {
