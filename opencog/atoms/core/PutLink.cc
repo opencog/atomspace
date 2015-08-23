@@ -88,7 +88,10 @@ PutLink::PutLink(Link& l)
 /// PutLink expects a very strict format: an arity-2 link, with
 /// the first part being a pattern, and the second a list or set
 /// of values. If the pattern has N variables, then the seccond
-/// part must have N values.  The following formats are understood:
+/// part must have N values.  Furthermore, any type restrictions on
+/// the variables must be satisfied by the values.
+///
+/// The following formats are understood:
 ///
 ///    PutLink
 ///       <pattern with 1 variable>
@@ -104,7 +107,8 @@ PutLink::PutLink(Link& l)
 /// The below is a handy-dandy easy-to-use form. When it is reduced,
 /// it will result in the creation of a set of reduced forms, not
 /// just one (the two sets haveing the same arity). Unfortunately,
-/// this trick cannot work for N=1.
+/// this trick cannot work for N=1 unless the variable is cosntrained
+/// to not be a set.
 ///
 ///    PutLink
 ///       <pattern with N variables>
@@ -115,6 +119,14 @@ PutLink::PutLink(Link& l)
 ///             <atom N>
 ///
 void PutLink::init(void)
+{
+	extract_variables();
+	typecheck_values();
+}
+
+/// Extract the variables in the body.
+/// The body must either be a lambda, or we assume all free variables get bound.
+void PutLink::extract_variables(void)
 {
 	size_t sz = _outgoing.size();
 	if (2 != sz)
@@ -138,36 +150,64 @@ void PutLink::init(void)
 		VariableList vl(fl.get_vars());
 		_varlist = vl.get_variables();
 	}
+}
 
-#if LATER
-	// OK, now for the values.
-	if (_varseq.size() == 1) return;
+/// Check that the values in the PutLink obey the type constraints.
+void PutLink::typecheck_values(void)
+{
+	const Handle& vals = _outgoing[1];
 
-	LinkPtr lval(LinkCast(_outgoing[1]));
-	if (lval->getType() == LIST_LINK)
+	size_t sz = _varlist.varseq.size();
+	Type vtype = vals->getType();
+
+	if (1 == sz)
 	{
-		if (lval->getArity() != _varseq.size())
-			throw InvalidParamException(TRACE_INFO,
-				"PutLink has mismatched size! Expected %zu, got %zu\n",
-				_varseq.size(), lval->getArity());
+		if (not _varlist.is_type(vals)
+		    and SET_LINK != vtype)
+		{
+				throw InvalidParamException(TRACE_INFO,
+					"PutLink mismatched type!");
+		}
 		return;
 	}
-	if (lval->getType() != SET_LINK)
+
+	LinkPtr lval(LinkCast(vals));
+	if (LIST_LINK == vtype)
+	{
+		if (not _varlist.is_type(lval->getOutgoingSet()))
+			throw InvalidParamException(TRACE_INFO,
+				"PutLink has mismatched value list!");
+		return;
+	}
+
+	if (SET_LINK != vtype)
 		throw InvalidParamException(TRACE_INFO,
 			"PutLink was expecting a ListLink or SetLink!");
 
+	if (1 < sz)
+	{
+		for (const Handle& h : lval->getOutgoingSet())
+		{
+			LinkPtr lse(LinkCast(h));
+			// If the arity is greater than one, then the values must be in a list.
+		   if (lse->getType() != LIST_LINK)
+				throw InvalidParamException(TRACE_INFO,
+					"PutLink expected value list!");
+
+			if (not _varlist.is_type(lval->getOutgoingSet()))
+				throw InvalidParamException(TRACE_INFO,
+					"PutLink bad value list!");
+		}
+		return;
+	}
+
+	// If the arity is one, the values must obey type constraint.
 	for (const Handle& h : lval->getOutgoingSet())
 	{
-		LinkPtr lse(LinkCast(h));
-		if (lse->getType() != LIST_LINK)
+		if (not _varlist.is_type(h))
 			throw InvalidParamException(TRACE_INFO,
-				"PutLink was expecting a ListLink here");
-		if (lse->getArity() != _varseq.size())
-			throw InvalidParamException(TRACE_INFO,
-				"PutLink set element has mismatched size! Expected %zu, got %zu\n",
-				_varseq.size(), lse->getArity());
+					"PutLink bad type!");
 	}
-#endif
 }
 /* ================================================================= */
 
@@ -221,7 +261,7 @@ Handle PutLink::do_reduce(void) const
 	}
 
 	OC_ASSERT(vals->getType() == SET_LINK,
-		"Should have checked for this earlier, in the ctor");
+		"Should have caught this earlier, in the ctor");
 
 	HandleSeq bset;
 	for (Handle h : LinkCast(vals)->getOutgoingSet())

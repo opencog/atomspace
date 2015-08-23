@@ -56,6 +56,9 @@ protected:
 	Variables _varlist;
 
 	void init(void);
+	void extract_variables(void);
+	void typecheck_values(void);
+
 	Handle do_reduce(void) const;
 
 	PutLink(Type, const HandleSeq& oset,
