@@ -100,6 +100,11 @@ FreeLink::FreeLink(Link& l)
 /// order (from left to right, as they appear in the tree), with each
 /// variable being named only once.  The varset is only used to make
 /// sure that we don't name a variable more than once; that's all.
+//
+// XXX TODO Add support for UnquoteLink
+// Also -- anything that binds variables should not be searched.
+// i.e. variables bound in a BindLink, GetLink, SatiscationLink
+// should not be added to the list.  Ditto ForAllLink, ExistsLink.
 void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 {
 	for (const Handle& h : oset)
