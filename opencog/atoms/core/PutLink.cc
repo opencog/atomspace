@@ -203,62 +203,31 @@ void PutLink::init(void)
  * Again, only a substitution is performed, there is no evaluation.
  * Note also that the resulting tree is NOT placed into any atomspace!
  */
-Handle PutLink::substitute_nocheck(const Handle& term,
-                                   const HandleSeq& args) const
-{
-#if 0
-	// If it is a singleton, just return that singleton.
-	std::map<Handle, unsigned int>::const_iterator idx;
-	idx = _index.find(term);
-	if (idx != _index.end())
-		return args.at(idx->second);
-
-	// If its a node, and its not a variable, then it is a constant,
-	// and just return that.
-	LinkPtr lterm(LinkCast(term));
-	if (NULL == lterm) return term;
-
-	// QuoteLinks halt the reursion
-	if (QUOTE_LINK == term->getType()) return term;
-
-	// Recursively fill out the subtrees.
-	HandleSeq oset;
-	for (const Handle& h : lterm->getOutgoingSet())
-	{
-		oset.push_back(substitute_nocheck(h, args));
-	}
-	return Handle(createLink(term->getType(), oset));
-#endif
-return Handle::UNDEFINED; // XXX tmp hack
-}
-
 Handle PutLink::do_reduce(void) const
 {
 	const Handle& body = _outgoing[0];
 	const Handle& vals = _outgoing[1];
 
-#if 0
-	if (1 == _varseq.size())
+	if (1 == _varlist.varseq.size())
 	{
 		HandleSeq oset;
 		oset.push_back(vals);
-		return substitute_nocheck(body, oset);
+		return _varlist.substitute_nocheck(body, oset);
 	}
 	if (vals->getType() == LIST_LINK)
 	{
 		const HandleSeq& oset = LinkCast(vals)->getOutgoingSet();
-		return substitute_nocheck(body, oset);
+		return _varlist.substitute_nocheck(body, oset);
 	}
 
 	OC_ASSERT(vals->getType() == SET_LINK,
-		"Should have checked for this earlier, tin the ctor");
-#endif
+		"Should have checked for this earlier, in the ctor");
 
 	HandleSeq bset;
 	for (Handle h : LinkCast(vals)->getOutgoingSet())
 	{
 		const HandleSeq& oset = LinkCast(h)->getOutgoingSet();
-		bset.push_back(substitute_nocheck(body, oset));
+		bset.push_back(_varlist.substitute_nocheck(body, oset));
 	}
 	return Handle(createLink(SET_LINK, bset));
 }

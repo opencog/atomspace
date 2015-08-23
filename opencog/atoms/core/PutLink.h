@@ -56,7 +56,6 @@ protected:
 	Variables _varlist;
 
 	void init(void);
-	Handle substitute_nocheck(const Handle&, const HandleSeq&) const;
 	Handle do_reduce(void) const;
 
 	PutLink(Type, const HandleSeq& oset,
