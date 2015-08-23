@@ -59,6 +59,26 @@ struct Variables
 	std::set<Handle> varset;
 	VariableTypeMap typemap;
 	std::map<Handle, unsigned int> index;
+
+	// Return true if we are holding a single variable, and the handle
+	// given as the argument satisfies the type restrictions (if any).
+	// Else return false.
+	bool is_type(const Handle& h) const;
+
+	// Return true if the sequence is of the same length as the variable
+	// declarations we are holding, and if they satisfy all of the type
+	// restrictions (if any).
+	bool is_type(const HandleSeq& hseq) const;
+
+	// Given the tree `tree` containing variables in it, create and
+	// return a new tree with the indicated values `vals` substituted
+	// for the variables. The vals must pass the typecheck, else an
+	// exception is thrown. An exception is thrown if the vals are not
+	// of the types specified in this class.
+	Handle substitute(const Handle& tree, const HandleSeq& vals) const;
+
+	// Like the above, except no type-checking is done.
+	Handle substitute_nocheck(const Handle&, const HandleSeq&) const;
 };
 
 
@@ -90,7 +110,6 @@ protected:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	void build_index(void);
-	static Handle substitute_nocheck(const Handle&, const HandleSeq&, const Variables&);
 public:
 	VariableList(const HandleSeq& vardecls,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
