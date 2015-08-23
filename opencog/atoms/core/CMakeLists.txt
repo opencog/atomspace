@@ -3,6 +3,7 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (atomcore SHARED
+	DefineLink.cc
 	FreeLink.cc
 	LambdaLink.cc
 	PutLink.cc
@@ -21,6 +22,7 @@ INSTALL (TARGETS atomcore
 )
 
 INSTALL (FILES
+	DefineLink.h
 	FreeLink.h
 	LambdaLink.h
 	PutLink.h

@@ -4,7 +4,6 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (lambda SHARED
 	BindLink.cc
-	DefineLink.cc
 	PatternLink.cc
 	PatternUtils.cc
 )
@@ -30,7 +29,6 @@ ENDIF (CYGWIN)
 
 INSTALL (FILES
 	BindLink.h
-	DefineLink.h
 	PatternLink.h
 	PatternUtils.h
 	DESTINATION "include/opencog/atoms/bind"
