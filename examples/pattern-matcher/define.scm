@@ -51,7 +51,7 @@
 
 ;; Define a pattern to find the electrical parts of things
 (define get-elect
-	(GetLink elect-parts))
+	(GetLink (PredicateNode "Electrical Part Of")))
 
 ;; Search the atomspace for electrical things.
 (cog-execute! get-elect)
