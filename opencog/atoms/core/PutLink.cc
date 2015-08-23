@@ -255,13 +255,26 @@ Handle PutLink::do_reduce(void) const
 	const Handle& vals = _outgoing[1];
 	Type vtype = vals->getType();
 
-	// Well, we should accept the SetLink here only if
-	// it was dynamically generated... but for now, I'm lazy.
-	if (1 == _varlist.varseq.size() and SET_LINK != vtype)
+	if (1 == _varlist.varseq.size())
 	{
-		HandleSeq oset;
-		oset.push_back(vals);
-		return _varlist.substitute_nocheck(body, oset);
+		// Well, we should accept the SetLink here only if it was
+		// dynamically generated... but I'm too lazy to code this up.
+		if (SET_LINK != vtype)
+		{
+			HandleSeq oset;
+			oset.push_back(vals);
+			return _varlist.substitute_nocheck(body, oset);
+		}
+
+		// Iterate over the set...
+		HandleSeq bset;
+		for (Handle h : LinkCast(vals)->getOutgoingSet())
+		{
+			HandleSeq oset;
+			oset.push_back(h);
+			bset.push_back(_varlist.substitute_nocheck(body, oset));
+		}
+		return Handle(createLink(SET_LINK, bset));
 	}
 	if (LIST_LINK == vtype)
 	{
