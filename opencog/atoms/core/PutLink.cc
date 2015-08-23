@@ -153,6 +153,9 @@ void PutLink::extract_variables(void)
 }
 
 /// Check that the values in the PutLink obey the type constraints.
+// XXX FIXME .. this is wrong, if, for example, the values are dynamic
+// i.e. produce run-time values. In that case, the type checking can
+// only be performed at run-time!
 void PutLink::typecheck_values(void)
 {
 	const Handle& vals = _outgoing[1];
@@ -243,24 +246,30 @@ void PutLink::typecheck_values(void)
  * Again, only a substitution is performed, there is no evaluation.
  * Note also that the resulting tree is NOT placed into any atomspace!
  */
+
+// XXX FIXME, if the values are dynamically generated, then type-checking
+// must be done at run-time, and not at definition-time.
 Handle PutLink::do_reduce(void) const
 {
 	const Handle& body = _outgoing[0];
 	const Handle& vals = _outgoing[1];
+	Type vtype = vals->getType();
 
-	if (1 == _varlist.varseq.size())
+	// Well, we should accept the SetLink here only if
+	// it was dynamically generated... but for now, I'm lazy.
+	if (1 == _varlist.varseq.size() and SET_LINK != vtype)
 	{
 		HandleSeq oset;
 		oset.push_back(vals);
 		return _varlist.substitute_nocheck(body, oset);
 	}
-	if (vals->getType() == LIST_LINK)
+	if (LIST_LINK == vtype)
 	{
 		const HandleSeq& oset = LinkCast(vals)->getOutgoingSet();
 		return _varlist.substitute_nocheck(body, oset);
 	}
 
-	OC_ASSERT(vals->getType() == SET_LINK,
+	OC_ASSERT(SET_LINK == vtype,
 		"Should have caught this earlier, in the ctor");
 
 	HandleSeq bset;
