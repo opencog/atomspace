@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/LambdaLink.h
+ * opencog/atoms/core/LambdaLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -25,7 +25,7 @@
 
 #include <map>
 
-#include <opencog/atoms/bind/VariableList.h>
+#include <opencog/atoms/core/VariableList.h>
 
 namespace opencog
 {
@@ -34,27 +34,40 @@ namespace opencog
  */
 
 /// The LambdaLink consitsts of two parts: An optional variable
-/// declaration, follwed by an expression body. If a variable
-/// declaration is present, then it must conform to current variable
-/// declaration standards: i.e. it must be either a single VariableNode,
-/// a single TypedVariableLink, or a VariableList.  This is then followed
-/// by a body, of any arbitrary form.  This class does little other than
-/// to check for the above-described format, and unpacke the variable
-/// decalrations, if present; it will throw an error if an ill-formed
-/// LambdaLink is inserted into the atomspace.  (As usual, the point of
-/// unpacked variables is to act as a memo or cache, speeding up later
-/// calculations.)
-class LambdaLink : public VariableList
+/// declaration, followed by an expression body (of arbitrary form).
+/// If a variable declaration is present, then it must conform to current
+/// variable declaration standards: i.e. it must be either a single
+/// VariableNode, a single TypedVariableLink, or a VariableList.  If a
+/// variable declaration is missing, then the body is searched for all
+/// free variables, these are then bound.
+///
+/// This class does little other than to check for the above-described
+/// format, and unpacke the variable decalrations, if present; it will
+/// throw an error if the variables are somehow ill-formed. As usual,
+/// the point of unpacked variables is to act as a memo or cache,
+/// speeding up later calculations.
+///
+class LambdaLink : public Link
 {
 protected:
+
+	/// Variables bound in the body.
+	Variables _varlist;
+
 	/// Handle of the body of the expression.
 	Handle _body;
+
+	LambdaLink(Type, const Handle&,
+	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	LambdaLink(Type, const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	void init(const HandleSeq&);
+	void init(void);
+	void extract_variables(const HandleSeq& oset);
+	void init_scoped_variables(const Handle& hvar);
 
 	// utility debug print
 	static void prt(const Handle& h)
@@ -72,13 +85,18 @@ public:
 
 	LambdaLink(Link &l);
 
+	// Return the list of variables we are holding.
+	const Variables& get_variables(void) const { return _varlist; }
+
 	// Take the list of values `vals`, and substitute them in for the
 	// variables in the body of this lambda. The values must satisfy all
 	// type restrictions, else an exception will be thrown.
+/*
 	Handle substitute (const HandleSeq& vals) const
 	{
 		return VariableList::substitute(_body, vals);
 	}
+*/
 };
 
 typedef std::shared_ptr<LambdaLink> LambdaLinkPtr;

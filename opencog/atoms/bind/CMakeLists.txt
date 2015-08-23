@@ -4,11 +4,8 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (lambda SHARED
 	BindLink.cc
-	DefineLink.cc
 	PatternLink.cc
 	PatternUtils.cc
-	LambdaLink.cc
-	VariableList.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -32,10 +29,7 @@ ENDIF (CYGWIN)
 
 INSTALL (FILES
 	BindLink.h
-	DefineLink.h
-	LambdaLink.h
 	PatternLink.h
 	PatternUtils.h
-	VariableList.h
 	DESTINATION "include/opencog/atoms/bind"
 )

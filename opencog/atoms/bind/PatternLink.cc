@@ -31,7 +31,6 @@
 
 #include "PatternLink.h"
 #include "PatternUtils.h"
-#include "VariableList.h"
 
 using namespace opencog;
 
@@ -114,7 +113,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
                          const VariableTypeMap& typemap,
                          const HandleSeq& compo,
                          const std::set<Handle>& opts)
-	: Link(PATTERN_LINK, HandleSeq())
+	: LambdaLink(PATTERN_LINK, HandleSeq())
 {
 	// First, lets deal with the vars. We have discarded the original
 	// order of the variables, and I think that's OK, because we will
@@ -175,7 +174,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 /// either.  This is used only for backwards-compatibility API's.
 PatternLink::PatternLink(const std::set<Handle>& vars,
                          const HandleSeq& clauses)
-	: Link(PATTERN_LINK, HandleSeq())
+	: LambdaLink(PATTERN_LINK, HandleSeq())
 {
 	_varlist.varset = vars;
 	_pat.clauses = clauses;
@@ -187,28 +186,28 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 
 PatternLink::PatternLink(const HandleSeq& hseq,
                          TruthValuePtr tv, AttentionValuePtr av)
-	: Link(PATTERN_LINK, hseq, tv, av)
+	: LambdaLink(PATTERN_LINK, hseq, tv, av)
 {
 	init();
 }
 
 PatternLink::PatternLink(const Handle& body,
                          TruthValuePtr tv, AttentionValuePtr av)
-	: Link(PATTERN_LINK, HandleSeq({body}), tv, av)
+	: LambdaLink(PATTERN_LINK, HandleSeq({body}), tv, av)
 {
 	init();
 }
 
 PatternLink::PatternLink(const Handle& vars, const Handle& body,
                          TruthValuePtr tv, AttentionValuePtr av)
-	: Link(PATTERN_LINK, HandleSeq({vars, body}), tv, av)
+	: LambdaLink(PATTERN_LINK, HandleSeq({vars, body}), tv, av)
 {
 	init();
 }
 
 PatternLink::PatternLink(Type t, const HandleSeq& hseq,
                          TruthValuePtr tv, AttentionValuePtr av)
-	: Link(t, hseq, tv, av)
+	: LambdaLink(t, hseq, tv, av)
 {
 	// BindLink has other init sequences
 	if (BIND_LINK == t) return;
@@ -216,7 +215,7 @@ PatternLink::PatternLink(Type t, const HandleSeq& hseq,
 }
 
 PatternLink::PatternLink(Link &l)
-	: Link(l)
+	: LambdaLink(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
@@ -233,66 +232,6 @@ PatternLink::PatternLink(Link &l)
 	init();
 }
 
-
-/* ================================================================= */
-///
-/// Find and unpack variable declarations, if any; otherwise, just
-/// find all free variables.
-///
-/// On top of that initialize _body with the clauses of the
-/// PatternLink.
-///
-void PatternLink::extract_variables(const HandleSeq& oset)
-{
-	size_t sz = oset.size();
-	if (2 < sz)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an outgoing set size of at most two, got %d", sz);
-
-	// If the outgoing set size is one, then there are no variable
-	// declarations; extract all free variables.
-	if (1 == sz)
-	{
-		_body = oset[0];
-
-		// Use the FreeLink class to find all the variables;
-		// Use the VariableList class for build the Variables struct.
-		FreeLink fl(oset[0]);
-		VariableList vl(fl.get_vars());
-		_varlist = vl.get_variables();
-		return;
-	}
-
-	// If we are here, then the first outgoing set member should be
-	// a variable declaration.
-	_body = oset[1];
-
-	// Initialize _varlist with the scoped variables
-	init_scoped_variables(oset[0]);
-}
-
-/* ================================================================= */
-///
-/// Initialize _varlist given a handle of either VariableList or a
-/// variable.
-///
-void PatternLink::init_scoped_variables(const Handle& hvar)
-{
-	// Either it is a VariableList, or its a naked variable, or its a
-	// typed variable.  Use the VariableList class as a tool to
-	// extract the variables for us.
-	Type t = hvar->getType();
-	if (VARIABLE_LIST == t)
-	{
-		VariableList vl(LinkCast(hvar)->getOutgoingSet());
-		_varlist = vl.get_variables();
-	}
-	else
-	{
-		VariableList vl({hvar});
-		_varlist = vl.get_variables();
-	}
-}
 
 /* ================================================================= */
 ///

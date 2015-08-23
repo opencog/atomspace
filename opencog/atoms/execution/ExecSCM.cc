@@ -52,7 +52,7 @@ static Handle ss_reduce(AtomSpace* atomspace, const Handle& h)
 	if (not classserver().isA(t, FREE_LINK))
 	{
 		throw InvalidParamException(TRACE_INFO,
-			"Expecteing a FreeLink (PlusLink, TimesLink, etc");
+			"Expecting a FreeLink (PlusLink, TimesLink, etc");
 	}
 
 	// Arghh.  The cast should have been enough, but we currently
