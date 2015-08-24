@@ -7,6 +7,7 @@ module OpenCog.AtomSpace
     -- * AtomSpace Environment
       AtomSpace
     , AtomSpaceObj
+    , getParent
     , newAtomSpace
     , onAtomSpace
     , (<:)
@@ -38,7 +39,7 @@ module OpenCog.AtomSpace
 import OpenCog.AtomSpace.Api
 import OpenCog.AtomSpace.Types
 import OpenCog.AtomSpace.Env         (AtomSpace,runOnNewAtomSpace,AtomSpaceObj,
-                                      newAtomSpace,onAtomSpace,(<:))
+                                      getParent,newAtomSpace,onAtomSpace,(<:))
 import OpenCog.AtomSpace.Utils       (printAtom,showAtom)
 import OpenCog.AtomSpace.AtomType    (AtomType(..))
 import OpenCog.AtomSpace.Inheritance (type (<~))
