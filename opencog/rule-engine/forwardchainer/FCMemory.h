@@ -79,7 +79,6 @@ public:
 
 	//History
 	void add_rules_product(int iteration, HandleSeq product);
-	void add_inference(int iteration, HandleSeq product);
 	vector<Inference>& get_inf_history();
 	HandleSeq get_result();
 	vector<Rule*> get_applied_rules(void);
