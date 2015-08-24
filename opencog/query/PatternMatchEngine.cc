@@ -420,7 +420,7 @@ static int facto (int n) { return (n==1)? 1 : n * facto(n-1); };
 
 How do unordered links work?
 ----------------------------
-This is complicted, so we write it out.  When ascending from below (i.e.
+This is complicated, so we write it out.  When ascending from below (i.e.
 from do_term_up()), unordered links may be found in two different
 places: The parent term may be unordered, or the parent link may hold
 another link (a sibling to us) that is unordered. Traversal needs to

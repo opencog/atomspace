@@ -9,7 +9,7 @@ classes, nor does it explain how to use this thing. This README
 is meant to provide an understanding of the code internals.
 
 The pattern match engine finds groundings (interpretations) for a
-set of mandatory and optional clauses. It can be thought of in seveal
+set of mandatory and optional clauses. It can be thought of in several
 ways: it performs a variable unification across multiple clauses;
 it discovers groundings for variables; it solves the subgraph
 isomorphism problem; it queries a graphical relational database
