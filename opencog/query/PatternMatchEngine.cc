@@ -36,7 +36,7 @@ using namespace opencog;
 /**
  * Pattern Match Engine Overview
  * -----------------------------
- * The explanation of how this code *actually* qorks has been
+ * The explanation of how this code *actually* works has been
  * moved to README-Algorithm. That README provies the "big-picture"
  * explanation of the rather complex interwoven code below. Read it
  * first, and refert to it when examining the main methods below.
