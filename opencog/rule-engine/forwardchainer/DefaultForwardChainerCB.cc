@@ -186,31 +186,24 @@ HandleSeq DefaultForwardChainerCB::derive_rules(Handle source, Rule* rule)
 }
 
 /**
- *  Tries to unify sub atoms of implicant lists in @param rule with @param source.
+ *  Checks if sub atoms of implicant lists in @param rule are unifiable with
+ *  @param source.
  *
  *  @param source  An atom that might bind to variables in @param rule.
  *  @param rule    The rule object whose implicants are to be sub atom unified.
  *
- *  @return        HandleSeq of derived rules from sub atoms unification.
+ *  @return        true if source is subatom unifiable and false otherwise.
  */
-HandleSeq DefaultForwardChainerCB::subatom_unify(Handle source,Rule* rule)
+bool DefaultForwardChainerCB::subatom_unify(Handle source,Rule* rule)
 {
-    HandleSeq derived_rules={};
-    HandleSeq impl_members = rule->get_implicant_seq();
-
-    UnorderedHandleSet output_expanded;
-    for (Handle h : impl_members) {
-        UnorderedHandleSet hs = get_all_unique_atoms(h);
-        hs.erase(h); //Already tried to unify this.
-        output_expanded.insert(hs.begin(), hs.end());
-    }
+    UnorderedHandleSet output_expanded = get_subatoms(rule);
 
     for (Handle h : output_expanded) {
-        HandleSeq result = unify(source, h, rule);
-        derived_rules.insert(derived_rules.end(), result.begin(), result.end());
+        if( unify(source,h, rule))
+            return true;
     }
 
-    return derived_rules;
+    return false;
 }
 
 HandleSeq DefaultForwardChainerCB::choose_premises(FCMemory& fcmem)
@@ -412,4 +405,25 @@ bool DefaultForwardChainerCB::is_valid_implicant(const Handle& h)
        return false;
 
     return true;
+}
+
+/**
+ * Gets all unique atoms of in the implicant list of @param r.
+ *
+ * @param r  A rule object
+ *
+ * @return   An unoderedHandleSet of of all unique atoms in the implicant.
+ */
+UnorderedHandleSet DefaultForwardChainerCB::get_subatoms(Rule *rule)
+{
+    UnorderedHandleSet output_expanded;
+
+    HandleSeq impl_members = rule->get_implicant_seq();
+    for (Handle h : impl_members) {
+        UnorderedHandleSet hs = get_all_unique_atoms(h);
+        hs.erase(h); //Already tried to unify this.
+        output_expanded.insert(hs.begin(), hs.end());
+    }
+
+    return output_expanded;
 }
