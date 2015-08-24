@@ -554,5 +554,26 @@ public:
 
 		TS_ASSERT(handle_set.size() == 1);
 	}
+
+	// This tests bug report #221
+	void testMoreSpace()
+	{
+		AtomSpace as;
+		AtomSpace ex(&as);
+		AtomSpace ns;
+
+		Handle haa = as.add_node(CONCEPT_NODE, "PLN");
+		Handle hab = as.add_node(CONCEPT_NODE, "URE");
+		Handle hea = ex.add_link(LIST_LINK, haa, hab);
+		Handle heb = ex.add_node(CONCEPT_NODE, "VAR");
+		Handle hec = ex.add_link(IMPLICATION_LINK, hea, heb);
+
+		as.add_link(LIST_LINK, haa, hab);
+
+		Handle hna = ns.add_atom(hec);
+		Handle hec_copy = ex.get_atom(hna);
+
+		TS_ASSERT(hec_copy == hec);
+	}
 };
 

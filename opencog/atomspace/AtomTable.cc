@@ -233,11 +233,16 @@ Handle AtomTable::getHandle(Handle& h) const
         if (this == h._ptr->_atomTable)
             return h;
 
+        // try getting this atomtable's version first
+        Handle hthis = getHandle(AtomPtr(h));
+        if (hthis) return hthis;
+
         if (_environ) {
             Handle henv = _environ->getHandle(h);
             if (henv) return henv;
         }
-        return getHandle(AtomPtr(h));
+
+        return Handle::UNDEFINED;
     }
 
     // Read-lock for the _atom_set.
