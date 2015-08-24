@@ -41,7 +41,7 @@ private:
     source_selection_mode _ts_mode;
 
     Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);
-    HandleSeq unify(Handle source,Handle target,Rule* rule);
+    bool unify(Handle source,Handle target,Rule* rule);
     HandleSeq subatom_unify(Handle source,Rule* rule);
     bool is_valid_implicant(const Handle& h);
 
