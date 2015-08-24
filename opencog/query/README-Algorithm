@@ -58,7 +58,7 @@ a TV of FALSE, then it is accepted; otherwise it is rejected.
 Other strategies for handling optional clauses in the callback
 are also possible. Thus, optional clauses themselves can be thought
 as implementing a bridge between "intuitionistic logic" and
-"classical logic", depending on ow they are handled in the callback.
+"classical logic", depending on how they are handled in the callback.
 
 At every step of the process, the PatternMatchCallback is consulted
 to determine whether a candidate match should be accepted or not.
