@@ -265,12 +265,9 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
  *
  * Every clause should contain at least one variable in it; clauses
  * that are constants and can be trivially discarded.
- *
-XXX WTF, what about evaluatables? How did those not get removed???
-I don't get it... fixme
  */
 void PatternLink::validate_clauses(std::set<Handle>& vars,
-                                    HandleSeq& clauses)
+                                   HandleSeq& clauses)
 
 {
 	// The Fuzzy matcher does some strange things: it declares no
@@ -298,13 +295,23 @@ void PatternLink::validate_clauses(std::set<Handle>& vars,
 	// clause.  They are presumably there due to programmer error.
 	// Quoted variables are constants, and so don't count.
 	//
-	// XXX Well, we could throw, here, but sureal gives us spurious
-	// variables, so instead of throwing, we just discard them and
-	// print a warning.
+	// Well, if any clause at all contains a DefinedSchemaNode or
+	// a DefinedPredicateNode, then it could be that all of the
+	// variables appear only in the definition, and the definition
+	// cannot be known until run-time.
+	if (contains_atomtype(clauses, DEFINED_PREDICATE_NODE))
+		return;
+
+	if (contains_atomtype(clauses, DEFINED_SCHEMA_NODE))
+		return;
+
 	for (const Handle& v : vars)
 	{
 		if (not is_unquoted_in_any_tree(clauses, v))
 		{
+			// XXX Well, we could throw, here, but sureal gives us spurious
+			// variables, so instead of throwing, we just discard them and
+			// print a warning.
 /*
 			logger().warn(
 				"%s: The variable %s does not appear (unquoted) in any clause!",
