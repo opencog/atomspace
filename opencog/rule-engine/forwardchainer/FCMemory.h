@@ -32,7 +32,6 @@ struct Inference {
 	int iter_step;
 	Rule* applied_rule;
 	HandleSeq inf_product;
-	HandleSeq matched_nodes; /**<matched nodes with the variables in the rule,useful during mutual exclusion checking*/
 };
 
 class FCMemory {
@@ -80,8 +79,7 @@ public:
 
 	//History
 	void add_rules_product(int iteration, HandleSeq product);
-	void add_inference(int iteration, HandleSeq product,
-			HandleSeq matched_nodes);
+	void add_inference(int iteration, HandleSeq product);
 	vector<Inference>& get_inf_history();
 	HandleSeq get_result();
 	vector<Rule*> get_applied_rules(void);
