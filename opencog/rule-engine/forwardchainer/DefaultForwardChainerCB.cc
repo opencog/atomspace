@@ -122,6 +122,69 @@ bool DefaultForwardChainerCB::unify(Handle source,Handle target,Rule* rule){
 
 }
 
+HandleSeq DefaultForwardChainerCB::derive_rules(Handle source, Rule* rule)
+{
+    HandleSeq derived_rules = { };
+
+    for (Handle target : rule->get_implicant_seq()) {
+        //exceptions
+        if (not is_valid_implicant(target))
+            return {};
+
+        AtomSpace temp_pm_as;
+        Handle hcpy = temp_pm_as.add_atom(target);
+        Handle implicant_vardecl = temp_pm_as.add_atom(
+                gen_sub_varlist(target, rule->get_vardecl()));
+        Handle sourcecpy = temp_pm_as.add_atom(source);
+
+        BindLinkPtr bl =
+        createBindLink(HandleSeq { implicant_vardecl, hcpy, hcpy });
+
+        VarGroundingPMCB gcb(&temp_pm_as);
+        gcb.implicand = bl->get_implicand();
+
+        bl->imply(gcb);
+
+        auto del_by_value =
+                [] (std::vector<std::map<Handle,Handle>>& vec_map,const Handle& h) {
+                    for (auto& map: vec_map)
+                    for(auto& it:map) {if (it.second == h) map.erase(it.first);}
+                };
+
+        //We don't want implicant_var list to be matched as
+        //in the case of free vars in modus-ponens rules.
+        del_by_value(gcb.term_groundings, implicant_vardecl);
+        del_by_value(gcb.var_groundings, implicant_vardecl);
+
+        FindAtoms fv(VARIABLE_NODE);
+        for (const auto& termg_map : gcb.term_groundings) {
+            for (const auto& it : termg_map) {
+                if (it.second == sourcecpy) {
+
+                    fv.search_set(it.first);
+
+                    Handle rhandle = rule->get_handle();
+                    HandleSeq new_candidate_rules = substitute_rule_part(
+                            temp_pm_as, temp_pm_as.add_atom(rhandle), fv.varset,
+                            gcb.var_groundings);
+
+                    for (Handle nr : new_candidate_rules) {
+                        if (find(derived_rules.begin(), derived_rules.end(), nr) == derived_rules.end()) {
+                            //Adding back to _as avoids UUID clashes.
+                            Handle h = _as.add_atom(nr);
+                            //Avoid adding original rule to derived rule list
+                            if (h != rhandle)
+                                derived_rules.push_back(h);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return derived_rules;
+}
+
 /**
  *  Tries to unify sub atoms of implicant lists in @param rule with @param source.
  *
