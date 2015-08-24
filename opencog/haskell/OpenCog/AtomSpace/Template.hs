@@ -5,30 +5,33 @@
 -- | This Module defines the main util functions to use Template Haskell
 -- in order to reduce as much boilerplate code as possible.
 module OpenCog.AtomSpace.Template (
-  declareAtomType
-, declareAtomFilters
-, atomHierarchyFile
-) where
+    declareAtomType
+  , declareAtomFilters
+  ) where
 
 import Language.Haskell.TH.Quote        (QuasiQuoter(..),dataToExpQ,quoteFile)
+import Language.Haskell.TH.Syntax       (addDependentFile)
 import Language.Haskell.TH
 import Data.List                        (isSuffixOf,sortBy,(\\),groupBy)
 import Data.Char                        (toUpper,toLower)
 import Data.Data                        (Data,Typeable)
+import Data.Functor                     ((<$>))
 import Data.Map.Strict                  (Map,mapKeys,toList,fromList,insert,
                                          empty,(!),keys,member)
 import qualified Data.Map.Strict as M   (map)
 import qualified Data.Set        as S   (Set,(\\),fromList,toList)
 import Control.Monad.State              (State,modify,get,execState)
+import System.Directory                 (getCurrentDirectory)
+import System.FilePath                  ((</>),takeDirectory)
 
--- | Simple Atom representation.
-data AT = NOD String
-        | LNK String
-    deriving (Typeable,Data,Eq,Ord,Show)
+-- | Simple Atom type.
+type AT = String
 
 -- | Template function to define AtomType and some util functions over it.
-declareAtomType :: [(AT,[AT])] -> Q [Dec]
-declareAtomType atomMap = do
+--   It takes as argument a relative path to the file "atom_types.script".
+declareAtomType :: FilePath -> Q [Dec]
+declareAtomType file = do
+    atomMap <- parseRelativeFile file
     a <- newName "a"
     b <- newName "b"
     let
@@ -40,7 +43,7 @@ declareAtomType atomMap = do
 
       constrNames   = map (\(nod,ancestors) ->
                              (mkName (toTypeName nod)
-                             ,toRawName nod
+                             ,nod
                              ,map (mkName . toTypeName) ancestors)) $
                                getFullAncestors atomMap
       constr        = map (\(x,_,_) -> NormalC x []) constrNames
@@ -79,8 +82,10 @@ declareAtomType atomMap = do
     genlist (x:xs) = AppT (AppT PromotedConsT (PromotedT x)) (genlist xs)
 
 -- | Template function to declare Filter instances for each AtomType.
-declareAtomFilters :: [(AT,[AT])] -> Q [Dec]
-declareAtomFilters atomMap = do
+--   It takes as argument a relative path to the file "atom_types.script".
+declareAtomFilters :: FilePath -> Q [Dec]
+declareAtomFilters file = do
+    atomMap <- parseRelativeFile file
     a <- newName "a"
     let
       className       = mkName "FilterIsChild"
@@ -125,17 +130,24 @@ declareAtomFilters atomMap = do
 
      in return classDef
 
--- | QuasiQuorter to read the atom_types.script file.
-atomHierarchyFile :: QuasiQuoter
-atomHierarchyFile = quoteFile atomHierarchy
+-- | 'getAbsFromRelPath' obtains an absolute path from a relative path to
+-- current file (where this template function is running).
+getAbsFromRelPath :: FilePath -> Q FilePath
+getAbsFromRelPath relative = do
+    actual <- runIO getCurrentDirectory
+    fileName <- loc_filename <$> location
+    let path = actual </> fileName
+        dir  = takeDirectory path
+    return $ dir </> relative
 
-atomHierarchy :: QuasiQuoter
-atomHierarchy = QuasiQuoter {
-      quoteExp  = dataToExpQ (\x -> Nothing) . parser
-    , quotePat  = undefined
-    , quoteDec  = undefined
-    , quoteType = undefined
-    }
+-- | 'parseRelativeFile' takes a relative path to a file, and executes the
+-- parser over it.
+parseRelativeFile :: FilePath -> Q [(AT,[AT])]
+parseRelativeFile fileName = do
+    file <- getAbsFromRelPath fileName
+    addDependentFile file
+    cont <- runIO $ readFile file
+    return $ parser cont
 
 type NameMap = Map String String
 type AtomMap = Map String [String]
@@ -152,8 +164,6 @@ onAtomMap f = modify (\(s1,s2) -> (s1,f s2))
 parser :: String -> [(AT,[AT])]
 parser s = ( toList
            . modifyVarNode
-           . M.map (map toAT)
-           . mapKeys toAT
            . snd
            ) $ execState (withState s) (empty,empty)
   where
@@ -178,7 +188,7 @@ parser s = ( toList
     -- We will set VariableNode's parent to all leaf nodes.
     -- So, VariableNode will inherit from every atom type, and we can place it
     -- everywhere without type constraints.
-    varNode = NOD "VariableNode"
+    varNode = "VariableNode"
     modifyVarNode :: Map AT [AT] -> Map AT [AT]
     modifyVarNode m = let parents = filter ((/=)varNode) $ getNodesLeaf $ toList m
                        in insert varNode parents m
@@ -216,29 +226,14 @@ toCamelCase = concat
       capital (x:xs) = toUpper x : map toLower xs
       capital []     = []
 
-toAT :: String -> AT
-toAT "Notype" = NOD "Notype"
-toAT "Atom"   = NOD "Atom"
-toAT "Node"   = NOD "Node"
-toAT "Link"   = LNK "Link"
-toAT xs | isSuffixOf "Node" xs = NOD xs
-        | otherwise = LNK xs
-
 -- | 'toTypeName' given an atomtype generates a phantom type notation for it.
 toTypeName :: AT -> String
-toTypeName (NOD "Node") = "NodeT"
-toTypeName (NOD s) = if isSuffixOf "Node" s
-                        then take (length s - 4) s ++ "T"
-                        else s ++ "T"
-toTypeName (LNK "Link") = "LinkT"
-toTypeName (LNK s) = if isSuffixOf "Link" s
-                        then take (length s - 4) s ++ "T"
-                        else s ++ "T"
-
--- | 'toRawName' simply gets the atomtype.
-toRawName :: AT -> String
-toRawName (NOD n) = n
-toRawName (LNK l) = l
+toTypeName "Node" = "NodeT"
+toTypeName "Link" = "LinkT"
+toTypeName s
+    | isSuffixOf "Node" s = take (length s - 4) s ++ "T"
+    | isSuffixOf "Link" s = take (length s - 4) s ++ "T"
+    | otherwise           = s ++ "T"
 
 -- | 'reverseTree' reverses the information provided in the atom_types.script file.
 -- From input: [(Atom, parent of Atom)]

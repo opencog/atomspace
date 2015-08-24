@@ -94,14 +94,14 @@ class PatternMatchEngine
 
 		// -------------------------------------------
 		// ChoiceLink state management
-		typedef std::pair<Handle, Handle> Choice;
+		typedef std::pair<PatternTermPtr, Handle> Choice;
 		typedef std::map<Choice, size_t> ChoiceState;
 
 		ChoiceState _choice_state;
 		bool _need_choice_push;
 
-		size_t curr_choice(const Handle&, const Handle&, bool&);
-		bool have_choice(const Handle&, const Handle&);
+		size_t curr_choice(const PatternTermPtr&, const Handle&, bool&);
+		bool have_choice(const PatternTermPtr&, const Handle&);
 
 		// Iteration control for choice links. Branchpoint advances
 		// whenever take_step is set to true.
@@ -109,13 +109,13 @@ class PatternMatchEngine
 
 		// -------------------------------------------
 		// Unordered Link suppoprt
-		typedef std::vector<Handle> Permutation;
-		typedef std::pair<Handle, Handle> Unorder; // Choice
+		typedef std::pair<PatternTermPtr, Handle> Unorder; // Choice
+		typedef PatternTermSeq Permutation;
 		typedef std::map<Unorder, Permutation> PermState; // ChoiceState
 
 		PermState _perm_state;
-		Permutation curr_perm(const Handle&, const Handle&, bool&);
-		bool have_perm(const Handle&, const Handle&);
+		Permutation curr_perm(const PatternTermPtr&, const Handle&, bool&);
+		bool have_perm(const PatternTermPtr&, const Handle&);
 
 		// Iteration control for unordered links. Branchpoint advances
 		// whenever take_step is set to true.
@@ -182,28 +182,37 @@ class PatternMatchEngine
 			CALL_SOLN
 		} Caller;   // temporary scaffolding !???
 
-		bool tree_compare(const Handle&, const Handle&, Caller);
-		bool quote_compare(const Handle&, const Handle&);
+		bool tree_compare(const PatternTermPtr&, const Handle&, Caller);
+
+		bool quote_compare(const PatternTermPtr&, const Handle&);
 		bool variable_compare(const Handle&, const Handle&);
 		bool self_compare(const Handle&);
 		bool node_compare(const Handle&, const Handle&);
 		bool redex_compare(const LinkPtr&, const LinkPtr&);
-		bool choice_compare(const Handle&, const Handle&,
+		bool choice_compare(const PatternTermPtr&, const Handle&,
 		                    const LinkPtr&, const LinkPtr&);
-		bool ordered_compare(const Handle&, const Handle&,
+		bool ordered_compare(const PatternTermPtr&, const Handle&,
 		                     const LinkPtr&, const LinkPtr&);
-		bool unorder_compare(const Handle&, const Handle&,
+		bool unorder_compare(const PatternTermPtr&, const Handle&,
 		                     const LinkPtr&, const LinkPtr&);
 
 		// -------------------------------------------
 		// Upwards-walking and grounding of a single clause.
 		// See PatternMatchEngine.cc for descriptions
-		bool explore_up_branches(const Handle&, const Handle&, const Handle&);
-		bool explore_link_branches(const Handle&, const Handle&, const Handle&);
-		bool explore_choice_branches(const Handle&, const Handle&, const Handle&);
-		bool explore_single_branch(const Handle&, const Handle&, const Handle&);
-		bool do_term_up(const Handle&, const Handle&, const Handle&);
-		bool clause_accept(const Handle&, const Handle&, const Handle&);
+		bool explore_clause(const Handle&, const Handle&, const Handle&);
+		bool explore_term_branches(const Handle&, const Handle&,
+		                           const Handle&);
+		bool explore_up_branches(const PatternTermPtr&, const Handle&,
+		                         const Handle&);
+		bool explore_link_branches(const PatternTermPtr&, const Handle&,
+		                           const Handle&);
+		bool explore_choice_branches(const PatternTermPtr&, const Handle&,
+		                             const Handle&);
+		bool explore_single_branch(const PatternTermPtr&, const Handle&,
+		                           const Handle&);
+		bool do_term_up(const PatternTermPtr&, const Handle&,
+		                const Handle&);
+		bool clause_accept(const Handle&, const Handle&);
 
 	public:
 		PatternMatchEngine(PatternMatchCallback&,

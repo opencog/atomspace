@@ -72,7 +72,6 @@ class InitiateSearchCB : public virtual PatternMatchCallback
 
 		bool _search_fail;
 		virtual bool neighbor_search(PatternMatchEngine *);
-		virtual bool disjunct_search(PatternMatchEngine *);
 		virtual bool link_type_search(PatternMatchEngine *);
 		virtual bool variable_search(PatternMatchEngine *);
 		virtual bool no_search(PatternMatchEngine *);

@@ -68,7 +68,7 @@ and the hypergraph
 
 Then, by pattern matching, the predicate part of the BindLink can be
 fulfilled, binding $var0 to "pottery" and $var1 to "clay".  These
-bindings are refered to as the 'groundings' or 'solutions' to the
+bindings are referred to as the 'groundings' or 'solutions' to the
 variables. So, e.g. $var0 is 'grounded' by "pottery".
 
 Next, a grounded copy of the implicand is then created; that is,
@@ -89,7 +89,7 @@ understood as 'bound variables' in the usual sense of
 lambda-calculus. (It is strongly suggested that variables always be
 declared as VariableNodes; there are several spots in the code where
 this is explicitly assumed, and declaring some other node type as a
-vaiable may lead to unexpected results.)
+variable may lead to unexpected results.)
 
 Pattern-matching proceeds by finding groundings for these variables.
 When a pattern match is found, the variables can be understood as
@@ -117,8 +117,8 @@ Type Restrictions
 -----------------
 It could make sense to store type restrictions with a new VariableNode
 class. This would offer a minor performance improvement: type
-restrictions would not have to be looked up in a mp, as currently
-implemented.  On the other hand, this could e a major headache: every
+restrictions would not have to be looked up in a map, as currently
+implemented.  On the other hand, this could be a major headache: every
 variable would have to be globally unique, as otherwise, the type
 restrictions would clash with one another.  This would also make
-type equations hrd to enforce.  Hmm. So maybe this is a bad idea...
+type equations hard to enforce.  Hmm. So maybe this is a bad idea...

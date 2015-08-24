@@ -7,12 +7,11 @@ The library (<em>opencog/haskell</em>) implements Haskell bindings.
 Right now, it is automatically installed, but if you want to reinstall,
 go to opencog/haskell and run:
 @code
-cabal update
-cabal install
+stack build --extra-lib-dirs=/usr/local/lib/opencog
 @endcode
 
 For appropiate Haddock documentation on the haskell library look
-at: <a href="./haskell/OpenCog-AtomSpace.html">
+at: <a href="./haskell/doc/opencog-atomspace-0.1.0.0/OpenCog-AtomSpace.html">
      opencog-atomspace</a>
 
 

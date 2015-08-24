@@ -26,7 +26,7 @@
 
 #include <boost/operators.hpp>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/bind/VariableList.h>
+#include <opencog/atoms/core/VariableList.h>
 
 
 namespace opencog {

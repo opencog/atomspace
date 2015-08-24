@@ -28,7 +28,8 @@
 #include <set>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atoms/bind/VariableList.h> // for VariableTypeMap
+#include <opencog/query/Pattern.h> // for VariableTypeMap
+#include <opencog/atoms/core/VariableList.h> // for VariableTypeMap
 
 // #define DEBUG 1
 
@@ -232,6 +233,9 @@ class PatternMatchCallback
 		 * acceptable. The engine is designed to halt once an acceptable
 		 * solution has been found; thus, in order to force it to search
 		 * for more, a return value of false is needed.)
+		 *
+		 * Note that the callback may be called many times reporting
+		 * the same result.
 		 */
 		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
 		                       const std::map<Handle, Handle> &term_soln) = 0;

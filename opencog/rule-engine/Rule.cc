@@ -28,7 +28,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/bind/BindLink.h>
-#include <opencog/atoms/bind/DefineLink.h>
+#include <opencog/atoms/core/DefineLink.h>
 
 #include "Rule.h"
 

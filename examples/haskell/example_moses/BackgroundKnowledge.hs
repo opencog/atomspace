@@ -12,18 +12,16 @@ bkn = atomList
                   \> VariableNode "Z" )
         (ImplicationLink noTv
             (AndLink noTv
-                (EvaluationLink noTv
+               |> EvaluationLink noTv
                     (PredicateNode "take" noTv)
                     (ListLink |> VariableNode "X"
                               \> VariableNode "Y"
                     )
-                )
-                (EvaluationLink noTv
+               \> EvaluationLink noTv
                     (PredicateNode "contain" noTv)
                     (ListLink |> VariableNode "Y"
                               \> VariableNode "Z"
                     )
-                )
             )
             (EvaluationLink noTv
                 (PredicateNode "take" noTv)

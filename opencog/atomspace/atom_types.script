@@ -100,42 +100,45 @@ VARIABLE_LIST <- LIST_LINK
 // Everything under a QuoteLink is interpreted literally.
 QUOTE_LINK <- ORDERED_LINK
 
-// A ScopeLink is (more or less???) the same thing as a LambdaLink
-// (We have not yet settled on the appropriate definition of a
-// LambdaLink) The ScopeLink is used to identify an open term, i.e. a
-// link containing VariableNodes within it, and then listing those
-// variables, and forcing type restrictions on them. Thus, in a certain
-// sense, the ScopeLink explicitly binds at least some, and maybe all
-// of the variables that occur in it's body.  It differs from the
-// FreeLink in that the FreeLink necessarily list ALL the (free)
-// variables within it; the ScopeLink need not bind all of them.
-// The FreeLink also has no type restrictions on the variables.
-SCOPE_LINK <- VARIABLE_LIST
-DEFINE_LINK <- ORDERED_LINK     // Gives a scoped lambda a name
-BETA_REDEX <- ORDERED_LINK      // Beta reduction of bound variables
+// The LambdaLink is used to identify an open term, i.e. a link
+// containing VariableNodes within it, and binding those variables.
+// In the process, it can also force type restrictions on them. 
+// The LambdaLink does not have to bind all variables that occur in it's
+// body; those that are not bound remain free.
+//
+// The LambdaLink differs from the FreeLink in that the FreeLink
+// necessarily list ALL the (free) variables within it; the LambdaLink
+// need not bind all of them.  The FreeLink also has no type
+// restrictions on the variables.
+LAMBDA_LINK <- ORDERED_LINK
+
+// Naming things, tagging things.
+DEFINE_LINK <- ORDERED_LINK
+
+// PutLinks perform a beta-reduction when executed; i.e. they get
+// beta-reduced when they are executed. The first atom in a PutLink
+// should be a LambdaLink... or I guess a FreeLink is OK, too?
+PUT_LINK <- ORDERED_LINK
 
 // Pattern definition, pattern grounding/satisfaction.
 // The PatternLink implements the base class holding a pattern that
 // the pattern matcher will traverse.  Its primary role in life is to
 // enable a C++ class that unpacks all the arguments and types, etc.
 // into assorted C++ structures. It does not have any semantics in and
-// of itself, it just holds machinery. PatternLink should probably
-// inherit from ScopeLink, but, for whatever reason, it doesn't need
-// to at the moment (at least, not as a C++ class)
+// of itself, it just holds machinery.
 //
-// The GetLink is probably exactly the same thing as a
-// SatsifyingSetLink, except that GetLink is imperative, while
-// SatisfyingSetLink is declarative.  Likewise, BindLink is probably
-// exactly the same thing as an ImplicationLink, except that its
-// imperative, not declarative.
-PATTERN_LINK <- ORDERED_LINK       // A pattern encapsulated in a Link.
+// The GetLink is almost exactly the same thing as a SatsifyingSetLink,
+// except that GetLink is imperative, while SatisfyingSetLink is
+// declarative.  Likewise, BindLink is exactly the same thing as an
+// ImplicationLink, except that its imperative, not declarative.
+PATTERN_LINK <- LAMBDA_LINK        // A pattern encapsulated in a Link.
 GET_LINK <- PATTERN_LINK           // Finds all groundings, return atoms
 SATISFACTION_LINK <- PATTERN_LINK  // Finds all groundings, return TV
 BIND_LINK <- GET_LINK              // Finds all groundings and executes
 
 // Logical quantifiers
-FORALL_LINK <- SCOPE_LINK "ForAllLink"
-EXISTS_LINK <- SCOPE_LINK
+FORALL_LINK <- LAMBDA_LINK "ForAllLink"
+EXISTS_LINK <- LAMBDA_LINK
 AVERAGE_LINK <- FORALL_LINK
 
 // Convert predicate into concept
@@ -173,7 +176,7 @@ ATTRACTION_LINK <- ORDERED_LINK
 //
 // The variables are necessarily free: they to NOT have type
 // declarations or restrictions associated with them.  This is in sharp
-// contrast to ScopeLink, which binds variables by scoping them, and
+// contrast to LambdaLink, which binds variables by scoping them, and
 // then forcing type restrictions to them.
 //
 // FreeLinks may be open or closed; they are closed terms if they
@@ -186,11 +189,6 @@ ATTRACTION_LINK <- ORDERED_LINK
 // shared-library conflicts, the FreeLink cannot currently be used in
 // this way.  Thus, its half-finished ....
 FREE_LINK <- ORDERED_LINK
-
-// PutLinks could be called BetaRedexLink's, except that name is already
-// taken. PutLinks hold beta redexes in them; then they are executed,
-// they are beta-reduced.
-PUT_LINK <- FREE_LINK
 
 // To be used with PredicateNode
 EVALUATION_LINK <- FREE_LINK

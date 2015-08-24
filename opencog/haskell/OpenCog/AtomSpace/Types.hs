@@ -101,10 +101,8 @@ type AtomGen = Gen AtomT
 data Atom (a :: AtomType) where
     PredicateNode       :: AtomName -> TVal -> Atom PredicateT
 
-    AndLink             :: (a <~ AtomT,b <~ AtomT) =>
-                           TVal -> Atom a -> Atom b -> Atom AndT
-    OrLink              :: (a <~ AtomT,b <~ AtomT) =>
-                           TVal -> Atom a -> Atom b -> Atom OrT
+    AndLink             :: TVal -> [AtomGen] -> Atom AndT
+    OrLink              :: TVal -> [AtomGen] -> Atom OrT
     ImplicationLink     :: (a <~ AtomT,b <~ AtomT) =>
                            TVal -> Atom a -> Atom b -> Atom ImplicationT
     EquivalenceLink     :: (a <~ AtomT,b <~ AtomT) =>

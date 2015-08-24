@@ -30,6 +30,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <opencog/query/PatternTerm.h>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/types.h>  // for typedef Type
 
@@ -38,33 +39,6 @@ namespace opencog {
 /** \addtogroup grp_atomspace
  *  @{
  */
-
-typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
-
-/// The Variables struct defines a list of variables in a way that
-/// makes it easier and faster to work with in C++.  It implements 
-/// the data that is shared between the VariableList link atom
-/// and the pattern matcher.
-///
-struct Variables
-{
-	/// Unbundled variables and types for them.
-	/// _typemap is the (possibly empty) list of restrictions on
-	/// the variable types. The _varset contains exactly the same atoms
-	/// as the _varseq; it is used for fast lookup; (i.e. is some
-	/// some variable a part of this set?) whereas the _varseq list
-	/// preserves the original order of the variables.  Yes, the fast
-	/// lookup really is needed!
-	///
-	/// The _index is a reversed index into _varseq: given a variable,
-	/// it returns the ordinal of that variable in the _varseq. It is
-	/// used to implement the variable substitution (aka beta-reducation
-	/// aka "PutLink") method.
-	HandleSeq varseq;
-	std::set<Handle> varset;
-	VariableTypeMap typemap;
-	std::map<Handle, unsigned int> index;
-};
 
 /// The Pattern struct defines a search pattern in a way that makes it
 /// easier and faster to work with in C++.  It implements the data that
@@ -78,6 +52,24 @@ struct Pattern
 	typedef std::vector<Handle> RootList;
 	typedef std::map<Handle, RootList> ConnectMap;
 	typedef std::pair<Handle, RootList> ConnectPair;
+
+	// Each atom of the pattern may appear in many clauses. Moreover the same
+	// atom may be repeated under the same clause root in many positions.
+	// AndLink
+	//   FirstClauseLink
+	//     ConceptNode "$x"
+	//     ConceptNode "$x"
+	//     ConceptNode "$y"
+	//   SecondClauseLink
+	//     ConceptNode "$x"
+	//     ConceptNode "$x"
+	// We need to keep the mapping from atoms and clauses to the list of atom
+	// occurences which are referenced by PatternTermPtr pointers.
+	// Each pointer corresponds to unique position in the pattern. The list of
+	// pointers is stored in PatternTermSeq. Typically the list contains one
+	// element, but it might have more if atom repeats in the same clause.
+	typedef std::pair<Handle,Handle> AtomInClausePair;  // first is atom
+	typedef std::map<AtomInClausePair, PatternTermSeq> ConnectTermMap;
 
 	// -------------------------------------------
 	// The current set of clauses (beta redex context) being grounded.
@@ -127,6 +119,8 @@ struct Pattern
 	// after one clause is solved, we know what parts of the unsolved
 	// clauses already have a solution.
 	ConnectMap       connectivity_map;     // setup by make_connectivity_map()
+
+	ConnectTermMap   connected_terms_map;  // setup by make_term_trees()
 };
 
 /** @}*/

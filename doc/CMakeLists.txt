@@ -25,13 +25,12 @@ IF (DOXYGEN_FOUND)
         ADD_DEPENDENCIES(doxygen haskell-doc)
     ENDIF (STACK_FOUND)
     ADD_CUSTOM_TARGET(haskell-doc
-        COMMAND cabal configure --builddir=${CMAKE_BINARY_DIR}/opencog/haskell
-                      --extra-lib-dirs=${CMAKE_BINARY_DIR}/opencog/haskell
-        COMMAND cabal haddock --builddir=${CMAKE_BINARY_DIR}/opencog/haskell --html
-                      --haddock-option=-o${CMAKE_CURRENT_BINARY_DIR}/html/haskell
-        COMMENT "Generating haskell library documentation..."
+        COMMAND ${CMAKE_COMMAND} -DBINDIR=${CMAKE_BINARY_DIR}
+                                 -DSRCDIR=${CMAKE_SOURCE_DIR}
+                                 -P HaskellDoc.cmake
         DEPENDS haskell-atomspace-lib
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/opencog/haskell/
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Generating haskell library documentation..."
     )
 ELSE (DOXYGEN_FOUND)
     MESSAGE(STATUS "Doxygen not found, you won't be able to generate API documentation.")

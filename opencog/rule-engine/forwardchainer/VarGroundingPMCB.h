@@ -48,11 +48,8 @@ public:
 
         var_groundings.push_back(var_soln);
         term_groundings.push_back(term_soln);
-        // If we found as many as we want, then stop looking for more.
-        if (result_list.size() < max_results)
-            return false;
 
-        return true;
+        return false;
     }
 
     std::vector<std::map<Handle, Handle>> var_groundings;

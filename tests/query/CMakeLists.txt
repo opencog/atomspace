@@ -47,7 +47,8 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(SubstitutionUTest)
 	ADD_CXXTEST(GetLinkUTest)
 
-	# Currently disabled, because these requireScopeLink, which is no
+	# Currently disabled, because these are under consturction;
+	# The BetaRedex has been replaced by PutLink.
 	# longer used by the BindLink/SatsifactionLink
 	# ADD_CXXTEST(BetaRedexUTest)
 	# ADD_CXXTEST(RedexBindUTest)
@@ -103,6 +104,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-nest.scm
     ${PROJECT_BINARY_DIR}/tests/query/choice-nest.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-top-nest.scm
     ${PROJECT_BINARY_DIR}/tests/query/choice-top-nest.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-unary.scm
+    ${PROJECT_BINARY_DIR}/tests/query/choice-unary.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/evaluation.scm
     ${PROJECT_BINARY_DIR}/tests/query/evaluation.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/finite-state-machine.scm
