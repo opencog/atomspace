@@ -44,7 +44,9 @@ namespace opencog {
  *
  * Terms that contain GroundedSchema or GroundedPrecdicate nodes can
  * have side-effects, and are thus not really constants. They must be
- * evaluated during the pattern search.
+ * evaluated during the pattern search. Terms that contain
+ * DefinedPedicate or DefinedSchema nodes are simply not known until
+ * runtime evaluation/execution.
  *
  * Returns true if the list of clauses was modified, else returns false.
  */
@@ -59,6 +61,8 @@ bool remove_constants(const std::set<Handle> &vars,
 	{
 		Handle clause(*i);
 		if (any_unquoted_in_tree(clause, vars)
+		    or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
+		    or contains_atomtype(clause, DEFINED_SCHEMA_NODE)
 		    or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
 		    or contains_atomtype(clause, GROUNDED_SCHEMA_NODE))
 		{
