@@ -38,7 +38,7 @@
 ;; Define the concept of electrical parts of things.
 (define elect-parts
 	(DefineLink
-		(PredicateNode "Electrical Part Of")
+		(DefinedPredicateNode "Electrical Part Of")
 		(AndLink
 			(InheritanceLink
 				(VariableNode "$x")
@@ -51,7 +51,7 @@
 
 ;; Define a pattern to find the electrical parts of things
 (define get-elect
-	(GetLink (PredicateNode "Electrical Part Of")))
+	(GetLink (DefinedPredicateNode "Electrical Part Of")))
 
 ;; Search the atomspace for electrical things.
 (cog-execute! get-elect)

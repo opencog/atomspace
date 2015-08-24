@@ -107,7 +107,7 @@ VARIABLE_LIST <- LIST_LINK
 
 // The LambdaLink is used to identify an open term, i.e. a link
 // containing VariableNodes within it, and binding those variables.
-// In the process, it can also force type restrictions on them. 
+// In the process, it can also force type restrictions on them.
 // The LambdaLink does not have to bind all variables that occur in it's
 // body; those that are not bound remain free.
 //
@@ -219,14 +219,17 @@ GROUNDED_PROCEDURE_NODE <- PROCEDURE_NODE
 
 // SchemaNodes are atom-valued.
 SCHEMA_NODE <- PROCEDURE_NODE
+DEFINED_SCHEMA_NODE <- SCHEMA_NODE
 GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
 
 // PredicateNodes are TV-valued.
 PREDICATE_NODE <- PROCEDURE_NODE
+DEFINED_PREDICATE_NODE <- PREDICATE_NODE
 GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 
 // Huh?? XXX What are these? I don't understand them Do we use them
-// anywhere?
+// anywhere? I think the first is ame as ExecutionOutputLink, right?
+// Not clear how a schema can be evaluated ...
 SCHEMA_EXECUTION_LINK <- INHERITANCE_LINK
 SCHEMA_EVALUATION_LINK <- SCHEMA_EXECUTION_LINK
 
@@ -252,7 +255,7 @@ QUANTITY_LINK <- ORDERED_LINK
 //
 // The VirtuaLink designation is needed by the pattern matcher,
 // in order to be able to find and treat these terms correctly.
-// 
+//
 // VirtualLinks only need to be used for those GPN's that take 2 or
 // more arguments. If they take only one, then there is no reason
 // for them to be declared as virtual (at least, as far as the pattern
