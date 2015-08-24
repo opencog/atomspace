@@ -107,16 +107,15 @@ void FCMemory::add_rules_product(int iteration, HandleSeq product)
     }
 }
 
-void FCMemory::add_inference(int iter_step, HandleSeq product,
-                             HandleSeq matched_nodes)
+void FCMemory::add_inference(int iter_step, HandleSeq product)
 {
     Inference inf;
     inf.applied_rule = _cur_rule;
     inf.iter_step = iter_step;
+
     for (Handle p : product)
         inf.inf_product.push_back(p);
-    for (Handle mn : matched_nodes)
-        inf.matched_nodes.push_back(mn);
+
     _inf_history.push_back(inf);
 }
 
