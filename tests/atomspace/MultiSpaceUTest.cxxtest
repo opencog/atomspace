@@ -570,9 +570,12 @@ public:
 
 		as.add_link(LIST_LINK, haa, hab);
 
-		Handle hna = ns.add_atom(hec);
-		Handle hec_copy = ex.get_atom(hna);
+		Handle hna = ns.add_atom(haa);
+		Handle hnb = ns.add_atom(hec);
+		Handle haa_copy = ex.get_atom(hna);
+		Handle hec_copy = ex.get_atom(hnb);
 
+		TS_ASSERT(haa_copy == haa);
 		TS_ASSERT(hec_copy == hec);
 	}
 };
