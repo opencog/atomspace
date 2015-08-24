@@ -73,15 +73,12 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
         HandleSeq hs = rule->get_implicand_seq();
         for(Handle target: hs)
         {
-            HandleSeq hs = unify(source,target,rule);
-            derived_rules.insert(derived_rules.end(),hs.begin(),hs.end());
+            if (unify(source, target, rule)){
+                chosen_rules.push_back(rule);
+                break;
+            }
         }
-        //Chosen rule.
-        if (not derived_rules.empty())
-        {
-            chosen_rules.push_back(rule);
-            rule_derivations[rule->get_handle()] = derived_rules;
-        }
+
     }
 
     return chosen_rules;
@@ -95,13 +92,12 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
  * @param target  An atom to be unified with @param source
  * @rule  rule    The rule object whose implicants are to be unified.
  *
- * @return        HandleSeq of possible derivation of rules by substituting
- *                variables in implicants members of @param rule with their
- *                mapped bindings.
+ * @return        true on successful unification and false otherwise.
  */
-HandleSeq DefaultForwardChainerCB::unify(Handle source,Handle target,Rule* rule){
+bool DefaultForwardChainerCB::unify(Handle source,Handle target,Rule* rule){
     //exceptions
-    if(not is_valid_implicant(target)) return {};
+    if (not is_valid_implicant(target))
+        return false;
 
     HandleSeq derived_rules={};
 
@@ -113,48 +109,19 @@ HandleSeq DefaultForwardChainerCB::unify(Handle source,Handle target,Rule* rule)
 
     BindLinkPtr bl =
     createBindLink(HandleSeq { implicant_vardecl, hcpy, hcpy });
-    VarGroundingPMCB gcb(&temp_pm_as);
-    gcb.implicand = bl->get_implicand();
 
-    bl->imply(gcb);
+    DefaultImplicator impl(&temp_pm_as);
+    impl.implicand = bl->get_implicand();
 
-    auto del_by_value =
-            [] (std::vector<std::map<Handle,Handle>>& vec_map,const Handle& h) {
-                for (auto& map: vec_map)
-                   for(auto& it:map) { if (it.second == h) map.erase(it.first);}
-            };
+    bl->imply(impl);
 
-    //We don't want implicant_var list to be matched as
-    //in the case of free vars in modus-ponens rules.
-    del_by_value(gcb.term_groundings, implicant_vardecl);
-    del_by_value(gcb.var_groundings, implicant_vardecl);
+    if(not impl.result_list.empty())
+        return true;
+    else
+        return false;
 
-    FindAtoms fv(VARIABLE_NODE);
-    for (const auto& termg_map : gcb.term_groundings) {
-        for (const auto& it : termg_map) {
-            if (it.second == sourcecpy) {
-                fv.search_set(it.first);
-
-                Handle rhandle = rule->get_handle();
-                HandleSeq new_candidate_rules = substitute_rule_part(
-                        temp_pm_as, temp_pm_as.add_atom(rhandle), fv.varset,
-                        gcb.var_groundings);
-
-                for (Handle nr : new_candidate_rules) {
-                    if (find(derived_rules.begin(), derived_rules.end(), nr) == derived_rules.end()) {
-                        //Adding back to _as avoids UUID clashes.
-                        Handle h = _as.add_atom(nr);
-                        //Avoid adding original rule to derived rule list
-                        if (h != rhandle)
-                            derived_rules.push_back(h);
-                    }
-                }
-            }
-        }
-    }
-
-    return derived_rules;
 }
+
 /**
  *  Tries to unify sub atoms of implicant lists in @param rule with @param source.
  *
