@@ -22,15 +22,9 @@
  */
 
 #include <opencog/atomutils/AtomUtils.h>
-#include <opencog/atomutils/FindUtils.h>
-#include <opencog/atomutils/Substitutor.h>
-#include <opencog/atoms/bind/PatternUtils.h>
-#include <opencog/atoms/bind/PatternLink.h>
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/query/DefaultImplicator.h>
-#include <opencog/query/PatternMatch.cc>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/rule-engine/URECommons.h>
 
 #include "VarGroundingPMCB.h"
@@ -81,97 +75,6 @@ vector<Rule*> DefaultForwardChainerCB::choose_rules(FCMemory& fcmem)
     }
 
     return chosen_rules;
-}
-
-/**
- * Tries to unify the @param source with @parama target and derives
- * new rules using @param rule as a template.
- *
- * @param source  An atom that might bind to variables in @param rule.
- * @param target  An atom to be unified with @param source
- * @rule  rule    The rule object whose implicants are to be unified.
- *
- * @return        true on successful unification and false otherwise.
- */
-bool DefaultForwardChainerCB::unify(Handle source,Handle target,Rule* rule){
-    //exceptions
-    if (not is_valid_implicant(target))
-        return false;
-
-    HandleSeq derived_rules={};
-
-    AtomSpace temp_pm_as;
-    Handle hcpy = temp_pm_as.add_atom(target);
-    Handle implicant_vardecl = temp_pm_as.add_atom(
-            gen_sub_varlist(target, rule->get_vardecl()));
-    Handle sourcecpy = temp_pm_as.add_atom(source);
-
-    BindLinkPtr bl =
-    createBindLink(HandleSeq { implicant_vardecl, hcpy, hcpy });
-
-    DefaultImplicator impl(&temp_pm_as);
-    impl.implicand = bl->get_implicand();
-
-    bl->imply(impl);
-
-    if(not impl.result_list.empty())
-        return true;
-    else
-        return false;
-
-}
-
-/**
- * Derives new rules by replacing variables in @param rule that are
- * unfiable with source.
- *
- * @param  source    A source atom that will be matched with the rule.
- * @param  rule      A rule object
- * @param  subatomic A flag that sets subatom unification.
- *
- * @return  A HandleSeq of derived rule handles.
- */
-HandleSeq DefaultForwardChainerCB::derive_rules(Handle source, Rule* rule,bool subatomic/*=false*/)
-{
-    HandleSeq derived_rules = { };
-
-    auto add_result = [&derived_rules] (HandleSeq result) {
-        derived_rules.insert(derived_rules.end(), result.begin(),
-                result.end());
-    };
-
-    if (subatomic) {
-        for (Handle target : get_subatoms(rule))
-            add_result(derive_rules(source, target, rule));
-
-    } else {
-        for (Handle target : rule->get_implicant_seq())
-            add_result(derive_rules(source, target, rule));
-
-    }
-
-    return derived_rules;
-}
-
-/**
- *  Checks if sub atoms of implicant lists in @param rule are unifiable with
- *  @param source.
- *
- *  @param source  An atom that might bind to variables in @param rule.
- *  @param rule    The rule object whose implicants are to be sub atom unified.
- *
- *  @return        true if source is subatom unifiable and false otherwise.
- */
-bool DefaultForwardChainerCB::subatom_unify(Handle source,Rule* rule)
-{
-    UnorderedHandleSet output_expanded = get_subatoms(rule);
-
-    for (Handle h : output_expanded) {
-        if( unify(source,h, rule))
-            return true;
-    }
-
-    return false;
 }
 
 HandleSeq DefaultForwardChainerCB::choose_premises(FCMemory& fcmem)
@@ -245,8 +148,6 @@ Handle DefaultForwardChainerCB::choose_next_source(FCMemory& fcmem)
 
 HandleSeq DefaultForwardChainerCB::apply_rule(FCMemory& fcmem)
 {
-    _fcpm.set_fcmem(&fcmem);
-
     auto rule_handle = fcmem.get_cur_rule()->get_handle();
     BindLinkPtr bl(BindLinkCast(rule_handle));
     if (NULL == bl) {
@@ -268,6 +169,7 @@ HandleSeq DefaultForwardChainerCB::apply_rule(FCMemory& fcmem)
 
     return product;
 }
+<<<<<<< HEAD
 
 Handle DefaultForwardChainerCB::gen_sub_varlist(const Handle& parent,
                                                 const Handle& parent_varlist)
@@ -395,3 +297,5 @@ UnorderedHandleSet DefaultForwardChainerCB::get_subatoms(Rule *rule)
 
     return output_expanded;
 }
+=======
+>>>>>>> Move code in an effort to reduce complexity

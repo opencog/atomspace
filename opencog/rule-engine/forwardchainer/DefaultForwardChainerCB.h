@@ -41,15 +41,7 @@ private:
     ForwardChainerPMCB _fcpm;
     source_selection_mode _ts_mode;
 
-    Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);
-    bool unify(Handle source,Handle target,Rule* rule);
-    HandleSeq derive_rules(Handle source, Handle target, Rule* rule);
-    bool subatom_unify(Handle source,Rule* rule);
-    bool is_valid_implicant(const Handle& h);
-    UnorderedHandleSet get_subatoms(Rule *rule);
-
 public:
-    HandleSeq substitute_rule_part(AtomSpace& as, Handle hrule,const std::set<Handle>& vars,const std::vector<std::map<Handle,Handle>>& var_groundings);
     DefaultForwardChainerCB(AtomSpace& as, source_selection_mode ts_mode =
             TV_FITNESS_BASED);
 
@@ -58,7 +50,6 @@ public:
     virtual HandleSeq choose_premises(FCMemory& fcmem);
     virtual Handle choose_next_source(FCMemory& fcmem);
     virtual HandleSeq apply_rule(FCMemory& fcmem);
-    HandleSeq apply_rule(FCMemory& fcmem,const Handle& h);
 
 };
 
