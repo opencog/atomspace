@@ -3,7 +3,10 @@
  * Base class for ZeroMQ-backed persistent storage.
  *
  * HISTORY:
- * Copyright (c) 2015 Erwin Joosten, Hendy Irawan <ceefour666@gmail.com>
+ * Copyright (C) 2008-2015 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * Written by Erwin Joosten, Hendy Irawan <ceefour666@gmail.com>
  *
  * LICENSE:
  * This program is free software; you can redistribute it and/or modify
