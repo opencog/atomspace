@@ -76,8 +76,6 @@ CHOICE_LINK <- ORDERED_LINK
 // of AbsentLink, and is dual to ChoiceLink, since it requires that all
 // terms are AND'ed together.
 //
-// XXX This is needed by the pattern matcher, but is not fully
-// implemented; a work-around is to use AndLink ChoiceLink.
 PRESENT_LINK <- ORDERED_LINK
 
 // ====================================================================
