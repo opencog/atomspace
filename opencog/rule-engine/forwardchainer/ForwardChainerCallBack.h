@@ -38,7 +38,7 @@ class FCMemory;
 class ForwardChainerCallBack
 {
 private:
-    AtomSpace* as_;
+    AtomSpace* _as;
     bool is_valid_implicant(const Handle& h);
     UnorderedHandleSet get_subatoms(Rule *rule);
     Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);
@@ -53,7 +53,7 @@ protected:
 
 public:
     ForwardChainerCallBack(AtomSpace* as) :
-            as_(as)
+            _as(as)
     {
     }
     virtual ~ForwardChainerCallBack()

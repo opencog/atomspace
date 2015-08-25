@@ -37,7 +37,7 @@ using namespace opencog;
 
 HandleSeq ForwardChainerCallBack::apply_rule(Handle rhandle){
 
-    DefaultImplicator impl(as_);
+    DefaultImplicator impl(_as);
 
     BindLinkPtr bl(BindLinkCast(rhandle));
     if (NULL == bl) {
@@ -110,7 +110,7 @@ HandleSeq ForwardChainerCallBack::derive_rules(Handle source, Handle target,
                 for (Handle nr : new_candidate_rules) {
                     if (find(derived_rules.begin(), derived_rules.end(), nr) == derived_rules.end()) {
                         //Adding back to _as avoids UUID clashes.
-                        Handle h = as_->add_atom(nr);
+                        Handle h = _as->add_atom(nr);
                         //Avoid adding original rule to derived rule list
                         if (h != rhandle)
                             derived_rules.push_back(h);
