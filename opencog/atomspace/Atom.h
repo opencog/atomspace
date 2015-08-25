@@ -379,8 +379,15 @@ public:
      * @return A string representation of the node.
      * cannot be const, because observing the TV and AV requires a lock.
      */
-    virtual std::string toString(std::string indent = "") = 0;
-    virtual std::string toShortString(std::string indent = "") = 0;
+    virtual std::string toString(std::string indent) = 0;
+    virtual std::string toShortString(std::string indent) = 0;
+
+	// Work around gdb's incapability to build a string on the fly,
+	// see http://stackoverflow.com/questions/16734783 and
+	// http://stackoverflow.com/questions/2973976 for more
+	// explanation.
+	std::string toString() { return toString(""); }
+	std::string toShortString() { return toShortString(""); }
 
     /** Returns whether two atoms are equal.
      *
