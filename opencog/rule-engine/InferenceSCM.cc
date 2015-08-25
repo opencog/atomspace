@@ -27,7 +27,7 @@
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
-#include <opencog/rule-engine/forwardchainer/DefaultForwardChainerCB.h>
+#include <opencog/rule-engine/forwardchainer/ForwardChainerCallBack.h>
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -88,7 +88,7 @@ Handle InferenceSCM::do_forward_chaining(Handle h, Handle rbs)
 
 #ifdef HAVE_GUILE
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fc");
-    DefaultForwardChainerCB dfc(*as);
+    ForwardChainerCallBack dfc(as);
     ForwardChainer fc(*as, rbs);
     /**
      * Parse (cog-fc ListLink()) as forward chaining with
