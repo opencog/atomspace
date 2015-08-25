@@ -136,7 +136,22 @@ NodePtr ZMQClient::getNode(Type t, const char * str)
  */
 LinkPtr ZMQClient::getLink(Type t, const std::vector<Handle>&oset)
 {
-	return NULL;
+    ZMQRequestMessage req;
+    ZMQReplyMessage rep;
+
+    req.set_function(ZMQgetAtoms);
+    ZMQAtomFetch *fetch1 = req.add_fetch();
+    fetch1->set_kind(ZMQAtomFetchKind::LINK);
+    fetch1->set_type(t);
+    for (int i = 0; i < oset.size(); i++) {
+    	fetch1->add_outgoing(oset[i].value());
+    }
+    sendMessage(req, rep);
+
+    //Atom* atom = ProtocolBufferSerializer::deserialize(rep.atom());
+	//return AtomPtr(atom);
+
+    return NULL;
 }
 
 /**
@@ -148,6 +163,18 @@ LinkPtr ZMQClient::getLink(Type t, const std::vector<Handle>&oset)
  */
 AtomPtr ZMQClient::getAtom(Handle &h)
 {
+    ZMQRequestMessage req;
+    ZMQReplyMessage rep;
+
+    req.set_function(ZMQgetAtoms);
+    ZMQAtomFetch *fetch1 = req.add_fetch();
+    fetch1->set_kind(ZMQAtomFetchKind::UUID);
+    fetch1->set_handle(h.value());
+    sendMessage(req, rep);
+
+    //Atom* atom = ProtocolBufferSerializer::deserialize(rep.atom());
+	//return AtomPtr(atom);
+
 	return NULL;
 }
 
