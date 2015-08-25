@@ -77,7 +77,7 @@ void ProtocolBufferSerializer::deserializeAtom(
     atom._type = atomMessage.type();
     atom._flags = atomMessage.flags();
 
-    atom._truthValue = deserialize(atomMessage.truthvalue());
+    atom.setTruthValue(deserialize(atomMessage.truthvalue()));
 }
 
 //void ProtocolBufferSerializer::serializeAtom(
@@ -99,19 +99,20 @@ void ProtocolBufferSerializer::deserializeAtom(
 //
 //    serialize(*atom.truthValue, atomMessage->mutable_truthvalue());
 //}
-//
-//shared_ptr<Atom> ProtocolBufferSerializer::deserialize(const ZMQAtomMessage& atomMessage)
-//{
-//    switch(atomMessage.atomtype())
-//    {
-//    case ZMQAtomTypeNode:
-//    {
-//        NodePtr node(new Node(atomMessage.type(), atomMessage.name()));
-//        deserializeAtom(atomMessage, *node);
-//        return node;
-//    }
-//    case ZMQAtomTypeLink:
-//    {
+
+AtomPtr ProtocolBufferSerializer::deserialize(const ZMQAtomMessage& atomMessage)
+{
+    switch(atomMessage.atomtype())
+    {
+    case ZMQAtomTypeNode:
+    {
+        NodePtr node(new Node(atomMessage.type(), atomMessage.name()));
+        deserializeAtom(atomMessage, *node);
+        return node;
+    }
+    case ZMQAtomTypeLink:
+    {
+    	throw RuntimeException(TRACE_INFO, "not yet implemented");
 //    	HandleSeq handleSeq(atomMessage.outgoing_size());
 //    	for (int i = 0; i < atomMessage.outgoing_size(); i++) {
 //    		handleSeq[i] = Handle(atomMessage.outgoing(i));
@@ -119,11 +120,13 @@ void ProtocolBufferSerializer::deserializeAtom(
 //        shared_ptr<Link> linkPtr(new Link(atomMessage.type()));
 //        deserializeLink(atomMessage, *linkPtr);
 //        return linkPtr;
-//    }
-//    default:
-//        throw RuntimeException(TRACE_INFO, "Invalid ZMQ atomtype");
-//    }
-//}
+    }
+    case ZMQAtomTypeNotFound:
+    	return AtomPtr();
+    default:
+        throw RuntimeException(TRACE_INFO, "Invalid ZMQ atomtype");
+    }
+}
 
 void ProtocolBufferSerializer::serialize(Atom &atom, ZMQAtomMessage* atomMessage)
 {

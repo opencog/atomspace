@@ -118,9 +118,13 @@ NodePtr ZMQClient::getNode(Type t, const char * str)
     fetch1->set_name(str);
     sendMessage(req, rep);
 
-    return NULL;
-    //Atom* atom = ProtocolBufferSerializer::deserialize(rep.atom());
-    //return AtomPtr(atom);
+    ZMQAtomMessage atomMsg = rep.atom(0);
+    if (atomMsg.atomtype() == ZMQAtomTypeNode) {
+        NodePtr atom = (NodePtr) ProtocolBufferSerializer::deserialize(atomMsg);
+        return atom;
+    } else {
+    	return NULL;
+    }
 }
 
 /**

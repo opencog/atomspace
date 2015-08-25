@@ -92,7 +92,7 @@ public:
     ProtocolBufferSerializer();
     ~ProtocolBufferSerializer();
 
-//    static shared_ptr<Atom> deserialize(const ZMQAtomMessage& atomMessage);
+    static AtomPtr deserialize(const ZMQAtomMessage& atomMessage);
     static void serialize(Atom &atom, ZMQAtomMessage* atomMessage);
 //
 //    static shared_ptr<TruthValue> deserialize(const ZMQTruthValueMessage& truthValueMessage);
