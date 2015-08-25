@@ -51,8 +51,6 @@ void ProtocolBufferSerializer::deserializeAtom(
         const ZMQAtomMessage& atomMessage, Atom& atom)
 {
     //deserializeAttentionValueHolder(atomMessage.attentionvalueholder(), atom);
-    //atom.handle = Handle(atomMessage.handle());
-	atom._uuid = atomMessage.handle();
 
     atom._atomTable = NULL;
     if (atomMessage.incoming_size() == 0)
@@ -74,10 +72,7 @@ void ProtocolBufferSerializer::deserializeAtom(
 //        }
     }
 
-    atom._type = atomMessage.type();
     atom._flags = atomMessage.flags();
-
-    atom.setTruthValue(deserialize(atomMessage.truthvalue()));
 }
 
 //void ProtocolBufferSerializer::serializeAtom(
@@ -106,20 +101,13 @@ AtomPtr ProtocolBufferSerializer::deserialize(const ZMQAtomMessage& atomMessage)
     {
     case ZMQAtomTypeNode:
     {
-        NodePtr node(new Node(atomMessage.type(), atomMessage.name()));
-        deserializeAtom(atomMessage, *node);
-        return node;
+    	NodePtr nodePtr = deserializeNode(atomMessage);
+        return nodePtr;
     }
     case ZMQAtomTypeLink:
     {
-    	throw RuntimeException(TRACE_INFO, "not yet implemented");
-//    	HandleSeq handleSeq(atomMessage.outgoing_size());
-//    	for (int i = 0; i < atomMessage.outgoing_size(); i++) {
-//    		handleSeq[i] = Handle(atomMessage.outgoing(i));
-//    	}
-//        shared_ptr<Link> linkPtr(new Link(atomMessage.type()));
-//        deserializeLink(atomMessage, *linkPtr);
-//        return linkPtr;
+        LinkPtr linkPtr = deserializeLink(atomMessage);
+        return linkPtr;
     }
     case ZMQAtomTypeNotFound:
     	return AtomPtr();
@@ -230,25 +218,45 @@ void ProtocolBufferSerializer::serializeIndefiniteTruthValue(
     }
 }
 
-//void ProtocolBufferSerializer::deserializeLink(
-//        const ZMQAtomMessage& atomMessage, Link& link)
-//{
-//    deserializeAtom(atomMessage, link);
-//
-//    for(int i=0;i<atomMessage.outgoing_size();i++)
-//    {
-//        link.outgoing.push_back(Handle(atomMessage.outgoing(i)));
-//    }
-//
-//    if(!atomMessage.has_trail())
-//        link.trail=NULL;
-//    else
-//    {
-//        link.trail=new Trail();
-//        deserializeTrail(atomMessage.trail(), *(link.trail));
-//    }
-//}
-//
+NodePtr ProtocolBufferSerializer::deserializeNode(
+        const ZMQAtomMessage& atomMessage)
+{
+    TruthValuePtr tv;
+    if (atomMessage.has_truthvalue()) {
+    	tv = deserialize(atomMessage.truthvalue());
+    } else {
+    	tv = TruthValue::DEFAULT_TV();
+    }
+	NodePtr nodePtr(new Node(atomMessage.type(), atomMessage.name(), tv));
+	nodePtr->_uuid = atomMessage.handle();
+    deserializeAtom(atomMessage, *nodePtr);
+
+    return nodePtr;
+}
+
+LinkPtr ProtocolBufferSerializer::deserializeLink(
+        const ZMQAtomMessage& atomMessage)
+{
+
+	HandleSeq oset(atomMessage.outgoing_size());
+    for(int i = 0; i < atomMessage.outgoing_size(); i++)
+    {
+    	oset[i] = Handle(atomMessage.outgoing(i));
+    }
+
+    TruthValuePtr tv;
+    if (atomMessage.has_truthvalue()) {
+    	tv = deserialize(atomMessage.truthvalue());
+    } else {
+    	tv = TruthValue::DEFAULT_TV();
+    }
+	LinkPtr linkPtr(new Link(atomMessage.type(), oset, tv));
+	linkPtr->_uuid = atomMessage.handle();
+    deserializeAtom(atomMessage, *linkPtr);
+
+    return linkPtr;
+}
+
 //void ProtocolBufferSerializer::serializeLink(
 //        Link& link, ZMQAtomMessage * atomMessage)
 //{

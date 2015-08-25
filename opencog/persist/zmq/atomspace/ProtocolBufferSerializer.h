@@ -65,7 +65,8 @@ class ProtocolBufferSerializer {
 //            AttentionValueHolder& attentionValueHolder,
 //            ZMQAttentionValueHolderMessage *attentionValueHolderMessage);
 
-//    static void deserializeLink(const ZMQAtomMessage& atomMessage, Link& link);
+    static NodePtr deserializeNode(const ZMQAtomMessage& atomMessage);
+    static LinkPtr deserializeLink(const ZMQAtomMessage& atomMessage);
 //    static void serializeLink(Link& link, ZMQAtomMessage *atomMessage);
 //    static void deserializeNode(const ZMQAtomMessage& atomMessage, Node& node);
 //    static void serializeNode(Node& node, ZMQAtomMessage *atomMessage);
