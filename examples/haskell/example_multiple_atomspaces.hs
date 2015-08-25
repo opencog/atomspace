@@ -23,7 +23,7 @@ main = do
             else putStrLn "Error in Parent relation."
         Nothing     -> putStrLn "Error in Parent relation."
 
-    putStrLn $ replicate 60 '-'
+    putStrLn $ replicate 60 '#'
     putStrLn "State after inserting GenConcepts to Parent Atomspace"
     putStrLn "and PrivateConcepts to Child AtomSpace:"
     putStrLn "- Parent AtomSpace:"
@@ -31,7 +31,7 @@ main = do
     putStrLn "- Child AtomSpace:"
     childAs <: debug
 
-    putStrLn $ replicate 60 '-'
+    putStrLn $ replicate 60 '#'
     putStrLn "State after removing GenConcept1 from Parent Atomspace:"
     parentAs <: remove $ ConceptNode "GenConcept1" (stv 1 1)
     putStrLn "- Parent AtomSpace:"
@@ -39,7 +39,7 @@ main = do
     putStrLn "- Child AtomSpace:"
     childAs <: debug
 
-    putStrLn $ replicate 60 '-'
+    putStrLn $ replicate 60 '#'
     putStrLn "State after trying to remove GenConcept2 from Child Atomspace:"
     childAs <: remove $ ConceptNode "GenConcept2" noTv
     putStrLn "- Parent AtomSpace:"
@@ -47,7 +47,7 @@ main = do
     putStrLn "- Child AtomSpace:"
     childAs <: debug
 
-    putStrLn $ replicate 60 '-'
+    putStrLn $ replicate 60 '#'
     putStrLn "State after removing PrivateConcept1 from Child Atomspace:"
     childAs <: remove $ ConceptNode "PrivateConcept1" noTv
     putStrLn "- Parent AtomSpace:"

@@ -11,8 +11,8 @@ module OpenCog.AtomSpace.Api (
     , remove
     , get
     , debug
-    , getByHandle
-    , getWithHandle
+    , getByUUID
+    , getWithUUID
     ) where
 
 import Foreign                       (Ptr)
@@ -26,11 +26,14 @@ import Data.Functor                  ((<$>))
 import Data.Typeable                 (Typeable)
 import Control.Monad.IO.Class        (liftIO)
 import OpenCog.AtomSpace.Env         (AtomSpaceRef(..),AtomSpace,getAtomSpace)
-import OpenCog.AtomSpace.Internal    (Handle,AtomTypeRaw,AtomRaw(..),TVRaw(..),
+import OpenCog.AtomSpace.Internal    (UUID,AtomTypeRaw,AtomRaw(..),TVRaw(..),
                                       toRaw,fromRaw,tvMAX_PARAMS)
 import OpenCog.AtomSpace.Types       (Atom(..),AtomName(..),TruthVal(..))
 import OpenCog.AtomSpace.Inheritance (type (<~))
 import OpenCog.AtomSpace.AtomType    (AtomType(AtomT))
+
+sUCCESS :: CInt
+sUCCESS = 0
 
 --------------------------------------------------------------------------------
 
@@ -50,54 +53,73 @@ foreign import ccall "AtomSpace_addNode"
   c_atomspace_addnode :: AtomSpaceRef
                       -> CString
                       -> CString
-                      -> IO Handle
+                      -> Ptr UUID
+                      -> IO CInt
 
-insertNode :: AtomTypeRaw -> AtomName -> AtomSpace Handle
+insertNode :: AtomTypeRaw -> AtomName -> AtomSpace (Maybe UUID)
 insertNode aType aName = do
     asRef <- getAtomSpace
     liftIO $ withCString aType $
        \atype -> withCString aName $
-       \aname -> c_atomspace_addnode asRef atype aname
+       \aname -> alloca $
+       \uptr -> do
+            res <- c_atomspace_addnode asRef atype aname uptr
+            if res == sUCCESS
+              then do
+                      uuid <- peek uptr
+                      return $ Just uuid
+              else return Nothing
 
 foreign import ccall "AtomSpace_addLink"
   c_atomspace_addlink :: AtomSpaceRef
                       -> CString
-                      -> Ptr Handle
+                      -> Ptr UUID
                       -> CInt
-                      -> IO Handle
+                      -> Ptr UUID
+                      -> IO CInt
 
-insertLink :: AtomTypeRaw -> [AtomRaw] -> AtomSpace Handle
+insertLink :: AtomTypeRaw -> [AtomRaw] -> AtomSpace (Maybe UUID)
 insertLink aType aOutgoing = do
-    list <- mapM insertAndGetHandle aOutgoing
-    asRef <- getAtomSpace
-    liftIO $ withCString aType $
-      \atype -> withArray list $
-      \lptr -> c_atomspace_addlink asRef atype lptr (fromIntegral $ length list)
+    mlist <- mapM insertAndGetUUID aOutgoing
+    case mapM id mlist of
+      Nothing -> return Nothing
+      Just list -> do
+        asRef <- getAtomSpace
+        liftIO $ withCString aType $
+          \atype -> withArray list $
+          \lptr -> alloca $
+          \uptr -> do
+                res <- c_atomspace_addlink asRef atype lptr (fromIntegral $ length list) uptr
+                if res == sUCCESS
+                  then do
+                          uuid <- peek uptr
+                          return $ Just uuid
+                  else return Nothing
 
-insertAndGetHandle :: AtomRaw -> AtomSpace Handle
-insertAndGetHandle i = case i of
+insertAndGetUUID :: AtomRaw -> AtomSpace (Maybe UUID)
+insertAndGetUUID i = case i of
     Node aType aName mtv     -> do
         h <- insertNode aType aName
-        case mtv of -- set truth value after inserting.
-            Just tv -> setTruthValue h tv
-            Nothing -> return ()
+        case (mtv,h) of -- set truth value after inserting.
+            (Just tv,Just hand) -> setTruthValue hand tv
+            _                   -> return False
         return h
     Link aType aOutgoing mtv -> do
         h <- insertLink aType aOutgoing
-        case mtv of -- set truth value after inserting.
-            Just tv -> setTruthValue h tv
-            Nothing -> return ()
+        case (mtv,h) of -- set truth value after inserting.
+            (Just tv,Just hand) -> setTruthValue hand tv
+            _                   -> return False
         return h
 
 -- | 'insert' creates a new atom on the atomspace or updates the existing one.
 insert :: Typeable a => Atom a -> AtomSpace ()
-insert i = insertAndGetHandle (toRaw i) >> return ()
+insert i = insertAndGetUUID (toRaw i) >> return ()
 
 --------------------------------------------------------------------------------
 
 foreign import ccall "AtomSpace_removeAtom"
   c_atomspace_remove :: AtomSpaceRef
-                     -> Handle
+                     -> UUID
                      -> IO CInt
 
 -- | 'remove' deletes an atom from the atomspace.
@@ -105,9 +127,9 @@ foreign import ccall "AtomSpace_removeAtom"
 remove :: Typeable a => Atom a -> AtomSpace Bool
 remove i = do
     asRef <- getAtomSpace
-    m <- getWithHandle $ toRaw i
+    m <- getWithUUID $ toRaw i
     case m of
-      Just (_,handle) -> liftIO $ toBool <$> c_atomspace_remove asRef handle
+      Just (_,handle) -> liftIO $ (==) sUCCESS <$> c_atomspace_remove asRef handle
       _               -> return False
 
 --------------------------------------------------------------------------------
@@ -116,71 +138,76 @@ foreign import ccall "AtomSpace_getNode"
   c_atomspace_getnode :: AtomSpaceRef
                       -> CString
                       -> CString
-                      -> Ptr CInt
-                      -> IO Handle
+                      -> Ptr UUID
+                      -> IO CInt
 
-getNodeHandle :: AtomTypeRaw -> AtomName -> AtomSpace (Maybe Handle)
-getNodeHandle aType aName = do
+getNodeUUID :: AtomTypeRaw -> AtomName -> AtomSpace (Maybe UUID)
+getNodeUUID aType aName = do
     asRef <- getAtomSpace
     liftIO $ withCString aType $
       \atype -> withCString aName $
       \aname -> alloca $
-      \iptr -> do
-          h <- c_atomspace_getnode asRef atype aname iptr
-          found <- toBool <$> peek iptr
+      \hptr -> do
+          res <- c_atomspace_getnode asRef atype aname hptr
+          let found = res == sUCCESS
+          h <- peek hptr
           return $ if found
                      then Just h
                      else Nothing
 
-getNode :: AtomTypeRaw -> AtomName -> AtomSpace (Maybe (TVRaw,Handle))
+getNode :: AtomTypeRaw -> AtomName -> AtomSpace (Maybe (TVRaw,UUID))
 getNode aType aName = do
-    m <- getNodeHandle aType aName
+    m <- getNodeUUID aType aName
     case m of
       Nothing -> return Nothing
       Just h  -> do
-          tv <- getTruthValue h
-          return $ Just (tv,h)
-
+          res <- getTruthValue h
+          return $ case res of
+              Just tv -> Just (tv,h)
+              Nothing -> Nothing
 
 foreign import ccall "AtomSpace_getLink"
   c_atomspace_getlink :: AtomSpaceRef
                       -> CString
-                      -> Ptr Handle
+                      -> Ptr UUID
                       -> CInt
-                      -> Ptr CInt
-                      -> IO Handle
+                      -> Ptr UUID
+                      -> IO CInt
 
-getLinkHandle :: AtomTypeRaw -> [Handle] -> AtomSpace (Maybe Handle)
-getLinkHandle aType aOutgoing = do
+getLinkUUID :: AtomTypeRaw -> [UUID] -> AtomSpace (Maybe UUID)
+getLinkUUID aType aOutgoing = do
     asRef <- getAtomSpace
     liftIO $ withCString aType $
       \atype -> withArray aOutgoing $
       \lptr -> alloca $
-      \iptr -> do
-          h <- c_atomspace_getlink asRef atype lptr
-                 (fromIntegral $ length aOutgoing) iptr
-          found <- toBool <$> peek iptr
+      \hptr -> do
+          res <- c_atomspace_getlink asRef atype lptr
+                 (fromIntegral $ length aOutgoing) hptr
+          let found = res == sUCCESS
+          h <- peek hptr
           return $ if found
                      then Just h
                      else Nothing
 
-getLink :: AtomTypeRaw -> [Handle] -> AtomSpace (Maybe (TVRaw,Handle))
+getLink :: AtomTypeRaw -> [UUID] -> AtomSpace (Maybe (TVRaw,UUID))
 getLink aType aOutgoing = do
-    m <- getLinkHandle aType aOutgoing
+    m <- getLinkUUID aType aOutgoing
     case m of
       Nothing -> return Nothing
       Just h  -> do
-          tv <- getTruthValue h
-          return $ Just (tv,h)
+          res <- getTruthValue h
+          return $ case res of
+              Just tv -> Just (tv,h)
+              Nothing -> Nothing
 
-getWithHandle :: AtomRaw -> AtomSpace (Maybe (AtomRaw,Handle))
-getWithHandle i = do
+getWithUUID :: AtomRaw -> AtomSpace (Maybe (AtomRaw,UUID))
+getWithUUID i = do
     let onLink :: AtomTypeRaw
                -> [AtomRaw]
-               -> AtomSpace (Maybe (TVRaw,Handle,[AtomRaw]))
+               -> AtomSpace (Maybe (TVRaw,UUID,[AtomRaw]))
         onLink aType aOutgoing = do
-            ml <- sequence <$> mapM getWithHandle aOutgoing
-            case ml of -- ml :: Maybe [(AtomRaw,Handle)]
+            ml <- sequence <$> mapM getWithUUID aOutgoing
+            case ml of -- ml :: Maybe [(AtomRaw,UUID)]
               Nothing -> return Nothing
               Just l -> do
                 res <- getLink aType $ map snd l
@@ -205,83 +232,102 @@ getWithHandle i = do
 -- (With updated mutable information)
 get :: (a <~ AtomT) => Atom a -> AtomSpace (Maybe (Atom a))
 get i = do
-    m <- getWithHandle $ toRaw i
+    m <- getWithUUID $ toRaw i
     return $ case m of
       Just (araw,_) -> fromRaw araw i
       _             -> Nothing
 
 --------------------------------------------------------------------------------
 
-foreign import ccall "AtomSpace_getAtomByHandle"
-  c_atomspace_getAtomByHandle :: AtomSpaceRef
-                              -> Handle
+foreign import ccall "AtomSpace_getAtomByUUID"
+  c_atomspace_getAtomByUUID :: AtomSpaceRef
+                              -> UUID
+                              -> Ptr CInt
                               -> Ptr CString
                               -> Ptr CString
-                              -> Ptr (Ptr Handle)
+                              -> Ptr (Ptr UUID)
                               -> Ptr CInt
                               -> IO CInt
 
-getByHandle :: Handle -> AtomSpace AtomRaw
-getByHandle h = do
+getByUUID :: UUID -> AtomSpace (Maybe AtomRaw)
+getByUUID h = do
     asRef <- getAtomSpace
-    tv <- getTruthValue h
-    res <- liftIO $ alloca $
-      \tptr -> alloca $
-      \nptr -> alloca $
-      \hptr -> alloca $
-      \iptr -> do
-          isNode <- toBool <$> c_atomspace_getAtomByHandle asRef h tptr nptr hptr iptr
-          ctptr <- peek tptr
-          atype <- peekCString ctptr
-          free ctptr
-          if isNode
-            then do
-                cnptr <- peek nptr
-                aname <- peekCString cnptr
-                free cnptr
-                return $ Right (atype,aname)
-            else do
-                outLen <- fromIntegral <$> peek iptr
-                chptr <- peek hptr
-                outList <- peekArray outLen chptr
-                free chptr
-                return $ Left (atype,outList)
-    case res of
-        Right (atype,aname)  -> return $ Node atype aname $ Just tv
-        Left (atype,outList) -> do
-            out <- mapM getByHandle outList
-            return $ Link atype out $ Just tv
+    resTv <- getTruthValue h
+    case resTv of
+      Nothing -> return Nothing
+      Just tv -> do
+        res <- liftIO $ alloca $
+          \aptr -> alloca $
+          \tptr -> alloca $
+          \nptr -> alloca $
+          \hptr -> alloca $
+          \iptr -> do
+            res <- c_atomspace_getAtomByUUID asRef h aptr tptr nptr hptr iptr
+            if res /= sUCCESS
+              then return Nothing
+              else do
+                isNode <- toBool <$> peek aptr
+                ctptr <- peek tptr
+                atype <- peekCString ctptr
+                free ctptr
+                if isNode
+                  then do
+                      cnptr <- peek nptr
+                      aname <- peekCString cnptr
+                      free cnptr
+                      return $ Just $ Right (atype,aname)
+                  else do
+                      outLen <- fromIntegral <$> peek iptr
+                      chptr <- peek hptr
+                      outList <- peekArray outLen chptr
+                      free chptr
+                      return $ Just $ Left (atype,outList)
+        case res of
+            Nothing                     -> return Nothing
+            Just (Right (atype,aname))  -> return $ Just $ Node atype aname $ Just tv
+            Just (Left (atype,outList)) -> do
+                mout <- mapM getByUUID outList
+                return $ case mapM id mout of
+                    Just out -> Just $ Link atype out $ Just tv
+                    Nothing  -> Nothing
 
 --------------------------------------------------------------------------------
 
 foreign import ccall "AtomSpace_getTruthValue"
   c_atomspace_getTruthValue :: AtomSpaceRef
-                            -> Handle
+                            -> UUID
+                            -> Ptr CInt
                             -> Ptr CDouble
                             -> IO CInt
 
 -- Internal function to get an atom's truth value.
-getTruthValue :: Handle -> AtomSpace TVRaw
+getTruthValue :: UUID -> AtomSpace (Maybe TVRaw)
 getTruthValue handle = do
     asRef <- getAtomSpace
-    liftIO $ allocaArray tvMAX_PARAMS $
+    liftIO $ alloca $
+      \tptr -> allocaArray tvMAX_PARAMS $
       \lptr -> do
-          tvType <- c_atomspace_getTruthValue asRef handle lptr
-          l <- peekArray tvMAX_PARAMS lptr
-          return $ TVRaw (toEnum $ fromIntegral tvType) (map realToFrac l)
+          res <- c_atomspace_getTruthValue asRef handle tptr lptr
+          if res == sUCCESS
+            then do
+                tvType <- peek tptr
+                l <- peekArray tvMAX_PARAMS lptr
+                return $ Just $ TVRaw (toEnum $ fromIntegral tvType) (map realToFrac l)
+            else return Nothing
 
 foreign import ccall "AtomSpace_setTruthValue"
   c_atomspace_setTruthValue :: AtomSpaceRef
-                            -> Handle
+                            -> UUID
                             -> CInt
                             -> Ptr CDouble
-                            -> IO ()
+                            -> IO CInt
 
 -- Internal function to set an atom's truth value.
-setTruthValue :: Handle -> TVRaw -> AtomSpace ()
+setTruthValue :: UUID -> TVRaw -> AtomSpace Bool
 setTruthValue handle (TVRaw tvtype list) = do
     asRef <- getAtomSpace
     liftIO $ withArray (map realToFrac list) $
       \lptr -> do
-          c_atomspace_setTruthValue asRef handle (fromIntegral $ fromEnum tvtype) lptr
+          res <- c_atomspace_setTruthValue asRef handle (fromIntegral $ fromEnum tvtype) lptr
+          return $ res == sUCCESS
 
