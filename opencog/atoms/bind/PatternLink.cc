@@ -383,7 +383,7 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 /// Sort out the list of clauses into four classes:
 /// virtual, evaluatable, executable and concrete.
 ///
-/// A term is "evalutable" if it contains a GroundedPredicate,
+/// A term is "evalutable" if it contains a GroundedPredicateNode,
 /// or if it inherits from VirtualLink (such as the GreaterThanLink).
 /// Such terms need evaluation at grounding time, to determine
 /// thier truth values.
@@ -391,7 +391,7 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 /// A term may also be evaluatable if consists of connectives (such as
 /// AndLink, OrLink, NotLink) used to join together evaluatable terms.
 /// Normally, the above search for GPN's and VirtualLinks should be
-/// enough, expect when an entire term is a variable.  Thus, for
+/// enough, except when an entire term is a variable.  Thus, for
 /// example, a term such as (NotLink (VariableNode $x)) needs to be
 /// evaluated at grounding-time, even though it does not currently
 /// contain a GPN or a VirtualLink: the grounding might contain it;
@@ -399,8 +399,9 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 /// what the connectives are. The actual connectives depend on the
 /// callback; the default callback uses AndLink, OrLink, NotLink, but
 /// other callbacks may pick something else.  Thus, we cannot do this
-/// here. By contrast, SatisfactionLink and BindLink explicitly assume
-/// the default callback, so they do the additional unbundling there.
+/// here. By contrast, GetLink, SatisfactionLink and BindLink
+/// explicitly assume the default callback, so they do the additional
+/// unbundling there.
 ///
 /// A term is "executable" if it is an ExecutionOutputLink
 /// or if it inherits from one (such as PlusLink, TimesLink).
@@ -422,7 +423,7 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 /// Thus, non-virtual clasues must be grounded first. Another problem
 /// arises when a virtual clause has two or more variables in it, and
 /// those variables are grounded by different disconnected graph
-/// components; the combinatoric explosino has to be handled...
+/// components; the combinatoric explosion has to be handled...
 ///
 void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
                                    const HandleSeq& clauses,
