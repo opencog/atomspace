@@ -214,7 +214,6 @@ void BackwardChainer::process_target(Target& target)
 	logger().debug("[BackwardChainer] Selected rule "
 	               + standardized_rule.get_handle()->toShortString());
 
-	Handle hrule_implicant = standardized_rule.get_implicant();
 	Handle hrule_vardecl = standardized_rule.get_vardecl();
 	HandleSeq qrule_outputs = standardized_rule.get_implicand_seq();
 
@@ -275,67 +274,19 @@ void BackwardChainer::process_target(Target& target)
 	// all, and add all resulting new targets to targets list; this will
 	// avoid having to visit the target multiple times to get all
 	// possible output mappings
-	VarMap implicand_normal_mapping = rand_element(all_implicand_to_target_mappings);
-	for (auto& p : implicand_normal_mapping)
+	VarMap implicand_mapping = rand_element(all_implicand_to_target_mappings);
+	for (auto& p : implicand_mapping)
 		logger().debug("[BackwardChainer] Chosen mapping is "
 		               + p.first->toShortString()
 		               + " to " + p.second->toShortString());
 
-	// Reverse ground the implicant with the grounding we found from
-	// unifying the implicand
-	Substitutor subt(&_garbage_superspace);
-	std::vector<VarMap> premises_vmap_list, premises_vmap_list_alt;
-	Handle hrule_implicant_normal_grounded = subt.substitute(hrule_implicant, implicand_normal_mapping);
-
-	logger().debug("[BackwardChainer] Reverse grounded as "
-	               + hrule_implicant_normal_grounded->toShortString());
-
-	// Find all matching premises matching the implicant, where premises_vmap_list
-	// will be the mapping from free variables in himplicant to stuff in a premise
-	HandleSeq possible_premises =
-		match_knowledge_base(hrule_implicant_normal_grounded,
-	                         _garbage_superspace.add_atom(gen_sub_varlist(hrule_implicant_normal_grounded, hrule_vardecl, target.get_varset())),
-	                         premises_vmap_list);
-
-	// only need to generate QuoteLink version when there are free variables
-	if (not target.get_varseq().empty())
-	{
-		// Generate another version where each variables (free or bound) are inside
-		// QuoteLink; mostly to handle where PM cannot map a variable to itself
-		VarMap implicand_quoted_mapping;
-		for (auto& p : implicand_normal_mapping)
-		{
-			// find all variables
-			FindAtoms fv(VARIABLE_NODE);
-			fv.search_set(p.second);
-
-			// wrap a QuoteLink on each variable
-			VarMap quote_mapping;
-			for (auto& h: fv.varset)
-				quote_mapping[h] = _garbage_superspace.add_atom(createLink(QUOTE_LINK, h));
-
-			Substitutor subt(&_garbage_superspace);
-			implicand_quoted_mapping[p.first] = subt.substitute(p.second, quote_mapping);
-		}
-
-		// Reverse ground 2nd version, try it with QuoteLink around variables
-		Handle hrule_implicant_quoted_grounded = subt.substitute(hrule_implicant, implicand_quoted_mapping);
-
-		logger().debug("[BackwardChainer] Alternative reverse grounded as "
-		               + hrule_implicant_quoted_grounded->toShortString());
-
-		HandleSeq possible_premises_alt =
-			match_knowledge_base(hrule_implicant_quoted_grounded,
-								 _garbage_superspace.add_atom(gen_sub_varlist(hrule_implicant_quoted_grounded, hrule_vardecl, target.get_varset())),
-								 premises_vmap_list_alt);
-
-		// collect the possible premises from the two verions of mapping
-		possible_premises.insert(possible_premises.end(),
-		                         possible_premises_alt.begin(),
-		                         possible_premises_alt.end());
-		premises_vmap_list.insert(premises_vmap_list.end(), premises_vmap_list_alt.begin(),
-		                          premises_vmap_list_alt.end());
-	}
+	Handle hrule_implicant_reverse_grounded;
+	std::vector<VarMap> premises_vmap_list;
+	HandleSeq possible_premises = find_premises(standardized_rule,
+	                                            implicand_mapping,
+	                                            target.get_varset(),
+	                                            hrule_implicant_reverse_grounded,
+	                                            premises_vmap_list);
 
 	logger().debug("[BackwardChainer] %d possible permises", possible_premises.size());
 
@@ -351,9 +302,9 @@ void BackwardChainer::process_target(Target& target)
 	{
 		logger().debug("[BackwardChainer] Adding rule's grounded input as Target");
 
-		target.store_step(selected_rule, { hrule_implicant_normal_grounded });
-		_targets_set.emplace(hrule_implicant_normal_grounded,
-		                     _garbage_superspace.add_atom(gen_sub_varlist(hrule_implicant_normal_grounded, hrule_vardecl, target.get_varset())));
+		target.store_step(selected_rule, { hrule_implicant_reverse_grounded });
+		_targets_set.emplace(hrule_implicant_reverse_grounded,
+		                     _garbage_superspace.add_atom(gen_sub_varlist(hrule_implicant_reverse_grounded, hrule_vardecl, target.get_varset())));
 		return;
 	}
 
@@ -370,7 +321,8 @@ void BackwardChainer::process_target(Target& target)
 		// reverse ground the rule's outputs with the mapping to the premise
 		// so that when we ground the premise, we know how to generate
 		// the final output
-		Handle output_grounded = subt.substitute(standardized_rule.get_implicand(), implicand_normal_mapping);
+		Substitutor subt(&_garbage_superspace);
+		Handle output_grounded = subt.substitute(standardized_rule.get_implicand(), implicand_mapping);
 
 		logger().debug("[BackwardChainer] Output reverse grounded step 1 as " + output_grounded->toShortString());
 		output_grounded = subt.substitute(output_grounded, vm);
@@ -380,7 +332,7 @@ void BackwardChainer::process_target(Target& target)
 		std::vector<VarMap> vm_list;
 
 		// include the implicand mapping into vm so we can do variable chasing
-		vm.insert(implicand_normal_mapping.begin(), implicand_normal_mapping.end());
+		vm.insert(implicand_mapping.begin(), implicand_mapping.end());
 
 		// use pattern matcher to try to ground the variables (if any) in the
 		// selected premises, so we can use this grounding to "apply" the rule
@@ -629,6 +581,80 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
 	}
 
 	return results;
+}
+
+HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
+                                         const VarMap& implicand_mapping,
+                                         const std::set<Handle> additional_free_varset,
+                                         Handle& hrule_implicant_reverse_grounded,
+                                         std::vector<VarMap>& premises_vmap_list)
+{
+	Handle hrule_implicant = standardized_rule.get_implicant();
+	Handle hrule_vardecl = standardized_rule.get_vardecl();
+
+	// Reverse ground the implicant with the grounding we found from
+	// unifying the implicand
+	Substitutor subt(&_garbage_superspace);
+	hrule_implicant_reverse_grounded = subt.substitute(hrule_implicant, implicand_mapping);
+
+	logger().debug("[BackwardChainer] Reverse grounded as "
+	               + hrule_implicant_reverse_grounded->toShortString());
+
+	// Find all matching premises matching the implicant, where premises_vmap_list
+	// will be the mapping from free variables in himplicant to stuff in a premise
+	HandleSeq possible_premises =
+		match_knowledge_base(hrule_implicant_reverse_grounded,
+	                         _garbage_superspace.add_atom(
+	                             gen_sub_varlist(hrule_implicant_reverse_grounded,
+	                                             hrule_vardecl,
+	                                             additional_free_varset)),
+	                         premises_vmap_list);
+
+	// only need to generate QuoteLink version when there are free variables
+	if (not additional_free_varset.empty())
+	{
+		std::vector<VarMap> premises_vmap_list_alt;
+
+		// Generate another version where each variables (free or bound) are inside
+		// QuoteLink; mostly to handle where PM cannot map a variable to itself
+		VarMap implicand_quoted_mapping;
+		for (auto& p : implicand_mapping)
+		{
+			// find all variables
+			FindAtoms fv(VARIABLE_NODE);
+			fv.search_set(p.second);
+
+			// wrap a QuoteLink on each variable
+			VarMap quote_mapping;
+			for (auto& h: fv.varset)
+				quote_mapping[h] = _garbage_superspace.add_atom(createLink(QUOTE_LINK, h));
+
+			implicand_quoted_mapping[p.first] = subt.substitute(p.second, quote_mapping);
+		}
+
+		// Reverse ground 2nd version, try it with QuoteLink around variables
+		Handle hrule_implicant_quoted_grounded = subt.substitute(hrule_implicant, implicand_quoted_mapping);
+
+		logger().debug("[BackwardChainer] Alternative reverse grounded as "
+		               + hrule_implicant_quoted_grounded->toShortString());
+
+		HandleSeq possible_premises_alt =
+			match_knowledge_base(hrule_implicant_quoted_grounded,
+								 _garbage_superspace.add_atom(
+		                             gen_sub_varlist(hrule_implicant_quoted_grounded,
+		                                             hrule_vardecl,
+		                                             additional_free_varset)),
+								 premises_vmap_list_alt);
+
+		// collect the possible premises from the two verions of mapping
+		possible_premises.insert(possible_premises.end(),
+		                         possible_premises_alt.begin(),
+		                         possible_premises_alt.end());
+		premises_vmap_list.insert(premises_vmap_list.end(), premises_vmap_list_alt.begin(),
+		                          premises_vmap_list_alt.end());
+	}
+
+	return possible_premises;
 }
 
 /**

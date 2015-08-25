@@ -114,6 +114,11 @@ private:
 	HandleSeq match_knowledge_base(const Handle& htarget,
 	                               Handle htarget_vardecl,
 	                               std::vector<VarMap>& vmap);
+	HandleSeq find_premises(const Rule& standardized_rule,
+	                        const VarMap& implicand_mapping,
+	                        const std::set<Handle> additional_free_varset,
+	                        Handle& hrule_implicant_reverse_grounded,
+	                        std::vector<VarMap>& premises_vmap_list);
 	HandleSeq ground_premises(const Handle& htarget, const VarMap& vmap,
 	                          std::vector<VarMap>& vmap_list);
 	bool unify(const Handle& hsource, const Handle& hmatch,
