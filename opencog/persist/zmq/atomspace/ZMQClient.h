@@ -3,7 +3,7 @@
  * Base class for ZeroMQ-backed persistent storage.
  *
  * HISTORY:
- * Copyright (c) 2015 Hendy Irawan <ceefour666@gmail.com>
+ * Copyright (c) 2015 Erwin Joosten, Hendy Irawan <ceefour666@gmail.com>
  *
  * LICENSE:
  * This program is free software; you can redistribute it and/or modify
@@ -30,7 +30,9 @@
 #include <set>
 #include <thread>
 #include <vector>
+#include <string>
 
+#include <zmq.hpp>
 #include <opencog/util/async_method_caller.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Link.h>
@@ -38,19 +40,28 @@
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/types.h>
 
+#include "ZMQMessages.pb.h"
+
+using namespace std;
+
 namespace opencog
 {
 /** \addtogroup grp_persist
  *  @{
  */
 
-class ZMQStorage
+class ZMQClient
 {
 	private:
+		zmq::context_t *zmqContext;
+		zmq::socket_t *zmqClientSocket;
 
+	protected:
+		void sendMessage(ZMQRequestMessage& requestMessage,
+		        ZMQReplyMessage& replyMessage);
 	public:
-		ZMQStorage();
-		~ZMQStorage();
+		ZMQClient(string networkAddress="tcp://127.0.0.1:5555"); //"ipc:///tmp/AtomSpaceZMQ.ipc"
+		~ZMQClient();
 
 		bool connected(void); // connection to DB is alive
 
@@ -61,7 +72,7 @@ class ZMQStorage
 
 		// Fetch atoms from DB
 //		bool atomExists(Handle);
-		AtomPtr getAtom(Handle);
+		AtomPtr getAtom(Handle &h);
 		std::vector<Handle> getIncomingSet(Handle);
 		NodePtr getNode(Type, const char *);
 		NodePtr getNode(const Node &n)

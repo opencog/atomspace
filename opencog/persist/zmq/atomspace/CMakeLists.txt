@@ -11,10 +11,9 @@ INCLUDE_DIRECTORIES (
 #
 ADD_LIBRARY (zmqatoms SHARED
 #    ProtocolBufferSerializer
-#    ZMQClient
     ZMQMessages.pb
+    ZMQClient
 #    ZMQServer
-	ZMQStorage
 	ZMQPersistSCM
 )
 

@@ -42,38 +42,57 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/TruthValue.h>
 
-#include "ZMQStorage.h"
+#include <opencog/persist/zmq/atomspace/ZMQClient.h>
 
 using namespace opencog;
 
-ZMQStorage::ZMQStorage() {
+ZMQClient::ZMQClient(string networkAddress) {
+	zmqContext = new zmq::context_t(1);
+    zmqClientSocket = new zmq::socket_t(*zmqContext, ZMQ_REQ);
+    zmqClientSocket->connect(networkAddress.c_str());
+}
+
+ZMQClient::~ZMQClient() {
+	delete zmqClientSocket;
+	delete zmqContext;
+}
+
+bool ZMQClient::connected(void) {
+	return zmqClientSocket->connected();
+}
+
+void ZMQClient::sendMessage(ZMQRequestMessage& requestMessage,
+        ZMQReplyMessage& replyMessage)
+{
+    // Send request to server
+    string strRequest = requestMessage.SerializeAsString();
+    zmq::message_t request(strRequest.size());
+    memcpy((void *) request.data (), strRequest.c_str(),
+            strRequest.size()); //TODO use copyless init from data
+    zmqClientSocket->send(request);
+
+    // Wait for reply
+    zmq::message_t reply;
+    zmqClientSocket->recv(&reply);
+    replyMessage.ParseFromArray(reply.data(), reply.size());
+}
+
+void ZMQClient::reserve() {
 
 }
 
-ZMQStorage::~ZMQStorage() {
+void ZMQClient::store(const AtomTable &table) {
 
 }
 
-bool ZMQStorage::connected(void) {
-	return false;
-}
-
-void ZMQStorage::reserve() {
-
-}
-
-void ZMQStorage::store(const AtomTable &table) {
-
-}
-
-void ZMQStorage::load(AtomTable &table) {
+void ZMQClient::load(AtomTable &table) {
 
 }
 
 /**
- * Retreive the entire incoming set of the indicated atom.
+ * Retrieve the entire incoming set of the indicated atom.
  */
-std::vector<Handle> ZMQStorage::getIncomingSet(Handle h)
+std::vector<Handle> ZMQClient::getIncomingSet(Handle h)
 {
 
 }
@@ -88,9 +107,21 @@ std::vector<Handle> ZMQStorage::getIncomingSet(Handle h)
  * However, it does register with the TLB, as the SQL uuids and the
  * TLB Handles must be kept in sync, or all hell breaks loose.
  */
-NodePtr ZMQStorage::getNode(Type t, const char * str)
+NodePtr ZMQClient::getNode(Type t, const char * str)
 {
-	return NULL;
+    ZMQRequestMessage req;
+    ZMQReplyMessage rep;
+
+    req.set_function(ZMQgetAtoms);
+    ZMQAtomFetch *fetch1 = req.add_fetch();
+    fetch1->set_kind(ZMQAtomFetchKind::NODE);
+    fetch1->set_type(t);
+    fetch1->set_name(str);
+    sendMessage(req, rep);
+
+    return NULL;
+    //Atom* atom = ProtocolBufferSerializer::deserialize(rep.atom());
+    //return AtomPtr(atom);
 }
 
 /**
@@ -103,7 +134,7 @@ NodePtr ZMQStorage::getNode(Type t, const char * str)
  * However, it does register with the TLB, as the SQL uuids and the
  * TLB Handles must be kept in sync, or all hell breaks loose.
  */
-LinkPtr ZMQStorage::getLink(Type t, const std::vector<Handle>&oset)
+LinkPtr ZMQClient::getLink(Type t, const std::vector<Handle>&oset)
 {
 	return NULL;
 }
@@ -115,12 +146,12 @@ LinkPtr ZMQStorage::getLink(Type t, const std::vector<Handle>&oset)
  * However, it does register with the TLB, as the SQL uuids and the
  * TLB Handles must be kept in sync, or all hell breaks loose.
  */
-AtomPtr ZMQStorage::getAtom(Handle h)
+AtomPtr ZMQClient::getAtom(Handle &h)
 {
 	return NULL;
 }
 
-void ZMQStorage::flushStoreQueue()
+void ZMQClient::flushStoreQueue()
 {
 
 }

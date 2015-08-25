@@ -24,9 +24,9 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/BackingStore.h>
 #include <opencog/guile/SchemePrimitive.h>
+#include <opencog/persist/zmq/atomspace/ZMQClient.h>
 
 #include "ZMQPersistSCM.h"
-#include "ZMQStorage.h"
 
 using namespace opencog;
 
@@ -39,10 +39,10 @@ namespace opencog
 class ZMQBackingStore : public BackingStore
 {
 	private:
-		ZMQStorage *_store;
+		ZMQClient *_store;
 	public:
 		ZMQBackingStore();
-		void set_store(ZMQStorage *);
+		void set_store(ZMQClient *);
 
 		virtual NodePtr getNode(Type, const char *) const;
 		virtual LinkPtr getLink(Type, const HandleSeq&) const;
@@ -61,7 +61,7 @@ ZMQBackingStore::ZMQBackingStore()
 	_store = NULL;
 }
 
-void ZMQBackingStore::set_store(ZMQStorage *as)
+void ZMQBackingStore::set_store(ZMQClient *as)
 {
 	_store = as;
 }
@@ -151,7 +151,7 @@ void ZMQPersistSCM::do_open(const std::string& dbname,
                          const std::string& username,
                          const std::string& auth)
 {
-	_store = new ZMQStorage(/*dbname, username, auth*/);
+	_store = new ZMQClient(/*dbname, username, auth*/);
 	if (!_store)
 		throw RuntimeException(TRACE_INFO,
 			"zmq-open: Error: Unable to open the database");

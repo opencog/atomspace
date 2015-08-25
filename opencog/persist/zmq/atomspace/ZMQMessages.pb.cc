@@ -332,9 +332,9 @@ void protobuf_AddDesc_ZMQMessages_2eproto() {
     "sage\"1\n\017ZMQTrailMessage\022\017\n\007maxSize\030\001 \002(\005"
     "\022\r\n\005trail\030\002 \003(\004\"\232\002\n\016ZMQAtomMessage\022\036\n\010at"
     "omtype\030\001 \002(\0162\014.ZMQAtomType\022=\n\024attentionv"
-    "alueholder\030\002 \002(\0132\037.ZMQAttentionValueHold"
-    "erMessage\022\016\n\006handle\030\003 \002(\004\022\020\n\010incoming\030\004 "
-    "\003(\004\022\014\n\004type\030\005 \002(\005\022\r\n\005flags\030\006 \001(\005\022)\n\ntrut"
+    "alueholder\030\002 \001(\0132\037.ZMQAttentionValueHold"
+    "erMessage\022\016\n\006handle\030\003 \001(\004\022\020\n\010incoming\030\004 "
+    "\003(\004\022\014\n\004type\030\005 \001(\005\022\r\n\005flags\030\006 \001(\005\022)\n\ntrut"
     "hValue\030\007 \001(\0132\025.ZMQTruthValueMessage\022\014\n\004n"
     "ame\030\010 \001(\t\022\020\n\010outgoing\030\t \003(\004\022\037\n\005trail\030\n \001"
     "(\0132\020.ZMQTrailMessage\"m\n\014ZMQAtomFetch\022\037\n\004"
@@ -2212,7 +2212,7 @@ bool ZMQAtomMessage::MergePartialFromCodedStream(
         break;
       }
 
-      // required .ZMQAttentionValueHolderMessage attentionvalueholder = 2;
+      // optional .ZMQAttentionValueHolderMessage attentionvalueholder = 2;
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
@@ -2226,7 +2226,7 @@ bool ZMQAtomMessage::MergePartialFromCodedStream(
         break;
       }
 
-      // required uint64 handle = 3;
+      // optional uint64 handle = 3;
       case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -2264,7 +2264,7 @@ bool ZMQAtomMessage::MergePartialFromCodedStream(
         break;
       }
 
-      // required int32 type = 5;
+      // optional int32 type = 5;
       case 5: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -2387,13 +2387,13 @@ void ZMQAtomMessage::SerializeWithCachedSizes(
       1, this->atomtype(), output);
   }
 
-  // required .ZMQAttentionValueHolderMessage attentionvalueholder = 2;
+  // optional .ZMQAttentionValueHolderMessage attentionvalueholder = 2;
   if (has_attentionvalueholder()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
       2, this->attentionvalueholder(), output);
   }
 
-  // required uint64 handle = 3;
+  // optional uint64 handle = 3;
   if (has_handle()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt64(3, this->handle(), output);
   }
@@ -2404,7 +2404,7 @@ void ZMQAtomMessage::SerializeWithCachedSizes(
       4, this->incoming(i), output);
   }
 
-  // required int32 type = 5;
+  // optional int32 type = 5;
   if (has_type()) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->type(), output);
   }
@@ -2455,14 +2455,14 @@ void ZMQAtomMessage::SerializeWithCachedSizes(
       1, this->atomtype(), target);
   }
 
-  // required .ZMQAttentionValueHolderMessage attentionvalueholder = 2;
+  // optional .ZMQAttentionValueHolderMessage attentionvalueholder = 2;
   if (has_attentionvalueholder()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
         2, this->attentionvalueholder(), target);
   }
 
-  // required uint64 handle = 3;
+  // optional uint64 handle = 3;
   if (has_handle()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(3, this->handle(), target);
   }
@@ -2473,7 +2473,7 @@ void ZMQAtomMessage::SerializeWithCachedSizes(
       WriteUInt64ToArray(4, this->incoming(i), target);
   }
 
-  // required int32 type = 5;
+  // optional int32 type = 5;
   if (has_type()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->type(), target);
   }
@@ -2530,21 +2530,21 @@ int ZMQAtomMessage::ByteSize() const {
         ::google::protobuf::internal::WireFormatLite::EnumSize(this->atomtype());
     }
 
-    // required .ZMQAttentionValueHolderMessage attentionvalueholder = 2;
+    // optional .ZMQAttentionValueHolderMessage attentionvalueholder = 2;
     if (has_attentionvalueholder()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->attentionvalueholder());
     }
 
-    // required uint64 handle = 3;
+    // optional uint64 handle = 3;
     if (has_handle()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt64Size(
           this->handle());
     }
 
-    // required int32 type = 5;
+    // optional int32 type = 5;
     if (has_type()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
@@ -2673,7 +2673,7 @@ void ZMQAtomMessage::CopyFrom(const ZMQAtomMessage& from) {
 }
 
 bool ZMQAtomMessage::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000017) != 0x00000017) return false;
+  if ((_has_bits_[0] & 0x00000001) != 0x00000001) return false;
 
   if (has_attentionvalueholder()) {
     if (!this->attentionvalueholder().IsInitialized()) return false;

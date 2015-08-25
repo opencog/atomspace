@@ -29,7 +29,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Handle.h>
-#include "ZMQStorage.h"
+#include <opencog/persist/zmq/atomspace/ZMQClient.h>
 
 namespace opencog
 {
@@ -46,7 +46,7 @@ private:
 	void init(void);
 
 	ZMQBackingStore *_backing;
-	ZMQStorage *_store;
+	ZMQClient *_store;
 	AtomSpace *_as;
 
 public:

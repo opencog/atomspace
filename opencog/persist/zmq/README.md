@@ -6,6 +6,8 @@ libzmq 3.x
 
 Ubuntu: `sudo apt-get install protobuf-compiler libzmq3-dev`
 
+TODO: use libzmqpp-dev or better yet, [azmq (Boost-friendly)](https://github.com/zeromq/azmq) for ZeroMQ 4.0+.
+
 ## protobuf
 
     protoc --proto_path=opencog/persist/zmq/atomspace --cpp_out=opencog/persist/zmq/atomspace opencog/persist/zmq/atomspace/ZMQMessages.proto

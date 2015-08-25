@@ -750,7 +750,7 @@ class ZMQAtomMessage : public ::google::protobuf::Message {
   inline ::ZMQAtomType atomtype() const;
   inline void set_atomtype(::ZMQAtomType value);
 
-  // required .ZMQAttentionValueHolderMessage attentionvalueholder = 2;
+  // optional .ZMQAttentionValueHolderMessage attentionvalueholder = 2;
   inline bool has_attentionvalueholder() const;
   inline void clear_attentionvalueholder();
   static const int kAttentionvalueholderFieldNumber = 2;
@@ -759,7 +759,7 @@ class ZMQAtomMessage : public ::google::protobuf::Message {
   inline ::ZMQAttentionValueHolderMessage* release_attentionvalueholder();
   inline void set_allocated_attentionvalueholder(::ZMQAttentionValueHolderMessage* attentionvalueholder);
 
-  // required uint64 handle = 3;
+  // optional uint64 handle = 3;
   inline bool has_handle() const;
   inline void clear_handle();
   static const int kHandleFieldNumber = 3;
@@ -778,7 +778,7 @@ class ZMQAtomMessage : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
       mutable_incoming();
 
-  // required int32 type = 5;
+  // optional int32 type = 5;
   inline bool has_type() const;
   inline void clear_type();
   static const int kTypeFieldNumber = 5;
@@ -1841,7 +1841,7 @@ inline void ZMQAtomMessage::set_atomtype(::ZMQAtomType value) {
   atomtype_ = value;
 }
 
-// required .ZMQAttentionValueHolderMessage attentionvalueholder = 2;
+// optional .ZMQAttentionValueHolderMessage attentionvalueholder = 2;
 inline bool ZMQAtomMessage::has_attentionvalueholder() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -1879,7 +1879,7 @@ inline void ZMQAtomMessage::set_allocated_attentionvalueholder(::ZMQAttentionVal
   }
 }
 
-// required uint64 handle = 3;
+// optional uint64 handle = 3;
 inline bool ZMQAtomMessage::has_handle() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
@@ -1926,7 +1926,7 @@ ZMQAtomMessage::mutable_incoming() {
   return &incoming_;
 }
 
-// required int32 type = 5;
+// optional int32 type = 5;
 inline bool ZMQAtomMessage::has_type() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
