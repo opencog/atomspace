@@ -9,7 +9,7 @@ ADD_LIBRARY(ruleengine SHARED
 	URECommons.cc
 	forwardchainer/ForwardChainer.cc
 	forwardchainer/ForwardChainerPMCB.cc
-	forwardchainer/ForwardChainerCallBack.h
+	forwardchainer/ForwardChainerCallBack.cc
 	forwardchainer/DefaultForwardChainerCB.cc
 	forwardchainer/FCMemory.cc	
 	InferenceSCM.cc
