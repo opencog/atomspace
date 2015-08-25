@@ -1,8 +1,8 @@
 /*
  * opencog/persist/zmq/atomspace/ZMQPersistSCM.h
  *
- * Copyright (c) 2008 by OpenCog Foundation
- * Copyright (c) 2008, 2009, 2013, 2015 Hendy Irawan <ceefour666@gmail.com>
+ * Copyright (c) 2008-2015 by OpenCog Foundation
+ * Written by Hendy Irawan <ceefour666@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
