@@ -128,20 +128,20 @@ AtomPtr ProtocolBufferSerializer::deserialize(const ZMQAtomMessage& atomMessage)
     }
 }
 
-void ProtocolBufferSerializer::serialize(Atom &atom, ZMQAtomMessage* atomMessage)
-{
-    Link* link = dynamic_cast<Link *>(&atom);
-    if(link)
-        serializeLink(*link, atomMessage);
-    else
-    {
-        Node* node = dynamic_cast<Node *>(&atom);
-        if(node)
-            serializeNode(*node, atomMessage);
-        else
-            throw RuntimeException(TRACE_INFO, "Invalid atomtype");
-    }
-}
+//void ProtocolBufferSerializer::serialize(Atom &atom, ZMQAtomMessage* atomMessage)
+//{
+//    Link* link = dynamic_cast<Link *>(&atom);
+//    if(link)
+//        serializeLink(*link, atomMessage);
+//    else
+//    {
+//        Node* node = dynamic_cast<Node *>(&atom);
+//        if(node)
+//            serializeNode(*node, atomMessage);
+//        else
+//            throw RuntimeException(TRACE_INFO, "Invalid atomtype");
+//    }
+//}
 
 //void ProtocolBufferSerializer::deserializeAttentionValue(
 //        const ZMQAttentionValueHolderMessage &attentionValueHolderMessage,
@@ -185,21 +185,20 @@ void ProtocolBufferSerializer::serializeCountTruthValue(
 {
     ZMQSingleTruthValueMessage *singleTruthValue=truthValueMessage->add_singletruthvalue();
     singleTruthValue->set_truthvaluetype(ZMQTruthValueTypeCount);
-    singleTruthValue->set_mean(tv.mean);
-    singleTruthValue->set_count(tv.count);
-    singleTruthValue->set_confidence(tv.confidence);
+    singleTruthValue->set_mean(tv.getMean());
+    singleTruthValue->set_count(tv.getCount());
+    singleTruthValue->set_confidence(tv.getConfidence());
 }
 
 IndefiniteTruthValuePtr ProtocolBufferSerializer::deserializeIndefiniteTruthValue(
         const ZMQSingleTruthValueMessage& singleTruthValue)
 {
 	IndefiniteTruthValuePtr tv(
-			new IndefiniteTruthValue(singleTruthValue.l(), singleTruthValue.u(), singleTruthValue.confidencelevel()));
-    tv->setSymmetric(singleTruthValue.symmetric());
-    tv->setDiff(singleTruthValue.diff());
+			new IndefiniteTruthValue(singleTruthValue.l(), singleTruthValue.u(), singleTruthValue.confidence()));
     tv->setMean(singleTruthValue.mean());
-    tv->setConfidence(singleTruthValue.confidence());
-    tv->setCount(singleTruthValue.count());
+    tv->setConfidenceLevel(singleTruthValue.confidencelevel());
+    tv->setDiff(singleTruthValue.diff());
+    tv->setSymmetric(singleTruthValue.symmetric());
 
     vector<strength_t*> firstOrderDistribution(singleTruthValue.firstorderdistribution_size());
     for(int i = 0; i < singleTruthValue.firstorderdistribution_size(); i++)
@@ -217,15 +216,15 @@ void ProtocolBufferSerializer::serializeIndefiniteTruthValue(
 {
     ZMQSingleTruthValueMessage *singleTruthValue=truthValueMessage->add_singletruthvalue();
     singleTruthValue->set_truthvaluetype(ZMQTruthValueTypeIndefinite);
-    singleTruthValue->set_l(tv.L);
-    singleTruthValue->set_u(tv.U);
-    singleTruthValue->set_confidencelevel(tv.confidenceLevel);
-    singleTruthValue->set_symmetric(tv.symmetric);
-    singleTruthValue->set_diff(tv.diff);
-    singleTruthValue->set_mean(tv.mean);
-    singleTruthValue->set_count(tv.count);
-    singleTruthValue->set_confidence(tv.confidence);
-    for (float *f : tv.firstOrderDistribution)
+    singleTruthValue->set_l(tv.getL());
+    singleTruthValue->set_u(tv.getU());
+    singleTruthValue->set_confidencelevel(tv.getConfidenceLevel());
+    singleTruthValue->set_symmetric(tv.isSymmetric());
+    singleTruthValue->set_diff(tv.getDiff());
+    singleTruthValue->set_mean(tv.getMean());
+    singleTruthValue->set_count(tv.getCount());
+    singleTruthValue->set_confidence(tv.getConfidence());
+    for (float *f : tv.getFirstOrderDistribution())
     {
         singleTruthValue->add_firstorderdistribution(*f);
     }
@@ -293,8 +292,8 @@ void ProtocolBufferSerializer::serializeSimpleTruthValue(
 {
     ZMQSingleTruthValueMessage *singleTruthValue=truthValueMessage->add_singletruthvalue();
     singleTruthValue->set_truthvaluetype(ZMQTruthValueTypeSimple);
-    singleTruthValue->set_mean(tv.mean);
-    singleTruthValue->set_count(tv.count);
+    singleTruthValue->set_mean(tv.getMean());
+    singleTruthValue->set_count(tv.getCount());
 }
 
 void ProtocolBufferSerializer::serialize(TruthValue &tv, ZMQTruthValueMessage* truthValueMessage)
@@ -333,7 +332,7 @@ void ProtocolBufferSerializer::serialize(TruthValue &tv, ZMQTruthValueMessage* t
 TruthValuePtr ProtocolBufferSerializer::deserialize(
         const ZMQTruthValueMessage& truthValueMessage)
 {
-    if(truthValueMessage.singletruthvalue_size()==1)
+    if (truthValueMessage.singletruthvalue_size() == 1)
         return deserialize(truthValueMessage.singletruthvalue(0));
     else
     {
@@ -347,11 +346,8 @@ TruthValuePtr ProtocolBufferSerializer::deserialize(
     switch(singleTruthValueMessage.truthvaluetype())
     {
     case ZMQTruthValueTypeSimple:
-    {
         return deserializeSimpleTruthValue(singleTruthValueMessage);
-    }
     case ZMQTruthValueTypeCount:
-    {
         return deserializeCountTruthValue(singleTruthValueMessage);
     case ZMQTruthValueTypeNull:
     {
@@ -359,9 +355,7 @@ TruthValuePtr ProtocolBufferSerializer::deserialize(
         return tv;
     }
     case ZMQTruthValueTypeIndefinite:
-    {
         return deserializeIndefiniteTruthValue(singleTruthValueMessage);
-    }
     default:
          throw RuntimeException(TRACE_INFO, "Invalid ZMQ truthvaluetype: '%d'.",
                  singleTruthValueMessage.truthvaluetype());

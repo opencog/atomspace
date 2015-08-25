@@ -27,10 +27,20 @@
 #ifndef _OPENCOG_PROTOCOLBUFFER_SERIALIZER_H
 #define _OPENCOG_PROTOCOLBUFFER_SERIALIZER_H
 
-#include "opencog/atomspace/types.h"
+#include <opencog/atomspace/types.h>
 #include <string>
 #include <memory>
 #include "ZMQMessages.pb.h"
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/AttentionValue.h>
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/TruthValue.h>
+#include <opencog/atomspace/CountTruthValue.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
+#include <opencog/atomspace/NullTruthValue.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
 
 using namespace std;
 
@@ -38,16 +48,6 @@ namespace opencog {
 /** \addtogroup grp_atomspace
  *  @{
  */
-
-class AttentionValue;
-class Atom;
-class Link;
-class Node;
-class TruthValue;
-class CountTruthValue;
-class IndefiniteTruthValue;
-class NullTruthValue;
-class SimpleTruthValue;
 
 class ProtocolBufferSerializer {
     static void deserializeAtom(const ZMQAtomMessage& atomMessage, Atom& atom);
@@ -93,10 +93,10 @@ public:
     ~ProtocolBufferSerializer();
 
     static AtomPtr deserialize(const ZMQAtomMessage& atomMessage);
-    static void serialize(Atom &atom, ZMQAtomMessage* atomMessage);
-//
-//    static shared_ptr<TruthValue> deserialize(const ZMQTruthValueMessage& truthValueMessage);
-//    static void serialize(TruthValue &tv, ZMQTruthValueMessage* truthValueMessage);
+//    static void serialize(Atom &atom, ZMQAtomMessage* atomMessage);
+
+    static TruthValuePtr deserialize(const ZMQTruthValueMessage& truthValueMessage);
+    static void serialize(TruthValue &tv, ZMQTruthValueMessage* truthValueMessage);
 };
 
 /** @}*/

@@ -93,7 +93,9 @@ void ZMQClient::load(AtomTable &table) {
  */
 std::vector<Handle> ZMQClient::getIncomingSet(Handle h)
 {
-
+	// TODO: implement
+	std::vector<Handle> handles;
+	return handles;
 }
 
 /**
@@ -120,8 +122,8 @@ NodePtr ZMQClient::getNode(Type t, const char * str)
 
     ZMQAtomMessage atomMsg = rep.atom(0);
     if (atomMsg.atomtype() == ZMQAtomTypeNode) {
-        NodePtr atom = (NodePtr) ProtocolBufferSerializer::deserialize(atomMsg);
-        return atom;
+        NodePtr nodePtr = dynamic_pointer_cast<Node>(ProtocolBufferSerializer::deserialize(atomMsg));
+        return nodePtr;
     } else {
     	return NULL;
     }
@@ -146,15 +148,18 @@ LinkPtr ZMQClient::getLink(Type t, const std::vector<Handle>&oset)
     ZMQAtomFetch *fetch1 = req.add_fetch();
     fetch1->set_kind(ZMQAtomFetchKind::LINK);
     fetch1->set_type(t);
-    for (int i = 0; i < oset.size(); i++) {
+    for (unsigned int i = 0; i < oset.size(); i++) {
     	fetch1->add_outgoing(oset[i].value());
     }
     sendMessage(req, rep);
 
-    //Atom* atom = ProtocolBufferSerializer::deserialize(rep.atom());
-	//return AtomPtr(atom);
-
-    return NULL;
+    ZMQAtomMessage atomMsg = rep.atom(0);
+    if (atomMsg.atomtype() == ZMQAtomTypeLink) {
+        LinkPtr linkPtr = dynamic_pointer_cast<Link>(ProtocolBufferSerializer::deserialize(atomMsg));
+        return linkPtr;
+    } else {
+    	return NULL;
+    }
 }
 
 /**
@@ -175,10 +180,13 @@ AtomPtr ZMQClient::getAtom(Handle &h)
     fetch1->set_handle(h.value());
     sendMessage(req, rep);
 
-    //Atom* atom = ProtocolBufferSerializer::deserialize(rep.atom());
-	//return AtomPtr(atom);
-
-	return NULL;
+    ZMQAtomMessage atomMsg = rep.atom(0);
+    if (atomMsg.atomtype() != ZMQAtomTypeNotFound) {
+        AtomPtr atomPtr = ProtocolBufferSerializer::deserialize(atomMsg);
+        return atomPtr;
+    } else {
+    	return NULL;
+    }
 }
 
 void ZMQClient::flushStoreQueue()

@@ -41,6 +41,7 @@
 #include <opencog/atomspace/types.h>
 
 #include "ZMQMessages.pb.h"
+#include "ProtocolBufferSerializer.h"
 
 using namespace std;
 
