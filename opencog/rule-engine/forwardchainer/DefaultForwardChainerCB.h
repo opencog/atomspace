@@ -58,11 +58,8 @@ public:
     virtual HandleSeq choose_premises(FCMemory& fcmem);
     virtual Handle choose_next_source(FCMemory& fcmem);
     virtual HandleSeq apply_rule(FCMemory& fcmem);
+    HandleSeq apply_rule(FCMemory& fcmem,const Handle& h);
 
-    HandleSeq derive_rules(Handle source,Rule* rule,bool subatomic=false);
-
-    // new_rules formed by substituting source to matching implicant
-    std::map<Handle,std::vector<Handle> > rule_derivations;
 };
 
 } // ~namespace opencog
