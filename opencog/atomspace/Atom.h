@@ -383,8 +383,7 @@ public:
     virtual std::string toShortString(std::string indent) = 0;
 
 	// Work around gdb's incapability to build a string on the fly,
-	// see http://stackoverflow.com/questions/16734783 and
-	// http://stackoverflow.com/questions/2973976 for more
+	// see http://stackoverflow.com/questions/16734783 for more
 	// explanation.
 	std::string toString() { return toString(""); }
 	std::string toShortString() { return toShortString(""); }

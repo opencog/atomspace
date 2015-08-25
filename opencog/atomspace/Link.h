@@ -206,7 +206,8 @@ public:
     std::string toShortString(std::string indent);
 
 	// Work around gdb's incapability to build a string on the fly,
-	// see http://stackoverflow.com/questions/16734783 for more
+	// see http://stackoverflow.com/questions/16734783 and
+	// http://stackoverflow.com/questions/2973976 for more
 	// explanation.
 	using Atom::toString;
 	using Atom::toShortString;
