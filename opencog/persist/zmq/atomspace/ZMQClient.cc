@@ -1,9 +1,8 @@
-
 /*
  * FUNCTION:
  * Persistent Atom storage, ZeroMQ-backed e.g. Neo4j.
  *
- * Copyright (c) 2015 Hendy Irawan <ceefour666@gmail.com>
+ * Copyright (c) 2015 Erwin Joosten, Hendy Irawan <ceefour666@gmail.com>
  *
  * LICENSE:
  * This program is free software; you can redistribute it and/or modify

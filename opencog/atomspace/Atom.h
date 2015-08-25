@@ -81,6 +81,7 @@ class Atom
     friend class TLB;             // Needs to view _uuid
     friend class CreateLink;      // Needs to call getAtomTable();
     friend class DeleteLink;      // Needs to call getAtomTable();
+    friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
 
 private:
     //! Sets the AtomTable in which this Atom is inserted.
