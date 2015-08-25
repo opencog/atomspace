@@ -349,6 +349,7 @@ void BackwardChainer::process_target(Target& target)
 			logger().debug("[BackwardChainer] Checking possible permises grounding "
 			               + g->toShortString());
 
+			// XXX should this only search for free var?
 			FindAtoms fv(VARIABLE_NODE);
 			fv.search_set(g);
 
@@ -492,16 +493,9 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
                                                 Handle hpattern_vardecl,
                                                 vector<VarMap>& vmap)
 {
-	// Get all VariableNodes (unquoted)
-	FindAtoms fv(VARIABLE_NODE);
-	fv.search_set(hpattern);
-
 	if (hpattern_vardecl == Handle::UNDEFINED)
 	{
-		HandleSeq vars;
-		for (auto& h : fv.varset)
-			vars.push_back(h);
-
+		HandleSeq vars = get_free_vars_in_tree(hpattern);
 		hpattern_vardecl = _garbage_superspace.add_atom(createVariableList(vars));
 	}
 
@@ -510,8 +504,19 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
 	               hpattern->toShortString().c_str(),
 	               hpattern_vardecl->toShortString().c_str());
 
+	// if no variables at all
 	if (VariableListCast(hpattern_vardecl)->get_variables().varseq.empty())
+	{
+		// If the pattern already in the main atomspace, then itself is a match
+		Handle hself = _as.get_atom(hpattern);
+		if (hself != Handle::UNDEFINED)
+		{
+			vmap.push_back(VarMap());
+			return { hself };
+		}
+
 		return HandleSeq();
+	}
 
 	// Pattern Match on _garbage_superspace since some atoms in hpattern could
 	// be in the _garbage space
@@ -583,6 +588,16 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
 	return results;
 }
 
+/**
+ * Find all possible premises for a specific rule's implicant (input).
+ *
+ * @param standardized_rule                 the Rule object with the implicant
+ * @param implicand_mapping                 the output (implicand) var mapping
+ * @param additional_free_varset            additional free variables from the target
+ * @param hrule_implicant_reverse_grounded  output grounding of the implicant
+ * @param premises_vmap_list                the var mapping of each premise
+ * @return                                  a vector of premises
+ */
 HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
                                          const VarMap& implicand_mapping,
                                          const std::set<Handle> additional_free_varset,
@@ -671,12 +686,10 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 {
 	HandleSeq results;
 
-	// XXX are all variables in premises free?
-	FindAtoms fv(VARIABLE_NODE);
-	fv.search_set(hpremise);
+	HandleSeq varseq = get_free_vars_in_tree(hpremise);
 
 	// if the target is already fully grounded
-	if (fv.varset.empty())
+	if (varseq.empty())
 	{
 		VarMap old_map = premise_vmap;
 		VarMap new_map;
