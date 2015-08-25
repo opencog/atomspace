@@ -71,7 +71,7 @@ class ZMQClient
 
 		// Store atoms to DB
 //		void storeSingleAtom(AtomPtr);
-		void storeAtom(AtomPtr, bool synchronous = false);
+		void storeAtom(const AtomPtr& atomPtr, bool synchronous = false);
 		void flushStoreQueue();
 
 		// Fetch atoms from DB

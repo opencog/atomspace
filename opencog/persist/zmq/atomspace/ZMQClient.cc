@@ -83,6 +83,40 @@ void ZMQClient::reserve() {
 
 }
 
+/**
+ * In Java: org.opencog.atomspace.zmq.ZmqBackingStore#storeAtomsAsync
+ */
+void ZMQClient::storeAtom(const AtomPtr& atomPtr, bool synchronous) {
+    ZMQRequestMessage req;
+    ZMQReplyMessage rep;
+
+    req.set_function(ZMQstoreAtoms);
+    ZMQAtomMessage *atomMsg = req.add_atom();
+    atomMsg->set_handle(atomPtr->getHandle().value());
+    atomMsg->set_type(atomPtr->getType());
+    ZMQTruthValueMessage *tvMsg = atomMsg->mutable_truthvalue();
+    ZMQSingleTruthValueMessage *stvMsg = tvMsg->add_singletruthvalue();
+    stvMsg->set_truthvaluetype(ZMQTruthValueTypeSimple);
+    stvMsg->set_mean(atomPtr->getTruthValue()->getMean());
+    stvMsg->set_confidence(atomPtr->getTruthValue()->getConfidence());
+    stvMsg->set_count(atomPtr->getTruthValue()->getCount());
+    atomMsg->set_allocated_truthvalue(tvMsg);
+
+    LinkPtr linkPtr = dynamic_pointer_cast<Link>(atomPtr);
+    if (linkPtr != NULL) {
+    	atomMsg->set_atomtype(ZMQAtomTypeLink);
+    	for (unsigned int i = 0; i < linkPtr->getOutgoingSet().size(); i++) {
+    		atomMsg->add_outgoing(linkPtr->getOutgoingSet()[i].value());
+    	}
+    } else {
+    	NodePtr nodePtr = dynamic_pointer_cast<Node>(atomPtr);
+    	atomMsg->set_atomtype(ZMQAtomTypeNode);
+    	atomMsg->set_name(nodePtr->getName());
+    }
+
+    sendMessage(req, rep);
+}
+
 void ZMQClient::store(const AtomTable &table) {
 
 }
