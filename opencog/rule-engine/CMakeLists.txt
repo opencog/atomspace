@@ -10,7 +10,6 @@ ADD_LIBRARY(ruleengine SHARED
 	forwardchainer/ForwardChainer.cc
 	forwardchainer/ForwardChainerPMCB.cc
 	forwardchainer/ForwardChainerCallBack.cc
-	forwardchainer/DefaultForwardChainerCB.cc
 	forwardchainer/FCMemory.cc	
 	InferenceSCM.cc
 	Rule.cc
