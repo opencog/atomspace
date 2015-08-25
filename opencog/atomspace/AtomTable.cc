@@ -39,17 +39,16 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/TypeNode.h>
-#include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/BindLink.h>
-#include <opencog/atoms/bind/DefineLink.h>
 #include <opencog/atoms/bind/PatternLink.h>
-#include <opencog/atoms/bind/ScopeLink.h>
-#include <opencog/atoms/bind/VariableList.h>
+#include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atoms/core/PutLink.h>
+#include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/reduct/DeleteLink.h>
 #include <opencog/atoms/reduct/FunctionLink.h>
-#include <opencog/atoms/core/PutLink.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
@@ -234,11 +233,16 @@ Handle AtomTable::getHandle(Handle& h) const
         if (this == h._ptr->_atomTable)
             return h;
 
+        // try getting this atomtable's version first
+        Handle hthis = getHandle(AtomPtr(h));
+        if (hthis) return hthis;
+
         if (_environ) {
             Handle henv = _environ->getHandle(h);
             if (henv) return henv;
         }
-        return getHandle(AtomPtr(h));
+
+        return Handle::UNDEFINED;
     }
 
     // Read-lock for the _atom_set.
@@ -281,9 +285,6 @@ AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
     } else if (BIND_LINK == atom_type) {
         if (NULL == BindLinkCast(atom))
             return createBindLink(*LinkCast(atom));
-    } else if (BETA_REDEX == atom_type) {
-        if (NULL == BetaRedexCast(atom))
-            return createBetaRedex(*LinkCast(atom));
     } else if (DEFINE_LINK == atom_type) {
         if (NULL == DefineLinkCast(atom))
             return createDefineLink(*LinkCast(atom));
@@ -313,9 +314,9 @@ AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
     } else if (SATISFACTION_LINK == atom_type) {
         if (NULL == PatternLinkCast(atom))
             return createPatternLink(*LinkCast(atom));
-    } else if (SCOPE_LINK == atom_type) {
-        if (NULL == ScopeLinkCast(atom))
-            return createScopeLink(*LinkCast(atom));
+    } else if (LAMBDA_LINK == atom_type) {
+        if (NULL == LambdaLinkCast(atom))
+            return createLambdaLink(*LinkCast(atom));
     } else if (VARIABLE_LIST == atom_type) {
         if (NULL == VariableListCast(atom))
             return createVariableList(*LinkCast(atom));
@@ -342,8 +343,6 @@ static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
     // Links of various kinds -----------
     if (BIND_LINK == atom_type)
         return createBindLink(*LinkCast(atom));
-    if (BETA_REDEX == atom_type)
-        return createBetaRedex(*LinkCast(atom));
     if (DEFINE_LINK == atom_type)
         return createDefineLink(*LinkCast(atom));
 /*
@@ -364,8 +363,8 @@ static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
         return createPutLink(*LinkCast(atom));
     if (SATISFACTION_LINK == atom_type)
         return createPatternLink(*LinkCast(atom));
-    if (SCOPE_LINK == atom_type)
-        return createScopeLink(*LinkCast(atom));
+    if (LAMBDA_LINK == atom_type)
+        return createLambdaLink(*LinkCast(atom));
     if (VARIABLE_LIST == atom_type)
         return createVariableList(*LinkCast(atom));
     if (classserver().isA(atom_type, FUNCTION_LINK))

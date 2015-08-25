@@ -44,11 +44,14 @@ ptv a b c = Just $ ProbTV a b c
 
 -- | 'atomList' is simple sugar notation for listing atoms, using operators '|>'
 -- and '\>'. For example, if you want to define a list of atoms:
+--
+-- @
 -- l :: [AtomGen]
 -- l = atomList
 --       |> ConceptNode "concept1" noTv
 --       |> PredicateNode "predicate2" noTv
---       \> ConceptNode "lastconcept" noTv
+--       \\> ConceptNode "lastconcept" noTv
+-- @
 atomList :: (Typeable c) => ([Gen c] -> [Gen c])
 atomList = id
 
@@ -57,6 +60,32 @@ infixr 4 \>
 
 -- | '|>' and '\>' operators are provided for easier notation of list of 'Gen'
 -- elements when working with atoms of random arity (e.g. 'ListLink').
+--
+-- * Without sugar:
+--
+--     @
+--     list :: Atom ListT
+--     list = ListLink [ Gen (ConceptNode "someConcept1" noTv)
+--                     , Gen (PredicateNode "somePredicate1" noTv)
+--                     , Gen (PredicateNode "somePredicate2" noTv)
+--                     , Gen (ListLink [ Gen (ConceptNode "someConcept2" noTv)
+--                                     , Gen (PredicateNode "somePredicate3" noTv)
+--                                     ]
+--                           )
+--                     ]
+--     @
+--
+-- * With sugar:
+--
+--     @
+--     list :: Atom ListT
+--     list = ListLink |> ConceptNode "someConcept1" noTv
+--                     |> PredicateNode "somePredicate1" noTv
+--                     |> PredicateNode "somePredicate2" noTv
+--                     \\> ListLink |> ConceptNode "someConcept2" noTv
+--                                 \\> PredicateNode "somePredicate3" noTv
+--     @
+--
 (|>) :: (Typeable c,b <~ c) => ([Gen c] -> a) -> Atom b -> ([Gen c] -> a)
 f |> at = \l -> f $ (Gen at) : l
 

@@ -22,6 +22,8 @@
 
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
+#include "FreeLink.h"
+#include "LambdaLink.h"
 #include "PutLink.h"
 
 using namespace opencog;
@@ -29,7 +31,7 @@ using namespace opencog;
 PutLink::PutLink(const HandleSeq& oset,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : FreeLink(PUT_LINK, oset, tv, av)
+    : Link(PUT_LINK, oset, tv, av)
 {
 	init();
 }
@@ -37,7 +39,7 @@ PutLink::PutLink(const HandleSeq& oset,
 PutLink::PutLink(const Handle& a,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : FreeLink(PUT_LINK, a, tv, av)
+    : Link(PUT_LINK, a, tv, av)
 {
 	init();
 }
@@ -45,7 +47,7 @@ PutLink::PutLink(const Handle& a,
 PutLink::PutLink(Type t, const HandleSeq& oset,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : FreeLink(t, oset, tv, av)
+    : Link(t, oset, tv, av)
 {
 	if (not classserver().isA(t, PUT_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
@@ -55,7 +57,7 @@ PutLink::PutLink(Type t, const HandleSeq& oset,
 PutLink::PutLink(Type t, const Handle& a,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : FreeLink(t, a, tv, av)
+    : Link(t, a, tv, av)
 {
 	if (not classserver().isA(t, PUT_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
@@ -65,7 +67,7 @@ PutLink::PutLink(Type t, const Handle& a,
 PutLink::PutLink(Type t, const Handle& a, const Handle& b,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : FreeLink(t, a, b, tv, av)
+    : Link(t, a, b, tv, av)
 {
 	if (not classserver().isA(t, PUT_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
@@ -73,7 +75,7 @@ PutLink::PutLink(Type t, const Handle& a, const Handle& b,
 }
 
 PutLink::PutLink(Link& l)
-    : FreeLink(l)
+    : Link(l)
 {
 	Type tscope = l.getType();
 	if (not classserver().isA(tscope, PUT_LINK))
@@ -86,7 +88,10 @@ PutLink::PutLink(Link& l)
 /// PutLink expects a very strict format: an arity-2 link, with
 /// the first part being a pattern, and the second a list or set
 /// of values. If the pattern has N variables, then the seccond
-/// part must have N values.  The following formats are understood:
+/// part must have N values.  Furthermore, any type restrictions on
+/// the variables must be satisfied by the values.
+///
+/// The following formats are understood:
 ///
 ///    PutLink
 ///       <pattern with 1 variable>
@@ -102,7 +107,8 @@ PutLink::PutLink(Link& l)
 /// The below is a handy-dandy easy-to-use form. When it is reduced,
 /// it will result in the creation of a set of reduced forms, not
 /// just one (the two sets haveing the same arity). Unfortunately,
-/// this trick cannot work for N=1.
+/// this trick cannot work for N=1 unless the variable is cosntrained
+/// to not be a set.
 ///
 ///    PutLink
 ///       <pattern with N variables>
@@ -114,51 +120,96 @@ PutLink::PutLink(Link& l)
 ///
 void PutLink::init(void)
 {
-	if (2 != _outgoing.size())
-		throw InvalidParamException(TRACE_INFO, "PutLinks should be arity 2!");
+	extract_variables();
+	typecheck_values();
+}
+
+/// Extract the variables in the body.
+/// The body must either be a lambda, or we assume all free variables get bound.
+void PutLink::extract_variables(void)
+{
+	size_t sz = _outgoing.size();
+	if (2 != sz)
+		throw InvalidParamException(TRACE_INFO, "Unexprected PutLink arity! Got %lu", sz);
 
 	const Handle& body = _outgoing[0];
-	if (VARIABLE_NODE == body->getType())
+	Type btype = body->getType();
+
+	// If the body is a LambdaLink, then use it's variable declarations;
+	// else use the FreeLink to find all the variables.
+	if (classserver().isA(btype, LAMBDA_LINK))
 	{
-		_varseq.push_back(body);
+		LambdaLinkPtr lam(LambdaLinkCast(body));
+		if (NULL == lam)
+			lam = createLambdaLink(*LinkCast(body));
+		_varlist = lam->get_variables();
 	}
 	else
 	{
-		LinkPtr lll(LinkCast(body));
-		if (lll)
-		{
-			std::set<Handle> varset;
-			find_vars(varset, lll->getOutgoingSet());
-		}
+		FreeLink fl(body);
+		VariableList vl(fl.get_vars());
+		_varlist = vl.get_variables();
 	}
-	build_index();
+}
 
-	// OK, now for the values.
-	if (_varseq.size() == 1) return;
+/// Check that the values in the PutLink obey the type constraints.
+// XXX FIXME .. this is wrong, if, for example, the values are dynamic
+// i.e. produce run-time values. In that case, the type checking can
+// only be performed at run-time!
+void PutLink::typecheck_values(void)
+{
+	const Handle& vals = _outgoing[1];
 
-	LinkPtr lval(LinkCast(_outgoing[1]));
-	if (lval->getType() == LIST_LINK)
+	size_t sz = _varlist.varseq.size();
+	Type vtype = vals->getType();
+
+	if (1 == sz)
 	{
-		if (lval->getArity() != _varseq.size())
-			throw InvalidParamException(TRACE_INFO,
-				"PutLink has mismatched size! Expected %zu, got %zu\n",
-				_varseq.size(), lval->getArity());
+		if (not _varlist.is_type(vals)
+		    and SET_LINK != vtype)
+		{
+				throw InvalidParamException(TRACE_INFO,
+					"PutLink mismatched type!");
+		}
 		return;
 	}
-	if (lval->getType() != SET_LINK)
+
+	LinkPtr lval(LinkCast(vals));
+	if (LIST_LINK == vtype)
+	{
+		if (not _varlist.is_type(lval->getOutgoingSet()))
+			throw InvalidParamException(TRACE_INFO,
+				"PutLink has mismatched value list!");
+		return;
+	}
+
+	if (SET_LINK != vtype)
 		throw InvalidParamException(TRACE_INFO,
 			"PutLink was expecting a ListLink or SetLink!");
 
+	if (1 < sz)
+	{
+		for (const Handle& h : lval->getOutgoingSet())
+		{
+			LinkPtr lse(LinkCast(h));
+			// If the arity is greater than one, then the values must be in a list.
+		   if (lse->getType() != LIST_LINK)
+				throw InvalidParamException(TRACE_INFO,
+					"PutLink expected value list!");
+
+			if (not _varlist.is_type(lval->getOutgoingSet()))
+				throw InvalidParamException(TRACE_INFO,
+					"PutLink bad value list!");
+		}
+		return;
+	}
+
+	// If the arity is one, the values must obey type constraint.
 	for (const Handle& h : lval->getOutgoingSet())
 	{
-		LinkPtr lse(LinkCast(h));
-		if (lse->getType() != LIST_LINK)
+		if (not _varlist.is_type(h))
 			throw InvalidParamException(TRACE_INFO,
-				"PutLink was expecting a ListLink here");
-		if (lse->getArity() != _varseq.size())
-			throw InvalidParamException(TRACE_INFO,
-				"PutLink set element has mismatched size! Expected %zu, got %zu\n",
-				_varseq.size(), lse->getArity());
+					"PutLink bad type!");
 	}
 }
 /* ================================================================= */
@@ -195,57 +246,50 @@ void PutLink::init(void)
  * Again, only a substitution is performed, there is no evaluation.
  * Note also that the resulting tree is NOT placed into any atomspace!
  */
-Handle PutLink::substitute_nocheck(const Handle& term,
-                                   const HandleSeq& args) const
-{
-	// If it is a singleton, just return that singleton.
-	std::map<Handle, unsigned int>::const_iterator idx;
-	idx = _index.find(term);
-	if (idx != _index.end())
-		return args.at(idx->second);
 
-	// If its a node, and its not a variable, then it is a constant,
-	// and just return that.
-	LinkPtr lterm(LinkCast(term));
-	if (NULL == lterm) return term;
-
-	// QuoteLinks halt the reursion
-	if (QUOTE_LINK == term->getType()) return term;
-
-	// Recursively fill out the subtrees.
-	HandleSeq oset;
-	for (const Handle& h : lterm->getOutgoingSet())
-	{
-		oset.push_back(substitute_nocheck(h, args));
-	}
-	return Handle(createLink(term->getType(), oset));
-}
-
+// XXX FIXME, if the values are dynamically generated, then type-checking
+// must be done at run-time, and not at definition-time.
 Handle PutLink::do_reduce(void) const
 {
 	const Handle& body = _outgoing[0];
 	const Handle& vals = _outgoing[1];
+	Type vtype = vals->getType();
 
-	if (1 == _varseq.size())
+	if (1 == _varlist.varseq.size())
 	{
-		HandleSeq oset;
-		oset.push_back(vals);
-		return substitute_nocheck(body, oset);
+		// Well, we should accept the SetLink here only if it was
+		// dynamically generated... but I'm too lazy to code this up.
+		if (SET_LINK != vtype)
+		{
+			HandleSeq oset;
+			oset.push_back(vals);
+			return _varlist.substitute_nocheck(body, oset);
+		}
+
+		// Iterate over the set...
+		HandleSeq bset;
+		for (Handle h : LinkCast(vals)->getOutgoingSet())
+		{
+			HandleSeq oset;
+			oset.push_back(h);
+			bset.push_back(_varlist.substitute_nocheck(body, oset));
+		}
+		return Handle(createLink(SET_LINK, bset));
 	}
-	if (vals->getType() == LIST_LINK)
+	if (LIST_LINK == vtype)
 	{
 		const HandleSeq& oset = LinkCast(vals)->getOutgoingSet();
-		return substitute_nocheck(body, oset);
+		return _varlist.substitute_nocheck(body, oset);
 	}
 
-	OC_ASSERT(vals->getType() == SET_LINK,
-		"Should have checked for this earlier, tin the ctor");
+	OC_ASSERT(SET_LINK == vtype,
+		"Should have caught this earlier, in the ctor");
 
 	HandleSeq bset;
 	for (Handle h : LinkCast(vals)->getOutgoingSet())
 	{
 		const HandleSeq& oset = LinkCast(h)->getOutgoingSet();
-		bset.push_back(substitute_nocheck(body, oset));
+		bset.push_back(_varlist.substitute_nocheck(body, oset));
 	}
 	return Handle(createLink(SET_LINK, bset));
 }

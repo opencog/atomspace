@@ -221,6 +221,23 @@ void VariableList::validate_vardecl(const Handle& hdecls)
 
 /* ================================================================= */
 /**
+ * Build the index from variable name, to its ordinal number.
+ * The index is needed for variable substitution, i.e. for the
+ * substitute method below.  The specific sequence order of the
+ * variables is essential for making substitution work.
+ */
+void VariableList::build_index(void)
+{
+	if (0 < _varlist.index.size()) return;
+	size_t sz = _varlist.varseq.size();
+	for (size_t i=0; i<sz; i++)
+	{
+		_varlist.index.insert(std::pair<Handle, unsigned int>(_varlist.varseq[i], i));
+	}
+}
+
+/* ================================================================= */
+/**
  * Simple type checker.
  *
  * Returns true/false if the indicated handle is of the type that
@@ -230,17 +247,17 @@ void VariableList::validate_vardecl(const Handle& hdecls)
  * be a TypeChoice, and so the handle must be one of the types in the
  * TypeChoice.
  */
-bool VariableList::is_type(const Handle& h) const
+bool Variables::is_type(const Handle& h) const
 {
 	// The arity must be one for there to be a match.
-	if (1 != _varlist.varset.size()) return false;
+	if (1 != varset.size()) return false;
 
 	// No type restrictions.
-	if (0 == _varlist.typemap.size()) return true;
+	if (0 == typemap.size()) return true;
 
 	// Check the type restrictions.
 	VariableTypeMap::const_iterator it =
-		_varlist.typemap.find(_varlist.varseq[0]);
+		typemap.find(varseq[0]);
 	const std::set<Type> &tchoice = it->second;
 
 	Type htype = h->getType();
@@ -259,20 +276,20 @@ bool VariableList::is_type(const Handle& h) const
  * on the wiki; We would need the general pattern matcher to do type
  * checking, in that situation.
  */
-bool VariableList::is_type(const HandleSeq& hseq) const
+bool Variables::is_type(const HandleSeq& hseq) const
 {
 	// The arity must be one for there to be a match.
 	size_t len = hseq.size();
-	if (_varlist.varset.size() != len) return false;
+	if (varset.size() != len) return false;
 	// No type restrictions.
-	if (0 == _varlist.typemap.size()) return true;
+	if (0 == typemap.size()) return true;
 
 	// Check the type restrictions.
 	for (size_t i=0; i<len; i++)
 	{
 		VariableTypeMap::const_iterator it =
-			_varlist.typemap.find(_varlist.varseq[i]);
-		if (it == _varlist.typemap.end()) continue;  // no restriction
+			typemap.find(varseq[i]);
+		if (it == typemap.end()) continue;  // no restriction
 
 		const std::set<Type> &tchoice = it->second;
 		Type htype = hseq[i]->getType();
@@ -284,28 +301,11 @@ bool VariableList::is_type(const HandleSeq& hseq) const
 
 /* ================================================================= */
 /**
- * Build the index from variable name, to its ordinal number.
- * The index is needed for variable substitution, i.e. for the
- * substitute method below.  The specific sequence order of the
- * variables is essential for making substitution work.
- */
-void VariableList::build_index(void)
-{
-	if (0 < _varlist.index.size()) return;
-	size_t sz = _varlist.varseq.size();
-	for (size_t i=0; i<sz; i++)
-	{
-		_varlist.index.insert(std::pair<Handle, unsigned int>(_varlist.varseq[i], i));
-	}
-}
-
-/* ================================================================= */
-/**
  * Substitute variables in tree with the indicated values.
  * This is a lot like applying the function fun to the argument list
  * args, except that no actual evaluation is performed; only
  * substitution.  The resulting tree is NOT placed into any atomspace,
- * either. If you want that, you must do it youself.  If you want
+ * either. If you want that, you must do it yourself.  If you want
  * evaluation or execution to happen during sustitution, use either
  * the EvaluationLink, the ExecutionOutputLink, or the Instantiator.
  *
@@ -348,13 +348,13 @@ void VariableList::build_index(void)
  * Again, only a substitution is performed, there is no evaluation.
  * Note also that the resulting tree is NOT placed into any atomspace!
  */
-Handle VariableList::substitute(const Handle& fun,
-                                const HandleSeq& args) const
+Handle Variables::substitute(const Handle& fun,
+                             const HandleSeq& args) const
 {
-	if (args.size() != _varlist.varseq.size())
+	if (args.size() != varseq.size())
 		throw InvalidParamException(TRACE_INFO,
 			"Incorrect numer of arguments specified, expecting %lu got %lu",
-			_varlist.varseq.size(), args.size());
+			varseq.size(), args.size());
 
 	if (not is_type(args))
 		throw InvalidParamException(TRACE_INFO,
@@ -363,13 +363,13 @@ Handle VariableList::substitute(const Handle& fun,
 	return substitute_nocheck(fun, args);
 }
 
-Handle VariableList::substitute_nocheck(const Handle& term,
-                                        const HandleSeq& args) const
+Handle Variables::substitute_nocheck(const Handle& term,
+                                     const HandleSeq& args) const
 {
 	// If it is a singleton, just return that singleton.
 	std::map<Handle, unsigned int>::const_iterator idx;
-	idx = _varlist.index.find(term);
-	if (idx != _varlist.index.end())
+	idx = index.find(term);
+	if (idx != index.end())
 		return args.at(idx->second);
 
 	// If its a node, and its not a variable, then it is a constant,
@@ -378,6 +378,7 @@ Handle VariableList::substitute_nocheck(const Handle& term,
 	if (NULL == lterm) return term;
 
 	// QuoteLinks halt the reursion
+	// XXX TODO -- support UnquoteLink
 	if (QUOTE_LINK == term->getType()) return term;
 
 	// Recursively fill out the subtrees.

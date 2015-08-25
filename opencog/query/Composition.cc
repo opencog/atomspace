@@ -21,7 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/PatternLink.h>
 
 #include "PatternMatchEngine.h"
@@ -117,6 +116,7 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	// we push all pme state, clear the decks, (almost as if starting from
 	// scratch) and then pop all pme state when we are done.
 
+#if LATER
 	BetaRedexPtr cpl(BetaRedexCast(lp));
 
 	// Get the variales and clauses that make up the redex.
@@ -163,7 +163,11 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	clause_accepted = false;
 
 	Handle hp(_pat->cnf_clauses[0]);
-	bool found = tree_compare(hp, Handle(lg), CALL_COMP);
+	throw RuntimeException(TRACE_INFO, "Unimplemented yet");
+	// TODO: wrap by PatternTermPtr
+	// bool found = tree_compare(hp, Handle(lg), CALL_COMP);
+	bool found = false;
+#endif
 
 #if 0
 	Handle join;
@@ -191,6 +195,7 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
    bool found = soln_up(curr_soln_handle);
 #endif
 
+#if LATER
 	dbgprt("redex finishing; found match=%d\n", found);
 
 	// No match; restore original grounding and quit
@@ -213,6 +218,7 @@ bool PatternMatchEngine::redex_compare(const LinkPtr& lp,
 	}
 
 	pop_redex();
+#endif
 	return true;
 }
 
