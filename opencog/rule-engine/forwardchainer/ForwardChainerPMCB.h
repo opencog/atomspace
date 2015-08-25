@@ -51,7 +51,6 @@ public:
     }
 
     HandleSeq get_products(void);
-    void set_fcmem(FCMemory *fcmem);
     // The follwing callbacks are used for guiding the PM to look
     // only at the source list.
     virtual bool node_match(const Handle& node1, const Handle& node2);
