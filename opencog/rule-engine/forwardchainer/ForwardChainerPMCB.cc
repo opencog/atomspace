@@ -65,19 +65,10 @@ bool ForwardChainerPMCB::grounding(const std::map<Handle, Handle> &var_soln,
 {
     Handle source = _fcmem->get_cur_source();
 
-    for (auto& vs : var_soln) {
-        if (vs.second == source) {
-            Handle h = inst.instantiate(implicand, var_soln);
-            insert_result(h);
-        }
-    }
+    Handle h = inst.instantiate(implicand, var_soln);
+    insert_result(h);
 
     return false;
-}
-
-void ForwardChainerPMCB::set_fcmem(FCMemory *fcmem)
-{
-    _fcmem = fcmem;
 }
 
 HandleSeq ForwardChainerPMCB::get_products()
