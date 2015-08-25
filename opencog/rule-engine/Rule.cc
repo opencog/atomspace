@@ -50,7 +50,7 @@ Rule::Rule(Handle rule)
 	weight_ = rule->getTruthValue()->getMean();
 }
 
-float Rule::get_weight()
+float Rule::get_weight() const
 {
 	return weight_;
 }
@@ -90,7 +90,7 @@ void Rule::set_handle(Handle h) throw (InvalidParamException)
 	rule_handle_ = h;
 }
 
-Handle Rule::get_handle()
+Handle Rule::get_handle() const
 {
 	return rule_handle_;
 }
@@ -100,7 +100,7 @@ Handle Rule::get_handle()
  *
  * @return the VariableList or the lone VariableNode
  */
-Handle Rule::get_vardecl()
+Handle Rule::get_vardecl() const
 {
 	return LinkCast(rule_handle_)->getOutgoingAtom(0);
 }
@@ -110,7 +110,7 @@ Handle Rule::get_vardecl()
  *
  * @return the Handle of the implicant
  */
-Handle Rule::get_implicant()
+Handle Rule::get_implicant() const
 {
 	// if the rule's handle has not been set yet
 	if (rule_handle_ == Handle::UNDEFINED)
@@ -125,7 +125,7 @@ Handle Rule::get_implicant()
  *
  * @return HandleSeq of members of the implicant
  */
-HandleSeq Rule::get_implicant_seq()
+HandleSeq Rule::get_implicant_seq() const
 {
     Handle implicant= get_implicant();
     Type t = implicant->getType();
@@ -143,7 +143,7 @@ HandleSeq Rule::get_implicant_seq()
  *
  * @return the Handle of the implicand
  */
-Handle Rule::get_implicand()
+Handle Rule::get_implicand() const
 {
 	// if the rule's handle has not been set yet
 	if (rule_handle_ == Handle::UNDEFINED)
@@ -160,7 +160,7 @@ Handle Rule::get_implicand()
  *
  * @return the HandleSeq of the implicand
  */
-HandleSeq Rule::get_implicand_seq()
+HandleSeq Rule::get_implicand_seq() const
 {
 	// if the rule's handle has not been set yet
 	if (rule_handle_ == Handle::UNDEFINED)

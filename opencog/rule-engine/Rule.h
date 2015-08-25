@@ -66,13 +66,13 @@ public:
 	const string& get_name() const;
 	string& get_category();
 	const string& get_category() const;
-	Handle get_handle();
-	Handle get_vardecl();
-	Handle get_implicant();
-	HandleSeq get_implicant_seq();
-	Handle get_implicand();
-	HandleSeq get_implicand_seq();
-	float get_weight();
+	Handle get_handle() const;
+	Handle get_vardecl() const;
+	Handle get_implicant() const;
+	HandleSeq get_implicant_seq() const;
+	Handle get_implicand() const;
+	HandleSeq get_implicand_seq() const;
+	float get_weight() const;
 
 	Rule gen_standardize_apart(AtomSpace* as);
 
