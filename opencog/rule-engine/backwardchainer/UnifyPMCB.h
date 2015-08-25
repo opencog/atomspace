@@ -35,6 +35,7 @@ public:
 	UnifyPMCB(AtomSpace*, VariableListPtr, VariableListPtr);
 	virtual ~UnifyPMCB();
 
+	virtual bool node_match(const Handle&, const Handle&);
 	virtual bool variable_match(const Handle&, const Handle&);
 	virtual bool grounding(const std::map<Handle, Handle> &var_soln,
 			const std::map<Handle, Handle> &pred_soln);

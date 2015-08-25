@@ -42,6 +42,18 @@ UnifyPMCB::~UnifyPMCB()
 
 }
 
+bool UnifyPMCB::node_match(const Handle& npat_h, const Handle& nsoln_h)
+{
+	if (npat_h == nsoln_h)
+		return true;
+
+	// the name of the non-variable VariableNode does not matter
+	if (npat_h->getType() == VARIABLE_NODE && nsoln_h->getType() == VARIABLE_NODE)
+		return true;
+
+	return false;
+}
+
 bool UnifyPMCB::variable_match(const Handle& npat_h,
                                const Handle& nsoln_h)
 {
