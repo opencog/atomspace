@@ -64,7 +64,7 @@ class ZMQClient
 		void sendMessage(ZMQRequestMessage& requestMessage,
 		        ZMQReplyMessage& replyMessage);
 	public:
-		ZMQClient(string networkAddress="tcp://127.0.0.1:5555"); //"ipc:///tmp/AtomSpaceZMQ.ipc"
+		ZMQClient(string networkAddress = "tcp://127.0.0.1:5555"); //"ipc:///tmp/AtomSpaceZMQ.ipc"
 		~ZMQClient();
 
 		bool connected(void); // connection to DB is alive

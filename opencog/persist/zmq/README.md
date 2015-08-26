@@ -50,6 +50,17 @@ Ensure in `lib/opencog.conf` you have this line:
 	                        opencog/modules/libPersistZmqModule.so,
 	                        ...
 
+Make sure `listmodules` command shows:
+
+	Filename: libPersistZmqModule.so, ID: opencog::PersistZmqModule
+
+and `help` command shows:
+
+	zmq-close:          Close the ZeroMQ persistence
+	zmq-load:           Load contents of ZeroMQ persistence
+	zmq-open:           Open connection to ZeroMQ persistence
+	zmq-store:          Save the atomtable on the ZeroMQ persistence
+
 If any problem, check `/tmp/cogserver.log` (this path is configured in `lib/opencog.conf`)
 
 ## Testing
@@ -58,5 +69,6 @@ If any problem, check `/tmp/cogserver.log` (this path is configured in `lib/open
 2. In `opencog_build`, do `make -j4`
 3. In `opencog_build`, run: `opencog/server/cogserver`
 4. Telnet to localhost port 17001: `telnet localhost 17001`
+5. `zmq-open tcp://127.0.0.1:5555`
 5. Go into Scheme shell: `scm`
 6. Create a node: `(ConceptNode "human")`
