@@ -23,14 +23,12 @@ main = runOnNewAtomSpace program
 
 program :: AtomSpace ()
 program = do
-        insert $ (InheritanceLink noTv
-                    (ConceptNode "fox" noTv)
-                    (ConceptNode "animal" noTv)
-                 )
-        insert $ (InheritanceLink noTv
-                    (ConceptNode "cat" noTv)
-                    (ConceptNode "animal" noTv)
-                 )
+        insert $ InheritanceLink noTv
+                   (ConceptNode "fox" noTv)
+                   (ConceptNode "animal" noTv)
+        insert $ InheritanceLink noTv
+                   (ConceptNode "cat" noTv)
+                   (ConceptNode "animal" noTv)
         insert findAnimals
         res <- cogBind findAnimals
         liftIO $ putStrLn "Result: " >> case res of
@@ -39,4 +37,3 @@ program = do
         liftIO $ putStrLn "-----AtomSpace state at the end:-----"
         debug
         liftIO $ putStrLn "-------------------------------------"
-

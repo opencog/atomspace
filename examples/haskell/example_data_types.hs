@@ -63,16 +63,16 @@ main :: IO ()
 main = runOnNewAtomSpace $ do
          p <- get $ PredicateNode "Pred" noTv
          case p of
-            Just (PredicateNode _ _) -> liftIO $ print "Predicate found."
-            _                        -> liftIO $ print "No Predicate found."
+            Just (PredicateNode _ _) -> liftIO $ putStrLn "Predicate found."
+            _                        -> liftIO $ putStrLn "No Predicate found."
          liftIO $ printAtom li
          insert li
          res <- get li
          () <- case res of
            Just (ListLink (x:_)) -> case x of
-               Gen (ConceptNode c _)    -> liftIO $ print "First is Concept"
-               Gen (PredicateNode p _ ) -> liftIO $ print "First is Predicate"
-               _                        -> liftIO $ print "First is other type"
+               Gen (ConceptNode c _)    -> liftIO $ putStrLn "First is Concept"
+               Gen (PredicateNode p _ ) -> liftIO $ putStrLn "First is Predicate"
+               _                        -> liftIO $ putStrLn "First is other type"
          insert e
          remove e
          return ()

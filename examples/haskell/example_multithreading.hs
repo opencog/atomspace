@@ -12,12 +12,12 @@ import Control.Monad.IO.Class   (liftIO)
 import Control.Concurrent       (forkIO,threadDelay)
 import System.Random            (randomIO,randomRIO)
 
-randomConcept :: Int -> IO (Atom ConceptT)
+randomConcept :: Int -> AtomSpace (Atom ConceptT)
 randomConcept top = do
     num <- liftIO $ randomRIO (1,top)
     return $ ConceptNode ("Concept"++show num) noTv
 
-randomList :: Int -> Int -> IO (Atom ListT)
+randomList :: Int -> Int -> AtomSpace (Atom ListT)
 randomList n m = do
     num <- liftIO $ randomRIO (1,n)
     list <- mapM (\_ -> randomConcept m >>= return . Gen) [1..num]
@@ -35,33 +35,33 @@ loop idNum = do
 
     waitRandom
 
-    concept1 <- liftIO $ randomConcept 6
+    concept1 <- randomConcept 6
     remove concept1
 
-    concept2 <- liftIO $ randomConcept 6
+    concept2 <- randomConcept 6
     insert concept2
 
-    concept3 <- liftIO $ randomConcept 6
+    concept3 <- randomConcept 6
     get concept3
 
     waitRandom
 
-    list1 <- liftIO $ randomList 3 6
+    list1 <- randomList 3 6
     res <- get list1
     case res of
-        Nothing -> liftIO $ putStrLn $ "Got: Nothing"
+        Nothing -> liftIO $ putStrLn "Got: Nothing"
         Just l  -> liftIO $ putStrLn "Got:" >> printAtom l
 
-    list2 <- liftIO $ randomList 3 6
+    list2 <- randomList 3 6
     insert list2
 
-    list3 <- liftIO $ randomList 3 6
+    list3 <- randomList 3 6
     remove list3
 
     if idNum == 1
       then do
         liftIO $ threadDelay 5000000
-        liftIO $ putStrLn $ (replicate 70 '#')
+        liftIO $ putStrLn $ replicate 70 '#'
         debug
       else return ()
 
