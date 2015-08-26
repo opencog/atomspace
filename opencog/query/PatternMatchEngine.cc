@@ -903,19 +903,21 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
                                                const Handle& hg,
                                                const Handle& clause_root)
 {
+	// The term may appear in the clause in many places.
+	// Start exploration for each occurence
 	try
 	{
-		// The term may appear in the clause in many places.
-		// Start exploration for each occurence
 		for (const PatternTermPtr &ptm :
 			_pat->connected_terms_map.at({term, clause_root}))
 		{
 			if (explore_link_branches(ptm, hg, clause_root))
 				return true;
 		}
-	} catch (const std::out_of_range&) {
+	}
+	catch (const std::out_of_range&)
+	{
 		dbgprt("Pattern term not found for %s, clause=%s\n",
-		        hp->toShortString().c_str(),
+		        term->toShortString().c_str(),
 		        clause_root->toShortString().c_str());
 	}
 	return false;
