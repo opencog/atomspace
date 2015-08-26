@@ -110,6 +110,7 @@ void PatternLink::init(void)
 PatternLink::PatternLink(const Variables& vars, const HandleSeq& cls)
 	: LambdaLink(PATTERN_LINK, HandleSeq())
 {
+	_pat.redex_name = "jit PatternLink";
 
 	// XXX FIXME a hunt for additional variables should be performed
 	// in the clauses: although maybe they should have been declared
@@ -665,7 +666,7 @@ void PatternLink::check_connectivity(const std::vector<HandleSeq>& components)
 void PatternLink::debug_print(void) const
 {
 	// Print out the predicate ...
-	printf("\nRedex '%s' has following clauses:\n",
+	printf("\nPattern '%s' has following clauses:\n",
 	       _pat.redex_name.c_str());
 	int cl = 0;
 	for (const Handle& h : _pat.mandatory)

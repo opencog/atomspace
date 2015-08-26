@@ -689,7 +689,7 @@ void InitiateSearchCB::jit_analyze(void)
 		if (DEFINED_PREDICATE_NODE == h->getType())
 		{
 			Handle defn = DefineLink::get_definition(h);
-			expand.push_back(h);
+			expand.push_back(defn);
 			did_expand = true;
 		}
 		else
@@ -706,6 +706,10 @@ void InitiateSearchCB::jit_analyze(void)
 
 		_type_restrictions = &_variables->typemap;
 		_dynamic = &_pattern->evaluatable_terms;
+#ifdef DEBUG
+		dbgprt("JIT exapnded!\n");
+		pl->debug_print();
+#endif
 	}
 }
 
