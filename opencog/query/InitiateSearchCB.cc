@@ -58,9 +58,8 @@ void InitiateSearchCB::set_pattern(const Variables& vars,
 {
 	_search_fail = false;
 
-	// XXX FIXME cast away constness... Needed to hack around JIT, for now.
-	_variables = (Variables *) &vars;
-	_pattern = (Pattern *) &pat;
+	_variables = &vars;
+	_pattern = &pat;
 	_type_restrictions = &vars.typemap;
 	_dynamic = &pat.evaluatable_terms;
 }
@@ -701,8 +700,8 @@ void InitiateSearchCB::jit_analyze(void)
 	if (did_expand)
 	{
 		PatternLinkPtr pl = createPatternLink(*_variables, expand);
-		_variables = (Variables*) &pl->get_variables();
-		_pattern = (Pattern*) &pl->get_pattern();
+		_variables = &pl->get_variables();
+		_pattern = &pl->get_pattern();
 
 		_type_restrictions = &_variables->typemap;
 		_dynamic = &_pattern->evaluatable_terms;
