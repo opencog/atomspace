@@ -6,7 +6,7 @@
 -- with the AtomSpace C wrapper library.
 -- Intended for internal use only.
 module OpenCog.AtomSpace.Internal (
-      Handle(..)
+      UUID(..)
     , AtomTypeRaw(..)
     , AtomRaw(..)
     , toRaw
@@ -28,7 +28,7 @@ import OpenCog.AtomSpace.Types       (Atom(..),AtomName(..),getType,TruthVal(..)
                                       appGen,Gen(..),AtomGen)
 
 -- Data type to hold atoms's UUID.
-type Handle = CULong
+type UUID = CULong
 type AtomTypeRaw = String
 
 -- Main general atom representation.

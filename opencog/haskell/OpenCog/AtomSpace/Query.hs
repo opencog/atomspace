@@ -9,8 +9,8 @@ module OpenCog.AtomSpace.Query (
 
 import Control.Monad.IO.Class      (liftIO)
 import Foreign.C.Types             (CULong(..))
-import OpenCog.AtomSpace.Api       (getByHandle,getWithHandle)
-import OpenCog.AtomSpace.Internal  (fromRawGen,toRaw,Handle)
+import OpenCog.AtomSpace.Api       (getByUUID,getWithUUID)
+import OpenCog.AtomSpace.Internal  (fromRawGen,toRaw,UUID)
 import OpenCog.AtomSpace.Types     (AtomGen,Atom)
 import OpenCog.AtomSpace.AtomType  (AtomType(BindT))
 import OpenCog.AtomSpace.Env       (AtomSpaceRef(..),AtomSpace,getAtomSpace)
@@ -19,18 +19,18 @@ import OpenCog.AtomSpace.Env       (AtomSpaceRef(..),AtomSpace,getAtomSpace)
 
 foreign import ccall "PatternMatcher_BindLink"
   c_pmatcher_bindlink :: AtomSpaceRef
-                      -> Handle
-                      -> IO Handle
+                      -> UUID
+                      -> IO UUID
 
 -- | 'cogBind' calls the pattern matcher with the given bindLink.
 -- (you should insert the bindlink to the atomspace before using this function).
 cogBind :: Atom BindT -> AtomSpace (Maybe AtomGen)
 cogBind at = do
-    m <- getWithHandle $ toRaw at
+    m <- getWithUUID $ toRaw at
     case m of
       Just (_,handle) -> do
             asRef <- getAtomSpace
             handleRes <- liftIO $ c_pmatcher_bindlink asRef handle
-            raw <- getByHandle handleRes
-            return $ fromRawGen raw
+            mraw <- getByUUID handleRes
+            return $ mraw >>= fromRawGen
       Nothing -> return Nothing
