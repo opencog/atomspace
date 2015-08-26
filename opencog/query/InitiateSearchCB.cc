@@ -21,6 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <opencog/atoms/bind/PatternLink.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atomutils/FindUtils.h>
@@ -677,28 +680,32 @@ bool InitiateSearchCB::no_search(PatternMatchEngine *pme)
  */
 void InitiateSearchCB::jit_analyze(void)
 {
-	/* Are any of the clauses a DefinedPredicateNode? */
-	auto cle = _pattern->clauses.end();
-	for (HandleSeq::iterator cl = _pattern->clauses.begin(); cl != cle; cl++)
+	/* Are any of the clauses a DefinedPredicateNode?
+	 * If so, then we need to rebuild the pattern from scratch. */
+	bool did_expand = false;
+	HandleSeq expand;
+	for (const Handle& h : _pattern->clauses)
 	{
-		Handle h = *cl;
 		if (DEFINED_PREDICATE_NODE == h->getType())
 		{
 			Handle defn = DefineLink::get_definition(h);
-			*cl = defn;
-
-			auto cne = _pattern->cnf_clauses.end();
-			for (auto cnf = _pattern->cnf_clauses.begin(); cnf != cne; cnf++)
-			{
-				if (*cnf == h) *cnf = defn;
-			}
-
-			auto mne = _pattern->mandatory.end();
-			for (auto mnd = _pattern->mandatory.begin(); mnd != mne; mnd++)
-			{
-				if (*mnd == h) *mnd = defn;
-			}
+			expand.push_back(h);
+			did_expand = true;
 		}
+		else
+		{
+			expand.push_back(h);
+		}
+	}
+
+	if (did_expand)
+	{
+		PatternLinkPtr pl = createPatternLink(*_variables, expand);
+		_variables = (Variables*) &pl->get_variables();
+		_pattern = (Pattern*) &pl->get_pattern();
+
+		_type_restrictions = &_variables->typemap;
+		_dynamic = &_pattern->evaluatable_terms;
 	}
 }
 

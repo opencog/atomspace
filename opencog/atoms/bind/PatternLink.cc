@@ -106,6 +106,22 @@ void PatternLink::init(void)
 
 /* ================================================================= */
 
+/// Special constructor used during just-in-time pattern compilation.
+PatternLink::PatternLink(const Variables& vars, const HandleSeq& cls)
+	: LambdaLink(PATTERN_LINK, HandleSeq())
+{
+
+	// XXX FIXME a hunt for additional variables should be performed
+	// in the clauses: although maybe they should have been declared
+	// already!? Confusing. We are punting for now.
+	_varlist = vars;
+	_pat.clauses = cls;
+	common_init();
+	setup_components();
+}
+
+/* ================================================================= */
+
 /// Special constructor used only to make single concrete pattern
 /// components.  We are given the pre-computed components; we only
 /// have to store them.
@@ -605,8 +621,8 @@ void PatternLink::make_term_trees()
 }
 
 void PatternLink::make_term_tree_recursive(const Handle& root,
-		                                   const Handle& h,
-		                                   PatternTermPtr& parent)
+		                                     const Handle& h,
+		                                     PatternTermPtr& parent)
 {
 	PatternTermPtr ptm(std::make_shared<PatternTerm>(parent, h));
 	parent->addOutgoingTerm(ptm);
