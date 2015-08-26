@@ -147,21 +147,19 @@ ZMQPersistSCM::~ZMQPersistSCM()
 	delete _backing;
 }
 
-void ZMQPersistSCM::do_open(const std::string& dbname,
-                         const std::string& username,
-                         const std::string& auth)
+void ZMQPersistSCM::do_open(const std::string& networkAddress)
 {
-	_store = new ZMQClient(/*dbname, username, auth*/);
+	_store = new ZMQClient(networkAddress);
 	if (!_store)
 		throw RuntimeException(TRACE_INFO,
-			"zmq-open: Error: Unable to open the database");
+			"zmq-open: Error: Unable to open ZeroMQ-based persistence");
 
 	if (!_store->connected())
 	{
 		delete _store;
 		_store = NULL;
 		throw RuntimeException(TRACE_INFO,
-			"zmq-open: Error: Unable to connect to the database");
+			"zmq-open: Error: Unable to connect to ZeroMQ-based persistence");
 	}
 
 	// reserve() is critical here, to reserve UUID range.

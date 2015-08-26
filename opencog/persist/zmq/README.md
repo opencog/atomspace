@@ -40,3 +40,23 @@ guile shell:
 
 Parts of `persist/zmq` which still need fixing.
 After these are fixed please move to working directory `atomspace`.
+
+## cogserver
+
+Ensure in `lib/opencog.conf` you have this line:
+
+	MODULES               = opencog/server/libbuiltinreqs.so,
+	                        opencog/modules/libPersistModule.so,
+	                        opencog/modules/libPersistZmqModule.so,
+	                        ...
+
+If any problem, check `/tmp/cogserver.log` (this path is configured in `lib/opencog.conf`)
+
+## Testing
+
+1. In `atomspace_build`, do `make -j4` and `sudo make install`
+2. In `opencog_build`, do `make -j4`
+3. In `opencog_build`, run: `opencog/server/cogserver`
+4. Telnet to localhost port 17001: `telnet localhost 17001`
+5. Go into Scheme shell: `scm`
+6. Create a node: `(ConceptNode "human")`

@@ -19,3 +19,14 @@ ADD_LIBRARY (zmqatoms SHARED
 
 TARGET_LINK_LIBRARIES(zmqatoms zmq)
 
+INSTALL (TARGETS zmqatoms
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+)
+
+INSTALL (FILES
+	ZMQMessages.pb.h
+	ProtocolBufferSerializer.h
+	ZMQClient.h
+	ZMQPersistSCM.h
+	DESTINATION "include/opencog/persist/zmq/atomspace"
+)
