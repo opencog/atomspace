@@ -56,10 +56,18 @@ class InitiateSearchCB : public virtual PatternMatchCallback
 
 		ClassServer& _classserver;
 
-		const Variables* _variables;
-		const Pattern* _pattern;
+		// XXX FIXME as a hack, to implement JIT compilation for DefineLink,
+		// these are marked non-concet. But that is wrrong, they need to be
+		// const, and a copy-on-write needs to be done, if they need to be
+		// modified.
+		// const Variables* _variables;
+		// const Pattern* _pattern;
+		Variables* _variables;
+		Pattern* _pattern;
 		const VariableTypeMap* _type_restrictions;
 		const std::set<Handle>* _dynamic;
+
+		void jit_analyze(void);
 
 		Handle _root;
 		Handle _starter_term;

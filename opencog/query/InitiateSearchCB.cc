@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atomutils/FindUtils.h>
 
@@ -53,8 +54,10 @@ void InitiateSearchCB::set_pattern(const Variables& vars,
                                    const Pattern& pat)
 {
 	_search_fail = false;
-	_variables = &vars;
-	_pattern = &pat;
+
+	// XXX FIXME cast away constness... Needed to hack around JIT, for now.
+	_variables = (Variables *) &vars;
+	_pattern = (Pattern *) &pat;
 	_type_restrictions = &vars.typemap;
 	_dynamic = &pat.evaluatable_terms;
 }
@@ -385,6 +388,8 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
  */
 bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 {
+	jit_analyze();
+
 	dbgprt("Attempt to use node-neighbor search\n");
 	_search_fail = false;
 	bool found = neighbor_search(pme);
@@ -659,6 +664,42 @@ bool InitiateSearchCB::no_search(PatternMatchEngine *pme)
 	_root = _starter_term = clauses[0];
 	bool found = pme->explore_neighborhood(_root, _starter_term, _root);
 	return found;
+}
+
+/* ======================================================== */
+/**
+ * Just-In-Time analysis of patterns. Patterns we could not unpack
+ * earlier.
+ *
+ * XXX TODO: what we really need to do here is to provide the same analysis
+ * PatternLink.cc does, and apply it to each DefinedPredicateNode.  But, for
+ * now we punt on this.
+ */
+void InitiateSearchCB::jit_analyze(void)
+{
+	/* Are any of the clauses a DefinedPredicateNode? */
+	auto cle = _pattern->clauses.end();
+	for (HandleSeq::iterator cl = _pattern->clauses.begin(); cl != cle; cl++)
+	{
+		Handle h = *cl;
+		if (DEFINED_PREDICATE_NODE == h->getType())
+		{
+			Handle defn = DefineLink::get_definition(h);
+			*cl = defn;
+
+			auto cne = _pattern->cnf_clauses.end();
+			for (auto cnf = _pattern->cnf_clauses.begin(); cnf != cne; cnf++)
+			{
+				if (*cnf == h) *cnf = defn;
+			}
+
+			auto mne = _pattern->mandatory.end();
+			for (auto mnd = _pattern->mandatory.begin(); mnd != mne; mnd++)
+			{
+				if (*mnd == h) *mnd = defn;
+			}
+		}
+	}
 }
 
 /* ===================== END OF FILE ===================== */
