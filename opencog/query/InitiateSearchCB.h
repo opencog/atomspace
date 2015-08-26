@@ -26,11 +26,12 @@
 #define _OPENCOG_INITIATE_SEARCH_H
 
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/PatternMatchEngine.h>
 
 namespace opencog {
+
+class AtomSpace;
 
 /**
  * Callback mixin class, used to provide a default atomspace search.
