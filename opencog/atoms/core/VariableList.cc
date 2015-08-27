@@ -390,4 +390,47 @@ Handle Variables::substitute_nocheck(const Handle& term,
 	return Handle(createLink(term->getType(), oset));
 }
 
+/* ================================================================= */
+/**
+ * Extend a set of variables.
+ *
+ */
+void Variables::extend(const Variables& vset)
+{
+	for (const Handle& h : vset.varseq)
+	{
+		try
+		{
+			index.at(h);
+
+			// Merge the two typemaps, if needed.
+			try
+			{
+				const std::set<Type>& tms = vset.typemap.at(h);
+				std::set<Type> mytypes = typemap[h];
+				for (Type t : tms)
+					mytypes.insert(t);
+				typemap.erase(h);	 // is it safe to erase if h not in already?
+				typemap.insert({h,mytypes});
+			}
+			catch(const std::out_of_range&) {}
+		}
+		catch(const std::out_of_range&)
+		{
+			// Found a new variable! Insert it.
+			index.insert({h, varseq.size()});
+			varseq.push_back(h);
+			varset.insert(h);
+
+			// Install the type constraints, as well.
+			// The at() might throw...
+			try
+			{
+				typemap.insert({h, vset.typemap.at(h)});
+			}
+			catch(const std::out_of_range&) {}
+		}
+	}
+}
+
 /* ===================== END OF FILE ===================== */
