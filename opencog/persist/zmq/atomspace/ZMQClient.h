@@ -59,10 +59,14 @@ class ZMQClient
 	private:
 		zmq::context_t *zmqContext;
 		zmq::socket_t *zmqClientSocket;
+		int store_count = 0;
 
 	protected:
 		void sendMessage(ZMQRequestMessage& requestMessage,
 		        ZMQReplyMessage& replyMessage);
+		void storeSingleAtom(AtomPtr atom);
+		bool store_cb(AtomPtr atom);
+
 	public:
 		ZMQClient(string networkAddress = "tcp://127.0.0.1:5555"); //"ipc:///tmp/AtomSpaceZMQ.ipc"
 		~ZMQClient();

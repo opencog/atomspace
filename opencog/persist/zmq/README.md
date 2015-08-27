@@ -72,3 +72,35 @@ If any problem, check `/tmp/cogserver.log` (this path is configured in `lib/open
 5. `zmq-open tcp://127.0.0.1:5555`
 5. Go into Scheme shell: `scm`
 6. Create a node: `(ConceptNode "human")`
+
+## TODO/Problems
+
+When store():
+
+	[2015-08-27 07:00:31:533] [ERROR] Caught signal 11 (Segmentation fault) on thread 140021036828736
+	        Stack Trace:
+	        2: Logger.h:175   opencog::Logger::Base::~Base()
+	        3: CogServerMain.cc:79  _Z7sighandi()
+	        4: ??:0 killpg()
+	        5: ZMQMessages.pb.cc:2682         ZMQAtomMessage::IsInitialized() const
+	        6: ZMQMessages.pb.cc:3736         ZMQRequestMessage::IsInitialized() const
+	        7: ??:0   google::protobuf::MessageLite::AppendToString(std::string*) const
+	        8: ??:0   google::protobuf::MessageLite::SerializeAsString() const
+	        9: ZMQClient.cc:70        opencog::ZMQClient::sendMessage(ZMQRequestMessage&, ZMQReplyMessage&)
+	        10: ZMQClient.cc:104      opencog::ZMQClient::storeAtom(std::shared_ptr<opencog::Atom> const&, bool)
+	        11: ZMQClient.cc:128      opencog::ZMQClient::storeSingleAtom(std::shared_ptr<opencog::Atom>)
+	        12: ZMQClient.cc:132      opencog::ZMQClient::store_cb(std::shared_ptr<opencog::Atom>)
+	        13: ZMQClient.cc:144    operator()()
+	        14: AtomTable.h:230     operator()()
+	        15: stl_algo.h:4417     for_each<opencog::TypeIndex::iterator, opencog::AtomTable::foreachHandleByType(Function, opencog::Type, bool, bool) const [with Function = opencog::ZMQClient::store(const opencog::AtomTable&)::__lambda1; opencog::Type = short unsigned int]::__lambda0>()
+	        16: AtomTable.h:231     foreachHandleByType<opencog::ZMQClient::store(const opencog::AtomTable&)::__lambda1>()
+	        17: ZMQClient.cc:145      opencog::ZMQClient::store(opencog::AtomTable const&)
+	        18: ZMQPersistSCM.cc:221          opencog::ZMQPersistSCM::do_store()
+	        19: PersistZmqModule.cc:131       opencog::PersistZmqModule::do_store(opencog::Request*, std::list<std::string, std::allocator<std::string> >)
+	        20: PersistZmqModule.h:71         opencog::PersistZmqModule::do_storeRequest::execute()
+	        21: CogServer.cc:297      opencog::CogServer::processRequests()
+	        22: CogServer.cc:237      opencog::CogServer::runLoopStep()
+	        23: CogServer.cc:200      opencog::CogServer::serverLoop()
+	        24: CogServerMain.cc:211        main()
+	        25: ??:0        __libc_start_main()
+	        26: ??:0        _start()

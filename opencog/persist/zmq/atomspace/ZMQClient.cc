@@ -33,7 +33,6 @@
 #include <thread>
 
 #include <opencog/util/oc_assert.h>
-#include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/CountTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
@@ -51,6 +50,7 @@ using namespace opencog;
 ZMQClient::ZMQClient(string networkAddress) {
 	zmqContext = new zmq::context_t(1);
     zmqClientSocket = new zmq::socket_t(*zmqContext, ZMQ_REQ);
+    fprintf(stderr, "ZeroMQ connecting to %s\n", networkAddress.c_str());
     zmqClientSocket->connect(networkAddress.c_str());
 }
 
@@ -67,6 +67,7 @@ void ZMQClient::sendMessage(ZMQRequestMessage& requestMessage,
         ZMQReplyMessage& replyMessage)
 {
     // Send request to server
+    fprintf(stderr, "%s. Request... %s\n", connected() ? "Connected" : "NOT connected", requestMessage.DebugString().c_str());
     string strRequest = requestMessage.SerializeAsString();
     zmq::message_t request(strRequest.size());
     memcpy((void *) request.data (), strRequest.c_str(),
@@ -77,6 +78,7 @@ void ZMQClient::sendMessage(ZMQRequestMessage& requestMessage,
     zmq::message_t reply;
     zmqClientSocket->recv(&reply);
     replyMessage.ParseFromArray(reply.data(), reply.size());
+    fprintf(stderr, "Reply received... %s\n", replyMessage.DebugString().c_str());
 }
 
 void ZMQClient::reserve() {
@@ -87,6 +89,9 @@ void ZMQClient::reserve() {
  * In Java: org.opencog.atomspace.zmq.ZmqBackingStore#storeAtomsAsync
  */
 void ZMQClient::storeAtom(const AtomPtr& atomPtr, bool synchronous) {
+
+	fprintf(stderr, "Storing atom %lu ...", atomPtr->getHandle().value());
+
     ZMQRequestMessage req;
     ZMQReplyMessage rep;
 
@@ -94,13 +99,14 @@ void ZMQClient::storeAtom(const AtomPtr& atomPtr, bool synchronous) {
     ZMQAtomMessage *atomMsg = req.add_atom();
     atomMsg->set_handle(atomPtr->getHandle().value());
     atomMsg->set_type(atomPtr->getType());
-    ZMQTruthValueMessage *tvMsg = atomMsg->mutable_truthvalue();
-    ZMQSingleTruthValueMessage *stvMsg = tvMsg->add_singletruthvalue();
-    stvMsg->set_truthvaluetype(ZMQTruthValueTypeSimple);
-    stvMsg->set_mean(atomPtr->getTruthValue()->getMean());
-    stvMsg->set_confidence(atomPtr->getTruthValue()->getConfidence());
-    stvMsg->set_count(atomPtr->getTruthValue()->getCount());
-    atomMsg->set_allocated_truthvalue(tvMsg);
+
+//    ZMQTruthValueMessage *tvMsg = atomMsg->mutable_truthvalue();
+//    ZMQSingleTruthValueMessage *stvMsg = tvMsg->add_singletruthvalue();
+//    stvMsg->set_truthvaluetype(ZMQTruthValueTypeSimple);
+//    stvMsg->set_mean(atomPtr->getTruthValue()->getMean());
+//    stvMsg->set_confidence(atomPtr->getTruthValue()->getConfidence());
+//    stvMsg->set_count(atomPtr->getTruthValue()->getCount());
+//    atomMsg->set_allocated_truthvalue(tvMsg);
 
     LinkPtr linkPtr = dynamic_pointer_cast<Link>(atomPtr);
     if (linkPtr != NULL) {
@@ -117,8 +123,32 @@ void ZMQClient::storeAtom(const AtomPtr& atomPtr, bool synchronous) {
     sendMessage(req, rep);
 }
 
-void ZMQClient::store(const AtomTable &table) {
+/* ================================================================ */
+/**
+ * Store the single, indicated atom.
+ * Store its truth values too.
+ * The store is performed synchnously (in the calling thread).
+ */
+void ZMQClient::storeSingleAtom(AtomPtr atom)
+{
+	storeAtom(atom, true);
+}
 
+bool ZMQClient::store_cb(AtomPtr atom)
+{
+	storeSingleAtom(atom);
+	store_count ++;
+	if (store_count%1 == 0)
+	{
+		fprintf(stderr, "\tStored %lu atoms.\n", (unsigned long) store_count);
+	}
+	return false;
+}
+
+void ZMQClient::store(const AtomTable &table) {
+	store_count = 0;
+	table.foreachHandleByType(
+	    [&](Handle h)->void { store_cb(h); }, ATOM, true);
 }
 
 void ZMQClient::load(AtomTable &table) {
