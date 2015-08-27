@@ -26,6 +26,7 @@
 #define _OPENCOG_INITIATE_SEARCH_H
 
 #include <opencog/atomspace/types.h>
+#include <opencog/atoms/bind/PatternLink.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/PatternMatchEngine.h>
 
@@ -62,7 +63,8 @@ class InitiateSearchCB : public virtual PatternMatchCallback
 		const VariableTypeMap* _type_restrictions;
 		const std::set<Handle>* _dynamic;
 
-		void jit_analyze(void);
+		PatternLinkPtr _pl;
+		void jit_analyze(PatternMatchEngine *);
 
 		Handle _root;
 		Handle _starter_term;

@@ -390,7 +390,7 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
  */
 bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 {
-	jit_analyze();
+	jit_analyze(pme);
 
 	dbgprt("Attempt to use node-neighbor search\n");
 	_search_fail = false;
@@ -677,7 +677,7 @@ bool InitiateSearchCB::no_search(PatternMatchEngine *pme)
  * PatternLink.cc does, and apply it to each DefinedPredicateNode.  But, for
  * now we punt on this.
  */
-void InitiateSearchCB::jit_analyze(void)
+void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 {
 	/* Are any of the clauses a DefinedPredicateNode?
 	 * If so, then we need to rebuild the pattern from scratch. */
@@ -699,15 +699,17 @@ void InitiateSearchCB::jit_analyze(void)
 
 	if (did_expand)
 	{
-		PatternLinkPtr pl = createPatternLink(*_variables, expand);
-		_variables = &pl->get_variables();
-		_pattern = &pl->get_pattern();
+		_pl = createPatternLink(*_variables, expand);
+		_variables = &_pl->get_variables();
+		_pattern = &_pl->get_pattern();
 
 		_type_restrictions = &_variables->typemap;
 		_dynamic = &_pattern->evaluatable_terms;
+
+		pme->set_pattern(*_variables, *_pattern);
 #ifdef DEBUG
 		dbgprt("JIT exapnded!\n");
-		pl->debug_print();
+		_pl->debug_print();
 #endif
 	}
 }

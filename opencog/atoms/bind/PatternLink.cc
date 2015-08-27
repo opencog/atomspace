@@ -66,7 +66,7 @@ void PatternLink::common_init(void)
 		// a minor performance boost during clause traversal.
 		// Gurk. This does not work currently; the evaluatables have been
 		// stripped out of the component. I think this is a bug ...
-		// Is this related to the other XXX for validate_clasues??
+		// Is this related to the other XXX for validate_clauses??
 		// _pat.cnf_clauses = _components[0];
 	   make_connectivity_map(_pat.cnf_clauses);
 	}
@@ -146,8 +146,8 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 			_varlist.typemap.insert(*it);
 	}
 
-	// Next, the body... there no _body for lambda. The compo is the
-	// _cnf_clauses; we have to reconstruct the optionals.  We cannot
+	// Next, the body... there's no _body for lambda. The compo is the
+	// cnf_clauses; we have to reconstruct the optionals.  We cannot
 	// use extract_optionals because opts have been stripped already.
 
 	_pat.cnf_clauses = compo;
