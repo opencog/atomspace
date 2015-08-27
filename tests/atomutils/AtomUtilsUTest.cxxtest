@@ -170,7 +170,7 @@ void AtomUtilsUTest::test_get_predicates()
 		eats = as.add_node(PREDICATE_NODE, "eats"),
 		programmerEatsBacon = as.add_link(EVALUATION_LINK, eats,
 		                                  programmer_bacon),
-		lover = as.add_node(DEFINED_RELATIONSHIP_NODE, "lover"),
+		lover = as.add_node(GROUNDED_PREDICATE_NODE, "lover"),
 		programmerBaconLover = as.add_link(EVALUATION_LINK, lover,
 		                                   programmer_bacon),
 		anotherNode = as.add_node(CONCEPT_NODE, "pigs"),
@@ -182,7 +182,7 @@ void AtomUtilsUTest::test_get_predicates()
 
 	// Test get_predicates with specific type.
 	HandleSeq baconLovers {programmerBaconLover};
-	TS_ASSERT_EQUALS(get_predicates(bacon, DEFINED_RELATIONSHIP_NODE), 
+	TS_ASSERT_EQUALS(get_predicates(bacon, GROUNDED_PREDICATE_NODE),
 					 baconLovers);
 
 	// Test get_predicates with specific type and no subclasses.

@@ -15,6 +15,9 @@ For general information on haskell bindings you can visit the wiki page:
 For in depth information on the implementation and project details:
 [Haskell Bindings - GSoC 2015](http://wiki.opencog.org/w/Haskell_Bindings_-_GSoC_2015)
 
+For [Haddock](https://www.haskell.org/haddock/) documentation:
+[opencog-atomspace-0.1.0.0](http://docs.opencog.org/atomspace/haskell/doc/opencog-atomspace-0.1.0.0/OpenCog-AtomSpace.html)
+
 ### Requirements
 
 To use the Haskell bindings, it is necessary to have installed:
@@ -106,7 +109,11 @@ Then, a better option is to compile the package to object code, so it is loaded,
 
 
 ### Documentation
-To generate proper [Haddock](https://www.haskell.org/haddock/) documentation,
+
+[Haddock](https://www.haskell.org/haddock/) documentation is available online on:
+[opencog-atomspace-0.1.0.0](http://docs.opencog.org/atomspace/haskell/doc/opencog-atomspace-0.1.0.0/OpenCog-AtomSpace.html)
+
+To generate proper [Haddock](https://www.haskell.org/haddock/) documentation on your own,
 you should go to the build directory and execute:
 
 ```

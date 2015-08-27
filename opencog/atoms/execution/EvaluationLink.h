@@ -23,7 +23,6 @@
 #ifndef _OPENCOG_EVALUTATION_LINK_H
 #define _OPENCOG_EVALUTATION_LINK_H
 
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/FreeLink.h>
 
 namespace opencog
@@ -31,6 +30,8 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
+
+class AtomSpace;
 
 class EvaluationLink : public FreeLink
 {

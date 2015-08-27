@@ -3,13 +3,12 @@
  *
  * Copyright (C) 2015 Linas Vepstas
  *
- * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
+ * Author: Linas Vepstas <linasvepstas@gmail.com>  May 2015
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the
- * exceptions
- * at http://opencog.org/wiki/Licenses
+ * exceptions at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,8 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License
- * along with this program; if not, write to:
+ * License along with this program; if not, write to:
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
@@ -43,13 +41,13 @@ void DefineLink::init(const HandleSeq& oset)
 	IncomingSet defs = _alias->getIncomingSetByType(DEFINE_LINK);
 	for (LinkPtr def : defs)
 		if (def->isSource(_alias))
-	        throw InvalidParamException(TRACE_INFO,
-	                                    "Cannot define %s\n"
-	                                    "with alias %s\n"
-	                                    "as it is already defined in %s",
-	                                    _definition->toString().c_str(),
-	                                    _alias->toString().c_str(),
-	                                    def->toString().c_str());
+			throw InvalidParamException(TRACE_INFO,
+			                            "Cannot define %s\n"
+			                            "with alias %s\n"
+			                            "as it is already defined in %s",
+			                            _definition->toString().c_str(),
+			                            _alias->toString().c_str(),
+			                            def->toString().c_str());
 }
 
 DefineLink::DefineLink(const HandleSeq& oset,
@@ -81,23 +79,26 @@ DefineLink::DefineLink(Link &l)
 	init(l.getOutgoingSet());
 }
 
-Handle DefineLink::get_definition(const Handle& alias) {
-	// Get all DefineLinks associated with that alias, beware that it
-	// will also return DefineLink with that alias as definition body.
-    IncomingSet defs = alias->getIncomingSetByType(DEFINE_LINK);
+Handle DefineLink::get_definition(const Handle& alias)
+{
+	// Get all DefineLinks associated with that alias. Beware that the
+	// incoming set will also include those DefineLinks which have the
+	// alias as the definition body.
+	IncomingSet defs = alias->getIncomingSetByType(DEFINE_LINK);
 
-    // Return the first (supposedly unique) definition
-    for (LinkPtr defl : defs) {
-	    DefineLinkPtr def(DefineLinkCast(defl->getHandle()));
-	    if (def->get_alias() == alias)
-		    return def->get_definition();
-    }
+	// Return the first (supposedly unique) definition
+	for (LinkPtr defl : defs)
+	{
+		DefineLinkPtr def(DefineLinkCast(defl->getHandle()));
+		if (def->get_alias() == alias)
+			return def->get_definition();
+	}
 
-    // There is no definition for that alias
-    throw InvalidParamException(TRACE_INFO,
-                                "Cannot find defined hypergraph for atom %s",
-                                alias->toString().c_str());
-    return Handle::UNDEFINED;
+	// There is no definition for the alias
+	throw InvalidParamException(TRACE_INFO,
+	                            "Cannot find defined hypergraph for atom %s",
+	                            alias->toString().c_str());
+	return Handle::UNDEFINED;
 }
 
 /* ===================== END OF FILE ===================== */

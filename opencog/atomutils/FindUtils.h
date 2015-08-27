@@ -342,6 +342,19 @@ static inline bool contains_atomtype(const Handle& clause, Type atom_type)
 	return false;
 }
 
+/**
+ * Returns true if any of the clauses contain an atom of type atom_type.
+ * ... but only if it is not quoted.  Quoted terms are constants (literals).
+ */
+static inline bool contains_atomtype(const HandleSeq& clauses, Type atom_type)
+{
+	for (const Handle& clause: clauses)
+	{
+		if (contains_atomtype(clause, atom_type)) return true;
+	}
+	return false;
+}
+
 } // namespace opencog
 
 #endif // _OPENCOG_FIND_UTILS_H

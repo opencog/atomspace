@@ -903,19 +903,21 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
                                                const Handle& hg,
                                                const Handle& clause_root)
 {
+	// The given term may appear in the clause in more than one place.
+	// Each distinct locatation should be explored separately.
 	try
 	{
-		// The term may appear in the clause in many places.
-		// Start exploration for each occurence
 		for (const PatternTermPtr &ptm :
 			_pat->connected_terms_map.at({term, clause_root}))
 		{
 			if (explore_link_branches(ptm, hg, clause_root))
 				return true;
 		}
-	} catch (const std::out_of_range&) {
+	}
+	catch (const std::out_of_range&)
+	{
 		dbgprt("Pattern term not found for %s, clause=%s\n",
-		        hp->toShortString().c_str(),
+		        term->toShortString().c_str(),
 		        clause_root->toShortString().c_str());
 	}
 	return false;
@@ -1843,13 +1845,11 @@ void PatternMatchEngine::clear_current_state(void)
 	issued.clear();
 }
 
-PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb,
-                                       const Variables& v,
-                                       const Pattern& p)
+PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	: _pmc(pmcb),
 	_classserver(classserver()),
-	_varlist(&v),
-	_pat(&p)
+	_varlist(NULL),
+	_pat(NULL)
 {
 	// current state
 	in_quote = false;
@@ -1865,6 +1865,13 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb,
 	// unordered link state
 	have_more = false;
 	take_step = true;
+}
+
+void PatternMatchEngine::set_pattern(const Variables& v,
+                                     const Pattern& p)
+{
+	_varlist = &v;
+	_pat = &p;
 }
 
 /* ======================================================== */
