@@ -38,18 +38,17 @@
 		(VariableNode "car")))
 
 ;; Define the concept of electrical parts of things.
-(define elect-parts
-	(DefineLink
-		(DefinedPredicateNode "Electrical Part Of")
-		(PresentLink
-			(InheritanceLink
+(DefineLink
+	(DefinedPredicateNode "Electrical Part Of")
+	(PresentLink
+		(InheritanceLink
+			(VariableNode "$x")
+			(ConceptNode "electrical device"))
+		(EvaluationLink
+			(PredicateNode "PartOf")
+			(ListLink
 				(VariableNode "$x")
-				(ConceptNode "electrical device"))
-			(EvaluationLink
-				(PredicateNode "PartOf")
-				(ListLink
-					(VariableNode "$x")
-					(VariableNode "$y"))))))
+				(VariableNode "$y")))))
 
 ;; Define a pattern to find the electrical parts of things
 ;; At this time, an explicit variable declaration has to be done;
