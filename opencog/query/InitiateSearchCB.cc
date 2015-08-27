@@ -688,7 +688,9 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 		if (DEFINED_PREDICATE_NODE == h->getType())
 		{
 			Handle defn = DefineLink::get_definition(h);
-			expand.push_back(defn);
+			// Skip over the yoking link
+			for (const Handle& ho : LinkCast(defn)->getOutgoingSet())
+				expand.push_back(ho);
 			did_expand = true;
 		}
 		else
