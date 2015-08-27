@@ -3,6 +3,8 @@
 ;
 ; Demonstrate the use of DefineLink to give names to things.
 ;
+; XXX caution: under construction, unstable, known buggy.
+;
 (use-modules (opencog))
 (use-modules (opencog query))
 
@@ -39,7 +41,7 @@
 (define elect-parts
 	(DefineLink
 		(DefinedPredicateNode "Electrical Part Of")
-		(AndLink
+		(PresentLink
 			(InheritanceLink
 				(VariableNode "$x")
 				(ConceptNode "electrical device"))
@@ -50,8 +52,12 @@
 					(VariableNode "$y"))))))
 
 ;; Define a pattern to find the electrical parts of things
+;; At this time, an explicit variable declaration has to be done;
+;; this needs to be fixed...
 (define get-elect
-	(GetLink (DefinedPredicateNode "Electrical Part Of")))
+	(GetLink 
+		(VariableList (VariableNode "$x") (VariableNode "$y"))
+		(DefinedPredicateNode "Electrical Part Of")))
 
 ;; Search the atomspace for electrical things.
 (cog-execute! get-elect)
