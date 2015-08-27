@@ -61,6 +61,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(BuggyQuoteUTest)
 	ADD_CXXTEST(BuggyEqualUTest)
 	ADD_CXXTEST(ChoiceLinkUTest)
+	ADD_CXXTEST(DefineUTest)
 	ADD_CXXTEST(FiniteStateMachineUTest)
 	ADD_CXXTEST(AbsentUTest)
 	ADD_CXXTEST(SingleUTest)
@@ -106,6 +107,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-top-nest.scm
     ${PROJECT_BINARY_DIR}/tests/query/choice-top-nest.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-unary.scm
     ${PROJECT_BINARY_DIR}/tests/query/choice-unary.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/define.scm
+    ${PROJECT_BINARY_DIR}/tests/query/define.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/evaluation.scm
     ${PROJECT_BINARY_DIR}/tests/query/evaluation.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/finite-state-machine.scm

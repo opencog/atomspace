@@ -144,10 +144,12 @@ public:
 	            TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	            AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
+	PatternLink(const Variables&, const HandleSeq&);
+
 	PatternLink(Link &l);
 
 	// Used only to set up multi-component links.
-	// DO NOT call this!
+	// DO NOT call this! (unless you are the component handler).
 	PatternLink(const std::set<Handle>& vars,
 	            const VariableTypeMap& typemap,
 	            const HandleSeq& component,

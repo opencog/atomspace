@@ -23,7 +23,6 @@
 #ifndef _OPENCOG_FREE_LINK_H
 #define _OPENCOG_FREE_LINK_H
 
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 
 namespace opencog

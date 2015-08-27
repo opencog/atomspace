@@ -331,11 +331,12 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	// in a direct fashion.
 	if (1 == _num_comps)
 	{
-		PatternMatchEngine pme(pmcb, _varlist, _pat);
+		PatternMatchEngine pme(pmcb);
 
 #ifdef DEBUG
 		debug_print();
 #endif
+		pme.set_pattern(_varlist, _pat);
 		pmcb.set_pattern(_varlist, _pat);
 		bool found = pmcb.initiate_search(&pme);
 

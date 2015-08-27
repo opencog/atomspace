@@ -121,10 +121,9 @@ class PatternMatchCallback
 
 		/**
 		 * Called when the template pattern and the candidate grounding
-		 * are not having the same type, or one of them are undefined.
-		 * It is obviously a mismatch so it returns false by default,
-		 * but it would be useful if we are not looking for an exact match.
-		 * It gives the Pattern Matcher more flexibility.
+		 * do not have the same type, or if one of them is undefined.
+		 * By default, this is a mismatch, but, if overloaded, it can be
+		 * used to declare approximate matches.
 		 */
 		virtual bool fuzzy_match(const Handle& ph, const Handle& gh)
 		{

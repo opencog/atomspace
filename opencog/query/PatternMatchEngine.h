@@ -215,9 +215,8 @@ class PatternMatchEngine
 		bool clause_accept(const Handle&, const Handle&);
 
 	public:
-		PatternMatchEngine(PatternMatchCallback&,
-		                   const Variables&,
-		                   const Pattern&);
+		PatternMatchEngine(PatternMatchCallback&);
+		void set_pattern(const Variables&, const Pattern&);
 
 		// Examine the locally connected neighborhood for possible
 		// matches.

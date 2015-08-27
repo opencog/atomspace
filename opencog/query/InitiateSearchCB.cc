@@ -21,6 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <opencog/atoms/bind/PatternLink.h>
+#include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atomutils/FindUtils.h>
 
@@ -53,6 +57,7 @@ void InitiateSearchCB::set_pattern(const Variables& vars,
                                    const Pattern& pat)
 {
 	_search_fail = false;
+
 	_variables = &vars;
 	_pattern = &pat;
 	_type_restrictions = &vars.typemap;
@@ -385,6 +390,8 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
  */
 bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 {
+	jit_analyze(pme);
+
 	dbgprt("Attempt to use node-neighbor search\n");
 	_search_fail = false;
 	bool found = neighbor_search(pme);
@@ -659,6 +666,54 @@ bool InitiateSearchCB::no_search(PatternMatchEngine *pme)
 	_root = _starter_term = clauses[0];
 	bool found = pme->explore_neighborhood(_root, _starter_term, _root);
 	return found;
+}
+
+/* ======================================================== */
+/**
+ * Just-In-Time analysis of patterns. Patterns we could not unpack
+ * earlier.
+ *
+ * XXX TODO: what we really need to do here is to provide the same analysis
+ * PatternLink.cc does, and apply it to each DefinedPredicateNode.  But, for
+ * now we punt on this.
+ */
+void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
+{
+	/* Are any of the clauses a DefinedPredicateNode?
+	 * If so, then we need to rebuild the pattern from scratch. */
+	bool did_expand = false;
+	HandleSeq expand;
+	for (const Handle& h : _pattern->clauses)
+	{
+		if (DEFINED_PREDICATE_NODE == h->getType())
+		{
+			Handle defn = DefineLink::get_definition(h);
+			// Skip over the yoking link
+			for (const Handle& ho : LinkCast(defn)->getOutgoingSet())
+				expand.push_back(ho);
+			did_expand = true;
+		}
+		else
+		{
+			expand.push_back(h);
+		}
+	}
+
+	if (did_expand)
+	{
+		_pl = createPatternLink(*_variables, expand);
+		_variables = &_pl->get_variables();
+		_pattern = &_pl->get_pattern();
+
+		_type_restrictions = &_variables->typemap;
+		_dynamic = &_pattern->evaluatable_terms;
+
+		pme->set_pattern(*_variables, *_pattern);
+#ifdef DEBUG
+		dbgprt("JIT exapnded!\n");
+		_pl->debug_print();
+#endif
+	}
 }
 
 /* ===================== END OF FILE ===================== */

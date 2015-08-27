@@ -72,6 +72,12 @@ ABSENT_LINK <- UNORDERED_LINK
 //
 CHOICE_LINK <- ORDERED_LINK
 
+// Rounding out the above, we have PresentLink, which is the converse
+// of AbsentLink, and is dual to ChoiceLink, since it requires that all
+// terms are AND'ed together.
+//
+PRESENT_LINK <- ORDERED_LINK
+
 // ====================================================================
 // Herbrand/First-order-logic/lambda-calc/model-theory style links
 // and nodes.  This are used to implement the pattern matcher, and
@@ -97,12 +103,9 @@ TYPED_VARIABLE_LINK <- ORDERED_LINK
 // A list of variables or variable declarations.
 VARIABLE_LIST <- LIST_LINK
 
-// Everything under a QuoteLink is interpreted literally.
-QUOTE_LINK <- ORDERED_LINK
-
 // The LambdaLink is used to identify an open term, i.e. a link
 // containing VariableNodes within it, and binding those variables.
-// In the process, it can also force type restrictions on them. 
+// In the process, it can also force type restrictions on them.
 // The LambdaLink does not have to bind all variables that occur in it's
 // body; those that are not bound remain free.
 //
@@ -117,7 +120,7 @@ DEFINE_LINK <- ORDERED_LINK
 
 // PutLinks perform a beta-reduction when executed; i.e. they get
 // beta-reduced when they are executed. The first atom in a PutLink
-// should be a LambdaLink... or I guess a FreeLink is OK, too?
+// can be eithr a LambdaLink... or anything that's free, too.
 PUT_LINK <- ORDERED_LINK
 
 // Pattern definition, pattern grounding/satisfaction.
@@ -135,6 +138,16 @@ PATTERN_LINK <- LAMBDA_LINK        // A pattern encapsulated in a Link.
 GET_LINK <- PATTERN_LINK           // Finds all groundings, return atoms
 SATISFACTION_LINK <- PATTERN_LINK  // Finds all groundings, return TV
 BIND_LINK <- GET_LINK              // Finds all groundings and executes
+
+// Everything under a QuoteLink is interpreted literally.
+QUOTE_LINK <- ORDERED_LINK
+
+// The QuoteLink is actually a quasi-quote. The UnquoteLink undoes the
+// quoting.  Defined to work just like in lisp/scheme.
+UNQUOTE_LINK <- ORDERED_LINK
+
+// ==============================================================
+// Assorted PLN link types.
 
 // Logical quantifiers
 FORALL_LINK <- LAMBDA_LINK "ForAllLink"
@@ -197,16 +210,24 @@ EXECUTION_LINK <- ORDERED_LINK
 
 // Procedure, schema and predicate nodes.
 // These are used to define functions and predicates (relations)
+// Procedures are generic terms; they can be either atom-valued
+// of TV-valued. This is narrowed down, below.
 PROCEDURE_NODE <- NODE
 GROUNDED_PROCEDURE_NODE <- PROCEDURE_NODE
 
+// SchemaNodes are atom-valued.
 SCHEMA_NODE <- PROCEDURE_NODE
+DEFINED_SCHEMA_NODE <- SCHEMA_NODE
 GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
 
-PREDICATE_NODE <- SCHEMA_NODE
+// PredicateNodes are TV-valued.
+PREDICATE_NODE <- PROCEDURE_NODE
+DEFINED_PREDICATE_NODE <- PREDICATE_NODE
 GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
-DEFINED_RELATIONSHIP_NODE <- PREDICATE_NODE // Generic relations
 
+// Huh?? XXX What are these? I don't understand them Do we use them
+// anywhere? I think the first is ame as ExecutionOutputLink, right?
+// Not clear how a schema can be evaluated ...
 SCHEMA_EXECUTION_LINK <- INHERITANCE_LINK
 SCHEMA_EVALUATION_LINK <- SCHEMA_EXECUTION_LINK
 
@@ -232,7 +253,7 @@ QUANTITY_LINK <- ORDERED_LINK
 //
 // The VirtuaLink designation is needed by the pattern matcher,
 // in order to be able to find and treat these terms correctly.
-// 
+//
 // VirtualLinks only need to be used for those GPN's that take 2 or
 // more arguments. If they take only one, then there is no reason
 // for them to be declared as virtual (at least, as far as the pattern

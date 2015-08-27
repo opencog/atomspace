@@ -66,7 +66,7 @@ void PatternLink::common_init(void)
 		// a minor performance boost during clause traversal.
 		// Gurk. This does not work currently; the evaluatables have been
 		// stripped out of the component. I think this is a bug ...
-		// Is this related to the other XXX for validate_clasues??
+		// Is this related to the other XXX for validate_clauses??
 		// _pat.cnf_clauses = _components[0];
 	   make_connectivity_map(_pat.cnf_clauses);
 	}
@@ -106,6 +106,23 @@ void PatternLink::init(void)
 
 /* ================================================================= */
 
+/// Special constructor used during just-in-time pattern compilation.
+PatternLink::PatternLink(const Variables& vars, const HandleSeq& cls)
+	: LambdaLink(PATTERN_LINK, HandleSeq())
+{
+	_pat.redex_name = "jit PatternLink";
+
+	// XXX FIXME a hunt for additional variables should be performed
+	// in the clauses: although maybe they should have been declared
+	// already!? Confusing. We are punting for now.
+	_varlist = vars;
+	_pat.clauses = cls;
+	common_init();
+	setup_components();
+}
+
+/* ================================================================= */
+
 /// Special constructor used only to make single concrete pattern
 /// components.  We are given the pre-computed components; we only
 /// have to store them.
@@ -129,8 +146,8 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 			_varlist.typemap.insert(*it);
 	}
 
-	// Next, the body... there no _body for lambda. The compo is the
-	// _cnf_clauses; we have to reconstruct the optionals.  We cannot
+	// Next, the body... there's no _body for lambda. The compo is the
+	// cnf_clauses; we have to reconstruct the optionals.  We cannot
 	// use extract_optionals because opts have been stripped already.
 
 	_pat.cnf_clauses = compo;
@@ -265,12 +282,9 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
  *
  * Every clause should contain at least one variable in it; clauses
  * that are constants and can be trivially discarded.
- *
-XXX WTF, what about evaluatables? How did those not get removed???
-I don't get it... fixme
  */
 void PatternLink::validate_clauses(std::set<Handle>& vars,
-                                    HandleSeq& clauses)
+                                   HandleSeq& clauses)
 
 {
 	// The Fuzzy matcher does some strange things: it declares no
@@ -298,13 +312,23 @@ void PatternLink::validate_clauses(std::set<Handle>& vars,
 	// clause.  They are presumably there due to programmer error.
 	// Quoted variables are constants, and so don't count.
 	//
-	// XXX Well, we could throw, here, but sureal gives us spurious
-	// variables, so instead of throwing, we just discard them and
-	// print a warning.
+	// Well, if any clause at all contains a DefinedSchemaNode or
+	// a DefinedPredicateNode, then it could be that all of the
+	// variables appear only in the definition, and the definition
+	// cannot be known until run-time.
+	if (contains_atomtype(clauses, DEFINED_PREDICATE_NODE))
+		return;
+
+	if (contains_atomtype(clauses, DEFINED_SCHEMA_NODE))
+		return;
+
 	for (const Handle& v : vars)
 	{
 		if (not is_unquoted_in_any_tree(clauses, v))
 		{
+			// XXX Well, we could throw, here, but sureal gives us spurious
+			// variables, so instead of throwing, we just discard them and
+			// print a warning.
 /*
 			logger().warn(
 				"%s: The variable %s does not appear (unquoted) in any clause!",
@@ -376,7 +400,7 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 /// Sort out the list of clauses into four classes:
 /// virtual, evaluatable, executable and concrete.
 ///
-/// A term is "evalutable" if it contains a GroundedPredicate,
+/// A term is "evalutable" if it contains a GroundedPredicateNode,
 /// or if it inherits from VirtualLink (such as the GreaterThanLink).
 /// Such terms need evaluation at grounding time, to determine
 /// thier truth values.
@@ -384,7 +408,7 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 /// A term may also be evaluatable if consists of connectives (such as
 /// AndLink, OrLink, NotLink) used to join together evaluatable terms.
 /// Normally, the above search for GPN's and VirtualLinks should be
-/// enough, expect when an entire term is a variable.  Thus, for
+/// enough, except when an entire term is a variable.  Thus, for
 /// example, a term such as (NotLink (VariableNode $x)) needs to be
 /// evaluated at grounding-time, even though it does not currently
 /// contain a GPN or a VirtualLink: the grounding might contain it;
@@ -392,8 +416,9 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 /// what the connectives are. The actual connectives depend on the
 /// callback; the default callback uses AndLink, OrLink, NotLink, but
 /// other callbacks may pick something else.  Thus, we cannot do this
-/// here. By contrast, SatisfactionLink and BindLink explicitly assume
-/// the default callback, so they do the additional unbundling there.
+/// here. By contrast, GetLink, SatisfactionLink and BindLink
+/// explicitly assume the default callback, so they do the additional
+/// unbundling there.
 ///
 /// A term is "executable" if it is an ExecutionOutputLink
 /// or if it inherits from one (such as PlusLink, TimesLink).
@@ -415,7 +440,7 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 /// Thus, non-virtual clasues must be grounded first. Another problem
 /// arises when a virtual clause has two or more variables in it, and
 /// those variables are grounded by different disconnected graph
-/// components; the combinatoric explosino has to be handled...
+/// components; the combinatoric explosion has to be handled...
 ///
 void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
                                    const HandleSeq& clauses,
@@ -597,8 +622,8 @@ void PatternLink::make_term_trees()
 }
 
 void PatternLink::make_term_tree_recursive(const Handle& root,
-		                                   const Handle& h,
-		                                   PatternTermPtr& parent)
+		                                     const Handle& h,
+		                                     PatternTermPtr& parent)
 {
 	PatternTermPtr ptm(std::make_shared<PatternTerm>(parent, h));
 	parent->addOutgoingTerm(ptm);
@@ -641,7 +666,7 @@ void PatternLink::check_connectivity(const std::vector<HandleSeq>& components)
 void PatternLink::debug_print(void) const
 {
 	// Print out the predicate ...
-	printf("\nRedex '%s' has following clauses:\n",
+	printf("\nPattern '%s' has following clauses:\n",
 	       _pat.redex_name.c_str());
 	int cl = 0;
 	for (const Handle& h : _pat.mandatory)

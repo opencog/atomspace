@@ -25,7 +25,6 @@
 
 #include <map>
 
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 
 namespace opencog
@@ -34,13 +33,14 @@ namespace opencog
  *  @{
  *
  * Experimental DefineLink class. This is a rough sketch for how things
- * like this might be done. It is not necessarily a good idea, and might
- * be replaced by something completely different, someday ...
+ * like this might be done.  The interplay between this and free variabls,
+ * bound variables and the EquivalenceLink remain unclear. Fine details
+ * of how it interacts with the pattern matcher remain unclear.
  */
 
 /// The DefineLink is used to give a name to a hypergraph (schema,
 /// pattern, concept, predicate, etc).  The DefineLink is unique, in
-/// that, if any other atoms exists with this same name, it will throw
+/// that, if any other atom exists with this same name, it will throw
 /// an error!  Thus, only ONE DefineLink with a given name can exist
 /// at a time.
 ///
@@ -51,18 +51,20 @@ namespace opencog
 /// semantics? 'or' semantics ??)  Thus, this exists to define an atom
 /// uniquely.
 ///
-/// The only place where I know of, at the moment, for this beast, is
-/// for the construction of recursive patterns, as that is the only
-/// place where a simple cut-n-paste is insufficient to specify what
-/// comes next.
+/// This is useful for three different purposes. These are:
+/// -- The definition of new predicates and schemas. Yes, the 
+///    EquivalenceLink could be used for this; but right now, we are
+///    experimenting with DefineLink.
+/// -- A programmer/use convenience. Handy for tagging some atom with
+///    a name, and then refering to that atom by it's name, later on.
+/// -- Enabling recursion. A definition can occur within itself, and
+///    can thus specify an infinitely-recursive pattern.  When evaluated
+///    or executed, this inifinite pattern must, of course terminate,
+///    or your code will hang.  Bummer if your code hangs.
 ///
-/// It is intended that the DefineLink be used with the ComposeLink,
-/// which provides the values for the variables bound by the DefineLink.
-/// That is, the ComposeLink acts like function composition. It does not
-/// actually call, invoke or ground the resulting composition.
+/// Of the three, the last is the most important, as, right now, there
+/// is no other way of sprecifying recursive functions in the atomspace.
 ///
-/// Currently, the implementation of ComposeLink is half-finished and
-/// mostly broken.
 class DefineLink : public Link
 {
 protected:
@@ -77,7 +79,7 @@ public:
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	DefineLink(const Handle& varcdecls, const Handle& body,
+	DefineLink(const Handle& alias, const Handle& body,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
