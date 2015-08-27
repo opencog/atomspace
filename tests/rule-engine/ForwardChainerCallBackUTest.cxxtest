@@ -7,17 +7,17 @@
 #include <opencog/rule-engine/forwardchainer/FCMemory.h>
 #include <opencog/rule-engine/URECommons.h>
 #include <opencog/rule-engine/UREConfigReader.h>
-#include <opencog/rule-engine/forwardchainer/DefaultForwardChainerCB.h>
+#include <opencog/rule-engine/forwardchainer/ForwardChainerCallBack.h>
 
 using namespace opencog;
 
-class DefaultForwardChainerCBUTest: public CxxTest::TestSuite {
+class ForwardChainerCallBackUTest: public CxxTest::TestSuite {
 private:
     AtomSpace as;
     SchemeEval eval;
 
 public:
-    DefaultForwardChainerCBUTest(void) : eval(&as)
+    ForwardChainerCallBackUTest(void) : eval(&as)
     {
         config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
                      "opencog/scm/utilities.scm, opencog/scm/av-tv.scm");
@@ -37,15 +37,15 @@ public:
     void test_subatom_unify(void);
 };
 
-void DefaultForwardChainerCBUTest::setUp()
+void ForwardChainerCallBackUTest::setUp()
 {
 }
 
-void DefaultForwardChainerCBUTest::tearDown()
+void ForwardChainerCallBackUTest::tearDown()
 {
 }
 
-void DefaultForwardChainerCBUTest::test_choose_rule(void)
+void ForwardChainerCallBackUTest::test_choose_rule(void)
 {
     logger().setPrintToStdoutFlag(true);
     logger().setLevel(Logger::DEBUG);
@@ -60,7 +60,7 @@ void DefaultForwardChainerCBUTest::test_choose_rule(void)
         "(InheritanceLink (ConceptNode \"cat\")(ConceptNode \"animal\"))");
     TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
     fcmem.set_source(h);
-    DefaultForwardChainerCB dfcb(as);
+    ForwardChainerCallBack dfcb(&as);
     vector<Rule*> rule = dfcb.choose_rules(fcmem);
     TS_ASSERT_EQUALS(2, rule.size()); //since bc-modus-ponens variables are untyped, they are matched to h
     HandleSeq bindlinks;
@@ -69,7 +69,7 @@ void DefaultForwardChainerCBUTest::test_choose_rule(void)
     TS_ASSERT_DIFFERS(it, bindlinks.end());
 }
 
-void DefaultForwardChainerCBUTest::test_choose_source(void)
+void ForwardChainerCallBackUTest::test_choose_source(void)
 {
     config().set("SCM_PRELOAD", "tests/rule-engine/simple-assertions.scm");
     load_scm_files_from_config(as);
@@ -77,12 +77,12 @@ void DefaultForwardChainerCBUTest::test_choose_source(void)
     Handle source = eval.eval_h("(ConceptNode \"Einstein\")");
     FCMemory fcmem(&as);
     fcmem.set_source(source);
-    DefaultForwardChainerCB dfcb(as);
+    ForwardChainerCallBack dfcb(&as);
     HandleSeq hs = dfcb.choose_premises(fcmem);
     TS_ASSERT(5 == hs.size());
 }
 
-void DefaultForwardChainerCBUTest::test_apply_rule(void)
+void ForwardChainerCallBackUTest::test_apply_rule(void)
 {
     //Apply rule x and see if all the inferences made
     //are a direct result of source being part of input/premise
@@ -104,7 +104,7 @@ void DefaultForwardChainerCBUTest::test_apply_rule(void)
     fcmem.set_cur_rule(rules[0]);
     fcmem.set_source(source);
 
-    DefaultForwardChainerCB dfcb(as);
+    ForwardChainerCallBack dfcb(&as);
     HandleSeq hs = dfcb.apply_rule(fcmem);
 
     TS_ASSERT_EQUALS(1,hs.size());
@@ -114,7 +114,7 @@ void DefaultForwardChainerCBUTest::test_apply_rule(void)
 
 }
 
-void DefaultForwardChainerCBUTest::test_substitute_rule_part(void)
+void ForwardChainerCallBackUTest::test_substitute_rule_part(void)
 {
     config().set("SCM_PRELOAD",
                      "tests/rule-engine/dfc-tests.scm");
@@ -137,7 +137,7 @@ void DefaultForwardChainerCBUTest::test_substitute_rule_part(void)
     std::vector<std::map<Handle, Handle>> var_groundings = { vg_map_1 };
     std::set<Handle> vars_case_1 = { var_a, var_b };
 
-    DefaultForwardChainerCB dfcb(as);
+    ForwardChainerCallBack dfcb(&as);
     HandleSeq rule_derivatives = dfcb.substitute_rule_part(as, rule_handle,
                                                            vars_case_1,
                                                            var_groundings);
@@ -159,36 +159,36 @@ void DefaultForwardChainerCBUTest::test_substitute_rule_part(void)
 
 }
 
-void DefaultForwardChainerCBUTest::test_unify(void)
+void ForwardChainerCallBackUTest::test_unify(void)
 {
     Handle source = eval.eval_h(
                 "(InheritanceLink (ConceptNode \"Cat\")(ConceptNode \"Animal\"))");
 
-    DefaultForwardChainerCB dfcb(as);
+    ForwardChainerCallBack dfcb(&as);
     Handle rule_handle = eval.eval_h("(MemberLink"
                                          "   pln-rule-modus-ponens-name"
                                          "   (ConceptNode \"URE\"))");
     Rule rule(rule_handle);
     Handle target = eval.eval_h("(VariableNode \"$A\")");
 
-    HandleSeq hs = dfcb.unify(source,target,&rule);
-    TS_ASSERT_EQUALS(hs.size(), 3);
+    bool result = dfcb.unify(source,target,&rule);
+    TS_ASSERT_EQUALS(result,true);
     //TODO more test cases here
 }
 
-void DefaultForwardChainerCBUTest::test_subatom_unify(void)
+void ForwardChainerCallBackUTest::test_subatom_unify(void)
 {
     Handle source = eval.eval_h(
             "(ConceptNode \"Cat\")");
 
-    DefaultForwardChainerCB dfcb(as);
+    ForwardChainerCallBack dfcb(&as);
     Handle rule_handle = eval.eval_h("(MemberLink"
                                      "   pln-rule-modus-ponens-name"
                                      "   (ConceptNode \"URE\"))");
     Rule rule(rule_handle);
     Handle target = eval.eval_h("(VariableNode \"$A\")");
 
-    HandleSeq hs = dfcb.subatom_unify(source, &rule);
-    TS_ASSERT_EQUALS(hs.size(), 2);
+    bool result = dfcb.subatom_unify(source, &rule);
+    TS_ASSERT_EQUALS(result,true);
     //TODO more test cases here
 }
