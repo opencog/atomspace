@@ -87,6 +87,7 @@ public:
 
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _varlist; }
+	const Handle& get_body(void) const { return _body; }
 
 	// Take the list of values `vals`, and substitute them in for the
 	// variables in the body of this lambda. The values must satisfy all

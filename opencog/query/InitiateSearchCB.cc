@@ -25,6 +25,7 @@
 
 #include <opencog/atoms/bind/PatternLink.h>
 #include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atomutils/FindUtils.h>
 
@@ -703,11 +704,29 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 	 * If so, then we need to rebuild the pattern from scratch. */
 	bool did_expand = false;
 	HandleSeq expand;
+	Variables vset;
 	for (const Handle& h : _pattern->clauses)
 	{
 		if (DEFINED_PREDICATE_NODE == h->getType())
 		{
 			Handle defn = DefineLink::get_definition(h);
+
+			// Extract the variables in the definition
+			// Either some are given in a LambdaLink, or we just
+			// hunt down all of them.
+			if (LAMBDA_LINK == defn->getType())
+			{
+				LambdaLinkPtr lam = LambdaLinkCast(defn);
+				vset.extend(lam->get_variables());
+				defn = lam->get_body();
+			}
+			else
+			{
+				FreeLink fl(defn);
+				VariableList vl(fl.get_vars());
+				vset.extend(vl.get_variables());
+			}
+
 			// Skip over the yoking link
 			for (const Handle& ho : LinkCast(defn)->getOutgoingSet())
 				expand.push_back(ho);
@@ -721,7 +740,8 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 
 	if (did_expand)
 	{
-		_pl = createPatternLink(*_variables, expand);
+		vset.extend(*_variables);
+		_pl = createPatternLink(vset, expand);
 		_variables = &_pl->get_variables();
 		_pattern = &_pl->get_pattern();
 
