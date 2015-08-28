@@ -49,7 +49,7 @@
 			(PredicateNode "PartOf")
 			(ListLink
 				(VariableNode "$x")
-				(VariableNode "$y"))))
+				(VariableNode "$y")))))
 
 ;; Define a pattern to find the electrical parts of things.
 ;; Variables are automatically extracted from the definition.
