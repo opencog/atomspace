@@ -50,6 +50,8 @@ private:
     Logger * _log;
     int _iteration = 0;
 
+    map<Rule*, float> rule_weight;
+
     /**
      * initialize config methods
      */
@@ -70,7 +72,7 @@ public:
     ForwardChainer(AtomSpace& as, Handle rbs);
     void do_chain(ForwardChainerCallBack& fcb, Handle hsource =
             Handle::UNDEFINED);
-    void do_step(ForwardChainerCallBack& fcb);
+    UnorderedHandleSet do_step(ForwardChainerCallBack& fcb);
     HandleSeq get_chaining_result(void);
 
     void setLogger(Logger* log);
