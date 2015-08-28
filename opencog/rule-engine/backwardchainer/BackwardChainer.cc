@@ -625,50 +625,6 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
 	                                             additional_free_varset)),
 	                         premises_vmap_list);
 
-	// only need to generate QuoteLink version when there are free variables
-	if (not additional_free_varset.empty())
-	{
-		std::vector<VarMap> premises_vmap_list_alt;
-
-		// Generate another version where each variables (free or bound) are inside
-		// QuoteLink; mostly to handle where PM cannot map a variable to itself
-		VarMap implicand_quoted_mapping;
-		for (auto& p : implicand_mapping)
-		{
-			// find all variables
-			FindAtoms fv(VARIABLE_NODE);
-			fv.search_set(p.second);
-
-			// wrap a QuoteLink on each variable
-			VarMap quote_mapping;
-			for (auto& h: fv.varset)
-				quote_mapping[h] = _garbage_superspace.add_atom(createLink(QUOTE_LINK, h));
-
-			implicand_quoted_mapping[p.first] = subt.substitute(p.second, quote_mapping);
-		}
-
-		// Reverse ground 2nd version, try it with QuoteLink around variables
-		Handle hrule_implicant_quoted_grounded = subt.substitute(hrule_implicant, implicand_quoted_mapping);
-
-		logger().debug("[BackwardChainer] Alternative reverse grounded as "
-		               + hrule_implicant_quoted_grounded->toShortString());
-
-		HandleSeq possible_premises_alt =
-			match_knowledge_base(hrule_implicant_quoted_grounded,
-								 _garbage_superspace.add_atom(
-		                             gen_sub_varlist(hrule_implicant_quoted_grounded,
-		                                             hrule_vardecl,
-		                                             additional_free_varset)),
-								 premises_vmap_list_alt);
-
-		// collect the possible premises from the two verions of mapping
-		possible_premises.insert(possible_premises.end(),
-		                         possible_premises_alt.begin(),
-		                         possible_premises_alt.end());
-		premises_vmap_list.insert(premises_vmap_list.end(), premises_vmap_list_alt.begin(),
-		                          premises_vmap_list_alt.end());
-	}
-
 	return possible_premises;
 }
 
