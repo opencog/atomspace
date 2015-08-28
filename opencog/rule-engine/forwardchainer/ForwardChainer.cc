@@ -122,19 +122,49 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
      init_sources = _as.get_outgoing(hsource);
     else
         init_sources.push_back(hsource);
+
     _fcmem.update_potential_sources(init_sources);
 
-    _fcmem.set_source(fcb.choose_next_source(_fcmem)); //set initial source
     auto max_iter = _configReader.get_maximum_iterations();
 
     while (_iteration < max_iter /*OR other termination criteria*/) {
         _log->info("Iteration %d", _iteration);
 
-        do_step(fcb);
+        if(rule_weight.empty())
+        {
+            //! Choose next source.
+            _log->info("[ForwardChainer] setting next source");
 
-        //! Choose next source.
-        _log->info("[ForwardChainer] setting next source");
-        _fcmem.set_source(fcb.choose_next_source(_fcmem));
+            _fcmem.set_source(fcb.choose_next_source(_fcmem));
+
+            // Choose matching rules whose input matches with the source.
+            vector<Rule*> matched_rules = fcb.choose_rules(_fcmem);
+
+            //! If no rules matches the pattern of the source,
+            //! set all rules for candidacy to be selected by the proceeding step.
+            //! xxx this decision is made based on recent discussion.
+            //! it might still face some changes.
+            if (not matched_rules.empty()) {
+                _log->info("[ForwardChainer] Found matching rule");
+
+                for (Rule* r : matched_rules) {
+                    rule_weight[r] = r->get_weight();
+                }
+
+            } else {
+                _log->info("[ForwardChainer] No matching rule found. "
+                           "Setting all rules as candidates.");
+                //TODO subatoms unify here
+            }
+
+        }
+
+        UnorderedHandleSet products = do_step(fcb);
+
+        _fcmem.add_rules_product(_iteration,
+                                 HandleSeq(products.begin(), products.end()));
+        _fcmem.update_potential_sources(
+                HandleSeq(products.begin(), products.end()));
 
         _iteration++;
     }
