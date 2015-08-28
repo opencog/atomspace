@@ -36,6 +36,7 @@ using namespace opencog;
 
 void PatternLink::common_init(void)
 {
+	locate_defines(_pat.clauses);
 	validate_clauses(_varlist.varset, _pat.clauses);
 	extract_optionals(_varlist.varset, _pat.clauses);
 
@@ -132,7 +133,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
                          const VariableTypeMap& typemap,
                          const HandleSeq& compo,
                          const std::set<Handle>& opts)
-	: LambdaLink(PATTERN_LINK, HandleSeq())
+	: LambdaLink(PATTERN_LINK, HandleSeq()), _contains_defines(false)
 {
 	// First, lets deal with the vars. We have discarded the original
 	// order of the variables, and I think that's OK, because we will
@@ -283,6 +284,18 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	}
 }
 
+void PatternLink::locate_defines(HandleSeq& clauses)
+{
+	if (contains_atomtype(clauses, DEFINED_PREDICATE_NODE))
+	{
+		_contains_defines = true;
+		return;
+	}
+
+	if (contains_atomtype(clauses, DEFINED_SCHEMA_NODE))
+		_contains_defines = true;
+}
+
 /* ================================================================= */
 /**
  * A simple validatation a collection of clauses for correctness.
@@ -318,17 +331,6 @@ void PatternLink::validate_clauses(std::set<Handle>& vars,
 	// We won't (can't) ground variables that don't show up in a
 	// clause.  They are presumably there due to programmer error.
 	// Quoted variables are constants, and so don't count.
-	//
-	// Well, if any clause at all contains a DefinedSchemaNode or
-	// a DefinedPredicateNode, then it could be that all of the
-	// variables appear only in the definition, and the definition
-	// cannot be known until run-time.
-	if (contains_atomtype(clauses, DEFINED_PREDICATE_NODE))
-		return;
-
-	if (contains_atomtype(clauses, DEFINED_SCHEMA_NODE))
-		return;
-
 	for (const Handle& v : vars)
 	{
 		if (not is_unquoted_in_any_tree(clauses, v))
