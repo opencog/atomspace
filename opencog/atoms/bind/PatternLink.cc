@@ -287,14 +287,16 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 
 void PatternLink::locate_defines(HandleSeq& clauses)
 {
-	if (contains_atomtype(clauses, DEFINED_PREDICATE_NODE))
+	for (const Handle& clause: clauses)
 	{
-		_pat.contains_defines = true;
-		return;
-	}
+		FindAtoms fdpn(DEFINED_PREDICATE_NODE, DEFINED_SCHEMA_NODE, true);
+		fdpn.search_set(clause);
 
-	if (contains_atomtype(clauses, DEFINED_SCHEMA_NODE))
-		_pat.contains_defines = true;
+		for (const Handle& sh : fdpn.varset)
+		{
+			_pat.defined_terms.insert(sh);
+		}
+	}
 }
 
 /* ================================================================= */

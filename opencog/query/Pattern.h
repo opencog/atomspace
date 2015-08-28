@@ -107,6 +107,10 @@ struct Pattern
 	std::set<Handle> executable_terms;    // smallest term that is executable
 	std::set<Handle> executable_holders;  // holds something executable.
 
+	// Defined terms are terms that are a DefinedPredicateNode (DPN)
+	// or a DefineSchemaNode (DSN).
+	std::set<Handle> defined_terms;    // The DPN/DSN itself.
+
 	// Maps; the value is the largest (evaluatable or executable)
 	// term containing the variable. Its a multimap, because
 	// a variable may appear in several different evaluatables.
@@ -121,9 +125,6 @@ struct Pattern
 	ConnectMap       connectivity_map;     // setup by make_connectivity_map()
 
 	ConnectTermMap   connected_terms_map;  // setup by make_term_trees()
-
-	// Do any of the terms contain defined atoms?
-	bool contains_defines = false;
 };
 
 /** @}*/

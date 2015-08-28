@@ -698,7 +698,7 @@ bool InitiateSearchCB::no_search(PatternMatchEngine *pme)
 void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 {
 	// If there are no definitions, there is nothing to do.
-	if (not _pattern->contains_defines)
+	if (0 == _pattern->defined_terms.size())
 		return;
 
 	/* Rebuild the pattern, expanding all DefinedPredicateNodes to one level. */
