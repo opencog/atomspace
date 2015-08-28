@@ -198,72 +198,16 @@ void BackwardChainer::process_target(Target& target)
 	/**** This is where the actual BC step starts ****/
 	/*************************************************/
 
-	// Find all rules whose implicand can be unified to htarget
-	std::vector<Rule> acceptable_rules = filter_rules(target);
-
-	logger().debug("[BackwardChainer] %d rules unifiable", acceptable_rules.size());
+	Rule selected_rule(Handle::UNDEFINED);
+	Rule standardized_rule(Handle::UNDEFINED);
+	std::vector<VarMap> all_implicand_to_target_mappings;
 
 	// If no rules to backward chain on, no way to solve this target
-	if (acceptable_rules.empty())
+	if (not select_rule(target, selected_rule, standardized_rule, all_implicand_to_target_mappings))
 		return;
-
-	Rule selected_rule = select_rule(target, acceptable_rules);
-	Rule standardized_rule =
-		selected_rule.gen_standardize_apart(&_garbage_superspace);
 
 	logger().debug("[BackwardChainer] Selected rule "
 	               + standardized_rule.get_handle()->toShortString());
-
-	Handle hrule_implicant = standardized_rule.get_implicant();
-	Handle hrule_vardecl = standardized_rule.get_vardecl();
-	HandleSeq qrule_outputs = standardized_rule.get_implicand_seq();
-
-	std::vector<VarMap> all_implicand_to_target_mappings;
-
-	// A rule can have multiple outputs, and more than one output will unify
-	// to our target, so get all outputs that works
-	for (Handle h : qrule_outputs)
-	{
-		VarMap temp_mapping;
-
-		if (not unify(h,
-		              htarget,
-		              _garbage_superspace.add_atom(gen_sub_varlist(h, hrule_vardecl, std::set<Handle>())),
-		              target.get_vardecl(),
-		              temp_mapping))
-			continue;
-
-		all_implicand_to_target_mappings.push_back(temp_mapping);
-	}
-
-	// try sub-atom unification only if no whole output unification is possible
-	if (all_implicand_to_target_mappings.empty())
-	{
-		logger().debug("[BackwardChainer] Trying sub-atom unification");
-
-		UnorderedHandleSet output_expanded;
-		for (Handle h : qrule_outputs)
-		{
-			UnorderedHandleSet hs = get_all_unique_atoms(h);
-			output_expanded.insert(hs.begin(), hs.end());
-			output_expanded.erase(h);
-		}
-
-		for (Handle h : output_expanded)
-		{
-			VarMap temp_mapping;
-
-			if (not unify(h,
-			              htarget,
-			              _garbage_superspace.add_atom(gen_sub_varlist(h, hrule_vardecl, std::set<Handle>())),
-			              target.get_vardecl(),
-			              temp_mapping))
-				continue;
-
-			all_implicand_to_target_mappings.push_back(temp_mapping);
-		}
-	}
-
 	logger().debug("[BackwardChainer] Found %d implicand's output unifiable",
 	               all_implicand_to_target_mappings.size());
 
@@ -275,67 +219,19 @@ void BackwardChainer::process_target(Target& target)
 	// all, and add all resulting new targets to targets list; this will
 	// avoid having to visit the target multiple times to get all
 	// possible output mappings
-	VarMap implicand_normal_mapping = rand_element(all_implicand_to_target_mappings);
-	for (auto& p : implicand_normal_mapping)
+	VarMap implicand_mapping = rand_element(all_implicand_to_target_mappings);
+	for (auto& p : implicand_mapping)
 		logger().debug("[BackwardChainer] Chosen mapping is "
 		               + p.first->toShortString()
 		               + " to " + p.second->toShortString());
 
-	// Reverse ground the implicant with the grounding we found from
-	// unifying the implicand
-	Substitutor subt(&_garbage_superspace);
-	std::vector<VarMap> premises_vmap_list, premises_vmap_list_alt;
-	Handle hrule_implicant_normal_grounded = subt.substitute(hrule_implicant, implicand_normal_mapping);
-
-	logger().debug("[BackwardChainer] Reverse grounded as "
-	               + hrule_implicant_normal_grounded->toShortString());
-
-	// Find all matching premises matching the implicant, where premises_vmap_list
-	// will be the mapping from free variables in himplicant to stuff in a premise
-	HandleSeq possible_premises =
-		match_knowledge_base(hrule_implicant_normal_grounded,
-	                         _garbage_superspace.add_atom(gen_sub_varlist(hrule_implicant_normal_grounded, hrule_vardecl, target.get_varset())),
-	                         premises_vmap_list);
-
-	// only need to generate QuoteLink version when there are free variables
-	if (not target.get_varseq().empty())
-	{
-		// Generate another version where each variables (free or bound) are inside
-		// QuoteLink; mostly to handle where PM cannot map a variable to itself
-		VarMap implicand_quoted_mapping;
-		for (auto& p : implicand_normal_mapping)
-		{
-			// find all variables
-			FindAtoms fv(VARIABLE_NODE);
-			fv.search_set(p.second);
-
-			// wrap a QuoteLink on each variable
-			VarMap quote_mapping;
-			for (auto& h: fv.varset)
-				quote_mapping[h] = _garbage_superspace.add_atom(createLink(QUOTE_LINK, h));
-
-			Substitutor subt(&_garbage_superspace);
-			implicand_quoted_mapping[p.first] = subt.substitute(p.second, quote_mapping);
-		}
-
-		// Reverse ground 2nd version, try it with QuoteLink around variables
-		Handle hrule_implicant_quoted_grounded = subt.substitute(hrule_implicant, implicand_quoted_mapping);
-
-		logger().debug("[BackwardChainer] Alternative reverse grounded as "
-		               + hrule_implicant_quoted_grounded->toShortString());
-
-		HandleSeq possible_premises_alt =
-			match_knowledge_base(hrule_implicant_quoted_grounded,
-								 _garbage_superspace.add_atom(gen_sub_varlist(hrule_implicant_quoted_grounded, hrule_vardecl, target.get_varset())),
-								 premises_vmap_list_alt);
-
-		// collect the possible premises from the two verions of mapping
-		possible_premises.insert(possible_premises.end(),
-		                         possible_premises_alt.begin(),
-		                         possible_premises_alt.end());
-		premises_vmap_list.insert(premises_vmap_list.end(), premises_vmap_list_alt.begin(),
-		                          premises_vmap_list_alt.end());
-	}
+	Handle hrule_implicant_reverse_grounded;
+	std::vector<VarMap> premises_vmap_list;
+	HandleSeq possible_premises = find_premises(standardized_rule,
+	                                            implicand_mapping,
+	                                            target.get_varset(),
+	                                            hrule_implicant_reverse_grounded,
+	                                            premises_vmap_list);
 
 	logger().debug("[BackwardChainer] %d possible permises", possible_premises.size());
 
@@ -351,9 +247,12 @@ void BackwardChainer::process_target(Target& target)
 	{
 		logger().debug("[BackwardChainer] Adding rule's grounded input as Target");
 
-		target.store_step(selected_rule, { hrule_implicant_normal_grounded });
-		_targets_set.emplace(hrule_implicant_normal_grounded,
-		                     _garbage_superspace.add_atom(gen_sub_varlist(hrule_implicant_normal_grounded, hrule_vardecl, target.get_varset())));
+		target.store_step(selected_rule, { hrule_implicant_reverse_grounded });
+		_targets_set.emplace(hrule_implicant_reverse_grounded,
+		                     _garbage_superspace.add_atom(
+		                         gen_sub_varlist(hrule_implicant_reverse_grounded,
+		                                         standardized_rule.get_vardecl(),
+		                                         target.get_varset())));
 		return;
 	}
 
@@ -370,7 +269,8 @@ void BackwardChainer::process_target(Target& target)
 		// reverse ground the rule's outputs with the mapping to the premise
 		// so that when we ground the premise, we know how to generate
 		// the final output
-		Handle output_grounded = subt.substitute(standardized_rule.get_implicand(), implicand_normal_mapping);
+		Substitutor subt(&_garbage_superspace);
+		Handle output_grounded = subt.substitute(standardized_rule.get_implicand(), implicand_mapping);
 
 		logger().debug("[BackwardChainer] Output reverse grounded step 1 as " + output_grounded->toShortString());
 		output_grounded = subt.substitute(output_grounded, vm);
@@ -380,7 +280,7 @@ void BackwardChainer::process_target(Target& target)
 		std::vector<VarMap> vm_list;
 
 		// include the implicand mapping into vm so we can do variable chasing
-		vm.insert(implicand_normal_mapping.begin(), implicand_normal_mapping.end());
+		vm.insert(implicand_mapping.begin(), implicand_mapping.end());
 
 		// use pattern matcher to try to ground the variables (if any) in the
 		// selected premises, so we can use this grounding to "apply" the rule
@@ -397,6 +297,7 @@ void BackwardChainer::process_target(Target& target)
 			logger().debug("[BackwardChainer] Checking possible permises grounding "
 			               + g->toShortString());
 
+			// XXX should this only search for free var?
 			FindAtoms fv(VARIABLE_NODE);
 			fv.search_set(g);
 
@@ -450,85 +351,6 @@ void BackwardChainer::process_target(Target& target)
 }
 
 /**
- * Find all rules in which the output could generate target.
- *
- * This method will try sub-atom unification if no whole output
- * unification is possible.
- *
- * @param htarget   the target to be generated by the rule's output
- * @return          a vector of rules
- */
-std::vector<Rule> BackwardChainer::filter_rules(const Target& target)
-{
-	std::vector<Rule> rules;
-
-	Handle htarget = target.get_handle();
-	Handle htarget_vardecl = target.get_vardecl();
-
-	for (Rule& r : _configReader.get_rules())
-	{
-		// unify against the standardized version, so the result will match
-		// with what we will be applying against at later step
-		Rule standardized_rule = r.gen_standardize_apart(&_garbage_superspace);
-
-		Handle hrule_vardecl = standardized_rule.get_vardecl();
-		HandleSeq output = standardized_rule.get_implicand_seq();
-		bool unifiable = false;
-
-		// check if any of the implicand's output can be unified to target
-		for (Handle h : output)
-		{
-			VarMap mapping;
-
-			if (not unify(h,
-			              htarget,
-			              _garbage_superspace.add_atom(gen_sub_varlist(h, hrule_vardecl, std::set<Handle>())),
-			              htarget_vardecl,
-			              mapping))
-				continue;
-
-			unifiable = true;
-			break;
-		}
-
-		// if not unifiable, try sub-atom unification
-		if (not unifiable)
-		{
-			UnorderedHandleSet output_expanded;
-			for (Handle h : output)
-			{
-				UnorderedHandleSet hs = get_all_unique_atoms(h);
-				output_expanded.insert(hs.begin(), hs.end());
-				output_expanded.erase(h);
-			}
-
-			for (Handle h : output_expanded)
-			{
-				VarMap mapping;
-
-				if (not unify(h,
-				              htarget,
-				              _garbage_superspace.add_atom(gen_sub_varlist(h, hrule_vardecl, std::set<Handle>())),
-				              htarget_vardecl,
-				              mapping))
-					continue;
-
-				unifiable = true;
-				break;
-			}
-		}
-
-		// move on to next rule if htarget cannot map to the output
-		if (not unifiable)
-			continue;
-
-		rules.push_back(r);
-	}
-
-	return rules;
-}
-
-/**
  * Find all atoms in the AtomSpace matching the pattern.
  *
  * @param hpattern         the atom to pattern match against
@@ -540,16 +362,9 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
                                                 Handle hpattern_vardecl,
                                                 vector<VarMap>& vmap)
 {
-	// Get all VariableNodes (unquoted)
-	FindAtoms fv(VARIABLE_NODE);
-	fv.search_set(hpattern);
-
 	if (hpattern_vardecl == Handle::UNDEFINED)
 	{
-		HandleSeq vars;
-		for (auto& h : fv.varset)
-			vars.push_back(h);
-
+		HandleSeq vars = get_free_vars_in_tree(hpattern);
 		hpattern_vardecl = _garbage_superspace.add_atom(createVariableList(vars));
 	}
 
@@ -558,8 +373,19 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
 	               hpattern->toShortString().c_str(),
 	               hpattern_vardecl->toShortString().c_str());
 
+	// if no variables at all
 	if (VariableListCast(hpattern_vardecl)->get_variables().varseq.empty())
+	{
+		// If the pattern already in the main atomspace, then itself is a match
+		Handle hself = _as.get_atom(hpattern);
+		if (hself != Handle::UNDEFINED)
+		{
+			vmap.push_back(VarMap());
+			return { hself };
+		}
+
 		return HandleSeq();
+	}
 
 	// Pattern Match on _garbage_superspace since some atoms in hpattern could
 	// be in the _garbage space
@@ -632,6 +458,46 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
 }
 
 /**
+ * Find all possible premises for a specific rule's implicant (input).
+ *
+ * @param standardized_rule                 the Rule object with the implicant
+ * @param implicand_mapping                 the output (implicand) var mapping
+ * @param additional_free_varset            additional free variables from the target
+ * @param hrule_implicant_reverse_grounded  output grounding of the implicant
+ * @param premises_vmap_list                the var mapping of each premise
+ * @return                                  a vector of premises
+ */
+HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
+                                         const VarMap& implicand_mapping,
+                                         const std::set<Handle> additional_free_varset,
+                                         Handle& hrule_implicant_reverse_grounded,
+                                         std::vector<VarMap>& premises_vmap_list)
+{
+	Handle hrule_implicant = standardized_rule.get_implicant();
+	Handle hrule_vardecl = standardized_rule.get_vardecl();
+
+	// Reverse ground the implicant with the grounding we found from
+	// unifying the implicand
+	Substitutor subt(&_garbage_superspace);
+	hrule_implicant_reverse_grounded = subt.substitute(hrule_implicant, implicand_mapping);
+
+	logger().debug("[BackwardChainer] Reverse grounded as "
+	               + hrule_implicant_reverse_grounded->toShortString());
+
+	// Find all matching premises matching the implicant, where premises_vmap_list
+	// will be the mapping from free variables in himplicant to stuff in a premise
+	HandleSeq possible_premises =
+		match_knowledge_base(hrule_implicant_reverse_grounded,
+	                         _garbage_superspace.add_atom(
+	                             gen_sub_varlist(hrule_implicant_reverse_grounded,
+	                                             hrule_vardecl,
+	                                             additional_free_varset)),
+	                         premises_vmap_list);
+
+	return possible_premises;
+}
+
+/**
  * Try to ground any free variables in the input target.
  *
  * @param hpremise      the input atom to be grounded
@@ -645,12 +511,10 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 {
 	HandleSeq results;
 
-	// XXX are all variables in premises free?
-	FindAtoms fv(VARIABLE_NODE);
-	fv.search_set(hpremise);
+	HandleSeq varseq = get_free_vars_in_tree(hpremise);
 
 	// if the target is already fully grounded
-	if (fv.varset.empty())
+	if (varseq.empty())
 	{
 		VarMap old_map = premise_vmap;
 		VarMap new_map;
@@ -830,25 +694,100 @@ bool BackwardChainer::unify(const Handle& hsource,
 }
 
 /**
- * Select a candidate rule from the set of filtered rules.
+ * Select a candidate rule from all rules.
+ *
+ * This method will try sub-atom unification if no whole output
+ * unification is possible.
  *
  * XXX TODO use the rule weight
  * XXX should these selection functions be in callbacks like the ForwardChainer?
  *
- * @param target  the original target the set of filtered rules are unifiable to
- * @param rules   a vector of filtered rules to select from
- * @return        one of the rule
+ * @param target             the original target that the rules are going to unify to
+ * @param selected_rule      output the selected rule
+ * @param standardized_rule  output the standardized-apart version of the selected rule
+ * @param all_implicand_to_target_mappings  the output implicand to target mapping
+ * @return                   true if a rule is selected
  */
-Rule BackwardChainer::select_rule(Target& target, const std::vector<Rule>& rules)
+bool BackwardChainer::select_rule(const Target& target,
+                                  Rule& selected_rule,
+                                  Rule& standardized_rule,
+                                  std::vector<VarMap>& all_implicand_to_target_mappings)
 {
+	Handle htarget = target.get_handle();
+	Handle htarget_vardecl = target.get_vardecl();
+	std::vector<Rule> rules = _configReader.get_rules();
+
 	// store how many times each rule has been used for the target
 	std::vector<double> weights;
 	std::for_each(rules.begin(), rules.end(),
 	              [&](const Rule& r)
 	              { weights.push_back(target.get_selection_count() - target.rule_count(r) + 1); });
 
-	// Select the rule that has been applied least
-	return rules[randGen().randDiscrete(weights)];
+	while (not rules.empty())
+	{
+		// Select the rule that has been applied least
+		int index = randGen().randDiscrete(weights);
+
+		// unify against the standardized version, so the result will match
+		// with what we will be applying against at later step
+		selected_rule = rules[index];
+		standardized_rule = selected_rule.gen_standardize_apart(&_garbage_superspace);
+
+		Handle hrule_vardecl = standardized_rule.get_vardecl();
+		HandleSeq output = standardized_rule.get_implicand_seq();
+
+		all_implicand_to_target_mappings.clear();
+
+		// check if any of the implicand's output can be unified to target
+		for (Handle h : output)
+		{
+			VarMap mapping;
+
+			if (not unify(h,
+			              htarget,
+			              _garbage_superspace.add_atom(gen_sub_varlist(h, hrule_vardecl, std::set<Handle>())),
+			              htarget_vardecl,
+			              mapping))
+				continue;
+
+			all_implicand_to_target_mappings.push_back(mapping);
+		}
+
+		// if not unifiable, try sub-atom unification
+		if (all_implicand_to_target_mappings.empty())
+		{
+			UnorderedHandleSet output_expanded;
+			for (Handle h : output)
+			{
+				UnorderedHandleSet hs = get_all_unique_atoms(h);
+				output_expanded.insert(hs.begin(), hs.end());
+				output_expanded.erase(h);
+			}
+
+			for (Handle h : output_expanded)
+			{
+				VarMap mapping;
+
+				if (not unify(h,
+				              htarget,
+				              _garbage_superspace.add_atom(gen_sub_varlist(h, hrule_vardecl, std::set<Handle>())),
+				              htarget_vardecl,
+				              mapping))
+					continue;
+
+				all_implicand_to_target_mappings.push_back(mapping);
+			}
+		}
+
+		if (not all_implicand_to_target_mappings.empty())
+			return true;
+
+		// move on to next rule if htarget cannot map to the output
+		rules.erase(rules.begin() + index);
+		weights.erase(weights.begin() + index);
+	}
+
+	return false;
 }
 
 /**

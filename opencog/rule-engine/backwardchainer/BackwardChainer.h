@@ -108,12 +108,19 @@ private:
 
 	void process_target(Target& target);
 
-	std::vector<Rule> filter_rules(const Target& target);
-	Rule select_rule(Target& target, const std::vector<Rule>& rules);
+	bool select_rule(const Target& target,
+	                 Rule& selected_rule,
+	                 Rule& standardized_rule,
+	                 std::vector<VarMap>& all_implicand_to_target_mappings);
 
 	HandleSeq match_knowledge_base(const Handle& htarget,
 	                               Handle htarget_vardecl,
 	                               std::vector<VarMap>& vmap);
+	HandleSeq find_premises(const Rule& standardized_rule,
+	                        const VarMap& implicand_mapping,
+	                        const std::set<Handle> additional_free_varset,
+	                        Handle& hrule_implicant_reverse_grounded,
+	                        std::vector<VarMap>& premises_vmap_list);
 	HandleSeq ground_premises(const Handle& htarget, const VarMap& vmap,
 	                          std::vector<VarMap>& vmap_list);
 	bool unify(const Handle& hsource, const Handle& hmatch,

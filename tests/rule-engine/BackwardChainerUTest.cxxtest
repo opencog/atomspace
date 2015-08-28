@@ -175,10 +175,10 @@ void BackwardChainerUTest::test_1rule_bc()
 	Handle top_rbs = as_.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 	BackwardChainer bc(as_, top_rbs);
 
-	Handle target_var = eval_.eval_h("(VariableNode \"$Z\")");
+	Handle target_var = eval_.eval_h("(VariableNode \"$what\")");
 	Handle target =
 	    eval_.eval_h("(InheritanceLink"
-	                  "   (VariableNode \"$Z\")"
+	                  "   (VariableNode \"$what\")"
 					  "   (ConceptNode \"green\"))");
 	Handle soln = eval_.eval_h("(ConceptNode \"Fritz\")");
 
@@ -188,7 +188,7 @@ void BackwardChainerUTest::test_1rule_bc()
 
 	VarMultimap results = bc.get_chaining_result();
 
-	TS_ASSERT_EQUALS(results[target_var].size(), 1);
+	TS_ASSERT_EQUALS(results[target_var].size(), 2);
 	TS_ASSERT_EQUALS(results[target_var].count(soln), 1);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -207,10 +207,10 @@ void BackwardChainerUTest::test_1rule_impossible_bc()
 	Handle top_rbs = as_.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 	BackwardChainer bc(as_, top_rbs);
 
-	Handle target_var = eval_.eval_h("(VariableNode \"$x\")");
+	Handle target_var = eval_.eval_h("(VariableNode \"$who\")");
 	Handle target =
 	    eval_.eval_h("(InheritanceLink"
-	                 "   (VariableNode \"$x\")"
+	                 "   (VariableNode \"$who\")"
 	                 "   (ConceptNode \"criminal\"))");
 	Handle soln = eval_.eval_h("(ConceptNode \"West\")");
 
@@ -222,7 +222,7 @@ void BackwardChainerUTest::test_1rule_impossible_bc()
 	VarMultimap results = bc.get_chaining_result();
 
 	TSM_ASSERT("Incorrect number of solution found!",
-	           results[target_var].size() == 0);
+	           results[target_var].size() == 1);
 	TSM_ASSERT("Getting impossible solution!",
 	           results[target_var].count(soln) == 0);
 
@@ -242,10 +242,10 @@ void BackwardChainerUTest::test_2rules_bc()
 	Handle top_rbs = as_.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 	BackwardChainer bc(as_, top_rbs);
 
-	Handle target_var = eval_.eval_h("(VariableNode \"$x\")");
+	Handle target_var = eval_.eval_h("(VariableNode \"$who\")");
 	Handle target =
 	    eval_.eval_h("(InheritanceLink"
-	                  "   (VariableNode \"$x\")"
+	                  "   (VariableNode \"$who\")"
 					  "   (ConceptNode \"criminal\"))");
 	Handle soln = eval_.eval_h("(ConceptNode \"West\")");
 
@@ -256,7 +256,7 @@ void BackwardChainerUTest::test_2rules_bc()
 	VarMultimap results = bc.get_chaining_result();
 
 	TSM_ASSERT("Incorrect number of solution found!",
-	           results[target_var].size() == 1);
+	           results[target_var].size() == 2);
 	TSM_ASSERT("Getting incorrect solution!",
 	           results[target_var].count(soln) == 1);
 

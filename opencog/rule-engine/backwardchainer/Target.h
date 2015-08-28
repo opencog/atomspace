@@ -53,7 +53,7 @@ public:
 	void store_step(const Rule& r, const HandleSeq& premises);
 	void store_varmap(VarMultimap& vm);
 	void store_varmap(VarMap& vm);
-	unsigned int rule_count(const Rule& r);
+	unsigned int rule_count(const Rule& r) const;
 
 	/**
 	 * Increment the internal counter.
