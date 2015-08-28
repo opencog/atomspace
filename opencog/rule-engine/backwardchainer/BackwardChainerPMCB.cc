@@ -38,6 +38,39 @@ BackwardChainerPMCB::~BackwardChainerPMCB()
 {
 }
 
+bool BackwardChainerPMCB::node_match(const Handle& npat_h, const Handle& nsoln_h)
+{
+	if (npat_h == nsoln_h)
+		return true;
+
+	// The name of the non-variable VariableNode does not matter.
+	// This allows treating
+	//
+	//   SatisfyingSetLink
+	//      VariableNode $X
+	//      EvaluationLink
+	//         eat
+	//         ListLink
+	//            $X
+	//            birds
+	//
+	// to be the same as
+	//
+	//   SatisfyingSetLink
+	//      VariableNode $Y
+	//      EvaluationLink
+	//         eat
+	//         ListLink
+	//            $Y
+	//            birds
+	//
+	// although PM will still returns more than one solution.
+	if (npat_h->getType() == VARIABLE_NODE && nsoln_h->getType() == VARIABLE_NODE)
+		return true;
+
+	return false;
+}
+
 bool BackwardChainerPMCB::grounding(const std::map<Handle, Handle> &var_soln,
                                const std::map<Handle, Handle> &pred_soln)
 {
