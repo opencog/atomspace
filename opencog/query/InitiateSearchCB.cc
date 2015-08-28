@@ -711,9 +711,9 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 		{
 			Handle defn = DefineLink::get_definition(h);
 
-			// Extract the variables in the definition
-			// Either some are given in a LambdaLink, or we just
-			// hunt down all of them.
+			// Extract the variables in the definition.
+			// Either they are given in a LambdaLink, or, if absent,
+			// we just hunt down and bind all of them.
 			if (LAMBDA_LINK == defn->getType())
 			{
 				LambdaLinkPtr lam = LambdaLinkCast(defn);
@@ -740,7 +740,12 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 
 	if (did_expand)
 	{
+		// We need to let both the PME know about the new clauses
+		// and variables, and also let master callback class know,
+		// too, since we are just one mixin in the callback class;
+		// the other mixins need to be updated as well.
 		vset.extend(*_variables);
+
 		_pl = createPatternLink(vset, expand);
 		_variables = &_pl->get_variables();
 		_pattern = &_pl->get_pattern();
@@ -749,8 +754,9 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 		_dynamic = &_pattern->evaluatable_terms;
 
 		pme->set_pattern(*_variables, *_pattern);
+		set_pattern(*_variables, *_pattern);
 #ifdef DEBUG
-		dbgprt("JIT exapnded!\n");
+		dbgprt("JIT expanded!\n");
 		_pl->debug_print();
 #endif
 	}
