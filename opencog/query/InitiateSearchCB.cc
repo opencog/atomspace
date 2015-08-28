@@ -28,6 +28,7 @@
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atomutils/FindUtils.h>
+#include <opencog/atomutils/Substitutor.h>
 
 #include "InitiateSearchCB.h"
 #include "PatternMatchEngine.h"
@@ -701,39 +702,42 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 	if (0 == _pattern->defined_terms.size())
 		return;
 
-	/* Rebuild the pattern, expanding all DefinedPredicateNodes to one level. */
-	HandleSeq expand;
+	// Now is the time to look up the defintions!
 	Variables vset;
-	for (const Handle& h : _pattern->clauses)
+	std::map<Handle, Handle> defnmap;
+	for (const Handle& name : _pattern->defined_terms)
 	{
-		if (DEFINED_PREDICATE_NODE == h->getType())
+		Handle defn = DefineLink::get_definition(name);
+		if (not defn) continue;
+
+		// Extract the variables in the definition.
+		// Either they are given in a LambdaLink, or, if absent,
+		// we just hunt down and bind all of them.
+		if (LAMBDA_LINK == defn->getType())
 		{
-			Handle defn = DefineLink::get_definition(h);
-
-			// Extract the variables in the definition.
-			// Either they are given in a LambdaLink, or, if absent,
-			// we just hunt down and bind all of them.
-			if (LAMBDA_LINK == defn->getType())
-			{
-				LambdaLinkPtr lam = LambdaLinkCast(defn);
-				vset.extend(lam->get_variables());
-				defn = lam->get_body();
-			}
-			else
-			{
-				FreeLink fl(defn);
-				VariableList vl(fl.get_vars());
-				vset.extend(vl.get_variables());
-			}
-
-			// Skip over the yoking link
-			for (const Handle& ho : LinkCast(defn)->getOutgoingSet())
-				expand.push_back(ho);
+			LambdaLinkPtr lam = LambdaLinkCast(defn);
+			vset.extend(lam->get_variables());
+			defn = lam->get_body();
 		}
 		else
 		{
-			expand.push_back(h);
+			FreeLink fl(defn);
+			VariableList vl(fl.get_vars());
+			vset.extend(vl.get_variables());
 		}
+
+		defnmap.insert({name, defn});
+	}
+
+	// Rebuild the pattern, expanding all DefinedPredicateNodes to one level.
+	HandleSeq expand;
+	for (const Handle& cl : _pattern->clauses)
+	{
+		Handle newcl = Substitutor::substitute(cl, defnmap);
+		expand.push_back(newcl);
+
+		// XXX confusing ... newcl is not being placed in the atomspace,
+		// but I think that's OK...
 	}
 
 	// We need to let both the PME know about the new clauses
