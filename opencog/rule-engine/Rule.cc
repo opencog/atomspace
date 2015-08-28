@@ -46,7 +46,7 @@ Rule::Rule(Handle rule)
 		                                rule->toString().c_str());
 
 		Handle name_h = LinkCast(rule)->getOutgoingAtom(0),
-			rbs_h = LinkCast(rule)->getOutgoingAtom(1);
+		        rbs_h = LinkCast(rule)->getOutgoingAtom(1);
 
 		rule_handle_ = DefineLink::get_definition(name_h);
 		name_ = NodeCast(name_h)->getName();
@@ -283,6 +283,8 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle h, std::map<Handle, 
 	{
 		std::string new_name = NodeCast(h)->getName() + "-" + to_string(boost::uuids::random_generator()());
 		Handle hcpy = as->add_atom(createNode(h->getType(), new_name, h->getTruthValue()));
+
+		dict[h] = hcpy;
 
 		return hcpy;
 	}
