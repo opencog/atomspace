@@ -108,8 +108,10 @@ private:
 
 	void process_target(Target& target);
 
-	std::vector<Rule> filter_rules(const Target& target);
-	Rule select_rule(Target& target, const std::vector<Rule>& rules);
+	bool select_rule(const Target& target,
+	                 Rule& selected_rule,
+	                 Rule& standardized_rule,
+	                 std::vector<VarMap>& all_implicand_to_target_mappings);
 
 	HandleSeq match_knowledge_base(const Handle& htarget,
 	                               Handle htarget_vardecl,

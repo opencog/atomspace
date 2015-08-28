@@ -104,9 +104,14 @@ void Target::store_varmap(VarMap& vm)
  * @param r  the Rule to search
  * @return   the number of times applied
  */
-unsigned int Target::rule_count(const Rule& r)
+unsigned int Target::rule_count(const Rule& r) const
 {
-	Handle hname = _as.add_node(CONCEPT_NODE, r.get_name());
+	Handle hname = _as.get_node(CONCEPT_NODE, r.get_name());
+
+	// if this rule's name never appear in history, it wasn't used
+	if (hname == Handle::UNDEFINED)
+		return 0;
+
 	HandleSeq q = get_neighbors(_htarget_internal, false, true,
 	                            SET_LINK, false);
 
