@@ -79,6 +79,9 @@ struct Variables
 
 	// Like the above, except no type-checking is done.
 	Handle substitute_nocheck(const Handle&, const HandleSeq&) const;
+
+	// Extend this variable set by adding in the given variable set.
+	void extend(const Variables&);
 };
 
 

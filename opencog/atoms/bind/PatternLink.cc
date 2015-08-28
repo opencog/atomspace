@@ -114,7 +114,9 @@ PatternLink::PatternLink(const Variables& vars, const HandleSeq& cls)
 
 	// XXX FIXME a hunt for additional variables should be performed
 	// in the clauses: although maybe they should have been declared
-	// already!? Confusing. We are punting for now.
+	// already!? Confusing. Anyway, the API is all wrong, because
+	// if the handle seq had type constraints, there's no way to pass
+	// them into here.  We are punting for now.
 	_varlist = vars;
 	_pat.clauses = cls;
 	common_init();
@@ -265,7 +267,12 @@ PatternLink::PatternLink(Link &l)
 void PatternLink::unbundle_clauses(const Handle& hbody)
 {
 	Type t = hbody->getType();
-	if (AND_LINK == t)
+	// For just right now, unpack PresentLink, although that is not
+	// technically correct in the long-run. XXX FIXME In the long run,
+	// nothing should be unpacked, since everything should be run-time
+	// evaluatable. i.e. everything should be a predicate, and that's
+	// that.
+	if (AND_LINK == t or PRESENT_LINK == t)
 	{
 		_pat.clauses = LinkCast(hbody)->getOutgoingSet();
 	}

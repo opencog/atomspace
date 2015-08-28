@@ -25,6 +25,7 @@
 
 #include <opencog/atoms/bind/PatternLink.h>
 #include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atomutils/FindUtils.h>
 
@@ -703,11 +704,29 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 	 * If so, then we need to rebuild the pattern from scratch. */
 	bool did_expand = false;
 	HandleSeq expand;
+	Variables vset;
 	for (const Handle& h : _pattern->clauses)
 	{
 		if (DEFINED_PREDICATE_NODE == h->getType())
 		{
 			Handle defn = DefineLink::get_definition(h);
+
+			// Extract the variables in the definition.
+			// Either they are given in a LambdaLink, or, if absent,
+			// we just hunt down and bind all of them.
+			if (LAMBDA_LINK == defn->getType())
+			{
+				LambdaLinkPtr lam = LambdaLinkCast(defn);
+				vset.extend(lam->get_variables());
+				defn = lam->get_body();
+			}
+			else
+			{
+				FreeLink fl(defn);
+				VariableList vl(fl.get_vars());
+				vset.extend(vl.get_variables());
+			}
+
 			// Skip over the yoking link
 			for (const Handle& ho : LinkCast(defn)->getOutgoingSet())
 				expand.push_back(ho);
@@ -721,7 +740,13 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 
 	if (did_expand)
 	{
-		_pl = createPatternLink(*_variables, expand);
+		// We need to let both the PME know about the new clauses
+		// and variables, and also let master callback class know,
+		// too, since we are just one mixin in the callback class;
+		// the other mixins need to be updated as well.
+		vset.extend(*_variables);
+
+		_pl = createPatternLink(vset, expand);
 		_variables = &_pl->get_variables();
 		_pattern = &_pl->get_pattern();
 
@@ -729,8 +754,9 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 		_dynamic = &_pattern->evaluatable_terms;
 
 		pme->set_pattern(*_variables, *_pattern);
+		set_pattern(*_variables, *_pattern);
 #ifdef DEBUG
-		dbgprt("JIT exapnded!\n");
+		dbgprt("JIT expanded!\n");
 		_pl->debug_print();
 #endif
 	}

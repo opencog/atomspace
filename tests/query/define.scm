@@ -37,9 +37,22 @@
 		(VariableNode "car")))
 
 ;; Define the concept of electrical parts of things.
-(define elect-parts
-	(DefineLink
-		(DefinedPredicateNode "Electrical Part Of")
+(DefineLink
+	(DefinedPredicateNode "Electrical Part Of")
+	(PresentLink
+		(InheritanceLink
+			(VariableNode "$x")
+			(ConceptNode "electrical device"))
+		(EvaluationLink
+			(PredicateNode "PartOf")
+			(ListLink
+				(VariableNode "$x")
+				(VariableNode "$y")))))
+
+(DefineLink
+	(DefinedPredicateNode "Elect-Part bound")
+	(LambdaLink
+		(VariableList (VariableNode "$x") (VariableNode "$y"))
 		(PresentLink
 			(InheritanceLink
 				(VariableNode "$x")
@@ -54,9 +67,10 @@
 ;; At this time, an explicit variable declaration has to be done;
 ;; this needs to be fixed...
 (define get-elect
-	(GetLink 
-		(VariableList (VariableNode "$x") (VariableNode "$y"))
-		(DefinedPredicateNode "Electrical Part Of")))
+	(GetLink (DefinedPredicateNode "Electrical Part Of")))
+
+(define get-elect-bound
+	(GetLink (DefinedPredicateNode "Elect-Part bound")))
 
 ;; Search the atomspace for electrical things.
 ;; (cog-execute! (get-elect))
