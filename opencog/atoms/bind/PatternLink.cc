@@ -133,7 +133,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
                          const VariableTypeMap& typemap,
                          const HandleSeq& compo,
                          const std::set<Handle>& opts)
-	: LambdaLink(PATTERN_LINK, HandleSeq()), _contains_defines(false)
+	: LambdaLink(PATTERN_LINK, HandleSeq())
 {
 	// First, lets deal with the vars. We have discarded the original
 	// order of the variables, and I think that's OK, because we will
@@ -170,6 +170,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 		if (not h_is_opt)
 			_pat.mandatory.push_back(h);
 	}
+	locate_defines(_pat.clauses);
 
 	// The rest is easy: the evaluatables and the connection map
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
@@ -288,12 +289,12 @@ void PatternLink::locate_defines(HandleSeq& clauses)
 {
 	if (contains_atomtype(clauses, DEFINED_PREDICATE_NODE))
 	{
-		_contains_defines = true;
+		_pat.contains_defines = true;
 		return;
 	}
 
 	if (contains_atomtype(clauses, DEFINED_SCHEMA_NODE))
-		_contains_defines = true;
+		_pat.contains_defines = true;
 }
 
 /* ================================================================= */

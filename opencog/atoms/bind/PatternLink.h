@@ -93,8 +93,6 @@ protected:
 	std::vector<std::set<Handle>> _component_vars;
 	HandleSeq _component_patterns;
 
-	bool _contains_defines;
-
 	void unbundle_clauses(const Handle& body);
 	void locate_defines(HandleSeq& clauses);
 	void validate_clauses(std::set<Handle>& vars,
@@ -168,8 +166,6 @@ public:
 
 	const Handle& get_body(void) const { return _body; }
 
-	// XXX temp hack till things get sorted out; remove this method
-	// later.
 	const Pattern& get_pattern(void) { return _pat; }
 
 	bool satisfy(PatternMatchCallback&) const;

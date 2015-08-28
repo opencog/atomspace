@@ -692,17 +692,16 @@ bool InitiateSearchCB::no_search(PatternMatchEngine *pme)
 /* ======================================================== */
 /**
  * Just-In-Time analysis of patterns. Patterns we could not unpack
- * earlier.
- *
- * XXX TODO: what we really need to do here is to provide the same analysis
- * PatternLink.cc does, and apply it to each DefinedPredicateNode.  But, for
- * now we punt on this.
+ * earlier, because the definitions for them might not have been
+ * present, or may have changed since the pattern was initially created.
  */
 void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 {
-	/* Are any of the clauses a DefinedPredicateNode?
-	 * If so, then we need to rebuild the pattern from scratch. */
-	bool did_expand = false;
+	// If there are no definitions, there is nothing to do.
+	if (not _pattern->contains_defines)
+		return;
+
+	/* Rebuild the pattern, expanding all DefinedPredicateNodes to one level. */
 	HandleSeq expand;
 	Variables vset;
 	for (const Handle& h : _pattern->clauses)
@@ -730,7 +729,6 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 			// Skip over the yoking link
 			for (const Handle& ho : LinkCast(defn)->getOutgoingSet())
 				expand.push_back(ho);
-			did_expand = true;
 		}
 		else
 		{
@@ -738,28 +736,25 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 		}
 	}
 
-	if (did_expand)
-	{
-		// We need to let both the PME know about the new clauses
-		// and variables, and also let master callback class know,
-		// too, since we are just one mixin in the callback class;
-		// the other mixins need to be updated as well.
-		vset.extend(*_variables);
+	// We need to let both the PME know about the new clauses
+	// and variables, and also let master callback class know,
+	// too, since we are just one mixin in the callback class;
+	// the other mixins need to be updated as well.
+	vset.extend(*_variables);
 
-		_pl = createPatternLink(vset, expand);
-		_variables = &_pl->get_variables();
-		_pattern = &_pl->get_pattern();
+	_pl = createPatternLink(vset, expand);
+	_variables = &_pl->get_variables();
+	_pattern = &_pl->get_pattern();
 
-		_type_restrictions = &_variables->typemap;
-		_dynamic = &_pattern->evaluatable_terms;
+	_type_restrictions = &_variables->typemap;
+	_dynamic = &_pattern->evaluatable_terms;
 
-		pme->set_pattern(*_variables, *_pattern);
-		set_pattern(*_variables, *_pattern);
+	pme->set_pattern(*_variables, *_pattern);
+	set_pattern(*_variables, *_pattern);
 #ifdef DEBUG
-		dbgprt("JIT expanded!\n");
-		_pl->debug_print();
+	dbgprt("JIT expanded!\n");
+	_pl->debug_print();
 #endif
-	}
 }
 
 /* ===================== END OF FILE ===================== */

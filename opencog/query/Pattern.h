@@ -53,8 +53,8 @@ struct Pattern
 	typedef std::map<Handle, RootList> ConnectMap;
 	typedef std::pair<Handle, RootList> ConnectPair;
 
-	// Each atom of the pattern may appear in many clauses. Moreover the same
-	// atom may be repeated under the same clause root in many positions.
+	// Each atom of the pattern may appear in many clauses. Moreover, the same
+	// atom may be repeated under the same clause root in several positions.
 	// AndLink
 	//   FirstClauseLink
 	//     ConceptNode "$x"
@@ -121,6 +121,9 @@ struct Pattern
 	ConnectMap       connectivity_map;     // setup by make_connectivity_map()
 
 	ConnectTermMap   connected_terms_map;  // setup by make_term_trees()
+
+	// Do any of the terms contain defined atoms?
+	bool contains_defines = false;
 };
 
 /** @}*/
