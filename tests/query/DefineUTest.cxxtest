@@ -88,6 +88,8 @@ void DefineLinkUTest::test_basic(void)
     load_scm_files_from_config(*as);
 
     Handle items = eval->eval_h("(cog-execute! get-elect)");
+    TS_ASSERT_EQUALS(2, as->get_arity(items));
 
+    items = eval->eval_h("(cog-execute! get-elect-bound)");
     TS_ASSERT_EQUALS(2, as->get_arity(items));
 }
