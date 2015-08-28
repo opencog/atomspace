@@ -27,28 +27,148 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atoms/bind/BindLink.h>
+#include <opencog/query/BindLinkAPI.h>
 #include <opencog/query/DefaultImplicator.h>
+
 #include <opencog/rule-engine/Rule.h>
+#include <opencog/rule-engine/URECommons.h>
 
 #include "ForwardChainerCallBack.h"
+#include "VarGroundingPMCB.h"
 
 using namespace opencog;
 
+vector<Rule*> ForwardChainerCallBack::choose_rules(FCMemory& fcmem)
+{
+    Handle source = fcmem.get_cur_source();
+    if (source == Handle::UNDEFINED)
+        throw InvalidParamException(TRACE_INFO, "Needs a valid source atom");
 
-HandleSeq ForwardChainerCallBack::apply_rule(Handle rhandle){
+    vector<Rule*> chosen_rules;
+    auto rules = fcmem.get_rules();
 
-    DefaultImplicator impl(_as);
+    for (Rule* rule : rules) {
+        HandleSeq derived_rules = { };
 
-    BindLinkPtr bl(BindLinkCast(rhandle));
-    if (NULL == bl) {
-        bl = createBindLink(*LinkCast(rhandle));
+        HandleSeq hs = rule->get_implicand_seq();
+        for (Handle target : hs) {
+            if (unify(source, target, rule)) {
+                chosen_rules.push_back(rule);
+                break;
+            }
+        }
+
     }
-    impl.implicand = bl->get_implicand();
-    bl->imply(impl);
 
-    HandleSeq product = impl.get_result_list();
+    return chosen_rules;
+}
+
+HandleSeq ForwardChainerCallBack::choose_premises(FCMemory& fcmem)
+{
+    HandleSeq inputs;
+    URECommons urec(*_as);
+    Handle hsource = fcmem.get_cur_source();
+
+    // Get everything associated with the source handle.
+    UnorderedHandleSet neighbors = get_distant_neighbors(hsource, 2);
+
+    // Add all root links of atoms in @param neighbors.
+    for (auto hn : neighbors) {
+        if (hn->getType() != VARIABLE_NODE) {
+            HandleSeq roots;
+            urec.get_root_links(hn, roots);
+            for (auto r : roots) {
+                if (find(inputs.begin(), inputs.end(), r) == inputs.end() and r->getType()
+                        != BIND_LINK)
+                    inputs.push_back(r);
+            }
+        }
+    }
+
+    return inputs;
+}
+
+Handle ForwardChainerCallBack::choose_next_source(FCMemory& fcmem)
+{
+    HandleSeq tlist = fcmem.get_potential_sources();
+    map<Handle, float> tournament_elem;
+    URECommons urec(*_as);
+    Handle hchosen = Handle::UNDEFINED;
+
+    for (Handle t : tlist) {
+        switch (_ts_mode) {
+        case TV_FITNESS_BASED: {
+            float fitness = urec.tv_fitness(t);
+            tournament_elem[t] = fitness;
+        }
+            break;
+        case STI_BASED:
+            tournament_elem[t] = t->getSTI();
+            break;
+        default:
+            throw RuntimeException(TRACE_INFO,
+                                   "Unknown source selection mode.");
+            break;
+        }
+    }
+
+    //!Choose a new source that has never been chosen before.
+    //!xxx FIXME since same handle might be chosen multiple times the following
+    //!code doesn't guarantee all sources have been exhaustively looked.
+    for (size_t i = 0; i < tournament_elem.size(); i++) {
+        Handle hselected = urec.tournament_select(tournament_elem);
+        if (fcmem.isin_selected_sources(hselected)) {
+            continue;
+        } else {
+            hchosen = hselected;
+            break;
+        }
+    }
+
+    // Incase of when all sources are selected
+    if (hchosen == Handle::UNDEFINED)
+        return urec.tournament_select(tournament_elem);
+
+    return hchosen;
+}
+
+HandleSeq ForwardChainerCallBack::apply_rule(FCMemory& fcmem)
+{
+    auto rule_handle = fcmem.get_cur_rule()->get_handle();
+    BindLinkPtr bl(BindLinkCast(rule_handle));
+    if (NULL == bl) {
+        bl = createBindLink(*LinkCast(rule_handle));
+    }
+    _fcpm.implicand = bl->get_implicand();
+    bl->imply(_fcpm);
+
+    HandleSeq product = _fcpm.get_products();
+
+    //! Make sure the inferences made are new.
+    for (auto iter = product.begin(); iter != product.end();) {
+        if (fcmem.isin_potential_sources(*iter))
+            iter = product.erase(iter);
+        else
+            ++iter;
+    }
 
     return product;
+}
+
+HandleSeq ForwardChainerCallBack::apply_rule(Handle rhandle,bool search_focus_set_only /*=false*/)
+{
+    HandleSeq result;
+
+    if (search_focus_set_only) {
+        //TODO use specialized callback that constrains search to be only within focus set
+
+    } else {
+
+        Handle h = bindlink(_as, rhandle);
+        result = _as->get_outgoing(h);
+    }
+
+    return result;
 }
 
 /**
@@ -111,6 +231,7 @@ HandleSeq ForwardChainerCallBack::derive_rules(Handle source, Handle target,
                     if (find(derived_rules.begin(), derived_rules.end(), nr) == derived_rules.end()) {
                         //Adding back to _as avoids UUID clashes.
                         Handle h = _as->add_atom(nr);
+
                         //Avoid adding original rule to derived rule list
                         if (h != rhandle)
                             derived_rules.push_back(h);
@@ -133,7 +254,8 @@ HandleSeq ForwardChainerCallBack::derive_rules(Handle source, Handle target,
  *
  * @return  A HandleSeq of derived rule handles.
  */
-HandleSeq ForwardChainerCallBack::derive_rules(Handle source, Rule* rule,bool subatomic/*=false*/)
+HandleSeq ForwardChainerCallBack::derive_rules(Handle source, Rule* rule,
+                                               bool subatomic/*=false*/)
 {
     HandleSeq derived_rules = { };
 
@@ -171,7 +293,7 @@ bool ForwardChainerCallBack::is_valid_implicant(const Handle& h)
     fv.search_set(h);
 
     if (fv.varset.empty())
-       return false;
+        return false;
 
     return true;
 }
@@ -239,9 +361,9 @@ HandleSeq ForwardChainerCallBack::substitute_rule_part(
 
             //Assuming himplicant's set of variables are superset for himplicand's,
             //generate varlist from himplicant.
-            Handle hvarlist = gen_sub_varlist(
-                    himplicant, LinkCast(hrule)->getOutgoingSet()[0]);
-            Handle hderived_rule = Handle(LinkCast(createBindLink(HandleSeq {
+            Handle hvarlist = as.add_atom(gen_sub_varlist(
+                    himplicant, LinkCast(hrule)->getOutgoingSet()[0]));
+            Handle hderived_rule = as.add_atom(Handle(createBindLink(HandleSeq {
                     hvarlist, himplicant, himplicand })));
             derived_rules.push_back(hderived_rule);
         } else {
@@ -262,12 +384,13 @@ HandleSeq ForwardChainerCallBack::substitute_rule_part(
  *
  * @return        true on successful unification and false otherwise.
  */
-bool ForwardChainerCallBack::unify(Handle source,Handle target,Rule* rule){
+bool ForwardChainerCallBack::unify(Handle source, Handle target, Rule* rule)
+{
     //exceptions
     if (not is_valid_implicant(target))
         return false;
 
-    HandleSeq derived_rules={};
+    HandleSeq derived_rules = { };
 
     AtomSpace temp_pm_as;
     Handle hcpy = temp_pm_as.add_atom(target);
@@ -283,7 +406,7 @@ bool ForwardChainerCallBack::unify(Handle source,Handle target,Rule* rule){
 
     bl->imply(impl);
 
-    if(not impl.get_result_list().empty())
+    if (not impl.get_result_list().empty())
         return true;
     else
         return false;
@@ -299,12 +422,12 @@ bool ForwardChainerCallBack::unify(Handle source,Handle target,Rule* rule){
  *
  *  @return        true if source is subatom unifiable and false otherwise.
  */
-bool ForwardChainerCallBack::subatom_unify(Handle source,Rule* rule)
+bool ForwardChainerCallBack::subatom_unify(Handle source, Rule* rule)
 {
     UnorderedHandleSet output_expanded = get_subatoms(rule);
 
     for (Handle h : output_expanded) {
-        if( unify(source,h, rule))
+        if (unify(source, h, rule))
             return true;
     }
 
@@ -312,7 +435,7 @@ bool ForwardChainerCallBack::subatom_unify(Handle source,Rule* rule)
 }
 
 Handle ForwardChainerCallBack::gen_sub_varlist(const Handle& parent,
-                                                const Handle& parent_varlist)
+                                               const Handle& parent_varlist)
 {
     FindAtoms fv(VARIABLE_NODE);
     fv.search_set(parent);

@@ -25,7 +25,8 @@
 #define FORWARDCHAINERCALLBACK_H_
 
 #include "ForwardChainerPMCB.h"
-#include "VarGroundingPMCB.h"
+
+class ForwardChainerCallBackUTest;
 
 namespace opencog {
 
@@ -35,10 +36,16 @@ enum source_selection_mode {
 
 class Rule;
 class FCMemory;
+
 class ForwardChainerCallBack
 {
 private:
+    friend ::ForwardChainerCallBackUTest;
+
     AtomSpace* _as;
+    ForwardChainerPMCB _fcpm;
+    source_selection_mode _ts_mode;
+
     bool is_valid_implicant(const Handle& h);
     UnorderedHandleSet get_subatoms(Rule *rule);
     Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);
@@ -52,8 +59,9 @@ protected:
     HandleSeq derive_rules(Handle source, Handle target, Rule* rule);
 
 public:
-    ForwardChainerCallBack(AtomSpace* as) :
-            _as(as)
+    ForwardChainerCallBack(AtomSpace* as, source_selection_mode ts_mode =
+            TV_FITNESS_BASED) :
+            _as(as),_fcpm(_as), _ts_mode(ts_mode)
     {
     }
     virtual ~ForwardChainerCallBack()
@@ -66,7 +74,7 @@ public:
      * ation of the forward chaining instance.
      * @return a set of applicable rules
      */
-    virtual std::vector<Rule*> choose_rules(FCMemory& fcmem) = 0;
+    virtual std::vector<Rule*> choose_rules(FCMemory& fcmem);
     /**
      * Choose additional premises for the rule.
      * @fcmem an object holding the current source/target and other inform
@@ -74,20 +82,20 @@ public:
      * @return a set of Handles chosen as a result of applying fitness
      * criteria with respect to the current source.
      */
-    virtual HandleSeq choose_premises(FCMemory& fcmem) = 0;
+    virtual HandleSeq choose_premises(FCMemory& fcmem);
     /**
      * choose next source from the source list
      * @return a handle to the chosen source from source list
      */
-    virtual Handle choose_next_source(FCMemory& fcmem) = 0;
+    virtual Handle choose_next_source(FCMemory& fcmem);
     /**
      * apply chosen rule. the default will wrap a custom PM callback class.
      * i.e invokes _pattern_matcher.
      * @return a set of handles created as a result of applying current choosen rule
      */
-    virtual HandleSeq apply_rule(FCMemory& fcmem) = 0;
+    virtual HandleSeq apply_rule(FCMemory& fcmem);
 
-    HandleSeq apply_rule(Handle rhandle);
+    HandleSeq apply_rule(Handle rhandle,bool search_focus_set_only = false);
     HandleSeq derive_rules(Handle source, Rule* rule, bool subatomic = false);
 
 };
