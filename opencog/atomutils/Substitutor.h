@@ -49,13 +49,13 @@ namespace opencog
 class Substitutor
 {
 private:
-	AtomSpace *_as;
-	const std::map<Handle, Handle> *_vmap;
 
-	Handle walk_tree(const Handle& expr)
+	// Placing vmap first allows the compiler to optimize the stack
+	// frame. That is, expr changes each time, but vmap does not.
+	static Handle walk_tree(const std::map<Handle, Handle> &vmap, const Handle& expr)
 	{
-		std::map<Handle,Handle>::const_iterator it = _vmap->find(expr);
-		if (_vmap->end() != it )
+		std::map<Handle,Handle>::const_iterator it = vmap.find(expr);
+		if (vmap.end() != it )
 			return it->second;
 
 		LinkPtr lexpr(LinkCast(expr));
@@ -68,7 +68,7 @@ private:
 		bool changed = false;
 		for (const Handle& h : lexpr->getOutgoingSet())
 		{
-			Handle hg = walk_tree(h);
+			Handle hg = walk_tree(vmap, h);
 			if (hg != h) changed = true;
 			oset_results.push_back(hg);
 		}
@@ -81,8 +81,6 @@ private:
 	}
 
 public:
-	Substitutor(AtomSpace* as) : _as(as) {}
-
 	/**
 	 * The main method to call to substitue sub-atoms.
 	 *
@@ -90,20 +88,16 @@ public:
 	 * @param vars  an atom to atom mapping
 	 * @return      a new atom with sub-atoms replaced
 	 */
-	Handle substitute(const Handle& expr, const std::map<Handle, Handle> &vars)
+	static Handle substitute(const Handle& expr,
+	                         const std::map<Handle, Handle> &vars)
 	{
 		// throw, not assert, because this is a user error ...
 		if (Handle::UNDEFINED == expr)
 			throw InvalidParamException(TRACE_INFO,
 				"Asked to substitute a null expression");
 
-		_vmap = &vars;
-
 		// The returned handle is not yet in the atomspace. Add it now.
-		Handle hn = walk_tree(expr);
-		if (expr != hn)
-			return _as->add_atom(hn);
-		return expr;
+		return  walk_tree(vars, expr);
 	}
 };
 
