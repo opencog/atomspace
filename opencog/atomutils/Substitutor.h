@@ -32,14 +32,19 @@ namespace opencog
 {
 
 /**
- * Like the Instantiator but does not execute stuff, and also
- * works for non-VariableNode.
+ * Given a term, substitute one set of atoms for another within that
+ * term.  That is, given a substituion map from atoms to atoms, then,
+ * if the term contains a substitutable atom in it, then the
+ * substutition will be made. The entire term will be searched, i.e.
+ * recursively downwards. However, only one level of substitution is
+ * performed; that is, atoms in the substituted terms won't be
+ * substituted.
  *
- * Also a bit like VariableList's substitute, but again also
- * works for non-VariableNode.
+ * Similar to the Instantiator class, but does not execute stuff;
+ * also can substitute non-VariableNode atoms.
  *
- * Won't recurse into the atom substituted; so if the new atom
- * also contains sub-atom to be subsituted, they will be ignored.
+ * Similar to VariableList's substitute() method, but works for
+ * non-VariableNode atoms.
  */
 class Substitutor
 {
@@ -55,19 +60,24 @@ private:
 
 		LinkPtr lexpr(LinkCast(expr));
 
-		// if not a link, and not mapped, just return it
+		// If not a link, and not mapped, just return it.
 		if (not lexpr)
 			return Handle(expr);
 
 		HandleSeq oset_results;
+		bool changed = false;
 		for (const Handle& h : lexpr->getOutgoingSet())
 		{
 			Handle hg = walk_tree(h);
+			if (hg != h) changed = true;
 			oset_results.push_back(hg);
 		}
 
-		// Now create a duplicate link with the substitution
-		return Handle(createLink(expr->getType(), oset_results, expr->getTruthValue()));
+		if (not changed) return expr;
+
+		// Create a duplicate link with the substitution.
+		return Handle(createLink(expr->getType(), oset_results,
+		                         expr->getTruthValue()));
 	}
 
 public:
@@ -91,9 +101,9 @@ public:
 
 		// The returned handle is not yet in the atomspace. Add it now.
 		Handle hn = walk_tree(expr);
-		if (NULL != hn)
+		if (expr != hn)
 			return _as->add_atom(hn);
-		return hn;
+		return expr;
 	}
 };
 
