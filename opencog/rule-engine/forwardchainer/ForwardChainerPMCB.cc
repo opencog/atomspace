@@ -31,7 +31,6 @@ ForwardChainerPMCB::ForwardChainerPMCB(AtomSpace * as) :
         Implicator(as), InitiateSearchCB(as), DefaultPatternMatchCB(as),
         /*AttentionalFocusCB(as),*/_as(as)
 {
-    _fcmem = nullptr;
 }
 
 ForwardChainerPMCB::~ForwardChainerPMCB()
@@ -63,8 +62,6 @@ bool ForwardChainerPMCB::link_match(const LinkPtr& lpat, const LinkPtr& lsoln)
 bool ForwardChainerPMCB::grounding(const std::map<Handle, Handle> &var_soln,
                                    const std::map<Handle, Handle> &pred_soln)
 {
-    Handle source = _fcmem->get_cur_source();
-
     Handle h = inst.instantiate(implicand, var_soln);
     insert_result(h);
 

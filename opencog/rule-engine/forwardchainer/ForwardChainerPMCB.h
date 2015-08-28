@@ -39,7 +39,7 @@ class ForwardChainerPMCB: public virtual Implicator,
         public virtual DefaultPatternMatchCB {
 private:
     AtomSpace* _as;
-    FCMemory * _fcmem;
+
 public:
     ForwardChainerPMCB(AtomSpace * as);
     virtual ~ForwardChainerPMCB();
