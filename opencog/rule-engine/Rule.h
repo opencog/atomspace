@@ -56,7 +56,7 @@ public:
 	}
 
 	// Modifiers
-	void set_handle(Handle h) throw (InvalidParamException);
+	void set_handle(Handle h);
 	void set_name(const string& name);
 	void set_category(const string& name);
 	void set_weight(float p);

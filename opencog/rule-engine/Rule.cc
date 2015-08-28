@@ -36,18 +36,23 @@ using namespace opencog;
 
 Rule::Rule(Handle rule)
 {
-	if (!rule->isType(MEMBER_LINK, true))
-		throw InvalidParamException(TRACE_INFO,
-		                            "Rule '%s' is expected to be a MemberLink",
-		                            rule->toString().c_str());
+	if (rule == Handle::UNDEFINED)
+		rule_handle_ = Handle::UNDEFINED;
+	else
+	{
+		if (!rule->isType(MEMBER_LINK, true))
+			throw InvalidParamException(TRACE_INFO,
+										"Rule '%s' is expected to be a MemberLink",
+										rule->toString().c_str());
 
-	Handle name_h = LinkCast(rule)->getOutgoingAtom(0),
-		rbs_h = LinkCast(rule)->getOutgoingAtom(1);
+		Handle name_h = LinkCast(rule)->getOutgoingAtom(0),
+			rbs_h = LinkCast(rule)->getOutgoingAtom(1);
 
-	rule_handle_ = DefineLink::get_definition(name_h);
-	name_ = NodeCast(name_h)->getName();
-	category_ = NodeCast(rbs_h)->getName();
-	weight_ = rule->getTruthValue()->getMean();
+		rule_handle_ = DefineLink::get_definition(name_h);
+		name_ = NodeCast(name_h)->getName();
+		category_ = NodeCast(rbs_h)->getName();
+		weight_ = rule->getTruthValue()->getMean();
+	}
 }
 
 float Rule::get_weight() const
@@ -85,7 +90,7 @@ const string& Rule::get_name() const
 	return name_;
 }
 
-void Rule::set_handle(Handle h) throw (InvalidParamException)
+void Rule::set_handle(Handle h)
 {
 	rule_handle_ = h;
 }
@@ -102,6 +107,10 @@ Handle Rule::get_handle() const
  */
 Handle Rule::get_vardecl() const
 {
+	// if the rule's handle has not been set yet
+	if (rule_handle_ == Handle::UNDEFINED)
+		return Handle::UNDEFINED;
+
 	return LinkCast(rule_handle_)->getOutgoingAtom(0);
 }
 
@@ -127,6 +136,10 @@ Handle Rule::get_implicant() const
  */
 HandleSeq Rule::get_implicant_seq() const
 {
+	// if the rule's handle has not been set yet
+	if (rule_handle_ == Handle::UNDEFINED)
+		return HandleSeq();
+
     Handle implicant= get_implicant();
     Type t = implicant->getType();
     HandleSeq hs;
@@ -219,6 +232,10 @@ void Rule::set_weight(float p)
  */
 Rule Rule::gen_standardize_apart(AtomSpace* as)
 {
+	if (rule_handle_ == Handle::UNDEFINED)
+		throw InvalidParamException(TRACE_INFO,
+		                            "Attempted standardized-apart on invalid Rule");
+
 	// clone the Rule
 	Rule st_ver = *this;
 	std::map<Handle, Handle> dict;
