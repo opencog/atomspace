@@ -171,7 +171,6 @@ class PatternMatchEngine
 		// -------------------------------------------
 		// Recursive tree comparison algorithm.
 		unsigned int depth; // Recursion depth for tree_compare.
-		bool in_quote;      // Everything below a quote is literal.
 
 		typedef enum {
 			CALL_QUOTE,
@@ -186,7 +185,7 @@ class PatternMatchEngine
 
 		bool quote_compare(const PatternTermPtr&, const Handle&);
 		bool variable_compare(const Handle&, const Handle&);
-		bool self_compare(const Handle&);
+		bool self_compare(const PatternTermPtr&);
 		bool node_compare(const Handle&, const Handle&);
 		bool redex_compare(const LinkPtr&, const LinkPtr&);
 		bool choice_compare(const PatternTermPtr&, const Handle&,
