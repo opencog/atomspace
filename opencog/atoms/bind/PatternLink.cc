@@ -37,6 +37,17 @@ using namespace opencog;
 void PatternLink::common_init(void)
 {
 	locate_defines(_pat.clauses);
+
+	// If there are ny defines in the pattern, then all bets are off
+	// as to whether it is connected or not, what's virtual, what isn't.
+	// The analysis will have to be performed at run-time, so we can
+	// skip doing it here.
+	if (0 < _pat.defined_terms.size())
+	{
+		_num_comps = 1;
+		return;
+	}
+
 	validate_clauses(_varlist.varset, _pat.clauses);
 	extract_optionals(_varlist.varset, _pat.clauses);
 
@@ -79,6 +90,8 @@ void PatternLink::common_init(void)
 /// The second half of the common initialization sequence
 void PatternLink::setup_components(void)
 {
+	if (1 == _num_comps) return;
+
 	// If we are here, then set up a PatternLink for each connected
 	// component.
 	//
@@ -167,7 +180,10 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 			}
 		}
 		if (not h_is_opt)
+		{
+			_pat.clauses.push_back(h);
 			_pat.mandatory.push_back(h);
+		}
 	}
 	locate_defines(_pat.clauses);
 
