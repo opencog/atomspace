@@ -75,6 +75,9 @@ struct Pattern
 	// The current set of clauses (beta redex context) being grounded.
 	std::string redex_name;  // for debugging only!
 
+	/// The original body containing the link (if any).
+	Handle           body;
+
 	/// The actual clauses. Set by validate_clauses()
 	HandleSeq        clauses;
 

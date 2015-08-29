@@ -146,7 +146,7 @@ public:
 	            TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	            AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	PatternLink(const Variables&, const HandleSeq&);
+	PatternLink(const Variables&, const Handle&);
 
 	PatternLink(Link &l);
 

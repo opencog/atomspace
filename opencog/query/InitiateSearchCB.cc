@@ -730,15 +730,9 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 	}
 
 	// Rebuild the pattern, expanding all DefinedPredicateNodes to one level.
-	HandleSeq expand;
-	for (const Handle& cl : _pattern->clauses)
-	{
-		Handle newcl = Substitutor::substitute(cl, defnmap);
-		expand.push_back(newcl);
-
-		// XXX confusing ... newcl is not being placed in the atomspace,
-		// but I think that's OK...
-	}
+	// Note that newbody is not being place in any atomspace; but I think
+	// that is OK...
+	Handle newbody = Substitutor::substitute(_pattern->body, defnmap);
 
 	// We need to let both the PME know about the new clauses
 	// and variables, and also let master callback class know,
@@ -746,7 +740,7 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 	// the other mixins need to be updated as well.
 	vset.extend(*_variables);
 
-	_pl = createPatternLink(vset, expand);
+	_pl = createPatternLink(vset, newbody);
 	_variables = &_pl->get_variables();
 	_pattern = &_pl->get_pattern();
 

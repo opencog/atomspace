@@ -108,18 +108,17 @@ void PatternLink::init(void)
 /* ================================================================= */
 
 /// Special constructor used during just-in-time pattern compilation.
-PatternLink::PatternLink(const Variables& vars, const HandleSeq& cls)
+///
+/// It assumes that the vaiables have already been correctly extracted
+/// from the body, as appropriate.
+PatternLink::PatternLink(const Variables& vars, const Handle& body)
 	: LambdaLink(PATTERN_LINK, HandleSeq())
 {
 	_pat.redex_name = "jit PatternLink";
 
-	// XXX FIXME a hunt for additional variables should be performed
-	// in the clauses: although maybe they should have been declared
-	// already!? Confusing. Anyway, the API is all wrong, because
-	// if the handle seq had type constraints, there's no way to pass
-	// them into here.  We are punting for now.
 	_varlist = vars;
-	_pat.clauses = cls;
+	_body = body;
+	unbundle_clauses(_body);
 	common_init();
 	setup_components();
 }
@@ -274,6 +273,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	// nothing should be unpacked, since everything should be run-time
 	// evaluatable. i.e. everything should be a predicate, and that's
 	// that.
+	_pat.body = hbody;
 	if (AND_LINK == t or PRESENT_LINK == t)
 	{
 		_pat.clauses = LinkCast(hbody)->getOutgoingSet();
