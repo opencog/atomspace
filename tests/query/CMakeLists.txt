@@ -60,6 +60,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(BuggyLinkUTest)
 	ADD_CXXTEST(BuggyQuoteUTest)
 	ADD_CXXTEST(BuggyEqualUTest)
+	ADD_CXXTEST(BuggySelfGroundUTest)
 	ADD_CXXTEST(ChoiceLinkUTest)
 	ADD_CXXTEST(DefineUTest)
 	ADD_CXXTEST(FiniteStateMachineUTest)
@@ -93,6 +94,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-link.scm
     ${PROJECT_BINARY_DIR}/tests/query/buggy-link.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-stack.scm
     ${PROJECT_BINARY_DIR}/tests/query/buggy-stack.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-selfgnd.scm
+    ${PROJECT_BINARY_DIR}/tests/query/buggy-selfgnd.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-disconnected.scm
     ${PROJECT_BINARY_DIR}/tests/query/choice-disconnected.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-embed.scm
