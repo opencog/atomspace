@@ -49,6 +49,7 @@
 				(VariableNode "$x")
 				(VariableNode "$y")))))
 
+; A version of above with lambda-bound variables.
 (DefineLink
 	(DefinedPredicateNode "Elect-Part bound")
 	(LambdaLink
@@ -63,6 +64,21 @@
 					(VariableNode "$x")
 					(VariableNode "$y"))))))
 
+; Split up into parts...
+(DefineLink
+   (DefinedPredicateNode "Electrical Thing")
+   (InheritanceLink
+      (VariableNode "$x")
+      (ConceptNode "electrical device")))
+
+(DefineLink
+   (DefinedPredicateNode "Part-whole Relation")
+   (EvaluationLink
+      (PredicateNode "PartOf")
+      (ListLink
+         (VariableNode "$x")
+         (VariableNode "$y"))))
+
 ;; Define a pattern to find the electrical parts of things
 ;; At this time, an explicit variable declaration has to be done;
 ;; this needs to be fixed...
@@ -71,6 +87,12 @@
 
 (define get-elect-bound
 	(GetLink (DefinedPredicateNode "Elect-Part bound")))
+
+(define get-parts
+	(GetLink
+		(AndLink
+			(DefinedPredicateNode "Electrical Thing")
+			(DefinedPredicateNode "Part-whole Relation"))))
 
 ;; Search the atomspace for electrical things.
 ;; (cog-execute! (get-elect))
