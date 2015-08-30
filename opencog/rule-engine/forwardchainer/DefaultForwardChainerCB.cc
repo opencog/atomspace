@@ -338,23 +338,24 @@ HandleSeq DefaultForwardChainerCB::substitute_rule_part(
 
     HandleSeq derived_rules;
     BindLinkPtr blptr = BindLinkCast(hrule);
-    Substitutor st(&as);
 
     for (auto& vgmap : filtered_vgmap_list) {
-        Handle himplicand = st.substitute(blptr->get_implicand(), vgmap);
-        //Create the BindLink/Rule by substituting vars with groundings
+        Handle himplicand = Substitutor::substitute(blptr->get_implicand(), vgmap);
+        himplicand = as.add_atom(himplicand);
+        // Create the BindLink/Rule by substituting vars with groundings.
         if (contains_atomtype(himplicand, VARIABLE_NODE)) {
-            Handle himplicant = st.substitute(blptr->get_body(), vgmap);
+            Handle himplicant = Substitutor::substitute(blptr->get_body(), vgmap);
+            himplicant = as.add_atom(himplicant);
 
-            //Assuming himplicant's set of variables are superset for himplicand's,
-            //generate varlist from himplicant.
+            // Assuming himplicant's set of variables are superset for himplicand's,
+            // generate varlist from himplicant.
             Handle hvarlist = gen_sub_varlist(
                     himplicant, LinkCast(hrule)->getOutgoingSet()[0]);
             Handle hderived_rule = Handle(LinkCast(createBindLink(HandleSeq {
                     hvarlist, himplicant, himplicand })));
             derived_rules.push_back(hderived_rule);
         }
-        else{
+        else {
             //TODO Execute if executable and push to FC results
         }
     }

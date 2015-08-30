@@ -92,4 +92,7 @@ void DefineLinkUTest::test_basic(void)
 
     items = eval->eval_h("(cog-execute! get-elect-bound)");
     TS_ASSERT_EQUALS(2, as->get_arity(items));
+
+    items = eval->eval_h("(cog-execute! get-parts)");
+    TS_ASSERT_EQUALS(2, as->get_arity(items));
 }

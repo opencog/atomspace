@@ -28,6 +28,7 @@
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atomutils/FindUtils.h>
+#include <opencog/atomutils/Substitutor.h>
 
 #include "InitiateSearchCB.h"
 #include "PatternMatchEngine.h"
@@ -692,74 +693,66 @@ bool InitiateSearchCB::no_search(PatternMatchEngine *pme)
 /* ======================================================== */
 /**
  * Just-In-Time analysis of patterns. Patterns we could not unpack
- * earlier.
- *
- * XXX TODO: what we really need to do here is to provide the same analysis
- * PatternLink.cc does, and apply it to each DefinedPredicateNode.  But, for
- * now we punt on this.
+ * earlier, because the definitions for them might not have been
+ * present, or may have changed since the pattern was initially created.
  */
 void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 {
-	/* Are any of the clauses a DefinedPredicateNode?
-	 * If so, then we need to rebuild the pattern from scratch. */
-	bool did_expand = false;
-	HandleSeq expand;
+	// If there are no definitions, there is nothing to do.
+	if (0 == _pattern->defined_terms.size())
+		return;
+
+	// Now is the time to look up the defintions!
 	Variables vset;
-	for (const Handle& h : _pattern->clauses)
+	std::map<Handle, Handle> defnmap;
+	for (const Handle& name : _pattern->defined_terms)
 	{
-		if (DEFINED_PREDICATE_NODE == h->getType())
+		Handle defn = DefineLink::get_definition(name);
+		if (not defn) continue;
+
+		// Extract the variables in the definition.
+		// Either they are given in a LambdaLink, or, if absent,
+		// we just hunt down and bind all of them.
+		if (LAMBDA_LINK == defn->getType())
 		{
-			Handle defn = DefineLink::get_definition(h);
-
-			// Extract the variables in the definition.
-			// Either they are given in a LambdaLink, or, if absent,
-			// we just hunt down and bind all of them.
-			if (LAMBDA_LINK == defn->getType())
-			{
-				LambdaLinkPtr lam = LambdaLinkCast(defn);
-				vset.extend(lam->get_variables());
-				defn = lam->get_body();
-			}
-			else
-			{
-				FreeLink fl(defn);
-				VariableList vl(fl.get_vars());
-				vset.extend(vl.get_variables());
-			}
-
-			// Skip over the yoking link
-			for (const Handle& ho : LinkCast(defn)->getOutgoingSet())
-				expand.push_back(ho);
-			did_expand = true;
+			LambdaLinkPtr lam = LambdaLinkCast(defn);
+			vset.extend(lam->get_variables());
+			defn = lam->get_body();
 		}
 		else
 		{
-			expand.push_back(h);
+			FreeLink fl(defn);
+			VariableList vl(fl.get_vars());
+			vset.extend(vl.get_variables());
 		}
+
+		defnmap.insert({name, defn});
 	}
 
-	if (did_expand)
-	{
-		// We need to let both the PME know about the new clauses
-		// and variables, and also let master callback class know,
-		// too, since we are just one mixin in the callback class;
-		// the other mixins need to be updated as well.
-		vset.extend(*_variables);
+	// Rebuild the pattern, expanding all DefinedPredicateNodes to one level.
+	// Note that newbody is not being place in any atomspace; but I think
+	// that is OK...
+	Handle newbody = Substitutor::substitute(_pattern->body, defnmap);
 
-		_pl = createPatternLink(vset, expand);
-		_variables = &_pl->get_variables();
-		_pattern = &_pl->get_pattern();
+	// We need to let both the PME know about the new clauses
+	// and variables, and also let master callback class know,
+	// too, since we are just one mixin in the callback class;
+	// the other mixins need to be updated as well.
+	vset.extend(*_variables);
 
-		_type_restrictions = &_variables->typemap;
-		_dynamic = &_pattern->evaluatable_terms;
+	_pl = createPatternLink(vset, newbody);
+	_variables = &_pl->get_variables();
+	_pattern = &_pl->get_pattern();
 
-		pme->set_pattern(*_variables, *_pattern);
-		set_pattern(*_variables, *_pattern);
+	_type_restrictions = &_variables->typemap;
+	_dynamic = &_pattern->evaluatable_terms;
+
+	pme->set_pattern(*_variables, *_pattern);
+	set_pattern(*_variables, *_pattern);
 #ifdef DEBUG
-		dbgprt("JIT expanded!\n");
-		_pl->debug_print();
+	dbgprt("JIT expanded!\n");
+	_pl->debug_print();
 #endif
-	}
 }
 
 /* ===================== END OF FILE ===================== */

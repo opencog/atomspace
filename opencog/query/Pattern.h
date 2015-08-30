@@ -53,8 +53,8 @@ struct Pattern
 	typedef std::map<Handle, RootList> ConnectMap;
 	typedef std::pair<Handle, RootList> ConnectPair;
 
-	// Each atom of the pattern may appear in many clauses. Moreover the same
-	// atom may be repeated under the same clause root in many positions.
+	// Each atom of the pattern may appear in many clauses. Moreover, the same
+	// atom may be repeated under the same clause root in several positions.
 	// AndLink
 	//   FirstClauseLink
 	//     ConceptNode "$x"
@@ -74,6 +74,9 @@ struct Pattern
 	// -------------------------------------------
 	// The current set of clauses (beta redex context) being grounded.
 	std::string redex_name;  // for debugging only!
+
+	/// The original body containing the link (if any).
+	Handle           body;
 
 	/// The actual clauses. Set by validate_clauses()
 	HandleSeq        clauses;
@@ -106,6 +109,10 @@ struct Pattern
 	// in them.
 	std::set<Handle> executable_terms;    // smallest term that is executable
 	std::set<Handle> executable_holders;  // holds something executable.
+
+	// Defined terms are terms that are a DefinedPredicateNode (DPN)
+	// or a DefineSchemaNode (DSN).
+	std::set<Handle> defined_terms;    // The DPN/DSN itself.
 
 	// Maps; the value is the largest (evaluatable or executable)
 	// term containing the variable. Its a multimap, because

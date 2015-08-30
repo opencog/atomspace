@@ -269,11 +269,12 @@ void BackwardChainer::process_target(Target& target)
 		// reverse ground the rule's outputs with the mapping to the premise
 		// so that when we ground the premise, we know how to generate
 		// the final output
-		Substitutor subt(&_garbage_superspace);
-		Handle output_grounded = subt.substitute(standardized_rule.get_implicand(), implicand_mapping);
+		Handle output_grounded = Substitutor::substitute(standardized_rule.get_implicand(), implicand_mapping);
+		output_grounded = _garbage_superspace.add_atom(output_grounded);
 
 		logger().debug("[BackwardChainer] Output reverse grounded step 1 as " + output_grounded->toShortString());
-		output_grounded = subt.substitute(output_grounded, vm);
+		output_grounded = Substitutor::substitute(output_grounded, vm);
+		output_grounded = _garbage_superspace.add_atom(output_grounded);
 
 		logger().debug("[BackwardChainer] Output reverse grounded step 2 as " + output_grounded->toShortString());
 
@@ -478,8 +479,8 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
 
 	// Reverse ground the implicant with the grounding we found from
 	// unifying the implicand
-	Substitutor subt(&_garbage_superspace);
-	hrule_implicant_reverse_grounded = subt.substitute(hrule_implicant, implicand_mapping);
+	hrule_implicant_reverse_grounded = Substitutor::substitute(hrule_implicant, implicand_mapping);
+	hrule_implicant_reverse_grounded = _garbage_superspace.add_atom(hrule_implicant_reverse_grounded);
 
 	logger().debug("[BackwardChainer] Reverse grounded as "
 	               + hrule_implicant_reverse_grounded->toShortString());

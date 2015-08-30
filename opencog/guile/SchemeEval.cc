@@ -1076,7 +1076,7 @@ TruthValuePtr SchemeEval::apply_tv(const std::string &func, Handle varargs)
 	thread_unlock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 	if (eval_error())
-		throw RuntimeException(TRACE_INFO, error_msg.c_str());
+		throw RuntimeException(TRACE_INFO, "%s", error_msg.c_str());
 
 	// We do not want this->tvp to point at anything after we return.
 	// This is so that we do not hold a long-term reference to the TV.

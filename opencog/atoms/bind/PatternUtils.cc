@@ -109,6 +109,10 @@ bool remove_constants(const std::set<Handle> &vars,
  * speeds up the discovery of the next ungrounded clause: it is
  * trivially just the very next clause in the connected set.  Of
  * course, users will typically never specify clauses in such order.
+ *
+ * XXX FIXME: It can happen that some clauses have no variables at all
+ * in them.  These end up in thier own component, which can be extremely
+ * confusing.
  */
 void get_connected_components(const std::set<Handle>& vars,
                               const HandleSeq& clauses,

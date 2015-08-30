@@ -40,22 +40,23 @@ namespace opencog
 /// The PatternLink specifies an (optional) list of variables, and a
 /// pattern (containing those variables) that is to be grounded
 /// (satisfied).  If no list of variables is explicltly specified,
-/// then the pattner is searched for all (free) variables, and these
+/// then the pattern is searched for all (free) variables, and these
 /// then become implicitly bound.  When processed by the pattern
-/// matcher, these at the variables that get grounded.
+/// matcher, these are the variables that get grounded.
 ///
 /// The body of the PatternLink is assumed to collection of clauses
 /// to be satsified. Thus, the body is typically an AndLink, ChoiceLink
-/// or a SequentialAnd, depending on how they are to be satsified.
+/// or a SequentialAndLink, depending on how they are to be satsified.
 ///
 /// The PatternLink is used as a base class for GetLink, BindLink
 /// and SatisfactionLink. It provides all the methods and tools needed
 /// to unpack the clauses, extract variables, check for connectivity,
 /// discover the evaluatable terms, and so on. The pattern matcher
-/// needs all of these different parts unpakced into C++ structures
-/// so that it can directly access them during traversal.  Thus, this
-/// class is really a "utility class", designed to pre-process
-/// everything that the pattern matcher will need to have later on.
+/// needs all of these different parts unpacked into C++ structures
+/// so that it can quickly, directly access them during traversal.
+/// Thus, this class is designed to pre-process everything that the
+/// pattern matcher will need to have later on; it also acts as a cache,
+/// avoiding repeated unpacking, if the pattern is used more than once.
 ///
 /// Given the initial list of variables and clauses, the constructors
 /// extract the optional clauses and the dynamically-evaluatable clauses.
@@ -70,8 +71,8 @@ namespace opencog
 /// components; the components themselves are connected only by
 /// virtual links.
 ///
-/// The (cog-satisfy) scheme call can ground this link, and return
-/// a truth value.
+/// The (cog-satisfy) and (cog-execute!) scheme calls can ground this
+/// link, and return a truth value.
 class PatternLink : public LambdaLink
 {
 protected:
@@ -93,6 +94,7 @@ protected:
 	HandleSeq _component_patterns;
 
 	void unbundle_clauses(const Handle& body);
+	void locate_defines(HandleSeq& clauses);
 	void validate_clauses(std::set<Handle>& vars,
 	                      HandleSeq& clauses);
 
@@ -144,7 +146,7 @@ public:
 	            TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	            AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	PatternLink(const Variables&, const HandleSeq&);
+	PatternLink(const Variables&, const Handle&);
 
 	PatternLink(Link &l);
 
@@ -164,8 +166,6 @@ public:
 
 	const Handle& get_body(void) const { return _body; }
 
-	// XXX temp hack till things get sorted out; remove this method
-	// later.
 	const Pattern& get_pattern(void) { return _pat; }
 
 	bool satisfy(PatternMatchCallback&) const;
