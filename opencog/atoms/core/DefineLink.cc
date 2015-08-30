@@ -40,14 +40,20 @@ void DefineLink::init(const HandleSeq& oset)
 	// The name must not be used in another definition
 	IncomingSet defs = _alias->getIncomingSetByType(DEFINE_LINK);
 	for (LinkPtr def : defs)
-		if (def->isSource(_alias))
+	{
+		if (2 != def->getArity()) continue;
+		if (def->getOutgoingAtom(0) == _alias and
+		    def->getOutgoingAtom(1) != _definition)
+		{
 			throw InvalidParamException(TRACE_INFO,
 			                            "Cannot define %s\n"
-			                            "with alias %s\n"
-			                            "as it is already defined in %s",
-			                            _definition->toString().c_str(),
+			                            "with definition %s\n"
+			                            "as it is already defined as %s",
 			                            _alias->toString().c_str(),
+			                            _definition->toString().c_str(),
 			                            def->toString().c_str());
+		}
+	}
 }
 
 DefineLink::DefineLink(const HandleSeq& oset,
