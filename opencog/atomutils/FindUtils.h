@@ -185,7 +185,6 @@ class FindAtoms
  */
 static inline bool is_atom_in_tree(const Handle& tree, const Handle& atom)
 {
-	if (tree == Handle::UNDEFINED) return false;
 	if (tree == atom) return true;
 	LinkPtr ltree(LinkCast(tree));
 	if (NULL == ltree) return false;
@@ -204,7 +203,6 @@ static inline bool is_atom_in_tree(const Handle& tree, const Handle& atom)
  */
 static inline bool is_quoted_in_tree(const Handle& tree, const Handle& atom)
 {
-	if (tree == Handle::UNDEFINED) return false;
 	if (tree == atom) return false;  // not quoted, so false.
 	LinkPtr ltree(LinkCast(tree));
 	if (NULL == ltree) return false;
@@ -231,7 +229,6 @@ static inline bool is_quoted_in_tree(const Handle& tree, const Handle& atom)
  */
 static inline bool is_unquoted_in_tree(const Handle& tree, const Handle& atom)
 {
-	if (tree == Handle::UNDEFINED) return false;
 	if (tree == atom) return true;
 	LinkPtr ltree(LinkCast(tree));
 	if (NULL == ltree) return false;
