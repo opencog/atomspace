@@ -286,6 +286,13 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	_temp_aspace.clear();
 	TruthValuePtr tvp(EvaluationLink::do_evaluate(&_temp_aspace, gvirt));
 
+	// Avoid null-pointer dereference if user specified a bogus evaluation.
+	// i.e. an evaluation that failed to return a TV.
+	if (NULL == tvp)
+		throw InvalidParamException(TRACE_INFO,
+	            "Expecting a TruthValue for an evaluatable link: %s\n",
+	            gvirt->toShortString().c_str());
+
 	dbgprt("eval_term evaluation yeilded tv=%s\n", tvp->toString().c_str());
 
 	// XXX FIXME: we are making a crsip-logic go/no-go decision
