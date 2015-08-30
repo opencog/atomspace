@@ -86,6 +86,11 @@
 	(format #t "At count ~a found this part: ~a \n" cnt atom)
 	(stv 1 1))
 
+(DefineLink
+	(DefinedPredicateNode "Counter Printer")
+	(EvaluationLink (GroundedPredicateNode "scm: do-stuff")
+		(ListLink (VariableNode "$x"))))
+
 ;; Assemble a pattern out of the parts above. Notice that the variables
 ;; in each of the different defines are joined together.
 (define get-electrical-parts
@@ -93,8 +98,7 @@
 		(AndLink
 			(DefinedPredicateNode "Electrical Thing")
 			(DefinedPredicateNode "Part-whole Relation")
-			(EvaluationLink (GroundedPredicateNode "scm: do-stuff")
-				(ListLink (VariableNode "$x")))
+			(DefinedPredicateNode "Counter Printer")
 )))
 
 (cog-execute! get-electrical-parts)
