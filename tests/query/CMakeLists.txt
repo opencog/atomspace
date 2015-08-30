@@ -116,6 +116,10 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/evaluation.scm
     ${PROJECT_BINARY_DIR}/tests/query/evaluation.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/finite-state-machine.scm
     ${PROJECT_BINARY_DIR}/tests/query/finite-state-machine.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/get-link.scm
+    ${PROJECT_BINARY_DIR}/tests/query/get-link.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/get-link-eval.scm
+    ${PROJECT_BINARY_DIR}/tests/query/get-link-eval.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/greater-compute.scm
     ${PROJECT_BINARY_DIR}/tests/query/greater-compute.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/greater_than.scm

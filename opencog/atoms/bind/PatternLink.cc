@@ -141,8 +141,10 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 	// API will need to be changed...
 	// So all we need is the varset, and the subset of the typemap.
 	_varlist.varset = vars;
+	_varlist.varseq.clear();
 	for (const Handle& v : vars)
 	{
+		_varlist.varseq.push_back(v);
 		auto it = typemap.find(v);
 		if (it != typemap.end())
 			_varlist.typemap.insert(*it);
