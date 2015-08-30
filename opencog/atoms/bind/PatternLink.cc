@@ -81,6 +81,7 @@ void PatternLink::common_init(void)
 		// Is this related to the other XXX for validate_clauses??
 		// _pat.cnf_clauses = _components[0];
 	   make_connectivity_map(_pat.cnf_clauses);
+		check_satisfiability(_varlist.varset);
 	}
 
 	make_term_trees();
@@ -634,6 +635,30 @@ void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 	{
 		for (const Handle& ho: l->getOutgoingSet())
 			make_map_recursive(root, ho);
+	}
+}
+
+/// Make sure that every variable appears in some groundable clause.
+/// Variables have to be grounded to get used; it makes no sense to
+/// bind variables that are fundamentally ungroundable.
+void PatternLink::check_satisfiability(const std::set<Handle>& vars)
+{
+	for (const Handle& v : vars)
+	{
+		bool whoops = false;
+		try
+		{
+			_pat.connectivity_map.at(v);
+		}
+		catch(const std::out_of_range&) 
+		{
+			whoops = true;
+		}
+		if (whoops)
+		{
+			throw InvalidParamException(TRACE_INFO,
+				"Cannot ground variable %s\n", v->toString().c_str());
+		}
 	}
 }
 
