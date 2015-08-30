@@ -32,7 +32,7 @@
 
 namespace opencog {
 
-/*
+/**
  * PatternTerm class is used by pattern matcher to navigate through the
  * pattern query. PatternTerm is a node of tree data structure. Pattern
  * matcher searches for solutions by traversing this tree structure.
@@ -63,6 +63,16 @@ class PatternTerm
 		PatternTermPtr _parent;
 		PatternTermSeq _outgoing;
 
+		// Number of QuoteLinks on the path up to the root including this
+		// term. Zero means the term is unquoted. Quoted terms are matched
+		// literally.
+		unsigned int _quote_depth;
+
+		// True if the pattern subtree rooted in this tree node does not
+		// contain any bound variable. This means that the term is constant
+		// and may be self-grounded.
+		bool _has_any_bound_var;
+
 	public:
 		static const PatternTermPtr UNDEFINED;
 
@@ -70,12 +80,16 @@ class PatternTerm
 		{
 			_handle = Handle::UNDEFINED;
 			_parent = PatternTerm::UNDEFINED;
+			_quote_depth = 0;
+			_has_any_bound_var = false;
 		}
 
 		PatternTerm(const PatternTermPtr& parent, const Handle& h)
 		{
 			_parent = parent;
 			_handle = h;
+			_quote_depth = parent->_quote_depth;
+			_has_any_bound_var = false;
 		}
 
 		void addOutgoingTerm(const PatternTermPtr& ptm)
@@ -98,8 +112,21 @@ class PatternTerm
 			return _outgoing;
 		}
 
-		inline Arity getArity() const {
+		inline Arity getArity() const
+		{
 			return _outgoing.size();
+		}
+
+		inline bool isQuoted() const
+		{
+			// Check parent quote depth, because we need the top QuoteLink-s
+			// to be unqouted.
+			return (_parent->_quote_depth > 0);
+		}
+
+		inline bool hasAnyBoundVariable() const
+		{
+			return _has_any_bound_var;
 		}
 
 		inline PatternTermPtr getOutgoingTerm(Arity pos) const
@@ -111,6 +138,21 @@ class PatternTerm
 			} else {
 				throw RuntimeException(TRACE_INFO,
 				                       "invalid outgoing set index %d", pos);
+			}
+		}
+
+		inline void addQuote()
+		{
+			_quote_depth++;
+		}
+
+		inline void addBoundVariable()
+		{
+			if (!_has_any_bound_var)
+			{
+				_has_any_bound_var = true;
+				if (_parent != PatternTerm::UNDEFINED)
+					_parent->addBoundVariable();
 			}
 		}
 
@@ -130,7 +172,7 @@ using namespace opencog;
 
 namespace std {
 
-/*
+/**
  * We need to overload standard comparison operator for PatternTerm pointers.
  * Now we do not care much about complexity of this comparison. The cases of
  * queries having repeated atoms that are deep should be very rare. So we just

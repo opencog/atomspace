@@ -279,11 +279,11 @@ void QuoteUTest::test_crash(void)
     Handle cr = eval->eval_h("(cog-bind crasher)");
     TS_ASSERT_EQUALS(1, as->get_arity(cr));
 
-    // This blows out the stack in an infinite loop, if the instantiator
-    // doesn't catch it and prevent it.
+    // This blows out the stack in an infinite loop, if the pattern
+    // matcher doesn't prevent it.
     Handle inf = eval->eval_h("(cog-bind infloop)");
     printf("infloop is %s\n", inf->toShortString().c_str());
-    TS_ASSERT_EQUALS(7, as->get_arity(inf));
+    TS_ASSERT_EQUALS(4, as->get_arity(inf));
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }

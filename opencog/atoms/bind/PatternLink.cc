@@ -635,11 +635,27 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	PatternTermPtr ptm(std::make_shared<PatternTerm>(parent, h));
 	parent->addOutgoingTerm(ptm);
 	_pat.connected_terms_map[{h, root}].push_back(ptm);
+
+	Type t = h->getType();
 	LinkPtr l(LinkCast(h));
 	if (l)
 	{
+		if (QUOTE_LINK == t)
+			ptm->addQuote();
+
 		for (const Handle& ho: l->getOutgoingSet())
 		     make_term_tree_recursive(root, ho, ptm);
+		return;
+	}
+
+	// If the current node is a bound variable store this information for
+	// later checks. The flag telling whether the term subtree contains
+	// any bound variable is set by addBoundVariable() method for all terms
+	// on the path up to the root (unless it has been set already).
+	if (VARIABLE_NODE == t && !ptm->isQuoted() &&
+	    _varlist.varset.end() != _varlist.varset.find(h))
+	{
+		ptm->addBoundVariable();
 	}
 }
 

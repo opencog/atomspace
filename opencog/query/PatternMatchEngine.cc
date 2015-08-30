@@ -117,13 +117,11 @@ static inline void prtmsg(const char * msg, const Handle& h)
 bool PatternMatchEngine::quote_compare(const PatternTermPtr& ptm,
                                        const Handle& hg)
 {
-	in_quote = true;
 	LinkPtr lp(LinkCast(ptm->getHandle()));
 	if (1 != lp->getArity())
 		throw InvalidParamException(TRACE_INFO,
 		            "QuoteLink has unexpected arity!");
 	bool ma = tree_compare(ptm->getOutgoingTerm(0), hg, CALL_QUOTE);
-	in_quote = false;
 	return ma;
 }
 
@@ -161,13 +159,22 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 
 #ifdef NO_SELF_GROUNDING
 	// Disallow matches that contain a bound variable in the
-	// grounding. However, a bound variable can be legitimately
-	// grounded by a free variable (because free variables are
+	// grounding, unless they are quoted. However, a bound variable can be
+	// legitimately grounded by a free variable, because free variables are
 	// effectively constant literals, during the pattern match.
-	if (VARIABLE_NODE == hg->getType() and
-	    _varlist->varset.end() != _varlist->varset.find(hg))
+	if (any_unquoted_in_tree(hg, _varlist->varset))
 	{
-		return false;
+		for (Handle vh: _varlist->varset)
+		{
+			// OK, which variable is it?
+			if (is_unquoted_in_tree(hg, vh))
+			{
+				prtmsg("miscompare; found bound variable in grounding tree:", vh);
+				prtmsg("matching  variable  is:", hp);
+				prtmsg("proposed grounding is:", hg);
+				return false;
+			}
+		}
 	}
 #endif
 
@@ -191,27 +198,16 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 /// that what it might seem to be ...
 ///
 /// If they're the same atom, then clearly they match.
-/// ... but only if hp is a constant (i.e. contains no bound variables)
+/// ... but only if atom is a constant (i.e. contains no bound variables)
 ///
-/// This is screwed up. Right now, quoted variables are dealt with
-/// using a different mechanism, and bound beta redex varaiables are
-/// ... just broken, at the moment.
-bool PatternMatchEngine::self_compare(const Handle& hp)
+bool PatternMatchEngine::self_compare(const PatternTermPtr& ptm)
 {
-	// prtmsg("Compare atom to itself:\n", hp);
+	prtmsg("Compare atom to itself: ", ptm->getHandle());
 
 #ifdef NO_SELF_GROUNDING
-#if THIS_CANT_BE_RIGHT
-	// Bound but quoted variables cannot be solutions to themselves.
-	// huh? whaaaat?
-	if (not in_quote or
-	    (in_quote and
-	     (VARIABLE_NODE != tp or
-	       _varlist->varset.end() == _varlist->varset.find(hp))))
-	{
-		if (hp != hg) var_grounding[hp] = hg;
-	}
-#endif // THIS_CANT_BE_RIGHT
+
+	return !ptm->hasAnyBoundVariable();
+
 #endif
 	return true;
 }
@@ -774,12 +770,13 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	// must have only one child; anything else beyond that is ignored
 	// (as its not clear what else could possibly be done).
 	Type tp = hp->getType();
-	if (not in_quote and QUOTE_LINK == tp)
+	if (not ptm->isQuoted() and QUOTE_LINK == tp)
 		return quote_compare(ptm, hg);
 
 	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
-	if (not in_quote and _varlist->varset.end() != _varlist->varset.find(hp))
+	if (not ptm->isQuoted() and _varlist->varset.end() !=
+	    _varlist->varset.find(hp))
 		return variable_compare(hp, hg);
 
 	// If they're the same atom, then clearly they match.
@@ -792,7 +789,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	// (2) evaluation may depend on external state. These are
 	// typically used to implement behavior trees, e.g SequenceUTest
 	if ((hp == hg) and not is_evaluatable(hp))
-		return self_compare(hp);
+		return self_compare(ptm);
 
 	// If both are nodes, compare them as such.
 	NodePtr np(NodeCast(hp));
@@ -804,37 +801,6 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	LinkPtr lp(LinkCast(hp));
 	LinkPtr lg(LinkCast(hg));
 	if (not (lp and lg)) return _pmc.fuzzy_match(hp, hg);
-
-#ifdef NO_SELF_GROUNDING
-	// The proposed grounding must NOT contain any bound variables!
-	// .. unless they are quoted in the pattern, in which case they
-	// are allowed... well, not just allowed, but give the right
-	// answer. The below checks for this case. The check is not
-	// entirely correct though; there are some weird corner cases
-	// where a variable may appear quoted in the pattern, but then
-	// be in the wrong spot entirely in the proposed grounding, and
-	// so should not have been allowed.
-	// XXX FIXME For now, we punt on this... a proper fix would be
-	// ... hard, as we would have to line up the location of the
-	// quoted and the unquoted parts.
-	if (any_unquoted_in_tree(hg, _varlist->varset))
-	{
-		for (Handle vh: _varlist->varset)
-		{
-			// OK, which tree is it in? And is it quoted in the pattern?
-			if (is_unquoted_in_tree(hg, vh))
-			{
-				prtmsg("found bound variable in grounding tree:", vh);
-				prtmsg("matching  pattern  is:", hp);
-				prtmsg("proposed grounding is:", hg);
-
-				if (is_quoted_in_tree(hp, vh)) continue;
-				dbgprt("miscompare; var is not in pattern, or its not quoted\n");
-				return false;
-			}
-		}
-	}
-#endif
 
 	// Let the callback perform basic checking.
 	bool match = _pmc.link_match(lp, lg);
@@ -1647,8 +1613,6 @@ void PatternMatchEngine::clause_stacks_push(void)
 	_clause_stack_depth++;
 	dbgprt("--- That's it, now push to stack depth=%d\n\n", _clause_stack_depth);
 
-	OC_ASSERT(not in_quote, "Can't posssibly happen!");
-
 	var_solutn_stack.push(var_grounding);
 	term_solutn_stack.push(clause_grounding);
 
@@ -1828,7 +1792,6 @@ void PatternMatchEngine::clear_current_state(void)
 	// Clear all state.
 	var_grounding.clear();
 	clause_grounding.clear();
-	in_quote = false;
 
 	depth = 0;
 
@@ -1852,7 +1815,6 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	_pat(NULL)
 {
 	// current state
-	in_quote = false;
 	depth = 0;
 
 	// graph state
