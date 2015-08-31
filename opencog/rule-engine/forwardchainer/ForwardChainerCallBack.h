@@ -34,14 +34,17 @@ enum source_selection_mode {
 
 class Rule;
 class FCMemory;
+class ForwardChainer;
 
 class ForwardChainerCallBack
 {
 private:
     friend ::ForwardChainerCallBackUTest;
+    friend ForwardChainer; //accesses _fcmem
 
     AtomSpace* _as;
     source_selection_mode _ts_mode;
+    FCMemory * _fcmem;
 
     bool is_valid_implicant(const Handle& h);
     UnorderedHandleSet get_subatoms(Rule *rule);
