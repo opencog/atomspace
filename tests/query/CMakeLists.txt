@@ -112,6 +112,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-unary.scm
     ${PROJECT_BINARY_DIR}/tests/query/choice-unary.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/define.scm
     ${PROJECT_BINARY_DIR}/tests/query/define.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/disco-vars.scm
+    ${PROJECT_BINARY_DIR}/tests/query/disco-vars.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/evaluation.scm
     ${PROJECT_BINARY_DIR}/tests/query/evaluation.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/finite-state-machine.scm
