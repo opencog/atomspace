@@ -105,3 +105,39 @@
 
 (cog-evaluate! (DefinedPredicateNode "Does Bill like X?"))
 (cog-satisfy (DefinedPredicateNode "Does Bill like X?"))
+
+;; A quasi-generic rule implicator.
+;; Searches for all implication links (of a very specific form)
+;; and runs them.
+(PutLink
+	(VariableList
+		(VariableNode "$discard")
+		(VariableNode "$pred")
+		(VariableNode "$aaa")
+		(VariableNode "don't care")
+		(VariableNode "$bbb")
+	)
+	(EvaluationLink
+		(VariableNode "$pred")
+		(ListLink
+			(VariableNode "$aaa")
+			(VariableNode "$bbb")))
+	(GetLink
+		(VariableList
+			(TypedVariableLink (VariableNode "$fpred") (TypeNode "PredicateNode"))
+			(TypedVariableLink (VariableNode "$tpred") (TypeNode "PredicateNode"))
+			(TypedVariableLink (VariableNode "$A") (TypeNode "ConceptNode"))
+			(TypedVariableLink (VariableNode "$B") (TypeNode "ConceptNode"))
+			(TypedVariableLink (VariableNode "$V") (TypeNode "VariableNode"))
+		)
+		(ImplicationLink
+			(EvaluationLink
+				(VariableNode "$fpred")
+				(ListLink
+					(VariableNode "$A")
+					(VariableNode "$X")))
+			(EvaluationLink
+				(VariableNode "$tpred")
+				(ListLink
+					(VariableNode "$B")
+					(VariableNode "$V"))))))
