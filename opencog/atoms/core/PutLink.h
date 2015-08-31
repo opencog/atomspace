@@ -24,7 +24,7 @@
 #define _OPENCOG_PUT_LINK_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/core/VariableList.h>
+#include <opencog/atoms/core/LambdaLink.h>
 
 namespace opencog
 {
@@ -48,12 +48,9 @@ namespace opencog
  * reduction.  The reduce() method only performs the substitution; it
  * does not attempt to execute or evaluate the resulting expression.
  */
-class PutLink : public Link
+class PutLink : public LambdaLink
 {
 protected:
-
-	/// Variables bound in the body.
-	Variables _varlist;
 
 	void init(void);
 	void extract_variables(void);

@@ -31,7 +31,7 @@ using namespace opencog;
 PutLink::PutLink(const HandleSeq& oset,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : Link(PUT_LINK, oset, tv, av)
+    : LambdaLink(PUT_LINK, oset, tv, av)
 {
 	init();
 }
@@ -39,7 +39,7 @@ PutLink::PutLink(const HandleSeq& oset,
 PutLink::PutLink(const Handle& a,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : Link(PUT_LINK, a, tv, av)
+    : LambdaLink(PUT_LINK, a, tv, av)
 {
 	init();
 }
@@ -47,7 +47,7 @@ PutLink::PutLink(const Handle& a,
 PutLink::PutLink(Type t, const HandleSeq& oset,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : Link(t, oset, tv, av)
+    : LambdaLink(t, oset, tv, av)
 {
 	if (not classserver().isA(t, PUT_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
@@ -57,7 +57,7 @@ PutLink::PutLink(Type t, const HandleSeq& oset,
 PutLink::PutLink(Type t, const Handle& a,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : Link(t, a, tv, av)
+    : LambdaLink(t, a, tv, av)
 {
 	if (not classserver().isA(t, PUT_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
@@ -67,7 +67,7 @@ PutLink::PutLink(Type t, const Handle& a,
 PutLink::PutLink(Type t, const Handle& a, const Handle& b,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : Link(t, a, b, tv, av)
+    : LambdaLink(t, {a, b}, tv, av)
 {
 	if (not classserver().isA(t, PUT_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
@@ -75,7 +75,7 @@ PutLink::PutLink(Type t, const Handle& a, const Handle& b,
 }
 
 PutLink::PutLink(Link& l)
-    : Link(l)
+    : LambdaLink(l)
 {
 	Type tscope = l.getType();
 	if (not classserver().isA(tscope, PUT_LINK))

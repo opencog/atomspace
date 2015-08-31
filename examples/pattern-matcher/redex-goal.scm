@@ -1,7 +1,7 @@
 ;
 ; Simple goal solving using redex's
 ;
-;; XXX under construction and broken.
+;; XXX under construction and broken. Just junk right now.
 ;
 (use-modules (opencog))
 (use-modules (opencog query))
