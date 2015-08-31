@@ -3,8 +3,6 @@
 ;
 ; Demonstrate the use of DefineLink to give names to things.
 ;
-; XXX caution: under construction, unstable, known buggy.
-;
 (use-modules (opencog))
 (use-modules (opencog query))
 

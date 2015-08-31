@@ -120,8 +120,8 @@ DEFINE_LINK <- ORDERED_LINK
 
 // PutLinks perform a beta-reduction when executed; i.e. they get
 // beta-reduced when they are executed. The first atom in a PutLink
-// can be eithr a LambdaLink... or anything that's free, too.
-PUT_LINK <- ORDERED_LINK
+// can be either a LambdaLink... or anything that's free, too.
+PUT_LINK <- LAMBDA_LINK
 
 // Pattern definition, pattern grounding/satisfaction.
 // The PatternLink implements the base class holding a pattern that

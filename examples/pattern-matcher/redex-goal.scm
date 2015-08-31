@@ -1,6 +1,8 @@
 ;
 ; Simple goal solving using redex's
 ;
+;; XXX under construction and broken. Just junk right now.
+;
 (use-modules (opencog))
 (use-modules (opencog query))
 
@@ -16,32 +18,60 @@
 
 ;;; Assert implication
 ;;;   |- likes(Tom,$X) -> likes(Bill, $X) 
+;;; The ImplicationLink is a declarative form of the above.
 (ImplicationLink
 	(EvaluationLink
 		(PredicateNode "likes")
 		(ListLink
 			(ConceptNode "Tom")
-			(VariableNode "$X")
-		)
-	)
+			(VariableNode "$X")))
 	(EvaluationLink
 		(PredicateNode "likes")
 		(ListLink
 			(ConceptNode "Bill")
-			(VariableNode "$X")
-		)
-	)
-)
+			(VariableNode "$X"))))
+
+;;; The equivalent imperative form of the above.
+(BindLink
+	(VariableNode "$X")
+	(EvaluationLink
+		(PredicateNode "likes")
+		(ListLink
+			(ConceptNode "Tom")
+			(VariableNode "$X")))
+	(EvaluationLink
+		(PredicateNode "likes")
+		(ListLink
+			(ConceptNode "Bill")
+			(VariableNode "$X"))))
+
+;;; Same as above, but in imperative form. it uses the GetLink
+;;; to search the atomspace to find everything Tom likes, and then
+;;; uses the PutLink to perform a beta-reduction, to plug in those
+;;; answers into a template for the things that Bill likes.
+;;; Note the use of two distinct variables; $X is bound to GetLink;
+;;; basically, $X is the return value from GetLink. The $Y variable
+;;; is bound to PutLink, and functions as a classical lambda-calculus
+;;; lambda, defining the arguments that PutLink accepts.
+(define implication
+	(PutLink
+		(EvaluationLink
+			(PredicateNode "likes")
+			(ListLink
+				(ConceptNode "Bill")
+				(VariableNode "$Y")))
+		(GetLink
+			(EvaluationLink
+				(PredicateNode "likes")
+				(ListLink
+					(ConceptNode "Tom")
+					(VariableNode "$X"))))))
+
+;; This causes the implication to be performed.
+(cog-execute! implication)
 
 ;;; Question to be answered: is it true that likes(Bill, baseball)?
 ;;; i.e. can we show that |- likes(Bill, baseball)
-
-(BetaRedex
-	(ConceptNode "liking-rule")
-	(ListLink
-		(ConceptNode "baseball")
-	)
-)
 
 ;;;
 ;;; A named satisfiability query: Does Bill like $X?
@@ -66,23 +96,19 @@
 ;;; the DefineLink binds exactly the same variables that the lambda under
 ;;; it does (with SatisfactionLink being the lambda).
 (DefineLink
-	(ConceptNode "Does Bill like X?")
+	(DefinedPredicateNode "Does Bill like X?")
 	(SatisfactionLink
 		(VariableNode "$X")
 		(EvaluationLink
 			(PredicateNode "likes")
 			(ListLink
 				(ConceptNode "Bill")
-				(VariableNode "$X")
-			)
-		)
-	)
-)
+				(VariableNode "$X")))))
 
 ;;; A satisfiability question: Does Bill like X where X is baseball?
 (MemberLink
 	(ConceptNode "baseball")
-	(ConceptNode "Does Bill like X?")
+	(DefinedPredicateNode "Does Bill like X?")
 )
 
 ;; solution:
@@ -91,3 +117,88 @@
 ;; pattern match first half of implication, if found
 ;; try to check member again.
 
+(cog-evaluate! (DefinedPredicateNode "Does Bill like X?"))
+(cog-satisfy (DefinedPredicateNode "Does Bill like X?"))
+
+;; A quasi-generic rule implicator.
+;; Searches for all implication links (of a very specific form)
+;; and converts them into GetPut imperatives.
+(PutLink
+	(VariableList
+		(VariableNode "$tp")
+		(VariableNode "$fp")
+		(VariableNode "$aaa")
+		(VariableNode "$bbb")
+		(VariableNode "$vvv")
+	)
+	(PutLink
+		(EvaluationLink
+			(VariableNode "$tp")
+			(ListLink
+				(VariableNode "$bbb")
+				(VariableNode "$vvv")))
+		(GetLink
+			(EvaluationLink
+				(VariableNode "$fp")
+				(ListLink
+					(VariableNode "$aaa")
+					(VariableNode "$vvv")))))
+
+	;; Search for ImplicationLinks, and disect them.
+	(GetLink
+		(VariableList
+			(TypedVariableLink (VariableNode "$fpred") (TypeNode "PredicateNode"))
+			(TypedVariableLink (VariableNode "$tpred") (TypeNode "PredicateNode"))
+			(TypedVariableLink (VariableNode "$A") (TypeNode "ConceptNode"))
+			(TypedVariableLink (VariableNode "$B") (TypeNode "ConceptNode"))
+			(TypedVariableLink (VariableNode "$V") (TypeNode "VariableNode"))
+		)
+		(ImplicationLink
+			(EvaluationLink
+				(VariableNode "$fpred")
+				(ListLink
+					(VariableNode "$A")
+					(VariableNode "$V")))
+			(EvaluationLink
+				(VariableNode "$tpred")
+				(ListLink
+					(VariableNode "$B")
+					(VariableNode "$V"))))))
+
+;; Same as above, but using BindLink, so order is reversed.
+(BindLink
+	;; Search for ImplicationLinks, and disect them.
+	(VariableList
+		(TypedVariableLink (VariableNode "$fpred") (TypeNode "PredicateNode"))
+		(TypedVariableLink (VariableNode "$tpred") (TypeNode "PredicateNode"))
+		(TypedVariableLink (VariableNode "$A") (TypeNode "ConceptNode"))
+		(TypedVariableLink (VariableNode "$B") (TypeNode "ConceptNode"))
+		(TypedVariableLink (VariableNode "$V") (TypeNode "VariableNode"))
+	)
+	(ImplicationLink
+		(EvaluationLink
+			(VariableNode "$fpred")
+			(ListLink
+				(VariableNode "$A")
+				(VariableNode "$V")))
+		(EvaluationLink
+			(VariableNode "$tpred")
+			(ListLink
+				(VariableNode "$B")
+				(VariableNode "$V"))))
+
+	; If an ImplicationLink was found, create a matching BindLink
+	(BindLink
+		(VariableNode "$V")
+		(EvaluationLink
+			(VariableNode "$fpred")
+			(ListLink
+				(VariableNode "$A")
+				(VariableNode "$V")))
+		(EvaluationLink
+			(VariableNode "$tpred")
+			(ListLink
+				(VariableNode "$B")
+				(VariableNode "$V")))))
+
+(cog-bind (gar (cog-bind x)))
