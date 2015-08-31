@@ -68,6 +68,9 @@ void PatternLink::common_init(void)
 	                         _components, _component_vars);
 	_num_comps = _components.size();
 
+	// Make sure every variable is in some component.
+	check_satisfiability(_varlist.varset, _component_vars);
+
 	// If there is only one connected component, then this can be
 	// handled during search by a single PatternLink. The multi-clause
 	// grounding mechanism is not required for that case.
@@ -81,7 +84,6 @@ void PatternLink::common_init(void)
 		// Is this related to the other XXX for validate_clauses??
 		// _pat.cnf_clauses = _components[0];
 	   make_connectivity_map(_pat.cnf_clauses);
-		check_satisfiability(_varlist.varset);
 	}
 
 	make_term_trees();
@@ -489,7 +491,7 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 // and I'm too lazy to investigate, because an alternate hack is
 // working, at the moment.
 		// If a clause is a variable, we have to make the worst-case
-		// assumption that it is evaulatable, so that we can evaluate
+		// assumption that it is evaluatable, so that we can evaluate
 		// it later.
 		if (VARIABLE_NODE == clause->getType())
 		{
@@ -639,25 +641,30 @@ void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 }
 
 /// Make sure that every variable appears in some groundable clause.
-/// Variables have to be grounded to get used; it makes no sense to
-/// bind variables that are fundamentally ungroundable.
-void PatternLink::check_satisfiability(const std::set<Handle>& vars)
+/// Variables have to be grounded before an evaluatable clause
+/// containing them can be evaluated.  If they can never be grounded,
+/// then any clauses in which they appear cannot ever be evaluated,
+/// leading to an undefined condition.  So, explicitly check and throw
+/// an error if a pattern is ill-formed.
+void PatternLink::check_satisfiability(const std::set<Handle>& vars,
+                                       const std::vector<std::set<Handle>>& compvars)
 {
+	// Compute the set-union of all component vars.
+	std::set<Handle> vunion;
+	for (const std::set<Handle>& vset : compvars)
+	{
+		for (const Handle& v : vset)
+			vunion.insert(v);
+	}
+
+	// Is every variable in some component? If not, then throw.
 	for (const Handle& v : vars)
 	{
-		bool whoops = false;
-		try
-		{
-			_pat.connectivity_map.at(v);
-		}
-		catch(const std::out_of_range&) 
-		{
-			whoops = true;
-		}
-		if (whoops)
+		auto it = vunion.find(v);
+		if (vunion.end() == it)
 		{
 			throw InvalidParamException(TRACE_INFO,
-				"Cannot ground variable %s\n", v->toString().c_str());
+				"Variable not groundable: %s\n", v->toString().c_str());
 		}
 	}
 }

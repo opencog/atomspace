@@ -113,7 +113,8 @@ protected:
 	void make_connectivity_map(const HandleSeq&);
 	void make_map_recursive(const Handle&, const Handle&);
 	void check_connectivity(const std::vector<HandleSeq>&);
-	void check_satisfiability(const std::set<Handle>&);
+	void check_satisfiability(const std::set<Handle>&,
+	                          const std::vector<std::set<Handle>>&);
 
 	void make_term_trees();
 	void make_term_tree_recursive(const Handle&, const Handle&,
