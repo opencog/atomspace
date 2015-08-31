@@ -99,13 +99,13 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
         lnew <- mapM fromRawGen out
         Just $ Gen $ OrLink tv lnew
       (ImplicationT ,[ar,br]) -> do
-        a <- fromRawGen ar
-        b <- fromRawGen br
+        a <- filt ar :: Maybe (Gen PredicateT)
+        b <- filt br :: Maybe (Gen PredicateT)
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ Gen $ ImplicationLink tv a1 b1
       (EquivalenceT ,[ar,br]) -> do
-        a <- fromRawGen ar
-        b <- fromRawGen br
+        a <- filt ar :: Maybe (Gen PredicateT)
+        b <- filt br :: Maybe (Gen PredicateT)
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ Gen $ EquivalenceLink tv a1 b1
       (EvaluationT ,[ar,br]) -> do
@@ -124,8 +124,8 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ Gen $ SimilarityLink tv a1 b1
       (MemberT ,[ar,br]) -> do
-        a <- filt ar :: Maybe (Gen NodeT)
-        b <- filt br :: Maybe (Gen NodeT)
+        a <- filt ar :: Maybe (Gen AtomT)
+        b <- filt br :: Maybe (Gen ConceptT)
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ Gen $ MemberLink tv a1 b1
       (SatisfyingSetT ,[ar]) -> do
