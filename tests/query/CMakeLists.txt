@@ -47,11 +47,6 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(SubstitutionUTest)
 	ADD_CXXTEST(GetLinkUTest)
 
-	# Currently disabled, because these are under consturction;
-	# The BetaRedex has been replaced by PutLink.
-	# longer used by the BindLink/SatsifactionLink
-	# ADD_CXXTEST(BetaRedexUTest)
-	# ADD_CXXTEST(RedexBindUTest)
 	ADD_CXXTEST(GreaterThanUTest)
 	ADD_CXXTEST(GreaterComputeUTest)
 	ADD_CXXTEST(SequenceUTest)
@@ -86,8 +81,6 @@ ADD_CUSTOM_TARGET (qtest
 # Copy files to the build directory.  We do this so that the
 # scheme files can be found no matter where the source directory
 # might be.
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/beta-redex.scm
-    ${PROJECT_BINARY_DIR}/tests/query/beta-redex.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-crime.scm
     ${PROJECT_BINARY_DIR}/tests/query/buggy-crime.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-link.scm

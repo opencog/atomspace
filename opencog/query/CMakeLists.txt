@@ -2,7 +2,6 @@
 # Build the query shlib
 ADD_LIBRARY(query SHARED
 	AttentionalFocusCB.cc
-	Composition.cc
 	DefaultPatternMatchCB.cc
 	Implicator.cc
 	InitiateSearchCB.cc
