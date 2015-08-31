@@ -112,12 +112,12 @@ data Atom (a :: AtomType) where
 
     AndLink             :: TVal -> [AtomGen] -> Atom AndT
     OrLink              :: TVal -> [AtomGen] -> Atom OrT
-    ImplicationLink     :: (a <~ AtomT,b <~ AtomT) =>
-                           TVal -> Atom a -> Atom b -> Atom ImplicationT
-    EquivalenceLink     :: (a <~ AtomT,b <~ AtomT) =>
-                           TVal -> Atom a -> Atom b -> Atom EquivalenceT
-    EvaluationLink      :: (p <~ PredicateT,l <~ ListT) =>
-                           TVal -> Atom p -> Atom l -> Atom EvaluationT
+    ImplicationLink     :: (p1 <~ PredicateT,p2 <~ PredicateT) =>
+                           TVal -> Atom p1 -> Atom p2 -> Atom ImplicationT
+    EquivalenceLink     :: (p1 <~ PredicateT,p2 <~ PredicateT) =>
+                           TVal -> Atom p1 -> Atom p2 -> Atom EquivalenceT
+    EvaluationLink      :: (p <~ PredicateT,a <~ AtomT) =>
+                           TVal -> Atom p -> Atom a -> Atom EvaluationT
 
     ConceptNode         :: AtomName -> TVal -> Atom ConceptT
 
@@ -125,8 +125,8 @@ data Atom (a :: AtomType) where
                            TVal -> Atom c1 -> Atom c2 -> Atom InheritanceT
     SimilarityLink      :: (c1 <~ ConceptT,c2 <~ ConceptT) =>
                            TVal -> Atom c1 -> Atom c2 -> Atom SimilarityT
-    MemberLink          :: (c1 <~ NodeT,c2 <~ NodeT) =>
-                           TVal -> Atom c1 -> Atom c2 -> Atom MemberT
+    MemberLink          :: (a <~ AtomT,c <~ ConceptT) =>
+                           TVal -> Atom a -> Atom c -> Atom MemberT
     SatisfyingSetLink   :: (p <~ PredicateT) =>
                            Atom p -> Atom SatisfyingSetT
 
@@ -137,8 +137,8 @@ data Atom (a :: AtomType) where
 
     SchemaNode          :: AtomName -> Atom SchemaT
     GroundedSchemaNode  :: AtomName -> Atom GroundedSchemaT
-    ExecutionLink       :: (s <~ SchemaT,l <~ ListT,a <~ AtomT) =>
-                           Atom s -> Atom l -> Atom a -> Atom ExecutionT
+    ExecutionLink       :: (s <~ SchemaT,i <~ AtomT,o <~ AtomT) =>
+                           Atom s -> Atom i -> Atom o -> Atom ExecutionT
 
     VariableNode        :: AtomName -> Atom VariableT
     VariableList        :: [Gen VariableT] -> Atom VariableT
