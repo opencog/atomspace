@@ -173,9 +173,13 @@ void PutLink::typecheck_values(void)
 		return;
 	}
 
+	// GetLinks are evaluated dynamically, later.
+	if (GET_LINK == vtype)
+		return;
+
 	if (SET_LINK != vtype)
 		throw InvalidParamException(TRACE_INFO,
-			"PutLink was expecting a ListLink or SetLink!");
+			"PutLink was expecting a ListLink, SetLink or GetLink!");
 
 	if (1 < sz)
 	{
