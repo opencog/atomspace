@@ -47,11 +47,6 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(SubstitutionUTest)
 	ADD_CXXTEST(GetLinkUTest)
 
-	# Currently disabled, because these are under consturction;
-	# The BetaRedex has been replaced by PutLink.
-	# longer used by the BindLink/SatsifactionLink
-	# ADD_CXXTEST(BetaRedexUTest)
-	# ADD_CXXTEST(RedexBindUTest)
 	ADD_CXXTEST(GreaterThanUTest)
 	ADD_CXXTEST(GreaterComputeUTest)
 	ADD_CXXTEST(SequenceUTest)
