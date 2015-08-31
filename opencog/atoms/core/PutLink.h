@@ -52,8 +52,10 @@ class PutLink : public LambdaLink
 {
 protected:
 
+	/// The values that are to be placed into the body.
+	Handle _values;
+
 	void init(void);
-	void extract_variables(void);
 	void typecheck_values(void);
 
 	Handle do_reduce(void) const;

@@ -120,37 +120,29 @@ PutLink::PutLink(Link& l)
 ///
 void PutLink::init(void)
 {
-	extract_variables();
-	typecheck_values();
-}
+	extract_variables(_outgoing);
 
-/// Extract the variables in the body.
-/// The body must either be a lambda, or we assume all free variables get bound.
-void PutLink::extract_variables(void)
-{
+	// If threre are initial variable declarations, they will be
+	// in position 0, the body will be at 1, and the values at 2.
+	// Otherwise, the body is at 0, and the values at 1.
 	size_t sz = _outgoing.size();
-	if (2 != sz)
-		throw InvalidParamException(TRACE_INFO, "Unexprected PutLink arity! Got %lu", sz);
-
-	const Handle& body = _outgoing[0];
-	Type btype = body->getType();
-
-	// If the body is a LambdaLink, then use it's variable declarations;
-	// else use the FreeLink to find all the variables.
-	if (classserver().isA(btype, LAMBDA_LINK))
+	if (_outgoing[0] == _body)
 	{
-		LambdaLinkPtr lam(LambdaLinkCast(body));
-		if (NULL == lam)
-			lam = createLambdaLink(*LinkCast(body));
-		_varlist = lam->get_variables();
+		if (2 != sz)
+			throw InvalidParamException(TRACE_INFO,
+				"Expecting an outgoing set size of two, got %d", sz);
+		_values = _outgoing[1];
 	}
 	else
 	{
-		FreeLink fl(body);
-		VariableList vl(fl.get_vars());
-		_varlist = vl.get_variables();
+		if (3 != sz)
+			throw InvalidParamException(TRACE_INFO,
+				"Expecting an outgoing set size of three, got %d", sz);
+		_values = _outgoing[2];
 	}
+	typecheck_values();
 }
+
 
 /// Check that the values in the PutLink obey the type constraints.
 // XXX FIXME .. this is wrong, if, for example, the values are dynamic
@@ -158,14 +150,12 @@ void PutLink::extract_variables(void)
 // only be performed at run-time!
 void PutLink::typecheck_values(void)
 {
-	const Handle& vals = _outgoing[1];
-
 	size_t sz = _varlist.varseq.size();
-	Type vtype = vals->getType();
+	Type vtype = _values->getType();
 
 	if (1 == sz)
 	{
-		if (not _varlist.is_type(vals)
+		if (not _varlist.is_type(_values)
 		    and SET_LINK != vtype)
 		{
 				throw InvalidParamException(TRACE_INFO,
@@ -174,7 +164,7 @@ void PutLink::typecheck_values(void)
 		return;
 	}
 
-	LinkPtr lval(LinkCast(vals));
+	LinkPtr lval(LinkCast(_values));
 	if (LIST_LINK == vtype)
 	{
 		if (not _varlist.is_type(lval->getOutgoingSet()))
@@ -251,9 +241,7 @@ void PutLink::typecheck_values(void)
 // must be done at run-time, and not at definition-time.
 Handle PutLink::do_reduce(void) const
 {
-	const Handle& body = _outgoing[0];
-	const Handle& vals = _outgoing[1];
-	Type vtype = vals->getType();
+	Type vtype = _values->getType();
 
 	if (1 == _varlist.varseq.size())
 	{
@@ -262,34 +250,34 @@ Handle PutLink::do_reduce(void) const
 		if (SET_LINK != vtype)
 		{
 			HandleSeq oset;
-			oset.push_back(vals);
-			return _varlist.substitute_nocheck(body, oset);
+			oset.push_back(_values);
+			return _varlist.substitute_nocheck(_body, oset);
 		}
 
 		// Iterate over the set...
 		HandleSeq bset;
-		for (Handle h : LinkCast(vals)->getOutgoingSet())
+		for (Handle h : LinkCast(_values)->getOutgoingSet())
 		{
 			HandleSeq oset;
 			oset.push_back(h);
-			bset.push_back(_varlist.substitute_nocheck(body, oset));
+			bset.push_back(_varlist.substitute_nocheck(_body, oset));
 		}
 		return Handle(createLink(SET_LINK, bset));
 	}
 	if (LIST_LINK == vtype)
 	{
-		const HandleSeq& oset = LinkCast(vals)->getOutgoingSet();
-		return _varlist.substitute_nocheck(body, oset);
+		const HandleSeq& oset = LinkCast(_values)->getOutgoingSet();
+		return _varlist.substitute_nocheck(_body, oset);
 	}
 
 	OC_ASSERT(SET_LINK == vtype,
 		"Should have caught this earlier, in the ctor");
 
 	HandleSeq bset;
-	for (Handle h : LinkCast(vals)->getOutgoingSet())
+	for (Handle h : LinkCast(_values)->getOutgoingSet())
 	{
 		const HandleSeq& oset = LinkCast(h)->getOutgoingSet();
-		bset.push_back(_varlist.substitute_nocheck(body, oset));
+		bset.push_back(_varlist.substitute_nocheck(_body, oset));
 	}
 	return Handle(createLink(SET_LINK, bset));
 }
