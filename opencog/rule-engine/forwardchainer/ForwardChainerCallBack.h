@@ -24,8 +24,6 @@
 #ifndef FORWARDCHAINERCALLBACK_H_
 #define FORWARDCHAINERCALLBACK_H_
 
-#include "ForwardChainerPMCB.h"
-
 class ForwardChainerCallBackUTest;
 
 namespace opencog {
@@ -43,7 +41,6 @@ private:
     friend ::ForwardChainerCallBackUTest;
 
     AtomSpace* _as;
-    ForwardChainerPMCB _fcpm;
     source_selection_mode _ts_mode;
 
     bool is_valid_implicant(const Handle& h);
@@ -61,7 +58,7 @@ protected:
 public:
     ForwardChainerCallBack(AtomSpace* as, source_selection_mode ts_mode =
             TV_FITNESS_BASED) :
-            _as(as),_fcpm(_as), _ts_mode(ts_mode)
+            _as(as), _ts_mode(ts_mode)
     {
     }
     virtual ~ForwardChainerCallBack()

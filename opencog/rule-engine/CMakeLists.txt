@@ -8,8 +8,8 @@ ADD_LIBRARY(ruleengine SHARED
 	backwardchainer/Target.cc
 	URECommons.cc
 	forwardchainer/ForwardChainer.cc
-	forwardchainer/ForwardChainerPMCB.cc
 	forwardchainer/ForwardChainerCallBack.cc
+	forwardchainer/VarGroundingPMCB.h
 	forwardchainer/FCMemory.cc	
 	InferenceSCM.cc
 	Rule.cc
