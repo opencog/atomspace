@@ -68,6 +68,9 @@ void PatternLink::common_init(void)
 	                         _components, _component_vars);
 	_num_comps = _components.size();
 
+	// Make sure every variable is in some component.
+	check_satisfiability(_varlist.varset, _component_vars);
+
 	// If there is only one connected component, then this can be
 	// handled during search by a single PatternLink. The multi-clause
 	// grounding mechanism is not required for that case.
@@ -488,7 +491,7 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 // and I'm too lazy to investigate, because an alternate hack is
 // working, at the moment.
 		// If a clause is a variable, we have to make the worst-case
-		// assumption that it is evaulatable, so that we can evaluate
+		// assumption that it is evaluatable, so that we can evaluate
 		// it later.
 		if (VARIABLE_NODE == clause->getType())
 		{
@@ -634,6 +637,35 @@ void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 	{
 		for (const Handle& ho: l->getOutgoingSet())
 			make_map_recursive(root, ho);
+	}
+}
+
+/// Make sure that every variable appears in some groundable clause.
+/// Variables have to be grounded before an evaluatable clause
+/// containing them can be evaluated.  If they can never be grounded,
+/// then any clauses in which they appear cannot ever be evaluated,
+/// leading to an undefined condition.  So, explicitly check and throw
+/// an error if a pattern is ill-formed.
+void PatternLink::check_satisfiability(const std::set<Handle>& vars,
+                                       const std::vector<std::set<Handle>>& compvars)
+{
+	// Compute the set-union of all component vars.
+	std::set<Handle> vunion;
+	for (const std::set<Handle>& vset : compvars)
+	{
+		for (const Handle& v : vset)
+			vunion.insert(v);
+	}
+
+	// Is every variable in some component? If not, then throw.
+	for (const Handle& v : vars)
+	{
+		auto it = vunion.find(v);
+		if (vunion.end() == it)
+		{
+			throw InvalidParamException(TRACE_INFO,
+				"Variable not groundable: %s\n", v->toString().c_str());
+		}
 	}
 }
 
