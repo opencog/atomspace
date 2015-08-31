@@ -191,7 +191,7 @@ void PutLink::typecheck_values(void)
 				throw InvalidParamException(TRACE_INFO,
 					"PutLink expected value list!");
 
-			if (not _varlist.is_type(lval->getOutgoingSet()))
+			if (not _varlist.is_type(lse->getOutgoingSet()))
 				throw InvalidParamException(TRACE_INFO,
 					"PutLink bad value list!");
 		}
