@@ -35,6 +35,7 @@
 
 #include "ForwardChainerCallBack.h"
 #include "VarGroundingPMCB.h"
+#include "FCMemory.h"
 
 using namespace opencog;
 
@@ -132,35 +133,12 @@ Handle ForwardChainerCallBack::choose_next_source(FCMemory& fcmem)
     return hchosen;
 }
 
-HandleSeq ForwardChainerCallBack::apply_rule(FCMemory& fcmem)
-{
-    auto rule_handle = fcmem.get_cur_rule()->get_handle();
-    BindLinkPtr bl(BindLinkCast(rule_handle));
-    if (NULL == bl) {
-        bl = createBindLink(*LinkCast(rule_handle));
-    }
-    _fcpm.implicand = bl->get_implicand();
-    bl->imply(_fcpm);
-
-    HandleSeq product = _fcpm.get_products();
-
-    //! Make sure the inferences made are new.
-    for (auto iter = product.begin(); iter != product.end();) {
-        if (fcmem.isin_potential_sources(*iter))
-            iter = product.erase(iter);
-        else
-            ++iter;
-    }
-
-    return product;
-}
-
 HandleSeq ForwardChainerCallBack::apply_rule(Handle rhandle,bool search_focus_set_only /*=false*/)
 {
     HandleSeq result;
 
     if (search_focus_set_only) {
-        //TODO use specialized callback that constrains search to be only within focus set
+        //TODO copy focus set to temp atomspace and invoke PM in the temp as
 
     } else {
 

@@ -90,9 +90,8 @@ public:
      * i.e invokes _pattern_matcher.
      * @return a set of handles created as a result of applying current choosen rule
      */
-    virtual HandleSeq apply_rule(FCMemory& fcmem);
+    virtual HandleSeq apply_rule(Handle rhandle,bool search_focus_set_only = false);
 
-    HandleSeq apply_rule(Handle rhandle,bool search_focus_set_only = false);
     HandleSeq derive_rules(Handle source, Rule* rule, bool subatomic = false);
 
 };
