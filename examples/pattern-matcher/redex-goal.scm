@@ -31,6 +31,20 @@
 			(ConceptNode "Bill")
 			(VariableNode "$X"))))
 
+;;; The equivalent imperative form of the above.
+(BindLink
+	(VariableNode "$X")
+	(EvaluationLink
+		(PredicateNode "likes")
+		(ListLink
+			(ConceptNode "Tom")
+			(VariableNode "$X")))
+	(EvaluationLink
+		(PredicateNode "likes")
+		(ListLink
+			(ConceptNode "Bill")
+			(VariableNode "$X"))))
+
 ;;; Same as above, but in imperative form. it uses the GetLink
 ;;; to search the atomspace to find everything Tom likes, and then
 ;;; uses the PutLink to perform a beta-reduction, to plug in those
@@ -108,20 +122,29 @@
 
 ;; A quasi-generic rule implicator.
 ;; Searches for all implication links (of a very specific form)
-;; and runs them.
+;; and converts them into GetPut imperatives.
 (PutLink
 	(VariableList
-		(VariableNode "$discard")
-		(VariableNode "$pred")
+		(VariableNode "$tp")
+		(VariableNode "$fp")
 		(VariableNode "$aaa")
-		(VariableNode "don't care")
 		(VariableNode "$bbb")
+		(VariableNode "$vvv")
 	)
-	(EvaluationLink
-		(VariableNode "$pred")
-		(ListLink
-			(VariableNode "$aaa")
-			(VariableNode "$bbb")))
+	(PutLink
+		(EvaluationLink
+			(VariableNode "$tp")
+			(ListLink
+				(VariableNode "$bbb")
+				(VariableNode "$vvv")))
+		(GetLink
+			(EvaluationLink
+				(VariableNode "$fp")
+				(ListLink
+					(VariableNode "$aaa")
+					(VariableNode "$vvv")))))
+
+	;; Search for ImplicationLinks, and disect them.
 	(GetLink
 		(VariableList
 			(TypedVariableLink (VariableNode "$fpred") (TypeNode "PredicateNode"))
@@ -135,9 +158,47 @@
 				(VariableNode "$fpred")
 				(ListLink
 					(VariableNode "$A")
-					(VariableNode "$X")))
+					(VariableNode "$V")))
 			(EvaluationLink
 				(VariableNode "$tpred")
 				(ListLink
 					(VariableNode "$B")
 					(VariableNode "$V"))))))
+
+;; Same as above, but using BindLink, so order is reversed.
+(BindLink
+	;; Search for ImplicationLinks, and disect them.
+	(VariableList
+		(TypedVariableLink (VariableNode "$fpred") (TypeNode "PredicateNode"))
+		(TypedVariableLink (VariableNode "$tpred") (TypeNode "PredicateNode"))
+		(TypedVariableLink (VariableNode "$A") (TypeNode "ConceptNode"))
+		(TypedVariableLink (VariableNode "$B") (TypeNode "ConceptNode"))
+		(TypedVariableLink (VariableNode "$V") (TypeNode "VariableNode"))
+	)
+	(ImplicationLink
+		(EvaluationLink
+			(VariableNode "$fpred")
+			(ListLink
+				(VariableNode "$A")
+				(VariableNode "$V")))
+		(EvaluationLink
+			(VariableNode "$tpred")
+			(ListLink
+				(VariableNode "$B")
+				(VariableNode "$V"))))
+
+	; If an ImplicationLink was found, create a matching BindLink
+	(BindLink
+		(VariableNode "$V")
+		(EvaluationLink
+			(VariableNode "$fpred")
+			(ListLink
+				(VariableNode "$A")
+				(VariableNode "$V")))
+		(EvaluationLink
+			(VariableNode "$tpred")
+			(ListLink
+				(VariableNode "$B")
+				(VariableNode "$V")))))
+
+(cog-bind (gar (cog-bind x)))
