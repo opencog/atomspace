@@ -24,5 +24,4 @@ them.
 * fsm-mealy.scm: A generic Mealy machine constructor.
 * markov-chain.scm: A Markov chain (probabilistic FSM) based on fsm-full.
 
-Under construction:
-* define.scm: using DefineLinks.
+* define.scm: using DefineLinks to create patterns out of parts.
