@@ -92,17 +92,22 @@ UnorderedHandleSet ForwardChainer::do_step(ForwardChainerCallBack& fcb)
     UnorderedHandleSet products;
     HandleSeq derived_rhandles = fcb.derive_rules(_fcmem.get_cur_source(), r);
 
-    for (Handle rhandle : derived_rhandles) {
+    HandleSeq temp_result;
+    if (not _fcmem.get_focus_set().empty()) {
 
-        HandleSeq result;
+        for (Handle rhandle : derived_rhandles) {
+            temp_result = fcb.apply_rule(rhandle, true);
+            std::copy(temp_result.begin(), temp_result.end(),
+                      std::inserter(products, products.end()));
+        }
 
-        //TODO move this out of the loop`
-        if (not _fcmem.get_focus_set().empty())
-            result = fcb.apply_rule(rhandle,true);
-        else
-            result = fcb.apply_rule(rhandle);
+    } else {
 
-        std::copy(result.begin(),result.end(),std::inserter(products,products.end()));
+        for (Handle rhandle : derived_rhandles) {
+            temp_result = fcb.apply_rule(rhandle);
+            std::copy(temp_result.begin(), temp_result.end(),
+                      std::inserter(products, products.end()));
+        }
     }
 
     //done with this rule.
