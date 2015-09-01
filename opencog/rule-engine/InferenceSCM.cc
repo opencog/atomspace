@@ -80,7 +80,8 @@ void InferenceSCM::init(void)
 #endif
 }
 
-Handle InferenceSCM::do_forward_chaining(Handle h, Handle rbs)
+Handle InferenceSCM::do_forward_chaining(
+        Handle h, Handle rbs, Handle hfocus_set /*= Handle::UNDEFINED*/)
 {
     if (Handle::UNDEFINED == rbs)
         throw RuntimeException(TRACE_INFO,
@@ -90,6 +91,17 @@ Handle InferenceSCM::do_forward_chaining(Handle h, Handle rbs)
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fc");
     ForwardChainerCallBack dfc(as);
     ForwardChainer fc(*as, rbs);
+
+    HandleSeq focus_set = {};
+
+    if (hfocus_set != Handle::UNDEFINED) {
+        if (LinkCast(hfocus_set))
+            focus_set = LinkCast(hfocus_set)->getOutgoingSet();
+        else
+            throw RuntimeException(
+                    TRACE_INFO,
+                    "InferenceSCM::do_forward_chaining - focus set should be link type!");
+    }
     /**
      * Parse (cog-fc ListLink()) as forward chaining with
      * Handle::UNDEFINED which does pattern matching on the atomspace
@@ -97,8 +109,14 @@ Handle InferenceSCM::do_forward_chaining(Handle h, Handle rbs)
      * with the python version of the forward chainer.
      */
     if (h->getType() == LIST_LINK and as->get_outgoing(h).empty())
-        fc.do_chain(dfc, Handle::UNDEFINED);
+    {
+        if (focus_set.empty())
+            fc.do_chain(dfc, Handle::UNDEFINED);
+        else
+            fc.do_chain(dfc, Handle::UNDEFINED,focus_set);
+    }
     else
+    {
         /** Does variable fulfillment forward chaining or forward chaining based on
          *  target node @param h.
          *  example (cog-fc (InheritanceLink (VariableNode "$X") (ConceptNode "Human")))
@@ -107,7 +125,11 @@ Handle InferenceSCM::do_forward_chaining(Handle h, Handle rbs)
          *  and (cog-fc (ConceptNode "Human")) will start forward chaining on the concept Human
          *  trying to generate inferences associated only with the conceptNode Human.
          */
-        fc.do_chain(dfc, h);
+        if (focus_set.empty())
+            fc.do_chain(dfc, h);
+        else
+            fc.do_chain(dfc, h, focus_set);
+    }
 
     HandleSeq result = fc.get_chaining_result();
     return as->add_link(LIST_LINK, result);
