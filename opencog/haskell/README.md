@@ -69,15 +69,28 @@ export STACK_YAML=<ATOMSPACE_ROOT>/opencog/haskell/stack.yaml
 stack ghci
 ```
 
-Or, to avoid defining STACK_YAML every time, you can include this
-library to your local environment, adding this library path to your
-package list in your local config file:
-
-~/.stack/global/stack.yaml ,and then running:
+### Global installation
+To avoid defining STACK_YAML every time, you can include this
+library to your global environment, adding the absolute library path
+to your package list in your global config file
+~/.stack/global/stack.yaml :
+```yaml
+...
+packages:
+- /home/...<ATOMSPACE_ROOT>/opencog/haskell
+...
+```
+and then running:
 
 ```
-stack install opencog-atomspace
+stack setup
+
+stack install opencog-atomspace --extra-lib-dirs=/usr/local/lib/opencog
 ```
+
+(Note: they must be run in a different directory than
+<ATOMSPACE_ROOT>/opencog/haskell ,
+or stack will use the local project environment)
 
 Then you can compile simple .hs files with:
 ```
