@@ -44,6 +44,7 @@ private:
 	HandleSeq _selected_sources; /*<selected sources on each forward chaining steps*/
 	HandleSeq _potential_sources; /*<list of inference products and premises to select source from*/
 	vector<Inference> _inf_history; /*<inference history*/
+	HandleSeq _focus_set;
 
 	AtomSpace* _as;
 public:
@@ -72,6 +73,10 @@ public:
 	void update_potential_sources(HandleSeq input);
 	bool isin_potential_sources(Handle h);
 	Handle get_cur_source(void);
+
+	//focus set
+	void set_focus_set(HandleSeq focus_set);
+	HandleSeq get_focus_set(void);
 
     //Attentional focus flag
 	void set_search_in_af(bool val);

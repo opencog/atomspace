@@ -94,7 +94,14 @@ UnorderedHandleSet ForwardChainer::do_step(ForwardChainerCallBack& fcb)
 
     for (Handle rhandle : derived_rhandles) {
 
-        HandleSeq result = fcb.apply_rule(rhandle);
+        HandleSeq result;
+
+        //TODO move this out of the loop`
+        if (not _fcmem.get_focus_set().empty())
+            result = fcb.apply_rule(rhandle,true);
+        else
+            result = fcb.apply_rule(rhandle);
+
         std::copy(result.begin(),result.end(),std::inserter(products,products.end()));
     }
 
@@ -106,12 +113,15 @@ UnorderedHandleSet ForwardChainer::do_step(ForwardChainerCallBack& fcb)
 
 void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
                               Handle hsource/*=Handle::UNDEFINED*/,
-                              Handle focus_set /*= {}*/)
+                              HandleSeq focus_set /*= {}*/)
 {
     if (hsource == Handle::UNDEFINED) {
         do_pm();
         return;
     }
+
+    if(not focus_set.empty())
+            _fcmem.set_focus_set(focus_set);
 
     fcb._fcmem = &_fcmem;
 

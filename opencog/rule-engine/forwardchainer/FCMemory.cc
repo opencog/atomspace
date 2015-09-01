@@ -96,6 +96,16 @@ void FCMemory::set_cur_rule(Rule* r)
     _cur_rule = r;
 }
 
+void FCMemory::set_focus_set(HandleSeq focus_set)
+{
+    _focus_set = focus_set;
+}
+
+HandleSeq FCMemory::get_focus_set(void)
+{
+    return _focus_set ;
+}
+
 void FCMemory::add_rules_product(int iteration, HandleSeq product)
 {
     for (Handle p : product) {
