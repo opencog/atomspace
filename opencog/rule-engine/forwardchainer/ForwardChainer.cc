@@ -113,6 +113,8 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
         return;
     }
 
+    fcb._fcmem = &_fcmem;
+
     // Variable fulfillment query.
     UnorderedHandleSet var_nodes = get_outgoing_nodes(hsource,
                                                       { VARIABLE_NODE });
@@ -131,6 +133,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
     auto max_iter = _configReader.get_maximum_iterations();
 
     while (_iteration < max_iter /*OR other termination criteria*/) {
+
         _log->info("Iteration %d", _iteration);
 
         if(rule_weight.empty())
