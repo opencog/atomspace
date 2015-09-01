@@ -1,7 +1,23 @@
 INCLUDE_DIRECTORIES(
 	${PYTHON_INCLUDE_PATH}
+	${PROJECT_SOURCE_DIR}/opencog/atomspace
+	${PROJECT_SOURCE_DIR}/opencog/guile
+	${PROJECT_SOURCE_DIR}/opencog/util
 )
 
+LINK_DIRECTORIES(
+	${PROJECT_BINARY_DIR}/opencog/atomspace
+	${PROJECT_BINARY_DIR}/opencog/guile
+	${PROJECT_BINARY_DIR}/opencog/util
+)
+
+LINK_LIBRARIES(
+	atomspace
+	smob
+	clearbox
+	execution
+	${GUILE_LIBRARIES}
+)
 
 # The PythonEvalUTest tests PythonEval independent of the CogServer. It depends
 # on the server being around for the Scheme code but it does not message

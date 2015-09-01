@@ -7,6 +7,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/guile/load-file.h>
+#include <opencog/atoms/execution/ExecSCM.h>
 
 using std::string;
 
@@ -41,6 +42,8 @@ public:
         logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
         logger().setBackTraceLevel(Logger::getLevelFromString(config()["BACK_TRACE_LOG_LEVEL"]));
         logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+        opencog_exec_init();
     }
 
     ~PythonEvalUTest() {}
@@ -264,8 +267,7 @@ public:
 
         config().set("SCM_PRELOAD",
                      "opencog/atomspace/core_types.scm, "
-                     "opencog/scm/opencog.scm, "
-                     "opencog/scm/opencog/exec.scm");
+		     "opencog/scm/opencog/exec.scm");
         AtomSpace *as = new AtomSpace();
         PythonEval::create_singleton_instance(as);
         PythonEval* python = &PythonEval::instance();
