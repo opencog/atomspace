@@ -45,13 +45,14 @@ private:
 	 * @param rbs rule-based system atom
 	 * @return ???
 	 */
-	Handle do_forward_chaining(Handle h, Handle rbs);
+    Handle do_forward_chaining(Handle h, Handle rbs, Handle hfocus_set =
+            Handle::UNDEFINED);
 	/**
 	 * @param h target
 	 * @param rbs rule-based system atom
 	 * @return ???
 	 */
-	Handle do_backward_chaining(Handle h, Handle rbs);
+    Handle do_backward_chaining(Handle h, Handle rbs);
 public:
 	InferenceSCM();
 };
