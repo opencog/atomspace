@@ -90,7 +90,12 @@ UnorderedHandleSet ForwardChainer::do_step(ForwardChainerCallBack& fcb)
     _fcmem.set_cur_rule(r);
     //TODO Should we use all derived rules or what?
     UnorderedHandleSet products;
+
     HandleSeq derived_rhandles = fcb.derive_rules(_fcmem.get_cur_source(), r);
+
+    //try sub-atom unification on failure to full unification
+    if (derived_rhandles.empty())
+        derived_rhandles = fcb.derive_rules(_fcmem.get_cur_source(), r, true);
 
     HandleSeq temp_result;
     if (not _fcmem.get_focus_set().empty()) {
