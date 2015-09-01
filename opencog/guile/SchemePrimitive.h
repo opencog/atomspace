@@ -94,6 +94,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			Handle (T::*h_h)(Handle);
 			Handle (T::*h_hi)(Handle, int);
 			Handle (T::*h_hh)(Handle, Handle);
+			Handle (T::*h_hhh)(Handle, Handle, Handle);
 			Handle (T::*h_hs)(Handle, const std::string&);
 			Handle (T::*h_htq)(Handle, Type, const HandleSeq&);
 			Handle (T::*h_sq)(const std::string&, const HandleSeq&);
@@ -137,6 +138,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			H_HI,  // return handle, take handle and int
 			H_HH,  // return handle, take handle and handle
 			H_HS,  // return handle, take handle and string
+			H_HHH, // return handle, take handle, handle and Handle
 			H_HTQ, // return handle, take handle, type, and HandleSeq
 			H_SQ,  // return handle, take string and HandleSeq
 			H_SQQ, // return handle, take string, HandleSeq and HandleSeq
@@ -232,6 +234,17 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
+		               case H_HHH:
+		               {
+		                    Handle h1(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
+		                    Handle h2(
+		                            SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2));
+		                    Handle h3(
+		                            SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 3));
+		                    Handle rh((that->*method.h_hhh)(h1, h2, h3));
+		                    rc = SchemeSmob::handle_to_scm(rh);
+		                    break;
+		                }
 				case H_HS:
 				{
 					Handle h(SchemeSmob::verify_handle(scm_car(args),
@@ -621,6 +634,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		                             const std::string&)
 		DECLARE_CONSTR_3(S_SSS,s_sss,const std::string&, const std::string&,
 		                             const std::string&, const std::string&)
+		DECLARE_CONSTR_3(H_HHH, h_hhh, Handle, Handle, Handle, Handle)
 		DECLARE_CONSTR_0(S_V,  s_v,  const std::string&)
 		DECLARE_CONSTR_1(P_H,  p_h,  TruthValuePtr, Handle)
 		DECLARE_CONSTR_1(V_H,  v_h,  void, Handle)
@@ -699,6 +713,7 @@ DECLARE_DECLARE_3(const std::string&, const std::string&,
                   const std::string&, const std::string&)
 DECLARE_DECLARE_3(void, const std::string&,
                   const std::string&, const std::string&)
+DECLARE_DECLARE_3(Handle, Handle, Handle, Handle)
 DECLARE_DECLARE_4(double, Handle, Handle, Type, bool)
 DECLARE_DECLARE_4(void, Type, int, double, int)
 DECLARE_DECLARE_4(HandleSeq, Handle, Type, int, bool)
