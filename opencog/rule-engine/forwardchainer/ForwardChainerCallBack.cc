@@ -138,9 +138,9 @@ HandleSeq ForwardChainerCallBack::apply_rule(Handle rhandle,bool search_focus_se
     HandleSeq result;
 
     if (search_focus_set_only) {
-        //This restricts PM to look only in the focus set atoms
+        //This restricts PM to look only in the focus set
         AtomSpace focus_set_as;
-        HandleSeq focus_set_atoms = _fcmem->get_potential_sources();
+        HandleSeq focus_set_atoms = _fcmem->get_focus_set();
 
         for (Handle& h : focus_set_atoms)
             focus_set_as.add_atom(h);
