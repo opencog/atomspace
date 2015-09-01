@@ -71,7 +71,7 @@ public:
 	 */
     ForwardChainer(AtomSpace& as, Handle rbs);
     void do_chain(ForwardChainerCallBack& fcb, Handle hsource =
-            Handle::UNDEFINED);
+            Handle::UNDEFINED,HandleSeq focus_set = {});
     UnorderedHandleSet do_step(ForwardChainerCallBack& fcb);
     HandleSeq get_chaining_result(void);
 

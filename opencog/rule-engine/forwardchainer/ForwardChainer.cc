@@ -93,6 +93,7 @@ UnorderedHandleSet ForwardChainer::do_step(ForwardChainerCallBack& fcb)
     HandleSeq derived_rhandles = fcb.derive_rules(_fcmem.get_cur_source(), r);
 
     for (Handle rhandle : derived_rhandles) {
+
         HandleSeq result = fcb.apply_rule(rhandle);
         std::copy(result.begin(),result.end(),std::inserter(products,products.end()));
     }
@@ -104,12 +105,14 @@ UnorderedHandleSet ForwardChainer::do_step(ForwardChainerCallBack& fcb)
 }
 
 void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
-                              Handle hsource/*=Handle::UNDEFINED*/)
+                              Handle hsource/*=Handle::UNDEFINED*/,
+                              Handle focus_set /*= {}*/)
 {
     if (hsource == Handle::UNDEFINED) {
         do_pm();
         return;
     }
+
     // Variable fulfillment query.
     UnorderedHandleSet var_nodes = get_outgoing_nodes(hsource,
                                                       { VARIABLE_NODE });
