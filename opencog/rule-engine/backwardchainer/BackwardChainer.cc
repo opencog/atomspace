@@ -146,6 +146,30 @@ void BackwardChainer::process_target(Target& target)
 		return;
 	}
 
+	// Check whether this target is a logical link and everything inside are
+	// virtual, and therefor useless to explore (PM cannot match it)
+	if (_logical_link_types.count(htarget->getType()) == 1)
+	{
+		bool all_virtual = true;
+		HandleSeq sub_premises = LinkCast(htarget)->getOutgoingSet();
+
+		for (Handle& h : sub_premises)
+		{
+			if (classserver().isA(h->getType(), VIRTUAL_LINK))
+				continue;
+
+			all_virtual = false;
+			break;
+		}
+
+		if (all_virtual)
+		{
+			logger().debug("[BackwardChainer] Boring logical link all virtual, "
+			               "skipping " + htarget->toShortString());
+			return;
+		}
+	}
+
 	// before doing any real backward chaining, see if any variables in
 	// vardecl can already be grounded
 	if (not target.get_varseq().empty())
