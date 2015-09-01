@@ -32,7 +32,6 @@
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atomutils/Substitutor.h>
 #include <opencog/atomutils/AtomUtils.h>
-#include <opencog/atoms/bind/PatternUtils.h>
 #include <opencog/atoms/bind/PatternLink.h>
 
 using namespace opencog;
