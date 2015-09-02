@@ -35,6 +35,7 @@ public:
     void test_substitute_rule_part(void);
     void test_unify(void);
     void test_subatom_unify(void);
+    void test_derive_rules(void);
 };
 
 void ForwardChainerCallBackUTest::setUp()
@@ -82,6 +83,24 @@ void ForwardChainerCallBackUTest::test_choose_source(void)
     TS_ASSERT(5 == hs.size());
 }
 
+void ForwardChainerCallBackUTest::test_derive_rules(void)
+{
+    config().set("SCM_PRELOAD", "tests/rule-engine/bc-deduction.scm,"
+                 "tests/rule-engine/simple-assertions.scm");
+    load_scm_files_from_config(as);
+
+    Handle rule_handle = eval.eval_h("(MemberLink"
+                                     "   pln-rule-deduction-name"
+                                     "   (ConceptNode \"URE\"))");
+    vector<Rule*> rules { new Rule(rule_handle) };
+    Handle source =
+            eval.eval_h(
+                    R"((ConceptNode "Socrates"))");
+
+    ForwardChainerCallBack dfcb(&as);
+    HandleSeq hrules = dfcb.derive_rules(source,rules[0]);
+
+}
 void ForwardChainerCallBackUTest::test_apply_rule(void)
 {
     //Apply rule x and see if all the inferences made
@@ -105,7 +124,17 @@ void ForwardChainerCallBackUTest::test_apply_rule(void)
     fcmem.set_source(source);
 
     ForwardChainerCallBack dfcb(&as);
-    HandleSeq hs = dfcb.apply_rule(fcmem);
+    dfcb._fcmem = &fcmem;
+    HandleSeq derules = dfcb.derive_rules(source,fcmem.get_cur_rule(),true);
+    TS_ASSERT_EQUALS(3,derules.size());
+
+    HandleSeq hs;
+    for(Handle h:derules)
+    {
+    HandleSeq tmp = dfcb.apply_rule(h);
+    hs.insert(hs.end(),tmp.begin(),tmp.end());
+    }
+
 
     TS_ASSERT_EQUALS(1,hs.size());
 
