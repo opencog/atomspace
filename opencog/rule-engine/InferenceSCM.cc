@@ -102,6 +102,7 @@ Handle InferenceSCM::do_forward_chaining(
                     TRACE_INFO,
                     "InferenceSCM::do_forward_chaining - focus set should be link type!");
     }
+
     /**
      * Parse (cog-fc ListLink()) as forward chaining with
      * Handle::UNDEFINED which does pattern matching on the atomspace
@@ -111,9 +112,9 @@ Handle InferenceSCM::do_forward_chaining(
     if (h->getType() == LIST_LINK and as->get_outgoing(h).empty())
     {
         if (focus_set.empty())
-            fc.do_chain(dfc, Handle::UNDEFINED);
+            fc.do_chain(dfc, Handle::UNDEFINED, focus_set, false);
         else
-            fc.do_chain(dfc, Handle::UNDEFINED,focus_set);
+            fc.do_chain(dfc, Handle::UNDEFINED, focus_set, true);
     }
     else
     {
@@ -126,13 +127,14 @@ Handle InferenceSCM::do_forward_chaining(
          *  trying to generate inferences associated only with the conceptNode Human.
          */
         if (focus_set.empty())
-            fc.do_chain(dfc, h);
+            fc.do_chain(dfc, h, focus_set, false);
         else
-            fc.do_chain(dfc, h, focus_set);
+            fc.do_chain(dfc, h, focus_set, true);
     }
 
     HandleSeq result = fc.get_chaining_result();
     return as->add_link(LIST_LINK, result);
+
 #else
     return Handle::UNDEFINED;
 #endif

@@ -68,7 +68,8 @@ Logger* ForwardChainer::getLogger()
  *
  * @return An unordered sets of result of applying a particular selected rule.
  */
-UnorderedHandleSet ForwardChainer::do_step(ForwardChainerCallBack& fcb)
+UnorderedHandleSet ForwardChainer::do_step(ForwardChainerCallBack& fcb,
+                                           bool search_focus_set/* = false*/)
 {
 
     if (_fcmem.get_cur_source() == Handle::UNDEFINED) {
@@ -123,15 +124,15 @@ UnorderedHandleSet ForwardChainer::do_step(ForwardChainerCallBack& fcb)
 
 void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
                               Handle hsource/*=Handle::UNDEFINED*/,
-                              HandleSeq focus_set /*= {}*/)
+                              HandleSeq focus_set /*= {}*/,
+                              bool search_focus_set/* = false*/)
 {
     if (hsource == Handle::UNDEFINED) {
         do_pm();
         return;
     }
 
-    if(not focus_set.empty())
-            _fcmem.set_focus_set(focus_set);
+   _fcmem.set_focus_set(focus_set);
 
     fcb._fcmem = &_fcmem;
 
@@ -185,7 +186,7 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
 
         }
 
-        UnorderedHandleSet products = do_step(fcb);
+        UnorderedHandleSet products = do_step(fcb,search_focus_set);
 
         _fcmem.add_rules_product(_iteration,
                                  HandleSeq(products.begin(), products.end()));
