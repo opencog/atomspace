@@ -354,7 +354,7 @@ public:
      * exists in RAM (and is thus usable as a naked atom).
      */
     bool is_valid_handle(Handle h) const {
-        // The h->get_handle() maneuver below is a trick to get at the
+        // The h->getHandle() maneuver below is a trick to get at the
         // UUID of the actual atom, rather than the cached UUID in the
         // handle. Technically, this is not quite right, since, in
         // principle, a handle could have a valid UUID, but the atom
@@ -369,7 +369,8 @@ public:
         // which causes h.operator!=() to run, which fixes up the atom
         // pointer, as needed.
         //
-        return (NULL != h) and (h->getHandle() != Handle::UNDEFINED);
+        bool stuff = (NULL != h) and (h->getHandle().value() != ULONG_MAX);
+        return stuff;
     }
 
     /**
