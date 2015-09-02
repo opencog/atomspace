@@ -62,6 +62,9 @@ private:
     UUID _uuid;
     AtomPtr _ptr;
 
+    static bool atoms_eq(const AtomPtr&, const AtomPtr&);
+    static bool atoms_less(const AtomPtr&, const AtomPtr&);
+
     Atom* resolve();
     Atom* cresolve() const;
     static AtomPtr do_res(const Handle*);
@@ -141,18 +144,46 @@ public:
     // care about that. It should never ever happen that we have two
     // identical uuid's but inequivalent pointers!! Well, unless both
     // uuids are -1, in which case, we are comparing atoms that have
-    // not yet been inserted into the atomspace. We refuse to deal with
-    // this situation here, because it is a confusing mess to try to
-    // compare atoms that are not in the atomspace; the notion of
-    // equality and equivalence differ, and it depends strong on the
-    // atom type.
-    inline bool operator==(const Handle& h) const noexcept { return _uuid == h._uuid; }
-    inline bool operator!=(const Handle& h) const noexcept { return _uuid != h._uuid; }
-    inline bool operator< (const Handle& h) const noexcept { return _uuid <  h._uuid; }
-    inline bool operator> (const Handle& h) const noexcept { return _uuid >  h._uuid; }
-    inline bool operator<=(const Handle& h) const noexcept { return _uuid <= h._uuid; }
-    inline bool operator>=(const Handle& h) const noexcept { return _uuid >= h._uuid; }
-
+    // not yet been inserted into the atomspace.
+    //
+    // Ughhh. Be aware that operator<() is used by std::less<T>
+    // and that std::less<T> is used by std::set<T> and maybe other
+    // classes (e.g. maps) to perform uniqueness tests. It can happen
+    // (and does happen, in e.g. the VariableList ctor) that these
+    // sometimes run before atoms have been assigned a UUID (i.e. before
+    // they have been inserted in the atomspace).  In such cases, we
+    // still need the handle comparison to work correctly, else stuff
+    // breaks. We resort to comparing atoms, in that case.
+    inline bool operator==(const Handle& h) const noexcept {
+        if (ULONG_MAX != _uuid and ULONG_MAX != h._uuid)
+            return _uuid == h._uuid;
+        return atoms_eq(_ptr, h._ptr);
+    }
+    inline bool operator!=(const Handle& h) const noexcept {
+        if (ULONG_MAX != _uuid and ULONG_MAX != h._uuid)
+            return _uuid != h._uuid;
+        return not atoms_eq(_ptr, h._ptr);
+    }
+    inline bool operator< (const Handle& h) const noexcept {
+        if (ULONG_MAX != _uuid and ULONG_MAX != h._uuid)
+            return _uuid < h._uuid;
+        return atoms_less(_ptr, h._ptr);
+    }
+    inline bool operator> (const Handle& h) const noexcept {
+        if (ULONG_MAX != _uuid and ULONG_MAX != h._uuid)
+            return _uuid > h._uuid;
+        return atoms_less(h._ptr, _ptr);
+    }
+    inline bool operator<=(const Handle& h) const noexcept {
+        if (ULONG_MAX != _uuid and ULONG_MAX != h._uuid)
+            return _uuid <= h._uuid;
+        return atoms_less(_ptr, h._ptr) or atoms_eq(_ptr, h._ptr);
+    }
+    inline bool operator>=(const Handle& h) const noexcept {
+        if (ULONG_MAX != _uuid and ULONG_MAX != h._uuid)
+            return _uuid >= h._uuid;
+        return atoms_less(h._ptr, _ptr) or atoms_eq(_ptr, h._ptr);
+    }
 
     /**
      * Returns a negative value, zero or a positive value if the first
