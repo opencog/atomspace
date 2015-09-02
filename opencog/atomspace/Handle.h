@@ -155,32 +155,32 @@ public:
     // still need the handle comparison to work correctly, else stuff
     // breaks. We resort to comparing atoms, in that case.
     inline bool operator==(const Handle& h) const noexcept {
-        if (ULONG_MAX != _uuid and ULONG_MAX != h._uuid)
+        if (ULONG_MAX != _uuid or ULONG_MAX != h._uuid)
             return _uuid == h._uuid;
         return atoms_eq(_ptr, h._ptr);
     }
     inline bool operator!=(const Handle& h) const noexcept {
-        if (ULONG_MAX != _uuid and ULONG_MAX != h._uuid)
+        if (ULONG_MAX != _uuid or ULONG_MAX != h._uuid)
             return _uuid != h._uuid;
         return not atoms_eq(_ptr, h._ptr);
     }
     inline bool operator< (const Handle& h) const noexcept {
-        if (ULONG_MAX != _uuid and ULONG_MAX != h._uuid)
+        if (ULONG_MAX != _uuid or ULONG_MAX != h._uuid)
             return _uuid < h._uuid;
         return atoms_less(_ptr, h._ptr);
     }
     inline bool operator> (const Handle& h) const noexcept {
-        if (ULONG_MAX != _uuid and ULONG_MAX != h._uuid)
+        if (ULONG_MAX != _uuid or ULONG_MAX != h._uuid)
             return _uuid > h._uuid;
         return atoms_less(h._ptr, _ptr);
     }
     inline bool operator<=(const Handle& h) const noexcept {
-        if (ULONG_MAX != _uuid and ULONG_MAX != h._uuid)
+        if (ULONG_MAX != _uuid or ULONG_MAX != h._uuid)
             return _uuid <= h._uuid;
         return not atoms_less(h._ptr, _ptr);
     }
     inline bool operator>=(const Handle& h) const noexcept {
-        if (ULONG_MAX != _uuid and ULONG_MAX != h._uuid)
+        if (ULONG_MAX != _uuid or ULONG_MAX != h._uuid)
             return _uuid >= h._uuid;
         return not atoms_less(_ptr, h._ptr);
     }
