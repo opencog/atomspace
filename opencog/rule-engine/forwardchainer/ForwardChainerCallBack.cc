@@ -283,16 +283,16 @@ HandleSeq ForwardChainerCallBack::derive_rules(Handle source, Rule* rule,
  */
 bool ForwardChainerCallBack::is_valid_implicant(const Handle& h)
 {
-    if (h->getType() == ABSENT_LINK)
-        return false;
-
     FindAtoms fv(VARIABLE_NODE);
-    fv.search_set(h);
+        fv.search_set(h);
 
-    if (fv.varset.empty())
-        return false;
+    bool is_valid = h->getType() != ABSENT_LINK and
+                    h->getType() != NOT_LINK    and
+                    h->getType() != EQUAL_LINK  and
+                    //more virtual links here
+                    (not fv.varset.empty());
 
-    return true;
+    return is_valid;
 }
 
 /**
