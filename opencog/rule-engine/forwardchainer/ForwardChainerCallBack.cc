@@ -133,26 +133,34 @@ Handle ForwardChainerCallBack::choose_next_source(FCMemory& fcmem)
     return hchosen;
 }
 
-HandleSeq ForwardChainerCallBack::apply_rule(Handle rhandle,bool search_focus_set_only /*=false*/)
+HandleSeq ForwardChainerCallBack::apply_rule(Handle rhandle,bool search_in_focus_set /*=false*/)
 {
     HandleSeq result;
 
-    if (search_focus_set_only) {
+    if (search_in_focus_set) {
         //This restricts PM to look only in the focus set
         AtomSpace focus_set_as;
-        HandleSeq focus_set_atoms = _fcmem->get_focus_set();
 
-        for (Handle& h : focus_set_atoms)
+        //Add focus set atoms to focus_set atomspace
+        HandleSeq focus_set_atoms = _fcmem->get_focus_set();
+        for (Handle h : focus_set_atoms)
             focus_set_as.add_atom(h);
 
+        //Add source atoms to focus_set atomspace
+        HandleSeq sources = _fcmem->get_potential_sources();
+        for (Handle h : sources)
+            focus_set_as.add_atom(h);
+
+        //Add the rule to focus_set atomspace
         focus_set_as.add_atom(rhandle);
 
         Handle h = bindlink(&focus_set_as, rhandle);
 
         result = _as->get_outgoing(_as->add_atom(h));
 
-    } else {
-
+    }
+    //Search the whole atomspace
+    else {
         Handle h = bindlink(_as, rhandle);
         result = _as->get_outgoing(h);
     }
