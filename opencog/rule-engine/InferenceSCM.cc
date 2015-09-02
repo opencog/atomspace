@@ -80,8 +80,20 @@ void InferenceSCM::init(void)
 #endif
 }
 
+/**
+ * A scheme cog-fc call back handler method which invokes the forward
+ * chainer with the arguments passed to cog-fc.
+ *
+ * @param hsource      - The source atom to start the forward chaining with.
+ * @param rbs         - A handle to the rule base ConceptNode.
+ * @param hfoucs_set  - A handle to a set link containing the set of focus sets.
+ *                      if the set link is empty, FC will be invoked on the entire
+ *                      atomspace.
+ *
+ * @return a ListLink containing the result of FC inference.
+ */
 Handle InferenceSCM::do_forward_chaining(
-        Handle h, Handle rbs, Handle hfocus_set /*= Handle::UNDEFINED*/)
+        Handle hsource, Handle rbs, Handle hfocus_set /*= Handle::UNDEFINED*/)
 {
     if (Handle::UNDEFINED == rbs)
         throw RuntimeException(TRACE_INFO,
@@ -109,7 +121,7 @@ Handle InferenceSCM::do_forward_chaining(
      * using the rules declared in the config. A similar functionality
      * with the python version of the forward chainer.
      */
-    if (h->getType() == LIST_LINK and as->get_outgoing(h).empty())
+    if (hsource->getType() == LIST_LINK and as->get_outgoing(hsource).empty())
     {
         if (focus_set.empty())
             fc.do_chain(dfc, Handle::UNDEFINED, focus_set, false);
@@ -127,9 +139,9 @@ Handle InferenceSCM::do_forward_chaining(
          *  trying to generate inferences associated only with the conceptNode Human.
          */
         if (focus_set.empty())
-            fc.do_chain(dfc, h, focus_set, false);
+            fc.do_chain(dfc, hsource, focus_set, false);
         else
-            fc.do_chain(dfc, h, focus_set, true);
+            fc.do_chain(dfc, hsource, focus_set, true);
     }
 
     HandleSeq result = fc.get_chaining_result();
