@@ -12,7 +12,7 @@
 #include <opencog/guile/SchemeEval.h>
 
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
-#include <opencog/rule-engine/forwardchainer/DefaultForwardChainerCB.h>
+#include <opencog/rule-engine/forwardchainer/ForwardChainerCallBack.h>
 
 
 using namespace opencog;
@@ -77,12 +77,12 @@ void ForwardChainerUTest::test_do_chain()
 		                  "    (PredicateNode \"C\"))");
 
 	// Run forward chainer
-	DefaultForwardChainerCB dfc(as_);
+	ForwardChainerCallBack dfc(&as_);
 	fc_->do_chain(dfc, AB);
 
 	// Collect the results
 	HandleSeq results = fc_->get_chaining_result();
-	std::cout << "do_chain results:" << std::endl;
+	std::cout << "\ndo_chain results:" << std::endl;
 	for (Handle h : results)
 		std::cout << h->toString() << std::endl;
 

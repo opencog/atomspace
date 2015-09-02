@@ -65,73 +65,77 @@ Logger* ForwardChainer::getLogger()
  * Does one step forward chaining
  *
  * @param fcb a concrete implementation of of ForwardChainerCallBack class 
+ *
+ * @return An unordered sets of result of applying a particular selected rule.
  */
-void ForwardChainer::do_step(ForwardChainerCallBack& fcb)
+UnorderedHandleSet ForwardChainer::do_step(ForwardChainerCallBack& fcb,
+                                           bool search_focus_set/* = false*/)
 {
 
     if (_fcmem.get_cur_source() == Handle::UNDEFINED) {
         _log->info("[ForwardChainer] No current source, step "
                    "forward chaining aborted.");
-        return;
+        return {};
     }
 
     _log->info("[ForwardChainer] Next source %s",
                _fcmem.get_cur_source()->toString().c_str());
 
-    // Choose matching rules whose input matches with the source.
-    vector<Rule*> matched_rules = fcb.choose_rules(_fcmem);
-    _log->info("[ForwardChainer] Found matching rule");
-
-    //! If no rules matches the pattern of the source,
-    //! set all rules for candidacy to be selected by the proceeding step.
-    //! xxx this decision is maded based on recent discussion.I
-    //! it might still face some changes.
-    if (matched_rules.empty()) {
-        _log->info("[ForwardChainer] No matching rule found. "
-                   "Setting all rules as candidates.");
-        matched_rules = _fcmem.get_rules();
-    }
-
-    // Select a rule amongst the matching rules by tournament selection
-    map<Rule*, float> rule_weight;
-    for (Rule* r : matched_rules) {
-        rule_weight[r] = r->get_weight();
-    }
-
     _log->info("[ForwardChainer] Selecting a rule from the set of "
                "candidate rules.");
+
     Rule* r = _rec.tournament_select(rule_weight);
-    _fcmem.set_cur_rule(r);
-    _log->info("[ForwardChainer] Selected rule is %s", (r->get_handle())->toShortString().c_str());
-
-    //!TODO Find/add premises?
-
-    //! Apply rule.
-    _log->info("[ForwardChainer] Applying chosen rule %s",
+    _log->info("[ForwardChainer] Selected rule is %s",
                (r->get_handle())->toShortString().c_str());
-    HandleSeq product = fcb.apply_rule(_fcmem);
 
-    _log->info("PRODUCTS...");
-    for(const auto& p:product)
-    {
-        _log->info("%s ", p->toShortString().c_str() );
+    _fcmem.set_cur_rule(r);
+    //TODO Should we use all derived rules or what?
+    UnorderedHandleSet products;
+
+    HandleSeq derived_rhandles = fcb.derive_rules(_fcmem.get_cur_source(), r);
+
+    //try sub-atom unification on failure to full unification
+    if (derived_rhandles.empty())
+        derived_rhandles = fcb.derive_rules(_fcmem.get_cur_source(), r, true);
+
+    HandleSeq temp_result;
+    if (not _fcmem.get_focus_set().empty()) {
+
+        for (Handle rhandle : derived_rhandles) {
+            temp_result = fcb.apply_rule(rhandle, true);
+            std::copy(temp_result.begin(), temp_result.end(),
+                      std::inserter(products, products.end()));
+        }
+
+    } else {
+
+        for (Handle rhandle : derived_rhandles) {
+            temp_result = fcb.apply_rule(rhandle);
+            std::copy(temp_result.begin(), temp_result.end(),
+                      std::inserter(products, products.end()));
+        }
     }
 
-    _log->info("[ForwardChainer] updating premise list with the "
-               "inference made");
-    _fcmem.update_potential_sources(product);
+    //done with this rule.
+    rule_weight.erase(r);
 
-    _log->info("[ForwardChainer] adding inference to history");
-    _fcmem.add_rules_product(_iteration, product);
+    return products;
 }
 
 void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
-                              Handle hsource/*=Handle::UNDEFINED*/)
+                              Handle hsource/*=Handle::UNDEFINED*/,
+                              HandleSeq focus_set /*= {}*/,
+                              bool search_focus_set/* = false*/)
 {
     if (hsource == Handle::UNDEFINED) {
         do_pm();
         return;
     }
+
+   _fcmem.set_focus_set(focus_set);
+
+    fcb._fcmem = &_fcmem;
+
     // Variable fulfillment query.
     UnorderedHandleSet var_nodes = get_outgoing_nodes(hsource,
                                                       { VARIABLE_NODE });
@@ -144,19 +148,50 @@ void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
      init_sources = _as.get_outgoing(hsource);
     else
         init_sources.push_back(hsource);
+
     _fcmem.update_potential_sources(init_sources);
 
-    _fcmem.set_source(fcb.choose_next_source(_fcmem)); //set initial source
     auto max_iter = _configReader.get_maximum_iterations();
 
     while (_iteration < max_iter /*OR other termination criteria*/) {
+
         _log->info("Iteration %d", _iteration);
 
-        do_step(fcb);
+        if(rule_weight.empty())
+        {
+            //! Choose next source.
+            _log->info("[ForwardChainer] setting next source");
 
-        //! Choose next source.
-        _log->info("[ForwardChainer] setting next source");
-        _fcmem.set_source(fcb.choose_next_source(_fcmem));
+            _fcmem.set_source(fcb.choose_next_source(_fcmem));
+
+            // Choose matching rules whose input matches with the source.
+            vector<Rule*> matched_rules = fcb.choose_rules(_fcmem);
+
+            //! If no rules matches the pattern of the source,
+            //! set all rules for candidacy to be selected by the proceeding step.
+            //! xxx this decision is made based on recent discussion.
+            //! it might still face some changes.
+            if (not matched_rules.empty()) {
+                _log->info("[ForwardChainer] Found matching rule");
+
+                for (Rule* r : matched_rules) {
+                    rule_weight[r] = r->get_weight();
+                }
+
+            } else {
+                _log->info("[ForwardChainer] No matching rule found. "
+                           "Setting all rules as candidates.");
+                //TODO subatoms unify here
+            }
+
+        }
+
+        UnorderedHandleSet products = do_step(fcb,search_focus_set);
+
+        _fcmem.add_rules_product(_iteration,
+                                 HandleSeq(products.begin(), products.end()));
+        _fcmem.update_potential_sources(
+                HandleSeq(products.begin(), products.end()));
 
         _iteration++;
     }
