@@ -222,8 +222,8 @@ public:
         delete rng;
     }
 
-    /* test the fix for the bug triggered whenever we had a link pointing to the
-     * same atom twice (or more) */
+    /* test the fix for the bug triggered whenever we had a link
+     * pointing to the same atom twice (or more). */
     void testDoubleLink()
     {
         NodePtr n1(createNode(NUMBER_NODE, "1"));
@@ -236,6 +236,7 @@ public:
         LinkPtr l1(createLink(LIST_LINK, os));
         Handle hl1 = table->add(l1, false);
 
+        // Now, remove hn1 from the table ...
         table->extract(hn1, true);
 
         // Number nodes are handled differently, in the atomspace. Try
