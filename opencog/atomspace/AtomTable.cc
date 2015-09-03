@@ -182,7 +182,7 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     Handle h(linkIndex.getHandle(t, resolved_seq));
-    if (_environ and Handle::UNDEFINED == h)
+    if (_environ and Handle::UNDEFINED.value() == h.value())
         return _environ->getHandle(t, resolved_seq);
     return h;
 }
@@ -483,7 +483,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             // UUID but no pointer? Some persistance scenario ???
             // Please explain ...
             if (NULL == h._ptr.get()) {
-                if (Handle::UNDEFINED == h) {
+                if (Handle::UNDEFINED.value() == h.value()) {
                     prt_diag(atom, i, arity, ogs);
                     throw RuntimeException(TRACE_INFO,
                                "AtomTable - Attempting to insert link with "
@@ -549,7 +549,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
                 ho->remove_atom(llc);
                 llc->_outgoing[i] = add(ho, async);
             }
-            else if (ho == Handle::UNDEFINED) {
+            else if (ho.value() == Handle::UNDEFINED.value()) {
                 // If we are here, then the atom is in the atomspace,
                 // but the handle has an invalid UUID. This can happen
                 // if the atom appears more than once in the outgoing
