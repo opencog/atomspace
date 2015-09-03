@@ -89,10 +89,9 @@ AtomTable::~AtomTable()
 
     // No one who shall look at these atoms ahall ever again
     // find a reference to this atomtable.
-    UUID undef = Handle::UNDEFINED.value();
     for (const Handle& h : _atom_set) {
         h->_atomTable = NULL;
-        h->_uuid = undef;
+        h->_uuid = Handle::INVALID_UUID;
     }
 }
 
@@ -182,7 +181,7 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     Handle h(linkIndex.getHandle(t, resolved_seq));
-    if (_environ and Handle::UNDEFINED.value() == h.value())
+    if (_environ and Handle::INVALID_UUID == h.value())
         return _environ->getHandle(t, resolved_seq);
     return h;
 }
@@ -220,7 +219,7 @@ Handle AtomTable::getHandle(const AtomPtr& a) const
 Handle AtomTable::getHandle(Handle& h) const
 {
     // If we have an atom, but don't know the uuid, find uuid.
-    if (Handle::UNDEFINED.value() == h.value())
+    if (Handle::INVALID_UUID == h.value())
         return getHandle(AtomPtr(h));
 
     // If we have both a uuid and pointer, AND the pointer is
@@ -408,7 +407,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // So we have to accept that, and hope its correct and consistent.
     // XXX this can also occur if the atom is in some other atomspace;
     // so we need to move this check elsewhere.
-    if (atom->_uuid != Handle::UNDEFINED.value())
+    if (atom->_uuid != Handle::INVALID_UUID)
         throw RuntimeException(TRACE_INFO,
           "AtomTable - Attempting to insert atom with handle already set!");
 #endif
@@ -483,7 +482,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             // UUID but no pointer? Some persistance scenario ???
             // Please explain ...
             if (NULL == h._ptr.get()) {
-                if (Handle::UNDEFINED.value() == h.value()) {
+                if (Handle::INVALID_UUID == h.value()) {
                     prt_diag(atom, i, arity, ogs);
                     throw RuntimeException(TRACE_INFO,
                                "AtomTable - Attempting to insert link with "
@@ -549,7 +548,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
                 ho->remove_atom(llc);
                 llc->_outgoing[i] = add(ho, async);
             }
-            else if (ho.value() == Handle::UNDEFINED.value()) {
+            else if (ho.value() == Handle::INVALID_UUID) {
                 // If we are here, then the atom is in the atomspace,
                 // but the handle has an invalid UUID. This can happen
                 // if the atom appears more than once in the outgoing
@@ -574,7 +573,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // e.g. if it was fetched from persistent storage; this
     // was done to preserve handle consistency. SavingLoading does
     // this too.  XXX Review SavingLoading for correctness...
-    if (atom->_uuid == Handle::UNDEFINED.value()) {
+    if (atom->_uuid == Handle::INVALID_UUID) {
        // Atom doesn't yet have a valid uuid assigned to it. Ask the TLB
        // to issue a valid uuid.  And then memorize it.
        TLB::addAtom(atom);

@@ -77,11 +77,12 @@ private:
     static const AtomPtr NULL_POINTER;
 public:
 
+    static const UUID INVALID_UUID = ULONG_MAX;
     static const Handle UNDEFINED;
 
     explicit Handle(const AtomPtr& atom);
     explicit Handle(const UUID u) : _uuid(u) {}
-    explicit Handle() : _uuid(ULONG_MAX) {}
+    explicit Handle() : _uuid(INVALID_UUID) {}
     Handle(const Handle& h) : _uuid(h._uuid), _ptr(h._ptr) {}
     ~Handle() {}
 
@@ -112,14 +113,14 @@ public:
     inline Atom* operator->() {
         Atom* ptr = _ptr.get();
         if (ptr) return ptr;
-        if (ULONG_MAX == _uuid) return NULL;
+        if (INVALID_UUID == _uuid) return NULL;
         return resolve();
     }
 
     inline Atom* operator->() const {
         Atom* ptr = _ptr.get();
         if (ptr) return ptr;
-        if (ULONG_MAX == _uuid) return NULL;
+        if (INVALID_UUID == _uuid) return NULL;
         return cresolve();
     }
 
@@ -155,32 +156,32 @@ public:
     // still need the handle comparison to work correctly, else stuff
     // breaks. We resort to comparing atoms, in that case.
     inline bool operator==(const Handle& h) const noexcept {
-        if (ULONG_MAX != _uuid or ULONG_MAX != h._uuid)
+        if (INVALID_UUID != _uuid or INVALID_UUID != h._uuid)
             return _uuid == h._uuid;
         return atoms_eq(_ptr, h._ptr);
     }
     inline bool operator!=(const Handle& h) const noexcept {
-        if (ULONG_MAX != _uuid or ULONG_MAX != h._uuid)
+        if (INVALID_UUID != _uuid or INVALID_UUID != h._uuid)
             return _uuid != h._uuid;
         return not atoms_eq(_ptr, h._ptr);
     }
     inline bool operator< (const Handle& h) const noexcept {
-        if (ULONG_MAX != _uuid or ULONG_MAX != h._uuid)
+        if (INVALID_UUID != _uuid or INVALID_UUID != h._uuid)
             return _uuid < h._uuid;
         return atoms_less(_ptr, h._ptr);
     }
     inline bool operator> (const Handle& h) const noexcept {
-        if (ULONG_MAX != _uuid or ULONG_MAX != h._uuid)
+        if (INVALID_UUID != _uuid or INVALID_UUID != h._uuid)
             return _uuid > h._uuid;
         return atoms_less(h._ptr, _ptr);
     }
     inline bool operator<=(const Handle& h) const noexcept {
-        if (ULONG_MAX != _uuid or ULONG_MAX != h._uuid)
+        if (INVALID_UUID != _uuid or INVALID_UUID != h._uuid)
             return _uuid <= h._uuid;
         return not atoms_less(h._ptr, _ptr);
     }
     inline bool operator>=(const Handle& h) const noexcept {
-        if (ULONG_MAX != _uuid or ULONG_MAX != h._uuid)
+        if (INVALID_UUID != _uuid or INVALID_UUID != h._uuid)
             return _uuid >= h._uuid;
         return not atoms_less(_ptr, h._ptr);
     }
@@ -205,19 +206,19 @@ public:
 
     operator AtomPtr() const {
         if (_ptr.get()) return _ptr;
-        if (ULONG_MAX == _uuid) return NULL_POINTER;
+        if (INVALID_UUID == _uuid) return NULL_POINTER;
         Handle h(*this);
         return h.resolve_ptr();
     }
     operator AtomPtr() {
         if (_ptr.get()) return _ptr;
-        if (ULONG_MAX == _uuid) return NULL_POINTER;
+        if (INVALID_UUID == _uuid) return NULL_POINTER;
         return resolve_ptr();
     }
 /***
     operator const AtomPtr&() {
         if (_ptr.get()) return _ptr;
-        if (ULONG_MAX == _uuid) return NULL_POINTER;
+        if (INVALID_UUID == _uuid) return NULL_POINTER;
         return resolve_ptr();
     }
 ***/

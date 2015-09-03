@@ -121,7 +121,7 @@ protected:
      */
     Atom(Type t, TruthValuePtr tv = TruthValue::DEFAULT_TV(),
             AttentionValuePtr av = AttentionValue::DEFAULT_AV())
-      : _uuid(Handle::UNDEFINED.value()),
+      : _uuid(Handle::INVALID_UUID),
         _atomTable(NULL),
         _type(t),
         _flags(0),

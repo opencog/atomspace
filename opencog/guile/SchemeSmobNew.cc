@@ -188,7 +188,7 @@ SCM SchemeSmob::ss_handle (SCM satom)
  */
 SCM SchemeSmob::ss_undefined_handle (void)
 {
-	return scm_from_ulong(Handle::UNDEFINED.value());
+	return scm_from_ulong(Handle::INVALID_UUID);
 }
 
 /* ============================================================== */

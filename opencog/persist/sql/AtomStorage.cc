@@ -1157,7 +1157,7 @@ AtomPtr  AtomStorage::getAtom(const char * query, int height)
 
 	// Did we actually find anything?
 	// DO NOT USE TLB::IsInvalidHandle() HERE! It won't work, duhh!
-	if (rp.handle.value() == Handle::UNDEFINED.value())
+	if (rp.handle.value() == Handle::INVALID_UUID)
 	{
 		rp.rs->release();
 		put_conn(db_conn);
@@ -1349,7 +1349,7 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 				uuid, realtype, atom->getType());
 		}
 		// If we are here, and the atom uuid is set, then it should match.
-		if (Handle::UNDEFINED.value() != atom->_uuid and 
+		if (Handle::INVALID_UUID != atom->_uuid and 
 		    atom->_uuid != h.value())
 		{
 			throw RuntimeException(TRACE_INFO,
