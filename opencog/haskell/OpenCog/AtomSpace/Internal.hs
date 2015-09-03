@@ -110,7 +110,7 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
           (Gen a1,Gen b1) -> Just $ Gen $ EquivalenceLink tv a1 b1
       (EvaluationT ,[ar,br]) -> do
         a <- filt ar :: Maybe (Gen PredicateT)
-        b <- filt br :: Maybe (Gen ListT)
+        b <- filt br :: Maybe (Gen AtomT)
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ Gen $ EvaluationLink tv a1 b1
       (InheritanceT ,[ar,br]) -> do
@@ -134,7 +134,7 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
           (Gen a1) -> Just $ Gen $ SatisfyingSetLink a1
       (ExecutionT ,[ar,br,cr]) -> do
         a <- filt ar :: Maybe (Gen SchemaT)
-        b <- filt br :: Maybe (Gen ListT)
+        b <- filt br :: Maybe (Gen AtomT)
         c <- filt br :: Maybe (Gen AtomT)
         case (a,b,c) of
           (Gen a1,Gen b1,Gen c1) -> Just $ Gen $ ExecutionLink a1 b1 c1
