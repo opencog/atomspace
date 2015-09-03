@@ -139,28 +139,28 @@ public:
         Handle hle(createLink(EVALUATION_LINK, hnp, hll));
 
         // No UUID should be assigned yet.
-        TS_ASSERT_EQUALS(hn1.value(), Handle::UNDEFINED.value());
-        TS_ASSERT_EQUALS(hn2.value(), Handle::UNDEFINED.value());
-        TS_ASSERT_EQUALS(hn3.value(), Handle::UNDEFINED.value());
-        TS_ASSERT_EQUALS(hn4.value(), Handle::UNDEFINED.value());
-        TS_ASSERT_EQUALS(hnp.value(), Handle::UNDEFINED.value());
-        TS_ASSERT_EQUALS(hll.value(), Handle::UNDEFINED.value());
-        TS_ASSERT_EQUALS(hle.value(), Handle::UNDEFINED.value());
+        TS_ASSERT_EQUALS(hn1.value(), Handle::INVALID_UUID);
+        TS_ASSERT_EQUALS(hn2.value(), Handle::INVALID_UUID);
+        TS_ASSERT_EQUALS(hn3.value(), Handle::INVALID_UUID);
+        TS_ASSERT_EQUALS(hn4.value(), Handle::INVALID_UUID);
+        TS_ASSERT_EQUALS(hnp.value(), Handle::INVALID_UUID);
+        TS_ASSERT_EQUALS(hll.value(), Handle::INVALID_UUID);
+        TS_ASSERT_EQUALS(hle.value(), Handle::INVALID_UUID);
 
         // Add the link.  All the outgoing atoms should get added too.
         Handle hlet = table->add(hle, false);
-        TS_ASSERT(hlet.value() != Handle::UNDEFINED.value());
+        TS_ASSERT(hlet.value() != Handle::INVALID_UUID);
         LinkPtr let(LinkCast(hlet));
         const HandleSeq& hs = let->getOutgoingSet();
-        TS_ASSERT(hs[0].value() != Handle::UNDEFINED.value());
-        TS_ASSERT(hs[1].value() != Handle::UNDEFINED.value());
+        TS_ASSERT(hs[0].value() != Handle::INVALID_UUID);
+        TS_ASSERT(hs[1].value() != Handle::INVALID_UUID);
 
         LinkPtr llt(LinkCast(hs[1]));
         const HandleSeq& hsl = llt->getOutgoingSet();
-        TS_ASSERT(hsl[0].value() != Handle::UNDEFINED.value());
-        TS_ASSERT(hsl[1].value() != Handle::UNDEFINED.value());
-        TS_ASSERT(hsl[2].value() != Handle::UNDEFINED.value());
-        TS_ASSERT(hsl[3].value() != Handle::UNDEFINED.value());
+        TS_ASSERT(hsl[0].value() != Handle::INVALID_UUID);
+        TS_ASSERT(hsl[1].value() != Handle::INVALID_UUID);
+        TS_ASSERT(hsl[2].value() != Handle::INVALID_UUID);
+        TS_ASSERT(hsl[3].value() != Handle::INVALID_UUID);
 
         // Now test resolution.  Given the version of the atom that is
         // not yet in the atomspace, we should be able to find the one
@@ -222,8 +222,8 @@ public:
         delete rng;
     }
 
-    /* test the fix for the bug triggered whenever we had a link pointing to the
-     * same atom twice (or more) */
+    /* test the fix for the bug triggered whenever we had a link
+     * pointing to the same atom twice (or more). */
     void testDoubleLink()
     {
         NodePtr n1(createNode(NUMBER_NODE, "1"));
@@ -236,6 +236,7 @@ public:
         LinkPtr l1(createLink(LIST_LINK, os));
         Handle hl1 = table->add(l1, false);
 
+        // Now, remove hn1 from the table ...
         table->extract(hn1, true);
 
         // Number nodes are handled differently, in the atomspace. Try

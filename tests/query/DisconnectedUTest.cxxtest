@@ -57,6 +57,7 @@ class Disconnected :  public CxxTest::TestSuite
 
 		void test_components(void);
 		void test_variables(void);
+		void test_cvariables(void);
 };
 
 /*
@@ -142,6 +143,7 @@ void Disconnected::test_variables(void)
 		caught = true;
 	}
 	logger().info("Caught exception? %d\n", caught);
+	TSM_ASSERT("Failed to catch expected exception", caught);
 
 	// We expect to catch an error here. ------------------------------
 	caught = false;
@@ -155,6 +157,7 @@ void Disconnected::test_variables(void)
 		caught = true;
 	}
 	logger().info("Caught exception? %d\n", caught);
+	TSM_ASSERT("Failed to catch expected exception", caught);
 
 	// We expect to catch an error here. ------------------------------
 	caught = false;
@@ -168,6 +171,37 @@ void Disconnected::test_variables(void)
 		caught = true;
 	}
 	logger().info("Caught exception? %d\n", caught);
+	TSM_ASSERT("Failed to catch expected exception", caught);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Similar to above, except that the stuff is build up in C++ not in
+// scheme.  See bug #172.
+void Disconnected::test_cvariables(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// We expect to catch an error here.
+	bool caught = false;
+	try
+	{
+		Handle va(createNode(VARIABLE_NODE, "$A"));
+		Handle vb(createNode(VARIABLE_NODE, "$B"));
+		Handle blv(createLink(VARIABLE_LIST, va, vb));
+		Handle blb(createLink(AND_LINK, va));
+		Handle blt(createLink(LIST_LINK, va));
+		HandleSeq bll = {blv, blb, blt};
+		Handle bl_final(createLink(BIND_LINK, bll));
+		as->add_atom(bl_final);
+	}
+	catch (const InvalidParamException& ex)
+	{
+		logger().debug("Caught exception, just as expected: %s", ex.getMessage());
+		caught = true;
+	}
+	logger().info("Caught exception? %d\n", caught);
+	TSM_ASSERT("Failed to catch expected exception", caught);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

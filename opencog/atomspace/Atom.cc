@@ -249,7 +249,7 @@ void Atom::setAtomTable(AtomTable *tb)
     if (NULL != _atomTable) {
         // Atom is being removed from the atom table.
         // UUID's belong to the atom table, not the atom. Reclaim it.
-        _uuid = Handle::UNDEFINED.value();
+        _uuid = Handle::INVALID_UUID;
     }
     _atomTable = tb;
 }

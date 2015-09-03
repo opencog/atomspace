@@ -405,7 +405,7 @@ void AtomStorage::init(const char * dbname,
                        const char * username,
                        const char * authentication)
 {
-	// Create six, by default ... maybe make more? 
+	// Create six, by default ... maybe make more?
 	// There should probably be a few more here, than the number of
 	// startWriterThread() calls below.
 #define DEFAULT_NUM_CONNS 6
@@ -462,7 +462,7 @@ AtomStorage::~AtomStorage()
 }
 
 /**
- * connected -- return true if a successful connection to the 
+ * connected -- return true if a successful connection to the
  * database exists; else return false.  Note that this may block,
  * if all database connections are in use...
  */
@@ -617,7 +617,7 @@ TruthValue* AtomStorage::getTV(int tvid)
 /**
  * Return largest distance from this atom to any node under it.
  * Nodes have a height of 0, by definition.  Links that contain only
- * nodes in their outgoing set have a height of 1, by definition. 
+ * nodes in their outgoing set have a height of 1, by definition.
  * The height of a link is, by definition, one more than the height
  * of the tallest atom in its outgoing set.
  * @note This can conversely be viewed as the depth of a tree.
@@ -644,7 +644,7 @@ int AtomStorage::get_height(AtomPtr atom)
 
 std::string AtomStorage::oset_to_string(const std::vector<Handle>& out,
                                         int arity)
-{ 
+{
 	std::string str;
 	str += "\'{";
 	for (int i=0; i<arity; i++)
@@ -676,7 +676,7 @@ void AtomStorage::flushStoreQueue()
 /**
  * Recursively store the indicated atom, and all that it points to.
  * Store its truth values too. The recursive store is unconditional;
- * its assumed that all sorts of underlying truuth values have changed, 
+ * its assumed that all sorts of underlying truuth values have changed,
  * so that the whole thing needs to be stored.
  *
  * By default, the actual store is done asynchronously (in a different
@@ -800,7 +800,7 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 		Type t = atom->getType();
 		int dbtype = storing_typemap[t];
 		STMTI("type", dbtype);
-	
+
 		// Store the node name, if its a node
 		NodePtr n(NodeCast(atom));
 		if (n)
@@ -812,7 +812,7 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 			qname += "'";
 #else
 			// Use postgres $-quoting to make unicode strings
-			// easier to deal with. 
+			// easier to deal with.
 			std::string qname = " $ocp$";
 			qname += n->getName();
 			qname += "$ocp$ ";
@@ -898,23 +898,23 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 /**
  * Store the concordance of type names to type values.
  *
- * The concordance is used to match up the type id's stored in 
+ * The concordance is used to match up the type id's stored in
  * the SQL database, against those currently in use in the current
  * version of the opencog server. The basic problem is that types
- * can be dynamic in OpenCog -- different versions will have 
+ * can be dynamic in OpenCog -- different versions will have
  * different types, and will assign different type numbers to some
  * given type name. To overcome this, the SQL database stores all
  * atoms according to the type *name* -- although, to save space, it
  * actually stored type ids; however, the SQL type-name-to-type-id
  * mapping can be completely different than the OpenCog type-name
- * to type-id mapping. Thus, tables to convert the one to the other 
+ * to type-id mapping. Thus, tables to convert the one to the other
  * id are needed.
  *
  * Given an opencog type t, the storing_typemap[t] will contain the
  * sqlid for the named type. The storing_typemap[t] will *always*
  * contain a valid value.
  *
- * Given an SQL type sq, the loading_typemap[sq] will contain the 
+ * Given an SQL type sq, the loading_typemap[sq] will contain the
  * opencog type t for the named type, or NOTYPE if this version of
  * opencog does not have this kind of atom.
  *
@@ -1064,7 +1064,7 @@ std::unique_lock<std::mutex> AtomStorage::maybe_create_id(UUID uuid)
 		cache_lock.unlock();
 		while (true)
 		{
-			// If we are here, some other thread is making this UUID, 
+			// If we are here, some other thread is making this UUID,
 			// and so we need to wait till they're done. Wait by stalling
 			// on the creation lock.
 			std::unique_lock<std::mutex> local_create_lock(id_create_mutex);
@@ -1078,7 +1078,7 @@ std::unique_lock<std::mutex> AtomStorage::maybe_create_id(UUID uuid)
 				return std::unique_lock<std::mutex>();
 			}
 			cache_lock.unlock();
-		} 
+		}
 	}
 
 	// If we are here, then no one has attempted to make this UUID before.
@@ -1157,7 +1157,7 @@ AtomPtr  AtomStorage::getAtom(const char * query, int height)
 
 	// Did we actually find anything?
 	// DO NOT USE TLB::IsInvalidHandle() HERE! It won't work, duhh!
-	if (rp.handle.value() == Handle::UNDEFINED.value())
+	if (rp.handle.value() == Handle::INVALID_UUID)
 	{
 		rp.rs->release();
 		put_conn(db_conn);
@@ -1235,7 +1235,7 @@ NodePtr AtomStorage::getNode(Type t, const char * str)
 	setup_typemap();
 	char buff[40*BUFSZ];
 
-	// Use postgres $-quoting to make unicode strings easier to deal with. 
+	// Use postgres $-quoting to make unicode strings easier to deal with.
 	int nc = snprintf(buff, 4*BUFSZ, "SELECT * FROM Atoms WHERE "
 	    "type = %hu AND name = $ocp$%s$ocp$ ;", storing_typemap[t], str);
 
@@ -1265,7 +1265,7 @@ LinkPtr AtomStorage::getLink(Type t, const std::vector<Handle>&oset)
 	setup_typemap();
 
 	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, 
+	snprintf(buff, BUFSZ,
 	    "SELECT * FROM Atoms WHERE type = %hu AND outgoing = ",
 	    storing_typemap[t]);
 
@@ -1277,7 +1277,7 @@ LinkPtr AtomStorage::getLink(Type t, const std::vector<Handle>&oset)
 	return LinkCast(atom);
 }
 
-/** 
+/**
  * Instantiate a new atom, from the response buffer contents
  */
 AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
@@ -1299,7 +1299,7 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 		// All height zero atoms are nodes,
 		// All positive height atoms are links.
 		// A negative height is "unknown" and must be checked.
-		if ((0 == rp.height) || 
+		if ((0 == rp.height) ||
 		    ((-1 == rp.height) &&
 		      classserver().isA(realtype, NODE)))
 		{
@@ -1349,7 +1349,7 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 				uuid, realtype, atom->getType());
 		}
 		// If we are here, and the atom uuid is set, then it should match.
-		if (Handle::UNDEFINED.value() != atom->_uuid and 
+		if (Handle::INVALID_UUID != atom->_uuid and
 		    atom->_uuid != h.value())
 		{
 			throw RuntimeException(TRACE_INFO,
@@ -1620,7 +1620,7 @@ void AtomStorage::create_tables(void)
 	ODBCConnection* db_conn = get_conn();
 	Response rp;
 
-	// See the file "atom.sql" for detailed documentation as to the 
+	// See the file "atom.sql" for detailed documentation as to the
 	// structure of the SQL tables.
 	rp.rs = db_conn->exec("CREATE TABLE Atoms ("
 	                      "uuid     BIGINT PRIMARY KEY,"
@@ -1673,7 +1673,7 @@ void AtomStorage::kill_data(void)
 	ODBCConnection* db_conn = get_conn();
 	Response rp;
 
-	// See the file "atom.sql" for detailed documentation as to the 
+	// See the file "atom.sql" for detailed documentation as to the
 	// structure of the SQL tables.
 	rp.rs = db_conn->exec("DELETE from Atoms;");
 	rp.rs->release();
@@ -1687,7 +1687,7 @@ void AtomStorage::kill_data(void)
 
 void AtomStorage::setMaxHeight(int sqmax)
 {
-	// Max height of db contents can only get larger! 
+	// Max height of db contents can only get larger!
 	if (max_height < sqmax) max_height = sqmax;
 
 	char buff[BUFSZ];

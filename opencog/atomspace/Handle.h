@@ -62,6 +62,9 @@ private:
     UUID _uuid;
     AtomPtr _ptr;
 
+    static bool atoms_eq(const AtomPtr&, const AtomPtr&);
+    static bool atoms_less(const AtomPtr&, const AtomPtr&);
+
     Atom* resolve();
     Atom* cresolve() const;
     static AtomPtr do_res(const Handle*);
@@ -74,11 +77,12 @@ private:
     static const AtomPtr NULL_POINTER;
 public:
 
+    static const UUID INVALID_UUID = ULONG_MAX;
     static const Handle UNDEFINED;
 
     explicit Handle(const AtomPtr& atom);
     explicit Handle(const UUID u) : _uuid(u) {}
-    explicit Handle() : _uuid(ULONG_MAX) {}
+    explicit Handle() : _uuid(INVALID_UUID) {}
     Handle(const Handle& h) : _uuid(h._uuid), _ptr(h._ptr) {}
     ~Handle() {}
 
@@ -109,14 +113,14 @@ public:
     inline Atom* operator->() {
         Atom* ptr = _ptr.get();
         if (ptr) return ptr;
-        if (ULONG_MAX == _uuid) return NULL;
+        if (INVALID_UUID == _uuid) return NULL;
         return resolve();
     }
 
     inline Atom* operator->() const {
         Atom* ptr = _ptr.get();
         if (ptr) return ptr;
-        if (ULONG_MAX == _uuid) return NULL;
+        if (INVALID_UUID == _uuid) return NULL;
         return cresolve();
     }
 
@@ -141,18 +145,46 @@ public:
     // care about that. It should never ever happen that we have two
     // identical uuid's but inequivalent pointers!! Well, unless both
     // uuids are -1, in which case, we are comparing atoms that have
-    // not yet been inserted into the atomspace. We refuse to deal with
-    // this situation here, because it is a confusing mess to try to
-    // compare atoms that are not in the atomspace; the notion of
-    // equality and equivalence differ, and it depends strong on the
-    // atom type.
-    inline bool operator==(const Handle& h) const noexcept { return _uuid == h._uuid; }
-    inline bool operator!=(const Handle& h) const noexcept { return _uuid != h._uuid; }
-    inline bool operator< (const Handle& h) const noexcept { return _uuid <  h._uuid; }
-    inline bool operator> (const Handle& h) const noexcept { return _uuid >  h._uuid; }
-    inline bool operator<=(const Handle& h) const noexcept { return _uuid <= h._uuid; }
-    inline bool operator>=(const Handle& h) const noexcept { return _uuid >= h._uuid; }
-
+    // not yet been inserted into the atomspace.
+    //
+    // Ughhh. Be aware that operator<() is used by std::less<T>
+    // and that std::less<T> is used by std::set<T> and maybe other
+    // classes (e.g. maps) to perform uniqueness tests. It can happen
+    // (and does happen, in e.g. the VariableList ctor) that these
+    // sometimes run before atoms have been assigned a UUID (i.e. before
+    // they have been inserted in the atomspace).  In such cases, we
+    // still need the handle comparison to work correctly, else stuff
+    // breaks. We resort to comparing atoms, in that case.
+    inline bool operator==(const Handle& h) const noexcept {
+        if (INVALID_UUID != _uuid or INVALID_UUID != h._uuid)
+            return _uuid == h._uuid;
+        return atoms_eq(_ptr, h._ptr);
+    }
+    inline bool operator!=(const Handle& h) const noexcept {
+        if (INVALID_UUID != _uuid or INVALID_UUID != h._uuid)
+            return _uuid != h._uuid;
+        return not atoms_eq(_ptr, h._ptr);
+    }
+    inline bool operator< (const Handle& h) const noexcept {
+        if (INVALID_UUID != _uuid or INVALID_UUID != h._uuid)
+            return _uuid < h._uuid;
+        return atoms_less(_ptr, h._ptr);
+    }
+    inline bool operator> (const Handle& h) const noexcept {
+        if (INVALID_UUID != _uuid or INVALID_UUID != h._uuid)
+            return _uuid > h._uuid;
+        return atoms_less(h._ptr, _ptr);
+    }
+    inline bool operator<=(const Handle& h) const noexcept {
+        if (INVALID_UUID != _uuid or INVALID_UUID != h._uuid)
+            return _uuid <= h._uuid;
+        return not atoms_less(h._ptr, _ptr);
+    }
+    inline bool operator>=(const Handle& h) const noexcept {
+        if (INVALID_UUID != _uuid or INVALID_UUID != h._uuid)
+            return _uuid >= h._uuid;
+        return not atoms_less(_ptr, h._ptr);
+    }
 
     /**
      * Returns a negative value, zero or a positive value if the first
@@ -174,19 +206,19 @@ public:
 
     operator AtomPtr() const {
         if (_ptr.get()) return _ptr;
-        if (ULONG_MAX == _uuid) return NULL_POINTER;
+        if (INVALID_UUID == _uuid) return NULL_POINTER;
         Handle h(*this);
         return h.resolve_ptr();
     }
     operator AtomPtr() {
         if (_ptr.get()) return _ptr;
-        if (ULONG_MAX == _uuid) return NULL_POINTER;
+        if (INVALID_UUID == _uuid) return NULL_POINTER;
         return resolve_ptr();
     }
 /***
     operator const AtomPtr&() {
         if (_ptr.get()) return _ptr;
-        if (ULONG_MAX == _uuid) return NULL_POINTER;
+        if (INVALID_UUID == _uuid) return NULL_POINTER;
         return resolve_ptr();
     }
 ***/
