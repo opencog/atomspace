@@ -49,11 +49,11 @@ std::string Node::toShortString(std::string indent)
     if (_name == "")
         tmpname = "#" + std::to_string(_uuid);
 
-	std::string atname;
-	if (_atomTable)
-		atname = std::to_string(_atomTable->get_uuid());
-	else
-		atname = "NULL";
+    std::string atname;
+    if (_atomTable)
+        atname = std::to_string(_atomTable->get_uuid());
+    else
+        atname = "NULL";
 
     std::string nam = indent +
         "(" + classserver().getTypeName(_type) +
