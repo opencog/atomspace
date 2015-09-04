@@ -22,7 +22,6 @@
  */
 
 #include <opencog/util/random.h>
-#include <opencog/atoms/bind/PatternUtils.h>
 #include <opencog/atomutils/AtomUtils.h>
 
 #include "Target.h"
