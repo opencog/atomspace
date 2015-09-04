@@ -27,7 +27,6 @@
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
-#include <opencog/rule-engine/forwardchainer/ForwardChainerCallBack.h>
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -101,7 +100,6 @@ Handle InferenceSCM::do_forward_chaining(
 
 #ifdef HAVE_GUILE
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fc");
-    ForwardChainerCallBack dfc(as);
     ForwardChainer fc(*as, rbs);
 
     HandleSeq focus_set = {};
@@ -124,9 +122,9 @@ Handle InferenceSCM::do_forward_chaining(
     if (hsource->getType() == LIST_LINK and as->get_outgoing(hsource).empty())
     {
         if (focus_set.empty())
-            fc.do_chain(dfc, Handle::UNDEFINED, focus_set, false);
+            fc.do_chain(Handle::UNDEFINED,focus_set, false);
         else
-            fc.do_chain(dfc, Handle::UNDEFINED, focus_set, true);
+            fc.do_chain(Handle::UNDEFINED,focus_set, true);
     }
     else
     {
@@ -139,9 +137,9 @@ Handle InferenceSCM::do_forward_chaining(
          *  trying to generate inferences associated only with the conceptNode Human.
          */
         if (focus_set.empty())
-            fc.do_chain(dfc, hsource, focus_set, false);
+            fc.do_chain(hsource, focus_set, false);
         else
-            fc.do_chain(dfc, hsource, focus_set, true);
+            fc.do_chain(hsource, focus_set, true);
     }
 
     HandleSeq result = fc.get_chaining_result();
