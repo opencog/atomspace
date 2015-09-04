@@ -181,47 +181,6 @@ void get_connected_components(const std::set<Handle>& vars,
 	}
 }
 
-/**
- * Search for free VariableNode in a tree.
- *
- * Currently assume any variables within a LambdaLink (and its subtype)
- * are bound, since some subtype does implicit binding.
- *
- * Treat $A in something like (AndLink $A (LambdaLink $A ...)) as free.
- *
- * XXX TODO when implicit binding is gone, this method should be changed
- */
-HandleSeq get_free_vars_in_tree(const Handle& tree)
-{
-	std::set<Handle> varset;
-
-	std::function<void (const Handle&)> find_rec = [&](const Handle& h)
-	{
-		Type t = h->getType();
-		if (t == VARIABLE_NODE)
-		{
-			varset.insert(h);
-			return;
-		}
-
-		if (classserver().isA(t, LAMBDA_LINK))
-			return;
-
-		LinkPtr l(LinkCast(h));
-		if (l)
-		{
-			for (const Handle& oh : l->getOutgoingSet())
-				find_rec(oh);
-		}
-
-		return;
-	};
-
-	find_rec(tree);
-
-	return HandleSeq(varset.begin(), varset.end());
-}
-
 } // namespace opencog
 
 /* ===================== END OF FILE ===================== */

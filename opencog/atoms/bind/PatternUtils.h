@@ -48,9 +48,6 @@ void get_connected_components(const std::set<Handle>& vars,
                               std::vector<HandleSeq>& compset,
                               std::vector<std::set<Handle>>& compvars);
 
-
-HandleSeq get_free_vars_in_tree(const Handle& tree);
-
 } // namespace opencog
 
 #endif // _OPENCOG_PATTERN_UTILS_H
