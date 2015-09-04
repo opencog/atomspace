@@ -86,7 +86,7 @@ UnorderedHandleSet ForwardChainer::do_step(bool search_focus_set/* = false*/)
     _log->info("[ForwardChainer] Selecting a rule from the set of "
                "candidate rules.");
 
-    Rule* r = _rec.tournament_select(rule_weight);
+    Rule* r = _rec.tournament_select(_rule_weight);
     _log->info("[ForwardChainer] Selected rule is %s",
                (r->get_handle())->toShortString().c_str());
 
@@ -119,7 +119,7 @@ UnorderedHandleSet ForwardChainer::do_step(bool search_focus_set/* = false*/)
     }
 
     //done with this rule.
-    rule_weight.erase(r);
+    _rule_weight.erase(r);
 
     return products;
 }
@@ -156,7 +156,7 @@ void ForwardChainer::do_chain(Handle hsource/*=Handle::UNDEFINED*/,
 
         _log->info("Iteration %d", _iteration);
 
-        if(rule_weight.empty())
+        if(_rule_weight.empty())
         {
             //! Choose next source.
             _log->info("[ForwardChainer] setting next source");
@@ -174,7 +174,7 @@ void ForwardChainer::do_chain(Handle hsource/*=Handle::UNDEFINED*/,
                 _log->info("[ForwardChainer] Found matching rule");
 
                 for (Rule* r : matched_rules) {
-                    rule_weight[r] = r->get_weight();
+                    _rule_weight[r] = r->get_weight();
                 }
 
             } else {

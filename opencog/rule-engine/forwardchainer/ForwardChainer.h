@@ -58,7 +58,7 @@ private:
     Logger * _log;
     int _iteration = 0;
     source_selection_mode _ts_mode;
-    std::map<Rule*, float> rule_weight;
+    std::map<Rule*, float> _rule_weight;
 
     void init();
     void add_to_source_list(Handle h);
