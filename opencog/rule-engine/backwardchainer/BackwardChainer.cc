@@ -411,10 +411,10 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
 		return HandleSeq();
 	}
 
-	// Pattern Match on _garbage_superspace since some atoms in hpattern could
-	// be in the _garbage space
+	// Pattern Match on _as, assuming PM will work even if some atoms
+	// in hpattern are in the _garbage space
 	PatternLinkPtr sl(createPatternLink(hpattern_vardecl, hpattern));
-	BackwardChainerPMCB pmcb(&_garbage_superspace,
+	BackwardChainerPMCB pmcb(&_as,
 	                         VariableListCast(hpattern_vardecl));
 
 	sl->satisfy(pmcb);
@@ -592,6 +592,9 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 
 	std::vector<VarMap> temp_vmap_list;
 
+	// XXX TODO when all VariableNode are unique, we will be able to tell what
+	// type a random VariableNode is in the AtomSpace by looking at its
+	// antecendent; so the type should be include in the future
 	HandleSeq temp_results = match_knowledge_base(premises, Handle::UNDEFINED, temp_vmap_list);
 
 	// chase the variables so that if a variable A were mapped to another
