@@ -261,10 +261,12 @@ SCM SchemeSmob::ss_get_type (SCM stype)
 		"*** Code currently assumes types are shorts!  ***");
 
 	if (scm_is_false(scm_string_p(stype)))
-		return scm_from_ushort(NOTYPE);
+		scm_wrong_type_arg_msg("cog-type->int", 0, stype, "opencog atom type");
 
 	const char * ct = scm_i_string_chars(stype);
 	Type t = classserver().getType(ct);
+	if (NOTYPE == t and strcmp(ct, "Notype"))
+		scm_wrong_type_arg_msg("cog-type->int", 0, stype, "opencog atom type");
 
 	return scm_from_ushort(t);
 }
