@@ -23,7 +23,6 @@
 
 #include <stdio.h>
 
-#include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/util/Logger.h>
@@ -49,17 +48,11 @@ std::string Node::toShortString(std::string indent)
     if (_name == "")
         tmpname = "#" + std::to_string(_uuid);
 
-    std::string atname;
-    if (_atomTable)
-        atname = std::to_string(_atomTable->get_uuid());
-    else
-        atname = "NULL";
-
     std::string nam = indent +
         "(" + classserver().getTypeName(_type) +
         // + getTruthValue()->toString() + ")\n";
         " \"" + tmpname + "\") ; [" +
-        std::to_string(_uuid) + "][" + atname +"]\n";
+        std::to_string(_uuid) + "]\n";
     return nam;
 }
 
