@@ -87,13 +87,7 @@ std::string Link::toShortString(std::string indent)
             answer << indent << "Undefined Atom!\n";
     }
 
-    answer << indent << ") ; [" << _uuid << "]";
-
-    if (_atomTable)
-        answer << "[" << _atomTable->get_uuid() << "]\n";
-    else
-        answer << "[NULL]\n";
-
+    answer << indent << ") ; [" << _uuid << "]\n";
     return answer.str();
 }
 
