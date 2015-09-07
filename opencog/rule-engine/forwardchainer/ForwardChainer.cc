@@ -48,6 +48,8 @@ void ForwardChainer::init()
     _fcmem.set_search_in_af(_configReader.get_attention_allocation());
     _fcmem.set_rules(_configReader.get_rules());
     _fcmem.set_cur_rule(nullptr);
+    
+    _ts_mode = TV_FITNESS_BASED;
 
     // Provide a logger
     _log = NULL;
