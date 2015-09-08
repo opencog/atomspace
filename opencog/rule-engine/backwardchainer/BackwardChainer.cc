@@ -47,14 +47,30 @@ BackwardChainer::BackwardChainer(AtomSpace& as, Handle rbs)
  * Set the initial target for backward chaining.
  *
  * @param init_target   Handle of the target
+ * @param focus_link    The SetLink containing the optional focus set.
  */
-void BackwardChainer::set_target(Handle init_target)
+void BackwardChainer::set_target(Handle init_target, Handle focus_link)
 {
 	_init_target = init_target;
 
 	_targets_set.clear();
+	_focus_space.clear();
+
 	_targets_set.emplace(_init_target,
 	                     _garbage_superspace.add_atom(createVariableList(get_free_vars_in_tree(init_target))));
+
+	// get the stuff under the SetLink
+	LinkPtr lll(LinkCast(focus_link));
+
+	if (lll)
+	{
+		HandleSeq focus_set = lll->getOutgoingSet();
+		for (const auto& h : focus_set)
+			_focus_space.add_atom(h);
+
+		// the target itself should be part of the focus set
+		_focus_space.add_atom(init_target);
+	}
 }
 
 UREConfigReader& BackwardChainer::get_config()
@@ -382,15 +398,35 @@ void BackwardChainer::process_target(Target& target)
  * @param vmap             an output list of mapping for variables in hpattern
  * @return                 a vector of matched atoms
  */
-HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
+HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
                                                 Handle hpattern_vardecl,
                                                 vector<VarMap>& vmap)
 {
+	AtomSpace focus_garbage_superspace(&_focus_space);
+	AtomSpace* working_space;
+	AtomSpace* working_garbage_superspace;
+
+	// decide whether to look at a small focus set or whole AtomSpace
+	if (focus_garbage_superspace.get_size() != 0)
+	{
+		working_space = &_focus_space;
+		working_garbage_superspace = &focus_garbage_superspace;
+	}
+	else
+	{
+		working_space = &_as;
+		working_garbage_superspace = &_garbage_superspace;
+	}
+
+	hpattern = working_garbage_superspace->add_atom(hpattern);
+
 	if (hpattern_vardecl == Handle::UNDEFINED)
 	{
 		HandleSeq vars = get_free_vars_in_tree(hpattern);
-		hpattern_vardecl = _garbage_superspace.add_atom(createVariableList(vars));
+		hpattern_vardecl = working_garbage_superspace->add_atom(createVariableList(vars));
 	}
+	else
+		hpattern_vardecl = working_garbage_superspace->add_atom(hpattern_vardecl);
 
 	logger().debug("[BackwardChainer] Matching knowledge base with "
 	               " %s and variables %s",
@@ -411,10 +447,10 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
 		return HandleSeq();
 	}
 
-	// Pattern Match on _as, assuming PM will work even if some atoms
-	// in hpattern are in the _garbage space
+	// Pattern Match on working_space, assuming PM will work even if some atoms
+	// in hpattern are in the garbage space
 	PatternLinkPtr sl(createPatternLink(hpattern_vardecl, hpattern));
-	BackwardChainerPMCB pmcb(&_as,
+	BackwardChainerPMCB pmcb(working_space,
 	                         VariableListCast(hpattern_vardecl));
 
 	sl->satisfy(pmcb);
@@ -451,14 +487,15 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
 				break;
 			}
 
-			// don't want matched clause that is not in the parent _as
-			if (_as.get_atom(p.second) == Handle::UNDEFINED)
+			// don't want matched clause that is not in the focus set or parent _as
+			if (working_space->get_atom(p.second) == Handle::UNDEFINED)
 			{
-				logger().debug("[BackwardChainer] matched clause not in _as");
+				logger().debug("[BackwardChainer] matched clause " + p.second->toShortString() + "not in target search space");
 				break;
 			}
 
-			i_pred_soln.push_back(p.second);
+			// store the main _as version of the matched atom
+			i_pred_soln.push_back(_as.get_atom(p.second));
 		}
 
 		if (i_pred_soln.size() != pred_solns[i].size())
@@ -475,7 +512,14 @@ HandleSeq BackwardChainer::match_knowledge_base(const Handle& hpattern,
 			this_result = i_pred_soln[0];
 
 		results.push_back(this_result);
-		vmap.push_back(var_solns[i]);
+
+		// convert the working_space mapping to _as
+		std::map<Handle, Handle> converted_vmap;
+		for (auto& p : var_solns[i])
+			converted_vmap[_garbage_superspace.get_atom(p.first)]
+			        = _as.get_atom(p.second);
+
+		vmap.push_back(converted_vmap);
 	}
 
 	return results;

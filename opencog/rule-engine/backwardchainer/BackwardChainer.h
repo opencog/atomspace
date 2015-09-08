@@ -95,7 +95,7 @@ class BackwardChainer
 public:
 	BackwardChainer(AtomSpace& as, Handle rbs);
 
-	void set_target(Handle init_target);
+	void set_target(Handle init_target, Handle focus_link = Handle::UNDEFINED);
 	UREConfigReader& get_config();
 	const UREConfigReader& get_config() const;
 
@@ -113,7 +113,7 @@ private:
 	                 Rule& standardized_rule,
 	                 std::vector<VarMap>& all_implicand_to_target_mappings);
 
-	HandleSeq match_knowledge_base(const Handle& htarget,
+	HandleSeq match_knowledge_base(Handle htarget,
 	                               Handle htarget_vardecl,
 	                               std::vector<VarMap>& vmap);
 	HandleSeq find_premises(const Rule& standardized_rule,
@@ -133,6 +133,7 @@ private:
 	UREConfigReader _configReader;
 	AtomSpace _garbage_superspace;
 	Handle _init_target;
+	AtomSpace _focus_space;
 
 	TargetSet _targets_set;
 
