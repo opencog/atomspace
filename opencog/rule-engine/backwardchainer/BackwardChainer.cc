@@ -307,15 +307,22 @@ void BackwardChainer::process_target(Target& target)
 
 		// reverse ground the rule's outputs with the mapping to the premise
 		// so that when we ground the premise, we know how to generate
-		// the final output
+		// the final output; one version containing the ExecutionOutputLink (if
+		// any), and the other contains the actual output vector sequence
 		Handle output_grounded = Substitutor::substitute(standardized_rule.get_implicand(), implicand_mapping);
 		output_grounded = _garbage_superspace.add_atom(output_grounded);
-
 		logger().debug("[BackwardChainer] Output reverse grounded step 1 as " + output_grounded->toShortString());
 		output_grounded = Substitutor::substitute(output_grounded, vm);
 		output_grounded = _garbage_superspace.add_atom(output_grounded);
-
 		logger().debug("[BackwardChainer] Output reverse grounded step 2 as " + output_grounded->toShortString());
+
+		HandleSeq output_grounded_seq;
+		for (const auto& h : standardized_rule.get_implicand_seq())
+		{
+			Handle reverse_grounded = Substitutor::substitute(h, implicand_mapping);
+			reverse_grounded = Substitutor::substitute(reverse_grounded, vm);
+			output_grounded_seq.push_back(reverse_grounded);
+		}
 
 		std::vector<VarMap> vm_list;
 
@@ -356,6 +363,13 @@ void BackwardChainer::process_target(Target& target)
 			Handle added = inst.instantiate(output_grounded, m);
 
 			logger().debug("[BackwardChainer] Added " + added->toShortString() + " to _as");
+
+			for (const auto& h : output_grounded_seq)
+			{
+				added = Substitutor::substitute(h, m);
+				_focus_space.add_atom(added);
+				logger().debug("[BackwardChainer] Added " + added->toShortString() + " to _as & focus set");
+			}
 
 			// Add the grounding to the return results
 			for (Handle& h : target.get_varseq())
