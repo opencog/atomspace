@@ -175,14 +175,15 @@ void ForwardChainer::do_chain(Handle hsource/*=Handle::UNDEFINED*/,
             if (not matched_rules.empty()) {
                 _log->info("[ForwardChainer] Found matching rule");
 
-                for (Rule* r : matched_rules) {
+                for (Rule* r : matched_rules) 
                     _rule_weight[r] = r->get_weight();
-                }
 
             } else {
                 _log->info("[ForwardChainer] No matching rule found. "
                            "Setting all rules as candidates.");
-                //TODO subatoms unify here
+                           
+                for(Rule* r : _fcmem.get_rules())
+                    _rule_weight[r] = r->get_weight();
             }
 
         }
