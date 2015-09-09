@@ -29,6 +29,7 @@ cat - << XXX | /usr/bin/env guile
 (add-to-load-path "../../opencog/scm")
 
 (use-modules (opencog))
+(use-modules (opencog query))
 (use-modules (ice-9 format))
 (use-modules (srfi srfi-19))
 

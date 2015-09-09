@@ -5,6 +5,7 @@
 ;
 
 (use-modules (opencog))
+(use-modules (opencog exec))
 
 ; First, just give it some broken junk.  See what happens.
 (cog-execute!

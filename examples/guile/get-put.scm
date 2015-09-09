@@ -11,6 +11,7 @@
 ;
 (use-modules (opencog))
 (use-modules (opencog exec))
+(use-modules (opencog query))
 
 ; A utility function to print all EvaluationLinks in the AtomSpace.
 (define (show-eval-links)
