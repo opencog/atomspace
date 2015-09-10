@@ -8,6 +8,7 @@
 ; are thrown.
 ;
 (use-modules (opencog))
+(use-modules (opencog exec))
 
 ; Using python code in an execution link. Be sure to set the PYTHONPATH
 ; environment varialbe first, so that the cython and python libraries
