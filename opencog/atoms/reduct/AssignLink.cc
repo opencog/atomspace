@@ -183,6 +183,13 @@ InsertLink::InsertLink(Link &l)
 ///
 Handle RemoveLink::execute(AtomSpace* as) const
 {
+	// A word of caution: It may be the case that the atoms in
+	// HandleSeq _outset are not in the atomspace we are being
+	// executed with. Thus, we need to get thier equivalents that
+	// actually are in the atomspace, so that we can actually
+	// locate the atom to be removed.  This is kind-of subtle,
+	// and explains the calls to as->get_atom() below.
+
 	// Are there *any* constants in the outgoing set?
 	// narrowst will be -1 if they're all free variables.
 	// narrowest helps make the next loop small...
@@ -190,8 +197,9 @@ Handle RemoveLink::execute(AtomSpace* as) const
 	size_t narsz = SIZE_MAX;
 	for (size_t i=0; i < _osetz; i++)
 	{
-		if (VARIABLE_NODE == _outset[i]->getType()) continue;
-		size_t isz = _outset[i]->getIncomingSetSize();
+		Handle ho(as->get_atom(_outset[i]));
+		if (VARIABLE_NODE == ho->getType()) continue;
+		size_t isz = ho->getIncomingSetSize();
 		if (isz < narsz)
 		{
 			narsz = isz;
@@ -202,7 +210,8 @@ Handle RemoveLink::execute(AtomSpace* as) const
 	// Delete matching constant (closed) links
 	if (0 <= narrowest)
 	{
-		IncomingSet iset = _outset[narrowest]->getIncomingSet();
+		Handle nar(as->get_atom(_outset[narrowest]));
+		IncomingSet iset = nar->getIncomingSet();
 		for (const LinkPtr& lp : iset)
 		{
 			// Wrong type, can't delete that!
@@ -218,7 +227,7 @@ Handle RemoveLink::execute(AtomSpace* as) const
 
 				// Contains a variable, or doesn't match -- don't delete.
 				if (VARIABLE_NODE == hs[i]->getType() or
-				    _outset[i] != hs[i])
+				    as->get_atom(_outset[i]) != hs[i])
 				{
 					match = false;
 					break;
@@ -232,7 +241,7 @@ Handle RemoveLink::execute(AtomSpace* as) const
 	}
 
 	// If we are here, then the entire outset consisted of free variables.
-	// In this case, deleted everything that has the same arity, and does
+	// In this case, delete everything that has the same arity, and does
 	// not contain variables.
 	HandleSeq seq;
 	as->get_handles_by_type(seq, _link_type);
