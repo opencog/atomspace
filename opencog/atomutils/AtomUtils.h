@@ -50,6 +50,8 @@ HandleSeq get_all_atoms(Handle h);
 
 UnorderedHandleSet get_all_unique_atoms(Handle h);
 
+Handle gen_non_atomspace_copy(Handle h);
+
 /**
  * Returns neighboring atoms, following incoming links and
  * returning their outgoing sets.

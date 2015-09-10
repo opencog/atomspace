@@ -38,8 +38,7 @@ using namespace opencog;
  */
 Target::Target(AtomSpace& as, const Handle& h, const Handle& hvardecl) : _as(as)
 {
-	_htarget_external = h;
-	_htarget_internal = _as.add_atom(h);
+	_htarget = h;
 	_selection_count = 0;
 
 	_vardecl = hvardecl;
@@ -62,8 +61,8 @@ void Target::store_step(const Rule& r, const HandleSeq& premises)
 	// XXX TODO think of a good structure for storing the inference step
 	// XXX TODO if the rule was actually applied, store the change to the TV?
 	_as.add_link(SET_LINK,
-	             _htarget_internal,
-	             _as.add_node(CONCEPT_NODE, r.get_name()),
+	             _htarget,
+	             _as.add_node(NODE, r.get_name()),
 	             _as.add_link(LIST_LINK, premises));
 }
 
@@ -76,8 +75,13 @@ void Target::store_varmap(VarMultimap& vm)
 {
 	for (auto& p : vm)
 	{
-		if (_varmap.count(p.first) == 1)
-			_varmap[p.first].insert(p.second.begin(), p.second.end());
+		Handle hk = gen_non_atomspace_copy(p.first);
+
+		if (_varmap.count(hk) == 1)
+		{
+			for (auto& h : p.second)
+				_varmap[hk].insert(gen_non_atomspace_copy(h));
+		}
 	}
 }
 
@@ -90,8 +94,10 @@ void Target::store_varmap(VarMap& vm)
 {
 	for (auto& p : vm)
 	{
-		if (_varmap.count(p.first) == 1)
-			_varmap[p.first].insert(p.second);
+		Handle hk = gen_non_atomspace_copy(p.first);
+
+		if (_varmap.count(hk) == 1)
+			_varmap[hk].insert(gen_non_atomspace_copy(p.second));
 	}
 }
 
@@ -105,14 +111,18 @@ void Target::store_varmap(VarMap& vm)
  */
 unsigned int Target::rule_count(const Rule& r) const
 {
-	Handle hname = _as.get_node(CONCEPT_NODE, r.get_name());
+	Handle hname = _as.get_node(NODE, r.get_name());
 
 	// if this rule's name never appear in history, it wasn't used
 	if (hname == Handle::UNDEFINED)
 		return 0;
 
-	HandleSeq q = get_neighbors(_htarget_internal, false, true,
-	                            SET_LINK, false);
+	Handle htarget = _as.get_atom(_htarget);
+
+	if (htarget == Handle::UNDEFINED)
+		return 0;
+
+	HandleSeq q = get_neighbors(htarget, false, true, SET_LINK, false);
 
 	return std::count(q.begin(), q.end(), hname);
 }
@@ -153,8 +163,12 @@ void TargetSet::clear()
  */
 void TargetSet::emplace(Handle h, Handle hvardecl)
 {
+	h = gen_non_atomspace_copy(h);
+
 	if (_targets_map.count(h) == 1)
 		return;
+
+	hvardecl = gen_non_atomspace_copy(hvardecl);
 
 	_targets_map.insert(std::pair<Handle, Target>(h, Target(_history_space, h, hvardecl)));
 }
@@ -205,7 +219,7 @@ Target& TargetSet::select()
  * @param h  the handle of the Target
  * @return   a reference to the Target
  */
-Target& TargetSet::get(Handle& h)
+Target& TargetSet::get(Handle h)
 {
-	return _targets_map.at(h);
+	return _targets_map.at(gen_non_atomspace_copy(h));
 }

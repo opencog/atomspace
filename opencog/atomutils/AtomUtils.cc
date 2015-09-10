@@ -25,6 +25,7 @@
 
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/AtomTable.h>
 #include "AtomUtils.h"
 
 namespace opencog
@@ -125,6 +126,35 @@ UnorderedHandleSet get_all_unique_atoms(Handle h)
     return results;
 }
 
+/**
+ * Generate a copy of the atom that is not in any AtomSpace.
+ *
+ * @param h  the input atom in some AtomSpace
+ * @return   a copy of the atom not inside any AtomSpace
+ */
+Handle gen_non_atomspace_copy(Handle h)
+{
+    LinkPtr lll(LinkCast(h));
+    if (lll)
+    {
+        HandleSeq oset;
+        for (const Handle& o : lll->getOutgoingSet())
+            oset.push_back(gen_non_atomspace_copy(o));
+
+		return Handle(AtomTable::factory(lll->getType(),
+		                                 createLink(lll->getType(),
+		                                            oset,
+		                                            lll->getTruthValue(),
+		                                            lll->getAttentionValue())));
+	}
+
+    NodePtr nnn(NodeCast(h));
+    return Handle(AtomTable::factory(nnn->getType(),
+	                                 createNode(nnn->getType(),
+	                                            nnn->getName(),
+	                                            nnn->getTruthValue(),
+	                                            nnn->getAttentionValue())));
+}
 
 HandleSeq get_neighbors(const Handle& h, bool fanin,
                         bool fanout, Type desiredLinkType,
