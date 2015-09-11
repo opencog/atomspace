@@ -118,17 +118,10 @@ void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 		if (UNQUOTE_LINK == t)
 			_in_quote = false;
 
-		if (classserver().isA(t, LAMBDA_LINK))
-		{
-			_bound_stack.push(_bound_vars);
-			LambdaLinkPtr lam(h);
-			const Variables& vees = lam->get_variables();
-			for (Handle v : vees.varseq) _bound_vars.insert(v);
-		}
-
 		if (VARIABLE_NODE == t and
 		    not _in_quote and
-		    0 == varset.count(h))
+		    0 == varset.count(h) and
+		    0 == _bound_vars.count(h))
 		{
 			_varseq.push_back(h);
 			varset.insert(h);
@@ -136,10 +129,20 @@ void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 		LinkPtr lll(LinkCast(h));
 		if (NULL == lll) continue;
 
+		bool islam = classserver().isA(t, LAMBDA_LINK);
+		if (islam)
+		{
+			_bound_stack.push(_bound_vars);
+			LambdaLinkPtr lam(createLambdaLink(*lll));
+			const Variables& vees = lam->get_variables();
+			for (Handle v : vees.varseq) _bound_vars.insert(v);
+		}
+
 		find_vars(varset, lll->getOutgoingSet());
 
-		if (classserver().isA(t, LAMBDA_LINK))
+		if (islam)
 		{
+			_bound_vars = _bound_stack.top();
 			_bound_stack.pop();
 		}
 	}
