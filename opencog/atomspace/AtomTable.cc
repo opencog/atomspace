@@ -284,6 +284,9 @@ AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
     } else if (BIND_LINK == atom_type) {
         if (NULL == BindLinkCast(atom))
             return createBindLink(*LinkCast(atom));
+    } else if (PATTERN_LINK == atom_type) {
+        if (NULL == PatternLinkCast(atom))
+            return createPatternLink(*LinkCast(atom));
     } else if (DEFINE_LINK == atom_type) {
         if (NULL == DefineLinkCast(atom))
             return createDefineLink(*LinkCast(atom));
@@ -342,6 +345,8 @@ static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
     // Links of various kinds -----------
     if (BIND_LINK == atom_type)
         return createBindLink(*LinkCast(atom));
+    if (PATTERN_LINK == atom_type)
+        return createPatternLink(*LinkCast(atom));
     if (DEFINE_LINK == atom_type)
         return createDefineLink(*LinkCast(atom));
 /*
