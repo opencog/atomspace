@@ -23,6 +23,8 @@
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
 #include "FreeLink.h"
+#include "LambdaLink.h"
+#include "VariableList.h"
 
 using namespace opencog;
 
@@ -101,7 +103,7 @@ FreeLink::FreeLink(Link& l)
 /// variable being named only once.  The varset is only used to make
 /// sure that we don't name a variable more than once; that's all.
 //
-// XXX TODO Add support for UnquoteLink
+// XXX TODO 
 // Also -- anything that binds variables should not be searched.
 // i.e. variables bound in a BindLink, GetLink, SatiscationLink
 // should not be added to the list.  Ditto ForAllLink, ExistsLink.
@@ -116,6 +118,14 @@ void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 		if (UNQUOTE_LINK == t)
 			_in_quote = false;
 
+		if (classserver().isA(t, LAMBDA_LINK))
+		{
+			_bound_stack.push(_bound_vars);
+			LambdaLinkPtr lam(h);
+			const Variables& vees = lam->get_variables();
+			for (Handle v : vees.varseq) _bound_vars.insert(v);
+		}
+
 		if (VARIABLE_NODE == t and
 		    not _in_quote and
 		    0 == varset.count(h))
@@ -127,6 +137,11 @@ void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 		if (NULL == lll) continue;
 
 		find_vars(varset, lll->getOutgoingSet());
+
+		if (classserver().isA(t, LAMBDA_LINK))
+		{
+			_bound_stack.pop();
+		}
 	}
 }
 

@@ -23,6 +23,8 @@
 #ifndef _OPENCOG_FREE_LINK_H
 #define _OPENCOG_FREE_LINK_H
 
+#include <set>
+#include <stack>
 #include <opencog/atomspace/Link.h>
 
 namespace opencog
@@ -59,6 +61,9 @@ class FreeLink : public Link
 {
 private:
 	bool _in_quote;
+	std::set<Handle> _bound_vars;
+	std::stack<std::set<Handle>> _bound_stack;
+
 protected:
 	HandleSeq _varseq;
 	std::map<Handle, unsigned int> _index;
