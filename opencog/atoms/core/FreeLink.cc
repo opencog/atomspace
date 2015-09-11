@@ -102,11 +102,17 @@ FreeLink::FreeLink(Link& l)
 /// order (from left to right, as they appear in the tree), with each
 /// variable being named only once.  The varset is only used to make
 /// sure that we don't name a variable more than once; that's all.
-//
-// XXX TODO 
-// Also -- anything that binds variables should not be searched.
-// i.e. variables bound in a BindLink, GetLink, SatiscationLink
-// should not be added to the list.  Ditto ForAllLink, ExistsLink.
+///
+/// Variables that are inside a QuoteLink are ignored ... unless they
+/// are wrapped by UnquoteLink.  That is, QuoteLink behaves like a
+/// quasi-quote in lisp/scheme.
+///
+/// Variables that are bound inside of some deeper link are ignored;
+/// they are not free, and thus must not be collected up.  That is,
+/// any bound variables appearing in a GetLink, BindLink,
+/// SatisfactionLink, etc. will not be collected.  Any *free* variables
+/// in these same links *will* be collected (since they are free!)
+///
 void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 {
 	for (const Handle& h : oset)
@@ -132,8 +138,15 @@ void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 		bool islam = classserver().isA(t, LAMBDA_LINK);
 		if (islam)
 		{
+			// Save the current set of bound variables...
 			_bound_stack.push(_bound_vars);
-			LambdaLinkPtr lam(createLambdaLink(*lll));
+
+			// If we can cast to Lambda, then do so; otherwise,
+			// take the low road, and let Lambda constructor
+			// do the bound-variable extraction.
+			LambdaLinkPtr lam(LambdaLinkCast(lll));
+			if (NULL == lam)
+				lam = createLambdaLink(lll->getOutgoingSet());
 			const Variables& vees = lam->get_variables();
 			for (Handle v : vees.varseq) _bound_vars.insert(v);
 		}
