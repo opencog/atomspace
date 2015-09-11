@@ -24,6 +24,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/FreeLink.h>
+#include <opencog/atoms/core/VariableList.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -91,7 +92,19 @@ void FreeLinkUTest::test_unquote(void)
 		"	(QuoteLink (ListLink (VariableNode \"$y\"))"
 		"		(UnquoteLink (VariableNode \"$z\"))))"
 	);
-	printf("expecting four: %s\n", unq->toShortString().c_str());
+
+	FreeLink fl(unq);
+	// VariableList vl(fl.get_vars());
+	HandleSeq vars = fl.get_vars();
+
+	printf("expecting Variable $x: %s\n", vars[0]->toShortString().c_str());
+	printf("expecting Variable $z: %s\n", vars[1]->toShortString().c_str());
+
+	// Expecting only two variables $x and $z, because $y is quoted.
+	// Expecting the order to be preserved: i.e. $x before $z
+	TS_ASSERT_EQUALS(vars.size(), 2);
+	TS_ASSERT_EQUALS(vars[0], vx);
+	TS_ASSERT_EQUALS(vars[1], vz);
 
 	// ---------
 	logger().debug("END TEST: %s", __FUNCTION__);
