@@ -110,8 +110,14 @@ void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 	for (const Handle& h : oset)
 	{
 		Type t = h->getType();
-		if (QUOTE_LINK == t) continue;
+		if (QUOTE_LINK == t)
+			_in_quote = true;
+
+		if (UNQUOTE_LINK == t)
+			_in_quote = false;
+
 		if (VARIABLE_NODE == t and
+		    not _in_quote and
 		    0 == varset.count(h))
 		{
 			_varseq.push_back(h);
@@ -143,6 +149,7 @@ void FreeLink::build_index(void)
 
 void FreeLink::init(void)
 {
+	_in_quote = false;
 	std::set<Handle> varset;
 	find_vars(varset, _outgoing);
 	build_index();
