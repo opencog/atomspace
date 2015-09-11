@@ -291,8 +291,8 @@ public:
         Handle hlist_added = table->add(hlist, false);
 
         VariableListPtr v_added_ptr(VariableListCast(hlist_added));
-        TS_ASSERT_DIFFERS(v_added_ptr->get_variables().varset.count(hv1), 1);
-        TS_ASSERT_DIFFERS(v_added_ptr->get_variables().varset.count(hv2), 1);
+        TS_ASSERT_EQUALS(v_added_ptr->get_variables().varset.count(hv1), 0);
+        TS_ASSERT_EQUALS(v_added_ptr->get_variables().varset.count(hv2), 0);
 
         Handle hv1_added = table->add(hv1, false);
         Handle hv2_added = table->add(hv2, false);
