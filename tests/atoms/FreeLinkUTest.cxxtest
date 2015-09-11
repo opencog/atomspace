@@ -59,6 +59,8 @@ public:
 	void tearDown(void);
 
 	void test_unquote(void);
+	void test_binding(void);
+	void test_getlink(void);
 };
 
 void FreeLinkUTest::tearDown(void)
@@ -71,14 +73,13 @@ void FreeLinkUTest::setUp(void)
 	as->clear();
 	config().set("SCM_PRELOAD",
 		"opencog/atomspace/core_types.scm, "
-		"opencog/scm/opencog/exec.scm, "
 		"opencog/scm/utilities.scm");
 
 	load_scm_files_from_config(*as);
 }
 
 /*
- * FreeLinkLink unit test.  Test arithmetic.
+ * FreeLink free-variable extraction test.  Test UnquoteLink.
  */
 void FreeLinkUTest::test_unquote(void)
 {
@@ -99,6 +100,79 @@ void FreeLinkUTest::test_unquote(void)
 
 	printf("expecting Variable $x: %s\n", vars[0]->toShortString().c_str());
 	printf("expecting Variable $z: %s\n", vars[1]->toShortString().c_str());
+
+	// Expecting only two variables $x and $z, because $y is quoted.
+	// Expecting the order to be preserved: i.e. $x before $z
+	TS_ASSERT_EQUALS(vars.size(), 2);
+	TS_ASSERT_EQUALS(vars[0], vx);
+	TS_ASSERT_EQUALS(vars[1], vz);
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * FreeLink free-variable extraction test.  Test bound variables.
+ */
+void FreeLinkUTest::test_binding(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// ---------
+	Handle vx = eval->eval_h("(VariableNode \"$x\")");
+	Handle vz = eval->eval_h("(VariableNode \"$z\")");
+	Handle unq = eval->eval_h(
+		"(AndLink (VariableNode \"$x\")"
+		"	(LambdaLink (VariableList (VariableNode \"$y\"))"
+		"		(ListLink (VariableNode \"$z\"))))"
+	);
+
+	FreeLink fl(unq);
+	// VariableList vl(fl.get_vars());
+	HandleSeq vars = fl.get_vars();
+
+	printf("expecting free $x: %s\n", vars[0]->toShortString().c_str());
+	printf("expecting free $z: %s\n", vars[1]->toShortString().c_str());
+
+	// Expecting only two variables $x and $z, because $y is quoted.
+	// Expecting the order to be preserved: i.e. $x before $z
+	TS_ASSERT_EQUALS(vars.size(), 2);
+	TS_ASSERT_EQUALS(vars[0], vx);
+	TS_ASSERT_EQUALS(vars[1], vz);
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * FreeLink free-variable extraction test.  Test GetLink.
+ */
+void FreeLinkUTest::test_getlink(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// ---------
+	Handle vx = eval->eval_h("(VariableNode \"$x\")");
+	Handle vz = eval->eval_h("(VariableNode \"$z\")");
+	Handle unq = eval->eval_h(
+		"(AndLink (VariableNode \"$x\")"
+		"	(GetLink (VariableList (VariableNode \"$ya\")"
+		"			(VariableNode \"$yb\")"
+		"			(VariableNode \"$yc\")"
+		"			(VariableNode \"$yd\"))"
+		"		(ListLink (VariableNode \"$ya\")"
+		"			(VariableNode \"$yb\")"
+		"			(VariableNode \"$z\")"
+		"			(VariableNode \"$yc\")"
+		"			(VariableNode \"$yd\"))))"
+	);
+
+	FreeLink fl(unq);
+	// VariableList vl(fl.get_vars());
+	HandleSeq vars = fl.get_vars();
+
+	printf("expecting get $x: %s\n", vars[0]->toShortString().c_str());
+	printf("expecting get $z: %s\n", vars[1]->toShortString().c_str());
 
 	// Expecting only two variables $x and $z, because $y is quoted.
 	// Expecting the order to be preserved: i.e. $x before $z
