@@ -57,6 +57,8 @@ namespace opencog
  */
 class FreeLink : public Link
 {
+private:
+	bool _in_quote;
 protected:
 	HandleSeq _varseq;
 	std::map<Handle, unsigned int> _index;
