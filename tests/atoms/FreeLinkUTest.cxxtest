@@ -59,6 +59,7 @@ public:
 	void tearDown(void);
 
 	void test_unquote(void);
+	void test_deunquote(void);
 	void test_binding(void);
 	void test_getlink(void);
 };
@@ -90,8 +91,8 @@ void FreeLinkUTest::test_unquote(void)
 	Handle vz = eval->eval_h("(VariableNode \"$z\")");
 	Handle unq = eval->eval_h(
 		"(AndLink (VariableNode \"$x\")"
-		"	(QuoteLink (ListLink (VariableNode \"$y\"))"
-		"		(UnquoteLink (VariableNode \"$z\"))))"
+		"	(QuoteLink (ListLink (VariableNode \"$y\")"
+		"		(UnquoteLink (VariableNode \"$z\")))))"
 	);
 
 	FreeLink fl(unq);
@@ -106,6 +107,47 @@ void FreeLinkUTest::test_unquote(void)
 	TS_ASSERT_EQUALS(vars.size(), 2);
 	TS_ASSERT_EQUALS(vars[0], vx);
 	TS_ASSERT_EQUALS(vars[1], vz);
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * FreeLink free-variable extraction test.  Test multiple,
+ * recursive UnquoteLinks.
+ */
+void FreeLinkUTest::test_deunquote(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// ---------
+	Handle vx = eval->eval_h("(VariableNode \"$x\")");
+	Handle vz = eval->eval_h("(VariableNode \"$z\")");
+	Handle vu = eval->eval_h("(VariableNode \"$u\")");
+	Handle unq = eval->eval_h(
+		"(AndLink (VariableNode \"$x\")"
+		"	(QuoteLink (ListLink (VariableNode \"$y\")"
+		"		(UnquoteLink (VariableNode \"$z\"))"
+		"		(VariableNode \"$w\")"
+		"		(UnquoteLink (VariableNode \"$u\"))"
+		"		(VariableNode \"$t\"))))"
+	);
+
+	FreeLink fl(unq);
+	// VariableList vl(fl.get_vars());
+	HandleSeq vars = fl.get_vars();
+
+	printf("expect Var $x: %s\n", vars[0]->toShortString().c_str());
+	printf("expect Var $z: %s\n", vars[1]->toShortString().c_str());
+	printf("expect Var $u: %s\n", vars[2]->toShortString().c_str());
+
+	// Expecting only three variables $x, $z, $u because all the
+	// others are quoted.  Expecting the order to be preserved:
+	// i.e. $x then $z then $u.
+	TS_ASSERT_EQUALS(vars.size(), 3);
+	TS_ASSERT_EQUALS(vars[0], vx);
+	TS_ASSERT_EQUALS(vars[1], vz);
+	TS_ASSERT_EQUALS(vars[2], vu);
 
 	// ---------
 	logger().debug("END TEST: %s", __FUNCTION__);
