@@ -60,7 +60,8 @@ void PatternLink::common_init(void)
 	// we are being run with the DefaultPatternMatchCB, and so we assume
 	// that the logical connectives are AndLink, OrLink and NotLink.
 	// Tweak the evaluatable_holders to reflect this.
-	std::set<Type> connectives({AND_LINK, OR_LINK, NOT_LINK});
+	std::set<Type> connectives({AND_LINK, SEQUENTIAL_AND_LINK,
+	                            OR_LINK, NOT_LINK});
 	trace_connectives(connectives, _pat.clauses);
 
 	// Split the non-virtual clauses into connected components
@@ -281,11 +282,11 @@ PatternLink::PatternLink(Link &l)
 /// The predicate is either an AndLink of clauses to be satisfied, or a
 /// single clause. Other link types, such as OrLink and SequentialAnd,
 /// are treated here as single clauses; unpacking them here would lead
-/// to confusion in the pattern matcher. This is partly because, after
-/// unpacking, clauses can be grounded in  an arbitrary order; thus,
-/// SequentialAnd's must be griounded and evaluated sequentially, and
-/// thus, not unpacked. In the case of OrLinks, there is no flag to say
-/// that "these are disjoined", so again, that has to happen later.
+/// to confusion in the pattern matcher.  This is partly because, after
+/// unpacking, clauses can be grounded in an arbitrary order; thus,
+/// SequentialAnd's must be grounded and evaluated sequentially, and
+/// thus, not unpacked.  In the case of OrLinks, there is no flag to
+/// say that "these are disjoined", so again, that has to happen later.
 void PatternLink::unbundle_clauses(const Handle& hbody)
 {
 	Type t = hbody->getType();
