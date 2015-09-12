@@ -386,7 +386,13 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 	// I guess ChoiceLink is the same as OrLink PresentLink.
 	// XXX .. would doing this here make the code simpler, than
 	// doing it in the bowels of the patten matcher, as it is
-	// currently being done?
+	// currently being done? Well, no it cannot, since the current
+	// ChoiceLink gaurantees a complete exploration of all
+	// possibilities, whereas here, by willy-nilly grounding some
+	// subset, we would like run into conflicting assignments of
+	// groundings to variables, thus leading to bizarre conflicts
+	// and failures, and/or incomplete exploration of choices.
+	// What to do ??
 	throw InvalidParamException(TRACE_INFO,
 	            "Unknown logical connective %s\n",
 	            top->toShortString().c_str());
