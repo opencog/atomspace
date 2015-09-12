@@ -294,11 +294,34 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	// technically correct in the long-run. XXX FIXME In the long run,
 	// nothing should be unpacked, since everything should be run-time
 	// evaluatable. i.e. everything should be a predicate, and that's
-	// that.
+	// that. ??? But how can this be done? We have to pattern-match
+	// disjoint clauses, connected via variables only; how else can this
+	// be done, except by unpacking?  I'm confused.
+	//
+	// For SequentialAndLinks, which are expected to be evaluated
+	// in-order, we need to fish out any PresentLinks, and add them
+	// to the list of clauses to be grounded.  Of course, the
+	// SequentialAndLink itself also has to be evaluated, so we add it
+	// too.
 	_pat.body = hbody;
 	if (AND_LINK == t or PRESENT_LINK == t)
 	{
 		_pat.clauses = LinkCast(hbody)->getOutgoingSet();
+	}
+	else if (SEQUENTIAL_AND_LINK == t)
+	{
+		const HandleSeq& oset = LinkCast(hbody)->getOutgoingSet();
+		for (const Handle& ho : oset)
+		{
+			Type ot = ho->getType();
+			if (PRESENT_LINK == ot)
+			{
+				const HandleSeq& pset = LinkCast(ho)->getOutgoingSet();
+				for (const Handle& ph : pset)
+					_pat.clauses.push_back(ph);
+			}
+		}
+		_pat.clauses.push_back(hbody);
 	}
 	else
 	{
