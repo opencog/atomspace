@@ -361,6 +361,32 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 	{
 		return eval_term(top, gnds);
 	}
+	else if (PRESENT_LINK == term_type)
+	{
+		// If *every* clause in the PresentLink has been grounded,
+		// then return true.  That is, PresentLink behaves like an
+		// AndLink for term-presence.
+		for (const Handle& h : oset)
+		{
+			try
+			{
+				Handle g = gnds.at(h);
+			}
+			catch (...)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	// XXX TODO: Implement ChoiceLink here: its true if any one term
+	// is present.
+	// Also: Implement AbsentLink: its false if any clause is grounded.
+	// I guess AbsentLink is same as NotLink PresentLink.
+	// I guess ChoiceLink is the same as OrLink PresentLink.
+	// XXX .. would doing this here make the code simpler, than
+	// doing it in the bowels of the patten matcher, as it is
+	// currently being done?
 	throw InvalidParamException(TRACE_INFO,
 	            "Unknown logical connective %s\n",
 	            top->toShortString().c_str());
