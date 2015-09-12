@@ -118,11 +118,6 @@ void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 	for (const Handle& h : oset)
 	{
 		Type t = h->getType();
-		if (QUOTE_LINK == t)
-			_in_quote = true;
-
-		if (UNQUOTE_LINK == t)
-			_in_quote = false;
 
 		if (VARIABLE_NODE == t and
 		    not _in_quote and
@@ -132,14 +127,24 @@ void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 			_varseq.push_back(h);
 			varset.insert(h);
 		}
+
 		LinkPtr lll(LinkCast(h));
 		if (NULL == lll) continue;
 
+		// Save the recursive state on stack.
+		bool save_quote = _in_quote;
+		if (QUOTE_LINK == t)
+			_in_quote = true;
+
+		if (UNQUOTE_LINK == t)
+			_in_quote = false;
+
 		bool islam = classserver().isA(t, LAMBDA_LINK);
+		std::set<Handle> bsave = _bound_vars;
 		if (islam)
 		{
 			// Save the current set of bound variables...
-			_bound_stack.push(_bound_vars);
+			bsave = _bound_vars;
 
 			// If we can cast to Lambda, then do so; otherwise,
 			// take the low road, and let Lambda constructor
@@ -154,10 +159,11 @@ void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 		find_vars(varset, lll->getOutgoingSet());
 
 		if (islam)
-		{
-			_bound_vars = _bound_stack.top();
-			_bound_stack.pop();
-		}
+			_bound_vars = bsave;
+
+		// Restore current state from the stack.
+		if (QUOTE_LINK == t or UNQUOTE_LINK == t)
+			_in_quote = save_quote;
 	}
 }
 

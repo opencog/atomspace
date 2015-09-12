@@ -62,7 +62,6 @@ class FreeLink : public Link
 private:
 	bool _in_quote;
 	std::set<Handle> _bound_vars;
-	std::stack<std::set<Handle>> _bound_stack;
 
 protected:
 	HandleSeq _varseq;
