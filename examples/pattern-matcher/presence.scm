@@ -1,5 +1,5 @@
 ;;
-;; test-presence.scm
+;; presence.scm
 ;;
 ;; Four different ways to check for the existance of some structure
 ;; in the atomspace.
@@ -45,6 +45,7 @@
 ;; uses the SequentialAndLink, it is in a form appropriate for creating
 ;; a behavior tree.
 ;;
+#|
 (define empty-sequence
 	(SatisfactionLink
 		;; SequentialAndLink - verify predicates in sequential order.
@@ -60,8 +61,8 @@
 		)))
 
 (cog-satisfy empty-sequence)
-#|
 
+|#
 ; ------------------------------------------------------
 ;; This variant uses a GetLink to fetch the room-state from the
 ;; AtomSpace, and then uses EqualLink to see if it is in the desired
@@ -70,17 +71,21 @@
 ;; GetLink returns it's results in a SetLink, so comparison must
 ;; use a SetLink as well.
 
-(define empty-seq
+(define get-empty-seq
 	(SatisfactionLink
+		;; Perform operations in sequential order.
 		(SequentialAndLink
+			;; Check for equality ...
 			(EqualLink
 				(SetLink room-empty)
+				;; Retrieve the room state; place it into a SetLink
 				(GetLink (ListLink room-state (VariableNode "$x"))))
+
+			;; If the EqualLink evaluated to TRUE, then print the message.
 			(EvaluationLink
 				(GroundedPredicateNode "scm: print-msg")
 				(ListLink))
 		)))
 
-(cog-satisfy empty-seq)
+(cog-satisfy get-empty-seq)
 ; ------------------------------------------------------
-|#
