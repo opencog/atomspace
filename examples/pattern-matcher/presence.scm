@@ -31,8 +31,19 @@
 ;; Assume room empty at first
 (ListLink room-state room-empty)
 
-(define (print-msg) (display "Hello, I've been triggered!\n") (stv 1 1))
+; Print a message, return a TV value
+(define (tv-print-msg)
+	(display "Hello, I've been triggered!\n") (stv 1 1))
 
+; Print an atom, return a TV value
+(define (tv-print-atom atom)
+	(format #t "Hello, I got this atom: ~a\n" atom) (stv 1 1))
+
+; Print an Atom, return an Atom.
+(define (atom-print-atom atom)
+	(format #t "Hello, Exectuting with atom: ~a\n" atom) atom)
+
+#|
 ; ------------------------------------------------------
 ; ------------------------------------------------------
 
@@ -45,7 +56,6 @@
 ;; uses the SequentialAndLink, it is in a form appropriate for creating
 ;; a behavior tree.
 ;;
-#|
 (define empty-sequence
 	(SatisfactionLink
 		;; SequentialAndLink - verify predicates in sequential order.
@@ -56,13 +66,12 @@
 			(EqualLink (VariableNode "$x") room-empty)
 			;; ... then print a message.
 			(EvaluationLink
-				(GroundedPredicateNode "scm: print-msg")
-				(ListLink))
+				(GroundedPredicateNode "scm: tv-print-atom")
+				(ListLink (VariableNode "$x")))
 		)))
 
 (cog-satisfy empty-sequence)
 
-|#
 ; ------------------------------------------------------
 ;; This variant uses a GetLink to fetch the room-state from the
 ;; AtomSpace, and then uses EqualLink to see if it is in the desired
@@ -70,6 +79,10 @@
 ;; matcher; the GetLink being the inner one.  Note also that the
 ;; GetLink returns it's results in a SetLink, so comparison must
 ;; use a SetLink as well.
+;;
+;; In this example, the variable $x is bound by the GetLink, and
+;; is thus not available outside of the GetLink.  Thus, the grounding
+;; for that variable cannot be given to the print-message routine.
 
 (define get-empty-seq
 	(SatisfactionLink
@@ -83,9 +96,41 @@
 
 			;; If the EqualLink evaluated to TRUE, then print the message.
 			(EvaluationLink
-				(GroundedPredicateNode "scm: print-msg")
-				(ListLink))
+				(GroundedPredicateNode "scm: tv-print-msg")
+				(ListLink))  ; zero arguments passed to function
 		)))
 
 (cog-satisfy get-empty-seq)
+
+|#
 ; ------------------------------------------------------
+;; This variant uses the traditional BindLink format to trigger
+;; the execuation of a schema.  It is similar to the first example,
+;; except for these notable differences:
+;;
+;; -- The BindLink does not use SequentialAnd, and thus any embedded
+;;    GPN may or may not run after the EqualLink; there is no guarantee
+;;    of ordered execution.
+;; -- The action to be performed must be in the form of a GSN, and thus
+;;    it must return an atom, not a truth value.
+;; -- Because of the above, actions cannot be chained: this is not
+;;    suitable for creating a behavior tree.
+
+(define (print-atom) (display "Hello, I've been triggered!\n") (stv 1 1))
+
+(define bind-empty
+	(BindLink
+		;; Perform operations in sequential order.
+		(AndLink
+			;; Assign the room-state to variable $x
+			(ListLink room-state (VariableNode "$x"))
+			;; If the variable $x equals the emtpry state, then ...
+			(EqualLink (VariableNode "$x") room-empty)
+		)
+		;; If the EqualLink evaluated to TRUE, then print the message.
+		(ExecutionOutputLink
+				(GroundedSchemaNode "scm: atom-print-atom")
+				(ListLink (VariableNode "$x")))
+		))
+
+(cog-bind bind-empty)
