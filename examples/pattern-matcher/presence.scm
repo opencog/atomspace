@@ -49,16 +49,24 @@
 ;; a variable, and then uses EqualLink to check the value of
 ;; that variable.
 ;;
-;; This variant haas an advantage over the next one, as it requires
+;; This variant has an advantage over the next one, as it requires
 ;; only one invocation of the pattern matcher, not two. Because it
 ;; uses the SequentialAndLink, it is in a form appropriate for creating
 ;; a behavior tree.
+;;
+;; Note that there may be other atoms linked to the AnchoreNode;
+;; it there are, then those other atoms are ignored. This may be
+;; an davantage or a disadvantage; the next axample demands that
+;; there be only one atom linked to the AnchorNode.
 ;;
 (define empty-sequence
 	(SatisfactionLink
 		;; SequentialAndLink - verify predicates in sequential order.
 		(SequentialAndLink
 			;; Assign the room-state to variable $x
+			;; PresentLink evaluates to 'true' if the ListLink is found;
+			;; processing continues to the next statement ONLY if true
+			;; is returned by the PresentLink.
 			(PresentLink (ListLink room-state (VariableNode "$x")))
 			;; If the variable $x equals the emtpry state, then ...
 			(EqualLink (VariableNode "$x") room-empty)
@@ -81,6 +89,12 @@
 ;; In this example, the variable $x is bound by the GetLink, and
 ;; is thus not available outside of the GetLink.  Thus, the grounding
 ;; for that variable cannot be given to the print-message routine.
+;;
+;; Unlike the previous example, this one will explicitly fail if there
+;; are other atoms linked to the AnchorNode.  That is, the equality
+;; check is makeing sure that the SetLink has one and only one element
+;; in it, which effectively blocks other anchored atoms.  This may be
+;; an advantage, or a disadvantage, depending on the situation.
 
 (define get-empty-seq
 	(SatisfactionLink
