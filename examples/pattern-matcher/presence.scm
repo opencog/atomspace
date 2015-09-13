@@ -4,15 +4,14 @@
 ;; Four different ways to check for the existance of some structure
 ;; in the atomspace.
 ;;
-;; Below are four different approaches to determining if the atomspace
-;; contains the link
+;; Each variant checks to see if the atomspace contains the link
 ;;    (ListLink (AnchorNode "Room State") (ConceptNode "room empty"))
 ;;
-;; If the atomspace does contain the above, then the print-msg
-;; function is run. Each different method has its strengths and
-;; weaknesses. Several of the methods are good for designing behavior
-;; trees that can run in the atomspace.  Others fit the more traditional
-;; BindLink AtmSpace query paradigm.
+;; If the atomspace does contain the above, then the print-msg function
+;; is run. Each different method has its strengths and weaknesses.
+;; Several of the methods are good for designing behavior trees that
+;; run inside the AtomSpace.  Others fit the more traditional query
+;; paradigm.
 
 (add-to-load-path "/usr/local/share/opencog/scm")
 
@@ -41,9 +40,8 @@
 
 ; Print an Atom, return an Atom.
 (define (atom-print-atom atom)
-	(format #t "Hello, Exectuting with atom: ~a\n" atom) atom)
+	(format #t "Hello, Executing with atom: ~a\n" atom) atom)
 
-#|
 ; ------------------------------------------------------
 ; ------------------------------------------------------
 
@@ -102,7 +100,6 @@
 
 (cog-satisfy get-empty-seq)
 
-|#
 ; ------------------------------------------------------
 ;; This variant uses the traditional BindLink format to trigger
 ;; the execuation of a schema.  It is similar to the first example,
@@ -115,8 +112,6 @@
 ;;    it must return an atom, not a truth value.
 ;; -- Because of the above, actions cannot be chained: this is not
 ;;    suitable for creating a behavior tree.
-
-(define (print-atom) (display "Hello, I've been triggered!\n") (stv 1 1))
 
 (define bind-empty
 	(BindLink
@@ -134,3 +129,28 @@
 		))
 
 (cog-bind bind-empty)
+
+; ------------------------------------------------------
+;; This variant uses a PutLink-GetLink combination. It is functionally
+;; identical to the BindLink; merely, the order in which the action
+;; is done is reversed w.r.t. the test.
+;;
+(define put-empty-atom
+	(PutLink
+		;; Replace the value of $x by whatever the GetLink returns.
+		(ExecutionOutputLink
+				(GroundedSchemaNode "scm: atom-print-atom")
+				(ListLink (VariableNode "$x")))
+		(GetLink
+			;; The variable $y is automatically bound by the GetLink;
+			;; it does not escape the scope of the GetLink.
+			(AndLink
+				;; Search for presence
+				(ListLink room-state (VariableNode "$y"))
+				;; Check for equality ...
+				(EqualLink (VariableNode "$y") room-empty)))
+		))
+
+(cog-execute! put-empty-atom)
+
+; ------------------------------------------------------
