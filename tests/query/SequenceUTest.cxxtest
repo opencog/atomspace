@@ -58,6 +58,7 @@ public:
     void tearDown(void);
 
     void test_sequence(void);
+    void test_presence(void);
 };
 
 void SequenceUTest::tearDown(void)
@@ -141,4 +142,19 @@ void SequenceUTest::test_sequence(void)
     nred = atoi(snred.c_str());
     TS_ASSERT_EQUALS(7, ngreen);
     TS_ASSERT_EQUALS(1, nred);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void SequenceUTest::test_presence(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/seq-presence.scm");
+    load_scm_files_from_config(*as);
+
+    TruthValuePtr tv = eval->eval_tv("(cog-satisfy empty-sequence)");
+    TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
+
+    logger().debug("END TEST: %s", __FUNCTION__);
 }

@@ -60,7 +60,8 @@ void PatternLink::common_init(void)
 	// we are being run with the DefaultPatternMatchCB, and so we assume
 	// that the logical connectives are AndLink, OrLink and NotLink.
 	// Tweak the evaluatable_holders to reflect this.
-	std::set<Type> connectives({AND_LINK, OR_LINK, NOT_LINK});
+	std::set<Type> connectives({AND_LINK, SEQUENTIAL_AND_LINK,
+	                            OR_LINK, NOT_LINK});
 	trace_connectives(connectives, _pat.clauses);
 
 	// Split the non-virtual clauses into connected components
@@ -281,11 +282,11 @@ PatternLink::PatternLink(Link &l)
 /// The predicate is either an AndLink of clauses to be satisfied, or a
 /// single clause. Other link types, such as OrLink and SequentialAnd,
 /// are treated here as single clauses; unpacking them here would lead
-/// to confusion in the pattern matcher. This is partly because, after
-/// unpacking, clauses can be grounded in  an arbitrary order; thus,
-/// SequentialAnd's must be griounded and evaluated sequentially, and
-/// thus, not unpacked. In the case of OrLinks, there is no flag to say
-/// that "these are disjoined", so again, that has to happen later.
+/// to confusion in the pattern matcher.  This is partly because, after
+/// unpacking, clauses can be grounded in an arbitrary order; thus,
+/// SequentialAnd's must be grounded and evaluated sequentially, and
+/// thus, not unpacked.  In the case of OrLinks, there is no flag to
+/// say that "these are disjoined", so again, that has to happen later.
 void PatternLink::unbundle_clauses(const Handle& hbody)
 {
 	Type t = hbody->getType();
@@ -293,11 +294,34 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	// technically correct in the long-run. XXX FIXME In the long run,
 	// nothing should be unpacked, since everything should be run-time
 	// evaluatable. i.e. everything should be a predicate, and that's
-	// that.
+	// that. ??? But how can this be done? We have to pattern-match
+	// disjoint clauses, connected via variables only; how else can this
+	// be done, except by unpacking?  I'm confused.
+	//
+	// For SequentialAndLinks, which are expected to be evaluated
+	// in-order, we need to fish out any PresentLinks, and add them
+	// to the list of clauses to be grounded.  Of course, the
+	// SequentialAndLink itself also has to be evaluated, so we add it
+	// too.
 	_pat.body = hbody;
 	if (AND_LINK == t or PRESENT_LINK == t)
 	{
 		_pat.clauses = LinkCast(hbody)->getOutgoingSet();
+	}
+	else if (SEQUENTIAL_AND_LINK == t)
+	{
+		const HandleSeq& oset = LinkCast(hbody)->getOutgoingSet();
+		for (const Handle& ho : oset)
+		{
+			Type ot = ho->getType();
+			if (PRESENT_LINK == ot)
+			{
+				const HandleSeq& pset = LinkCast(ho)->getOutgoingSet();
+				for (const Handle& ph : pset)
+					_pat.clauses.push_back(ph);
+			}
+		}
+		_pat.clauses.push_back(hbody);
 	}
 	else
 	{
