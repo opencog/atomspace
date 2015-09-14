@@ -62,6 +62,7 @@ AtomSpace::AtomSpace(AtomSpace* parent) :
 
 AtomSpace::~AtomSpace()
 {
+    clear();
     // Be sure to disconnect the attention bank signals before the
     // atom table destructor runs. XXX FIXME yes this is an ugly hack.
     bank.shutdown();
