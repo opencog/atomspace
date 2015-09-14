@@ -34,13 +34,13 @@ using namespace opencog;
 
 void DeleteLink::init(void)
 {
-	// The handleset must contain a free variable in it, somewhere.
-	// If it doesn't, then the entire Handleset should be deleted
+	// The handleset must contain a variable in it, somewhere.
+	// If it doesn't, then the entire handleset should be deleted
 	// (removed from the atomspace). We can't do this at constructor
 	// time, because we don't know the atomspace yet.  So we hack
 	// around this by thowing at construtor time.
 	//
-	if (0 == _varseq.size())
+	if (0 == _varlist.varseq.size())
 		// throw DeleteException();
 		throw InvalidParamException(TRACE_INFO,
 			"Cannot create a fully grounded DeleteLink!");

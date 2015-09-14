@@ -191,8 +191,3 @@ void FreeLink::init(void)
 	find_vars(varset, _outgoing);
 	build_index();
 }
-
-Handle FreeLink::reduce(void)
-{
-   throw RuntimeException(TRACE_INFO, "Not reducible!");
-}
