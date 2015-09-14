@@ -195,12 +195,6 @@ ATTRACTION_LINK <- ORDERED_LINK
 // FreeLinks may be open or closed; they are closed terms if they
 // have no free variables in them.
 //
-// XXX TODO -- Review and rethink. FreeLinks were introduced for the
-// pattern matcher, to simplify the discovery and handling of expressions
-// with free variables in them (by pulling out those variables beforehand,
-// at link-creation time, rather than at runtime). However, due to
-// shared-library conflicts, the FreeLink cannot currently be used in
-// this way.  Thus, its half-finished ....
 FREE_LINK <- ORDERED_LINK
 
 // To be used with PredicateNode
@@ -211,7 +205,7 @@ EXECUTION_LINK <- ORDERED_LINK
 // Procedure, schema and predicate nodes.
 // These are used to define functions and predicates (relations)
 // Procedures are generic terms; they can be either atom-valued
-// of TV-valued. This is narrowed down, below.
+// or TV-valued. This is narrowed down, below.
 PROCEDURE_NODE <- NODE
 GROUNDED_PROCEDURE_NODE <- PROCEDURE_NODE
 
@@ -226,7 +220,7 @@ DEFINED_PREDICATE_NODE <- PREDICATE_NODE
 GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 
 // Huh?? XXX What are these? I don't understand them Do we use them
-// anywhere? I think the first is ame as ExecutionOutputLink, right?
+// anywhere? I think the first is same as ExecutionOutputLink, right?
 // Not clear how a schema can be evaluated ...
 SCHEMA_EXECUTION_LINK <- INHERITANCE_LINK
 SCHEMA_EVALUATION_LINK <- SCHEMA_EXECUTION_LINK
@@ -283,7 +277,7 @@ TIMES_LINK <- ARITHMETIC_LINK
 // This is an interesting one. It is a link that must never be grounded!
 // It must contain at least one VariableNode somewhere within it; that
 // is, it must be an "open sentence" and never a "closed sentence".
-// (as it would be called, if we were using the termiology of ordinary
+// (as it would be called, if we were using the terminology of ordinary
 // logic).
 //
 // Attempting to insert a DeleteLink holding a fully grounded term
