@@ -170,13 +170,13 @@ Handle ArithmeticLink::execute(AtomSpace* as) const
 #ifdef CIRCULAR_SHARED_LIBS
 		h = inst.execute(h);
 #else
-		FunctionLinkPtr flp = FunctionLinkCast(h);
+		FoldLinkPtr flp = FoldLinkCast(h);
 
 		// Arghh.  The cast should have been enough, but we currently
 		// can't store these in the atomsapce, due to circular shared
 		// lib dependencies.
-		if (NULL == flp and classserver().isA(h->getType(), FUNCTION_LINK))
-			flp = FunctionLinkCast(FunctionLink::factory(LinkCast(h)));
+		if (NULL == flp and classserver().isA(h->getType(), FOLD_LINK))
+			flp = FoldLinkCast(FoldLink::factory(LinkCast(h)));
 		if (NULL != flp)
 			h = flp->execute();
 #endif
