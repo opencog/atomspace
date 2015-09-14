@@ -284,6 +284,9 @@ AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
     } else if (BIND_LINK == atom_type) {
         if (NULL == BindLinkCast(atom))
             return createBindLink(*LinkCast(atom));
+    } else if (PATTERN_LINK == atom_type) {
+        if (NULL == PatternLinkCast(atom))
+            return createPatternLink(*LinkCast(atom));
     } else if (DEFINE_LINK == atom_type) {
         if (NULL == DefineLinkCast(atom))
             return createDefineLink(*LinkCast(atom));
@@ -342,6 +345,8 @@ static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
     // Links of various kinds -----------
     if (BIND_LINK == atom_type)
         return createBindLink(*LinkCast(atom));
+    if (PATTERN_LINK == atom_type)
+        return createPatternLink(*LinkCast(atom));
     if (DEFINE_LINK == atom_type)
         return createDefineLink(*LinkCast(atom));
 /*
@@ -432,27 +437,25 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     Handle hexist(getHandle(atom));
     if (hexist) return hexist;
 
-    // If this atom is in some other atomspace, then we need to clone
-    // it. We cannot insert it into this atomtable as-is.  (We already
-    // know that its not in this atomspace, or its environ.)
-    AtomTable* at = atom->getAtomTable();
-    if (at != NULL) {
-        LinkPtr lll(LinkCast(atom));
-        if (lll) {
-            // Well, if the link was in some other atomspace, then
-            // the outgoing set will probably be too. (It might not
-            // be if the other atomspace is a child of this one).
-            // So we recursively clone that too.
-            HandleSeq closet;
-            for (const Handle& h : lll->getOutgoingSet()) {
-                closet.push_back(add(h, async));
-            }
-            atom = createLink(atom_type, closet,
-                              atom->getTruthValue(),
-                              atom->getAttentionValue());
+    // If this atom is in some other atomspace or not in any atomspace,
+    // then we need to clone it. We cannot insert it into this atomtable
+    // as-is.  (We already know that its not in this atomspace, or its
+    // environ.)
+    LinkPtr lll(LinkCast(atom));
+    if (lll) {
+        // Well, if the link was in some other atomspace, then
+        // the outgoing set will probably be too. (It might not
+        // be if the other atomspace is a child of this one).
+        // So we recursively clone that too.
+        HandleSeq closet;
+        for (const Handle& h : lll->getOutgoingSet()) {
+            closet.push_back(add(h, async));
         }
-        atom = clone_factory(atom_type, atom);
+        atom = createLink(atom_type, closet,
+                          atom->getTruthValue(),
+                          atom->getAttentionValue());
     }
+    atom = clone_factory(atom_type, atom);
 
     // Sometimes one inserts an atom that was previously deleted.
     // In this case, the removal flag might still be set. Clear it.
@@ -463,7 +466,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // no pointers to actual atoms.  We want to have the actual atoms,
     // because later steps need the pointers to do stuff, in particular,
     // to make sure the child atoms are in an atomtable, too.
-    LinkPtr lll(LinkCast(atom));
+    lll = LinkCast(atom);
     if (lll) {
         const HandleSeq& ogs(lll->getOutgoingSet());
         size_t arity = ogs.size();

@@ -123,6 +123,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/match-link.scm
     ${PROJECT_BINARY_DIR}/tests/query/match-link.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/sequence.scm
     ${PROJECT_BINARY_DIR}/tests/query/sequence.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/seq-presence.scm
+    ${PROJECT_BINARY_DIR}/tests/query/seq-presence.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/single.scm
     ${PROJECT_BINARY_DIR}/tests/query/single.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/stackmore-o-o.scm

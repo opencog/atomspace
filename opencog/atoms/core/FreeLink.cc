@@ -23,6 +23,8 @@
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
 #include "FreeLink.h"
+#include "LambdaLink.h"
+#include "VariableList.h"
 
 using namespace opencog;
 
@@ -100,27 +102,68 @@ FreeLink::FreeLink(Link& l)
 /// order (from left to right, as they appear in the tree), with each
 /// variable being named only once.  The varset is only used to make
 /// sure that we don't name a variable more than once; that's all.
-//
-// XXX TODO Add support for UnquoteLink
-// Also -- anything that binds variables should not be searched.
-// i.e. variables bound in a BindLink, GetLink, SatiscationLink
-// should not be added to the list.  Ditto ForAllLink, ExistsLink.
+///
+/// Variables that are inside a QuoteLink are ignored ... unless they
+/// are wrapped by UnquoteLink.  That is, QuoteLink behaves like a
+/// quasi-quote in lisp/scheme.
+///
+/// Variables that are bound inside of some deeper link are ignored;
+/// they are not free, and thus must not be collected up.  That is,
+/// any bound variables appearing in a GetLink, BindLink,
+/// SatisfactionLink, etc. will not be collected.  Any *free* variables
+/// in these same links *will* be collected (since they are free!)
+///
 void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 {
 	for (const Handle& h : oset)
 	{
 		Type t = h->getType();
-		if (QUOTE_LINK == t) continue;
+
 		if (VARIABLE_NODE == t and
-		    0 == varset.count(h))
+		    not _in_quote and
+		    0 == varset.count(h) and
+		    0 == _bound_vars.count(h))
 		{
 			_varseq.push_back(h);
 			varset.insert(h);
 		}
+
 		LinkPtr lll(LinkCast(h));
 		if (NULL == lll) continue;
 
+		// Save the recursive state on stack.
+		bool save_quote = _in_quote;
+		if (QUOTE_LINK == t)
+			_in_quote = true;
+
+		if (UNQUOTE_LINK == t)
+			_in_quote = false;
+
+		bool islam = classserver().isA(t, LAMBDA_LINK);
+		std::set<Handle> bsave = _bound_vars;
+		if (islam)
+		{
+			// Save the current set of bound variables...
+			bsave = _bound_vars;
+
+			// If we can cast to Lambda, then do so; otherwise,
+			// take the low road, and let Lambda constructor
+			// do the bound-variable extraction.
+			LambdaLinkPtr lam(LambdaLinkCast(lll));
+			if (NULL == lam)
+				lam = createLambdaLink(lll->getOutgoingSet());
+			const Variables& vees = lam->get_variables();
+			for (Handle v : vees.varseq) _bound_vars.insert(v);
+		}
+
 		find_vars(varset, lll->getOutgoingSet());
+
+		if (islam)
+			_bound_vars = bsave;
+
+		// Restore current state from the stack.
+		if (QUOTE_LINK == t or UNQUOTE_LINK == t)
+			_in_quote = save_quote;
 	}
 }
 
@@ -143,12 +186,8 @@ void FreeLink::build_index(void)
 
 void FreeLink::init(void)
 {
+	_in_quote = false;
 	std::set<Handle> varset;
 	find_vars(varset, _outgoing);
 	build_index();
-}
-
-Handle FreeLink::reduce(void)
-{
-   throw RuntimeException(TRACE_INFO, "Not reducible!");
 }
