@@ -35,6 +35,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	Type t = expr->getType();
 
 	// Must not explore the insides of a QuoteLink.
+	// XXX TODO: Need to implement UNQUOTE_LINK here...
 	if (QUOTE_LINK == t)
 		return Handle(expr);
 
