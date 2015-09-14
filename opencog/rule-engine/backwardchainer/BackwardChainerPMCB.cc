@@ -65,6 +65,12 @@ bool BackwardChainerPMCB::node_match(const Handle& npat_h, const Handle& nsoln_h
 	//            birds
 	//
 	// although PM will still returns more than one solution.
+	//
+	// This is for PLN's member-to-evaluation-rule, which contains a
+	// non-variable VariableNode that should be matched to all other
+	// VariableNode no matter the name.
+	//
+	// XXX TODO this is making VariableNode self-grounding awkward to implement
 	if (npat_h->getType() == VARIABLE_NODE && nsoln_h->getType() == VARIABLE_NODE)
 		return true;
 

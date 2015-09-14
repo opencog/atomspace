@@ -102,7 +102,7 @@ public:
 	void do_chain();
 	void do_step();
 
-	const VarMultimap& get_chaining_result();
+	VarMultimap get_chaining_result();
 
 private:
 
