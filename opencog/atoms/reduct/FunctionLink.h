@@ -52,6 +52,7 @@ namespace opencog
 class FunctionLink : public LambdaLink
 {
 protected:
+	void init(void);
 	FunctionLink(Type, const Handle& a,
 	             TruthValuePtr tv = TruthValue::NULL_TV(),
 	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
