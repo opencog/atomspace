@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atoms/core/PutLink.h>
-#include <opencog/atoms/reduct/FunctionLink.h>
+#include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/query/BindLinkAPI.h>
 

@@ -25,7 +25,6 @@
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/NumberNode.h>
-#include <opencog/atoms/reduct/AssignLink.h>
 #include <opencog/atoms/reduct/PlusLink.h>
 #include <opencog/atoms/reduct/TimesLink.h>
 #include <opencog/cython/PythonEval.h>

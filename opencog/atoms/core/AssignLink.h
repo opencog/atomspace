@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/AssignLink.h
+ * opencog/atoms/core/AssignLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -25,7 +25,7 @@
 
 #include <map>
 
-#include <opencog/atoms/reduct/FunctionLink.h>
+#include <opencog/atoms/core/FunctionLink.h>
 
 namespace opencog
 {
