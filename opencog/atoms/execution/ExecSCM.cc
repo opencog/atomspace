@@ -49,14 +49,14 @@ static Handle ss_reduce(AtomSpace* atomspace, const Handle& h)
 	Type t = h->getType();
 	if (NUMBER_NODE == t) return Handle(h);
 
-	if (not classserver().isA(t, FREE_LINK))
+	if (not classserver().isA(t, FUNCTION_LINK))
 	{
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting a FreeLink (PlusLink, TimesLink, etc");
+			"Expecting a FunctionLink (PlusLink, TimesLink, etc");
 	}
 
 	// Arghh.  The cast should have been enough, but we currently
-	// can't store these in the atomsapce, due to circular shared
+	// can't store these in the atomspace, due to circular shared
 	// lib dependencies.
 	FunctionLinkPtr fff(FunctionLinkCast(h));
 	if (NULL == fff)
