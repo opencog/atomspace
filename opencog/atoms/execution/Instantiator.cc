@@ -24,6 +24,7 @@
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
+#include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/query/BindLinkAPI.h>
 
 #include "Instantiator.h"
@@ -124,6 +125,16 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// Fire execution links, if found.
 	if (classserver().isA(t, FUNCTION_LINK))
 	{
+		// FoldLink's cannot be handled by the factory below, due to
+		// ciruclar shared library dependencies. Yuck. Somethine better
+		// than a factory needs to be invented.
+		if (classserver().isA(t, FOLD_LINK))
+		{
+			Handle hl(FoldLink::factory(t, oset_results));
+			FoldLinkPtr flp(FoldLinkCast(hl));
+			return flp->execute(_as);
+		}
+
 		// ExecutionOutputLinks are not handled by the factory below.
 		// This is due to a circular shared-libarary dependency.
 		if (EXECUTION_OUTPUT_LINK == t)
