@@ -75,12 +75,12 @@ void Target::store_varmap(VarMultimap& vm)
 {
 	for (auto& p : vm)
 	{
-		Handle hk = gen_non_atomspace_copy(p.first);
+		Handle hk = _as.add_atom(p.first);
 
 		if (_varmap.count(hk) == 1)
 		{
 			for (auto& h : p.second)
-				_varmap[hk].insert(gen_non_atomspace_copy(h));
+				_varmap[hk].insert(_as.add_atom(h));
 		}
 	}
 }
@@ -94,10 +94,10 @@ void Target::store_varmap(VarMap& vm)
 {
 	for (auto& p : vm)
 	{
-		Handle hk = gen_non_atomspace_copy(p.first);
+		Handle hk = _as.add_atom(p.first);
 
 		if (_varmap.count(hk) == 1)
-			_varmap[hk].insert(gen_non_atomspace_copy(p.second));
+			_varmap[hk].insert(_as.add_atom(p.second));
 	}
 }
 
@@ -163,12 +163,14 @@ void TargetSet::clear()
  */
 void TargetSet::emplace(Handle h, Handle hvardecl)
 {
-	h = gen_non_atomspace_copy(h);
+	h = _history_space.add_atom(h);
 
 	if (_targets_map.count(h) == 1)
 		return;
 
-	hvardecl = gen_non_atomspace_copy(hvardecl);
+	hvardecl = _history_space.add_atom(hvardecl);
+
+	logger().debug("[Target] Adding " + h->toShortString() + " to target set");
 
 	_targets_map.insert(std::pair<Handle, Target>(h, Target(_history_space, h, hvardecl)));
 }
@@ -221,5 +223,5 @@ Target& TargetSet::select()
  */
 Target& TargetSet::get(Handle h)
 {
-	return _targets_map.at(gen_non_atomspace_copy(h));
+	return _targets_map.at(_history_space.get_atom(h));
 }
