@@ -116,7 +116,7 @@ Handle InferenceSCM::do_forward_chaining(Handle h, Handle rbs)
 #endif
 }
 
-Handle InferenceSCM::do_backward_chaining(Handle h, Handle rbs)
+Handle InferenceSCM::do_backward_chaining(Handle h, Handle rbs, Handle focus_link)
 {
     if (Handle::UNDEFINED == rbs)
         throw RuntimeException(TRACE_INFO,
@@ -126,7 +126,7 @@ Handle InferenceSCM::do_backward_chaining(Handle h, Handle rbs)
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
 
     BackwardChainer bc(*as, rbs);
-    bc.set_target(h);
+    bc.set_target(h, focus_link);
 
     logger().debug("[BackwardChainer] Before do_chain");
 
