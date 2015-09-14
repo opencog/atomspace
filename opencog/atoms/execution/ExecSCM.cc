@@ -58,9 +58,9 @@ static Handle ss_reduce(AtomSpace* atomspace, const Handle& h)
 	// Arghh.  The cast should have been enough, but we currently
 	// can't store these in the atomsapce, due to circular shared
 	// lib dependencies.
-	FreeLinkPtr fff(FreeLinkCast(h));
+	FunctionLinkPtr fff(FunctionLinkCast(h));
 	if (NULL == fff)
-		fff = FreeLinkCast(FunctionLink::factory(LinkCast(h)));
+		fff = FunctionLinkCast(FunctionLink::factory(LinkCast(h)));
 	Handle hr(fff->reduce());
 
 	if (DELETE_LINK == hr->getType())

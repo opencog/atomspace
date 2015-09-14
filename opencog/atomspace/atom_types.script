@@ -257,15 +257,15 @@ VIRTUAL_LINK <- EVALUATION_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK
 EQUAL_LINK <- VIRTUAL_LINK
 
-// Same idea as the VirtualLink, but for ExecutionOutputLinks.
-// Recall: FreeLink simply keeps track of the free variables in an
-// ordered link.  A FunctionLink is a link that can be executed,
-// with the result of execution being some atom.  There
-// ExecutionOutPutLink is a specific kind of function: it must
-// have a GroundedSchemeNode as its first argument.  The other
-// kinds of FunctionLinks do not have this restriction: indeed,
-// the actual function they perform is implicit in the link type.
-FUNCTION_LINK <- FREE_LINK
+// A FunctionLink is a link that can be executed, with the result of
+// execution being some atom. The LambdaLink is used to specify the
+// function arguments (as bound variables).
+//
+// The ExecutionOutPutLink is a specific kind of function: it must have
+// a GroundedSchemeNode as its first argument.  The other kinds of
+// FunctionLinks do not have this restriction: indeed, the actual
+// function they perform is implicit in the link type.
+FUNCTION_LINK <- LAMBDA_LINK
 EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
 
 // Basic arithmetic operators
