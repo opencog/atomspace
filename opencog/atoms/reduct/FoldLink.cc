@@ -26,6 +26,8 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atoms/NumberNode.h>
 #include "FoldLink.h"
+#include "PlusLink.h"
+#include "TimesLink.h"
 
 using namespace opencog;
 
@@ -243,3 +245,27 @@ Handle FoldLink::reduce(void)
 }
 
 // ===========================================================
+
+LinkPtr FoldLink::factory(LinkPtr lp)
+{
+	if (NULL == lp)
+		throw RuntimeException(TRACE_INFO, "Not executable!");
+
+	// If h is of the right form already, its just a matter of calling
+	// it.  Otherwise, we have to create
+	FoldLinkPtr flp(FoldLinkCast(lp));
+	if (flp) return lp;
+
+	return LinkCast(FoldLink::factory(lp->getType(), lp->getOutgoingSet()));
+}
+
+// Basic type factory.
+Handle FoldLink::factory(Type t, const HandleSeq& seq)
+{
+	if (PLUS_LINK == t)
+		return Handle(createPlusLink(seq));
+	if (TIMES_LINK == t)
+		return Handle(createTimesLink(seq));
+
+	throw RuntimeException(TRACE_INFO, "Not a FoldLink!");
+}

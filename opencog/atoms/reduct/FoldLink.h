@@ -60,6 +60,9 @@ public:
 	FoldLink(Link& l);
 
    virtual Handle reduce(void);
+
+	static LinkPtr factory(LinkPtr);
+	static Handle factory(Type, const HandleSeq&);
 };
 
 typedef std::shared_ptr<FoldLink> FoldLinkPtr;
