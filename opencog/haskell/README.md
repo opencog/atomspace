@@ -57,42 +57,52 @@ packages:
 On the other hand, if you simply want to compile some code using this
 library, you should compile with:
 
-```
+```bash
 export STACK_YAML=<ATOMSPACE_ROOT>/opencog/haskell/stack.yaml
 stack ghc example.hs
 ```
 
 For using ghci:
 
-```
+```bash
 export STACK_YAML=<ATOMSPACE_ROOT>/opencog/haskell/stack.yaml
 stack ghci
 ```
 
 ### Global installation
-To avoid defining STACK_YAML every time, you can include this
-library to your global environment, adding the absolute library path
-to your package list in your global config file
-~/.stack/global/stack.yaml :
-```yaml
-...
-packages:
-- /home/...<ATOMSPACE_ROOT>/opencog/haskell
-...
+To avoid defining STACK_YAML every time, you can either add
+
+```bash
+export STACK_YAML=<ATOMSPACE_ROOT>/opencog/haskell/stack.yaml
 ```
+
+in your .profile or .bashrc file. Or include this library to your
+global environment, adding the absolute library path to your package
+list in your global config file ~/.stack/global/stack.yaml. If you
+don't have a global stack.yaml file create a new one with the
+following:
+
+```yaml
+flags: {}
+packages:
+  - <ATOMSPACE_ROOT>/opencog/haskell
+extra-deps: []
+resolver: lts-2.18
+```
+
 and then running:
 
 ```
 stack setup
-
 stack install opencog-atomspace --extra-lib-dirs=/usr/local/lib/opencog
 ```
 
 (Note: they must be run in a different directory than
-<ATOMSPACE_ROOT>/opencog/haskell ,
-or stack will use the local project environment)
+<ATOMSPACE_ROOT>/opencog/haskell , or stack will use the local project
+environment)
 
 Then you can compile simple .hs files with:
+
 ```
 stack ghc example.hs
 ```
@@ -105,8 +115,12 @@ stack ghc example.hs
   "haskell-atomspace library not found" , first of all, you should
   ensure it was properly installed when installing the AtomSpace.
 
-* If when running "stack ghc" or "stack build" you get an error about
-  "Missing C library: haskell-atomspace", you should add the flag:
+* If you get an error like `libhaskell-atomspace.so: cannot open
+  shared object file: No such file or directory` try to run `sudo
+  ldconfig /usr/local/lib/opencog/`
+
+* If when running `stack ghc` or `stack build` you get an error about
+  `Missing C library: haskell-atomspace`, you should add the flag:
  
   --extra-lib-dir=/usr/local/lib/opencog (with proper library location).
 
@@ -115,8 +129,8 @@ stack ghc example.hs
 
   --ghc-options -lhaskell-atomspace
 
-* If when using "stack ghci" you see that ghci is interpreting the
-  code: "[..] Compiling ... (..., interpreted )". Then, a better
+* If when using `stack ghci` you see that ghci is interpreting the
+  code: `[..] Compiling ... (..., interpreted )`. Then, a better
   option is to compile the package to object code, so it is loaded,
   which runs faster. All you have to do is to execute only one time:
 
@@ -281,6 +295,27 @@ program :: AtomSpace ()
 program = do
     s <- get (ConceptNode "GenConcept" noTv)
     ...
+```
+
+### Interacting with the AtomSpace in GHCi
+
+You first need to create an AtomSpace:
+
+```haskell
+Prelude OpenCog.AtomSpace> as <- newAtomSpace Nothing
+```
+
+Then you may add atoms in it:
+
+```haskell
+Prelude OpenCog.AtomSpace> as <: insert (ConceptNode "A" noTv)
+```
+
+And display its content
+
+```haskell
+Prelude OpenCog.AtomSpace> as <: debug
+(ConceptNode "A" (av 0 0 0) (stv 1.000000 0.000000)) ; [2]
 ```
 
 ### Main functions
