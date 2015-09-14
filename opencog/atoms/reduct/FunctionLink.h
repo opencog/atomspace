@@ -69,7 +69,6 @@ public:
 	FunctionLink(Link& l);
 	virtual ~FunctionLink() {}
 
-	virtual Handle reduce(void);
 	virtual Handle execute(AtomSpace* = NULL) const;
 	static Handle do_execute(AtomSpace*, const Handle&);
 
