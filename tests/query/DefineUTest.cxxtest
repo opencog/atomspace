@@ -59,6 +59,7 @@ public:
     void tearDown(void);
 
     void test_basic(void);
+    void test_schema(void);
 };
 
 void DefineLinkUTest::tearDown(void)
@@ -95,4 +96,40 @@ void DefineLinkUTest::test_basic(void)
 
     items = eval->eval_h("(cog-execute! get-parts)");
     TS_ASSERT_EQUALS(2, as->get_arity(items));
+}
+
+/*
+ * DefineLink DefinedSchemaNode
+ * Should be able to execute defined schemas.
+ */
+void DefineLinkUTest::test_schema(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/define-schema.scm");
+    load_scm_files_from_config(*as);
+
+    Handle timestamp = eval->eval_h(
+        "(cog-execute! (DefinedSchemaNode \"set timestamp\"))");
+    TS_ASSERT_EQUALS(2, as->get_arity(timestamp));
+
+    // Executing the above should return something like this:
+    // (EvaluationLink
+    //     (PredicateNode "start-interaction-timestamp")
+    //     (ListLink
+    //         (NumberNode "1442342173.000000")))
+    // We need to check explicitly for the NumberNode, as a bogus
+    // return would provide a VariableNode instead, and that would
+    // be wrong.
+
+    LinkPtr lp = LinkCast(timestamp);
+    Handle pred = lp->getOutgoingAtom(0);
+    TS_ASSERT_EQUALS(PREDICATE_NODE, pred->getType());
+
+    Handle list = lp->getOutgoingAtom(1);
+    TS_ASSERT_EQUALS(LIST_LINK, list->getType());
+
+    LinkPtr ll = LinkCast(list);
+    Handle num = ll->getOutgoingAtom(0);
+    TS_ASSERT_EQUALS(NUMBER_NODE, num->getType());
 }
