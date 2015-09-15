@@ -47,19 +47,22 @@ std::string NullTruthValue::toString() const
     return "(null TV)";
 }
 
-strength_t NullTruthValue::getMean() const throw (RuntimeException)
+strength_t NullTruthValue::getMean() const
 {
-    throw RuntimeException(TRACE_INFO, "Cannot call getMean() method of a NullTruthvalue");
+    throw RuntimeException(TRACE_INFO,
+        "Cannot call getMean() method of a NullTruthvalue");
 }
 
-count_t NullTruthValue::getCount() const throw (RuntimeException)
+count_t NullTruthValue::getCount() const
 {
-    throw RuntimeException(TRACE_INFO, "Cannot call getCount() method of a NullTruthvalue");
+    throw RuntimeException(TRACE_INFO,
+        "Cannot call getCount() method of a NullTruthvalue");
 }
 
-confidence_t NullTruthValue::getConfidence() const throw (RuntimeException)
+confidence_t NullTruthValue::getConfidence() const
 {
-    throw RuntimeException(TRACE_INFO, "Cannot call getConfidence() method of a NullTruthvalue");
+    throw RuntimeException(TRACE_INFO,
+        "Cannot call getConfidence() method of a NullTruthvalue");
 }
 
 TruthValueType NullTruthValue::getType() const
@@ -67,9 +70,11 @@ TruthValueType NullTruthValue::getType() const
     return NULL_TRUTH_VALUE;
 }
 
-TruthValuePtr NullTruthValue::merge(TruthValuePtr,TVMergeStyle ms/*=DEFAULT*/) const throw (RuntimeException)
+TruthValuePtr NullTruthValue::merge(TruthValuePtr,
+                                    TVMergeStyle ms/*=DEFAULT*/) const
 {
-    throw RuntimeException(TRACE_INFO, "Cannot call merge() method of a NullTruthvalue");
+    throw RuntimeException(TRACE_INFO,
+        "Cannot call merge() method of a NullTruthvalue");
 }
 
 TruthValuePtr NullTruthValue::clone() const
@@ -82,4 +87,3 @@ TruthValue* NullTruthValue::rawclone() const
 {
     return new NullTruthValue();
 }
-
