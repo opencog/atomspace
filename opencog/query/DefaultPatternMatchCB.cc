@@ -283,18 +283,20 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	// do_evaluate callback.  Alternately, perhaps the
 	// EvaluationLink::do_evaluate() method should do this ??? Its a toss-up.
 
-	_temp_aspace.clear();
-
 	TruthValuePtr tvp;
-	// If its not evaluatable, then just use the TV attached to it ...
-	Type gty = gvirt->getType();
-	if (EXECUTION_OUTPUT_LINK == gty or
-	    _classserver.isA(gty, FUNCTION_LINK))
+	// The instantiator would have taken care of expanding out
+	// and executing any FunctionLinks and the like.  Just use
+	// the TV value on the resulting atom.
+	Type vty = virt->getType();
+	if (EXECUTION_OUTPUT_LINK == vty or
+	    DEFINED_SCHEMA_NODE == vty or
+	    _classserver.isA(vty, FUNCTION_LINK))
 	{
 		tvp = gvirt->getTruthValue();
 	}
 	else
 	{
+		_temp_aspace.clear();
 		tvp = EvaluationLink::do_evaluate(&_temp_aspace, gvirt);
 	}
 
