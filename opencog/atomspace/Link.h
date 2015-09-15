@@ -52,7 +52,7 @@ class Link : public Atom
     friend class AtomTable;
 
 private:
-    void init(const HandleSeq&) throw (InvalidParamException);
+    void init(const HandleSeq&);
     void resort(void);
 
     Link(const Link &l) : Atom(0)
@@ -165,7 +165,7 @@ public:
      * @param The position of the handle in the array.
      * @return A specific handle in the outgoing set.
      */
-    inline Handle getOutgoingAtom(Arity pos) const throw (RuntimeException)
+    inline Handle getOutgoingAtom(Arity pos) const
     {
         // Checks for a valid position
         if (pos < getArity()) {
@@ -219,7 +219,7 @@ public:
      * @param Handle to be checked for being a link source.
      * @return Whether a given handle is a source of this link.
      */
-    bool isSource(Handle) const throw (InvalidParamException);
+    bool isSource(Handle) const;
 
     /**
      * Returns whether the element in a given position in the
@@ -230,7 +230,7 @@ public:
      * @return Whether the element in a given position in the
      *         outgoing set of this link is a source.
      */
-    bool isSource(size_t) const throw (IndexErrorException, InvalidParamException);
+    bool isSource(size_t) const;
 
     /**
      * Returns whether a given handle is a target (any but the first
@@ -239,7 +239,7 @@ public:
      * @param Handle to be checked for being a link target.
      * @return Whether a given handle is a target of this link.
      */
-    bool isTarget(Handle) const throw (InvalidParamException);
+    bool isTarget(Handle) const;
 
     /**
      * Returns whether the element in a given position in the
@@ -250,7 +250,7 @@ public:
      * @return Whether the element in a given position in the
      *         outgoing set of this link is a target.
      */
-    bool isTarget(size_t) const throw (IndexErrorException, InvalidParamException);
+    bool isTarget(size_t) const;
 
     /**
      * Returns whether a given atom is equal to the current link.
