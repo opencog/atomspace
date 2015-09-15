@@ -5,7 +5,6 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/rule-engine/forwardchainer/FCMemory.h>
-#include <opencog/rule-engine/forwardchainer/DefaultForwardChainerCB.h>
 
 using namespace opencog;
 
