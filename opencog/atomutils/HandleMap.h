@@ -84,7 +84,7 @@ public:
      * @param Key.
      * @param Element.
      */
-    void add(Handle key, T element) throw (RuntimeException)
+    void add(Handle key, T element)
     {
         std::lock_guard<std::mutex> lck(_mtx);
 
@@ -255,7 +255,7 @@ public:
      *
      * @return Next key of the iterator and advances.
      */
-    Handle next() throw (IndexErrorException)
+    Handle next()
     {
         if (!has_next()) {
             throw IndexErrorException(TRACE_INFO, "HandleMapIterator out of bounds");
