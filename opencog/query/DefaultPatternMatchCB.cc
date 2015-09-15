@@ -287,11 +287,15 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	// The instantiator would have taken care of expanding out
 	// and executing any FunctionLinks and the like.  Just use
 	// the TV value on the resulting atom.
+	//
+	// However, we also want to have a side-effect: the result of
+	// exeuctng one of these things should be placed into the atomspace.
 	Type vty = virt->getType();
 	if (EXECUTION_OUTPUT_LINK == vty or
 	    DEFINED_SCHEMA_NODE == vty or
 	    _classserver.isA(vty, FUNCTION_LINK))
 	{
+		gvirt = _as->add_atom(gvirt);
 		tvp = gvirt->getTruthValue();
 	}
 	else
