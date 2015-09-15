@@ -284,15 +284,18 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	// EvaluationLink::do_evaluate() method should do this ??? Its a toss-up.
 
 	_temp_aspace.clear();
+
 	TruthValuePtr tvp;
-	try
+	// If its not evaluatable, then just use the TV attached to it ...
+	Type gty = gvirt->getType();
+	if (EXECUTION_OUTPUT_LINK == gty or
+	    _classserver.isA(gty, FUNCTION_LINK))
+	{
+		tvp = gvirt->getTruthValue();
+	}
+	else
 	{
 		tvp = EvaluationLink::do_evaluate(&_temp_aspace, gvirt);
-	}
-	catch (...)
-	{
-		// If its not evaluatable, then just use the TV attached to it ...
-		tvp = gvirt->getTruthValue();
 	}
 
 	// Avoid null-pointer dereference if user specified a bogus evaluation.
@@ -430,15 +433,7 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 	catch (...) {}
 
 	// If it's not grounded, then perhaps its executable.
-	if (EXECUTION_OUTPUT_LINK == term_type or
-	    _classserver.isA(term_type, FUNCTION_LINK))
-	{
-		return eval_term(top, gnds);
-	}
-
-	throw InvalidParamException(TRACE_INFO,
-	            "Unknown logical connective %s\n",
-	            top->toShortString().c_str());
+	return eval_term(top, gnds);
 }
 
 /* ===================== END OF FILE ===================== */
