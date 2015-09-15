@@ -133,30 +133,32 @@ static TruthValuePtr equal(AtomSpace* as, LinkPtr ll)
 /// This method will then invoke "func_name" on the provided ListLink
 /// of arguments to the function.
 ///
-TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle execlnk)
+TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle evelnk)
 {
-	Type t = execlnk->getType();
+	Type t = evelnk->getType();
 	if (EVALUATION_LINK == t)
 	{
-		LinkPtr l(LinkCast(execlnk));
+		LinkPtr l(LinkCast(evelnk));
 		return do_evaluate(as, l->getOutgoingSet());
 	}
 	else if (EQUAL_LINK == t)
 	{
-		return equal(as, LinkCast(execlnk));
+		return equal(as, LinkCast(evelnk));
 	}
 	else if (GREATER_THAN_LINK == t)
 	{
-		return greater(as, LinkCast(execlnk));
+		return greater(as, LinkCast(evelnk));
 	}
 	else if (NOT_LINK == t)
 	{
-		LinkPtr l(LinkCast(execlnk));
+		LinkPtr l(LinkCast(evelnk));
 		TruthValuePtr tv(do_evaluate(as, l->getOutgoingAtom(0)));
 		return SimpleTruthValue::createTV(
 		              1.0 - tv->getMean(), tv->getCount());
 	}
-	throw RuntimeException(TRACE_INFO, "Expecting to get an EvaluationLink!");
+	throw RuntimeException(TRACE_INFO,
+		"Expecting to get an EvaluationLink, got %s",
+		evelnk->toString().c_str());
 }
 
 /// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
