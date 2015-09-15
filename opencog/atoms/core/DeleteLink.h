@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/reduct/DeleteLink.h
+ * opencog/atoms/core/DeleteLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -27,7 +27,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atoms/reduct/FunctionLink.h>
+#include <opencog/atoms/core/FunctionLink.h>
 
 namespace opencog
 {

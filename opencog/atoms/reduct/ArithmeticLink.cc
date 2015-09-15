@@ -131,7 +131,7 @@ Handle ArithmeticLink::reorder(void)
 	for (const Handle& h : exprs) result.push_back(h);
 	for (const Handle& h : numbers) result.push_back(h);
 
-	Handle h(FunctionLink::factory(getType(), result));
+	Handle h(FoldLink::factory(getType(), result));
 	if (NULL == _atomTable) return h;
 
 	return _atomTable->getAtomSpace()->add_atom(h);
@@ -170,13 +170,13 @@ Handle ArithmeticLink::execute(AtomSpace* as) const
 #ifdef CIRCULAR_SHARED_LIBS
 		h = inst.execute(h);
 #else
-		FunctionLinkPtr flp = FunctionLinkCast(h);
+		FoldLinkPtr flp = FoldLinkCast(h);
 
 		// Arghh.  The cast should have been enough, but we currently
 		// can't store these in the atomsapce, due to circular shared
 		// lib dependencies.
-		if (NULL == flp and classserver().isA(h->getType(), FUNCTION_LINK))
-			flp = FunctionLinkCast(FunctionLink::factory(LinkCast(h)));
+		if (NULL == flp and classserver().isA(h->getType(), FOLD_LINK))
+			flp = FoldLinkCast(FoldLink::factory(LinkCast(h)));
 		if (NULL != flp)
 			h = flp->execute();
 #endif

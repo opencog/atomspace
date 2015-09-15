@@ -26,8 +26,6 @@
 
 #include "AssignLink.h"
 #include "DeleteLink.h"
-#include "PlusLink.h"
-#include "TimesLink.h"
 
 using namespace opencog;
 
@@ -75,11 +73,6 @@ FunctionLink::FunctionLink(Link& l)
 	init();
 }
 
-Handle FunctionLink::reduce(void)
-{
-	throw RuntimeException(TRACE_INFO, "Not reducible!");
-}
-
 Handle FunctionLink::execute(AtomSpace* as) const
 {
 	throw RuntimeException(TRACE_INFO, "Not executable: %s\n",
@@ -123,13 +116,15 @@ Handle FunctionLink::factory(Type t, const HandleSeq& seq)
 		return Handle(createInsertLink(seq));
 
 	if (PLUS_LINK == t)
-		return Handle(createPlusLink(seq));
+		// return Handle(createPlusLink(seq));
+		throw RuntimeException(TRACE_INFO, "Can't be a factory for this!");
 
 	if (REMOVE_LINK == t)
 		return Handle(createRemoveLink(seq));
 
 	if (TIMES_LINK == t)
-		return Handle(createTimesLink(seq));
+		// return Handle(createTimesLink(seq));
+		throw RuntimeException(TRACE_INFO, "Can't be a factory for this!");
 
 	// XXX FIXME In principle, we should manufacture the
 	// ExecutionOutputLink as well. In practice, we can't, due to a

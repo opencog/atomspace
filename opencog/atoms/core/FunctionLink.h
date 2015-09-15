@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/reduct/FunctionLink.h
+ * opencog/atoms/core/FunctionLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -69,7 +69,6 @@ public:
 	FunctionLink(Link& l);
 	virtual ~FunctionLink() {}
 
-	virtual Handle reduce(void);
 	virtual Handle execute(AtomSpace* = NULL) const;
 	static Handle do_execute(AtomSpace*, const Handle&);
 

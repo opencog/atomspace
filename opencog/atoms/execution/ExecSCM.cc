@@ -11,7 +11,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/atoms/reduct/FunctionLink.h>
+#include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/guile/SchemeModule.h>
 
 #include "ExecSCM.h"
@@ -42,25 +42,25 @@ static TruthValuePtr ss_evaluate(AtomSpace* atomspace, const Handle& h)
 }
 
 /**
- * cog-reduce! reduces a FreeLink with free variables in it.
+ * cog-reduce! reduces a FoldLink with free variables in it.
  */
 static Handle ss_reduce(AtomSpace* atomspace, const Handle& h)
 {
 	Type t = h->getType();
 	if (NUMBER_NODE == t) return Handle(h);
 
-	if (not classserver().isA(t, FUNCTION_LINK))
+	if (not classserver().isA(t, FOLD_LINK))
 	{
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting a FunctionLink (PlusLink, TimesLink, etc");
+			"Expecting a FoldLink (PlusLink, TimesLink, etc");
 	}
 
 	// Arghh.  The cast should have been enough, but we currently
 	// can't store these in the atomspace, due to circular shared
 	// lib dependencies.
-	FunctionLinkPtr fff(FunctionLinkCast(h));
+	FoldLinkPtr fff(FoldLinkCast(h));
 	if (NULL == fff)
-		fff = FunctionLinkCast(FunctionLink::factory(LinkCast(h)));
+		fff = FoldLinkCast(FoldLink::factory(LinkCast(h)));
 	Handle hr(fff->reduce());
 
 	if (DELETE_LINK == hr->getType())

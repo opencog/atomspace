@@ -1,5 +1,5 @@
 /*
- * tests/atomspace/AssignUTest.cxxtest
+ * tests/atoms/AssignUTest.cxxtest
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -22,7 +22,7 @@
 
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/reduct/AssignLink.h>
+#include <opencog/atoms/core/AssignLink.h>
 
 using namespace opencog;
 

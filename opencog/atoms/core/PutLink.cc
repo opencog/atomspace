@@ -23,7 +23,7 @@
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
 #include "FreeLink.h"
-#include "LambdaLink.h"
+#include "FunctionLink.h"
 #include "PutLink.h"
 
 using namespace opencog;
@@ -31,7 +31,7 @@ using namespace opencog;
 PutLink::PutLink(const HandleSeq& oset,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : LambdaLink(PUT_LINK, oset, tv, av)
+    : FunctionLink(PUT_LINK, oset, tv, av)
 {
 	init();
 }
@@ -39,7 +39,7 @@ PutLink::PutLink(const HandleSeq& oset,
 PutLink::PutLink(const Handle& a,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : LambdaLink(PUT_LINK, a, tv, av)
+    : FunctionLink(PUT_LINK, a, tv, av)
 {
 	init();
 }
@@ -47,7 +47,7 @@ PutLink::PutLink(const Handle& a,
 PutLink::PutLink(Type t, const HandleSeq& oset,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : LambdaLink(t, oset, tv, av)
+    : FunctionLink(t, oset, tv, av)
 {
 	if (not classserver().isA(t, PUT_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
@@ -57,7 +57,7 @@ PutLink::PutLink(Type t, const HandleSeq& oset,
 PutLink::PutLink(Type t, const Handle& a,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : LambdaLink(t, a, tv, av)
+    : FunctionLink(t, a, tv, av)
 {
 	if (not classserver().isA(t, PUT_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
@@ -67,7 +67,7 @@ PutLink::PutLink(Type t, const Handle& a,
 PutLink::PutLink(Type t, const Handle& a, const Handle& b,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : LambdaLink(t, {a, b}, tv, av)
+    : FunctionLink(t, {a, b}, tv, av)
 {
 	if (not classserver().isA(t, PUT_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
@@ -75,7 +75,7 @@ PutLink::PutLink(Type t, const Handle& a, const Handle& b,
 }
 
 PutLink::PutLink(Link& l)
-    : LambdaLink(l)
+    : FunctionLink(l)
 {
 	Type tscope = l.getType();
 	if (not classserver().isA(tscope, PUT_LINK))

@@ -24,7 +24,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atoms/NumberNode.h>
-#include <opencog/atoms/reduct/FunctionLink.h>
+#include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 #include "EvaluationLink.h"
@@ -65,6 +65,15 @@ EvaluationLink::EvaluationLink(Link& l)
 	}
 }
 
+static Handle fold_execute(AtomSpace* as, const Handle& h)
+{
+	FoldLinkPtr flp(FoldLinkCast(FoldLink::factory(LinkCast(h))));
+	if (NULL == flp)
+		throw RuntimeException(TRACE_INFO, "Not executable!");
+
+	return flp->execute(as);
+}
+
 // Perform a GreaterThan check
 static TruthValuePtr greater(AtomSpace* as, LinkPtr ll)
 {
@@ -77,10 +86,10 @@ static TruthValuePtr greater(AtomSpace* as, LinkPtr ll)
 	// If they are not numbers, then we expect them to be something that
 	// can be executed, yeilding a number.
 	if (NUMBER_NODE != h1->getType())
-		h1 = FunctionLink::do_execute(as, h1);
+		h1 = fold_execute(as, h1);
 
 	if (NUMBER_NODE != h2->getType())
-		h2 = FunctionLink::do_execute(as, h2);
+		h2 = fold_execute(as, h2);
 
 	NumberNodePtr n1(NumberNodeCast(h1));
 	NumberNodePtr n2(NumberNodeCast(h2));

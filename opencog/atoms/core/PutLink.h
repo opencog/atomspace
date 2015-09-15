@@ -24,7 +24,7 @@
 #define _OPENCOG_PUT_LINK_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atoms/core/FunctionLink.h>
 
 namespace opencog
 {
@@ -48,7 +48,7 @@ namespace opencog
  * reduction.  The reduce() method only performs the substitution; it
  * does not attempt to execute or evaluate the resulting expression.
  */
-class PutLink : public LambdaLink
+class PutLink : public FunctionLink
 {
 protected:
 

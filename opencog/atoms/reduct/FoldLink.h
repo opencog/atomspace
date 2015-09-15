@@ -24,7 +24,7 @@
 #define _OPENCOG_FOLD_LINK_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/reduct/FunctionLink.h>
+#include <opencog/atoms/core/FunctionLink.h>
 
 namespace opencog
 {
@@ -60,6 +60,9 @@ public:
 	FoldLink(Link& l);
 
    virtual Handle reduce(void);
+
+	static LinkPtr factory(LinkPtr);
+	static Handle factory(Type, const HandleSeq&);
 };
 
 typedef std::shared_ptr<FoldLink> FoldLinkPtr;
