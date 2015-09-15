@@ -304,9 +304,27 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	// SequentialAndLink itself also has to be evaluated, so we add it
 	// too.
 	_pat.body = hbody;
-	if (AND_LINK == t or PRESENT_LINK == t)
+	if (PRESENT_LINK == t)
 	{
 		_pat.clauses = LinkCast(hbody)->getOutgoingSet();
+	}
+	else if (AND_LINK == t)
+	{
+		const HandleSeq& oset = LinkCast(hbody)->getOutgoingSet();
+		for (const Handle& ho : oset)
+		{
+			Type ot = ho->getType();
+			// If there is a PresentLink hiding under the AndLink
+			// then pull clauses out of it.
+			if (PRESENT_LINK == ot)
+			{
+				const HandleSeq& pset = LinkCast(ho)->getOutgoingSet();
+				for (const Handle& ph : pset)
+					_pat.clauses.push_back(ph);
+			}
+			else
+				_pat.clauses.push_back(ho);
+		}
 	}
 	else if (SEQUENTIAL_AND_LINK == t)
 	{
