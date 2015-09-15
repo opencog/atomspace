@@ -31,7 +31,7 @@ using namespace opencog;
 
 void FunctionLink::init(void)
 {
-	// extract_variables(_outgoing);
+	extract_variables(_outgoing);
 }
 
 FunctionLink::FunctionLink(Type t, const HandleSeq& oset,
