@@ -150,6 +150,13 @@ void PutLink::init(void)
 // only be performed at run-time!
 void PutLink::typecheck_values(void)
 {
+
+	// Cannot typecheck at this pont in time, because the schema
+	// might not be defined yet...
+	Type btype = _body->getType();
+	if (DEFINED_SCHEMA_NODE == btype)
+		return;
+
 	size_t sz = _varlist.varseq.size();
 	Type vtype = _values->getType();
 
