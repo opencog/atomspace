@@ -130,7 +130,6 @@ class PatternTerm
 		}
 
 		inline PatternTermPtr getOutgoingTerm(Arity pos) const
-			throw (RuntimeException)
 		{
 			// Checks for a valid position
 			if (pos < getArity()) {
