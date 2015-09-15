@@ -86,11 +86,23 @@ AtomTable::~AtomTable()
     addedTypeConnection.disconnect();
     Handle::clear_resolver(this);
 
-    // No one who shall look at these atoms ahall ever again
+    // No one who shall look at these atoms shall ever again
     // find a reference to this atomtable.
     for (const Handle& h : _atom_set) {
         h->_atomTable = NULL;
         h->_uuid = Handle::INVALID_UUID;
+
+        // Aiee ... We added this link to every incoming set;
+        // thus, it is our responsibility to remove it as well.
+        // This is a stinky design, but I see no other way,
+        // because it seems that we can't do this in the Atom
+        // destructor (which is where this should be happening).
+        LinkPtr lll(LinkCast(h));
+        if (lll) {
+            for (AtomPtr a : lll->_outgoing) {
+                a->remove_atom(lll);
+            }
+        }
     }
 }
 
