@@ -21,8 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/core/PutLink.h>
+#include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/query/BindLinkAPI.h>
@@ -43,7 +44,12 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	LinkPtr lexpr(LinkCast(expr));
 	if (not lexpr)
 	{
-		// If were are here, we are a Node.
+		// If we are here, we are a Node.
+		if (DEFINED_SCHEMA_NODE == t)
+		{
+			return walk_tree(DefineLink::get_definition(expr));
+		}
+
 		if (VARIABLE_NODE != t)
 			return Handle(expr);
 
