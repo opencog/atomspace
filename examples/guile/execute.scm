@@ -20,11 +20,11 @@
 ; XXX FIXME -- this doesn't work!???  Don't know how to fix.
 ;
 (cog-execute!
-   (ExecutionOutputLink
-      (GroundedSchemaNode "py:my_py_func")
-      (ListLink
-         (ConceptNode "1")
-         (ConceptNode "2"))))
+	(ExecutionOutputLink
+		(GroundedSchemaNode "py:my_py_func")
+		(ListLink
+			(ConceptNode "1")
+			(ConceptNode "2"))))
 
 ; Similar example, for embedded scheme code
 ;
@@ -34,10 +34,31 @@
 	(newline)
 	(ConceptNode "I'm returning this atom")
 )
-	
+
 (cog-execute!
-   (ExecutionOutputLink
-      (GroundedSchemaNode "scm:my-scm-func")
-      (ListLink
-         (ConceptNode "1")
-         (ConceptNode "2"))))
+	(ExecutionOutputLink
+		(GroundedSchemaNode "scm:my-scm-func")
+		(ListLink
+			(ConceptNode "1")
+			(ConceptNode "2"))))
+
+; Using DefineLink to define Schema's
+(DefineLink
+	(DefinedSchemaNode "x+y*10")
+	(FunctionLink
+		(VariableList
+			(VariableNode "$X")
+			(VariableNode "$Y"))
+		(PlusLink
+			(VariableNode "$X")
+			(TimesLink
+				(VariableNode "$Y")
+				(NumberNode 10)))))
+
+(cog-execute!
+	;; (ExecutionOutputLink
+	(PutLink
+		(DefinedSchemaNode "x+y*10")
+		(ListLink
+			(NumberNode "2")
+			(NumberNode "4"))))
