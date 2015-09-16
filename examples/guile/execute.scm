@@ -56,8 +56,7 @@
 				(NumberNode 10)))))
 
 (cog-execute!
-	;; (ExecutionOutputLink
-	(PutLink
+	(ExecutionOutputLink
 		(DefinedSchemaNode "x+y*10")
 		(ListLink
 			(NumberNode "2")

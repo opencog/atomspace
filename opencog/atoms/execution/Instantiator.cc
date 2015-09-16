@@ -84,10 +84,11 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	{
 		PutLinkPtr ppp(PutLinkCast(expr));
 
-		// PutLinks always have arity two. There are NO free vars in
-		// the body of the PutLink.  If there are free vars, they are
-		// in the argument.  Subsitute for them.  Do NOT execute the
-		// body until after the beta-reduction has been done.
+		// PutLinks always have arity two. There may be free vars in
+		// the body of the PutLink, but we won't substitue for them until
+		// after the beta-reduction.  Do substitute the free vars that
+		// occur in the argument, and do that before beta-reduction.
+		// Execute the body only after the beta-reduction has been done.
 		const HandleSeq& oset = lexpr->getOutgoingSet();
 		Handle gargs = walk_tree(oset[1]);
 		if (gargs != oset[1])
@@ -143,6 +144,35 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		return Handle::UNDEFINED;
 	}
 
+	// ExecutionOutputLinks are not handled by the FunctionLink factory
+	// below. This is due to a circular shared-libarary dependency.
+	if (EXECUTION_OUTPUT_LINK == t)
+	{
+		// The atoms being created above might not all be in the
+		// atomspace, just yet. Because we have no clue what the
+		// ExecutionOutputLink might do (its a black box), we had
+		// best put them there now. In particular, the black box
+		// may want to look at the atom TV's, and for that, they
+		// MUST be fetched from the atomspace, since only the
+		// atomspace knows the correct TV values.
+		//
+		// The problem here is that the insertion leaves garbage
+		// intermediate-result atoms littering the atomspace, with
+		// no effective way of removing them. XXX This needs fixing.
+		// Again, some kind of monad solution. XXX FIXME later.
+		//
+		// Just as well, because it seems the scheme (and python)
+		// bindings get tripped up by the UUID==-1 of uninserted atoms.
+		// XXX Well, this arguably means that scheme and python are
+		// broken.
+		size_t sz = oset_results.size();
+		for (size_t i=0; i< sz; i++)
+			oset_results[i] = _as->add_atom(oset_results[i]);
+
+		ExecutionOutputLinkPtr eolp(createExecutionOutputLink(oset_results));
+		return eolp->execute(_as);
+	}
+
 	// Fire execution links, if found.
 	if (classserver().isA(t, FUNCTION_LINK))
 	{
@@ -154,35 +184,6 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			Handle hl(FoldLink::factory(t, oset_results));
 			FoldLinkPtr flp(FoldLinkCast(hl));
 			return flp->execute(_as);
-		}
-
-		// ExecutionOutputLinks are not handled by the factory below.
-		// This is due to a circular shared-libarary dependency.
-		if (EXECUTION_OUTPUT_LINK == t)
-		{
-			// The atoms being created above might not all be in the
-			// atomspace, just yet. Because we have no clue what the
-			// ExecutionOutputLink might do (its a black box), we had
-			// best put them there now. In particular, the black box
-			// may want to look at the atom TV's, and for that, they
-			// MUST be fetched from the atomspace, since only the
-			// atomspace knows the correct TV values.
-			//
-			// The problem here is that the insertion leaves garbage
-			// intermediate-result atoms littering the atomspace, with
-			// no effective way of removing them. XXX This needs fixing.
-			// Again, some kind of monad solution. XXX FIXME later.
-			//
-			// Just as well, because it seems the scheme (and python)
-			// bindings get tripped up by the UUID==-1 of uninserted atoms.
-			// XXX Well, this arguably means that scheme and python are
-			// broken.
-			size_t sz = oset_results.size();
-			for (size_t i=0; i< sz; i++)
-				oset_results[i] = _as->add_atom(oset_results[i]);
-
-			ExecutionOutputLinkPtr eolp(createExecutionOutputLink(oset_results));
-			return eolp->execute(_as);
 		}
 
 		// This throws if it can't figure out the schema ...
