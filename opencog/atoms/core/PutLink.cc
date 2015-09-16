@@ -22,7 +22,7 @@
 
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
-#include "FreeLink.h"
+#include "DefineLink.h"
 #include "FunctionLink.h"
 #include "PutLink.h"
 
@@ -150,6 +150,13 @@ void PutLink::init(void)
 // only be performed at run-time!
 void PutLink::typecheck_values(void)
 {
+
+	// Cannot typecheck at this pont in time, because the schema
+	// might not be defined yet...
+	Type btype = _body->getType();
+	if (DEFINED_SCHEMA_NODE == btype)
+		return;
+
 	size_t sz = _varlist.varseq.size();
 	Type vtype = _values->getType();
 
@@ -245,9 +252,28 @@ void PutLink::typecheck_values(void)
 // must be done at run-time, and not at definition-time.
 Handle PutLink::do_reduce(void) const
 {
+	Handle bods(_body);
+	Variables vars(_varlist);
+	// Resolve the body, if needed:
+	if (DEFINED_SCHEMA_NODE == _body->getType())
+	{
+		Handle fun(DefineLink::get_definition(_body));
+		// XXX TODO we should perform a type-check on the function.
+		if (FUNCTION_LINK != fun->getType())
+			throw InvalidParamException(TRACE_INFO,
+					"Expecting a FunctionLink, got %s",
+			      fun->toString().c_str());
+
+		FunctionLinkPtr flp(FunctionLinkCast(fun));
+		if (NULL == flp)
+			flp = createFunctionLink(*LinkCast(fun));
+		bods = flp->get_body();
+		vars = flp->get_variables();
+	}
+
 	Type vtype = _values->getType();
 
-	if (1 == _varlist.varseq.size())
+	if (1 == vars.varseq.size())
 	{
 		// Well, we should accept the SetLink here only if it was
 		// dynamically generated... but I'm too lazy to code this up.
@@ -255,7 +281,7 @@ Handle PutLink::do_reduce(void) const
 		{
 			HandleSeq oset;
 			oset.push_back(_values);
-			return _varlist.substitute_nocheck(_body, oset);
+			return vars.substitute_nocheck(bods, oset);
 		}
 
 		// Iterate over the set...
@@ -264,14 +290,14 @@ Handle PutLink::do_reduce(void) const
 		{
 			HandleSeq oset;
 			oset.push_back(h);
-			bset.push_back(_varlist.substitute_nocheck(_body, oset));
+			bset.push_back(vars.substitute_nocheck(bods, oset));
 		}
 		return Handle(createLink(SET_LINK, bset));
 	}
 	if (LIST_LINK == vtype)
 	{
 		const HandleSeq& oset = LinkCast(_values)->getOutgoingSet();
-		return _varlist.substitute_nocheck(_body, oset);
+		return vars.substitute_nocheck(bods, oset);
 	}
 
 	OC_ASSERT(SET_LINK == vtype,
@@ -281,7 +307,7 @@ Handle PutLink::do_reduce(void) const
 	for (Handle h : LinkCast(_values)->getOutgoingSet())
 	{
 		const HandleSeq& oset = LinkCast(h)->getOutgoingSet();
-		bset.push_back(_varlist.substitute_nocheck(_body, oset));
+		bset.push_back(vars.substitute_nocheck(bods, oset));
 	}
 	return Handle(createLink(SET_LINK, bset));
 }

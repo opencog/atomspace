@@ -160,7 +160,7 @@ Handle ArithmeticLink::execute(AtomSpace* as) const
 {
 	// XXX FIXME, we really want the instantiator to do the work
 	// here, but there is a giant circular-shared-library mess
-	// that results if we do this. So i'm disablig for now.
+	// that results if we do this. So i'm disabling for now.
 #ifdef CIRCULAR_SHARED_LIBS
 	Instantiator inst(as);
 #endif
