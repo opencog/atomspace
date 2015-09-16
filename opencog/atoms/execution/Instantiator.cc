@@ -179,26 +179,12 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		return flp->execute(_as);
 	}
 
-	// If we are here, we assume that any/all variables that are in
-	// the outgoing set are free variables. Substitute the ground
-	// values for them. Do this by tree-walk.
-	HandleSeq oset_results;
-	for (const Handle& h : lexpr->getOutgoingSet())
-	{
-		Handle hg = walk_tree(h);
-		// It could be a NULL handle if it's deleted... Just skip
-		// over it. We test the pointer here, not the uuid, since
-		// the uuid's are all Handle::UNDEFINED until we put them
-		// into the atomspace.
-		if (NULL != hg)
-			oset_results.push_back(hg);
-	}
-
 	// If there is a GetLink, we have to perform the get, and replace
 	// it with the results of the get. The get is implemented with the
 	// PatternLink::satisfy() method.
 	if (GET_LINK == t)
 	{
+		HandleSeq oset_results(walk_tree(lexpr->getOutgoingSet()));
 		size_t sz = oset_results.size();
 		for (size_t i=0; i< sz; i++)
 			oset_results[i] = _as->add_atom(oset_results[i]);
@@ -208,8 +194,9 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		return satisfying_set(_as, Handle(lp));
 	}
 
-	// Now create a duplicate link, but with an outgoing set where
-	// the variables have been substituted by their values.
+	// None of the above. Create a duplicate link, but with an outgoing
+	// set where the variables have been substituted by their values.
+	HandleSeq oset_results(walk_tree(lexpr->getOutgoingSet()));
 	return Handle(createLink(t, oset_results, expr->getTruthValue()));
 }
 
