@@ -118,25 +118,6 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		// Perform substitution on the args, only.
 		args = walk_tree(args);
 
-		// The atoms being created above might not all be in the
-		// atomspace, just yet. Because we have no clue what the
-		// ExecutionOutputLink might do (its a black box), we had
-		// best put them there now. In particular, the black box
-		// may want to look at the atom TV's, and for that, they
-		// MUST be fetched from the atomspace, since only the
-		// atomspace knows the correct TV values.
-		//
-		// The problem here is that the insertion leaves garbage
-		// intermediate-result atoms littering the atomspace, with
-		// no effective way of removing them. XXX This needs fixing.
-		// Again, some kind of monad solution. XXX FIXME later.
-		//
-		// Just as well, because it seems the scheme (and python)
-		// bindings get tripped up by the UUID==-1 of uninserted atoms.
-		// XXX Well, this arguably means that scheme and python are
-		// broken.
-
-		args = _as->add_atom(args);
 		ExecutionOutputLinkPtr eolp(createExecutionOutputLink(sn, args));
 		return eolp->execute(_as);
 	}
