@@ -180,8 +180,6 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 		{
 			if (is_atom_in_tree(opt, h))
 			{
-                std::cout << "----------------- REmoving:\n" << opt->toShortString() << "After comparing it to:\n" << h->toShortString();
-
 				_pat.optionals.insert(opt);
 				_pat.clauses.push_back(opt);
 				h_is_opt = true;
@@ -196,8 +194,6 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 			_pat.mandatory.push_back(h);
 		}
 	}
-
-    std::cout << "----------------- After: " << discon_opts.size() << "\n";
 
 	// If there are any disconnected optionals, consider each of them as an
 	// optional for all mandatory clauses in the pattern

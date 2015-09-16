@@ -1,5 +1,3 @@
-(clear)
-
 (define soln
     (SetLink (ListLink
         (ConceptNode "A")
