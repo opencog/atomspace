@@ -136,17 +136,14 @@ Handle Instantiator::walk_tree(const Handle& expr)
 
 		// If its a DSN, obtain the correct body for it.
 		if (DEFINED_SCHEMA_NODE == sn->getType())
-		{
-			Handle fun(DefineLink::get_definition(sn));
-			// XXX TODO we should perform a type-check on the variables
-			if (FUNCTION_LINK != fun->getType())
-				throw InvalidParamException(TRACE_INFO,
-				      "Expecting a FunctionLink, got %s",
-				      fun->toString().c_str());
+			sn = DefineLink::get_definition(sn);
 
-			FunctionLinkPtr flp(FunctionLinkCast(fun));
+		// If its a function link, execute it here.
+		if (FUNCTION_LINK == sn->getType())
+		{
+			FunctionLinkPtr flp(FunctionLinkCast(sn));
 			if (NULL == flp)
-				flp = createFunctionLink(*LinkCast(fun));
+				flp = createFunctionLink(*LinkCast(sn));
 
 			// Two-step process. First, plug the arguments into the
 			// function; i.e. perform beta-reduction. Second, actually
@@ -156,7 +153,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			Variables vars(flp->get_variables());
 
 			const HandleSeq& oset(LinkCast(args)->getOutgoingSet());
-			Handle beta_reduced(vars.substitute_nocheck(body, oset));
+			Handle beta_reduced(vars.substitute(body, oset));
 			return walk_tree(beta_reduced);
 		}
 

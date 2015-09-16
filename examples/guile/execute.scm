@@ -80,25 +80,9 @@
 				(VariableNode "$X")
 				(TimesLink
 					(VariableNode "$Y")
-					(NumberNode 10)))))
+					(NumberNode 10))))
 		(ListLink
 			(NumberNode "2")
-			(NumberNode "4")))
-
-; -------------------------------------------------------------
-; Like the above, but the explicit variable declarations are not
-; used; all variables are implicitly bound, if not specified.
-
-(cog-execute!
-	(ExecutionOutputLink
-		(FunctionLink
-			(PlusLink
-				(VariableNode "$X")
-				(TimesLink
-					(VariableNode "$Y")
-					(NumberNode 10)))))
-		(ListLink
-			(NumberNode "2")
-			(NumberNode "4")))
+			(NumberNode "4"))))
 
 ; -------------------------------------------------------------
