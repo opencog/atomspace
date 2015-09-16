@@ -73,9 +73,10 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		return hgnd;
 	}
 
+	// -----------------------------------------------------------
 	// If we are here, then we have a link. Walk it. In general,
 	// links may contain both bound variables, and also free variables.
-	// We must be careful to subtitute only for free variables, and
+	// We must be careful to substitute only for free variables, and
 	// never for bound ones.
 	//
 	// Reduce PutLinks.
@@ -115,6 +116,20 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		// into the atomspace.
 		if (NULL != hg)
 			oset_results.push_back(hg);
+	}
+
+	// If there is a GetLink, we have to perform the get, and replace
+	// it with the results of the get. The get is implemented with the
+	// PatternLink::satisfy() method.
+	if (GET_LINK == t)
+	{
+		size_t sz = oset_results.size();
+		for (size_t i=0; i< sz; i++)
+			oset_results[i] = _as->add_atom(oset_results[i]);
+
+		LinkPtr lp = createLink(GET_LINK, oset_results);
+
+		return satisfying_set(_as, Handle(lp));
 	}
 
 	// Handle DeleteLink's before general FunctionLink's; they
@@ -175,20 +190,6 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		Handle hl(FunctionLink::factory(t, oset_results));
 		FunctionLinkPtr flp(FunctionLinkCast(hl));
 		return flp->execute(_as);
-	}
-
-	// If there is a GetLink, we have to perform the get, and replace
-	// it with the results of the get. The get is implemented with the
-	// PatternLink::satisfy() method.
-	if (GET_LINK == t)
-	{
-		size_t sz = oset_results.size();
-		for (size_t i=0; i< sz; i++)
-			oset_results[i] = _as->add_atom(oset_results[i]);
-
-		LinkPtr lp = createLink(GET_LINK, oset_results);
-
-		return satisfying_set(_as, Handle(lp));
 	}
 
 	// Now create a duplicate link, but with an outgoing set where
