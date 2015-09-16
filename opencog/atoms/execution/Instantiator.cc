@@ -148,11 +148,16 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			if (NULL == flp)
 				flp = createFunctionLink(*LinkCast(fun));
 
+			// Two-step process. First, plug the arguments into the
+			// function; i.e. perform beta-reduction. Second, actually
+			// execute the result. We execute by just calling walk_tree
+			// again.
 			Handle body(flp->get_body());
 			Variables vars(flp->get_variables());
 
 			const HandleSeq& oset(LinkCast(args)->getOutgoingSet());
-			return vars.substitute_nocheck(body, oset);
+			Handle beta_reduced(vars.substitute_nocheck(body, oset));
+			return walk_tree(beta_reduced);
 		}
 
 		ExecutionOutputLinkPtr eolp(createExecutionOutputLink(sn, args));
