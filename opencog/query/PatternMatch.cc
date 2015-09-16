@@ -374,11 +374,39 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	std::vector<std::vector<std::map<Handle, Handle>>> comp_term_gnds;
 	std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds;
 
+	// The purpose of this loop is to find all the component patterns that are
+	// purely optionals (i.e. have no mandatory clause). The reason of doing this
+	// is mainly for distinguishing patterns that are purely optionals
+	// from patterns that are not but contains some disconnected optionals.
+	std::vector<size_t> pure_opt_idx;
+	for (size_t i=0; i<_num_comps; i++)
+	{
+		if (PatternLinkCast(_component_patterns.at(i))->get_pattern().mandatory.size() == 0)
+			pure_opt_idx.push_back(i);
+	}
+
 	for (size_t i=0; i<_num_comps; i++)
 	{
 		dbgprt("BEGIN COMPONENT GROUNDING %zu of %zu: ======================\n",
 		       i + 1, _num_comps);
-		// Pass through the callbacks, collect up answers.
+
+		if (pure_opt_idx.size() < _num_comps and
+			std::find(pure_opt_idx.begin(), pure_opt_idx.end(), i) != pure_opt_idx.end())
+        {
+			// If we are here, it means that there are mandatory as well as
+			// disconnected optionals in the whole pattern, and we are looking
+			// at one of the optionals now. Since deciding whether or to accept
+			// a grounding will be handled in the optional_clause_match callback,
+			// just like what it's done for connected optionals, for that reason
+			// we don't want to initiate a pattern matcher query for this optional
+			// as that may ended up finding nothing and then reject a grounding
+			// that we may be expecting, so let's skip it here.
+			// On the other hand, we don't want to skip any if the whole
+			// pattern contains no mandatory but optionals.
+			continue;
+        }
+
+		// Pass through the callbacks, collect up answers.        
 		PMCGroundings gcb(pmcb);
 		PatternLinkPtr clp(PatternLinkCast(_component_patterns.at(i)));
 		clp->satisfy(gcb);
