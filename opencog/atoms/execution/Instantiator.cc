@@ -32,6 +32,22 @@
 
 using namespace opencog;
 
+HandleSeq Instantiator::walk_tree(const HandleSeq& expr)
+{
+	HandleSeq oset_results;
+	for (const Handle& h : expr)
+	{
+		Handle hg(walk_tree(h));
+		// It could be a NULL handle if it's deleted... Just skip
+		// over it. We test the pointer here, not the uuid, since
+		// the uuid's are all Handle::UNDEFINED until we put them
+		// into the atomspace.
+		if (NULL != hg)
+			oset_results.push_back(hg);
+	}
+	return oset_results;
+}
+
 Handle Instantiator::walk_tree(const Handle& expr)
 {
 	Type t = expr->getType();
@@ -122,6 +138,47 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		return eolp->execute(_as);
 	}
 
+	// FoldLink's cannot be handled by the factory below, due to
+	// ciruclar shared library dependencies. Yuck. Something better
+	// than a factory needs to be invented.
+	if (classserver().isA(t, FOLD_LINK))
+	{
+		// At this time, no FoldLink ever has a variable declaration,
+		// and the number of arguments is not fixed, i.e. variadic.
+		// Perform substitution on all arguments before applying the
+		// function itself.
+		HandleSeq oset_results(walk_tree(lexpr->getOutgoingSet()));
+		Handle hl(FoldLink::factory(t, oset_results));
+		FoldLinkPtr flp(FoldLinkCast(hl));
+		return flp->execute(_as);
+	}
+
+	// Handle DeleteLink's before general FunctionLink's; they
+	// work differently.
+	if (DELETE_LINK == t)
+	{
+		HandleSeq oset_results(walk_tree(lexpr->getOutgoingSet()));
+		for (const Handle& h: oset_results)
+			if (VARIABLE_NODE != h->getType())
+				_as->remove_atom(h, true);
+
+		return Handle::UNDEFINED;
+	}
+
+	// Fire any other function links, not handled above.
+	if (classserver().isA(t, FUNCTION_LINK))
+	{
+		// At this time, no FunctionLink that is outsode of an
+		// ExecutionOutputLink ever has a variable declaration.
+		// Also, the number of arguments is not fixed, i.e. variadic.
+		// Perform substitution on all arguments before applying the
+		// function itself.
+		HandleSeq oset_results(walk_tree(lexpr->getOutgoingSet()));
+		Handle hl(FunctionLink::factory(t, oset_results));
+		FunctionLinkPtr flp(FunctionLinkCast(hl));
+		return flp->execute(_as);
+	}
+
 	// If we are here, we assume that any/all variables that are in
 	// the outgoing set are free variables. Substitute the ground
 	// values for them. Do this by tree-walk.
@@ -149,37 +206,6 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		LinkPtr lp = createLink(GET_LINK, oset_results);
 
 		return satisfying_set(_as, Handle(lp));
-	}
-
-	// Handle DeleteLink's before general FunctionLink's; they
-	// work differently.
-	if (DELETE_LINK == t)
-	{
-		for (const Handle& h: oset_results)
-			if (VARIABLE_NODE != h->getType())
-				_as->remove_atom(h, true);
-
-		return Handle::UNDEFINED;
-	}
-
-	// Fire execution links, if found.
-	if (classserver().isA(t, FUNCTION_LINK))
-	{
-		// FoldLink's cannot be handled by the factory below, due to
-		// ciruclar shared library dependencies. Yuck. Somethine better
-		// than a factory needs to be invented.
-		if (classserver().isA(t, FOLD_LINK))
-		{
-			Handle hl(FoldLink::factory(t, oset_results));
-			FoldLinkPtr flp(FoldLinkCast(hl));
-			return flp->execute(_as);
-		}
-
-		// This throws if it can't figure out the schema ...
-		// Let the throw pass right on up the stack.
-		Handle hl(FunctionLink::factory(t, oset_results));
-		FunctionLinkPtr flp(FunctionLinkCast(hl));
-		return flp->execute(_as);
 	}
 
 	// Now create a duplicate link, but with an outgoing set where
