@@ -134,6 +134,27 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		// Perform substitution on the args, only.
 		args = walk_tree(args);
 
+		// If its a DSN, obtain the correct body for it.
+		if (DEFINED_SCHEMA_NODE == sn->getType())
+		{
+			Handle fun(DefineLink::get_definition(sn));
+			// XXX TODO we should perform a type-check on the variables
+			if (FUNCTION_LINK != fun->getType())
+				throw InvalidParamException(TRACE_INFO,
+				      "Expecting a FunctionLink, got %s",
+				      fun->toString().c_str());
+
+			FunctionLinkPtr flp(FunctionLinkCast(fun));
+			if (NULL == flp)
+				flp = createFunctionLink(*LinkCast(fun));
+
+			Handle body(flp->get_body());
+			Variables vars(flp->get_variables());
+
+			const HandleSeq& oset(LinkCast(args)->getOutgoingSet());
+			return vars.substitute_nocheck(body, oset);
+		}
+
 		ExecutionOutputLinkPtr eolp(createExecutionOutputLink(sn, args));
 		return eolp->execute(_as);
 	}
