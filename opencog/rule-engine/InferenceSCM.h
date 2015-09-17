@@ -51,7 +51,7 @@ private:
 	 * @param rbs rule-based system atom
 	 * @return ???
 	 */
-	Handle do_backward_chaining(Handle h, Handle rbs);
+	Handle do_backward_chaining(Handle h, Handle rbs, Handle focus_link);
 public:
 	InferenceSCM();
 };

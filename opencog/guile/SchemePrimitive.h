@@ -234,17 +234,15 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
-		               case H_HHH:
-		               {
-		                    Handle h1(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
-		                    Handle h2(
-		                            SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2));
-		                    Handle h3(
-		                            SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 3));
-		                    Handle rh((that->*method.h_hhh)(h1, h2, h3));
-		                    rc = SchemeSmob::handle_to_scm(rh);
-		                    break;
-		                }
+				case H_HHH:
+				{
+					Handle h1(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
+					Handle h2(SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2));
+					Handle h3(SchemeSmob::verify_handle(scm_caddr(args), scheme_name, 3));
+					Handle rh((that->*method.h_hhh)(h1, h2, h3));
+					rc = SchemeSmob::handle_to_scm(rh);
+					break;
+				}
 				case H_HS:
 				{
 					Handle h(SchemeSmob::verify_handle(scm_car(args),

@@ -43,11 +43,11 @@ public:
 	// Comparison
 	bool operator==(const Target& t) const
 	{
-		return _htarget_internal == t._htarget_internal;
+		return _htarget == t._htarget;
 	}
 	bool operator<(const Target& t) const
 	{
-		return _htarget_internal < t._htarget_internal;
+		return _htarget < t._htarget;
 	}
 
 	void store_step(const Rule& r, const HandleSeq& premises);
@@ -67,7 +67,7 @@ public:
 	 *
 	 * @return the handle
 	 */
-	Handle get_handle() const { return _htarget_external; }
+	Handle get_handle() const { return _htarget; }
 
 	/**
 	 * Get the "free" variables list in HandleSeq.
@@ -113,8 +113,7 @@ public:
 private:
 	Target(AtomSpace& as, const Handle& h, const Handle& hvardecl);
 
-	Handle _htarget_external;
-	Handle _htarget_internal;
+	Handle _htarget;
 	unsigned int _selection_count;
 
 	Handle _vardecl;
@@ -134,7 +133,7 @@ public:
 	void emplace(Handle h, Handle hvardecl);
 	unsigned int size();
 	Target& select();
-	Target& get(Handle& h);
+	Target& get(Handle h);
 
 private:
 	std::map<Handle, Target> _targets_map;
