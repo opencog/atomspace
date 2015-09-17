@@ -117,6 +117,15 @@ void PatternLink::init(void)
 {
 	_pat.redex_name = "anonymous PatternLink";
 	extract_variables(_outgoing);
+
+	if (2 < _outgoing.size() or
+	   (2 == _outgoing.size() and _outgoing[1] != _body))
+	{
+		throw InvalidParamException(TRACE_INFO,
+		      "Expecting (optional) variable decls and a body; got %s",
+		      toString().c_str());
+	}
+
 	unbundle_clauses(_body);
 	common_init();
 	setup_components();
@@ -126,7 +135,7 @@ void PatternLink::init(void)
 
 /// Special constructor used during just-in-time pattern compilation.
 ///
-/// It assumes that the vaiables have already been correctly extracted
+/// It assumes that the variables have already been correctly extracted
 /// from the body, as appropriate.
 PatternLink::PatternLink(const Variables& vars, const Handle& body)
 	: LambdaLink(PATTERN_LINK, HandleSeq())
