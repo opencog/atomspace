@@ -25,7 +25,6 @@
 
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/AtomTable.h>
 #include "AtomUtils.h"
 
 namespace opencog
@@ -125,6 +124,7 @@ UnorderedHandleSet get_all_unique_atoms(Handle h)
 
     return results;
 }
+
 
 HandleSeq get_neighbors(const Handle& h, bool fanin,
                         bool fanout, Type desiredLinkType,

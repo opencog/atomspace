@@ -70,6 +70,8 @@ bool BackwardChainerPMCB::node_match(const Handle& npat_h, const Handle& nsoln_h
 	// non-variable VariableNode that should be matched to all other
 	// VariableNode no matter the name.
 	//
+	// XXX this is not needed when VariableNode is correctly implemented to be
+	//     unique
 	// XXX TODO this is making VariableNode self-grounding awkward to implement
 	if (npat_h->getType() == VARIABLE_NODE && nsoln_h->getType() == VARIABLE_NODE)
 		return true;
