@@ -19,6 +19,7 @@ INSTALL (FILES
 	opencog/persist-sql.scm
 	opencog/persist-zmq.scm
 	opencog/query.scm
+	opencog/dist-gearman.scm
 	opencog/rule-engine.scm
 	DESTINATION "${DATADIR}/scm/opencog"
 )

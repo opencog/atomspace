@@ -11,8 +11,11 @@ ADD_LIBRARY(query SHARED
 	Satisfier.cc
 	FuzzyMatch/FuzzyPatternMatch.cc
 	FuzzyMatch/FuzzyPatternMatchCB.cc
+#	Distributed/DistSCM.cc
 )
-
+ADD_LIBRARY(dist-gearman SHARED
+    Distributed/DistSCM.cc
+)
 ADD_DEPENDENCIES(query
 	opencog_atom_types
 )
@@ -22,17 +25,23 @@ TARGET_LINK_LIBRARIES(query
 	lambda
 	atomspace
 #	execution
+#    gearman
 )
-
+TARGET_LINK_LIBRARIES(dist-gearman
+    gearman
+)
 IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(query
 		smob
 	)
+	TARGET_LINK_LIBRARIES(dist-gearman
+		smob
+	)	
 ENDIF (HAVE_GUILE)
 
 
 INSTALL (TARGETS query DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-
+INSTALL (TARGETS dist-gearman DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 INSTALL (FILES
 	AttentionalFocusCB.h
 	BindLinkAPI.h
@@ -46,5 +55,6 @@ INSTALL (FILES
 	PatternMatchCallback.h
 	PatternMatchEngine.h
 	Satisfier.h
+	Distributed/DistSCM.h
 	DESTINATION "include/opencog/query"
 )
