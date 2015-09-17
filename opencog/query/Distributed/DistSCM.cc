@@ -57,7 +57,8 @@ void DistSCM::set_master_mode(void)
 {
 	master_mode=true;
 }
-static gearman_return_t worker_function(gearman_job_st *job, void *context)
+
+gearman_return_t DistSCM::worker_function(gearman_job_st *job, void *context)
 {
   const char *workload= (const char *)gearman_job_workload(job);
   const size_t workload_size= gearman_job_workload_size(job);
@@ -67,26 +68,22 @@ static gearman_return_t worker_function(gearman_job_st *job, void *context)
   char *result=new char[workload_size];
   memcpy(result,workload,workload_size);
   
-  /*
-   *if (gearman_failed(gearman_job_send_data(job, &result[y], 1)))
-      {
-        return GEARMAN_ERROR;
-      }
-   */
     if (gearman_failed(gearman_job_send_data(job, &result[0], workload_size)))
     {
       return GEARMAN_ERROR;
     }
-   
+   return GEARMAN_SUCCESS;
 }
 
 const std::string& DistSCM::slave_mode(const std::string& ip_string,const std::string& workerID)
 {
+	
     if ((worker= gearman_worker_create(NULL)) == NULL)
     {
       std::cerr << "Memory allocation failure on worker creation." << std::endl;
       return false_string;
     }
+    
     gearman_worker_add_options(worker, GEARMAN_WORKER_GRAB_UNIQ);
     gearman_worker_set_timeout(worker, 200);//ms
     if (gearman_failed(gearman_worker_add_server(worker, ip_string.c_str(), GEARMAN_DEFAULT_TCP_PORT)))
@@ -104,7 +101,7 @@ const std::string& DistSCM::slave_mode(const std::string& ip_string,const std::s
                                                     gearman_literal_param("make_call"),
                                                     worker_fn,
                                                     0, 
-                                                    NULL/*&options*/)))
+                                                    NULL)))
     {
       std::cerr << gearman_worker_error(worker) << std::endl;
       return false_string;
@@ -121,6 +118,7 @@ const std::string& DistSCM::slave_mode(const std::string& ip_string,const std::s
   
 	//master_ip=ip_string;
 	gearman_worker_free(worker);
+	
 	return ip_string;
 }
 const std::string& DistSCM::dist_scm(const std::string& scm_string)

@@ -44,9 +44,11 @@ private:
 	const std::string& dist_scm(const std::string& scm_string);
 	const std::string true_string, false_string;
 	std::string master_ip;
+
 	gearman_client_st client;
 	gearman_worker_st *worker;
 	static gearman_return_t worker_function(gearman_job_st *job, void *context);
+	
 	public:
 		DistSCM(void);
 		~DistSCM();
