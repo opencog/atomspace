@@ -429,7 +429,8 @@ void BackwardChainer::process_target(Target& target)
  */
 HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
                                                 Handle hpattern_vardecl,
-                                                vector<VarMap>& vmap)
+                                                vector<VarMap>& vmap,
+                                                bool enable_var_name_check)
 {
 	AtomSpace focus_garbage_superspace(&_focus_space);
 	AtomSpace* working_space;
@@ -480,7 +481,8 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
 	// in hpattern are in the garbage space
 	PatternLinkPtr sl(createPatternLink(hpattern_vardecl, hpattern));
 	BackwardChainerPMCB pmcb(working_space,
-	                         VariableListCast(hpattern_vardecl));
+	                         VariableListCast(hpattern_vardecl),
+	                         enable_var_name_check);
 
 	sl->satisfy(pmcb);
 
@@ -591,30 +593,31 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
 	                                             additional_free_varset)),
 	                         premises_vmap_list);
 
-//	// Do another match but without the target's free var as variable, so they
-//	// are constant; mostly to handle where PM cannot map a variable to itself
-//	if (not additional_free_varset.empty())
-//	{
-//		std::vector<VarMap> premises_vmap_list_alt;
+	// Do another match but without the target's free var as variable, so they
+	// are constant; mostly to handle where PM cannot map a variable to itself
+	if (not additional_free_varset.empty())
+	{
+		std::vector<VarMap> premises_vmap_list_alt;
 
-//		HandleSeq possible_premises_alt =
-//			match_knowledge_base(hrule_implicant_reverse_grounded,
-//								 _garbage_superspace.add_atom(
-//		                             gen_sub_varlist(hrule_implicant_reverse_grounded,
-//		                                             hrule_vardecl,
-//		                                             std::set<Handle>())),
-//								 premises_vmap_list_alt);
+		HandleSeq possible_premises_alt =
+			match_knowledge_base(hrule_implicant_reverse_grounded,
+								 _garbage_superspace.add_atom(
+		                             gen_sub_varlist(hrule_implicant_reverse_grounded,
+		                                             hrule_vardecl,
+		                                             std::set<Handle>())),
+								 premises_vmap_list_alt,
+		                         true);
 
-//		// XXX But the target's var could still be mapped to other var...
-//		// Need extra processing here, or make PM possible to ground to var of same name
+		// XXX But the target's var could still be mapped to other var...
+		// Need extra processing here, or make PM possible to ground to var of same name
 
-//		// collect the possible premises from the two verions of mapping
-//		possible_premises.insert(possible_premises.end(),
-//		                         possible_premises_alt.begin(),
-//		                         possible_premises_alt.end());
-//		premises_vmap_list.insert(premises_vmap_list.end(), premises_vmap_list_alt.begin(),
-//		                          premises_vmap_list_alt.end());
-//	}
+		// collect the possible premises from the two verions of mapping
+		possible_premises.insert(possible_premises.end(),
+		                         possible_premises_alt.begin(),
+		                         possible_premises_alt.end());
+		premises_vmap_list.insert(premises_vmap_list.end(), premises_vmap_list_alt.begin(),
+		                          premises_vmap_list_alt.end());
+	}
 
 
 	return possible_premises;
