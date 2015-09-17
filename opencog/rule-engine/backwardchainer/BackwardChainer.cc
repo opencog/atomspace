@@ -600,16 +600,13 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
 		std::vector<VarMap> premises_vmap_list_alt;
 
 		HandleSeq possible_premises_alt =
-			match_knowledge_base(hrule_implicant_reverse_grounded,
-								 _garbage_superspace.add_atom(
-		                             gen_sub_varlist(hrule_implicant_reverse_grounded,
-		                                             hrule_vardecl,
-		                                             std::set<Handle>())),
-								 premises_vmap_list_alt,
-		                         true);
-
-		// XXX But the target's var could still be mapped to other var...
-		// Need extra processing here, or make PM possible to ground to var of same name
+		        match_knowledge_base(hrule_implicant_reverse_grounded,
+		                             _garbage_superspace.add_atom(
+		                                 gen_sub_varlist(hrule_implicant_reverse_grounded,
+		                                                 hrule_vardecl,
+		                                                 std::set<Handle>())),
+		                             premises_vmap_list_alt,
+		                             true);
 
 		// collect the possible premises from the two verions of mapping
 		possible_premises.insert(possible_premises.end(),
