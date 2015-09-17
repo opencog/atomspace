@@ -239,7 +239,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
                                          const LinkPtr& lp,
                                          const LinkPtr& lg)
 {
-	const PatternTermSeq &osp = ptm->getOutgoingSet();
+	PatternTermSeq osp = ptm->getOutgoingSet();
 	const HandleSeq &osg = lg->getOutgoingSet();
 
 //	size_t oset_sz = osp.size();
@@ -314,7 +314,7 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
                                         const LinkPtr& lg)
 {
 	const Handle& hp = ptm->getHandle();
-	const PatternTermSeq &osp = ptm->getOutgoingSet();
+	PatternTermSeq osp = ptm->getOutgoingSet();
 
 	// _choice_state lets use resume where we last left off.
 	size_t iend = osp.size();
@@ -549,7 +549,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 {
 	const Handle& hp = ptm->getHandle();
 	const HandleSeq& osg = lg->getOutgoingSet();
-	const PatternTermSeq& osp = ptm->getOutgoingSet();
+	PatternTermSeq osp = ptm->getOutgoingSet();
 //	size_t arity = osp.size();
 	size_t osg_size = osg.size();
 	size_t osp_size = osp.size();
