@@ -168,7 +168,7 @@ void BackwardChainerUTest::test_tvq_bc()
 	             "tests/rule-engine/bc-config-1.scm,"
 	             "tests/rule-engine/bc-example.scm");
 	load_scm_files_from_config(as_);
-	randGen().seed(0);
+	randGen().seed(500);
 
 	// load modus ponens
 	Handle top_rbs = as_.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);

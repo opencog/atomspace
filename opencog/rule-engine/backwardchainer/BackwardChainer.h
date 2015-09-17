@@ -115,7 +115,8 @@ private:
 
 	HandleSeq match_knowledge_base(Handle htarget,
 	                               Handle htarget_vardecl,
-	                               std::vector<VarMap>& vmap);
+	                               std::vector<VarMap>& vmap,
+	                               bool enable_var_name_check = false);
 	HandleSeq find_premises(const Rule& standardized_rule,
 	                        const VarMap& implicand_mapping,
 	                        const std::set<Handle> additional_free_varset,
