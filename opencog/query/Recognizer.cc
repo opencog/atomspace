@@ -2,34 +2,99 @@
  * Recognizer experiment
  */
 
-#include <opencog/atoms/bind/PatternLink.h>
-#include <opencog/query/InitiateSearchCB.h>
-#include <opencog/query/DefaultPatternMatchCB.h>
+#ifndef _OPENCOG_RECOGNIZER_H
+#define _OPENCOG_RECOGNIZER_H
 
+#include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/atoms/bind/PatternLink.h>
 
 #include "BindLinkAPI.h"
 
-using namespace opencog;
+namespace opencog {
 
 class Recognizer :
-   public virtual InitiateSearchCB,
    public virtual DefaultPatternMatchCB
 {
+	protected:
+		const Pattern* _pattern;
+
+		Handle _root;
+		Handle _starter_term;
+		bool do_search(PatternMatchEngine*, const Handle&);
+
 	public:
 		Recognizer(AtomSpace* as) :
-			InitiateSearchCB(as),
 			DefaultPatternMatchCB(as) {}
 
+		virtual bool initiate_search(PatternMatchEngine*);
 		virtual void set_pattern(const Variables& vars,
 										 const Pattern& pat)
 		{
-			InitiateSearchCB::set_pattern(vars, pat);
+			_pattern = &pat;
 			DefaultPatternMatchCB::set_pattern(vars, pat);
 		}
 
 		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
 		                       const std::map<Handle, Handle> &term_soln);
 };
+
+} // namespace opencog
+
+#endif // _OPENCOG_RECOGNIZER_H
+
+using namespace opencog;
+
+// Uncomment below to enable debug print
+// #define DEBUG
+#ifdef DEBUG
+#define dbgprt(f, varargs...) printf(f, ##varargs)
+#else
+#define dbgprt(f, varargs...)
+#endif
+
+/* ======================================================== */
+
+bool Recognizer::do_search(PatternMatchEngine* pme, const Handle& top)
+{
+	LinkPtr ltop(LinkCast(top));
+	if (ltop)
+	{
+		for (const Handle& h : ltop->getOutgoingSet())
+		{
+			_starter_term = top;
+			bool found = do_search(pme, h);
+			if (found) return true;
+		}
+	}
+	IncomingSet iset = get_incoming_set(top);
+	size_t sz = iset.size();
+	for (size_t i = 0; i < sz; i++)
+	{
+		Handle h(iset[i]);
+		dbgprt("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr\n");
+		dbgprt("Loop candidate (%lu/%lu):\n%s\n", i+1, sz,
+		       h->toShortString().c_str());
+		bool found = pme->explore_neighborhood(_root, _starter_term, h);
+
+		// Terminate search if satisfied.
+		if (found) return true;
+   }
+
+	return false;
+}
+
+bool Recognizer::initiate_search(PatternMatchEngine* pme)
+{
+	const HandleSeq& clauses = _pattern->cnf_clauses;
+
+	for (const Handle& h: clauses)
+	{
+		_root = h;
+		bool found = do_search(pme, h);
+		if (found) return true;
+	}
+	return false;
+}
 
 bool Recognizer::grounding(const std::map<Handle, Handle> &var_soln,
                            const std::map<Handle, Handle> &term_soln)

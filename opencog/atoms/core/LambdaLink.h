@@ -26,7 +26,6 @@
 #include <map>
 
 #include <opencog/atoms/core/VariableList.h>
-#include <opencog/atomspace/Link.h>
 
 namespace opencog
 {
