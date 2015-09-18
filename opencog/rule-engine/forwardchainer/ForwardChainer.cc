@@ -242,3 +242,58 @@ HandleSeq ForwardChainer::get_chaining_result()
 {
     return _fcmem.get_result();
 }
+
+Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
+{
+    //TODO move this somewhere else
+    std::map<Rule*, float> rule_weight;
+    for (Rule* r : _fcmem.get_rules())
+        rule_weight[r] = r->get_weight();
+
+    _log->debug("[ForwardChainer] %d rules to be searched",rule_weight.size());
+
+    //Select a rule among the admissible rules in the rule-base via stochastic
+    //selection,based on the weights of the rules in the current context.
+    Rule* rule = nullptr;
+    bool unifiable = false;
+
+    if (subatom_match) {
+        _log->debug("[ForwardChainer] Subatom-unifying. %s",(hsource->toShortString()).c_str());
+
+        while (!unifiable and !rule_weight.empty()) {
+            Rule* temp = _rec.tournament_select(rule_weight);
+
+            if (subatom_unify(hsource, temp)) {
+                unifiable = true;
+                rule = temp;
+                break;
+            }
+            rule_weight.erase(temp);
+        }
+
+    } else {
+        _log->debug("[ForwardChainer] Unifying. %s",(hsource->toShortString()).c_str());
+
+        while (!unifiable and !rule_weight.empty()) {
+            Rule *temp = _rec.tournament_select(rule_weight);
+            HandleSeq hs = temp->get_implicant_seq();
+
+            for (Handle target : hs) {
+                if (unify(hsource, target, temp)) {
+                    unifiable = true;
+                    rule = temp;
+                    break;
+                }
+            }
+            rule_weight.erase(temp);
+        }
+    }
+
+    if(nullptr != rule)
+        _log->debug("[ForwardChainer] Selected rule is %s",
+                            (rule->get_handle())->toShortString().c_str());
+    else
+       _log->debug("[ForwardChainer] No match found.");
+
+    return rule;
+};
