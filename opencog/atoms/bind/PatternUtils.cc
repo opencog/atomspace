@@ -51,7 +51,8 @@ namespace opencog {
  * Returns true if the list of clauses was modified, else returns false.
  */
 bool remove_constants(const std::set<Handle> &vars,
-                      std::vector<Handle> &clauses)
+                      std::vector<Handle> &clauses,
+                      std::vector<Handle> &constants)
 {
 	bool modified = false;
 
@@ -70,6 +71,7 @@ bool remove_constants(const std::set<Handle> &vars,
 		}
 		else
 		{
+			constants.push_back(clause);
 			i = clauses.erase(i);
 			modified = true;
 		}
