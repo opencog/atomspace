@@ -219,7 +219,7 @@ static bool try_to_load_modules(const char ** config_paths)
     // we'll write it out before the imports below to aid in debugging.
     if (logger().isDebugEnabled())
     {
-        logger().debug("Python 'sys.path' after OpenCog config adds is:");
+        logger().debug("Python 'sys.path' after config adds is:");
         Py_ssize_t pathSize = PyList_Size(pySysPath);
         for (int i = 0; i < pathSize; i++)
         {
@@ -247,10 +247,11 @@ static bool try_to_load_modules(const char ** config_paths)
                        "opencog.atomspace module", __FUNCTION__);
     }
 
-    // Now we can use get_path_as_string() to get 'sys.path'
-    // But only if import_opencog__atomspace() suceeded without error.
-    // When it fails, it fails silently, leaving get_path_as_string with
-    // a NULL PLT/GOT entry
+    // Now we can use get_path_as_string() to get 'sys.path',
+    // but only if import_opencog__atomspace() suceeded without error.
+    // When it fails, it fails silently, leaving get_path_as_string
+    // with a NULL PLT/GOT entry (i.e. calling the subroutine is a
+    // null-pointer deref).
     if (NULL != get_path_as_string)
         logger().info("Python 'sys.path' after OpenCog config adds is: " +
                get_path_as_string());
