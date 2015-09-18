@@ -56,6 +56,11 @@ void PatternSCM::init(void)
 
 	_binders.push_back(new FunctionWrap(satisfying_set,
 	                   "cog-satisfying-set", "query"));
+
+   // Rule recognition.
+	_binders.push_back(new FunctionWrap(recognize,
+	                   "cog-recognize", "query"));
+
 }
 
 PatternSCM::~PatternSCM()
