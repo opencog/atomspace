@@ -66,63 +66,46 @@ Logger* ForwardChainer::getLogger()
  *
  * @param fcb a concrete implementation of of ForwardChainerCallBack class 
  */
-void ForwardChainer::do_step(ForwardChainerCallBack& fcb)
+UnorderedHandleSet ForwardChainer::do_step(bool search_focus_set/* = false*/)
 {
 
-    if (_fcmem.get_cur_source() == Handle::UNDEFINED) {
-        _log->info("[ForwardChainer] No current source, step "
-                   "forward chaining aborted.");
-        return;
+    Handle hsource = choose_next_source(_fcmem);
+
+    _log->debug("[ForwardChainer] Next source %s", hsource->toString().c_str());
+
+    _fcmem.set_source(hsource);
+
+    HandleSeq derived_rhandles;
+
+    //choose a rule that source unifies with one of its premises.
+    Rule *rule = choose_rule(hsource, false);
+    if (rule) {
+        _fcmem.set_cur_rule(rule);
+        derived_rhandles = derive_rules(hsource, rule);
+
+    } else {
+        //choose rule that unifies that source unifies with sub-atoms of its premises.
+        rule = choose_rule(hsource, true);
+
+        if (rule) {
+            _fcmem.set_cur_rule(rule);
+            derived_rhandles = derive_rules(hsource, rule,
+            true);
+        }
     }
 
-    _log->info("[ForwardChainer] Next source %s",
-               _fcmem.get_cur_source()->toString().c_str());
+    _log->debug( "Derived rule size = %d", derived_rhandles.size());
 
-    // Choose matching rules whose input matches with the source.
-    vector<Rule*> matched_rules = fcb.choose_rules(_fcmem);
-    _log->info("[ForwardChainer] Found matching rule");
+    UnorderedHandleSet products;
 
-    //! If no rules matches the pattern of the source,
-    //! set all rules for candidacy to be selected by the proceeding step.
-    //! xxx this decision is maded based on recent discussion.I
-    //! it might still face some changes.
-    if (matched_rules.empty()) {
-        _log->info("[ForwardChainer] No matching rule found. "
-                   "Setting all rules as candidates.");
-        matched_rules = _fcmem.get_rules();
+    for (Handle rhandle : derived_rhandles) {
+        HandleSeq temp_result = apply_rule(rhandle,search_focus_set);
+
+        std::copy(temp_result.begin(), temp_result.end(),
+                  std::inserter(products, products.end()));
     }
 
-    // Select a rule amongst the matching rules by tournament selection
-    map<Rule*, float> rule_weight;
-    for (Rule* r : matched_rules) {
-        rule_weight[r] = r->get_weight();
-    }
-
-    _log->info("[ForwardChainer] Selecting a rule from the set of "
-               "candidate rules.");
-    Rule* r = _rec.tournament_select(rule_weight);
-    _fcmem.set_cur_rule(r);
-    _log->info("[ForwardChainer] Selected rule is %s", (r->get_handle())->toShortString().c_str());
-
-    //!TODO Find/add premises?
-
-    //! Apply rule.
-    _log->info("[ForwardChainer] Applying chosen rule %s",
-               (r->get_handle())->toShortString().c_str());
-    HandleSeq product = fcb.apply_rule(_fcmem);
-
-    _log->info("PRODUCTS...");
-    for(const auto& p:product)
-    {
-        _log->info("%s ", p->toShortString().c_str() );
-    }
-
-    _log->info("[ForwardChainer] updating premise list with the "
-               "inference made");
-    _fcmem.update_potential_sources(product);
-
-    _log->info("[ForwardChainer] adding inference to history");
-    _fcmem.add_rules_product(_iteration, product);
+    return products;
 }
 
 void ForwardChainer::do_chain(Handle hsource, HandleSeq focus_set)
