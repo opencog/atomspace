@@ -125,43 +125,65 @@ void ForwardChainer::do_step(ForwardChainerCallBack& fcb)
     _fcmem.add_rules_product(_iteration, product);
 }
 
-void ForwardChainer::do_chain(ForwardChainerCallBack& fcb,
-                              Handle hsource/*=Handle::UNDEFINED*/)
+void ForwardChainer::do_chain(Handle hsource, HandleSeq focus_set)
 {
-    if (hsource == Handle::UNDEFINED) {
-        do_pm();
-        return;
+
+    validate(hsource,focus_set);
+
+    _fcmem.set_focus_set(focus_set);
+
+    HandleSeq init_sources;
+    //Accept set of initial sources wrapped in a SET_LINK
+    if(LinkCast(hsource) and hsource->getType() == SET_LINK)
+    {
+     init_sources = _as.get_outgoing(hsource);
+
+     //Relex2Logic uses this.TODO make a separate class
+     //to handle this robustly.
+     if(init_sources.empty())
+     {
+         bool search_in_af = not focus_set.empty();
+         apply_all_rules(search_in_af);
+         return;
+     }
+
     }
+    else
+    {
+        init_sources.push_back(hsource);
+    }
+
     // Variable fulfillment query.
     UnorderedHandleSet var_nodes = get_outgoing_nodes(hsource,
                                                       { VARIABLE_NODE });
     if (not var_nodes.empty())
-        return do_pm(hsource, var_nodes, fcb);
+        return do_pm(hsource, var_nodes);
 
-    HandleSeq init_sources;
-    //Accept set of initial sources wrapped by a SET_LINK
-    if(LinkCast(hsource) and hsource->getType() == SET_LINK)
-     init_sources = _as.get_outgoing(hsource);
-    else
-        init_sources.push_back(hsource);
+    // Default forward chaining
     _fcmem.update_potential_sources(init_sources);
 
-    _fcmem.set_source(fcb.choose_next_source(_fcmem)); //set initial source
     auto max_iter = _configReader.get_maximum_iterations();
 
     while (_iteration < max_iter /*OR other termination criteria*/) {
-        _log->info("Iteration %d", _iteration);
 
-        do_step(fcb);
+        _log->debug("Iteration %d", _iteration);
 
-        //! Choose next source.
-        _log->info("[ForwardChainer] setting next source");
-        _fcmem.set_source(fcb.choose_next_source(_fcmem));
+        UnorderedHandleSet products;
+
+        if (focus_set.empty())
+            products = do_step(false);
+        else
+            products = do_step(true);
+
+        _fcmem.add_rules_product(_iteration,
+                                 HandleSeq(products.begin(), products.end()));
+        _fcmem.update_potential_sources(
+                HandleSeq(products.begin(), products.end()));
 
         _iteration++;
     }
 
-    _log->info("[ForwardChainer] finished do_chain.");
+    _log->debug("[ForwardChainer] finished forwarch chaining.");
 }
 
 /**
