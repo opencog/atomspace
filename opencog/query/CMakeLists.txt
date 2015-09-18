@@ -19,7 +19,9 @@ ADD_LIBRARY(dist-gearman SHARED
 ADD_DEPENDENCIES(query
 	opencog_atom_types
 )
-
+ADD_DEPENDENCIES(dist-gearman
+	opencog_atom_types
+)
 TARGET_LINK_LIBRARIES(query
 	atomutils
 	lambda
@@ -30,6 +32,7 @@ TARGET_LINK_LIBRARIES(query
 TARGET_LINK_LIBRARIES(dist-gearman
     gearman
     atomspace
+#    persist-sql
 )
 IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(query
