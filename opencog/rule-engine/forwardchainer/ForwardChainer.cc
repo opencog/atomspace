@@ -297,3 +297,65 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
 
     return rule;
 };
+HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=false*/)
+{
+    HandleSeq result;
+
+    if (search_in_focus_set) {
+        //This restricts PM to look only in the focus set
+        AtomSpace focus_set_as;
+
+        //Add focus set atoms to focus_set atomspace
+        HandleSeq focus_set_atoms = _fcmem.get_focus_set();
+        for (Handle h : focus_set_atoms)
+            focus_set_as.add_atom(h);
+
+        //Add source atoms to focus_set atomspace
+        HandleSeq sources = _fcmem.get_potential_sources();
+        for (Handle h : sources)
+            focus_set_as.add_atom(h);
+
+        //rhandle may introduce a new atoms that satisfies condition for the output
+        //In order to prevent this undesirable effect, lets store rhandle in a child
+        //atomspace of parent focus_set_as so that PM will never be able to find this
+        //new undesired atom created from partial grounding.
+        AtomSpace derived_rule_as(&focus_set_as);
+        Handle rhcpy = derived_rule_as.add_atom(rhandle);
+
+        BindLinkPtr bl = BindLinkCast(rhcpy);
+
+        FocusSetPMCB fs_pmcb(&derived_rule_as, &_as);
+        fs_pmcb.implicand = bl->get_implicand();
+
+        _log->debug("Applying rule in focus set %s ",(rhcpy->toShortString()).c_str());
+
+        std::cout << "ATOMSPACE:" << derived_rule_as << std::endl;
+        bl->imply(fs_pmcb);
+
+        result = fs_pmcb.get_result_list();
+
+        _log->debug(
+                "Result is %s ",
+                ((_as.add_link(SET_LINK, result))->toShortString()).c_str());
+
+    }
+    //Search the whole atomspace
+    else {
+        AtomSpace derived_rule_as(&_as);
+
+        Handle rhcpy = derived_rule_as.add_atom(rhandle);
+
+        _log->debug("Applying rule on atomspace %s ",(rhcpy->toShortString()).c_str());
+
+        Handle h = bindlink(&derived_rule_as,rhcpy);
+
+        _log->debug("Result is %s ",(h->toShortString()).c_str());
+
+        result = derived_rule_as.get_outgoing(h);
+    }
+
+    //add the results back to main atomspace
+    for(Handle h:result) _as.add_atom(h);
+
+    return result;
+}
