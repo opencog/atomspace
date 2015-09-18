@@ -292,6 +292,77 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
 
     return rule;
 };
+
+HandleSeq ForwardChainer::choose_premises(FCMemory& fcmem)
+{
+    HandleSeq inputs;
+    URECommons urec(_as);
+    Handle hsource = fcmem.get_cur_source();
+
+    // Get everything associated with the source handle.
+    UnorderedHandleSet neighbors = get_distant_neighbors(hsource, 2);
+
+    // Add all root links of atoms in @param neighbors.
+    for (auto hn : neighbors) {
+        if (hn->getType() != VARIABLE_NODE) {
+            HandleSeq roots;
+            urec.get_root_links(hn, roots);
+            for (auto r : roots) {
+                if (find(inputs.begin(), inputs.end(), r) == inputs.end() and r->getType()
+                        != BIND_LINK)
+                    inputs.push_back(r);
+            }
+        }
+    }
+
+    return inputs;
+}
+
+Handle ForwardChainer::choose_next_source(FCMemory& fcmem)
+{
+
+    URECommons urec(_as);
+    HandleSeq tlist = fcmem.get_potential_sources();
+    map<Handle, float> tournament_elem;
+
+    switch (_ts_mode) {
+    case TV_FITNESS_BASED:
+        for (Handle t : tlist)
+            tournament_elem[t] = urec.tv_fitness(t);
+        break;
+
+    case STI_BASED:
+        for (Handle t : tlist)
+            tournament_elem[t] = t->getSTI();
+        break;
+
+    default:
+        throw RuntimeException(TRACE_INFO, "Unknown source selection mode.");
+        break;
+    }
+
+    Handle hchosen = Handle::UNDEFINED;
+
+    //!Choose a new source that has never been chosen before.
+    //!xxx FIXME since same handle might be chosen multiple times the following
+    //!code doesn't guarantee all sources have been exhaustively looked.
+    for (size_t i = 0; i < tournament_elem.size(); i++) {
+        Handle hselected = urec.tournament_select(tournament_elem);
+        if (fcmem.isin_selected_sources(hselected)) {
+            continue;
+        } else {
+            hchosen = hselected;
+            break;
+        }
+    }
+
+    // Incase of when all sources are selected
+    if (hchosen == Handle::UNDEFINED)
+        return urec.tournament_select(tournament_elem);
+
+    return hchosen;
+}
+
 HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=false*/)
 {
     HandleSeq result;
@@ -353,4 +424,141 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
     for(Handle h:result) _as.add_atom(h);
 
     return result;
+}
+/**
+ * Derives new rules from @param hrule by replacing variables
+ * with their groundings.
+ *
+ * @param as             An atomspace where the handles dwell.
+ * @param hrule          A handle to BindLink instance
+ * @param vars           The grounded var list in @param hrule
+ * @param var_groundings The set of groundings to each var in @param vars
+ *
+ * @return A HandleSeq of all possible derived rules
+ */
+HandleSeq ForwardChainer::substitute_rule_part(
+        AtomSpace& as, Handle hrule, const std::set<Handle>& vars,
+        const std::vector<std::map<Handle, Handle>>& var_groundings)
+{
+    std::vector<std::map<Handle, Handle>> filtered_vgmap_list;
+
+    //Filter out variables not listed in vars from var-groundings
+    for (const auto& varg_map : var_groundings) {
+        std::map<Handle, Handle> filtered;
+
+        for (const auto& iv : varg_map) {
+            if (find(vars.begin(), vars.end(), iv.first) != vars.end()) {
+                filtered[iv.first] = iv.second;
+            }
+        }
+
+        filtered_vgmap_list.push_back(filtered);
+    }
+
+    HandleSeq derived_rules;
+    BindLinkPtr blptr = BindLinkCast(hrule);
+    //Substitutor st(&as);
+
+    for (auto& vgmap : filtered_vgmap_list) {
+        Handle himplicand = Substitutor::substitute(blptr->get_implicand(), vgmap);
+        //Create the BindLink/Rule by substituting vars with groundings
+        if (contains_atomtype(himplicand, VARIABLE_NODE)) {
+            Handle himplicant = Substitutor::substitute(blptr->get_body(), vgmap);
+
+            //Assuming himplicant's set of variables are superset for himplicand's,
+            //generate varlist from himplicant.
+            Handle hvarlist = as.add_atom(gen_sub_varlist(
+                    himplicant, LinkCast(hrule)->getOutgoingSet()[0]));
+            Handle hderived_rule = as.add_atom(Handle(createBindLink(HandleSeq {
+                    hvarlist, himplicant, himplicand })));
+            derived_rules.push_back(hderived_rule);
+        } else {
+            //TODO Execute if executable and push to FC results
+        }
+    }
+
+    return derived_rules;
+}
+
+/**
+ * Tries to unify the @param source with @parama target and derives
+ * new rules using @param rule as a template.
+ *
+ * @param source  An atom that might bind to variables in @param rule.
+ * @param target  An atom to be unified with @param source
+ * @rule  rule    The rule object whose implicants are to be unified.
+ *
+ * @return        true on successful unification and false otherwise.
+ */
+bool ForwardChainer::unify(Handle source, Handle target, Rule* rule)
+{
+    //exceptions
+    if (not is_valid_implicant(target))
+        return false;
+
+    AtomSpace temp_pm_as;
+    Handle hcpy = temp_pm_as.add_atom(target);
+    Handle implicant_vardecl = temp_pm_as.add_atom(
+            gen_sub_varlist(target, rule->get_vardecl()));
+    Handle sourcecpy = temp_pm_as.add_atom(source);
+
+    BindLinkPtr bl =
+    createBindLink(HandleSeq { implicant_vardecl, hcpy, hcpy });
+    Handle blhandle = temp_pm_as.add_atom(bl);
+    Handle  result = bindlink(&temp_pm_as, blhandle);
+    HandleSeq results = temp_pm_as.get_outgoing(result);
+
+    if (std::find(results.begin(), results.end(), sourcecpy) != results.end())
+        return true;
+    else
+        return false;
+}
+
+/**
+ *  Checks if sub atoms of implicant lists in @param rule are unifiable with
+ *  @param source.
+ *
+ *  @param source  An atom that might bind to variables in @param rule.
+ *  @param rule    The rule object whose implicants are to be sub atom unified.
+ *
+ *  @return        true if source is subatom unifiable and false otherwise.
+ */
+bool ForwardChainer::subatom_unify(Handle source, Rule* rule)
+{
+    UnorderedHandleSet output_expanded = get_subatoms(rule);
+
+    for (Handle h : output_expanded) {
+        if (unify(source, h, rule))
+            return true;
+    }
+
+    return false;
+}
+
+Handle ForwardChainer::gen_sub_varlist(const Handle& parent,
+                                       const Handle& parent_varlist)
+{
+    FindAtoms fv(VARIABLE_NODE);
+    fv.search_set(parent);
+
+    HandleSeq oset;
+    if (LinkCast(parent_varlist))
+        oset = LinkCast(parent_varlist)->getOutgoingSet();
+    else
+        oset.push_back(parent_varlist);
+
+    HandleSeq final_oset;
+
+    // for each var in varlist, check if it is used in parent
+    for (const Handle& h : oset) {
+        Type t = h->getType();
+
+        if (VARIABLE_NODE == t && fv.varset.count(h) == 1)
+            final_oset.push_back(h);
+        else if (TYPED_VARIABLE_LINK == t
+                and fv.varset.count(LinkCast(h)->getOutgoingSet()[0]) == 1)
+            final_oset.push_back(h);
+    }
+
+    return Handle(createVariableList(final_oset));
 }
