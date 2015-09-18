@@ -20,6 +20,7 @@ class Recognizer :
 
 		Handle _root;
 		Handle _starter_term;
+		size_t _cnt;
 		bool do_search(PatternMatchEngine*, const Handle&);
 
 	public:
@@ -65,14 +66,17 @@ bool Recognizer::do_search(PatternMatchEngine* pme, const Handle& top)
 			bool found = do_search(pme, h);
 			if (found) return true;
 		}
+		return false;
 	}
+
 	IncomingSet iset = get_incoming_set(top);
 	size_t sz = iset.size();
 	for (size_t i = 0; i < sz; i++)
 	{
 		Handle h(iset[i]);
 		dbgprt("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr\n");
-		dbgprt("Loop candidate (%lu/%lu):\n%s\n", i+1, sz,
+		dbgprt("Loop candidate (%lu - %s):\n%s\n", _cnt++,
+		       top->toShortString().c_str(),
 		       h->toShortString().c_str());
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 
@@ -87,6 +91,7 @@ bool Recognizer::initiate_search(PatternMatchEngine* pme)
 {
 	const HandleSeq& clauses = _pattern->cnf_clauses;
 
+	_cnt = 0;
 	for (const Handle& h: clauses)
 	{
 		_root = h;
