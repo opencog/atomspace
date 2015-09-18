@@ -29,6 +29,7 @@ TARGET_LINK_LIBRARIES(query
 )
 TARGET_LINK_LIBRARIES(dist-gearman
     gearman
+    atomspace
 )
 IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(query

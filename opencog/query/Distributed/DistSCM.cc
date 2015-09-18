@@ -25,6 +25,8 @@
 #include "DistSCM.h"
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
+#include <opencog/guile/SchemeEval.h>//which lib to link?
+#include <opencog/guile/SchemeSmob.h>
 using namespace opencog;
 bool DistSCM::master_mode=true;
 DistSCM::DistSCM(void):true_string("true"),false_string("false")
@@ -68,10 +70,20 @@ gearman_return_t DistSCM::worker_function(gearman_job_st *job, void *context)
 
   std::cout << "Recieved " << workload_size << " bytes" << std::endl;
 ////  run eval_h(""), get handle, wrap to anchor node and push to db
-  char *result=new char[workload_size];
-  memcpy(result,workload,workload_size);
+  //char *result=new char[workload_size];
+  //memcpy(result,workload,workload_size);
+  char scm_str[MAX_SCM_CODE_STRING+1];
+  strcpy(scm_str,workload);
+  unsigned int slen=strlen(scm_str);
+  char tag[16];
+  memcpy(&tag,scm_str+slen+1, 16);
+  SchemeEval evl((AtomSpace*)context);
+  evl.init_scheme();
+  Handle result=evl.eval_h(scm_str);//can we check if handle is valid? how to get current atomspace
+  //wrap handle with a custom link and ...
+  //push to backing store
   
-    if (gearman_failed(gearman_job_send_data(job, &result[0], workload_size)))
+    if (gearman_failed(gearman_job_send_data(job, "true", strlen("true"))))
     {
       return GEARMAN_ERROR;
     }
@@ -80,6 +92,7 @@ gearman_return_t DistSCM::worker_function(gearman_job_st *job, void *context)
 
 const std::string& DistSCM::slave_mode(const std::string& ip_string,const std::string& workerID)
 {
+	AtomSpace* atoms_ptr=SchemeSmob::ss_get_env_as("set_slave_mode");
 	
     if ((worker= gearman_worker_create(NULL)) == NULL)
     {
@@ -104,7 +117,7 @@ const std::string& DistSCM::slave_mode(const std::string& ip_string,const std::s
                                                     gearman_literal_param("make_call"),
                                                     worker_fn,
                                                     0, 
-                                                    NULL)))
+                                                    atoms_ptr)))
     {
       std::cerr << gearman_worker_error(worker) << std::endl;
       return false_string;
@@ -162,7 +175,7 @@ const std::string& DistSCM::dist_scm(const std::string& scm_string,const std::st
     strcpy(send_str,scm_string.c_str());
     send_len+=scm_string.length()+1;
     boost::uuids::uuid tag=boost::uuids::random_generator()();
-    memcpy(&tag, send_str+(send_len-1), 16);
+    memcpy(send_str+send_len,&tag, 16);
     send_len+=16;
     //send_str = scm string + '\0' + uuid
     result= (char *)gearman_client_do(&client, "make_call", NULL,

@@ -29,6 +29,10 @@
 //taken from InferenceSCM
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
+
+//
+#include <opencog/atomspace/Handle.h>
+
 namespace opencog {
 
 class DistSCM 
