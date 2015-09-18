@@ -273,7 +273,7 @@ void opencog::global_python_initialize()
     if (already_initialized) {
         return;
         throw opencog::RuntimeException(TRACE_INFO,
-                "Python initializer global_python_init() called twice.");
+            "Python initializer global_python_init() called twice.");
     }
 
     // Remember this initialization.
@@ -345,8 +345,8 @@ PythonEval::PythonEval(AtomSpace* atomspace)
 {
     // Check that this is the first and only PythonEval object.
     if (singletonInstance) {
-        throw (RuntimeException(TRACE_INFO,
-                "Can't create more than one PythonEval singleton instance!"));
+        throw RuntimeException(TRACE_INFO,
+            "Can't create more than one PythonEval singleton instance!");
     }
 
     // Remember our atomspace.
@@ -687,8 +687,9 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
     if (!pyModule) {
         PyGILState_Release(gstate);
         logger().error("Python module for '%s' not found!", moduleFunction.c_str());
-        throw (RuntimeException(TRACE_INFO, "Python module for '%s' not found!",
-                moduleFunction.c_str()));
+        throw RuntimeException(TRACE_INFO,
+            "Python module for '%s' not found!",
+            moduleFunction.c_str());
     }
 
     // Get a reference to the user function.
@@ -701,9 +702,9 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
     // If we can't find that function then throw an exception.
     if (!pyUserFunc) {
         PyGILState_Release(gstate);
-        logger().error("Python function '%s' not found!", moduleFunction.c_str());
-        throw (RuntimeException(TRACE_INFO, "Python function '%s' not found!",
-                moduleFunction.c_str()));
+        throw RuntimeException(TRACE_INFO,
+            "Python function '%s' not found!",
+            moduleFunction.c_str());
     }
 
     // Promote the borrowed reference for pyUserFunc since it will
@@ -714,19 +715,17 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
     if (!PyCallable_Check(pyUserFunc)) {
         Py_DECREF(pyUserFunc);
         PyGILState_Release(gstate);
-        logger().error("Python user function '%s' not callable!",
-                moduleFunction.c_str());
-        throw (RuntimeException(TRACE_INFO,
-            "Python function '%s' not callable!", moduleFunction.c_str()));
+        throw RuntimeException(TRACE_INFO,
+            "Python function '%s' not callable!", moduleFunction.c_str());
     }
 
     // Get the expected argument count.
     int expectedArgumentCount = this->argument_count(pyUserFunc);
     if (expectedArgumentCount == MISSING_FUNC_CODE) {
         PyGILState_Release(gstate);
-        throw (RuntimeException(TRACE_INFO,
+        throw RuntimeException(TRACE_INFO,
             "Python function '%s' error missing 'func_code'!",
-            moduleFunction.c_str()));
+            moduleFunction.c_str());
     }
 
     // Get the actual argument count, passed in the ListLink.
@@ -741,11 +740,10 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
     // Now make sure the expected count matches the actual argument count.
     if (expectedArgumentCount != actualArgumentCount) {
         PyGILState_Release(gstate);
-        throw (RuntimeException(TRACE_INFO,
+        throw RuntimeException(TRACE_INFO,
             "Python function '%s' which expects '%d arguments,"
             " called with %d arguments!", moduleFunction.c_str(),
-            expectedArgumentCount, actualArgumentCount
-            ));
+            expectedArgumentCount, actualArgumentCount);
     }
 
     // Create the Python tuple for the function call with python
@@ -839,7 +837,7 @@ Handle PythonEval::apply(AtomSpace* as, const std::string& func, Handle varargs)
     } else {
 
         throw RuntimeException(TRACE_INFO,
-                "Python function '%s' did not return Atom!", func.c_str());
+            "Python function '%s' did not return Atom!", func.c_str());
     }
 
     return Handle(uuid);
@@ -858,11 +856,10 @@ TruthValuePtr PythonEval::apply_tv(AtomSpace *as, const std::string& func, Handl
     PyObject *pyTruthValue = call_user_function(func, varargs);
 
     // If we got a non-null truth value there were no errors.
-    if (NULL == pyTruthValue) {
+    if (NULL == pyTruthValue)
         throw RuntimeException(TRACE_INFO,
-                "Python function '%s' did not return TruthValue!",
-                func.c_str());
-    }
+            "Python function '%s' did not return TruthValue!",
+            func.c_str());
 
     // Grab the GIL.
     PyGILState_STATE gstate = PyGILState_Ensure();
@@ -959,13 +956,10 @@ std::string PythonEval::apply_script(const std::string& script)
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
 
-    // If there was an error throw an exception so the user knows the
+    // If there was an error, throw an exception so the user knows the
     // script had a problem.
-    if (errorRunningScript) {
-        logger().warn() << errorString;
-        errorString += "\n";
+    if (errorRunningScript)
         throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
-    }
 
     // printf("Python says that: %s\n", result.c_str());
     return result;
@@ -1264,7 +1258,7 @@ wait_for_more:
 
 std::string PythonEval::poll_result()
 {
-	std::string r = _result;
-	_result.clear();
-	return r;
+    std::string r = _result;
+    _result.clear();
+    return r;
 }
