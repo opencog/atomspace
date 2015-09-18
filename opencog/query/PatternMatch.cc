@@ -32,6 +32,7 @@
 #include "PatternMatch.h"
 #include "PatternMatchEngine.h"
 #include "PatternMatchCallback.h"
+#include "DefaultPatternMatchCB.h"
 
 using namespace opencog;
 
@@ -378,13 +379,28 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	{
 		dbgprt("BEGIN COMPONENT GROUNDING %zu of %zu: ======================\n",
 		       i + 1, _num_comps);
+
+		Pattern pat = PatternLinkCast(_component_patterns.at(i))->get_pattern();
+		bool is_pure_optional = false;
+		if (pat.mandatory.size() == 0 and pat.optionals.size() > 0)
+			is_pure_optional = true;
+
 		// Pass through the callbacks, collect up answers.
 		PMCGroundings gcb(pmcb);
 		PatternLinkPtr clp(PatternLinkCast(_component_patterns.at(i)));
 		clp->satisfy(gcb);
 
-		comp_var_gnds.push_back(gcb._var_groundings);
-		comp_term_gnds.push_back(gcb._term_groundings);
+		if (is_pure_optional)
+		{
+			DefaultPatternMatchCB* dpmcb = dynamic_cast<DefaultPatternMatchCB*>(&pmcb);
+			if (dpmcb->optionals_present()) return false;
+		}
+
+		if (0 < gcb._var_groundings.size() and 0 < gcb._term_groundings.size())
+		{
+			comp_var_gnds.push_back(gcb._var_groundings);
+			comp_term_gnds.push_back(gcb._term_groundings);
+		}
 	}
 
 	// And now, try grounding each of the virtual clauses.
