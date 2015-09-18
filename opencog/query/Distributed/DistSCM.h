@@ -33,6 +33,9 @@
 //
 #include <opencog/atomspace/Handle.h>
 
+
+//(use-modules (opencog gearman))
+//(set-slave-mode "mapster-ip" "worker1")
 namespace opencog {
 
 class DistSCM 

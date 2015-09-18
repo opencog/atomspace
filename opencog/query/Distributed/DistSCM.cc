@@ -21,6 +21,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+ 
 #define MAX_SCM_CODE_STRING 5000
 #include "DistSCM.h"
 #include <boost/uuid/uuid.hpp>
