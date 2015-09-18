@@ -785,7 +785,7 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
         // Construct the error message and throw an exception.
         this->build_python_error_message(moduleFunction.c_str(), errorString);
         PyGILState_Release(gstate);
-        throw RuntimeException(TRACE_INFO, errorString.c_str());
+        throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
 
         // PyErr_Occurred returns a borrowed reference, so don't do this:
         // Py_DECREF(pyError);
@@ -964,7 +964,7 @@ std::string PythonEval::apply_script(const std::string& script)
     if (errorRunningScript) {
         logger().warn() << errorString;
         errorString += "\n";
-        throw (RuntimeException(TRACE_INFO, errorString.c_str()));
+        throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
     }
 
     // printf("Python says that: %s\n", result.c_str());
