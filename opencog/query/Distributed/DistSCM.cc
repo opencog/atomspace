@@ -21,7 +21,10 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#define MAX_SCM_CODE_STRING 5000
 #include "DistSCM.h"
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 using namespace opencog;
 bool DistSCM::master_mode=true;
 DistSCM::DistSCM(void):true_string("true"),false_string("false")
@@ -85,7 +88,7 @@ const std::string& DistSCM::slave_mode(const std::string& ip_string,const std::s
     }
     
     gearman_worker_add_options(worker, GEARMAN_WORKER_GRAB_UNIQ);
-    gearman_worker_set_timeout(worker, 200);//ms
+    gearman_worker_set_timeout(worker, 100);//ms
     if (gearman_failed(gearman_worker_add_server(worker, ip_string.c_str(), GEARMAN_DEFAULT_TCP_PORT)))
     {
       std::cerr << gearman_worker_error(worker) << std::endl;
@@ -121,8 +124,92 @@ const std::string& DistSCM::slave_mode(const std::string& ip_string,const std::s
 	
 	return ip_string;
 }
-const std::string& DistSCM::dist_scm(const std::string& scm_string)
-{
+const std::string& DistSCM::dist_scm(const std::string& scm_string,const std::string& clientID)
+{ //max scheme code = 4900 bytes
+  if (gearman_client_create(&client) == NULL)
+  {
+    std::cerr << "Memory allocation failure on client creation" << std::endl;
+    return false_string;
+  }
+  //
+  int timeout=-1;
+  //
+  if (timeout >= 0)
+  {
+    gearman_client_set_timeout(&client, timeout);
+  }
+
+  gearman_return_t ret= gearman_client_add_server(&client, "localhost", GEARMAN_DEFAULT_TCP_PORT);
+  if (ret != GEARMAN_SUCCESS)
+  {
+    std::cerr<<(gearman_client_error(&client));
+    return false_string;
+  }
+  if (gearman_failed(gearman_client_set_identifier(&client, clientID.c_str(), clientID.length())))
+  {
+    std::cerr<<(gearman_client_error(&client));
+    return false_string;
+  }
+  int exit_code= EXIT_SUCCESS;
+  if (scm_string.length()>MAX_SCM_CODE_STRING)return false_string;
+  int count=1; //if status is to be returned then don't change count on status receive
+  do
+  {
+    size_t result_size;
+    char *result;
+    char send_str[MAX_SCM_CODE_STRING+1+16];
+    unsigned int send_len=0;
+    strcpy(send_str,scm_string.c_str());
+    send_len+=scm_string.length()+1;
+    boost::uuids::uuid tag=boost::uuids::random_generator()();
+    memcpy(&tag, send_str+(send_len-1), 16);
+    send_len+=16;
+    //send_str = scm string + '\0' + uuid
+    result= (char *)gearman_client_do(&client, "make_call", NULL,
+                                      send_str, send_len,
+                                      &result_size, &ret);
+    if (ret == GEARMAN_WORK_DATA)
+    {
+      std::cout.write(result, result_size);
+
+      free(result);
+      continue;
+    }
+    else if (ret == GEARMAN_WORK_STATUS)
+    {
+      uint32_t numerator;
+      uint32_t denominator;
+
+      gearman_client_do_status(&client, &numerator, &denominator);
+      std::clog << "Status: " << numerator << "/" << denominator << std::endl;
+      continue;
+    }
+    else if (ret == GEARMAN_SUCCESS)
+    {
+      std::cout.write(result, result_size);
+      free(result);
+    }
+    else if (ret == GEARMAN_WORK_FAIL)
+    {
+      std::cerr<<("Work failed");
+      exit_code= EXIT_FAILURE;
+      break;
+    }
+    else
+    {
+      std::cerr<<(gearman_client_error(&client));
+      exit_code= EXIT_FAILURE;
+      break;
+    }
+
+    --count;
+
+  } while (count);
+
+  gearman_client_free(&client);
+
+  if (exit_code==EXIT_FAILURE)return false_string;
+	
 	return true_string;
 }
 DistSCM::~DistSCM()

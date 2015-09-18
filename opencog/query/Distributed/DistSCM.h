@@ -41,7 +41,7 @@ private:
 	static bool master_mode;
 	void set_master_mode(void);
 	const std::string& slave_mode(const std::string& ip_string,const std::string& workerID);
-	const std::string& dist_scm(const std::string& scm_string);
+	const std::string& dist_scm(const std::string& scm_string,const std::string& clientID);
 	const std::string true_string, false_string;
 	std::string master_ip;
 
