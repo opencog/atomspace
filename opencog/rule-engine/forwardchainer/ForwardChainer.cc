@@ -427,6 +427,107 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
 }
 
 /**
+ * Derives new rules by replacing variables that are unfiable in @param target
+ * with source.The rule handles are not added to any atomspace.
+ *
+ * @param  source    A source atom that will be matched with the target.
+ * @param  target    An implicant containing variable to be grounded form source.
+ * @param  rule      A rule object that contains @param target in its implicant. *
+ *
+ * @return  A HandleSeq of derived rule handles.
+ */
+HandleSeq ForwardChainer::derive_rules(Handle source, Handle target,
+                                               Rule* rule)
+{
+    //exceptions
+    if (not is_valid_implicant(target))
+        return {};
+
+    HandleSeq derived_rules = { };
+
+    AtomSpace temp_pm_as;
+    Handle hcpy = temp_pm_as.add_atom(target);
+    Handle implicant_vardecl = temp_pm_as.add_atom(
+            gen_sub_varlist(target, rule->get_vardecl()));
+    Handle sourcecpy = temp_pm_as.add_atom(source);
+
+    Handle h = temp_pm_as.add_link(BIND_LINK,HandleSeq { implicant_vardecl, hcpy, hcpy });
+    BindLinkPtr bl = BindLinkCast(h);
+
+    VarGroundingPMCB gcb(&temp_pm_as);
+    gcb.implicand = bl->get_implicand();
+
+    bl->imply(gcb);
+
+    auto del_by_value =
+            [] (std::vector<std::map<Handle,Handle>>& vec_map,const Handle& h) {
+                for (auto& map: vec_map)
+                for(auto& it:map) {if (it.second == h) map.erase(it.first);}
+            };
+
+    //We don't want VariableList atoms to ground free-vars.
+    del_by_value(gcb.term_groundings, implicant_vardecl);
+    del_by_value(gcb.var_groundings, implicant_vardecl);
+
+    FindAtoms fv(VARIABLE_NODE);
+    for (const auto& termg_map : gcb.term_groundings) {
+        for (const auto& it : termg_map) {
+            if (it.second == sourcecpy) {
+
+                fv.search_set(it.first);
+
+                Handle rhandle = rule->get_handle();
+                HandleSeq new_candidate_rules = substitute_rule_part(
+                        temp_pm_as, temp_pm_as.add_atom(rhandle), fv.varset,
+                        gcb.var_groundings);
+
+                for (Handle nr : new_candidate_rules) {
+                    if (find(derived_rules.begin(), derived_rules.end(), nr) == derived_rules.end()
+                            and nr != rhandle) {
+                        derived_rules.push_back(nr);
+                    }
+                }
+            }
+        }
+    }
+
+    return derived_rules;
+}
+
+/**
+ * Derives new rules by replacing variables in @param rule that are
+ * unifiable with source.
+ *
+ * @param  source    A source atom that will be matched with the rule.
+ * @param  rule      A rule object
+ * @param  subatomic A flag that sets subatom unification.
+ *
+ * @return  A HandleSeq of derived rule handles.
+ */
+HandleSeq ForwardChainer::derive_rules(Handle source, Rule* rule,
+                                               bool subatomic/*=false*/)
+{
+    HandleSeq derived_rules = { };
+
+    auto add_result = [&derived_rules] (HandleSeq result) {
+        derived_rules.insert(derived_rules.end(), result.begin(),
+                result.end());
+    };
+
+    if (subatomic) {
+        for (Handle target : get_subatoms(rule))
+            add_result(derive_rules(source, target, rule));
+
+    } else {
+        for (Handle target : rule->get_implicant_seq())
+            add_result(derive_rules(source, target, rule));
+
+    }
+
+    return derived_rules;
+}
+
+/**
  * Checks whether an atom can be used to generate a bindLink or not.
  *
  * @param h  The atom handle to be validated.
