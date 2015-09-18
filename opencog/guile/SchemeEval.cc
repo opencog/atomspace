@@ -882,7 +882,7 @@ Handle SchemeEval::eval_h(const std::string &expr)
 
 	// Convert evaluation errors into C++ exceptions.
 	if (eval_error())
-		throw RuntimeException(TRACE_INFO, error_msg.c_str());
+		throw RuntimeException(TRACE_INFO, "%s", error_msg.c_str());
 
 	return hargs;
 }
@@ -932,7 +932,7 @@ TruthValuePtr SchemeEval::eval_tv(const std::string &expr)
 
 	// Convert evaluation errors into C++ exceptions.
 	if (eval_error())
-		throw RuntimeException(TRACE_INFO, error_msg.c_str());
+		throw RuntimeException(TRACE_INFO, "%s", error_msg.c_str());
 
 	return tvp;
 }
@@ -983,7 +983,7 @@ Handle SchemeEval::apply(const std::string &func, Handle varargs)
 	thread_unlock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 	if (eval_error())
-		throw RuntimeException(TRACE_INFO, error_msg.c_str());
+		throw RuntimeException(TRACE_INFO, "%s", error_msg.c_str());
 
 	return hargs;
 }
