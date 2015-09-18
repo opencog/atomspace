@@ -46,7 +46,7 @@ void DistSCM::init_in_module(void* data)
 }
 void DistSCM::init(void)
 {
-#ifdef HAVE_GUILE
+//#ifdef HAVE_GUILE
 	define_scheme_primitive("set-slave-mode", &DistSCM::slave_mode,
                             this, "dist-gearman");
                             //if master ip is empty string then make this a slave
@@ -56,7 +56,7 @@ void DistSCM::init(void)
     define_scheme_primitive("dist-run-scm", &DistSCM::dist_scm,
                             this, "dist-gearman");
     //there will be a slave-run-scm non scheme primitive gearman worker active if is set as a slave
-#endif
+//#endif
 }
 void DistSCM::set_master_mode(void)
 {
@@ -101,7 +101,7 @@ const std::string& DistSCM::slave_mode(const std::string& ip_string,const std::s
     }
     
     gearman_worker_add_options(worker, GEARMAN_WORKER_GRAB_UNIQ);
-    gearman_worker_set_timeout(worker, 100);//ms
+    //gearman_worker_set_timeout(worker, 100);//ms
     if (gearman_failed(gearman_worker_add_server(worker, ip_string.c_str(), GEARMAN_DEFAULT_TCP_PORT)))
     {
       std::cerr << gearman_worker_error(worker) << std::endl;
@@ -122,13 +122,13 @@ const std::string& DistSCM::slave_mode(const std::string& ip_string,const std::s
       std::cerr << gearman_worker_error(worker) << std::endl;
       return false_string;
     }
-
+	gearman_worker_set_timeout(worker, 100);
 	master_mode=false;
     while(!(master_mode)){
     if (gearman_failed(gearman_worker_work(worker)))
     {
-      std::cerr << gearman_worker_error(worker) << std::endl;
-      return false_string;
+      //std::cerr << gearman_worker_error(worker) << std::endl;
+      //return false_string;
     }
 	}
   
