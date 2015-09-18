@@ -77,30 +77,39 @@ gearman_return_t DistSCM::worker_function(gearman_job_st *job, void *context)
   ////unsigned int slen=strlen(scm_str);
   ////char tag[16];
   ////memcpy(&tag,scm_str+slen+1, 16);
+  std::cout<<"atomspace "<<((AtomSpace*)context)<<"\n";
+
   SchemeEval evl((AtomSpace*)context);
   evl.init_scheme();
+  std::cout<<scm_str<<"\n";
   Handle result=evl.eval_h(scm_str);//can we check if handle is valid? how to get current atomspace
   //create a link to point to handle
   UUID vl=result.value();
+  if (Handle::UNDEFINED==result)std::cout<<"invalid handle \n";
   
   evl.eval("(sql-store)");
+  
+  
   ////SQLPersistSCM bs((AtomSpace*)context);
   ////bs.do_open("mycogdata","opencog_user","cheese");
   ////bs.do_store();
   //wrap handle with a custom link and ...
   //push to backing store
-  
+  //std::cout<<"\n"<<vl<<" "<<sizeof(vl)<<" .. "<<Handle::INVALID_UUID<<"\n";
     if (gearman_failed(gearman_job_send_data(job, &vl, sizeof(vl))))
     {
+		std::cout<<"error occured";
       return GEARMAN_ERROR;
     }
-   if (vl==Handle::INVALID_UUID)return GEARMAN_ERROR;
+   std::cout<<"gearman data sent..."<<"\n";
+   ///if (vl==Handle::INVALID_UUID)return GEARMAN_ERROR;
    return GEARMAN_SUCCESS;
 }
 
 const std::string& DistSCM::slave_mode(const std::string& ip_string,const std::string& workerID)
 {
-	AtomSpace* atoms_ptr=SchemeSmob::ss_get_env_as("set_slave_mode");
+	AtomSpace* atoms_ptr=SchemeSmob::ss_get_env_as("set-slave-mode");
+	std::cout<<"atomspace "<<atoms_ptr<<"\n";
 	
     if ((worker= gearman_worker_create(NULL)) == NULL)
     {
@@ -135,9 +144,10 @@ const std::string& DistSCM::slave_mode(const std::string& ip_string,const std::s
     while(!(master_mode)){
     if (gearman_failed(gearman_worker_work(worker)))
     {
-      //std::cerr << gearman_worker_error(worker) << std::endl;
-      //return false_string;
+      ////std::cerr << gearman_worker_error(worker) << std::endl;//comment these
+      ////return false_string;//when set with time out
     }
+    //gearman_job_free_all(worker);//causes segfault
 	}
   
 	//master_ip=ip_string;
