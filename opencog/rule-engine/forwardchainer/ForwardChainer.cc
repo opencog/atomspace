@@ -212,28 +212,23 @@ void ForwardChainer::do_pm(const Handle& hsource,
         _fcmem.add_rules_product(0, impl.get_result_list());
     }
 }
+
 /**
- * Invokes pattern matcher using each rule declared in the configuration file.
+ * Applies all rules in the rule base.
+ *
+ * @param search_focus_set flag for searching focus set.
  */
-void ForwardChainer::do_pm()
+void ForwardChainer::apply_all_rules(bool search_focus_set /*= false*/)
 {
-    //! Do pattern matching using the rules declared in the declaration file
-    _log->info("Forward chaining on the rule-based system %s "
-               "declared in %s", _rbs->toString().c_str());
     vector<Rule*> rules = _fcmem.get_rules();
+
     for (Rule* rule : rules) {
-        _log->info("Applying rule %s on ", rule->get_name().c_str());
-        BindLinkPtr bl(BindLinkCast(rule->get_handle()));
-        DefaultImplicator impl(&_as);
-        impl.implicand = bl->get_implicand();
-        bl->imply(impl);
         _fcmem.set_cur_rule(rule);
+        HandleSeq hs = apply_rule(rule->get_handle(), search_focus_set);
 
-        _log->info("OUTPUTS");
-        for (auto h : impl.get_result_list())
-            _log->info("%s", h->toString().c_str());
-
-        _fcmem.add_rules_product(0, impl.get_result_list());
+        //Update
+        _fcmem.add_rules_product(0, hs);
+        _fcmem.update_potential_sources(hs);
     }
 
 }
