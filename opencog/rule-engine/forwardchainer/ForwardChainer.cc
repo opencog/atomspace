@@ -1,7 +1,7 @@
 /*
  * ForwardChainer.cc
  *
- * Copyright (C) 2014,2015 Misgana Bayetta
+ * Copyright (C) 2014,2015
  *
  * Author: Misgana Bayetta <misgana.bayetta@gmail.com>
  *
@@ -22,20 +22,26 @@
  */
 
 #include <opencog/util/Logger.h>
+
+#include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/PatternLink.h>
 #include <opencog/atomutils/AtomUtils.h>
+#include <opencog/atomutils/FindUtils.h>
+#include <opencog/atomutils/Substitutor.h>
+#include <opencog/query/BindLinkAPI.h>
 #include <opencog/query/DefaultImplicator.h>
 #include <opencog/rule-engine/Rule.h>
-#include <opencog/atoms/bind/BindLink.h>
+
 #include "ForwardChainer.h"
-#include "ForwardChainerCallBack.h"
+#include "FocusSetPMCB.h"
+#include "VarGroundingPMCB.h"
 
 using namespace opencog;
 
 ForwardChainer::ForwardChainer(AtomSpace& as, Handle rbs) :
-	_as(as), _rec(_as), _rbs(rbs), _configReader(as, rbs), _fcmem(&as)
+	_as(as), _rec(as), _rbs(rbs), _configReader(as, rbs), _fcmem(&as)
 {
-    init();
+   init();
 }
 
 void ForwardChainer::init()
@@ -43,6 +49,8 @@ void ForwardChainer::init()
     _fcmem.set_search_in_af(_configReader.get_attention_allocation());
     _fcmem.set_rules(_configReader.get_rules());
     _fcmem.set_cur_rule(nullptr);
+    
+    _ts_mode = TV_FITNESS_BASED;
 
     // Provide a logger
     _log = NULL;
@@ -64,7 +72,7 @@ Logger* ForwardChainer::getLogger()
 /**
  * Does one step forward chaining
  *
- * @param fcb a concrete implementation of of ForwardChainerCallBack class 
+ * @return An unordered sets of result of applying a particular selected rule.
  */
 UnorderedHandleSet ForwardChainer::do_step(bool search_focus_set/* = false*/)
 {
@@ -171,14 +179,13 @@ void ForwardChainer::do_chain(Handle hsource, HandleSeq focus_set)
 
 /**
  * Does pattern matching for a variable containing query.
- * @param source a variable containing handle passed as an input to the pattern matcher
- * @param var_nodes the VariableNodes in @param hsource
- * @param fcb a forward chainer callback implementation used here only for choosing rules
- * that contain @param hsource in their implicant
+ *
+ * @param source    A variable containing handle passed as an input to the pattern matcher
+ * @param var_nodes The VariableNodes in @param hsource
+ *
  */
 void ForwardChainer::do_pm(const Handle& hsource,
-                           const UnorderedHandleSet& var_nodes,
-                           ForwardChainerCallBack& fcb)
+                           const UnorderedHandleSet& var_nodes)
 {
     DefaultImplicator impl(&_as);
     impl.implicand = hsource;
@@ -202,7 +209,7 @@ void ForwardChainer::do_pm(const Handle& hsource,
     _as.remove_atom(hclause);
 
     //!Additionally, find applicable rules and apply.
-    vector<Rule*> rules = fcb.choose_rules(_fcmem);
+    vector<Rule*> rules = {choose_rule(hsource,true)};
     for (Rule* rule : rules) {
         BindLinkPtr bl(BindLinkCast(rule->get_handle()));
         DefaultImplicator impl(&_as);
