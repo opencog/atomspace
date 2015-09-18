@@ -48,7 +48,7 @@ void PatternLink::common_init(void)
 		return;
 	}
 
-	validate_clauses(_varlist.varset, _pat.clauses);
+	validate_clauses(_varlist.varset, _pat.clauses, _pat.constants);
 	extract_optionals(_varlist.varset, _pat.clauses);
 
 	// Locate the black-box clauses.
@@ -379,7 +379,8 @@ void PatternLink::locate_defines(HandleSeq& clauses)
  * that are constants and can be trivially discarded.
  */
 void PatternLink::validate_clauses(std::set<Handle>& vars,
-                                   HandleSeq& clauses)
+                                   HandleSeq& clauses,
+                                   HandleSeq& constants)
 
 {
 	// The Fuzzy matcher does some strange things: it declares no
@@ -394,7 +395,7 @@ void PatternLink::validate_clauses(std::set<Handle>& vars,
 		// The presence of constant clauses will mess up the current
 		// pattern matcher.  Constant clauses are "trivial" to match,
 		// and so its pointless to even send them through the system.
-		bool bogus = remove_constants(vars, clauses);
+		bool bogus = remove_constants(vars, clauses, constants);
 		if (bogus)
 		{
 			logger().warn("%s: Constant clauses removed from pattern",
