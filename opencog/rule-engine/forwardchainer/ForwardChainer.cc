@@ -425,6 +425,56 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
 
     return result;
 }
+
+/**
+ * Checks whether an atom can be used to generate a bindLink or not.
+ *
+ * @param h  The atom handle to be validated.
+ *
+ * @return   A boolean result of the check.
+ */
+bool ForwardChainer::is_valid_implicant(const Handle& h)
+{
+    FindAtoms fv(VARIABLE_NODE);
+            fv.search_set(h);
+
+    bool is_valid = (h->getType() != NOT_LINK)   and
+                    (not classserver().isA(h->getType(),
+                                          VIRTUAL_LINK))
+                    and
+                    (not fv.varset.empty());
+
+    return is_valid;
+}
+
+void ForwardChainer::validate(Handle hsource, HandleSeq hfocus_set)
+{
+    if (hsource == Handle::UNDEFINED)
+        throw RuntimeException(TRACE_INFO, "ForwardChainer - Invalid source.");
+   //Any other validation here
+}
+
+/**
+ * Gets all unique atoms of in the implicant list of @param r.
+ *
+ * @param r  A rule object
+ *
+ * @return   An unoderedHandleSet of of all unique atoms in the implicant.
+ */
+UnorderedHandleSet ForwardChainer::get_subatoms(Rule *rule)
+{
+    UnorderedHandleSet output_expanded;
+
+    HandleSeq impl_members = rule->get_implicant_seq();
+    for (Handle h : impl_members) {
+        UnorderedHandleSet hs = get_all_unique_atoms(h);
+        hs.erase(h); //Already tried to unify this.
+        output_expanded.insert(hs.begin(), hs.end());
+    }
+
+    return output_expanded;
+}
+
 /**
  * Derives new rules from @param hrule by replacing variables
  * with their groundings.
