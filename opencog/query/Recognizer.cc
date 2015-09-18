@@ -40,7 +40,7 @@ printf("duuuude ola!!\n");
 	return false;
 }
 
-Handle recognize(AtomSpace* as, const Handle& hlink)
+Handle opencog::recognize(AtomSpace* as, const Handle& hlink)
 {
 	PatternLinkPtr bl(PatternLinkCast(hlink));
 	if (NULL == bl)
@@ -49,5 +49,5 @@ Handle recognize(AtomSpace* as, const Handle& hlink)
 	Recognizer reco(as);
 	bl->satisfy(reco);
 
-	return Handle::UNDEFINED;
+	return Handle(createLink(LIST_LINK, HandleSeq()));
 }
