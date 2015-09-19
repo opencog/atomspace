@@ -13,8 +13,7 @@ TARGET_LINK_LIBRARIES(haskell-atomspace
 
 ADD_CUSTOM_TARGET(haskell-atomspace-lib ALL
     DEPENDS haskell-atomspace
-    COMMAND stack build --extra-lib-dirs=${CMAKE_CURRENT_BINARY_DIR}
-    COMMAND ${CMAKE_COMMAND} -DBIN_DIR=${CMAKE_CURRENT_BINARY_DIR} -P setupghci.cmake
+    COMMAND sh build.sh ${CMAKE_CURRENT_BINARY_DIR}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Building Haskell bindings."
 )
