@@ -134,8 +134,10 @@ public:
      * because thread-safe locking required in the gets. */
     Link(Link &l)
         : Atom(l.getType(),
-               l.getTruthValue()->clone(),
-               l.getAttentionValue()->clone())
+               ({ TruthValuePtr tv(l.getTruthValue());
+                  tv->isDefinedTV() ? tv : tv->clone(); }),
+               ({ AttentionValuePtr av(l.getAttentionValue());
+                  av->isDefaultAV() ? av : av->clone(); }))
     {
         init(l.getOutgoingSet());
     }
