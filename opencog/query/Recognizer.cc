@@ -1,9 +1,30 @@
 /*
- * Recognizer experiment
+ * Recognizer.cc
+ *
+ * Copyright (C) 2015 Linas Vepstas
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the
+ * exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef _OPENCOG_RECOGNIZER_H
 #define _OPENCOG_RECOGNIZER_H
+
+#include <set>
 
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/atoms/bind/PatternLink.h>
@@ -12,6 +33,25 @@
 
 namespace opencog {
 
+/**
+ * Very rough, crude, experimental prototype for the idea that
+ * pattern recognition is the dual of pattern matching.
+ * That is, rather than using one query pattern to search a large
+ * collection of data, this does the opposite: given a single peice of
+ * data, it searches for all rules/queries which apply to it.
+ *
+ * The file /examples/aiml/recog.scm provides a very simple example.
+ * The implementation here is very minimalistic, and does many things
+ * wrong:
+ * -- it fails to identify the actual GetLink/BindLink that was matched.
+ * -- it fails to perform any type-checking to make sure the variable
+ *    constraints are satisfied.
+ * -- AIML wants a left-to-right traversal, this does an omni-
+ *    directional exploration. (which is OK, but is not how AIML is
+ *    defined...)
+ * -- This hasn't been thought through thoroughly There are almost
+ *    surely some weird gotcha's.
+ */
 class Recognizer :
    public virtual DefaultPatternMatchCB
 {
@@ -24,10 +64,11 @@ class Recognizer :
 		bool do_search(PatternMatchEngine*, const Handle&);
 
 	public:
+		std::set<Handle> _rules;
+
 		Recognizer(AtomSpace* as) :
 			DefaultPatternMatchCB(as) {}
 
-		virtual bool initiate_search(PatternMatchEngine*);
 		virtual void set_pattern(const Variables& vars,
 										 const Pattern& pat)
 		{
@@ -35,6 +76,8 @@ class Recognizer :
 			DefaultPatternMatchCB::set_pattern(vars, pat);
 		}
 
+		virtual bool initiate_search(PatternMatchEngine*);
+		virtual bool node_match(const Handle&, const Handle&);
 		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
 		                       const std::map<Handle, Handle> &term_soln);
 };
@@ -101,10 +144,19 @@ bool Recognizer::initiate_search(PatternMatchEngine* pme)
 	return false;
 }
 
+bool Recognizer::node_match(const Handle& npat_h, const Handle& nsoln_h)
+{
+	if (npat_h == nsoln_h) return true;
+	if (VARIABLE_NODE == nsoln_h->getType()) return true;
+	return false;
+}
+
 bool Recognizer::grounding(const std::map<Handle, Handle> &var_soln,
                            const std::map<Handle, Handle> &term_soln)
 {
-printf("duuuude ola!!\n");
+	Handle rule = term_soln.at(_root);
+
+	_rules.insert(rule);
 
 	// Look for more groundings.
 	return false;
@@ -119,5 +171,8 @@ Handle opencog::recognize(AtomSpace* as, const Handle& hlink)
 	Recognizer reco(as);
 	bl->satisfy(reco);
 
-	return Handle(createLink(LIST_LINK, HandleSeq()));
+	HandleSeq hs;
+	for (const Handle& h : reco._rules) hs.push_back(h);
+
+	return Handle(createLink(SET_LINK, hs));
 }
