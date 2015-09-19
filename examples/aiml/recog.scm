@@ -35,29 +35,67 @@
 (define data
 	;; A pretend "sentence" that is the "input".
 	(PatternLink
-		(ListLink
-			(ConceptNode "I")
-			(ConceptNode "love")
-			(ConceptNode "you"))))
+		(BindLink
+			(ListLink
+				(ConceptNode "I")
+				(ConceptNode "love")
+				(ConceptNode "you"))
+			(VariableNode "$impl"))))
 
 ;; Perform the search.
 (cog-recognize data)
 
-;; At this time, the above will return this:
+;; At this time, the above will return the below:
+;; The BindLinks are NOT evaluated!  To evaluate, see bottom
+
 (SetLink
-   (ListLink
-      (ConceptNode "I")
-      (VariableNode "$star")
-      (ConceptNode "you")
-   )
+	(BindLink
+		(ListLink
+			(ConceptNode "I")
+			(VariableNode "$star")
+			(ConceptNode "you")
+		)
+		(ListLink
+			(ConceptNode "I")
+			(VariableNode "$star")
+			(ConceptNode "you")
+			(ConceptNode "too")
+		)
+	)
+	(BindLink
+		(ListLink
+			(ConceptNode "I")
+			(ConceptNode "love")
+			(VariableNode "$star")
+		)
+		(ListLink
+			(ConceptNode "I")
+			(ConceptNode "like")
+			(VariableNode "$star")
+			(ConceptNode "a")
+			(ConceptNode "lot!")
+		)
+	)
+)
+
+;; Evaluate each of the bind links that were found.
+(define ruleset (cog-recognize data))
+
+(map cog-bind (cog-outgoing-set ruleset))
+
+; Which returns the below:
+((SetLink
    (ListLink
       (ConceptNode "I")
       (ConceptNode "love")
-      (VariableNode "$star")
-   )
-)
+      (ConceptNode "you")
+      (ConceptNode "too")))
+ (SetLink
+   (ListLink
+      (ConceptNode "I")
+      (ConceptNode "like")
+      (ConceptNode "you")
+      (ConceptNode "a")
+      (ConceptNode "lot!"))))
 
-;; It is not directy useful, because the rest of the BindLink
-;; involved is not located and specified.  But it illustrates
-;; the general idea.
-;;
+
