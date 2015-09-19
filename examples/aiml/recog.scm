@@ -5,13 +5,10 @@
 ; is the dual of pattern matching.  There are many things wrong
 ; with the below; its just a sketch.
 
-(define data
-	(PatternLink
-		(ListLink
-			(ConceptNode "I")
-			(ConceptNode "love")
-			(ConceptNode "you"))))
-
+; Two different pseudo-AIML rules:
+;    I * you   --> I * you too
+;    I love *  --> I like * a lot!
+;
 (BindLink
 	(ListLink
 		(ConceptNode "I")
@@ -35,6 +32,15 @@
 		(ConceptNode "a")
 		(ConceptNode "lot!")))
 
+(define data
+	;; A pretend "sentence" that is the "input".
+	(PatternLink
+		(ListLink
+			(ConceptNode "I")
+			(ConceptNode "love")
+			(ConceptNode "you"))))
+
+;; Perform the search.
 (cog-recognize data)
 
 ;; At this time, the above will return this:
