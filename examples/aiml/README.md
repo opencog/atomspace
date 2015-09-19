@@ -2,15 +2,15 @@
 AIML in the AtomSpace
 ---------------------
 
-=Status
+# Status
 Under development, very incomplete.
 
-=Goal
+# Goal
 Map AIML expressions to equivalent atomspace graphs, in such a
 way that the OpenCog pattern matcher can perform all of the same
 funcitons that AIML currently performs.
 
-=Lightning reivew of AIML
+# Lightning reivew of AIML
 Some example sentences.
 
 ```
@@ -39,7 +39,7 @@ Future, not a current part of AIML:
 (F2)  Do you like <get name="topic"/> ?
 ```
 
-==Notes
+## Notes
 * Notice that the pattern match of R3 takes precendence over R2.
 * srai == sent the result back through.
 * that == what the robot said last time. (just a string)
@@ -60,7 +60,7 @@ Future, not a current part of AIML:
   2-word topic.  (TBD XXX what about N words ??)
 * (R14) the wild-card match limited to one of a set.
 
-=Pattern Recognition
+# Pattern Recognition
 
 Implementing AIML efficiently in the atomspace requires that the pattern
 matcher be run "in reverse": rather than applying one query to a
@@ -72,12 +72,12 @@ querying.  This means that the traditional link types BindLink and
 SatisfactionLink are not appropriate; instead, we use the PatternLink
 to specify the AIML patterns.
 
-== Globbing
+## Globbing
 
 The default pattern matcher does not glob.
 
 
-=OpenCog equivalents
+# OpenCog equivalents
 * R1 example.
 
 the below won't be efficient/work well as written, due to globbing ...
