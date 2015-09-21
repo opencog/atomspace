@@ -181,6 +181,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 	// use extract_optionals because opts have been stripped already.
 
 	_pat.cnf_clauses = compo;
+	std::set<Handle> discon_opts = opts;  // The disconnected optionals
 	for (const Handle& h : compo)
 	{
 		bool h_is_opt = false;
@@ -191,6 +192,8 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 				_pat.optionals.insert(opt);
 				_pat.clauses.push_back(opt);
 				h_is_opt = true;
+				// Remove it from discon_opts as it exists in some other clause
+				discon_opts.erase(discon_opts.find(opt), discon_opts.end());
 				break;
 			}
 		}
@@ -200,6 +203,11 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 			_pat.mandatory.push_back(h);
 		}
 	}
+
+	// If there are any disconnected optionals, consider each of them as an
+	// optional for all mandatory clauses in the pattern
+	_pat.optionals.insert(discon_opts.begin(), discon_opts.end());
+
 	locate_defines(_pat.clauses);
 
 	// The rest is easy: the evaluatables and the connection map
