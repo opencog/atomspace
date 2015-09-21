@@ -94,3 +94,49 @@ bool TruthValue::isDefaultTV() const
     }
     return false;
 }
+
+bool TruthValue::isDefinedTV() const
+{
+    TruthValuePtr dtv = DEFAULT_TV();
+    if (dtv.get() == this) return true;
+    if (getType() == dtv->getType() and
+        getMean() == dtv->getMean() and
+        getCount() == dtv->getCount())
+    {
+        return true;
+    }
+
+    dtv = TRUE_TV();
+    if (dtv.get() == this) return true;
+
+    dtv = FALSE_TV();
+    if (dtv.get() == this) return true;
+
+    dtv = TRIVIAL_TV();
+    if (dtv.get() == this) return true;
+
+    dtv = TRUE_TV();
+    if (getType() == dtv->getType() and
+        getMean() == dtv->getMean() and
+        getCount() == dtv->getCount())
+    {
+        return true;
+    }
+
+    dtv = FALSE_TV();
+    if (getType() == dtv->getType() and
+        getMean() == dtv->getMean() and
+        getCount() == dtv->getCount())
+    {
+        return true;
+    }
+
+    dtv = TRIVIAL_TV();
+    if (getType() == dtv->getType() and
+        getMean() == dtv->getMean() and
+        getCount() == dtv->getCount())
+    {
+        return true;
+    }
+    return false;
+}

@@ -39,7 +39,8 @@ namespace opencog {
 // Make sure that variables can be found in the clauses.
 // See C file for description
 bool remove_constants(const std::set<Handle> &vars,
-                      std::vector<Handle> &clauses);
+                      std::vector<Handle> &clauses,
+                      std::vector<Handle> &constants);
 
 
 // See C file for description
