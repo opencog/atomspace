@@ -390,13 +390,19 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 		PatternLinkPtr clp(PatternLinkCast(_component_patterns.at(i)));
 		clp->satisfy(gcb);
 
+		// Special handling for disconnected pure optionals:
+		// 1) Returns false to end the search if this disconnected pure optional
+		//    is found
+		// 2) Keep the search going without inserting an empty _var_groundings
+		//    nor an empty _term_groundings into comp_var_gnds and comp_term_gnds
+		//    respectively, so that potential solutions for mandatory clauses,
+		//    if any, will get a chance to reach the grounding callback
 		if (is_pure_optional)
 		{
 			DefaultPatternMatchCB* dpmcb = dynamic_cast<DefaultPatternMatchCB*>(&pmcb);
 			if (dpmcb->optionals_present()) return false;
 		}
-
-		if (0 < gcb._var_groundings.size() and 0 < gcb._term_groundings.size())
+		else
 		{
 			comp_var_gnds.push_back(gcb._var_groundings);
 			comp_term_gnds.push_back(gcb._term_groundings);
