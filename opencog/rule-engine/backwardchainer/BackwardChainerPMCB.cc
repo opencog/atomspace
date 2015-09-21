@@ -86,6 +86,7 @@ bool BackwardChainerPMCB::grounding(const std::map<Handle, Handle> &var_soln,
                                const std::map<Handle, Handle> &pred_soln)
 {
 	std::map<Handle, Handle> true_var_soln;
+	std::map<Handle, Handle> true_pred_soln;
 
 	// get rid of non-var mapping
 	for (auto& p : var_soln)
@@ -97,9 +98,15 @@ bool BackwardChainerPMCB::grounding(const std::map<Handle, Handle> &var_soln,
 	if (true_var_soln.size() == 0)
 		return false;
 
+	true_pred_soln = pred_soln;
+
+	// add all the constant clauses into the final pred_soln
+	for (auto& h : _pattern->constants)
+		true_pred_soln[h] = h;
+
 	// store the variable solution
 	var_solns_.push_back(true_var_soln);
-	pred_solns_.push_back(pred_soln);
+	pred_solns_.push_back(true_pred_soln);
 
 	return false;
 }
