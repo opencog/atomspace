@@ -123,25 +123,22 @@ void ForwardChainer::do_chain(Handle hsource, HandleSeq focus_set)
 
     _fcmem.set_focus_set(focus_set);
 
-    HandleSeq init_sources;
+    HandleSeq init_sources = {};
     //Accept set of initial sources wrapped in a SET_LINK
     if(LinkCast(hsource) and hsource->getType() == SET_LINK)
     {
-     init_sources = _as.get_outgoing(hsource);
-
-     //Relex2Logic uses this.TODO make a separate class
-     //to handle this robustly.
-     if(init_sources.empty())
-     {
-         bool search_in_af = not focus_set.empty();
-         apply_all_rules(search_in_af);
-         return;
-     }
-
-    }
-    else
-    {
+        init_sources = _as.get_outgoing(hsource);
+    } else {
         init_sources.push_back(hsource);
+    }
+
+    //Relex2Logic uses this.TODO make a separate class
+    //to handle this robustly.
+    if(init_sources.empty())
+    {
+        bool search_in_af = not focus_set.empty();
+        apply_all_rules(search_in_af);
+        return;
     }
 
     // Variable fulfillment query.
