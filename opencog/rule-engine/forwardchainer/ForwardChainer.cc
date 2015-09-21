@@ -39,9 +39,9 @@
 using namespace opencog;
 
 ForwardChainer::ForwardChainer(AtomSpace& as, Handle rbs) :
-	_as(as), _rec(as), _rbs(rbs), _configReader(as, rbs), _fcmem(&as)
+        _as(as), _rec(as), _rbs(rbs), _configReader(as, rbs), _fcmem(&as)
 {
-   init();
+    init();
 }
 
 void ForwardChainer::init()
@@ -402,7 +402,6 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
 
         _log->debug("Applying rule in focus set %s ",(rhcpy->toShortString()).c_str());
 
-        std::cout << "ATOMSPACE:" << derived_rule_as << std::endl;
         bl->imply(fs_pmcb);
 
         result = fs_pmcb.get_result_list();
