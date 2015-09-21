@@ -64,6 +64,7 @@ void FCMemory::set_source(Handle source)
 {
     _cur_source = source;
     _selected_sources.push_back(_cur_source);
+    update_potential_sources(HandleSeq{source});
 }
 
 HandleSeq FCMemory::get_selected_sources()
@@ -96,6 +97,16 @@ void FCMemory::set_cur_rule(Rule* r)
     _cur_rule = r;
 }
 
+void FCMemory::set_focus_set(HandleSeq focus_set)
+{
+    _focus_set = focus_set;
+}
+
+HandleSeq FCMemory::get_focus_set(void)
+{
+    return _focus_set ;
+}
+
 void FCMemory::add_rules_product(int iteration, HandleSeq product)
 {
     for (Handle p : product) {
@@ -103,21 +114,9 @@ void FCMemory::add_rules_product(int iteration, HandleSeq product)
         inf.iter_step = iteration;
         inf.applied_rule = _cur_rule;
         inf.inf_product.push_back(p);
+
         _inf_history.push_back(inf);
     }
-}
-
-void FCMemory::add_inference(int iter_step, HandleSeq product,
-                             HandleSeq matched_nodes)
-{
-    Inference inf;
-    inf.applied_rule = _cur_rule;
-    inf.iter_step = iter_step;
-    for (Handle p : product)
-        inf.inf_product.push_back(p);
-    for (Handle mn : matched_nodes)
-        inf.matched_nodes.push_back(mn);
-    _inf_history.push_back(inf);
 }
 
 Handle FCMemory::get_cur_source()

@@ -37,16 +37,19 @@ private:
 
 	void init(void);
 
-	// 
 	/**
-	 * Run Forward Chaining on source h and rule-based system rbs
+	 * Run Forward Chaining on source h and rule-based system rbs and
+	 * optional focus set of atoms.
 	 *
-	 * @param h target
-	 * @param rbs rule-based system atom
+	 * @param h           target
+	 * @param rbs         rule-based system atom
+	 * @param hfocus_set  focus set atoms
+	 *
 	 * @return ???
 	 */
-	Handle do_forward_chaining(Handle h, Handle rbs);
-	/**
+    Handle do_forward_chaining(Handle hsource, Handle rbs, Handle hfocus_set);
+
+    /**
 	 * @param h target
 	 * @param rbs rule-based system atom
 	 * @return ???
