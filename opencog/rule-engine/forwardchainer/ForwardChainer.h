@@ -124,6 +124,7 @@ public:
 	 * Ctor. rbs is a Handle pointing to rule-based system.
 	 */
     ForwardChainer(AtomSpace& as, Handle rbs);
+    virtual ~ForwardChainer();
 
     void do_chain(Handle hsource,HandleSeq focus_set ={});
 

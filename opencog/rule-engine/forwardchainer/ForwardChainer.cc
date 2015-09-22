@@ -44,6 +44,11 @@ ForwardChainer::ForwardChainer(AtomSpace& as, Handle rbs) :
     init();
 }
 
+ForwardChainer::~ForwardChainer()
+{
+
+}
+
 void ForwardChainer::init()
 {
     _fcmem.set_search_in_af(_configReader.get_attention_allocation());
