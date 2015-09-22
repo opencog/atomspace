@@ -121,11 +121,12 @@ UnorderedHandleSet ForwardChainer::do_step(bool search_focus_set/* = false*/)
     return products;
 }
 
-void ForwardChainer::do_chain(Handle hsource, HandleSeq focus_set)
+void ForwardChainer::do_chain(Handle hsource, HandleSeq focus_set,
+                              bool single_step /*=false*/)
 {
 
     validate(hsource,focus_set);
-
+    bool search_in_af = not focus_set.empty();
     _fcmem.set_focus_set(focus_set);
 
     HandleSeq init_sources = {};
@@ -141,7 +142,6 @@ void ForwardChainer::do_chain(Handle hsource, HandleSeq focus_set)
     //to handle this robustly.
     if(init_sources.empty())
     {
-        bool search_in_af = not focus_set.empty();
         apply_all_rules(search_in_af);
         return;
     }
@@ -161,13 +161,7 @@ void ForwardChainer::do_chain(Handle hsource, HandleSeq focus_set)
 
         _log->debug("Iteration %d", _iteration);
 
-        UnorderedHandleSet products;
-
-        if (focus_set.empty())
-            products = do_step(false);
-        else
-            products = do_step(true);
-
+        UnorderedHandleSet products = do_step(search_in_af);
         _fcmem.add_rules_product(_iteration,
                                  HandleSeq(products.begin(), products.end()));
         _fcmem.update_potential_sources(
