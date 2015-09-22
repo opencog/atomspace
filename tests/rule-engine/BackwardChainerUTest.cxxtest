@@ -112,7 +112,7 @@ void BackwardChainerUTest::test_1rule_impossible_bc()
 
 	// should NOT be possible to find the solution without deduction rule
 	bc.set_target(target);
-	bc.get_config().set_maximum_iterations(500);
+	bc.get_config().set_maximum_iterations(700);
 	bc.do_chain();
 
 	VarMultimap results = bc.get_chaining_result();
@@ -147,7 +147,7 @@ void BackwardChainerUTest::test_2rules_bc()
 	Handle soln = eval_.eval_h("(ConceptNode \"West\")");
 
 	bc.set_target(target);
-	bc.get_config().set_maximum_iterations(500);
+	bc.get_config().set_maximum_iterations(700);
 	bc.do_chain();
 
 	VarMultimap results = bc.get_chaining_result();
