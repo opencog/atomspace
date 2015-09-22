@@ -757,13 +757,13 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
                                       const Handle& hg,
                                       Caller caller)
 {
-	const Handle& hp = ptm->getHandle();
-
 	// This could happen when the arity of the two hypergraphs are different.
 	// It's clearly a mismatch so we should always return false here unless
 	// we are looking for a non-exact match
-	if (Handle::UNDEFINED == hp or Handle::UNDEFINED == hg)
-		return _pmc.fuzzy_match(hp, hg);
+	if (PatternTerm::UNDEFINED == ptm or Handle::UNDEFINED == hg)
+		return _pmc.fuzzy_match(Handle::UNDEFINED, hg);
+
+	const Handle& hp = ptm->getHandle();
 
 	// If the pattern link is a quote, then we compare the quoted
 	// contents. This is done recursively, of course.  The QuoteLink
