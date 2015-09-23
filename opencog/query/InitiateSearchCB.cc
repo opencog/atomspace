@@ -117,26 +117,26 @@ void InitiateSearchCB::set_pattern(const Variables& vars,
 
 Handle
 InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
-                                     Handle& start, size_t& width)
+                                     Handle& startrm, size_t& width)
 {
 	// If its a node, then we are done.
 	Type t = h->getType();
 	if (_classserver.isNode(t)) {
 		if (t != VARIABLE_NODE) {
 			width = h->getIncomingSetSize();
-			start = h;
+			startrm = h; // XXX wtf ???
 			return h;
 		}
 		return Handle::UNDEFINED;
 	}
 
 	// If its a link, then find recursively
-	return find_starter_recursive(h, depth, start, width);
+	return find_starter_recursive(h, depth, startrm, width);
 }
 
 Handle
 InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
-                                         Handle& start, size_t& width)
+                                         Handle& startrm, size_t& width)
 {
 	// If its a node, then we are done. Don't modify either depth or
 	// start.
@@ -149,11 +149,6 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 		return Handle::UNDEFINED;
 	}
 
-	// Ignore all ChoiceLink's. Picking a starter inside one of these
-	// will almost surely be disconnected from the rest of the graph.
-	if (CHOICE_LINK == t)
-		return Handle::UNDEFINED;
-
 	// Ignore all dynamically-evaluatable links up front.
 	if (_dynamic->find(h) != _dynamic->end())
 		return Handle::UNDEFINED;
@@ -163,7 +158,7 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 	// the search there.  If there are two at the same depth,
 	// then start with the skinnier one.
 	size_t deepest = depth;
-	start = Handle::UNDEFINED;
+	startrm = Handle::UNDEFINED;
 	Handle hdeepest(Handle::UNDEFINED);
 	size_t thinnest = SIZE_MAX;
 
@@ -180,16 +175,28 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 
 		Handle s(find_starter_recursive(hunt, brdepth, sbr, brwid));
 
-		if (s != Handle::UNDEFINED
-		    and (brwid < thinnest
-		         or (brwid == thinnest and deepest < brdepth)))
+		if (s != Handle::UNDEFINED)
 		{
-			deepest = brdepth;
-			hdeepest = s;
-			start = sbr;
-			thinnest = brwid;
+			// Each ChoiceLink is potentially disconnected from the rest
+			// of the graph. Assume the worst case, explore them all.
+			if (CHOICE_LINK == t)
+			{
+				Choice ch;
+				ch.clause = _curr_clause;
+				ch.best_start = s;
+				ch.start_term = sbr;
+				_choices.push_back(ch);
+			}
+			else
+			if (brwid < thinnest
+		         or (brwid == thinnest and deepest < brdepth))
+			{
+				deepest = brdepth;
+				hdeepest = s;
+				startrm = sbr;
+				thinnest = brwid;
+			}
 		}
-
 	}
 	depth = deepest;
 	width = thinnest;
@@ -218,6 +225,8 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
 	{
 		// Cannot start with an evaluatable clause!
 		if (0 < evl.count(clauses[i])) continue;
+
+		_curr_clause = i;
 		Handle h(clauses[i]);
 		size_t depth = 0;
 		size_t width = SIZE_MAX;
@@ -282,11 +291,13 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 	Handle best_start = find_thinnest(clauses, _pattern->evaluatable_holders,
 	                                  _starter_term, bestclause);
 
-	// Cannot find a starting point! This can happen if all of the
-	// clauses contain nothing but variables, or if all of the
-	// clauses are evaluatable(!) Somewhat unusual, but it can
-	// happen.  In this case, we need some other, alternative search
-	// strategy.
+	// Cannot find a starting point! This can happen if:
+	// 1) all of the clauses contain nothing but variables,
+	// 2) all of the clauses are evaluatable(!),
+	// 3) all of the clauses are under a ChoiceLink.
+	// Somewhat unusual, but it can happen.  For the first two cases,
+	// we need some other, alternative search strategy. We can (we
+	// should) handle the third case here, but its more cumbersome.
 	if (Handle::UNDEFINED == best_start)
 	{
 		_search_fail = true;
