@@ -189,7 +189,7 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 			}
 			else
 			if (brwid < thinnest
-		         or (brwid == thinnest and deepest < brdepth))
+			    or (brwid == thinnest and deepest < brdepth))
 			{
 				deepest = brdepth;
 				hdeepest = s;
