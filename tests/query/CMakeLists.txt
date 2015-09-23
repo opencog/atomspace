@@ -102,6 +102,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-nest.scm
     ${PROJECT_BINARY_DIR}/tests/query/choice-nest.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-top-nest.scm
     ${PROJECT_BINARY_DIR}/tests/query/choice-top-nest.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-typed.scm
+    ${PROJECT_BINARY_DIR}/tests/query/choice-typed.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-unary.scm
     ${PROJECT_BINARY_DIR}/tests/query/choice-unary.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/define.scm

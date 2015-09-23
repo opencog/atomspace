@@ -73,8 +73,10 @@ public:
      */
     Node(Node &n)
         : Atom(n.getType(),
-               n.getTruthValue()->clone(),
-               n.getAttentionValue()->clone())
+               ({ TruthValuePtr tv(n.getTruthValue());
+                  tv->isDefinedTV() ? tv : tv->clone(); }),
+               ({ AttentionValuePtr av(n.getAttentionValue());
+                  av->isDefaultAV() ? av : av->clone(); }))
     {
         init(n._name);
     }

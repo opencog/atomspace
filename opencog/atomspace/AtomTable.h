@@ -32,8 +32,6 @@
 #include <boost/signals2.hpp>
 
 #include <opencog/util/async_method_caller.h>
-#include <opencog/util/exceptions.h>
-#include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
 
 #include <opencog/atomspace/atom_types.h>

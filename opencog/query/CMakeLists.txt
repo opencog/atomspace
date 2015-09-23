@@ -8,6 +8,7 @@ ADD_LIBRARY(query SHARED
 	PatternMatch.cc
 	PatternMatchEngine.cc
 	PatternSCM.cc
+	Recognizer.cc
 	Satisfier.cc
 	FuzzyMatch/FuzzyPatternMatch.cc
 	FuzzyMatch/FuzzyPatternMatchCB.cc

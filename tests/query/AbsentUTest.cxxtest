@@ -60,6 +60,10 @@ public:
 
 	void test_single(void);
 	void test_double(void);
+	void test_connect_exist(void);
+	void test_connect_not_exist(void);
+	void test_discon_exist(void);
+	void test_discon_not_exist(void);
 };
 
 void AbsentUTest::tearDown(void)
@@ -218,6 +222,74 @@ void AbsentUTest::test_double(void)
 
 	state = eval->eval_h("(show-ufo-state)");
 	TS_ASSERT_EQUALS(state, exists);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void AbsentUTest::test_connect_exist(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD", "tests/query/absent-conn1.scm");
+	load_scm_files_from_config(*as);
+
+	Handle rtn = eval->eval_h("(cog-bind test)");
+
+	Handle soln = eval->eval_h("soln");
+
+	TSM_ASSERT_EQUALS("Wrong number of solutions", as->get_arity(rtn), 0);
+	TS_ASSERT_EQUALS(rtn, soln);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void AbsentUTest::test_connect_not_exist(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD", "tests/query/absent-conn2.scm");
+	load_scm_files_from_config(*as);
+
+	Handle rtn = eval->eval_h("(cog-bind test)");
+
+	Handle soln = eval->eval_h("soln");
+
+	TSM_ASSERT_EQUALS("Wrong number of solutions", as->get_arity(rtn), 1);
+	TS_ASSERT_EQUALS(rtn, soln);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void AbsentUTest::test_discon_exist(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD", "tests/query/absent-disconn1.scm");
+	load_scm_files_from_config(*as);
+
+	Handle rtn = eval->eval_h("(cog-bind test)");
+
+	Handle soln = eval->eval_h("soln");
+
+	TSM_ASSERT_EQUALS("Wrong number of solutions", as->get_arity(rtn), 0);
+	TS_ASSERT_EQUALS(rtn, soln);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void AbsentUTest::test_discon_not_exist(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD", "tests/query/absent-disconn2.scm");
+	load_scm_files_from_config(*as);
+
+	Handle rtn = eval->eval_h("(cog-bind test)");
+
+	Handle soln = eval->eval_h("soln");
+
+	TSM_ASSERT_EQUALS("Wrong number of solutions", as->get_arity(rtn), 1);
+	TS_ASSERT_EQUALS(rtn, soln);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

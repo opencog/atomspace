@@ -69,6 +69,15 @@ class InitiateSearchCB : public virtual PatternMatchCallback
 		Handle _root;
 		Handle _starter_term;
 
+		struct Choice
+		{
+			size_t clause;
+			Handle best_start;
+			Handle start_term;
+		};
+		size_t _curr_clause;
+		std::vector<Choice> _choices;
+
 		virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
 		virtual Handle find_starter_recursive(const Handle&, size_t&, Handle&,
 		                                      size_t&);

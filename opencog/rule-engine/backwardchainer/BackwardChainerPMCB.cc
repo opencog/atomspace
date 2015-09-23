@@ -26,11 +26,12 @@
 
 using namespace opencog;
 
-BackwardChainerPMCB::BackwardChainerPMCB(AtomSpace* as, VariableListPtr int_vars)
+BackwardChainerPMCB::BackwardChainerPMCB(AtomSpace* as, VariableListPtr int_vars, bool name_check)
     : InitiateSearchCB(as),
       DefaultPatternMatchCB(as),
       _as(as),
-      _int_vars(int_vars)
+      _int_vars(int_vars),
+      _enable_var_name_check(name_check)
 {
 }
 
@@ -73,7 +74,9 @@ bool BackwardChainerPMCB::node_match(const Handle& npat_h, const Handle& nsoln_h
 	// XXX this is not needed when VariableNode is correctly implemented to be
 	//     unique
 	// XXX TODO this is making VariableNode self-grounding awkward to implement
-	if (npat_h->getType() == VARIABLE_NODE && nsoln_h->getType() == VARIABLE_NODE)
+	if (not _enable_var_name_check
+	        && npat_h->getType() == VARIABLE_NODE
+	        && nsoln_h->getType() == VARIABLE_NODE)
 		return true;
 
 	return false;
@@ -83,6 +86,7 @@ bool BackwardChainerPMCB::grounding(const std::map<Handle, Handle> &var_soln,
                                const std::map<Handle, Handle> &pred_soln)
 {
 	std::map<Handle, Handle> true_var_soln;
+	std::map<Handle, Handle> true_pred_soln;
 
 	// get rid of non-var mapping
 	for (auto& p : var_soln)
@@ -94,9 +98,15 @@ bool BackwardChainerPMCB::grounding(const std::map<Handle, Handle> &var_soln,
 	if (true_var_soln.size() == 0)
 		return false;
 
+	true_pred_soln = pred_soln;
+
+	// add all the constant clauses into the final pred_soln
+	for (auto& h : _pattern->constants)
+		true_pred_soln[h] = h;
+
 	// store the variable solution
 	var_solns_.push_back(true_var_soln);
-	pred_solns_.push_back(pred_soln);
+	pred_solns_.push_back(true_pred_soln);
 
 	return false;
 }

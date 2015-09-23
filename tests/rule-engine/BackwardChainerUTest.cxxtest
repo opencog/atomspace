@@ -78,7 +78,7 @@ void BackwardChainerUTest::test_1rule_bc()
 	Handle soln = eval_.eval_h("(ConceptNode \"Fritz\")");
 
 	bc.set_target(target);
-	bc.get_config().set_maximum_iterations(100);
+	bc.get_config().set_maximum_iterations(300);
 	bc.do_chain();
 
 	VarMultimap results = bc.get_chaining_result();
@@ -112,7 +112,7 @@ void BackwardChainerUTest::test_1rule_impossible_bc()
 
 	// should NOT be possible to find the solution without deduction rule
 	bc.set_target(target);
-	bc.get_config().set_maximum_iterations(500);
+	bc.get_config().set_maximum_iterations(1000);
 	bc.do_chain();
 
 	VarMultimap results = bc.get_chaining_result();
@@ -147,7 +147,7 @@ void BackwardChainerUTest::test_2rules_bc()
 	Handle soln = eval_.eval_h("(ConceptNode \"West\")");
 
 	bc.set_target(target);
-	bc.get_config().set_maximum_iterations(500);
+	bc.get_config().set_maximum_iterations(1000);
 	bc.do_chain();
 
 	VarMultimap results = bc.get_chaining_result();
@@ -168,7 +168,7 @@ void BackwardChainerUTest::test_tvq_bc()
 	             "tests/rule-engine/bc-config-1.scm,"
 	             "tests/rule-engine/bc-example.scm");
 	load_scm_files_from_config(as_);
-	randGen().seed(0);
+	randGen().seed(500);
 
 	// load modus ponens
 	Handle top_rbs = as_.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
@@ -180,7 +180,7 @@ void BackwardChainerUTest::test_tvq_bc()
 	                 "   (ConceptNode \"green\"))");
 
 	bc.set_target(target);
-	bc.get_config().set_maximum_iterations(100);
+	bc.get_config().set_maximum_iterations(300);
 	bc.do_chain();
 
 	TSM_ASSERT("Incorrect strength after BC!",
@@ -217,7 +217,7 @@ void BackwardChainerUTest::test_tvq_impossible_bc()
 	                             "   (ConceptNode \"Frog\"))");
 
 	bc.set_target(target);
-	bc.get_config().set_maximum_iterations(100);
+	bc.get_config().set_maximum_iterations(300);
 	bc.do_chain();
 
 	TSM_ASSERT("Incorrect strength of target after BC!", target->getTruthValue()->getMean() < 0.1f);
@@ -269,7 +269,7 @@ void BackwardChainerUTest::test_focus_set()
 	Handle soln2 = eval_.eval_h("(ConceptNode \"Fritz\")");
 
 	bc.set_target(target, focus_set);
-	bc.get_config().set_maximum_iterations(100);
+	bc.get_config().set_maximum_iterations(300);
 	bc.do_chain();
 
 	VarMultimap results = bc.get_chaining_result();
