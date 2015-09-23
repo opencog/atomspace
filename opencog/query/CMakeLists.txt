@@ -1,13 +1,5 @@
-FIND_PATH(GEARMAN_INCLUDE_DIR NAMES gearman.h 
-	PATHS /usr/include/libgearman /usr/local/include/libgearman)
-
-FIND_LIBRARY(GEARMAN_LIBRARY NAMES gearman PATHS /usr/lib /usr/local/lib)
-
-IF (GEARMAN_INCLUDE_DIR)
+IF (HAVE_GEARMAN)
 IF (HAVE_GUILE)
-
-	MESSAGE(STATUS "gearman Include dir: ${GEARMAN_INCLUDE_DIR}")
-	MESSAGE(STATUS "libgearman library: ${GEARMAN_LIBRARY}")
 	ADD_LIBRARY(dist-gearman SHARED
 	    Distributed/DistSCM.cc
 	)
@@ -15,20 +7,24 @@ IF (HAVE_GUILE)
 		opencog_atom_types
 	)
 	TARGET_LINK_LIBRARIES(dist-gearman
-	    gearman
+	    ${GEARMAN_LIBRARY}
 	    atomspace
 	)
 	TARGET_LINK_LIBRARIES(dist-gearman
 		smob
 	)
 	INSTALL (TARGETS dist-gearman DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")	
-ELSE()
+	INSTALL (FILES
+		Distributed/DistSCM.h
+		DESTINATION "include/opencog/query"
+	)
+ELSE(HAVE_GUILE)
 	MESSAGE(FATAL_ERROR "Cannot find guile")
 ENDIF (HAVE_GUILE)
 
-ELSE()
+ELSE(HAVE_GEARMAN)
 	MESSAGE(FATAL_ERROR "Cannot find libgearman library")
-ENDIF()
+ENDIF(HAVE_GEARMAN)
 
 # Build the query shlib
 ADD_LIBRARY(query SHARED
@@ -77,6 +73,5 @@ INSTALL (FILES
 	PatternMatchCallback.h
 	PatternMatchEngine.h
 	Satisfier.h
-	Distributed/DistSCM.h
 	DESTINATION "include/opencog/query"
 )

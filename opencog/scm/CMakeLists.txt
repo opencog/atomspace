@@ -19,9 +19,14 @@ INSTALL (FILES
 	opencog/persist-sql.scm
 	opencog/persist-zmq.scm
 	opencog/query.scm
-	opencog/dist-gearman.scm
 	opencog/rule-engine.scm
 	DESTINATION "${DATADIR}/scm/opencog"
 )
+IF(HAVE_GEARMAN)
+INSTALL (FILES
+	opencog/dist-gearman.scm
+	DESTINATION "${DATADIR}/scm/opencog"
+	)
+ENDIF(HAVE_GEARMAN)
 # No CMakeLists.txt in dir:
 #ADD_SUBDIRECTORY (wires)
