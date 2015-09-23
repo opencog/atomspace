@@ -295,10 +295,8 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 	// Cannot find a starting point! This can happen if:
 	// 1) all of the clauses contain nothing but variables,
 	// 2) all of the clauses are evaluatable(!),
-	// 3) all of the clauses are under a ChoiceLink.
-	// Somewhat unusual, but it can happen.  For the first two cases,
-	// we need some other, alternative search strategy. We can (we
-	// should) handle the third case here, but its more cumbersome.
+	// Somewhat unusual, but it can happen.  For this, we need
+	// some other, alternative search strategy.
 	if (Handle::UNDEFINED == best_start and 0 == _choices.size())
 	{
 		_search_fail = true;
