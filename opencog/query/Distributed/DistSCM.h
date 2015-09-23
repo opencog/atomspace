@@ -51,7 +51,6 @@ private:
 	const std::string& slave_mode(const std::string& ip_string,const std::string& workerID);
 	UUID dist_scm(const std::string& scm_string,const std::string& clientID,bool truth);
 	const std::string true_string, false_string;
-	std::string master_ip;
 
 	gearman_client_st client;
 	gearman_worker_st *worker;

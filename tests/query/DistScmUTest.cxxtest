@@ -1,16 +1,40 @@
-//#include <atomic>
+/*
+ * tests/query/DistScmUTest.cxxtest
+ * Author : Mandeep Singh Bhatia
+ * Copyright (C) 2015 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
 #include <thread>
 #include <string>
+
 #include <opencog/util/Config.h>
 #include <opencog/atomspace/AtomSpace.h>
-//#include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/load-file.h>
+
 #include <opencog/query/Distributed/DistSCM.h>
 
 using namespace opencog;
 //assuming cxxtest times the tests with some time out and fails test on timeout - say if gearman breaks and test blocks forever
+//always use cerr or logger to debug instead of cout
+
 class DistScmUTest :  public CxxTest::TestSuite
 {
 	private:
@@ -18,12 +42,9 @@ class DistScmUTest :  public CxxTest::TestSuite
     SchemeEval *evl,*evl2;
   public:
     DistScmUTest(void){
-    //std::cerr<<"\natomspace init\n";
       as=new AtomSpace();
-    //std::cerr<<"\nscm eval init\n";
       evl=new SchemeEval(as);
       evl2=new SchemeEval(as);
-    //std::cerr<<"\nscm eval done init\n";
     }
     ~DistScmUTest(){
       delete evl;
@@ -39,13 +60,11 @@ class DistScmUTest :  public CxxTest::TestSuite
 
 void DistScmUTest::setUp(void)
 {
-//std::cerr<<"\nsetup start..\n";
   config().set("SCM_PRELOAD",
 	             "opencog/atomspace/core_types.scm, "
                "opencog/scm/opencog/dist-gearman.scm"
 	             );
- //std::cerr<<"\nsetup done..\n";
-load_scm_files_from_config(*as);
+  load_scm_files_from_config(*as);
 }
 
 void DistScmUTest::create_slave_thread(DistScmUTest* dt)
@@ -57,16 +76,12 @@ void DistScmUTest::create_slave_thread(DistScmUTest* dt)
 
 void DistScmUTest::test_dist()
 {
-//std::cerr<<"\n creating slave thread\n";
   std::thread slaveThread(create_slave_thread,this);
   //call master
-evl2->eval("(use-modules (opencog dist-gearman))");
+  evl2->eval("(use-modules (opencog dist-gearman))");
   std::string mast="(dist-run-scm \"(ConceptNode \\\"Hello\\\")\" \"client1\" #t)";
-std::string result=evl2->eval(mast);
-//std::cerr<<"\n calling master\n";
-//std::cerr<<result;
+  std::string result=evl2->eval(mast);
   TS_ASSERT_DIFFERS(atoll(result.c_str()),Handle::INVALID_UUID);
-//std::cerr<<"\n exiting slave\n";
   evl2->eval("(set-master-mode)");
   slaveThread.join();
 }
