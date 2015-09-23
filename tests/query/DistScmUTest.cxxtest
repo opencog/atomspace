@@ -1,0 +1,72 @@
+//#include <atomic>
+#include <thread>
+#include <string>
+#include <opencog/util/Config.h>
+#include <opencog/atomspace/AtomSpace.h>
+//#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/Handle.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/load-file.h>
+#include <opencog/query/Distributed/DistSCM.h>
+
+using namespace opencog;
+//assuming cxxtest times the tests with some time out and fails test on timeout - say if gearman breaks and test blocks forever
+class DistScmUTest :  public CxxTest::TestSuite
+{
+	private:
+		AtomSpace *as;
+    SchemeEval *evl,*evl2;
+  public:
+    DistScmUTest(void){
+    //std::cerr<<"\natomspace init\n";
+      as=new AtomSpace();
+    //std::cerr<<"\nscm eval init\n";
+      evl=new SchemeEval(as);
+      evl2=new SchemeEval(as);
+    //std::cerr<<"\nscm eval done init\n";
+    }
+    ~DistScmUTest(){
+      delete evl;
+      delete evl2;
+      delete as;
+    }
+    void setUp(void);
+    static void create_slave_thread(DistScmUTest* dt);
+
+    void tearDown(void){}//thread join, after calling set master mode
+    void test_dist();//call master and get return -
+};
+
+void DistScmUTest::setUp(void)
+{
+//std::cerr<<"\nsetup start..\n";
+  config().set("SCM_PRELOAD",
+	             "opencog/atomspace/core_types.scm, "
+               "opencog/scm/opencog/dist-gearman.scm"
+	             );
+ //std::cerr<<"\nsetup done..\n";
+load_scm_files_from_config(*as);
+}
+
+void DistScmUTest::create_slave_thread(DistScmUTest* dt)
+{
+  dt->evl->eval("(use-modules (opencog dist-gearman))");
+  std::string slv="(set-slave-mode \"localhost\" \"worker1\")";
+  TS_ASSERT_EQUALS(dt->evl->eval(slv),"localhost\n");
+}
+
+void DistScmUTest::test_dist()
+{
+//std::cerr<<"\n creating slave thread\n";
+  std::thread slaveThread(create_slave_thread,this);
+  //call master
+evl2->eval("(use-modules (opencog dist-gearman))");
+  std::string mast="(dist-run-scm \"(ConceptNode \\\"Hello\\\")\" \"client1\" #t)";
+std::string result=evl2->eval(mast);
+//std::cerr<<"\n calling master\n";
+//std::cerr<<result;
+  TS_ASSERT_DIFFERS(atoll(result.c_str()),Handle::INVALID_UUID);
+//std::cerr<<"\n exiting slave\n";
+  evl2->eval("(set-master-mode)");
+  slaveThread.join();
+}

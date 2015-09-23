@@ -20,6 +20,7 @@ LINK_LIBRARIES (
 # We want to run the tests in the order below;
 # Each test gets progressively more complex, and exercises
 # features that the later tests depend on.
+ADD_CXXTEST(DistScmUTest)
 ADD_CXXTEST(PatternUTest)
 ADD_CXXTEST(PatternCrashUTest)
 ADD_CXXTEST(StackUTest)
@@ -64,7 +65,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(AttentionalFocusCBUTest)
 	ADD_CXXTEST(SudokuUTest)
 	ADD_CXXTEST(EinsteinUTest)
-    
+
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
 		${COGUTIL_LIBRARY}
 	)

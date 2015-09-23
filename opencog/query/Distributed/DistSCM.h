@@ -1,7 +1,7 @@
 /*
  * DistSCM.h
  *
- * 
+ *
  * Copyright (C) 2015 OpenCog Foundation
  *
  * Author: Mandeep Singh Bhatia , September 2015
@@ -38,9 +38,10 @@
 //(set-slave-mode "mapster-ip" "worker1")
 namespace opencog {
 
-class DistSCM 
+class DistSCM
 {
 private:
+	//friend class DistributedEvalTest;
 	static void* init_in_guile(void*);
 	static void init_in_module(void*);
 
@@ -55,7 +56,7 @@ private:
 	gearman_client_st client;
 	gearman_worker_st *worker;
 	static gearman_return_t worker_function(gearman_job_st *job, void *context);
-	
+
 	public:
 		DistSCM(void);
 		~DistSCM();
