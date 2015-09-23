@@ -68,6 +68,7 @@ public:
     void test_embed_disco(void);
     void test_double_or(void);
     void test_unary(void);
+    void test_typed(void);
 };
 
 void ChoiceLinkUTest::tearDown(void)
@@ -255,4 +256,23 @@ void ChoiceLinkUTest::test_unary(void)
 
     printf("unary door-bc found:\n%s\n", doors->toString().c_str());
     TS_ASSERT_EQUALS(4, as->get_arity(doors));
+}
+
+/*
+ * ChoiceLinks with typed ariables in them.
+ */
+void ChoiceLinkUTest::test_typed(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/choice-typed.scm");
+    load_scm_files_from_config(*as);
+
+    // Needed to define cog-execute!
+    eval->eval("(use-modules (opencog exec))");
+
+    Handle rules = eval->eval_h("(cog-execute! get-nodes1)");
+
+    printf("typed get-nodes found:\n%s\n", rules->toString().c_str());
+    TS_ASSERT_EQUALS(2, as->get_arity(rules));
 }

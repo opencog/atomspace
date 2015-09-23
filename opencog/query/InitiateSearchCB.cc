@@ -117,26 +117,26 @@ void InitiateSearchCB::set_pattern(const Variables& vars,
 
 Handle
 InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
-                                     Handle& start, size_t& width)
+                                     Handle& startrm, size_t& width)
 {
 	// If its a node, then we are done.
 	Type t = h->getType();
 	if (_classserver.isNode(t)) {
 		if (t != VARIABLE_NODE) {
 			width = h->getIncomingSetSize();
-			start = h;
+			startrm = h; // XXX wtf ???
 			return h;
 		}
 		return Handle::UNDEFINED;
 	}
 
 	// If its a link, then find recursively
-	return find_starter_recursive(h, depth, start, width);
+	return find_starter_recursive(h, depth, startrm, width);
 }
 
 Handle
 InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
-                                         Handle& start, size_t& width)
+                                         Handle& startrm, size_t& width)
 {
 	// If its a node, then we are done. Don't modify either depth or
 	// start.
@@ -149,11 +149,6 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 		return Handle::UNDEFINED;
 	}
 
-	// Ignore all ChoiceLink's. Picking a starter inside one of these
-	// will almost surely be disconnected from the rest of the graph.
-	if (CHOICE_LINK == t)
-		return Handle::UNDEFINED;
-
 	// Ignore all dynamically-evaluatable links up front.
 	if (_dynamic->find(h) != _dynamic->end())
 		return Handle::UNDEFINED;
@@ -163,7 +158,7 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 	// the search there.  If there are two at the same depth,
 	// then start with the skinnier one.
 	size_t deepest = depth;
-	start = Handle::UNDEFINED;
+	startrm = Handle::UNDEFINED;
 	Handle hdeepest(Handle::UNDEFINED);
 	size_t thinnest = SIZE_MAX;
 
@@ -180,16 +175,28 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 
 		Handle s(find_starter_recursive(hunt, brdepth, sbr, brwid));
 
-		if (s != Handle::UNDEFINED
-		    and (brwid < thinnest
-		         or (brwid == thinnest and deepest < brdepth)))
+		if (s != Handle::UNDEFINED)
 		{
-			deepest = brdepth;
-			hdeepest = s;
-			start = sbr;
-			thinnest = brwid;
+			// Each ChoiceLink is potentially disconnected from the rest
+			// of the graph. Assume the worst case, explore them all.
+			if (CHOICE_LINK == t)
+			{
+				Choice ch;
+				ch.clause = _curr_clause;
+				ch.best_start = s;
+				ch.start_term = sbr;
+				_choices.push_back(ch);
+			}
+			else
+			if (brwid < thinnest
+			    or (brwid == thinnest and deepest < brdepth))
+			{
+				deepest = brdepth;
+				hdeepest = s;
+				startrm = sbr;
+				thinnest = brwid;
+			}
 		}
-
 	}
 	depth = deepest;
 	width = thinnest;
@@ -212,12 +219,15 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
 	bestclause = 0;
 	Handle best_start(Handle::UNDEFINED);
 	starter_term = Handle::UNDEFINED;
+	_choices.clear();
 
 	size_t nc = clauses.size();
 	for (size_t i=0; i < nc; i++)
 	{
 		// Cannot start with an evaluatable clause!
 		if (0 < evl.count(clauses[i])) continue;
+
+		_curr_clause = i;
 		Handle h(clauses[i]);
 		size_t depth = 0;
 		size_t width = SIZE_MAX;
@@ -282,38 +292,59 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 	Handle best_start = find_thinnest(clauses, _pattern->evaluatable_holders,
 	                                  _starter_term, bestclause);
 
-	// Cannot find a starting point! This can happen if all of the
-	// clauses contain nothing but variables, or if all of the
-	// clauses are evaluatable(!) Somewhat unusual, but it can
-	// happen.  In this case, we need some other, alternative search
-	// strategy.
-	if (Handle::UNDEFINED == best_start)
+	// Cannot find a starting point! This can happen if:
+	// 1) all of the clauses contain nothing but variables,
+	// 2) all of the clauses are evaluatable(!),
+	// Somewhat unusual, but it can happen.  For this, we need
+	// some other, alternative search strategy.
+	if (Handle::UNDEFINED == best_start and 0 == _choices.size())
 	{
 		_search_fail = true;
 		return false;
 	}
 
-	_root = clauses[bestclause];
-	dbgprt("Search start node: %s\n", best_start->toShortString().c_str());
-	dbgprt("Start term is: %s\n", _starter_term == Handle::UNDEFINED ?
-	       "UNDEFINED" : _starter_term->toShortString().c_str());
-	dbgprt("Root clause is: %s\n", _root->toShortString().c_str());
-
-	// This should be calling the over-loaded virtual method
-	// get_incoming_set(), so that, e.g. it gets sorted by attentional
-	// focus in the AttentionalFocusCB class...
-	IncomingSet iset = get_incoming_set(best_start);
-	size_t sz = iset.size();
-	for (size_t i = 0; i < sz; i++)
+	// If only a single choice, fake it for the loop below.
+	if (0 == _choices.size())
 	{
-		Handle h(iset[i]);
-		dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-		dbgprt("Loop candidate (%lu/%lu):\n%s\n", i+1, sz,
-		       h->toShortString().c_str());
-		bool found = pme->explore_neighborhood(_root, _starter_term, h);
+		Choice ch;
+		ch.clause = bestclause;
+		ch.best_start = best_start;
+		ch.start_term = _starter_term;
+		_choices.push_back(ch);
+	}
+	else
+	{
+		// TODO -- weed out duplicates!
+	}
 
-		// Terminate search if satisfied.
-		if (found) return true;
+	for (const Choice& ch : _choices)
+	{
+		bestclause = ch.clause;
+		best_start = ch.best_start;
+		_starter_term = ch.start_term;
+
+		_root = clauses[bestclause];
+		dbgprt("Search start node: %s\n", best_start->toShortString().c_str());
+		dbgprt("Start term is: %s\n", _starter_term == Handle::UNDEFINED ?
+		       "UNDEFINED" : _starter_term->toShortString().c_str());
+		dbgprt("Root clause is: %s\n", _root->toShortString().c_str());
+
+		// This should be calling the over-loaded virtual method
+		// get_incoming_set(), so that, e.g. it gets sorted by attentional
+		// focus in the AttentionalFocusCB class...
+		IncomingSet iset = get_incoming_set(best_start);
+		size_t sz = iset.size();
+		for (size_t i = 0; i < sz; i++)
+		{
+			Handle h(iset[i]);
+			dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+			dbgprt("Loop candidate (%lu/%lu):\n%s\n", i+1, sz,
+			       h->toShortString().c_str());
+			bool found = pme->explore_neighborhood(_root, _starter_term, h);
+
+			// Terminate search if satisfied.
+			if (found) return true;
+		}
 	}
 
 	// If we are here, we have searched the entire neighborhood, and

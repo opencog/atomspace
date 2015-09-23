@@ -47,7 +47,7 @@ bool SatisfyingSet::grounding(const std::map<Handle, Handle> &var_soln,
 
 	if (1 == _varseq.size())
 	{
-		_satisfying_set.push_back(var_soln.at(_varseq[0]));
+		_satisfying_set.emplace(var_soln.at(_varseq[0]));
 		return false;
 	}
 
@@ -58,7 +58,7 @@ bool SatisfyingSet::grounding(const std::map<Handle, Handle> &var_soln,
 	{
 		vargnds.push_back(var_soln.at(hv));
 	}
-	_satisfying_set.push_back(Handle(createLink(LIST_LINK, vargnds)));
+	_satisfying_set.emplace(Handle(createLink(LIST_LINK, vargnds)));
 
 	// Look for more groundings.
 	return false;
@@ -99,7 +99,13 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink)
 	SatisfyingSet sater(as);
 	bl->satisfy(sater);
 
-	return as->add_link(SET_LINK, sater._satisfying_set);
+	// Ugh. We used an std::set to avoid duplicates. But now, we need a
+	// vector.  Which means copying. Got a better idea?
+	HandleSeq satvec;
+	for (const Handle& h : sater._satisfying_set)
+		satvec.push_back(h);
+
+	return as->add_link(SET_LINK, satvec);
 }
 
 /* ===================== END OF FILE ===================== */
