@@ -92,7 +92,7 @@ class SatisfyingSet :
 		SatisfyingSet(AtomSpace* as) :
 			InitiateSearchCB(as), DefaultPatternMatchCB(as) {}
 		HandleSeq _varseq;
-		HandleSeq _satisfying_set;
+		std::set<Handle> _satisfying_set;
 
 		virtual void set_pattern(const Variables& vars,
 		                         const Pattern& pat)
