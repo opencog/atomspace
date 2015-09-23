@@ -10,17 +10,23 @@ http://wiki.opencog.org/w/Pattern_matching#The_Simplified_API
 
 __author__ = 'Cosmo Harrigan'
 
-from opencog.atomspace import AtomSpace, TruthValue, types, get_type_name
-from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h, __init__
+from opencog.atomspace import AtomSpace
+from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h
 
 atomspace = AtomSpace()
-__init__(atomspace)
 
 data = ["opencog/atomspace/core_types.scm",
         "opencog/scm/utilities.scm"]
 
 for item in data:
     load_scm(atomspace, item)
+
+# Add to scheme's %load-path directory to serach for opencog guile modules
+scheme_eval(atomspace, "(add-to-load-path \"/usr/local/share/opencog/scm\")")
+
+# Import opencog modules required for using `cog-bind` in scheme_eval
+scheme_eval(atomspace, "(use-modules (opencog))")
+scheme_eval(atomspace, "(use-modules (opencog query))")
 
 # Define several animals and something of a different type as well
 scheme_animals = \
@@ -31,7 +37,6 @@ scheme_animals = \
     (InheritanceLink (ConceptNode "Spaceship") (ConceptNode "machine"))
     '''
 scheme_eval_h(atomspace, scheme_animals)
-
 # Define a graph search query
 scheme_query = \
     '''
