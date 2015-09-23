@@ -22,6 +22,13 @@ data = ["opencog/atomspace/core_types.scm",
 for item in data:
     load_scm(atomspace, item)
 
+# Add to scheme's %load-path directory to serach for opencog guile modules
+scheme_eval(atomspace, "(add-to-load-path \"/usr/local/share/opencog/scm\")")
+
+# Import opencog modules required for using `cog-bind` in scheme_eval
+scheme_eval(atomspace, "(use-modules (opencog))")
+scheme_eval(atomspace, "(use-modules (opencog query))")
+
 # Define several animals and something of a different type as well
 scheme_animals = \
     '''
@@ -31,7 +38,6 @@ scheme_animals = \
     (InheritanceLink (ConceptNode "Spaceship") (ConceptNode "machine"))
     '''
 scheme_eval_h(atomspace, scheme_animals)
-
 # Define a graph search query
 scheme_query = \
     '''
