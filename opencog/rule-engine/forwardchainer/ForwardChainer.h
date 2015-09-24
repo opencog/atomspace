@@ -27,8 +27,6 @@
 #include <opencog/rule-engine/URECommons.h>
 #include <opencog/rule-engine/UREConfigReader.h>
 
-#include "FCMemory.h"
-
 class ForwardChainerUTest;
 
 namespace opencog
@@ -50,37 +48,42 @@ private:
     URECommons _rec;            // utility class
 	Handle _rbs;                // rule-based system
 	UREConfigReader _configReader;
-    FCMemory _fcmem;            // stores history
     Logger * _log;
+
     int _iteration = 0;
     source_selection_mode _ts_mode;
+    bool _search_in_af;
 
     void init();
-    void add_to_source_list(Handle h);
 
     void apply_all_rules(bool search_focus_set = false);
-
     void do_pm(const Handle& hsource, const UnorderedHandleSet& var_nodes);
-
     UnorderedHandleSet do_step(bool search_focus_set = false);
 
-    bool is_valid_implicant(const Handle& h);
-
-    void validate(Handle hsource, HandleSeq hfocus_set);
-
     UnorderedHandleSet get_subatoms(Rule *rule);
-
     Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);
-
     HandleSeq substitute_rule_part(
             AtomSpace& as, Handle hrule, const std::set<Handle>& vars,
             const std::vector<std::map<Handle, Handle>>& var_groundings);
-
     bool unify(Handle source, Handle target, Rule* rule);
     bool subatom_unify(Handle source, Rule* rule);
     HandleSeq derive_rules(Handle source, Handle target, Rule* rule);
 
+    void update_potential_sources(HandleSeq input);
+    void add_rules_product(int iteration, HandleSeq product);
+    void add_to_source_list(Handle h);
+
+    bool is_valid_implicant(const Handle& h);
+    void validate(Handle hsource, HandleSeq hfocus_set);
+
 protected:
+    vector<Rule*> _rules; /*<loaded rules*/
+    Rule*  _cur_rule;
+    Handle _cur_source;
+
+    /*<list of inference products and premises to select source from*/
+    HandleSeq _potential_sources;
+    HandleSeq _focus_set;
     /**
      * Choose an applicable rules from the rule base by selecting
      * rules whose premise structurally matches with the source.
@@ -99,13 +102,13 @@ protected:
      *          criteria with respect to the current source.
      */
 
-    virtual HandleSeq choose_premises(FCMemory& fcmem);
+    virtual HandleSeq choose_premises(void);
     /**
      * choose next source from the source list
      *
      * @return  A handle to the chosen source from source list
      */
-    virtual Handle choose_next_source(FCMemory& fcmem);
+    virtual Handle choose_next_source(void);
 
     /**
      * Apply chosen rule. the default will wrap a custom PM callback class.
@@ -126,7 +129,7 @@ public:
     ForwardChainer(AtomSpace& as, Handle rbs);
     virtual ~ForwardChainer();
 
-    void do_chain(Handle hsource,HandleSeq focus_set ={});
+    void do_chain(Handle hsource,HandleSeq focus_set ={},bool single_step = false);
 
     HandleSeq get_chaining_result(void);
 

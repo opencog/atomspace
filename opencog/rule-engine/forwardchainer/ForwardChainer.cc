@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/Logger.h>
+#include <boost/range/algorithm/find.hpp>
 
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/PatternLink.h>
@@ -31,6 +31,7 @@
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/query/DefaultImplicator.h>
 #include <opencog/rule-engine/Rule.h>
+#include <opencog/util/Logger.h>
 
 #include "ForwardChainer.h"
 #include "FocusSetPMCB.h"
@@ -39,7 +40,7 @@
 using namespace opencog;
 
 ForwardChainer::ForwardChainer(AtomSpace& as, Handle rbs) :
-        _as(as), _rec(as), _rbs(rbs), _configReader(as, rbs), _fcmem(&as)
+        _as(as), _rec(as), _rbs(rbs), _configReader(as, rbs)
 {
     init();
 }
@@ -51,9 +52,14 @@ ForwardChainer::~ForwardChainer()
 
 void ForwardChainer::init()
 {
-    _fcmem.set_search_in_af(_configReader.get_attention_allocation());
-    _fcmem.set_rules(_configReader.get_rules());
-    _fcmem.set_cur_rule(nullptr);
+     _search_in_af = _configReader.get_attention_allocation();
+
+     //TODO change pointer to ref in FC
+     for(Rule r :_configReader.get_rules())
+     {
+         _rules.push_back(&r);
+     }
+    _cur_rule = nullptr;
     
     _ts_mode = TV_FITNESS_BASED;
 
@@ -81,28 +87,24 @@ Logger* ForwardChainer::getLogger()
  */
 UnorderedHandleSet ForwardChainer::do_step(bool search_focus_set/* = false*/)
 {
-
-    Handle hsource = choose_next_source(_fcmem);
-
-    _log->debug("[ForwardChainer] Next source %s", hsource->toString().c_str());
-
-    _fcmem.set_source(hsource);
+    _cur_source=choose_next_source();
+    _log->debug("[ForwardChainer] Next source %s", _cur_source->toString().c_str());
 
     HandleSeq derived_rhandles;
 
     //choose a rule that source unifies with one of its premises.
-    Rule *rule = choose_rule(hsource, false);
+    Rule *rule = choose_rule(_cur_source, false);
     if (rule) {
-        _fcmem.set_cur_rule(rule);
-        derived_rhandles = derive_rules(hsource, rule);
+        _cur_rule = rule;
+        derived_rhandles = derive_rules(_cur_source, rule);
 
     } else {
         //choose rule that unifies that source unifies with sub-atoms of its premises.
-        rule = choose_rule(hsource, true);
+        rule = choose_rule(_cur_source, true);
 
         if (rule) {
-            _fcmem.set_cur_rule(rule);
-            derived_rhandles = derive_rules(hsource, rule,
+            _cur_rule = rule;
+            derived_rhandles = derive_rules(_cur_source, rule,
             true);
         }
     }
@@ -124,10 +126,9 @@ UnorderedHandleSet ForwardChainer::do_step(bool search_focus_set/* = false*/)
 void ForwardChainer::do_chain(Handle hsource, HandleSeq focus_set,
                               bool single_step /*=false*/)
 {
-
     validate(hsource,focus_set);
     bool search_in_af = not focus_set.empty();
-    _fcmem.set_focus_set(focus_set);
+    _focus_set = focus_set;
 
     HandleSeq init_sources = {};
     //Accept set of initial sources wrapped in a SET_LINK
@@ -153,7 +154,7 @@ void ForwardChainer::do_chain(Handle hsource, HandleSeq focus_set,
         return do_pm(hsource, var_nodes);
 
     // Default forward chaining
-    _fcmem.update_potential_sources(init_sources);
+    update_potential_sources(init_sources);
 
     auto max_iter = _configReader.get_maximum_iterations();
 
@@ -162,10 +163,9 @@ void ForwardChainer::do_chain(Handle hsource, HandleSeq focus_set,
         _log->debug("Iteration %d", _iteration);
 
         UnorderedHandleSet products = do_step(search_in_af);
-        _fcmem.add_rules_product(_iteration,
-                                 HandleSeq(products.begin(), products.end()));
-        _fcmem.update_potential_sources(
-                HandleSeq(products.begin(), products.end()));
+        add_rules_product(_iteration,
+                          HandleSeq(products.begin(), products.end()));
+        update_potential_sources(HandleSeq(products.begin(), products.end()));
 
         _iteration++;
     }
@@ -188,7 +188,7 @@ void ForwardChainer::do_pm(const Handle& hsource,
     HandleSeq vars;
     for (auto h : var_nodes)
         vars.push_back(h);
-    _fcmem.set_source(hsource);
+    _cur_source = hsource;
     Handle hvar_list = _as.add_link(VARIABLE_LIST, vars);
     Handle hclause = _as.add_link(AND_LINK, hsource);
 
@@ -198,7 +198,7 @@ void ForwardChainer::do_pm(const Handle& hsource,
     sl->satisfy(impl);
 
     // Update result
-    _fcmem.add_rules_product(0, impl.get_result_list());
+    add_rules_product(0, impl.get_result_list());
 
     // Delete the AND_LINK and LIST_LINK
     _as.remove_atom(hvar_list);
@@ -211,8 +211,8 @@ void ForwardChainer::do_pm(const Handle& hsource,
         DefaultImplicator impl(&_as);
         impl.implicand = bl->get_implicand();
         bl->imply(impl);
-        _fcmem.set_cur_rule(rule);
-        _fcmem.add_rules_product(0, impl.get_result_list());
+        _cur_rule = rule;
+        add_rules_product(0, impl.get_result_list());
     }
 }
 
@@ -223,29 +223,28 @@ void ForwardChainer::do_pm(const Handle& hsource,
  */
 void ForwardChainer::apply_all_rules(bool search_focus_set /*= false*/)
 {
-    vector<Rule*> rules = _fcmem.get_rules();
-
-    for (Rule* rule : rules) {
-        _fcmem.set_cur_rule(rule);
+    for (Rule* rule : _rules) {
+        _cur_rule = rule;
         HandleSeq hs = apply_rule(rule->get_handle(), search_focus_set);
 
         //Update
-        _fcmem.add_rules_product(0, hs);
-        _fcmem.update_potential_sources(hs);
+        add_rules_product(0, hs);
+        update_potential_sources(hs);
     }
 
 }
 
 HandleSeq ForwardChainer::get_chaining_result()
 {
-    return _fcmem.get_result();
+    //TODO Implement this
+    return HandleSeq{};
 }
 
 Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
 {
     //TODO move this somewhere else
     std::map<Rule*, float> rule_weight;
-    for (Rule* r : _fcmem.get_rules())
+    for (Rule* r : _rules)
         rule_weight[r] = r->get_weight();
 
     _log->debug("[ForwardChainer] %d rules to be searched",rule_weight.size());
@@ -296,14 +295,13 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
     return rule;
 };
 
-HandleSeq ForwardChainer::choose_premises(FCMemory& fcmem)
+HandleSeq ForwardChainer::choose_premises()
 {
     HandleSeq inputs;
     URECommons urec(_as);
-    Handle hsource = fcmem.get_cur_source();
 
     // Get everything associated with the source handle.
-    UnorderedHandleSet neighbors = get_distant_neighbors(hsource, 2);
+    UnorderedHandleSet neighbors = get_distant_neighbors(_cur_source, 2);
 
     // Add all root links of atoms in @param neighbors.
     for (auto hn : neighbors) {
@@ -321,22 +319,21 @@ HandleSeq ForwardChainer::choose_premises(FCMemory& fcmem)
     return inputs;
 }
 
-Handle ForwardChainer::choose_next_source(FCMemory& fcmem)
+Handle ForwardChainer::choose_next_source()
 {
 
     URECommons urec(_as);
-    HandleSeq tlist = fcmem.get_potential_sources();
     map<Handle, float> tournament_elem;
 
     switch (_ts_mode) {
     case TV_FITNESS_BASED:
-        for (Handle t : tlist)
-            tournament_elem[t] = urec.tv_fitness(t);
+        for (Handle s : _potential_sources)
+            tournament_elem[s] = urec.tv_fitness(s);
         break;
 
     case STI_BASED:
-        for (Handle t : tlist)
-            tournament_elem[t] = t->getSTI();
+        for (Handle s : _potential_sources)
+            tournament_elem[s] = s->getSTI();
         break;
 
     default:
@@ -375,13 +372,11 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
         AtomSpace focus_set_as;
 
         //Add focus set atoms to focus_set atomspace
-        HandleSeq focus_set_atoms = _fcmem.get_focus_set();
-        for (Handle h : focus_set_atoms)
+        for (Handle h : _focus_set)
             focus_set_as.add_atom(h);
 
         //Add source atoms to focus_set atomspace
-        HandleSeq sources = _fcmem.get_potential_sources();
-        for (Handle h : sources)
+        for (Handle h : _potential_sources)
             focus_set_as.add_atom(h);
 
         //rhandle may introduce a new atoms that satisfies condition for the output
@@ -715,3 +710,26 @@ Handle ForwardChainer::gen_sub_varlist(const Handle& parent,
 
     return Handle(createVariableList(final_oset));
 }
+
+//////moved from fcmemory
+void ForwardChainer::update_potential_sources(HandleSeq input)
+{
+    for (Handle i : input) {
+        if (boost::find(_potential_sources, i) == _potential_sources.end())
+            _potential_sources.push_back(i);
+    }
+}
+
+void ForwardChainer::add_rules_product(int iteration, HandleSeq product)
+{
+    //TODO implement this
+    /*for (Handle p : product) {
+        Inference inf;
+        inf.iter_step = iteration;
+        inf.applied_rule = _cur_rule;
+        inf.inf_product.push_back(p);
+
+        _inf_history.push_back(inf);
+    }*/
+}
+
