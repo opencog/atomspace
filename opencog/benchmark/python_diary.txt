@@ -93,9 +93,9 @@ Some notes:
 Here are the timing differences on my machine (details below):
 
 Bind with Python bindings:  24.19µs
-Bind with scheme_eval_h and cog-bind: 120.98µs 
+Bind with scheme_eval_h and cog-bind: 120.98µs
 
-The overhead isn't so much the fact that you're calling from Python as it 
+The overhead isn't so much the fact that you're calling from Python as it
 is just plain guile interpreter overhead, it appears. Even minor changes in
 the parsing requirement has a significant measurable effect on the execution
 timing. For example,
@@ -121,7 +121,6 @@ The prep for the bind tests is:
 
 
     def prep_bind(atomspace):
-        __init__(atomspace)
         for scheme_file in scheme_preload:
             load_scm(atomspace, scheme_file)
 
@@ -200,13 +199,13 @@ The Scheme tests use:
 
     result = scheme_eval_h(atomspace, '(cog-bind find-animals)')
 
-In both cases, this is about the fastest way you can do a bind using the 
+In both cases, this is about the fastest way you can do a bind using the
 respective mechanisms since the BindLink node is already created and referenced
 in the test setup, in the case of scheme via find-animals, and for Python the
 test prep creates an atom for bindlink_handle which has been prepopulated in
 the test atomspace.
 
-In order to determine how much time was spend in the bindings themselves, I 
+In order to determine how much time was spend in the bindings themselves, I
 created a stub that had the same signature as the C++:
 
 Handle bindlink(AtomSpace*, Handle)
@@ -272,7 +271,7 @@ Resolve handle 1M - by type
 
 The "Bare atom traversal" test is just iterating over the Handle list without
 doing anything which requires a resolution. It's just a pass in Python in the
-loop so it is timing iteration over a Python list. The "Resolve handle traversal" 
+loop so it is timing iteration over a Python list. The "Resolve handle traversal"
 tests call atomspace.isValidHandle(Handle) which requires a resolve from the
 UUID to the actual AtomPtr. Notice that the resolve takes 0.552µs for a 10K
 atomspace, 0.575µs for 100K, and 0.667µs for a 1 million node atomspace.
@@ -315,8 +314,8 @@ Resolve handle 1M - by type
   Op time:        0.312µs
   Ops/sec:    3,209,804
 
-The resolve time drops from 0.552µs to 0.470µs at 10K nodes in the atomspace, 
-0.575µs to 0.334µs at 100K nodes, and 0.667µs to 0.312µs at 1M nodes. The times 
+The resolve time drops from 0.552µs to 0.470µs at 10K nodes in the atomspace,
+0.575µs to 0.334µs at 100K nodes, and 0.667µs to 0.312µs at 1M nodes. The times
 actually drop for large traversals using std::unordered_set, probably because
 the processor caches are hitting for almost all the accesses and accesses for
 hash table entries don't take more time as the tables get bigger, unlike binary
