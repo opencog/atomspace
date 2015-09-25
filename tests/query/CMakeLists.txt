@@ -15,6 +15,8 @@ LINK_LIBRARIES (
 	atomspace
 	clearbox
 	execution
+  dist-gearman
+  gearman
 )
 
 # We want to run the tests in the order below;
