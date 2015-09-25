@@ -93,17 +93,6 @@ protected:
     virtual Rule* choose_rule(Handle hsource, bool subatom_match );
 
     /**
-     * Choose additional premises for the rule.
-     *
-     * @fcmem  An object holding the current source/target and other inform
-     *         ation of the forward chaining instance.
-     *
-     * @return  A set of Handles chosen as a result of applying fitness
-     *          criteria with respect to the current source.
-     */
-
-    virtual HandleSeq choose_premises(void);
-    /**
      * choose next source from the source list
      *
      * @return  A handle to the chosen source from source list

@@ -295,30 +295,6 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
     return rule;
 };
 
-HandleSeq ForwardChainer::choose_premises()
-{
-    HandleSeq inputs;
-    URECommons urec(_as);
-
-    // Get everything associated with the source handle.
-    UnorderedHandleSet neighbors = get_distant_neighbors(_cur_source, 2);
-
-    // Add all root links of atoms in @param neighbors.
-    for (auto hn : neighbors) {
-        if (hn->getType() != VARIABLE_NODE) {
-            HandleSeq roots;
-            urec.get_root_links(hn, roots);
-            for (auto r : roots) {
-                if (find(inputs.begin(), inputs.end(), r) == inputs.end() and r->getType()
-                        != BIND_LINK)
-                    inputs.push_back(r);
-            }
-        }
-    }
-
-    return inputs;
-}
-
 Handle ForwardChainer::choose_next_source()
 {
 
