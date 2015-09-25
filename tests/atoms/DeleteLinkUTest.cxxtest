@@ -68,6 +68,10 @@ void DeleteLinkUTest::test_free_delete()
 				N(CONCEPT_NODE, "thing A"),
 				N(CONCEPT_NODE, "B-dom-ness")));
 
+	// The incoming set should be simple.
+	TS_ASSERT_EQUALS(1, pred->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, list->getIncomingSetSize());
+
 	// Test that execution creates the desired link...
 	Instantiator inst(&_as);
 	Handle prop = inst.execute(add);
@@ -78,7 +82,32 @@ void DeleteLinkUTest::test_free_delete()
 	TS_ASSERT_EQUALS(pred, lprop->getOutgoingAtom(0));
 	TS_ASSERT_EQUALS(list, lprop->getOutgoingAtom(1));
 
+	// The incoming set should increase by one.
+	TS_ASSERT_EQUALS(2, pred->getIncomingSetSize());
+	TS_ASSERT_EQUALS(2, list->getIncomingSetSize());
 
+	// ----------------------------------------------
+	// Now, delete the thing.
+	Handle del =
+		L(PUT_LINK,
+			L(DELETE_LINK,
+				L(EVALUATION_LINK,
+					N(PREDICATE_NODE, "some property"),
+					N(VARIABLE_NODE, "$x"))),
+			L(LIST_LINK,
+				N(CONCEPT_NODE, "thing A"),
+				N(CONCEPT_NODE, "B-dom-ness")));
+
+	// The incoming set of the ListLink (only) should increase by one.
+	TS_ASSERT_EQUALS(2, pred->getIncomingSetSize());
+	TS_ASSERT_EQUALS(3, list->getIncomingSetSize());
+
+	Handle undef = inst.execute(del);
+	TS_ASSERT_EQUALS(undef, Handle::UNDEFINED);
+
+	// The incoming set of both should decrease by one.
+	TS_ASSERT_EQUALS(1, pred->getIncomingSetSize());
+	TS_ASSERT_EQUALS(2, list->getIncomingSetSize());
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
