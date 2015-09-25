@@ -80,8 +80,10 @@
 ; Force its removal.
 (cog-execute! remove-thing-ab)
 
-; Look for it.
+; Look for it; it should be absent.
 (cog-execute! get-value)
+; Double-check it's absence.
+(show-eval-links)
 
 ; Add it back in:
 (cog-execute! to-be-added)

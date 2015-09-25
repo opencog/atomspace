@@ -40,7 +40,7 @@ void DeleteLink::init(void)
 	// time, because we don't know the atomspace yet.  So we hack
 	// around this by thowing at construtor time.
 	//
-	if (0 == _varlist.varseq.size())
+	if (0 == _varseq.size())
 		// throw DeleteException();
 		throw InvalidParamException(TRACE_INFO,
 			"Cannot create a fully grounded DeleteLink!");
@@ -67,13 +67,13 @@ Handle DeleteLink::execute(AtomSpace * as) const
 
 DeleteLink::DeleteLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: FunctionLink(DELETE_LINK, oset, tv, av)
+	: FreeLink(DELETE_LINK, oset, tv, av)
 {
 	init();
 }
 
 DeleteLink::DeleteLink(Link &l)
-	: FunctionLink(l)
+	: FreeLink(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();

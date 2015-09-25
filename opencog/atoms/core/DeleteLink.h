@@ -27,7 +27,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/core/FreeLink.h>
 
 namespace opencog
 {
@@ -43,7 +43,7 @@ namespace opencog
 /// atomspace!  In essence, the DeleteLink is a link that can never be
 /// grounded!
 ///
-class DeleteLink : public FunctionLink
+class DeleteLink : public FreeLink
 {
 protected:
 	void init(void);
