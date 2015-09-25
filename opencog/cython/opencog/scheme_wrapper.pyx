@@ -21,17 +21,6 @@ cdef extern from "<string>" namespace "std":
         char * c_str()
         int size()
 
-# This needs to be explicitly initialized...
-cdef extern from "opencog/query/PatternSCM.h" namespace "opencog":
-    cdef cppclass PatternSCM:
-        PatternSCM()
-
-def __init__(AtomSpace a):
-    # Do something, anything, to force initialization
-    eval_scheme(deref(a.atomspace), "(+ 2 2)")
-    PatternSCM()
-
-
 cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
     string eval_scheme(cAtomSpace& as, const string& s) except +
 
@@ -64,4 +53,3 @@ cdef extern from "opencog/guile/load-file.h" namespace "opencog":
 def load_scm(AtomSpace a, char* fname):
     status = load_scm_file_relative(deref(a.atomspace), fname)
     return status == 0
-
