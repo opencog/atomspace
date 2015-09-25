@@ -24,8 +24,10 @@
 			(NumberNode "42")
 			(ConceptNode "foo")
 			(PredicateNode "biffle")
+			(EvaluationLink
+				(ConceptNode "thingy"))
 			(SchemaNode "finagle")
-			(ConceptNode "bar")))
+			(ConceptNode "bar"))))
 
 ; Now, perform the actual filtering:
 (cog-execute! filter-it)
