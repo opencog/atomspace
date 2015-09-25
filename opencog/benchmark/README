@@ -31,7 +31,7 @@ Built atomspace, execution time: 1.95s
 Benchmarking AtomSpace's addLink method 1000 times ........................
 Sum time for all requests: 0.056635 seconds
 Memory (max RSS) change after benchmark: 464kb
-Per operation stats, in CPU clock ticks: 
+Per operation stats, in CPU clock ticks:
   N: 1000
   mean: 56
   min: 7
@@ -87,7 +87,7 @@ new Cython bindings.
 To use the python benchmark, make sure you have your PYTHONPATH set to include
 the cython directory:
 
- $ export PYTHONPATH="${PYTHONPATH}:${HOME}/src/opencog/build/opencog/cython:${HOME}/src/opencog/opencog/python::${HOME}/src/opencog/opencog/nlp"
+ $ export PYTHONPATH="${PYTHONPATH}:${HOME}/src/opencog/build/opencog/cython:${HOME}/src/opencog/opencog/python:${HOME}/src/opencog/opencog/nlp"
 
 and then run:
 
@@ -114,10 +114,8 @@ optional arguments:
   -t {spread,node,bindlink,traverse,scheme}, --test {spread,node,bindlink,traverse,scheme}
                         Test to benchmark, where:
                           spread    - a spread of tests across areas (default)
-                          node      - atomspace node operations 
+                          node      - atomspace node operations
                           bindlink  - all the bindlink forms
                           traverse  - traversal of atomspace lists
                           scheme    - scheme evaluation functions
   -i N, --iterations N  iterations to average (default=10)
-
-
