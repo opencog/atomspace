@@ -1,0 +1,113 @@
+/*
+ * tests/atomspace/DeleteUTest.cxxtest
+ *
+ * Copyright (C) 2015 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/DeleteLink.h>
+#include <opencog/atomutils/AtomUtils.h>
+#include <opencog/atoms/execution/Instantiator.h>
+
+using namespace opencog;
+
+// Test the DeleteLink.
+//
+class DeleteLinkUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+
+public:
+	DeleteLinkUTest()
+	{
+		logger().setPrintToStdoutFlag(true);
+	}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void test_free_delete();
+};
+
+#define N _as.add_node
+#define L _as.add_link
+
+// Test to make sure that DeleteLink is a FreeLink, i.e. does not
+// bind any of its variables. See bug #333 for the original report.
+void DeleteLinkUTest::test_free_delete()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Copied from examples/guile/get-put.scm
+	Handle pred, list;
+	Handle add =
+		L(PUT_LINK,
+			L(EVALUATION_LINK,
+				pred = N(PREDICATE_NODE, "some property"),
+				N(VARIABLE_NODE, "$x")),
+			list = L(LIST_LINK,
+				N(CONCEPT_NODE, "thing A"),
+				N(CONCEPT_NODE, "B-dom-ness")));
+
+	// The incoming set should be simple.
+	TS_ASSERT_EQUALS(1, pred->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, list->getIncomingSetSize());
+
+	// Test that execution creates the desired link...
+	Instantiator inst(&_as);
+	Handle prop = inst.execute(add);
+
+	printf("Created link %s\n", prop->toString().c_str());
+	TS_ASSERT_EQUALS(EVALUATION_LINK, prop->getType());
+	LinkPtr lprop(LinkCast(prop));
+	TS_ASSERT_EQUALS(pred, lprop->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(list, lprop->getOutgoingAtom(1));
+
+	// The incoming set should increase by one.
+	TS_ASSERT_EQUALS(2, pred->getIncomingSetSize());
+	TS_ASSERT_EQUALS(2, list->getIncomingSetSize());
+
+	// ----------------------------------------------
+	// Now, delete the thing.
+	Handle del =
+		L(PUT_LINK,
+			L(DELETE_LINK,
+				L(EVALUATION_LINK,
+					N(PREDICATE_NODE, "some property"),
+					N(VARIABLE_NODE, "$x"))),
+			L(LIST_LINK,
+				N(CONCEPT_NODE, "thing A"),
+				N(CONCEPT_NODE, "B-dom-ness")));
+
+	// The incoming set of the ListLink (only) should increase by one.
+	TS_ASSERT_EQUALS(2, pred->getIncomingSetSize());
+	TS_ASSERT_EQUALS(3, list->getIncomingSetSize());
+
+	Handle undef = inst.execute(del);
+	TS_ASSERT_EQUALS(undef, Handle::UNDEFINED);
+
+	// The incoming set of both should decrease by one.
+	TS_ASSERT_EQUALS(1, pred->getIncomingSetSize());
+	TS_ASSERT_EQUALS(2, list->getIncomingSetSize());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}

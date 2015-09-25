@@ -286,7 +286,11 @@ TIMES_LINK <- ARITHMETIC_LINK
 // with the pattern matcher, so that if it discovers a grounding, the
 // grounded term is deleted.
 //
-DELETE_LINK <- FUNCTION_LINK
+// Implementation Note: The DeleteLink cannot inherit from FunctionLink
+// because that would cause all variables to be bound, i.e. to become
+// a closed sentence; thus it inherits from FreeLink.
+//
+DELETE_LINK <- FREE_LINK
 
 // The Insert, Assign and RemoveLink's all expect at TypeNode as the first
 // member of thier outgoing set.  When these execute, they add or remove
