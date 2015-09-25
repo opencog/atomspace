@@ -25,7 +25,7 @@
 
 #include <libgearman/gearman.h>
 
-//#include <opencog/guile/SchemeModule.h> //function wrap not defined for dist function
+
 //taken from InferenceSCM
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
@@ -33,6 +33,7 @@
 //
 #include <opencog/atomspace/Handle.h>
 
+//#include <opencog/persist/sql/AtomStorage.h>
 
 //(use-modules (opencog gearman))
 //(set-slave-mode "mapster-ip" "worker1")
