@@ -1,0 +1,91 @@
+/*
+ * tests/atomspace/PutUTest.cxxtest
+ *
+ * Copyright (C) 2015 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/PutLink.h>
+#include <opencog/atomutils/AtomUtils.h>
+#include <opencog/atoms/execution/Instantiator.h>
+
+using namespace opencog;
+
+// Test the PutLink.
+//
+class PutLinkUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+
+public:
+	PutLinkUTest()
+	{
+		logger().setPrintToStdoutFlag(true);
+	}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void test_filtering();
+};
+
+#define N _as.add_node
+#define L _as.add_link
+
+// Test to make sure that PutLink filters.
+void PutLinkUTest::test_filtering()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// copied from /examples/guile/filter.scm
+	Handle foo, bar;
+	Handle filt =
+		L(PUT_LINK,
+			L(TYPED_VARIABLE_LINK,
+				N(VARIABLE_NODE, "$x"),
+				N(TYPE_NODE, "ConceptNode")),
+			N(VARIABLE_NODE, "$x"),
+			L(SET_LINK,
+				N(NUMBER_NODE, "42"),
+				foo = N(CONCEPT_NODE, "foo"),
+				N(PREDICATE_NODE, "biffle"),
+				L(EVALUATION_LINK,
+					N(CONCEPT_NODE, "thingy")),
+				N(SCHEMA_NODE, "finagle"),
+				bar = N(CONCEPT_NODE, "bar")));
+				
+	// Test that execution filters as desired...
+	Instantiator inst(&_as);
+	Handle cncpts = inst.execute(filt);
+
+	printf("Filtered %s\n", cncpts->toString().c_str());
+	TS_ASSERT_EQUALS(SET_LINK, cncpts->getType());
+	LinkPtr lset(LinkCast(cncpts));
+	TS_ASSERT_EQUALS(2, lset->getArity());
+	Handle a = lset->getOutgoingAtom(0);
+	Handle b = lset->getOutgoingAtom(1);
+	TS_ASSERT(foo == a or foo == b);
+	TS_ASSERT(bar == a or bar == b);
+	TS_ASSERT(a != b);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}

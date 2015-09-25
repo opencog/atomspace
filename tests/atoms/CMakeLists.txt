@@ -14,3 +14,6 @@ TARGET_LINK_LIBRARIES(DefineLinkUTest atomspace)
 
 ADD_CXXTEST(DeleteLinkUTest)
 TARGET_LINK_LIBRARIES(DeleteLinkUTest execution atomspace)
+
+ADD_CXXTEST(PutLinkUTest)
+TARGET_LINK_LIBRARIES(PutLinkUTest execution atomspace)
