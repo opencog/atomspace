@@ -304,4 +304,58 @@ HandleSeq get_predicates_for(const Handle& target,
     return answer;
 }
 
+bool are_similar(const Handle& h1, const Handle& h2,bool strict_type_match)
+{
+    if (h1 == h2) return true;
+
+    if (NodeCast(h1) and NodeCast(h2)) {
+        if (strict_type_match and (h1->getType() != h2->getType()) )
+            return false;
+        else
+            return true;
+    }
+
+    LinkPtr lh1(LinkCast(h1));
+    LinkPtr lh2(LinkCast(h2));
+
+    if (lh1 and lh2) {
+        if(strict_type_match and (lh1->getType() != lh2->getType()))
+        {
+         return false;
+        }
+
+        HandleSeq hseqh1 = lh1->getOutgoingSet();
+        HandleSeq hseqh2 = lh2->getOutgoingSet();
+
+        if (hseqh1.size() != hseqh2.size()) return false;
+
+        //Unordered links should be treated in a special way
+        if (classserver().isA(lh1->getType(), UNORDERED_LINK) or classserver().isA(
+                lh2->getType(), UNORDERED_LINK)) {
+
+            for (const auto& h1 : hseqh1) {
+                for (auto it = hseqh2.begin(); it != hseqh2.end();) {
+                    if (are_similar(h1, h2, strict_type_match)) {
+                        hseqh2.erase(it);
+                        break;
+                    }
+                }
+            }
+            //Empty means all has been mapped.Success.
+            if (hseqh2.empty()) return true;
+
+            return false;
+        }
+
+        for (HandleSeq::size_type i = 0; i < hseqh1.size(); i++) {
+            if (not are_similar(hseqh1[i], hseqh2[i], strict_type_match))
+                return false;
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
 } // namespace OpenCog
