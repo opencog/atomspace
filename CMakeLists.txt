@@ -178,16 +178,22 @@ ELSE (COGUTIL_FOUND)
 ENDIF (COGUTIL_FOUND)
 
 FIND_PACKAGE(Cxxtest)
-IF (NOT CXXTEST_FOUND)
+IF (CXXTEST_FOUND)
+	MESSAGE(STATUS "CxxTest found.")
+ELSE (CXXTEST_FOUND)
 	MESSAGE(STATUS "CxxTest missing: needed for unit tests.")
-ENDIF (NOT CXXTEST_FOUND)
+ENDIF (CXXTEST_FOUND)
 
-# Glasgow Haskell compiler
-FIND_PACKAGE(Stack)
-IF (STACK_FOUND)
-	ADD_DEFINITIONS(-DHAVE_STACK)
-	SET(HAVE_STACK 1)
-ENDIF (STACK_FOUND)
+FIND_PACKAGE(LibGearman)
+ADD_DEFINITIONS(-DHAVE_GEARMAN)
+IF(GEARMAN_FOUND)
+	SET(HAVE_GEARMAN 1)
+	SET(GEARMAN_DIR_MESSAGE "Gearman found.")
+ELSE (GEARMAN_FOUND)
+	SET(HAVE_GEARMAN 0)
+	SET(GEARMAN_DIR_MESSAGE "Gearman not found.")
+ENDIF(GEARMAN_FOUND)
+MESSAGE(STATUS "${GEARMAN_DIR_MESSAGE}")
 
 # Gnu Scientific Library
 FIND_PACKAGE(GSL)
@@ -280,27 +286,12 @@ IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND PYTHONLIBS_FOUND)
 	SET(HAVE_NOSETESTS 1)
 ENDIF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND PYTHONLIBS_FOUND)
 
-# Threaded Building Blocks (Intel TBB) library
-FIND_PACKAGE(TBB)
-IF (TBB_FOUND)
-	SET(HAVE_TBB 1)
-ELSE (TBB_FOUND)
-	SET(TBB_DIR_MESSAGE "Intel TBB (Threaded Building Blocks) was not found; the AtomSpace Publisher module will not be built. Installation instructions: https://www.threadingbuildingblocks.org/download")
-ENDIF (TBB_FOUND)
-MESSAGE(STATUS "${TBB_DIR_MESSAGE}")
-
-# Enable the hypergraph persistence module, if unixodbc is found.
-# In principle, iODBC could be used; however, iODBC is buggy when
-# used with UTF8/unicode node names, and fails miserably. Thus,
-# only UnixODBC is supported at this time.
-#
-# FIND_PACKAGE(IODBC QUIET)
-# IF (IODBC_FOUND)
-# 	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
-# 	SET(ODBC_FOUND 1)
-# 	SET(ODBC_INCLUDE_DIRS ${IODBC_INCLUDE_DIRS})
-# 	SET(ODBC_LIBRARIES ${IODBC_LIBRARIES})
-# ENDIF (IODBC_FOUND)
+# Glasgow Haskell compiler
+FIND_PACKAGE(Stack)
+IF (STACK_FOUND)
+	ADD_DEFINITIONS(-DHAVE_STACK)
+	SET(HAVE_STACK 1)
+ENDIF (STACK_FOUND)
 
 FIND_PACKAGE(UnixODBC QUIET)
 IF (UnixODBC_FOUND)
@@ -341,17 +332,6 @@ ELSE (ZMQ_FOUND AND ZMQ_LIBRARY)
 ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY)
 MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
 
-FIND_PACKAGE(LibGearman)
-ADD_DEFINITIONS(-DHAVE_GEARMAN)
-IF(GEARMAN_FOUND)
-	SET(HAVE_GEARMAN 1)
-	SET(GEARMAN_DIR_MESSAGE "libgearman was found.")
-ELSE (GEARMAN_FOUND)
-	SET(HAVE_GEARMAN 0)
-	SET(GEARMAN_DIR_MESSAGE "libgearman was not found.")
-ENDIF(GEARMAN_FOUND)
-MESSAGE(STATUS "${GEARMAN_DIR_MESSAGE}")
-	
 # ==========================================================
 # Decide what to build, based on the packages found.
 
@@ -574,13 +554,12 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 SUMMARY_ADD("AtomSpace" "A weighted and typed hypergraph database" HAVE_ATOMSPACE)
 SUMMARY_ADD("Cython bindings" "Cython (python) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
+SUMMARY_ADD("Gearman" "Distributed processing capability" HAVE_GEARMAN)
 SUMMARY_ADD("Haskell bindings" "Haskell bindings" HAVE_STACK)
 SUMMARY_ADD("Hypertable" "HyperTable for scalable persistance (experimental)" HAVE_HYPERTABLE)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("SQL persistance" "Save/Restore of AtomSpace to database" HAVE_PERSIST)
 SUMMARY_ADD("ZeroMQ persistence" "Save/Restore of AtomSpace to ZeroMQ server" HAVE_ZMQ)
-SUMMARY_ADD("TBB" "Intel TBB (Threaded Building Blocks) for multithreading" HAVE_TBB)
-SUMMARY_ADD("Distributed SCM" "Distributed processing capability" HAVE_GEARMAN)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_SHOW()

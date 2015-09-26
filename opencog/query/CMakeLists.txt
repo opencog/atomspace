@@ -13,21 +13,21 @@ ADD_LIBRARY(query SHARED
 	FuzzyMatch/FuzzyPatternMatch.cc
 	FuzzyMatch/FuzzyPatternMatchCB.cc
 )
+
 ADD_DEPENDENCIES(query
 	opencog_atom_types
 )
+
 TARGET_LINK_LIBRARIES(query
 	atomutils
 	lambda
 	atomspace
 #	execution
 )
-IF (HAVE_GUILE)
-	TARGET_LINK_LIBRARIES(query
-		smob
-	)
-ENDIF (HAVE_GUILE)
 
+IF (HAVE_GUILE)
+	TARGET_LINK_LIBRARIES(query smob)
+ENDIF (HAVE_GUILE)
 
 INSTALL (TARGETS query DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
@@ -46,26 +46,3 @@ INSTALL (FILES
 	Satisfier.h
 	DESTINATION "include/opencog/query"
 )
-
-IF (HAVE_GEARMAN AND HAVE_GUILE)
-	ADD_LIBRARY(dist-gearman SHARED
-	    Distributed/DistSCM.cc
-	)
-	ADD_DEPENDENCIES(dist-gearman
-		opencog_atom_types
-	)
-	TARGET_LINK_LIBRARIES(dist-gearman
-	    ${GEARMAN_LIBRARY}
-	    atomspace
-	)
-	TARGET_LINK_LIBRARIES(dist-gearman
-		smob
-	)
-	INSTALL (TARGETS dist-gearman DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-	INSTALL (FILES
-		Distributed/DistSCM.h
-		DESTINATION "include/opencog/query"
-	)
-ELSE(HAVE_GEARMAN AND HAVE_GUILE)
-	MESSAGE(FATAL_ERROR "Cannot find libgearman library or guile")
-ENDIF(HAVE_GEARMAN AND HAVE_GUILE)
