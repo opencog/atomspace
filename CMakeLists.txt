@@ -282,28 +282,6 @@ IF (STACK_FOUND)
 	SET(HAVE_STACK 1)
 ENDIF (STACK_FOUND)
 
-# Threaded Building Blocks (Intel TBB) library
-FIND_PACKAGE(TBB)
-IF (TBB_FOUND)
-	SET(HAVE_TBB 1)
-ELSE (TBB_FOUND)
-	SET(TBB_DIR_MESSAGE "Intel TBB (Threaded Building Blocks) was not found; the AtomSpace Publisher module will not be built. Installation instructions: https://www.threadingbuildingblocks.org/download")
-ENDIF (TBB_FOUND)
-MESSAGE(STATUS "${TBB_DIR_MESSAGE}")
-
-# Enable the hypergraph persistence module, if unixodbc is found.
-# In principle, iODBC could be used; however, iODBC is buggy when
-# used with UTF8/unicode node names, and fails miserably. Thus,
-# only UnixODBC is supported at this time.
-#
-# FIND_PACKAGE(IODBC QUIET)
-# IF (IODBC_FOUND)
-# 	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
-# 	SET(ODBC_FOUND 1)
-# 	SET(ODBC_INCLUDE_DIRS ${IODBC_INCLUDE_DIRS})
-# 	SET(ODBC_LIBRARIES ${IODBC_LIBRARIES})
-# ENDIF (IODBC_FOUND)
-
 FIND_PACKAGE(UnixODBC QUIET)
 IF (UnixODBC_FOUND)
 	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
@@ -582,7 +560,6 @@ SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("SQL persistance" "Save/Restore of AtomSpace to database" HAVE_PERSIST)
 SUMMARY_ADD("ZeroMQ persistence" "Save/Restore of AtomSpace to ZeroMQ server" HAVE_ZMQ)
-SUMMARY_ADD("TBB" "Intel TBB (Threaded Building Blocks) for multithreading" HAVE_TBB)
 SUMMARY_ADD("Distributed SCM" "Distributed processing capability" HAVE_GEARMAN)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_SHOW()
