@@ -33,8 +33,9 @@
 #include <opencog/persist/gearman/DistSCM.h>
 
 using namespace opencog;
-//assuming cxxtest times the tests with some time out and fails test on timeout - say if gearman breaks and test blocks forever
-//always use cerr or logger to debug instead of cout
+// assuming cxxtest times the tests with some time out and fails test
+// on timeout - say if gearman breaks and test blocks forever
+// always use cerr or logger to debug instead of cout
 
 class DistScmUTest :  public CxxTest::TestSuite
 {
@@ -63,8 +64,7 @@ void DistScmUTest::setUp(void)
 {
   as->clear();
   config().set("SCM_PRELOAD",
-	             "opencog/atomspace/core_types.scm, "
-               "opencog/scm/opencog/dist-gearman.scm"
+	             "opencog/atomspace/core_types.scm"
 	             );
   load_scm_files_from_config(*as);
 }
