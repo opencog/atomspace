@@ -10,21 +10,26 @@ as well as to be saved and restored from disk, file, database, network.
 
 Systems include:
 
-file       -- file-based storage.  Works, but deprecated.
+file       -- File-based storage. Strongly deprecated. Probably broken.
 
-hypertable -- experimental HyperTable support. Unmaintained.
-              (Won't compile at this time.)
+gearman    -- Experimental support for distributed operation, using
+              GearMan.
 
-memcache   -- experimental/broken, uses memcached for persistence.
-              (Won't compile at this time.)
+hypertable -- Experimental HyperTable support. Unmaintained.
+              (Won't compile at this time.) Should be revived!
 
-sql        -- works well for most uses -- with caveats
+memcache   -- Experimental/broken, uses memcached for persistence.
+              (Won't compile at this time.) Not worth it, very poor
+              performance; memcache does not work well for small
+              objects, e.g. atoms, which are about 50 bytes in size.
+
+sql        -- Works well for most uses -- with caveats.
 
 zmq        -- ZeroMQ-based atomspace serialization and deserialization.
               Unmaintained.  (Won't compile at this time.)
 
 
-The hypertable, memcache and sql systems all support networked,
+The gearman, hypertable, memcache and sql systems all support networked,
 peer-to-peer communications between cogservers.  (In principle ...
 currently, needs test cases, and general work to enable/support).
 
@@ -44,5 +49,3 @@ OpenCog most closely resembles the fourth bullet in that post:
 most promising backend would seem to be "bigdata":
 http://sourceforge.net/projects/bigdata/ (GPLv2)
 http://www.bigdata.com/
-
-
