@@ -56,42 +56,43 @@ class DistScmUTest :  public CxxTest::TestSuite
 		void setUp(void);
 		static void create_slave_thread(DistScmUTest* dt);
 
-	// thread join, after calling set master mode
+		// Thread join, after calling set master mode.
 		void tearDown(void){}
-		void test_dist();//call master and get return -
+
+		// Call master and get return.
+		void test_dist();
 };
 
 void DistScmUTest::setUp(void)
 {
 	as->clear();
 	config().set("SCM_PRELOAD",
-							 "opencog/atomspace/core_types.scm"
-							 );
+	             "opencog/atomspace/core_types.scm");
 	load_scm_files_from_config(*as);
 }
 
 void DistScmUTest::create_slave_thread(DistScmUTest* dt)
 {
-	std::string rc;
-	rc = dt->evl->eval("(setenv \"LTDL_LIBRARY_PATH\" \"/usr/local/lib/opencog\")");
-	std::cout << "ltdl path: " << rc << std::endl;
-	rc = dt->evl->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
-	std::cout << "load path: " << rc << std::endl;
-	rc = dt->evl->eval("(use-modules (opencog))");
-	std::cout << "use-modules: " << rc << std::endl;
-	rc = dt->evl->eval("(use-modules (opencog dist-gearman))");
-	std::cout << "use-gearman: " << rc << std::endl;
-	fflush(stdout);
+	dt->evl->eval("(setenv \"LTDL_LIBRARY_PATH\" \"/usr/local/lib/opencog\")");
+	dt->evl->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+	dt->evl->eval("(use-modules (opencog))");
+	dt->evl->eval("(use-modules (opencog dist-gearman))");
 
 	std::string slv = dt->evl->eval(
 		"(set-slave-mode \"localhost\" \"worker1\")");
+
+	std::cout << "Slave mode message:\n" << slv << std::endl;
 	TS_ASSERT_EQUALS(slv, "localhost\n");
 }
 
 void DistScmUTest::test_dist()
 {
-	std::thread slaveThread(create_slave_thread,this);
-	//call master
+	std::thread slaveThread(create_slave_thread, this);
+
+	// Call master
+	evl2->eval("(setenv \"LTDL_LIBRARY_PATH\" \"/usr/local/lib/opencog\")");
+	evl2->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+	evl2->eval("(use-modules (opencog))");
 	evl2->eval("(use-modules (opencog dist-gearman))");
 	std::string mast =
 		"(dist-run-scm \"(ConceptNode \\\"Hello\\\")\" \"client1\" #t)";
