@@ -43,12 +43,15 @@ class DistScmUTest :  public CxxTest::TestSuite
 		AtomSpace *as;
 		SchemeEval *evl,*evl2;
 	public:
-		DistScmUTest(void){
-			as=new AtomSpace();
-			evl=new SchemeEval(as);
-			evl2=new SchemeEval(as);
+		DistScmUTest(void)
+		{
+			as = new AtomSpace();
+			evl = new SchemeEval(as);
+			evl2 = new SchemeEval(as);
 		}
-		~DistScmUTest(){
+
+		~DistScmUTest()
+		{
 			delete evl;
 			delete evl2;
 			delete as;
