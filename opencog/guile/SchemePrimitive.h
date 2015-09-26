@@ -113,6 +113,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			                               const std::string&);
 			const std::string& (T::*s_v)(void);
 			TruthValuePtr (T::*p_h)(Handle);
+			UUID (T::*u_ssb)(const std::string&,const std::string&,bool);
 			void (T::*v_h)(Handle);
 			void (T::*v_s)(const std::string&);
 			void (T::*v_ss)(const std::string&,
@@ -152,6 +153,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			S_SSS, // return string, take three strings
 			S_V,   // return string, take void
 			P_H,   // return truth value, take Handle
+			U_SSB, //return UUID, take string,string,boolean
 			V_H,   // return void, take Handle
 			V_S,   // return void, take string
 			V_SS,  // return void, take two strings
@@ -448,6 +450,18 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = SchemeSmob::tv_to_scm(tv);
 					break;
 				}
+				case U_SSB:
+				{
+					// First argument is a string
+					std::string str = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
+					std::string str2(SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2));
+					bool b = scm_to_bool(scm_caddr(args));
+
+
+					UUID rh=((that->*method.u_ssb)(str, str2, b));
+					rc = scm_from_ulong(rh);//SchemeSmob::handle_to_scm(rh);
+					break;
+				}
 				case V_H:
 				{
 					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name));
@@ -635,6 +649,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_3(H_HHH, h_hhh, Handle, Handle, Handle, Handle)
 		DECLARE_CONSTR_0(S_V,  s_v,  const std::string&)
 		DECLARE_CONSTR_1(P_H,  p_h,  TruthValuePtr, Handle)
+		DECLARE_CONSTR_3(U_SSB, u_ssb, UUID,const std::string&,const std::string&, bool)
 		DECLARE_CONSTR_1(V_H,  v_h,  void, Handle)
 		DECLARE_CONSTR_1(V_S,  v_s,  void, const std::string&)
 		DECLARE_CONSTR_2(V_SS, v_ss, void, const std::string&,
@@ -709,6 +724,7 @@ DECLARE_DECLARE_3(Handle, const std::string&, const HandleSeq&, const HandleSeq&
 DECLARE_DECLARE_3(HandleSeq, Handle, Type, int)
 DECLARE_DECLARE_3(const std::string&, const std::string&,
                   const std::string&, const std::string&)
+DECLARE_DECLARE_3(UUID, const std::string&,const std::string&, bool)
 DECLARE_DECLARE_3(void, const std::string&,
                   const std::string&, const std::string&)
 DECLARE_DECLARE_3(Handle, Handle, Handle, Handle)
@@ -722,4 +738,3 @@ DECLARE_DECLARE_4(HandleSeq, Handle, Type, int, bool)
 #endif // _OPENCOG_SCHEME_PRIMITIVE_H
 
 #endif // HAVE_GUILE
-

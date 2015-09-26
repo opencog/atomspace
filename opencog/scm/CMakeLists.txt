@@ -22,5 +22,11 @@ INSTALL (FILES
 	opencog/rule-engine.scm
 	DESTINATION "${DATADIR}/scm/opencog"
 )
+IF(HAVE_GEARMAN)
+INSTALL (FILES
+	opencog/dist-gearman.scm
+	DESTINATION "${DATADIR}/scm/opencog"
+	)
+ENDIF(HAVE_GEARMAN)
 # No CMakeLists.txt in dir:
 #ADD_SUBDIRECTORY (wires)
