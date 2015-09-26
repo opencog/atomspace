@@ -75,6 +75,7 @@ void DistScmUTest::setUp(void)
 
 	evl->eval("(setenv \"LTDL_LIBRARY_PATH\" \"/usr/local/lib/opencog\")");
 	evl->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+	evl->eval("(add-to-load-path \"./opencog/scm\")");
 	evl->eval("(use-modules (opencog))");
 	evl->eval("(use-modules (opencog dist-gearman))");
 }
