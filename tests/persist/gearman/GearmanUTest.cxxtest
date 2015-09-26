@@ -72,15 +72,15 @@ void DistScmUTest::setUp(void)
 	config().set("SCM_PRELOAD",
 	             "opencog/atomspace/core_types.scm");
 	load_scm_files_from_config(*as);
+
+	evl->eval("(setenv \"LTDL_LIBRARY_PATH\" \"/usr/local/lib/opencog\")");
+	evl->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+	evl->eval("(use-modules (opencog))");
+	evl->eval("(use-modules (opencog dist-gearman))");
 }
 
 void DistScmUTest::create_slave_thread(DistScmUTest* dt)
 {
-	dt->evl->eval("(setenv \"LTDL_LIBRARY_PATH\" \"/usr/local/lib/opencog\")");
-	dt->evl->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
-	dt->evl->eval("(use-modules (opencog))");
-	dt->evl->eval("(use-modules (opencog dist-gearman))");
-
 	std::string slv = dt->evl->eval(
 		"(set-slave-mode \"localhost\" \"worker1\")");
 
@@ -93,15 +93,16 @@ void DistScmUTest::test_dist()
 	std::thread slaveThread(create_slave_thread, this);
 
 	// Call master
-	evl2->eval("(setenv \"LTDL_LIBRARY_PATH\" \"/usr/local/lib/opencog\")");
-	evl2->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
-	evl2->eval("(use-modules (opencog))");
-	evl2->eval("(use-modules (opencog dist-gearman))");
 	std::string mast =
 		"(dist-run-scm \"(ConceptNode \\\"Hello\\\")\" \"client1\" #t)";
 
 	std::string result = evl2->eval(mast);
-	TS_ASSERT_DIFFERS(atoll(result.c_str()), Handle::INVALID_UUID);
+	std::cout << "Master result message:\n" << result << std::endl;
+	std::cout << "Master got: " <<
+		evl2->eval("(cog-atom " + result + ")");
+
 	evl2->eval("(set-master-mode)");
 	slaveThread.join();
+
+	TS_ASSERT_DIFFERS(atoll(result.c_str()), Handle::INVALID_UUID);
 }
