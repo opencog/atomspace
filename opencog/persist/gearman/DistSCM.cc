@@ -29,7 +29,7 @@ using namespace opencog;
 
 bool DistSCM::master_mode = true;
 
-DistSCM::DistSCM(void): true_string("true"), false_string("false")
+DistSCM::DistSCM(void)
 {
 	scm_with_guile(init_in_guile, this);
 }
