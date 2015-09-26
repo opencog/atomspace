@@ -341,7 +341,17 @@ ELSE (ZMQ_FOUND AND ZMQ_LIBRARY)
 ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY)
 MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
 
-
+FIND_PACKAGE(LibGearman)
+ADD_DEFINITIONS(-DHAVE_GEARMAN)
+IF(GEARMAN_FOUND)
+	SET(HAVE_GEARMAN 1)
+	SET(GEARMAN_DIR_MESSAGE "libgearman was found.")
+ELSE (GEARMAN_FOUND)
+	SET(HAVE_GEARMAN 0)
+	SET(GEARMAN_DIR_MESSAGE "libgearman was not found.")
+ENDIF(GEARMAN_FOUND)
+MESSAGE(STATUS "${GEARMAN_DIR_MESSAGE}")
+	
 # ==========================================================
 # Decide what to build, based on the packages found.
 
@@ -571,5 +581,6 @@ SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("SQL persistance" "Save/Restore of AtomSpace to database" HAVE_PERSIST)
 SUMMARY_ADD("ZeroMQ persistence" "Save/Restore of AtomSpace to ZeroMQ server" HAVE_ZMQ)
 SUMMARY_ADD("TBB" "Intel TBB (Threaded Building Blocks) for multithreading" HAVE_TBB)
+SUMMARY_ADD("Distributed SCM" "Distributed processing capability" HAVE_GEARMAN)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_SHOW()

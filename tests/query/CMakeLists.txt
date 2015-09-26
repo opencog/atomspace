@@ -17,9 +17,12 @@ LINK_LIBRARIES (
 	execution
 )
 
+#start gearman-job-server
+
 # We want to run the tests in the order below;
 # Each test gets progressively more complex, and exercises
 # features that the later tests depend on.
+
 ADD_CXXTEST(PatternUTest)
 ADD_CXXTEST(PatternCrashUTest)
 ADD_CXXTEST(StackUTest)
@@ -30,10 +33,14 @@ ADD_CXXTEST(BooleanUTest)
 ADD_CXXTEST(Boolean2NotUTest)
 ADD_CXXTEST(FuzzyPatternUTest)
 
+
 # Its a *lot* easier to write scheme, than to write C++ code!
 # These are not in alphabetical order; they are in order of
 # simpler to more complex.
 IF (HAVE_GUILE)
+	IF (HAVE_GEARMAN)
+		ADD_CXXTEST(DistScmUTest)
+	ENDIF (HAVE_GEARMAN)
 	ADD_CXXTEST(DisconnectedUTest)
 	ADD_CXXTEST(ImplicationUTest)
 	ADD_CXXTEST(ExecutionOutputUTest)
@@ -64,7 +71,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(AttentionalFocusCBUTest)
 	ADD_CXXTEST(SudokuUTest)
 	ADD_CXXTEST(EinsteinUTest)
-    
+
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
 		${COGUTIL_LIBRARY}
 	)
