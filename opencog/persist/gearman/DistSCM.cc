@@ -21,15 +21,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "DistSCM.h"
-#include <opencog/guile/SchemeEval.h>//which lib to link?
+#include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
+#include "DistSCM.h"
 
 using namespace opencog;
 
-bool DistSCM::master_mode=true;
+bool DistSCM::master_mode = true;
 
-DistSCM::DistSCM(void):true_string("true"),false_string("false")
+DistSCM::DistSCM(void): true_string("true"), false_string("false")
 {
 	scm_with_guile(init_in_guile, this);
 }
@@ -98,7 +98,8 @@ const std::string& DistSCM::slave_mode(const std::string& ip_string,
 	if ((worker= gearman_worker_create(NULL)) == NULL)
 	{
 		std::cerr << "Memory allocation failure on worker creation." << std::endl;
-		throw std::string("Memory allocation failure on worker creation.");
+		throw RuntimeException(TRACE_INFO,
+			"Gearman: Memory allocation failure on worker creation.");
 	}
 
 	gearman_worker_add_options(worker, GEARMAN_WORKER_GRAB_UNIQ);
@@ -106,14 +107,16 @@ const std::string& DistSCM::slave_mode(const std::string& ip_string,
 	                   ip_string.c_str(), GEARMAN_DEFAULT_TCP_PORT)))
 	{
 		std::cerr << gearman_worker_error(worker) << std::endl;
-		throw std::string(gearman_worker_error(worker));
+		throw RuntimeException(TRACE_INFO,
+			"Gearman: %s", gearman_worker_error(worker));
 	}
 
 	if (gearman_failed(gearman_worker_set_identifier(worker,
                       workerID.c_str(), workerID.length())))
 	{
 		std::cerr << gearman_worker_error(worker) << std::endl;
-		throw std::string(gearman_worker_error(worker));
+		throw RuntimeException(TRACE_INFO,
+			"Gearman: %s", gearman_worker_error(worker));
 	}
 
 	gearman_function_t worker_fn = gearman_function_create(worker_function);
@@ -124,7 +127,8 @@ const std::string& DistSCM::slave_mode(const std::string& ip_string,
 	                                       atoms_ptr)))
 	{
 		std::cerr << gearman_worker_error(worker) << std::endl;
-		throw std::string(gearman_worker_error(worker));
+		throw RuntimeException(TRACE_INFO,
+			"Gearman: %s", gearman_worker_error(worker));
 	}
 
 	gearman_worker_set_timeout(worker, 100);
@@ -150,7 +154,8 @@ UUID DistSCM::dist_scm(const std::string& scm_string,
 	if (gearman_client_create(&client) == NULL)
 	{
 		std::cerr << "Memory allocation failure on client creation" << std::endl;
-		throw std::string("Memory allocation failure on client creation");
+		throw RuntimeException(TRACE_INFO,
+			"Gearman: Memory allocation failure on client creation");
 	}
 	//
 	int timeout=-1;
@@ -164,15 +169,17 @@ UUID DistSCM::dist_scm(const std::string& scm_string,
                               "localhost", GEARMAN_DEFAULT_TCP_PORT);
 	if (ret != GEARMAN_SUCCESS)
 	{
-		std::cerr<<(gearman_client_error(&client));
-		throw std::string(gearman_client_error(&client));
+		std::cerr << gearman_client_error(&client);
+		throw RuntimeException(TRACE_INFO,
+			"Gearman: %s", gearman_client_error(&client));
 	}
 
 	if (gearman_failed(gearman_client_set_identifier(&client,
                                clientID.c_str(), clientID.length())))
 	{
 		std::cerr<<(gearman_client_error(&client));
-		throw std::string(gearman_client_error(&client));
+		throw RuntimeException(TRACE_INFO,
+			"Gearman: %s", gearman_client_error(&client));
 	}
 
 	int exit_code = EXIT_SUCCESS;
@@ -203,12 +210,12 @@ UUID DistSCM::dist_scm(const std::string& scm_string,
 	}
 	else if (ret == GEARMAN_WORK_FAIL)
 	{
-		std::cerr<<("Work failed");
+		std::cerr << "Work failed";
 		exit_code = EXIT_FAILURE;
 	}
 	else
 	{
-		std::cerr<<(gearman_client_error(&client));
+		std::cerr << gearman_client_error(&client);
 		exit_code = EXIT_FAILURE;
 	}
 
