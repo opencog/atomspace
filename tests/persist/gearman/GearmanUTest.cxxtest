@@ -72,10 +72,16 @@ void DistScmUTest::setUp(void)
 void DistScmUTest::create_slave_thread(DistScmUTest* dt)
 {
 	std::string rc;
+	rc = dt->evl->eval("(setenv \"LTDL_LIBRARY_PATH\" \"/usr/local/lib/opencog\")");
+	std::cout << "ltdl path: " << rc << std::endl;
+	rc = dt->evl->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+	std::cout << "load path: " << rc << std::endl;
 	rc = dt->evl->eval("(use-modules (opencog))");
-	std::cout << rc;
+	std::cout << "use-modules: " << rc << std::endl;
 	rc = dt->evl->eval("(use-modules (opencog dist-gearman))");
-	std::cout << rc;
+	std::cout << "use-gearman: " << rc << std::endl;
+	fflush(stdout);
+
 	std::string slv = dt->evl->eval(
 		"(set-slave-mode \"localhost\" \"worker1\")");
 	TS_ASSERT_EQUALS(slv, "localhost\n");
