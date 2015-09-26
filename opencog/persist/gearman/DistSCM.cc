@@ -69,7 +69,7 @@ void DistSCM::set_master_mode(void)
 gearman_return_t DistSCM::worker_function(gearman_job_st *job, void *context)
 {
     const char *workload= (const char *)gearman_job_workload(job);
-    const size_t workload_size= gearman_job_workload_size(job);
+    // const size_t workload_size= gearman_job_workload_size(job);
 
     //std::cout << "Recieved " << workload_size << " bytes" << std::endl;
 
