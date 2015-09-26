@@ -72,8 +72,9 @@ void DistScmUTest::setUp(void)
 void DistScmUTest::create_slave_thread(DistScmUTest* dt)
 {
   dt->evl->eval("(use-modules (opencog dist-gearman))");
-  std::string slv="(set-slave-mode \"localhost\" \"worker1\")";
-  TS_ASSERT_EQUALS(dt->evl->eval(slv),"localhost\n");
+  std::string slv = dt->evl->eval(
+		"(set-slave-mode \"localhost\" \"worker1\")");
+  TS_ASSERT_EQUALS(slv, "localhost\n");
 }
 
 void DistScmUTest::test_dist()
@@ -81,9 +82,11 @@ void DistScmUTest::test_dist()
   std::thread slaveThread(create_slave_thread,this);
   //call master
   evl2->eval("(use-modules (opencog dist-gearman))");
-  std::string mast="(dist-run-scm \"(ConceptNode \\\"Hello\\\")\" \"client1\" #t)";
-  std::string result=evl2->eval(mast);
-  TS_ASSERT_DIFFERS(atoll(result.c_str()),Handle::INVALID_UUID);
+  std::string mast =
+		"(dist-run-scm \"(ConceptNode \\\"Hello\\\")\" \"client1\" #t)";
+
+  std::string result = evl2->eval(mast);
+  TS_ASSERT_DIFFERS(atoll(result.c_str()), Handle::INVALID_UUID);
   evl2->eval("(set-master-mode)");
   slaveThread.join();
 }
