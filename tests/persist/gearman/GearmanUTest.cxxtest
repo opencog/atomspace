@@ -41,32 +41,33 @@ class DistScmUTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *as;
-    SchemeEval *evl,*evl2;
-  public:
-    DistScmUTest(void){
-      as=new AtomSpace();
-      evl=new SchemeEval(as);
-      evl2=new SchemeEval(as);
-    }
-    ~DistScmUTest(){
-      delete evl;
-      delete evl2;
-      delete as;
-    }
-    void setUp(void);
-    static void create_slave_thread(DistScmUTest* dt);
+		SchemeEval *evl,*evl2;
+	public:
+		DistScmUTest(void){
+			as=new AtomSpace();
+			evl=new SchemeEval(as);
+			evl2=new SchemeEval(as);
+		}
+		~DistScmUTest(){
+			delete evl;
+			delete evl2;
+			delete as;
+		}
+		void setUp(void);
+		static void create_slave_thread(DistScmUTest* dt);
 
-    void tearDown(void){}//thread join, after calling set master mode
-    void test_dist();//call master and get return -
+	// thread join, after calling set master mode
+		void tearDown(void){}
+		void test_dist();//call master and get return -
 };
 
 void DistScmUTest::setUp(void)
 {
-  as->clear();
-  config().set("SCM_PRELOAD",
-	             "opencog/atomspace/core_types.scm"
-	             );
-  load_scm_files_from_config(*as);
+	as->clear();
+	config().set("SCM_PRELOAD",
+							 "opencog/atomspace/core_types.scm"
+							 );
+	load_scm_files_from_config(*as);
 }
 
 void DistScmUTest::create_slave_thread(DistScmUTest* dt)
@@ -89,14 +90,14 @@ void DistScmUTest::create_slave_thread(DistScmUTest* dt)
 
 void DistScmUTest::test_dist()
 {
-  std::thread slaveThread(create_slave_thread,this);
-  //call master
-  evl2->eval("(use-modules (opencog dist-gearman))");
-  std::string mast =
+	std::thread slaveThread(create_slave_thread,this);
+	//call master
+	evl2->eval("(use-modules (opencog dist-gearman))");
+	std::string mast =
 		"(dist-run-scm \"(ConceptNode \\\"Hello\\\")\" \"client1\" #t)";
 
-  std::string result = evl2->eval(mast);
-  TS_ASSERT_DIFFERS(atoll(result.c_str()), Handle::INVALID_UUID);
-  evl2->eval("(set-master-mode)");
-  slaveThread.join();
+	std::string result = evl2->eval(mast);
+	TS_ASSERT_DIFFERS(atoll(result.c_str()), Handle::INVALID_UUID);
+	evl2->eval("(set-master-mode)");
+	slaveThread.join();
 }
