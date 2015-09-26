@@ -66,6 +66,4 @@ IF (HAVE_GEARMAN AND HAVE_GUILE)
 		Distributed/DistSCM.h
 		DESTINATION "include/opencog/query"
 	)
-ELSE(HAVE_GEARMAN AND HAVE_GUILE)
-	MESSAGE(FATAL_ERROR "Cannot find libgearman library or guile")
 ENDIF(HAVE_GEARMAN AND HAVE_GUILE)
