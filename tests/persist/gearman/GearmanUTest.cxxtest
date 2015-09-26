@@ -1,5 +1,6 @@
 /*
- * tests/query/DistScmUTest.cxxtest
+ * tests/persist/gearman/GearmanUTest.cxxtest
+ *
  * Author : Mandeep Singh Bhatia
  * Copyright (C) 2015 OpenCog Foundation
  * All Rights Reserved
@@ -29,7 +30,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/load-file.h>
 
-#include <opencog/query/Distributed/DistSCM.h>
+#include <opencog/persist/gearman/DistSCM.h>
 
 using namespace opencog;
 //assuming cxxtest times the tests with some time out and fails test on timeout - say if gearman breaks and test blocks forever

@@ -18,5 +18,5 @@ TARGET_LINK_LIBRARIES(dist-gearman
 INSTALL (TARGETS dist-gearman DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 INSTALL (FILES
 	DistSCM.h
-	DESTINATION "include/opencog/gearman"
+	DESTINATION "include/opencog/persist/gearman"
 )
