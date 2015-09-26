@@ -14,15 +14,15 @@ LINK_LIBRARIES (
 
 # Make sure that the Gearman job server is running.
 # See the README file for details.
-FIND_PROGRAM(GEARMAN_JOB_SERVER gearman-job-server)
+FIND_PROGRAM(GEARMAN_JOB_SERVER gearmand)
 IF (GEARMAN_JOB_SERVER)
-	EXECUTE_PROCESS(COMMAND "ps aux | grep gearmand"
+	EXECUTE_PROCESS(COMMAND "ps" "-C" "gearmand"
 		OUTPUT_VARIABLE OUT
 		ERROR_VARIABLE ERR
 		RESULT_VARIABLE RC)
 
 	IF (RC)
-		MESSAGE(WARNING "gearman-job-server is not running")
+		MESSAGE(WARNING "gearman-job-server is not running; will not run the GearmanUTest")
 	ELSE (RC)
 		SET(GEARMAN_RUNNING 1)
 		MESSAGE(STATUS "gearman-job-server found")
