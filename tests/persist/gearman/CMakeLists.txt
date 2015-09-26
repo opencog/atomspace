@@ -12,6 +12,24 @@ LINK_LIBRARIES (
 	atomspace
 )
 
-#start gearman-job-server
+# Make sure that the Gearman job server is running.
+# See the README file for details.
+FIND_PROGRAM(GEARMAN_JOB_SERVER gearman-job-server)
+IF (GEARMAN_JOB_SERVER)
+	EXECUTE_PROCESS(COMMAND "ps aux | grep gearmand"
+		OUTPUT_VARIABLE OUT
+		ERROR_VARIABLE ERR
+		RESULT_VARIABLE RC)
 
-ADD_CXXTEST(GearmanUTest)
+	IF (RC)
+		MESSAGE(WARNING "gearman-job-server is not running")
+	ELSE (RC)
+		SET(GEARMAN_RUNNING 1)
+		MESSAGE(STATUS "gearman-job-server found")
+	ENDIF (RC)
+
+ENDIF (GEARMAN_JOB_SERVER)
+
+IF (GEARMAN_RUNNING)
+	ADD_CXXTEST(GearmanUTest)
+ENDIF (GEARMAN_RUNNING)
