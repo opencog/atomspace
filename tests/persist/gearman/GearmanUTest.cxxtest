@@ -71,10 +71,14 @@ void DistScmUTest::setUp(void)
 
 void DistScmUTest::create_slave_thread(DistScmUTest* dt)
 {
-  dt->evl->eval("(use-modules (opencog dist-gearman))");
-  std::string slv = dt->evl->eval(
+	std::string rc;
+	rc = dt->evl->eval("(use-modules (opencog))");
+	std::cout << rc;
+	rc = dt->evl->eval("(use-modules (opencog dist-gearman))");
+	std::cout << rc;
+	std::string slv = dt->evl->eval(
 		"(set-slave-mode \"localhost\" \"worker1\")");
-  TS_ASSERT_EQUALS(slv, "localhost\n");
+	TS_ASSERT_EQUALS(slv, "localhost\n");
 }
 
 void DistScmUTest::test_dist()
