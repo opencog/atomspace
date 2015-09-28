@@ -73,8 +73,8 @@ void DistScmUTest::setUp(void)
 	             "opencog/atomspace/core_types.scm");
 	load_scm_files_from_config(*as);
 
-	evl->eval("(setenv \"LTDL_LIBRARY_PATH\" \"/usr/local/lib/opencog\")");
-	evl->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+	evl->eval("(setenv \"LTDL_LIBRARY_PATH\" \"/usr/local/lib/opencog:../../../opencog/persist/gearman\")");
+	evl->eval("(add-to-load-path \"/usr/local/share/opencog/scm:../../../opencog/scm\")");
 	evl->eval("(use-modules (opencog))");
 	evl->eval("(use-modules (opencog dist-gearman))");
 }
