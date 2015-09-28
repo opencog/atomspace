@@ -22,6 +22,7 @@ IF (GEARMAN_JOB_SERVER)
 		RESULT_VARIABLE RC)
 
 	IF (RC)
+		SET(GEARMAN_RUNNING 0)
 		MESSAGE(WARNING "gearman-job-server is not running; will not run the GearmanUTest")
 	ELSE (RC)
 		SET(GEARMAN_RUNNING 1)
@@ -31,8 +32,5 @@ IF (GEARMAN_JOB_SERVER)
 ENDIF (GEARMAN_JOB_SERVER)
 
 IF (GEARMAN_RUNNING)
-# XXX FIXME I am disabling this for now; its passes for me, but is
-# failing in CircleCI, and I don't know how to view stdout from
-# CircleCI... so I don't know how to fix it ...
-	# ADD_CXXTEST(GearmanUTest)
+	ADD_CXXTEST(GearmanUTest)
 ENDIF (GEARMAN_RUNNING)
