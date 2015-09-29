@@ -181,6 +181,20 @@ HandleSeq get_predicates(const Handle& target,
 HandleSeq get_predicates_for(const Handle& target, 
                              const Handle& predicate);
 
+/**
+ * Makes a one to one similarity matching.If the atoms
+ * are of type UnorderedLink, does one vs all similarity
+ * matching and removes the matched from matching list
+ * immediately.
+ *
+ * @param h1  A handle
+ * @param h2  A handle
+ * @param strict_type_match A flag telling how type matching should be done.
+ *
+ * @return  A boolean true if similar and false otherwise.
+ */
+bool are_similar(const Handle& h1,const Handle& h2,bool strict_type_match);
+
 /** @}*/
 }
 
