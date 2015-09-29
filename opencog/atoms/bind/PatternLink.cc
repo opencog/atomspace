@@ -793,55 +793,59 @@ void PatternLink::check_connectivity(const std::vector<HandleSeq>& components)
 
 /* ================================================================= */
 
-void PatternLink::debug_print(void) const
+void PatternLink::debug_log(void) const
 {
-	// Print out the predicate ...
-	printf("\nPattern '%s' has following clauses:\n",
-	       _pat.redex_name.c_str());
+	if (!logger().isFineEnabled())
+		return;
+
+	// Log the predicate ...
+	logger().fine("Pattern '%s' has following clauses:",
+	              _pat.redex_name.c_str());
 	int cl = 0;
 	for (const Handle& h : _pat.mandatory)
 	{
-		printf("Mandatory %d:", cl);
+		std::stringstream ss;
+		ss << "Mandatory " << cl << ":";
 		if (_pat.evaluatable_holders.find(h) != _pat.evaluatable_holders.end())
-			printf(" (evaluatable)");
+			ss << " (evaluatable)";
 		if (_pat.executable_holders.find(h) != _pat.executable_holders.end())
-			printf(" (executable)");
-		printf("\n");
-		prt(h);
+			ss << " (executable)";
+		ss << std::endl;
+		ss << h->toShortString();
+		logger().fine() << ss.str();
 		cl++;
 	}
 
 	if (0 < _pat.optionals.size())
 	{
-		printf("Predicate includes the following optional clauses:\n");
+		logger().fine("Predicate includes the following optional clauses:");
 		cl = 0;
 		for (const Handle& h : _pat.optionals)
 		{
-			printf("Optional clause %d:", cl);
+			std::stringstream ss;
+			ss << "Optional clause " << cl << ":";
 			if (_pat.evaluatable_holders.find(h) != _pat.evaluatable_holders.end())
-				printf(" (evaluatable)");
+				ss << " (evaluatable)";
 			if (_pat.executable_holders.find(h) != _pat.executable_holders.end())
-				printf(" (executable)");
-			printf("\n");
-			prt(h);
+				ss << " (executable)";
+			ss << std::endl;
+			ss << h->toShortString();
+			logger().fine() << ss.str();
 			cl++;
 		}
 	}
 	else
-		printf("No optional clauses\n");
+		logger().fine("No optional clauses");
 
 	// Print out the bound variables in the predicate.
 	for (const Handle& h : _varlist.varset)
 	{
 		if (NodeCast(h))
-			printf("Bound var: "); prt(h);
+			logger().fine() << "Bound var: " << h->toShortString();
 	}
 
 	if (_varlist.varset.empty())
-		printf("There are no bound vars in this pattern\n");
-
-	printf("\n");
-	fflush(stdout);
+		logger().fine("There are no bound vars in this pattern");
 }
 
 /* ===================== END OF FILE ===================== */

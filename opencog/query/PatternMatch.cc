@@ -36,14 +36,6 @@
 
 using namespace opencog;
 
-// Uncomment below to enable debug print
-// #define DEBUG
-#ifdef DEBUG
-	#define dbgprt(f, varargs...) printf(f, ##varargs)
-#else
-	#define dbgprt(f, varargs...)
-#endif
-
 /* ================================================================= */
 /// A pass-through class, which wraps a regular callback, but captures
 /// all of the different possible groundings that result.  This class is
@@ -144,12 +136,13 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
 	// what they've got to say about it.
 	if (0 == comp_var_gnds.size())
 	{
-#ifdef DEBUG
-		dbgprt("\nExplore one possible combinatoric grounding "
-		       "(var_gnds.size = %zu, term_gnds.size = %zu):\n",
-			   var_gnds.size(), term_gnds.size());
-		PatternMatchEngine::print_solution(var_gnds, term_gnds);
-#endif
+		if (logger().isFineEnabled())
+		{
+			logger().fine("\nExplore one possible combinatoric grounding "
+			              "(var_gnds.size = %zu, term_gnds.size = %zu):\n",
+			              var_gnds.size(), term_gnds.size());
+			PatternMatchEngine::log_solution(var_gnds, term_gnds);
+		}
 
 		// Note, FYI, that if there are no virtual clauses at all,
 		// then this loop falls straight-through, and the grounding
@@ -187,7 +180,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
 		// pattern! See what the callback thinks of it.
 		return cb.grounding(var_gnds, term_gnds);
 	}
-	dbgprt("Component recursion: num comp=%zd\n", comp_var_gnds.size());
+	LAZY_LOG_FINE << "Component recursion: num comp=" << comp_var_gnds.size();
 
 	// Recurse over all components. If component k has N_k groundings,
 	// and there are m components, then we have to explore all
@@ -334,16 +327,14 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	{
 		PatternMatchEngine pme(pmcb);
 
-#ifdef DEBUG
-		debug_print();
-#endif
+		debug_log();
+
 		pme.set_pattern(_varlist, _pat);
 		pmcb.set_pattern(_varlist, _pat);
 		bool found = pmcb.initiate_search(&pme);
 
-#ifdef DEBUG
-		printf("==================== Done with Search ==================\n");
-#endif
+		logger().fine("================= Done with Search =================");
+
 		return found;
 	}
 
@@ -359,26 +350,27 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	// grounding combination through the virtual link, for the final
 	// accept/reject determination.
 
-#ifdef DEBUG
-	printf("VIRTUAL PATTERN: ====================== "
-	       "num comp=%zd num virts=%zd\n", _num_comps, _num_virts);
-	printf("Virtuals are:\n");
-	size_t iii=0;
-	for (const Handle& v : _virtual)
+	if (logger().isFineEnabled())
 	{
-		printf("Virtual clause %zu of %zu:\n%s\n", iii, _num_virts,
-		       v->toShortString().c_str());
-		iii++;
+		logger().fine("VIRTUAL PATTERN: ====================== "
+		              "num comp=%zd num virts=%zd\n", _num_comps, _num_virts);
+		logger().fine("Virtuals are:");
+		size_t iii=0;
+		for (const Handle& v : _virtual)
+		{
+			logger().fine("Virtual clause %zu of %zu:", iii, _num_virts);
+			logger().fine(v->toShortString());
+			iii++;
+		}
 	}
-#endif
 
 	std::vector<std::vector<std::map<Handle, Handle>>> comp_term_gnds;
 	std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds;
 
 	for (size_t i=0; i<_num_comps; i++)
 	{
-		dbgprt("BEGIN COMPONENT GROUNDING %zu of %zu: ======================\n",
-		       i + 1, _num_comps);
+		LAZY_LOG_FINE << "BEGIN COMPONENT GROUNDING " << i+1
+		              << " of " << _num_comps << ": ======================\n";
 
 		Pattern pat = PatternLinkCast(_component_patterns.at(i))->get_pattern();
 		bool is_pure_optional = false;
@@ -405,9 +397,9 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	}
 
 	// And now, try grounding each of the virtual clauses.
-	dbgprt("BEGIN component recursion: ====================== "
-	       "num comp=%zd num virts=%zd\n",
-	       comp_var_gnds.size(), _virtual.size());
+	LAZY_LOG_FINE << "BEGIN component recursion: ====================== "
+	              << "num comp=" << comp_var_gnds.size()
+	              << " num virts=" << _virtual.size();
 	std::map<Handle, Handle> empty_vg;
 	std::map<Handle, Handle> empty_pg;
 	std::vector<Handle> optionals; // currently ignored

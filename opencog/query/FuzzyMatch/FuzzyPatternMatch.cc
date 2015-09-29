@@ -29,8 +29,6 @@
 
 using namespace opencog;
 
-//#define DEBUG
-
 /**
  * Implement the "cog-fuzzy-match" scheme primitive.
  * It uses the Pattern Matcher to find hypergraphs in the atomspace that are
@@ -57,10 +55,10 @@ Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp,
     PatternLinkPtr slp(createPatternLink(no_vars, terms));
     slp->satisfy(fpmcb);
 
-#ifdef DEBUG
-    std::cout << "\n---------- solns ----------\n";
-    for (Handle h : fpmcb.solns) std::cout << h->toShortString();
-#endif
+    if (logger().isFineEnabled()) {
+	    logger().fine() << "---------- solns ----------";
+	    for (Handle h : fpmcb.solns) logger().fine() << h->toShortString();
+    }
 
     // The result_list contains a list of the grounded expressions.
     // Turn it into a true list, and return it.

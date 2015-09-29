@@ -173,7 +173,7 @@ public:
 
 	bool satisfy(PatternMatchCallback&) const;
 
-	void debug_print(void) const;
+	void debug_log(void) const;
 };
 
 typedef std::shared_ptr<PatternLink> PatternLinkPtr;
