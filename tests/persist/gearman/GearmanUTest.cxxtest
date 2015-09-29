@@ -1,0 +1,108 @@
+/*
+ * tests/persist/gearman/GearmanUTest.cxxtest
+ *
+ * Author : Mandeep Singh Bhatia
+ * Copyright (C) 2015 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <thread>
+#include <string>
+
+#include <opencog/util/Config.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Handle.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/load-file.h>
+
+#include <opencog/persist/gearman/DistSCM.h>
+
+using namespace opencog;
+// assuming cxxtest times the tests with some time out and fails test
+// on timeout - say if gearman breaks and test blocks forever
+// always use cerr or logger to debug instead of cout
+
+class DistScmUTest :  public CxxTest::TestSuite
+{
+	private:
+		AtomSpace *as;
+		SchemeEval *evl,*evl2;
+	public:
+		DistScmUTest(void)
+		{
+			as = new AtomSpace();
+			evl = new SchemeEval(as);
+			evl2 = new SchemeEval(as);
+		}
+
+		~DistScmUTest()
+		{
+			delete evl;
+			delete evl2;
+			delete as;
+		}
+		void setUp(void);
+		static void create_slave_thread(DistScmUTest* dt);
+
+		// Thread join, after calling set master mode.
+		void tearDown(void){}
+
+		// Call master and get return.
+		void test_dist();
+};
+
+void DistScmUTest::setUp(void)
+{
+	as->clear();
+	config().set("SCM_PRELOAD",
+	             "opencog/atomspace/core_types.scm");
+	load_scm_files_from_config(*as);
+
+	evl->eval("(setenv \"LTDL_LIBRARY_PATH\" \"/usr/local/lib/opencog\")");
+	evl->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+	evl->eval("(use-modules (opencog))");
+	evl->eval("(use-modules (opencog dist-gearman))");
+}
+
+void DistScmUTest::create_slave_thread(DistScmUTest* dt)
+{
+	std::string slv = dt->evl->eval(
+		"(set-slave-mode \"localhost\" \"worker1\")");
+
+	std::cout << "Slave mode message:\n" << slv << std::endl;
+	TS_ASSERT_EQUALS(slv, "localhost\n");
+}
+
+void DistScmUTest::test_dist()
+{
+	std::thread slaveThread(create_slave_thread, this);
+
+	// Call master
+	std::string mast =
+		"(dist-run-scm \"(ConceptNode \\\"Hello\\\")\" \"client1\" #t)";
+
+	std::string result = evl2->eval(mast);
+	std::cout << "Master result message:\n" << result << std::endl;
+	std::cout << "Master got: " <<
+		evl2->eval("(cog-atom " + result + ")");
+
+	evl2->eval("(set-master-mode)");
+	slaveThread.join();
+
+	TS_ASSERT_DIFFERS(atoll(result.c_str()), Handle::INVALID_UUID);
+}

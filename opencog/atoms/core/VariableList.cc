@@ -353,7 +353,7 @@ Handle Variables::substitute(const Handle& fun,
 {
 	if (args.size() != varseq.size())
 		throw InvalidParamException(TRACE_INFO,
-			"Incorrect numer of arguments specified, expecting %lu got %lu",
+			"Incorrect number of arguments specified, expecting %lu got %lu",
 			varseq.size(), args.size());
 
 	if (not is_type(args))

@@ -244,12 +244,14 @@ void PutLink::typecheck_values(void)
  *         ConceptNode "cowpie"
  *         ConceptNode "hot patootie"
  *
+ * Type checking is performed during substitution; if the values fail to
+ * have the desired types, no substituion is performed.  In this case,
+ * an undefined handle is returned. For set substitutions, this acts as
+ * a filter, removeing (filtering out) the mismatched types.
+ *
  * Again, only a substitution is performed, there is no evaluation.
  * Note also that the resulting tree is NOT placed into any atomspace!
  */
-
-// XXX FIXME, if the values are dynamically generated, then type-checking
-// must be done at run-time, and not at definition-time.
 Handle PutLink::do_reduce(void) const
 {
 	Handle bods(_body);
@@ -275,13 +277,18 @@ Handle PutLink::do_reduce(void) const
 
 	if (1 == vars.varseq.size())
 	{
-		// Well, we should accept the SetLink here only if it was
-		// dynamically generated... but I'm too lazy to code this up.
 		if (SET_LINK != vtype)
 		{
 			HandleSeq oset;
 			oset.push_back(_values);
-			return vars.substitute_nocheck(bods, oset);
+			try
+			{
+				return vars.substitute(bods, oset);
+			}
+			catch (...)
+			{
+				return Handle::UNDEFINED;
+			}
 		}
 
 		// Iterate over the set...
@@ -290,14 +297,25 @@ Handle PutLink::do_reduce(void) const
 		{
 			HandleSeq oset;
 			oset.push_back(h);
-			bset.push_back(vars.substitute_nocheck(bods, oset));
+			try
+			{
+				bset.push_back(vars.substitute(bods, oset));
+			}
+			catch (...) {}
 		}
 		return Handle(createLink(SET_LINK, bset));
 	}
 	if (LIST_LINK == vtype)
 	{
 		const HandleSeq& oset = LinkCast(_values)->getOutgoingSet();
-		return vars.substitute_nocheck(bods, oset);
+		try
+		{
+			return vars.substitute(bods, oset);
+		}
+		catch (...)
+		{
+			return Handle::UNDEFINED;
+		}
 	}
 
 	OC_ASSERT(SET_LINK == vtype,
@@ -307,7 +325,11 @@ Handle PutLink::do_reduce(void) const
 	for (Handle h : LinkCast(_values)->getOutgoingSet())
 	{
 		const HandleSeq& oset = LinkCast(h)->getOutgoingSet();
-		bset.push_back(vars.substitute_nocheck(bods, oset));
+		try
+		{
+			bset.push_back(vars.substitute(bods, oset));
+		}
+		catch (...) {}
 	}
 	return Handle(createLink(SET_LINK, bset));
 }
