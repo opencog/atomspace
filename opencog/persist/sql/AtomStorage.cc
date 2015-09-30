@@ -1622,17 +1622,27 @@ void AtomStorage::create_tables(void)
 
 	// See the file "atom.sql" for detailed documentation as to the
 	// structure of the SQL tables.
+	rp.rs = db_conn->exec("CREATE TABLE Spaces ("
+	                      "space     BIGINT PRIMARY KEY,"
+	                      "parent    BIGINT);");
+	rp.rs->release();
+
+	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (1,1);");
+	rp.rs->release();
+
 	rp.rs = db_conn->exec("CREATE TABLE Atoms ("
 	                      "uuid     BIGINT PRIMARY KEY,"
-	                      "space    BIGINT,"
+	                      "space    BIGINT REFERENCES spaces(space),"
 	                      "type     SMALLINT,"
 	                      "type_tv  SMALLINT,"
 	                      "stv_mean FLOAT,"
 	                      "stv_confidence FLOAT,"
-	                      "stv_count FLOAT,"
+	                      "stv_count DOUBLE PRECISION,"
 	                      "height   SMALLINT,"
 	                      "name     TEXT,"
-	                      "outgoing BIGINT[]);");
+	                      "outgoing BIGINT[],"
+	                      "UNIQUE (type, name),"
+	                      "UNIQUE (type, outgoing));");
 	rp.rs->release();
 
 #ifndef USE_INLINE_EDGES
@@ -1648,11 +1658,6 @@ void AtomStorage::create_tables(void)
 	                      "typename TEXT UNIQUE);");
 	rp.rs->release();
 	type_map_was_loaded = false;
-
-	rp.rs = db_conn->exec("CREATE TABLE Spaces ("
-	                      "space     BIGINT,"
-	                      "parent    BIGINT);");
-	rp.rs->release();
 
 	rp.rs = db_conn->exec("CREATE TABLE Global ("
 	                      "max_height INT);");
@@ -1676,6 +1681,13 @@ void AtomStorage::kill_data(void)
 	// See the file "atom.sql" for detailed documentation as to the
 	// structure of the SQL tables.
 	rp.rs = db_conn->exec("DELETE from Atoms;");
+	rp.rs->release();
+
+	// Delete the atomspaces as well!
+	rp.rs = db_conn->exec("DELETE from Spaces;");
+	rp.rs->release();
+
+	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (1,1);");
 	rp.rs->release();
 
 	rp.rs = db_conn->exec("UPDATE Global SET max_height = 0;");
