@@ -1482,13 +1482,14 @@ void AtomStorage::load(AtomTable &table)
 		rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
 		rp.rs->release();
 #else
-		// It appears that, when the select statment returns more than
+		// It appears that, when the select statement returns more than
 		// about a 100K to a million atoms or so, some sort of heap
 		// corruption occurs in the iodbc code, causing future mallocs
 		// to fail. So limit the number of records processed in one go.
 		// It also appears that asking for lots of records increases
 		// the memory fragmentation (and/or there's a memory leak in iodbc??)
 		// XXX Not clear is UnixODBC suffers from this same problem.
+		// Whatever, seems to be a better strategy overall, anyway.
 #define STEP 12003
 		unsigned long rec;
 		for (rec = 0; rec <= max_nrec; rec += STEP)
