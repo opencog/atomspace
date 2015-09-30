@@ -161,6 +161,7 @@ public:
     AtomTable(AtomTable* parent = NULL, AtomSpace* holder = NULL);
     ~AtomTable();
     UUID get_uuid(void) { return _uuid; }
+    AtomTable* get_environ(void) { return _environ; }
     AtomSpace* getAtomSpace(void) { return _as; }
 
     /**
