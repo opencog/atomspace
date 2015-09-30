@@ -123,8 +123,7 @@ public:
                    HandleSeq focus_set);
     virtual ~ForwardChainer();
 
-    void do_chain(Handle hsource,HandleSeq focus_set ={},bool single_step = false);
-
+    void do_chain(void);
     void do_step(void);
     HandleSeq get_chaining_result(void);
 };
