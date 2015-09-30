@@ -94,11 +94,10 @@ Logger* ForwardChainer::getLogger()
 }
 
 /**
- * Does one step forward chaining
+ * Does one step forward chaining and stores result.
  *
- * @return An unordered sets of result of applying a particular selected rule.
  */
-UnorderedHandleSet ForwardChainer::do_step(bool search_focus_set/* = false*/)
+void ForwardChainer::do_step(void)
 {
     _cur_source=choose_next_source();
     _log->debug("[ForwardChainer] Next source %s", _cur_source->toString().c_str());
@@ -106,15 +105,15 @@ UnorderedHandleSet ForwardChainer::do_step(bool search_focus_set/* = false*/)
     HandleSeq derived_rhandles;
 
     //choose a rule that source unifies with one of its premises.
+    //if not found try to find by matching suba-toms of the rules
+    //premises.
     Rule *rule = choose_rule(_cur_source, false);
     if (rule) {
         _cur_rule = rule;
         derived_rhandles = derive_rules(_cur_source, rule);
 
     } else {
-        //choose rule that unifies that source unifies with sub-atoms of its premises.
         rule = choose_rule(_cur_source, true);
-
         if (rule) {
             _cur_rule = rule;
             derived_rhandles = derive_rules(_cur_source, rule,
@@ -124,62 +123,38 @@ UnorderedHandleSet ForwardChainer::do_step(bool search_focus_set/* = false*/)
 
     _log->debug( "Derived rule size = %d", derived_rhandles.size());
 
-    UnorderedHandleSet products;
-
+    HandleSeq products;
+    //Applying all partial groundings found.
     for (Handle rhandle : derived_rhandles) {
-        HandleSeq temp_result = apply_rule(rhandle,search_focus_set);
-
-        std::copy(temp_result.begin(), temp_result.end(),
-                  std::inserter(products, products.end()));
+        HandleSeq hs = apply_rule(rhandle,_search_focus_Set);
+        products.insert(products.end(),hs.begin(),hs.end());
     }
 
-    return products;
+    //Finally store source partial groundings and inference results.
+    if (not derived_rhandles.empty()) {
+        _fcstat.add_partial_grounding(_cur_source, rule->get_handle(),
+                              derived_rhandles);
+        _fcstat.add_inference_record(
+                _cur_source, HandleSeq(products.begin(), products.end()));
+    }
+
 }
 
-void ForwardChainer::do_chain(Handle hsource, HandleSeq focus_set,
-                              bool single_step /*=false*/)
+void ForwardChainer::do_chain(void)
 {
-    validate(hsource,focus_set);
-    bool search_in_af = not focus_set.empty();
-    _focus_set = focus_set;
-
-    HandleSeq init_sources = {};
-    //Accept set of initial sources wrapped in a SET_LINK
-    if(LinkCast(hsource) and hsource->getType() == SET_LINK)
-    {
-        init_sources = _as.get_outgoing(hsource);
-    } else {
-        init_sources.push_back(hsource);
-    }
-
     //Relex2Logic uses this.TODO make a separate class
     //to handle this robustly.
-    if(init_sources.empty())
+    if(_potential_sources.empty())
     {
-        apply_all_rules(search_in_af);
+        apply_all_rules(_search_focus_Set);
         return;
     }
-
-    // Variable fulfillment query.
-    UnorderedHandleSet var_nodes = get_outgoing_nodes(hsource,
-                                                      { VARIABLE_NODE });
-    if (not var_nodes.empty())
-        return do_pm(hsource, var_nodes);
-
-    // Default forward chaining
-    update_potential_sources(init_sources);
 
     auto max_iter = _configReader.get_maximum_iterations();
 
     while (_iteration < max_iter /*OR other termination criteria*/) {
-
         _log->debug("Iteration %d", _iteration);
-
-        UnorderedHandleSet products = do_step(search_in_af);
-        add_rules_product(_iteration,
-                          HandleSeq(products.begin(), products.end()));
-        update_potential_sources(HandleSeq(products.begin(), products.end()));
-
+         do_step();
         _iteration++;
     }
 
