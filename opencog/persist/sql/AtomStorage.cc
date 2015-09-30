@@ -140,7 +140,7 @@ class AtomStorage::Response
 			// printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
-			AtomPtr atom(store->makeAtom(*this, NULL, uuid));
+			AtomPtr atom(store->makeAtom(*this, uuid));
 			table->add(atom, true);
 			return false;
 		}
@@ -158,7 +158,7 @@ class AtomStorage::Response
 			Handle h(uuid);
 			if (not table->holds(h))
 			{
-				AtomPtr atom(store->makeAtom(*this, NULL, uuid));
+				AtomPtr atom(store->makeAtom(*this, uuid));
 				load_recursive_if_not_exists(atom);
 			}
 			return false;
@@ -193,7 +193,7 @@ class AtomStorage::Response
 			// Note, unlike the above 'load' routines, this merely fetches
 			// the atoms, and returns a vector of them.  They are loaded
 			// into the atomspace later, by the caller.
-			Handle h(store->makeAtom(*this, NULL, uuid));
+			Handle h(store->makeAtom(*this, uuid));
 			hvec->push_back(h);
 			return false;
 		}
@@ -1211,7 +1211,7 @@ AtomPtr  AtomStorage::getAtom(const char * query, int height)
 	}
 
 	rp.height = height;
-	AtomPtr atom(makeAtom(rp, NULL, rp.uuid));
+	AtomPtr atom(makeAtom(rp, rp.uuid));
 	rp.rs->release();
 	put_conn(db_conn);
 	return atom;
@@ -1326,8 +1326,9 @@ LinkPtr AtomStorage::getLink(Type t, const std::vector<Handle>&oset)
 /**
  * Instantiate a new atom, from the response buffer contents
  */
-AtomPtr AtomStorage::makeAtom(Response &rp, AtomPtr atom, UUID uuid)
+AtomPtr AtomStorage::makeAtom(Response &rp, UUID uuid)
 {
+	AtomPtr atom;
 	// Now that we know everything about an atom, actually construct one.
 	Type realtype = loading_typemap[rp.itype];
 
@@ -1339,54 +1340,31 @@ AtomPtr AtomStorage::makeAtom(Response &rp, AtomPtr atom, UUID uuid)
 		return NULL;
 	}
 
-	if (NULL == atom)
+	// All height zero atoms are nodes,
+	// All positive height atoms are links.
+	// A negative height is "unknown" and must be checked.
+	if ((0 == rp.height) or
+	    ((-1 == rp.height) and classserver().isA(realtype, NODE)))
 	{
-		// All height zero atoms are nodes,
-		// All positive height atoms are links.
-		// A negative height is "unknown" and must be checked.
-		if ((0 == rp.height) ||
-		    ((-1 == rp.height) &&
-		      classserver().isA(realtype, NODE)))
-		{
-			atom = createNode(realtype, rp.name);
-		}
-		else
-		{
-			std::vector<Handle> outvec;
-#ifndef USE_INLINE_EDGES
-			getOutgoing(outvec, h);
-#else
-			char *p = (char *) rp.outlist;
-			while (p)
-			{
-				// Break if there is no more atom in the outgoing set
-				// or the outgoing set is empty in the first place
-				if (*p == '}' or *p == '\0') break;
-				Handle hout = (Handle) strtoul(p+1, &p, 10);
-				outvec.push_back(hout);
-			}
-#endif /* USE_INLINE_EDGES */
-			atom = createLink(realtype, outvec);
-		}
+		atom = createNode(realtype, rp.name);
 	}
 	else
 	{
-		// Perform at least some basic sanity checking ...
-		if (realtype != atom->getType())
+		std::vector<Handle> outvec;
+#ifndef USE_INLINE_EDGES
+		getOutgoing(outvec, h);
+#else
+		char *p = (char *) rp.outlist;
+		while (p)
 		{
-			throw RuntimeException(TRACE_INFO,
-				"Fatal Error: mismatched atom type for existing atom! "
-				"uuid=%lu real=%d atom=%d\n",
-				uuid, realtype, atom->getType());
+			// Break if there is no more atom in the outgoing set
+			// or the outgoing set is empty in the first place
+			if (*p == '}' or *p == '\0') break;
+			Handle hout = (Handle) strtoul(p+1, &p, 10);
+			outvec.push_back(hout);
 		}
-		// If we are here, and the atom uuid is set, then it should match.
-		if (Handle::INVALID_UUID != atom->_uuid and
-		    atom->_uuid != uuid)
-		{
-			throw RuntimeException(TRACE_INFO,
-				"Fatal Error: mismatched handle and atom UUID's, atom=%lu handle=%lu",
-				atom->_uuid, uuid);
-		}
+#endif /* USE_INLINE_EDGES */
+		atom = createLink(realtype, outvec);
 	}
 
 	// Give the atom the correct UUID. The AtomTable will need this.
