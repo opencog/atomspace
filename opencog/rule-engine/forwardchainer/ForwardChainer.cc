@@ -317,15 +317,17 @@ Handle ForwardChainer::choose_next_source()
 
     Handle hchosen = Handle::UNDEFINED;
 
-    //!Choose a new source that has never been chosen before.
-    //!xxx FIXME since same handle might be chosen multiple times the following
-    //!code doesn't guarantee all sources have been exhaustively looked.
+    //!Prioritize new source selection.
     for (size_t i = 0; i < tournament_elem.size(); i++) {
         Handle hselected = urec.tournament_select(tournament_elem);
-        if (fcmem.isin_selected_sources(hselected)) {
+        bool selected_before = (boost::find(_selected_sources, hselected)
+                != _selected_sources.end());
+
+        if (selected_before) {
             continue;
         } else {
             hchosen = hselected;
+            _selected_sources.push_back(hchosen);
             break;
         }
     }
