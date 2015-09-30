@@ -68,22 +68,17 @@ private:
     bool unify(Handle source, Handle target, Rule* rule);
     bool subatom_unify(Handle source, Rule* rule);
     HandleSeq derive_rules(Handle source, Handle target, Rule* rule);
-
     void update_potential_sources(HandleSeq input);
-    void add_rules_product(int iteration, HandleSeq product);
-    void add_to_source_list(Handle h);
 
     bool is_valid_implicant(const Handle& h);
     void validate(Handle hsource, HandleSeq hfocus_set);
 
 protected:
     vector<Rule*> _rules; /*<loaded rules*/
-    Rule*  _cur_rule;
-    Handle _cur_source;
-
     /*<list of inference products and premises to select source from*/
     HandleSeq _potential_sources;
     HandleSeq _focus_set;
+
     /**
      * Choose an applicable rules from the rule base by selecting
      * rules whose premise structurally matches with the source.

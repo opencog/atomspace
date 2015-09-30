@@ -198,7 +198,7 @@ void ForwardChainer::do_pm(const Handle& hsource,
     sl->satisfy(impl);
 
     // Update result
-    add_rules_product(0, impl.get_result_list());
+    _fcstat.add_inference_record(Handle::UNDEFINED, impl.get_result_list());
 
     // Delete the AND_LINK and LIST_LINK
     _as.remove_atom(hvar_list);
@@ -212,7 +212,6 @@ void ForwardChainer::do_pm(const Handle& hsource,
         impl.implicand = bl->get_implicand();
         bl->imply(impl);
         _cur_rule = rule;
-        add_rules_product(0, impl.get_result_list());
     }
 }
 
@@ -228,7 +227,6 @@ void ForwardChainer::apply_all_rules(bool search_focus_set /*= false*/)
         HandleSeq hs = apply_rule(rule->get_handle(), search_focus_set);
 
         //Update
-        add_rules_product(0, hs);
         update_potential_sources(hs);
     }
 
@@ -687,7 +685,6 @@ Handle ForwardChainer::gen_sub_varlist(const Handle& parent,
     return Handle(createVariableList(final_oset));
 }
 
-//////moved from fcmemory
 void ForwardChainer::update_potential_sources(HandleSeq input)
 {
     for (Handle i : input) {
@@ -695,17 +692,3 @@ void ForwardChainer::update_potential_sources(HandleSeq input)
             _potential_sources.push_back(i);
     }
 }
-
-void ForwardChainer::add_rules_product(int iteration, HandleSeq product)
-{
-    //TODO implement this
-    /*for (Handle p : product) {
-        Inference inf;
-        inf.iter_step = iteration;
-        inf.applied_rule = _cur_rule;
-        inf.inf_product.push_back(p);
-
-        _inf_history.push_back(inf);
-    }*/
-}
-
