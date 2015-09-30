@@ -27,6 +27,8 @@
 #include <opencog/rule-engine/URECommons.h>
 #include <opencog/rule-engine/UREConfigReader.h>
 
+#include "FCStat.h"
+
 class ForwardChainerUTest;
 
 namespace opencog
@@ -53,6 +55,12 @@ private:
     int _iteration = 0;
     source_selection_mode _ts_mode;
     bool _search_in_af;
+    bool _search_focus_Set;
+    Rule*  _cur_rule;
+    Handle _cur_source;
+    HandleSeq _selected_sources;
+
+    FCStat _fcstat;
 
     void init();
 
