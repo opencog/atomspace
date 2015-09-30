@@ -68,7 +68,6 @@ private:
 
     void apply_all_rules(bool search_focus_set = false);
     void do_pm(const Handle& hsource, const UnorderedHandleSet& var_nodes);
-    UnorderedHandleSet do_step(bool search_focus_set = false);
 
     UnorderedHandleSet get_subatoms(Rule *rule);
     Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);
@@ -126,6 +125,7 @@ public:
 
     void do_chain(Handle hsource,HandleSeq focus_set ={},bool single_step = false);
 
+    void do_step(void);
     HandleSeq get_chaining_result(void);
 };
 
