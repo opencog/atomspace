@@ -63,6 +63,8 @@ private:
     FCStat _fcstat;
 
     void init(Handle hsource, HandleSeq focus_set);
+    void setLogger(Logger* log);
+    Logger* getLogger(void);
 
     void apply_all_rules(bool search_focus_set = false);
     void do_pm(const Handle& hsource, const UnorderedHandleSet& var_nodes);
@@ -124,9 +126,6 @@ public:
     void do_chain(Handle hsource,HandleSeq focus_set ={},bool single_step = false);
 
     HandleSeq get_chaining_result(void);
-
-    void setLogger(Logger* log);
-    Logger* getLogger(void);
 };
 
 } // ~namespace opencog
