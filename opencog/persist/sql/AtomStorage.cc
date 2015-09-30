@@ -370,8 +370,8 @@ class AtomStorage::Outgoing
 		bool each_handle (Handle h)
 		{
 			char buff[BUFSZ];
-			UUID src_uuid = src_handle.value();
-			UUID dst_uuid = h.value();
+			UUID src_uuid = src_handle->_uuid;
+			UUID dst_uuid = h->_uuid;
 			snprintf(buff, BUFSZ, "INSERT  INTO Edges "
 			        "(src_uuid, dst_uuid, pos) VALUES (%lu, %lu, %u);",
 			        src_uuid, dst_uuid, pos);
@@ -685,10 +685,7 @@ std::string AtomStorage::oset_to_string(const std::vector<Handle>& out,
 	{
 		Handle h = out[i];
 		if (i != 0) str += ", ";
-		char buff[BUFSZ];
-		UUID uuid = h.value();
-		snprintf(buff, BUFSZ, "%lu", uuid);
-		str += buff;
+		str += std::to_string(h->_uuid);
 	}
 	str += "}\'";
 	return str;
@@ -789,13 +786,12 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 	std::string coda;
 
 	// Use the TLB Handle as the UUID.
-	char uuidbuff[BUFSZ];
 	Handle h(atom->getHandle());
 	if (TLB::isInvalidHandle(h))
 		throw RuntimeException(TRACE_INFO, "Trying to save atom with an invalid handle!");
 
-	UUID uuid = h.value();
-	snprintf(uuidbuff, BUFSZ, "%lu", uuid);
+	UUID uuid = h->_uuid;
+	std::string uuidbuff = std::to_string(uuid);
 
 	std::unique_lock<std::mutex> lck = maybe_create_id(uuid);
 	bool update = not lck.owns_lock();
@@ -823,11 +819,9 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 	if (false == update)
 	{
 		// Store the atomspace UUID
-		UUID asuid = 0;
 		AtomTable * at = atom->getAtomTable();
 		// We allow storage of atoms that don't belong to an atomspace.
-		if (at) asuid = at->get_uuid();
-		snprintf(uuidbuff, BUFSZ, "%lu", asuid);
+		if (at) uuidbuff = std::to_string(at->get_uuid());
 		STMT("space", uuidbuff);
 
 		// Store the atom UUID
@@ -1059,13 +1053,12 @@ bool AtomStorage::atomExists(Handle h)
 {
 #ifdef ASK_SQL_SERVER
 	char buff[BUFSZ];
-	UUID uuid = h.value();
-	snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", uuid);
+	snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", h->_uuid);
 	return idExists(buff);
 #else
 	std::unique_lock<std::mutex> lock(id_cache_mutex);
 	// look at the local cache of id's to see if the atom is in storage or not.
-	return local_id_cache.count(h.value());
+	return local_id_cache.count(h->_uuid);
 #endif
 }
 
@@ -1177,7 +1170,7 @@ void AtomStorage::get_ids(void)
 void AtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
 {
 	char buff[BUFSZ];
-	UUID uuid = h.value();
+	UUID uuid = h->_uuid;
 	snprintf(buff, BUFSZ, "SELECT * FROM Edges WHERE src_uuid = %lu;", uuid);
 
 	ODBCConnection* db_conn = get_conn();
@@ -1228,8 +1221,7 @@ AtomPtr  AtomStorage::getAtom(Handle h)
 {
 	setup_typemap();
 	char buff[BUFSZ];
-	UUID uuid = h.value();
-	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE uuid = %lu;", uuid);
+	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE uuid = %lu;", h->_uuid);
 
 	return getAtom(buff, -1);
 }
@@ -1243,9 +1235,9 @@ std::vector<Handle> AtomStorage::getIncomingSet(Handle h)
 
 	setup_typemap();
 	char buff[BUFSZ];
-	UUID uuid = h.value();
 	snprintf(buff, BUFSZ,
-		"SELECT * FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];", uuid);
+		"SELECT * FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
+		h->_uuid);
 
 	// Note: "select * from atoms where outgoing@>array[556];" will return
 	// all links with atom 556 in the outgoing set -- i.e. the incoming set of 556.
