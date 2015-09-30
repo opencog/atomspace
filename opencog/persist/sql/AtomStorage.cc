@@ -1369,19 +1369,6 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 #endif /* USE_INLINE_EDGES */
 			atom = createLink(realtype, outvec);
 		}
-
-		// Create via the factory for specific types of atom
-		// Otherwise at the later stage of the sql-load process when the
-		// same atom is being added to the AtomTable (which will also call
-		// the same factory function), the dynamic-casting of any atom of
-		// one of these types will fail, resulting a new atom being created.
-		// But the new atom is having a different UUID, if there exist another
-		// link connecting to this atom, the system will fail to find the
-		// correct handle of this atom (because it is using the original
-		// UUID, as retrieve from the SQL database). Since each of the atoms
-		// in the outgoing set of a link needs to be valid, we will get
-		// an "Atom in outgoing set isn't known!" error as a result
-		atom = AtomTable::factory(realtype, atom);
 	}
 	else
 	{
