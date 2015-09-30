@@ -269,6 +269,12 @@ void PersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 
 	hl[idx] = as->add_link(SET_LINK, hvec);
 	l[idx] = LinkCast(hl[idx]);
+
+	hl2[idx] = as->add_link(LIST_LINK, hl[idx], h2[idx]);
+	l2[idx] = LinkCast(hl2[idx]);
+
+	hl3[idx] = as->add_link(EVALUATION_LINK, h1[idx], hl2[idx], h3[idx]);
+	l3[idx] = LinkCast(hl3[idx]);
 }
 
 void PersistUTest::check_space(int idx, AtomSpace *space)
@@ -293,6 +299,14 @@ void PersistUTest::check_space(int idx, AtomSpace *space)
 
 	Handle hlb = space->get_handle(hl[idx]->getType(), hvec);
 	atomCompare(hl[idx], hlb);
+
+	HandleSeq hv2({hlb, hb2});
+	Handle hlb2 = space->get_handle(hl2[idx]->getType(), hv2);
+	atomCompare(hl2[idx], hlb2);
+
+	HandleSeq hv3({hb1, hlb2, hb3});
+	Handle hlb3 = space->get_handle(hl3[idx]->getType(), hv3);
+	atomCompare(hl3[idx], hlb3);
 }
 
 void PersistUTest::check_empty(int idx, AtomSpace *space)
