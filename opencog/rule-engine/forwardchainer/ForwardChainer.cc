@@ -39,10 +39,11 @@
 
 using namespace opencog;
 
-ForwardChainer::ForwardChainer(AtomSpace& as, Handle rbs) :
+ForwardChainer::ForwardChainer(AtomSpace& as, Handle rbs, Handle hsource,
+                               HandleSeq focus_set) :
         _as(as), _rec(as), _rbs(rbs), _configReader(as, rbs)
 {
-    init();
+    init(hsource,focus_set);
 }
 
 ForwardChainer::~ForwardChainer()
@@ -50,19 +51,31 @@ ForwardChainer::~ForwardChainer()
 
 }
 
-void ForwardChainer::init()
+void ForwardChainer::init(Handle hsource, HandleSeq focus_set)
 {
-     _search_in_af = _configReader.get_attention_allocation();
+     validate(hsource, focus_set);
 
-     //TODO change pointer to ref in FC
-     for(Rule r :_configReader.get_rules())
+    _search_in_af = _configReader.get_attention_allocation();
+    _search_focus_Set = not focus_set.empty();
+    _ts_mode = TV_FITNESS_BASED;
+
+    //Set potential source.
+    HandleSeq init_sources = { };
+    //Accept set of initial sources wrapped in a SET_LINK
+    if (LinkCast(hsource) and hsource->getType() == SET_LINK) {
+        init_sources = _as.get_outgoing(hsource);
+    } else {
+        init_sources.push_back(hsource);
+    }
+    update_potential_sources(init_sources);
+
+     //Set rules.
+     for(Rule& r :_configReader.get_rules())
      {
          _rules.push_back(&r);
      }
     _cur_rule = nullptr;
     
-    _ts_mode = TV_FITNESS_BASED;
-
     // Provide a logger
     _log = NULL;
     setLogger(new opencog::Logger("forward_chainer.log", Logger::FINE, true));
