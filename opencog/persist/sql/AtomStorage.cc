@@ -1627,6 +1627,8 @@ void AtomStorage::create_tables(void)
 	                      "parent    BIGINT);");
 	rp.rs->release();
 
+	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (0,0);");
+	rp.rs->release();
 	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (1,1);");
 	rp.rs->release();
 
