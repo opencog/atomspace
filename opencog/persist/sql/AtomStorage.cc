@@ -1345,9 +1345,8 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 		// All height zero atoms are nodes,
 		// All positive height atoms are links.
 		// A negative height is "unknown" and must be checked.
-		if ((0 == rp.height) ||
-		    ((-1 == rp.height) &&
-		      classserver().isA(realtype, NODE)))
+		if ((0 == rp.height) or
+		    ((-1 == rp.height) and classserver().isA(realtype, NODE)))
 		{
 			atom = createNode(realtype, rp.name);
 		}

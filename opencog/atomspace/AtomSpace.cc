@@ -231,8 +231,8 @@ Handle AtomSpace::get_link(Type t, const HandleSeq& outgoing)
         {
             LinkPtr l(backing_store->getLink(t, outgoing));
             if (l) {
-                // Register the atom with the atomtable (so it gets placed in
-                // indices)
+                // Register the atom with the atomtable (so it
+                // gets placed in indices)
                 return atomTable.add(l, false);
             }
         }
