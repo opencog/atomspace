@@ -120,7 +120,10 @@ std::string Link::toString(std::string indent)
     }
 
     answer += indent + ") ; [" + 
-            std::to_string(_uuid).c_str() + "]\n";
+            std::to_string(_uuid).c_str() + "][" +
+            std::to_string(_atomTable? _atomTable->get_uuid() : -1) +
+            "]\n";
+
     return answer;
 }
 

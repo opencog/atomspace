@@ -55,10 +55,12 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 		NodePtr n1[10];
 		NodePtr n2[10];
 		NodePtr n3[10];
+		NodePtr n4[10];
 		LinkPtr l[10];
 		AtomPtr a1[10];
 		AtomPtr a2[10];
 		AtomPtr a3[10];
+		AtomPtr a4[10];
 		AtomPtr al[10];
 
 	public:
@@ -273,29 +275,39 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
 	n1[idx] = createNode(SCHEMA_NODE, id + "fromNode");
 	TruthValuePtr stv(SimpleTruthValue::createTV(0.11, 100+idx));
 	n1[idx]->setTruthValue(stv);
+	n1[idx] = NodeCast(table->add(n1[idx], false));
 	a1[idx] = n1[idx];
-	table->add(a1[idx], false);
 
 	n2[idx] = createNode(SCHEMA_NODE, id + "toNode");
 	TruthValuePtr stv2(SimpleTruthValue::createTV(0.22, 200+idx));
 	n2[idx]->setTruthValue(stv2);
+	n2[idx] = NodeCast(table->add(n2[idx], false));
 	a2[idx] = n2[idx];
-	table->add(a2[idx], false);
 
 	n3[idx] = createNode(SCHEMA_NODE, id + "third wheel");
 	TruthValuePtr stv3(SimpleTruthValue::createTV(0.33, 300+idx));
 	n3[idx]->setTruthValue(stv3);
+	n3[idx] = NodeCast(table->add(n3[idx], false));
 	a3[idx] = n3[idx];
-	table->add(a3[idx], false);
+
+	// The NumberNode will go through the AtomTable clone factory
+	// and should thus elicit any errors in clone uuid handling.
+	char buf[40]; sprintf(buf, "%f", idx+0.14159265358979);
+	n4[idx] = createNode(NUMBER_NODE, buf);
+	TruthValuePtr stv4(SimpleTruthValue::createTV(0.33, 400+idx));
+	n4[idx]->setTruthValue(stv4);
+	n4[idx] = NodeCast(table->add(n4[idx], false));
+	a4[idx] = n4[idx];
 
 	std::vector<Handle> hvec;
 	hvec.push_back(a1[idx]->getHandle());
 	hvec.push_back(a2[idx]->getHandle());
 	hvec.push_back(a3[idx]->getHandle());
+	hvec.push_back(a4[idx]->getHandle());
 
 	l[idx] = createLink(SET_LINK, hvec);
+	l[idx] = LinkCast(table->add(l[idx], false));
 	al[idx] = l[idx];
-	table->add(l[idx], false);
 }
 
 void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
@@ -309,10 +321,14 @@ void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
 	Handle hb3 = table->getHandle(n3[idx]);
 	atomCompare(a3[idx], hb3, "check_table hb3");
 
+	Handle hb4 = table->getHandle(n4[idx]);
+	atomCompare(a4[idx], hb4, "check_table hb4");
+
 	std::vector<Handle> hvec;
 	hvec.push_back(hb1);
 	hvec.push_back(hb2);
 	hvec.push_back(hb3);
+	hvec.push_back(hb4);
 
 	LinkPtr lb(createLink(SET_LINK, hvec));
 	Handle hlb = table->getHandle(lb);
@@ -356,19 +372,6 @@ void BasicSaveUTest::test_table(void)
 	store->store(*table1);
 	// table1->print();
 	delete store;
-
-	// Copy atoms; the original atoms will be blown away
-	// when table1 is deleted. (they're also removed from
-	// the TLB, so this indirectly tests the correctness
-	// of the stored uuid's as well.)
-	int mi = idx;
-	for (idx=0; idx < mi; idx++)
-	{
-		n1[idx] = createNode(*n1[idx]); a1[idx] = n1[idx];
-		n2[idx] = createNode(*n2[idx]); a2[idx] = n2[idx];
-		n3[idx] = createNode(*n3[idx]); a3[idx] = n3[idx];
-		l[idx]  = createLink(*l[idx]);  al[idx] = l[idx];
-	}
 	delete table1;
 
 	// Reopen connection, and load the atom table.

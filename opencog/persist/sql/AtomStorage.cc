@@ -423,6 +423,7 @@ void AtomStorage::init(const char * dbname,
 	}
 
 	local_id_cache_is_inited = false;
+	table_cache_is_inited = false;
 	if (!connected()) return;
 
 	reserve();
@@ -474,10 +475,43 @@ bool AtomStorage::connected(void)
 	return have_connection;
 }
 
+/* ================================================================== */
+/* AtomTable UUID stuff */
+
+void AtomStorage::store_atomtable_id(const AtomTable& at)
+{
+	UUID tab_id = at.get_uuid();
+	if (table_id_cache.count(tab_id)) return;
+
+	table_id_cache.insert(tab_id);
+
+	// Get the parent table as well.
+	UUID parent_id = 1;
+	AtomTable *env = at.get_environ();
+	if (env)
+	{
+		parent_id = env->get_uuid();
+		store_atomtable_id(*env);
+	}
+
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"INSERT INTO Spaces (space, parent) VALUES (%ld, %ld);",
+		tab_id, parent_id);
+
+	std::unique_lock<std::mutex> lock(table_cache_mutex);
+	ODBCConnection* db_conn = get_conn();
+	Response rp;
+	rp.rs = db_conn->exec(buff);
+	rp.rs->release();
+	put_conn(db_conn);
+}
+
+
 /* ================================================================ */
 
 #define STMT(colname,val) { \
-	if(update) { \
+	if (update) { \
 		if (notfirst) { cols += ", "; } else notfirst = 1; \
 		cols += colname; \
 		cols += " = "; \
@@ -873,11 +907,23 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 				"Error: store_single: Unknown truth value type\n");
 	}
 
+	// We may have to store the atom table UUID and try again...
+	// We waste CPU cycles to store the atomtable, only if it failed.
+	bool try_again = false;
 	std::string qry = cols + vals + coda;
 	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.rs = db_conn->exec(qry.c_str());
+	if (NULL == rp.rs) try_again = true;
 	rp.rs->release();
+
+	if (try_again)
+	{
+		AtomTable *at = atom->getAtomTable();
+		if (at) store_atomtable_id(*at);
+		rp.rs = db_conn->exec(qry.c_str());
+		rp.rs->release();
+	}
 	put_conn(db_conn);
 
 #ifndef USE_INLINE_EDGES
@@ -1436,13 +1482,14 @@ void AtomStorage::load(AtomTable &table)
 		rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
 		rp.rs->release();
 #else
-		// It appears that, when the select statment returns more than
+		// It appears that, when the select statement returns more than
 		// about a 100K to a million atoms or so, some sort of heap
 		// corruption occurs in the iodbc code, causing future mallocs
 		// to fail. So limit the number of records processed in one go.
 		// It also appears that asking for lots of records increases
 		// the memory fragmentation (and/or there's a memory leak in iodbc??)
 		// XXX Not clear is UnixODBC suffers from this same problem.
+		// Whatever, seems to be a better strategy overall, anyway.
 #define STEP 12003
 		unsigned long rec;
 		for (rec = 0; rec <= max_nrec; rec += STEP)
@@ -1622,17 +1669,29 @@ void AtomStorage::create_tables(void)
 
 	// See the file "atom.sql" for detailed documentation as to the
 	// structure of the SQL tables.
+	rp.rs = db_conn->exec("CREATE TABLE Spaces ("
+	                      "space     BIGINT PRIMARY KEY,"
+	                      "parent    BIGINT);");
+	rp.rs->release();
+
+	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (0,0);");
+	rp.rs->release();
+	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (1,1);");
+	rp.rs->release();
+
 	rp.rs = db_conn->exec("CREATE TABLE Atoms ("
 	                      "uuid     BIGINT PRIMARY KEY,"
-	                      "space    BIGINT,"
+	                      "space    BIGINT REFERENCES spaces(space),"
 	                      "type     SMALLINT,"
 	                      "type_tv  SMALLINT,"
 	                      "stv_mean FLOAT,"
 	                      "stv_confidence FLOAT,"
-	                      "stv_count FLOAT,"
+	                      "stv_count DOUBLE PRECISION,"
 	                      "height   SMALLINT,"
 	                      "name     TEXT,"
-	                      "outgoing BIGINT[]);");
+	                      "outgoing BIGINT[],"
+	                      "UNIQUE (type, name),"
+	                      "UNIQUE (type, outgoing));");
 	rp.rs->release();
 
 #ifndef USE_INLINE_EDGES
@@ -1648,11 +1707,6 @@ void AtomStorage::create_tables(void)
 	                      "typename TEXT UNIQUE);");
 	rp.rs->release();
 	type_map_was_loaded = false;
-
-	rp.rs = db_conn->exec("CREATE TABLE Spaces ("
-	                      "space     BIGINT,"
-	                      "parent    BIGINT);");
-	rp.rs->release();
 
 	rp.rs = db_conn->exec("CREATE TABLE Global ("
 	                      "max_height INT);");
@@ -1676,6 +1730,15 @@ void AtomStorage::kill_data(void)
 	// See the file "atom.sql" for detailed documentation as to the
 	// structure of the SQL tables.
 	rp.rs = db_conn->exec("DELETE from Atoms;");
+	rp.rs->release();
+
+	// Delete the atomspaces as well!
+	rp.rs = db_conn->exec("DELETE from Spaces;");
+	rp.rs->release();
+
+	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (0,0);");
+	rp.rs->release();
+	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (1,1);");
 	rp.rs->release();
 
 	rp.rs = db_conn->exec("UPDATE Global SET max_height = 0;");

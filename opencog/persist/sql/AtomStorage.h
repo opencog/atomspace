@@ -58,6 +58,16 @@ class AtomStorage
 		class Outgoing;
 
 		void init(const char *, const char *, const char *);
+
+		// ---------------------------------------------
+		// Handle multiple atomspaces like typecodes: we have to
+		// convert from sql UUID to the atual UUID.
+		std::mutex table_cache_mutex;
+		bool table_cache_is_inited;
+		std::set<UUID> table_id_cache;
+		void store_atomtable_id(const AtomTable&);
+
+		// ---------------------------------------------
 		AtomPtr makeAtom (Response &, Handle);
 		AtomPtr getAtom (const char *, int);
 

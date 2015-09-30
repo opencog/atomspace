@@ -281,7 +281,7 @@ bool AtomTable::inEnviron(AtomPtr atom)
 
 // Experimental C++ atom types support code
 // Try to cast, if possible.
-AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
+AtomPtr do_factory(Type atom_type, AtomPtr atom)
 {
     // Nodes of various kinds -----------
     if (NUMBER_NODE == atom_type) {
@@ -343,7 +343,7 @@ AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
 }
 
 // create a clone
-static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
+static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
 {
     // Nodes of various kinds -----------
     if (NUMBER_NODE == atom_type)
@@ -391,6 +391,30 @@ static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
 
     throw RuntimeException(TRACE_INFO,
           "AtomTable - failed factory call!");
+}
+
+AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
+{
+	AtomPtr clone(do_factory(atom_type, atom));
+	clone->_uuid = atom->_uuid;
+	return clone;
+}
+
+/// The purpose of the clone factory is to create a private, unique
+/// copy of the atom, so as to avoid accidental, unintentional
+/// sharing with others. In particular, the atom that we are given
+/// may already exist in some other atomspace; we want our own private
+/// copy, in that case.
+AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
+{
+	AtomPtr clone(do_clone_factory(atom_type, atom));
+	// Copy the UUID ONLY if the atom does not belong to some other
+	// atomspace. This is the situation that applies to atoms being
+	// delivered to us from the backing store: the UUID is set, but
+	// they are othrwise "fresh" atoms.
+	if (NULL == atom->getAtomTable())
+		clone->_uuid = atom->_uuid;
+	return clone;
 }
 
 static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
@@ -585,8 +609,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 
     // Its possible that the atom already has a UUID assigned,
     // e.g. if it was fetched from persistent storage; this
-    // was done to preserve handle consistency. SavingLoading does
-    // this too.  XXX Review SavingLoading for correctness...
+    // was done to preserve handle consistency.
     if (atom->_uuid == Handle::INVALID_UUID) {
        // Atom doesn't yet have a valid uuid assigned to it. Ask the TLB
        // to issue a valid uuid.  And then memorize it.
