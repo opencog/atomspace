@@ -62,7 +62,7 @@ private:
 
     FCStat _fcstat;
 
-    void init();
+    void init(Handle hsource, HandleSeq focus_set);
 
     void apply_all_rules(bool search_focus_set = false);
     void do_pm(const Handle& hsource, const UnorderedHandleSet& var_nodes);
