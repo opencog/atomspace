@@ -423,6 +423,7 @@ void AtomStorage::init(const char * dbname,
 	}
 
 	local_id_cache_is_inited = false;
+	table_cache_is_inited = false;
 	if (!connected()) return;
 
 	reserve();
@@ -474,10 +475,42 @@ bool AtomStorage::connected(void)
 	return have_connection;
 }
 
+/* ================================================================== */
+/* AtomTable UUID stuff */
+
+void AtomStorage::store_atomtable_id(const AtomTable& at)
+{
+	UUID tab_id = at.get_uuid();
+	if (table_id_cache.count(tab_id)) return;
+
+	table_id_cache.insert(tab_id);
+
+	// Get the parent table as well.
+	UUID parent_id = 1;
+	AtomTable *env = at.get_environ();
+	if (env)
+	{
+		parent_id = env->get_uuid();
+		store_atomtable_id(*env);
+	}
+
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"INSERT INTO Spaces (space, parent) VALUES (%ld, %ld);",
+		tab_id, parent_id);
+
+	std::unique_lock<std::mutex> lock(table_cache_mutex);
+	ODBCConnection* db_conn = get_conn();
+	Response rp;
+	rp.rs = db_conn->exec(buff);
+	rp.rs->release();
+}
+
+
 /* ================================================================ */
 
 #define STMT(colname,val) { \
-	if(update) { \
+	if (update) { \
 		if (notfirst) { cols += ", "; } else notfirst = 1; \
 		cols += colname; \
 		cols += " = "; \
