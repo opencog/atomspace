@@ -134,6 +134,8 @@ private:
     // JUST FOR TESTS:
     bool isCleared() const;
 
+    static AtomPtr clone_factory(Type, AtomPtr);
+
     /// Parent environment for this table.  Null if top-level.
     /// This allows atomspaces to be nested; atoms in this atomspace
     /// can reference those in the parent environment.
