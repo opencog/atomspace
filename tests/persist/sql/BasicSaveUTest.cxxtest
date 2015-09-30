@@ -273,20 +273,20 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
 	n1[idx] = createNode(SCHEMA_NODE, id + "fromNode");
 	TruthValuePtr stv(SimpleTruthValue::createTV(0.11, 100+idx));
 	n1[idx]->setTruthValue(stv);
+	n1[idx] = NodeCast(table->add(n1[idx], false));
 	a1[idx] = n1[idx];
-	table->add(a1[idx], false);
 
 	n2[idx] = createNode(SCHEMA_NODE, id + "toNode");
 	TruthValuePtr stv2(SimpleTruthValue::createTV(0.22, 200+idx));
 	n2[idx]->setTruthValue(stv2);
+	n2[idx] = NodeCast(table->add(n2[idx], false));
 	a2[idx] = n2[idx];
-	table->add(a2[idx], false);
 
 	n3[idx] = createNode(SCHEMA_NODE, id + "third wheel");
 	TruthValuePtr stv3(SimpleTruthValue::createTV(0.33, 300+idx));
 	n3[idx]->setTruthValue(stv3);
+	n3[idx] = NodeCast(table->add(n3[idx], false));
 	a3[idx] = n3[idx];
-	table->add(a3[idx], false);
 
 	std::vector<Handle> hvec;
 	hvec.push_back(a1[idx]->getHandle());
@@ -294,8 +294,8 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
 	hvec.push_back(a3[idx]->getHandle());
 
 	l[idx] = createLink(SET_LINK, hvec);
+	l[idx] = LinkCast(table->add(l[idx], false));
 	al[idx] = l[idx];
-	table->add(l[idx], false);
 }
 
 void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
@@ -356,19 +356,6 @@ void BasicSaveUTest::test_table(void)
 	store->store(*table1);
 	// table1->print();
 	delete store;
-
-	// Copy atoms; the original atoms will be blown away
-	// when table1 is deleted. (they're also removed from
-	// the TLB, so this indirectly tests the correctness
-	// of the stored uuid's as well.)
-	int mi = idx;
-	for (idx=0; idx < mi; idx++)
-	{
-		n1[idx] = createNode(*n1[idx]); a1[idx] = n1[idx];
-		n2[idx] = createNode(*n2[idx]); a2[idx] = n2[idx];
-		n3[idx] = createNode(*n3[idx]); a3[idx] = n3[idx];
-		l[idx]  = createLink(*l[idx]);  al[idx] = l[idx];
-	}
 	delete table1;
 
 	// Reopen connection, and load the atom table.
