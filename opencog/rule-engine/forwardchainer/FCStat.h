@@ -70,8 +70,6 @@ private:
     std::vector<InferenceRecord> _inf_rec;
 
 public:
-    bool are_similar(const Handle& h1,const Handle& h2,bool strict_type_match);
-
     //PartialGroundingRecord queries.
     bool has_partial_grounding(const Handle& hsource);
     void add_partial_grounding(Handle source, Handle hrule, HandleSeq pgroundings);
