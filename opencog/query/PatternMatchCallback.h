@@ -31,8 +31,6 @@
 #include <opencog/query/Pattern.h> // for VariableTypeMap
 #include <opencog/atoms/core/VariableList.h> // for VariableTypeMap
 
-// #define DEBUG 1
-
 namespace opencog {
 class PatternMatchEngine;
 

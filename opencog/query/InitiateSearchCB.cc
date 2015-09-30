@@ -35,14 +35,6 @@
 
 using namespace opencog;
 
-// Uncomment below to enable debug print
-// #define DEBUG
-#ifdef DEBUG
-#define dbgprt(f, varargs...) printf(f, ##varargs)
-#else
-#define dbgprt(f, varargs...)
-#endif
-
 /* ======================================================== */
 
 InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
@@ -324,10 +316,11 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 		_starter_term = ch.start_term;
 
 		_root = clauses[bestclause];
-		dbgprt("Search start node: %s\n", best_start->toShortString().c_str());
-		dbgprt("Start term is: %s\n", _starter_term == Handle::UNDEFINED ?
-		       "UNDEFINED" : _starter_term->toShortString().c_str());
-		dbgprt("Root clause is: %s\n", _root->toShortString().c_str());
+		LAZY_LOG_FINE << "Search start node: " << best_start->toShortString();
+		LAZY_LOG_FINE << "Start term is: "
+		              << (_starter_term == Handle::UNDEFINED ?
+		                  "UNDEFINED" : _starter_term->toShortString());
+		LAZY_LOG_FINE << "Root clause is: " <<  _root->toShortString();
 
 		// This should be calling the over-loaded virtual method
 		// get_incoming_set(), so that, e.g. it gets sorted by attentional
@@ -337,9 +330,9 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 		for (size_t i = 0; i < sz; i++)
 		{
 			Handle h(iset[i]);
-			dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-			dbgprt("Loop candidate (%lu/%lu):\n%s\n", i+1, sz,
-			       h->toShortString().c_str());
+			LAZY_LOG_FINE << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n"
+			              << "Loop candidate (" << i+1 << "/" << sz << "):\n"
+			              << h->toShortString();
 			bool found = pme->explore_neighborhood(_root, _starter_term, h);
 
 			// Terminate search if satisfied.
@@ -445,7 +438,7 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 {
 	jit_analyze(pme);
 
-	dbgprt("Attempt to use node-neighbor search\n");
+	logger().fine("Attempt to use node-neighbor search");
 	_search_fail = false;
 	bool found = neighbor_search(pme);
 	if (found) return true;
@@ -456,7 +449,7 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// they are all evaluatable. This can happen for sequence links;
 	// we want to quickly rule out this case before moving to more
 	// complex searches, below.
-	dbgprt("Cannot use node-neighbor search, use no-var search\n");
+	logger().fine("Cannot use node-neighbor search, use no-var search");
 	_search_fail = false;
 	found = no_search(pme);
 	if (found) return true;
@@ -467,7 +460,7 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// variables! Which can happen (there is a unit test for this,
 	// the LoopUTest), and so instead, we search based on the link
 	// types that occur in the atomspace.
-	dbgprt("Cannot use no-var search, use link-type search\n");
+	logger().fine("Cannot use no-var search, use link-type search");
 	_search_fail = false;
 	found = link_type_search(pme);
 	if (found) return true;
@@ -479,7 +472,7 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// variable, all by itself, and set some type restrictions on it,
 	// and that's all. We deal with this in the variable_search()
 	// method.
-	dbgprt("Cannot use link-type search, use variable-type search\n");
+	logger().fine("Cannot use link-type search, use variable-type search");
 	_search_fail = false;
 	found = variable_search(pme);
 	return found;
@@ -556,8 +549,8 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 		return false;
 	}
 
-	dbgprt("Start clause is: %s\n", _root->toShortString().c_str());
-	dbgprt("Start term is: %s\n", _starter_term->toShortString().c_str());
+	LAZY_LOG_FINE << "Start clause is: " << _root->toShortString();
+	LAZY_LOG_FINE << "Start term is: " << _starter_term->toShortString();
 
 	// Get type of the rarest link
 	Type ptype = _starter_term->getType();
@@ -565,14 +558,12 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 	HandleSeq handle_set;
 	_as->get_handles_by_type(handle_set, ptype);
 
-#ifdef DEBUG
-	size_t i = 0;
-#endif
+	size_t i = 0, hsz = handle_set.size();
 	for (const Handle& h : handle_set)
 	{
-		dbgprt("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\n");
-		dbgprt("Loop candidate (%lu/%lu):\n%s\n", ++i, handle_set.size(),
-		       h->toShortString().c_str());
+		LAZY_LOG_FINE << "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\n"
+		              << "Loop candidate (" << i+1 << "/" << hsz << "):\n"
+		              << h->toShortString();
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;
 	}
@@ -600,21 +591,23 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	size_t count = SIZE_MAX;
 	Type ptype = ATOM;
 
-	dbgprt("varset size = %lu\n", _variables->varset.size());
+	LAZY_LOG_FINE << "varset size = " <<  _variables->varset.size();
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
 	for (const Handle& var: _variables->varset)
 	{
-		dbgprt("Examine variable %s\n", var->toShortString().c_str());
+		LAZY_LOG_FINE << "Examine variable " << var->toShortString();
 		auto tit = _type_restrictions->find(var);
 		if (_type_restrictions->end() == tit) continue;
 		const std::set<Type>& typeset = tit->second;
-		dbgprt("Type-restictions set size = %lu\n", typeset.size());
+		LAZY_LOG_FINE << "Type-restictions set size = "
+		              << typeset.size();
 		for (Type t : typeset)
 		{
 			size_t num = (size_t) _as->get_num_atoms_of_type(t);
-			dbgprt("Type = %s has %lu atoms in the atomspace\n",
-			       _classserver.getTypeName(t).c_str(), num);
+			LAZY_LOG_FINE << "Type = "
+			              << _classserver.getTypeName(t) << " has "
+			              << num << " atoms in the atomspace";
 			if (0 < num and num < count)
 			{
 				for (const Handle& cl : clauses)
@@ -630,7 +623,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 						_starter_term = cl;
 						count = num;
 						ptype = t;
-						dbgprt("New minimum count of %lu\n", count);
+						LAZY_LOG_FINE << "New minimum count of " << count;
 						break;
 					}
 					if (0 < fa.least_holders.size())
@@ -639,7 +632,8 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 						_starter_term = *fa.least_holders.begin();
 						count = num;
 						ptype = t;
-						dbgprt("New minimum count of %lu (nonroot)\n", count);
+						LAZY_LOG_FINE << "New minimum count of "
+						              << count << "(nonroot)";
 						break;
 					}
 				}
@@ -650,7 +644,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	// There were no type restrictions!
 	if (Handle::UNDEFINED == _root)
 	{
-		dbgprt("There were no type restrictions! That must be wrong!\n");
+		logger().fine("There were no type restrictions! That must be wrong!");
 		if (0 == clauses.size())
 		{
 			// This is kind-of weird, it can happen if all clauses
@@ -667,16 +661,14 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	else
 		_as->get_handles_by_type(handle_set, ptype);
 
-	dbgprt("Atomspace reported %lu atoms\n", handle_set.size());
+	LAZY_LOG_FINE << "Atomspace reported " << handle_set.size() << " atoms";
 
-#ifdef DEBUG
-	size_t i = 0;
-#endif
+	size_t i = 0, hsz = handle_set.size();
 	for (const Handle& h : handle_set)
 	{
-		dbgprt("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz\n");
-		dbgprt("Loop candidate (%lu/%lu):\n%s\n", ++i, handle_set.size(),
-		       h->toShortString().c_str());
+		LAZY_LOG_FINE << "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz\n"
+		              << "Loop candidate (" << i+1 << "/" << hsz << "):\n"
+		              << h->toShortString();
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;
 	}
@@ -714,8 +706,8 @@ bool InitiateSearchCB::no_search(PatternMatchEngine *pme)
 		return false;
 	}
 
-	dbgprt("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww\n");
-	dbgprt("Non-search: no variables, no non-evaluatable clauses\n");
+	LAZY_LOG_FINE << "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww\n"
+	              << "Non-search: no variables, no non-evaluatable clauses";
 	_root = _starter_term = clauses[0];
 	bool found = pme->explore_neighborhood(_root, _starter_term, _root);
 	return found;
@@ -780,10 +772,8 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 
 	pme->set_pattern(*_variables, *_pattern);
 	set_pattern(*_variables, *_pattern);
-#ifdef DEBUG
-	dbgprt("JIT expanded!\n");
-	_pl->debug_print();
-#endif
+	logger().fine("JIT expanded!");
+	_pl->debug_log();
 }
 
 /* ===================== END OF FILE ===================== */

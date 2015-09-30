@@ -121,10 +121,8 @@ class PatternMatchEngine
 		// whenever take_step is set to true.
 		bool take_step;
 		bool have_more;
-#ifdef DEBUG
 		std::map<Unorder, int> perm_count;
 		std::stack<std::map<Unorder, int>> perm_count_stack;
-#endif
 
 		// --------------------------------------------
 		// Methods and state that select the next clause to be grounded.
@@ -222,11 +220,11 @@ class PatternMatchEngine
 		bool explore_neighborhood(const Handle&, const Handle&, const Handle&);
 
 		// Handy-dandy utilities
-		static void print_solution(const std::map<Handle, Handle> &vars,
-		                           const std::map<Handle, Handle> &clauses);
+		static void log_solution(const std::map<Handle, Handle> &vars,
+		                         const std::map<Handle, Handle> &clauses);
 
-		static void print_term(const std::set<Handle> &vars,
-		                            const std::vector<Handle> &clauses);
+		static void log_term(const std::set<Handle> &vars,
+		                     const std::vector<Handle> &clauses);
 };
 
 } // namespace opencog
