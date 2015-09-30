@@ -212,6 +212,7 @@ void ForwardChainer::do_pm(const Handle& hsource,
         impl.implicand = bl->get_implicand();
         bl->imply(impl);
         _cur_rule = rule;
+        _fcstat.add_inference_record(Handle::UNDEFINED, impl.get_result_list());
     }
 }
 
@@ -227,6 +228,7 @@ void ForwardChainer::apply_all_rules(bool search_focus_set /*= false*/)
         HandleSeq hs = apply_rule(rule->get_handle(), search_focus_set);
 
         //Update
+       _fcstat.add_inference_record(Handle::UNDEFINED,hs);
         update_potential_sources(hs);
     }
 
@@ -234,8 +236,7 @@ void ForwardChainer::apply_all_rules(bool search_focus_set /*= false*/)
 
 HandleSeq ForwardChainer::get_chaining_result()
 {
-    //TODO Implement this
-    return HandleSeq{};
+    return _fcstat.get_all_inferences();
 }
 
 Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
