@@ -281,7 +281,7 @@ bool AtomTable::inEnviron(AtomPtr atom)
 
 // Experimental C++ atom types support code
 // Try to cast, if possible.
-AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
+AtomPtr do_factory(Type atom_type, AtomPtr atom)
 {
     // Nodes of various kinds -----------
     if (NUMBER_NODE == atom_type) {
@@ -391,6 +391,13 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
 
     throw RuntimeException(TRACE_INFO,
           "AtomTable - failed factory call!");
+}
+
+AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
+{
+	AtomPtr clone(do_factory(atom_type, atom));
+	clone->_uuid = atom->_uuid;
+	return clone;
 }
 
 AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
