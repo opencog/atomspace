@@ -97,7 +97,6 @@ Handle InferenceSCM::do_forward_chaining(Handle hsource,
 {
 #ifdef HAVE_GUILE
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fc");
-    ForwardChainer fc(*as, rbs);
 
     HandleSeq focus_set = {};
 
@@ -108,8 +107,8 @@ Handle InferenceSCM::do_forward_chaining(Handle hsource,
                 TRACE_INFO,
                 "InferenceSCM::do_forward_chaining - focus set should be SET_LINK type!");
 
-    //TODO variable fulfillment
-    fc.do_chain(hsource,focus_set);
+    ForwardChainer fc(*as, rbs, hsource, focus_set);
+    fc.do_chain();
     HandleSeq result = fc.get_chaining_result();
 
     return as->add_link(LIST_LINK, result);
