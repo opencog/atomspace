@@ -160,9 +160,9 @@ public:
      */
     AtomTable(AtomTable* parent = NULL, AtomSpace* holder = NULL);
     ~AtomTable();
-    UUID get_uuid(void) { return _uuid; }
-    AtomTable* get_environ(void) { return _environ; }
-    AtomSpace* getAtomSpace(void) { return _as; }
+    UUID get_uuid(void) const { return _uuid; }
+    AtomTable* get_environ(void) const { return _environ; }
+    AtomSpace* getAtomSpace(void) const { return _as; }
 
     /**
      * Return the number of atoms contained in a table.
