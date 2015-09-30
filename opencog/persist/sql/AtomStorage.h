@@ -68,7 +68,7 @@ class AtomStorage
 		void store_atomtable_id(const AtomTable&);
 
 		// ---------------------------------------------
-		AtomPtr makeAtom (Response &, Handle);
+		AtomPtr makeAtom (Response &, AtomPtr, UUID);
 		AtomPtr getAtom (const char *, int);
 
 		int get_height(AtomPtr);

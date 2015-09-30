@@ -71,7 +71,7 @@ class AtomStorage::Response
 		ODBCRecordSet *rs;
 
 		// Temporary cache of info about atom being assembled.
-		Handle handle;
+		UUID uuid;
 		int itype;
 		const char * name;
 		int tv_type;
@@ -121,8 +121,7 @@ class AtomStorage::Response
 			}
 			else if (!strcmp(colname, "uuid"))
 			{
-				UUID uuid = strtoul(colvalue, NULL, 10);
-				handle = Handle(uuid);
+				uuid = strtoul(colvalue, NULL, 10);
 			}
 			return false;
 		}
@@ -141,7 +140,7 @@ class AtomStorage::Response
 			// printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
-			AtomPtr atom(store->makeAtom(*this, handle));
+			AtomPtr atom(store->makeAtom(*this, NULL, uuid));
 			table->add(atom, true);
 			return false;
 		}
@@ -156,9 +155,10 @@ class AtomStorage::Response
 			// printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
-			if (not table->holds(handle))
+			Handle h(uuid);
+			if (not table->holds(h))
 			{
-				AtomPtr atom(store->makeAtom(*this, handle));
+				AtomPtr atom(store->makeAtom(*this, NULL, uuid));
 				load_recursive_if_not_exists(atom);
 			}
 			return false;
@@ -193,7 +193,7 @@ class AtomStorage::Response
 			// Note, unlike the above 'load' routines, this merely fetches
 			// the atoms, and returns a vector of them.  They are loaded
 			// into the atomspace later, by the caller.
-			Handle h(store->makeAtom(*this, handle));
+			Handle h(store->makeAtom(*this, NULL, uuid));
 			hvec->push_back(h);
 			return false;
 		}
@@ -1197,13 +1197,13 @@ AtomPtr  AtomStorage::getAtom(const char * query, int height)
 {
 	ODBCConnection* db_conn = get_conn();
 	Response rp;
-	rp.handle = Handle::UNDEFINED;
+	rp.uuid = Handle::INVALID_UUID;
 	rp.rs = db_conn->exec(query);
 	rp.rs->foreach_row(&Response::create_atom_cb, &rp);
 
 	// Did we actually find anything?
 	// DO NOT USE TLB::IsInvalidHandle() HERE! It won't work, duhh!
-	if (rp.handle.value() == Handle::INVALID_UUID)
+	if (rp.uuid == Handle::INVALID_UUID)
 	{
 		rp.rs->release();
 		put_conn(db_conn);
@@ -1211,7 +1211,7 @@ AtomPtr  AtomStorage::getAtom(const char * query, int height)
 	}
 
 	rp.height = height;
-	AtomPtr atom(makeAtom(rp, rp.handle));
+	AtomPtr atom(makeAtom(rp, NULL, rp.uuid));
 	rp.rs->release();
 	put_conn(db_conn);
 	return atom;
@@ -1326,10 +1326,9 @@ LinkPtr AtomStorage::getLink(Type t, const std::vector<Handle>&oset)
 /**
  * Instantiate a new atom, from the response buffer contents
  */
-AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
+AtomPtr AtomStorage::makeAtom(Response &rp, AtomPtr atom, UUID uuid)
 {
 	// Now that we know everything about an atom, actually construct one.
-	AtomPtr atom(h);
 	Type realtype = loading_typemap[rp.itype];
 
 	if (NOTYPE == realtype)
@@ -1375,7 +1374,6 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 		// Perform at least some basic sanity checking ...
 		if (realtype != atom->getType())
 		{
-			UUID uuid = h.value();
 			throw RuntimeException(TRACE_INFO,
 				"Fatal Error: mismatched atom type for existing atom! "
 				"uuid=%lu real=%d atom=%d\n",
@@ -1383,16 +1381,16 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 		}
 		// If we are here, and the atom uuid is set, then it should match.
 		if (Handle::INVALID_UUID != atom->_uuid and
-		    atom->_uuid != h.value())
+		    atom->_uuid != uuid)
 		{
 			throw RuntimeException(TRACE_INFO,
 				"Fatal Error: mismatched handle and atom UUID's, atom=%lu handle=%lu",
-				atom->_uuid, h.value());
+				atom->_uuid, uuid);
 		}
 	}
 
 	// Give the atom the correct UUID. The AtomTable will need this.
-	atom->_uuid = h.value();
+	atom->_uuid = uuid;
 
 	// Now get the truth value
 	switch (rp.tv_type)
@@ -1435,7 +1433,7 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 		fprintf(stderr, "\tLoaded %lu atoms.\n", (unsigned long) load_count);
 	}
 
-	add_id_to_cache(h.value());
+	add_id_to_cache(uuid);
 	return atom;
 }
 
