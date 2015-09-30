@@ -504,6 +504,7 @@ void AtomStorage::store_atomtable_id(const AtomTable& at)
 	Response rp;
 	rp.rs = db_conn->exec(buff);
 	rp.rs->release();
+	put_conn(db_conn);
 }
 
 
@@ -906,11 +907,23 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 				"Error: store_single: Unknown truth value type\n");
 	}
 
+	// We may have to store the atom table UUID and try again...
+	// We waste CPU cycles to store the atomtable, only if it failed.
+	bool try_again = false;
 	std::string qry = cols + vals + coda;
 	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.rs = db_conn->exec(qry.c_str());
+	if (NULL == rp.rs) try_again = true;
 	rp.rs->release();
+
+	if (try_again)
+	{
+		AtomTable *at = atom->getAtomTable();
+		if (at) store_atomtable_id(*at);
+		rp.rs = db_conn->exec(qry.c_str());
+		rp.rs->release();
+	}
 	put_conn(db_conn);
 
 #ifndef USE_INLINE_EDGES
