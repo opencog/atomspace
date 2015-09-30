@@ -1360,7 +1360,7 @@ AtomPtr AtomStorage::makeAtom(Response &rp, UUID uuid)
 			// Break if there is no more atom in the outgoing set
 			// or the outgoing set is empty in the first place
 			if (*p == '}' or *p == '\0') break;
-			Handle hout = (Handle) strtoul(p+1, &p, 10);
+			Handle hout(strtoul(p+1, &p, 10));
 			outvec.push_back(hout);
 		}
 #endif /* USE_INLINE_EDGES */
