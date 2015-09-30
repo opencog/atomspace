@@ -1,7 +1,7 @@
 /*
  * ForwardChainer.h
  *
- * Copyright (C) 2014,2015 Misgana Bayetta
+ * Copyright (C) 2014,2015 OpenCog Foundation
  *
  * Author: Misgana Bayetta <misgana.bayetta@gmail.com>
  *
@@ -48,15 +48,15 @@ private:
 
     AtomSpace& _as;
     URECommons _rec;            // utility class
-	Handle _rbs;                // rule-based system
-	UREConfigReader _configReader;
+    Handle _rbs;                // rule-based system
+    UREConfigReader _configReader;
     Logger * _log;
 
     int _iteration = 0;
     source_selection_mode _ts_mode;
     bool _search_in_af;
     bool _search_focus_Set;
-    Rule*  _cur_rule;
+    Rule* _cur_rule;
     Handle _cur_source;
     HandleSeq _selected_sources;
 
@@ -71,9 +71,10 @@ private:
 
     UnorderedHandleSet get_subatoms(Rule *rule);
     Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);
-    HandleSeq substitute_rule_part(
-            AtomSpace& as, Handle hrule, const std::set<Handle>& vars,
-            const std::vector<std::map<Handle, Handle>>& var_groundings);
+    HandleSeq substitute_rule_part(AtomSpace& as, Handle hrule,
+                                   const std::set<Handle>& vars,
+                                   const std::vector<std::map<Handle, Handle>>&
+                                   var_groundings);
     bool unify(Handle source, Handle target, Rule* rule);
     bool subatom_unify(Handle source, Rule* rule);
     HandleSeq derive_rules(Handle source, Handle target, Rule* rule);
@@ -84,7 +85,6 @@ private:
 
 protected:
     vector<Rule*> _rules; /*<loaded rules*/
-    /*<list of inference products and premises to select source from*/
     HandleSeq _potential_sources;
     HandleSeq _focus_set;
 
@@ -116,9 +116,9 @@ protected:
     HandleSeq derive_rules(Handle source, Rule* rule, bool subatomic = false);
 
 public:
-	/**
-	 * Ctor. rbs is a Handle pointing to rule-based system.
-	 */
+    /**
+     * Ctor. rbs is a Handle pointing to rule-based system.
+     */
     ForwardChainer(AtomSpace& as, Handle rbs, Handle hsource,
                    HandleSeq focus_set);
     virtual ~ForwardChainer();
