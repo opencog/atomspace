@@ -1689,6 +1689,8 @@ void AtomStorage::kill_data(void)
 	rp.rs = db_conn->exec("DELETE from Spaces;");
 	rp.rs->release();
 
+	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (0,0);");
+	rp.rs->release();
 	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (1,1);");
 	rp.rs->release();
 
