@@ -181,13 +181,10 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 
     // Aiieee! unordered link!
     if (classserver().isA(t, UNORDERED_LINK)) {
-        struct HandleComparison
-        {
-            bool operator()(const Handle& h1, const Handle& h2) const {
-                return (Handle::compare(h1, h2) < 0);
-            }
-        };
-        std::sort(resolved_seq.begin(), resolved_seq.end(), HandleComparison());
+        // Caution: this comparison function MUST BE EXACTLY THE SAME
+        // as the one in Link.cc, used for sorting unordered links.
+        // Changing this without changing the other one will break things!
+        std::sort(resolved_seq.begin(), resolved_seq.end(), handle_less());
     }
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);

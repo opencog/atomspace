@@ -36,16 +36,12 @@
 
 using namespace opencog;
 
-struct HandleComparison
-{
-    bool operator()(const Handle& h1, const Handle& h2) const {
-        return (Handle::compare(h1, h2) < 0);
-    }
-};
-
 void Link::resort(void)
 {
-    std::sort(_outgoing.begin(), _outgoing.end(), HandleComparison());
+    // Caution: this comparison function MUST BE EXACTLY THE SAME as
+    // the one in AtomTable.cc, used for Unordered links. Changing
+    // this without changing the other one will break things!
+    std::sort(_outgoing.begin(), _outgoing.end(), handle_less());
 }
 
 void Link::init(const std::vector<Handle>& outgoingVector)
