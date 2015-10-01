@@ -242,11 +242,43 @@ ELSE (HYPERTABLE_FOUND)
 
 ENDIF (HYPERTABLE_FOUND)
 
-
 # At this time, there is no reason to build with memcached for
 # FIND_PACKAGE(LibMemCached)
 
-# Python needed for embodiment (!?) and for PLN
+# Google Protobuf library
+# The protocol buffer compiler is a separately installable package, and
+# it is also needed for building embodiment PAI. So check for that, too.
+FIND_PACKAGE(Protobuf)
+IF (PROTOBUF_FOUND
+		AND PROTOBUF_LIBRARY
+		AND PROTOBUF_INCLUDE_DIR
+		AND PROTOBUF_PROTOC_EXECUTABLE)
+
+	ADD_DEFINITIONS(-DHAVE_PROTOBUF)
+	SET(HAVE_PROTOBUF 1)
+	SET(PROTOBUF_DIR_MESSAGE "Protobuf was found.")
+
+ELSE (PROTOBUF_FOUND
+		AND PROTOBUF_LIBRARY
+		AND PROTOBUF_INCLUDE_DIR
+		AND PROTOBUF_PROTOC_EXECUTABLE)
+
+	# If we are here, then we are missing either the libraries, or the
+	# compiler. React appropriately.
+	IF (PROTOBUF_PROTOC_EXECUTABLE)
+		SET(PROTOBUF_DIR_MESSAGE "Protobuf was not found; the new message decoding functions would not work.\n	To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
+	ELSE (PROTOBUF_PROTOC_EXECUTABLE)
+		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; embodiment PAI can't be built without it.\n	To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
+	ENDIF (PROTOBUF_PROTOC_EXECUTABLE)
+
+ENDIF (PROTOBUF_FOUND
+		AND PROTOBUF_LIBRARY
+		AND PROTOBUF_INCLUDE_DIR
+		AND PROTOBUF_PROTOC_EXECUTABLE)
+
+MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
+
+# Python needed for PLN !???
 FIND_PACKAGE(PythonInterp)
 FIND_PACKAGE(PythonLibs 2.7)
 IF(PYTHONLIBS_FOUND)
