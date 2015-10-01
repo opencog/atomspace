@@ -71,6 +71,11 @@ the build, will be more precise as to which parts will not be built.
 > Asynchronous messaging library
 > http://zeromq.org/intro:get-the-software | libzmq3-dev
 
+###### Google Protocol Buffers
+> Google's data interchange format (used by ZeroMQ)
+> https://developers.google.com/protocol-buffers | libprotobuf-dev
+
+
 Building AtomSpace
 ------------------
 Perform the following steps at the shell prompt:
