@@ -21,9 +21,12 @@ class FunctionWrap
 {
 	private:
 		Handle (*_func)(AtomSpace*, const Handle&);
+		Handle (*_func_hhh)(AtomSpace*, const Handle&,
+		                    const Handle&, const Handle&);
 		Handle (*_func_htq)(AtomSpace*, const Handle&, Type, const HandleSeq&);
 
 		Handle wrapper(Handle);
+		Handle wrapper_hhh(Handle, Handle, Handle);
 		Handle wrapper_htq(Handle, Type, const HandleSeq&);
 
 		TruthValuePtr (*_pred)(AtomSpace*, const Handle&);
@@ -33,7 +36,11 @@ class FunctionWrap
 	public:
 		FunctionWrap(Handle (*)(AtomSpace*, const Handle&),
 		             const char*, const char*);
-		FunctionWrap(Handle (*)(AtomSpace*, const Handle&, Type, const HandleSeq&),
+		FunctionWrap(Handle (*)(AtomSpace*, const Handle&,
+		                        Type, const HandleSeq&),
+		             const char*, const char*);
+		FunctionWrap(Handle (*)(AtomSpace*, const Handle&, const Handle&,
+		                        const Handle&),
 		             const char*, const char*);
 		FunctionWrap(TruthValuePtr (*)(AtomSpace*, const Handle&),
 		             const char*, const char*);
