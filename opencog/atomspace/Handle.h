@@ -46,13 +46,16 @@ namespace opencog
 typedef unsigned long UUID;
 
 class Atom;
+class ProtoAtom;
 typedef std::shared_ptr<Atom> AtomPtr;
+typedef std::shared_ptr<ProtoAtom> ProtoAtomPtr;
 
 //! contains an unique identificator
 class AtomTable;
 class Handle
 {
 
+friend class ProtoAtom;
 friend class AtomTable;
 friend class AtomStorage;         // persistance
 friend class AtomspaceHTabler;    // persistance

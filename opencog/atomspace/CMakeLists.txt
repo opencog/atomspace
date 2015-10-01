@@ -84,6 +84,7 @@ INSTALL (FILES
 	NodeIndex.h
 	NullTruthValue.h
 	ProbabilisticTruthValue.h
+	ProtoAtom.h
 	SimpleTruthValue.h
 	StringIndex.h
 	TLB.h

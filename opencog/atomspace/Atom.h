@@ -38,8 +38,8 @@
 
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/ProtoAtom.h>
 #include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/types.h>
 
 class AtomUTest;
 
@@ -70,7 +70,7 @@ typedef boost::signals2::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
  * properties from atoms.
  */
 class Atom
-    : public std::enable_shared_from_this<Atom>
+    : public ProtoAtom
 {
     friend class ::AtomUTest;     // Needs to call setFlag()
     friend class AtomStorage;     // Needs to set _uuid
@@ -91,13 +91,12 @@ private:
     AtomTable *getAtomTable() const { return _atomTable; }
 
 protected:
+    // Byte of bitflags (each bit is a flag, see AtomSpaceDefinites.h)
+    // Place this first, so that is shares a word with Type.
+    char _flags;
+
     UUID _uuid;
     AtomTable *_atomTable;
-
-    Type _type;
-
-    // Byte of bitflags (each bit is a flag, see AtomSpaceDefinites.h)
-    char _flags;
 
     TruthValuePtr _truthValue;
     AttentionValuePtr _attentionValue;
@@ -121,10 +120,10 @@ protected:
      */
     Atom(Type t, TruthValuePtr tv = TruthValue::DEFAULT_TV(),
             AttentionValuePtr av = AttentionValue::DEFAULT_AV())
-      : _uuid(Handle::INVALID_UUID),
-        _atomTable(NULL),
-        _type(t),
+      : ProtoAtom(t),
         _flags(0),
+        _uuid(Handle::INVALID_UUID),
+        _atomTable(NULL),
         _truthValue(tv),
         _attentionValue(av)
     {}
@@ -190,28 +189,6 @@ private:
 public:
 
     virtual ~Atom();
-
-    /** Returns the type of the atom.
-     *
-     * @return The type of the atom.
-     */
-    inline Type getType() const { return _type; }
-
-    /** Basic predicate */
-    bool isType(Type t, bool subclass) const
-    {
-        Type at(getType());
-        if (not subclass) return t == at;
-        return classserver().isA(at, t);
-    }
-
-    /** Returns the handle of the atom.
-     *
-     * @return The handle of the atom.
-     */
-    inline Handle getHandle() {
-        return Handle(shared_from_this());
-    }
 
     /** Returns the AttentionValue object of the atom.
      *

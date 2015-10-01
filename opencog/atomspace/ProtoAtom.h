@@ -27,12 +27,10 @@
 #ifndef _OPENCOG_PROTO_ATOM_H
 #define _OPENCOG_PROTO_ATOM_H
 
-#include <memory>
-#include <mutex>
-#include <set>
 #include <string>
 
 #include <opencog/util/exceptions.h>
+#include <opencog/atomspace/types.h>
 
 namespace opencog
 {
@@ -45,16 +43,17 @@ namespace opencog
  * ProtoAtoms are the base class for the Atom shared pointer.
  */
 class ProtoAtom
-	: public std::enable_shared_from_this<Atom>
+	: public std::enable_shared_from_this<ProtoAtom>
 {
-potected:
+protected:
 	// We store the type locally, to avoid teh overhead of
 	// turning getType into a virtual method.
 	Type _type;
 
 public:
+	ProtoAtom(Type t) : _type(t) {}
 
-	virtual ~ProtoAtom();
+	virtual ~ProtoAtom() {}
 
 	inline Type getType() const { return _type; }
 
