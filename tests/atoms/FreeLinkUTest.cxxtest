@@ -90,7 +90,7 @@ void FreeLinkUTest::test_unquote(void)
 	Handle vx = eval->eval_h("(VariableNode \"$x\")");
 	Handle vz = eval->eval_h("(VariableNode \"$z\")");
 	Handle unq = eval->eval_h(
-		"(AndLink (VariableNode \"$x\")"
+		"(OrderedLink (VariableNode \"$x\")"
 		"	(QuoteLink (ListLink (VariableNode \"$y\")"
 		"		(UnquoteLink (VariableNode \"$z\")))))"
 	);
@@ -125,7 +125,7 @@ void FreeLinkUTest::test_deunquote(void)
 	Handle vz = eval->eval_h("(VariableNode \"$z\")");
 	Handle vu = eval->eval_h("(VariableNode \"$u\")");
 	Handle unq = eval->eval_h(
-		"(AndLink (VariableNode \"$x\")"
+		"(OrderedLink (VariableNode \"$x\")"
 		"	(QuoteLink (ListLink (VariableNode \"$y\")"
 		"		(UnquoteLink (VariableNode \"$z\"))"
 		"		(VariableNode \"$w\")"
@@ -164,7 +164,7 @@ void FreeLinkUTest::test_binding(void)
 	Handle vx = eval->eval_h("(VariableNode \"$x\")");
 	Handle vz = eval->eval_h("(VariableNode \"$z\")");
 	Handle unq = eval->eval_h(
-		"(AndLink (VariableNode \"$x\")"
+		"(OrderedLink (VariableNode \"$x\")"
 		"	(LambdaLink (VariableList (VariableNode \"$y\"))"
 		"		(ListLink (VariableNode \"$z\"))))"
 	);
@@ -197,7 +197,7 @@ void FreeLinkUTest::test_getlink(void)
 	Handle vx = eval->eval_h("(VariableNode \"$x\")");
 	Handle vz = eval->eval_h("(VariableNode \"$z\")");
 	Handle unq = eval->eval_h(
-		"(AndLink (VariableNode \"$x\")"
+		"(OrderedLink (VariableNode \"$x\")"
 		"	(GetLink (VariableList (VariableNode \"$ya\")"
 		"			(VariableNode \"$yb\")"
 		"			(VariableNode \"$yc\")"
