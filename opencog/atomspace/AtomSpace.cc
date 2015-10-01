@@ -106,10 +106,19 @@ Handle AtomSpace::add_atom(AtomPtr atom, bool async)
     // If we are here, the AtomTable does not yet know about this atom.
     // Maybe the backing store knows about this atom.
     Type t = atom->getType();
-    if (backing_store and not backing_store->ignoreType(t)) {
-
-        Handle ha(atom);
-        AtomPtr ba(backing_store->getAtom(ha));
+    if (backing_store and not backing_store->ignoreType(t))
+    {
+        AtomPtr ba;
+        NodePtr n(NodeCast(atom));
+        if (n) {
+            ba = backing_store->getNode(n->getType(),
+                                        n->getName().c_str());
+        } else {
+            LinkPtr l(LinkCast(atom));
+            if (l)
+                 ba = backing_store->getLink(l->getType(),
+                                             l->getOutgoingSet());
+        }
         if (ba) {
             return atomTable.add(ba, async);
         }
@@ -280,38 +289,26 @@ Handle AtomSpace::fetch_atom(Handle h)
     // Case 2:
     // This atom is not yet in any (this??) atomspace; go get it.
     if (NULL == h->getAtomTable()) {
-        AtomPtr a(backing_store->getAtom(h));
+        AtomPtr ba;
+        NodePtr n(NodeCast(h));
+        if (n) {
+            ba = backing_store->getNode(n->getType(),
+                                        n->getName().c_str());
+        } else {
+            LinkPtr l(LinkCast(h));
+            if (l)
+                 ba = backing_store->getLink(l->getType(),
+                                             l->getOutgoingSet());
+        }
 
         // If we still don't have an atom, then the requested UUID
         // was "insane", that is, unknown by either the atom table
         // (case 1) or the backend.
-        if (NULL == a.operator->())
+        if (NULL == ba)
             throw RuntimeException(TRACE_INFO,
                 "Asked backend for an atom %s\n",
                 h->toString().c_str());
-        h = a;
-    }
-
-    // For links, must perform a recursive fetch, as otherwise
-    // the atomTable.add() below will throw an error.
-    LinkPtr l(LinkCast(h));
-    if (l) {
-       bool changed = false;
-       HandleSeq ogs = l->getOutgoingSet();
-       size_t arity = ogs.size();
-       for (size_t i=0; i<arity; i++)
-       {
-          Handle oh(fetch_atom(ogs[i]));
-          if (oh != ogs[i])
-          {
-              changed = true;
-              ogs[i] = oh;
-          }
-       }
-
-       if (changed)
-           h = createLink(h->getType(), ogs,
-                          h->getTruthValue(), h->getAttentionValue());
+        h = ba;
     }
 
     return atomTable.add(h, false);
@@ -343,10 +340,7 @@ Handle AtomSpace::fetch_atom(UUID uuid)
 
     // Case 2 & 3:
     // We don't have the atom for this UUID, then go get it.
-Handle h;
-// xxxxxxxxxxxxxxxxxxxxxx
-    // Handle h(uuid);
-    AtomPtr a(backing_store->getAtom(h));
+    AtomPtr a(backing_store->getAtom(uuid));
 
     // If we still don't have an atom, then the requested UUID
     // was "insane", that is, unknown by either the atom table
@@ -355,24 +349,8 @@ Handle h;
         throw RuntimeException(TRACE_INFO,
             "Asked backend for an unknown handle; UUID=%lu\n",
             uuid);
-    h = a;
 
-    // For links, must perform a recursive fetch, as otherwise
-    // the atomTable.add() below will throw an error.
-    LinkPtr l(LinkCast(h));
-    if (l) {
-       const HandleSeq& ogs = l->getOutgoingSet();
-       size_t arity = ogs.size();
-       for (size_t i=0; i<arity; i++)
-       {
-          Handle oh(fetch_atom(ogs[i]));
-          if (oh != ogs[i]) throw RuntimeException(TRACE_INFO,
-              "Unexpected handle mismatch! Expected %lu got %lu\n",
-              ogs[i].value(), oh.value());
-       }
-    }
-
-    return atomTable.add(h, false);
+    return atomTable.add(a, false);
 }
 
 Handle AtomSpace::get_atom(Handle h)

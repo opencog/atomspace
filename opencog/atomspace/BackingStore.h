@@ -64,7 +64,7 @@ class BackingStore
 		 * Return a pointer to an Atom associated with the given
 		 * handle, if it exists; else return NULL.
 		 */
-		virtual AtomPtr getAtom(Handle) const = 0;
+		virtual AtomPtr getAtom(UUID) const = 0;
 
 		/**
 		 * Return a vector containing the handles of the entire incoming
