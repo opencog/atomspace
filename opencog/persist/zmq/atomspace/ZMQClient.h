@@ -80,7 +80,7 @@ class ZMQClient
 
 		// Fetch atoms from DB
 //		bool atomExists(Handle);
-		AtomPtr getAtom(Handle &h);
+		AtomPtr getAtom(UUID);
 		std::vector<Handle> getIncomingSet(Handle);
 		NodePtr getNode(Type, const char *);
 		NodePtr getNode(const Node &n)

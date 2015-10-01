@@ -236,7 +236,7 @@ LinkPtr ZMQClient::getLink(Type t, const std::vector<Handle>&oset)
  * However, it does register with the TLB, as the SQL uuids and the
  * TLB Handles must be kept in sync, or all hell breaks loose.
  */
-AtomPtr ZMQClient::getAtom(Handle &h)
+AtomPtr ZMQClient::getAtom(UUID uuid)
 {
     ZMQRequestMessage req;
     ZMQReplyMessage rep;
@@ -244,7 +244,7 @@ AtomPtr ZMQClient::getAtom(Handle &h)
     req.set_function(ZMQgetAtoms);
     ZMQAtomFetch *fetch1 = req.add_fetch();
     fetch1->set_kind(ZMQAtomFetchKind::UUID);
-    fetch1->set_handle(h.value());
+    fetch1->set_handle(uuid);
     sendMessage(req, rep);
 
     ZMQAtomMessage atomMsg = rep.atom(0);
