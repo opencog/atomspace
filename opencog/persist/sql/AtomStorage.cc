@@ -160,6 +160,7 @@ class AtomStorage::Response
 			{
 				AtomPtr atom(store->makeAtom(*this, uuid));
 				load_recursive_if_not_exists(atom);
+				table->add(atom, true);
 			}
 			return false;
 		}
@@ -181,7 +182,6 @@ class AtomStorage::Response
 					load_recursive_if_not_exists(a);
 				}
 			}
-			table->add(atom, true);
 		}
 
 		std::vector<Handle> *hvec;
