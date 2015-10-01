@@ -239,8 +239,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 	store->storeAtom(a, true);
 
 	// Fetch it back ...
-	Handle hb(uuid);
-	AtomPtr b = store->getAtom(hb);
+	AtomPtr b = store->getAtom(uuid);
 
 	// Are they equal ??
 	atomCompare(a, b, "Single node save-restore");
@@ -260,7 +259,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 	store->storeAtom(l, true);
 
 	UUID ul = l->getHandle().value();
-	AtomPtr lb = store->getAtom(Handle(ul));
+	AtomPtr lb = store->getAtom(ul);
 	atomCompare(l, lb, "Single link save-restore");
 
 	store->kill_data();
