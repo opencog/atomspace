@@ -39,7 +39,6 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atoms/core/VariableList.h>
 #include <opencog/guile/load-file.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -275,28 +274,5 @@ public:
         TS_ASSERT(table->getHandlex("1", MY_NUMBER_NODE) != Handle::UNDEFINED);
         TS_ASSERT(table->getHandlex("28675194", MY_CONCEPT_NODE) != Handle::UNDEFINED);
         TS_ASSERT(table->getHandle(MY_INHERITANCE_LINK, os) != Handle::UNDEFINED);
-    }
-
-    void testUnaddedCustomAtomTypes()
-    {
-        Handle hv1 = Handle(createNode(VARIABLE_NODE, "$1"));
-        Handle hv2 = Handle(createNode(VARIABLE_NODE, "$2"));
-        HandleSeq hvs{hv1, hv2};
-        Handle hlist = Handle(createVariableList(hvs));
-
-        VariableListPtr v_ptr(VariableListCast(hlist));
-        TS_ASSERT_EQUALS(v_ptr->get_variables().varset.count(hv1), 1);
-        TS_ASSERT_EQUALS(v_ptr->get_variables().varset.count(hv2), 1);
-
-        Handle hlist_added = table->add(hlist, false);
-
-        VariableListPtr v_added_ptr(VariableListCast(hlist_added));
-        TS_ASSERT_EQUALS(v_added_ptr->get_variables().varset.count(hv1), 0);
-        TS_ASSERT_EQUALS(v_added_ptr->get_variables().varset.count(hv2), 0);
-
-        Handle hv1_added = table->add(hv1, false);
-        Handle hv2_added = table->add(hv2, false);
-        TS_ASSERT_EQUALS(v_added_ptr->get_variables().varset.count(hv1_added), 1);
-        TS_ASSERT_EQUALS(v_added_ptr->get_variables().varset.count(hv2_added), 1);
     }
 };
