@@ -16,9 +16,12 @@ extern "C"
     /**
      * AtomSpace_new Creates a new instance of the AtomSpace class.
      *
+     * @param parent_ptr  Pointer to the parent atomspace
+     *                    (null if we want a new independent atomspace).
+     *
      * @return  Pointer to the AtomSpace instance created.
      */
-    AtomSpace* AtomSpace_new();
+    AtomSpace* AtomSpace_new( AtomSpace * parent_ptr );
 
     /**
      * AtomSpace_delete Deletes an AtomSpace object.
@@ -31,31 +34,35 @@ extern "C"
      * AtomSpace_addNode Inserts a new node to the atomspace, or
      *                   updates it if exists.
      *
-     * @param  this_ptr  Pointer to AtomSpace instance.
-     * @param  type      String representation of a node type.
-     * @param  name      Node name.
+     * @param      this_ptr  Pointer to AtomSpace instance.
+     * @param      type      String representation of a node type.
+     * @param      name      Node name.
+     * @param[out] uuid_out  Uuid of the node inserted.
      *
-     * @return Handle id of the node inserted.
+     * @return  0 (success) if the node was inserted.
      */
-    UUID AtomSpace_addNode( AtomSpace* this_ptr
-                          , const char* type
-                          , const char* name);
+    int AtomSpace_addNode( AtomSpace* this_ptr
+                         , const char* type
+                         , const char* name
+                         , UUID* uuid_out );
 
     /**
      * AtomSpace_addLink Inserts a new link to the atomspace, or
      *                   updates it if exists.
      *
-     * @param  this_ptr  Pointer to AtomSpace instance.
-     * @param  type      String representation of a link type.
-     * @param  outgoing  List of UUID of the outgoing set.
-     * @param  size      Size of the outgoing list.
+     * @param      this_ptr  Pointer to AtomSpace instance.
+     * @param      type      String representation of a link type.
+     * @param      outgoing  List of UUID of the outgoing set.
+     * @param      size      Size of the outgoing list.
+     * @param[out] uuid_out  Uuid of the link inserted.
      *
-     * @return Handle id of the link inserted.
+     * @return  0 (success) if the link was inserted.
      */
-    UUID AtomSpace_addLink( AtomSpace* this_ptr
-                          , const char* type
-                          , const UUID* outgoing
-                          , int size );
+    int AtomSpace_addLink( AtomSpace* this_ptr
+                         , const char* type
+                         , const UUID* outgoing
+                         , int size
+                         , UUID* uuid_out );
 
     /**
      * AtomSpace_getNode Gets a node back from the atomspace.
@@ -63,14 +70,14 @@ extern "C"
      * @param      this_ptr  Pointer to AtomSpace instance.
      * @param      type      String representation of a node type.
      * @param      name      Node name.
-     * @param[out] found     Flag to know if the node was found.
+     * @param[out] uuid_out  Uuid of the node (when found).
      *
-     * @return     Handle id of the node.
+     * @return  0 (success) if the node was found.
      */
-    UUID AtomSpace_getNode( AtomSpace* this_ptr
-                          , const char* type
-                          , const char* name
-                          , int* found );
+    int AtomSpace_getNode( AtomSpace* this_ptr
+                         , const char* type
+                         , const char* name
+                         , UUID* uuid_out );
 
     /**
      * AtomSpace_getLink     Gets a link back from the atomspace.
@@ -79,26 +86,53 @@ extern "C"
      * @param      type      String representation of a link type.
      * @param      outgoing  List of UUID of the outgoing set.
      * @param      size      Size of the outgoing list.
-     * @param[out] found     Flag to know if the link was found.
+     * @param[out] uuid_out  Uuid of the link (when found).
      *
-     * @return     Handle id of the link.
+     * @return  0 (success) if the link was found.
      */
-    UUID AtomSpace_getLink( AtomSpace* this_ptr
-                          , const char* type
-                          , const UUID* outgoing
-                          , int size
-                          , int* found );
+    int AtomSpace_getLink( AtomSpace* this_ptr
+                         , const char* type
+                         , const UUID* outgoing
+                         , int size
+                         , UUID* uuid_out );
 
     /**
      * AtomSpace_removeAtom  Removes an atom from the atomspace.
      *
      * @param      this_ptr  Pointer to AtomSpace instance.
-     * @param      handle    Handle id of the atom to be removed.
+     * @param      uuid      Uuid of the atom to be removed.
      *
-     * @return     Flag to know if the atom has been removed.
+     * @return  0 (success) if the link was removed.
      */
     int AtomSpace_removeAtom( AtomSpace* this_ptr
-                            , UUID handle );
+                            , UUID uuid );
+
+    /**
+     * AtomSpace_getAtomByUUID Gets an atom back from the atomspace.
+     *
+     * @param      this_ptr      Pointer to AtomSpace instance.
+     * @param      uuid          UUID of the atom.
+     * @param      node_or_link  =1 if node, =0 if link.     
+     * @param[out] type          String representation of atom type.
+     * @param[out] name          String representation of atom name (if node).
+     * @param[out] out           List of UUID of the outgoing set (if link).
+     * @param[out] out_len       Size of the outgoing list (if link).
+     *
+     * @return  0 if success.
+     *
+     * NOTE: Memory for output parameter is allocated with malloc. The caller
+     * should properly free memory in output parameters according to
+     * the return value:
+     *   If node -> free type and name fields.
+     *   If link -> free type and out field.
+     */
+    int AtomSpace_getAtomByUUID( AtomSpace* this_ptr
+                               , UUID handle
+                               , int* node_or_link
+                               , char** type
+                               , char** name
+                               , UUID** out
+                               , int* out_len);
 
     /**
      * AtomSpace_debug  Debug function to print the state
@@ -114,12 +148,14 @@ extern "C"
      *
      * @param      this_ptr    Pointer to AtomSpace instance.
      * @param      handle      Handle id of target atom.
+     * @param[out] tv_type     TruthValue type.
      * @param[out] parameters  List of parameters of TruthValue result instance.
      *
-     * @return     TruthValue type.
+     * @return  0 if success.
      */
-    TruthValueType AtomSpace_getTruthValue( AtomSpace* this_ptr
+    int AtomSpace_getTruthValue( AtomSpace* this_ptr
                                           , UUID handle
+                                          , TruthValueType* tv_type
                                           , double* parameters );
 
     /**
@@ -130,10 +166,12 @@ extern "C"
      * @param      handle      Handle id of target atom.
      * @param      type        TruthValue type to be set.
      * @param      parameters  List of parameters of TruthValue to be set.
+     *
+     * @return  0 if success.
      */
-    void AtomSpace_setTruthValue( AtomSpace* this_ptr
-                                , UUID handle
-                                , TruthValueType type
-                                , double* parameters );
+    int AtomSpace_setTruthValue( AtomSpace* this_ptr
+                               , UUID handle
+                               , TruthValueType type
+                               , double* parameters );
 }
 

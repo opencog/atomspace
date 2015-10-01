@@ -185,7 +185,6 @@ class FindAtoms
  */
 static inline bool is_atom_in_tree(const Handle& tree, const Handle& atom)
 {
-	if (tree == Handle::UNDEFINED) return false;
 	if (tree == atom) return true;
 	LinkPtr ltree(LinkCast(tree));
 	if (NULL == ltree) return false;
@@ -204,7 +203,6 @@ static inline bool is_atom_in_tree(const Handle& tree, const Handle& atom)
  */
 static inline bool is_quoted_in_tree(const Handle& tree, const Handle& atom)
 {
-	if (tree == Handle::UNDEFINED) return false;
 	if (tree == atom) return false;  // not quoted, so false.
 	LinkPtr ltree(LinkCast(tree));
 	if (NULL == ltree) return false;
@@ -231,7 +229,6 @@ static inline bool is_quoted_in_tree(const Handle& tree, const Handle& atom)
  */
 static inline bool is_unquoted_in_tree(const Handle& tree, const Handle& atom)
 {
-	if (tree == Handle::UNDEFINED) return false;
 	if (tree == atom) return true;
 	LinkPtr ltree(LinkCast(tree));
 	if (NULL == ltree) return false;
@@ -340,6 +337,61 @@ static inline bool contains_atomtype(const Handle& clause, Type atom_type)
 		if (contains_atomtype(subclause, atom_type)) return true;
 	}
 	return false;
+}
+
+/**
+ * Returns true if any of the clauses contain an atom of type atom_type.
+ * ... but only if it is not quoted.  Quoted terms are constants (literals).
+ */
+static inline bool contains_atomtype(const HandleSeq& clauses, Type atom_type)
+{
+	for (const Handle& clause: clauses)
+	{
+		if (contains_atomtype(clause, atom_type)) return true;
+	}
+	return false;
+}
+
+
+/**
+ * Search for free VariableNode in a tree.
+ *
+ * Currently assume any variables within a LambdaLink (and its subtype)
+ * are bound, since some subtype does implicit binding.
+ *
+ * Treat $A in something like (AndLink $A (LambdaLink $A ...)) as free.
+ *
+ * XXX TODO when implicit binding is gone, this method should be changed
+ */
+static inline HandleSeq get_free_vars_in_tree(const Handle& tree)
+{
+	std::set<Handle> varset;
+
+	std::function<void (const Handle&)> find_rec = [&](const Handle& h)
+	{
+		Type t = h->getType();
+		if (t == VARIABLE_NODE)
+		{
+			varset.insert(h);
+			return;
+		}
+
+		if (classserver().isA(t, LAMBDA_LINK))
+			return;
+
+		LinkPtr l(LinkCast(h));
+		if (l)
+		{
+			for (const Handle& oh : l->getOutgoingSet())
+				find_rec(oh);
+		}
+
+		return;
+	};
+
+	find_rec(tree);
+
+	return HandleSeq(varset.begin(), varset.end());
 }
 
 } // namespace opencog

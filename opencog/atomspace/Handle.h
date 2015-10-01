@@ -69,6 +69,7 @@ private:
     static const AtomPtr NULL_POINTER;
 public:
 
+    static const UUID INVALID_UUID = ULONG_MAX;
     static const Handle UNDEFINED;
 
     explicit Handle(const AtomPtr& atom) : _ptr(atom) {}
@@ -119,7 +120,6 @@ public:
     inline bool operator> (const Handle& h) const noexcept { return _ptr >  h._ptr; }
     inline bool operator<=(const Handle& h) const noexcept { return _ptr <= h._ptr; }
     inline bool operator>=(const Handle& h) const noexcept { return _ptr >= h._ptr; }
-
 
     /**
      * Returns a negative value, zero or a positive value if the first

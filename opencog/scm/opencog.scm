@@ -5,7 +5,7 @@
 ; the opencog infrastructure, including a default atomspace.
 ;
 ; To use, say this from the guile prompt:
-; (load-modules (opencog))
+; (use-modules (opencog))
 ;
 ;
 ; This should result in a utf8 locale being used!
@@ -42,6 +42,8 @@
 ; Also they need to be defined "public" to be useable in guile, except
 ; for utilities that uses (export-utilities)
 (load-from-path "config.scm")
+
+(load-from-path "core-docs.scm")
 
 (load-from-path "utilities.scm")
 (export-utilities)

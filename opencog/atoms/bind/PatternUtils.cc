@@ -44,12 +44,15 @@ namespace opencog {
  *
  * Terms that contain GroundedSchema or GroundedPrecdicate nodes can
  * have side-effects, and are thus not really constants. They must be
- * evaluated during the pattern search.
+ * evaluated during the pattern search. Terms that contain
+ * DefinedPedicate or DefinedSchema nodes are simply not known until
+ * runtime evaluation/execution.
  *
  * Returns true if the list of clauses was modified, else returns false.
  */
 bool remove_constants(const std::set<Handle> &vars,
-                      std::vector<Handle> &clauses)
+                      std::vector<Handle> &clauses,
+                      std::vector<Handle> &constants)
 {
 	bool modified = false;
 
@@ -59,6 +62,8 @@ bool remove_constants(const std::set<Handle> &vars,
 	{
 		Handle clause(*i);
 		if (any_unquoted_in_tree(clause, vars)
+		    or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
+		    or contains_atomtype(clause, DEFINED_SCHEMA_NODE)
 		    or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
 		    or contains_atomtype(clause, GROUNDED_SCHEMA_NODE))
 		{
@@ -66,6 +71,7 @@ bool remove_constants(const std::set<Handle> &vars,
 		}
 		else
 		{
+			constants.push_back(clause);
 			i = clauses.erase(i);
 			modified = true;
 		}
@@ -105,6 +111,10 @@ bool remove_constants(const std::set<Handle> &vars,
  * speeds up the discovery of the next ungrounded clause: it is
  * trivially just the very next clause in the connected set.  Of
  * course, users will typically never specify clauses in such order.
+ *
+ * XXX FIXME: It can happen that some clauses have no variables at all
+ * in them.  These end up in thier own component, which can be extremely
+ * confusing.
  */
 void get_connected_components(const std::set<Handle>& vars,
                               const HandleSeq& clauses,
@@ -171,47 +181,6 @@ void get_connected_components(const std::set<Handle>& vars,
 		fv.search_set(ncl);
 		component_vars.push_back(fv.varset);
 	}
-}
-
-/**
- * Search for free VariableNode in a tree.
- *
- * Currently assume any variables within a ScopeLink (and its subtype)
- * are bound, since some subtype does implicit binding.
- *
- * Treat $A in something like (AndLink $A (ScopeLink $A ...)) as free.
- *
- * XXX TODO when implicit binding is gone, this method should be changed
- */
-HandleSeq get_free_vars_in_tree(const Handle& tree)
-{
-	std::set<Handle> varset;
-
-	std::function<void (const Handle&)> find_rec = [&](const Handle& h)
-	{
-		Type t = h->getType();
-		if (t == VARIABLE_NODE)
-		{
-			varset.insert(h);
-			return;
-		}
-
-		if (classserver().isA(t, SCOPE_LINK))
-			return;
-
-		LinkPtr l(LinkCast(h));
-		if (l)
-		{
-			for (const Handle& oh : l->getOutgoingSet())
-				find_rec(oh);
-		}
-
-		return;
-	};
-
-	find_rec(tree);
-
-	return HandleSeq(varset.begin(), varset.end());
 }
 
 } // namespace opencog

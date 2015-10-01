@@ -39,7 +39,8 @@ namespace opencog {
 // Make sure that variables can be found in the clauses.
 // See C file for description
 bool remove_constants(const std::set<Handle> &vars,
-                      std::vector<Handle> &clauses);
+                      std::vector<Handle> &clauses,
+                      std::vector<Handle> &constants);
 
 
 // See C file for description
@@ -47,9 +48,6 @@ void get_connected_components(const std::set<Handle>& vars,
                               const HandleSeq& clauses,
                               std::vector<HandleSeq>& compset,
                               std::vector<std::set<Handle>>& compvars);
-
-
-HandleSeq get_free_vars_in_tree(const Handle& tree);
 
 } // namespace opencog
 

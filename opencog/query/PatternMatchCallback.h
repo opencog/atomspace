@@ -28,9 +28,8 @@
 #include <set>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atoms/bind/VariableList.h> // for VariableTypeMap
-
-// #define DEBUG 1
+#include <opencog/query/Pattern.h> // for VariableTypeMap
+#include <opencog/atoms/core/VariableList.h> // for VariableTypeMap
 
 namespace opencog {
 class PatternMatchEngine;
@@ -120,10 +119,9 @@ class PatternMatchCallback
 
 		/**
 		 * Called when the template pattern and the candidate grounding
-		 * are not having the same type, or one of them are undefined.
-		 * It is obviously a mismatch so it returns false by default,
-		 * but it would be useful if we are not looking for an exact match.
-		 * It gives the Pattern Matcher more flexibility.
+		 * do not have the same type, or if one of them is undefined.
+		 * By default, this is a mismatch, but, if overloaded, it can be
+		 * used to declare approximate matches.
 		 */
 		virtual bool fuzzy_match(const Handle& ph, const Handle& gh)
 		{
@@ -232,6 +230,9 @@ class PatternMatchCallback
 		 * acceptable. The engine is designed to halt once an acceptable
 		 * solution has been found; thus, in order to force it to search
 		 * for more, a return value of false is needed.)
+		 *
+		 * Note that the callback may be called many times reporting
+		 * the same result.
 		 */
 		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
 		                       const std::map<Handle, Handle> &term_soln) = 0;

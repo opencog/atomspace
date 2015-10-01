@@ -1,5 +1,5 @@
 /*
- * tests/atomspace/AssignUTest.cxxtest
+ * tests/atoms/AssignUTest.cxxtest
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -22,7 +22,7 @@
 
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/reduct/AssignLink.h>
+#include <opencog/atoms/core/AssignLink.h>
 
 using namespace opencog;
 
@@ -69,7 +69,7 @@ void AssignUTest::testInsert()
 	TS_ASSERT(as.get_size() == 6);
 
 	// Arghh.  The cast should have been enough, but we currently
-	// can't store these in the atomsapce, due to circular shared
+	// can't store these in the atomspace, due to circular shared
 	// lib dependencies.
 	InsertLinkPtr alp = InsertLinkCast(hna);
 	if (NULL == alp)

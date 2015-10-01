@@ -59,6 +59,7 @@ const int MISSING_FUNC_CODE = -1;
 
 static bool already_initialized = false;
 static bool initialized_outside_opencog = false;
+std::recursive_mutex PythonEval::_mtx;
 
 /*
  * @todo When can we remove the singleton instance?
@@ -218,7 +219,7 @@ static bool try_to_load_modules(const char ** config_paths)
     // we'll write it out before the imports below to aid in debugging.
     if (logger().isDebugEnabled())
     {
-        logger().debug("Python 'sys.path' after OpenCog config adds is:");
+        logger().debug("Python 'sys.path' after config adds is:");
         Py_ssize_t pathSize = PyList_Size(pySysPath);
         for (int i = 0; i < pathSize; i++)
         {
@@ -246,10 +247,11 @@ static bool try_to_load_modules(const char ** config_paths)
                        "opencog.atomspace module", __FUNCTION__);
     }
 
-    // Now we can use get_path_as_string() to get 'sys.path'
-    // But only if import_opencog__atomspace() suceeded without error.
-    // When it fails, it fails silently, leaving get_path_as_string with
-    // a NULL PLT/GOT entry
+    // Now we can use get_path_as_string() to get 'sys.path',
+    // but only if import_opencog__atomspace() suceeded without error.
+    // When it fails, it fails silently, leaving get_path_as_string
+    // with a NULL PLT/GOT entry (i.e. calling the subroutine is a
+    // null-pointer deref).
     if (NULL != get_path_as_string)
         logger().info("Python 'sys.path' after OpenCog config adds is: " +
                get_path_as_string());
@@ -271,7 +273,7 @@ void opencog::global_python_initialize()
     if (already_initialized) {
         return;
         throw opencog::RuntimeException(TRACE_INFO,
-                "Python initializer global_python_init() called twice.");
+            "Python initializer global_python_init() called twice.");
     }
 
     // Remember this initialization.
@@ -343,8 +345,8 @@ PythonEval::PythonEval(AtomSpace* atomspace)
 {
     // Check that this is the first and only PythonEval object.
     if (singletonInstance) {
-        throw (RuntimeException(TRACE_INFO,
-                "Can't create more than one PythonEval singleton instance!"));
+        throw RuntimeException(TRACE_INFO,
+            "Can't create more than one PythonEval singleton instance!");
     }
 
     // Remember our atomspace.
@@ -421,6 +423,8 @@ PythonEval& PythonEval::instance(AtomSpace* atomspace)
     // Make sure the atom space is the same as the one in the singleton.
     if (atomspace and singletonInstance->_atomspace != atomspace) {
 
+#define CHECK_SINGLETON
+#ifdef CHECK_SINGLETON
         // Someone is trying to initialize the Python interpreter on a
         // different AtomSpace.  Because of the singleton design of the
         // the CosgServer+AtomSpace, there is no easy way to support this...
@@ -428,6 +432,19 @@ PythonEval& PythonEval::instance(AtomSpace* atomspace)
             "Trying to re-initialize python interpreter with different\n"
             "AtomSpace ptr! Current ptr=%p New ptr=%p\n",
             singletonInstance->_atomspace, atomspace);
+#else
+        // We need to be able to call the python interpreter with
+        // different atomspaces; for example, we need to use temporary
+        // atomspaces when evaluating virtual links.  So, just set it
+        // here.  Hopefully the user will set it back, after using the
+        // temp atomspace.   Cleary, this is not thread-safe, and will
+        // bust with multiple threads. But the whole singleton-instance
+        // design is fundamentally flawed, so there is not much we can
+        // do about it until someone takes the time to fix this class
+        // to allow multiple instances.
+        //
+        singletonInstance->_atomspace = atomspace;
+#endif
     }
     return *singletonInstance;
 }
@@ -453,7 +470,7 @@ void PythonEval::initialize_python_objects_and_imports(void)
 
     // Add ATOMSPACE to __main__ module.
     PyObject* pyRootDictionary = PyModule_GetDict(_pyRootModule);
-    PyObject* pyAtomSpaceObject = this->atomspace_py_object();
+    PyObject* pyAtomSpaceObject = this->atomspace_py_object(_atomspace);
     PyDict_SetItemString(pyRootDictionary, "ATOMSPACE", pyAtomSpaceObject);
     Py_DECREF(pyAtomSpaceObject);
 
@@ -484,11 +501,16 @@ PyObject* PythonEval::atomspace_py_object(AtomSpace* atomspace)
         return NULL;
     }
 
-    PyObject * pyAtomSpace;
-    if (atomspace)
-        pyAtomSpace = py_atomspace(atomspace);
-    else
-        pyAtomSpace = py_atomspace(this->_atomspace);
+/***********
+    Weird ... I guess NULL atomspaces are OK!?
+    if (NULL == atomspace) {
+        logger().error("PythonEval::%s No atomspace specified!",
+                        __FUNCTION__);
+        return NULL;
+    }
+************/
+
+    PyObject * pyAtomSpace = py_atomspace(atomspace);
 
     if (!pyAtomSpace) {
         if (PyErr_Occurred())
@@ -647,6 +669,8 @@ PyObject* PythonEval::module_for_function(  const std::string& moduleFunction,
 PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
                                             Handle arguments)
 {
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+
     PyObject *pyError, *pyModule, *pyUserFunc, *pyReturnValue = NULL;
     PyObject *pyDict;
     std::string functionName;
@@ -663,8 +687,9 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
     if (!pyModule) {
         PyGILState_Release(gstate);
         logger().error("Python module for '%s' not found!", moduleFunction.c_str());
-        throw (RuntimeException(TRACE_INFO, "Python module for '%s' not found!",
-                moduleFunction.c_str()));
+        throw RuntimeException(TRACE_INFO,
+            "Python module for '%s' not found!",
+            moduleFunction.c_str());
     }
 
     // Get a reference to the user function.
@@ -677,9 +702,9 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
     // If we can't find that function then throw an exception.
     if (!pyUserFunc) {
         PyGILState_Release(gstate);
-        logger().error("Python function '%s' not found!", moduleFunction.c_str());
-        throw (RuntimeException(TRACE_INFO, "Python function '%s' not found!",
-                moduleFunction.c_str()));
+        throw RuntimeException(TRACE_INFO,
+            "Python function '%s' not found!",
+            moduleFunction.c_str());
     }
 
     // Promote the borrowed reference for pyUserFunc since it will
@@ -690,19 +715,17 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
     if (!PyCallable_Check(pyUserFunc)) {
         Py_DECREF(pyUserFunc);
         PyGILState_Release(gstate);
-        logger().error("Python user function '%s' not callable!",
-                moduleFunction.c_str());
-        throw (RuntimeException(TRACE_INFO,
-            "Python function '%s' not callable!", moduleFunction.c_str()));
+        throw RuntimeException(TRACE_INFO,
+            "Python function '%s' not callable!", moduleFunction.c_str());
     }
 
     // Get the expected argument count.
     int expectedArgumentCount = this->argument_count(pyUserFunc);
     if (expectedArgumentCount == MISSING_FUNC_CODE) {
         PyGILState_Release(gstate);
-        throw (RuntimeException(TRACE_INFO,
+        throw RuntimeException(TRACE_INFO,
             "Python function '%s' error missing 'func_code'!",
-            moduleFunction.c_str()));
+            moduleFunction.c_str());
     }
 
     // Get the actual argument count, passed in the ListLink.
@@ -717,17 +740,16 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
     // Now make sure the expected count matches the actual argument count.
     if (expectedArgumentCount != actualArgumentCount) {
         PyGILState_Release(gstate);
-        throw (RuntimeException(TRACE_INFO,
+        throw RuntimeException(TRACE_INFO,
             "Python function '%s' which expects '%d arguments,"
             " called with %d arguments!", moduleFunction.c_str(),
-            expectedArgumentCount, actualArgumentCount
-            ));
+            expectedArgumentCount, actualArgumentCount);
     }
 
     // Create the Python tuple for the function call with python
     // atoms for each of the atoms in the link arguments.
     PyObject* pyArguments = PyTuple_New(actualArgumentCount);
-    PyObject* pyAtomSpace = this->atomspace_py_object();
+    PyObject* pyAtomSpace = this->atomspace_py_object(_atomspace);
     const HandleSeq& argumentHandles = linkArguments->getOutgoingSet();
     int tupleItem = 0;
     for (HandleSeq::const_iterator it = argumentHandles.begin();
@@ -761,7 +783,7 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
         // Construct the error message and throw an exception.
         this->build_python_error_message(moduleFunction.c_str(), errorString);
         PyGILState_Release(gstate);
-        throw RuntimeException(TRACE_INFO, errorString.c_str());
+        throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
 
         // PyErr_Occurred returns a borrowed reference, so don't do this:
         // Py_DECREF(pyError);
@@ -773,14 +795,15 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
     return pyReturnValue;
 }
 
-Handle PythonEval::apply(const std::string& func, Handle varargs)
+Handle PythonEval::apply(AtomSpace* as, const std::string& func, Handle varargs)
 {
-    PyObject *pyReturnAtom = NULL;
-    PyObject *pyError, *pyAtomUUID = NULL;
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    RAII raii(this, as);
+
     UUID uuid = 0;
 
     // Get the atom object returned by this user function.
-    pyReturnAtom = this->call_user_function(func, varargs);
+    PyObject* pyReturnAtom = this->call_user_function(func, varargs);
 
     // If we got a non-null atom were no errors.
     if (pyReturnAtom) {
@@ -790,11 +813,11 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
         gstate = PyGILState_Ensure();
 
         // Get the handle UUID from the atom.
-        pyAtomUUID = PyObject_CallMethod(pyReturnAtom, (char*) "handle_uuid",
+        PyObject* pyAtomUUID = PyObject_CallMethod(pyReturnAtom, (char*) "handle_uuid",
                 NULL);
 
         // Make sure we got an atom UUID.
-        pyError = PyErr_Occurred();
+        PyObject* pyError = PyErr_Occurred();
         if (pyError || !pyAtomUUID) {
             PyGILState_Release(gstate);
             throw RuntimeException(TRACE_INFO,
@@ -814,7 +837,7 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     } else {
 
         throw RuntimeException(TRACE_INFO,
-                "Python function '%s' did not return Atom!", func.c_str());
+            "Python function '%s' did not return Atom!", func.c_str());
     }
 
     return Handle(uuid);
@@ -824,17 +847,19 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
  * Apply the user function to the arguments passed in varargs and return
  * the extracted truth value.
  */
-TruthValuePtr PythonEval::apply_tv(const std::string& func, Handle varargs)
+TruthValuePtr PythonEval::apply_tv(AtomSpace *as, const std::string& func, Handle varargs)
 {
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    RAII raii(this, as);
+
     // Get the python truth value object returned by this user function.
     PyObject *pyTruthValue = call_user_function(func, varargs);
 
     // If we got a non-null truth value there were no errors.
-    if (NULL == pyTruthValue) {
+    if (NULL == pyTruthValue)
         throw RuntimeException(TRACE_INFO,
-                "Python function '%s' did not return TruthValue!",
-                func.c_str());
-    }
+            "Python function '%s' did not return TruthValue!",
+            func.c_str());
 
     // Grab the GIL.
     PyGILState_STATE gstate = PyGILState_Ensure();
@@ -874,6 +899,8 @@ TruthValuePtr PythonEval::apply_tv(const std::string& func, Handle varargs)
 
 std::string PythonEval::apply_script(const std::string& script)
 {
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+
     PyObject* pyError = NULL;
     PyObject *pyCatcher = NULL;
     PyObject *pyOutput = NULL;
@@ -929,13 +956,10 @@ std::string PythonEval::apply_script(const std::string& script)
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
 
-    // If there was an error throw an exception so the user knows the
+    // If there was an error, throw an exception so the user knows the
     // script had a problem.
-    if (errorRunningScript) {
-        logger().warn() << errorString;
-        errorString += "\n";
-        throw (RuntimeException(TRACE_INFO, errorString.c_str()));
-    }
+    if (errorRunningScript)
+        throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
 
     // printf("Python says that: %s\n", result.c_str());
     return result;
@@ -991,7 +1015,7 @@ void PythonEval::import_module( const boost::filesystem::path &file,
         PyObject* pyModuleDictionary = PyModule_GetDict(pyModule);
 
         // Add the ATOMSPACE object to this module
-        PyObject* pyAtomSpaceObject = this->atomspace_py_object();
+        PyObject* pyAtomSpaceObject = this->atomspace_py_object(_atomspace);
         PyDict_SetItemString(pyModuleDictionary,"ATOMSPACE",
                 pyAtomSpaceObject);
 
@@ -1234,7 +1258,7 @@ wait_for_more:
 
 std::string PythonEval::poll_result()
 {
-	std::string r = _result;
-	_result.clear();
-	return r;
+    std::string r = _result;
+    _result.clear();
+    return r;
 }

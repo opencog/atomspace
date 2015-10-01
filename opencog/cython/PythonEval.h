@@ -41,6 +41,7 @@
 #include "PyIncludeWrapper.h"
 
 #include <map>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -97,16 +98,39 @@ class PythonEval : public GenericEval
         void build_python_error_message(const char* function_name,
                                         std::string& errorMessage);
         void add_to_sys_path(std::string path);
-        PyObject * atomspace_py_object(AtomSpace * atomspace = NULL);
-        void print_dictionary(PyObject* obj);
+        PyObject * atomspace_py_object(AtomSpace *);
+        void print_dictionary(PyObject*);
         void execute_string(const char* command);
         int argument_count(PyObject* pyFunction);
-        PyObject* module_for_function(  const std::string& moduleFunction,
-                                        std::string& functionName);
+        PyObject* module_for_function(const std::string& moduleFunction,
+                                      std::string& functionName);
 
         static PythonEval* singletonInstance;
 
         AtomSpace* _atomspace;
+        // Resource Acquisition is Allocation, for the current AtomSpace.
+        // If anything throws an exception, then dtor runs and restores
+        // the old atomspace.
+        struct RAII {
+            RAII(PythonEval* pev, AtomSpace* as) : _pev(pev)
+               { _save_as = pev->_atomspace; pev->_atomspace = as; }
+            ~RAII() {_pev->_atomspace = _save_as; }
+            AtomSpace* _save_as;
+            PythonEval* _pev;
+        };
+
+        // Single, global mutex for serializing access to the atomspace.
+        // The singleton-instance design of this class forces us to
+        // serialize access (the GIL is not enough), because there is
+        // no way to guarantee that python won't accidentally be called
+        // from multiple threads.  That's because the EvaluationLink
+        // is called from scheme and from the pattern matcher, and its
+        // unknown how many threads those things might be running in.
+        // The lock is recursive, because we may need to use multiple
+        // different atomspaces with the evaluator, in some nested
+        // fashion. So this lock prevents other threads from using the
+        // wrong atomspace in some other thread.  Unfort
+        static std::recursive_mutex _mtx;
 
         PyObject* _pyGlobal;
         PyObject* _pyLocal;
@@ -120,13 +144,13 @@ class PythonEval : public GenericEval
         int _paren_count;
 
     public:
-        PythonEval(AtomSpace* atomspace);
+        PythonEval(AtomSpace*);
         ~PythonEval();
 
         /**
          * Create the singleton instance with the supplied atomspace.
          */
-        static void create_singleton_instance(AtomSpace * atomspace);
+        static void create_singleton_instance(AtomSpace*);
 
         /**
          * Delete the singleton instance.
@@ -136,7 +160,7 @@ class PythonEval : public GenericEval
         /**
          * Get a reference to the singleton instance.
          */
-        static PythonEval & instance(AtomSpace * atomspace = NULL);
+        static PythonEval & instance(AtomSpace* atomspace = NULL);
 
         // The async-output interface.
         virtual void begin_eval() {}
@@ -155,12 +179,12 @@ class PythonEval : public GenericEval
         /**
          * Calls the Python function passed in 'func' returning a Handle.
          */
-        Handle apply(const std::string& func, Handle varargs);
+        Handle apply(AtomSpace*, const std::string& func, Handle varargs);
 
         /**
          * Calls the Python function passed in 'func' returning a TruthValuePtr.
          */
-        TruthValuePtr apply_tv(const std::string& func, Handle varargs);
+        TruthValuePtr apply_tv(AtomSpace*, const std::string& func, Handle varargs);
 
         /**
          *

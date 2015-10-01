@@ -3,8 +3,14 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (atomcore SHARED
+	AssignLink.cc
+	DefineLink.cc
+	DeleteLink.cc
 	FreeLink.cc
+	FunctionLink.cc
+	LambdaLink.cc
 	PutLink.cc
+	VariableList.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -19,7 +25,13 @@ INSTALL (TARGETS atomcore
 )
 
 INSTALL (FILES
+	AssignLink.h
+	DefineLink.h
+	DeleteLink.h
 	FreeLink.h
+	FunctionLink.h
+	LambdaLink.h
 	PutLink.h
-	DESTINATION "include/${PROJECT_NAME}/atoms/core"
+	VariableList.h
+	DESTINATION "include/opencog/atoms/core"
 )

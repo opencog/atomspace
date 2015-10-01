@@ -66,6 +66,7 @@ public:
 	void test_unary_get(void);
 	void test_binary_get(void);
 	void test_free_bound(void);
+	void test_eval_clause(void);
 };
 
 void GetLinkUTest::tearDown(void)
@@ -136,6 +137,35 @@ void GetLinkUTest::test_free_bound(void)
 	Handle hgnd = eval->eval_h("(cog-satisfying-set is-query)");
 
 	Handle hans = eval->eval_h("(SetLink (ConceptNode \"human\"))");
+
+	printf("Expected this: %s\n", hans->toString().c_str());
+	printf("Found this answer: %s\n", hgnd->toString().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Evaluatable clause GetLink unit test;
+ */
+void GetLinkUTest::test_eval_clause(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+	config().set("SCM_PRELOAD",
+			"opencog/atomspace/core_types.scm, "
+			"opencog/scm/utilities.scm, "
+			"opencog/scm/opencog/exec.scm, "
+			"opencog/scm/opencog/query.scm, "
+			"tests/query/get-link-eval.scm");
+	load_scm_files_from_config(*as);
+
+	Handle hgnd = eval->eval_h("(cog-satisfying-set get)");
+
+	Handle hans = eval->eval_h("(SetLink"
+		"(EvaluationLink (ConceptNode \"glib\") (ConceptNode \"blab\")))");
 
 	printf("Expected this: %s\n", hans->toString().c_str());
 	printf("Found this answer: %s\n", hgnd->toString().c_str());

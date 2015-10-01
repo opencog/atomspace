@@ -72,6 +72,12 @@ ABSENT_LINK <- UNORDERED_LINK
 //
 CHOICE_LINK <- ORDERED_LINK
 
+// Rounding out the above, we have PresentLink, which is the converse
+// of AbsentLink, and is dual to ChoiceLink, since it requires that all
+// terms are AND'ed together.
+//
+PRESENT_LINK <- ORDERED_LINK
+
 // ====================================================================
 // Herbrand/First-order-logic/lambda-calc/model-theory style links
 // and nodes.  This are used to implement the pattern matcher, and
@@ -97,49 +103,54 @@ TYPED_VARIABLE_LINK <- ORDERED_LINK
 // A list of variables or variable declarations.
 VARIABLE_LIST <- LIST_LINK
 
-// Everything under a QuoteLink is interpreted literally.
-QUOTE_LINK <- ORDERED_LINK
+// The LambdaLink is used to identify an open term, i.e. a link
+// containing VariableNodes within it, and binding those variables.
+// In the process, it can also force type restrictions on them.
+// The LambdaLink does not have to bind all variables that occur in it's
+// body; those that are not bound remain free.
+//
+// The LambdaLink differs from the FreeLink in that the FreeLink
+// necessarily list ALL the (free) variables within it; the LambdaLink
+// need not bind all of them.  The FreeLink also has no type
+// restrictions on the variables.
+LAMBDA_LINK <- ORDERED_LINK
 
-// A ScopeLink is (more or less???) the same thing as a LambdaLink
-// (We have not yet settled on the appropriate definition of a
-// LambdaLink) The ScopeLink is used to identify an open term, i.e. a
-// link containing VariableNodes within it, and then listing those
-// variables, and forcing type restrictions on them. Thus, in a certain
-// sense, the ScopeLink explicitly binds at least some, and maybe all
-// of the variables that occur in it's body.  It differs from the
-// FreeLink in that the FreeLink necessarily list ALL the (free)
-// variables within it; the ScopeLink need not bind all of them.
-// The FreeLink also has no type restrictions on the variables.
-SCOPE_LINK <- VARIABLE_LIST
-DEFINE_LINK <- ORDERED_LINK     // Gives a scoped lambda a name
-BETA_REDEX <- ORDERED_LINK      // Beta reduction of bound variables
+// Naming things, tagging things.
+DEFINE_LINK <- ORDERED_LINK
 
 // Pattern definition, pattern grounding/satisfaction.
 // The PatternLink implements the base class holding a pattern that
 // the pattern matcher will traverse.  Its primary role in life is to
 // enable a C++ class that unpacks all the arguments and types, etc.
 // into assorted C++ structures. It does not have any semantics in and
-// of itself, it just holds machinery. PatternLink should probably
-// inherit from ScopeLink, but, for whatever reason, it doesn't need
-// to at the moment (at least, not as a C++ class)
+// of itself, it just holds machinery.
 //
-// The GetLink is probably exactly the same thing as a
-// SatsifyingSetLink, except that GetLink is imperative, while
-// SatisfyingSetLink is declarative.  Likewise, BindLink is probably
-// exactly the same thing as an ImplicationLink, except that its
-// imperative, not declarative.
-PATTERN_LINK <- ORDERED_LINK       // A pattern encapsulated in a Link.
+// The GetLink is almost exactly the same thing as a SatsifyingSetLink,
+// except that GetLink is imperative, while SatisfyingSetLink is
+// declarative.  Likewise, BindLink is exactly the same thing as an
+// ImplicationLink, except that its imperative, not declarative.
+PATTERN_LINK <- LAMBDA_LINK        // A pattern encapsulated in a Link.
 GET_LINK <- PATTERN_LINK           // Finds all groundings, return atoms
 SATISFACTION_LINK <- PATTERN_LINK  // Finds all groundings, return TV
 BIND_LINK <- GET_LINK              // Finds all groundings and executes
 
+// Everything under a QuoteLink is interpreted literally.
+QUOTE_LINK <- ORDERED_LINK
+
+// The QuoteLink is actually a quasi-quote. The UnquoteLink undoes the
+// quoting.  Defined to work just like in lisp/scheme.
+UNQUOTE_LINK <- ORDERED_LINK
+
+// ==============================================================
+// Assorted PLN link types.
+
 // Logical quantifiers
-FORALL_LINK <- SCOPE_LINK "ForAllLink"
-EXISTS_LINK <- SCOPE_LINK
+FORALL_LINK <- LAMBDA_LINK "ForAllLink"
+EXISTS_LINK <- LAMBDA_LINK
 AVERAGE_LINK <- FORALL_LINK
 
 // Convert predicate into concept
-SATISFYING_SET_LINK <- UNORDERED_LINK
+SATISFYING_SET_LINK <- LAMBDA_LINK
 
 // ??? What is this???
 SCHOLEM_LINK <- ORDERED_LINK
@@ -173,24 +184,13 @@ ATTRACTION_LINK <- ORDERED_LINK
 //
 // The variables are necessarily free: they to NOT have type
 // declarations or restrictions associated with them.  This is in sharp
-// contrast to ScopeLink, which binds variables by scoping them, and
+// contrast to LambdaLink, which binds variables by scoping them, and
 // then forcing type restrictions to them.
 //
 // FreeLinks may be open or closed; they are closed terms if they
 // have no free variables in them.
 //
-// XXX TODO -- Review and rethink. FreeLinks were introduced for the
-// pattern matcher, to simplify the discovery and handling of expressions
-// with free variables in them (by pulling out those variables beforehand,
-// at link-creation time, rather than at runtime). However, due to
-// shared-library conflicts, the FreeLink cannot currently be used in
-// this way.  Thus, its half-finished ....
 FREE_LINK <- ORDERED_LINK
-
-// PutLinks could be called BetaRedexLink's, except that name is already
-// taken. PutLinks hold beta redexes in them; then they are executed,
-// they are beta-reduced.
-PUT_LINK <- FREE_LINK
 
 // To be used with PredicateNode
 EVALUATION_LINK <- FREE_LINK
@@ -199,16 +199,24 @@ EXECUTION_LINK <- ORDERED_LINK
 
 // Procedure, schema and predicate nodes.
 // These are used to define functions and predicates (relations)
+// Procedures are generic terms; they can be either atom-valued
+// or TV-valued. This is narrowed down, below.
 PROCEDURE_NODE <- NODE
 GROUNDED_PROCEDURE_NODE <- PROCEDURE_NODE
 
+// SchemaNodes are atom-valued.
 SCHEMA_NODE <- PROCEDURE_NODE
+DEFINED_SCHEMA_NODE <- SCHEMA_NODE
 GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
 
-PREDICATE_NODE <- SCHEMA_NODE
+// PredicateNodes are TV-valued.
+PREDICATE_NODE <- PROCEDURE_NODE
+DEFINED_PREDICATE_NODE <- PREDICATE_NODE
 GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
-DEFINED_RELATIONSHIP_NODE <- PREDICATE_NODE // Generic relations
 
+// Huh?? XXX What are these? I don't understand them Do we use them
+// anywhere? I think the first is same as ExecutionOutputLink, right?
+// Not clear how a schema can be evaluated ...
 SCHEMA_EXECUTION_LINK <- INHERITANCE_LINK
 SCHEMA_EVALUATION_LINK <- SCHEMA_EXECUTION_LINK
 
@@ -234,7 +242,7 @@ QUANTITY_LINK <- ORDERED_LINK
 //
 // The VirtuaLink designation is needed by the pattern matcher,
 // in order to be able to find and treat these terms correctly.
-// 
+//
 // VirtualLinks only need to be used for those GPN's that take 2 or
 // more arguments. If they take only one, then there is no reason
 // for them to be declared as virtual (at least, as far as the pattern
@@ -244,16 +252,21 @@ VIRTUAL_LINK <- EVALUATION_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK
 EQUAL_LINK <- VIRTUAL_LINK
 
-// Same idea as the VirtualLink, but for ExecutionOutputLinks.
-// Recall: FreeLink simply keeps track of the free variables in an
-// ordered link.  A FunctionLink is a link that can be executed,
-// with the result of execution being some atom.  There
-// ExecutionOutPutLink is a specific kind of function: it must
-// have a GroundedSchemeNode as its first argument.  The other
-// kinds of FunctionLinks do not have this restriction: indeed,
-// the actual function they perform is implicit in the link type.
-FUNCTION_LINK <- FREE_LINK
+// A FunctionLink is a link that can be executed, with the result of
+// execution being some atom. The LambdaLink is used to specify the
+// function arguments (as bound variables).
+//
+// The ExecutionOutPutLink is a specific kind of function: it must have
+// a GroundedSchemeNode as its first argument.  The other kinds of
+// FunctionLinks do not have this restriction: indeed, the actual
+// function they perform is implicit in the link type.
+FUNCTION_LINK <- LAMBDA_LINK
 EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
+
+// PutLinks perform a beta-reduction when executed; i.e. they get
+// beta-reduced when they are executed. The first atom in a PutLink
+// can be either a LambdaLink... or anything that's free, too.
+PUT_LINK <- FUNCTION_LINK
 
 // Basic arithmetic operators
 FOLD_LINK <- FUNCTION_LINK
@@ -264,7 +277,7 @@ TIMES_LINK <- ARITHMETIC_LINK
 // This is an interesting one. It is a link that must never be grounded!
 // It must contain at least one VariableNode somewhere within it; that
 // is, it must be an "open sentence" and never a "closed sentence".
-// (as it would be called, if we were using the termiology of ordinary
+// (as it would be called, if we were using the terminology of ordinary
 // logic).
 //
 // Attempting to insert a DeleteLink holding a fully grounded term
@@ -273,7 +286,11 @@ TIMES_LINK <- ARITHMETIC_LINK
 // with the pattern matcher, so that if it discovers a grounding, the
 // grounded term is deleted.
 //
-DELETE_LINK <- FUNCTION_LINK
+// Implementation Note: The DeleteLink cannot inherit from FunctionLink
+// because that would cause all variables to be bound, i.e. to become
+// a closed sentence; thus it inherits from FreeLink.
+//
+DELETE_LINK <- FREE_LINK
 
 // The Insert, Assign and RemoveLink's all expect at TypeNode as the first
 // member of thier outgoing set.  When these execute, they add or remove

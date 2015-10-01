@@ -8,9 +8,8 @@ ADD_LIBRARY(ruleengine SHARED
 	backwardchainer/Target.cc
 	URECommons.cc
 	forwardchainer/ForwardChainer.cc
-	forwardchainer/ForwardChainerPMCB.cc
-	forwardchainer/ForwardChainerCallBack.h
-	forwardchainer/DefaultForwardChainerCB.cc
+	forwardchainer/VarGroundingPMCB.h
+	forwardchainer/FocusSetPMCB.h
 	forwardchainer/FCMemory.cc	
 	InferenceSCM.cc
 	Rule.cc
@@ -39,7 +38,7 @@ INSTALL (FILES
 	URECommons.h
 	Rule.h
 	UREConfigReader.h
-	DESTINATION "include/${PROJECT_NAME}/rule-engine"
+	DESTINATION "include/opencog/rule-engine"
 )
 
 ADD_SUBDIRECTORY(forwardchainer)

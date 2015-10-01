@@ -23,6 +23,9 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/Config.h>
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
 
 using namespace opencog;
 
@@ -44,6 +47,7 @@ public:
 	void test_get_outgoing_nodes();
 	void test_get_predicates();
 	void test_get_predicates_for();
+	void test_are_similar();
 };
 
 // Test get_all_nodes()
@@ -170,7 +174,7 @@ void AtomUtilsUTest::test_get_predicates()
 		eats = as.add_node(PREDICATE_NODE, "eats"),
 		programmerEatsBacon = as.add_link(EVALUATION_LINK, eats,
 		                                  programmer_bacon),
-		lover = as.add_node(DEFINED_RELATIONSHIP_NODE, "lover"),
+		lover = as.add_node(GROUNDED_PREDICATE_NODE, "lover"),
 		programmerBaconLover = as.add_link(EVALUATION_LINK, lover,
 		                                   programmer_bacon),
 		anotherNode = as.add_node(CONCEPT_NODE, "pigs"),
@@ -182,7 +186,7 @@ void AtomUtilsUTest::test_get_predicates()
 
 	// Test get_predicates with specific type.
 	HandleSeq baconLovers {programmerBaconLover};
-	TS_ASSERT_EQUALS(get_predicates(bacon, DEFINED_RELATIONSHIP_NODE), 
+	TS_ASSERT_EQUALS(get_predicates(bacon, GROUNDED_PREDICATE_NODE),
 					 baconLovers);
 
 	// Test get_predicates with specific type and no subclasses.
@@ -235,5 +239,42 @@ void AtomUtilsUTest::test_get_predicates_for()
 	// Test for eats bacon.
 	HandleSeq eatsBacon {dogEatsBacon, programmerEatsBacon};
 	TS_ASSERT_EQUALS(get_predicates_for(bacon, eats), eatsBacon);
+}
+
+void AtomUtilsUTest::test_are_similar()
+{
+    AtomSpace as;
+    config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
+                 "opencog/scm/utilities.scm, "
+                 "opencog/scm/av-tv.scm");
+    load_scm_files_from_config(as);
+
+    SchemeEval eval(&as);
+
+    Handle h1 = eval.eval_h("(EvaluationLink "
+                            "(PredicateNode \"chirps\")"
+                            "(ConceptNode \"Tweety\"))");
+
+    Handle h2 = eval.eval_h("(EvaluationLink"
+                            "(PredicateNode \"chirps\")"
+                            "(ConceptNode \"Peter\"))");
+    Handle h3 = eval.eval_h("(InheritanceLink"
+                            "(ConceptNode \"Peter\")"
+                            "(ConceptNode \"Frog\"))");
+    Handle h4 = eval.eval_h("(SetLink"
+                            "(PredicateNode \"chirps\")"
+                            "(ConceptNode \"X\"))"
+                            "(ConceptNode \"Z\"))"
+                            ")");
+    Handle h5 = eval.eval_h("(SetLink"
+                            "(ConceptNode \"X\"))"
+                            "(PredicateNode \"chirps\")"
+                            "(ConceptNode \"Z\"))"
+                            ")");
+
+    TS_ASSERT_EQUALS(true, are_similar(h1, h2, true));
+    TS_ASSERT_EQUALS(false, are_similar(h1, h3, true));
+    TS_ASSERT_EQUALS(true, are_similar(h1, h3, false));
+    TS_ASSERT_EQUALS(true, are_similar(h4, h5, true));
 }
 

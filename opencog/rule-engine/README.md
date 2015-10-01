@@ -29,17 +29,11 @@ of PLN.
    the rule engine, you get to choose which of the available control
    policies will be used.
 
-4. There should be a standard way to express exclusivity between
-   rules,and priority levels of rules --- but both of these things
-   should be relative to a given control policy (i.e rule X might have
-   higher priority than rule Y with respect to policy A, but not
-   policy B)
-
-5. The rule engine should be associated with some way of keeping
+4. The rule engine should be associated with some way of keeping
   track of which rules have been applied to which Atoms.  This
   information may be used by some control policies.
 
-6. Use pattern matcher for finding groundings and implement the
+5. Use pattern matcher for finding groundings and implement the
    callbacks if the need arises.
 
 Further reading:
@@ -49,6 +43,8 @@ Further reading:
   [http://wiki.opencog.org/w/Control_policy](http://wiki.opencog.org/w/Control_policy)
 
   [http://wiki.opencog.org/w/Pattern_Matcher](http://wiki.opencog.org/w/Pattern_Matcher)
+
+  [http://wiki.opencog.org/wikihome/index.php/URE_Chainer_Design](http://wiki.opencog.org/wikihome/index.php/URE_Chainer_Design)
 
 ## New PLN implementation overview
 
@@ -61,76 +57,54 @@ by contributors and can be found
 
 The high level algorithm for the new PLN forward and backward chaining
 is found [here](http://wiki.opencog.org/w/New_PLN_Chainer_Design).
-  
-## Algorithmic detail of the current implementation (Dec 2014)
 
-### Forward chaining
+## Algorithmic detail of the current implementation
 
-The implementation of the forward chainer is pretty straight forward.
-The call graph starts in the do_chain method.  I have tried to use
-config files as a ways to declare what rules to use during the
-chaining process. The rules are read by `load_fc_conf` method. The
-current state of the code does the forward chaining algorithm stated
-in the wiki page.
- 
-Below is a kind of pseudo code of the do_chain function
+### Forward chaining (Sept 2015)
+The detail can be found [here](http://wiki.opencog.org/wikihome/index.php/URE_Chainer_Design).
 
-	do_chain(hsource)
-		hcurrent_source	
-		steps = 0
-		while (steps <= ITERATION_SIZE /*or !terminate*/) 
-			if steps == 0
-				if hsource == Handle::UNDEFINED
-					hcurrent_source = choose_source_from_atomspace(main_atom_space); //start FC on a random source
-				else
-					hcurrent_source = hsource;
-	    	else 
-				if (!source_list_.empty())
-					hcurrent_source = choose_source_from_list(source_list_)
-			choose_input(hcurrent_source); //add more premise via pattern matching of related atoms to hcurrent_source
-			choose_rule()
-			patternmatch(hcurrent_chosen_rule) // call the pattern matching with the chosen rule wrapped in a BindLink
-			steps++
-	
-* Implementing fitness based rule choosing: For the sake of having a
-  prototype implementation other parts of the algorithms, I have
-  implemented the choose_rule as a random selector.
- 
-* The termination criteria: right now it just does some constant
-  iterations specified in the config file which should be changed to
-  appropriate criteria.
- 
-* The control policy: I did a basic rule loading from a config file as
-  a prototype. But I am thinking of how to declare conditional rule
-  applications. An example usage scenario is
- 
-The relex to logic SV and SVO rules. the detail is found
-[here](http://wiki.opencog.org/w/RelEx2Logic_Rules#Suggested_Rule_File_Format).
 
 #### How to call the forward chainer from a scheme interface?
 
-One can use the `cog-fc` scheme binding to start forward chaining on a
-particular source.
+One can use the `(cog-fc *source* *rule-base* *focus-set*)` scheme binding
+to start forward chaining.
+
+*source* - Could be one of the follow:
+ - An empty [SetLink](http://wiki.opencog.org/wikihome/index.php/SetLink)
+ - A single atom
+ - A set of atoms wrapped in a SetLink
+
+When the source is an empty SetLink, forward chainer will apply all rules
+leaving aside source and rule selection steps on the specified focus set or on entire atomspace based on the size of the focus set as described below.
+
+*rule-base* - Is a [ConceptNode](http://wiki.opencog.org/wikihome/index.php/ConceptNode) with a particular name describing the rule base.
+
+*focus-set* - A set of atoms wrapped in a SetLink.If the SetLink is not empty,
+the forward chainer will apply selected rules on the atoms inside the focus set.otherwise rules will be applied on the entire atomspace.
+
+When both source and focus set are empty, all rules on the whole atomspace will be applied iteratively.
 
 **Example**: suppose there is some knowledges about the ConceptNode
 Socrates then one can do a bunch of forward chaining inference by
-calling `(cog-fc (ConceptNode "Socrates"))` from a scheme shell or
-interfaces. All results of the inferences are returned in in a
-ListLink.
+calling `(cog-fc (ConceptNode "Socrates") (ConceptNode "rb-pln") (SetLink [ATOMS_ASSOCIATED]))`
+from the scheme shell interface. All results of the inferences are returned wrapped in a ListLink.
 
 ### Backward chaining
 
 In the backward chaining inference we are interested in either truth
-value fulfillment query or variable fulfillment query.  The current
-implementation does the later where a variable containing link is
-passed as an argument and the backward chainer tries to find grounding
-for the variable.  The entry point for the backward chainer is the
-`do_full_chain` or the `do_step` function.
+value fulfillment query or variable fulfillment query.  For variable
+fullfillment query,variable containing link is passed as an argument
+and the backward chainer tries to find grounding for the variable.
+The entry point for the backward chainer is the `do_chain` function.
+
+There exist a scheme primitive `(cog-bc *target* *rule-base* *focus-set*)`
+for using the Backward Chainer in scheme.
 
 Here's how the criminal example located at
 https://github.com/opencog/opencog/blob/master/opencog/python/pln_old/examples/backward_chaining/criminal.scm
-is expected to be solved by the Backward Chainer, when only the Modus
-Ponens rule is present.
+could be solved by the Backward Chaining, when only the Modus
+Ponens rule is present (disclaminer: the internal implement will
+be different)
 
 
 ```
@@ -206,12 +180,9 @@ $who in the end map to West
 
 ```
 
-where `t` is the targets stack (left is the front).  Since there's a
-check where a target will not be readded to the stack if all its
-knowledge base matches are in the inference history or has no free
-var, persumably the targets stack will be cleared and get back to the
-original target `(InheritanceLink $who criminal)` and finally solve
-`$who`
+where `t` is a targets stack (left is the front).  In the actual
+implmentation, a list is used and the targets are visited in
+some roulette selection way.
 
 ## Control policy
 
@@ -222,27 +193,33 @@ representing the rule-based system (rules + other parameters) is
 passed to the chainers (forward or backward) and loaded at
 construction time.
 
-## Summary of current state of the implementation
+## Things need to be implemented
 
-The rule engine as it exists now is in its infancy. So far I have been
-able to write a forward chainer, backward chainer and a configuration
-system ( basically it loads rules from a configuration file). There is
-a lot of space for improvement. Right now am working on
+The rule engine as it exists now is in its infancy. There is
+a lot of space for improvement.
 
 * Rethinking the design configuration/control policy so that it
   complies with the initial design goal
 
-* Adding capability of multiple inference tree in the backward chainer
-
-* Storing inference history
-
-* Truth value fulfillment queries
-
 * Rule choosing fitness functions
 
-* Inference termination 
+* Inference termination
 
 * Refactoring out some codes
+
+* Rules output need to be clearly defined for backward chaining,
+  which is not currently possible if the output in hidden
+  inside some scheme function
+
+* VariableNode need to have the following properties for backward chaining
+
+  1. all usage of VariableNode are unique & well-defined, in that
+     the same named VariableNode is never declared and appears in more than one scope
+  2. atoms like `(SatisfyingSetLink (VariableNode $X) (humans eat $X))`,
+     `(SatisfyingSetLink (VariableNode $Y) (humans eat $Y))` are treated as exactly the same atom
+
+  This can be done via "canonical label" of the scoping links.  See
+  discussion at https://groups.google.com/forum/#!topic/opencog/dKCYL47fpCQ
 
 ## Rule represenation next steps
 
@@ -261,12 +238,5 @@ a lot of space for improvement. Right now am working on
   being discussed, to assert that the replacement graphs match a
   predefined expected value for specific test instances
 
-- For a rule like Modus Ponens to work, it will be necessary to
-  implement "Recursive Unification using the Pattern Matcher",
-  described [in this thread](http://wiki.opencog.org/w/Idea:_Recursive_Unification_using_the_Pattern_Matcher).
-
-- Rules will require mutual exclusions and priorities, but that can
-  likely be implemented outside of the definition of the rule itself
-  for clarity.
 
 ***Author*** *Misgana Bayetta*

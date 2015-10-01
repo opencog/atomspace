@@ -9,11 +9,11 @@ from opencog.type_constructors import *
 atomspace = AtomSpace()
 
 # Initialize Scheme
-scheme_preload = [  
+scheme_preload = [
                     "opencog/atomspace/core_types.scm",
-                    "opencog/scm/utilities.scm" 
+                    "opencog/scm/utilities.scm"
                  ]
-scheme.__init__(atomspace)
+
 for scheme_file in scheme_preload:
     load_scm(atomspace, scheme_file)
 
@@ -49,11 +49,11 @@ else:
 
 executed = False
 execute_atom( atomspace,
-    ExecutionOutputLink( 
+    ExecutionOutputLink(
         GroundedSchemaNode("py: add_link"),
         ListLink(
             ConceptNode("one"),
-            ConceptNode("two") 
+            ConceptNode("two")
         )
     )
 )

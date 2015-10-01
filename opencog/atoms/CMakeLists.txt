@@ -7,5 +7,5 @@ ADD_SUBDIRECTORY (reduct)
 INSTALL (FILES
 	NumberNode.h
 	TypeNode.h
-	DESTINATION "include/${PROJECT_NAME}/atoms"
+	DESTINATION "include/opencog/atoms"
 )

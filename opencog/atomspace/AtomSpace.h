@@ -55,6 +55,7 @@ class AtomSpace
 {
     friend class SavingLoading;
     friend class SQLPersistSCM;
+    friend class ZMQPersistSCM;
     friend class ::AtomTableUTest;
 
     /**

@@ -1,11 +1,14 @@
 /*
- * opencog/atomspace/ZMQClient.h
+ * FUNCTION:
+ * Base class for ZeroMQ-backed persistent storage.
  *
- * Copyright (C) 2008-2010 OpenCog Foundation
+ * HISTORY:
+ * Copyright (C) 2008-2015 OpenCog Foundation
  * All Rights Reserved
  *
- * Written by Erwin Joosten
+ * Written by Erwin Joosten, Hendy Irawan <ceefour666@gmail.com>
  *
+ * LICENSE:
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
@@ -22,41 +25,83 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_ZMQ_CLIENT_H
-#define _OPENCOG_ZMQ_CLIENT_H
+#ifndef _OPENCOG_PERSISTENT_ZMQ_STORAGE_H
+#define _OPENCOG_PERSISTENT_ZMQ_STORAGE_H
 
-#include "opencog/atomspace/Atom.h"
-#include "opencog/atomspace/Handle.h"
-#include "types.h"
-#include <lib/zmq/zmq.hpp>
-#include <opencog/atomspace/ZMQMessages.pb.h>
+#include <atomic>
+#include <mutex>
+#include <set>
+#include <thread>
+#include <vector>
 #include <string>
-#include <boost/thread.hpp>
+
+#include <zmq.hpp>
+#include <opencog/util/async_method_caller.h>
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/AtomTable.h>
+#include <opencog/atomspace/types.h>
+
+#include "ZMQMessages.pb.h"
+#include "ProtocolBufferSerializer.h"
 
 using namespace std;
 
-namespace opencog {
-/** \addtogroup grp_atomspace
+namespace opencog
+{
+/** \addtogroup grp_persist
  *  @{
  */
 
-class ZMQClient {
-    zmq::socket_t* zmqClientSocket;
-    zmq::context_t* zmqContext;
+class ZMQClient
+{
+	private:
+		zmq::context_t *zmqContext;
+		zmq::socket_t *zmqClientSocket;
+		int store_count = 0;
 
-    void SendMessage(ZMQRequestMessage& requestMessage,
-            ZMQReplyMessage& replyMessage);
+	protected:
+		void sendMessage(ZMQRequestMessage& requestMessage,
+		        ZMQReplyMessage& replyMessage);
+		void storeSingleAtom(AtomPtr atom);
+		bool store_cb(AtomPtr atom);
 
-public:
-    ZMQClient(string networkAddres="tcp://127.0.0.1:5555"); //"ipc:///tmp/AtomSpaceZMQ.ipc"
-    ~ZMQClient();
+	public:
+		ZMQClient(string networkAddress = "tcp://127.0.0.1:5555"); //"ipc:///tmp/AtomSpaceZMQ.ipc"
+		~ZMQClient();
 
-    AtomPtr getAtom(Handle& h);
-    
-    /** @todo add other functions as needed */
+		bool connected(void); // connection to DB is alive
+
+		// Store atoms to DB
+//		void storeSingleAtom(AtomPtr);
+		void storeAtom(const AtomPtr& atomPtr, bool synchronous = false);
+		void flushStoreQueue();
+
+		// Fetch atoms from DB
+//		bool atomExists(Handle);
+		AtomPtr getAtom(Handle &h);
+		std::vector<Handle> getIncomingSet(Handle);
+		NodePtr getNode(Type, const char *);
+		NodePtr getNode(const Node &n)
+		{
+			return getNode(n.getType(), n.getName().c_str());
+		}
+		LinkPtr getLink(Type, const std::vector<Handle>&);
+		LinkPtr getLink(const Link &l)
+		{
+			return getLink(l.getType(), l.getOutgoingSet());
+		}
+
+		// Large-scale loads and saves
+		void loadType(AtomTable &, Type); // Load *all* atoms of type
+		void load(AtomTable &); // Load entire contents of DB
+		void store(const AtomTable &); // Store entire contents of AtomTable
+		void reserve(void);     // reserve range of UUID's
+
 };
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_ZMQ_CLIENT_H
+#endif // _OPENCOG_PERSISTENT_ZMQ_STORAGE_H

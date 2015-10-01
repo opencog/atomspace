@@ -26,5 +26,5 @@ INSTALL (FILES
     ForeachChaseLink.h
     HandleMap.h
     Substitutor.h
-    DESTINATION "include/${PROJECT_NAME}/atomutils"
+    DESTINATION "include/opencog/atomutils"
 )

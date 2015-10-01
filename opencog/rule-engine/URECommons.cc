@@ -31,7 +31,7 @@ using namespace opencog;
 URECommons::URECommons(AtomSpace& as) : _as(as) {}
 
 Handle URECommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
-		throw (opencog::InvalidParamException) {
+{
 	if (!LinkCast(himplicant)) {
 		throw InvalidParamException(TRACE_INFO, "Input must be a link type ");
 	} //xxx why?

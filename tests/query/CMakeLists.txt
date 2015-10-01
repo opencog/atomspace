@@ -17,9 +17,12 @@ LINK_LIBRARIES (
 	execution
 )
 
+#start gearman-job-server
+
 # We want to run the tests in the order below;
 # Each test gets progressively more complex, and exercises
 # features that the later tests depend on.
+
 ADD_CXXTEST(PatternUTest)
 ADD_CXXTEST(PatternCrashUTest)
 ADD_CXXTEST(StackUTest)
@@ -29,6 +32,7 @@ ADD_CXXTEST(LoopPatternUTest)
 ADD_CXXTEST(BooleanUTest)
 ADD_CXXTEST(Boolean2NotUTest)
 ADD_CXXTEST(FuzzyPatternUTest)
+
 
 # Its a *lot* easier to write scheme, than to write C++ code!
 # These are not in alphabetical order; they are in order of
@@ -47,10 +51,6 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(SubstitutionUTest)
 	ADD_CXXTEST(GetLinkUTest)
 
-	# Currently disabled, because these requireScopeLink, which is no
-	# longer used by the BindLink/SatsifactionLink
-	# ADD_CXXTEST(BetaRedexUTest)
-	# ADD_CXXTEST(RedexBindUTest)
 	ADD_CXXTEST(GreaterThanUTest)
 	ADD_CXXTEST(GreaterComputeUTest)
 	ADD_CXXTEST(SequenceUTest)
@@ -59,14 +59,16 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(BuggyLinkUTest)
 	ADD_CXXTEST(BuggyQuoteUTest)
 	ADD_CXXTEST(BuggyEqualUTest)
+	ADD_CXXTEST(BuggySelfGroundUTest)
 	ADD_CXXTEST(ChoiceLinkUTest)
+	ADD_CXXTEST(DefineUTest)
 	ADD_CXXTEST(FiniteStateMachineUTest)
 	ADD_CXXTEST(AbsentUTest)
 	ADD_CXXTEST(SingleUTest)
 	ADD_CXXTEST(AttentionalFocusCBUTest)
 	ADD_CXXTEST(SudokuUTest)
 	ADD_CXXTEST(EinsteinUTest)
-    
+
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
 		${COGUTIL_LIBRARY}
 	)
@@ -83,14 +85,14 @@ ADD_CUSTOM_TARGET (qtest
 # Copy files to the build directory.  We do this so that the
 # scheme files can be found no matter where the source directory
 # might be.
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/beta-redex.scm
-    ${PROJECT_BINARY_DIR}/tests/query/beta-redex.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-crime.scm
     ${PROJECT_BINARY_DIR}/tests/query/buggy-crime.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-link.scm
     ${PROJECT_BINARY_DIR}/tests/query/buggy-link.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-stack.scm
     ${PROJECT_BINARY_DIR}/tests/query/buggy-stack.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-selfgnd.scm
+    ${PROJECT_BINARY_DIR}/tests/query/buggy-selfgnd.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-disconnected.scm
     ${PROJECT_BINARY_DIR}/tests/query/choice-disconnected.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-embed.scm
@@ -103,10 +105,24 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-nest.scm
     ${PROJECT_BINARY_DIR}/tests/query/choice-nest.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-top-nest.scm
     ${PROJECT_BINARY_DIR}/tests/query/choice-top-nest.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-typed.scm
+    ${PROJECT_BINARY_DIR}/tests/query/choice-typed.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-unary.scm
+    ${PROJECT_BINARY_DIR}/tests/query/choice-unary.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/define.scm
+    ${PROJECT_BINARY_DIR}/tests/query/define.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/define-schema.scm
+    ${PROJECT_BINARY_DIR}/tests/query/define-schema.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/disco-vars.scm
+    ${PROJECT_BINARY_DIR}/tests/query/disco-vars.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/evaluation.scm
     ${PROJECT_BINARY_DIR}/tests/query/evaluation.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/finite-state-machine.scm
     ${PROJECT_BINARY_DIR}/tests/query/finite-state-machine.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/get-link.scm
+    ${PROJECT_BINARY_DIR}/tests/query/get-link.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/get-link-eval.scm
+    ${PROJECT_BINARY_DIR}/tests/query/get-link-eval.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/greater-compute.scm
     ${PROJECT_BINARY_DIR}/tests/query/greater-compute.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/greater_than.scm
@@ -115,6 +131,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/match-link.scm
     ${PROJECT_BINARY_DIR}/tests/query/match-link.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/sequence.scm
     ${PROJECT_BINARY_DIR}/tests/query/sequence.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/seq-presence.scm
+    ${PROJECT_BINARY_DIR}/tests/query/seq-presence.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/single.scm
     ${PROJECT_BINARY_DIR}/tests/query/single.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/stackmore-o-o.scm
@@ -127,6 +145,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/stackmore-u-u.scm
     ${PROJECT_BINARY_DIR}/tests/query/stackmore-u-u.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/substitution.scm
     ${PROJECT_BINARY_DIR}/tests/query/substitution.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/test_types.scm
+    ${PROJECT_BINARY_DIR}/tests/query/test_types.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/unordered.scm
     ${PROJECT_BINARY_DIR}/tests/query/unordered.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/unordered-more.scm

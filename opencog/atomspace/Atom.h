@@ -82,6 +82,7 @@ class Atom
     friend class TLB;             // Needs to view _uuid
     friend class CreateLink;      // Needs to call getAtomTable();
     friend class DeleteLink;      // Needs to call getAtomTable();
+    friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
 
 private:
     //! Sets the AtomTable in which this Atom is inserted.
@@ -121,7 +122,7 @@ protected:
      */
     Atom(Type t, TruthValuePtr tv = TruthValue::DEFAULT_TV(),
             AttentionValuePtr av = AttentionValue::DEFAULT_AV())
-      : _uuid(Handle::UNDEFINED.value()),
+      : _uuid(Handle::INVALID_UUID),
         _atomTable(NULL),
         _type(t),
         _flags(0),
@@ -381,8 +382,14 @@ public:
      * @return A string representation of the node.
      * cannot be const, because observing the TV and AV requires a lock.
      */
-    virtual std::string toString(std::string indent = "") = 0;
-    virtual std::string toShortString(std::string indent = "") = 0;
+    virtual std::string toString(std::string indent) = 0;
+    virtual std::string toShortString(std::string indent) = 0;
+
+	// Work around gdb's incapability to build a string on the fly,
+	// see http://stackoverflow.com/questions/16734783 for more
+	// explanation.
+	std::string toString() { return toString(""); }
+	std::string toShortString() { return toShortString(""); }
 
     /** Returns whether two atoms are equal.
      *

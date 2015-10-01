@@ -12,6 +12,10 @@
 ; output, and no graph-rewriting occurs, thus a BindLink is not needed,
 ; and the simpler SatisfactionLink is enough.
 ;
+; The SatisfactionLink, combined with the SequentialAndLink, implement
+; the concept of a behavior tree "sequence node". See
+; https://en.wikipedia.org/wiki/Behavior_Trees_(artificial_intelligence,_robotics_and_control)
+;
 ; The run this, you probably need to do this:
 ;
 ; OCDIR=home/home/yourname/opencog

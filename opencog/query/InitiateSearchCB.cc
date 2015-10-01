@@ -21,22 +21,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <opencog/atoms/bind/PatternLink.h>
+#include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atomutils/FindUtils.h>
-#include <opencog/atoms/bind/BetaRedex.h>
+#include <opencog/atomutils/Substitutor.h>
 
 #include "InitiateSearchCB.h"
 #include "PatternMatchEngine.h"
 
 using namespace opencog;
-
-// Uncomment below to enable debug print
-// #define DEBUG
-#ifdef DEBUG
-#define dbgprt(f, varargs...) printf(f, ##varargs)
-#else
-#define dbgprt(f, varargs...)
-#endif
 
 /* ======================================================== */
 
@@ -49,6 +46,18 @@ InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
 	_as(as)
 {
 }
+
+void InitiateSearchCB::set_pattern(const Variables& vars,
+                                   const Pattern& pat)
+{
+	_search_fail = false;
+
+	_variables = &vars;
+	_pattern = &pat;
+	_type_restrictions = &vars.typemap;
+	_dynamic = &pat.evaluatable_terms;
+}
+
 
 /* ======================================================== */
 
@@ -97,9 +106,29 @@ InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
 // If no constant is found, then the returned value is the undefnied
 // handle.
 //
+
 Handle
 InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
-                               Handle& start, size_t& width)
+                                     Handle& startrm, size_t& width)
+{
+	// If its a node, then we are done.
+	Type t = h->getType();
+	if (_classserver.isNode(t)) {
+		if (t != VARIABLE_NODE) {
+			width = h->getIncomingSetSize();
+			startrm = h; // XXX wtf ???
+			return h;
+		}
+		return Handle::UNDEFINED;
+	}
+
+	// If its a link, then find recursively
+	return find_starter_recursive(h, depth, startrm, width);
+}
+
+Handle
+InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
+                                         Handle& startrm, size_t& width)
 {
 	// If its a node, then we are done. Don't modify either depth or
 	// start.
@@ -112,11 +141,6 @@ InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
 		return Handle::UNDEFINED;
 	}
 
-	// Ignore all ChoiceLink's. Picking a starter inside one of these
-	// will almost surely be disconnected from the rest of the graph.
-	if (CHOICE_LINK == t)
-		return Handle::UNDEFINED;
-
 	// Ignore all dynamically-evaluatable links up front.
 	if (_dynamic->find(h) != _dynamic->end())
 		return Handle::UNDEFINED;
@@ -126,19 +150,11 @@ InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
 	// the search there.  If there are two at the same depth,
 	// then start with the skinnier one.
 	size_t deepest = depth;
-	start = Handle::UNDEFINED;
+	startrm = Handle::UNDEFINED;
 	Handle hdeepest(Handle::UNDEFINED);
 	size_t thinnest = SIZE_MAX;
 
-	// If there is a ComposeLink, then search it's definition instead.
-	// but do this only at depth zero, so as to get us started; otherwise
-	// we risk infinite descent if the compose is recursive.
 	LinkPtr ll(LinkCast(h));
-	if (0 == depth and BETA_REDEX == ll->getType())
-	{
-		BetaRedexPtr cpl(BetaRedexCast(ll));
-		ll = LinkCast(cpl->beta_reduce());
-	}
 	for (Handle hunt : ll->getOutgoingSet())
 	{
 		size_t brdepth = depth + 1;
@@ -149,18 +165,30 @@ InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
 		if (QUOTE_LINK == hunt->getType())
 			hunt = LinkCast(hunt)->getOutgoingAtom(0);
 
-		Handle s(find_starter(hunt, brdepth, sbr, brwid));
+		Handle s(find_starter_recursive(hunt, brdepth, sbr, brwid));
 
-		if (s != Handle::UNDEFINED
-		    and (brwid < thinnest
-		         or (brwid == thinnest and deepest < brdepth)))
+		if (s != Handle::UNDEFINED)
 		{
-			deepest = brdepth;
-			hdeepest = s;
-			start = sbr;
-			thinnest = brwid;
+			// Each ChoiceLink is potentially disconnected from the rest
+			// of the graph. Assume the worst case, explore them all.
+			if (CHOICE_LINK == t)
+			{
+				Choice ch;
+				ch.clause = _curr_clause;
+				ch.best_start = s;
+				ch.start_term = sbr;
+				_choices.push_back(ch);
+			}
+			else
+			if (brwid < thinnest
+			    or (brwid == thinnest and deepest < brdepth))
+			{
+				deepest = brdepth;
+				hdeepest = s;
+				startrm = sbr;
+				thinnest = brwid;
+			}
 		}
-
 	}
 	depth = deepest;
 	width = thinnest;
@@ -183,12 +211,15 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
 	bestclause = 0;
 	Handle best_start(Handle::UNDEFINED);
 	starter_term = Handle::UNDEFINED;
+	_choices.clear();
 
 	size_t nc = clauses.size();
 	for (size_t i=0; i < nc; i++)
 	{
 		// Cannot start with an evaluatable clause!
 		if (0 < evl.count(clauses[i])) continue;
+
+		_curr_clause = i;
 		Handle h(clauses[i]);
 		size_t depth = 0;
 		size_t width = SIZE_MAX;
@@ -206,7 +237,7 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
 		}
 	}
 
-    return best_start;
+	return best_start;
 }
 
 /* ======================================================== */
@@ -253,38 +284,60 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 	Handle best_start = find_thinnest(clauses, _pattern->evaluatable_holders,
 	                                  _starter_term, bestclause);
 
-	// Cannot find a starting point! This can happen if all of the
-	// clauses contain nothing but variables, or if all of the
-	// clauses are evaluatable(!) Somewhat unusual, but it can
-	// happen.  In this case, we need some other, alternative search
-	// strategy.
-	if (Handle::UNDEFINED == best_start)
+	// Cannot find a starting point! This can happen if:
+	// 1) all of the clauses contain nothing but variables,
+	// 2) all of the clauses are evaluatable(!),
+	// Somewhat unusual, but it can happen.  For this, we need
+	// some other, alternative search strategy.
+	if (Handle::UNDEFINED == best_start and 0 == _choices.size())
 	{
 		_search_fail = true;
 		return false;
 	}
 
-	_root = clauses[bestclause];
-	dbgprt("Search start node: %s\n", best_start->toShortString().c_str());
-	dbgprt("Start term is: %s\n", _starter_term == Handle::UNDEFINED ?
-	       "UNDEFINED" : _starter_term->toShortString().c_str());
-	dbgprt("Root clause is: %s\n", _root->toShortString().c_str());
-
-	// This should be calling the over-loaded virtual method
-	// get_incoming_set(), so that, e.g. it gets sorted by attentional
-	// focus in the AttentionalFocusCB class...
-	IncomingSet iset = get_incoming_set(best_start);
-	size_t sz = iset.size();
-	for (size_t i = 0; i < sz; i++)
+	// If only a single choice, fake it for the loop below.
+	if (0 == _choices.size())
 	{
-		Handle h(iset[i]);
-		dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-		dbgprt("Loop candidate (%lu/%lu):\n%s\n", i+1, sz,
-		       h->toShortString().c_str());
-		bool found = pme->explore_neighborhood(_root, _starter_term, h);
+		Choice ch;
+		ch.clause = bestclause;
+		ch.best_start = best_start;
+		ch.start_term = _starter_term;
+		_choices.push_back(ch);
+	}
+	else
+	{
+		// TODO -- weed out duplicates!
+	}
 
-		// Terminate search if satisfied.
-		if (found) return true;
+	for (const Choice& ch : _choices)
+	{
+		bestclause = ch.clause;
+		best_start = ch.best_start;
+		_starter_term = ch.start_term;
+
+		_root = clauses[bestclause];
+		LAZY_LOG_FINE << "Search start node: " << best_start->toShortString();
+		LAZY_LOG_FINE << "Start term is: "
+		              << (_starter_term == Handle::UNDEFINED ?
+		                  "UNDEFINED" : _starter_term->toShortString());
+		LAZY_LOG_FINE << "Root clause is: " <<  _root->toShortString();
+
+		// This should be calling the over-loaded virtual method
+		// get_incoming_set(), so that, e.g. it gets sorted by attentional
+		// focus in the AttentionalFocusCB class...
+		IncomingSet iset = get_incoming_set(best_start);
+		size_t sz = iset.size();
+		for (size_t i = 0; i < sz; i++)
+		{
+			Handle h(iset[i]);
+			LAZY_LOG_FINE << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n"
+			              << "Loop candidate (" << i+1 << "/" << sz << "):\n"
+			              << h->toShortString();
+			bool found = pme->explore_neighborhood(_root, _starter_term, h);
+
+			// Terminate search if satisfied.
+			if (found) return true;
+		}
 	}
 
 	// If we are here, we have searched the entire neighborhood, and
@@ -383,102 +436,22 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
  */
 bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 {
-	return disjunct_search(pme);
-}
+	jit_analyze(pme);
 
-void InitiateSearchCB::set_pattern(const Variables& vars,
-                                   const Pattern& pat)
-{
-	_search_fail = false;
-	_variables = &vars;
-	_pattern = &pat;
-	_type_restrictions = &vars.typemap;
-	_dynamic = &pat.evaluatable_terms;
-}
-
-/* ======================================================== */
-/**
- * This callback implements the handling of the special case where the
- * pattern consists of a single clause, at the top of which there is an
- * ChoiceLink. In this situation, one effectively has multiple, unrelated
- * grounding problems at hand, and they need to be treated as such.
- *
- * The core issue here is that, from the point of view of satisfiability,
- * each subgraph that occurs inside an ChoiceLink might be grounded by a
- * graph that is disconnected from the other subgraphs. There is no
- * a-priori way of knowing whether the groundings might be connected,
- * and thus, the worst-case must be assumed: each subgraph that occurs
- * inside an ChoiceLink must be considered to be a unique, independent
- * graph, which must be assumed to be disconnected from each of the
- * other subgraphs (even though they "accidentally" share a common
- * variable name).
- *
- * This is best understood through an example. Consider the clause
- *
- *   ChoiceLink
- *       ListLink
- *           ConceptNode Hunt
- *           VariableNode $X
- *       ListLink
- *           VariableNode $X
- *           ConceptNode Zebra
- *
- * Suppose that the Universe over which this is being grounded consists
- * of only two clauses:
- *
- *   ListLink
- *       ConceptNode Hunt
- *       ConceptNode RedOctober
- *
- *   ListLink
- *       ConceptNode IceStation
- *       ConceptNode Zebra
- *
- * Suppose that the search for a grounding is begun at `Hunt`. Then, the
- * `RedOctober` is found, so $X is grounded by `RedOctober`.  From here,
- * it is impossible to walk the graph in a connected manner to find the
- * alternative grounding: `IceStation`.  To find `IceStation`, a second
- * search needs to be launched, starting at `Zebra`.
- *
- * Since the pattern matcher is only able to walk over connected
- * graphs, it must be assumed a-priori that each subgraph in an ChoiceLink
- * is disconnected from the others. The only way that these two sub
- * graphs might prove to be connected is if the variable $X is used in
- * some other clause, thus establishing connectivity from that clause to
- * the subgraphs of the ChoiceLink.
- *
- * The practical side-effect, here, with regards to satisfcation, is
- * this: if both groundings are to be found in the above example, then
- * two efforts must be made: One effort, with the initial grounding
- * starting at `Hunt`, and a second, starting at `Zebra`.  So... that
- * is what we do here, with the ChoiceLink loop.
- */
-bool InitiateSearchCB::disjunct_search(PatternMatchEngine *pme)
-{
-	const HandleSeq& clauses = _pattern->mandatory;
-
-	if (1 == clauses.size() and clauses[0]->getType() == CHOICE_LINK)
-	{
-		const Pattern* porig = _pattern;
-		Pattern pcpy = *_pattern;
-		LinkPtr orl(LinkCast(clauses[0]));
-		const HandleSeq& oset = orl->getOutgoingSet();
-		for (const Handle& h : oset)
-		{
-			HandleSeq hs;
-			hs.push_back(h);
-			pcpy.mandatory = hs;
-			_pattern = &pcpy;
-			bool found = disjunct_search(pme);
-			_pattern = porig;
-			if (found) return true;
-		}
-		if (not _search_fail) return false;
-	}
-
-	dbgprt("Attempt to use node-neighbor search\n");
+	logger().fine("Attempt to use node-neighbor search");
 	_search_fail = false;
 	bool found = neighbor_search(pme);
+	if (found) return true;
+	if (not _search_fail) return false;
+
+	// If we are here, then we could not find a clause at which to
+	// start, which can happen if the clauses hold no variables, and
+	// they are all evaluatable. This can happen for sequence links;
+	// we want to quickly rule out this case before moving to more
+	// complex searches, below.
+	logger().fine("Cannot use node-neighbor search, use no-var search");
+	_search_fail = false;
+	found = no_search(pme);
 	if (found) return true;
 	if (not _search_fail) return false;
 
@@ -487,7 +460,7 @@ bool InitiateSearchCB::disjunct_search(PatternMatchEngine *pme)
 	// variables! Which can happen (there is a unit test for this,
 	// the LoopUTest), and so instead, we search based on the link
 	// types that occur in the atomspace.
-	dbgprt("Cannot use node-neighbor search, use link-type search\n");
+	logger().fine("Cannot use no-var search, use link-type search");
 	_search_fail = false;
 	found = link_type_search(pme);
 	if (found) return true;
@@ -499,7 +472,7 @@ bool InitiateSearchCB::disjunct_search(PatternMatchEngine *pme)
 	// variable, all by itself, and set some type restrictions on it,
 	// and that's all. We deal with this in the variable_search()
 	// method.
-	dbgprt("Cannot use link-type search, use variable-type search\n");
+	logger().fine("Cannot use link-type search, use variable-type search");
 	_search_fail = false;
 	found = variable_search(pme);
 	return found;
@@ -576,8 +549,8 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 		return false;
 	}
 
-	dbgprt("Start clause is: %s\n", _root->toShortString().c_str());
-	dbgprt("Start term is: %s\n", _starter_term->toShortString().c_str());
+	LAZY_LOG_FINE << "Start clause is: " << _root->toShortString();
+	LAZY_LOG_FINE << "Start term is: " << _starter_term->toShortString();
 
 	// Get type of the rarest link
 	Type ptype = _starter_term->getType();
@@ -585,14 +558,12 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 	HandleSeq handle_set;
 	_as->get_handles_by_type(handle_set, ptype);
 
-#ifdef DEBUG
-	size_t i = 0;
-#endif
+	size_t i = 0, hsz = handle_set.size();
 	for (const Handle& h : handle_set)
 	{
-		dbgprt("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\n");
-		dbgprt("Loop candidate (%lu/%lu):\n%s\n", ++i, handle_set.size(),
-		       h->toShortString().c_str());
+		LAZY_LOG_FINE << "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\n"
+		              << "Loop candidate (" << i+1 << "/" << hsz << "):\n"
+		              << h->toShortString();
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;
 	}
@@ -609,7 +580,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
  * If the varset is empty, or if there are no variables, then the
  * entire atomspace will be searched.  Depending on the pattern,
  * many, many duplicates might be reported. If you are not using
- * variables, then you probably don't want to use this metod, either;
+ * variables, then you probably don't want to use this method, either;
  * you should create somethnig more clever.
  */
 bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
@@ -620,21 +591,23 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	size_t count = SIZE_MAX;
 	Type ptype = ATOM;
 
-	dbgprt("varset size = %lu\n", _variables->varset.size());
+	LAZY_LOG_FINE << "varset size = " <<  _variables->varset.size();
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
 	for (const Handle& var: _variables->varset)
 	{
-		dbgprt("Examine variable %s\n", var->toShortString().c_str());
+		LAZY_LOG_FINE << "Examine variable " << var->toShortString();
 		auto tit = _type_restrictions->find(var);
 		if (_type_restrictions->end() == tit) continue;
 		const std::set<Type>& typeset = tit->second;
-		dbgprt("Type-restictions set size = %lu\n", typeset.size());
+		LAZY_LOG_FINE << "Type-restictions set size = "
+		              << typeset.size();
 		for (Type t : typeset)
 		{
 			size_t num = (size_t) _as->get_num_atoms_of_type(t);
-			dbgprt("Type = %s has %lu atoms in the atomspace\n",
-			       _classserver.getTypeName(t).c_str(), num);
+			LAZY_LOG_FINE << "Type = "
+			              << _classserver.getTypeName(t) << " has "
+			              << num << " atoms in the atomspace";
 			if (0 < num and num < count)
 			{
 				for (const Handle& cl : clauses)
@@ -650,7 +623,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 						_starter_term = cl;
 						count = num;
 						ptype = t;
-						dbgprt("New minimum count of %lu\n", count);
+						LAZY_LOG_FINE << "New minimum count of " << count;
 						break;
 					}
 					if (0 < fa.least_holders.size())
@@ -659,7 +632,8 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 						_starter_term = *fa.least_holders.begin();
 						count = num;
 						ptype = t;
-						dbgprt("New minimum count of %lu (nonroot)\n", count);
+						LAZY_LOG_FINE << "New minimum count of "
+						              << count << "(nonroot)";
 						break;
 					}
 				}
@@ -670,7 +644,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	// There were no type restrictions!
 	if (Handle::UNDEFINED == _root)
 	{
-		dbgprt("There were no type restrictions! That must be wrong!\n");
+		logger().fine("There were no type restrictions! That must be wrong!");
 		if (0 == clauses.size())
 		{
 			// This is kind-of weird, it can happen if all clauses
@@ -687,21 +661,119 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	else
 		_as->get_handles_by_type(handle_set, ptype);
 
-	dbgprt("Atomspace reported %lu atoms\n", handle_set.size());
+	LAZY_LOG_FINE << "Atomspace reported " << handle_set.size() << " atoms";
 
-#ifdef DEBUG
-	size_t i = 0;
-#endif
+	size_t i = 0, hsz = handle_set.size();
 	for (const Handle& h : handle_set)
 	{
-		dbgprt("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz\n");
-		dbgprt("Loop candidate (%lu/%lu):\n%s\n", ++i, handle_set.size(),
-		       h->toShortString().c_str());
+		LAZY_LOG_FINE << "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz\n"
+		              << "Loop candidate (" << i+1 << "/" << hsz << "):\n"
+		              << h->toShortString();
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;
 	}
 
 	return false;
+}
+
+/* ======================================================== */
+/**
+ * No search -- no variables, one evaluatable clause.
+ * The stop-go sequence demo falls in this category: no actual
+ * matching needs to be done; merely, the sequence needs to be
+ * evaluated.  Arguably, it is a user error to use the pattern
+ * matcher for this, as there is nothing that needs to be matched.
+ * But, for just right now, we gloss over this, and allow it, because
+ * it is "closely related" to sequences with variables. It is a
+ * bit inefficient to use the pattern matcher for this, so if you
+ * want it to run fast, re-work the below to not use the PME.
+ */
+bool InitiateSearchCB::no_search(PatternMatchEngine *pme)
+{
+	if (0 < _variables->varset.size() or
+	    1 != _pattern->mandatory.size())
+	{
+		_search_fail = true;
+		return false;
+	}
+
+	// The one-and-only clause must be evaluatable!
+	const HandleSeq& clauses = _pattern->mandatory;
+	const std::set<Handle>& evl = _pattern->evaluatable_holders;
+	if (0 == evl.count(clauses[0]))
+	{
+		_search_fail = true;
+		return false;
+	}
+
+	LAZY_LOG_FINE << "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww\n"
+	              << "Non-search: no variables, no non-evaluatable clauses";
+	_root = _starter_term = clauses[0];
+	bool found = pme->explore_neighborhood(_root, _starter_term, _root);
+	return found;
+}
+
+/* ======================================================== */
+/**
+ * Just-In-Time analysis of patterns. Patterns we could not unpack
+ * earlier, because the definitions for them might not have been
+ * present, or may have changed since the pattern was initially created.
+ */
+void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
+{
+	// If there are no definitions, there is nothing to do.
+	if (0 == _pattern->defined_terms.size())
+		return;
+
+	// Now is the time to look up the defintions!
+	Variables vset;
+	std::map<Handle, Handle> defnmap;
+	for (const Handle& name : _pattern->defined_terms)
+	{
+		Handle defn = DefineLink::get_definition(name);
+		if (not defn) continue;
+
+		// Extract the variables in the definition.
+		// Either they are given in a LambdaLink, or, if absent,
+		// we just hunt down and bind all of them.
+		if (LAMBDA_LINK == defn->getType())
+		{
+			LambdaLinkPtr lam = LambdaLinkCast(defn);
+			vset.extend(lam->get_variables());
+			defn = lam->get_body();
+		}
+		else
+		{
+			FreeLink fl(defn);
+			VariableList vl(fl.get_vars());
+			vset.extend(vl.get_variables());
+		}
+
+		defnmap.insert({name, defn});
+	}
+
+	// Rebuild the pattern, expanding all DefinedPredicateNodes to one level.
+	// Note that newbody is not being place in any atomspace; but I think
+	// that is OK...
+	Handle newbody = Substitutor::substitute(_pattern->body, defnmap);
+
+	// We need to let both the PME know about the new clauses
+	// and variables, and also let master callback class know,
+	// too, since we are just one mixin in the callback class;
+	// the other mixins need to be updated as well.
+	vset.extend(*_variables);
+
+	_pl = createPatternLink(vset, newbody);
+	_variables = &_pl->get_variables();
+	_pattern = &_pl->get_pattern();
+
+	_type_restrictions = &_variables->typemap;
+	_dynamic = &_pattern->evaluatable_terms;
+
+	pme->set_pattern(*_variables, *_pattern);
+	set_pattern(*_variables, *_pattern);
+	logger().fine("JIT expanded!");
+	_pl->debug_log();
 }
 
 /* ===================== END OF FILE ===================== */

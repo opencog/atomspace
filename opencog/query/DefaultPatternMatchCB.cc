@@ -21,22 +21,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/Logger.h>
+
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atomutils/FindUtils.h>
-#include <opencog/atoms/bind/BetaRedex.h>
 
 #include "DefaultPatternMatchCB.h"
 
 using namespace opencog;
-
-// Uncomment below to enable debug print
-// #define DEBUG
-#ifdef DEBUG
-#define dbgprt(f, varargs...) printf(f, ##varargs)
-#else
-#define dbgprt(f, varargs...)
-#endif
 
 /* ======================================================== */
 
@@ -46,6 +39,7 @@ DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
 	_instor(&_temp_aspace),
 	_as(as)
 {
+	_connectives.insert(SEQUENTIAL_AND_LINK);
 	_connectives.insert(AND_LINK);
 	_connectives.insert(OR_LINK);
 	_connectives.insert(NOT_LINK);
@@ -179,15 +173,27 @@ bool DefaultPatternMatchCB::post_link_match(const LinkPtr& lpat,
 bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
                                          const Handle& grnd)
 {
-	if (ptrn == grnd) return false;
+	// Is the pattern same as the ground?
+	// if (ptrn == grnd) return false;
+	// Well, in a "normal" world, it intuitively makes sense to reject
+	// clauses that are grounded by themselves. In the real world, this
+	// runs afoul of several unusual situations. The one we care about
+	// is an evaluatable clause which contains no variables.  In this
+	// case, we need to accept the match in order for a SatisfactionLink
+	// to get valued correctly. Tested in SequenceUTest.
+	// if (ptrn == grnd) return false;
+
+	// This if-statement handles the case given in the callback description.
+	// It is tested by EvaluationUTest.
 	if (ptrn->getType() == VARIABLE_NODE and
 	    grnd->getType() == EVALUATION_LINK and
 	    0 < LinkCast(grnd)->getArity() and
 	    LinkCast(grnd)->getOutgoingAtom(0)->getType() ==
 	                                     GROUNDED_PREDICATE_NODE)
 	{
-		dbgprt("Evaluate the grounding clause=\n%s\n",
-		        grnd->toShortString().c_str());
+		LAZY_LOG_FINE << "Evaluate the grounding clause=" << std::endl
+		              << grnd->toShortString() << std::endl;
+
 		// We make two awkard asumptions here: the ground term itself
 		// does not contain any variables, and so does not need any
 		// further grounding. This actuall seems reasonable. The second
@@ -198,9 +204,10 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 		_temp_aspace.clear();
 		TruthValuePtr tvp(EvaluationLink::do_evaluate(&_temp_aspace, grnd));
 
-		dbgprt("clause_match evaluation yeilded tv=%s\n", tvp->toString().c_str());
+		LAZY_LOG_FINE << "Clause_match evaluation yeilded tv"
+		              << std::endl << tvp->toString() << std::endl;
 
-		// XXX FIXME: we are making a crsip-logic go/no-go decision
+		// XXX FIXME: we are making a crisp-logic go/no-go decision
 		// based on the TV strength. Perhaps something more subtle might be
 		// wanted, here.
 		bool relation_holds = tvp->getMean() > 0.5;
@@ -237,11 +244,10 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 
 	Handle gvirt(_instor.instantiate(virt, gnds));
 
-	dbgprt("Enter eval_term CB with virt=\n%s\n",
-	        virt->toShortString().c_str());
-	dbgprt("grounded by gvirt=\n%s\n",
-	        gvirt->toShortString().c_str());
-
+	LAZY_LOG_FINE << "Enter eval_term CB with virt=" << std::endl
+	              << virt->toShortString() << std::endl;
+	LAZY_LOG_FINE << "Grounded by gvirt=" << std::endl
+	              << gvirt->toShortString() << std::endl;
 
 	// At this time, we expect all virutal links to be in one of two
 	// forms: either EvaluationLink's or GreaterThanLink's.  The
@@ -272,10 +278,36 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	// do_evaluate callback.  Alternately, perhaps the
 	// EvaluationLink::do_evaluate() method should do this ??? Its a toss-up.
 
-	_temp_aspace.clear();
-	TruthValuePtr tvp(EvaluationLink::do_evaluate(&_temp_aspace, gvirt));
+	TruthValuePtr tvp;
+	// The instantiator would have taken care of expanding out
+	// and executing any FunctionLinks and the like.  Just use
+	// the TV value on the resulting atom.
+	//
+	// However, we also want to have a side-effect: the result of
+	// exeuctng one of these things should be placed into the atomspace.
+	Type vty = virt->getType();
+	if (EXECUTION_OUTPUT_LINK == vty or
+	    DEFINED_SCHEMA_NODE == vty or
+	    _classserver.isA(vty, FUNCTION_LINK))
+	{
+		gvirt = _as->add_atom(gvirt);
+		tvp = gvirt->getTruthValue();
+	}
+	else
+	{
+		_temp_aspace.clear();
+		tvp = EvaluationLink::do_evaluate(&_temp_aspace, gvirt);
+	}
 
-	dbgprt("eval_term evaluation yeilded tv=%s\n", tvp->toString().c_str());
+	// Avoid null-pointer dereference if user specified a bogus evaluation.
+	// i.e. an evaluation that failed to return a TV.
+	if (NULL == tvp)
+		throw InvalidParamException(TRACE_INFO,
+	            "Expecting a TruthValue for an evaluatable link: %s\n",
+	            gvirt->toShortString().c_str());
+
+	LAZY_LOG_FINE << "Eval_term evaluation yeilded tv="
+	              << tvp->toString() << std::endl;
 
 	// XXX FIXME: we are making a crsip-logic go/no-go decision
 	// based on the TV strength. Perhaps something more subtle might be
@@ -296,8 +328,8 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
                               const std::map<Handle, Handle>& gnds)
 {
-	dbgprt("Enter eval_sentence CB with top=\n%s\n",
-	        top->toShortString().c_str());
+	LAZY_LOG_FINE << "Enter eval_sentence CB with top=" << std::endl
+	              << top->toShortString() << std::endl;
 
 	if (top->getType() == VARIABLE_NODE)
 	{
@@ -323,7 +355,7 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 
 		return false;
 	}
-	else if (AND_LINK == term_type)
+	else if (AND_LINK == term_type or SEQUENTIAL_AND_LINK == term_type)
 	{
 		for (const Handle& h : oset)
 			if (not eval_sentence(h, gnds)) return false;
@@ -343,9 +375,68 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 	{
 		return eval_term(top, gnds);
 	}
-	throw InvalidParamException(TRACE_INFO,
-	            "Unknown logical connective %s\n",
-	            top->toShortString().c_str());
+	else if (PRESENT_LINK == term_type)
+	{
+		// If *every* clause in the PresentLink has been grounded,
+		// then return true.  That is, PresentLink behaves like an
+		// AndLink for term-presence.
+		for (const Handle& h : oset)
+		{
+			try
+			{
+				Handle g = gnds.at(h);
+			}
+			catch (...)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	// XXX TODO: Implement ChoiceLink here: its true if any one term
+	// is present.
+	// Also: Implement AbsentLink: its false if any clause is grounded.
+	// I guess AbsentLink is same as NotLink PresentLink.
+	// I guess ChoiceLink is the same as OrLink PresentLink.
+	// XXX .. would doing this here make the code simpler, than
+	// doing it in the bowels of the patten matcher, as it is
+	// currently being done? Well, no it cannot, since the current
+	// ChoiceLink gaurantees a complete exploration of all
+	// possibilities, whereas here, by willy-nilly grounding some
+	// subset, we would like run into conflicting assignments of
+	// groundings to variables, thus leading to bizarre conflicts
+	// and failures, and/or incomplete exploration of choices.
+	// What to do ??
+
+	// --------------------------------------------------------
+	// If we are here, then what we have is some atom that is not
+	// normally "truth-valued". We can do one of three things:
+	// a) Throw an exception and complain.
+	// b) Invent a new link type: GetTruthValueLink, that 'returns'
+	//    the TV of the atom that it wraps.
+	// c) Do the above, without inventing a new link type.
+	// The below implements choice (c): i.e. it gets the TV of this
+	// atom, and checks to see if it is greater than 0.5 or not.
+	//
+	// There are several minor issues: 1) we need to check the TV
+	// of the grounded atom, not the TV of the pattern, and 2) if
+	// the atom is executable, we need to execute it.
+	try
+	{
+		Handle g = gnds.at(top);
+		TruthValuePtr tvp(g->getTruthValue());
+		LAZY_LOG_FINE << "Non-logical atom has tv="
+		              << tvp->toString() << std::endl;
+		// XXX FIXME: we are making a crsip-logic go/no-go decision
+		// based on the TV strength. Perhaps something more subtle might be
+		// wanted, here.
+		bool relation_holds = tvp->getMean() > 0.5;
+		return relation_holds;
+	}
+	catch (...) {}
+
+	// If it's not grounded, then perhaps its executable.
+	return eval_term(top, gnds);
 }
 
 /* ===================== END OF FILE ===================== */

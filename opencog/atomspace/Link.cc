@@ -49,7 +49,6 @@ void Link::resort(void)
 }
 
 void Link::init(const std::vector<Handle>& outgoingVector)
-	throw (InvalidParamException)
 {
     if (not classserver().isA(_type, LINK)) {
         throw InvalidParamException(TRACE_INFO,
@@ -87,7 +86,13 @@ std::string Link::toShortString(std::string indent)
             answer << indent << "Undefined Atom!\n";
     }
 
-    answer << indent << ") ; [" << _uuid << "]\n";
+    answer << indent << ") ; [" << _uuid << "]";
+
+    if (_atomTable)
+        answer << "[" << _atomTable->get_uuid() << "]\n";
+    else
+        answer << "[NULL]\n";
+
     return answer.str();
 }
 
@@ -115,11 +120,14 @@ std::string Link::toString(std::string indent)
     }
 
     answer += indent + ") ; [" + 
-            std::to_string(_uuid).c_str() + "]\n";
+            std::to_string(_uuid).c_str() + "][" +
+            std::to_string(_atomTable? _atomTable->get_uuid() : -1) +
+            "]\n";
+
     return answer;
 }
 
-bool Link::isSource(Handle handle) const throw (InvalidParamException)
+bool Link::isSource(Handle handle) const
 {
     // On ordered links, only the first position in the outgoing set is a source
     // of this link. So, if the handle given is equal to the first position,
@@ -142,7 +150,7 @@ bool Link::isSource(Handle handle) const throw (InvalidParamException)
     return false;
 }
 
-bool Link::isSource(size_t i) const throw (IndexErrorException, InvalidParamException)
+bool Link::isSource(size_t i) const
 {
     // tests if the int given is valid.
     if (i > getArity()) {
@@ -162,7 +170,7 @@ bool Link::isSource(size_t i) const throw (IndexErrorException, InvalidParamExce
     }
 }
 
-bool Link::isTarget(Handle handle) const throw (InvalidParamException)
+bool Link::isTarget(Handle handle) const
 {
     // On ordered links, the first position of the outgoing set defines the
     // source of the link. The other positions are targets. So, it scans the
@@ -190,7 +198,7 @@ bool Link::isTarget(Handle handle) const throw (InvalidParamException)
     return false;
 }
 
-bool Link::isTarget(size_t i) const throw (IndexErrorException, InvalidParamException)
+bool Link::isTarget(size_t i) const
 {
     // tests if the int given is valid.
     if (i > getArity()) {

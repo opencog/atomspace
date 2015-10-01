@@ -125,6 +125,12 @@ public:
     inline bool operator!=(const AttentionValue& rhs) const
          { return !(*this == rhs); }
 
+    bool isDefaultAV() const {
+        if (this == DEFAULT_AV().get()) return true;
+        if (*this == *DEFAULT_AV()) return true;
+        return false;
+    }
+
     //! functor for comparing atom's attention value
     struct STISort : public AtomComparator  {
         STISort() {};

@@ -109,9 +109,9 @@ Handle AtomSpace::add_atom(AtomPtr atom, bool async)
     if (backing_store and not backing_store->ignoreType(t)) {
 
         Handle ha(atom);
-        Handle hb(backing_store->getAtom(ha));
-        if (hb.value() != Handle::UNDEFINED.value()) {
-            return atomTable.add(hb, async);
+        AtomPtr ba(backing_store->getAtom(ha));
+        if (ba) {
+            return atomTable.add(ba, async);
         }
     }
 
@@ -231,8 +231,8 @@ Handle AtomSpace::get_link(Type t, const HandleSeq& outgoing)
         {
             LinkPtr l(backing_store->getLink(t, outgoing));
             if (l) {
-                // Register the atom with the atomtable (so it gets placed in
-                // indices)
+                // Register the atom with the atomtable (so it
+                // gets placed in indices)
                 return atomTable.add(l, false);
             }
         }

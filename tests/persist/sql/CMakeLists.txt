@@ -17,9 +17,9 @@ LINK_LIBRARIES(
 )
 
 # The two tests below currrently work and pass, as of 10 December 2013.
-# There's this complicated cmake junk, because they will fail for anyone who
-# hasn't corrrectly configured their SQL setup.  To run these tests,
-# see the README file, and re-run cmake.
+# There's this complicated cmake junk, because they will fail for
+# anyone who hasn't corrrectly configured their SQL setup.  To run
+# these tests, see the README file, and re-run cmake.
 
 FIND_PROGRAM(PSQL_EXECUTABLE psql)
 IF (PSQL_EXECUTABLE)
@@ -40,6 +40,17 @@ IF (PSQL_EXECUTABLE)
 	ENDIF(PG_HOST)
 	UNSET(ENV{PG_HOST})
 
+	# Check the return code from PSQL; if it failed, try a second time.
+	# The most likely cause of failure is that "-h localhost" requires
+	# a tcp socket to be open; it might not be. So we retest; then,
+	# without the PGHOST and without the "-h localhost", the unix-domain
+	# socket will get used.
+	IF (RC)
+		EXECUTE_PROCESS(COMMAND ${PSQL_EXECUTABLE} -c "SELECT * from TypeCodes;" -d opencog_test -U opencog_tester
+			OUTPUT_VARIABLE OUT
+			ERROR_VARIABLE ERR
+			RESULT_VARIABLE RC)
+	ENDIF (RC)
 
 	# Check the return code from PSQL
 	IF (RC)

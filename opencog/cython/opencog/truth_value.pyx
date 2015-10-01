@@ -63,8 +63,10 @@ cdef class TruthValue:
     def __str__(self):
         return self._ptr().toString().c_str()
 
-    def confidence_to_count(self, float conf):
+    @staticmethod
+    def confidence_to_count(float conf):
         return (<cSimpleTruthValue*> 0).confidenceToCount(conf)
 
-    def count_to_confidence(self, float count):
+    @staticmethod
+    def count_to_confidence(float count):
         return (<cSimpleTruthValue*> 0).countToConfidence(count)

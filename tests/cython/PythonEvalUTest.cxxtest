@@ -264,8 +264,7 @@ public:
 
         config().set("SCM_PRELOAD",
                      "opencog/atomspace/core_types.scm, "
-                     "opencog/scm/opencog.scm, "
-                     "opencog/scm/opencog/exec.scm");
+		     "opencog/scm/opencog/exec.scm");
         AtomSpace *as = new AtomSpace();
         PythonEval::create_singleton_instance(as);
         PythonEval* python = &PythonEval::instance();

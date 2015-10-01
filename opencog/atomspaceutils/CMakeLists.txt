@@ -22,5 +22,5 @@ ENDIF (CYGWIN)
 
 INSTALL (FILES
 	AtomSpaceUtils.h
-	DESTINATION "include/${PROJECT_NAME}/atomspaceutils"
+	DESTINATION "include/opencog/atomspaceutils"
 )

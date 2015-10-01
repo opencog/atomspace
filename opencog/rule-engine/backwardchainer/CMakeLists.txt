@@ -1,4 +1,4 @@
 INSTALL (FILES
 	BackwardChainerPMCB.h
-	DESTINATION "include/${PROJECT_NAME}/rule-engine/backwardchainer"
+	DESTINATION "include/opencog/rule-engine/backwardchainer"
 )

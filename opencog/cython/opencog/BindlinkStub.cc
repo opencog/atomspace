@@ -2,7 +2,7 @@
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
-#include <opencog/atoms/reduct/FunctionLink.h>
+#include <opencog/atoms/core/FunctionLink.h>
 
 #include "BindlinkStub.h"
 

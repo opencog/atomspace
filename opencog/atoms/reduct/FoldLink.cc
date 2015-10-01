@@ -26,6 +26,8 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atoms/NumberNode.h>
 #include "FoldLink.h"
+#include "PlusLink.h"
+#include "TimesLink.h"
 
 using namespace opencog;
 
@@ -139,14 +141,14 @@ Handle FoldLink::reduce(void)
 	{
 		Type t = h->getType();
 
-		if (classserver().isA(t, FUNCTION_LINK))
+		if (classserver().isA(t, FOLD_LINK))
 		{
-			FunctionLinkPtr fff(FunctionLinkCast(h));
+			FoldLinkPtr fff(FoldLinkCast(h));
 			// Arghh.  The cast should have been enough, but we currently
 			// can't store these in the atomsapce, due to circular shared
 			// lib dependencies.
 			if (NULL == fff)
-				fff = FunctionLinkCast(FunctionLink::factory(LinkCast(h)));
+				fff = FoldLinkCast(FoldLink::factory(LinkCast(h)));
 
 			Handle redh = fff->reduce();
 			if (h != redh)
@@ -224,13 +226,13 @@ Handle FoldLink::reduce(void)
 			if (_atomTable)
 				foo = _atomTable->getAtomSpace()->add_atom(foo);
 
-			FunctionLinkPtr flp = FunctionLinkCast(foo);
+			FoldLinkPtr flp = FoldLinkCast(foo);
 
 			// Arghh.  The cast should have been enough, but we currently
 			// can't store these in the atomsapce, due to circular shared
 			// lib dependencies.
 			if (NULL == flp)
-				flp = FunctionLinkCast(FunctionLink::factory(LinkCast(foo)));
+				flp = FoldLinkCast(FoldLink::factory(LinkCast(foo)));
 			DO_RETURN(Handle(flp->reduce()));
 		}
 	}
@@ -243,3 +245,27 @@ Handle FoldLink::reduce(void)
 }
 
 // ===========================================================
+
+LinkPtr FoldLink::factory(LinkPtr lp)
+{
+	if (NULL == lp)
+		throw RuntimeException(TRACE_INFO, "Not executable!");
+
+	// If h is of the right form already, its just a matter of calling
+	// it.  Otherwise, we have to create
+	FoldLinkPtr flp(FoldLinkCast(lp));
+	if (flp) return lp;
+
+	return LinkCast(FoldLink::factory(lp->getType(), lp->getOutgoingSet()));
+}
+
+// Basic type factory.
+Handle FoldLink::factory(Type t, const HandleSeq& seq)
+{
+	if (PLUS_LINK == t)
+		return Handle(createPlusLink(seq));
+	if (TIMES_LINK == t)
+		return Handle(createTimesLink(seq));
+
+	throw RuntimeException(TRACE_INFO, "Not a FoldLink!");
+}

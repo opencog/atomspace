@@ -186,7 +186,7 @@ SCM SchemeSmob::ss_handle (SCM satom)
  */
 SCM SchemeSmob::ss_undefined_handle (void)
 {
-	return scm_from_ulong(Handle::UNDEFINED.value());
+	return scm_from_ulong(Handle::INVALID_UUID);
 }
 
 /* ============================================================== */
@@ -513,7 +513,7 @@ SCM SchemeSmob::ss_delete (SCM satom, SCM kv_pairs)
 
 	// It can happen that the atom has already been deleted, but we're
 	// still holding on to its UUID.  This is rare... but possible. So
-	// don't crash when it happens.
+	// don't crash when it happens. XXX Is it really possible? How?
 	if (NULL == h.operator->()) return SCM_BOOL_F;
 
 	// The remove will fail/log warning if the incoming set isn't null.
@@ -525,6 +525,10 @@ SCM SchemeSmob::ss_delete (SCM satom, SCM kv_pairs)
 	// AtomSpace::removeAtom() returns true if atom was deleted,
 	// else returns false
 	bool rc = atomspace->remove_atom(h, false);
+
+	// Clobber the handle, too.
+	*((Handle *) SCM_SMOB_DATA(satom)) = Handle::UNDEFINED;
+	scm_remember_upto_here_1(satom);
 
 	// rc should always be true at this point ...
 	if (rc) return SCM_BOOL_T;
@@ -546,6 +550,10 @@ SCM SchemeSmob::ss_delete_recursive (SCM satom, SCM kv_pairs)
 
 	bool rc = atomspace->remove_atom(h, true);
 
+	// Clobber the handle, too.
+	*((Handle *) SCM_SMOB_DATA(satom)) = Handle::UNDEFINED;
+	scm_remember_upto_here_1(satom);
+
 	if (rc) return SCM_BOOL_T;
 	return SCM_BOOL_F;
 }
@@ -563,7 +571,7 @@ SCM SchemeSmob::ss_purge (SCM satom, SCM kv_pairs)
 
 	// It can happen that the atom has already been purged, but we're
 	// still holding on to its UUID.  This is rare... but possible. So
-	// don't crash when it happens.
+	// don't crash when it happens. XXX Is it really possible? How?
 	if (NULL == h.operator->()) return SCM_BOOL_F;
 
 	// The purge will fail/log warning if the incoming set isn't null.
@@ -575,6 +583,10 @@ SCM SchemeSmob::ss_purge (SCM satom, SCM kv_pairs)
 	// AtomSpace::purgeAtom() returns true if atom was purged,
 	// else returns false
 	bool rc = atomspace->purge_atom(h, false);
+
+	// Clobber the handle, too.
+	*((Handle *) SCM_SMOB_DATA(satom)) = Handle::UNDEFINED;
+	scm_remember_upto_here_1(satom);
 
 	// rc should always be true at this point ...
 	if (rc) return SCM_BOOL_T;
@@ -595,6 +607,10 @@ SCM SchemeSmob::ss_purge_recursive (SCM satom, SCM kv_pairs)
 	if (NULL == atomspace) atomspace = ss_get_env_as("cog-purge-recursive");
 
 	bool rc = atomspace->purge_atom(h, true);
+
+	// Clobber the handle, too.
+	*((Handle *) SCM_SMOB_DATA(satom)) = Handle::UNDEFINED;
+	scm_remember_upto_here_1(satom);
 
 	if (rc) return SCM_BOOL_T;
 	return SCM_BOOL_F;

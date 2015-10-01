@@ -32,7 +32,6 @@ struct Inference {
 	int iter_step;
 	Rule* applied_rule;
 	HandleSeq inf_product;
-	HandleSeq matched_nodes; /**<matched nodes with the variables in the rule,useful during mutual exclusion checking*/
 };
 
 class FCMemory {
@@ -45,6 +44,7 @@ private:
 	HandleSeq _selected_sources; /*<selected sources on each forward chaining steps*/
 	HandleSeq _potential_sources; /*<list of inference products and premises to select source from*/
 	vector<Inference> _inf_history; /*<inference history*/
+	HandleSeq _focus_set;
 
 	AtomSpace* _as;
 public:
@@ -74,14 +74,16 @@ public:
 	bool isin_potential_sources(Handle h);
 	Handle get_cur_source(void);
 
+	//focus set
+	void set_focus_set(HandleSeq focus_set);
+	HandleSeq get_focus_set(void);
+
     //Attentional focus flag
 	void set_search_in_af(bool val);
 	bool is_search_in_af();
 
 	//History
 	void add_rules_product(int iteration, HandleSeq product);
-	void add_inference(int iteration, HandleSeq product,
-			HandleSeq matched_nodes);
 	vector<Inference>& get_inf_history();
 	HandleSeq get_result();
 	vector<Rule*> get_applied_rules(void);

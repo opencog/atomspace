@@ -46,7 +46,7 @@ void PatternSCM::init(void)
 	_binders.push_back(new FunctionWrap(af_bindlink,
 	                   "cog-bind-af", "query"));
 
-   // Fuzzy matching.
+	// Fuzzy matching.
 	_binders.push_back(new FunctionWrap(find_approximate_match,
 	                   "cog-fuzzy-match", "query"));
 
@@ -56,6 +56,11 @@ void PatternSCM::init(void)
 
 	_binders.push_back(new FunctionWrap(satisfying_set,
 	                   "cog-satisfying-set", "query"));
+
+	// Rule recognition.
+	_binders.push_back(new FunctionWrap(recognize,
+	                   "cog-recognize", "query"));
+
 }
 
 PatternSCM::~PatternSCM()

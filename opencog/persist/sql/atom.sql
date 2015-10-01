@@ -1,3 +1,17 @@
+-- -----------------------------------------------------------
+-- Table showing inheritance relationship between atomspaces.
+-- Atomspaces have UUID's identifying them. Top-level atomspaces have
+-- a UUID of zero.  Otherwise, all atomspaces have some (other)
+-- atomspace as a parent.
+
+CREATE TABLE Spaces (
+	space  BIGINT PRIMARY KEY,
+	parent BIGINT
+);
+
+-- Space 0 is used primarily (only) in testing of raw atoms.
+INSERT INTO Spaces VALUES (0,0); -- no space defined; raw atoms.
+INSERT INTO Spaces VALUES (1,1); -- default root
 
 --
 -- Create a table representation for an opencog Atom
@@ -82,19 +96,6 @@ CREATE TABLE TypeCodes (
 	type SMALLINT UNIQUE,
 	typename TEXT UNIQUE
 );
-
--- -----------------------------------------------------------
--- Table showing inheritance relationship between atomspaces.
--- Atomspaces have UUID's identifying them. Top-level atomspaces have
--- a UUID of zero.  Otherwise, all atomspaces have some (other)
--- atomspace as a parent.
-
-CREATE TABLE Spaces (
-	space  BIGINT PRIMARY KEY,
-	parent BIGINT
-);
-
-INSERT INTO Spaces VALUES (1,1); -- default root
 
 -- -----------------------------------------------------------
 -- Global state

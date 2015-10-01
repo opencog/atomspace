@@ -52,7 +52,7 @@ class Link : public Atom
     friend class AtomTable;
 
 private:
-    void init(const HandleSeq&) throw (InvalidParamException);
+    void init(const HandleSeq&);
     void resort(void);
 
     Link(const Link &l) : Atom(0)
@@ -134,8 +134,10 @@ public:
      * because thread-safe locking required in the gets. */
     Link(Link &l)
         : Atom(l.getType(),
-               l.getTruthValue()->clone(),
-               l.getAttentionValue()->clone())
+               ({ TruthValuePtr tv(l.getTruthValue());
+                  tv->isDefinedTV() ? tv : tv->clone(); }),
+               ({ AttentionValuePtr av(l.getAttentionValue());
+                  av->isDefaultAV() ? av : av->clone(); }))
     {
         init(l.getOutgoingSet());
     }
@@ -165,7 +167,7 @@ public:
      * @param The position of the handle in the array.
      * @return A specific handle in the outgoing set.
      */
-    inline Handle getOutgoingAtom(Arity pos) const throw (RuntimeException)
+    inline Handle getOutgoingAtom(Arity pos) const
     {
         // Checks for a valid position
         if (pos < getArity()) {
@@ -193,7 +195,7 @@ public:
      *
      * @return A string representation of the link.
      */
-    std::string toString(std::string indent = "");
+    std::string toString(std::string indent);
 
     /**
      * Returns a short string representation of the link.
@@ -203,8 +205,15 @@ public:
      *
      * @return A short string representation of the link.
      */
-    std::string toShortString(std::string indent = "");
+    std::string toShortString(std::string indent);
 
+	// Work around gdb's incapability to build a string on the fly,
+	// see http://stackoverflow.com/questions/16734783 and
+	// http://stackoverflow.com/questions/2973976 for more
+	// explanation.
+	using Atom::toString;
+	using Atom::toShortString;
+	
     /**
      * Returns whether a given handle is a source (the first outgoing
      * if the link is ordered) of this link.
@@ -212,7 +221,7 @@ public:
      * @param Handle to be checked for being a link source.
      * @return Whether a given handle is a source of this link.
      */
-    bool isSource(Handle) const throw (InvalidParamException);
+    bool isSource(Handle) const;
 
     /**
      * Returns whether the element in a given position in the
@@ -223,7 +232,7 @@ public:
      * @return Whether the element in a given position in the
      *         outgoing set of this link is a source.
      */
-    bool isSource(size_t) const throw (IndexErrorException, InvalidParamException);
+    bool isSource(size_t) const;
 
     /**
      * Returns whether a given handle is a target (any but the first
@@ -232,7 +241,7 @@ public:
      * @param Handle to be checked for being a link target.
      * @return Whether a given handle is a target of this link.
      */
-    bool isTarget(Handle) const throw (InvalidParamException);
+    bool isTarget(Handle) const;
 
     /**
      * Returns whether the element in a given position in the
@@ -243,7 +252,7 @@ public:
      * @return Whether the element in a given position in the
      *         outgoing set of this link is a target.
      */
-    bool isTarget(size_t) const throw (IndexErrorException, InvalidParamException);
+    bool isTarget(size_t) const;
 
     /**
      * Returns whether a given atom is equal to the current link.

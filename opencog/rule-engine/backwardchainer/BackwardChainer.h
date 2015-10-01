@@ -95,25 +95,33 @@ class BackwardChainer
 public:
 	BackwardChainer(AtomSpace& as, Handle rbs);
 
-	void set_target(Handle init_target);
+	void set_target(Handle init_target, Handle focus_link = Handle::UNDEFINED);
 	UREConfigReader& get_config();
 	const UREConfigReader& get_config() const;
 
 	void do_chain();
 	void do_step();
 
-	const VarMultimap& get_chaining_result();
+	VarMultimap get_chaining_result();
 
 private:
 
 	void process_target(Target& target);
 
-	std::vector<Rule> filter_rules(const Target& target);
-	Rule select_rule(Target& target, const std::vector<Rule>& rules);
+	bool select_rule(const Target& target,
+	                 Rule& selected_rule,
+	                 Rule& standardized_rule,
+	                 std::vector<VarMap>& all_implicand_to_target_mappings);
 
-	HandleSeq match_knowledge_base(const Handle& htarget,
+	HandleSeq match_knowledge_base(Handle htarget,
 	                               Handle htarget_vardecl,
-	                               std::vector<VarMap>& vmap);
+	                               std::vector<VarMap>& vmap,
+	                               bool enable_var_name_check = false);
+	HandleSeq find_premises(const Rule& standardized_rule,
+	                        const VarMap& implicand_mapping,
+	                        const std::set<Handle> additional_free_varset,
+	                        Handle& hrule_implicant_reverse_grounded,
+	                        std::vector<VarMap>& premises_vmap_list);
 	HandleSeq ground_premises(const Handle& htarget, const VarMap& vmap,
 	                          std::vector<VarMap>& vmap_list);
 	bool unify(const Handle& hsource, const Handle& hmatch,
@@ -126,6 +134,7 @@ private:
 	UREConfigReader _configReader;
 	AtomSpace _garbage_superspace;
 	Handle _init_target;
+	AtomSpace _focus_space;
 
 	TargetSet _targets_set;
 

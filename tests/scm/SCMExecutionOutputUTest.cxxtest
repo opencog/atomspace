@@ -76,6 +76,8 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 
 	void test_boolean(void);
 	void test_numeric(void);
+
+	void test_dsn(void);
 };
 
 void SCMExecutionOutputUTest::setUp(void)
@@ -426,7 +428,7 @@ void SCMExecutionOutputUTest::test_numeric(void)
 	CHKEV(eval);
 	Handle twntyfour = eval->eval_h("(NumberNode 24)");
 	std::cout << "Expression is " << nexp->toString() << std::endl;
-	std::cout << "Number is " << twntyfour->toString() << std::endl;
+	std::cout << "Expected " << twntyfour->toString() << std::endl;
 	TS_ASSERT_EQUALS(nexp, twntyfour);
 
 	NumberNodePtr ne(NumberNodeCast(nexp));
@@ -464,4 +466,62 @@ void SCMExecutionOutputUTest::test_boolean(void)
 	// When evaluated, this one should be false.
 	tv = EvaluationLink::do_evaluate(as, boolex);
 	TS_ASSERT_LESS_THAN_EQUALS(tv->getMean(), 0.001);
+}
+
+void SCMExecutionOutputUTest::test_dsn(void)
+{
+	// A boolean-valued expression
+	eval->eval(
+	   "(DefineLink"
+	   "   (DefinedSchemaNode \"x+y*10\")"
+	   "   (FunctionLink"
+	   "      (VariableList"
+	   "         (VariableNode \"$X\")"
+	   "         (VariableNode \"$Y\"))"
+	   "      (PlusLink"
+	   "         (VariableNode \"$X\")"
+	   "         (TimesLink"
+	   "            (VariableNode \"$Y\")"
+	   "            (NumberNode 10)))))"
+	);
+	CHKEV(eval);
+
+	// Execute the DSN.
+	Handle result = eval->eval_h(
+	   "(cog-execute!"
+	   "   (ExecutionOutputLink"
+	   "      (DefinedSchemaNode \"x+y*10\")"
+	   "      (ListLink"
+	   "         (NumberNode 2)"
+	   "         (NumberNode 4))))"
+	);
+	CHKEV(eval);
+
+	Handle expect = eval->eval_h("(NumberNode 42)");
+	std::cout << "Expression is " << result->toString() << std::endl;
+	std::cout << "Expected " << expect->toString() << std::endl;
+	TS_ASSERT_EQUALS(result, expect);
+
+	// Same as above, but without the define.
+	result = eval->eval_h(
+	   "(cog-execute!"
+	   "   (ExecutionOutputLink"
+	   "      (FunctionLink"
+	   "         (VariableList"
+	   "            (VariableNode \"$X\")"
+	   "            (VariableNode \"$Y\"))"
+	   "         (PlusLink"
+	   "            (VariableNode \"$X\")"
+	   "            (TimesLink"
+	   "               (VariableNode \"$Y\")"
+	   "               (NumberNode 10))))"
+	   "      (ListLink"
+	   "         (NumberNode 2)"
+	   "         (NumberNode 4))))"
+	);
+	CHKEV(eval);
+
+	std::cout << "Lambda is " << result->toString() << std::endl;
+	std::cout << "Expected " << expect->toString() << std::endl;
+	TS_ASSERT_EQUALS(result, expect);
 }

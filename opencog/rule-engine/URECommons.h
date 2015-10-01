@@ -52,8 +52,7 @@ public:
 	 *                     a variable node.
 	 * @return - a Handle to the BindLink instance created
 	 */
-	Handle create_bindLink(Handle himplicant, bool is_quoted = false)
-			throw (opencog::InvalidParamException);
+	Handle create_bindLink(Handle himplicant, bool is_quoted = false);
 
 	/**
 	 * checks if a handle already exists in a HandleSeq

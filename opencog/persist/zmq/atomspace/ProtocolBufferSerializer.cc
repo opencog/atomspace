@@ -1,10 +1,10 @@
 /*
  * opencog/atomspace/ProtocolBufferSerializer.cc
  *
- * Copyright (C) 2008-2010 OpenCog Foundation
+ * Copyright (C) 2008-2015 OpenCog Foundation
  * All Rights Reserved
  *
- * Written by Erwin Joosten
+ * Written by Erwin Joosten, Hendy Irawan <ceefour666@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -31,11 +31,8 @@
 #include "opencog/atomspace/TruthValue.h"
 #include "opencog/atomspace/CountTruthValue.h"
 #include "opencog/atomspace/NullTruthValue.h"
-#include "opencog/atomspace/CompositeTruthValue.h"
 #include "opencog/atomspace/IndefiniteTruthValue.h"
 #include "opencog/atomspace/SimpleTruthValue.h"
-#include "Trail.h"
-#include "VersionHandle.h"
 
 using namespace opencog;
 
@@ -53,152 +50,122 @@ ProtocolBufferSerializer::~ProtocolBufferSerializer()
 void ProtocolBufferSerializer::deserializeAtom(
         const ZMQAtomMessage& atomMessage, Atom& atom)
 {
-    deserializeAttentionValueHolder(atomMessage.attentionvalueholder(), atom);
-    atom.handle = Handle(atomMessage.handle());
+    //deserializeAttentionValueHolder(atomMessage.attentionvalueholder(), atom);
 
-    atom.atomTable=NULL;
-    if(atomMessage.incoming_size()==0)
+    atom._atomTable = NULL;
+    if (atomMessage.incoming_size() == 0)
     {
-        atom.incoming=NULL;
+        atom._incoming_set = NULL;
     }
     else
     {
-        atom.incoming = new HandleEntry(Handle(atomMessage.incoming(0)));
-        HandleEntry *previous = atom.incoming;
-        for(int i = 1; i < atomMessage.incoming_size(); i++)
-        {
-            HandleEntry *current = new HandleEntry(Handle(atomMessage.incoming(i)));
-            previous->next = current;
-            previous = current;
-        }
+    	// TODO: is incoming set transferred over ZMQBackingStore? If so, how to "deserialize" them back?
+    	atom._incoming_set = NULL;
+//    	IncomingSet inSet(atomMessage.incoming_size());
+//        atom._incoming_set = shared_ptr<LinkPtr>(inSet);
+//        HandleEntry *previous = atom.incoming;
+//        for(int i = 1; i < atomMessage.incoming_size(); i++)
+//        {
+//            HandleEntry *current = new HandleEntry(Handle(atomMessage.incoming(i)));
+//        	LinkPtr linkPtr();
+//        	inSet.push_back(linkPtr);
+//        }
     }
 
-    atom.type = atomMessage.type();
-    atom.flags = atomMessage.flags();
-
-    atom.truthValue = deserialize(atomMessage.truthvalue());
+    atom._flags = atomMessage.flags();
 }
 
-void ProtocolBufferSerializer::serializeAtom(
-        Atom& atom, ZMQAtomMessage* atomMessage)
-{
-    serializeAttentionValueHolder(atom, atomMessage->mutable_attentionvalueholder());
+//void ProtocolBufferSerializer::serializeAtom(
+//        Atom& atom, ZMQAtomMessage* atomMessage)
+//{
+//    //serializeAttentionValueHolder(atom, atomMessage->mutable_attentionvalueholder());
+//
+//    atomMessage->set_handle(atom.getHandle().value());
+//
+//    HandleEntry* next=atom.incoming;
+//    while(next)
+//    {
+//        atomMessage->add_incoming(next->handle.value());
+//        next = next->next;
+//    }
+//
+//    atomMessage->set_type(atom.type);
+//    atomMessage->set_flags(atom.flags);
+//
+//    serialize(*atom.truthValue, atomMessage->mutable_truthvalue());
+//}
 
-    atomMessage->set_handle(atom.handle.value());
-
-    HandleEntry* next=atom.incoming;
-    while(next)
-    {
-        atomMessage->add_incoming(next->handle.value());
-        next = next->next;
-    }
-
-    atomMessage->set_type(atom.type);
-    atomMessage->set_flags(atom.flags);
-
-    serialize(*atom.truthValue, atomMessage->mutable_truthvalue());
-}
-
-Atom* ProtocolBufferSerializer::deserialize(const ZMQAtomMessage& atomMessage)
+AtomPtr ProtocolBufferSerializer::deserialize(const ZMQAtomMessage& atomMessage)
 {
     switch(atomMessage.atomtype())
     {
     case ZMQAtomTypeNode:
     {
-        Node* node = new Node();
-        deserializeNode(atomMessage, *node);
-        return node;
+    	NodePtr nodePtr = deserializeNode(atomMessage);
+        return nodePtr;
     }
     case ZMQAtomTypeLink:
     {
-        Link* link = new Link();
-        deserializeLink(atomMessage, *link);
-        return link;
+        LinkPtr linkPtr = deserializeLink(atomMessage);
+        return linkPtr;
     }
+    case ZMQAtomTypeNotFound:
+    	return AtomPtr();
     default:
         throw RuntimeException(TRACE_INFO, "Invalid ZMQ atomtype");
     }
 }
 
-void ProtocolBufferSerializer::serialize(Atom &atom, ZMQAtomMessage* atomMessage)
+//void ProtocolBufferSerializer::serialize(Atom &atom, ZMQAtomMessage* atomMessage)
+//{
+//    Link* link = dynamic_cast<Link *>(&atom);
+//    if(link)
+//        serializeLink(*link, atomMessage);
+//    else
+//    {
+//        Node* node = dynamic_cast<Node *>(&atom);
+//        if(node)
+//            serializeNode(*node, atomMessage);
+//        else
+//            throw RuntimeException(TRACE_INFO, "Invalid atomtype");
+//    }
+//}
+
+//void ProtocolBufferSerializer::deserializeAttentionValue(
+//        const ZMQAttentionValueHolderMessage &attentionValueHolderMessage,
+//        AttentionValue& av)
+//{
+//    av.m_STI=attentionValueHolderMessage.sti();
+//    av.m_LTI=attentionValueHolderMessage.lti();
+//    av.m_VLTI=attentionValueHolderMessage.vlti();
+//}
+//
+//void ProtocolBufferSerializer::serializeAttentionValue(
+//        AttentionValue& av, ZMQAttentionValueHolderMessage* attentionValueHolderMessage)
+//{
+//    attentionValueHolderMessage->set_sti(av.m_STI);
+//    attentionValueHolderMessage->set_lti(av.m_LTI);
+//    attentionValueHolderMessage->set_vlti(av.m_VLTI);
+//}
+//
+//void ProtocolBufferSerializer::deserializeAttentionValueHolder(
+//        const ZMQAttentionValueHolderMessage &attentionValueHolderMessage,
+//        AttentionValueHolder& avh )
+//{
+//    deserializeAttentionValue(attentionValueHolderMessage, avh.attentionValue);
+//}
+//
+//void ProtocolBufferSerializer::serializeAttentionValueHolder(
+//        AttentionValueHolder& avh, ZMQAttentionValueHolderMessage* attentionValueHolderMessage)
+//{
+//    serializeAttentionValue(avh.attentionValue, attentionValueHolderMessage);
+//}
+
+CountTruthValuePtr ProtocolBufferSerializer::deserializeCountTruthValue(
+        const ZMQSingleTruthValueMessage& singleTruthValue)
 {
-    Link* link = dynamic_cast<Link *>(&atom);
-    if(link)
-        serializeLink(*link, atomMessage);
-    else
-    {
-        Node* node = dynamic_cast<Node *>(&atom);
-        if(node)
-            serializeNode(*node, atomMessage);
-        else
-            throw RuntimeException(TRACE_INFO, "Invalid atomtype");
-    }
-}
-
-void ProtocolBufferSerializer::deserializeAttentionValue(
-        const ZMQAttentionValueHolderMessage &attentionValueHolderMessage,
-        AttentionValue& av)
-{
-    av.m_STI=attentionValueHolderMessage.sti();
-    av.m_LTI=attentionValueHolderMessage.lti();
-    av.m_VLTI=attentionValueHolderMessage.vlti();
-}
-
-void ProtocolBufferSerializer::serializeAttentionValue(
-        AttentionValue& av, ZMQAttentionValueHolderMessage* attentionValueHolderMessage)
-{
-    attentionValueHolderMessage->set_sti(av.m_STI);
-    attentionValueHolderMessage->set_lti(av.m_LTI);
-    attentionValueHolderMessage->set_vlti(av.m_VLTI);
-}
-
-void ProtocolBufferSerializer::deserializeAttentionValueHolder(
-        const ZMQAttentionValueHolderMessage &attentionValueHolderMessage,
-        AttentionValueHolder& avh )
-{
-    deserializeAttentionValue(attentionValueHolderMessage, avh.attentionValue);
-}
-
-void ProtocolBufferSerializer::serializeAttentionValueHolder(
-        AttentionValueHolder& avh, ZMQAttentionValueHolderMessage* attentionValueHolderMessage)
-{
-    serializeAttentionValue(avh.attentionValue, attentionValueHolderMessage);
-}
-
-void ProtocolBufferSerializer::deserializeCompositeTruthValue(
-        const ZMQTruthValueMessage& truthValueMessage, CompositeTruthValue& tv)
-{
-    tv.primaryTV = deserialize(truthValueMessage.singletruthvalue(0));
-
-    for (int i=1;i<truthValueMessage.singletruthvalue_size();i++)
-    {
-        const ZMQSingleTruthValueMessage& singleTruthValue = truthValueMessage.singletruthvalue(i);
-        VersionHandle vh;
-        deserializeVersionHandle(singleTruthValue.versionhandle(), vh);
-        tv.versionedTVs[vh] = deserialize(singleTruthValue);
-    }
-}
-
-void ProtocolBufferSerializer::serializeCompositeTruthValue(
-        CompositeTruthValue& tv, ZMQTruthValueMessage* truthValueMessage)
-{
-    serialize(*(tv.primaryTV), truthValueMessage);
-
-    for (VersionedTruthValueMap::const_iterator itr = tv.versionedTVs.begin();itr != tv.versionedTVs.end(); ++itr)
-    {
-        serialize(*(itr->second), truthValueMessage); //creates a new singletruthvaluemessage
-        VersionHandle vh = itr->first;
-        ZMQVersionHandleMessage *versionHandleMessage=truthValueMessage->mutable_singletruthvalue(truthValueMessage->singletruthvalue_size()-1)->mutable_versionhandle();
-        serializeVersionHandle(vh, versionHandleMessage);
-    }
-}
-
-void ProtocolBufferSerializer::deserializeCountTruthValue(
-        const ZMQSingleTruthValueMessage& singleTruthValue, CountTruthValue& tv)
-{
-    tv.mean=singleTruthValue.mean();
-    tv.confidence=singleTruthValue.confidence();
-    tv.count=singleTruthValue.count();
+	return CountTruthValuePtr(new CountTruthValue(
+			singleTruthValue.mean(), singleTruthValue.confidence(), singleTruthValue.count()));
 }
 
 void ProtocolBufferSerializer::serializeCountTruthValue(
@@ -206,28 +173,30 @@ void ProtocolBufferSerializer::serializeCountTruthValue(
 {
     ZMQSingleTruthValueMessage *singleTruthValue=truthValueMessage->add_singletruthvalue();
     singleTruthValue->set_truthvaluetype(ZMQTruthValueTypeCount);
-    singleTruthValue->set_mean(tv.mean);
-    singleTruthValue->set_count(tv.count);
-    singleTruthValue->set_confidence(tv.confidence);
+    singleTruthValue->set_mean(tv.getMean());
+    singleTruthValue->set_count(tv.getCount());
+    singleTruthValue->set_confidence(tv.getConfidence());
 }
 
-void ProtocolBufferSerializer::deserializeIndefiniteTruthValue(
-        const ZMQSingleTruthValueMessage& singleTruthValue, IndefiniteTruthValue& tv)
+IndefiniteTruthValuePtr ProtocolBufferSerializer::deserializeIndefiniteTruthValue(
+        const ZMQSingleTruthValueMessage& singleTruthValue)
 {
-    tv.L=singleTruthValue.l();
-    tv.U=singleTruthValue.u();
-    tv.confidenceLevel=singleTruthValue.confidencelevel();
-    tv.symmetric=singleTruthValue.symmetric();
-    tv.diff=singleTruthValue.diff();
-    tv.mean=singleTruthValue.mean();
-    tv.confidence=singleTruthValue.confidence();
-    tv.count=singleTruthValue.count();
+	IndefiniteTruthValuePtr tv(
+			new IndefiniteTruthValue(singleTruthValue.l(), singleTruthValue.u(), singleTruthValue.confidence()));
+    tv->setMean(singleTruthValue.mean());
+    tv->setConfidenceLevel(singleTruthValue.confidencelevel());
+    tv->setDiff(singleTruthValue.diff());
+    tv->setSymmetric(singleTruthValue.symmetric());
 
-    for(int i=0;i<singleTruthValue.firstorderdistribution_size();i++)
+    vector<strength_t*> firstOrderDistribution(singleTruthValue.firstorderdistribution_size());
+    for(int i = 0; i < singleTruthValue.firstorderdistribution_size(); i++)
     {
-        strength_t* s=new strength_t(singleTruthValue.firstorderdistribution(i));
-        tv.firstOrderDistribution.push_back(s);
+    	// WARNING: memory leak!
+        strength_t* s = new strength_t(singleTruthValue.firstorderdistribution(i));
+        firstOrderDistribution[i] = s;
     }
+    tv->setFirstOrderDistribution(firstOrderDistribution);
+    return tv;
 }
 
 void ProtocolBufferSerializer::serializeIndefiniteTruthValue(
@@ -235,70 +204,82 @@ void ProtocolBufferSerializer::serializeIndefiniteTruthValue(
 {
     ZMQSingleTruthValueMessage *singleTruthValue=truthValueMessage->add_singletruthvalue();
     singleTruthValue->set_truthvaluetype(ZMQTruthValueTypeIndefinite);
-    singleTruthValue->set_l(tv.L);
-    singleTruthValue->set_u(tv.U);
-    singleTruthValue->set_confidencelevel(tv.confidenceLevel);
-    singleTruthValue->set_symmetric(tv.symmetric);
-    singleTruthValue->set_diff(tv.diff);
-    singleTruthValue->set_mean(tv.mean);
-    singleTruthValue->set_count(tv.count);
-    singleTruthValue->set_confidence(tv.confidence);
-    for (float *f : tv.firstOrderDistribution)
+    singleTruthValue->set_l(tv.getL());
+    singleTruthValue->set_u(tv.getU());
+    singleTruthValue->set_confidencelevel(tv.getConfidenceLevel());
+    singleTruthValue->set_symmetric(tv.isSymmetric());
+    singleTruthValue->set_diff(tv.getDiff());
+    singleTruthValue->set_mean(tv.getMean());
+    singleTruthValue->set_count(tv.getCount());
+    singleTruthValue->set_confidence(tv.getConfidence());
+    for (float *f : tv.getFirstOrderDistribution())
     {
         singleTruthValue->add_firstorderdistribution(*f);
     }
 }
 
-void ProtocolBufferSerializer::deserializeLink(
-        const ZMQAtomMessage& atomMessage, Link& link)
+NodePtr ProtocolBufferSerializer::deserializeNode(
+        const ZMQAtomMessage& atomMessage)
 {
-    deserializeAtom(atomMessage, link);
+    TruthValuePtr tv;
+    if (atomMessage.has_truthvalue()) {
+    	tv = deserialize(atomMessage.truthvalue());
+    } else {
+    	tv = TruthValue::DEFAULT_TV();
+    }
+	NodePtr nodePtr(new Node(atomMessage.type(), atomMessage.name(), tv));
+	nodePtr->_uuid = atomMessage.handle();
+    deserializeAtom(atomMessage, *nodePtr);
 
-    for(int i=0;i<atomMessage.outgoing_size();i++)
+    return nodePtr;
+}
+
+LinkPtr ProtocolBufferSerializer::deserializeLink(
+        const ZMQAtomMessage& atomMessage)
+{
+
+	HandleSeq oset(atomMessage.outgoing_size());
+    for(int i = 0; i < atomMessage.outgoing_size(); i++)
     {
-        link.outgoing.push_back(Handle(atomMessage.outgoing(i)));
+    	oset[i] = Handle(atomMessage.outgoing(i));
     }
 
-    if(!atomMessage.has_trail())
-        link.trail=NULL;
-    else
-    {
-        link.trail=new Trail();
-        deserializeTrail(atomMessage.trail(), *(link.trail));
+    TruthValuePtr tv;
+    if (atomMessage.has_truthvalue()) {
+    	tv = deserialize(atomMessage.truthvalue());
+    } else {
+    	tv = TruthValue::DEFAULT_TV();
     }
+	LinkPtr linkPtr(new Link(atomMessage.type(), oset, tv));
+	linkPtr->_uuid = atomMessage.handle();
+    deserializeAtom(atomMessage, *linkPtr);
+
+    return linkPtr;
 }
 
-void ProtocolBufferSerializer::serializeLink(
-        Link& link, ZMQAtomMessage * atomMessage)
-{
-    serializeAtom(link, atomMessage);
-
-    atomMessage->set_atomtype(ZMQAtomTypeLink);
-
-    for (Handle h : link.outgoing)
-        atomMessage->add_outgoing(h.value());
-
-    if(link.trail)
-        serializeTrail(*(link.trail), atomMessage->mutable_trail());
-}
-
-void ProtocolBufferSerializer::deserializeNode(
-        const ZMQAtomMessage &atomMessage, Node& node)
-{
-    deserializeAtom(atomMessage, node);
-
-    node.name=atomMessage.name();
-}
-
-void ProtocolBufferSerializer::serializeNode(
-        Node& node, ZMQAtomMessage* atomMessage)
-{
-    serializeAtom(node, atomMessage);
-
-    atomMessage->set_atomtype(ZMQAtomTypeNode);
-
-    atomMessage->set_name(node.name);
-}
+//void ProtocolBufferSerializer::serializeLink(
+//        Link& link, ZMQAtomMessage * atomMessage)
+//{
+//    serializeAtom(link, atomMessage);
+//
+//    atomMessage->set_atomtype(ZMQAtomTypeLink);
+//
+//    for (Handle h : link.outgoing)
+//        atomMessage->add_outgoing(h.value());
+//
+//    if(link.trail)
+//        serializeTrail(*(link.trail), atomMessage->mutable_trail());
+//}
+//
+//void ProtocolBufferSerializer::serializeNode(
+//        Node& node, ZMQAtomMessage* atomMessage)
+//{
+//    serializeAtom(node, atomMessage);
+//
+//    atomMessage->set_atomtype(ZMQAtomTypeNode);
+//
+//    atomMessage->set_name(node.name);
+//}
 
 void ProtocolBufferSerializer::serializeNullTruthValue(
         NullTruthValue& tv, ZMQTruthValueMessage* truthValueMessage)
@@ -307,11 +288,11 @@ void ProtocolBufferSerializer::serializeNullTruthValue(
     singleTruthValue->set_truthvaluetype(ZMQTruthValueTypeNull);
 }
 
-void ProtocolBufferSerializer::deserializeSimpleTruthValue(
-        const ZMQSingleTruthValueMessage& singleTruthValue, SimpleTruthValue& tv)
+SimpleTruthValuePtr ProtocolBufferSerializer::deserializeSimpleTruthValue(
+        const ZMQSingleTruthValueMessage& singleTruthValue)
 {
-    tv.mean=singleTruthValue.mean();
-    tv.count=singleTruthValue.count();
+	SimpleTruthValuePtr tv(new SimpleTruthValue(singleTruthValue.mean(), singleTruthValue.count()));
+	return tv;
 }
 
 void ProtocolBufferSerializer::serializeSimpleTruthValue(
@@ -319,31 +300,8 @@ void ProtocolBufferSerializer::serializeSimpleTruthValue(
 {
     ZMQSingleTruthValueMessage *singleTruthValue=truthValueMessage->add_singletruthvalue();
     singleTruthValue->set_truthvaluetype(ZMQTruthValueTypeSimple);
-    singleTruthValue->set_mean(tv.mean);
-    singleTruthValue->set_count(tv.count);
-}
-
-void ProtocolBufferSerializer::deserializeTrail(
-        const ZMQTrailMessage& trailMessage, Trail& t)
-{
-    t.maxSize=trailMessage.maxsize();
-    if(trailMessage.trail_size()==0)
-    {
-        t.trail=NULL;
-    }
-    else
-    {
-        t.trail = new std::deque<Handle>(trailMessage.trail_size());
-        for(int i=0;i<trailMessage.trail_size();i++)
-            t.trail->push_back(Handle(trailMessage.trail(i)));
-    }
-}
-
-void ProtocolBufferSerializer::serializeTrail(Trail& t, ZMQTrailMessage* trailMessage)
-{
-    trailMessage->set_maxsize(t.maxSize);
-    for (Handle h : *(t.trail))
-        trailMessage->add_trail(h.value());
+    singleTruthValue->set_mean(tv.getMean());
+    singleTruthValue->set_count(tv.getCount());
 }
 
 void ProtocolBufferSerializer::serialize(TruthValue &tv, ZMQTruthValueMessage* truthValueMessage)
@@ -379,64 +337,35 @@ void ProtocolBufferSerializer::serialize(TruthValue &tv, ZMQTruthValueMessage* t
     throw RuntimeException(TRACE_INFO, "Invalid truthvaluetype.");
 }
 
-TruthValue* ProtocolBufferSerializer::deserialize(
+TruthValuePtr ProtocolBufferSerializer::deserialize(
         const ZMQTruthValueMessage& truthValueMessage)
 {
-    if(truthValueMessage.singletruthvalue_size()==1)
+    if (truthValueMessage.singletruthvalue_size() == 1)
         return deserialize(truthValueMessage.singletruthvalue(0));
     else
     {
-        CompositeTruthValue* tv = new CompositeTruthValue();
-        deserializeCompositeTruthValue(truthValueMessage, *tv);
-        return tv;
+    	throw std::runtime_error("CompositeTruthValue no longer supported");
     }
 }
 
-TruthValue* ProtocolBufferSerializer::deserialize(
+TruthValuePtr ProtocolBufferSerializer::deserialize(
         const ZMQSingleTruthValueMessage& singleTruthValueMessage)
 {
     switch(singleTruthValueMessage.truthvaluetype())
     {
     case ZMQTruthValueTypeSimple:
-    {
-        SimpleTruthValue* tv = new SimpleTruthValue();
-        deserializeSimpleTruthValue(singleTruthValueMessage, *tv);
-        return tv;
-    }
+        return deserializeSimpleTruthValue(singleTruthValueMessage);
     case ZMQTruthValueTypeCount:
-    {
-        CountTruthValue* tv = new CountTruthValue();
-        deserializeCountTruthValue(singleTruthValueMessage, *tv);
-        return tv;
-    }
+        return deserializeCountTruthValue(singleTruthValueMessage);
     case ZMQTruthValueTypeNull:
     {
-        NullTruthValue* tv = new NullTruthValue();
+        shared_ptr<NullTruthValue> tv(new NullTruthValue());
         return tv;
     }
     case ZMQTruthValueTypeIndefinite:
-    {
-        IndefiniteTruthValue* tv = new IndefiniteTruthValue();
-        deserializeIndefiniteTruthValue(singleTruthValueMessage, *tv);
-        return tv;
-    }
+        return deserializeIndefiniteTruthValue(singleTruthValueMessage);
     default:
          throw RuntimeException(TRACE_INFO, "Invalid ZMQ truthvaluetype: '%d'.",
                  singleTruthValueMessage.truthvaluetype());
     }
 }
-
-void ProtocolBufferSerializer::deserializeVersionHandle(
-        const ZMQVersionHandleMessage& versionHandleMessage, VersionHandle& vh)
-{
-    vh.indicator=(IndicatorType)versionHandleMessage.indicator();
-    vh.substantive=Handle(versionHandleMessage.substantive());
-}
-
-void ProtocolBufferSerializer::serializeVersionHandle(
-        VersionHandle& vh, ZMQVersionHandleMessage * versionHandleMessage)
-{
-    versionHandleMessage->set_indicator(vh.indicator);
-    versionHandleMessage->set_substantive(vh.substantive.value());
-}
-

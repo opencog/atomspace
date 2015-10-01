@@ -39,6 +39,7 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atoms/core/VariableList.h>
 #include <opencog/guile/load-file.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -139,28 +140,28 @@ public:
         Handle hle(createLink(EVALUATION_LINK, hnp, hll));
 
         // No UUID should be assigned yet.
-        TS_ASSERT_EQUALS(hn1.value(), Handle::UNDEFINED.value());
-        TS_ASSERT_EQUALS(hn2.value(), Handle::UNDEFINED.value());
-        TS_ASSERT_EQUALS(hn3.value(), Handle::UNDEFINED.value());
-        TS_ASSERT_EQUALS(hn4.value(), Handle::UNDEFINED.value());
-        TS_ASSERT_EQUALS(hnp.value(), Handle::UNDEFINED.value());
-        TS_ASSERT_EQUALS(hll.value(), Handle::UNDEFINED.value());
-        TS_ASSERT_EQUALS(hle.value(), Handle::UNDEFINED.value());
+        TS_ASSERT_EQUALS(hn1.value(), Handle::INVALID_UUID);
+        TS_ASSERT_EQUALS(hn2.value(), Handle::INVALID_UUID);
+        TS_ASSERT_EQUALS(hn3.value(), Handle::INVALID_UUID);
+        TS_ASSERT_EQUALS(hn4.value(), Handle::INVALID_UUID);
+        TS_ASSERT_EQUALS(hnp.value(), Handle::INVALID_UUID);
+        TS_ASSERT_EQUALS(hll.value(), Handle::INVALID_UUID);
+        TS_ASSERT_EQUALS(hle.value(), Handle::INVALID_UUID);
 
         // Add the link.  All the outgoing atoms should get added too.
         Handle hlet = table->add(hle, false);
-        TS_ASSERT(hlet.value() != Handle::UNDEFINED.value());
+        TS_ASSERT(hlet.value() != Handle::INVALID_UUID);
         LinkPtr let(LinkCast(hlet));
         const HandleSeq& hs = let->getOutgoingSet();
-        TS_ASSERT(hs[0].value() != Handle::UNDEFINED.value());
-        TS_ASSERT(hs[1].value() != Handle::UNDEFINED.value());
+        TS_ASSERT(hs[0].value() != Handle::INVALID_UUID);
+        TS_ASSERT(hs[1].value() != Handle::INVALID_UUID);
 
         LinkPtr llt(LinkCast(hs[1]));
         const HandleSeq& hsl = llt->getOutgoingSet();
-        TS_ASSERT(hsl[0].value() != Handle::UNDEFINED.value());
-        TS_ASSERT(hsl[1].value() != Handle::UNDEFINED.value());
-        TS_ASSERT(hsl[2].value() != Handle::UNDEFINED.value());
-        TS_ASSERT(hsl[3].value() != Handle::UNDEFINED.value());
+        TS_ASSERT(hsl[0].value() != Handle::INVALID_UUID);
+        TS_ASSERT(hsl[1].value() != Handle::INVALID_UUID);
+        TS_ASSERT(hsl[2].value() != Handle::INVALID_UUID);
+        TS_ASSERT(hsl[3].value() != Handle::INVALID_UUID);
 
         // Now test resolution.  Given the version of the atom that is
         // not yet in the atomspace, we should be able to find the one
@@ -222,8 +223,8 @@ public:
         delete rng;
     }
 
-    /* test the fix for the bug triggered whenever we had a link pointing to the
-     * same atom twice (or more) */
+    /* test the fix for the bug triggered whenever we had a link
+     * pointing to the same atom twice (or more). */
     void testDoubleLink()
     {
         NodePtr n1(createNode(NUMBER_NODE, "1"));
@@ -236,6 +237,7 @@ public:
         LinkPtr l1(createLink(LIST_LINK, os));
         Handle hl1 = table->add(l1, false);
 
+        // Now, remove hn1 from the table ...
         table->extract(hn1, true);
 
         // Number nodes are handled differently, in the atomspace. Try
@@ -273,5 +275,28 @@ public:
         TS_ASSERT(table->getHandlex("1", MY_NUMBER_NODE) != Handle::UNDEFINED);
         TS_ASSERT(table->getHandlex("28675194", MY_CONCEPT_NODE) != Handle::UNDEFINED);
         TS_ASSERT(table->getHandle(MY_INHERITANCE_LINK, os) != Handle::UNDEFINED);
+    }
+
+    void testUnaddedCustomAtomTypes()
+    {
+        Handle hv1 = Handle(createNode(VARIABLE_NODE, "$1"));
+        Handle hv2 = Handle(createNode(VARIABLE_NODE, "$2"));
+        HandleSeq hvs{hv1, hv2};
+        Handle hlist = Handle(createVariableList(hvs));
+
+        VariableListPtr v_ptr(VariableListCast(hlist));
+        TS_ASSERT_EQUALS(v_ptr->get_variables().varset.count(hv1), 1);
+        TS_ASSERT_EQUALS(v_ptr->get_variables().varset.count(hv2), 1);
+
+        Handle hlist_added = table->add(hlist, false);
+
+        VariableListPtr v_added_ptr(VariableListCast(hlist_added));
+        TS_ASSERT_EQUALS(v_added_ptr->get_variables().varset.count(hv1), 0);
+        TS_ASSERT_EQUALS(v_added_ptr->get_variables().varset.count(hv2), 0);
+
+        Handle hv1_added = table->add(hv1, false);
+        Handle hv2_added = table->add(hv2, false);
+        TS_ASSERT_EQUALS(v_added_ptr->get_variables().varset.count(hv1_added), 1);
+        TS_ASSERT_EQUALS(v_added_ptr->get_variables().varset.count(hv2_added), 1);
     }
 };

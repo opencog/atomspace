@@ -41,9 +41,9 @@ class NullTruthValue : public TruthValue
 public:
     NullTruthValue();
     bool isNullTv() const;
-    strength_t getMean() const throw (RuntimeException);
-    count_t getCount() const throw (RuntimeException);
-    confidence_t getConfidence() const  throw (RuntimeException);
+    strength_t getMean() const;
+    count_t getCount() const;
+    confidence_t getConfidence() const;
     std::string toString() const;
     TruthValueType getType() const;
     TruthValuePtr clone() const;
@@ -52,7 +52,7 @@ public:
     virtual bool operator==(const TruthValue& rhs) const;
 
 protected:
-    TruthValuePtr merge(TruthValuePtr,TVMergeStyle ms=DEFAULT) const throw (RuntimeException);
+    TruthValuePtr merge(TruthValuePtr,TVMergeStyle ms=DEFAULT) const;
 };
 
 /** @}*/

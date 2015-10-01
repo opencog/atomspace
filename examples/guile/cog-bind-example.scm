@@ -43,7 +43,7 @@
 
 (define x
 	(BindLink
-		(ListLink
+		(VariableList
 			(VariableNode "$var0")
 			(VariableNode "$var1")
 			(VariableNode "$verb")

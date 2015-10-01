@@ -18,7 +18,7 @@
 ; Create helper functions to call the forward and backward chainer on
 ; that system
 (define (crisp-fc source) (cog-fc source crisp-rbs))
-(define (crisp-bc target) (cog-bc target crisp-rbs))
+(define (crisp-bc target) (cog-bc target crisp-rbs (SetLink)))
 
 ; Associate the rules to the rule base (with weights, their semantics
 ; is currently undefined, we might settled with probabilities but it's

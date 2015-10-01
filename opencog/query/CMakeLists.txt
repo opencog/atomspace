@@ -2,13 +2,13 @@
 # Build the query shlib
 ADD_LIBRARY(query SHARED
 	AttentionalFocusCB.cc
-	Composition.cc
 	DefaultPatternMatchCB.cc
 	Implicator.cc
 	InitiateSearchCB.cc
 	PatternMatch.cc
 	PatternMatchEngine.cc
 	PatternSCM.cc
+	Recognizer.cc
 	Satisfier.cc
 	FuzzyMatch/FuzzyPatternMatch.cc
 	FuzzyMatch/FuzzyPatternMatchCB.cc
@@ -26,11 +26,8 @@ TARGET_LINK_LIBRARIES(query
 )
 
 IF (HAVE_GUILE)
-	TARGET_LINK_LIBRARIES(query
-		smob
-	)
+	TARGET_LINK_LIBRARIES(query smob)
 ENDIF (HAVE_GUILE)
-
 
 INSTALL (TARGETS query DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
@@ -42,9 +39,10 @@ INSTALL (FILES
 	Implicator.h
 	InitiateSearchCB.h
 	Pattern.h
+	PatternTerm.h
 	PatternSCM.h
 	PatternMatchCallback.h
 	PatternMatchEngine.h
 	Satisfier.h
-	DESTINATION "include/${PROJECT_NAME}/query"
+	DESTINATION "include/opencog/query"
 )

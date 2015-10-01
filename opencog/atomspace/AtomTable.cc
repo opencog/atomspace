@@ -39,17 +39,15 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/TypeNode.h>
-#include <opencog/atoms/bind/BetaRedex.h>
 #include <opencog/atoms/bind/BindLink.h>
-#include <opencog/atoms/bind/DefineLink.h>
 #include <opencog/atoms/bind/PatternLink.h>
-#include <opencog/atoms/bind/ScopeLink.h>
-#include <opencog/atoms/bind/VariableList.h>
+#include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atoms/core/PutLink.h>
+#include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
-#include <opencog/atoms/reduct/DeleteLink.h>
-#include <opencog/atoms/reduct/FunctionLink.h>
-#include <opencog/atoms/core/PutLink.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
@@ -88,12 +86,23 @@ AtomTable::~AtomTable()
     addedTypeConnection.disconnect();
     Handle::clear_resolver(this);
 
-    // No one who shall look at these atoms ahall ever again
+    // No one who shall look at these atoms shall ever again
     // find a reference to this atomtable.
     UUID undef = Handle::UNDEFINED.value();
     for (auto pr : _atom_set) {
         pr.second->_atomTable = NULL;
         pr.second->_uuid = undef;
+        // Aiee ... We added this link to every incoming set;
+        // thus, it is our responsibility to remove it as well.
+        // This is a stinky design, but I see no other way,
+        // because it seems that we can't do this in the Atom
+        // destructor (which is where this should be happening).
+        LinkPtr lll(LinkCast(pr.second));
+        if (lll) {
+            for (AtomPtr a : lll->_outgoing) {
+                a->remove_atom(lll);
+            }
+        }
     }
 }
 
@@ -183,7 +192,7 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     Handle h(linkIndex.getHandle(t, resolved_seq));
-    if (_environ and Handle::UNDEFINED == h)
+    if (_environ and Handle::INVALID_UUID == h.value())
         return _environ->getHandle(t, resolved_seq);
     return h;
 }
@@ -245,7 +254,7 @@ bool AtomTable::inEnviron(AtomPtr atom)
 
 // Experimental C++ atom types support code
 // Try to cast, if possible.
-AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
+AtomPtr do_factory(Type atom_type, AtomPtr atom)
 {
     // Nodes of various kinds -----------
     if (NUMBER_NODE == atom_type) {
@@ -259,9 +268,9 @@ AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
     } else if (BIND_LINK == atom_type) {
         if (NULL == BindLinkCast(atom))
             return createBindLink(*LinkCast(atom));
-    } else if (BETA_REDEX == atom_type) {
-        if (NULL == BetaRedexCast(atom))
-            return createBetaRedex(*LinkCast(atom));
+    } else if (PATTERN_LINK == atom_type) {
+        if (NULL == PatternLinkCast(atom))
+            return createPatternLink(*LinkCast(atom));
     } else if (DEFINE_LINK == atom_type) {
         if (NULL == DefineLinkCast(atom))
             return createDefineLink(*LinkCast(atom));
@@ -291,9 +300,9 @@ AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
     } else if (SATISFACTION_LINK == atom_type) {
         if (NULL == PatternLinkCast(atom))
             return createPatternLink(*LinkCast(atom));
-    } else if (SCOPE_LINK == atom_type) {
-        if (NULL == ScopeLinkCast(atom))
-            return createScopeLink(*LinkCast(atom));
+    } else if (LAMBDA_LINK == atom_type) {
+        if (NULL == LambdaLinkCast(atom))
+            return createLambdaLink(*LinkCast(atom));
     } else if (VARIABLE_LIST == atom_type) {
         if (NULL == VariableListCast(atom))
             return createVariableList(*LinkCast(atom));
@@ -307,7 +316,7 @@ AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
 }
 
 // create a clone
-static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
+static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
 {
     // Nodes of various kinds -----------
     if (NUMBER_NODE == atom_type)
@@ -320,8 +329,8 @@ static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
     // Links of various kinds -----------
     if (BIND_LINK == atom_type)
         return createBindLink(*LinkCast(atom));
-    if (BETA_REDEX == atom_type)
-        return createBetaRedex(*LinkCast(atom));
+    if (PATTERN_LINK == atom_type)
+        return createPatternLink(*LinkCast(atom));
     if (DEFINE_LINK == atom_type)
         return createDefineLink(*LinkCast(atom));
 /*
@@ -342,8 +351,8 @@ static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
         return createPutLink(*LinkCast(atom));
     if (SATISFACTION_LINK == atom_type)
         return createPatternLink(*LinkCast(atom));
-    if (SCOPE_LINK == atom_type)
-        return createScopeLink(*LinkCast(atom));
+    if (LAMBDA_LINK == atom_type)
+        return createLambdaLink(*LinkCast(atom));
     if (VARIABLE_LIST == atom_type)
         return createVariableList(*LinkCast(atom));
     if (classserver().isA(atom_type, FUNCTION_LINK))
@@ -355,6 +364,30 @@ static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
 
     throw RuntimeException(TRACE_INFO,
           "AtomTable - failed factory call!");
+}
+
+AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
+{
+	AtomPtr clone(do_factory(atom_type, atom));
+	clone->_uuid = atom->_uuid;
+	return clone;
+}
+
+/// The purpose of the clone factory is to create a private, unique
+/// copy of the atom, so as to avoid accidental, unintentional
+/// sharing with others. In particular, the atom that we are given
+/// may already exist in some other atomspace; we want our own private
+/// copy, in that case.
+AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
+{
+	AtomPtr clone(do_clone_factory(atom_type, atom));
+	// Copy the UUID ONLY if the atom does not belong to some other
+	// atomspace. This is the situation that applies to atoms being
+	// delivered to us from the backing store: the UUID is set, but
+	// they are othrwise "fresh" atoms.
+	if (NULL == atom->getAtomTable())
+		clone->_uuid = atom->_uuid;
+	return clone;
 }
 
 static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
@@ -387,7 +420,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // So we have to accept that, and hope its correct and consistent.
     // XXX this can also occur if the atom is in some other atomspace;
     // so we need to move this check elsewhere.
-    if (atom->_uuid != Handle::UNDEFINED.value())
+    if (atom->_uuid != Handle::INVALID_UUID)
         throw RuntimeException(TRACE_INFO,
           "AtomTable - Attempting to insert atom with handle already set!");
 #endif
@@ -412,27 +445,32 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     Handle hexist(getHandle(atom));
     if (hexist) return hexist;
 
-    // If this atom is in some other atomspace, then we need to clone
-    // it. We cannot insert it into this atomtable as-is.  (We already
-    // know that its not in this atomspace, or its environ.)
-    AtomTable* at = atom->getAtomTable();
-    if (at != NULL) {
-        LinkPtr lll(LinkCast(atom));
-        if (lll) {
-            // Well, if the link was in some other atomspace, then
-            // the outgoing set will probably be too. (It might not
-            // be if the other atomspace is a child of this one).
-            // So we recursively clone that too.
-            HandleSeq closet;
-            for (const Handle& h : lll->getOutgoingSet()) {
-                closet.push_back(add(h, async));
-            }
-            atom = createLink(atom_type, closet,
-                              atom->getTruthValue(),
-                              atom->getAttentionValue());
+    // If this atom is in some other atomspace or not in any atomspace,
+    // then we need to clone it. We cannot insert it into this atomtable
+    // as-is.  (We already know that its not in this atomspace, or its
+    // environ.)
+    LinkPtr lll(LinkCast(atom));
+    if (lll) {
+        // Well, if the link was in some other atomspace, then
+        // the outgoing set will probably be too. (It might not
+        // be if the other atomspace is a child of this one).
+        // So we recursively clone that too.
+        HandleSeq closet;
+        for (const Handle& h : lll->getOutgoingSet()) {
+            closet.push_back(add(h, async));
         }
-        atom = clone_factory(atom_type, atom);
+        // Preserve the UUID! This is needed for assigning the UUID
+        // correctly when fetching from backing store. But do this
+        // if the atom is actually coming from backing store (i.e.
+        // does not yet belong to any table).
+        UUID save = atom->_uuid;
+        if (NULL != atom->getAtomTable()) save = (UUID) -1;
+        atom = createLink(atom_type, closet,
+                          atom->getTruthValue(),
+                          atom->getAttentionValue());
+        atom->_uuid = save;
     }
+    atom = clone_factory(atom_type, atom);
 
     // Sometimes one inserts an atom that was previously deleted.
     // In this case, the removal flag might still be set. Clear it.
@@ -443,7 +481,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // no pointers to actual atoms.  We want to have the actual atoms,
     // because later steps need the pointers to do stuff, in particular,
     // to make sure the child atoms are in an atomtable, too.
-    LinkPtr lll(LinkCast(atom));
+    lll = LinkCast(atom);
     if (lll) {
         const HandleSeq& ogs(lll->getOutgoingSet());
         size_t arity = ogs.size();
@@ -479,7 +517,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
                 ho->remove_atom(llc);
                 llc->_outgoing[i] = add(ho, async);
             }
-            else if (ho == Handle::UNDEFINED) {
+            else if (ho.value() == Handle::INVALID_UUID) {
                 // If we are here, then the atom is in the atomspace,
                 // but the handle has an invalid UUID. This can happen
                 // if the atom appears more than once in the outgoing
@@ -502,9 +540,8 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 
     // Its possible that the atom already has a UUID assigned,
     // e.g. if it was fetched from persistent storage; this
-    // was done to preserve handle consistency. SavingLoading does
-    // this too.  XXX Review SavingLoading for correctness...
-    if (atom->_uuid == Handle::UNDEFINED.value()) {
+    // was done to preserve handle consistency.
+    if (atom->_uuid == Handle::INVALID_UUID) {
        // Atom doesn't yet have a valid uuid assigned to it. Ask the TLB
        // to issue a valid uuid.  And then memorize it.
        TLB::addAtom(atom);

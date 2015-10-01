@@ -24,10 +24,7 @@
 
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/NumberNode.h>
-#include <opencog/atoms/reduct/AssignLink.h>
-#include <opencog/atoms/reduct/PlusLink.h>
-#include <opencog/atoms/reduct/TimesLink.h>
+#include <opencog/atoms/core/DefineLink.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 
@@ -42,7 +39,8 @@ ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset,
 	: FunctionLink(EXECUTION_OUTPUT_LINK, oset, tv, av)
 {
 	if (2 != oset.size() or
-	   GROUNDED_SCHEMA_NODE != oset[0]->getType() or
+	   (DEFINED_SCHEMA_NODE != oset[0]->getType() and
+	   GROUNDED_SCHEMA_NODE != oset[0]->getType()) or
 	   LIST_LINK != oset[1]->getType())
 	{
 		throw RuntimeException(TRACE_INFO,
@@ -56,8 +54,10 @@ ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
                                          AttentionValuePtr av)
 	: FunctionLink(EXECUTION_OUTPUT_LINK, schema, args, tv, av)
 {
-	if (GROUNDED_SCHEMA_NODE != schema->getType())
-		throw RuntimeException(TRACE_INFO, "Expecting GroundedSchemaNode!");
+	Type stype = schema->getType();
+	if (GROUNDED_SCHEMA_NODE != stype and
+	    DEFINED_SCHEMA_NODE != stype)
+		throw RuntimeException(TRACE_INFO, "Expecting SchemaNode!");
 
 	if (LIST_LINK != args->getType())
 		throw RuntimeException(TRACE_INFO,
@@ -92,9 +92,9 @@ Handle ExecutionOutputLink::execute(AtomSpace* as) const
 	return do_execute(as, _outgoing[0], _outgoing[1]);
 }
 
-/// do_execute -- execute the GroundedSchemaNode of the ExecutionOutputLink
+/// do_execute -- execute the SchemaNode of the ExecutionOutputLink
 ///
-/// Expects "gsn" to be a GroundedSchemaNode
+/// Expects "gsn" to be a GroundedSchemaNode or a DefinedSchemaNode
 /// Expects "args" to be a ListLink
 /// Executes the GroundedSchemaNode, supplying the args as argument
 ///
@@ -162,13 +162,11 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		size_t pos = 3;
 		while (' ' == schema[pos]) pos++;
 
-		// Get a reference to the python evaluator. NOTE: We are
-		// passing in a reference to our atom space to invoke
-		// the safety checking to make sure the singleton instance
-		// is using the same atom space.
-		PythonEval &applier = PythonEval::instance(as);
-
-		Handle h = applier.apply(schema.substr(pos), args);
+		// Get a reference to the python evaluator. 
+		// Be sure to specify the atomspace in which the
+		// evaluation is to be performed.
+		PythonEval &applier = PythonEval::instance();
+		Handle h = applier.apply(as, schema.substr(pos), args);
 
 		// Return the handle
 		return h;

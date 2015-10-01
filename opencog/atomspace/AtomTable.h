@@ -32,8 +32,6 @@
 #include <boost/signals2.hpp>
 
 #include <opencog/util/async_method_caller.h>
-#include <opencog/util/exceptions.h>
-#include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
 
 #include <opencog/atomspace/atom_types.h>
@@ -162,8 +160,9 @@ public:
      */
     AtomTable(AtomTable* parent = NULL, AtomSpace* holder = NULL);
     ~AtomTable();
-    UUID get_uuid(void) { return _uuid; }
-    AtomSpace* getAtomSpace(void) { return _as; }
+    UUID get_uuid(void) const { return _uuid; }
+    AtomTable* get_environ(void) const { return _environ; }
+    AtomSpace* getAtomSpace(void) const { return _as; }
 
     /**
      * Return the number of atoms contained in a table.
@@ -191,6 +190,7 @@ public:
     Handle getHandle(UUID) const;
 
     static AtomPtr factory(Type atom_type, AtomPtr atom);
+    static AtomPtr clone_factory(Type, AtomPtr);
 
 public:
     /**
@@ -292,7 +292,7 @@ public:
     /**
      * Return true if the atom table holds this handle, else return false.
      */
-    bool holds(Handle& h) const {
+    bool holds(const Handle& h) const {
         return (NULL != h) and h->getAtomTable() == this;
     }
 

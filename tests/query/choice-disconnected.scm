@@ -53,7 +53,7 @@
 	)
 )
 
-;;; Same as above, but the tope-level ChoiceLink is wrapped.
+;;; Same as above, but the top-level ChoiceLink is wrapped.
 (define (wrapped-disco)
 	(BindLink
 		(AndLink

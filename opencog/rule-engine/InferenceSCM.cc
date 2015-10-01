@@ -27,7 +27,6 @@
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
-#include <opencog/rule-engine/forwardchainer/DefaultForwardChainerCB.h>
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -80,43 +79,47 @@ void InferenceSCM::init(void)
 #endif
 }
 
-Handle InferenceSCM::do_forward_chaining(Handle h, Handle rbs)
+/**
+ * A scheme cog-fc call back handler method which invokes the forward
+ * chainer with the arguments passed to cog-fc.
+ *
+ * @param hsource      The source atom to start the forward chaining with.
+ * @param rbs          A handle to the rule base ConceptNode.
+ * @param hfoucs_set   A handle to a set link containing the set of focus sets.
+ *                     if the set link is empty, FC will be invoked on the entire
+ *                     atomspace.
+ *
+ * @return             A ListLink containing the result of FC inference.
+ */
+Handle InferenceSCM::do_forward_chaining(Handle hsource,
+                                         Handle rbs,
+                                         Handle hfocus_set)
 {
-    if (Handle::UNDEFINED == rbs)
-        throw RuntimeException(TRACE_INFO,
-            "InferenceSCM::do_forward_chaining - invalid rulebase!");
-
 #ifdef HAVE_GUILE
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fc");
-    DefaultForwardChainerCB dfc(*as);
     ForwardChainer fc(*as, rbs);
-    /**
-     * Parse (cog-fc ListLink()) as forward chaining with
-     * Handle::UNDEFINED which does pattern matching on the atomspace
-     * using the rules declared in the config. A similar functionality
-     * with the python version of the forward chainer.
-     */
-    if (h->getType() == LIST_LINK and as->get_outgoing(h).empty())
-        fc.do_chain(dfc, Handle::UNDEFINED);
-    else
-        /** Does variable fulfillment forward chaining or forward chaining based on
-         *  target node @param h.
-         *  example (cog-fc (InheritanceLink (VariableNode "$X") (ConceptNode "Human")))
-         *  finds all the matches for $X by first finding matching rules and then applying
-         *  all of them using the pattern matcher.
-         *  and (cog-fc (ConceptNode "Human")) will start forward chaining on the concept Human
-         *  trying to generate inferences associated only with the conceptNode Human.
-         */
-        fc.do_chain(dfc, h);
 
+    HandleSeq focus_set = {};
+
+    if (hfocus_set->getType() == SET_LINK)
+        focus_set = LinkCast(hfocus_set)->getOutgoingSet();
+    else
+        throw RuntimeException(
+                TRACE_INFO,
+                "InferenceSCM::do_forward_chaining - focus set should be SET_LINK type!");
+
+    //TODO variable fulfillment
+    fc.do_chain(hsource,focus_set);
     HandleSeq result = fc.get_chaining_result();
+
     return as->add_link(LIST_LINK, result);
+
 #else
     return Handle::UNDEFINED;
 #endif
 }
 
-Handle InferenceSCM::do_backward_chaining(Handle h, Handle rbs)
+Handle InferenceSCM::do_backward_chaining(Handle h, Handle rbs, Handle focus_link)
 {
     if (Handle::UNDEFINED == rbs)
         throw RuntimeException(TRACE_INFO,
@@ -126,7 +129,7 @@ Handle InferenceSCM::do_backward_chaining(Handle h, Handle rbs)
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
 
     BackwardChainer bc(*as, rbs);
-    bc.set_target(h);
+    bc.set_target(h, focus_link);
 
     logger().debug("[BackwardChainer] Before do_chain");
 

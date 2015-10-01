@@ -7,7 +7,7 @@ To run these examples you have to previously
 
 Set the stack environment with:
 ```
-export STACK_YAML=../../opencog/haskell/stack.yaml
+export STACK_YAML=<ATOMSPACE_ROOT>/opencog/haskell/stack.yaml
 ```
 Then you can just compile them with:
 ```

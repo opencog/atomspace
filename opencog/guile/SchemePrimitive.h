@@ -94,6 +94,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			Handle (T::*h_h)(Handle);
 			Handle (T::*h_hi)(Handle, int);
 			Handle (T::*h_hh)(Handle, Handle);
+			Handle (T::*h_hhh)(Handle, Handle, Handle);
 			Handle (T::*h_hs)(Handle, const std::string&);
 			Handle (T::*h_htq)(Handle, Type, const HandleSeq&);
 			Handle (T::*h_sq)(const std::string&, const HandleSeq&);
@@ -110,7 +111,9 @@ class SchemePrimitive : public PrimitiveEnviron
 			const std::string& (T::*s_sss)(const std::string&,
 			                               const std::string&,
 			                               const std::string&);
+			const std::string& (T::*s_v)(void);
 			TruthValuePtr (T::*p_h)(Handle);
+			UUID (T::*u_ssb)(const std::string&,const std::string&,bool);
 			void (T::*v_h)(Handle);
 			void (T::*v_s)(const std::string&);
 			void (T::*v_ss)(const std::string&,
@@ -136,6 +139,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			H_HI,  // return handle, take handle and int
 			H_HH,  // return handle, take handle and handle
 			H_HS,  // return handle, take handle and string
+			H_HHH, // return handle, take handle, handle and Handle
 			H_HTQ, // return handle, take handle, type, and HandleSeq
 			H_SQ,  // return handle, take string and HandleSeq
 			H_SQQ, // return handle, take string, HandleSeq and HandleSeq
@@ -147,7 +151,9 @@ class SchemePrimitive : public PrimitiveEnviron
 			S_S,   // return string, take string
 			S_SS,  // return string, take two strings
 			S_SSS, // return string, take three strings
+			S_V,   // return string, take void
 			P_H,   // return truth value, take Handle
+			U_SSB, //return UUID, take string,string,boolean
 			V_H,   // return void, take Handle
 			V_S,   // return void, take string
 			V_SS,  // return void, take two strings
@@ -227,6 +233,15 @@ class SchemePrimitive : public PrimitiveEnviron
 					Handle h2(SchemeSmob::verify_handle(scm_cadr(args),
 					                                    scheme_name, 2));
 					Handle rh((that->*method.h_hh)(h1, h2));
+					rc = SchemeSmob::handle_to_scm(rh);
+					break;
+				}
+				case H_HHH:
+				{
+					Handle h1(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
+					Handle h2(SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2));
+					Handle h3(SchemeSmob::verify_handle(scm_caddr(args), scheme_name, 3));
+					Handle rh((that->*method.h_hhh)(h1, h2, h3));
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
@@ -422,11 +437,29 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = scm_from_utf8_string(rs.c_str());
 					break;
 				}
+				case S_V:
+				{
+					const std::string &rs = (that->*method.s_v)();
+					rc = scm_from_utf8_string(rs.c_str());
+					break;
+				}
 				case P_H:
 				{
 					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
 					TruthValuePtr tv((that->*method.p_h)(h));
 					rc = SchemeSmob::tv_to_scm(tv);
+					break;
+				}
+				case U_SSB:
+				{
+					// First argument is a string
+					std::string str = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
+					std::string str2(SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2));
+					bool b = scm_to_bool(scm_caddr(args));
+
+
+					UUID rh=((that->*method.u_ssb)(str, str2, b));
+					rc = scm_from_ulong(rh);//SchemeSmob::handle_to_scm(rh);
 					break;
 				}
 				case V_H:
@@ -531,6 +564,18 @@ class SchemePrimitive : public PrimitiveEnviron
 		virtual size_t get_size(void) { return sizeof (*this); }
 	public:
 
+#define DECLARE_CONSTR_0(SIG, LSIG, RET_TYPE) \
+	SchemePrimitive(const char* module, const char* name, \
+		 RET_TYPE (T::*cb)(void), T *data) \
+	{ \
+		that = data; \
+		method.LSIG = cb; \
+		scheme_module = module; \
+		scheme_name = name; \
+		signature = SIG; \
+		do_register(module, name, 0); /* cb has 0 args */ \
+	}
+
 #define DECLARE_CONSTR_1(SIG, LSIG, RET_TYPE, ARG_TYPE) \
 	SchemePrimitive(const char* module, const char* name, \
 		 RET_TYPE (T::*cb)(ARG_TYPE), T *data) \
@@ -601,7 +646,10 @@ class SchemePrimitive : public PrimitiveEnviron
 		                             const std::string&)
 		DECLARE_CONSTR_3(S_SSS,s_sss,const std::string&, const std::string&,
 		                             const std::string&, const std::string&)
+		DECLARE_CONSTR_3(H_HHH, h_hhh, Handle, Handle, Handle, Handle)
+		DECLARE_CONSTR_0(S_V,  s_v,  const std::string&)
 		DECLARE_CONSTR_1(P_H,  p_h,  TruthValuePtr, Handle)
+		DECLARE_CONSTR_3(U_SSB, u_ssb, UUID,const std::string&,const std::string&, bool)
 		DECLARE_CONSTR_1(V_H,  v_h,  void, Handle)
 		DECLARE_CONSTR_1(V_S,  v_s,  void, const std::string&)
 		DECLARE_CONSTR_2(V_SS, v_ss, void, const std::string&,
@@ -612,17 +660,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_2(V_TI, v_ti, void, Type, int)
 		DECLARE_CONSTR_4(V_TIDI, v_tidi, void, Type, int, double, int)
 
-		// Below is DECLARE_CONSTR_0(V_V, v_v, void*, void);
-		SchemePrimitive(const char *module, const char *name,
-		                void (T::*cb)(void), T *data)
-		{
-			that = data;
-			method.v_v = cb;
-			scheme_module = module;
-			scheme_name = name;
-			signature = V_V;
-			do_register(module, name, 0); // cb has 0 args
-		}
+		DECLARE_CONSTR_0(V_V,  v_v,  void);
 };
 
 #define DECLARE_DECLARE_1(RET,ARG) \
@@ -664,6 +702,7 @@ DECLARE_DECLARE_1(Handle, Handle)
 DECLARE_DECLARE_1(HandleSeq, Handle)
 DECLARE_DECLARE_1(HandleSeqSeq, Handle)
 DECLARE_DECLARE_1(const std::string&, const std::string&)
+DECLARE_DECLARE_1(const std::string&, void)
 DECLARE_DECLARE_1(TruthValuePtr, Handle)
 DECLARE_DECLARE_1(void, Handle)
 DECLARE_DECLARE_1(void, const std::string&)
@@ -685,8 +724,10 @@ DECLARE_DECLARE_3(Handle, const std::string&, const HandleSeq&, const HandleSeq&
 DECLARE_DECLARE_3(HandleSeq, Handle, Type, int)
 DECLARE_DECLARE_3(const std::string&, const std::string&,
                   const std::string&, const std::string&)
+DECLARE_DECLARE_3(UUID, const std::string&,const std::string&, bool)
 DECLARE_DECLARE_3(void, const std::string&,
                   const std::string&, const std::string&)
+DECLARE_DECLARE_3(Handle, Handle, Handle, Handle)
 DECLARE_DECLARE_4(double, Handle, Handle, Type, bool)
 DECLARE_DECLARE_4(void, Type, int, double, int)
 DECLARE_DECLARE_4(HandleSeq, Handle, Type, int, bool)
@@ -697,4 +738,3 @@ DECLARE_DECLARE_4(HandleSeq, Handle, Type, int, bool)
 #endif // _OPENCOG_SCHEME_PRIMITIVE_H
 
 #endif // HAVE_GUILE
-

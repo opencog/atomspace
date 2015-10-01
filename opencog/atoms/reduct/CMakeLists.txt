@@ -4,10 +4,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (clearbox SHARED
 	ArithmeticLink.cc
-	AssignLink.cc
-	DeleteLink.cc
 	FoldLink.cc
-	FunctionLink.cc
 	PlusLink.cc
 	TimesLink.cc
 )
@@ -26,11 +23,8 @@ INSTALL (TARGETS clearbox
 
 INSTALL (FILES
 	ArithmeticLink.h
-	AssignLink.h
-	DeleteLink.h
 	FoldLink.h
-	FunctionLink.h
 	PlusLink.h
 	TimesLink.h
-	DESTINATION "include/${PROJECT_NAME}/atoms/reduct"
+	DESTINATION "include/opencog/atoms/reduct"
 )

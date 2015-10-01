@@ -27,7 +27,6 @@
 
 #include <atomic>
 
-#include <opencog/util/Logger.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Handle.h>
 
@@ -141,7 +140,7 @@ inline bool TLB::isValidHandle(const Handle& h)
 
 inline void TLB::addAtom(AtomPtr atom)
 {
-    if (atom->_uuid != Handle::UNDEFINED.value())
+    if (atom->_uuid != Handle::INVALID_UUID)
         throw InvalidParamException(TRACE_INFO,
                 "Atom is already in the TLB!");
 
