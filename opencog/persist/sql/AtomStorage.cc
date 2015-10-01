@@ -169,19 +169,34 @@ class AtomStorage::Response
 		// adding links of unknown provenance, it could happen that
 		// the outgoing set of the link has not yet been loaded.  In
 		// that case, we have to load the outgoing set first.
-		void load_recursive_if_not_exists(AtomPtr atom)
+		AtomPtr load_recursive_if_not_exists(AtomPtr atom)
 		{
 			LinkPtr link(LinkCast(atom));
 			if (link)
 			{
 				const HandleSeq& oset = link->getOutgoingSet();
-				for (Handle h : oset)
+				bool did_load = false;
+				HandleSeq resolved_oset;
+				for (const Handle& h : oset)
 				{
-					if (table->holds(h)) continue;
+					if (table->holds(h))
+					{
+						resolved_oset.push_back(h);
+						continue;
+					}
 					AtomPtr a(store->getAtom(h.value()));
-					load_recursive_if_not_exists(a);
+					AtomPtr ra = load_recursive_if_not_exists(a);
+					resolved_oset.push_back(ra->getHandle());
+					did_load = true;
+				}
+
+				if (did_load)
+				{
+					return createLink(link->getType(), resolved_oset,
+					           link->getTruthValue());
 				}
 			}
+			return atom;
 		}
 
 		std::vector<Handle> *hvec;
