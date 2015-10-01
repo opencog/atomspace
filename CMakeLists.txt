@@ -242,11 +242,43 @@ ELSE (HYPERTABLE_FOUND)
 
 ENDIF (HYPERTABLE_FOUND)
 
-
 # At this time, there is no reason to build with memcached for
 # FIND_PACKAGE(LibMemCached)
 
-# Python needed for embodiment (!?) and for PLN
+# Google Protobuf library
+# The protocol buffer compiler is a separately installable package, and
+# it is also needed for building embodiment PAI. So check for that, too.
+FIND_PACKAGE(Protobuf)
+IF (PROTOBUF_FOUND
+		AND PROTOBUF_LIBRARY
+		AND PROTOBUF_INCLUDE_DIR
+		AND PROTOBUF_PROTOC_EXECUTABLE)
+
+	ADD_DEFINITIONS(-DHAVE_PROTOBUF)
+	SET(HAVE_PROTOBUF 1)
+	SET(PROTOBUF_DIR_MESSAGE "Protobuf was found.")
+
+ELSE (PROTOBUF_FOUND
+		AND PROTOBUF_LIBRARY
+		AND PROTOBUF_INCLUDE_DIR
+		AND PROTOBUF_PROTOC_EXECUTABLE)
+
+	# If we are here, then we are missing either the libraries, or the
+	# compiler. React appropriately.
+	IF (PROTOBUF_PROTOC_EXECUTABLE)
+		SET(PROTOBUF_DIR_MESSAGE "Protobuf was not found; the new message decoding functions would not work.\n	To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
+	ELSE (PROTOBUF_PROTOC_EXECUTABLE)
+		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; embodiment PAI can't be built without it.\n	To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
+	ENDIF (PROTOBUF_PROTOC_EXECUTABLE)
+
+ENDIF (PROTOBUF_FOUND
+		AND PROTOBUF_LIBRARY
+		AND PROTOBUF_INCLUDE_DIR
+		AND PROTOBUF_PROTOC_EXECUTABLE)
+
+MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
+
+# Python needed for PLN !???
 FIND_PACKAGE(PythonInterp)
 FIND_PACKAGE(PythonLibs 2.7)
 IF(PYTHONLIBS_FOUND)
@@ -324,8 +356,8 @@ ENDIF (VALGRIND_FOUND)
 # ZeroMQ
 FIND_PACKAGE(ZMQ 3.2.4)
 IF (ZMQ_FOUND AND ZMQ_LIBRARY)
-	ADD_DEFINITIONS(-DHAVE_ZMQ)
-	SET(HAVE_ZMQ 1)
+	ADD_DEFINITIONS(-DHAVE_ZMQLIB)
+	SET(HAVE_ZMQLIB 1)
 	SET(ZMQ_DIR_MESSAGE "ZeroMQ was found.")
 ELSE (ZMQ_FOUND AND ZMQ_LIBRARY)
 	SET(ZMQ_DIR_MESSAGE "ZeroMQ was not found; \nTo over-ride, make sure that the environment variable ZMQ_LIBRARY is set.\nInstallation instructions: http://zeromq.org/intro:get-the-software")
@@ -342,6 +374,11 @@ ENDIF(GSL_FOUND AND HAVE_COGUTIL)
 IF(HAVE_ATOMSPACE AND ODBC_FOUND) # SQL persistance
 	SET(HAVE_PERSIST 1)
 ENDIF(HAVE_ATOMSPACE AND ODBC_FOUND)
+
+# Both protobuf and also zmq are needed to build ZMQ API.
+IF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
+	SET(HAVE_ZMQ 1)
+ENDIF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
 
 # At this time, there is no reason to build with memcached for
 # any "normal" use, so just stub it out.
@@ -552,11 +589,11 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 
 # Show a summary of what we got
 SUMMARY_ADD("AtomSpace" "A weighted and typed hypergraph database" HAVE_ATOMSPACE)
-SUMMARY_ADD("Cython bindings" "Cython (python) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("Gearman" "Distributed processing capability" HAVE_GEARMAN)
 SUMMARY_ADD("Haskell bindings" "Haskell bindings" HAVE_STACK)
 SUMMARY_ADD("Hypertable" "HyperTable for scalable persistance (experimental)" HAVE_HYPERTABLE)
+SUMMARY_ADD("Python bindings" "Python (cython) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("SQL persistance" "Save/Restore of AtomSpace to database" HAVE_PERSIST)
