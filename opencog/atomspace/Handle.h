@@ -60,6 +60,7 @@ friend class AtomspaceHTabler;    // persistance
 private:
     AtomPtr _ptr;
 
+    static bool atoms_less(const AtomPtr&, const AtomPtr&);
     static AtomPtr do_res(UUID);
     static std::vector<const AtomTable*> _resolver;
 
@@ -116,10 +117,18 @@ public:
 
     inline bool operator==(const Handle& h) const noexcept { return _ptr == h._ptr; }
     inline bool operator!=(const Handle& h) const noexcept { return _ptr != h._ptr; }
-    inline bool operator< (const Handle& h) const noexcept { return _ptr <  h._ptr; }
-    inline bool operator> (const Handle& h) const noexcept { return _ptr >  h._ptr; }
-    inline bool operator<=(const Handle& h) const noexcept { return _ptr <= h._ptr; }
-    inline bool operator>=(const Handle& h) const noexcept { return _ptr >= h._ptr; }
+    inline bool operator< (const Handle& h) const noexcept {
+       return atoms_less(_ptr, h._ptr);
+    }
+    inline bool operator> (const Handle& h) const noexcept {
+       return atoms_less(h._ptr, _ptr);
+    }
+    inline bool operator<=(const Handle& h) const noexcept {
+       return not atoms_less(h._ptr, _ptr);
+    }
+    inline bool operator>=(const Handle& h) const noexcept {
+       return not atoms_less(_ptr, h._ptr);
+    }
 
     /**
      * Returns a negative value, zero or a positive value if the first

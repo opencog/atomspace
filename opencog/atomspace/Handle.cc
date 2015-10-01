@@ -46,6 +46,27 @@ UUID Handle::value(void) const {
 }
 
 // ===================================================
+// Atom comparison.
+
+#if 0
+bool Handle::atoms_eq(const AtomPtr& a, const AtomPtr& b)
+{
+    if (a == b) return true;
+    if (NULL == a or NULL == b) return false;
+    return *a == *b;
+}
+#endif
+
+bool Handle::atoms_less(const AtomPtr& a, const AtomPtr& b)
+{
+    if (a == b) return false;
+    if (NULL == a) return true;
+    if (NULL == b) return false;
+    if (*a == *b) return false;
+    return a->getUUID() < b->getUUID();
+}
+
+// ===================================================
 // Handle resolution stuff.
 
 // Its a vector, not a set, because its priority ranked.
