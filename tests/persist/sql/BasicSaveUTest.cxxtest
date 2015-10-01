@@ -161,32 +161,29 @@ void BasicSaveUTest::tearDown(void)
 
 static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
 {
-	LinkPtr la(LinkCast(a));
-	LinkPtr lb(LinkCast(b));
-
 	printf("Testing at %s\n", where);
 	TSM_ASSERT("No atom found", b != NULL);
 	if (NULL == b) return;
 
-	TSM_ASSERT_EQUALS("Type mistmatch", a->getType(), b->getType());
+	TSM_ASSERT_EQUALS("Type mismatch", a->getType(), b->getType());
 
-	// Only links can have arity
-	if (la && lb)
+	NodePtr na(NodeCast(a));
+	NodePtr nb(NodeCast(b));
+	if (na and nb)
 	{
-		TSM_ASSERT_EQUALS("Arity mistmatch", la->getArity(), lb->getArity());
+		TSM_ASSERT_EQUALS("Name mismatch", na->getName(), nb->getName());
+	}
 
-		if (0 < la->getArity())
+	LinkPtr la(LinkCast(a));
+	LinkPtr lb(LinkCast(b));
+	if (la and lb)
+	{
+		TSM_ASSERT_EQUALS("Arity mismatch", la->getArity(), lb->getArity());
+		if (*la != *lb)
 		{
-			std::vector<Handle> outa = la->getOutgoingSet();
-			std::vector<Handle> outb = lb->getOutgoingSet();
-			for (int i=0; i< la->getArity(); i++)
-			{
-				if (outa[i] != outb[i])
-				{
-					TSM_ASSERT_EQUALS("outgoing set mis-match", 
-						outa[i].value(), outb[i].value());
-				}
-			}
+			printf("Mismatching la = %s\n", la->toString().c_str());
+			printf("Mismatching lb = %s\n", lb->toString().c_str());
+			TSM_ASSERT_EQUALS("Link mis-match", la, lb);
 		}
 	}
 
