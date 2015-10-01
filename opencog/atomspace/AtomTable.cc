@@ -486,9 +486,16 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         for (const Handle& h : lll->getOutgoingSet()) {
             closet.push_back(add(h, async));
         }
+        // Preserve the UUID! This is needed for assigning the UUID
+        // correctly when fetching from backing store. But do this
+        // if the atom is actually coming from backing store (i.e.
+        // does not yet belong to any table).
+        UUID save = atom->_uuid;
+        if (NULL != atom->getAtomTable()) save = (UUID) -1;
         atom = createLink(atom_type, closet,
                           atom->getTruthValue(),
                           atom->getAttentionValue());
+        atom->_uuid = save;
     }
     atom = clone_factory(atom_type, atom);
 
