@@ -822,6 +822,7 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 		AtomTable * at = atom->getAtomTable();
 		// We allow storage of atoms that don't belong to an atomspace.
 		if (at) uuidbuff = std::to_string(at->get_uuid());
+		else uuidbuff = "0";
 		STMT("space", uuidbuff);
 
 		// Store the atom UUID
