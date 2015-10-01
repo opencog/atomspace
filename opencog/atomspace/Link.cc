@@ -227,7 +227,15 @@ bool Link::operator==(const Atom& other) const
     Arity arity = getArity();
     if (arity != olink.getArity()) return false;
     for (Arity i = 0; i < arity; i++)
-        if (_outgoing[i] != olink._outgoing[i]) return false;
+    {
+        NodePtr tn(NodeCast(_outgoing[i]));
+        NodePtr on(NodeCast(olink._outgoing[i]));
+        if (tn and on and *tn != *on) return false;
+
+        LinkPtr tl(LinkCast(_outgoing[i]));
+        LinkPtr ol(LinkCast(olink._outgoing[i]));
+        if (tl and ol and *tl != *ol) return false;
+    }
     return true;
 }
 
