@@ -205,7 +205,7 @@ struct handle_less
 {
    bool operator()(const Handle& hl, const Handle& hr) const
    {
-       return hl.value() < hr.value();
+       return hl < hr;
    }
 };
 
@@ -224,9 +224,7 @@ struct handle_seq_less
        size_t sr = hsr.size();
        if (sl != sr) return sl < sr;
        for (size_t i=0; i<sl; i++) {
-           UUID ul = hsl[i].value();
-           UUID ur = hsr[i].value();
-           if (ul != ur) return ul < ur;
+           if (hsl[i] != hsr[i]) return hsl[i] < hsr[i];
        }
        return false;
    }
@@ -276,7 +274,7 @@ std::hash<opencog::Handle>::operator()(opencog::Handle h) const
 
 #else
 
-// This works for e, per note immediately above.
+// This works for me, per note immediately above.
 template<>
 struct hash<opencog::Handle>
 {
