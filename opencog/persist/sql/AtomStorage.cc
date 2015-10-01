@@ -1243,6 +1243,7 @@ AtomStorage::PseudoPtr AtomStorage::petAtom(UUID uuid)
 AtomPtr AtomStorage::getAtom(UUID uuid)
 {
 	PseudoPtr p(petAtom(uuid));
+	if (NULL == p) return NULL;
 
 	if (classserver().isA(p->type, NODE))
 	{
@@ -1301,8 +1302,6 @@ std::vector<Handle> AtomStorage::getIncomingSet(Handle h)
  * to fetch the associated TruthValue for this node.
  *
  * This method does *not* register the atom with any atomtable/atomspace
- * However, it does register with the TLB, as the SQL uuids and the
- * TLB Handles must be kept in sync, or all hell breaks loose.
  */
 NodePtr AtomStorage::getNode(Type t, const char * str)
 {
@@ -1322,7 +1321,9 @@ NodePtr AtomStorage::getNode(Type t, const char * str)
 	}
 
 	PseudoPtr p(getAtom(buff, 0));
-	NodePtr node = createNode(p->type, p->name, p->tv);
+	if (NULL == p) return NULL;
+
+	NodePtr node = createNode(t, str, p->tv);
 	node->_uuid = p->uuid;
 	return node;
 }
@@ -1349,6 +1350,8 @@ LinkPtr AtomStorage::getLink(Type t, const HandleSeq& oset)
 	ostr += ";";
 
 	PseudoPtr p = getAtom(ostr.c_str(), 1);
+	if (NULL == p) return NULL;
+
 	LinkPtr link = createLink(t, oset, p->tv);
 	link->_uuid = p->uuid;
 	return link;
