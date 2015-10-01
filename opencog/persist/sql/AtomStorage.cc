@@ -140,7 +140,8 @@ class AtomStorage::Response
 			// printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
-			AtomPtr atom(store->makeAtom(*this, uuid));
+			PseudoPtr p(store->makeAtom(*this, uuid));
+			AtomPtr atom(get_recursive_if_not_exists(p));
 			table->add(atom, true);
 			return false;
 		}
@@ -156,50 +157,16 @@ class AtomStorage::Response
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
 			Handle h(uuid);
-			if (not table->holds(h))
+			if (Handle::UNDEFINED == table->getHandle(h))
 			{
-				AtomPtr atom(store->makeAtom(*this, uuid));
-				atom = load_recursive_if_not_exists(atom);
+				PseudoPtr p(store->makeAtom(*this, uuid));
+				AtomPtr atom(get_recursive_if_not_exists(p));
 				table->add(atom, true);
 			}
 			return false;
 		}
 
-		// Helper function for the above.  The problem is that, when
-		// adding links of unknown provenance, it could happen that
-		// the outgoing set of the link has not yet been loaded.  In
-		// that case, we have to load the outgoing set first.
-		AtomPtr load_recursive_if_not_exists(AtomPtr atom)
-		{
-			LinkPtr link(LinkCast(atom));
-			if (link)
-			{
-				const HandleSeq& oset = link->getOutgoingSet();
-				bool did_load = false;
-				HandleSeq resolved_oset;
-				for (const Handle& h : oset)
-				{
-					if (table->holds(h))
-					{
-						resolved_oset.push_back(h);
-						continue;
-					}
-					AtomPtr a(store->getAtom(h.value()));
-					AtomPtr ra = load_recursive_if_not_exists(a);
-					resolved_oset.push_back(ra->getHandle());
-					did_load = true;
-				}
-
-				if (did_load)
-				{
-					return createLink(link->getType(), resolved_oset,
-					           link->getTruthValue());
-				}
-			}
-			return atom;
-		}
-
-		std::vector<Handle> *hvec;
+		HandleSeq *hvec;
 		bool fetch_incoming_set_cb(void)
 		{
 			// printf ("---- New atom found ----\n");
@@ -208,9 +175,41 @@ class AtomStorage::Response
 			// Note, unlike the above 'load' routines, this merely fetches
 			// the atoms, and returns a vector of them.  They are loaded
 			// into the atomspace later, by the caller.
-			Handle h(store->makeAtom(*this, uuid));
-			hvec->push_back(h);
+			PseudoPtr p(store->makeAtom(*this, uuid));
+			AtomPtr atom(get_recursive_if_not_exists(p));
+			hvec->push_back(atom->getHandle());
 			return false;
+		}
+
+		// Helper function for above.  The problem is that, when
+		// adding links of unknown provenance, it could happen that
+		// the outgoing set of the link has not yet been loaded.  In
+		// that case, we have to load the outgoing set first.
+		AtomPtr get_recursive_if_not_exists(PseudoPtr p)
+		{
+			if (classserver().isA(p->type, NODE))
+			{
+				NodePtr node(createNode(p->type, p->name, p->tv));
+				node->_uuid = p->uuid;
+				return node;
+			}
+			HandleSeq resolved_oset;
+			for (UUID idu : p->oset)
+			{
+				Handle h(idu);
+				h = table->getHandle(h);
+				if (Handle::UNDEFINED != h)
+				{
+					resolved_oset.push_back(h);
+					continue;
+				}
+				PseudoPtr po(store->petAtom(idu));
+				AtomPtr ra = get_recursive_if_not_exists(po);
+				resolved_oset.push_back(ra->getHandle());
+			}
+			LinkPtr link(createLink(p->type, resolved_oset, p->tv));
+			link->_uuid = p->uuid;
+			return link;
 		}
 
 		bool row_exists;
@@ -323,7 +322,6 @@ class AtomStorage::Response
 			id_set->insert(id);
 			return false;
 		}
-
 };
 
 /* ================================================================ */
@@ -1202,7 +1200,7 @@ void AtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
 /* ================================================================ */
 
 /* One-size-fits-all atom fetcher */
-AtomPtr  AtomStorage::getAtom(const char * query, int height)
+AtomStorage::PseudoPtr AtomStorage::getAtom(const char * query, int height)
 {
 	ODBCConnection* db_conn = get_conn();
 	Response rp;
@@ -1220,26 +1218,48 @@ AtomPtr  AtomStorage::getAtom(const char * query, int height)
 	}
 
 	rp.height = height;
-	AtomPtr atom(makeAtom(rp, rp.uuid));
+	PseudoPtr atom(makeAtom(rp, rp.uuid));
 	rp.rs->release();
 	put_conn(db_conn);
 	return atom;
 }
 
-/**
- * Create a new atom, retrieved from storage
- *
- * This method does *not* register the atom with any atomtable/atomspace
- * However, it does register with the TLB, as the SQL uuids and the
- * TLB Handles must be kept in sync, or all hell breaks loose.
- */
-AtomPtr  AtomStorage::getAtom(UUID uuid)
+AtomStorage::PseudoPtr AtomStorage::petAtom(UUID uuid)
 {
 	setup_typemap();
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE uuid = %lu;", uuid);
 
 	return getAtom(buff, -1);
+}
+
+/**
+ * Create a new atom, retrieved from storage
+ *
+ * This method does *not* register the atom with any atomtable.
+ * XXX It also is not recursive; if the atom is a link, the
+ * outgoing set is not resolved.  XXX FIXME.
+ */
+AtomPtr AtomStorage::getAtom(UUID uuid)
+{
+	PseudoPtr p(petAtom(uuid));
+
+	if (classserver().isA(p->type, NODE))
+	{
+		NodePtr node(createNode(p->type, p->name, p->tv));
+		node->_uuid = p->uuid;
+		return node;
+	}
+
+	HandleSeq bogus_oset;
+	for (UUID idu : p->oset)
+	{
+		Handle h(idu);
+		bogus_oset.push_back(h);
+	}
+	LinkPtr link(createLink(p->type, bogus_oset, p->tv));
+	link->_uuid = p->uuid;
+	return link;
 }
 
 /**
@@ -1301,7 +1321,10 @@ NodePtr AtomStorage::getNode(Type t, const char * str)
 		return NULL;
 	}
 
-	return NodeCast(getAtom(buff, 0));
+	PseudoPtr p(getAtom(buff, 0));
+	NodePtr node = createNode(p->type, p->name, p->tv);
+	node->_uuid = p->uuid;
+	return node;
 }
 
 /**
@@ -1311,10 +1334,8 @@ NodePtr AtomStorage::getNode(Type t, const char * str)
  * to fetch the associated TruthValue for this link.
  *
  * This method does *not* register the atom with any atomtable/atomspace
- * However, it does register with the TLB, as the SQL uuids and the
- * TLB Handles must be kept in sync, or all hell breaks loose.
  */
-LinkPtr AtomStorage::getLink(Type t, const std::vector<Handle>&oset)
+LinkPtr AtomStorage::getLink(Type t, const HandleSeq& oset)
 {
 	setup_typemap();
 
@@ -1327,16 +1348,17 @@ LinkPtr AtomStorage::getLink(Type t, const std::vector<Handle>&oset)
 	ostr += oset_to_string(oset, oset.size());
 	ostr += ";";
 
-	AtomPtr atom = getAtom(ostr.c_str(), 1);
-	return LinkCast(atom);
+	PseudoPtr p = getAtom(ostr.c_str(), 1);
+	LinkPtr link = createLink(t, oset, p->tv);
+	link->_uuid = p->uuid;
+	return link;
 }
 
 /**
  * Instantiate a new atom, from the response buffer contents
  */
-AtomPtr AtomStorage::makeAtom(Response &rp, UUID uuid)
+AtomStorage::PseudoPtr AtomStorage::makeAtom(Response &rp, UUID uuid)
 {
-	AtomPtr atom;
 	// Now that we know everything about an atom, actually construct one.
 	Type realtype = loading_typemap[rp.itype];
 
@@ -1348,35 +1370,32 @@ AtomPtr AtomStorage::makeAtom(Response &rp, UUID uuid)
 		return NULL;
 	}
 
+	PseudoPtr atom(createPseudo());
+
 	// All height zero atoms are nodes,
 	// All positive height atoms are links.
 	// A negative height is "unknown" and must be checked.
 	if ((0 == rp.height) or
 	    ((-1 == rp.height) and classserver().isA(realtype, NODE)))
 	{
-		atom = createNode(realtype, rp.name);
+		atom->name = rp.name;
 	}
 	else
 	{
-		std::vector<Handle> outvec;
-#ifndef USE_INLINE_EDGES
-		getOutgoing(outvec, h);
-#else
 		char *p = (char *) rp.outlist;
 		while (p)
 		{
-			// Break if there is no more atom in the outgoing set
-			// or the outgoing set is empty in the first place
+			// Break if there are no more atoms in the outgoing set
+			// or if the outgoing set is empty in the first place.
 			if (*p == '}' or *p == '\0') break;
-			Handle hout(strtoul(p+1, &p, 10));
-			outvec.push_back(hout);
+			UUID out(strtoul(p+1, &p, 10));
+			atom->oset.push_back(out);
 		}
-#endif /* USE_INLINE_EDGES */
-		atom = createLink(realtype, outvec);
 	}
 
 	// Give the atom the correct UUID. The AtomTable will need this.
-	atom->_uuid = uuid;
+	atom->type = realtype;
+	atom->uuid = uuid;
 
 	// Now get the truth value
 	switch (rp.tv_type)
@@ -1387,25 +1406,25 @@ AtomPtr AtomStorage::makeAtom(Response &rp, UUID uuid)
 		case SIMPLE_TRUTH_VALUE:
 		{
 			TruthValuePtr stv(SimpleTruthValue::createTV(rp.mean, rp.count));
-			atom->setTruthValue(stv);
+			atom->tv = stv;
 			break;
 		}
 		case COUNT_TRUTH_VALUE:
 		{
 			TruthValuePtr ctv(CountTruthValue::createTV(rp.mean, rp.confidence, rp.count));
-			atom->setTruthValue(ctv);
+			atom->tv = ctv;
 			break;
 		}
 		case INDEFINITE_TRUTH_VALUE:
 		{
 			TruthValuePtr itv(IndefiniteTruthValue::createTV(rp.mean, rp.count, rp.confidence));
-			atom->setTruthValue(itv);
+			atom->tv = itv;
 			break;
 		}
 		case PROBABILISTIC_TRUTH_VALUE:
 		{
 			TruthValuePtr ptv(ProbabilisticTruthValue::createTV(rp.mean, rp.confidence, rp.count));
-			atom->setTruthValue(ptv);
+			atom->tv = ptv;
 			break;
 		}
 		default:

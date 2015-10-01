@@ -68,8 +68,20 @@ class AtomStorage
 		void store_atomtable_id(const AtomTable&);
 
 		// ---------------------------------------------
-		AtomPtr makeAtom (Response &, UUID);
-		AtomPtr getAtom (const char *, int);
+		struct PseudoAtom
+			: public std::enable_shared_from_this<PseudoAtom>
+		{
+			Type type;
+			UUID uuid;
+			std::string name;
+			std::vector<UUID> oset;
+			TruthValuePtr tv;
+		};
+		typedef std::shared_ptr<PseudoAtom> PseudoPtr;
+		#define createPseudo std::make_shared<PseudoAtom>
+		PseudoPtr makeAtom(Response &, UUID);
+		PseudoPtr getAtom(const char *, int);
+		PseudoPtr petAtom(UUID);
 
 		int get_height(AtomPtr);
 		int max_height;
