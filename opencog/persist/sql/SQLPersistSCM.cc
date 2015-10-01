@@ -71,7 +71,7 @@ LinkPtr SQLBackingStore::getLink(Type t, const std::vector<Handle>& oset) const
 
 AtomPtr SQLBackingStore::getAtom(Handle h) const
 {
-	return _store->getAtom(h);
+	return _store->getAtom(h.value());
 }
 
 HandleSeq SQLBackingStore::getIncomingSet(Handle h) const

@@ -177,7 +177,7 @@ class AtomStorage::Response
 				for (Handle h : oset)
 				{
 					if (table->holds(h)) continue;
-					AtomPtr a(store->getAtom(h));
+					AtomPtr a(store->getAtom(h.value()));
 					load_recursive_if_not_exists(a);
 				}
 			}
@@ -1217,11 +1217,11 @@ AtomPtr  AtomStorage::getAtom(const char * query, int height)
  * However, it does register with the TLB, as the SQL uuids and the
  * TLB Handles must be kept in sync, or all hell breaks loose.
  */
-AtomPtr  AtomStorage::getAtom(Handle h)
+AtomPtr  AtomStorage::getAtom(UUID uuid)
 {
 	setup_typemap();
 	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE uuid = %lu;", h->_uuid);
+	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE uuid = %lu;", uuid);
 
 	return getAtom(buff, -1);
 }
