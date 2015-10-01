@@ -159,7 +159,7 @@ class AtomStorage::Response
 			if (not table->holds(h))
 			{
 				AtomPtr atom(store->makeAtom(*this, uuid));
-				load_recursive_if_not_exists(atom);
+				atom = load_recursive_if_not_exists(atom);
 				table->add(atom, true);
 			}
 			return false;
