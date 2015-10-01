@@ -229,9 +229,9 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 	TruthValuePtr stv(SimpleTruthValue::createTV(0.55, 0.6));
 	a->setTruthValue(stv);
 	TLB::addAtom(a);
+	UUID uuid = a->getUUID();
 
 	Handle h = a->getHandle();
-	UUID uuid = h.value();
 
 	TSM_ASSERT("Bad Handle", h != Handle::UNDEFINED);
 
@@ -258,7 +258,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 	TLB::addAtom(l);
 	store->storeAtom(l, true);
 
-	UUID ul = l->getHandle().value();
+	UUID ul = l->getUUID();
 	AtomPtr lb = store->getAtom(ul);
 	atomCompare(l, lb, "Single link save-restore");
 
