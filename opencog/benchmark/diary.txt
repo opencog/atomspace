@@ -332,16 +332,16 @@ I think this change is compiler-related.
    test           AtomTable    AtomSpaceImpl    AtomSpace    Scheme
    name           K-ops/sec      K-ops/sec      K-ops/sec   K-ops/sec
    ----           ---------    -------------    ---------   ---------
-  noop             1428       
-  addNode           222         
-  addLink            75.7      
-  getType          1429       
-  getTV            1429      
-  setTV            1666     
-  getHandleSet        0.693  
-  getNodeHandles    101     
-  getOutgoingSet   1111    
-  getIncomingSet   1000   
+  noop             1428
+  addNode           222
+  addLink            75.7
+  getType          1429
+  getTV            1429
+  setTV            1666
+  getHandleSet        0.693
+  getNodeHandles    101
+  getOutgoingSet   1111
+  getIncomingSet   1000
 
 
 9 October 2013
@@ -553,16 +553,16 @@ Summary:
    test           AtomTable    AtomSpace    Scheme
    name           K-ops/sec    K-ops/sec   K-ops/sec
    ----           ---------    ---------   ---------
-  noop             5000        5000          
-  addNode           196         185         
-  addLink            87          78.1       
-  getType          1000         769        
-  getTV             769         833       
-  setTV             555         455      
-  getHandleSet        0.471       0.426        
+  noop             5000        5000
+  addNode           196         185
+  addLink            87          78.1
+  getType          1000         769
+  getTV             769         833
+  setTV             555         455
+  getHandleSet        0.471       0.426
   getNodeHandles     95.2        87.0
-  getOutgoingSet    769         588          
-  getIncomingSet    526         555         
+  getOutgoingSet    769         588
+  getIncomingSet    526         555
   removeAtom        161         156
 
 
@@ -581,16 +581,16 @@ Big drop in getNodesHandles, don't know why.
    test           AtomTable    AtomSpace    Scheme
    name           K-ops/sec    K-ops/sec   K-ops/sec
    ----           ---------    ---------   ---------
-  noop            10000        3333      
-  addNode           217          93.5         
-  addLink            88          54.3       
-  getType          1000         833        
-  getTV             769         833    
-  setTV             769         476      
-  getHandleSet        0.423       0.401        
+  noop            10000        3333
+  addNode           217          93.5
+  addLink            88          54.3
+  getType          1000         833
+  getTV             769         833
+  setTV             769         476
+  getHandleSet        0.423       0.401
   getNodeHandles     41.8        30.5
-  getOutgoingSet    833         666          
-  getIncomingSet    714         555         
+  getOutgoingSet    833         666
+  getIncomingSet    714         555
   removeAtom        145         130
 
 
@@ -870,17 +870,17 @@ for python, either, can't tell why...
 ======================================================================
 19 March 2015:
 
-Replaced AtomPtr in the AtomTable indexes with Atom*.  This should
-improve atom insert and remove performance. It does seem to, but not very
-much.
+On "fanny", replaced AtomPtr in the AtomTable indexes with Atom*.
+This should improve atom insert and remove performance. It does seem
+to, but not very much.
 
-                   -A
+                 -A Atom*     AtomPtr
    test          AtomSpace
    name          K-ops/sec
-   ----          ---------
-  addNode          195
-  addLink          101
-  removeAtom       170
+   ----          ---------   --------
+  addNode          195         183
+  addLink          101          95.1
+  removeAtom       170         161
 
 
 ======================================================================
@@ -898,10 +898,14 @@ Before:
    ----               ---------
   getHandlesByType    0.320
 
-After:                
+After:
                       -m getHandlesByType
    test               AtomSpace
    name               K-ops/sec
    ----               ---------
   getHandlesByType    0.439
 
+======================================================================
+2 October 2015
+
+On "fanny", after removing UUID's from handles.
