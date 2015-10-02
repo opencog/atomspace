@@ -25,5 +25,6 @@ INSTALL (FILES
 	opencog/persist-zmq.scm
 	opencog/query.scm
 	opencog/rule-engine.scm
+	opencog/logger.scm
 	DESTINATION "${DATADIR}/scm/opencog"
 )

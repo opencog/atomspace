@@ -1,5 +1,5 @@
 INSTALL (FILES
-	FCMemory.h
-	ForwardChainer.h	
+	FCStat.h
+	ForwardChainer.h
 	DESTINATION "include/opencog/rule-engine/forwardchainer"
 )
