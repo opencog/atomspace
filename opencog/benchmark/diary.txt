@@ -910,19 +910,40 @@ After:
 
 On "fanny", after removing UUID's from handles.
 
-                 old (March)  new (de-uuid)
-                    -A            -A
+                 old (March)  new (master)  new (de-uuid)
+                    -A            -A           -A
    test           AtomSpace
-   name           K-ops/sec     K-ops/sec
-   ----           ---------     --------
-  noop             1915          1821
-  addNode           183           160
-  addLink            95.1          73.5
-  removeAtom        161           166
-  getType          1720           916
-  getTV            1486           746
-  setTV             863           471
-  getOutgoingSet   1532           626
-  getIncomingSet   1117           504
+   name           K-ops/sec     K-ops/sec    K-ops/sec
+   ----           ---------     ---------    --------
+  noop             1915          1851         1821
+  addNode           183           156          160
+  addLink            95.1          84.3         73.5
+  removeAtom        161           172          166
+  getType          1720           915          916
+  getTV            1486           739          746
+  setTV             863           475          471
+  getOutgoingSet   1532           638          626
+  getIncomingSet   1117           506          504
 
-Conclude: ...
+The "old" column is a cut-n-paste from the March 2015 results above.
+The "new (master)" column is the git-pull from 1 October 2015.
+The "new (de-uuid)" column is the de-uuid branch thate removes the
+    UUID's from the handle.
+
+Observations:
+* The getType, getTV, setTV, getIn/OutSet saw reductions by more than
+  half since March.  Why?  Well, comparing the March No-op results to
+  to these suggests that these were near the limit of measurability (as
+  currently done, which is poorly). These functions could-be/were rate
+  limited by the speed of dererencing AtomPtr.  Why this changed is ...
+  unknown to me.  A git bisect would be useful.
+
+* The addNode and removeAtom operations are unchanged by the de-uuid
+  process.  That addLink got slower is dissappointing, but may be due
+  to the fact that, in the past, Handle comparison was done by directly
+  comparing UUID's in the Handles, whereas now, it must be done by
+  fetching them from atoms.
+
+* That all three addNode addLink and removeAtom are in the same ballpark
+  indicates that the primary bottleneck here is the update of the
+  atomspace indexes (eitehr add or remove in these).
