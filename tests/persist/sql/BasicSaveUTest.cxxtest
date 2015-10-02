@@ -239,8 +239,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 	store->storeAtom(a, true);
 
 	// Fetch it back ...
-	Handle hb(uuid);
-	AtomPtr b = store->getAtom(hb);
+	AtomPtr b = store->getAtom(uuid);
 
 	// Are they equal ??
 	atomCompare(a, b, "Single node save-restore");
@@ -260,7 +259,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 	store->storeAtom(l, true);
 
 	UUID ul = l->getHandle().value();
-	AtomPtr lb = store->getAtom(Handle(ul));
+	AtomPtr lb = store->getAtom(ul);
 	atomCompare(l, lb, "Single link save-restore");
 
 	store->kill_data();
@@ -294,7 +293,7 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
 	// and should thus elicit any errors in clone uuid handling.
 	char buf[40]; sprintf(buf, "%f", idx+0.14159265358979);
 	n4[idx] = createNode(NUMBER_NODE, buf);
-	TruthValuePtr stv4(SimpleTruthValue::createTV(0.33, 400+idx));
+	TruthValuePtr stv4(SimpleTruthValue::createTV(0.44, 400+idx));
 	n4[idx]->setTruthValue(stv4);
 	n4[idx] = NodeCast(table->add(n4[idx], false));
 	a4[idx] = n4[idx];
