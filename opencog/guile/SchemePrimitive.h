@@ -114,6 +114,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			const std::string& (T::*s_v)(void);
 			TruthValuePtr (T::*p_h)(Handle);
 			UUID (T::*u_ssb)(const std::string&,const std::string&,bool);
+			void (T::*v_b)(bool);
 			void (T::*v_h)(Handle);
 			void (T::*v_s)(const std::string&);
 			void (T::*v_ss)(const std::string&,
@@ -153,7 +154,8 @@ class SchemePrimitive : public PrimitiveEnviron
 			S_SSS, // return string, take three strings
 			S_V,   // return string, take void
 			P_H,   // return truth value, take Handle
-			U_SSB, //return UUID, take string,string,boolean
+			U_SSB, // return UUID, take string,string,boolean
+			V_B,   // return void, take bool
 			V_H,   // return void, take Handle
 			V_S,   // return void, take string
 			V_SS,  // return void, take two strings
@@ -462,6 +464,12 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = scm_from_ulong(rh);//SchemeSmob::handle_to_scm(rh);
 					break;
 				}
+				case V_B:
+				{
+					bool b = scm_to_bool(scm_car(args));
+					(that->*method.v_b)(b);
+					break;
+				}
 				case V_H:
 				{
 					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name));
@@ -650,6 +658,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_0(S_V,  s_v,  const std::string&)
 		DECLARE_CONSTR_1(P_H,  p_h,  TruthValuePtr, Handle)
 		DECLARE_CONSTR_3(U_SSB, u_ssb, UUID,const std::string&,const std::string&, bool)
+		DECLARE_CONSTR_1(V_B,  v_b,  void, bool)
 		DECLARE_CONSTR_1(V_H,  v_h,  void, Handle)
 		DECLARE_CONSTR_1(V_S,  v_s,  void, const std::string&)
 		DECLARE_CONSTR_2(V_SS, v_ss, void, const std::string&,
@@ -704,6 +713,7 @@ DECLARE_DECLARE_1(HandleSeqSeq, Handle)
 DECLARE_DECLARE_1(const std::string&, const std::string&)
 DECLARE_DECLARE_1(const std::string&, void)
 DECLARE_DECLARE_1(TruthValuePtr, Handle)
+DECLARE_DECLARE_1(void, bool)
 DECLARE_DECLARE_1(void, Handle)
 DECLARE_DECLARE_1(void, const std::string&)
 DECLARE_DECLARE_1(void, Type)
