@@ -79,8 +79,6 @@ Handle do_forward_chaining(AtomSpace* as,
                            const Handle& hfocus_set)
 {
 #ifdef HAVE_GUILE
-    ForwardChainer fc(*as, rbs);
-
     HandleSeq focus_set = {};
 
     if (hfocus_set->getType() == SET_LINK)
@@ -90,8 +88,8 @@ Handle do_forward_chaining(AtomSpace* as,
                 TRACE_INFO,
                 "InferenceSCM::do_forward_chaining - focus set should be SET_LINK type!");
 
-    // TODO variable fulfillment
-    fc.do_chain(hsource,focus_set);
+    ForwardChainer fc(*as, rbs, hsource, focus_set);
+    fc.do_chain();
     HandleSeq result = fc.get_chaining_result();
 
     return as->add_link(LIST_LINK, result);

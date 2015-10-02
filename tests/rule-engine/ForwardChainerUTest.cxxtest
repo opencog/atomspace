@@ -19,7 +19,6 @@ class ForwardChainerUTest: public CxxTest::TestSuite {
 private:
 	AtomSpace _as;
 	SchemeEval eval;
-	ForwardChainer * _fc;
 
 public:
 	ForwardChainerUTest() : eval(&_as)
@@ -50,15 +49,9 @@ public:
 
 		 eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
 		                  "/tests/rule-engine/bc-config-2.scm\")");
-
-		// Get the ConceptNode corresponding to the rule-based system
-		// to test
-		Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
-		_fc = new ForwardChainer(_as, rbs);
 	}
 	void test_do_chain();
     void test_choose_rule(void);
-    void test_choose_source(void);
     void test_apply_rule(void);
     void test_substitute_rule_part(void);
     void test_unify(void);
@@ -84,11 +77,15 @@ void ForwardChainerUTest::test_do_chain()
 		                  "    (PredicateNode \"B\")"
 		                  "    (PredicateNode \"C\"))");
 
+    // Get the ConceptNode corresponding to the rule-based system
+    // to test
+    Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
+    ForwardChainer fc(_as, rbs,AB, HandleSeq {});
 	// Run forward chainer
-	_fc->do_chain(AB);
+	fc.do_chain();
 
 	// Collect the results
-	HandleSeq results = _fc->get_chaining_result();
+	HandleSeq results = fc.get_chaining_result();
 
 	// Check that AC is in the results
 	Handle AC = _as.add_link(IMPLICATION_LINK, A, C);
@@ -100,44 +97,25 @@ void ForwardChainerUTest::test_choose_rule(void)
     logger().setPrintToStdoutFlag(true);
     logger().setLevel(Logger::DEBUG);
 
-    Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
-    UREConfigReader cr(_as, top_rbs);
-
-    FCMemory fcmem(&_as);
-    fcmem.set_rules(cr.get_rules());
-    TS_ASSERT_EQUALS(2, fcmem.get_rules().size());
-
     Handle h = eval.eval_h(
         "(InheritanceLink (ConceptNode \"cat\")(ConceptNode \"animal\"))");
     TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
-    fcmem.set_source(h);
+
+    Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
+    ForwardChainer fc(_as, rbs, h, HandleSeq { });
 
     //full unification
-    Rule* rule = _fc->choose_rule(fcmem.get_cur_source(),false);
+    Rule* rule = fc.choose_rule(h,false);
     TS_ASSERT_EQUALS(nullptr,rule);
-
     //Since variable nodes of deduction rule are untyped,
     //sub-atom unification will succeed.
-    rule = _fc->choose_rule(fcmem.get_cur_source(),true);
+    rule = fc.choose_rule(h,true);
     TS_ASSERT_DIFFERS(nullptr,rule);
 
     HandleSeq bindlinks;
     _as.get_handles_by_type(back_inserter(bindlinks), BIND_LINK);
     auto it = find(bindlinks.begin(), bindlinks.end(), rule->get_handle());
     TS_ASSERT_DIFFERS(it, bindlinks.end());
-}
-
-void ForwardChainerUTest::test_choose_source(void)
-{
-    config().set("SCM_PRELOAD", "tests/rule-engine/simple-assertions.scm");
-    load_scm_files_from_config(_as);
-
-    Handle source = eval.eval_h("(ConceptNode \"Einstein\")");
-    FCMemory fcmem(&_as);
-    fcmem.set_source(source);
-
-    HandleSeq hs = _fc->choose_premises(fcmem);
-    TS_ASSERT(5 == hs.size());
 }
 
 void ForwardChainerUTest::test_derive_rules(void)
@@ -156,21 +134,24 @@ void ForwardChainerUTest::test_derive_rules(void)
     Handle source2 =  eval.eval_h(
             R"((InheritanceLink (ConceptNode "Cat") (ConceptNode "Animal") ))");
 
+    Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
+    ForwardChainer fc(_as, rbs,source, HandleSeq { });
+
     //is not unifiable
-    HandleSeq hrules = _fc->derive_rules(source,rule);
+    HandleSeq hrules = fc.derive_rules(source,rule);
     TS_ASSERT_EQUALS(0,hrules.size());
 
-    hrules = _fc->derive_rules(source2,rule);
+    hrules = fc.derive_rules(source2,rule);
     TS_ASSERT_EQUALS(2,hrules.size());
 
     //for(Handle h:hrules)
                // std::cout << "DERIVED:\n" << h->toShortString() << std::endl;
 
     //subatom unifiable
-    hrules = _fc->derive_rules(source,rule,true);
+    hrules = fc.derive_rules(source,rule,true);
     TS_ASSERT_EQUALS(3,hrules.size());
 
-    hrules = _fc->derive_rules(source2,rule,true);
+    hrules = fc.derive_rules(source2,rule,true);
     TS_ASSERT_EQUALS(0,hrules.size());
 }
 void ForwardChainerUTest::test_apply_rule(void)
@@ -189,21 +170,16 @@ void ForwardChainerUTest::test_apply_rule(void)
     vector<Rule*> rules { new Rule(rule_handle) };
     Handle source = eval.eval_h(R"((ConceptNode "Socrates"))");
 
-    FCMemory fcmem(&_as);
-    fcmem.set_search_in_af(false);
-    fcmem.set_rules(rules);
-    fcmem.set_cur_rule(rules[0]);
-    fcmem.set_source(source);
+    Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
+    ForwardChainer fc(_as, rbs,source, HandleSeq { });
 
-    _fc->_fcmem = fcmem;
-
-    HandleSeq derules = _fc->derive_rules(source,fcmem.get_cur_rule(),true);
+    HandleSeq derules = fc.derive_rules(source,rules[0],true);
     TS_ASSERT_EQUALS(3,derules.size());
 
     HandleSeq hs;
     for(Handle h:derules)
     {
-    HandleSeq tmp = _fc->apply_rule(h);
+    HandleSeq tmp = fc.apply_rule(h);
     hs.insert(hs.end(),tmp.begin(),tmp.end());
     }
 
@@ -238,7 +214,10 @@ void ForwardChainerUTest::test_substitute_rule_part(void)
     std::vector<std::map<Handle, Handle>> var_groundings = { vg_map_1 };
     std::set<Handle> vars_case_1 = { var_a, var_b };
 
-    HandleSeq rule_derivatives = _fc->substitute_rule_part(_as, rule_handle,
+    Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
+    ForwardChainer fc(_as, rbs, grnd_2, HandleSeq { });
+
+    HandleSeq rule_derivatives = fc.substitute_rule_part(_as, rule_handle,
                                                            vars_case_1,
                                                            var_groundings);
     TS_ASSERT_EQUALS(rule_derivatives.size(), 1);
@@ -249,7 +228,7 @@ void ForwardChainerUTest::test_substitute_rule_part(void)
     var_groundings =
     {   vg_map_2};
     std::set<Handle> vars_case_2 = { var_b, var_c };
-    rule_derivatives = _fc->substitute_rule_part(_as, rule_handle, vars_case_2,
+    rule_derivatives = fc.substitute_rule_part(_as, rule_handle, vars_case_2,
                                                  var_groundings);
 
     TS_ASSERT_EQUALS(rule_derivatives.size(), 1);
@@ -271,7 +250,10 @@ void ForwardChainerUTest::test_unify(void)
     Rule rule(rule_handle);
     Handle target = eval.eval_h("(VariableNode \"$A\")");
 
-    bool result = _fc->unify(source,target,&rule);
+    Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
+    ForwardChainer fc(_as, rbs,target, HandleSeq { });
+
+    bool result =fc.unify(source,target,&rule);
     TS_ASSERT_EQUALS(result,true);
     //TODO more test cases here
 }
@@ -287,7 +269,10 @@ void ForwardChainerUTest::test_subatom_unify(void)
     Rule rule(rule_handle);
     Handle target = eval.eval_h("(VariableNode \"$A\")");
 
-    bool result = _fc->subatom_unify(source, &rule);
+    Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
+    ForwardChainer fc(_as, rbs,target, HandleSeq { });
+
+    bool result = fc.subatom_unify(source, &rule);
     TS_ASSERT_EQUALS(result,true);
     //TODO more test cases here
 }
