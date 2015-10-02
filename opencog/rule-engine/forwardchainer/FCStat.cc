@@ -38,12 +38,18 @@ bool FCStat::has_partial_grounding(const Handle& hsource)
 
 void FCStat::add_partial_grounding(Handle source, Handle hrule, HandleSeq pgroundings)
 {
-    PartiaGroundingRecord pgr(source,hrule,pgroundings);
-    auto it = std::find(_spg_stat.begin(),_spg_stat.end(),pgr);
+    if (hrule == Handle::UNDEFINED) {
+        PartiaGroundingRecord pgr(source);
+        _spg_stat.push_back(pgr);
+        return;
+    }
+
+    PartiaGroundingRecord pgr(source, hrule, pgroundings);
+    auto it = std::find(_spg_stat.begin(), _spg_stat.end(), pgr);
 
     if (it != _spg_stat.end()) {
         (*it)._rule_pgroundings_map.insert(pgr._rule_pgroundings_map.begin(),
-                                  pgr._rule_pgroundings_map.end());
+                                           pgr._rule_pgroundings_map.end());
     } else {
         _spg_stat.push_back(pgr);
     }

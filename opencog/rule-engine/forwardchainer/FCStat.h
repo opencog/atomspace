@@ -41,6 +41,9 @@ public:
         _rule_pgroundings_map[hrule] = pgroundings;
     }
 
+    //When no matching rule is found
+    PartiaGroundingRecord(Handle source) : hsource(source) { }
+
     inline bool operator==(const PartiaGroundingRecord& spg)
     {
         return (spg.hsource == hsource) ? true : false;
