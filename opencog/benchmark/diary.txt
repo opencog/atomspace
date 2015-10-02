@@ -909,3 +909,20 @@ After:
 2 October 2015
 
 On "fanny", after removing UUID's from handles.
+
+                 old (March)  new (de-uuid)
+                    -A            -A
+   test           AtomSpace
+   name           K-ops/sec     K-ops/sec
+   ----           ---------     --------
+  noop             1915          1821
+  addNode           183           160
+  addLink            95.1          73.5
+  removeAtom        161           166
+  getType          1720           916
+  getTV            1486           746
+  setTV             863           471
+  getOutgoingSet   1532           626
+  getIncomingSet   1117           504
+
+Conclude: ...
