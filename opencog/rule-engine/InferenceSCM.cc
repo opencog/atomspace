@@ -24,8 +24,6 @@
 
 #include "InferenceSCM.h"
 
-#include <opencog/guile/SchemePrimitive.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 #include <opencog/atomspace/AtomSpace.h>
