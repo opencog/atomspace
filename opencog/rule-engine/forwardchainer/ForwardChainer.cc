@@ -432,7 +432,7 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
  * @return  A HandleSeq of derived rule handles.
  */
 HandleSeq ForwardChainer::derive_rules(Handle source, Handle target,
-                                               Rule* rule)
+                                               const Rule* rule)
 {
     //exceptions
     if (not is_valid_implicant(target))
@@ -499,7 +499,7 @@ HandleSeq ForwardChainer::derive_rules(Handle source, Handle target,
  *
  * @return  A HandleSeq of derived rule handles.
  */
-HandleSeq ForwardChainer::derive_rules(Handle source, Rule* rule,
+HandleSeq ForwardChainer::derive_rules(Handle source, const Rule* rule,
                                                bool subatomic/*=false*/)
 {
     HandleSeq derived_rules = { };
@@ -557,7 +557,7 @@ void ForwardChainer::validate(Handle hsource, HandleSeq hfocus_set)
  *
  * @return   An unoderedHandleSet of of all unique atoms in the implicant.
  */
-UnorderedHandleSet ForwardChainer::get_subatoms(Rule *rule)
+UnorderedHandleSet ForwardChainer::get_subatoms(const Rule *rule)
 {
     UnorderedHandleSet output_expanded;
 
@@ -634,7 +634,7 @@ HandleSeq ForwardChainer::substitute_rule_part(
  *
  * @return        true on successful unification and false otherwise.
  */
-bool ForwardChainer::unify(Handle source, Handle target, Rule* rule)
+bool ForwardChainer::unify(Handle source, Handle target, const Rule* rule)
 {
     //exceptions
     if (not is_valid_implicant(target))
@@ -667,7 +667,7 @@ bool ForwardChainer::unify(Handle source, Handle target, Rule* rule)
  *
  *  @return        true if source is subatom unifiable and false otherwise.
  */
-bool ForwardChainer::subatom_unify(Handle source, Rule* rule)
+bool ForwardChainer::subatom_unify(Handle source, const Rule* rule)
 {
     UnorderedHandleSet output_expanded = get_subatoms(rule);
 
