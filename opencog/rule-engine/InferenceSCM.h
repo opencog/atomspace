@@ -50,7 +50,7 @@ public:
  *
  * @return ???
  */
-static Handle do_forward_chaining(AtomSpace* as,
+Handle do_forward_chaining(AtomSpace* as,
                            const Handle& h,
                            const Handle& rbs,
                            const Handle& hfocus_set);
