@@ -214,25 +214,6 @@ void AtomSpaceBenchmark::setMethod(std::string methodToTest)
         methodNames.push_back( "noop");
         foundMethod = true;
     }
-
-    if (methodToTest == "all" || methodToTest == "addNode") {
-        methodsToTest.push_back( &AtomSpaceBenchmark::bm_addNode);
-        methodNames.push_back( "addNode");
-        foundMethod = true;
-    }
-
-    if (methodToTest == "all" || methodToTest == "addLink") {
-        methodsToTest.push_back( &AtomSpaceBenchmark::bm_addLink);
-        methodNames.push_back( "addLink");
-        foundMethod = true;
-    }
-
-    if (methodToTest == "all" || methodToTest == "removeAtom") {
-        methodsToTest.push_back( &AtomSpaceBenchmark::bm_rmAtom);
-        methodNames.push_back( "removeAtom");
-        foundMethod = true;
-    }
-
     if (methodToTest == "all" || methodToTest == "getType") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getType);
         methodNames.push_back( "getType");
@@ -268,6 +249,24 @@ void AtomSpaceBenchmark::setMethod(std::string methodToTest)
     if (methodToTest == "all" || methodToTest == "getIncomingSet") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getIncomingSet);
         methodNames.push_back( "getIncomingSet");
+        foundMethod = true;
+    }
+
+    if (methodToTest == "all" || methodToTest == "addNode") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_addNode);
+        methodNames.push_back( "addNode");
+        foundMethod = true;
+    }
+
+    if (methodToTest == "all" || methodToTest == "addLink") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_addLink);
+        methodNames.push_back( "addLink");
+        foundMethod = true;
+    }
+
+    if (methodToTest == "all" || methodToTest == "removeAtom") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_rmAtom);
+        methodNames.push_back( "removeAtom");
         foundMethod = true;
     }
 
