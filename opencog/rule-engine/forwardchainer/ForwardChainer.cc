@@ -244,16 +244,14 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
     //Select a rule among the admissible rules in the rule-base via stochastic
     //selection,based on the weights of the rules in the current context.
     Rule* rule = nullptr;
-    bool unifiable = false;
 
     if (subatom_match) {
         _log->debug("[ForwardChainer] Subatom-unifying. %s",(hsource->toShortString()).c_str());
 
-        while (!unifiable and !rule_weight.empty()) {
+        while (!rule_weight.empty()) {
             Rule* temp = _rec.tournament_select(rule_weight);
 
             if (subatom_unify(hsource, temp)) {
-                unifiable = true;
                 rule = temp;
                 break;
             }
@@ -263,17 +261,19 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
     } else {
         _log->debug("[ForwardChainer] Unifying. %s",(hsource->toShortString()).c_str());
 
-        while (!unifiable and !rule_weight.empty()) {
+        bool unified = false;
+        while (not rule_weight.empty()) {
             Rule *temp = _rec.tournament_select(rule_weight);
             HandleSeq hs = temp->get_implicant_seq();
 
             for (Handle target : hs) {
                 if (unify(hsource, target, temp)) {
-                    unifiable = true;
+                    unified = true;
                     rule = temp;
                     break;
                 }
             }
+            if(unified) break;
             rule_weight.erase(temp);
         }
     }
