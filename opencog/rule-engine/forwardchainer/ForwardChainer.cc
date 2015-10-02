@@ -1,7 +1,7 @@
 /*
  * ForwardChainer.cc
  *
- * Copyright (C) 2014,2015
+ * Copyright (C) 2014,2015 OpenCog Foundation
  *
  * Author: Misgana Bayetta <misgana.bayetta@gmail.com>
  *
@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/Logger.h>
+#include <boost/range/algorithm/find.hpp>
 
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/PatternLink.h>
@@ -31,6 +31,7 @@
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/query/DefaultImplicator.h>
 #include <opencog/rule-engine/Rule.h>
+#include <opencog/util/Logger.h>
 
 #include "ForwardChainer.h"
 #include "FocusSetPMCB.h"
@@ -38,20 +39,43 @@
 
 using namespace opencog;
 
-ForwardChainer::ForwardChainer(AtomSpace& as, Handle rbs) :
-        _as(as), _rec(as), _rbs(rbs), _configReader(as, rbs), _fcmem(&as)
+ForwardChainer::ForwardChainer(AtomSpace& as, Handle rbs, Handle hsource,
+                               HandleSeq focus_set) :
+        _as(as), _rec(as), _rbs(rbs), _configReader(as, rbs)
 {
-    init();
+    init(hsource,focus_set);
 }
 
-void ForwardChainer::init()
+ForwardChainer::~ForwardChainer()
 {
-    _fcmem.set_search_in_af(_configReader.get_attention_allocation());
-    _fcmem.set_rules(_configReader.get_rules());
-    _fcmem.set_cur_rule(nullptr);
-    
+
+}
+
+void ForwardChainer::init(Handle hsource, HandleSeq focus_set)
+{
+     validate(hsource, focus_set);
+
+    _search_in_af = _configReader.get_attention_allocation();
+    _search_focus_Set = not focus_set.empty();
     _ts_mode = TV_FITNESS_BASED;
 
+    //Set potential source.
+    HandleSeq init_sources = { };
+    //Accept set of initial sources wrapped in a SET_LINK
+    if (LinkCast(hsource) and hsource->getType() == SET_LINK) {
+        init_sources = _as.get_outgoing(hsource);
+    } else {
+        init_sources.push_back(hsource);
+    }
+    update_potential_sources(init_sources);
+
+     //Set rules.
+     for(Rule& r :_configReader.get_rules())
+     {
+         _rules.push_back(&r);
+     }
+    _cur_rule = nullptr;
+    
     // Provide a logger
     _log = NULL;
     setLogger(new opencog::Logger("forward_chainer.log", Logger::FINE, true));
@@ -70,107 +94,67 @@ Logger* ForwardChainer::getLogger()
 }
 
 /**
- * Does one step forward chaining
+ * Does one step forward chaining and stores result.
  *
- * @return An unordered sets of result of applying a particular selected rule.
  */
-UnorderedHandleSet ForwardChainer::do_step(bool search_focus_set/* = false*/)
+void ForwardChainer::do_step(void)
 {
-
-    Handle hsource = choose_next_source(_fcmem);
-
-    _log->debug("[ForwardChainer] Next source %s", hsource->toString().c_str());
-
-    _fcmem.set_source(hsource);
+    _cur_source=choose_next_source();
+    _log->debug("[ForwardChainer] Next source %s", _cur_source->toString().c_str());
 
     HandleSeq derived_rhandles;
 
     //choose a rule that source unifies with one of its premises.
-    Rule *rule = choose_rule(hsource, false);
+    //if not found try to find by matching suba-toms of the rules
+    //premises.
+    Rule *rule = choose_rule(_cur_source, false);
     if (rule) {
-        _fcmem.set_cur_rule(rule);
-        derived_rhandles = derive_rules(hsource, rule);
+        _cur_rule = rule;
+        derived_rhandles = derive_rules(_cur_source, rule);
 
     } else {
-        //choose rule that unifies that source unifies with sub-atoms of its premises.
-        rule = choose_rule(hsource, true);
-
+        rule = choose_rule(_cur_source, true);
         if (rule) {
-            _fcmem.set_cur_rule(rule);
-            derived_rhandles = derive_rules(hsource, rule,
+            _cur_rule = rule;
+            derived_rhandles = derive_rules(_cur_source, rule,
             true);
         }
     }
 
     _log->debug( "Derived rule size = %d", derived_rhandles.size());
 
-    UnorderedHandleSet products;
-
+    HandleSeq products;
+    //Applying all partial groundings found.
     for (Handle rhandle : derived_rhandles) {
-        HandleSeq temp_result = apply_rule(rhandle,search_focus_set);
-
-        std::copy(temp_result.begin(), temp_result.end(),
-                  std::inserter(products, products.end()));
+        HandleSeq hs = apply_rule(rhandle,_search_focus_Set);
+        products.insert(products.end(),hs.begin(),hs.end());
     }
 
-    return products;
+    //Finally store source partial groundings and inference results.
+    if (not derived_rhandles.empty()) {
+        _fcstat.add_partial_grounding(_cur_source, rule->get_handle(),
+                              derived_rhandles);
+        _fcstat.add_inference_record(
+                _cur_source, HandleSeq(products.begin(), products.end()));
+    }
+
 }
 
-void ForwardChainer::do_chain(Handle hsource, HandleSeq focus_set)
+void ForwardChainer::do_chain(void)
 {
-
-    validate(hsource,focus_set);
-
-    _fcmem.set_focus_set(focus_set);
-
-    HandleSeq init_sources;
-    //Accept set of initial sources wrapped in a SET_LINK
-    if(LinkCast(hsource) and hsource->getType() == SET_LINK)
+    //Relex2Logic uses this.TODO make a separate class
+    //to handle this robustly.
+    if(_potential_sources.empty())
     {
-     init_sources = _as.get_outgoing(hsource);
-
-     //Relex2Logic uses this.TODO make a separate class
-     //to handle this robustly.
-     if(init_sources.empty())
-     {
-         bool search_in_af = not focus_set.empty();
-         apply_all_rules(search_in_af);
-         return;
-     }
-
+        apply_all_rules(_search_focus_Set);
+        return;
     }
-    else
-    {
-        init_sources.push_back(hsource);
-    }
-
-    // Variable fulfillment query.
-    UnorderedHandleSet var_nodes = get_outgoing_nodes(hsource,
-                                                      { VARIABLE_NODE });
-    if (not var_nodes.empty())
-        return do_pm(hsource, var_nodes);
-
-    // Default forward chaining
-    _fcmem.update_potential_sources(init_sources);
 
     auto max_iter = _configReader.get_maximum_iterations();
 
     while (_iteration < max_iter /*OR other termination criteria*/) {
-
         _log->debug("Iteration %d", _iteration);
-
-        UnorderedHandleSet products;
-
-        if (focus_set.empty())
-            products = do_step(false);
-        else
-            products = do_step(true);
-
-        _fcmem.add_rules_product(_iteration,
-                                 HandleSeq(products.begin(), products.end()));
-        _fcmem.update_potential_sources(
-                HandleSeq(products.begin(), products.end()));
-
+         do_step();
         _iteration++;
     }
 
@@ -192,7 +176,7 @@ void ForwardChainer::do_pm(const Handle& hsource,
     HandleSeq vars;
     for (auto h : var_nodes)
         vars.push_back(h);
-    _fcmem.set_source(hsource);
+    _cur_source = hsource;
     Handle hvar_list = _as.add_link(VARIABLE_LIST, vars);
     Handle hclause = _as.add_link(AND_LINK, hsource);
 
@@ -202,7 +186,7 @@ void ForwardChainer::do_pm(const Handle& hsource,
     sl->satisfy(impl);
 
     // Update result
-    _fcmem.add_rules_product(0, impl.get_result_list());
+    _fcstat.add_inference_record(Handle::UNDEFINED, impl.get_result_list());
 
     // Delete the AND_LINK and LIST_LINK
     _as.remove_atom(hvar_list);
@@ -215,8 +199,8 @@ void ForwardChainer::do_pm(const Handle& hsource,
         DefaultImplicator impl(&_as);
         impl.implicand = bl->get_implicand();
         bl->imply(impl);
-        _fcmem.set_cur_rule(rule);
-        _fcmem.add_rules_product(0, impl.get_result_list());
+        _cur_rule = rule;
+        _fcstat.add_inference_record(Handle::UNDEFINED, impl.get_result_list());
     }
 }
 
@@ -227,29 +211,27 @@ void ForwardChainer::do_pm(const Handle& hsource,
  */
 void ForwardChainer::apply_all_rules(bool search_focus_set /*= false*/)
 {
-    vector<Rule*> rules = _fcmem.get_rules();
-
-    for (Rule* rule : rules) {
-        _fcmem.set_cur_rule(rule);
+    for (Rule* rule : _rules) {
+        _cur_rule = rule;
         HandleSeq hs = apply_rule(rule->get_handle(), search_focus_set);
 
         //Update
-        _fcmem.add_rules_product(0, hs);
-        _fcmem.update_potential_sources(hs);
+       _fcstat.add_inference_record(Handle::UNDEFINED,hs);
+        update_potential_sources(hs);
     }
 
 }
 
 HandleSeq ForwardChainer::get_chaining_result()
 {
-    return _fcmem.get_result();
+    return _fcstat.get_all_inferences();
 }
 
 Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
 {
     //TODO move this somewhere else
     std::map<Rule*, float> rule_weight;
-    for (Rule* r : _fcmem.get_rules())
+    for (Rule* r : _rules)
         rule_weight[r] = r->get_weight();
 
     _log->debug("[ForwardChainer] %d rules to be searched",rule_weight.size());
@@ -300,47 +282,21 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
     return rule;
 };
 
-HandleSeq ForwardChainer::choose_premises(FCMemory& fcmem)
-{
-    HandleSeq inputs;
-    URECommons urec(_as);
-    Handle hsource = fcmem.get_cur_source();
-
-    // Get everything associated with the source handle.
-    UnorderedHandleSet neighbors = get_distant_neighbors(hsource, 2);
-
-    // Add all root links of atoms in @param neighbors.
-    for (auto hn : neighbors) {
-        if (hn->getType() != VARIABLE_NODE) {
-            HandleSeq roots;
-            urec.get_root_links(hn, roots);
-            for (auto r : roots) {
-                if (find(inputs.begin(), inputs.end(), r) == inputs.end() and r->getType()
-                        != BIND_LINK)
-                    inputs.push_back(r);
-            }
-        }
-    }
-
-    return inputs;
-}
-
-Handle ForwardChainer::choose_next_source(FCMemory& fcmem)
+Handle ForwardChainer::choose_next_source()
 {
 
     URECommons urec(_as);
-    HandleSeq tlist = fcmem.get_potential_sources();
     map<Handle, float> tournament_elem;
 
     switch (_ts_mode) {
     case TV_FITNESS_BASED:
-        for (Handle t : tlist)
-            tournament_elem[t] = urec.tv_fitness(t);
+        for (Handle s : _potential_sources)
+            tournament_elem[s] = urec.tv_fitness(s);
         break;
 
     case STI_BASED:
-        for (Handle t : tlist)
-            tournament_elem[t] = t->getSTI();
+        for (Handle s : _potential_sources)
+            tournament_elem[s] = s->getSTI();
         break;
 
     default:
@@ -350,15 +306,17 @@ Handle ForwardChainer::choose_next_source(FCMemory& fcmem)
 
     Handle hchosen = Handle::UNDEFINED;
 
-    //!Choose a new source that has never been chosen before.
-    //!xxx FIXME since same handle might be chosen multiple times the following
-    //!code doesn't guarantee all sources have been exhaustively looked.
+    //!Prioritize new source selection.
     for (size_t i = 0; i < tournament_elem.size(); i++) {
         Handle hselected = urec.tournament_select(tournament_elem);
-        if (fcmem.isin_selected_sources(hselected)) {
+        bool selected_before = (boost::find(_selected_sources, hselected)
+                != _selected_sources.end());
+
+        if (selected_before) {
             continue;
         } else {
             hchosen = hselected;
+            _selected_sources.push_back(hchosen);
             break;
         }
     }
@@ -379,13 +337,11 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
         AtomSpace focus_set_as;
 
         //Add focus set atoms to focus_set atomspace
-        HandleSeq focus_set_atoms = _fcmem.get_focus_set();
-        for (Handle h : focus_set_atoms)
+        for (Handle h : _focus_set)
             focus_set_as.add_atom(h);
 
         //Add source atoms to focus_set atomspace
-        HandleSeq sources = _fcmem.get_potential_sources();
-        for (Handle h : sources)
+        for (Handle h : _potential_sources)
             focus_set_as.add_atom(h);
 
         //rhandle may introduce a new atoms that satisfies condition for the output
@@ -718,4 +674,12 @@ Handle ForwardChainer::gen_sub_varlist(const Handle& parent,
     }
 
     return Handle(createVariableList(final_oset));
+}
+
+void ForwardChainer::update_potential_sources(HandleSeq input)
+{
+    for (Handle i : input) {
+        if (boost::find(_potential_sources, i) == _potential_sources.end())
+            _potential_sources.push_back(i);
+    }
 }
