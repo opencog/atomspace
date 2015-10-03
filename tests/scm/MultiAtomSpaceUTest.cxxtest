@@ -144,6 +144,7 @@ void MultiAtomSpace::test_two_scm(void)
 #define CHKEV(ev) \
 	TSM_ASSERT("Caught scm error during eval", \
 		(false == ev->eval_error()));
+
 void MultiAtomSpace::test_three(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);

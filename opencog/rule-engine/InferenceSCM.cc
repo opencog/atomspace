@@ -24,60 +24,40 @@
 
 #include "InferenceSCM.h"
 
-#include <opencog/guile/SchemePrimitive.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;
 
-InferenceSCM::InferenceSCM()
-{
-    static bool is_init = false;
-    if (is_init) return;
-    is_init = true;
-    scm_with_guile(init_in_guile, this);
-}
+// XXX HACK ALERT This needs to be static, in order for python to
+// work correctly.  The problem is that python keeps creating and
+// destroying this class, but it expects things to stick around.
+// Oh well. I guess that's OK, since the definition is meant to be
+// for the lifetime of the server, anyway.
+std::vector<FunctionWrap*> InferenceSCM::_binders;
 
-/**
- * Init function for using with scm_with_guile.
- *
- * Creates the scheme module and uses it by default.
- *
- * @param self   pointer to the InferenceSCM object
- * @return       null
- */
-void* InferenceSCM::init_in_guile(void* self)
-{
-    scm_c_define_module("opencog rule-engine", init_in_module, self);
-    scm_c_use_module("opencog rule-engine");
-    return NULL;
-}
+InferenceSCM::InferenceSCM() : ModuleWrap("opencog rule-engine") {}
 
-/**
- * The main function for defining stuff in the scheme module.
- *
- * @param data   pointer to the InferenceSCM object
- */
-void InferenceSCM::init_in_module(void* data)
-{
-    InferenceSCM* self = (InferenceSCM*) data;
-    self->init();
-}
-
-
+/// This is called while (opencog rule-engine) is the current module.
+/// Thus, all the definitions below happen in that module.
 void InferenceSCM::init(void)
 {
-#ifdef HAVE_GUILE
-    // All commands for invoking the rule engine from scm shell should
-    // be declared here
-    define_scheme_primitive("cog-fc", &InferenceSCM::do_forward_chaining,
-                            this, "rule-engine");
-    define_scheme_primitive("cog-bc", &InferenceSCM::do_backward_chaining,
-                            this, "rule-engine");
+	_binders.push_back(new FunctionWrap(do_forward_chaining,
+	                                    "cog-fc", "rule-engine"));
+	_binders.push_back(new FunctionWrap(do_backward_chaining,
+	                                    "cog-bc", "rule-engine"));
+}
+
+InferenceSCM::~InferenceSCM()
+{
+#if PYTHON_BUG_IS_FIXED
+	for (FunctionWrap* pw : _binders)
+		delete pw;
 #endif
 }
+
+namespace opencog {
 
 /**
  * A scheme cog-fc call back handler method which invokes the forward
@@ -91,14 +71,12 @@ void InferenceSCM::init(void)
  *
  * @return             A ListLink containing the result of FC inference.
  */
-Handle InferenceSCM::do_forward_chaining(Handle hsource,
-                                         Handle rbs,
-                                         Handle hfocus_set)
+Handle do_forward_chaining(AtomSpace* as,
+                           const Handle& hsource,
+                           const Handle& rbs,
+                           const Handle& hfocus_set)
 {
 #ifdef HAVE_GUILE
-    AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fc");
-    ForwardChainer fc(*as, rbs);
-
     HandleSeq focus_set = {};
 
     if (hfocus_set->getType() == SET_LINK)
@@ -108,8 +86,8 @@ Handle InferenceSCM::do_forward_chaining(Handle hsource,
                 TRACE_INFO,
                 "InferenceSCM::do_forward_chaining - focus set should be SET_LINK type!");
 
-    //TODO variable fulfillment
-    fc.do_chain(hsource,focus_set);
+    ForwardChainer fc(*as, rbs, hsource, focus_set);
+    fc.do_chain();
     HandleSeq result = fc.get_chaining_result();
 
     return as->add_link(LIST_LINK, result);
@@ -119,15 +97,16 @@ Handle InferenceSCM::do_forward_chaining(Handle hsource,
 #endif
 }
 
-Handle InferenceSCM::do_backward_chaining(Handle h, Handle rbs, Handle focus_link)
+Handle do_backward_chaining(AtomSpace* as,
+                            const Handle& h,
+                            const Handle& rbs,
+                            const Handle& focus_link)
 {
     if (Handle::UNDEFINED == rbs)
         throw RuntimeException(TRACE_INFO,
             "InferenceSCM::do_backward_chaining - invalid rulebase!");
 
 #ifdef HAVE_GUILE
-    AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
-
     BackwardChainer bc(*as, rbs);
     bc.set_target(h, focus_link);
 
@@ -153,8 +132,10 @@ Handle InferenceSCM::do_backward_chaining(Handle h, Handle rbs, Handle focus_lin
 #endif
 }
 
+}
 
 void opencog_ruleengine_init(void)
 {
     static InferenceSCM inference;
+    inference.module_init();
 }

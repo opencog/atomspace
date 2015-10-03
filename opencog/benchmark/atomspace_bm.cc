@@ -104,7 +104,7 @@ int main(int argc, char** argv)
            case 'R': {
              char* last_arg_char = optarg + strlen(optarg);
              benchmarker.randomseed = (unsigned long) std::strtoul(optarg,
-                    &last_arg_char, 10); }                    
+                    &last_arg_char, 10); }
              break;
            case 'S':
              benchmarker.sizeIncrease = atoi(optarg);

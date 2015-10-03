@@ -75,6 +75,7 @@ class Atom
     friend class ::AtomUTest;     // Needs to call setFlag()
     friend class AtomStorage;     // Needs to set _uuid
     friend class AtomTable;       // Needs to call MarkedForRemoval()
+    friend class AtomSpace;       // Needs to call getAtomTable()
     friend class ImportanceIndex; // Needs to call setFlag()
     friend class Handle;          // Needs to view _uuid
     friend class SavingLoading;   // Needs to set _uuid
@@ -189,6 +190,8 @@ private:
 public:
 
     virtual ~Atom();
+
+    inline UUID getUUID() const { return _uuid; }
 
     /** Returns the AttentionValue object of the atom.
      *

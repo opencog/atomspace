@@ -31,37 +31,50 @@
 
 using namespace opencog;
 
-const Handle Handle::UNDEFINED(ULONG_MAX);
+const Handle Handle::UNDEFINED;
 const AtomPtr Handle::NULL_POINTER;
 
-Handle::Handle(const AtomPtr& atom) : _uuid(atom->_uuid), _ptr(atom) {}
-
-Handle& Handle::operator=(const AtomPtr& a)
+Handle::Handle(const UUID u)
 {
-    this->_uuid = a->_uuid;
-    this->_ptr = a;
-    return *this;
+	_ptr = do_res(u);
+}
+
+UUID Handle::value(void) const {
+    const Atom* a = operator->();
+    if (a) return a->getUUID();
+    return ULONG_MAX;
 }
 
 // ===================================================
 // Atom comparison.
 
+#if 0
 bool Handle::atoms_eq(const AtomPtr& a, const AtomPtr& b)
 {
     if (a == b) return true;
     if (NULL == a or NULL == b) return false;
     return *a == *b;
 }
+#endif
 
 bool Handle::atoms_less(const AtomPtr& a, const AtomPtr& b)
 {
     if (a == b) return false;
     if (NULL == a) return true;
     if (NULL == b) return false;
-    if (*a == *b) return false;
-    return a < b;
-}
+    UUID ua = a->getUUID();
+    UUID ub = b->getUUID();
+    if (INVALID_UUID != ua or INVALID_UUID != ub) return ua < ub;
 
+    // If both UUID's are invalid, we still need to compare
+    // the atoms somehow. The need to compare in some "reasonable"
+    // way, so that std::set<Handle> works correctly when it uses
+    // the sttd::less<Handle> operator, which calls this function.
+    // Performing an address-space comparison is all I can think
+    // of...
+    // if (*a == *b) return false; lets not do this cpu-time-waster...
+    return a.get() < b.get();
+}
 
 // ===================================================
 // Handle resolution stuff.
@@ -83,30 +96,11 @@ void Handle::clear_resolver(const AtomTable* tab)
 
 // Search several atomspaces, in order.  First one to come up with
 // the atom wins.  Seems to work, for now.
-inline AtomPtr Handle::do_res(const Handle* hp)
+inline AtomPtr Handle::do_res(UUID uuid)
 {
     for (const AtomTable* at : _resolver) {
-        AtomPtr a(at->getHandle((Handle&)(*hp))._ptr);
+        AtomPtr a(at->getHandle(uuid)._ptr);
         if (a.get()) return a;
     }
     return NULL;
-}
-
-Atom* Handle::resolve()
-{
-    AtomPtr a(do_res(this));
-    _ptr.swap(a);
-    return _ptr.get();
-}
-
-Atom* Handle::cresolve() const
-{
-    return do_res(this).get();
-}
-
-AtomPtr Handle::resolve_ptr()
-{
-    AtomPtr a(do_res(this));
-    _ptr.swap(a);
-    return _ptr;
 }

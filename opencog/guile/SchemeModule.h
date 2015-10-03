@@ -20,20 +20,46 @@ class AtomSpace;
 class FunctionWrap
 {
 	private:
-		Handle (*_func)(AtomSpace*, const Handle&);
-		Handle (*_func_htq)(AtomSpace*, const Handle&, Type, const HandleSeq&);
+		void (*_func_v_s)(const std::string&);
+		const std::string& (*_func_s)();
+		void (*_func_v_b)(bool);
+		Handle (*_func_h_ah)(AtomSpace*, const Handle&);
+		Handle (*_func_h_ahhh)(AtomSpace*, const Handle&,
+		                      const Handle&, const Handle&);
+		Handle (*_func_h_ahtq)(AtomSpace*, const Handle&, Type, const HandleSeq&);
 
-		Handle wrapper(Handle);
-		Handle wrapper_htq(Handle, Type, const HandleSeq&);
+		// Wrappers are used because define_scheme_primitive expect a
+		// class function member pointer as opposed to a dangling
+		// function pointer.
+		void wrapper_v_s(const std::string&);
+		const std::string& wrapper_s();
+		void wrapper_v_b(bool);
 
-		TruthValuePtr (*_pred)(AtomSpace*, const Handle&);
-		TruthValuePtr prapper(Handle);
+		// These wrappers abstract the atomspace away.
+		Handle as_wrapper_h_h(Handle);
+		Handle as_wrapper_h_hhh(Handle, Handle, Handle);
+		Handle as_wrapper_h_htq(Handle, Type, const HandleSeq&);
+
+		// These wrappers return a TruthValuePtr and abstract the
+		// atomspace away.
+		TruthValuePtr (*_pred_ah)(AtomSpace*, const Handle&);
+		TruthValuePtr as_prapper_h(Handle);
 
 		const char *_name;  // scheme name of the c++ function.
 	public:
+		FunctionWrap(void (*)(bool),
+		             const char*, const char*);
+		FunctionWrap(const std::string& (*)(),
+		             const char*, const char*);
+		FunctionWrap(void (*)(const std::string&),
+		             const char*, const char*);
 		FunctionWrap(Handle (*)(AtomSpace*, const Handle&),
 		             const char*, const char*);
-		FunctionWrap(Handle (*)(AtomSpace*, const Handle&, Type, const HandleSeq&),
+		FunctionWrap(Handle (*)(AtomSpace*, const Handle&,
+		                        Type, const HandleSeq&),
+		             const char*, const char*);
+		FunctionWrap(Handle (*)(AtomSpace*, const Handle&, const Handle&,
+		                        const Handle&),
 		             const char*, const char*);
 		FunctionWrap(TruthValuePtr (*)(AtomSpace*, const Handle&),
 		             const char*, const char*);
