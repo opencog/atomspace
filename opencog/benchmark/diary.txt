@@ -915,23 +915,29 @@ On "fanny", after removing UUID's from handles.
    test           AtomSpace
    name           K-ops/sec     K-ops/sec    K-ops/sec
    ----           ---------     ---------    --------
-  noop             1915          1851         1821
+  noop             1915          1780         1821
+  getType          1720          1391         1343
+  getTV            1486          1028          997
+  setTV             863           575          574
+  getOutgoingSet   1532           832          836
+  getIncomingSet   1117           642          634
   addNode           183           156          160
   addLink            95.1          84.3         73.5
   removeAtom        161           172          166
-  getType          1720           915          916
-  getTV            1486           739          746
-  setTV             863           475          471
-  getOutgoingSet   1532           638          626
-  getIncomingSet   1117           506          504
+
+
 
 The "old" column is a cut-n-paste from the March 2015 results above.
 The "new (master)" column is the git-pull from 1 October 2015.
 The "new (de-uuid)" column is the de-uuid branch thate removes the
     UUID's from the handle.
 
+The measurement for the gets has to be done with -n1M to get valid
+values; the default -n of 100K is too small.
+
+
 Observations:
-* The getType, getTV, setTV, getIn/OutSet saw reductions by more than
+* The getType, getTV, setTV, getIn/OutSet saw reductions of about
   half since March.  Why?  Well, comparing the March No-op results to
   to these suggests that these were near the limit of measurability (as
   currently done, which is poorly). These functions could-be/were rate
