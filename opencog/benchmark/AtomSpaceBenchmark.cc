@@ -276,6 +276,12 @@ void AtomSpaceBenchmark::setMethod(std::string methodToTest)
         foundMethod = true;
     }
 
+    if (methodToTest == "all" or methodToTest == "push_back") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_push_back);
+        methodNames.push_back( "push_back");
+        foundMethod = true;
+    }
+
     if (!foundMethod) {
         std::cerr << "Error: specified a bad test name: " << methodToTest << std::endl;
         exit(1);
@@ -1288,25 +1294,73 @@ timepair_t AtomSpaceBenchmark::bm_getHandlesByType()
     return timepair_t(0,0);
 }
 
-#if 0
-xxxxxxxxxxxxxxx
+// ================================================================
+// ================================================================
+// ================================================================
+
 timepair_t AtomSpaceBenchmark::bm_push_back()
 {
     Handle ha = getRandomHandle();
     Handle hb = getRandomHandle();
     Handle hc = getRandomHandle();
     Handle hd = getRandomHandle();
-Nlooops
 
-    clock_t t_begin = clock();
-    HandleSeq oset;
-    oset.push_back(ha);
-    clock_t time_taken = clock() - t_begin;
+    if (1 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            HandleSeq oset;
+            oset.push_back(ha);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
 
-    return timepair_t(time_taken,0);
+    if (2 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            HandleSeq oset;
+            oset.push_back(ha);
+            oset.push_back(hb);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    if (3 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            HandleSeq oset;
+            oset.push_back(ha);
+            oset.push_back(hb);
+            oset.push_back(hc);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    if (4 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            HandleSeq oset;
+            oset.push_back(ha);
+            oset.push_back(hb);
+            oset.push_back(hc);
+            oset.push_back(hd);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    return timepair_t(0,0);
 }
-#endif
-
 
 // ================================================================
 

@@ -1011,3 +1011,8 @@ to be correctly normalized.
 
 The removeAtom numbers are faster, because only 3/4ths the atomspace
 gets removed now. The change in addNode and addLink is unclear.
+
+======================================================================
+3 October 2015
+
+How fast is std::vector<Handle>, really?

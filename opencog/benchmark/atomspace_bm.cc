@@ -25,7 +25,10 @@ int main(int argc, char** argv)
      "-n <int>  \tHow many times to call the method in the measurement loop\n"
      "          \t(default: 100000)\n"
      "-r <int>  \tLooping count; how many times a python/scheme operation is looped\n"
-     "          \t(default: 1)\n"
+     "-u <int>  \tInner looping count\n"
+     "          \t(default: 2000)\n"
+     "-h <int>  \tstd::vector<Handle>::reserve() count\n"
+     "          \t(default: 0)\n"
      "-R <int>  \tUse specific randomseed; useful for benchmark comparisons\n"
      "          \t(default: time(NULL))\n"
      "-S <int>  \tHow many random atoms to add after each measurement\n"
@@ -52,7 +55,7 @@ int main(int argc, char** argv)
     opterr = 0;
     benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_AS;
 
-    while ((c = getopt (argc, argv, "tAXgMCcm:ln:r:R:S:p:s:d:kfi:")) != -1) {
+    while ((c = getopt (argc, argv, "tAXgMCcm:ln:r:u:h:R:S:p:s:d:kfi:")) != -1) {
        switch (c)
        {
            case 't':
@@ -100,6 +103,12 @@ int main(int argc, char** argv)
              break;
            case 'r':
              benchmarker.baseNloops = (unsigned int) atoi(optarg);
+             break;
+           case 'u':
+             benchmarker.baseNclock = (unsigned int) atoi(optarg);
+             break;
+           case 'h':
+             benchmarker.Nreserve = (unsigned int) atoi(optarg);
              break;
            case 'R': {
              char* last_arg_char = optarg + strlen(optarg);

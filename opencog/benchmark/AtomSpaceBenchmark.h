@@ -86,6 +86,7 @@ public:
     unsigned int baseNclock;
     unsigned int baseNreps;
     unsigned int baseNloops;
+    unsigned int Nreserve;
 
     bool memoize;
     bool compile;
@@ -150,7 +151,7 @@ public:
     timepair_t bm_getTruthValueZmq();
 #endif
 
-    // timepair_t bm_push_back();
+    timepair_t bm_push_back();
 };
 
 } // namespace opencog
