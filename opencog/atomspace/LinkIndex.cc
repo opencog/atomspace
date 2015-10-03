@@ -71,7 +71,9 @@ void LinkIndex::removeAtom(const AtomPtr& a)
 Handle LinkIndex::getHandle(Type t, const HandleSeq &seq) const
 {
 	const HandleSeqIndex &hsi = idx.at(t);
-	return hsi.get(seq)->getHandle();
+	Link* l = hsi.get(seq);
+	if (l) return l->getHandle();
+	return Handle::UNDEFINED;
 }
 
 void LinkIndex::remove(bool (*filter)(const Handle&))
