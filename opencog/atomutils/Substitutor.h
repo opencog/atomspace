@@ -92,7 +92,7 @@ public:
 	                         const std::map<Handle, Handle> &vars)
 	{
 		// throw, not assert, because this is a user error ...
-		if (Handle::UNDEFINED == expr)
+		if (nullptr == expr)
 			throw InvalidParamException(TRACE_INFO,
 				"Asked to substitute a null expression");
 

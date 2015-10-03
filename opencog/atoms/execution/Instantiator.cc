@@ -240,7 +240,7 @@ Handle Instantiator::instantiate(const Handle& expr,
                                  const std::map<Handle, Handle> &vars)
 {
 	// throw, not assert, because this is a user error ...
-	if (Handle::UNDEFINED == expr)
+	if (nullptr == expr)
 		throw InvalidParamException(TRACE_INFO,
 			"Asked to ground a null expression");
 
