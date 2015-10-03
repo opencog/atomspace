@@ -22,6 +22,7 @@
 
 (load-from-path "utilities.scm")
 
+; A query to find all humans
 (define human
   (GetLink
      ; This is the pattern that will be matched ...
@@ -35,6 +36,8 @@
 )
 
 
+; A re-write rule that, when it finds one graph, it creates another.
+; Here, for each $H that is human, asserts that $H is an animal.
 (define human-implies-animal
    (BindLink
       ; This is the pattern that will be matched ...
@@ -51,7 +54,8 @@
    )
 )
 
-
+; A re-write rule, like the above, except that, when it triggers,
+; it also computes a custom truth value.
 (define human-implies-animal-stv
    (BindLink
       ; This is the pattern that will be matched ...
@@ -109,12 +113,14 @@
   (ConceptNode "human")
 )
 
-; Run the Pattern-Mather by invoking either of the following.
+;;;; Run the Pattern-Mather by invoking any of the following.
+
 ; (cog-satisfying-set human)
 ; (cog-bind human-implies-animal)
 ; (cog-bind human-implies-animal-stv)
 
-;Expected output in the same order as the above invokation
+;;;; Expected output for each case above:
+
 ; (SetLink
 ;    (ConceptNode "Ben")
 ;    (ConceptNode "Linas")
@@ -135,4 +141,3 @@
 ;       (ConceptNode "animal")
 ;    )
 ; )
-
