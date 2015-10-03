@@ -604,8 +604,9 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
     }
 #endif /* HAVE_GUILE */
 
-#if HAVE_CYTHONX
+#if HAVE_CYTHON
     case BENCH_PYTHON: {
+#if HAVE_CYTHONX
         std::ostringstream dss;
         for (unsigned int i=0; i<Nloops; i++) {
             if (memoize) dss << "    ";   // indentation
@@ -631,6 +632,7 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
         clock_t t_begin = clock();
         pyev->eval(ps);
         return clock() - t_begin;
+#endif /* HAVE_CYTHON */
     }
 #endif /* HAVE_CYTHON */
     }
@@ -640,25 +642,33 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
 
 clock_t AtomSpaceBenchmark::makeRandomLink()
 {
-    Type t = defaultLinkType;
     double p = rng->randdouble();
-    if (p < chanceOfNonDefaultLink) t = randomType(LINK);
+    Type ta[Nclock];
+    HandleSeq og[Nclock];
+    for (unsigned int i = 0; i<Nclock; i++)
+    {
+        Type t = defaultLinkType;
+        if (p < chanceOfNonDefaultLink) t = randomType(LINK);
+        ta[i] = t;
 
-    size_t arity = (*prg)(randgen);
-    if (arity == 0) { ++arity; };
+        size_t arity = (*prg)(randgen);
+        if (arity == 0) { ++arity; };
 
-    // AtomSpace will throw if the context link has bad arity
-    if (CONTEXT_LINK == t) arity = 2;
+        // AtomSpace will throw if the context link has bad arity
+        if (CONTEXT_LINK == t) arity = 2;
 
-    HandleSeq outgoing;
-    for (size_t j=0; j < arity; j++) {
-        Handle h(getRandomHandle());
-        outgoing.push_back(h);
+        HandleSeq outgoing;
+        for (size_t j=0; j < arity; j++) {
+            Handle h(getRandomHandle());
+            outgoing.push_back(h);
+        }
+        og[i] = outgoing;
     }
 
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+#if HAVE_CYTHONX
         OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         dss << "aspace.add_link (" << t << ", [";
@@ -671,62 +681,75 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
         clock_t t_begin = clock();
         pyev->eval(ps);
         return clock() - t_begin;
+#endif /* HAVE_CYTHON */
     }
 #endif /* HAVE_CYTHON */
 
 #if HAVE_GUILE
     case BENCH_SCM: {
-        // This is somewhat more cumbersome and slower than what
-        // anyone would actually do in scheme, because handles are
-        // never handled in this way, but wtf, not much choice here.
-        // I guess its quasi-realistic as a stand-in for other work
-        // that might be done anyway...
-        std::ostringstream ss;
-        for (unsigned int i=0; i<Nloops; i++) {
-            if (25 < arity) arity = 25;
-            for (size_t j = 0; j < arity; j++) {
-                char c = 'a' + j;
-                ss << "(define h" << c
-                   << " (cog-atom " << outgoing[j].value() << "))\n";
+        std::string gsa[Nclock];
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            Type t = ta[i];
+            HandleSeq outgoing = og[i];
+            size_t arity = outgoing.size();
+
+            // This is somewhat more cumbersome and slower than what
+            // anyone would actually do in scheme, because handles are
+            // never handled in this way, but wtf, not much choice here.
+            // I guess its quasi-realistic as a stand-in for other work
+            // that might be done anyway...
+            std::ostringstream ss;
+            for (unsigned int i=0; i<Nloops; i++) {
+                if (25 < arity) arity = 25;
+                for (size_t j = 0; j < arity; j++) {
+                    char c = 'a' + j;
+                    ss << "(define h" << c
+                       << " (cog-atom " << outgoing[j].value() << "))\n";
+                }
+                ss << "(cog-new-link '"
+                   << classserver().getTypeName(t);
+                for (size_t j = 0; j < arity; j++) {
+                    char c = 'a' + j;
+                    ss << " h" << c;
+                }
+                ss << ")\n";
+
+                t = defaultLinkType;
+                p = rng->randdouble();
+                if (p < chanceOfNonDefaultLink) t = randomType(LINK);
+
+                arity = (*prg)(randgen);
+                if (arity == 0) { ++arity; };
+
+                // AtomSpace will throw if the context link has bad arity
+                if (CONTEXT_LINK == t) arity = 2;
+
+                outgoing.clear();
+                for (size_t j=0; j < arity; j++) {
+                    outgoing.push_back(getRandomHandle());
+                }
             }
-            ss << "(cog-new-link '"
-               << classserver().getTypeName(t);
-            for (size_t j = 0; j < arity; j++) {
-                char c = 'a' + j;
-                ss << " h" << c;
-            }
-            ss << ")\n";
-
-            t = defaultLinkType;
-            p = rng->randdouble();
-            if (p < chanceOfNonDefaultLink) t = randomType(LINK);
-
-            arity = (*prg)(randgen);
-            if (arity == 0) { ++arity; };
-
-            // AtomSpace will throw if the context link has bad arity
-            if (CONTEXT_LINK == t) arity = 2;
-
-            outgoing.clear();
-            for (size_t j=0; j < arity; j++) {
-                outgoing.push_back(getRandomHandle());
-            }
+            std::string gs = memoize_or_compile(ss.str());
+            gsa[i] = gs;
         }
-        std::string gs = memoize_or_compile(ss.str());
 
         clock_t t_begin = clock();
-        scm->eval_h(gs);
+        for (unsigned int i=0; i<Nclock; i++)
+            scm->eval_h(gsa[i]);
         return clock() - t_begin;
     }
 #endif /* HAVE_GUILE */
     case BENCH_TABLE: {
         clock_t tAddLinkStart = clock();
-        atab->add(createLink(t, outgoing), false);
+        for (unsigned int i=0; i<Nclock; i++)
+            atab->add(createLink(ta[i], og[i]), false);
         return clock() - tAddLinkStart;
     }
     case BENCH_AS: {
         clock_t tAddLinkStart = clock();
-        asp->add_link(t, outgoing);
+        for (unsigned int i=0; i<Nclock; i++)
+            asp->add_link(ta[i], og[i]);
         return clock() - tAddLinkStart;
     }}
     return 0;
