@@ -126,8 +126,8 @@ void Handle::clear_resolver(const AtomTable* tab)
 inline Handle Handle::do_res(UUID uuid)
 {
     for (const AtomTable* at : _resolver) {
-        Handler h(at->getHandle(uuid));
+        Handle h(at->getHandle(uuid));
         if (NULL != h) return h;
     }
-    return NULL;
+    return Handle();
 }
