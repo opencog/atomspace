@@ -59,6 +59,8 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
     baseNclock = 2000;
     baseNreps = 200 * baseNclock;
     baseNloops = 1;
+    Nreserve = 0;
+
     memoize = false;
     compile = false;
     sizeIncrease = 0;
@@ -771,7 +773,8 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
     return 0;
 }
 
-void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize, float _percentLinks, bool display)
+void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize,
+                                float _percentLinks, bool display)
 {
     BenchType saveKind = testKind;
 #if HAVE_CYTHON
@@ -790,9 +793,10 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize, float _percentLinks,
     }
 
     // Add nodes
+    Nclock  = 5000;
     long nodeCount = atomspaceSize * (1.0f - _percentLinks) / Nclock;
     int i;
-    if (display) cout << "Adding " << nodeCount << " nodes ";
+    if (display) cout << "Adding " << nodeCount*Nclock << " nodes ";
     int diff = nodeCount / PROGRESS_BAR_LENGTH;
     if (!diff) diff = 1;
     for (i=0; i<nodeCount; i++) {
