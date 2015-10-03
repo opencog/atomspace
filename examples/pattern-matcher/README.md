@@ -8,6 +8,7 @@ The first set of demos provide a basic introduction to various
 main features.
 
 * simple.scm: A basic introduction to pattern matching.
+* choice.scm: Using the ChoiceLink to explore alternatives.
 * gsn.scm: Calling arbitrary functions upon a match.
 * gpn.scm: Calling arbitrary functions to decide a match.
 * sequence.scm: Using GPN's to execute a sequence of tasks.
@@ -17,6 +18,7 @@ main features.
     the AtomSpace.
 * absent.scm: Use the AssignLink to set state; use AbsentLink to check
     for the absence of atoms in the AtomSpace.
+* define.scm: using DefineLinks to create patterns out of parts.
 
 Some simpler applications showing some things one can do, and how to do
 them.
@@ -25,5 +27,3 @@ them.
 * fsm-full.scm: A generic deterministic finite-state-machine constructor.
 * fsm-mealy.scm: A generic Mealy machine constructor.
 * markov-chain.scm: A Markov chain (probabilistic FSM) based on fsm-full.
-
-* define.scm: using DefineLinks to create patterns out of parts.
