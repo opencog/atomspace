@@ -96,10 +96,10 @@ int main(int argc, char** argv)
              exit(0);
              break;
            case 'n':
-             benchmarker.Nreps = (unsigned int) atoi(optarg);
+             benchmarker.baseNreps = (unsigned int) atoi(optarg);
              break;
            case 'r':
-             benchmarker.Nloops = (unsigned int) atoi(optarg);
+             benchmarker.baseNloops = (unsigned int) atoi(optarg);
              break;
            case 'R': {
              char* last_arg_char = optarg + strlen(optarg);
@@ -145,7 +145,7 @@ int main(int argc, char** argv)
 #endif // HAVE_CYTHON
     )
     {
-        if (1 != benchmarker.Nloops)
+        if (1 != benchmarker.baseNloops)
         {
             cerr << "Fatal Error: the atomspace tests do not support looping\n";
             exit(-1);

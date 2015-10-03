@@ -77,9 +77,15 @@ class AtomSpaceBenchmark
 
     std::vector<std::string>  methodNames;
 
-public:
+    unsigned int Nclock;
     unsigned int Nreps;
     unsigned int Nloops;
+
+public:
+    unsigned int baseNclock;
+    unsigned int baseNreps;
+    unsigned int baseNloops;
+
     bool memoize;
     bool compile;
     int sizeIncrease;
@@ -142,6 +148,8 @@ public:
 #ifdef ZMQ_EXPERIMENT
     timepair_t bm_getTruthValueZmq();
 #endif
+
+    // timepair_t bm_push_back();
 };
 
 } // namespace opencog

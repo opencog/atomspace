@@ -56,8 +56,9 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
 
     counter = 0;
     showTypeSizes = false;
-    Nreps = 100000;
-    Nloops = 1;
+    baseNclock = 1000;
+    baseNreps = 100;
+    baseNloops = 1;
     memoize = false;
     compile = false;
     sizeIncrease = 0;
@@ -69,7 +70,6 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
     testKind = BENCH_AS;
 
     randomseed = (unsigned long) time(NULL);
-
 
     asp = NULL;
     atab = NULL;
@@ -127,7 +127,6 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
     }
 
     return total;
-
 }
 
 long AtomSpaceBenchmark::getMemUsage()
@@ -188,89 +187,90 @@ void AtomSpaceBenchmark::printTypeSizes()
          << estimateOfAtomSize(el) << endl;
 }
 
-void AtomSpaceBenchmark::showMethods() {
+void AtomSpaceBenchmark::showMethods()
+{
     /// @todo should really encapsulate each test method in a struct or class
     cout << "Methods that can be tested:" << endl;
-    cout << "  addNode" << endl;
-    cout << "  addLink" << endl;
-    cout << "  removeAtom" << endl;
     cout << "  getType" << endl;
     cout << "  getTruthValue" << endl;
     cout << "  setTruthValue" << endl;
- #ifdef ZMQ_EXPERIMENT
+#ifdef ZMQ_EXPERIMENT
     cout << "  getTruthValueZMQ" << endl;
 #endif
-    cout << "  getHandlesByType" << endl;
     cout << "  getOutgoingSet" << endl;
     cout << "  getIncomingSet" << endl;
+    cout << "  addNode" << endl;
+    cout << "  addLink" << endl;
+    cout << "  removeAtom" << endl;
+    cout << "  getHandlesByType" << endl;
 }
 
 void AtomSpaceBenchmark::setMethod(std::string methodToTest)
 {
     bool foundMethod = false;
 
-    if (methodToTest == "all" || methodToTest == "noop") {
+    if (methodToTest == "all" or methodToTest == "noop") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_noop);
         methodNames.push_back( "noop");
         foundMethod = true;
     }
-    if (methodToTest == "all" || methodToTest == "getType") {
+    if (methodToTest == "all" or methodToTest == "getType") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getType);
         methodNames.push_back( "getType");
         foundMethod = true;
     }
 
-    if (methodToTest == "all" || methodToTest == "getTruthValue") {
+    if (methodToTest == "all" or methodToTest == "getTruthValue") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getTruthValue);
         methodNames.push_back( "getTruthValue");
         foundMethod = true;
     }
 
 #ifdef ZMQ_EXPERIMENT
-    if (methodToTest == "all" || methodToTest == "getTruthValueZMQ") {
+    if (methodToTest == "all" or methodToTest == "getTruthValueZMQ") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getTruthValueZmq);
         methodNames.push_back( "getTruthValueZMQ");
         foundMethod = true;
     }
 #endif
 
-    if (methodToTest == "all" || methodToTest == "setTruthValue") {
+    if (methodToTest == "all" or methodToTest == "setTruthValue") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_setTruthValue);
         methodNames.push_back( "setTruthValue");
         foundMethod = true;
     }
 
-    if (methodToTest == "all" || methodToTest == "getOutgoingSet") {
+    if (methodToTest == "all" or methodToTest == "getOutgoingSet") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getOutgoingSet);
         methodNames.push_back( "getOutgoingSet");
         foundMethod = true;
     }
 
-    if (methodToTest == "all" || methodToTest == "getIncomingSet") {
+    if (methodToTest == "all" or methodToTest == "getIncomingSet") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getIncomingSet);
         methodNames.push_back( "getIncomingSet");
         foundMethod = true;
     }
 
-    if (methodToTest == "all" || methodToTest == "addNode") {
+    if (methodToTest == "all" or methodToTest == "addNode") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_addNode);
         methodNames.push_back( "addNode");
         foundMethod = true;
     }
 
-    if (methodToTest == "all" || methodToTest == "addLink") {
+    if (methodToTest == "all" or methodToTest == "addLink") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_addLink);
         methodNames.push_back( "addLink");
         foundMethod = true;
     }
 
-    if (methodToTest == "all" || methodToTest == "removeAtom") {
+    if (methodToTest == "all" or methodToTest == "removeAtom") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_rmAtom);
         methodNames.push_back( "removeAtom");
         foundMethod = true;
     }
 
-    if (methodToTest == "all" || methodToTest == "getHandlesByType") {
+    if (methodToTest == "all" or methodToTest == "getHandlesByType") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getHandlesByType);
         methodNames.push_back( "getHandlesByType");
         foundMethod = true;
@@ -287,6 +287,16 @@ void AtomSpaceBenchmark::setMethod(std::string methodToTest)
 void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
                                      BMFn methodToCall)
 {
+    Nclock = baseNclock;
+    Nloops = baseNloops;
+    Nreps = baseNreps;
+    if (BENCH_SCM == testKind /* or BENCH_PYTHON == testKind */)
+    {
+        // Try to avoid excessive compilation times.
+        Nclock /= 100;
+        Nreps *= 100;
+    }
+
     clock_t sumAsyncTime = 0;
     long rssStart;
     std::vector<record_t> records;
@@ -305,7 +315,7 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
         case BENCH_PYTHON: cout << "Python's "; break;
 #endif /* HAVE_CYTHON */
     }
-    cout << methodName << " method " << (Nreps*Nloops) << " times ";
+    cout << methodName << " method " << (Nclock*Nreps*Nloops) << " times ";
     std::ofstream myfile;
     if (saveToFile)
     {
@@ -313,7 +323,7 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
     }
     int diff = (Nreps / PROGRESS_BAR_LENGTH);
     if (!diff) diff = 1;
-    int counter=0;
+    int counter = 0;
     rssStart = getMemUsage();
     long rssFromIncrease = 0;
     timeval tim;
@@ -353,12 +363,13 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
     }
     Handle rh = getRandomHandle();
     gettimeofday(&tim, NULL);
-    double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
-    printf("\n%.6lf seconds elapsed (%.2f per second)\n", t2-t1, 1.0f/((t2-t1)/Nreps));
+    double t2 = tim.tv_sec + (tim.tv_usec/1000000.0);
+    printf("\n%.6lf seconds elapsed (%.2f per second)\n", 
+         t2-t1, 1.0f / ((t2-t1) / (Nreps*Nclock)));
     // rssEnd = getMemUsage();
     cout << "Sum clock() time for all requests: " << sumAsyncTime << " (" <<
         (float) sumAsyncTime / CLOCKS_PER_SEC << " seconds, "<<
-        1.0f/(((float)sumAsyncTime/CLOCKS_PER_SEC) / (Nreps*Nloops)) << " requests per second)" << endl;
+        1.0f/(((float)sumAsyncTime/CLOCKS_PER_SEC) / (Nreps*Nclock*Nloops)) << " requests per second)" << endl;
     //cout << "Memory (max RSS) change after benchmark: " <<
     //    (rssEnd - rssStart - rssFromIncrease) / 1024 << "kb" << endl;
 
@@ -516,65 +527,84 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
 #endif
 
     double p = rng->randdouble();
-    Type t = defaultNodeType;
-    if (p < chanceOfNonDefaultNode)
-        t = randomType(NODE);
+    Type ta[Nclock];
+    std::string nn[Nclock];
+    for (unsigned int i = 0; i<Nclock; i++)
+    {
+        Type t = defaultNodeType;
+        if (p < chanceOfNonDefaultNode)
+            t = randomType(NODE);
+        ta[i] = t;
 
-    std::string scp(csi);
-    if (csi.size() ==  0) {
-        std::ostringstream oss;
-        counter++;
-        if (NUMBER_NODE == t)
-            oss << counter;    // number nodes must actually be numbers.
-        else
-            oss << "node " << counter;
-        scp = oss.str();
+        std::string scp(csi);
+        if (csi.size() ==  0) {
+            std::ostringstream oss;
+            counter++;
+            if (NUMBER_NODE == t)
+                oss << counter;    // number nodes must actually be numbers.
+            else
+                oss << "node " << counter;
+            scp = oss.str();
+        }
+        nn[i] = scp;
     }
 
     switch (testKind) {
     case BENCH_TABLE: {
         clock_t t_begin = clock();
-        atab->add(createNode(t, scp), false);
+        for (unsigned int i=0; i<Nclock; i++)
+            atab->add(createNode(ta[i], nn[i]), false);
         return clock() - t_begin;
     }
     case BENCH_AS: {
         clock_t t_begin = clock();
-        asp->add_node(t, scp);
+        for (unsigned int i=0; i<Nclock; i++)
+            asp->add_node(ta[i], nn[i]);
         return clock() - t_begin;
     }
 #if HAVE_GUILE
     case BENCH_SCM: {
-        std::ostringstream ss;
-        for (unsigned int i=0; i<Nloops; i++) {
-            ss << "(cog-new-node '"
-               << classserver().getTypeName(t)
-               << " \"" << scp << "\")\n";
+        std::string gsa[Nclock];
 
-            p = rng->randdouble();
-            t = defaultNodeType;
-            if (p < chanceOfNonDefaultNode)
-                t = randomType(NODE);
+        for (unsigned int i=0; i<Nclock; i++)
+        {
+            Type t = ta[i];
+            std::string scp = nn[i];
 
-            scp = csi;
-            if (csi.size() ==  0) {
-                std::ostringstream oss;
-                counter++;
-                if (NUMBER_NODE == t)
-                    oss << counter;  // number nodes must actually be numbers.
-                else
-                    oss << "node " << counter;
-                scp = oss.str();
+            std::ostringstream ss;
+            for (unsigned int i=0; i<Nloops; i++) {
+                ss << "(cog-new-node '"
+                   << classserver().getTypeName(t)
+                   << " \"" << scp << "\")\n";
+    
+                p = rng->randdouble();
+                t = defaultNodeType;
+                if (p < chanceOfNonDefaultNode)
+                    t = randomType(NODE);
+
+                scp = csi;
+                if (csi.size() ==  0) {
+                    std::ostringstream oss;
+                    counter++;
+                    if (NUMBER_NODE == t)
+                        oss << counter;  // number nodes must actually be numbers.
+                    else
+                        oss << "node " << counter;
+                    scp = oss.str();
+                }
             }
+            std::string gs = memoize_or_compile(ss.str());
+            gsa[i] = gs;
         }
-        std::string gs = memoize_or_compile(ss.str());
 
         clock_t t_begin = clock();
-        scm->eval_h(gs);
+        for (unsigned int i=0; i<Nclock; i++)
+            scm->eval_h(gsa[i]);
         return clock() - t_begin;
     }
 #endif /* HAVE_GUILE */
 
-#if HAVE_CYTHON
+#if HAVE_CYTHONX
     case BENCH_PYTHON: {
         std::ostringstream dss;
         for (unsigned int i=0; i<Nloops; i++) {
@@ -1149,6 +1179,28 @@ timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
     }}
     return timepair_t(0,0);
 }
+
+#if 0
+xxxxxxxxxxxxxxx
+timepair_t AtomSpaceBenchmark::bm_push_back()
+{
+    Handle ha = getRandomHandle();
+    Handle hb = getRandomHandle();
+    Handle hc = getRandomHandle();
+    Handle hd = getRandomHandle();
+Nlooops
+
+    clock_t t_begin = clock();
+    HandleSeq oset;
+    oset.push_back(ha);
+    clock_t time_taken = clock() - t_begin;
+
+    return timepair_t(time_taken,0);
+}
+#endif
+
+
+// ================================================================
 
 AtomSpaceBenchmark::TimeStats::TimeStats(
         const std::vector<record_t>& records)
