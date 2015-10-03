@@ -124,7 +124,7 @@ void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 		    0 == varset.count(h) and
 		    0 == _bound_vars.count(h))
 		{
-			_varseq.push_back(h);
+			_varseq.emplace_back(h);
 			varset.insert(h);
 		}
 

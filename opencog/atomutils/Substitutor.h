@@ -70,7 +70,7 @@ private:
 		{
 			Handle hg = walk_tree(vmap, h);
 			if (hg != h) changed = true;
-			oset_results.push_back(hg);
+			oset_results.emplace_back(hg);
 		}
 
 		if (not changed) return expr;
