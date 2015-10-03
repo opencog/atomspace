@@ -297,6 +297,14 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
         Nreps *= 100;
     }
 
+    // Must not remove more atoms than there are
+    if (methodToCall == &AtomSpaceBenchmark::bm_rmAtom)
+    {
+        size_t asz = asp->get_size();
+        if (asz < 3*Nreps*Nclock*Nloops/4)
+            Nreps = asz / (3*Nclock*Nloops/4);
+    }
+
     clock_t sumAsyncTime = 0;
     long rssStart;
     std::vector<record_t> records;
