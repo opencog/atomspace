@@ -1262,7 +1262,7 @@ timepair_t AtomSpaceBenchmark::bm_getHandlesByType()
         std::string ps = dss.str();
         clock_t t_begin = clock();
         pyev->eval(ps);
-        return clock() - t_begin;
+        return Nclock*(clock() - t_begin);
     }
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
@@ -1276,14 +1276,14 @@ timepair_t AtomSpaceBenchmark::bm_getHandlesByType()
         HandleSeq results;
         asp->get_handles_by_type(results, t, true);
         clock_t time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
+        return timepair_t(Nclock*time_taken,0);
     }
     case BENCH_AS: {
         HandleSeq results;
         clock_t t_begin = clock();
         asp->get_handles_by_type(back_inserter(results), t, true);
         clock_t time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
+        return timepair_t(Nclock*time_taken,0);
     }}
     return timepair_t(0,0);
 }
