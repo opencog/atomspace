@@ -22,7 +22,6 @@
 #ifndef _OPENCOG_HANDLE_SEQ_INDEX_H
 #define _OPENCOG_HANDLE_SEQ_INDEX_H
 
-#include <cstddef>
 #include <map>
 
 #include <opencog/atomspace/Handle.h>
