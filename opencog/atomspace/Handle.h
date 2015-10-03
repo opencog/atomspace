@@ -61,9 +61,9 @@ friend class AtomStorage;         // persistance
 friend class AtomspaceHTabler;    // persistance
 
 private:
-    AtomPtr _ptr;
+    ProtoAtomPtr _ptr;
 
-    static bool atoms_less(const AtomPtr&, const AtomPtr&);
+    static bool atoms_less(const ProtoAtomPtr&, const ProtoAtomPtr&);
     static AtomPtr do_res(UUID);
     static std::vector<const AtomTable*> _resolver;
 
@@ -76,7 +76,7 @@ public:
     static const UUID INVALID_UUID = ULONG_MAX;
     static const Handle UNDEFINED;
 
-    explicit Handle(const AtomPtr& atom) : _ptr(atom) {}
+    explicit Handle(const ProtoAtomPtr& atom) : _ptr(atom) {}
     explicit Handle(const UUID);
     explicit Handle() {}
     Handle(const Handle& h) : _ptr(h._ptr) {}
@@ -94,13 +94,34 @@ public:
         return *this;
     }
 
+#if 0
     inline Atom* operator->() {
-        return _ptr.get();
+        // return _ptr.get();
+        ProtoAtom* pa = _ptr.get();
+        return dynamic_cast<Atom*>(pa);
     }
 
     inline Atom* operator->() const {
-        return _ptr.get();
+        return dynamic_cast<Atom*>(_ptr.get());
     }
+
+    operator AtomPtr() const {
+        return dynamic_cast<AtomPtr>(_ptr);
+    }
+    operator AtomPtr() {
+        return dynamic_cast<AtomPtr>(_ptr);
+    }
+#else
+    // XXX FIXME its a performance disaster if these are not inline!
+    // is there some gcc setting that can force the inlining of
+    // these, e.g. during the link stage?
+    Atom* operator->();
+    Atom* operator->() const;
+
+    operator AtomPtr() const;
+    operator AtomPtr();
+#endif
+
 
     // Allows expressions like "if(h)..." to work when h has a non-null pointer.
     explicit inline operator bool() const noexcept {
@@ -151,12 +172,6 @@ public:
         return 0;
     }
 
-    operator AtomPtr() const {
-        return _ptr;
-    }
-    operator AtomPtr() {
-        return _ptr;
-    }
 /***
     operator const AtomPtr&() {
         return _ptr;

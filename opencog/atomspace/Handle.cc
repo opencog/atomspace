@@ -39,11 +39,33 @@ Handle::Handle(const UUID u)
 	_ptr = do_res(u);
 }
 
-UUID Handle::value(void) const {
+UUID Handle::value(void) const
+{
     const Atom* a = operator->();
     if (a) return a->getUUID();
     return ULONG_MAX;
 }
+
+Atom* Handle::operator->()
+{
+	ProtoAtom* pa = _ptr.get();
+	return dynamic_cast<Atom*>(pa);
+}
+
+Atom* Handle::operator->() const
+{
+	ProtoAtom* pa = _ptr.get();
+	return dynamic_cast<Atom*>(pa);
+}
+
+Handle::operator AtomPtr() const {
+	return dynamic_cast<AtomPtr>(_ptr);
+}
+
+Handle::operator AtomPtr() {
+	return dynamic_cast<AtomPtr>(_ptr);
+}
+
 
 // ===================================================
 // Atom comparison.
