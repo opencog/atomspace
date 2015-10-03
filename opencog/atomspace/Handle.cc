@@ -68,6 +68,11 @@ Handle::operator AtomPtr()
 	return std::dynamic_pointer_cast<Atom>(_ptr);
 }
 
+Handle& Handle::operator=(const AtomPtr& a)
+{
+	this->_ptr = std::dynamic_pointer_cast<ProtoAtom>(a);
+	return *this;
+}
 
 // ===================================================
 // Atom comparison.

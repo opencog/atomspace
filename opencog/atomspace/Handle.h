@@ -89,11 +89,6 @@ public:
         return *this;
     }
 
-    Handle& operator=(const AtomPtr& a) {
-        this->_ptr = a;
-        return *this;
-    }
-
 #if 0
     inline Atom* operator->() {
         // return _ptr.get();
@@ -111,6 +106,11 @@ public:
     operator AtomPtr() {
         return std::dynamic_pointer_cast<AtomPtr>(_ptr);
     }
+
+    Handle& operator=(const AtomPtr& a) {
+        this->_ptr = std::dynamic_pointer_cast<ProtoAtom>(a);
+        return *this;
+    }
 #else
     // XXX FIXME its a performance disaster if these are not inline!
     // is there some gcc setting that can force the inlining of
@@ -120,6 +120,7 @@ public:
 
     operator AtomPtr() const;
     operator AtomPtr();
+    Handle& operator=(const AtomPtr&);
 #endif
 
 
