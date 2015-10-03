@@ -57,7 +57,7 @@ static inline bool log(const Handle& h)
 
 static inline void logmsg(const char * msg, const Handle& h)
 {
-	LAZY_LOG_FINE << msg << (h == Handle::UNDEFINED ?
+	LAZY_LOG_FINE << msg << (h == nullptr ?
 	                         std::string("(invalid handle)") :
 	                         h->toShortString());
 }
@@ -123,7 +123,7 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 	try
 	{
 		Handle gnd(var_grounding.at(hp));
-		if (Handle::UNDEFINED != gnd)
+		if (gnd)
 			return (gnd == hg);
 	}
 	catch(...) { }
@@ -733,7 +733,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	// This could happen when the arity of the two hypergraphs are different.
 	// It's clearly a mismatch so we should always return false here unless
 	// we are looking for a non-exact match
-	if (PatternTerm::UNDEFINED == ptm or Handle::UNDEFINED == hg)
+	if (nullptr == ptm or nullptr == hg)
 		return _pmc.fuzzy_match(Handle::UNDEFINED, hg);
 
 	const Handle& hp = ptm->getHandle();
@@ -1269,7 +1269,7 @@ bool PatternMatchEngine::do_next_clause(void)
 	// If there are no further clauses to solve,
 	// we are really done! Report the solution via callback.
 	bool found = false;
-	if (Handle::UNDEFINED == curr_root)
+	if (nullptr == curr_root)
 	{
 		logger().fine("==================== FINITO!");
 		log_solution(var_grounding, clause_grounding);
@@ -1297,7 +1297,7 @@ bool PatternMatchEngine::do_next_clause(void)
 
 		clause_accepted = false;
 		Handle hgnd = var_grounding[joiner];
-		OC_ASSERT(hgnd != Handle::UNDEFINED,
+		OC_ASSERT(hgnd != nullptr,
 			"Error: joining handle has not been grounded yet!");
 		found = explore_clause(joiner, hgnd, curr_root);
 
@@ -1331,7 +1331,7 @@ bool PatternMatchEngine::do_next_clause(void)
 			curr_root = next_clause;
 
 			logmsg("Next optional clause is", curr_root);
-			if (Handle::UNDEFINED == curr_root)
+			if (nullptr == curr_root)
 			{
 				logger().fine("==================== FINITO BANDITO!");
 				log_solution(var_grounding, clause_grounding);
@@ -1495,7 +1495,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 	{
 		try {
 			const Handle& gnd = var_grounding.at(v);
-			if (Handle::UNDEFINED != gnd)
+			if (gnd)
 			{
 				std::size_t incoming_set_size = gnd->getIncomingSetSize();
 				thick_vars.insert(std::make_pair(incoming_set_size, v));
@@ -1552,7 +1552,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 		next_clause = unsolved_clause;
 		next_joint = joint;
 
-		if (Handle::UNDEFINED != unsolved_clause)
+		if (unsolved_clause)
 		{
 			issued.insert(unsolved_clause);
 			return true;
@@ -1704,7 +1704,7 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
                                        const Handle& grnd,
                                        const Handle& first_clause)
 {
-	if (term == Handle::UNDEFINED)
+	if (term == nullptr)
 		return false;
 
 	// Cleanup
@@ -1828,7 +1828,7 @@ void PatternMatchEngine::log_solution(
 		// Only print grounding for variables.
 		if (VARIABLE_NODE != var->getType()) continue;
 
-		if (soln == Handle::UNDEFINED)
+		if (soln == nullptr)
 		{
 			logger().fine("ERROR: ungrounded variable %s\n",
 			              var->toShortString().c_str());
@@ -1846,7 +1846,7 @@ void PatternMatchEngine::log_solution(
 	int i = 0;
 	for (m = clauses.begin(); m != clauses.end(); ++m, ++i)
 	{
-		if (m->second == Handle::UNDEFINED)
+		if (m->second == nullptr)
 		{
 			Handle mf(m->first);
 			logmsg("ERROR: ungrounded clause: ", mf);

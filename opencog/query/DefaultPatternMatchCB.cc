@@ -225,7 +225,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
                                                   const Handle& grnd)
 {
-	if (Handle::UNDEFINED == grnd) return true;
+	if (nullptr == grnd) return true;
 	_optionals_present = true;
 	return false;
 }
