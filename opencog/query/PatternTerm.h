@@ -170,7 +170,7 @@ class PatternTerm
 
 		inline std::string toString(std::string indent = ":") const
 		{
-			if (_handle == Handle::UNDEFINED) return "-";
+			if (_handle == nullptr) return "-";
 			std::string str = _parent->toString();
 			str += indent + std::to_string(_handle.value());
 			return str;
@@ -200,7 +200,7 @@ struct less<PatternTermPtr>
 		const Handle& rHandle = rhs->getHandle();
 		if (lHandle == rHandle)
 		{
-			if (lHandle == Handle::UNDEFINED) return false;
+			if (lHandle == nullptr) return false;
 			return lhs->getParent() < rhs->getParent();
 		}
 		return lHandle < rHandle;

@@ -43,7 +43,7 @@ HandleSeq Instantiator::walk_tree(const HandleSeq& expr)
 		// the uuid's are all Handle::UNDEFINED until we put them
 		// into the atomspace.
 		if (NULL != hg)
-			oset_results.push_back(hg);
+			oset_results.emplace_back(hg);
 	}
 	return oset_results;
 }
@@ -110,8 +110,8 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		if (gargs != oset[1])
 		{
 			HandleSeq groset;
-			groset.push_back(oset[0]);
-			groset.push_back(gargs);
+			groset.emplace_back(oset[0]);
+			groset.emplace_back(gargs);
 			ppp = createPutLink(groset);
 		}
 		// Step one: beta-reduce.
@@ -240,7 +240,7 @@ Handle Instantiator::instantiate(const Handle& expr,
                                  const std::map<Handle, Handle> &vars)
 {
 	// throw, not assert, because this is a user error ...
-	if (Handle::UNDEFINED == expr)
+	if (nullptr == expr)
 		throw InvalidParamException(TRACE_INFO,
 			"Asked to ground a null expression");
 

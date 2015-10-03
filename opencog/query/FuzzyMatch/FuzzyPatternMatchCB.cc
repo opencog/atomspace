@@ -60,7 +60,7 @@ void FuzzyPatternMatchCB::find_starters(const Handle& hp, const size_t& depth,
     else {
         NodePtr np(NodeCast(hp));
 
-        if (hp != Handle::UNDEFINED and np) {
+        if (hp and np) {
             pat_size++;
 
             if ((np->getType() != VARIABLE_NODE) and

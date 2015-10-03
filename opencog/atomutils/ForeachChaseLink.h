@@ -196,7 +196,7 @@ private:
 		LinkCast(link_h)->foreach_outgoing(endpoint_matcher, this);
 
 		bool rc = false;
-		if (Handle::UNDEFINED != to_atom)
+		if (to_atom)
 		{
 			if (user_callback)
 				rc = (user_data->*user_callback)(to_atom);
