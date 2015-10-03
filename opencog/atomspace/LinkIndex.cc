@@ -104,7 +104,7 @@ UnorderedHandleSet LinkIndex::getHandleSet(Type type,
 	else
 	{
 		Handle h(getHandle(type, seq));
-		if (Handle::UNDEFINED != h)
+		if (nullptr != h)
 			hs.insert(h);
 	}
 	return hs;
