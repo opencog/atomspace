@@ -57,7 +57,7 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
     counter = 0;
     showTypeSizes = false;
     baseNclock = 2000;
-    baseNreps = 200;
+    baseNreps = 200 * baseNclock;
     baseNloops = 1;
     memoize = false;
     compile = false;
@@ -289,7 +289,7 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
 {
     Nclock = baseNclock;
     Nloops = baseNloops;
-    Nreps = baseNreps;
+    Nreps = baseNreps / Nclock;
     if (BENCH_SCM == testKind /* or BENCH_PYTHON == testKind */)
     {
         // Try to avoid excessive compilation times.
