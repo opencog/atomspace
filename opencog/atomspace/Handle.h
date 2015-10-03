@@ -89,11 +89,10 @@ public:
         return *this;
     }
 
-#if 0
+#ifdef INLINE_POINTER_CHASING
     inline Atom* operator->() {
         // return _ptr.get();
-        ProtoAtom* pa = _ptr.get();
-        return dynamic_cast<Atom*>(pa);
+        return dynamic_cast<Atom*>(_ptr.get());
     }
 
     inline Atom* operator->() const {
@@ -112,9 +111,12 @@ public:
         return *this;
     }
 #else
-    // XXX FIXME its a performance disaster if these are not inline!
-    // is there some gcc setting that can force the inlining of
-    // these, e.g. during the link stage?
+    // Caution: there is a potentially serious performance hit,
+    // if the following are not inlined.  I beleive/hope that
+    // gcc "link time optimization" (-flto flag) can overcome
+    // this hit.  Anyway, right now, the above forms cannot work,
+    // because they require access to class Atom, which we can't
+    // have here, due to circular includes...
     Atom* operator->();
     Atom* operator->() const;
 
@@ -172,12 +174,6 @@ public:
         if (h1 > h2) return 1;
         return 0;
     }
-
-/***
-    operator const AtomPtr&() {
-        return _ptr;
-    }
-***/
 };
 
 static inline bool operator== (std::nullptr_t, const Handle& rhs) noexcept
