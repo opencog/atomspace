@@ -153,6 +153,7 @@ public:
 
     timepair_t bm_push_back();
     timepair_t bm_emplace_back();
+    timepair_t bm_reserve();
 };
 
 } // namespace opencog

@@ -207,6 +207,7 @@ void AtomSpaceBenchmark::showMethods()
     cout << "  getHandlesByType" << endl;
     cout << "  push_back" << endl;
     cout << "  emplace_back" << endl;
+    cout << "  reserve" << endl;
 }
 
 void AtomSpaceBenchmark::setMethod(std::string methodToTest)
@@ -289,6 +290,12 @@ void AtomSpaceBenchmark::setMethod(std::string methodToTest)
     if (methodToTest == "all" or methodToTest == "emplace_back") {
         methodsToTest.emplace_back( &AtomSpaceBenchmark::bm_emplace_back);
         methodNames.emplace_back( "emplace_back");
+        foundMethod = true;
+    }
+
+    if (methodToTest == "all" or methodToTest == "reserve") {
+        methodsToTest.reserve( &AtomSpaceBenchmark::bm_reserve);
+        methodNames.reserve( "reserve");
         foundMethod = true;
     }
 
@@ -388,7 +395,7 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
     Handle rh = getRandomHandle();
     gettimeofday(&tim, NULL);
     double t2 = tim.tv_sec + (tim.tv_usec/1000000.0);
-    printf("\n%.6lf seconds elapsed (%.2f per second)\n", 
+    printf("\n%.6lf seconds elapsed (%.2f per second)\n",
          t2-t1, 1.0f / ((t2-t1) / (Nreps*Nclock)));
     // rssEnd = getMemUsage();
     cout << "Sum clock() time for all requests: " << sumAsyncTime << " (" <<
@@ -602,7 +609,7 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
                 ss << "(cog-new-node '"
                    << classserver().getTypeName(t)
                    << " \"" << scp << "\")\n";
-    
+
                 p = rng->randdouble();
                 t = defaultNodeType;
                 if (p < chanceOfNonDefaultNode)
@@ -841,7 +848,7 @@ timepair_t AtomSpaceBenchmark::bm_noop()
     {
         n[i] = rng->randint(42);
     }
-    
+
     clock_t t_begin = clock();
     int sum=0;
     // prevent compiler optimizer from optimizing away the loop.
@@ -1129,7 +1136,7 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
                 ss << "(cog-set-tv! (cog-atom " << h.value() << ")"
                    << "   (cog-new-stv " << strength << " " << cnf << ")"
                    << ")\n";
-    
+
                 h = getRandomHandle();
                 strength = rng->randfloat();
                 cnf = rng->randfloat();
@@ -1430,6 +1437,70 @@ timepair_t AtomSpaceBenchmark::bm_emplace_back()
             oset.emplace_back(hb);
             oset.emplace_back(hc);
             oset.emplace_back(hd);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    return timepair_t(0,0);
+}
+
+timepair_t AtomSpaceBenchmark::bm_reserve()
+{
+    Handle ha = getRandomHandle();
+    Handle hb = getRandomHandle();
+    Handle hc = getRandomHandle();
+    Handle hd = getRandomHandle();
+
+    if (1 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            HandleSeq oset(Nreserve);
+            oset[0] = ha;
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    if (2 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            HandleSeq oset(Nreserve);
+            oset[0] = ha;
+            oset[1] = hb;
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    if (3 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            HandleSeq oset(Nreserve);
+            oset[0] = ha;
+            oset[1] = hb;
+            oset[2] = hc;
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    if (4 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            HandleSeq oset(Nreserve);
+            oset[0] = ha;
+            oset[1] = hb;
+            oset[2] = hc;
+            oset[3] = hd;
         }
         clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
