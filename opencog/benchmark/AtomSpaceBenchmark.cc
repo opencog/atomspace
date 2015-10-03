@@ -205,6 +205,8 @@ void AtomSpaceBenchmark::showMethods()
     cout << "  addLink" << endl;
     cout << "  removeAtom" << endl;
     cout << "  getHandlesByType" << endl;
+    cout << "  push_back" << endl;
+    cout << "  emplace_back" << endl;
 }
 
 void AtomSpaceBenchmark::setMethod(std::string methodToTest)
@@ -281,6 +283,12 @@ void AtomSpaceBenchmark::setMethod(std::string methodToTest)
     if (methodToTest == "all" or methodToTest == "push_back") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_push_back);
         methodNames.push_back( "push_back");
+        foundMethod = true;
+    }
+
+    if (methodToTest == "all" or methodToTest == "emplace_back") {
+        methodsToTest.emplace_back( &AtomSpaceBenchmark::bm_emplace_back);
+        methodNames.emplace_back( "emplace_back");
         foundMethod = true;
     }
 
@@ -1358,6 +1366,70 @@ timepair_t AtomSpaceBenchmark::bm_push_back()
             oset.push_back(hb);
             oset.push_back(hc);
             oset.push_back(hd);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    return timepair_t(0,0);
+}
+
+timepair_t AtomSpaceBenchmark::bm_emplace_back()
+{
+    Handle ha = getRandomHandle();
+    Handle hb = getRandomHandle();
+    Handle hc = getRandomHandle();
+    Handle hd = getRandomHandle();
+
+    if (1 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            HandleSeq oset;
+            oset.emplace_back(ha);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    if (2 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            HandleSeq oset;
+            oset.emplace_back(ha);
+            oset.emplace_back(hb);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    if (3 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            HandleSeq oset;
+            oset.emplace_back(ha);
+            oset.emplace_back(hb);
+            oset.emplace_back(hc);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    if (4 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            HandleSeq oset;
+            oset.emplace_back(ha);
+            oset.emplace_back(hb);
+            oset.emplace_back(hc);
+            oset.emplace_back(hd);
         }
         clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
