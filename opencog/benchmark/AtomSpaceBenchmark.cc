@@ -808,10 +808,18 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize, float _percentLinks,
 timepair_t AtomSpaceBenchmark::bm_noop()
 {
     // Benchmark clock overhead.
-    clock_t t_begin;
-    clock_t time_taken;
-    t_begin = clock();
-    time_taken = clock() - t_begin;
+    int n[Nclock];
+    for (unsigned int i=0; i<Nclock; i++)
+    {
+        n[i] = rng->randint(42);
+    }
+    
+    clock_t t_begin = clock();
+    int sum=0;
+    // prevent compiler optimizer from optimizing away the loop.
+    for (unsigned int i=0; i<Nclock; i++)
+        sum += n[i];
+    clock_t time_taken = clock() - t_begin;
     return timepair_t(time_taken,0);
 }
 
@@ -829,18 +837,32 @@ timepair_t AtomSpaceBenchmark::bm_addLink()
 
 timepair_t AtomSpaceBenchmark::bm_rmAtom()
 {
-    Handle h = getRandomHandle();
+    Handle hs[Nclock];
+    for (unsigned int i=0; i<Nclock; i++)
+    {
+        Handle h = getRandomHandle();
+        while (true)
+        {
+            h = getRandomHandle();
 
-    // Can't remove something that has incoming links, so find something
-    // that doesn't.
-    while (0 < h->getIncomingSetSize()) {
-        h = getRandomHandle();
+            // Can't remove something that has incoming links,
+            // so find something that doesn't.
+            while (0 < h->getIncomingSetSize()) {
+                h = getRandomHandle();
+            }
+            bool uniq = true;
+            for (unsigned int j=0; j<i; j++) {
+                if (h == hs[j]) uniq = false;
+            }
+            if (uniq) break;
+        }
+        hs[i] = h;
     }
-    clock_t t_begin;
-    clock_t time_taken;
+
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+#if HAVE_CYTHONX
         OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         for (unsigned int i=0; i<Nloops; i++) {
@@ -856,38 +878,48 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
         clock_t t_begin = clock();
         pyev->eval(ps);
         return clock() - t_begin;
+#endif /* HAVE_CYTHON */
     }
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
-        std::ostringstream ss;
-        for (unsigned int i=0; i<Nloops; i++) {
-            ss << "(cog-delete-recursive (cog-atom " << h.value() << "))\n";
-            h = getRandomHandle();
-            // XXX FIXME --- this may have trouble finding anything if
-            // Nloops is bigger than the number of links in the atomspace !
-            while (0 < h->getIncomingSetSize()) {
+        std::string gsa[Nclock];
+        for (unsigned int i=0; i<Nclock; i++)
+        {
+            Handle h = hs[i];
+            std::ostringstream ss;
+            for (unsigned int i=0; i<Nloops; i++) {
+                ss << "(cog-delete-recursive (cog-atom " << h.value() << "))\n";
                 h = getRandomHandle();
+                // XXX FIXME --- this may have trouble finding anything if
+                // Nloops is bigger than the number of links in the atomspace !
+                while (0 < h->getIncomingSetSize()) {
+                    h = getRandomHandle();
+                }
             }
-        }
-        std::string gs = memoize_or_compile(ss.str());
+            std::string gs = memoize_or_compile(ss.str());
+            gsa[i] = gs;
+			}
 
         clock_t t_begin = clock();
-        scm->eval(gs);
-        time_taken = clock() - t_begin;
+        for (unsigned int i=0; i<Nclock; i++)
+            scm->eval(gsa[i]);
+        clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
 #endif /* HAVE_GUILE */
     case BENCH_TABLE: {
-        t_begin = clock();
-        atab->extract(h);
-        time_taken = clock() - t_begin;
+        clock_t t_begin = clock();
+        for (unsigned int i=0; i<Nclock; i++)
+            atab->extract(hs[i]);
+        clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
     case BENCH_AS: {
-        t_begin = clock();
-        asp->remove_atom(h);
-        time_taken = clock() - t_begin;
+        clock_t t_begin = clock();
+        for (unsigned int i=0; i<Nclock; i++)
+            asp->remove_atom(hs[i]);
+        clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }}
     return timepair_t(0,0);
