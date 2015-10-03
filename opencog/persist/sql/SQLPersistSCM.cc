@@ -41,7 +41,7 @@ class SQLBackingStore : public BackingStore
 
 		virtual NodePtr getNode(Type, const char *) const;
 		virtual LinkPtr getLink(Type, const HandleSeq&) const;
-		virtual AtomPtr getAtom(Handle) const;
+		virtual AtomPtr getAtom(UUID) const;
 		virtual HandleSeq getIncomingSet(Handle) const;
 		virtual void storeAtom(Handle);
 		virtual void loadType(AtomTable&, Type);
@@ -69,9 +69,9 @@ LinkPtr SQLBackingStore::getLink(Type t, const std::vector<Handle>& oset) const
 	return _store->getLink(t, oset);
 }
 
-AtomPtr SQLBackingStore::getAtom(Handle h) const
+AtomPtr SQLBackingStore::getAtom(UUID uuid) const
 {
-	return _store->getAtom(h.value());
+	return _store->getAtom(uuid);
 }
 
 HandleSeq SQLBackingStore::getIncomingSet(Handle h) const

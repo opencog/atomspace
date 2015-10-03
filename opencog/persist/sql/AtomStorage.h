@@ -167,6 +167,14 @@ class AtomStorage
 		// Fetch atoms from DB
 		bool atomExists(Handle);
 		AtomPtr getAtom(UUID);
+		AtomPtr getAtom(const Handle& h)
+		{
+			NodePtr n(NodeCast(h));
+			if (n) return getNode(*n);
+			LinkPtr l(LinkCast(h));
+			if (l) return getLink(*l);
+			return NULL;
+		}
 		std::vector<Handle> getIncomingSet(Handle);
 		NodePtr getNode(Type, const char *);
 		NodePtr getNode(const Node &n)

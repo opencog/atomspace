@@ -1234,11 +1234,12 @@ AtomStorage::PseudoPtr AtomStorage::petAtom(UUID uuid)
 }
 
 /**
- * Create a new atom, retrieved from storage
+ * Create a new atom, retrieved from storage. This is a recursive-get;
+ * if the atom is a link, then the outgoing set will be fetched too.
+ * This may not be efficient, if you only wanted to get the latest TV
+ * for an existing atom!
  *
  * This method does *not* register the atom with any atomtable.
- * XXX It also is not recursive; if the atom is a link, the
- * outgoing set is not resolved.  XXX FIXME.
  */
 AtomPtr AtomStorage::getAtom(UUID uuid)
 {
@@ -1252,13 +1253,11 @@ AtomPtr AtomStorage::getAtom(UUID uuid)
 		return node;
 	}
 
-	HandleSeq bogus_oset;
+	HandleSeq oset;
 	for (UUID idu : p->oset)
-	{
-		Handle h(idu);
-		bogus_oset.push_back(h);
-	}
-	LinkPtr link(createLink(p->type, bogus_oset, p->tv));
+		oset.push_back(getAtom(idu)->getHandle());
+
+	LinkPtr link(createLink(p->type, oset, p->tv));
 	link->_uuid = p->uuid;
 	return link;
 }

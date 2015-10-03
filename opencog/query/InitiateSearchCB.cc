@@ -562,7 +562,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 	for (const Handle& h : handle_set)
 	{
 		LAZY_LOG_FINE << "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\n"
-		              << "Loop candidate (" << i+1 << "/" << hsz << "):\n"
+		              << "Loop candidate (" << ++i << "/" << hsz << "):\n"
 		              << h->toShortString();
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;
@@ -667,7 +667,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	for (const Handle& h : handle_set)
 	{
 		LAZY_LOG_FINE << "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz\n"
-		              << "Loop candidate (" << i+1 << "/" << hsz << "):\n"
+		              << "Loop candidate (" << ++i << "/" << hsz << "):\n"
 		              << h->toShortString();
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;

@@ -106,10 +106,19 @@ Handle AtomSpace::add_atom(AtomPtr atom, bool async)
     // If we are here, the AtomTable does not yet know about this atom.
     // Maybe the backing store knows about this atom.
     Type t = atom->getType();
-    if (backing_store and not backing_store->ignoreType(t)) {
-
-        Handle ha(atom);
-        AtomPtr ba(backing_store->getAtom(ha));
+    if (backing_store and not backing_store->ignoreType(t))
+    {
+        AtomPtr ba;
+        NodePtr n(NodeCast(atom));
+        if (n) {
+            ba = backing_store->getNode(n->getType(),
+                                        n->getName().c_str());
+        } else {
+            LinkPtr l(LinkCast(atom));
+            if (l)
+                 ba = backing_store->getLink(l->getType(),
+                                             l->getOutgoingSet());
+        }
         if (ba) {
             return atomTable.add(ba, async);
         }
@@ -254,15 +263,68 @@ Handle AtomSpace::fetch_atom(Handle h)
 {
     if (NULL == backing_store)
         throw RuntimeException(TRACE_INFO, "No backing store");
+    if (NULL == h) return h;
 
-    // OK, we have to handle three distinct cases.
-    // 1) If atom table already knows about this uuid or atom, then
-    //    this function returns the atom-table's version of the atom.
+    // We deal with two distinct cases.
+    // 1) If atom table already knows about this atom, then this
+    //    function returns the atom-table's version of the atom.
     //    In particular, no attempt is made to reconcile the possibly
     //    differing truth values in the atomtable vs. backing store.
-    // 2) If the handle h holds a UUID but no atom pointer, then get
-    //    the corresponding atom from storage, and add it to the atom
-    //    table.
+    //    Why?  Because it is likely that the user plans to over-write
+    //    what is in the backend.
+    // 2) If (1) does not hold, i.e. the atom is not in this table, nor
+    //    it's environs, then assume that atom is from some previous
+    //    (recursive) query; do fetch it from backing store (i.e. fetch
+    //    the TV) and add it to the atomtable.
+    // For case 2, if the atom is a link, then it's outgoing set is
+    // fetched as well, as currently, a link cannot be added to the
+    // atomtable, unless all of its outgoing set already is in the
+    // atomtable.
+
+    // Case 1:
+    Handle hb(atomTable.getHandle(h));
+    if (atomTable.holds(hb))
+        return hb;
+
+    // Case 2:
+    // This atom is not yet in any (this??) atomspace; go get it.
+    if (NULL == h->getAtomTable()) {
+        AtomPtr ba;
+        NodePtr n(NodeCast(h));
+        if (n) {
+            ba = backing_store->getNode(n->getType(),
+                                        n->getName().c_str());
+        } else {
+            LinkPtr l(LinkCast(h));
+            if (l)
+                 ba = backing_store->getLink(l->getType(),
+                                             l->getOutgoingSet());
+        }
+
+        // If we still don't have an atom, then the requested UUID
+        // was "insane", that is, unknown by either the atom table
+        // (case 1) or the backend.
+        if (NULL == ba)
+            throw RuntimeException(TRACE_INFO,
+                "Asked backend for an atom %s\n",
+                h->toString().c_str());
+        h = ba;
+    }
+
+    return atomTable.add(h, false);
+}
+
+Handle AtomSpace::fetch_atom(UUID uuid)
+{
+    if (NULL == backing_store)
+        throw RuntimeException(TRACE_INFO, "No backing store");
+
+    // OK, we have to handle three distinct cases.
+    // 1) If atom table already knows about this uuid, then this
+    //    function returns the atom-table's version of the atom.
+    //    In particular, no attempt is made to reconcile the possibly
+    //    differing truth values in the atomtable vs. backing store.
+    // 2) Else, get the atom corresponding to the UUID from storage.
     // 3) If the handle h contains a pointer to an atom (that is not
     //    in the atom table), then assume that atom is from some previous
     //    (recursive) query, and add it to the atomtable.
@@ -272,41 +334,23 @@ Handle AtomSpace::fetch_atom(Handle h)
     // atomtable.
 
     // Case 1:
-    Handle hb(atomTable.getHandle(h));
+    Handle hb(atomTable.getHandle(uuid));
     if (atomTable.holds(hb))
         return hb;
 
     // Case 2 & 3:
-    // If we don't have the atom for this UUID, then go get it.
-    if (NULL == h.operator->()) {
-        AtomPtr a(backing_store->getAtom(h));
+    // We don't have the atom for this UUID, then go get it.
+    AtomPtr a(backing_store->getAtom(uuid));
 
-        // If we still don't have an atom, then the requested UUID
-        // was "insane", that is, unknown by either the atom table
-        // (case 1) or the backend.
-        if (NULL == a.operator->())
-            throw RuntimeException(TRACE_INFO,
-                "Asked backend for an unknown handle; UUID=%lu\n",
-                h.value());
-        h = a;
-    }
+    // If we still don't have an atom, then the requested UUID
+    // was "insane", that is, unknown by either the atom table
+    // (case 1) or the backend.
+    if (NULL == a.operator->())
+        throw RuntimeException(TRACE_INFO,
+            "Asked backend for an unknown handle; UUID=%lu\n",
+            uuid);
 
-    // For links, must perform a recursive fetch, as otherwise
-    // the atomTable.add() below will throw an error.
-    LinkPtr l(LinkCast(h));
-    if (l) {
-       const HandleSeq& ogs = l->getOutgoingSet();
-       size_t arity = ogs.size();
-       for (size_t i=0; i<arity; i++)
-       {
-          Handle oh(fetch_atom(ogs[i]));
-          if (oh != ogs[i]) throw RuntimeException(TRACE_INFO,
-              "Unexpected handle mismatch! Expected %lu got %lu\n",
-              ogs[i].value(), oh.value());
-       }
-    }
-
-    return atomTable.add(h, false);
+    return atomTable.add(a, false);
 }
 
 Handle AtomSpace::get_atom(Handle h)
@@ -315,6 +359,15 @@ Handle AtomSpace::get_atom(Handle h)
     if (he) return he;
     if (backing_store)
         return fetch_atom(h);
+    return Handle::UNDEFINED;
+}
+
+Handle AtomSpace::get_atom(UUID uuid)
+{
+    Handle he(atomTable.getHandle(uuid));
+    if (he) return he;
+    if (backing_store)
+        return fetch_atom(uuid);
     return Handle::UNDEFINED;
 }
 

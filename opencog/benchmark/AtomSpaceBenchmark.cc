@@ -213,75 +213,74 @@ void AtomSpaceBenchmark::setMethod(std::string methodToTest)
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_noop);
         methodNames.push_back( "noop");
         foundMethod = true;
-    } 
-
-    if (methodToTest == "all" || methodToTest == "addNode") {
-        methodsToTest.push_back( &AtomSpaceBenchmark::bm_addNode);
-        methodNames.push_back( "addNode");
-        foundMethod = true;
-   } 
-
-    if (methodToTest == "all" || methodToTest == "addLink") {
-        methodsToTest.push_back( &AtomSpaceBenchmark::bm_addLink);
-        methodNames.push_back( "addLink");
-        foundMethod = true;
-    } 
-
-    if (methodToTest == "all" || methodToTest == "removeAtom") {
-        methodsToTest.push_back( &AtomSpaceBenchmark::bm_rmAtom);
-        methodNames.push_back( "removeAtom");
-        foundMethod = true;
-    } 
-
+    }
     if (methodToTest == "all" || methodToTest == "getType") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getType);
         methodNames.push_back( "getType");
         foundMethod = true;
-    } 
+    }
 
     if (methodToTest == "all" || methodToTest == "getTruthValue") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getTruthValue);
         methodNames.push_back( "getTruthValue");
         foundMethod = true;
-    } 
+    }
 
 #ifdef ZMQ_EXPERIMENT
     if (methodToTest == "all" || methodToTest == "getTruthValueZMQ") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getTruthValueZmq);
         methodNames.push_back( "getTruthValueZMQ");
         foundMethod = true;
-    } 
+    }
 #endif
 
     if (methodToTest == "all" || methodToTest == "setTruthValue") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_setTruthValue);
         methodNames.push_back( "setTruthValue");
         foundMethod = true;
-    } 
-
-    if (methodToTest == "all" || methodToTest == "getHandlesByType") {
-        methodsToTest.push_back( &AtomSpaceBenchmark::bm_getHandlesByType);
-        methodNames.push_back( "getHandlesByType");
-        foundMethod = true;
-    } 
+    }
 
     if (methodToTest == "all" || methodToTest == "getOutgoingSet") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getOutgoingSet);
         methodNames.push_back( "getOutgoingSet");
         foundMethod = true;
-    } 
+    }
 
     if (methodToTest == "all" || methodToTest == "getIncomingSet") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getIncomingSet);
         methodNames.push_back( "getIncomingSet");
         foundMethod = true;
-    } 
+    }
+
+    if (methodToTest == "all" || methodToTest == "addNode") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_addNode);
+        methodNames.push_back( "addNode");
+        foundMethod = true;
+    }
+
+    if (methodToTest == "all" || methodToTest == "addLink") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_addLink);
+        methodNames.push_back( "addLink");
+        foundMethod = true;
+    }
+
+    if (methodToTest == "all" || methodToTest == "removeAtom") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_rmAtom);
+        methodNames.push_back( "removeAtom");
+        foundMethod = true;
+    }
+
+    if (methodToTest == "all" || methodToTest == "getHandlesByType") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_getHandlesByType);
+        methodNames.push_back( "getHandlesByType");
+        foundMethod = true;
+    }
 
     if (!foundMethod) {
         std::cerr << "Error: specified a bad test name: " << methodToTest << std::endl;
         exit(1);
     }
-    
+
 }
 
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
@@ -491,8 +490,10 @@ Type AtomSpaceBenchmark::randomType(Type t)
     do {
         candidateType = ATOM + rng->randint(numberOfTypes-1);
     } while (!classserver().isA(candidateType, t) or
-        !classserver().isA(candidateType, FREE_LINK) or
-        !classserver().isA(candidateType, LAMBDA_LINK) or
+        classserver().isA(candidateType, FREE_LINK) or
+        classserver().isA(candidateType, LAMBDA_LINK) or
+        candidateType == VARIABLE_LIST or
+        candidateType == DEFINE_LINK or
         candidateType == NUMBER_NODE or
         candidateType == TYPE_NODE);
 
@@ -1191,4 +1192,3 @@ void AtomSpaceBenchmark::recordToFile(std::ofstream& myfile, record_t record) co
 }
 
 }
-

@@ -58,19 +58,12 @@ friend class AtomStorage;         // persistance
 friend class AtomspaceHTabler;    // persistance
 
 private:
-
-    UUID _uuid;
     AtomPtr _ptr;
 
-    static bool atoms_eq(const AtomPtr&, const AtomPtr&);
     static bool atoms_less(const AtomPtr&, const AtomPtr&);
-
-    Atom* resolve();
-    Atom* cresolve() const;
-    static AtomPtr do_res(const Handle*);
+    static AtomPtr do_res(UUID);
     static std::vector<const AtomTable*> _resolver;
 
-    AtomPtr resolve_ptr();
     static void set_resolver(const AtomTable*);
     static void clear_resolver(const AtomTable*);
 
@@ -80,110 +73,61 @@ public:
     static const UUID INVALID_UUID = ULONG_MAX;
     static const Handle UNDEFINED;
 
-    explicit Handle(const AtomPtr& atom);
-    explicit Handle(const UUID u) : _uuid(u) {}
-    explicit Handle() : _uuid(INVALID_UUID) {}
-    Handle(const Handle& h) : _uuid(h._uuid), _ptr(h._ptr) {}
+    explicit Handle(const AtomPtr& atom) : _ptr(atom) {}
+    explicit Handle(const UUID);
+    explicit Handle() {}
+    Handle(const Handle& h) : _ptr(h._ptr) {}
     ~Handle() {}
 
-    inline UUID value(void) const {
-        return _uuid;
-    }
+    UUID value(void) const;
 
     inline Handle& operator=(const Handle& h) {
-        if (this->_uuid == h._uuid) {
-            Atom* a = h._ptr.get();
-            // The 'typical' case here is where a isn't null,
-            // but this is.  The weirdo case is where both
-            // aren't null, and yet differ.
-            // Mostly, we want to avoid the CPU overhead of calling
-            // resolve(), it we can; so the goal of this if-stmt is
-            // to upgrade the ptr from null to non-null.
-            if (a != NULL and a != this->_ptr.get())
-                this->_ptr = h._ptr;
-            return *this;
-        }
-        this->_uuid = h._uuid;
         this->_ptr = h._ptr;
         return *this;
     }
 
-    Handle& operator=(const AtomPtr& a);
+    Handle& operator=(const AtomPtr& a) {
+        this->_ptr = a;
+        return *this;
+    }
 
     inline Atom* operator->() {
-        Atom* ptr = _ptr.get();
-        if (ptr) return ptr;
-        if (INVALID_UUID == _uuid) return NULL;
-        return resolve();
+        return _ptr.get();
     }
 
     inline Atom* operator->() const {
-        Atom* ptr = _ptr.get();
-        if (ptr) return ptr;
-        if (INVALID_UUID == _uuid) return NULL;
-        return cresolve();
+        return _ptr.get();
     }
 
     // Allows expressions like "if(h)..." to work when h has a non-null pointer.
     explicit inline operator bool() const noexcept {
         if (_ptr.get()) return true;
-        return NULL != cresolve(); // might be null because we haven't resolved it yet!
+        return false;
     }
 
     inline bool operator==(std::nullptr_t) const noexcept {
         if (_ptr.get()) return false;
-        return NULL == cresolve(); // might be null because we haven't resolved it yet!
+        return true;
     }
 
     inline bool operator!=(std::nullptr_t) const noexcept {
         if (_ptr.get()) return true;
-        return NULL != cresolve(); // might be null because we haven't resolved it yet!
+        return false;
     }
 
-    // Handles are equivalent when their uuid's compare. It may happen
-    // that one has a null pointer, and the other one doesn't; we don't
-    // care about that. It should never ever happen that we have two
-    // identical uuid's but inequivalent pointers!! Well, unless both
-    // uuids are -1, in which case, we are comparing atoms that have
-    // not yet been inserted into the atomspace.
-    //
-    // Ughhh. Be aware that operator<() is used by std::less<T>
-    // and that std::less<T> is used by std::set<T> and maybe other
-    // classes (e.g. maps) to perform uniqueness tests. It can happen
-    // (and does happen, in e.g. the VariableList ctor) that these
-    // sometimes run before atoms have been assigned a UUID (i.e. before
-    // they have been inserted in the atomspace).  In such cases, we
-    // still need the handle comparison to work correctly, else stuff
-    // breaks. We resort to comparing atoms, in that case.
-    inline bool operator==(const Handle& h) const noexcept {
-        if (INVALID_UUID != _uuid or INVALID_UUID != h._uuid)
-            return _uuid == h._uuid;
-        return atoms_eq(_ptr, h._ptr);
-    }
-    inline bool operator!=(const Handle& h) const noexcept {
-        if (INVALID_UUID != _uuid or INVALID_UUID != h._uuid)
-            return _uuid != h._uuid;
-        return not atoms_eq(_ptr, h._ptr);
-    }
+    inline bool operator==(const Handle& h) const noexcept { return _ptr == h._ptr; }
+    inline bool operator!=(const Handle& h) const noexcept { return _ptr != h._ptr; }
     inline bool operator< (const Handle& h) const noexcept {
-        if (INVALID_UUID != _uuid or INVALID_UUID != h._uuid)
-            return _uuid < h._uuid;
-        return atoms_less(_ptr, h._ptr);
+       return atoms_less(_ptr, h._ptr);
     }
     inline bool operator> (const Handle& h) const noexcept {
-        if (INVALID_UUID != _uuid or INVALID_UUID != h._uuid)
-            return _uuid > h._uuid;
-        return atoms_less(h._ptr, _ptr);
+       return atoms_less(h._ptr, _ptr);
     }
     inline bool operator<=(const Handle& h) const noexcept {
-        if (INVALID_UUID != _uuid or INVALID_UUID != h._uuid)
-            return _uuid <= h._uuid;
-        return not atoms_less(h._ptr, _ptr);
+       return not atoms_less(h._ptr, _ptr);
     }
     inline bool operator>=(const Handle& h) const noexcept {
-        if (INVALID_UUID != _uuid or INVALID_UUID != h._uuid)
-            return _uuid >= h._uuid;
-        return not atoms_less(_ptr, h._ptr);
+       return not atoms_less(_ptr, h._ptr);
     }
 
     /**
@@ -205,21 +149,14 @@ public:
     }
 
     operator AtomPtr() const {
-        if (_ptr.get()) return _ptr;
-        if (INVALID_UUID == _uuid) return NULL_POINTER;
-        Handle h(*this);
-        return h.resolve_ptr();
+        return _ptr;
     }
     operator AtomPtr() {
-        if (_ptr.get()) return _ptr;
-        if (INVALID_UUID == _uuid) return NULL_POINTER;
-        return resolve_ptr();
+        return _ptr;
     }
 /***
     operator const AtomPtr&() {
-        if (_ptr.get()) return _ptr;
-        if (INVALID_UUID == _uuid) return NULL_POINTER;
-        return resolve_ptr();
+        return _ptr;
     }
 ***/
 };
@@ -264,13 +201,11 @@ inline std::size_t hash_value(Handle const& h)
     return static_cast<std::size_t>(h.value());
 }
 
-/// Compare handle uuid's ONLY. Do not compare atom pointers
-/// (as one might be null, and the other one not null.)
 struct handle_less
 {
    bool operator()(const Handle& hl, const Handle& hr) const
    {
-       return hl.value() < hr.value();
+       return hl < hr;
    }
 };
 
@@ -289,9 +224,7 @@ struct handle_seq_less
        size_t sr = hsr.size();
        if (sl != sr) return sl < sr;
        for (size_t i=0; i<sl; i++) {
-           UUID ul = hsl[i].value();
-           UUID ur = hsr[i].value();
-           if (ul != ur) return ul < ur;
+           if (hsl[i] != hsr[i]) return hsl[i] < hsr[i];
        }
        return false;
    }
@@ -341,7 +274,7 @@ std::hash<opencog::Handle>::operator()(opencog::Handle h) const
 
 #else
 
-// This works for e, per note immediately above.
+// This works for me, per note immediately above.
 template<>
 struct hash<opencog::Handle>
 {

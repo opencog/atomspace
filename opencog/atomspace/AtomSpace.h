@@ -202,9 +202,10 @@ public:
      * backing store are not used.
      *
      * To avoid a fetch if the atom already is in the atomtable, use the
-     * getAtom() method instead.
+     * get_atom() method instead.
      */
     Handle fetch_atom(Handle h);
+    Handle fetch_atom(UUID);
 
     /**
      * Get an atom from the AtomTable. If not found there, get it from
@@ -212,6 +213,7 @@ public:
      * not found in either place, return Handle::UNDEFINED.
      */
     Handle get_atom(Handle);
+    Handle get_atom(UUID);
 
     /**
      * Load *all* atoms of the given type, but only if they are not
@@ -335,42 +337,9 @@ public:
     /**
      * Return true if the handle points to an atom that is in some
      * (any) atomspace; else return false.
-     *
-     * Currently, this code has the side-effect of resolving the handle.
-     * That is, if the handle's atom-pointer was non-null, and the atom
-     * can be located based on its UUID, then the atom will be
-     * instantiated in the appropriate atomspace.  Thus, this method
-     * returns false only if the handles UUID is -1 or if the UUID is
-     * positive, but no atomspace can lay claim to it.
-     *
-     * A UUID can be positive, but not a part of any atomspace, if the
-     * atom was recently removed from some atomspace. In this case, the
-     * handle is still caching its old UUID, although the atom itself
-     * now has a UUID of -1.
-     *
-     * Note also: a handle that is pointing to a recently-created atom
-     * that is not in any atomspace will have a UUID of -1, and thus is
-     * considered "invalid", even though it points to an atom that
-     * exists in RAM (and is thus usable as a naked atom).
      */
     bool is_valid_handle(Handle h) const {
-        // The h->getHandle() maneuver below is a trick to get at the
-        // UUID of the actual atom, rather than the cached UUID in the
-        // handle. Technically, this is not quite right, since, in
-        // principle, a handle could have a valid UUID, but the atom
-        // pointer is null, because the atom is on disk, in a database,
-        // is on a remote server, or has been purged from RAM.  But we
-        // have no way of knowing that the situation really is, so it
-        // seems like the only thing that can be done here is to resolve
-        // the pointer (i.e. make it point to an acutal atom, in RAM,
-        // and then check the actual UUID in the atom.
-        //
-        // The actual resolution is done with the (NULL != h) check,
-        // which causes h.operator!=() to run, which fixes up the atom
-        // pointer, as needed.
-        //
-        bool stuff = (NULL != h) and (h->getHandle().value() != ULONG_MAX);
-        return stuff;
+        return (NULL != h) and (h->getAtomTable() != NULL);
     }
 
     /**
