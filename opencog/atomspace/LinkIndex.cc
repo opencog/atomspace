@@ -95,9 +95,9 @@ UnorderedHandleSet LinkIndex::getHandleSet(Type type,
 			if (classserver().isA(s, type))
 			{
 				const HandleSeqIndex &hsi = idx.at(s);
-				Handle h(hsi.get(seq)->getHandle());
-				if (Handle::UNDEFINED != h)
-					hs.insert(h);
+				Link* l = hsi.get(seq);
+				if (l)
+					hs.insert(l->getHandle());
 			}
 		}
 	}
