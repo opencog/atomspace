@@ -88,7 +88,7 @@ AtomTable::~AtomTable()
 
     // No one who shall look at these atoms shall ever again
     // find a reference to this atomtable.
-    UUID undef = Handle::UNDEFINED.value();
+    UUID undef = Handle::INVALID_UUID;
     for (auto pr : _atom_set) {
         pr.second->_atomTable = NULL;
         pr.second->_uuid = undef;
@@ -189,7 +189,7 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     Handle h(linkIndex.getHandle(t, resolved_seq));
-    if (_environ and Handle::INVALID_UUID == h.value())
+    if (_environ and nullptr == h)
         return _environ->getHandle(t, resolved_seq);
     return h;
 }
