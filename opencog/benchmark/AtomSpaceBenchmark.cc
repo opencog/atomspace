@@ -56,8 +56,8 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
 
     counter = 0;
     showTypeSizes = false;
-    baseNclock = 1000;
-    baseNreps = 100;
+    baseNclock = 2000;
+    baseNreps = 200;
     baseNloops = 1;
     memoize = false;
     compile = false;
@@ -289,7 +289,7 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
 {
     Nclock = baseNclock;
     Nloops = baseNloops;
-    Nreps = baseNreps / Nclock;
+    Nreps = baseNreps;
     if (BENCH_SCM == testKind /* or BENCH_PYTHON == testKind */)
     {
         // Try to avoid excessive compilation times.
@@ -776,7 +776,7 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize, float _percentLinks,
     }
 
     // Add nodes
-    long nodeCount = atomspaceSize * (1.0f - _percentLinks);
+    long nodeCount = atomspaceSize * (1.0f - _percentLinks) / Nclock;
     int i;
     if (display) cout << "Adding " << nodeCount << " nodes ";
     int diff = nodeCount / PROGRESS_BAR_LENGTH;
@@ -791,7 +791,7 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize, float _percentLinks,
     if (display) cout << endl << "Adding " << atomspaceSize - nodeCount << " links " << flush;
     diff = ((atomspaceSize - nodeCount) / PROGRESS_BAR_LENGTH);
     if (!diff) diff = 1;
-    for (; i < atomspaceSize; i++) {
+    for (; i < atomspaceSize/Nclock; i++) {
         makeRandomLink();
         if (display && (i-nodeCount) % diff == 0) { cerr << "." << flush; }
     }
