@@ -27,9 +27,9 @@ ADD_LIBRARY (atomspace SHARED
 	GenericTruthValue.cc
 	Handle.cc
 	HandleSeqIndex.cc
-	HandleSetIndex.cc
+	# HandleSetIndex.cc
 	ImportanceIndex.cc
-	IncomingIndex.cc
+	# IncomingIndex.cc
 	IndefiniteTruthValue.cc
 	Link.cc
 	LinkIndex.cc
@@ -73,9 +73,9 @@ INSTALL (FILES
 	GenericTruthValue.h
 	Handle.h
 	HandleSeqIndex.h
-	HandleSetIndex.h
+	# HandleSetIndex.h
 	ImportanceIndex.h
-	IncomingIndex.h
+	# IncomingIndex.h
 	IndefiniteTruthValue.h
 	Link.h
 	LinkIndex.h

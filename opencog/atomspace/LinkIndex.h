@@ -35,7 +35,7 @@ namespace opencog
  */
 
 /**
- * Implements an (type, HandleSeq) index array of RB-trees (C++ set)
+ * Implements a (type, HandleSeq) index array of RB-trees (C++ set)
  * That is, given both a type, and a HandleSeq, it returns a single,
  * unique Handle associated with that pair.  In other words, it returns
  * the single, unique Link which is that pair.
