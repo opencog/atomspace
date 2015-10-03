@@ -916,8 +916,8 @@ On "fanny", after removing UUID's from handles.
    name           K-ops/sec     K-ops/sec    K-ops/sec
    ----           ---------     ---------    --------
   noop             1915          1780         1821
-  getType          1720          1391         1343
-  getTV            1486          1028          997
+  getType          1720          1391         1345
+  getTV            1486          1028         1031
   setTV             863           575          574
   getOutgoingSet   1532           832          836
   getIncomingSet   1117           642          634
