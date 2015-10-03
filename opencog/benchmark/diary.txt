@@ -942,7 +942,10 @@ Observations:
   to these suggests that these were near the limit of measurability (as
   currently done, which is poorly). These functions could-be/were rate
   limited by the speed of dererencing AtomPtr.  Why this changed is ...
-  unknown to me.  A git bisect would be useful.
+  unknown to me.  A git bisect would be useful. XXXX WTF. If measured
+  one at a time, i.e. -m getIncomingSet, instead of in bulk, -A then
+  the results are on parity. So .. is something wrong with the -A flag?
+  What could possibly be different? The remesrued results below.
 
 * The addNode and removeAtom operations are unchanged by the de-uuid
   process.  That addLink got slower is dissappointing, but may be due
@@ -953,3 +956,19 @@ Observations:
 * That all three addNode addLink and removeAtom are in the same ballpark
   indicates that the primary bottleneck here is the update of the
   atomspace indexes (eitehr add or remove in these).
+
+
+Below: same as above, except remeasured with -m testNmae -n 2000000
+Big WTF as to  why this differs from -A
+
+                 new (master)  new (de-uuid)
+                     -A           -A
+   test
+   name            K-ops/sec    K-ops/sec
+   ----            ---------    --------
+  noop              1744         1802
+  getType           1654         1675
+  getTV             1495         1451
+  setTV              744          726
+  getOutgoingSet    1480         1520
+  getIncomingSet    1149         1147
