@@ -109,7 +109,7 @@ void PatternLink::setup_components(void)
 	{
 		Handle h(createPatternLink(_component_vars[i], _varlist.typemap,
 		                           _components[i], _pat.optionals));
-		_component_patterns.push_back(h);
+		_component_patterns.emplace_back(h);
 	}
 }
 
@@ -170,7 +170,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 	_varlist.varseq.clear();
 	for (const Handle& v : vars)
 	{
-		_varlist.varseq.push_back(v);
+		_varlist.varseq.emplace_back(v);
 		auto it = typemap.find(v);
 		if (it != typemap.end())
 			_varlist.typemap.insert(*it);
@@ -189,15 +189,15 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 			if (is_atom_in_tree(opt, h))
 			{
 				_pat.optionals.insert(opt);
-				_pat.clauses.push_back(opt);
+				_pat.clauses.emplace_back(opt);
 				h_is_opt = true;
 				break;
 			}
 		}
 		if (not h_is_opt)
 		{
-			_pat.clauses.push_back(h);
-			_pat.mandatory.push_back(h);
+			_pat.clauses.emplace_back(h);
+			_pat.mandatory.emplace_back(h);
 		}
 	}
 	locate_defines(_pat.clauses);
@@ -208,7 +208,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 	_num_virts = _virtual.size();
 	OC_ASSERT (0 == _num_virts, "Must not have any virtuals!");
 
-	_components.push_back(compo);
+	_components.emplace_back(compo);
 	_num_comps = 1;
 
 	make_connectivity_map(_pat.cnf_clauses);
@@ -329,10 +329,10 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 			{
 				const HandleSeq& pset = LinkCast(ho)->getOutgoingSet();
 				for (const Handle& ph : pset)
-					_pat.clauses.push_back(ph);
+					_pat.clauses.emplace_back(ph);
 			}
 			else
-				_pat.clauses.push_back(ho);
+				_pat.clauses.emplace_back(ho);
 		}
 	}
 	else if (SEQUENTIAL_AND_LINK == t)
@@ -345,15 +345,15 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 			{
 				const HandleSeq& pset = LinkCast(ho)->getOutgoingSet();
 				for (const Handle& ph : pset)
-					_pat.clauses.push_back(ph);
+					_pat.clauses.emplace_back(ph);
 			}
 		}
-		_pat.clauses.push_back(hbody);
+		_pat.clauses.emplace_back(hbody);
 	}
 	else
 	{
 		// There's just one single clause!
-		_pat.clauses.push_back(hbody);
+		_pat.clauses.emplace_back(hbody);
 	}
 }
 
@@ -459,12 +459,12 @@ void PatternLink::extract_optionals(const std::set<Handle> &vars,
 
 			const Handle& inv(lopt->getOutgoingAtom(0));
 			_pat.optionals.insert(inv);
-			_pat.cnf_clauses.push_back(inv);
+			_pat.cnf_clauses.emplace_back(inv);
 		}
 		else
 		{
-			_pat.mandatory.push_back(h);
-			_pat.cnf_clauses.push_back(h);
+			_pat.mandatory.emplace_back(h);
+			_pat.cnf_clauses.emplace_back(h);
 		}
 	}
 }
@@ -615,9 +615,9 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 			_pat.executable_holders.insert(sh);
 
 		if (is_virtual)
-			virtual_clauses.push_back(clause);
+			virtual_clauses.emplace_back(clause);
 		else
-			fixed_clauses.push_back(clause);
+			fixed_clauses.emplace_back(clause);
 
 		if (is_black)
 			black_clauses.insert(clause);
@@ -682,7 +682,7 @@ void PatternLink::make_connectivity_map(const HandleSeq& component)
 
 void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 {
-	_pat.connectivity_map[h].push_back(root);
+	_pat.connectivity_map[h].emplace_back(root);
 
 	LinkPtr l(LinkCast(h));
 	if (l)
@@ -741,7 +741,7 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 {
 	PatternTermPtr ptm(std::make_shared<PatternTerm>(parent, h));
 	parent->addOutgoingTerm(ptm);
-	_pat.connected_terms_map[{h, root}].push_back(ptm);
+	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
 
 	Type t = h->getType();
 	LinkPtr l(LinkCast(h));

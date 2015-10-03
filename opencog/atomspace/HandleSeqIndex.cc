@@ -25,14 +25,14 @@ using namespace opencog;
 
 void HandleSeqIndex::remove(bool (*filter)(const Handle&))
 {
-	std::map<const HandleSeq,Handle>::iterator i, j;
+	std::map<const HandleSeq*, Link*>::iterator i, j;
 	
 	i = idx.begin();
 	while (i != idx.end())
 	{
 		j = i;
 		++i;
-		if (filter(j->second))
+		if (filter(j->second->getHandle()))
 			idx.erase(j->first);
 	}
 }

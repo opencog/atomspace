@@ -25,8 +25,6 @@
 #ifndef _OPENCOG_HANDLE_H
 #define _OPENCOG_HANDLE_H
 
-#include <cstddef>
-#include <cstdio>
 #include <iostream>
 #include <climits>
 #include <functional>
@@ -225,6 +223,21 @@ struct handle_seq_less
        if (sl != sr) return sl < sr;
        for (size_t i=0; i<sl; i++) {
            if (hsl[i] != hsr[i]) return hsl[i] < hsr[i];
+       }
+       return false;
+   }
+};
+
+struct handle_seq_ptr_less
+{
+   bool operator()(const HandleSeq* hsl, const HandleSeq* hsr) const
+   {
+       size_t sl = hsl->size();
+       size_t sr = hsr->size();
+       if (sl != sr) return sl < sr;
+       for (size_t i=0; i<sl; i++) {
+           if (hsl->operator[](i) != hsr->operator[](i))
+               return hsl->operator[](i) < hsr->operator[](i);
        }
        return false;
    }

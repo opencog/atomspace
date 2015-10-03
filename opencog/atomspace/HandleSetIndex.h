@@ -22,7 +22,6 @@
 #ifndef _OPENCOG_HANDLE_SET_INDEX_H
 #define _OPENCOG_HANDLE_SET_INDEX_H
 
-#include <cstddef>
 #include <map>
 
 #include <opencog/atomspace/Handle.h>
@@ -38,6 +37,9 @@ namespace opencog
  * That is, given a Handle, it will return an UnorderedHandleSet
  * associated with that Handle.  This index is the "opposite" to the 
  * HandleSeqIndex; the map goes in the opposite direction.
+ *
+ * This is used to build the IncomingIndex (which is not used anywhere,
+ * currently).
  */
 class HandleSetIndex
 {

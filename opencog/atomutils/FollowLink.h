@@ -81,7 +81,7 @@ private:
 		to_atom = Handle::UNDEFINED;
 		LinkPtr l(LinkCast(h));
 		if (l) l->foreach_outgoing(&FollowLink::pursue_link, this);
-		if (to_atom != Handle::UNDEFINED) return true;
+		if (to_atom) return true;
 		return false;
 	}
 

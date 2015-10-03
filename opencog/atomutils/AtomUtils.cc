@@ -48,7 +48,7 @@ HandleSeq get_all_nodes(Handle h)
             results.insert(results.end(), sub.begin(), sub.end());
         }
     else
-        results.push_back(h);
+        results.emplace_back(h);
 
     // Handle is copy safe, but in this case C++11 would move it
     return results;
@@ -88,7 +88,7 @@ UnorderedHandleSet get_all_unique_nodes(Handle h)
 HandleSeq get_all_atoms(Handle h)
 {
     HandleSeq results;
-    results.push_back(h);
+    results.emplace_back(h);
 
     LinkPtr lll(LinkCast(h));
     if (lll)
@@ -145,7 +145,7 @@ HandleSeq get_neighbors(const Handle& h, bool fanin,
                 if (handle == h) continue;
                 if (!fanout && link->isSource(h)) continue;
                 if (!fanin && link->isTarget(h)) continue;
-                answer.push_back(handle);
+                answer.emplace_back(handle);
             }
         }
     }
@@ -256,7 +256,7 @@ HandleSeq get_predicates(const Handle& target,
                 or (subClasses &&
                     classServer.isA(candidateType, predicateType)))
             {
-                answer.push_back(evaluationLink->getHandle());
+                answer.emplace_back(evaluationLink->getHandle());
             }
         }
     }
@@ -297,7 +297,7 @@ HandleSeq get_predicates_for(const Handle& target,
             // Check if the first outgoing atom for this EvaluationLink is
             // the desired predicate.
             if (predicate == evaluationLink->getOutgoingAtom(0))
-                answer.push_back(evaluationLink->getHandle());
+                answer.emplace_back(evaluationLink->getHandle());
         }
     }
 

@@ -22,7 +22,6 @@
 #ifndef _OPENCOG_STRINGINDEX_H
 #define _OPENCOG_STRINGINDEX_H
 
-#include <cstddef>
 #include <map>
 
 #include <opencog/atomspace/Handle.h>

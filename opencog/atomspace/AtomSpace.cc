@@ -378,7 +378,7 @@ Handle AtomSpace::fetch_incoming_set(Handle h, bool recursive)
 
     h = get_atom(h);
 
-    if (Handle::UNDEFINED == h) return Handle::UNDEFINED;
+    if (nullptr == h) return Handle::UNDEFINED;
 
     // Get everything from the backing store.
     HandleSeq iset = backing_store->getIncomingSet(h);

@@ -45,6 +45,8 @@ namespace opencog
  * The const UnorderedHandleSet& returned by the getIncomingSet()
  * method will also become invalid if an atom is inserted or deleted
  * (for that particular IncomingSet).
+ *
+ * Note: Currently, this is not used anywhere.
  */
 class IncomingIndex
 {

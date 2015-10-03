@@ -38,7 +38,7 @@ using namespace opencog;
 Handle SchemeSmob::verify_handle (SCM satom, const char * subrname, int pos)
 {
 	Handle h(scm_to_handle(satom));
-	if (Handle::UNDEFINED == h)
+	if (nullptr == h)
 		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
 
 	return h;
