@@ -64,7 +64,7 @@ private:
     ProtoAtomPtr _ptr;
 
     static bool atoms_less(const ProtoAtomPtr&, const ProtoAtomPtr&);
-    static AtomPtr do_res(UUID);
+    static Handle do_res(UUID);
     static std::vector<const AtomTable*> _resolver;
 
     static void set_resolver(const AtomTable*);
@@ -106,10 +106,10 @@ public:
     }
 
     operator AtomPtr() const {
-        return dynamic_cast<AtomPtr>(_ptr);
+        return std::dynamic_pointer_cast<AtomPtr>(_ptr);
     }
     operator AtomPtr() {
-        return dynamic_cast<AtomPtr>(_ptr);
+        return std::dynamic_pointer_cast<AtomPtr>(_ptr);
     }
 #else
     // XXX FIXME its a performance disaster if these are not inline!

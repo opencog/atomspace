@@ -36,7 +36,7 @@ const AtomPtr Handle::NULL_POINTER;
 
 Handle::Handle(const UUID u)
 {
-	_ptr = do_res(u);
+	_ptr = do_res(u)._ptr;
 }
 
 UUID Handle::value(void) const
@@ -58,12 +58,14 @@ Atom* Handle::operator->() const
 	return dynamic_cast<Atom*>(pa);
 }
 
-Handle::operator AtomPtr() const {
-	return dynamic_cast<AtomPtr>(_ptr);
+Handle::operator AtomPtr() const
+{
+	return std::dynamic_pointer_cast<Atom>(_ptr);
 }
 
-Handle::operator AtomPtr() {
-	return dynamic_cast<AtomPtr>(_ptr);
+Handle::operator AtomPtr()
+{
+	return std::dynamic_pointer_cast<Atom>(_ptr);
 }
 
 
@@ -79,11 +81,14 @@ bool Handle::atoms_eq(const AtomPtr& a, const AtomPtr& b)
 }
 #endif
 
-bool Handle::atoms_less(const AtomPtr& a, const AtomPtr& b)
+bool Handle::atoms_less(const ProtoAtomPtr& pa, const ProtoAtomPtr& pb)
 {
-    if (a == b) return false;
-    if (NULL == a) return true;
-    if (NULL == b) return false;
+    if (pa == pb) return false;
+    if (NULL == pa) return true;
+    if (NULL == pb) return false;
+
+    AtomPtr a(std::dynamic_pointer_cast<Atom>(pa));
+    AtomPtr b(std::dynamic_pointer_cast<Atom>(pb));
     UUID ua = a->getUUID();
     UUID ub = b->getUUID();
     if (INVALID_UUID != ua or INVALID_UUID != ub) return ua < ub;
@@ -118,11 +123,11 @@ void Handle::clear_resolver(const AtomTable* tab)
 
 // Search several atomspaces, in order.  First one to come up with
 // the atom wins.  Seems to work, for now.
-inline AtomPtr Handle::do_res(UUID uuid)
+inline Handle Handle::do_res(UUID uuid)
 {
     for (const AtomTable* at : _resolver) {
-        AtomPtr a(at->getHandle(uuid)._ptr);
-        if (a.get()) return a;
+        Handler h(at->getHandle(uuid));
+        if (NULL != h) return h;
     }
     return NULL;
 }
