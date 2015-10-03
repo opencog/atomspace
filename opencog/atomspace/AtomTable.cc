@@ -514,13 +514,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
                 ho->remove_atom(llc);
                 llc->_outgoing[i] = add(ho, async);
             }
-            else if (ho.value() == Handle::INVALID_UUID) {
-                // If we are here, then the atom is in the atomspace,
-                // but the handle has an invalid UUID. This can happen
-                // if the atom appears more than once in the outgoing
-                // set. Fix the handles' UUID, by forcing a cast.
-                llc->_outgoing[i] = ((AtomPtr) llc->_outgoing[i]);
-            }
             // Build the incoming set of outgoing atom h.
             llc->_outgoing[i]->insert_atom(llc);
         }
