@@ -288,14 +288,14 @@ void AtomSpaceBenchmark::setMethod(std::string methodToTest)
     }
 
     if (methodToTest == "all" or methodToTest == "emplace_back") {
-        methodsToTest.emplace_back( &AtomSpaceBenchmark::bm_emplace_back);
-        methodNames.emplace_back( "emplace_back");
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_emplace_back);
+        methodNames.push_back( "emplace_back");
         foundMethod = true;
     }
 
     if (methodToTest == "all" or methodToTest == "reserve") {
-        methodsToTest.reserve( &AtomSpaceBenchmark::bm_reserve);
-        methodNames.reserve( "reserve");
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_reserve);
+        methodNames.push_back( "reserve");
         foundMethod = true;
     }
 
