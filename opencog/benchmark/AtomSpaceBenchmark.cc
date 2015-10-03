@@ -289,7 +289,7 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
 {
     Nclock = baseNclock;
     Nloops = baseNloops;
-    Nreps = baseNreps;
+    Nreps = baseNreps / Nclock;
     if (BENCH_SCM == testKind /* or BENCH_PYTHON == testKind */)
     {
         // Try to avoid excessive compilation times.
@@ -938,12 +938,14 @@ Handle AtomSpaceBenchmark::getRandomHandle()
 
 timepair_t AtomSpaceBenchmark::bm_getType()
 {
-    Handle h = getRandomHandle();
-    clock_t t_begin;
-    clock_t time_taken;
+    Handle hs[Nclock];
+    for (unsigned int i=0; i<Nclock; i++)
+        hs[i] = getRandomHandle();
+
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+#if HAVE_CYTHONX
         OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         for (unsigned int i=0; i<Nloops; i++) {
@@ -954,35 +956,41 @@ timepair_t AtomSpaceBenchmark::bm_getType()
         clock_t t_begin = clock();
         pyev->eval(ps);
         return clock() - t_begin;
+#endif /* HAVE_CYTHON */
     }
 #endif /* HAVE_CYTHON */
+
 #if HAVE_GUILE
     case BENCH_SCM: {
-        std::ostringstream ss;
-        for (unsigned int i=0; i<Nloops; i++) {
-            ss << "(cog-type (cog-atom " << h.value() << "))\n";
-            h = getRandomHandle();
+        std::string gsa[Nclock];
+        for (unsigned int i=0; i<Nclock; i++)
+        {
+            Handle h = hs[i];
+            std::ostringstream ss;
+            for (unsigned int i=0; i<Nloops; i++) {
+                ss << "(cog-type (cog-atom " << h.value() << "))\n";
+                h = getRandomHandle();
+            }
+            std::string gs = memoize_or_compile(ss.str());
+            gsa[i] = gs;
         }
-        std::string gs = memoize_or_compile(ss.str());
-
         clock_t t_begin = clock();
-        scm->eval(gs);
-        time_taken = clock() - t_begin;
+        for (unsigned int i=0; i<Nclock; i++)
+           scm->eval(gsa[i]);
+        clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
 #endif /* HAVE_GUILE */
+
+    case BENCH_AS:
     case BENCH_TABLE: {
-        t_begin = clock();
-        h->getType();
-        time_taken = clock() - t_begin;
+        clock_t t_begin = clock();
+        for (unsigned int i=0; i<Nclock; i++)
+            hs[i]->getType();
+        clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
-    case BENCH_AS: {
-        t_begin = clock();
-        asp->get_type(h);
-        time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }}
+    }
     return timepair_t(0,0);
 }
 
