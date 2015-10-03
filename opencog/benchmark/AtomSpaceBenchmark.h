@@ -80,6 +80,7 @@ class AtomSpaceBenchmark
     unsigned int Nclock;
     unsigned int Nreps;
     unsigned int Nloops;
+    int global;
 
 public:
     unsigned int baseNclock;

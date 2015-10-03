@@ -390,6 +390,8 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
     cout << "\nRandom generator: MT19937\n";
     cout << "Random seed: " << randomseed << "\n\n";
 
+    if (saveToFile) cout << "Ingnore this: " << global << std::endl;
+
     // Initialize the random number generator with the seed which might
     // have been passed in on the command line.
     if (rng)
@@ -820,6 +822,7 @@ timepair_t AtomSpaceBenchmark::bm_noop()
     for (unsigned int i=0; i<Nclock; i++)
         sum += n[i];
     clock_t time_taken = clock() - t_begin;
+    global += sum;
     return timepair_t(time_taken,0);
 }
 
@@ -985,9 +988,12 @@ timepair_t AtomSpaceBenchmark::bm_getType()
     case BENCH_AS:
     case BENCH_TABLE: {
         clock_t t_begin = clock();
+        // summing prevents the optimizer from optimizing away.
+        int sum = 0;
         for (unsigned int i=0; i<Nclock; i++)
-            hs[i]->getType();
+            sum += hs[i]->getType();
         clock_t time_taken = clock() - t_begin;
+        global += sum;
         return timepair_t(time_taken,0);
     }
     }
@@ -996,12 +1002,14 @@ timepair_t AtomSpaceBenchmark::bm_getType()
 
 timepair_t AtomSpaceBenchmark::bm_getTruthValue()
 {
-    Handle h = getRandomHandle();
-    clock_t t_begin;
-    clock_t time_taken;
+    Handle hs[Nclock];
+    for (unsigned int i=0; i<Nclock; i++)
+        hs[i] = getRandomHandle();
+
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+#if HAVE_CYTHONX
         OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         dss << "aspace.get_tv(Handle(" << h.value() << "))\n";
@@ -1009,35 +1017,39 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
         clock_t t_begin = clock();
         pyev->eval(ps);
         return clock() - t_begin;
+#endif /* HAVE_CYTHON */
     }
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
-        std::ostringstream ss;
-        for (unsigned int i=0; i<Nloops; i++) {
-            ss << "(cog-tv (cog-atom " << h.value() << "))\n";
-            h = getRandomHandle();
+        std::string gsa[Nclock];
+        for (unsigned int i=0; i<Nclock; i++)
+        {
+            Handle h = hs[i];
+            std::ostringstream ss;
+            for (unsigned int i=0; i<Nloops; i++) {
+                ss << "(cog-tv (cog-atom " << h.value() << "))\n";
+                h = getRandomHandle();
+            }
+            std::string gs = memoize_or_compile(ss.str());
+            gsa[i] = gs;
         }
-        std::string gs = memoize_or_compile(ss.str());
-
         clock_t t_begin = clock();
-        scm->eval(gs);
-        time_taken = clock() - t_begin;
+        for (unsigned int i=0; i<Nclock; i++)
+           scm->eval(gsa[i]);
+        clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
 #endif /* HAVE_GUILE */
+    case BENCH_AS:
     case BENCH_TABLE: {
-        t_begin = clock();
-        h->getTruthValue();
-        time_taken = clock() - t_begin;
+        clock_t t_begin = clock();
+        for (unsigned int i=0; i<Nclock; i++)
+            hs[i]->getTruthValue();
+        clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
-    case BENCH_AS: {
-        t_begin = clock();
-        asp->get_TV(h);
-        time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }}
+    }
     return timepair_t(0,0);
 }
 
@@ -1053,16 +1065,20 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValueZmq()
 
 timepair_t AtomSpaceBenchmark::bm_setTruthValue()
 {
-    Handle h = getRandomHandle();
+    Handle hs[Nclock];
+    float strg[Nclock];
+    float conf[Nclock];
+    for (unsigned int i=0; i<Nclock; i++)
+    {
+        hs[i] = getRandomHandle();
+        strg[i] = rng->randfloat();
+        conf[i] = rng->randfloat();
+    }
 
-    float strength = rng->randfloat();
-    float conf = rng->randfloat();
-
-    clock_t t_begin;
-    clock_t time_taken;
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+#if HAVE_CYTHONX
         OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
         dss << "aspace.set_tv(Handle(" << h.value()
@@ -1071,42 +1087,158 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
         clock_t t_begin = clock();
         pyev->eval(ps);
         return clock() - t_begin;
+#endif /* HAVE_CYTHON */
     }
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
-        std::ostringstream ss;
-        for (unsigned int i=0; i<Nloops; i++) {
-            ss << "(cog-set-tv! (cog-atom " << h.value() << ")"
-               << "   (cog-new-stv " << strength << " " << conf << ")"
-               << ")\n";
-
-            h = getRandomHandle();
-            strength = rng->randfloat();
-            conf = rng->randfloat();
+        std::string gsa[Nclock];
+        for (unsigned int i=0; i<Nclock; i++)
+        {
+            Handle h = hs[i];
+            float strength = strg[i];
+            float cnf = conf[i];
+            std::ostringstream ss;
+            for (unsigned int i=0; i<Nloops; i++) {
+                ss << "(cog-set-tv! (cog-atom " << h.value() << ")"
+                   << "   (cog-new-stv " << strength << " " << cnf << ")"
+                   << ")\n";
+    
+                h = getRandomHandle();
+                strength = rng->randfloat();
+                cnf = rng->randfloat();
+            }
+            std::string gs = memoize_or_compile(ss.str());
+            gsa[i] = gs;
         }
-        std::string gs = memoize_or_compile(ss.str());
-
         clock_t t_begin = clock();
-        scm->eval(gs);
-        time_taken = clock() - t_begin;
+        for (unsigned int i=0; i<Nclock; i++)
+           scm->eval(gsa[i]);
+        clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
 #endif /* HAVE_GUILE */
+    case BENCH_AS:
     case BENCH_TABLE: {
-        t_begin = clock();
-        TruthValuePtr stv(SimpleTruthValue::createTV(strength, conf));
-        h->setTruthValue(stv);
-        time_taken = clock() - t_begin;
+        clock_t t_begin = clock();
+        for (unsigned int i=0; i<Nclock; i++)
+        {
+            TruthValuePtr stv(SimpleTruthValue::createTV(strg[i], conf[i]));
+            hs[i]->setTruthValue(stv);
+        }
+        clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
-    case BENCH_AS: {
-        t_begin = clock();
-        TruthValuePtr stv(SimpleTruthValue::createTV(strength, conf));
-        asp->set_TV(h,stv);
-        time_taken = clock() - t_begin;
+    }
+    return timepair_t(0,0);
+}
+
+timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
+{
+    Handle hs[Nclock];
+    for (unsigned int i=0; i<Nclock; i++)
+        hs[i] = getRandomHandle();
+
+    switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+#if HAVE_CYTHONX
+        OC_ASSERT(1 == Nloops, "Looping not supported for python");
+        std::ostringstream dss;
+        dss << "aspace.get_outgoing(Handle(" << h.value() << "))\n";
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
+#endif /* HAVE_CYTHON */
+    }
+#endif /* HAVE_CYTHON */
+#if HAVE_GUILE
+    case BENCH_SCM: {
+        std::string gsa[Nclock];
+        for (unsigned int i=0; i<Nclock; i++)
+        {
+            Handle h = hs[i];
+            std::ostringstream ss;
+            for (unsigned int i=0; i<Nloops; i++) {
+                ss << "(cog-outgoing-set (cog-atom " << h.value() << "))\n";
+                h = getRandomHandle();
+            }
+            std::string gs = memoize_or_compile(ss.str());
+            gsa[i] = gs;
+        }
+        clock_t t_begin = clock();
+        for (unsigned int i=0; i<Nclock; i++)
+           scm->eval(gsa[i]);
+        clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
-    }}
+    }
+#endif /* HAVE_GUILE */
+    case BENCH_AS:
+    case BENCH_TABLE: {
+        clock_t t_begin = clock();
+        for (unsigned int i=0; i<Nclock; i++)
+        {
+            LinkPtr l(LinkCast(hs[i]));
+            if (l) l->getOutgoingSet();
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+    }
+    return timepair_t(0,0);
+}
+
+timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
+{
+    Handle hs[Nclock];
+    for (unsigned int i=0; i<Nclock; i++)
+        hs[i] = getRandomHandle();
+
+    switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+#if HAVE_CYTHONX
+        OC_ASSERT(1 == Nloops, "Looping not supported for python");
+        std::ostringstream dss;
+        dss << "aspace.get_incoming(Handle(" << h.value() << "))\n";
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
+#endif /* HAVE_CYTHON */
+    }
+#endif /* HAVE_CYTHON */
+#if HAVE_GUILE
+    case BENCH_SCM: {
+        std::string gsa[Nclock];
+        for (unsigned int i=0; i<Nclock; i++)
+        {
+            Handle h = hs[i];
+            std::ostringstream ss;
+            for (unsigned int i=0; i<Nloops; i++) {
+                ss << "(cog-incoming-set (cog-atom " << h.value() << "))\n";
+                h = getRandomHandle();
+            }
+            std::string gs = memoize_or_compile(ss.str());
+            gsa[i] = gs;
+        }
+        clock_t t_begin = clock();
+        for (unsigned int i=0; i<Nclock; i++)
+           scm->eval(gsa[i]);
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+#endif /* HAVE_GUILE */
+    case BENCH_AS:
+    case BENCH_TABLE: {
+        clock_t t_begin = clock();
+        for (unsigned int i=0; i<Nclock; i++)
+            hs[i]->getIncomingSet();
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+    }
     return timepair_t(0,0);
 }
 
@@ -1143,101 +1275,6 @@ timepair_t AtomSpaceBenchmark::bm_getHandlesByType()
         clock_t t_begin = clock();
         asp->get_handles_by_type(back_inserter(results), t, true);
         clock_t time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }}
-    return timepair_t(0,0);
-}
-
-timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
-{
-    Handle h = getRandomHandle();
-    clock_t t_begin;
-    clock_t time_taken;
-    switch (testKind) {
-#if HAVE_CYTHON
-    case BENCH_PYTHON: {
-        OC_ASSERT(1 == Nloops, "Looping not supported for python");
-        std::ostringstream dss;
-        dss << "aspace.get_outgoing(Handle(" << h.value() << "))\n";
-        std::string ps = dss.str();
-        clock_t t_begin = clock();
-        pyev->eval(ps);
-        return clock() - t_begin;
-    }
-#endif /* HAVE_CYTHON */
-#if HAVE_GUILE
-    case BENCH_SCM: {
-        std::ostringstream ss;
-        for (unsigned int i=0; i<Nloops; i++) {
-            ss << "(cog-outgoing-set (cog-atom " << h.value() << "))\n";
-            h = getRandomHandle();
-        }
-        std::string gs = memoize_or_compile(ss.str());
-
-        clock_t t_begin = clock();
-        scm->eval(gs);
-        time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }
-#endif /* HAVE_GUILE */
-    case BENCH_TABLE: {
-        t_begin = clock();
-        LinkPtr l(atab->getLink(h));
-        if (l) l->getOutgoingSet();
-        time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }
-    case BENCH_AS: {
-        t_begin = clock();
-        asp->get_outgoing(h);
-        time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }}
-    return timepair_t(0,0);
-}
-
-timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
-{
-    Handle h = getRandomHandle();
-    clock_t t_begin;
-    clock_t time_taken;
-    switch (testKind) {
-#if HAVE_CYTHON
-    case BENCH_PYTHON: {
-        OC_ASSERT(1 == Nloops, "Looping not supported for python");
-        std::ostringstream dss;
-        dss << "aspace.get_incoming(Handle(" << h.value() << "))\n";
-        std::string ps = dss.str();
-        clock_t t_begin = clock();
-        pyev->eval(ps);
-        return clock() - t_begin;
-    }
-#endif /* HAVE_CYTHON */
-#if HAVE_GUILE
-    case BENCH_SCM: {
-        std::ostringstream ss;
-        for (unsigned int i=0; i<Nloops; i++) {
-            ss << "(cog-incoming-set (cog-atom " << h.value() << "))\n";
-            h = getRandomHandle();
-        }
-        std::string gs = memoize_or_compile(ss.str());
-
-        clock_t t_begin = clock();
-        scm->eval(gs);
-        time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }
-#endif /* HAVE_GUILE */
-    case BENCH_TABLE: {
-        t_begin = clock();
-        h->getIncomingSet();
-        time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }
-    case BENCH_AS: {
-        t_begin = clock();
-        asp->get_incoming(h);
-        time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }}
     return timepair_t(0,0);
