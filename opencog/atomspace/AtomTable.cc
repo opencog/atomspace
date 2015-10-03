@@ -176,7 +176,7 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
     // Make sure all the atoms in the outgoing set are resolved :-)
     HandleSeq resolved_seq;
     for (Handle ho : seq) {
-        resolved_seq.push_back(getHandle(ho));
+        resolved_seq.emplace_back(getHandle(ho));
     }
 
     // Aiieee! unordered link!
@@ -454,7 +454,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         // So we recursively clone that too.
         HandleSeq closet;
         for (const Handle& h : lll->getOutgoingSet()) {
-            closet.push_back(add(h, async));
+            closet.emplace_back(add(h, async));
         }
         // Preserve the UUID! This is needed for assigning the UUID
         // correctly when fetching from backing store. But do this

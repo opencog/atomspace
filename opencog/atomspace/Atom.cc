@@ -329,7 +329,7 @@ IncomingSet Atom::getIncomingSet()
     for (WinkPtr w : _incoming_set->_iset)
     {
         LinkPtr l(w.lock());
-        if (l) iset.push_back(l);
+        if (l) iset.emplace_back(l);
     }
     return iset;
 }
@@ -340,6 +340,6 @@ IncomingSet Atom::getIncomingSetByType(Type type, bool subclass)
 	getIncomingSetByType(std::back_inserter(inhs), type, subclass);
 	IncomingSet inlinks;
 	for (const Handle& h : inhs)
-		inlinks.push_back(LinkCast(h));
+		inlinks.emplace_back(LinkCast(h));
 	return inlinks;
 }
