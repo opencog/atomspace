@@ -26,6 +26,7 @@
 #include <map>
 
 #include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/Link.h>
 
 namespace opencog
 {
@@ -37,36 +38,28 @@ namespace opencog
  * Implements a Handle-sequence index as an RB-tree (C++ map)
  * That is, given a HandleSeq, it will return a (single) Handle
  * associated with that HandleSeq.  This map is in the "opposite"
- * direction from the HandleIndex.
- *
- * @todo Notice that it this wastes a fair amount of RAM by storing a 
- * copy of a HandleSeq --- it could save a fair amount of space by storing
- * a pointer to the HandleSeq that is in the Link already (at the cost of
- * some fragility in Link deletion). Alternately, we could use a "HandleSeq 
- * cache", analogous to a string cache, to ensure only one copy of a
- * HandleSeq per system...
- * XXX FixMe! 
+ * direction from the HandleSetIndex.
  */
 class HandleSeqIndex
 {
 	private:
-		std::map<const HandleSeq, Handle, handle_seq_less> idx;
+		std::map<const HandleSeq*, Link*, handle_seq_ptr_less> idx;
 
 	public:
-		void insert(const HandleSeq& seq, const Handle& h)
+		void insert(const HandleSeq& seq, Link* l)
 		{
-			idx.insert(std::pair<const HandleSeq,Handle>(seq, h));
+			idx.insert(std::pair<const HandleSeq*, Link*>(&seq, l));
 		}
-		const Handle& get(const HandleSeq& seq) const
+		Link* get(const HandleSeq& seq) const
 		{
-			std::map<const HandleSeq, Handle>::const_iterator it;
-			it = idx.find(seq);
+			std::map<const HandleSeq*, Link*>::const_iterator it;
+			it = idx.find(&seq);
 			if (it != idx.end()) return it->second;
-			return Handle::UNDEFINED;
+			return nullptr;
 		}
 		void remove(const HandleSeq& seq)
 		{
-			idx.erase(seq);
+			idx.erase(&seq);
 		}
 		size_t size(void) const
 		{

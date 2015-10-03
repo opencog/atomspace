@@ -230,6 +230,21 @@ struct handle_seq_less
    }
 };
 
+struct handle_seq_ptr_less
+{
+   bool operator()(const HandleSeq* hsl, const HandleSeq* hsr) const
+   {
+       size_t sl = hsl->size();
+       size_t sr = hsr->size();
+       if (sl != sr) return sl < sr;
+       for (size_t i=0; i<sl; i++) {
+           if (hsl->operator[](i) != hsr->operator[](i))
+               return hsl->operator[](i) < hsr->operator[](i);
+       }
+       return false;
+   }
+};
+
 //! append string representation of the Hash to the string
 static inline std::string operator+ (const char *lhs, Handle h)
 {

@@ -54,13 +54,13 @@ void LinkIndex::insertAtom(const AtomPtr& a)
 	LinkPtr l(LinkCast(a));
 	if (NULL == l) return;
 
-	hsi.insert(l->getOutgoingSet(), a->getHandle());
+	hsi.insert(l->getOutgoingSet(), l.get());
 }
 
 void LinkIndex::removeAtom(const AtomPtr& a)
 {
 	Type t = a->getType();
-	HandleSeqIndex &hsi = idx[t];
+	HandleSeqIndex &hsi = idx.at(t);
 
 	LinkPtr l(LinkCast(a));
 	if (NULL == l) return;
@@ -70,10 +70,8 @@ void LinkIndex::removeAtom(const AtomPtr& a)
 
 Handle LinkIndex::getHandle(Type t, const HandleSeq &seq) const
 {
-	if (t >= idx.size()) throw RuntimeException(TRACE_INFO,
-	            "Index out of bounds for atom type (t = %lu)", t);
-	const HandleSeqIndex &hsi = idx[t];
-	return hsi.get(seq);
+	const HandleSeqIndex &hsi = idx.at(t);
+	return hsi.get(seq)->getHandle();
 }
 
 void LinkIndex::remove(bool (*filter)(const Handle&))
@@ -82,7 +80,8 @@ void LinkIndex::remove(bool (*filter)(const Handle&))
 		s.remove(filter);
 }
 
-UnorderedHandleSet LinkIndex::getHandleSet(Type type, const HandleSeq& seq, bool subclass) const
+UnorderedHandleSet LinkIndex::getHandleSet(Type type,
+                          const HandleSeq& seq, bool subclass) const
 {
 	UnorderedHandleSet hs;
 	if (subclass)
@@ -93,10 +92,8 @@ UnorderedHandleSet LinkIndex::getHandleSet(Type type, const HandleSeq& seq, bool
 			// The 'AssignableFrom' direction is unit-tested in AtomSpaceUTest.cxxtest
 			if (classserver().isA(s, type))
 			{
-				if (s >= idx.size()) throw RuntimeException(TRACE_INFO,
-				           "Index out of bounds for atom type (s = %lu)", s);
-				const HandleSeqIndex &hsi = idx[s];
-				Handle h = hsi.get(seq);
+				const HandleSeqIndex &hsi = idx.at(s);
+				Handle h(hsi.get(seq)->getHandle());
 				if (Handle::UNDEFINED != h)
 					hs.insert(h);
 			}
@@ -104,7 +101,7 @@ UnorderedHandleSet LinkIndex::getHandleSet(Type type, const HandleSeq& seq, bool
 	}
 	else
 	{
-		Handle h = getHandle(type, seq);
+		Handle h(getHandle(type, seq));
 		if (Handle::UNDEFINED != h)
 			hs.insert(h);
 	}
