@@ -958,7 +958,7 @@ Observations:
   atomspace indexes (eitehr add or remove in these).
 
 
-Below: same as above, except remeasured with -m testNmae -n 2000000
+Below: same as above, except remeasured with -m testName -n 2000000
 Big WTF as to  why this differs from -A
 
                  new (master)  new (de-uuid)
@@ -972,3 +972,42 @@ Big WTF as to  why this differs from -A
   setTV              744          726
   getOutgoingSet    1480         1520
   getIncomingSet    1149         1147
+
+
+======================================================================
+2 October 2015
+
+ProtoAtom testing.
+Implementing the ProtoAtom requires that some of the Handle operators,
+for casting to AtomPtr and for operator->() are no longer in he header
+file. Does this impact performance? Lets see...
+
+                   de-uuid      -flto -O3     -02
+                     -A           -A           -A
+   test
+   name            K-ops/sec    K-ops/sec   K-ops/sec
+   ----            ---------    ---------   ---------
+  noop              1821         1771         1783
+  getType           1345         1327         1349
+  getTV             1031         1024         1025
+  setTV              574          544          538
+  getOutgoingSet     836          814          791
+  getIncomingSet     634          625          620
+  addNode            160          141          138
+  addLink             73.5         46.4         46.8
+  removeAtom         166          129          128
+
+de-uuid column:  copied from above; its the current mainline.
+-flto -O3:  CMakefile enables gcc -O3 -flto flags as well as the
+            the ProtoAtom changes to Handle.h
+-O2 column: CMakefile enables gcc -O2 only ... but with ProtoAtom.
+
+Conclusions:
+* ProtoAtom has a strong impact on the AddLink performance, and maybe
+  a 13% hit to AddNode and 23% hit to removeAtom.  Meanwhile -flto is
+  essentially invisible. This is surprising.  One may have thought that
+  the get* functions would take a hit from the lack of operator->()
+  inlining, which the -flto would fix. Well, no hit and no fix.
+  Meanwhile. addLink does get hit. Why?  I think this has something
+  to do with index insertion, maybe due to bad std::less<Handle>
+  performance??
