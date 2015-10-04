@@ -36,5 +36,5 @@ bool FloatValue::operator==(const ProtoAtom& other) const
 
 std::string FloatValue::toString(std::string indent)
 {
-	return indent + std::to_string(value);
+	return indent + std::to_string(_value);
 }

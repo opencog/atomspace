@@ -40,10 +40,10 @@ class FloatValue
 	: public ProtoAtom
 {
 private:
-	double value;
+	double _value;
 
 public:
-	FloatValue() : ProtoAtom(FLOAT_VALUE), value(0.0) {}
+	FloatValue(double v) : ProtoAtom(FLOAT_VALUE), _value(v) {}
 
 	virtual ~FloatValue() {}
 
