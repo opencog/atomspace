@@ -37,7 +37,6 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/Config.h>
 
-#include "HandleEntry.h"
 #include "makeVirtualAtom.h"
 
 using namespace opencog;
@@ -56,11 +55,6 @@ using namespace std;
 #define AV1_LTI 0
 #define AV2_LTI 30000
 #define AV3_LTI 700
-
-void HandleEntry2HandleSeq(HandleEntry& src, HandleSeq& dest)
-{
-    dest = src.toHandleVector();
-}
 
 void setSTI(Handle h, AttentionValue::sti_t stiValue)
 {
