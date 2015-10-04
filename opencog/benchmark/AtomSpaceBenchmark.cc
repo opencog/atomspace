@@ -1329,7 +1329,8 @@ timepair_t AtomSpaceBenchmark::bm_push_back()
         clock_t t_begin = clock();
         for (unsigned int i = 0; i<Nclock; i++)
         {
-            HandleSeq oset;
+            // HandleSeq oset;
+            HandleSeq oset(Nreserve);
             oset.push_back(ha);
         }
         clock_t time_taken = clock() - t_begin;
@@ -1341,7 +1342,8 @@ timepair_t AtomSpaceBenchmark::bm_push_back()
         clock_t t_begin = clock();
         for (unsigned int i = 0; i<Nclock; i++)
         {
-            HandleSeq oset;
+            // HandleSeq oset;
+            HandleSeq oset(Nreserve);
             oset.push_back(ha);
             oset.push_back(hb);
         }
@@ -1354,7 +1356,8 @@ timepair_t AtomSpaceBenchmark::bm_push_back()
         clock_t t_begin = clock();
         for (unsigned int i = 0; i<Nclock; i++)
         {
-            HandleSeq oset;
+            // HandleSeq oset;
+            HandleSeq oset(Nreserve);
             oset.push_back(ha);
             oset.push_back(hb);
             oset.push_back(hc);
@@ -1368,7 +1371,8 @@ timepair_t AtomSpaceBenchmark::bm_push_back()
         clock_t t_begin = clock();
         for (unsigned int i = 0; i<Nclock; i++)
         {
-            HandleSeq oset;
+            // HandleSeq oset;
+            HandleSeq oset(Nreserve);
             oset.push_back(ha);
             oset.push_back(hb);
             oset.push_back(hc);
