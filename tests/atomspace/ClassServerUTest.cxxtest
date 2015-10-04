@@ -46,7 +46,7 @@ public:
         Type numClasses = classserver().getNumberOfClasses();
         for (Type t = 0; t < numClasses; t++) {
             TS_ASSERT(classserver().isA(t, t));
-            if (t > 0) TS_ASSERT(classserver().isA(t, NODE)
+            if (t > ATOM) TS_ASSERT(classserver().isA(t, NODE)
                               or classserver().isA(t, LINK));
         }
 
