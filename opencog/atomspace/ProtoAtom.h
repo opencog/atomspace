@@ -23,9 +23,10 @@
 #ifndef _OPENCOG_PROTO_ATOM_H
 #define _OPENCOG_PROTO_ATOM_H
 
+#include <memory>
 #include <string>
 
-#include <opencog/util/exceptions.h>
+#include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/types.h>
 
 namespace opencog
@@ -42,7 +43,7 @@ class ProtoAtom
 	: public std::enable_shared_from_this<ProtoAtom>
 {
 protected:
-	// We store the type locally, to avoid teh overhead of
+	// We store the type locally, to avoid the overhead of
 	// turning getType into a virtual method.
 	Type _type;
 

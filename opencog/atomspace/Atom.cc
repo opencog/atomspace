@@ -30,8 +30,6 @@
 #include <unistd.h>
 #endif
 
-#include <opencog/util/Logger.h>
-#include <opencog/util/exceptions.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/platform.h>
 
@@ -39,8 +37,7 @@
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/IndefiniteTruthValue.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/TruthValue.h>
 
 //! Atom flag
 // #define WRITE_MUTEX             1  //BIT0

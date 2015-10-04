@@ -42,7 +42,7 @@ private:
 	double value;
 
 public:
-	FloatValue() : _type(FLOAT_VALUE) {}
+	FloatValue() : _type(FLOAT_VALUE), value(0.0) {}
 
 	virtual ~FloatValue() {}
 
@@ -52,7 +52,8 @@ public:
 	 * cannot be const, because observing the TV and AV requires a lock.
 	 */
 	virtual std::string toString(std::string indent);
-	virtual std::string toShortString(std::string indent);
+	virtual std::string toShortString(std::string indent)
+	{ return toString(indent); }
 
 	/** Returns whether two atoms are equal.
 	 *

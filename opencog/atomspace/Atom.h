@@ -34,10 +34,7 @@
 
 #include <boost/signals2.hpp>
 
-#include <opencog/util/exceptions.h>
-
 #include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/ProtoAtom.h>
 #include <opencog/atomspace/TruthValue.h>
 
