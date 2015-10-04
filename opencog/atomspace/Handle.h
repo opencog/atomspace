@@ -125,7 +125,6 @@ public:
 
     operator AtomPtr() const;
     operator AtomPtr();
-    Handle& operator=(const AtomPtr&);
 #endif
 
     operator ProtoAtomPtr() const {

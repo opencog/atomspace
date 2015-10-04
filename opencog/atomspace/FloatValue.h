@@ -71,7 +71,7 @@ public:
 };
 
 typedef std::shared_ptr<FloatValue> FloatValuePtr;
-static inline FloatValuePtr FloatValueCast(Handle& h)
+static inline FloatValuePtr FloatValueCast(const Handle& h)
 	{ ProtoAtomPtr a(h); return std::dynamic_pointer_cast<FloatValue>(a); }
 static inline FloatValuePtr FloatValueCast(ProtoAtomPtr& a)
 	{ return std::dynamic_pointer_cast<FloatValue>(a); }

@@ -407,6 +407,9 @@ static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
 
 Handle AtomTable::add(AtomPtr atom, bool async)
 {
+    // Can be null, if its a PseudoAtom
+    if (nullptr == atom) return Handle::UNDEFINED;
+
     // Is the atom already in this table, or one of its environments?
     if (inEnviron(atom))
         return atom->getHandle();
