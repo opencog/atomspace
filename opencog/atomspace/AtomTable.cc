@@ -88,7 +88,7 @@ AtomTable::~AtomTable()
 
     // No one who shall look at these atoms shall ever again
     // find a reference to this atomtable.
-    UUID undef = Handle::UNDEFINED.value();
+    UUID undef = Handle::INVALID_UUID;
     for (auto pr : _atom_set) {
         pr.second->_atomTable = NULL;
         pr.second->_uuid = undef;
@@ -176,7 +176,7 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
     // Make sure all the atoms in the outgoing set are resolved :-)
     HandleSeq resolved_seq;
     for (Handle ho : seq) {
-        resolved_seq.push_back(getHandle(ho));
+        resolved_seq.emplace_back(getHandle(ho));
     }
 
     // Aiieee! unordered link!
@@ -189,7 +189,7 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     Handle h(linkIndex.getHandle(t, resolved_seq));
-    if (_environ and Handle::INVALID_UUID == h.value())
+    if (_environ and nullptr == h)
         return _environ->getHandle(t, resolved_seq);
     return h;
 }
@@ -454,7 +454,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         // So we recursively clone that too.
         HandleSeq closet;
         for (const Handle& h : lll->getOutgoingSet()) {
-            closet.push_back(add(h, async));
+            closet.emplace_back(add(h, async));
         }
         // Preserve the UUID! This is needed for assigning the UUID
         // correctly when fetching from backing store. But do this

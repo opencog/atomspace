@@ -280,7 +280,7 @@ Handle PutLink::do_reduce(void) const
 		if (SET_LINK != vtype)
 		{
 			HandleSeq oset;
-			oset.push_back(_values);
+			oset.emplace_back(_values);
 			try
 			{
 				return vars.substitute(bods, oset);
@@ -296,10 +296,10 @@ Handle PutLink::do_reduce(void) const
 		for (Handle h : LinkCast(_values)->getOutgoingSet())
 		{
 			HandleSeq oset;
-			oset.push_back(h);
+			oset.emplace_back(h);
 			try
 			{
-				bset.push_back(vars.substitute(bods, oset));
+				bset.emplace_back(vars.substitute(bods, oset));
 			}
 			catch (...) {}
 		}
@@ -327,7 +327,7 @@ Handle PutLink::do_reduce(void) const
 		const HandleSeq& oset = LinkCast(h)->getOutgoingSet();
 		try
 		{
-			bset.push_back(vars.substitute(bods, oset));
+			bset.emplace_back(vars.substitute(bods, oset));
 		}
 		catch (...) {}
 	}

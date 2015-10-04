@@ -157,7 +157,7 @@ class AtomStorage::Response
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
 			Handle h(uuid);
-			if (Handle::UNDEFINED == table->getHandle(h))
+			if (nullptr == table->getHandle(h))
 			{
 				PseudoPtr p(store->makeAtom(*this, uuid));
 				AtomPtr atom(get_recursive_if_not_exists(p));
@@ -177,7 +177,7 @@ class AtomStorage::Response
 			// into the atomspace later, by the caller.
 			PseudoPtr p(store->makeAtom(*this, uuid));
 			AtomPtr atom(get_recursive_if_not_exists(p));
-			hvec->push_back(atom->getHandle());
+			hvec->emplace_back(atom->getHandle());
 			return false;
 		}
 
@@ -198,14 +198,14 @@ class AtomStorage::Response
 			{
 				Handle h(idu);
 				h = table->getHandle(h);
-				if (Handle::UNDEFINED != h)
+				if (h)
 				{
-					resolved_oset.push_back(h);
+					resolved_oset.emplace_back(h);
 					continue;
 				}
 				PseudoPtr po(store->petAtom(idu));
 				AtomPtr ra = get_recursive_if_not_exists(po);
-				resolved_oset.push_back(ra->getHandle());
+				resolved_oset.emplace_back(ra->getHandle());
 			}
 			LinkPtr link(createLink(p->type, resolved_oset, p->tv));
 			link->_uuid = p->uuid;
@@ -1255,7 +1255,7 @@ AtomPtr AtomStorage::getAtom(UUID uuid)
 
 	HandleSeq oset;
 	for (UUID idu : p->oset)
-		oset.push_back(getAtom(idu)->getHandle());
+		oset.emplace_back(getAtom(idu)->getHandle());
 
 	LinkPtr link(createLink(p->type, oset, p->tv));
 	link->_uuid = p->uuid;
@@ -1391,7 +1391,7 @@ AtomStorage::PseudoPtr AtomStorage::makeAtom(Response &rp, UUID uuid)
 			// or if the outgoing set is empty in the first place.
 			if (*p == '}' or *p == '\0') break;
 			UUID out(strtoul(p+1, &p, 10));
-			atom->oset.push_back(out);
+			atom->oset.emplace_back(out);
 		}
 	}
 

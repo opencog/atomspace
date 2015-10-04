@@ -49,8 +49,7 @@ std::string SchemeSmob::to_string(Handle h)
 
 std::string SchemeSmob::handle_to_string(Handle h, int indent)
 {
-	if (Handle::UNDEFINED == h) return "#<Undefined atom handle>";
-	if (NULL == h) return "#<Invalid handle>";
+	if (nullptr == h) return "#<Invalid handle>";
 
 	// Print a scheme expression, so that the output can be saved
 	// to file, and then restored, as needed.
@@ -174,7 +173,7 @@ SCM SchemeSmob::ss_atom (SCM suuid)
 SCM SchemeSmob::ss_handle (SCM satom)
 {
 	Handle h(scm_to_handle(satom));
-	if (Handle::UNDEFINED == h)
+	if (nullptr == h)
 		scm_wrong_type_arg_msg("cog-handle", 1, satom, "opencog atom");
 
 	return scm_from_ulong(h.value());
@@ -210,7 +209,7 @@ SCM SchemeSmob::ss_atom_p (SCM s)
 SCM SchemeSmob::ss_node_p (SCM s)
 {
 	Handle h(scm_to_handle(s));
-	if (Handle::UNDEFINED == h)
+	if (nullptr == h)
 		return SCM_BOOL_F;
 
 	if (NodeCast(h)) return SCM_BOOL_T;
@@ -224,7 +223,7 @@ SCM SchemeSmob::ss_node_p (SCM s)
 SCM SchemeSmob::ss_link_p (SCM s)
 {
 	Handle h(scm_to_handle(s));
-	if (Handle::UNDEFINED == h)
+	if (nullptr == h)
 		return SCM_BOOL_F;
 
 	if (LinkCast(h)) return SCM_BOOL_T;
@@ -394,8 +393,8 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
 
 		// Verify that the contents of the list are actual atoms.
 		Handle h(scm_to_handle(satom));
-		if (Handle::UNDEFINED != h) {
-			outgoing_set.push_back(h);
+		if (h) {
+			outgoing_set.emplace_back(h);
 		}
 		else if (scm_is_pair(satom) and !scm_is_null(satom_list)) {
 			// Allow lists to be specified: e.g.
@@ -406,7 +405,7 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
 				verify_handle_list(satom, subrname, pos);
 			std::vector<Handle>::const_iterator it;
 			for (it = oset.begin(); it != oset.end(); ++it) {
-				outgoing_set.push_back(*it);
+				outgoing_set.emplace_back(*it);
 			}
 		}
 		else if (scm_is_null(satom)) {
@@ -485,8 +484,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 
 	// Now, look to find the actual link... in the actual atom space.
 	Handle h(atomspace->get_handle(t, outgoing_set));
-	if (Handle::UNDEFINED == h) return SCM_EOL;
-	if (NULL == h) return SCM_EOL;
+	if (nullptr == h) return SCM_EOL;
 
 	// If there was a truth value, change it.
 	const TruthValue *tv = get_tv_from_list(satom_list);

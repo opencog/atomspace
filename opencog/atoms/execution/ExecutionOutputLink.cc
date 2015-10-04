@@ -121,7 +121,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 			Handle nh(inst.execute(ho));
 			// nh might be NULL if ho was a DeleteLink
 			if (nh != NULL)
-				new_oset.push_back(nh);
+				new_oset.emplace_back(nh);
 			if (nh != ho) changed = true;
 		}
 		if (changed)

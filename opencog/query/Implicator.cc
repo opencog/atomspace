@@ -56,13 +56,10 @@ bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
 
 void Implicator::insert_result(const Handle& h)
 {
-	if (Handle::UNDEFINED != h)
+	if (h and _result_set.end() == _result_set.find(h))
 	{
-		if (_result_set.end() == _result_set.find(h))
-		{
-			_result_set.insert(h);
-			_result_list.push_back(h);
-		}
+		_result_set.insert(h);
+		_result_list.push_back(h);
 	}
 }
 

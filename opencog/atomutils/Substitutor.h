@@ -70,7 +70,7 @@ private:
 		{
 			Handle hg = walk_tree(vmap, h);
 			if (hg != h) changed = true;
-			oset_results.push_back(hg);
+			oset_results.emplace_back(hg);
 		}
 
 		if (not changed) return expr;
@@ -92,7 +92,7 @@ public:
 	                         const std::map<Handle, Handle> &vars)
 	{
 		// throw, not assert, because this is a user error ...
-		if (Handle::UNDEFINED == expr)
+		if (nullptr == expr)
 			throw InvalidParamException(TRACE_INFO,
 				"Asked to substitute a null expression");
 

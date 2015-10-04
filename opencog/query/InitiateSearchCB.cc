@@ -167,7 +167,7 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 
 		Handle s(find_starter_recursive(hunt, brdepth, sbr, brwid));
 
-		if (s != Handle::UNDEFINED)
+		if (s)
 		{
 			// Each ChoiceLink is potentially disconnected from the rest
 			// of the graph. Assume the worst case, explore them all.
@@ -225,7 +225,7 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
 		size_t width = SIZE_MAX;
 		Handle term(Handle::UNDEFINED);
 		Handle start(find_starter(h, depth, term, width));
-		if (start != Handle::UNDEFINED
+		if (start != nullptr
 		    and (width < thinnest
 		         or (width == thinnest and depth > deepest)))
 		{
@@ -289,7 +289,7 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 	// 2) all of the clauses are evaluatable(!),
 	// Somewhat unusual, but it can happen.  For this, we need
 	// some other, alternative search strategy.
-	if (Handle::UNDEFINED == best_start and 0 == _choices.size())
+	if (nullptr == best_start and 0 == _choices.size())
 	{
 		_search_fail = true;
 		return false;
@@ -318,7 +318,7 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 		_root = clauses[bestclause];
 		LAZY_LOG_FINE << "Search start node: " << best_start->toShortString();
 		LAZY_LOG_FINE << "Start term is: "
-		              << (_starter_term == Handle::UNDEFINED ?
+		              << (_starter_term == nullptr ?
 		                  "UNDEFINED" : _starter_term->toShortString());
 		LAZY_LOG_FINE << "Root clause is: " <<  _root->toShortString();
 
@@ -543,7 +543,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 	// variable, all by itself, and set some type restrictions on it,
 	// and that's all. We deal with this in the variable_search()
 	// method.
-	if (Handle::UNDEFINED == _root)
+	if (nullptr == _root)
 	{
 		_search_fail = true;
 		return false;
@@ -642,7 +642,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	}
 
 	// There were no type restrictions!
-	if (Handle::UNDEFINED == _root)
+	if (nullptr == _root)
 	{
 		logger().fine("There were no type restrictions! That must be wrong!");
 		if (0 == clauses.size())
