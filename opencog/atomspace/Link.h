@@ -260,13 +260,6 @@ public:
      * @return true if they are equal, false otherwise.
      */
     virtual bool operator==(const Atom&) const;
-
-    /**
-     * Returns whether a given atom is different from the current link.
-     * @param Atom to be tested.
-     * @return true if they are different, false otherwise.
-     */
-    virtual bool operator!=(const Atom&) const;
 };
 
 static inline LinkPtr LinkCast(const Handle& h)

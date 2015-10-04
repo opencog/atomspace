@@ -379,9 +379,14 @@ public:
      *
      * @return true if the atoms are different, false otherwise.
      */
-    virtual bool operator!=(const Atom&) const = 0;
+    bool operator!=(const Atom& other) const
+    { return not operator==(other); }
 
-
+    virtual bool operator==(const ProtoAtom& other) const
+    {
+        if (_type != other.getType()) return false;
+        return operator==(dynamic_cast<const Atom&>(other));
+    }
 };
 
 /** @}*/

@@ -109,13 +109,6 @@ public:
      * @return true if they are equal, false otherwise.
      */
     virtual bool operator==(const Atom&) const;
-
-    /**
-     * Returns whether a given atom is different from the current node.
-     * @param Atom to be tested.
-     * @return true if they are different, false otherwise.
-     */
-    virtual bool operator!=(const Atom&) const;
 };
 
 typedef std::shared_ptr<Node> NodePtr;

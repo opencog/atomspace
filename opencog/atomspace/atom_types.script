@@ -14,8 +14,12 @@
 // Special type designating that no atom type has been assigned.
 NOTYPE
 
+VALUE
+FLOAT_VALUE <- VALUE
+STRING_VALUE <- VALUE
+
 // Base of hierarchy
-ATOM
+ATOM <- VALUE
 NODE <- ATOM
 LINK <- ATOM
 
