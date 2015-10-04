@@ -40,7 +40,6 @@
 #include <opencog/util/misc.h>
 #include <opencog/util/oc_assert.h>
 
-#include "HandleEntry.h"
 #include "makeVirtualAtom.h"
 
 using namespace opencog;
@@ -139,12 +138,6 @@ static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::i
 static inline Handle addAtom(AtomSpace& as, tree<Vertex>& a, TruthValuePtr tvn)
 {
     return addAtomIter(as, a, a.begin(), tvn);
-}
-
-
-void HandleEntry2HandleSeq(HandleEntry& src, HandleSeq& dest)
-{
-    dest = src.toHandleVector();
 }
 
 HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
