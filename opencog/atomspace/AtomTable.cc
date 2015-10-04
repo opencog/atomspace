@@ -387,6 +387,7 @@ AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
 	return clone;
 }
 
+#if 0
 static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
 {
     Logger::Level save = logger().getBackTraceLevel();
@@ -404,6 +405,7 @@ static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
     logger().flush();
     logger().setBackTraceLevel(save);
 }
+#endif
 
 Handle AtomTable::add(AtomPtr atom, bool async)
 {
