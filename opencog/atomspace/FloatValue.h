@@ -70,6 +70,16 @@ public:
 	{  return not operator==(other); }
 };
 
+typedef std::shared_ptr<FloatValue> FloatValuePtr;
+static inline FloatValuePtr FloatValueCast(Handle& h)
+	{ ProtoAtomPtr a(h); return std::dynamic_pointer_cast<FloatValue>(a); }
+static inline FloatValuePtr FloatValueCast(ProtoAtomPtr& a)
+	{ return std::dynamic_pointer_cast<FloatValue>(a); }
+
+// XXX temporary hack ...
+#define createFloatValue std::make_shared<FloatValue>
+
+
 /** @}*/
 } // namespace opencog
 

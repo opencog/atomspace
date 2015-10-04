@@ -87,6 +87,11 @@ public:
         return *this;
     }
 
+    inline Handle& operator=(const ProtoAtomPtr& a) {
+        this->_ptr = a;
+        return *this;
+    }
+
 #ifdef INLINE_POINTER_CHASING
     inline Atom* operator->() {
         // return _ptr.get();
@@ -123,6 +128,12 @@ public:
     Handle& operator=(const AtomPtr&);
 #endif
 
+    operator ProtoAtomPtr() const {
+        return _ptr;
+    }
+    operator ProtoAtomPtr() {
+        return _ptr;
+    }
 
     // Allows expressions like "if(h)..." to work when h has a non-null pointer.
     explicit inline operator bool() const noexcept {
