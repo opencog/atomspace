@@ -457,6 +457,9 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         // So we recursively clone that too.
         HandleSeq closet;
         for (const Handle& h : lll->getOutgoingSet()) {
+            // operator->() will be null if its a ProtoAtom that is
+            // not an atom.
+            if (nullptr == h.operator->()) return Handle::UNDEFINED;
             closet.emplace_back(add(h, async));
         }
         // Preserve the UUID! This is needed for assigning the UUID
@@ -491,15 +494,8 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         // methods on those atoms.
         bool need_copy = false;
         for (size_t i = 0; i < arity; i++) {
-            if (NULL == ogs[i]._ptr.get()) {
-                prt_diag(atom, i, arity, ogs);
-                throw RuntimeException(TRACE_INFO,
-                           "AtomTable - Attempting to insert link with "
-                           "invalid outgoing members");
-            }
-
-            // The outgoing set must consist entirely of atoms
-            // either in this atomtable, or its environment.
+            // The outgoing set must consist entirely of atoms that
+            // are either in this atomtable, or its environment.
             if (not inEnviron(ogs[i])) need_copy = true;
         }
 
