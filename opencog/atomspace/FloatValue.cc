@@ -24,7 +24,7 @@
 
 using namespace opencog;
 
-bool FloatValue::operator==(const ProtoAtom& other)
+bool FloatValue::operator==(const ProtoAtom& other) const
 {
 	if (FLOAT_VALUE != other.getType()) return false;
 	return true;

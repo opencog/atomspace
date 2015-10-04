@@ -27,6 +27,7 @@
 #include <string>
 
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/types.h>
 
 namespace opencog

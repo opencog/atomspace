@@ -24,6 +24,7 @@
 #define _OPENCOG_FLOAT_VALUE_H
 
 #include <opencog/atomspace/ProtoAtom.h>
+#include <opencog/atomspace/atom_types.h>
 
 namespace opencog
 {
@@ -42,7 +43,7 @@ private:
 	double value;
 
 public:
-	FloatValue() : _type(FLOAT_VALUE), value(0.0) {}
+	FloatValue() : ProtoAtom(FLOAT_VALUE), value(0.0) {}
 
 	virtual ~FloatValue() {}
 
