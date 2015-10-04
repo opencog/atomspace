@@ -912,7 +912,7 @@ On "fanny", after removing UUID's from handles.
 
                  old (March)  new (master)  new (de-uuid)
                     -A            -A           -A
-   test           AtomSpace
+   test           AtomSpace     AtomSpace    AtomSpace
    name           K-ops/sec     K-ops/sec    K-ops/sec
    ----           ---------     ---------    --------
   noop             1915          1780         1821
@@ -963,7 +963,7 @@ Big WTF as to  why this differs from -A
 
                  new (master)  new (de-uuid)
                      -A           -A
-   test
+   test            AtomSpace    AtomSpace
    name            K-ops/sec    K-ops/sec
    ----            ---------    --------
   noop              1744         1802
@@ -972,3 +972,55 @@ Big WTF as to  why this differs from -A
   setTV              744          726
   getOutgoingSet    1480         1520
   getIncomingSet    1149         1147
+
+Its all broken. Remeasure, below.
+
+======================================================================
+3 October 2015
+
+Clearly the benchmark has been badly designed for too long.  So fix
+this.  All inner loop mesurements are now repeated 2K times, by default.
+The current results are:
+
+                   broken         fixed
+                    -A             -A
+   test           AtomSpace     AtomSpace
+   name           K-ops/sec     K-ops/sec
+   ----           ---------     ---------
+  noop             1821           1e6
+  getType          1345          75.5K
+  getTV            1031           4166
+  setTV             574           1113
+  getOutgoingSet    836           7555
+  getIncomingSet    634           2276
+  addNode           160            149
+  addLink            73.5           70.1
+  removeAtom        166            188
+
+broken column: copied from above, measured with the broken benchmark.
+fixed column: measured with the fixed benchmark.
+
+Comments:
+The get* numbers are much much higher, because the old test was
+mis-measuring these; they were under a microsecond, so the call to
+clock() was given spurious measurements. The actual performance is
+now revealed. Its roughly equal to what one would get from the
+broken column, if one took reciprocal, subtracted the "noop",
+and took reciprocal, again. So the "broken" numbers had been failing
+to be correctly normalized.
+
+The removeAtom numbers are faster, because only 3/4ths the atomspace
+gets removed now. The change in addNode and addLink is unclear.
+
+======================================================================
+3 October 2015
+
+How fast is std::vector<Handle>, really?
+
+ 
+   count             1            2           3            4
+   rate           M-ops/sec    M-ops/sec   M-ops/sec    M-ops/sec
+   ----           ---------    ---------   ---------    ---------
+  push_back         7.54         3.27        1.96         1.88
+  emplace_back      7.26         3.35        1.96         1.87
+  reserve           7.66         6.01        4.75         4.13
