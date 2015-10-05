@@ -549,8 +549,10 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 		return false;
 	}
 
-	LAZY_LOG_FINE << "Start clause is: " << _root->toShortString();
-	LAZY_LOG_FINE << "Start term is: " << _starter_term->toShortString();
+	LAZY_LOG_FINE << "Start clause is: " << std::endl
+	              << _root->toShortString();
+	LAZY_LOG_FINE << "Start term is: " << std::endl
+	              << _starter_term->toShortString();
 
 	// Get type of the rarest link
 	Type ptype = _starter_term->getType();
