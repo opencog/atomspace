@@ -60,6 +60,8 @@ void ForwardChainer::init(Handle hsource, HandleSeq focus_set)
     _search_focus_Set = not focus_set.empty();
     _ts_mode = TV_FITNESS_BASED;
 
+    _focus_set = focus_set;
+
     //Set potential source.
     HandleSeq init_sources = { };
     //Accept set of initial sources wrapped in a SET_LINK
@@ -208,7 +210,7 @@ void ForwardChainer::do_pm(const Handle& hsource,
         BindLinkPtr bl(BindLinkCast(rule->get_handle()));
         DefaultImplicator impl(&_as);
         impl.implicand = bl->get_implicand();
-        bl->imply(impl);
+        bl->imply(impl, false);
         _cur_rule = rule;
         _fcstat.add_inference_record(Handle::UNDEFINED, impl.get_result_list());
     }
@@ -368,7 +370,7 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
 
         _log->debug("Applying rule in focus set %s ",(rhcpy->toShortString()).c_str());
 
-        bl->imply(fs_pmcb);
+        bl->imply(fs_pmcb, false);
 
         result = fs_pmcb.get_result_list();
 
@@ -429,7 +431,7 @@ HandleSeq ForwardChainer::derive_rules(Handle source, Handle target,
     VarGroundingPMCB gcb(&temp_pm_as);
     gcb.implicand = bl->get_implicand();
 
-    bl->imply(gcb);
+    bl->imply(gcb, false);
 
     auto del_by_value =
             [] (std::vector<std::map<Handle,Handle>>& vec_map,const Handle& h) {
