@@ -10,6 +10,7 @@ ADD_LIBRARY (atomcore SHARED
 	FunctionLink.cc
 	LambdaLink.cc
 	PutLink.cc
+	UniqueLink.cc
 	VariableList.cc
 )
 
@@ -32,6 +33,7 @@ INSTALL (FILES
 	FunctionLink.h
 	LambdaLink.h
 	PutLink.h
+	UniqueLink.h
 	VariableList.h
 	DESTINATION "include/opencog/atoms/core"
 )
