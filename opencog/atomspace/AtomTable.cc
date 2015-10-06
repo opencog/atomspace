@@ -456,6 +456,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         return atom->getHandle();
 
     // Factory implements experimental C++ atom types support code
+    AtomPtr orig(atom);
     Type atom_type = atom->getType();
     atom = factory(atom_type, atom);
 
@@ -492,9 +493,14 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         atom = createLink(atom_type, closet,
                           atom->getTruthValue(),
                           atom->getAttentionValue());
+        atom = clone_factory(atom_type, atom);
         atom->_uuid = save;
     }
-    atom = clone_factory(atom_type, atom);
+
+    // Clone, if we haven't done so already. We MUST maintain our own
+    // private copy of the atom, else crazy things go wrong.
+    if (atom == orig)
+        atom = clone_factory(atom_type, atom);
 
     // Sometimes one inserts an atom that was previously deleted.
     // In this case, the removal flag might still be set. Clear it.
