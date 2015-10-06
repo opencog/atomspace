@@ -57,9 +57,10 @@ static inline bool log(const Handle& h)
 
 static inline void logmsg(const char * msg, const Handle& h)
 {
-	LAZY_LOG_FINE << msg << (h == nullptr ?
-	                         std::string("(invalid handle)") :
-	                         h->toShortString());
+	LAZY_LOG_FINE << msg << std::endl
+	              << (h == nullptr ?
+	                  std::string("(invalid handle)") :
+	                  h->toShortString());
 }
 
 /* ======================================================== */
@@ -164,8 +165,8 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 
 	// Make a record of it.
 	LAZY_LOG_FINE << "Found grounding of variable:";
-	logmsg("$$ variable:    ", hp);
-	logmsg("$$ ground term: ", hg);
+	logmsg("$$ variable:", hp);
+	logmsg("$$ ground term:", hg);
 	if (hp != hg) var_grounding[hp] = hg;
 	return true;
 }
@@ -180,7 +181,7 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 ///
 bool PatternMatchEngine::self_compare(const PatternTermPtr& ptm)
 {
-	logmsg("Compare atom to itself: ", ptm->getHandle());
+	logmsg("Compare atom to itself:", ptm->getHandle());
 
 #ifdef NO_SELF_GROUNDING
 
@@ -201,8 +202,8 @@ bool PatternMatchEngine::node_compare(const Handle& hp,
 	if (match)
 	{
 		LAZY_LOG_FINE << "Found matching nodes";
-		logmsg("# pattern: ", hp);
-		logmsg("# match:   ", hg);
+		logmsg("# pattern:", hp);
+		logmsg("# match:", hg);
 		if (hp != hg) var_grounding[hp] = hg;
 	}
 	return match;
@@ -780,8 +781,8 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	if (not match) return false;
 
 	LAZY_LOG_FINE << "depth=" << depth;
-	logmsg("> tree_compare", hp);
-	logmsg(">           to", hg);
+	logmsg("tree_compare:", hp);
+	logmsg("to:", hg);
 
 	// CHOICE_LINK's are multiple-choice links. As long as we can
 	// can match one of the sub-expressions of the ChoiceLink, then
@@ -1163,7 +1164,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 			if (not is_unquoted_in_tree(clause_root, evit->second))
 				continue;
 
-			logmsg("Term inside evaluatable, move up to it's top:\n",
+			logmsg("Term inside evaluatable, move up to it's top:",
 			       evit->second);
 
 			// All of the variables occurring in the term should have
@@ -1284,7 +1285,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		LAZY_LOG_FINE << "This clause is "
 		              << (is_evaluatable(curr_root)?
 		                  "dynamically evaluatable" : "non-dynamic");
-		logmsg("Joining variable  is", joiner);
+		logmsg("Joining variable is", joiner);
 		logmsg("Joining grounding is", var_grounding[joiner]);
 
 		// Else, start solving the next unsolved clause. Note: this is
@@ -1850,7 +1851,7 @@ void PatternMatchEngine::log_solution(
 		if (m->second == nullptr)
 		{
 			Handle mf(m->first);
-			logmsg("ERROR: ungrounded clause: ", mf);
+			logmsg("ERROR: ungrounded clause", mf);
 			continue;
 		}
 		std::string str = m->second->toShortString();
