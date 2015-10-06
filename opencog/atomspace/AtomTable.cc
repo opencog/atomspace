@@ -423,17 +423,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (inEnviron(atom))
         return atom->getHandle();
 
-#if LATER
-    // XXX FIXME -- technically, this throw is correct, except
-    // that SavingLoading gives us atoms with handles preset.
-    // So we have to accept that, and hope its correct and consistent.
-    // XXX this can also occur if the atom is in some other atomspace;
-    // so we need to move this check elsewhere.
-    if (atom->_uuid != Handle::INVALID_UUID)
-        throw RuntimeException(TRACE_INFO,
-          "AtomTable - Attempting to insert atom with handle already set!");
-#endif
-
     // Lock before checking to see if this kind of atom can already
     // be found in the atomspace.  We need to lock here, to avoid two
     // different threads from trying to add exactly the same atom.
