@@ -27,84 +27,47 @@
 
 using namespace opencog;
 
-void DefineLink::init(const HandleSeq& oset)
+void DefineLink::init()
 {
 	// Must have name and body
-	if (2 != oset.size())
+	if (2 != _outgoing.size())
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting name and definition, got size %d", oset.size());
+			"Expecting name and definition, got size %d", _outgoing.size());
 
-	_alias = oset[0];
-	_definition = oset[1];
-
-	// The name must not be used in another definition
-	IncomingSet defs = _alias->getIncomingSetByType(DEFINE_LINK);
-	for (LinkPtr def : defs)
-	{
-		if (2 != def->getArity()) continue;
-		if (def->getOutgoingAtom(0) == _alias and
-		    def->getOutgoingAtom(1) != _definition)
-		{
-			throw InvalidParamException(TRACE_INFO,
-			                            "Cannot define %s\n"
-			                            "with definition %s\n"
-			                            "as it is already defined as %s",
-			                            _alias->toString().c_str(),
-			                            _definition->toString().c_str(),
-			                            def->toString().c_str());
-		}
-	}
+	// Perform some additional checks in the UniqueLink init method
+	UniqueLink::init();
 }
 
 DefineLink::DefineLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: Link(DEFINE_LINK, oset, tv, av)
+	: UniqueLink(DEFINE_LINK, oset, tv, av)
 {
-	init(oset);
+	init();
 }
 
 DefineLink::DefineLink(const Handle& name, const Handle& defn,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: Link(DEFINE_LINK, HandleSeq({name, defn}), tv, av)
+	: UniqueLink(DEFINE_LINK, HandleSeq({name, defn}), tv, av)
 {
-	init(getOutgoingSet());
+	init();
 }
 
 DefineLink::DefineLink(Link &l)
-	: Link(l)
+	: UniqueLink(l)
 {
-	// Type must be as expected
-	Type tscope = l.getType();
-	if (not classserver().isA(tscope, DEFINE_LINK))
-	{
-		const std::string& tname = classserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a DefineLink, got %s", tname.c_str());
-	}
-
-	init(l.getOutgoingSet());
+	init();
 }
 
+/**
+ * Get the defintion associated with the alias.
+ * This will be the second atom of some DefineLink, where
+ * `alias` is the first.
+ */
 Handle DefineLink::get_definition(const Handle& alias)
 {
-	// Get all DefineLinks associated with that alias. Beware that the
-	// incoming set will also include those DefineLinks which have the
-	// alias as the definition body.
-	IncomingSet defs = alias->getIncomingSetByType(DEFINE_LINK);
-
-	// Return the first (supposedly unique) definition
-	for (LinkPtr defl : defs)
-	{
-		DefineLinkPtr def(DefineLinkCast(defl->getHandle()));
-		if (def->get_alias() == alias)
-			return def->get_definition();
-	}
-
-	// There is no definition for the alias
-	throw InvalidParamException(TRACE_INFO,
-	                            "Cannot find defined hypergraph for atom %s",
-	                            alias->toString().c_str());
-	return Handle::UNDEFINED;
+	Handle uniq(get_unique(alias, DEFINE_LINK));
+	LinkPtr luniq(LinkCast(uniq));
+	return luniq->getOutgoingAtom(1);
 }
 
 /* ===================== END OF FILE ===================== */

@@ -27,12 +27,12 @@
 
 using namespace opencog;
 
-void UniqueLink::init(Type type)
+void UniqueLink::init()
 {
 	// The name must not be used in another definition
 	const Handle& alias = _outgoing[0];
-	IncomingSet defs = alias->getIncomingSetByType(type);
-	for (LinkPtr def : defs)
+	IncomingSet defs = alias->getIncomingSetByType(_type);
+	for (const LinkPtr& def : defs)
 	{
 		if (def->getOutgoingAtom(0) == alias)
 		{
@@ -50,32 +50,45 @@ void UniqueLink::init(Type type)
 	}
 }
 
+UniqueLink::UniqueLink(Type type, const HandleSeq& oset,
+                       TruthValuePtr tv, AttentionValuePtr av)
+	: Link(type, oset, tv, av)
+{
+	if (not classserver().isA(type, UNIQUE_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(type);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a UniqueLink, got %s", tname.c_str());
+	}
+	init();
+}
+
 UniqueLink::UniqueLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: Link(UNIQUE_LINK, oset, tv, av)
 {
-	init(UNIQUE_LINK);
+	init();
 }
 
 UniqueLink::UniqueLink(const Handle& name, const Handle& defn,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: Link(UNIQUE_LINK, HandleSeq({name, defn}), tv, av)
 {
-	init(UNIQUE_LINK);
+	init();
 }
 
 UniqueLink::UniqueLink(Link &l)
 	: Link(l)
 {
 	// Type must be as expected
-	Type tscope = l.getType();
-	if (not classserver().isA(tscope, UNIQUE_LINK))
+	Type type = l.getType();
+	if (not classserver().isA(type, UNIQUE_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(tscope);
+		const std::string& tname = classserver().getTypeName(type);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a UniqueLink, got %s", tname.c_str());
 	}
-	init(tscope);
+	init();
 }
 
 Handle UniqueLink::get_unique(const Handle& alias, Type type)
