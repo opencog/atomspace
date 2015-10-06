@@ -112,18 +112,21 @@ data Atom (a :: AtomType) where
 
     AndLink             :: TVal -> [AtomGen] -> Atom AndT
     OrLink              :: TVal -> [AtomGen] -> Atom OrT
-    ImplicationLink     :: (p1 <~ PredicateT,p2 <~ PredicateT) =>
+    NotLink		:: (a <~ AtomT) =>
+			   TVal -> Atom a -> Atom NotT
+    ImplicationLink     :: (p1 <~ AtomT,p2 <~ AtomT) =>
                            TVal -> Atom p1 -> Atom p2 -> Atom ImplicationT
-    EquivalenceLink     :: (p1 <~ PredicateT,p2 <~ PredicateT) =>
+
+    EquivalenceLink     :: (p1 <~ AtomT,p2 <~ AtomT) =>
                            TVal -> Atom p1 -> Atom p2 -> Atom EquivalenceT
     EvaluationLink      :: (p <~ PredicateT,a <~ AtomT) =>
                            TVal -> Atom p -> Atom a -> Atom EvaluationT
 
     ConceptNode         :: AtomName -> TVal -> Atom ConceptT
 
-    InheritanceLink     :: (c1 <~ ConceptT,c2 <~ ConceptT) =>
+    InheritanceLink     :: (c1 <~ AtomT,c2 <~ AtomT) =>
                            TVal -> Atom c1 -> Atom c2 -> Atom InheritanceT
-    SimilarityLink      :: (c1 <~ ConceptT,c2 <~ ConceptT) =>
+    SimilarityLink      :: (c1 <~ AtomT,c2 <~ AtomT) =>
                            TVal -> Atom c1 -> Atom c2 -> Atom SimilarityT
     MemberLink          :: (a <~ AtomT,c <~ ConceptT) =>
                            TVal -> Atom a -> Atom c -> Atom MemberT
@@ -156,6 +159,12 @@ data Atom (a :: AtomType) where
 
     BindLink            :: (v <~ VariableT,p <~ AtomT,q <~ AtomT) =>
                            Atom v -> Atom p -> Atom q -> Atom BindT
+    ContextLink         :: (c <~ AtomT,e <~ AtomT) =>
+                           TVal -> Atom c -> Atom e -> Atom ContextT
+    LambdaLink		:: (v <~ VariableT,a <~ AtomT) =>
+			   Atom v -> Atom a -> Atom LambdaT
+    SubsetLink          :: (a1 <~ AtomT, a2 <~ AtomT) =>
+			   TVal -> Atom a1 -> Atom a2 -> Atom SubsetT
 
 deriving instance Show (Atom a)
 deriving instance Typeable Atom

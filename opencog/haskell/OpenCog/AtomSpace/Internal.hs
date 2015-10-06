@@ -64,6 +64,10 @@ toRaw at = let atype = getType at
     QuoteLink a1             -> Link atype [toRaw a1] Nothing
     VariableList list        -> Link atype (map (appGen toRaw) list) Nothing
     BindLink a1 a2 a3        -> Link atype [toRaw a1,toRaw a2,toRaw a3] Nothing
+    ContextLink tv c e       -> Link atype [toRaw c,toRaw e] $ toTVRaw <$> tv
+    LambdaLink v a	     -> Link atype [toRaw v,toRaw a] Nothing
+    NotLink tv a             -> Link atype [toRaw a] $ toTVRaw <$> tv
+    SubsetLink tv a1 a2      -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
     x                        -> error $ "You should complete the code of toRaw"
                                       ++ " with an instance for: " ++ show x
 
@@ -172,6 +176,25 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
         c <- filt cr :: Maybe (Gen AtomT)
         case (a,b,c) of
           (Gen a1,Gen b1,Gen c1) -> Just $ Gen $ BindLink a1 b1 c1
+      (ContextT ,[cr,er]) -> do
+        c <- filt cr :: Maybe (Gen ConceptT)
+        e <- filt er :: Maybe (Gen EvaluationT)
+        case (c,e) of
+          (Gen c1,Gen e1) -> Just $ Gen $ ContextLink tv c1 e1
+      (LambdaT ,[vr,er]) -> do
+	v <- filt vr :: Maybe (Gen VariableT)
+	e <- filt er :: Maybe (Gen AtomT)
+	case (v,e) of
+	  (Gen v,Gen e) -> Just $ Gen $ LambdaLink v e
+      (NotT ,[ar]) -> do
+	a <- filt ar :: Maybe (Gen AtomT)
+	case a of
+	  (Gen a) -> Just $ Gen $ NotLink tv a
+      (SubsetT , [sr,ar]) -> do
+	s <- filt sr :: Maybe (Gen AtomT)
+	a <- filt sr :: Maybe (Gen AtomT)
+	case (s,a) of
+	   (Gen s,Gen a) -> Just $ Gen $ SubsetLink tv s a
       x               -> error $ "You should complete the code of fromRawGen"
                                ++ " with an instance for: " ++ show x
 
