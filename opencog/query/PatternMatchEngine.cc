@@ -931,8 +931,8 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 /// controls the exploration of these different branches. For each
 /// possible branch, it saves state, explores the branch, and pops the
 /// state. If the exploration yielded nothing, then the next branch is
-/// explored, until exhaustion of the possibilities.  Upon exhaustion, it
-/// returns to the caller.
+/// explored, until exhaustion of the possibilities.  Upon exhaustion,
+/// it returns to the caller.
 ///
 /// This method is part of a recursive chain that only terminates
 /// when a grounding for *the entire pattern* was found (and the
