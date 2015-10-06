@@ -17,4 +17,4 @@ test:
 
 general:
   artifacts:
-    - "$PWD/build/tests/Testing/Temporary" # Test logs
+    - "~/atomspace/build/tests/Testing/Temporary" # Test logs
