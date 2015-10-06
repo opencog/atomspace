@@ -40,4 +40,5 @@ library
                    , filepath         >=1.3.0.2
 
   extra-libraries:   haskell-atomspace
+  extra-lib-dirs:    /usr/local/lib/opencog
   ghc-options:       -fcontext-stack=500
