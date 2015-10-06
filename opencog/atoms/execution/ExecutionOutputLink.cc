@@ -101,6 +101,9 @@ Handle ExecutionOutputLink::execute(AtomSpace* as) const
 Handle ExecutionOutputLink::do_execute(AtomSpace* as,
                          const Handle& gsn, const Handle& cargs)
 {
+	LAZY_LOG_FINE << "Execute gsn: " << gsn->toShortString()
+	              << "with arguments: " << cargs->toShortString();
+
 	// Search for additional execution links, and execute them too.
 	// We will know that happend if the returned handle differs from
 	// the input handle. If the results are different, add the new
