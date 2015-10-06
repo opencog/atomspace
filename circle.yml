@@ -12,3 +12,7 @@ test:
     override:
         - docker run -v $PWD:/atomspace -it opencog/cogutils /bin/sh -c "cd /atomspace && /tmp/octool -bet":
             parallel: true
+
+general:
+  artifacts:
+    - "$PWD/build/tests/Testing/Temporary" # Test logs
