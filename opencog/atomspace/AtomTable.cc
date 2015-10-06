@@ -321,15 +321,21 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
     // Very special handling for DeleteLink's
     } else if (DELETE_LINK == atom_type) {
         DeleteLinkPtr delp(DeleteLinkCast(atom));
-        if (nullptr == delp)
-            delp = createDeleteLink(*LinkCast(atom));
-
-        // If it's an "open term", we ar OK.
-        if (0 < delp->get_vars().size())
+        // If it can be cast, then its not an open term.
+        if (nullptr != delp)
             return delp;
-        // Else destroy!
-        for (Handle ho : delp->getOutgoingSet()) {
-            this->extract(ho);
+
+        // Trying to create a closed-term DeleteLink will throw.
+        // This is a sign that we need to remove stuff.
+        try {
+            delp = createDeleteLink(*LinkCast(atom));
+        }
+        catch(...) {
+            LinkPtr lp(LinkCast(atom));
+            for (Handle ho : lp->getOutgoingSet()) {
+                this->extract(ho);
+            }
+            return Handle();
         }
     }
     return atom;
