@@ -67,4 +67,32 @@ Handle StateLink::get_state(const Handle& alias)
 	return luniq->getOutgoingAtom(1);
 }
 
+/**
+ * Get the link associated with the alias.  This will be the StateLink
+ * which has `alias` as the first member of the outgoing set.
+ */
+Handle StateLink::get_link(const Handle& alias)
+{
+	return get_unique(alias, STATE_LINK);
+}
+
+/**
+ * If there is a *second* StateLink, equivalent to this one,
+ * return it.  This is used for managing state in the AtomSpace.
+ */
+Handle StateLink::get_other(void) const
+{
+	// Get all StateLinks associated with the alias. Ignore this one.
+	const Handle& alias = _outgoing[0];
+	IncomingSet defs = alias->getIncomingSetByType(STATE_LINK);
+
+	// Return any non-unique definition that isn't this one.
+	for (const LinkPtr& defl : defs)
+	{
+		if (defl->getOutgoingAtom(0) == alias and defl.get() != this)
+			return defl->getHandle();
+	}
+	return Handle();
+}
+
 /* ===================== END OF FILE ===================== */

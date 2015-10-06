@@ -300,9 +300,6 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
     } else if (SATISFACTION_LINK == atom_type) {
         if (NULL == PatternLinkCast(atom))
             return createPatternLink(*LinkCast(atom));
-    } else if (STATE_LINK == atom_type) {
-        if (NULL == StateLinkCast(atom))
-            return createStateLink(*LinkCast(atom));
     } else if (UNIQUE_LINK == atom_type) {
         if (NULL == UniqueLinkCast(atom))
             return createUniqueLink(*LinkCast(atom));
@@ -317,9 +314,10 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
         if (NULL == FunctionLinkCast(atom))
             return FunctionLink::factory(LinkCast(atom));
 */
+    }
 
     // Very special handling for DeleteLink's
-    } else if (DELETE_LINK == atom_type) {
+    else if (DELETE_LINK == atom_type) {
         DeleteLinkPtr delp(DeleteLinkCast(atom));
         // If it can be cast, then its not an open term.
         if (nullptr != delp)
@@ -338,6 +336,21 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
             return Handle();
         }
         return delp;
+    }
+
+    // Very special handling for StateLink's
+    else if (STATE_LINK == atom_type) {
+        StateLinkPtr slp(StateLinkCast(atom));
+        if (NULL == slp)
+            slp = createStateLink(*LinkCast(atom));
+
+        // Compare to the current state
+        Handle old_state(slp->get_other());
+        while (nullptr != old_state) {
+            this->extract(old_state);
+            old_state = slp->get_other();
+        }
+        return slp;
     }
     return atom;
 }

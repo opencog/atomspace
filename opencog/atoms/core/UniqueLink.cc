@@ -99,7 +99,7 @@ Handle UniqueLink::get_unique(const Handle& alias, Type type)
 	IncomingSet defs = alias->getIncomingSetByType(type);
 
 	// Return the first (supposedly unique) definition
-	for (LinkPtr defl : defs)
+	for (const LinkPtr& defl : defs)
 	{
 		if (defl->getOutgoingAtom(0) == alias)
 			return defl->getHandle();

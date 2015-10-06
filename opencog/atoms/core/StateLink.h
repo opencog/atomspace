@@ -58,8 +58,9 @@ public:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	StateLink(Link &l);
-	Handle get_alias(void) { return _outgoing[0]; }
-	Handle get_state(void) { return _outgoing[1]; }
+	Handle get_alias(void) const { return _outgoing[0]; }
+	Handle get_state(void) const { return _outgoing[1]; }
+	Handle get_other(void) const;
 
 	/**
 	 * Given a Handle pointing to <name> in
@@ -70,6 +71,7 @@ public:
 	 *
 	 * return <body>
 	 */
+	static Handle get_link(const Handle& alias);
 	static Handle get_state(const Handle& alias);
 };
 

@@ -73,8 +73,8 @@ public:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	DefineLink(Link &l);
-	Handle get_alias(void) { return _outgoing[0]; }
-	Handle get_definition(void) { return _outgoing[1]; }
+	Handle get_alias(void) const { return _outgoing[0]; }
+	Handle get_definition(void) const { return _outgoing[1]; }
 
 	/**
 	 * Given a Handle pointing to <name> in
