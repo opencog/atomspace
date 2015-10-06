@@ -5,10 +5,10 @@ machine:
 dependencies:
     override:
         - docker info
-        - docker pull opencog/opencog-deps
-        - docker images opencog/opencog-deps
+        - docker pull opencog/cogutils
+        - docker images opencog/cogutils
 
 test:
     override:
-        - docker run -v $PWD:/atomspace -it opencog/opencog-deps /bin/sh -c "cd /atomspace && /tmp/octool -cbet":
+        - docker run -v $PWD:/atomspace -it opencog/cogutils /bin/sh -c "cd /atomspace && /tmp/octool -bet":
             parallel: true
