@@ -13,9 +13,7 @@ dependencies:
 
 test:
     override:
-        - docker run -v $PWD:/atomspace --link postgres:db -e PGHOST=db \
-          -e PGUSER=opencog_user  -it opencog/cogutils \
-          /bin/sh -c "./configure-database.sh && cd /atomspace && /tmp/octool -bet":
+        - docker run -v $PWD:/atomspace --link postgres:db -e PGHOST=db -e PGUSER=opencog_user  -it opencog/cogutils /bin/sh -c "./configure-database.sh && cd /atomspace && /tmp/octool -bet":
           parallel: true
 
 general:
