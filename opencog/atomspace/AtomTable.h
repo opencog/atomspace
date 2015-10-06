@@ -188,8 +188,9 @@ public:
     Handle getHandle(const AtomPtr&) const;
     Handle getHandle(UUID) const;
 
-    static AtomPtr factory(Type atom_type, AtomPtr atom);
-    static AtomPtr clone_factory(Type, AtomPtr);
+    AtomPtr do_factory(Type atom_type, AtomPtr atom);
+    AtomPtr factory(Type atom_type, AtomPtr atom);
+    AtomPtr clone_factory(Type, AtomPtr);
 
 public:
     /**

@@ -1,5 +1,5 @@
 /*
- * DefineLink.cc
+ * StateLink.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  *
@@ -23,51 +23,76 @@
 
 #include <opencog/atomspace/ClassServer.h>
 
-#include "DefineLink.h"
+#include "StateLink.h"
 
 using namespace opencog;
 
-void DefineLink::init()
+void StateLink::init()
 {
 	// Must have name and body
 	if (2 != _outgoing.size())
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting name and definition, got size %d", _outgoing.size());
-
-	// Perform some additional checks in the UniqueLink init method
-	UniqueLink::init();
+			"Expecting name and state, got size %d", _outgoing.size());
 }
 
-DefineLink::DefineLink(const HandleSeq& oset,
+StateLink::StateLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: UniqueLink(DEFINE_LINK, oset, tv, av)
+	: UniqueLink(STATE_LINK, oset, tv, av)
 {
 	init();
 }
 
-DefineLink::DefineLink(const Handle& name, const Handle& defn,
+StateLink::StateLink(const Handle& name, const Handle& defn,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: UniqueLink(DEFINE_LINK, HandleSeq({name, defn}), tv, av)
+	: UniqueLink(STATE_LINK, HandleSeq({name, defn}), tv, av)
 {
 	init();
 }
 
-DefineLink::DefineLink(Link &l)
+StateLink::StateLink(Link &l)
 	: UniqueLink(l)
 {
 	init();
 }
 
 /**
- * Get the defintion associated with the alias.
- * This will be the second atom of some DefineLink, where
+ * Get the state associated with the alias.
+ * This will be the second atom of some StateLink, where
  * `alias` is the first.
  */
-Handle DefineLink::get_definition(const Handle& alias)
+Handle StateLink::get_state(const Handle& alias)
 {
-	Handle uniq(get_unique(alias, DEFINE_LINK));
+	Handle uniq(get_unique(alias, STATE_LINK));
 	LinkPtr luniq(LinkCast(uniq));
 	return luniq->getOutgoingAtom(1);
+}
+
+/**
+ * Get the link associated with the alias.  This will be the StateLink
+ * which has `alias` as the first member of the outgoing set.
+ */
+Handle StateLink::get_link(const Handle& alias)
+{
+	return get_unique(alias, STATE_LINK);
+}
+
+/**
+ * If there is a *second* StateLink, equivalent to this one,
+ * return it.  This is used for managing state in the AtomSpace.
+ */
+Handle StateLink::get_other(void) const
+{
+	// Get all StateLinks associated with the alias. Ignore this one.
+	const Handle& alias = _outgoing[0];
+	IncomingSet defs = alias->getIncomingSetByType(STATE_LINK);
+
+	// Return any non-unique definition that isn't this one.
+	for (const LinkPtr& defl : defs)
+	{
+		if (defl->getOutgoingAtom(0) == alias and defl.get() != this)
+			return defl->getHandle();
+	}
+	return Handle();
 }
 
 /* ===================== END OF FILE ===================== */
