@@ -115,8 +115,17 @@ VARIABLE_LIST <- LIST_LINK
 // restrictions on the variables.
 LAMBDA_LINK <- ORDERED_LINK
 
-// Naming things, tagging things.
-DEFINE_LINK <- ORDERED_LINK
+// Only one UniqueLink may exist (in the atomspace) for a fixed
+// first atom of the link.  Useful for defining state.
+UNIQUE_LINK <- ORDERED_LINK
+
+// Inserting a StateLink into the atomspace causes the previous
+// state to be removed from the atomspace.
+STATE_LINK <- UNIQUE_LINK
+
+// Uniquely naming things, tagging things. Attempting to insert a
+// second definition into the atomspace will throw an exception.
+DEFINE_LINK <- UNIQUE_LINK
 
 // Pattern definition, pattern grounding/satisfaction.
 // The PatternLink implements the base class holding a pattern that
