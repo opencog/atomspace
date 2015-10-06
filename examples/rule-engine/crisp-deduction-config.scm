@@ -16,8 +16,11 @@
 
 ; Create helper functions to call the forward and backward chainer on
 ; that system
-(define (crisp-deduction-fc source) (cog-fc source crisp-deduction-rbs))
-(define (crisp-deduction-bc target) (cog-bc target crisp-deduction-rbs))
+(define default-focus-set (SetLink))
+(define (crisp-deduction-fc source)
+  (cog-fc source crisp-deduction-rbs default-focus-set))
+(define (crisp-deduction-bc target)
+  (cog-bc target crisp-deduction-rbs default-focus-set))
 
 ; Associate the rules to the rule base (with weights, their semantics
 ; is currently undefined, we might settled with probabilities but it's

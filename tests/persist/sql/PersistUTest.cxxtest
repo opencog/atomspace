@@ -56,11 +56,17 @@ class PersistUTest :  public CxxTest::TestSuite
 		NodePtr n1[10];
 		NodePtr n2[10];
 		NodePtr n3[10];
+		NodePtr n4[10];
 		LinkPtr l[10];
+		LinkPtr l2[10];
+		LinkPtr l3[10];
 		Handle h1[10];
 		Handle h2[10];
 		Handle h3[10];
+		Handle h4[10];
 		Handle hl[10];
+		Handle hl2[10];
+		Handle hl3[10];
 
 	public:
 
@@ -179,31 +185,28 @@ void PersistUTest::kill_data(void)
 
 static void atomCompare(AtomPtr a, AtomPtr b)
 {
-	LinkPtr la(LinkCast(a));
-	LinkPtr lb(LinkCast(b));
-
 	TSM_ASSERT("No atom found", b != NULL);
 	if (NULL == b) return;
 
-	TSM_ASSERT_EQUALS("Type mistmatch", a->getType(), b->getType());
+	TSM_ASSERT_EQUALS("Type mismatch", a->getType(), b->getType());
 
-	// Only links can have arity
-	if (la && lb)
+	NodePtr na(NodeCast(a));
+	NodePtr nb(NodeCast(b));
+	if (na and nb)
 	{
-		TSM_ASSERT_EQUALS("Arity mistmatch", la->getArity(), lb->getArity());
+		TSM_ASSERT_EQUALS("Name mismatch", na->getName(), nb->getName());
+	}
 
-		if (0 < la->getArity())
+	LinkPtr la(LinkCast(a));
+	LinkPtr lb(LinkCast(b));
+	if (la and lb)
+	{
+		TSM_ASSERT_EQUALS("Arity mismatch", la->getArity(), lb->getArity());
+		if (*la != *lb)
 		{
-			std::vector<Handle> outa = la->getOutgoingSet();
-			std::vector<Handle> outb = lb->getOutgoingSet();
-			for (int i=0; i< la->getArity(); i++)
-			{
-				if (outa[i] != outb[i])
-				{
-					TSM_ASSERT_EQUALS("outgoing set mis-match", 
-						outa[i].value(), outb[i].value());
-				}
-			}
+			printf("Mismatching la = %s\n", la->toString().c_str());
+			printf("Mismatching lb = %s\n", lb->toString().c_str());
+			TSM_ASSERT_EQUALS("Link mis-match", la, lb);
 		}
 	}
 
@@ -231,7 +234,7 @@ static void atomCompare(AtomPtr a, AtomPtr b)
 
 void PersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 {
-	// Create an atom ... 
+	// Create an atom ...
 	TruthValuePtr stv(SimpleTruthValue::createTV(0.11, 100+idx));
 	h1[idx] = as->add_node(SCHEMA_NODE, id + "fromNode");
 	h1[idx]->setTruthValue(stv);
@@ -247,13 +250,28 @@ void PersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 	h3[idx]->setTruthValue(stv3);
 	n3[idx] = NodeCast(h3[idx]);
 
+	// The NumberNode will go through the AtomTable clone factory
+	// and should thus elicit any errors in clone uuid handling.
+	char buf[40]; sprintf(buf, "%f", idx+0.14159265358979);
+	h4[idx] = as->add_node(NUMBER_NODE, buf);
+	TruthValuePtr stv4(SimpleTruthValue::createTV(0.44, 400+idx));
+	h4[idx]->setTruthValue(stv4);
+	n4[idx] = NodeCast(h4[idx]);
+
 	std::vector<Handle> hvec;
 	hvec.push_back(h1[idx]);
 	hvec.push_back(h2[idx]);
 	hvec.push_back(h3[idx]);
+	hvec.push_back(h4[idx]);
 
 	hl[idx] = as->add_link(SET_LINK, hvec);
 	l[idx] = LinkCast(hl[idx]);
+
+	hl2[idx] = as->add_link(LIST_LINK, hl[idx], h2[idx]);
+	l2[idx] = LinkCast(hl2[idx]);
+
+	hl3[idx] = as->add_link(EVALUATION_LINK, h1[idx], hl2[idx], h3[idx]);
+	l3[idx] = LinkCast(hl3[idx]);
 }
 
 void PersistUTest::check_space(int idx, AtomSpace *space)
@@ -267,13 +285,25 @@ void PersistUTest::check_space(int idx, AtomSpace *space)
 	Handle hb3 = space->get_handle(n3[idx]->getType(), n3[idx]->getName());
 	atomCompare(h3[idx], hb3);
 
+	Handle hb4 = space->get_handle(n4[idx]->getType(), n4[idx]->getName());
+	atomCompare(h4[idx], hb4);
+
 	std::vector<Handle> hvec;
 	hvec.push_back(hb1);
 	hvec.push_back(hb2);
 	hvec.push_back(hb3);
+	hvec.push_back(hb4);
 
 	Handle hlb = space->get_handle(hl[idx]->getType(), hvec);
 	atomCompare(hl[idx], hlb);
+
+	HandleSeq hv2({hlb, hb2});
+	Handle hlb2 = space->get_handle(hl2[idx]->getType(), hv2);
+	atomCompare(hl2[idx], hlb2);
+
+	HandleSeq hv3({hb1, hlb2, hb3});
+	Handle hlb3 = space->get_handle(hl3[idx]->getType(), hv3);
+	atomCompare(hl3[idx], hlb3);
 }
 
 void PersistUTest::check_empty(int idx, AtomSpace *space)
@@ -287,10 +317,14 @@ void PersistUTest::check_empty(int idx, AtomSpace *space)
 	Handle hb3 = space->get_handle(n3[idx]->getType(), n3[idx]->getName());
 	TSM_ASSERT("Should not find this atom", hb3 == Handle::UNDEFINED);
 
+	Handle hb4 = space->get_handle(n4[idx]->getType(), n4[idx]->getName());
+	TSM_ASSERT("Should not find this atom", hb4 == Handle::UNDEFINED);
+
 	std::vector<Handle> hvec;
 	hvec.push_back(h1[idx]);
 	hvec.push_back(h2[idx]);
 	hvec.push_back(h3[idx]);
+	hvec.push_back(h4[idx]);
 
 	Handle hlb = space->get_handle(hl[idx]->getType(), hvec);
 	TSM_ASSERT("Should not find this atom", hlb == Handle::UNDEFINED);

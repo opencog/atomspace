@@ -6,7 +6,7 @@
 ; taken from ProLog, where the system as a whole behave like a database,
 ; and there must be a way of adding records, or removing them from the
 ; database.  So, likewise, in the AtomSpace: the AtomSpace is a database,
-; and the InsertLink and RemoveLink provide a way to add and remove
+; and the PutLink and DeleteLink provide a way to add and remove
 ; statements when they are executed.
 ;
 (use-modules (opencog))
@@ -80,8 +80,10 @@
 ; Force its removal.
 (cog-execute! remove-thing-ab)
 
-; Look for it.
+; Look for it; it should be absent.
 (cog-execute! get-value)
+; Double-check it's absence.
+(show-eval-links)
 
 ; Add it back in:
 (cog-execute! to-be-added)
@@ -134,7 +136,7 @@
 ; ------------------------------------------------
 ; The AssignLink combines the add and remove into one.
 ;
-; At this time, there is not Get/Put analog that works
+; At this time, there is no Get/Put analog that works
 ; in the same fashion thaat AssignLink does. So we copy
 ; this part of the example from the assert/retract example.
 ; This should probably be updated and fixed.

@@ -22,7 +22,7 @@
 
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
-#include "FreeLink.h"
+#include "DefineLink.h"
 #include "FunctionLink.h"
 #include "PutLink.h"
 
@@ -150,6 +150,13 @@ void PutLink::init(void)
 // only be performed at run-time!
 void PutLink::typecheck_values(void)
 {
+
+	// Cannot typecheck at this pont in time, because the schema
+	// might not be defined yet...
+	Type btype = _body->getType();
+	if (DEFINED_SCHEMA_NODE == btype)
+		return;
+
 	size_t sz = _varlist.varseq.size();
 	Type vtype = _values->getType();
 
@@ -237,25 +244,51 @@ void PutLink::typecheck_values(void)
  *         ConceptNode "cowpie"
  *         ConceptNode "hot patootie"
  *
+ * Type checking is performed during substitution; if the values fail to
+ * have the desired types, no substituion is performed.  In this case,
+ * an undefined handle is returned. For set substitutions, this acts as
+ * a filter, removeing (filtering out) the mismatched types.
+ *
  * Again, only a substitution is performed, there is no evaluation.
  * Note also that the resulting tree is NOT placed into any atomspace!
  */
-
-// XXX FIXME, if the values are dynamically generated, then type-checking
-// must be done at run-time, and not at definition-time.
 Handle PutLink::do_reduce(void) const
 {
+	Handle bods(_body);
+	Variables vars(_varlist);
+	// Resolve the body, if needed:
+	if (DEFINED_SCHEMA_NODE == _body->getType())
+	{
+		Handle fun(DefineLink::get_definition(_body));
+		// XXX TODO we should perform a type-check on the function.
+		if (FUNCTION_LINK != fun->getType())
+			throw InvalidParamException(TRACE_INFO,
+					"Expecting a FunctionLink, got %s",
+			      fun->toString().c_str());
+
+		FunctionLinkPtr flp(FunctionLinkCast(fun));
+		if (NULL == flp)
+			flp = createFunctionLink(*LinkCast(fun));
+		bods = flp->get_body();
+		vars = flp->get_variables();
+	}
+
 	Type vtype = _values->getType();
 
-	if (1 == _varlist.varseq.size())
+	if (1 == vars.varseq.size())
 	{
-		// Well, we should accept the SetLink here only if it was
-		// dynamically generated... but I'm too lazy to code this up.
 		if (SET_LINK != vtype)
 		{
 			HandleSeq oset;
-			oset.push_back(_values);
-			return _varlist.substitute_nocheck(_body, oset);
+			oset.emplace_back(_values);
+			try
+			{
+				return vars.substitute(bods, oset);
+			}
+			catch (...)
+			{
+				return Handle::UNDEFINED;
+			}
 		}
 
 		// Iterate over the set...
@@ -263,15 +296,26 @@ Handle PutLink::do_reduce(void) const
 		for (Handle h : LinkCast(_values)->getOutgoingSet())
 		{
 			HandleSeq oset;
-			oset.push_back(h);
-			bset.push_back(_varlist.substitute_nocheck(_body, oset));
+			oset.emplace_back(h);
+			try
+			{
+				bset.emplace_back(vars.substitute(bods, oset));
+			}
+			catch (...) {}
 		}
 		return Handle(createLink(SET_LINK, bset));
 	}
 	if (LIST_LINK == vtype)
 	{
 		const HandleSeq& oset = LinkCast(_values)->getOutgoingSet();
-		return _varlist.substitute_nocheck(_body, oset);
+		try
+		{
+			return vars.substitute(bods, oset);
+		}
+		catch (...)
+		{
+			return Handle::UNDEFINED;
+		}
 	}
 
 	OC_ASSERT(SET_LINK == vtype,
@@ -281,7 +325,11 @@ Handle PutLink::do_reduce(void) const
 	for (Handle h : LinkCast(_values)->getOutgoingSet())
 	{
 		const HandleSeq& oset = LinkCast(h)->getOutgoingSet();
-		bset.push_back(_varlist.substitute_nocheck(_body, oset));
+		try
+		{
+			bset.emplace_back(vars.substitute(bods, oset));
+		}
+		catch (...) {}
 	}
 	return Handle(createLink(SET_LINK, bset));
 }

@@ -25,7 +25,10 @@ int main(int argc, char** argv)
      "-n <int>  \tHow many times to call the method in the measurement loop\n"
      "          \t(default: 100000)\n"
      "-r <int>  \tLooping count; how many times a python/scheme operation is looped\n"
-     "          \t(default: 1)\n"
+     "-u <int>  \tInner looping count\n"
+     "          \t(default: 2000)\n"
+     "-h <int>  \tstd::vector<Handle>::reserve() count\n"
+     "          \t(default: 0)\n"
      "-R <int>  \tUse specific randomseed; useful for benchmark comparisons\n"
      "          \t(default: time(NULL))\n"
      "-S <int>  \tHow many random atoms to add after each measurement\n"
@@ -52,7 +55,7 @@ int main(int argc, char** argv)
     opterr = 0;
     benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_AS;
 
-    while ((c = getopt (argc, argv, "tAXgMCcm:ln:r:R:S:p:s:d:kfi:")) != -1) {
+    while ((c = getopt (argc, argv, "tAXgMCcm:ln:r:u:h:R:S:p:s:d:kfi:")) != -1) {
        switch (c)
        {
            case 't':
@@ -96,15 +99,21 @@ int main(int argc, char** argv)
              exit(0);
              break;
            case 'n':
-             benchmarker.Nreps = (unsigned int) atoi(optarg);
+             benchmarker.baseNreps = (unsigned int) atoi(optarg);
              break;
            case 'r':
-             benchmarker.Nloops = (unsigned int) atoi(optarg);
+             benchmarker.baseNloops = (unsigned int) atoi(optarg);
+             break;
+           case 'u':
+             benchmarker.baseNclock = (unsigned int) atoi(optarg);
+             break;
+           case 'h':
+             benchmarker.Nreserve = (unsigned int) atoi(optarg);
              break;
            case 'R': {
              char* last_arg_char = optarg + strlen(optarg);
              benchmarker.randomseed = (unsigned long) std::strtoul(optarg,
-                    &last_arg_char, 10); }                    
+                    &last_arg_char, 10); }
              break;
            case 'S':
              benchmarker.sizeIncrease = atoi(optarg);
@@ -145,7 +154,7 @@ int main(int argc, char** argv)
 #endif // HAVE_CYTHON
     )
     {
-        if (1 != benchmarker.Nloops)
+        if (1 != benchmarker.baseNloops)
         {
             cerr << "Fatal Error: the atomspace tests do not support looping\n";
             exit(-1);

@@ -8,6 +8,7 @@ ADD_LIBRARY(query SHARED
 	PatternMatch.cc
 	PatternMatchEngine.cc
 	PatternSCM.cc
+	Recognizer.cc
 	Satisfier.cc
 	FuzzyMatch/FuzzyPatternMatch.cc
 	FuzzyMatch/FuzzyPatternMatchCB.cc
@@ -25,11 +26,8 @@ TARGET_LINK_LIBRARIES(query
 )
 
 IF (HAVE_GUILE)
-	TARGET_LINK_LIBRARIES(query
-		smob
-	)
+	TARGET_LINK_LIBRARIES(query smob)
 ENDIF (HAVE_GUILE)
-
 
 INSTALL (TARGETS query DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 

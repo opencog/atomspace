@@ -17,9 +17,12 @@ LINK_LIBRARIES (
 	execution
 )
 
+#start gearman-job-server
+
 # We want to run the tests in the order below;
 # Each test gets progressively more complex, and exercises
 # features that the later tests depend on.
+
 ADD_CXXTEST(PatternUTest)
 ADD_CXXTEST(PatternCrashUTest)
 ADD_CXXTEST(StackUTest)
@@ -29,6 +32,7 @@ ADD_CXXTEST(LoopPatternUTest)
 ADD_CXXTEST(BooleanUTest)
 ADD_CXXTEST(Boolean2NotUTest)
 ADD_CXXTEST(FuzzyPatternUTest)
+
 
 # Its a *lot* easier to write scheme, than to write C++ code!
 # These are not in alphabetical order; they are in order of
@@ -64,7 +68,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(AttentionalFocusCBUTest)
 	ADD_CXXTEST(SudokuUTest)
 	ADD_CXXTEST(EinsteinUTest)
-    
+
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
 		${COGUTIL_LIBRARY}
 	)
@@ -101,6 +105,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-nest.scm
     ${PROJECT_BINARY_DIR}/tests/query/choice-nest.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-top-nest.scm
     ${PROJECT_BINARY_DIR}/tests/query/choice-top-nest.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-typed.scm
+    ${PROJECT_BINARY_DIR}/tests/query/choice-typed.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/choice-unary.scm
     ${PROJECT_BINARY_DIR}/tests/query/choice-unary.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/define.scm

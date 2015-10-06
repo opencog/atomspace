@@ -88,16 +88,16 @@ AtomTable::~AtomTable()
 
     // No one who shall look at these atoms shall ever again
     // find a reference to this atomtable.
-    for (const Handle& h : _atom_set) {
-        h->_atomTable = NULL;
-        h->_uuid = Handle::INVALID_UUID;
-
+    UUID undef = Handle::INVALID_UUID;
+    for (auto pr : _atom_set) {
+        pr.second->_atomTable = NULL;
+        pr.second->_uuid = undef;
         // Aiee ... We added this link to every incoming set;
         // thus, it is our responsibility to remove it as well.
         // This is a stinky design, but I see no other way,
         // because it seems that we can't do this in the Atom
         // destructor (which is where this should be happening).
-        LinkPtr lll(LinkCast(h));
+        LinkPtr lll(LinkCast(pr.second));
         if (lll) {
             for (AtomPtr a : lll->_outgoing) {
                 a->remove_atom(lll);
@@ -176,23 +176,20 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
     // Make sure all the atoms in the outgoing set are resolved :-)
     HandleSeq resolved_seq;
     for (Handle ho : seq) {
-        resolved_seq.push_back(getHandle(ho));
+        resolved_seq.emplace_back(getHandle(ho));
     }
 
     // Aiieee! unordered link!
     if (classserver().isA(t, UNORDERED_LINK)) {
-        struct HandleComparison
-        {
-            bool operator()(const Handle& h1, const Handle& h2) const {
-                return (Handle::compare(h1, h2) < 0);
-            }
-        };
-        std::sort(resolved_seq.begin(), resolved_seq.end(), HandleComparison());
+        // Caution: this comparison function MUST BE EXACTLY THE SAME
+        // as the one in Link.cc, used for sorting unordered links.
+        // Changing this without changing the other one will break things!
+        std::sort(resolved_seq.begin(), resolved_seq.end(), handle_less());
     }
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     Handle h(linkIndex.getHandle(t, resolved_seq));
-    if (_environ and Handle::INVALID_UUID == h.value())
+    if (_environ and nullptr == h)
         return _environ->getHandle(t, resolved_seq);
     return h;
 }
@@ -227,44 +224,17 @@ Handle AtomTable::getHandle(const AtomPtr& a) const
     return Handle::UNDEFINED;
 }
 
-Handle AtomTable::getHandle(Handle& h) const
+// If we have a uuid but no atom pointer, find the atom pointer.
+Handle AtomTable::getHandle(UUID uuid) const
 {
-    // If we have an atom, but don't know the uuid, find uuid.
-    if (Handle::INVALID_UUID == h.value())
-        return getHandle(AtomPtr(h));
-
-    // If we have both a uuid and pointer, AND the pointer is
-    // pointing to an atom that is in this table (not some other
-    // table), then there's nothing to do.  Otherwise, we have to
-    // find the equivalent atom in this atomspace.
-    // Note: we access the naked pointer itself; that's because
-    // Handle itself calls this method to resolve null pointers.
-    if (h._ptr) {
-        if (this == h._ptr->_atomTable)
-            return h;
-
-        // try getting this atomtable's version first
-        Handle hthis = getHandle(AtomPtr(h));
-        if (hthis) return hthis;
-
-        if (_environ) {
-            Handle henv = _environ->getHandle(h);
-            if (henv) return henv;
-        }
-
-        return Handle::UNDEFINED;
-    }
-
     // Read-lock for the _atom_set.
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
-    // If we have a uuid but no atom pointer, find the atom pointer.
-    auto hit = _atom_set.find(h);
+    auto hit = _atom_set.find(uuid);
     if (hit != _atom_set.end())
-        return *hit;
+        return hit->second;
     return Handle::UNDEFINED;
 }
-
 
 /// Return true if the atom is in this atomtable, or in the
 /// environment for this atomtable.
@@ -281,7 +251,7 @@ bool AtomTable::inEnviron(AtomPtr atom)
 
 // Experimental C++ atom types support code
 // Try to cast, if possible.
-AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
+AtomPtr do_factory(Type atom_type, AtomPtr atom)
 {
     // Nodes of various kinds -----------
     if (NUMBER_NODE == atom_type) {
@@ -343,7 +313,7 @@ AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
 }
 
 // create a clone
-static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
+static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
 {
     // Nodes of various kinds -----------
     if (NUMBER_NODE == atom_type)
@@ -391,6 +361,30 @@ static AtomPtr clone_factory(Type atom_type, AtomPtr atom)
 
     throw RuntimeException(TRACE_INFO,
           "AtomTable - failed factory call!");
+}
+
+AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
+{
+	AtomPtr clone(do_factory(atom_type, atom));
+	clone->_uuid = atom->_uuid;
+	return clone;
+}
+
+/// The purpose of the clone factory is to create a private, unique
+/// copy of the atom, so as to avoid accidental, unintentional
+/// sharing with others. In particular, the atom that we are given
+/// may already exist in some other atomspace; we want our own private
+/// copy, in that case.
+AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
+{
+	AtomPtr clone(do_clone_factory(atom_type, atom));
+	// Copy the UUID ONLY if the atom does not belong to some other
+	// atomspace. This is the situation that applies to atoms being
+	// delivered to us from the backing store: the UUID is set, but
+	// they are othrwise "fresh" atoms.
+	if (NULL == atom->getAtomTable())
+		clone->_uuid = atom->_uuid;
+	return clone;
 }
 
 static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
@@ -460,11 +454,18 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         // So we recursively clone that too.
         HandleSeq closet;
         for (const Handle& h : lll->getOutgoingSet()) {
-            closet.push_back(add(h, async));
+            closet.emplace_back(add(h, async));
         }
+        // Preserve the UUID! This is needed for assigning the UUID
+        // correctly when fetching from backing store. But do this
+        // if the atom is actually coming from backing store (i.e.
+        // does not yet belong to any table).
+        UUID save = atom->_uuid;
+        if (NULL != atom->getAtomTable()) save = (UUID) -1;
         atom = createLink(atom_type, closet,
                           atom->getTruthValue(),
                           atom->getAttentionValue());
+        atom->_uuid = save;
     }
     atom = clone_factory(atom_type, atom);
 
@@ -487,65 +488,16 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         // methods on those atoms.
         bool need_copy = false;
         for (size_t i = 0; i < arity; i++) {
-            Handle h(ogs[i]);
-            // It can happen that the uuid is assigned, but the pointer
-            // is NULL. In that case, we should at least know about this
-            // uuid.  We explicitly test h._ptr.get() so as not to
-            // accidentally call resolve() during the test.
-            // XXX ??? How? How can this happen ??? How could we have a
-            // UUID but no pointer? Some persistance scenario ???
-            // Please explain ...
-            if (NULL == h._ptr.get()) {
-                if (Handle::INVALID_UUID == h.value()) {
-                    prt_diag(atom, i, arity, ogs);
-                    throw RuntimeException(TRACE_INFO,
-                               "AtomTable - Attempting to insert link with "
-                               "invalid outgoing members");
-                }
-                auto it = _atom_set.find(h);
-                if (it != _atom_set.end()) {
-                    h = *it;
-
-                    // OK, here's the deal. We really need to fixup
-                    // link so that it holds a valid atom pointer. We
-                    // do that here. Unfortunately, this is not really
-                    // thread-safe, and there is no particularly elegant
-                    // way to lock. So we punt.  This makes sense,
-                    // because it is unlikely that one thread is going to
-                    // be wingeing on the outgoing set, while another
-                    // thread is performing an atom-table add.  I'm pretty
-                    // sure its a user error if the user fails to serialize
-                    // atom table adds appropriately for their app.
-                    lll->_outgoing[i]->remove_atom(lll);
-                    lll->_outgoing[i] = h;
-                    lll->_outgoing[i]->insert_atom(lll);
-                } else {
-                    // XXX FIXME. This can trigger when external code
-                    // removes atoms from the atomspace, but retains
-                    // copies of the (now defunct, because deleted)
-                    // UUID's.  That is, when an atom is removed from
-                    // the atomtable, it's UUID is no longer valid, and
-                    // So that external code should not have saved the
-                    // UUID's.  However, if it did, and then created a
-                    // handle out of them, then the handle would have
-                    // a null atom pointer and a positive UUID, and we
-                    // end up here.  This is a user error.  Note: the
-                    // atomspace benchmark has been known to do this.
-                    //
-                    // Perhaps there are other weird secenarios, an we
-                    // should search the environmnet first, before
-                    // throwing... (we did not search environmnet,
-                    // above ... this may need fixing...)
-                    prt_diag(atom, i, arity, ogs);
-                    throw RuntimeException(TRACE_INFO,
-                        "AtomTable - Atom in outgoing set isn't known!");
-                }
+            if (NULL == ogs[i]._ptr.get()) {
+                prt_diag(atom, i, arity, ogs);
+                throw RuntimeException(TRACE_INFO,
+                           "AtomTable - Attempting to insert link with "
+                           "invalid outgoing members");
             }
 
-            // h has to point to an actual atom, else below will crash.
-            // Anyway, the outgoing set must consist entirely of atoms
+            // The outgoing set must consist entirely of atoms
             // either in this atomtable, or its environment.
-            if (not inEnviron(h)) need_copy = true;
+            if (not inEnviron(ogs[i])) need_copy = true;
         }
 
         if (need_copy) {
@@ -561,13 +513,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             if (not inEnviron(ho)) {
                 ho->remove_atom(llc);
                 llc->_outgoing[i] = add(ho, async);
-            }
-            else if (ho.value() == Handle::INVALID_UUID) {
-                // If we are here, then the atom is in the atomspace,
-                // but the handle has an invalid UUID. This can happen
-                // if the atom appears more than once in the outgoing
-                // set. Fix the handles' UUID, by forcing a cast.
-                llc->_outgoing[i] = ((AtomPtr) llc->_outgoing[i]);
             }
             // Build the incoming set of outgoing atom h.
             llc->_outgoing[i]->insert_atom(llc);
@@ -585,8 +530,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 
     // Its possible that the atom already has a UUID assigned,
     // e.g. if it was fetched from persistent storage; this
-    // was done to preserve handle consistency. SavingLoading does
-    // this too.  XXX Review SavingLoading for correctness...
+    // was done to preserve handle consistency.
     if (atom->_uuid == Handle::INVALID_UUID) {
        // Atom doesn't yet have a valid uuid assigned to it. Ask the TLB
        // to issue a valid uuid.  And then memorize it.
@@ -596,7 +540,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     }
     Handle h(atom->getHandle());
     size++;
-    _atom_set.insert(h);
+    _atom_set.insert({atom->_uuid, h});
 
     atom->keep_incoming_set();
     atom->setAtomTable(this);
@@ -819,7 +763,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
 
     // Decrements the size of the table
     size--;
-    _atom_set.erase(handle);
+    _atom_set.erase(atom->_uuid);
 
     Atom* pat = atom.operator->();
     nodeIndex.removeAtom(pat);

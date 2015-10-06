@@ -71,7 +71,7 @@ class AtomStorage::Response
 		ODBCRecordSet *rs;
 
 		// Temporary cache of info about atom being assembled.
-		Handle handle;
+		UUID uuid;
 		int itype;
 		const char * name;
 		int tv_type;
@@ -121,8 +121,7 @@ class AtomStorage::Response
 			}
 			else if (!strcmp(colname, "uuid"))
 			{
-				UUID uuid = strtoul(colvalue, NULL, 10);
-				handle = Handle(uuid);
+				uuid = strtoul(colvalue, NULL, 10);
 			}
 			return false;
 		}
@@ -141,7 +140,8 @@ class AtomStorage::Response
 			// printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
-			AtomPtr atom(store->makeAtom(*this, handle));
+			PseudoPtr p(store->makeAtom(*this, uuid));
+			AtomPtr atom(get_recursive_if_not_exists(p));
 			table->add(atom, true);
 			return false;
 		}
@@ -156,35 +156,17 @@ class AtomStorage::Response
 			// printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
-			if (not table->holds(handle))
+			Handle h(uuid);
+			if (nullptr == table->getHandle(h))
 			{
-				AtomPtr atom(store->makeAtom(*this, handle));
-				load_recursive_if_not_exists(atom);
+				PseudoPtr p(store->makeAtom(*this, uuid));
+				AtomPtr atom(get_recursive_if_not_exists(p));
+				table->add(atom, true);
 			}
 			return false;
 		}
 
-		// Helper function for the above.  The problem is that, when
-		// adding links of unknown provenance, it could happen that
-		// the outgoing set of the link has not yet been loaded.  In
-		// that case, we have to load the outgoing set first.
-		void load_recursive_if_not_exists(AtomPtr atom)
-		{
-			LinkPtr link(LinkCast(atom));
-			if (link)
-			{
-				const HandleSeq& oset = link->getOutgoingSet();
-				for (Handle h : oset)
-				{
-					if (table->holds(h)) continue;
-					AtomPtr a(store->getAtom(h));
-					load_recursive_if_not_exists(a);
-				}
-			}
-			table->add(atom, true);
-		}
-
-		std::vector<Handle> *hvec;
+		HandleSeq *hvec;
 		bool fetch_incoming_set_cb(void)
 		{
 			// printf ("---- New atom found ----\n");
@@ -193,9 +175,41 @@ class AtomStorage::Response
 			// Note, unlike the above 'load' routines, this merely fetches
 			// the atoms, and returns a vector of them.  They are loaded
 			// into the atomspace later, by the caller.
-			Handle h(store->makeAtom(*this, handle));
-			hvec->push_back(h);
+			PseudoPtr p(store->makeAtom(*this, uuid));
+			AtomPtr atom(get_recursive_if_not_exists(p));
+			hvec->emplace_back(atom->getHandle());
 			return false;
+		}
+
+		// Helper function for above.  The problem is that, when
+		// adding links of unknown provenance, it could happen that
+		// the outgoing set of the link has not yet been loaded.  In
+		// that case, we have to load the outgoing set first.
+		AtomPtr get_recursive_if_not_exists(PseudoPtr p)
+		{
+			if (classserver().isA(p->type, NODE))
+			{
+				NodePtr node(createNode(p->type, p->name, p->tv));
+				node->_uuid = p->uuid;
+				return node;
+			}
+			HandleSeq resolved_oset;
+			for (UUID idu : p->oset)
+			{
+				Handle h(idu);
+				h = table->getHandle(h);
+				if (h)
+				{
+					resolved_oset.emplace_back(h);
+					continue;
+				}
+				PseudoPtr po(store->petAtom(idu));
+				AtomPtr ra = get_recursive_if_not_exists(po);
+				resolved_oset.emplace_back(ra->getHandle());
+			}
+			LinkPtr link(createLink(p->type, resolved_oset, p->tv));
+			link->_uuid = p->uuid;
+			return link;
 		}
 
 		bool row_exists;
@@ -308,7 +322,6 @@ class AtomStorage::Response
 			id_set->insert(id);
 			return false;
 		}
-
 };
 
 /* ================================================================ */
@@ -370,8 +383,8 @@ class AtomStorage::Outgoing
 		bool each_handle (Handle h)
 		{
 			char buff[BUFSZ];
-			UUID src_uuid = src_handle.value();
-			UUID dst_uuid = h.value();
+			UUID src_uuid = src_handle->_uuid;
+			UUID dst_uuid = h->_uuid;
 			snprintf(buff, BUFSZ, "INSERT  INTO Edges "
 			        "(src_uuid, dst_uuid, pos) VALUES (%lu, %lu, %u);",
 			        src_uuid, dst_uuid, pos);
@@ -423,6 +436,7 @@ void AtomStorage::init(const char * dbname,
 	}
 
 	local_id_cache_is_inited = false;
+	table_cache_is_inited = false;
 	if (!connected()) return;
 
 	reserve();
@@ -474,10 +488,43 @@ bool AtomStorage::connected(void)
 	return have_connection;
 }
 
+/* ================================================================== */
+/* AtomTable UUID stuff */
+
+void AtomStorage::store_atomtable_id(const AtomTable& at)
+{
+	UUID tab_id = at.get_uuid();
+	if (table_id_cache.count(tab_id)) return;
+
+	table_id_cache.insert(tab_id);
+
+	// Get the parent table as well.
+	UUID parent_id = 1;
+	AtomTable *env = at.get_environ();
+	if (env)
+	{
+		parent_id = env->get_uuid();
+		store_atomtable_id(*env);
+	}
+
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"INSERT INTO Spaces (space, parent) VALUES (%ld, %ld);",
+		tab_id, parent_id);
+
+	std::unique_lock<std::mutex> lock(table_cache_mutex);
+	ODBCConnection* db_conn = get_conn();
+	Response rp;
+	rp.rs = db_conn->exec(buff);
+	rp.rs->release();
+	put_conn(db_conn);
+}
+
+
 /* ================================================================ */
 
 #define STMT(colname,val) { \
-	if(update) { \
+	if (update) { \
 		if (notfirst) { cols += ", "; } else notfirst = 1; \
 		cols += colname; \
 		cols += " = "; \
@@ -651,10 +698,7 @@ std::string AtomStorage::oset_to_string(const std::vector<Handle>& out,
 	{
 		Handle h = out[i];
 		if (i != 0) str += ", ";
-		char buff[BUFSZ];
-		UUID uuid = h.value();
-		snprintf(buff, BUFSZ, "%lu", uuid);
-		str += buff;
+		str += std::to_string(h->_uuid);
 	}
 	str += "}\'";
 	return str;
@@ -755,13 +799,12 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 	std::string coda;
 
 	// Use the TLB Handle as the UUID.
-	char uuidbuff[BUFSZ];
 	Handle h(atom->getHandle());
 	if (TLB::isInvalidHandle(h))
 		throw RuntimeException(TRACE_INFO, "Trying to save atom with an invalid handle!");
 
-	UUID uuid = h.value();
-	snprintf(uuidbuff, BUFSZ, "%lu", uuid);
+	UUID uuid = h->_uuid;
+	std::string uuidbuff = std::to_string(uuid);
 
 	std::unique_lock<std::mutex> lck = maybe_create_id(uuid);
 	bool update = not lck.owns_lock();
@@ -789,11 +832,10 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 	if (false == update)
 	{
 		// Store the atomspace UUID
-		UUID asuid = 0;
 		AtomTable * at = atom->getAtomTable();
 		// We allow storage of atoms that don't belong to an atomspace.
-		if (at) asuid = at->get_uuid();
-		snprintf(uuidbuff, BUFSZ, "%lu", asuid);
+		if (at) uuidbuff = std::to_string(at->get_uuid());
+		else uuidbuff = "0";
 		STMT("space", uuidbuff);
 
 		// Store the atom UUID
@@ -873,11 +915,23 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 				"Error: store_single: Unknown truth value type\n");
 	}
 
+	// We may have to store the atom table UUID and try again...
+	// We waste CPU cycles to store the atomtable, only if it failed.
+	bool try_again = false;
 	std::string qry = cols + vals + coda;
 	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.rs = db_conn->exec(qry.c_str());
+	if (NULL == rp.rs) try_again = true;
 	rp.rs->release();
+
+	if (try_again)
+	{
+		AtomTable *at = atom->getAtomTable();
+		if (at) store_atomtable_id(*at);
+		rp.rs = db_conn->exec(qry.c_str());
+		rp.rs->release();
+	}
 	put_conn(db_conn);
 
 #ifndef USE_INLINE_EDGES
@@ -1013,13 +1067,12 @@ bool AtomStorage::atomExists(Handle h)
 {
 #ifdef ASK_SQL_SERVER
 	char buff[BUFSZ];
-	UUID uuid = h.value();
-	snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", uuid);
+	snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", h->_uuid);
 	return idExists(buff);
 #else
 	std::unique_lock<std::mutex> lock(id_cache_mutex);
 	// look at the local cache of id's to see if the atom is in storage or not.
-	return local_id_cache.count(h.value());
+	return local_id_cache.count(h->_uuid);
 #endif
 }
 
@@ -1131,7 +1184,7 @@ void AtomStorage::get_ids(void)
 void AtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
 {
 	char buff[BUFSZ];
-	UUID uuid = h.value();
+	UUID uuid = h->_uuid;
 	snprintf(buff, BUFSZ, "SELECT * FROM Edges WHERE src_uuid = %lu;", uuid);
 
 	ODBCConnection* db_conn = get_conn();
@@ -1147,17 +1200,17 @@ void AtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
 /* ================================================================ */
 
 /* One-size-fits-all atom fetcher */
-AtomPtr  AtomStorage::getAtom(const char * query, int height)
+AtomStorage::PseudoPtr AtomStorage::getAtom(const char * query, int height)
 {
 	ODBCConnection* db_conn = get_conn();
 	Response rp;
-	rp.handle = Handle::UNDEFINED;
+	rp.uuid = Handle::INVALID_UUID;
 	rp.rs = db_conn->exec(query);
 	rp.rs->foreach_row(&Response::create_atom_cb, &rp);
 
 	// Did we actually find anything?
 	// DO NOT USE TLB::IsInvalidHandle() HERE! It won't work, duhh!
-	if (rp.handle.value() == Handle::INVALID_UUID)
+	if (rp.uuid == Handle::INVALID_UUID)
 	{
 		rp.rs->release();
 		put_conn(db_conn);
@@ -1165,27 +1218,48 @@ AtomPtr  AtomStorage::getAtom(const char * query, int height)
 	}
 
 	rp.height = height;
-	AtomPtr atom(makeAtom(rp, rp.handle));
+	PseudoPtr atom(makeAtom(rp, rp.uuid));
 	rp.rs->release();
 	put_conn(db_conn);
 	return atom;
 }
 
-/**
- * Create a new atom, retrieved from storage
- *
- * This method does *not* register the atom with any atomtable/atomspace
- * However, it does register with the TLB, as the SQL uuids and the
- * TLB Handles must be kept in sync, or all hell breaks loose.
- */
-AtomPtr  AtomStorage::getAtom(Handle h)
+AtomStorage::PseudoPtr AtomStorage::petAtom(UUID uuid)
 {
 	setup_typemap();
 	char buff[BUFSZ];
-	UUID uuid = h.value();
 	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE uuid = %lu;", uuid);
 
 	return getAtom(buff, -1);
+}
+
+/**
+ * Create a new atom, retrieved from storage. This is a recursive-get;
+ * if the atom is a link, then the outgoing set will be fetched too.
+ * This may not be efficient, if you only wanted to get the latest TV
+ * for an existing atom!
+ *
+ * This method does *not* register the atom with any atomtable.
+ */
+AtomPtr AtomStorage::getAtom(UUID uuid)
+{
+	PseudoPtr p(petAtom(uuid));
+	if (NULL == p) return NULL;
+
+	if (classserver().isA(p->type, NODE))
+	{
+		NodePtr node(createNode(p->type, p->name, p->tv));
+		node->_uuid = p->uuid;
+		return node;
+	}
+
+	HandleSeq oset;
+	for (UUID idu : p->oset)
+		oset.emplace_back(getAtom(idu)->getHandle());
+
+	LinkPtr link(createLink(p->type, oset, p->tv));
+	link->_uuid = p->uuid;
+	return link;
 }
 
 /**
@@ -1197,9 +1271,9 @@ std::vector<Handle> AtomStorage::getIncomingSet(Handle h)
 
 	setup_typemap();
 	char buff[BUFSZ];
-	UUID uuid = h.value();
 	snprintf(buff, BUFSZ,
-		"SELECT * FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];", uuid);
+		"SELECT * FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
+		h->_uuid);
 
 	// Note: "select * from atoms where outgoing@>array[556];" will return
 	// all links with atom 556 in the outgoing set -- i.e. the incoming set of 556.
@@ -1227,8 +1301,6 @@ std::vector<Handle> AtomStorage::getIncomingSet(Handle h)
  * to fetch the associated TruthValue for this node.
  *
  * This method does *not* register the atom with any atomtable/atomspace
- * However, it does register with the TLB, as the SQL uuids and the
- * TLB Handles must be kept in sync, or all hell breaks loose.
  */
 NodePtr AtomStorage::getNode(Type t, const char * str)
 {
@@ -1247,7 +1319,12 @@ NodePtr AtomStorage::getNode(Type t, const char * str)
 		return NULL;
 	}
 
-	return NodeCast(getAtom(buff, 0));
+	PseudoPtr p(getAtom(buff, 0));
+	if (NULL == p) return NULL;
+
+	NodePtr node = createNode(t, str, p->tv);
+	node->_uuid = p->uuid;
+	return node;
 }
 
 /**
@@ -1257,10 +1334,8 @@ NodePtr AtomStorage::getNode(Type t, const char * str)
  * to fetch the associated TruthValue for this link.
  *
  * This method does *not* register the atom with any atomtable/atomspace
- * However, it does register with the TLB, as the SQL uuids and the
- * TLB Handles must be kept in sync, or all hell breaks loose.
  */
-LinkPtr AtomStorage::getLink(Type t, const std::vector<Handle>&oset)
+LinkPtr AtomStorage::getLink(Type t, const HandleSeq& oset)
 {
 	setup_typemap();
 
@@ -1273,17 +1348,20 @@ LinkPtr AtomStorage::getLink(Type t, const std::vector<Handle>&oset)
 	ostr += oset_to_string(oset, oset.size());
 	ostr += ";";
 
-	AtomPtr atom = getAtom(ostr.c_str(), 1);
-	return LinkCast(atom);
+	PseudoPtr p = getAtom(ostr.c_str(), 1);
+	if (NULL == p) return NULL;
+
+	LinkPtr link = createLink(t, oset, p->tv);
+	link->_uuid = p->uuid;
+	return link;
 }
 
 /**
  * Instantiate a new atom, from the response buffer contents
  */
-AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
+AtomStorage::PseudoPtr AtomStorage::makeAtom(Response &rp, UUID uuid)
 {
 	// Now that we know everything about an atom, actually construct one.
-	AtomPtr atom(h);
 	Type realtype = loading_typemap[rp.itype];
 
 	if (NOTYPE == realtype)
@@ -1294,72 +1372,32 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 		return NULL;
 	}
 
-	if (NULL == atom)
-	{
-		// All height zero atoms are nodes,
-		// All positive height atoms are links.
-		// A negative height is "unknown" and must be checked.
-		if ((0 == rp.height) ||
-		    ((-1 == rp.height) &&
-		      classserver().isA(realtype, NODE)))
-		{
-			atom = createNode(realtype, rp.name);
-		}
-		else
-		{
-			std::vector<Handle> outvec;
-#ifndef USE_INLINE_EDGES
-			getOutgoing(outvec, h);
-#else
-			char *p = (char *) rp.outlist;
-			while (p)
-			{
-				// Break if there is no more atom in the outgoing set
-				// or the outgoing set is empty in the first place
-				if (*p == '}' or *p == '\0') break;
-				Handle hout = (Handle) strtoul(p+1, &p, 10);
-				outvec.push_back(hout);
-			}
-#endif /* USE_INLINE_EDGES */
-			atom = createLink(realtype, outvec);
-		}
+	PseudoPtr atom(createPseudo());
 
-		// Create via the factory for specific types of atom
-		// Otherwise at the later stage of the sql-load process when the
-		// same atom is being added to the AtomTable (which will also call
-		// the same factory function), the dynamic-casting of any atom of
-		// one of these types will fail, resulting a new atom being created.
-		// But the new atom is having a different UUID, if there exist another
-		// link connecting to this atom, the system will fail to find the
-		// correct handle of this atom (because it is using the original
-		// UUID, as retrieve from the SQL database). Since each of the atoms
-		// in the outgoing set of a link needs to be valid, we will get
-		// an "Atom in outgoing set isn't known!" error as a result
-		atom = AtomTable::factory(realtype, atom);
+	// All height zero atoms are nodes,
+	// All positive height atoms are links.
+	// A negative height is "unknown" and must be checked.
+	if ((0 == rp.height) or
+	    ((-1 == rp.height) and classserver().isA(realtype, NODE)))
+	{
+		atom->name = rp.name;
 	}
 	else
 	{
-		// Perform at least some basic sanity checking ...
-		if (realtype != atom->getType())
+		char *p = (char *) rp.outlist;
+		while (p)
 		{
-			UUID uuid = h.value();
-			throw RuntimeException(TRACE_INFO,
-				"Fatal Error: mismatched atom type for existing atom! "
-				"uuid=%lu real=%d atom=%d\n",
-				uuid, realtype, atom->getType());
-		}
-		// If we are here, and the atom uuid is set, then it should match.
-		if (Handle::INVALID_UUID != atom->_uuid and
-		    atom->_uuid != h.value())
-		{
-			throw RuntimeException(TRACE_INFO,
-				"Fatal Error: mismatched handle and atom UUID's, atom=%lu handle=%lu",
-				atom->_uuid, h.value());
+			// Break if there are no more atoms in the outgoing set
+			// or if the outgoing set is empty in the first place.
+			if (*p == '}' or *p == '\0') break;
+			UUID out(strtoul(p+1, &p, 10));
+			atom->oset.emplace_back(out);
 		}
 	}
 
 	// Give the atom the correct UUID. The AtomTable will need this.
-	atom->_uuid = h.value();
+	atom->type = realtype;
+	atom->uuid = uuid;
 
 	// Now get the truth value
 	switch (rp.tv_type)
@@ -1370,25 +1408,25 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 		case SIMPLE_TRUTH_VALUE:
 		{
 			TruthValuePtr stv(SimpleTruthValue::createTV(rp.mean, rp.count));
-			atom->setTruthValue(stv);
+			atom->tv = stv;
 			break;
 		}
 		case COUNT_TRUTH_VALUE:
 		{
 			TruthValuePtr ctv(CountTruthValue::createTV(rp.mean, rp.confidence, rp.count));
-			atom->setTruthValue(ctv);
+			atom->tv = ctv;
 			break;
 		}
 		case INDEFINITE_TRUTH_VALUE:
 		{
 			TruthValuePtr itv(IndefiniteTruthValue::createTV(rp.mean, rp.count, rp.confidence));
-			atom->setTruthValue(itv);
+			atom->tv = itv;
 			break;
 		}
 		case PROBABILISTIC_TRUTH_VALUE:
 		{
 			TruthValuePtr ptv(ProbabilisticTruthValue::createTV(rp.mean, rp.confidence, rp.count));
-			atom->setTruthValue(ptv);
+			atom->tv = ptv;
 			break;
 		}
 		default:
@@ -1402,7 +1440,7 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 		fprintf(stderr, "\tLoaded %lu atoms.\n", (unsigned long) load_count);
 	}
 
-	add_id_to_cache(h.value());
+	add_id_to_cache(uuid);
 	return atom;
 }
 
@@ -1436,13 +1474,14 @@ void AtomStorage::load(AtomTable &table)
 		rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
 		rp.rs->release();
 #else
-		// It appears that, when the select statment returns more than
+		// It appears that, when the select statement returns more than
 		// about a 100K to a million atoms or so, some sort of heap
 		// corruption occurs in the iodbc code, causing future mallocs
 		// to fail. So limit the number of records processed in one go.
 		// It also appears that asking for lots of records increases
 		// the memory fragmentation (and/or there's a memory leak in iodbc??)
 		// XXX Not clear is UnixODBC suffers from this same problem.
+		// Whatever, seems to be a better strategy overall, anyway.
 #define STEP 12003
 		unsigned long rec;
 		for (rec = 0; rec <= max_nrec; rec += STEP)
@@ -1622,17 +1661,29 @@ void AtomStorage::create_tables(void)
 
 	// See the file "atom.sql" for detailed documentation as to the
 	// structure of the SQL tables.
+	rp.rs = db_conn->exec("CREATE TABLE Spaces ("
+	                      "space     BIGINT PRIMARY KEY,"
+	                      "parent    BIGINT);");
+	rp.rs->release();
+
+	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (0,0);");
+	rp.rs->release();
+	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (1,1);");
+	rp.rs->release();
+
 	rp.rs = db_conn->exec("CREATE TABLE Atoms ("
 	                      "uuid     BIGINT PRIMARY KEY,"
-	                      "space    BIGINT,"
+	                      "space    BIGINT REFERENCES spaces(space),"
 	                      "type     SMALLINT,"
 	                      "type_tv  SMALLINT,"
 	                      "stv_mean FLOAT,"
 	                      "stv_confidence FLOAT,"
-	                      "stv_count FLOAT,"
+	                      "stv_count DOUBLE PRECISION,"
 	                      "height   SMALLINT,"
 	                      "name     TEXT,"
-	                      "outgoing BIGINT[]);");
+	                      "outgoing BIGINT[],"
+	                      "UNIQUE (type, name),"
+	                      "UNIQUE (type, outgoing));");
 	rp.rs->release();
 
 #ifndef USE_INLINE_EDGES
@@ -1648,11 +1699,6 @@ void AtomStorage::create_tables(void)
 	                      "typename TEXT UNIQUE);");
 	rp.rs->release();
 	type_map_was_loaded = false;
-
-	rp.rs = db_conn->exec("CREATE TABLE Spaces ("
-	                      "space     BIGINT,"
-	                      "parent    BIGINT);");
-	rp.rs->release();
 
 	rp.rs = db_conn->exec("CREATE TABLE Global ("
 	                      "max_height INT);");
@@ -1676,6 +1722,15 @@ void AtomStorage::kill_data(void)
 	// See the file "atom.sql" for detailed documentation as to the
 	// structure of the SQL tables.
 	rp.rs = db_conn->exec("DELETE from Atoms;");
+	rp.rs->release();
+
+	// Delete the atomspaces as well!
+	rp.rs = db_conn->exec("DELETE from Spaces;");
+	rp.rs->release();
+
+	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (0,0);");
+	rp.rs->release();
+	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (1,1);");
 	rp.rs->release();
 
 	rp.rs = db_conn->exec("UPDATE Global SET max_height = 0;");

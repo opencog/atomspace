@@ -1,3 +1,6 @@
+# No CMakeLists.txt in dir:
+#ADD_SUBDIRECTORY (wires)
+
 INSTALL (FILES
 	apply.scm
 	av-tv.scm
@@ -12,7 +15,9 @@ INSTALL (FILES
 	rule-engine-utils.scm
 	DESTINATION "${DATADIR}/scm"
 )
+
 INSTALL (FILES
+	opencog/dist-gearman.scm
 	opencog/exec.scm
 	opencog/extension.scm
 	opencog/persist.scm
@@ -20,7 +25,6 @@ INSTALL (FILES
 	opencog/persist-zmq.scm
 	opencog/query.scm
 	opencog/rule-engine.scm
+	opencog/logger.scm
 	DESTINATION "${DATADIR}/scm/opencog"
 )
-# No CMakeLists.txt in dir:
-#ADD_SUBDIRECTORY (wires)

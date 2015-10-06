@@ -9,6 +9,8 @@ CREATE TABLE Spaces (
 	parent BIGINT
 );
 
+-- Space 0 is used primarily (only) in testing of raw atoms.
+INSERT INTO Spaces VALUES (0,0); -- no space defined; raw atoms.
 INSERT INTO Spaces VALUES (1,1); -- default root
 
 --

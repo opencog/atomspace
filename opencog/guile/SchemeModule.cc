@@ -12,45 +12,95 @@
 
 using namespace opencog;
 
+FunctionWrap::FunctionWrap(void (f)(const std::string&),
+                           const char* funcname, const char* modname)
+	: _func_v_s(f), _name(funcname)
+{
+	define_scheme_primitive(_name, &FunctionWrap::wrapper_v_s, this, modname);
+}
+
+FunctionWrap::FunctionWrap(void (f)(bool),
+                           const char* funcname, const char* modname)
+	: _func_v_b(f), _name(funcname)
+{
+	define_scheme_primitive(_name, &FunctionWrap::wrapper_v_b, this, modname);
+}
+
+FunctionWrap::FunctionWrap(const std::string& (f)(),
+                           const char* funcname, const char* modname)
+	: _func_s(f), _name(funcname)
+{
+	define_scheme_primitive(_name, &FunctionWrap::wrapper_s, this, modname);
+}
+
 FunctionWrap::FunctionWrap(Handle (f)(AtomSpace*, const Handle&),
                            const char* funcname, const char* modname)
-	: _func(f), _pred(NULL), _name(funcname)
+	: _func_h_ah(f), _name(funcname)
 {
-	define_scheme_primitive(_name, &FunctionWrap::wrapper, this, modname);
+	define_scheme_primitive(_name, &FunctionWrap::as_wrapper_h_h, this, modname);
+}
+
+FunctionWrap::FunctionWrap(Handle (f)(AtomSpace*, const Handle&,
+                                      const Handle&, const Handle&),
+			   const char* funcname, const char* modname)
+	: _func_h_ahhh(f), _name(funcname)
+{
+	define_scheme_primitive(_name, &FunctionWrap::as_wrapper_h_hhh, this, modname);
 }
 
 FunctionWrap::FunctionWrap(Handle (f)(AtomSpace*, const Handle&, Type, const HandleSeq&),
 			   const char* funcname, const char* modname)
-	: _func_htq(f), _pred(NULL), _name(funcname)
+	: _func_h_ahtq(f), _name(funcname)
 {
-	define_scheme_primitive(_name, &FunctionWrap::wrapper_htq, this, modname);
+	define_scheme_primitive(_name, &FunctionWrap::as_wrapper_h_htq, this, modname);
 }
 
 FunctionWrap::FunctionWrap(TruthValuePtr (p)(AtomSpace*, const Handle&),
                            const char* funcname, const char* modname)
-	: _func(NULL), _pred(p), _name(funcname)
+	: _pred_ah(p), _name(funcname)
 {
-	define_scheme_primitive(_name, &FunctionWrap::prapper, this, modname);
+	define_scheme_primitive(_name, &FunctionWrap::as_prapper_h, this, modname);
 }
 
-Handle FunctionWrap::wrapper(Handle h)
+void FunctionWrap::wrapper_v_s(const std::string& s)
+{
+	return _func_v_s(s);
+}
+
+const std::string& FunctionWrap::wrapper_s()
+{
+	return _func_s();
+}
+
+void FunctionWrap::wrapper_v_b(bool b)
+{
+	return _func_v_b(b);
+}
+
+Handle FunctionWrap::as_wrapper_h_h(Handle h)
 {
 	// XXX we should also allow opt-args to be a list of handles
 	AtomSpace *as = SchemeSmob::ss_get_env_as(_name);
-	return _func(as, h);
+	return _func_h_ah(as, h);
 }
 
-Handle FunctionWrap::wrapper_htq(Handle h, Type t, const HandleSeq& seq)
+Handle FunctionWrap::as_wrapper_h_hhh(Handle h1, Handle h2, Handle h3)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as(_name);
-	return _func_htq(as, h, t, seq);
+	return _func_h_ahhh(as, h1, h2, h3);
 }
 
-TruthValuePtr FunctionWrap::prapper(Handle h)
+Handle FunctionWrap::as_wrapper_h_htq(Handle h, Type t, const HandleSeq& seq)
+{
+	AtomSpace *as = SchemeSmob::ss_get_env_as(_name);
+	return _func_h_ahtq(as, h, t, seq);
+}
+
+TruthValuePtr FunctionWrap::as_prapper_h(Handle h)
 {
 	// XXX we should also allow opt-args to be a list of handles
 	AtomSpace *as = SchemeSmob::ss_get_env_as(_name);
-	return _pred(as, h);
+	return _pred_ah(as, h);
 }
 
 // ========================================================

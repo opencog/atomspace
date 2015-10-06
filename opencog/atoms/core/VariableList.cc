@@ -38,7 +38,7 @@ void VariableList::validate_vardecl(const HandleSeq& oset)
 		if (VARIABLE_NODE == t)
 		{
 			_varlist.varset.insert(h);    // tree (unordered)
-			_varlist.varseq.push_back(h); // vector (ordered)
+			_varlist.varseq.emplace_back(h); // vector (ordered)
 		}
 		else if (TYPED_VARIABLE_LINK == t)
 		{
@@ -131,7 +131,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 		std::set<Type> ts = {vt};
 		_varlist.typemap.insert(ATPair(varname, ts));
 		_varlist.varset.insert(varname);
-		_varlist.varseq.push_back(varname);
+		_varlist.varseq.emplace_back(varname);
 	}
 	else if (TYPE_CHOICE == t)
 	{
@@ -156,7 +156,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 
 		_varlist.typemap.insert(ATPair(varname,ts));
 		_varlist.varset.insert(varname);
-		_varlist.varseq.push_back(varname);
+		_varlist.varseq.emplace_back(varname);
 	}
 	else
 	{
@@ -198,7 +198,7 @@ void VariableList::validate_vardecl(const Handle& hdecls)
 	    NodeCast(hdecls)) // allow *any* node as a variable
 	{
 		_varlist.varset.insert(hdecls);
-		_varlist.varseq.push_back(hdecls);
+		_varlist.varseq.emplace_back(hdecls);
 	}
 	else if (TYPED_VARIABLE_LINK == tdecls)
 	{
@@ -353,7 +353,7 @@ Handle Variables::substitute(const Handle& fun,
 {
 	if (args.size() != varseq.size())
 		throw InvalidParamException(TRACE_INFO,
-			"Incorrect numer of arguments specified, expecting %lu got %lu",
+			"Incorrect number of arguments specified, expecting %lu got %lu",
 			varseq.size(), args.size());
 
 	if (not is_type(args))
@@ -385,7 +385,7 @@ Handle Variables::substitute_nocheck(const Handle& term,
 	HandleSeq oset;
 	for (const Handle& h : lterm->getOutgoingSet())
 	{
-		oset.push_back(substitute_nocheck(h, args));
+		oset.emplace_back(substitute_nocheck(h, args));
 	}
 	return Handle(createLink(term->getType(), oset));
 }
@@ -419,7 +419,7 @@ void Variables::extend(const Variables& vset)
 		{
 			// Found a new variable! Insert it.
 			index.insert({h, varseq.size()});
-			varseq.push_back(h);
+			varseq.emplace_back(h);
 			varset.insert(h);
 
 			// Install the type constraints, as well.

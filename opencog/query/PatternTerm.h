@@ -54,14 +54,16 @@ namespace opencog {
 
 class PatternTerm;
 typedef std::shared_ptr<PatternTerm> PatternTermPtr;
+typedef std::weak_ptr<PatternTerm> PatternTermWPtr;
 typedef std::vector<PatternTermPtr> PatternTermSeq;
+typedef std::vector<PatternTermWPtr> PatternTermWSeq;
 
 class PatternTerm
 {
 	protected:
 		Handle _handle;
 		PatternTermPtr _parent;
-		PatternTermSeq _outgoing;
+		PatternTermWSeq _outgoing;
 
 		// Number of QuoteLinks on the path up to the root including this
 		// term. Zero means the term is unquoted. Quoted terms are matched
@@ -100,16 +102,23 @@ class PatternTerm
 		inline Handle getHandle()
 		{
 			return _handle;
-		};
+		}
 	
 		inline PatternTermPtr getParent()
 		{
 			return _parent;
-		};
+		}
 
-		inline const PatternTermSeq& getOutgoingSet() const
+		inline PatternTermSeq getOutgoingSet() const
 		{
-			return _outgoing;
+			PatternTermSeq oset;
+			for (PatternTermWPtr w : _outgoing)
+			{
+				PatternTermPtr s(w.lock());
+				if (s) oset.push_back(s);
+			}
+
+			return oset;
 		}
 
 		inline Arity getArity() const
@@ -133,7 +142,11 @@ class PatternTerm
 		{
 			// Checks for a valid position
 			if (pos < getArity()) {
-				return _outgoing[pos];
+				PatternTermPtr s(_outgoing[pos].lock());
+				if (not s)
+					throw RuntimeException(TRACE_INFO,
+					                       "expired outgoing set index %d", pos);
+				return s;
 			} else {
 				throw RuntimeException(TRACE_INFO,
 				                       "invalid outgoing set index %d", pos);
@@ -157,7 +170,7 @@ class PatternTerm
 
 		inline std::string toString(std::string indent = ":") const
 		{
-			if (_handle == Handle::UNDEFINED) return "-";
+			if (_handle == nullptr) return "-";
 			std::string str = _parent->toString();
 			str += indent + std::to_string(_handle.value());
 			return str;
@@ -187,7 +200,7 @@ struct less<PatternTermPtr>
 		const Handle& rHandle = rhs->getHandle();
 		if (lHandle == rHandle)
 		{
-			if (lHandle == Handle::UNDEFINED) return false;
+			if (lHandle == nullptr) return false;
 			return lhs->getParent() < rhs->getParent();
 		}
 		return lHandle < rHandle;

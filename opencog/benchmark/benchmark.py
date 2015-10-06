@@ -53,7 +53,7 @@ class SmartFormatter(argparse.HelpFormatter):
     def _split_lines(self, text, width):
         # this is the RawTextHelpFormatter._split_lines
         if text.startswith('R|'):
-            return text[2:].splitlines()  
+            return text[2:].splitlines()
         return argparse.HelpFormatter._split_lines(self, text, width)
 
 # Setup the argument parser.
@@ -84,9 +84,9 @@ if args.verbose:
 # Number of test iterations to average for timing.
 test_iterations = args.iterations
 
-scheme_preload = [  
+scheme_preload = [
                     "opencog/atomspace/core_types.scm",
-                    "opencog/scm/utilities.scm" 
+                    "opencog/scm/utilities.scm"
                  ]
 
 def loop_time_per_op():
@@ -149,11 +149,7 @@ def prep_get_outgoing(atomspace):
     # Number of vertices plus number of edges in a fully connected graph
     return n + (n**2 - n) / 2
 
-def prep_scheme(atomspace):
-    scheme.__init__(atomspace)
-
 def prep_bind(atomspace):
-    scheme.__init__(atomspace)
     for scheme_file in scheme_preload:
         load_scm(atomspace, scheme_file)
 
@@ -211,7 +207,6 @@ def prep_bind_scheme(atomspace):
     scheme_eval_h(atomspace, scheme_query)
 
 def prep_predicates(atomspace):
-    scheme.__init__(atomspace)
     for scheme_file in scheme_preload:
         load_scm(atomspace, scheme_file)
 
@@ -416,7 +411,7 @@ def test_get_predicates_scheme(atomspace, prep_result):
 # atomspace goes out of scope. So each test begins with a new AtomSpace.
 def do_test(prep, test, description, op_time_adjustment):
     """Runs tests and prints the test name and performance"""
-    if not args.columns: 
+    if not args.columns:
         print description
     if (test != None):
         total_time = 0
@@ -485,10 +480,10 @@ tests = [
 (['bindlink','spread'],     prep_bind_python,       test_bind,                  "Bind - bindlink - Cython"),
 
 (['all'],                   None,                   None,                       "-- Testing Scheme Eval --"),
-(['scheme','spread'],       prep_scheme,            test_scheme_eval,           "Test scheme_eval_h(+ 2 2)"),
+(['scheme','spread'],       prep_none,              test_scheme_eval,           "Test scheme_eval_h(+ 2 2)"),
 (['scheme'],                prep_bind_scheme,       test_bind_scheme,           "Bind - cog-bind - Scheme"),
-(['scheme'],                prep_scheme,            test_add_nodes_scheme,      "Add nodes - cog-new-node - Scheme"),
-(['scheme'],                prep_scheme,            test_add_nodes_sugar,       "Add nodes - ConceptNode sugar - Scheme"),
+(['scheme'],                prep_none,              test_add_nodes_scheme,      "Add nodes - cog-new-node - Scheme"),
+(['scheme'],                prep_none,              test_add_nodes_sugar,       "Add nodes - ConceptNode sugar - Scheme"),
 
 (['all'],                   None,                   None,                       "-- Testing Get Predicates --"),
 (['predicates','spread'],   prep_predicates,        test_get_predicates,        "Predicates - get_predicates"),
@@ -497,7 +492,7 @@ tests = [
 ]
 
 
-print 
+print
 print "--- OpenCog Python Benchmark - ", str(datetime.datetime.now()), "---"
 print
 

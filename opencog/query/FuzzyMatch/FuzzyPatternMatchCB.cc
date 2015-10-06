@@ -26,8 +26,6 @@
 
 using namespace opencog;
 
-//#define DEBUG
-
 FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as, Type rt, const HandleSeq& excl)
         : DefaultPatternMatchCB(as),
           rtn_type(rt),
@@ -62,7 +60,7 @@ void FuzzyPatternMatchCB::find_starters(const Handle& hp, const size_t& depth,
     else {
         NodePtr np(NodeCast(hp));
 
-        if (hp != Handle::UNDEFINED and np) {
+        if (hp and np) {
             pat_size++;
 
             if ((np->getType() != VARIABLE_NODE) and
@@ -125,24 +123,22 @@ bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
         const Handle& best_start = starters[search_cnt].handle;
         search_cnt++;
 
-#ifdef DEBUG
-        std::cout << "\n========================================\n";
-        std::cout << "Initiating the fuzzy match... (" << search_cnt << "/"
-                  << num_starters << ")\n";
-        std::cout << "Starter:\n" << best_start->toShortString() << "\n";
-        std::cout << "Start term:\n" << starter_term->toShortString();
-        std::cout << "========================================\n\n";
-#endif
+        LAZY_LOG_FINE << "\n========================================\n"
+                      << "Initiating the fuzzy match... ("
+                      << search_cnt << "/"
+                      << num_starters << ")\n"
+                      << "Starter:\n" << best_start->toShortString() << "\n"
+                      << "Start term:\n" << starter_term->toShortString()
+                      << "========================================\n";
 
         IncomingSet iset = best_start->getIncomingSet();
         size_t iset_size = iset.size();
         for (size_t i = 0; i < iset_size; i++) {
             Handle h(iset[i]);
 
-#ifdef DEBUG
-            std::cout << "Loop candidate (" << (i + 1) << "/" << iset_size << "):\n"
-                      << h->toShortString() << "\n";
-#endif
+            LAZY_LOG_FINE << "Loop candidate ("
+                          << (i + 1) << "/" << iset_size << "):\n"
+                          << h->toShortString() << "\n";
 
             pme->explore_neighborhood(clause, starter_term, h);
         }
@@ -202,11 +198,10 @@ void FuzzyPatternMatchCB::check_if_accept(const Handle& gh)
     // Reject if the potential solution contains any atoms that we want to exclude
     for (const Handle& eh : excl_list) {
         if (std::find(gn.begin(), gn.end(), eh) != gn.end()) {
-#ifdef DEBUG
-        std::cout << "Rejecting:\n" << gh->toShortString()
-                  << "due to the existance of:\n" << eh->toShortString()
-                  << "\n";
-#endif
+
+	        LAZY_LOG_FINE << "Rejecting:\n" << gh->toShortString()
+	                      << "due to the existance of:\n"
+	                      << eh->toShortString();
             return;
         }
     }
@@ -237,16 +232,14 @@ void FuzzyPatternMatchCB::check_if_accept(const Handle& gh)
         similarity += 1.0 / iss;
     }
 
-#ifdef DEBUG
-    std::cout << "\n========================================\n";
-    std::cout << "Compaing:\n" << clause->toShortString() << "--- and:\n"
-              << gh->toShortString() << "\n";
-    std::cout << "Common nodes = " << common_nodes.size() << "\n";
-    std::cout << "Size diff = " << diff << "\n";
-    std::cout << "Similarity = " << similarity << "\n";
-    std::cout << "Most similar = " << max_similarity << "\n";
-    std::cout << "========================================\n\n";
-#endif
+    LAZY_LOG_FINE << "\n========================================\n"
+                  << "Compaing:\n" << clause->toShortString() << "--- and:\n"
+                  << gh->toShortString() << "\n"
+                  << "Common nodes = " << common_nodes.size() << "\n"
+                  << "Size diff = " << diff << "\n"
+                  << "Similarity = " << similarity << "\n"
+                  << "Most similar = " << max_similarity << "\n"
+                  << "========================================\n";
 
     // Decide if we should accept the potential solutions or not
     if ((similarity > max_similarity) or

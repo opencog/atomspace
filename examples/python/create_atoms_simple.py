@@ -7,7 +7,7 @@ A simple way of creating atoms in the AtomSpace.
 See also create_stoms_by_type.py for an alternate API for atoms.
 """
 
-from opencog.atomspace import AtomSpace, TruthValue, Atom
+from opencog.atomspace import AtomSpace, TruthValue
 from opencog.atomspace import types
 from opencog.type_constructors import *
 

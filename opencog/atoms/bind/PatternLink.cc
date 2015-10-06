@@ -48,7 +48,7 @@ void PatternLink::common_init(void)
 		return;
 	}
 
-	validate_clauses(_varlist.varset, _pat.clauses);
+	validate_clauses(_varlist.varset, _pat.clauses, _pat.constants);
 	extract_optionals(_varlist.varset, _pat.clauses);
 
 	// Locate the black-box clauses.
@@ -109,7 +109,7 @@ void PatternLink::setup_components(void)
 	{
 		Handle h(createPatternLink(_component_vars[i], _varlist.typemap,
 		                           _components[i], _pat.optionals));
-		_component_patterns.push_back(h);
+		_component_patterns.emplace_back(h);
 	}
 }
 
@@ -117,6 +117,15 @@ void PatternLink::init(void)
 {
 	_pat.redex_name = "anonymous PatternLink";
 	extract_variables(_outgoing);
+
+	if (2 < _outgoing.size() or
+	   (2 == _outgoing.size() and _outgoing[1] != _body))
+	{
+		throw InvalidParamException(TRACE_INFO,
+		      "Expecting (optional) variable decls and a body; got %s",
+		      toString().c_str());
+	}
+
 	unbundle_clauses(_body);
 	common_init();
 	setup_components();
@@ -126,7 +135,7 @@ void PatternLink::init(void)
 
 /// Special constructor used during just-in-time pattern compilation.
 ///
-/// It assumes that the vaiables have already been correctly extracted
+/// It assumes that the variables have already been correctly extracted
 /// from the body, as appropriate.
 PatternLink::PatternLink(const Variables& vars, const Handle& body)
 	: LambdaLink(PATTERN_LINK, HandleSeq())
@@ -161,7 +170,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 	_varlist.varseq.clear();
 	for (const Handle& v : vars)
 	{
-		_varlist.varseq.push_back(v);
+		_varlist.varseq.emplace_back(v);
 		auto it = typemap.find(v);
 		if (it != typemap.end())
 			_varlist.typemap.insert(*it);
@@ -180,15 +189,15 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 			if (is_atom_in_tree(opt, h))
 			{
 				_pat.optionals.insert(opt);
-				_pat.clauses.push_back(opt);
+				_pat.clauses.emplace_back(opt);
 				h_is_opt = true;
 				break;
 			}
 		}
 		if (not h_is_opt)
 		{
-			_pat.clauses.push_back(h);
-			_pat.mandatory.push_back(h);
+			_pat.clauses.emplace_back(h);
+			_pat.mandatory.emplace_back(h);
 		}
 	}
 	locate_defines(_pat.clauses);
@@ -199,7 +208,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 	_num_virts = _virtual.size();
 	OC_ASSERT (0 == _num_virts, "Must not have any virtuals!");
 
-	_components.push_back(compo);
+	_components.emplace_back(compo);
 	_num_comps = 1;
 
 	make_connectivity_map(_pat.cnf_clauses);
@@ -320,10 +329,10 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 			{
 				const HandleSeq& pset = LinkCast(ho)->getOutgoingSet();
 				for (const Handle& ph : pset)
-					_pat.clauses.push_back(ph);
+					_pat.clauses.emplace_back(ph);
 			}
 			else
-				_pat.clauses.push_back(ho);
+				_pat.clauses.emplace_back(ho);
 		}
 	}
 	else if (SEQUENTIAL_AND_LINK == t)
@@ -336,15 +345,15 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 			{
 				const HandleSeq& pset = LinkCast(ho)->getOutgoingSet();
 				for (const Handle& ph : pset)
-					_pat.clauses.push_back(ph);
+					_pat.clauses.emplace_back(ph);
 			}
 		}
-		_pat.clauses.push_back(hbody);
+		_pat.clauses.emplace_back(hbody);
 	}
 	else
 	{
 		// There's just one single clause!
-		_pat.clauses.push_back(hbody);
+		_pat.clauses.emplace_back(hbody);
 	}
 }
 
@@ -370,7 +379,8 @@ void PatternLink::locate_defines(HandleSeq& clauses)
  * that are constants and can be trivially discarded.
  */
 void PatternLink::validate_clauses(std::set<Handle>& vars,
-                                   HandleSeq& clauses)
+                                   HandleSeq& clauses,
+                                   HandleSeq& constants)
 
 {
 	// The Fuzzy matcher does some strange things: it declares no
@@ -385,7 +395,7 @@ void PatternLink::validate_clauses(std::set<Handle>& vars,
 		// The presence of constant clauses will mess up the current
 		// pattern matcher.  Constant clauses are "trivial" to match,
 		// and so its pointless to even send them through the system.
-		bool bogus = remove_constants(vars, clauses);
+		bool bogus = remove_constants(vars, clauses, constants);
 		if (bogus)
 		{
 			logger().warn("%s: Constant clauses removed from pattern",
@@ -449,12 +459,12 @@ void PatternLink::extract_optionals(const std::set<Handle> &vars,
 
 			const Handle& inv(lopt->getOutgoingAtom(0));
 			_pat.optionals.insert(inv);
-			_pat.cnf_clauses.push_back(inv);
+			_pat.cnf_clauses.emplace_back(inv);
 		}
 		else
 		{
-			_pat.mandatory.push_back(h);
-			_pat.cnf_clauses.push_back(h);
+			_pat.mandatory.emplace_back(h);
+			_pat.cnf_clauses.emplace_back(h);
 		}
 	}
 }
@@ -605,9 +615,9 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 			_pat.executable_holders.insert(sh);
 
 		if (is_virtual)
-			virtual_clauses.push_back(clause);
+			virtual_clauses.emplace_back(clause);
 		else
-			fixed_clauses.push_back(clause);
+			fixed_clauses.emplace_back(clause);
 
 		if (is_black)
 			black_clauses.insert(clause);
@@ -672,7 +682,7 @@ void PatternLink::make_connectivity_map(const HandleSeq& component)
 
 void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 {
-	_pat.connectivity_map[h].push_back(root);
+	_pat.connectivity_map[h].emplace_back(root);
 
 	LinkPtr l(LinkCast(h));
 	if (l)
@@ -731,7 +741,7 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 {
 	PatternTermPtr ptm(std::make_shared<PatternTerm>(parent, h));
 	parent->addOutgoingTerm(ptm);
-	_pat.connected_terms_map[{h, root}].push_back(ptm);
+	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
 
 	Type t = h->getType();
 	LinkPtr l(LinkCast(h));
@@ -783,55 +793,59 @@ void PatternLink::check_connectivity(const std::vector<HandleSeq>& components)
 
 /* ================================================================= */
 
-void PatternLink::debug_print(void) const
+void PatternLink::debug_log(void) const
 {
-	// Print out the predicate ...
-	printf("\nPattern '%s' has following clauses:\n",
-	       _pat.redex_name.c_str());
+	if (!logger().isFineEnabled())
+		return;
+
+	// Log the predicate ...
+	logger().fine("Pattern '%s' has following clauses:",
+	              _pat.redex_name.c_str());
 	int cl = 0;
 	for (const Handle& h : _pat.mandatory)
 	{
-		printf("Mandatory %d:", cl);
+		std::stringstream ss;
+		ss << "Mandatory " << cl << ":";
 		if (_pat.evaluatable_holders.find(h) != _pat.evaluatable_holders.end())
-			printf(" (evaluatable)");
+			ss << " (evaluatable)";
 		if (_pat.executable_holders.find(h) != _pat.executable_holders.end())
-			printf(" (executable)");
-		printf("\n");
-		prt(h);
+			ss << " (executable)";
+		ss << std::endl;
+		ss << h->toShortString();
+		logger().fine() << ss.str();
 		cl++;
 	}
 
 	if (0 < _pat.optionals.size())
 	{
-		printf("Predicate includes the following optional clauses:\n");
+		logger().fine("Predicate includes the following optional clauses:");
 		cl = 0;
 		for (const Handle& h : _pat.optionals)
 		{
-			printf("Optional clause %d:", cl);
+			std::stringstream ss;
+			ss << "Optional clause " << cl << ":";
 			if (_pat.evaluatable_holders.find(h) != _pat.evaluatable_holders.end())
-				printf(" (evaluatable)");
+				ss << " (evaluatable)";
 			if (_pat.executable_holders.find(h) != _pat.executable_holders.end())
-				printf(" (executable)");
-			printf("\n");
-			prt(h);
+				ss << " (executable)";
+			ss << std::endl;
+			ss << h->toShortString();
+			logger().fine() << ss.str();
 			cl++;
 		}
 	}
 	else
-		printf("No optional clauses\n");
+		logger().fine("No optional clauses");
 
 	// Print out the bound variables in the predicate.
 	for (const Handle& h : _varlist.varset)
 	{
 		if (NodeCast(h))
-			printf("Bound var: "); prt(h);
+			logger().fine() << "Bound var: " << h->toShortString();
 	}
 
 	if (_varlist.varset.empty())
-		printf("There are no bound vars in this pattern\n");
-
-	printf("\n");
-	fflush(stdout);
+		logger().fine("There are no bound vars in this pattern");
 }
 
 /* ===================== END OF FILE ===================== */

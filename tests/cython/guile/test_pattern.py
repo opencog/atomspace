@@ -2,13 +2,12 @@ from unittest import TestCase
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle
 from opencog.atomspace import types, is_a, get_type, get_type_name
-from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h, __init__
+from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h
 
 
 # We are poking atoms into this from the scm files, so we want
 # them to still be there, later.
 shared_space = AtomSpace()
-__init__(shared_space)
 
 class SchemeTest(TestCase):
 

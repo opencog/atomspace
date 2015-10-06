@@ -51,7 +51,8 @@ namespace opencog {
  * Returns true if the list of clauses was modified, else returns false.
  */
 bool remove_constants(const std::set<Handle> &vars,
-                      std::vector<Handle> &clauses)
+                      std::vector<Handle> &clauses,
+                      std::vector<Handle> &constants)
 {
 	bool modified = false;
 
@@ -70,6 +71,7 @@ bool remove_constants(const std::set<Handle> &vars,
 		}
 		else
 		{
+			constants.emplace_back(clause);
 			i = clauses.erase(i);
 			modified = true;
 		}
@@ -142,7 +144,7 @@ void get_connected_components(const std::set<Handle>& vars,
 				if (any_unquoted_in_tree(cl, cur_vars))
 				{
 					// Extend the component
-					components[i].push_back(cl);
+					components[i].emplace_back(cl);
 
 					// Add to the varset cache for that component.
 					FindAtoms fv(vars);
@@ -156,7 +158,7 @@ void get_connected_components(const std::set<Handle>& vars,
 			}
 
 			if (not extended)
-				no_con_yet.push_back(cl);
+				no_con_yet.emplace_back(cl);
 		}
 
 		if (did_at_least_one)
@@ -177,7 +179,7 @@ void get_connected_components(const std::set<Handle>& vars,
 
 		FindAtoms fv(vars);
 		fv.search_set(ncl);
-		component_vars.push_back(fv.varset);
+		component_vars.emplace_back(fv.varset);
 	}
 }
 

@@ -173,9 +173,11 @@ public:
     virtual bool isNullTv() const;
 
     /**
-     * Check if this TV is equal to the default TV. operator!= only compares pointers
+     * Check if this TV is equal to the default TV.
+     * operator!= only compares pointers.
      */
     virtual bool isDefaultTV() const;
+    virtual bool isDefinedTV() const;
 };
 
 } // namespace opencog

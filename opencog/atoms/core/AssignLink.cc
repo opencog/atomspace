@@ -93,7 +93,7 @@ void AssignLink::init(const HandleSeq& oset)
 	_link_type = classserver().getType(name);
 
 	for (size_t j=1; j < oset.size(); j++)
-		_outset.push_back(oset[j]);
+		_outset.emplace_back(oset[j]);
 
 	_osetz = _outset.size();
 }

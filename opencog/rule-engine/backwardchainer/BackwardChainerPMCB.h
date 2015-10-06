@@ -37,12 +37,13 @@ class BackwardChainerPMCB :
 protected:
 	AtomSpace* _as;
 	VariableListPtr _int_vars;
+	bool _enable_var_name_check;
 
 	std::vector<std::map<Handle, Handle>> var_solns_;
 	std::vector<std::map<Handle, Handle>> pred_solns_;
 
 public:
-	BackwardChainerPMCB(AtomSpace*, VariableListPtr);
+	BackwardChainerPMCB(AtomSpace*, VariableListPtr, bool);
 	virtual ~BackwardChainerPMCB();
 
 	virtual void set_pattern(const Variables& vars,

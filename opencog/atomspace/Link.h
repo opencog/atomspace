@@ -88,7 +88,7 @@ public:
         : Atom(t, tv, av)
     {
         HandleSeq oset;
-        oset.push_back(h);
+        oset.emplace_back(h);
         init(oset);
     }
 
@@ -98,8 +98,8 @@ public:
         : Atom(t, tv, av)
     {
         HandleSeq oset;
-        oset.push_back(ha);
-        oset.push_back(hb);
+        oset.emplace_back(ha);
+        oset.emplace_back(hb);
         init(oset);
     }
 
@@ -109,9 +109,9 @@ public:
         : Atom(t, tv, av)
     {
         HandleSeq oset;
-        oset.push_back(ha);
-        oset.push_back(hb);
-        oset.push_back(hc);
+        oset.emplace_back(ha);
+        oset.emplace_back(hb);
+        oset.emplace_back(hc);
         init(oset);
     }
     Link(Type t, const Handle& ha, const Handle &hb,
@@ -121,10 +121,10 @@ public:
         : Atom(t, tv, av)
     {
         HandleSeq oset;
-        oset.push_back(ha);
-        oset.push_back(hb);
-        oset.push_back(hc);
-        oset.push_back(hd);
+        oset.emplace_back(ha);
+        oset.emplace_back(hb);
+        oset.emplace_back(hc);
+        oset.emplace_back(hd);
         init(oset);
     }
 
@@ -134,8 +134,10 @@ public:
      * because thread-safe locking required in the gets. */
     Link(Link &l)
         : Atom(l.getType(),
-               l.getTruthValue()->clone(),
-               l.getAttentionValue()->clone())
+               ({ TruthValuePtr tv(l.getTruthValue());
+                  tv->isDefinedTV() ? tv : tv->clone(); }),
+               ({ AttentionValuePtr av(l.getAttentionValue());
+                  av->isDefaultAV() ? av : av->clone(); }))
     {
         init(l.getOutgoingSet());
     }

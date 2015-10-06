@@ -96,7 +96,8 @@ protected:
 	void unbundle_clauses(const Handle& body);
 	void locate_defines(HandleSeq& clauses);
 	void validate_clauses(std::set<Handle>& vars,
-	                      HandleSeq& clauses);
+	                      HandleSeq& clauses,
+	                      HandleSeq& constants);
 
 	void extract_optionals(const std::set<Handle> &vars,
 	                       const std::vector<Handle> &component);
@@ -172,7 +173,7 @@ public:
 
 	bool satisfy(PatternMatchCallback&) const;
 
-	void debug_print(void) const;
+	void debug_log(void) const;
 };
 
 typedef std::shared_ptr<PatternLink> PatternLinkPtr;

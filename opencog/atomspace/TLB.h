@@ -27,7 +27,6 @@
 
 #include <atomic>
 
-#include <opencog/util/Logger.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Handle.h>
 
@@ -130,8 +129,7 @@ private:
 
 inline bool TLB::isInvalidHandle(const Handle& h)
 {
-    return (h == Handle::UNDEFINED) ||
-           (h.value() >= _brk_uuid);
+    return (h == nullptr) or (h.value() >= _brk_uuid);
 }
 
 inline bool TLB::isValidHandle(const Handle& h)

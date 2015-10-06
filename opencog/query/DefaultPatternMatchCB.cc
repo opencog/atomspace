@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/Logger.h>
+
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atomutils/FindUtils.h>
@@ -28,14 +30,6 @@
 #include "DefaultPatternMatchCB.h"
 
 using namespace opencog;
-
-// Uncomment below to enable debug print
-// #define DEBUG
-#ifdef DEBUG
-#define dbgprt(f, varargs...) printf(f, ##varargs)
-#else
-#define dbgprt(f, varargs...)
-#endif
 
 /* ======================================================== */
 
@@ -197,8 +191,9 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 	    LinkCast(grnd)->getOutgoingAtom(0)->getType() ==
 	                                     GROUNDED_PREDICATE_NODE)
 	{
-		dbgprt("Evaluate the grounding clause=\n%s\n",
-		        grnd->toShortString().c_str());
+		LAZY_LOG_FINE << "Evaluate the grounding clause=" << std::endl
+		              << grnd->toShortString() << std::endl;
+
 		// We make two awkard asumptions here: the ground term itself
 		// does not contain any variables, and so does not need any
 		// further grounding. This actuall seems reasonable. The second
@@ -209,7 +204,8 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 		_temp_aspace.clear();
 		TruthValuePtr tvp(EvaluationLink::do_evaluate(&_temp_aspace, grnd));
 
-		dbgprt("clause_match evaluation yeilded tv=%s\n", tvp->toString().c_str());
+		LAZY_LOG_FINE << "Clause_match evaluation yeilded tv"
+		              << std::endl << tvp->toString() << std::endl;
 
 		// XXX FIXME: we are making a crisp-logic go/no-go decision
 		// based on the TV strength. Perhaps something more subtle might be
@@ -229,7 +225,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
                                                   const Handle& grnd)
 {
-	if (Handle::UNDEFINED == grnd) return true;
+	if (nullptr == grnd) return true;
 	_optionals_present = true;
 	return false;
 }
@@ -248,11 +244,10 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 
 	Handle gvirt(_instor.instantiate(virt, gnds));
 
-	dbgprt("Enter eval_term CB with virt=\n%s\n",
-	        virt->toShortString().c_str());
-	dbgprt("grounded by gvirt=\n%s\n",
-	        gvirt->toShortString().c_str());
-
+	LAZY_LOG_FINE << "Enter eval_term CB with virt=" << std::endl
+	              << virt->toShortString() << std::endl;
+	LAZY_LOG_FINE << "Grounded by gvirt=" << std::endl
+	              << gvirt->toShortString() << std::endl;
 
 	// At this time, we expect all virutal links to be in one of two
 	// forms: either EvaluationLink's or GreaterThanLink's.  The
@@ -311,7 +306,8 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	            "Expecting a TruthValue for an evaluatable link: %s\n",
 	            gvirt->toShortString().c_str());
 
-	dbgprt("eval_term evaluation yeilded tv=%s\n", tvp->toString().c_str());
+	LAZY_LOG_FINE << "Eval_term evaluation yeilded tv="
+	              << tvp->toString() << std::endl;
 
 	// XXX FIXME: we are making a crsip-logic go/no-go decision
 	// based on the TV strength. Perhaps something more subtle might be
@@ -332,8 +328,8 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
                               const std::map<Handle, Handle>& gnds)
 {
-	dbgprt("Enter eval_sentence CB with top=\n%s\n",
-	        top->toShortString().c_str());
+	LAZY_LOG_FINE << "Enter eval_sentence CB with top=" << std::endl
+	              << top->toShortString() << std::endl;
 
 	if (top->getType() == VARIABLE_NODE)
 	{
@@ -429,7 +425,8 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 	{
 		Handle g = gnds.at(top);
 		TruthValuePtr tvp(g->getTruthValue());
-		dbgprt("non-logical atom has tv=%s\n", tvp->toString().c_str());
+		LAZY_LOG_FINE << "Non-logical atom has tv="
+		              << tvp->toString() << std::endl;
 		// XXX FIXME: we are making a crsip-logic go/no-go decision
 		// based on the TV strength. Perhaps something more subtle might be
 		// wanted, here.

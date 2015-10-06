@@ -70,14 +70,15 @@ std::string Node::toString(std::string indent)
     std::string tmpname = _name;
     if (_name == "")
         tmpname = "#" + std::to_string(_uuid);
-    snprintf(buf, BUFSZ, "(%s \"%s\" (av %d %d %d) %s) ; [%lu]\n",
+    snprintf(buf, BUFSZ, "(%s \"%s\" (av %d %d %d) %s) ; [%lu][%lu]\n",
              classserver().getTypeName(_type).c_str(),
              tmpname.c_str(),
              (int)getAttentionValue()->getSTI(),
              (int)getAttentionValue()->getLTI(),
              (int)getAttentionValue()->getVLTI(),
              getTruthValue()->toString().c_str(),
-             _uuid);
+             _uuid,
+             _atomTable? _atomTable->get_uuid() : -1);
     return indent + buf;
 }
 

@@ -1,7 +1,7 @@
 /*
  * ForwardChainer.h
  *
- * Copyright (C) 2014,2015 Misgana Bayetta
+ * Copyright (C) 2014,2015 OpenCog Foundation
  *
  * Author: Misgana Bayetta <misgana.bayetta@gmail.com>
  *
@@ -24,57 +24,108 @@
 #ifndef FORWARDCHAINERX_H_
 #define FORWARDCHAINERX_H_
 
-#include <opencog/util/Logger.h>
-#include <opencog/rule-engine/UREConfigReader.h>
 #include <opencog/rule-engine/URECommons.h>
-#include "FCMemory.h"
+#include <opencog/rule-engine/UREConfigReader.h>
+
+#include "FCStat.h"
 
 class ForwardChainerUTest;
 
 namespace opencog
 {
 
-class ForwardChainerCallBack;
+enum source_selection_mode {
+    TV_FITNESS_BASED, STI_BASED
+};
+
+class FCMemory;
+class Logger;
+class Rule;
+
 class ForwardChainer {
 private:
     friend class ::ForwardChainerUTest;
 
     AtomSpace& _as;
     URECommons _rec;            // utility class
-	Handle _rbs;                // rule-based system
-
-	UREConfigReader _configReader;
-
-
-    FCMemory _fcmem;            // stores history
+    Handle _rbs;                // rule-based system
+    UREConfigReader _configReader;
     Logger * _log;
+
     int _iteration = 0;
+    source_selection_mode _ts_mode;
+    bool _search_in_af;
+    bool _search_focus_Set;
+    Rule* _cur_rule;
+    Handle _cur_source;
+    HandleSeq _selected_sources;
 
-    /**
-     * initialize config methods
-     */
-    void init();
-    void add_to_source_list(Handle h);
+    FCStat _fcstat;
 
-    void do_pm();
-    void do_pm(const Handle& hsource, const UnorderedHandleSet& var_nodes,
-               ForwardChainerCallBack& fcb);
-protected:
-    enum source_selection_mode {
-        TV_FITNESS_BASED, STI_BASED
-    };
-public:
-	/**
-	 * Ctor. rbs is a Handle pointing to rule-based system.
-	 */
-    ForwardChainer(AtomSpace& as, Handle rbs);
-    void do_chain(ForwardChainerCallBack& fcb, Handle hsource =
-            Handle::UNDEFINED);
-    void do_step(ForwardChainerCallBack& fcb);
-    HandleSeq get_chaining_result(void);
-
+    void init(Handle hsource, HandleSeq focus_set);
     void setLogger(Logger* log);
     Logger* getLogger(void);
+
+    void apply_all_rules(bool search_focus_set = false);
+    void do_pm(const Handle& hsource, const UnorderedHandleSet& var_nodes);
+
+    UnorderedHandleSet get_subatoms(Rule *rule);
+    Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);
+    HandleSeq substitute_rule_part(AtomSpace& as, Handle hrule,
+                                   const std::set<Handle>& vars,
+                                   const std::vector<std::map<Handle, Handle>>&
+                                   var_groundings);
+    bool unify(Handle source, Handle target, Rule* rule);
+    bool subatom_unify(Handle source, Rule* rule);
+    HandleSeq derive_rules(Handle source, Handle target, Rule* rule);
+    void update_potential_sources(HandleSeq input);
+
+    bool is_valid_implicant(const Handle& h);
+    void validate(Handle hsource, HandleSeq hfocus_set);
+
+protected:
+    vector<Rule*> _rules; /*<loaded rules*/
+    HandleSeq _potential_sources;
+    HandleSeq _focus_set;
+
+    /**
+     * Choose an applicable rules from the rule base by selecting
+     * rules whose premise structurally matches with the source.
+     *
+     * @return  A rule that in which @param source could ground.
+     */
+    virtual Rule* choose_rule(Handle hsource, bool subatom_match );
+
+    /**
+     * choose next source from the source list
+     *
+     * @return  A handle to the chosen source from source list
+     */
+    virtual Handle choose_next_source(void);
+
+    /**
+     * Apply chosen rule. the default will wrap a custom PM callback class.
+     * i.e invokes _pattern_matcher.
+     *
+     * @return  A set of handles created as a result of applying current
+     *          choosen rule.
+     */
+    virtual HandleSeq apply_rule(Handle rhandle, bool search_focus_set_only =
+            false);
+
+    HandleSeq derive_rules(Handle source, Rule* rule, bool subatomic = false);
+
+public:
+    /**
+     * Ctor. rbs is a Handle pointing to rule-based system.
+     */
+    ForwardChainer(AtomSpace& as, Handle rbs, Handle hsource,
+                   HandleSeq focus_set);
+    virtual ~ForwardChainer();
+
+    void do_chain(void);
+    void do_step(void);
+    HandleSeq get_chaining_result(void);
 };
 
 } // ~namespace opencog
