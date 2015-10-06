@@ -252,7 +252,7 @@ Handle Instantiator::instantiate(const Handle& expr,
 	// some time by doing it just once, right here, in one big batch.
 	// A null pointer means that we hit
 	Handle gnd = walk_tree(expr);
-	if (NULL != gnd)
+	if (nullptr != gnd)
 		return _as->add_atom(gnd);
 	return gnd;
 }
