@@ -45,11 +45,23 @@ public:
 
 	void tearDown() {}
 
+	void test_throws();
 	void test_free_delete();
 };
 
 #define N _as.add_node
 #define L _as.add_link
+
+// Attempting to create a full grounded DeleteLink should throw.
+// The AtomTable code depnds on this working correctly.
+void DeleteLinkUTest::test_throws()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+	TS_ASSERT_THROWS(
+		L(DELETE_LINK, N(CONCEPT_NODE, "apple")),
+		opencog::RuntimeException);
+	logger().info("END TEST: %s", __FUNCTION__);
+}
 
 // Test to make sure that DeleteLink is a FreeLink, i.e. does not
 // bind any of its variables. See bug #333 for the original report.
