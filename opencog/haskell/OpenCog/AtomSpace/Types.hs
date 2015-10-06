@@ -112,8 +112,8 @@ data Atom (a :: AtomType) where
 
     AndLink             :: TVal -> [AtomGen] -> Atom AndT
     OrLink              :: TVal -> [AtomGen] -> Atom OrT
-    NotLink		:: (a <~ AtomT) =>
-			   TVal -> Atom a -> Atom NotT
+    NotLink		        :: (a <~ AtomT) =>
+			               TVal -> Atom a -> Atom NotT
     ImplicationLink     :: (p1 <~ AtomT,p2 <~ AtomT) =>
                            TVal -> Atom p1 -> Atom p2 -> Atom ImplicationT
 
@@ -161,10 +161,10 @@ data Atom (a :: AtomType) where
                            Atom v -> Atom p -> Atom q -> Atom BindT
     ContextLink         :: (c <~ AtomT,e <~ AtomT) =>
                            TVal -> Atom c -> Atom e -> Atom ContextT
-    LambdaLink		:: (v <~ VariableT,a <~ AtomT) =>
-			   Atom v -> Atom a -> Atom LambdaT
+    LambdaLink		    :: (v <~ VariableT,a <~ AtomT) =>
+			                Atom v -> Atom a -> Atom LambdaT
     SubsetLink          :: (a1 <~ AtomT, a2 <~ AtomT) =>
-			   TVal -> Atom a1 -> Atom a2 -> Atom SubsetT
+			                TVal -> Atom a1 -> Atom a2 -> Atom SubsetT
 
 deriving instance Show (Atom a)
 deriving instance Typeable Atom
