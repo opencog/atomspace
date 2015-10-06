@@ -60,6 +60,9 @@ UniqueLink::UniqueLink(Type type, const HandleSeq& oset,
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a UniqueLink, got %s", tname.c_str());
 	}
+
+	// Derived types have thier own initialization
+	if (UNIQUE_LINK != type) return;
 	init();
 }
 
@@ -88,6 +91,9 @@ UniqueLink::UniqueLink(Link &l)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a UniqueLink, got %s", tname.c_str());
 	}
+
+	// Derived types have thier own initialization
+	if (UNIQUE_LINK != type) return;
 	init();
 }
 
