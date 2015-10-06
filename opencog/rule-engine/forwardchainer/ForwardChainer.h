@@ -67,7 +67,6 @@ private:
     Logger* getLogger(void);
 
     void apply_all_rules(bool search_focus_set = false);
-    void do_pm(const Handle& hsource, const UnorderedHandleSet& var_nodes);
 
     UnorderedHandleSet get_subatoms(const Rule *rule);
     Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);

@@ -167,49 +167,6 @@ void ForwardChainer::do_chain(void)
 }
 
 /**
- * Does pattern matching for a variable containing query.
- *
- * @param source    A variable containing handle passed as an input to the pattern matcher
- * @param var_nodes The VariableNodes in @param hsource
- *
- */
-void ForwardChainer::do_pm(const Handle& hsource,
-                           const UnorderedHandleSet& var_nodes)
-{
-    DefaultImplicator impl(&_as);
-    impl.implicand = hsource;
-    HandleSeq vars;
-    for (auto h : var_nodes)
-        vars.push_back(h);
-    _cur_source = hsource;
-    Handle hvar_list = _as.add_link(VARIABLE_LIST, vars);
-    Handle hclause = _as.add_link(AND_LINK, hsource);
-
-    // Run the pattern matcher, find all patterns that satisfy the
-    // the clause, with the given variables in it.
-    PatternLinkPtr sl(createPatternLink(hvar_list, hclause));
-    sl->satisfy(impl);
-
-    // Update result
-    _fcstat.add_inference_record(Handle::UNDEFINED, impl.get_result_list());
-
-    // Delete the AND_LINK and LIST_LINK
-    _as.remove_atom(hvar_list);
-    _as.remove_atom(hclause);
-
-    //!Additionally, find applicable rules and apply.
-    vector<Rule*> rules = {choose_rule(hsource,true)};
-    for (Rule* rule : rules) {
-        BindLinkPtr bl(BindLinkCast(rule->get_handle()));
-        DefaultImplicator impl(&_as);
-        impl.implicand = bl->get_implicand();
-        bl->imply(impl, false);
-        _cur_rule = rule;
-        _fcstat.add_inference_record(Handle::UNDEFINED, impl.get_result_list());
-    }
-}
-
-/**
  * Applies all rules in the rule base.
  *
  * @param search_focus_set flag for searching focus set.
