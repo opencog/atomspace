@@ -42,6 +42,7 @@
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/PatternLink.h>
 #include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/core/DeleteLink.h>
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/PutLink.h>
@@ -253,7 +254,7 @@ bool AtomTable::inEnviron(AtomPtr atom)
 
 // Experimental C++ atom types support code
 // Try to cast, if possible.
-AtomPtr do_factory(Type atom_type, AtomPtr atom)
+AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
 {
     // Nodes of various kinds -----------
     if (NUMBER_NODE == atom_type) {
@@ -316,6 +317,20 @@ AtomPtr do_factory(Type atom_type, AtomPtr atom)
         if (NULL == FunctionLinkCast(atom))
             return FunctionLink::factory(LinkCast(atom));
 */
+
+    // Very special handling for DeleteLink's
+    } else if (DELETE_LINK == atom_type) {
+        DeleteLinkPtr delp(DeleteLinkCast(atom));
+        if (nullptr == delp)
+            delp = createDeleteLink(*LinkCast(atom));
+
+        // If it's an "open term", we ar OK.
+        if (0 < delp->get_vars().size())
+            return delp;
+        // Else destroy!
+        for (Handle ho : delp->getOutgoingSet()) {
+            this->extract(ho);
+        }
     }
     return atom;
 }
@@ -378,6 +393,7 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
 AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
 {
 	AtomPtr clone(do_factory(atom_type, atom));
+	if (nullptr == clone) return clone;
 	clone->_uuid = atom->_uuid;
 	return clone;
 }
@@ -435,6 +451,9 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // Factory implements experimental C++ atom types support code
     Type atom_type = atom->getType();
     atom = factory(atom_type, atom);
+
+    // Certain DeleteLinks can never be added!
+    if (nullptr == atom) return Handle();
 
     // Is the equivalent of this atom already in the table?
     // If so, then return the existing atom.  (Note that this 'existing'
