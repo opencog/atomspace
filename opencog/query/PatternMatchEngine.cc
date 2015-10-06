@@ -951,7 +951,8 @@ bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
 	    and not is_evaluatable(clause_root))
 		return false;
 
-	// If its not an unordered link, then don't try to iterate.
+	// If its not an unordered link, then don't try to iterate over
+	// all permutations.
 	Type tp = hp->getType();
 	if (not _classserver.isA(tp, UNORDERED_LINK))
 		return explore_choice_branches(ptm, hg, clause_root);
