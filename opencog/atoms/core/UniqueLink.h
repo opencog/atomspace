@@ -33,10 +33,12 @@ namespace opencog
  *  @{
  */
 
-/// The UniqueLink is used to force uniqueness of a link, given the
-/// first atom of the outgoing set.  Any attempt to make a different
-/// definition with the same name will throw an error.  Thus, only
-/// ONE UniqueLink with a given first-atom can exist at a time.
+/// The UniqueLink is used to force uniqueness of a link from a given
+/// atom, appearing as the first member of the outgoing set, to the
+/// rest of the outgoing set.  Any attempt to make another UniqueLink
+/// with the same atom in the first outgoing slot will throw an error.
+/// Thus, only ONE UniqueLink with a given first-atom can exist at a
+/// time.
 ///
 /// This class is intended to be the base class for DefineLink, which
 /// is used to name things, and StateLink, which is used to maintain
