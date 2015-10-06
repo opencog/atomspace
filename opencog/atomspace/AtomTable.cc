@@ -330,13 +330,14 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
         try {
             delp = createDeleteLink(*LinkCast(atom));
         }
-        catch(...) {
+        catch (...) {
             LinkPtr lp(LinkCast(atom));
             for (Handle ho : lp->getOutgoingSet()) {
                 this->extract(ho);
             }
             return Handle();
         }
+        return delp;
     }
     return atom;
 }

@@ -97,7 +97,7 @@ LambdaLink::LambdaLink(Link &l)
 ///
 void LambdaLink::extract_variables(const HandleSeq& oset)
 {
-	Type decls = oset[0]->getType();
+	Type decls = oset.at(0)->getType();
 
 	// If the first atom is not explicitly a variable declaration, then
 	// there are no variable declarations; extract all free variables.

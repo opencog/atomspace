@@ -58,8 +58,12 @@ void DeleteLinkUTest::test_throws()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 	TS_ASSERT_THROWS(
-		L(DELETE_LINK, N(CONCEPT_NODE, "apple")),
-		opencog::RuntimeException);
+		createDeleteLink(HandleSeq({N(CONCEPT_NODE, "apple")})),
+		opencog::InvalidParamException);
+
+	Handle added = L(DELETE_LINK, N(CONCEPT_NODE, "apple"));
+	TS_ASSERT_EQUALS(added, Handle::UNDEFINED);
+
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
