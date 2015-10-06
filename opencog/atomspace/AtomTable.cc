@@ -45,6 +45,8 @@
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/PutLink.h>
+#include <opencog/atoms/core/StateLink.h>
+#include <opencog/atoms/core/UniqueLink.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
@@ -297,12 +299,18 @@ AtomPtr do_factory(Type atom_type, AtomPtr atom)
     } else if (SATISFACTION_LINK == atom_type) {
         if (NULL == PatternLinkCast(atom))
             return createPatternLink(*LinkCast(atom));
-    } else if (LAMBDA_LINK == atom_type) {
-        if (NULL == LambdaLinkCast(atom))
-            return createLambdaLink(*LinkCast(atom));
+    } else if (STATE_LINK == atom_type) {
+        if (NULL == StateLinkCast(atom))
+            return createStateLink(*LinkCast(atom));
+    } else if (UNIQUE_LINK == atom_type) {
+        if (NULL == UniqueLinkCast(atom))
+            return createUniqueLink(*LinkCast(atom));
     } else if (VARIABLE_LIST == atom_type) {
         if (NULL == VariableListCast(atom))
             return createVariableList(*LinkCast(atom));
+    } else if (LAMBDA_LINK == atom_type) {
+        if (NULL == LambdaLinkCast(atom))
+            return createLambdaLink(*LinkCast(atom));
     } else if (classserver().isA(atom_type, FUNCTION_LINK)) {
 /* More circular-dependency heart-ache
         if (NULL == FunctionLinkCast(atom))
@@ -348,10 +356,14 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
         return createPutLink(*LinkCast(atom));
     if (SATISFACTION_LINK == atom_type)
         return createPatternLink(*LinkCast(atom));
-    if (LAMBDA_LINK == atom_type)
-        return createLambdaLink(*LinkCast(atom));
+    if (STATE_LINK == atom_type)
+        return createStateLink(*LinkCast(atom));
+    if (UNIQUE_LINK == atom_type)
+        return createUniqueLink(*LinkCast(atom));
     if (VARIABLE_LIST == atom_type)
         return createVariableList(*LinkCast(atom));
+    if (LAMBDA_LINK == atom_type)
+        return createLambdaLink(*LinkCast(atom));
     if (classserver().isA(atom_type, FUNCTION_LINK))
         // XXX FIXME more circular-dependency heart-ache
         // return FunctionLink::factory(LinkCast(atom));

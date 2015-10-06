@@ -109,7 +109,6 @@ Handle UniqueLink::get_unique(const Handle& alias, Type type)
 	throw InvalidParamException(TRACE_INFO,
 	                            "Cannot find defined hypergraph for atom %s",
 	                            alias->toString().c_str());
-	return Handle();
 }
 
 /* ===================== END OF FILE ===================== */
