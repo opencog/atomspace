@@ -250,11 +250,7 @@ Handle Instantiator::instantiate(const Handle& expr,
 	// We do this here, instead of in walk_tree(), because adding
 	// atoms to the atomspace is an expensive process.  We can save
 	// some time by doing it just once, right here, in one big batch.
-	// A null pointer means that we hit
-	Handle gnd = walk_tree(expr);
-	if (nullptr != gnd)
-		return _as->add_atom(gnd);
-	return gnd;
+	return _as->add_atom(walk_tree(expr));
 }
 
 /* ===================== END OF FILE ===================== */

@@ -99,6 +99,8 @@ void AtomSpace::unregisterBackingStore(BackingStore *bs)
 
 Handle AtomSpace::add_atom(AtomPtr atom, bool async)
 {
+    if (nullptr == atom) return Handle();
+
     // Is this atom already in the atom table?
     Handle hexist(atomTable.getHandle(atom));
     if (hexist) return hexist;
