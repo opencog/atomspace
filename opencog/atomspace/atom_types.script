@@ -103,6 +103,59 @@ TYPED_VARIABLE_LINK <- ORDERED_LINK
 // A list of variables or variable declarations.
 VARIABLE_LIST <- LIST_LINK
 
+// A FreeLink is any kind of link that might have free variables in it.
+// The FreeLink exists for one purpose: to make visible/explicit all of
+// free variables in the link. The primary user is the pattern matcher.
+// That is, envision the FreeLink as being at the top of a tree, and
+// somewhere in that tree, there might be VariableNodes.  The C++ class
+// for this link records the names of those variables, in order of
+// traversal.  The goal here is to simply know these variables, so that,
+// at the time of evaluation or execution, they are easily located.
+//
+// The variables are necessarily free: they to NOT have type
+// declarations or restrictions associated with them.  This is in sharp
+// contrast to LambdaLink, which binds variables by scoping them, and
+// then forcing type restrictions to them.
+//
+// FreeLinks may be open or closed; they are closed terms if they
+// have no free variables in them.
+//
+FREE_LINK <- ORDERED_LINK
+
+// This is an interesting one. It is a link that must never be grounded!
+// It must contain at least one VariableNode somewhere within it; that
+// is, it must be an "open sentence" and never a "closed sentence".
+// (as it would be called, using the terminology of predicate logic;
+// See wikipedia for a formal defintion).
+//
+// Attempting to insert a DeleteLink holding a fully grounded term
+// (holding a closed sentence) will instead cause the the term to be
+// deleted from the AtomSpace, thus the name.  This is meant to be used
+// with the pattern matcher, so that if it discovers a grounding, the
+// grounded term is deleted.
+//
+// Implementation Note: The DeleteLink cannot inherit from FunctionLink
+// because that would cause all variables to be bound, i.e. to become
+// a closed sentence; thus it inherits from FreeLink.
+//
+DELETE_LINK <- FREE_LINK
+
+// Only one "closed" UniqueLink may exist (in the atomspace), for a
+// fixed first atom of the link.  Useful for defining state.  Additional
+// "open" links may exist; "open" links are defined as links that
+// contain free variables (see wikipedia defition of "open term",
+// "closed term").  Kind of like DeleteLink, but allows one instead of
+// zero closed terms.
+UNIQUE_LINK <- FREE_LINK
+
+// Inserting a StateLink into the atomspace causes the previous
+// state to be removed from the atomspace.
+STATE_LINK <- UNIQUE_LINK
+
+// Uniquely naming things, tagging things. Attempting to insert a
+// second definition into the atomspace will throw an exception.
+DEFINE_LINK <- UNIQUE_LINK
+
 // The LambdaLink is used to identify an open term, i.e. a link
 // containing VariableNodes within it, and binding those variables.
 // In the process, it can also force type restrictions on them.
@@ -114,9 +167,6 @@ VARIABLE_LIST <- LIST_LINK
 // need not bind all of them.  The FreeLink also has no type
 // restrictions on the variables.
 LAMBDA_LINK <- ORDERED_LINK
-
-// Naming things, tagging things.
-DEFINE_LINK <- ORDERED_LINK
 
 // Pattern definition, pattern grounding/satisfaction.
 // The PatternLink implements the base class holding a pattern that
@@ -171,26 +221,6 @@ ASSOCIATIVE_LINK <- ORDERED_LINK
 INHERITANCE_LINK <- ORDERED_LINK
 SIMILARITY_LINK <- UNORDERED_LINK
 ATTRACTION_LINK <- ORDERED_LINK
-
-// A FreeLink is any kind of link that might be evaluatable or
-// executable in some way, and can have free variables in it. The
-// FreeLink exists for one purpose: to make visible to the pattern
-// matcher all of the free variables that lie within the link. That is,
-// the FreeLink is at the top of a tree, and somewhere in that tree,
-// there might be VariableNodes.  The C++ class for this link records
-// the names of those variables, in order of traversal.  The goal here
-// is to simply know these variables, so that, at the time of evaluation
-// or execution, they are easily located.
-//
-// The variables are necessarily free: they to NOT have type
-// declarations or restrictions associated with them.  This is in sharp
-// contrast to LambdaLink, which binds variables by scoping them, and
-// then forcing type restrictions to them.
-//
-// FreeLinks may be open or closed; they are closed terms if they
-// have no free variables in them.
-//
-FREE_LINK <- ORDERED_LINK
 
 // To be used with PredicateNode
 EVALUATION_LINK <- FREE_LINK
@@ -273,24 +303,6 @@ FOLD_LINK <- FUNCTION_LINK
 ARITHMETIC_LINK <- FOLD_LINK
 PLUS_LINK <- ARITHMETIC_LINK
 TIMES_LINK <- ARITHMETIC_LINK
-
-// This is an interesting one. It is a link that must never be grounded!
-// It must contain at least one VariableNode somewhere within it; that
-// is, it must be an "open sentence" and never a "closed sentence".
-// (as it would be called, if we were using the terminology of ordinary
-// logic).
-//
-// Attempting to insert a DeleteLink holding a fully grounded term
-// (holding a closed sentence) will instead cause the the term to be
-// deleted from the AtomSpace, thus the name.  This is meant to be used
-// with the pattern matcher, so that if it discovers a grounding, the
-// grounded term is deleted.
-//
-// Implementation Note: The DeleteLink cannot inherit from FunctionLink
-// because that would cause all variables to be bound, i.e. to become
-// a closed sentence; thus it inherits from FreeLink.
-//
-DELETE_LINK <- FREE_LINK
 
 // The Insert, Assign and RemoveLink's all expect at TypeNode as the first
 // member of thier outgoing set.  When these execute, they add or remove

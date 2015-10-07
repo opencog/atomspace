@@ -1,0 +1,168 @@
+/*
+ * tests/atomspace/StateUTest.cxxtest
+ *
+ * Copyright (C) 2015 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/StateLink.h>
+
+using namespace opencog;
+
+// Test the StateLink.
+//
+class StateLinkUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+
+public:
+	StateLinkUTest()
+	{
+		logger().setPrintToStdoutFlag(true);
+	}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void test_setting();
+};
+
+#define N _as.add_node
+#define L _as.add_link
+
+// Test to make sure that there is only ever one StateLink.
+void StateLinkUTest::test_setting()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Set the state to apple.
+	Handle fruit, apple, bananna;
+	LinkPtr link = LinkCast(
+		L(STATE_LINK,
+			fruit = N(ANCHOR_NODE, "fruit"),
+			apple = N(CONCEPT_NODE, "apple")));
+
+	bananna = N(CONCEPT_NODE, "bananna");
+
+	// The incoming set should be simple.
+	TS_ASSERT_EQUALS(1, fruit->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, apple->getIncomingSetSize());
+	TS_ASSERT_EQUALS(0, bananna->getIncomingSetSize());
+	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(apple, link->getOutgoingAtom(1));
+
+	// Change the state to bananna
+	link = LinkCast(
+		L(STATE_LINK,
+			N(ANCHOR_NODE, "fruit"),
+			N(CONCEPT_NODE, "bananna")));
+
+	// The incoming set should be simple.
+	TS_ASSERT_EQUALS(1, fruit->getIncomingSetSize());
+	TS_ASSERT_EQUALS(0, apple->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, bananna->getIncomingSetSize());
+	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(bananna, link->getOutgoingAtom(1));
+
+
+	// Change the state back to apple.
+	link = LinkCast(
+		L(STATE_LINK,
+			N(ANCHOR_NODE, "fruit"),
+			N(CONCEPT_NODE, "apple")));
+
+	// The incoming set should be simple.
+	TS_ASSERT_EQUALS(1, fruit->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, apple->getIncomingSetSize());
+	TS_ASSERT_EQUALS(0, bananna->getIncomingSetSize());
+	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(apple, link->getOutgoingAtom(1));
+
+	// Change the state back to bananna, again
+	link = LinkCast(
+		L(STATE_LINK,
+			N(ANCHOR_NODE, "fruit"),
+			N(CONCEPT_NODE, "bananna")));
+
+	// The incoming set should be simple.
+	TS_ASSERT_EQUALS(1, fruit->getIncomingSetSize());
+	TS_ASSERT_EQUALS(0, apple->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, bananna->getIncomingSetSize());
+	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(bananna, link->getOutgoingAtom(1));
+
+
+	// Change the state back to apple, again
+	link = LinkCast(
+		L(STATE_LINK,
+			N(ANCHOR_NODE, "fruit"),
+			N(CONCEPT_NODE, "apple")));
+
+	// The incoming set should be simple.
+	TS_ASSERT_EQUALS(1, fruit->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, apple->getIncomingSetSize());
+	TS_ASSERT_EQUALS(0, bananna->getIncomingSetSize());
+	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(apple, link->getOutgoingAtom(1));
+
+	// --------------------------------------
+	// ... But variable nodes are OK...
+	Handle vara = N(VARIABLE_NODE, "$vara");
+	Handle varb = N(VARIABLE_NODE, "$varb");
+	L(STATE_LINK, N(ANCHOR_NODE, "fruit"), vara);
+	L(STATE_LINK, N(ANCHOR_NODE, "fruit"), varb);
+
+	// The incoming set should have 2 vars and one apple.
+	TS_ASSERT_EQUALS(3, fruit->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, apple->getIncomingSetSize());
+	TS_ASSERT_EQUALS(0, bananna->getIncomingSetSize());
+	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(apple, link->getOutgoingAtom(1));
+
+	// Change the state to bananna, again
+	link = LinkCast(
+		L(STATE_LINK,
+			N(ANCHOR_NODE, "fruit"),
+			N(CONCEPT_NODE, "bananna")));
+
+	// The incoming set should have vars and bananna.
+	TS_ASSERT_EQUALS(3, fruit->getIncomingSetSize());
+	TS_ASSERT_EQUALS(0, apple->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, bananna->getIncomingSetSize());
+	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(bananna, link->getOutgoingAtom(1));
+
+	// Change the state back to apple, again
+	link = LinkCast(
+		L(STATE_LINK,
+			N(ANCHOR_NODE, "fruit"),
+			N(CONCEPT_NODE, "apple")));
+
+	// The incoming set should two vars, one apple.
+	TS_ASSERT_EQUALS(3, fruit->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, apple->getIncomingSetSize());
+	TS_ASSERT_EQUALS(0, bananna->getIncomingSetSize());
+	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(apple, link->getOutgoingAtom(1));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}

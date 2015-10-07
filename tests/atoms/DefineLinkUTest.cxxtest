@@ -49,26 +49,37 @@ public:
 	// void test_define_function();
 };
 
+#define N _as.add_node
+#define L _as.add_link
+
 // Test DefineLink over a ConceptNode
 void DefineLinkUTest::test_define_concept()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	// Create DefineLink over a concept node
-	Handle A = _as.add_node(CONCEPT_NODE, "A"),
-		B = _as.add_node(CONCEPT_NODE, "B"),
-		aliasA = _as.add_node(CONCEPT_NODE, "alias-of-A"),
-		def_concept = _as.add_link(DEFINE_LINK, aliasA, A);
+	Handle A = N(CONCEPT_NODE, "A");
+	Handle B = N(CONCEPT_NODE, "B");
+	Handle VA = N(VARIABLE_NODE, "$va");
+	Handle VB = N(VARIABLE_NODE, "$vb");
+	Handle aliasA = N(CONCEPT_NODE, "alias-of-A");
+	Handle def_concept = L(DEFINE_LINK, aliasA, A);
 
 	// Test that aliasA returns A as definition
 	Handle body = DefineLink::get_definition(aliasA);
 	TS_ASSERT_EQUALS(A, body);
 
 	// Reinserting the same definition doesn't raise an error
-	TS_ASSERT_THROWS_NOTHING(_as.add_link(DEFINE_LINK, aliasA, A));
+	TS_ASSERT_THROWS_NOTHING(L(DEFINE_LINK, aliasA, A));
 
 	// But inserting another one with the same alias does raise an error
-	TS_ASSERT_THROWS_ANYTHING(_as.add_link(DEFINE_LINK, aliasA, B));
+	TS_ASSERT_THROWS_ANYTHING(L(DEFINE_LINK, aliasA, B));
+
+	TS_ASSERT_THROWS_ANYTHING(L(DEFINE_LINK, aliasA, VA));
+	TS_ASSERT_THROWS_ANYTHING(L(DEFINE_LINK, aliasA, VB));
+
+	body = DefineLink::get_definition(aliasA);
+	TS_ASSERT_EQUALS(A, body);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

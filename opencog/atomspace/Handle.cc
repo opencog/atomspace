@@ -69,7 +69,7 @@ bool Handle::atoms_less(const AtomPtr& a, const AtomPtr& b)
     // If both UUID's are invalid, we still need to compare
     // the atoms somehow. The need to compare in some "reasonable"
     // way, so that std::set<Handle> works correctly when it uses
-    // the sttd::less<Handle> operator, which calls this function.
+    // the std::less<Handle> operator, which calls this function.
     // Performing an address-space comparison is all I can think
     // of...
     // if (*a == *b) return false; lets not do this cpu-time-waster...
