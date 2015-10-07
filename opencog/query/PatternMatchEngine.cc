@@ -757,6 +757,8 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// If the pattern is a DefinedSchemaNode, we need to substitute
 	// its definition. XXX TODO.
+	if (DEFINED_SCHEMA_NODE == tp)
+		throw RuntimeException(TRACE_INFO, "Not implemented!!");
 
 	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
