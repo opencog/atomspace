@@ -64,7 +64,7 @@ StateLink::StateLink(Link &l)
  */
 Handle StateLink::get_state(const Handle& alias)
 {
-	Handle uniq(get_unique(alias, STATE_LINK));
+	Handle uniq(get_unique(alias, STATE_LINK, true));
 	LinkPtr luniq(LinkCast(uniq));
 	return luniq->getOutgoingAtom(1);
 }
@@ -75,7 +75,7 @@ Handle StateLink::get_state(const Handle& alias)
  */
 Handle StateLink::get_link(const Handle& alias)
 {
-	return get_unique(alias, STATE_LINK);
+	return get_unique(alias, STATE_LINK, true);
 }
 
 /**

@@ -47,8 +47,8 @@ namespace opencog
 class UniqueLink : public FreeLink
 {
 protected:
-	void init();
-	static Handle get_unique(const Handle&, Type);
+	void init(bool);
+	static Handle get_unique(const Handle&, Type, bool);
 	UniqueLink(Type, const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());

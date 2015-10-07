@@ -27,14 +27,17 @@
 
 using namespace opencog;
 
-void UniqueLink::init()
+void UniqueLink::init(bool allow_open)
 {
-	FreeLink::init();
+	if (allow_open)
+	{
+		FreeLink::init();
 
-	// The name must not be used in another definition,
-	// but only if it has no free variables in the definition.
-	// That is, "closed sentences" must be unique.
-	if (0 < _varseq.size()) return;
+		// The name must not be used in another definition,
+		// but only if it has no free variables in the definition.
+		// That is, "closed sentences" must be unique.
+		if (0 < _varseq.size()) return;
+	}
 
 	const Handle& alias = _outgoing[0];
 	IncomingSet defs = alias->getIncomingSetByType(_type);
@@ -69,21 +72,21 @@ UniqueLink::UniqueLink(Type type, const HandleSeq& oset,
 
 	// Derived types have thier own initialization
 	if (UNIQUE_LINK != type) return;
-	init();
+	init(true);
 }
 
 UniqueLink::UniqueLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: FreeLink(UNIQUE_LINK, oset, tv, av)
 {
-	init();
+	init(true);
 }
 
 UniqueLink::UniqueLink(const Handle& name, const Handle& defn,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: FreeLink(UNIQUE_LINK, HandleSeq({name, defn}), tv, av)
 {
-	init();
+	init(true);
 }
 
 UniqueLink::UniqueLink(Link &l)
@@ -100,10 +103,12 @@ UniqueLink::UniqueLink(Link &l)
 
 	// Derived types have thier own initialization
 	if (UNIQUE_LINK != type) return;
-	init();
+	init(true);
 }
 
-Handle UniqueLink::get_unique(const Handle& alias, Type type)
+/// Get the unique link for this alias.
+Handle UniqueLink::get_unique(const Handle& alias, Type type,
+                              bool allow_open)
 {
 	// Get all UniqueLinks associated with the alias. Be aware that
 	// the incoming set will also include those UniqueLinks which
@@ -116,8 +121,11 @@ Handle UniqueLink::get_unique(const Handle& alias, Type type)
 	{
 		if (defl->getOutgoingAtom(0) == alias)
 		{
-			UniqueLinkPtr ulp(UniqueLinkCast(defl));
-		   if (0 < ulp->get_vars().size()) continue;
+			if (allow_open)
+			{
+				UniqueLinkPtr ulp(UniqueLinkCast(defl));
+				if (0 < ulp->get_vars().size()) continue;
+			}
 			return defl->getHandle();
 		}
 	}

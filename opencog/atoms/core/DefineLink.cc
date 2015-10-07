@@ -35,7 +35,7 @@ void DefineLink::init()
 			"Expecting name and definition, got size %d", _outgoing.size());
 
 	// Perform some additional checks in the UniqueLink init method
-	UniqueLink::init();
+	UniqueLink::init(false);
 }
 
 DefineLink::DefineLink(const HandleSeq& oset,
@@ -65,7 +65,7 @@ DefineLink::DefineLink(Link &l)
  */
 Handle DefineLink::get_definition(const Handle& alias)
 {
-	Handle uniq(get_unique(alias, DEFINE_LINK));
+	Handle uniq(get_unique(alias, DEFINE_LINK, false));
 	LinkPtr luniq(LinkCast(uniq));
 	return luniq->getOutgoingAtom(1);
 }
