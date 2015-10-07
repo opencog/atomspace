@@ -97,7 +97,7 @@ void StateLinkUTest::test_setting()
 	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
 	TS_ASSERT_EQUALS(apple, link->getOutgoingAtom(1));
 
-	// Change the state to back to bananna, again
+	// Change the state back to bananna, again
 	link = LinkCast(
 		L(STATE_LINK,
 			N(ANCHOR_NODE, "fruit"),
@@ -124,6 +124,45 @@ void StateLinkUTest::test_setting()
 	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
 	TS_ASSERT_EQUALS(apple, link->getOutgoingAtom(1));
 
+	// --------------------------------------
+	// ... But variable nodes are OK...
+	Handle vara = N(VARIABLE_NODE, "$vara");
+	Handle varb = N(VARIABLE_NODE, "$varb");
+	L(STATE_LINK, N(ANCHOR_NODE, "fruit"), vara);
+	L(STATE_LINK, N(ANCHOR_NODE, "fruit"), varb);
+
+	// The incoming set should have 2 vars and one apple.
+	TS_ASSERT_EQUALS(3, fruit->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, apple->getIncomingSetSize());
+	TS_ASSERT_EQUALS(0, bananna->getIncomingSetSize());
+	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(apple, link->getOutgoingAtom(1));
+
+	// Change the state to bananna, again
+	link = LinkCast(
+		L(STATE_LINK,
+			N(ANCHOR_NODE, "fruit"),
+			N(CONCEPT_NODE, "bananna")));
+
+	// The incoming set should have vars and bananna.
+	TS_ASSERT_EQUALS(3, fruit->getIncomingSetSize());
+	TS_ASSERT_EQUALS(0, apple->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, bananna->getIncomingSetSize());
+	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(bananna, link->getOutgoingAtom(1));
+
+	// Change the state back to apple, again
+	link = LinkCast(
+		L(STATE_LINK,
+			N(ANCHOR_NODE, "fruit"),
+			N(CONCEPT_NODE, "apple")));
+
+	// The incoming set should two vars, one apple.
+	TS_ASSERT_EQUALS(3, fruit->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, apple->getIncomingSetSize());
+	TS_ASSERT_EQUALS(0, bananna->getIncomingSetSize());
+	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(apple, link->getOutgoingAtom(1));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
