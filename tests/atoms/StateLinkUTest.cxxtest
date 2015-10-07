@@ -23,6 +23,7 @@
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/StateLink.h>
+#include <opencog/atoms/execution/Instantiator.h>
 
 using namespace opencog;
 
@@ -44,6 +45,7 @@ public:
 	void tearDown() {}
 
 	void test_setting();
+	void test_getting();
 };
 
 #define N _as.add_node
@@ -163,6 +165,35 @@ void StateLinkUTest::test_setting()
 	TS_ASSERT_EQUALS(0, bananna->getIncomingSetSize());
 	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
 	TS_ASSERT_EQUALS(apple, link->getOutgoingAtom(1));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test to make sure GetLink works.
+void StateLinkUTest::test_getting()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Set the state to apple.
+	Handle fruit, apple, bananna;
+	L(STATE_LINK,
+		fruit = N(ANCHOR_NODE, "fruit"),
+		apple = N(CONCEPT_NODE, "apple"));
+
+	bananna = N(CONCEPT_NODE, "bananna");
+
+	Handle get =
+		L(GET_LINK,
+			L(STATE_LINK, N(ANCHOR_NODE, "fruit"), N(VARIABLE_NODE, "$x")));
+
+	Instantiator inst(&_as);
+	Handle gotten = inst.execute(get);
+	printf("Got %s\n", gotten->toString().c_str());
+
+	Handle apple_set = L(SET_LINK, N(CONCEPT_NODE, "apple"));
+
+	// The incoming set should be simple.
+	TS_ASSERT_EQUALS(gotten, apple_set);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
