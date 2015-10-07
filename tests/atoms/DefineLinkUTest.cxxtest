@@ -75,8 +75,8 @@ void DefineLinkUTest::test_define_concept()
 	// But inserting another one with the same alias does raise an error
 	TS_ASSERT_THROWS_ANYTHING(L(DEFINE_LINK, aliasA, B));
 
-	TS_ASSERT_THROWS_NOTHING(L(DEFINE_LINK, aliasA, VA));
-	TS_ASSERT_THROWS_NOTHING(L(DEFINE_LINK, aliasA, VB));
+	TS_ASSERT_THROWS_ANYTHING(L(DEFINE_LINK, aliasA, VA));
+	TS_ASSERT_THROWS_ANYTHING(L(DEFINE_LINK, aliasA, VB));
 
 	body = DefineLink::get_definition(aliasA);
 	TS_ASSERT_EQUALS(A, body);
