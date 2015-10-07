@@ -11,7 +11,7 @@
 (InheritanceLink (stv 1.0 1.0)
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ExecutionOutputLink (stv 1.0 1.0)
+	(ExecutionLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -25,7 +25,7 @@
 (MemberLink (stv 1.0 1.0)
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ExecutionOutputLink (stv 1.0 1.0)
+	(ExecutionLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -52,7 +52,7 @@
 (MemberLink (stv 1.0 1.0)
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ExecutionOutputLink (stv 1.0 1.0)
+	(ExecutionLink (stv 1.0 1.0)
 		(PrepositionalRelationshipNode "Big Red Button")
 		(ListLink
 			(LemmaNode "thing1")
@@ -80,7 +80,7 @@
 (MemberLink (stv 1.0 1.0)
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(ConceptNode "big idea")
-	(ExecutionOutputLink (stv 1.0 1.0)
+	(ExecutionLink (stv 1.0 1.0)
 		(FeatureNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -98,7 +98,7 @@
 (MemberLink (stv 1.0 1.0)
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ExecutionOutputLink (stv 1.0 1.0)
+	(ExecutionLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -112,7 +112,7 @@
 (MemberLink (stv 1.0 1.0)
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ExecutionOutputLink (stv 1.0 1.0)
+	(ExecutionLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing2")
@@ -125,7 +125,7 @@
 (FeatureLink (stv 1.0 1.0)
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ExecutionOutputLink (stv 1.0 1.0)
+	(ExecutionLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -139,7 +139,7 @@
 (MemberLink (stv 1.0 1.0)
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ExecutionOutputLink (stv 1.0 1.0)
+	(ExecutionLink (stv 1.0 1.0)
 		(WordNode "bird is the word")
 		(ListLink
 			(LemmaNode "thing1")
@@ -153,7 +153,7 @@
 (MemberLink (stv 1.0 1.0)
 	(SemeNode "ActivationModulatorUpdater")
 	(ConceptNode "big idea")
-	(ExecutionOutputLink (stv 1.0 1.0)
+	(ExecutionLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -188,7 +188,7 @@
 		(MemberLink (stv 1.0 1.0)
 			(VariableNode "$var_schema")
 			(VariableNode "$var_number")
-			(ExecutionOutputLink (stv 1.0 1.0)
+			(ExecutionLink (stv 1.0 1.0)
 				(VariableNode "$var_schema")
 				(ListLink
 					(LemmaNode "thing1")
@@ -209,7 +209,7 @@
 (SubsetLink (stv 1.0 1.0)
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ExecutionOutputLink (stv 1.0 1.0)
+	(ExecutionLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -223,7 +223,7 @@
 (MemberLink (stv 1.0 1.0)
 	(WordNode "bird is the word")
 	(NumberNode "0.24")
-	(ExecutionOutputLink (stv 1.0 1.0)
+	(ExecutionLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -251,7 +251,7 @@
 (MemberLink (stv 1.0 1.0)
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ExecutionOutputLink (stv 1.0 1.0)
+	(ExecutionLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing ohh noo")
@@ -265,7 +265,7 @@
 (MemberLink (stv 1.0 1.0)
 	(PrepositionalRelationshipNode "Big Red Button")
 	(NumberNode "0.24")
-	(ExecutionOutputLink (stv 1.0 1.0)
+	(ExecutionLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
