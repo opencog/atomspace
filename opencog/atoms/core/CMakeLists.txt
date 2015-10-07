@@ -8,8 +8,8 @@ ADD_LIBRARY (atomcore SHARED
 	DeleteLink.cc
 	FreeLink.cc
 	FunctionLink.cc
-	LambdaLink.cc
 	PutLink.cc
+	ScopeLink.cc
 	StateLink.cc
 	UniqueLink.cc
 	VariableList.cc
@@ -32,8 +32,8 @@ INSTALL (FILES
 	DeleteLink.h
 	FreeLink.h
 	FunctionLink.h
-	LambdaLink.h
 	PutLink.h
+	ScopeLink.h
 	StateLink.h
 	UniqueLink.h
 	VariableList.h

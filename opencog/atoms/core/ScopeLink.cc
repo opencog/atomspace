@@ -1,5 +1,5 @@
 /*
- * LambdaLink.cc
+ * ScopeLink.cc
  *
  * Copyright (C) 2009, 2014, 2015 Linas Vepstas
  *
@@ -27,11 +27,11 @@
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/FreeLink.h>
 
-#include "LambdaLink.h"
+#include "ScopeLink.h"
 
 using namespace opencog;
 
-void LambdaLink::init(void)
+void ScopeLink::init(void)
 {
 	size_t sz = _outgoing.size();
 	if (2 < sz)
@@ -41,52 +41,52 @@ void LambdaLink::init(void)
 	extract_variables(_outgoing);
 }
 
-LambdaLink::LambdaLink(const HandleSeq& oset,
+ScopeLink::ScopeLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: Link(LAMBDA_LINK, oset, tv, av)
+	: Link(SCOPE_LINK, oset, tv, av)
 {
 	init();
 }
 
-LambdaLink::LambdaLink(const Handle& vars, const Handle& body,
+ScopeLink::ScopeLink(const Handle& vars, const Handle& body,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: Link(LAMBDA_LINK, HandleSeq({vars, body}), tv, av)
+	: Link(SCOPE_LINK, HandleSeq({vars, body}), tv, av)
 {
 	init();
 }
 
-LambdaLink::LambdaLink(Type t, const Handle& body,
+ScopeLink::ScopeLink(Type t, const Handle& body,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: Link(t, HandleSeq({body}), tv, av)
 {
 	// Derived classes have a different initialization sequence
-	if (LAMBDA_LINK != t) return;
+	if (SCOPE_LINK != t) return;
 	init();
 }
 
-LambdaLink::LambdaLink(Type t, const HandleSeq& oset,
+ScopeLink::ScopeLink(Type t, const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: Link(t, oset, tv, av)
 {
 	// Derived classes have a different initialization sequence
-	if (LAMBDA_LINK != t) return;
+	if (SCOPE_LINK != t) return;
 	init();
 }
 
-LambdaLink::LambdaLink(Link &l)
+ScopeLink::ScopeLink(Link &l)
 	: Link(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
-	if (not classserver().isA(tscope, LAMBDA_LINK))
+	if (not classserver().isA(tscope, SCOPE_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting a LambdaLink, got %s", tname.c_str());
+			"Expecting a ScopeLink, got %s", tname.c_str());
 	}
 
 	// Dervided types have a different initialization sequence
-	if (LAMBDA_LINK != tscope) return;
+	if (SCOPE_LINK != tscope) return;
 	init();
 }
 
@@ -95,7 +95,7 @@ LambdaLink::LambdaLink(Link &l)
 /// Find and unpack variable declarations, if any; otherwise, just
 /// find all free variables.
 ///
-void LambdaLink::extract_variables(const HandleSeq& oset)
+void ScopeLink::extract_variables(const HandleSeq& oset)
 {
 	Type decls = oset.at(0)->getType();
 
@@ -128,7 +128,7 @@ void LambdaLink::extract_variables(const HandleSeq& oset)
 /// Initialize _varlist given a handle of either VariableList or a
 /// variable.
 ///
-void LambdaLink::init_scoped_variables(const Handle& hvar)
+void ScopeLink::init_scoped_variables(const Handle& hvar)
 {
 	// Either it is a VariableList, or its a naked variable, or its a
 	// typed variable.  Use the VariableList class as a tool to

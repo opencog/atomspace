@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/LambdaLink.h
+ * opencog/atoms/core/ScopeLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_LAMBDA_LINK_H
-#define _OPENCOG_LAMBDA_LINK_H
+#ifndef _OPENCOG_SCOPE_LINK_H
+#define _OPENCOG_SCOPE_LINK_H
 
 #include <map>
 
@@ -33,7 +33,7 @@ namespace opencog
  *  @{
  */
 
-/// The LambdaLink consitsts of two parts: An optional variable
+/// The ScopeLink consitsts of two parts: An optional variable
 /// declaration, followed by an expression body (of arbitrary form).
 /// If a variable declaration is present, then it must conform to current
 /// variable declaration standards: i.e. it must be either a single
@@ -47,7 +47,7 @@ namespace opencog
 /// the point of unpacked variables is to act as a memo or cache,
 /// speeding up later calculations.
 ///
-class LambdaLink : public Link
+class ScopeLink : public Link
 {
 protected:
 
@@ -57,11 +57,11 @@ protected:
 	/// Handle of the body of the expression.
 	Handle _body;
 
-	LambdaLink(Type, const Handle&,
+	ScopeLink(Type, const Handle&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	LambdaLink(Type, const HandleSeq&,
+	ScopeLink(Type, const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
@@ -75,15 +75,15 @@ protected:
 		printf("%s\n", h->toShortString().c_str());
 	}
 public:
-	LambdaLink(const HandleSeq&,
+	ScopeLink(const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	LambdaLink(const Handle& varcdecls, const Handle& body,
+	ScopeLink(const Handle& varcdecls, const Handle& body,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	LambdaLink(Link &l);
+	ScopeLink(Link &l);
 
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _varlist; }
@@ -100,16 +100,16 @@ public:
 */
 };
 
-typedef std::shared_ptr<LambdaLink> LambdaLinkPtr;
-static inline LambdaLinkPtr LambdaLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<LambdaLink>(a); }
-static inline LambdaLinkPtr LambdaLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<LambdaLink>(a); }
+typedef std::shared_ptr<ScopeLink> ScopeLinkPtr;
+static inline ScopeLinkPtr ScopeLinkCast(const Handle& h)
+	{ AtomPtr a(h); return std::dynamic_pointer_cast<ScopeLink>(a); }
+static inline ScopeLinkPtr ScopeLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<ScopeLink>(a); }
 
 // XXX temporary hack ...
-#define createLambdaLink std::make_shared<LambdaLink>
+#define createScopeLink std::make_shared<ScopeLink>
 
 /** @}*/
 }
 
-#endif // _OPENCOG_LAMBDA_LINK_H
+#endif // _OPENCOG_SCOPE_LINK_H
