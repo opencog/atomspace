@@ -86,11 +86,17 @@ Handle StateLink::get_other(void) const
 	const Handle& alias = _outgoing[0];
 	IncomingSet defs = alias->getIncomingSetByType(STATE_LINK);
 
-	// Return any non-unique definition that isn't this one.
+	// Return any non-unique definition that isn't this one,
+	// and doesn't have variables in it.  Multiple "open terms"
+	// are OK, and naturally occur in patterns.
 	for (const LinkPtr& defl : defs)
 	{
 		if (defl->getOutgoingAtom(0) == alias and defl.get() != this)
+		{
+			FreeLinkPtr flp(FreeLinkCast(defl));
+			if (0 < flp->get_vars().size()) continue;
 			return defl->getHandle();
+		}
 	}
 	return Handle();
 }

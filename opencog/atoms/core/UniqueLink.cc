@@ -29,7 +29,11 @@ using namespace opencog;
 
 void UniqueLink::init()
 {
-	// The name must not be used in another definition
+	// The name must not be used in another definition,
+	// but only if it has no free variables in the definition.
+	// That is, "closed sentences" must be unique.
+	if (0 < _varseq.size()) return;
+
 	const Handle& alias = _outgoing[0];
 	IncomingSet defs = alias->getIncomingSetByType(_type);
 	for (const LinkPtr& def : defs)
@@ -99,19 +103,24 @@ UniqueLink::UniqueLink(Link &l)
 
 Handle UniqueLink::get_unique(const Handle& alias, Type type)
 {
-	// Get all UniqueLinks associated with that alias. Be aware that
+	// Get all UniqueLinks associated with the alias. Be aware that
 	// the incoming set will also include those UniqueLinks which
 	// have the alias in a position other than the first.
 	IncomingSet defs = alias->getIncomingSetByType(type);
 
-	// Return the first (supposedly unique) definition
+	// Return the first (supposedly unique) definition that has no
+	// variables in it.
 	for (const LinkPtr& defl : defs)
 	{
 		if (defl->getOutgoingAtom(0) == alias)
+		{
+			UniqueLinkPtr ulp(UniqueLinkCast(defl));
+		   if (0 < ulp->get_vars().size()) continue;
 			return defl->getHandle();
+		}
 	}
 
-	// There is no definition for the alias
+	// There is no definition for the alias.
 	throw InvalidParamException(TRACE_INFO,
 	                            "Cannot find defined hypergraph for atom %s",
 	                            alias->toString().c_str());
