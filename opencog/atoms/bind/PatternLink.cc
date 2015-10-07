@@ -591,10 +591,14 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 		for (const Handle& sh : fgtl.holders)
 			_pat.evaluatable_holders.insert(sh);
 
-		// Subclasses of ExecutionOutputLink, e.g. PlusLink,
-		// TimesLink are executable. They get treated by the
-		// same virtual-graph algo as the virtual links.
-		FindAtoms feol(EXECUTION_OUTPUT_LINK, true);
+		// Subclasses of FunctionLink, e.g. ExecutionOutputLink,
+		// but also PlusLink, TimesLink are all executable. They
+		// need to be executed *before* pattern matching, but after
+		// any variables in them have been grounded, so that the
+		// pattern match is performed on the result of the execution.
+		// Thus, these are treated by the same virtual-graph algo as
+		// the virtual links.
+		FindAtoms feol(FUNCTION_LINK, true);
 		feol.search_set(clause);
 
 		for (const Handle& sh : feol.varset)

@@ -24,6 +24,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atoms/NumberNode.h>
+#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
@@ -112,7 +113,12 @@ static TruthValuePtr equal(AtomSpace* as, LinkPtr ll)
 	if (2 != oset.size())
 		throw RuntimeException(TRACE_INFO,
 		     "EqualLink expects two arguments");
-	if (oset[0] == oset[1])
+
+	Instantiator inst(as);
+	Handle h0(inst.execute(oset[0]));
+	Handle h1(inst.execute(oset[1]));
+
+	if (h0 == h1)
 		return TruthValue::TRUE_TV();
 	else
 		return TruthValue::FALSE_TV();
