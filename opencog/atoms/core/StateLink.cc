@@ -33,6 +33,8 @@ void StateLink::init()
 	if (2 != _outgoing.size())
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting name and state, got size %d", _outgoing.size());
+
+	FreeLink::init();
 }
 
 StateLink::StateLink(const HandleSeq& oset,
@@ -62,7 +64,7 @@ StateLink::StateLink(Link &l)
  */
 Handle StateLink::get_state(const Handle& alias)
 {
-	Handle uniq(get_unique(alias, STATE_LINK));
+	Handle uniq(get_unique(alias, STATE_LINK, true));
 	LinkPtr luniq(LinkCast(uniq));
 	return luniq->getOutgoingAtom(1);
 }
@@ -73,7 +75,7 @@ Handle StateLink::get_state(const Handle& alias)
  */
 Handle StateLink::get_link(const Handle& alias)
 {
-	return get_unique(alias, STATE_LINK);
+	return get_unique(alias, STATE_LINK, true);
 }
 
 /**
@@ -82,15 +84,24 @@ Handle StateLink::get_link(const Handle& alias)
  */
 Handle StateLink::get_other(void) const
 {
+	// No-op if this has variables!
+	if (0 < this->get_vars().size()) return Handle();
+
 	// Get all StateLinks associated with the alias. Ignore this one.
 	const Handle& alias = _outgoing[0];
 	IncomingSet defs = alias->getIncomingSetByType(STATE_LINK);
 
-	// Return any non-unique definition that isn't this one.
+	// Return any non-unique definition that isn't this one,
+	// and doesn't have variables in it.  Multiple "open terms"
+	// are OK, and naturally occur in patterns.
 	for (const LinkPtr& defl : defs)
 	{
 		if (defl->getOutgoingAtom(0) == alias and defl.get() != this)
+		{
+			FreeLinkPtr flp(FreeLinkCast(defl));
+			if (0 < flp->get_vars().size()) continue;
 			return defl->getHandle();
+		}
 	}
 	return Handle();
 }

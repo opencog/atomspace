@@ -25,7 +25,7 @@
 
 #include <map>
 
-#include <opencog/atomspace/Link.h>
+#include <opencog/atoms/core/FreeLink.h>
 
 namespace opencog
 {
@@ -44,11 +44,11 @@ namespace opencog
 /// is used to name things, and StateLink, which is used to maintain
 /// current state.
 ///
-class UniqueLink : public Link
+class UniqueLink : public FreeLink
 {
 protected:
-	void init();
-	static Handle get_unique(const Handle&, Type);
+	void init(bool);
+	static Handle get_unique(const Handle&, Type, bool);
 	UniqueLink(Type, const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
