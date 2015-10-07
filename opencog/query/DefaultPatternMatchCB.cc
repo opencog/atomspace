@@ -23,6 +23,7 @@
 
 #include <opencog/util/Logger.h>
 
+#include <opencog/atoms/core/StateLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atomutils/FindUtils.h>
@@ -143,6 +144,18 @@ bool DefaultPatternMatchCB::link_match(const LinkPtr& lpat,
 bool DefaultPatternMatchCB::post_link_match(const LinkPtr& lpat,
                                             const LinkPtr& lgnd)
 {
+	// A temp hack until we get around to implementing executable
+	// terms in the search pattern. Viz, an executable term is anything
+	// that should be executed before the match is made... in this case,
+	// StateLinks can have only one closed-term value ...
+	if (STATE_LINK == lpat->getType())
+	{
+		if (StateLink::get_state(lpat->getOutgoingAtom(0)) !=
+		    lgnd->getOutgoingAtom(1))
+			return false;
+		return true;
+	}
+
 	if (not _have_evaluatables) return true;
 	Handle hp(lpat);
 	if (_dynamic->find(hp) == _dynamic->end()) return true;
