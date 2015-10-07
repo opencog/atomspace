@@ -86,4 +86,8 @@
      rbs)
 )
 
-(define (export-rule-engine-utils) (export ure-add-rules ure-set-num-parameter ure-set-fuzzy-bool-parameter export-rule-engine-utils))
+(define (export-rule-engine-utils)
+  (export ure-add-rules
+          ure-set-num-parameter
+          ure-set-fuzzy-bool-parameter
+          export-rule-engine-utils))
