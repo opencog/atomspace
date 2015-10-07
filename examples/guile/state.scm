@@ -42,3 +42,11 @@
 (cog-evaluate! (EqualLink (SetLink (ConceptNode "bananna"))
 	(GetLink (StateLink (AnchorNode "fruit") (VariableNode "$x")))))
 
+; Change the state, using PutLink:
+(cog-execute! (PutLink
+	(StateLink (AnchorNode "fruit") (VariableNode "$x"))
+	(ConceptNode "strawberry")))
+
+; And, again verify that the stae has changed, as expected:
+(cog-execute! (GetLink
+	(StateLink (AnchorNode "fruit") (VariableNode "$x"))))
