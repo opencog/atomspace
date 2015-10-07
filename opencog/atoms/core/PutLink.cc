@@ -23,7 +23,8 @@
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
 #include "DefineLink.h"
-#include "FunctionLink.h"
+#include "FreeLink.h"
+#include "LambdaLink.h"
 #include "PutLink.h"
 
 using namespace opencog;
@@ -31,7 +32,7 @@ using namespace opencog;
 PutLink::PutLink(const HandleSeq& oset,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : FunctionLink(PUT_LINK, oset, tv, av)
+    : Link(PUT_LINK, oset, tv, av)
 {
 	init();
 }
@@ -39,43 +40,13 @@ PutLink::PutLink(const HandleSeq& oset,
 PutLink::PutLink(const Handle& a,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : FunctionLink(PUT_LINK, a, tv, av)
+    : Link(PUT_LINK, a, tv, av)
 {
-	init();
-}
-
-PutLink::PutLink(Type t, const HandleSeq& oset,
-                 TruthValuePtr tv,
-                 AttentionValuePtr av)
-    : FunctionLink(t, oset, tv, av)
-{
-	if (not classserver().isA(t, PUT_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
-	init();
-}
-
-PutLink::PutLink(Type t, const Handle& a,
-                 TruthValuePtr tv,
-                 AttentionValuePtr av)
-    : FunctionLink(t, a, tv, av)
-{
-	if (not classserver().isA(t, PUT_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
-	init();
-}
-
-PutLink::PutLink(Type t, const Handle& a, const Handle& b,
-                 TruthValuePtr tv,
-                 AttentionValuePtr av)
-    : FunctionLink(t, {a, b}, tv, av)
-{
-	if (not classserver().isA(t, PUT_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
 	init();
 }
 
 PutLink::PutLink(Link& l)
-    : FunctionLink(l)
+    : Link(l)
 {
 	Type tscope = l.getType();
 	if (not classserver().isA(tscope, PUT_LINK))
@@ -120,37 +91,44 @@ PutLink::PutLink(Link& l)
 ///
 void PutLink::init(void)
 {
-	extract_variables(_outgoing);
-
-	// If threre are initial variable declarations, they will be
-	// in position 0, the body will be at 1, and the values at 2.
-	// Otherwise, the body is at 0, and the values at 1.
 	size_t sz = _outgoing.size();
-	if (_outgoing[0] == _body)
+	if (2 != sz)
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an outgoing set size of two, got %d", sz);
+
+	// There are two situations that can occur here:
+	// The first atom is LambdaLink. In this case, just use it.
+	// The first atom is just a some free-form expression. In that
+	// grab all the free variables in that, and just use them.
+	Handle putty(_outgoing[0]);
+	if (classserver().isA(putty->getType(), LAMBDA_LINK))
 	{
-		if (2 != sz)
-			throw InvalidParamException(TRACE_INFO,
-				"Expecting an outgoing set size of two, got %d", sz);
-		_values = _outgoing[1];
+		LambdaLinkPtr lam(LambdaLinkCast(putty));
+		if (nullptr == lam)
+			lam = createLambdaLink(*LinkCast(putty));
+
+		_varlist = lam->get_variables();
+		_body = lam->get_body();
 	}
 	else
 	{
-		if (3 != sz)
-			throw InvalidParamException(TRACE_INFO,
-				"Expecting an outgoing set size of three, got %d", sz);
-		_values = _outgoing[2];
+		FreeLink fl(putty);
+		VariableList vl(fl.get_vars());
+		_varlist = vl.get_variables();
+		_body = putty;
 	}
-	typecheck_values();
+
+	_values = _outgoing[1];
+	static_typecheck_values();
 }
 
 
 /// Check that the values in the PutLink obey the type constraints.
-// XXX FIXME .. this is wrong, if, for example, the values are dynamic
-// i.e. produce run-time values. In that case, the type checking can
-// only be performed at run-time!
-void PutLink::typecheck_values(void)
+/// This only performs "static" typechecking, at construction-time;
+/// the values may be dynamically obtained at run-time, we cannot check
+/// these here.
+void PutLink::static_typecheck_values(void)
 {
-
 	// Cannot typecheck at this pont in time, because the schema
 	// might not be defined yet...
 	Type btype = _body->getType();
@@ -259,18 +237,18 @@ Handle PutLink::do_reduce(void) const
 	// Resolve the body, if needed:
 	if (DEFINED_SCHEMA_NODE == _body->getType())
 	{
-		Handle fun(DefineLink::get_definition(_body));
+		Handle dfn(DefineLink::get_definition(_body));
 		// XXX TODO we should perform a type-check on the function.
-		if (FUNCTION_LINK != fun->getType())
+		if (classserver().isA(dfn->getType(), LAMBDA_LINK))
 			throw InvalidParamException(TRACE_INFO,
-					"Expecting a FunctionLink, got %s",
-			      fun->toString().c_str());
+					"Expecting a LambdaLink, got %s",
+			      dfn->toString().c_str());
 
-		FunctionLinkPtr flp(FunctionLinkCast(fun));
-		if (NULL == flp)
-			flp = createFunctionLink(*LinkCast(fun));
-		bods = flp->get_body();
-		vars = flp->get_variables();
+		LambdaLinkPtr lam(LambdaLinkCast(dfn));
+		if (NULL == lam)
+			lam = createLambdaLink(*LinkCast(dfn));
+		bods = lam->get_body();
+		vars = lam->get_variables();
 	}
 
 	Type vtype = _values->getType();
