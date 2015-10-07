@@ -23,7 +23,7 @@
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
 #include "FreeLink.h"
-#include "LambdaLink.h"
+#include "ScopeLink.h"
 #include "VariableList.h"
 
 using namespace opencog;
@@ -139,20 +139,20 @@ void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 		if (UNQUOTE_LINK == t)
 			_in_quote = false;
 
-		bool islam = classserver().isA(t, LAMBDA_LINK);
+		bool islam = classserver().isA(t, SCOPE_LINK);
 		std::set<Handle> bsave = _bound_vars;
 		if (islam)
 		{
 			// Save the current set of bound variables...
 			bsave = _bound_vars;
 
-			// If we can cast to Lambda, then do so; otherwise,
-			// take the low road, and let Lambda constructor
+			// If we can cast to ScopeLink, then do so; otherwise,
+			// take the low road, and let ScopeLinka constructor
 			// do the bound-variable extraction.
-			LambdaLinkPtr lam(LambdaLinkCast(lll));
-			if (NULL == lam)
-				lam = createLambdaLink(lll->getOutgoingSet());
-			const Variables& vees = lam->get_variables();
+			ScopeLinkPtr sco(ScopeLinkCast(lll));
+			if (NULL == sco)
+				sco = createScopeLink(lll->getOutgoingSet());
+			const Variables& vees = sco->get_variables();
 			for (Handle v : vees.varseq) _bound_vars.insert(v);
 		}
 
