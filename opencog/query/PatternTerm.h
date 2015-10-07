@@ -4,6 +4,8 @@
  * Copyright (C) 2015 OpenCog Foundation
  * All Rights Reserved
  *
+ * Created by Jacek Świergocki <jswiergo@gmail.com> July 2015
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
@@ -18,8 +20,6 @@
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * Created by Jacek Świergocki <jswiergo@gmail.com> July 2015
  */
 
 #ifndef _OPENCOG_PATTERN_TERM_H
@@ -33,16 +33,38 @@
 namespace opencog {
 
 /**
- * PatternTerm class is used by pattern matcher to navigate through the
- * pattern query. PatternTerm is a node of tree data structure. Pattern
- * matcher searches for solutions by traversing this tree structure.
+ * The PatternTerm class is used to manage the situation where a given
+ * non-constant term (atom) may appear in more than one location in a
+ * pattern. Such multiple inclusions are usually harmless, but can cause
+ * difficulties when they appear inside of UnorderedLinks. In such a
+ * case, additional state needs to be maintained to traverse the
+ * UnorderedLink correctly.  This class holds that additional state.
  *
- * Each pattern term corresponds to one atom in the query. The relation
- * beetween pattern terms and atoms is one-to-many, because atoms may repeat
- * in the query in many positions. The _handle attribute points to the
- * corresponding atom of the query. Roots of the pattern term trees reference
- * to the roots of query clauses. Term tree roots have its _parent attributes
- * UNDEFINED.
+ * Queries are converted to PatternTerm trees during pattern
+ * pre-processing.  For a given query pattern, specified as an atom, an
+ * equivalent PatternTerm tree is constructed.  The PatternTerm tree
+ * differs from the original tree in that any atom that appears two or
+ * more times in the query is "disambiguated", and given a distinct,
+ * unique PatternTerm that corresponds to it.  Thus, each instance of
+ * PatternTerm corresponds to one atom in at one fixed location in the
+ * pattern.  That is, the relation between instances of PatternTerm and
+ * atoms is many-to-one, because a given atom may occur in the pattern
+ * in many several positions.
+ *
+ * For example, given the query
+ *    SetLink
+ *        VariableNode $a
+ *        BlahBlahLink
+ *             VariableNode $a
+ *             VariableNode $b
+ *
+ * The VariableNode $a occurs twice, in two different locations. Each
+ * location will get it's own unique instance of PatternTerm.
+ *
+ * For a given term in the pattern, the _handle attribute points to the
+ * corresponding atom of the query.  Roots of the PatternTerm trees
+ * reference the roots of query clauses. Term tree roots have its _parent
+ * attributes UNDEFINED.
  *
  * Term trees are build in the course of preprocessing stage before
  * pattern matcher starts searching for variable groundigns. Each clause
@@ -71,7 +93,7 @@ class PatternTerm
 		unsigned int _quote_depth;
 
 		// True if the pattern subtree rooted in this tree node does not
-		// contain any bound variable. This means that the term is constant
+		// contain any bound variables. This means that the term is constant
 		// and may be self-grounded.
 		bool _has_any_bound_var;
 
