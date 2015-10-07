@@ -38,11 +38,11 @@ void LoggerSCM::init(void)
 	new FunctionWrap(do_logger_set_filename, "cog-logger-set-filename", "logger");
 	new FunctionWrap(do_logger_get_filename, "cog-logger-get-filename", "logger");
 	new FunctionWrap(do_logger_set_stdout, "cog-logger-set-stdout", "logger");
-	new FunctionWrap(do_logger_error, "cog-logger-error", "logger");
-	new FunctionWrap(do_logger_warn, "cog-logger-warn", "logger");
-	new FunctionWrap(do_logger_info, "cog-logger-info", "logger");
-	new FunctionWrap(do_logger_debug, "cog-logger-debug", "logger");
-	new FunctionWrap(do_logger_fine, "cog-logger-fine", "logger");
+	new FunctionWrap(do_logger_error, "cog-logger-error-str", "logger");
+	new FunctionWrap(do_logger_warn, "cog-logger-warn-str", "logger");
+	new FunctionWrap(do_logger_info, "cog-logger-info-str", "logger");
+	new FunctionWrap(do_logger_debug, "cog-logger-debug-str", "logger");
+	new FunctionWrap(do_logger_fine, "cog-logger-fine-str", "logger");
 }
 
 namespace opencog {

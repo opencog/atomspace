@@ -30,3 +30,10 @@
 ; I'd like to have the stack trace on top of the log message, the
 ; error level provides that
 (cog-logger-error "First error message (comes with the stack trace)")
+
+; The logger supports scheme format (see
+; https://www.gnu.org/software/guile/manual/html_node/Formatted-Output.html
+; for more information), that way you can easily log messages about
+; atoms or any object.
+(define A (ConceptNode "A"))
+(cog-logger-info "My concept ~a" A)
