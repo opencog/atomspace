@@ -33,6 +33,8 @@ void StateLink::init()
 	if (2 != _outgoing.size())
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting name and state, got size %d", _outgoing.size());
+
+	FreeLink::init();
 }
 
 StateLink::StateLink(const HandleSeq& oset,
@@ -82,6 +84,9 @@ Handle StateLink::get_link(const Handle& alias)
  */
 Handle StateLink::get_other(void) const
 {
+	// No-op if this has variables!
+	if (0 < this->get_vars().size()) return Handle();
+
 	// Get all StateLinks associated with the alias. Ignore this one.
 	const Handle& alias = _outgoing[0];
 	IncomingSet defs = alias->getIncomingSetByType(STATE_LINK);

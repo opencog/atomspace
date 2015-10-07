@@ -29,6 +29,8 @@ using namespace opencog;
 
 void UniqueLink::init()
 {
+	FreeLink::init();
+
 	// The name must not be used in another definition,
 	// but only if it has no free variables in the definition.
 	// That is, "closed sentences" must be unique.
