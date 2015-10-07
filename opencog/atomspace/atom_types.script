@@ -156,6 +156,10 @@ STATE_LINK <- UNIQUE_LINK
 // second definition into the atomspace will throw an exception.
 DEFINE_LINK <- UNIQUE_LINK
 
+// PutLinks perform a beta-reduction when executed; i.e. they get
+// beta-reduced when they are executed.
+PUT_LINK <- ORDERED_LINK
+
 // The ScopeLink is used to identify an open term, i.e. a link
 // containing VariableNodes within it, and binding those variables.
 // In the process, it can also force type restrictions on them.
@@ -304,10 +308,6 @@ LAMBDA_LINK <- SCOPE_LINK
 // function they perform is implicit in the link type.
 FUNCTION_LINK <- LAMBDA_LINK
 EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
-
-// PutLinks perform a beta-reduction when executed; i.e. they get
-// beta-reduced when they are executed.
-PUT_LINK <- FUNCTION_LINK
 
 // Basic arithmetic operators
 FOLD_LINK <- FUNCTION_LINK
