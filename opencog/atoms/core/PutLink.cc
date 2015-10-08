@@ -239,7 +239,7 @@ Handle PutLink::do_reduce(void) const
 	{
 		Handle dfn(DefineLink::get_definition(_body));
 		// XXX TODO we should perform a type-check on the function.
-		if (classserver().isA(dfn->getType(), LAMBDA_LINK))
+		if (not classserver().isA(dfn->getType(), LAMBDA_LINK))
 			throw InvalidParamException(TRACE_INFO,
 					"Expecting a LambdaLink, got %s",
 			      dfn->toString().c_str());
