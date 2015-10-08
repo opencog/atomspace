@@ -25,7 +25,7 @@
 
 #include <map>
 
-#include <opencog/atoms/core/VariableList.h>
+#include <opencog/atoms/core/ScopeLink.h>
 
 namespace opencog
 {
@@ -33,29 +33,13 @@ namespace opencog
  *  @{
  */
 
-/// The LambdaLink consitsts of two parts: An optional variable
-/// declaration, followed by an expression body (of arbitrary form).
-/// If a variable declaration is present, then it must conform to current
-/// variable declaration standards: i.e. it must be either a single
-/// VariableNode, a single TypedVariableLink, or a VariableList.  If a
-/// variable declaration is missing, then the body is searched for all
-/// free variables, these are then bound.
+/// The LambdaLink is a ScopeLink that implements beta-reduction.
+/// It does little more than to provide a method that subsitutes values
+/// into the variables bound by ScopeLink.
 ///
-/// This class does little other than to check for the above-described
-/// format, and unpacke the variable decalrations, if present; it will
-/// throw an error if the variables are somehow ill-formed. As usual,
-/// the point of unpacked variables is to act as a memo or cache,
-/// speeding up later calculations.
-///
-class LambdaLink : public Link
+class LambdaLink : public ScopeLink
 {
 protected:
-
-	/// Variables bound in the body.
-	Variables _varlist;
-
-	/// Handle of the body of the expression.
-	Handle _body;
 
 	LambdaLink(Type, const Handle&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
@@ -65,15 +49,6 @@ protected:
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	void init(void);
-	void extract_variables(const HandleSeq& oset);
-	void init_scoped_variables(const Handle& hvar);
-
-	// utility debug print
-	static void prt(const Handle& h)
-	{
-		printf("%s\n", h->toShortString().c_str());
-	}
 public:
 	LambdaLink(const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
@@ -85,15 +60,11 @@ public:
 
 	LambdaLink(Link &l);
 
-	// Return the list of variables we are holding.
-	const Variables& get_variables(void) const { return _varlist; }
-	const Handle& get_body(void) const { return _body; }
-
 	// Take the list of values `vals`, and substitute them in for the
 	// variables in the body of this lambda. The values must satisfy all
 	// type restrictions, else an exception will be thrown.
 /*
-	Handle substitute (const HandleSeq& vals) const
+	Handle substitute(const HandleSeq& vals) const
 	{
 		return VariableList::substitute(_body, vals);
 	}

@@ -26,7 +26,7 @@
 #include <unordered_map>
 
 #include <opencog/query/Pattern.h>
-#include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/query/PatternMatchCallback.h>
 
@@ -73,7 +73,7 @@ namespace opencog
 ///
 /// The (cog-satisfy) and (cog-execute!) scheme calls can ground this
 /// link, and return a truth value.
-class PatternLink : public LambdaLink
+class PatternLink : public ScopeLink
 {
 protected:
 	// The pattern that is specified by this link.

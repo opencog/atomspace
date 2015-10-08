@@ -138,7 +138,7 @@ void PatternLink::init(void)
 /// It assumes that the variables have already been correctly extracted
 /// from the body, as appropriate.
 PatternLink::PatternLink(const Variables& vars, const Handle& body)
-	: LambdaLink(PATTERN_LINK, HandleSeq())
+	: ScopeLink(PATTERN_LINK, HandleSeq())
 {
 	_pat.redex_name = "jit PatternLink";
 
@@ -158,7 +158,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
                          const VariableTypeMap& typemap,
                          const HandleSeq& compo,
                          const std::set<Handle>& opts)
-	: LambdaLink(PATTERN_LINK, HandleSeq())
+	: ScopeLink(PATTERN_LINK, HandleSeq())
 {
 	// First, lets deal with the vars. We have discarded the original
 	// order of the variables, and I think that's OK, because we will
@@ -225,7 +225,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 /// either.  This is used only for backwards-compatibility API's.
 PatternLink::PatternLink(const std::set<Handle>& vars,
                          const HandleSeq& clauses)
-	: LambdaLink(PATTERN_LINK, HandleSeq())
+	: ScopeLink(PATTERN_LINK, HandleSeq())
 {
 	_varlist.varset = vars;
 	_pat.clauses = clauses;
@@ -237,28 +237,28 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 
 PatternLink::PatternLink(const HandleSeq& hseq,
                          TruthValuePtr tv, AttentionValuePtr av)
-	: LambdaLink(PATTERN_LINK, hseq, tv, av)
+	: ScopeLink(PATTERN_LINK, hseq, tv, av)
 {
 	init();
 }
 
 PatternLink::PatternLink(const Handle& body,
                          TruthValuePtr tv, AttentionValuePtr av)
-	: LambdaLink(PATTERN_LINK, HandleSeq({body}), tv, av)
+	: ScopeLink(PATTERN_LINK, HandleSeq({body}), tv, av)
 {
 	init();
 }
 
 PatternLink::PatternLink(const Handle& vars, const Handle& body,
                          TruthValuePtr tv, AttentionValuePtr av)
-	: LambdaLink(PATTERN_LINK, HandleSeq({vars, body}), tv, av)
+	: ScopeLink(PATTERN_LINK, HandleSeq({vars, body}), tv, av)
 {
 	init();
 }
 
 PatternLink::PatternLink(Type t, const HandleSeq& hseq,
                          TruthValuePtr tv, AttentionValuePtr av)
-	: LambdaLink(t, hseq, tv, av)
+	: ScopeLink(t, hseq, tv, av)
 {
 	// BindLink has other init sequences
 	if (BIND_LINK == t) return;
@@ -266,7 +266,7 @@ PatternLink::PatternLink(Type t, const HandleSeq& hseq,
 }
 
 PatternLink::PatternLink(Link &l)
-	: LambdaLink(l)
+	: ScopeLink(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();

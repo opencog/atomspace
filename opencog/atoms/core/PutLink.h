@@ -24,7 +24,7 @@
 #define _OPENCOG_PUT_LINK_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/core/VariableList.h>
 
 namespace opencog
 {
@@ -34,7 +34,7 @@ namespace opencog
 
 /**
  * The PutLink implements a beta redex; it is similar to an imperative
- * version of MemberLink, with argumets reversed. 
+ * version of MemberLink, with arguments reversed.
  *
  * A beta redex is a concatentation or composition of two expressions,
  * one with N declared variables in it, and a list of N values for those
@@ -48,29 +48,20 @@ namespace opencog
  * reduction.  The reduce() method only performs the substitution; it
  * does not attempt to execute or evaluate the resulting expression.
  */
-class PutLink : public FunctionLink
+class PutLink : public Link
 {
 protected:
+	Variables _varlist;
+	Handle _body;
 
 	/// The values that are to be placed into the body.
 	Handle _values;
 
 	void init(void);
-	void typecheck_values(void);
+	void static_typecheck_values(void);
 
 	Handle do_reduce(void) const;
 
-	PutLink(Type, const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
-	PutLink(Type, const Handle& a,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
-	PutLink(Type, const Handle& a, const Handle& b,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 public:
 	PutLink(const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
