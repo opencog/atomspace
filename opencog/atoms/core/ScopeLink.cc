@@ -42,21 +42,21 @@ void ScopeLink::init(void)
 }
 
 ScopeLink::ScopeLink(const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
+                     TruthValuePtr tv, AttentionValuePtr av)
 	: Link(SCOPE_LINK, oset, tv, av)
 {
 	init();
 }
 
 ScopeLink::ScopeLink(const Handle& vars, const Handle& body,
-                       TruthValuePtr tv, AttentionValuePtr av)
+                     TruthValuePtr tv, AttentionValuePtr av)
 	: Link(SCOPE_LINK, HandleSeq({vars, body}), tv, av)
 {
 	init();
 }
 
 ScopeLink::ScopeLink(Type t, const Handle& body,
-                       TruthValuePtr tv, AttentionValuePtr av)
+                     TruthValuePtr tv, AttentionValuePtr av)
 	: Link(t, HandleSeq({body}), tv, av)
 {
 	// Derived classes have a different initialization sequence
@@ -65,7 +65,7 @@ ScopeLink::ScopeLink(Type t, const Handle& body,
 }
 
 ScopeLink::ScopeLink(Type t, const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
+                     TruthValuePtr tv, AttentionValuePtr av)
 	: Link(t, oset, tv, av)
 {
 	// Derived classes have a different initialization sequence
