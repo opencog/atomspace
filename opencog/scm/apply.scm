@@ -7,7 +7,7 @@
 ;------------------------------------------------------------------------
 ; Get the list of variables from forAll, recalling that
 ; ForAllLink
-;    ListLink X1,...,Xn
+;    VariableList X1,...,Xn
 ;    Body
 (define (get-variables forAll) (cog-outgoing-set (gar forAll)))
 ; Get the body from forAll
