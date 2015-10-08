@@ -27,20 +27,21 @@
 #ifndef _OPENCOG_PROTOCOLBUFFER_SERIALIZER_H
 #define _OPENCOG_PROTOCOLBUFFER_SERIALIZER_H
 
-#include <opencog/atomspace/types.h>
-#include <string>
 #include <memory>
-#include "ZMQMessages.pb.h"
+#include <string>
+
 #include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/AttentionValue.h>
+#include <opencog/atomspace/CountTruthValue.h>
+#include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/CountTruthValue.h>
-#include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/NullTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/TruthValue.h>
+#include <opencog/atomspace/types.h>
+#include "opencog/persist/zmq/atomspace/ZMQMessages.pb.h"
 
 using namespace std;
 
@@ -89,7 +90,7 @@ class ProtocolBufferSerializer {
     static TruthValuePtr deserialize(
             const ZMQSingleTruthValueMessage& singleTruthValueMessage);
 
-public: 
+public:
     ProtocolBufferSerializer();
     ~ProtocolBufferSerializer();
 
