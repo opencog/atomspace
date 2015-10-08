@@ -9,6 +9,7 @@ ADD_LIBRARY (atomcore SHARED
 	FreeLink.cc
 	FunctionLink.cc
 	LambdaLink.cc
+	ForAllLink.cc
 	PutLink.cc
 	ScopeLink.cc
 	StateLink.cc
@@ -34,6 +35,7 @@ INSTALL (FILES
 	FreeLink.h
 	FunctionLink.h
 	LambdaLink.h
+	ForAllLink.h
 	PutLink.h
 	ScopeLink.h
 	StateLink.h
