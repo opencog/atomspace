@@ -16,20 +16,13 @@ enum ZMQTruthValueType {
     ZMQTruthValueTypeCount=1;	
     ZMQTruthValueTypeNull=2;	
     ZMQTruthValueTypeIndefinite=3;
-    ZMQTruthValueTypeComposite=4;
 }
 
-message ZMQVersionHandleMessage {
-	required uint32 indicator=1;
-	required uint64 substantive=2; //handle
-}
-	
 message ZMQSingleTruthValueMessage { 
     required ZMQTruthValueType truthvaluetype=1;
     optional float mean=2; //simple, count, composite, indefinite
     optional float confidence=3; //count, composite, indefinite
     optional float count=4; //simple, count, composite, indefinite
-    optional ZMQVersionHandleMessage versionHandle=5; //composite (versionedTVs)
     optional float U=6; //indefinite
     optional float L=7; //indefinite
     optional float confidenceLevel=8; //indefinite
@@ -39,12 +32,7 @@ message ZMQSingleTruthValueMessage {
 }
 
 message ZMQTruthValueMessage { 
-    repeated ZMQSingleTruthValueMessage singleTruthValue=1;  //if size==1, check truthvalueclass, if size>1, it's a composite truthvalue (first SingleTruthValueMessage is the primaryTV, the others are VersionedTVs)
-}
-
-message ZMQTrailMessage { 
-	required int32 maxSize=1; 
-    repeated uint64 trail=2;
+    repeated ZMQSingleTruthValueMessage singleTruthValue=1;
 }
 
 enum ZMQAtomType {
@@ -63,8 +51,6 @@ message ZMQAtomMessage {
     optional ZMQTruthValueMessage truthValue=7;
     optional string name=8; //node
     repeated uint64 outgoing=9; //link
-    optional ZMQTrailMessage trail=10; //link
-    //optional string atom_type_str=11; // FIXME: change to int then put a lookup table
 }
 
 enum ZMQAtomFetchKind {
@@ -82,7 +68,6 @@ message ZMQAtomFetch {
     optional int32 type = 3;
     optional string name = 4;
     repeated uint64 outgoing = 5;
-    //optional string atom_type = 6; // FIXME: change to int then put a lookup table
 }
 
 enum ZMQFunctionType {
