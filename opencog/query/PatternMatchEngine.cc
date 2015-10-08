@@ -731,9 +731,9 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
                                       const Handle& hg,
                                       Caller caller)
 {
-	// This could happen when the arity of the two hypergraphs are different.
-	// It's clearly a mismatch so we should always return false here unless
-	// we are looking for a non-exact match
+	// This could happen when the arity of the two hypergraphs are
+	// different. It's clearly a mismatch so we should always return
+	// false, unless we are looking for a non-exact match.
 	if (nullptr == ptm or nullptr == hg)
 		return _pmc.fuzzy_match(Handle::UNDEFINED, hg);
 
@@ -746,6 +746,19 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	Type tp = hp->getType();
 	if (not ptm->isQuoted() and QUOTE_LINK == tp)
 		return quote_compare(ptm, hg);
+
+	// If the pattern link is executable, then we should execute, and
+	// use the result of that execution. (This isn't implemented yet,
+	// because all variables in an executable link need to be grounded,
+	// before the execution can occur... thus, this needs to be handled
+	// a lot like a VirtualLink.)
+	if (is_executable(hp))
+		throw RuntimeException(TRACE_INFO, "Not implemented!!");
+
+	// If the pattern is a DefinedSchemaNode, we need to substitute
+	// its definition. XXX TODO.
+	if (DEFINED_SCHEMA_NODE == tp)
+		throw RuntimeException(TRACE_INFO, "Not implemented!!");
 
 	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.

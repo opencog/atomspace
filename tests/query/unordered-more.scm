@@ -9,7 +9,7 @@
 ;; should match to this.
 (SimilarityLink (stv 1.0 1.0)
 	(NumberNode "0.24")
-	(ExecutionOutputLink (stv 1.0 1.0)
+	(ExecutionLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink)
 	)
@@ -18,7 +18,7 @@
 ;; this should not match.
 (SimilarityLink (stv 1.0 1.0)
 	(NumberNode "0.24")
-	(ExecutionOutputLink (stv 1.0 1.0)
+	(ExecutionLink (stv 1.0 1.0)
 		(SemeNode "We are legion; we are Anonymous")
 		(ListLink)
 	)
@@ -27,7 +27,7 @@
 ;; this should not match.
 (SimilarityLink (stv 1.0 1.0)
 	(NumberNode "0.24")
-	(ExecutionOutputLink (stv 1.0 1.0)
+	(ExecutionLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(ConceptNode "ring a ling a ding")
@@ -47,7 +47,7 @@
 ;; this should not match.
 (UnorderedLink (stv 1.0 1.0)
 	(NumberNode "0.24")
-	(ExecutionOutputLink (stv 1.0 1.0)
+	(ExecutionLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink)
 	)
@@ -56,7 +56,7 @@
 ;; this should not match.
 (SimilarityLink (stv 1.0 1.0)
 	(WordNode "0.24")
-	(ExecutionOutputLink (stv 1.0 1.0)
+	(ExecutionLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink)
 	)
@@ -75,7 +75,7 @@
 		;; body
 		(SimilarityLink
 			(VariableNode "$var_number_node_type")
-			(ExecutionOutputLink
+			(ExecutionLink
 				(GroundedSchemaNode "ActivationModulatorUpdater")
 				(ListLink)
 			)

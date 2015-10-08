@@ -108,8 +108,8 @@ struct Pattern
 	std::set<Handle> evaluatable_terms;   // smallest term that is evaluatable
 	std::set<Handle> evaluatable_holders; // holds something evaluatable.
 
-	// Execuatable terms are those that hold a GroundedSchemaNode (GSN)
-	// in them.
+	// Executable terms are those that inherit from FunctionLink;
+	// this includes ExecutionOutputLink's.
 	std::set<Handle> executable_terms;    // smallest term that is executable
 	std::set<Handle> executable_holders;  // holds something executable.
 

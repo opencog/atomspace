@@ -12,7 +12,7 @@
 (SimilarityLink (stv 1.0 1.0)
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ExecutionOutputLink (stv 1.0 1.0)
+	(ExecutionLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink)
 	)
@@ -32,7 +32,7 @@
 		(SimilarityLink (stv 1.0 1.0)
 			(VariableNode "$var_one")
 			(VariableNode "$var_two")
-			(ExecutionOutputLink (stv 1.0 1.0)
+			(ExecutionLink (stv 1.0 1.0)
 				(GroundedSchemaNode "ActivationModulatorUpdater")
 				(ListLink)
 			)
@@ -47,7 +47,7 @@
 
 ;; We expect the below to match in only one way: the grounding
 ;; of $var_schema must be to GroundedSchemaNode, due to it's
-;; presence in the ExecutionOutputLink.  Thus, $var_number must,
+;; presence in the ExecutionLink.  Thus, $var_number must,
 ;; by elimination, be grounded by the NumberNode.
 (define (blink)
 	(BindLink
@@ -60,7 +60,7 @@
 		(SimilarityLink (stv 1.0 1.0)
 			(VariableNode "$var_schema")
 			(VariableNode "$var_number")
-			(ExecutionOutputLink (stv 1.0 1.0)
+			(ExecutionLink (stv 1.0 1.0)
 				(VariableNode "$var_schema")
 				(ListLink)
 			)
@@ -87,7 +87,7 @@
 		(SimilarityLink (stv 1.0 1.0)
 			(VariableNode "$vbr_schema")
 			(VariableNode "$vbr_number")
-			(ExecutionOutputLink (stv 1.0 1.0)
+			(ExecutionLink (stv 1.0 1.0)
 				(VariableNode "$vbr_schema")
 				(ListLink)
 			)

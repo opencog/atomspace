@@ -64,6 +64,9 @@ class PatternMatchEngine
 		bool is_evaluatable(const Handle& h) {
 			return (_pat->evaluatable_holders.count(h) != 0); }
 
+		bool is_executable(const Handle& h) {
+			return (_pat->executable_terms.count(h) != 0); }
+
 		bool is_black(const Handle& h) {
 			return (_pat->black.count(h) != 0); }
 

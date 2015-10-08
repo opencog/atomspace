@@ -294,8 +294,7 @@ FUNCTION_LINK <- LAMBDA_LINK
 EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
 
 // PutLinks perform a beta-reduction when executed; i.e. they get
-// beta-reduced when they are executed. The first atom in a PutLink
-// can be either a LambdaLink... or anything that's free, too.
+// beta-reduced when they are executed.
 PUT_LINK <- FUNCTION_LINK
 
 // Basic arithmetic operators
