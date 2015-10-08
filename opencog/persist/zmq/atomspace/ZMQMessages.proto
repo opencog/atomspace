@@ -8,17 +8,17 @@ option java_outer_classname = "AtomSpaceProtos";
 message ZMQAttentionValueHolderMessage {
     required int32 STI=1;
     required int32 LTI=2;
-    required int32 VLTI=3; 
+    required int32 VLTI=3;
 }
 
 enum ZMQTruthValueType {
     ZMQTruthValueTypeSimple =0;
-    ZMQTruthValueTypeCount=1;	
-    ZMQTruthValueTypeNull=2;	
+    ZMQTruthValueTypeCount=1;
+    ZMQTruthValueTypeNull=2;
     ZMQTruthValueTypeIndefinite=3;
 }
 
-message ZMQSingleTruthValueMessage { 
+message ZMQSingleTruthValueMessage {
     required ZMQTruthValueType truthvaluetype=1;
     optional float mean=2; //simple, count, composite, indefinite
     optional float confidence=3; //count, composite, indefinite
@@ -31,7 +31,7 @@ message ZMQSingleTruthValueMessage {
     repeated float firstOrderDistribution=11; //indefinite
 }
 
-message ZMQTruthValueMessage { 
+message ZMQTruthValueMessage {
     repeated ZMQSingleTruthValueMessage singleTruthValue=1;
 }
 
@@ -42,11 +42,11 @@ enum ZMQAtomType {
 }
 
 message ZMQAtomMessage {
-	required ZMQAtomType atomtype=1;
+    required ZMQAtomType atomtype=1;
     optional ZMQAttentionValueHolderMessage attentionvalueholder=2;
     optional uint64 handle=3;
     repeated uint64 incoming=4;
-    optional int32 type=5; 
+    optional int32 type=5;
     optional int32 flags=6;
     optional ZMQTruthValueMessage truthValue=7;
     optional string name=8; //node
