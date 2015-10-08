@@ -9,11 +9,9 @@ INSTALL (FILES
 	example-dbi.scm
 	file-utils.scm
 	opencog.scm
-	persistence.scm
 	repl-shell.scm
-	utilities.scm
 	rule-engine-utils.scm
-	logger-utils.scm
+	utilities.scm
 	DESTINATION "${DATADIR}/scm"
 )
 
@@ -21,11 +19,11 @@ INSTALL (FILES
 	opencog/dist-gearman.scm
 	opencog/exec.scm
 	opencog/extension.scm
+	opencog/logger.scm
 	opencog/persist.scm
 	opencog/persist-sql.scm
 	opencog/persist-zmq.scm
 	opencog/query.scm
 	opencog/rule-engine.scm
-	opencog/logger.scm
 	DESTINATION "${DATADIR}/scm/opencog"
 )
