@@ -26,6 +26,8 @@
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atoms/execution/Instantiator.h>
 
+#include <cxxtest/TestSuite.h>
+
 using namespace opencog;
 
 // Test the PutLink.
@@ -47,6 +49,7 @@ public:
 
 	void test_define();
 	void test_filtering();
+	void test_lambda();
 };
 
 #define N _as.add_node
@@ -120,6 +123,42 @@ void PutLinkUTest::test_filtering()
 	TS_ASSERT(foo == a or foo == b);
 	TS_ASSERT(bar == a or bar == b);
 	TS_ASSERT(a != b);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void PutLinkUTest::test_lambda()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test that the substitution follows the order of variables
+	// provided in the lambda rather than left-to-right in the body.
+	Handle lam =
+		L(LAMBDA_LINK,
+		  L(VARIABLE_LIST,
+		    N(VARIABLE_NODE, "$x"),
+		    N(VARIABLE_NODE, "$y")),
+		  L(INHERITANCE_LINK,
+		    N(VARIABLE_NODE, "$y"),
+		    N(VARIABLE_NODE, "$x")));
+	Handle put =
+		L(PUT_LINK,
+		  lam,
+		  L(LIST_LINK,
+		    N(CONCEPT_NODE, "animal"),
+		    N(CONCEPT_NODE, "coyote")));
+
+	Instantiator inst(&_as);
+	Handle putted = inst.execute(put);
+
+	Handle expected_putted =
+		L(INHERITANCE_LINK,
+		  N(CONCEPT_NODE, "coyote"),
+		  N(CONCEPT_NODE, "animal"));
+
+	printf("Expecting %s\n", expected_putted->toString().c_str());
+	printf("Got %s\n", putted->toString().c_str());
+	TS_ASSERT_EQUALS(putted, expected_putted);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
