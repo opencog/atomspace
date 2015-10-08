@@ -26,6 +26,7 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/FreeLink.h>
+#include <opencog/atoms/core/LambdaLink.h>
 
 #include "ScopeLink.h"
 
@@ -100,18 +101,31 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 	Type decls = oset.at(0)->getType();
 
 	// If the first atom is not explicitly a variable declaration, then
-	// there are no variable declarations; extract all free variables.
+	// there are no variable declarations. There are two cases that; can
+	// apply here: either the body is a lmabda, in whcih casse, we copy
+	// the variables from the lambda; else we extract all free variables.
 	if (VARIABLE_LIST != decls and
 	    VARIABLE_NODE != decls and
 	    TYPED_VARIABLE_LINK != decls)
 	{
 		_body = oset[0];
 
-		// Use the FreeLink class to find all the variables;
-		// Use the VariableList class for build the Variables struct.
-		FreeLink fl(oset[0]);
-		VariableList vl(fl.get_vars());
-		_varlist = vl.get_variables();
+		if (classserver().isA(_body->getType(), LAMBDA_LINK))
+		{
+			LambdaLinkPtr lam(LambdaLinkCast(_body));
+			if (nullptr == lam)
+				lam = createLambdaLink(*LinkCast(_body));
+			_varlist = lam->get_variables();
+			_body = lam->get_body();
+		}
+		else
+		{
+			// Use the FreeLink class to find all the variables;
+			// Use the VariableList class for build the Variables struct.
+			FreeLink fl(oset[0]);
+			VariableList vl(fl.get_vars());
+			_varlist = vl.get_variables();
+		}
 		return;
 	}
 
