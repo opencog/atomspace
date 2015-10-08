@@ -178,6 +178,12 @@ PUT_LINK <- ORDERED_LINK
 // beta-reducible.
 SCOPE_LINK <- ORDERED_LINK
 
+// A LambdaLink is a link whose bound variables mey be substituted,
+// that is, may be beta-reduced. It can be thought of as not only a
+// variable declaration (which is what ScopeLink does) but also has
+// the ability to substitute values for those variables.
+LAMBDA_LINK <- SCOPE_LINK
+
 // Pattern definition, pattern grounding/satisfaction.
 // The PatternLink implements the base class holding a pattern that
 // the pattern matcher will traverse.  Its primary role in life is to
@@ -205,8 +211,8 @@ UNQUOTE_LINK <- ORDERED_LINK
 // Assorted PLN link types.
 
 // Logical quantifiers
-FORALL_LINK <- SCOPE_LINK "ForAllLink"
-EXISTS_LINK <- SCOPE_LINK
+FORALL_LINK <- LAMBDA_LINK "ForAllLink"
+EXISTS_LINK <- LAMBDA_LINK
 AVERAGE_LINK <- FORALL_LINK
 
 // Convert predicate into concept
@@ -291,12 +297,6 @@ QUANTITY_LINK <- ORDERED_LINK
 VIRTUAL_LINK <- EVALUATION_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK
 EQUAL_LINK <- VIRTUAL_LINK
-
-// A LambdaLink is a link whose bound variables mey be substituted,
-// that is, may be beta-reduced. It can be thought of as not only a
-// variable declaration (which is what ScopeLink does) but also has
-// the ability to substitute values for those variables.
-LAMBDA_LINK <- SCOPE_LINK
 
 // A FunctionLink is a link that can be executed, with the result of
 // execution being some atom. The LambdaLink is used to specify the
