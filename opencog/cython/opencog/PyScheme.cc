@@ -28,29 +28,24 @@ using std::string;
 
 using namespace opencog;
 
-#ifdef HAVE_GUILE
-
-static void check_err(SchemeEval* evaluator, const std::string &s)
-{
-	if (evaluator->eval_error()) {
-		throw RuntimeException(TRACE_INFO,
-		       "Scheme: Failed to execute '%s'", s.c_str());
-	}
-
-	if (evaluator->input_pending()) {
-		throw RuntimeException(TRACE_INFO,
-		      "Scheme: Syntax error in input: '%s'", s.c_str());
-	}
-}
-#endif // HAVE_GUILE
-
 // Convenience wrapper, for stand-alone usage.
 std::string opencog::eval_scheme(AtomSpace& as, const std::string &s)
 {
 #ifdef HAVE_GUILE
 	SchemeEval* evaluator = SchemeEval::get_evaluator(&as);
 	std::string scheme_return_value = evaluator->eval(s);
-	check_err(evaluator, s);
+
+	// If there's an error, the scheme_return_value will contain
+	// a backtrace.  Be sure to display that to the user.
+	if (evaluator->eval_error())
+		throw RuntimeException(TRACE_INFO,
+		       "Scheme: Failed to execute '%s'\n%s",
+		       s.c_str(), scheme_return_value.c_str());
+
+	if (evaluator->input_pending())
+		throw RuntimeException(TRACE_INFO,
+		      "Scheme: Syntax error in input: '%s'", s.c_str());
+
 	return scheme_return_value;
 #else // HAVE_GUILE
 	return "Error: Compiled without Guile support";
@@ -63,7 +58,11 @@ Handle opencog::eval_scheme_h(AtomSpace& as, const std::string &s)
 #ifdef HAVE_GUILE
 	SchemeEval* evaluator = SchemeEval::get_evaluator(&as);
 	Handle scheme_return_value = evaluator->eval_h(s);
-	check_err(evaluator, s);
+
+	if (evaluator->eval_error())
+		throw RuntimeException(TRACE_INFO,
+		       "Scheme: Failed to execute '%s'", s.c_str());
+
 	return scheme_return_value;
 #else // HAVE_GUILE
 	return "Error: Compiled without Guile support";
