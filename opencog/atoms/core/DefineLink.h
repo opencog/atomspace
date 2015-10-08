@@ -25,7 +25,7 @@
 
 #include <map>
 
-#include <opencog/atomspace/Link.h>
+#include <opencog/atoms/core/UniqueLink.h>
 
 namespace opencog
 {
@@ -59,15 +59,10 @@ namespace opencog
 /// Of the three, the last is the most important, as, right now, there
 /// is no other way of sprecifying recursive functions in the atomspace.
 ///
-class DefineLink : public Link
+class DefineLink : public UniqueLink
 {
 protected:
-	// Reference to the definition body (typically a node)
-	Handle _alias;
-	// Definition body that this link is defining.
-	Handle _definition;
-
-	void init(const HandleSeq&);
+	void init();
 public:
 	DefineLink(const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
@@ -78,8 +73,8 @@ public:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	DefineLink(Link &l);
-	Handle get_alias(void) { return _alias; }
-	Handle get_definition(void) { return _definition; }
+	Handle get_alias(void) const { return _outgoing[0]; }
+	Handle get_definition(void) const { return _outgoing[1]; }
 
 	/**
 	 * Given a Handle pointing to <name> in

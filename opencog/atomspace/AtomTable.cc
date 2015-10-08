@@ -42,9 +42,12 @@
 #include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/bind/PatternLink.h>
 #include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/core/DeleteLink.h>
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/PutLink.h>
+#include <opencog/atoms/core/StateLink.h>
+#include <opencog/atoms/core/UniqueLink.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
@@ -251,7 +254,7 @@ bool AtomTable::inEnviron(AtomPtr atom)
 
 // Experimental C++ atom types support code
 // Try to cast, if possible.
-AtomPtr do_factory(Type atom_type, AtomPtr atom)
+AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
 {
     // Nodes of various kinds -----------
     if (NUMBER_NODE == atom_type) {
@@ -297,17 +300,57 @@ AtomPtr do_factory(Type atom_type, AtomPtr atom)
     } else if (SATISFACTION_LINK == atom_type) {
         if (NULL == PatternLinkCast(atom))
             return createPatternLink(*LinkCast(atom));
-    } else if (LAMBDA_LINK == atom_type) {
-        if (NULL == LambdaLinkCast(atom))
-            return createLambdaLink(*LinkCast(atom));
+    } else if (UNIQUE_LINK == atom_type) {
+        if (NULL == UniqueLinkCast(atom))
+            return createUniqueLink(*LinkCast(atom));
     } else if (VARIABLE_LIST == atom_type) {
         if (NULL == VariableListCast(atom))
             return createVariableList(*LinkCast(atom));
+    } else if (LAMBDA_LINK == atom_type) {
+        if (NULL == LambdaLinkCast(atom))
+            return createLambdaLink(*LinkCast(atom));
     } else if (classserver().isA(atom_type, FUNCTION_LINK)) {
 /* More circular-dependency heart-ache
         if (NULL == FunctionLinkCast(atom))
             return FunctionLink::factory(LinkCast(atom));
 */
+    }
+
+    // Very special handling for DeleteLink's
+    else if (DELETE_LINK == atom_type) {
+        DeleteLinkPtr delp(DeleteLinkCast(atom));
+        // If it can be cast, then its not an open term.
+        if (nullptr != delp)
+            return delp;
+
+        // Trying to create a closed-term DeleteLink will throw.
+        // This is a sign that we need to remove stuff.
+        try {
+            delp = createDeleteLink(*LinkCast(atom));
+        }
+        catch (...) {
+            LinkPtr lp(LinkCast(atom));
+            for (Handle ho : lp->getOutgoingSet()) {
+                this->extract(ho);
+            }
+            return Handle();
+        }
+        return delp;
+    }
+
+    // Very special handling for StateLink's
+    else if (STATE_LINK == atom_type) {
+        StateLinkPtr slp(StateLinkCast(atom));
+        if (NULL == slp)
+            slp = createStateLink(*LinkCast(atom));
+
+        // Compare to the current state
+        Handle old_state(slp->get_other());
+        while (nullptr != old_state) {
+            this->extract(old_state);
+            old_state = slp->get_other();
+        }
+        return slp;
     }
     return atom;
 }
@@ -348,10 +391,14 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
         return createPutLink(*LinkCast(atom));
     if (SATISFACTION_LINK == atom_type)
         return createPatternLink(*LinkCast(atom));
-    if (LAMBDA_LINK == atom_type)
-        return createLambdaLink(*LinkCast(atom));
+    if (STATE_LINK == atom_type)
+        return createStateLink(*LinkCast(atom));
+    if (UNIQUE_LINK == atom_type)
+        return createUniqueLink(*LinkCast(atom));
     if (VARIABLE_LIST == atom_type)
         return createVariableList(*LinkCast(atom));
+    if (LAMBDA_LINK == atom_type)
+        return createLambdaLink(*LinkCast(atom));
     if (classserver().isA(atom_type, FUNCTION_LINK))
         // XXX FIXME more circular-dependency heart-ache
         // return FunctionLink::factory(LinkCast(atom));
@@ -366,6 +413,7 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
 AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
 {
 	AtomPtr clone(do_factory(atom_type, atom));
+	if (nullptr == clone) return clone;
 	clone->_uuid = atom->_uuid;
 	return clone;
 }
@@ -416,17 +464,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (inEnviron(atom))
         return atom->getHandle();
 
-#if LATER
-    // XXX FIXME -- technically, this throw is correct, except
-    // that SavingLoading gives us atoms with handles preset.
-    // So we have to accept that, and hope its correct and consistent.
-    // XXX this can also occur if the atom is in some other atomspace;
-    // so we need to move this check elsewhere.
-    if (atom->_uuid != Handle::INVALID_UUID)
-        throw RuntimeException(TRACE_INFO,
-          "AtomTable - Attempting to insert atom with handle already set!");
-#endif
-
     // Lock before checking to see if this kind of atom can already
     // be found in the atomspace.  We need to lock here, to avoid two
     // different threads from trying to add exactly the same atom.
@@ -437,8 +474,12 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         return atom->getHandle();
 
     // Factory implements experimental C++ atom types support code
+    AtomPtr orig(atom);
     Type atom_type = atom->getType();
     atom = factory(atom_type, atom);
+
+    // Certain DeleteLinks can never be added!
+    if (nullptr == atom) return Handle();
 
     // Is the equivalent of this atom already in the table?
     // If so, then return the existing atom.  (Note that this 'existing'
@@ -473,9 +514,14 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         atom = createLink(atom_type, closet,
                           atom->getTruthValue(),
                           atom->getAttentionValue());
+        atom = clone_factory(atom_type, atom);
         atom->_uuid = save;
     }
-    atom = clone_factory(atom_type, atom);
+
+    // Clone, if we haven't done so already. We MUST maintain our own
+    // private copy of the atom, else crazy things go wrong.
+    if (atom == orig)
+        atom = clone_factory(atom_type, atom);
 
     // Sometimes one inserts an atom that was previously deleted.
     // In this case, the removal flag might still be set. Clear it.

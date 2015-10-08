@@ -376,7 +376,7 @@ static inline HandleSeq get_free_vars_in_tree(const Handle& tree)
 			return;
 		}
 
-		if (classserver().isA(t, LAMBDA_LINK))
+		if (classserver().isA(t, SCOPE_LINK))
 			return;
 
 		LinkPtr l(LinkCast(h));

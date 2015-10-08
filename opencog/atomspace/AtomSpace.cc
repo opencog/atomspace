@@ -99,6 +99,8 @@ void AtomSpace::unregisterBackingStore(BackingStore *bs)
 
 Handle AtomSpace::add_atom(AtomPtr atom, bool async)
 {
+    if (nullptr == atom) return Handle();
+
     // Is this atom already in the atom table?
     Handle hexist(atomTable.getHandle(atom));
     if (hexist) return hexist;
@@ -319,26 +321,22 @@ Handle AtomSpace::fetch_atom(UUID uuid)
     if (NULL == backing_store)
         throw RuntimeException(TRACE_INFO, "No backing store");
 
-    // OK, we have to handle three distinct cases.
+    // OK, we have to handle two distinct cases.
     // 1) If atom table already knows about this uuid, then this
     //    function returns the atom-table's version of the atom.
     //    In particular, no attempt is made to reconcile the possibly
     //    differing truth values in the atomtable vs. backing store.
     // 2) Else, get the atom corresponding to the UUID from storage.
-    // 3) If the handle h contains a pointer to an atom (that is not
-    //    in the atom table), then assume that atom is from some previous
-    //    (recursive) query, and add it to the atomtable.
-    // For both case 2 & 3, if the atom is a link, then it's outgoing
-    // set is fetched as well, as currently, a link cannot be added to
-    // the atomtable, unless all of its outgoing set already is in the
-    // atomtable.
+    //    If the atom is a link, then it's outgoing set is fetched as
+    //    well, as currently, a link cannot be added to the atomtable,
+    //    unless all of its outgoing set already is in the atomtable.
 
     // Case 1:
     Handle hb(atomTable.getHandle(uuid));
     if (atomTable.holds(hb))
         return hb;
 
-    // Case 2 & 3:
+    // Case 2:
     // We don't have the atom for this UUID, then go get it.
     AtomPtr a(backing_store->getAtom(uuid));
 

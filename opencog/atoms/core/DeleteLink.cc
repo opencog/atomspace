@@ -40,6 +40,7 @@ void DeleteLink::init(void)
 	// time, because we don't know the atomspace yet.  So we hack
 	// around this by thowing at construtor time.
 	//
+	FreeLink::init();
 	if (0 == _varseq.size())
 		// throw DeleteException();
 		throw InvalidParamException(TRACE_INFO,

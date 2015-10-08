@@ -13,6 +13,7 @@ INSTALL (FILES
 	repl-shell.scm
 	utilities.scm
 	rule-engine-utils.scm
+	logger-utils.scm
 	DESTINATION "${DATADIR}/scm"
 )
 

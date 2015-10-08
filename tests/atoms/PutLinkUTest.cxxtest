@@ -45,11 +45,44 @@ public:
 
 	void tearDown() {}
 
+	void test_define();
 	void test_filtering();
 };
 
 #define N _as.add_node
 #define L _as.add_link
+
+// Test to make sure that PutLink filters.
+void PutLinkUTest::test_define()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	L(DEFINE_LINK,
+		N(DEFINED_SCHEMA_NODE, "foobar"),
+		L(LAMBDA_LINK,
+			L(INHERITANCE_LINK,
+				N(CONCEPT_NODE, "aaa"),
+				N(VARIABLE_NODE, "$zzz"))));
+
+	Handle put =
+	L(PUT_LINK,
+		N(DEFINED_SCHEMA_NODE, "foobar"),
+		N(CONCEPT_NODE, "bbb"));
+
+	Instantiator inst(&_as);
+	Handle putted = inst.execute(put);
+
+	Handle pat =
+	L(INHERITANCE_LINK,
+		N(CONCEPT_NODE, "aaa"),
+		N(CONCEPT_NODE, "bbb"));
+
+	printf("Expecting %s\n", pat->toString().c_str());
+	printf("Got %s\n", putted->toString().c_str());
+	TS_ASSERT_EQUALS(putted, pat);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
 
 // Test to make sure that PutLink filters.
 void PutLinkUTest::test_filtering()
@@ -60,10 +93,11 @@ void PutLinkUTest::test_filtering()
 	Handle foo, bar;
 	Handle filt =
 		L(PUT_LINK,
-			L(TYPED_VARIABLE_LINK,
-				N(VARIABLE_NODE, "$x"),
-				N(TYPE_NODE, "ConceptNode")),
-			N(VARIABLE_NODE, "$x"),
+			L(LAMBDA_LINK,
+				L(TYPED_VARIABLE_LINK,
+					N(VARIABLE_NODE, "$x"),
+					N(TYPE_NODE, "ConceptNode")),
+				N(VARIABLE_NODE, "$x")),
 			L(SET_LINK,
 				N(NUMBER_NODE, "42"),
 				foo = N(CONCEPT_NODE, "foo"),
