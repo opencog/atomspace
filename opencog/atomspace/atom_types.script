@@ -156,10 +156,6 @@ STATE_LINK <- UNIQUE_LINK
 // second definition into the atomspace will throw an exception.
 DEFINE_LINK <- UNIQUE_LINK
 
-// PutLinks perform a beta-reduction when executed; i.e. they get
-// beta-reduced when they are executed.
-PUT_LINK <- ORDERED_LINK
-
 // The ScopeLink is used to identify an open term, i.e. a link
 // containing VariableNodes within it, and binding those variables.
 // In the process, it can also force type restrictions on them.
@@ -177,6 +173,10 @@ PUT_LINK <- ORDERED_LINK
 // ExistsLink and AverageLink, which bind variables, but are not
 // beta-reducible.
 SCOPE_LINK <- ORDERED_LINK
+
+// PutLinks perform a beta-reduction when executed; i.e. they get
+// beta-reduced when they are executed.
+PUT_LINK <- SCOPE_LINK
 
 // Pattern definition, pattern grounding/satisfaction.
 // The PatternLink implements the base class holding a pattern that
