@@ -170,3 +170,25 @@
 (cog-execute! get-state)
 
 ; ... and so on, ad infinitum
+
+; ------------------------------------------------
+; DefineLink can be used to specify the body of a PutLink.
+; Thus, for example:
+
+(DefineLink
+	(DefinedSchemaNode "colored things")
+	(LambdaLink
+		(InheritanceLink
+			(ConceptNode "color")
+			(VariableNode "$yyy"))))
+
+(cog-execute!
+	(PutLink
+		(DefinedSchemaNode "colored things")
+		(ConceptNode "green")))
+
+; Will cause the following to be created:
+;
+; (InheritanceLink
+;    (ConceptNode "color")
+;    (ConceptNode "green"))
