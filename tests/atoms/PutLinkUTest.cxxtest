@@ -60,10 +60,11 @@ void PutLinkUTest::test_filtering()
 	Handle foo, bar;
 	Handle filt =
 		L(PUT_LINK,
-			L(TYPED_VARIABLE_LINK,
-				N(VARIABLE_NODE, "$x"),
-				N(TYPE_NODE, "ConceptNode")),
-			N(VARIABLE_NODE, "$x"),
+			L(LAMBDA_LINK,
+				L(TYPED_VARIABLE_LINK,
+					N(VARIABLE_NODE, "$x"),
+					N(TYPE_NODE, "ConceptNode")),
+				N(VARIABLE_NODE, "$x")),
 			L(SET_LINK,
 				N(NUMBER_NODE, "42"),
 				foo = N(CONCEPT_NODE, "foo"),
