@@ -211,8 +211,8 @@ UNQUOTE_LINK <- ORDERED_LINK
 // Assorted PLN link types.
 
 // Logical quantifiers
-FORALL_LINK <- SCOPE_LINK "ForAllLink"
-EXISTS_LINK <- SCOPE_LINK
+FORALL_LINK <- LAMBDA_LINK "ForAllLink"
+EXISTS_LINK <- LAMBDA_LINK
 AVERAGE_LINK <- FORALL_LINK
 
 // Convert predicate into concept
