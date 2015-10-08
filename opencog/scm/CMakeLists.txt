@@ -9,11 +9,8 @@ INSTALL (FILES
 	example-dbi.scm
 	file-utils.scm
 	opencog.scm
-	persistence.scm
 	repl-shell.scm
 	utilities.scm
-	rule-engine-utils.scm
-	logger-utils.scm
 	DESTINATION "${DATADIR}/scm"
 )
 
