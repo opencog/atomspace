@@ -37,7 +37,6 @@
 ; the reduction. cog-execute! will also execute any executable
 ; links that result.
 (cog-execute! to-be-added)
-(cog-reduce! to-be-added)
 
 ; Take a look again:
 (show-eval-links)
@@ -134,35 +133,40 @@
 
 
 ; ------------------------------------------------
-; The AssignLink combines the add and remove into one.
+; The simplest way to combine Delete/Get/Put to maintain state is to
+; use the StateLink.  StateLinks do not even have to be executed;
+; simply using them changes the state. See state.scm for details.
 ;
-; At this time, there is no Get/Put analog that works
-; in the same fashion thaat AssignLink does. So we copy
-; this part of the example from the assert/retract example.
-; This should probably be updated and fixed.
-(define assign-b
-	(AssignLink
-		(TypeNode "EvaluationLink")
-		(PredicateNode "some property")
-		(ListLink
-			(ConceptNode "thing A")
-			(ConceptNode "alternative B"))))
+; Thus for example:
 
-(define assign-v
-	(AssignLink
-		(TypeNode "EvaluationLink")
-		(PredicateNode "some property")
-		(ListLink
-			(ConceptNode "thing A")
-			(ConceptNode "The V alternative"))))
+(StateLink
+	(PredicateNode "some property")
+	(ListLink
+		(ConceptNode "thing A")
+		(ConceptNode "alternative B")))
 
-(cog-execute! assign-b)
-(cog-execute! get-value)
+(define get-state
+	(GetLink
+		(StateLink
+			(PredicateNode "some property")
+			(VariableNode "$x"))))
 
-(cog-execute! assign-v)
-(cog-execute! get-value)
+(cog-execute! get-state)
 
-(cog-execute! assign-b)
-(cog-execute! get-value)
+(StateLink
+	(PredicateNode "some property")
+	(ListLink
+		(ConceptNode "thing A")
+		(ConceptNode "The V alternative")))
+
+(cog-execute! get-state)
+
+(StateLink
+	(PredicateNode "some property")
+	(ListLink
+		(ConceptNode "thing A")
+		(ConceptNode "first alternative again")))
+
+(cog-execute! get-state)
 
 ; ... and so on, ad infinitum
