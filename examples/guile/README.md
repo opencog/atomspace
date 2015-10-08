@@ -70,8 +70,7 @@ The current list of modules that wrap C++ code includes:
 * cog-bind-example.scm -- an example of using the pattern matcher.
 * execute.scm -- an example of executing executable atoms, with
                  callbacks written in python or scheme.
-* assign.scm  -- an example of asserting facts in the AtomSpace.
-* get-put.scm -- a different way of asserting facts in the AtomSpace.
+* get-put.scm -- an example of asserting facts in the AtomSpace.
 * state.scm   -- maintaining unique state
 * filter.scm  -- filtering sets of atoms.
 * except.scm  -- an example of exceptions being thrown and passed.
