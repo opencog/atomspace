@@ -139,9 +139,9 @@ void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 		if (UNQUOTE_LINK == t)
 			_in_quote = false;
 
-		bool islam = classserver().isA(t, SCOPE_LINK);
+		bool issco = classserver().isA(t, SCOPE_LINK);
 		std::set<Handle> bsave = _bound_vars;
-		if (islam)
+		if (issco)
 		{
 			// Save the current set of bound variables...
 			bsave = _bound_vars;
@@ -158,7 +158,7 @@ void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 
 		find_vars(varset, lll->getOutgoingSet());
 
-		if (islam)
+		if (issco)
 			_bound_vars = bsave;
 
 		// Restore current state from the stack.

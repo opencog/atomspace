@@ -35,24 +35,32 @@ LambdaLink::LambdaLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: ScopeLink(LAMBDA_LINK, oset, tv, av)
 {
+	ScopeLink::init();
 }
 
 LambdaLink::LambdaLink(const Handle& vars, const Handle& body,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: ScopeLink(LAMBDA_LINK, HandleSeq({vars, body}), tv, av)
 {
+	ScopeLink::init();
 }
 
 LambdaLink::LambdaLink(Type t, const Handle& body,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: ScopeLink(t, HandleSeq({body}), tv, av)
 {
+	// Derived types have a different initialization sequence.
+	if (LAMBDA_LINK != t) return;
+	ScopeLink::init();
 }
 
 LambdaLink::LambdaLink(Type t, const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: ScopeLink(t, oset, tv, av)
 {
+	// Derived types have a different initialization sequence.
+	if (LAMBDA_LINK != t) return;
+	ScopeLink::init();
 }
 
 LambdaLink::LambdaLink(Link &l)
@@ -66,6 +74,10 @@ LambdaLink::LambdaLink(Link &l)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a LambdaLink, got %s", tname.c_str());
 	}
+
+	// Derived types have a different initialization sequence.
+	if (LAMBDA_LINK != tscope) return;
+	ScopeLink::init();
 }
 
 /* ===================== END OF FILE ===================== */

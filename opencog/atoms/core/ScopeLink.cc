@@ -76,7 +76,7 @@ ScopeLink::ScopeLink(Type t, const HandleSeq& oset,
 ScopeLink::ScopeLink(Link &l)
 	: Link(l)
 {
-	// Type must be as expected
+	// Type must be as expected.
 	Type tscope = l.getType();
 	if (not classserver().isA(tscope, SCOPE_LINK))
 	{
@@ -85,7 +85,7 @@ ScopeLink::ScopeLink(Link &l)
 			"Expecting a ScopeLink, got %s", tname.c_str());
 	}
 
-	// Dervided types have a different initialization sequence
+	// Derived types have a different initialization sequence.
 	if (SCOPE_LINK != tscope) return;
 	init();
 }
