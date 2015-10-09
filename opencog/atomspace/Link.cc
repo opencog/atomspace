@@ -71,7 +71,9 @@ std::string Link::toShortString(const std::string& indent)
     std::string more_indent = indent + "  ";
 
     answer << indent << "(" << classserver().getTypeName(_type);
-    answer << " " << getTruthValue()->toString() << "\n";
+    if (not getTruthValue()->isDefaultTV())
+        answer << " " << getTruthValue()->toString();
+    answer << "\n";
 
     // Here the target string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
@@ -79,7 +81,7 @@ std::string Link::toShortString(const std::string& indent)
         if (h.operator->() != NULL)
             answer << h->toShortString(more_indent);
         else
-            answer << indent << "Undefined Atom!\n";
+            answer << more_indent << "Undefined Atom!\n";
     }
 
     answer << indent << ") ; [" << _uuid << "]";
