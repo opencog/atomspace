@@ -41,6 +41,7 @@ DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
 	_as(as)
 {
 	_connectives.insert(SEQUENTIAL_AND_LINK);
+	_connectives.insert(SEQUENTIAL_OR_LINK);
 	_connectives.insert(AND_LINK);
 	_connectives.insert(OR_LINK);
 	_connectives.insert(NOT_LINK);
@@ -361,7 +362,7 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 		   "Expecting logical connective to have at least one child!");
 
 	Type term_type = top->getType();
-	if (OR_LINK == term_type)
+	if (OR_LINK == term_type or SEQUENTIAL_OR_LINK == term_type)
 	{
 		for (const Handle& h : oset)
 			if (eval_sentence(h, gnds)) return true;
