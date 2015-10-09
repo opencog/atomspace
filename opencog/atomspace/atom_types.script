@@ -51,16 +51,21 @@ SIMILARITY_LINK <- UNORDERED_LINK
 EXTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 
-// Boolean set operations, logical constants
-// The ordered version of AND_LINK is SEQUENTIAL_AND_LINK, below.
+// Boolean set operations, logical constants.
 // These are used by the pattern matcher to compute crisp-logic
 // boolean combinations of predicates.
+//
+// The ordered links SequentialAndLink, SequentialOrLink allow
+// behavior-tree Sequence and Fallback to be implemented: they guarantee
+// sequential execution until the first failure or the first success.
+//
 TRUE_LINK <- ORDERED_LINK
 FALSE_LINK <- ORDERED_LINK
 AND_LINK <- UNORDERED_LINK
 OR_LINK <- UNORDERED_LINK
 NOT_LINK <- UNORDERED_LINK
 SEQUENTIAL_AND_LINK <- ORDERED_LINK
+SEQUENTIAL_OR_LINK <- ORDERED_LINK
 
 // The 'intuitionist logic' version of NOT_LINK is ABSENT_LINK.
 // In 'intuitionist logic', the opposite of "true" is not "false",
