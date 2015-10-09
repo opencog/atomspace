@@ -162,6 +162,15 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle evelnk)
 		return SimpleTruthValue::createTV(
 		              1.0 - tv->getMean(), tv->getCount());
 	}
+	else if (TRUE_LINK == t)
+	{
+		return TruthValue::TRUE_TV();
+	}
+	else if (FALSE_LINK == t)
+	{
+		return TruthValue::FALSE_TV();
+	}
+
 	throw RuntimeException(TRACE_INFO,
 		"Expecting to get an EvaluationLink, got %s",
 		evelnk->toString().c_str());

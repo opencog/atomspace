@@ -31,17 +31,32 @@ SET_LINK <- UNORDERED_LINK
 LIST_LINK <- ORDERED_LINK
 MEMBER_LINK <- ORDERED_LINK
 
+// ContextLink: Universe of discourse. This behaves like set subtraction
+// in that the set of things outside of the context have no bearing on
+// the probability.
+CONTEXT_LINK <- ORDERED_LINK
+
+// Measure-theoritic (probabilisitic) versions of AND_LINK, OR_LINK
+// These use probabilistic formulas to compute truth values.
+// UNION_LINK <- OR_LINK
+// INTERSECTION_LINK <- AND_LINK
+
 // SUBSET_LINK is semantically equivalent to EXTENSIONAL_INHERITANCE_LINK.
 // Therefore the later has been removed.
-SUBSET_LINK <- ORDERED_LINK
-INTENSIONAL_INHERITANCE_LINK <- ORDERED_LINK
-EXTENSIONAL_SIMILARITY_LINK <- UNORDERED_LINK
-INTENSIONAL_SIMILARITY_LINK <- UNORDERED_LINK
+INHERITANCE_LINK <- ORDERED_LINK
+SUBSET_LINK <- INHERITANCE_LINK
+INTENSIONAL_INHERITANCE_LINK <- INHERITANCE_LINK
+
+SIMILARITY_LINK <- UNORDERED_LINK
+EXTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
+INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 
 // Boolean set operations, logical constants
 // The ordered version of AND_LINK is SEQUENTIAL_AND_LINK, below.
-// These are used by the pattern match to perform boolean combinations
-// of predicates.
+// These are used by the pattern matcher to compute crisp-logic
+// boolean combinations of predicates.
+TRUE_LINK <- ORDERED_LINK
+FALSE_LINK <- ORDERED_LINK
 AND_LINK <- UNORDERED_LINK
 OR_LINK <- UNORDERED_LINK
 NOT_LINK <- UNORDERED_LINK
@@ -83,11 +98,6 @@ PRESENT_LINK <- ORDERED_LINK
 // and nodes.  This are used to implement the pattern matcher, and
 // everything built from the pattern matcher, including the query
 // engine, the atomspace indexes, and the graph rewrite rules.
-//
-// Not all of these are in active use: e.g. SCHOLEM_LINK is not used ATM.
-
-// Universe of discourse
-CONTEXT_LINK <- ORDERED_LINK
 
 // ---------------------------------------------------------
 // Types and variables and signatures.
@@ -213,7 +223,7 @@ AVERAGE_LINK <- FORALL_LINK
 SATISFYING_SET_LINK <- SCOPE_LINK
 
 // ??? What is this???
-SCHOLEM_LINK <- ORDERED_LINK
+// SCHOLEM_LINK <- ORDERED_LINK
 
 // Basic first-order logic operations
 // These inherit from ForAll because if these contain variables, then
@@ -222,19 +232,17 @@ SCHOLEM_LINK <- ORDERED_LINK
 // like AVERAGE_LINK, averaging over the for-all universe that they
 // apply to.
 IMPLICATION_LINK <- AVERAGE_LINK
-INTENSIONAL_IMPLICATION_LINK <- AVERAGE_LINK
-EXTENSIONAL_IMPLICATION_LINK <- AVERAGE_LINK
+INTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
+EXTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
 
 EQUIVALENCE_LINK <- AVERAGE_LINK
-INTENSIONAL_EQUIVALENCE_LINK <- AVERAGE_LINK
-EXTENSIONAL_EQUIVALENCE_LINK <- AVERAGE_LINK
+INTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
+EXTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
 
 // Generic association
 ASSOCIATIVE_LINK <- ORDERED_LINK
 
-// Inheritence and association links
-INHERITANCE_LINK <- ORDERED_LINK
-SIMILARITY_LINK <- UNORDERED_LINK
+// Misc mystery links.
 ATTRACTION_LINK <- ORDERED_LINK
 
 // To be used with PredicateNode
@@ -262,8 +270,8 @@ GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 // Huh?? XXX What are these? I don't understand them Do we use them
 // anywhere? I think the first is same as ExecutionOutputLink, right?
 // Not clear how a schema can be evaluated ...
-SCHEMA_EXECUTION_LINK <- INHERITANCE_LINK
-SCHEMA_EVALUATION_LINK <- SCHEMA_EXECUTION_LINK
+// SCHEMA_EXECUTION_LINK <- INHERITANCE_LINK
+// SCHEMA_EVALUATION_LINK <- SCHEMA_EXECUTION_LINK
 
 // ====================================================================
 // Synchronization primitive, used to mark stages of a processing
@@ -300,7 +308,9 @@ EQUAL_LINK <- VIRTUAL_LINK
 // A LambdaLink is a link whose bound variables mey be substituted,
 // that is, may be beta-reduced. It can be thought of as not only a
 // variable declaration (which is what ScopeLink does) but also has
-// the ability to substitute values for those variables.
+// the ability to substitute values for those variables.  This is
+// exactly the standard definition from lambda calc/functional
+// programming: an anonymous function declaration.
 LAMBDA_LINK <- SCOPE_LINK
 
 // A FunctionLink is a link that can be executed, with the result of

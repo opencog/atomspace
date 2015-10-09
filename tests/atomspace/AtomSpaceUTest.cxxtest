@@ -376,7 +376,7 @@ public:
             HandleSeq temp(2);
             temp[0] = h[i];
             temp[1] = h[4];
-            FU[i] = atomSpace->add_link(SCHEMA_EXECUTION_LINK, temp);
+            FU[i] = atomSpace->add_link(SUBSET_LINK, temp);
             FU[i]->setTruthValue(SimpleTruthValue::createTV(ForceUser[i], SimpleTruthValue::confidenceToCount(0.99f)));
         }
         //logger().debug("ForceUser links created\n");
@@ -506,9 +506,9 @@ public:
                 }
             }
 
-            TS_ASSERT(classserver().isA(SCHEMA_EXECUTION_LINK, INHERITANCE_LINK));
+            TS_ASSERT(classserver().isA(SUBSET_LINK, INHERITANCE_LINK));
 
-            // Note: SCHEMA_EXECUTION_LINK is a subType of INHERITANCE_LINK
+            // Note: SUBSET_LINK is a subType of INHERITANCE_LINK
             HandleSeq links;
             atomSpace->get_handles_by_name(back_inserter(links), "", LINK, true);
             logger().debug("1) links.size() = %d Expected = %d\n", (int) links.size(), 8);
@@ -529,11 +529,11 @@ public:
             //logger().info("5) justInhLinks.size() = %d (vhIdx: %d)\n", justInhLinks.size(), vhIdx);
             TS_ASSERT(justInhLinks.size() == 4);
             HandleSeq partOfLinks;
-            atomSpace->get_handles_by_name(back_inserter(partOfLinks), "", SCHEMA_EXECUTION_LINK, true);
+            atomSpace->get_handles_by_name(back_inserter(partOfLinks), "", SUBSET_LINK, true);
             //logger().debug("5) partOfLinks.size() = %d\n", partOfLinks.size());
             TS_ASSERT(partOfLinks.size() == 4);
             partOfLinks.clear();
-            atomSpace->get_handles_by_name(back_inserter(partOfLinks), "", SCHEMA_EXECUTION_LINK, false);
+            atomSpace->get_handles_by_name(back_inserter(partOfLinks), "", SUBSET_LINK, false);
             //logger().debug("6) partOfLinks.size() = %d\n", partOfLinks.size());
             TS_ASSERT(partOfLinks.size() == 4);
         }

@@ -382,8 +382,8 @@ public:
      * @return A string representation of the node.
      * cannot be const, because observing the TV and AV requires a lock.
      */
-    virtual std::string toString(std::string indent) = 0;
-    virtual std::string toShortString(std::string indent) = 0;
+    virtual std::string toString(const std::string& indent) = 0;
+    virtual std::string toShortString(const std::string& indent) = 0;
 
 	// Work around gdb's incapability to build a string on the fly,
 	// see http://stackoverflow.com/questions/16734783 for more
