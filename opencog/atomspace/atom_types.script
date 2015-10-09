@@ -199,7 +199,7 @@ PUT_LINK <- SCOPE_LINK
 // except that GetLink is imperative, while SatisfyingSetLink is
 // declarative.  Likewise, BindLink is exactly the same thing as an
 // ImplicationLink, except that its imperative, not declarative.
-PATTERN_LINK <- SCOPE_LINK        // A pattern encapsulated in a Link.
+PATTERN_LINK <- SCOPE_LINK         // A pattern encapsulated in a Link.
 GET_LINK <- PATTERN_LINK           // Finds all groundings, return atoms
 SATISFACTION_LINK <- PATTERN_LINK  // Finds all groundings, return TV
 BIND_LINK <- GET_LINK              // Finds all groundings and executes

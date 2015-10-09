@@ -28,6 +28,7 @@
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/query/BindLinkAPI.h>
 #include "EvaluationLink.h"
 
 using namespace opencog;
@@ -169,6 +170,10 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle evelnk)
 	else if (FALSE_LINK == t)
 	{
 		return TruthValue::FALSE_TV();
+	}
+	else if (SATISFACTION_LINK == t)
+	{
+		return satisfaction_link(as, evelnk);
 	}
 
 	throw RuntimeException(TRACE_INFO,
