@@ -14,13 +14,14 @@
 ; a set of atoms.
 (define filter-it
 	(PutLink
-		; Declare a single variable: The variable must be a ConceptNode.
-		(TypedVariableLink
-			(VariableNode "%x")
-			(TypeNode "ConceptNode"))
+		(LambdaLink
+			; Declare a single variable: The variable must be a ConceptNode.
+			(TypedVariableLink
+				(VariableNode "%x")
+				(TypeNode "ConceptNode"))
 
-		; The body of the put is just the variable.
-		(VariableNode "%x")
+			; The body of the put is just the variable.
+			(VariableNode "%x"))
 
 		; This is the set of things that will be filtered.
 		(SetLink
@@ -43,14 +44,15 @@
 ; Similar to the above, but this time, we accept only EvaluationLinks.
 (define filter-links
 	(PutLink
-		; Declare a single variable: The variable must be an
-		; EvaluationLink.
-		(TypedVariableLink
-			(VariableNode "%x")
-			(TypeNode "EvaluationLink"))
+		(LambdaLink
+			; Declare a single variable: The variable must be an
+			; EvaluationLink.
+			(TypedVariableLink
+				(VariableNode "%x")
+				(TypeNode "EvaluationLink"))
 
-		; The body of the put is just the variable.
-		(VariableNode "%x")
+			; The body of the put is just the variable.
+			(VariableNode "%x"))
 
 		; This is the set of things that will be filtered.
 		(SetLink

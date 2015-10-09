@@ -377,9 +377,11 @@ Handle Variables::substitute_nocheck(const Handle& term,
 	LinkPtr lterm(LinkCast(term));
 	if (NULL == lterm) return term;
 
-	// QuoteLinks halt the reursion
-	// XXX TODO -- support UnquoteLink
+	// QuoteLinks halt the recursion
 	if (QUOTE_LINK == term->getType()) return term;
+
+	if (UNQUOTE_LINK == term->getType())
+		throw RuntimeException(TRACE_INFO, "Not implemented!");
 
 	// Recursively fill out the subtrees.
 	HandleSeq oset;

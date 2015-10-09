@@ -44,15 +44,20 @@ def is_a(Type t1, Type t2):
 #    class_ = type(name, (object, ), {})
 #    setattr(mod, name, class_)
 
+types = {}
 cdef generate_type_module():
+    global types
     types = {}
     cdef string s
+    # print "Class server has num types=", classserver().getNumberOfClasses()
     for i in range(0, classserver().getNumberOfClasses()):
         s = classserver().getTypeName(i)
         assert s.size() > 0, "Got blank type name while generating types module"
         types[s.c_str()] = i
+        # print "type ", i, " has name ", s
     types["NO_TYPE"] = NOTYPE
     return types
+
 types = type('atom_types', (), generate_type_module())
 
 #This function is for refreshing new types
@@ -60,4 +65,6 @@ types = type('atom_types', (), generate_type_module())
 #And you can refresh these new types by this function
 
 def get_refreshed_types():    
-    return type('atom_types', (), generate_type_module())
+    global types
+    types = type('atom_types', (), generate_type_module())
+    return types
