@@ -24,6 +24,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atoms/NumberNode.h>
+#include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/cython/PythonEval.h>
@@ -174,6 +175,10 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle evelnk)
 	else if (SATISFACTION_LINK == t)
 	{
 		return satisfaction_link(as, evelnk);
+	}
+	else if (DEFINED_PREDICATE_NODE == t)
+	{
+		return do_evaluate(as, DefineLink::get_definition(evelnk));
 	}
 
 	throw RuntimeException(TRACE_INFO,
