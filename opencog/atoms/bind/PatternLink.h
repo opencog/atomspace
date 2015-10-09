@@ -166,10 +166,7 @@ public:
 
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _varlist; }
-
-	const Handle& get_body(void) const { return _body; }
-
-	const Pattern& get_pattern(void) { return _pat; }
+	const Pattern& get_pattern(void) const { return _pat; }
 
 	bool satisfy(PatternMatchCallback&) const;
 
