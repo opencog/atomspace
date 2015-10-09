@@ -95,6 +95,9 @@ bool TruthValue::isDefaultTV() const
     return false;
 }
 
+/**
+ * Return true if the TV value is one of the pre-defined TV values.
+ */
 bool TruthValue::isDefinedTV() const
 {
     TruthValuePtr dtv = DEFAULT_TV();

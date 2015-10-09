@@ -94,29 +94,33 @@ std::string Link::toShortString(std::string indent)
 
 std::string Link::toString(std::string indent)
 {
-    std::string answer;
+    std::string answer = indent;
     std::string more_indent = indent + "  ";
-#define BUFSZ 1024
-    static char buf[BUFSZ];
 
-    snprintf(buf, BUFSZ, "(%s (av %d %d %d) %s\n",
-             classserver().getTypeName(_type).c_str(),
-             (int)getAttentionValue()->getSTI(),
-             (int)getAttentionValue()->getLTI(),
-             (int)getAttentionValue()->getVLTI(),
-             getTruthValue()->toString().c_str());
-    answer = indent + buf;
-    // Here the targets string is made. If a target is a node, its name is
-    // concatenated. If it's a link, all its properties are concatenated.
+    answer += "(" + classserver().getTypeName(_type);
+
+    // Print the TV and AV only if its not the default.
+    if (not getAttentionValue()->isDefaultAV())
+        answer += " (av " +
+             std::to_string(getAttentionValue()->getSTI()) + " " +
+             std::to_string(getAttentionValue()->getLTI()) + " " +
+             std::to_string(getAttentionValue()->getVLTI()) + ")";
+
+    if (not getTruthValue()->isDefaultTV())
+        answer += " " + getTruthValue()->toString();
+
+    answer += "\n";
+    // Here, the outset string is made. If a target is a node,
+    // its name is concatenated. If it's a link, then recurse.
     for (const Handle& h : _outgoing) {
         if (h.operator->() != NULL)
             answer += h->toString(more_indent);
         else
-            answer += indent + "Undefined Atom!\n";
+            answer += more_indent + "Undefined Atom!\n";
     }
 
-    answer += indent + ") ; [" + 
-            std::to_string(_uuid).c_str() + "][" +
+    answer += indent + ") ; [" +
+            std::to_string(_uuid) + "][" +
             std::to_string(_atomTable? _atomTable->get_uuid() : -1) +
             "]\n";
 
