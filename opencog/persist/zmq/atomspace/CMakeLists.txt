@@ -27,7 +27,7 @@ INSTALL (TARGETS zmqatoms
 )
 
 INSTALL (FILES
-	ZMQMessages.pb.h
+	${CMAKE_CURRENT_BINARY_DIR}/ZMQMessages.pb.h
 	ProtocolBufferSerializer.h
 	ZMQClient.h
 	ZMQPersistSCM.h
