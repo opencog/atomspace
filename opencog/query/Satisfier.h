@@ -70,6 +70,9 @@ class Satisfier :
 		// groundings.
 		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
 		                       const std::map<Handle, Handle> &term_soln);
+
+		// Final pass, if no grounding was found.
+		virtual bool search_finished(bool);
 };
 
 /**

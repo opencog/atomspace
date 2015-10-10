@@ -40,6 +40,26 @@ bool Satisfier::grounding(const std::map<Handle, Handle> &var_soln,
 	return false;
 }
 
+/// This method handles the case of SequentialAnd, SequentialOr with
+/// embedded AbsentLinks, NotLink-PresentLink and so-on.  The idea here
+/// is that, if the full pattern matcher ran, and NO groundings at all
+/// were found, then evaluation may still need to trigger evaluatable
+/// clauses that evaluate only if the search fails.  So, indeed, we do
+/// that here.
+bool Satisfier::search_finished(bool done)
+{
+	if (done) return done;
+
+	std::map<Handle,Handle> empty;
+	bool rc = eval_sentence(_pattern_body, empty);
+	if (rc)
+		_result = TruthValue::TRUE_TV();
+
+	return rc;
+}
+
+// ===========================================================
+
 bool SatisfyingSet::grounding(const std::map<Handle, Handle> &var_soln,
                               const std::map<Handle, Handle> &term_soln)
 {

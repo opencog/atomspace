@@ -494,18 +494,4 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 	return eval_term(top, gnds);
 }
 
-/// This method handles the case of SequentialAnd, SequentialOr with
-/// embedded AbsentLinks, NotLink-PresentLink and so-on.  The idea here
-/// is that, if the full pattern matcher ran, and NO groundings at all
-/// were found, then evaluation may still need to trigger evaluatable
-/// clauses that evaluate only if the search fails.  So, indeed, we do
-/// that here.
-bool DefaultPatternMatchCB::search_finished(bool done)
-{
-	if (done) return done;
-
-	std::map<Handle,Handle> empty;
-	return eval_sentence(_pattern_body, empty);
-}
-
 /* ===================== END OF FILE ===================== */

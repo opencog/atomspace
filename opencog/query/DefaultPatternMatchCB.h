@@ -77,8 +77,6 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		                           const std::map<Handle,Handle>& gnds)
 		{ return eval_sentence(pat, gnds); }
 
-		virtual bool search_finished(bool);
-
 		virtual const std::set<Type>& get_connectives(void)
 		{
 			return _connectives;
