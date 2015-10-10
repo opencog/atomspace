@@ -335,7 +335,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 				_pat.clauses.emplace_back(ho);
 		}
 	}
-	else if (SEQUENTIAL_AND_LINK == t)
+	else if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t)
 	{
 		const HandleSeq& oset = LinkCast(hbody)->getOutgoingSet();
 		for (const Handle& ho : oset)
