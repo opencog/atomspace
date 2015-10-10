@@ -59,6 +59,7 @@ public:
 
     void test_sequence(void);
     void test_presence(void);
+    void test_fallback(void);
 };
 
 void SequenceUTest::tearDown(void)
@@ -155,6 +156,34 @@ void SequenceUTest::test_presence(void)
 
     TruthValuePtr tv = eval->eval_tv("(cog-satisfy empty-sequence)");
     TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * SequentialOrLink unit test.
+ */
+void SequenceUTest::test_fallback(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/sequence.scm");
+    load_scm_files_from_config(*as);
+
+    // This should not throw any exceptions.
+    TruthValuePtr tv = eval->eval_tv("(cog-satisfy drag-race)");
+    TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
+
+    // Check the number of green lights and red lights that were
+    // evaluated. The pattern has two green lights and one red
+    // light... The GPN's count how many times these are hit, and
+    // the counts should be correct.
+    std::string sngreen = eval->eval("num-green");
+    std::string snred = eval->eval("num-red");
+    int ngreen = atoi(sngreen.c_str());
+    int nred = atoi(snred.c_str());
+    TS_ASSERT_EQUALS(1, ngreen);
+    TS_ASSERT_EQUALS(3, nred);
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
