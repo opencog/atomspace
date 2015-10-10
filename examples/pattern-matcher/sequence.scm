@@ -107,15 +107,15 @@
 )
 
 (define (start-again)
-	(cog-satisfy traffic-lights)
+	(cog-evaluate! traffic-lights)
 	(simple-format #t "Went through ~A green lights and ~A  red lights\n"
 		num-green num-red)
 )
 
 ;;; Try the below.  This should result in an exception being thrown.
 ;;;
-; (cog-satisfy off-road)
-
+; (cog-evaluate! off-road)
+;
 ;;; The below should result in the green light being seen twice, and
 ;;; the red light once, and no exceptions or errors.
 ;;;

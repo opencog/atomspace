@@ -203,10 +203,12 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 Handle AtomTable::getHandle(const LinkPtr& l) const
 {
     const AtomTable *env = this;
-    do {
-        if (l->_atomTable == env) return Handle(l);
-        env = env->_environ;
-    } while (env);
+    if (l->_atomTable) {
+        do {
+            if (l->_atomTable == env) return Handle(l);
+            env = env->_environ;
+        } while (env);
+    }
 
     return getHandle(l->getType(), l->getOutgoingSet());
 }
