@@ -113,3 +113,31 @@
 		)
 	)
 )
+
+;;; The below is very similar to the above, except that this uses
+;;; a SequentialOrLink that halts after the first TRUE value.
+;;;
+(define drag-race
+	(SatisfactionLink
+		(VariableList)  ; no variables
+		(SequentialOrLink   ; <==== unlike before, this it OR
+			(EvaluationLink
+				(GroundedPredicateNode "scm: stop-go")
+				(ListLink red-light)
+			)
+			(EvaluationLink
+				(GroundedPredicateNode "scm: stop-go")
+				(ListLink red-light)
+			)
+			(EvaluationLink
+				(GroundedPredicateNode "scm: stop-go")
+				(ListLink red-light)
+			)
+			(EvaluationLink
+				(GroundedPredicateNode "scm: stop-go")
+				(ListLink green-light)
+			)
+			(EvaluationLink
+				(GroundedPredicateNode "scm: stop-go")
+				(ListLink
+					(ConceptNode ".... And they're off!"))))))
