@@ -41,14 +41,27 @@ bool Satisfier::grounding(const std::map<Handle, Handle> &var_soln,
 }
 
 /// This method handles the case of SequentialAnd, SequentialOr with
-/// embedded AbsentLinks, NotLink-PresentLink and so-on.  The idea here
-/// is that, if the full pattern matcher ran, and NO groundings at all
-/// were found, then evaluation may still need to trigger evaluatable
-/// clauses that evaluate only if the search fails.  So, indeed, we do
-/// that here.
+/// embedded AbsentLinks, NotLink-PresentLink and some weird
+/// combinations of NotLink-ChoiceLink, and so-on.  The idea here is
+/// that, if the pattern matcher ran to exhaustion, and NO groundings
+/// at all were found, then pattern evaluation may still need to
+/// trigger evaluatable clauses that evaluate only when exhaustive
+/// search fails.  So, indeed, we do that here.
+///
+/// Of course, if the pattern had no variables (e.g. a SequenceLink or
+/// FallbackLink with only evaluatables), then there cannot be a
+/// grounding failure, by definition.  And if there was a grounding,
+/// there can be no grounding failure, either.
 bool Satisfier::search_finished(bool done)
 {
 	if (done) return done;
+
+	// If there were no variables to be grounded, we have nothing to do.
+	if (not _have_variables) return done;
+
+	// If there was a grounding, then don't don't re-run; we're here
+	// only to handle the no-groundings case.
+	if (TruthValue::TRUE_TV() == _result) return done;
 
 	std::map<Handle,Handle> empty;
 	bool rc = eval_sentence(_pattern_body, empty);

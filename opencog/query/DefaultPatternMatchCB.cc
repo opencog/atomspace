@@ -53,6 +53,7 @@ void DefaultPatternMatchCB::set_pattern(const Variables& vars,
 	_type_restrictions = &vars.typemap;
 	_dynamic = &pat.evaluatable_terms;
 	_have_evaluatables = (0 < _dynamic->size());
+	_have_variables = (0 < vars.varseq.size());
 	_pattern_body = pat.body;
 }
 

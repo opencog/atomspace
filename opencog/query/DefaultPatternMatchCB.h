@@ -90,6 +90,8 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		const VariableTypeMap* _type_restrictions = NULL;
 		const std::set<Handle>* _dynamic = NULL;
 		bool _have_evaluatables = false;
+
+		bool _have_variables;
 		Handle _pattern_body;
 
 		// Temp atomspace used for test-groundings of virtual links.
