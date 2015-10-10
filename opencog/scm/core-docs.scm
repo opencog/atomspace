@@ -1,3 +1,15 @@
+;
+; core-docs.scm
+;
+; Provide documentation for all the functions implemented in C++ code.
+; These can be viewed the guile interpreter prompt by saying
+;
+;    guile> ,describe  FUNCTION-NAME
+;
+; A list of all of these is printed by saying
+;
+;    guile> ,apropos cog
+;
 (set-procedure-property! cog-new-node 'documentation
 "
  cog-new-node node-type node-name
