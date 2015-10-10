@@ -451,11 +451,11 @@ void PatternLink::extract_optionals(const std::set<Handle> &vars,
 			LinkPtr lopt(LinkCast(h));
 
 			// We insist on an arity of 1, because anything else is
-			// ambiguous: consider not(A B) is that (not(A) and not(B))
-			// or is it (not(A) or not(B))?
+			// ambiguous: consider absent(A B) is that: "both A and B must
+			// be absent"?  Or is it "if any of A and B are absent, then .."
 			if (1 != lopt->getArity())
 				throw InvalidParamException(TRACE_INFO,
-					"NotLink and AbsentLink can have an arity of one only!");
+					"AbsentLink can have an arity of one only!");
 
 			const Handle& inv(lopt->getOutgoingAtom(0));
 			_pat.optionals.insert(inv);
