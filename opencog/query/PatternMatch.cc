@@ -91,6 +91,11 @@ class PMCGroundings : public PatternMatchCallback
 			return _cb.initiate_search(pme);
 		}
 
+		bool search_finished(bool done)
+		{
+			return _cb.search_finished(done);
+		}
+
 		// This one we don't pass through. Instead, we collect the
 		// groundings.
 		bool grounding(const std::map<Handle, Handle> &var_soln,
@@ -334,6 +339,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 		bool found = pmcb.initiate_search(&pme);
 
 		logger().fine("================= Done with Search =================");
+		found = pmcb.search_finished(found);
 
 		return found;
 	}

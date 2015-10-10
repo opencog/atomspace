@@ -53,6 +53,7 @@ void DefaultPatternMatchCB::set_pattern(const Variables& vars,
 	_type_restrictions = &vars.typemap;
 	_dynamic = &pat.evaluatable_terms;
 	_have_evaluatables = (0 < _dynamic->size());
+	_pattern_body = pat.body;
 }
 
 
@@ -393,7 +394,8 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 	{
 		// If *every* clause in the PresentLink has been grounded,
 		// then return true.  That is, PresentLink behaves like an
-		// AndLink for term-presence.
+		// AndLink for term-presence.  The other behavior "if some
+		// clause is present" is implemented by ChoiceLink.
 		for (const Handle& h : oset)
 		{
 			try
@@ -407,20 +409,59 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 		}
 		return true;
 	}
-	// XXX TODO: Implement ChoiceLink here: its true if any one term
-	// is present.
-	// Also: Implement AbsentLink: its false if any clause is grounded.
-	// I guess AbsentLink is same as NotLink PresentLink.
-	// I guess ChoiceLink is the same as OrLink PresentLink.
-	// XXX .. would doing this here make the code simpler, than
-	// doing it in the bowels of the patten matcher, as it is
-	// currently being done? Well, no it cannot, since the current
-	// ChoiceLink gaurantees a complete exploration of all
-	// possibilities, whereas here, by willy-nilly grounding some
-	// subset, we would like run into conflicting assignments of
-	// groundings to variables, thus leading to bizarre conflicts
-	// and failures, and/or incomplete exploration of choices.
-	// What to do ??
+	else if (ABSENT_LINK == term_type)
+	{
+		// If *any* clause in the AbsentLink has been grounded, then
+		// return false.  That is, AbsentLink behaves like an AndLink
+		// for term-absence.  Note that this conflicts with
+		// PatternLink::extract_optionals(), which insists on an arity
+		// of one. Viz "must all be absent"? or "if any are absent"?
+		//
+		// AbsentLink is same as NotLink PresentLink.
+		for (const Handle& h : oset)
+		{
+			try
+			{
+				Handle g = gnds.at(h);
+			}
+			catch (...)
+			{
+				// If no grounding, that,s good, try the next one.
+				continue;
+			}
+			// If we are here, a grounding was found; that's bad.
+			return false;
+		}
+		return true;
+	}
+	else if (CHOICE_LINK == term_type)
+	{
+		// If *some* clause in the ChoiceLink has been grounded,
+		// then return true.  That is, ChoiceLink behaves like an
+		// OrLink for term-presence.  The other behavior "all clauses
+		// must be present" is implemented by PresentLink.
+		//
+		// XXX ... This might be buggy; I'm confused. Deep in the bowels
+		// of the pattern matcher, we make an explicit promise to explore
+		// all possible choices.  Here, we are making no such promise;
+		// instead, we're just responding to what higher layers have
+		// determined.  Did those higher layers actually explore all
+		// possibilities?  And if they failed to do so, can we even do
+		// anything about that here? Seems like we can't do anything...
+		for (const Handle& h : oset)
+		{
+			try
+			{
+				Handle g = gnds.at(h);
+			}
+			catch (...)
+			{
+				continue;
+			}
+			return true;
+		}
+		return false;
+	}
 
 	// --------------------------------------------------------
 	// If we are here, then what we have is some atom that is not
@@ -451,6 +492,20 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 
 	// If it's not grounded, then perhaps its executable.
 	return eval_term(top, gnds);
+}
+
+/// This method handles the case of SequentialAnd, SequentialOr with
+/// embedded AbsentLinks, NotLink-PresentLink and so-on.  The idea here
+/// is that, if the full pattern matcher ran, and NO groundings at all
+/// were found, then evaluation may still need to trigger evaluatable
+/// clauses that evaluate only if the search fails.  So, indeed, we do
+/// that here.
+bool DefaultPatternMatchCB::search_finished(bool done)
+{
+	if (done) return done;
+
+	std::map<Handle,Handle> empty;
+	return eval_sentence(_pattern_body, empty);
 }
 
 /* ===================== END OF FILE ===================== */

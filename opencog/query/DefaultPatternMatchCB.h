@@ -77,6 +77,8 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		                           const std::map<Handle,Handle>& gnds)
 		{ return eval_sentence(pat, gnds); }
 
+		virtual bool search_finished(bool);
+
 		virtual const std::set<Type>& get_connectives(void)
 		{
 			return _connectives;
@@ -90,6 +92,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		const VariableTypeMap* _type_restrictions = NULL;
 		const std::set<Handle>* _dynamic = NULL;
 		bool _have_evaluatables = false;
+		Handle _pattern_body;
 
 		// Temp atomspace used for test-groundings of virtual links.
 		AtomSpace _temp_aspace;
