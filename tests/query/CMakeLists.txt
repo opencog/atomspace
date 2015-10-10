@@ -17,8 +17,6 @@ LINK_LIBRARIES (
 	execution
 )
 
-#start gearman-job-server
-
 # We want to run the tests in the order below;
 # Each test gets progressively more complex, and exercises
 # features that the later tests depend on.
