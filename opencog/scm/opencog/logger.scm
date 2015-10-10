@@ -1,19 +1,45 @@
 ;
 ; OpenCog Logger module
 ;
+; Copyright (c) 2015, OpenCog Foundation
+;
 
 (define-module (opencog logger))
 
 (load-extension "libsmob" "opencog_logger_init")
 
-;
-;;; Commentary:
-;
-; Helper to use ice-9 format in logger functions
-;
-;;; Code:
-; Copyright (c) 2015, OpenCog Foundation
-;
+; Documentation for the functions implemented as C++ code
+(set-procedure-property! cog-logger-get-filename 'documentation
+"
+ cog-logger-get-filename
+    Return the name of the current logfile.
+")
+
+(set-procedure-property! cog-logger-get-level 'documentation
+"
+ cog-logger-get-level
+    Return the current logging level.
+")
+
+(set-procedure-property! cog-logger-set-filename 'documentation
+"
+ cog-logger-set-filename FILENAME
+    Change the current logger file to FILENAME.
+")
+
+(set-procedure-property! cog-logger-set-level 'documentation
+"
+ cog-logger-set-level LEVEL
+    Set the current logging level to LEVEL.
+")
+
+(set-procedure-property! cog-logger-set-stdout 'documentation
+"
+ cog-logger-set-stdout BOOL
+    If BOOL is #t, send log messages to stdout; else don't.
+")
+
+; Helper functions, using ice-9 format in logger functions.
 
 (use-modules (ice-9 format))
 
