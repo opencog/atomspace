@@ -181,9 +181,13 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle evelnk)
 		return do_evaluate(as, DefineLink::get_definition(evelnk));
 	}
 
-	throw RuntimeException(TRACE_INFO,
-		"Expecting to get an EvaluationLink, got %s",
-		evelnk->toString().c_str());
+	// We do not want to waste CPU time printing an exception message;
+	// this is supposed to be handled automatically.  Hmmm... unless
+	// its a user Syntax error ....
+	throw NotEvaluatableException();
+	// throw SyntaxException(TRACE_INFO,
+		// "Expecting to get an EvaluationLink, got %s",
+		// evelnk->toString().c_str());
 }
 
 /// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink

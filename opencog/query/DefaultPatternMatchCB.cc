@@ -312,7 +312,19 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	else
 	{
 		_temp_aspace.clear();
-		tvp = EvaluationLink::do_evaluate(&_temp_aspace, gvirt);
+		try
+		{
+			tvp = EvaluationLink::do_evaluate(&_temp_aspace, gvirt);
+		}
+		catch (const NotEvaluatableException& ex)
+		{
+			// The do_evaluate() bove can throw if its given ungrounded
+			// expressions. It can be given ungrounded expressions if
+			// no grounding was found, and a final pass, run by the
+			// search_finished() callback, puts us here. So handle this
+			// case gracefully.
+			return false;
+		}
 	}
 
 	// Avoid null-pointer dereference if user specified a bogus evaluation.
