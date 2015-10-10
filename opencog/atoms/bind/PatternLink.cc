@@ -61,7 +61,7 @@ void PatternLink::common_init(void)
 	// that the logical connectives are AndLink, OrLink and NotLink.
 	// Tweak the evaluatable_holders to reflect this.
 	std::set<Type> connectives({AND_LINK, SEQUENTIAL_AND_LINK,
-	                            OR_LINK, NOT_LINK});
+	                            OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
 	trace_connectives(connectives, _pat.clauses);
 
 	// Split the non-virtual clauses into connected components
@@ -335,7 +335,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 				_pat.clauses.emplace_back(ho);
 		}
 	}
-	else if (SEQUENTIAL_AND_LINK == t)
+	else if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t)
 	{
 		const HandleSeq& oset = LinkCast(hbody)->getOutgoingSet();
 		for (const Handle& ho : oset)
