@@ -122,3 +122,49 @@
 ; (start-again)
 ; (start-again)
 ; (start-again)
+;
+;
+;;; The below is very similar to the above, except that this uses
+;;; a SequentialOrLink that halts after the first TRUE value.
+;;;
+(define hot-rodding
+	(SatisfactionLink
+		(VariableList)  ; no variables
+		(SequentialOrLink   ; <==== unlike before, this it OR
+			(EvaluationLink
+				(GroundedPredicateNode "scm: stop-go")
+				(ListLink red-light)
+			)
+			(EvaluationLink
+				(GroundedPredicateNode "scm: stop-go")
+				(ListLink red-light)
+			)
+			(EvaluationLink
+				(GroundedPredicateNode "scm: stop-go")
+				(ListLink red-light)
+			)
+			(EvaluationLink
+				(GroundedPredicateNode "scm: stop-go")
+				(ListLink green-light)
+			)
+			(EvaluationLink
+				(GroundedPredicateNode "scm: stop-go")
+				(ListLink
+					(ConceptNode ".... And they're off!")
+				)
+			)
+		)
+	)
+)
+
+(define (drag-race)
+	(cog-evaluate! hot-rodding)
+	(simple-format #t "Waited on ~A red lights\n" num-red)
+)
+
+;;; The below should result in the three red lights before it turns
+;;; green.
+;;;
+; (drag-race)
+; (drag-race)
+; (drag-race)
