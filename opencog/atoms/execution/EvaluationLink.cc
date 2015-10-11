@@ -166,10 +166,20 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle evelnk)
 	}
 	else if (TRUE_LINK == t)
 	{
+		// Assume that the link is wrapping something executable,
+		// which we execute, but then ignore the result.
+		LinkPtr ll(LinkCast(evelnk));
+		Instantiator inst(as);
+		inst.execute(ll->getOutgoingAtom(0));
 		return TruthValue::TRUE_TV();
 	}
 	else if (FALSE_LINK == t)
 	{
+		// Assume that the link is wrapping something executable,
+		// which we execute, but then ignore the result.
+		LinkPtr ll(LinkCast(evelnk));
+		Instantiator inst(as);
+		inst.execute(ll->getOutgoingAtom(0));
 		return TruthValue::FALSE_TV();
 	}
 	else if (SATISFACTION_LINK == t)
