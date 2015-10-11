@@ -229,6 +229,42 @@ void SequenceUTest::test_pass_presence(void)
     ntrig = atoi(sntrig.c_str());
     TS_ASSERT_EQUALS(4, ntrig);
 
+    // -------------------------------------------------------
+    // and now, all the above should fail...
+    eval->eval_h("(EvaluationLink (PredicateNode \"visible\")"
+                 "(ListLink (ConceptNode \"yes it is\")))");
+
+    int no_change = 4;
+
+    // ----
+    eval->eval_tv("(cog-satisfy or-presence)");
+    TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
+
+    ntrig = atoi(eval->eval("trig").c_str());
+    TS_ASSERT_EQUALS(no_change, ntrig);
+
+    // ----
+    tv = eval->eval_tv("(cog-satisfy and-absence)");
+    TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
+
+    ntrig = atoi(eval->eval("trig").c_str());
+    TS_ASSERT_EQUALS(no_change, ntrig);
+
+    // ----
+    tv = eval->eval_tv("(cog-satisfy and-not-present)");
+    TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
+
+    ntrig = atoi(eval->eval("trig").c_str());
+    TS_ASSERT_EQUALS(no_change, ntrig);
+
+    // ----
+    tv = eval->eval_tv("(cog-satisfy or-not-absent)");
+    TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
+
+    ntrig = atoi(eval->eval("trig").c_str());
+    TS_ASSERT_EQUALS(no_change, ntrig);
+
+    // ----
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
