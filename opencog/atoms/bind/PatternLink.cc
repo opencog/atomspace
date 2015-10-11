@@ -347,6 +347,21 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 				for (const Handle& ph : pset)
 					_pat.clauses.emplace_back(ph);
 			}
+			else if (ABSENT_LINK == ot)
+			{
+				LinkPtr lopt(LinkCast(ho));
+
+				// We insist on an arity of 1, because anything else is
+				// ambiguous: consider absent(A B) is that: "both A and B must
+				// be absent"?  Or is it "if any of A and B are absent, then .."
+				if (1 != lopt->getArity())
+					throw InvalidParamException(TRACE_INFO,
+						"AbsentLink can have an arity of one only!");
+
+				const Handle& inv(lopt->getOutgoingAtom(0));
+				_pat.optionals.insert(inv);
+				_pat.cnf_clauses.emplace_back(inv);
+			}
 		}
 		_pat.clauses.emplace_back(hbody);
 	}
