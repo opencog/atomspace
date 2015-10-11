@@ -285,6 +285,16 @@ class PatternMatchCallback
 		virtual bool initiate_search(PatternMatchEngine *) = 0;
 
 		/**
+		 * Called when the search has completed. In principle, this is not
+		 * really needed, since the above callback "knows" when the search
+		 * is completed: its completed when the above returns. In practice, 
+		 * the implementation is much simpler if we have a distinct
+		 * callback to handle this situation.  The argument, is the return
+		 * value from initiaitate_search().
+		 */
+		virtual bool search_finished(bool done) { return done; }
+
+		/**
 		 * Called before search initiation, to indicate the pattern
 		 * that will be searched for, and the variables to be grounded
 		 * during the search.

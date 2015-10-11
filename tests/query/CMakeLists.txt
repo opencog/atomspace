@@ -17,8 +17,6 @@ LINK_LIBRARIES (
 	execution
 )
 
-#start gearman-job-server
-
 # We want to run the tests in the order below;
 # Each test gets progressively more complex, and exercises
 # features that the later tests depend on.
@@ -131,6 +129,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/match-link.scm
     ${PROJECT_BINARY_DIR}/tests/query/match-link.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/sequence.scm
     ${PROJECT_BINARY_DIR}/tests/query/sequence.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/seq-absence.scm
+    ${PROJECT_BINARY_DIR}/tests/query/seq-absence.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/seq-presence.scm
     ${PROJECT_BINARY_DIR}/tests/query/seq-presence.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/single.scm

@@ -38,7 +38,7 @@ void DeleteLink::init(void)
 	// If it doesn't, then the entire handleset should be deleted
 	// (removed from the atomspace). We can't do this at constructor
 	// time, because we don't know the atomspace yet.  So we hack
-	// around this by thowing at construtor time.
+	// around this by throwing at constructor time.
 	//
 	FreeLink::init();
 	if (0 == _varseq.size())

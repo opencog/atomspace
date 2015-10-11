@@ -337,23 +337,57 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	}
 	else if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t)
 	{
+		// XXX FIXME, Just like in trace_connectives, assume we are
+		// working with the DefaultPatternMatchCB, which uses these.
+		std::set<Type> connectives({AND_LINK, SEQUENTIAL_AND_LINK,
+		                            OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
 		const HandleSeq& oset = LinkCast(hbody)->getOutgoingSet();
-		for (const Handle& ho : oset)
-		{
-			Type ot = ho->getType();
-			if (PRESENT_LINK == ot)
-			{
-				const HandleSeq& pset = LinkCast(ho)->getOutgoingSet();
-				for (const Handle& ph : pset)
-					_pat.clauses.emplace_back(ph);
-			}
-		}
+		unbundle_clauses_rec(connectives, oset);
+
 		_pat.clauses.emplace_back(hbody);
 	}
 	else
 	{
 		// There's just one single clause!
 		_pat.clauses.emplace_back(hbody);
+	}
+}
+
+/// Search for any PRESENT, ABSENT_LINK's that are recusively
+/// embedded inside some evaluatable clause.  Expose thse as
+/// first-class, groundable clauses.
+void PatternLink::unbundle_clauses_rec(const std::set<Type>& connectives,
+                                       const HandleSeq& nest)
+{
+	for (const Handle& ho : nest)
+	{
+		Type ot = ho->getType();
+		if (PRESENT_LINK == ot)
+		{
+			const HandleSeq& pset = LinkCast(ho)->getOutgoingSet();
+			for (const Handle& ph : pset)
+				_pat.clauses.emplace_back(ph);
+		}
+		else if (ABSENT_LINK == ot)
+		{
+			LinkPtr lopt(LinkCast(ho));
+
+			// We insist on an arity of 1, because anything else is
+			// ambiguous: consider absent(A B) is that: "both A and B must
+			// be absent"?  Or is it "if any of A and B are absent, then .."
+			if (1 != lopt->getArity())
+				throw InvalidParamException(TRACE_INFO,
+					"AbsentLink can have an arity of one only!");
+
+			const Handle& inv(lopt->getOutgoingAtom(0));
+			_pat.optionals.insert(inv);
+			_pat.cnf_clauses.emplace_back(inv);
+		}
+		else if (connectives.find(ot) != connectives.end())
+		{
+			LinkPtr lnest(LinkCast(ho));
+			unbundle_clauses_rec(connectives, lnest->getOutgoingSet());
+		}
 	}
 }
 
@@ -451,11 +485,11 @@ void PatternLink::extract_optionals(const std::set<Handle> &vars,
 			LinkPtr lopt(LinkCast(h));
 
 			// We insist on an arity of 1, because anything else is
-			// ambiguous: consider not(A B) is that (not(A) and not(B))
-			// or is it (not(A) or not(B))?
+			// ambiguous: consider absent(A B) is that: "both A and B must
+			// be absent"?  Or is it "if any of A and B are absent, then .."
 			if (1 != lopt->getArity())
 				throw InvalidParamException(TRACE_INFO,
-					"NotLink and AbsentLink can have an arity of one only!");
+					"AbsentLink can have an arity of one only!");
 
 			const Handle& inv(lopt->getOutgoingAtom(0));
 			_pat.optionals.insert(inv);

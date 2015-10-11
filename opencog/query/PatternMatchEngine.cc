@@ -1186,10 +1186,6 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 			// try again later).  So validate the grounding, but leave
 			// the evaluation for the callback.
 // XXX TODO count the number of ungrounded vars !!! (make sure its zero)
-// XXX TODO make sure that all links from the clause_root to the term are
-// connectives (i.e. are in the _connectives set).  Else throw an error.
-// why bother with this extra overhead, though?? Do we really need to do
-// this?
 
 			bool found = _pmc.evaluate_sentence(clause_root, var_grounding);
 			logger().fine("After evaluating clause, found = %d", found);
