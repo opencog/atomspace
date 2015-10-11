@@ -12,8 +12,8 @@
 ;
 (set-procedure-property! cog-new-node 'documentation
 "
- cog-new-node node-type node-name
-    Create a new node of the given type and name
+ cog-new-node NODE-TYPE NODE-NAME
+    Create a new node of type NODE-TYPE and name NODE-NAME.
 
     Optionally, a truth value and/or an attention value can follow
     the node name.
@@ -34,9 +34,9 @@
 
 (set-procedure-property! cog-node 'documentation
 "
- cog-node node-type node-name
-    Returns the node of the given type and name, if it exists, else
-    returns null.
+ cog-node NODE-TYPE NODE-NAME
+    Returns the node of type NODE-TYPE and name NODE-NAME, if it exists,
+    else returns null.
 
     Optionally, a truth value and/or attention value can follow the
     node name. If the node exists, then the truth value and/or
@@ -67,8 +67,8 @@
 
 (set-procedure-property! cog-new-link 'documentation
 "
- cog-new-link link-type atom ... atom
-    Create a new link, with the given atoms in the link.
+ cog-new-link LINK-TYPE ATOM-1 ... ATOM-N
+    Create a new link, of type LINK-TYPE, with the given atoms in the link.
 
     Optionally, a truth value or an attention value can be included
     in the list of atoms.
@@ -97,9 +97,9 @@
 
 (set-procedure-property! cog-link 'documentation
 "
- cog-link link-type atom ... atom
-    Returns the link of the given type and list of atoms, if it
-    exists, else returns null.
+ cog-link LINK-TYPE ATOM-1 ... ATOM-N
+    Returns the link of the given type LINK-TYPE and list of atoms,
+    if it exists, else returns null.
 
     Optionally, a truth value or attention value can be included
     in the list of atoms. If the link exists, then the truth value
@@ -142,16 +142,16 @@
 
 (set-procedure-property! cog-delete 'documentation
 "
- cog-delete atom
-    Delete the indicated atom, but only if it has no incoming links.
+ cog-delete ATOM
+    Delete the indicated ATOM, but only if it has no incoming links.
 
     Returns #t if the atom was deleted, else returns #f if not deleted.\"
 ")
 
 (set-procedure-property! cog-delete-recursive 'documentation
 "
- cog-delete-recursive atom
-    Delete the indicated atom, and all atoms that point at it.
+ cog-delete-recursive ATOM
+    Delete the indicated ATOM, and all atoms that point at it.
 
     Both functions return #t on success, else they return #f.
     If #f is returned, then the delete failed.
@@ -191,8 +191,8 @@
 
 (set-procedure-property! cog-atom? 'documentation
 "
- cog-atom? exp
-    Return #t if exp is an atom, else return #f
+ cog-atom? EXP
+    Return #t if EXP is an atom, else return #f
 
     Example:
        ; Define a node
@@ -206,8 +206,8 @@
 
 (set-procedure-property! cog-node? 'documentation
 "
- cog-node? exp
-    Return #t if exp is an node, else return #f
+ cog-node? EXP
+    Return #t if EXP is an node, else return #f
 
     See also cog-node, which will check to see if a specific node
     already exists.
@@ -224,8 +224,8 @@
 
 (set-procedure-property! cog-link? 'documentation
 "
- cog-link? exp
-    Return #t if exp is an link, else return #f
+ cog-link? EXP
+    Return #t if EXP is an link, else return #f
 
     See also cog-link, which will check to see if a specific link
     already exists.
@@ -242,8 +242,8 @@
 
 (set-procedure-property! cog-name 'documentation
 "
- cog-name atom
-    Return the name of the node. If the atom is not a node,
+ cog-name ATOM
+    Return the name of the node ATOM. If the atom is not a node,
     returns NIL.
 
     Example:
@@ -255,8 +255,8 @@
 
 (set-procedure-property! cog-type 'documentation
 "
- cog-type atom
-    Return the type of the atom.
+ cog-type ATOM
+    Return the type of ATOM.
 
     Example:
        ; Define a node
@@ -269,8 +269,8 @@
 
 (set-procedure-property! cog-arity 'documentation
 "
- cog-arity atom
-    Return the arity of the atom.
+ cog-arity ATOM
+    Return the arity of ATOM.
 
     Example:
        guile> (define x (cog-new-node 'ConceptNode \"abc\"))
@@ -283,8 +283,8 @@
 
 (set-procedure-property! cog-incoming-set 'documentation
 "
- cog-incoming-set atom
-    Return the incoming set of the atom.  This set is returned as an
+ cog-incoming-set ATOM
+    Return the incoming set of ATOM.  This set is returned as an
     ordinary scheme list.
 
     Example:
@@ -325,21 +325,21 @@
 
 (set-procedure-property! cog-outgoing-set 'documentation
 "
- cog-outgoing-set atom
-    Return the outgoing set of the atom.  This set is returned as an
+ cog-outgoing-set ATOM
+    Return the outgoing set of ATOM.  This set is returned as an
     ordinary scheme list.
 ")
 
 (set-procedure-property! cog-atom 'documentation
 "
- cog-atom handle
-    Reference the atom identified by the integer-valued handle
+ cog-atom UUID
+    Reference the atom identified by the integer-valued UUID.
 ")
 
 (set-procedure-property! cog-handle 'documentation
 "
- cog-handle atom
-    Return the handle (which is an integer) of the atom
+ cog-handle ATOM
+    Return the UUID (which is an integer) of ATOM.
 
     It may be useful to remember that scheme indicates hexadecimal
     numbers by preceeding them with #x, and so, for example,
@@ -367,8 +367,8 @@
 
 (set-procedure-property! cog-new-stv 'documentation
 "
- cog-new-stv mean confidence
-    Create a SimpleTruthValue with the given mean and confidence.
+ cog-new-stv MEAN CONFIDENCE
+    Create a SimpleTruthValue with the given MEAN and CONFIDENCE.
     Unlike atoms, truth values are ephemeral: they are automatically
     garbage-collected when no longer needed.
 
@@ -381,8 +381,8 @@
 
 (set-procedure-property! cog-new-ctv 'documentation
 "
- cog-new-ctv mean confidence count
-    Create a CountTruthValue with the given mean, confidence and count.
+ cog-new-ctv MEAN CONFIDENCE COUNT
+    Create a CountTruthValue with the given MEAN, CONFIDENCE and COUNT.
     Unlike atoms, truth values are ephemeral: they are automatically
     garbage-collected when no longer needed.
 
@@ -395,10 +395,10 @@
 
 (set-procedure-property! cog-new-itv 'documentation
 "
- cog-new-itv lower upper confidence
-    Create an IndefiniteTruthValue with the given lower, upper and confidence.
-    Unlike atoms, truth values are ephemeral: they are automatically
-    garbage-collected when no longer needed.
+ cog-new-itv LOWER UPPER CONFIDENCE
+    Create an IndefiniteTruthValue with the given LOWER, UPPER and
+    CONFIDENCE.  Unlike atoms, truth values are ephemeral: they are
+    automatically garbage-collected when no longer needed.
 
     Throws errors if lower, upper and confidence are not floating-point
     values.
@@ -409,10 +409,10 @@
 
 (set-procedure-property! cog-new-ptv 'documentation
 "
- cog-new-ptv mean confidence count
-    Create a ProbabilisticTruthValue with the given mean, confidence and count.
-    Unlike atoms, truth values are ephemeral: they are automatically
-    garbage-collected when no longer needed.
+ cog-new-ptv MEAN CONFIENCE COUNT
+    Create a ProbabilisticTruthValue with the given MEAN, CONFIDENCE
+    and COUNT.  Unlike atoms, truth values are ephemeral: they are
+    automatically garbage-collected when no longer needed.
 
     Throws errors if mean, confidence and count are not floating-point
     values.
@@ -423,8 +423,8 @@
 
 (set-procedure-property! cog-new-ftv 'documentation
 "
- cog-new-ftv mean confidence
-    Create a FuzzyTruthValue with the given mean and confidence.
+ cog-new-ftv MEAN CONFIDENCE
+    Create a FuzzyTruthValue with the given MEAN and CONFIDENCE.
     Unlike atoms, truth values are ephemeral: they are automatically
     garbage-collected when no longer needed.
 
@@ -437,8 +437,8 @@
 
 (set-procedure-property! cog-tv? 'documentation
 "
- cog-tv? exp
-    Return #t if exp is a truth value, else return #f
+ cog-tv? EXP
+    Return #t if EXP is a truth value, else return #f
 
     Example:
        ; Define a simple truth value
@@ -452,38 +452,38 @@
 
 (set-procedure-property! cog-stv? 'documentation
 "
- cog-stv? exp
-    Return #t if exp is a SimpleTruthValue, else return #f
+ cog-stv? EXP
+    Return #t if EXP is a SimpleTruthValue, else return #f
 ")
 
 (set-procedure-property! cog-ctv? 'documentation
 "
- cog-ctv? exp
-    Return #t if exp is a CountTruthValue, else return #f
+ cog-ctv? EXP
+    Return #t if EXP is a CountTruthValue, else return #f
 ")
 
 (set-procedure-property! cog-itv? 'documentation
 "
- cog-itv? exp
-    Return #t if exp is a IndefiniteTruthValue, else return #f
+ cog-itv? EXP
+    Return #t if EXP is a IndefiniteTruthValue, else return #f
 ")
 
 (set-procedure-property! cog-ptv? 'documentation
 "
- cog-ptv? exp
-    Return #t if exp is a ProbablisticTruthValue, else return #f
+ cog-ptv? EXP
+    Return #t if EXP is a ProbablisticTruthValue, else return #f
 ")
 
 (set-procedure-property! cog-ftv? 'documentation
 "
- cog-ftv? exp
-    Return #t if exp is a FuzzyTruthValue, else return #f
+ cog-ftv? EXP
+    Return #t if EXP is a FuzzyTruthValue, else return #f
 ")
 
 (set-procedure-property! cog-tv 'documentation
 "
- cog-tv atom
-    Return the truth-value of the atom.
+ cog-tv ATOM
+    Return the truth-value of ATOM.
 
     Example:
        ; Define a node
@@ -498,8 +498,8 @@
 
 (set-procedure-property! cog-set-tv! 'documentation
 "
- cog-set-tv! atom tv
-    Set the truth-value of the atom.
+ cog-set-tv! ATOM TV
+    Set the truth-value of ATOM to TV.
 
     Example:
        ; Define a node
@@ -514,8 +514,8 @@
 
 (set-procedure-property! cog-tv->alist 'documentation
 "
- cog-tv->alist tv
-    Convert a truth value to an association list (alist).
+ cog-tv->alist TV
+    Convert the truth value TV to an association list (alist).
 
     Example:
        guile> (define x (cog-new-stv 0.7 0.9))
@@ -525,10 +525,10 @@
 
 (set-procedure-property! cog-new-av 'documentation
 "
- cog-new-av sti lti vlti
+ cog-new-av STI LTI VLTI
     Create an AttentionValue with the given STI, LTI and VLTI.
-    Unlike atoms, attention values are ephemeral: they are automatically
-    garbage-collected when no longer needed.
+    Unlike atoms, attention values are ephemeral: they are
+    automatically garbage-collected when no longer needed.
 
     Example:
         ; Create a new attention value:
@@ -537,8 +537,8 @@
 
 (set-procedure-property! cog-av? 'documentation
 "
- cog-av? exp
-    Return #t if exp is an attention value, else return #f
+ cog-av? EXP
+    Return #t if EXP is an attention value, else return #f
 
     Example:
        ; Define a simple attention value
@@ -552,8 +552,8 @@
 
 (set-procedure-property! cog-av 'documentation
 "
- cog-av atom
-    Return the attention value of the atom.
+ cog-av ATOM
+    Return the attention value of ATOM.
 
     Example:
        ; Define a node
@@ -568,8 +568,8 @@
 
 (set-procedure-property! cog-set-av! 'documentation
 "
- cog-set-av! atom av
-    Set the attention value of the atom.
+ cog-set-av! ATOM AV
+    Set the attention value of ATOM to AV.
 
     Example:
        ; Define a node
@@ -584,8 +584,8 @@
 
 (set-procedure-property! cog-inc-vlti! 'documentation
 "
- cog-inc-vlti! atom av
-    Increase the vlti of the atom by 1.
+ cog-inc-vlti! ATOM
+    Increase the vlti of ATOM by 1.
 
     Example:
        ; Define a node
@@ -604,8 +604,8 @@
 
 (set-procedure-property! cog-dec-vlti! 'documentation
 "
- cog-dec-vlti! atom av
-    Decrease the vlti of the atom by 1.
+ cog-dec-vlti! ATOM
+    Decrease the vlti of ATOM by 1.
 
     Example:
        ; Define a node
@@ -620,8 +620,8 @@
 
 (set-procedure-property! cog-av->alist 'documentation
 "
- cog-av->alist av
-    Convert an attention value to an association list (alist).
+ cog-av->alist AV
+    Convert an attention value AV to an association list (alist).
 
     Example:
        guile> (define x (cog-new-av 99 88 0))
@@ -643,7 +643,7 @@
 
 (set-procedure-property! cog-set-af-boundary! 'documentation
 "
- cog-set-af-boundary! int
+ cog-set-af-boundary! STI
     Set the AttentionalFocus Boundary of the AtomSpace (which is a
     short integer STI value). Returns the new AttentionalFocus boundary
     (which is a short integer STI value).
@@ -675,8 +675,8 @@
 
 (set-procedure-property! cog-type? 'documentation
 "
- cog-type? symbol
-    Return #t if the symbol names an atom type, else return #f
+ cog-type? SYMOBL
+    Return #t if the SYMOBL names an atom type, else return #f
 
     Example:
         guile> (cog-type? 'ConceptNode)
@@ -687,8 +687,8 @@
 
 (set-procedure-property! cog-node-type? 'documentation
 "
- cog-node-type? symbol
-    Return #t if the symbol names an node type, else return #f
+ cog-node-type? SYMOBL
+    Return #t if the SYMOBL names an node type, else return #f
 
     Example:
         guile> (cog-node-type? 'ConceptNode)
@@ -701,8 +701,8 @@
 
 (set-procedure-property! cog-link-type? 'documentation
 "
- cog-link-type? symbol
-    Return #t if the symbol names a link type, else return #f
+ cog-link-type? SYMBOL
+    Return #t if the SYMBOL names a link type, else return #f
 
     Example:
         guile> (cog-link-type? 'ConceptNode)
@@ -715,8 +715,8 @@
 
 (set-procedure-property! cog-type->int 'documentation
 "
- cog-type->int type
-    Return the integer value corresponding to an atom type.
+ cog-type->int TYPE
+    Return the integer value corresponding to an atom TYPE.
 
     Example:
         guile> (cog-type->int 'ListLink)
@@ -725,8 +725,8 @@
 
 (set-procedure-property! cog-get-subtypes 'documentation
 "
- cog-get-subtypes type
-    Return a list of the subtypes of the given type.  Only the
+ cog-get-subtypes TYPE
+    Return a list of the subtypes of the given TYPE.  Only the
     immediate subtypes are returned; to obtain all subtypes, this
     function should be called recursively.
 
