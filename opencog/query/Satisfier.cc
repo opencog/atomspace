@@ -63,6 +63,10 @@ bool Satisfier::search_finished(bool done)
 	// only to handle the no-groundings case.
 	if (TruthValue::TRUE_TV() == _result) return done;
 
+	// _optionals_present will be set to true if some optional clause
+	// was grounded. Ergo, its not the no-grounding case.
+	if (_optionals_present) return done;
+
 	std::map<Handle,Handle> empty;
 	bool rc = eval_sentence(_pattern_body, empty);
 	if (rc)
