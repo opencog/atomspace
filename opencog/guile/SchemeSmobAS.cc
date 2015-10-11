@@ -121,11 +121,16 @@ AtomSpace* SchemeSmob::ss_to_atomspace(SCM sas)
  */
 SCM SchemeSmob::ss_as_uuid(SCM sas)
 {
-	AtomSpace* as = ss_to_atomspace(sas);
-	UUID uuid = Handle::INVALID_UUID;
-	if (as) uuid = as->get_uuid();
+	if (scm_is_null(sas))
+		return scm_from_ulong(Handle::INVALID_UUID);
 
+	AtomSpace* as = ss_to_atomspace(sas);
+	if (nullptr == as)
+		scm_wrong_type_arg_msg("cog-atomspace-uuid", 1, sas, "atomspace");
+
+	UUID uuid = as->get_uuid();
 	scm_remember_upto_here_1(sas);
+
 	return scm_from_ulong(uuid);
 }
 
@@ -155,7 +160,10 @@ SCM SchemeSmob::ss_as(SCM satom)
 	if (nullptr == h)
 		scm_wrong_type_arg_msg("cog-as", 1, satom, "opencog atom");
 
-	return make_as(h->getAtomSpace());
+	AtomSpace* as = h->getAtomSpace();
+	if (nullptr == as) return SCM_EOL;
+
+	return make_as(as);
 }
 
 /* ============================================================== */

@@ -75,7 +75,7 @@
 
     Throws errors if the link type is not a valid opencog link type,
     or if any of the arguments after the link type are not atoms,
-    truth values, attention values, or nil.
+    truth values, attention values, or null.
 
     Example:
         ; Creates two nodes, and a new link:
@@ -107,7 +107,7 @@
 
     Throws errors if the link type is not a valid opencog link type,
     or if any of the arguments after the link type are not atoms,
-    truth values, attention values, or nil.
+    truth values, attention values, or null.
 
     Example:
         ; Create two nodes:
@@ -244,7 +244,7 @@
 "
  cog-name ATOM
     Return the name of the node ATOM. If the atom is not a node,
-    returns NIL.
+    returns null.
 
     Example:
        ; Define a node
@@ -633,7 +633,7 @@
 "
  cog-as ATOM
     Return the atomspace of the ATOM.  If the ATOM does not belong to
-    any atomspace, nil is returned.
+    any atomspace, null is returned.
 ")
 
 (set-procedure-property! cog-af-boundary 'documentation
