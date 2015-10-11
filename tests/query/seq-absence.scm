@@ -58,4 +58,18 @@
 				(GroundedPredicateNode "scm: incr-trig") (ListLink))
 		)))
 
+;; This one is a bit perverted, and similar expressions are guaranteed
+;; to fail in the general case, cause teh pattern matcher treats
+;; AbsentLinks in a fundamentally different way. But we test this
+;; anyway, for now.
+(define or-not-absent
+	(SatisfactionLink
+		(SequentialOrLink
+			(NotLink (AbsentLink (EvaluationLink (PredicateNode "visible")
+					(ListLink (VariableNode "$x")))))
+			;; If above fails then increment
+			(EvaluationLink
+				(GroundedPredicateNode "scm: incr-trig") (ListLink))
+		)))
+
 ; ------------------------------------------------------
