@@ -94,6 +94,9 @@ protected:
 	HandleSeq _component_patterns;
 
 	void unbundle_clauses(const Handle& body);
+	void unbundle_clauses_rec(const std::set<Type>&,
+	                          const HandleSeq&);
+
 	void locate_defines(HandleSeq& clauses);
 	void validate_clauses(std::set<Handle>& vars,
 	                      HandleSeq& clauses,
