@@ -777,7 +777,7 @@
  cog-set-atomspace ATOMSPACE
     Set the current atomspace for this thread to ATOMSPACE. Every
     thread has it's own current atomspace, to which all atom-processing
-    operations apply.
+    operations apply.  Returns the previous atomspace for this thread.
 ")
 
 (set-procedure-property! cog-atomspace? 'documentation
@@ -792,7 +792,10 @@
     Create a new atomspace.  If the optional argument ATOMSPACE
     is present, then the new atomspace will be an expansion (child)
     of ATOMSPACE.  Atomspaces are automatically deleted when no more
-    references to them remain.
+    references to them remain. Returns the new atomspace.
+
+    Note that this does NOT set the current atomspace to the new one;
+    to do that, you need to use cog-set-atomspace!
 ")
 
 (set-procedure-property! cog-prt-atomspace 'documentation
