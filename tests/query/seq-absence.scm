@@ -48,4 +48,14 @@
 				(GroundedPredicateNode "scm: incr-trig") (ListLink))
 		)))
 
+(define and-not-present
+	(SatisfactionLink
+		(SequentialAndLink
+			(NotLink (PresentLink (EvaluationLink (PredicateNode "visible")
+					(ListLink (VariableNode "$x")))))
+			;; If above fails then increment
+			(EvaluationLink
+				(GroundedPredicateNode "scm: incr-trig") (ListLink))
+		)))
+
 ; ------------------------------------------------------
