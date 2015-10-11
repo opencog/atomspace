@@ -24,6 +24,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/StateLink.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -60,6 +61,7 @@ public:
     void test_sequence(void);
     void test_presence(void);
     void test_fallback(void);
+    void test_or_absence(void);
 };
 
 void SequenceUTest::tearDown(void)
@@ -186,4 +188,21 @@ void SequenceUTest::test_fallback(void)
     TS_ASSERT_EQUALS(3, nred);
 
     logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void SequenceUTest::test_or_absence(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/seq-absence.scm");
+    load_scm_files_from_config(*as);
+
+    TruthValuePtr tv = eval->eval_tv("(cog-satisfy or-sequence)");
+    TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
+
+    // Check the state.
+    Handle not_viz = eval->eval_h("(ConceptNode \"not-vis\")");
+    Handle stateh = eval->eval_h("(AnchorNode \"state\")");
+    Handle state = StateLink::get_state(stateh);
+    TS_ASSERT_EQUALS(state, not_viz);
 }
