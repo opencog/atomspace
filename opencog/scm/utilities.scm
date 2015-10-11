@@ -929,14 +929,16 @@
 
 ; ---------------------------------------------------------------------
 
-; Returns true when x is equal to y up to an epsilon
 (define (approx-eq? x y)
-    (let ((diff (- x y))
-          (minus-epsilon -0.000001)
-          (plus-epsilon 0.000001)
-          )
-        (and (< minus-epsilon diff) (> plus-epsilon diff))
-    )
+"
+ approx-eq? X Y
+    Returns true when X is equal to Y up to an epsilon.
+"
+	(let ((diff (- x y))
+			(minus-epsilon -0.000001)
+			(plus-epsilon 0.000001))
+		(and (< minus-epsilon diff) (> plus-epsilon diff))
+	)
 )
 
 ; ---------------------------------------------------------------------
@@ -953,55 +955,23 @@
 
 ; ---------------------------------------------------------------------
 
-; Given a list l and function k (from element to number) return the
-; element so that k(e) is the lowest.
-(define (min-element-by-key l k)
- (let ((head-element (car l)))
-  (if (eq? (length l) 1)
-
-   ; Base case
-   head-element
-
-   ; Recursive case
-   (let* ((tail (cdr l))
-          (head-key (k head-element))
-          (tail-min-element (min-element-by-key tail k))
-          (tail-min-key (k tail-min-element))
-          )
-    (if (< head-key tail-min-key)
-     head-element
-     tail-min-element
-     )
-    )
-   )
-  )
- )
+(define (min-element-by-key lyst fun)
+"
+ min-element-by-key LIST FUN
+    Given LIST and function FUN (from element to number), return the
+    element for which FUN(e) is the least.
+"
+	(fold (lambda (x y) (if (< x y) x y)) 1e300 (map fun lyst)))
 
 ; ---------------------------------------------------------------------
 
-; Given a list l and function k (from element to number) return the
-; element so that k(e) is the highest.
-(define (max-element-by-key l k)
- (let ((head-element (car l)))
-  (if (eq? (length l) 1)
-
-   ; Base case
-   head-element
-
-   ; Recursive case
-   (let* ((tail (cdr l))
-          (head-key (k head-element))
-          (tail-max-element (max-element-by-key tail k))
-          (tail-max-key (k tail-max-element))
-          )
-    (if (< head-key tail-max-key)
-     head-element
-     tail-max-element
-     )
-    )
-   )
-  )
- )
+(define (max-element-by-key lyst fun)
+"
+ max-element-by-key LIST FUN
+    Given LIST and function FUN (from element to number), return the
+    element of LIST for which FUN(e) is the highest.
+"
+	(fold (lambda (x y) (if (> x y) x y)) -1e300 (map fun lyst)))
 
 ; ---------------------------------------------------------------------
 
@@ -1082,11 +1052,13 @@
 'cog-equal?
 'min-element-by-key
 'max-element-by-key
+'cog-push-atomspace
+'cog-pop-atomspace
 ))
 
 ; Compile 'em all.  This should improve performance a bit.
 ; XXX FIXME This should be removed when guile-2.2 becomes popular
-; (maybe in 2017?) since it compiles everything anyway.
+; (maybe in 2017?) since 2.2 compiles everything by default.
 (for-each
 	(lambda (symb) (compile symb #:env (current-module)))
 	cog-utilities
@@ -1108,6 +1080,17 @@
 ;
 ; (for-each (lambda (fun) (export (fun))) cog-utilities)
 ;
-; Doesn't work, so till a fix is found I'm using this dedundant definition
+; Doesn't work, so till a fix is found I'm using this redundant definition
 ;
-(define (export-utilities) (export av stv itv ctv tv-mean tv-conf tv-count gar gdr gadr gddr gaddr gdddr for-each-except cog-atom-incr purge-hypergraph purge-type clear count-all cog-get-atoms cog-prt-atomspace cog-count-atoms cog-report-counts cog-get-root cog-get-all-nodes cog-get-partner cog-pred-get-partner cog-filter cog-chase-link cog-chase-link-chk cog-map-chase-link cog-par-chase-link cog-map-chase-links cog-par-chase-links cog-map-chase-links-chk cog-par-chase-links-chk cog-map-chase-link-dbg cog-map-apply-link cog-get-link cog-get-pred cog-get-reference filter-hypergraph cartesian-prod cartesian-prod-list-only approx-eq? cog-equal? min-element-by-key max-element-by-key))
+(define (export-utilities) (export av stv itv ctv tv-mean tv-conf
+tv-count gar gdr gadr gddr gaddr gdddr for-each-except cog-atom-incr
+purge-hypergraph purge-type clear count-all cog-get-atoms
+cog-prt-atomspace cog-count-atoms cog-report-counts cog-get-root
+cog-get-all-nodes cog-get-partner cog-pred-get-partner cog-filter
+cog-chase-link cog-chase-link-chk cog-map-chase-link cog-par-chase-link
+cog-map-chase-links cog-par-chase-links cog-map-chase-links-chk
+cog-par-chase-links-chk cog-map-chase-link-dbg cog-map-apply-link
+cog-get-link cog-get-pred cog-get-reference filter-hypergraph
+cartesian-prod cartesian-prod-list-only approx-eq? cog-equal?
+min-element-by-key max-element-by-key cog-push-atomspace
+cog-pop-atomspace))
