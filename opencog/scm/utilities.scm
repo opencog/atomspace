@@ -44,6 +44,8 @@
 ; -- cog-equal? -- Test equality of 2 atoms and returns TRUE_TV/FALSE_TV
 ; -- max-element-by-key -- Get maximum element in a list
 ; -- min-element-by-key -- Get maximum element in a list
+; -- cog-push-atomspace -- Create a temporary atomspace.
+; -- cog-pop-atomspace -- Delete a temporary atomspace.
 ;
 ;;; Code:
 ; Copyright (c) 2008, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
@@ -1000,6 +1002,32 @@
    )
   )
  )
+
+; ---------------------------------------------------------------------
+
+(define cog-atomspace-stack '())
+(define (cog-push-atomspace)
+"
+ cog-push-atomspace -- Create a temporary atomspace.
+    This creates a new atomspace, derived from the current atomspace,
+    and makes it current.  Thus, all subsequent atom operations will
+    create atoms in this new atomspace. To delete it, simply pop it;
+    after popping, all of the atoms placed into it will also be
+    deleted (unless they are refered to in some way).
+"
+	(set! cog-atomspace-stack (cons (cog-atomspace) cog-atomspace-stack))
+	(cog-set-atomspace! (cog-new-atomspace (cog-atomspace))))
+
+(define (cog-pop-atomspace)
+"
+ cog-pop-atomspace -- Delete a temporary atomspace.
+    See cog-push-atomspace for an explanation.
+"
+	(if (null-list? cog-atomspace-stack))
+		(throw 'badpop "More pops than pushes!")
+	(cog-set-atomspace! (car cog-atomspace-stack))
+	(set! cog-atomspace-stack (cdr cog-atomspace-stack))
+	(gc) (gc) (gc)) ; MUST GC OR ELSE DELETED ATOMSPACE STICKS AROUND!!
 
 ; ---------------------------------------------------------------------
 
