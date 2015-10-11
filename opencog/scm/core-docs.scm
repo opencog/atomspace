@@ -737,8 +737,8 @@
 
 (set-procedure-property! cog-subtype? 'documentation
 "
- cog-subtype? type subtype
-    Return #t if 'subtype' is a subtype of 'type', else return #f.
+ cog-subtype? TYPE SUBTYPE
+    Return #t if SUBTYPE is a subtype of TYPE, else return #f.
     The check is performed recursively.
 
     Example:
@@ -752,9 +752,9 @@
 
 (set-procedure-property! cog-map-type 'documentation
 "
- cog-map-type proc type
-    Call proceedure proc for each atom in the atomspace that is of
-    type type. If proc returns any value other than #f, then the
+ cog-map-type PROC TYPE
+    Call proceedure PROC for each atom in the atomspace that is of
+    type TYPE. If proc returns any value other than #f, then the
     iteration is terminated.  Note that this iterates only over the
     given type, and not its sub-types. Thus (cog-map-type proc 'Atom)
     will never call proc, because no atoms in the atomspace can have
@@ -764,6 +764,42 @@
        ; define a function that prints the atoms:
        guile> (define (prt-atom h) (display h) #f)
        guile> (cog-map-type prt-atom 'ConceptNode)
+")
+
+(set-procedure-property! cog-atomspace 'documentation
+"
+ cog-atomspace
+     Return the current atomspace for this thread.
+")
+
+(set-procedure-property! cog-set-atomspace! 'documentation
+"
+ cog-set-atomspace ATOMSPACE
+    Set the current atomspace for this thread to ATOMSPACE. Every
+    thread has it's own current atomspace, to which all atom-processing
+    operations apply.
+")
+
+(set-procedure-property! cog-atomspace? 'documentation
+"
+ cog-atomspace? ATOMSPACE
+    Return #t if ATOMSPACE is an atomspace; else return #f.
+")
+
+(set-procedure-property! cog-new-atomspace 'documentation
+"
+ cog-atomspace [ATOMSPACE]
+    Create a new atomspace.  If the optional argument ATOMSPACE
+    is present, then the new atomspace will be an expansion (child)
+    of ATOMSPACE.  Atomspaces are automatically deleted when no more
+    references to them remain.
+")
+
+(set-procedure-property! cog-prt-atomspace 'documentation
+"
+ cog-prt-atomspace
+    Print the contents of the crrent atomspace. CAUTION! If the
+    atomspace is large, this will result in huge amounts of output!
 ")
 
 ;set-procedure-property! cog-yield 'documentation
