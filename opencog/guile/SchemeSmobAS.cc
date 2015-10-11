@@ -110,7 +110,23 @@ AtomSpace* SchemeSmob::ss_to_atomspace(SCM sas)
 	if (COG_AS != misctype)
 		return NULL;
 
-   return (AtomSpace *) SCM_SMOB_DATA(sas);
+   AtomSpace* as = (AtomSpace *) SCM_SMOB_DATA(sas);
+	scm_remember_upto_here_1(sas);
+   return as;
+}
+
+/* ============================================================== */
+/**
+ * Return UUID of the atom space
+ */
+SCM SchemeSmob::ss_get_as_uuid(SCM sas)
+{
+	AtomSpace* as = ss_to_atomspace(sas);
+	if (nullptr == as)
+		scm_wrong_type_arg_msg("cog-atomspace-uuid", 1, sas, "atomspace");
+
+	scm_remember_upto_here_1(sas);
+	return scm_from_ulong(as->get_uuid());
 }
 
 /* ============================================================== */
