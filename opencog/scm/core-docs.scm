@@ -629,6 +629,13 @@
        ((sti . 99) (lti . 88) (vlti . 0))
 ")
 
+(set-procedure-property! cog-as 'documentation
+"
+ cog-as ATOM
+    Return the atomspace of the ATOM.  If the ATOM does not belong to
+    any atomspace, nil is returned.
+")
+
 (set-procedure-property! cog-af-boundary 'documentation
 "
  cog-af-boundary
@@ -774,7 +781,7 @@
 
 (set-procedure-property! cog-set-atomspace! 'documentation
 "
- cog-set-atomspace ATOMSPACE
+ cog-set-atomspace! ATOMSPACE
     Set the current atomspace for this thread to ATOMSPACE. Every
     thread has it's own current atomspace, to which all atom-processing
     operations apply.  Returns the previous atomspace for this thread.
@@ -788,7 +795,7 @@
 
 (set-procedure-property! cog-new-atomspace 'documentation
 "
- cog-atomspace [ATOMSPACE]
+ cog-new-atomspace [ATOMSPACE]
     Create a new atomspace.  If the optional argument ATOMSPACE
     is present, then the new atomspace will be an expansion (child)
     of ATOMSPACE.  Atomspaces are automatically deleted when no more
@@ -803,6 +810,18 @@
  cog-prt-atomspace
     Print the contents of the crrent atomspace. CAUTION! If the
     atomspace is large, this will result in huge amounts of output!
+")
+
+(set-procedure-property! cog-atomspace-uuid 'documentation
+"
+ cog-atomspace-uuid ATOMSPACE
+     Return the UUID of ATOMSPACE.
+")
+
+(set-procedure-property! cog-atomspace-clear 'documentation
+"
+ cog-atomspace-clear ATOMSPACE
+     Remove all atoms from ATOMSPACE.
 ")
 
 ;set-procedure-property! cog-yield 'documentation
