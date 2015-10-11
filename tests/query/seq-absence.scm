@@ -12,7 +12,7 @@
 
 ; ------------------------------------------------------
 
-(define or-sequence
+(define or-put
 	(SatisfactionLink
 		;; SequentialOrLink - verify predicates in sequential order.
 		(SequentialOrLink
@@ -22,6 +22,20 @@
 			(TrueLink (PutLink
 					(StateLink (AnchorNode "state") (VariableNode "$yy"))
 					(ConceptNode "not-vis")))
+		)))
+
+(define trig 0)
+(define (incr-trig) (set! trig (+ trig 1)) (stv 1 1))
+
+(define or-sequence
+	(SatisfactionLink
+		;; SequentialOrLink - verify predicates in sequential order.
+		(SequentialOrLink
+			(PresentLink (EvaluationLink (PredicateNode "visible")
+					(ListLink (VariableNode "$x"))))
+			;; If above fails then increment
+			(EvaluationLink
+				(GroundedPredicateNode "scm: incr-trig") (ListLink))
 		)))
 
 ; ------------------------------------------------------

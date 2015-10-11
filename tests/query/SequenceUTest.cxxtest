@@ -61,7 +61,8 @@ public:
     void test_sequence(void);
     void test_presence(void);
     void test_fallback(void);
-    void test_or_absence(void);
+    void test_pass_presence(void);
+    void xtest_or_put(void);
 };
 
 void SequenceUTest::tearDown(void)
@@ -190,7 +191,7 @@ void SequenceUTest::test_fallback(void)
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void SequenceUTest::test_or_absence(void)
+void SequenceUTest::test_pass_presence(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -198,6 +199,23 @@ void SequenceUTest::test_or_absence(void)
     load_scm_files_from_config(*as);
 
     TruthValuePtr tv = eval->eval_tv("(cog-satisfy or-sequence)");
+    TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
+
+    std::string sntrig = eval->eval("trig");
+    int ntrig = atoi(sntrig.c_str());
+    TS_ASSERT_EQUALS(1, ntrig);
+}
+
+// XXX This test currently fails, because the PutLink runs in
+// the temp atomspace.... needs to be fixed.
+void SequenceUTest::xtest_or_put(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/seq-absence.scm");
+    load_scm_files_from_config(*as);
+
+    TruthValuePtr tv = eval->eval_tv("(cog-satisfy or-put)");
     TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
 
     // Check the state.

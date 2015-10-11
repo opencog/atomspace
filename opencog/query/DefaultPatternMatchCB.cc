@@ -212,7 +212,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 
 		// We make two awkard asumptions here: the ground term itself
 		// does not contain any variables, and so does not need any
-		// further grounding. This actuall seems reasonable. The second
+		// further grounding. This actually seems reasonable. The second
 		// assumption is that the EvaluationLink is actually evaluatable,
 		// which seems reasonable, except that everything else in the
 		// default callback ignores the TV on EvaluationLinks. So this
