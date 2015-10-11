@@ -135,7 +135,8 @@ class SchemeSmob
 		static SCM ss_as_p(SCM);
 		static SCM ss_get_as(void);
 		static SCM ss_set_as(SCM);
-		static SCM ss_get_as_uuid(SCM);
+		static SCM ss_as_uuid(SCM);
+		static SCM ss_as_clear(SCM);
 		static SCM take_as(AtomSpace *);
 		static SCM make_as(AtomSpace *);
 		static AtomSpace* ss_to_atomspace(SCM);
