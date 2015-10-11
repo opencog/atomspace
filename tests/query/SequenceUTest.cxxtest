@@ -198,12 +198,22 @@ void SequenceUTest::test_pass_presence(void)
     config().set("SCM_PRELOAD", "tests/query/seq-absence.scm");
     load_scm_files_from_config(*as);
 
-    TruthValuePtr tv = eval->eval_tv("(cog-satisfy or-sequence)");
+    TruthValuePtr tv = eval->eval_tv("(cog-satisfy or-presence)");
     TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
 
     std::string sntrig = eval->eval("trig");
     int ntrig = atoi(sntrig.c_str());
     TS_ASSERT_EQUALS(1, ntrig);
+
+    // -------------------------------------------------------
+    tv = eval->eval_tv("(cog-satisfy and-absence)");
+    TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
+
+    sntrig = eval->eval("trig");
+    ntrig = atoi(sntrig.c_str());
+    TS_ASSERT_EQUALS(2, ntrig);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 // XXX This test currently fails, because the PutLink runs in

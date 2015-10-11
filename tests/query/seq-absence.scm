@@ -27,11 +27,21 @@
 (define trig 0)
 (define (incr-trig) (set! trig (+ trig 1)) (stv 1 1))
 
-(define or-sequence
+(define or-presence
 	(SatisfactionLink
 		;; SequentialOrLink - verify predicates in sequential order.
 		(SequentialOrLink
 			(PresentLink (EvaluationLink (PredicateNode "visible")
+					(ListLink (VariableNode "$x"))))
+			;; If above fails then increment
+			(EvaluationLink
+				(GroundedPredicateNode "scm: incr-trig") (ListLink))
+		)))
+
+(define and-absence
+	(SatisfactionLink
+		(SequentialAndLink
+			(AbsentLink (EvaluationLink (PredicateNode "visible")
 					(ListLink (VariableNode "$x"))))
 			;; If above fails then increment
 			(EvaluationLink
