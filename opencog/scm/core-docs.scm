@@ -805,13 +805,6 @@
     to do that, you need to use cog-set-atomspace!
 ")
 
-(set-procedure-property! cog-prt-atomspace 'documentation
-"
- cog-prt-atomspace
-    Print the contents of the crrent atomspace. CAUTION! If the
-    atomspace is large, this will result in huge amounts of output!
-")
-
 (set-procedure-property! cog-atomspace-uuid 'documentation
 "
  cog-atomspace-uuid ATOMSPACE
