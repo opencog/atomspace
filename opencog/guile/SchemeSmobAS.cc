@@ -106,27 +106,40 @@ AtomSpace* SchemeSmob::ss_to_atomspace(SCM sas)
 	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sas))
 		return NULL;
 
-   scm_t_bits misctype = SCM_SMOB_FLAGS(sas);
+	scm_t_bits misctype = SCM_SMOB_FLAGS(sas);
 	if (COG_AS != misctype)
 		return NULL;
 
-   AtomSpace* as = (AtomSpace *) SCM_SMOB_DATA(sas);
+	AtomSpace* as = (AtomSpace *) SCM_SMOB_DATA(sas);
 	scm_remember_upto_here_1(sas);
-   return as;
+	return as;
 }
 
 /* ============================================================== */
 /**
- * Return UUID of the atom space
+ * Return UUID of the atomspace
  */
 SCM SchemeSmob::ss_get_as_uuid(SCM sas)
 {
 	AtomSpace* as = ss_to_atomspace(sas);
-	if (nullptr == as)
-		scm_wrong_type_arg_msg("cog-atomspace-uuid", 1, sas, "atomspace");
+	UUID uuid = -1;
+	if (as) uuid = as->get_uuid();
 
 	scm_remember_upto_here_1(sas);
-	return scm_from_ulong(as->get_uuid());
+	return scm_from_ulong(uuid);
+}
+
+/* ============================================================== */
+/**
+ * Return the atomspace of an atom.
+ */
+SCM SchemeSmob::ss_as(SCM satom)
+{
+	Handle h(scm_to_handle(satom));
+	if (nullptr == h)
+		scm_wrong_type_arg_msg("cog-handle", 1, satom, "opencog atom");
+
+	return make_as(h->getAtomSpace());
 }
 
 /* ============================================================== */
@@ -163,7 +176,6 @@ void SchemeSmob::as_ref_count(SCM old_as, AtomSpace *nas)
 		if (oas and deleteable_as.end() != deleteable_as.find(oas))
 			deleteable_as[oas] --;
 	}
-
 }
 
 /**

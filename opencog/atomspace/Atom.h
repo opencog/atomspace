@@ -50,6 +50,8 @@ namespace opencog
  *  @{
  */
 
+class AtomSpace;
+
 class Link;
 typedef std::shared_ptr<Link> LinkPtr;
 typedef std::vector<LinkPtr> IncomingSet; // use vector; see below.
@@ -191,6 +193,9 @@ private:
 public:
 
     virtual ~Atom();
+
+    //! Returns the AtomTable in which this Atom is inserted.
+    AtomSpace* getAtomSpace() const;
 
     /** Returns the type of the atom.
      *
