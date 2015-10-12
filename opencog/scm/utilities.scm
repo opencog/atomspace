@@ -988,13 +988,15 @@
 	(set! cog-atomspace-stack (cons (cog-atomspace) cog-atomspace-stack))
 	(cog-set-atomspace! (cog-new-atomspace (cog-atomspace))))
 
+; ---------------------------------------------------------------------
+
 (define (cog-pop-atomspace)
 "
  cog-pop-atomspace -- Delete a temporary atomspace.
     See cog-push-atomspace for an explanation.
 "
-	(if (null-list? cog-atomspace-stack))
-		(throw 'badpop "More pops than pushes!")
+	(if (null-list? cog-atomspace-stack)
+		(throw 'badpop "More pops than pushes!"))
 	(cog-set-atomspace! (car cog-atomspace-stack))
 	(set! cog-atomspace-stack (cdr cog-atomspace-stack))
 	(gc) (gc) (gc)) ; MUST GC OR ELSE DELETED ATOMSPACE STICKS AROUND!!
