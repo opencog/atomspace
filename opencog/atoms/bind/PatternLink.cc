@@ -788,6 +788,9 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 		if (QUOTE_LINK == t)
 			ptm->addQuote();
 
+		else if (UNQUOTE_LINK == t)
+			ptm->remQuote();
+
 		for (const Handle& ho: l->getOutgoingSet())
 		     make_term_tree_recursive(root, ho, ptm);
 		return;

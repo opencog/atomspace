@@ -99,9 +99,8 @@ bool PatternMatchEngine::quote_compare(const PatternTermPtr& ptm,
 	LinkPtr lp(LinkCast(ptm->getHandle()));
 	if (1 != lp->getArity())
 		throw InvalidParamException(TRACE_INFO,
-		            "QuoteLink has unexpected arity!");
-	bool ma = tree_compare(ptm->getOutgoingTerm(0), hg, CALL_QUOTE);
-	return ma;
+		            "QuoteLink/UnquoteLink has unexpected arity!");
+	return tree_compare(ptm->getOutgoingTerm(0), hg, CALL_QUOTE);
 }
 
 /* ======================================================== */
@@ -745,6 +744,9 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	// (as its not clear what else could possibly be done).
 	Type tp = hp->getType();
 	if (not ptm->isQuoted() and QUOTE_LINK == tp)
+		return quote_compare(ptm, hg);
+
+	if (ptm->isQuoted() and UNQUOTE_LINK == tp)
 		return quote_compare(ptm, hg);
 
 	// If the pattern link is executable, then we should execute, and

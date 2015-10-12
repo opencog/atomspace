@@ -195,7 +195,6 @@ void VariableList::validate_vardecl(const Handle& hdecls)
 	// variable, or a list of variable declarations
 	Type tdecls = hdecls->getType();
 	if (VARIABLE_NODE == tdecls or GLOB_NODE == tdecls)
-	    // or NodeCast(hdecls) // WTF ... allow *any* node as a variable???
 	{
 		_varlist.varset.insert(hdecls);
 		_varlist.varseq.emplace_back(hdecls);
