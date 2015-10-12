@@ -50,6 +50,8 @@ namespace opencog
  *  @{
  */
 
+class AtomSpace;
+
 class Link;
 typedef std::shared_ptr<Link> LinkPtr;
 typedef std::vector<LinkPtr> IncomingSet; // use vector; see below.
@@ -78,7 +80,6 @@ class Atom
     friend class AtomSpace;       // Needs to call getAtomTable()
     friend class ImportanceIndex; // Needs to call setFlag()
     friend class Handle;          // Needs to view _uuid
-    friend class SavingLoading;   // Needs to set _uuid
     friend class TLB;             // Needs to view _uuid
     friend class CreateLink;      // Needs to call getAtomTable();
     friend class DeleteLink;      // Needs to call getAtomTable();
@@ -296,10 +297,15 @@ public:
     size_t getIncomingSetSize();
 
     //! Return the incoming set of this atom.
-    //! The resulting incoming set consists of strong pointers,
-    //! that is, to valid, non-null handles that were part of the
-    //! incoming set at the time this call was made.
-    IncomingSet getIncomingSet();
+    //! If the AtomSpace pointer is non-null, then only those atoms
+    //! that belonged to that atomspace at the time this call was made
+    //! are returned. Otherwise, the entire incoming set is returned.
+    //!
+    //! This call is thread-safe again simultaneous deletion of atoms.
+    //! That is, this call returns the incoming set as it was att the
+    //! time of the call; any deletions that occur afterwards (possibly
+    //! in other threads) will not be reflected in the returned set.
+    IncomingSet getIncomingSet(AtomSpace* = NULL);
 
     //! Place incoming set into STL container of Handles.
     //! Example usage:
