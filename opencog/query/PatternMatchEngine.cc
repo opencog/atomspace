@@ -126,7 +126,7 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 		if (gnd)
 			return (gnd == hg);
 	}
-	catch(...) { }
+	catch (...) { }
 
 	// VariableNode had better be an actual node!
 	// If it's not then we are very very confused ...
@@ -160,13 +160,14 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 	// The variable_match() callback may implement some tighter
 	// variable check, e.g. to make sure that the grounding is
 	// of some certain type.
-	if (not _pmc.variable_match (hp, hg)) return false;
+	if (not _pmc.variable_match(hp, hg)) return false;
 
-	// Make a record of it.
+	// Make a record of it. Cannot record GlobNodes here; they're
+	// variadic.
 	LAZY_LOG_FINE << "Found grounding of variable:";
 	logmsg("$$ variable:", hp);
 	logmsg("$$ ground term:", hg);
-	if (hp != hg) var_grounding[hp] = hg;
+	if (hp != hg and hp->getType() != GLOB_NODE) var_grounding[hp] = hg;
 	return true;
 }
 
@@ -261,27 +262,66 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	}
 	else
 	{
-		for (size_t ip=0, jg=0; ip<osp_size, jg<osg_size; ip++, jg++)
+		for (size_t ip=0, jg=0; ip<osp_size and jg<osg_size; ip++, jg++)
 		{
 			bool tc = false;
-			Type ptype = osp[ip]->getType();
+			const Handle& ohp(osp[ip]->getHandle());
+			Type ptype = ohp->getType();
 			if (GLOB_NODE == ptype)
 			{
-				tc = tree_compare(osp[ip], osg[jg], CALL_GLOB);
-				while (tc)
+				HandleSeq glob_seq;
+				PatternTermPtr glob(osp[ip]);
+				// Globs at the end are handled differently than globs
+				// which are followed by other stuff. So, is there
+				// anything after the glob?
+				if (ip+1 < osp_size)
 				{
+					// Match at least one.
+					tc = tree_compare(glob, osg[jg], CALL_GLOB);
+					if (not tc)
+					{
+						match = false;
+						break;
+					}
+					glob_seq.push_back(osg[jg]);
 					jg++;
-					tc = tree_compare(osp[ip], osg[jg], CALL_GLOB);
+
+					// Can we match more?
+					PatternTermPtr post_glob(osp[ip+1]);
+					while (tc and jg<osg_size)
+					{
+						// If the atom after the glob matches, then we are done.
+						tc = tree_compare(post_glob, osg[jg], CALL_GLOB);
+						if (tc) break;
+						tc = tree_compare(glob, osg[jg], CALL_GLOB);
+						if (tc) glob_seq.push_back(osg[jg]);
+						jg ++;
+					}
+					jg --;
+					if (not tc)
+					{
+						match = false;
+						break;
+					}
+
+					// If we are here, we've got a match; record the glob.
+					LinkPtr glp(createLink(LIST_LINK, glob_seq));
+					var_grounding[glob->getHandle()] = glp->getHandle();
+				}
+				else
+				{
+throw RuntimeException(TRACE_INFO, "Not implemented!!");
 				}
 			}
 			else
 			{
-				tc = tree_compare(osp[ip], osg[jg], CALL_GLOB);
-			}
-			if (not tc)
-			{
-				match = false;
-				break;
+				// If we are here, we are not comparing to a glob.
+				tc = tree_compare(osp[ip], osg[jg], CALL_ORDER);
+				if (not tc)
+				{
+					match = false;
+					break;
+				}
 			}
 		}
 	}
@@ -834,7 +874,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// If the two links are both ordered, its enough to compare
 	// them "side-by-side".
-	if (2 > lp->getArity() || _classserver.isA(tp, ORDERED_LINK))
+	if (2 > lp->getArity() or _classserver.isA(tp, ORDERED_LINK))
 		return ordered_compare(ptm, hg, lp, lg);
 
 	// If we are here, we are dealing with an unordered link.
