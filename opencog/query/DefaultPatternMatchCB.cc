@@ -248,6 +248,13 @@ bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
 
 /* ======================================================== */
 
+IncomingSet DefaultPatternMatchCB::get_incoming_set(const Handle& h)
+{
+	return h->getIncomingSet(_as);
+}
+
+/* ======================================================== */
+
 bool DefaultPatternMatchCB::eval_term(const Handle& virt,
                                       const std::map<Handle, Handle>& gnds)
 {

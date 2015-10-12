@@ -69,6 +69,8 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		virtual bool optional_clause_match(const Handle& pattrn,
 		                                   const Handle& grnd);
 
+		virtual IncomingSet get_incoming_set(const Handle&);
+
 		/**
 		 * Called when a virtual link is encountered. Returns false
 		 * to reject the match.
