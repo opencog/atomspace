@@ -208,12 +208,11 @@ public:
     Handle fetch_atom(UUID);
 
     /**
-     * Get an atom from the AtomTable. If not found there, get it from
-     * the backingstore (and add it to the AtomTable).  If the atom is
-     * not found in either place, return Handle::UNDEFINED.
+     * Get an atom from the AtomTable. If the atom is not there, then
+     * return Handle::UNDEFINED.
      */
-    Handle get_atom(Handle);
-    Handle get_atom(UUID);
+    Handle get_atom(const Handle& h) { return atomTable.getHandle(h); }
+    Handle get_atom(UUID uuid) { return atomTable.getHandle(uuid); }
 
     /**
      * Load *all* atoms of the given type, but only if they are not
