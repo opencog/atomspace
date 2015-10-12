@@ -55,6 +55,7 @@ void DefaultPatternMatchCB::set_pattern(const Variables& vars,
 	_have_evaluatables = (0 < _dynamic->size());
 	_have_variables = (0 < vars.varseq.size());
 	_pattern_body = pat.body;
+	_globs = &pat.globby_terms;
 }
 
 
@@ -137,10 +138,12 @@ bool DefaultPatternMatchCB::link_match(const LinkPtr& lpat,
 	Type pattype = lpat->getType();
 	if (CHOICE_LINK == pattype) return true;
 
-	if (lpat->getArity() != lsoln->getArity()) return false;
-	Type soltype = lsoln->getType();
+	// Reject mis-sized compares, unless the pattern has a glob in it.
+	if (0 == _globs->count(lpat->getHandle()) and
+	    lpat->getArity() != lsoln->getArity()) return false;
 
 	// If types differ, no match
+	Type soltype = lsoln->getType();
 	return pattype == soltype;
 }
 
