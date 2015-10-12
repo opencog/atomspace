@@ -958,12 +958,6 @@ bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
                                                const Handle& clause_root)
 {
 	const Handle& hp = ptm->getHandle();
-	// Let's not stare at our own navel. ... Unless the current
-	// clause has GroundedPredicateNodes in it. In that case, we
-	// have to make sure that they get evaluated.
-	if ((hg == clause_root)
-	    and not is_evaluatable(clause_root))
-		return false;
 
 	// If its not an unordered link, then don't try to iterate over
 	// all permutations.
