@@ -220,12 +220,9 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	PatternTermSeq osp = ptm->getOutgoingSet();
 	const HandleSeq &osg = lg->getOutgoingSet();
 
-//	size_t oset_sz = osp.size();
-//	if (oset_sz != osg.size()) return false;
-
 	size_t osg_size = osg.size();
 	size_t osp_size = osp.size();
-	size_t max_size = std::max(osg.size(), osp.size());
+	size_t max_size = std::max(osg_size, osp_size);
 
 	// The recursion step: traverse down the tree.
 	// In principle, we could/should push the current groundings
@@ -246,12 +243,12 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	{
 		bool tc = false;
 		if (i < osp_size and i < osg_size)
-			tc = tree_compare(osp[i], osg[i], CALL_UNORDER);
+			tc = tree_compare(osp[i], osg[i], CALL_ORDER);
 
 		else if (i < osp_size)
-			tc = tree_compare(osp[i], Handle::UNDEFINED, CALL_UNORDER);
+			tc = tree_compare(osp[i], Handle::UNDEFINED, CALL_ORDER);
 
-		else tc = tree_compare(PatternTerm::UNDEFINED, osg[i], CALL_UNORDER);
+		else tc = tree_compare(PatternTerm::UNDEFINED, osg[i], CALL_ORDER);
 
 		if (not tc)
 		{
