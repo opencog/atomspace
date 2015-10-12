@@ -37,6 +37,7 @@ using namespace opencog;
 void PatternLink::common_init(void)
 {
 	locate_defines(_pat.clauses);
+	locate_globs(_pat.clauses);
 
 	// If there are any defines in the pattern, then all bets are off
 	// as to whether it is connected or not, what's virtual, what isn't.
@@ -201,6 +202,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 		}
 	}
 	locate_defines(_pat.clauses);
+	locate_globs(_pat.clauses);
 
 	// The rest is easy: the evaluatables and the connection map
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
@@ -401,6 +403,20 @@ void PatternLink::locate_defines(HandleSeq& clauses)
 		for (const Handle& sh : fdpn.varset)
 		{
 			_pat.defined_terms.insert(sh);
+		}
+	}
+}
+
+void PatternLink::locate_globs(HandleSeq& clauses)
+{
+	for (const Handle& clause: clauses)
+	{
+		FindAtoms fgn(GLOB_NODE, true);
+		fgn.search_set(clause);
+
+		for (const Handle& sh : fgn.least_holders)
+		{
+			_pat.globby_terms.insert(sh);
 		}
 	}
 }
