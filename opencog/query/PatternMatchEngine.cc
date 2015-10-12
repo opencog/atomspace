@@ -1837,7 +1837,8 @@ void PatternMatchEngine::log_solution(
 		Handle soln(j->second);
 
 		// Only print grounding for variables.
-		if (VARIABLE_NODE != var->getType()) continue;
+		Type vtype = var->getType();
+		if (VARIABLE_NODE != vtype and GLOB_NODE != vtype) continue;
 
 		if (soln == nullptr)
 		{

@@ -94,7 +94,7 @@ bool DefaultPatternMatchCB::variable_match(const Handle& npat_h,
 	// accept the match. This allows any kind of node types to be
 	// explicitly bound as variables.  However, the type VariableNode
 	// gets special handling, below.
-	if (pattype != VARIABLE_NODE) return true;
+	if (VARIABLE_NODE != pattype and GLOB_NODE != pattype) return true;
 
 	// If the ungrounded term is a variable, then see if there
 	// are any restrictions on the variable type.

@@ -66,7 +66,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			return walk_tree(DefineLink::get_definition(expr));
 		}
 
-		if (VARIABLE_NODE != t)
+		if (VARIABLE_NODE != t and GLOB_NODE != t)
 			return Handle(expr);
 
 		// If we are here, we found a variable. Look it up. Return a
@@ -182,9 +182,11 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	{
 		HandleSeq oset_results(walk_tree(lexpr->getOutgoingSet()));
 		for (const Handle& h: oset_results)
-			if (VARIABLE_NODE != h->getType())
+		{
+			Type ht = h->getType();
+			if (VARIABLE_NODE != ht and GLOB_NODE != ht)
 				_as->remove_atom(h, true);
-
+		}
 		return Handle::UNDEFINED;
 	}
 
