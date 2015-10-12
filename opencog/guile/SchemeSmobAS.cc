@@ -121,12 +121,14 @@ AtomSpace* SchemeSmob::ss_to_atomspace(SCM sas)
  */
 SCM SchemeSmob::ss_as_uuid(SCM sas)
 {
-	if (scm_is_null(sas))
-		return scm_from_ulong(Handle::INVALID_UUID);
-
 	AtomSpace* as = ss_to_atomspace(sas);
 	if (nullptr == as)
+	{
+		// Special care for atom whose atomspace was null
+		if (scm_is_null(sas))
+			return scm_from_ulong(Handle::INVALID_UUID);
 		scm_wrong_type_arg_msg("cog-atomspace-uuid", 1, sas, "atomspace");
+	}
 
 	UUID uuid = as->get_uuid();
 	scm_remember_upto_here_1(sas);
