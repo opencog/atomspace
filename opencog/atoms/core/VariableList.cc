@@ -35,7 +35,7 @@ void VariableList::validate_vardecl(const HandleSeq& oset)
 	for (const Handle& h: oset)
 	{
 		Type t = h->getType();
-		if (VARIABLE_NODE == t)
+		if (VARIABLE_NODE == t or GLOB_NODE == t)
 		{
 			_varlist.varset.insert(h);    // tree (unordered)
 			_varlist.varseq.emplace_back(h); // vector (ordered)
@@ -194,8 +194,8 @@ void VariableList::validate_vardecl(const Handle& hdecls)
 	// Expecting the declaration list to be either a single
 	// variable, or a list of variable declarations
 	Type tdecls = hdecls->getType();
-	if ((VARIABLE_NODE == tdecls) or
-	    NodeCast(hdecls)) // allow *any* node as a variable
+	if (VARIABLE_NODE == tdecls or GLOB_NODE == tdecls)
+	    // or NodeCast(hdecls) // WTF ... allow *any* node as a variable???
 	{
 		_varlist.varset.insert(hdecls);
 		_varlist.varseq.emplace_back(hdecls);
@@ -204,7 +204,7 @@ void VariableList::validate_vardecl(const Handle& hdecls)
 	{
 		get_vartype(hdecls);
 	}
-	else if (VARIABLE_LIST == tdecls or LIST_LINK == tdecls)
+	else if (VARIABLE_LIST == tdecls)
 	{
 		// The list of variable declarations should be .. a list of
 		// variables! Make sure its as expected.
