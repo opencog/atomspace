@@ -140,6 +140,7 @@ void ArcanaUTest::test_const(void)
     config().set("SCM_PRELOAD", "tests/query/arcana-const.scm");
     load_scm_files_from_config(*as);
 
+    // ----
     Handle marconi = eval->eval_h("marconi");
 
     Handle answer = eval->eval_h("(cog-bind who)");
@@ -147,9 +148,17 @@ void ArcanaUTest::test_const(void)
 
     TS_ASSERT_EQUALS(1, as->get_arity(answer));
     LinkPtr lp = LinkCast(answer);
-    answer = lp->getOutgoingAtom(0);
+    Handle devel = lp->getOutgoingAtom(0);
 
-    TS_ASSERT_EQUALS(marconi, answer);
+    TS_ASSERT_EQUALS(marconi, devel);
+
+    // ----
+    // Test DefinedSchemaNode as an answer.
+    Handle defans = eval->eval_h("(cog-bind whodfn)");
+    printf("defined radio=%s\n", defans->toString().c_str());
+
+    TS_ASSERT_EQUALS(1, as->get_arity(defans));
+    TS_ASSERT_EQUALS(defans, answer);
 
     // ----
     logger().debug("END TEST: %s", __FUNCTION__);
