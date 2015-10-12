@@ -218,6 +218,7 @@ Handle AtomTable::getHandle(UUID uuid) const
 /// environment for this atomtable.
 bool AtomTable::in_environ(const AtomPtr& atom) const
 {
+    if (nullptr == atom) return false;
     AtomTable* atab = atom->getAtomTable();
     const AtomTable* env = this;
     while (env) {
