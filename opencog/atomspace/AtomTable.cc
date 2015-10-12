@@ -160,20 +160,6 @@ Handle AtomTable::getHandle(Type t, std::string name) const
     return Handle::UNDEFINED;
 }
 
-/// Find an equivalent atom that has exactly the same name and type.
-/// That is, if there is an atom with this name and type already in
-/// the table, then return that; else return undefined.
-Handle AtomTable::getHandle(const NodePtr& n) const
-{
-    const AtomTable *env = this;
-    do {
-        if (n->_atomTable == env) return Handle(n);
-        env = env->_environ;
-    } while (env);
-
-    return getHandle(n->getType(), n->getName());
-}
-
 Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 {
     // Make sure all the atoms in the outgoing set are resolved :-)
@@ -197,34 +183,26 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
     return h;
 }
 
-/// Find an equivalent atom that has exactly the same type and outgoing
-/// set.  That is, if there is an atom with this ype and outset already
-/// in the table, then return that; else return undefined.
-Handle AtomTable::getHandle(const LinkPtr& l) const
-{
-    const AtomTable *env = this;
-    if (l->_atomTable) {
-        do {
-            if (l->_atomTable == env) return Handle(l);
-            env = env->_environ;
-        } while (env);
-    }
-
-    return getHandle(l->getType(), l->getOutgoingSet());
-}
-
 /// Find an equivalent atom that is exactly the same as the arg. If
 /// such an atom is in the table, it is returned, else the return
 /// is the bad handle.
 Handle AtomTable::getHandle(const AtomPtr& a) const
 {
+    const AtomTable *env = this;
+    if (a->_atomTable) {
+        do {
+            if (a->_atomTable == env) return a->getHandle();
+            env = env->_environ;
+        } while (env);
+    }
+
     NodePtr nnn(NodeCast(a));
     if (nnn)
-         return getHandle(nnn);
+        return getHandle(nnn->getType(), nnn->getName());
     else {
         LinkPtr lll(LinkCast(a));
         if (lll)
-            return getHandle(lll);
+            return getHandle(lll->getType(), lll->getOutgoingSet());
     }
     return Handle::UNDEFINED;
 }
