@@ -75,7 +75,6 @@ class AtomSpace;
  */
 class AtomTable
 {
-    friend class SavingLoading;
     friend class ::AtomTableUTest;
 
 private:
@@ -140,7 +139,6 @@ private:
     /// operation. Viz, other computers on the network may have a copy
     /// of this atomtable, and so need to have its UUID to sync up.
     AtomTable* _environ;
-    bool inEnviron(AtomPtr);
     UUID _uuid;
 
     // The AtomSpace that is holding us (if any). Needed for DeleteLink operation
@@ -164,6 +162,12 @@ public:
     AtomSpace* getAtomSpace(void) const { return _as; }
 
     /**
+     * Return true if the atom is in this atomtable, or if it is
+     * in the environment of this atomspace.
+     */
+    bool in_environ(const AtomPtr&) const;
+
+    /**
      * Return the number of atoms contained in a table.
      */
     size_t getSize() const;
@@ -181,10 +185,7 @@ public:
      * @return The handle of the desired atom if found.
      */
     Handle getHandle(Type, std::string) const;
-    Handle getHandle(const NodePtr&) const;
-
     Handle getHandle(Type, const HandleSeq&) const;
-    Handle getHandle(const LinkPtr&) const;
     Handle getHandle(const AtomPtr&) const;
     Handle getHandle(UUID) const;
 

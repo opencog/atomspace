@@ -351,24 +351,6 @@ Handle AtomSpace::fetch_atom(UUID uuid)
     return atomTable.add(a, false);
 }
 
-Handle AtomSpace::get_atom(Handle h)
-{
-    Handle he(atomTable.getHandle(h));
-    if (he) return he;
-    if (backing_store)
-        return fetch_atom(h);
-    return Handle::UNDEFINED;
-}
-
-Handle AtomSpace::get_atom(UUID uuid)
-{
-    Handle he(atomTable.getHandle(uuid));
-    if (he) return he;
-    if (backing_store)
-        return fetch_atom(uuid);
-    return Handle::UNDEFINED;
-}
-
 Handle AtomSpace::fetch_incoming_set(Handle h, bool recursive)
 {
     if (NULL == backing_store)
