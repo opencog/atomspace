@@ -239,21 +239,50 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	depth ++;
 
 	bool match = true;
-	for (size_t i=0; i<max_size; i++)
+	if (0 == _pat->globby_terms.count(lp->getHandle()))
 	{
-		bool tc = false;
-		if (i < osp_size and i < osg_size)
-			tc = tree_compare(osp[i], osg[i], CALL_ORDER);
-
-		else if (i < osp_size)
-			tc = tree_compare(osp[i], Handle::UNDEFINED, CALL_ORDER);
-
-		else tc = tree_compare(PatternTerm::UNDEFINED, osg[i], CALL_ORDER);
-
-		if (not tc)
+		for (size_t i=0; i<max_size; i++)
 		{
-			match = false;
-			break;
+			bool tc = false;
+			if (i < osp_size and i < osg_size)
+				tc = tree_compare(osp[i], osg[i], CALL_ORDER);
+
+			else if (i < osp_size)
+				tc = tree_compare(osp[i], Handle::UNDEFINED, CALL_ORDER);
+
+			else tc = tree_compare(PatternTerm::UNDEFINED, osg[i], CALL_ORDER);
+
+			if (not tc)
+			{
+				match = false;
+				break;
+			}
+		}
+	}
+	else
+	{
+		for (size_t ip=0, jg=0; ip<osp_size, jg<osg_size; ip++, jg++)
+		{
+			bool tc = false;
+			Type ptype = osp[ip]->getType();
+			if (GLOB_NODE == ptype)
+			{
+				tc = tree_compare(osp[ip], osg[jg], CALL_GLOB);
+				while (tc)
+				{
+					jg++;
+					tc = tree_compare(osp[ip], osg[jg], CALL_GLOB);
+				}
+			}
+			else
+			{
+				tc = tree_compare(osp[ip], osg[jg], CALL_GLOB);
+			}
+			if (not tc)
+			{
+				match = false;
+				break;
+			}
 		}
 	}
 
