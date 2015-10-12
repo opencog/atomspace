@@ -139,8 +139,14 @@ bool DefaultPatternMatchCB::link_match(const LinkPtr& lpat,
 	if (CHOICE_LINK == pattype) return true;
 
 	// Reject mis-sized compares, unless the pattern has a glob in it.
-	if (0 == _globs->count(lpat->getHandle()) and
-	    lpat->getArity() != lsoln->getArity()) return false;
+	if (0 == _globs->count(lpat->getHandle()))
+	{ 
+		if (lpat->getArity() != lsoln->getArity()) return false;
+	}
+	else
+	{
+		if (lpat->getArity() > lsoln->getArity()) return false;
+	}
 
 	// If types differ, no match
 	Type soltype = lsoln->getType();
