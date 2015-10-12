@@ -44,6 +44,8 @@
 ; -- cog-equal? -- Test equality of 2 atoms and returns TRUE_TV/FALSE_TV
 ; -- max-element-by-key -- Get maximum element in a list
 ; -- min-element-by-key -- Get maximum element in a list
+; -- cog-push-atomspace -- Create a temporary atomspace.
+; -- cog-pop-atomspace -- Delete a temporary atomspace.
 ;
 ;;; Code:
 ; Copyright (c) 2008, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
@@ -927,14 +929,16 @@
 
 ; ---------------------------------------------------------------------
 
-; Returns true when x is equal to y up to an epsilon
 (define (approx-eq? x y)
-    (let ((diff (- x y))
-          (minus-epsilon -0.000001)
-          (plus-epsilon 0.000001)
-          )
-        (and (< minus-epsilon diff) (> plus-epsilon diff))
-    )
+"
+ approx-eq? X Y
+    Returns true when X is equal to Y up to an epsilon.
+"
+	(let ((diff (- x y))
+			(minus-epsilon -0.000001)
+			(plus-epsilon 0.000001))
+		(and (< minus-epsilon diff) (> plus-epsilon diff))
+	)
 )
 
 ; ---------------------------------------------------------------------
@@ -951,55 +955,51 @@
 
 ; ---------------------------------------------------------------------
 
-; Given a list l and function k (from element to number) return the
-; element so that k(e) is the lowest.
-(define (min-element-by-key l k)
- (let ((head-element (car l)))
-  (if (eq? (length l) 1)
-
-   ; Base case
-   head-element
-
-   ; Recursive case
-   (let* ((tail (cdr l))
-          (head-key (k head-element))
-          (tail-min-element (min-element-by-key tail k))
-          (tail-min-key (k tail-min-element))
-          )
-    (if (< head-key tail-min-key)
-     head-element
-     tail-min-element
-     )
-    )
-   )
-  )
- )
+(define (min-element-by-key lyst fun)
+"
+ min-element-by-key LIST FUN
+    Given LIST and function FUN (from element to number), return the
+    element for which FUN(e) is the least.
+"
+	(fold (lambda (x y) (if (< x y) x y)) 1e300 (map fun lyst)))
 
 ; ---------------------------------------------------------------------
 
-; Given a list l and function k (from element to number) return the
-; element so that k(e) is the highest.
-(define (max-element-by-key l k)
- (let ((head-element (car l)))
-  (if (eq? (length l) 1)
+(define (max-element-by-key lyst fun)
+"
+ max-element-by-key LIST FUN
+    Given LIST and function FUN (from element to number), return the
+    element of LIST for which FUN(e) is the highest.
+"
+	(fold (lambda (x y) (if (> x y) x y)) -1e300 (map fun lyst)))
 
-   ; Base case
-   head-element
+; ---------------------------------------------------------------------
 
-   ; Recursive case
-   (let* ((tail (cdr l))
-          (head-key (k head-element))
-          (tail-max-element (max-element-by-key tail k))
-          (tail-max-key (k tail-max-element))
-          )
-    (if (< head-key tail-max-key)
-     head-element
-     tail-max-element
-     )
-    )
-   )
-  )
- )
+(define cog-atomspace-stack '())
+(define (cog-push-atomspace)
+"
+ cog-push-atomspace -- Create a temporary atomspace.
+    This creates a new atomspace, derived from the current atomspace,
+    and makes it current.  Thus, all subsequent atom operations will
+    create atoms in this new atomspace. To delete it, simply pop it;
+    after popping, all of the atoms placed into it will also be
+    deleted (unless they are refered to in some way).
+"
+	(set! cog-atomspace-stack (cons (cog-atomspace) cog-atomspace-stack))
+	(cog-set-atomspace! (cog-new-atomspace (cog-atomspace))))
+
+; ---------------------------------------------------------------------
+
+(define (cog-pop-atomspace)
+"
+ cog-pop-atomspace -- Delete a temporary atomspace.
+    See cog-push-atomspace for an explanation.
+"
+	(if (null-list? cog-atomspace-stack)
+		(throw 'badpop "More pops than pushes!"))
+	(cog-set-atomspace! (car cog-atomspace-stack))
+	(set! cog-atomspace-stack (cdr cog-atomspace-stack))
+	(gc) (gc) (gc)) ; MUST GC OR ELSE DELETED ATOMSPACE STICKS AROUND!!
 
 ; ---------------------------------------------------------------------
 
@@ -1054,11 +1054,13 @@
 'cog-equal?
 'min-element-by-key
 'max-element-by-key
+'cog-push-atomspace
+'cog-pop-atomspace
 ))
 
 ; Compile 'em all.  This should improve performance a bit.
 ; XXX FIXME This should be removed when guile-2.2 becomes popular
-; (maybe in 2017?) since it compiles everything anyway.
+; (maybe in 2017?) since 2.2 compiles everything by default.
 (for-each
 	(lambda (symb) (compile symb #:env (current-module)))
 	cog-utilities
@@ -1080,6 +1082,17 @@
 ;
 ; (for-each (lambda (fun) (export (fun))) cog-utilities)
 ;
-; Doesn't work, so till a fix is found I'm using this dedundant definition
+; Doesn't work, so till a fix is found I'm using this redundant definition
 ;
-(define (export-utilities) (export av stv itv ctv tv-mean tv-conf tv-count gar gdr gadr gddr gaddr gdddr for-each-except cog-atom-incr purge-hypergraph purge-type clear count-all cog-get-atoms cog-prt-atomspace cog-count-atoms cog-report-counts cog-get-root cog-get-all-nodes cog-get-partner cog-pred-get-partner cog-filter cog-chase-link cog-chase-link-chk cog-map-chase-link cog-par-chase-link cog-map-chase-links cog-par-chase-links cog-map-chase-links-chk cog-par-chase-links-chk cog-map-chase-link-dbg cog-map-apply-link cog-get-link cog-get-pred cog-get-reference filter-hypergraph cartesian-prod cartesian-prod-list-only approx-eq? cog-equal? min-element-by-key max-element-by-key))
+(define (export-utilities) (export av stv itv ctv tv-mean tv-conf
+tv-count gar gdr gadr gddr gaddr gdddr for-each-except cog-atom-incr
+purge-hypergraph purge-type clear count-all cog-get-atoms
+cog-prt-atomspace cog-count-atoms cog-report-counts cog-get-root
+cog-get-all-nodes cog-get-partner cog-pred-get-partner cog-filter
+cog-chase-link cog-chase-link-chk cog-map-chase-link cog-par-chase-link
+cog-map-chase-links cog-par-chase-links cog-map-chase-links-chk
+cog-par-chase-links-chk cog-map-chase-link-dbg cog-map-apply-link
+cog-get-link cog-get-pred cog-get-reference filter-hypergraph
+cartesian-prod cartesian-prod-list-only approx-eq? cog-equal?
+min-element-by-key max-element-by-key cog-push-atomspace
+cog-pop-atomspace))

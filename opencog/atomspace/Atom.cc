@@ -76,6 +76,15 @@ Atom::~Atom()
 }
 
 // ==============================================================
+
+// Return the atomspace in which this atom is inserted.
+AtomSpace* Atom::getAtomSpace() const
+{
+    if (_atomTable) return _atomTable->getAtomSpace();
+    return nullptr;
+}
+
+// ==============================================================
 // Whole lotta truthiness going on here.  Does it really need to be
 // this complicated!?
 

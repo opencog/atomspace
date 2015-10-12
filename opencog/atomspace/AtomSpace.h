@@ -93,6 +93,7 @@ public:
     inline int get_num_links() const { return atomTable.getNumLinks(); }
     inline int get_num_atoms_of_type(Type type, bool subclass = false) const
         { return atomTable.getNumAtomsOfType(type, subclass); }
+    UUID get_uuid(void) { return atomTable.get_uuid(); }
 
     //! Clear the atomspace, remove all atoms
     void clear();

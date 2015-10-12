@@ -215,6 +215,7 @@ void SchemeSmob::register_procs(void*)
 	register_proc("cog-outgoing-set",      1, 0, 0, C(ss_outgoing_set));
 	register_proc("cog-tv",                1, 0, 0, C(ss_tv));
 	register_proc("cog-av",                1, 0, 0, C(ss_av));
+	register_proc("cog-as",                1, 0, 0, C(ss_as));
 
 	// Truth-values
 	register_proc("cog-new-stv",           2, 0, 0, C(ss_new_stv));
@@ -235,6 +236,8 @@ void SchemeSmob::register_procs(void*)
 	register_proc("cog-atomspace?",        1, 0, 0, C(ss_as_p));
 	register_proc("cog-atomspace",         0, 0, 0, C(ss_get_as));
 	register_proc("cog-set-atomspace!",    1, 0, 0, C(ss_set_as));
+	register_proc("cog-atomspace-uuid",    1, 0, 0, C(ss_as_uuid));
+	register_proc("cog-atomspace-clear",   1, 0, 0, C(ss_as_clear));
 
 	// Attention values
 	register_proc("cog-new-av",            3, 0, 0, C(ss_new_av));
