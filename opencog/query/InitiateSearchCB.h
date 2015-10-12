@@ -26,7 +26,7 @@
 #define _OPENCOG_INITIATE_SEARCH_H
 
 #include <opencog/atomspace/types.h>
-#include <opencog/atoms/bind/PatternLink.h>
+#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/PatternMatchEngine.h>
 

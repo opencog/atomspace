@@ -1,6 +1,6 @@
 
 #include <opencog/atomutils/FindUtils.h>
-#include <opencog/atoms/bind/BindLink.h>
+#include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/DefaultImplicator.h>
 

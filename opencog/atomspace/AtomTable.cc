@@ -39,8 +39,8 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/TypeNode.h>
-#include <opencog/atoms/bind/BindLink.h>
-#include <opencog/atoms/bind/PatternLink.h>
+#include <opencog/atoms/pattern/BindLink.h>
+#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/DeleteLink.h>
 #include <opencog/atoms/core/FunctionLink.h>

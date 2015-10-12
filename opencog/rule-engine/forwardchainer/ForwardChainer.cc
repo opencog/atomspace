@@ -23,9 +23,9 @@
 
 #include <boost/range/algorithm/find.hpp>
 
-#include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/atoms/bind/PatternLink.h>
+#include <opencog/atoms/pattern/BindLink.h>
+#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atomutils/Substitutor.h>

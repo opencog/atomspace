@@ -27,7 +27,7 @@
 #include <set>
 
 #include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/atoms/bind/PatternLink.h>
+#include <opencog/atoms/pattern/PatternLink.h>
 
 #include "BindLinkAPI.h"
 
