@@ -188,13 +188,8 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 /// is the bad handle.
 Handle AtomTable::getHandle(const AtomPtr& a) const
 {
-    const AtomTable *env = this;
-    if (a->_atomTable) {
-        do {
-            if (a->_atomTable == env) return a->getHandle();
-            env = env->_environ;
-        } while (env);
-    }
+    if (inEnviron(a))
+        return a->getHandle();
 
     NodePtr nnn(NodeCast(a));
     if (nnn)
