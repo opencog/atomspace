@@ -53,7 +53,7 @@ namespace opencog
  */
 class AtomSpace
 {
-    friend class SavingLoading;
+    friend class Atom;               // Needs to call get_atomtable()
     friend class SQLPersistSCM;
     friend class ZMQPersistSCM;
     friend class ::AtomTableUTest;

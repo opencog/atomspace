@@ -88,7 +88,6 @@ typedef std::shared_ptr<TruthValue> TruthValuePtr;
 class TruthValue
     : public std::enable_shared_from_this<TruthValue>
 {
-    friend class SavingLoading;
     friend class Atom;
 
     // the TruthValueUTest class needs to access private members from the
