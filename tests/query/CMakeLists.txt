@@ -48,6 +48,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(ArcanaUTest)
 	ADD_CXXTEST(SubstitutionUTest)
 	ADD_CXXTEST(GetLinkUTest)
+	ADD_CXXTEST(GlobUTest)
 
 	ADD_CXXTEST(GreaterThanUTest)
 	ADD_CXXTEST(GreaterComputeUTest)

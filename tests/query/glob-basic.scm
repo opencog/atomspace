@@ -1,7 +1,5 @@
 ;
-; glob.scm
-;
-; Demonstration of globbing.
+; glob-basic.scm
 ;
 
 (use-modules (opencog))
