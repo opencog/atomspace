@@ -1,9 +1,9 @@
-
-; Some very crude experiments
+;
+; recog.scm
 ;
 ; This is a rough sketch of the idea that pattern recognition
 ; is the dual of pattern matching.  There are many things wrong
-; with the below; its just a sketch.
+; with the below; its just a sketch. However, it does work.
 
 (use-modules (opencog))
 (use-modules (opencog query))
