@@ -12,11 +12,11 @@
 (BindLink
 	(ListLink
 		(ConceptNode "I")
-		(VariableNode "$star")
+		(GlobNode "$star")
 		(ConceptNode "you"))
 	(ListLink
 		(ConceptNode "I")
-		(VariableNode "$star")
+		(GlobNode "$star")
 		(ConceptNode "you")
 		(ConceptNode "too")))
 
@@ -24,11 +24,11 @@
 	(ListLink
 		(ConceptNode "I")
 		(ConceptNode "love")
-		(VariableNode "$star"))
+		(GlobNode "$star"))
 	(ListLink
 		(ConceptNode "I")
 		(ConceptNode "like")
-		(VariableNode "$star")
+		(GlobNode "$star")
 		(ConceptNode "a")
 		(ConceptNode "lot!")))
 
@@ -52,12 +52,12 @@
 	(BindLink
 		(ListLink
 			(ConceptNode "I")
-			(VariableNode "$star")
+			(GlobNode "$star")
 			(ConceptNode "you")
 		)
 		(ListLink
 			(ConceptNode "I")
-			(VariableNode "$star")
+			(GlobNode "$star")
 			(ConceptNode "you")
 			(ConceptNode "too")
 		)
@@ -66,12 +66,12 @@
 		(ListLink
 			(ConceptNode "I")
 			(ConceptNode "love")
-			(VariableNode "$star")
+			(GlobNode "$star")
 		)
 		(ListLink
 			(ConceptNode "I")
 			(ConceptNode "like")
-			(VariableNode "$star")
+			(GlobNode "$star")
 			(ConceptNode "a")
 			(ConceptNode "lot!")
 		)
