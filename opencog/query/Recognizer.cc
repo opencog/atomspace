@@ -62,6 +62,7 @@ class Recognizer :
 		Handle _starter_term;
 		size_t _cnt;
 		bool do_search(PatternMatchEngine*, const Handle&);
+		bool loose_match(const Handle&, const Handle&);
 
 	public:
 		std::set<Handle> _rules;
@@ -172,11 +173,80 @@ bool Recognizer::link_match(const LinkPtr& lpat, const LinkPtr& lsoln)
 	return true;
 }
 
+bool Recognizer::loose_match(const Handle& npat_h, const Handle& nsoln_h)
+{
+	Type gtype = nsoln_h->getType();
+	// Variable matches anything; move to next.
+	if (VARIABLE_NODE == gtype) return true;
+
+	// Strict match for link types
+	if (npat_h->getType() != gtype) return false;
+	if (nullptr == NodeCast(npat_h)) return true;
+
+	// if we are here, we know we have nodes. Ask for a strick match.
+	if (npat_h != nsoln_h) return false;
+	return true;
+}
+
 bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 {
 printf("duuuuuude fuzzyyyy on %s vs %s\n", npat_h->toString().c_str(),
 nsoln_h->toString().c_str());
-	//
+	// If we are here, then there are probably glob nodes in the soln.
+	// Try to match them, rigorously. This might be a bad idea, though;
+	// if we are too rigorouos here, and have a bug, we may fail to find
+	// a good pattern.
+
+	LinkPtr lpat(LinkCast(npat_h));
+	LinkPtr lsoln(LinkCast(nsoln_h));
+	if (nullptr == lpat or nullptr == lsoln) return false;
+
+	const HandleSeq &osg = lsoln->getOutgoingSet();
+	size_t osg_size = osg.size();
+
+	// Lets not waste time, if there's no glob there.
+	bool have_glob = false;
+	for (size_t j=0; j<osg_size; j++)
+	{
+		if (osg[j]->getType() == GLOB_NODE)
+		{
+			have_glob = true;
+			break;
+		}
+	}
+	if (not have_glob) return false;
+
+	const HandleSeq &osp = lpat->getOutgoingSet();
+	size_t osp_size = osp.size();
+	size_t max_size = std::max(osg_size, osp_size);
+
+	// Do a side-by-side compare. This is not as rigorous as
+	// PatternMatchEngine::tree_compare() nor does it handle the bells
+	// and whistles (ChoiceLink, QuoteLink, etc).
+	for (size_t ip=0, jg=0; ip<osp_size and jg<osg_size; ip++, jg++)
+	{
+		if (GLOB_NODE != osg[jg]->getType())
+		{
+			if (loose_match(osp[ip], osg[jg])) continue;
+			return false;
+		}
+
+		// If we are here, we have a glob in the soln. If the glob is at
+		// the end, it eats everything, so its a match. Else, resume
+		// matching at the end of the glob.
+		if ((jg+1) == osg_size) return true;
+
+		Handle post(osg[jg+1]);
+		ip++;
+		while (ip < max_size and not loose_match(osp[ip], post))
+		{
+			ip++;
+		}
+		// If ip ran past the end, then the post was not found. This is
+		// a mismatch.
+		if (not ip < max_size) return false;
+	}
+
 	return false;
 }
 
