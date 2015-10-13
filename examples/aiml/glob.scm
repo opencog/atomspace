@@ -51,7 +51,7 @@
 		(ConceptNode "I")
 		(ConceptNode "like")
 		(GlobNode "$star")
-		(ConceptNode "too"))))
+		(ConceptNode "also"))))
 
 ;; Both of these patterns should "work as expected".
 ; (cog-bind glob-you)

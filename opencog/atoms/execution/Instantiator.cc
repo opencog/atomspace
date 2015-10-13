@@ -38,12 +38,29 @@ HandleSeq Instantiator::walk_tree(const HandleSeq& expr)
 	for (const Handle& h : expr)
 	{
 		Handle hg(walk_tree(h));
-		// It could be a NULL handle if it's deleted... Just skip
-		// over it. We test the pointer here, not the uuid, since
-		// the uuid's are all Handle::UNDEFINED until we put them
-		// into the atomspace.
-		if (NULL != hg)
-			oset_results.emplace_back(hg);
+
+		// GlobNodes are grounded by a ListLink of everything that
+		// the GlobNode matches. Unwrap the list, and insert each
+		// of the glob elements in sequence.
+		if (GLOB_NODE == h->getType() and hg != h)
+		{
+			LinkPtr lp(LinkCast(hg));
+			OC_ASSERT(nullptr != lp, "Expecting glob list");
+			for (const Handle& gloe: lp->getOutgoingSet())
+			{
+				if (NULL != gloe)
+					oset_results.emplace_back(gloe);
+			}
+		}
+		else
+		{
+			// It could be a NULL handle if it's deleted... Just skip
+			// over it. We test the pointer here, not the uuid, since
+			// the uuid's are all Handle::UNDEFINED until we put them
+			// into the atomspace.
+			if (NULL != hg)
+				oset_results.emplace_back(hg);
+		}
 	}
 	return oset_results;
 }
