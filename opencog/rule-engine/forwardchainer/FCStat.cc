@@ -36,7 +36,7 @@ bool FCStat::has_partial_grounding(const Handle& hsource)
     return false;
 }
 
-void FCStat::add_partial_grounding(Handle source, Handle hrule, HandleSeq pgroundings)
+void FCStat::add_partial_grounding(Handle source, Handle hrule, HandleWeightMap pgroundings)
 {
     if (hrule == Handle::UNDEFINED) {
         PartiaGroundingRecord pgr(source);
@@ -63,7 +63,7 @@ void FCStat::add_partial_grounding(Handle source, Handle hrule, HandleSeq pgroun
  *
  * @return  A map or rules to their partial groundings.
  */
-std::map<Handle,HandleSeq> FCStat::get_rule_pg_map(const Handle& hsource)
+std::map<Handle,HandleWeightMap> FCStat::get_rule_pg_map(const Handle& hsource)
 {
     for (PartiaGroundingRecord& pgr : _spg_stat) {
         if (pgr.hsource == hsource)
