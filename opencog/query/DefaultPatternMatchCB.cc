@@ -55,6 +55,7 @@ void DefaultPatternMatchCB::set_pattern(const Variables& vars,
 	_have_evaluatables = (0 < _dynamic->size());
 	_have_variables = (0 < vars.varseq.size());
 	_pattern_body = pat.body;
+	_globs = &pat.globby_terms;
 }
 
 
@@ -94,7 +95,7 @@ bool DefaultPatternMatchCB::variable_match(const Handle& npat_h,
 	// accept the match. This allows any kind of node types to be
 	// explicitly bound as variables.  However, the type VariableNode
 	// gets special handling, below.
-	if (pattype != VARIABLE_NODE) return true;
+	if (VARIABLE_NODE != pattype and GLOB_NODE != pattype) return true;
 
 	// If the ungrounded term is a variable, then see if there
 	// are any restrictions on the variable type.
@@ -137,10 +138,18 @@ bool DefaultPatternMatchCB::link_match(const LinkPtr& lpat,
 	Type pattype = lpat->getType();
 	if (CHOICE_LINK == pattype) return true;
 
-	if (lpat->getArity() != lsoln->getArity()) return false;
-	Type soltype = lsoln->getType();
+	// Reject mis-sized compares, unless the pattern has a glob in it.
+	if (0 == _globs->count(lpat->getHandle()))
+	{ 
+		if (lpat->getArity() != lsoln->getArity()) return false;
+	}
+	else
+	{
+		if (lpat->getArity() > lsoln->getArity()) return false;
+	}
 
 	// If types differ, no match
+	Type soltype = lsoln->getType();
 	return pattype == soltype;
 }
 

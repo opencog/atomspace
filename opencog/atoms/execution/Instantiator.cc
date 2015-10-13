@@ -38,12 +38,29 @@ HandleSeq Instantiator::walk_tree(const HandleSeq& expr)
 	for (const Handle& h : expr)
 	{
 		Handle hg(walk_tree(h));
-		// It could be a NULL handle if it's deleted... Just skip
-		// over it. We test the pointer here, not the uuid, since
-		// the uuid's are all Handle::UNDEFINED until we put them
-		// into the atomspace.
-		if (NULL != hg)
-			oset_results.emplace_back(hg);
+
+		// GlobNodes are grounded by a ListLink of everything that
+		// the GlobNode matches. Unwrap the list, and insert each
+		// of the glob elements in sequence.
+		if (GLOB_NODE == h->getType() and hg != h)
+		{
+			LinkPtr lp(LinkCast(hg));
+			OC_ASSERT(nullptr != lp, "Expecting glob list");
+			for (const Handle& gloe: lp->getOutgoingSet())
+			{
+				if (NULL != gloe)
+					oset_results.emplace_back(gloe);
+			}
+		}
+		else
+		{
+			// It could be a NULL handle if it's deleted... Just skip
+			// over it. We test the pointer here, not the uuid, since
+			// the uuid's are all Handle::UNDEFINED until we put them
+			// into the atomspace.
+			if (NULL != hg)
+				oset_results.emplace_back(hg);
+		}
 	}
 	return oset_results;
 }
@@ -66,7 +83,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			return walk_tree(DefineLink::get_definition(expr));
 		}
 
-		if (VARIABLE_NODE != t)
+		if (VARIABLE_NODE != t and GLOB_NODE != t)
 			return Handle(expr);
 
 		// If we are here, we found a variable. Look it up. Return a
@@ -182,9 +199,11 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	{
 		HandleSeq oset_results(walk_tree(lexpr->getOutgoingSet()));
 		for (const Handle& h: oset_results)
-			if (VARIABLE_NODE != h->getType())
+		{
+			Type ht = h->getType();
+			if (VARIABLE_NODE != ht and GLOB_NODE != ht)
 				_as->remove_atom(h, true);
-
+		}
 		return Handle::UNDEFINED;
 	}
 
@@ -212,7 +231,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		for (size_t i=0; i< sz; i++)
 			oset_results[i] = _as->add_atom(oset_results[i]);
 
-		LinkPtr lp = createLink(GET_LINK, oset_results);
+		LinkPtr lp(createLink(GET_LINK, oset_results));
 
 		return satisfying_set(_as, Handle(lp));
 	}

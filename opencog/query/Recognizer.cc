@@ -27,7 +27,7 @@
 #include <set>
 
 #include <opencog/query/DefaultPatternMatchCB.h>
-#include <opencog/atoms/bind/PatternLink.h>
+#include <opencog/atoms/pattern/PatternLink.h>
 
 #include "BindLinkAPI.h"
 
@@ -147,7 +147,8 @@ bool Recognizer::initiate_search(PatternMatchEngine* pme)
 bool Recognizer::node_match(const Handle& npat_h, const Handle& nsoln_h)
 {
 	if (npat_h == nsoln_h) return true;
-	if (VARIABLE_NODE == nsoln_h->getType()) return true;
+	Type tso = nsoln_h->getType();
+	if (VARIABLE_NODE == tso or GLOB_NODE == tso) return true;
 	return false;
 }
 

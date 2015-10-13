@@ -24,7 +24,7 @@
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
 #include <opencog/atomutils/FindUtils.h>
-#include <opencog/atoms/bind/PatternUtils.h>
+#include <opencog/atoms/pattern/PatternUtils.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
@@ -99,9 +99,8 @@ bool PatternMatchEngine::quote_compare(const PatternTermPtr& ptm,
 	LinkPtr lp(LinkCast(ptm->getHandle()));
 	if (1 != lp->getArity())
 		throw InvalidParamException(TRACE_INFO,
-		            "QuoteLink has unexpected arity!");
-	bool ma = tree_compare(ptm->getOutgoingTerm(0), hg, CALL_QUOTE);
-	return ma;
+		            "QuoteLink/UnquoteLink has unexpected arity!");
+	return tree_compare(ptm->getOutgoingTerm(0), hg, CALL_QUOTE);
 }
 
 /* ======================================================== */
@@ -127,7 +126,7 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 		if (gnd)
 			return (gnd == hg);
 	}
-	catch(...) { }
+	catch (...) { }
 
 	// VariableNode had better be an actual node!
 	// If it's not then we are very very confused ...
@@ -161,13 +160,14 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 	// The variable_match() callback may implement some tighter
 	// variable check, e.g. to make sure that the grounding is
 	// of some certain type.
-	if (not _pmc.variable_match (hp, hg)) return false;
+	if (not _pmc.variable_match(hp, hg)) return false;
 
-	// Make a record of it.
+	// Make a record of it. Cannot record GlobNodes here; they're
+	// variadic.
 	LAZY_LOG_FINE << "Found grounding of variable:";
 	logmsg("$$ variable:", hp);
 	logmsg("$$ ground term:", hg);
-	if (hp != hg) var_grounding[hp] = hg;
+	if (hp != hg and hp->getType() != GLOB_NODE) var_grounding[hp] = hg;
 	return true;
 }
 
@@ -221,12 +221,9 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	PatternTermSeq osp = ptm->getOutgoingSet();
 	const HandleSeq &osg = lg->getOutgoingSet();
 
-//	size_t oset_sz = osp.size();
-//	if (oset_sz != osg.size()) return false;
-
 	size_t osg_size = osg.size();
 	size_t osp_size = osp.size();
-	size_t max_size = std::max(osg.size(), osp.size());
+	size_t max_size = std::max(osg_size, osp_size);
 
 	// The recursion step: traverse down the tree.
 	// In principle, we could/should push the current groundings
@@ -242,22 +239,100 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	//
 	depth ++;
 
+	// If the pattern contains no globs, do the "regular" search.
 	bool match = true;
-	for (size_t i=0; i<max_size; i++)
+	if (0 == _pat->globby_terms.count(lp->getHandle()))
 	{
-		bool tc = false;
-		if (i < osp_size and i < osg_size)
-			tc = tree_compare(osp[i], osg[i], CALL_UNORDER);
-
-		else if (i < osp_size)
-			tc = tree_compare(osp[i], Handle::UNDEFINED, CALL_UNORDER);
-
-		else tc = tree_compare(PatternTerm::UNDEFINED, osg[i], CALL_UNORDER);
-
-		if (not tc)
+		for (size_t i=0; i<max_size; i++)
 		{
-			match = false;
-			break;
+			bool tc = false;
+			if (i < osp_size and i < osg_size)
+				tc = tree_compare(osp[i], osg[i], CALL_ORDER);
+
+			else if (i < osp_size)
+				tc = tree_compare(osp[i], Handle::UNDEFINED, CALL_ORDER);
+
+			else tc = tree_compare(PatternTerm::UNDEFINED, osg[i], CALL_ORDER);
+
+			if (not tc)
+			{
+				match = false;
+				break;
+			}
+		}
+	}
+	else
+	{
+		// If we are here, then the pattern contains globs. A glob can
+		// match one or more atoms in a row. Thus, we have a more
+		// complicated search ...
+		for (size_t ip=0, jg=0; ip<osp_size and jg<osg_size; ip++, jg++)
+		{
+			bool tc = false;
+			const Handle& ohp(osp[ip]->getHandle());
+			Type ptype = ohp->getType();
+			if (GLOB_NODE == ptype)
+			{
+#ifdef NO_SELF_GROUNDING
+				if (ohp == osg[jg]) return false;
+#endif
+				HandleSeq glob_seq;
+				PatternTermPtr glob(osp[ip]);
+				// Globs at the end are handled differently than globs
+				// which are followed by other stuff. So, is there
+				// anything after the glob?
+				PatternTermPtr post_glob;
+				bool have_post = false;
+				if (ip+1 < osp_size)
+				{
+					have_post = true;
+					post_glob = (osp[ip+1]);
+				}
+
+				// Match at least one.
+				tc = tree_compare(glob, osg[jg], CALL_GLOB);
+				if (not tc)
+				{
+					match = false;
+					break;
+				}
+				glob_seq.push_back(osg[jg]);
+				jg++;
+
+				// Can we match more?
+				while (tc and jg<osg_size)
+				{
+					if (have_post)
+					{
+						// If the atom after the glob matches, then we are done.
+						tc = tree_compare(post_glob, osg[jg], CALL_GLOB);
+						if (tc) break;
+					}
+					tc = tree_compare(glob, osg[jg], CALL_GLOB);
+					if (tc) glob_seq.push_back(osg[jg]);
+					jg ++;
+				}
+				jg --;
+				if (not tc)
+				{
+					match = false;
+					break;
+				}
+
+				// If we are here, we've got a match; record the glob.
+				LinkPtr glp(createLink(LIST_LINK, glob_seq));
+				var_grounding[glob->getHandle()] = glp->getHandle();
+			}
+			else
+			{
+				// If we are here, we are not comparing to a glob.
+				tc = tree_compare(osp[ip], osg[jg], CALL_ORDER);
+				if (not tc)
+				{
+					match = false;
+					break;
+				}
+			}
 		}
 	}
 
@@ -747,6 +822,9 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	if (not ptm->isQuoted() and QUOTE_LINK == tp)
 		return quote_compare(ptm, hg);
 
+	if (ptm->isQuoted() and UNQUOTE_LINK == tp)
+		return quote_compare(ptm, hg);
+
 	// If the pattern link is executable, then we should execute, and
 	// use the result of that execution. (This isn't implemented yet,
 	// because all variables in an executable link need to be grounded,
@@ -762,9 +840,11 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
-	if (not ptm->isQuoted() and _varlist->varset.end() !=
-	    _varlist->varset.find(hp))
+	if (not ptm->isQuoted() and
+	    _varlist->varset.end() != _varlist->varset.find(hp))
+	{
 		return variable_compare(hp, hg);
+	}
 
 	// If they're the same atom, then clearly they match.
 	// ... but only if hp is a constant i.e. contains no bound variables)
@@ -806,7 +886,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// If the two links are both ordered, its enough to compare
 	// them "side-by-side".
-	if (2 > lp->getArity() || _classserver.isA(tp, ORDERED_LINK))
+	if (2 > lp->getArity() or _classserver.isA(tp, ORDERED_LINK))
 		return ordered_compare(ptm, hg, lp, lg);
 
 	// If we are here, we are dealing with an unordered link.
@@ -1831,7 +1911,8 @@ void PatternMatchEngine::log_solution(
 		Handle soln(j->second);
 
 		// Only print grounding for variables.
-		if (VARIABLE_NODE != var->getType()) continue;
+		Type vtype = var->getType();
+		if (VARIABLE_NODE != vtype and GLOB_NODE != vtype) continue;
 
 		if (soln == nullptr)
 		{

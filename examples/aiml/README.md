@@ -74,26 +74,27 @@ to specify the AIML patterns.
 
 ## Globbing
 
-The default pattern matcher does not glob.
+The pattern matcher uses GlobNode to perform globbing.
+See `http://wiki.opencog.org/w/GlobNode` for details.
+See `glob.scm` for a simple working example.
 
 
 # OpenCog equivalents
 * R1 example.
 
-the below won't be efficient/work well as written, due to globbing ...
 ```
 PatternLink
-   SequentailAndLink
+   AndLink
       WordSequenceLink
          WordNode "Hello"
-         VariableNode "$eol"     # rest of the input line
+         GlobNode "$eol"     # rest of the input line
       ListLink
-         AnchoreNode "#that"
-         VariableNode "$that"
+         AnchorNode "#that"
+         GlobNode "$that"
       ListLink
          AnchorNode "#topic"
-         VariableNode "$topic"
-      PutLink                    # if the above conditions are satisfied
+         GlobNode "$topic"
+      PutLink                    # If the above conditions are satisfied
          AnchorNode "#reply"     # then this PutLink is triggered.
          WordSequenceLink        # This is the reply.
             WordNode "Hi"

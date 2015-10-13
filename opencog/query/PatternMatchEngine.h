@@ -176,6 +176,7 @@ class PatternMatchEngine
 		typedef enum {
 			CALL_QUOTE,
 			CALL_ORDER,
+			CALL_GLOB,
 			CALL_UNORDER,
 			CALL_CHOICE,
 			CALL_COMP,

@@ -118,6 +118,9 @@ TYPED_VARIABLE_LINK <- ORDERED_LINK
 // A list of variables or variable declarations.
 VARIABLE_LIST <- LIST_LINK
 
+// A greedy globbing variable
+GLOB_NODE <- VARIABLE_NODE
+
 // A FreeLink is any kind of link that might have free variables in it.
 // The FreeLink exists for one purpose: to make visible/explicit all of
 // free variables in the link. The primary user is the pattern matcher.

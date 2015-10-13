@@ -106,7 +106,8 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 	// the variables from the lambda; else we extract all free variables.
 	if (VARIABLE_LIST != decls and
 	    VARIABLE_NODE != decls and
-	    TYPED_VARIABLE_LINK != decls)
+	    TYPED_VARIABLE_LINK != decls and
+	    GLOB_NODE != decls)
 	{
 		_body = oset[0];
 
