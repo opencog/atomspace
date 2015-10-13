@@ -273,6 +273,9 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 			Type ptype = ohp->getType();
 			if (GLOB_NODE == ptype)
 			{
+#ifdef NO_SELF_GROUNDING
+				if (ohp == osg[jg]) return false;
+#endif
 				HandleSeq glob_seq;
 				PatternTermPtr glob(osp[ip]);
 				// Globs at the end are handled differently than globs
@@ -837,9 +840,11 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
-	if (not ptm->isQuoted() and _varlist->varset.end() !=
-	    _varlist->varset.find(hp))
+	if (not ptm->isQuoted() and
+	    _varlist->varset.end() != _varlist->varset.find(hp))
+	{
 		return variable_compare(hp, hg);
+	}
 
 	// If they're the same atom, then clearly they match.
 	// ... but only if hp is a constant i.e. contains no bound variables)

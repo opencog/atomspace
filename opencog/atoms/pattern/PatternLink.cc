@@ -816,7 +816,8 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	// later checks. The flag telling whether the term subtree contains
 	// any bound variable is set by addBoundVariable() method for all terms
 	// on the path up to the root (unless it has been set already).
-	if (VARIABLE_NODE == t && !ptm->isQuoted() &&
+	if ((VARIABLE_NODE == t or GLOB_NODE == t) and
+	    !ptm->isQuoted() and
 	    _varlist.varset.end() != _varlist.varset.find(h))
 	{
 		ptm->addBoundVariable();
