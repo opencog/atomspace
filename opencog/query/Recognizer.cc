@@ -271,5 +271,5 @@ Handle opencog::recognize(AtomSpace* as, const Handle& hlink)
 	HandleSeq hs;
 	for (const Handle& h : reco._rules) hs.push_back(h);
 
-	return Handle(createLink(SET_LINK, hs));
+	return as->add_link(SET_LINK, hs);
 }
