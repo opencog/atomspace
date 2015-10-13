@@ -32,7 +32,8 @@
 		(ConceptNode "a")
 		(ConceptNode "lot!")))
 
-(define data
+;-------------------------------------------------------
+(define sent
 	;; A pretend "sentence" that is the "input".
 	(PatternLink
 		(BindLink
@@ -42,8 +43,9 @@
 				(ConceptNode "you"))
 			(VariableNode "$impl"))))
 
-;; Perform the search.
-(cog-recognize data)
+;; Search for patterns that match the sentence. Both of the above
+;; should match.
+(cog-recognize sent)
 
 ;; At this time, the above will return the below:
 ;; The BindLinks are NOT evaluated!  To evaluate, see bottom
@@ -78,8 +80,25 @@
 	)
 )
 
+;-------------------------------------------------------
+;; Another sentence, but with adverbs.
+(define adv-sent
+	(PatternLink
+		(BindLink
+			(ListLink
+				(ConceptNode "I")
+				(ConceptNode "really")
+				(ConceptNode "truly")
+				(ConceptNode "love")
+				(ConceptNode "you"))
+			(VariableNode "$impl"))))
+
+;; Perform the search.
+(cog-recognize adv-sent)
+
+;-------------------------------------------------------
 ;; Evaluate each of the bind links that were found.
-(define ruleset (cog-recognize data))
+(define ruleset (cog-recognize sent))
 
 (map cog-bind (cog-outgoing-set ruleset))
 
@@ -97,5 +116,3 @@
       (ConceptNode "you")
       (ConceptNode "a")
       (ConceptNode "lot!"))))
-
-

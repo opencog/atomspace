@@ -190,8 +190,6 @@ bool Recognizer::loose_match(const Handle& npat_h, const Handle& nsoln_h)
 
 bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 {
-printf("duuuuuude fuzzyyyy on %s vs %s\n", npat_h->toString().c_str(),
-nsoln_h->toString().c_str());
 	// If we are here, then there are probably glob nodes in the soln.
 	// Try to match them, rigorously. This might be a bad idea, though;
 	// if we are too rigorouos here, and have a bug, we may fail to find
@@ -244,10 +242,10 @@ nsoln_h->toString().c_str());
 		}
 		// If ip ran past the end, then the post was not found. This is
 		// a mismatch.
-		if (not ip < max_size) return false;
+		if (not (ip < max_size)) return false;
 	}
 
-	return false;
+	return true;
 }
 
 bool Recognizer::grounding(const std::map<Handle, Handle> &var_soln,
