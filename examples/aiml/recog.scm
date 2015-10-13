@@ -5,6 +5,9 @@
 ; is the dual of pattern matching.  There are many things wrong
 ; with the below; its just a sketch.
 
+(use-modules (opencog))
+(use-modules (opencog query))
+
 ; Two different pseudo-AIML rules:
 ;    I * you   --> I * you too
 ;    I love *  --> I like * a lot!
@@ -48,8 +51,7 @@
 (cog-recognize sent)
 
 ;; At this time, the above will return the below:
-;; The BindLinks are NOT evaluated!  To evaluate, see bottom
-
+;; The BindLinks are NOT evaluated!  To evaluate, see bottom.
 (SetLink
 	(BindLink
 		(ListLink
@@ -81,7 +83,8 @@
 )
 
 ;-------------------------------------------------------
-;; Another sentence, but with adverbs.
+;; Another sentence, but with adverbs.  It will match one of the
+;; patterns, but not the other.
 (define adv-sent
 	(PatternLink
 		(BindLink
@@ -102,7 +105,7 @@
 
 (map cog-bind (cog-outgoing-set ruleset))
 
-; Which returns the below:
+; For the non-adverbial sentence this returns the below:
 ((SetLink
    (ListLink
       (ConceptNode "I")
