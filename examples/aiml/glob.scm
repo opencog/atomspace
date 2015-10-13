@@ -1,9 +1,10 @@
 ;
 ; glob.scm
 ;
-; Demonstration of globbing.  Under development, broken.
+; Demonstration of globbing.
 ;
 
+;;; Populate the atomspace with some "sentences".
 (ListLink
 	(ConceptNode "I")
 	(ConceptNode "love")
@@ -24,7 +25,9 @@
 	(ConceptNode "a")
 	(ConceptNode "lot"))
 
-(define globby
+;; Two different re-write rules. The first rule, immediately below,
+;; says "I * you" -> "I * you too".
+(define glob-you
 	(BindLink
 	(ListLink
 		(ConceptNode "I")
@@ -36,7 +39,8 @@
 		(ConceptNode "you")
 		(ConceptNode "too"))))
 
-(define glob-end
+;; This one implements "I love *" -> "Hey! I love * too"
+(define love-glob
 	(BindLink
 	(ListLink
 		(ConceptNode "I")
@@ -49,9 +53,6 @@
 		(GlobNode "$star")
 		(ConceptNode "too"))))
 
-(use-modules (opencog logger))
-(cog-logger-set-stdout #t)
-(cog-logger-set-level "fine")
-
-(cog-bind globby)
-; (cog-bind glob-end)
+;; Both of these patterns should "work as expected".
+; (cog-bind glob-you)
+; (cog-bind love-glob)

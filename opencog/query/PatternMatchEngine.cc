@@ -239,6 +239,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	//
 	depth ++;
 
+	// If the pattern contains no globs, do the "regular" search.
 	bool match = true;
 	if (0 == _pat->globby_terms.count(lp->getHandle()))
 	{
@@ -262,6 +263,9 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	}
 	else
 	{
+		// If we are here, then the pattern contains globs. A glob can
+		// match one or more atoms in a row. Thus, we have a more
+		// complicated search ...
 		for (size_t ip=0, jg=0; ip<osp_size and jg<osg_size; ip++, jg++)
 		{
 			bool tc = false;
