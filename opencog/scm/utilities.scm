@@ -959,19 +959,31 @@
 "
  min-element-by-key LIST FUN
     Given LIST and function FUN (from element to number), return the
-    element for which FUN(e) is the least.
+    element of LIST for which FUN(e) is the least. That is, implements
+    the argmin function.
 "
-	(fold (lambda (x y) (if (< x y) x y)) 1e300 (map fun lyst)))
+	;;; No not this.
+	;;; (fold (lambda (x y) (if (< x y) x y)) 1e300 (map fun lyst)))
+	(fold (lambda (x y)
+		(if (eq? '() x) y
+		(if (eq? '() y) x
+		(if (< (fun x) (fun y)) x y)))) '() lyst))
 
 ; ---------------------------------------------------------------------
 
 (define (max-element-by-key lyst fun)
 "
  max-element-by-key LIST FUN
-    Given LIST and function FUN (from element to number), return the
-    element of LIST for which FUN(e) is the highest.
+    Given LIST and function FUN (from element to number), return
+    the element of LIST for which FUN(e) is the highest.  That is,
+    implements the argmax function.
 "
-	(fold (lambda (x y) (if (> x y) x y)) -1e300 (map fun lyst)))
+	;;; No not this.
+	;;; (fold (lambda (x y) (if (> x y) x y)) -1e300 (map fun lyst)))
+	(fold (lambda (x y)
+		(if (eq? '() x) y
+		(if (eq? '() y) x
+		(if (> (fun x) (fun y)) x y)))) '() lyst))
 
 ; ---------------------------------------------------------------------
 
