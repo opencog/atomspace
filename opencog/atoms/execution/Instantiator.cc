@@ -214,7 +214,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		for (size_t i=0; i< sz; i++)
 			oset_results[i] = _as->add_atom(oset_results[i]);
 
-		LinkPtr lp = createLink(GET_LINK, oset_results);
+		LinkPtr lp(createLink(GET_LINK, oset_results));
 
 		return satisfying_set(_as, Handle(lp));
 	}

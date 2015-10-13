@@ -274,44 +274,47 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 				// Globs at the end are handled differently than globs
 				// which are followed by other stuff. So, is there
 				// anything after the glob?
+				PatternTermPtr post_glob;
+				bool have_post = false;
 				if (ip+1 < osp_size)
 				{
-					// Match at least one.
-					tc = tree_compare(glob, osg[jg], CALL_GLOB);
-					if (not tc)
-					{
-						match = false;
-						break;
-					}
-					glob_seq.push_back(osg[jg]);
-					jg++;
+					have_post = true;
+					post_glob = (osp[ip+1]);
+				}
 
-					// Can we match more?
-					PatternTermPtr post_glob(osp[ip+1]);
-					while (tc and jg<osg_size)
+				// Match at least one.
+				tc = tree_compare(glob, osg[jg], CALL_GLOB);
+				if (not tc)
+				{
+					match = false;
+					break;
+				}
+				glob_seq.push_back(osg[jg]);
+				jg++;
+
+				// Can we match more?
+				while (tc and jg<osg_size)
+				{
+					if (have_post)
 					{
 						// If the atom after the glob matches, then we are done.
 						tc = tree_compare(post_glob, osg[jg], CALL_GLOB);
 						if (tc) break;
-						tc = tree_compare(glob, osg[jg], CALL_GLOB);
-						if (tc) glob_seq.push_back(osg[jg]);
-						jg ++;
 					}
-					jg --;
-					if (not tc)
-					{
-						match = false;
-						break;
-					}
-
-					// If we are here, we've got a match; record the glob.
-					LinkPtr glp(createLink(LIST_LINK, glob_seq));
-					var_grounding[glob->getHandle()] = glp->getHandle();
+					tc = tree_compare(glob, osg[jg], CALL_GLOB);
+					if (tc) glob_seq.push_back(osg[jg]);
+					jg ++;
 				}
-				else
+				jg --;
+				if (not tc)
 				{
-throw RuntimeException(TRACE_INFO, "Not implemented!!");
+					match = false;
+					break;
 				}
+
+				// If we are here, we've got a match; record the glob.
+				LinkPtr glp(createLink(LIST_LINK, glob_seq));
+				var_grounding[glob->getHandle()] = glp->getHandle();
 			}
 			else
 			{
