@@ -78,6 +78,8 @@ class Recognizer :
 
 		virtual bool initiate_search(PatternMatchEngine*);
 		virtual bool node_match(const Handle&, const Handle&);
+		virtual bool link_match(const LinkPtr&, const LinkPtr&);
+		virtual bool fuzzy_match(const Handle&, const Handle&);
 		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
 		                       const std::map<Handle, Handle> &term_soln);
 };
@@ -89,9 +91,9 @@ class Recognizer :
 using namespace opencog;
 
 // Uncomment below to enable debug print
-// #define DEBUG
+#define DEBUG
 #ifdef DEBUG
-#define dbgprt(f, varargs...) printf(f, ##varargs)
+#define dbgprt(f, varargs...) logger().fine(f, ##varargs)
 #else
 #define dbgprt(f, varargs...)
 #endif
@@ -103,6 +105,9 @@ bool Recognizer::do_search(PatternMatchEngine* pme, const Handle& top)
 	LinkPtr ltop(LinkCast(top));
 	if (ltop)
 	{
+		// Recursively drill down and explore every possible node as
+		// a search starting point. This is needed, as the patterns we
+		// compare against might not be connected.
 		for (const Handle& h : ltop->getOutgoingSet())
 		{
 			_starter_term = top;
@@ -149,6 +154,29 @@ bool Recognizer::node_match(const Handle& npat_h, const Handle& nsoln_h)
 	if (npat_h == nsoln_h) return true;
 	Type tso = nsoln_h->getType();
 	if (VARIABLE_NODE == tso or GLOB_NODE == tso) return true;
+	return false;
+}
+
+bool Recognizer::link_match(const LinkPtr& lpat, const LinkPtr& lsoln)
+{
+	// Self-compares always proceed.
+	if (lpat == lsoln) return true;
+
+	// mis-matched types are a dead-end.
+	if (lpat->getType() != lsoln->getType()) return false;
+
+	// Globs are arity-changing. But there is a minimum length.
+	// Note that the inequality is backwards, here: the soln has the
+	// globs!
+	if (lpat->getArity() < lsoln->getArity()) return false;
+	return true;
+}
+
+bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
+{
+printf("duuuuuude fuzzyyyy on %s vs %s\n", npat_h->toString().c_str(),
+nsoln_h->toString().c_str());
+	//
 	return false;
 }
 
