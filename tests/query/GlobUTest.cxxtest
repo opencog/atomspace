@@ -90,8 +90,25 @@ void GlobUTest::test_glob_middle(void)
     load_scm_files_from_config(*as);
 
     Handle love = eval->eval_h("(cog-bind glob-you)");
-    printf("love, num solutions=%d\n", as->get_arity(love));
+    printf("glob-you %s\n", love->toString().c_str());
     TS_ASSERT_EQUALS(2, as->get_arity(love));
+
+    Handle response = eval->eval_h(
+       "(SetLink"
+       "  (ListLink"
+       "    (ConceptNode \"I\")"
+       "    (ConceptNode \"love\")"
+       "    (ConceptNode \"you\")"
+       "    (ConceptNode \"too\"))"
+       "  (ListLink"
+       "    (ConceptNode \"I\")"
+       "    (ConceptNode \"really\")"
+       "    (ConceptNode \"totally\")"
+       "    (ConceptNode \"need\")"
+       "    (ConceptNode \"you\")"
+       "    (ConceptNode \"too\")))"
+    );
+    TS_ASSERT_EQUALS(love, response);
 
     // ----
     logger().debug("END TEST: %s", __FUNCTION__);
@@ -108,8 +125,28 @@ void GlobUTest::test_glob_final(void)
     load_scm_files_from_config(*as);
 
     Handle love = eval->eval_h("(cog-bind love-glob)");
-    printf("love, num solutions=%d\n", as->get_arity(love));
+    printf("love-glob %s\n", love->toString().c_str());
     TS_ASSERT_EQUALS(2, as->get_arity(love));
+
+    Handle response = eval->eval_h(
+       "(SetLink"
+       "  (ListLink"
+       "    (ConceptNode \"Hey!\")"
+       "    (ConceptNode \"I\")"
+       "    (ConceptNode \"like\")"
+       "    (ConceptNode \"you\")"
+       "    (ConceptNode \"also\"))"
+       "  (ListLink"
+       "    (ConceptNode \"Hey!\")"
+       "    (ConceptNode \"I\")"
+       "    (ConceptNode \"like\")"
+       "    (ConceptNode \"teddy\")"
+       "    (ConceptNode \"bears\")"
+       "    (ConceptNode \"a\")"
+       "    (ConceptNode \"lot\")"
+       "    (ConceptNode \"also\")))"
+    );
+    TS_ASSERT_EQUALS(love, response);
 
     // ----
     logger().debug("END TEST: %s", __FUNCTION__);
