@@ -248,15 +248,19 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	if (0 == _pat->globby_terms.count(lp->getHandle()))
 	{
 		// If the arities are mis-matched, do a fuzzy compare instead.
-		if (osg_size != osp_size)
-			return _pmc.fuzzy_match(ptm->getHandle(), hg);
-
-		for (size_t i=0; i<max_size; i++)
+		if (osp_size != osg_size)
 		{
-			if (not tree_compare(osp[i], osg[i], CALL_ORDER))
+			match = _pmc.fuzzy_match(ptm->getHandle(), hg);
+		}
+		else
+		{
+			for (size_t i=0; i<max_size; i++)
 			{
-				match = false;
-				break;
+				if (not tree_compare(osp[i], osg[i], CALL_ORDER))
+				{
+					match = false;
+					break;
+				}
 			}
 		}
 	}
