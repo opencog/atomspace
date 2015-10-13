@@ -119,7 +119,7 @@ void FreeLink::find_vars(std::set<Handle>& varset, const HandleSeq& oset)
 	{
 		Type t = h->getType();
 
-		if (VARIABLE_NODE == t and
+		if ((VARIABLE_NODE == t or GLOB_NODE == t) and
 		    not _in_quote and
 		    0 == varset.count(h) and
 		    0 == _bound_vars.count(h))

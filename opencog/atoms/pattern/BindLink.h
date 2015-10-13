@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_BIND_LINK_H
 #define _OPENCOG_BIND_LINK_H
 
-#include <opencog/atoms/bind/PatternLink.h>
+#include <opencog/atoms/pattern/PatternLink.h>
 
 namespace opencog
 {

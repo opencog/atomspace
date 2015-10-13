@@ -98,6 +98,7 @@ protected:
 	                          const HandleSeq&);
 
 	void locate_defines(HandleSeq& clauses);
+	void locate_globs(HandleSeq& clauses);
 	void validate_clauses(std::set<Handle>& vars,
 	                      HandleSeq& clauses,
 	                      HandleSeq& constants);

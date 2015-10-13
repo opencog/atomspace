@@ -37,6 +37,7 @@ using namespace opencog;
 void PatternLink::common_init(void)
 {
 	locate_defines(_pat.clauses);
+	locate_globs(_pat.clauses);
 
 	// If there are any defines in the pattern, then all bets are off
 	// as to whether it is connected or not, what's virtual, what isn't.
@@ -201,6 +202,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 		}
 	}
 	locate_defines(_pat.clauses);
+	locate_globs(_pat.clauses);
 
 	// The rest is easy: the evaluatables and the connection map
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
@@ -401,6 +403,20 @@ void PatternLink::locate_defines(HandleSeq& clauses)
 		for (const Handle& sh : fdpn.varset)
 		{
 			_pat.defined_terms.insert(sh);
+		}
+	}
+}
+
+void PatternLink::locate_globs(HandleSeq& clauses)
+{
+	for (const Handle& clause: clauses)
+	{
+		FindAtoms fgn(GLOB_NODE, true);
+		fgn.search_set(clause);
+
+		for (const Handle& sh : fgn.least_holders)
+		{
+			_pat.globby_terms.insert(sh);
 		}
 	}
 }
@@ -788,6 +804,9 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 		if (QUOTE_LINK == t)
 			ptm->addQuote();
 
+		else if (UNQUOTE_LINK == t)
+			ptm->remQuote();
+
 		for (const Handle& ho: l->getOutgoingSet())
 		     make_term_tree_recursive(root, ho, ptm);
 		return;
@@ -797,7 +816,8 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	// later checks. The flag telling whether the term subtree contains
 	// any bound variable is set by addBoundVariable() method for all terms
 	// on the path up to the root (unless it has been set already).
-	if (VARIABLE_NODE == t && !ptm->isQuoted() &&
+	if ((VARIABLE_NODE == t or GLOB_NODE == t) and
+	    !ptm->isQuoted() and
 	    _varlist.varset.end() != _varlist.varset.find(h))
 	{
 		ptm->addBoundVariable();

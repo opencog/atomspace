@@ -23,10 +23,10 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
-#include <opencog/atoms/bind/PatternLink.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atomutils/Substitutor.h>
 
@@ -113,8 +113,10 @@ InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
 {
 	// If its a node, then we are done.
 	Type t = h->getType();
-	if (_classserver.isNode(t)) {
-		if (t != VARIABLE_NODE) {
+	if (_classserver.isNode(t))
+	{
+		if (VARIABLE_NODE != t and GLOB_NODE != t)
+		{
 			width = h->getIncomingSetSize();
 			startrm = h; // XXX wtf ???
 			return h;
@@ -133,8 +135,10 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 	// If its a node, then we are done. Don't modify either depth or
 	// start.
 	Type t = h->getType();
-	if (_classserver.isNode(t)) {
-		if (t != VARIABLE_NODE) {
+	if (_classserver.isNode(t))
+	{
+		if (VARIABLE_NODE != t and GLOB_NODE != t)
+		{
 			width = h->getIncomingSetSize();
 			return h;
 		}
