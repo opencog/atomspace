@@ -746,7 +746,7 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 	// Now is the time to look up the defintions!
 	// We loop here, so that all recursive definitions are expanded
 	// as well.  XXX Except that this is wrong, if any of the
-	// defnitions are actually recursive. That is, this will be
+	// definitions are actually recursive. That is, this will be
 	// an infinite loop if a defintion is self-referencing; so
 	// really we need to expand, one level at a time, during
 	// evaluation, and only expand if really, really needed. (Which
