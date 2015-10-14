@@ -239,25 +239,28 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	//
 	depth ++;
 
-	// If the pattern contains no globs, do the "regular" search.
+	// If the pattern contains no globs, then the pattern and ground
+	// must match exactly, term by term. If the pattern has globs,
+	// perform glob-matching (which can be thought of as a well-defined
+	// kind of fuzzy matching). If there are no globs, and the arity is
+	// mis-matched, then perform fuzzy matching.
 	bool match = true;
 	if (0 == _pat->globby_terms.count(lp->getHandle()))
 	{
-		for (size_t i=0; i<max_size; i++)
+		// If the arities are mis-matched, do a fuzzy compare instead.
+		if (osp_size != osg_size)
 		{
-			bool tc = false;
-			if (i < osp_size and i < osg_size)
-				tc = tree_compare(osp[i], osg[i], CALL_ORDER);
-
-			else if (i < osp_size)
-				tc = tree_compare(osp[i], Handle::UNDEFINED, CALL_ORDER);
-
-			else tc = tree_compare(PatternTerm::UNDEFINED, osg[i], CALL_ORDER);
-
-			if (not tc)
+			match = _pmc.fuzzy_match(ptm->getHandle(), hg);
+		}
+		else
+		{
+			for (size_t i=0; i<max_size; i++)
 			{
-				match = false;
-				break;
+				if (not tree_compare(osp[i], osg[i], CALL_ORDER))
+				{
+					match = false;
+					break;
+				}
 			}
 		}
 	}
@@ -603,13 +606,12 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	const Handle& hp = ptm->getHandle();
 	const HandleSeq& osg = lg->getOutgoingSet();
 	PatternTermSeq osp = ptm->getOutgoingSet();
-//	size_t arity = osp.size();
-	size_t osg_size = osg.size();
-	size_t osp_size = osp.size();
-	size_t max_size = std::max(osg.size(), osp.size());
+	size_t arity = osp.size();
 
 	// They've got to be the same size, at the least!
-//	if (osg.size() != arity) return false;
+	// We con't currently support globs, here.
+	if (osg.size() != arity)
+		return _pmc.fuzzy_match(ptm->getHandle(), hg);
 
 	// Test for case A, described above.
 	OC_ASSERT (not (take_step and have_more),
@@ -638,18 +640,9 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		              << " of term=" << ptm->toString();
 		solution_push();
 		bool match = true;
-		for (size_t i=0; i<max_size; i++)
+		for (size_t i=0; i<arity; i++)
 		{
-			bool tc = false;
-			if (i < osp_size and i < osg_size)
-				tc = tree_compare(mutation[i], osg[i], CALL_UNORDER);
-
-			else if (i < osp_size)
-				tc = tree_compare(mutation[i], Handle::UNDEFINED, CALL_UNORDER);
-
-			else tc = tree_compare(PatternTerm::UNDEFINED, osg[i], CALL_UNORDER);
-
-			if (not tc)
+			if (not tree_compare(mutation[i], osg[i], CALL_UNORDER))
 			{
 				match = false;
 				break;
@@ -806,12 +799,6 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
                                       const Handle& hg,
                                       Caller caller)
 {
-	// This could happen when the arity of the two hypergraphs are
-	// different. It's clearly a mismatch so we should always return
-	// false, unless we are looking for a non-exact match.
-	if (nullptr == ptm or nullptr == hg)
-		return _pmc.fuzzy_match(Handle::UNDEFINED, hg);
-
 	const Handle& hp = ptm->getHandle();
 
 	// If the pattern link is a quote, then we compare the quoted
@@ -1237,9 +1224,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 		//
 		// Anyway, all of this talk abbout booleans is emphasizing the
 		// point that, someday, we need to replace this crisp logic with
-		// probabalistic logic of some sort. XXX TODO. The fuzzy matcher
-		// tries to do this, but I'm not sure its correct. We eventually
-		// need to do this here, not there.
+		// probabalistic logic of some sort.
 		//
 		// By the way, if we are here, then `hp` is surely a variable;
 		// or, at least, it is, if we are working in the canonical
