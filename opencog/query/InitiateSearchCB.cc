@@ -744,46 +744,53 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 		return;
 
 	// Now is the time to look up the defintions!
-	Variables vset;
-	std::map<Handle, Handle> defnmap;
-	for (const Handle& name : _pattern->defined_terms)
+	// We loop here, so that all recursive definitions are expanded
+	// as well. It might be more efficient to just be recursive instead
+	// of looping. XXX Anyway, this code should almost surely be moved
+	// to class PatternLink::jit_expand(). Do this later, some rainy day.
+	while (0 < _pattern->defined_terms.size())
 	{
-		Handle defn = DefineLink::get_definition(name);
-		if (not defn) continue;
-
-		// Extract the variables in the definition.
-		// Either they are given in a LambdaLink, or, if absent,
-		// we just hunt down and bind all of them.
-		if (_classserver.isA(LAMBDA_LINK, defn->getType()))
+		Variables vset;
+		std::map<Handle, Handle> defnmap;
+		for (const Handle& name : _pattern->defined_terms)
 		{
-			LambdaLinkPtr lam = LambdaLinkCast(defn);
-			vset.extend(lam->get_variables());
-			defn = lam->get_body();
-		}
-		else
-		{
-			FreeLink fl(defn);
-			VariableList vl(fl.get_vars());
-			vset.extend(vl.get_variables());
+			Handle defn = DefineLink::get_definition(name);
+			if (not defn) continue;
+
+			// Extract the variables in the definition.
+			// Either they are given in a LambdaLink, or, if absent,
+			// we just hunt down and bind all of them.
+			if (_classserver.isA(LAMBDA_LINK, defn->getType()))
+			{
+				LambdaLinkPtr lam = LambdaLinkCast(defn);
+				vset.extend(lam->get_variables());
+				defn = lam->get_body();
+			}
+			else
+			{
+				FreeLink fl(defn);
+				VariableList vl(fl.get_vars());
+				vset.extend(vl.get_variables());
+			}
+
+			defnmap.insert({name, defn});
 		}
 
-		defnmap.insert({name, defn});
+		// Rebuild the pattern, expanding all DefinedPredicateNodes to one level.
+		// Note that newbody is not being place in any atomspace; but I think
+		// that is OK...
+		Handle newbody = Substitutor::substitute(_pattern->body, defnmap);
+
+		// We need to let both the PME know about the new clauses
+		// and variables, and also let master callback class know,
+		// too, since we are just one mixin in the callback class;
+		// the other mixins need to be updated as well.
+		vset.extend(*_variables);
+
+		_pl = createPatternLink(vset, newbody);
+		_variables = &_pl->get_variables();
+		_pattern = &_pl->get_pattern();
 	}
-
-	// Rebuild the pattern, expanding all DefinedPredicateNodes to one level.
-	// Note that newbody is not being place in any atomspace; but I think
-	// that is OK...
-	Handle newbody = Substitutor::substitute(_pattern->body, defnmap);
-
-	// We need to let both the PME know about the new clauses
-	// and variables, and also let master callback class know,
-	// too, since we are just one mixin in the callback class;
-	// the other mixins need to be updated as well.
-	vset.extend(*_variables);
-
-	_pl = createPatternLink(vset, newbody);
-	_variables = &_pl->get_variables();
-	_pattern = &_pl->get_pattern();
 
 	_type_restrictions = &_variables->typemap;
 	_dynamic = &_pattern->evaluatable_terms;
