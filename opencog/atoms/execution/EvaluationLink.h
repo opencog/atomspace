@@ -51,6 +51,9 @@ public:
 	}
 
 	static TruthValuePtr do_evaluate(AtomSpace*, const Handle&);
+	static TruthValuePtr do_eval_scratch(AtomSpace* main,
+	                                     const Handle&,
+	                                     AtomSpace* scratch);
 	static TruthValuePtr do_evaluate(AtomSpace*,
 	                                 const HandleSeq& schema_and_args);
 	static TruthValuePtr do_evaluate(AtomSpace*,

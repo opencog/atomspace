@@ -230,7 +230,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 		// default callback ignores the TV on EvaluationLinks. So this
 		// is kind-of schizophrenic here.  Not sure what else to do.
 		_temp_aspace.clear();
-		TruthValuePtr tvp(EvaluationLink::do_evaluate(&_temp_aspace, grnd));
+		TruthValuePtr tvp(EvaluationLink::do_eval_scratch(_as, grnd, &_temp_aspace));
 
 		LAZY_LOG_FINE << "Clause_match evaluation yeilded tv"
 		              << std::endl << tvp->toString() << std::endl;
