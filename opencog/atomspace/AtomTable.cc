@@ -323,7 +323,7 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
         // Compare to the current state
         Handle old_state(slp->get_other());
         while (nullptr != old_state) {
-            this->extract(old_state);
+            this->extract(old_state, true);
             old_state = slp->get_other();
         }
         return slp;
@@ -656,13 +656,18 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // deleting it.
     handle = getHandle(handle);
     AtomPtr atom(handle);
-    if (!atom || atom->isMarkedForRemoval()) return result;
+    if (nullptr == atom or atom->isMarkedForRemoval()) return result;
 
     // Perhaps the atom is not in any table? Or at least, not in this
     // atom table? Its a user-error if the user is trying to extract
     // atoms that are not in this atomspace, but we're going to be
     // silent about this error -- it seems pointless to throw.
-    if (atom->getAtomTable() != this) return result;
+    AtomTable* other = atom->getAtomTable();
+    if (other != this)
+    {
+        if (not in_environ(handle)) return result;
+        return other->extract(handle, recursive);
+    }
 
     // Lock before fetching the incoming set. Since getting the
     // incoming set also grabs a lock, we need this mutex to be
