@@ -197,11 +197,11 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (SATISFACTION_LINK == t)
 	{
-		return satisfaction_link(scratch, evelnk);
+		return satisfaction_link(as, evelnk);
 	}
 	else if (DEFINED_PREDICATE_NODE == t)
 	{
-		return do_evaluate(scratch, DefineLink::get_definition(evelnk));
+		return do_eval_scratch(as, DefineLink::get_definition(evelnk), scratch);
 	}
 
 	// We do not want to waste CPU time printing an exception message;
