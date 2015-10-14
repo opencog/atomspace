@@ -754,7 +754,7 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 		// Extract the variables in the definition.
 		// Either they are given in a LambdaLink, or, if absent,
 		// we just hunt down and bind all of them.
-		if (LAMBDA_LINK == defn->getType())
+		if (_classserver.isA(LAMBDA_LINK, defn->getType()))
 		{
 			LambdaLinkPtr lam = LambdaLinkCast(defn);
 			vset.extend(lam->get_variables());
