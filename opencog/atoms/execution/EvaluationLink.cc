@@ -181,7 +181,8 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		// which we execute, but then ignore the result.
 		const LinkPtr ll(LinkCast(evelnk));
 		Instantiator inst(as);
-		inst.execute(ll->getOutgoingAtom(0));
+		Handle result(inst.execute(ll->getOutgoingAtom(0)));
+		as->add_atom(result);
 		return TruthValue::TRUE_TV();
 	}
 	else if (FALSE_LINK == t)
@@ -190,7 +191,8 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		// which we execute, but then ignore the result.
 		const LinkPtr ll(LinkCast(evelnk));
 		Instantiator inst(as);
-		inst.execute(ll->getOutgoingAtom(0));
+		Handle result(inst.execute(ll->getOutgoingAtom(0)));
+		as->add_atom(result);
 		return TruthValue::FALSE_TV();
 	}
 	else if (SATISFACTION_LINK == t)

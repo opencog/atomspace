@@ -333,7 +333,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 		_temp_aspace.clear();
 		try
 		{
-			tvp = EvaluationLink::do_evaluate(&_temp_aspace, gvirt);
+			tvp = EvaluationLink::do_eval_scratch(_as, gvirt, &_temp_aspace);
 		}
 		catch (const NotEvaluatableException& ex)
 		{
