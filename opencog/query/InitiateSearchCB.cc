@@ -745,9 +745,13 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 
 	// Now is the time to look up the defintions!
 	// We loop here, so that all recursive definitions are expanded
-	// as well. It might be more efficient to just be recursive instead
-	// of looping. XXX Anyway, this code should almost surely be moved
-	// to class PatternLink::jit_expand(). Do this later, some rainy day.
+	// as well.  XXX Except that this is wrong, if any of the
+	// defnitions are actually recursive. That is, this will be
+	// an infinite loop if a defintion is self-referencing; so
+	// really we need to expand, one level at a time, during
+	// evaluation, and only expand if really, really needed. (Which
+	// then brings up ideas like tail recursion, etc.)  Anyway, most
+	// of this code should probably be moved to PatterLink::jit_expand()
 	while (0 < _pattern->defined_terms.size())
 	{
 		Variables vset;
