@@ -16,12 +16,24 @@
 	(SatisfactionLink
 		;; SequentialOrLink - verify predicates in sequential order.
 		(SequentialOrLink
-			(PresentLink (EvaluationLink (PredicateNode "visible")
+			(PresentLink (EvaluationLink (PredicateNode "or-visible")
 					(ListLink (VariableNode "$x"))))
 			;; If above fails then set state
 			(TrueLink (PutLink
 					(StateLink (AnchorNode "state") (VariableNode "$yy"))
 					(ConceptNode "not-vis")))
+		)))
+
+(define or-visible-put
+	(SatisfactionLink
+		;; SequentialOrLink - verify predicates in sequential order.
+		(SequentialOrLink
+			(PresentLink (EvaluationLink (PredicateNode "yes-visible")
+					(ListLink (VariableNode "$x"))))
+			;; If above fails then set state
+			(TrueLink (PutLink
+					(StateLink (AnchorNode "state") (VariableNode "$yy"))
+					(ConceptNode "ohhh noot visible")))
 		)))
 
 (define trig 0)

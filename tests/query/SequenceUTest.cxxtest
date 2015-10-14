@@ -62,7 +62,7 @@ public:
     void test_presence(void);
     void test_fallback(void);
     void test_pass_presence(void);
-    void xtest_or_put(void);
+    void test_or_put(void);
 };
 
 void SequenceUTest::tearDown(void)
@@ -273,16 +273,31 @@ void SequenceUTest::test_pass_presence(void)
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-// XXX This test currently fails, because the PutLink runs in
-// the temp atomspace.... needs to be fixed.
-void SequenceUTest::xtest_or_put(void)
+// This is an interesting test case .. the PutLink writes atoms to the
+// main atomspace, instead of a temporary scratch space!
+void SequenceUTest::test_or_put(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
     config().set("SCM_PRELOAD", "tests/query/seq-absence.scm");
     load_scm_files_from_config(*as);
 
-    TruthValuePtr tv = eval->eval_tv("(cog-satisfy or-put)");
+    // ----
+    // Insert eval link to prevent it from tripping.
+    eval->eval_h(
+        "(EvaluationLink (PredicateNode \"yes-visible\")"
+        "    (ListLink (ConceptNode \"is-vis\")))");
+    TruthValuePtr tv = eval->eval_tv("(cog-satisfy or-visible-put)");
+    TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
+
+    // Check the state. Should have a list of length 1,
+    // with a variable only; the state was NOT set.
+    Handle iset = eval->eval_h(
+          "(cdr (cog-incoming-set (AnchorNode \"state\")))");
+    TS_ASSERT_EQUALS(iset, Handle::UNDEFINED);
+
+    // ----
+    tv = eval->eval_tv("(cog-satisfy or-put)");
     TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
 
     // Check the state.
@@ -290,4 +305,7 @@ void SequenceUTest::xtest_or_put(void)
     Handle stateh = eval->eval_h("(AnchorNode \"state\")");
     Handle state = StateLink::get_state(stateh);
     TS_ASSERT_EQUALS(state, not_viz);
+
+    // ----
+    logger().debug("END TEST: %s", __FUNCTION__);
 }
