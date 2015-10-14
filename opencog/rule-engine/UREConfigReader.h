@@ -85,8 +85,7 @@ private:
 
 	AtomSpace& _as;
 
-	class RuleBaseParameters {
-	public:
+	struct RuleBaseParameters {
 		std::vector<Rule> rules;
 		bool attention_alloc;
 		int max_iter;
