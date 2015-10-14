@@ -47,7 +47,7 @@ EvaluationLink::EvaluationLink(const HandleSeq& oset,
 	}
 }
 
-EvaluationLink::EvaluationLink(Handle schema, Handle args,
+EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args,
                                TruthValuePtr tv,
                                AttentionValuePtr av)
     : FreeLink(EVALUATION_LINK, schema, args, tv, av)
@@ -78,7 +78,7 @@ static Handle fold_execute(AtomSpace* as, const Handle& h)
 }
 
 // Perform a GreaterThan check
-static TruthValuePtr greater(AtomSpace* as, LinkPtr ll)
+static TruthValuePtr greater(AtomSpace* as, const LinkPtr& ll)
 {
 	if (2 != ll->getArity())
 		throw RuntimeException(TRACE_INFO,
@@ -109,7 +109,7 @@ static TruthValuePtr greater(AtomSpace* as, LinkPtr ll)
 		return TruthValue::FALSE_TV();
 }
 
-static TruthValuePtr equal(AtomSpace* as, LinkPtr ll)
+static TruthValuePtr equal(AtomSpace* as, const LinkPtr& ll)
 {
 	const HandleSeq& oset = ll->getOutgoingSet();
 	if (2 != oset.size())
@@ -141,12 +141,12 @@ static TruthValuePtr equal(AtomSpace* as, LinkPtr ll)
 /// This method will then invoke "func_name" on the provided ListLink
 /// of arguments to the function.
 ///
-TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle evelnk)
+TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const Handle& evelnk)
 {
 	Type t = evelnk->getType();
 	if (EVALUATION_LINK == t)
 	{
-		LinkPtr l(LinkCast(evelnk));
+		const LinkPtr l(LinkCast(evelnk));
 		return do_evaluate(as, l->getOutgoingSet());
 	}
 	else if (EQUAL_LINK == t)
@@ -168,7 +168,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle evelnk)
 	{
 		// Assume that the link is wrapping something executable,
 		// which we execute, but then ignore the result.
-		LinkPtr ll(LinkCast(evelnk));
+		const LinkPtr ll(LinkCast(evelnk));
 		Instantiator inst(as);
 		inst.execute(ll->getOutgoingAtom(0));
 		return TruthValue::TRUE_TV();
@@ -177,7 +177,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle evelnk)
 	{
 		// Assume that the link is wrapping something executable,
 		// which we execute, but then ignore the result.
-		LinkPtr ll(LinkCast(evelnk));
+		const LinkPtr ll(LinkCast(evelnk));
 		Instantiator inst(as);
 		inst.execute(ll->getOutgoingAtom(0));
 		return TruthValue::FALSE_TV();
@@ -223,7 +223,8 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const HandleSeq& sna)
 /// Expects "args" to be a ListLink
 /// Executes the GroundedPredicateNode, supplying the args as argument
 ///
-TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args)
+TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
+                                    const Handle& gsn, const Handle& args)
 {
 	if (GROUNDED_PREDICATE_NODE != gsn->getType())
 	{
