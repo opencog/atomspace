@@ -52,6 +52,7 @@ public:
 	// Access methods, return parameters given a rule-based system
 	const std::vector<Rule>& get_rules() const;
 	std::vector<Rule>& get_rules();
+	const Rule& get_rule(const Handle& h);
 	bool get_attention_allocation() const;
 	int get_maximum_iterations() const;
 
@@ -89,6 +90,17 @@ private:
 		std::vector<Rule> rules;
 		bool attention_alloc;
 		int max_iter;
+
+		const Rule& get_rule(const Handle& h) const
+		{
+			for (const auto& rule : rules) {
+				if (rule.get_handle() == h)
+					return rule;
+			}
+
+			throw InvalidParamException(
+			        TRACE_INFO, "No rule with the given handle was found.");
+		}
 	};
 	RuleBaseParameters _rbparams;
 

@@ -60,6 +60,16 @@ std::vector<Rule>& UREConfigReader::get_rules()
 	return _rbparams.rules;
 }
 
+const Rule& UREConfigReader::get_rule(const Handle& hblink)
+{
+    if (hblink->getType() != BIND_LINK) {
+        throw InvalidParamException(TRACE_INFO,
+                                    "UREConfigReader - Expected a BindLink.");
+    }
+
+    return _rbparams.get_rule(hblink);
+}
+
 bool UREConfigReader::get_attention_allocation() const
 {
 	return _rbparams.attention_alloc;
