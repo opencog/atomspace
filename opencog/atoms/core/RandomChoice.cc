@@ -30,7 +30,7 @@
 
 using namespace opencog;
 
-static MT19937RandGen randy(42);
+static MT19937RandGen randy(43);
 
 RandomChoiceLink::RandomChoiceLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
@@ -64,15 +64,21 @@ Handle RandomChoiceLink::execute(AtomSpace * as) const
 
 	// Special-case handling for SetLinks, so it works with
 	// dynamically-evaluated PutLinks ...
-	if (1 == ary)
+	if (1 == ary and SET_LINK == _outgoing[0]->getType())
 	{
+#if 0
+		// Already executed by the time we get here... !?
+		// XXX not sure why we are doing "eager" execution
+		// like this...
 		FunctionLinkPtr flp(FunctionLinkCast(_outgoing[0]));
 		if (nullptr == flp) return _outgoing[0];
 
 		Handle h(flp->execute(as));
 		LinkPtr lll(LinkCast(h));
 		if (nullptr == lll) return h;
+#endif
 
+		LinkPtr lll(LinkCast(_outgoing[0]));
 		ary = lll->getArity();
 		return lll->getOutgoingAtom(randy.randint(ary));
 	}
