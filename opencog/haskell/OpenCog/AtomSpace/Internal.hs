@@ -103,13 +103,13 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
         lnew <- mapM fromRawGen out
         Just $ Gen $ OrLink tv lnew
       (ImplicationT ,[ar,br]) -> do
-        a <- filt ar :: Maybe (Gen PredicateT)
-        b <- filt br :: Maybe (Gen PredicateT)
+        a <- filt ar :: Maybe (Gen AtomT)
+        b <- filt br :: Maybe (Gen AtomT)
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ Gen $ ImplicationLink tv a1 b1
       (EquivalenceT ,[ar,br]) -> do
-        a <- filt ar :: Maybe (Gen PredicateT)
-        b <- filt br :: Maybe (Gen PredicateT)
+        a <- filt ar :: Maybe (Gen AtomT)
+        b <- filt br :: Maybe (Gen AtomT)
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ Gen $ EquivalenceLink tv a1 b1
       (EvaluationT ,[ar,br]) -> do
@@ -118,13 +118,13 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ Gen $ EvaluationLink tv a1 b1
       (InheritanceT ,[ar,br]) -> do
-        a <- filt ar :: Maybe (Gen ConceptT)
-        b <- filt br :: Maybe (Gen ConceptT)
+        a <- filt ar :: Maybe (Gen AtomT)
+        b <- filt br :: Maybe (Gen AtomT)
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ Gen $ InheritanceLink tv a1 b1
       (SimilarityT ,[ar,br]) -> do
-        a <- filt ar :: Maybe (Gen ConceptT)
-        b <- filt br :: Maybe (Gen ConceptT)
+        a <- filt ar :: Maybe (Gen AtomT)
+        b <- filt br :: Maybe (Gen AtomT)
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ Gen $ SimilarityLink tv a1 b1
       (MemberT ,[ar,br]) -> do
@@ -177,8 +177,8 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
         case (a,b,c) of
           (Gen a1,Gen b1,Gen c1) -> Just $ Gen $ BindLink a1 b1 c1
       (ContextT ,[cr,er]) -> do
-        c <- filt cr :: Maybe (Gen ConceptT)
-        e <- filt er :: Maybe (Gen EvaluationT)
+        c <- filt cr :: Maybe (Gen AtomT)
+        e <- filt er :: Maybe (Gen AtomT)
         case (c,e) of
           (Gen c1,Gen e1) -> Just $ Gen $ ContextLink tv c1 e1
       (LambdaT ,[vr,er]) -> do
