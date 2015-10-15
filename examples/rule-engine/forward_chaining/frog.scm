@@ -28,7 +28,9 @@
 
 (define rule2
 	(BindLink
-		(VariableNode "$x")
+		(VariableList
+			(VariableNode "$x")
+		)
 		(InheritanceLink
 			(VariableNode "$x")
 			(ConceptNode "frog")
