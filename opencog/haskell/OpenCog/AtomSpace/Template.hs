@@ -186,12 +186,18 @@ parser s = ( toList
                       else toCamelCase s
     -- This util function is used to modify the parents of VariableNode.
     -- We will set VariableNode's parent to all leaf nodes.
-    -- So, VariableNode will inherit from every atom type, and we can place it
-    -- everywhere without type constraints.
+    -- So, VariableNode will inherit from every atom type (except it's children)
+    -- , and we can place it everywhere without type constraints.
     varNode = "VariableNode"
     modifyVarNode :: Map AT [AT] -> Map AT [AT]
-    modifyVarNode m = let parents = filter ((/=)varNode) $ getNodesLeaf $ toList m
-                       in insert varNode parents m
+    modifyVarNode m = insert varNode parents m
+        where lst = toList m
+              children = getChildes varNode lst
+              ff e = foldr (\a b -> a /= e && b) True (varNode:children)
+              parents = filter (ff) $ getNodesLeaf lst
+
+    getChildes :: AT -> [(AT,[AT])] -> [AT]
+    getChildes a m = map fst $ filter ((elem a).snd) m
 
 removeComm :: String -> String
 removeComm ('/':'/':_) = []
