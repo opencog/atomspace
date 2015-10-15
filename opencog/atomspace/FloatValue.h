@@ -52,8 +52,8 @@ public:
 	 * @return A string representation of the node.
 	 * cannot be const, because observing the TV and AV requires a lock.
 	 */
-	virtual std::string toString(std::string indent);
-	virtual std::string toShortString(std::string indent)
+	virtual std::string toString(const std::string& indent);
+	virtual std::string toShortString(const std::string& indent)
 	{ return toString(indent); }
 
 	/** Returns whether two atoms are equal.
