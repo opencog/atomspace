@@ -192,12 +192,13 @@ parser s = ( toList
     modifyVarNode :: Map AT [AT] -> Map AT [AT]
     modifyVarNode m = insert varNode parents m
         where lst = toList m
-              children = getChildes varNode lst
+              children = getChildes lst varNode
               ff e = foldr (\a b -> a /= e && b) True (varNode:children)
               parents = filter (ff) $ getNodesLeaf lst
 
-    getChildes :: AT -> [(AT,[AT])] -> [AT]
-    getChildes a m = map fst $ filter ((elem a).snd) m
+    getChildes :: [(AT,[AT])] -> AT -> [AT]
+    getChildes m a = childs++(concatMap (getChildes m) childs)
+        where childs = map fst $ filter ((elem a).snd) m
 
 removeComm :: String -> String
 removeComm ('/':'/':_) = []
