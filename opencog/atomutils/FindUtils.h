@@ -49,7 +49,7 @@ namespace opencog {
 /// The FindAtoms class is used to locate atoms of a given type or
 /// target that occur inside some clause.  The target is specified in
 /// the constructor, the clause to be searched is given with the
-/// 'search_set()' method. Aftr the search has been done, the targets
+/// 'search_set()' method. After the search has been done, the targets
 /// are available in the various public members.
 ///
 /// Find a "target atom", or find all atoms of a given "target type",
@@ -84,13 +84,12 @@ namespace opencog {
 class FindAtoms
 {
 	public:
-		bool stop_at_quote;
 		std::set<Handle> varset;
 		std::set<Handle> holders;
 		std::set<Handle> least_holders;
 
 		inline FindAtoms(Type t, bool subclass = false)
-			: stop_at_quote(true), _target_types({t})
+			: _target_types({t})
 		{
 			if (subclass)
 			{
@@ -99,7 +98,7 @@ class FindAtoms
 		}
 
 		inline FindAtoms(Type ta, Type tb, bool subclass = false)
-			: stop_at_quote(true), _target_types({ta, tb})
+			: _target_types({ta, tb})
 		{
 			if (subclass)
 			{
@@ -109,16 +108,16 @@ class FindAtoms
 		}
 
 		inline FindAtoms(const Handle& atom)
-			: stop_at_quote(true),
-			  _target_types(),
+			: _target_types(),
 			  _target_atoms()
-		{ _target_atoms.insert(atom); }
+		{
+			_target_atoms.insert(atom);
+		}
 
 		inline FindAtoms(const std::set<Handle>& selection)
-			: stop_at_quote(true),
-			  _target_types(),
+			: _target_types(),
 			  _target_atoms(selection)
-			{}
+		{}
 
 		/**
 		 * Given a handle to be searched, create a set of all of the
@@ -151,7 +150,9 @@ class FindAtoms
 				return IMM; //! Don't explore link-typed vars!
 			}
 
-			if (stop_at_quote and QUOTE_LINK == t) return NOPE;
+			// XXX TODO Need to also handle UNQUOTE_LINK ...
+			if (t == QUOTE_LINK) return NOPE;
+			// if (classserver().isA(t, SCOPE_LINK)) return NOPE;
 
 			LinkPtr l(LinkCast(h));
 			if (l)
@@ -326,8 +327,9 @@ static inline bool is_unquoted_in_any_tree(const std::vector<Handle>& trees,
 static inline bool contains_atomtype(const Handle& clause, Type atom_type)
 {
 	Type clause_type = clause->getType();
-	if (QUOTE_LINK == clause_type) return false;
 	if (classserver().isA(clause_type, atom_type)) return true;
+	if (QUOTE_LINK == clause_type) return false;
+	// if (classserver().isA(clause_type, SCOPE_LINK)) return false;
 
 	LinkPtr lc(LinkCast(clause));
 	if (not lc) return false;
@@ -360,8 +362,6 @@ static inline bool contains_atomtype(const HandleSeq& clauses, Type atom_type)
  * are bound, since some subtype does implicit binding.
  *
  * Treat $A in something like (AndLink $A (LambdaLink $A ...)) as free.
- *
- * XXX TODO when implicit binding is gone, this method should be changed
  */
 static inline HandleSeq get_free_vars_in_tree(const Handle& tree)
 {
@@ -376,8 +376,9 @@ static inline HandleSeq get_free_vars_in_tree(const Handle& tree)
 			return;
 		}
 
-		if (classserver().isA(t, SCOPE_LINK))
-			return;
+		// XXX FIXME Add support for UNQUOTE_LINK
+		if (t == QUOTE_LINK) return;
+		if (classserver().isA(t, SCOPE_LINK)) return;
 
 		LinkPtr l(LinkCast(h));
 		if (l)
@@ -385,8 +386,6 @@ static inline HandleSeq get_free_vars_in_tree(const Handle& tree)
 			for (const Handle& oh : l->getOutgoingSet())
 				find_rec(oh);
 		}
-
-		return;
 	};
 
 	find_rec(tree);
