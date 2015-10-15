@@ -398,6 +398,7 @@ void PatternLink::locate_defines(HandleSeq& clauses)
 	for (const Handle& clause: clauses)
 	{
 		FindAtoms fdpn(DEFINED_PREDICATE_NODE, DEFINED_SCHEMA_NODE, true);
+		fdpn.stopset.insert(SCOPE_LINK);
 		fdpn.search_set(clause);
 
 		for (const Handle& sh : fdpn.varset)
@@ -604,6 +605,7 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 #endif
 
 		FindAtoms fgpn(GROUNDED_PREDICATE_NODE, true);
+		fgpn.stopset.insert(SCOPE_LINK);
 		fgpn.search_set(clause);
 		for (const Handle& sh : fgpn.least_holders)
 		{
