@@ -34,6 +34,7 @@
 #include <opencog/util/platform.h>
 
 #include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
@@ -69,6 +70,15 @@ Atom::~Atom()
              classserver().getTypeName(_type).c_str(), _uuid);
     }
     drop_incoming_set();
+}
+
+// ==============================================================
+
+// Return the atomspace in which this atom is inserted.
+AtomSpace* Atom::getAtomSpace() const
+{
+    if (_atomTable) return _atomTable->getAtomSpace();
+    return nullptr;
 }
 
 // ==============================================================
@@ -316,10 +326,24 @@ size_t Atom::getIncomingSetSize()
 // is not thread-safe during reading while simultaneous insertion and
 // deletion.  Besides, the incoming set is weak; we have to make it
 // strong in order to hand it out.
-IncomingSet Atom::getIncomingSet()
+IncomingSet Atom::getIncomingSet(AtomSpace* as)
 {
     static IncomingSet empty_set;
     if (NULL == _incoming_set) return empty_set;
+
+    if (as) {
+        const AtomTable *atab = &as->get_atomtable();
+        // Prevent update of set while a copy is being made.
+        std::lock_guard<std::mutex> lck (_mtx);
+        IncomingSet iset;
+        for (WinkPtr w : _incoming_set->_iset)
+        {
+            LinkPtr l(w.lock());
+            if (l and atab->in_environ(l))
+					iset.emplace_back(l);
+        }
+        return iset;
+    }
 
     // Prevent update of set while a copy is being made.
     std::lock_guard<std::mutex> lck (_mtx);

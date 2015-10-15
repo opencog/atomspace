@@ -94,7 +94,11 @@ protected:
 	HandleSeq _component_patterns;
 
 	void unbundle_clauses(const Handle& body);
+	void unbundle_clauses_rec(const std::set<Type>&,
+	                          const HandleSeq&);
+
 	void locate_defines(HandleSeq& clauses);
+	void locate_globs(HandleSeq& clauses);
 	void validate_clauses(std::set<Handle>& vars,
 	                      HandleSeq& clauses,
 	                      HandleSeq& constants);
@@ -166,10 +170,7 @@ public:
 
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _varlist; }
-
-	const Handle& get_body(void) const { return _body; }
-
-	const Pattern& get_pattern(void) { return _pat; }
+	const Pattern& get_pattern(void) const { return _pat; }
 
 	bool satisfy(PatternMatchCallback&) const;
 

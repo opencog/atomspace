@@ -78,10 +78,10 @@ struct Pattern
 	/// The original body containing the link (if any).
 	Handle           body;
 
-	/// The actual clauses. Set by validate_clauses()
+	/// The actual clauses. Set by validate_clauses().
 	HandleSeq        clauses;
 
-	/// The removed constant clauses, Set by validate_clauses()
+	/// The removed constant clauses. Set by validate_clauses().
 	HandleSeq        constants;
 
 	// The cnf_clauses are the clauses, but with the AbsentLink removed.
@@ -116,6 +116,9 @@ struct Pattern
 	// Defined terms are terms that are a DefinedPredicateNode (DPN)
 	// or a DefineSchemaNode (DSN).
 	std::set<Handle> defined_terms;    // The DPN/DSN itself.
+
+	// Globby terms are terms that contain a GlobNode
+	std::set<Handle> globby_terms;     // Smallest term that has a glob.
 
 	// Maps; the value is the largest (evaluatable or executable)
 	// term containing the variable. Its a multimap, because

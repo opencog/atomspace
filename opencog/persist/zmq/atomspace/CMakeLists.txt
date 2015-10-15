@@ -3,10 +3,16 @@ INCLUDE_DIRECTORIES (
 	${CMAKE_BINARY_DIR}
 )
 
-# Proto should be part of the build process so that the .pb.h and .pb.cc
-# files are updated dynamically, rather than being included in the
-# repository.
-#
+# Generate the .pb.h and .pb.cc files dynamically.
+ADD_CUSTOM_COMMAND(
+	OUTPUT ZMQMessages.pb.h ZMQMessages.pb.cc
+	COMMAND protoc
+	ARGS --cpp_out=. -I ${CMAKE_CURRENT_SOURCE_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}/ZMQMessages.proto
+	DEPENDS ZMQMessages.proto
+	COMMENT "Serializing with protobuf"
+)
+
 ADD_LIBRARY (zmqatoms SHARED
 	ZMQMessages.pb
 	ProtocolBufferSerializer
@@ -21,7 +27,7 @@ INSTALL (TARGETS zmqatoms
 )
 
 INSTALL (FILES
-	ZMQMessages.pb.h
+	${CMAKE_CURRENT_BINARY_DIR}/ZMQMessages.pb.h
 	ProtocolBufferSerializer.h
 	ZMQClient.h
 	ZMQPersistSCM.h

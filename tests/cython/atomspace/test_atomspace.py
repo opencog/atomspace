@@ -388,7 +388,7 @@ class AtomTest(TestCase):
         # test string representation
         a1_expected = "(Node \"test1\") ; [{0}][{1}]\n".format(str(a1.h.value()), 97)
         a1_expected_long = \
-            "(Node \"test1\" (av 0 0 0) (stv 0.500000 0.800000)) ; [{0}][{1}]\n"\
+            "(Node \"test1\" (stv 0.500000 0.800000)) ; [{0}][{1}]\n"\
             .format(str(a1.h.value()), 97)
 
         a2_expected = "(Node \"test2\") ; [{0}][{1}]\n".format(str(a2.h.value()), 97)
@@ -397,10 +397,10 @@ class AtomTest(TestCase):
             .format(str(a2.h.value()), 97)
 
         l_expected = \
-            "(Link (stv 1.000000 0.000000)\n  {0}  {1}) ; [{2}][{3}]\n"\
+            "(Link\n  {0}  {1}) ; [{2}][{3}]\n"\
             .format(a1_expected, a2_expected, str(l.h.value()), 97)
         l_expected_long = \
-            "(Link (av 0 0 0) (stv 1.000000 0.000000)\n  {0}  {1}) ; [{2}][{3}]\n"\
+            "(Link\n  {0}  {1}) ; [{2}][{3}]\n"\
             .format(a1_expected_long, a2_expected_long, str(l.h.value()), 97)
 
         self.assertEqual(str(a1), a1_expected)

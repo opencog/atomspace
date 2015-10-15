@@ -37,6 +37,7 @@ using namespace opencog;
 void PatternLink::common_init(void)
 {
 	locate_defines(_pat.clauses);
+	locate_globs(_pat.clauses);
 
 	// If there are any defines in the pattern, then all bets are off
 	// as to whether it is connected or not, what's virtual, what isn't.
@@ -61,7 +62,7 @@ void PatternLink::common_init(void)
 	// that the logical connectives are AndLink, OrLink and NotLink.
 	// Tweak the evaluatable_holders to reflect this.
 	std::set<Type> connectives({AND_LINK, SEQUENTIAL_AND_LINK,
-	                            OR_LINK, NOT_LINK});
+	                            OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
 	trace_connectives(connectives, _pat.clauses);
 
 	// Split the non-virtual clauses into connected components
@@ -201,6 +202,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 		}
 	}
 	locate_defines(_pat.clauses);
+	locate_globs(_pat.clauses);
 
 	// The rest is easy: the evaluatables and the connection map
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
@@ -335,19 +337,15 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 				_pat.clauses.emplace_back(ho);
 		}
 	}
-	else if (SEQUENTIAL_AND_LINK == t)
+	else if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t)
 	{
+		// XXX FIXME, Just like in trace_connectives, assume we are
+		// working with the DefaultPatternMatchCB, which uses these.
+		std::set<Type> connectives({AND_LINK, SEQUENTIAL_AND_LINK,
+		                            OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
 		const HandleSeq& oset = LinkCast(hbody)->getOutgoingSet();
-		for (const Handle& ho : oset)
-		{
-			Type ot = ho->getType();
-			if (PRESENT_LINK == ot)
-			{
-				const HandleSeq& pset = LinkCast(ho)->getOutgoingSet();
-				for (const Handle& ph : pset)
-					_pat.clauses.emplace_back(ph);
-			}
-		}
+		unbundle_clauses_rec(connectives, oset);
+
 		_pat.clauses.emplace_back(hbody);
 	}
 	else
@@ -357,16 +355,69 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	}
 }
 
+/// Search for any PRESENT, ABSENT_LINK's that are recusively
+/// embedded inside some evaluatable clause.  Expose thse as
+/// first-class, groundable clauses.
+void PatternLink::unbundle_clauses_rec(const std::set<Type>& connectives,
+                                       const HandleSeq& nest)
+{
+	for (const Handle& ho : nest)
+	{
+		Type ot = ho->getType();
+		if (PRESENT_LINK == ot)
+		{
+			const HandleSeq& pset = LinkCast(ho)->getOutgoingSet();
+			for (const Handle& ph : pset)
+				_pat.clauses.emplace_back(ph);
+		}
+		else if (ABSENT_LINK == ot)
+		{
+			LinkPtr lopt(LinkCast(ho));
+
+			// We insist on an arity of 1, because anything else is
+			// ambiguous: consider absent(A B) is that: "both A and B must
+			// be absent"?  Or is it "if any of A and B are absent, then .."
+			if (1 != lopt->getArity())
+				throw InvalidParamException(TRACE_INFO,
+					"AbsentLink can have an arity of one only!");
+
+			const Handle& inv(lopt->getOutgoingAtom(0));
+			_pat.optionals.insert(inv);
+			_pat.cnf_clauses.emplace_back(inv);
+		}
+		else if (connectives.find(ot) != connectives.end())
+		{
+			LinkPtr lnest(LinkCast(ho));
+			unbundle_clauses_rec(connectives, lnest->getOutgoingSet());
+		}
+	}
+}
+
 void PatternLink::locate_defines(HandleSeq& clauses)
 {
 	for (const Handle& clause: clauses)
 	{
 		FindAtoms fdpn(DEFINED_PREDICATE_NODE, DEFINED_SCHEMA_NODE, true);
+		fdpn.stopset.insert(SCOPE_LINK);
 		fdpn.search_set(clause);
 
 		for (const Handle& sh : fdpn.varset)
 		{
 			_pat.defined_terms.insert(sh);
+		}
+	}
+}
+
+void PatternLink::locate_globs(HandleSeq& clauses)
+{
+	for (const Handle& clause: clauses)
+	{
+		FindAtoms fgn(GLOB_NODE, true);
+		fgn.search_set(clause);
+
+		for (const Handle& sh : fgn.least_holders)
+		{
+			_pat.globby_terms.insert(sh);
 		}
 	}
 }
@@ -451,11 +502,11 @@ void PatternLink::extract_optionals(const std::set<Handle> &vars,
 			LinkPtr lopt(LinkCast(h));
 
 			// We insist on an arity of 1, because anything else is
-			// ambiguous: consider not(A B) is that (not(A) and not(B))
-			// or is it (not(A) or not(B))?
+			// ambiguous: consider absent(A B) is that: "both A and B must
+			// be absent"?  Or is it "if any of A and B are absent, then .."
 			if (1 != lopt->getArity())
 				throw InvalidParamException(TRACE_INFO,
-					"NotLink and AbsentLink can have an arity of one only!");
+					"AbsentLink can have an arity of one only!");
 
 			const Handle& inv(lopt->getOutgoingAtom(0));
 			_pat.optionals.insert(inv);
@@ -554,6 +605,7 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 #endif
 
 		FindAtoms fgpn(GROUNDED_PREDICATE_NODE, true);
+		fgpn.stopset.insert(SCOPE_LINK);
 		fgpn.search_set(clause);
 		for (const Handle& sh : fgpn.least_holders)
 		{
@@ -754,6 +806,9 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 		if (QUOTE_LINK == t)
 			ptm->addQuote();
 
+		else if (UNQUOTE_LINK == t)
+			ptm->remQuote();
+
 		for (const Handle& ho: l->getOutgoingSet())
 		     make_term_tree_recursive(root, ho, ptm);
 		return;
@@ -763,7 +818,8 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	// later checks. The flag telling whether the term subtree contains
 	// any bound variable is set by addBoundVariable() method for all terms
 	// on the path up to the root (unless it has been set already).
-	if (VARIABLE_NODE == t && !ptm->isQuoted() &&
+	if ((VARIABLE_NODE == t or GLOB_NODE == t) and
+	    !ptm->isQuoted() and
 	    _varlist.varset.end() != _varlist.varset.find(h))
 	{
 		ptm->addBoundVariable();

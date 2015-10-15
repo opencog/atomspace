@@ -24,10 +24,12 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atoms/NumberNode.h>
+#include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/query/BindLinkAPI.h>
 #include "EvaluationLink.h"
 
 using namespace opencog;
@@ -45,7 +47,7 @@ EvaluationLink::EvaluationLink(const HandleSeq& oset,
 	}
 }
 
-EvaluationLink::EvaluationLink(Handle schema, Handle args,
+EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args,
                                TruthValuePtr tv,
                                AttentionValuePtr av)
     : FreeLink(EVALUATION_LINK, schema, args, tv, av)
@@ -76,7 +78,7 @@ static Handle fold_execute(AtomSpace* as, const Handle& h)
 }
 
 // Perform a GreaterThan check
-static TruthValuePtr greater(AtomSpace* as, LinkPtr ll)
+static TruthValuePtr greater(AtomSpace* as, const LinkPtr& ll)
 {
 	if (2 != ll->getArity())
 		throw RuntimeException(TRACE_INFO,
@@ -107,7 +109,7 @@ static TruthValuePtr greater(AtomSpace* as, LinkPtr ll)
 		return TruthValue::FALSE_TV();
 }
 
-static TruthValuePtr equal(AtomSpace* as, LinkPtr ll)
+static TruthValuePtr equal(AtomSpace* as, const LinkPtr& ll)
 {
 	const HandleSeq& oset = ll->getOutgoingSet();
 	if (2 != oset.size())
@@ -139,32 +141,81 @@ static TruthValuePtr equal(AtomSpace* as, LinkPtr ll)
 /// This method will then invoke "func_name" on the provided ListLink
 /// of arguments to the function.
 ///
-TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle evelnk)
+/// This function takes TWO atomspace arguments!  The first is the
+/// "main" atomspace, the second is a "scratch" or "temporary"
+/// atomspace.  The scratch space is used to instantiate any arguments
+/// that need to be passed to evaluatable links (i.e. to predicates);
+/// the idea is that such temproraries don't add garbage to the main
+/// atomspace.  The first argument, though, the "main" space, is used
+/// to instantiate any executable atoms: specifically, any PutLinks
+/// that were wrapped up by TrueLink, FalseLink. This is needed to get
+/// SequentialAndLink to work correctly, when moving down the sequence.
+///
+TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
+                     const Handle& evelnk, AtomSpace* scratch)
 {
 	Type t = evelnk->getType();
 	if (EVALUATION_LINK == t)
 	{
-		LinkPtr l(LinkCast(evelnk));
-		return do_evaluate(as, l->getOutgoingSet());
+		const LinkPtr l(LinkCast(evelnk));
+		return do_evaluate(scratch, l->getOutgoingSet());
 	}
 	else if (EQUAL_LINK == t)
 	{
-		return equal(as, LinkCast(evelnk));
+		return equal(scratch, LinkCast(evelnk));
 	}
 	else if (GREATER_THAN_LINK == t)
 	{
-		return greater(as, LinkCast(evelnk));
+		return greater(scratch, LinkCast(evelnk));
 	}
 	else if (NOT_LINK == t)
 	{
 		LinkPtr l(LinkCast(evelnk));
-		TruthValuePtr tv(do_evaluate(as, l->getOutgoingAtom(0)));
+		TruthValuePtr tv(do_eval_scratch(as, l->getOutgoingAtom(0), scratch));
 		return SimpleTruthValue::createTV(
 		              1.0 - tv->getMean(), tv->getCount());
 	}
-	throw RuntimeException(TRACE_INFO,
-		"Expecting to get an EvaluationLink, got %s",
-		evelnk->toString().c_str());
+	else if (TRUE_LINK == t)
+	{
+		// Assume that the link is wrapping something executable,
+		// which we execute, but then ignore the result.
+		const LinkPtr ll(LinkCast(evelnk));
+		Instantiator inst(as);
+		Handle result(inst.execute(ll->getOutgoingAtom(0)));
+		as->add_atom(result);
+		return TruthValue::TRUE_TV();
+	}
+	else if (FALSE_LINK == t)
+	{
+		// Assume that the link is wrapping something executable,
+		// which we execute, but then ignore the result.
+		const LinkPtr ll(LinkCast(evelnk));
+		Instantiator inst(as);
+		Handle result(inst.execute(ll->getOutgoingAtom(0)));
+		as->add_atom(result);
+		return TruthValue::FALSE_TV();
+	}
+	else if (SATISFACTION_LINK == t)
+	{
+		return satisfaction_link(as, evelnk);
+	}
+	else if (DEFINED_PREDICATE_NODE == t)
+	{
+		return do_eval_scratch(as, DefineLink::get_definition(evelnk), scratch);
+	}
+
+	// We do not want to waste CPU time printing an exception message;
+	// this is supposed to be handled automatically.  Hmmm... unless
+	// its a user Syntax error ....
+	throw NotEvaluatableException();
+	// throw SyntaxException(TRACE_INFO,
+		// "Expecting to get an EvaluationLink, got %s",
+		// evelnk->toString().c_str());
+}
+
+TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const Handle& evelnk)
+{
+	return do_eval_scratch(as, evelnk, as);
 }
 
 /// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
@@ -190,7 +241,8 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const HandleSeq& sna)
 /// Expects "args" to be a ListLink
 /// Executes the GroundedPredicateNode, supplying the args as argument
 ///
-TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, Handle gsn, Handle args)
+TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
+                                    const Handle& gsn, const Handle& args)
 {
 	if (GROUNDED_PREDICATE_NODE != gsn->getType())
 	{

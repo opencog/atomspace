@@ -31,19 +31,19 @@
 #include <atomic>
 #include <mutex>
 #include <set>
+#include <string>
 #include <thread>
 #include <vector>
-#include <string>
 
 #include <zmq.hpp>
 #include <opencog/util/async_method_caller.h>
 #include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/types.h>
 
-#include "ZMQMessages.pb.h"
+#include "opencog/persist/zmq/atomspace/ZMQMessages.pb.h"
 #include "ProtocolBufferSerializer.h"
 
 using namespace std;

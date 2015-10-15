@@ -69,6 +69,8 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		virtual bool optional_clause_match(const Handle& pattrn,
 		                                   const Handle& grnd);
 
+		virtual IncomingSet get_incoming_set(const Handle&);
+
 		/**
 		 * Called when a virtual link is encountered. Returns false
 		 * to reject the match.
@@ -90,6 +92,10 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		const VariableTypeMap* _type_restrictions = NULL;
 		const std::set<Handle>* _dynamic = NULL;
 		bool _have_evaluatables = false;
+		const std::set<Handle>* _globs = NULL;
+
+		bool _have_variables;
+		Handle _pattern_body;
 
 		// Temp atomspace used for test-groundings of virtual links.
 		AtomSpace _temp_aspace;

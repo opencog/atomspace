@@ -23,9 +23,9 @@
 
 #include <boost/range/algorithm/find.hpp>
 
-#include <opencog/atoms/bind/BindLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/atoms/bind/PatternLink.h>
+#include <opencog/atoms/pattern/BindLink.h>
+#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atomutils/Substitutor.h>
@@ -126,20 +126,21 @@ void ForwardChainer::do_step(void)
 
     _log->debug( "Derived rule size = %d", derived_rhandles.size());
 
-    HandleSeq products;
+    UnorderedHandleSet products;
     //Applying all partial/full groundings.
     for (Handle rhandle : derived_rhandles) {
         HandleSeq hs;
         //Check for fully grounded outputs returned by derive_rules.
         if (not contains_atomtype(rhandle, VARIABLE_NODE)) {
             Instantiator inst(&_as);
-            hs.push_back(inst.instantiate(rhandle, { }));
+            Handle houtput = LinkCast(rhandle)->getOutgoingSet().back();
+            hs.push_back(inst.instantiate(houtput, { }));
 
         } else {
             hs = apply_rule(rhandle, _search_focus_Set);
         }
 
-        products.insert(products.end(), hs.begin(), hs.end());
+        products.insert( hs.begin(), hs.end());
     }
 
     //Finally store source partial groundings and inference results.
@@ -589,23 +590,15 @@ HandleSeq ForwardChainer::substitute_rule_part(
         Handle himplicand = Substitutor::substitute(blptr->get_implicand(),
                                                     vgmap);
         Handle himplicant = Substitutor::substitute(blptr->get_body(), vgmap);
-        Handle hvarlist;
 
-        if (contains_atomtype(himplicand, VARIABLE_NODE)) {
-            //Assuming himplicant's set of variables are superset for himplicand's,
-            //generate varlist from himplicant.
-            hvarlist = as.add_atom(
-                    gen_sub_varlist(himplicant,
-                                    LinkCast(hrule)->getOutgoingSet()[0]));
-            Handle hderived_rule = as.add_atom(Handle(createBindLink(HandleSeq {
-                hvarlist, himplicant, himplicand})));
-            derived_rules.push_back(hderived_rule);
-
-        } else {
-            //We can't create BindLink with no variable.Just add the output.
-            derived_rules.push_back(himplicand);
-        }
-
+        //Assuming himplicant's set of variables are superset for himplicand's,
+        //generate varlist from himplicant.
+        Handle hvarlist = as.add_atom(
+                gen_sub_varlist(himplicant,
+                                LinkCast(hrule)->getOutgoingSet()[0]));
+        Handle hderived_rule = as.add_atom(createBindLink(HandleSeq {
+            hvarlist, himplicant, himplicand}));
+        derived_rules.push_back(hderived_rule);
     }
 
     return derived_rules;

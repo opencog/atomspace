@@ -41,6 +41,7 @@ DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
 	_as(as)
 {
 	_connectives.insert(SEQUENTIAL_AND_LINK);
+	_connectives.insert(SEQUENTIAL_OR_LINK);
 	_connectives.insert(AND_LINK);
 	_connectives.insert(OR_LINK);
 	_connectives.insert(NOT_LINK);
@@ -52,6 +53,9 @@ void DefaultPatternMatchCB::set_pattern(const Variables& vars,
 	_type_restrictions = &vars.typemap;
 	_dynamic = &pat.evaluatable_terms;
 	_have_evaluatables = (0 < _dynamic->size());
+	_have_variables = (0 < vars.varseq.size());
+	_pattern_body = pat.body;
+	_globs = &pat.globby_terms;
 }
 
 
@@ -91,7 +95,7 @@ bool DefaultPatternMatchCB::variable_match(const Handle& npat_h,
 	// accept the match. This allows any kind of node types to be
 	// explicitly bound as variables.  However, the type VariableNode
 	// gets special handling, below.
-	if (pattype != VARIABLE_NODE) return true;
+	if (VARIABLE_NODE != pattype and GLOB_NODE != pattype) return true;
 
 	// If the ungrounded term is a variable, then see if there
 	// are any restrictions on the variable type.
@@ -134,11 +138,22 @@ bool DefaultPatternMatchCB::link_match(const LinkPtr& lpat,
 	Type pattype = lpat->getType();
 	if (CHOICE_LINK == pattype) return true;
 
-	if (lpat->getArity() != lsoln->getArity()) return false;
-	Type soltype = lsoln->getType();
-
 	// If types differ, no match
-	return pattype == soltype;
+	Type soltype = lsoln->getType();
+	if (pattype != soltype) return false;
+
+	// Reject mis-sized compares, unless the pattern has a glob in it.
+	if (0 == _globs->count(lpat->getHandle()))
+	{ 
+		if (lpat->getArity() != lsoln->getArity()) return false;
+	}
+	else
+	{
+		if (lpat->getArity() > lsoln->getArity()) return false;
+	}
+
+	// No reason to reject; proceed with the compare.
+	return true;
 }
 
 bool DefaultPatternMatchCB::post_link_match(const LinkPtr& lpat,
@@ -209,13 +224,13 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 
 		// We make two awkard asumptions here: the ground term itself
 		// does not contain any variables, and so does not need any
-		// further grounding. This actuall seems reasonable. The second
+		// further grounding. This actually seems reasonable. The second
 		// assumption is that the EvaluationLink is actually evaluatable,
 		// which seems reasonable, except that everything else in the
 		// default callback ignores the TV on EvaluationLinks. So this
 		// is kind-of schizophrenic here.  Not sure what else to do.
 		_temp_aspace.clear();
-		TruthValuePtr tvp(EvaluationLink::do_evaluate(&_temp_aspace, grnd));
+		TruthValuePtr tvp(EvaluationLink::do_eval_scratch(_as, grnd, &_temp_aspace));
 
 		LAZY_LOG_FINE << "Clause_match evaluation yeilded tv"
 		              << std::endl << tvp->toString() << std::endl;
@@ -241,6 +256,13 @@ bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
 	if (nullptr == grnd) return true;
 	_optionals_present = true;
 	return false;
+}
+
+/* ======================================================== */
+
+IncomingSet DefaultPatternMatchCB::get_incoming_set(const Handle& h)
+{
+	return h->getIncomingSet(_as);
 }
 
 /* ======================================================== */
@@ -309,7 +331,19 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	else
 	{
 		_temp_aspace.clear();
-		tvp = EvaluationLink::do_evaluate(&_temp_aspace, gvirt);
+		try
+		{
+			tvp = EvaluationLink::do_eval_scratch(_as, gvirt, &_temp_aspace);
+		}
+		catch (const NotEvaluatableException& ex)
+		{
+			// The do_evaluate() bove can throw if its given ungrounded
+			// expressions. It can be given ungrounded expressions if
+			// no grounding was found, and a final pass, run by the
+			// search_finished() callback, puts us here. So handle this
+			// case gracefully.
+			return false;
+		}
 	}
 
 	// Avoid null-pointer dereference if user specified a bogus evaluation.
@@ -361,7 +395,7 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 		   "Expecting logical connective to have at least one child!");
 
 	Type term_type = top->getType();
-	if (OR_LINK == term_type)
+	if (OR_LINK == term_type or SEQUENTIAL_OR_LINK == term_type)
 	{
 		for (const Handle& h : oset)
 			if (eval_sentence(h, gnds)) return true;
@@ -392,7 +426,8 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 	{
 		// If *every* clause in the PresentLink has been grounded,
 		// then return true.  That is, PresentLink behaves like an
-		// AndLink for term-presence.
+		// AndLink for term-presence.  The other behavior "if some
+		// clause is present" is implemented by ChoiceLink.
 		for (const Handle& h : oset)
 		{
 			try
@@ -406,20 +441,59 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 		}
 		return true;
 	}
-	// XXX TODO: Implement ChoiceLink here: its true if any one term
-	// is present.
-	// Also: Implement AbsentLink: its false if any clause is grounded.
-	// I guess AbsentLink is same as NotLink PresentLink.
-	// I guess ChoiceLink is the same as OrLink PresentLink.
-	// XXX .. would doing this here make the code simpler, than
-	// doing it in the bowels of the patten matcher, as it is
-	// currently being done? Well, no it cannot, since the current
-	// ChoiceLink gaurantees a complete exploration of all
-	// possibilities, whereas here, by willy-nilly grounding some
-	// subset, we would like run into conflicting assignments of
-	// groundings to variables, thus leading to bizarre conflicts
-	// and failures, and/or incomplete exploration of choices.
-	// What to do ??
+	else if (ABSENT_LINK == term_type)
+	{
+		// If *any* clause in the AbsentLink has been grounded, then
+		// return false.  That is, AbsentLink behaves like an AndLink
+		// for term-absence.  Note that this conflicts with
+		// PatternLink::extract_optionals(), which insists on an arity
+		// of one. Viz "must all be absent"? or "if any are absent"?
+		//
+		// AbsentLink is same as NotLink PresentLink.
+		for (const Handle& h : oset)
+		{
+			try
+			{
+				Handle g = gnds.at(h);
+			}
+			catch (...)
+			{
+				// If no grounding, that,s good, try the next one.
+				continue;
+			}
+			// If we are here, a grounding was found; that's bad.
+			return false;
+		}
+		return true;
+	}
+	else if (CHOICE_LINK == term_type)
+	{
+		// If *some* clause in the ChoiceLink has been grounded,
+		// then return true.  That is, ChoiceLink behaves like an
+		// OrLink for term-presence.  The other behavior "all clauses
+		// must be present" is implemented by PresentLink.
+		//
+		// XXX ... This might be buggy; I'm confused. Deep in the bowels
+		// of the pattern matcher, we make an explicit promise to explore
+		// all possible choices.  Here, we are making no such promise;
+		// instead, we're just responding to what higher layers have
+		// determined.  Did those higher layers actually explore all
+		// possibilities?  And if they failed to do so, can we even do
+		// anything about that here? Seems like we can't do anything...
+		for (const Handle& h : oset)
+		{
+			try
+			{
+				Handle g = gnds.at(h);
+			}
+			catch (...)
+			{
+				continue;
+			}
+			return true;
+		}
+		return false;
+	}
 
 	// --------------------------------------------------------
 	// If we are here, then what we have is some atom that is not
@@ -440,7 +514,7 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 		TruthValuePtr tvp(g->getTruthValue());
 		LAZY_LOG_FINE << "Non-logical atom has tv="
 		              << tvp->toString() << std::endl;
-		// XXX FIXME: we are making a crsip-logic go/no-go decision
+		// XXX FIXME: we are making a crisp-logic go/no-go decision
 		// based on the TV strength. Perhaps something more subtle might be
 		// wanted, here.
 		bool relation_holds = tvp->getMean() > 0.5;

@@ -23,8 +23,8 @@
 
 #include <opencog/util/Logger.h>
 
-#include <opencog/atoms/bind/BindLink.h>
-#include <opencog/atoms/bind/PatternLink.h>
+#include <opencog/atoms/pattern/BindLink.h>
+#include <opencog/atoms/pattern/PatternLink.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/ClassServer.h>
@@ -89,6 +89,11 @@ class PMCGroundings : public PatternMatchCallback
 		bool initiate_search(PatternMatchEngine* pme)
 		{
 			return _cb.initiate_search(pme);
+		}
+
+		bool search_finished(bool done)
+		{
+			return _cb.search_finished(done);
 		}
 
 		// This one we don't pass through. Instead, we collect the
@@ -334,6 +339,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 		bool found = pmcb.initiate_search(&pme);
 
 		logger().fine("================= Done with Search =================");
+		found = pmcb.search_finished(found);
 
 		return found;
 	}

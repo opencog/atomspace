@@ -23,10 +23,10 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
-#include <opencog/atoms/bind/PatternLink.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atomutils/Substitutor.h>
 
@@ -113,8 +113,10 @@ InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
 {
 	// If its a node, then we are done.
 	Type t = h->getType();
-	if (_classserver.isNode(t)) {
-		if (t != VARIABLE_NODE) {
+	if (_classserver.isNode(t))
+	{
+		if (VARIABLE_NODE != t and GLOB_NODE != t)
+		{
 			width = h->getIncomingSetSize();
 			startrm = h; // XXX wtf ???
 			return h;
@@ -133,8 +135,10 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 	// If its a node, then we are done. Don't modify either depth or
 	// start.
 	Type t = h->getType();
-	if (_classserver.isNode(t)) {
-		if (t != VARIABLE_NODE) {
+	if (_classserver.isNode(t))
+	{
+		if (VARIABLE_NODE != t and GLOB_NODE != t)
+		{
 			width = h->getIncomingSetSize();
 			return h;
 		}
@@ -198,7 +202,7 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 /* ======================================================== */
 /**
  * Iterate over all the clauses, to find the "thinnest" one.
- * Skip any/all evaluatable clauses, as thes typically do not
+ * Skip any/all evaluatable clauses, as these typically do not
  * exist in the atomspace, anyway.
  */
 Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
@@ -263,10 +267,22 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
 bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 {
 	// Sometimes, the number of mandatory clauses can be zero...
-	// We still want to search, though.
+	// or they might all be evaluatable.  In this case, its OK to
+	// start searching with an optional clause. But if there ARE
+	// mandatories, we must NOT start serch on an optional, since,
+	// after all, it might be absent!
+	bool try_all = true;
+	for (const Handle& m : _pattern->mandatory)
+	{
+		if (0 == _pattern->evaluatable_holders.count(m))
+		{
+			try_all = false;
+			break;
+		}
+	}
+
 	const HandleSeq& clauses =
-		(0 < _pattern->mandatory.size()) ?
-			 _pattern->mandatory : _pattern->cnf_clauses;
+		try_all ?  _pattern->cnf_clauses :  _pattern->mandatory;
 
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by
@@ -728,46 +744,57 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 		return;
 
 	// Now is the time to look up the defintions!
-	Variables vset;
-	std::map<Handle, Handle> defnmap;
-	for (const Handle& name : _pattern->defined_terms)
+	// We loop here, so that all recursive definitions are expanded
+	// as well.  XXX Except that this is wrong, if any of the
+	// definitions are actually recursive. That is, this will be
+	// an infinite loop if a defintion is self-referencing; so
+	// really we need to expand, one level at a time, during
+	// evaluation, and only expand if really, really needed. (Which
+	// then brings up ideas like tail recursion, etc.)  Anyway, most
+	// of this code should probably be moved to PatterLink::jit_expand()
+	while (0 < _pattern->defined_terms.size())
 	{
-		Handle defn = DefineLink::get_definition(name);
-		if (not defn) continue;
-
-		// Extract the variables in the definition.
-		// Either they are given in a LambdaLink, or, if absent,
-		// we just hunt down and bind all of them.
-		if (LAMBDA_LINK == defn->getType())
+		Variables vset;
+		std::map<Handle, Handle> defnmap;
+		for (const Handle& name : _pattern->defined_terms)
 		{
-			LambdaLinkPtr lam = LambdaLinkCast(defn);
-			vset.extend(lam->get_variables());
-			defn = lam->get_body();
-		}
-		else
-		{
-			FreeLink fl(defn);
-			VariableList vl(fl.get_vars());
-			vset.extend(vl.get_variables());
+			Handle defn = DefineLink::get_definition(name);
+			if (not defn) continue;
+
+			// Extract the variables in the definition.
+			// Either they are given in a LambdaLink, or, if absent,
+			// we just hunt down and bind all of them.
+			if (_classserver.isA(LAMBDA_LINK, defn->getType()))
+			{
+				LambdaLinkPtr lam = LambdaLinkCast(defn);
+				vset.extend(lam->get_variables());
+				defn = lam->get_body();
+			}
+			else
+			{
+				FreeLink fl(defn);
+				VariableList vl(fl.get_vars());
+				vset.extend(vl.get_variables());
+			}
+
+			defnmap.insert({name, defn});
 		}
 
-		defnmap.insert({name, defn});
+		// Rebuild the pattern, expanding all DefinedPredicateNodes to one level.
+		// Note that newbody is not being place in any atomspace; but I think
+		// that is OK...
+		Handle newbody = Substitutor::substitute(_pattern->body, defnmap);
+
+		// We need to let both the PME know about the new clauses
+		// and variables, and also let master callback class know,
+		// too, since we are just one mixin in the callback class;
+		// the other mixins need to be updated as well.
+		vset.extend(*_variables);
+
+		_pl = createPatternLink(vset, newbody);
+		_variables = &_pl->get_variables();
+		_pattern = &_pl->get_pattern();
 	}
-
-	// Rebuild the pattern, expanding all DefinedPredicateNodes to one level.
-	// Note that newbody is not being place in any atomspace; but I think
-	// that is OK...
-	Handle newbody = Substitutor::substitute(_pattern->body, defnmap);
-
-	// We need to let both the PME know about the new clauses
-	// and variables, and also let master callback class know,
-	// too, since we are just one mixin in the callback class;
-	// the other mixins need to be updated as well.
-	vset.extend(*_variables);
-
-	_pl = createPatternLink(vset, newbody);
-	_variables = &_pl->get_variables();
-	_pattern = &_pl->get_pattern();
 
 	_type_restrictions = &_variables->typemap;
 	_dynamic = &_pattern->evaluatable_terms;

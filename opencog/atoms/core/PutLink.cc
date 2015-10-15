@@ -32,7 +32,7 @@ using namespace opencog;
 PutLink::PutLink(const HandleSeq& oset,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : Link(PUT_LINK, oset, tv, av)
+    : ScopeLink(PUT_LINK, oset, tv, av)
 {
 	init();
 }
@@ -40,13 +40,13 @@ PutLink::PutLink(const HandleSeq& oset,
 PutLink::PutLink(const Handle& a,
                  TruthValuePtr tv,
                  AttentionValuePtr av)
-    : Link(PUT_LINK, a, tv, av)
+    : ScopeLink(PUT_LINK, a, tv, av)
 {
 	init();
 }
 
 PutLink::PutLink(Link& l)
-    : Link(l)
+    : ScopeLink(l)
 {
 	Type tscope = l.getType();
 	if (not classserver().isA(tscope, PUT_LINK))
@@ -92,33 +92,17 @@ PutLink::PutLink(Link& l)
 void PutLink::init(void)
 {
 	size_t sz = _outgoing.size();
-	if (2 != sz)
+	if (2 != sz and 3 != sz)
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting an outgoing set size of two, got %d", sz);
+			"Expecting an outgoing set size of two or three, got %d", sz);
 
-	// There are two situations that can occur here:
-	// The first atom is LambdaLink. In this case, just use it.
-	// The first atom is just a some free-form expression. In that
-	// grab all the free variables in that, and just use them.
-	Handle putty(_outgoing[0]);
-	if (classserver().isA(putty->getType(), LAMBDA_LINK))
-	{
-		LambdaLinkPtr lam(LambdaLinkCast(putty));
-		if (nullptr == lam)
-			lam = createLambdaLink(*LinkCast(putty));
+	ScopeLink::extract_variables(_outgoing);
 
-		_varlist = lam->get_variables();
-		_body = lam->get_body();
-	}
+	if (2 == sz)
+		_values = _outgoing[1];
 	else
-	{
-		FreeLink fl(putty);
-		VariableList vl(fl.get_vars());
-		_varlist = vl.get_variables();
-		_body = putty;
-	}
+		_values = _outgoing[2];
 
-	_values = _outgoing[1];
 	static_typecheck_values();
 }
 

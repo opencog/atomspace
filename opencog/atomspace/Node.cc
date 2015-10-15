@@ -43,7 +43,7 @@ void Node::init(const std::string& cname)
     _name = cname;
 }
 
-std::string Node::toShortString(std::string indent)
+std::string Node::toShortString(const std::string& indent)
 {
     std::string tmpname = _name;
     if (_name == "")
@@ -57,29 +57,39 @@ std::string Node::toShortString(std::string indent)
 
     std::string nam = indent +
         "(" + classserver().getTypeName(_type) +
-        // + getTruthValue()->toString() + ")\n";
         " \"" + tmpname + "\") ; [" +
         std::to_string(_uuid) + "][" + atname +"]\n";
     return nam;
 }
 
-std::string Node::toString(std::string indent)
+std::string Node::toString(const std::string& indent)
 {
-#define BUFSZ 256
-    char buf[BUFSZ + _name.size()];
     std::string tmpname = _name;
     if (_name == "")
         tmpname = "#" + std::to_string(_uuid);
-    snprintf(buf, BUFSZ, "(%s \"%s\" (av %d %d %d) %s) ; [%lu][%lu]\n",
-             classserver().getTypeName(_type).c_str(),
-             tmpname.c_str(),
-             (int)getAttentionValue()->getSTI(),
-             (int)getAttentionValue()->getLTI(),
-             (int)getAttentionValue()->getVLTI(),
-             getTruthValue()->toString().c_str(),
-             _uuid,
-             _atomTable? _atomTable->get_uuid() : -1);
-    return indent + buf;
+
+    std::string answer = indent;
+
+    answer += "(" + classserver().getTypeName(_type);
+
+    answer += " \"" + tmpname + "\"";
+
+    // Print the TV and AV only if its not the default.
+    if (not getAttentionValue()->isDefaultAV())
+        answer += " (av " +
+             std::to_string(getAttentionValue()->getSTI()) + " " +
+             std::to_string(getAttentionValue()->getLTI()) + " " +
+             std::to_string(getAttentionValue()->getVLTI()) + ")";
+
+    if (not getTruthValue()->isDefaultTV())
+        answer += " " + getTruthValue()->toString();
+
+    answer += ") ; [" +
+            std::to_string(_uuid) + "][" +
+            std::to_string(_atomTable? _atomTable->get_uuid() : -1) +
+            "]\n";
+
+    return answer;
 }
 
 bool Node::operator==(const Atom& other) const

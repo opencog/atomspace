@@ -175,10 +175,8 @@ class PatternTerm
 			}
 		}
 
-		inline void addQuote()
-		{
-			_quote_depth++;
-		}
+		inline void addQuote() { _quote_depth++; }
+		inline void remQuote() { _quote_depth--; }
 
 		inline void addBoundVariable()
 		{

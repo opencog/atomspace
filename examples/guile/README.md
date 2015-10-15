@@ -54,7 +54,9 @@ and more generally
 The current list of modules that wrap C++ code includes:
 ```
 (use-modules (opencog))
+(use-modules (opencog logger))
 (use-modules (opencog query))
+(use-modules (opencog exec))
 (use-modules (opencog rule-engine))
 (use-modules (opencog nlp lg-dict))
 (use-modules (opencog nlp sureal))
@@ -64,15 +66,15 @@ The current list of modules that wrap C++ code includes:
 
 # Example Files
 
-* basic.scm   -- a very simple introduction
-* cog-bind-example.scm -- an example of using the pattern matcher.
-* execute.scm -- an example of executing executable atoms, with
-                 callbacks written in python or scheme.
-* assign.scm  -- an example of asserting facts in the AtomSpace.
-* get-put.scm -- a different way of asserting facts in the AtomSpace.
-* state.scm   -- maintaining unique state
-* filter.scm  -- filtering sets of atoms.
-* except.scm  -- an example of exceptions being thrown and passed.
-* persist-example.scm -- and example of saving atomspace data in an SQL
-                 database.
-* gperf.scm   -- some very crude performance measurements.
+* `basic.scm`   -- a very simple introduction
+* `bindlink-example.scm` -- an example of using the pattern matcher.
+* `execute.scm` -- an example of executing executable atoms, with
+                   callbacks written in python or scheme.
+* `get-put.scm` -- an example of asserting facts in the AtomSpace.
+* `state.scm`   -- maintaining unique state
+* `filter.scm`  -- filtering sets of atoms.
+* `logger-example.scm` -- using the built-in logger.
+* `except.scm`  -- an example of exceptions being thrown and passed.
+* `persist-example.scm` -- and example of saving atomspace data in an SQL
+                   database.
+* `gperf.scm`   -- some very crude performance measurements.

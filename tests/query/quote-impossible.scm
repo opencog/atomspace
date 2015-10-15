@@ -17,4 +17,4 @@
             (VariableNode "$x") 
             (ConceptNode "criminal")))))))
 
-(define (sat-imp) (cog-satisfy x))
+(define (sat-imp) (cog-evaluate! x))

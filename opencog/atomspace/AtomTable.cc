@@ -39,8 +39,8 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/TypeNode.h>
-#include <opencog/atoms/bind/BindLink.h>
-#include <opencog/atoms/bind/PatternLink.h>
+#include <opencog/atoms/pattern/BindLink.h>
+#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/DeleteLink.h>
 #include <opencog/atoms/core/FunctionLink.h>
@@ -160,20 +160,6 @@ Handle AtomTable::getHandle(Type t, std::string name) const
     return Handle::UNDEFINED;
 }
 
-/// Find an equivalent atom that has exactly the same name and type.
-/// That is, if there is an atom with this name and type already in
-/// the table, then return that; else return undefined.
-Handle AtomTable::getHandle(const NodePtr& n) const
-{
-    const AtomTable *env = this;
-    do {
-        if (n->_atomTable == env) return Handle(n);
-        env = env->_environ;
-    } while (env);
-
-    return getHandle(n->getType(), n->getName());
-}
-
 Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 {
     // Make sure all the atoms in the outgoing set are resolved :-)
@@ -197,32 +183,21 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
     return h;
 }
 
-/// Find an equivalent atom that has exactly the same type and outgoing
-/// set.  That is, if there is an atom with this ype and outset already
-/// in the table, then return that; else return undefined.
-Handle AtomTable::getHandle(const LinkPtr& l) const
-{
-    const AtomTable *env = this;
-    do {
-        if (l->_atomTable == env) return Handle(l);
-        env = env->_environ;
-    } while (env);
-
-    return getHandle(l->getType(), l->getOutgoingSet());
-}
-
 /// Find an equivalent atom that is exactly the same as the arg. If
 /// such an atom is in the table, it is returned, else the return
 /// is the bad handle.
 Handle AtomTable::getHandle(const AtomPtr& a) const
 {
+    if (in_environ(a))
+        return a->getHandle();
+
     NodePtr nnn(NodeCast(a));
     if (nnn)
-         return getHandle(nnn);
+        return getHandle(nnn->getType(), nnn->getName());
     else {
         LinkPtr lll(LinkCast(a));
         if (lll)
-            return getHandle(lll);
+            return getHandle(lll->getType(), lll->getOutgoingSet());
     }
     return Handle::UNDEFINED;
 }
@@ -241,10 +216,11 @@ Handle AtomTable::getHandle(UUID uuid) const
 
 /// Return true if the atom is in this atomtable, or in the
 /// environment for this atomtable.
-bool AtomTable::inEnviron(AtomPtr atom)
+bool AtomTable::in_environ(const AtomPtr& atom) const
 {
+    if (nullptr == atom) return false;
     AtomTable* atab = atom->getAtomTable();
-    AtomTable* env = this;
+    const AtomTable* env = this;
     while (env) {
         if (atab == env) return true;
         env = env->_environ;
@@ -347,7 +323,7 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
         // Compare to the current state
         Handle old_state(slp->get_other());
         while (nullptr != old_state) {
-            this->extract(old_state);
+            this->extract(old_state, true);
             old_state = slp->get_other();
         }
         return slp;
@@ -461,7 +437,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (nullptr == atom) return Handle::UNDEFINED;
 
     // Is the atom already in this table, or one of its environments?
-    if (inEnviron(atom))
+    if (in_environ(atom))
         return atom->getHandle();
 
     // Lock before checking to see if this kind of atom can already
@@ -470,7 +446,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     std::unique_lock<std::recursive_mutex> lck(_mtx);
 
     // Check again, under the lock this time.
-    if (inEnviron(atom))
+    if (in_environ(atom))
         return atom->getHandle();
 
     // Factory implements experimental C++ atom types support code
@@ -544,7 +520,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         for (size_t i = 0; i < arity; i++) {
             // The outgoing set must consist entirely of atoms that
             // are either in this atomtable, or its environment.
-            if (not inEnviron(ogs[i])) need_copy = true;
+            if (not in_environ(ogs[i])) need_copy = true;
         }
 
         if (need_copy) {
@@ -557,7 +533,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 
             // Make sure all children have correct incoming sets
             Handle ho(llc->_outgoing[i]);
-            if (not inEnviron(ho)) {
+            if (not in_environ(ho)) {
                 ho->remove_atom(llc);
                 llc->_outgoing[i] = add(ho, async);
             }
@@ -681,13 +657,18 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // deleting it.
     handle = getHandle(handle);
     AtomPtr atom(handle);
-    if (!atom || atom->isMarkedForRemoval()) return result;
+    if (nullptr == atom or atom->isMarkedForRemoval()) return result;
 
     // Perhaps the atom is not in any table? Or at least, not in this
     // atom table? Its a user-error if the user is trying to extract
     // atoms that are not in this atomspace, but we're going to be
     // silent about this error -- it seems pointless to throw.
-    if (atom->getAtomTable() != this) return result;
+    AtomTable* other = atom->getAtomTable();
+    if (other != this)
+    {
+        if (not in_environ(handle)) return result;
+        return other->extract(handle, recursive);
+    }
 
     // Lock before fetching the incoming set. Since getting the
     // incoming set also grabs a lock, we need this mutex to be
@@ -719,7 +700,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
             // atom table.  So flag that as an error; it will assert
             // a few dozen lines later, below.
             AtomTable* other = his->getAtomTable();
-            if (other and other != this and not other->inEnviron(handle)) {
+            if (other and other != this and not other->in_environ(handle)) {
                 logger().warn() << "AtomTable::extract() internal error, "
                                 << "non-DAG membership.";
             }
@@ -773,7 +754,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
                 // XXX this might not be exactly thread-safe, if
                 // other atomspaces are involved...
                 if (iset[i]->getAtomTable() != NULL and
-                    (not iset[i]->getAtomTable()->inEnviron(handle) or
+                    (not iset[i]->getAtomTable()->in_environ(handle) or
                      not iset[i]->isMarkedForRemoval()))
                 {
                     Logger::Level lev = logger().getBackTraceLevel();
@@ -783,7 +764,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
                                     << ilen << " First trouble at " << i;
                     logger().warn() << "This atomtable=" << ((void*) this)
                                     << " other atomtale=" << ((void*) iset[i]->getAtomTable())
-                                    << " inEnviron=" << iset[i]->getAtomTable()->inEnviron(handle);
+                                    << " in_environ=" << iset[i]->getAtomTable()->in_environ(handle);
                     logger().warn() << "This atom: " << handle->toString();
                     for (size_t j=0; j<ilen; j++) {
                         logger().warn() << "Atom j=" << j << " " << iset[j]->toString();

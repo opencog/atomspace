@@ -27,3 +27,10 @@
 
 ; Access an atom that does not exist.
 (cog-node 'ConceptNode "qwerty")
+
+; Print a list of all (currently loaded) opencog functions.
+,apropos cog
+
+;
+,describe cog-new-node
+,describe cog-node

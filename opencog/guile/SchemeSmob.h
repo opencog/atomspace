@@ -97,12 +97,13 @@ class SchemeSmob
 		static SCM ss_name(SCM);
 		static SCM ss_type(SCM);
 		static SCM ss_arity(SCM);
+		static SCM ss_as(SCM);
 		static SCM ss_av(SCM);
 		static SCM ss_tv(SCM);
 		static SCM ss_incoming_set(SCM);
 		static SCM ss_outgoing_set(SCM);
 
-		// AtomSpace query functions
+		// Type query functions
 		static SCM ss_map_type(SCM, SCM);
 		static SCM ss_get_types(void);
 		static SCM ss_get_type(SCM);
@@ -134,6 +135,8 @@ class SchemeSmob
 		static SCM ss_as_p(SCM);
 		static SCM ss_get_as(void);
 		static SCM ss_set_as(SCM);
+		static SCM ss_as_uuid(SCM);
+		static SCM ss_as_clear(SCM);
 		static SCM take_as(AtomSpace *);
 		static SCM make_as(AtomSpace *);
 		static AtomSpace* ss_to_atomspace(SCM);

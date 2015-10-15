@@ -93,8 +93,8 @@ public:
      *
      * @return A string representation of the node.
      */
-    std::string toString(std::string indent);
-    std::string toShortString(std::string indent);
+    std::string toString(const std::string& indent);
+    std::string toShortString(const std::string& indent);
 
 	// Work around gdb's incapability to build a string on the fly,
 	// see http://stackoverflow.com/questions/16734783 and

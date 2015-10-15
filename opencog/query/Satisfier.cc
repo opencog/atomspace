@@ -23,7 +23,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atoms/bind/PatternLink.h>
+#include <opencog/atoms/pattern/PatternLink.h>
 
 #include "BindLinkAPI.h"
 #include "Satisfier.h"
@@ -39,6 +39,43 @@ bool Satisfier::grounding(const std::map<Handle, Handle> &var_soln,
 	// Look for more groundings.
 	return false;
 }
+
+/// This method handles the case of SequentialAnd, SequentialOr with
+/// embedded AbsentLinks, NotLink-PresentLink and some weird
+/// combinations of NotLink-ChoiceLink, and so-on.  The idea here is
+/// that, if the pattern matcher ran to exhaustion, and NO groundings
+/// at all were found, then pattern evaluation may still need to
+/// trigger evaluatable clauses that evaluate only when exhaustive
+/// search fails.  So, indeed, we do that here.
+///
+/// Of course, if the pattern had no variables (e.g. a SequenceLink or
+/// FallbackLink with only evaluatables), then there cannot be a
+/// grounding failure, by definition.  And if there was a grounding,
+/// there can be no grounding failure, either.
+bool Satisfier::search_finished(bool done)
+{
+	if (done) return done;
+
+	// If there were no variables to be grounded, we have nothing to do.
+	if (not _have_variables) return done;
+
+	// If there was a grounding, then don't don't re-run; we're here
+	// only to handle the no-groundings case.
+	if (TruthValue::TRUE_TV() == _result) return done;
+
+	// _optionals_present will be set to true if some optional clause
+	// was grounded. Ergo, its not the no-grounding case.
+	if (_optionals_present) return done;
+
+	std::map<Handle,Handle> empty;
+	bool rc = eval_sentence(_pattern_body, empty);
+	if (rc)
+		_result = TruthValue::TRUE_TV();
+
+	return rc;
+}
+
+// ===========================================================
 
 bool SatisfyingSet::grounding(const std::map<Handle, Handle> &var_soln,
                               const std::map<Handle, Handle> &term_soln)

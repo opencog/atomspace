@@ -61,7 +61,7 @@ friend class AtomspaceHTabler;    // persistance
 private:
     ProtoAtomPtr _ptr;
 
-    static bool atoms_less(const ProtoAtomPtr&, const ProtoAtomPtr&);
+    static bool atoms_less(const ProtoAtom*, const ProtoAtom*);
     static Handle do_res(UUID);
     static std::vector<const AtomTable*> _resolver;
 
@@ -150,19 +150,23 @@ public:
         return false;
     }
 
-    inline bool operator==(const Handle& h) const noexcept { return _ptr == h._ptr; }
-    inline bool operator!=(const Handle& h) const noexcept { return _ptr != h._ptr; }
+    inline bool operator==(const Handle& h) const noexcept {
+        return _ptr.get() == h._ptr.get();
+    }
+    inline bool operator!=(const Handle& h) const noexcept {
+        return _ptr.get() != h._ptr.get();
+    }
     inline bool operator< (const Handle& h) const noexcept {
-       return atoms_less(_ptr, h._ptr);
+       return atoms_less(_ptr.get(), h._ptr.get());
     }
     inline bool operator> (const Handle& h) const noexcept {
-       return atoms_less(h._ptr, _ptr);
+       return atoms_less(h._ptr.get(), _ptr.get());
     }
     inline bool operator<=(const Handle& h) const noexcept {
-       return not atoms_less(h._ptr, _ptr);
+       return not atoms_less(h._ptr.get(), _ptr.get());
     }
     inline bool operator>=(const Handle& h) const noexcept {
-       return not atoms_less(_ptr, h._ptr);
+       return not atoms_less(_ptr.get(), h._ptr.get());
     }
 
     /**
