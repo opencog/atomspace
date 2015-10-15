@@ -84,6 +84,7 @@ namespace opencog {
 class FindAtoms
 {
 	public:
+		std::set<Type> stopset;
 		std::set<Handle> varset;
 		std::set<Handle> holders;
 		std::set<Handle> least_holders;
@@ -152,7 +153,10 @@ class FindAtoms
 
 			// XXX TODO Need to also handle UNQUOTE_LINK ...
 			if (t == QUOTE_LINK) return NOPE;
-			// if (classserver().isA(t, SCOPE_LINK)) return NOPE;
+			for (Type stopper : stopset)
+			{
+				if (classserver().isA(t, stopper)) return NOPE;
+			}
 
 			LinkPtr l(LinkCast(h));
 			if (l)
