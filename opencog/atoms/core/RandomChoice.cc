@@ -62,6 +62,21 @@ Handle RandomChoiceLink::execute(AtomSpace * as) const
 	size_t ary = _outgoing.size();
 	if (0 == ary) return Handle();
 
+	// Special-case handling for SetLinks, so it works with
+	// dynamically-evaluated PutLinks ...
+	if (1 == ary)
+	{
+		FunctionLinkPtr flp(FunctionLinkCast(_outgoing[0]));
+		if (nullptr == flp) return _outgoing[0];
+
+		Handle h(flp->execute(as));
+		LinkPtr lll(LinkCast(h));
+		if (nullptr == lll) return h;
+
+		ary = lll->getArity();
+		return lll->getOutgoingAtom(randy.randint(ary));
+	}
+
 	return _outgoing.at(randy.randint(ary));
 }
 
