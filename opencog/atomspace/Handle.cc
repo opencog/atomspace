@@ -86,8 +86,8 @@ bool Handle::atoms_less(const ProtoAtom* pa, const ProtoAtom* pb)
     if (NULL == pa) return true;
     if (NULL == pb) return false;
 
-    Atom* a(std::dynamic_cast<Atom>(pa));
-    Atom* b(std::dynamic_cast<Atom>(pb));
+    const Atom* a(dynamic_cast<const Atom*>(pa));
+    const Atom* b(dynamic_cast<const Atom*>(pb));
     UUID ua = a->getUUID();
     UUID ub = b->getUUID();
     if (INVALID_UUID != ua or INVALID_UUID != ub) return ua < ub;
