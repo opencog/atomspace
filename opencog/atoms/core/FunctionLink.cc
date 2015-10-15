@@ -24,6 +24,7 @@
 #include <opencog/atomspace/ClassServer.h>
 #include "FunctionLink.h"
 
+#include "ArityLink.h"
 #include "AssignLink.h"
 #include "DeleteLink.h"
 
@@ -106,6 +107,9 @@ LinkPtr FunctionLink::factory(LinkPtr lp)
 // Basic type factory.
 Handle FunctionLink::factory(Type t, const HandleSeq& seq)
 {
+	if (ARITY_LINK == t)
+		return Handle(createArityLink(seq));
+
 	if (ASSIGN_LINK == t)
 		return Handle(createAssignLink(seq));
 
