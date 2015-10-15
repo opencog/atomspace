@@ -338,6 +338,7 @@ ARITHMETIC_LINK <- FOLD_LINK
 PLUS_LINK <- ARITHMETIC_LINK
 TIMES_LINK <- ARITHMETIC_LINK
 
+// XXX These are obsolete!!! They should be removed, next rainy day.
 // The Insert, Assign and RemoveLink's all expect at TypeNode as the first
 // member of thier outgoing set.  When these execute, they add or remove
 // the named type to the atomsapce.  Thus, they similar to Prolog's assert
