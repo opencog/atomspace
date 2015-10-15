@@ -27,6 +27,7 @@
 #include "ArityLink.h"
 #include "AssignLink.h"
 #include "DeleteLink.h"
+#include "RandomChoice.h"
 
 using namespace opencog;
 
@@ -119,6 +120,9 @@ Handle FunctionLink::factory(Type t, const HandleSeq& seq)
 	if (PLUS_LINK == t)
 		// return Handle(createPlusLink(seq));
 		throw RuntimeException(TRACE_INFO, "Can't be a factory for this!");
+
+	if (RANDOM_CHOICE_LINK == t)
+		return Handle(createRandomChoiceLink(seq));
 
 	if (REMOVE_LINK == t)
 		return Handle(createRemoveLink(seq));

@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/ArityLink.h
+ * opencog/atoms/core/RandomChoiceLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_ARITY_LINK_H
-#define _OPENCOG_ARITY_LINK_H
+#ifndef _OPENCOG_RANDOM_CHOICE_LINK_H
+#define _OPENCOG_RANDOM_CHOICE_LINK_H
 
 #include <opencog/atoms/core/FunctionLink.h>
 
@@ -31,42 +31,40 @@ namespace opencog
  *  @{
  */
 
-/// The ArityLink returns a NumberNode holding the arity of the wrapped
-/// atom; its zero for Nodes, and empty Links.
+/// The RandomChoiceLink randomly selects and returns one of its
+/// N atoms, with a uniform probability distribution.
 ///
 /// For example,
 ///
-///     ArityLink
+///     RandomChoiceLink
 ///         SomeAtom
 ///         OtherAtom
 ///
-/// will return
-///
-///     NumberNode 2
-///
-class ArityLink : public FunctionLink
+/// will return either SomeAtom or OtherAtom.
+///     
+class RandomChoiceLink : public FunctionLink
 {
 public:
-	ArityLink(const HandleSeq&,
+	RandomChoiceLink(const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	ArityLink(Link &l);
+	RandomChoiceLink(Link &l);
 
 	// Return a pointer to the atom being specified.
 	virtual Handle execute(AtomSpace* = NULL) const;
 };
 
-typedef std::shared_ptr<ArityLink> ArityLinkPtr;
-static inline ArityLinkPtr ArityLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<ArityLink>(a); }
-static inline ArityLinkPtr ArityLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<ArityLink>(a); }
+typedef std::shared_ptr<RandomChoiceLink> RandomChoiceLinkPtr;
+static inline RandomChoiceLinkPtr RandomChoiceLinkCast(const Handle& h)
+	{ AtomPtr a(h); return std::dynamic_pointer_cast<RandomChoiceLink>(a); }
+static inline RandomChoiceLinkPtr RandomChoiceLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<RandomChoiceLink>(a); }
 
 // XXX temporary hack ...
-#define createArityLink std::make_shared<ArityLink>
+#define createRandomChoiceLink std::make_shared<RandomChoiceLink>
 
 /** @}*/
 }
 
-#endif // _OPENCOG_ARITY_LINK_H
+#endif // _OPENCOG_RANDOM_CHOICE_LINK_H

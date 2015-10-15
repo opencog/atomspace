@@ -11,6 +11,7 @@ ADD_LIBRARY (atomcore SHARED
 	FunctionLink.cc
 	LambdaLink.cc
 	PutLink.cc
+	RandomChoice.cc
 	ScopeLink.cc
 	StateLink.cc
 	UniqueLink.cc
@@ -37,6 +38,7 @@ INSTALL (FILES
 	FunctionLink.h
 	LambdaLink.h
 	PutLink.h
+	RandomChoice.h
 	ScopeLink.h
 	StateLink.h
 	UniqueLink.h
