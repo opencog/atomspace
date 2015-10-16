@@ -349,8 +349,10 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
             hs.push_back(implicant);
         //Actual checking here.
         for (Handle& h : hs) {
-            if (_as.get_atom(h) == Handle::UNDEFINED)
+            if (_as.get_atom(h) == Handle::UNDEFINED or (search_in_focus_set
+                    and find(_focus_set.begin(), _focus_set.end(), h) == _focus_set.end())) {
                 return {};
+            }
         }
 
         Instantiator inst(&_as);
