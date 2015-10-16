@@ -339,6 +339,20 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
 
     //Check for fully grounded outputs returned by derive_rules.
     if (not contains_atomtype(rhandle, VARIABLE_NODE)) {
+        //Subatomic matching may have created a non existing implicant
+        //atom and if the implicant doesn't exist, nor should the implicand.
+        Handle implicant = BindLinkCast(rhandle)->get_body();
+        HandleSeq hs;
+        if (implicant->getType() == AND_LINK or implicant->getType() == OR_LINK)
+            hs = LinkCast(implicant)->getOutgoingSet();
+        else
+            hs.push_back(implicant);
+        //Actual checking here.
+        for (Handle& h : hs) {
+            if (_as.get_atom(h) == Handle::UNDEFINED)
+                return {};
+        }
+
         Instantiator inst(&_as);
         Handle houtput = LinkCast(rhandle)->getOutgoingSet().back();
         result.push_back(inst.instantiate(houtput, { }));
