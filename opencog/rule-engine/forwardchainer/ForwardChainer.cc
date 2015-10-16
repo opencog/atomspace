@@ -129,24 +129,16 @@ void ForwardChainer::do_step(void)
     UnorderedHandleSet products;
     //Applying all partial/full groundings.
     for (Handle rhandle : derived_rhandles) {
-        HandleSeq hs;
-        //Check for fully grounded outputs returned by derive_rules.
-        if (not contains_atomtype(rhandle, VARIABLE_NODE)) {
-            Instantiator inst(&_as);
-            Handle houtput = LinkCast(rhandle)->getOutgoingSet().back();
-            hs.push_back(inst.instantiate(houtput, { }));
-
-        } else {
-            hs = apply_rule(rhandle, _search_focus_Set);
-        }
-
-        products.insert( hs.begin(), hs.end());
+        HandleSeq hs = apply_rule(rhandle, _search_focus_Set);
+        products.insert(hs.begin(), hs.end());
     }
 
     //Finally store source partial groundings and inference results.
     if (not derived_rhandles.empty()) {
+        _potential_sources.insert(_potential_sources.end(), products.begin(),
+                                  products.end());
         _fcstat.add_partial_grounding(_cur_source, rule->get_handle(),
-                              derived_rhandles);
+                                      derived_rhandles);
         _fcstat.add_inference_record(
                 _cur_source, HandleSeq(products.begin(), products.end()));
     }
@@ -345,58 +337,84 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
 {
     HandleSeq result;
 
-    if (search_in_focus_set) {
-        //This restricts PM to look only in the focus set
-        AtomSpace focus_set_as;
+    //Check for fully grounded outputs returned by derive_rules.
+    if (not contains_atomtype(rhandle, VARIABLE_NODE)) {
+        //Subatomic matching may have created a non existing implicant
+        //atom and if the implicant doesn't exist, nor should the implicand.
+        Handle implicant = BindLinkCast(rhandle)->get_body();
+        HandleSeq hs;
+        if (implicant->getType() == AND_LINK or implicant->getType() == OR_LINK)
+            hs = LinkCast(implicant)->getOutgoingSet();
+        else
+            hs.push_back(implicant);
+        //Actual checking here.
+        for (Handle& h : hs) {
+            if (_as.get_atom(h) == Handle::UNDEFINED)
+                return {};
+        }
 
-        //Add focus set atoms to focus_set atomspace
-        for (Handle h : _focus_set)
-            focus_set_as.add_atom(h);
-
-        //Add source atoms to focus_set atomspace
-        for (Handle h : _potential_sources)
-            focus_set_as.add_atom(h);
-
-        //rhandle may introduce a new atoms that satisfies condition for the output
-        //In order to prevent this undesirable effect, lets store rhandle in a child
-        //atomspace of parent focus_set_as so that PM will never be able to find this
-        //new undesired atom created from partial grounding.
-        AtomSpace derived_rule_as(&focus_set_as);
-        Handle rhcpy = derived_rule_as.add_atom(rhandle);
-
-        BindLinkPtr bl = BindLinkCast(rhcpy);
-
-        FocusSetPMCB fs_pmcb(&derived_rule_as, &_as);
-        fs_pmcb.implicand = bl->get_implicand();
-
-        _log->debug("Applying rule in focus set %s ",(rhcpy->toShortString()).c_str());
-
-        bl->imply(fs_pmcb, false);
-
-        result = fs_pmcb.get_result_list();
-
-        _log->debug(
-                "Result is %s ",
-                ((_as.add_link(SET_LINK, result))->toShortString()).c_str());
-
+        Instantiator inst(&_as);
+        Handle houtput = LinkCast(rhandle)->getOutgoingSet().back();
+        result.push_back(inst.instantiate(houtput, { }));
     }
-    //Search the whole atomspace
+
     else {
-        AtomSpace derived_rule_as(&_as);
+        if (search_in_focus_set) {
+            //This restricts PM to look only in the focus set
+            AtomSpace focus_set_as;
 
-        Handle rhcpy = derived_rule_as.add_atom(rhandle);
+            //Add focus set atoms to focus_set atomspace
+            for (Handle h : _focus_set)
+                focus_set_as.add_atom(h);
 
-        _log->debug("Applying rule on atomspace %s ",(rhcpy->toShortString()).c_str());
+            //Add source atoms to focus_set atomspace
+            for (Handle h : _potential_sources)
+                focus_set_as.add_atom(h);
 
-        Handle h = bindlink(&derived_rule_as,rhcpy);
+            //rhandle may introduce a new atoms that satisfies condition for the output
+            //In order to prevent this undesirable effect, lets store rhandle in a child
+            //atomspace of parent focus_set_as so that PM will never be able to find this
+            //new undesired atom created from partial grounding.
+            AtomSpace derived_rule_as(&focus_set_as);
+            Handle rhcpy = derived_rule_as.add_atom(rhandle);
 
-        _log->debug("Result is %s ",(h->toShortString()).c_str());
+            BindLinkPtr bl = BindLinkCast(rhcpy);
 
-        result = derived_rule_as.get_outgoing(h);
+            FocusSetPMCB fs_pmcb(&derived_rule_as, &_as);
+            fs_pmcb.implicand = bl->get_implicand();
+
+            _log->debug("Applying rule in focus set %s ",
+                        (rhcpy->toShortString()).c_str());
+
+            bl->imply(fs_pmcb, false);
+
+            result = fs_pmcb.get_result_list();
+
+            _log->debug(
+                    "Result is %s ",
+                    ((_as.add_link(SET_LINK, result))->toShortString()).c_str());
+
+        }
+        //Search the whole atomspace
+        else {
+            AtomSpace derived_rule_as(&_as);
+
+            Handle rhcpy = derived_rule_as.add_atom(rhandle);
+
+            _log->debug("Applying rule on atomspace %s ",
+                        (rhcpy->toShortString()).c_str());
+
+            Handle h = bindlink(&derived_rule_as, rhcpy);
+
+            _log->debug("Result is %s ", (h->toShortString()).c_str());
+
+            result = derived_rule_as.get_outgoing(h);
+        }
     }
 
     //add the results back to main atomspace
-    for(Handle h:result) _as.add_atom(h);
+    for (Handle h : result)
+        _as.add_atom(h);
 
     return result;
 }
