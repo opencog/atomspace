@@ -145,6 +145,8 @@ void ForwardChainer::do_step(void)
 
     //Finally store source partial groundings and inference results.
     if (not derived_rhandles.empty()) {
+        _potential_sources.insert(_potential_sources.end(), products.begin(),
+		                          products.end());
         _fcstat.add_partial_grounding(_cur_source, rule->get_handle(),
                               derived_rhandles);
         _fcstat.add_inference_record(
