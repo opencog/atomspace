@@ -90,7 +90,7 @@ public:
 	Type tournament_select(map<Type, float> tfitnes_map) {
 		// Nothing to select, return the nullptr rule
 		if (tfitnes_map.empty())
-			return Type();
+			 throw RuntimeException(TRACE_INFO,"[URECommons] Empty fitness map provided.");
 
 		// Something to select, randomly pick (without replacement)
 		// about half of the rules and return the best
