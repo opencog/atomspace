@@ -110,7 +110,6 @@ void ForwardChainer::do_step(void)
     HandleSeq derived_rhandles = { };
 
     //Look in the cache first
-    HandleSeq hs = _fcstat.get_pg_similar_sources(_cur_source, true);
 
     map<Rule, float> rule_weight_map;
     if (_fcstat.has_partial_grounding(_cur_source)) {
@@ -129,26 +128,9 @@ void ForwardChainer::do_step(void)
             derived_rhandles.push_back(p.first);
         }
 
-    } else if (not hs.empty()) {
-     HandleWeightMap hweight_map;
-     for (auto s : hs) {
-     hweight_map[s] = (s->getTruthValue())->getMean();
-     }
-     Handle hchosen = _rec.tournament_select(hweight_map);
-
-     rule_weight_map.clear();
-     auto pgmap = _fcstat.get_rule_pg_map(hchosen);
-     for (auto p : pgmap) {
-     Rule rule = _configReader.get_rule(p.first);
-     rule_weight_map[rule] = rule.get_weight();
-     }
-
-     Rule r = _rec.tournament_select(rule_weight_map);
-     rule = &_configReader.get_rule(r.get_handle());
-
-     } else {
-     rule = choose_rule(_cur_source, false);
-     }
+    } else {
+        rule = choose_rule(_cur_source, false);
+    }
 
     //choose a rule that source unifies with one of its premises.
     //if not found try to find by matching suba-toms of the rules
@@ -181,11 +163,13 @@ void ForwardChainer::do_step(void)
     if (not derived_rhandles.empty()) {
         _potential_sources.insert(_potential_sources.end(), products.begin(),
                                   products.end());
+
         HandleWeightMap hwm;
         float weight = _cur_rule->get_weight();
         for(Handle& h: derived_rhandles)  hwm[h] = weight;
         _fcstat.add_partial_grounding(_cur_source, rule->get_handle(),
                                       hwm);
+
         _fcstat.add_inference_record(
                 _cur_source, HandleSeq(products.begin(), products.end()));
     }
