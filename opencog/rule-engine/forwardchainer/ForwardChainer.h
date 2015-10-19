@@ -56,7 +56,7 @@ private:
     source_selection_mode _ts_mode;
     bool _search_in_af;
     bool _search_focus_Set;
-    Rule* _cur_rule;
+    const Rule* _cur_rule;
     Handle _cur_source;
     HandleSeq _selected_sources;
 
