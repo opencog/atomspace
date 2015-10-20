@@ -28,18 +28,22 @@
 
 namespace opencog {
 
-class PartiaGroundingRecord {
-public:
+using HandleWeightMap = std::map<Handle,float>;
+
+struct PartiaGroundingRecord {
     const Handle hsource;
     //Partial grounding may not be in any atomspace.
-    std::map<Handle, HandleSeq> _rule_pgroundings_map;
+    std::map<Handle, HandleWeightMap> _rule_pgroundings_map;
 
-    PartiaGroundingRecord(Handle source, Handle hrule, HandleSeq pgroundings) :
+    PartiaGroundingRecord(Handle source, Handle hrule, HandleWeightMap pgroundings) :
                            hsource(source)
 
     {
         _rule_pgroundings_map[hrule] = pgroundings;
     }
+
+    //When no matching rule is found
+    PartiaGroundingRecord(Handle source) : hsource(source) { }
 
     inline bool operator==(const PartiaGroundingRecord& spg)
     {
@@ -47,8 +51,7 @@ public:
     }
 };
 
-class InferenceRecord {
-public:
+struct InferenceRecord {
     const int step;
     const Handle hsource;
     HandleSeq product;
@@ -72,8 +75,8 @@ private:
 public:
     //PartialGroundingRecord queries.
     bool has_partial_grounding(const Handle& hsource);
-    void add_partial_grounding(Handle source, Handle hrule, HandleSeq pgroundings);
-    std::map<Handle,HandleSeq> get_rule_pg_map(const Handle& hsource);
+    void add_partial_grounding(Handle source, Handle hrule, HandleWeightMap pgroundings);
+    std::map<Handle,HandleWeightMap> get_rule_pg_map(const Handle& hsource);
     HandleSeq get_pg_similar_sources(const Handle& hsource,bool strict);
 
     //InferenceRecord queries.

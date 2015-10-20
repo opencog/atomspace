@@ -56,7 +56,7 @@ private:
     source_selection_mode _ts_mode;
     bool _search_in_af;
     bool _search_focus_Set;
-    Rule* _cur_rule;
+    const Rule* _cur_rule;
     Handle _cur_source;
     HandleSeq _selected_sources;
 
@@ -67,17 +67,16 @@ private:
     Logger* getLogger(void);
 
     void apply_all_rules(bool search_focus_set = false);
-    void do_pm(const Handle& hsource, const UnorderedHandleSet& var_nodes);
 
-    UnorderedHandleSet get_subatoms(Rule *rule);
+    UnorderedHandleSet get_subatoms(const Rule *rule);
     Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);
     HandleSeq substitute_rule_part(AtomSpace& as, Handle hrule,
                                    const std::set<Handle>& vars,
                                    const std::vector<std::map<Handle, Handle>>&
                                    var_groundings);
-    bool unify(Handle source, Handle target, Rule* rule);
-    bool subatom_unify(Handle source, Rule* rule);
-    HandleSeq derive_rules(Handle source, Handle target, Rule* rule);
+    bool unify(Handle source, Handle target, const Rule* rule);
+    bool subatom_unify(Handle source, const Rule* rule);
+    HandleSeq derive_rules(Handle source, Handle target, const Rule* rule);
     void update_potential_sources(HandleSeq input);
 
     bool is_valid_implicant(const Handle& h);
@@ -113,7 +112,7 @@ protected:
     virtual HandleSeq apply_rule(Handle rhandle, bool search_focus_set_only =
             false);
 
-    HandleSeq derive_rules(Handle source, Rule* rule, bool subatomic = false);
+    HandleSeq derive_rules(Handle source, const Rule* rule, bool subatomic = false);
 
 public:
     /**

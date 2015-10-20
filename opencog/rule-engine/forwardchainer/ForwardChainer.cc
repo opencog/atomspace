@@ -102,21 +102,47 @@ Logger* ForwardChainer::getLogger()
  */
 void ForwardChainer::do_step(void)
 {
-    _cur_source=choose_next_source();
-    _log->debug("[ForwardChainer] Next source %s", _cur_source->toString().c_str());
+    _cur_source = choose_next_source();
+    _log->debug("[ForwardChainer] Next source %s",
+                _cur_source->toString().c_str());
 
-    HandleSeq derived_rhandles;
+    const Rule* rule;
+    HandleSeq derived_rhandles = { };
+
+    //Look in the cache first
+
+    map<Rule, float> rule_weight_map;
+    if (_fcstat.has_partial_grounding(_cur_source)) {
+        auto pgmap = _fcstat.get_rule_pg_map(_cur_source);
+
+        for (auto p : pgmap) {
+            Rule r = _configReader.get_rule(p.first);
+            rule_weight_map[r] = r.get_weight();
+        }
+
+        Rule r = _rec.tournament_select(rule_weight_map);
+
+        rule = &_configReader.get_rule(r.get_handle());
+        HandleWeightMap hwm = pgmap[r.get_handle()];
+        for (auto& p : hwm) {
+            derived_rhandles.push_back(p.first);
+        }
+
+    } else {
+        rule = choose_rule(_cur_source, false);
+    }
 
     //choose a rule that source unifies with one of its premises.
     //if not found try to find by matching suba-toms of the rules
     //premises.
-    Rule *rule = choose_rule(_cur_source, false);
     if (rule) {
         _cur_rule = rule;
-        derived_rhandles = derive_rules(_cur_source, rule);
+        if (derived_rhandles.empty())
+            derived_rhandles = derive_rules(_cur_source, rule);
 
     } else {
         rule = choose_rule(_cur_source, true);
+
         if (rule) {
             _cur_rule = rule;
             derived_rhandles = derive_rules(_cur_source, rule,
@@ -124,7 +150,7 @@ void ForwardChainer::do_step(void)
         }
     }
 
-    _log->debug( "Derived rule size = %d", derived_rhandles.size());
+    _log->debug("Derived rule size = %d", derived_rhandles.size());
 
     UnorderedHandleSet products;
     //Applying all partial/full groundings.
@@ -137,8 +163,13 @@ void ForwardChainer::do_step(void)
     if (not derived_rhandles.empty()) {
         _potential_sources.insert(_potential_sources.end(), products.begin(),
                                   products.end());
+
+        HandleWeightMap hwm;
+        float weight = _cur_rule->get_weight();
+        for(Handle& h: derived_rhandles)  hwm[h] = weight;
         _fcstat.add_partial_grounding(_cur_source, rule->get_handle(),
-                                      derived_rhandles);
+                                      hwm);
+
         _fcstat.add_inference_record(
                 _cur_source, HandleSeq(products.begin(), products.end()));
     }
@@ -164,49 +195,6 @@ void ForwardChainer::do_chain(void)
     }
 
     _log->debug("[ForwardChainer] finished forwarch chaining.");
-}
-
-/**
- * Does pattern matching for a variable containing query.
- *
- * @param source    A variable containing handle passed as an input to the pattern matcher
- * @param var_nodes The VariableNodes in @param hsource
- *
- */
-void ForwardChainer::do_pm(const Handle& hsource,
-                           const UnorderedHandleSet& var_nodes)
-{
-    DefaultImplicator impl(&_as);
-    impl.implicand = hsource;
-    HandleSeq vars;
-    for (auto h : var_nodes)
-        vars.push_back(h);
-    _cur_source = hsource;
-    Handle hvar_list = _as.add_link(VARIABLE_LIST, vars);
-    Handle hclause = _as.add_link(AND_LINK, hsource);
-
-    // Run the pattern matcher, find all patterns that satisfy the
-    // the clause, with the given variables in it.
-    PatternLinkPtr sl(createPatternLink(hvar_list, hclause));
-    sl->satisfy(impl);
-
-    // Update result
-    _fcstat.add_inference_record(Handle::UNDEFINED, impl.get_result_list());
-
-    // Delete the AND_LINK and LIST_LINK
-    _as.remove_atom(hvar_list);
-    _as.remove_atom(hclause);
-
-    //!Additionally, find applicable rules and apply.
-    vector<Rule*> rules = {choose_rule(hsource,true)};
-    for (Rule* rule : rules) {
-        BindLinkPtr bl(BindLinkCast(rule->get_handle()));
-        DefaultImplicator impl(&_as);
-        impl.implicand = bl->get_implicand();
-        bl->imply(impl, false);
-        _cur_rule = rule;
-        _fcstat.add_inference_record(Handle::UNDEFINED, impl.get_result_list());
-    }
 }
 
 /**
@@ -244,16 +232,14 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
     //Select a rule among the admissible rules in the rule-base via stochastic
     //selection,based on the weights of the rules in the current context.
     Rule* rule = nullptr;
-    bool unifiable = false;
 
     if (subatom_match) {
         _log->debug("[ForwardChainer] Subatom-unifying. %s",(hsource->toShortString()).c_str());
 
-        while (!unifiable and !rule_weight.empty()) {
+        while (!rule_weight.empty()) {
             Rule* temp = _rec.tournament_select(rule_weight);
 
             if (subatom_unify(hsource, temp)) {
-                unifiable = true;
                 rule = temp;
                 break;
             }
@@ -263,17 +249,19 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
     } else {
         _log->debug("[ForwardChainer] Unifying. %s",(hsource->toShortString()).c_str());
 
-        while (!unifiable and !rule_weight.empty()) {
+        bool unified = false;
+        while (not rule_weight.empty()) {
             Rule *temp = _rec.tournament_select(rule_weight);
             HandleSeq hs = temp->get_implicant_seq();
 
             for (Handle target : hs) {
                 if (unify(hsource, target, temp)) {
-                    unifiable = true;
+                    unified = true;
                     rule = temp;
                     break;
                 }
             }
+            if(unified) break;
             rule_weight.erase(temp);
         }
     }
@@ -432,7 +420,7 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
  * @return  A HandleSeq of derived rule handles.
  */
 HandleSeq ForwardChainer::derive_rules(Handle source, Handle target,
-                                               Rule* rule)
+                                               const Rule* rule)
 {
     //exceptions
     if (not is_valid_implicant(target))
@@ -499,7 +487,7 @@ HandleSeq ForwardChainer::derive_rules(Handle source, Handle target,
  *
  * @return  A HandleSeq of derived rule handles.
  */
-HandleSeq ForwardChainer::derive_rules(Handle source, Rule* rule,
+HandleSeq ForwardChainer::derive_rules(Handle source, const Rule* rule,
                                                bool subatomic/*=false*/)
 {
     HandleSeq derived_rules = { };
@@ -557,7 +545,7 @@ void ForwardChainer::validate(Handle hsource, HandleSeq hfocus_set)
  *
  * @return   An unoderedHandleSet of of all unique atoms in the implicant.
  */
-UnorderedHandleSet ForwardChainer::get_subatoms(Rule *rule)
+UnorderedHandleSet ForwardChainer::get_subatoms(const Rule *rule)
 {
     UnorderedHandleSet output_expanded;
 
@@ -634,7 +622,7 @@ HandleSeq ForwardChainer::substitute_rule_part(
  *
  * @return        true on successful unification and false otherwise.
  */
-bool ForwardChainer::unify(Handle source, Handle target, Rule* rule)
+bool ForwardChainer::unify(Handle source, Handle target, const Rule* rule)
 {
     //exceptions
     if (not is_valid_implicant(target))
@@ -667,7 +655,7 @@ bool ForwardChainer::unify(Handle source, Handle target, Rule* rule)
  *
  *  @return        true if source is subatom unifiable and false otherwise.
  */
-bool ForwardChainer::subatom_unify(Handle source, Rule* rule)
+bool ForwardChainer::subatom_unify(Handle source, const Rule* rule)
 {
     UnorderedHandleSet output_expanded = get_subatoms(rule);
 
