@@ -109,44 +109,35 @@ void ForwardChainer::do_step(void)
     const Rule* rule;
     HandleSeq derived_rhandles = { };
 
+    auto get_derived = [&](Handle hsource) {
+        auto pgmap = _fcstat.get_rule_pg_map(hsource);
+        auto it = pgmap.find(rule->get_handle());
+        if (it != pgmap.end()) {
+            for (auto hwm : it->second) {
+                derived_rhandles.push_back(hwm.first);
+            }
+        }
+    };
+
     //Look in the cache first
-
     map<Rule, float> rule_weight_map;
-    if (_fcstat.has_partial_grounding(_cur_source)) {
-        auto pgmap = _fcstat.get_rule_pg_map(_cur_source);
+    rule = choose_rule(_cur_source, false);
 
-        for (auto p : pgmap) {
-            Rule r = _configReader.get_rule(p.first);
-            rule_weight_map[r] = r.get_weight();
-        }
-
-        Rule r = _rec.tournament_select(rule_weight_map);
-
-        rule = &_configReader.get_rule(r.get_handle());
-        HandleWeightMap hwm = pgmap[r.get_handle()];
-        for (auto& p : hwm) {
-            derived_rhandles.push_back(p.first);
-        }
-
-    } else {
-        rule = choose_rule(_cur_source, false);
-    }
-
-    //choose a rule that source unifies with one of its premises.
-    //if not found try to find by matching suba-toms of the rules
-    //premises.
     if (rule) {
         _cur_rule = rule;
-        if (derived_rhandles.empty())
+        if (_fcstat.has_partial_grounding(_cur_source))
+            get_derived(_cur_source);
+        else
             derived_rhandles = derive_rules(_cur_source, rule);
 
     } else {
         rule = choose_rule(_cur_source, true);
-
         if (rule) {
             _cur_rule = rule;
-            derived_rhandles = derive_rules(_cur_source, rule,
-            true);
+            if (_fcstat.has_partial_grounding(_cur_source))
+                get_derived(_cur_source);
+            else
+                derived_rhandles = derive_rules(_cur_source, rule, true);
         }
     }
 
