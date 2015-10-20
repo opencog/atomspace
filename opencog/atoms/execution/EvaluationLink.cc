@@ -175,7 +175,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		return SimpleTruthValue::createTV(
 		              1.0 - tv->getMean(), tv->getCount());
 	}
-	else if (TRUE_LINK == t)
+	else if (TRUE_LINK == t or FALSE_LINK == t)
 	{
 		// Assume that the link is wrapping something executable,
 		// which we execute, but then ignore the result.
@@ -183,16 +183,8 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		Instantiator inst(as);
 		Handle result(inst.execute(ll->getOutgoingAtom(0)));
 		as->add_atom(result);
-		return TruthValue::TRUE_TV();
-	}
-	else if (FALSE_LINK == t)
-	{
-		// Assume that the link is wrapping something executable,
-		// which we execute, but then ignore the result.
-		const LinkPtr ll(LinkCast(evelnk));
-		Instantiator inst(as);
-		Handle result(inst.execute(ll->getOutgoingAtom(0)));
-		as->add_atom(result);
+		if (TRUE_LINK == t)
+			return TruthValue::TRUE_TV();
 		return TruthValue::FALSE_TV();
 	}
 	else if (SATISFACTION_LINK == t)
