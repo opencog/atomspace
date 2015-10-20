@@ -144,7 +144,7 @@ data Atom (a :: AtomType) where
                            Atom s -> Atom i -> Atom o -> Atom ExecutionT
 
     VariableNode        :: AtomName -> Atom VariableT
-    VariableList        :: [Gen VariableT] -> Atom VariableT
+    VariableList        :: [Gen VariableT] -> Atom VariableListT
 
     SatisfactionLink    :: (v <~ VariableT,l <~ LinkT) =>
                            Atom v -> Atom l -> Atom SatisfactionT
@@ -155,7 +155,7 @@ data Atom (a :: AtomType) where
                            TVal -> Atom v -> Atom a -> Atom AverageT
 
     QuoteLink           :: (a <~ AtomT) =>
-                           Atom a -> Atom a
+                           Atom a -> Atom QuoteT
 
     BindLink            :: (v <~ VariableT,p <~ AtomT,q <~ AtomT) =>
                            Atom v -> Atom p -> Atom q -> Atom BindT
