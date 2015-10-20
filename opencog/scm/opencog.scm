@@ -51,4 +51,3 @@
 (load-from-path "apply.scm")
 (load-from-path "av-tv.scm")
 (load-from-path "file-utils.scm")
-(load-from-path "persistence.scm")

@@ -2,8 +2,9 @@
                                   scm
                                   ---
 
-This repository contains assorted routines, written in scheme, for manipulating
-OpenCog atoms and systems, in various general ways. These utilities include:
+This repository contains assorted routines, written in scheme, for
+manipulating OpenCog atoms and systems, in various general ways. These
+utilities include:
 
 -- debug.scm
    + debugger/backtrace support.
@@ -12,9 +13,6 @@ OpenCog atoms and systems, in various general ways. These utilities include:
    + list files in directory
    + load scheme code from file
    + execute scheme code from a string or a port.
-
--- persistence.scm
-   + store, fetch groups of atoms from persistent store.
 
 -- utilities.scm
    + increment a CountTruthValue
