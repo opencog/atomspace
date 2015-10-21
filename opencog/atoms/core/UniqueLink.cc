@@ -36,7 +36,7 @@ void UniqueLink::init(bool allow_open)
 		// The name must not be used in another definition,
 		// but only if it has no free variables in the definition.
 		// That is, "closed sentences" must be unique.
-		if (0 < _varseq.size()) return;
+		if (0 < _vars.varseq.size()) return;
 	}
 
 	const Handle& alias = _outgoing[0];
@@ -124,7 +124,7 @@ Handle UniqueLink::get_unique(const Handle& alias, Type type,
 			if (allow_open)
 			{
 				UniqueLinkPtr ulp(UniqueLinkCast(defl));
-				if (0 < ulp->get_vars().size()) continue;
+				if (0 < ulp->get_vars().varseq.size()) continue;
 			}
 			return defl->getHandle();
 		}

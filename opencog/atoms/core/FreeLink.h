@@ -66,6 +66,9 @@ public:
 
 	FreeLink(Link& l);
 	virtual ~FreeLink() {}
+
+	const FreeVariables& get_vars() const
+	{ return  _vars; }
 };
 
 typedef std::shared_ptr<FreeLink> FreeLinkPtr;

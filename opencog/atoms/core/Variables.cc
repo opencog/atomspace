@@ -112,6 +112,21 @@ void FreeVariables::find_variables(const HandleSeq& oset)
 		index.insert(std::pair<Handle, unsigned int>(varseq[i], i));
 }
 
+void FreeVariables::find_variables(const Handle& h)
+{
+	LinkPtr lp(LinkCast(h));
+	if (nullptr != lp)
+	{
+		find_variables(lp->getOutgoingSet());
+	}
+	else
+	{
+		HandleSeq bogus;
+		bogus.push_back(h);
+		find_variables(bogus);
+	}
+}
+
 /* ================================================================= */
 
 Handle FreeVariables::substitute_nocheck(const Handle& term,

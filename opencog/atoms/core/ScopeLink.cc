@@ -122,11 +122,7 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 		}
 		else
 		{
-			// Use the FreeLink class to find all the variables;
-			// Use the VariableList class for build the Variables struct.
-			FreeLink fl(oset[0]);
-			VariableList vl(fl.get_vars());
-			_varlist = vl.get_variables();
+			_varlist.find_variables(oset[0]);
 		}
 		return;
 	}

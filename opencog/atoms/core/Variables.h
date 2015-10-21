@@ -72,6 +72,7 @@ struct FreeVariables
 	/// any bound variables appearing in a GetLink, BindLink,
 	/// SatisfactionLink, etc. will not be collected.  Any *free* variables
 	/// in these same links *will* be collected (since they are free!)
+	void find_variables(const Handle&);
 	void find_variables(const HandleSeq&);
 
 	// Given the tree `tree` containing variables in it, create and
