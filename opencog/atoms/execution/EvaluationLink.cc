@@ -158,7 +158,14 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	if (EVALUATION_LINK == t)
 	{
 		const LinkPtr l(LinkCast(evelnk));
-		return do_evaluate(scratch, l->getOutgoingSet());
+		const HandleSeq& sna(l->getOutgoingSet());
+
+		// The argumets may need to be executed...
+		// XXX FIXME When they don't need to be executed, this introduces
+		// huge slowdown/bottleneck; EinsteinUTest runs 15x slower!
+		Instantiator inst(as);
+		Handle args(inst.execute(sna.at(1)));
+		return do_evaluate(scratch, sna.at(0), args);
 	}
 	else if (EQUAL_LINK == t)
 	{
