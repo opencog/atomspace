@@ -38,10 +38,10 @@ showAtom at = concatWNewline $ list 0 $ toRaw at
   where
     list :: Int -> AtomRaw -> [String]
     list lv at = case at of
-      Link atype lraw  tv -> let showtv = showTV' $ fromTVRaw <$> tv
+      Link atype lraw  tv -> let showtv = showTV $ fromTVRaw tv
                               in [tab lv $ concatWSpaces [atype,showtv]]
                                  ++ concat (map (list (lv+1)) lraw)
-      Node atype aname tv -> let showtv = showTV' $ fromTVRaw <$> tv
+      Node atype aname tv -> let showtv = showTV $ fromTVRaw tv
                               in [tab lv $ concatWSpaces [atype,showtv
                                                          ,"\""++aname++"\""]]
 

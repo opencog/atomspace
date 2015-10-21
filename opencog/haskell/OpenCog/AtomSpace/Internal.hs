@@ -23,6 +23,7 @@ import Foreign.C.Types               (CULong(..))
 import Data.Functor                  ((<$>))
 import Data.Typeable                 (cast,Typeable)
 import OpenCog.AtomSpace.Filter      (FilterIsChild(..))
+import OpenCog.AtomSpace.Sugar       (noTv)
 import OpenCog.AtomSpace.AtomType    (AtomType(..),fromAtomTypeRaw,toAtomTypeRaw)
 import OpenCog.AtomSpace.Types       (Atom(..),AtomName(..),getType,TruthVal(..),
                                       appGen,Gen(..),AtomGen)
@@ -32,42 +33,43 @@ type UUID = CULong
 type AtomTypeRaw = String
 
 -- Main general atom representation.
-data AtomRaw = Link AtomTypeRaw [AtomRaw] (Maybe TVRaw)
-             | Node AtomTypeRaw AtomName  (Maybe TVRaw)
+data AtomRaw = Link AtomTypeRaw [AtomRaw] TVRaw
+             | Node AtomTypeRaw AtomName  TVRaw
         deriving (Eq,Show)
 
 -- Function to convert an Atom to its general representation.
 toRaw :: (Typeable a) => Atom a -> AtomRaw
-toRaw at = let atype = getType at
+toRaw at = let atype     = getType at
+               defaultTv = toTVRaw noTv
            in case at of
-    PredicateNode n tv       -> Node atype n $ toTVRaw <$> tv
-    ConceptNode n tv         -> Node atype n $ toTVRaw <$> tv
-    NumberNode d             -> Node atype (show d) Nothing
-    SchemaNode n             -> Node atype n Nothing
-    GroundedSchemaNode n     -> Node atype n Nothing
-    VariableNode n           -> Node atype n Nothing
-    AndLink tv list          -> Link atype (map (appGen toRaw) list) $ toTVRaw <$> tv
-    OrLink tv list           -> Link atype (map (appGen toRaw) list) $ toTVRaw <$> tv
-    ImplicationLink tv a1 a2 -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
-    EquivalenceLink tv a1 a2 -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
-    EvaluationLink tv a1 a2  -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
-    InheritanceLink tv a1 a2 -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
-    SimilarityLink tv a1 a2  -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
-    MemberLink tv a1 a2      -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
-    SatisfyingSetLink a1     -> Link atype [toRaw a1] Nothing
-    ExecutionLink a1 a2 a3   -> Link atype [toRaw a1,toRaw a2,toRaw a3] Nothing
-    ListLink list            -> Link atype (map (appGen toRaw) list) Nothing
-    SetLink list             -> Link atype (map (appGen toRaw) list) Nothing
-    SatisfactionLink a1 a2   -> Link atype [toRaw a1,toRaw a2] Nothing
-    ForAllLink tv a1 a2      -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
-    AverageLink tv a1 a2     -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
-    QuoteLink a1             -> Link atype [toRaw a1] Nothing
-    VariableList list        -> Link atype (map (appGen toRaw) list) Nothing
-    BindLink a1 a2 a3        -> Link atype [toRaw a1,toRaw a2,toRaw a3] Nothing
-    ContextLink tv c e       -> Link atype [toRaw c,toRaw e] $ toTVRaw <$> tv
-    LambdaLink v a           -> Link atype [toRaw v,toRaw a] Nothing
-    NotLink tv a             -> Link atype [toRaw a] $ toTVRaw <$> tv
-    SubsetLink tv a1 a2      -> Link atype [toRaw a1,toRaw a2] $ toTVRaw <$> tv
+    PredicateNode n tv       -> Node atype n $ toTVRaw tv
+    ConceptNode n tv         -> Node atype n $ toTVRaw tv
+    NumberNode d             -> Node atype (show d) defaultTv
+    SchemaNode n             -> Node atype n defaultTv
+    GroundedSchemaNode n     -> Node atype n defaultTv
+    VariableNode n           -> Node atype n defaultTv
+    AndLink tv list          -> Link atype (map (appGen toRaw) list) $ toTVRaw tv
+    OrLink tv list           -> Link atype (map (appGen toRaw) list) $ toTVRaw tv
+    ImplicationLink tv a1 a2 -> Link atype [toRaw a1,toRaw a2] $ toTVRaw tv
+    EquivalenceLink tv a1 a2 -> Link atype [toRaw a1,toRaw a2] $ toTVRaw tv
+    EvaluationLink tv a1 a2  -> Link atype [toRaw a1,toRaw a2] $ toTVRaw tv
+    InheritanceLink tv a1 a2 -> Link atype [toRaw a1,toRaw a2] $ toTVRaw tv
+    SimilarityLink tv a1 a2  -> Link atype [toRaw a1,toRaw a2] $ toTVRaw tv
+    MemberLink tv a1 a2      -> Link atype [toRaw a1,toRaw a2] $ toTVRaw tv
+    SatisfyingSetLink a1     -> Link atype [toRaw a1] defaultTv
+    ExecutionLink a1 a2 a3   -> Link atype [toRaw a1,toRaw a2,toRaw a3] defaultTv
+    ListLink list            -> Link atype (map (appGen toRaw) list) defaultTv
+    SetLink list             -> Link atype (map (appGen toRaw) list) defaultTv
+    SatisfactionLink a1 a2   -> Link atype [toRaw a1,toRaw a2] defaultTv
+    ForAllLink tv a1 a2      -> Link atype [toRaw a1,toRaw a2] $ toTVRaw tv
+    AverageLink tv a1 a2     -> Link atype [toRaw a1,toRaw a2] $ toTVRaw tv
+    QuoteLink a1             -> Link atype [toRaw a1] defaultTv
+    VariableList list        -> Link atype (map (appGen toRaw) list) defaultTv
+    BindLink a1 a2 a3        -> Link atype [toRaw a1,toRaw a2,toRaw a3] defaultTv
+    ContextLink tv c e       -> Link atype [toRaw c,toRaw e] $ toTVRaw tv
+    LambdaLink v a           -> Link atype [toRaw v,toRaw a] defaultTv
+    NotLink tv a             -> Link atype [toRaw a] $ toTVRaw tv
+    SubsetLink tv a1 a2      -> Link atype [toRaw a1,toRaw a2] $ toTVRaw tv
     x                        -> error $ "You should complete the code of toRaw"
                                       ++ " with an instance for: " ++ show x
 
@@ -77,7 +79,7 @@ fromRaw raw _ = fromRawGen raw >>= appGen cast
 
 -- Function to get an Atom back from its general representation (if possible).
 fromRawGen :: AtomRaw -> Maybe AtomGen
-fromRawGen (Node araw n tvraw) = let tv = fromTVRaw <$> tvraw in do
+fromRawGen (Node araw n tvraw) = let tv = fromTVRaw tvraw in do
     atype <- fromAtomTypeRaw araw
     case atype of
       ConceptT        -> Just $ Gen $ ConceptNode n tv
@@ -93,7 +95,7 @@ fromRawGen (Node araw n tvraw) = let tv = fromTVRaw <$> tvraw in do
         readMaybe s = case reads s of
                         [(x, "")] -> Just x
                         _ -> Nothing
-fromRawGen (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
+fromRawGen (Link araw out tvraw) = let tv = fromTVRaw tvraw in do
     atype <- fromAtomTypeRaw araw
     case (atype,out) of
       (AndT, _     ) -> do
@@ -139,7 +141,7 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
       (ExecutionT ,[ar,br,cr]) -> do
         a <- filt ar :: Maybe (Gen SchemaT)
         b <- filt br :: Maybe (Gen AtomT)
-        c <- filt br :: Maybe (Gen AtomT)
+        c <- filt cr :: Maybe (Gen AtomT)
         case (a,b,c) of
           (Gen a1,Gen b1,Gen c1) -> Just $ Gen $ ExecutionLink a1 b1 c1
       (ListT, _     ) -> do
@@ -192,7 +194,7 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw <$> tvraw in do
           (Gen a) -> Just $ Gen $ NotLink tv a
       (SubsetT , [sr,ar]) -> do
         s <- filt sr :: Maybe (Gen AtomT)
-        a <- filt sr :: Maybe (Gen AtomT)
+        a <- filt ar :: Maybe (Gen AtomT)
         case (s,a) of
           (Gen s,Gen a) -> Just $ Gen $ SubsetLink tv s a
       x               -> error $ "You should complete the code of fromRawGen"

@@ -29,15 +29,14 @@ suite :: TestTree
 suite = adjustOption setDepth $ testGroup "Haskell Test-Suite" [
     testProperty "simple Insert Test" testInsertGet]
 
+
+--Simple Test that inserts Atoms and retrives them
+--if the inserted and retirived Atoms are the same the test passes
 testInsertGet :: Gen AtomT -> Property IO
 testInsertGet a = monadic $ do
     let prog = genInsert a >> genGet a
     res <- runOnNewAtomSpace prog
     case res of
-        Just na -> print "-----" >> print na >> print a >> return (na == a)
+        Just na -> return (na == a)
         Nothing -> return False
-    --ma <- genGet a
-    --case ma of
-    --    Just na -> return (na == a)
-    --    Nothing -> return False
 

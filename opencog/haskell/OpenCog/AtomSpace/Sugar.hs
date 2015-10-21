@@ -24,23 +24,23 @@ import Data.Typeable                    (Typeable)
 
 
 -- | TruthVal syntactic sugar.
-noTv :: Maybe TruthVal
-noTv = Nothing
+noTv :: TruthVal
+noTv = stv 1 0
 
-stv :: Double -> Double -> Maybe TruthVal
-stv a b = Just $ SimpleTV a b
+stv :: Double -> Double -> TruthVal
+stv a b = SimpleTV a b
 
-ctv :: Double -> Double -> Double -> Maybe TruthVal
-ctv a b c = Just $ CountTV a b c
+ctv :: Double -> Double -> Double -> TruthVal
+ctv a b c = CountTV a b c
 
-itv :: Double -> Double -> Double -> Double -> Double -> Maybe TruthVal
-itv a b c d e = Just $ IndefTV a b c d e
+itv :: Double -> Double -> Double -> Double -> Double -> TruthVal
+itv a b c d e = IndefTV a b c d e
 
-ftv :: Double -> Double -> Maybe TruthVal
-ftv a b = Just $ FuzzyTV a b
+ftv :: Double -> Double -> TruthVal
+ftv a b = FuzzyTV a b
 
-ptv :: Double -> Double -> Double -> Maybe TruthVal
-ptv a b c = Just $ ProbTV a b c
+ptv :: Double -> Double -> Double -> TruthVal
+ptv a b c = ProbTV a b c
 
 -- | 'atomList' is simple sugar notation for listing atoms, using operators '|>'
 -- and '\>'. For example, if you want to define a list of atoms:

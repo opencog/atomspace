@@ -25,45 +25,41 @@ import Data.List
 import Control.Monad
 import Data.Foldable
 import Data.Maybe
-import Prelude hiding (fst)
+import Prelude
 
-type TVal = Maybe TruthVal
+data Atomtree a = Leaf a | Node a [Atomtree a]
+type AtomTree = Atomtree String
 
-errorS s = error $ show s
+deriving instance (Show a) => (Show (Atomtree a))
+deriving instance (Eq a) => (Eq (Atomtree a))
+deriving instance (Foldable Atomtree)
+deriving instance (Functor Atomtree)
+deriving instance (Traversable Atomtree)
 
-fst (a,b,c) = a
+-- Representation of Data Constructor with Name,Arity
+-- And a function the returns the type with the input devining the
+-- result Type of the Signature
+type ConstructorType = (Name,Int,String -> Type)
+type Constructor = (String,Maybe (String -> String -> Exp))
 
+--Creates all Instance Delcarations for (Serial m (Gen a))
 declareInstanceSerialAtom :: FilePath -> Q [Dec]
 declareInstanceSerialAtom file = do
     fullatomtree <- runIO $ parsefile file
     (TyConI a)   <- reify (mkName "Atom")
     let constructors = getCons a
-        conNames     = map (nameBase.fst) constructors
+        conNames     = map (nameBase.fst3) constructors
         [atomtree]   = pruneAtomTree conNames [fullatomtree]
         conTree      = toConstructors atomtree constructors
+        fst3 (a,b,c) = a
     customFoldAtomTree conTree
 
-uncurry0 = id
-uncurry1 = uncurry
-uncurry2 f (a,b,c) = (uncurry . uncurry) f ((a,b),c)
-myappGen2a :: (forall b. (Typeable bb, b <~ bb) =>
-              a -> Atom b -> r) -> (a, Gen bb) -> r
-myappGen2a f (a,Gen b) = f a b
-myappGen2b :: (forall a b. (Typeable a, Typeable b,
-              a <~ aa,b <~ bb) => (Atom a -> Atom b -> r)) ->
-              (Gen aa, Gen bb) -> r
-myappGen2b f (Gen a,Gen b) = f a b
-myappGen3a :: (forall b c. (Typeable b, Typeable c,
-              b <~ bb,c <~ cc) => (a -> Atom b -> Atom c -> r)) ->
-              (a,Gen bb, Gen cc) -> r
-myappGen3a f (a,Gen b,Gen c) = f a b c
-myappGen3b :: (forall a b c. (Typeable a,Typeable b, Typeable c,
-              a <~ aa,b <~ bb,c <~ cc) =>
-              (Atom a -> Atom b -> Atom c -> r)) ->
-              (Gen aa,Gen bb, Gen cc) -> r
-myappGen3b f (Gen a,Gen b,Gen c) = f a b c
-
-customFoldAtomTree :: Atomtree (String,Maybe (String -> String -> Exp)) -> Q [Dec]
+-- Create all Instance declarations
+-- Each instance has the Constructor of it's own Type if it exists
+-- And all Constructors of it's sub-tree
+-- TODO: Switch from all sub-Constructors to using the series function
+--       of only the dircet Children
+customFoldAtomTree :: Atomtree Constructor -> Q [Dec]
 customFoldAtomTree tree = do
     let series           = VarP $ mkName "series"
         dec c            = [ValD series (NormalB c) []]
@@ -104,8 +100,11 @@ typename s = PromotedT (mkName (consToType s))
                        | "Node" `isSuffixOf` a = replace "T" "Node" a
                        | otherwise             = a++"T"
 
-toConstructors :: AtomTree -> [(Name,Int,String -> Type)]
-                  -> Atomtree (String,Maybe (String -> String -> Exp))
+
+-- Given an AtomTree (represeting all the Inheritance relations of AtomTypes)
+-- Create a Tree where each Element contains the Name of the AtomType
+-- And maybe a Function that creates the AST for the DataConstruct
+toConstructors :: AtomTree -> [ConstructorType] -> Atomtree Constructor
 toConstructors tree constructors = fmap mkCons tree
     where mkCons s = case getConsName s of
             Just (i,t) -> (s,Just $ createConstructorCreator i t)
@@ -134,7 +133,6 @@ toConstructors tree constructors = fmap mkCons tree
                     isNode a     = "Node" `isSuffixOf` a
 
                     toAcceptGen (ForallT _ _ (AppT (AppT ArrowT m) _)) = sub m
-                    toAcceptGen a = errorS a
 
 --Figure out which helper function applies to to the structure of this Atom
 sub (AppT (AppT (TupleT 2) (ConT _  )) (AppT ListT _))             = ("",False)
@@ -146,29 +144,6 @@ sub (ConT _)                                                       = ("",False)
 sub (AppT ListT _)                                                 = ("",False)
 sub (AppT _ _)                                                     = ("appGen",True)
 
-replace :: String -> String -> String -> String
-replace a b [] = []
-replace a b c | b `isPrefixOf` c = a ++ drop (length b) c
-replace a b (x:xs) = x:replace a b xs
-
-data Atomtree a = Leaf a | Node a [Atomtree a]
-type AtomTree = Atomtree String
-
-instance (Show a) => (Show (Atomtree a)) where
-    show (Leaf a) = "(Leaf " ++ show a ++ ")"
-    show (Node a ls) = "(Node " ++ show a ++ "[" ++ concatMap show ls ++ "])"
-deriving instance (Eq a) => (Eq (Atomtree a))
-deriving instance (Foldable Atomtree)
-deriving instance (Functor Atomtree)
-deriving instance (Traversable Atomtree)
-
-addAtom :: (String,String) -> AtomTree -> AtomTree
-addAtom (c,p) (Leaf x)   | p == x = Node p [Leaf c]
-addAtom (c,p) (Node x ls)| p == x = Node p $ Leaf c : ls
-addAtom _     (Leaf x)            = Leaf x
-addAtom cp    (Node x ls)         = Node x $ map (addAtom cp) ls
-
-parsefile :: FilePath -> IO AtomTree
 parsefile file = do
     cont <- readFile file
     let ff a = not ("//" `isPrefixOf` a) && a /= "" && not ("PATTERN_LINK" `isInfixOf` a)
@@ -180,6 +155,15 @@ relsToAtomTree [] tree = tree
 relsToAtomTree (x:xs) tree = relsToAtomTree xs (addAtom (a,b) tree)
     where [a,_,b] = map toCamelCase $ take 3 $ words x
 
+--Given a Parent adds the Child to the Tree
+addAtom :: (String,String) -> AtomTree -> AtomTree
+addAtom (c,p) (Leaf x)   | p == x = Node p [Leaf c]
+addAtom (c,p) (Node x ls)| p == x = Node p $ Leaf c : ls
+addAtom _     (Leaf x)            = Leaf x
+addAtom cp    (Node x ls)         = Node x $ map (addAtom cp) ls
+
+parsefile :: FilePath -> IO AtomTree
+
 --Remove All Leafes/Nodes that have no Constructors
 pruneAtomTree :: [String] -> [AtomTree] -> [AtomTree]
 pruneAtomTree  _ [] = []
@@ -190,26 +174,18 @@ pruneAtomTree a (Node b sl:ys) = (let r = pruneAtomTree a sl
                                  ++ pruneAtomTree a ys
 pruneAtomTree a (Leaf b:ys) = [Leaf b | [b] `isInfixOf` a ] ++ pruneAtomTree a ys
 
-toCamelCase :: String -> String
-toCamelCase = concatMap capital
-            . words
-            . map repl
-  where
-      repl '_' = ' '
-      repl  x  = x
-      capital (x:xs) = toUpper x : map toLower xs
-      capital []     = []
-
-getCons :: Dec -> [(Name,Int,String -> Type)]
+getCons :: Dec -> [ConstructorType]
 getCons d = case d of
     d@(DataD _ _ dtvb c _) -> map (getCon dtvb) c
 
-getCon dtvb c = let conA (NormalC c xs)      = (simpleName c, length xs)
-                    conA (RecC c xs)         = (simpleName c, length xs)
-                    conA (InfixC _ c _)      = (simpleName c, 2)
-                    conA (ForallC _ _ c)     = conA c
-                    conToType (NormalC c [xs]) = snd xs
-                    conToType (NormalC c xs) = foldr (flip AppT) (TupleT $ length xs) $ reverse $ map snd xs
+getCon dtvb c = let conA (NormalC c xs)       = (simpleName c, length xs)
+                    conA (RecC c xs)          = (simpleName c, length xs)
+                    conA (InfixC _ c _)       = (simpleName c, 2)
+                    conA (ForallC _ _ c)      = conA c
+                    conToType (NormalC c [e]) = snd e
+                    conToType (NormalC c xs)  = foldr (flip AppT) tuple argtypes
+                        where tuple    = TupleT $ length xs
+                              argtypes = reverse $ map snd xs
                     appt t n = AppT (AppT ArrowT t) (AppT (ConT $ mkName "Gen") n)
                 in case c of
     (ForallC tvb (t:ctx) con) -> let (n,i) = conA con
@@ -224,7 +200,7 @@ getCon dtvb c = let conA (NormalC c xs)      = (simpleName c, length xs)
 
 findTypes [] = []
 findTypes (AppT (AppT _ (VarT vname)) (ConT cname):xs) = (vname,cname):findTypes xs
-findTypes (_:xs)                    = findTypes xs
+findTypes (_:xs)                                       = findTypes xs
 
 --replaceVarWithType
 rVWT (AppT a b) names = AppT (rVWT a names)(rVWT b names)
@@ -241,3 +217,19 @@ simpleName nm =
         []          -> mkName s
         [_]         -> mkName s
         _:t         -> mkName t
+
+toCamelCase :: String -> String
+toCamelCase = concatMap capital
+            . words
+            . map repl
+  where
+      repl '_' = ' '
+      repl  x  = x
+      capital (x:xs) = toUpper x : map toLower xs
+      capital []     = []
+
+replace :: String -> String -> String -> String
+replace a b [] = []
+replace a b c | b `isPrefixOf` c = a ++ drop (length b) c
+replace a b (x:xs) = x:replace a b xs
+
