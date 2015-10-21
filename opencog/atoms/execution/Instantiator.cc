@@ -25,6 +25,7 @@
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/query/BindLinkAPI.h>
 
@@ -132,9 +133,36 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			ppp = createPutLink(groset);
 		}
 		// Step one: beta-reduce.
-		Handle red = ppp->reduce();
+		Handle red(ppp->reduce());
 		// Step two: execute the resulting body.
-		return walk_tree(red);
+		Handle rex(walk_tree(red));
+		if (nullptr == rex)
+			return rex;
+
+		// Step three: XXX this is awkward, but seems to be needed...
+		// If the result is evaluatable, then evaluate it. e.g. if the
+		// result has a GroundedPredicateNode, we need to run it now.
+		// We do, however, ignore the reulsting TV, which is also
+		// awkward.  I'm confused about how to handle this best.
+		// The behavior tree uses this!
+		// Anyway, do_evaluate() will throw if rex is not evaluatable.
+		if (SET_LINK == rex->getType())
+		{
+			LinkPtr slp(LinkCast(rex));
+			for (const Handle& plo : slp->getOutgoingSet())
+			{
+				try {
+					EvaluationLink::do_evaluate(_as, plo);
+				}
+				catch (...) {}
+			}
+			return rex;
+		}
+		try {
+			EvaluationLink::do_evaluate(_as, rex);
+		}
+		catch (...) {}
+		return rex;
 	}
 
 	// ExecutionOutputLinks are not handled by the FunctionLink factory

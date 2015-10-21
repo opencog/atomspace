@@ -24,8 +24,10 @@
 #include <opencog/atomspace/ClassServer.h>
 #include "FunctionLink.h"
 
+#include "ArityLink.h"
 #include "AssignLink.h"
 #include "DeleteLink.h"
+#include "RandomChoice.h"
 
 using namespace opencog;
 
@@ -106,6 +108,9 @@ LinkPtr FunctionLink::factory(LinkPtr lp)
 // Basic type factory.
 Handle FunctionLink::factory(Type t, const HandleSeq& seq)
 {
+	if (ARITY_LINK == t)
+		return Handle(createArityLink(seq));
+
 	if (ASSIGN_LINK == t)
 		return Handle(createAssignLink(seq));
 
@@ -115,6 +120,9 @@ Handle FunctionLink::factory(Type t, const HandleSeq& seq)
 	if (PLUS_LINK == t)
 		// return Handle(createPlusLink(seq));
 		throw RuntimeException(TRACE_INFO, "Can't be a factory for this!");
+
+	if (RANDOM_CHOICE_LINK == t)
+		return Handle(createRandomChoiceLink(seq));
 
 	if (REMOVE_LINK == t)
 		return Handle(createRemoveLink(seq));

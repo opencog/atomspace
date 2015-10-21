@@ -514,7 +514,7 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 		TruthValuePtr tvp(g->getTruthValue());
 		LAZY_LOG_FINE << "Non-logical atom has tv="
 		              << tvp->toString() << std::endl;
-		// XXX FIXME: we are making a crsip-logic go/no-go decision
+		// XXX FIXME: we are making a crisp-logic go/no-go decision
 		// based on the TV strength. Perhaps something more subtle might be
 		// wanted, here.
 		bool relation_holds = tvp->getMean() > 0.5;

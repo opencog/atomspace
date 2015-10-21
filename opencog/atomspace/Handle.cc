@@ -57,11 +57,11 @@ bool Handle::atoms_eq(const AtomPtr& a, const AtomPtr& b)
 }
 #endif
 
-bool Handle::atoms_less(const AtomPtr& a, const AtomPtr& b)
+bool Handle::atoms_less(const Atom* a, const Atom* b)
 {
     if (a == b) return false;
-    if (NULL == a) return true;
-    if (NULL == b) return false;
+    if (nullptr == a) return true;
+    if (nullptr == b) return false;
     UUID ua = a->getUUID();
     UUID ub = b->getUUID();
     if (INVALID_UUID != ua or INVALID_UUID != ub) return ua < ub;
@@ -73,7 +73,7 @@ bool Handle::atoms_less(const AtomPtr& a, const AtomPtr& b)
     // Performing an address-space comparison is all I can think
     // of...
     // if (*a == *b) return false; lets not do this cpu-time-waster...
-    return a.get() < b.get();
+    return a < b;
 }
 
 // ===================================================

@@ -240,7 +240,13 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
 	Rule st_ver = *this;
 	std::map<Handle, Handle> dict;
 
-	std::set<Handle> varset = VariableListCast(get_vardecl())->get_variables().varset;
+	Handle vdecl = get_vardecl();
+	std::set<Handle> varset;
+
+	if (VariableListCast(vdecl))
+		varset = VariableListCast(vdecl)->get_variables().varset;
+	else
+		varset.insert(vdecl);
 
 	for (auto& h : varset)
 		dict[h] = Handle::UNDEFINED;

@@ -938,7 +938,12 @@ Handle BackwardChainer::gen_sub_varlist(const Handle& parent,
 	FindAtoms fv(VARIABLE_NODE);
 	fv.search_set(parent);
 
-	HandleSeq oset = LinkCast(parent_varlist)->getOutgoingSet();
+	HandleSeq oset;
+	if (LinkCast(parent_varlist))
+		oset = LinkCast(parent_varlist)->getOutgoingSet();
+	else
+		oset.push_back(parent_varlist);
+
 	HandleSeq final_oset;
 
 	// for each var in varlist, check if it is used in parent
