@@ -4,7 +4,6 @@
 {-# LANGUAGE UndecidableInstances   #-}
 {-# LANGUAGE ConstraintKinds        #-}
 {-# LANGUAGE FlexibleContexts       #-}
-{-# LANGUAGE TemplateHaskell        #-}
 {-# LANGUAGE PartialTypeSignatures  #-}
 {-# LANGUAGE Rank2Types             #-}
 
@@ -24,28 +23,21 @@ import Control.Exception
 main :: IO ()
 main = defaultMain suite
 
-setDepth (SmallCheckDepth d) = (SmallCheckDepth 4)
+setDepth (SmallCheckDepth d) = SmallCheckDepth 4
 
 suite :: TestTree
 suite = adjustOption setDepth $ testGroup "Haskell Test-Suite" [
-    testProperty "simple Insert Test" testInsert]
+    testProperty "simple Insert Test" testInsertGet]
 
-testInsert :: (Gen AtomT) -> Property IO
-testInsert a = monadic $ do
-    print a
-    putStrLn "------------------------------------"
-    runOnNewAtomSpace $ do
-        (appGen insert a :: AtomSpace ())
-        ma <- genGet a
-        case ma of
-            Just na -> return True
-            Nothing -> return False
-
-genGet :: Gen AtomT -> AtomSpace (Maybe (Gen AtomT))
-genGet (Gen a) = do
-    res <- get a
+testInsertGet :: Gen AtomT -> Property IO
+testInsertGet a = monadic $ do
+    let prog = genInsert a >> genGet a
+    res <- runOnNewAtomSpace prog
     case res of
-        Just x ->  return $ Just $ Gen x
-        Nothing -> return $ Nothing
+        Just na -> print "-----" >> print na >> print a >> return (na == a)
+        Nothing -> return False
+    --ma <- genGet a
+    --case ma of
+    --    Just na -> return (na == a)
+    --    Nothing -> return False
 
---prop_InsertP a@(PredicateNode _ _) = monadicIO $ do

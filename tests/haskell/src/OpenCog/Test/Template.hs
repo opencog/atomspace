@@ -41,10 +41,8 @@ declareInstanceSerialAtom file = do
         conNames     = map (nameBase.fst) constructors
         [atomtree]   = pruneAtomTree conNames [fullatomtree]
         conTree      = toConstructors atomtree constructors
-    instances <- customFoldAtomTree conTree
-    return (instances)
+    customFoldAtomTree conTree
 
---helper functions
 uncurry0 = id
 uncurry1 = uncurry
 uncurry2 f (a,b,c) = (uncurry . uncurry) f ((a,b),c)
@@ -65,36 +63,31 @@ myappGen3b :: (forall a b c. (Typeable a,Typeable b, Typeable c,
               (Gen aa,Gen bb, Gen cc) -> r
 myappGen3b f (Gen a,Gen b,Gen c) = f a b c
 
---appGen :: (forall b. (Typeable a,b <~ a) => Atom b -> c) -> Gen a -> c
---appGen f (Gen at) = f at
-
 customFoldAtomTree :: Atomtree (String,Maybe (String -> String -> Exp)) -> Q [Dec]
 customFoldAtomTree tree = do
-    let series                               = VarP $ mkName "series"
-        dec c                                = [ValD series (NormalB c) []]
-        createInstance a                     = [d| instance Monad m => Serial m (Gen $(return $ typename a)) where|]
+    let series           = VarP $ mkName "series"
+        dec c            = [ValD series (NormalB c) []]
+        createInstance a = [d| instance Monad m => Serial m (Gen $(return $ typename a)) where|]
     case tree of
         (Leaf (a,Just c)) -> do
             [InstanceD x y _] <- createInstance a
             return [InstanceD x y (dec $ c a a)]
         (Node (a,c) ls) -> do
+            [InstanceD x y _] <- createInstance a
             sub <- mapM customFoldAtomTree ls
             let subinst     = concat sub
                 exp         = concantExpWith (VarE $ mkName "\\/") $ subcons ls
                 subcons lst = foldr ff [] lst
                 ff x b      = case x of
-                    (Leaf (n,Just cc))     -> (cc n a):b
-                    (Node (n,Just cc) as)  -> (subcons as)++(cc n a):b
-                    (Node (n,Nothing) as)  -> (subcons as)++b
+                    (Leaf (n,Just cc))     -> cc n a : b
+                    (Node (n,Just cc) as)  -> subcons as ++ cc n a : b
+                    (Node (n,Nothing) as)  -> subcons as ++ b
                     _                      -> b
             this <- case c of
-                Just x  -> do
-                    cons <- [e| $(return $ x a a) \/ $(return exp) |]
-                    [InstanceD x y _] <- createInstance a
-                    return [InstanceD x y (dec cons)]
-                Nothing -> do
-                    [InstanceD x y _] <- createInstance a
-                    return [InstanceD x y (dec exp)]
+                Just cons -> do
+                    conss <- [e| $(return $ cons a a) \/ $(return exp) |]
+                    return [InstanceD x y (dec conss)]
+                Nothing -> return [InstanceD x y (dec exp)]
             return (this++subinst)
 
 concantExpWith :: Exp -> [Exp] -> Exp
@@ -111,40 +104,39 @@ typename s = PromotedT (mkName (consToType s))
                        | "Node" `isSuffixOf` a = replace "T" "Node" a
                        | otherwise             = a++"T"
 
-toConstructors :: AtomTree -> [(Name,Int,String -> Type)] -> Atomtree (String,Maybe (String -> String -> Exp))
+toConstructors :: AtomTree -> [(Name,Int,String -> Type)]
+                  -> Atomtree (String,Maybe (String -> String -> Exp))
 toConstructors tree constructors = fmap mkCons tree
     where mkCons s = case getConsName s of
-            --Just (i,t) -> errorS t
-            Just (i,t) -> (s,Just $ tobenamed i t)
+            Just (i,t) -> (s,Just $ createConstructorCreator i t)
             Nothing    -> (s,Nothing)
 
-          getConsName s = case (filter (\(a,_,_) -> (nameBase a) == s) constructors) of
+          getConsName s = case filter (\(a,_,_) -> nameBase a == s) constructors of
             [(_,i,t)] -> Just (i,t)
             _         -> Nothing
+          createConstructorCreator i t a b = case (i,isNode a) of
+              (i,True)  -> myapp (mydot (uncry (i-1) (conE a)))
+              (i,False) -> myapp (mydot $ function (i-1) a)
+              where expType = t b
+                    varE n  = VarE $ mkName n
+                    conE n  = ConE $ mkName n
+                    cons i  = varE ("cons"++show i)
+                    uncry n = AppE (varE $ "uncurry"++show n)
+                    mydot   = UInfixE (conE "Gen") (varE ".")
+                    myapp x = AppE (cons 1) (SigE x expType)
 
-tobenamed i t a b = let vare i    = (VarE $ mkName ("cons"++show i))
-                        cone n    = (ConE $ mkName n)
-                        uncry n x = (AppE (VarE $ mkName $ "uncurry"++show n) x)
-                        mydot y   = (UInfixE (cone "Gen") (VarE $ mkName ".") y)
-                        myapp     = AppE (vare 1)
-                        aasdf     = toAcceptGen $ t b
-                        (ForallT _ _ (AppT ta (AppT _ _))) = t b
-                        subtype   = (AppT ta (AppT (ConT $ mkName "Atom") (typename a)))
-                        function i= case aasdf of
-                            (str,True) -> SigE (AppE (VarE $ mkName str) (cone a)) subtype
-                            (_  ,False)-> (uncry i (cone a))
-                        isNode a  = "Node" `isSuffixOf` a
-                    in case (i,isNode a) of
-                        (1,True)  -> myapp (SigE (mydot          (cone a))  $ t b)
-                        (2,True)  -> myapp (SigE (mydot (uncry 1 (cone a))) $ t b)
-                        (3,True)  -> myapp (SigE (mydot (uncry 2 (cone a))) $ t b)
-                        (1,False) -> myapp (SigE (mydot $ function 0) $ t b)
-                        (2,False) -> myapp (SigE (mydot $ function 1) $ t b)
-                        (3,False) -> myapp (SigE (mydot $ function 2) $ t b)
+                    (ForallT _ _ (AppT ta (AppT _ _))) = expType
+                    subtype      = AppT ta (AppT (ConT $ mkName "Atom") (typename a))
 
-toAcceptGen (ForallT _ _ (AppT (AppT ArrowT m) _)) = sub m
-toAcceptGen a = errorS a
+                    function i a = case toAcceptGen $ expType of
+                        (str,True) -> SigE (AppE (varE str) (conE a)) subtype
+                        (_  ,False)-> uncry i (conE a)
+                    isNode a     = "Node" `isSuffixOf` a
 
+                    toAcceptGen (ForallT _ _ (AppT (AppT ArrowT m) _)) = sub m
+                    toAcceptGen a = errorS a
+
+--Figure out which helper function applies to to the structure of this Atom
 sub (AppT (AppT (TupleT 2) (ConT _  )) (AppT ListT _))             = ("",False)
 sub (AppT (AppT (TupleT 2) (ConT _  )) (AppT _ _))                 = ("myappGen2a",True)
 sub (AppT (AppT (TupleT 2) (AppT _ _)) (AppT _ _))                 = ("myappGen2b",True)
@@ -156,44 +148,30 @@ sub (AppT _ _)                                                     = ("appGen",T
 
 replace :: String -> String -> String -> String
 replace a b [] = []
-replace a b c | b `isPrefixOf` c = a ++ (drop (length b) c)
+replace a b c | b `isPrefixOf` c = a ++ drop (length b) c
 replace a b (x:xs) = x:replace a b xs
-
--- construct an instance of class class_name for type for_type
--- funcs is a list of instance method names with a corresponding
--- function to build the method body
---gen_instance :: Name -> TypeQ -> [Constructor] -> Funcs -> DecQ
---gen_instance class_name for_type constructors funcs =
---  instanceD ([| Monad m |])
---    (appT (conT class_name) for_type)
---    (map func_def funcs)
---      where func_def (func_name, gen_func)
---                = funD func_name -- method name
---                  -- generate function body for each constructor
---                  (map (gen_clause gen_func) constructors)
---
 
 data Atomtree a = Leaf a | Node a [Atomtree a]
 type AtomTree = Atomtree String
 
 instance (Show a) => (Show (Atomtree a)) where
     show (Leaf a) = "(Leaf " ++ show a ++ ")"
-    show (Node a ls) = "(Node " ++ show a ++ "[" ++ (concat $ map show ls) ++ "])"
+    show (Node a ls) = "(Node " ++ show a ++ "[" ++ concatMap show ls ++ "])"
 deriving instance (Eq a) => (Eq (Atomtree a))
 deriving instance (Foldable Atomtree)
 deriving instance (Functor Atomtree)
 deriving instance (Traversable Atomtree)
 
 addAtom :: (String,String) -> AtomTree -> AtomTree
-addAtom (c,p) (Leaf x)   | p == x = (Node p [Leaf c])
-addAtom (c,p) (Node x ls)| p == x = (Node p $ (Leaf c):ls)
-addAtom _     (Leaf x)            = (Leaf x)
-addAtom cp    (Node x ls)         = (Node x $ map (addAtom cp) ls)
+addAtom (c,p) (Leaf x)   | p == x = Node p [Leaf c]
+addAtom (c,p) (Node x ls)| p == x = Node p $ Leaf c : ls
+addAtom _     (Leaf x)            = Leaf x
+addAtom cp    (Node x ls)         = Node x $ map (addAtom cp) ls
 
 parsefile :: FilePath -> IO AtomTree
 parsefile file = do
     cont <- readFile file
-    let ff a = (not $ isPrefixOf "//" a) && a /= "" && (not $ isInfixOf "PATTERN_LINK" a)
+    let ff a = not ("//" `isPrefixOf` a) && a /= "" && not ("PATTERN_LINK" `isInfixOf` a)
         rels = filter ff $ lines cont
     return $ relsToAtomTree (drop 2 rels) (Leaf "Atom")
 
@@ -202,14 +180,18 @@ relsToAtomTree [] tree = tree
 relsToAtomTree (x:xs) tree = relsToAtomTree xs (addAtom (a,b) tree)
     where [a,_,b] = map toCamelCase $ take 3 $ words x
 
+--Remove All Leafes/Nodes that have no Constructors
 pruneAtomTree :: [String] -> [AtomTree] -> [AtomTree]
 pruneAtomTree  _ [] = []
-pruneAtomTree a ((Node b sl):ys) = (let  r = (pruneAtomTree a sl) in if r  == [] then (if [b] `isInfixOf` a then [Leaf b] else []) else [Node b r])++(pruneAtomTree a ys)
-pruneAtomTree a ((Leaf b):ys) = (if [b] `isInfixOf` a then [Leaf b] else [])++(pruneAtomTree a ys)
+pruneAtomTree a (Node b sl:ys) = (let r = pruneAtomTree a sl
+                                  in if null r
+                                     then [Leaf b | [b] `isInfixOf` a]
+                                     else [Node b r])
+                                 ++ pruneAtomTree a ys
+pruneAtomTree a (Leaf b:ys) = [Leaf b | [b] `isInfixOf` a ] ++ pruneAtomTree a ys
 
 toCamelCase :: String -> String
-toCamelCase = concat
-            . map capital
+toCamelCase = concatMap capital
             . words
             . map repl
   where
@@ -232,26 +214,23 @@ getCon dtvb c = let conA (NormalC c xs)      = (simpleName c, length xs)
                 in case c of
     (ForallC tvb (t:ctx) con) -> let (n,i) = conA con
                                      (AppT a@(AppT _ x) _) = t
-                                     newt y = (AppT a (typename y))
+                                     newt y = AppT a (typename y)
                                      typeNs = findTypes ctx
                                      types  = rVWT (conToType con) typeNs
                                      func y = ForallT (dtvb++tvb)
-                                                      ([(newt y)])
+                                                      [newt y]
                                                       (appt types x)
-                                 in (n,i,func) --case tvb of
-                                     --[] -> (n,i,func)
-                                     --_ -> errorS $ conToType con
-    --c@(NormalC n xs)    -> (simpleName n,length xs,conToType c)
+                                 in (n,i,func)
 
 findTypes [] = []
-findTypes ((AppT (AppT _ (VarT vname)) (ConT cname)):xs) = (vname,cname):findTypes xs
+findTypes (AppT (AppT _ (VarT vname)) (ConT cname):xs) = (vname,cname):findTypes xs
 findTypes (_:xs)                    = findTypes xs
 
 --replaceVarWithType
-rVWT (AppT a b) names = (AppT (rVWT a names)(rVWT b names))
-rVWT (ConT a)  _ | (nameBase a) == "Atom" = (ConT $ mkName "Gen")
-rVWT (VarT a) ((vname,cname):xs) | a == vname  = (ConT cname)
-                                 | xs == []    = (VarT a)
+rVWT (AppT a b) names = AppT (rVWT a names)(rVWT b names)
+rVWT (ConT a)  _ | nameBase a == "Atom" = ConT $ mkName "Gen"
+rVWT (VarT a) ((vname,cname):xs) | a == vname  = ConT cname
+                                 | null xs     = VarT a
                                  | otherwise   = rVWT (VarT a) xs
 rVWT a _ = a
 
@@ -260,5 +239,5 @@ simpleName nm =
    let s = nameBase nm
    in case dropWhile (/=':') s of
         []          -> mkName s
-        _:[]        -> mkName s
+        [_]         -> mkName s
         _:t         -> mkName t
