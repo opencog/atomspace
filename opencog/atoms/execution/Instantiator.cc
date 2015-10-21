@@ -194,11 +194,10 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			// function; i.e. perform beta-reduction. Second, actually
 			// execute the result. We execute by just calling walk_tree
 			// again.
-			Handle body(flp->get_body());
-			Variables vars(flp->get_variables());
+			const FreeVariables& vars(flp->get_vars());
 
 			const HandleSeq& oset(LinkCast(args)->getOutgoingSet());
-			Handle beta_reduced(vars.substitute(body, oset));
+			Handle beta_reduced(vars.substitute_nocheck(expr, oset));
 			return walk_tree(beta_reduced);
 		}
 
