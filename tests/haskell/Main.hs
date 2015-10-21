@@ -11,7 +11,6 @@ module Main where
 
 import System.Exit
 import OpenCog.AtomSpace
-import OpenCog.AtomSpace.AtomType
 import OpenCog.Test
 import Test.Tasty
 import Test.Tasty.SmallCheck
