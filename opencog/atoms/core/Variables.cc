@@ -32,6 +32,37 @@
 using namespace opencog;
 
 /* ================================================================= */
+
+Handle FreeVariables::substitute_nocheck(const Handle& term,
+                                     const HandleSeq& args) const
+{
+	// If it is a singleton, just return that singleton.
+	std::map<Handle, unsigned int>::const_iterator idx;
+	idx = index.find(term);
+	if (idx != index.end())
+		return args.at(idx->second);
+
+	// If its a node, and its not a variable, then it is a constant,
+	// and just return that.
+	LinkPtr lterm(LinkCast(term));
+	if (NULL == lterm) return term;
+
+	// QuoteLinks halt the recursion
+	if (QUOTE_LINK == term->getType()) return term;
+
+	if (UNQUOTE_LINK == term->getType())
+		throw RuntimeException(TRACE_INFO, "Not implemented!");
+
+	// Recursively fill out the subtrees.
+	HandleSeq oset;
+	for (const Handle& h : lterm->getOutgoingSet())
+	{
+		oset.emplace_back(substitute_nocheck(h, args));
+	}
+	return Handle(createLink(term->getType(), oset));
+}
+
+/* ================================================================= */
 /**
  * Simple type checker.
  *
@@ -156,35 +187,6 @@ Handle Variables::substitute(const Handle& fun,
 			"Arguments fail to match variable declarations");
 
 	return substitute_nocheck(fun, args);
-}
-
-Handle FreeVariables::substitute_nocheck(const Handle& term,
-                                     const HandleSeq& args) const
-{
-	// If it is a singleton, just return that singleton.
-	std::map<Handle, unsigned int>::const_iterator idx;
-	idx = index.find(term);
-	if (idx != index.end())
-		return args.at(idx->second);
-
-	// If its a node, and its not a variable, then it is a constant,
-	// and just return that.
-	LinkPtr lterm(LinkCast(term));
-	if (NULL == lterm) return term;
-
-	// QuoteLinks halt the recursion
-	if (QUOTE_LINK == term->getType()) return term;
-
-	if (UNQUOTE_LINK == term->getType())
-		throw RuntimeException(TRACE_INFO, "Not implemented!");
-
-	// Recursively fill out the subtrees.
-	HandleSeq oset;
-	for (const Handle& h : lterm->getOutgoingSet())
-	{
-		oset.emplace_back(substitute_nocheck(h, args));
-	}
-	return Handle(createLink(term->getType(), oset));
 }
 
 /* ================================================================= */
