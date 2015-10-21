@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atoms/core/DefineLink.h>
-#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
@@ -183,21 +183,22 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		if (DEFINED_SCHEMA_NODE == sn->getType())
 			sn = DefineLink::get_definition(sn);
 
-		// If its a function link, execute it here.
-		if (FUNCTION_LINK == sn->getType())
+		// If its an anonymous function link, execute it here.
+		if (LAMBDA_LINK == sn->getType())
 		{
-			FunctionLinkPtr flp(FunctionLinkCast(sn));
+			LambdaLinkPtr flp(LambdaLinkCast(sn));
 			if (NULL == flp)
-				flp = createFunctionLink(*LinkCast(sn));
+				flp = createLambdaLink(*LinkCast(sn));
 
 			// Two-step process. First, plug the arguments into the
 			// function; i.e. perform beta-reduction. Second, actually
 			// execute the result. We execute by just calling walk_tree
 			// again.
-			const FreeVariables& vars(flp->get_vars());
+			Handle body(flp->get_body());
+			Variables vars(flp->get_variables());
 
 			const HandleSeq& oset(LinkCast(args)->getOutgoingSet());
-			Handle beta_reduced(vars.substitute_nocheck(sn, oset));
+			Handle beta_reduced(vars.substitute_nocheck(body, oset));
 			return walk_tree(beta_reduced);
 		}
 
