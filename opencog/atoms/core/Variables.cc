@@ -27,9 +27,90 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/ClassServer.h>
 
+#include "ScopeLink.h"
+#include "VariableList.h"
 #include "Variables.h"
 
 using namespace opencog;
+
+struct VarScraper
+{
+	bool _in_quote;
+	std::set<Handle> _bound_vars;
+	void find_vars(HandleSeq&, std::set<Handle>&, const HandleSeq&);
+};
+
+/* ================================================================= */
+//
+// The work-horse that does the actual heavy-lifting.
+// See the find_variables() method for the description of what
+// this does, and why.
+void VarScraper::find_vars(HandleSeq& varseq, std::set<Handle>& varset,
+                           const HandleSeq& oset)
+{
+	for (const Handle& h : oset)
+	{
+		Type t = h->getType();
+
+		if ((VARIABLE_NODE == t or GLOB_NODE == t) and
+		    not _in_quote and
+		    0 == varset.count(h) and
+		    0 == _bound_vars.count(h))
+		{
+			varseq.emplace_back(h);
+			varset.insert(h);
+		}
+
+		LinkPtr lll(LinkCast(h));
+		if (NULL == lll) continue;
+
+		// Save the recursive state on stack.
+		bool save_quote = _in_quote;
+		if (QUOTE_LINK == t)
+			_in_quote = true;
+
+		if (UNQUOTE_LINK == t)
+			_in_quote = false;
+
+		bool issco = classserver().isA(t, SCOPE_LINK);
+		std::set<Handle> bsave = _bound_vars;
+		if (issco)
+		{
+			// Save the current set of bound variables...
+			bsave = _bound_vars;
+
+			// If we can cast to ScopeLink, then do so; otherwise,
+			// take the low road, and let ScopeLinka constructor
+			// do the bound-variable extraction.
+			ScopeLinkPtr sco(ScopeLinkCast(lll));
+			if (NULL == sco)
+				sco = createScopeLink(lll->getOutgoingSet());
+			const Variables& vees = sco->get_variables();
+			for (Handle v : vees.varseq) _bound_vars.insert(v);
+		}
+
+		find_vars(varseq, varset, lll->getOutgoingSet());
+
+		if (issco)
+			_bound_vars = bsave;
+
+		// Restore current state from the stack.
+		if (QUOTE_LINK == t or UNQUOTE_LINK == t)
+			_in_quote = save_quote;
+	}
+}
+
+void FreeVariables::find_variables(const HandleSeq& oset)
+{
+	VarScraper vsc;
+	vsc._in_quote = false;
+	vsc.find_vars(varseq, varset, oset);
+
+	// Build the index from variable name, to its ordinal number.
+	size_t sz = varseq.size();
+	for (size_t i=0; i<sz; i++)
+		index.insert(std::pair<Handle, unsigned int>(varseq[i], i));
+}
 
 /* ================================================================= */
 

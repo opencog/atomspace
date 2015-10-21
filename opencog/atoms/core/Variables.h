@@ -56,6 +56,24 @@ struct FreeVariables
 	std::set<Handle> varset;
 	std::map<Handle, unsigned int> index;
 
+	/// Create an ordered set of the free variables in the given oset.
+	///
+	/// By "ordered set" it is meant: a list of variables, in traversal
+	/// order (from left to right, as they appear in the tree), with each
+	/// variable being named only once.  The varset is only used to make
+	/// sure that we don't name a variable more than once; that's all.
+	///
+	/// Variables that are inside a QuoteLink are ignored ... unless they
+	/// are wrapped by UnquoteLink.  That is, QuoteLink behaves like a
+	/// quasi-quote in lisp/scheme.
+	///
+	/// Variables that are bound inside of some deeper link are ignored;
+	/// they are not free, and thus must not be collected up.  That is,
+	/// any bound variables appearing in a GetLink, BindLink,
+	/// SatisfactionLink, etc. will not be collected.  Any *free* variables
+	/// in these same links *will* be collected (since they are free!)
+	void find_variables(const HandleSeq&);
+
 	// Given the tree `tree` containing variables in it, create and
 	// return a new tree with the indicated values `vals` substituted
 	// for the variables.  "nocheck" == no type checking is done.
