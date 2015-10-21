@@ -158,7 +158,7 @@ Handle Variables::substitute(const Handle& fun,
 	return substitute_nocheck(fun, args);
 }
 
-Handle Variables::substitute_nocheck(const Handle& term,
+Handle FreeVariables::substitute_nocheck(const Handle& term,
                                      const HandleSeq& args) const
 {
 	// If it is a singleton, just return that singleton.

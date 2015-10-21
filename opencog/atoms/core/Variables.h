@@ -34,22 +34,19 @@ namespace opencog
  *  @{
  */
 
-typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
-
-/// The Variables struct defines a list of variables in a way that
-/// makes it easier and faster to work with in C++.  It implements 
-/// the data that is shared between the VariableList link atom
-/// and the pattern matcher.
+/// The FreeVariables struct defines a list of free, untyped variables
+/// in a way that makes it easier and faster to work with in C++.  It
+/// implements the data that is used by FreeLink to work with free
+/// variables.
 ///
-struct Variables
+struct FreeVariables
 {
-	/// Unbundled variables and types for them.
-	/// _typemap is the (possibly empty) list of restrictions on
-	/// the variable types. The _varset contains exactly the same atoms
-	/// as the _varseq; it is used for fast lookup; (i.e. is some
-	/// some variable a part of this set?) whereas the _varseq list
-	/// preserves the original order of the variables.  Yes, the fast
-	/// lookup really is needed!
+	/// Unbundled variables.
+	///
+	/// The _varset contains exactly the same atoms as the _varseq; it
+	/// is used for fast lookup; (i.e. is some some variable a part of
+	/// this set?) whereas the _varseq list preserves the original order
+	/// of the variables.  Yes, the fast lookup really is needed!
 	///
 	/// The _index is a reversed index into _varseq: given a variable,
 	/// it returns the ordinal of that variable in the _varseq. It is
@@ -57,8 +54,28 @@ struct Variables
 	/// aka "PutLink") method.
 	HandleSeq varseq;
 	std::set<Handle> varset;
-	VariableTypeMap typemap;
 	std::map<Handle, unsigned int> index;
+
+	// Given the tree `tree` containing variables in it, create and
+	// return a new tree with the indicated values `vals` substituted
+	// for the variables.  "nocheck" == no type checking is done.
+	Handle substitute_nocheck(const Handle&, const HandleSeq&) const;
+};
+
+typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
+
+/// The Variables struct defines a list of typed variables in a way
+/// that makes it easier and faster to work with in C++.  It is used
+/// by VariableList and ScopeLink to define typed, scoped, bound
+/// variables; in particular, it is heavily used by the pattern matcher.
+///
+struct Variables : public FreeVariables
+{
+	/// Unbundled variables and types for them.
+	/// _typemap is the (possibly empty) list of restrictions on
+	/// the variable types.
+	///
+	VariableTypeMap typemap;
 
 	// Return true if we are holding a single variable, and the handle
 	// given as the argument satisfies the type restrictions (if any).
@@ -76,9 +93,6 @@ struct Variables
 	// exception is thrown. An exception is thrown if the vals are not
 	// of the types specified in this class.
 	Handle substitute(const Handle& tree, const HandleSeq& vals) const;
-
-	// Like the above, except no type-checking is done.
-	Handle substitute_nocheck(const Handle&, const HandleSeq&) const;
 
 	// Extend this variable set by adding in the given variable set.
 	void extend(const Variables&);
