@@ -158,7 +158,12 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	if (EVALUATION_LINK == t)
 	{
 		const LinkPtr l(LinkCast(evelnk));
-		return do_evaluate(scratch, l->getOutgoingSet());
+		const HandleSeq& sna(l->getOutgoingSet());
+
+		// The arguments may need to be executed...
+		Instantiator inst(scratch);
+		Handle args(inst.execute(sna.at(1)));
+		return do_evaluate(scratch, sna.at(0), args);
 	}
 	else if (EQUAL_LINK == t)
 	{
