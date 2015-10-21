@@ -163,7 +163,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		// The argumets may need to be executed...
 		// XXX FIXME When they don't need to be executed, this introduces
 		// huge slowdown/bottleneck; EinsteinUTest runs 15x slower!
-		Instantiator inst(as);
+		Instantiator inst(scratch);
 		Handle args(inst.execute(sna.at(1)));
 		return do_evaluate(scratch, sna.at(0), args);
 	}
