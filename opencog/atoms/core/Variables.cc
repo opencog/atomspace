@@ -62,7 +62,7 @@ void VarScraper::find_vars(HandleSeq& varseq, std::set<Handle>& varset,
 		}
 
 		LinkPtr lll(LinkCast(h));
-		if (NULL == lll) continue;
+		if (nullptr == lll) continue;
 
 		// Save the recursive state on stack.
 		bool save_quote = _in_quote;

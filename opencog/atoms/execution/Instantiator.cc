@@ -197,7 +197,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			const FreeVariables& vars(flp->get_vars());
 
 			const HandleSeq& oset(LinkCast(args)->getOutgoingSet());
-			Handle beta_reduced(vars.substitute_nocheck(expr, oset));
+			Handle beta_reduced(vars.substitute_nocheck(sn, oset));
 			return walk_tree(beta_reduced);
 		}
 
