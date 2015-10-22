@@ -50,15 +50,25 @@ SCM SchemeSmob::make_as (AtomSpace *as)
 }
 
 /* ============================================================== */
-/**
- * Take over memory management of an atom space
- */
-SCM SchemeSmob::take_as (AtomSpace *as)
-{
-	scm_gc_register_collectable_memory (as,
-	                 sizeof(*as), "opencog atomspace");
 
-	return make_as(as);
+void SchemeSmob::release_as (AtomSpace *as)
+{
+	std::lock_guard<std::mutex> lck(as_mtx);
+	auto has = deleteable_as.find(as);
+	if (deleteable_as.end() == has) return;
+	deleteable_as[as] --;
+
+	if (0 == deleteable_as[as])
+	{
+		// Decrement the use count on the parent.
+		AtomSpace* env = as->get_environ();
+		if (env) release_as(env);
+
+		deleteable_as.erase(has);
+		scm_gc_unregister_collectable_memory (as,
+	                  sizeof(*as), "opencog atomspace");
+		delete as;
+	}
 }
 
 /* ============================================================== */
@@ -72,9 +82,19 @@ SCM SchemeSmob::ss_new_as (SCM s)
 
 	AtomSpace *as = new AtomSpace(parent);
 
+	scm_gc_register_collectable_memory (as,
+	                 sizeof(*as), "opencog atomspace");
+
 	// Only the internally-created atomspaces are trackable.
-	deleteable_as[as] = 0;
-	return take_as(as);
+	std::lock_guard<std::mutex> lck(as_mtx);
+	deleteable_as[as] = 1;
+
+	// Don't delete the parent, as long as its in use by a child
+	// (that guile still has a reference to).
+	if (parent and deleteable_as.end() != deleteable_as.find(parent))
+		deleteable_as[parent]++;
+
+	return make_as(as);
 }
 
 /* ============================================================== */
