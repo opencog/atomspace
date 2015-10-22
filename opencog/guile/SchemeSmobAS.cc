@@ -94,6 +94,43 @@ SCM SchemeSmob::ss_new_as (SCM s)
 	if (parent and deleteable_as.end() != deleteable_as.find(parent))
 		deleteable_as[parent]++;
 
+#define WORK_AROUND_GUILE_20_GC_BUG
+#ifdef WORK_AROUND_GUILE_20_GC_BUG
+	// Below is a wrk-around to a bug.  You can trigger this bug
+	// with the code below;  if will crash, because the initial
+	// GC gets erroneously garbage-collected.  Guile is trying
+	// to release the main AS every time through the loop.  I can't
+	// tell why.
+/******
+(use-modules (opencog))
+(use-modules (opencog exec))
+
+(define  n 0)
+(define (prt)
+   (set! n (+ n 1))
+   (format #t "yaaaa ~a ~a\n" n cog-initial-as) (usleep 200000)
+   (gc)
+   (format #t "post-gc ~a\n" cog-initial-as)
+   (if (< n 200) (stv 1 1) (stv 0 1)))
+
+(DefineLink
+   (DefinedPredicateNode "loopy")
+   (SatisfactionLink
+      (SequentialAndLink
+         (EvaluationLink
+            (GroundedPredicateNode "scm:prt") (ListLink))
+         (DefinedPredicateNode "loopy")
+      )))
+
+(cog-evaluate! (DefinedPredicateNode "loopy"))
+*******/
+	static bool first = true;
+	if (first)
+	{
+		first = false;
+		deleteable_as[as] = 4002001000;
+	}
+#endif
 	return make_as(as);
 }
 
