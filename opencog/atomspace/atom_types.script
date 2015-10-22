@@ -314,6 +314,9 @@ VIRTUAL_LINK <- EVALUATION_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK
 EQUAL_LINK <- VIRTUAL_LINK
 
+// --------------------------------------------------------------
+// Functions that do NOT bind variables.
+
 // A LambdaLink is a link whose bound variables mey be substituted,
 // that is, may be beta-reduced. It can be thought of as not only a
 // variable declaration (which is what ScopeLink does) but also has
@@ -323,14 +326,22 @@ EQUAL_LINK <- VIRTUAL_LINK
 LAMBDA_LINK <- SCOPE_LINK
 
 // A FunctionLink is a link that can be executed, with the result of
-// execution being some atom. The LambdaLink is used to specify the
-// function arguments (as bound variables).
+// execution being some atom.  FunctionLink does NOT derive from
+// LambdaLink, which may seem counter-intutitive; here's why, so
+// listen up.  All of the explicitly-named functions (e.g. PlusLink)
+// do not need to explicitly name thier arguments, and it would even
+// be confusing if they did so.  Instead, the convetion is that every
+// element in the outgoing set of the FunctionLink IS an argument of
+// the function; that's all, end-of-story.
 //
+// All variables that appear underneath the FunctionLink are necessarily
+// free variables; they are neither scoped, nor bound.
+FUNCTION_LINK <- FREE_LINK
+
 // The ExecutionOutPutLink is a specific kind of function: it must have
 // a GroundedSchemeNode as its first argument.  The other kinds of
 // FunctionLinks do not have this restriction: indeed, the actual
 // function they perform is implicit in the link type.
-FUNCTION_LINK <- LAMBDA_LINK
 EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
 
 // Basic arithmetic operators

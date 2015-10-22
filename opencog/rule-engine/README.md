@@ -198,9 +198,6 @@ construction time.
 The rule engine as it exists now is in its infancy. There is
 a lot of space for improvement.
 
-* Rethinking the design configuration/control policy so that it
-  complies with the initial design goal
-
 * Rule choosing fitness functions
 
 * Inference termination

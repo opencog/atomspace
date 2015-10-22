@@ -95,9 +95,9 @@ void FreeLinkUTest::test_unquote(void)
 		"		(UnquoteLink (VariableNode \"$z\")))))"
 	);
 
-	FreeLink fl(unq);
-	// VariableList vl(fl.get_vars());
-	HandleSeq vars = fl.get_vars();
+	FreeVariables fv;
+	fv.find_variables(unq);
+	HandleSeq vars = fv.varseq;
 
 	printf("expecting Variable $x: %s\n", vars[0]->toShortString().c_str());
 	printf("expecting Variable $z: %s\n", vars[1]->toShortString().c_str());
@@ -133,9 +133,9 @@ void FreeLinkUTest::test_deunquote(void)
 		"		(VariableNode \"$t\"))))"
 	);
 
-	FreeLink fl(unq);
-	// VariableList vl(fl.get_vars());
-	HandleSeq vars = fl.get_vars();
+	FreeVariables fv;
+	fv.find_variables(unq);
+	HandleSeq vars = fv.varseq;
 
 	printf("expect Var $x: %s\n", vars[0]->toShortString().c_str());
 	printf("expect Var $z: %s\n", vars[1]->toShortString().c_str());
@@ -169,9 +169,9 @@ void FreeLinkUTest::test_binding(void)
 		"		(ListLink (VariableNode \"$z\"))))"
 	);
 
-	FreeLink fl(unq);
-	// VariableList vl(fl.get_vars());
-	HandleSeq vars = fl.get_vars();
+	FreeVariables fv;
+	fv.find_variables(unq);
+	HandleSeq vars = fv.varseq;
 
 	printf("expecting free $x: %s\n", vars[0]->toShortString().c_str());
 	printf("expecting free $z: %s\n", vars[1]->toShortString().c_str());
@@ -209,9 +209,9 @@ void FreeLinkUTest::test_getlink(void)
 		"			(VariableNode \"$yd\"))))"
 	);
 
-	FreeLink fl(unq);
-	// VariableList vl(fl.get_vars());
-	HandleSeq vars = fl.get_vars();
+	FreeVariables fv;
+	fv.find_variables(unq);
+	HandleSeq vars = fv.varseq;
 
 	printf("expecting get $x: %s\n", vars[0]->toShortString().c_str());
 	printf("expecting get $z: %s\n", vars[1]->toShortString().c_str());

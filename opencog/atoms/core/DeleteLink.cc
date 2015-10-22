@@ -41,7 +41,7 @@ void DeleteLink::init(void)
 	// around this by throwing at constructor time.
 	//
 	FreeLink::init();
-	if (0 == _varseq.size())
+	if (0 == _vars.varseq.size())
 		// throw DeleteException();
 		throw InvalidParamException(TRACE_INFO,
 			"Cannot create a fully grounded DeleteLink!");

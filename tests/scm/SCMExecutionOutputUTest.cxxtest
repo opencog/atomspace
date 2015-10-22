@@ -474,7 +474,7 @@ void SCMExecutionOutputUTest::test_dsn(void)
 	eval->eval(
 	   "(DefineLink"
 	   "   (DefinedSchemaNode \"x+y*10\")"
-	   "   (FunctionLink"
+	   "   (LambdaLink"
 	   "      (VariableList"
 	   "         (VariableNode \"$X\")"
 	   "         (VariableNode \"$Y\"))"
@@ -506,7 +506,7 @@ void SCMExecutionOutputUTest::test_dsn(void)
 	result = eval->eval_h(
 	   "(cog-execute!"
 	   "   (ExecutionOutputLink"
-	   "      (FunctionLink"
+	   "      (LambdaLink"
 	   "         (VariableList"
 	   "            (VariableNode \"$X\")"
 	   "            (VariableNode \"$Y\"))"
