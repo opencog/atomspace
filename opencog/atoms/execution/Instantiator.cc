@@ -305,10 +305,7 @@ Handle Instantiator::instantiate(const Handle& expr,
 	// We do this here, instead of in walk_tree(), because adding
 	// atoms to the atomspace is an expensive process.  We can save
 	// some time by doing it just once, right here, in one big batch.
-	Handle inst(walk_tree(expr));
-	if (inst != expr)
-		return _as->add_atom(inst);
-	return expr;
+	return _as->add_atom(walk_tree(expr));
 }
 
 /* ===================== END OF FILE ===================== */
