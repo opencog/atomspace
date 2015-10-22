@@ -103,19 +103,19 @@ bool SatisfyingSet::grounding(const std::map<Handle, Handle> &var_soln,
 
 TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
 {
-	PatternLinkPtr bl(PatternLinkCast(hlink));
-	if (NULL == bl)
+	PatternLinkPtr plp(PatternLinkCast(hlink));
+	if (NULL == plp)
 	{
 		// If it is a BindLink (for example), we want to use that ctor
 		// instead of the default ctor.
 		if (classserver().isA(hlink->getType(), SATISFACTION_LINK))
-			bl = createPatternLink(*LinkCast(hlink));
+			plp = createPatternLink(*LinkCast(hlink));
 		else
-			bl = createPatternLink(hlink);
+			plp = createPatternLink(hlink);
 	}
 
 	Satisfier sater(as);
-	bl->satisfy(sater);
+	plp->satisfy(sater);
 
 	return sater._result;
 }
