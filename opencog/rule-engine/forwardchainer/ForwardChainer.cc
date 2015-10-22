@@ -61,6 +61,9 @@ void ForwardChainer::init(Handle hsource, HandleSeq focus_set)
     _ts_mode = TV_FITNESS_BASED;
 
     _focus_set = focus_set;
+    //Add focus set atoms to focus_set atomspace
+    for (Handle h : _focus_set)
+        _focus_set_as.add_atom(h);
 
     //Set potential source.
     HandleSeq init_sources = { };
@@ -346,7 +349,7 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
         //Actual checking here.
         for (Handle& h : hs) {
             if (_as.get_atom(h) == Handle::UNDEFINED or (search_in_focus_set
-                    and find(_focus_set.begin(), _focus_set.end(), h) == _focus_set.end())) {
+                    and _focus_set_as.get_atom(h) == Handle::UNDEFINED ) ) {
                 return {};
             }
         }
@@ -358,22 +361,16 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
 
     else {
         if (search_in_focus_set) {
-            //This restricts PM to look only in the focus set
-            AtomSpace focus_set_as;
-
-            //Add focus set atoms to focus_set atomspace
-            for (Handle h : _focus_set)
-                focus_set_as.add_atom(h);
 
             //Add source atoms to focus_set atomspace
             for (Handle h : _potential_sources)
-                focus_set_as.add_atom(h);
+                _focus_set_as.add_atom(h);
 
             //rhandle may introduce a new atoms that satisfies condition for the output
             //In order to prevent this undesirable effect, lets store rhandle in a child
             //atomspace of parent focus_set_as so that PM will never be able to find this
             //new undesired atom created from partial grounding.
-            AtomSpace derived_rule_as(&focus_set_as);
+            AtomSpace derived_rule_as(&_focus_set_as);
             Handle rhcpy = derived_rule_as.add_atom(rhandle);
 
             BindLinkPtr bl = BindLinkCast(rhcpy);

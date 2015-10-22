@@ -47,6 +47,9 @@ private:
     friend class ::ForwardChainerUTest;
 
     AtomSpace& _as;
+    //This restricts PM to look only in the focus set
+    AtomSpace _focus_set_as;
+
     URECommons _rec;            // utility class
     Handle _rbs;                // rule-based system
     UREConfigReader _configReader;
