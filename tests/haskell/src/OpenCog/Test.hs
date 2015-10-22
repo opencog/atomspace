@@ -38,3 +38,4 @@ myappGen3b :: (forall a b c. (Typeable a,Typeable b, Typeable c,
               (Atom a -> Atom b -> Atom c -> r)) ->
               (Gen aa,Gen bb, Gen cc) -> r
 myappGen3b f (Gen a,Gen b,Gen c) = f a b c
+
