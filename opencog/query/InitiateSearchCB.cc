@@ -772,9 +772,9 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 			}
 			else
 			{
-				FreeLink fl(defn);
-				VariableList vl(fl.get_vars());
-				vset.extend(vl.get_variables());
+				Variables freevars;
+				freevars.find_variables(defn);
+				vset.extend(freevars);
 			}
 
 			defnmap.insert({name, defn});

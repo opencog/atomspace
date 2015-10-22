@@ -33,13 +33,13 @@ using namespace opencog;
 
 void FunctionLink::init(void)
 {
-	extract_variables(_outgoing);
+	FreeLink::init();
 }
 
 FunctionLink::FunctionLink(Type t, const HandleSeq& oset,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
-    : LambdaLink(t, oset, tv, av)
+    : FreeLink(t, oset, tv, av)
 {
 	if (not classserver().isA(t, FUNCTION_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FunctionLink");
@@ -49,7 +49,7 @@ FunctionLink::FunctionLink(Type t, const HandleSeq& oset,
 FunctionLink::FunctionLink(Type t, const Handle& a,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
-    : LambdaLink(t, a, tv, av)
+    : FreeLink(t, a, tv, av)
 {
 	if (not classserver().isA(t, FUNCTION_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FunctionLink");
@@ -59,7 +59,7 @@ FunctionLink::FunctionLink(Type t, const Handle& a,
 FunctionLink::FunctionLink(Type t, const Handle& a, const Handle& b,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
-    : LambdaLink(t, {a, b}, tv, av)
+    : FreeLink(t, {a, b}, tv, av)
 {
 	if (not classserver().isA(t, FUNCTION_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FunctionLink");
@@ -67,7 +67,7 @@ FunctionLink::FunctionLink(Type t, const Handle& a, const Handle& b,
 }
 
 FunctionLink::FunctionLink(Link& l)
-    : LambdaLink(l)
+    : FreeLink(l)
 {
 	Type tscope = l.getType();
 	if (not classserver().isA(tscope, FUNCTION_LINK))

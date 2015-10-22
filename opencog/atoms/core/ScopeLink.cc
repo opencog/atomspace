@@ -37,7 +37,8 @@ void ScopeLink::init(void)
 	size_t sz = _outgoing.size();
 	if (2 < sz)
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting an outgoing set size of at most two, got %d", sz);
+			"Expecting an outgoing set size of at most two, got %d for %s",
+			sz, toString().c_str());
 
 	extract_variables(_outgoing);
 }
@@ -121,11 +122,7 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 		}
 		else
 		{
-			// Use the FreeLink class to find all the variables;
-			// Use the VariableList class for build the Variables struct.
-			FreeLink fl(oset[0]);
-			VariableList vl(fl.get_vars());
-			_varlist = vl.get_variables();
+			_varlist.find_variables(oset[0]);
 		}
 		return;
 	}

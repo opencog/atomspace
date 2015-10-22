@@ -24,7 +24,7 @@
 #define _OPENCOG_FUNCTION_LINK_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atoms/core/FreeLink.h>
 
 namespace opencog
 {
@@ -49,7 +49,7 @@ namespace opencog
  * Note also: EvaluationLinks can be reduced, but they can never be
  * executed (they can only be evaluated).
  */
-class FunctionLink : public LambdaLink
+class FunctionLink : public FreeLink
 {
 protected:
 	void init(void);

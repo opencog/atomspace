@@ -15,6 +15,7 @@ ADD_LIBRARY (atomcore SHARED
 	ScopeLink.cc
 	StateLink.cc
 	UniqueLink.cc
+	Variables.cc
 	VariableList.cc
 )
 
@@ -42,6 +43,7 @@ INSTALL (FILES
 	ScopeLink.h
 	StateLink.h
 	UniqueLink.h
+	Variables.h
 	VariableList.h
 	DESTINATION "include/opencog/atoms/core"
 )

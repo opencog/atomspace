@@ -23,9 +23,8 @@
 #ifndef _OPENCOG_FREE_LINK_H
 #define _OPENCOG_FREE_LINK_H
 
-#include <set>
-#include <stack>
 #include <opencog/atomspace/Link.h>
+#include <opencog/atoms/core/Variables.h>
 
 namespace opencog
 {
@@ -38,38 +37,13 @@ namespace opencog
  * (underneath) it, in traversal order. Those variables are placed in
  * sequential order in _varseq. An index is placed in _index. That is,
  * given a variable, its ordinal number is placed in _index.
- *
- * The FreeLink, as a base class, also provides an important method:
- * reduce()
- *
- * The reduce() method takes the given expression, and applies
- * term reduction rules to obtain a smaller but equivalent expression.
- * Ideally, the reduced expression is the "minimal" such expression.
- * There is no guarantee that reduce is normalizing or strongly
- * normalizing, but that does seem like a desirable goal.
- *
- * An expression that contains free variables will contain the same
- * free variables (or a subset of them) after reduction.
- *
- * Note that both EvaluationLinks and ExecutionOutputLinks are
- * reducible, and the result of reduction is always another Atom.
- * This is in contrast to the concept of evaluation/execution:
- * EvaluationLinks, when evaluated, yield truth values, while
- * ExecutionOutputLinks, when executed, yield Atoms.
  */
 class FreeLink : public Link
 {
-private:
-	bool _in_quote;
-	std::set<Handle> _bound_vars;
-
 protected:
-	HandleSeq _varseq;
-	std::map<Handle, unsigned int> _index;
+	FreeVariables _vars;
 
 	void init(void);
-	void find_vars(std::set<Handle>&, const HandleSeq&);
-	void build_index(void);
 
 	FreeLink(Type, const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::NULL_TV(),
@@ -93,7 +67,8 @@ public:
 	FreeLink(Link& l);
 	virtual ~FreeLink() {}
 
-	const HandleSeq& get_vars(void) const { return _varseq; }
+	const FreeVariables& get_vars() const
+	{ return  _vars; }
 };
 
 typedef std::shared_ptr<FreeLink> FreeLinkPtr;
