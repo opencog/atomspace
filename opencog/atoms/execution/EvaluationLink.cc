@@ -243,7 +243,8 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 {
 	if (GROUNDED_PREDICATE_NODE != gsn->getType())
 	{
-		throw RuntimeException(TRACE_INFO, "Expecting GroundedPredicateNode!");
+		// Throw a silent exception; this is called in some try..catch blocks.
+		throw NotEvaluatableException();
 	}
 	if (LIST_LINK != args->getType())
 	{

@@ -50,15 +50,25 @@ SCM SchemeSmob::make_as (AtomSpace *as)
 }
 
 /* ============================================================== */
-/**
- * Take over memory management of an atom space
- */
-SCM SchemeSmob::take_as (AtomSpace *as)
-{
-	scm_gc_register_collectable_memory (as,
-	                 sizeof(*as), "opencog atomspace");
 
-	return make_as(as);
+void SchemeSmob::release_as (AtomSpace *as)
+{
+	std::lock_guard<std::mutex> lck(as_mtx);
+	auto has = deleteable_as.find(as);
+	if (deleteable_as.end() == has) return;
+	deleteable_as[as] --;
+
+	if (0 == deleteable_as[as])
+	{
+		// Decrement the use count on the parent.
+		AtomSpace* env = as->get_environ();
+		if (env) release_as(env);
+
+		deleteable_as.erase(has);
+		scm_gc_unregister_collectable_memory (as,
+	                  sizeof(*as), "opencog atomspace");
+		delete as;
+	}
 }
 
 /* ============================================================== */
@@ -72,9 +82,56 @@ SCM SchemeSmob::ss_new_as (SCM s)
 
 	AtomSpace *as = new AtomSpace(parent);
 
+	scm_gc_register_collectable_memory (as,
+	                 sizeof(*as), "opencog atomspace");
+
 	// Only the internally-created atomspaces are trackable.
-	deleteable_as[as] = 0;
-	return take_as(as);
+	std::lock_guard<std::mutex> lck(as_mtx);
+	deleteable_as[as] = 1;
+
+	// Don't delete the parent, as long as its in use by a child
+	// (that guile still has a reference to).
+	if (parent and deleteable_as.end() != deleteable_as.find(parent))
+		deleteable_as[parent]++;
+
+#define WORK_AROUND_GUILE_20_GC_BUG
+#ifdef WORK_AROUND_GUILE_20_GC_BUG
+	// Below is a wrk-around to a bug.  You can trigger this bug
+	// with the code below;  if will crash, because the initial
+	// GC gets erroneously garbage-collected.  Guile is trying
+	// to release the main AS every time through the loop.  I can't
+	// tell why.
+/******
+(use-modules (opencog))
+(use-modules (opencog exec))
+
+(define  n 0)
+(define (prt)
+   (set! n (+ n 1))
+   (format #t "yaaaa ~a ~a\n" n cog-initial-as) (usleep 200000)
+   (gc)
+   (format #t "post-gc ~a\n" cog-initial-as)
+   (if (< n 200) (stv 1 1) (stv 0 1)))
+
+(DefineLink
+   (DefinedPredicateNode "loopy")
+   (SatisfactionLink
+      (SequentialAndLink
+         (EvaluationLink
+            (GroundedPredicateNode "scm:prt") (ListLink))
+         (DefinedPredicateNode "loopy")
+      )))
+
+(cog-evaluate! (DefinedPredicateNode "loopy"))
+*******/
+	static bool first = true;
+	if (first)
+	{
+		first = false;
+		deleteable_as[as] = 4002001000;
+	}
+#endif
+	return make_as(as);
 }
 
 /* ============================================================== */
