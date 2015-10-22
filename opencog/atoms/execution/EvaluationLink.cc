@@ -26,6 +26,7 @@
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
@@ -128,13 +129,24 @@ static TruthValuePtr equal(AtomSpace* as, const LinkPtr& ll)
 
 static bool is_tail_rec(const Handle& thish, const Handle& tail)
 {
-	Type tailt = tail->getType();
-	if (DEFINED_PREDICATE_NODE == tailt)
-	{
-		if (DefineLink::get_definition(tail) == thish)
-			return true;
-	}
-	return false;
+	if (DEFINED_PREDICATE_NODE != tail->getType())
+		return false;
+
+	Handle defn(DefineLink::get_definition(tail));
+	if (defn == thish)
+		return true;
+
+	if (SATISFACTION_LINK != defn->getType())
+		return false;
+
+	PatternLinkPtr plp(PatternLinkCast(defn));
+	if (nullptr == plp)
+		plp = createPatternLink(defn);
+
+	if (0 < plp->get_variables().varseq.size())
+		return false;
+
+	return true;
 }
 
 /// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
