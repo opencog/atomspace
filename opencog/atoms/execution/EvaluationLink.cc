@@ -145,7 +145,7 @@ static TruthValuePtr equal(AtomSpace* as, const LinkPtr& ll)
 /// "main" atomspace, the second is a "scratch" or "temporary"
 /// atomspace.  The scratch space is used to instantiate any arguments
 /// that need to be passed to evaluatable links (i.e. to predicates);
-/// the idea is that such temproraries don't add garbage to the main
+/// the idea is that such temporaries don't add garbage to the main
 /// atomspace.  The first argument, though, the "main" space, is used
 /// to instantiate any executable atoms: specifically, any PutLinks
 /// that were wrapped up by TrueLink, FalseLink. This is needed to get
