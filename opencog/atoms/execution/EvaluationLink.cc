@@ -127,6 +127,20 @@ static TruthValuePtr equal(AtomSpace* as, const LinkPtr& ll)
 		return TruthValue::FALSE_TV();
 }
 
+static bool is_evaluatable_sat(const Handle& satl)
+{
+	PatternLinkPtr plp(PatternLinkCast(satl));
+	if (nullptr == plp)
+		plp = createPatternLink(satl);
+
+	if (1 < plp->getArity())
+		throw SyntaxException(TRACE_INFO,
+			"Expecting SatisfacionLink of arity one; got %s",
+			satl->toString().c_str());
+
+	return 0 == plp->get_variables().varseq.size();
+}
+
 static bool is_tail_rec(const Handle& thish, const Handle& tail)
 {
 	if (DEFINED_PREDICATE_NODE != tail->getType())
@@ -139,14 +153,14 @@ static bool is_tail_rec(const Handle& thish, const Handle& tail)
 	if (SATISFACTION_LINK != defn->getType())
 		return false;
 
-	PatternLinkPtr plp(PatternLinkCast(defn));
-	if (nullptr == plp)
-		plp = createPatternLink(defn);
-
-	if (0 < plp->get_variables().varseq.size())
+	if (not is_evaluatable_sat(defn))
 		return false;
 
-	return true;
+	LinkPtr l(LinkCast(defn));
+	if (thish == l->getOutgoingAtom(0))
+		return true;
+
+	return false;
 }
 
 /// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
@@ -285,7 +299,15 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (SATISFACTION_LINK == t)
 	{
-		return satisfaction_link(as, evelnk);
+		if (not is_evaluatable_sat(evelnk))
+			return satisfaction_link(as, evelnk);
+
+		// If we are here, the we can optimize: we can evaluate
+		// directly, instead of going through the pattern matcher.
+		// The only reason we want to do even this much is to do
+		// tail-recursion optimization, if possible.
+		LinkPtr l(LinkCast(evelnk));
+		return do_eval_scratch(as, l->getOutgoingAtom(0), scratch);
 	}
 	else if (DEFINED_PREDICATE_NODE == t)
 	{
