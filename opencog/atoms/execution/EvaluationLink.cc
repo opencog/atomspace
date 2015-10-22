@@ -126,6 +126,17 @@ static TruthValuePtr equal(AtomSpace* as, const LinkPtr& ll)
 		return TruthValue::FALSE_TV();
 }
 
+static bool is_tail_rec(const Handle& thish, const Handle& tail)
+{
+	Type tailt = tail->getType();
+	if (DEFINED_PREDICATE_NODE == tailt)
+	{
+		if (DefineLink::get_definition(tail) == thish)
+			return true;
+	}
+	return false;
+}
+
 /// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
 ///
 /// Expects the argument to be an EvaluationLink, which should have the
@@ -179,6 +190,74 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		TruthValuePtr tv(do_eval_scratch(as, l->getOutgoingAtom(0), scratch));
 		return SimpleTruthValue::createTV(
 		              1.0 - tv->getMean(), tv->getCount());
+	}
+	else if (AND_LINK == t)
+	{
+		LinkPtr l(LinkCast(evelnk));
+		for (const Handle& h : l->getOutgoingSet())
+		{
+			TruthValuePtr tv(do_eval_scratch(as, h, scratch));
+			if (tv->getMean() < 0.5)
+				return tv;
+		}
+		return TruthValue::TRUE_TV();
+	}
+	else if (OR_LINK == t)
+	{
+		LinkPtr l(LinkCast(evelnk));
+		for (const Handle& h : l->getOutgoingSet())
+		{
+			TruthValuePtr tv(do_eval_scratch(as, h, scratch));
+			if (0.5 < tv->getMean())
+				return tv;
+		}
+		return TruthValue::FALSE_TV();
+	}
+	else if (SEQUENTIAL_AND_LINK == t)
+	{
+		LinkPtr l(LinkCast(evelnk));
+		const HandleSeq& oset = l->getOutgoingSet();
+		size_t arity = oset.size();
+		if (0 == arity) return TruthValue::TRUE_TV();
+
+		// Is this tail-recursive? If so, then handle it.
+		bool is_trec = is_tail_rec(evelnk, oset[arity-1]);
+		if (is_trec) arity--;
+
+		// Loop at least once. If tail-recurive, loop forever.
+		do
+		{
+			for (size_t i=0; i<arity; i++)
+			{
+				TruthValuePtr tv(do_eval_scratch(as, oset[i], scratch));
+				if (tv->getMean() < 0.5)
+					return tv;
+			}
+		} while (is_trec);
+		return TruthValue::TRUE_TV();
+	}
+	else if (SEQUENTIAL_OR_LINK == t)
+	{
+		LinkPtr l(LinkCast(evelnk));
+		const HandleSeq& oset = l->getOutgoingSet();
+		size_t arity = oset.size();
+		if (0 == arity) return TruthValue::FALSE_TV();
+
+		// Is this tail-recursive? If so, then handle it.
+		bool is_trec = is_tail_rec(evelnk, oset[arity-1]);
+		if (is_trec) arity--;
+
+		// Loop at least once. If tail-recurive, loop forever.
+		do
+		{
+			for (size_t i=0; i<arity; i++)
+			{
+				TruthValuePtr tv(do_eval_scratch(as, oset[i], scratch));
+				if (0.5 < tv->getMean())
+					return tv;
+			}
+		} while (is_trec);
+		return TruthValue::FALSE_TV();
 	}
 	else if (TRUE_LINK == t or FALSE_LINK == t)
 	{
