@@ -23,13 +23,19 @@
 
 (use-modules (system base compile))
 
+; Create a global to hold the atomspace ... to (try to) prevent guile GC
+; from collecting it.  Unfortunately, there appears to be a GC bug in
+; guile-2.0 that causes his o e collected, anyway, under certain rare
+; circumstances (during recursive calls into guile).
+(define-public cog-initial-as (cog-new-atomspace))
+
 ; Initialze a default atomspace, just to keep things sane...
 ; The below is safe, because this module runs at most only once
 ; (if invoked from the guile shell, as (load-modules (opencog)) )
 ; or zero times, if invoked from the cogserver shell. The cogserver
 ; refuses to run this; the cogserver main atomspace is never clobbered.
 ;
-(cog-set-atomspace! (cog-new-atomspace))
+(cog-set-atomspace! cog-initial-as)
 
 ; Load core atom types
 ; The remaining atom types from the cogserver are in (opencog atom-types)

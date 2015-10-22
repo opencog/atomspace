@@ -63,15 +63,7 @@ size_t SchemeSmob::free_misc(SCM node)
 		case COG_AS:
 		{
 			AtomSpace *as = (AtomSpace *) SCM_SMOB_DATA(node);
-			std::lock_guard<std::mutex> lck(as_mtx);
-			auto has = deleteable_as.find(as);
-			if (deleteable_as.end() != has and 0 == deleteable_as[as])
-			{
-				deleteable_as.erase(has);
-				scm_gc_unregister_collectable_memory (as,
-			                  sizeof(*as), "opencog atomspace");
-				delete as;
-			}
+			release_as(as);
 			scm_remember_upto_here_1(node);
 			return 0;
 		}
