@@ -338,6 +338,13 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
 
     //Check for fully grounded outputs returned by derive_rules.
     if (not contains_atomtype(rhandle, VARIABLE_NODE)) {
+
+        //Add source atoms to focus_set atomspace
+        if (search_in_focus_set) {
+            for (Handle h : _potential_sources)
+                _focus_set_as.add_atom(h);
+        }
+
         //Subatomic matching may have created a non existing implicant
         //atom and if the implicant doesn't exist, nor should the implicand.
         Handle implicant = BindLinkCast(rhandle)->get_body();
