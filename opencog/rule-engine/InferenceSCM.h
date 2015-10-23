@@ -1,7 +1,6 @@
 /*
  * InferenceSCM.h
  *
- * Copyright (C) 2014 Misgana Bayetta
  * Copyright (C) 2015 OpenCog Foundation
  *
  * Author: Misgana Bayetta <misgana.bayetta@gmail.com>  Sept 2014

@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atoms/core/DefineLink.h>
-#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
@@ -33,12 +33,13 @@
 
 using namespace opencog;
 
-HandleSeq Instantiator::walk_tree(const HandleSeq& expr)
+bool Instantiator::walk_tree(HandleSeq& oset_results, const HandleSeq& expr)
 {
-	HandleSeq oset_results;
+	bool changed = false;
 	for (const Handle& h : expr)
 	{
 		Handle hg(walk_tree(h));
+		if (hg != h) changed = true;
 
 		// GlobNodes are grounded by a ListLink of everything that
 		// the GlobNode matches. Unwrap the list, and insert each
@@ -63,7 +64,7 @@ HandleSeq Instantiator::walk_tree(const HandleSeq& expr)
 				oset_results.emplace_back(hg);
 		}
 	}
-	return oset_results;
+	return changed;
 }
 
 Handle Instantiator::walk_tree(const Handle& expr)
@@ -183,12 +184,12 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		if (DEFINED_SCHEMA_NODE == sn->getType())
 			sn = DefineLink::get_definition(sn);
 
-		// If its a function link, execute it here.
-		if (FUNCTION_LINK == sn->getType())
+		// If its an anonymous function link, execute it here.
+		if (LAMBDA_LINK == sn->getType())
 		{
-			FunctionLinkPtr flp(FunctionLinkCast(sn));
+			LambdaLinkPtr flp(LambdaLinkCast(sn));
 			if (NULL == flp)
-				flp = createFunctionLink(*LinkCast(sn));
+				flp = createLambdaLink(*LinkCast(sn));
 
 			// Two-step process. First, plug the arguments into the
 			// function; i.e. perform beta-reduction. Second, actually
@@ -198,7 +199,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			Variables vars(flp->get_variables());
 
 			const HandleSeq& oset(LinkCast(args)->getOutgoingSet());
-			Handle beta_reduced(vars.substitute(body, oset));
+			Handle beta_reduced(vars.substitute_nocheck(body, oset));
 			return walk_tree(beta_reduced);
 		}
 
@@ -215,7 +216,8 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		// and the number of arguments is not fixed, i.e. variadic.
 		// Perform substitution on all arguments before applying the
 		// function itself.
-		HandleSeq oset_results(walk_tree(lexpr->getOutgoingSet()));
+		HandleSeq oset_results;
+		walk_tree(oset_results, lexpr->getOutgoingSet());
 		Handle hl(FoldLink::factory(t, oset_results));
 		FoldLinkPtr flp(FoldLinkCast(hl));
 		return flp->execute(_as);
@@ -225,7 +227,8 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// work differently.
 	if (DELETE_LINK == t)
 	{
-		HandleSeq oset_results(walk_tree(lexpr->getOutgoingSet()));
+		HandleSeq oset_results;
+		walk_tree(oset_results, lexpr->getOutgoingSet());
 		for (const Handle& h: oset_results)
 		{
 			Type ht = h->getType();
@@ -243,7 +246,8 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		// Also, the number of arguments is not fixed, i.e. variadic.
 		// Perform substitution on all arguments before applying the
 		// function itself.
-		HandleSeq oset_results(walk_tree(lexpr->getOutgoingSet()));
+		HandleSeq oset_results;
+		walk_tree(oset_results, lexpr->getOutgoingSet());
 		Handle hl(FunctionLink::factory(t, oset_results));
 		FunctionLinkPtr flp(FunctionLinkCast(hl));
 		return flp->execute(_as);
@@ -254,7 +258,8 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// PatternLink::satisfy() method.
 	if (GET_LINK == t)
 	{
-		HandleSeq oset_results(walk_tree(lexpr->getOutgoingSet()));
+		HandleSeq oset_results;
+		walk_tree(oset_results, lexpr->getOutgoingSet());
 		size_t sz = oset_results.size();
 		for (size_t i=0; i< sz; i++)
 			oset_results[i] = _as->add_atom(oset_results[i]);
@@ -266,8 +271,11 @@ Handle Instantiator::walk_tree(const Handle& expr)
 
 	// None of the above. Create a duplicate link, but with an outgoing
 	// set where the variables have been substituted by their values.
-	HandleSeq oset_results(walk_tree(lexpr->getOutgoingSet()));
-	return Handle(createLink(t, oset_results, expr->getTruthValue()));
+	HandleSeq oset_results;
+	bool changed = walk_tree(oset_results, lexpr->getOutgoingSet());
+	if (changed)
+		return Handle(createLink(t, oset_results, expr->getTruthValue()));
+	return expr;
 }
 
 /**

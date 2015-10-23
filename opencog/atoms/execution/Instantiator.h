@@ -62,7 +62,7 @@ private:
 		 * (actually, beta reduction).
 		 */
 		Handle walk_tree(const Handle& tree);
-		HandleSeq walk_tree(const HandleSeq& tree);
+		bool walk_tree(HandleSeq&, const HandleSeq& orig);
 
 	public:
 		Instantiator(AtomSpace* as) : _as(as) {}
