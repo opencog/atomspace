@@ -44,22 +44,25 @@ namespace opencog
 typedef unsigned long UUID;
 
 class Atom;
+class ProtoAtom;
 typedef std::shared_ptr<Atom> AtomPtr;
+typedef std::shared_ptr<ProtoAtom> ProtoAtomPtr;
 
 //! contains an unique identificator
 class AtomTable;
 class Handle
 {
 
+friend class ProtoAtom;
 friend class AtomTable;
 friend class AtomStorage;         // persistance
 friend class AtomspaceHTabler;    // persistance
 
 private:
-    AtomPtr _ptr;
+    ProtoAtomPtr _ptr;
 
-    static bool atoms_less(const Atom*, const Atom*);
-    static AtomPtr do_res(UUID);
+    static bool atoms_less(const ProtoAtom*, const ProtoAtom*);
+    static Handle do_res(UUID);
     static std::vector<const AtomTable*> _resolver;
 
     static void set_resolver(const AtomTable*);
@@ -71,7 +74,7 @@ public:
     static const UUID INVALID_UUID = ULONG_MAX;
     static const Handle UNDEFINED;
 
-    explicit Handle(const AtomPtr& atom) : _ptr(atom) {}
+    explicit Handle(const ProtoAtomPtr& atom) : _ptr(atom) {}
     explicit Handle(const UUID);
     explicit Handle() {}
     Handle(const Handle& h) : _ptr(h._ptr) {}
@@ -84,17 +87,51 @@ public:
         return *this;
     }
 
-    Handle& operator=(const AtomPtr& a) {
+    inline Handle& operator=(const ProtoAtomPtr& a) {
         this->_ptr = a;
         return *this;
     }
 
+#ifdef INLINE_POINTER_CHASING
     inline Atom* operator->() {
-        return _ptr.get();
+        // return _ptr.get();
+        return dynamic_cast<Atom*>(_ptr.get());
     }
 
     inline Atom* operator->() const {
-        return _ptr.get();
+        return dynamic_cast<Atom*>(_ptr.get());
+    }
+
+    operator AtomPtr() const {
+        return std::dynamic_pointer_cast<AtomPtr>(_ptr);
+    }
+    operator AtomPtr() {
+        return std::dynamic_pointer_cast<AtomPtr>(_ptr);
+    }
+
+    Handle& operator=(const AtomPtr& a) {
+        this->_ptr = std::dynamic_pointer_cast<ProtoAtom>(a);
+        return *this;
+    }
+#else
+    // Caution: there is a potentially serious performance hit,
+    // if the following are not inlined.  I beleive/hope that
+    // gcc "link time optimization" (-flto flag) can overcome
+    // this hit.  Anyway, right now, the above forms cannot work,
+    // because they require access to class Atom, which we can't
+    // have here, due to circular includes...
+    Atom* operator->();
+    Atom* operator->() const;
+
+    operator AtomPtr() const;
+    operator AtomPtr();
+#endif
+
+    operator ProtoAtomPtr() const {
+        return _ptr;
+    }
+    operator ProtoAtomPtr() {
+        return _ptr;
     }
 
     // Allows expressions like "if(h)..." to work when h has a non-null pointer.
@@ -149,18 +186,6 @@ public:
         if (h1 > h2) return 1;
         return 0;
     }
-
-    operator AtomPtr() const {
-        return _ptr;
-    }
-    operator AtomPtr() {
-        return _ptr;
-    }
-/***
-    operator const AtomPtr&() {
-        return _ptr;
-    }
-***/
 };
 
 static inline bool operator== (std::nullptr_t, const Handle& rhs) noexcept

@@ -363,13 +363,8 @@ class AtomTest(TestCase):
         # test get out
         a = self.space.add_node(types.Node, "test2")
 
-        self.assertEqual(a.type, 1)
-        self.assertEqual(a.t, 1)
-
         a2 = self.space.add_node(types.Node, "test3")
         l = self.space.add_link(types.Link, [a, a2])
-        self.assertEqual(l.type, 2)
-        self.assertEqual(l.t, 2)
 
         # ensure type is considered immutable
         self.assertRaises(AttributeError, setattr, l, "type", 5)

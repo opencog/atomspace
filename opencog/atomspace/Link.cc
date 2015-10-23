@@ -240,9 +240,3 @@ bool Link::operator==(const Atom& other) const
     }
     return true;
 }
-
-bool Link::operator!=(const Atom& other) const
-{
-    return !(*this == other);
-}
-

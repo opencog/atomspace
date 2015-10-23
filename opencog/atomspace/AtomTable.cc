@@ -411,6 +411,7 @@ AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
 	return clone;
 }
 
+#if 0
 static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
 {
     Logger::Level save = logger().getBackTraceLevel();
@@ -428,9 +429,13 @@ static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
     logger().flush();
     logger().setBackTraceLevel(save);
 }
+#endif
 
 Handle AtomTable::add(AtomPtr atom, bool async)
 {
+    // Can be null, if its a PseudoAtom
+    if (nullptr == atom) return Handle::UNDEFINED;
+
     // Is the atom already in this table, or one of its environments?
     if (in_environ(atom))
         return atom->getHandle();
@@ -471,6 +476,9 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         // So we recursively clone that too.
         HandleSeq closet;
         for (const Handle& h : lll->getOutgoingSet()) {
+            // operator->() will be null if its a ProtoAtom that is
+            // not an atom.
+            if (nullptr == h.operator->()) return Handle::UNDEFINED;
             closet.emplace_back(add(h, async));
         }
         // Preserve the UUID! This is needed for assigning the UUID
@@ -510,15 +518,8 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         // methods on those atoms.
         bool need_copy = false;
         for (size_t i = 0; i < arity; i++) {
-            if (NULL == ogs[i]._ptr.get()) {
-                prt_diag(atom, i, arity, ogs);
-                throw RuntimeException(TRACE_INFO,
-                           "AtomTable - Attempting to insert link with "
-                           "invalid outgoing members");
-            }
-
-            // The outgoing set must consist entirely of atoms
-            // either in this atomtable, or its environment.
+            // The outgoing set must consist entirely of atoms that
+            // are either in this atomtable, or its environment.
             if (not in_environ(ogs[i])) need_copy = true;
         }
 

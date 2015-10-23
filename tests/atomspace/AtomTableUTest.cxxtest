@@ -36,6 +36,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/FloatValue.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
@@ -271,5 +272,16 @@ public:
         TS_ASSERT(table->getHandlex("1", MY_NUMBER_NODE) != Handle::UNDEFINED);
         TS_ASSERT(table->getHandlex("28675194", MY_CONCEPT_NODE) != Handle::UNDEFINED);
         TS_ASSERT(table->getHandle(MY_INHERITANCE_LINK, os) != Handle::UNDEFINED);
+    }
+
+    void testValue()
+    {
+        Handle time(createNode(TIME_NODE, "1"));
+        Handle fvalue(createFloatValue(2.222));
+        Handle sense(createNode(CONCEPT_NODE, "28675194"));
+
+        Handle inh = table->add(createLink(INHERITANCE_LINK, time, fvalue, sense), true);
+        table->barrier();
+        TS_ASSERT(inh==nullptr);
     }
 };

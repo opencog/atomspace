@@ -23,6 +23,7 @@ ADD_LIBRARY (atomspace SHARED
 	ClassServer.cc
 	CountTruthValue.cc
 	FixedIntegerIndex.cc
+	FloatValue.cc
 	FuzzyTruthValue.cc
 	GenericTruthValue.cc
 	Handle.cc
@@ -69,6 +70,7 @@ INSTALL (FILES
 	ClassServer.h
 	CountTruthValue.h
 	FixedIntegerIndex.h
+	FloatValue.h
 	FuzzyTruthValue.h
 	GenericTruthValue.h
 	Handle.h
@@ -84,6 +86,7 @@ INSTALL (FILES
 	NodeIndex.h
 	NullTruthValue.h
 	ProbabilisticTruthValue.h
+	ProtoAtom.h
 	SimpleTruthValue.h
 	StringIndex.h
 	TLB.h
