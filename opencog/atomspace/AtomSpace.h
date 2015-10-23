@@ -85,6 +85,13 @@ public:
     AtomSpace(AtomSpace* parent = NULL);
     ~AtomSpace();
 
+    /// Get the environment that this atomspace was created in.
+    AtomSpace* get_environ() {
+        AtomTable* env = atomTable.get_environ();
+        if (env) return env->getAtomSpace();
+        return nullptr;
+    }
+
     /**
      * Return the number of atoms contained in the space.
      */

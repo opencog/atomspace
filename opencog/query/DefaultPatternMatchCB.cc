@@ -175,7 +175,7 @@ bool DefaultPatternMatchCB::post_link_match(const LinkPtr& lpat,
 	Handle hp(lpat);
 	if (_dynamic->find(hp) == _dynamic->end()) return true;
 
-	// We will find ourselves here whenever the link contain
+	// We will find ourselves here whenever the link contains
 	// a GroundedPredicateNode. In this case, execute the
 	// node, and declare a match, or no match, depending
 	// one how the evaluation turned out.  Its "crisp logic"
