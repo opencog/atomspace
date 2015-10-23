@@ -160,13 +160,13 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		const LinkPtr l(LinkCast(evelnk));
 		const HandleSeq& sna(l->getOutgoingSet());
 
-		// The arguments may need to be executed...
-		Instantiator inst(scratch);
-		Handle args(inst.execute(sna.at(1)));
-
 		// An ungrounded predicate evaluates to itself
 		if (sna.at(0)->getType() == PREDICATE_NODE)
 			return evelnk->getTruthValue();
+
+		// The arguments may need to be executed...
+		Instantiator inst(scratch);
+		Handle args(inst.execute(sna.at(1)));
 
 		return do_evaluate(scratch, sna.at(0), args);
 	}
