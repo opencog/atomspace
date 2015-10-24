@@ -191,9 +191,7 @@ void Atom::setAttentionValue(AttentionValuePtr av)
     // If the atom importance has changed its bin,
     // update the importance index.
     if (oldBin != newBin) {
-        ProtoAtomPtr pa(shared_from_this());
-        Handle a(pa);
-        _atomTable->updateImportanceIndex(a, oldBin);
+        _atomTable->updateImportanceIndex(getHandle(), oldBin);
     }
 
     // Notify any interested parties that the AV changed.

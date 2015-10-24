@@ -63,14 +63,6 @@ public:
 		return classserver().isA(at, t);
 	}
 
-	/** Returns the handle of the atom.
-	 *
-	 * @return The handle of the atom.
-	 */
-	inline Handle getHandle() {
-		return Handle(shared_from_this());
-	}
-
 	/** Returns a string representation of the node.
 	 *
 	 * @return A string representation of the node.
@@ -98,6 +90,8 @@ public:
 	bool operator!=(const ProtoAtom& other) const
 	{ return not operator==(other); }
 };
+
+typedef std::shared_ptr<ProtoAtom> ProtoAtomPtr;
 
 /** @}*/
 } // namespace opencog

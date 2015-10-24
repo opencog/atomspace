@@ -46,28 +46,6 @@ UUID Handle::value(void) const
     return ULONG_MAX;
 }
 
-Atom* Handle::operator->()
-{
-	ProtoAtom* pa = _ptr.get();
-	return dynamic_cast<Atom*>(pa);
-}
-
-Atom* Handle::operator->() const
-{
-	ProtoAtom* pa = _ptr.get();
-	return dynamic_cast<Atom*>(pa);
-}
-
-Handle::operator AtomPtr() const
-{
-	return std::dynamic_pointer_cast<Atom>(_ptr);
-}
-
-Handle::operator AtomPtr()
-{
-	return std::dynamic_pointer_cast<Atom>(_ptr);
-}
-
 // ===================================================
 // Atom comparison.
 
@@ -80,7 +58,7 @@ bool Handle::atoms_eq(const AtomPtr& a, const AtomPtr& b)
 }
 #endif
 
-bool Handle::atoms_less(const ProtoAtom* pa, const ProtoAtom* pb)
+bool Handle::atoms_less(const Atom* pa, const Atom* pb)
 {
     if (pa == pb) return false;
     if (NULL == pa) return true;

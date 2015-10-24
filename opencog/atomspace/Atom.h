@@ -194,6 +194,14 @@ public:
 
     inline UUID getUUID() const { return _uuid; }
 
+    /** Returns the handle of the atom.
+     *
+     * @return The handle of the atom.
+     */
+    inline Handle getHandle() {
+        return Handle(std::dynamic_pointer_cast<Atom>(shared_from_this()));
+    }
+
     /** Returns the AttentionValue object of the atom.
      *
      * @return The pointer to the AttentionValue object
@@ -268,7 +276,7 @@ public:
      */
     inline Handle tvmerge(TruthValuePtr tv) {
         merge(tv);
-        return Handle(shared_from_this());
+        return getHandle();
     }
 
     //! Get the size of the incoming set.
@@ -396,7 +404,7 @@ public:
 };
 
 static inline AtomPtr AtomCast(const Handle& h)
-    { return std::dynamic_pointer_cast<Atom>(ProtoAtomPtr(h)); }
+    { return AtomPtr(h); }
 
 
 /** @}*/
