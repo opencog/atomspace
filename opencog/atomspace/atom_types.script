@@ -15,9 +15,8 @@
 NOTYPE
 
 VALUE
+FLOAT_VALUE <- VALUE    // vector of floats, actually.
 STRING_VALUE <- VALUE
-FLOAT_VALUE <- VALUE
-VECTOR_VALUE <- FLOAT_VALUE
 
 // Base of hierarchy
 ATOM <- VALUE

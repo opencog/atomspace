@@ -31,10 +31,11 @@ bool FloatValue::operator==(const ProtoAtom& other) const
 }
 
 // ==============================================================
-// Whole lotta truthiness going on here.  Does it really need to be
-// this complicated!?
 
 std::string FloatValue::toString(const std::string& indent)
 {
-	return indent + std::to_string(_value);
+	std::string rv = indent + "(FloatValue";
+	for (double v :_value)
+		rv += std::string(" ") + std::to_string(v);
+	return rv;
 }

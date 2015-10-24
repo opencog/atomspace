@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_FLOAT_VALUE_H
 #define _OPENCOG_FLOAT_VALUE_H
 
+#include <vector>
 #include <opencog/atomspace/ProtoAtom.h>
 #include <opencog/atomspace/atom_types.h>
 
@@ -34,23 +35,25 @@ namespace opencog
  */
 
 /**
- * FloatValues are the base class for the Atom shared pointer.
+ * FloatValues hold an ordered vector of doubles.
  */
 class FloatValue
 	: public ProtoAtom
 {
-private:
-	double _value;
+protected:
+	std::vector<double> _value;
 
 public:
-	FloatValue(double v) : ProtoAtom(FLOAT_VALUE), _value(v) {}
+	FloatValue(double v) : ProtoAtom(FLOAT_VALUE) { _value.push_back(v); }
+	FloatValue(std::vector<double> v) : ProtoAtom(FLOAT_VALUE), _value(v) {}
 
 	virtual ~FloatValue() {}
 
-	/** Returns a string representation of the node.
+	std::vector<double>& value() { return _value; }
+
+	/** Returns a string representation of the value.
 	 *
-	 * @return A string representation of the node.
-	 * cannot be const, because observing the TV and AV requires a lock.
+	 * @return A string representation of the value.
 	 */
 	virtual std::string toString(const std::string& indent);
 	virtual std::string toShortString(const std::string& indent)
