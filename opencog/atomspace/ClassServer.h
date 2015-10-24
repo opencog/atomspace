@@ -158,20 +158,20 @@ public:
     bool isA_non_recursive(Type sub, Type super);
 
     /**
+     * Returns true if given class is a Value.
+     *
+     * @param t class.
+     * @return Whether a given class is Value.
+     */
+    bool isValue(Type t) { return isA(t, VALUE); }
+
+    /**
      * Returns true if given class is a valid atom type.
      *
      * @param t class.
-     * @return Whether a given class is valid.
+     * @return Whether a given class is an atom.
      */
-    bool isValid(Type t) { return isA(t, ATOM); }
-
-    /**
-     * Returns true if given class is a Link.
-     *
-     * @param t class.
-     * @return Whether a given class is Link.
-     */
-    bool isLink(Type t) { return isA(t, LINK); }
+    bool isAtom(Type t) { return isA(t, ATOM); }
 
     /**
      * Returns true if given class is a Node.
@@ -180,6 +180,14 @@ public:
      * @return Whether a given class is Node.
      */
     bool isNode(Type t) { return isA(t, NODE); }
+
+    /**
+     * Returns true if given class is a Link.
+     *
+     * @param t class.
+     * @return Whether a given class is Link.
+     */
+    bool isLink(Type t) { return isA(t, LINK); }
 
     /**
      * Returns whether a class with name 'typeName' is defined.
