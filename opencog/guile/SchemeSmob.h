@@ -24,6 +24,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AttentionValue.h>
+#include <opencog/atomspace/ProtoAtom.h>
 #include <opencog/atomspace/TruthValue.h>
 
 namespace opencog {
@@ -65,6 +66,10 @@ class SchemeSmob
 		static SCM equalp_misc(SCM, SCM);
 		static SCM mark_misc(SCM);
 		static size_t free_misc(SCM);
+
+		static SCM handle_to_scm(const Handle&);
+		static SCM protom_to_scm(const ProtoAtomPtr&);
+		static Handle scm_to_handle(SCM);
 
 		// Atom creation and deletion functions
 		static SCM ss_new_value(SCM, SCM);
@@ -196,13 +201,6 @@ class SchemeSmob
 		// This allows other users to get the atomspace that scheme is
 		// using.
 		static AtomSpace* ss_get_env_as(const char *);
-
-		// Helper functions XXX why are these public ??
-		// XXX Because the embodiment code uses them :-(
-		// The embodiment code should be refactored to not use these.
-		static SCM handle_to_scm(Handle);
-		static Handle scm_to_handle(SCM);
-	public:
 
 		// Utility printing functions
 		static std::string to_string(Handle);

@@ -127,14 +127,20 @@ std::string SchemeSmob::handle_to_string(SCM node)
  * C++ handle object itself.
  */
 
-SCM SchemeSmob::handle_to_scm (Handle h)
+SCM SchemeSmob::handle_to_scm (const Handle& h)
 {
-	Handle* hp = new Handle(h); // so that the smart pointer increments!
-	scm_gc_register_collectable_memory (hp,
-					sizeof(h), "opencog handle");
+	return protom_to_scm(AtomCast(h));
+}
+
+SCM SchemeSmob::protom_to_scm (const ProtoAtomPtr& pa)
+{
+	// Use new so that the smart pointer increments!
+	ProtoAtomPtr* pap = new ProtoAtomPtr(pa);
+	scm_gc_register_collectable_memory (pap,
+					sizeof(pa), "opencog protoatom");
 
 	SCM smob;
-	SCM_NEWSMOB (smob, cog_misc_tag, hp);
+	SCM_NEWSMOB (smob, cog_misc_tag, pap);
 	SCM_SET_SMOB_FLAGS(smob, COG_HANDLE);
 	return smob;
 }
@@ -342,16 +348,16 @@ SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
 {
 	Type t = verify_atom_type(stype, "cog-new-value", 1);
 
-	Handle h;
+	ProtoAtomPtr pa;
 	if (FLOAT_VALUE == t)
 	{
 		std::vector<double> valist;
 		valist = verify_float_list(svalue_list, "cog-new-value", 2);
-		h = createFloatValue(valist);
+		pa = createFloatValue(valist);
 	}
 
 	scm_remember_upto_here_1(svalue_list);
-	return handle_to_scm(h);
+	return protom_to_scm(pa);
 }
 
 /* ============================================================== */
