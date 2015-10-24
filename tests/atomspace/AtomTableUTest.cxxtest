@@ -277,7 +277,7 @@ public:
     void testValue()
     {
         Handle time(createNode(TIME_NODE, "1"));
-        Handle fvalue(createFloatValue(2.222));
+        ProtoAtomPtr fvalue(createFloatValue(2.222));
         Handle sense(createNode(CONCEPT_NODE, "28675194"));
 
         Handle inh = table->add(createLink(INHERITANCE_LINK, time, fvalue, sense), true);

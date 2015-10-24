@@ -44,7 +44,13 @@ namespace opencog
 typedef unsigned long UUID;
 
 class Atom;
-typedef std::shared_ptr<Atom> AtomPtr;
+class Handle;
+struct AtomPtr : public std::shared_ptr<Atom>
+{
+	AtomPtr() : std::shared_ptr<Atom>(nullptr) {}
+	AtomPtr(std::shared_ptr<Atom> ap) : std::shared_ptr<Atom>(ap) {}
+	operator Handle();
+};
 class AtomTable;
 
 //! contains an unique identificator
@@ -164,6 +170,10 @@ public:
         return 0;
     }
 };
+
+inline AtomPtr::operator Handle() {
+	return Handle(*this);
+}
 
 static inline bool operator== (std::nullptr_t, const Handle& rhs) noexcept
     { return rhs == NULL; }

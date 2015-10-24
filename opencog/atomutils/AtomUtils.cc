@@ -42,9 +42,9 @@ HandleSeq get_all_nodes(Handle h)
 
     LinkPtr lll(LinkCast(h));
     if (lll)
-        for (const Handle& o : lll->getOutgoingSet())
+        for (const ProtoAtomPtr& o : lll->getOutgoingSet())
         {
-            HandleSeq sub = get_all_nodes(o);
+            HandleSeq sub(get_all_nodes(o));
             results.insert(results.end(), sub.begin(), sub.end());
         }
     else

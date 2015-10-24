@@ -91,7 +91,15 @@ public:
 	{ return not operator==(other); }
 };
 
-typedef std::shared_ptr<ProtoAtom> ProtoAtomPtr;
+struct ProtoAtomPtr : public std::shared_ptr<ProtoAtom>
+{
+	// ProtoAtomPtr
+	operator AtomPtr() const {
+		return AtomPtr(std::dynamic_pointer_cast<Atom>(*this)); }
+	operator Handle() const { return AtomPtr(*this); }
+};
+
+typedef std::vector<ProtoAtomPtr> ProtomSeq;
 
 /** @}*/
 } // namespace opencog
