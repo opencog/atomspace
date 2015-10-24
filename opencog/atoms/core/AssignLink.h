@@ -119,8 +119,8 @@ public:
 
 typedef std::shared_ptr<AssignLink> AssignLinkPtr;
 static inline AssignLinkPtr AssignLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<AssignLink>(a); }
-static inline AssignLinkPtr AssignLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<AssignLink>(AtomCast(h)); }
+static inline AssignLinkPtr AssignLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<AssignLink>(a); }
 
 // XXX temporary hack ...
@@ -143,8 +143,8 @@ public:
 
 typedef std::shared_ptr<InsertLink> InsertLinkPtr;
 static inline InsertLinkPtr InsertLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<InsertLink>(a); }
-static inline InsertLinkPtr InsertLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<InsertLink>(AtomCast(h)); }
+static inline InsertLinkPtr InsertLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<InsertLink>(a); }
 
 // XXX temporary hack ...
@@ -167,8 +167,8 @@ public:
 
 typedef std::shared_ptr<RemoveLink> RemoveLinkPtr;
 static inline RemoveLinkPtr RemoveLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<RemoveLink>(a); }
-static inline RemoveLinkPtr RemoveLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<RemoveLink>(AtomCast(h)); }
+static inline RemoveLinkPtr RemoveLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<RemoveLink>(a); }
 
 // XXX temporary hack ...

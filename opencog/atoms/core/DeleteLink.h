@@ -57,8 +57,8 @@ public:
 
 typedef std::shared_ptr<DeleteLink> DeleteLinkPtr;
 static inline DeleteLinkPtr DeleteLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<DeleteLink>(a); }
-static inline DeleteLinkPtr DeleteLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<DeleteLink>(AtomCast(h)); }
+static inline DeleteLinkPtr DeleteLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<DeleteLink>(a); }
 
 // XXX temporary hack ...

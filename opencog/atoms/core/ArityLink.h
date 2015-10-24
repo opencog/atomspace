@@ -59,8 +59,8 @@ public:
 
 typedef std::shared_ptr<ArityLink> ArityLinkPtr;
 static inline ArityLinkPtr ArityLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<ArityLink>(a); }
-static inline ArityLinkPtr ArityLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<ArityLink>(AtomCast(h)); }
+static inline ArityLinkPtr ArityLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<ArityLink>(a); }
 
 // XXX temporary hack ...

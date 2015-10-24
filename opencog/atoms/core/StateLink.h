@@ -77,8 +77,8 @@ public:
 
 typedef std::shared_ptr<StateLink> StateLinkPtr;
 static inline StateLinkPtr StateLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<StateLink>(a); }
-static inline StateLinkPtr StateLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<StateLink>(AtomCast(h)); }
+static inline StateLinkPtr StateLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<StateLink>(a); }
 
 // XXX temporary hack ...

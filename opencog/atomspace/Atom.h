@@ -395,6 +395,10 @@ public:
     }
 };
 
+static inline AtomPtr AtomCast(const Handle& h)
+    { return std::dynamic_pointer_cast<Atom>(ProtoAtomPtr(h)); }
+
+
 /** @}*/
 } // namespace opencog
 

@@ -113,7 +113,7 @@ public:
 
 typedef std::shared_ptr<Node> NodePtr;
 static inline NodePtr NodeCast(const Handle& h)
-    { AtomPtr a(h); return std::dynamic_pointer_cast<Node>(a); }
+    { return std::dynamic_pointer_cast<Node>(AtomCast(h)); }
 static inline NodePtr NodeCast(const AtomPtr& a)
     { return std::dynamic_pointer_cast<Node>(a); }
 

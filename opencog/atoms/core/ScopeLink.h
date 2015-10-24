@@ -102,8 +102,8 @@ public:
 
 typedef std::shared_ptr<ScopeLink> ScopeLinkPtr;
 static inline ScopeLinkPtr ScopeLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<ScopeLink>(a); }
-static inline ScopeLinkPtr ScopeLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<ScopeLink>(AtomCast(a)); }
+static inline ScopeLinkPtr ScopeLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<ScopeLink>(a); }
 
 // XXX temporary hack ...

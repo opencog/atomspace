@@ -73,8 +73,8 @@ public:
 
 typedef std::shared_ptr<FreeLink> FreeLinkPtr;
 static inline FreeLinkPtr FreeLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<FreeLink>(a); }
-static inline FreeLinkPtr FreeLinkCast(AtomPtr a)
+   { return std::dynamic_pointer_cast<FreeLink>(AtomCast(h)); }
+static inline FreeLinkPtr FreeLinkCast(const AtomPtr& a)
    { return std::dynamic_pointer_cast<FreeLink>(a); }
 
 // XXX temporary hack ...

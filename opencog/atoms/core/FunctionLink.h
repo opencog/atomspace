@@ -78,8 +78,8 @@ public:
 
 typedef std::shared_ptr<FunctionLink> FunctionLinkPtr;
 static inline FunctionLinkPtr FunctionLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<FunctionLink>(a); }
-static inline FunctionLinkPtr FunctionLinkCast(AtomPtr a)
+   { return std::dynamic_pointer_cast<FunctionLink>(AtomCast(h)); }
+static inline FunctionLinkPtr FunctionLinkCast(const AtomPtr& a)
    { return std::dynamic_pointer_cast<FunctionLink>(a); }
 
 // XXX temporary hack ...
