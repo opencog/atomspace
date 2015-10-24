@@ -319,8 +319,8 @@ bool are_similar(const Handle& h1, const Handle& h2, bool strict_type_match)
         if (strict_type_match and (lh1->getType() != lh2->getType()))
             return false;
 
-        HandleSeq hseqh1 = lh1->getOutgoingSet();
-        HandleSeq hseqh2 = lh2->getOutgoingSet();
+        const ProtomSeq& hseqh1(lh1->getOutgoingSet());
+        ProtomSeq hseqh2(lh2->getOutgoingSet());
 
         if (hseqh1.size() != hseqh2.size())
             return false;

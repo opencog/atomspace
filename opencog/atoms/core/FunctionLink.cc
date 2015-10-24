@@ -36,7 +36,7 @@ void FunctionLink::init(void)
 	FreeLink::init();
 }
 
-FunctionLink::FunctionLink(Type t, const HandleSeq& oset,
+FunctionLink::FunctionLink(Type t, const ProtomSeq& oset,
                    TruthValuePtr tv,
                    AttentionValuePtr av)
     : FreeLink(t, oset, tv, av)
@@ -106,7 +106,7 @@ LinkPtr FunctionLink::factory(LinkPtr lp)
 }
 
 // Basic type factory.
-Handle FunctionLink::factory(Type t, const HandleSeq& seq)
+Handle FunctionLink::factory(Type t, const ProtomSeq& seq)
 {
 	if (ARITY_LINK == t)
 		return Handle(createArityLink(seq));

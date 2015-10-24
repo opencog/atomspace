@@ -93,10 +93,18 @@ public:
 
 struct ProtoAtomPtr : public std::shared_ptr<ProtoAtom>
 {
-	// ProtoAtomPtr
-	operator AtomPtr() const {
-		return AtomPtr(std::dynamic_pointer_cast<Atom>(*this)); }
-	operator Handle() const { return AtomPtr(*this); }
+	ProtoAtomPtr(std::shared_ptr<ProtoAtom> pa) :
+		std::shared_ptr<ProtoAtom>(pa) {}
+	ProtoAtomPtr(AtomPtr a) :
+		std::shared_ptr<ProtoAtom>(
+			std::dynamic_pointer_cast<ProtoAtom>(a)) {}
+	ProtoAtomPtr(Handle h) :
+		std::shared_ptr<ProtoAtom>(
+			std::dynamic_pointer_cast<ProtoAtom>(AtomPtr(h))) {}
+	operator AtomPtr() const
+		{ return AtomPtr(std::dynamic_pointer_cast<Atom>(*this)); }
+	operator Handle() const
+		{ return Handle(AtomPtr(*this)); }
 };
 
 typedef std::vector<ProtoAtomPtr> ProtomSeq;

@@ -199,7 +199,7 @@ public:
      * @return The handle of the atom.
      */
     inline Handle getHandle() {
-        return AtomPtr(std::dynamic_pointer_cast<Atom>(shared_from_this()));
+        return Handle(std::dynamic_pointer_cast<Atom>(shared_from_this()));
     }
 
     /** Returns the AttentionValue object of the atom.
