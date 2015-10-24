@@ -189,6 +189,7 @@ void SchemeSmob::register_procs(void*)
 	register_proc("cog-atom",              1, 0, 0, C(ss_atom));
 	register_proc("cog-handle",            1, 0, 0, C(ss_handle));
 	register_proc("cog-undefined-handle",  0, 0, 0, C(ss_undefined_handle));
+	register_proc("cog-new-value",         1, 0, 1, C(ss_new_value));
 	register_proc("cog-new-node",          2, 0, 1, C(ss_new_node));
 	register_proc("cog-new-link",          1, 0, 1, C(ss_new_link));
 	register_proc("cog-node",              2, 0, 1, C(ss_node));
@@ -197,6 +198,7 @@ void SchemeSmob::register_procs(void*)
 	register_proc("cog-delete-recursive",  1, 0, 1, C(ss_delete_recursive));
 	register_proc("cog-purge",             1, 0, 1, C(ss_purge));
 	register_proc("cog-purge-recursive",   1, 0, 1, C(ss_purge_recursive));
+	register_proc("cog-value?",            1, 0, 1, C(ss_value_p));
 	register_proc("cog-atom?",             1, 0, 1, C(ss_atom_p));
 	register_proc("cog-node?",             1, 0, 1, C(ss_node_p));
 	register_proc("cog-link?",             1, 0, 1, C(ss_link_p));
@@ -253,6 +255,7 @@ void SchemeSmob::register_procs(void*)
 	register_proc("cog-get-types",         0, 0, 0, C(ss_get_types));
 	register_proc("cog-type->int",         1, 0, 0, C(ss_get_type));
 	register_proc("cog-type?",             1, 0, 0, C(ss_type_p));
+	register_proc("cog-value-type?",       1, 0, 0, C(ss_value_type_p));
 	register_proc("cog-node-type?",        1, 0, 0, C(ss_node_type_p));
 	register_proc("cog-link-type?",        1, 0, 0, C(ss_link_type_p));
 	register_proc("cog-get-subtypes",      1, 0, 0, C(ss_get_subtypes));

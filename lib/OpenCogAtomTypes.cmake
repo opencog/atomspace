@@ -143,11 +143,16 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
         MESSAGE(STATUS "Atom type name: ${TYPE_NAME}")
 
         # Try to guess if the thing is a node or link based on its name
+        STRING(REGEX MATCH "VALUE$" ISVALUE ${TYPE})
         STRING(REGEX MATCH "NODE$" ISNODE ${TYPE})
         STRING(REGEX MATCH "LINK$" ISLINK ${TYPE})
 
         # Print out the scheme definitions
         FILE(APPEND "${SCM_FILE}" "(define-public ${TYPE_NAME}Type (cog-type->int '${TYPE_NAME}))\n")
+        IF (ISVALUE STREQUAL "VALUE")
+            FILE(APPEND "${SCM_FILE}" "(define-public (${TYPE_NAME} . x)\n")
+            FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-value (append (list ${TYPE_NAME}Type) x)))\n")
+        ENDIF (ISVALUE STREQUAL "VALUE")
         IF (ISNODE STREQUAL "NODE")
             FILE(APPEND "${SCM_FILE}" "(define-public (${TYPE_NAME} . x)\n")
             FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-node (append (list ${TYPE_NAME}Type) x)))\n")
@@ -165,6 +170,10 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
         ENDIF (NOT ISNODE STREQUAL "NODE" AND NOT ISLINK STREQUAL "LINK")
 
         # Print out the python definitions
+        IF (ISVALUE STREQUAL "VALUE")
+            FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(node_name, tv=None):\n")
+            FILE(APPEND "${PYTHON_FILE}" "    return atomspace.add_node(types.${TYPE_NAME}, node_name, tv)\n")
+        ENDIF (ISVALUE STREQUAL "VALUE")
         IF (ISNODE STREQUAL "NODE")
             FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(node_name, tv=None):\n")
             FILE(APPEND "${PYTHON_FILE}" "    return atomspace.add_node(types.${TYPE_NAME}, node_name, tv)\n")

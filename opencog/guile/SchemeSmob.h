@@ -67,6 +67,7 @@ class SchemeSmob
 		static size_t free_misc(SCM);
 
 		// Atom creation and deletion functions
+		static SCM ss_new_value(SCM, SCM);
 		static SCM ss_new_node(SCM, SCM, SCM);
 		static SCM ss_new_link(SCM, SCM);
 		static SCM ss_node(SCM, SCM, SCM);
@@ -75,6 +76,7 @@ class SchemeSmob
 		static SCM ss_delete_recursive(SCM, SCM);
 		static SCM ss_purge(SCM, SCM);
 		static SCM ss_purge_recursive(SCM, SCM);
+		static SCM ss_value_p(SCM);
 		static SCM ss_atom_p(SCM);
 		static SCM ss_node_p(SCM);
 		static SCM ss_link_p(SCM);
@@ -108,6 +110,7 @@ class SchemeSmob
 		static SCM ss_get_types(void);
 		static SCM ss_get_type(SCM);
 		static SCM ss_type_p(SCM);
+		static SCM ss_value_type_p(SCM);
 		static SCM ss_node_type_p(SCM);
 		static SCM ss_link_type_p(SCM);
 		static SCM ss_get_subtypes(SCM);
@@ -175,6 +178,8 @@ class SchemeSmob
 		static TruthValue * verify_tv(SCM, const char *, int pos = 1);
 		static AttentionValue * verify_av(SCM, const char *, int pos = 1);
 		static std::vector<Handle> verify_handle_list (SCM, const char *,
+		                                  int pos = 1);
+		static std::vector<double> verify_float_list (SCM, const char *,
 		                                  int pos = 1);
 		static std::string verify_string (SCM, const char *, int pos = 1,
 		                                  const char *msg = "expecting string");

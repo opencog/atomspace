@@ -15,6 +15,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/FloatValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
@@ -189,6 +190,21 @@ SCM SchemeSmob::ss_undefined_handle (void)
 }
 
 /* ============================================================== */
+/** Return true if s is a value */
+
+SCM SchemeSmob::ss_value_p (SCM s)
+{
+	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
+		return SCM_BOOL_F;
+
+	scm_t_bits misctype = SCM_SMOB_FLAGS(s);
+	if (COG_HANDLE == misctype)
+		return SCM_BOOL_T;
+
+	return SCM_BOOL_F;
+}
+
+/* ============================================================== */
 /** Return true if s is an atom */
 
 SCM SchemeSmob::ss_atom_p (SCM s)
@@ -287,6 +303,58 @@ int SchemeSmob::verify_int (SCM sint, const char *subrname,
 	return scm_to_int(sint);
 }
 
+/* ============================================================== */
+/**
+ * Convert argument into a list of floats.
+ */
+std::vector<double>
+SchemeSmob::verify_float_list (SCM svalue_list, const char * subrname, int pos)
+{
+	// Verify that second arg is an actual list. Allow null list
+	// (which is rather unusual, but legit.  Allow embedded nulls
+	// as this can be convenient for writing scheme code.
+	if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
+		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a list of (float-pt) values");
+
+	std::vector<double> valist;
+	SCM sl = svalue_list;
+	pos = 2;
+	while (scm_is_pair(sl)) {
+		SCM svalue = SCM_CAR(sl);
+
+		// Verify that the contents of the list are actual floats.
+		double v = scm_to_double(svalue);
+		valist.emplace_back(v);
+		if (scm_is_null(svalue)) {
+			// No-op, just ignore.
+		}
+		sl = SCM_CDR(sl);
+		pos++;
+	}
+
+	return valist;
+}
+
+/**
+ * Create a new value, of named type stype, and value vector svect
+ */
+SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
+{
+	Type t = verify_atom_type(stype, "cog-new-value", 1);
+
+	Handle h;
+	if (FLOAT_VALUE == t)
+	{
+		std::vector<double> valist;
+		valist = verify_float_list(svalue_list, "cog-new-value", 2);
+		h = createFloatValue(valist);
+	}
+
+	scm_remember_upto_here_1(svalue_list);
+	return handle_to_scm(h);
+}
+
+/* ============================================================== */
 /**
  * Create a new node, of named type stype, and string name sname
  */
@@ -380,7 +448,7 @@ std::vector<Handle>
 SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
 {
 	// Verify that second arg is an actual list. Allow null list
-	// (which is rather unusal, but legit.  Allow embedded nulls
+	// (which is rather unusual, but legit.  Allow embedded nulls
 	// as this can be convenient for writing scheme code.
 	if (!scm_is_pair(satom_list) and !scm_is_null(satom_list))
 		scm_wrong_type_arg_msg(subrname, pos, satom_list, "a list of atoms");
