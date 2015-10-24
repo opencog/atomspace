@@ -14,7 +14,7 @@ ADD_CUSTOM_COMMAND(
 )
 
 ADD_LIBRARY (zmqatoms SHARED
-	ZMQMessages.pb
+	ZMQMessages.pb.cc ZMQMessages.pb.h
 	ProtocolBufferSerializer
 	ZMQClient
 	ZMQPersistSCM
