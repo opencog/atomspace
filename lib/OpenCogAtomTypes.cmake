@@ -164,10 +164,14 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
 
         # If not named as a node or a link, assume its a link
         # This is kind of hacky, but I don't know what else to do ... 
-        IF (NOT ISNODE STREQUAL "NODE" AND NOT ISLINK STREQUAL "LINK")
+        IF (NOT ISNODE STREQUAL "NODE" AND
+            NOT ISLINK STREQUAL "LINK" AND
+            NOT ISVALUE STREQUAL "VALUE")
             FILE(APPEND "${SCM_FILE}" "(define-public (${TYPE_NAME} . x)\n")
             FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-link (append (list ${TYPE_NAME}Type) x)))\n")
-        ENDIF (NOT ISNODE STREQUAL "NODE" AND NOT ISLINK STREQUAL "LINK")
+        ENDIF (NOT ISNODE STREQUAL "NODE" AND
+            NOT ISLINK STREQUAL "LINK" AND
+            NOT ISVALUE STREQUAL "VALUE")
 
         # Print out the python definitions
         IF (ISVALUE STREQUAL "VALUE")
@@ -185,10 +189,14 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
 
         # If not named as a node or a link, assume its a link
         # This is kind of hacky, but I don't know what else to do ... 
-        IF (NOT ISNODE STREQUAL "NODE" AND NOT ISLINK STREQUAL "LINK")
+        IF (NOT ISNODE STREQUAL "NODE" AND
+            NOT ISLINK STREQUAL "LINK" AND
+            NOT ISVALUE STREQUAL "VALUE")
             FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(*args):\n")
             FILE(APPEND "${PYTHON_FILE}" "    return atomspace.add_link(types.${TYPE_NAME}, args)\n")
-        ENDIF (NOT ISNODE STREQUAL "NODE" AND NOT ISLINK STREQUAL "LINK")
+        ENDIF (NOT ISNODE STREQUAL "NODE" AND
+            NOT ISLINK STREQUAL "LINK" AND
+            NOT ISVALUE STREQUAL "VALUE")
 
         IF (PARENT_TYPES)
             STRING(REGEX REPLACE "[ 	]*,[ 	]*" ";" PARENT_TYPES "${PARENT_TYPES}")
