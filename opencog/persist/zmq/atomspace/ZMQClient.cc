@@ -151,6 +151,10 @@ void ZMQClient::store(const AtomTable &table) {
 	    [&](Handle h)->void { store_cb(h); }, ATOM, true);
 }
 
+void ZMQClient::loadType(AtomTable &, Type)
+{
+}
+
 void ZMQClient::load(AtomTable &table) {
 
 }
