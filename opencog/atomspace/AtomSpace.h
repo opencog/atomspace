@@ -710,8 +710,8 @@ public:
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    const ProtomSeq& get_outgoing(Handle h) const {
-        static ProtomSeq empty;
+    const HandleSeq& get_outgoing(Handle h) const {
+        static HandleSeq empty;
         LinkPtr lll(LinkCast(h));
         if (lll) return lll->getOutgoingSet();
         return empty;

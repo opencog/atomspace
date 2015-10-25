@@ -91,6 +91,8 @@ public:
 	{ return not operator==(other); }
 };
 
+typedef std::shared_ptr<ProtoAtom> ProtoAtomPtr;
+/*
 struct ProtoAtomPtr : public std::shared_ptr<ProtoAtom>
 {
 	ProtoAtomPtr(std::shared_ptr<ProtoAtom> pa) :
@@ -106,6 +108,7 @@ struct ProtoAtomPtr : public std::shared_ptr<ProtoAtom>
 	operator Handle() const
 		{ return Handle(AtomPtr(*this)); }
 };
+*/
 
 typedef std::vector<ProtoAtomPtr> ProtomSeq;
 

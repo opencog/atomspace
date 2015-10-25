@@ -119,7 +119,7 @@ Handle AssignLink::execute(AtomSpace * as) const
 		// Wrong Arity, can't delete that either!
 		if (_osetz != lp->getArity()) continue;
 
-		const ProtomSeq& hs = lp->getOutgoingSet();
+		const HandleSeq& hs = lp->getOutgoingSet();
 		if (_outset[0] != hs[0]) continue;
 
 		bool match = true;
@@ -186,7 +186,7 @@ InsertLink::InsertLink(Link &l)
 Handle RemoveLink::execute(AtomSpace* as) const
 {
 	// A word of caution: It may be the case that the atoms in
-	// ProtomSeq _outset are not in the atomspace we are being
+	// HandleSeq _outset are not in the atomspace we are being
 	// executed with. Thus, we need to get thier equivalents that
 	// actually are in the atomspace, so that we can actually
 	// locate the atom to be removed.  This is kind-of subtle,
@@ -221,7 +221,7 @@ Handle RemoveLink::execute(AtomSpace* as) const
 			// Wrong Arity, can't delete that either!
 			if (_osetz != lp->getArity()) continue;
 
-			const ProtomSeq& hs = lp->getOutgoingSet();
+			const HandleSeq& hs = lp->getOutgoingSet();
 			bool match = true;
 			for (size_t i=0; i < _osetz; i++)
 			{
@@ -254,7 +254,7 @@ Handle RemoveLink::execute(AtomSpace* as) const
 		// Wrong Arity, cannot delete that.
 		if (_osetz != lp->getArity()) continue;
 
-		const ProtomSeq& hs = lp->getOutgoingSet();
+		const HandleSeq& hs = lp->getOutgoingSet();
 		bool match = true;
 		for (size_t i=0; i < _osetz; i++)
 		{

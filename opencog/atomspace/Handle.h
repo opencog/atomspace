@@ -46,15 +46,6 @@ typedef unsigned long UUID;
 class Atom;
 class Handle;
 typedef std::shared_ptr<Atom> AtomPtr;
-/*
-struct AtomPtr : public std::shared_ptr<Atom>
-{
-	AtomPtr() : std::shared_ptr<Atom>(nullptr) {}
-	AtomPtr(std::shared_ptr<Atom> ap) : std::shared_ptr<Atom>(ap) {}
-	operator Handle();
-	operator std::shared_ptr<Atom>() { return *this; }
-};
-*/
 class AtomTable;
 
 //! contains an unique identificator
@@ -81,7 +72,6 @@ public:
     static const UUID INVALID_UUID = ULONG_MAX;
     static const Handle UNDEFINED;
 
-    // explicit Handle(const std::shared_ptr<Atom>& atom) : _ptr(atom) {}
     explicit Handle(const AtomPtr& atom) : _ptr(atom) {}
     explicit Handle(const UUID);
     explicit Handle() {}
@@ -175,12 +165,6 @@ public:
         return 0;
     }
 };
-
-/*
-inline AtomPtr::operator Handle() {
-	return Handle(*this);
-}
-*/
 
 static inline bool operator== (std::nullptr_t, const Handle& rhs) noexcept
     { return rhs == NULL; }

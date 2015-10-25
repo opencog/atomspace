@@ -42,7 +42,7 @@ HandleSeq get_all_nodes(Handle h)
 
     LinkPtr lll(LinkCast(h));
     if (lll)
-        for (const ProtoAtomPtr& o : lll->getOutgoingSet())
+        for (const Handle& o : lll->getOutgoingSet())
         {
             HandleSeq sub(get_all_nodes(o));
             results.insert(results.end(), sub.begin(), sub.end());
@@ -319,8 +319,8 @@ bool are_similar(const Handle& h1, const Handle& h2, bool strict_type_match)
         if (strict_type_match and (lh1->getType() != lh2->getType()))
             return false;
 
-        const ProtomSeq& hseqh1(lh1->getOutgoingSet());
-        ProtomSeq hseqh2(lh2->getOutgoingSet());
+        const HandleSeq& hseqh1(lh1->getOutgoingSet());
+        HandleSeq hseqh2(lh2->getOutgoingSet());
 
         if (hseqh1.size() != hseqh2.size())
             return false;

@@ -52,7 +52,7 @@ class Link : public Atom
     friend class AtomTable;
 
 private:
-    void init(const ProtomSeq&);
+    void init(const HandleSeq&);
     void resort(void);
 
     Link(const Link &l) : Atom(0)
@@ -62,7 +62,7 @@ protected:
 
     //! Array holding actual outgoing set of the link.
     //! Should not change during atom lifespan.
-    ProtomSeq _outgoing;
+    HandleSeq _outgoing;
 
 public:
     /**
@@ -74,7 +74,7 @@ public:
      * @param Link truthvalue, which will be cloned before being
      *        stored in this Link.
      */
-    Link(Type t, const ProtomSeq& oset,
+    Link(Type t, const HandleSeq& oset,
          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
@@ -87,7 +87,7 @@ public:
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
     {
-        ProtomSeq oset;
+        HandleSeq oset;
         oset.emplace_back(h);
         init(oset);
     }
@@ -97,7 +97,7 @@ public:
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
     {
-        ProtomSeq oset;
+        HandleSeq oset;
         oset.emplace_back(ha);
         oset.emplace_back(hb);
         init(oset);
@@ -108,7 +108,7 @@ public:
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
     {
-        ProtomSeq oset;
+        HandleSeq oset;
         oset.emplace_back(ha);
         oset.emplace_back(hb);
         oset.emplace_back(hc);
@@ -120,7 +120,7 @@ public:
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
     {
-        ProtomSeq oset;
+        HandleSeq oset;
         oset.emplace_back(ha);
         oset.emplace_back(hb);
         oset.emplace_back(hc);
@@ -157,7 +157,7 @@ public:
      *
      * @return A const reference to this atom's outgoing set.
      */
-    inline const ProtomSeq& getOutgoingSet() const
+    inline const HandleSeq& getOutgoingSet() const
     {
         return _outgoing;
     }
