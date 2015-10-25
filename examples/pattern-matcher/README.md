@@ -16,7 +16,7 @@ main features.
     depend on a precondition.
 * presence.scm: various ways of testing for the presence of an atom in
     the AtomSpace.
-* absent.scm: Use the AssignLink to set state; use AbsentLink to check
+* absent.scm: Use the StateLink to set state; use AbsentLink to check
     for the absence of atoms in the AtomSpace.
 * define.scm: using DefineLinks to create patterns out of parts.
 
