@@ -42,6 +42,12 @@ std::string SchemeSmob::to_string(SCM node)
  * The input handle is represented in terms of a valid scheme
  * expression. Evaluating this expression should result in exactly
  * the same atom being created.
+ *
+ * This is NOT optimized for performance, as printing should not
+ * be in any performance-critical paths ...
+ *
+ * This does NOT use the Atom::toString() methods, because those
+ * methods are not guaranteed to generate valid scheme.
  */
 std::string SchemeSmob::to_string(Handle h)
 {
@@ -56,11 +62,10 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 	// to file, and then restored, as needed.
 	std::string ret = "";
 	for (int i=0; i< indent; i++) ret += "   ";
-	ret += "(";
-	ret += classserver().getTypeName(h->getType());
 	NodePtr nnn(NodeCast(h));
-	LinkPtr lll(LinkCast(h));
 	if (nnn) {
+		ret += "(";
+		ret += classserver().getTypeName(h->getType());
 		ret += " \"";
 		ret += nnn->getName();
 		ret += "\"";
@@ -81,7 +86,12 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 		ret += ")";
 		return ret;
 	}
-	else if (lll) {
+
+	LinkPtr lll(LinkCast(h));
+	if (lll) {
+		ret += "(";
+		ret += classserver().getTypeName(h->getType());
+
 		// If there's a truth value, print it before the other atoms
 		TruthValuePtr tv(h->getTruthValue());
 		if (!tv->isDefaultTV()) {
@@ -111,6 +121,11 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 		return ret;
 	}
 
+	ProtoAtomPtr vvv(AtomCast(h));
+	if (vvv) {
+		ret += vvv->toString();
+		return ret;
+	}
 	return ret;
 }
 
