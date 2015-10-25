@@ -75,7 +75,6 @@ ADD_LIBRARY(atomspace_cython SHARED
 # XXX FIXME Cython should not static link the atom-types, but
 # but should instead dynamic-load them, as needed.
 ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
-ADD_DEPENDENCIES(atomspace_cython pln_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace_cython
 	atomspace
