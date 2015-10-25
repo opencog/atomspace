@@ -16,6 +16,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/FloatValue.h>
+#include <opencog/atomspace/LinkValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
@@ -343,11 +344,39 @@ SchemeSmob::verify_float_list (SCM svalue_list, const char * subrname, int pos)
 	while (scm_is_pair(sl)) {
 		SCM svalue = SCM_CAR(sl);
 
-		// Verify that the contents of the list are actual floats.
-		double v = scm_to_double(svalue);
-		valist.emplace_back(v);
-		if (scm_is_null(svalue)) {
-			// No-op, just ignore.
+		if (not scm_is_null(svalue)) {
+			double v = scm_to_double(svalue);
+			valist.emplace_back(v);
+		}
+		sl = SCM_CDR(sl);
+		pos++;
+	}
+
+	return valist;
+}
+
+/**
+ * Convert argument into a list of protoatoms.
+ */
+std::vector<ProtoAtomPtr>
+SchemeSmob::verify_protom_list (SCM svalue_list, const char * subrname, int pos)
+{
+	// Verify that second arg is an actual list. Allow null list
+	// (which is rather unusual, but legit.  Allow embedded nulls
+	// as this can be convenient for writing scheme code.
+	if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
+		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a list of (protoato) values");
+
+	std::vector<ProtoAtomPtr> valist;
+	SCM sl = svalue_list;
+	pos = 2;
+	while (scm_is_pair(sl)) {
+		SCM svalue = SCM_CAR(sl);
+
+		if (not scm_is_null(svalue)) {
+			Handle h(scm_to_handle(svalue));
+			ProtoAtomPtr pa(AtomCast(h));
+			valist.emplace_back(pa);
 		}
 		sl = SCM_CDR(sl);
 		pos++;
@@ -369,6 +398,13 @@ SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
 		std::vector<double> valist;
 		valist = verify_float_list(svalue_list, "cog-new-value", 2);
 		pa = createFloatValue(valist);
+	}
+
+	else if (LINK_VALUE == t)
+	{
+		std::vector<ProtoAtomPtr> valist;
+		valist = verify_protom_list(svalue_list, "cog-new-value", 2);
+		pa = createLinkValue(valist);
 	}
 
 	scm_remember_upto_here_1(svalue_list);

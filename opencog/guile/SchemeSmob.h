@@ -186,6 +186,8 @@ class SchemeSmob
 		                                  int pos = 1);
 		static std::vector<double> verify_float_list (SCM, const char *,
 		                                  int pos = 1);
+		static std::vector<ProtoAtomPtr> verify_protom_list (SCM, const char *,
+		                                  int pos = 1);
 		static std::string verify_string (SCM, const char *, int pos = 1,
 		                                  const char *msg = "expecting string");
 		static int verify_int (SCM, const char *, int pos = 1,
