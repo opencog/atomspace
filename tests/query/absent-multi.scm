@@ -55,7 +55,7 @@
 (define (get-proven) ufo-proven)
 
 ; Initial state: UFO exists
-(ListLink ufo-state ufo-exists)
+(StateLink ufo-state ufo-exists)
 
 ; The UFO exists only if both Mulder and Scully are not around.
 (define is-visible
@@ -83,4 +83,4 @@
 
 ;; Display the current UFO state
 (define (show-ufo-state)
-   (cog-chase-link 'StateLink 'ConceptNode ufo-state))
+   (car (cog-chase-link 'StateLink 'ConceptNode ufo-state)))
