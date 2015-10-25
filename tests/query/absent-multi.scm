@@ -25,15 +25,17 @@
 
 ; Call in the agents
 (define call-mulder
-	(InsertLink
-		(TypeNode "EvaluationLink")
-		(PredicateNode "Agent Mulder")
+	(PutLink
+		(EvaluationLink
+			(PredicateNode "Agent Mulder")
+			(VariableNode "$x"))
 		(ListLink (ConceptNode "Exploring Area 51"))))
 
 (define call-scully
-	(InsertLink
-		(TypeNode "EvaluationLink")
-		(PredicateNode "Agent Scully")
+	(PutLink
+		(EvaluationLink
+			(PredicateNode "Agent Scully")
+			(VariableNode "$x"))
 		(ListLink (ConceptNode "Late night in the morgue"))))
 
 ; Make the agents go away.
@@ -53,13 +55,13 @@
 (define (get-proven) ufo-proven)
 
 ; Initial state: UFO exists
-(ListLink ufo-state ufo-exists)
+(StateLink ufo-state ufo-exists)
 
 ; The UFO exists only if both Mulder and Scully are not around.
 (define is-visible
 	(BindLink
 		(AndLink (AbsentLink mulder) (AbsentLink scully))
-		(AssignLink (TypeNode "ListLink") ufo-state ufo-exists)
+		(PutLink (StateLink ufo-state (VariableNode "$x")) ufo-exists)
 	)
 )
 
@@ -67,7 +69,7 @@
 (define is-invisible
 	(BindLink
 		(ChoiceLink mulder scully)
-		(AssignLink (TypeNode "ListLink") ufo-state ufo-denied)
+		(PutLink (StateLink ufo-state (VariableNode "$x")) ufo-denied)
 	)
 )
 
@@ -75,10 +77,10 @@
 (define is-proven
 	(BindLink
 		(AndLink mulder scully)
-		(AssignLink (TypeNode "ListLink") ufo-state ufo-proven)
+		(PutLink (StateLink ufo-state (VariableNode "$x")) ufo-proven)
 	)
 )
 
 ;; Display the current UFO state
 (define (show-ufo-state)
-   (car (cog-chase-link 'ListLink 'ConceptNode ufo-state)))
+   (car (cog-chase-link 'StateLink 'ConceptNode ufo-state)))
