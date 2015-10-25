@@ -5,7 +5,7 @@
 ; EvaluationLink is present in the atomspace. If it is, then set a state
 ; atom that indicates whether it is present or not.
 ;
-; The state atom is called "Room State", and it will be linked either to
+; The state atom is called "Room List", and it will be linked either to
 ; (ConceptNode "empty") or to (ConceptNode "full"). The (show-room-state)
 ; function will display the current state, when called.
 ;
@@ -30,11 +30,7 @@
 
 ; Create a golem; the golem is brought to life when its executed.
 (define golem
-	(PutLink
-		(EvaluationLink
-			(PredicateNode "visiblity")
-			(VariableNode "$x"))
-		(ListLink (ConceptNode "item 42"))))
+	(PutLink query (ConceptNode "item 42")))
 
 ; If an item is visible, delete it, kill it.
 (define destroy
@@ -46,12 +42,12 @@
 	(BindLink (AbsentLink query) golem)
 )
 
-(define room-state (AnchorNode "Room State"))
+(define room-state (AnchorNode "Room List"))
 (define room-empty (ConceptNode "room empty"))
 (define room-nonempty (ConceptNode "room nonempty"))
 
 ; Initial state: room is empty
-(ListLink room-state room-empty)
+(StateLink room-state room-empty)
 
 ; Set the current state if an item is visible.
 (define is-visible
@@ -70,4 +66,4 @@
 
 ;; Display the current room state
 (define (show-room-state)
-   (cog-chase-link 'StateLink 'ConceptNode room-state))
+   (car (cog-chase-link 'StateLink 'ConceptNode room-state)))
