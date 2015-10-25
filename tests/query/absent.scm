@@ -15,11 +15,7 @@
 ; absense, and if it is absent, sets the state to "empty".
 ;
 ; The EvaluationLink is created and destroyed by running one of two
-; patterns, `create` or `destroy`.  The first one uses a `golem`, an
-; InsertLink that will create the actual EvaluationLink when it is
-; executed.  That is, the InsertLink defines a potential link, one that
-; is not yet in the Atomspace, but whose description is. When it is
-; triggered, the description is turned into the actual link.
+; patterns, `create` or `destroy`.
 ;
 (use-modules (opencog))
 (use-modules (opencog query))
@@ -34,9 +30,10 @@
 
 ; Create a golem; the golem is brought to life when its executed.
 (define golem
-	(InsertLink
-		(TypeNode "EvaluationLink")
-		(PredicateNode "visiblity")
+	(PutLink
+		(EvaluationLink
+			(PredicateNode "visiblity")
+			(VariableNode "$x"))
 		(ListLink (ConceptNode "item 42"))))
 
 ; If an item is visible, delete it, kill it.
@@ -60,19 +57,17 @@
 (define is-visible
 	(BindLink
 		query
-		(AssignLink (TypeNode "ListLink") room-state room-nonempty)
-	)
-)
+		(PutLink (StateLink room-state (VariableNode "$x")) room-nonempty)
+	))
 
 ; This has an absent link in it; the link is assigned only when
 ; the atomspace does not have a visible item.
 (define is-invisible
 	(BindLink
 		(AbsentLink query)
-		(AssignLink (TypeNode "ListLink") room-state room-empty)
-	)
-)
+		(PutLink (StateLink room-state (VariableNode "$x")) room-empty)
+	))
 
 ;; Display the current room state
 (define (show-room-state)
-   (car (cog-chase-link 'ListLink 'ConceptNode room-state)))
+   (cog-chase-link 'StateLink 'ConceptNode room-state))
