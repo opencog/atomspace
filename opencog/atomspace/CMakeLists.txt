@@ -34,6 +34,7 @@ ADD_LIBRARY (atomspace SHARED
 	IndefiniteTruthValue.cc
 	Link.cc
 	LinkIndex.cc
+	LinkValue.cc
 	Node.cc
 	NodeIndex.cc
 	NullTruthValue.cc
@@ -81,6 +82,7 @@ INSTALL (FILES
 	IndefiniteTruthValue.h
 	Link.h
 	LinkIndex.h
+	LinkValue.h
 	NameIndex.h
 	Node.h
 	NodeIndex.h
