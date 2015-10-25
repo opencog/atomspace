@@ -23,7 +23,6 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifdef HAVE_ZMQ
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -265,6 +264,4 @@ void ZMQClient::flushStoreQueue()
 
 }
 
-
-#endif /* HAVE_ZMQ_STORAGE */
 /* ============================= END OF FILE ================= */
