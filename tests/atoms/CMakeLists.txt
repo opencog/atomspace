@@ -1,7 +1,4 @@
 
-ADD_CXXTEST(AssignUTest)
-TARGET_LINK_LIBRARIES(AssignUTest atomspace clearbox)
-
 IF(HAVE_GUILE)
 	ADD_CXXTEST(FreeLinkUTest)
 	TARGET_LINK_LIBRARIES(FreeLinkUTest atomspace smob)
