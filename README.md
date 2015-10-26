@@ -11,6 +11,7 @@ The main project site is at http://opencog.org
 
 An interactive tutorial for getting started is available at:
 https://github.com/opencog/opencog/blob/master/TUTORIAL.md
+See also https://github.com/opencog/atomspace/blob/master/examples
 
 Prerequisites
 -------------
