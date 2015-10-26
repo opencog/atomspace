@@ -44,7 +44,7 @@ ADD_LIBRARY (atomspace SHARED
 )
 
 # Without this, parallel make will race and crap up the generated files.
-ADD_DEPENDENCIES(atomspace opencog_atom_types atom_types.h)
+ADD_DEPENDENCIES(atomspace opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace
 	lambda
