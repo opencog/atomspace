@@ -87,7 +87,7 @@ int load_scm_file_relative (AtomSpace& as, const std::string& filename,
     for (const std::string& search_path : search_paths) {
         boost::filesystem::path modulePath(search_path);
         modulePath /= filename;
-        logger().debug("Searching path %s", modulePath.string().c_str());
+        logger().fine("Searching path %s", modulePath.string().c_str());
         if (boost::filesystem::exists(modulePath)) {
             rc = load_scm_file(as, modulePath.string());
             if (0 == rc) {

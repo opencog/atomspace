@@ -355,13 +355,13 @@ ENDIF (VALGRIND_FOUND)
 
 # ZeroMQ
 FIND_PACKAGE(ZMQ 3.2.4)
-IF (ZMQ_FOUND AND ZMQ_LIBRARY)
+IF (ZMQPP_FOUND AND ZMQ_LIBRARY)
 	ADD_DEFINITIONS(-DHAVE_ZMQLIB)
 	SET(HAVE_ZMQLIB 1)
 	SET(ZMQ_DIR_MESSAGE "ZeroMQ was found.")
-ELSE (ZMQ_FOUND AND ZMQ_LIBRARY)
-	SET(ZMQ_DIR_MESSAGE "ZeroMQ was not found; \nTo over-ride, make sure that the environment variable ZMQ_LIBRARY is set.\nInstallation instructions: http://zeromq.org/intro:get-the-software")
-ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY)
+ELSE (ZMQPP_FOUND AND ZMQ_LIBRARY)
+	SET(ZMQ_DIR_MESSAGE "ZeroMQ library or its C++ header file was not found; \nTo over-ride, make sure that the environment variable ZMQ_LIBRARY is set.\nInstallation instructions: http://zeromq.org/intro:get-the-software")
+ENDIF (ZMQPP_FOUND AND ZMQ_LIBRARY)
 MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
 
 # ==========================================================
@@ -419,7 +419,7 @@ IF (NOT DEFINED LIB_DIR_SUFFIX)
 ENDIF (NOT DEFINED LIB_DIR_SUFFIX)
 
 # set default include paths
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${Boost_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${COGUTIL_INCLUDE_DIR})
 
 # rpath handling
 SET(CMAKE_SKIP_BUILD_RPATH	FALSE)

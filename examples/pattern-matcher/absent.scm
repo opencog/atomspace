@@ -1,14 +1,14 @@
 ;
-; Demo illustrating use of AbsentLink, AssignLink
+; Demo illustrating use of AbsentLink, StateLink
 ;
 ; Repeatedly create and destroy an EvaluationLink. Then test to see if
 ; the EvaluationLink is present in the atomspace. If it is, then set a
 ; state atom that indicates whether it is present or not.
 ;
-; The state atom is set using the AssignLink, which provides a device
+; The state is managed using the StateLink, which provides a device
 ; that "sets state" in the AtomSpace.  It does not actually set state,
-; in the sense of changing some atom; this is impossible.  Instead, it
-; just adds and removes links; however, the net effect is as if the
+; in the sense of changing some atom; this is impossible (by design).
+; Instead, it just adds and removes links; the net effect is as if the
 ; linked atom was a state variable; as its linkage changes, it looks
 ; as if it's state is changing.
 ;
@@ -42,8 +42,8 @@
 ;
 ; The EvaluationLink is created and destroyed by running one of two
 ; patterns, `create` or `destroy`.  The first one uses a `golem`, an
-; InsertLink that will create the actual EvaluationLink when it is
-; executed.  That is, the InsertLink defines a potential link, one that
+; PutLink that will create the actual EvaluationLink when it is
+; executed.  That is, the PutLink defines a potential link, one that
 ; is not yet in the Atomspace, but whose description is. When it is
 ; triggered, the description is turned into the actual link.
 ;
@@ -52,7 +52,7 @@
 
 (load-from-path "utilities.scm")
 
-; Clause to match during query.  This is the EvaluiationLink whose
+; Clause to match during query.  This is the EvaluationLink whose
 ; presence or absence we will be testing for.
 (define query
 	(EvaluationLink
@@ -62,10 +62,7 @@
 ; Create a golem; the golem is brought to life when its executed.
 ; i.e. this creates the EvaluationLink when it is executed.
 (define golem
-	(InsertLink
-		(TypeNode "EvaluationLink")
-		(PredicateNode "visiblity")
-		(ListLink (ConceptNode "item 42"))))
+	(PutLink query (ConceptNode "item 42")))
 
 ; If an item is visible, delete it, kill it.
 (define destroy
@@ -83,13 +80,13 @@
 (define room-nonempty (ConceptNode "room nonempty"))
 
 ; Initial state: room is empty.
-(ListLink room-state room-empty)
+(StateLink room-state room-empty)
 
 ; Set the current state if an item is visible.
 (define is-visible
 	(BindLink
 		query
-		(AssignLink (TypeNode "ListLink") room-state room-nonempty)
+		(PutLink (StateLink room-state (VariableNode "$x")) room-nonempty)
 	)
 )
 
@@ -98,13 +95,13 @@
 (define is-invisible
 	(BindLink
 		(AbsentLink query)
-		(AssignLink (TypeNode "ListLink") room-state room-empty)
+		(PutLink (StateLink room-state (VariableNode "$x")) room-empty)
 	)
 )
 
 ;; Display the current room state
 (define (show-room-state)
-   (car (cog-chase-link 'ListLink 'ConceptNode room-state)))
+   (car (cog-chase-link 'StateLink 'ConceptNode room-state)))
 
 ; Now, for the actual demonstration.
 ; First, verify that the room is empty.

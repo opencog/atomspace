@@ -336,8 +336,15 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
 {
     HandleSeq result;
 
+    //Add source atoms to focus_set atomspace
+    if (search_in_focus_set) {
+        for (Handle h : _potential_sources)
+            _focus_set_as.add_atom(h);
+    }
+
     //Check for fully grounded outputs returned by derive_rules.
     if (not contains_atomtype(rhandle, VARIABLE_NODE)) {
+
         //Subatomic matching may have created a non existing implicant
         //atom and if the implicant doesn't exist, nor should the implicand.
         Handle implicant = BindLinkCast(rhandle)->get_body();
@@ -356,15 +363,13 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
 
         Instantiator inst(&_as);
         Handle houtput = LinkCast(rhandle)->getOutgoingSet().back();
+        _log->debug("Instantiating %s ", (houtput->toShortString()).c_str());
+
         result.push_back(inst.instantiate(houtput, { }));
     }
 
     else {
         if (search_in_focus_set) {
-
-            //Add source atoms to focus_set atomspace
-            for (Handle h : _potential_sources)
-                _focus_set_as.add_atom(h);
 
             //rhandle may introduce a new atoms that satisfies condition for the output
             //In order to prevent this undesirable effect, lets store rhandle in a child
