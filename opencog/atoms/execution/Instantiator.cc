@@ -119,7 +119,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	{
 		PutLinkPtr ppp(PutLinkCast(expr));
 		if (nullptr == ppp)
-			ppp = createPutLink(expr);
+			ppp = createPutLink(*lexpr);
 
 		// Execute the values in the PutLink before ding the beta-reduction.
 		// Execute the body only after the beta-reduction has been done.
