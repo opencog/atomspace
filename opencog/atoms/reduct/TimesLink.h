@@ -43,19 +43,19 @@ protected:
 
 	void init(void);
 	TimesLink(Type, const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	TimesLink(Type, const Handle& a, const Handle& b,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 public:
 	TimesLink(const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	TimesLink(const Handle& a, const Handle& b,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	TimesLink(Link& l);

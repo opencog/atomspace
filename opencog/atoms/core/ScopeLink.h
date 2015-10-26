@@ -50,12 +50,14 @@ namespace opencog
 class ScopeLink : public Link
 {
 protected:
+	/// Handle of the (optionally present) variable declaration.
+	Handle _vardecl;
+	/// Handle of the body of the expression.
+	Handle _body;
+
 
 	/// Variables bound in the body.
 	Variables _varlist;
-
-	/// Handle of the body of the expression.
-	Handle _body;
 
 	ScopeLink(Type, const Handle&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
@@ -87,6 +89,7 @@ public:
 
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _varlist; }
+	const Handle& get_vardecl(void) const { return _vardecl; }
 	const Handle& get_body(void) const { return _body; }
 
 	// Take the list of values `vals`, and substitute them in for the

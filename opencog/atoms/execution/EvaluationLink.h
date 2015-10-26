@@ -37,11 +37,11 @@ class EvaluationLink : public FreeLink
 {
 public:
 	EvaluationLink(const HandleSeq& oset,
-	     TruthValuePtr tv = TruthValue::NULL_TV(),
+	     TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	     AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	EvaluationLink(const Handle& schema, const Handle& args,
-	     TruthValuePtr tv = TruthValue::NULL_TV(),
+	     TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	     AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	EvaluationLink(Link& l);
