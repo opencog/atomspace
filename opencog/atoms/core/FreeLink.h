@@ -46,22 +46,22 @@ protected:
 	void init(void);
 
 	FreeLink(Type, const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	FreeLink(Type, const Handle& a,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	FreeLink(Type, const Handle& a, const Handle& b,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 public:
 	FreeLink(const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 	FreeLink(const Handle& a,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	FreeLink(Link& l);

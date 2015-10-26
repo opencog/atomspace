@@ -54,16 +54,16 @@ class FunctionLink : public FreeLink
 protected:
 	void init(void);
 	FunctionLink(Type, const Handle& a,
-	             TruthValuePtr tv = TruthValue::NULL_TV(),
+	             TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	FunctionLink(Type, const Handle& a, const Handle& b,
-	             TruthValuePtr tv = TruthValue::NULL_TV(),
+	             TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 public:
 	FunctionLink(Type, const HandleSeq& oset,
-	             TruthValuePtr tv = TruthValue::NULL_TV(),
+	             TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	FunctionLink(Link& l);

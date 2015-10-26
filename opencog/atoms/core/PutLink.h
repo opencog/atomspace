@@ -61,10 +61,10 @@ protected:
 
 public:
 	PutLink(const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 	PutLink(const Handle& a,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	PutLink(Link& l);
