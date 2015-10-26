@@ -56,6 +56,8 @@ public:
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 	MinusLink(Link& l);
+
+	virtual Handle execute(AtomSpace* as) const;
 };
 
 typedef std::shared_ptr<MinusLink> MinusLinkPtr;

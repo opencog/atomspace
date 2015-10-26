@@ -75,6 +75,31 @@ MinusLink::MinusLink(Link& l)
 
 void MinusLink::init(void)
 {
+	size_t sz = _outgoing.size();
+	if (2 < sz or 0 == sz)
+		throw InvalidParamException(TRACE_INFO,
+			"Don't know how to subract that!");
+}
+
+Handle MinusLink::execute(AtomSpace* as) const
+{
+	if (1 == _outgoing.size())
+	{
+		NumberNodePtr na(NumberNodeCast(_outgoing[0]));
+		if (nullptr == na)
+			throw InvalidParamException(TRACE_INFO,
+				"Don't know how to subract that!");
+
+		return createNumberNode(- na->get_value())->getHandle();
+	}
+
+	NumberNodePtr na(NumberNodeCast(_outgoing[0]));
+	NumberNodePtr nb(NumberNodeCast(_outgoing[1]));
+	if (nullptr == na or nullptr == nb)
+			throw InvalidParamException(TRACE_INFO,
+				"Don't know how to subract that!");
+
+	return createNumberNode(na->get_value() - nb->get_value())->getHandle();
 }
 
 // ============================================================
