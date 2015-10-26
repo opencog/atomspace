@@ -26,6 +26,7 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atoms/NumberNode.h>
 #include "FoldLink.h"
+#include "MinusLink.h"
 #include "PlusLink.h"
 #include "TimesLink.h"
 
@@ -262,6 +263,8 @@ LinkPtr FoldLink::factory(LinkPtr lp)
 // Basic type factory.
 Handle FoldLink::factory(Type t, const HandleSeq& seq)
 {
+	if (MINUS_LINK == t)
+		return Handle(createMinusLink(seq));
 	if (PLUS_LINK == t)
 		return Handle(createPlusLink(seq));
 	if (TIMES_LINK == t)
