@@ -61,15 +61,17 @@ protected:
 
 public:
 	PutLink(const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 	PutLink(const Handle& a,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	PutLink(Link& l);
 	virtual ~PutLink() {}
 
+	// PutLink values may be e second or the third outset elt.
+	Handle get_values() { return _values; }
 	virtual Handle reduce(void);
 };
 

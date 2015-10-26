@@ -129,10 +129,11 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 
 	// If we are here, then the first outgoing set member should be
 	// a variable declaration.
+	_vardecl = oset[0];
 	_body = oset[1];
 
 	// Initialize _varlist with the scoped variables
-	init_scoped_variables(oset[0]);
+	init_scoped_variables(_vardecl);
 }
 
 /* ================================================================= */

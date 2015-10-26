@@ -94,7 +94,8 @@ void PutLink::init(void)
 	size_t sz = _outgoing.size();
 	if (2 != sz and 3 != sz)
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting an outgoing set size of two or three, got %d", sz);
+			"Expecting an outgoing set size of two or three, got %d; %s",
+			sz, toString().c_str());
 
 	ScopeLink::extract_variables(_outgoing);
 
