@@ -60,13 +60,9 @@ void ForwardChainer::init(Handle hsource, HandleSeq focus_set)
     _search_focus_Set = not focus_set.empty();
     _ts_mode = TV_FITNESS_BASED;
 
-    _focus_set = focus_set;
-    //Add focus set atoms to focus_set atomspace
-    for (Handle h : _focus_set)
-        _focus_set_as.add_atom(h);
-
     //Set potential source.
     HandleSeq init_sources = { };
+
     //Accept set of initial sources wrapped in a SET_LINK
     if (LinkCast(hsource) and hsource->getType() == SET_LINK) {
         init_sources = _as.get_outgoing(hsource);
@@ -74,6 +70,17 @@ void ForwardChainer::init(Handle hsource, HandleSeq focus_set)
         init_sources.push_back(hsource);
     }
     update_potential_sources(init_sources);
+
+    //Add focus set atoms and sources to focus_set atomspace
+    if (_search_focus_Set) {
+        _focus_set = focus_set;
+
+        for (Handle& h : _focus_set)
+            _focus_set_as.add_atom(h);
+
+        for (Handle& h : _potential_sources)
+            _focus_set_as.add_atom(h);
+    }
 
      //Set rules.
      for(Rule& r :_configReader.get_rules())
@@ -336,12 +343,6 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
 {
     HandleSeq result;
 
-    //Add source atoms to focus_set atomspace
-    if (search_in_focus_set) {
-        for (Handle h : _potential_sources)
-            _focus_set_as.add_atom(h);
-    }
-
     //Check for fully grounded outputs returned by derive_rules.
     if (not contains_atomtype(rhandle, VARIABLE_NODE)) {
 
@@ -412,9 +413,15 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
         }
     }
 
-    //add the results back to main atomspace
-    for (Handle h : result)
-        _as.add_atom(h);
+    //Add result back to atomspace
+    if (search_in_focus_set) {
+        for (Handle h : result)
+            _focus_set_as.add_atom(h);
+
+    } else {
+        for (Handle h : result)
+            _as.add_atom(h);
+    }
 
     return result;
 }
