@@ -294,8 +294,8 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 {
 	Type t = verify_atom_type(stype, "cog-new-node", 1);
 
-	// Special case handling for NumberNode
-	if (NUMBER_NODE == t and scm_is_number(sname)) {
+	// Special case handling for NumberNode (and TimeNode, etc.)
+	if (classserver().isA(t, NUMBER_NODE) and scm_is_number(sname)) {
 		sname = scm_number_to_string(sname, _radix_ten);
 		// TODO: if we're given a string, I guess maybe we should check
 		// that the string is convertible to a number ??
