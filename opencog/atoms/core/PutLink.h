@@ -70,6 +70,8 @@ public:
 	PutLink(Link& l);
 	virtual ~PutLink() {}
 
+	// PutLink values may be e second or the third outset elt.
+	Handle get_values() { return _values; }
 	virtual Handle reduce(void);
 };
 

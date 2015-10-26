@@ -118,18 +118,19 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	if (PUT_LINK == t)
 	{
 		PutLinkPtr ppp(PutLinkCast(expr));
+		if (nullptr == ppp)
+			ppp = createPutLink(expr);
 
-		// PutLinks always have arity two. There may be free vars in
-		// the body of the PutLink, but we won't substitue for them until
-		// after the beta-reduction.  Do substitute the free vars that
-		// occur in the argument, and do that before beta-reduction.
+		// Execute the values in the PutLink before ding the beta-reduction.
 		// Execute the body only after the beta-reduction has been done.
-		const HandleSeq& oset = lexpr->getOutgoingSet();
-		Handle gargs = walk_tree(oset[1]);
-		if (gargs != oset[1])
+		Handle pvals = ppp->get_values();
+		Handle gargs = walk_tree(pvals);
+		if (gargs != pvals)
 		{
 			HandleSeq groset;
-			groset.emplace_back(oset[0]);
+			if (ppp->get_vardecl())
+				groset.emplace_back(ppp->get_vardecl());
+			groset.emplace_back(ppp->get_body());
 			groset.emplace_back(gargs);
 			ppp = createPutLink(groset);
 		}
