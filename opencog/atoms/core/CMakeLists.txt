@@ -13,6 +13,7 @@ ADD_LIBRARY (atomcore SHARED
 	RandomChoice.cc
 	ScopeLink.cc
 	StateLink.cc
+	TimeLink.cc
 	UniqueLink.cc
 	Variables.cc
 	VariableList.cc
@@ -40,6 +41,7 @@ INSTALL (FILES
 	RandomChoice.h
 	ScopeLink.h
 	StateLink.h
+	TimeLink.h
 	UniqueLink.h
 	Variables.h
 	VariableList.h
