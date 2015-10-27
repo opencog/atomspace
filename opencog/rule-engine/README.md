@@ -3,40 +3,20 @@ Unified rule engine
 
 ## Introduction
 
-The unified rule engine project aims at building a generic opencog
-rule engine on top of the Pattern Matcher with a C++ PLN
-implementation where rules are put in a scheme representation. This
-will enable the reuse of PLN for any kind of Backward and Forward
-chaining inferences, as long as rules are represented as BindLinks
-which are decoupled from the PLN inference engine and are loaded
-dynamically from a scheme file.  In the new design of the rule engine,
-PLN uses the Pattern Matcher API for querying the atomspace to
-guarantee code reuse and no reinvention of the wheel.  The pattern
-matcher can be invoked implicitly with the default callbacks or
-explicitly using custom callback handlers for specialized cases.  All
-the above criteria and other issues has required a new implementation
-of PLN.
+The unified rule engine (URE) project aims at building a generic opencog
+rule engine on top of the Pattern Matcher, applicable to rules written
+in a scheme representation, such as for PLN and R2L. The main components
+of the URE includes a forward chainer and a backward chiainer. This will enable
+the usage of Backward and Forward chaining inferences.  At the moment,
+these rules are written as Pattern Matcher's BindLink, though that can
+be changed in the future as these rules are not applied as strict
+Pattern Matching query.
 
-## Overall requirement/objectives
+Rules are organized inside a "Rule Base", which customizable control
+policy for controlling the inferences (such as the number of steps, 
+the weight of a rule, etc).
 
-1. Rules should be specified as BindLinks in a scheme file.
-
-2. Mechanisms will be provided for backward chaining from a given
-   target, or forward chaining from a set of premises.
-
-3. The control mechanism, i.e. the policy for choosing which rules to
-   apply in a given case, must be pluggable. That is, when you invoke
-   the rule engine, you get to choose which of the available control
-   policies will be used.
-
-4. The rule engine should be associated with some way of keeping
-  track of which rules have been applied to which Atoms.  This
-  information may be used by some control policies.
-
-5. Use pattern matcher for finding groundings and implement the
-   callbacks if the need arises.
-
-Further reading:
+The overall design can be found on the wiki pages below:
 
   [http://wiki.opencog.org/w/Unified_Rule_Engine](http://wiki.opencog.org/w/Unified_Rule_Engine)
 
@@ -44,25 +24,8 @@ Further reading:
 
   [http://wiki.opencog.org/w/Pattern_Matcher](http://wiki.opencog.org/w/Pattern_Matcher)
 
-  [http://wiki.opencog.org/wikihome/index.php/URE_Chainer_Design](http://wiki.opencog.org/wikihome/index.php/URE_Chainer_Design)
-
-## New PLN implementation overview
-
-In general, PLN rules and their associated formulas are all supposed
-to be ported to a scheme representation and are loaded at the
-beginning of the inference process (backward and forward
-chaining). Most of PLN formulas have been ported in to a scheme file
-by contributors and can be found
-[here](https://github.com/opencog/opencog/tree/master/opencog/reasoning/engine/rules).
-
-The high level algorithm for the new PLN forward and backward chaining
-is found [here](http://wiki.opencog.org/w/New_PLN_Chainer_Design).
-
-## Algorithmic detail of the current implementation
 
 ### Forward chaining (Sept 2015)
-The detail can be found [here](http://wiki.opencog.org/wikihome/index.php/URE_Chainer_Design).
-
 
 #### How to call the forward chainer from a scheme interface?
 
@@ -93,9 +56,12 @@ from the scheme shell interface. All results of the inferences are returned wrap
 
 In the backward chaining inference we are interested in either truth
 value fulfillment query or variable fulfillment query.  For variable
-fullfillment query,variable containing link is passed as an argument
+fullfillment query, variable containing link is passed as an argument
 and the backward chainer tries to find grounding for the variable.
-The entry point for the backward chainer is the `do_chain` function.
+For truth value fullfillment query, the TV of the original target are
+updated via inference.
+
+The main C++ entry point for the backward chainer is the `do_chain` function.
 
 There exist a scheme primitive `(cog-bc *target* *rule-base* *focus-set*)`
 for using the Backward Chainer in scheme.
@@ -217,6 +183,48 @@ a lot of space for improvement.
 
   This can be done via "canonical label" of the scoping links.  See
   discussion at https://groups.google.com/forum/#!topic/opencog/dKCYL47fpCQ
+ 
+* Both Forward Chainer and Backward Chainer need to handle inferences
+  involving existing variables.
+  
+  For example, given
+  ```
+SatisfyingSetLink
+  X, Y
+  AndLink
+    InheritanceLink X Y
+    InhertianceLink Y animals
+  ```
+  
+  Then the deduction rule should produce
+  ```
+ SatisfyingSetLink
+  Z
+  InheritanceLink Z animals
+  ```
+  with new variables, instead of the useless
+  ```
+  InheritanceLink X animals
+  ```
+  
+  In addition, the premises should all be contained within the same scope, so 
+  if the following exist
+  ```
+  SatisfyingSetLink
+  X
+  AndLink
+    InheritanceLink X animal
+    ...
+
+BindLink
+  Y
+  AndLink
+    InheritanceLink animal Y
+    ...
+  ...
+  ```
+  We do not want any form of `InheritanceLink X Y` to be generated.  Special
+  care is also needed for nested scopes.
 
 ## Rule represenation next steps
 
@@ -236,4 +244,4 @@ a lot of space for improvement.
   predefined expected value for specific test instances
 
 
-***Author*** *Misgana Bayetta*
+***Author*** *Misgana Bayetta*, *William Ma*
