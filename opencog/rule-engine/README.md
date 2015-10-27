@@ -184,7 +184,9 @@ a lot of space for improvement.
   discussion at https://groups.google.com/forum/#!topic/opencog/dKCYL47fpCQ
  
 * Both Forward Chainer and Backward Chainer need to handle inferences
-  involving existing variables.
+  involving existing variables, possibly subject to some control policy,
+  since it is possible this use case is only applicable to specific rule
+  base such as PLN.
   
   For example, given
   ```
