@@ -113,7 +113,7 @@ void FCStat::add_inference_record(Handle source,HandleSeq product)
 }
 
 HandleSeq FCStat::get_all_inferences(void){
-  UnorderedHandleSet all={};
+  UnorderedHandleSet all;
   for(const auto& ir : _inf_rec)
   {
       all.insert(ir.product.begin(),ir.product.end());
