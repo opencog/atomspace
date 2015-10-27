@@ -1,5 +1,4 @@
-Unified rule engine
--------------------
+# Unified rule engine
 
 ## Introduction
 
@@ -189,39 +188,37 @@ a lot of space for improvement.
   
   For example, given
   ```
-SatisfyingSetLink
-  X, Y
-  AndLink
-    InheritanceLink X Y
-    InhertianceLink Y animals
+   SatisfyingSetLink
+     X, Y
+     AndLink
+       InheritanceLink X Y
+       InhertianceLink Y animals
   ```
   
   Then the deduction rule should produce
   ```
- SatisfyingSetLink
-  Z
-  InheritanceLink Z animals
+   SatisfyingSetLink
+     Z
+     InheritanceLink Z animals
   ```
-  with new variables, instead of the useless
-  ```
-  InheritanceLink X animals
-  ```
+  with new variables, instead of the useless `InheritanceLink X animals` that is
+  not inside the original scope.
   
   In addition, the premises should all be contained within the same scope, so 
   if the following exist
   ```
-  SatisfyingSetLink
-  X
-  AndLink
-    InheritanceLink X animal
-    ...
+   SatisfyingSetLink
+     X
+     AndLink
+       InheritanceLink X animal
+       ...
 
-BindLink
-  Y
-  AndLink
-    InheritanceLink animal Y
-    ...
-  ...
+   BindLink
+     Y
+     AndLink
+       InheritanceLink animal Y
+       ...
+     ...
   ```
   We do not want any form of `InheritanceLink X Y` to be generated.  Special
   care is also needed for nested scopes.
