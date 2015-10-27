@@ -24,6 +24,7 @@
  */
 
 #include <time.h>
+#include <sys/time.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/NumberNode.h>
@@ -58,7 +59,10 @@ TimeLink::TimeLink(Link &l)
 
 Handle TimeLink::execute(AtomSpace * as) const
 {
-	time_t now = time(nullptr);
+	// time_t now = time(nullptr);
+	struct timeval tv;
+	gettimeofday(&tv, nullptr);
+	double now = tv.tv_sec + 1.0e-6 * tv.tv_usec;
 
 	// XXX This is probably wrong ... if the as is null, we should
 	// probably use the atomspace that this link is in, right?
