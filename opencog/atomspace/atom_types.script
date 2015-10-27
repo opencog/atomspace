@@ -356,3 +356,6 @@ ARITY_LINK <- FUNCTION_LINK
 
 // Return (with uniform distribution) one of the links it wraps.
 RANDOM_CHOICE_LINK <- FUNCTION_LINK
+
+// Return the current time.
+TIME_LINK <- FUNCTION_LINK
