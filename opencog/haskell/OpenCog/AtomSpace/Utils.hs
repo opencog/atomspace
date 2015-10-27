@@ -1,13 +1,20 @@
+{-# LANGUAGE DataKinds      #-}
 -- GSoC 2015 - Haskell bindings for OpenCog.
 
 -- | This Module offers useful functions for working on an AtomSpace.
 module OpenCog.AtomSpace.Utils (
       showAtom
     , printAtom
+    , genInsert
+    , genGet
     ) where
 
 import OpenCog.AtomSpace.Types      (Atom(..),TruthVal(..))
 import OpenCog.AtomSpace.Internal   (fromTVRaw,toRaw,AtomRaw(..))
+import OpenCog.AtomSpace.Api        (get,insert)
+import OpenCog.AtomSpace.Types
+import OpenCog.AtomSpace.AtomType    (AtomType(..))
+import OpenCog.AtomSpace.Env         (AtomSpace)
 import Data.Functor                 ((<$>))
 import Data.Typeable                (Typeable)
 
@@ -31,10 +38,10 @@ showAtom at = concatWNewline $ list 0 $ toRaw at
   where
     list :: Int -> AtomRaw -> [String]
     list lv at = case at of
-      Link atype lraw  tv -> let showtv = showTV' $ fromTVRaw <$> tv
+      Link atype lraw  tv -> let showtv = showTV $ fromTVRaw tv
                               in [tab lv $ concatWSpaces [atype,showtv]]
                                  ++ concat (map (list (lv+1)) lraw)
-      Node atype aname tv -> let showtv = showTV' $ fromTVRaw <$> tv
+      Node atype aname tv -> let showtv = showTV $ fromTVRaw tv
                               in [tab lv $ concatWSpaces [atype,showtv
                                                          ,"\""++aname++"\""]]
 
@@ -56,3 +63,12 @@ showAtom at = concatWNewline $ list 0 $ toRaw at
 printAtom :: Typeable a => Atom a -> IO ()
 printAtom at = putStrLn $ showAtom at
 
+genInsert :: Gen a -> AtomSpace ()
+genInsert a = appGen insert a
+
+genGet :: Gen AtomT -> AtomSpace (Maybe (Gen AtomT))
+genGet (Gen a) = do
+    res <- get a
+    case res of
+        Just x ->  return $ Just $ Gen x
+        Nothing -> return $ Nothing

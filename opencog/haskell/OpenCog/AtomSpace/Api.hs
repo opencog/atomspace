@@ -98,17 +98,17 @@ insertLink aType aOutgoing = do
 
 insertAndGetUUID :: AtomRaw -> AtomSpace (Maybe UUID)
 insertAndGetUUID i = case i of
-    Node aType aName mtv     -> do
+    Node aType aName tv -> do
         h <- insertNode aType aName
-        case (mtv,h) of -- set truth value after inserting.
-            (Just tv,Just hand) -> setTruthValue hand tv
-            _                   -> return False
+        case h of -- set truth value after inserting.
+            Just hand -> setTruthValue hand tv
+            _         -> return False
         return h
-    Link aType aOutgoing mtv -> do
+    Link aType aOutgoing tv -> do
         h <- insertLink aType aOutgoing
-        case (mtv,h) of -- set truth value after inserting.
-            (Just tv,Just hand) -> setTruthValue hand tv
-            _                   -> return False
+        case h of -- set truth value after inserting.
+            Just hand -> setTruthValue hand tv
+            _         -> return False
         return h
 
 -- | 'insert' creates a new atom on the atomspace or updates the existing one.
@@ -219,13 +219,13 @@ getWithUUID i = do
           Node aType aName _ -> do
            m <- getNode aType aName
            return $ case m of
-             Just (tv,h) -> Just $ (Node aType aName (Just tv),h)
+             Just (tv,h) -> Just $ (Node aType aName tv,h)
              _           -> Nothing
 
           Link aType aOutgoing _ -> do
            m <- onLink aType aOutgoing
            return $ case m of
-             Just (tv,h,newOutgoing) -> Just $ (Link aType newOutgoing (Just tv), h)
+             Just (tv,h,newOutgoing) -> Just $ (Link aType newOutgoing tv, h)
              _                       -> Nothing
 
 -- | 'get' looks for an atom in the atomspace and returns it.
@@ -284,11 +284,11 @@ getByUUID h = do
                       return $ Just $ Left (atype,outList)
         case res of
             Nothing                     -> return Nothing
-            Just (Right (atype,aname))  -> return $ Just $ Node atype aname $ Just tv
+            Just (Right (atype,aname))  -> return $ Just $ Node atype aname tv
             Just (Left (atype,outList)) -> do
                 mout <- mapM getByUUID outList
                 return $ case mapM id mout of
-                    Just out -> Just $ Link atype out $ Just tv
+                    Just out -> Just $ Link atype out tv
                     Nothing  -> Nothing
 
 --------------------------------------------------------------------------------
