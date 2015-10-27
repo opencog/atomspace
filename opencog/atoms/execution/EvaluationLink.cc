@@ -293,11 +293,15 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	else if (TRUE_LINK == t or FALSE_LINK == t)
 	{
 		// Assume that the link is wrapping something executable,
-		// which we execute, but then ignore the result.
+		// which we execute, but then ignore the result. Well, we need
+		// to put it in the atomspace ... but we ignore the TV on it.
 		const LinkPtr ll(LinkCast(evelnk));
-		Instantiator inst(as);
-		Handle result(inst.execute(ll->getOutgoingAtom(0)));
-		as->add_atom(result);
+		if (0 < ll->getArity())
+		{
+			Instantiator inst(as);
+			Handle result(inst.execute(ll->getOutgoingAtom(0)));
+			as->add_atom(result);
+		}
 		if (TRUE_LINK == t)
 			return TruthValue::TRUE_TV();
 		return TruthValue::FALSE_TV();

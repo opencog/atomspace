@@ -109,6 +109,11 @@ ui_*.h
 Makefile
 *-build-*
 
+# Eclipse
+.cproject
+.project
+.settings/
+
 ### Linux ###
 *~
 *.autosave

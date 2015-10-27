@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/reduct/PlusLink.h
+ * opencog/atoms/reduct/MinusLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -20,11 +20,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_PLUS_LINK_H
-#define _OPENCOG_PLUS_LINK_H
+#ifndef _OPENCOG_MINUS_LINK_H
+#define _OPENCOG_MINUS_LINK_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/reduct/ArithmeticLink.h>
+#include <opencog/atoms/reduct/PlusLink.h>
 
 namespace opencog
 {
@@ -33,44 +33,43 @@ namespace opencog
  */
 
 /**
- * The PlusLink implements the mathematical operation of "plus"
+ * The MinusLink implements the mathematical operation of "minus"
  */
-class PlusLink : public ArithmeticLink
+class MinusLink : public PlusLink
 {
 protected:
-	virtual double konsd(double, double) const;
-	virtual Handle kons(const Handle&, const Handle&);
-
 	void init(void);
-	PlusLink(Type, const HandleSeq& oset,
+	MinusLink(Type, const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	PlusLink(Type, const Handle& a, const Handle& b,
+	MinusLink(Type, const Handle& a, const Handle& b,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 public:
-	PlusLink(const Handle& a, const Handle& b,
+	MinusLink(const Handle& a, const Handle& b,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	PlusLink(const HandleSeq& oset,
+	MinusLink(const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-	PlusLink(Link& l);
+	MinusLink(Link& l);
+
+	virtual Handle execute(AtomSpace* as) const;
 };
 
-typedef std::shared_ptr<PlusLink> PlusLinkPtr;
-static inline PlusLinkPtr PlusLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<PlusLink>(a); }
-static inline PlusLinkPtr PlusLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<PlusLink>(a); }
+typedef std::shared_ptr<MinusLink> MinusLinkPtr;
+static inline MinusLinkPtr MinusLinkCast(const Handle& h)
+   { AtomPtr a(h); return std::dynamic_pointer_cast<MinusLink>(a); }
+static inline MinusLinkPtr MinusLinkCast(AtomPtr a)
+   { return std::dynamic_pointer_cast<MinusLink>(a); }
 
 // XXX temporary hack ...
-#define createPlusLink std::make_shared<PlusLink>
+#define createMinusLink std::make_shared<MinusLink>
 
 /** @}*/
 }
 
-#endif // _OPENCOG_PLUS_LINK_H
+#endif // _OPENCOG_MINUS_LINK_H

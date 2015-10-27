@@ -6,7 +6,7 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
- * published by the Function Software Foundation and including the exceptions
+ * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
- * Function Software Foundation, Inc.,
+ * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
@@ -26,6 +26,7 @@
 
 #include "ArityLink.h"
 #include "DeleteLink.h"
+#include "TimeLink.h"
 #include "RandomChoice.h"
 
 using namespace opencog;
@@ -116,6 +117,9 @@ Handle FunctionLink::factory(Type t, const HandleSeq& seq)
 
 	if (RANDOM_CHOICE_LINK == t)
 		return Handle(createRandomChoiceLink(seq));
+
+	if (TIME_LINK == t)
+		return Handle(createTimeLink(seq));
 
 	if (TIMES_LINK == t)
 		// return Handle(createTimesLink(seq));
