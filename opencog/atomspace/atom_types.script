@@ -348,6 +348,7 @@ EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
 FOLD_LINK <- FUNCTION_LINK
 ARITHMETIC_LINK <- FOLD_LINK
 PLUS_LINK <- ARITHMETIC_LINK
+MINUS_LINK <- PLUS_LINK
 TIMES_LINK <- ARITHMETIC_LINK
 
 // Return arity of the wrapped link.
@@ -355,3 +356,6 @@ ARITY_LINK <- FUNCTION_LINK
 
 // Return (with uniform distribution) one of the links it wraps.
 RANDOM_CHOICE_LINK <- FUNCTION_LINK
+
+// Return the current time.
+TIME_LINK <- FUNCTION_LINK
