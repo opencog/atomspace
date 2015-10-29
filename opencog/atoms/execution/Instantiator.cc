@@ -242,7 +242,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// Fire any other function links, not handled above.
 	if (classserver().isA(t, FUNCTION_LINK))
 	{
-		// At this time, no FunctionLink that is outsode of an
+		// At this time, no FunctionLink that is outside of an
 		// ExecutionOutputLink ever has a variable declaration.
 		// Also, the number of arguments is not fixed, i.e. variadic.
 		// Perform substitution on all arguments before applying the
