@@ -25,8 +25,6 @@
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atoms/NumberNode.h>
-#include <opencog/atoms/core/DefineLink.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include "ArithmeticLink.h"
 
 using namespace opencog;
@@ -171,17 +169,6 @@ NumberNodePtr ArithmeticLink::unwrap_set(Handle h) const
 		h = lp->getOutgoingAtom(0);
 	}
 
-	if (DEFINED_SCHEMA_NODE == h->getType())
-	{
-		h = DefineLink::get_definition(h);
-	}
-
-	FunctionLinkPtr flp(FunctionLinkCast(h));
-	if (nullptr == flp and classserver().isA(h->getType(), FUNCTION_LINK))
-		flp = FunctionLinkCast(FunctionLink::factory(LinkCast(h)));
-	if (flp)
-		h = flp->execute();
-
 	NumberNodePtr na(NumberNodeCast(h));
 	if (nullptr == na)
 		throw SyntaxException(TRACE_INFO,
@@ -204,24 +191,15 @@ Handle ArithmeticLink::execute(AtomSpace* as) const
 
 Handle ArithmeticLink::do_execute(AtomSpace* as, const HandleSeq& oset) const
 {
-	// XXX FIXME, we really want the instantiator to do the work
-	// here, but there is a giant circular-shared-library mess
-	// that results if we do this. So i'm disabling for now.
-#ifdef CIRCULAR_SHARED_LIBS
-	Instantiator inst(as);
-#endif
 	double sum = knild;
 	for (Handle h: oset)
 	{
-#ifdef CIRCULAR_SHARED_LIBS
-		h = inst.execute(h);
-#else
 		h = unwrap_set(h);
-#endif
 		sum = konsd(sum, get_double(as, h));
 	}
 
 	if (as) return as->add_atom(createNumberNode(sum));
 	return Handle(createNumberNode(sum));
 }
+
 // ===========================================================
