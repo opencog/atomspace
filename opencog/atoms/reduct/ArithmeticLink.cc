@@ -25,6 +25,7 @@
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atoms/NumberNode.h>
+#include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include "ArithmeticLink.h"
 
@@ -168,6 +169,11 @@ NumberNodePtr ArithmeticLink::unwrap_set(Handle h) const
 				"Don't know how to do arithmetic with this: %s",
 				h->toString().c_str());
 		h = lp->getOutgoingAtom(0);
+	}
+
+	if (DEFINED_SCHEMA_NODE == h->getType())
+	{
+		h = DefineLink::get_definition(h);
 	}
 
 	FunctionLinkPtr flp(FunctionLinkCast(h));
