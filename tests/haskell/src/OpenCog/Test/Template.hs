@@ -17,7 +17,7 @@ import Language.Haskell.TH.Quote
 import Test.Tasty
 import Test.Tasty.SmallCheck
 import Test.SmallCheck.Series
-import OpenCog.AtomSpace (appGen,Gen(..),Atom,type (<~),TruthVal,AtomType(AtomT,NotT))
+import OpenCog.AtomSpace (AtomSpace, appGen,Gen(..),Atom,type (<~),TruthVal,AtomType(AtomT,NotT))
 import Data.Typeable
 import Debug.Trace
 import Data.Char
@@ -100,7 +100,6 @@ typename s = PromotedT (mkName (consToType s))
                        | "Node" `isSuffixOf` a = replace "T" "Node" a
                        | otherwise             = a++"T"
 
-
 -- Given an AtomTree (represeting all the Inheritance relations of AtomTypes)
 -- Create a Tree where each Element contains the Name of the AtomType
 -- And maybe a Function that creates the AST for the DataConstruct
@@ -178,25 +177,27 @@ getCons :: Dec -> [ConstructorType]
 getCons d = case d of
     d@(DataD _ _ dtvb c _) -> map (getCon dtvb) c
 
-getCon dtvb c = let conA (NormalC c xs)       = (simpleName c, length xs)
-                    conA (RecC c xs)          = (simpleName c, length xs)
-                    conA (InfixC _ c _)       = (simpleName c, 2)
-                    conA (ForallC _ _ c)      = conA c
-                    conToType (NormalC c [e]) = snd e
-                    conToType (NormalC c xs)  = foldr (flip AppT) tuple argtypes
-                        where tuple    = TupleT $ length xs
-                              argtypes = reverse $ map snd xs
-                    appt t n = AppT (AppT ArrowT t) (AppT (ConT $ mkName "Gen") n)
-                in case c of
-    (ForallC tvb (t:ctx) con) -> let (n,i) = conA con
-                                     (AppT a@(AppT _ x) _) = t
-                                     newt y = AppT a (typename y)
-                                     typeNs = findTypes ctx
-                                     types  = rVWT (conToType con) typeNs
-                                     func y = ForallT (dtvb++tvb)
-                                                      [newt y]
-                                                      (appt types x)
-                                 in (n,i,func)
+getCon dtvb c =
+    let conA (NormalC c xs)       = (simpleName c, length xs)
+        conA (RecC c xs)          = (simpleName c, length xs)
+        conA (InfixC _ c _)       = (simpleName c, 2)
+        conA (ForallC _ _ c)      = conA c
+        conToType (NormalC c [e]) = snd e
+        conToType (NormalC c xs)  = foldr (flip AppT) tuple argtypes
+            where tuple    = TupleT $ length xs
+                  argtypes = reverse $ map snd xs
+        appt t n = AppT (AppT ArrowT t) (AppT (ConT $ mkName "Gen") n)
+    in case c of
+    (ForallC tvb (t:ctx) con) ->
+        let (n,i) = conA con
+            (AppT a@(AppT _ x) _) = t
+            newt y = AppT a (typename y)
+            typeNs = findTypes ctx
+            types  = rVWT (conToType con) typeNs
+            func y = ForallT (dtvb++tvb)
+                             [newt y]
+                             (appt types x)
+        in (n,i,func)
 
 findTypes [] = []
 findTypes (AppT (AppT _ (VarT vname)) (ConT cname):xs) = (vname,cname):findTypes xs

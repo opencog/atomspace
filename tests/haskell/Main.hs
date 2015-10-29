@@ -28,7 +28,6 @@ suite :: TestTree
 suite = adjustOption setDepth $ testGroup "Haskell Test-Suite" [
     testProperty "simple Insert Test" testInsertGet]
 
-
 --Simple Test that inserts Atoms and retrives them
 --if the inserted and retirived Atoms are the same the test passes
 testInsertGet :: Gen AtomT -> Property IO
