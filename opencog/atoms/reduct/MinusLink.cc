@@ -94,9 +94,9 @@ NumberNodePtr MinusLink::unwrap_set(Handle h) const
 		h = lp->getOutgoingAtom(0);
 	}
 
-	FoldLinkPtr flp(FoldLinkCast(h));
-	if (nullptr == flp and classserver().isA(h->getType(), FOLD_LINK))
-		flp = FoldLinkCast(FoldLink::factory(LinkCast(h)));
+	FunctionLinkPtr flp(FunctionLinkCast(h));
+	if (nullptr == flp and classserver().isA(h->getType(), FUNCTION_LINK))
+		flp = FunctionLinkCast(FunctionLink::factory(LinkCast(h)));
 	if (flp)
 		h = flp->execute();
 
