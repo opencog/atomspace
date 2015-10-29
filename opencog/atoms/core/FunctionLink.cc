@@ -28,6 +28,7 @@
 #include "DeleteLink.h"
 #include "TimeLink.h"
 #include "RandomChoice.h"
+#include "RandomNumber.h"
 
 using namespace opencog;
 
@@ -113,6 +114,9 @@ Handle FunctionLink::factory(Type t, const HandleSeq& seq)
 
 	if (RANDOM_CHOICE_LINK == t)
 		return Handle(createRandomChoiceLink(seq));
+
+	if (RANDOM_NUMBER_LINK == t)
+		return Handle(createRandomNumberLink(seq));
 
 	if (TIME_LINK == t)
 		return Handle(createTimeLink(seq));

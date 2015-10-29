@@ -45,7 +45,7 @@ void DeleteLink::init(void)
 		// throw DeleteException();
 		throw InvalidParamException(TRACE_INFO,
 			"Cannot create a fully grounded DeleteLink!");
-} 
+}
 
 #if 0
 /*****
