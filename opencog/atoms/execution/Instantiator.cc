@@ -208,22 +208,6 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		return eolp->execute(_as);
 	}
 
-	// FoldLink's cannot be handled by the factory below, due to
-	// ciruclar shared library dependencies. Yuck. Something better
-	// than a factory needs to be invented.
-	if (classserver().isA(t, FOLD_LINK))
-	{
-		// At this time, no FoldLink ever has a variable declaration,
-		// and the number of arguments is not fixed, i.e. variadic.
-		// Perform substitution on all arguments before applying the
-		// function itself.
-		HandleSeq oset_results;
-		walk_tree(oset_results, lexpr->getOutgoingSet());
-		Handle hl(FoldLink::factory(t, oset_results));
-		FoldLinkPtr flp(FoldLinkCast(hl));
-		return flp->execute(_as);
-	}
-
 	// Handle DeleteLink's before general FunctionLink's; they
 	// work differently.
 	if (DELETE_LINK == t)
@@ -239,10 +223,26 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		return Handle::UNDEFINED;
 	}
 
+	// FoldLink's are a kind-of FunctionLink, but are not currently
+	// handled by the FunctionLink factory below.  This should be fixed
+	// someday, when the reduct directory is re-desiged.
+	if (classserver().isA(t, FOLD_LINK))
+	{
+		// At this time, no FoldLink ever has a variable declaration,
+		// and the number of arguments is not fixed, i.e. variadic.
+		// Perform substitution on all arguments before applying the
+		// function itself.
+		HandleSeq oset_results;
+		walk_tree(oset_results, lexpr->getOutgoingSet());
+		Handle hl(FoldLink::factory(t, oset_results));
+		FoldLinkPtr flp(FoldLinkCast(hl));
+		return flp->execute(_as);
+	}
+
 	// Fire any other function links, not handled above.
 	if (classserver().isA(t, FUNCTION_LINK))
 	{
-		// At this time, no FunctionLink that is outsode of an
+		// At this time, no FunctionLink that is outside of an
 		// ExecutionOutputLink ever has a variable declaration.
 		// Also, the number of arguments is not fixed, i.e. variadic.
 		// Perform substitution on all arguments before applying the
