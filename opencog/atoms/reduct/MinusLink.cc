@@ -81,32 +81,6 @@ void MinusLink::init(void)
 			"Don't know how to subract that!");
 }
 
-NumberNodePtr MinusLink::unwrap_set(Handle h) const
-{
-	// Pattern matching hack. The pattern matcher returns sets of atoms;
-	// if that set contains numbers or something numeric, then unwrap it.
-	if (SET_LINK == h->getType())
-	{
-		LinkPtr lp(LinkCast(h));
-		if (1 != lp->getArity())
-			throw SyntaxException(TRACE_INFO,
-				"Don't know how to subtract this: %s", h->toString().c_str());
-		h = lp->getOutgoingAtom(0);
-	}
-
-	FunctionLinkPtr flp(FunctionLinkCast(h));
-	if (nullptr == flp and classserver().isA(h->getType(), FUNCTION_LINK))
-		flp = FunctionLinkCast(FunctionLink::factory(LinkCast(h)));
-	if (flp)
-		h = flp->execute();
-
-	NumberNodePtr na(NumberNodeCast(h));
-	if (nullptr == na)
-		throw SyntaxException(TRACE_INFO,
-			"Don't know how to subtract this: %s", h->toString().c_str());
-	return na;
-}
-
 Handle MinusLink::execute(AtomSpace* as) const
 {
 	// Pattern matching hack. The pattern matcher returns sets of atoms;
