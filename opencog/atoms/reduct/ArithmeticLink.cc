@@ -156,9 +156,35 @@ static inline double get_double(AtomSpace *as, Handle h)
 	return nnn->get_value();
 }
 
+NumberNodePtr ArithmeticLink::unwrap_set(Handle h) const
+{
+	// Pattern matching hack. The pattern matcher returns sets of atoms;
+	// if that set contains numbers or something numeric, then unwrap it.
+	if (SET_LINK == h->getType())
+	{
+		LinkPtr lp(LinkCast(h));
+		if (1 != lp->getArity())
+			throw SyntaxException(TRACE_INFO,
+				"Don't know how to do arithmetic with that!");
+		h = lp->getOutgoingAtom(0);
+	}
+
+	FoldLinkPtr flp(FoldLinkCast(h));
+	if (nullptr == flp and classserver().isA(h->getType(), FOLD_LINK))
+		flp = FoldLinkCast(FoldLink::factory(LinkCast(h)));
+	if (flp)
+		h = flp->execute();
+
+	NumberNodePtr na(NumberNodeCast(h));
+	if (nullptr == na)
+		throw SyntaxException(TRACE_INFO,
+			"Don't know how to do arithmetic with that!");
+	return na;
+}
+
 Handle ArithmeticLink::execute(AtomSpace* as) const
 {
-	// Patern matching hack. The pattern matcher returns sets of atoms;
+	// Pattern matching hack. The pattern matcher returns sets of atoms;
 	// if that set contains numbers or something numeric, then unwrap it.
 	if (SET_LINK == _type and 1 == _outgoing.size())
 	{
@@ -182,15 +208,7 @@ Handle ArithmeticLink::do_execute(AtomSpace* as, const HandleSeq& oset) const
 #ifdef CIRCULAR_SHARED_LIBS
 		h = inst.execute(h);
 #else
-		FoldLinkPtr flp = FoldLinkCast(h);
-
-		// Arghh.  The cast should have been enough, but we currently
-		// can't store these in the atomspace, due to circular shared
-		// lib dependencies.
-		if (NULL == flp and classserver().isA(h->getType(), FOLD_LINK))
-			flp = FoldLinkCast(FoldLink::factory(LinkCast(h)));
-		if (NULL != flp)
-			h = flp->execute();
+		h = unwrap_set(h);
 #endif
 		sum = konsd(sum, get_double(as, h));
 	}

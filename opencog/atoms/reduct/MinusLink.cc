@@ -81,9 +81,35 @@ void MinusLink::init(void)
 			"Don't know how to subract that!");
 }
 
+NumberNodePtr MinusLink::unwrap_set(Handle h) const
+{
+	// Pattern matching hack. The pattern matcher returns sets of atoms;
+	// if that set contains numbers or something numeric, then unwrap it.
+	if (SET_LINK == h->getType())
+	{
+		LinkPtr lp(LinkCast(h));
+		if (1 != lp->getArity())
+			throw SyntaxException(TRACE_INFO,
+				"Don't know how to subtract that!");
+		h = lp->getOutgoingAtom(0);
+	}
+
+	FoldLinkPtr flp(FoldLinkCast(h));
+	if (nullptr == flp and classserver().isA(h->getType(), FOLD_LINK))
+		flp = FoldLinkCast(FoldLink::factory(LinkCast(h)));
+	if (flp)
+		h = flp->execute();
+
+	NumberNodePtr na(NumberNodeCast(h));
+	if (nullptr == na)
+		throw SyntaxException(TRACE_INFO,
+			"Don't know how to subtract that!");
+	return na;
+}
+
 Handle MinusLink::execute(AtomSpace* as) const
 {
-	// Patern matching hack. The pattern matcher returns sets of atoms;
+	// Pattern matching hack. The pattern matcher returns sets of atoms;
 	// if that set contains numbers or something numeric, then unwrap it.
 	if (SET_LINK == _type and 1 == _outgoing.size())
 	{
@@ -97,20 +123,12 @@ Handle MinusLink::do_execute(const HandleSeq& oset) const
 {
 	if (1 == oset.size())
 	{
-		NumberNodePtr na(NumberNodeCast(oset[0]));
-		if (nullptr == na)
-			throw InvalidParamException(TRACE_INFO,
-				"Don't know how to subract that!");
-
+		NumberNodePtr na(unwrap_set(oset[0]));
 		return createNumberNode(- na->get_value())->getHandle();
 	}
 
-	NumberNodePtr na(NumberNodeCast(oset[0]));
-	NumberNodePtr nb(NumberNodeCast(oset[1]));
-	if (nullptr == na or nullptr == nb)
-			throw InvalidParamException(TRACE_INFO,
-				"Don't know how to subract that!");
-
+	NumberNodePtr na(unwrap_set(oset[0]));
+	NumberNodePtr nb(unwrap_set(oset[1]));
 	return createNumberNode(na->get_value() - nb->get_value())->getHandle();
 }
 

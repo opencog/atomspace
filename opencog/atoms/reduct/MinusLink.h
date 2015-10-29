@@ -25,6 +25,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/reduct/PlusLink.h>
+#include <opencog/atoms/NumberNode.h>
 
 namespace opencog
 {
@@ -47,6 +48,7 @@ protected:
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
+	NumberNodePtr unwrap_set(Handle) const;
 	Handle do_execute(const HandleSeq&) const;
 public:
 	MinusLink(const Handle& a, const Handle& b,
