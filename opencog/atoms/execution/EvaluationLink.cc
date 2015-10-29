@@ -69,6 +69,28 @@ EvaluationLink::EvaluationLink(Link& l)
 	}
 }
 
+// Pattern matching hack. The pattern matcher returns sets of atoms;
+// if that set contains a single number, then unwrap it.
+static NumberNodePtr unwrap_set(Handle h)
+{
+	if (SET_LINK == h->getType())
+	{
+		LinkPtr lp(LinkCast(h));
+		if (1 != lp->getArity())
+			throw SyntaxException(TRACE_INFO,
+				"Don't know how to do arithmetic with this: %s",
+				h->toString().c_str());
+		h = lp->getOutgoingAtom(0);
+	}
+
+	NumberNodePtr na(NumberNodeCast(h));
+	if (nullptr == na)
+		throw SyntaxException(TRACE_INFO,
+			"Don't know how to compare this: %s",
+			h->toString().c_str());
+	return na;
+}
+
 // Perform a GreaterThan check
 static TruthValuePtr greater(AtomSpace* as, const LinkPtr& ll)
 {
@@ -81,14 +103,8 @@ static TruthValuePtr greater(AtomSpace* as, const LinkPtr& ll)
 	Handle h1(inst.execute(oset[0]));
 	Handle h2(inst.execute(oset[1]));
 
-	NumberNodePtr n1(NumberNodeCast(h1));
-	NumberNodePtr n2(NumberNodeCast(h2));
-
-	if (nullptr == n1 or nullptr == n2)
-		throw SyntaxException(TRACE_INFO,
-		    "GreaterThan args must be NumberNode's!  Got:\n%s\nand %s\n",
-		    (h1==nullptr)? "(invalid handle)" : h1->toShortString().c_str(),
-		    (h2==nullptr)? "(invalid handle)" : h2->toShortString().c_str());
+	NumberNodePtr n1(unwrap_set(h1));
+	NumberNodePtr n2(unwrap_set(h2));
 
 	if (n1->get_value() > n2->get_value())
 		return TruthValue::TRUE_TV();
