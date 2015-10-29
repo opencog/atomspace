@@ -86,7 +86,7 @@ static TruthValuePtr greater(AtomSpace* as, const LinkPtr& ll)
 
 	if (nullptr == n1 or nullptr == n2)
 		throw SyntaxException(TRACE_INFO,
-		    "Expecting GreaterThan arguments to be NumberNode's!  Got:\n%s\n",
+		    "GreaterThan args must be NumberNode's!  Got:\n%s\nand %s\n",
 		    (h1==nullptr)? "(invalid handle)" : h1->toShortString().c_str(),
 		    (h2==nullptr)? "(invalid handle)" : h2->toShortString().c_str());
 
