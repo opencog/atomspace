@@ -158,6 +158,18 @@ static inline double get_double(AtomSpace *as, Handle h)
 
 Handle ArithmeticLink::execute(AtomSpace* as) const
 {
+	// Patern matching hack. The pattern matcher returns sets of atoms;
+	// if that set contains numbers or something numeric, then unwrap it.
+	if (SET_LINK == _type and 1 == _outgoing.size())
+	{
+		LinkPtr lp(LinkCast(_outgoing[0]));
+		return do_execute(as, lp->getOutgoingSet());
+	}
+	return do_execute(as, _outgoing);
+}
+
+Handle ArithmeticLink::do_execute(AtomSpace* as, const HandleSeq& oset) const
+{
 	// XXX FIXME, we really want the instantiator to do the work
 	// here, but there is a giant circular-shared-library mess
 	// that results if we do this. So i'm disabling for now.
@@ -165,7 +177,7 @@ Handle ArithmeticLink::execute(AtomSpace* as) const
 	Instantiator inst(as);
 #endif
 	double sum = knild;
-	for (Handle h: _outgoing)
+	for (Handle h: oset)
 	{
 #ifdef CIRCULAR_SHARED_LIBS
 		h = inst.execute(h);
@@ -173,7 +185,7 @@ Handle ArithmeticLink::execute(AtomSpace* as) const
 		FoldLinkPtr flp = FoldLinkCast(h);
 
 		// Arghh.  The cast should have been enough, but we currently
-		// can't store these in the atomsapce, due to circular shared
+		// can't store these in the atomspace, due to circular shared
 		// lib dependencies.
 		if (NULL == flp and classserver().isA(h->getType(), FOLD_LINK))
 			flp = FoldLinkCast(FoldLink::factory(LinkCast(h)));

@@ -47,6 +47,7 @@ protected:
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
+	Handle do_execute(const HandleSeq&) const;
 public:
 	MinusLink(const Handle& a, const Handle& b,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),

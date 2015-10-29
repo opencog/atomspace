@@ -50,6 +50,8 @@ protected:
 	ArithmeticLink(Type, const Handle& a, const Handle& b,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
+	Handle do_execute(AtomSpace*, const HandleSeq&) const;
 public:
 	ArithmeticLink(const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
