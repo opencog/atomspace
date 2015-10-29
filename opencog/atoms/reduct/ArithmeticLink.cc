@@ -165,7 +165,8 @@ NumberNodePtr ArithmeticLink::unwrap_set(Handle h) const
 		LinkPtr lp(LinkCast(h));
 		if (1 != lp->getArity())
 			throw SyntaxException(TRACE_INFO,
-				"Don't know how to do arithmetic with that!");
+				"Don't know how to do arithmetic with this: %s",
+				h->toString().c_str());
 		h = lp->getOutgoingAtom(0);
 	}
 
@@ -178,7 +179,8 @@ NumberNodePtr ArithmeticLink::unwrap_set(Handle h) const
 	NumberNodePtr na(NumberNodeCast(h));
 	if (nullptr == na)
 		throw SyntaxException(TRACE_INFO,
-			"Don't know how to do arithmetic with that!");
+			"Don't know how to do arithmetic with this: %s",
+			h->toString().c_str());
 	return na;
 }
 
