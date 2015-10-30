@@ -325,10 +325,11 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		return do_eval_scratch(as, DefineLink::get_definition(evelnk), scratch);
 	}
 
-	// We do not want to waste CPU time printing an exception message;
-	// this is supposed to be handled automatically.  Hmmm... unless
-	// its a user Syntax error ....
-	// throw NotEvaluatableException();
+	// We get exceptions here in two differet ways: (a) due to user
+	// error, in which case we need o print an error, ad (b) automatic,
+	// e.g. when Instantiator calls us, knowing it will get an error,
+	// in which case, printing the exception message is a waste of CPU
+	// time...
 	throw SyntaxException(TRACE_INFO,
 		"Expecting to get an EvaluationLink, got %s",
 		evelnk->toString().c_str());

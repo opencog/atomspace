@@ -144,7 +144,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		// Step three: XXX this is awkward, but seems to be needed...
 		// If the result is evaluatable, then evaluate it. e.g. if the
 		// result has a GroundedPredicateNode, we need to run it now.
-		// We do, however, ignore the reulsting TV, which is also
+		// We do, however, ignore the resulting TV, which is also
 		// awkward.  I'm confused about how to handle this best.
 		// The behavior tree uses this!
 		// Anyway, do_evaluate() will throw if rex is not evaluatable.
