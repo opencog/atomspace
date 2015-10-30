@@ -328,10 +328,10 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	// We do not want to waste CPU time printing an exception message;
 	// this is supposed to be handled automatically.  Hmmm... unless
 	// its a user Syntax error ....
-	throw NotEvaluatableException();
-	// throw SyntaxException(TRACE_INFO,
-		// "Expecting to get an EvaluationLink, got %s",
-		// evelnk->toString().c_str());
+	// throw NotEvaluatableException();
+	throw SyntaxException(TRACE_INFO,
+		"Expecting to get an EvaluationLink, got %s",
+		evelnk->toString().c_str());
 }
 
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const Handle& evelnk)
