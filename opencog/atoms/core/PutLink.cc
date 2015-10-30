@@ -138,8 +138,18 @@ void PutLink::static_typecheck_values(void)
 	if (LIST_LINK == vtype)
 	{
 		if (not _varlist.is_type(lval->getOutgoingSet()))
-			throw InvalidParamException(TRACE_INFO,
-				"PutLink has mismatched value list!");
+		{
+			if (_vardecl)
+				throw SyntaxException(TRACE_INFO,
+					"PutLink has mismatched value list! vardecl=%s\nvals=%s",
+					_vardecl->toString().c_str(),
+					lval->toString().c_str());
+			else
+				throw SyntaxException(TRACE_INFO,
+					"PutLink has mismatched value list! body=%s\nvals=%s",
+					_body->toString().c_str(),
+					lval->toString().c_str());
+		}
 		return;
 	}
 
