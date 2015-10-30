@@ -25,7 +25,6 @@
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atoms/NumberNode.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include "ArithmeticLink.h"
 
 using namespace opencog;
@@ -156,34 +155,51 @@ static inline double get_double(AtomSpace *as, Handle h)
 	return nnn->get_value();
 }
 
+NumberNodePtr ArithmeticLink::unwrap_set(Handle h) const
+{
+	// Pattern matching hack. The pattern matcher returns sets of atoms;
+	// if that set contains numbers or something numeric, then unwrap it.
+	if (SET_LINK == h->getType())
+	{
+		LinkPtr lp(LinkCast(h));
+		if (1 != lp->getArity())
+			throw SyntaxException(TRACE_INFO,
+				"Don't know how to do arithmetic with this: %s",
+				h->toString().c_str());
+		h = lp->getOutgoingAtom(0);
+	}
+
+	NumberNodePtr na(NumberNodeCast(h));
+	if (nullptr == na)
+		throw SyntaxException(TRACE_INFO,
+			"Don't know how to do arithmetic with this: %s",
+			h->toString().c_str());
+	return na;
+}
+
 Handle ArithmeticLink::execute(AtomSpace* as) const
 {
-	// XXX FIXME, we really want the instantiator to do the work
-	// here, but there is a giant circular-shared-library mess
-	// that results if we do this. So i'm disabling for now.
-#ifdef CIRCULAR_SHARED_LIBS
-	Instantiator inst(as);
-#endif
-	double sum = knild;
-	for (Handle h: _outgoing)
+	// Pattern matching hack. The pattern matcher returns sets of atoms;
+	// if that set contains numbers or something numeric, then unwrap it.
+	if (SET_LINK == _type and 1 == _outgoing.size())
 	{
-#ifdef CIRCULAR_SHARED_LIBS
-		h = inst.execute(h);
-#else
-		FoldLinkPtr flp = FoldLinkCast(h);
+		LinkPtr lp(LinkCast(_outgoing[0]));
+		return do_execute(as, lp->getOutgoingSet());
+	}
+	return do_execute(as, _outgoing);
+}
 
-		// Arghh.  The cast should have been enough, but we currently
-		// can't store these in the atomsapce, due to circular shared
-		// lib dependencies.
-		if (NULL == flp and classserver().isA(h->getType(), FOLD_LINK))
-			flp = FoldLinkCast(FoldLink::factory(LinkCast(h)));
-		if (NULL != flp)
-			h = flp->execute();
-#endif
+Handle ArithmeticLink::do_execute(AtomSpace* as, const HandleSeq& oset) const
+{
+	double sum = knild;
+	for (Handle h: oset)
+	{
+		h = unwrap_set(h);
 		sum = konsd(sum, get_double(as, h));
 	}
 
 	if (as) return as->add_atom(createNumberNode(sum));
 	return Handle(createNumberNode(sum));
 }
+
 // ===========================================================

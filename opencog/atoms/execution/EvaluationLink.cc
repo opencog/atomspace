@@ -69,40 +69,42 @@ EvaluationLink::EvaluationLink(Link& l)
 	}
 }
 
-static Handle fold_execute(AtomSpace* as, const Handle& h)
+// Pattern matching hack. The pattern matcher returns sets of atoms;
+// if that set contains a single number, then unwrap it.
+static NumberNodePtr unwrap_set(Handle h)
 {
-	FoldLinkPtr flp(FoldLinkCast(FoldLink::factory(LinkCast(h))));
-	if (NULL == flp)
-		throw RuntimeException(TRACE_INFO, "Not executable!");
+	if (SET_LINK == h->getType())
+	{
+		LinkPtr lp(LinkCast(h));
+		if (1 != lp->getArity())
+			throw SyntaxException(TRACE_INFO,
+				"Don't know how to do arithmetic with this: %s",
+				h->toString().c_str());
+		h = lp->getOutgoingAtom(0);
+	}
 
-	return flp->execute(as);
+	NumberNodePtr na(NumberNodeCast(h));
+	if (nullptr == na)
+		throw SyntaxException(TRACE_INFO,
+			"Don't know how to compare this: %s",
+			h->toString().c_str());
+	return na;
 }
 
 // Perform a GreaterThan check
 static TruthValuePtr greater(AtomSpace* as, const LinkPtr& ll)
 {
-	if (2 != ll->getArity())
+	const HandleSeq& oset = ll->getOutgoingSet();
+	if (2 != oset.size())
 		throw RuntimeException(TRACE_INFO,
 		     "GreaterThankLink expects two arguments");
-	Handle h1(ll->getOutgoingAtom(0));
-	Handle h2(ll->getOutgoingAtom(1));
 
-	// If they are not numbers, then we expect them to be something that
-	// can be executed, yeilding a number.
-	if (NUMBER_NODE != h1->getType())
-		h1 = fold_execute(as, h1);
+	Instantiator inst(as);
+	Handle h1(inst.execute(oset[0]));
+	Handle h2(inst.execute(oset[1]));
 
-	if (NUMBER_NODE != h2->getType())
-		h2 = fold_execute(as, h2);
-
-	NumberNodePtr n1(NumberNodeCast(h1));
-	NumberNodePtr n2(NumberNodeCast(h2));
-
-	if (NULL == n1 or NULL == n2)
-		throw RuntimeException(TRACE_INFO,
-		    "Expecting c++:greater arguments to be NumberNode's!  Got:\n%s\n",
-		    (h1==NULL)? "(invalid handle)" : h1->toShortString().c_str(),
-		    (h2==NULL)? "(invalid handle)" : h2->toShortString().c_str());
+	NumberNodePtr n1(unwrap_set(h1));
+	NumberNodePtr n2(unwrap_set(h2));
 
 	if (n1->get_value() > n2->get_value())
 		return TruthValue::TRUE_TV();
