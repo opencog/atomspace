@@ -119,6 +119,8 @@ void PutLink::static_typecheck_values(void)
 	Type btype = _body->getType();
 	if (DEFINED_SCHEMA_NODE == btype)
 		return;
+	if (DEFINED_PREDICATE_NODE == btype)
+		return;
 
 	size_t sz = _varlist.varseq.size();
 	Type vtype = _values->getType();
@@ -138,8 +140,18 @@ void PutLink::static_typecheck_values(void)
 	if (LIST_LINK == vtype)
 	{
 		if (not _varlist.is_type(lval->getOutgoingSet()))
-			throw InvalidParamException(TRACE_INFO,
-				"PutLink has mismatched value list!");
+		{
+			if (_vardecl)
+				throw SyntaxException(TRACE_INFO,
+					"PutLink has mismatched value list! vardecl=%s\nvals=%s",
+					_vardecl->toString().c_str(),
+					lval->toString().c_str());
+			else
+				throw SyntaxException(TRACE_INFO,
+					"PutLink has mismatched value list! body=%s\nvals=%s",
+					_body->toString().c_str(),
+					lval->toString().c_str());
+		}
 		return;
 	}
 
@@ -220,7 +232,9 @@ Handle PutLink::do_reduce(void) const
 	Handle bods(_body);
 	Variables vars(_varlist);
 	// Resolve the body, if needed:
-	if (DEFINED_SCHEMA_NODE == _body->getType())
+	Type btype = _body->getType();
+	if (DEFINED_SCHEMA_NODE == btype or
+	    DEFINED_PREDICATE_NODE == btype)
 	{
 		Handle dfn(DefineLink::get_definition(_body));
 		// XXX TODO we should perform a type-check on the function.

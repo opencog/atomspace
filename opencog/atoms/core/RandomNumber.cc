@@ -38,7 +38,8 @@ void RandomNumberLink::init()
 {
 	if (_outgoing.size() != 2)
 		throw SyntaxException(TRACE_INFO,
-			"Expecting a numerical min ad max");
+			"Expecting a numerical min and max; got %s",
+			toString().c_str());
 }
 
 RandomNumberLink::RandomNumberLink(const HandleSeq& oset,

@@ -150,7 +150,7 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 void SchemeSmob::throw_exception(const char *msg, const char * func)
 {
 	if (msg) {
-		// Should we even bother to log this?
+		// Should we even bother to log this?  Probably not ...
 		logger().info("Guile caught C++ exception: %s", msg);
 
 		// scm_misc_error(fe->get_name(), msg, SCM_EOL);

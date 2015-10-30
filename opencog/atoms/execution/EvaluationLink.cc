@@ -25,6 +25,7 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
@@ -131,14 +132,13 @@ static TruthValuePtr equal(AtomSpace* as, const LinkPtr& ll)
 
 static bool is_evaluatable_sat(const Handle& satl)
 {
+	LinkPtr lp(LinkCast(satl));
+	if (1 != lp->getArity())
+		return false;
+
 	PatternLinkPtr plp(PatternLinkCast(satl));
 	if (nullptr == plp)
 		plp = createPatternLink(satl);
-
-	if (1 < plp->getArity())
-		throw SyntaxException(TRACE_INFO,
-			"Expecting SatisfacionLink of arity one; got %s",
-			satl->toString().c_str());
 
 	return 0 == plp->get_variables().varseq.size();
 }
@@ -320,18 +320,54 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		LinkPtr l(LinkCast(evelnk));
 		return do_eval_scratch(as, l->getOutgoingAtom(0), scratch);
 	}
+	else if (PUT_LINK == t)
+	{
+		PutLinkPtr pl(PutLinkCast(evelnk));
+		if (nullptr == pl)
+			pl = createPutLink(*LinkCast(evelnk));
+
+		// Evalating a PutLink requires three steps:
+		// (1) execute the values, first,
+		// (2) beta reduce (put values into body)
+		// (3) evaluate the resulting body.
+		Handle pvals = pl->get_values();
+		Instantiator inst(as);
+		// Step (1)
+		Handle gvals = inst.execute(pvals);
+		if (gvals != pvals)
+		{
+			as->add_atom(gvals);
+			HandleSeq goset;
+			if (pl->get_vardecl())
+				goset.emplace_back(pl->get_vardecl());
+			goset.emplace_back(pl->get_body());
+			goset.emplace_back(gvals);
+			pl = createPutLink(goset);
+		}
+		// Step (2)
+		Handle red = pl->reduce();
+
+		// Step (3)
+		return do_eval_scratch(as, red, scratch);
+	}
 	else if (DEFINED_PREDICATE_NODE == t)
 	{
 		return do_eval_scratch(as, DefineLink::get_definition(evelnk), scratch);
 	}
 
-	// We do not want to waste CPU time printing an exception message;
-	// this is supposed to be handled automatically.  Hmmm... unless
-	// its a user Syntax error ....
-	throw NotEvaluatableException();
-	// throw SyntaxException(TRACE_INFO,
-		// "Expecting to get an EvaluationLink, got %s",
-		// evelnk->toString().c_str());
+	// We get exceptions here in two differet ways: (a) due to user
+	// error, in which case we need o print an error, ad (b) automatic,
+	// e.g. when Instantiator calls us, knowing it will get an error,
+	// in which case, printing the exception message is a waste of CPU
+	// time...
+	//
+	// XXX Except that DefaultPatternMatchCB.cc really really wats to
+	// catch the NotEvaluatableException thrw here.  WTF. Not currently
+	//  triggered b unit tests ...
+// throw NotEvaluatableException();
+	throw SyntaxException(TRACE_INFO,
+		"Expecting to get an EvaluationLink, got %s",
+		evelnk->toString().c_str());
 }
 
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const Handle& evelnk)
