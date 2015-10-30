@@ -132,14 +132,13 @@ static TruthValuePtr equal(AtomSpace* as, const LinkPtr& ll)
 
 static bool is_evaluatable_sat(const Handle& satl)
 {
+	LinkPtr lp(LinkCast(satl));
+	if (1 != lp->getArity())
+		return false;
+
 	PatternLinkPtr plp(PatternLinkCast(satl));
 	if (nullptr == plp)
 		plp = createPatternLink(satl);
-
-	if (1 < plp->getArity())
-		throw SyntaxException(TRACE_INFO,
-			"Expecting SatisfacionLink of arity one; got %s",
-			satl->toString().c_str());
 
 	return 0 == plp->get_variables().varseq.size();
 }
