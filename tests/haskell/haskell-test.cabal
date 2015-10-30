@@ -1,13 +1,12 @@
 name:                haskell-test
 version:             0.1.0.0
-synopsis:            Initial project template from stack
-description:         Please see README.md
-homepage:            http://github.com/githubuser/new-template#readme
-license:             BSD3
-author:              Author name here
-maintainer:          example@example.com
-copyright:           2010 Author Here
-category:            Web
+synopsis:            Tests for the Haskell AtomSpace Bindings
+description:            
+homepage:            github.com/opencog/atomspace/tree/master/tests/haskell
+license:             OtherLicense
+author:              Roman Treutlein
+maintainer:          -
+category:            Artificial Intelligence
 build-type:          Simple
 cabal-version:       >=1.10
 
@@ -17,8 +16,6 @@ library
   other-modules:       OpenCog.Test.Template
   build-depends:       base
                      , template-haskell
-                     , tasty
-                     , tasty-smallcheck
                      , smallcheck
                      , opencog-atomspace
   default-language:    Haskell2010
@@ -34,7 +31,3 @@ Test-Suite haskell-test-suite
                      , smallcheck
                      , haskell-test
   default-language:    Haskell2010
-
-source-repository head
-  type:     git
-  location: https://github.com/githubuser/new-template
