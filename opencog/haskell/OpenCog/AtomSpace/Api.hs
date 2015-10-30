@@ -31,6 +31,7 @@ import OpenCog.AtomSpace.Internal    (UUID,AtomTypeRaw,AtomRaw(..),TVRaw(..),
 import OpenCog.AtomSpace.Types       (Atom(..),AtomName(..),TruthVal(..))
 import OpenCog.AtomSpace.Inheritance (type (<~))
 import OpenCog.AtomSpace.AtomType    (AtomType(AtomT))
+import OpenCog.AtomSpace.CUtils
 
 sUCCESS :: CInt
 sUCCESS = 0
@@ -304,16 +305,7 @@ foreign import ccall "AtomSpace_getTruthValue"
 getTruthValue :: UUID -> AtomSpace (Maybe TVRaw)
 getTruthValue handle = do
     asRef <- getAtomSpace
-    liftIO $ alloca $
-      \tptr -> allocaArray tvMAX_PARAMS $
-      \lptr -> do
-          res <- c_atomspace_getTruthValue asRef handle tptr lptr
-          if res == sUCCESS
-            then do
-                tvType <- peek tptr
-                l <- peekArray tvMAX_PARAMS lptr
-                return $ Just $ TVRaw (toEnum $ fromIntegral tvType) (map realToFrac l)
-            else return Nothing
+    liftIO $ getTVfromC $ c_atomspace_getTruthValue asRef handle
 
 foreign import ccall "AtomSpace_setTruthValue"
   c_atomspace_setTruthValue :: AtomSpaceRef

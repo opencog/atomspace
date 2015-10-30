@@ -1,5 +1,5 @@
-#include <Utils_CWrapper.h>
 
+#include "Utils_CWrapper.h"
 
 int Utils_toRawType(TruthValuePtr tv
                     , TruthValueType* tv_type
@@ -40,5 +40,5 @@ switch(tv->getType())
             break;
     }
     *tv_type = tv->getType();
-    return 0
+    return 0;
 }

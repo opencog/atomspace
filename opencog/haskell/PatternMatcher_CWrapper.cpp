@@ -9,7 +9,7 @@ UUID PatternMatcher_BindLink(AtomSpace* this_ptr, UUID handle)
     return bindlink(this_ptr, h).value();
 }
 
-int PatternMatcher_BindLink(AtomSpace* this_ptr
+int PatternMatcher_SatisfactionLink(AtomSpace* this_ptr
                             , UUID handle
                             , TruthValueType* tv_type
                             , double* parameters)

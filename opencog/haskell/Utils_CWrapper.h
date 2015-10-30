@@ -1,4 +1,12 @@
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/TruthValue.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/CountTruthValue.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
+#include <opencog/atomspace/FuzzyTruthValue.h>
+#include <opencog/atomspace/ProbabilisticTruthValue.h>
+
 
 /**
  * C wrapper of the Pattern Matcher api:
@@ -13,7 +21,7 @@ extern "C"
     using namespace opencog;
 
     int Utils_toRawType(TruthValuePtr tv
-                    , TruthValueType* tv_type
-                    , double* parameters);
+                        , TruthValueType* tv_type
+                        , double* parameters);
 }
 
