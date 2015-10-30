@@ -360,6 +360,11 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	// e.g. when Instantiator calls us, knowing it will get an error,
 	// in which case, printing the exception message is a waste of CPU
 	// time...
+	//
+	// XXX Except that DefaultPatternMatchCB.cc really really wats to
+	// catch the NotEvaluatableException thrw here.  WTF. Not currently
+	//  triggered b unit tests ...
+// throw NotEvaluatableException();
 	throw SyntaxException(TRACE_INFO,
 		"Expecting to get an EvaluationLink, got %s",
 		evelnk->toString().c_str());
