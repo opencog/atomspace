@@ -28,6 +28,7 @@
 #include "DeleteLink.h"
 #include "TimeLink.h"
 #include "RandomChoice.h"
+#include "RandomNumber.h"
 
 using namespace opencog;
 
@@ -111,19 +112,14 @@ Handle FunctionLink::factory(Type t, const HandleSeq& seq)
 	if (ARITY_LINK == t)
 		return Handle(createArityLink(seq));
 
-	if (PLUS_LINK == t)
-		// return Handle(createPlusLink(seq));
-		throw RuntimeException(TRACE_INFO, "Can't be a factory for this!");
-
 	if (RANDOM_CHOICE_LINK == t)
 		return Handle(createRandomChoiceLink(seq));
 
+	if (RANDOM_NUMBER_LINK == t)
+		return Handle(createRandomNumberLink(seq));
+
 	if (TIME_LINK == t)
 		return Handle(createTimeLink(seq));
-
-	if (TIMES_LINK == t)
-		// return Handle(createTimesLink(seq));
-		throw RuntimeException(TRACE_INFO, "Can't be a factory for this!");
 
 	// XXX FIXME In principle, we should manufacture the
 	// ExecutionOutputLink as well. In practice, we can't, due to a
@@ -132,7 +128,9 @@ Handle FunctionLink::factory(Type t, const HandleSeq& seq)
 	// depends on python. Whoops!)
 	if (EXECUTION_OUTPUT_LINK == t)
 		// return Handle(createExecutionOutputLink(seq));
-		throw RuntimeException(TRACE_INFO, "Can't be a factory for this!");
+		throw SyntaxException(TRACE_INFO, "Can't be a factory for this!");
 
-	throw RuntimeException(TRACE_INFO, "Not executable!");
+	throw SyntaxException(TRACE_INFO,
+		"FunctionLink is not a factory for %s",
+		classserver().getTypeName(t).c_str());
 }

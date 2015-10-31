@@ -83,22 +83,26 @@ void MinusLink::init(void)
 
 Handle MinusLink::execute(AtomSpace* as) const
 {
-	if (1 == _outgoing.size())
+	// Pattern matching hack. The pattern matcher returns sets of atoms;
+	// if that set contains numbers or something numeric, then unwrap it.
+	if (SET_LINK == _type and 1 == _outgoing.size())
 	{
-		NumberNodePtr na(NumberNodeCast(_outgoing[0]));
-		if (nullptr == na)
-			throw InvalidParamException(TRACE_INFO,
-				"Don't know how to subract that!");
+		LinkPtr lp(LinkCast(_outgoing[0]));
+		return do_execute(lp->getOutgoingSet());
+	}
+	return do_execute(_outgoing);
+}
 
+Handle MinusLink::do_execute(const HandleSeq& oset) const
+{
+	if (1 == oset.size())
+	{
+		NumberNodePtr na(unwrap_set(oset[0]));
 		return createNumberNode(- na->get_value())->getHandle();
 	}
 
-	NumberNodePtr na(NumberNodeCast(_outgoing[0]));
-	NumberNodePtr nb(NumberNodeCast(_outgoing[1]));
-	if (nullptr == na or nullptr == nb)
-			throw InvalidParamException(TRACE_INFO,
-				"Don't know how to subract that!");
-
+	NumberNodePtr na(unwrap_set(oset[0]));
+	NumberNodePtr nb(unwrap_set(oset[1]));
 	return createNumberNode(na->get_value() - nb->get_value())->getHandle();
 }
 

@@ -5,8 +5,15 @@ Reduct-inspired term reduction for atoms
 This is an experimental implementation of reduct-type functionality
 in the atomspace. Its experimental because its not really designed for
 performance nor for extensibility, nor anything else. Its more of a
-proof-of-concept.  There are surely other ways of doing this, and some
-of them might be better.
+proof-of-concept. It was insipred by combo, which does reduction in
+C++ code...
+
+After doing this, I decided that this is a bad idea. If you want to
+do reduction, do it using the unified rule engine (URE) ad write some
+rules for it. Don't do it in C++ code, the way its done here.
+Basically, much or most of the code here should be eliminated, and
+polynomial algebra should be implemented using URE rules.
+
 
 Caution:
 Some of the examples below used to work, but got broken during a
