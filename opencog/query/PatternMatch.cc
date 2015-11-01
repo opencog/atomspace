@@ -81,7 +81,7 @@ class PMCGroundings : public PatternMatchCallback
 		void push(void) { _cb.push(); }
 		void pop(void) { _cb.pop(); }
 		void set_pattern(const Variables& vars,
-	                    const Pattern& pat)
+		                 const Pattern& pat)
 		{
 			_cb.set_pattern(vars, pat);
 		}
@@ -143,8 +143,8 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
 	{
 		if (logger().isFineEnabled())
 		{
-			logger().fine("\nExplore one possible combinatoric grounding "
-			              "(var_gnds.size = %zu, term_gnds.size = %zu):\n",
+			logger().fine("Explore one possible combinatoric grounding "
+			              "(var_gnds.size = %zu, term_gnds.size = %zu):",
 			              var_gnds.size(), term_gnds.size());
 			PatternMatchEngine::log_solution(var_gnds, term_gnds);
 		}
