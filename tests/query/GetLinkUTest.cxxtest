@@ -23,6 +23,7 @@
 #include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -67,6 +68,7 @@ public:
 	void test_binary_get(void);
 	void test_free_bound(void);
 	void test_eval_clause(void);
+	void test_disconnected_binary_get(void);
 };
 
 void GetLinkUTest::tearDown(void)
@@ -154,18 +156,42 @@ void GetLinkUTest::test_eval_clause(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
-	config().set("SCM_PRELOAD",
-			"opencog/atomspace/core_types.scm, "
-			"opencog/scm/utilities.scm, "
-			"opencog/scm/opencog/exec.scm, "
-			"opencog/scm/opencog/query.scm, "
-			"tests/query/get-link-eval.scm");
+	config().set("SCM_PRELOAD", "tests/query/get-link-eval.scm");
 	load_scm_files_from_config(*as);
 
 	Handle hgnd = eval->eval_h("(cog-satisfying-set get)");
 
 	Handle hans = eval->eval_h("(SetLink"
-		"(EvaluationLink (ConceptNode \"glib\") (ConceptNode \"blab\")))");
+	                           "   (ListLink"
+	                           "      (ConceptNode \"glib\")"
+	                           "      (ConceptNode \"blab\")"
+	                           "      (EvaluationLink"
+	                           "         (ConceptNode \"glib\")"
+	                           "         (ConceptNode \"blab\"))))");
+
+	printf("Expected this: %s\n", hans->toString().c_str());
+	printf("Found this answer: %s\n", hgnd->toString().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Two-variable GetLink unit test that currently return the wrong result
+ */
+void GetLinkUTest::test_disconnected_binary_get(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD", "tests/query/get-link.scm");
+	load_scm_files_from_config(*as);
+
+	Handle g_take_contain = eval->eval_h("g-take-contain");
+	Handle hgnd = satisfying_set(as, g_take_contain);
+	Handle hans = eval->eval_h(
+		"(SetLink "
+		"(ListLink (ConceptNode \"John\") (ConceptNode \"compound-A\")))");
 
 	printf("Expected this: %s\n", hans->toString().c_str());
 	printf("Found this answer: %s\n", hgnd->toString().c_str());
