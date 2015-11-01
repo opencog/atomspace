@@ -1,5 +1,7 @@
 ; https://github.com/opencog/atomspace/issues/211
 
+(use-modules ((opencog query)))
+
 (EvaluationLink
    (ConceptNode "arkle")
    (ConceptNode "barkle")

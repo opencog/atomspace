@@ -409,6 +409,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	std::map<Handle, Handle> empty_vg;
 	std::map<Handle, Handle> empty_pg;
 	std::vector<Handle> optionals; // currently ignored
+	pmcb.set_pattern(_varlist, _pat);
 	return PatternMatch::recursive_virtual(pmcb, _virtual, optionals,
 	                  empty_vg, empty_pg,
 	                  comp_var_gnds, comp_term_gnds);
