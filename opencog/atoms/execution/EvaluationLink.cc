@@ -191,7 +191,8 @@ static bool is_tail_rec(const Handle& thish, const Handle& tail)
 /// SequentialAndLink to work correctly, when moving down the sequence.
 ///
 TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
-                     const Handle& evelnk, AtomSpace* scratch)
+                     const Handle& evelnk, AtomSpace* scratch,
+                     bool silent)
 {
 	Type t = evelnk->getType();
 	if (EVALUATION_LINK == t)
@@ -361,18 +362,23 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	// in which case, printing the exception message is a waste of CPU
 	// time...
 	//
-	// XXX Except that DefaultPatternMatchCB.cc really really wats to
-	// catch the NotEvaluatableException thrw here.  WTF. Not currently
-	//  triggered b unit tests ...
-// throw NotEvaluatableException();
+	// DefaultPatternMatchCB.cc and also Instantiator wants to
+	// catch the NotEvaluatableException thrw here.  Basically, these
+	// know that they might be sending non-evaluatable atoms here, and
+	// don't want to garbage up the log files with bogus errors.
+	if (silent)
+		throw NotEvaluatableException();
+
 	throw SyntaxException(TRACE_INFO,
 		"Expecting to get an EvaluationLink, got %s",
 		evelnk->toString().c_str());
 }
 
-TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const Handle& evelnk)
+TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
+                                          const Handle& evelnk,
+                                          bool silent)
 {
-	return do_eval_scratch(as, evelnk, as);
+	return do_eval_scratch(as, evelnk, as, silent);
 }
 
 /// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
