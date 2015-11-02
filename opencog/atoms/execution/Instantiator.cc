@@ -154,16 +154,16 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			for (const Handle& plo : slp->getOutgoingSet())
 			{
 				try {
-					EvaluationLink::do_evaluate(_as, plo);
+					EvaluationLink::do_evaluate(_as, plo, true);
 				}
-				catch (...) {}
+				catch (const NotEvaluatableException& ex) {}
 			}
 			return rex;
 		}
 		try {
-			EvaluationLink::do_evaluate(_as, rex);
+			EvaluationLink::do_evaluate(_as, rex, true);
 		}
-		catch (...) {}
+		catch (const NotEvaluatableException& ex) {}
 		return rex;
 	}
 
