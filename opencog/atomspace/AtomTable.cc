@@ -570,17 +570,12 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (not async)
         put_atom_into_index(atom);
 
-    // We can now unlock, since we are done. In particular, the signals
-    // need to run unlocked, since they may result in more atom table
-    // additions.
+    // We can now unlock, since we are done.
     lck.unlock();
 
     // Update the indexes asynchronously
     if (async)
         _index_queue.enqueue(atom);
-
-    // Now that we are completely done, emit the added signal.
-    _addAtomSignal(h);
 
     DPRINTF("Atom added: %ld => %s\n", atom->_uuid, atom->toString().c_str());
     return h;
@@ -594,6 +589,15 @@ void AtomTable::put_atom_into_index(AtomPtr& atom)
     linkIndex.insertAtom(atom);
     typeIndex.insertAtom(pat);
     importanceIndex.insertAtom(pat);
+
+    // We can now unlock, since we are done. In particular, the signals
+    // need to run unlocked, since they may result in more atom table
+    // additions.
+    lck.unlock();
+
+    // Now that we are completely done, emit the added signal.
+    // Don't emit signal until after the indexes are updated!
+    _addAtomSignal(atom->getHandle());
 }
 
 void AtomTable::barrier()
