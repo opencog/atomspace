@@ -117,7 +117,7 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
         ENDIF (NOT "${TYPE}" STREQUAL "NOTYPE")
 
         IF (TYPE_NAME STREQUAL "")
-            # set type name using camel casing
+            # Set type name using camel casing
             STRING(REGEX MATCHALL "." CHARS ${TYPE})
             LIST(LENGTH CHARS LIST_LENGTH)
             MATH(EXPR LAST_INDEX "${LIST_LENGTH} - 1")
@@ -140,29 +140,37 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
             ENDFOREACH(I RANGE ${LIST_LENGTH})
         ENDIF (TYPE_NAME STREQUAL "")
         
-        MESSAGE(STATUS "Atom type name: ${TYPE_NAME}")
+        STRING(REGEX REPLACE "([a-zA-Z]*)(Link|Node)$" "\\1" SHORT_NAME ${TYPE_NAME})
+        MESSAGE(STATUS "Atom type name: ${TYPE_NAME} ${SHORT_NAME}")
 
         # Try to guess if the thing is a node or link based on its name
         STRING(REGEX MATCH "NODE$" ISNODE ${TYPE})
         STRING(REGEX MATCH "LINK$" ISLINK ${TYPE})
+
+        # If not named as a node or a link, assume its a link
+        # This is kind of hacky, but I don't know what else to do ...
+        IF (NOT ISNODE STREQUAL "NODE" AND NOT ISLINK STREQUAL "LINK")
+            SET(ISLINK, "LINK")
+        ENDIF (NOT ISNODE STREQUAL "NODE" AND NOT ISLINK STREQUAL "LINK")
 
         # Print out the scheme definitions
         FILE(APPEND "${SCM_FILE}" "(define-public ${TYPE_NAME}Type (cog-type->int '${TYPE_NAME}))\n")
         IF (ISNODE STREQUAL "NODE")
             FILE(APPEND "${SCM_FILE}" "(define-public (${TYPE_NAME} . x)\n")
             FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-node (append (list ${TYPE_NAME}Type) x)))\n")
+            IF (NOT SHORT_NAME STREQUAL "")
+                FILE(APPEND "${SCM_FILE}" "(define-public (${SHORT_NAME} . x)\n")
+                FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-node (append (list ${TYPE_NAME}Type) x)))\n")
+            ENDIF (NOT SHORT_NAME STREQUAL "")
         ENDIF (ISNODE STREQUAL "NODE")
         IF (ISLINK STREQUAL "LINK")
             FILE(APPEND "${SCM_FILE}" "(define-public (${TYPE_NAME} . x)\n")
             FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-link (append (list ${TYPE_NAME}Type) x)))\n")
+            IF (NOT SHORT_NAME STREQUAL "")
+                FILE(APPEND "${SCM_FILE}" "(define-public (${SHORT_NAME} . x)\n")
+                FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-link (append (list ${TYPE_NAME}Type) x)))\n")
+            ENDIF (NOT SHORT_NAME STREQUAL "")
         ENDIF (ISLINK STREQUAL "LINK")
-
-        # If not named as a node or a link, assume its a link
-        # This is kind of hacky, but I don't know what else to do ... 
-        IF (NOT ISNODE STREQUAL "NODE" AND NOT ISLINK STREQUAL "LINK")
-            FILE(APPEND "${SCM_FILE}" "(define-public (${TYPE_NAME} . x)\n")
-            FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-link (append (list ${TYPE_NAME}Type) x)))\n")
-        ENDIF (NOT ISNODE STREQUAL "NODE" AND NOT ISLINK STREQUAL "LINK")
 
         # Print out the python definitions
         IF (ISNODE STREQUAL "NODE")
@@ -173,13 +181,6 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
             FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(*args):\n")
             FILE(APPEND "${PYTHON_FILE}" "    return atomspace.add_link(types.${TYPE_NAME}, args)\n")
         ENDIF (ISLINK STREQUAL "LINK")
-
-        # If not named as a node or a link, assume its a link
-        # This is kind of hacky, but I don't know what else to do ... 
-        IF (NOT ISNODE STREQUAL "NODE" AND NOT ISLINK STREQUAL "LINK")
-            FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(*args):\n")
-            FILE(APPEND "${PYTHON_FILE}" "    return atomspace.add_link(types.${TYPE_NAME}, args)\n")
-        ENDIF (NOT ISNODE STREQUAL "NODE" AND NOT ISLINK STREQUAL "LINK")
 
         IF (PARENT_TYPES)
             STRING(REGEX REPLACE "[ 	]*,[ 	]*" ";" PARENT_TYPES "${PARENT_TYPES}")
