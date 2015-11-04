@@ -150,7 +150,7 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
         # If not named as a node or a link, assume its a link
         # This is kind of hacky, but I don't know what else to do ...
         IF (NOT ISNODE STREQUAL "NODE" AND NOT ISLINK STREQUAL "LINK")
-            SET(ISLINK, "LINK")
+            SET(ISLINK "LINK")
         ENDIF (NOT ISNODE STREQUAL "NODE" AND NOT ISLINK STREQUAL "LINK")
 
         # Print out the scheme definitions
