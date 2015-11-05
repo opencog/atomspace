@@ -275,7 +275,10 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	HandleSeq oset_results;
 	bool changed = walk_tree(oset_results, lexpr->getOutgoingSet());
 	if (changed)
-		return Handle(createLink(t, oset_results, expr->getTruthValue()));
+	{
+		LinkPtr subl = createLink(t, oset_results, expr->getTruthValue());
+		return Handle(_as->add_atom(subl));
+	}
 	return expr;
 }
 
