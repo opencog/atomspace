@@ -86,16 +86,3 @@ void ImplicationLink::extract_variables(const HandleSeq& oset)
 	// Initialize _varlist with the scoped variables
 	init_scoped_variables(oset[0]);
 }
-
-namespace opencog {
-
-ImplicationLinkPtr ImplicationLinkCast(const Handle& h)
-{
-	AtomPtr a(h); return std::dynamic_pointer_cast<ImplicationLink>(a);
-}
-ImplicationLinkPtr ImplicationLinkCast(AtomPtr a)
-{
-	return std::dynamic_pointer_cast<ImplicationLink>(a.get());
-}
-
-}

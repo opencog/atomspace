@@ -85,8 +85,10 @@ public:
 };
 
 typedef std::shared_ptr<ImplicationLink> ImplicationLinkPtr;
-ImplicationLinkPtr ImplicationLinkCast(const Handle& h);
-ImplicationLinkPtr ImplicationLinkCast(AtomPtr a);
+static inline ImplicationLinkPtr ImplicationLinkCast(const Handle& h)
+	{ AtomPtr a(h); return std::dynamic_pointer_cast<ImplicationLink>(a); }
+static inline ImplicationLinkPtr ImplicationLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<ImplicationLink>(a); }
 
 // XXX temporary hack ...
 #define createImplicationLink std::make_shared<ImplicationLink>
@@ -94,4 +96,4 @@ ImplicationLinkPtr ImplicationLinkCast(AtomPtr a);
 /** @}*/
 }
 
-#endif // _OPENCOG_SCOPE_LINK_H
+#endif // _OPENCOG_IMPLICATION_LINK_H
