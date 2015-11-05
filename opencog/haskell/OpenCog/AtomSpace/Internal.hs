@@ -62,7 +62,6 @@ toRaw at = let atype     = getType at
     SetLink list             -> Link atype (map (appGen toRaw) list) defaultTv
     SatisfactionLink a1 a2   -> Link atype [toRaw a1,toRaw a2] defaultTv
     ForAllLink tv a1 a2      -> Link atype [toRaw a1,toRaw a2] $ toTVRaw tv
-    AverageLink tv a1 a2     -> Link atype [toRaw a1,toRaw a2] $ toTVRaw tv
     QuoteLink a1             -> Link atype [toRaw a1] defaultTv
     VariableList list        -> Link atype (map (appGen toRaw) list) defaultTv
     BindLink a1 a2 a3        -> Link atype [toRaw a1,toRaw a2,toRaw a3] defaultTv
@@ -160,11 +159,6 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw tvraw in do
         b <- filt br :: Maybe (Gen ImplicationT)
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ Gen $ ForAllLink tv a1 b1
-      (AverageT ,[ar,br]) -> do
-        a <- filt ar :: Maybe (Gen VariableT)
-        b <- filt br :: Maybe (Gen AtomT)
-        case (a,b) of
-          (Gen a1,Gen b1) -> Just $ Gen $ AverageLink tv a1 b1
       (QuoteT ,[ar]) -> do
         a <- filt ar :: Maybe (Gen AtomT)
         case a of

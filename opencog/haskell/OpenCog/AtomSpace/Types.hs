@@ -149,9 +149,6 @@ data Atom (a :: AtomType) where
     ForAllLink          :: (v <~ ListT,i <~ ImplicationT) =>
                            TruthVal -> Atom v -> Atom i -> Atom ForAllT
 
-    AverageLink         :: (v <~ VariableT,a <~ AtomT) =>
-                           TruthVal -> Atom v -> Atom a -> Atom AverageT
-
     QuoteLink           :: (a <~ AtomT) =>
                            Atom a -> Atom QuoteT
 
