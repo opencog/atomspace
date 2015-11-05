@@ -414,7 +414,7 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 				// If the grounding is accepted, record it.
 				if (hp != hg) var_grounding[hp] = hg;
 
-				_choice_state[Choice(ptm, hg)] = icurr;
+				_choice_state[GndChoice(ptm, hg)] = icurr;
 				return true;
 			}
 		}
@@ -424,7 +424,7 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 	}
 
 	// If we are here, we've explored all the possibilities already
-	_choice_state.erase(Choice(ptm, hg));
+	_choice_state.erase(GndChoice(ptm, hg));
 	return false;
 }
 
@@ -435,7 +435,7 @@ size_t PatternMatchEngine::curr_choice(const PatternTermPtr& ptm,
                                        bool& fresh)
 {
 	size_t istart;
-	try { istart = _choice_state.at(Choice(ptm, hg)); }
+	try { istart = _choice_state.at(GndChoice(ptm, hg)); }
 	catch(...) { istart = 0; fresh = true; }
 	return istart;
 }
@@ -445,11 +445,11 @@ bool PatternMatchEngine::have_choice(const PatternTermPtr& ptm,
 {
 #if USE_AT
 	bool have = true;
-	try { _choice_state.at(Choice(ptm, hg)); }
+	try { _choice_state.at(GndChoice(ptm, hg)); }
 	catch(...) { have = false;}
 	return have;
 #else
-	return 0 < _choice_state.count(Choice(ptm, hg));
+	return 0 < _choice_state.count(GndChoice(ptm, hg));
 #endif
 }
 
@@ -1082,8 +1082,8 @@ bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
 		choose_next = true;
 	} while (have_choice(ptm, hg));
 
-	logger().fine("Exhausted all choice possibilities");
-
+	logger().fine("Exhausted all choice possibilities"
+	              "\n----------------------------------");
 	return false;
 }
 
