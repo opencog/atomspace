@@ -1057,16 +1057,16 @@ bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
                                                  const Handle& clause_root)
 {
 	const Handle& hp = ptm->getHandle();
-	// If its not an choice link, then don't try to iterate.
+	// If its not a choice link, then don't try to iterate.
 	if (CHOICE_LINK != hp->getType())
 		return explore_single_branch(ptm, hg, clause_root);
 
 	logger().fine("Begin choice branchpoint iteration loop");
 	do {
-		// XXX this "need_choice_push thing is probably wrong; it probably
+		// XXX This `need_choice_push` thing is probably wrong; it probably
 		// should resemble the perm_push() used for unordered links.
 		// However, currently, no test case trips this up. so .. OK.
-		// whatever. This still probably needs fixing.
+		// Whatever. This still probably needs fixing.
 		if (_need_choice_push) choice_stack.push(_choice_state);
 		bool match = explore_single_branch(ptm, hg, clause_root);
 		if (_need_choice_push) POPSTK(choice_stack, _choice_state);
@@ -1793,7 +1793,7 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
  * boolean-logic formulas, although the infrastructure is designed
  * to handle other situations as well, e.g. Bayesian formulas, etc.)
  *
- * This method simply dispatches a given clause to be eitther pattern
+ * This method simply dispatches a given clause to be either pattern
  * matched, or to be evaluated.
  */
 bool PatternMatchEngine::explore_clause(const Handle& term,
