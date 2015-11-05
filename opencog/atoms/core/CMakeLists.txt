@@ -13,6 +13,7 @@ ADD_LIBRARY (atomcore SHARED
 	RandomChoice.cc
 	RandomNumber.cc
 	ScopeLink.cc
+	ImplicationLink.cc
 	StateLink.cc
 	TimeLink.cc
 	UniqueLink.cc
