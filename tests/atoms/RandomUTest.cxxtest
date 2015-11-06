@@ -1,0 +1,111 @@
+/*
+ * tests/atoms/RandomUTest.cxxtest
+ *
+ * Copyright (C) 2015 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class RandomUTest: public CxxTest::TestSuite
+{
+private:
+        AtomSpace *as;
+        SchemeEval* eval;
+
+public:
+    RandomUTest(void)
+    {
+        logger().setLevel(Logger::DEBUG);
+        logger().setPrintToStdoutFlag(true);
+
+        as = new AtomSpace();
+        eval = new SchemeEval(as);
+    }
+
+    ~RandomUTest()
+    {
+        delete eval;
+        delete as;
+        // Erase the log file if no assertions failed.
+        if (!CxxTest::TestTracker::tracker().suiteFailed())
+                std::remove(logger().getFilename().c_str());
+    }
+
+    void setUp(void);
+    void tearDown(void);
+
+    void test_weights(void);
+};
+
+void RandomUTest::tearDown(void)
+{
+    as->clear();
+}
+
+void RandomUTest::setUp(void)
+{
+    as->clear();
+    config().set("SCM_PRELOAD",
+        "opencog/atomspace/core_types.scm, "
+        "opencog/scm/utilities.scm, "
+        "opencog/scm/opencog/exec.scm");
+
+    load_scm_files_from_config(*as);
+}
+
+/*
+ * RandomChoiceLink unit test.
+ */
+void RandomUTest::test_weights(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/atoms/random-choice.scm");
+    load_scm_files_from_config(*as);
+
+    for (int i=0; i<3000; i++)
+    	eval->eval_tv("(cog-evaluate! (DefinedPredicate \"counter\"))");
+
+    Handle countA = eval->eval_h(
+        "(cog-execute! (Get (State (Anchor \"sum-A\") (Variable \"$x\"))))");
+    printf("A-count = %s\n", countA->toString().c_str());
+
+    Handle countB = eval->eval_h(
+        "(cog-execute! (Get (State (Anchor \"sum-B\") (Variable \"$x\"))))");
+    printf("B-count = %s\n", countB->toString().c_str());
+
+    Handle ratio = eval->eval_h(
+        "(cog-execute! (Divide "
+        "     (Get (State (Anchor \"sum-A\") (Variable \"$x\")))"
+        "     (Get (State (Anchor \"sum-B\") (Variable \"$x\")))))");
+    printf("ratio = %s\n", ratio->toString().c_str());
+
+    TruthValuePtr tv = eval->eval_tv("(cog-evaluate! (DefinedPredicate \"test\"))");
+    TS_ASSERT_LESS_THAN(0.5, tv->getMean());
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
