@@ -49,3 +49,39 @@
 ; Print the counts
 (cog-execute! (Get (State (Anchor "sum-A") (Variable "$x"))))
 (cog-execute! (Get (State (Anchor "sum-B") (Variable "$x"))))
+
+; Run it a thousand times
+(State (Anchor "loop-count") (Number 0))
+
+(Define (DefinedPredicate "loop a lot of times")
+	(SequentialAnd
+		(DefinedPredicate "counter")
+		(TrueLink (PutLink
+			(State (Anchor "loop-count") (Variable "$x"))
+			(Plus (Number 1) (Get (State (Anchor "loop-count") (Variable "$x"))))))
+		(GreaterThan
+			(Number 1000)
+			(Get (State (Anchor "loop-count") (Variable "$x"))))
+		(DefinedPredicate "loop a lot of times")))
+
+(cog-evaluate! (DefinedPredicate "loop a lot of times"))
+
+; Print the counts again
+(cog-execute! (Get (State (Anchor "sum-A") (Variable "$x"))))
+(cog-execute! (Get (State (Anchor "sum-B") (Variable "$x"))))
+
+; Print the ratio
+(Define (DefinedSchema "ratio")
+	(Divide
+		(Get (State (Anchor "sum-A") (Variable "$x")))
+		(Get (State (Anchor "sum-B") (Variable "$x")))))
+
+(cog-execute! (DefinedSchema "ratio"))
+
+; Test that the expectation value is bounded.
+(Define (DefinedPredicate "test expectation")
+   (SequentialAnd
+      (GreaterThan (Number 2.5) (DefinedSchema "ratio"))
+      (GreaterThan (DefinedSchema "ratio") (NumberNode 2.1))))
+
+(cog-evaluate! (DefinedPredicate "test expectation"))
