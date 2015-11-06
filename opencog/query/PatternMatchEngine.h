@@ -97,8 +97,8 @@ class PatternMatchEngine
 
 		// -------------------------------------------
 		// ChoiceLink state management
-		typedef std::pair<PatternTermPtr, Handle> Choice;
-		typedef std::map<Choice, size_t> ChoiceState;
+		typedef std::pair<PatternTermPtr, Handle> GndChoice;
+		typedef std::map<GndChoice, size_t> ChoiceState;
 
 		ChoiceState _choice_state;
 		bool _need_choice_push;
