@@ -74,7 +74,7 @@ The current list of modules that wrap C++ code includes:
 * `state.scm`   -- maintaining unique state.
 * `property.scm`-- setting properies on atoms.
 * `filter.scm`  -- filtering sets of atoms.
-* `random-choice.scm`  -- Assorted mathematical operations.
+* `random-choice.scm`  -- Numerical programming, including loops.
 * `logger-example.scm` -- using the built-in logger.
 * `except.scm`  -- an example of exceptions being thrown and passed.
 * `persist-example.scm` -- and example of saving atomspace data in an SQL
