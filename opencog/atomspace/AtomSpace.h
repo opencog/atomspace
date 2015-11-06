@@ -43,6 +43,29 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
+enum ImportanceValueChangeEventType {
+    STI_CHANGED, LTI_CHANGED, VLTI_CHANGED
+};
+
+struct ImportanceValueChangedEvent {
+    const Handle& hatom; //use this to get current vlti,lti and sti values
+    const ImportanceValueChangeEventType eventType;
+    union {
+        AttentionValue::vlti_t vlti_old;
+        AttentionValue::lti_t lti_old;
+        AttentionValue::sti_t sti_old;
+    };
+
+    ImportanceValueChangedEvent(const Handle& h,
+                                ImportanceValueChangeEventType aievent) :
+            hatom(h), eventType(aievent)
+    {
+
+    }
+
+};
+
+typedef boost::signals2::signal<void(const ImportanceValueChangedEvent&)> ImportanceValueChangedSignal;
 /**
  * The AtomSpace class exposes the public API of the OpenCog AtomSpace
  *
@@ -71,6 +94,9 @@ class AtomSpace
      * Used to fetch atoms from disk.
      */
     BackingStore *backing_store;
+
+    /** Signal emitted when there is a change in importance value (i.e sti,lit or vlti).*/
+    ImportanceValueChangedSignal _importanceValueChangedSignal;
 
     AtomTable& get_atomtable(void) { return atomTable; }
 protected:
@@ -595,7 +621,11 @@ public:
     {
         return bank.RemoveAFSignal().connect(function);
     }
-
+    boost::signals2::connection ImportanceValChangedSignal(
+            const ImportanceValueChangedSignal::slot_type& function)
+    {
+        return _importanceValueChangedSignal.connect(function);
+    }
     /* ----------------------------------------------------------- */
     /* Deprecated and obsolete code */
 
@@ -673,22 +703,50 @@ public:
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
     void set_STI(Handle h, AttentionValue::sti_t stiValue) const {
+        ImportanceValueChangeEventType etype =
+                ImportanceValueChangeEventType::STI_CHANGED;
+        ImportanceValueChangedEvent event(h, etype);
+        event.sti_old = h->getSTI();
+
         h->setSTI(stiValue);
+        _importanceValueChangedSignal(event);
     }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
     void set_LTI(Handle h, AttentionValue::lti_t ltiValue) const {
+        ImportanceValueChangeEventType etype =
+                ImportanceValueChangeEventType::LTI_CHANGED;
+        ImportanceValueChangedEvent event(h, etype);
+        event.lti_old = h->getLTI();
+
         h->setLTI(ltiValue);
+        _importanceValueChangedSignal(event);
     }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    void inc_VLTI(Handle h) const { h->incVLTI(); }
+    void inc_VLTI(Handle h) const {
+        ImportanceValueChangeEventType etype =
+                ImportanceValueChangeEventType::VLTI_CHANGED;
+        ImportanceValueChangedEvent event(h, etype);
+        event.vlti_old = h->getVLTI();
+
+        h->incVLTI();
+        _importanceValueChangedSignal(event);
+    }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    void dec_VLTI(Handle h) const { h->decVLTI(); }
+    void dec_VLTI(Handle h) const {
+        ImportanceValueChangeEventType etype =
+                ImportanceValueChangeEventType::VLTI_CHANGED;
+        ImportanceValueChangedEvent event(h, etype);
+        event.vlti_old = h->getVLTI();
+
+        h->decVLTI();
+        _importanceValueChangedSignal(event);
+    }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
