@@ -1,5 +1,10 @@
 ;
-; Unit test for RandomChoiceLink
+; Unit test for several different things, that are not really
+; tested anywhere else (or are poorly tested):
+; -- RandomChoiceLink with weights
+; -- DefinedPredicate ad DefinedSchema
+; -- DivideLink
+; -- Tail recursion optimization in the SequentialAndLink
 ;
 (use-modules (opencog) (opencog exec))
 

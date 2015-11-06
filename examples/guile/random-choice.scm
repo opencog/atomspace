@@ -53,6 +53,8 @@
 ; Run it a thousand times
 (State (Anchor "loop-count") (Number 0))
 
+; This defines a tail-recursive loop. The loop-counter is incremented,
+; and, if its less than a thousand, the function calls itself again.
 (Define (DefinedPredicate "loop a lot of times")
 	(SequentialAnd
 		(DefinedPredicate "counter")
@@ -64,6 +66,7 @@
 			(Get (State (Anchor "loop-count") (Variable "$x"))))
 		(DefinedPredicate "loop a lot of times")))
 
+; Actually execute the loop.
 (cog-evaluate! (DefinedPredicate "loop a lot of times"))
 
 ; Print the counts again
