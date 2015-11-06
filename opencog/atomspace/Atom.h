@@ -59,6 +59,32 @@ typedef std::weak_ptr<Link> WinkPtr;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 typedef boost::signals2::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
 
+enum ImportanceValueChangeEventType
+{
+    STI_CHANGED, LTI_CHANGED, VLTI_CHANGED
+};
+
+struct ImportanceValueChangedEvent {
+    const Handle& hatom; //use this to get current vlti,lti and sti values
+    const ImportanceValueChangeEventType eventType;
+    union
+    {
+        AttentionValue::vlti_t vlti_old;
+        AttentionValue::lti_t lti_old;
+        AttentionValue::sti_t sti_old;
+    };
+
+    ImportanceValueChangedEvent(const Handle& h,
+                               ImportanceValueChangeEventType aievent) :
+            hatom(h), eventType(aievent)
+    {
+
+    }
+
+};
+
+typedef boost::signals2::signal<void (const ImportanceValueChangedEvent&)> ImportanceValueChangedSignal;
+
 // We use a std:vector instead of std::set for IncomingSet, because
 // virtually all access will be either insert, or iterate, so we get
 // O(1) performance. We use std::set for WincomingSet, because we want
@@ -86,6 +112,8 @@ class Atom
     friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
 
 private:
+    ImportanceValueChangedSignal _importanceValueChangedSignal;
+
     //! Sets the AtomTable in which this Atom is inserted.
     void setAtomTable(AtomTable *);
 
@@ -250,22 +278,40 @@ public:
     {
         /* Make a copy */
         AttentionValuePtr old_av = getAttentionValue();
+
+        ImportanceValueChangeEventType etype =
+                ImportanceValueChangeEventType::STI_CHANGED;
+        ImportanceValueChangedEvent event(Handle(AtomPtr(this)), etype);
+        event.sti_old = old_av->getSTI();
+
         AttentionValuePtr new_av = createAV(
             stiValue,
             old_av->getLTI(),
             old_av->getVLTI());
         setAttentionValue(new_av);
+
+        /* Broadcast event*/
+        _importanceValueChangedSignal(event);
     }
 
     /** Change the Long-term Importance */
     void setLTI(AttentionValue::lti_t ltiValue)
     {
         AttentionValuePtr old_av = getAttentionValue();
+
+        ImportanceValueChangeEventType etype =
+                ImportanceValueChangeEventType::LTI_CHANGED;
+        ImportanceValueChangedEvent event(Handle(AtomPtr(this)), etype);
+        event.lti_old = old_av->getLTI();
+
         AttentionValuePtr new_av = createAV(
             old_av->getSTI(),
             ltiValue,
             old_av->getVLTI());
         setAttentionValue(new_av);
+
+        /* Broadcast event*/
+        _importanceValueChangedSignal(event);
     }
 
     /** Increase the Very-Long-Term Importance by 1 */
@@ -273,6 +319,12 @@ public:
 
     /** Decrease the Very-Long-Term Importance by 1 */
     void decVLTI() { chgVLTI(-1); }
+
+    boost::signals2::connection AddImportanceValueChangedSignal(
+            const ImportanceValueChangedSignal::slot_type& function)
+    {
+        return _importanceValueChangedSignal.connect(function);
+    }
 
     /** Returns the TruthValue object of the atom.
      *
