@@ -1,5 +1,5 @@
-
-; Unit test for RandomChideLink
+;
+; Unit test for RandomChoiceLink
 ;
 (use-modules (opencog) (opencog exec))
 
