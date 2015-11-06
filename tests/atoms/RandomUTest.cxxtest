@@ -87,8 +87,7 @@ void RandomUTest::test_weights(void)
     config().set("SCM_PRELOAD", "tests/atoms/random-choice.scm");
     load_scm_files_from_config(*as);
 
-    for (int i=0; i<3000; i++)
-    	eval->eval_tv("(cog-evaluate! (DefinedPredicate \"counter\"))");
+    eval->eval_tv("(cog-evaluate! (DefinedPredicate \"loop a lot of times\"))");
 
     Handle countA = eval->eval_h(
         "(cog-execute! (Get (State (Anchor \"sum-A\") (Variable \"$x\"))))");
@@ -99,9 +98,7 @@ void RandomUTest::test_weights(void)
     printf("B-count = %s\n", countB->toString().c_str());
 
     Handle ratio = eval->eval_h(
-        "(cog-execute! (Divide "
-        "     (Get (State (Anchor \"sum-A\") (Variable \"$x\")))"
-        "     (Get (State (Anchor \"sum-B\") (Variable \"$x\")))))");
+        "(cog-execute! (DefinedSchema \"ratio\"))");
     printf("ratio = %s\n", ratio->toString().c_str());
 
     TruthValuePtr tv = eval->eval_tv("(cog-evaluate! (DefinedPredicate \"test\"))");

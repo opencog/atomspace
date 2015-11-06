@@ -27,15 +27,28 @@
          (Plus (Number 1)
             (Get (State (Anchor "sum-B") (Variable "$y"))))))))
 
+; Run it a few thousand times
+(State (Anchor "loop-count") (Number 0))
+
+(Define (DefinedPredicate "loop a lot of times")
+   (SequentialAnd
+      (DefinedPredicate "counter")
+      (TrueLink (PutLink
+         (State (Anchor "loop-count") (Variable "$x"))
+         (Plus (Number 1) (Get (State (Anchor "loop-count") (Variable "$x"))))))
+      (GreaterThan
+         (Number 3000)
+         (Get (State (Anchor "loop-count") (Variable "$x"))))
+      (DefinedPredicate "loop a lot of times")))
+
+; Print the ratio
+(Define (DefinedSchema "ratio")
+   (Divide
+      (Get (State (Anchor "sum-A") (Variable "$x")))
+      (Get (State (Anchor "sum-B") (Variable "$x")))))
+
 ; Expectation value os 0.7/0.3 = 2.33333
 (Define (DefinedPredicate "test")
    (SequentialAnd
-      (GreaterThan (Number 2.5)
-         (Divide
-            (Get (State (Anchor "sum-A") (Variable "$x")))
-            (Get (State (Anchor "sum-B") (Variable "$y")))))
-      (GreaterThan
-         (Divide
-            (Get (State (Anchor "sum-A") (Variable "$x")))
-            (Get (State (Anchor "sum-B") (Variable "$y"))))
-      (Number 2.2))))
+      (GreaterThan (Number 2.5) (DefinedSchema "ratio"))
+      (GreaterThan (DefinedSchema "ratio") (Number 2.2))))
