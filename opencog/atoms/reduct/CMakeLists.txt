@@ -4,6 +4,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (clearbox SHARED
 	ArithmeticLink.cc
+	DivideLink.cc
 	FoldLink.cc
 	MinusLink.cc
 	PlusLink.cc
@@ -24,6 +25,7 @@ INSTALL (TARGETS clearbox
 
 INSTALL (FILES
 	ArithmeticLink.h
+	DivideLink.h
 	FoldLink.h
 	MinusLink.h
 	PlusLink.h
