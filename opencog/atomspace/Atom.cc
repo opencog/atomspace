@@ -206,11 +206,20 @@ void Atom::setAttentionValue(AttentionValuePtr av)
 void Atom::chgVLTI(int unit)
 {
     AttentionValuePtr old_av = getAttentionValue();
+
+    ImportanceValueChangeEventType etype =
+            ImportanceValueChangeEventType::VLTI_CHANGED;
+    ImportanceValueChangeEvent event(Handle(AtomPtr(this)), etype);
+    event.vlti_old = old_av->getVLTI();
+
     AttentionValuePtr new_av = createAV(
         old_av->getSTI(),
         old_av->getLTI(),
         old_av->getVLTI() + unit);
     setAttentionValue(new_av);
+
+    /* Broadcast event*/
+    _importanceValueChangedSignal(event);
 }
 
 // ==============================================================
