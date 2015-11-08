@@ -151,7 +151,7 @@ HandleSeq get_rulebase_rules(AtomSpace* as,
     // TODO: create a rule-vector scheme-primitive signature, if Rule.h isn't
     // converted to a sub-class of PatternLink.
     for (auto i = rules.begin(); i != rules.end(); i++){
-	       hs.push_back((*i).get_handle());
+	       hs.push_back((*i).get_alias());
     }
 
     return hs;
