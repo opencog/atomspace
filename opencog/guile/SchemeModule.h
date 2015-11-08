@@ -44,7 +44,7 @@ class FunctionWrap
 		// These wrappers return a TruthValuePtr and abstract the
 		// atomspace away.
 		TruthValuePtr (*_pred_ah)(AtomSpace*, const Handle&);
-		TruthValuePtr as_prapper_h(Handle);
+		TruthValuePtr as_wrapper_p_h(Handle);
 
 		// This wrapper return HandleSeq and abstract the atomspace away.
 		HandleSeq as_wrapper_q_h(Handle);
