@@ -159,21 +159,28 @@ void EvaluationUTest::test_varval(void)
 	config().set("SCM_PRELOAD", "tests/query/eval-var.scm");
 	load_scm_files_from_config(*as);
 
-	Handle dostuff = eval->eval_h("(cog-bind (do-things))");
-	printf ("do-things: \n%s\n", dostuff->toShortString().c_str());
+	Handle do_things = eval->eval_h("(do-things)");
+	Handle do_things_results = bindlink(as, do_things);
+	printf ("do-things: \n%s\n", do_things_results->toShortString().c_str());
 
 	// Of the two possibilities, we only expect one to pass.
 	Handle expected = eval->eval_h(
-		"(SetLink (ImplicationLink (ConceptNode \"acceptance\")))");
+		"(SetLink"
+		"   (ImplicationLink"
+		"      (PredicateNode \"acceptance\")"
+		"      (PredicateNode \"acceptance\")))");
 
-	TS_ASSERT_EQUALS(expected, dostuff);
+	TS_ASSERT_EQUALS(expected, do_things_results);
 
 	Handle ndostuff = eval->eval_h("(cog-bind (do-nthings))");
 	printf ("do-nthings: \n%s\n", ndostuff->toShortString().c_str());
 
 	// Of the two possibilities, we only expect one to pass.
 	Handle rejected = eval->eval_h(
-		"(SetLink (ImplicationLink (ConceptNode \"rejection\")))");
+		"(SetLink"
+		"   (ImplicationLink"
+		"      (PredicateNode \"rejection\")"
+		"      (PredicateNode \"rejection\")))");
 
 	TS_ASSERT_EQUALS(rejected, ndostuff);
 

@@ -24,6 +24,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -113,19 +114,6 @@ void ArcanaUTest::test_repeats(void)
         printf("Solution 2:\n%s\n", oset[0]->toShortString().c_str());
     TS_ASSERT_EQUALS(true, pass);
 
-    Handle d3d = eval->eval_h("(cog-bind (repeat-diff-thrice))");
-    printf("d3d, num solutions=%d\n", as->get_arity(d3d));
-    TS_ASSERT(1 <= as->get_arity(d3d));
-    TS_ASSERT(as->get_arity(d3d) <= 3);
-
-    Handle thrice = eval->eval_h("(cog-bind (repeat-thrice))");
-    printf("thrice, num solutions=%d\n", as->get_arity(thrice));
-    TS_ASSERT_EQUALS(1, as->get_arity(thrice));
-
-    Handle once = eval->eval_h("(cog-bind (repeat-once))");
-    printf("once, num solutions=%d\n", as->get_arity(once));
-    TS_ASSERT_EQUALS(1, as->get_arity(once));
-
     // ----
     logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -177,10 +165,10 @@ void ArcanaUTest::test_numeric(void)
     load_scm_files_from_config(*as);
 
     // ----
-    eval->eval_h(
-        "(cog-execute! (StateLink"
-        "     (SchemaNode \"start-interaction-timestamp\")"
-        "     (TimeLink)))");
+    Handle sl = eval->eval_h("(StateLink"
+                             "   (SchemaNode \"start-interaction-timestamp\")"
+                             "   (TimeLink))");
+    Instantiator(as).execute(sl);
   
     TruthValuePtr too_soon = eval->eval_tv(
         "(cog-evaluate! (DefinedPredicateNode \"Time to change expression\"))");
