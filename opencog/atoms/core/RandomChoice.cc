@@ -26,6 +26,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/mt19937ar.h>
 
+#include "../NumberNode.h"
+#include "FunctionLink.h"
 #include "RandomChoice.h"
 
 using namespace opencog;
@@ -60,12 +62,13 @@ Handle RandomChoiceLink::execute(AtomSpace * as) const
 
 	// Special-case handling for SetLinks, so it works with
 	// dynamically-evaluated PutLinks ...
-	if (1 == ary and SET_LINK == _outgoing[0]->getType())
+	Type ot = _outgoing[0]->getType();
+	if (1 == ary and (SET_LINK == ot or LIST_LINK == ot))
 	{
 #if 0
 		// Already executed by the time we get here... !?
-		// XXX not sure why we are doing "eager" execution
-		// like this...
+		// XXX FIXME: this is a situation where doing "eager" execution
+		// is a bad idea.
 		FunctionLinkPtr flp(FunctionLinkCast(_outgoing[0]));
 		if (nullptr == flp) return _outgoing[0];
 
@@ -77,6 +80,33 @@ Handle RandomChoiceLink::execute(AtomSpace * as) const
 		LinkPtr lll(LinkCast(_outgoing[0]));
 		ary = lll->getArity();
 		return lll->getOutgoingAtom(randy.randint(ary));
+	}
+
+	if (2 == ary and (SET_LINK == ot or LIST_LINK == ot))
+	{
+		LinkPtr lweights(LinkCast(_outgoing[0]));
+		LinkPtr lchoices(LinkCast(_outgoing[1]));
+
+		if (lweights->getArity() != lchoices->getArity())
+			throw SyntaxException(TRACE_INFO,
+				"Weights and choices must be the same size");
+
+		// Weights need to be numbers, or must evaluate to numbers.
+		std::vector<double> weights;
+		for (Handle h : lweights->getOutgoingSet())
+		{
+			FunctionLinkPtr flp(FunctionLinkCast(h));
+			if (nullptr != flp)
+				h = flp->execute(as);
+
+			NumberNodePtr nn(NumberNodeCast(h));
+			if (nullptr == nn)
+				throw SyntaxException(TRACE_INFO,
+				       "Expecting a NumberNode");
+			weights.push_back(nn->get_value());
+		}
+
+		return lchoices->getOutgoingAtom(randy.randDiscrete(weights));
 	}
 
 	return _outgoing.at(randy.randint(ary));
