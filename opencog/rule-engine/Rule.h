@@ -81,8 +81,8 @@ private:
 	// Rule handle, typically a BindLink
 	Handle rule_handle_;
 
-    // Rule alias: (DefineLink rule_alias_ rule_handle_)
-    Handle rule_alias_;
+	// Rule alias: (DefineLink rule_alias_ rule_handle_)
+	Handle rule_alias_;
 
 	// Rule name, the name of the node referring to the rule body
 	string name_;
