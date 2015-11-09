@@ -13,7 +13,7 @@
 )
 
 (define (konsekwens x)
-	(ImplicationLink x)
+	(ImplicationLink x x)
 )
 
 ; The bind link will accept this
@@ -25,7 +25,7 @@
 	)
 	(ExecutionOutputLink
 		(GroundedSchemaNode "scm: konsekwens")
-		(ListLink (ConceptNode "acceptance"))
+		(ListLink (PredicateNode "acceptance"))
 	)
 )
 
@@ -38,7 +38,7 @@
 	)
 	(ExecutionOutputLink
 		(GroundedSchemaNode "scm: konsekwens")
-		(ListLink (ConceptNode "rejection"))
+		(ListLink (PredicateNode "rejection"))
 	)
 )
 
