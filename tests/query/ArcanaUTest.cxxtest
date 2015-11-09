@@ -114,6 +114,19 @@ void ArcanaUTest::test_repeats(void)
         printf("Solution 2:\n%s\n", oset[0]->toShortString().c_str());
     TS_ASSERT_EQUALS(true, pass);
 
+    Handle d3d = eval->eval_h("(cog-bind (repeat-diff-thrice))");
+    printf("d3d, num solutions=%d\n", as->get_arity(d3d));
+    TS_ASSERT(1 <= as->get_arity(d3d));
+    TS_ASSERT(as->get_arity(d3d) <= 3);
+
+    Handle thrice = eval->eval_h("(cog-bind (repeat-thrice))");
+    printf("thrice, num solutions=%d\n", as->get_arity(thrice));
+    TS_ASSERT_EQUALS(1, as->get_arity(thrice));
+
+    Handle once = eval->eval_h("(cog-bind (repeat-once))");
+    printf("once, num solutions=%d\n", as->get_arity(once));
+    TS_ASSERT_EQUALS(1, as->get_arity(once));
+
     // ----
     logger().debug("END TEST: %s", __FUNCTION__);
 }
