@@ -140,14 +140,15 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 	// grounding, unless they are quoted. However, a bound variable can be
 	// legitimately grounded by a free variable, because free variables are
 	// effectively constant literals, during the pattern match.
-	if (any_unquoted_in_tree(hg, _varlist->varset))
+	if (any_unquoted_unscoped_in_tree(hg, _varlist->varset))
 	{
 		for (Handle vh: _varlist->varset)
 		{
 			// OK, which variable is it?
-			if (is_unquoted_in_tree(hg, vh))
+			if (is_unquoted_in_tree(hg, vh) and is_unscoped_in_tree(hg, vh))
 			{
-				logmsg("miscompare; found bound variable in grounding tree:", vh);
+				logmsg("miscompare; found bound variable in grounding tree:",
+				       vh);
 				logmsg("matching  variable  is:", hp);
 				logmsg("proposed grounding is:", hg);
 				return false;
