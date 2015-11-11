@@ -115,6 +115,9 @@ struct Variables : public FreeVariables
 
 	// Extend this variable set by adding in the given variable set.
 	void extend(const Variables&);
+
+	// Useful for debugging
+	std::string to_string();
 };
 
 /** @}*/

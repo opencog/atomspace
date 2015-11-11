@@ -328,4 +328,18 @@ void Variables::extend(const Variables& vset)
 	}
 }
 
+std::string Variables::to_string()
+{
+	std::stringstream ss;
+	for (auto& v : typemap)
+	{
+		ss << "{variable: " << v.first->toShortString()
+		   << "types: ";
+		for (auto& t : v.second)
+			ss << classserver().getTypeName(t) << " ";
+		ss << "}" << std::endl;
+	}
+	return ss.str();
+}
+
 /* ===================== END OF FILE ===================== */
