@@ -26,6 +26,7 @@
 #include <opencog/util/Config.h>
 #include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
+#include <cxxtest/TestSuite.h>
 
 using namespace opencog;
 
