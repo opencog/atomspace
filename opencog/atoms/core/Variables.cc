@@ -328,7 +328,7 @@ void Variables::extend(const Variables& vset)
 	}
 }
 
-std::string Variables::to_string()
+std::string Variables::to_string() const
 {
 	std::stringstream ss;
 	for (auto& v : typemap)
