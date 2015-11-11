@@ -593,7 +593,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
  * Initiate a search by looping over all atoms of the allowed
  * variable types (as set with the set_type_testrictions() method).
  * This assumes that the varset contains the variables to be searched
- * over, and that the type restrictins are set up approrpriately.
+ * over, and that the type restrictions are set up approrpriately.
  *
  * If the varset is empty, or if there are no variables, then the
  * entire atomspace will be searched.  Depending on the pattern,
