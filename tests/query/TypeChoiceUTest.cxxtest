@@ -59,7 +59,7 @@ public:
 	void tearDown(void);
 
 	void test_connected();
-	// void test_disconnected();
+	void test_disconnected();
 };
 
 void TypeChoiceUTest::tearDown(void)
@@ -122,24 +122,30 @@ void TypeChoiceUTest::test_connected()
 	Handle expected = al(SET_LINK, al(LIST_LINK, predicate, lambda));
 
 	logger().debug() << "result = " << result->toString();
-	logger().debug() << "expected = " << result->toString();
+	logger().debug() << "expected = " << expected->toString();
     
 	TS_ASSERT_EQUALS(result, expected);
 }
 
-// /*
-//  * TypeChoice over disconnected components
-//  */
-// void TypeChoiceUTest::test_disconnected()
-// {
-// 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+/*
+ * TypeChoice over disconnected components
+ */
+void TypeChoiceUTest::test_disconnected()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-// 	Handle result = satisfying_set(&as, disconnected_pattern);
+	Handle result = satisfying_set(&as, disconnected_pattern);
+	Handle expected = al(SET_LINK,
+	                     al(LIST_LINK, lambda, predicate),
+	                     al(LIST_LINK, predicate, predicate),
+	                     al(LIST_LINK, lambda, lambda),
+	                     al(LIST_LINK, predicate, lambda));
 
-// 	logger().debug() << "result = " << result->toString();
+	logger().debug() << "result = " << result->toString();
+	logger().debug() << "expected = " << expected->toString();
 	
-// 	TS_ASSERT(true);
-// }
+	TS_ASSERT_EQUALS(result, expected);
+}
 
 #undef al
 #undef an
