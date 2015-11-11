@@ -286,7 +286,7 @@ static inline bool any_unquoted_in_tree(const Handle& tree,
  * longer a variable.
  */
 static inline unsigned int num_unquoted_in_tree(const Handle& tree,
-                                        const std::set<Handle>& atoms)
+                                                const std::set<Handle>& atoms)
 {
 	unsigned int count = 0;
 	for (const Handle& n: atoms)

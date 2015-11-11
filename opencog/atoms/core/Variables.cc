@@ -163,7 +163,7 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
  * Simple type checker.
  *
  * Returns true/false if the indicated handle is of the type that
- * we have memoized.  If this typelist contians more than one type in
+ * we have memoized.  If this typelist contains more than one type in
  * it, then clearly, there is a mismatch.  If there are no type
  * restrictions, then it is trivially a match.  Otherwise, there must
  * be a TypeChoice, and so the handle must be one of the types in the
@@ -175,7 +175,7 @@ bool Variables::is_type(const Handle& h) const
 	if (1 != varset.size()) return false;
 
 	// No type restrictions.
-	if (0 == typemap.size()) return true;
+	if (typemap.empty()) return true;
 
 	// Check the type restrictions.
 	VariableTypeMap::const_iterator it =
@@ -204,7 +204,7 @@ bool Variables::is_type(const HandleSeq& hseq) const
 	size_t len = hseq.size();
 	if (varset.size() != len) return false;
 	// No type restrictions.
-	if (0 == typemap.size()) return true;
+	if (typemap.empty()) return true;
 
 	// Check the type restrictions.
 	for (size_t i=0; i<len; i++)
