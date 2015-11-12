@@ -23,10 +23,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "IndefiniteTruthValue.h"
-
-#include <opencog/util/platform.h>
+#include <math.h>
 #include <opencog/util/exceptions.h>
+
+#include "IndefiniteTruthValue.h"
 
 #define W() getU()-getL();
 
