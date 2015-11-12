@@ -64,7 +64,10 @@ static strength_t DensityIntegral(strength_t lower, strength_t upper,
     params[2] = static_cast<double>(k_);
     params[3] = static_cast<double>(s_);
 
-    double delta = (upper-lower) / 30.0;
+    // Previous code computed this integral to an absolute accuracy
+    // of 0.1 which seems absurd to me. Improve on this just a bit.
+#define NSTEPS 15.0
+    double delta = (upper-lower) / NSTEPS;
     double result = 0.0;
     for (double x=lower; x<upper; x += delta) {
         result += integralFormula(x, &params);
