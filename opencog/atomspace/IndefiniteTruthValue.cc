@@ -69,6 +69,7 @@ static strength_t DensityIntegral(strength_t lower, strength_t upper,
     for (double x=lower; x<upper; x += delta) {
         result += integralFormula(x, &params);
     }
+    result *= delta;
     return (strength_t) result;
 }
 
