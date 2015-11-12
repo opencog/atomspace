@@ -23,9 +23,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_integration.h>
-
 #include "IndefiniteTruthValue.h"
 
 #include <opencog/util/platform.h>
@@ -62,20 +59,16 @@ static strength_t DensityIntegral(strength_t lower, strength_t upper,
                                   count_t k_, strength_t s_)
 {
     double params[4];
-    size_t neval = 0;
-    double result = 0.0, abserr = 0.0;
-    gsl_function F;
-
     params[0] = static_cast<double>(L_);
     params[1] = static_cast<double>(U_);
     params[2] = static_cast<double>(k_);
     params[3] = static_cast<double>(s_);
 
-    F.function = &integralFormula;
-    F.params = &params;
-
-    gsl_integration_qng (&F, lower, upper,
-                         1e-1, 0.0, &result, &abserr, &neval);
+    double delta = (upper-lower) / 30.0;
+    double result = 0.0;
+    for (double x=lower; x<upper; x += delta) {
+        result += integralFormula(x, &params);
+    }
     return (strength_t) result;
 }
 
