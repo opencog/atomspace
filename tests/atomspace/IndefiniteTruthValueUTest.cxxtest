@@ -25,14 +25,12 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_integration.h>
-
-#include <opencog/atomspace/IndefiniteTruthValue.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/numeric.h>
+
+#include <opencog/atomspace/IndefiniteTruthValue.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
 
 using namespace opencog;
 using namespace std;
@@ -53,7 +51,8 @@ using namespace std;
 
 //these 2 following functions are used by computeDiff
 //solely for testing purpose
-static double TestIntegralFormula(double x, void * params) {
+static double TestIntegralFormula(double x, void * params)
+{
   double L_, U_,k_,s_;
   double *in_params = static_cast<double*>(params);
   L_ = in_params[0];
@@ -68,20 +67,18 @@ static strength_t TestDensityIntegral(strength_t lower, strength_t upper,
                                  strength_t L_, strength_t U_, count_t k_, strength_t s_)
 {
   double params[4];
-  size_t neval = 0;
-  double result = 0, abserr = 0 ;
-  gsl_function F;
-
   params[0] = static_cast<double>(L_);
   params[1] = static_cast<double>(U_);
   params[2] = static_cast<double>(k_);
   params[3] = static_cast<double>(s_);
 
-  F.function = &TestIntegralFormula;
-  F.params = &params;
-
-  gsl_integration_qng (&F, lower, upper,
-                                1e-1, 0.0, &result, &abserr, &neval);
+#define NSTEPS 15.0
+  double delta = (upper-lower) / NSTEPS;
+  double result = 0.0;
+  for (double x=lower; x<upper; x += delta) {
+      result += TestIntegralFormula(x, &params);
+  }
+  result *= delta;
 
   return (strength_t) result;
 }
