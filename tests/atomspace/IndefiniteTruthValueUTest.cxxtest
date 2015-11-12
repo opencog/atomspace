@@ -51,7 +51,8 @@ using namespace std;
 
 //these 2 following functions are used by computeDiff
 //solely for testing purpose
-static double TestIntegralFormula(double x, void * params) {
+static double TestIntegralFormula(double x, void * params)
+{
   double L_, U_,k_,s_;
   double *in_params = static_cast<double*>(params);
   L_ = in_params[0];
@@ -75,7 +76,7 @@ static strength_t TestDensityIntegral(strength_t lower, strength_t upper,
   double delta = (upper-lower) / NSTEPS;
   double result = 0.0;
   for (double x=lower; x<upper; x += delta) {
-      result += integralFormula(x, &params);
+      result += TestIntegralFormula(x, &params);
   }
   result *= delta;
 
