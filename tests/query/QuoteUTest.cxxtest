@@ -283,7 +283,7 @@ void QuoteUTest::test_crash(void)
     // matcher doesn't prevent it.
     Handle inf = eval->eval_h("(cog-bind infloop)");
     printf("infloop is %s\n", inf->toShortString().c_str());
-    TS_ASSERT_EQUALS(4, as->get_arity(inf));
+    TS_ASSERT_EQUALS(6, as->get_arity(inf));
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
