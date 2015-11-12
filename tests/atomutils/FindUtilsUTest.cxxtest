@@ -1,0 +1,77 @@
+/*
+ * tests/atomspace/FindUtilsUTest.cxxtest
+ *
+ * Copyright (C) 2015 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomutils/FindUtils.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/Config.h>
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+class FindUtilsUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace as;
+	Handle X, free_evaluation, scoped_implication;
+
+public:
+	FindUtilsUTest()
+	{
+		logger().setPrintToStdoutFlag(true);
+	}
+
+	void setUp();
+
+	void test_is_unscoped_in_tree();
+};
+
+void FindUtilsUTest::setUp(void)
+{
+#define al as.add_link
+#define an as.add_node
+
+	X = an(VARIABLE_NODE, "$X");
+	free_evaluation =
+		al(EVALUATION_LINK,
+		   an(PREDICATE_NODE, "P"),
+		   X);
+	scoped_implication =
+		al(IMPLICATION_LINK,
+		   an(PREDICATE_NODE, "P"),
+		   al(LAMBDA_LINK,
+		      X,
+		      free_evaluation));
+
+#undef al
+#undef an
+}
+
+// Test is_unscoped_in_tree()
+void FindUtilsUTest::test_is_unscoped_in_tree()
+{
+	bool free_result = is_unscoped_in_tree(free_evaluation, X);
+	TS_ASSERT_EQUALS(free_result, true);
+
+	bool scoped_result = is_unscoped_in_tree(scoped_implication, X);
+	TS_ASSERT_EQUALS(scoped_result, false);
+}
