@@ -358,7 +358,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 
 	if (logger().isFineEnabled())
 	{
-		logger().fine("VIRTUAL PATTERN: ====================== "
+		logger().fine("VIRTUAL PATTERN: ====== "
 		              "num comp=%zd num virts=%zd\n", _num_comps, _num_virts);
 		logger().fine("Virtuals are:");
 		size_t iii=0;
@@ -376,7 +376,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	for (size_t i=0; i<_num_comps; i++)
 	{
 		LAZY_LOG_FINE << "BEGIN COMPONENT GROUNDING " << i+1
-		              << " of " << _num_comps << ": ======================\n";
+		              << " of " << _num_comps << ": ===========\n";
 
 		Pattern pat = PatternLinkCast(_component_patterns.at(i))->get_pattern();
 		bool is_pure_optional = false;

@@ -68,6 +68,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(AttentionalFocusCBUTest)
 	ADD_CXXTEST(SudokuUTest)
 	ADD_CXXTEST(EinsteinUTest)
+	ADD_CXXTEST(TypeChoiceUTest)
 
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
 		${COGUTIL_LIBRARY}

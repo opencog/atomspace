@@ -36,6 +36,7 @@
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/types.h>
+#include <opencog/atoms/core/ScopeLink.h>
 
 namespace opencog {
 
@@ -248,6 +249,30 @@ static inline bool is_unquoted_in_tree(const Handle& tree, const Handle& atom)
 }
 
 /**
+ * Return true if the atom (variable) occurs unscoped somewhere in the
+ * tree.
+ */
+static inline bool is_unscoped_in_tree(const Handle& tree, const Handle& atom)
+{
+	// Base cases
+	if (tree == atom) return true;
+	LinkPtr ltree(LinkCast(tree));
+	if (nullptr == ltree) return false;
+	ScopeLinkPtr stree(ScopeLinkCast(tree));
+	if (nullptr != stree) {
+		const std::set<Handle>& varset = stree->get_variables().varset;
+		if (varset.find(atom) != varset.cend())
+			return false;
+	}
+
+	// Recursive case
+	for (const Handle& h : ltree->getOutgoingSet())
+		if (is_unscoped_in_tree(h, atom))
+			return true;
+	return false;
+}
+
+/**
  * Return true if any of the indicated atoms occur somewhere in
  * the tree (that is, in the tree spanned by the outgoing set.)
  */
@@ -279,6 +304,31 @@ static inline bool any_unquoted_in_tree(const Handle& tree,
 }
 
 /**
+ * Return true if any of the atoms (variables) occur unscoped
+ * somewhere in the tree.
+ */
+static inline bool any_unscoped_in_tree(const Handle& tree,
+                                        const std::set<Handle>& atoms)
+{
+	for (const Handle& n: atoms)
+		if (is_unscoped_in_tree(tree, n)) return true;
+	return false;
+}
+
+/**
+ * Return true if any of the atoms (variables) occur unquoted and
+ * unscoped somewhere in the tree.
+ */
+static inline bool any_unquoted_unscoped_in_tree(const Handle& tree,
+                                                 const std::set<Handle>& atoms)
+{
+	for (const Handle& n: atoms)
+		if (is_unquoted_in_tree(tree, n) and is_unscoped_in_tree(tree, n))
+			return true;
+	return false;
+}
+
+/**
  * Return how many of the indicated atoms occur somewhere in
  * the tree (that is, in the tree spanned by the outgoing set.)
  * But ONLY if they are not quoted!  This is intended to be used to
@@ -286,7 +336,7 @@ static inline bool any_unquoted_in_tree(const Handle& tree,
  * longer a variable.
  */
 static inline unsigned int num_unquoted_in_tree(const Handle& tree,
-                                        const std::set<Handle>& atoms)
+                                                const std::set<Handle>& atoms)
 {
 	unsigned int count = 0;
 	for (const Handle& n: atoms)
