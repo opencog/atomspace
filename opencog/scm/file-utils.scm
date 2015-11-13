@@ -19,7 +19,7 @@
 (use-modules (rnrs io ports))
 
 ; ---------------------------------------------------------------------
-(define (list-files dir)
+(define-public (list-files dir)
 "
  list-files dir    List files in a directory
 
@@ -56,7 +56,7 @@
 )
 
 ; ---------------------------------------------------------------------
-(define (exec-scm-from-port port)
+(define-public (exec-scm-from-port port)
 "
  exec-scm-from-port port   Execute scheme code read from port
 
@@ -85,7 +85,7 @@
 )
 
 ; ---------------------------------------------------------------------
-(define (exec-scm-from-cmd cmd-string)
+(define-public (exec-scm-from-cmd cmd-string)
 "
  exec-scm-from-cmd cmd-string   Run scheme returend by shell command
 
@@ -106,7 +106,7 @@
 
 ; ---------------------------------------------------------------------
 ; XXX this duplicates (load-from-path) which is a built-in in guile...
-(define (load-scm-from-file filename)
+(define-public (load-scm-from-file filename)
 "
  load-scm-from-file filename   Run scheme code taken from file
 
@@ -119,7 +119,7 @@
 )
 
 ; ---------------------------------------------------------------------
-(define (prt-atom-list port lst)
+(define-public (prt-atom-list port lst)
 "
  prt-atom-list          Send to port the list of atoms.
 
@@ -142,7 +142,7 @@
 )
 
 ; ---------------------------------------------------------------------
-(define (export-atoms lst filename)
+(define-public (export-atoms lst filename)
 "
  export-atoms           Export the atoms in a list to file.
 
@@ -157,7 +157,7 @@
 )
 
 ; ---------------------------------------------------------------------
-(define (export-all-atoms filename)
+(define-public (export-all-atoms filename)
 "
  export-all-atoms filename      Export entire atomspace into file
 

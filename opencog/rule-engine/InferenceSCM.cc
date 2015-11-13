@@ -48,7 +48,7 @@ void InferenceSCM::init(void)
     _binders.push_back(new FunctionWrap(do_backward_chaining,
                                         "cog-bc", "rule-engine"));
     _binders.push_back(new FunctionWrap(get_rulebase_rules,
-                                        "rbs-rules", "rule-engine"));
+                                        "ure-rbs-rules", "rule-engine"));
 }
 
 InferenceSCM::~InferenceSCM()
