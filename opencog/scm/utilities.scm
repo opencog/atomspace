@@ -1070,6 +1070,7 @@
 'cog-equal?
 'min-element-by-key
 'max-element-by-key
+'cog-atomspace-stack
 'cog-push-atomspace
 'cog-pop-atomspace
 ))
@@ -1110,5 +1111,5 @@ cog-map-chase-links cog-par-chase-links cog-map-chase-links-chk
 cog-par-chase-links-chk cog-map-chase-link-dbg cog-map-apply-link
 cog-get-link cog-get-pred cog-get-reference filter-hypergraph
 cartesian-prod cartesian-prod-list-only approx-eq? cog-equal?
-min-element-by-key max-element-by-key cog-push-atomspace
+min-element-by-key max-element-by-key cog-atomspace-stack cog-push-atomspace
 cog-pop-atomspace))
