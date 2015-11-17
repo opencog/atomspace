@@ -691,17 +691,27 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 /// we have to assume that stuff, more-stuff and not-stuff are all
 /// evaluatable.
 void PatternLink::trace_connectives(const std::set<Type>& connectives,
-                                    const HandleSeq& oset)
+                                    const HandleSeq& oset,
+                                    bool is_quoted)
 {
 	for (const Handle& term: oset)
 	{
 		Type t = term->getType();
+
+		// Deal with quote
+		if (is_quoted) {
+			if (t == UNQUOTE_LINK)
+				is_quoted = false;
+			else
+				continue;
+		}
+
 		if (connectives.find(t) == connectives.end()) continue;
 		_pat.evaluatable_holders.insert(term);
 		add_to_map(_pat.in_evaluatable, term, term);
 		LinkPtr lp(LinkCast(term));
 		if (lp)
-			trace_connectives(connectives, lp->getOutgoingSet());
+			trace_connectives(connectives, lp->getOutgoingSet(), is_quoted);
 	}
 }
 

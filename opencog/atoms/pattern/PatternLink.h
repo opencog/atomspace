@@ -113,7 +113,8 @@ protected:
 	                      std::set<Handle>& black_clauses);
 
 	void trace_connectives(const std::set<Type>&,
-	                       const HandleSeq& clauses);
+	                       const HandleSeq& clauses,
+	                       bool is_quoted = false);
 
 	void make_connectivity_map(const HandleSeq&);
 	void make_map_recursive(const Handle&, const Handle&);
