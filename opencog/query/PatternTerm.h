@@ -82,119 +82,119 @@ typedef std::vector<PatternTermWPtr> PatternTermWSeq;
 
 class PatternTerm
 {
-	protected:
-		Handle _handle;
-		PatternTermPtr _parent;
-		PatternTermWSeq _outgoing;
+protected:
+	Handle _handle;
+	PatternTermPtr _parent;
+	PatternTermWSeq _outgoing;
 
-		// Number of QuoteLinks on the path up to the root including this
-		// term. Zero means the term is unquoted. Quoted terms are matched
-		// literally.
-		unsigned int _quote_depth;
+	// Number of QuoteLinks on the path up to the root including this
+	// term. Zero means the term is unquoted. Quoted terms are matched
+	// literally.
+	unsigned int _quote_depth;
 
-		// True if the pattern subtree rooted in this tree node does not
-		// contain any bound variables. This means that the term is constant
-		// and may be self-grounded.
-		bool _has_any_bound_var;
+	// True if the pattern subtree rooted in this tree node does not
+	// contain any bound variables. This means that the term is constant
+	// and may be self-grounded.
+	bool _has_any_bound_var;
 
-	public:
-		static const PatternTermPtr UNDEFINED;
+public:
+	static const PatternTermPtr UNDEFINED;
 
-		PatternTerm()
-		{
-			_handle = Handle::UNDEFINED;
-			_parent = PatternTerm::UNDEFINED;
-			_quote_depth = 0;
-			_has_any_bound_var = false;
-		}
+	PatternTerm()
+	{
+		_handle = Handle::UNDEFINED;
+		_parent = PatternTerm::UNDEFINED;
+		_quote_depth = 0;
+		_has_any_bound_var = false;
+	}
 
-		PatternTerm(const PatternTermPtr& parent, const Handle& h)
-		{
-			_parent = parent;
-			_handle = h;
-			_quote_depth = parent->_quote_depth;
-			_has_any_bound_var = false;
-		}
+	PatternTerm(const PatternTermPtr& parent, const Handle& h)
+	{
+		_parent = parent;
+		_handle = h;
+		_quote_depth = parent->_quote_depth;
+		_has_any_bound_var = false;
+	}
 
-		void addOutgoingTerm(const PatternTermPtr& ptm)
-		{
-			_outgoing.push_back(ptm);
-		}
+	void addOutgoingTerm(const PatternTermPtr& ptm)
+	{
+		_outgoing.push_back(ptm);
+	}
 
-		inline Handle getHandle()
-		{
-			return _handle;
-		}
+	inline Handle getHandle()
+	{
+		return _handle;
+	}
 	
-		inline PatternTermPtr getParent()
+	inline PatternTermPtr getParent()
+	{
+		return _parent;
+	}
+
+	inline PatternTermSeq getOutgoingSet() const
+	{
+		PatternTermSeq oset;
+		for (PatternTermWPtr w : _outgoing)
 		{
-			return _parent;
+			PatternTermPtr s(w.lock());
+			if (s) oset.push_back(s);
 		}
+		
+		return oset;
+	}
 
-		inline PatternTermSeq getOutgoingSet() const
-		{
-			PatternTermSeq oset;
-			for (PatternTermWPtr w : _outgoing)
-			{
-				PatternTermPtr s(w.lock());
-				if (s) oset.push_back(s);
-			}
+	inline Arity getArity() const
+	{
+		return _outgoing.size();
+	}
 
-			return oset;
-		}
+	inline bool isQuoted() const
+	{
+		// Check parent quote depth, because we need the top QuoteLink-s
+		// to be unqouted.
+		return (_parent->_quote_depth > 0);
+	}
 
-		inline Arity getArity() const
-		{
-			return _outgoing.size();
-		}
+	inline bool hasAnyBoundVariable() const
+	{
+		return _has_any_bound_var;
+	}
 
-		inline bool isQuoted() const
-		{
-			// Check parent quote depth, because we need the top QuoteLink-s
-			// to be unqouted.
-			return (_parent->_quote_depth > 0);
-		}
-
-		inline bool hasAnyBoundVariable() const
-		{
-			return _has_any_bound_var;
-		}
-
-		inline PatternTermPtr getOutgoingTerm(Arity pos) const
-		{
-			// Checks for a valid position
-			if (pos < getArity()) {
-				PatternTermPtr s(_outgoing[pos].lock());
-				if (not s)
-					throw RuntimeException(TRACE_INFO,
-					                       "expired outgoing set index %d", pos);
-				return s;
-			} else {
+	inline PatternTermPtr getOutgoingTerm(Arity pos) const
+	{
+		// Checks for a valid position
+		if (pos < getArity()) {
+			PatternTermPtr s(_outgoing[pos].lock());
+			if (not s)
 				throw RuntimeException(TRACE_INFO,
-				                       "invalid outgoing set index %d", pos);
-			}
+				                       "expired outgoing set index %d", pos);
+			return s;
+		} else {
+			throw RuntimeException(TRACE_INFO,
+			                       "invalid outgoing set index %d", pos);
 		}
+	}
 
-		inline void addQuote() { _quote_depth++; }
-		inline void remQuote() { _quote_depth--; }
+	inline void addQuote() { _quote_depth++; }
+	inline void remQuote() { _quote_depth--; }
 
-		inline void addBoundVariable()
+	inline void addBoundVariable()
+	{
+		if (!_has_any_bound_var)
 		{
-			if (!_has_any_bound_var)
-			{
-				_has_any_bound_var = true;
-				if (_parent != PatternTerm::UNDEFINED)
-					_parent->addBoundVariable();
-			}
+			_has_any_bound_var = true;
+			if (_parent != PatternTerm::UNDEFINED)
+				_parent->addBoundVariable();
 		}
+	}
 
-		inline std::string toString(std::string indent = ":") const
-		{
-			if (_handle == nullptr) return "-";
-			std::string str = _parent->toString();
-			str += indent + std::to_string(_handle.value());
-			return str;
-		}
+	inline std::string toString(std::string indent = ":") const
+	{
+		if (_handle == nullptr) return "-";
+		std::string str = _parent->toString();
+		str += indent + std::to_string(_handle.value());
+		return str;
+	}
 
 };
 
