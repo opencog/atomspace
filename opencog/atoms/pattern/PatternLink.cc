@@ -589,7 +589,7 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 		bool is_virtual = false;
 		bool is_black = false;
 
-#ifdef BORKEN_DOESNT_WORK
+#ifdef BROKEN_DOESNT_WORK
 // The below should have worked to set things up, but it doesn't,
 // and I'm too lazy to investigate, because an alternate hack is
 // working, at the moment.
@@ -792,8 +792,8 @@ void PatternLink::make_term_trees()
 }
 
 void PatternLink::make_term_tree_recursive(const Handle& root,
-		                                     const Handle& h,
-		                                     PatternTermPtr& parent)
+                                           const Handle& h,
+                                           PatternTermPtr& parent)
 {
 	PatternTermPtr ptm(std::make_shared<PatternTerm>(parent, h));
 	parent->addOutgoingTerm(ptm);

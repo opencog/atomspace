@@ -689,7 +689,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				have_more = true;
 				LAZY_LOG_FINE << "Good permutation "
 				              << perm_count[Unorder(ptm, hg)]
-				              << "for term=" << ptm->toString()
+				              << " for term=" << ptm->toString()
 				              << " have_more=" << have_more;
 				_perm_state[Unorder(ptm, hg)] = mutation;
 				return true;

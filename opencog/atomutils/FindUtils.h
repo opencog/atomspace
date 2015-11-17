@@ -211,7 +211,7 @@ static inline bool is_quoted_in_tree(const Handle& tree, const Handle& atom)
 {
 	if (tree == atom) return false;  // not quoted, so false.
 	LinkPtr ltree(LinkCast(tree));
-	if (NULL == ltree) return false;
+	if (nullptr == ltree) return false;
 
 	if (tree->getType() == QUOTE_LINK)
 	{
@@ -237,7 +237,7 @@ static inline bool is_unquoted_in_tree(const Handle& tree, const Handle& atom)
 {
 	if (tree == atom) return true;
 	LinkPtr ltree(LinkCast(tree));
-	if (NULL == ltree) return false;
+	if (nullptr == ltree) return false;
 
 	if (tree->getType() == QUOTE_LINK) return false;
 
