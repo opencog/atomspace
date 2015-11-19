@@ -41,6 +41,7 @@ foreign import ccall "PatternMatcher_SatisfactionLink"
                       -> Ptr CInt
                       -> Ptr CDouble
                       -> IO CInt
+
 cogSatisfy :: Atom SatisfactionT -> AtomSpace (Maybe TruthVal)
 cogSatisfy at = do
     m <- getWithUUID $ toRaw at
