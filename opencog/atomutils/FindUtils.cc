@@ -156,6 +156,24 @@ bool is_unquoted_in_tree(const Handle& tree, const Handle& atom)
 	return false;
 }
 
+int min_quotation_level(const Handle& tree,
+                        const Handle& var,
+                        int level_from_root)
+{
+	// Base case
+	if (tree == var) return level_from_root;
+	LinkPtr ltree(LinkCast(tree));
+	if (nullptr == ltree) return std::numeric_limits<int>::max();
+
+	// Recursive case
+	if (tree->getType() == QUOTE_LINK) level_from_root++;
+	else if (tree->getType() == UNQUOTE_LINK) level_from_root--;
+	int result = std::numeric_limits<int>::max();
+	for (const Handle& h : ltree->getOutgoingSet())
+		result = std::min(result, min_quotation_level(h, var, level_from_root));
+	return result;
+}
+
 bool is_unscoped_in_tree(const Handle& tree, const Handle& atom)
 {
 	// Base cases
