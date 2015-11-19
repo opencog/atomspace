@@ -31,6 +31,7 @@
 #include <vector>
 
 #include <opencog/util/functional.h>
+#include <opencog/util/Logger.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Handle.h>
@@ -84,147 +85,51 @@ namespace opencog {
 ///
 class FindAtoms
 {
-	public:
-		std::set<Type> stopset;
-		std::set<Handle> varset;
-		std::set<Handle> holders;
-		std::set<Handle> least_holders;
+public:
+	std::set<Type> stopset;
+	std::set<Handle> varset;
+	std::set<Handle> holders;
+	std::set<Handle> least_holders;
 
-		inline FindAtoms(Type t, bool subclass = false)
-			: _target_types({t})
-		{
-			if (subclass)
-			{
-				classserver().getChildrenRecursive(t, inserter(_target_types));
-			}
-		}
+	FindAtoms(Type t, bool subclass = false);
+	FindAtoms(Type ta, Type tb, bool subclass = false);
+	FindAtoms(const Handle& atom);
+	FindAtoms(const std::set<Handle>& selection);
 
-		inline FindAtoms(Type ta, Type tb, bool subclass = false)
-			: _target_types({ta, tb})
-		{
-			if (subclass)
-			{
-				classserver().getChildrenRecursive(ta, inserter(_target_types));
-				classserver().getChildrenRecursive(tb, inserter(_target_types));
-			}
-		}
+	/**
+	 * Given a handle to be searched, create a set of all of the
+	 * target atoms/types that lie in the outgoing set of the handle
+	 * (recursively).
+	 */
+	void search_set(const Handle& h);
+	void search_set(const std::vector<Handle>& hlist);
+private:
+	typedef enum
+	{
+		NOPE,  // Does not contain.
+		YEP,   // Contains, but not immediately so.
+		IMM    // Contains immediately below.
+	} Loco;
 
-		inline FindAtoms(const Handle& atom)
-			: _target_types(),
-			  _target_atoms()
-		{
-			_target_atoms.insert(atom);
-		}
+	Loco find_rec(const Handle& h);
 
-		inline FindAtoms(const std::set<Handle>& selection)
-			: _target_types(),
-			  _target_atoms(selection)
-		{}
-
-		/**
-		 * Given a handle to be searched, create a set of all of the
-		 * target atoms/types that lie in the outgoing set of the handle
-		 * (recursively).
-		 */
-		inline void search_set(const Handle& h)
-		{
-			find_rec(h);
-		}
-
-		inline void search_set(const std::vector<Handle>& hlist)
-		{
-			for (const Handle& h : hlist) find_rec(h);
-		}
-	private:
-		typedef enum
-		{
-			NOPE,  // Does not contain.
-			YEP,   // Contains, but not immediately so.
-			IMM    // Contains immediately below.
-		} Loco;
-
-		inline Loco find_rec(const Handle& h)
-		{
-			Type t = h->getType();
-			if (1 == _target_types.count(t) or _target_atoms.count(h) == 1)
-			{
-				varset.insert(h);
-				return IMM; //! Don't explore link-typed vars!
-			}
-
-			// XXX TODO Need to also handle UNQUOTE_LINK ...
-			if (t == QUOTE_LINK) return NOPE;
-			for (Type stopper : stopset)
-			{
-				if (classserver().isA(t, stopper)) return NOPE;
-			}
-
-			LinkPtr l(LinkCast(h));
-			if (l)
-			{
-				bool held = false;
-				bool imm = false;
-				for (const Handle& oh : l->getOutgoingSet())
-				{
-					Loco where = find_rec(oh);
-					if (NOPE != where) held = true;
-					if (IMM == where) imm = true;
-				}
-				if (imm) least_holders.insert(h);
-				if (held)
-				{
-					holders.insert(h);
-					return YEP;
-				}
-			}
-			return NOPE;
-		}
-
-	private:
-		std::set<Type> _target_types;
-		std::set<Handle> _target_atoms;
+private:
+	std::set<Type> _target_types;
+	std::set<Handle> _target_atoms;
 };
 
 /**
  * Return true if the indicated atom occurs somewhere in the tree
  * (viz, the tree recursively spanned by the outgoing set of the handle)
  */
-static inline bool is_atom_in_tree(const Handle& tree, const Handle& atom)
-{
-	if (tree == atom) return true;
-	LinkPtr ltree(LinkCast(tree));
-	if (NULL == ltree) return false;
-
-	// Recurse downwards...
-	for (const Handle h: ltree->getOutgoingSet()) {
-		if (is_atom_in_tree(h, atom)) return true;
-	}
-	return false;
-}
+bool is_atom_in_tree(const Handle& tree, const Handle& atom);
 
 /**
  * Return true if the indicated atom occurs quoted somewhere in the
  * tree.  That is, it returns true only if the atom is inside a
  * QuoteLink.
  */
-static inline bool is_quoted_in_tree(const Handle& tree, const Handle& atom)
-{
-	if (tree == atom) return false;  // not quoted, so false.
-	LinkPtr ltree(LinkCast(tree));
-	if (nullptr == ltree) return false;
-
-	if (tree->getType() == QUOTE_LINK)
-	{
-		if (is_atom_in_tree(tree, atom)) return true;
-		return false;
-	}
-
-	// Recurse downwards...
-	for (const Handle& h: ltree->getOutgoingSet()) {
-		if (is_quoted_in_tree(h, atom)) return true;
-	}
-	return false;
-}
+bool is_quoted_in_tree(const Handle& tree, const Handle& atom);
 
 /**
  * Return true if the indicated atom occurs unquoted somewhere in the tree
@@ -233,58 +138,20 @@ static inline bool is_quoted_in_tree(const Handle& tree, const Handle& atom)
  * for variables, but only those variables that have not been quoted, as
  * the quoted variables are constants (literals).
  */
-static inline bool is_unquoted_in_tree(const Handle& tree, const Handle& atom)
-{
-	if (tree == atom) return true;
-	LinkPtr ltree(LinkCast(tree));
-	if (nullptr == ltree) return false;
-
-	if (tree->getType() == QUOTE_LINK) return false;
-
-	// Recurse downwards...
-	for (const Handle& h : ltree->getOutgoingSet()) {
-		if (is_unquoted_in_tree(h, atom)) return true;
-	}
-	return false;
-}
+bool is_unquoted_in_tree(const Handle& tree, const Handle& atom);
 
 /**
  * Return true if the atom (variable) occurs unscoped somewhere in the
  * tree.
  */
-static inline bool is_unscoped_in_tree(const Handle& tree, const Handle& atom)
-{
-	// Base cases
-	if (tree == atom) return true;
-	LinkPtr ltree(LinkCast(tree));
-	if (nullptr == ltree) return false;
-	ScopeLinkPtr stree(ScopeLinkCast(tree));
-	if (nullptr != stree) {
-		const std::set<Handle>& varset = stree->get_variables().varset;
-		if (varset.find(atom) != varset.cend())
-			return false;
-	}
-
-	// Recursive case
-	for (const Handle& h : ltree->getOutgoingSet())
-		if (is_unscoped_in_tree(h, atom))
-			return true;
-	return false;
-}
+bool is_unscoped_in_tree(const Handle& tree, const Handle& atom);
 
 /**
  * Return true if any of the indicated atoms occur somewhere in
  * the tree (that is, in the tree spanned by the outgoing set.)
  */
-static inline bool any_atom_in_tree(const Handle& tree,
-                                    const std::set<Handle>& atoms)
-{
-	for (const Handle& n: atoms)
-	{
-		if (is_atom_in_tree(tree, n)) return true;
-	}
-	return false;
-}
+bool any_atom_in_tree(const Handle& tree,
+                      const std::set<Handle>& atoms);
 
 /**
  * Return true if any of the indicated atoms occur somewhere in
@@ -293,40 +160,22 @@ static inline bool any_atom_in_tree(const Handle& tree,
  * search for variables; but when a variable is quoted, it is no
  * longer a variable.
  */
-static inline bool any_unquoted_in_tree(const Handle& tree,
-                                        const std::set<Handle>& atoms)
-{
-	for (const Handle& n: atoms)
-	{
-		if (is_unquoted_in_tree(tree, n)) return true;
-	}
-	return false;
-}
+bool any_unquoted_in_tree(const Handle& tree,
+                          const std::set<Handle>& atoms);
 
 /**
  * Return true if any of the atoms (variables) occur unscoped
  * somewhere in the tree.
  */
-static inline bool any_unscoped_in_tree(const Handle& tree,
-                                        const std::set<Handle>& atoms)
-{
-	for (const Handle& n: atoms)
-		if (is_unscoped_in_tree(tree, n)) return true;
-	return false;
-}
+bool any_unscoped_in_tree(const Handle& tree,
+                          const std::set<Handle>& atoms);
 
 /**
  * Return true if any of the atoms (variables) occur unquoted and
  * unscoped somewhere in the tree.
  */
-static inline bool any_unquoted_unscoped_in_tree(const Handle& tree,
-                                                 const std::set<Handle>& atoms)
-{
-	for (const Handle& n: atoms)
-		if (is_unquoted_in_tree(tree, n) and is_unscoped_in_tree(tree, n))
-			return true;
-	return false;
-}
+bool any_unquoted_unscoped_in_tree(const Handle& tree,
+                                   const std::set<Handle>& atoms);
 
 /**
  * Return how many of the indicated atoms occur somewhere in
@@ -335,78 +184,34 @@ static inline bool any_unquoted_unscoped_in_tree(const Handle& tree,
  * search for variables; but when a variable is quoted, it is no
  * longer a variable.
  */
-static inline unsigned int num_unquoted_in_tree(const Handle& tree,
-                                                const std::set<Handle>& atoms)
-{
-	unsigned int count = 0;
-	for (const Handle& n: atoms)
-	{
-		if (is_unquoted_in_tree(tree, n)) count++;
-	}
-	return count;
-}
+unsigned int num_unquoted_in_tree(const Handle& tree,
+                                  const std::set<Handle>& atoms);
 
 /**
  * Return true if the indicated atom occurs somewhere in any of the trees.
  */
-static inline bool is_atom_in_any_tree(const std::vector<Handle>& trees,
-                                       const Handle& atom)
-{
-	for (const Handle& tree: trees)
-	{
-		if (is_atom_in_tree(tree, atom)) return true;
-	}
-	return false;
-}
+bool is_atom_in_any_tree(const std::vector<Handle>& trees,
+                         const Handle& atom);
 
 /**
  * Return true if the indicated atom occurs somewhere in any of the trees,
  * but only if it is not quoted.  This is intended to be used to search
  * for variables, which cease to be variable when they are quoted.
  */
-static inline bool is_unquoted_in_any_tree(const std::vector<Handle>& trees,
-                                           const Handle& atom)
-{
-	for (const Handle& tree: trees)
-	{
-		if (is_unquoted_in_tree(tree, atom)) return true;
-	}
-	return false;
-}
+bool is_unquoted_in_any_tree(const std::vector<Handle>& trees,
+                             const Handle& atom);
 
 /**
  * Returns true if the clause contains an atom of type atom_type.
  * ... but only if it is not quoted.  Quoted terms are constants (literals).
  */
-static inline bool contains_atomtype(const Handle& clause, Type atom_type)
-{
-	Type clause_type = clause->getType();
-	if (classserver().isA(clause_type, atom_type)) return true;
-	if (QUOTE_LINK == clause_type) return false;
-	// if (classserver().isA(clause_type, SCOPE_LINK)) return false;
-
-	LinkPtr lc(LinkCast(clause));
-	if (not lc) return false;
-
-	for (const Handle& subclause: lc->getOutgoingSet())
-	{
-		if (contains_atomtype(subclause, atom_type)) return true;
-	}
-	return false;
-}
+bool contains_atomtype(const Handle& clause, Type atom_type);
 
 /**
  * Returns true if any of the clauses contain an atom of type atom_type.
  * ... but only if it is not quoted.  Quoted terms are constants (literals).
  */
-static inline bool contains_atomtype(const HandleSeq& clauses, Type atom_type)
-{
-	for (const Handle& clause: clauses)
-	{
-		if (contains_atomtype(clause, atom_type)) return true;
-	}
-	return false;
-}
+bool contains_atomtype(const HandleSeq& clauses, Type atom_type);
 
 
 /**
@@ -417,35 +222,7 @@ static inline bool contains_atomtype(const HandleSeq& clauses, Type atom_type)
  *
  * Treat $A in something like (AndLink $A (LambdaLink $A ...)) as free.
  */
-static inline HandleSeq get_free_vars_in_tree(const Handle& tree)
-{
-	std::set<Handle> varset;
-
-	std::function<void (const Handle&)> find_rec = [&](const Handle& h)
-	{
-		Type t = h->getType();
-		if (t == VARIABLE_NODE)
-		{
-			varset.insert(h);
-			return;
-		}
-
-		// XXX FIXME Add support for UNQUOTE_LINK
-		if (t == QUOTE_LINK) return;
-		if (classserver().isA(t, SCOPE_LINK)) return;
-
-		LinkPtr l(LinkCast(h));
-		if (l)
-		{
-			for (const Handle& oh : l->getOutgoingSet())
-				find_rec(oh);
-		}
-	};
-
-	find_rec(tree);
-
-	return HandleSeq(varset.begin(), varset.end());
-}
+HandleSeq get_free_vars_in_tree(const Handle& tree);
 
 } // namespace opencog
 
