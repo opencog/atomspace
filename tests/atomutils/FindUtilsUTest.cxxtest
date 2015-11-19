@@ -45,6 +45,7 @@ public:
 
 	void test_is_unscoped_in_tree();
 	void test_min_quotation_level();
+	void test_max_quotation_level();
 };
 
 void FindUtilsUTest::setUp(void)
@@ -93,4 +94,11 @@ void FindUtilsUTest::test_min_quotation_level()
 {
 	TS_ASSERT_EQUALS(min_quotation_level(quotation, X), 0);
 	TS_ASSERT_EQUALS(min_quotation_level(quotation, Y), 1);
+}
+
+// Test max_quotation_level()
+void FindUtilsUTest::test_max_quotation_level()
+{
+	TS_ASSERT_EQUALS(max_quotation_level(quotation, X), 2);
+	TS_ASSERT_EQUALS(max_quotation_level(quotation, Y), 1);
 }

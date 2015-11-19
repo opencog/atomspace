@@ -124,36 +124,12 @@ bool is_atom_in_tree(const Handle& tree, const Handle& atom)
 
 bool is_quoted_in_tree(const Handle& tree, const Handle& atom)
 {
-	if (tree == atom) return false;  // not quoted, so false.
-	LinkPtr ltree(LinkCast(tree));
-	if (nullptr == ltree) return false;
-
-	if (tree->getType() == QUOTE_LINK)
-	{
-		if (is_atom_in_tree(tree, atom)) return true;
-		return false;
-	}
-
-	// Recurse downwards...
-	for (const Handle& h: ltree->getOutgoingSet()) {
-		if (is_quoted_in_tree(h, atom)) return true;
-	}
-	return false;
+	return max_quotation_level(tree, atom) > 0;
 }
 
 bool is_unquoted_in_tree(const Handle& tree, const Handle& atom)
 {
-	if (tree == atom) return true;
-	LinkPtr ltree(LinkCast(tree));
-	if (nullptr == ltree) return false;
-
-	if (tree->getType() == QUOTE_LINK) return false;
-
-	// Recurse downwards...
-	for (const Handle& h : ltree->getOutgoingSet()) {
-		if (is_unquoted_in_tree(h, atom)) return true;
-	}
-	return false;
+	return min_quotation_level(tree, atom) < 1;
 }
 
 int min_quotation_level(const Handle& tree,
@@ -171,6 +147,24 @@ int min_quotation_level(const Handle& tree,
 	int result = std::numeric_limits<int>::max();
 	for (const Handle& h : ltree->getOutgoingSet())
 		result = std::min(result, min_quotation_level(h, var, level_from_root));
+	return result;
+}
+
+int max_quotation_level(const Handle& tree,
+                        const Handle& var,
+                        int level_from_root)
+{
+	// Base case
+	if (tree == var) return level_from_root;
+	LinkPtr ltree(LinkCast(tree));
+	if (nullptr == ltree) return std::numeric_limits<int>::min();
+
+	// Recursive case
+	if (tree->getType() == QUOTE_LINK) level_from_root++;
+	else if (tree->getType() == UNQUOTE_LINK) level_from_root--;
+	int result = std::numeric_limits<int>::min();
+	for (const Handle& h : ltree->getOutgoingSet())
+		result = std::max(result, max_quotation_level(h, var, level_from_root));
 	return result;
 }
 

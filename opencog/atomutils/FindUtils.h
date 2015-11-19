@@ -142,9 +142,9 @@ bool is_unquoted_in_tree(const Handle& tree, const Handle& atom);
 
 /**
  * Return the minimum quotation level of a given variable. The
- * quotation level of a variable is the minimum number of QuoteLinks
- * minus the number of UnquoteLinks between the root and the variables
- * in the tree (or should we say hypergraph).
+ * minimumquotation level of a variable is the minimum number of
+ * QuoteLinks minus the number of UnquoteLinks between the root and
+ * the variables in the tree (or should we say hypergraph).
  *
  * @param tree             handle of the hypergraph to explore
  *
@@ -158,9 +158,33 @@ bool is_unquoted_in_tree(const Handle& tree, const Handle& atom);
  *
  * If the number is zero or below, it means that this variable is
  * unquoted at least once. If the number is above zero then it is
- * always quoted.
+ * never unquoted.
  */
 int min_quotation_level(const Handle& tree,
+                        const Handle& var,
+                        int level_from_root = 0);
+
+/**
+ * Return the maximum quotation level of a given variable. The maximum
+ * quotation level of a variable is the maximum number of QuoteLinks
+ * minus the number of UnquoteLinks between the root and the variables
+ * in the tree (or should we say hypergraph).
+ *
+ * @param tree             handle of the hypergraph to explore
+ *
+ * @param var              handle of the variable to check
+ *
+ * @param quotation_level  quotation level from the root to the handle
+ *                         the of tree
+ *
+ * @return                 maximum quotation level. If var doesn't appear
+ *                         in the tree then it returns the minimum integer.
+ *
+ * If the number is above zero, it means that this variable is quoted
+ * at least once. If the number is zero or below then it is never
+ * quoted.
+ */
+int max_quotation_level(const Handle& tree,
                         const Handle& var,
                         int level_from_root = 0);
 
