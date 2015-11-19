@@ -14,8 +14,6 @@ module OpenCog.Test.Template where
 
 import Language.Haskell.TH
 import Language.Haskell.TH.Quote
-import Test.Tasty
-import Test.Tasty.SmallCheck
 import Test.SmallCheck.Series
 import OpenCog.AtomSpace (AtomSpace, appGen,Gen(..),Atom,type (<~),TruthVal,AtomType(AtomT,NotT))
 import Data.Typeable

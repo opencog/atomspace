@@ -25,6 +25,7 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
@@ -69,40 +70,42 @@ EvaluationLink::EvaluationLink(Link& l)
 	}
 }
 
-static Handle fold_execute(AtomSpace* as, const Handle& h)
+// Pattern matching hack. The pattern matcher returns sets of atoms;
+// if that set contains a single number, then unwrap it.
+static NumberNodePtr unwrap_set(Handle h)
 {
-	FoldLinkPtr flp(FoldLinkCast(FoldLink::factory(LinkCast(h))));
-	if (NULL == flp)
-		throw RuntimeException(TRACE_INFO, "Not executable!");
+	if (SET_LINK == h->getType())
+	{
+		LinkPtr lp(LinkCast(h));
+		if (1 != lp->getArity())
+			throw SyntaxException(TRACE_INFO,
+				"Don't know how to do arithmetic with this: %s",
+				h->toString().c_str());
+		h = lp->getOutgoingAtom(0);
+	}
 
-	return flp->execute(as);
+	NumberNodePtr na(NumberNodeCast(h));
+	if (nullptr == na)
+		throw SyntaxException(TRACE_INFO,
+			"Don't know how to compare this: %s",
+			h->toString().c_str());
+	return na;
 }
 
 // Perform a GreaterThan check
 static TruthValuePtr greater(AtomSpace* as, const LinkPtr& ll)
 {
-	if (2 != ll->getArity())
+	const HandleSeq& oset = ll->getOutgoingSet();
+	if (2 != oset.size())
 		throw RuntimeException(TRACE_INFO,
 		     "GreaterThankLink expects two arguments");
-	Handle h1(ll->getOutgoingAtom(0));
-	Handle h2(ll->getOutgoingAtom(1));
 
-	// If they are not numbers, then we expect them to be something that
-	// can be executed, yeilding a number.
-	if (NUMBER_NODE != h1->getType())
-		h1 = fold_execute(as, h1);
+	Instantiator inst(as);
+	Handle h1(inst.execute(oset[0]));
+	Handle h2(inst.execute(oset[1]));
 
-	if (NUMBER_NODE != h2->getType())
-		h2 = fold_execute(as, h2);
-
-	NumberNodePtr n1(NumberNodeCast(h1));
-	NumberNodePtr n2(NumberNodeCast(h2));
-
-	if (NULL == n1 or NULL == n2)
-		throw RuntimeException(TRACE_INFO,
-		    "Expecting c++:greater arguments to be NumberNode's!  Got:\n%s\n",
-		    (h1==NULL)? "(invalid handle)" : h1->toShortString().c_str(),
-		    (h2==NULL)? "(invalid handle)" : h2->toShortString().c_str());
+	NumberNodePtr n1(unwrap_set(h1));
+	NumberNodePtr n2(unwrap_set(h2));
 
 	if (n1->get_value() > n2->get_value())
 		return TruthValue::TRUE_TV();
@@ -129,14 +132,13 @@ static TruthValuePtr equal(AtomSpace* as, const LinkPtr& ll)
 
 static bool is_evaluatable_sat(const Handle& satl)
 {
+	LinkPtr lp(LinkCast(satl));
+	if (1 != lp->getArity())
+		return false;
+
 	PatternLinkPtr plp(PatternLinkCast(satl));
 	if (nullptr == plp)
 		plp = createPatternLink(satl);
-
-	if (1 < plp->getArity())
-		throw SyntaxException(TRACE_INFO,
-			"Expecting SatisfacionLink of arity one; got %s",
-			satl->toString().c_str());
 
 	return 0 == plp->get_variables().varseq.size();
 }
@@ -189,7 +191,8 @@ static bool is_tail_rec(const Handle& thish, const Handle& tail)
 /// SequentialAndLink to work correctly, when moving down the sequence.
 ///
 TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
-                     const Handle& evelnk, AtomSpace* scratch)
+                     const Handle& evelnk, AtomSpace* scratch,
+                     bool silent)
 {
 	Type t = evelnk->getType();
 	if (EVALUATION_LINK == t)
@@ -318,23 +321,64 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		LinkPtr l(LinkCast(evelnk));
 		return do_eval_scratch(as, l->getOutgoingAtom(0), scratch);
 	}
+	else if (PUT_LINK == t)
+	{
+		PutLinkPtr pl(PutLinkCast(evelnk));
+		if (nullptr == pl)
+			pl = createPutLink(*LinkCast(evelnk));
+
+		// Evalating a PutLink requires three steps:
+		// (1) execute the values, first,
+		// (2) beta reduce (put values into body)
+		// (3) evaluate the resulting body.
+		Handle pvals = pl->get_values();
+		Instantiator inst(as);
+		// Step (1)
+		Handle gvals = inst.execute(pvals);
+		if (gvals != pvals)
+		{
+			as->add_atom(gvals);
+			HandleSeq goset;
+			if (pl->get_vardecl())
+				goset.emplace_back(pl->get_vardecl());
+			goset.emplace_back(pl->get_body());
+			goset.emplace_back(gvals);
+			pl = createPutLink(goset);
+		}
+		// Step (2)
+		Handle red = pl->reduce();
+
+		// Step (3)
+		return do_eval_scratch(as, red, scratch);
+	}
 	else if (DEFINED_PREDICATE_NODE == t)
 	{
 		return do_eval_scratch(as, DefineLink::get_definition(evelnk), scratch);
 	}
 
-	// We do not want to waste CPU time printing an exception message;
-	// this is supposed to be handled automatically.  Hmmm... unless
-	// its a user Syntax error ....
-	throw NotEvaluatableException();
-	// throw SyntaxException(TRACE_INFO,
-		// "Expecting to get an EvaluationLink, got %s",
-		// evelnk->toString().c_str());
+	// We get exceptions here in two differet ways: (a) due to user
+	// error, in which case we need o print an error, ad (b) automatic,
+	// e.g. when Instantiator calls us, knowing it will get an error,
+	// in which case, printing the exception message is a waste of CPU
+	// time...
+	//
+	// DefaultPatternMatchCB.cc and also Instantiator wants to
+	// catch the NotEvaluatableException thrw here.  Basically, these
+	// know that they might be sending non-evaluatable atoms here, and
+	// don't want to garbage up the log files with bogus errors.
+	if (silent)
+		throw NotEvaluatableException();
+
+	throw SyntaxException(TRACE_INFO,
+		"Expecting to get an EvaluationLink, got %s",
+		evelnk->toString().c_str());
 }
 
-TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const Handle& evelnk)
+TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
+                                          const Handle& evelnk,
+                                          bool silent)
 {
-	return do_eval_scratch(as, evelnk, as);
+	return do_eval_scratch(as, evelnk, as, silent);
 }
 
 /// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink

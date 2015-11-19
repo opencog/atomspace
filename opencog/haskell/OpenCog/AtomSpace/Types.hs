@@ -156,9 +156,6 @@ data Atom (a :: AtomType) where
     ExistsLink          :: (v <~ VariableListT,i <~ AtomT) =>
                            TruthVal -> Atom v -> Atom i -> Atom ExistsT
 
-    AverageLink         :: (v <~ VariableListT,a <~ AtomT) =>
-                           TruthVal -> Atom v -> Atom a -> Atom AverageT
-
     QuoteLink           :: (a <~ AtomT) =>
                            Atom a -> Atom QuoteT
 

@@ -12,7 +12,6 @@ This page is a high level overview of the library; to dig into the details
 read \ref grp_atomspace "the comprehensive overview".
 
 Dependencies:
-- gsl
 - boost signals
 - boost thread
 - zmq (if present)

@@ -22,7 +22,7 @@ Source0:        file:///home/gama/rpmbuild/SOURCES/opencog-%{version}.tar.bz2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 
-BuildRequires:  cmake >= 2.6, make >= 3, gcc-c++ >= 4.4, boost-devel >= 1.44, unixODBC-devel >= 2.2, guile-devel >= 1.8.6, gsl-devel >= 1.9, glibc-devel >= 2.3
+BuildRequires:  cmake >= 2.6, make >= 3, gcc-c++ >= 4.4, boost-devel >= 1.44, unixODBC-devel >= 2.2, guile-devel >= 2.0, glibc-devel >= 2.3
 %if 0%{?suse_version} > 1020
 BuildRequires:  libexpat-devel >= 2
 %else
@@ -138,7 +138,7 @@ needed to develop programs that use the Open Cognition Framework.
 Summary: The main modules used by the opencog server
 Group:   Development/Libraries
 AutoReqProv: 0
-Requires: opencog-server >= %{version}, guile >= 1.8.6, unixODBC >= 2.2, gsl >= 1.9
+Requires: opencog-server >= %{version}, guile >= 2.0, unixODBC >= 2.2
 %description core
 The opencog-core package contains the modules shipped by default by the Open
 Cognition Framework. They provide a variety of enhancements and additional
@@ -160,7 +160,7 @@ allocation.
 Summary: Header files for the the opencog-core package
 Group:   Development/Libraries
 AutoReqProv: 0
-Requires: opencog-core >= %{version}, opencog-server-devel >= %{version}, guile-devel >= 1.8.6, unixODBC-devel >= 2.2, gsl-devel >= 1.9
+Requires: opencog-core >= %{version}, opencog-server-devel >= %{version}, guile-devel >= 2.0, unixODBC-devel >= 2.2
 %description core-devel
 The opencog-core-devel package contains the header files associated with the
 modules that are part of the opencog-core package.

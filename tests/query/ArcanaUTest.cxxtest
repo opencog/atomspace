@@ -24,6 +24,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -60,6 +61,7 @@ public:
 
     void test_repeats(void);
     void test_const(void);
+    void test_numeric(void);
 };
 
 void ArcanaUTest::tearDown(void)
@@ -159,6 +161,38 @@ void ArcanaUTest::test_const(void)
 
     TS_ASSERT_EQUALS(1, as->get_arity(defans));
     TS_ASSERT_EQUALS(defans, answer);
+
+    // ----
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Miscellaneous Arcana
+ * This one tests a "typical" behavior tree node.
+ */
+void ArcanaUTest::test_numeric(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/arcana-numeric.scm");
+    load_scm_files_from_config(*as);
+
+    // ----
+    Handle sl = eval->eval_h("(StateLink"
+                             "   (SchemaNode \"start-interaction-timestamp\")"
+                             "   (TimeLink))");
+    Instantiator(as).execute(sl);
+  
+    TruthValuePtr too_soon = eval->eval_tv(
+        "(cog-evaluate! (DefinedPredicateNode \"Time to change expression\"))");
+
+    TS_ASSERT_LESS_THAN_EQUALS(too_soon->getMean(), 0.5);
+
+    // The TV needs to change after 2 seconds.... sleep 4 to be safe.
+    sleep(4);
+    TruthValuePtr too_late = eval->eval_tv(
+        "(cog-evaluate! (DefinedPredicateNode \"Time to change expression\"))");
+    TS_ASSERT_LESS_THAN_EQUALS(0.5, too_late->getMean());
 
     // ----
     logger().debug("END TEST: %s", __FUNCTION__);

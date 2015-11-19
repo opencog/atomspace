@@ -50,10 +50,12 @@ public:
 	    return do_evaluate(as, Handle(shared_from_this()));
 	}
 
-	static TruthValuePtr do_evaluate(AtomSpace*, const Handle&);
+	static TruthValuePtr do_evaluate(AtomSpace*, const Handle&,
+	                                 bool silent=false);
 	static TruthValuePtr do_eval_scratch(AtomSpace* main,
 	                                     const Handle&,
-	                                     AtomSpace* scratch);
+	                                     AtomSpace* scratch,
+	                                     bool silent=false);
 	static TruthValuePtr do_evaluate(AtomSpace*,
 	                                 const HandleSeq& schema_and_args);
 	static TruthValuePtr do_evaluate(AtomSpace*,

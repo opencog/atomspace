@@ -60,7 +60,7 @@
        rbs
        value)
   )
-  (let ((del-prev-val (BindLink 
+  (let ((del-prev-val (BindLink
                           (param-hypergraph (VariableNode "__VALUE__"))
                           (DeleteLink
                              (param-hypergraph (VariableNode "__VALUE__"))))))

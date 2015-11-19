@@ -52,8 +52,8 @@ void DefaultPatternMatchCB::set_pattern(const Variables& vars,
 {
 	_type_restrictions = &vars.typemap;
 	_dynamic = &pat.evaluatable_terms;
-	_have_evaluatables = (0 < _dynamic->size());
-	_have_variables = (0 < vars.varseq.size());
+	_have_evaluatables = ! _dynamic->empty();
+	_have_variables = ! vars.varseq.empty();
 	_pattern_body = pat.body;
 	_globs = &pat.globby_terms;
 }
@@ -333,11 +333,11 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 		_temp_aspace.clear();
 		try
 		{
-			tvp = EvaluationLink::do_eval_scratch(_as, gvirt, &_temp_aspace);
+			tvp = EvaluationLink::do_eval_scratch(_as, gvirt, &_temp_aspace, true);
 		}
 		catch (const NotEvaluatableException& ex)
 		{
-			// The do_evaluate() bove can throw if its given ungrounded
+			// The do_evaluate() above can throw if its given ungrounded
 			// expressions. It can be given ungrounded expressions if
 			// no grounding was found, and a final pass, run by the
 			// search_finished() callback, puts us here. So handle this

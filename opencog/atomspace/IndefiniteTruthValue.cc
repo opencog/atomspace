@@ -23,13 +23,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_integration.h>
+#include <math.h>
+#include <opencog/util/exceptions.h>
 
 #include "IndefiniteTruthValue.h"
-
-#include <opencog/util/platform.h>
-#include <opencog/util/exceptions.h>
 
 #define W() getU()-getL();
 
@@ -62,20 +59,20 @@ static strength_t DensityIntegral(strength_t lower, strength_t upper,
                                   count_t k_, strength_t s_)
 {
     double params[4];
-    size_t neval = 0;
-    double result = 0.0, abserr = 0.0;
-    gsl_function F;
-
     params[0] = static_cast<double>(L_);
     params[1] = static_cast<double>(U_);
     params[2] = static_cast<double>(k_);
     params[3] = static_cast<double>(s_);
 
-    F.function = &integralFormula;
-    F.params = &params;
-
-    gsl_integration_qng (&F, lower, upper,
-                         1e-1, 0.0, &result, &abserr, &neval);
+    // Previous code computed this integral to an absolute accuracy
+    // of 0.1 which seems absurd to me. Improve on this just a bit.
+#define NSTEPS 15.0
+    double delta = (upper-lower) / NSTEPS;
+    double result = 0.0;
+    for (double x=lower; x<upper; x += delta) {
+        result += integralFormula(x, &params);
+    }
+    result *= delta;
     return (strength_t) result;
 }
 

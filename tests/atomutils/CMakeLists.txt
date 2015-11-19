@@ -1,5 +1,4 @@
-
-LINK_LIBRARIES(AtomUtilsUTest
+LINK_LIBRARIES(
 	atomutils
 	atomspace
 	clearbox
@@ -7,3 +6,4 @@ LINK_LIBRARIES(AtomUtilsUTest
 )
 
 ADD_CXXTEST(AtomUtilsUTest)
+ADD_CXXTEST(FindUtilsUTest)

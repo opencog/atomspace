@@ -45,7 +45,7 @@
 (define rule2-name (Node "rule2"))
 (DefineLink rule2-name rule2)
 
-(define source1
+(define source
 	(InheritanceLink
 		(ConceptNode "fritz")
 		(ConceptNode "croaks")
@@ -63,12 +63,10 @@
 ;-------------------------------------------
 (define wiki (ConceptNode "wikipedia-fc"))
 
-
 (InheritanceLink  ; Defining a rule base
 	(ConceptNode "wikipedia-fc")
 	(ConceptNode "URE")
 )
-
 
 (ExecutionLink
    (SchemaNode "URE:maximum-iterations")

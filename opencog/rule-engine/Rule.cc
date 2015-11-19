@@ -45,11 +45,11 @@ Rule::Rule(Handle rule)
 		                                "Rule '%s' is expected to be a MemberLink",
 		                                rule->toString().c_str());
 
-		Handle name_h = LinkCast(rule)->getOutgoingAtom(0),
-		        rbs_h = LinkCast(rule)->getOutgoingAtom(1);
+		rule_alias_ = LinkCast(rule)->getOutgoingAtom(0);
+		Handle rbs_h = LinkCast(rule)->getOutgoingAtom(1);
 
-		rule_handle_ = DefineLink::get_definition(name_h);
-		name_ = NodeCast(name_h)->getName();
+		rule_handle_ = DefineLink::get_definition(rule_alias_);
+		name_ = NodeCast(rule_alias_)->getName();
 		category_ = NodeCast(rbs_h)->getName();
 		weight_ = rule->getTruthValue()->getMean();
 	}
@@ -100,6 +100,10 @@ Handle Rule::get_handle() const
 	return rule_handle_;
 }
 
+Handle Rule::get_alias() const
+{
+	return rule_alias_;
+}
 /**
  * Get the typed variable list of the Rule.
  *

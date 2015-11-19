@@ -28,3 +28,46 @@
 	(GetLink
 		(VariableNode "$B") ;; bind only the second variable.
 		(InheritanceLink (VariableNode "$H") (VariableNode "$B"))))
+
+(define g-take-contain
+   (GetLink
+      (VariableList
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (TypedVariableLink
+            (VariableNode "$Z")
+            (TypeNode "ConceptNode")
+         )
+      )
+      (AndLink
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "$X")
+               (ConceptNode "treatment-1")
+            )
+         )
+         (EvaluationLink
+            (PredicateNode "contain")
+            (ListLink
+               (ConceptNode "treatment-1")
+               (VariableNode "$Z")
+            )
+         )
+      )
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "take")
+   (ListLink
+      (ConceptNode "John")
+      (ConceptNode "treatment-1")))
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "contain")
+   (ListLink
+      (ConceptNode "treatment-1")
+      (ConceptNode "compound-A")))

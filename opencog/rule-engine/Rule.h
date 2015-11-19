@@ -67,6 +67,7 @@ public:
 	string& get_category();
 	const string& get_category() const;
 	Handle get_handle() const;
+	Handle get_alias() const;
 	Handle get_vardecl() const;
 	Handle get_implicant() const;
 	HandleSeq get_implicant_seq() const;
@@ -79,6 +80,9 @@ public:
 private:
 	// Rule handle, typically a BindLink
 	Handle rule_handle_;
+
+	// Rule alias: (DefineLink rule_alias_ rule_handle_)
+	Handle rule_alias_;
 
 	// Rule name, the name of the node referring to the rule body
 	string name_;

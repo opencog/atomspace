@@ -49,6 +49,7 @@
 #include <opencog/atoms/core/StateLink.h>
 #include <opencog/atoms/core/UniqueLink.h>
 #include <opencog/atoms/core/VariableList.h>
+#include <opencog/atoms/core/ImplicationLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/util/exceptions.h>
@@ -285,6 +286,9 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
     } else if (LAMBDA_LINK == atom_type) {
         if (NULL == LambdaLinkCast(atom))
             return createLambdaLink(*LinkCast(atom));
+    } else if (IMPLICATION_LINK == atom_type) {
+        if (NULL == ImplicationLinkCast(atom))
+            return createImplicationLink(*LinkCast(atom));
     } else if (classserver().isA(atom_type, FUNCTION_LINK)) {
 /* More circular-dependency heart-ache
         if (NULL == FunctionLinkCast(atom))
@@ -375,6 +379,8 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
         return createVariableList(*LinkCast(atom));
     if (LAMBDA_LINK == atom_type)
         return createLambdaLink(*LinkCast(atom));
+    if (IMPLICATION_LINK == atom_type)
+        return createImplicationLink(*LinkCast(atom));
     if (classserver().isA(atom_type, FUNCTION_LINK))
         // XXX FIXME more circular-dependency heart-ache
         // return FunctionLink::factory(LinkCast(atom));
@@ -570,17 +576,12 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (not async)
         put_atom_into_index(atom);
 
-    // We can now unlock, since we are done. In particular, the signals
-    // need to run unlocked, since they may result in more atom table
-    // additions.
+    // We can now unlock, since we are done.
     lck.unlock();
 
     // Update the indexes asynchronously
     if (async)
         _index_queue.enqueue(atom);
-
-    // Now that we are completely done, emit the added signal.
-    _addAtomSignal(h);
 
     DPRINTF("Atom added: %ld => %s\n", atom->_uuid, atom->toString().c_str());
     return h;
@@ -594,6 +595,15 @@ void AtomTable::put_atom_into_index(AtomPtr& atom)
     linkIndex.insertAtom(atom);
     typeIndex.insertAtom(pat);
     importanceIndex.insertAtom(pat);
+
+    // We can now unlock, since we are done. In particular, the signals
+    // need to run unlocked, since they may result in more atom table
+    // additions.
+    lck.unlock();
+
+    // Now that we are completely done, emit the added signal.
+    // Don't emit signal until after the indexes are updated!
+    _addAtomSignal(atom->getHandle());
 }
 
 void AtomTable::barrier()

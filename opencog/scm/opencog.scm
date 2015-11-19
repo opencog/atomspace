@@ -31,7 +31,7 @@
 
 ; Initialze a default atomspace, just to keep things sane...
 ; The below is safe, because this module runs at most only once
-; (if invoked from the guile shell, as (load-modules (opencog)) )
+; (if invoked from the guile shell, as (use-modules (opencog)) )
 ; or zero times, if invoked from the cogserver shell. The cogserver
 ; refuses to run this; the cogserver main atomspace is never clobbered.
 ;

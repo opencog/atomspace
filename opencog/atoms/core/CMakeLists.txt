@@ -11,7 +11,9 @@ ADD_LIBRARY (atomcore SHARED
 	LambdaLink.cc
 	PutLink.cc
 	RandomChoice.cc
+	RandomNumber.cc
 	ScopeLink.cc
+	ImplicationLink.cc
 	StateLink.cc
 	TimeLink.cc
 	UniqueLink.cc
@@ -39,6 +41,7 @@ INSTALL (FILES
 	LambdaLink.h
 	PutLink.h
 	RandomChoice.h
+	RandomNumber.h
 	ScopeLink.h
 	StateLink.h
 	TimeLink.h

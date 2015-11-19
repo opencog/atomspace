@@ -44,10 +44,6 @@ be built and run.
 > Embedded scheme interpreter (version 2.0.9 or newer is required)
 > http://www.gnu.org/software/guile/guile.html | guile-2.0-dev
 
-###### libgsl
-> The GNU Scientific Library
-> http://www.gnu.org/software/gsl/ | libgsl0-dev
-
 Optional Prerequisites
 ----------------------
 The following packages are optional. If they are not installed, some

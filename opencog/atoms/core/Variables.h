@@ -43,13 +43,13 @@ struct FreeVariables
 {
 	/// Unbundled variables.
 	///
-	/// The _varset contains exactly the same atoms as the _varseq; it
+	/// The varset contains exactly the same atoms as the varseq; it
 	/// is used for fast lookup; (i.e. is some some variable a part of
-	/// this set?) whereas the _varseq list preserves the original order
+	/// this set?) whereas the varseq list preserves the original order
 	/// of the variables.  Yes, the fast lookup really is needed!
 	///
-	/// The _index is a reversed index into _varseq: given a variable,
-	/// it returns the ordinal of that variable in the _varseq. It is
+	/// The index is a reversed index into varseq: given a variable,
+	/// it returns the ordinal of that variable in the varseq. It is
 	/// used to implement the variable substitution (aka beta-reducation
 	/// aka "PutLink") method.
 	HandleSeq varseq;
@@ -91,7 +91,7 @@ typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
 struct Variables : public FreeVariables
 {
 	/// Unbundled variables and types for them.
-	/// _typemap is the (possibly empty) list of restrictions on
+	/// typemap is the (possibly empty) list of restrictions on
 	/// the variable types.
 	///
 	VariableTypeMap typemap;
@@ -115,6 +115,9 @@ struct Variables : public FreeVariables
 
 	// Extend this variable set by adding in the given variable set.
 	void extend(const Variables&);
+
+	// Useful for debugging
+	std::string to_string() const;
 };
 
 /** @}*/

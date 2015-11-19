@@ -4,7 +4,7 @@ Instalation and dependency resolution for Fedora 9 users
 
 Opencog depends on the following packages:
 
-   gcc-c++ cmake boost boost-devel gsl-devel
+   gcc-c++ cmake boost boost-devel
 
 ----------------------------------------------------------
 
