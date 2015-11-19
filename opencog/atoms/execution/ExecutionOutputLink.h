@@ -49,6 +49,9 @@ public:
 	ExecutionOutputLink(Link& l);
 
 	virtual Handle execute(AtomSpace* = NULL) const;
+
+	Handle get_schema(void) const { return getOutgoingAtom(0); }
+	Handle get_args(void) const { return getOutgoingAtom(1); }
 };
 
 typedef std::shared_ptr<ExecutionOutputLink> ExecutionOutputLinkPtr;

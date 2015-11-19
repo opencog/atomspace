@@ -43,7 +43,7 @@ ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset,
 	   GROUNDED_SCHEMA_NODE != oset[0]->getType()) or
 	   LIST_LINK != oset[1]->getType())
 	{
-		throw RuntimeException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 			"ExecutionOutputLink must have schema and args!");
 	}
 }
@@ -60,7 +60,7 @@ ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
 		throw RuntimeException(TRACE_INFO, "Expecting SchemaNode!");
 
 	if (LIST_LINK != args->getType())
-		throw RuntimeException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 			"ExecutionOutputLink must have schema and args!");
 }
 
@@ -69,7 +69,7 @@ ExecutionOutputLink::ExecutionOutputLink(Link& l)
 {
 	Type tscope = l.getType();
 	if (EXECUTION_OUTPUT_LINK != tscope)
-		throw RuntimeException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 			"Expection an ExecutionOutputLink!");
 }
 
