@@ -8,7 +8,7 @@ Unfortunately, it is no longer simple, straight-forward.
 
 Vocabulary
 ----------
-Some vobabulary:
+Some vocabulary:
 
 * "Substitution" means the substitution of values for thier place holders.
   There are several variants:
@@ -38,17 +38,17 @@ at some abstract level, its the same thing; we just use the word
 Design complexity
 -----------------
 The design has gotten complex due to mutiple reasons.  But first,
-Here is why execution is complex:
+here is why execution is complex:
 
 * Execution must be done recursively, starting at the leafs.
-  That is, must (but not all) functions require the function
+  That is, most (but not all) functions require the function
   arguments to be in thier final reduced 'value' form, before
   the function can be executed.  That is, execution does NOT
   commute with substitution.
 
 * Substitution has to be done recursviely, but with care: Not all
   variables are free; not all variables are bound. Thus, for example,
-  the PutLink has to parts: all variables in the body of the PutLink
+  the PutLink has two parts: all variables in the body of the PutLink
   are bound, but all variables in the value-list are free.  Thus,
   if there is variable substitution outside of PutLink, only the
   free variables can be subsituted!
@@ -58,7 +58,7 @@ Here is why execution is complex:
   beta reduction. It is easier to handle execution of e.g.
   delete links if execution is done before beta reduction.
 
-* The exeuction of black-box links requires that the argument atoms
+* The execution of black-box links requires that the argument atoms
   be placed into the atomspace, first. This is for two reasons:
   -- Both python and guile rely on the atomspace to find atoms.
      If the argument to a scheme/python function is not in the
@@ -75,6 +75,11 @@ Here is why execution is complex:
   told the atom when it was being inserted, but, right now, the
   atomspace does not send an "insert" message to the atoms being
   inserted.
+
+* Execution is currently done in an eager fashion, and should be
+  done in a lazy fashion. Until recently, this did not matter, because
+  conditional links were no much used... well, now they are (e.g. the
+  RandomChoiceLink -- only one branch needs to be instantiated/executed).
 
 
 Garbage Collection
@@ -150,12 +155,12 @@ Non-string values
 Some node types need to store one or more non-string values.  The
 NumberNode here is a rough prototype for how that could be done. By
 storing a double-precision floating point number (i.e. "caching" it)
-it can potentially avoid string->double and double->string conversions
+it can potentially avoid `string->double` and `double->string` conversions
 every time that it is accessed.  There are several caveats:
 
  * This works only if all possible Handles and AtomPtr's actually
    point to an instance of the NumberNode class, instead of an
-   instance of a Node class, with the type set to NUMBER_NODE.
+   instance of a Node class, with the type set to `NUMBER_NODE`.
 
  * The above can happen only if the AtomSpace itself is careful to
    always work with instances of NumberNode, as it is the final

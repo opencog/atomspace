@@ -357,13 +357,13 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 
 	// We get exceptions here in two differet ways: (a) due to user
-	// error, in which case we need o print an error, ad (b) automatic,
+	// error, in which case we need to print an error, and (b) intentionally,
 	// e.g. when Instantiator calls us, knowing it will get an error,
 	// in which case, printing the exception message is a waste of CPU
 	// time...
 	//
-	// DefaultPatternMatchCB.cc and also Instantiator wants to
-	// catch the NotEvaluatableException thrw here.  Basically, these
+	// DefaultPatternMatchCB.cc and also Instantiator wants to catch
+	// the NotEvaluatableException thrown here.  Basically, these
 	// know that they might be sending non-evaluatable atoms here, and
 	// don't want to garbage up the log files with bogus errors.
 	if (silent)
