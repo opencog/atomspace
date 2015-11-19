@@ -43,56 +43,56 @@ class AtomSpace;
  */
 class InitiateSearchCB : public virtual PatternMatchCallback
 {
-	public:
-		InitiateSearchCB(AtomSpace*);
+public:
+	InitiateSearchCB(AtomSpace*);
 
-		/**
-		 * Called to perform the actual search. This makes some default
-		 * assumptions about the kind of things that might be matched,
-		 * in order to drive a reasonably-fast search.
-		 */
-		virtual void set_pattern(const Variables&, const Pattern&);
-		virtual bool initiate_search(PatternMatchEngine *);
+	/**
+	 * Called to perform the actual search. This makes some default
+	 * assumptions about the kind of things that might be matched,
+	 * in order to drive a reasonably-fast search.
+	 */
+	virtual void set_pattern(const Variables&, const Pattern&);
+	virtual bool initiate_search(PatternMatchEngine *);
 
-	protected:
+protected:
 
-		ClassServer& _classserver;
+	ClassServer& _classserver;
 
-		const Variables* _variables;
-		const Pattern* _pattern;
-		const VariableTypeMap* _type_restrictions;
-		const std::set<Handle>* _dynamic;
+	const Variables* _variables;
+	const Pattern* _pattern;
+	const VariableTypeMap* _type_restrictions;
+	const std::set<Handle>* _dynamic;
 
-		PatternLinkPtr _pl;
-		void jit_analyze(PatternMatchEngine *);
+	PatternLinkPtr _pl;
+	void jit_analyze(PatternMatchEngine *);
 
-		Handle _root;
-		Handle _starter_term;
+	Handle _root;
+	Handle _starter_term;
 
-		struct Choice
-		{
-			size_t clause;
-			Handle best_start;
-			Handle start_term;
-		};
-		size_t _curr_clause;
-		std::vector<Choice> _choices;
+	struct Choice
+	{
+		size_t clause;
+		Handle best_start;
+		Handle start_term;
+	};
+	size_t _curr_clause;
+	std::vector<Choice> _choices;
 
-		virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
-		virtual Handle find_starter_recursive(const Handle&, size_t&, Handle&,
-		                                      size_t&);
-		virtual Handle find_thinnest(const HandleSeq&,
-		                             const std::set<Handle>&,
-		                             Handle&, size_t&);
-		virtual void find_rarest(const Handle&, Handle&, size_t&);
+	virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
+	virtual Handle find_starter_recursive(const Handle&, size_t&, Handle&,
+	                                      size_t&);
+	virtual Handle find_thinnest(const HandleSeq&,
+	                             const std::set<Handle>&,
+	                             Handle&, size_t&);
+	virtual void find_rarest(const Handle&, Handle&, size_t&);
 
-		bool _search_fail;
-		virtual bool neighbor_search(PatternMatchEngine *);
-		virtual bool link_type_search(PatternMatchEngine *);
-		virtual bool variable_search(PatternMatchEngine *);
-		virtual bool no_search(PatternMatchEngine *);
+	bool _search_fail;
+	virtual bool neighbor_search(PatternMatchEngine *);
+	virtual bool link_type_search(PatternMatchEngine *);
+	virtual bool variable_search(PatternMatchEngine *);
+	virtual bool no_search(PatternMatchEngine *);
 
-		AtomSpace *_as;
+	AtomSpace *_as;
 };
 
 } // namespace opencog
