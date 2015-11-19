@@ -141,51 +141,51 @@ bool is_quoted_in_tree(const Handle& tree, const Handle& atom);
 bool is_unquoted_in_tree(const Handle& tree, const Handle& atom);
 
 /**
- * Return the minimum quotation level of a given variable. The
- * minimumquotation level of a variable is the minimum number of
- * QuoteLinks minus the number of UnquoteLinks between the root and
- * the variables in the tree (or should we say hypergraph).
+ * Return the minimum quotation level of a given atom. The minimum
+ * quotation level of an atom is the minimum number of QuoteLinks
+ * minus the number of UnquoteLinks between the root and the atom
+ * in the tree (or rather hypergraph).
  *
  * @param tree             handle of the hypergraph to explore
  *
- * @param var              handle of the variable to check
+ * @param atom             handle of the atom to check
  *
  * @param quotation_level  quotation level from the root to the handle
  *                         the of tree
  *
- * @return                 minimum quotation level. If var doesn't appear
+ * @return                 minimum quotation level. If atom doesn't appear
  *                         in the tree then it returns the maximum integer.
  *
- * If the number is zero or below, it means that this variable is
+ * If the number is zero or below, it means that this atom is
  * unquoted at least once. If the number is above zero then it is
  * never unquoted.
  */
 int min_quotation_level(const Handle& tree,
-                        const Handle& var,
+                        const Handle& atom,
                         int level_from_root = 0);
 
 /**
- * Return the maximum quotation level of a given variable. The maximum
- * quotation level of a variable is the maximum number of QuoteLinks
- * minus the number of UnquoteLinks between the root and the variables
- * in the tree (or should we say hypergraph).
+ * Return the maximum quotation level of a given atom. The maximum
+ * quotation level of an atom is the maximum number of QuoteLinks
+ * minus the number of UnquoteLinks between the root and the atom in
+ * the tree (or rather hypergraph).
  *
  * @param tree             handle of the hypergraph to explore
  *
- * @param var              handle of the variable to check
+ * @param var              handle of the atom to check
  *
  * @param quotation_level  quotation level from the root to the handle
- *                         the of tree
+ *                         the atom of tree
  *
  * @return                 maximum quotation level. If var doesn't appear
  *                         in the tree then it returns the minimum integer.
  *
- * If the number is above zero, it means that this variable is quoted
+ * If the number is above zero, it means that this atom is quoted
  * at least once. If the number is zero or below then it is never
  * quoted.
  */
 int max_quotation_level(const Handle& tree,
-                        const Handle& var,
+                        const Handle& atom,
                         int level_from_root = 0);
 
 /**
