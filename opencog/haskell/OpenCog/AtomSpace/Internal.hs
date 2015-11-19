@@ -170,6 +170,10 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw tvraw in do
       (SetT, _     ) -> do
         lnew <- mapM fromRawGen out
         Just $ Gen $ SetLink lnew
+      (SatisfactionT ,[br]) -> do
+        b <- filt br :: Maybe (Gen LinkT)
+        case (b) of
+          (Gen b1) -> Just $ Gen $ SatisfactionLink (VariableList []) b1
       (SatisfactionT ,[ar,br]) -> do
         a <- filt ar :: Maybe (Gen VariableListT)
         b <- filt br :: Maybe (Gen LinkT)
