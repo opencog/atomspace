@@ -67,7 +67,7 @@ namespace opencog {
  * attributes UNDEFINED.
  *
  * Term trees are build in the course of preprocessing stage before
- * pattern matcher starts searching for variable groundigns. Each clause
+ * pattern matcher starts searching for variable groundings. Each clause
  * is then recursively traversed from the root downwards through outgoing
  * atoms. The _outgoing attribute stores a list of childs created during this
  * traversal. They corresponds one-to-one to outgoing sets of referenced
@@ -151,7 +151,7 @@ public:
 	inline bool isQuoted() const
 	{
 		// Check parent quote depth, because we need the top QuoteLink-s
-		// to be unqouted.
+		// to be unquoted.
 		return (_parent->_quote_depth > 0);
 	}
 
