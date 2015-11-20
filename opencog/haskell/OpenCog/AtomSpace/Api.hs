@@ -15,6 +15,7 @@ module OpenCog.AtomSpace.Api (
     , getWithUUID
     , execute
     , evaluate
+    , exportFunction
     ) where
 
 import Foreign                       (Ptr)
@@ -26,11 +27,15 @@ import Foreign.Marshal.Alloc         (alloca,free)
 import Foreign.Storable              (peek)
 import Data.Functor                  ((<$>))
 import Data.Typeable                 (Typeable)
+import Data.Maybe                    (fromJust)
+import Control.Monad.Trans.Reader    (ReaderT,runReaderT,ask)
 import Control.Monad.IO.Class        (liftIO)
-import OpenCog.AtomSpace.Env         (AtomSpaceRef(..),AtomSpace,getAtomSpace)
+import OpenCog.AtomSpace.Env         (AtomSpaceObj(..),AtomSpaceRef(..),(<:),
+                                      AtomSpace(..),getAtomSpace,refToObj)
 import OpenCog.AtomSpace.Internal    (fromTVRaw,UUID,AtomTypeRaw,AtomRaw(..),TVRaw(..),
-                                      toRaw,fromRaw,tvMAX_PARAMS)
-import OpenCog.AtomSpace.Types       (Atom(..),AtomName(..),TruthVal(..))
+                                      toRaw,fromRaw,fromRawGen,tvMAX_PARAMS)
+import OpenCog.AtomSpace.Types       (AtomGen,Atom(..),AtomName(..),TruthVal(..),
+                                     appGen)
 import OpenCog.AtomSpace.Inheritance (type (<~))
 import OpenCog.AtomSpace.AtomType    (AtomType(..))
 import OpenCog.AtomSpace.CUtils
@@ -164,7 +169,8 @@ getNode aType aName = do
     case m of
       Nothing -> return Nothing
       Just h  -> do
-          res <- getTruthValue h
+          asRef <- getAtomSpace
+          res <- liftIO $ getTruthValue asRef h
           return $ case res of
               Just tv -> Just (tv,h)
               Nothing -> Nothing
@@ -198,7 +204,8 @@ getLink aType aOutgoing = do
     case m of
       Nothing -> return Nothing
       Just h  -> do
-          res <- getTruthValue h
+          asRef <- getAtomSpace
+          res <- liftIO $ getTruthValue asRef h
           return $ case res of
               Just tv -> Just (tv,h)
               Nothing -> Nothing
@@ -291,7 +298,7 @@ foreign import ccall "AtomSpace_getAtomByUUID"
 getByUUID :: UUID -> AtomSpace (Maybe AtomRaw)
 getByUUID h = do
     asRef <- getAtomSpace
-    resTv <- getTruthValue h
+    resTv <- liftIO $ getTruthValue asRef h
     case resTv of
       Nothing -> return Nothing
       Just tv -> do
@@ -330,6 +337,38 @@ getByUUID h = do
                     Just out -> Just $ Link atype out tv
                     Nothing  -> Nothing
 
+foreign import ccall "AtomSpace_getAtom"
+  c_atomspace_getatom :: AtomSpaceRef
+                      -> UUID
+                      -> CString
+                      -> CString
+                      -> Ptr CInt
+                      -> Ptr UUID
+                      -> IO CInt
+
+getAtom :: AtomSpaceRef -> UUID -> IO (Maybe AtomRaw)
+getAtom asRef id = do
+    mtv   <- getTruthValue asRef id
+    case mtv of
+        Just tv -> liftIO $ alloca $
+            \nptr -> alloca $
+            \tptr -> alloca $
+            \sptr -> alloca $
+            \hptr -> do
+                res <- c_atomspace_getatom asRef id nptr tptr sptr hptr
+                aName <- peekCString nptr
+                aType <- peekCString tptr
+                oSize <- peek sptr
+                case (res,oSize) of
+                    (0,0) -> return $ Just $ Node aType aName tv
+                    (0,s) -> do
+                        outids <- peekArray (fromIntegral s) hptr
+                        mout <- mapM (getAtom asRef) outids
+                        let out = map fromJust mout
+                        return $ Just $ Link aType out tv
+                    _     -> return Nothing
+        Nothing -> return Nothing
+
 --------------------------------------------------------------------------------
 
 foreign import ccall "AtomSpace_getTruthValue"
@@ -340,9 +379,8 @@ foreign import ccall "AtomSpace_getTruthValue"
                             -> IO CInt
 
 -- Internal function to get an atom's truth value.
-getTruthValue :: UUID -> AtomSpace (Maybe TVRaw)
-getTruthValue handle = do
-    asRef <- getAtomSpace
+getTruthValue :: AtomSpaceRef -> UUID -> IO (Maybe TVRaw)
+getTruthValue asRef handle = do
     liftIO $ getTVfromC $ c_atomspace_getTruthValue asRef handle
 
 foreign import ccall "AtomSpace_setTruthValue"
@@ -360,4 +398,17 @@ setTruthValue handle (TVRaw tvtype list) = do
       \lptr -> do
           res <- c_atomspace_setTruthValue asRef handle (fromIntegral $ fromEnum tvtype) lptr
           return $ res == sUCCESS
+
+
+-- Helpfer function for creating function that can be called from C
+exportFunction :: (AtomGen -> AtomSpace (AtomGen)) -> Ptr AtomSpaceRef -> UUID -> IO (UUID)
+exportFunction f asRef id = do
+    (Just ratom) <- getAtom (AtomSpaceRef asRef) id
+    let (Just atom)           = fromRawGen ratom
+        (AtomSpace op)        = f atom
+    resAtom <- runReaderT op (AtomSpaceRef asRef)
+    as <- refToObj asRef
+    (Just (_,resID)) <- as <: getWithUUID $ (toRaw `appGen` resAtom :: AtomRaw)
+    return resID
+
 

@@ -93,6 +93,40 @@ int AtomSpace_removeAtom( AtomSpace* this_ptr
     return -1;
 }
 
+int AtomSpace_getAtom( AtomSpace * this_ptr
+                     , UUID id
+                     , const char * name
+                     , const char * type
+                     , size_t * size
+                     , UUID* outsetp)
+{
+    Handle h(id);
+    if(!h) // Invalid UUID parameter.
+        return -1;
+
+    ClassServer server = classserver();
+    Type t = h->getType();
+    type = server.getTypeName(t);
+
+    if (server.isA(t,NODE))
+    {
+        name = h->getName();
+        *size = 0;
+    }
+    else
+    {
+        name = ""
+        hset = h->getOutgoingSet();
+        *size = hset.size();
+        UUID outset [size];
+        for(int i=0;i<size;i++)
+            outset[i] = hset[i].value();
+        outsetp = &outset;
+    }
+    return 0;
+}
+
+
 int AtomSpace_getAtomByUUID( AtomSpace* this_ptr
                            , UUID uuid
                            , int* node_or_link

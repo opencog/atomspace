@@ -41,4 +41,4 @@ library
                    , filepath         >=1.3.0.2
 
   extra-libraries:   atomspace-cwrapper
-  ghc-options:       -fcontext-stack=500 -ddump-splices
+  ghc-options:       -fcontext-stack=500 -ddump-splices -dynamic -shared -fPIC
