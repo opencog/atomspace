@@ -113,7 +113,8 @@ protected:
 	                      std::set<Handle>& black_clauses);
 
 	void trace_connectives(const std::set<Type>&,
-	                       const HandleSeq& clauses);
+	                       const HandleSeq& clauses,
+	                       int quotation_level = 0);
 
 	void make_connectivity_map(const HandleSeq&);
 	void make_map_recursive(const Handle&, const Handle&);
@@ -122,7 +123,7 @@ protected:
 	                          const std::vector<std::set<Handle>>&);
 
 	void make_term_trees();
-	void make_term_tree_recursive(const Handle&, const Handle&,
+	void make_term_tree_recursive(const Handle&, Handle,
 	                              PatternTermPtr&);
 
 	void init(void);

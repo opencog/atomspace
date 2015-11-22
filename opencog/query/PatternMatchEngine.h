@@ -45,190 +45,190 @@ class PatternMatchEngine
 
 	// Private, locally scoped typedefs, not used outside of this class.
 
-	private:
-		// -------------------------------------------
-		// The current set of clauses (redex context) being grounded.
-		// A single redex consists of a collection of clauses, all of
-		// which must be grounded.
-		bool explore_redex(const Handle&, const Handle&, const Handle&);
+private:
+	// -------------------------------------------
+	// The current set of clauses (redex context) being grounded.
+	// A single redex consists of a collection of clauses, all of
+	// which must be grounded.
+	bool explore_redex(const Handle&, const Handle&, const Handle&);
 
-		// These have to be pointers, not references; they get pushed
-		// onto a stack when a new redex context is started. This is
-		// how redex recursion will (eventually) be implemented.
-		const Variables* _varlist;
-		const Pattern* _pat;
+	// These have to be pointers, not references; they get pushed
+	// onto a stack when a new redex context is started. This is
+	// how redex recursion will (eventually) be implemented.
+	const Variables* _varlist;
+	const Pattern* _pat;
 
-		bool is_optional(const Handle& h) {
-			return (_pat->optionals.count(h) != 0); }
+	bool is_optional(const Handle& h) {
+		return (_pat->optionals.count(h) != 0); }
 
-		bool is_evaluatable(const Handle& h) {
-			return (_pat->evaluatable_holders.count(h) != 0); }
+	bool is_evaluatable(const Handle& h) {
+		return (_pat->evaluatable_holders.count(h) != 0); }
 
-		bool is_executable(const Handle& h) {
-			return (_pat->executable_terms.count(h) != 0); }
+	bool is_executable(const Handle& h) {
+		return (_pat->executable_terms.count(h) != 0); }
 
-		bool is_black(const Handle& h) {
-			return (_pat->black.count(h) != 0); }
+	bool is_black(const Handle& h) {
+		return (_pat->black.count(h) != 0); }
 
-		// -------------------------------------------
-		// Recursive redex support. These are stacks of the clauses
-		// above, that are being searched.
-		std::stack<const Variables*>  _stack_variables;
-		std::stack<const Pattern*>    _stack_pattern;
+	// -------------------------------------------
+	// Recursive redex support. These are stacks of the clauses
+	// above, that are being searched.
+	std::stack<const Variables*>  _stack_variables;
+	std::stack<const Pattern*>    _stack_pattern;
 
-		void push_redex(void);
-		void pop_redex(void);
+	void push_redex(void);
+	void pop_redex(void);
 
-		// --------------------------------------------
-		// Current clause traversal state. These hold the state needed
-		// to traverse a single clause, and find groundings for it.
-		// Note, though, that these are cumulative: so e.g. the
-		// var_grounding map accumulates variable groundings for this
-		// clause, and all previous clauses so far.
+	// --------------------------------------------
+	// Current clause traversal state. These hold the state needed
+	// to traverse a single clause, and find groundings for it.
+	// Note, though, that these are cumulative: so e.g. the
+	// var_grounding map accumulates variable groundings for this
+	// clause, and all previous clauses so far.
 
-		// Map of current groundings of variables to thier grounds
-		// Also contains grounds of subclauses (not sure why, this seems
-		// to be needed)
-		std::map<Handle, Handle> var_grounding;
-		// Map of clauses to their current groundings
-		std::map<Handle, Handle> clause_grounding;
+	// Map of current groundings of variables to thier grounds
+	// Also contains grounds of subclauses (not sure why, this seems
+	// to be needed)
+	std::map<Handle, Handle> var_grounding;
+	// Map of clauses to their current groundings
+	std::map<Handle, Handle> clause_grounding;
 
-		void clear_current_state(void);  // clear the stuff above
+	void clear_current_state(void);  // clear the stuff above
 
-		// -------------------------------------------
-		// ChoiceLink state management
-		typedef std::pair<PatternTermPtr, Handle> GndChoice;
-		typedef std::map<GndChoice, size_t> ChoiceState;
+	// -------------------------------------------
+	// ChoiceLink state management
+	typedef std::pair<PatternTermPtr, Handle> GndChoice;
+	typedef std::map<GndChoice, size_t> ChoiceState;
 
-		ChoiceState _choice_state;
-		bool _need_choice_push;
+	ChoiceState _choice_state;
+	bool _need_choice_push;
 
-		size_t curr_choice(const PatternTermPtr&, const Handle&, bool&);
-		bool have_choice(const PatternTermPtr&, const Handle&);
+	size_t curr_choice(const PatternTermPtr&, const Handle&, bool&);
+	bool have_choice(const PatternTermPtr&, const Handle&);
 
-		// Iteration control for choice links. Branchpoint advances
-		// whenever take_step is set to true.
-		bool choose_next;
+	// Iteration control for choice links. Branchpoint advances
+	// whenever take_step is set to true.
+	bool choose_next;
 
-		// -------------------------------------------
-		// Unordered Link suppoprt
-		typedef std::pair<PatternTermPtr, Handle> Unorder; // Choice
-		typedef PatternTermSeq Permutation;
-		typedef std::map<Unorder, Permutation> PermState; // ChoiceState
+	// -------------------------------------------
+	// Unordered Link suppoprt
+	typedef std::pair<PatternTermPtr, Handle> Unorder; // Choice
+	typedef PatternTermSeq Permutation;
+	typedef std::map<Unorder, Permutation> PermState; // ChoiceState
 
-		PermState _perm_state;
-		Permutation curr_perm(const PatternTermPtr&, const Handle&, bool&);
-		bool have_perm(const PatternTermPtr&, const Handle&);
+	PermState _perm_state;
+	Permutation curr_perm(const PatternTermPtr&, const Handle&, bool&);
+	bool have_perm(const PatternTermPtr&, const Handle&);
 
-		// Iteration control for unordered links. Branchpoint advances
-		// whenever take_step is set to true.
-		bool take_step;
-		bool have_more;
-		std::map<Unorder, int> perm_count;
-		std::stack<std::map<Unorder, int>> perm_count_stack;
+	// Iteration control for unordered links. Branchpoint advances
+	// whenever take_step is set to true.
+	bool take_step;
+	bool have_more;
+	std::map<Unorder, int> perm_count;
+	std::stack<std::map<Unorder, int>> perm_count_stack;
 
-		// --------------------------------------------
-		// Methods and state that select the next clause to be grounded.
+	// --------------------------------------------
+	// Methods and state that select the next clause to be grounded.
 
-		bool do_next_clause(void);
-		bool clause_accepted;
-		void get_next_untried_clause(void);
-		bool get_next_thinnest_clause(bool, bool, bool);
-		unsigned int thickness(const Handle&, const std::set<Handle>&);
-		Handle next_clause;
-		Handle next_joint;
-		// Set of clauses for which a grounding is currently being attempted.
-		typedef std::set<Handle> IssuedSet;
-		IssuedSet issued;     // stacked on issued_stack
+	bool do_next_clause(void);
+	bool clause_accepted;
+	void get_next_untried_clause(void);
+	bool get_next_thinnest_clause(bool, bool, bool);
+	unsigned int thickness(const Handle&, const std::set<Handle>&);
+	Handle next_clause;
+	Handle next_joint;
+	// Set of clauses for which a grounding is currently being attempted.
+	typedef std::set<Handle> IssuedSet;
+	IssuedSet issued;     // stacked on issued_stack
 
-		// -------------------------------------------
-		// Stack used to store current traversal state for a single
-		// clause. These are pushed when a clause is fully grounded,
-		// and a new clause is about to be started. These are popped
-		// in order to get back to the original clause, and resume
-		// traversal of that clause, where it was last left off.
-		void solution_push(void);
-		void solution_pop(void);
-		void solution_drop(void);
+	// -------------------------------------------
+	// Stack used to store current traversal state for a single
+	// clause. These are pushed when a clause is fully grounded,
+	// and a new clause is about to be started. These are popped
+	// in order to get back to the original clause, and resume
+	// traversal of that clause, where it was last left off.
+	void solution_push(void);
+	void solution_pop(void);
+	void solution_drop(void);
 
-		// Stacks containing partial groundings.
-		typedef std::map<Handle, Handle> SolnMap;
-		std::stack<SolnMap> var_solutn_stack;
-		std::stack<SolnMap> term_solutn_stack;
+	// Stacks containing partial groundings.
+	typedef std::map<Handle, Handle> SolnMap;
+	std::stack<SolnMap> var_solutn_stack;
+	std::stack<SolnMap> term_solutn_stack;
 
-		std::stack<IssuedSet> issued_stack;
-		std::stack<ChoiceState> choice_stack;
+	std::stack<IssuedSet> issued_stack;
+	std::stack<ChoiceState> choice_stack;
 
-		std::stack<PermState> perm_stack;
-		void perm_push(void);
-		void perm_pop(void);
+	std::stack<PermState> perm_stack;
+	void perm_push(void);
+	void perm_pop(void);
 
-		// push, pop and clear these states.
-		void clause_stacks_push(void);
-		void clause_stacks_pop(void);
-		void clause_stacks_clear(void);
-		unsigned int _clause_stack_depth;
+	// push, pop and clear these states.
+	void clause_stacks_push(void);
+	void clause_stacks_pop(void);
+	void clause_stacks_clear(void);
+	unsigned int _clause_stack_depth;
 
-		// -------------------------------------------
-		// Recursive tree comparison algorithm.
-		unsigned int depth; // Recursion depth for tree_compare.
+	// -------------------------------------------
+	// Recursive tree comparison algorithm.
+	unsigned int depth; // Recursion depth for tree_compare.
 
-		typedef enum {
-			CALL_QUOTE,
-			CALL_ORDER,
-			CALL_GLOB,
-			CALL_UNORDER,
-			CALL_CHOICE,
-			CALL_COMP,
-			CALL_SOLN
-		} Caller;   // temporary scaffolding !???
+	typedef enum {
+		CALL_QUOTE,
+		CALL_ORDER,
+		CALL_GLOB,
+		CALL_UNORDER,
+		CALL_CHOICE,
+		CALL_COMP,
+		CALL_SOLN
+	} Caller;   // temporary scaffolding !???
 
-		bool tree_compare(const PatternTermPtr&, const Handle&, Caller);
+	bool tree_compare(const PatternTermPtr&, const Handle&, Caller);
 
-		bool quote_compare(const PatternTermPtr&, const Handle&);
-		bool variable_compare(const Handle&, const Handle&);
-		bool self_compare(const PatternTermPtr&);
-		bool node_compare(const Handle&, const Handle&);
-		bool redex_compare(const LinkPtr&, const LinkPtr&);
-		bool choice_compare(const PatternTermPtr&, const Handle&,
-		                    const LinkPtr&, const LinkPtr&);
-		bool ordered_compare(const PatternTermPtr&, const Handle&,
-		                     const LinkPtr&, const LinkPtr&);
-		bool unorder_compare(const PatternTermPtr&, const Handle&,
-		                     const LinkPtr&, const LinkPtr&);
+	bool variable_compare(const Handle&, const Handle&);
+	bool self_compare(const PatternTermPtr&);
+	bool node_compare(const Handle&, const Handle&);
+	bool redex_compare(const LinkPtr&, const LinkPtr&);
+	bool choice_compare(const PatternTermPtr&, const Handle&,
+	                    const LinkPtr&, const LinkPtr&);
+	bool ordered_compare(const PatternTermPtr&, const Handle&,
+	                     const LinkPtr&, const LinkPtr&);
+	bool unorder_compare(const PatternTermPtr&, const Handle&,
+	                     const LinkPtr&, const LinkPtr&);
+	bool clause_compare(const PatternTermPtr&, const Handle&);
 
-		// -------------------------------------------
-		// Upwards-walking and grounding of a single clause.
-		// See PatternMatchEngine.cc for descriptions
-		bool explore_clause(const Handle&, const Handle&, const Handle&);
-		bool explore_term_branches(const Handle&, const Handle&,
-		                           const Handle&);
-		bool explore_up_branches(const PatternTermPtr&, const Handle&,
-		                         const Handle&);
-		bool explore_link_branches(const PatternTermPtr&, const Handle&,
-		                           const Handle&);
-		bool explore_choice_branches(const PatternTermPtr&, const Handle&,
-		                             const Handle&);
-		bool explore_single_branch(const PatternTermPtr&, const Handle&,
-		                           const Handle&);
-		bool do_term_up(const PatternTermPtr&, const Handle&,
-		                const Handle&);
-		bool clause_accept(const Handle&, const Handle&);
+	// -------------------------------------------
+	// Upwards-walking and grounding of a single clause.
+	// See PatternMatchEngine.cc for descriptions
+	bool explore_clause(const Handle&, const Handle&, const Handle&);
+	bool explore_term_branches(const Handle&, const Handle&,
+	                           const Handle&);
+	bool explore_up_branches(const PatternTermPtr&, const Handle&,
+	                         const Handle&);
+	bool explore_link_branches(const PatternTermPtr&, const Handle&,
+	                           const Handle&);
+	bool explore_choice_branches(const PatternTermPtr&, const Handle&,
+	                             const Handle&);
+	bool explore_single_branch(const PatternTermPtr&, const Handle&,
+	                           const Handle&);
+	bool do_term_up(const PatternTermPtr&, const Handle&,
+	                const Handle&);
+	bool clause_accept(const Handle&, const Handle&);
 
-	public:
-		PatternMatchEngine(PatternMatchCallback&);
-		void set_pattern(const Variables&, const Pattern&);
+public:
+	PatternMatchEngine(PatternMatchCallback&);
+	void set_pattern(const Variables&, const Pattern&);
 
-		// Examine the locally connected neighborhood for possible
-		// matches.
-		bool explore_neighborhood(const Handle&, const Handle&, const Handle&);
+	// Examine the locally connected neighborhood for possible
+	// matches.
+	bool explore_neighborhood(const Handle&, const Handle&, const Handle&);
 
-		// Handy-dandy utilities
-		static void log_solution(const std::map<Handle, Handle> &vars,
-		                         const std::map<Handle, Handle> &clauses);
+	// Handy-dandy utilities
+	static void log_solution(const std::map<Handle, Handle> &vars,
+	                         const std::map<Handle, Handle> &clauses);
 
-		static void log_term(const std::set<Handle> &vars,
-		                     const std::vector<Handle> &clauses);
+	static void log_term(const std::set<Handle> &vars,
+	                     const std::vector<Handle> &clauses);
 };
 
 } // namespace opencog
