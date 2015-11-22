@@ -30,9 +30,6 @@
 
 using namespace opencog;
 
-#define al as->add_link
-#define an as->add_node
-
 class GetLinkUTest: public CxxTest::TestSuite
 {
 private:
@@ -73,7 +70,6 @@ public:
 	void test_free_bound(void);
 	void test_eval_clause(void);
 	void test_disconnected_binary_get(void);
-	void test_and(void);
 };
 
 void GetLinkUTest::tearDown(void)
@@ -208,47 +204,3 @@ void GetLinkUTest::test_disconnected_binary_get(void)
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
-
-/*
- * Try to match a simple pattern involving AndLink
- */
-void GetLinkUTest::test_and(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	as->clear();
-
-	Handle simple_and = al(AND_LINK,
-	                       an(CONCEPT_NODE, "A"),
-	                       an(CONCEPT_NODE, "B"));
-	Handle var_A = an(VARIABLE_NODE, "$A");
-	Handle var_B = an(VARIABLE_NODE, "$B");
-	Handle variables = al(VARIABLE_LIST,
-	                      al(TYPED_VARIABLE_LINK,
-	                         var_A, an(TYPE_NODE, "ConceptNode")),
-	                      al(TYPED_VARIABLE_LINK,
-	                         var_B, an(TYPE_NODE, "ConceptNode")));
-	Handle body = al(QUOTE_LINK, al(AND_LINK, al(UNQUOTE_LINK, var_A), al(UNQUOTE_LINK, var_B)));
-	Handle rewrite = al(AND_LINK, var_A, var_B);
-	Handle pat = al(BIND_LINK, variables,
-	                // Add an extraneous AndLink to tell the pattern
-	                // matcher that we want to look for an AndLink
-	                // instead of a conjunction of single variable
-	                // clauses.
-	                al(AND_LINK, body),
-	                rewrite);
-
-	// Handle result = satisfying_set(as, pat);
-	Handle result = bindlink(as, pat);
-	Handle expected = al(SET_LINK, simple_and);
-
-	printf("Expected this: %s\n", expected->toString().c_str());
-	printf("Found this answer: %s\n", result->toString().c_str());
-
-	TS_ASSERT_EQUALS(result, expected);
-
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-#undef al
-#undef an

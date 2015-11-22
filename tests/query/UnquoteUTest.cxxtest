@@ -1,0 +1,135 @@
+/*
+ * tests/query/UnquoteUTest.cxxtest
+ *
+ * Copyright (C) 2015 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * Author: Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al as.add_link
+#define an as.add_node
+
+class UnquoteUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace as;
+	Handle X, Y, var_decl, A, B;
+	
+public:
+	UnquoteUTest()
+	{
+		logger().setLevel(Logger::FINE);
+		logger().setPrintToStdoutFlag(true);
+	}
+
+	void setUp();
+    void tearDown();
+
+	void test_list();
+	void test_and();
+};
+
+void UnquoteUTest::setUp(void)
+{
+	X = an(VARIABLE_NODE, "$X");
+	Y = an(VARIABLE_NODE, "$Y");
+	var_decl = al(VARIABLE_LIST,
+	              al(TYPED_VARIABLE_LINK,
+	                 X, an(TYPE_NODE, "ConceptNode")),
+	              al(TYPED_VARIABLE_LINK,
+	                 Y, an(TYPE_NODE, "ConceptNode")));
+	A = an(CONCEPT_NODE, "A");
+	B = an(CONCEPT_NODE, "B");
+}
+
+void UnquoteUTest::tearDown(void)
+{
+    as.clear();
+}
+
+
+/*
+ * Just check if quoting and then unquoting the variable in a list
+ * works.
+ */
+void UnquoteUTest::test_list(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle simple_list = al(LIST_LINK, A, B);
+	Handle body = al(AND_LINK,
+	                 al(QUOTE_LINK,
+	                    al(LIST_LINK,
+	                       al(UNQUOTE_LINK, X),
+	                       al(UNQUOTE_LINK, Y))));
+	Handle pat = al(GET_LINK, var_decl, body);
+
+	logger().fine() << "AtomSpace = " << as;
+	
+	Handle result = satisfying_set(&as, pat);
+	Handle expected = al(SET_LINK, simple_list);
+
+	logger().fine() << "result = " << result;
+	logger().fine() << "expected = " << expected;
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Try to match a simple pattern involving AndLink, escaping the
+ * connective nature of AndLink using QuoteLink and UnquoteLink.
+ */
+void UnquoteUTest::test_and(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle simple_and = al(AND_LINK, A, B);
+	Handle body = al(AND_LINK,
+	                 al(QUOTE_LINK,
+	                    al(AND_LINK,
+	                       al(UNQUOTE_LINK, X),
+	                       al(UNQUOTE_LINK, Y))));
+	Handle rewrite = al(AND_LINK, X, Y);
+	Handle pat = al(BIND_LINK, var_decl, body, rewrite);
+
+	logger().fine() << "AtomSpace = " << as;
+	
+	Handle result = bindlink(&as, pat);
+	Handle expected = al(SET_LINK, simple_and);
+
+	logger().fine() << "result = " << result;
+	logger().fine() << "expected = " << expected;
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+#undef al
+#undef an
