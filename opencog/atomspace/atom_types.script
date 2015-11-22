@@ -106,9 +106,6 @@ PRESENT_LINK <- ORDERED_LINK
 PARALLEL_LINK <- AND_LINK
 JOIN_LINK <- PARALLEL_LINK
 
-// Sleep link pauses executation for the indicated number of seconds.
-SLEEP_LINK <- UNORDERED_LINK
-
 // ====================================================================
 // Herbrand/First-order-logic/lambda-calc/model-theory style links
 // and nodes.  This are used to implement the pattern matcher, and
@@ -375,3 +372,6 @@ RANDOM_CHOICE_LINK <- FUNCTION_LINK
 
 // Return the current time.
 TIME_LINK <- FUNCTION_LINK
+
+// Sleep link pauses executation for the indicated number of seconds.
+SLEEP_LINK <- FUNCTION_LINK
