@@ -698,6 +698,17 @@ take_next_step:
 	return false;
 }
 
+
+/// Compare a PatternTermPtr with a clause taking in consideration
+/// quoting or unquoting operations.
+bool PatternMatchEngine::clause_compare(const PatternTermPtr& ptm,
+                                        const Handle& clause)
+{
+	return ptm->getHandle() == clause
+		or (clause->getType() == QUOTE_LINK
+		    and ptm->getHandle() == LinkCast(clause)->getOutgoingAtom(0));
+}
+
 /// Return the saved unordered-link permutation for this
 /// particular point in the tree comparison (i.e. for the
 /// particular unordered link hp in the pattern.)
@@ -1165,7 +1176,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// we are working on a term somewhere in the middle of a clause
 	// and need to walk upwards.
 	const Handle& hp = ptm->getHandle();
-	if (hp == clause_root)
+	if (clause_compare(ptm, clause_root))
 		return clause_accept(clause_root, hg);
 
 	// Move upwards in the term, and hunt for a match, again.

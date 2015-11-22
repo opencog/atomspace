@@ -195,6 +195,7 @@ private:
 	                     const LinkPtr&, const LinkPtr&);
 	bool unorder_compare(const PatternTermPtr&, const Handle&,
 	                     const LinkPtr&, const LinkPtr&);
+	bool clause_compare(const PatternTermPtr&, const Handle&);
 
 	// -------------------------------------------
 	// Upwards-walking and grounding of a single clause.
