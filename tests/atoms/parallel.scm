@@ -7,15 +7,31 @@
 (define pllel
 	(Parallel
 		(SequentialAnd
-			(TrueLink (Sleep (Number 1)))
+			(True (Sleep (Number 1)))
 			(EvaluationLink
-				(GroundedPredicateNode "scm:incr") (List)))
+				(GroundedPredicate "scm:incr") (List)))
 		(SequentialAnd
-			(TrueLink (Sleep (Number 3)))
+			(True (Sleep (Number 3)))
 			(EvaluationLink
-				(GroundedPredicateNode "scm:incr") (List)))
+				(GroundedPredicate "scm:incr") (List)))
 		(SequentialAnd
-			(TrueLink (Sleep (Number 5)))
+			(True (Sleep (Number 5)))
 			(EvaluationLink
-				(GroundedPredicateNode "scm:incr") (List)))
+				(GroundedPredicate "scm:incr") (List)))
+	))
+
+(define wait
+	(Join
+		(SequentialAnd
+			(True (Sleep (Number 1)))
+			(EvaluationLink
+				(GroundedPredicate "scm:incr") (List)))
+		(SequentialAnd
+			(False (Sleep (Number 3)))
+			(EvaluationLink
+				(GroundedPredicate "scm:incr") (List)))
+		(SequentialAnd
+			(True (Sleep (Number 5)))
+			(EvaluationLink
+				(GroundedPredicate "scm:incr") (List)))
 	))
