@@ -140,7 +140,7 @@ void ParallelUTest::test_join(void)
 
     // This should take exactly 5 seconds to run.
     // In particular, this thread should be blocked for 5 seconds.
-    eval->eval_tv("(cog-evaluate! wait)");
+    TruthValuePtr tvp = eval->eval_tv("(cog-evaluate! wait)");
 
     gettimeofday(&tv, nullptr);
     double end = tv.tv_sec + 1.0e-6 * tv.tv_usec;
@@ -156,6 +156,10 @@ void ParallelUTest::test_join(void)
     printf("2-count = %s\n", str.c_str());
     int cnt = atoi(str.c_str());
     TS_ASSERT_EQUALS(cnt, 2);
+
+    // The Join is an AndLink...
+    double mean = tvp->getMean();
+    TS_ASSERT_LESS_THAN(mean, 0.5);
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
