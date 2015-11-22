@@ -82,7 +82,8 @@ Handle RandomChoiceLink::execute(AtomSpace * as) const
 		return lll->getOutgoingAtom(randy.randint(ary));
 	}
 
-	if (2 == ary and (SET_LINK == ot or LIST_LINK == ot))
+	// Weighted choices cannot be sets, since sets are unordered.
+	if (2 == ary and LIST_LINK == ot)
 	{
 		LinkPtr lweights(LinkCast(_outgoing[0]));
 		LinkPtr lchoices(LinkCast(_outgoing[1]));

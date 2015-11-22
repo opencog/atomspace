@@ -38,14 +38,24 @@ ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset,
                                          AttentionValuePtr av)
 	: FunctionLink(EXECUTION_OUTPUT_LINK, oset, tv, av)
 {
-	if (2 != oset.size() or
-	   (DEFINED_SCHEMA_NODE != oset[0]->getType() and
-	   GROUNDED_SCHEMA_NODE != oset[0]->getType()) or
-	   LIST_LINK != oset[1]->getType())
+	if (2 != oset.size())
+		throw SyntaxException(TRACE_INFO,
+			"ExecutionOutputLink must have schema and args! Got arity=%d",
+			oset.size());
+
+	if (DEFINED_SCHEMA_NODE != oset[0]->getType() and
+	    LAMBDA_LINK != oset[0]->getType() and
+	    GROUNDED_SCHEMA_NODE != oset[0]->getType())
 	{
-		throw RuntimeException(TRACE_INFO,
-			"ExecutionOutputLink must have schema and args!");
+		throw SyntaxException(TRACE_INFO,
+			"ExecutionOutputLink must have schema! Got %s",
+			oset[0]->toString().c_str());
 	}
+
+	if (LIST_LINK != oset[1]->getType())
+		throw SyntaxException(TRACE_INFO,
+			"ExecutionOutputLink must have args! Got %s",
+			oset[1]->toString().c_str());
 }
 
 ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
@@ -56,12 +66,18 @@ ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
 {
 	Type stype = schema->getType();
 	if (GROUNDED_SCHEMA_NODE != stype and
+	    LAMBDA_LINK != stype and
 	    DEFINED_SCHEMA_NODE != stype)
-		throw RuntimeException(TRACE_INFO, "Expecting SchemaNode!");
+	{
+		throw SyntaxException(TRACE_INFO,
+			"ExecutionOutputLink expecting schema, got %s",
+			schema->toString().c_str());
+	}
 
 	if (LIST_LINK != args->getType())
-		throw RuntimeException(TRACE_INFO,
-			"ExecutionOutputLink must have schema and args!");
+		throw SyntaxException(TRACE_INFO,
+			"ExecutionOutputLink expecting args, got %s",
+			args->toString().c_str());
 }
 
 ExecutionOutputLink::ExecutionOutputLink(Link& l)
@@ -69,7 +85,7 @@ ExecutionOutputLink::ExecutionOutputLink(Link& l)
 {
 	Type tscope = l.getType();
 	if (EXECUTION_OUTPUT_LINK != tscope)
-		throw RuntimeException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 			"Expection an ExecutionOutputLink!");
 }
 

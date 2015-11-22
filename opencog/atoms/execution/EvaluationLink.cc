@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
+
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
@@ -165,6 +167,20 @@ static bool is_tail_rec(const Handle& thish, const Handle& tail)
 	return false;
 }
 
+static void thread_eval(AtomSpace* as,
+                        const Handle& evelnk, AtomSpace* scratch,
+                        bool silent)
+{
+	EvaluationLink::do_eval_scratch(as, evelnk, scratch, silent);
+}
+
+static void thread_eval_tv(AtomSpace* as,
+                     const Handle& evelnk, AtomSpace* scratch,
+                     bool silent, TruthValuePtr* tv)
+{
+	*tv = EvaluationLink::do_eval_scratch(as, evelnk, scratch, silent);
+}
+
 /// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
 ///
 /// Expects the argument to be an EvaluationLink, which should have the
@@ -293,6 +309,44 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		} while (is_trec);
 		return TruthValue::FALSE_TV();
 	}
+	else if (JOIN_LINK == t)
+	{
+		LinkPtr l(LinkCast(evelnk));
+		const HandleSeq& oset = l->getOutgoingSet();
+		size_t arity = oset.size();
+		std::vector<TruthValuePtr> tvp(arity);
+
+		// Create a collection of joinable threads.
+		std::vector<std::thread> thread_set;
+		for (size_t i=0; i< arity; i++)
+		{
+			thread_set.push_back(std::thread(&thread_eval_tv,
+				as, oset[i], scratch, silent, &tvp[i]));
+		}
+
+		// Wait for it all to come together.
+		for (std::thread& t : thread_set) t.join();
+
+		// Return the logical-AND of the returned truth values
+		for (const TruthValuePtr& tv: tvp)
+		{
+			if (0.5 > tv->getMean())
+				return tv;
+		}
+		return TruthValue::TRUE_TV();
+	}
+	else if (PARALLEL_LINK == t)
+	{
+		LinkPtr l(LinkCast(evelnk));
+
+		// Create and detach threads; return immediately.
+		for (const Handle& h : l->getOutgoingSet())
+		{
+			std::thread thr(&thread_eval, as, h, scratch, silent);
+			thr.detach();
+		}
+		return TruthValue::TRUE_TV();
+	}
 	else if (TRUE_LINK == t or FALSE_LINK == t)
 	{
 		// Assume that the link is wrapping something executable,
@@ -357,13 +411,13 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 
 	// We get exceptions here in two differet ways: (a) due to user
-	// error, in which case we need o print an error, ad (b) automatic,
+	// error, in which case we need to print an error, and (b) intentionally,
 	// e.g. when Instantiator calls us, knowing it will get an error,
 	// in which case, printing the exception message is a waste of CPU
 	// time...
 	//
-	// DefaultPatternMatchCB.cc and also Instantiator wants to
-	// catch the NotEvaluatableException thrw here.  Basically, these
+	// DefaultPatternMatchCB.cc and also Instantiator wants to catch
+	// the NotEvaluatableException thrown here.  Basically, these
 	// know that they might be sending non-evaluatable atoms here, and
 	// don't want to garbage up the log files with bogus errors.
 	if (silent)

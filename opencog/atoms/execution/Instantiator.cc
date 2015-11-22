@@ -171,12 +171,18 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// below. This is due to a circular shared-libarary dependency.
 	if (EXECUTION_OUTPUT_LINK == t)
 	{
+		// XXX Force syntax checking; normally this would be done in the
+		// atomspace factory, but that is currently broken, so do it here.
+		ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(expr));
+		if (nullptr == eolp)
+			eolp = createExecutionOutputLink(lexpr->getOutgoingSet());
+
 		// At this time, the GSN or the DSN is always in position 0
 		// of the outgoing set, and the ListLink of arguments is always
 		// in position 1.  Someday in the future, there may be a variable
 		// declaration; we punt on that.
-		Handle sn(lexpr->getOutgoingAtom(0));
-		Handle args(lexpr->getOutgoingAtom(1));
+		Handle sn(eolp->get_schema());
+		Handle args(eolp->get_args());
 
 		// Perform substitution on the args, only.
 		args = walk_tree(args);
@@ -204,8 +210,8 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			return walk_tree(beta_reduced);
 		}
 
-		ExecutionOutputLinkPtr eolp(createExecutionOutputLink(sn, args));
-		return eolp->execute(_as);
+		ExecutionOutputLinkPtr geolp(createExecutionOutputLink(sn, args));
+		return geolp->execute(_as);
 	}
 
 	// Handle DeleteLink's before general FunctionLink's; they
