@@ -114,7 +114,7 @@ protected:
 
 	void trace_connectives(const std::set<Type>&,
 	                       const HandleSeq& clauses,
-	                       bool is_quoted = false);
+	                       int quotation_level = 0);
 
 	void make_connectivity_map(const HandleSeq&);
 	void make_map_recursive(const Handle&, const Handle&);
