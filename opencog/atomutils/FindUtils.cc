@@ -52,10 +52,8 @@ FindAtoms::FindAtoms(Type ta, Type tb, bool subclass)
 
 FindAtoms::FindAtoms(const Handle& atom)
 	: _target_types(),
-	  _target_atoms()
-{
-	_target_atoms.insert(atom);
-}
+	  _target_atoms({atom})
+{}
 
 FindAtoms::FindAtoms(const std::set<Handle>& selection)
 	: _target_types(),
@@ -72,17 +70,19 @@ void FindAtoms::search_set(const std::vector<Handle>& hlist)
 	for (const Handle& h : hlist) find_rec(h);
 }
 
-FindAtoms::Loco FindAtoms::find_rec(const Handle& h)
+FindAtoms::Loco FindAtoms::find_rec(const Handle& h, int quotation_level)
 {
 	Type t = h->getType();
-	if (1 == _target_types.count(t) or _target_atoms.count(h) == 1)
+	if (quotation_level < 1 and
+	    (1 == _target_types.count(t) or _target_atoms.count(h) == 1))
 	{
 		varset.insert(h);
 		return IMM; //! Don't explore link-typed vars!
 	}
 
-	// XXX TODO Need to also handle UNQUOTE_LINK ...
-	if (t == QUOTE_LINK) return NOPE;
+	if (t == QUOTE_LINK) quotation_level++;
+	else if (t == UNQUOTE_LINK) quotation_level--;
+
 	for (Type stopper : stopset)
 	{
 		if (classserver().isA(t, stopper)) return NOPE;
@@ -95,7 +95,7 @@ FindAtoms::Loco FindAtoms::find_rec(const Handle& h)
 		bool imm = false;
 		for (const Handle& oh : l->getOutgoingSet())
 		{
-			Loco where = find_rec(oh);
+			Loco where = find_rec(oh, quotation_level);
 			if (NOPE != where) held = true;
 			if (IMM == where) imm = true;
 		}

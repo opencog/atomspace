@@ -111,7 +111,7 @@ private:
 		IMM    // Contains immediately below.
 	} Loco;
 
-	Loco find_rec(const Handle& h);
+	Loco find_rec(const Handle& h, int quotation_level = 0);
 
 private:
 	std::set<Type> _target_types;
