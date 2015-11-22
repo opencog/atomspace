@@ -802,38 +802,43 @@ void PatternLink::make_term_trees()
 }
 
 void PatternLink::make_term_tree_recursive(const Handle& root,
-                                           const Handle& h,
+                                           Handle h,
                                            PatternTermPtr& parent)
 {
+	Type t = h->getType();
+
+	// Ignore quoting and unquoting nodes in the PatternTerm
+	if ((not parent->isQuoted() and QUOTE_LINK == t)
+	    or (parent->getQuotationLevel() == 1 and UNQUOTE_LINK == t))
+		h = LinkCast(h)->getOutgoingAtom(0);
+
 	PatternTermPtr ptm(std::make_shared<PatternTerm>(parent, h));
 	parent->addOutgoingTerm(ptm);
 	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
 
-	Type t = h->getType();
-	LinkPtr l(LinkCast(h));
-	if (l)
-	{
-		if (QUOTE_LINK == t)
-			ptm->addQuote();
-
-		else if (UNQUOTE_LINK == t)
-			ptm->remQuote();
-
-		for (const Handle& ho: l->getOutgoingSet())
-		     make_term_tree_recursive(root, ho, ptm);
-		return;
-	}
+	// Update the PatternTerm quotation level
+	if (QUOTE_LINK == t)
+		ptm->addQuote();
+	else if (UNQUOTE_LINK == t)
+		ptm->remQuote();
 
 	// If the current node is a bound variable store this information for
 	// later checks. The flag telling whether the term subtree contains
 	// any bound variable is set by addBoundVariable() method for all terms
 	// on the path up to the root (unless it has been set already).
-	if ((VARIABLE_NODE == t or GLOB_NODE == t) and
-	    !ptm->isQuoted() and
-	    _varlist.varset.end() != _varlist.varset.find(h))
+	t = h->getType();
+	if ((VARIABLE_NODE == t or GLOB_NODE == t)
+	    and not ptm->isQuoted()
+	    and _varlist.varset.end() != _varlist.varset.find(h))
 	{
 		ptm->addBoundVariable();
+		return;
 	}
+
+	LinkPtr l(LinkCast(h));
+	if (l)
+		for (const Handle& ho: l->getOutgoingSet())
+			make_term_tree_recursive(root, ho, ptm);
 }
 
 /* ================================================================= */

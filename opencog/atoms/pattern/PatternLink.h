@@ -123,7 +123,7 @@ protected:
 	                          const std::vector<std::set<Handle>>&);
 
 	void make_term_trees();
-	void make_term_tree_recursive(const Handle&, const Handle&,
+	void make_term_tree_recursive(const Handle&, Handle,
 	                              PatternTermPtr&);
 
 	void init(void);
