@@ -809,8 +809,14 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 
 	// Ignore quoting and unquoting nodes in the PatternTerm
 	if ((not parent->isQuoted() and QUOTE_LINK == t)
-	    or (parent->getQuotationLevel() == 1 and UNQUOTE_LINK == t))
-		h = LinkCast(h)->getOutgoingAtom(0);
+	    or (parent->getQuotationLevel() == 1 and UNQUOTE_LINK == t)) {
+		LinkPtr lp(LinkCast(h));
+		if (1 != lp->getArity())
+			throw InvalidParamException(TRACE_INFO,
+			                            "QuoteLink/UnquoteLink has "
+			                            "unexpected arity!");
+		h = lp->getOutgoingAtom(0);
+	}
 
 	PatternTermPtr ptm(std::make_shared<PatternTerm>(parent, h));
 	parent->addOutgoingTerm(ptm);

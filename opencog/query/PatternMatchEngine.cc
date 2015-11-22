@@ -89,22 +89,6 @@ static inline void logmsg(const char * msg, const Handle& h)
 
 /* ======================================================== */
 
-/// If the pattern link is a quote, then we compare the quoted
-/// contents. This is done recursively, of course.  The QuoteLink
-/// must have only one child; anything else beyond that is ignored
-/// (as its not clear what else could possibly be done).
-bool PatternMatchEngine::quote_compare(const PatternTermPtr& ptm,
-                                       const Handle& hg)
-{
-	LinkPtr lp(LinkCast(ptm->getHandle()));
-	if (1 != lp->getArity())
-		throw InvalidParamException(TRACE_INFO,
-		            "QuoteLink/UnquoteLink has unexpected arity!");
-	return tree_compare(ptm->getOutgoingTerm(0), hg, CALL_QUOTE);
-}
-
-/* ======================================================== */
-
 /// Compare a VariableNode in the pattern to the proposed grounding.
 ///
 /// Handle hp is from the pattern clause.
@@ -807,11 +791,6 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	// must have only one child; anything else beyond that is ignored
 	// (as its not clear what else could possibly be done).
 	Type tp = hp->getType();
-	if (not ptm->isQuoted() and QUOTE_LINK == tp)
-		return quote_compare(ptm, hg);
-
-	if (ptm->isQuoted() and UNQUOTE_LINK == tp)
-		return quote_compare(ptm, hg);
 
 	// If the pattern link is executable, then we should execute, and
 	// use the result of that execution. (This isn't implemented yet,

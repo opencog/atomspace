@@ -185,7 +185,6 @@ private:
 
 	bool tree_compare(const PatternTermPtr&, const Handle&, Caller);
 
-	bool quote_compare(const PatternTermPtr&, const Handle&);
 	bool variable_compare(const Handle&, const Handle&);
 	bool self_compare(const PatternTermPtr&);
 	bool node_compare(const Handle&, const Handle&);
