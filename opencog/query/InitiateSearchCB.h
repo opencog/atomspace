@@ -84,7 +84,8 @@ protected:
 	virtual Handle find_thinnest(const HandleSeq&,
 	                             const std::set<Handle>&,
 	                             Handle&, size_t&);
-	virtual void find_rarest(const Handle&, Handle&, size_t&);
+	virtual void find_rarest(const Handle&, Handle&, size_t&,
+	                         int quotation_level = 0);
 
 	bool _search_fail;
 	virtual bool neighbor_search(PatternMatchEngine *);
