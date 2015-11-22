@@ -852,7 +852,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	if (np and ng)
 		return node_compare(hp, hg);
 
-	// If they're not both are links, then it is clearly a mismatch.
+	// If they're not both links, then it is clearly a mismatch.
 	LinkPtr lp(LinkCast(hp));
 	LinkPtr lg(LinkCast(hg));
 	if (not (lp and lg)) return _pmc.fuzzy_match(hp, hg);
@@ -978,7 +978,7 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 	              << " have " << sz << " branches";
 	bool found = false;
 	for (size_t i = 0; i < sz; i++) {
-		LAZY_LOG_FINE << "Try upward branch " << i << " of " << sz
+		LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
 		              << " for term=" << ptm->toString()
 		              << " propose=" << Handle(iset[i]).value();
 		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
@@ -1124,7 +1124,7 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 	}
 
 	LAZY_LOG_FINE << "Pattern term=" << ptm->toString()
-	              << " solved by " << hg.value() << " move up";
+	              << " solved by " << hg.value() << ", move up";
 
 	// XXX should not do perm_push every time... only selectively.
 	// But when? This is very confusing ...
@@ -1159,7 +1159,7 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 ///    we don't want to go to the immediate parent, we want to go to
 ///    the larger evaluatable term, and offer that up as the thing to
 ///    match (i.e. to evaluate, to invoke callbacks, etc.)
-///  * The parent is an ChoiceLink. In this case, the ChoiceLink
+///  * The parent is a ChoiceLink. In this case, the ChoiceLink
 ///    itself cannot be directly matched, as is; only its children can
 ///    be. So in this case, we fetch the ChoiceLink's parent, instead.
 ///  * Some crazy combination of the above.
@@ -1760,8 +1760,8 @@ void PatternMatchEngine::solution_drop(void)
  * a graph that hopefully will match the pattern.
  */
 bool PatternMatchEngine::explore_neighborhood(const Handle& do_clause,
-                                      const Handle& term,
-                                      const Handle& grnd)
+                                              const Handle& term,
+                                              const Handle& grnd)
 {
 	clause_stacks_clear();
 	return explore_redex(term, grnd, do_clause);
