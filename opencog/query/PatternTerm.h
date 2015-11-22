@@ -29,6 +29,7 @@
 
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/Link.h>
+#include <opencog/util/Logger.h>
 
 namespace opencog {
 
@@ -90,7 +91,7 @@ protected:
 	// Number of QuoteLinks on the path up to the root including this
 	// term. Zero means the term is unquoted. Quoted terms are matched
 	// literally.
-	unsigned int _quote_depth;
+	int _quotation_level;
 
 	// True if the pattern subtree rooted in this tree node does not
 	// contain any bound variables. This means that the term is constant
@@ -101,20 +102,14 @@ public:
 	static const PatternTermPtr UNDEFINED;
 
 	PatternTerm()
-	{
-		_handle = Handle::UNDEFINED;
-		_parent = PatternTerm::UNDEFINED;
-		_quote_depth = 0;
-		_has_any_bound_var = false;
-	}
+		: _handle(Handle::UNDEFINED), _parent(PatternTerm::UNDEFINED),
+		  _quotation_level(0), _has_any_bound_var(false)
+		{}
 
 	PatternTerm(const PatternTermPtr& parent, const Handle& h)
-	{
-		_parent = parent;
-		_handle = h;
-		_quote_depth = parent->_quote_depth;
-		_has_any_bound_var = false;
-	}
+		: _handle(h), _parent(parent),
+		  _quotation_level(parent->_quotation_level), _has_any_bound_var(false)
+		{}
 
 	void addOutgoingTerm(const PatternTermPtr& ptm)
 	{
@@ -125,7 +120,7 @@ public:
 	{
 		return _handle;
 	}
-	
+
 	inline PatternTermPtr getParent()
 	{
 		return _parent;
@@ -150,9 +145,12 @@ public:
 
 	inline bool isQuoted() const
 	{
-		// Check parent quote depth, because we need the top QuoteLink-s
-		// to be unquoted.
-		return (_parent->_quote_depth > 0);
+		return _quotation_level > 0;
+	}
+
+	inline int getQuotationLevel() const
+	{
+		return _quotation_level;
 	}
 
 	inline bool hasAnyBoundVariable() const
@@ -175,8 +173,8 @@ public:
 		}
 	}
 
-	inline void addQuote() { _quote_depth++; }
-	inline void remQuote() { _quote_depth--; }
+	inline void addQuote() { _quotation_level++; }
+	inline void remQuote() { _quotation_level--; }
 
 	inline void addBoundVariable()
 	{
@@ -188,7 +186,12 @@ public:
 		}
 	}
 
-	inline std::string toString(std::string indent = ":") const
+	// Work around gdb's incapability to build a string on the fly,
+	// see http://stackoverflow.com/questions/16734783 for more
+	// explanation.
+	std::string toString() const { return toString(":"); }
+
+	inline std::string toString(std::string indent) const
 	{
 		if (_handle == nullptr) return "-";
 		std::string str = _parent->toString();
