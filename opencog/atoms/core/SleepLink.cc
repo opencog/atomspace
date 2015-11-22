@@ -36,7 +36,7 @@ using namespace opencog;
 
 SleepLink::SleepLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: FunctionLink(TIME_LINK, oset, tv, av)
+	: FunctionLink(SLEEP_LINK, oset, tv, av)
 {
 	if (1 != oset.size())
 		throw SyntaxException(TRACE_INFO,
