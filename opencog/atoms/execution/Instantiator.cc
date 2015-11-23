@@ -33,18 +33,19 @@
 
 using namespace opencog;
 
-bool Instantiator::walk_tree(HandleSeq& oset_results, const HandleSeq& expr)
+bool Instantiator::walk_tree(HandleSeq& oset_results, const HandleSeq& expr,
+                             int quotation_level)
 {
 	bool changed = false;
 	for (const Handle& h : expr)
 	{
-		Handle hg(walk_tree(h));
+		Handle hg(walk_tree(h, quotation_level));
 		if (hg != h) changed = true;
 
 		// GlobNodes are grounded by a ListLink of everything that
 		// the GlobNode matches. Unwrap the list, and insert each
 		// of the glob elements in sequence.
-		if (GLOB_NODE == h->getType() and hg != h)
+		if (quotation_level == 0 and GLOB_NODE == h->getType() and hg != h)
 		{
 			LinkPtr lp(LinkCast(hg));
 			OC_ASSERT(nullptr != lp, "Expecting glob list");
@@ -67,22 +68,37 @@ bool Instantiator::walk_tree(HandleSeq& oset_results, const HandleSeq& expr)
 	return changed;
 }
 
-Handle Instantiator::walk_tree(const Handle& expr)
+Handle Instantiator::walk_tree(const Handle& expr, int quotation_level)
 {
 	Type t = expr->getType();
-
-	// Must not explore the insides of a QuoteLink.
-	// XXX TODO: Need to implement UNQUOTE_LINK here...
-	if (QUOTE_LINK == t)
-		return Handle(expr);
-
 	LinkPtr lexpr(LinkCast(expr));
+
+	// Quotation case
+	if (QUOTE_LINK == t)
+		quotation_level++;
+	else if (UNQUOTE_LINK == t)
+		quotation_level--;
+
+	// Discard the following QuoteLink or UnquoteLink (as it is
+	// serving its quoting or unquoting function).
+	if ((quotation_level == 1 and QUOTE_LINK == t)
+		or (quotation_level == 0 and UNQUOTE_LINK == t)) {
+		if (1 != lexpr->getArity())
+			throw InvalidParamException(TRACE_INFO,
+			                            "QuoteLink/UnquoteLink has "
+			                            "unexpected arity!");
+		return walk_tree(lexpr->getOutgoingAtom(0), quotation_level);
+	}
+
 	if (not lexpr)
 	{
+		if (quotation_level > 0)
+			return expr;
+
 		// If we are here, we are a Node.
 		if (DEFINED_SCHEMA_NODE == t)
 		{
-			return walk_tree(DefineLink::get_definition(expr));
+			return walk_tree(DefineLink::get_definition(expr), quotation_level);
 		}
 
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
@@ -103,7 +119,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			return Handle(expr);
 
 		_halt = true;
-		Handle hgnd(walk_tree(it->second));
+		Handle hgnd(walk_tree(it->second, quotation_level));
 		_halt = false;
 		return hgnd;
 	}
@@ -113,7 +129,10 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// links may contain both bound variables, and also free variables.
 	// We must be careful to substitute only for free variables, and
 	// never for bound ones.
-	//
+
+	if (quotation_level > 0)
+		goto mere_recursive_call;
+
 	// Reduce PutLinks.
 	if (PUT_LINK == t)
 	{
@@ -124,7 +143,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		// Execute the values in the PutLink before doing the beta-reduction.
 		// Execute the body only after the beta-reduction has been done.
 		Handle pvals = ppp->get_values();
-		Handle gargs = walk_tree(pvals);
+		Handle gargs = walk_tree(pvals, quotation_level);
 		if (gargs != pvals)
 		{
 			HandleSeq groset;
@@ -137,7 +156,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		// Step one: beta-reduce.
 		Handle red(ppp->reduce());
 		// Step two: execute the resulting body.
-		Handle rex(walk_tree(red));
+		Handle rex(walk_tree(red, quotation_level));
 		if (nullptr == rex)
 			return rex;
 
@@ -185,7 +204,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		Handle args(eolp->get_args());
 
 		// Perform substitution on the args, only.
-		args = walk_tree(args);
+		args = walk_tree(args, quotation_level);
 
 		// If its a DSN, obtain the correct body for it.
 		if (DEFINED_SCHEMA_NODE == sn->getType())
@@ -207,7 +226,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 
 			const HandleSeq& oset(LinkCast(args)->getOutgoingSet());
 			Handle beta_reduced(vars.substitute_nocheck(body, oset));
-			return walk_tree(beta_reduced);
+			return walk_tree(beta_reduced, quotation_level);
 		}
 
 		ExecutionOutputLinkPtr geolp(createExecutionOutputLink(sn, args));
@@ -219,7 +238,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	if (DELETE_LINK == t)
 	{
 		HandleSeq oset_results;
-		walk_tree(oset_results, lexpr->getOutgoingSet());
+		walk_tree(oset_results, lexpr->getOutgoingSet(), quotation_level);
 		for (const Handle& h: oset_results)
 		{
 			Type ht = h->getType();
@@ -239,7 +258,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		// Perform substitution on all arguments before applying the
 		// function itself.
 		HandleSeq oset_results;
-		walk_tree(oset_results, lexpr->getOutgoingSet());
+		walk_tree(oset_results, lexpr->getOutgoingSet(), quotation_level);
 		Handle hl(FoldLink::factory(t, oset_results));
 		FoldLinkPtr flp(FoldLinkCast(hl));
 		return flp->execute(_as);
@@ -254,7 +273,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		// Perform substitution on all arguments before applying the
 		// function itself.
 		HandleSeq oset_results;
-		walk_tree(oset_results, lexpr->getOutgoingSet());
+		walk_tree(oset_results, lexpr->getOutgoingSet(), quotation_level);
 		Handle hl(FunctionLink::factory(t, oset_results));
 		FunctionLinkPtr flp(FunctionLinkCast(hl));
 		return flp->execute(_as);
@@ -266,7 +285,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	if (GET_LINK == t)
 	{
 		HandleSeq oset_results;
-		walk_tree(oset_results, lexpr->getOutgoingSet());
+		walk_tree(oset_results, lexpr->getOutgoingSet(), quotation_level);
 		size_t sz = oset_results.size();
 		for (size_t i=0; i< sz; i++)
 			oset_results[i] = _as->add_atom(oset_results[i]);
@@ -276,10 +295,12 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		return satisfying_set(_as, Handle(lp));
 	}
 
+	mere_recursive_call:
 	// None of the above. Create a duplicate link, but with an outgoing
 	// set where the variables have been substituted by their values.
 	HandleSeq oset_results;
-	bool changed = walk_tree(oset_results, lexpr->getOutgoingSet());
+	bool changed = walk_tree(oset_results, lexpr->getOutgoingSet(),
+	                         quotation_level);
 	if (changed)
 	{
 		LinkPtr subl = createLink(t, oset_results, expr->getTruthValue());
