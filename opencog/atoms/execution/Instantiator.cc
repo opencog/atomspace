@@ -71,10 +71,30 @@ bool Instantiator::walk_tree(HandleSeq& oset_results, const HandleSeq& expr,
 Handle Instantiator::walk_tree(const Handle& expr, int quotation_level)
 {
 	Type t = expr->getType();
-
 	LinkPtr lexpr(LinkCast(expr));
+
+	// Quotation case
+	if (QUOTE_LINK == t)
+		quotation_level++;
+	else if (UNQUOTE_LINK == t)
+		quotation_level--;
+
+	// Discard the following QuoteLink or UnquoteLink (as it is
+	// serving its quoting or unquoting function).
+	if ((quotation_level == 1 and QUOTE_LINK == t)
+		or (quotation_level == 0 and UNQUOTE_LINK == t)) {
+		if (1 != lexpr->getArity())
+			throw InvalidParamException(TRACE_INFO,
+			                            "QuoteLink/UnquoteLink has "
+			                            "unexpected arity!");
+		return walk_tree(lexpr->getOutgoingAtom(0), quotation_level);
+	}
+
 	if (not lexpr)
 	{
+		if (quotation_level > 0)
+			return expr;
+
 		// If we are here, we are a Node.
 		if (DEFINED_SCHEMA_NODE == t)
 		{
@@ -109,23 +129,6 @@ Handle Instantiator::walk_tree(const Handle& expr, int quotation_level)
 	// links may contain both bound variables, and also free variables.
 	// We must be careful to substitute only for free variables, and
 	// never for bound ones.
-
-	// Take case of quotation
-	if (QUOTE_LINK == t)
-		quotation_level++;
-	else if (UNQUOTE_LINK == t)
-		quotation_level--;
-
-	// Discard the following QuoteLink or UnquoteLink (as it is
-	// serving its quoting or unquoting function).
-	if ((quotation_level == 1 and QUOTE_LINK == t)
-		or (quotation_level == 0 and UNQUOTE_LINK == t)) {
-		if (1 != lexpr->getArity())
-			throw InvalidParamException(TRACE_INFO,
-			                            "QuoteLink/UnquoteLink has "
-			                            "unexpected arity!");
-		return walk_tree(lexpr->getOutgoingAtom(0), quotation_level);
-	}
 
 	if (quotation_level > 0)
 		goto mere_recursive_call;
