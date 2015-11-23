@@ -104,24 +104,25 @@ int AtomSpace_getAtom( AtomSpace * this_ptr
     if(!h) // Invalid UUID parameter.
         return -1;
 
-    ClassServer server = classserver();
     Type t = h->getType();
-    type = server.getTypeName(t);
+    type = classserver().getTypeName(t).c_str();
 
-    if (server.isA(t,NODE))
+    if (classserver().isA(t,NODE))
     {
-        name = h->getName();
+        NodePtr ptr = NodeCast(h);
+        name = ptr->getName().c_str();
         *size = 0;
     }
     else
     {
-        name = ""
-        hset = h->getOutgoingSet();
+        LinkPtr lnk = LinkCast(h);
+        name = "";
+        HandleSeq hset = lnk->getOutgoingSet();
         *size = hset.size();
-        UUID outset [size];
-        for(int i=0;i<size;i++)
+        UUID outset [*size];
+        for(int i=0;i<*size;i++)
             outset[i] = hset[i].value();
-        outsetp = &outset;
+        outsetp = outset;
     }
     return 0;
 }

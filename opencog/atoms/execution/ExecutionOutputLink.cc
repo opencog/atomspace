@@ -188,14 +188,14 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 
         //Get the name of the Library and Function
         //They should be sperated by a .
-        std::size_t dotpos = schema.find(".");
+        std::size_t dotpos = schema.find("\\");
         if (dotpos == std::string::npos)
         {
             throw RuntimeException(TRACE_INFO,
                 "LibName and FunctionName not seperated by a '.'");
         }
         std::string libName  = schema.substr(pos,dotpos-pos);
-        std::string funcName = schema.substr(dotpos);
+        std::string funcName = schema.substr(dotpos+1);
 
         void *libHandle;
         void * tmp;
