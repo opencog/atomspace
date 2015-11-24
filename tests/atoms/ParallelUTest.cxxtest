@@ -1,0 +1,165 @@
+/*
+ * tests/atoms/ParallelUTest.cxxtest
+ *
+ * Copyright (C) 2015 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <time.h>
+#include <sys/time.h>
+
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class ParallelUTest: public CxxTest::TestSuite
+{
+private:
+        AtomSpace *as;
+        SchemeEval* eval;
+
+public:
+    ParallelUTest(void)
+    {
+        logger().setLevel(Logger::DEBUG);
+        logger().setPrintToStdoutFlag(true);
+
+        as = new AtomSpace();
+        eval = new SchemeEval(as);
+    }
+
+    ~ParallelUTest()
+    {
+        delete eval;
+        delete as;
+        // Erase the log file if no assertions failed.
+        if (!CxxTest::TestTracker::tracker().suiteFailed())
+                std::remove(logger().getFilename().c_str());
+    }
+
+    void setUp(void);
+    void tearDown(void);
+
+    void test_parallel(void);
+    void test_join(void);
+};
+
+void ParallelUTest::tearDown(void)
+{
+    as->clear();
+}
+
+void ParallelUTest::setUp(void)
+{
+    as->clear();
+    config().set("SCM_PRELOAD",
+        "opencog/atomspace/core_types.scm, "
+        "opencog/scm/utilities.scm, "
+        "opencog/scm/opencog/exec.scm");
+
+    load_scm_files_from_config(*as);
+}
+
+/*
+ * ParallelLink unit test.
+ */
+void ParallelUTest::test_parallel(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/atoms/parallel.scm");
+    load_scm_files_from_config(*as);
+
+    // The scheme variable nnn should increment by one after 1, 3 and 5
+    // seconds. If we wait 2 seconds, we should get a clear eye for the
+    // measurement.
+    eval->eval_tv("(cog-evaluate! pllel)");
+
+    std::string str = eval->eval("nnn");
+    printf("0-count = %s\n", str.c_str());
+    int cnt = atoi(str.c_str());
+    TS_ASSERT_EQUALS(cnt, 0);
+    sleep(2);
+
+    str = eval->eval("nnn");
+    printf("1-count = %s\n", str.c_str());
+    cnt = atoi(str.c_str());
+    TS_ASSERT_EQUALS(cnt, 1);
+    sleep(2);
+
+    str = eval->eval("nnn");
+    printf("2-count = %s\n", str.c_str());
+    cnt = atoi(str.c_str());
+    TS_ASSERT_EQUALS(cnt, 2);
+    sleep(2);
+
+    str = eval->eval("nnn");
+    printf("3-count = %s\n", str.c_str());
+    cnt = atoi(str.c_str());
+    TS_ASSERT_EQUALS(cnt, 3);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * JoinLink unit test.
+ */
+void ParallelUTest::test_join(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/atoms/parallel.scm");
+    load_scm_files_from_config(*as);
+
+    eval->eval("(set! nnn 0)");
+
+    struct timeval tv;
+    gettimeofday(&tv, nullptr);
+    double start = tv.tv_sec + 1.0e-6 * tv.tv_usec;
+
+    // This should take exactly 5 seconds to run.
+    // In particular, this thread should be blocked for 5 seconds.
+    TruthValuePtr tvp = eval->eval_tv("(cog-evaluate! wait)");
+
+    gettimeofday(&tv, nullptr);
+    double end = tv.tv_sec + 1.0e-6 * tv.tv_usec;
+    double elapsed = end - start;
+    printf("elapsed time = %f seconds\n", elapsed);
+    TS_ASSERT_LESS_THAN(elapsed, 5.2);
+    TS_ASSERT_LESS_THAN(4.8, elapsed);
+
+    // The scheme variable nnn should get incremented twice (not three
+    // times); the middle SequentialAnd has a False in it, so the middle
+    // increment should not happen.
+    std::string str = eval->eval("nnn");
+    printf("2-count = %s\n", str.c_str());
+    int cnt = atoi(str.c_str());
+    TS_ASSERT_EQUALS(cnt, 2);
+
+    // The Join is an AndLink...
+    double mean = tvp->getMean();
+    TS_ASSERT_LESS_THAN(mean, 0.5);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}

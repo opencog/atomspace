@@ -589,7 +589,7 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 		bool is_virtual = false;
 		bool is_black = false;
 
-#ifdef BORKEN_DOESNT_WORK
+#ifdef BROKEN_DOESNT_WORK
 // The below should have worked to set things up, but it doesn't,
 // and I'm too lazy to investigate, because an alternate hack is
 // working, at the moment.
@@ -691,17 +691,27 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 /// we have to assume that stuff, more-stuff and not-stuff are all
 /// evaluatable.
 void PatternLink::trace_connectives(const std::set<Type>& connectives,
-                                    const HandleSeq& oset)
+                                    const HandleSeq& oset,
+                                    int quotation_level)
 {
 	for (const Handle& term: oset)
 	{
 		Type t = term->getType();
-		if (connectives.find(t) == connectives.end()) continue;
+
+		// Deal with quote
+		if (t == QUOTE_LINK)
+			quotation_level++;
+		else if (t == UNQUOTE_LINK)
+			quotation_level--;
+
+		if (quotation_level > 0
+		    or connectives.find(t) == connectives.end()) continue;
 		_pat.evaluatable_holders.insert(term);
 		add_to_map(_pat.in_evaluatable, term, term);
 		LinkPtr lp(LinkCast(term));
 		if (lp)
-			trace_connectives(connectives, lp->getOutgoingSet());
+			trace_connectives(connectives, lp->getOutgoingSet(),
+			                  quotation_level);
 	}
 }
 
@@ -792,38 +802,49 @@ void PatternLink::make_term_trees()
 }
 
 void PatternLink::make_term_tree_recursive(const Handle& root,
-		                                     const Handle& h,
-		                                     PatternTermPtr& parent)
+                                           Handle h,
+                                           PatternTermPtr& parent)
 {
+	Type t = h->getType();
+
+	// Ignore quoting and unquoting nodes in the PatternTerm
+	if ((not parent->isQuoted() and QUOTE_LINK == t)
+	    or (parent->getQuotationLevel() == 1 and UNQUOTE_LINK == t)) {
+		LinkPtr lp(LinkCast(h));
+		if (1 != lp->getArity())
+			throw InvalidParamException(TRACE_INFO,
+			                            "QuoteLink/UnquoteLink has "
+			                            "unexpected arity!");
+		h = lp->getOutgoingAtom(0);
+	}
+
 	PatternTermPtr ptm(std::make_shared<PatternTerm>(parent, h));
 	parent->addOutgoingTerm(ptm);
 	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
 
-	Type t = h->getType();
-	LinkPtr l(LinkCast(h));
-	if (l)
-	{
-		if (QUOTE_LINK == t)
-			ptm->addQuote();
-
-		else if (UNQUOTE_LINK == t)
-			ptm->remQuote();
-
-		for (const Handle& ho: l->getOutgoingSet())
-		     make_term_tree_recursive(root, ho, ptm);
-		return;
-	}
+	// Update the PatternTerm quotation level
+	if (QUOTE_LINK == t)
+		ptm->addQuote();
+	else if (UNQUOTE_LINK == t)
+		ptm->remQuote();
 
 	// If the current node is a bound variable store this information for
 	// later checks. The flag telling whether the term subtree contains
 	// any bound variable is set by addBoundVariable() method for all terms
 	// on the path up to the root (unless it has been set already).
-	if ((VARIABLE_NODE == t or GLOB_NODE == t) and
-	    !ptm->isQuoted() and
-	    _varlist.varset.end() != _varlist.varset.find(h))
+	t = h->getType();
+	if ((VARIABLE_NODE == t or GLOB_NODE == t)
+	    and not ptm->isQuoted()
+	    and _varlist.varset.end() != _varlist.varset.find(h))
 	{
 		ptm->addBoundVariable();
+		return;
 	}
+
+	LinkPtr l(LinkCast(h));
+	if (l)
+		for (const Handle& ho: l->getOutgoingSet())
+			make_term_tree_recursive(root, ho, ptm);
 }
 
 /* ================================================================= */

@@ -497,30 +497,40 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 /* ======================================================== */
 /**
  * Find the rarest link type contained in the clause, or one
- * of its subclauses. Of course, QuoteLinks, and anything under
- * a Quotelink, must be ignored.
+ * of its subclauses.
  */
 void InitiateSearchCB::find_rarest(const Handle& clause,
                                    Handle& rarest,
-                                   size_t& count)
+                                   size_t& count,
+                                   int quotation_level)
 {
 	Type t = clause->getType();
-	if (QUOTE_LINK == t) return;
-	if (CHOICE_LINK == t) return;
+
+	// Base case
+	if ((quotation_level < 1) and (CHOICE_LINK == t)) return;
 
 	LinkPtr lll(LinkCast(clause));
-	if (NULL == lll) return;
+	if (nullptr == lll) return;
 
-	size_t num = (size_t) _as->get_num_atoms_of_type(t);
-	if (num < count)
+	if ((QUOTE_LINK == t and quotation_level > 0)
+	    or (UNQUOTE_LINK == t and quotation_level > 1)
+	    or (QUOTE_LINK != t and UNQUOTE_LINK != t))
 	{
-		count = num;
-		rarest = clause;
+		size_t num = (size_t) _as->get_num_atoms_of_type(t);
+		if (num < count)
+		{
+			count = num;
+			rarest = clause;
+		}
 	}
+
+	// Recursive case
+	if (QUOTE_LINK == t) quotation_level++;
+	else if (UNQUOTE_LINK == t) quotation_level--;
 
 	const HandleSeq& oset = lll->getOutgoingSet();
 	for (const Handle& h : oset)
-		find_rarest(h, rarest, count);
+		find_rarest(h, rarest, count, quotation_level);
 }
 
 /* ======================================================== */

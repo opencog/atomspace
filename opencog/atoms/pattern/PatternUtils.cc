@@ -42,10 +42,10 @@ namespace opencog {
  * pattern matching. Thus, the routine below can be used to validate
  * the input.
  *
- * Terms that contain GroundedSchema or GroundedPrecdicate nodes can
+ * Terms that contain GroundedSchema or GroundedPredicate nodes can
  * have side-effects, and are thus not really constants. They must be
  * evaluated during the pattern search. Terms that contain
- * DefinedPedicate or DefinedSchema nodes are simply not known until
+ * DefinedPredicate or DefinedSchema nodes are simply not known until
  * runtime evaluation/execution.
  *
  * Returns true if the list of clauses was modified, else returns false.
