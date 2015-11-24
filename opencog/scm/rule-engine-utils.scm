@@ -86,8 +86,54 @@
      rbs)
 )
 
+(define (ure-define-rbs rbs iteration)
+"
+  Transforms the atom into a node that represents a rulebase and returns it.
+
+  rbs: The ConceptNode that represents the set of rules.
+  iteration: The maximum number of iteration that the rulebase should
+"
+    (InheritanceLink
+       rbs
+       (ConceptNode "RuleBase"))
+
+    ; URE:attention-allocation isn't set b/c it isn't in use presently.
+    (ure-set-num-parameter rbs "URE:maximum-iterations"  iteration)
+
+    rbs
+)
+
+(define (ure-add-rule rbs rule-name rule weight)
+"
+  Adds a rule to a rulebase and sets its weight and returns the rule node. It
+  also creates the rbs.
+
+  rbs: The ConceptNode that represents a rulebase.
+
+  rule-name : A string that names the rule.
+
+  rule: The BindLink that is run.
+
+  weight: A number that is used to represent the priority of the rule.
+"
+    ; Didn't add type checking here b/c the ure-configuration format isn't
+    ; set in stone yet. And the best place to do that is in c++ UREConfigReader
+    (let ((alias (Node rule-name)))
+        (DefineLink alias rule)
+
+        (MemberLink (stv weight 1)
+           alias
+           rbs)
+
+        alias
+    )
+)
+
 (define (export-rule-engine-utils)
   (export ure-add-rules
           ure-set-num-parameter
           ure-set-fuzzy-bool-parameter
-          export-rule-engine-utils))
+          export-rule-engine-utils
+          ure-define-rbs
+          ure-add-rule)
+)
