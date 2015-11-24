@@ -8,7 +8,7 @@
 ;
 ; Utilities include:
 ; -- ure-add-rule -- Associate a rule to a rbs
-; -- ure-add-rules -- Associate  a list of rule and weight pairs to a rbs
+; -- ure-add-rules -- Associate  a list of rule-alias and weight pairs to a rbs
 ; -- ure-set-num-parameter -- Set a numeric parameter of an rbs
 ; -- ure-set-fuzzy-bool-parameter -- Set a fuzzy boolean parameter of an rbs
 ; -- ure-define-rbs -- Create a rbs that runs for a parituclar number of
@@ -51,19 +51,27 @@
 
 (define (ure-add-rules rbs rules)
 "
-  Given an rbs and a list of pairs (rule weight) create for each rule
+  Given a rbs and a list of pairs (rule-alias weight) create for each rule
 
   MemberLink (stv weight 1)
-    rule
+    rule-alias
     rbs
+
+  rbs: The ConceptNode that represents a rulebase
+
+  rules: A list of rule-alias and weight pairs, where rule-alias is the node
+         alias of a rule in a DefineLink already created.
 "
-  (define (ure-add-rule weighted-rule)
-    (let ((rule (car weighted-rule))
-          (weight (cadr weighted-rule)))
-      (MemberLink (stv weight 1)
-         rule
-         rbs)))
-  (for-each ure-add-rule rules)
+  (define (expand-pair weighted-rule)
+    (let* ((rule-alias (car weighted-rule))
+           (rule-name (cog-name rule-alias))
+           ; Assuming a rule is a BindLink
+           (rule (car (cog-chase-link 'DefineLink 'BindLink rule-alias)))
+           (weight (cadr weighted-rule)))
+        (ure-add-rule rbs rule-name rule weight)
+    )
+  )
+  (for-each expand-pair rules)
 )
 
 ; Set numerical parameters. Given an rbs, a parameter name and its
