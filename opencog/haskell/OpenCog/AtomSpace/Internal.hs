@@ -154,7 +154,7 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw tvraw in do
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ Gen $ MemberLink tv a1 b1
       (SatisfyingSetT ,[ar]) -> do
-        a <- filt ar :: Maybe (Gen PredicateT)
+        a <- filt ar :: Maybe (Gen AtomT)
         case a of
           (Gen a1) -> Just $ Gen $ SatisfyingSetLink a1
       (ExecutionT ,[ar,br,cr]) -> do
@@ -207,7 +207,7 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw tvraw in do
         case (c,e) of
           (Gen c1,Gen e1) -> Just $ Gen $ ContextLink tv c1 e1
       (LambdaT ,[vr,er]) -> do
-        v <- filt vr :: Maybe (Gen VariableT)
+        v <- filt vr :: Maybe (Gen VariableListT)
         e <- filt er :: Maybe (Gen AtomT)
         case (v,e) of
           (Gen v,Gen e) -> Just $ Gen $ LambdaLink v e

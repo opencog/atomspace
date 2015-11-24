@@ -111,15 +111,16 @@ toConstructors tree constructors = fmap mkCons tree
             [(_,i,t)] -> Just (i,t)
             _         -> Nothing
           createConstructorCreator i t a b = case (i,isNode a) of
-              (i,True)  -> myapp (mydot (uncry (i-1) (conE a)))
-              (i,False) -> myapp (mydot $ function (i-1) a)
-              where expType = t b
-                    varE n  = VarE $ mkName n
-                    conE n  = ConE $ mkName n
-                    cons i  = varE ("cons"++show i)
-                    uncry n = AppE (varE $ "uncurry"++show n)
-                    mydot   = UInfixE (conE "Gen") (varE ".")
-                    myapp x = AppE (cons 1) (SigE x expType)
+              (0,_) -> myapp 0 (AppE (conE "Gen") (conE a))
+              (i,True)  -> myapp 1 (mydot (uncry (i-1) (conE a)))
+              (i,False) -> myapp 1 (mydot $ function (i-1) a)
+              where expType   = t b
+                    varE n    = VarE $ mkName n
+                    conE n    = ConE $ mkName n
+                    cons i    = varE ("cons"++show i)
+                    uncry n   = AppE (varE $ "uncurry"++show n)
+                    mydot     = UInfixE (conE "Gen") (varE ".")
+                    myapp n x = AppE (cons n) (SigE x expType)
 
                     (ForallT _ _ (AppT ta (AppT _ _))) = expType
                     subtype      = AppT ta (AppT (ConT $ mkName "Atom") (typename a))
@@ -140,6 +141,7 @@ sub (AppT (AppT (AppT (TupleT 3) (AppT _ _))(AppT _ _))(AppT _ _)) = ("myappGen3
 sub (ConT _)                                                       = ("",False)
 sub (AppT ListT _)                                                 = ("",False)
 sub (AppT _ _)                                                     = ("appGen",True)
+sub (TupleT 0)                                                     = ("",False)
 
 parsefile file = do
     cont <- readFile file
@@ -184,6 +186,7 @@ getCon dtvb c =
         conToType (NormalC c xs)  = foldr (flip AppT) tuple argtypes
             where tuple    = TupleT $ length xs
                   argtypes = reverse $ map snd xs
+        appt (TupleT 0) n = AppT (ConT $ mkName "Gen") n
         appt t n = AppT (AppT ArrowT t) (AppT (ConT $ mkName "Gen") n)
     in case c of
     (ForallC tvb (t:ctx) con) ->
