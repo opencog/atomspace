@@ -105,8 +105,7 @@
 
 (define (ure-add-rule rbs rule-name rule weight)
 "
-  Adds a rule to a rulebase and sets its weight and returns the rule node. It
-  also creates the rbs.
+  Adds a rule to a rulebase and sets its weight and returns the rule node.
 
   rbs: The ConceptNode that represents a rulebase.
 
