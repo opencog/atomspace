@@ -52,7 +52,6 @@
 (load-from-path "core-docs.scm")
 
 (load-from-path "utilities.scm")
-(export-utilities)
 
 (load-from-path "apply.scm")
 (load-from-path "av-tv.scm")
