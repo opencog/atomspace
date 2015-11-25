@@ -76,8 +76,8 @@ toRaw at = let atype     = getType at
     NotLink tv a               -> Link atype [toRaw a] $ toTVRaw tv
     SubsetLink tv a1 a2        -> Link atype [toRaw a1,toRaw a2] $ toTVRaw tv
     EqualLink a1 a2            -> Link atype [toRaw a1,toRaw a2] defaultTv
-    TrueLink                   -> Link atype [] defaultTv
-    FalseLink                  -> Link atype [] defaultTv
+    TrueLink list              -> Link atype (map (appGen toRaw) list) defaultTv
+    FalseLink list             -> Link atype (map (appGen toRaw) list) defaultTv
     DefineLink a1 a2           -> Link atype [toRaw a1,toRaw a2] defaultTv
     SequentialAndLink list     -> Link atype (map (appGen toRaw) list) defaultTv
     SequentialOrLink list      -> Link atype (map (appGen toRaw) list) defaultTv
@@ -154,7 +154,7 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw tvraw in do
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ Gen $ MemberLink tv a1 b1
       (SatisfyingSetT ,[ar]) -> do
-        a <- filt ar :: Maybe (Gen PredicateT)
+        a <- filt ar :: Maybe (Gen AtomT)
         case a of
           (Gen a1) -> Just $ Gen $ SatisfyingSetLink a1
       (ExecutionT ,[ar,br,cr]) -> do
@@ -196,7 +196,7 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw tvraw in do
         lnew <- filtList out :: Maybe [Gen VariableT]
         Just $ Gen $ VariableList lnew
       (BindT ,[ar,br,cr]) -> do
-        a <- filt ar :: Maybe (Gen VariableT)
+        a <- filt ar :: Maybe (Gen VariableListT)
         b <- filt br :: Maybe (Gen AtomT)
         c <- filt cr :: Maybe (Gen AtomT)
         case (a,b,c) of
@@ -207,7 +207,7 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw tvraw in do
         case (c,e) of
           (Gen c1,Gen e1) -> Just $ Gen $ ContextLink tv c1 e1
       (LambdaT ,[vr,er]) -> do
-        v <- filt vr :: Maybe (Gen VariableT)
+        v <- filt vr :: Maybe (Gen VariableListT)
         e <- filt er :: Maybe (Gen AtomT)
         case (v,e) of
           (Gen v,Gen e) -> Just $ Gen $ LambdaLink v e
@@ -230,8 +230,12 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw tvraw in do
         a <- filt ar :: Maybe (Gen AtomT)
         case (s,a) of
           (Gen s,Gen a) -> Just $ Gen $ DefineLink s a
-      (TrueT,_) -> Just $ Gen $ TrueLink
-      (FalseT,_) -> Just $ Gen $ FalseLink
+      (TrueT,_) -> do
+        lnew <- mapM fromRawGen out
+        Just $ Gen $ TrueLink lnew
+      (FalseT,_) -> do
+        lnew <- mapM fromRawGen out
+        Just $ Gen $ FalseLink lnew
       x               -> error $ "You should complete the code of fromRawGen"
                                ++ " with an instance for: " ++ show x
 

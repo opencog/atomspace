@@ -27,14 +27,15 @@
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
+#include <cxxtest/TestSuite.h>
 
 using namespace opencog;
 
 class QuoteUTest: public CxxTest::TestSuite
 {
 private:
-        AtomSpace *as;
-        SchemeEval* eval;
+    AtomSpace *as;
+    SchemeEval* eval;
 
 public:
     QuoteUTest(void)
@@ -144,7 +145,7 @@ void QuoteUTest::test_nest(void)
 
     allstar = as->get_outgoing(allstar, 0);
     TS_ASSERT_EQUALS(PREDICATE_NODE, allstar->getType());
-    TS_ASSERT_EQUALS(0, strcmp("all-var", as->get_name(allstar).c_str()));
+    TS_ASSERT_EQUALS(std::string("all-var"), as->get_name(allstar));
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -153,20 +154,27 @@ void QuoteUTest::test_throw(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/quote-throw.scm");
-    load_scm_files_from_config(*as);
-
-    Handle bindy = eval->eval_h("bindy");
-
     bool did_throw = false;
     try
     {
-        bindlink(as, bindy);
+#define al as->add_link
+#define an as->add_node
+        Handle var_a = an(VARIABLE_NODE, "$var-a");
+        Handle var_b = an(VARIABLE_NODE, "$var-b");
+        Handle bindy = al(BIND_LINK,
+                          var_a,
+                          al(EVALUATION_LINK,
+                             var_a,
+                             al(QUOTE_LINK, var_a, var_b)),
+                          var_a);
+#undef al
+#undef an
     }
     catch (InvalidParamException &e)
     {
         did_throw = true;
     }
+
     TS_ASSERT_EQUALS(true, did_throw);
 
     logger().debug("END TEST: %s", __FUNCTION__);
@@ -281,9 +289,10 @@ void QuoteUTest::test_crash(void)
 
     // This blows out the stack in an infinite loop, if the pattern
     // matcher doesn't prevent it.
-    Handle inf = eval->eval_h("(cog-bind infloop)");
+    Handle infloop = eval->eval_h("infloop");
+    Handle inf = bindlink(as, infloop);
     printf("infloop is %s\n", inf->toShortString().c_str());
-    TS_ASSERT_EQUALS(6, as->get_arity(inf));
+    TS_ASSERT_EQUALS(4, as->get_arity(inf));
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
