@@ -13,6 +13,8 @@ module OpenCog.AtomSpace.Api (
     , debug
     , getByUUID
     , getWithUUID
+    , execute
+    , evaluate
     ) where
 
 import Foreign                       (Ptr)
@@ -26,11 +28,12 @@ import Data.Functor                  ((<$>))
 import Data.Typeable                 (Typeable)
 import Control.Monad.IO.Class        (liftIO)
 import OpenCog.AtomSpace.Env         (AtomSpaceRef(..),AtomSpace,getAtomSpace)
-import OpenCog.AtomSpace.Internal    (UUID,AtomTypeRaw,AtomRaw(..),TVRaw(..),
+import OpenCog.AtomSpace.Internal    (fromTVRaw,UUID,AtomTypeRaw,AtomRaw(..),TVRaw(..),
                                       toRaw,fromRaw,tvMAX_PARAMS)
 import OpenCog.AtomSpace.Types       (Atom(..),AtomName(..),TruthVal(..))
 import OpenCog.AtomSpace.Inheritance (type (<~))
-import OpenCog.AtomSpace.AtomType    (AtomType(AtomT))
+import OpenCog.AtomSpace.AtomType    (AtomType(..))
+import OpenCog.AtomSpace.CUtils
 
 sUCCESS :: CInt
 sUCCESS = 0
@@ -239,6 +242,42 @@ get i = do
 
 --------------------------------------------------------------------------------
 
+foreign import ccall "Exec_execute"
+    c_exec_execute :: AtomSpaceRef
+                    -> UUID
+                    -> IO UUID
+
+execute :: Atom ExecutionOutputT -> AtomSpace (Maybe UUID)
+execute atom = do
+    m <- getWithUUID $ toRaw atom
+    case m of
+        Just (_,handle) -> do
+            asRef <- getAtomSpace
+            res <- liftIO $ c_exec_execute asRef handle
+            return $ Just res
+        _ -> return Nothing
+
+foreign import ccall "Exec_evaluate"
+    c_exec_evaluate :: AtomSpaceRef
+                    -> UUID
+                    -> Ptr CInt
+                    -> Ptr CDouble
+                    -> IO CInt
+
+evaluate :: (a <~ AtomT) => Atom a -> AtomSpace (Maybe TruthVal)
+evaluate atom = do
+    m <- getWithUUID $ toRaw atom
+    case m of
+        Just (_,handle) -> do
+            asRef <- getAtomSpace
+            res <- liftIO $ getTVfromC $ c_exec_evaluate asRef handle
+            return $ fromTVRaw <$> res
+        _ -> return Nothing
+
+
+
+--------------------------------------------------------------------------------
+
 foreign import ccall "AtomSpace_getAtomByUUID"
   c_atomspace_getAtomByUUID :: AtomSpaceRef
                               -> UUID
@@ -304,16 +343,7 @@ foreign import ccall "AtomSpace_getTruthValue"
 getTruthValue :: UUID -> AtomSpace (Maybe TVRaw)
 getTruthValue handle = do
     asRef <- getAtomSpace
-    liftIO $ alloca $
-      \tptr -> allocaArray tvMAX_PARAMS $
-      \lptr -> do
-          res <- c_atomspace_getTruthValue asRef handle tptr lptr
-          if res == sUCCESS
-            then do
-                tvType <- peek tptr
-                l <- peekArray tvMAX_PARAMS lptr
-                return $ Just $ TVRaw (toEnum $ fromIntegral tvType) (map realToFrac l)
-            else return Nothing
+    liftIO $ getTVfromC $ c_atomspace_getTruthValue asRef handle
 
 foreign import ccall "AtomSpace_setTruthValue"
   c_atomspace_setTruthValue :: AtomSpaceRef
