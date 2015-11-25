@@ -53,7 +53,9 @@
 
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 threads))  ; needed for par-map par-for-each
-; (use-modules (system base compile)) ;; needed for compiler
+
+; See below; the compiler step is not needed for guile-2.1
+(use-modules (system base compile)) ;; needed for compiler
 
 (define (av sti lti vlti) (cog-new-av sti lti vlti))
 
