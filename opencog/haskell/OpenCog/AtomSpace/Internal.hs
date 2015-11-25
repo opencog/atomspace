@@ -76,8 +76,8 @@ toRaw at = let atype     = getType at
     NotLink tv a               -> Link atype [toRaw a] $ toTVRaw tv
     SubsetLink tv a1 a2        -> Link atype [toRaw a1,toRaw a2] $ toTVRaw tv
     EqualLink a1 a2            -> Link atype [toRaw a1,toRaw a2] defaultTv
-    TrueLink                   -> Link atype [] defaultTv
-    FalseLink                  -> Link atype [] defaultTv
+    TrueLink list              -> Link atype (map (appGen toRaw) list) defaultTv
+    FalseLink list             -> Link atype (map (appGen toRaw) list) defaultTv
     DefineLink a1 a2           -> Link atype [toRaw a1,toRaw a2] defaultTv
     SequentialAndLink list     -> Link atype (map (appGen toRaw) list) defaultTv
     SequentialOrLink list      -> Link atype (map (appGen toRaw) list) defaultTv
@@ -196,7 +196,7 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw tvraw in do
         lnew <- filtList out :: Maybe [Gen VariableT]
         Just $ Gen $ VariableList lnew
       (BindT ,[ar,br,cr]) -> do
-        a <- filt ar :: Maybe (Gen VariableT)
+        a <- filt ar :: Maybe (Gen VariableListT)
         b <- filt br :: Maybe (Gen AtomT)
         c <- filt cr :: Maybe (Gen AtomT)
         case (a,b,c) of
@@ -230,8 +230,12 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw tvraw in do
         a <- filt ar :: Maybe (Gen AtomT)
         case (s,a) of
           (Gen s,Gen a) -> Just $ Gen $ DefineLink s a
-      (TrueT,_) -> Just $ Gen $ TrueLink
-      (FalseT,_) -> Just $ Gen $ FalseLink
+      (TrueT,_) -> do
+        lnew <- mapM fromRawGen out
+        Just $ Gen $ TrueLink lnew
+      (FalseT,_) -> do
+        lnew <- mapM fromRawGen out
+        Just $ Gen $ FalseLink lnew
       x               -> error $ "You should complete the code of fromRawGen"
                                ++ " with an instance for: " ++ show x
 

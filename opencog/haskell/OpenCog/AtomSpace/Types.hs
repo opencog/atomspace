@@ -169,8 +169,8 @@ data Atom (a :: AtomType) where
                             TruthVal -> Atom a1 -> Atom a2 -> Atom SubsetT
     EqualLink           :: (a1 <~ AtomT, a2 <~ AtomT) =>
                             Atom a1 -> Atom a2 -> Atom EqualT
-    TrueLink            :: Atom TrueT
-    FalseLink           :: Atom FalseT
+    TrueLink            :: [AtomGen] -> Atom TrueT
+    FalseLink           :: [AtomGen] -> Atom FalseT
     SequentialAndLink   :: [AtomGen] -> Atom SequentialAndT
     SequentialOrLink    :: [AtomGen] -> Atom SequentialOrT
     DefineLink          :: (a1 <~ AtomT, a2 <~ AtomT) =>
