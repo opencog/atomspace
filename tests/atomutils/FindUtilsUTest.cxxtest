@@ -32,17 +32,20 @@ class FindUtilsUTest :  public CxxTest::TestSuite
 {
 private:
 	AtomSpace as;
-	Handle X, free_evaluation, scoped_implication;
+	Handle X, Y, P, free_evaluation, scoped_implication, quotation;
 
 public:
 	FindUtilsUTest()
 	{
+		logger().setLevel(Logger::FINE);
 		logger().setPrintToStdoutFlag(true);
 	}
 
 	void setUp();
 
 	void test_is_unscoped_in_tree();
+	void test_min_quotation_level();
+	void test_max_quotation_level();
 };
 
 void FindUtilsUTest::setUp(void)
@@ -51,16 +54,26 @@ void FindUtilsUTest::setUp(void)
 #define an as.add_node
 
 	X = an(VARIABLE_NODE, "$X");
+	Y = an(VARIABLE_NODE, "$Y");
+	P = an(PREDICATE_NODE, "P");
+
 	free_evaluation =
-		al(EVALUATION_LINK,
-		   an(PREDICATE_NODE, "P"),
-		   X);
+		al(EVALUATION_LINK, P, X);
+
 	scoped_implication =
-		al(IMPLICATION_LINK,
-		   an(PREDICATE_NODE, "P"),
+		al(IMPLICATION_LINK, P,
 		   al(LAMBDA_LINK,
 		      X,
 		      free_evaluation));
+
+	quotation =
+		al(QUOTE_LINK,
+		   al(AND_LINK,
+		      al(UNQUOTE_LINK, X),
+		      al(QUOTE_LINK,
+		         al(OR_LINK,
+		            X,
+		            al(UNQUOTE_LINK, Y)))));
 
 #undef al
 #undef an
@@ -74,4 +87,18 @@ void FindUtilsUTest::test_is_unscoped_in_tree()
 
 	bool scoped_result = is_unscoped_in_tree(scoped_implication, X);
 	TS_ASSERT_EQUALS(scoped_result, false);
+}
+
+// Test min_quotation_level()
+void FindUtilsUTest::test_min_quotation_level()
+{
+	TS_ASSERT_EQUALS(min_quotation_level(quotation, X), 0);
+	TS_ASSERT_EQUALS(min_quotation_level(quotation, Y), 1);
+}
+
+// Test max_quotation_level()
+void FindUtilsUTest::test_max_quotation_level()
+{
+	TS_ASSERT_EQUALS(max_quotation_level(quotation, X), 2);
+	TS_ASSERT_EQUALS(max_quotation_level(quotation, Y), 1);
 }
