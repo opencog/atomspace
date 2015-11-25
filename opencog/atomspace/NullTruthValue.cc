@@ -71,7 +71,7 @@ TruthValueType NullTruthValue::getType() const
 }
 
 TruthValuePtr NullTruthValue::merge(TruthValuePtr,
-                                    TVMergeStyle ms/*=DEFAULT*/) const
+                                    TVTypeMerge tvtm) const
 {
     throw RuntimeException(TRACE_INFO,
         "Cannot call merge() method of a NullTruthvalue");

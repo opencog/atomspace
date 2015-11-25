@@ -71,15 +71,18 @@ enum TruthValueType
     NUMBER_OF_TRUTH_VALUE_TYPES
 };
 
-//Flags for alternative ways of merging two different truth value types
-//as described in https://github.com/opencog/opencog/issues/1295
-enum TVMergeStyle
+// Flags for alternative ways of merging two different truth value types
+// as described in https://github.com/opencog/opencog/issues/1295
+//
+/// Stronger means TV type with higher resolution. The weakest TV type
+/// would be simple TV, and the strongest would be distributional TV
+/// (to be (re)implemented).
+enum class TVTypeMerge
 {
-    USE_OLDER_TV_TYPE,
-    USE_NEWER_TV_TYPE,
-    USE_STRONGER_TV_TYPE,
-    USE_WEAKER_TV_TYPE,
-    DEFAULT
+    OLDER,
+    NEWER,
+    STRONGER,
+    WEAKER
 };
 
 class TruthValue;
@@ -164,7 +167,8 @@ public:
      * @param ms the merge style as described in
      *        https://github.com/opencog/opencog/issues/1295
      */
-    virtual TruthValuePtr merge(TruthValuePtr, TVMergeStyle ms=DEFAULT) const = 0;
+    virtual TruthValuePtr merge(TruthValuePtr,
+                                TVTypeMerge tvtm=TVTypeMerge::STRONGER) const = 0;
 
     /**
      * Check if this TV is a null TV.

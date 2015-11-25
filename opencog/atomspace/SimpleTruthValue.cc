@@ -73,25 +73,19 @@ confidence_t SimpleTruthValue::getConfidence() const
 }
 
 // This is the merge formula appropriate for PLN.
-TruthValuePtr SimpleTruthValue::merge(TruthValuePtr other,TVMergeStyle ms/*=DEFAULT*/) const
+TruthValuePtr SimpleTruthValue::merge(TruthValuePtr other,
+                                      TVTypeMerge tvtm) const
 {
-	switch(ms){
-	case DEFAULT:
-	{
-		//Based on section 5.10.2(A heuristic revision rule for STV) of the PLN book
-		if (other->getType() != SIMPLE_TRUTH_VALUE)
-		        throw RuntimeException(TRACE_INFO,
-		           "Don't know how to merge %s into a SimpleTruthValue using the default style",
-		           typeid(*other).name());
-		auto count2 = other->getCount();
-		auto count_new = count+ count2  - std::min(count,count2)*CVAL;
-		auto mean_new = (mean*count + other->getMean()*count2)/(count+count2);
-		return std::make_shared<SimpleTruthValue>(mean_new,count_new);
-	}
-	default:
-			throw RuntimeException(TRACE_INFO,
-			           "Unknown or not yet implemented merge strategy");
-             }
+    // Based on section 5.10.2(A heuristic revision rule for STV) of the PLN book
+    if (other->getType() != SIMPLE_TRUTH_VALUE)
+        throw RuntimeException(TRACE_INFO,
+                               "Don't know how to merge %s into a "
+                               "SimpleTruthValue using the default style",
+                               typeid(*other).name());
+    auto count2 = other->getCount();
+    auto count_new = count + count2 - std::min(count, count2) * CVAL;
+    auto mean_new = (mean * count + other->getMean() * count2) / (count + count2);
+    return std::make_shared<SimpleTruthValue>(mean_new, count_new);
 }
 
 std::string SimpleTruthValue::toString() const

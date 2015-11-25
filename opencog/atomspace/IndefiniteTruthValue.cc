@@ -298,7 +298,8 @@ bool IndefiniteTruthValue::isSymmetric() const
 }
 
 // Merge formula, as specified by PLN.
-TruthValuePtr IndefiniteTruthValue::merge(TruthValuePtr other,TVMergeStyle ms/*=DEFAULT*/) const
+TruthValuePtr IndefiniteTruthValue::merge(TruthValuePtr other,
+                                          TVTypeMerge tvtm) const
 {
     if (other->getConfidence() > getConfidence()) {
         return other->clone();

@@ -52,7 +52,8 @@ public:
     virtual bool operator==(const TruthValue& rhs) const;
 
 protected:
-    TruthValuePtr merge(TruthValuePtr,TVMergeStyle ms=DEFAULT) const;
+    TruthValuePtr merge(TruthValuePtr,
+                        TVTypeMerge tvtm=TVTypeMerge::STRONGER) const;
 };
 
 /** @}*/
