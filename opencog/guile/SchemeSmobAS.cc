@@ -51,6 +51,17 @@ SCM SchemeSmob::make_as (AtomSpace *as)
 
 /* ============================================================== */
 
+/**
+ * The only place this is called from is the guile garbage collector!
+ * Its called when guile thinks it has no pointers to the given
+ * atomspace; thus, we should free it. In fact, we only decrement the
+ * use count for it; XXX but under what circumstance would that not be
+ * zero? If its racing with another thread ?? I'm confused.
+ *
+ * Note that if the atomspace was given to use externally, e.g. by the
+ * cogserver, then it will not even have a use-count (and thus, it's
+ * never deleted here.)
+ */
 void SchemeSmob::release_as (AtomSpace *as)
 {
 	std::lock_guard<std::mutex> lck(as_mtx);
@@ -60,14 +71,15 @@ void SchemeSmob::release_as (AtomSpace *as)
 
 	if (0 == deleteable_as[as])
 	{
-		// Decrement the use count on the parent.
 		AtomSpace* env = as->get_environ();
-		if (env) release_as(env);
-
 		deleteable_as.erase(has);
 		scm_gc_unregister_collectable_memory (as,
 	                  sizeof(*as), "opencog atomspace");
 		delete as;
+
+		// (Recursively) decrement the use count on the parent.
+		// XXX This is confusing, I'm not sure its right.
+		if (env) release_as(env);
 	}
 }
 
@@ -91,14 +103,17 @@ SCM SchemeSmob::ss_new_as (SCM s)
 
 	// Don't delete the parent, as long as its in use by a child
 	// (that guile still has a reference to).
-	if (parent and deleteable_as.end() != deleteable_as.find(parent))
+	while (parent and deleteable_as.end() != deleteable_as.find(parent))
+	{
 		deleteable_as[parent]++;
+		parent = parent->get_environ();
+	}
 
 #define WORK_AROUND_GUILE_20_GC_BUG
 #ifdef WORK_AROUND_GUILE_20_GC_BUG
 	// Below is a wrk-around to a bug.  You can trigger this bug
 	// with the code below;  if will crash, because the initial
-	// GC gets erroneously garbage-collected.  Guile is trying
+	// AS gets erroneously garbage-collected.  Guile is trying
 	// to release the main AS every time through the loop.  I can't
 	// tell why.
 /******
@@ -128,7 +143,7 @@ SCM SchemeSmob::ss_new_as (SCM s)
 	if (first)
 	{
 		first = false;
-		deleteable_as[as] = 4002001000;
+		deleteable_as[as] = 2002001000;
 	}
 #endif
 	return make_as(as);
@@ -239,11 +254,11 @@ SCM SchemeSmob::ss_get_as (void)
 /// The current atomspace for the current thread must not be deleted
 /// under any circumstances. Thus each thread increments a use-count
 /// on the atomspace (stored in deleteable_as).  Atomspaces that are
-/// not current in any thread, and also have no SCM mobs pointing
+/// not current in any thread, and also have no SCM smobs pointing
 /// at them may be deleted by the gc.  This will cause atoms to
 /// disappear, if the user is not careful ...
 ///
-/// Oh, wait: only atomspaces that were interanlly created (i.e.
+/// Oh, wait: only atomspaces that were internally created (i.e.
 /// created by a scheme call) are eligible for deletion.  We may
 /// also be given atomspaces that magically appeared from the outside
 /// world --- we do NOT track those for deletion.
