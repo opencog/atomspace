@@ -28,8 +28,6 @@
 
 #include "IndefiniteTruthValue.h"
 
-#define W() getU()-getL();
-
 //#define DPRINTF printf
 #define DPRINTF(...)
 
@@ -275,7 +273,7 @@ strength_t IndefiniteTruthValue::getMean() const
 count_t IndefiniteTruthValue::getCount() const
 {
     if (count < 0) { // count must be updated
-        strength_t W = W();
+        strength_t W = getU()-getL();
         // to avoid division by zero
         W = std::max(W, static_cast<strength_t>(0.0000001)); 
         count = (DEFAULT_K * (1 - W) / W);
