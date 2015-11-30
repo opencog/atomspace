@@ -108,6 +108,12 @@ type AtomGen = Gen AtomT
 data Atom (a :: AtomType) where
     PredicateNode       :: AtomName -> TruthVal -> Atom PredicateT
 
+    ConceptNode         :: AtomName -> TruthVal -> Atom ConceptT
+
+    DefinedPredicateNode:: AtomName -> TruthVal -> Atom DefinedPredicateT
+
+    AnchorNode          :: AtomName -> Atom AnchorT
+
     AndLink             :: TruthVal -> [AtomGen] -> Atom AndT
     OrLink              :: TruthVal -> [AtomGen] -> Atom OrT
     NotLink             :: (a <~ AtomT) =>
@@ -120,7 +126,6 @@ data Atom (a :: AtomType) where
     EvaluationLink      :: (p <~ PredicateT,a <~ AtomT) =>
                            TruthVal -> Atom p -> Atom a -> Atom EvaluationT
 
-    ConceptNode         :: AtomName -> TruthVal -> Atom ConceptT
 
     InheritanceLink     :: (c1 <~ AtomT,c2 <~ AtomT) =>
                            TruthVal -> Atom c1 -> Atom c2 -> Atom InheritanceT
@@ -128,7 +133,7 @@ data Atom (a :: AtomType) where
                            TruthVal -> Atom c1 -> Atom c2 -> Atom SimilarityT
     MemberLink          :: (a <~ AtomT,c <~ ConceptT) =>
                            TruthVal -> Atom a -> Atom c -> Atom MemberT
-    SatisfyingSetLink   :: (p <~ PredicateT) =>
+    SatisfyingSetLink   :: (p <~ AtomT) =>
                            Atom p -> Atom SatisfyingSetT
 
     NumberNode          :: Double -> Atom NumberT
@@ -144,22 +149,32 @@ data Atom (a :: AtomType) where
     VariableNode        :: AtomName -> Atom VariableT
     VariableList        :: [Gen VariableT] -> Atom VariableListT
 
-    SatisfactionLink    :: (v <~ VariableT,l <~ LinkT) =>
+    SatisfactionLink    :: (v <~ VariableListT,l <~ AtomT) =>
                            Atom v -> Atom l -> Atom SatisfactionT
-    ForAllLink          :: (v <~ ListT,i <~ ImplicationT) =>
+    ForAllLink          :: (v <~ VariableListT,i <~ AtomT) =>
                            TruthVal -> Atom v -> Atom i -> Atom ForAllT
+    ExistsLink          :: (v <~ VariableListT,i <~ AtomT) =>
+                           TruthVal -> Atom v -> Atom i -> Atom ExistsT
 
     QuoteLink           :: (a <~ AtomT) =>
                            Atom a -> Atom QuoteT
 
-    BindLink            :: (v <~ VariableT,p <~ AtomT,q <~ AtomT) =>
+    BindLink            :: (v <~ VariableListT,p <~ AtomT,q <~ AtomT) =>
                            Atom v -> Atom p -> Atom q -> Atom BindT
     ContextLink         :: (c <~ AtomT,e <~ AtomT) =>
                            TruthVal -> Atom c -> Atom e -> Atom ContextT
-    LambdaLink          :: (v <~ VariableT,a <~ AtomT) =>
+    LambdaLink          :: (v <~ VariableListT,a <~ AtomT) =>
                             Atom v -> Atom a -> Atom LambdaT
     SubsetLink          :: (a1 <~ AtomT, a2 <~ AtomT) =>
                             TruthVal -> Atom a1 -> Atom a2 -> Atom SubsetT
+    EqualLink           :: (a1 <~ AtomT, a2 <~ AtomT) =>
+                            Atom a1 -> Atom a2 -> Atom EqualT
+    TrueLink            :: [AtomGen] -> Atom TrueT
+    FalseLink           :: [AtomGen] -> Atom FalseT
+    SequentialAndLink   :: [AtomGen] -> Atom SequentialAndT
+    SequentialOrLink    :: [AtomGen] -> Atom SequentialOrT
+    DefineLink          :: (a1 <~ AtomT, a2 <~ AtomT) =>
+                            Atom a1 -> Atom a2 -> Atom DefineT
 
 deriving instance Show (Atom a)
 deriving instance Typeable Atom

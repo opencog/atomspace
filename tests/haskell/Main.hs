@@ -13,29 +13,33 @@ import System.Exit
 import OpenCog.AtomSpace
 import OpenCog.Test
 import Test.Tasty
-import Test.Tasty.SmallCheck
-import Test.SmallCheck.Series
+import Test.Tasty.HUnit
 import Data.Typeable
 import GHC.Exts
-import Control.Exception
+import Control.Exception (throwIO)
+
+import Debug.Trace
 
 main :: IO ()
 main = defaultMain suite
 
-setDepth (SmallCheckDepth d) = SmallCheckDepth 4
+mytrace a = traceShow a a
 
 suite :: TestTree
-suite = adjustOption setDepth $ testGroup "Haskell Test-Suite" [
-    testProperty "simple Insert Test" testInsertGet]
+suite = testGroup "Haskell Test-Suite" [
+    testCase "simple Insert Test" $ assert testInsertGet
+    ]
 
+testInsertGet :: IO (Bool)
+testInsertGet = do
+    test <- mapM insertGet testData
+    return $ and test
 
---Simple Test that inserts Atoms and retrives them
---if the inserted and retirived Atoms are the same the test passes
-testInsertGet :: Gen AtomT -> Property IO
-testInsertGet a = monadic $ do
+insertGet :: Gen AtomT -> IO Bool
+insertGet a = do
     let prog = genInsert a >> genGet a
     res <- runOnNewAtomSpace prog
+    return True
     case res of
         Just na -> return (na == a)
-        Nothing -> return False
-
+        Nothing -> error $ "Test Failed for atom: " ++ show a

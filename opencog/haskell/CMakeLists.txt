@@ -1,9 +1,11 @@
 ADD_LIBRARY (atomspace-cwrapper SHARED
     AtomSpace_CWrapper.cpp
     PatternMatcher_CWrapper.cpp
+    Exec_CWrapper.cpp
+    Utils_CWrapper.cpp
 )
 
-ADD_DEPENDENCIES(atomspace-cwrapper atomspace query)
+ADD_DEPENDENCIES(atomspace-cwrapper atomspace query atoms)
 
 TARGET_LINK_LIBRARIES(atomspace-cwrapper
 	atomspace

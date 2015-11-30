@@ -17,6 +17,9 @@ module OpenCog.AtomSpace
     , remove
     , get
     , debug
+    -- * AtomSpace Execution
+    , execute
+    , evaluate
     -- * AtomSpace Query
     , module OpenCog.AtomSpace.Query
     -- * AtomSpace Printing
