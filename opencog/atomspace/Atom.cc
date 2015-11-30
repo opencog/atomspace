@@ -342,7 +342,7 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as)
         {
             LinkPtr l(w.lock());
             if (l and atab->in_environ(l))
-					iset.emplace_back(l);
+                iset.emplace_back(l);
         }
         return iset;
     }
@@ -360,10 +360,10 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as)
 
 IncomingSet Atom::getIncomingSetByType(Type type, bool subclass)
 {
-	HandleSeq inhs;
-	getIncomingSetByType(std::back_inserter(inhs), type, subclass);
-	IncomingSet inlinks;
-	for (const Handle& h : inhs)
-		inlinks.emplace_back(LinkCast(h));
-	return inlinks;
+    HandleSeq inhs;
+    getIncomingSetByType(std::back_inserter(inhs), type, subclass);
+    IncomingSet inlinks;
+    for (const Handle& h : inhs)
+        inlinks.emplace_back(LinkCast(h));
+    return inlinks;
 }
