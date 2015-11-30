@@ -143,3 +143,11 @@ bool TruthValue::isDefinedTV() const
     }
     return false;
 }
+
+TruthValuePtr TruthValue::higher_confidence_merge(TruthValuePtr other) const
+{
+    if (other->getConfidence() > getConfidence()) {
+        return other->clone();
+    }
+    return clone();
+}

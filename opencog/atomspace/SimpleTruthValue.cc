@@ -73,25 +73,32 @@ confidence_t SimpleTruthValue::getConfidence() const
 }
 
 // This is the merge formula appropriate for PLN.
-TruthValuePtr SimpleTruthValue::merge(TruthValuePtr other,TVMergeStyle ms/*=DEFAULT*/) const
+TruthValuePtr SimpleTruthValue::merge(TruthValuePtr other,
+                                      const MergeCtrl& mc) const
 {
-	switch(ms){
-	case DEFAULT:
-	{
-		//Based on section 5.10.2(A heuristic revision rule for STV) of the PLN book
-		if (other->getType() != SIMPLE_TRUTH_VALUE)
-		        throw RuntimeException(TRACE_INFO,
-		           "Don't know how to merge %s into a SimpleTruthValue using the default style",
-		           typeid(*other).name());
-		auto count2 = other->getCount();
-		auto count_new = count+ count2  - std::min(count,count2)*CVAL;
-		auto mean_new = (mean*count + other->getMean()*count2)/(count+count2);
-		return std::make_shared<SimpleTruthValue>(mean_new,count_new);
-	}
-	default:
-			throw RuntimeException(TRACE_INFO,
-			           "Unknown or not yet implemented merge strategy");
-             }
+    switch(mc.tv_formula) {
+    case MergeCtrl::TVFormula::HIGHER_CONFIDENCE:
+        return higher_confidence_merge(other);
+    case MergeCtrl::TVFormula::PLN_BOOK_REVISION:
+    {
+        // Based on Section 5.10.2(A heuristic revision rule for STV)
+        // of the PLN book
+        if (other->getType() != SIMPLE_TRUTH_VALUE)
+            throw RuntimeException(TRACE_INFO,
+                                   "Don't know how to merge %s into a "
+                                   "SimpleTruthValue using the default style",
+                                   typeid(*other).name());
+        auto count2 = other->getCount();
+        auto count_new = count + count2 - std::min(count, count2) * CVAL;
+        auto mean_new = (mean * count + other->getMean() * count2)
+            / (count + count2);
+        return std::make_shared<SimpleTruthValue>(mean_new, count_new);
+    }
+    default:
+        throw RuntimeException(TRACE_INFO,
+                               "SimpleTruthValue::merge: case not implemented");
+        return nullptr;
+    }
 }
 
 std::string SimpleTruthValue::toString() const

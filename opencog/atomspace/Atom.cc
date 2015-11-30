@@ -129,7 +129,7 @@ TruthValuePtr Atom::getTruthValue()
     return local;
 }
 
-void Atom::merge(TruthValuePtr tvn)
+void Atom::merge(TruthValuePtr tvn, const MergeCtrl& mc)
 {
     if (NULL == tvn or tvn->isDefaultTV() or tvn->isNullTv()) return;
 
@@ -147,7 +147,7 @@ void Atom::merge(TruthValuePtr tvn)
         return;
     }
 
-    TruthValuePtr mergedTV(currentTV->merge(tvn));
+    TruthValuePtr mergedTV(currentTV->merge(tvn, mc));
     setTruthValue(mergedTV);
 }
 
@@ -342,7 +342,7 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as)
         {
             LinkPtr l(w.lock());
             if (l and atab->in_environ(l))
-					iset.emplace_back(l);
+                iset.emplace_back(l);
         }
         return iset;
     }
@@ -360,10 +360,10 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as)
 
 IncomingSet Atom::getIncomingSetByType(Type type, bool subclass)
 {
-	HandleSeq inhs;
-	getIncomingSetByType(std::back_inserter(inhs), type, subclass);
-	IncomingSet inlinks;
-	for (const Handle& h : inhs)
-		inlinks.emplace_back(LinkCast(h));
-	return inlinks;
+    HandleSeq inhs;
+    getIncomingSetByType(std::back_inserter(inhs), type, subclass);
+    IncomingSet inlinks;
+    for (const Handle& h : inhs)
+        inlinks.emplace_back(LinkCast(h));
+    return inlinks;
 }
