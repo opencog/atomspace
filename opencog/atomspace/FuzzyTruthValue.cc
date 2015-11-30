@@ -73,7 +73,7 @@ confidence_t FuzzyTruthValue::getConfidence() const
 
 // This is the merge formula appropriate for PLN.
 TruthValuePtr FuzzyTruthValue::merge(TruthValuePtr other,
-                                     TVTypeMerge tvtm) const
+                                     const MergeCtrl& mc) const
 {
     if (other->getType() != SIMPLE_TRUTH_VALUE) {
         throw RuntimeException(TRACE_INFO,

@@ -284,7 +284,7 @@ public:
     void setTruthValue(TruthValuePtr);
 
     /** merge truth value into this */
-    void merge(TruthValuePtr);
+	void merge(TruthValuePtr, const MergeCtrl& mc=MergeCtrl());
 
     /**
      * Merge truth value, return Handle for this.

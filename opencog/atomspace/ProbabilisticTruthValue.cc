@@ -102,7 +102,7 @@ TruthValueType ProbabilisticTruthValue::getType() const
 // because the ProbabilisticTruthValue usally stores an integer count,
 // and a log-probability or entropy, instead of a confidence.
 TruthValuePtr ProbabilisticTruthValue::merge(TruthValuePtr other,
-                                             TVTypeMerge tvtm) const
+                                             const MergeCtrl& mc) const
 {
     ProbabilisticTruthValuePtr oc =
         std::dynamic_pointer_cast<ProbabilisticTruthValue>(other);

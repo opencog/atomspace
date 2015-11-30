@@ -115,7 +115,7 @@ public:
     bool isSymmetric() const;
 
     TruthValuePtr merge(TruthValuePtr,
-                        TVTypeMerge tvtm=TVTypeMerge::STRONGER) const;
+                        const MergeCtrl& mc=MergeCtrl()) const;
 
     std::string toString() const;
     TruthValueType getType() const;

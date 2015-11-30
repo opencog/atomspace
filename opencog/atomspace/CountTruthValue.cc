@@ -102,7 +102,7 @@ TruthValueType CountTruthValue::getType() const
 // because the CountTruthValue usally stores an integer count,
 // and a log-probability or entropy, instead of a confidence.
 TruthValuePtr CountTruthValue::merge(TruthValuePtr other,
-                                     TVTypeMerge tvtm) const
+                                     const MergeCtrl& mc) const
 {
     CountTruthValuePtr oc =
         std::dynamic_pointer_cast<CountTruthValue>(other);

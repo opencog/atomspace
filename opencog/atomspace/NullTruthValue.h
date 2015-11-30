@@ -53,7 +53,7 @@ public:
 
 protected:
     TruthValuePtr merge(TruthValuePtr,
-                        TVTypeMerge tvtm=TVTypeMerge::STRONGER) const;
+                        const MergeCtrl& mc=MergeCtrl()) const;
 };
 
 /** @}*/

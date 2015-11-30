@@ -86,7 +86,7 @@ public:
      * with the highest confidence.
      */
     TruthValuePtr merge(TruthValuePtr,
-                        TVTypeMerge tvtm=TVTypeMerge::STRONGER) const;
+                        const MergeCtrl& mc=MergeCtrl()) const;
 
     static SimpleTruthValuePtr createSTV(strength_t mean, count_t count)
     {
