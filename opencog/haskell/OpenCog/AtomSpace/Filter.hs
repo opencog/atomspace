@@ -62,4 +62,4 @@ getPhantomType = read . show . typeRep
 --
 -- instance FilteIsChild ...
 --
-declareAtomFilters "../../../atomspace/atom_types.script"
+declareAtomFilters "../../../atomspace/atom_types.script" "/usr/local/share/opencog/atom_types.script"
