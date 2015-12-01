@@ -101,7 +101,8 @@ TruthValueType ProbabilisticTruthValue::getType() const
 // Note: this is NOT the merge formula used by PLN.  This is
 // because the ProbabilisticTruthValue usally stores an integer count,
 // and a log-probability or entropy, instead of a confidence.
-TruthValuePtr ProbabilisticTruthValue::merge(TruthValuePtr other,TVMergeStyle ms/*=DEFAULT*/) const
+TruthValuePtr ProbabilisticTruthValue::merge(TruthValuePtr other,
+                                             const MergeCtrl& mc) const
 {
     ProbabilisticTruthValuePtr oc =
         std::dynamic_pointer_cast<ProbabilisticTruthValue>(other);

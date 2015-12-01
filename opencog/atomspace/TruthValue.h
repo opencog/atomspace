@@ -71,15 +71,38 @@ enum TruthValueType
     NUMBER_OF_TRUTH_VALUE_TYPES
 };
 
-//Flags for alternative ways of merging two different truth value types
-//as described in https://github.com/opencog/opencog/issues/1295
-enum TVMergeStyle
+/// Class to control the TV merging strategy
+struct MergeCtrl
 {
-    USE_OLDER_TV_TYPE,
-    USE_NEWER_TV_TYPE,
-    USE_STRONGER_TV_TYPE,
-    USE_WEAKER_TV_TYPE,
-    DEFAULT
+    /// Styles for controlling merging two different truth value types
+    /// as described in https://github.com/opencog/opencog/issues/1295
+    ///
+    /// Stronger means TV type with higher resolution. The weakest TV type
+    /// would be simple TV, and the strongest would be distributional TV
+    /// (to be (re)implemented).
+    enum class TVType
+    {
+        OLDER,
+        NEWER,
+        STRONGER,
+        WEAKER
+    };
+
+    /// Styles for controlling the formula while merging two different
+    /// truth values.
+    enum class TVFormula
+    {
+        HIGHER_CONFIDENCE,  // TV with higher confidence overwrite the other
+        PLN_BOOK_REVISION   // PLN book Section 5.10.2 revision rule
+
+    };
+
+    TVFormula tv_formula;
+    TVType tv_type;
+
+    MergeCtrl(TVFormula tvf=TVFormula::PLN_BOOK_REVISION,
+              TVType tvt=TVType::OLDER)
+        : tv_formula(tvf), tv_type(tvt) {}
 };
 
 class TruthValue;
@@ -164,7 +187,8 @@ public:
      * @param ms the merge style as described in
      *        https://github.com/opencog/opencog/issues/1295
      */
-    virtual TruthValuePtr merge(TruthValuePtr, TVMergeStyle ms=DEFAULT) const = 0;
+    virtual TruthValuePtr merge(TruthValuePtr,
+                                const MergeCtrl& mc=MergeCtrl()) const = 0;
 
     /**
      * Check if this TV is a null TV.
@@ -177,6 +201,10 @@ public:
      */
     virtual bool isDefaultTV() const;
     virtual bool isDefinedTV() const;
+
+protected:
+    // Helper merging methods
+    TruthValuePtr higher_confidence_merge(TruthValuePtr) const;
 };
 
 } // namespace opencog
