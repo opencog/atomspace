@@ -9,9 +9,11 @@
 #ifdef HAVE_GUILE
 
 #include <cstddef>
+#include <cstdlib>
 #include <libguile.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/StringManipulator.h>
 #include "SchemePrimitive.h"
 #include "SchemeSmob.h"
 
@@ -45,6 +47,25 @@ void SchemeSmob::init()
 	if (is_inited.test_and_set()) return;
 
 	init_smob_type();
+
+	// If one is importing this class then the functions defined in
+	// .scm files associated with '(opencog)' module should be available.
+	// Assuming installation in a standard path.
+	scm_c_eval_string("(add-to-load-path \"/usr/local/share/opencog/scm\")\n");
+
+	// Add paths set through GUILE_LOAD_PATH
+	std::string env_str;
+
+	if (const char* _env = std::getenv("GUILE_LOAD_PATH")) {
+		env_str = _env;
+		auto output = StringManipulator::split(env_str, ":");
+
+		for (const auto& i : output) {
+			std::string scm_command = "(add-to-load-path \"" + i + "\")";
+			scm_c_eval_string(scm_command.c_str());
+		}
+	}
+
 	scm_c_define_module("opencog", register_procs, NULL);
 	scm_c_use_module("opencog");
 
@@ -250,7 +271,7 @@ void SchemeSmob::register_procs(void*)
 	register_proc("cog-af-boundary",       0, 0, 0, C(ss_af_boundary));
 	register_proc("cog-set-af-boundary!",  1, 0, 0, C(ss_set_af_boundary));
 	register_proc("cog-af",                0, 0, 0, C(ss_af));
-    
+
 	// Atom types
 	register_proc("cog-get-types",         0, 0, 0, C(ss_get_types));
 	register_proc("cog-type->int",         1, 0, 0, C(ss_get_type));
