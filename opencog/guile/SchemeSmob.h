@@ -53,6 +53,7 @@ private:
 	static std::atomic_flag is_inited;
 	static void register_procs(void*);
 	static void register_proc(const char*, int, int, int, scm_t_subr);
+	static void register_proc_from_scm(const char*);
 
 	// The cog_misc_tag are for all other opencog types, such
 	// as truth values, which are ephemeral (garbage-collected)
@@ -156,7 +157,7 @@ private:
 	static SCM ss_af_boundary(void);
 	static SCM ss_set_af_boundary(SCM);
 	static SCM ss_af(void);
-        
+
 	// Callback into misc C++ code.
 	static SCM ss_ad_hoc(SCM, SCM);
 

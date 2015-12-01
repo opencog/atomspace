@@ -283,12 +283,43 @@ void SchemeSmob::register_procs(void*)
 
 	// Iterators
 	register_proc("cog-map-type",          2, 0, 0, C(ss_map_type));
+
+	// Load scheme files from load-path either set by GUILE_LOAD_PATH or
+	// (add-to-load-path "...")
+	// Load core atom types.
+	// The remaining atom types from the cogserver are in (opencog atom-types)
+	register_proc_from_scm("core_types.scm");
+
+	// Load other grunge too.
+	// Some of these things should probably be modules ...?
+	register_proc_from_scm("config.scm");
+
+	register_proc_from_scm("core-docs.scm");
+
+	register_proc_from_scm("utilities.scm");
+
+	register_proc_from_scm("apply.scm");
+	register_proc_from_scm("av-tv.scm");
+	register_proc_from_scm("file-utils.scm");
+	register_proc_from_scm("debug-trace.scm");
+
 }
 
 void SchemeSmob::register_proc(const char* name, int req, int opt, int rst, scm_t_subr fcn)
 {
 	scm_c_define_gsubr(name, req, opt, rst, fcn);
 	scm_c_export(name, NULL);
+}
+
+void SchemeSmob::register_proc_from_scm(const char* filename)
+{
+	//scm_c_primitive_load_path(filename);
+	auto path = scm_sys_search_load_path(scm_from_utf8_string(filename));
+	if (scm_is_true (path)) {
+		scm_c_primitive_load_path(filename);
+	} else {
+		std::cout << "Didn't find " << filename << std::endl;
+	}
 }
 
 #endif
