@@ -6,6 +6,7 @@ INSTALL (FILES
 	av-tv.scm
 	config.scm
 	core-docs.scm
+	debug-trace.scm
 	example-dbi.scm
 	file-utils.scm
 	opencog.scm

@@ -114,7 +114,8 @@ public:
     strength_t getL_() const;
     bool isSymmetric() const;
 
-    TruthValuePtr merge(TruthValuePtr,TVMergeStyle ms=DEFAULT) const;
+    TruthValuePtr merge(TruthValuePtr,
+                        const MergeCtrl& mc=MergeCtrl()) const;
 
     std::string toString() const;
     TruthValueType getType() const;

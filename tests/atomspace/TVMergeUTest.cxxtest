@@ -106,13 +106,16 @@ public:
             simpleTvs[i] = SimpleTruthValue::createTV(simpleMeans[i], simpleCounts[i]);
         }
 
+        MergeCtrl merge_ctrl(MergeCtrl::TVFormula::PLN_BOOK_REVISION,
+                             MergeCtrl::TVType::OLDER);
+
         // Merge between SimpleTruthValue objects
         //mean=(0.25*0.0 +0.5*1.0)/(0.0+1.0)=0.5 count=0.0+1.0-0.0*0.2=1.0
-        mergedTv = simpleTvs[0]->merge(simpleTvs[1]);
+        mergedTv = simpleTvs[0]->merge(simpleTvs[1], merge_ctrl);
         TS_ASSERT(mergedTv != simpleTvs[0]);
         TS_ASSERT(mergedTv->getMean()==0.5f);
         TS_ASSERT(mergedTv->getCount()==1.0f);
-        mergedTv = simpleTvs[1]->merge(simpleTvs[2]);
+        mergedTv = simpleTvs[1]->merge(simpleTvs[2], merge_ctrl);
         TS_ASSERT(mergedTv != simpleTvs[1]);
         //mean=(0.5*1.0 +0.75*2.0)/(1.0+2.0)=0.6667 count=2.0+1.0-1.0*0.2=2.8
         TS_ASSERT_DELTA(mergedTv->getMean(), 0.6667f,0.0001f);

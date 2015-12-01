@@ -204,6 +204,8 @@ void SchemeSmob::register_procs(void*)
 	// property setters on atoms
 	register_proc("cog-set-av!",           2, 0, 0, C(ss_set_av));
 	register_proc("cog-set-tv!",           2, 0, 0, C(ss_set_tv));
+	register_proc("cog-merge-tv!",         2, 0, 0, C(ss_merge_tv));
+	register_proc("cog-merge-hi-conf-tv!", 2, 0, 0, C(ss_merge_hi_conf_tv));
 	register_proc("cog-inc-vlti!",         1, 0, 0, C(ss_inc_vlti));
 	register_proc("cog-dec-vlti!",         1, 0, 0, C(ss_dec_vlti));
 
