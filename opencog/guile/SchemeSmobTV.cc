@@ -406,13 +406,13 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 			IndefiniteTruthValue *itv = static_cast<IndefiniteTruthValue *>(tv);
 			SCM lower = scm_from_double(itv->getL());
 			SCM upper = scm_from_double(itv->getU());
-			SCM conf = scm_from_double(itv->getConfidence());
+			SCM conf_level = scm_from_double(itv->getConfidenceLevel());
 			SCM slower = scm_from_utf8_symbol("lower");
 			SCM supper = scm_from_utf8_symbol("upper");
-			SCM sconf = scm_from_utf8_symbol("confidence");
+			SCM sconf_level = scm_from_utf8_symbol("confidence-level");
 	
 			SCM rc = SCM_EOL;
-			rc = scm_acons(sconf, conf, rc);
+			rc = scm_acons(sconf_level, conf_level, rc);
 			rc = scm_acons(supper, upper, rc), 
 			rc = scm_acons(slower, lower, rc);
 			scm_remember_upto_here_1(s);
