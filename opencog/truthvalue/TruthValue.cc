@@ -42,6 +42,7 @@
 using namespace opencog;
 
 const strength_t MAX_TRUTH  = 1.0f;
+count_t TruthValue::DEFAULT_K = 800.0;
 
 TruthValuePtr TruthValue::NULL_TV()
 {

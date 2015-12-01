@@ -122,7 +122,13 @@ class TruthValue
         throw RuntimeException(TRACE_INFO, "Cannot modify truth values!");
     }
 public:
-    virtual ~TruthValue() {}
+    // default lookahead
+    static count_t DEFAULT_K;
+    static void setDefaultK(count_t k) {
+        DEFAULT_K = k;
+    }
+
+	virtual ~TruthValue() {}
 
     // Special TVs
 

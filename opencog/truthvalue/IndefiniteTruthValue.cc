@@ -34,7 +34,6 @@
 using namespace opencog;
 
 confidence_t IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL = 0.9;
-count_t IndefiniteTruthValue::DEFAULT_K = 2.0;
 strength_t IndefiniteTruthValue::diffError = 0.001;
 strength_t IndefiniteTruthValue::s = 0.5;
 
@@ -275,7 +274,11 @@ count_t IndefiniteTruthValue::getCount() const
     if (count < 0) { // count must be updated
         strength_t W = getU()-getL();
         // to avoid division by zero
-        W = std::max(W, static_cast<strength_t>(0.0000001)); 
+        W = std::max(W, static_cast<strength_t>(0.0000001));
+        // This is a bad heuristic that comes from c = N / (N+k). By
+        // assuming c is an estimate of 1 - W we end up with this
+        // formula. The problem is that c is definitely not a good
+        // estimate for 1 - W.
         count = (DEFAULT_K * (1 - W) / W);
     }
     return count;

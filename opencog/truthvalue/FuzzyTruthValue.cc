@@ -37,8 +37,6 @@
 
 using namespace opencog;
 
-#define KKK 800.0f
-
 FuzzyTruthValue::FuzzyTruthValue(strength_t m, count_t c)
 {
     mean = m;
@@ -125,10 +123,10 @@ count_t FuzzyTruthValue::confidenceToCount(confidence_t cf)
     // There are not quite 16 digits in double precision
     // not quite 7 in single-precision float
     cf = std::min(cf, 0.9999998f);
-    return static_cast<count_t>(KKK * cf / (1.0f - cf));
+    return static_cast<count_t>(DEFAULT_K * cf / (1.0f - cf));
 }
 
 confidence_t FuzzyTruthValue::countToConfidence(count_t cn)
 {
-    return static_cast<confidence_t>(cn / (cn + KKK));
+    return static_cast<confidence_t>(cn / (cn + DEFAULT_K));
 }

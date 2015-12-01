@@ -157,14 +157,10 @@ public:
     }
 
     static confidence_t DEFAULT_CONFIDENCE_LEVEL;
-    static count_t DEFAULT_K;
     static strength_t diffError;
     static strength_t s; //Nil : not that sure s should be strength_t
     static void setDefaultConfidenceLevel(confidence_t c) {
         DEFAULT_CONFIDENCE_LEVEL = c;
-    }
-    static void setDefaultK(count_t k) {
-        DEFAULT_K = k;
     }
 };
 
