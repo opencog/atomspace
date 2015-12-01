@@ -208,7 +208,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
         if (dotpos == std::string::npos)
         {
             throw RuntimeException(TRACE_INFO,
-                "LibName and FunctionName not seperated by a '.'");
+                "LibName and FunctionName not seperated by a '\\'");
         }
         std::string libName  = schema.substr(pos,dotpos-pos);
         std::string funcName = schema.substr(dotpos+1);

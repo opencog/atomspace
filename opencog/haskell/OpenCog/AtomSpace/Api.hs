@@ -254,14 +254,15 @@ foreign import ccall "Exec_execute"
                     -> UUID
                     -> IO UUID
 
-execute :: Atom ExecutionOutputT -> AtomSpace (Maybe UUID)
+execute :: Atom ExecutionOutputT -> AtomSpace (Maybe AtomGen)
 execute atom = do
     m <- getWithUUID $ toRaw atom
     case m of
         Just (_,handle) -> do
             asRef <- getAtomSpace
             res <- liftIO $ c_exec_execute asRef handle
-            return $ Just res
+            araw <- getByUUID res
+            return $ fromRawGen =<< araw
         _ -> return Nothing
 
 foreign import ccall "Exec_evaluate"
