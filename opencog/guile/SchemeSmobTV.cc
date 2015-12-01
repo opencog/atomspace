@@ -460,5 +460,32 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 	return SCM_EOL;
 }
 
+/**
+ * Return the truth value mean
+ */
+SCM SchemeSmob::ss_tv_get_mean(SCM s)
+{
+	TruthValue *tv = verify_tv(s, "cog-tv-mean");
+	return scm_from_double(tv->getMean());
+}
+
+/**
+ * Return the truth value confidence
+ */
+SCM SchemeSmob::ss_tv_get_confidence(SCM s)
+{
+	TruthValue *tv = verify_tv(s, "cog-tv-confidence");
+	return scm_from_double(tv->getConfidence());
+}
+
+/**
+ * Return the truth value count
+ */
+SCM SchemeSmob::ss_tv_get_count(SCM s)
+{
+	TruthValue *tv = verify_tv(s, "cog-tv-count");
+	return scm_from_double(tv->getCount());
+}
+
 #endif /* HAVE_GUILE */
 /* ===================== END OF FILE ============================ */
