@@ -16,7 +16,7 @@
 #include <cstddef>
 #include <libguile.h>
 #include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/TruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 #include <opencog/shell/GenericEval.h>
 #include <opencog/util/exceptions.h>
 

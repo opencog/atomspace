@@ -24,9 +24,9 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/TLB.h>
-#include <opencog/atomspace/TruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 
 using namespace opencog;
 

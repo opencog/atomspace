@@ -27,9 +27,9 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/IndefiniteTruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/truthvalue/IndefiniteTruthValue.h>
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/load-file.h>

@@ -29,8 +29,8 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/numeric.h>
 
-#include <opencog/atomspace/IndefiniteTruthValue.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/truthvalue/IndefiniteTruthValue.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 
 using namespace opencog;
 using namespace std;

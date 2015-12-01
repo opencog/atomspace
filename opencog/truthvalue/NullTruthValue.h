@@ -25,7 +25,7 @@
 #ifndef _OPENCOG_NULL_TRUTH_VALUE_TV_H
 #define _OPENCOG_NULL_TRUTH_VALUE_TV_H
 
-#include <opencog/atomspace/TruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 
 namespace opencog
 {

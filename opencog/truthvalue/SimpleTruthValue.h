@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/SimpleTruthValue.h
+ * opencog/truthvalue/SimpleTruthValue.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -27,7 +27,7 @@
 #ifndef _OPENCOG_SIMPLE_TRUTH_VALUE_H_
 #define _OPENCOG_SIMPLE_TRUTH_VALUE_H_
 
-#include <opencog/atomspace/TruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 
 namespace opencog
 {

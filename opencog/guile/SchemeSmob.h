@@ -24,7 +24,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/TruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 
 namespace opencog {
 /** \addtogroup grp_smob

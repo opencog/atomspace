@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/IndefiniteTruthValue.h
+ * opencog/truthvalue/IndefiniteTruthValue.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -29,7 +29,7 @@
 #include <memory>
 #include <vector>
 
-#include <opencog/atomspace/TruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 
 namespace opencog
 {

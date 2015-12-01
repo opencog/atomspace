@@ -38,8 +38,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/TruthValue.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 
 using namespace opencog;
 using namespace Hypertable;

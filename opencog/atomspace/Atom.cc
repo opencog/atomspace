@@ -40,8 +40,8 @@
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/IndefiniteTruthValue.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/truthvalue/IndefiniteTruthValue.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 
 //! Atom flag
 // #define WRITE_MUTEX             1  //BIT0
