@@ -15,7 +15,7 @@
 #include <string>
 
 #include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/TruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <libguile.h>
 #include <opencog/atomspace/ClassServer.h>
