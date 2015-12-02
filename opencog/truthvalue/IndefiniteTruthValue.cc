@@ -38,7 +38,7 @@ strength_t IndefiniteTruthValue::diffError = 0.001;
 strength_t IndefiniteTruthValue::s = 0.5;
 
 
-// Formula defined in the integral of step one [(x-L1)^ks * (U1-x)^k(1-s)
+// Formula defined in the integral of one step (x-L1)^ks * (U1-x)^k(1-s)
 static double integralFormula (double x, void * params)
 {
     double L_, U_, k_, s_;
@@ -47,7 +47,7 @@ static double integralFormula (double x, void * params)
     U_ = in_params[1];
     k_ = in_params[2];
     s_ = in_params[3];
-    double f = (pow((x - L_), (k_ * s_))) * pow((U_ -x), (k_ * (1 - s_)));
+    double f = (pow((x - L_), (k_ * s_))) * pow((U_ - x), (k_ * (1 - s_)));
     return f;
 }
 
@@ -140,17 +140,15 @@ strength_t IndefiniteTruthValue::getU() const
 
 strength_t IndefiniteTruthValue::getDiff()
 {
-    if (diff >= 0) return diff; // previously calculated
-    else {
-        if (U == L) { //Nil: I'm not sure returning 0 is the right thing to do
-            diff = 0.0;
-            return diff;
+    if (diff < 0) { // Need update
+        if (U == L) {
+            diff = 0.0; // Not sure returning 0 is right
         } else {
-            strength_t idiff = 0.01; //initial diff suggestion
+            strength_t idiff = 0.01; // Initial diff suggestion
             diff = findDiff(idiff);
-            return diff;
         }
     }
+    return diff;
 }
 
 strength_t IndefiniteTruthValue::findDiff(strength_t idiff)
