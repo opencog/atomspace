@@ -40,8 +40,25 @@ namespace opencog
 ///         SomeAtom
 ///         OtherAtom
 ///
-/// will return either SomeAtom or OtherAtom.
+/// will return either SomeAtom or OtherAtom, with a 50-50 probability.
+///
+/// There are two different extensions that support a non-uniform
+/// probability: one taking the name of a vector of numeric weights, and
+/// another taking the name of a schema that provides numeric weights.
+///
+/// An example of the weighted form is:
 ///     
+///     RandomChoiceLink
+///         ListLink
+///             NumberNode 0.4
+///             NumberNode 0.6
+///         ListLink
+///             SomeAtom
+///             OtherAtom
+///
+/// This will select SomeAtom 40% of the time, and OtherAtom 60% of the
+/// time.
+///
 class RandomChoiceLink : public FunctionLink
 {
 public:

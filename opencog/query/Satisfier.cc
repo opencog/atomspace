@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 
 #include "BindLinkAPI.h"
@@ -51,7 +51,8 @@ bool Satisfier::grounding(const std::map<Handle, Handle> &var_soln,
 /// Of course, if the pattern had no variables (e.g. a SequenceLink or
 /// FallbackLink with only evaluatables), then there cannot be a
 /// grounding failure, by definition.  And if there was a grounding,
-/// there can be no grounding failure, either.
+/// there can be no grounding failure, either. So we only process the
+/// case where there are variables, and grounding failed.
 bool Satisfier::search_finished(bool done)
 {
 	if (done) return done;
@@ -66,6 +67,13 @@ bool Satisfier::search_finished(bool done)
 	// _optionals_present will be set to true if some optional clause
 	// was grounded. Ergo, its not the no-grounding case.
 	if (_optionals_present) return done;
+
+	// Evaluating the pattern bod only makes sense if it is sequential
+	// (ordered) -- if the body is an unordered AdLik, or if its a
+	// ChoiceLink, etc, this makes no sense.
+	Type btype = _pattern_body->getType();
+	if (SEQUENTIAL_AND_LINK != btype and SEQUENTIAL_OR_LINK != btype)
+		return done;
 
 	std::map<Handle,Handle> empty;
 	bool rc = eval_sentence(_pattern_body, empty);

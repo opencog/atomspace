@@ -6,7 +6,7 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
- * published by the Fold Software Foundation and including the exceptions
+ * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
- * Fold Software Foundation, Inc.,
+ * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
@@ -25,7 +25,9 @@
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atoms/NumberNode.h>
+#include "DivideLink.h"
 #include "FoldLink.h"
+#include "MinusLink.h"
 #include "PlusLink.h"
 #include "TimesLink.h"
 
@@ -262,6 +264,10 @@ LinkPtr FoldLink::factory(LinkPtr lp)
 // Basic type factory.
 Handle FoldLink::factory(Type t, const HandleSeq& seq)
 {
+	if (DIVIDE_LINK == t)
+		return Handle(createDivideLink(seq));
+	if (MINUS_LINK == t)
+		return Handle(createMinusLink(seq));
 	if (PLUS_LINK == t)
 		return Handle(createPlusLink(seq));
 	if (TIMES_LINK == t)

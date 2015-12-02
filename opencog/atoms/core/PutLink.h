@@ -6,7 +6,7 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
- * published by the Put Software Foundation and including the exceptions
+ * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
- * Put Software Foundation, Inc.,
+ * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
@@ -61,15 +61,17 @@ protected:
 
 public:
 	PutLink(const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 	PutLink(const Handle& a,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	PutLink(Link& l);
 	virtual ~PutLink() {}
 
+	// PutLink values may be e second or the third outset elt.
+	Handle get_values() { return _values; }
 	virtual Handle reduce(void);
 };
 

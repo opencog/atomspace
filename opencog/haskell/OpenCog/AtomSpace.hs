@@ -17,6 +17,9 @@ module OpenCog.AtomSpace
     , remove
     , get
     , debug
+    -- * AtomSpace Execution
+    , execute
+    , evaluate
     -- * AtomSpace Query
     , module OpenCog.AtomSpace.Query
     -- * AtomSpace Printing
@@ -34,13 +37,16 @@ module OpenCog.AtomSpace
     -- * AtomSpace Phantom Types
     , AtomType(..)
     , type (<~)
+    -- * AtomSpace Unitily Functions
+    , genInsert
+    , genGet
     ) where
 
 import OpenCog.AtomSpace.Api
 import OpenCog.AtomSpace.Types
 import OpenCog.AtomSpace.Env         (AtomSpace,runOnNewAtomSpace,AtomSpaceObj,
                                       getParent,newAtomSpace,onAtomSpace,(<:))
-import OpenCog.AtomSpace.Utils       (printAtom,showAtom)
+import OpenCog.AtomSpace.Utils       (printAtom,showAtom,genInsert,genGet)
 import OpenCog.AtomSpace.AtomType    (AtomType(..))
 import OpenCog.AtomSpace.Inheritance (type (<~))
 import OpenCog.AtomSpace.Sugar

@@ -23,7 +23,6 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifdef HAVE_ZMQ
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -34,14 +33,14 @@
 
 #include <opencog/util/oc_assert.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/CountTruthValue.h>
-#include <opencog/atomspace/IndefiniteTruthValue.h>
+#include <opencog/truthvalue/CountTruthValue.h>
+#include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/ProbabilisticTruthValue.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/truthvalue/ProbabilisticTruthValue.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/TLB.h>
-#include <opencog/atomspace/TruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 
 #include <opencog/persist/zmq/atomspace/ZMQClient.h>
 
@@ -149,6 +148,10 @@ void ZMQClient::store(const AtomTable &table) {
 	store_count = 0;
 	table.foreachHandleByType(
 	    [&](Handle h)->void { store_cb(h); }, ATOM, true);
+}
+
+void ZMQClient::loadType(AtomTable &, Type)
+{
 }
 
 void ZMQClient::load(AtomTable &table) {
@@ -261,6 +264,4 @@ void ZMQClient::flushStoreQueue()
 
 }
 
-
-#endif /* HAVE_ZMQ_STORAGE */
 /* ============================= END OF FILE ================= */

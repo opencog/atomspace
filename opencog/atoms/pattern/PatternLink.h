@@ -113,7 +113,8 @@ protected:
 	                      std::set<Handle>& black_clauses);
 
 	void trace_connectives(const std::set<Type>&,
-	                       const HandleSeq& clauses);
+	                       const HandleSeq& clauses,
+	                       int quotation_level = 0);
 
 	void make_connectivity_map(const HandleSeq&);
 	void make_map_recursive(const Handle&, const Handle&);
@@ -122,7 +123,7 @@ protected:
 	                          const std::vector<std::set<Handle>>&);
 
 	void make_term_trees();
-	void make_term_tree_recursive(const Handle&, const Handle&,
+	void make_term_tree_recursive(const Handle&, Handle,
 	                              PatternTermPtr&);
 
 	void init(void);
@@ -171,6 +172,10 @@ public:
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _varlist; }
 	const Pattern& get_pattern(void) const { return _pat; }
+
+	// Return the list of fixed and virtual clauses we are holding.
+	const HandleSeq& get_fixed(void) const { return _fixed; }
+	const HandleSeq& get_virtual(void) const { return _virtual; }
 
 	bool satisfy(PatternMatchCallback&) const;
 

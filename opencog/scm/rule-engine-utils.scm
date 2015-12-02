@@ -7,9 +7,12 @@
 ; configure a rule-based system (rbs).
 ;
 ; Utilities include:
-; -- ure-add-rules -- Associate rules to an rbs
+; -- ure-add-rule -- Associate a rule to a rbs
+; -- ure-add-rules -- Associate  a list of rule-alias and weight pairs to a rbs
 ; -- ure-set-num-parameter -- Set a numeric parameter of an rbs
 ; -- ure-set-fuzzy-bool-parameter -- Set a fuzzy boolean parameter of an rbs
+; -- ure-define-rbs -- Create a rbs that runs for a parituclar number of
+;                      iterations.
 ;
 ; If you add more utilities don't forget to add them in the
 ; export-rule-engine-utils function.
@@ -21,19 +24,54 @@
 (use-modules (opencog))
 (use-modules (opencog query))
 
-; Given an rbs and a list of pairs (rule weight) create for each rule
-;
-; MemberLink (stv weight 1)
-;    rule
-;    rbs
+(define (ure-add-rule rbs rule-name rule weight)
+"
+  Adds a rule to a rulebase and sets its weight and returns the rule node.
+
+  rbs: The ConceptNode that represents a rulebase.
+
+  rule-name : A string that names the rule.
+
+  rule: The BindLink that is run.
+
+  weight: A number that is used to represent the priority of the rule.
+"
+    ; Didn't add type checking here b/c the ure-configuration format isn't
+    ; set in stone yet. And the best place to do that is in c++ UREConfigReader
+    (let ((alias (Node rule-name)))
+        (DefineLink alias rule)
+
+        (MemberLink (stv weight 1)
+           alias
+           rbs)
+
+        alias
+    )
+)
+
 (define (ure-add-rules rbs rules)
-  (define (ure-add-rule weighted-rule)
-    (let ((rule (car weighted-rule))
-          (weight (cadr weighted-rule)))
-      (MemberLink (stv weight 1)
-         rule
-         rbs)))
-  (for-each ure-add-rule rules)
+"
+  Given a rbs and a list of pairs (rule-alias weight) create for each rule
+
+  MemberLink (stv weight 1)
+    rule-alias
+    rbs
+
+  rbs: The ConceptNode that represents a rulebase
+
+  rules: A list of rule-alias and weight pairs, where rule-alias is the node
+         alias of a rule in a DefineLink already created.
+"
+  (define (expand-pair weighted-rule)
+    (let* ((rule-alias (car weighted-rule))
+           (rule-name (cog-name rule-alias))
+           ; Assuming a rule is a BindLink
+           (rule (car (cog-chase-link 'DefineLink 'BindLink rule-alias)))
+           (weight (cadr weighted-rule)))
+        (ure-add-rule rbs rule-name rule weight)
+    )
+  )
+  (for-each expand-pair rules)
 )
 
 ; Set numerical parameters. Given an rbs, a parameter name and its
@@ -60,7 +98,7 @@
        rbs
        value)
   )
-  (let ((del-prev-val (BindLink 
+  (let ((del-prev-val (BindLink
                           (param-hypergraph (VariableNode "__VALUE__"))
                           (DeleteLink
                              (param-hypergraph (VariableNode "__VALUE__"))))))
@@ -86,8 +124,29 @@
      rbs)
 )
 
+(define (ure-define-rbs rbs iteration)
+"
+  Transforms the atom into a node that represents a rulebase and returns it.
+
+  rbs: The ConceptNode that represents the set of rules.
+  iteration: The maximum number of iteration that the rulebase should
+"
+    (InheritanceLink
+       rbs
+       (ConceptNode "RuleBase"))
+
+    ; URE:attention-allocation isn't set b/c it isn't in use presently.
+    (ure-set-num-parameter rbs "URE:maximum-iterations"  iteration)
+
+    rbs
+)
+
+
 (define (export-rule-engine-utils)
-  (export ure-add-rules
+  (export ure-add-rule
+          ure-add-rules
           ure-set-num-parameter
           ure-set-fuzzy-bool-parameter
-          export-rule-engine-utils))
+          ure-define-rbs
+          export-rule-engine-utils)
+)

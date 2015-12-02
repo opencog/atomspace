@@ -21,37 +21,29 @@ ADD_LIBRARY (atomspace SHARED
 	AttentionBank.cc
 	BackingStore.cc
 	ClassServer.cc
-	CountTruthValue.cc
 	FixedIntegerIndex.cc
 	FloatValue.cc
-	FuzzyTruthValue.cc
-	GenericTruthValue.cc
 	Handle.cc
 	HandleSeqIndex.cc
 	# HandleSetIndex.cc
 	ImportanceIndex.cc
 	# IncomingIndex.cc
-	IndefiniteTruthValue.cc
 	Link.cc
 	LinkIndex.cc
 	LinkValue.cc
 	Node.cc
 	NodeIndex.cc
-	NullTruthValue.cc
-	ProbabilisticTruthValue.cc
-	SimpleTruthValue.cc
 	TLB.cc
-	TruthValue.cc
 	TypeIndex.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
-ADD_DEPENDENCIES(atomspace opencog_atom_types atom_types.h)
+ADD_DEPENDENCIES(atomspace opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace
+	truthvalue  
 	lambda
 	${COGUTIL_LIBRARY}
-	${GSL_LIBRARIES}
 	${Boost_THREAD_LIBRARY}
 )
 
@@ -69,30 +61,22 @@ INSTALL (FILES
 	AttentionBank.h
 	BackingStore.h
 	ClassServer.h
-	CountTruthValue.h
 	FixedIntegerIndex.h
 	FloatValue.h
-	FuzzyTruthValue.h
-	GenericTruthValue.h
 	Handle.h
 	HandleSeqIndex.h
 	# HandleSetIndex.h
 	ImportanceIndex.h
 	# IncomingIndex.h
-	IndefiniteTruthValue.h
 	Link.h
 	LinkIndex.h
 	LinkValue.h
 	NameIndex.h
 	Node.h
 	NodeIndex.h
-	NullTruthValue.h
-	ProbabilisticTruthValue.h
 	ProtoAtom.h
-	SimpleTruthValue.h
 	StringIndex.h
 	TLB.h
-	TruthValue.h
 	TypeIndex.h
 	types.h
 	version.h

@@ -14,11 +14,20 @@ FIND_LIBRARY(ZMQ_LIBRARY NAMES zmq PATHS
     /usr/local/lib/zmq
 )
 
+FIND_PATH(ZMQPP_INCLUDE_DIR zmq.hpp
+  /opt/local/include
+  /usr/local/include
+  /usr/include
+)
+
 # Copy the results to the output variables.
 IF (ZMQ_LIBRARY)
 	SET(ZMQ_FOUND 1)
 	SET(ZMQ_LIBRARIES ${ZMQ_LIBRARY})
 	MESSAGE(STATUS "Found ZeroMQ library: ${ZMQ_LIBRARIES}")
+	IF (ZMQPP_INCLUDE_DIR)
+		SET(ZMQPP_FOUND 1)
+	ENDIF (ZMQPP_INCLUDE_DIR)
 ELSE (ZMQ_LIBRARY)
 	SET(ZMQ_FOUND 0)
 	SET(ZMQ_LIBRARIES)

@@ -6,7 +6,7 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
- * published by the Put Software Foundation and including the exceptions
+ * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
- * Put Software Foundation, Inc.,
+ * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
@@ -94,7 +94,8 @@ void PutLink::init(void)
 	size_t sz = _outgoing.size();
 	if (2 != sz and 3 != sz)
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting an outgoing set size of two or three, got %d", sz);
+			"Expecting an outgoing set size of two or three, got %d; %s",
+			sz, toString().c_str());
 
 	ScopeLink::extract_variables(_outgoing);
 
@@ -118,6 +119,8 @@ void PutLink::static_typecheck_values(void)
 	Type btype = _body->getType();
 	if (DEFINED_SCHEMA_NODE == btype)
 		return;
+	if (DEFINED_PREDICATE_NODE == btype)
+		return;
 
 	size_t sz = _varlist.varseq.size();
 	Type vtype = _values->getType();
@@ -137,8 +140,18 @@ void PutLink::static_typecheck_values(void)
 	if (LIST_LINK == vtype)
 	{
 		if (not _varlist.is_type(lval->getOutgoingSet()))
-			throw InvalidParamException(TRACE_INFO,
-				"PutLink has mismatched value list!");
+		{
+			if (_vardecl)
+				throw SyntaxException(TRACE_INFO,
+					"PutLink has mismatched value list! vardecl=%s\nvals=%s",
+					_vardecl->toString().c_str(),
+					lval->toString().c_str());
+			else
+				throw SyntaxException(TRACE_INFO,
+					"PutLink has mismatched value list! body=%s\nvals=%s",
+					_body->toString().c_str(),
+					lval->toString().c_str());
+		}
 		return;
 	}
 
@@ -219,7 +232,9 @@ Handle PutLink::do_reduce(void) const
 	Handle bods(_body);
 	Variables vars(_varlist);
 	// Resolve the body, if needed:
-	if (DEFINED_SCHEMA_NODE == _body->getType())
+	Type btype = _body->getType();
+	if (DEFINED_SCHEMA_NODE == btype or
+	    DEFINED_PREDICATE_NODE == btype)
 	{
 		Handle dfn(DefineLink::get_definition(_body));
 		// XXX TODO we should perform a type-check on the function.

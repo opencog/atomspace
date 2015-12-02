@@ -14,7 +14,7 @@
 #include <libguile.h>
 
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/TruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
@@ -95,6 +95,26 @@ SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 	TruthValue *tv = verify_tv(stv, "cog-set-tv!", 2);
 
 	h->setTruthValue(tv->clone());
+	scm_remember_upto_here_1(stv);
+	return satom;
+}
+
+SCM SchemeSmob::ss_merge_tv (SCM satom, SCM stv)
+{
+	Handle h = verify_handle(satom, "cog-merge-tv!");
+	TruthValue *tv = verify_tv(stv, "cog-merge-tv!", 2);
+
+	h->merge(tv->clone());
+	scm_remember_upto_here_1(stv);
+	return satom;
+}
+
+SCM SchemeSmob::ss_merge_hi_conf_tv (SCM satom, SCM stv)
+{
+	Handle h = verify_handle(satom, "cog-merge-hi-conf-tv!");
+	TruthValue *tv = verify_tv(stv, "cog-merge-hi-conf-tv!", 2);
+
+	h->merge(tv->clone(), MergeCtrl(MergeCtrl::TVFormula::HIGHER_CONFIDENCE));
 	scm_remember_upto_here_1(stv);
 	return satom;
 }

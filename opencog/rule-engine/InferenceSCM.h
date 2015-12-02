@@ -65,6 +65,13 @@ Handle do_backward_chaining(AtomSpace* as,
                             const Handle& rbs,
                             const Handle& hfocus_set);
 
+/**
+ * @param rbs rule-based system atom
+ * @return ???
+ */
+HandleSeq get_rulebase_rules(AtomSpace* as,
+                          const Handle& rbs);
+
 } /*end of namespace opencog*/
 
 extern "C" {

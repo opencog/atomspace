@@ -1,0 +1,32 @@
+name:                haskell-test
+version:             0.1.0.0
+synopsis:            Tests for the Haskell AtomSpace Bindings
+description:
+homepage:            github.com/opencog/atomspace/tree/master/tests/haskell
+license:             OtherLicense
+author:              Roman Treutlein
+maintainer:          -
+category:            Artificial Intelligence
+build-type:          Simple
+cabal-version:       >=1.10
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     OpenCog.Test
+  other-modules:       OpenCog.Test.TemplateData
+  build-depends:       base
+                     , template-haskell
+                     , opencog-atomspace
+                     , containers
+  default-language:    Haskell2010
+
+Test-Suite haskell-test-suite
+  type:                exitcode-stdio-1.0
+  main-is:             Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base
+                     , opencog-atomspace
+                     , tasty
+                     , tasty-hunit
+                     , haskell-test
+  default-language:    Haskell2010

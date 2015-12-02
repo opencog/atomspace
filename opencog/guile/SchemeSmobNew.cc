@@ -73,14 +73,14 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 
 		// Print the truth value only after the node name
 		TruthValuePtr tv(h->getTruthValue());
-		if (!tv->isDefaultTV()) {
+		if (not tv->isDefaultTV()) {
 			ret += " ";
 			ret += tv_to_string (tv.get());
 		}
 
 		// Print the attention value after the truth value
 		AttentionValuePtr av(h->getAttentionValue());
-		if (av != AttentionValue::DEFAULT_AV()) {
+		if (not av->isDefaultAV()) {
 			ret += " ";
 			ret += av_to_string (av.get());
 		}
@@ -95,14 +95,14 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 
 		// If there's a truth value, print it before the other atoms
 		TruthValuePtr tv(h->getTruthValue());
-		if (!tv->isDefaultTV()) {
+		if (not tv->isDefaultTV()) {
 			ret += " ";
 			ret += tv_to_string (tv.get());
 		}
 
 		// Print the attention value after the truth value
 		AttentionValuePtr av(h->getAttentionValue());
-		if (av != AttentionValue::DEFAULT_AV()) {
+		if (not av->isDefaultAV()) {
 			ret += " ";
 			ret += av_to_string (av.get());
 		}
@@ -419,8 +419,8 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 {
 	Type t = verify_atom_type(stype, "cog-new-node", 1);
 
-	// Special case handling for NumberNode
-	if (NUMBER_NODE == t and scm_is_number(sname)) {
+	// Special case handling for NumberNode (and TimeNode, etc.)
+	if (classserver().isA(t, NUMBER_NODE) and scm_is_number(sname)) {
 		sname = scm_number_to_string(sname, _radix_ten);
 		// TODO: if we're given a string, I guess maybe we should check
 		// that the string is convertible to a number ??

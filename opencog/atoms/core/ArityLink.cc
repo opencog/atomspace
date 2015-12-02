@@ -53,10 +53,6 @@ ArityLink::ArityLink(Link &l)
 
 Handle ArityLink::execute(AtomSpace * as) const
 {
-	// XXX This is probably wrong ... if the as is null, we should
-	// probably use the atomspace that this link is in, right?
-	// We need to make a decision here and in many other places...
-
 	size_t ary = 0;
 	for (Handle h : _outgoing)
 	{
@@ -69,6 +65,9 @@ Handle ArityLink::execute(AtomSpace * as) const
 		if (nullptr != lp) ary += lp->getArity();
 	}
 
+	// XXX This is probably wrong ... if the as is null, we should
+	// probably use the atomspace that this link is in, right?
+	// We need to make a decision here and in many other places...
 	if (NULL == as)
 		return Handle(createNumberNode(ary));
 

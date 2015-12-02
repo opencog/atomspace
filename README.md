@@ -11,6 +11,7 @@ The main project site is at http://opencog.org
 
 An interactive tutorial for getting started is available at:
 https://github.com/opencog/opencog/blob/master/TUTORIAL.md
+See also https://github.com/opencog/atomspace/blob/master/examples
 
 Prerequisites
 -------------
@@ -42,10 +43,6 @@ be built and run.
 ###### guile
 > Embedded scheme interpreter (version 2.0.9 or newer is required)
 > http://www.gnu.org/software/guile/guile.html | guile-2.0-dev
-
-###### libgsl
-> The GNU Scientific Library
-> http://www.gnu.org/software/gsl/ | libgsl0-dev
 
 Optional Prerequisites
 ----------------------

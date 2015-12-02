@@ -28,11 +28,11 @@
 #include "opencog/atomspace/Atom.h"
 #include "opencog/atomspace/Link.h"
 #include "opencog/atomspace/Node.h"
-#include "opencog/atomspace/TruthValue.h"
-#include "opencog/atomspace/CountTruthValue.h"
-#include "opencog/atomspace/NullTruthValue.h"
-#include "opencog/atomspace/IndefiniteTruthValue.h"
-#include "opencog/atomspace/SimpleTruthValue.h"
+#include "opencog/truthvalue/TruthValue.h"
+#include "opencog/truthvalue/CountTruthValue.h"
+#include "opencog/truthvalue/NullTruthValue.h"
+#include "opencog/truthvalue/IndefiniteTruthValue.h"
+#include "opencog/truthvalue/SimpleTruthValue.h"
 
 using namespace opencog;
 

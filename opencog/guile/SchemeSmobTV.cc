@@ -26,11 +26,11 @@
 #include <cstddef>
 #include <libguile.h>
 
-#include <opencog/atomspace/FuzzyTruthValue.h>
-#include <opencog/atomspace/ProbabilisticTruthValue.h>
-#include <opencog/atomspace/CountTruthValue.h>
-#include <opencog/atomspace/IndefiniteTruthValue.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/truthvalue/FuzzyTruthValue.h>
+#include <opencog/truthvalue/ProbabilisticTruthValue.h>
+#include <opencog/truthvalue/CountTruthValue.h>
+#include <opencog/truthvalue/IndefiniteTruthValue.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
@@ -406,13 +406,13 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 			IndefiniteTruthValue *itv = static_cast<IndefiniteTruthValue *>(tv);
 			SCM lower = scm_from_double(itv->getL());
 			SCM upper = scm_from_double(itv->getU());
-			SCM conf = scm_from_double(itv->getConfidence());
+			SCM conf_level = scm_from_double(itv->getConfidenceLevel());
 			SCM slower = scm_from_utf8_symbol("lower");
 			SCM supper = scm_from_utf8_symbol("upper");
-			SCM sconf = scm_from_utf8_symbol("confidence");
+			SCM sconf_level = scm_from_utf8_symbol("confidence-level");
 	
 			SCM rc = SCM_EOL;
-			rc = scm_acons(sconf, conf, rc);
+			rc = scm_acons(sconf_level, conf_level, rc);
 			rc = scm_acons(supper, upper, rc), 
 			rc = scm_acons(slower, lower, rc);
 			scm_remember_upto_here_1(s);
@@ -458,6 +458,33 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 	}
 	scm_remember_upto_here_1(s);
 	return SCM_EOL;
+}
+
+/**
+ * Return the truth value mean
+ */
+SCM SchemeSmob::ss_tv_get_mean(SCM s)
+{
+	TruthValue *tv = verify_tv(s, "cog-tv-mean");
+	return scm_from_double(tv->getMean());
+}
+
+/**
+ * Return the truth value confidence
+ */
+SCM SchemeSmob::ss_tv_get_confidence(SCM s)
+{
+	TruthValue *tv = verify_tv(s, "cog-tv-confidence");
+	return scm_from_double(tv->getConfidence());
+}
+
+/**
+ * Return the truth value count
+ */
+SCM SchemeSmob::ss_tv_get_count(SCM s)
+{
+	TruthValue *tv = verify_tv(s, "cog-tv-count");
+	return scm_from_double(tv->getCount());
 }
 
 #endif /* HAVE_GUILE */

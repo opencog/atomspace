@@ -9,7 +9,7 @@
 #define _OPENCOG_SCHEME_MODULE_H
 
 #include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/TruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 #include <opencog/atomspace/atom_types.h>
 
 namespace opencog {
@@ -27,6 +27,7 @@ class FunctionWrap
 		Handle (*_func_h_ahhh)(AtomSpace*, const Handle&,
 		                      const Handle&, const Handle&);
 		Handle (*_func_h_ahtq)(AtomSpace*, const Handle&, Type, const HandleSeq&);
+		HandleSeq (*_func_q_ah)(AtomSpace*, const Handle&);
 
 		// Wrappers are used because define_scheme_primitive expect a
 		// class function member pointer as opposed to a dangling
@@ -43,7 +44,10 @@ class FunctionWrap
 		// These wrappers return a TruthValuePtr and abstract the
 		// atomspace away.
 		TruthValuePtr (*_pred_ah)(AtomSpace*, const Handle&);
-		TruthValuePtr as_prapper_h(Handle);
+		TruthValuePtr as_wrapper_p_h(Handle);
+
+		// This wrapper return HandleSeq and abstract the atomspace away.
+		HandleSeq as_wrapper_q_h(Handle);
 
 		const char *_name;  // scheme name of the c++ function.
 	public:
@@ -62,6 +66,8 @@ class FunctionWrap
 		                        const Handle&),
 		             const char*, const char*);
 		FunctionWrap(TruthValuePtr (*)(AtomSpace*, const Handle&),
+		             const char*, const char*);
+		FunctionWrap(HandleSeq (*)(AtomSpace*, const Handle&),
 		             const char*, const char*);
 };
 
@@ -82,4 +88,3 @@ class ModuleWrap
 }
 
 #endif // _OPENCOG_SCHEME_MODULE_H
-

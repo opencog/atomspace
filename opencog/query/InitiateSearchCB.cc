@@ -497,30 +497,40 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 /* ======================================================== */
 /**
  * Find the rarest link type contained in the clause, or one
- * of its subclauses. Of course, QuoteLinks, and anything under
- * a Quotelink, must be ignored.
+ * of its subclauses.
  */
 void InitiateSearchCB::find_rarest(const Handle& clause,
                                    Handle& rarest,
-                                   size_t& count)
+                                   size_t& count,
+                                   int quotation_level)
 {
 	Type t = clause->getType();
-	if (QUOTE_LINK == t) return;
-	if (CHOICE_LINK == t) return;
+
+	// Base case
+	if ((quotation_level < 1) and (CHOICE_LINK == t)) return;
 
 	LinkPtr lll(LinkCast(clause));
-	if (NULL == lll) return;
+	if (nullptr == lll) return;
 
-	size_t num = (size_t) _as->get_num_atoms_of_type(t);
-	if (num < count)
+	if ((QUOTE_LINK == t and quotation_level > 0)
+	    or (UNQUOTE_LINK == t and quotation_level > 1)
+	    or (QUOTE_LINK != t and UNQUOTE_LINK != t))
 	{
-		count = num;
-		rarest = clause;
+		size_t num = (size_t) _as->get_num_atoms_of_type(t);
+		if (num < count)
+		{
+			count = num;
+			rarest = clause;
+		}
 	}
+
+	// Recursive case
+	if (QUOTE_LINK == t) quotation_level++;
+	else if (UNQUOTE_LINK == t) quotation_level--;
 
 	const HandleSeq& oset = lll->getOutgoingSet();
 	for (const Handle& h : oset)
-		find_rarest(h, rarest, count);
+		find_rarest(h, rarest, count, quotation_level);
 }
 
 /* ======================================================== */
@@ -593,7 +603,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
  * Initiate a search by looping over all atoms of the allowed
  * variable types (as set with the set_type_testrictions() method).
  * This assumes that the varset contains the variables to be searched
- * over, and that the type restrictins are set up approrpriately.
+ * over, and that the type restrictions are set up approrpriately.
  *
  * If the varset is empty, or if there are no variables, then the
  * entire atomspace will be searched.  Depending on the pattern,
@@ -607,9 +617,9 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 
 	// Find the rarest variable type;
 	size_t count = SIZE_MAX;
-	Type ptype = ATOM;
+	std::set<Type> ptypes;
 
-	LAZY_LOG_FINE << "varset size = " <<  _variables->varset.size();
+	LAZY_LOG_FINE << "_variables = " <<  _variables->to_string();
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
 	for (const Handle& var: _variables->varset)
@@ -620,40 +630,42 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 		const std::set<Type>& typeset = tit->second;
 		LAZY_LOG_FINE << "Type-restictions set size = "
 		              << typeset.size();
+
+		// Calculate the total number of atoms of typeset
+		size_t num = 0;
 		for (Type t : typeset)
+			num += (size_t) _as->get_num_atoms_of_type(t);
+
+		LAZY_LOG_FINE << var->toString() << "has "
+		              << num << " atoms in the atomspace";
+
+		if (0 < num and num < count)
 		{
-			size_t num = (size_t) _as->get_num_atoms_of_type(t);
-			LAZY_LOG_FINE << "Type = "
-			              << _classserver.getTypeName(t) << " has "
-			              << num << " atoms in the atomspace";
-			if (0 < num and num < count)
+			for (const Handle& cl : clauses)
 			{
-				for (const Handle& cl : clauses)
+				// Evaluatables dont' exist in the atomspace, in general.
+				// Cannot start a search with them.
+				if (0 < _pattern->evaluatable_holders.count(cl)) continue;
+				FindAtoms fa(var);
+				fa.search_set(cl);
+				if (cl == var)
 				{
-					// Evaluatables dont' exist in the atomspace, in general.
-					// Cannot start a search with them.
-					if (0 < _pattern->evaluatable_holders.count(cl)) continue;
-					FindAtoms fa(var);
-					fa.search_set(cl);
-					if (cl == var)
-					{
-						_root = cl;
-						_starter_term = cl;
-						count = num;
-						ptype = t;
-						LAZY_LOG_FINE << "New minimum count of " << count;
-						break;
-					}
-					if (0 < fa.least_holders.size())
-					{
-						_root = cl;
-						_starter_term = *fa.least_holders.begin();
-						count = num;
-						ptype = t;
-						LAZY_LOG_FINE << "New minimum count of "
-						              << count << "(nonroot)";
-						break;
-					}
+					_root = cl;
+					_starter_term = cl;
+					count = num;
+					ptypes = typeset;
+					LAZY_LOG_FINE << "New minimum count of " << count;
+					break;
+				}
+				if (0 < fa.least_holders.size())
+				{
+					_root = cl;
+					_starter_term = *fa.least_holders.begin();
+					count = num;
+					ptypes = typeset;
+					LAZY_LOG_FINE << "New minimum count of "
+					              << count << "(nonroot)";
+					break;
 				}
 			}
 		}
@@ -674,10 +686,11 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	}
 
 	HandleSeq handle_set;
-	if (ptype == ATOM)
-		_as->get_handles_by_type(handle_set, ptype, true);
+	if (ptypes.empty())
+		_as->get_handles_by_type(handle_set, ATOM, true);
 	else
-		_as->get_handles_by_type(handle_set, ptype);
+		for (Type ptype : ptypes)
+			_as->get_handles_by_type(handle_set, ptype);
 
 	LAZY_LOG_FINE << "Atomspace reported " << handle_set.size() << " atoms";
 

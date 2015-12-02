@@ -6,7 +6,7 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
- * published by the Function Software Foundation and including the exceptions
+ * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
- * Function Software Foundation, Inc.,
+ * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
@@ -26,7 +26,10 @@
 
 #include "ArityLink.h"
 #include "DeleteLink.h"
+#include "SleepLink.h"
+#include "TimeLink.h"
 #include "RandomChoice.h"
+#include "RandomNumber.h"
 
 using namespace opencog;
 
@@ -110,16 +113,17 @@ Handle FunctionLink::factory(Type t, const HandleSeq& seq)
 	if (ARITY_LINK == t)
 		return Handle(createArityLink(seq));
 
-	if (PLUS_LINK == t)
-		// return Handle(createPlusLink(seq));
-		throw RuntimeException(TRACE_INFO, "Can't be a factory for this!");
-
 	if (RANDOM_CHOICE_LINK == t)
 		return Handle(createRandomChoiceLink(seq));
 
-	if (TIMES_LINK == t)
-		// return Handle(createTimesLink(seq));
-		throw RuntimeException(TRACE_INFO, "Can't be a factory for this!");
+	if (RANDOM_NUMBER_LINK == t)
+		return Handle(createRandomNumberLink(seq));
+
+	if (SLEEP_LINK == t)
+		return Handle(createSleepLink(seq));
+
+	if (TIME_LINK == t)
+		return Handle(createTimeLink(seq));
 
 	// XXX FIXME In principle, we should manufacture the
 	// ExecutionOutputLink as well. In practice, we can't, due to a
@@ -128,7 +132,9 @@ Handle FunctionLink::factory(Type t, const HandleSeq& seq)
 	// depends on python. Whoops!)
 	if (EXECUTION_OUTPUT_LINK == t)
 		// return Handle(createExecutionOutputLink(seq));
-		throw RuntimeException(TRACE_INFO, "Can't be a factory for this!");
+		throw SyntaxException(TRACE_INFO, "Can't be a factory for this!");
 
-	throw RuntimeException(TRACE_INFO, "Not executable!");
+	throw SyntaxException(TRACE_INFO,
+		"FunctionLink is not a factory for %s",
+		classserver().getTypeName(t).c_str());
 }

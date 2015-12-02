@@ -14,13 +14,13 @@ ADD_CUSTOM_COMMAND(
 )
 
 ADD_LIBRARY (zmqatoms SHARED
-	ZMQMessages.pb
+	ZMQMessages.pb.cc ZMQMessages.pb.h
 	ProtocolBufferSerializer
 	ZMQClient
 	ZMQPersistSCM
 )
 
-TARGET_LINK_LIBRARIES(zmqatoms zmq)
+TARGET_LINK_LIBRARIES(zmqatoms zmq ${PROTOBUF_LIBRARY})
 
 INSTALL (TARGETS zmqatoms
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"

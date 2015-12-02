@@ -39,16 +39,19 @@ private:
 	                                     const Handle& args);
 public:
 	ExecutionOutputLink(const HandleSeq& oset,
-	     TruthValuePtr tv = TruthValue::NULL_TV(),
+	     TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	     AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	ExecutionOutputLink(const Handle& schema, const Handle& args,
-	     TruthValuePtr tv = TruthValue::NULL_TV(),
+	     TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	     AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	ExecutionOutputLink(Link& l);
 
 	virtual Handle execute(AtomSpace* = NULL) const;
+
+	Handle get_schema(void) const { return getOutgoingAtom(0); }
+	Handle get_args(void) const { return getOutgoingAtom(1); }
 };
 
 typedef std::shared_ptr<ExecutionOutputLink> ExecutionOutputLinkPtr;

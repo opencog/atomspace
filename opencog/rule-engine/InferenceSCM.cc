@@ -25,6 +25,7 @@
 
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
+#include "UREConfigReader.h"
 #include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;
@@ -42,17 +43,19 @@ InferenceSCM::InferenceSCM() : ModuleWrap("opencog rule-engine") {}
 /// Thus, all the definitions below happen in that module.
 void InferenceSCM::init(void)
 {
-	_binders.push_back(new FunctionWrap(do_forward_chaining,
-	                                    "cog-fc", "rule-engine"));
-	_binders.push_back(new FunctionWrap(do_backward_chaining,
-	                                    "cog-bc", "rule-engine"));
+    _binders.push_back(new FunctionWrap(do_forward_chaining,
+                                        "cog-fc", "rule-engine"));
+    _binders.push_back(new FunctionWrap(do_backward_chaining,
+                                        "cog-bc", "rule-engine"));
+    _binders.push_back(new FunctionWrap(get_rulebase_rules,
+                                        "ure-rbs-rules", "rule-engine"));
 }
 
 InferenceSCM::~InferenceSCM()
 {
 #if PYTHON_BUG_IS_FIXED
-	for (FunctionWrap* pw : _binders)
-		delete pw;
+    for (FunctionWrap* pw : _binders)
+        delete pw;
 #endif
 }
 
@@ -128,6 +131,32 @@ Handle do_backward_chaining(AtomSpace* as,
     return as->add_link(LIST_LINK, soln_list_link);
 #else
     return Handle::UNDEFINED;
+#endif
+}
+
+HandleSeq get_rulebase_rules(AtomSpace* as,
+                          const Handle& rbs)
+{
+#ifdef HAVE_GUILE
+    if (Handle::UNDEFINED == rbs)
+        throw RuntimeException(TRACE_INFO,
+            "InferenceSCM::get_rulebase_rules - invalid rulebase!");
+
+    UREConfigReader ure_config(*as, rbs);
+    auto rules = ure_config.get_rules();
+    HandleSeq hs;
+
+    // Copy handles from a rule vector to a handle vector as there are no
+    // scheme-primitive signature for rule vector.
+    // TODO: create a rule-vector scheme-primitive signature, if Rule.h isn't
+    // converted to a sub-class of PatternLink.
+    for (auto i = rules.begin(); i != rules.end(); i++){
+        hs.push_back((*i).get_alias());
+    }
+
+    return hs;
+#else
+    return HandleSeq();
 #endif
 }
 

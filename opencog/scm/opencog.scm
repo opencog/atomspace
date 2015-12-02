@@ -23,37 +23,42 @@
 
 (use-modules (system base compile))
 
-; Create a global to hold the atomspace ... to (try to) prevent guile GC
-; from collecting it.  Unfortunately, there appears to be a GC bug in
-; guile-2.0 that causes his o e collected, anyway, under certain rare
-; circumstances (during recursive calls into guile).
-(define-public cog-initial-as (cog-new-atomspace))
-
-; Initialze a default atomspace, just to keep things sane...
-; The below is safe, because this module runs at most only once
-; (if invoked from the guile shell, as (load-modules (opencog)) )
-; or zero times, if invoked from the cogserver shell. The cogserver
-; refuses to run this; the cogserver main atomspace is never clobbered.
+; Create a global to hold the atomspace ... to (try to) prevent guile
+; GC from collecting it.  Unfortunately, there appears to be a GC bug
+; in guile-2.1 that causes this to be collected, anyway.  Its as if
+; guile forgets about this ... how? why? I don't get it.
 ;
-(cog-set-atomspace! cog-initial-as)
+; But wait -- it gets worse. If this module is loaded from the guile
+; REPL (i.e. as "(use-modules (opencog))" ), and then the cogserver
+; is started from the REPL, as "(start-cogserver "cogserver.conf"),
+; then there is a good chance that this file will be loaded (again),
+; directly by the SCM_PRELOAD directive in the cogserver.conf file.
+; Viz, the stuff in here may end up running a second time. We want
+; to avoid creating a second atomspace as a result. The below tries
+; to avoid problems by simply grabbing the existing atomspace, when
+; called a second time; this will almost surely be the cogserver
+; atomspace. Ugh. What a mess.
 
-; Load core atom types
+(define-public cog-initial-as (cog-atomspace))
+(if (eq? cog-initial-as #f)
+	(begin
+		(set! cog-initial-as (cog-new-atomspace))
+		; Initialize a default atomspace, just to keep things sane...
+		(cog-set-atomspace! cog-initial-as)))
+
+; Load core atom types.
 ; The remaining atom types from the cogserver are in (opencog atom-types)
 (load-from-path "core_types.scm")
 
-; Load other grunge too
-;
-; Lots of these things should probably be modules ...
-;
-; Also they need to be defined "public" to be useable in guile, except
-; for utilities that uses (export-utilities)
+; Load other grunge too.
+; Some of these things should probably be modules ...?
 (load-from-path "config.scm")
 
 (load-from-path "core-docs.scm")
 
 (load-from-path "utilities.scm")
-(export-utilities)
 
 (load-from-path "apply.scm")
 (load-from-path "av-tv.scm")
 (load-from-path "file-utils.scm")
+(load-from-path "debug-trace.scm")

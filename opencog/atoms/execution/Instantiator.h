@@ -42,36 +42,37 @@ namespace opencog {
 class Instantiator
 {
 private:
-		AtomSpace *_as;
-		const std::map<Handle, Handle> *_vmap;
-		bool _halt = false;
+	AtomSpace *_as;
+	const std::map<Handle, Handle> *_vmap;
+	bool _halt = false;
 
-		/**
-		 * Recursively walk a tree starting with the root of the
-		 * hypergraph to instantiate (typically an ExecutionOutputLink).
-		 *
-		 * Return the current result of the execution. If the node is an
-		 * ExecutionOutputLink then it returns the final result. If the
-		 * node is another list (typically a ListLink) it returns a copy
-		 * of it, replacing the variables in its outgoing by their
-		 * respective groundings.
-		 *
-		 * See also the related function VariableList::substitute(),
-		 * which will simply perform a substitution, without performing
-		 * any execution. See also PutLink, which does substituion.
-		 * (actually, beta reduction).
-		 */
-		Handle walk_tree(const Handle& tree);
-		bool walk_tree(HandleSeq&, const HandleSeq& orig);
+	/**
+	 * Recursively walk a tree starting with the root of the
+	 * hypergraph to instantiate (typically an ExecutionOutputLink).
+	 *
+	 * Return the current result of the execution. If the node is an
+	 * ExecutionOutputLink then it returns the final result. If the
+	 * node is another list (typically a ListLink) it returns a copy
+	 * of it, replacing the variables in its outgoing by their
+	 * respective groundings.
+	 *
+	 * See also the related function VariableList::substitute(),
+	 * which will simply perform a substitution, without performing
+	 * any execution. See also PutLink, which does substituion.
+	 * (actually, beta reduction).
+	 */
+	Handle walk_tree(const Handle& tree, int quotation_level = 0);
+	bool walk_tree(HandleSeq&, const HandleSeq& orig,
+	               int quotation_level = 0);
 
-	public:
-		Instantiator(AtomSpace* as) : _as(as) {}
+public:
+	Instantiator(AtomSpace* as) : _as(as) {}
 
-		Handle instantiate(const Handle& expr, const std::map<Handle, Handle> &vars);
-		Handle execute(const Handle& expr)
-		{
+	Handle instantiate(const Handle& expr, const std::map<Handle, Handle> &vars);
+	Handle execute(const Handle& expr)
+	{
 			return instantiate(expr, std::map<Handle, Handle>());
-		}
+	}
 };
 
 } // namespace opencog

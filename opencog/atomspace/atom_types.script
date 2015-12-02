@@ -103,6 +103,14 @@ CHOICE_LINK <- ORDERED_LINK
 //
 PRESENT_LINK <- ORDERED_LINK
 
+// Performance scripting links.
+// ParallelLink launches multiple threads, but does not wait for any of
+// them to return.  JoinLink launches multiple threads, and waits for
+// all of them to return, and then returns the And of thier truth
+// values.
+PARALLEL_LINK <- AND_LINK
+JOIN_LINK <- PARALLEL_LINK
+
 // ====================================================================
 // Herbrand/First-order-logic/lambda-calc/model-theory style links
 // and nodes.  This are used to implement the pattern matcher, and
@@ -231,25 +239,27 @@ UNQUOTE_LINK <- ORDERED_LINK
 // Logical quantifiers
 FORALL_LINK <- SCOPE_LINK "ForAllLink"
 EXISTS_LINK <- SCOPE_LINK
-AVERAGE_LINK <- FORALL_LINK
+
+// Average links are not really useful since they are equivalent to a
+// predicate (which could be a PredicateNode or derived, or built with
+// a LambdaLink. Note that the PLN rules should offer a way to
+// manipulate a predicate as if it were universally averaged quantified.
+// AVERAGE_LINK <- SCOPE_LINK
 
 // Convert predicate into concept
 SATISFYING_SET_LINK <- SCOPE_LINK
 
-// ??? What is this???
-// SCHOLEM_LINK <- ORDERED_LINK
-
 // Basic first-order logic operations
-// These inherit from ForAll because if these contain variables, then
-// those variables are implicitly scoped to this link (i.e. are not
-// free, but are bound to this link.) Truth-value wise, these behave
-// like AVERAGE_LINK, averaging over the for-all universe that they
-// apply to.
-IMPLICATION_LINK <- AVERAGE_LINK
+
+// Due to ImplicationLink having a sugar syntax form, an
+// ImplicationLink *may* inherits from a ScopeLink. See
+// http://wiki.opencog.org/wikihome/index.php/ImplicationLink for more
+// explanation.
+IMPLICATION_LINK <- SCOPE_LINK
 INTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
 EXTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
 
-EQUIVALENCE_LINK <- AVERAGE_LINK
+EQUIVALENCE_LINK <- SCOPE_LINK
 INTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
 EXTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
 
@@ -353,10 +363,20 @@ EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
 FOLD_LINK <- FUNCTION_LINK
 ARITHMETIC_LINK <- FOLD_LINK
 PLUS_LINK <- ARITHMETIC_LINK
+MINUS_LINK <- PLUS_LINK
 TIMES_LINK <- ARITHMETIC_LINK
+DIVIDE_LINK <- TIMES_LINK
+
+RANDOM_NUMBER_LINK <- FUNCTION_LINK
 
 // Return arity of the wrapped link.
 ARITY_LINK <- FUNCTION_LINK
 
 // Return (with uniform distribution) one of the links it wraps.
 RANDOM_CHOICE_LINK <- FUNCTION_LINK
+
+// Return the current time.
+TIME_LINK <- FUNCTION_LINK
+
+// Sleep link pauses executation for the indicated number of seconds.
+SLEEP_LINK <- FUNCTION_LINK

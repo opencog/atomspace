@@ -150,7 +150,7 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 void SchemeSmob::throw_exception(const char *msg, const char * func)
 {
 	if (msg) {
-		// Should we even bother to log this?
+		// Should we even bother to log this?  Probably not ...
 		logger().info("Guile caught C++ exception: %s", msg);
 
 		// scm_misc_error(fe->get_name(), msg, SCM_EOL);
@@ -206,6 +206,8 @@ void SchemeSmob::register_procs(void*)
 	// property setters on atoms
 	register_proc("cog-set-av!",           2, 0, 0, C(ss_set_av));
 	register_proc("cog-set-tv!",           2, 0, 0, C(ss_set_tv));
+	register_proc("cog-merge-tv!",         2, 0, 0, C(ss_merge_tv));
+	register_proc("cog-merge-hi-conf-tv!", 2, 0, 0, C(ss_merge_hi_conf_tv));
 	register_proc("cog-inc-vlti!",         1, 0, 0, C(ss_inc_vlti));
 	register_proc("cog-dec-vlti!",         1, 0, 0, C(ss_dec_vlti));
 
@@ -232,6 +234,9 @@ void SchemeSmob::register_procs(void*)
 	register_proc("cog-ptv?",              1, 0, 0, C(ss_ptv_p));
 	register_proc("cog-ftv?",              1, 0, 0, C(ss_ftv_p));
 	register_proc("cog-tv->alist",         1, 0, 0, C(ss_tv_get_value));
+	register_proc("cog-tv-mean",           1, 0, 0, C(ss_tv_get_mean));
+	register_proc("cog-tv-confidence",     1, 0, 0, C(ss_tv_get_confidence));
+	register_proc("cog-tv-count",          1, 0, 0, C(ss_tv_get_count));
 
 	// Atom Spaces
 	register_proc("cog-new-atomspace",     0, 1, 0, C(ss_new_as));

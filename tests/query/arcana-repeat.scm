@@ -6,7 +6,7 @@
 (use-modules (opencog query))
 
 ; Two parts, both identical
-(ImplicationLink
+(ListLink
 	(ListLink
 		(EvaluationLink
 			(PredicateNode "this way")
@@ -28,7 +28,7 @@
 )
 
 ; Three parts, all three identical
-(ImplicationLink
+(ListLink
 	(ListLink
 		(EvaluationLink
 			(PredicateNode "this way")
@@ -59,7 +59,7 @@
 )
 
 ; One part, three identical sub-parts
-(ImplicationLink
+(ListLink
 	(ListLink
 		(EvaluationLink
 			(PredicateNode "this way")
@@ -87,7 +87,7 @@
 
 ;; Two parts, one different than the other, but having a common
 ;; subexpression.
-(ImplicationLink
+(ListLink
 	(ListLink
 		(EvaluationLink
 			(PredicateNode "this way")
@@ -110,7 +110,7 @@
 
 ;; Three parts, all three different, but each having a common
 ;; subexpression.
-(ImplicationLink
+(ListLink
 	(ListLink
 		(EvaluationLink
 			(PredicateNode "this way")
@@ -145,7 +145,7 @@
 (define (repeat-same)
 	(BindLink
 		(VariableNode "$x")
-		(ImplicationLink
+		(ListLink
 			(ListLink
 				(EvaluationLink
 					(PredicateNode "this way")
@@ -174,7 +174,7 @@
 (define (repeat-different)
 	(BindLink
 		(VariableNode "$x")
-		(ImplicationLink
+		(ListLink
 			(ListLink
 				(EvaluationLink
 					(PredicateNode "this way")
@@ -203,7 +203,7 @@
 (define (repeat-diff-thrice)
 	(BindLink
 		(VariableNode "$x")
-		(ImplicationLink
+		(ListLink
 			(ListLink
 				(EvaluationLink
 					(PredicateNode "this way")
@@ -241,7 +241,7 @@
 (define (repeat-thrice)
 	(BindLink
 		(VariableNode "$x")
-		(ImplicationLink
+		(ListLink
 			(ListLink
 				(EvaluationLink
 					(PredicateNode "this way")
@@ -279,7 +279,7 @@
 (define (repeat-once)
 	(BindLink
 		(VariableNode "$x")
-		(ImplicationLink
+		(ListLink
 			(ListLink
 				(EvaluationLink
 					(PredicateNode "this way")

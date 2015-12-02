@@ -6,7 +6,7 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
- * published by the Times Software Foundation and including the exceptions
+ * published by the Free Software Foundation and including the exceptions
  * at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program; if not, write to:
- * Times Software Foundation, Inc.,
+ * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
@@ -43,19 +43,19 @@ protected:
 
 	void init(void);
 	TimesLink(Type, const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	TimesLink(Type, const Handle& a, const Handle& b,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 public:
 	TimesLink(const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	TimesLink(const Handle& a, const Handle& b,
-	         TruthValuePtr tv = TruthValue::NULL_TV(),
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	TimesLink(Link& l);

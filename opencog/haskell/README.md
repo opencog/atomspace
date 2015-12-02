@@ -115,7 +115,7 @@ stack ghc example.hs
   "haskell-atomspace library not found" , first of all, you should
   ensure it was properly installed when installing the AtomSpace.
 
-* If you get an error like `libhaskell-atomspace.so: cannot open
+* If you get an error like `libatomspace-cwrapper.so: cannot open
   shared object file: No such file or directory` try to run `sudo
   ldconfig /usr/local/lib/opencog/`
 

@@ -37,11 +37,11 @@ class EvaluationLink : public FreeLink
 {
 public:
 	EvaluationLink(const HandleSeq& oset,
-	     TruthValuePtr tv = TruthValue::NULL_TV(),
+	     TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	     AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	EvaluationLink(const Handle& schema, const Handle& args,
-	     TruthValuePtr tv = TruthValue::NULL_TV(),
+	     TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	     AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	EvaluationLink(Link& l);
@@ -50,10 +50,12 @@ public:
 	    return do_evaluate(as, getHandle());
 	}
 
-	static TruthValuePtr do_evaluate(AtomSpace*, const Handle&);
+	static TruthValuePtr do_evaluate(AtomSpace*, const Handle&,
+	                                 bool silent=false);
 	static TruthValuePtr do_eval_scratch(AtomSpace* main,
 	                                     const Handle&,
-	                                     AtomSpace* scratch);
+	                                     AtomSpace* scratch,
+	                                     bool silent=false);
 	static TruthValuePtr do_evaluate(AtomSpace*,
 	                                 const HandleSeq& schema_and_args);
 	static TruthValuePtr do_evaluate(AtomSpace*,

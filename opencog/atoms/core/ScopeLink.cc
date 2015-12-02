@@ -103,7 +103,7 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 
 	// If the first atom is not explicitly a variable declaration, then
 	// there are no variable declarations. There are two cases that; can
-	// apply here: either the body is a lmabda, in whcih casse, we copy
+	// apply here: either the body is a lambda, in which casse, we copy
 	// the variables from the lambda; else we extract all free variables.
 	if (VARIABLE_LIST != decls and
 	    VARIABLE_NODE != decls and
@@ -129,10 +129,11 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 
 	// If we are here, then the first outgoing set member should be
 	// a variable declaration.
+	_vardecl = oset[0];
 	_body = oset[1];
 
 	// Initialize _varlist with the scoped variables
-	init_scoped_variables(oset[0]);
+	init_scoped_variables(_vardecl);
 }
 
 /* ================================================================= */

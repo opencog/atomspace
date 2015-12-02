@@ -36,7 +36,8 @@
 
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/ProtoAtom.h>
-#include <opencog/atomspace/TruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atomspace/types.h>
 
 class AtomUTest;
 
@@ -267,7 +268,7 @@ public:
     void setTruthValue(TruthValuePtr);
 
     /** merge truth value into this */
-    void merge(TruthValuePtr);
+    void merge(TruthValuePtr, const MergeCtrl& mc=MergeCtrl());
 
     /**
      * Merge truth value, return Handle for this.
@@ -364,10 +365,10 @@ public:
         return result;
     }
 
-	/**
-	 * Functional version of getIncomingSetByType
-	 */
-	IncomingSet getIncomingSetByType(Type type, bool subclass = false);
+    /**
+     * Functional version of getIncomingSetByType
+     */
+    IncomingSet getIncomingSetByType(Type type, bool subclass = false);
 
     /** Returns a string representation of the node.
      *
@@ -377,11 +378,11 @@ public:
     virtual std::string toString(const std::string& indent) = 0;
     virtual std::string toShortString(const std::string& indent) = 0;
 
-	// Work around gdb's incapability to build a string on the fly,
-	// see http://stackoverflow.com/questions/16734783 for more
-	// explanation.
-	std::string toString() { return toString(""); }
-	std::string toShortString() { return toShortString(""); }
+    // Work around gdb's incapability to build a string on the fly,
+    // see http://stackoverflow.com/questions/16734783 for more
+    // explanation.
+    std::string toString() { return toString(""); }
+    std::string toShortString() { return toShortString(""); }
 
     /** Returns whether two atoms are equal.
      *

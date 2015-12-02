@@ -53,24 +53,26 @@
 
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 threads))  ; needed for par-map par-for-each
-; (use-modules (system base compile)) ;; needed for compiler
 
-(define (av sti lti vlti) (cog-new-av sti lti vlti))
+; See below; the compiler step is not needed for guile-2.1
+(use-modules (system base compile)) ;; needed for compiler
 
-(define (stv mean conf) (cog-new-stv mean conf))
-(define (itv lower upper conf) (cog-new-itv lower upper conf))
-(define (ctv mean conf count) (cog-new-ctv mean conf count))
-(define (ptv mean conf count) (cog-new-ptv mean conf count))
-(define (ftv mean conf) (cog-new-ftv mean conf))
+(define-public (av sti lti vlti) (cog-new-av sti lti vlti))
+
+(define-public (stv mean conf) (cog-new-stv mean conf))
+(define-public (itv lower upper conf) (cog-new-itv lower upper conf))
+(define-public (ctv mean conf count) (cog-new-ctv mean conf count))
+(define-public (ptv mean conf count) (cog-new-ptv mean conf count))
+(define-public (ftv mean conf) (cog-new-ftv mean conf))
 
 ; Fetch the mean, confidence and count of a TV.
-(define (tv-mean tv)
+(define-public (tv-mean tv)
 "
   Return the floating-point mean (strength) of a TruthValue.
 "
 	(assoc-ref (cog-tv->alist tv) 'mean))
 
-(define (tv-conf tv)
+(define-public (tv-conf tv)
 "
   Return the floating-point confidence of a TruthValue.
 "
@@ -78,7 +80,7 @@
 ;
 ; Simple truth values won't have a count. Its faster to just check
 ; for #f than to call (cog-ctv? tv)
-(define (tv-count tv)
+(define-public (tv-count tv)
 "
   Return the floating-point count of a CountTruthValue.
 "
@@ -91,12 +93,12 @@
 ; (define (gar x) (if (cog-atom? x) (car (cog-outgoing-set x)) (car x)))
 ; (define (gdr x) (if (cog-atom? x) (cadr (cog-outgoing-set x)) (cdr x)))
 
-(define (gar x) (car (cog-outgoing-set x)) )
-(define (gdr x) (cadr (cog-outgoing-set x)) )
-(define (gadr x) (gar (gdr x)) )
-(define (gddr x) (gdr (gdr x)) )
-(define (gaddr x) (gar (gddr x)) )
-(define (gdddr x) (gdr (gddr x)) )
+(define-public (gar x) (car (cog-outgoing-set x)) )
+(define-public (gdr x) (cadr (cog-outgoing-set x)) )
+(define-public (gadr x) (gar (gdr x)) )
+(define-public (gddr x) (gdr (gdr x)) )
+(define-public (gaddr x) (gar (gddr x)) )
+(define-public (gdddr x) (gdr (gddr x)) )
 
 ; A more agressive way of doing the above:
 ; (define car (let ((oldcar car)) (lambda (x) (if (cog-atom? x) (oldcar (cog-outgoing-set x)) (oldcar x)))))
@@ -104,7 +106,7 @@
 
 ; -----------------------------------------------------------------------
 ; for-each-except
-(define (for-each-except exclude proc lst)
+(define-public (for-each-except exclude proc lst)
 "
   Standard for-each loop, except that anything matching 'except' is skipped
 "
@@ -125,7 +127,7 @@
 
 ; --------------------------------------------------------------
 ;
-(define (cog-atom-incr atom cnt)
+(define-public (cog-atom-incr atom cnt)
 "
   cog-atom-incr --  Increment count truth value on 'atom' by 'cnt'
 
@@ -159,7 +161,7 @@
 )
 
 ; --------------------------------------------------------------------
-(define (purge-hypergraph atom)
+(define-public (purge-hypergraph atom)
 "
   purge-hypergraph -- purge a hypergraph and everything under it
 
@@ -181,7 +183,7 @@
 )
 
 ; --------------------------------------------------------------------
-(define (purge-type atom-type)
+(define-public (purge-type atom-type)
 "
   purge-type -- purge all atoms of type 'atom-type'
 
@@ -196,7 +198,7 @@
 )
 
 ; --------------------------------------------------------------------
-(define (clear)
+(define-public (clear)
 "
   clear -- purge all atoms in the atomspace.  This only removes the
   atoms from the atomspace, it does NOT remove it from the backingstore,
@@ -208,7 +210,7 @@
 	)
 )
 
-(define (count-all)
+(define-public (count-all)
 	(define cnt 0)
 	(define (ink a) (set! cnt (+ cnt 1)) #f)
 	(define (cnt-type x) (cog-map-type ink x))
@@ -217,7 +219,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (cog-get-atoms atom-type)
+(define-public (cog-get-atoms atom-type)
 "
   cog-get-atoms -- Return a list of all atoms of type 'atom-type'
 
@@ -239,7 +241,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (cog-prt-atomspace)
+(define-public (cog-prt-atomspace)
 "
   cog-prt-atomspace -- Prints all atoms in the atomspace
 
@@ -266,7 +268,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (cog-count-atoms atom-type)
+(define-public (cog-count-atoms atom-type)
 "
   cog-count-atoms -- Count of the number of atoms of given type
 
@@ -288,7 +290,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (cog-report-counts)
+(define-public (cog-report-counts)
 "
   cog-report-counts -- Return an association list of counts
 
@@ -310,7 +312,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (cog-get-root atom)
+(define-public (cog-get-root atom)
 "
   cog-get-root -- Return all hypergraph roots containing 'atom'
 
@@ -324,7 +326,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (cog-get-all-nodes link)
+(define-public (cog-get-all-nodes link)
 "
   cog-get-all-nodes -- Get all the nodes within a link and its sublinks
 
@@ -343,7 +345,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (cog-get-partner pare atom)
+(define-public (cog-get-partner pare atom)
 "
   cog-get-partner -- Return other atom of a link connecting two atoms
   cog-get-partner pair atom
@@ -363,7 +365,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (cog-pred-get-partner rel atom)
+(define-public (cog-pred-get-partner rel atom)
 "
   cog-pred-get-partner -- Get the partner in an EvaluationLink
 
@@ -388,7 +390,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (cog-filter atom-type atom-list)
+(define-public (cog-filter atom-type atom-list)
 "
   cog-filter -- return a list of atoms of given type.
 
@@ -399,7 +401,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (cog-chase-link link-type endpoint-type anchor)
+(define-public (cog-chase-link link-type endpoint-type anchor)
 "
   cog-chase-link -- Return other atom of a link connecting two atoms.
 
@@ -443,7 +445,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (cog-chase-link-chk link-type endpoint-type anchor anchor-type)
+(define-public (cog-chase-link-chk link-type endpoint-type anchor anchor-type)
 "
   cog-chase-link-chk -- chase a link with checking
 
@@ -463,7 +465,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (cog-map-chase-link link-type endpoint-type proc anchor)
+(define-public (cog-map-chase-link link-type endpoint-type proc anchor)
 "
   cog-map-chase-link -- Invoke proc on atom connected through type.
 
@@ -502,7 +504,7 @@
 	)
 )
 
-(define (cog-par-chase-link link-type endpoint-type proc anchor)
+(define-public (cog-par-chase-link link-type endpoint-type proc anchor)
 "
   cog-par-chase-link -- call proc on atom connected via type. (parallel)
 
@@ -521,7 +523,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (cog-map-chase-links link-type endpoint-type proc anchor)
+(define-public (cog-map-chase-links link-type endpoint-type proc anchor)
 "
   cog-map-chase-links -- Invoke proc on atom connected through type.
 
@@ -538,7 +540,7 @@
 	)
 )
 
-(define (cog-par-chase-links link-type endpoint-type proc anchor)
+(define-public (cog-par-chase-links link-type endpoint-type proc anchor)
 "
   cog-par-chase-links -- call proc on atoms connected via type. (parallel)
 
@@ -559,7 +561,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (cog-map-chase-links-chk link-type endpoint-type proc anchor anchor-type)
+(define-public (cog-map-chase-links-chk link-type endpoint-type proc anchor anchor-type)
 "
   cog-map-chase-links-chk -- Invoke proc on atom connected through type.
 
@@ -582,7 +584,7 @@
 	)
 )
 
-(define (cog-par-chase-links-chk link-type endpoint-type proc anchor anchor-type)
+(define-public (cog-par-chase-links-chk link-type endpoint-type proc anchor anchor-type)
 "
   cog-par-chase-links-chk -- call proc on atoms connected via type. (parallel)
 
@@ -606,7 +608,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (cog-map-chase-link-dbg link-type endpoint-type dbg-lmsg dbg-emsg proc anchor)
+(define-public (cog-map-chase-link-dbg link-type endpoint-type dbg-lmsg dbg-emsg proc anchor)
 "
   cog-map-chase-link-dbg -- debugging version of cog-map-chase-link
 
@@ -643,7 +645,7 @@
 
 ; -----------------------------------------------------------------------
 ;
-(define (cog-map-apply-link link-type endpoint-type proc anchor)
+(define-public (cog-map-apply-link link-type endpoint-type proc anchor)
 "
   cog-map-apply-link link-type endpoint-type proc anchor
 
@@ -659,7 +661,7 @@
 	(for-each get-link (cog-filter link-type (cog-incoming-set anchor)))
 )
 
-(define (cog-get-link link-type endpoint-type anchor)
+(define-public (cog-get-link link-type endpoint-type anchor)
 "
   cog-get-link link-type endpoint-type anchor
 
@@ -690,7 +692,7 @@
 )
 
 ; ---------------------------------------------------------------------
-(define (cog-get-pred inst pred-type)
+(define-public (cog-get-pred inst pred-type)
 "
   cog-get-pred -- Find all EvaluationLinks of given form.
 
@@ -720,7 +722,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (cog-get-reference refptr)
+(define-public (cog-get-reference refptr)
 "
   Given a reference structure, return the referenced list entries.
   That is, given a structure of the form
@@ -746,7 +748,7 @@
 )
 
 ; ---------------------------------------------------------------------
-(define (filter-hypergraph pred? atom-list)
+(define-public (filter-hypergraph pred? atom-list)
 "
   filter-hypergraph -- recursively traverse outgoing links of graph.
 
@@ -789,7 +791,7 @@
 )
 
 ; --------------------------------------------------------------------
-(define (cartesian-prod tuple-of-lists)
+(define-public (cartesian-prod tuple-of-lists)
 "
   cartesian-prod -- create Cartesian product from tuple of sets.
 
@@ -896,7 +898,7 @@
 )
 
 ; ---------------------------------------------------------------------
-(define (cartesian-prod-list-only tuple-of-lists)
+(define-public (cartesian-prod-list-only tuple-of-lists)
 "
   cartesian-prod-list-only -- Alternative version of cartesian-prod.
 
@@ -929,7 +931,7 @@
 
 ; ---------------------------------------------------------------------
 
-(define (approx-eq? x y)
+(define-public (approx-eq? x y)
 "
  approx-eq? X Y
     Returns true when X is equal to Y up to an epsilon.
@@ -942,7 +944,7 @@
 )
 
 ; ---------------------------------------------------------------------
-(define (cog-equal? atom-1 atom-2)
+(define-public (cog-equal? atom-1 atom-2)
 "
   Checks whether two nodes are equal. If they are equal then it will return
   TRUE_TV else it returns FALSE_TV.
@@ -955,7 +957,7 @@
 
 ; ---------------------------------------------------------------------
 
-(define (min-element-by-key lyst fun)
+(define-public (min-element-by-key lyst fun)
 "
  min-element-by-key LIST FUN
     Given LIST and function FUN (from element to number), return the
@@ -971,7 +973,7 @@
 
 ; ---------------------------------------------------------------------
 
-(define (max-element-by-key lyst fun)
+(define-public (max-element-by-key lyst fun)
 "
  max-element-by-key LIST FUN
     Given LIST and function FUN (from element to number), return
@@ -987,8 +989,8 @@
 
 ; ---------------------------------------------------------------------
 
-(define cog-atomspace-stack '())
-(define (cog-push-atomspace)
+(define-public cog-atomspace-stack '())
+(define-public (cog-push-atomspace)
 "
  cog-push-atomspace -- Create a temporary atomspace.
     This creates a new atomspace, derived from the current atomspace,
@@ -1002,7 +1004,7 @@
 
 ; ---------------------------------------------------------------------
 
-(define (cog-pop-atomspace)
+(define-public (cog-pop-atomspace)
 "
  cog-pop-atomspace -- Delete a temporary atomspace.
     See cog-push-atomspace for an explanation.
@@ -1070,6 +1072,7 @@
 'cog-equal?
 'min-element-by-key
 'max-element-by-key
+'cog-atomspace-stack
 'cog-push-atomspace
 'cog-pop-atomspace
 ))
@@ -1082,33 +1085,3 @@
 	cog-utilities
 )
 ; ---------------------------------------------------------------------
-
-; Call that in case you want to export those functions in a module. It
-; is currently used by opencog.scm.
-;
-; TODO it would be better to use cog-utilities, however something like
-;
-; (for-each export cog-utilities)
-;
-; or
-;
-; (for-each (lambda (fun) (export fun)) cog-utilities)
-;
-; or
-;
-; (for-each (lambda (fun) (export (fun))) cog-utilities)
-;
-; Doesn't work, so till a fix is found I'm using this redundant definition
-;
-(define (export-utilities) (export av stv itv ctv tv-mean tv-conf
-tv-count gar gdr gadr gddr gaddr gdddr for-each-except cog-atom-incr
-purge-hypergraph purge-type clear count-all cog-get-atoms
-cog-prt-atomspace cog-count-atoms cog-report-counts cog-get-root
-cog-get-all-nodes cog-get-partner cog-pred-get-partner cog-filter
-cog-chase-link cog-chase-link-chk cog-map-chase-link cog-par-chase-link
-cog-map-chase-links cog-par-chase-links cog-map-chase-links-chk
-cog-par-chase-links-chk cog-map-chase-link-dbg cog-map-apply-link
-cog-get-link cog-get-pred cog-get-reference filter-hypergraph
-cartesian-prod cartesian-prod-list-only approx-eq? cog-equal?
-min-element-by-key max-element-by-key cog-push-atomspace
-cog-pop-atomspace))

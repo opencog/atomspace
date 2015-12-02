@@ -89,22 +89,6 @@ static inline void logmsg(const char * msg, const Handle& h)
 
 /* ======================================================== */
 
-/// If the pattern link is a quote, then we compare the quoted
-/// contents. This is done recursively, of course.  The QuoteLink
-/// must have only one child; anything else beyond that is ignored
-/// (as its not clear what else could possibly be done).
-bool PatternMatchEngine::quote_compare(const PatternTermPtr& ptm,
-                                       const Handle& hg)
-{
-	LinkPtr lp(LinkCast(ptm->getHandle()));
-	if (1 != lp->getArity())
-		throw InvalidParamException(TRACE_INFO,
-		            "QuoteLink/UnquoteLink has unexpected arity!");
-	return tree_compare(ptm->getOutgoingTerm(0), hg, CALL_QUOTE);
-}
-
-/* ======================================================== */
-
 /// Compare a VariableNode in the pattern to the proposed grounding.
 ///
 /// Handle hp is from the pattern clause.
@@ -140,14 +124,15 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 	// grounding, unless they are quoted. However, a bound variable can be
 	// legitimately grounded by a free variable, because free variables are
 	// effectively constant literals, during the pattern match.
-	if (any_unquoted_in_tree(hg, _varlist->varset))
+	if (any_unquoted_unscoped_in_tree(hg, _varlist->varset))
 	{
 		for (Handle vh: _varlist->varset)
 		{
 			// OK, which variable is it?
-			if (is_unquoted_in_tree(hg, vh))
+			if (is_unquoted_in_tree(hg, vh) and is_unscoped_in_tree(hg, vh))
 			{
-				logmsg("miscompare; found bound variable in grounding tree:", vh);
+				logmsg("miscompare; found bound variable in grounding tree:",
+				       vh);
 				logmsg("matching  variable  is:", hp);
 				logmsg("proposed grounding is:", hg);
 				return false;
@@ -414,7 +399,7 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 				// If the grounding is accepted, record it.
 				if (hp != hg) var_grounding[hp] = hg;
 
-				_choice_state[Choice(ptm, hg)] = icurr;
+				_choice_state[GndChoice(ptm, hg)] = icurr;
 				return true;
 			}
 		}
@@ -424,7 +409,7 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 	}
 
 	// If we are here, we've explored all the possibilities already
-	_choice_state.erase(Choice(ptm, hg));
+	_choice_state.erase(GndChoice(ptm, hg));
 	return false;
 }
 
@@ -435,7 +420,7 @@ size_t PatternMatchEngine::curr_choice(const PatternTermPtr& ptm,
                                        bool& fresh)
 {
 	size_t istart;
-	try { istart = _choice_state.at(Choice(ptm, hg)); }
+	try { istart = _choice_state.at(GndChoice(ptm, hg)); }
 	catch(...) { istart = 0; fresh = true; }
 	return istart;
 }
@@ -445,11 +430,11 @@ bool PatternMatchEngine::have_choice(const PatternTermPtr& ptm,
 {
 #if USE_AT
 	bool have = true;
-	try { _choice_state.at(Choice(ptm, hg)); }
+	try { _choice_state.at(GndChoice(ptm, hg)); }
 	catch(...) { have = false;}
 	return have;
 #else
-	return 0 < _choice_state.count(Choice(ptm, hg));
+	return 0 < _choice_state.count(GndChoice(ptm, hg));
 #endif
 }
 
@@ -688,7 +673,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				have_more = true;
 				LAZY_LOG_FINE << "Good permutation "
 				              << perm_count[Unorder(ptm, hg)]
-				              << "for term=" << ptm->toString()
+				              << " for term=" << ptm->toString()
 				              << " have_more=" << have_more;
 				_perm_state[Unorder(ptm, hg)] = mutation;
 				return true;
@@ -711,6 +696,17 @@ take_next_step:
 	_perm_state.erase(Unorder(ptm, hg));
 	have_more = false;
 	return false;
+}
+
+
+/// Compare a PatternTermPtr with a clause taking in consideration
+/// quoting or unquoting operations.
+bool PatternMatchEngine::clause_compare(const PatternTermPtr& ptm,
+                                        const Handle& clause)
+{
+	return ptm->getHandle() == clause
+		or (clause->getType() == QUOTE_LINK
+		    and ptm->getHandle() == LinkCast(clause)->getOutgoingAtom(0));
 }
 
 /// Return the saved unordered-link permutation for this
@@ -806,11 +802,6 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	// must have only one child; anything else beyond that is ignored
 	// (as its not clear what else could possibly be done).
 	Type tp = hp->getType();
-	if (not ptm->isQuoted() and QUOTE_LINK == tp)
-		return quote_compare(ptm, hg);
-
-	if (ptm->isQuoted() and UNQUOTE_LINK == tp)
-		return quote_compare(ptm, hg);
 
 	// If the pattern link is executable, then we should execute, and
 	// use the result of that execution. (This isn't implemented yet,
@@ -851,7 +842,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	if (np and ng)
 		return node_compare(hp, hg);
 
-	// If they're not both are links, then it is clearly a mismatch.
+	// If they're not both links, then it is clearly a mismatch.
 	LinkPtr lp(LinkCast(hp));
 	LinkPtr lg(LinkCast(hg));
 	if (not (lp and lg)) return _pmc.fuzzy_match(hp, hg);
@@ -977,7 +968,7 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 	              << " have " << sz << " branches";
 	bool found = false;
 	for (size_t i = 0; i < sz; i++) {
-		LAZY_LOG_FINE << "Try upward branch " << i << " of " << sz
+		LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
 		              << " for term=" << ptm->toString()
 		              << " propose=" << Handle(iset[i]).value();
 		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
@@ -1057,16 +1048,16 @@ bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
                                                  const Handle& clause_root)
 {
 	const Handle& hp = ptm->getHandle();
-	// If its not an choice link, then don't try to iterate.
+	// If its not a choice link, then don't try to iterate.
 	if (CHOICE_LINK != hp->getType())
 		return explore_single_branch(ptm, hg, clause_root);
 
 	logger().fine("Begin choice branchpoint iteration loop");
 	do {
-		// XXX this "need_choice_push thing is probably wrong; it probably
+		// XXX This `need_choice_push` thing is probably wrong; it probably
 		// should resemble the perm_push() used for unordered links.
 		// However, currently, no test case trips this up. so .. OK.
-		// whatever. This still probably needs fixing.
+		// Whatever. This still probably needs fixing.
 		if (_need_choice_push) choice_stack.push(_choice_state);
 		bool match = explore_single_branch(ptm, hg, clause_root);
 		if (_need_choice_push) POPSTK(choice_stack, _choice_state);
@@ -1082,8 +1073,8 @@ bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
 		choose_next = true;
 	} while (have_choice(ptm, hg));
 
-	logger().fine("Exhausted all choice possibilities");
-
+	logger().fine("Exhausted all choice possibilities"
+	              "\n----------------------------------");
 	return false;
 }
 
@@ -1123,7 +1114,7 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 	}
 
 	LAZY_LOG_FINE << "Pattern term=" << ptm->toString()
-	              << " solved by " << hg.value() << " move up";
+	              << " solved by " << hg.value() << ", move up";
 
 	// XXX should not do perm_push every time... only selectively.
 	// But when? This is very confusing ...
@@ -1158,7 +1149,7 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 ///    we don't want to go to the immediate parent, we want to go to
 ///    the larger evaluatable term, and offer that up as the thing to
 ///    match (i.e. to evaluate, to invoke callbacks, etc.)
-///  * The parent is an ChoiceLink. In this case, the ChoiceLink
+///  * The parent is a ChoiceLink. In this case, the ChoiceLink
 ///    itself cannot be directly matched, as is; only its children can
 ///    be. So in this case, we fetch the ChoiceLink's parent, instead.
 ///  * Some crazy combination of the above.
@@ -1185,7 +1176,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// we are working on a term somewhere in the middle of a clause
 	// and need to walk upwards.
 	const Handle& hp = ptm->getHandle();
-	if (hp == clause_root)
+	if (clause_compare(ptm, clause_root))
 		return clause_accept(clause_root, hg);
 
 	// Move upwards in the term, and hunt for a match, again.
@@ -1759,8 +1750,8 @@ void PatternMatchEngine::solution_drop(void)
  * a graph that hopefully will match the pattern.
  */
 bool PatternMatchEngine::explore_neighborhood(const Handle& do_clause,
-                                      const Handle& term,
-                                      const Handle& grnd)
+                                              const Handle& term,
+                                              const Handle& grnd)
 {
 	clause_stacks_clear();
 	return explore_redex(term, grnd, do_clause);
@@ -1793,7 +1784,7 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
  * boolean-logic formulas, although the infrastructure is designed
  * to handle other situations as well, e.g. Bayesian formulas, etc.)
  *
- * This method simply dispatches a given clause to be eitther pattern
+ * This method simply dispatches a given clause to be either pattern
  * matched, or to be evaluated.
  */
 bool PatternMatchEngine::explore_clause(const Handle& term,

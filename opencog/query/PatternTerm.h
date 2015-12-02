@@ -29,6 +29,7 @@
 
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/Link.h>
+#include <opencog/util/Logger.h>
 
 namespace opencog {
 
@@ -67,7 +68,7 @@ namespace opencog {
  * attributes UNDEFINED.
  *
  * Term trees are build in the course of preprocessing stage before
- * pattern matcher starts searching for variable groundigns. Each clause
+ * pattern matcher starts searching for variable groundings. Each clause
  * is then recursively traversed from the root downwards through outgoing
  * atoms. The _outgoing attribute stores a list of childs created during this
  * traversal. They corresponds one-to-one to outgoing sets of referenced
@@ -82,119 +83,121 @@ typedef std::vector<PatternTermWPtr> PatternTermWSeq;
 
 class PatternTerm
 {
-	protected:
-		Handle _handle;
-		PatternTermPtr _parent;
-		PatternTermWSeq _outgoing;
+protected:
+	Handle _handle;
+	PatternTermPtr _parent;
+	PatternTermWSeq _outgoing;
 
-		// Number of QuoteLinks on the path up to the root including this
-		// term. Zero means the term is unquoted. Quoted terms are matched
-		// literally.
-		unsigned int _quote_depth;
+	// Number of QuoteLinks on the path up to the root including this
+	// term. Zero means the term is unquoted. Quoted terms are matched
+	// literally.
+	int _quotation_level;
 
-		// True if the pattern subtree rooted in this tree node does not
-		// contain any bound variables. This means that the term is constant
-		// and may be self-grounded.
-		bool _has_any_bound_var;
+	// True if the pattern subtree rooted in this tree node does not
+	// contain any bound variables. This means that the term is constant
+	// and may be self-grounded.
+	bool _has_any_bound_var;
 
-	public:
-		static const PatternTermPtr UNDEFINED;
+public:
+	static const PatternTermPtr UNDEFINED;
 
-		PatternTerm()
+	PatternTerm()
+		: _handle(Handle::UNDEFINED), _parent(PatternTerm::UNDEFINED),
+		  _quotation_level(0), _has_any_bound_var(false)
+		{}
+
+	PatternTerm(const PatternTermPtr& parent, const Handle& h)
+		: _handle(h), _parent(parent),
+		  _quotation_level(parent->_quotation_level), _has_any_bound_var(false)
+		{}
+
+	void addOutgoingTerm(const PatternTermPtr& ptm)
+	{
+		_outgoing.push_back(ptm);
+	}
+
+	inline Handle getHandle()
+	{
+		return _handle;
+	}
+
+	inline PatternTermPtr getParent()
+	{
+		return _parent;
+	}
+
+	inline PatternTermSeq getOutgoingSet() const
+	{
+		PatternTermSeq oset;
+		for (PatternTermWPtr w : _outgoing)
 		{
-			_handle = Handle::UNDEFINED;
-			_parent = PatternTerm::UNDEFINED;
-			_quote_depth = 0;
-			_has_any_bound_var = false;
+			PatternTermPtr s(w.lock());
+			if (s) oset.push_back(s);
 		}
+		
+		return oset;
+	}
 
-		PatternTerm(const PatternTermPtr& parent, const Handle& h)
-		{
-			_parent = parent;
-			_handle = h;
-			_quote_depth = parent->_quote_depth;
-			_has_any_bound_var = false;
-		}
+	inline Arity getArity() const
+	{
+		return _outgoing.size();
+	}
 
-		void addOutgoingTerm(const PatternTermPtr& ptm)
-		{
-			_outgoing.push_back(ptm);
-		}
+	inline bool isQuoted() const
+	{
+		return _quotation_level > 0;
+	}
 
-		inline Handle getHandle()
-		{
-			return _handle;
-		}
-	
-		inline PatternTermPtr getParent()
-		{
-			return _parent;
-		}
+	inline int getQuotationLevel() const
+	{
+		return _quotation_level;
+	}
 
-		inline PatternTermSeq getOutgoingSet() const
-		{
-			PatternTermSeq oset;
-			for (PatternTermWPtr w : _outgoing)
-			{
-				PatternTermPtr s(w.lock());
-				if (s) oset.push_back(s);
-			}
+	inline bool hasAnyBoundVariable() const
+	{
+		return _has_any_bound_var;
+	}
 
-			return oset;
-		}
-
-		inline Arity getArity() const
-		{
-			return _outgoing.size();
-		}
-
-		inline bool isQuoted() const
-		{
-			// Check parent quote depth, because we need the top QuoteLink-s
-			// to be unqouted.
-			return (_parent->_quote_depth > 0);
-		}
-
-		inline bool hasAnyBoundVariable() const
-		{
-			return _has_any_bound_var;
-		}
-
-		inline PatternTermPtr getOutgoingTerm(Arity pos) const
-		{
-			// Checks for a valid position
-			if (pos < getArity()) {
-				PatternTermPtr s(_outgoing[pos].lock());
-				if (not s)
-					throw RuntimeException(TRACE_INFO,
-					                       "expired outgoing set index %d", pos);
-				return s;
-			} else {
+	inline PatternTermPtr getOutgoingTerm(Arity pos) const
+	{
+		// Checks for a valid position
+		if (pos < getArity()) {
+			PatternTermPtr s(_outgoing[pos].lock());
+			if (not s)
 				throw RuntimeException(TRACE_INFO,
-				                       "invalid outgoing set index %d", pos);
-			}
+				                       "expired outgoing set index %d", pos);
+			return s;
+		} else {
+			throw RuntimeException(TRACE_INFO,
+			                       "invalid outgoing set index %d", pos);
 		}
+	}
 
-		inline void addQuote() { _quote_depth++; }
-		inline void remQuote() { _quote_depth--; }
+	inline void addQuote() { _quotation_level++; }
+	inline void remQuote() { _quotation_level--; }
 
-		inline void addBoundVariable()
+	inline void addBoundVariable()
+	{
+		if (!_has_any_bound_var)
 		{
-			if (!_has_any_bound_var)
-			{
-				_has_any_bound_var = true;
-				if (_parent != PatternTerm::UNDEFINED)
-					_parent->addBoundVariable();
-			}
+			_has_any_bound_var = true;
+			if (_parent != PatternTerm::UNDEFINED)
+				_parent->addBoundVariable();
 		}
+	}
 
-		inline std::string toString(std::string indent = ":") const
-		{
-			if (_handle == nullptr) return "-";
-			std::string str = _parent->toString();
-			str += indent + std::to_string(_handle.value());
-			return str;
-		}
+	// Work around gdb's incapability to build a string on the fly,
+	// see http://stackoverflow.com/questions/16734783 for more
+	// explanation.
+	std::string toString() const { return toString(":"); }
+
+	inline std::string toString(std::string indent) const
+	{
+		if (_handle == nullptr) return "-";
+		std::string str = _parent->toString();
+		str += indent + std::to_string(_handle.value());
+		return str;
+	}
 
 };
 

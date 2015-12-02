@@ -1,11 +1,14 @@
 ;
-; state.scm
+; state.scm - Setting state in the atomspace.
 ;
-; This provides a very simple demo of using the StateLink to maintain
-; unique state. A Statelink is a kind of link of which only one can ever
+; This demonstrates using the StateLink to maintain unique state in the
+; atomspace. A Statelink is a kind of link of which only one can ever
 ; exist in the atomspace, for a given "state" atom.  Whenever a new
 ; StateLink is added to the atomspace, the old one is automatically
 ; removed.
+;
+; StateLinks can be used to associate properties with atoms; see the
+; property.scm example.
 
 ; The current state of "fruit" is "apple".
 (StateLink (AnchorNode "fruit") (ConceptNode "apple"))

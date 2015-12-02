@@ -50,20 +50,22 @@ namespace opencog
 class ScopeLink : public Link
 {
 protected:
+	/// Handle of the (optionally present) variable declaration.
+	Handle _vardecl;
+	/// Handle of the body of the expression.
+	Handle _body;
+
 
 	/// Variables bound in the body.
 	Variables _varlist;
 
-	/// Handle of the body of the expression.
-	Handle _body;
-
 	ScopeLink(Type, const Handle&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	ScopeLink(Type, const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	void init(void);
 	void extract_variables(const HandleSeq& oset);
@@ -76,17 +78,18 @@ protected:
 	}
 public:
 	ScopeLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	ScopeLink(const Handle& varcdecls, const Handle& body,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	ScopeLink(Link &l);
 
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _varlist; }
+	const Handle& get_vardecl(void) const { return _vardecl; }
 	const Handle& get_body(void) const { return _body; }
 
 	// Take the list of values `vals`, and substitute them in for the
