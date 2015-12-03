@@ -6,7 +6,7 @@ resolver: lts-3.6
 # Local packages, usually specified by relative directory name
 packages:
 - '.'
-- '../../opencog/haskell'
+- '../../../opencog/haskell'
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
 extra-deps: []

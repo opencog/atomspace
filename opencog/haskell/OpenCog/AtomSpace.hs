@@ -40,14 +40,20 @@ module OpenCog.AtomSpace
     -- * AtomSpace Unitily Functions
     , genInsert
     , genGet
+    -- * Function for use in GSN
+    , exportFunction
+    , UUID
+    , AtomSpaceRef
     ) where
 
 import OpenCog.AtomSpace.Api
 import OpenCog.AtomSpace.Types
-import OpenCog.AtomSpace.Env         (AtomSpace,runOnNewAtomSpace,AtomSpaceObj,
-                                      getParent,newAtomSpace,onAtomSpace,(<:))
+import OpenCog.AtomSpace.Env         (AtomSpace(..),runOnNewAtomSpace,AtomSpaceObj,
+                                      getParent,newAtomSpace,onAtomSpace,(<:),
+                                      AtomSpaceRef(..))
 import OpenCog.AtomSpace.Utils       (printAtom,showAtom,genInsert,genGet)
 import OpenCog.AtomSpace.AtomType    (AtomType(..))
 import OpenCog.AtomSpace.Inheritance (type (<~))
 import OpenCog.AtomSpace.Sugar
 import OpenCog.AtomSpace.Query
+import OpenCog.AtomSpace.Internal    (UUID)

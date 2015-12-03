@@ -42,10 +42,19 @@ Then, go through the normal process of
 
 This will automatically build the haskell library.
 
-If you want to use this library in some project you should include it
-to the package list on the project
+If you want to use the library in some project add it to your project config
 [stack.yaml](https://github.com/commercialhaskell/stack/wiki/stack.yaml)
-config file. For example:
+as an extra-dep with the right version number.
+
+```yaml
+...
+extra-deps: [opencog-atomspace-0.1.0.1]
+...
+```
+
+If you also have to make changes to the library while working on your project
+you can include it in the following way. So it will always use the current
+version on your disk.
 
 ```yaml
 ...
@@ -69,7 +78,7 @@ export STACK_YAML=<ATOMSPACE_ROOT>/opencog/haskell/stack.yaml
 stack ghci
 ```
 
-### Global installation
+#### Global installation
 To avoid defining STACK_YAML every time, you can either add
 
 ```bash
@@ -178,6 +187,17 @@ when you only modify the Haskell code, you can build the library
 (working on: <ATOMSPACE_ROOT>/opencog/haskell/) with:
 ```
  stack build --extra-lib-dirs=/usr/local/lib/opencog
+```
+
+After Modifying the code and merging it back into the main repo, you should
+also upload the new version of the code to Hackage. You will need a Hackage
+account that is a maintainer of this package, if you don't have that ask
+somebody else to do it for you.
+
+This can be done with:
+```
+ stack sdist
+ stack upload
 ```
 
 ### Adding new Atom Types

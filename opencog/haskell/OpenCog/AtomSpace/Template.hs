@@ -21,7 +21,7 @@ import Data.Map.Strict                  (Map,mapKeys,toList,fromList,insert,
 import qualified Data.Map.Strict as M   (map)
 import qualified Data.Set        as S   (Set,(\\),fromList,toList)
 import Control.Monad.State              (State,modify,get,execState)
-import System.Directory                 (getCurrentDirectory)
+import System.Directory                 (getCurrentDirectory,doesFileExist)
 import System.FilePath                  ((</>),takeDirectory)
 
 -- | Simple Atom type.
@@ -29,9 +29,10 @@ type AT = String
 
 -- | Template function to define AtomType and some util functions over it.
 --   It takes as argument a relative path to the file "atom_types.script".
-declareAtomType :: FilePath -> Q [Dec]
-declareAtomType file = do
-    atomMap <- parseRelativeFile file
+declareAtomType :: FilePath -> FilePath -> Q [Dec]
+declareAtomType file1 file2 = do
+    file <- chooseFile file1 file2
+    atomMap <- parseFile file
     a <- newName "a"
     b <- newName "b"
     let
@@ -83,9 +84,10 @@ declareAtomType file = do
 
 -- | Template function to declare Filter instances for each AtomType.
 --   It takes as argument a relative path to the file "atom_types.script".
-declareAtomFilters :: FilePath -> Q [Dec]
-declareAtomFilters file = do
-    atomMap <- parseRelativeFile file
+declareAtomFilters :: FilePath -> FilePath-> Q [Dec]
+declareAtomFilters file1 file2 = do
+    file <- chooseFile file1 file2
+    atomMap <- parseFile file
     a <- newName "a"
     let
       className       = mkName "FilterIsChild"
@@ -140,11 +142,18 @@ getAbsFromRelPath relative = do
         dir  = takeDirectory path
     return $ dir </> relative
 
+chooseFile :: FilePath -> FilePath -> Q FilePath
+chooseFile file1rel file2 = do
+    file1 <- getAbsFromRelPath file1rel
+    exist <- runIO $ doesFileExist file1
+    return $ case exist of
+        True -> file1
+        False -> file2
+
 -- | 'parseRelativeFile' takes a relative path to a file, and executes the
 -- parser over it.
-parseRelativeFile :: FilePath -> Q [(AT,[AT])]
-parseRelativeFile fileName = do
-    file <- getAbsFromRelPath fileName
+parseFile :: FilePath -> Q [(AT,[AT])]
+parseFile file = do
     addDependentFile file
     cont <- runIO $ readFile file
     return $ parser cont

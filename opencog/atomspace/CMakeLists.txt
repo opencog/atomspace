@@ -83,3 +83,10 @@ INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/core_types.scm
    DESTINATION "${DATADIR}/scm"
 )
+
+# Install the atom_types.script
+# required to build the HaskellBindings from Hackage
+INSTALL (FILES
+	${CMAKE_CURRENT_SOURCE_DIR}/atom_types.script
+   DESTINATION "${DATADIR}"
+)

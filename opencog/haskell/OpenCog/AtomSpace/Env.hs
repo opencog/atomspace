@@ -4,22 +4,24 @@
 
 -- | This Module defines the main environment for the AtomSpace bindings.
 module OpenCog.AtomSpace.Env (
-      AtomSpace
+      AtomSpace(..)
     , AtomSpaceRef(..)
     , getAtomSpace
-    , AtomSpaceObj
+    , AtomSpaceObj(..)
     , getParent
     , newAtomSpace
     , onAtomSpace
     , (<:)
     , runOnNewAtomSpace
+    , refToObj
     ) where
 
 -- Note that I don't export the AtomSpace data constructor nor the
 -- c_as_delete/c_as_new functions.
 
 import Foreign                      (Ptr,nullPtr)
-import Foreign.ForeignPtr           (ForeignPtr,newForeignPtr,withForeignPtr)
+import Foreign.ForeignPtr           (ForeignPtr,newForeignPtr,newForeignPtr_,
+                                    withForeignPtr)
 import Foreign.Ptr                  (FunPtr)
 import Control.Applicative          (Applicative)
 import Control.Monad.Trans.Reader   (ReaderT,runReaderT,ask)
@@ -79,6 +81,13 @@ newAtomSpace parent = do
         return $ AtomSpaceObj { actualAS = actual
                               , parentAS = parent
                               }
+
+refToObj :: Ptr AtomSpaceRef -> IO AtomSpaceObj
+refToObj refptr = do
+    actual <- newForeignPtr_ refptr
+    return $ AtomSpaceObj { actualAS = actual
+                          , parentAS = Nothing
+                          }
 
 -- | 'onAtomSpace' runs the specified computation on the atomspace instance
 -- provided.

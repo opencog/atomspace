@@ -133,6 +133,12 @@ extern "C"
                                , char** name
                                , UUID** out
                                , int* out_len);
+    int AtomSpace_getAtom( AtomSpace * this_ptr
+                         , UUID id
+                         , const char * name
+                         , const char * type
+                         , size_t * size
+                         , UUID* outsetp);
 
     /**
      * AtomSpace_debug  Debug function to print the state

@@ -62,6 +62,7 @@ toRaw at = let atype     = getType at
     MemberLink tv a1 a2        -> Link atype [toRaw a1,toRaw a2] $ toTVRaw tv
     SatisfyingSetLink a1       -> Link atype [toRaw a1] defaultTv
     ExecutionLink a1 a2 a3     -> Link atype [toRaw a1,toRaw a2,toRaw a3] defaultTv
+    ExecutionOutputLink a1 a2  -> Link atype [toRaw a1,toRaw a2] defaultTv
     ListLink list              -> Link atype (map (appGen toRaw) list) defaultTv
     SetLink list               -> Link atype (map (appGen toRaw) list) defaultTv
     SatisfactionLink (VariableList []) a2 -> Link atype [toRaw a2] defaultTv
@@ -157,6 +158,11 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw tvraw in do
         a <- filt ar :: Maybe (Gen AtomT)
         case a of
           (Gen a1) -> Just $ Gen $ SatisfyingSetLink a1
+      (ExecutionOutputT ,[ar,br]) -> do
+        a <- filt ar :: Maybe (Gen SchemaT)
+        b <- filt br :: Maybe (Gen AtomT)
+        case (a,b) of
+          (Gen a1,Gen b1) -> Just $ Gen $ ExecutionOutputLink a1 b1
       (ExecutionT ,[ar,br,cr]) -> do
         a <- filt ar :: Maybe (Gen SchemaT)
         b <- filt br :: Maybe (Gen AtomT)
