@@ -14,7 +14,7 @@
 #include <libguile.h>
 
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/TruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;

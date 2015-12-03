@@ -43,7 +43,7 @@
 #include <opencog/atomspace/LinkIndex.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/NodeIndex.h>
-#include <opencog/atomspace/TruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 #include <opencog/atomspace/TypeIndex.h>
 
 class AtomTableUTest;
