@@ -24,7 +24,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/TruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 
 namespace opencog {
 /** \addtogroup grp_smob
@@ -131,6 +131,9 @@ private:
 	static SCM take_tv(TruthValue *);
 	static SCM tv_to_scm(TruthValuePtr);
 	static SCM ss_tv_get_value(SCM);
+	static SCM ss_tv_get_mean(SCM);
+	static SCM ss_tv_get_confidence(SCM);
+	static SCM ss_tv_get_count(SCM);
 
 	// Atom Spaces
 	static SCM ss_new_as(SCM);

@@ -29,11 +29,11 @@
 #include <stdlib.h>
 
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/CountTruthValue.h>
-#include <opencog/atomspace/IndefiniteTruthValue.h>
-#include <opencog/atomspace/NullTruthValue.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/TruthValue.h>
+#include <opencog/truthvalue/CountTruthValue.h>
+#include <opencog/truthvalue/IndefiniteTruthValue.h>
+#include <opencog/truthvalue/NullTruthValue.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 #include <opencog/util/platform.h>
 
 //#define DPRINTF printf
@@ -42,6 +42,7 @@
 using namespace opencog;
 
 const strength_t MAX_TRUTH  = 1.0f;
+count_t TruthValue::DEFAULT_K = 800.0;
 
 TruthValuePtr TruthValue::NULL_TV()
 {

@@ -30,7 +30,7 @@ ctypedef double count_t
 ctypedef float confidence_t
 ctypedef float strength_t
 
-cdef extern from "opencog/atomspace/TruthValue.h" namespace "opencog":
+cdef extern from "opencog/truthvalue/TruthValue.h" namespace "opencog":
     cdef cppclass tv_ptr "std::shared_ptr<opencog::TruthValue>":
         tv_ptr()
         tv_ptr(tv_ptr copy)
@@ -48,7 +48,7 @@ cdef extern from "opencog/atomspace/TruthValue.h" namespace "opencog":
         bint operator==(cTruthValue h)
         bint operator!=(cTruthValue h)
 
-cdef extern from "opencog/atomspace/SimpleTruthValue.h" namespace "opencog":
+cdef extern from "opencog/truthvalue/SimpleTruthValue.h" namespace "opencog":
     cdef cppclass cSimpleTruthValue "opencog::SimpleTruthValue":
         void initialize(float,float)
         cSimpleTruthValue(float, float)

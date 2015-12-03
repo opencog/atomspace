@@ -268,7 +268,7 @@ tvMAX_PARAMS :: Int
 tvMAX_PARAMS = 5
 
 -- TV enum type to work with TruthValueTypes from
--- <opencog/atomspace/TruthValue.h> definition.
+-- <opencog/truthvalue/TruthValue.h> definition.
 -- Note: this data type must be always similar to the definition on ../TruthValue.h.
 -- The order of enum types MUST be exactly the same on both sites.
 data TVTypeEnum = NULL_TRUTH_VALUE

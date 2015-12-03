@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/FuzzyTruthValue.cc
+ * opencog/atomspace/SimpleTruthValue.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -30,64 +30,77 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 
-#include "FuzzyTruthValue.h"
+#include "SimpleTruthValue.h"
 
 //#define DPRINTF printf
 #define DPRINTF(...)
 
 using namespace opencog;
 
-#define KKK 800.0f
+#define CVAL  0.2f
 
-FuzzyTruthValue::FuzzyTruthValue(strength_t m, count_t c)
+SimpleTruthValue::SimpleTruthValue(strength_t m, count_t c)
 {
     mean = m;
     count = c;
 }
 
-FuzzyTruthValue::FuzzyTruthValue(const TruthValue& source)
+SimpleTruthValue::SimpleTruthValue(const TruthValue& source)
 {
     mean = source.getMean();
     count = source.getCount();
 }
-FuzzyTruthValue::FuzzyTruthValue(FuzzyTruthValue const& source)
+SimpleTruthValue::SimpleTruthValue(SimpleTruthValue const& source)
 {
     mean = source.mean;
     count = source.count;
 }
 
-strength_t FuzzyTruthValue::getMean() const
+strength_t SimpleTruthValue::getMean() const
 {
     return mean;
 }
 
-count_t FuzzyTruthValue::getCount() const
+count_t SimpleTruthValue::getCount() const
 {
     return count;
 }
 
-confidence_t FuzzyTruthValue::getConfidence() const
+confidence_t SimpleTruthValue::getConfidence() const
 {
     return countToConfidence(count);
 }
 
 // This is the merge formula appropriate for PLN.
-TruthValuePtr FuzzyTruthValue::merge(TruthValuePtr other,
-                                     const MergeCtrl& mc) const
+TruthValuePtr SimpleTruthValue::merge(TruthValuePtr other,
+                                      const MergeCtrl& mc) const
 {
-    if (other->getType() != SIMPLE_TRUTH_VALUE) {
+    switch(mc.tv_formula) {
+    case MergeCtrl::TVFormula::HIGHER_CONFIDENCE:
+        return higher_confidence_merge(other);
+    case MergeCtrl::TVFormula::PLN_BOOK_REVISION:
+    {
+        // Based on Section 5.10.2(A heuristic revision rule for STV)
+        // of the PLN book
+        if (other->getType() != SIMPLE_TRUTH_VALUE)
+            throw RuntimeException(TRACE_INFO,
+                                   "Don't know how to merge %s into a "
+                                   "SimpleTruthValue using the default style",
+                                   typeid(*other).name());
+        auto count2 = other->getCount();
+        auto count_new = count + count2 - std::min(count, count2) * CVAL;
+        auto mean_new = (mean * count + other->getMean() * count2)
+            / (count + count2);
+        return std::make_shared<SimpleTruthValue>(mean_new, count_new);
+    }
+    default:
         throw RuntimeException(TRACE_INFO,
-           "Don't know how to merge %s into a FuzzyTruthValue",
-           typeid(*other).name());
+                               "SimpleTruthValue::merge: case not implemented");
+        return nullptr;
     }
-
-    if (other->getConfidence() > getConfidence()) {
-        return other->clone();
-    }
-    return clone();
 }
 
-std::string FuzzyTruthValue::toString() const
+std::string SimpleTruthValue::toString() const
 {
     char buf[1024];
     sprintf(buf, "(stv %f %f)",
@@ -96,9 +109,9 @@ std::string FuzzyTruthValue::toString() const
     return buf;
 }
 
-bool FuzzyTruthValue::operator==(const TruthValue& rhs) const
+bool SimpleTruthValue::operator==(const TruthValue& rhs) const
 {
-    const FuzzyTruthValue *stv = dynamic_cast<const FuzzyTruthValue *>(&rhs);
+    const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&rhs);
     if (NULL == stv) return false;
 
 #define FLOAT_ACCEPTABLE_MEAN_ERROR 0.000001
@@ -115,20 +128,20 @@ bool FuzzyTruthValue::operator==(const TruthValue& rhs) const
     return true;
 }
 
-TruthValueType FuzzyTruthValue::getType() const
+TruthValueType SimpleTruthValue::getType() const
 {
-    return FUZZY_TRUTH_VALUE;
+    return SIMPLE_TRUTH_VALUE;
 }
 
-count_t FuzzyTruthValue::confidenceToCount(confidence_t cf)
+count_t SimpleTruthValue::confidenceToCount(confidence_t cf)
 {
     // There are not quite 16 digits in double precision
     // not quite 7 in single-precision float
     cf = std::min(cf, 0.9999998f);
-    return static_cast<count_t>(KKK * cf / (1.0f - cf));
+    return static_cast<count_t>(DEFAULT_K * cf / (1.0f - cf));
 }
 
-confidence_t FuzzyTruthValue::countToConfidence(count_t cn)
+confidence_t SimpleTruthValue::countToConfidence(count_t cn)
 {
-    return static_cast<confidence_t>(cn / (cn + KKK));
+    return static_cast<confidence_t>(cn / (cn + DEFAULT_K));
 }
