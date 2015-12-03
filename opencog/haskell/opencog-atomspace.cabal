@@ -1,5 +1,5 @@
 name:                opencog-atomspace
-version:             0.1.0.1
+version:             0.1.0.2
 synopsis:            Haskell Bindings for the AtomSpace.
 description:         This library defines Haskell Bindings for the AtomSpace.
                      .
