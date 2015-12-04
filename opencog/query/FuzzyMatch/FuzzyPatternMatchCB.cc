@@ -61,8 +61,6 @@ void FuzzyPatternMatchCB::find_starters(const Handle& hp, const size_t& depth,
         NodePtr np(NodeCast(hp));
 
         if (hp and np) {
-            pat_size++;
-
             if ((np->getType() != VARIABLE_NODE) and
                 (np->getName().find("@") == std::string::npos) and
                 (std::find(excl_list.begin(), excl_list.end(), hp) == excl_list.end())) {
@@ -93,7 +91,8 @@ void FuzzyPatternMatchCB::find_starters(const Handle& hp, const size_t& depth,
 bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
 {
     // Find starters from the clause
-    clause = _pattern->mandatory[0];
+    std::vector<Starter> starters;
+    const Handle& clause = _pattern->mandatory[0];
     find_starters(clause, 0, 0, clause, starters);
 
     // For removing duplicates, if any, form the list of starters,
@@ -101,14 +100,13 @@ bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
     std::sort(starters.begin(), starters.end(),
               [](const Starter& s1, const Starter& s2)
               { return s1.uuid < s2.uuid; });
+
     starters.erase(std::unique(starters.begin(), starters.end(),
                                [](const Starter& s1, const Starter& s2)
-                               { return s1.uuid == s2.uuid; }),
-                   starters.end());
+                               { return s1.uuid == s2.uuid; }), starters.end());
 
-    // Sort the starters according to their "width" and "depth"
-    auto sort_by_wd = [](const Starter& s1, const Starter& s2)
-    {
+    // Sort the starters by their "width" and "depth"
+    auto sort_by_wd = [](const Starter& s1, const Starter& s2) {
         if (s1.width == s2.width) return s1.depth > s2.depth;
         else return s1.width < s2.width;
     };
@@ -155,102 +153,87 @@ bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
 }
 
 /**
- * Implement the link_match callback.
- *
- * It compares and estimates the similarity between the pattern and the potential
- * solution found.
- *
- * @param pl  A link in the pattern
- * @param gl  A potential solution
- * @return    Always return true to accept it, and keep the matching going
- */
-bool FuzzyPatternMatchCB::link_match(const LinkPtr& pl, const LinkPtr& gl)
-{
-    // Check if the potential solution is having the type that we are looking for
-    if (rtn_type and gl->getType() != rtn_type) return true;
-
-    const Handle& gh = gl->getHandle();
-    UUID gid = gh.value();
-
-    // Check if we have already compared the same one previously
-    if (std::find(prev_compared.begin(), prev_compared.end(), gid) == prev_compared.end()) {
-        if (pat_nodes.empty()) pat_nodes = get_all_nodes(clause);
-        check_if_accept(gh);
-        prev_compared.push_back(gid);
-    }
-
-    return true;
-}
-
-/**
  * Compare and estimate the similarity between the pattern and the potential
  * solution, and decide whether or not to accept it. The potential solution
  * will be accepted if it has a similarity greater than or equals to the
  * maximum similarity that we know, rejected otherwise.
  *
- * @param gh  The potential solution
+ * @param
  */
-void FuzzyPatternMatchCB::check_if_accept(const Handle& gh)
+bool FuzzyPatternMatchCB::grounding(const std::map<Handle, Handle>& var_soln,
+                                    const std::map<Handle, Handle>& term_soln)
 {
-    // Get all the ndoes from the potential solution
-    HandleSeq gn = get_all_nodes(gh);
+    for (auto i = term_soln.begin(); i != term_soln.end(); i++) {
+        Handle soln = i->second;
 
-    // Reject if the potential solution contains any atoms that we want to exclude
-    for (const Handle& eh : excl_list) {
-        if (std::find(gn.begin(), gn.end(), eh) != gn.end()) {
+        // Skip it if we have seen it before
+        if (std::find(prev_compared.begin(), prev_compared.end(), soln.value())
+                                                        != prev_compared.end())
+            continue;
+        else prev_compared.push_back(soln.value());
 
-	        LAZY_LOG_FINE << "Rejecting:\n" << gh->toShortString()
-	                      << "due to the existance of:\n"
-	                      << eh->toShortString();
-            return;
-        }
-    }
+        // Skip if it is not the type of atoms we are looking for
+        if (rtn_type and soln->getType() != rtn_type)
+            continue;
 
-    // Find out how many nodes the potential solution has in common with the pattern
-    HandleSeq common_nodes;
-    std::sort(pat_nodes.begin(), pat_nodes.end());
-    std::sort(gn.begin(), gn.end());
-    std::set_intersection(pat_nodes.begin(), pat_nodes.end(), gn.begin(), gn.end(),
-                          std::back_inserter(common_nodes));
+        // Skip if it contains atoms that we want to exclude
+        HandleSeq ex_nodes;
+        HandleSeq soln_nodes = get_all_nodes(soln);
 
-    // The size different between the pattern and the potential solution
-    size_t diff = std::abs((int)(pat_size - gn.size()));
+        std::sort(excl_list.begin(), excl_list.end());
+        std::sort(soln_nodes.begin(), soln_nodes.end());
 
-    double similarity = 0;
+        std::set_intersection(excl_list.begin(), excl_list.end(),
+                              soln_nodes.begin(), soln_nodes.end(),
+                              std::back_inserter(ex_nodes));
 
-    for (const Handle& common_node : common_nodes) {
-        size_t iss;
-        auto it = in_set_sizes.find(common_node);
-        if (it == in_set_sizes.end()) {
-            iss = common_node->getIncomingSetSize();
-            in_set_sizes.insert({common_node, iss});
-        }
-        else iss = it->second;
+        if (ex_nodes.size() > 0)
+            continue;
 
-        // Roughly estimate how "rare" the node is by using 1 / incoming set size
+        // Find out how many nodes it has in common with the pattern
+        HandleSeq common_nodes;
+        HandleSeq pat_nodes = get_all_nodes(_pattern->mandatory[0]);
+        size_t pat_size = pat_nodes.size();
+
+        std::sort(pat_nodes.begin(), pat_nodes.end());
+
+        std::set_intersection(pat_nodes.begin(), pat_nodes.end(),
+                              soln_nodes.begin(), soln_nodes.end(),
+                              std::back_inserter(common_nodes));
+
+        // The size different between the pattern and the potential solution
+        size_t diff = std::abs((int)(pat_size - soln_nodes.size()));
+
+        double similarity = 0;
+
+        // Roughly estimate how "rare" each node is by using 1 / incoming set size
         // TODO: May use Truth Value instead
-        similarity += 1.0 / iss;
+        for (const Handle& common_node : common_nodes)
+            similarity += 1.0 / common_node->getIncomingSetSize();
+
+        LAZY_LOG_FINE << "\n========================================\n"
+                      << "Compaing:\n" << _pattern->mandatory[0]->toShortString()
+                      << "--- and:\n" << soln->toShortString() << "\n"
+                      << "Common nodes = " << common_nodes.size() << "\n"
+                      << "Size diff = " << diff << "\n"
+                      << "Similarity = " << similarity << "\n"
+                      << "Most similar = " << max_similarity << "\n"
+                      << "========================================\n";
+
+        // Decide if we should accept the potential solutions or not
+        if ((similarity > max_similarity) or
+            (similarity == max_similarity and diff < min_size_diff)) {
+            max_similarity = similarity;
+            min_size_diff = diff;
+            solns.clear();
+            solns.push_back(soln);
+        }
+
+        else if (similarity == max_similarity and diff == min_size_diff) {
+            solns.push_back(soln);
+        }
     }
 
-    LAZY_LOG_FINE << "\n========================================\n"
-                  << "Compaing:\n" << clause->toShortString() << "--- and:\n"
-                  << gh->toShortString() << "\n"
-                  << "Common nodes = " << common_nodes.size() << "\n"
-                  << "Size diff = " << diff << "\n"
-                  << "Similarity = " << similarity << "\n"
-                  << "Most similar = " << max_similarity << "\n"
-                  << "========================================\n";
-
-    // Decide if we should accept the potential solutions or not
-    if ((similarity > max_similarity) or
-        (similarity == max_similarity and diff < min_size_diff)) {
-        max_similarity = similarity;
-        min_size_diff = diff;
-        solns.clear();
-        solns.push_back(gh);
-    }
-
-    else if (similarity == max_similarity and diff == min_size_diff) {
-        solns.push_back(gh);
-    }
+    // XXX
+    return true;
 }

@@ -37,7 +37,7 @@ namespace opencog
 
             FuzzyPatternMatchCB(AtomSpace*, Type, const HandleSeq&);
 
-            virtual bool initiate_search(PatternMatchEngine* pme);
+            virtual bool initiate_search(PatternMatchEngine*);
 
             virtual void set_pattern(const Variables& vars,
                                      const Pattern& pat)
@@ -46,32 +46,23 @@ namespace opencog
                 _pattern = &pat;
             }
 
-            virtual bool fuzzy_match(const Handle& h1, const Handle& h2)
-            {
-                return true;
-            }
+            virtual bool fuzzy_match(const Handle&, const Handle&)
+            { return true; }
 
-            virtual bool link_match(const LinkPtr& pLink, const LinkPtr& gLink);
+            virtual bool link_match(const LinkPtr&, const LinkPtr&)
+            { return true; }
 
-            virtual bool node_match(const Handle& pNode, const Handle& gNode)
-            {
-                return true;
-            }
+            virtual bool node_match(const Handle&, const Handle&)
+            { return true; }
 
-            virtual bool grounding(const std::map<Handle, Handle>& var_soln,
-                                   const std::map<Handle, Handle>& term_soln)
-            {
-                return true;
-            }
+            virtual bool variable_match(const Handle&, const Handle&)
+            { return true; }
+
+            virtual bool grounding(const std::map<Handle, Handle>&,
+                                   const std::map<Handle, Handle>&);
 
         private:
             const Pattern* _pattern = NULL;
-
-            // The input pattern
-            Handle clause;
-
-            // The nodes in the pattern
-            HandleSeq pat_nodes;
 
             // Type of atom that we are looking for
             Type rtn_type;
@@ -79,6 +70,7 @@ namespace opencog
             // List of atoms that we don't want them to exist in the solutions
             HandleSeq excl_list;
 
+            // Potential starters for the search
             struct Starter
             {
                 UUID uuid;
@@ -88,17 +80,8 @@ namespace opencog
                 size_t depth;
             };
 
-            // How many nodes are there in the pattern
-            size_t pat_size = 0;
-
-            // Potential starters that can be used to initiate the search
-            std::vector<Starter> starters;
-
-            // Links that have previously been compared
+            // Potential solutions that have previously been compared
             std::vector<UUID> prev_compared;
-
-            // Stores the incoming set sizes of nodes
-            std::unordered_map<Handle, size_t> in_set_sizes;
 
             // The minimum difference between the pattern and all the known solutions
             size_t min_size_diff = SIZE_MAX;
@@ -109,8 +92,6 @@ namespace opencog
             void find_starters(const Handle& hg, const size_t& depth,
                                const size_t& clause_idx, const Handle& term,
                                std::vector<Starter>& rtn);
-
-            void check_if_accept(const Handle& gh);
     };
 }
 
