@@ -35,7 +35,8 @@ FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as, Type rt, const HandleSeq
 
 /**
  * Find the starters that can be used to initiate a fuzzy-search. Currently the
- * starters has to be a node that is not an instance nor a variable.
+ * starters has to be a node that is not an instance nor a variable. It can't be
+ * any node that is listed in the exclude-list either.
  *
  * @param hp          The pattern (the hypergraph in the query)
  * @param depth       The depth of the starter in the pattern
@@ -78,12 +79,9 @@ void FuzzyPatternMatchCB::find_starters(const Handle& hp, const size_t& depth,
 }
 
 /**
- * Implement the initiate_search method in the Pattern Matcher. The main
- * difference between this method and the default one is that this initiates
- * multiple searches using differnt nodes as starters instead of one,
- * explores the neighborhood of each of them, and captures the partial
- * matches in the callbacks. It stops when there are no more available
- * starters in the pattern.
+ * Implement the initiate_search method in the Pattern Matcher. It finds and
+ * initiates multiple searches using differnt nodes as starters.
+ * It stops when each of the starters have been used for searching.
  *
  * @param pme   The PatternMatchEngine object
  * @return      True if one or more solutions are found, false otherwise
@@ -158,7 +156,9 @@ bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
  * will be accepted if it has a similarity greater than or equals to the
  * maximum similarity that we know, rejected otherwise.
  *
- * @param
+ * @param var_soln   Groundings for the variables & links
+ * @param term_soln  Groundings for the clauses
+ * @return           Always returns false to search for more solutions
  */
 bool FuzzyPatternMatchCB::grounding(const std::map<Handle, Handle>& var_soln,
                                     const std::map<Handle, Handle>& term_soln)

@@ -154,23 +154,7 @@ void FuzzyPatternUTest::test_basic_fuzzy_match(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	// Construct the query
-	Handle query = al(EVALUATION_LINK,
-					an(PREDICATE_NODE, "eats"),
-					al(LIST_LINK,
-						an(CONCEPT_NODE, "Tom"),
-						an(CONCEPT_NODE, "Saffron")
-					)
-				  );
 
-	Handle result = find_approximate_match(as, query);
-
-	const HandleSeq& solns = LinkCast(result)->getOutgoingSet();
-
-	TSM_ASSERT_EQUALS("Wrong number of solutions", solns.size(), 1);
-
-	// "Tim loves Saffron" is preferred as "Saffron" is relatively rare
-	TSM_ASSERT_EQUALS("Wrong match", solns[0].value(), hel5.value());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
