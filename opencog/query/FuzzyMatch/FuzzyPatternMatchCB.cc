@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atomutils/AtomUtils.h>
+#include <opencog/atomutils/FindUtils.h>
 #include "FuzzyPatternMatchCB.h"
 
 using namespace opencog;
@@ -166,6 +167,9 @@ bool FuzzyPatternMatchCB::grounding(const std::map<Handle, Handle>& var_soln,
     for (auto i = term_soln.begin(); i != term_soln.end(); i++) {
         Handle soln = i->second;
 
+        if (soln == _pattern->mandatory[0])
+            continue;
+
         // Skip it if we have seen it before
         if (std::find(prev_compared.begin(), prev_compared.end(), soln.value())
                                                         != prev_compared.end())
@@ -176,26 +180,19 @@ bool FuzzyPatternMatchCB::grounding(const std::map<Handle, Handle>& var_soln,
         if (rtn_type and soln->getType() != rtn_type)
             continue;
 
-        // Skip if it contains atoms that we want to exclude
-        HandleSeq ex_nodes;
-        HandleSeq soln_nodes = get_all_nodes(soln);
-
-        std::sort(excl_list.begin(), excl_list.end());
-        std::sort(soln_nodes.begin(), soln_nodes.end());
-
-        std::set_intersection(excl_list.begin(), excl_list.end(),
-                              soln_nodes.begin(), soln_nodes.end(),
-                              std::back_inserter(ex_nodes));
-
-        if (ex_nodes.size() > 0)
+        // Skip if it is or it contains some atom that we don't want
+        if (std::any_of(excl_list.begin(), excl_list.end(),
+                [&](Handle& h) { return is_atom_in_tree(soln, h); }))
             continue;
 
         // Find out how many nodes it has in common with the pattern
         HandleSeq common_nodes;
         HandleSeq pat_nodes = get_all_nodes(_pattern->mandatory[0]);
+        HandleSeq soln_nodes = get_all_nodes(soln);
         size_t pat_size = pat_nodes.size();
 
         std::sort(pat_nodes.begin(), pat_nodes.end());
+        std::sort(soln_nodes.begin(), soln_nodes.end());
 
         std::set_intersection(pat_nodes.begin(), pat_nodes.end(),
                               soln_nodes.begin(), soln_nodes.end(),
