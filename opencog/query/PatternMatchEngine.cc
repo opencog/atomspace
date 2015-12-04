@@ -1028,6 +1028,12 @@ bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
 		if (explore_choice_branches(ptm, hg, clause_root))
 			return true;
 
+		if (_pmc.skip_permutations(clause_root, hg))
+		{
+			logger().fine("Skipping the rest of the permutations");
+			return false;
+		}
+
 		logger().fine("Step to next permuation");
 		// If we are here, there was no match.
 		// On the next go-around, take a step.

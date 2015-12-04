@@ -58,6 +58,9 @@ namespace opencog
             virtual bool variable_match(const Handle&, const Handle&)
             { return true; }
 
+            virtual bool skip_permutations(const Handle&, const Handle&)
+            { return true; }
+
             virtual bool grounding(const std::map<Handle, Handle>&,
                                    const std::map<Handle, Handle>&);
 

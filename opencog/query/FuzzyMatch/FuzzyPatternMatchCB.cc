@@ -234,6 +234,5 @@ bool FuzzyPatternMatchCB::grounding(const std::map<Handle, Handle>& var_soln,
         }
     }
 
-    // XXX
-    return true;
+    return false;
 }
