@@ -17,7 +17,9 @@ import Data.Typeable
 main :: IO ()
 main = do
     res <- executionOutputTest
-    print res
+    case res of
+        True -> exitSuccess
+        False -> exitFailure
 
 executionOutputTest :: IO Bool
 executionOutputTest = do
