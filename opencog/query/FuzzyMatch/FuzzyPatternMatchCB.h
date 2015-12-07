@@ -37,8 +37,6 @@ namespace opencog
 
             FuzzyPatternMatchCB(AtomSpace*, Type, const HandleSeq&);
 
-            virtual bool initiate_search(PatternMatchEngine*);
-
             virtual void set_pattern(const Variables& vars,
                                      const Pattern& pat)
             {
@@ -46,20 +44,20 @@ namespace opencog
                 _pattern = &pat;
             }
 
-            virtual bool fuzzy_match(const Handle&, const Handle&)
-            { return true; }
+            virtual bool initiate_search(PatternMatchEngine*);
 
-            virtual bool link_match(const LinkPtr&, const LinkPtr&)
+            virtual bool link_match(const LinkPtr&, const LinkPtr&);
+
+            virtual bool fuzzy_match(const Handle&, const Handle&)
             { return true; }
 
             virtual bool node_match(const Handle&, const Handle&)
             { return true; }
 
-            virtual bool variable_match(const Handle&, const Handle&)
-            { return true; }
-
+            // Always returns false to search for more solutions
             virtual bool grounding(const std::map<Handle, Handle>&,
-                                   const std::map<Handle, Handle>&);
+                                   const std::map<Handle, Handle>&)
+            { return false; }
 
         private:
             const Pattern* _pattern = NULL;

@@ -152,38 +152,42 @@ bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
 }
 
 /**
+ * Implement the link_match method in the Pattern Matcher.
  * Compare and estimate the similarity between the pattern and the potential
  * solution, and decide whether or not to accept it. The potential solution
  * will be accepted if it has a similarity greater than or equals to the
  * maximum similarity that we know, rejected otherwise.
  *
- * @param var_soln   Groundings for the variables & links
- * @param term_soln  Groundings for the clauses
- * @return           Always returns false to search for more solutions
+ * @param pl  A link from the pattern
+ * @param gl  A possible grounding link
+ * @return    Returns true to accept all kinds of links when we are on the way
+ *            to finding a solution, false when we have finished deciding
+ *            whether or not to accept the solution
  */
-bool FuzzyPatternMatchCB::grounding(const std::map<Handle, Handle>& var_soln,
-                                    const std::map<Handle, Handle>& term_soln)
+bool FuzzyPatternMatchCB::link_match(const LinkPtr& pl, const LinkPtr& gl)
 {
-    for (auto i = term_soln.begin(); i != term_soln.end(); i++) {
-        Handle soln = i->second;
+    // In this case, gl is a potential solution
+    if (_pattern->mandatory[0] == pl->getHandle()) {
+        Handle soln = gl->getHandle();
 
+        // Skip it if it's grounded by itself
         if (soln == _pattern->mandatory[0])
-            continue;
+            return false;
 
         // Skip it if we have seen it before
         if (std::find(prev_compared.begin(), prev_compared.end(), soln.value())
                                                         != prev_compared.end())
-            continue;
+            return false;
         else prev_compared.push_back(soln.value());
 
         // Skip if it is not the type of atoms we are looking for
         if (rtn_type and soln->getType() != rtn_type)
-            continue;
+            return false;
 
         // Skip if it is or it contains some atom that we don't want
         if (std::any_of(excl_list.begin(), excl_list.end(),
                 [&](Handle& h) { return is_atom_in_tree(soln, h); }))
-            continue;
+            return false;
 
         // Find out how many nodes it has in common with the pattern
         HandleSeq common_nodes;
@@ -229,7 +233,12 @@ bool FuzzyPatternMatchCB::grounding(const std::map<Handle, Handle>& var_soln,
         else if (similarity == max_similarity and diff == min_size_diff) {
             solns.push_back(soln);
         }
+
+        // Returns false here to skip the rest of the pattern matching procedures,
+        // including the permutation comparsion for unordered links, as we have
+        // already decided whether or not to accpet this grounding.
+        return false;
     }
 
-    return false;
+    return true;
 }
