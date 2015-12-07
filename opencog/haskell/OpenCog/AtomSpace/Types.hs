@@ -177,6 +177,10 @@ data Atom (a :: AtomType) where
     SequentialOrLink    :: [AtomGen] -> Atom SequentialOrT
     DefineLink          :: (a1 <~ AtomT, a2 <~ AtomT) =>
                             Atom a1 -> Atom a2 -> Atom DefineT
+    GetLink             :: (v <~ VariableListT,l <~ LinkT) =>
+                            Atom v -> Atom l -> Atom GetT
+    SleepLink           :: (a <~ NumberT) =>
+                            Atom a -> Atom SleepT
 
 deriving instance Show (Atom a)
 deriving instance Typeable Atom

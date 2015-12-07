@@ -67,6 +67,8 @@ toRaw at = let atype     = getType at
     SetLink list               -> Link atype (map (appGen toRaw) list) defaultTv
     SatisfactionLink (VariableList []) a2 -> Link atype [toRaw a2] defaultTv
     SatisfactionLink a1 a2     -> Link atype [toRaw a1,toRaw a2] defaultTv
+    GetLink (VariableList []) a2 -> Link atype [toRaw a2] defaultTv
+    GetLink a1 a2              -> Link atype [toRaw a1,toRaw a2] defaultTv
     ForAllLink tv a1 a2        -> Link atype [toRaw a1,toRaw a2] $ toTVRaw tv
     ExistsLink tv a1 a2        -> Link atype [toRaw a1,toRaw a2] $ toTVRaw tv
     QuoteLink a1               -> Link atype [toRaw a1] defaultTv
@@ -82,6 +84,7 @@ toRaw at = let atype     = getType at
     DefineLink a1 a2           -> Link atype [toRaw a1,toRaw a2] defaultTv
     SequentialAndLink list     -> Link atype (map (appGen toRaw) list) defaultTv
     SequentialOrLink list      -> Link atype (map (appGen toRaw) list) defaultTv
+    SleepLink a                -> Link atype [toRaw a] defaultTv
     _                          -> error $ "You should complete the code of toRaw"
                                       ++ " with an instance for: " ++ show at
 
@@ -184,6 +187,15 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw tvraw in do
         b <- filt br :: Maybe (Gen LinkT)
         case (a,b) of
           (Gen a1,Gen b1) -> Just $ Gen $ SatisfactionLink a1 b1
+      (GetT ,[br]) -> do
+        b <- filt br :: Maybe (Gen LinkT)
+        case (b) of
+          (Gen b1) -> Just $ Gen $ GetLink (VariableList []) b1
+      (GetT ,[ar,br]) -> do
+        a <- filt ar :: Maybe (Gen VariableListT)
+        b <- filt br :: Maybe (Gen LinkT)
+        case (a,b) of
+          (Gen a1,Gen b1) -> Just $ Gen $ GetLink a1 b1
       (ForAllT ,[ar,br]) -> do
         a <- filt ar :: Maybe (Gen VariableListT)
         b <- filt br :: Maybe (Gen AtomT)
@@ -242,6 +254,10 @@ fromRawGen (Link araw out tvraw) = let tv = fromTVRaw tvraw in do
       (FalseT,_) -> do
         lnew <- mapM fromRawGen out
         Just $ Gen $ FalseLink lnew
+      (SleepT , [sr]) -> do
+        s <- filt sr :: Maybe (Gen NumberT)
+        case s of
+            (Gen s) -> Just $ Gen $ SleepLink s
       x               -> error $ "You should complete the code of fromRawGen"
                                ++ " with an instance for: " ++ show x
 

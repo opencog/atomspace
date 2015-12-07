@@ -4,6 +4,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE UndecidableInstances  #-}
+{-# LANGUAGE DataKinds             #-}
 
 -- | This Module defines some util syntactic sugar for embedded atom notation.
 module OpenCog.AtomSpace.Sugar (
@@ -13,6 +14,7 @@ module OpenCog.AtomSpace.Sugar (
   , ftv
   , ptv
   , noTv
+  , noVars
   , atomList
   , (|>)
   , (\>)
@@ -20,8 +22,11 @@ module OpenCog.AtomSpace.Sugar (
 
 import OpenCog.AtomSpace.Inheritance    (type (<~))
 import OpenCog.AtomSpace.Types          (TruthVal(..),Gen(..),Atom(..))
+import OpenCog.AtomSpace.AtomType       (AtomType(..))
 import Data.Typeable                    (Typeable)
 
+noVars :: Atom VariableListT
+noVars = VariableList []
 
 -- | TruthVal syntactic sugar.
 noTv :: TruthVal
