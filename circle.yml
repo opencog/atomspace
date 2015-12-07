@@ -13,7 +13,7 @@ dependencies:
 
 test:
     override:
-        - docker run --rm -v $PWD:/atomspace --link postgres:db -e PGHOST=db -e PGUSER=opencog_test -it opencog/cogutils /bin/sh -c "cd /atomspace && /tmp/octool -beti"
+        - docker run -v $PWD:/atomspace --link postgres:db -e PGHOST=db -e PGUSER=opencog_test -it opencog/cogutils /bin/sh -c "cd /atomspace && /tmp/octool -beti"
 
 general:
   artifacts:
