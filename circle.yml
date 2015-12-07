@@ -5,16 +5,17 @@ machine:
 dependencies:
     override:
         - docker info
-        #- docker pull postgres
+        - docker pull opencog/postgres
         - docker pull opencog/cogutils
         - docker images
-        #- docker run -d --name postgres postgres
-        #- docker ps -a
+        - docker run -d --name postgres opencog/postgres
+        - docker ps -a
+    cache_directories:
+        - "~/atomspace/build/"   # cache build directory
 
 test:
     override:
-        #- docker run -v $PWD:/atomspace --link postgres:db -e PGHOST=db -e PGUSER=opencog_user  -it opencog/cogutils /bin/sh -c "./configure-database.sh && cd /atomspace && /tmp/octool -bet"
-        - docker run -v $PWD:/atomspace -it opencog/cogutils /bin/sh -c "cd /atomspace && /tmp/octool -beti"
+        - docker run -v $PWD:/atomspace --link postgres:db -e PGHOST=db -e PGUSER=opencog_test -it opencog/cogutils /bin/sh -c "cd /atomspace && /tmp/octool -beti"
 
 general:
   artifacts:
