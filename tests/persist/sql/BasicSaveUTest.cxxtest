@@ -32,7 +32,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/persist/sql/AtomStorage.h>
@@ -209,7 +209,7 @@ static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
 
 // ============================================================
 /**
- * A simple test case that tests the save and restore of 
+ * A simple test case that tests the save and restore of
  * a couple of nodes and a link. Does not test atomtable/atomspace at all.
  */
 void BasicSaveUTest::single_atom_save_restore(std::string id)
@@ -221,7 +221,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 		return;
 	}
 
-	// Create an atom ... 
+	// Create an atom ...
 	AtomPtr a(createNode(SCHEMA_NODE, id + "someNode"));
 	TruthValuePtr stv(SimpleTruthValue::createTV(0.55, 0.6));
 	a->setTruthValue(stv);
@@ -232,7 +232,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 
 	TSM_ASSERT("Bad Handle", h != Handle::UNDEFINED);
 
-	// Store the atom ... 
+	// Store the atom ...
 	store->storeAtom(a, true);
 
 	// Fetch it back ...
@@ -267,7 +267,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 
 void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
 {
-	// Create an atom ... 
+	// Create an atom ...
 	n1[idx] = createNode(SCHEMA_NODE, id + "fromNode");
 	TruthValuePtr stv(SimpleTruthValue::createTV(0.11, 100+idx));
 	n1[idx]->setTruthValue(stv);
