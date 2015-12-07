@@ -5,6 +5,10 @@ ADD_CUSTOM_TARGET(haskell-atomspace-executiontest
     COMMENT "Building Haskell Execution-Test."
 )
 
+#The Code does not actually depend on haskell-atomspace-test
+#but we can't build both at the same time
+ADD_DEPENDENCIES(haskell-atomspace-executiontest haskell-atomspace-test)
+
 ADD_DEPENDENCIES(tests haskell-atomspace-executiontest)
 
 ADD_TEST(NAME HaskellAtomSpaceExecution
