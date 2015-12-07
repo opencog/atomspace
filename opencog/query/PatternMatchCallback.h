@@ -238,16 +238,6 @@ class PatternMatchCallback
 		                       const std::map<Handle, Handle> &term_soln) = 0;
 
 		/**
-		 * Called when we are comparing unordered links. It would be useful
-		 * if we want to skip this grounding and move on to the next right away
-		 * without having to compare all of its possible permutations.
-		 */
-		virtual bool skip_permutations(const Handle& ph, const Handle& gh)
-		{
-			return false;
-		}
-
-		/**
 		 * Called whenever the incoming set of an atom is to be explored.
 		 * This callback allows the search space to be prioritized, by
 		 * returning (all or some of) the incoming set in some sorted
