@@ -10,8 +10,6 @@ dependencies:
         - docker images
         - docker run -d --name postgres opencog/postgres
         - docker ps -a
-    cache_directories:
-        - "~/atomspace/build/"   # cache build directory
 
 test:
     override:
