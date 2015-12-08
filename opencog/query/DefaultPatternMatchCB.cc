@@ -172,7 +172,7 @@ bool DefaultPatternMatchCB::post_link_match(const LinkPtr& lpat,
 		{
 			// This throws an exception if there is no state.
 			// Obviousy, that's a mismatch.
-			if (StateLink::get_state(lpat->getOutgoingAtom(0)) !=
+			if (StateLink::get_state(lgnd->getOutgoingAtom(0)) !=
 			    lgnd->getOutgoingAtom(1))
 				return false;
 		}
