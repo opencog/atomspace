@@ -92,8 +92,10 @@ void ParallelUTest::test_parallel(void)
     load_scm_files_from_config(*as);
 
     // The scheme variable nnn should increment by one after 1, 3 and 5
-    // seconds. If we wait 2 seconds, we should get a clear eye for the
-    // measurement.
+    // seconds. If we check at 0, 2, 4, 6 seconds, we should get a clear
+    // eye for the measurement.  Note that, on a busy system, these
+    // timing windows can fail, if the OS muffs the sleeps.  Which does
+    // seem to happen; see bug #517 on github.
     eval->eval_tv("(cog-evaluate! pllel)");
 
     std::string str = eval->eval("nnn");
