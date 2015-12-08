@@ -55,6 +55,68 @@ RandomChoiceLink::RandomChoiceLink(Link &l)
 
 // ---------------------------------------------------------------
 
+// When executed, this will randomly select and return an atom
+// in it's outgoing set. The selection can use either a uniform or
+// a weighted distribution.  Two different formats are used to specify
+// weights; if neither of these are used, a uniform distribution is
+// used.
+//
+// One way to specify weights is to use a weight-vector:
+//
+//    RandomChoiceLink
+//        ListLink
+//           NumberNode
+//           ...
+//           NumberNode
+//        ListLink
+//           AtomA
+//           ...
+//           AtomZ
+//
+// With the above format, the atoms A..Z will be selected with
+// distribution weights taken from the NumberNodes. The probability of
+// selection is in *proportion* to the weights; viz the probability is
+// given by dividing a given weight by the sum of the weights.
+// The Number of AtomsA..Z MUST match the number of NumberNodes!
+//
+// A second way to specify weights is much more GetLink friendly:
+//
+//    RandomChoiceLink
+//        SetLink
+//           ListLink
+//              NumberNode1
+//              AtomA
+//           ListLink
+//              NumberNode2
+//              AtomB
+//              ...
+//           ListLink
+//              NumberNodeN
+//              AtomZ
+//
+// Here, the weights and atoms are paired. The pairs appear in a
+// SetLink, which is an unordered link, and is the link type returned
+// by the GetLink query function.
+//
+// If neither of the above two formats appear to hold, then it is
+// assumed that the RandomChoiceLink simply holds a list of atoms;
+// these are selected with uniform weighting.  Viz:
+//
+//    RandomChoiceLink
+//        AtomA
+//        AtomB
+//        ...
+//        AtomZ
+//
+// or the GetLink-friendly format:
+//
+//    RandomChoiceLink
+//        SetLink
+//           AtomA
+//           AtomB
+//           ...
+//           AtomZ
+//
 Handle RandomChoiceLink::execute(AtomSpace * as) const
 {
 	size_t ary = _outgoing.size();
