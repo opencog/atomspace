@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <dlfcn.h>
 #include <stdlib.h>
 
 #include <opencog/atomspace/atom_types.h>
