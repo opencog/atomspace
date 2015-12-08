@@ -140,6 +140,34 @@ Handle RandomChoiceLink::execute(AtomSpace * as) const
 #endif
 
 		LinkPtr lll(LinkCast(_outgoing[0]));
+
+		// Search for ListLink pairs, w/car of pair a number.
+		HandleSeq choices;
+		std::vector<double> weights;
+		for (const Handle& h : lll->getOutgoingSet())
+		{
+			if (LIST_LINK != h->getType()) goto uniform;
+
+			LinkPtr lpair(LinkCast(h));
+			const HandleSeq& oset = lpair->getOutgoingSet();
+			if (2 != oset.size()) goto uniform;
+
+			Handle hw = oset[0];
+			FunctionLinkPtr flp(FunctionLinkCast(hw));
+			if (nullptr != flp)
+				hw = flp->execute(as);
+
+			NumberNodePtr nn(NumberNodeCast(hw));
+			if (nullptr == nn) // goto uniform;
+				throw SyntaxException(TRACE_INFO,
+				       "Expecting a NumberNode");
+			weights.push_back(nn->get_value());
+			choices.push_back(oset[1]);
+		}
+
+		return choices[randy.randDiscrete(weights)];
+
+uniform:
 		ary = lll->getArity();
 		return lll->getOutgoingAtom(randy.randint(ary));
 	}
