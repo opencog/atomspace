@@ -9,9 +9,11 @@
 #ifdef HAVE_GUILE
 
 #include <cstddef>
+#include <cstdlib>
 #include <libguile.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/StringManipulator.h>
 #include "SchemePrimitive.h"
 #include "SchemeSmob.h"
 
@@ -45,6 +47,25 @@ void SchemeSmob::init()
 	if (is_inited.test_and_set()) return;
 
 	init_smob_type();
+
+	// If one is importing this class then the functions defined in
+	// .scm files associated with '(opencog)' module should be available.
+	// Assuming installation in a standard path.
+	scm_c_eval_string("(add-to-load-path \"/usr/local/share/opencog/scm\")\n");
+
+	// Add paths set through GUILE_LOAD_PATH
+	std::string env_str;
+
+	if (const char* _env = std::getenv("GUILE_LOAD_PATH")) {
+		env_str = _env;
+		auto output = StringManipulator::split(env_str, ":");
+
+		for (const auto& i : output) {
+			std::string scm_command = "(add-to-load-path \"" + i + "\")";
+			scm_c_eval_string(scm_command.c_str());
+		}
+	}
+
 	scm_c_define_module("opencog", register_procs, NULL);
 	scm_c_use_module("opencog");
 
@@ -253,7 +274,7 @@ void SchemeSmob::register_procs(void*)
 	register_proc("cog-af-boundary",       0, 0, 0, C(ss_af_boundary));
 	register_proc("cog-set-af-boundary!",  1, 0, 0, C(ss_set_af_boundary));
 	register_proc("cog-af",                0, 0, 0, C(ss_af));
-    
+
 	// Atom types
 	register_proc("cog-get-types",         0, 0, 0, C(ss_get_types));
 	register_proc("cog-type->int",         1, 0, 0, C(ss_get_type));
@@ -265,12 +286,43 @@ void SchemeSmob::register_procs(void*)
 
 	// Iterators
 	register_proc("cog-map-type",          2, 0, 0, C(ss_map_type));
+
+	// Load scheme files from load-path either set by GUILE_LOAD_PATH or
+	// (add-to-load-path "...")
+	// Load core atom types.
+	// The remaining atom types from the cogserver are in (opencog atom-types)
+	register_proc_from_scm("core_types.scm");
+
+	// Load other grunge too.
+	// Some of these things should probably be modules ...?
+	register_proc_from_scm("config.scm");
+
+	register_proc_from_scm("core-docs.scm");
+
+	register_proc_from_scm("utilities.scm");
+
+	register_proc_from_scm("apply.scm");
+	register_proc_from_scm("av-tv.scm");
+	register_proc_from_scm("file-utils.scm");
+	register_proc_from_scm("debug-trace.scm");
+
 }
 
 void SchemeSmob::register_proc(const char* name, int req, int opt, int rst, scm_t_subr fcn)
 {
 	scm_c_define_gsubr(name, req, opt, rst, fcn);
 	scm_c_export(name, NULL);
+}
+
+void SchemeSmob::register_proc_from_scm(const char* filename)
+{
+	//scm_c_primitive_load_path(filename);
+	auto path = scm_sys_search_load_path(scm_from_utf8_string(filename));
+	if (scm_is_true (path)) {
+		scm_c_primitive_load_path(filename);
+	} else {
+		std::cout << "Didn't find " << filename << std::endl;
+	}
 }
 
 #endif

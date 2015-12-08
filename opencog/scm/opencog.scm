@@ -15,9 +15,6 @@
 ; libsmob won't be found unless we setenv where to find it!
 (setenv "LTDL_LIBRARY_PATH" "/usr/local/lib/opencog")
 
-; Work-around another common usability issue...
-(add-to-load-path "/usr/local/share/opencog/scm")
-
 (define-module (opencog))
 (load-extension "libsmob" "opencog_guile_init")
 
@@ -45,20 +42,3 @@
 		(set! cog-initial-as (cog-new-atomspace))
 		; Initialize a default atomspace, just to keep things sane...
 		(cog-set-atomspace! cog-initial-as)))
-
-; Load core atom types.
-; The remaining atom types from the cogserver are in (opencog atom-types)
-(load-from-path "core_types.scm")
-
-; Load other grunge too.
-; Some of these things should probably be modules ...?
-(load-from-path "config.scm")
-
-(load-from-path "core-docs.scm")
-
-(load-from-path "utilities.scm")
-
-(load-from-path "apply.scm")
-(load-from-path "av-tv.scm")
-(load-from-path "file-utils.scm")
-(load-from-path "debug-trace.scm")
