@@ -1,5 +1,5 @@
 /*
- * FuzzyPatternMatchCB.cc
+ * FuzzyPatternMatch.cc
  *
  * Copyright (C) 2015 OpenCog Foundation
  *
@@ -21,13 +21,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FindUtils.h>
-#include "FuzzyPatternMatchCB.h"
+#include "FuzzyPatternMatch.h"
 
 using namespace opencog;
 
-FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as, Type rt, const HandleSeq& excl)
+FuzzyPatternMatch::FuzzyPatternMatch(AtomSpace* as, Type rt, const HandleSeq& excl)
         : DefaultPatternMatchCB(as),
           rtn_type(rt),
           excl_list(excl)
@@ -46,7 +47,7 @@ FuzzyPatternMatchCB::FuzzyPatternMatchCB(AtomSpace* as, Type rt, const HandleSeq
  * @param term        The term that the starter is located in the pattern
  * @param rtn         A list of potential starters found in the pattern
  */
-void FuzzyPatternMatchCB::find_starters(const Handle& hp, const size_t& depth,
+void FuzzyPatternMatch::find_starters(const Handle& hp, const size_t& depth,
                                         const size_t& clause_idx,
                                         const Handle& term,
                                         std::vector<Starter>& rtn)
@@ -87,7 +88,7 @@ void FuzzyPatternMatchCB::find_starters(const Handle& hp, const size_t& depth,
  * @param pme   The PatternMatchEngine object
  * @return      True if one or more solutions are found, false otherwise
  */
-bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
+bool FuzzyPatternMatch::initiate_search(PatternMatchEngine* pme)
 {
     // Find starters from the clause
     std::vector<Starter> starters;
@@ -164,7 +165,7 @@ bool FuzzyPatternMatchCB::initiate_search(PatternMatchEngine* pme)
  *            to finding a solution, false when we have finished deciding
  *            whether or not to accept the solution
  */
-bool FuzzyPatternMatchCB::link_match(const LinkPtr& pl, const LinkPtr& gl)
+bool FuzzyPatternMatch::link_match(const LinkPtr& pl, const LinkPtr& gl)
 {
     // In this case, gl is a potential solution
     if (_pattern->mandatory[0] == pl->getHandle()) {
@@ -242,3 +243,38 @@ bool FuzzyPatternMatchCB::link_match(const LinkPtr& pl, const LinkPtr& gl)
 
     return true;
 }
+
+/**
+ * Implement the "cog-fuzzy-match" scheme primitive.
+ * It uses the Pattern Matcher to find hypergraphs in the atomspace that are
+ * similar to the query hypergraph, and returns the most similar ones.
+ *
+ * @param as         The atomspace that we are using
+ * @param hp         The query hypergraph
+ * @param rtn_type   The type of atoms that we want
+ * @param excl_list  A list of atoms that we don't want any of them to exist in the results
+ * @return           One or more similar hypergraphs
+ */
+Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp,
+                                       Type rtn_type,
+                                       const HandleSeq& excl_list)
+{
+    FuzzyPatternMatch fpm(as, rtn_type, excl_list);
+
+    HandleSeq terms;
+    terms.push_back(hp);
+
+    std::set<Handle> no_vars;
+
+    PatternLinkPtr slp(createPatternLink(no_vars, terms));
+    slp->satisfy(fpm);
+
+    LAZY_LOG_FINE << "---------- solns ----------";
+    for (Handle h : fpm.solns) LAZY_LOG_FINE << h->toShortString();
+
+    // The result_list contains a list of the grounded expressions.
+    // Turn it into a true list, and return it.
+    Handle gl = as->add_link(LIST_LINK, fpm.solns);
+    return gl;
+}
+

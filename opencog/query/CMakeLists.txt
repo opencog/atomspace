@@ -3,6 +3,7 @@
 ADD_LIBRARY(query SHARED
 	AttentionalFocusCB.cc
 	DefaultPatternMatchCB.cc
+	FuzzyPatternMatch.cc
 	Implicator.cc
 	InitiateSearchCB.cc
 	PatternMatch.cc
@@ -10,8 +11,6 @@ ADD_LIBRARY(query SHARED
 	PatternSCM.cc
 	Recognizer.cc
 	Satisfier.cc
-	FuzzyMatch/FuzzyPatternMatch.cc
-	FuzzyMatch/FuzzyPatternMatchCB.cc
 )
 
 ADD_DEPENDENCIES(query
@@ -36,6 +35,7 @@ INSTALL (FILES
 	BindLinkAPI.h
 	DefaultImplicator.h
 	DefaultPatternMatchCB.h
+	FuzzyPatternMatch.h
 	Implicator.h
 	InitiateSearchCB.h
 	Pattern.h

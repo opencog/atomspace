@@ -1,5 +1,5 @@
 /*
- * FuzzyPatternMatchCB.h
+ * FuzzyPatternMatch.h
  *
  * Copyright (C) 2015 OpenCog Foundation
  *
@@ -21,21 +21,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FUZZYPATTERNMATCHCB_H
-#define FUZZYPATTERNMATCHCB_H
+#ifndef FUZZYPATTERNMATCH_H
+#define FUZZYPATTERNMATCH_H
 
 #include <opencog/query/DefaultPatternMatchCB.h>
 
 namespace opencog
 {
-    class FuzzyPatternMatchCB :
+    class FuzzyPatternMatch :
 		public DefaultPatternMatchCB
     {
         public:
             // The solutions
             HandleSeq solns;
 
-            FuzzyPatternMatchCB(AtomSpace*, Type, const HandleSeq&);
+            FuzzyPatternMatch(AtomSpace*, Type, const HandleSeq&);
 
             virtual void set_pattern(const Variables& vars,
                                      const Pattern& pat)
@@ -91,7 +91,10 @@ namespace opencog
                                const size_t& clause_idx, const Handle& term,
                                std::vector<Starter>& rtn);
     };
+
+    Handle find_approximate_match(AtomSpace* as, const Handle& hp,
+                                  Type rtn_type = 0, const HandleSeq& excl_list = {});
 }
 
-#endif // FUZZYPATTERNMATCHCB_H
+#endif // FUZZYPATTERNMATCH_H
 
