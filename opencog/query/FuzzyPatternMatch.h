@@ -45,9 +45,6 @@ namespace opencog
 		public DefaultPatternMatchCB
     {
         public:
-            // The solutions
-            HandleSeq solns;
-
             FuzzyPatternMatch(AtomSpace*, Type, const HandleSeq&);
 
             virtual void set_pattern(const Variables& vars,
@@ -72,8 +69,15 @@ namespace opencog
                                    const std::map<Handle, Handle>&)
             { return false; }
 
+            virtual void similarity_match(const Handle&, const Handle&, HandleSeq&);
+
+            HandleSeq get_solns() { return solutions; }
+
         private:
             const Pattern* _pattern = NULL;
+
+            // The solutions
+            HandleSeq solutions;
 
             // Type of atom that we are looking for
             Type rtn_type;

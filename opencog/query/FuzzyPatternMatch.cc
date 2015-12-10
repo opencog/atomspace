@@ -143,7 +143,7 @@ bool FuzzyPatternMatch::initiate_search(PatternMatchEngine* pme)
     }
 
     // Let's end the search here if there are solutions, continue could be costly
-    if (solns.size() > 0) {
+    if (solutions.size() > 0) {
         std::cout << "Fuzzy match is finished.\n";
         return true;
     }
@@ -169,10 +169,11 @@ bool FuzzyPatternMatch::link_match(const LinkPtr& pl, const LinkPtr& gl)
 {
     // In this case, gl is a potential solution
     if (_pattern->mandatory[0] == pl->getHandle()) {
+        Handle pat = _pattern->mandatory[0];
         Handle soln = gl->getHandle();
 
         // Skip it if it's grounded by itself
-        if (soln == _pattern->mandatory[0])
+        if (soln == pat)
             return false;
 
         // Skip it if we have seen it before
@@ -190,50 +191,7 @@ bool FuzzyPatternMatch::link_match(const LinkPtr& pl, const LinkPtr& gl)
                 [&](Handle& h) { return is_atom_in_tree(soln, h); }))
             return false;
 
-        // Find out how many nodes it has in common with the pattern
-        HandleSeq common_nodes;
-        HandleSeq pat_nodes = get_all_nodes(_pattern->mandatory[0]);
-        HandleSeq soln_nodes = get_all_nodes(soln);
-        size_t pat_size = pat_nodes.size();
-
-        std::sort(pat_nodes.begin(), pat_nodes.end());
-        std::sort(soln_nodes.begin(), soln_nodes.end());
-
-        std::set_intersection(pat_nodes.begin(), pat_nodes.end(),
-                              soln_nodes.begin(), soln_nodes.end(),
-                              std::back_inserter(common_nodes));
-
-        // The size different between the pattern and the potential solution
-        size_t diff = std::abs((int)(pat_size - soln_nodes.size()));
-
-        double similarity = 0;
-
-        // Roughly estimate how "rare" each node is by using 1 / incoming set size
-        // TODO: May use Truth Value instead
-        for (const Handle& common_node : common_nodes)
-            similarity += 1.0 / common_node->getIncomingSetSize();
-
-        LAZY_LOG_FINE << "\n========================================\n"
-                      << "Compaing:\n" << _pattern->mandatory[0]->toShortString()
-                      << "--- and:\n" << soln->toShortString() << "\n"
-                      << "Common nodes = " << common_nodes.size() << "\n"
-                      << "Size diff = " << diff << "\n"
-                      << "Similarity = " << similarity << "\n"
-                      << "Most similar = " << max_similarity << "\n"
-                      << "========================================\n";
-
-        // Decide if we should accept the potential solutions or not
-        if ((similarity > max_similarity) or
-            (similarity == max_similarity and diff < min_size_diff)) {
-            max_similarity = similarity;
-            min_size_diff = diff;
-            solns.clear();
-            solns.push_back(soln);
-        }
-
-        else if (similarity == max_similarity and diff == min_size_diff) {
-            solns.push_back(soln);
-        }
+        similarity_match(pat, soln, solutions);
 
         // Returns false here to skip the rest of the pattern matching procedures,
         // including the permutation comparsion for unordered links, as we have
@@ -242,6 +200,62 @@ bool FuzzyPatternMatch::link_match(const LinkPtr& pl, const LinkPtr& gl)
     }
 
     return true;
+}
+
+/**
+ * Estimate how similar the potential solution and the input pattern are.
+ *
+ * @param pat    The input pattern
+ * @param soln   The potential solution
+ * @param solns  Solutions that we have been accepted so far
+ */
+void FuzzyPatternMatch::similarity_match(const Handle& pat, const Handle& soln,
+                                         HandleSeq& solns)
+{
+    // Find out how many nodes it has in common with the pattern
+    HandleSeq common_nodes;
+    HandleSeq pat_nodes = get_all_nodes(pat);
+    HandleSeq soln_nodes = get_all_nodes(soln);
+    size_t pat_size = pat_nodes.size();
+
+    std::sort(pat_nodes.begin(), pat_nodes.end());
+    std::sort(soln_nodes.begin(), soln_nodes.end());
+
+    std::set_intersection(pat_nodes.begin(), pat_nodes.end(),
+                          soln_nodes.begin(), soln_nodes.end(),
+                          std::back_inserter(common_nodes));
+
+    // The size different between the pattern and the potential solution
+    size_t diff = std::abs((int)(pat_size - soln_nodes.size()));
+
+    double similarity = 0;
+
+    // Roughly estimate how "rare" each node is by using 1 / incoming set size
+    // TODO: May use Truth Value instead
+    for (const Handle& common_node : common_nodes)
+        similarity += 1.0 / common_node->getIncomingSetSize();
+
+    LAZY_LOG_FINE << "\n========================================\n"
+                  << "Compaing:\n" << pat->toShortString()
+                  << "--- and:\n" << soln->toShortString() << "\n"
+                  << "Common nodes = " << common_nodes.size() << "\n"
+                  << "Size diff = " << diff << "\n"
+                  << "Similarity = " << similarity << "\n"
+                  << "Most similar = " << max_similarity << "\n"
+                  << "========================================\n";
+
+    // Decide if we should accept the potential solutions or not
+    if ((similarity > max_similarity) or
+        (similarity == max_similarity and diff < min_size_diff)) {
+        max_similarity = similarity;
+        min_size_diff = diff;
+        solns.clear();
+        solns.push_back(soln);
+    }
+
+    else if (similarity == max_similarity and diff == min_size_diff) {
+        solns.push_back(soln);
+    }
 }
 
 /**
@@ -270,11 +284,12 @@ Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp,
     slp->satisfy(fpm);
 
     LAZY_LOG_FINE << "---------- solns ----------";
-    for (Handle h : fpm.solns) LAZY_LOG_FINE << h->toShortString();
+    for (Handle h : fpm.get_solns())
+        LAZY_LOG_FINE << h->toShortString();
 
     // The result_list contains a list of the grounded expressions.
     // Turn it into a true list, and return it.
-    Handle gl = as->add_link(LIST_LINK, fpm.solns);
+    Handle gl = as->add_link(LIST_LINK, fpm.get_solns());
     return gl;
 }
 
