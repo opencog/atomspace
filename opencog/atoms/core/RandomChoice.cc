@@ -165,6 +165,9 @@ Handle RandomChoiceLink::execute(AtomSpace * as) const
 			choices.push_back(oset[1]);
 		}
 
+		if (0 == weights.size())
+			throw RuntimeException(TRACE_INFO,
+				"Asked to choose element from empty set!");
 		return choices[randy.randDiscrete(weights)];
 
 uniform:
