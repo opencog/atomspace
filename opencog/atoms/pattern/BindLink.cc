@@ -86,7 +86,6 @@ void BindLink::extract_variables(const HandleSeq& oset)
 	// declarations; extract all free variables.
 	if (2 == sz)
 	{
-		_vardecl = Handle::UNDEFINED;
 		_body = oset[0];
 		_implicand = oset[1];
 		_varlist.find_variables(oset[0]);
