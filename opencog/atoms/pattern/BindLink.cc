@@ -94,6 +94,7 @@ void BindLink::extract_variables(const HandleSeq& oset)
 
 	// If we are here, then the first outgoing set member should be
 	// a variable declaration.
+	_vardecl = oset[0];
 	_body = oset[1];
 	_implicand = oset[2];
 
