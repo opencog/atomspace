@@ -45,7 +45,7 @@ namespace opencog
 		public DefaultPatternMatchCB
     {
         public:
-            FuzzyPatternMatch(AtomSpace*, Type, const HandleSeq&);
+            FuzzyPatternMatch(AtomSpace*);
 
             virtual void set_pattern(const Variables& vars,
                                      const Pattern& pat)
@@ -79,12 +79,6 @@ namespace opencog
             // The solutions
             HandleSeq solutions;
 
-            // Type of atom that we are looking for
-            Type rtn_type;
-
-            // List of atoms that we don't want them to exist in the solutions
-            HandleSeq excl_list;
-
             // Potential starters for the search
             struct Starter
             {
@@ -109,9 +103,8 @@ namespace opencog
                                std::vector<Starter>& rtn);
     };
 
-    Handle find_approximate_match(AtomSpace* as, const Handle& hp,
-                                  Type rtn_type = 0, const HandleSeq& excl_list = {});
+    Handle find_approximate_match(AtomSpace* as, const Handle& hp);
 }
 
-#endif // FUZZYPATTERNMATCH_H
+#endif  // FUZZYPATTERNMATCH_H
 

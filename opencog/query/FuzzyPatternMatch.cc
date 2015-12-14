@@ -24,21 +24,19 @@
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FindUtils.h>
+
 #include "FuzzyPatternMatch.h"
 
 using namespace opencog;
 
-FuzzyPatternMatch::FuzzyPatternMatch(AtomSpace* as, Type rt, const HandleSeq& excl)
-        : DefaultPatternMatchCB(as),
-          rtn_type(rt),
-          excl_list(excl)
+FuzzyPatternMatch::FuzzyPatternMatch(AtomSpace* as)
+        : DefaultPatternMatchCB(as)
 {
 }
 
 /**
  * Find the starters that can be used to initiate a fuzzy-search. Currently the
- * starters has to be a node that is not an instance nor a variable. It can't be
- * any node that is listed in the exclude-list either.
+ * starters has to be a node that is not an instance nor a variable.
  *
  * @param hp          The pattern (the hypergraph in the query)
  * @param depth       The depth of the starter in the pattern
@@ -65,8 +63,7 @@ void FuzzyPatternMatch::find_starters(const Handle& hp, const size_t& depth,
 
         if (hp and np) {
             if ((np->getType() != VARIABLE_NODE) and
-                (np->getName().find("@") == std::string::npos) and
-                (std::find(excl_list.begin(), excl_list.end(), hp) == excl_list.end())) {
+                (np->getName().find("@") == std::string::npos)) {
                 Starter sn;
                 sn.uuid = hp.value();
                 sn.handle = hp;
@@ -182,15 +179,6 @@ bool FuzzyPatternMatch::link_match(const LinkPtr& pl, const LinkPtr& gl)
             return false;
         else prev_compared.push_back(soln.value());
 
-        // Skip if it is not the type of atoms we are looking for
-        if (rtn_type and soln->getType() != rtn_type)
-            return false;
-
-        // Skip if it is or it contains some atom that we don't want
-        if (std::any_of(excl_list.begin(), excl_list.end(),
-                [&](Handle& h) { return is_atom_in_tree(soln, h); }))
-            return false;
-
         similarity_match(pat, soln, solutions);
 
         // Returns false here to skip the rest of the pattern matching procedures,
@@ -216,7 +204,6 @@ void FuzzyPatternMatch::similarity_match(const Handle& pat, const Handle& soln,
     HandleSeq common_nodes;
     HandleSeq pat_nodes = get_all_nodes(pat);
     HandleSeq soln_nodes = get_all_nodes(soln);
-    size_t pat_size = pat_nodes.size();
 
     std::sort(pat_nodes.begin(), pat_nodes.end());
     std::sort(soln_nodes.begin(), soln_nodes.end());
@@ -226,7 +213,7 @@ void FuzzyPatternMatch::similarity_match(const Handle& pat, const Handle& soln,
                           std::back_inserter(common_nodes));
 
     // The size different between the pattern and the potential solution
-    size_t diff = std::abs((int)(pat_size - soln_nodes.size()));
+    size_t diff = std::abs((int)(pat_nodes.size() - soln_nodes.size()));
 
     double similarity = 0;
 
@@ -263,17 +250,13 @@ void FuzzyPatternMatch::similarity_match(const Handle& pat, const Handle& soln,
  * It uses the Pattern Matcher to find hypergraphs in the atomspace that are
  * similar to the query hypergraph, and returns the most similar ones.
  *
- * @param as         The atomspace that we are using
- * @param hp         The query hypergraph
- * @param rtn_type   The type of atoms that we want
- * @param excl_list  A list of atoms that we don't want any of them to exist in the results
- * @return           One or more similar hypergraphs
+ * @param as  The atomspace that we are using
+ * @param hp  The query hypergraph
+ * @return    One or more similar hypergraphs
  */
-Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp,
-                                       Type rtn_type,
-                                       const HandleSeq& excl_list)
+Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp)
 {
-    FuzzyPatternMatch fpm(as, rtn_type, excl_list);
+    FuzzyPatternMatch fpm(as);
 
     HandleSeq terms;
     terms.push_back(hp);
