@@ -27,3 +27,9 @@ them.
 * fsm-full.scm: A generic deterministic finite-state-machine constructor.
 * fsm-mealy.scm: A generic Mealy machine constructor.
 * markov-chain.scm: A Markov chain (probabilistic FSM) based on fsm-full.
+
+Examples that demonstrate some of the inner workings of the pattern
+matcher.
+
+* virtual.scm: Using virtual links, and the resulting combinatorial
+     explosion.
