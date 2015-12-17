@@ -62,8 +62,7 @@ void FuzzyPatternMatch::find_starters(const Handle& hp, const size_t& depth,
         NodePtr np(NodeCast(hp));
 
         if (hp and np) {
-            if ((np->getType() != VARIABLE_NODE) and
-                (np->getName().find("@") == std::string::npos)) {
+            if (accept_starter(np)) {
                 Starter sn;
                 sn.uuid = hp.value();
                 sn.handle = hp;
@@ -140,13 +139,27 @@ bool FuzzyPatternMatch::initiate_search(PatternMatchEngine* pme)
     }
 
     // Let's end the search here if there are solutions, continue could be costly
-    if (solutions.size() > 0) {
+    if (solns.size() > 0) {
         std::cout << "Fuzzy match is finished.\n";
         return true;
     }
 
     // Return false to use other methods to find matches
     else return false;
+}
+
+/**
+ * A callback to check if a node can be a starter, which will be used to
+ * initiate a pattern matching process.
+ *
+ * @param np  A NodePtr of a node from the input pattern
+ * @return    Returns true if a node can be considered as a starter,
+ *            false otherwise.
+ */
+bool FuzzyPatternMatch::accept_starter(const NodePtr np)
+{
+    return np->getType() != VARIABLE_NODE and
+           np->getName().find("@") == std::string::npos;
 }
 
 /**
@@ -179,7 +192,7 @@ bool FuzzyPatternMatch::link_match(const LinkPtr& pl, const LinkPtr& gl)
             return false;
         else prev_compared.push_back(soln.value());
 
-        similarity_match(pat, soln, solutions);
+        similarity_match(pat, soln);
 
         // Returns false here to skip the rest of the pattern matching procedures,
         // including the permutation comparsion for unordered links, as we have
@@ -197,8 +210,7 @@ bool FuzzyPatternMatch::link_match(const LinkPtr& pl, const LinkPtr& gl)
  * @param soln   The potential solution
  * @param solns  Solutions that we have been accepted so far
  */
-void FuzzyPatternMatch::similarity_match(const Handle& pat, const Handle& soln,
-                                         HandleSeq& solns)
+void FuzzyPatternMatch::similarity_match(const Handle& pat, const Handle& soln)
 {
     // Find out how many nodes it has in common with the pattern
     HandleSeq common_nodes;

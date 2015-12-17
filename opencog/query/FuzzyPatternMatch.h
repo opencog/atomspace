@@ -69,15 +69,17 @@ namespace opencog
                                    const std::map<Handle, Handle>&)
             { return false; }
 
-            virtual void similarity_match(const Handle&, const Handle&, HandleSeq&);
+            virtual bool accept_starter(const NodePtr);
 
-            HandleSeq get_solns() { return solutions; }
+            virtual void similarity_match(const Handle&, const Handle&);
+
+            virtual HandleSeq get_solns() { return solns; }
 
         private:
             const Pattern* _pattern = NULL;
 
             // The solutions
-            HandleSeq solutions;
+            HandleSeq solns;
 
             // Potential starters for the search
             struct Starter
