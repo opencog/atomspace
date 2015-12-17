@@ -138,14 +138,9 @@ bool FuzzyPatternMatch::initiate_search(PatternMatchEngine* pme)
         }
     }
 
-    // Let's end the search here if there are solutions, continue could be costly
-    if (solns.size() > 0) {
-        std::cout << "Fuzzy match is finished.\n";
-        return true;
-    }
-
-    // Return false to use other methods to find matches
-    else return false;
+    // Let's end the search here, continue could be costly
+    std::cout << "Fuzzy match is finished.\n";
+    return true;
 }
 
 /**
