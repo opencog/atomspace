@@ -351,13 +351,18 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	{
 		// Assume that the link is wrapping something executable,
 		// which we execute, but then ignore the result. Well, we need
-		// to put it in the atomspace ... but we ignore the TV on it.
+		// to put it in the (scratch) atomspace ... but we ignore the
+		// TV on it. We execute for the side-effects, of course.
+		// We put the result in the scratch space, presumably because
+		// this is some GroundedSchemaNode calling some func with some
+		// args, and its pointless to put that function+args in the
+		// atomspace.
 		const LinkPtr ll(LinkCast(evelnk));
 		if (0 < ll->getArity())
 		{
 			Instantiator inst(as);
 			Handle result(inst.execute(ll->getOutgoingAtom(0)));
-			as->add_atom(result);
+			scratch->add_atom(result);
 		}
 		if (TRUE_LINK == t)
 			return TruthValue::TRUE_TV();
