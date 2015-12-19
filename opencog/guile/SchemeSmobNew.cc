@@ -189,18 +189,14 @@ SCM SchemeSmob::ss_undefined_handle (void)
 }
 
 /* ============================================================== */
-/** Return true if s is an atom */
+/** Return true if s is an atom. Invalid handles are not atoms. */
 
 SCM SchemeSmob::ss_atom_p (SCM s)
 {
-	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
+	if (nullptr == scm_to_handle(s))
 		return SCM_BOOL_F;
 
-	scm_t_bits misctype = SCM_SMOB_FLAGS(s);
-	if (COG_HANDLE == misctype)
-		return SCM_BOOL_T;
-
-	return SCM_BOOL_F;
+	return SCM_BOOL_T;
 }
 
 /* ============================================================== */
