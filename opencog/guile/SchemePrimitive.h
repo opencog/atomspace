@@ -527,20 +527,7 @@ class SchemePrimitive : public PrimitiveEnviron
 				}
 				case V_TI:
 				{
-					SCM input = scm_car(args);
-					//Assuming that the type is input as a string or symbol, eg
-					//(f 'SimilarityLink) or (f "SimilarityLink")
-					if (scm_is_true(scm_symbol_p(input)))
-						input = scm_symbol_to_string(input);
-
-					Type t = NOTYPE;
-					if (scm_is_integer(input))
-						t = scm_to_ushort(input);
-					else
-					{
-						const char *lstr = scm_i_string_chars(input);
-						t = classserver().getType(lstr);
-					}
+					Type t = SchemeSmob::verify_atom_type(scm_car(args), scheme_name, 1);
 
 					int i = scm_to_int(scm_cadr(args));
 
@@ -549,22 +536,7 @@ class SchemePrimitive : public PrimitiveEnviron
 				}
 				case V_TIDI:
 				{
-xxxxxxxxxx
-					SCM input = scm_car(args);
-					// Assume that the type is input as a string or symbol,
-					// e.g. (f 'SimilarityLink) or (f "SimilarityLink")
-					if (scm_is_true(scm_symbol_p(input)))
-						input = scm_symbol_to_string(input);
-
-					Type t = NOTYPE;
-					if (scm_is_integer(input))
-						t = scm_to_ushort(input);
-					else
-					{
-						const char *lstr = scm_i_string_chars(input);
-						t = classserver().getType(lstr);
-					}
-
+					Type t = SchemeSmob::verify_atom_type(scm_car(args), scheme_name, 1);
 					int i = scm_to_int(scm_cadr(args));
 					double d = scm_to_double(scm_caddr(args));
 					int i2 = scm_to_int(scm_cadddr(args));
