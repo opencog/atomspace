@@ -529,7 +529,7 @@ class SchemePrimitive : public PrimitiveEnviron
 				{
 					Type t = SchemeSmob::verify_atom_type(scm_car(args), scheme_name, 1);
 
-					int i = scm_to_int(scm_cadr(args));
+					int i = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
 
 					(that->*method.v_ti)(t, i);
 					break;
@@ -537,10 +537,9 @@ class SchemePrimitive : public PrimitiveEnviron
 				case V_TIDI:
 				{
 					Type t = SchemeSmob::verify_atom_type(scm_car(args), scheme_name, 1);
-					int i = scm_to_int(scm_cadr(args));
+					int i = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
 					double d = scm_to_double(scm_caddr(args));
-					int i2 = scm_to_int(scm_cadddr(args));
-
+					int i2 = SchemeSmob::verify_int(scm_cadddr(args), scheme_name, 4);
 					(that->*method.v_tidi)(t, i, d, i2);
 					break;
 				}
