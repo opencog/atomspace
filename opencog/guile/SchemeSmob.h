@@ -187,6 +187,8 @@ private:
 	                                  const char *msg = "expecting string");
 	static int verify_int (SCM, const char *, int pos = 1,
 	                       const char *msg = "expecting integer");
+	static double verify_real (SCM, const char *, int pos = 1,
+	                           const char *msg = "expecting real number");
 
 	static SCM atomspace_fluid;
 	static void ss_set_env_as(AtomSpace *);
