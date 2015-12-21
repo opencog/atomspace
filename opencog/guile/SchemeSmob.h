@@ -140,6 +140,7 @@ private:
 	static SCM ss_as_p(SCM);
 	static SCM ss_get_as(void);
 	static SCM ss_set_as(SCM);
+	static SCM ss_as_env(SCM);
 	static SCM ss_as_uuid(SCM);
 	static SCM ss_as_clear(SCM);
 	static SCM make_as(AtomSpace *);
