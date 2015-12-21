@@ -426,7 +426,7 @@ class SchemePrimitive : public PrimitiveEnviron
 					// First argument is an StomSpace ptr.
 					AtomSpace* as = SchemeSmob::verify_atomspace(scm_car(args), scheme_name, 1);
 					// Second argument is a string
-					std::string str(SchemeSmob::verify_string(scm_car(args), scheme_name, 2));
+					std::string str(SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2));
 
 					const std::string &rs = (that->*method.s_as)(as, str);
 					rc = scm_from_utf8_string(rs.c_str());
