@@ -35,8 +35,8 @@ FuzzyPatternMatch::FuzzyPatternMatch(AtomSpace* as)
 }
 
 /**
- * Find the starters that can be used to initiate a fuzzy-search. Currently the
- * starters has to be a node that is not an instance nor a variable.
+ * Override the find_starters method in InitiateSearchCB. It examines the
+ * pattern and find the starters that can be used to initiate fuzzy-searches.
  *
  * @param hp          The pattern (the hypergraph in the query)
  * @param depth       The depth of the starter in the pattern
@@ -46,9 +46,9 @@ FuzzyPatternMatch::FuzzyPatternMatch(AtomSpace* as)
  * @param rtn         A list of potential starters found in the pattern
  */
 void FuzzyPatternMatch::find_starters(const Handle& hp, const size_t& depth,
-                                        const size_t& clause_idx,
-                                        const Handle& term,
-                                        std::vector<Starter>& rtn)
+                                      const size_t& clause_idx,
+                                      const Handle& term,
+                                      std::vector<Starter>& rtn)
 {
     // Traverse its outgoing set if it is a link
     LinkPtr lp(LinkCast(hp));
@@ -77,12 +77,26 @@ void FuzzyPatternMatch::find_starters(const Handle& hp, const size_t& depth,
 }
 
 /**
- * Implement the initiate_search method in the Pattern Matcher. It finds and
- * initiates multiple searches using differnt nodes as starters.
- * It stops when each of the starters have been used for searching.
+ * A callback to check if a node can be consideded as a starter, which
+ * will then be used to initiate a fuzzy-search. By default a starter
+ * can't be a variable nor an instance.
  *
- * @param pme   The PatternMatchEngine object
- * @return      True if one or more solutions are found, false otherwise
+ * @param np  A NodePtr of a node from the input pattern
+ * @return    True if a node is accepted, false otherwise.
+ */
+bool FuzzyPatternMatch::accept_starter(const NodePtr np)
+{
+    return np->getType() != VARIABLE_NODE and
+           np->getName().find("@") == std::string::npos;
+}
+
+/**
+ * Override the initiate_search method in the InitiateSearchCB. It begins
+ * by finding one or more starter nodes, and then initiates a fuzzy-search
+ * for each of the starter nodes until all of them have been used.
+ *
+ * @param pme  The PatternMatchEngine object
+ * @return     True if one or more solutions are found, false otherwise
  */
 bool FuzzyPatternMatch::initiate_search(PatternMatchEngine* pme)
 {
@@ -144,31 +158,17 @@ bool FuzzyPatternMatch::initiate_search(PatternMatchEngine* pme)
 }
 
 /**
- * A callback to check if a node can be a starter, which will be used to
- * initiate a pattern matching process.
- *
- * @param np  A NodePtr of a node from the input pattern
- * @return    Returns true if a node can be considered as a starter,
- *            false otherwise.
- */
-bool FuzzyPatternMatch::accept_starter(const NodePtr np)
-{
-    return np->getType() != VARIABLE_NODE and
-           np->getName().find("@") == std::string::npos;
-}
-
-/**
- * Implement the link_match method in the Pattern Matcher.
- * Compare and estimate the similarity between the pattern and the potential
- * solution, and decide whether or not to accept it. The potential solution
- * will be accepted if it has a similarity greater than or equals to the
- * maximum similarity that we know, rejected otherwise.
+ * Implement the link_match method in the Pattern Matcher. Compare and estimate
+ * the similarity between the pattern and the potential solution, and decide
+ * whether or not to accept it by calling accept_solution. The potential
+ * solution will be accepted if it has a similarity score greater than or equals
+ * to the maximum similarity score that we know, rejected otherwise.
  *
  * @param pl  A link from the pattern
  * @param gl  A possible grounding link
- * @return    Returns true to accept all kinds of links when we are on the way
- *            to finding a solution, false when we have finished deciding
- *            whether or not to accept the solution
+ * @return    True to accept all kinds of links when we are on the way to
+ *            finding a solution, false when we have decided whether or not
+ *            to accept it as a solution
  */
 bool FuzzyPatternMatch::link_match(const LinkPtr& pl, const LinkPtr& gl)
 {
@@ -187,7 +187,7 @@ bool FuzzyPatternMatch::link_match(const LinkPtr& pl, const LinkPtr& gl)
             return false;
         else prev_compared.push_back(soln.value());
 
-        similarity_match(pat, soln);
+        accept_solution(pat, soln);
 
         // Returns false here to skip the rest of the pattern matching procedures,
         // including the permutation comparsion for unordered links, as we have
@@ -201,11 +201,10 @@ bool FuzzyPatternMatch::link_match(const LinkPtr& pl, const LinkPtr& gl)
 /**
  * Estimate how similar the potential solution and the input pattern are.
  *
- * @param pat    The input pattern
- * @param soln   The potential solution
- * @param solns  Solutions that we have been accepted so far
+ * @param pat   The input pattern
+ * @param soln  The potential solution
  */
-void FuzzyPatternMatch::similarity_match(const Handle& pat, const Handle& soln)
+void FuzzyPatternMatch::accept_solution(const Handle& pat, const Handle& soln)
 {
     // Find out how many nodes it has in common with the pattern
     HandleSeq common_nodes;
@@ -277,9 +276,7 @@ Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp)
     for (Handle h : fpm.get_solns())
         LAZY_LOG_FINE << h->toShortString();
 
-    // The result_list contains a list of the grounded expressions.
-    // Turn it into a true list, and return it.
+    // Wrap the solutions in a ListLink and return it
     Handle gl = as->add_link(LIST_LINK, fpm.get_solns());
     return gl;
 }
-

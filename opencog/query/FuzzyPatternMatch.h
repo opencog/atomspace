@@ -32,11 +32,10 @@ namespace opencog
      * A fuzzy pattern matcher that can be used to search patterns which are
      * similar but not identical to the input pattern. This is done by using
      * various nodes from the input pattern as starters to initiate multiple
-     * pattern matching process, and by overriding necessary Pattern Matcher
-     * callbacks, similar patterns (those share at least one common nodes
-     * with the input pattern) will be gathered. A similarity score will be
-     * assigned to each of those patterns and the ones with the highest
-     * scores will be returned.
+     * fuzzy-searches, and by overriding necessary Pattern Matcher callbacks,
+     * similar patterns (those share at least one common nodes with the input
+     * pattern) will be gathered. A similarity score will be assigned to each
+     * of those patterns and the ones with the highest scores will be returned.
      *
      * It can be called from C++ via find_approximate_match(), or from Scheme
      * via (cog-fuzzy-match).
@@ -71,11 +70,12 @@ namespace opencog
 
             virtual bool accept_starter(const NodePtr);
 
-            virtual void similarity_match(const Handle&, const Handle&);
+            virtual void accept_solution(const Handle&, const Handle&);
 
-            virtual HandleSeq get_solns() { return solns; }
+            HandleSeq get_solns() { return solns; }
 
         private:
+            // The pattern
             const Pattern* _pattern = NULL;
 
             // The solutions
