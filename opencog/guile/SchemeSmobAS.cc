@@ -188,6 +188,17 @@ AtomSpace* SchemeSmob::ss_to_atomspace(SCM sas)
 }
 
 /* ============================================================== */
+
+AtomSpace* SchemeSmob::verify_atomspace(SCM sas, const char * subrname, int pos)
+{
+   AtomSpace* as = ss_to_atomspace(sas);
+   if (nullptr == as)
+      scm_wrong_type_arg_msg(subrname, pos, sas, "opencog atomspace");
+
+   return as;
+}
+
+/* ============================================================== */
 /**
  * Return UUID of the atomspace
  */

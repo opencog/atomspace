@@ -259,7 +259,7 @@ Type SchemeSmob::verify_atom_type (SCM stype, const char *subrname, int pos)
  * Return the string, in C.
  */
 std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
-									   int pos, const char * msg)
+                                       int pos, const char * msg)
 {
 	if (scm_is_false(scm_string_p(sname)))
 		scm_wrong_type_arg_msg(subrname, pos, sname, msg);
@@ -275,12 +275,25 @@ std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
  * Return the int.
  */
 int SchemeSmob::verify_int (SCM sint, const char *subrname,
-							int pos, const char * msg)
+                            int pos, const char * msg)
 {
 	if (scm_is_false(scm_integer_p(sint)))
 		scm_wrong_type_arg_msg(subrname, pos, sint, msg);
 
 	return scm_to_int(sint);
+}
+
+/**
+ * Check that the argument is convertible to a real, else throw errors.
+ * Return as a float.
+ */
+double SchemeSmob::verify_real (SCM sreal, const char *subrname,
+                                int pos, const char * msg)
+{
+	if (scm_is_false(scm_real_p(sreal)))
+		scm_wrong_type_arg_msg(subrname, pos, sreal, msg);
+
+	return scm_to_double(sreal);
 }
 
 /**

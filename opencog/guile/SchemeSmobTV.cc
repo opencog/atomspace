@@ -395,7 +395,7 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 			SCM scont = scm_from_utf8_symbol("count");
 	
 			SCM rc = SCM_EOL;
-			rc = scm_acons(scont, cont, rc), 
+			rc = scm_acons(scont, cont, rc),
 			rc = scm_acons(sconf, conf, rc);
 			rc = scm_acons(smean, mean, rc);
 			scm_remember_upto_here_1(s);
@@ -413,7 +413,7 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 	
 			SCM rc = SCM_EOL;
 			rc = scm_acons(sconf_level, conf_level, rc);
-			rc = scm_acons(supper, upper, rc), 
+			rc = scm_acons(supper, upper, rc),
 			rc = scm_acons(slower, lower, rc);
 			scm_remember_upto_here_1(s);
 			return rc;
