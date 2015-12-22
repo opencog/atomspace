@@ -23,7 +23,6 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/FuzzyMatch/FuzzyPatternMatchCB.h>
 #include <opencog/query/FuzzyMatch/FuzzyPatternMatch.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
