@@ -188,6 +188,17 @@ AtomSpace* SchemeSmob::ss_to_atomspace(SCM sas)
 }
 
 /* ============================================================== */
+
+AtomSpace* SchemeSmob::verify_atomspace(SCM sas, const char * subrname, int pos)
+{
+   AtomSpace* as = ss_to_atomspace(sas);
+   if (nullptr == as)
+      scm_wrong_type_arg_msg(subrname, pos, sas, "opencog atomspace");
+
+   return as;
+}
+
+/* ============================================================== */
 /**
  * Return UUID of the atomspace
  */
@@ -206,6 +217,26 @@ SCM SchemeSmob::ss_as_uuid(SCM sas)
 	scm_remember_upto_here_1(sas);
 
 	return scm_from_ulong(uuid);
+}
+
+/* ============================================================== */
+/**
+ * Return parent of the atomspace
+ */
+SCM SchemeSmob::ss_as_env(SCM sas)
+{
+	AtomSpace* as = ss_to_atomspace(sas);
+	if (nullptr == as)
+	{
+		// Special care for null atomspace
+		if (scm_is_null(sas))
+			return SCM_EOL;
+		scm_wrong_type_arg_msg("cog-atomspace-env", 1, sas, "atomspace");
+	}
+
+	AtomSpace* env = as->get_environ();
+	scm_remember_upto_here_1(sas);
+	return make_as(env);
 }
 
 /* ============================================================== */

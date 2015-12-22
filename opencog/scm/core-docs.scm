@@ -805,6 +805,12 @@
     to do that, you need to use cog-set-atomspace!
 ")
 
+(set-procedure-property! cog-atomspace-env 'documentation
+"
+ cog-atomspace-env ATOMSPACE
+     Return the parent of ATOMSPACE.
+")
+
 (set-procedure-property! cog-atomspace-uuid 'documentation
 "
  cog-atomspace-uuid ATOMSPACE
