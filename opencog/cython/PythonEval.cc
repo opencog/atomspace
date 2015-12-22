@@ -1124,6 +1124,13 @@ void PythonEval::add_modules_from_path(std::string pathString)
         return;
     }
 
+    if ('.' == pathString[0] ) {
+        boost::filesystem::path base(getcwd(NULL, 0));
+        auto pypath = boost::filesystem::canonical(pathString,base);
+        add_modules_from_abspath(pypath.string());
+        return;
+    }
+
     bool did_load = false;
     const char** config_paths = get_module_paths();
     for (int i = 0; config_paths[i] != NULL; ++i) {
