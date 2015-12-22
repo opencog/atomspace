@@ -9,7 +9,7 @@
 #include <opencog/guile/SchemeModule.h>
 
 #include "BindLinkAPI.h"
-#include "FuzzyPatternMatch.h"
+#include "FuzzyMatch/FuzzyPatternMatch.h"
 #include "PatternMatch.h"
 #include "PatternSCM.h"
 
