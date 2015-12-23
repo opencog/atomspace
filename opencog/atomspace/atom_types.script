@@ -98,6 +98,11 @@ CHOICE_LINK <- ORDERED_LINK
 //
 PRESENT_LINK <- ORDERED_LINK
 
+// The FuzzyLink complements PresentLink by evaluating to true
+// even in the case of an imprecise, approximate match to the terms
+// that it matches.
+FUZZY_LINK <- ORDERED_LINK
+
 // Performance scripting links.
 // ParallelLink launches multiple threads, but does not wait for any of
 // them to return.  JoinLink launches multiple threads, and waits for
