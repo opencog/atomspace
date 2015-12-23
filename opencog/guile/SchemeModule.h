@@ -27,6 +27,8 @@ class FunctionWrap
 		Handle (*_func_h_ahhh)(AtomSpace*, const Handle&,
 		                      const Handle&, const Handle&);
 		Handle (*_func_h_ahtq)(AtomSpace*, const Handle&, Type, const HandleSeq&);
+		Handle (*_func_h_ahtqb)(AtomSpace*, const Handle&, Type,
+                                const HandleSeq&, bool);
 		HandleSeq (*_func_q_ah)(AtomSpace*, const Handle&);
 
 		// Wrappers are used because define_scheme_primitive expect a
@@ -40,6 +42,7 @@ class FunctionWrap
 		Handle as_wrapper_h_h(Handle);
 		Handle as_wrapper_h_hhh(Handle, Handle, Handle);
 		Handle as_wrapper_h_htq(Handle, Type, const HandleSeq&);
+		Handle as_wrapper_h_htqb(Handle, Type, const HandleSeq&, bool);
 
 		// These wrappers return a TruthValuePtr and abstract the
 		// atomspace away.
@@ -61,6 +64,9 @@ class FunctionWrap
 		             const char*, const char*);
 		FunctionWrap(Handle (*)(AtomSpace*, const Handle&,
 		                        Type, const HandleSeq&),
+		             const char*, const char*);
+		FunctionWrap(Handle (*)(AtomSpace*, const Handle&,
+		                        Type, const HandleSeq&, bool),
 		             const char*, const char*);
 		FunctionWrap(Handle (*)(AtomSpace*, const Handle&, const Handle&,
 		                        const Handle&),
