@@ -28,84 +28,84 @@
 
 namespace opencog
 {
-    /**
-     * A fuzzy pattern matcher that can be used to search patterns which are
-     * similar but not identical to the input pattern. This is done by using
-     * various nodes from the input pattern as starters to initiate multiple
-     * fuzzy-searches, and by overriding necessary Pattern Matcher callbacks,
-     * similar patterns (those share at least one common nodes with the input
-     * pattern) will be gathered. A similarity score will be assigned to each
-     * of those patterns and the ones with the highest scores will be returned.
-     *
-     * It can be called from C++ via find_approximate_match(), or from Scheme
-     * via (cog-fuzzy-match).
-     */
-    class FuzzyPatternMatch :
+/**
+ * A fuzzy pattern matcher that can be used to search patterns which are
+ * similar but not identical to the input pattern. This is done by using
+ * various nodes from the input pattern as starters to initiate multiple
+ * fuzzy-searches, and by overriding necessary Pattern Matcher callbacks,
+ * similar patterns (those share at least one common nodes with the input
+ * pattern) will be gathered. A similarity score will be assigned to each
+ * of those patterns and the ones with the highest scores will be returned.
+ *
+ * It can be called from C++ via find_approximate_match(), or from Scheme
+ * via (cog-fuzzy-match).
+ */
+class FuzzyPatternMatch :
 		public DefaultPatternMatchCB
-    {
-        public:
-            FuzzyPatternMatch(AtomSpace*);
+{
+    public:
+        FuzzyPatternMatch(AtomSpace*);
 
-            virtual void set_pattern(const Variables& vars,
-                                     const Pattern& pat)
-            {
-                DefaultPatternMatchCB::set_pattern(vars, pat);
-                _pattern = &pat;
-            }
+        virtual void set_pattern(const Variables& vars,
+                                 const Pattern& pat)
+        {
+            DefaultPatternMatchCB::set_pattern(vars, pat);
+            _pattern = &pat;
+        }
 
-            virtual bool initiate_search(PatternMatchEngine*);
+        virtual bool initiate_search(PatternMatchEngine*);
 
-            virtual bool link_match(const LinkPtr&, const LinkPtr&);
+        virtual bool link_match(const LinkPtr&, const LinkPtr&);
 
-            virtual bool fuzzy_match(const Handle&, const Handle&)
-            { return true; }
+        virtual bool fuzzy_match(const Handle&, const Handle&)
+        { return true; }
 
-            virtual bool node_match(const Handle&, const Handle&)
-            { return true; }
+        virtual bool node_match(const Handle&, const Handle&)
+        { return true; }
 
-            // Always returns false to search for more solutions
-            virtual bool grounding(const std::map<Handle, Handle>&,
-                                   const std::map<Handle, Handle>&)
-            { return false; }
+        // Always returns false to search for more solutions
+        virtual bool grounding(const std::map<Handle, Handle>&,
+                               const std::map<Handle, Handle>&)
+        { return false; }
 
-            virtual bool accept_starter(const NodePtr);
+        virtual bool accept_starter(const NodePtr);
 
-            virtual void accept_solution(const Handle&, const Handle&);
+        virtual void accept_solution(const Handle&, const Handle&);
 
-            HandleSeq get_solns() { return solns; }
+        HandleSeq get_solns() { return solns; }
 
-        private:
-            // The pattern
-            const Pattern* _pattern = NULL;
+    private:
+        // The pattern
+        const Pattern* _pattern = NULL;
 
-            // The solutions
-            HandleSeq solns;
+        // The solutions
+        HandleSeq solns;
 
-            // Potential starters for the search
-            struct Starter
-            {
-                UUID uuid;
-                Handle handle;
-                Handle term;
-                size_t width;
-                size_t depth;
-            };
+        // Potential starters for the search
+        struct Starter
+        {
+            UUID uuid;
+            Handle handle;
+            Handle term;
+            size_t width;
+            size_t depth;
+        };
 
-            // Potential solutions that have previously been compared
-            std::vector<UUID> prev_compared;
+        // Potential solutions that have previously been compared
+        std::vector<UUID> prev_compared;
 
-            // The minimum difference between the pattern and all the known solutions
-            size_t min_size_diff = SIZE_MAX;
+        // The minimum difference between the pattern and all the known solutions
+        size_t min_size_diff = SIZE_MAX;
 
-            // The maximum similarity of all the potential solutions we found
-            double max_similarity = -std::numeric_limits<double>::max();
+        // The maximum similarity of all the potential solutions we found
+        double max_similarity = -std::numeric_limits<double>::max();
 
-            void find_starters(const Handle& hg, const size_t& depth,
-                               const size_t& clause_idx, const Handle& term,
-                               std::vector<Starter>& rtn);
-    };
+        void find_starters(const Handle& hg, const size_t& depth,
+                           const size_t& clause_idx, const Handle& term,
+                           std::vector<Starter>& rtn);
+};
 
-    Handle find_approximate_match(AtomSpace* as, const Handle& hp);
+Handle find_approximate_match(AtomSpace* as, const Handle& hp);
 }
 
 #endif  // FUZZYPATTERNMATCH_H
