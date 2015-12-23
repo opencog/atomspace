@@ -355,9 +355,9 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	}
 }
 
-/// Search for any PRESENT, ABSENT_LINK's that are recusively
-/// embedded inside some evaluatable clause.  Expose thse as
-/// first-class, groundable clauses.
+/// Search for any PRESENT, ABSENT_LINK or FUZZY_LINK's that are
+/// recusively embedded inside some evaluatable clause.  Expose these
+/// as first-class, groundable clauses.
 void PatternLink::unbundle_clauses_rec(const std::set<Type>& connectives,
                                        const HandleSeq& nest)
 {
@@ -384,6 +384,12 @@ void PatternLink::unbundle_clauses_rec(const std::set<Type>& connectives,
 			const Handle& inv(lopt->getOutgoingAtom(0));
 			_pat.optionals.insert(inv);
 			_pat.cnf_clauses.emplace_back(inv);
+		}
+		else if (FUZZY_LINK == ot)
+		{
+			const HandleSeq& pset = LinkCast(ho)->getOutgoingSet();
+			for (const Handle& ph : pset)
+				_pat.fuzzy.insert(ph);
 		}
 		else if (connectives.find(ot) != connectives.end())
 		{
@@ -462,14 +468,6 @@ void PatternLink::validate_clauses(std::set<Handle>& vars,
 	{
 		if (not is_unquoted_in_any_tree(clauses, v))
 		{
-			// XXX Well, we could throw, here, but sureal gives us spurious
-			// variables, so instead of throwing, we just discard them and
-			// print a warning.
-/*
-			logger().warn(
-				"%s: The variable %s does not appear (unquoted) in any clause!",
-			           __FUNCTION__, v->toShortString().c_str());
-*/
 			vars.erase(v);
 			throw InvalidParamException(TRACE_INFO,
 			   "The variable %s does not appear (unquoted) in any clause!",
@@ -488,7 +486,7 @@ void PatternLink::validate_clauses(std::set<Handle>& vars,
 /* ================================================================= */
 /**
  * Given the initial list of variables and clauses, separate these into
- * the mandatory and optional clauses.
+ * the mandatory, optional and fuzzy clauses.
  */
 void PatternLink::extract_optionals(const std::set<Handle> &vars,
                                     const std::vector<Handle> &component)
@@ -511,6 +509,14 @@ void PatternLink::extract_optionals(const std::set<Handle> &vars,
 			const Handle& inv(lopt->getOutgoingAtom(0));
 			_pat.optionals.insert(inv);
 			_pat.cnf_clauses.emplace_back(inv);
+		}
+		else if (FUZZY_LINK == t)
+		{
+			LinkPtr lfuzz(LinkCast(h));
+			for (const Handle& fz : lfuzz->getOutgoingSet())
+			{
+				_pat.fuzzy.insert(fz);
+			}
 		}
 		else
 		{
