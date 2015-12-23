@@ -27,8 +27,8 @@
 
 /**
  * The GenericEval class implements a very simple API for language
- * evaluators.  Currently, its sole purpose in life is to make the
- * abstraction of the GenericShell class possible.
+ * evaluators.  Currently, its primary purpose in life is to make the
+ * abstraction of the CogServer's GenericShell class possible.
  */
 
 namespace opencog {
