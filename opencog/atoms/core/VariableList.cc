@@ -141,16 +141,16 @@ void VariableList::get_vartype(const Handle& htypelink)
 		size_t tss = tset.size();
 		for (size_t i=0; i<tss; i++)
 		{
-			Handle h(tset[i]);
-			Type var_type = h->getType();
+			Handle ht(tset[i]);
+			Type var_type = ht->getType();
 			if (TYPE_NODE == var_type)
 			{
-				Type vt = TypeNodeCast(h)->get_value();
+				Type vt = TypeNodeCast(ht)->get_value();
 				typeset.insert(vt);
 			}
 			else if (SIGNATURE_LINK == var_type)
 			{
-				const HandleSeq& sig = LinkCast(vartype)->getOutgoingSet();
+				const HandleSeq& sig = LinkCast(ht)->getOutgoingSet();
 				if (1 != sig.size())
 					throw SyntaxException(TRACE_INFO,
 						"Unexpected contents in SignatureLink\n"
@@ -160,7 +160,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 			}
 			else if (FUZZY_LINK == var_type)
 			{
-				const HandleSeq& fuz = LinkCast(vartype)->getOutgoingSet();
+				const HandleSeq& fuz = LinkCast(ht)->getOutgoingSet();
 				if (1 != fuz.size())
 					throw SyntaxException(TRACE_INFO,
 						"Unexpected contents in FuzzyLink\n"
@@ -173,7 +173,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 				throw InvalidParamException(TRACE_INFO,
 					"VariableChoice has unexpected content:\n"
 				              "Expected TypeNode, got %s",
-				              classserver().getTypeName(h->getType()).c_str());
+				              classserver().getTypeName(ht->getType()).c_str());
 			}
 		}
 
