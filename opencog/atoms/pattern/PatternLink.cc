@@ -108,7 +108,7 @@ void PatternLink::setup_components(void)
 	_component_patterns.reserve(_num_comps);
 	for (size_t i=0; i<_num_comps; i++)
 	{
-		Handle h(createPatternLink(_component_vars[i], _varlist.typemap,
+		Handle h(createPatternLink(_component_vars[i], _varlist._simple_typemap,
 		                           _components[i], _pat.optionals));
 		_component_patterns.emplace_back(h);
 	}
@@ -174,7 +174,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 		_varlist.varseq.emplace_back(v);
 		auto it = typemap.find(v);
 		if (it != typemap.end())
-			_varlist.typemap.insert(*it);
+			_varlist._simple_typemap.insert(*it);
 	}
 
 	// Next, the body... there's no _body for lambda. The compo is the

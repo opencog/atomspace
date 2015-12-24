@@ -35,13 +35,16 @@ namespace opencog
  */
 
 /// The FreeVariables struct defines a list of free, untyped variables
-/// in a way that makes it easier and faster to work with in C++.  It
-/// implements the data that is used by FreeLink to work with free
-/// variables.
+/// "unbundled" from the hypergraph in which they normally occur. The
+/// goal of this structure is to make it easier and faster to work with
+/// VariableNodes in C++; specifically, to find thier locations within
+/// a hypergraph, and to perform beta-substitution (to substitute a
+/// value for the variable).  This class implements the data that is
+/// used by FreeLink to work with free variables.
 ///
 struct FreeVariables
 {
-	/// Unbundled variables.
+	/// Unbundled variables (i.e. pulled out of the graph they live in).
 	///
 	/// The varset contains exactly the same atoms as the varseq; it
 	/// is used for fast lookup; (i.e. is some some variable a part of
@@ -82,19 +85,30 @@ struct FreeVariables
 };
 
 typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
+typedef std::map<Handle, const std::set<Handle> > VariableDeepTypeMap;
 
-/// The Variables struct defines a list of typed variables in a way
-/// that makes it easier and faster to work with in C++.  It is used
-/// by VariableList and ScopeLink to define typed, scoped, bound
-/// variables; in particular, it is heavily used by the pattern matcher.
+/// The Variables struct defines a list of typed variables "unbundled"
+/// from the hypergraph in which they normally occur. The goal of this
+/// structure is to make it easier and faster to work with VariableNodes
+/// in C++; specifically, to check any type restrictions that may apply.
+///
+/// This class is used by VariableList and ScopeLink to define typed,
+/// scoped, bound variables; in particular, it is heavily used by the
+/// pattern matcher.
 ///
 struct Variables : public FreeVariables
 {
-	/// Unbundled variables and types for them.
-	/// typemap is the (possibly empty) list of restrictions on
-	/// the variable types.
-	///
-	VariableTypeMap typemap;
+	/// Unbundled variables and type restrictions for them.
+
+	/// _simple_typemap is the (possibly empty) list of restrictions
+	/// on the variable types. It holds a disjunction of class Type.
+	/// _deep_typemap holds complex or "deep" type definitions, such
+	/// as those defined by SignatureLink.
+	/// _fuzzy_typemap holds approximate of "fuzzy" type definitions,
+	/// those which only need to be approximately matched.
+	VariableTypeMap _simple_typemap;
+	VariableDeepTypeMap _deep_typemap;
+	VariableDeepTypeMap _fuzzy_typemap;
 
 	// Return true if we are holding a single variable, and the handle
 	// given as the argument satisfies the type restrictions (if any).

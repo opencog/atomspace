@@ -175,11 +175,11 @@ bool Variables::is_type(const Handle& h) const
 	if (1 != varset.size()) return false;
 
 	// No type restrictions.
-	if (typemap.empty()) return true;
+	if (_simple_typemap.empty()) return true;
 
 	// Check the type restrictions.
 	VariableTypeMap::const_iterator it =
-		typemap.find(varseq[0]);
+		_simple_typemap.find(varseq[0]);
 	const std::set<Type> &tchoice = it->second;
 
 	Type htype = h->getType();
@@ -204,14 +204,14 @@ bool Variables::is_type(const HandleSeq& hseq) const
 	size_t len = hseq.size();
 	if (varset.size() != len) return false;
 	// No type restrictions.
-	if (typemap.empty()) return true;
+	if (_simple_typemap.empty()) return true;
 
 	// Check the type restrictions.
 	for (size_t i=0; i<len; i++)
 	{
 		VariableTypeMap::const_iterator it =
-			typemap.find(varseq[i]);
-		if (it == typemap.end()) continue;  // no restriction
+			_simple_typemap.find(varseq[i]);
+		if (it == _simple_typemap.end()) continue;  // no restriction
 
 		const std::set<Type> &tchoice = it->second;
 		Type htype = hseq[i]->getType();
@@ -301,12 +301,12 @@ void Variables::extend(const Variables& vset)
 			// Merge the two typemaps, if needed.
 			try
 			{
-				const std::set<Type>& tms = vset.typemap.at(h);
-				std::set<Type> mytypes = typemap[h];
+				const std::set<Type>& tms = vset._simple_typemap.at(h);
+				std::set<Type> mytypes = _simple_typemap[h];
 				for (Type t : tms)
 					mytypes.insert(t);
-				typemap.erase(h);	 // is it safe to erase if h not in already?
-				typemap.insert({h,mytypes});
+				_simple_typemap.erase(h);	 // is it safe to erase if h not in already?
+				_simple_typemap.insert({h,mytypes});
 			}
 			catch(const std::out_of_range&) {}
 		}
@@ -321,7 +321,7 @@ void Variables::extend(const Variables& vset)
 			// The at() might throw...
 			try
 			{
-				typemap.insert({h, vset.typemap.at(h)});
+				_simple_typemap.insert({h, vset._simple_typemap.at(h)});
 			}
 			catch(const std::out_of_range&) {}
 		}
@@ -331,7 +331,7 @@ void Variables::extend(const Variables& vset)
 std::string Variables::to_string() const
 {
 	std::stringstream ss;
-	for (auto& v : typemap)
+	for (auto& v : _simple_typemap)
 	{
 		ss << "{variable: " << v.first->toShortString()
 		   << "types: ";

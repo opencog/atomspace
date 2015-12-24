@@ -51,14 +51,16 @@ bool UnifyPMCB::variable_match(const Handle& npat_h,
 	if (soltype == VARIABLE_NODE && _ext_vars->get_variables().varset.count(nsoln_h) == 1)
 	{
 		// if the variable is untyped, match immediately
-		if (_ext_vars->get_variables().typemap.count(nsoln_h) == 0
-		    || _int_vars->get_variables().typemap.count(npat_h) == 0)
+		if (_ext_vars->get_variables()._simple_typemap.count(nsoln_h) == 0
+		    || _int_vars->get_variables()._simple_typemap.count(npat_h) == 0)
 			return true;
 
 		// otherwise the two variables type need to match
-		if (_int_vars->get_variables().typemap.at(npat_h)
-		    == _ext_vars->get_variables().typemap.at(nsoln_h))
+		if (_int_vars->get_variables()._simple_typemap.at(npat_h)
+		    == _ext_vars->get_variables()._simple_typemap.at(nsoln_h))
 			return true;
+
+		// XXX TODO perform matching on deep types, if any.
 
 		return false;
 	}

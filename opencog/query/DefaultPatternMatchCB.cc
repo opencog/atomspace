@@ -50,7 +50,7 @@ DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
 void DefaultPatternMatchCB::set_pattern(const Variables& vars,
                                         const Pattern& pat)
 {
-	_type_restrictions = &vars.typemap;
+	_type_restrictions = &vars._simple_typemap;
 	_dynamic = &pat.evaluatable_terms;
 	_have_evaluatables = ! _dynamic->empty();
 	_have_variables = ! vars.varseq.empty();

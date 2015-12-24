@@ -54,7 +54,7 @@ void InitiateSearchCB::set_pattern(const Variables& vars,
 
 	_variables = &vars;
 	_pattern = &pat;
-	_type_restrictions = &vars.typemap;
+	_type_restrictions = &vars._simple_typemap;
 	_dynamic = &pat.evaluatable_terms;
 }
 
@@ -809,7 +809,7 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 		_pattern = &_pl->get_pattern();
 	}
 
-	_type_restrictions = &_variables->typemap;
+	_type_restrictions = &_variables->_simple_typemap;
 	_dynamic = &_pattern->evaluatable_terms;
 
 	pme->set_pattern(*_variables, *_pattern);

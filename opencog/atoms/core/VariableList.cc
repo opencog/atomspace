@@ -129,7 +129,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 	{
 		Type vt = TypeNodeCast(vartype)->get_value();
 		std::set<Type> ts = {vt};
-		_varlist.typemap.insert(ATPair(varname, ts));
+		_varlist._simple_typemap.insert(ATPair(varname, ts));
 		_varlist.varset.insert(varname);
 		_varlist.varseq.emplace_back(varname);
 	}
@@ -154,7 +154,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 			ts.insert(vt);
 		}
 
-		_varlist.typemap.insert(ATPair(varname,ts));
+		_varlist._simple_typemap.insert(ATPair(varname,ts));
 		_varlist.varset.insert(varname);
 		_varlist.varseq.emplace_back(varname);
 	}
