@@ -26,6 +26,7 @@
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/TypeNode.h>
 
 #include "ScopeLink.h"
 #include "VariableList.h"
@@ -179,6 +180,21 @@ bool Variables::is_type(const Handle& h) const
 
 /* ================================================================= */
 /**
+ * Recursive deep-type checker.
+ */
+bool Variables::is_type_rec(const Handle& deep, const Handle& val) const
+{
+	Type valtype = val->getType();
+	Type dpt = deep->getType();
+	if (TYPE_NODE == dpt)
+	{
+		Type deeptype = TypeNodeCast(deep)->get_value();
+		return (valtype == deeptype);
+	}
+	return false;
+}
+
+/**
  * Type checker.
  *
  * Returns true/false if we are holding the variable `var`, and if
@@ -194,7 +210,7 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 	if (_simple_typemap.end() != tit)
 	{
 		const std::set<Type> &tchoice = tit->second;
-		Type htype = var->getType();
+		Type htype = val->getType();
 		std::set<Type>::const_iterator allow = tchoice.find(htype);
 
 		// If the value has the simple type, then we are good to go;
@@ -209,7 +225,12 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 		_deep_typemap.find(var);
 	if (_deep_typemap.end() != dit)
 	{
-		const std::set<Handle> &sig = dit->second;
+		const std::set<Handle> &sigset = dit->second;
+		for (const Handle& sig : sigset)
+		{
+			if (is_type_rec(sig, val)) return true;
+		}
+		ret = false;
 	}
 
 	// Maybe we don't know this variable?
