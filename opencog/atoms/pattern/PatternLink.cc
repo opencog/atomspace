@@ -355,7 +355,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	}
 }
 
-/// Search for any PRESENT, ABSENT_LINK or FUZZY_LINK's that are
+/// Search for any PRESENT_LINK or ABSENT_LINK's that are
 /// recusively embedded inside some evaluatable clause.  Expose these
 /// as first-class, groundable clauses.
 void PatternLink::unbundle_clauses_rec(const std::set<Type>& connectives,
@@ -384,12 +384,6 @@ void PatternLink::unbundle_clauses_rec(const std::set<Type>& connectives,
 			const Handle& inv(lopt->getOutgoingAtom(0));
 			_pat.optionals.insert(inv);
 			_pat.cnf_clauses.emplace_back(inv);
-		}
-		else if (FUZZY_LINK == ot)
-		{
-			const HandleSeq& pset = LinkCast(ho)->getOutgoingSet();
-			for (const Handle& ph : pset)
-				_pat.fuzzy.insert(ph);
 		}
 		else if (connectives.find(ot) != connectives.end())
 		{
@@ -509,14 +503,6 @@ void PatternLink::extract_optionals(const std::set<Handle> &vars,
 			const Handle& inv(lopt->getOutgoingAtom(0));
 			_pat.optionals.insert(inv);
 			_pat.cnf_clauses.emplace_back(inv);
-		}
-		else if (FUZZY_LINK == t)
-		{
-			LinkPtr lfuzz(LinkCast(h));
-			for (const Handle& fz : lfuzz->getOutgoingSet())
-			{
-				_pat.fuzzy.insert(fz);
-			}
 		}
 		else
 		{

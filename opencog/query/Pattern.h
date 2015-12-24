@@ -97,9 +97,6 @@ struct Pattern
 	// grounded, they might be rejected (depending on the callback).
 	std::set<Handle> optionals;    // Optional clauses
 
-	// Clauses that may be grounded in an imprecise way,
-	std::set<Handle> fuzzy;
-
 	// Black-box clauses. These are clauses that contain GPN's. These
 	// have to drop into scheme or python to get evaluated, which means
 	// that they will be slow.  So, we leave these for last, so that the
@@ -122,6 +119,10 @@ struct Pattern
 
 	// Globby terms are terms that contain a GlobNode
 	std::set<Handle> globby_terms;     // Smallest term that has a glob.
+
+	// Terms that may be grounded in an imprecise way. Similar to a
+	// GlobNode, but uses a different algorithm.
+	std::set<Handle> fuzzy_terms;
 
 	// Maps; the value is the largest (evaluatable or executable)
 	// term containing the variable. Its a multimap, because
