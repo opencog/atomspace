@@ -216,6 +216,11 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		const LinkPtr l(LinkCast(evelnk));
 		const HandleSeq& sna(l->getOutgoingSet());
 
+		if (2 != sna.size())
+			throw SyntaxException(TRACE_INFO,
+				"Incorrect number of arguments, expecting 2, got %lu",
+				sna.size());
+
 		// An ungrounded predicate evaluates to itself
 		if (sna.at(0)->getType() == PREDICATE_NODE)
 			return evelnk->getTruthValue();

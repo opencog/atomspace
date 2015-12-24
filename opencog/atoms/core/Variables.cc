@@ -186,6 +186,8 @@ bool Variables::is_type(const Handle& h) const
  */
 bool Variables::is_type(const Handle& var, const Handle& val) const
 {
+	bool ret = true;
+
 	// Simple type restrictions?
 	VariableTypeMap::const_iterator tit =
 		_simple_typemap.find(var);
@@ -199,13 +201,22 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 		// we are done.  Else, fall throough, and see if one of the
 		// others accept the match.
 		if (allow != tchoice.end()) return true;
+		ret = false;
+	}
+
+	// Deep type restrictions?
+	VariableDeepTypeMap::const_iterator dit =
+		_deep_typemap.find(var);
+	if (_deep_typemap.end() != dit)
+	{
+		const std::set<Handle> &sig = dit->second;
 	}
 
 	// Maybe we don't know this variable?
 	if (varset.end() == varset.find(var)) return false;
 
 	// There appear to be no type restrictions...
-	return true;
+	return ret;
 }
 
 /* ================================================================= */
@@ -286,12 +297,12 @@ Handle Variables::substitute(const Handle& fun,
                              const HandleSeq& args) const
 {
 	if (args.size() != varseq.size())
-		throw InvalidParamException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 			"Incorrect number of arguments specified, expecting %lu got %lu",
 			varseq.size(), args.size());
 
 	if (not is_type(args))
-		throw InvalidParamException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 			"Arguments fail to match variable declarations");
 
 	return substitute_nocheck(fun, args);
