@@ -86,8 +86,6 @@ VariableList::VariableList(Link &l)
 }
 
 /* ================================================================= */
-typedef std::pair<Handle, const std::set<Type> > ATPair;
-
 /**
  * Extract the variable type(s) from a TypedVariableLink
  *
@@ -106,6 +104,22 @@ typedef std::pair<Handle, const std::set<Type> > ATPair;
  *          TypeNode  "ConceptNode"
  *          TypeNode  "NumberNode"
  *          TypeNode  "WordNode"
+ *
+ * or possibly types that are SignatureLink's or FuyzzyLink's or
+ * polymorphic combinations thereof: e.g. the following is valid:
+ *
+ *    TypedVariableLink
+ *       VariableNode "$some_var_name"
+ *       TypeChoice
+ *          TypeNode  "ConceptNode"
+ *          SignatureLink
+ *              InheritanceLink
+ *                 PredicateNode "foobar"
+ *                 TypeNode  "ListLink"
+ *          FuzzyLink
+ *              InheritanceLink
+ *                 ConceptNode "animal"
+ *                 ConceptNode "tiger"
  *
  * In either case, the variable itself is appended to "vset",
  * and the list of allowed types are associated with the variable
@@ -129,7 +143,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 	{
 		Type vt = TypeNodeCast(vartype)->get_value();
 		std::set<Type> ts = {vt};
-		_varlist._simple_typemap.insert(ATPair(varname, ts));
+		_varlist._simple_typemap.insert({varname, ts});
 	}
 	else if (TYPE_CHOICE == t)
 	{
