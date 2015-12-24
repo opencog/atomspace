@@ -133,7 +133,9 @@ void VariableList::get_vartype(const Handle& htypelink)
 	}
 	else if (TYPE_CHOICE == t)
 	{
-		std::set<Type> ts;
+		std::set<Type> typeset;
+		std::set<Handle> deepset;
+		std::set<Handle> fuzzset;
 
 		const HandleSeq& tset = LinkCast(vartype)->getOutgoingSet();
 		size_t tss = tset.size();
@@ -141,18 +143,46 @@ void VariableList::get_vartype(const Handle& htypelink)
 		{
 			Handle h(tset[i]);
 			Type var_type = h->getType();
-			if (TYPE_NODE != var_type)
+			if (TYPE_NODE == var_type)
+			{
+				Type vt = TypeNodeCast(h)->get_value();
+				typeset.insert(vt);
+			}
+			else if (SIGNATURE_LINK == var_type)
+			{
+				const HandleSeq& sig = LinkCast(vartype)->getOutgoingSet();
+				if (1 != sig.size())
+					throw SyntaxException(TRACE_INFO,
+						"Unexpected contents in SignatureLink\n"
+						"Expected arity==1, got %s", vartype->toString().c_str());
+
+				deepset.insert(sig[0]);
+			}
+			else if (FUZZY_LINK == var_type)
+			{
+				const HandleSeq& fuz = LinkCast(vartype)->getOutgoingSet();
+				if (1 != fuz.size())
+					throw SyntaxException(TRACE_INFO,
+						"Unexpected contents in FuzzyLink\n"
+						"Expected arity==1, got %s", vartype->toString().c_str());
+
+				fuzzset.insert(fuz[0]);
+			}
+			else
 			{
 				throw InvalidParamException(TRACE_INFO,
 					"VariableChoice has unexpected content:\n"
 				              "Expected TypeNode, got %s",
 				              classserver().getTypeName(h->getType()).c_str());
 			}
-			Type vt = TypeNodeCast(h)->get_value();
-			ts.insert(vt);
 		}
 
-		_varlist._simple_typemap.insert(ATPair(varname,ts));
+		if (0 < typeset.size())
+			_varlist._simple_typemap.insert({varname, typeset});
+		if (0 < deepset.size())
+			_varlist._deep_typemap.insert({varname, deepset});
+		if (0 < fuzzset.size())
+			_varlist._fuzzy_typemap.insert({varname, fuzzset});
 	}
 	else if (SIGNATURE_LINK == t)
 	{
@@ -171,7 +201,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 		const HandleSeq& tset = LinkCast(vartype)->getOutgoingSet();
 		if (1 != tset.size())
 			throw SyntaxException(TRACE_INFO,
-				"Unexpected contents in SignatureLink\n"
+				"Unexpected contents in FuzzyLink\n"
 				"Expected arity==1, got %s", vartype->toString().c_str());
 
 		std::set<Handle> ts;
