@@ -174,22 +174,43 @@ bool Variables::is_type(const Handle& h) const
 	// The arity must be one for there to be a match.
 	if (1 != varset.size()) return false;
 
-	// No type restrictions.
-	if (_simple_typemap.empty()) return true;
-
-	// Check the type restrictions.
-	VariableTypeMap::const_iterator it =
-		_simple_typemap.find(varseq[0]);
-	const std::set<Type> &tchoice = it->second;
-
-	Type htype = h->getType();
-	std::set<Type>::const_iterator allow = tchoice.find(htype);
-	return allow != tchoice.end();
+	return is_type(varseq[0], h);
 }
 
 /* ================================================================= */
 /**
- * Very simple type checker.
+ * Type checker.
+ *
+ * Returns true/false if we are holding the variable `var`, and if
+ * the `val` satisfies the type restructions that apply to `var`.
+ */
+bool Variables::is_type(const Handle& var, const Handle& val) const
+{
+	// Simple type restrictions?
+	VariableTypeMap::const_iterator tit =
+		_simple_typemap.find(var);
+	if (_simple_typemap.end() != tit)
+	{
+		const std::set<Type> &tchoice = tit->second;
+		Type htype = var->getType();
+		std::set<Type>::const_iterator allow = tchoice.find(htype);
+
+		// If the value has the simple type, then we are good to go;
+		// we are done.  Else, fall throough, and see if one of the
+		// others accept the match.
+		if (allow != tchoice.end()) return true;
+	}
+
+	// Maybe we don't know this variable?
+	if (varset.end() == varset.find(var)) return false;
+
+	// There appear to be no type restrictions...
+	return true;
+}
+
+/* ================================================================= */
+/**
+ * Simple type checker.
  *
  * Returns true/false if the indicated handles are of the type that
  * we have memoized.
@@ -203,20 +224,11 @@ bool Variables::is_type(const HandleSeq& hseq) const
 	// The arity must be one for there to be a match.
 	size_t len = hseq.size();
 	if (varset.size() != len) return false;
-	// No type restrictions.
-	if (_simple_typemap.empty()) return true;
 
 	// Check the type restrictions.
 	for (size_t i=0; i<len; i++)
 	{
-		VariableTypeMap::const_iterator it =
-			_simple_typemap.find(varseq[i]);
-		if (it == _simple_typemap.end()) continue;  // no restriction
-
-		const std::set<Type> &tchoice = it->second;
-		Type htype = hseq[i]->getType();
-		std::set<Type>::const_iterator allow = tchoice.find(htype);
-		if (allow == tchoice.end()) return false;
+		if (not is_type(varseq[i], hseq[i])) return false;
 	}
 	return true;
 }
