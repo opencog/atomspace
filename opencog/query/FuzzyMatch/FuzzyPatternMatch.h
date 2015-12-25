@@ -99,7 +99,7 @@ class FuzzyPatternMatch :
         double max_similarity = -std::numeric_limits<double>::max();
 
         void find_starters(const Handle& hg, const size_t& depth,
-                           const size_t& clause_idx, const Handle& term,
+                           const Handle& term,
                            std::set<Starter>& rtn);
 };
 

@@ -46,7 +46,6 @@ FuzzyPatternMatch::FuzzyPatternMatch(AtomSpace* as)
  * @param rtn         A list of potential starters found in the pattern
  */
 void FuzzyPatternMatch::find_starters(const Handle& hp, const size_t& depth,
-                                      const size_t& clause_idx,
                                       const Handle& term,
                                       std::set<Starter>& rtn)
 {
@@ -56,7 +55,7 @@ void FuzzyPatternMatch::find_starters(const Handle& hp, const size_t& depth,
     LinkPtr lp(LinkCast(hp));
     if (lp) {
         for (Handle h : lp->getOutgoingSet())
-            find_starters(h, depth + 1, clause_idx, hp, rtn);
+            find_starters(h, depth + 1, hp, rtn);
         return;
     }
 
@@ -96,7 +95,7 @@ bool FuzzyPatternMatch::initiate_search(PatternMatchEngine* pme)
     // Find starters from the clause
     std::set<Starter> starters;
     const Handle& clause = _pattern->mandatory[0];
-    find_starters(clause, 0, 0, clause, starters);
+    find_starters(clause, 0, clause, starters);
 
     // Start the searches
     size_t search_cnt = 0;
