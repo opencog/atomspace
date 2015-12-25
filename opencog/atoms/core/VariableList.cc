@@ -86,8 +86,6 @@ VariableList::VariableList(Link &l)
 }
 
 /* ================================================================= */
-typedef std::pair<Handle, const std::set<Type> > ATPair;
-
 /**
  * Extract the variable type(s) from a TypedVariableLink
  *
@@ -106,6 +104,22 @@ typedef std::pair<Handle, const std::set<Type> > ATPair;
  *          TypeNode  "ConceptNode"
  *          TypeNode  "NumberNode"
  *          TypeNode  "WordNode"
+ *
+ * or possibly types that are SignatureLink's or FuyzzyLink's or
+ * polymorphic combinations thereof: e.g. the following is valid:
+ *
+ *    TypedVariableLink
+ *       VariableNode "$some_var_name"
+ *       TypeChoice
+ *          TypeNode  "ConceptNode"
+ *          SignatureLink
+ *              InheritanceLink
+ *                 PredicateNode "foobar"
+ *                 TypeNode  "ListLink"
+ *          FuzzyLink
+ *              InheritanceLink
+ *                 ConceptNode "animal"
+ *                 ConceptNode "tiger"
  *
  * In either case, the variable itself is appended to "vset",
  * and the list of allowed types are associated with the variable
@@ -129,42 +143,95 @@ void VariableList::get_vartype(const Handle& htypelink)
 	{
 		Type vt = TypeNodeCast(vartype)->get_value();
 		std::set<Type> ts = {vt};
-		_varlist.typemap.insert(ATPair(varname, ts));
-		_varlist.varset.insert(varname);
-		_varlist.varseq.emplace_back(varname);
+		_varlist._simple_typemap.insert({varname, ts});
 	}
 	else if (TYPE_CHOICE == t)
 	{
-		std::set<Type> ts;
+		std::set<Type> typeset;
+		std::set<Handle> deepset;
+		std::set<Handle> fuzzset;
 
-		const std::vector<Handle>& tset = LinkCast(vartype)->getOutgoingSet();
+		const HandleSeq& tset = LinkCast(vartype)->getOutgoingSet();
 		size_t tss = tset.size();
 		for (size_t i=0; i<tss; i++)
 		{
-			Handle h(tset[i]);
-			Type var_type = h->getType();
-			if (TYPE_NODE != var_type)
+			Handle ht(tset[i]);
+			Type var_type = ht->getType();
+			if (TYPE_NODE == var_type)
+			{
+				Type vt = TypeNodeCast(ht)->get_value();
+				typeset.insert(vt);
+			}
+			else if (SIGNATURE_LINK == var_type)
+			{
+				const HandleSeq& sig = LinkCast(ht)->getOutgoingSet();
+				if (1 != sig.size())
+					throw SyntaxException(TRACE_INFO,
+						"Unexpected contents in SignatureLink\n"
+						"Expected arity==1, got %s", vartype->toString().c_str());
+
+				deepset.insert(sig[0]);
+			}
+			else if (FUZZY_LINK == var_type)
+			{
+				const HandleSeq& fuz = LinkCast(ht)->getOutgoingSet();
+				if (1 != fuz.size())
+					throw SyntaxException(TRACE_INFO,
+						"Unexpected contents in FuzzyLink\n"
+						"Expected arity==1, got %s", vartype->toString().c_str());
+
+				fuzzset.insert(fuz[0]);
+			}
+			else
 			{
 				throw InvalidParamException(TRACE_INFO,
 					"VariableChoice has unexpected content:\n"
 				              "Expected TypeNode, got %s",
-				              classserver().getTypeName(h->getType()).c_str());
+				              classserver().getTypeName(ht->getType()).c_str());
 			}
-			Type vt = TypeNodeCast(h)->get_value();
-			ts.insert(vt);
 		}
 
-		_varlist.typemap.insert(ATPair(varname,ts));
-		_varlist.varset.insert(varname);
-		_varlist.varseq.emplace_back(varname);
+		if (0 < typeset.size())
+			_varlist._simple_typemap.insert({varname, typeset});
+		if (0 < deepset.size())
+			_varlist._deep_typemap.insert({varname, deepset});
+		if (0 < fuzzset.size())
+			_varlist._fuzzy_typemap.insert({varname, fuzzset});
+	}
+	else if (SIGNATURE_LINK == t)
+	{
+		const HandleSeq& tset = LinkCast(vartype)->getOutgoingSet();
+		if (1 != tset.size())
+			throw SyntaxException(TRACE_INFO,
+				"Unexpected contents in SignatureLink\n"
+				"Expected arity==1, got %s", vartype->toString().c_str());
+
+		std::set<Handle> ts;
+		ts.insert(tset[0]);
+		_varlist._deep_typemap.insert({varname, ts});
+	}
+	else if (FUZZY_LINK == t)
+	{
+		const HandleSeq& tset = LinkCast(vartype)->getOutgoingSet();
+		if (1 != tset.size())
+			throw SyntaxException(TRACE_INFO,
+				"Unexpected contents in FuzzyLink\n"
+				"Expected arity==1, got %s", vartype->toString().c_str());
+
+		std::set<Handle> ts;
+		ts.insert(tset[0]);
+		_varlist._fuzzy_typemap.insert({varname, ts});
 	}
 	else
 	{
-		throw InvalidParamException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 			"Unexpected contents in TypedVariableLink\n"
 			"Expected TypeNode or TypeChoice, got %s",
 			classserver().getTypeName(t).c_str());
 	}
+
+	_varlist.varset.insert(varname);
+	_varlist.varseq.emplace_back(varname);
 }
 
 /* ================================================================= */

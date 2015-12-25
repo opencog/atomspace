@@ -60,7 +60,6 @@ protected:
 
 	const Variables* _variables;
 	const Pattern* _pattern;
-	const VariableTypeMap* _type_restrictions;
 	const std::set<Handle>* _dynamic;
 
 	PatternLinkPtr _pl;

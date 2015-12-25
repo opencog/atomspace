@@ -86,6 +86,9 @@ INSTALL (FILES
 
 # Install the atom_types.script
 # required to build the HaskellBindings from Hackage
+# XXX FIXME this is just plain-old wrong. There are about FIVE or SIX
+# of these atom_types.script files; it is not sufficient to just handle
+# one of them.  See bug #549
 INSTALL (FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/atom_types.script
    DESTINATION "${DATADIR}"

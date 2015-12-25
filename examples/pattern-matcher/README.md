@@ -19,6 +19,8 @@ main features.
 * absent.scm: Use the StateLink to set state; use AbsentLink to check
     for the absence of atoms in the AtomSpace.
 * define.scm: using DefineLinks to create patterns out of parts.
+* type-signature.scm: using signatures or "deep types" to refine the
+    search.
 
 Some simpler applications showing some things one can do, and how to do
 them.
