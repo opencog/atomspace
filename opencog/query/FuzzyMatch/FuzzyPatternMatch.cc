@@ -200,8 +200,8 @@ void FuzzyPatternMatch::accept_solution(const Handle& pat, const Handle& soln)
         similarity += 1.0 / common_node->getIncomingSetSize();
 
     LAZY_LOG_FINE << "\n========================================\n"
-                  << "Compaing:\n" << pat->toShortString()
-                  << "--- and:\n" << soln->toShortString() << "\n"
+                  << "Comparing:\n" << pat->toShortString()
+                  << "----- and:\n" << soln->toShortString() << "\n"
                   << "Common nodes = " << common_nodes.size() << "\n"
                   << "Size diff = " << diff << "\n"
                   << "Similarity = " << similarity << "\n"
