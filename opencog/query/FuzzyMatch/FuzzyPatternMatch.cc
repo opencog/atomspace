@@ -92,7 +92,6 @@ bool FuzzyPatternMatch::accept_starter(const NodePtr np)
 // Sort the starters by their "width" and "depth"
 bool FuzzyPatternMatch::Starter::operator<(const Starter& s2) const
 {
-
     if (width == s2.width) return depth > s2.depth;
     else return width < s2.width;
 };
@@ -173,10 +172,9 @@ bool FuzzyPatternMatch::link_match(const LinkPtr& pl, const LinkPtr& gl)
             return false;
 
         // Skip it if we have seen it before
-        if (std::find(prev_compared.begin(), prev_compared.end(), soln.value())
-                                                        != prev_compared.end())
+        if (prev_compared.find(soln.value()) != prev_compared.end())
             return false;
-        else prev_compared.push_back(soln.value());
+        else prev_compared.insert(soln.value());
 
         accept_solution(pat, soln);
 

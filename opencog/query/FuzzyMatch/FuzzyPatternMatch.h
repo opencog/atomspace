@@ -92,7 +92,7 @@ class FuzzyPatternMatch :
         };
 
         // Potential solutions that have previously been compared
-        std::vector<UUID> prev_compared;
+        std::set<UUID> prev_compared;
 
         // The minimum difference between the pattern and all the known solutions
         size_t min_size_diff = SIZE_MAX;
