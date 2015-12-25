@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/exceptions.h>
+
 #include "UnifyPMCB.h"
 
 using namespace opencog;
@@ -87,6 +89,14 @@ bool UnifyPMCB::grounding(const std::map<Handle, Handle> &var_soln,
 				true_var_soln[p.second] = p.first;
 			else
 				true_var_soln[p.first] = p.second;
+
+			if (0 < DefaultPatternMatchCB::_vars->_deep_typemap.size())
+				throw RuntimeException(TRACE_INFO,
+					"Not implemented!  XXX FIXME!");
+
+			if (0 < DefaultPatternMatchCB::_vars->_fuzzy_typemap.size())
+				throw RuntimeException(TRACE_INFO,
+					"Not implemented!  XXX FIXME!");
 		}
 	}
 
