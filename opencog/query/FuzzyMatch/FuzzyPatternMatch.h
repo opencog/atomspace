@@ -84,11 +84,11 @@ class FuzzyPatternMatch :
         // Potential starters for the search
         struct Starter
         {
-            UUID uuid;
             Handle handle;
             Handle term;
             size_t width;
             size_t depth;
+            bool operator<(const Starter&) const;
         };
 
         // Potential solutions that have previously been compared
@@ -102,10 +102,12 @@ class FuzzyPatternMatch :
 
         void find_starters(const Handle& hg, const size_t& depth,
                            const size_t& clause_idx, const Handle& term,
-                           std::vector<Starter>& rtn);
+                           std::set<Starter>& rtn);
 };
 
 Handle find_approximate_match(AtomSpace* as, const Handle& hp);
+
+
 }
 
 #endif  // FUZZYPATTERNMATCH_H

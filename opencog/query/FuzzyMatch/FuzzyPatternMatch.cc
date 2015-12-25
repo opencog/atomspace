@@ -48,7 +48,7 @@ FuzzyPatternMatch::FuzzyPatternMatch(AtomSpace* as)
 void FuzzyPatternMatch::find_starters(const Handle& hp, const size_t& depth,
                                       const size_t& clause_idx,
                                       const Handle& term,
-                                      std::vector<Starter>& rtn)
+                                      std::set<Starter>& rtn)
 {
     // Traverse its outgoing set if it is a link
     LinkPtr lp(LinkCast(hp));
@@ -64,13 +64,12 @@ void FuzzyPatternMatch::find_starters(const Handle& hp, const size_t& depth,
         if (hp and np) {
             if (accept_starter(np)) {
                 Starter sn;
-                sn.uuid = hp.value();
                 sn.handle = hp;
                 sn.term = term;
                 sn.width = hp->getIncomingSetSize();
                 sn.depth = depth;
 
-                rtn.push_back(sn);
+                rtn.insert(sn);
             }
         }
     }
@@ -90,6 +89,14 @@ bool FuzzyPatternMatch::accept_starter(const NodePtr np)
            np->getName().find("@") == std::string::npos;
 }
 
+// Sort the starters by their "width" and "depth"
+bool FuzzyPatternMatch::Starter::operator<(const Starter& s2) const
+{
+
+    if (width == s2.width) return depth > s2.depth;
+    else return width < s2.width;
+};
+
 /**
  * Override the initiate_search method in the InitiateSearchCB. It begins
  * by finding one or more starter nodes, and then initiates a fuzzy-search
@@ -101,35 +108,19 @@ bool FuzzyPatternMatch::accept_starter(const NodePtr np)
 bool FuzzyPatternMatch::initiate_search(PatternMatchEngine* pme)
 {
     // Find starters from the clause
-    std::vector<Starter> starters;
+    std::set<Starter> starters;
     const Handle& clause = _pattern->mandatory[0];
     find_starters(clause, 0, 0, clause, starters);
-
-    // For removing duplicates, if any, form the list of starters,
-    // as we want to have a different starters for each of the searches
-    std::sort(starters.begin(), starters.end(),
-              [](const Starter& s1, const Starter& s2)
-              { return s1.uuid < s2.uuid; });
-
-    starters.erase(std::unique(starters.begin(), starters.end(),
-                               [](const Starter& s1, const Starter& s2)
-                               { return s1.uuid == s2.uuid; }), starters.end());
-
-    // Sort the starters by their "width" and "depth"
-    auto sort_by_wd = [](const Starter& s1, const Starter& s2) {
-        if (s1.width == s2.width) return s1.depth > s2.depth;
-        else return s1.width < s2.width;
-    };
-
-    std::sort(starters.begin(), starters.end(), sort_by_wd);
 
     // Start the searches
     size_t search_cnt = 0;
     size_t num_starters = starters.size();
+    auto iter = starters.begin();
     while (num_starters > search_cnt) {
-        const Handle& starter_term = starters[search_cnt].term;
-        const Handle& best_start = starters[search_cnt].handle;
+        const Handle& starter_term = iter->term;
+        const Handle& best_start = iter->handle;
         search_cnt++;
+        iter++;
 
         LAZY_LOG_FINE << "\n========================================\n"
                       << "Initiating the fuzzy match... ("
