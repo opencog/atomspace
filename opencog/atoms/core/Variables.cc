@@ -267,6 +267,17 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 		ret = false;
 	}
 
+	// Fuzzy deep type restrictions?
+	VariableDeepTypeMap::const_iterator fit =
+		_fuzzy_typemap.find(var);
+	if (_fuzzy_typemap.end() != fit)
+	{
+		// const std::set<Handle> &fuzzset = dit->second;
+		throw RuntimeException(TRACE_INFO,
+			"Not implemented! TODO XXX FIXME");
+		ret = false;
+	}
+
 	// Maybe we don't know this variable?
 	if (varset.end() == varset.find(var)) return false;
 
