@@ -51,7 +51,7 @@
 	(ListLink (ConceptNode "bingo") (ConceptNode "yes!")))
 
 (EvaluationLink
-	(GroundedPredicateNode "bar")
+	(AnchorNode "bar")
 	(ListLink (ConceptNode "hurrah") (ConceptNode "yay!")))
 
 (EvaluationLink
@@ -67,7 +67,7 @@
 				(EvaluationLink
 					(TypeChoice
 						(TypeNode "PredicateNode")
-						(TypeNode "GroundedPredicateNode"))
+						(TypeNode "AnchorNode"))
 					(ListLink
 						(Type "ConceptNode") (Type "ConceptNode")))))
 		(AndLink (Variable "$x"))))

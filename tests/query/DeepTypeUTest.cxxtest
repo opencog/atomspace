@@ -99,6 +99,7 @@ void DeepTypeUTest::test_get_signature(void)
 
 	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
 
+	// --------------------------------------------------------
 	hgnd = eval->eval_h("(cog-execute! get-foobar)");
 	hans = eval->eval_h(
 		"(SetLink "
@@ -106,6 +107,26 @@ void DeepTypeUTest::test_get_signature(void)
 		"        (ConceptNode \"foo\") (ConceptNode \"bingo\"))"
 		"    (InheritanceLink "
 		"        (ConceptNode \"bar\") (ConceptNode \"bingo\")))");
+
+	printf("Expected this: %s\n", hans->toString().c_str());
+	printf("Found this answer: %s\n", hgnd->toString().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	// --------------------------------------------------------
+	hgnd = eval->eval_h("(cog-execute! predicate-search)");
+	hans = eval->eval_h(
+		"(SetLink "
+		"   (EvaluationLink"
+		"      (PredicateNode \"foo\")"
+		"      (ListLink"
+		"         (ConceptNode \"bingo\")"
+		"         (ConceptNode \"yes!\")))"
+		"   (EvaluationLink"
+		"      (AnchorNode \"bar\")"
+		"      (ListLink"
+		"         (ConceptNode \"hurrah\")"
+		"         (ConceptNode \"yay!\"))))");
 
 	printf("Expected this: %s\n", hans->toString().c_str());
 	printf("Found this answer: %s\n", hgnd->toString().c_str());
