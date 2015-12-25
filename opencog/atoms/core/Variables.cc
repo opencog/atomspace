@@ -191,7 +191,41 @@ bool Variables::is_type_rec(const Handle& deep, const Handle& val) const
 		Type deeptype = TypeNodeCast(deep)->get_value();
 		return (valtype == deeptype);
 	}
-	return false;
+	else if (TYPE_CHOICE == dpt)
+	{
+		throw RuntimeException(TRACE_INFO,
+			"Not implemented! TODO XXX FIXME");
+	}
+	else if (FUZZY_LINK == dpt)
+	{
+		throw RuntimeException(TRACE_INFO,
+			"Not implemented! TODO XXX FIXME");
+	}
+
+	// If it is a node, not a link, then it is a type-constant,
+	// and thus must match perfectly.
+	LinkPtr dptr(LinkCast(deep));
+	if (nullptr == dptr)
+		return (deep == val);
+
+	// If a link, then both must be same link type.
+	if (valtype != dpt) return false;
+
+	LinkPtr vptr(LinkCast(val));
+	const HandleSeq& vlo = vptr->getOutgoingSet();
+	const HandleSeq& dpo = dptr->getOutgoingSet();
+	size_t sz = dpo.size();
+
+	// Both must be the same size...
+	if (vlo.size() != sz) return false;
+
+	for (size_t i=0; i<sz; i++)
+	{
+		if (not is_type_rec(dpo[i], vlo[i])) return false;
+	}
+
+	// If we are here, all checks must hav passed.
+	return true;
 }
 
 /**
