@@ -50,7 +50,7 @@ DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
 void DefaultPatternMatchCB::set_pattern(const Variables& vars,
                                         const Pattern& pat)
 {
-	_type_restrictions = &vars._simple_typemap;
+	_vars = &vars;
 	_dynamic = &pat.evaluatable_terms;
 	_have_evaluatables = ! _dynamic->empty();
 	_have_variables = ! vars.varseq.empty();
@@ -99,19 +99,7 @@ bool DefaultPatternMatchCB::variable_match(const Handle& npat_h,
 
 	// If the ungrounded term is a variable, then see if there
 	// are any restrictions on the variable type.
-	// If no restrictions, we are good to go.
-	if (_type_restrictions->empty()) return true;
-
-	// If we are here, there's a restriction on the grounding type.
-	// Validate the node type, if needed.
-	VariableTypeMap::const_iterator it = _type_restrictions->find(npat_h);
-	if (it == _type_restrictions->end()) return true;
-
-	// Is the ground-atom type in our list of allowed types?
-	Type soltype = nsoln_h->getType();
-	const std::set<Type> &tset = it->second;
-	std::set<Type>::const_iterator allow = tset.find(soltype);
-	return allow != tset.end();
+	return _vars->is_type(npat_h, nsoln_h);
 }
 
 /**

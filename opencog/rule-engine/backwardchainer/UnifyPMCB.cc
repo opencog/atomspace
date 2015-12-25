@@ -78,10 +78,12 @@ bool UnifyPMCB::grounding(const std::map<Handle, Handle> &var_soln,
 	{
 		if (_int_vars->get_variables().varset.count(p.first) == 1)
 		{
-			// check if any typed variable map to a variable, and if so,
-			// store the reverse mapping
-			if (DefaultPatternMatchCB::_type_restrictions->count(p.first) == 1
-			    && DefaultPatternMatchCB::_type_restrictions->at(p.first).count(p.second->getType()) == 0)
+			// Check if any typed variable maps to a variable, and if so,
+			// store the reverse mapping. XXX This is not correct,
+			// if there are non-trivial type restrictions (i.e. deep
+			// types of fuzzy types). FIXME
+			if (DefaultPatternMatchCB::_vars->_simple_typemap.count(p.first) == 1
+			    && DefaultPatternMatchCB::_vars->_simple_typemap.at(p.first).count(p.second->getType()) == 0)
 				true_var_soln[p.second] = p.first;
 			else
 				true_var_soln[p.first] = p.second;

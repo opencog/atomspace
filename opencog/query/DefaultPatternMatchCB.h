@@ -89,7 +89,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 
 		ClassServer& _classserver;
 
-		const VariableTypeMap* _type_restrictions = NULL;
+		const Variables* _vars = NULL;
 		const std::set<Handle>* _dynamic = NULL;
 		bool _have_evaluatables = false;
 		const std::set<Handle>* _globs = NULL;
