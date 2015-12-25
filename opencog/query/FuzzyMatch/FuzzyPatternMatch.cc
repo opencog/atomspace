@@ -50,43 +50,30 @@ void FuzzyPatternMatch::find_starters(const Handle& hp, const size_t& depth,
                                       const Handle& term,
                                       std::set<Starter>& rtn)
 {
+    if (nullptr == hp) return;
+
     // Traverse its outgoing set if it is a link
     LinkPtr lp(LinkCast(hp));
     if (lp) {
         for (Handle h : lp->getOutgoingSet())
             find_starters(h, depth + 1, clause_idx, hp, rtn);
+        return;
     }
 
     // Get the nodes that are not an instance nor a variable
-    else {
-        NodePtr np(NodeCast(hp));
+    NodePtr np(NodeCast(hp));
 
-        if (hp and np) {
-            if (accept_starter(np)) {
-                Starter sn;
-                sn.handle = hp;
-                sn.term = term;
-                sn.width = hp->getIncomingSetSize();
-                sn.depth = depth;
+    if (np->getType() != VARIABLE_NODE and
+        np->getName().find("@") == std::string::npos)
+    {
+        Starter sn;
+        sn.handle = hp;
+        sn.term = term;
+        sn.width = hp->getIncomingSetSize();
+        sn.depth = depth;
 
-                rtn.insert(sn);
-            }
-        }
+        rtn.insert(sn);
     }
-}
-
-/**
- * A callback to check if a node can be consideded as a starter, which
- * will then be used to initiate a fuzzy-search. By default a starter
- * can't be a variable nor an instance.
- *
- * @param np  A NodePtr of a node from the input pattern
- * @return    True if a node is accepted, false otherwise.
- */
-bool FuzzyPatternMatch::accept_starter(const NodePtr np)
-{
-    return np->getType() != VARIABLE_NODE and
-           np->getName().find("@") == std::string::npos;
 }
 
 // Sort the starters by their "width" and "depth"
