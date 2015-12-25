@@ -41,7 +41,6 @@ InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
 	_classserver(classserver()),
 	_variables(NULL),
 	_pattern(NULL),
-	_type_restrictions(NULL),
 	_dynamic(NULL),
 	_as(as)
 {
@@ -54,7 +53,6 @@ void InitiateSearchCB::set_pattern(const Variables& vars,
 
 	_variables = &vars;
 	_pattern = &pat;
-	_type_restrictions = &vars._simple_typemap;
 	_dynamic = &pat.evaluatable_terms;
 }
 
@@ -603,7 +601,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
  * Initiate a search by looping over all atoms of the allowed
  * variable types (as set with the set_type_testrictions() method).
  * This assumes that the varset contains the variables to be searched
- * over, and that the type restrictions are set up approrpriately.
+ * over, and that the type restrictions are set up appropriately.
  *
  * If the varset is empty, or if there are no variables, then the
  * entire atomspace will be searched.  Depending on the pattern,
@@ -625,8 +623,17 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	for (const Handle& var: _variables->varset)
 	{
 		LAZY_LOG_FINE << "Examine variable " << var->toShortString();
-		auto tit = _type_restrictions->find(var);
-		if (_type_restrictions->end() == tit) continue;
+
+		auto dit = _variables->_deep_typemap.find(var);
+		if (_variables->_deep_typemap.end() != dit)
+			throw RuntimeException(TRACE_INFO, "Not implemented!");
+
+		auto fit = _variables->_fuzzy_typemap.find(var);
+		if (_variables->_fuzzy_typemap.end() != fit)
+			throw RuntimeException(TRACE_INFO, "Not implemented!");
+
+		auto tit = _variables->_simple_typemap.find(var);
+		if (_variables->_simple_typemap.end() == tit) continue;
 		const std::set<Type>& typeset = tit->second;
 		LAZY_LOG_FINE << "Type-restictions set size = "
 		              << typeset.size();
@@ -643,7 +650,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 		{
 			for (const Handle& cl : clauses)
 			{
-				// Evaluatables dont' exist in the atomspace, in general.
+				// Evaluatables don't exist in the atomspace, in general.
 				// Cannot start a search with them.
 				if (0 < _pattern->evaluatable_holders.count(cl)) continue;
 				FindAtoms fa(var);
@@ -756,7 +763,7 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 	if (0 == _pattern->defined_terms.size())
 		return;
 
-	// Now is the time to look up the defintions!
+	// Now is the time to look up the definitions!
 	// We loop here, so that all recursive definitions are expanded
 	// as well.  XXX Except that this is wrong, if any of the
 	// definitions are actually recursive. That is, this will be
@@ -809,7 +816,6 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 		_pattern = &_pl->get_pattern();
 	}
 
-	_type_restrictions = &_variables->_simple_typemap;
 	_dynamic = &_pattern->evaluatable_terms;
 
 	pme->set_pattern(*_variables, *_pattern);
