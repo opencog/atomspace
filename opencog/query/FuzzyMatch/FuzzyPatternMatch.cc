@@ -149,28 +149,24 @@ bool FuzzyPatternMatch::initiate_search(PatternMatchEngine* pme)
 bool FuzzyPatternMatch::link_match(const LinkPtr& pl, const LinkPtr& gl)
 {
     // In this case, gl is a potential solution
-    if (_pattern->mandatory[0] == pl->getHandle()) {
-        Handle pat = _pattern->mandatory[0];
-        Handle soln = gl->getHandle();
+    Handle pat = _pattern->mandatory[0];
+    if (pat != pl->getHandle()) return true;
 
-        // Skip it if it's grounded by itself
-        if (soln == pat)
-            return false;
+    // Skip it if it's grounded by itself
+    if (pl == gl) return false;
 
-        // Skip it if we have seen it before
-        if (prev_compared.find(soln) != prev_compared.end())
-            return false;
-        else prev_compared.insert(soln);
-
-        accept_solution(pat, soln);
-
-        // Returns false here to skip the rest of the pattern matching procedures,
-        // including the permutation comparsion for unordered links, as we have
-        // already decided whether or not to accpet this grounding.
+    // Skip it if we have seen it before
+    Handle soln(gl->getHandle());
+    if (prev_compared.find(soln) != prev_compared.end())
         return false;
-    }
+    else prev_compared.insert(soln);
 
-    return true;
+    accept_solution(pat, soln);
+
+    // Returns false here to skip the rest of the pattern matching procedures,
+    // including the permutation comparsion for unordered links, as we have
+    // already decided whether or not to accpet this grounding.
+    return false;
 }
 
 /**
