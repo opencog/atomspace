@@ -172,9 +172,9 @@ bool FuzzyPatternMatch::link_match(const LinkPtr& pl, const LinkPtr& gl)
             return false;
 
         // Skip it if we have seen it before
-        if (prev_compared.find(soln.value()) != prev_compared.end())
+        if (prev_compared.find(soln) != prev_compared.end())
             return false;
-        else prev_compared.insert(soln.value());
+        else prev_compared.insert(soln);
 
         accept_solution(pat, soln);
 
