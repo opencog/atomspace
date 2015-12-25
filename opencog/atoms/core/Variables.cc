@@ -193,8 +193,12 @@ bool Variables::is_type_rec(const Handle& deep, const Handle& val) const
 	}
 	else if (TYPE_CHOICE == dpt)
 	{
-		throw RuntimeException(TRACE_INFO,
-			"Not implemented! TODO XXX FIXME");
+		LinkPtr dptr(LinkCast(deep));
+		for (const Handle& choice : dptr->getOutgoingSet())
+		{
+			if (is_type_rec(choice, val)) return true;
+		}
+		return false;
 	}
 	else if (FUZZY_LINK == dpt)
 	{

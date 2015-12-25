@@ -41,3 +41,35 @@
 
 ; Perform the search. Should return both foo and bar-inheritance.
 (cog-execute! get-foobar)
+
+; =============================================================
+; A more complex example
+
+; More data:
+(EvaluationLink
+	(PredicateNode "foo")
+	(ListLink (ConceptNode "bingo") (ConceptNode "yes!")))
+
+(EvaluationLink
+	(GroundedPredicateNode "bar")
+	(ListLink (ConceptNode "hurrah") (ConceptNode "yay!")))
+
+(EvaluationLink
+	(ConceptNode "baz")
+	(ListLink (ConceptNode "oops") (ConceptNode "Oh no, Mr. Bill!")))
+
+; A search pattern that looks for predicates or grounded predicates.
+(define predicate-search
+	(GetLink
+		(TypedVariable
+			(Variable "$x")
+			(Signature
+				(EvaluationLink
+					(TypeChoice
+						(TypeNode "PredicateNode")
+						(TypeNode "GroundedPredicateNode"))
+					(ListLink
+						(Type "ConceptNode") (Type "ConceptNode")))))
+		(AndLink (Variable "$x"))))
+
+(cog-execute! predicate-search)
