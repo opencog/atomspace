@@ -624,13 +624,15 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	{
 		LAZY_LOG_FINE << "Examine variable " << var->toShortString();
 
+#ifdef _IMPLMENT_ME_LATER
+		// XXX TODO FIXME --- if there is a deep type in the mix, that
+		// will offer a far-superior place to start the search.
+		// Unfortunately, implementing this will rquire a bit more work,
+		// so we punt for now, as there are no users ....
 		auto dit = _variables->_deep_typemap.find(var);
 		if (_variables->_deep_typemap.end() != dit)
 			throw RuntimeException(TRACE_INFO, "Not implemented!");
-
-		auto fit = _variables->_fuzzy_typemap.find(var);
-		if (_variables->_fuzzy_typemap.end() != fit)
-			throw RuntimeException(TRACE_INFO, "Not implemented!");
+#endif
 
 		auto tit = _variables->_simple_typemap.find(var);
 		if (_variables->_simple_typemap.end() == tit) continue;
