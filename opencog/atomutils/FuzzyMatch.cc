@@ -29,6 +29,12 @@
 
 using namespace opencog;
 
+bool FuzzyMatch::accept_starter(const NodePtr& np)
+{
+	return (np->getType() != VARIABLE_NODE and
+		np->getName().find("@") == std::string::npos);
+}
+
 /**
  * Examines the pattern and find the starting leaves that can be
  * used to initiate fuzzy-searches.
@@ -50,8 +56,7 @@ void FuzzyMatch::find_starters(const Handle& hp, const size_t& depth)
     // Get the nodes that are not an instance nor a variable
     NodePtr np(NodeCast(hp));
 
-    if (np->getType() != VARIABLE_NODE and
-        np->getName().find("@") == std::string::npos)
+    if (accept_starter(np))
     {
         LAZY_LOG_FINE << "\n========================================\n"
                       << "Initiating the fuzzy match... ("

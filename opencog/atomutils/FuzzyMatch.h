@@ -26,6 +26,7 @@
 
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
 
 namespace opencog
 {
@@ -44,13 +45,15 @@ class FuzzyMatch
     public:
         HandleSeq perform_search(const Handle&);
 
-    private:
-        void explore(const LinkPtr&, size_t);
-        void accept_solution(const Handle&);
-
+    protected:
         // What we are matching
         Handle target;
         HandleSeq target_nodes;
+
+        virtual bool accept_starter(const NodePtr&);
+        virtual void accept_solution(const Handle&);
+    private:
+        void explore(const LinkPtr&, size_t);
 
         // The solutions
         HandleSeq solns;
