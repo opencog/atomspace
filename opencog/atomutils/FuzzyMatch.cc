@@ -35,7 +35,7 @@ void FuzzyMatch::explore(const LinkPtr& gl, int depth)
 	Handle soln(gl->getHandle());
 	if (soln == target) return;
 
-	bool look_for_more = note_match(soln, depth);
+	bool look_for_more = try_match(soln, depth);
 
 	if (not look_for_more) return;
 

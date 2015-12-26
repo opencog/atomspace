@@ -40,7 +40,7 @@ bool FuzzyMatchBasic::accept_starter(const NodePtr& np)
  *
  * @param soln  The potential solution
  */
-bool FuzzyMatchBasic::note_match(const Handle& soln, int depth)
+bool FuzzyMatchBasic::try_match(const Handle& soln, int depth)
 {
 	if (0 < depth) return true;
 	if (0 > depth) return false;
