@@ -24,8 +24,6 @@
 #ifndef FUZZYPATTERNMATCH_H
 #define FUZZYPATTERNMATCH_H
 
-#include <opencog/query/DefaultPatternMatchCB.h>
-
 namespace opencog
 {
 /**
@@ -40,31 +38,12 @@ namespace opencog
  * It can be called from C++ via find_approximate_match(), or from Scheme
  * via (cog-fuzzy-match).
  */
-class FuzzyPatternMatch :
-		public DefaultPatternMatchCB
+class FuzzyPatternMatch
 {
     public:
         FuzzyPatternMatch(AtomSpace*, const Handle&);
 
-        virtual void set_pattern(const Variables& vars,
-                                 const Pattern& pat)
-        {
-            DefaultPatternMatchCB::set_pattern(vars, pat);
-            _pattern = &pat;
-        }
-
-        virtual bool initiate_search(PatternMatchEngine*);
-
-        virtual bool fuzzy_match(const Handle&, const Handle&)
-        { return true; }
-
-        virtual bool node_match(const Handle&, const Handle&)
-        { return true; }
-
-        // Always returns false to search for more solutions
-        virtual bool grounding(const std::map<Handle, Handle>&,
-                               const std::map<Handle, Handle>&)
-        { return false; }
+        bool initiate_search();
 
         void explore(const LinkPtr&, size_t);
         void accept_solution(const Handle&);
@@ -72,9 +51,6 @@ class FuzzyPatternMatch :
         HandleSeq get_solns() { return solns; }
 
     private:
-        // The pattern
-        const Pattern* _pattern = NULL;
-
         // What we are matching
         Handle target;
 

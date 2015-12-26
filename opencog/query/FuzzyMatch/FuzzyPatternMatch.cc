@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/pattern/PatternLink.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FindUtils.h>
 
@@ -30,7 +30,6 @@
 using namespace opencog;
 
 FuzzyPatternMatch::FuzzyPatternMatch(AtomSpace* as, const Handle& hp) :
-    DefaultPatternMatchCB(as),
     target(hp)
 {
     target_nodes = get_all_nodes(target);
@@ -94,7 +93,7 @@ bool FuzzyPatternMatch::Starter::operator<(const Starter& s2) const
  * @param pme  The PatternMatchEngine object
  * @return     True if one or more solutions are found, false otherwise
  */
-bool FuzzyPatternMatch::initiate_search(PatternMatchEngine* pme)
+bool FuzzyPatternMatch::initiate_search()
 {
     // Find starters from the clause
     std::set<Starter> starters;
@@ -218,7 +217,7 @@ Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp)
 {
     FuzzyPatternMatch fpm(as, hp);
 
-    fpm.initiate_search(NULL);
+    fpm.initiate_search();
 
     LAZY_LOG_FINE << "---------- solns ----------";
     for (Handle h : fpm.get_solns())
