@@ -27,13 +27,11 @@
 namespace opencog
 {
 /**
- * A fuzzy pattern matcher that can be used to search patterns which are
- * similar but not identical to the input pattern. This is done by using
- * various nodes from the input pattern as starters to initiate multiple
- * fuzzy-searches, and by overriding necessary Pattern Matcher callbacks,
- * similar patterns (those share at least one common nodes with the input
- * pattern) will be gathered. A similarity score will be assigned to each
- * of those patterns and the ones with the highest scores will be returned.
+ * The fuzzy pattern matcher searches for trees which are similar but
+ * not identical to the input target pattern. This is done by examining
+ * all possible trees that have at least one leaf node in common with
+ * the target pattern.  A similarity score is assigned to each such
+ * tree, and the ones with the highest scores are returned.
  *
  * It can be called from C++ via find_approximate_match(), or from Scheme
  * via (cog-fuzzy-match).
