@@ -62,7 +62,5 @@ class FuzzyMatch
         void find_starters(const Handle& hg, const size_t& depth);
 };
 
-Handle find_approximate_match(AtomSpace* as, const Handle& hp);
-}
-
+} // namespace opencog
 #endif  // FUZZY_MATCH_H

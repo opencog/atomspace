@@ -150,26 +150,3 @@ void FuzzyMatch::accept_solution(const Handle& soln)
         solns.push_back(soln);
     }
 }
-
-/**
- * Implement the "cog-fuzzy-match" scheme primitive.
- * It finds hypergraphs in the atomspace that are similar to
- * the target hypergraph, and returns the most similar ones.
- *
- * @param as  The atomspace that we are using
- * @param hp  The query hypergraph
- * @return    One or more similar hypergraphs
- */
-Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp)
-{
-    FuzzyMatch fpm;
-    HandleSeq solns = fpm.perform_search(hp);
-
-    LAZY_LOG_FINE << "---------- solns ----------";
-    for (const Handle& h : solns)
-        LAZY_LOG_FINE << h->toShortString();
-
-    // Wrap the solutions in a ListLink and return it
-    Handle gl = as->add_link(LIST_LINK, solns);
-    return gl;
-}

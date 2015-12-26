@@ -16,6 +16,15 @@
 using namespace opencog;
 
 // ========================================================
+// Convenience wrapper
+static Handle find_approximate_match(AtomSpace* as, const Handle& hp)
+{
+	FuzzyMatch fpm;
+	HandleSeq solns = fpm.perform_search(hp);
+	return as->add_link(LIST_LINK, solns);
+}
+
+// ========================================================
 
 // XXX HACK ALERT This needs to be static, in order for python to
 // work correctly.  The problem is that python keeps creating and
