@@ -189,7 +189,7 @@ void FuzzyPatternMatch::accept_solution(const Handle& soln)
                           std::back_inserter(common_nodes));
 
     // The size different between the pattern and the potential solution
-    size_t diff = std::abs((int)(target_nodes.size() - soln_nodes.size()));
+    size_t diff = std::abs((int)target_nodes.size() - (int)soln_nodes.size());
 
     double similarity = 0;
 
