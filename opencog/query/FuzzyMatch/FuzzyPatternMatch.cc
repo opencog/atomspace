@@ -160,7 +160,7 @@ bool FuzzyPatternMatch::link_match(const LinkPtr& pl, const LinkPtr& gl)
         return false;
     else prev_compared.insert(soln);
 
-    accept_solution(target, soln);
+    accept_solution(soln);
 
     // Returns false here to skip the rest of the pattern matching procedures,
     // including the permutation comparsion for unordered links, as we have
@@ -174,11 +174,11 @@ bool FuzzyPatternMatch::link_match(const LinkPtr& pl, const LinkPtr& gl)
  * @param pat   The input pattern
  * @param soln  The potential solution
  */
-void FuzzyPatternMatch::accept_solution(const Handle& pat, const Handle& soln)
+void FuzzyPatternMatch::accept_solution(const Handle& soln)
 {
     // Find out how many nodes it has in common with the pattern
     HandleSeq common_nodes;
-    HandleSeq pat_nodes = get_all_nodes(pat);
+    HandleSeq pat_nodes = get_all_nodes(target);
     HandleSeq soln_nodes = get_all_nodes(soln);
 
     std::sort(pat_nodes.begin(), pat_nodes.end());
@@ -199,7 +199,7 @@ void FuzzyPatternMatch::accept_solution(const Handle& pat, const Handle& soln)
         similarity += 1.0 / common_node->getIncomingSetSize();
 
     LAZY_LOG_FINE << "\n========================================\n"
-                  << "Comparing:\n" << pat->toShortString()
+                  << "Comparing:\n" << target->toShortString()
                   << "----- and:\n" << soln->toShortString() << "\n"
                   << "Common nodes = " << common_nodes.size() << "\n"
                   << "Size diff = " << diff << "\n"
