@@ -29,34 +29,31 @@
 
 using namespace opencog;
 
-bool FuzzyMatch::accept_starter(const NodePtr& np)
+
+void FuzzyMatch::explore(const LinkPtr& gl, int depth)
 {
-	return (np->getType() != VARIABLE_NODE and
-		np->getName().find("@") == std::string::npos);
+	Handle soln(gl->getHandle());
+	bool look_for_more = try_match(soln, depth);
+	if (not look_for_more) return;
+
+	for (const LinkPtr& lptr : gl->getIncomingSet())
+	{
+		explore(lptr, depth-1);
+	}
 }
 
 /**
- * Examines the pattern and find the starting leaves that can be
- * used to initiate fuzzy-searches.
+ * Recursively explores the target pattern and proposes each subtree
+ * as a possible starting point for a similarity search. If the subtree
+ * is accepted as a starting point, then all trees sharing thwe subtree
+ * are proposed as being similar.
  *
- * @param hp          The pattern (the hypergraph in the query)
- * @param depth       The depth of the starter in the pattern
+ * @param hp          A subtree of the target pattern.
+ * @param depth       The depth of the subtree in the pattern.
  */
-void FuzzyMatch::find_starters(const Handle& hp, const size_t& depth)
+void FuzzyMatch::find_starters(const Handle& hp, const int& depth)
 {
-	// Traverse its outgoing set if it is a link
-	LinkPtr lp(LinkCast(hp));
-	if (lp) {
-		for (const Handle& h : lp->getOutgoingSet()) {
-			find_starters(h, depth + 1);
-		}
-		return;
-	}
-
-	// Get the nodes that are not an instance nor a variable
-	NodePtr np(NodeCast(hp));
-
-	if (accept_starter(np))
+	if (accept_starter(hp))
 	{
 		LAZY_LOG_FINE << "\n========================================\n"
 		              << "Initiating the fuzzy match... ("
@@ -70,87 +67,29 @@ void FuzzyMatch::find_starters(const Handle& hp, const size_t& depth)
 
 			explore(lptr, depth-1);
 		}
+		return;
+	}
+
+	// Proposed start was not accepted. Look farther down, at it's
+	// sub-trees.
+	LinkPtr lp(LinkCast(hp));
+	if (lp) {
+		for (const Handle& h : lp->getOutgoingSet()) {
+			find_starters(h, depth + 1);
+		}
 	}
 }
 
 /**
  * Find leaves at which a search can be started.
  */
-HandleSeq FuzzyMatch::perform_search(const Handle& targ)
+RankedHandleSeq FuzzyMatch::perform_search(const Handle& target)
 {
-	target = targ;
-	target_nodes = get_all_nodes(target);
-	std::sort(target_nodes.begin(), target_nodes.end());
+	start_search(target);
 
-	// Find starting leaves from which to begin matches.
+	// Find starting atoms from which to begin matches.
 	find_starters(target, 0);
 
-	return solns;
-}
-
-void FuzzyMatch::explore(const LinkPtr& gl, size_t depth)
-{
-	if (0 < depth)
-	{
-		for (const LinkPtr& lptr : gl->getIncomingSet())
-		{
-			explore(lptr, depth-1);
-		}
-		return;
-	}
-
-	Handle soln(gl->getHandle());
-	if (soln == target) return;
-
-	accept_solution(soln);
-}
-
-/**
- * Estimate how similar the potential solution and the target pattern are.
- *
- * @param soln  The potential solution
- */
-void FuzzyMatch::accept_solution(const Handle& soln)
-{
-	// Find out how many nodes it has in common with the pattern
-	HandleSeq common_nodes;
-	HandleSeq soln_nodes = get_all_nodes(soln);
-
-	std::sort(soln_nodes.begin(), soln_nodes.end());
-
-	std::set_intersection(target_nodes.begin(), target_nodes.end(),
-	                      soln_nodes.begin(), soln_nodes.end(),
-	                      std::back_inserter(common_nodes));
-
-	// The size different between the pattern and the potential solution
-	size_t diff = std::abs((int)target_nodes.size() - (int)soln_nodes.size());
-
-	double similarity = 0.0;
-
-	// Roughly estimate how "rare" each node is by using 1 / incoming set size
-	// TODO: May use Truth Value instead
-	for (const Handle& common_node : common_nodes)
-		similarity += 1.0 / common_node->getIncomingSetSize();
-
-	LAZY_LOG_FINE << "\n========================================\n"
-	              << "Comparing:\n" << target->toShortString()
-	              << "----- and:\n" << soln->toShortString() << "\n"
-	              << "Common nodes = " << common_nodes.size() << "\n"
-	              << "Size diff = " << diff << "\n"
-	              << "Similarity = " << similarity << "\n"
-	              << "Most similar = " << max_similarity << "\n"
-	              << "========================================\n";
-
-	// Decide if we should accept the potential solutions or not
-	if ((similarity > max_similarity) or
-		(similarity == max_similarity and diff < min_size_diff)) {
-		max_similarity = similarity;
-		min_size_diff = diff;
-		solns.clear();
-		solns.push_back(soln);
-	}
-
-	else if (similarity == max_similarity and diff == min_size_diff) {
-		solns.push_back(soln);
-	}
+	// Give the derived class a chance to wrap things up.
+	return finished_search();
 }
