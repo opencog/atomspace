@@ -126,7 +126,6 @@ bool FuzzyPatternMatch::initiate_search(PatternMatchEngine* pme)
                           << h->toShortString() << "\n";
 
             explore(iset[i], iter->depth-1);
-            // pme->explore_neighborhood(target, starter_term, h);
         }
         search_cnt++;
         iter++;
@@ -219,13 +218,7 @@ Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp)
 {
     FuzzyPatternMatch fpm(as, hp);
 
-    HandleSeq terms;
-    terms.push_back(hp);
-
-    std::set<Handle> no_vars;
-
-    PatternLinkPtr slp(createPatternLink(no_vars, terms));
-    slp->satisfy(fpm);
+    fpm.initiate_search(NULL);
 
     LAZY_LOG_FINE << "---------- solns ----------";
     for (Handle h : fpm.get_solns())
