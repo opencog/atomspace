@@ -3,7 +3,6 @@
 ADD_LIBRARY(query SHARED
 	AttentionalFocusCB.cc
 	DefaultPatternMatchCB.cc
-	../atomspaceutils/FuzzyMatch.cc
 	Implicator.cc
 	InitiateSearchCB.cc
 	PatternMatch.cc
@@ -19,6 +18,7 @@ ADD_DEPENDENCIES(query
 
 TARGET_LINK_LIBRARIES(query
 	atomutils
+	atomspaceutils
 	lambda
 	atomspace
 #	execution

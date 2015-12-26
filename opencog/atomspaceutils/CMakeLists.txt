@@ -1,6 +1,7 @@
 
 ADD_LIBRARY (atomspaceutils SHARED
 	AtomSpaceUtils
+	FuzzyMatch
 )
 
 ADD_DEPENDENCIES(atomspaceutils opencog_atom_types)
