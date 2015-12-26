@@ -5,16 +5,27 @@
  * Copyright (c) 2008, 2014, 2015 Linas Vepstas <linas@linas.org>
  */
 
+#include <opencog/atomutils/FuzzyMatchBasic.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeModule.h>
 
 #include "BindLinkAPI.h"
 #include "PatternMatch.h"
 #include "PatternSCM.h"
-#include "FuzzyMatch/FuzzyPatternMatch.h"
-
 
 using namespace opencog;
+
+// ========================================================
+// Convenience wrapper
+static Handle find_approximate_match(AtomSpace* as, const Handle& hp)
+{
+	FuzzyMatchBasic fpm;
+	RankedHandleSeq ranked_solns = fpm.perform_search(hp);
+	HandleSeq solns;
+	for (auto rs: ranked_solns)
+		solns.emplace_back(rs.first);
+	return as->add_link(LIST_LINK, solns);
+}
 
 // ========================================================
 

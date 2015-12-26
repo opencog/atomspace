@@ -49,7 +49,7 @@
 
 #include <opencog/atomspace/Handle.h>
 #include <opencog/truthvalue/TruthValue.h>
-#include <opencog/shell/GenericEval.h>
+#include <opencog/eval/GenericEval.h>
 
 
 namespace opencog {

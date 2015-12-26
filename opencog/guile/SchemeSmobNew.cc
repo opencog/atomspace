@@ -227,18 +227,14 @@ SCM SchemeSmob::ss_value_p (SCM s)
 }
 
 /* ============================================================== */
-/** Return true if s is an atom */
+/** Return true if s is an atom. Invalid handles are not atoms. */
 
 SCM SchemeSmob::ss_atom_p (SCM s)
 {
-	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
+	if (nullptr == scm_to_handle(s))
 		return SCM_BOOL_F;
 
-	scm_t_bits misctype = SCM_SMOB_FLAGS(s);
-	if (COG_HANDLE == misctype)
-		return SCM_BOOL_T;
-
-	return SCM_BOOL_F;
+	return SCM_BOOL_T;
 }
 
 /* ============================================================== */
@@ -301,7 +297,7 @@ Type SchemeSmob::verify_atom_type (SCM stype, const char *subrname, int pos)
  * Return the string, in C.
  */
 std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
-									   int pos, const char * msg)
+                                       int pos, const char * msg)
 {
 	if (scm_is_false(scm_string_p(sname)))
 		scm_wrong_type_arg_msg(subrname, pos, sname, msg);
@@ -317,7 +313,7 @@ std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
  * Return the int.
  */
 int SchemeSmob::verify_int (SCM sint, const char *subrname,
-							int pos, const char * msg)
+                            int pos, const char * msg)
 {
 	if (scm_is_false(scm_integer_p(sint)))
 		scm_wrong_type_arg_msg(subrname, pos, sint, msg);
@@ -412,6 +408,19 @@ SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
 }
 
 /* ============================================================== */
+/**
+ * Check that the argument is convertible to a real, else throw errors.
+ * Return as a float.
+ */
+double SchemeSmob::verify_real (SCM sreal, const char *subrname,
+                                int pos, const char * msg)
+{
+	if (scm_is_false(scm_real_p(sreal)))
+		scm_wrong_type_arg_msg(subrname, pos, sreal, msg);
+
+	return scm_to_double(sreal);
+}
+
 /**
  * Create a new node, of named type stype, and string name sname
  */

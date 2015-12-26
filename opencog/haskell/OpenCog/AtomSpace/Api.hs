@@ -15,6 +15,7 @@ module OpenCog.AtomSpace.Api (
     , getWithUUID
     , execute
     , evaluate
+    , exportFunction
     ) where
 
 import Foreign                       (Ptr)
@@ -26,11 +27,15 @@ import Foreign.Marshal.Alloc         (alloca,free)
 import Foreign.Storable              (peek)
 import Data.Functor                  ((<$>))
 import Data.Typeable                 (Typeable)
+import Data.Maybe                    (fromJust)
+import Control.Monad.Trans.Reader    (ReaderT,runReaderT,ask)
 import Control.Monad.IO.Class        (liftIO)
-import OpenCog.AtomSpace.Env         (AtomSpaceRef(..),AtomSpace,getAtomSpace)
+import OpenCog.AtomSpace.Env         (AtomSpaceObj(..),AtomSpaceRef(..),(<:),
+                                      AtomSpace(..),getAtomSpace,refToObj)
 import OpenCog.AtomSpace.Internal    (fromTVRaw,UUID,AtomTypeRaw,AtomRaw(..),TVRaw(..),
-                                      toRaw,fromRaw,tvMAX_PARAMS)
-import OpenCog.AtomSpace.Types       (Atom(..),AtomName(..),TruthVal(..))
+                                      toRaw,fromRaw,fromRawGen,tvMAX_PARAMS)
+import OpenCog.AtomSpace.Types       (AtomGen,Atom(..),AtomName(..),TruthVal(..),
+                                     appGen)
 import OpenCog.AtomSpace.Inheritance (type (<~))
 import OpenCog.AtomSpace.AtomType    (AtomType(..))
 import OpenCog.AtomSpace.CUtils
@@ -164,7 +169,8 @@ getNode aType aName = do
     case m of
       Nothing -> return Nothing
       Just h  -> do
-          res <- getTruthValue h
+          asRef <- getAtomSpace
+          res <- liftIO $ getTruthValue asRef h
           return $ case res of
               Just tv -> Just (tv,h)
               Nothing -> Nothing
@@ -198,7 +204,8 @@ getLink aType aOutgoing = do
     case m of
       Nothing -> return Nothing
       Just h  -> do
-          res <- getTruthValue h
+          asRef <- getAtomSpace
+          res <- liftIO $ getTruthValue asRef h
           return $ case res of
               Just tv -> Just (tv,h)
               Nothing -> Nothing
@@ -247,14 +254,15 @@ foreign import ccall "Exec_execute"
                     -> UUID
                     -> IO UUID
 
-execute :: Atom ExecutionOutputT -> AtomSpace (Maybe UUID)
+execute :: Atom ExecutionOutputT -> AtomSpace (Maybe AtomGen)
 execute atom = do
     m <- getWithUUID $ toRaw atom
     case m of
         Just (_,handle) -> do
             asRef <- getAtomSpace
             res <- liftIO $ c_exec_execute asRef handle
-            return $ Just res
+            araw <- getByUUID res
+            return $ fromRawGen =<< araw
         _ -> return Nothing
 
 foreign import ccall "Exec_evaluate"
@@ -291,7 +299,7 @@ foreign import ccall "AtomSpace_getAtomByUUID"
 getByUUID :: UUID -> AtomSpace (Maybe AtomRaw)
 getByUUID h = do
     asRef <- getAtomSpace
-    resTv <- getTruthValue h
+    resTv <- liftIO $ getTruthValue asRef h
     case resTv of
       Nothing -> return Nothing
       Just tv -> do
@@ -340,9 +348,8 @@ foreign import ccall "AtomSpace_getTruthValue"
                             -> IO CInt
 
 -- Internal function to get an atom's truth value.
-getTruthValue :: UUID -> AtomSpace (Maybe TVRaw)
-getTruthValue handle = do
-    asRef <- getAtomSpace
+getTruthValue :: AtomSpaceRef -> UUID -> IO (Maybe TVRaw)
+getTruthValue asRef handle = do
     liftIO $ getTVfromC $ c_atomspace_getTruthValue asRef handle
 
 foreign import ccall "AtomSpace_setTruthValue"
@@ -361,3 +368,13 @@ setTruthValue handle (TVRaw tvtype list) = do
           res <- c_atomspace_setTruthValue asRef handle (fromIntegral $ fromEnum tvtype) lptr
           return $ res == sUCCESS
 
+-- Helpfer function for creating function that can be called from C
+exportFunction :: (AtomGen -> AtomSpace (AtomGen)) -> Ptr AtomSpaceRef -> UUID -> IO (UUID)
+exportFunction f asRef id = do
+    as <- refToObj asRef
+    (Just ratom) <- as <: getByUUID id
+    let (Just atom)           = fromRawGen ratom
+        (AtomSpace op)        = f atom
+    resAtom <- runReaderT op (AtomSpaceRef asRef)
+    (Just resID) <- as <: insertAndGetUUID (toRaw `appGen` resAtom :: AtomRaw)
+    return resID

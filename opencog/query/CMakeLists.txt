@@ -10,8 +10,6 @@ ADD_LIBRARY(query SHARED
 	PatternSCM.cc
 	Recognizer.cc
 	Satisfier.cc
-	FuzzyMatch/FuzzyPatternMatch.cc
-	FuzzyMatch/FuzzyPatternMatchCB.cc
 )
 
 ADD_DEPENDENCIES(query

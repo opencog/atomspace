@@ -108,7 +108,7 @@ void PatternLink::setup_components(void)
 	_component_patterns.reserve(_num_comps);
 	for (size_t i=0; i<_num_comps; i++)
 	{
-		Handle h(createPatternLink(_component_vars[i], _varlist.typemap,
+		Handle h(createPatternLink(_component_vars[i], _varlist._simple_typemap,
 		                           _components[i], _pat.optionals));
 		_component_patterns.emplace_back(h);
 	}
@@ -174,7 +174,7 @@ PatternLink::PatternLink(const std::set<Handle>& vars,
 		_varlist.varseq.emplace_back(v);
 		auto it = typemap.find(v);
 		if (it != typemap.end())
-			_varlist.typemap.insert(*it);
+			_varlist._simple_typemap.insert(*it);
 	}
 
 	// Next, the body... there's no _body for lambda. The compo is the
@@ -355,9 +355,9 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	}
 }
 
-/// Search for any PRESENT, ABSENT_LINK's that are recusively
-/// embedded inside some evaluatable clause.  Expose thse as
-/// first-class, groundable clauses.
+/// Search for any PRESENT_LINK or ABSENT_LINK's that are
+/// recusively embedded inside some evaluatable clause.  Expose these
+/// as first-class, groundable clauses.
 void PatternLink::unbundle_clauses_rec(const std::set<Type>& connectives,
                                        const HandleSeq& nest)
 {
@@ -462,14 +462,6 @@ void PatternLink::validate_clauses(std::set<Handle>& vars,
 	{
 		if (not is_unquoted_in_any_tree(clauses, v))
 		{
-			// XXX Well, we could throw, here, but sureal gives us spurious
-			// variables, so instead of throwing, we just discard them and
-			// print a warning.
-/*
-			logger().warn(
-				"%s: The variable %s does not appear (unquoted) in any clause!",
-			           __FUNCTION__, v->toShortString().c_str());
-*/
 			vars.erase(v);
 			throw InvalidParamException(TRACE_INFO,
 			   "The variable %s does not appear (unquoted) in any clause!",
@@ -488,7 +480,7 @@ void PatternLink::validate_clauses(std::set<Handle>& vars,
 /* ================================================================= */
 /**
  * Given the initial list of variables and clauses, separate these into
- * the mandatory and optional clauses.
+ * the mandatory, optional and fuzzy clauses.
  */
 void PatternLink::extract_optionals(const std::set<Handle> &vars,
                                     const std::vector<Handle> &component)

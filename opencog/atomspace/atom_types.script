@@ -124,6 +124,19 @@ JOIN_LINK <- PARALLEL_LINK
 TYPE_NODE <- NODE
 TYPE_CHOICE <- OR_LINK     // used for type polymorphism
 
+// The SignatureLink implements "deep types", a way for specifying
+// the type of an entire graph, and not just some node or link.
+// The type specification is "precise", in contrast to the fuzzy
+// type specification, below.
+SIGNATURE_LINK <- ORDERED_LINK
+
+// The FuzzyLink is a kind of type specification that can be imprecise.
+// It is used to specify a pattern that is then matched only
+// approximately by the pattern matcher, to find "similar" graphs.
+// See also GlobNode, which performs a more narrow kind of matching.
+// (viz. bunch-in-a-row globbing)
+FUZZY_LINK <- SIGNATURE_LINK
+
 // Variables and variable types
 VARIABLE_NODE <- NODE
 TYPED_VARIABLE_LINK <- ORDERED_LINK
@@ -132,7 +145,9 @@ TYPED_VARIABLE_LINK <- ORDERED_LINK
 VARIABLE_LIST <- LIST_LINK
 
 // A non-greedy globbing variable; matches one or more atoms in a
-// sequence.
+// sequence.  XXX TODO - this could be changed to a link, so that
+// it resenbles a FUZZY_LINK more closely?  FuzzyLink implements
+// the same idea, but in a more general fashion...
 GLOB_NODE <- VARIABLE_NODE
 
 // A FreeLink is any kind of link that might have free variables in it.

@@ -11,18 +11,24 @@ file.  These will then run every time you start guile.
 (add-to-load-path "/usr/local/share/opencog/scm")
 (add-to-load-path ".")
 ```
+
+If you want your arrow keys to work, so that you can do command-line
+editing, you should add the below to your `~/.guile` file as well.
+```
+(use-modules (ice-9 readline))
+(activate-readline)
+```
+
 Finally, start guile:
 ```
 $ guile
 ```
-
-You may want to copy the below to your `~/.guile` file as well, or you
-can copy them manually to the guile interpreter prompt:
+Next, load the opencog module:
 ```
-(use-modules (ice-9 readline))
-(activate-readline)
 (use-modules (opencog))
 ```
+In the long run, it might be convenient to add the above to `~/.guile`
+as well.
 
 After the opencog module is loaded, you can create atoms "as usual" e.g.
 ```

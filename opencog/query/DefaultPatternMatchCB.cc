@@ -50,7 +50,7 @@ DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
 void DefaultPatternMatchCB::set_pattern(const Variables& vars,
                                         const Pattern& pat)
 {
-	_type_restrictions = &vars.typemap;
+	_vars = &vars;
 	_dynamic = &pat.evaluatable_terms;
 	_have_evaluatables = ! _dynamic->empty();
 	_have_variables = ! vars.varseq.empty();
@@ -99,19 +99,7 @@ bool DefaultPatternMatchCB::variable_match(const Handle& npat_h,
 
 	// If the ungrounded term is a variable, then see if there
 	// are any restrictions on the variable type.
-	// If no restrictions, we are good to go.
-	if (_type_restrictions->empty()) return true;
-
-	// If we are here, there's a restriction on the grounding type.
-	// Validate the node type, if needed.
-	VariableTypeMap::const_iterator it = _type_restrictions->find(npat_h);
-	if (it == _type_restrictions->end()) return true;
-
-	// Is the ground-atom type in our list of allowed types?
-	Type soltype = nsoln_h->getType();
-	const std::set<Type> &tset = it->second;
-	std::set<Type>::const_iterator allow = tset.find(soltype);
-	return allow != tset.end();
+	return _vars->is_type(npat_h, nsoln_h);
 }
 
 /**
@@ -159,15 +147,27 @@ bool DefaultPatternMatchCB::link_match(const LinkPtr& lpat,
 bool DefaultPatternMatchCB::post_link_match(const LinkPtr& lpat,
                                             const LinkPtr& lgnd)
 {
-	// A temp hack until we get around to implementing executable
-	// terms in the search pattern. Viz, an executable term is anything
-	// that should be executed before the match is made... in this case,
-	// StateLinks can have only one closed-term value ...
+	// The if (STATE_LINK) thing is a temp hack until we get a nicer
+	// solution, viz, get around to implementing executable terms in
+	// the search pattern. So: an executable term is anything that
+	// should be executed before the match is made... in this case,
+	// the StateLink has a single, unique closed-term value (or possibly
+	// no value at all), and the check below discards all matches that
+	// aren't closed form, i.e. all StateLinks with a variable as state.
 	if (STATE_LINK == lpat->getType())
 	{
-		if (StateLink::get_state(lpat->getOutgoingAtom(0)) !=
-		    lgnd->getOutgoingAtom(1))
+		try
+		{
+			// This throws an exception if there is no state.
+			// Obviousy, that's a mismatch.
+			if (StateLink::get_state(lgnd->getOutgoingAtom(0)) !=
+			    lgnd->getOutgoingAtom(1))
+				return false;
+		}
+		catch (const InvalidParamException& ex)
+		{
 			return false;
+		}
 		return true;
 	}
 

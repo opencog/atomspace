@@ -26,6 +26,7 @@
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/TypeNode.h>
 
 #include "ScopeLink.h"
 #include "VariableList.h"
@@ -174,22 +175,129 @@ bool Variables::is_type(const Handle& h) const
 	// The arity must be one for there to be a match.
 	if (1 != varset.size()) return false;
 
-	// No type restrictions.
-	if (typemap.empty()) return true;
-
-	// Check the type restrictions.
-	VariableTypeMap::const_iterator it =
-		typemap.find(varseq[0]);
-	const std::set<Type> &tchoice = it->second;
-
-	Type htype = h->getType();
-	std::set<Type>::const_iterator allow = tchoice.find(htype);
-	return allow != tchoice.end();
+	return is_type(varseq[0], h);
 }
 
 /* ================================================================= */
 /**
- * Very simple type checker.
+ * Recursive deep-type checker.
+ */
+bool Variables::is_type_rec(const Handle& deep, const Handle& val) const
+{
+	Type valtype = val->getType();
+	Type dpt = deep->getType();
+	if (TYPE_NODE == dpt)
+	{
+		Type deeptype = TypeNodeCast(deep)->get_value();
+		return (valtype == deeptype);
+	}
+	else if (TYPE_CHOICE == dpt)
+	{
+		LinkPtr dptr(LinkCast(deep));
+		for (const Handle& choice : dptr->getOutgoingSet())
+		{
+			if (is_type_rec(choice, val)) return true;
+		}
+		return false;
+	}
+	else if (FUZZY_LINK == dpt)
+	{
+		throw RuntimeException(TRACE_INFO,
+			"Not implemented! TODO XXX FIXME");
+	}
+
+	// If it is a node, not a link, then it is a type-constant,
+	// and thus must match perfectly.
+	LinkPtr dptr(LinkCast(deep));
+	if (nullptr == dptr)
+		return (deep == val);
+
+	// If a link, then both must be same link type.
+	if (valtype != dpt) return false;
+
+	LinkPtr vptr(LinkCast(val));
+	const HandleSeq& vlo = vptr->getOutgoingSet();
+	const HandleSeq& dpo = dptr->getOutgoingSet();
+	size_t sz = dpo.size();
+
+	// Both must be the same size...
+	if (vlo.size() != sz) return false;
+
+	// Unordered links are harder to handle...
+	if (classserver().isA(dpt, UNORDERED_LINK))
+		throw RuntimeException(TRACE_INFO,
+			"Not implemented! TODO XXX FIXME");
+
+	// Ordered links are compared side-by-side
+	for (size_t i=0; i<sz; i++)
+	{
+		if (not is_type_rec(dpo[i], vlo[i])) return false;
+	}
+
+	// If we are here, all checks must hav passed.
+	return true;
+}
+
+/**
+ * Type checker.
+ *
+ * Returns true/false if we are holding the variable `var`, and if
+ * the `val` satisfies the type restructions that apply to `var`.
+ */
+bool Variables::is_type(const Handle& var, const Handle& val) const
+{
+	bool ret = true;
+
+	// Simple type restrictions?
+	VariableTypeMap::const_iterator tit =
+		_simple_typemap.find(var);
+	if (_simple_typemap.end() != tit)
+	{
+		const std::set<Type> &tchoice = tit->second;
+		Type htype = val->getType();
+		std::set<Type>::const_iterator allow = tchoice.find(htype);
+
+		// If the value has the simple type, then we are good to go;
+		// we are done.  Else, fall throough, and see if one of the
+		// others accept the match.
+		if (allow != tchoice.end()) return true;
+		ret = false;
+	}
+
+	// Deep type restrictions?
+	VariableDeepTypeMap::const_iterator dit =
+		_deep_typemap.find(var);
+	if (_deep_typemap.end() != dit)
+	{
+		const std::set<Handle> &sigset = dit->second;
+		for (const Handle& sig : sigset)
+		{
+			if (is_type_rec(sig, val)) return true;
+		}
+		ret = false;
+	}
+
+	// Fuzzy deep type restrictions?
+	VariableDeepTypeMap::const_iterator fit =
+		_fuzzy_typemap.find(var);
+	if (_fuzzy_typemap.end() != fit)
+	{
+		// const std::set<Handle> &fuzzset = dit->second;
+		throw RuntimeException(TRACE_INFO,
+			"Not implemented! TODO XXX FIXME");
+		ret = false;
+	}
+
+	// Maybe we don't know this variable?
+	if (varset.end() == varset.find(var)) return false;
+
+	// There appear to be no type restrictions...
+	return ret;
+}
+
+/* ================================================================= */
+/**
+ * Simple type checker.
  *
  * Returns true/false if the indicated handles are of the type that
  * we have memoized.
@@ -203,20 +311,11 @@ bool Variables::is_type(const HandleSeq& hseq) const
 	// The arity must be one for there to be a match.
 	size_t len = hseq.size();
 	if (varset.size() != len) return false;
-	// No type restrictions.
-	if (typemap.empty()) return true;
 
 	// Check the type restrictions.
 	for (size_t i=0; i<len; i++)
 	{
-		VariableTypeMap::const_iterator it =
-			typemap.find(varseq[i]);
-		if (it == typemap.end()) continue;  // no restriction
-
-		const std::set<Type> &tchoice = it->second;
-		Type htype = hseq[i]->getType();
-		std::set<Type>::const_iterator allow = tchoice.find(htype);
-		if (allow == tchoice.end()) return false;
+		if (not is_type(varseq[i], hseq[i])) return false;
 	}
 	return true;
 }
@@ -274,12 +373,12 @@ Handle Variables::substitute(const Handle& fun,
                              const HandleSeq& args) const
 {
 	if (args.size() != varseq.size())
-		throw InvalidParamException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 			"Incorrect number of arguments specified, expecting %lu got %lu",
 			varseq.size(), args.size());
 
 	if (not is_type(args))
-		throw InvalidParamException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 			"Arguments fail to match variable declarations");
 
 	return substitute_nocheck(fun, args);
@@ -301,12 +400,12 @@ void Variables::extend(const Variables& vset)
 			// Merge the two typemaps, if needed.
 			try
 			{
-				const std::set<Type>& tms = vset.typemap.at(h);
-				std::set<Type> mytypes = typemap[h];
+				const std::set<Type>& tms = vset._simple_typemap.at(h);
+				std::set<Type> mytypes = _simple_typemap[h];
 				for (Type t : tms)
 					mytypes.insert(t);
-				typemap.erase(h);	 // is it safe to erase if h not in already?
-				typemap.insert({h,mytypes});
+				_simple_typemap.erase(h);	 // is it safe to erase if h not in already?
+				_simple_typemap.insert({h,mytypes});
 			}
 			catch(const std::out_of_range&) {}
 		}
@@ -321,7 +420,7 @@ void Variables::extend(const Variables& vset)
 			// The at() might throw...
 			try
 			{
-				typemap.insert({h, vset.typemap.at(h)});
+				_simple_typemap.insert({h, vset._simple_typemap.at(h)});
 			}
 			catch(const std::out_of_range&) {}
 		}
@@ -331,7 +430,7 @@ void Variables::extend(const Variables& vset)
 std::string Variables::to_string() const
 {
 	std::stringstream ss;
-	for (auto& v : typemap)
+	for (auto& v : _simple_typemap)
 	{
 		ss << "{variable: " << v.first->toShortString()
 		   << "types: ";

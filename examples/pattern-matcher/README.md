@@ -19,6 +19,8 @@ main features.
 * absent.scm: Use the StateLink to set state; use AbsentLink to check
     for the absence of atoms in the AtomSpace.
 * define.scm: using DefineLinks to create patterns out of parts.
+* type-signature.scm: using signatures or "deep types" to refine the
+    search.
 
 Some simpler applications showing some things one can do, and how to do
 them.
@@ -27,3 +29,9 @@ them.
 * fsm-full.scm: A generic deterministic finite-state-machine constructor.
 * fsm-mealy.scm: A generic Mealy machine constructor.
 * markov-chain.scm: A Markov chain (probabilistic FSM) based on fsm-full.
+
+Examples that demonstrate some of the inner workings of the pattern
+matcher.
+
+* virtual.scm: Using virtual links, and the resulting combinatorial
+     explosion.

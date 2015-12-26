@@ -145,6 +145,8 @@ data Atom (a :: AtomType) where
     GroundedSchemaNode  :: AtomName -> Atom GroundedSchemaT
     ExecutionLink       :: (s <~ SchemaT,i <~ AtomT,o <~ AtomT) =>
                            Atom s -> Atom i -> Atom o -> Atom ExecutionT
+    ExecutionOutputLink :: (s <~ SchemaT,i <~ AtomT) =>
+                           Atom s -> Atom i -> Atom ExecutionOutputT
 
     VariableNode        :: AtomName -> Atom VariableT
     VariableList        :: [Gen VariableT] -> Atom VariableListT
