@@ -55,8 +55,6 @@ class FuzzyPatternMatch :
 
         virtual bool initiate_search(PatternMatchEngine*);
 
-        virtual bool link_match(const LinkPtr&, const LinkPtr&);
-
         virtual bool fuzzy_match(const Handle&, const Handle&)
         { return true; }
 
@@ -94,9 +92,6 @@ class FuzzyPatternMatch :
             size_t depth;
             bool operator<(const Starter&) const;
         };
-
-        // Potential solutions that have previously been compared
-        std::set<Handle> prev_compared;
 
         // The minimum difference between the pattern and all the known solutions
         size_t min_size_diff = SIZE_MAX;

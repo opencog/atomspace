@@ -137,41 +137,6 @@ bool FuzzyPatternMatch::initiate_search(PatternMatchEngine* pme)
     return true;
 }
 
-/**
- * Implement the link_match method in the Pattern Matcher. Compare and estimate
- * the similarity between the pattern and the potential solution, and decide
- * whether or not to accept it by calling accept_solution. The potential
- * solution will be accepted if it has a similarity score greater than or equals
- * to the maximum similarity score that we know, rejected otherwise.
- *
- * @param pl  A link from the pattern
- * @param gl  A possible grounding link
- * @return    True to accept all kinds of links when we are on the way to
- *            finding a solution, false when we have decided whether or not
- *            to accept it as a solution
- */
-bool FuzzyPatternMatch::link_match(const LinkPtr& pl, const LinkPtr& gl)
-{
-    // In this case, gl is a potential solution
-    if (target != pl->getHandle()) return true;
-
-    // Skip it if it's grounded by itself
-    if (pl == gl) return false;
-
-    // Skip it if we have seen it before
-    Handle soln(gl->getHandle());
-    if (prev_compared.find(soln) != prev_compared.end())
-        return false;
-    else prev_compared.insert(soln);
-
-    accept_solution(soln);
-
-    // Returns false here to skip the rest of the pattern matching procedures,
-    // including the permutation comparsion for unordered links, as we have
-    // already decided whether or not to accpet this grounding.
-    return false;
-}
-
 void FuzzyPatternMatch::explore(const LinkPtr& gl,
                                 size_t depth)
 {
@@ -185,14 +150,7 @@ void FuzzyPatternMatch::explore(const LinkPtr& gl,
 	}
 
 	Handle soln(gl->getHandle());
-
 	if (soln == target) return;
-
-	// Skip it if we have seen it before
-// XXX excpet this cannot possibly happen!
-	if (prev_compared.find(soln) != prev_compared.end())
-		return;
-	else prev_compared.insert(soln);
 
 	accept_solution(soln);
 }
