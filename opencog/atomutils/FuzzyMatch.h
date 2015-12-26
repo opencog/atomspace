@@ -44,7 +44,7 @@ class FuzzyMatch
 {
 public:
     HandleSeq perform_search(const Handle&);
-    virtual ~FuzzyMatch();
+    virtual ~FuzzyMatch() {}
 
 protected:
     // What we are matching
