@@ -77,17 +77,20 @@ namespace opencog
  * `accept_starter()` atom. The depth is negative is the propsed tree
  * is shorter, and postive if the propsed tree is larger.
  */
+
+typedef std::vector<std::pair<Handle, double>> RankedHandleSeq;
+
 class FuzzyMatch
 {
 public:
-    HandleSeq perform_search(const Handle&);
+    RankedHandleSeq perform_search(const Handle&);
     virtual ~FuzzyMatch() {}
 
 protected:
     virtual void start_search(const Handle&) = 0;
     virtual bool accept_starter(const Handle&) = 0;
     virtual bool try_match(const Handle&, int depth) = 0;
-    virtual HandleSeq finished_search(void) = 0;
+    virtual RankedHandleSeq finished_search(void) = 0;
 
 private:
     void find_starters(const Handle& hg, const int& depth);

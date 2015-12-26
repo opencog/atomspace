@@ -99,22 +99,23 @@ bool FuzzyMatchBasic::try_match(const Handle& soln, int depth)
 
 	// Decide if we should accept the potential solutions or not
 	if ((similarity > max_similarity) or
-		(similarity == max_similarity and diff < min_size_diff)) {
+		(similarity == max_similarity and diff < min_size_diff))
+	{
 		max_similarity = similarity;
 		min_size_diff = diff;
 		solns.clear();
-		solns.push_back(soln);
+		solns.push_back({soln, similarity});
 	}
 
 	else if (similarity == max_similarity and diff == min_size_diff) {
-		solns.push_back(soln);
+		solns.push_back({soln, similarity});
 	}
 
 	return false;
 }
 
 /* No-op; we already build "solns", just return it. */
-HandleSeq FuzzyMatchBasic::finished_search(void)
+RankedHandleSeq FuzzyMatchBasic::finished_search(void)
 {
 	return solns;
 }

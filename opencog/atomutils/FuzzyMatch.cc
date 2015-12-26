@@ -83,7 +83,7 @@ void FuzzyMatch::find_starters(const Handle& hp, const int& depth)
 /**
  * Find leaves at which a search can be started.
  */
-HandleSeq FuzzyMatch::perform_search(const Handle& target)
+RankedHandleSeq FuzzyMatch::perform_search(const Handle& target)
 {
 	start_search(target);
 

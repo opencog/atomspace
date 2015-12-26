@@ -43,7 +43,7 @@ protected:
     virtual void start_search(const Handle&);
     virtual bool accept_starter(const Handle&);
     virtual bool try_match(const Handle&, int);
-    virtual HandleSeq finished_search(void);
+    virtual RankedHandleSeq finished_search(void);
 
     // What we are matching
     Handle target;
@@ -51,7 +51,7 @@ protected:
 
 private:
     // The solutions that were found.
-    HandleSeq solns;
+    RankedHandleSeq solns;
 
     // The minimum difference between the pattern and all
     // the known solutions
