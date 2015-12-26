@@ -29,8 +29,9 @@
 
 using namespace opencog;
 
-FuzzyPatternMatch::FuzzyPatternMatch(AtomSpace* as)
-        : DefaultPatternMatchCB(as)
+FuzzyPatternMatch::FuzzyPatternMatch(AtomSpace* as, const Handle& hp) :
+    DefaultPatternMatchCB(as),
+    target(hp)
 {
 }
 
@@ -94,8 +95,7 @@ bool FuzzyPatternMatch::initiate_search(PatternMatchEngine* pme)
 {
     // Find starters from the clause
     std::set<Starter> starters;
-    const Handle& clause = _pattern->mandatory[0];
-    find_starters(clause, 0, clause, starters);
+    find_starters(target, 0, target, starters);
 
     // Start the searches
     size_t search_cnt = 0;
@@ -124,7 +124,7 @@ bool FuzzyPatternMatch::initiate_search(PatternMatchEngine* pme)
                           << (i + 1) << "/" << iset_size << "):\n"
                           << h->toShortString() << "\n";
 
-            pme->explore_neighborhood(clause, starter_term, h);
+            pme->explore_neighborhood(target, starter_term, h);
         }
     }
 
@@ -149,8 +149,7 @@ bool FuzzyPatternMatch::initiate_search(PatternMatchEngine* pme)
 bool FuzzyPatternMatch::link_match(const LinkPtr& pl, const LinkPtr& gl)
 {
     // In this case, gl is a potential solution
-    Handle pat = _pattern->mandatory[0];
-    if (pat != pl->getHandle()) return true;
+    if (target != pl->getHandle()) return true;
 
     // Skip it if it's grounded by itself
     if (pl == gl) return false;
@@ -161,7 +160,7 @@ bool FuzzyPatternMatch::link_match(const LinkPtr& pl, const LinkPtr& gl)
         return false;
     else prev_compared.insert(soln);
 
-    accept_solution(pat, soln);
+    accept_solution(target, soln);
 
     // Returns false here to skip the rest of the pattern matching procedures,
     // including the permutation comparsion for unordered links, as we have
@@ -233,7 +232,7 @@ void FuzzyPatternMatch::accept_solution(const Handle& pat, const Handle& soln)
  */
 Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp)
 {
-    FuzzyPatternMatch fpm(as);
+    FuzzyPatternMatch fpm(as, hp);
 
     HandleSeq terms;
     terms.push_back(hp);

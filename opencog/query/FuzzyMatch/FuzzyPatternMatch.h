@@ -44,7 +44,7 @@ class FuzzyPatternMatch :
 		public DefaultPatternMatchCB
 {
     public:
-        FuzzyPatternMatch(AtomSpace*);
+        FuzzyPatternMatch(AtomSpace*, const Handle&);
 
         virtual void set_pattern(const Variables& vars,
                                  const Pattern& pat)
@@ -75,6 +75,9 @@ class FuzzyPatternMatch :
     private:
         // The pattern
         const Pattern* _pattern = NULL;
+
+        // What we are matching
+        Handle target;
 
         // The solutions
         HandleSeq solns;
