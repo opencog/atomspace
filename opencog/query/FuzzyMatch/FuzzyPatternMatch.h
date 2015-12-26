@@ -41,16 +41,14 @@ namespace opencog
 class FuzzyPatternMatch
 {
     public:
-        FuzzyPatternMatch(AtomSpace*, const Handle&);
-
+        FuzzyPatternMatch(const Handle&);
+        HandleSeq get_solns() { return solns; }
         bool initiate_search();
 
+    private:
         void explore(const LinkPtr&, size_t);
         void accept_solution(const Handle&);
 
-        HandleSeq get_solns() { return solns; }
-
-    private:
         // What we are matching
         Handle target;
 
@@ -63,7 +61,6 @@ class FuzzyPatternMatch
         struct Starter
         {
             Handle handle;
-            Handle term;
             size_t width;
             size_t depth;
             bool operator<(const Starter&) const;
@@ -76,7 +73,6 @@ class FuzzyPatternMatch
         double max_similarity = -std::numeric_limits<double>::max();
 
         void find_starters(const Handle& hg, const size_t& depth,
-                           const Handle& term,
                            std::set<Starter>& rtn);
 };
 

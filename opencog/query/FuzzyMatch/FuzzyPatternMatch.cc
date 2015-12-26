@@ -29,7 +29,7 @@
 
 using namespace opencog;
 
-FuzzyPatternMatch::FuzzyPatternMatch(AtomSpace* as, const Handle& hp) :
+FuzzyPatternMatch::FuzzyPatternMatch(const Handle& hp) :
     target(hp)
 {
     target_nodes = get_all_nodes(target);
@@ -37,8 +37,8 @@ FuzzyPatternMatch::FuzzyPatternMatch(AtomSpace* as, const Handle& hp) :
 }
 
 /**
- * Override the find_starters method in InitiateSearchCB. It examines the
- * pattern and find the starters that can be used to initiate fuzzy-searches.
+ * Examines the pattern and find the starters that can be used to
+ * initiate fuzzy-searches.
  *
  * @param hp          The pattern (the hypergraph in the query)
  * @param depth       The depth of the starter in the pattern
@@ -48,16 +48,13 @@ FuzzyPatternMatch::FuzzyPatternMatch(AtomSpace* as, const Handle& hp) :
  * @param rtn         A list of potential starters found in the pattern
  */
 void FuzzyPatternMatch::find_starters(const Handle& hp, const size_t& depth,
-                                      const Handle& term,
                                       std::set<Starter>& rtn)
 {
-    if (nullptr == hp) return;
-
     // Traverse its outgoing set if it is a link
     LinkPtr lp(LinkCast(hp));
     if (lp) {
         for (const Handle& h : lp->getOutgoingSet()) {
-            find_starters(h, depth + 1, hp, rtn);
+            find_starters(h, depth + 1, rtn);
         }
         return;
     }
@@ -70,7 +67,6 @@ void FuzzyPatternMatch::find_starters(const Handle& hp, const size_t& depth,
     {
         Starter sn;
         sn.handle = hp;
-        sn.term = term;
         sn.width = hp->getIncomingSetSize();
         sn.depth = depth;
 
@@ -97,14 +93,13 @@ bool FuzzyPatternMatch::initiate_search()
 {
     // Find starters from the clause
     std::set<Starter> starters;
-    find_starters(target, 0, target, starters);
+    find_starters(target, 0, starters);
 
     // Start the searches
     size_t search_cnt = 0;
     size_t num_starters = starters.size();
     auto iter = starters.begin();
     while (num_starters > search_cnt) {
-        const Handle& starter_term = iter->term;
         const Handle& best_start = iter->handle;
 
         LAZY_LOG_FINE << "\n========================================\n"
@@ -112,7 +107,6 @@ bool FuzzyPatternMatch::initiate_search()
                       << search_cnt << "/"
                       << num_starters << ")\n"
                       << "Starter:\n" << best_start->toShortString() << "\n"
-                      << "Start term:\n" << starter_term->toShortString()
                       << "========================================\n";
 
         IncomingSet iset = best_start->getIncomingSet();
@@ -206,8 +200,8 @@ void FuzzyPatternMatch::accept_solution(const Handle& soln)
 
 /**
  * Implement the "cog-fuzzy-match" scheme primitive.
- * It uses the Pattern Matcher to find hypergraphs in the atomspace that are
- * similar to the query hypergraph, and returns the most similar ones.
+ * It finds hypergraphs in the atomspace that are similar to
+ * the target hypergraph, and returns the most similar ones.
  *
  * @param as  The atomspace that we are using
  * @param hp  The query hypergraph
@@ -215,8 +209,7 @@ void FuzzyPatternMatch::accept_solution(const Handle& soln)
  */
 Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp)
 {
-    FuzzyPatternMatch fpm(as, hp);
-
+    FuzzyPatternMatch fpm(hp);
     fpm.initiate_search();
 
     LAZY_LOG_FINE << "---------- solns ----------";
