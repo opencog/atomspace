@@ -29,10 +29,20 @@
 
 using namespace opencog;
 
-bool FuzzyMatch::accept_starter(const NodePtr& np)
+
+void FuzzyMatch::explore(const LinkPtr& gl, int depth)
 {
-	return (np->getType() != VARIABLE_NODE and
-		np->getName().find("@") == std::string::npos);
+	Handle soln(gl->getHandle());
+	if (soln == target) return;
+
+	bool look_for_more = note_match(soln, depth);
+
+	if (not look_for_more) return;
+
+	for (const LinkPtr& lptr : gl->getIncomingSet())
+	{
+		explore(lptr, depth-1);
+	}
 }
 
 /**
@@ -86,74 +96,4 @@ HandleSeq FuzzyMatch::perform_search(const Handle& targ)
 	find_starters(target, 0);
 
 	return solns;
-}
-
-void FuzzyMatch::explore(const LinkPtr& gl, int depth)
-{
-	Handle soln(gl->getHandle());
-	if (soln == target) return;
-
-	bool look_for_more = accept_solution(soln, depth);
-
-	if (not look_for_more) return;
-
-	for (const LinkPtr& lptr : gl->getIncomingSet())
-	{
-		explore(lptr, depth-1);
-	}
-}
-
-/**
- * Estimate how similar the potential solution and the target pattern are.
- *
- * @param soln  The potential solution
- */
-bool FuzzyMatch::note_match(const Handle& soln, int depth)
-{
-	if (0 < depth) return true;
-	if (0 > depth) return false;
-
-	// Find out how many nodes it has in common with the pattern
-	HandleSeq common_nodes;
-	HandleSeq soln_nodes = get_all_nodes(soln);
-
-	std::sort(soln_nodes.begin(), soln_nodes.end());
-
-	std::set_intersection(target_nodes.begin(), target_nodes.end(),
-	                      soln_nodes.begin(), soln_nodes.end(),
-	                      std::back_inserter(common_nodes));
-
-	// The size different between the pattern and the potential solution
-	size_t diff = std::abs((int)target_nodes.size() - (int)soln_nodes.size());
-
-	double similarity = 0.0;
-
-	// Roughly estimate how "rare" each node is by using 1 / incoming set size
-	// TODO: May use Truth Value instead
-	for (const Handle& common_node : common_nodes)
-		similarity += 1.0 / common_node->getIncomingSetSize();
-
-	LAZY_LOG_FINE << "\n========================================\n"
-	              << "Comparing:\n" << target->toShortString()
-	              << "----- and:\n" << soln->toShortString() << "\n"
-	              << "Common nodes = " << common_nodes.size() << "\n"
-	              << "Size diff = " << diff << "\n"
-	              << "Similarity = " << similarity << "\n"
-	              << "Most similar = " << max_similarity << "\n"
-	              << "========================================\n";
-
-	// Decide if we should accept the potential solutions or not
-	if ((similarity > max_similarity) or
-		(similarity == max_similarity and diff < min_size_diff)) {
-		max_similarity = similarity;
-		min_size_diff = diff;
-		solns.clear();
-		solns.push_back(soln);
-	}
-
-	else if (similarity == max_similarity and diff == min_size_diff) {
-		solns.push_back(soln);
-	}
-
-	return true;
 }

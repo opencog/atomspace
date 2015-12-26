@@ -3,6 +3,7 @@ ADD_LIBRARY (atomutils SHARED
 	AtomUtils
 	FindUtils
 	FuzzyMatch
+	FuzzyMatchBasic
 )
 
 ADD_DEPENDENCIES(atomutils opencog_atom_types)
@@ -27,6 +28,7 @@ INSTALL (FILES
 	FollowLink.h
 	ForeachChaseLink.h
 	FuzzyMatch.h
+	FuzzyMatchBasic.h
 	HandleMap.h
 	Substitutor.h
 	DESTINATION "include/opencog/atomutils"

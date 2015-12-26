@@ -1,5 +1,5 @@
 /*
- * FuzzyMatch.h
+ * FuzzyMatchBasic.h
  *
  * Copyright (C) 2015 OpenCog Foundation
  *
@@ -21,44 +21,37 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FUZZY_MATCH_H
-#define FUZZY_MATCH_H
+#ifndef FUZZY_MATCH_BASIC_H
+#define FUZZY_MATCH_BASIC_H
 
-#include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
+#include <opencog/atomutils/FuzzyMatch.h>
 
 namespace opencog
 {
 /**
- * The fuzzy pattern matcher searches for trees which are similar but
+ * The fuzzy pattern matchBasicer searches for trees which are similar but
  * not identical to the input target pattern. This is done by examining
  * all possible trees that have at least one leaf node in common with
  * the target pattern.  A similarity score is assigned to each such
  * tree, and the ones with the highest scores are returned.
+ *
+ * It can be called from C++ via find_approximate_matchBasic(), or from Scheme
+ * via (cog-fuzzy-matchBasic).
  */
-class FuzzyMatch
+class FuzzyMatchBasic : public FuzzyMatch
 {
-public:
-    HandleSeq perform_search(const Handle&);
-    virtual ~FuzzyMatch() {}
-
 protected:
-    // What we are matching
-    Handle target;
-    HandleSeq target_nodes;
-
-    virtual bool accept_starter(const NodePtr&) = 0;
-    virtual bool note_match(const Handle&, int depth) = 0;
-    virtual void finished_search(void) = 0;
+    virtual bool accept_starter(const NodePtr&);
+    virtual bool note_matchBasic(const Handle&, int depth);
 
 private:
-    // The solutions that were found.
-    HandleSeq solns;
+    // The minimum difference between the pattern and all
+    // the known solutions
+    size_t min_size_diff = SIZE_MAX;
 
-    void find_starters(const Handle& hg, const int& depth);
-    void explore(const LinkPtr&, int);
+    // The maximum similarity of all the potential solutions we found
+    double max_similarity = -std::numeric_limits<double>::max();
 };
 
 } // namespace opencog
-#endif  // FUZZY_MATCH_H
+#endif  // FUZZY_MATCH_BASIC_H
