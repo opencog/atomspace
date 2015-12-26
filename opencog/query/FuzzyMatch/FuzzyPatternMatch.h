@@ -49,35 +49,22 @@ class FuzzyPatternMatch
 
         // What we are matching
         Handle target;
-
         HandleSeq target_nodes;
 
         // The solutions
         HandleSeq solns;
 
-        // Potential starters for the search
-        struct Starter
-        {
-            Handle handle;
-            size_t width;
-            size_t depth;
-            bool operator<(const Starter&) const;
-        };
-
-        // The minimum difference between the pattern and all the known solutions
+        // The minimum difference between the pattern and all
+        // the known solutions
         size_t min_size_diff = SIZE_MAX;
 
         // The maximum similarity of all the potential solutions we found
         double max_similarity = -std::numeric_limits<double>::max();
 
-        void find_starters(const Handle& hg, const size_t& depth,
-                           std::set<Starter>& rtn);
+        void find_starters(const Handle& hg, const size_t& depth);
 };
 
 Handle find_approximate_match(AtomSpace* as, const Handle& hp);
-
-
 }
 
 #endif  // FUZZYPATTERNMATCH_H
-

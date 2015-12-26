@@ -42,16 +42,14 @@ FuzzyPatternMatch::FuzzyPatternMatch(const Handle& hp) :
  *
  * @param hp          The pattern (the hypergraph in the query)
  * @param depth       The depth of the starter in the pattern
- * @param rtn         A list of potential starters found in the pattern
  */
-void FuzzyPatternMatch::find_starters(const Handle& hp, const size_t& depth,
-                                      std::set<Starter>& rtn)
+void FuzzyPatternMatch::find_starters(const Handle& hp, const size_t& depth)
 {
     // Traverse its outgoing set if it is a link
     LinkPtr lp(LinkCast(hp));
     if (lp) {
         for (const Handle& h : lp->getOutgoingSet()) {
-            find_starters(h, depth + 1, rtn);
+            find_starters(h, depth + 1);
         }
         return;
     }
@@ -62,21 +60,20 @@ void FuzzyPatternMatch::find_starters(const Handle& hp, const size_t& depth,
     if (np->getType() != VARIABLE_NODE and
         np->getName().find("@") == std::string::npos)
     {
-        Starter sn;
-        sn.handle = hp;
-        sn.width = hp->getIncomingSetSize();
-        sn.depth = depth;
+        LAZY_LOG_FINE << "\n========================================\n"
+                      << "Initiating the fuzzy match... ("
+                      << "Starter:\n" << hp->toShortString() << "\n"
+                      << "========================================\n";
 
-        rtn.insert(sn);
+        for (const LinkPtr& lptr: hp->getIncomingSet())
+        {
+            LAZY_LOG_FINE << "Loop candidate"
+                          << lptr->toShortString() << "\n";
+
+            explore(lptr, depth-1);
+        }
     }
 }
-
-// Sort the starters by their "width" and "depth"
-bool FuzzyPatternMatch::Starter::operator<(const Starter& s2) const
-{
-    if (width == s2.width) return depth > s2.depth;
-    else return width < s2.width;
-};
 
 /**
  * Find one or more leaves that can be used to initiae a search.  Create
@@ -85,28 +82,7 @@ bool FuzzyPatternMatch::Starter::operator<(const Starter& s2) const
 void FuzzyPatternMatch::initiate_search()
 {
     // Find starters from the clause
-    std::set<Starter> starters;
-    find_starters(target, 0, starters);
-
-    // Start the searches
-    for (const Starter& leaf : starters)
-    {
-        LAZY_LOG_FINE << "\n========================================\n"
-                      << "Initiating the fuzzy match... ("
-                      << "Starter:\n" << leaf.handle->toShortString() << "\n"
-                      << "========================================\n";
-
-        for (const LinkPtr& lptr: leaf.handle->getIncomingSet())
-        {
-            LAZY_LOG_FINE << "Loop candidate"
-                          << lptr->toShortString() << "\n";
-
-            explore(lptr, leaf.depth-1);
-        }
-    }
-
-    // Let's end the search here, continue could be costly
-    std::cout << "Fuzzy match is finished.\n";
+    find_starters(target, 0);
 }
 
 void FuzzyPatternMatch::explore(const LinkPtr& gl,
