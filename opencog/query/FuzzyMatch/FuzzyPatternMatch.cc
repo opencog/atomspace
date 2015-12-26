@@ -33,6 +33,8 @@ FuzzyPatternMatch::FuzzyPatternMatch(AtomSpace* as, const Handle& hp) :
     DefaultPatternMatchCB(as),
     target(hp)
 {
+    target_nodes = get_all_nodes(target);
+    std::sort(target_nodes.begin(), target_nodes.end());
 }
 
 /**
@@ -178,18 +180,16 @@ void FuzzyPatternMatch::accept_solution(const Handle& soln)
 {
     // Find out how many nodes it has in common with the pattern
     HandleSeq common_nodes;
-    HandleSeq pat_nodes = get_all_nodes(target);
     HandleSeq soln_nodes = get_all_nodes(soln);
 
-    std::sort(pat_nodes.begin(), pat_nodes.end());
     std::sort(soln_nodes.begin(), soln_nodes.end());
 
-    std::set_intersection(pat_nodes.begin(), pat_nodes.end(),
+    std::set_intersection(target_nodes.begin(), target_nodes.end(),
                           soln_nodes.begin(), soln_nodes.end(),
                           std::back_inserter(common_nodes));
 
     // The size different between the pattern and the potential solution
-    size_t diff = std::abs((int)(pat_nodes.size() - soln_nodes.size()));
+    size_t diff = std::abs((int)(target_nodes.size() - soln_nodes.size()));
 
     double similarity = 0;
 

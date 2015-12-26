@@ -79,6 +79,8 @@ class FuzzyPatternMatch :
         // What we are matching
         Handle target;
 
+        HandleSeq target_nodes;
+
         // The solutions
         HandleSeq solns;
 
