@@ -5,11 +5,11 @@
  * Copyright (c) 2008, 2014, 2015 Linas Vepstas <linas@linas.org>
  */
 
+#include <opencog/atomutils/FuzzyMatch.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeModule.h>
 
 #include "BindLinkAPI.h"
-#include "../atomspaceutils/FuzzyMatch.h"
 #include "PatternMatch.h"
 #include "PatternSCM.h"
 
