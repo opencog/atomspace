@@ -1,5 +1,5 @@
 /*
- * FuzzyPatternMatch.cc
+ * FuzzyMatch.cc
  *
  * Copyright (C) 2015 OpenCog Foundation
  *
@@ -25,7 +25,7 @@
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FindUtils.h>
 
-#include "FuzzyPatternMatch.h"
+#include "FuzzyMatch.h"
 
 using namespace opencog;
 
@@ -36,7 +36,7 @@ using namespace opencog;
  * @param hp          The pattern (the hypergraph in the query)
  * @param depth       The depth of the starter in the pattern
  */
-void FuzzyPatternMatch::find_starters(const Handle& hp, const size_t& depth)
+void FuzzyMatch::find_starters(const Handle& hp, const size_t& depth)
 {
     // Traverse its outgoing set if it is a link
     LinkPtr lp(LinkCast(hp));
@@ -71,7 +71,7 @@ void FuzzyPatternMatch::find_starters(const Handle& hp, const size_t& depth)
 /**
  * Find leaves at which a search can be started.
  */
-HandleSeq FuzzyPatternMatch::perform_search(const Handle& targ)
+HandleSeq FuzzyMatch::perform_search(const Handle& targ)
 {
     target = targ;
     target_nodes = get_all_nodes(target);
@@ -83,7 +83,7 @@ HandleSeq FuzzyPatternMatch::perform_search(const Handle& targ)
     return solns;
 }
 
-void FuzzyPatternMatch::explore(const LinkPtr& gl,
+void FuzzyMatch::explore(const LinkPtr& gl,
                                 size_t depth)
 {
 	if (0 < depth)
@@ -106,7 +106,7 @@ void FuzzyPatternMatch::explore(const LinkPtr& gl,
  *
  * @param soln  The potential solution
  */
-void FuzzyPatternMatch::accept_solution(const Handle& soln)
+void FuzzyMatch::accept_solution(const Handle& soln)
 {
     // Find out how many nodes it has in common with the pattern
     HandleSeq common_nodes;
@@ -162,7 +162,7 @@ void FuzzyPatternMatch::accept_solution(const Handle& soln)
  */
 Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp)
 {
-    FuzzyPatternMatch fpm;
+    FuzzyMatch fpm;
     HandleSeq solns = fpm.perform_search(hp);
 
     LAZY_LOG_FINE << "---------- solns ----------";

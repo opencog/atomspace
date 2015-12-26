@@ -1,5 +1,5 @@
 /*
- * FuzzyPatternMatch.h
+ * FuzzyMatch.h
  *
  * Copyright (C) 2015 OpenCog Foundation
  *
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FUZZYPATTERNMATCH_H
-#define FUZZYPATTERNMATCH_H
+#ifndef FUZZY_MATCH_H
+#define FUZZY_MATCH_H
 
 namespace opencog
 {
@@ -36,7 +36,7 @@ namespace opencog
  * It can be called from C++ via find_approximate_match(), or from Scheme
  * via (cog-fuzzy-match).
  */
-class FuzzyPatternMatch
+class FuzzyMatch
 {
     public:
         HandleSeq perform_search(const Handle&);
@@ -65,4 +65,4 @@ class FuzzyPatternMatch
 Handle find_approximate_match(AtomSpace* as, const Handle& hp);
 }
 
-#endif  // FUZZYPATTERNMATCH_H
+#endif  // FUZZY_MATCH_H

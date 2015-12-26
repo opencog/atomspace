@@ -3,7 +3,7 @@
 ADD_LIBRARY(query SHARED
 	AttentionalFocusCB.cc
 	DefaultPatternMatchCB.cc
-	FuzzyMatch/FuzzyPatternMatch.cc
+	../atomspaceutils/FuzzyMatch.cc
 	Implicator.cc
 	InitiateSearchCB.cc
 	PatternMatch.cc
