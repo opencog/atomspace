@@ -29,7 +29,6 @@ ADD_CXXTEST(BiggerPatternUTest)
 ADD_CXXTEST(LoopPatternUTest)
 ADD_CXXTEST(BooleanUTest)
 ADD_CXXTEST(Boolean2NotUTest)
-ADD_CXXTEST(FuzzyPatternUTest)
 
 
 # These are NOT in alphabetical order; they are in order of

@@ -223,6 +223,12 @@ bool Variables::is_type_rec(const Handle& deep, const Handle& val) const
 	// Both must be the same size...
 	if (vlo.size() != sz) return false;
 
+	// Unordered links are harder to handle...
+	if (classserver().isA(dpt, UNORDERED_LINK))
+		throw RuntimeException(TRACE_INFO,
+			"Not implemented! TODO XXX FIXME");
+
+	// Ordered links are compared side-by-side
 	for (size_t i=0; i<sz; i++)
 	{
 		if (not is_type_rec(dpo[i], vlo[i])) return false;

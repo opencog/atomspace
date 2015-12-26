@@ -25,7 +25,7 @@
 #define _OPENCOG_SUBSTITUTOR
 
 
-#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Link.h>
 
 
 namespace opencog

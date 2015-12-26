@@ -23,12 +23,9 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/FuzzyMatch/FuzzyPatternMatch.h>
+#include <opencog/atomutils/FuzzyMatch.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
-
-#include "imply.h"
-#include "test-types.h"
 
 using namespace opencog;
 
@@ -70,6 +67,13 @@ void FuzzyPatternUTest::tearDown(void)
 
 void FuzzyPatternUTest::setUp(void)
 {
+}
+
+Handle find_approximate_match(AtomSpace* as, const Handle& hp)
+{
+    FuzzyMatch fpm;
+    HandleSeq solns = fpm.perform_search(hp);
+    return as->add_link(LIST_LINK, solns);
 }
 
 void FuzzyPatternUTest::test_basic_fuzzy_match(void)
