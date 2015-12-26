@@ -43,7 +43,7 @@ class FuzzyPatternMatch
     public:
         FuzzyPatternMatch(const Handle&);
         HandleSeq get_solns() { return solns; }
-        bool initiate_search();
+        void initiate_search();
 
     private:
         void explore(const LinkPtr&, size_t);

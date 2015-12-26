@@ -37,14 +37,11 @@ FuzzyPatternMatch::FuzzyPatternMatch(const Handle& hp) :
 }
 
 /**
- * Examines the pattern and find the starters that can be used to
- * initiate fuzzy-searches.
+ * Examines the pattern and find the starting leaves that can be
+ * used to initiate fuzzy-searches.
  *
  * @param hp          The pattern (the hypergraph in the query)
  * @param depth       The depth of the starter in the pattern
- * @param clause_idx  The index of the clause, i.e. which clause the starter
- *                    is in among all input clauses
- * @param term        The term that the starter is located in the pattern
  * @param rtn         A list of potential starters found in the pattern
  */
 void FuzzyPatternMatch::find_starters(const Handle& hp, const size_t& depth,
@@ -82,51 +79,34 @@ bool FuzzyPatternMatch::Starter::operator<(const Starter& s2) const
 };
 
 /**
- * Override the initiate_search method in the InitiateSearchCB. It begins
- * by finding one or more starter nodes, and then initiates a fuzzy-search
- * for each of the starter nodes until all of them have been used.
- *
- * @param pme  The PatternMatchEngine object
- * @return     True if one or more solutions are found, false otherwise
+ * Find one or more leaves that can be used to initiae a search.  Create
+ * a node to record these.
  */
-bool FuzzyPatternMatch::initiate_search()
+void FuzzyPatternMatch::initiate_search()
 {
     // Find starters from the clause
     std::set<Starter> starters;
     find_starters(target, 0, starters);
 
     // Start the searches
-    size_t search_cnt = 0;
-    size_t num_starters = starters.size();
-    auto iter = starters.begin();
-    while (num_starters > search_cnt) {
-        const Handle& best_start = iter->handle;
-
+    for (const Starter& leaf : starters)
+    {
         LAZY_LOG_FINE << "\n========================================\n"
                       << "Initiating the fuzzy match... ("
-                      << search_cnt << "/"
-                      << num_starters << ")\n"
-                      << "Starter:\n" << best_start->toShortString() << "\n"
+                      << "Starter:\n" << leaf.handle->toShortString() << "\n"
                       << "========================================\n";
 
-        IncomingSet iset = best_start->getIncomingSet();
-        size_t iset_size = iset.size();
-        for (size_t i = 0; i < iset_size; i++) {
-            Handle h(iset[i]);
+        for (const LinkPtr& lptr: leaf.handle->getIncomingSet())
+        {
+            LAZY_LOG_FINE << "Loop candidate"
+                          << lptr->toShortString() << "\n";
 
-            LAZY_LOG_FINE << "Loop candidate ("
-                          << (i + 1) << "/" << iset_size << "):\n"
-                          << h->toShortString() << "\n";
-
-            explore(iset[i], iter->depth-1);
+            explore(lptr, leaf.depth-1);
         }
-        search_cnt++;
-        iter++;
     }
 
     // Let's end the search here, continue could be costly
     std::cout << "Fuzzy match is finished.\n";
-    return true;
 }
 
 void FuzzyPatternMatch::explore(const LinkPtr& gl,
@@ -148,9 +128,8 @@ void FuzzyPatternMatch::explore(const LinkPtr& gl,
 }
 
 /**
- * Estimate how similar the potential solution and the input pattern are.
+ * Estimate how similar the potential solution and the target pattern are.
  *
- * @param pat   The input pattern
  * @param soln  The potential solution
  */
 void FuzzyPatternMatch::accept_solution(const Handle& soln)
@@ -168,7 +147,7 @@ void FuzzyPatternMatch::accept_solution(const Handle& soln)
     // The size different between the pattern and the potential solution
     size_t diff = std::abs((int)target_nodes.size() - (int)soln_nodes.size());
 
-    double similarity = 0;
+    double similarity = 0.0;
 
     // Roughly estimate how "rare" each node is by using 1 / incoming set size
     // TODO: May use Truth Value instead
