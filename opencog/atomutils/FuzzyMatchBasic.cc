@@ -29,6 +29,14 @@
 
 using namespace opencog;
 
+/** Set up the target. */
+void FuzzyMatchBasic::start_search(const Handle& trg)
+{
+	target = trg;
+	target_nodes = get_all_nodes(target);
+	std::sort(target_nodes.begin(), target_nodes.end());
+}
+
 /**
  * hp is a subtree of the target tree. Should we start a search
  * at that location?  Answer: yes if its a node, no, if its a link.
@@ -51,6 +59,8 @@ bool FuzzyMatchBasic::accept_starter(const Handle& hp)
  */
 bool FuzzyMatchBasic::try_match(const Handle& soln, int depth)
 {
+	if (soln == target) return false;
+
 	// For some reason, this algo only wnts to compare proposed
 	// solutions that are exactly the same size as the target.
 	// Why? I dunno. Might not a similar tree be slightly bigger or

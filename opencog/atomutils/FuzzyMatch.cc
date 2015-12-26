@@ -33,10 +33,7 @@ using namespace opencog;
 void FuzzyMatch::explore(const LinkPtr& gl, int depth)
 {
 	Handle soln(gl->getHandle());
-	if (soln == target) return;
-
 	bool look_for_more = try_match(soln, depth);
-
 	if (not look_for_more) return;
 
 	for (const LinkPtr& lptr : gl->getIncomingSet())
@@ -86,11 +83,9 @@ void FuzzyMatch::find_starters(const Handle& hp, const int& depth)
 /**
  * Find leaves at which a search can be started.
  */
-HandleSeq FuzzyMatch::perform_search(const Handle& targ)
+HandleSeq FuzzyMatch::perform_search(const Handle& target)
 {
-	target = targ;
-	target_nodes = get_all_nodes(target);
-	std::sort(target_nodes.begin(), target_nodes.end());
+	start_search(target);
 
 	// Find starting atoms from which to begin matches.
 	find_starters(target, 0);

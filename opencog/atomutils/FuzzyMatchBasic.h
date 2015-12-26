@@ -41,9 +41,14 @@ namespace opencog
 class FuzzyMatchBasic : public FuzzyMatch
 {
 protected:
+    virtual void start_search(const Handle&);
     virtual bool accept_starter(const Handle&);
     virtual bool try_match(const Handle&, int);
     virtual HandleSeq finished_search(void);
+
+    // What we are matching
+    Handle target;
+    HandleSeq target_nodes;
 
 private:
     // The solutions that were found.

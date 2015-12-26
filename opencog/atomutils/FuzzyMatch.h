@@ -84,10 +84,7 @@ public:
     virtual ~FuzzyMatch() {}
 
 protected:
-    // What we are matching
-    Handle target;
-    HandleSeq target_nodes;
-
+    virtual void start_search(const Handle&) = 0;
     virtual bool accept_starter(const Handle&) = 0;
     virtual bool try_match(const Handle&, int depth) = 0;
     virtual HandleSeq finished_search(void) = 0;
