@@ -34,7 +34,6 @@ INSTALL (FILES
 	BindLinkAPI.h
 	DefaultImplicator.h
 	DefaultPatternMatchCB.h
-	FuzzyMatch/FuzzyPatternMatch.h
 	Implicator.h
 	InitiateSearchCB.h
 	Pattern.h
