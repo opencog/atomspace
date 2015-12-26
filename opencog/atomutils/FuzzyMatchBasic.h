@@ -42,9 +42,13 @@ class FuzzyMatchBasic : public FuzzyMatch
 {
 protected:
     virtual bool accept_starter(const NodePtr&);
-    virtual bool note_matchBasic(const Handle&, int depth);
+    virtual bool note_match(const Handle&, int);
+    virtual HandleSeq finished_search(void);
 
 private:
+    // The solutions that were found.
+    HandleSeq solns;
+
     // The minimum difference between the pattern and all
     // the known solutions
     size_t min_size_diff = SIZE_MAX;

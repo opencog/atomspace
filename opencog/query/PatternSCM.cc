@@ -5,7 +5,7 @@
  * Copyright (c) 2008, 2014, 2015 Linas Vepstas <linas@linas.org>
  */
 
-#include <opencog/atomutils/FuzzyMatch.h>
+#include <opencog/atomutils/FuzzyMatchBasic.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeModule.h>
 
@@ -19,7 +19,7 @@ using namespace opencog;
 // Convenience wrapper
 static Handle find_approximate_match(AtomSpace* as, const Handle& hp)
 {
-	FuzzyMatch fpm;
+	FuzzyMatchBasic fpm;
 	HandleSeq solns = fpm.perform_search(hp);
 	return as->add_link(LIST_LINK, solns);
 }

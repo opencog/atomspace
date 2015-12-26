@@ -95,5 +95,6 @@ HandleSeq FuzzyMatch::perform_search(const Handle& targ)
 	// Find starting leaves from which to begin matches.
 	find_starters(target, 0);
 
-	return solns;
+	// Give the derived class a chance to wrap things up.
+	return finished_search();
 }

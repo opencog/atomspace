@@ -50,12 +50,9 @@ protected:
 
     virtual bool accept_starter(const NodePtr&) = 0;
     virtual bool note_match(const Handle&, int depth) = 0;
-    virtual void finished_search(void) = 0;
+    virtual HandleSeq finished_search(void) = 0;
 
 private:
-    // The solutions that were found.
-    HandleSeq solns;
-
     void find_starters(const Handle& hg, const int& depth);
     void explore(const LinkPtr&, int);
 };

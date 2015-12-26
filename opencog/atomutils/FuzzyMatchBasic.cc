@@ -90,6 +90,8 @@ bool FuzzyMatchBasic::note_match(const Handle& soln, int depth)
 	return true;
 }
 
-/* No-op; we already build "solns" */
-void FuzzyMatchBasic::finish(void)
-{}
+/* No-op; we already build "solns", just return it. */
+HandleSeq FuzzyMatchBasic::finished_search(void)
+{
+	return solns;
+}
