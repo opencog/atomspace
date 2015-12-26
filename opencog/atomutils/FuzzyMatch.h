@@ -52,10 +52,10 @@ protected:
     HandleSeq target_nodes;
 
     virtual bool accept_starter(const NodePtr&);
-    virtual void accept_solution(const Handle&);
+    virtual bool note_match(const Handle&, int depth);
 
 private:
-    void explore(const LinkPtr&, size_t);
+    void explore(const LinkPtr&, int);
 
     // The solutions
     HandleSeq solns;
@@ -67,7 +67,7 @@ private:
     // The maximum similarity of all the potential solutions we found
     double max_similarity = -std::numeric_limits<double>::max();
 
-    void find_starters(const Handle& hg, const size_t& depth);
+    void find_starters(const Handle& hg, const int& depth);
 };
 
 } // namespace opencog

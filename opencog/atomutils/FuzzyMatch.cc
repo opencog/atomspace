@@ -42,7 +42,7 @@ bool FuzzyMatch::accept_starter(const NodePtr& np)
  * @param hp          The pattern (the hypergraph in the query)
  * @param depth       The depth of the starter in the pattern
  */
-void FuzzyMatch::find_starters(const Handle& hp, const size_t& depth)
+void FuzzyMatch::find_starters(const Handle& hp, const int& depth)
 {
 	// Traverse its outgoing set if it is a link
 	LinkPtr lp(LinkCast(hp));
@@ -88,21 +88,19 @@ HandleSeq FuzzyMatch::perform_search(const Handle& targ)
 	return solns;
 }
 
-void FuzzyMatch::explore(const LinkPtr& gl, size_t depth)
+void FuzzyMatch::explore(const LinkPtr& gl, int depth)
 {
-	if (0 < depth)
-	{
-		for (const LinkPtr& lptr : gl->getIncomingSet())
-		{
-			explore(lptr, depth-1);
-		}
-		return;
-	}
-
 	Handle soln(gl->getHandle());
 	if (soln == target) return;
 
-	accept_solution(soln);
+	bool look_for_more = accept_solution(soln, depth);
+
+	if (not look_for_more) return;
+
+	for (const LinkPtr& lptr : gl->getIncomingSet())
+	{
+		explore(lptr, depth-1);
+	}
 }
 
 /**
@@ -110,8 +108,11 @@ void FuzzyMatch::explore(const LinkPtr& gl, size_t depth)
  *
  * @param soln  The potential solution
  */
-void FuzzyMatch::accept_solution(const Handle& soln)
+bool FuzzyMatch::note_match(const Handle& soln, int depth)
 {
+	if (0 < depth) return true;
+	if (0 > depth) return false;
+
 	// Find out how many nodes it has in common with the pattern
 	HandleSeq common_nodes;
 	HandleSeq soln_nodes = get_all_nodes(soln);
@@ -153,4 +154,6 @@ void FuzzyMatch::accept_solution(const Handle& soln)
 	else if (similarity == max_similarity and diff == min_size_diff) {
 		solns.push_back(soln);
 	}
+
+	return true;
 }
