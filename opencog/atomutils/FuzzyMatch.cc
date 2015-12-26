@@ -44,33 +44,33 @@ bool FuzzyMatch::accept_starter(const NodePtr& np)
  */
 void FuzzyMatch::find_starters(const Handle& hp, const size_t& depth)
 {
-    // Traverse its outgoing set if it is a link
-    LinkPtr lp(LinkCast(hp));
-    if (lp) {
-        for (const Handle& h : lp->getOutgoingSet()) {
-            find_starters(h, depth + 1);
-        }
-        return;
-    }
+	// Traverse its outgoing set if it is a link
+	LinkPtr lp(LinkCast(hp));
+	if (lp) {
+		for (const Handle& h : lp->getOutgoingSet()) {
+			find_starters(h, depth + 1);
+		}
+		return;
+	}
 
-    // Get the nodes that are not an instance nor a variable
-    NodePtr np(NodeCast(hp));
+	// Get the nodes that are not an instance nor a variable
+	NodePtr np(NodeCast(hp));
 
-    if (accept_starter(np))
-    {
-        LAZY_LOG_FINE << "\n========================================\n"
-                      << "Initiating the fuzzy match... ("
-                      << "Starter:\n" << hp->toShortString() << "\n"
-                      << "========================================\n";
+	if (accept_starter(np))
+	{
+		LAZY_LOG_FINE << "\n========================================\n"
+		              << "Initiating the fuzzy match... ("
+		              << "Starter:\n" << hp->toShortString() << "\n"
+		              << "========================================\n";
 
-        for (const LinkPtr& lptr: hp->getIncomingSet())
-        {
-            LAZY_LOG_FINE << "Loop candidate"
-                          << lptr->toShortString() << "\n";
+		for (const LinkPtr& lptr: hp->getIncomingSet())
+		{
+			LAZY_LOG_FINE << "Loop candidate"
+			              << lptr->toShortString() << "\n";
 
-            explore(lptr, depth-1);
-        }
-    }
+			explore(lptr, depth-1);
+		}
+	}
 }
 
 /**
@@ -78,18 +78,17 @@ void FuzzyMatch::find_starters(const Handle& hp, const size_t& depth)
  */
 HandleSeq FuzzyMatch::perform_search(const Handle& targ)
 {
-    target = targ;
-    target_nodes = get_all_nodes(target);
-    std::sort(target_nodes.begin(), target_nodes.end());
+	target = targ;
+	target_nodes = get_all_nodes(target);
+	std::sort(target_nodes.begin(), target_nodes.end());
 
-    // Find starting leaves from which to begin matches.
-    find_starters(target, 0);
+	// Find starting leaves from which to begin matches.
+	find_starters(target, 0);
 
-    return solns;
+	return solns;
 }
 
-void FuzzyMatch::explore(const LinkPtr& gl,
-                                size_t depth)
+void FuzzyMatch::explore(const LinkPtr& gl, size_t depth)
 {
 	if (0 < depth)
 	{
@@ -113,45 +112,45 @@ void FuzzyMatch::explore(const LinkPtr& gl,
  */
 void FuzzyMatch::accept_solution(const Handle& soln)
 {
-    // Find out how many nodes it has in common with the pattern
-    HandleSeq common_nodes;
-    HandleSeq soln_nodes = get_all_nodes(soln);
+	// Find out how many nodes it has in common with the pattern
+	HandleSeq common_nodes;
+	HandleSeq soln_nodes = get_all_nodes(soln);
 
-    std::sort(soln_nodes.begin(), soln_nodes.end());
+	std::sort(soln_nodes.begin(), soln_nodes.end());
 
-    std::set_intersection(target_nodes.begin(), target_nodes.end(),
-                          soln_nodes.begin(), soln_nodes.end(),
-                          std::back_inserter(common_nodes));
+	std::set_intersection(target_nodes.begin(), target_nodes.end(),
+	                      soln_nodes.begin(), soln_nodes.end(),
+	                      std::back_inserter(common_nodes));
 
-    // The size different between the pattern and the potential solution
-    size_t diff = std::abs((int)target_nodes.size() - (int)soln_nodes.size());
+	// The size different between the pattern and the potential solution
+	size_t diff = std::abs((int)target_nodes.size() - (int)soln_nodes.size());
 
-    double similarity = 0.0;
+	double similarity = 0.0;
 
-    // Roughly estimate how "rare" each node is by using 1 / incoming set size
-    // TODO: May use Truth Value instead
-    for (const Handle& common_node : common_nodes)
-        similarity += 1.0 / common_node->getIncomingSetSize();
+	// Roughly estimate how "rare" each node is by using 1 / incoming set size
+	// TODO: May use Truth Value instead
+	for (const Handle& common_node : common_nodes)
+		similarity += 1.0 / common_node->getIncomingSetSize();
 
-    LAZY_LOG_FINE << "\n========================================\n"
-                  << "Comparing:\n" << target->toShortString()
-                  << "----- and:\n" << soln->toShortString() << "\n"
-                  << "Common nodes = " << common_nodes.size() << "\n"
-                  << "Size diff = " << diff << "\n"
-                  << "Similarity = " << similarity << "\n"
-                  << "Most similar = " << max_similarity << "\n"
-                  << "========================================\n";
+	LAZY_LOG_FINE << "\n========================================\n"
+	              << "Comparing:\n" << target->toShortString()
+	              << "----- and:\n" << soln->toShortString() << "\n"
+	              << "Common nodes = " << common_nodes.size() << "\n"
+	              << "Size diff = " << diff << "\n"
+	              << "Similarity = " << similarity << "\n"
+	              << "Most similar = " << max_similarity << "\n"
+	              << "========================================\n";
 
-    // Decide if we should accept the potential solutions or not
-    if ((similarity > max_similarity) or
-        (similarity == max_similarity and diff < min_size_diff)) {
-        max_similarity = similarity;
-        min_size_diff = diff;
-        solns.clear();
-        solns.push_back(soln);
-    }
+	// Decide if we should accept the potential solutions or not
+	if ((similarity > max_similarity) or
+		(similarity == max_similarity and diff < min_size_diff)) {
+		max_similarity = similarity;
+		min_size_diff = diff;
+		solns.clear();
+		solns.push_back(soln);
+	}
 
-    else if (similarity == max_similarity and diff == min_size_diff) {
-        solns.push_back(soln);
-    }
+	else if (similarity == max_similarity and diff == min_size_diff) {
+		solns.push_back(soln);
+	}
 }

@@ -42,30 +42,32 @@ namespace opencog
  */
 class FuzzyMatch
 {
-    public:
-        HandleSeq perform_search(const Handle&);
+public:
+    HandleSeq perform_search(const Handle&);
+    virtual ~FuzzyMatch();
 
-    protected:
-        // What we are matching
-        Handle target;
-        HandleSeq target_nodes;
+protected:
+    // What we are matching
+    Handle target;
+    HandleSeq target_nodes;
 
-        virtual bool accept_starter(const NodePtr&);
-        virtual void accept_solution(const Handle&);
-    private:
-        void explore(const LinkPtr&, size_t);
+    virtual bool accept_starter(const NodePtr&);
+    virtual void accept_solution(const Handle&);
 
-        // The solutions
-        HandleSeq solns;
+private:
+    void explore(const LinkPtr&, size_t);
 
-        // The minimum difference between the pattern and all
-        // the known solutions
-        size_t min_size_diff = SIZE_MAX;
+    // The solutions
+    HandleSeq solns;
 
-        // The maximum similarity of all the potential solutions we found
-        double max_similarity = -std::numeric_limits<double>::max();
+    // The minimum difference between the pattern and all
+    // the known solutions
+    size_t min_size_diff = SIZE_MAX;
 
-        void find_starters(const Handle& hg, const size_t& depth);
+    // The maximum similarity of all the potential solutions we found
+    double max_similarity = -std::numeric_limits<double>::max();
+
+    void find_starters(const Handle& hg, const size_t& depth);
 };
 
 } // namespace opencog
