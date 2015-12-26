@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Node.h>
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FindUtils.h>
 
@@ -29,10 +29,17 @@
 
 using namespace opencog;
 
-bool FuzzyMatchBasic::accept_starter(const NodePtr& np)
+/**
+ * hp is a subtree of the target tree. Should we start a search
+ * at that location?  Answer: yes if its a node, no, if its a link.
+ */
+bool FuzzyMatchBasic::accept_starter(const Handle& hp)
 {
-	return (np->getType() != VARIABLE_NODE and
-		np->getName().find("@") == std::string::npos);
+	NodePtr np(NodeCast(hp));
+	if (nullptr == np) return false;
+
+	// Ignore variables. (Why?)
+	return (np->getType() != VARIABLE_NODE);
 }
 
 /**

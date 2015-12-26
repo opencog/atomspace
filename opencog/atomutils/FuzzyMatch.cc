@@ -46,27 +46,17 @@ void FuzzyMatch::explore(const LinkPtr& gl, int depth)
 }
 
 /**
- * Examines the pattern and find the starting leaves that can be
- * used to initiate fuzzy-searches.
+ * Recursively explores the target pattern and proposes each subtree
+ * as a possible starting point for a similarity search. If the subtree
+ * is accepted as a starting point, then all trees sharing thwe subtree
+ * are proposed as being similar.
  *
- * @param hp          The pattern (the hypergraph in the query)
- * @param depth       The depth of the starter in the pattern
+ * @param hp          A subtree of the target pattern.
+ * @param depth       The depth of the subtree in the pattern.
  */
 void FuzzyMatch::find_starters(const Handle& hp, const int& depth)
 {
-	// Traverse its outgoing set if it is a link
-	LinkPtr lp(LinkCast(hp));
-	if (lp) {
-		for (const Handle& h : lp->getOutgoingSet()) {
-			find_starters(h, depth + 1);
-		}
-		return;
-	}
-
-	// Get the nodes that are not an instance nor a variable
-	NodePtr np(NodeCast(hp));
-
-	if (accept_starter(np))
+	if (accept_starter(hp))
 	{
 		LAZY_LOG_FINE << "\n========================================\n"
 		              << "Initiating the fuzzy match... ("
@@ -80,6 +70,16 @@ void FuzzyMatch::find_starters(const Handle& hp, const int& depth)
 
 			explore(lptr, depth-1);
 		}
+		return;
+	}
+
+	// Proposed start was not accepted. Look farther down, at it's
+	// sub-trees.
+	LinkPtr lp(LinkCast(hp));
+	if (lp) {
+		for (const Handle& h : lp->getOutgoingSet()) {
+			find_starters(h, depth + 1);
+		}
 	}
 }
 
@@ -92,7 +92,7 @@ HandleSeq FuzzyMatch::perform_search(const Handle& targ)
 	target_nodes = get_all_nodes(target);
 	std::sort(target_nodes.begin(), target_nodes.end());
 
-	// Find starting leaves from which to begin matches.
+	// Find starting atoms from which to begin matches.
 	find_starters(target, 0);
 
 	// Give the derived class a chance to wrap things up.
