@@ -110,7 +110,7 @@ bool FuzzyMatchBasic::try_match(const Handle& soln, int depth)
 		solns.push_back(soln);
 	}
 
-	return true;
+	return false;
 }
 
 /* No-op; we already build "solns", just return it. */
