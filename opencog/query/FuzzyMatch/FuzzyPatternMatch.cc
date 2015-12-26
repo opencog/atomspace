@@ -29,13 +29,6 @@
 
 using namespace opencog;
 
-FuzzyPatternMatch::FuzzyPatternMatch(const Handle& hp) :
-    target(hp)
-{
-    target_nodes = get_all_nodes(target);
-    std::sort(target_nodes.begin(), target_nodes.end());
-}
-
 /**
  * Examines the pattern and find the starting leaves that can be
  * used to initiate fuzzy-searches.
@@ -76,13 +69,18 @@ void FuzzyPatternMatch::find_starters(const Handle& hp, const size_t& depth)
 }
 
 /**
- * Find one or more leaves that can be used to initiae a search.  Create
- * a node to record these.
+ * Find leaves at which a search can be started.
  */
-void FuzzyPatternMatch::initiate_search()
+HandleSeq FuzzyPatternMatch::perform_search(const Handle& targ)
 {
-    // Find starters from the clause
+    target = targ;
+    target_nodes = get_all_nodes(target);
+    std::sort(target_nodes.begin(), target_nodes.end());
+
+    // Find starting leaves from which to begin matches.
     find_starters(target, 0);
+
+    return solns;
 }
 
 void FuzzyPatternMatch::explore(const LinkPtr& gl,
@@ -164,14 +162,14 @@ void FuzzyPatternMatch::accept_solution(const Handle& soln)
  */
 Handle opencog::find_approximate_match(AtomSpace* as, const Handle& hp)
 {
-    FuzzyPatternMatch fpm(hp);
-    fpm.initiate_search();
+    FuzzyPatternMatch fpm;
+    HandleSeq solns = fpm.perform_search(hp);
 
     LAZY_LOG_FINE << "---------- solns ----------";
-    for (Handle h : fpm.get_solns())
+    for (const Handle& h : solns)
         LAZY_LOG_FINE << h->toShortString();
 
     // Wrap the solutions in a ListLink and return it
-    Handle gl = as->add_link(LIST_LINK, fpm.get_solns());
+    Handle gl = as->add_link(LIST_LINK, solns);
     return gl;
 }

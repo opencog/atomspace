@@ -39,9 +39,7 @@ namespace opencog
 class FuzzyPatternMatch
 {
     public:
-        FuzzyPatternMatch(const Handle&);
-        HandleSeq get_solns() { return solns; }
-        void initiate_search();
+        HandleSeq perform_search(const Handle&);
 
     private:
         void explore(const LinkPtr&, size_t);
