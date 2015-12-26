@@ -20,7 +20,10 @@ using namespace opencog;
 static Handle find_approximate_match(AtomSpace* as, const Handle& hp)
 {
 	FuzzyMatchBasic fpm;
-	HandleSeq solns = fpm.perform_search(hp);
+	RankedHandleSeq ranked_solns = fpm.perform_search(hp);
+	HandleSeq solns;
+	for (auto rs: ranked_solns)
+		solns.emplace_back(rs.first);
 	return as->add_link(LIST_LINK, solns);
 }
 
