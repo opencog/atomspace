@@ -68,6 +68,7 @@ class FuzzyPatternMatch :
                                const std::map<Handle, Handle>&)
         { return false; }
 
+        void explore(const LinkPtr&, size_t);
         void accept_solution(const Handle&);
 
         HandleSeq get_solns() { return solns; }

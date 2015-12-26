@@ -57,8 +57,9 @@ void FuzzyPatternMatch::find_starters(const Handle& hp, const size_t& depth,
     // Traverse its outgoing set if it is a link
     LinkPtr lp(LinkCast(hp));
     if (lp) {
-        for (Handle h : lp->getOutgoingSet())
+        for (const Handle& h : lp->getOutgoingSet()) {
             find_starters(h, depth + 1, hp, rtn);
+        }
         return;
     }
 
@@ -106,8 +107,6 @@ bool FuzzyPatternMatch::initiate_search(PatternMatchEngine* pme)
     while (num_starters > search_cnt) {
         const Handle& starter_term = iter->term;
         const Handle& best_start = iter->handle;
-        search_cnt++;
-        iter++;
 
         LAZY_LOG_FINE << "\n========================================\n"
                       << "Initiating the fuzzy match... ("
@@ -126,8 +125,11 @@ bool FuzzyPatternMatch::initiate_search(PatternMatchEngine* pme)
                           << (i + 1) << "/" << iset_size << "):\n"
                           << h->toShortString() << "\n";
 
-            pme->explore_neighborhood(target, starter_term, h);
+            explore(iset[i], iter->depth-1);
+            // pme->explore_neighborhood(target, starter_term, h);
         }
+        search_cnt++;
+        iter++;
     }
 
     // Let's end the search here, continue could be costly
@@ -168,6 +170,31 @@ bool FuzzyPatternMatch::link_match(const LinkPtr& pl, const LinkPtr& gl)
     // including the permutation comparsion for unordered links, as we have
     // already decided whether or not to accpet this grounding.
     return false;
+}
+
+void FuzzyPatternMatch::explore(const LinkPtr& gl,
+                                size_t depth)
+{
+	if (0 < depth)
+	{
+		for (const LinkPtr& lptr : gl->getIncomingSet())
+		{
+			explore(lptr, depth-1);
+		}
+		return;
+	}
+
+	Handle soln(gl->getHandle());
+
+	if (soln == target) return;
+
+	// Skip it if we have seen it before
+// XXX excpet this cannot possibly happen!
+	if (prev_compared.find(soln) != prev_compared.end())
+		return;
+	else prev_compared.insert(soln);
+
+	accept_solution(soln);
 }
 
 /**
