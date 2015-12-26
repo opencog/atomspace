@@ -35,8 +35,7 @@ namespace opencog
  * the target pattern.  A similarity score is assigned to each such
  * tree, and the ones with the highest scores are returned.
  *
- * It can be called from C++ via find_approximate_matchBasic(), or from Scheme
- * via (cog-fuzzy-matchBasic).
+ * This class implements certain specific similarity score.
  */
 class FuzzyMatchBasic : public FuzzyMatch
 {
