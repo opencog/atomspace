@@ -31,11 +31,21 @@ void DefineLink::init()
 {
 	// Must have name and body
 	if (2 != _outgoing.size())
-		throw InvalidParamException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 			"Expecting name and definition, got size %d", _outgoing.size());
 
 	// Perform some additional checks in the UniqueLink init method
 	UniqueLink::init(false);
+
+	// Type-check. Probably not needed, probably too strict, but what
+	// the heck, since we are here...
+	Type dtype = _outgoing[0]->getType();
+	if (DEFINED_SCHEMA_NODE != dtype and
+	    DEFINED_PREDICATE_NODE != dtype and
+	    DEFINED_TYPE_NODE != dtype)
+		throw SyntaxException(TRACE_INFO,
+			"Expecting Defined-X-Node, got %s",
+				classserver().getTypeName(dtype).c_str());
 }
 
 DefineLink::DefineLink(const HandleSeq& oset,
