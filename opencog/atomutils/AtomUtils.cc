@@ -30,31 +30,6 @@
 namespace opencog
 {
 
-/**
- * Get all unique atoms within a link and its sublinks.
- *
- * Similar to getAllAtoms except there will be no repetition.
- *
- * @param h     the top level link
- * @return      a UnorderedHandleSet of atoms
- */
-UnorderedHandleSet get_all_unique_atoms(Handle h)
-{
-    UnorderedHandleSet results;
-    results.insert(h);
-
-    LinkPtr lll(LinkCast(h));
-    if (lll)
-        for (const Handle& o : lll->getOutgoingSet())
-        {
-            UnorderedHandleSet sub = get_all_unique_atoms(o);
-            results.insert(sub.begin(), sub.end());
-        }
-
-    return results;
-}
-
-
 HandleSeq get_neighbors(const Handle& h, bool fanin,
                         bool fanout, Type desiredLinkType,
                         bool subClasses)

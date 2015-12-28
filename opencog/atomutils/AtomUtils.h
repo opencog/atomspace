@@ -38,13 +38,6 @@ namespace opencog
 const bool NO_SUBCLASSES = false;
 
 /**
- * General purpose utilities for processing atoms in the Atom.
- *
- * Contains methods and algorithms which might be useful to other processes.
- */
-UnorderedHandleSet get_all_unique_atoms(Handle h);
-
-/**
  * Returns neighboring atoms, following incoming links and
  * returning their outgoing sets.
  *

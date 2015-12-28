@@ -556,6 +556,27 @@ void ForwardChainer::validate(Handle hsource, HandleSeq hfocus_set)
 }
 
 /**
+ * Get all unique atoms within a link and its sublinks.
+ *
+ * Similar to getAllAtoms except there will be no repetition.
+ *
+ * @param h     the top level link
+ * @return      a UnorderedHandleSet of atoms
+ */
+static void get_all_unique_atoms(const Handle& h, UnorderedHandleSet& atom_set)
+{
+    atom_set.insert(h);
+
+    LinkPtr lll(LinkCast(h));
+    if (not lll)
+    {
+        for (const Handle& o : lll->getOutgoingSet())
+            get_all_unique_atoms(o, atom_set);
+    }
+}
+
+
+/**
  * Gets all unique atoms of in the implicant list of @param r.
  *
  * @param r  A rule object
@@ -566,11 +587,10 @@ UnorderedHandleSet ForwardChainer::get_subatoms(const Rule *rule)
 {
     UnorderedHandleSet output_expanded;
 
-    HandleSeq impl_members = rule->get_implicant_seq();
-    for (Handle h : impl_members) {
-        UnorderedHandleSet hs = get_all_unique_atoms(h);
-        hs.erase(h); //Already tried to unify this.
-        output_expanded.insert(hs.begin(), hs.end());
+    for (const Handle& h : rule->get_implicant_seq())
+    {
+        get_all_unique_atoms(h, output_expanded);
+        output_expanded.erase(h); // Already tried to unify this.
     }
 
     return output_expanded;
