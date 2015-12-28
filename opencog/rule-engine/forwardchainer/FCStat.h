@@ -30,9 +30,6 @@ namespace opencog {
 
 using HandleWeightMap = std::map<Handle,float>;
 
-bool are_similar(const Handle& h1, const Handle& h2, bool strict_type_match);
-
-
 struct PartiaGroundingRecord
 {
     const Handle hsource;

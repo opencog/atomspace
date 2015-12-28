@@ -28,8 +28,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/load-file.h>
-#include <opencog/rule-engine/forwardchainer/FCStat.h>
-#include <opencog/rule-engine/backwardchainer/ChainerUtils.h>
+#include <opencog/rule-engine/ChainerUtils.h>
 
 using namespace opencog;
 
