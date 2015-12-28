@@ -221,7 +221,7 @@ public:
      * @param Handle to be checked for being a link source.
      * @return Whether a given handle is a source of this link.
      */
-    bool isSource(Handle) const;
+    bool isSource(const Handle&) const;
 
     /**
      * Returns whether the element in a given position in the
@@ -241,7 +241,7 @@ public:
      * @param Handle to be checked for being a link target.
      * @return Whether a given handle is a target of this link.
      */
-    bool isTarget(Handle) const;
+    bool isTarget(const Handle&) const;
 
     /**
      * Returns whether the element in a given position in the

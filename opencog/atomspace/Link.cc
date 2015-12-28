@@ -129,7 +129,7 @@ std::string Link::toString(const std::string& indent)
     return answer;
 }
 
-bool Link::isSource(Handle handle) const
+bool Link::isSource(const Handle& handle) const
 {
     // On ordered links, only the first position in the outgoing set is a source
     // of this link. So, if the handle given is equal to the first position,
@@ -172,7 +172,7 @@ bool Link::isSource(size_t i) const
     }
 }
 
-bool Link::isTarget(Handle handle) const
+bool Link::isTarget(const Handle& handle) const
 {
     // On ordered links, the first position of the outgoing set defines the
     // source of the link. The other positions are targets. So, it scans the
