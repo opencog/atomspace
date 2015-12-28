@@ -34,13 +34,13 @@ namespace opencog
  */
 
 /**
- * Type checker.  Returns true if `val` is of type `deep`.
+ * Type checker.  Returns true if `val` is of type `type_spec`.
  * More precisely, returns true if `val` will fit into the type
- * specification given by `deep`; that the value and the type
+ * specification given by `type_spec`; that the value and the type
  * specification can be connected, e.g. for beta-reduction, or for
  * pattern matching (searching).
  */
-bool value_is_type(Handle deep, const Handle& val);
+bool value_is_type(const Handle& type_spec, const Handle& val);
 
 /** @}*/
 }

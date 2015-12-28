@@ -36,8 +36,10 @@ using namespace opencog;
 /**
  * Type checker.  Returns true if `val` is of type `deep`.
  */
-bool opencog::value_is_type(Handle deep, const Handle& val)
+bool opencog::value_is_type(const Handle& spec, const Handle& val)
 {
+	Handle deep(spec);
+
 	Type valtype = val->getType();
 	Type dpt = deep->getType();
 
