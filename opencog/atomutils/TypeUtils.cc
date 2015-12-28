@@ -36,7 +36,7 @@ using namespace opencog;
 /**
  * Type checker.  Returns true if `val` is of type `deep`.
  */
-bool opencog::is_type(Handle deep, const Handle& val)
+bool opencog::value_is_type(Handle deep, const Handle& val)
 {
 	Type valtype = val->getType();
 	Type dpt = deep->getType();
@@ -66,7 +66,7 @@ bool opencog::is_type(Handle deep, const Handle& val)
 		LinkPtr dptr(LinkCast(deep));
 		for (const Handle& choice : dptr->getOutgoingSet())
 		{
-			if (is_type(choice, val)) return true;
+			if (value_is_type(choice, val)) return true;
 		}
 		return false;
 	}
@@ -101,7 +101,7 @@ bool opencog::is_type(Handle deep, const Handle& val)
 	// Ordered links are compared side-by-side
 	for (size_t i=0; i<sz; i++)
 	{
-		if (not is_type(dpo[i], vlo[i])) return false;
+		if (not value_is_type(dpo[i], vlo[i])) return false;
 	}
 
 	// If we are here, all checks must hav passed.

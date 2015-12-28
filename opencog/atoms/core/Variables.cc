@@ -212,7 +212,7 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 		const std::set<Handle> &sigset = dit->second;
 		for (const Handle& sig : sigset)
 		{
-			if (opencog::is_type(sig, val)) return true;
+			if (value_is_type(sig, val)) return true;
 		}
 		ret = false;
 	}
