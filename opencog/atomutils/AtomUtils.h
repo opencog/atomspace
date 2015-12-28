@@ -35,23 +35,6 @@ namespace opencog
  *  @{
  */
 
-const bool NO_SUBCLASSES = false;
-
-/**
- * Returns neighboring atoms, following incoming links and
- * returning their outgoing sets.
- *
- * @param h Get neighbours for the atom this handle points to.
- * @param fanin Whether directional (ordered) links point to this
- *              node should beconsidered.
- * @param fanout Whether directional (ordered) links point from this
- *               node to another should be considered.
- * @param linkType Follow only these types of links.
- * @param subClasses Follow subtypes of linkType too.
- */
-HandleSeq get_neighbors(const Handle&, bool fanin=true, bool fanout=true,
-                        Type linkType=LINK, bool subClasses=true);
-
 /**
  * Given an atom (a link or node), Return all its children nodes
  * (i.e. traversing the outgoings recursively)
@@ -64,16 +47,6 @@ HandleSeq get_neighbors(const Handle&, bool fanin=true, bool fanout=true,
 UnorderedHandleSet get_outgoing_nodes(const Handle& hinput,
                                       const std::vector<Type>& types =
                                       std::vector<Type>());
-
-/**
- * Return all atoms connected to h up to a given distance. Both
- * incomings and outgoings are considered (unlike getNeighbors).
- *
- * @param h     the center atom
- * @param dist  the maximum distance, or none if negative
- * @return      an UnorderedHandleSet of neighbors
- */
-UnorderedHandleSet get_distant_neighbors(const Handle& h, int dist = 1);
 
 /**
  * Returns a list of all the EvaluationLinks with Predicates of the given type
