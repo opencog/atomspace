@@ -54,14 +54,12 @@ HandleSeq get_source_neighbors(const Handle& h, Type desiredLinkType)
 
     for (const LinkPtr& link : h->getIncomingSet())
     {
-        Type linkType = link->getType();
-        if (linkType == desiredLinkType)
-        {
-            for (const Handle& handle : link->getOutgoingSet()) {
-                if (handle == h) continue;
-                if (link->isSource(h)) continue;
-                answer.emplace_back(handle);
-            }
+        if (link->isSource(h)) continue;
+        if (link->getType() != desiredLinkType) continue;
+
+        for (const Handle& handle : link->getOutgoingSet()) {
+           if (handle == h) continue;
+            answer.emplace_back(handle);
         }
     }
     return answer;
