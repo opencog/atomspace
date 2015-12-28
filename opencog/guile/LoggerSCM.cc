@@ -27,24 +27,6 @@
 
 using namespace opencog;
 
-LoggerSCM::LoggerSCM() : ModuleWrap("opencog logger") {}
-
-/// This is called while (opencog logger) is the current module.
-/// Thus, all the definitions below happen in that module.
-void LoggerSCM::init(void)
-{
-	new FunctionWrap(do_logger_set_level, "cog-logger-set-level", "logger");
-	new FunctionWrap(do_logger_get_level, "cog-logger-get-level", "logger");
-	new FunctionWrap(do_logger_set_filename, "cog-logger-set-filename", "logger");
-	new FunctionWrap(do_logger_get_filename, "cog-logger-get-filename", "logger");
-	new FunctionWrap(do_logger_set_stdout, "cog-logger-set-stdout", "logger");
-	new FunctionWrap(do_logger_error, "cog-logger-error-str", "logger");
-	new FunctionWrap(do_logger_warn, "cog-logger-warn-str", "logger");
-	new FunctionWrap(do_logger_info, "cog-logger-info-str", "logger");
-	new FunctionWrap(do_logger_debug, "cog-logger-debug-str", "logger");
-	new FunctionWrap(do_logger_fine, "cog-logger-fine-str", "logger");
-}
-
 namespace opencog {
 
 void do_logger_set_level(const std::string& level)
@@ -100,6 +82,24 @@ void do_logger_fine(const std::string& msg)
 }
 
 } /*end of namespace opencog*/
+
+LoggerSCM::LoggerSCM() : ModuleWrap("opencog logger") {}
+
+/// This is called while (opencog logger) is the current module.
+/// Thus, all the definitions below happen in that module.
+void LoggerSCM::init(void)
+{
+	new FunctionWrap(do_logger_set_level, "cog-logger-set-level", "logger");
+	new FunctionWrap(do_logger_get_level, "cog-logger-get-level", "logger");
+	new FunctionWrap(do_logger_set_filename, "cog-logger-set-filename", "logger");
+	new FunctionWrap(do_logger_get_filename, "cog-logger-get-filename", "logger");
+	new FunctionWrap(do_logger_set_stdout, "cog-logger-set-stdout", "logger");
+	new FunctionWrap(do_logger_error, "cog-logger-error-str", "logger");
+	new FunctionWrap(do_logger_warn, "cog-logger-warn-str", "logger");
+	new FunctionWrap(do_logger_info, "cog-logger-info-str", "logger");
+	new FunctionWrap(do_logger_debug, "cog-logger-debug-str", "logger");
+	new FunctionWrap(do_logger_fine, "cog-logger-fine-str", "logger");
+}
 
 void opencog_logger_init(void)
 {
