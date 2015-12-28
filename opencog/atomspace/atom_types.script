@@ -129,6 +129,7 @@ TYPE_CHOICE <- OR_LINK
 // arg is output.
 ARROW_LINK <- ORDERED_LINK
 
+// Type constructor.
 // The SignatureLink implements "deep types", a way for specifying
 // the type of an entire graph, and not just some node or link.
 // The type specification is "precise", in contrast to the fuzzy

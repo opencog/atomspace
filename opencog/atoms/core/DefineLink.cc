@@ -37,8 +37,10 @@ void DefineLink::init()
 	// Perform some additional checks in the UniqueLink init method
 	UniqueLink::init(false);
 
+#if ALREADY_BROKEN
 	// Type-check. Probably not needed, probably too strict, but what
-	// the heck, since we are here...
+	// the heck, since we are here... Heh. There's already code that
+	// defines shit more loosely than this. Bummer.
 	Type dtype = _outgoing[0]->getType();
 	if (DEFINED_SCHEMA_NODE != dtype and
 	    DEFINED_PREDICATE_NODE != dtype and
@@ -46,6 +48,7 @@ void DefineLink::init()
 		throw SyntaxException(TRACE_INFO,
 			"Expecting Defined-X-Node, got %s",
 				classserver().getTypeName(dtype).c_str());
+#endif
 }
 
 DefineLink::DefineLink(const HandleSeq& oset,
