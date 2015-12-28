@@ -31,28 +31,6 @@ namespace opencog
 {
 
 /**
- * Get all the atoms within a link and its sublinks.
- *
- * @param h     the top level link
- * @return      a HandleSeq of atoms
- */
-HandleSeq get_all_atoms(Handle h)
-{
-    HandleSeq results;
-    results.emplace_back(h);
-
-    LinkPtr lll(LinkCast(h));
-    if (lll)
-        for (const Handle& o : lll->getOutgoingSet())
-        {
-            HandleSeq sub = get_all_atoms(o);
-            results.insert(results.end(), sub.begin(), sub.end());
-        }
-
-    return results;
-}
-
-/**
  * Get all unique atoms within a link and its sublinks.
  *
  * Similar to getAllAtoms except there will be no repetition.

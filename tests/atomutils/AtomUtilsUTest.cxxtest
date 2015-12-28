@@ -40,7 +40,6 @@ public:
         logger().setPrintToStdoutFlag(true);
     }
 
-	void test_get_all_atoms();
 	void test_get_all_unique_atoms();
 	void test_get_distant_neighbors();
 	void test_get_outgoing_nodes();
@@ -48,21 +47,6 @@ public:
 	void test_get_predicates_for();
 };
 
-
-// Test get_all_atoms()
-void AtomUtilsUTest::test_get_all_atoms()
-{
-	AtomSpace as;
-	Handle A = as.add_node(CONCEPT_NODE, "A"),
-		B = as.add_node(CONCEPT_NODE, "B"),
-		P = as.add_node(PREDICATE_NODE, "P"),
-		AB = as.add_link(INHERITANCE_LINK, A, B),
-		ABAP = as.add_link(LIST_LINK, AB, A, P);
-
-	// Get all atoms from ABAP
-	TS_ASSERT_EQUALS(get_all_atoms(ABAP),
-	                 HandleSeq({ABAP, AB, A, B, A, P}));
-}
 
 // Test get_all_unique_atoms()
 void AtomUtilsUTest::test_get_all_unique_atoms()
