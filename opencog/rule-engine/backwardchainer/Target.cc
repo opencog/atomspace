@@ -22,8 +22,8 @@
  */
 
 #include <opencog/util/random.h>
-#include <opencog/atomutils/AtomUtils.h>
 
+#include "../ChainerUtils.h"
 #include "Target.h"
 
 using namespace opencog;

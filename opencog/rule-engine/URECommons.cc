@@ -20,11 +20,12 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "URECommons.h"
 
 #include <opencog/util/macros.h>
-#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/guile/SchemeSmob.h>
+
+#include "URECommons.h"
+#include "ChainerUtils.h"
 
 using namespace opencog;
 

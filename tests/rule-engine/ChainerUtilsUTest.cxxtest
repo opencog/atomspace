@@ -49,7 +49,7 @@ public:
 
 
 // Test get_outgoing_nodes()
-void AtomUtilsUTest::test_get_outgoing_nodes()
+void ChainerUtilsUTest::test_get_outgoing_nodes()
 {
 	AtomSpace as;
 	Handle A = as.add_node(CONCEPT_NODE, "A"),
