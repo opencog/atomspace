@@ -183,7 +183,7 @@ cdef class AtomSpace:
     cdef bint owns_atomspace
 
 
-cdef extern from "opencog/cython/CythonUtils.h" namespace "opencog":
+cdef extern from "opencog/atomutils/AtomUtils.h" namespace "opencog":
     # C++: 
     #   
     #   HandleSeq get_predicates(const Handle& target, 
