@@ -30,36 +30,26 @@
 namespace opencog
 {
 
-UnorderedHandleSet get_outgoing_nodes(const Handle& hinput,
-                                      const std::vector<Type>& types)
+void get_outgoing_nodes(const Handle& hinput,
+                        UnorderedHandleSet& node_set,
+                        const std::vector<Type>& types)
 {
-	LinkPtr link(LinkCast(hinput));
-
+    LinkPtr link(LinkCast(hinput));
     // Recursive case
     if (link) {
-        UnorderedHandleSet found_nodes;
-        for (const Handle& h : link->getOutgoingSet()) {
-            UnorderedHandleSet tmp = get_outgoing_nodes(h, types);
-            found_nodes.insert(tmp.begin(), tmp.end());
-        }
-        return found_nodes;
+        for (const Handle& h : link->getOutgoingSet())
+            get_outgoing_nodes(h, node_set, types);
+        return;
     }
-    // Base case
-    else {
-        OC_ASSERT(NodeCast(hinput) != nullptr);
 
-        if (types.empty()) { // Empty means all kinds of nodes
-            return {hinput};
-        } else {
-            // Check if this node is in our wish list
-            Type t = NodeCast(hinput)->getType();
-            auto it = find(types.begin(), types.end(), t);
-            if (it != types.end())
-                return {hinput};
-            else
-                return UnorderedHandleSet();
-        }
-    }
+    // Base case
+    if (types.empty()) return;  // Empty means all kinds of nodes
+
+    // Check if this node is in our wish list
+    Type t = NodeCast(hinput)->getType();
+    auto it = find(types.begin(), types.end(), t);
+    if (it != types.end())
+        node_set.insert(hinput);
 }
 
 

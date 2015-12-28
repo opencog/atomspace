@@ -57,12 +57,12 @@ public:
 	/**
 	 * checks if a handle already exists in a HandleSeq
 	 */
-	bool exists_in(Handle& hlink, Handle& h);
+	bool exists_in(const Handle& hlink, const Handle& h);
 
 	/*
 	 * Generate UUID
 	 */
-	string get_unique_name(Handle& h);
+	string get_unique_name(const Handle& h);
 
 	/**
 	 * create a copy of the given implicatoin link with unique variables

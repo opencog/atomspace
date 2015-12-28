@@ -44,8 +44,9 @@ namespace opencog
  *                is empty, all kinds of nodes are looked
  * @return - a set of nodes
  */
-UnorderedHandleSet get_outgoing_nodes(const Handle& hinput,
-                                      const std::vector<Type>& types =
+void get_outgoing_nodes(const Handle& hinput,
+                        UnorderedHandleSet& retur,
+                        const std::vector<Type>& types =
                                       std::vector<Type>());
 
 /**

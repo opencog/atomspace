@@ -40,7 +40,8 @@ Handle URECommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
 	//if(vnode_is_typedv)
 	himplicant = replace_nodes_with_varnode(himplicant);
 
-	UnorderedHandleSet variable_nodes = get_outgoing_nodes(himplicant, {
+	UnorderedHandleSet variable_nodes;
+	get_outgoing_nodes(himplicant, variable_nodes, {
 			VARIABLE_NODE });
 	HandleSeq list_link_elem;
 
@@ -61,20 +62,22 @@ Handle URECommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
 }
 
 Handle URECommons::replace_nodes_with_varnode(Handle& handle,
-		Type t /*=VARIABLE_NODE*/) {
+                                              Type t /*=VARIABLE_NODE*/)
+{
 	UnorderedHandleSet hvars;
 	if (t == NODE)
-		hvars = get_outgoing_nodes(handle); // Get every node
+		get_outgoing_nodes(handle, hvars); // Get every node
 	else
-		hvars = get_outgoing_nodes(handle, { t });
+		get_outgoing_nodes(handle, hvars, { t });
 	map<Handle, Handle> node_unique_var_map;
-	for (Handle h : hvars)
+	for (const Handle& h : hvars)
 		node_unique_var_map[h] = _as.add_node(VARIABLE_NODE,
 				get_unique_name(h)); //TODO get_uuid is not implemented
 	return change_node_types(handle, node_unique_var_map);
 }
 
-string URECommons::get_unique_name(Handle& h) {
+string URECommons::get_unique_name(const Handle& h)
+{
 //xxx temporary implementation. need to be replaced by uuid generation for making sure name is always unique
 	string name = _as.get_name(h);
 	HandleSeq hs = _as.get_incoming(h);
@@ -84,7 +87,8 @@ string URECommons::get_unique_name(Handle& h) {
 	return name;
 }
 
-bool URECommons::exists_in(Handle& hlink, Handle& h) {
+bool URECommons::exists_in(const Handle& hlink, const Handle& h)
+{
 	if (hlink == h) {
 		return true;
 	} else {
@@ -95,7 +99,7 @@ bool URECommons::exists_in(Handle& hlink, Handle& h) {
 		if (find(outg.begin(), outg.end(), h) != outg.end())
 			return true;
 		else {
-			for (Handle hi : outg) {
+			for (const Handle& hi : outg) {
 				if (LinkCast(hi) and exists_in(hi, h))
 					return true;
 			}
@@ -105,7 +109,8 @@ bool URECommons::exists_in(Handle& hlink, Handle& h) {
 }
 
 Handle URECommons::change_node_types(Handle& h,
-		map<Handle, Handle>& replacement_map) {
+		map<Handle, Handle>& replacement_map)
+{
 	Handle hcpy;
 	if (LinkCast(h)) {
 		HandleSeq hs_cpy;
@@ -132,7 +137,8 @@ Handle URECommons::change_node_types(Handle& h,
 	return hcpy;
 }
 
-void URECommons::get_root_links(Handle h, HandleSeq& parents) {
+void URECommons::get_root_links(Handle h, HandleSeq& parents)
+{
 	auto incoming = _as.get_incoming(h);
 	if (incoming.empty())
 		return;
@@ -149,7 +155,8 @@ void URECommons::get_root_links(Handle h, HandleSeq& parents) {
 	}
 }
 
-float URECommons::tv_fitness(Handle h) {
+float URECommons::tv_fitness(Handle h)
+{
 	TruthValuePtr ptv = _as.get_TV(h);
 	confidence_t c = ptv->getConfidence();
 	strength_t s = ptv->getMean();
