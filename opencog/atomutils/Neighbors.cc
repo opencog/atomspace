@@ -50,10 +50,6 @@ HandleSeq get_target_neighbors(const Handle& h, Type desiredLinkType)
 
 HandleSeq get_source_neighbors(const Handle& h, Type desiredLinkType)
 {
-    if (h == NULL) {
-        throw InvalidParamException(TRACE_INFO,
-            "Handle %d doesn't refer to a Atom", h.value());
-    }
     HandleSeq answer;
 
     for (const LinkPtr& link : h->getIncomingSet())
@@ -74,10 +70,6 @@ HandleSeq get_source_neighbors(const Handle& h, Type desiredLinkType)
 HandleSeq get_all_neighbors(const Handle& h,
                             Type desiredLinkType)
 {
-    if (h == NULL) {
-        throw InvalidParamException(TRACE_INFO,
-            "Handle %d doesn't refer to a Atom", h.value());
-    }
     HandleSeq answer;
 
     for (const LinkPtr& link : h->getIncomingSet())
