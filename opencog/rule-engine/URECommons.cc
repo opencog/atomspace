@@ -60,7 +60,7 @@ Handle URECommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
 	return _as.add_link(BIND_LINK, var_listLink, himplicant, himplicant);
 }
 
-Handle URECommons::replace_nodes_with_varnode(Handle& handle,
+Handle URECommons::replace_nodes_with_varnode(const Handle& handle,
                                               Type t /*=VARIABLE_NODE*/)
 {
 	UnorderedHandleSet hvars;
@@ -72,7 +72,7 @@ Handle URECommons::replace_nodes_with_varnode(Handle& handle,
 	return change_node_types(handle, node_unique_var_map);
 }
 
-string URECommons::get_unique_name(const Handle& h)
+string URECommons::get_unique_name(const Handle& h) const
 {
 //xxx temporary implementation. need to be replaced by uuid generation for making sure name is always unique
 	string name = _as.get_name(h);
@@ -83,7 +83,7 @@ string URECommons::get_unique_name(const Handle& h)
 	return name;
 }
 
-bool URECommons::exists_in(const Handle& hlink, const Handle& h)
+bool URECommons::exists_in(const Handle& hlink, const Handle& h) const
 {
 	if (hlink == h) {
 		return true;
@@ -104,14 +104,16 @@ bool URECommons::exists_in(const Handle& hlink, const Handle& h)
 	}
 }
 
-Handle URECommons::change_node_types(Handle& h,
+Handle URECommons::change_node_types(const Handle& h,
 		map<Handle, Handle>& replacement_map)
 {
 	Handle hcpy;
-	if (LinkCast(h)) {
+	LinkPtr lp(LinkCast(h));
+
+	if (lp) {
 		HandleSeq hs_cpy;
-		HandleSeq hs = _as.get_outgoing(h);
-		for (Handle hi : hs) {
+		HandleSeq hs = lp->getOutgoingSet();
+		for (const Handle& hi : hs) {
 			if (NodeCast(hi)) {
 				if (replacement_map.find(hi) != replacement_map.end())
 					hs_cpy.push_back(replacement_map[hi]);
@@ -121,8 +123,8 @@ Handle URECommons::change_node_types(Handle& h,
 				hs_cpy.push_back(change_node_types(hi, replacement_map));
 			}
 		}
-		hcpy = _as.add_link(_as.get_type(h), hs_cpy);
-		hcpy->setTruthValue(_as.get_TV(h));
+		hcpy = _as.add_link(h->getType(), hs_cpy);
+		hcpy->setTruthValue(h->getTruthValue());
 	} else if (NodeCast(h)) {
 		if (replacement_map.find(h) != replacement_map.end())
 			hcpy = replacement_map[h];
@@ -133,7 +135,7 @@ Handle URECommons::change_node_types(Handle& h,
 	return hcpy;
 }
 
-void URECommons::get_root_links(const Handle& h, HandleSeq& parents)
+void URECommons::get_root_links(const Handle& h, HandleSeq& parents) const
 {
 	if (0 == h->getIncomingSetSize()) return;
 
@@ -151,7 +153,7 @@ void URECommons::get_root_links(const Handle& h, HandleSeq& parents)
 	}
 }
 
-float URECommons::tv_fitness(const Handle& h)
+double URECommons::tv_fitness(const Handle& h) const
 {
 	TruthValuePtr ptv(h->getTruthValue());
 	confidence_t c = ptv->getConfidence();
