@@ -7,3 +7,4 @@ LINK_LIBRARIES(
 
 ADD_CXXTEST(FindUtilsUTest)
 ADD_CXXTEST(FuzzyUTest)
+ADD_CXXTEST(NeighborUTest)
