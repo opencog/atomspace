@@ -57,29 +57,30 @@ public:
 	/**
 	 * checks if a handle already exists in a HandleSeq
 	 */
-	bool exists_in(Handle& hlink, Handle& h);
+	bool exists_in(const Handle& hlink, const Handle& h) const;
 
 	/*
 	 * Generate UUID
 	 */
-	string get_unique_name(Handle& h);
+	string get_unique_name(const Handle& h) const;
 
 	/**
 	 * create a copy of the given implicatoin link with unique variables
 	 */
-	Handle replace_nodes_with_varnode(Handle& himplication_link, Type t =
+	Handle replace_nodes_with_varnode(const Handle& himplication_link, Type t =
 			VARIABLE_NODE);
 
 	/**
-	 * create a copy of the handle with a different variable name passed in @param var_uniq_var map input
+	 * Create a copy of the handle with a different variable name
+	 * passed in @param var_uniq_var map input.
 	 */
-	Handle change_node_types(Handle& h, map<Handle, Handle>& replacement_map);
+	Handle change_node_types(const Handle& h, map<Handle, Handle>& replacement_map);
 
 	/**
 	 * Get top level parent of the handle
 	 * @return a Link or Handle::UNDEFINED if there is no
 	 */
-	void get_root_links(Handle h, HandleSeq& parents);
+	void get_root_links(const Handle& h, HandleSeq& parents) const;
 
 	/**
 	 * Randomly pick about half of the elements, and amongst those
@@ -116,7 +117,7 @@ public:
 	 * @param h - a handle
 	 * @return a fitness value
 	 */
-	float tv_fitness(Handle h);
+	double tv_fitness(const Handle& h) const;
 };
 
 } // ~namespace opencog

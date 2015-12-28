@@ -735,27 +735,6 @@ public:
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    bool is_source(Handle source, Handle link) const
-    {
-        LinkPtr l(LinkCast(link));
-        if (l) return l->isSource(source);
-        return false;
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    AttentionValuePtr get_AV(Handle h) const {
-        return h->getAttentionValue();
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    void set_AV(Handle h, AttentionValuePtr av) const {
-        h->setAttentionValue(av);
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
     Type get_type(Handle h) const {
         return h->getType();
     }

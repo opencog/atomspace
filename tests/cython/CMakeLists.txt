@@ -12,15 +12,12 @@ LINK_DIRECTORIES(
 )
 
 LINK_LIBRARIES(
-	CythonUtils
 	atomspace
 	smob
 	clearbox
 	execution
 	${GUILE_LIBRARIES}
 )
-
-ADD_CXXTEST(CythonUtilsUTest)
 
 # The PythonEvalUTest tests PythonEval independent of the CogServer. It depends
 # on the server being around for the Scheme code but it does not message

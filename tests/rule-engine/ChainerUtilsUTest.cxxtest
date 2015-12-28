@@ -1,5 +1,5 @@
 /*
- * tests/rule-engine/SimilarUTest.cxxtest
+ * tests/rule-engine/ChainerUtilsUTest.cxxtest
  *
  * Copyright (C) 2015 OpenCog Foundation
  * All Rights Reserved
@@ -43,7 +43,6 @@ public:
     }
 
 	void test_get_outgoing_nodes();
-	void test_get_distant_neighbors();
 	void test_are_similar();
 };
 
@@ -59,46 +58,19 @@ void ChainerUtilsUTest::test_get_outgoing_nodes()
 		ABP = as.add_link(LIST_LINK, AB, P);
 
 	// Get all nodes from ABP
-	TS_ASSERT_EQUALS(get_outgoing_nodes(ABP),
-	                 UnorderedHandleSet({A, B, P}));
+	UnorderedHandleSet abp;
+	get_outgoing_nodes(ABP, abp);
+	TS_ASSERT_EQUALS(abp, UnorderedHandleSet({A, B, P}));
 
 	// Get all concept nodes from ABP
-	TS_ASSERT_EQUALS(get_outgoing_nodes(ABP, {CONCEPT_NODE}),
-	                 UnorderedHandleSet({A, B}));
+	UnorderedHandleSet ab;
+	get_outgoing_nodes(ABP, ab, CONCEPT_NODE);
+	TS_ASSERT_EQUALS(ab, UnorderedHandleSet({A, B}));
 
 	// Get all predicate nodes from ABP
-	TS_ASSERT_EQUALS(get_outgoing_nodes(ABP, {PREDICATE_NODE}),
-	                 UnorderedHandleSet({P}));
-}
-
-// Test get_distant_neighbors()
-void ChainerUtilsUTest::test_get_distant_neighbors()
-{
-	// Fill atomspace
-	AtomSpace as;
-	Handle A = as.add_node(CONCEPT_NODE, "A"),
-		B = as.add_node(CONCEPT_NODE, "B"),
-		C = as.add_node(CONCEPT_NODE, "C"),
-		D = as.add_node(CONCEPT_NODE, "D"),
-		AB = as.add_link(INHERITANCE_LINK, A, B),
-		BC = as.add_link(INHERITANCE_LINK, B, C),
-		CD = as.add_link(INHERITANCE_LINK, C, D);
-
-	// Test neighbors at distance 1 of A
-	TS_ASSERT_EQUALS(get_distant_neighbors(A, 1),
-	                 UnorderedHandleSet({AB}));
-
-	// Test neighbors at distance 1 of AB
-	TS_ASSERT_EQUALS(get_distant_neighbors(AB, 1),
-	                 UnorderedHandleSet({A, B}));
-
-	// Test neighbors at distance 2 of AB
-	TS_ASSERT_EQUALS(get_distant_neighbors(AB, 2),
-	                 UnorderedHandleSet({A, B, BC}));
-
-	// Test all neighbors of AB
-	TS_ASSERT_EQUALS(get_distant_neighbors(AB, -1),
-	                 UnorderedHandleSet({A, B, C, D, BC, CD}));
+	UnorderedHandleSet p;
+	get_outgoing_nodes(ABP, p, PREDICATE_NODE);
+	TS_ASSERT_EQUALS(p, UnorderedHandleSet({P}));
 }
 
 void ChainerUtilsUTest::test_are_similar()

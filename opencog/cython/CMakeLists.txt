@@ -28,10 +28,6 @@ file(MAKE_DIRECTORY opencog)
 file(COPY opencog/__init__.py DESTINATION opencog)
 ##
 
-ADD_LIBRARY(CythonUtils SHARED
-	CythonUtils.cc
-)
-
 ADD_LIBRARY(PythonEval SHARED
 	PythonEval.cc
 )

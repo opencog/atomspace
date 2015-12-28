@@ -39,14 +39,13 @@ namespace opencog
  * Given an atom (a link or node), Return all its children nodes
  * (i.e. traversing the outgoings recursively)
  *
- * @param hinput - an atoms to be looked
- * @param types - a list of type nodes to look for. if vector
- *                is empty, all kinds of nodes are looked
- * @return - a set of nodes
+ * @param hinput - an atom to be searched
+ * @param types - a type to look for.
+ * @param retur - a set of nodes
  */
-UnorderedHandleSet get_outgoing_nodes(const Handle& hinput,
-                                      const std::vector<Type>& types =
-                                      std::vector<Type>());
+void get_outgoing_nodes(const Handle& hinput,
+                        UnorderedHandleSet& retur,
+                        Type types = NODE);
 
 /**
  * Makes a one to one similarity matching. If the atoms
@@ -62,34 +61,6 @@ UnorderedHandleSet get_outgoing_nodes(const Handle& hinput,
  * @return  A boolean true if similar and false otherwise.
  */
 bool are_similar(const Handle& h1, const Handle& h2, bool strict_type_match);
-
-/**
- * Returns neighboring atoms, following incoming links and
- * returning their outgoing sets.
- *
- * @param h Get neighbours for the atom this handle points to.
- * @param fanin Whether directional (ordered) links point to this
- *              node should beconsidered.
- * @param fanout Whether directional (ordered) links point from this
- *               node to another should be considered.
- * @param linkType Follow only these types of links.
- * @param subClasses Follow subtypes of linkType too.
- */
-HandleSeq get_neighbors(const Handle&, bool fanin=true, bool fanout=true,
-                        Type linkType=LINK, bool subClasses=true);
-
-/**
- * Return all atoms connected to h up to a given distance. Both
- * incomings and outgoings are considered (unlike getNeighbors).
- *
- * @param h     the center atom
- * @param dist  the maximum distance, or none if negative
- * @return      an UnorderedHandleSet of neighbors
- *
- * XXX FIXME -- this function is curently not used anywhere. Perhaps
- * it should be deleted?
- */
-UnorderedHandleSet get_distant_neighbors(const Handle& h, int dist = 1);
 
 /** @}*/
 }

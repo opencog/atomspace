@@ -30,35 +30,23 @@
 namespace opencog
 {
 
-UnorderedHandleSet get_outgoing_nodes(const Handle& hinput,
-                                      const std::vector<Type>& types)
+void get_outgoing_nodes(const Handle& hinput,
+                        UnorderedHandleSet& node_set,
+                        Type type)
 {
-	LinkPtr link(LinkCast(hinput));
-
+    LinkPtr link(LinkCast(hinput));
     // Recursive case
     if (link) {
-        UnorderedHandleSet found_nodes;
-        for (const Handle& h : link->getOutgoingSet()) {
-            UnorderedHandleSet tmp = get_outgoing_nodes(h, types);
-            found_nodes.insert(tmp.begin(), tmp.end());
-        }
-        return found_nodes;
+        for (const Handle& h : link->getOutgoingSet())
+            get_outgoing_nodes(h, node_set, type);
+        return;
     }
-    // Base case
-    else {
-        OC_ASSERT(NodeCast(hinput) != nullptr);
 
-        if (types.empty()) { // Empty means all kinds of nodes
-            return {hinput};
-        } else {
-            // Check if this node is in our wish list
-            Type t = NodeCast(hinput)->getType();
-            auto it = find(types.begin(), types.end(), t);
-            if (it != types.end())
-                return {hinput};
-            else
-                return UnorderedHandleSet();
-        }
+    // Base case
+    if (NODE == type or // Empty means all kinds of nodes
+        NodeCast(hinput)->getType() == type)
+    {
+        node_set.insert(hinput);
     }
 }
 
@@ -123,68 +111,6 @@ bool are_similar(const Handle& h1, const Handle& h2, bool strict_type_match)
     }
 
     return false;
-}
-
-HandleSeq get_neighbors(const Handle& h, bool fanin,
-                        bool fanout, Type desiredLinkType,
-                        bool subClasses)
-{
-    if (h == NULL) {
-        throw InvalidParamException(TRACE_INFO,
-            "Handle %d doesn't refer to a Atom", h.value());
-    }
-    HandleSeq answer;
-
-    for (const LinkPtr& link : h->getIncomingSet())
-    {
-        Type linkType = link->getType();
-        if ((linkType == desiredLinkType)
-            or (subClasses && classserver().isA(linkType, desiredLinkType))) {
-            for (const Handle& handle : link->getOutgoingSet()) {
-                if (handle == h) continue;
-                if (!fanout && link->isSource(h)) continue;
-                if (!fanin && link->isTarget(h)) continue;
-                answer.emplace_back(handle);
-            }
-        }
-    }
-    return answer;
-}
-
-/* Tail-recursive helper function. We mark it static, so that
- * gcc can optimize this, i.e. call it without buying the stack
- * frame. */
-static void get_distant_neighbors_rec(const Handle& h,
-                                      UnorderedHandleSet& res,
-                                      int dist)
-{
-    res.insert(h);
-
-    // Recursive calls
-    if (dist != 0) {
-        // 1. Fetch incomings
-        for (const LinkPtr& in_l : h->getIncomingSet()) {
-            Handle in_h = in_l->getHandle();
-            if (res.find(in_h) == res.cend()) // Do not re-explore
-                get_distant_neighbors_rec(in_h, res, dist - 1);
-        }
-        // 2. Fetch outgoings
-        LinkPtr link = LinkCast(h);
-        if (link) {
-            for (const Handle& out_h : link->getOutgoingSet()) {
-                if (res.find(out_h) == res.cend()) // Do not re-explore
-                    get_distant_neighbors_rec(out_h, res, dist - 1);
-            }
-        }
-    }
-}
-
-UnorderedHandleSet get_distant_neighbors(const Handle& h, int dist)
-{
-    UnorderedHandleSet results;
-    get_distant_neighbors_rec(h, results, dist);
-    results.erase(h);
-    return results;
 }
 
 } // namespace OpenCog

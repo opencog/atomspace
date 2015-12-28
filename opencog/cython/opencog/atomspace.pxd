@@ -143,7 +143,6 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         void set_TV(cHandle h, tv_ptr tvn)
 
         vector[cHandle] get_outgoing(cHandle h)
-        bint is_source(cHandle h, cHandle source)
         vector[cHandle] get_incoming(cHandle h)
 
         # these should alias the proper types for sti/lti/vlti
@@ -184,7 +183,7 @@ cdef class AtomSpace:
     cdef bint owns_atomspace
 
 
-cdef extern from "opencog/cython/CythonUtils.h" namespace "opencog":
+cdef extern from "opencog/atomutils/AtomUtils.h" namespace "opencog":
     # C++: 
     #   
     #   HandleSeq get_predicates(const Handle& target, 
