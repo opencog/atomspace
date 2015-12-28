@@ -6,6 +6,8 @@
  */
 
 #include <opencog/atomutils/FuzzyMatchBasic.h>
+#include <opencog/atomutils/TypeUtils.h>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeModule.h>
 #include <opencog/guile/SchemePrimitive.h>
@@ -29,6 +31,11 @@ Handle PatternSCM::find_approximate_match(Handle hp)
 
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fuzzy-match");
 	return as->add_link(LIST_LINK, solns);
+}
+
+bool PatternSCM::value_is_type(Handle type, Handle val)
+{
+	return opencog::value_is_type(type, val);
 }
 
 // ========================================================
@@ -77,6 +84,10 @@ void PatternSCM::init(void)
 	// module, maybe some utilities module?
 	define_scheme_primitive("cog-fuzzy-match",
 		&PatternSCM::find_approximate_match, this, "query");
+
+	// This also belongs somewhere else. Not sure where.
+	define_scheme_primitive("cog-value-is-type?",
+		&PatternSCM::value_is_type, this, "query");
 }
 
 PatternSCM::~PatternSCM()
