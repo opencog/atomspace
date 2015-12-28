@@ -115,11 +115,6 @@ bool are_similar(const Handle& h1, const Handle& h2, bool strict_type_match)
 
 HandleSeq get_neighbors(const Handle& h, Type desiredLinkType)
 {
-    if (h == NULL) {
-        throw InvalidParamException(TRACE_INFO,
-            "Handle %d doesn't refer to a Atom", h.value());
-    }
-
     HandleSeq answer;
     for (const LinkPtr& link : h->getIncomingSet())
     {
