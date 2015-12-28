@@ -21,21 +21,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "InferenceSCM.h"
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemePrimitive.h>
 
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
+
 #include "UREConfigReader.h"
-#include <opencog/atomspace/AtomSpace.h>
-
+#include "InferenceSCM.h"
 using namespace opencog;
-
-// XXX HACK ALERT This needs to be static, in order for python to
-// work correctly.  The problem is that python keeps creating and
-// destroying this class, but it expects things to stick around.
-// Oh well. I guess that's OK, since the definition is meant to be
-// for the lifetime of the server, anyway.
-std::vector<FunctionWrap*> InferenceSCM::_binders;
 
 InferenceSCM::InferenceSCM() : ModuleWrap("opencog rule-engine") {}
 
@@ -43,20 +37,14 @@ InferenceSCM::InferenceSCM() : ModuleWrap("opencog rule-engine") {}
 /// Thus, all the definitions below happen in that module.
 void InferenceSCM::init(void)
 {
-    _binders.push_back(new FunctionWrap(do_forward_chaining,
-                                        "cog-fc", "rule-engine"));
-    _binders.push_back(new FunctionWrap(do_backward_chaining,
-                                        "cog-bc", "rule-engine"));
-    _binders.push_back(new FunctionWrap(get_rulebase_rules,
-                                        "ure-rbs-rules", "rule-engine"));
-}
+	define_scheme_primitive("cog-fc",
+		&InferenceSCM::do_forward_chaining, this, "rule-engine");
 
-InferenceSCM::~InferenceSCM()
-{
-#if PYTHON_BUG_IS_FIXED
-    for (FunctionWrap* pw : _binders)
-        delete pw;
-#endif
+	define_scheme_primitive("cog-bc",
+		&InferenceSCM::do_backward_chaining, this, "rule-engine");
+
+	define_scheme_primitive("ure-rbs-rules",
+		&InferenceSCM::get_rulebase_rules, this, "rule-engine");
 }
 
 namespace opencog {
@@ -73,12 +61,12 @@ namespace opencog {
  *
  * @return             A ListLink containing the result of FC inference.
  */
-Handle do_forward_chaining(AtomSpace* as,
-                           const Handle& hsource,
-                           const Handle& rbs,
-                           const Handle& hfocus_set)
+Handle InferenceSCM::do_forward_chaining(
+                           Handle hsource,
+                           Handle rbs,
+                           Handle hfocus_set)
 {
-#ifdef HAVE_GUILE
+    AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fc");
     HandleSeq focus_set = {};
 
     if (hfocus_set->getType() == SET_LINK)
@@ -93,22 +81,18 @@ Handle do_forward_chaining(AtomSpace* as,
     HandleSeq result = fc.get_chaining_result();
 
     return as->add_link(LIST_LINK, result);
-
-#else
-    return Handle::UNDEFINED;
-#endif
 }
 
-Handle do_backward_chaining(AtomSpace* as,
-                            const Handle& h,
-                            const Handle& rbs,
-                            const Handle& focus_link)
+Handle InferenceSCM::do_backward_chaining(
+                            Handle h,
+                            Handle rbs,
+                            Handle focus_link)
 {
     if (Handle::UNDEFINED == rbs)
         throw RuntimeException(TRACE_INFO,
             "InferenceSCM::do_backward_chaining - invalid rulebase!");
 
-#ifdef HAVE_GUILE
+    AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
     BackwardChainer bc(*as, rbs);
     bc.set_target(h, focus_link);
 
@@ -129,19 +113,15 @@ Handle do_backward_chaining(AtomSpace* as,
     }
 
     return as->add_link(LIST_LINK, soln_list_link);
-#else
-    return Handle::UNDEFINED;
-#endif
 }
 
-HandleSeq get_rulebase_rules(AtomSpace* as,
-                          const Handle& rbs)
+HandleSeq InferenceSCM::get_rulebase_rules(Handle rbs)
 {
-#ifdef HAVE_GUILE
     if (Handle::UNDEFINED == rbs)
         throw RuntimeException(TRACE_INFO,
             "InferenceSCM::get_rulebase_rules - invalid rulebase!");
 
+    AtomSpace *as = SchemeSmob::ss_get_env_as("ure-rbs-rules");
     UREConfigReader ure_config(*as, rbs);
     auto rules = ure_config.get_rules();
     HandleSeq hs;
@@ -155,9 +135,6 @@ HandleSeq get_rulebase_rules(AtomSpace* as,
     }
 
     return hs;
-#else
-    return HandleSeq();
-#endif
 }
 
 }
