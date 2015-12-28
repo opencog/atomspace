@@ -259,7 +259,7 @@ bool Variables::is_type_rec(Handle deep, const Handle& val) const
  * Type checker.
  *
  * Returns true/false if we are holding the variable `var`, and if
- * the `val` satisfies the type restructions that apply to `var`.
+ * the `val` satisfies the type restrictions that apply to `var`.
  */
 bool Variables::is_type(const Handle& var, const Handle& val) const
 {
