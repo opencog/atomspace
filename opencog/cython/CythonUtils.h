@@ -1,5 +1,5 @@
 /*
- * AtomUtils.h
+ * CythonUtils.h
  *
  * Copyright (C) 2014 OpenCog Foundation
  *
@@ -25,7 +25,6 @@
 #define _OPENCOG_ATOM_UTILS_H
 
 #include <opencog/atomspace/atom_types.h>
-#include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/types.h>
 

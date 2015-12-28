@@ -1,5 +1,5 @@
 /*
- * tests/atomspace/AtomUtilsUTest.cxxtest
+ * tests/cython/CythonUtilsUTest.cxxtest
  *
  * Copyright (C) 2015 OpenCog Foundation
  * All Rights Reserved
@@ -21,7 +21,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomutils/AtomUtils.h>
+#include <opencog/cython/CythonUtils.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
 #include <opencog/guile/load-file.h>

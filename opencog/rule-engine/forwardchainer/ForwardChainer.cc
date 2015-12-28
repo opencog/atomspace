@@ -26,7 +26,6 @@
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atomutils/Substitutor.h>
 #include <opencog/query/BindLinkAPI.h>

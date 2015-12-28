@@ -23,7 +23,6 @@
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/DeleteLink.h>
-#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atoms/execution/Instantiator.h>
 
 using namespace opencog;

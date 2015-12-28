@@ -30,6 +30,7 @@ file(COPY opencog/__init__.py DESTINATION opencog)
 
 
 ADD_LIBRARY(PythonEval SHARED
+	CythonUtils.cc
 	PythonEval.cc
 )
 ADD_DEPENDENCIES(PythonEval atomspace_cython)
