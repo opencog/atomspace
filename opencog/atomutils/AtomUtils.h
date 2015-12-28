@@ -42,8 +42,6 @@ const bool NO_SUBCLASSES = false;
  *
  * Contains methods and algorithms which might be useful to other processes.
  */
-HandleSeq get_all_nodes(Handle h);
-
 HandleSeq get_all_atoms(Handle h);
 
 UnorderedHandleSet get_all_unique_atoms(Handle h);
