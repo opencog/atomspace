@@ -47,6 +47,53 @@ HandleSeq get_target_neighbors(const Handle& h, Type desiredLinkType)
     return answer;
 }
 
+
+HandleSeq get_source_neighbors(const Handle& h, Type desiredLinkType)
+{
+    if (h == NULL) {
+        throw InvalidParamException(TRACE_INFO,
+            "Handle %d doesn't refer to a Atom", h.value());
+    }
+    HandleSeq answer;
+
+    for (const LinkPtr& link : h->getIncomingSet())
+    {
+        Type linkType = link->getType();
+        if (linkType == desiredLinkType)
+        {
+            for (const Handle& handle : link->getOutgoingSet()) {
+                if (handle == h) continue;
+                if (link->isSource(h)) continue;
+                answer.emplace_back(handle);
+            }
+        }
+    }
+    return answer;
+}
+
+HandleSeq get_all_neighbors(const Handle& h,
+                            Type desiredLinkType)
+{
+    if (h == NULL) {
+        throw InvalidParamException(TRACE_INFO,
+            "Handle %d doesn't refer to a Atom", h.value());
+    }
+    HandleSeq answer;
+
+    for (const LinkPtr& link : h->getIncomingSet())
+    {
+        Type linkType = link->getType();
+        if (linkType == desiredLinkType)
+        {
+            for (const Handle& handle : link->getOutgoingSet()) {
+                if (handle == h) continue;
+                answer.emplace_back(handle);
+            }
+        }
+    }
+    return answer;
+}
+
 /* Tail-recursive helper function. We mark it static, so that
  * gcc can optimize this, i.e. call it without buying the stack
  * frame. */

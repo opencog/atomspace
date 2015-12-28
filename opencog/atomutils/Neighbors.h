@@ -41,6 +41,8 @@ namespace opencog
  * @param linkType Follow only these types of links.
  */
 HandleSeq get_target_neighbors(const Handle& h, Type desiredLinkType);
+HandleSeq get_source_neighbors(const Handle& h, Type desiredLinkType);
+HandleSeq get_any_neighbors(const Handle& h, Type desiredLinkType);
 
 
 /**
