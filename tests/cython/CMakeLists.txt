@@ -12,7 +12,6 @@ LINK_DIRECTORIES(
 )
 
 LINK_LIBRARIES(
-	CythonUtils
 	atomspace
 	smob
 	clearbox
