@@ -41,8 +41,7 @@ Handle URECommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
 	himplicant = replace_nodes_with_varnode(himplicant);
 
 	UnorderedHandleSet variable_nodes;
-	get_outgoing_nodes(himplicant, variable_nodes, {
-			VARIABLE_NODE });
+	get_outgoing_nodes(himplicant, variable_nodes, VARIABLE_NODE);
 	HandleSeq list_link_elem;
 
 	// For searching ImplicationLinks with variables.
@@ -65,10 +64,7 @@ Handle URECommons::replace_nodes_with_varnode(Handle& handle,
                                               Type t /*=VARIABLE_NODE*/)
 {
 	UnorderedHandleSet hvars;
-	if (t == NODE)
-		get_outgoing_nodes(handle, hvars); // Get every node
-	else
-		get_outgoing_nodes(handle, hvars, { t });
+	get_outgoing_nodes(handle, hvars, t);
 	map<Handle, Handle> node_unique_var_map;
 	for (const Handle& h : hvars)
 		node_unique_var_map[h] = _as.add_node(VARIABLE_NODE,

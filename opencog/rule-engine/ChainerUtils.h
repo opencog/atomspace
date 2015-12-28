@@ -39,15 +39,13 @@ namespace opencog
  * Given an atom (a link or node), Return all its children nodes
  * (i.e. traversing the outgoings recursively)
  *
- * @param hinput - an atoms to be looked
- * @param types - a list of type nodes to look for. if vector
- *                is empty, all kinds of nodes are looked
- * @return - a set of nodes
+ * @param hinput - an atom to be searched
+ * @param types - a type to look for.
+ * @param retur - a set of nodes
  */
 void get_outgoing_nodes(const Handle& hinput,
                         UnorderedHandleSet& retur,
-                        const std::vector<Type>& types =
-                                      std::vector<Type>());
+                        Type types = NODE);
 
 /**
  * Makes a one to one similarity matching. If the atoms

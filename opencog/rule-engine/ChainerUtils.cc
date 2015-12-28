@@ -32,24 +32,22 @@ namespace opencog
 
 void get_outgoing_nodes(const Handle& hinput,
                         UnorderedHandleSet& node_set,
-                        const std::vector<Type>& types)
+                        Type type)
 {
     LinkPtr link(LinkCast(hinput));
     // Recursive case
     if (link) {
         for (const Handle& h : link->getOutgoingSet())
-            get_outgoing_nodes(h, node_set, types);
+            get_outgoing_nodes(h, node_set, type);
         return;
     }
 
     // Base case
-    if (types.empty()) return;  // Empty means all kinds of nodes
-
-    // Check if this node is in our wish list
-    Type t = NodeCast(hinput)->getType();
-    auto it = find(types.begin(), types.end(), t);
-    if (it != types.end())
+    if (NODE == type or // Empty means all kinds of nodes
+        NodeCast(hinput)->getType() == type)
+    {
         node_set.insert(hinput);
+    }
 }
 
 

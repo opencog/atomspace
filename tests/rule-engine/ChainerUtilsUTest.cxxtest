@@ -59,16 +59,19 @@ void ChainerUtilsUTest::test_get_outgoing_nodes()
 		ABP = as.add_link(LIST_LINK, AB, P);
 
 	// Get all nodes from ABP
-	TS_ASSERT_EQUALS(get_outgoing_nodes(ABP),
-	                 UnorderedHandleSet({A, B, P}));
+	UnorderedHandleSet abp;
+	get_outgoing_nodes(ABP, abp);
+	TS_ASSERT_EQUALS(abp, UnorderedHandleSet({A, B, P}));
 
 	// Get all concept nodes from ABP
-	TS_ASSERT_EQUALS(get_outgoing_nodes(ABP, {CONCEPT_NODE}),
-	                 UnorderedHandleSet({A, B}));
+	UnorderedHandleSet ab;
+	get_outgoing_nodes(ABP, ab, CONCEPT_NODE);
+	TS_ASSERT_EQUALS(ab, UnorderedHandleSet({A, B}));
 
 	// Get all predicate nodes from ABP
-	TS_ASSERT_EQUALS(get_outgoing_nodes(ABP, {PREDICATE_NODE}),
-	                 UnorderedHandleSet({P}));
+	UnorderedHandleSet p;
+	get_outgoing_nodes(ABP, p, PREDICATE_NODE);
+	TS_ASSERT_EQUALS(p, UnorderedHandleSet({P}));
 }
 
 // Test get_distant_neighbors()
