@@ -32,11 +32,13 @@ namespace opencog
 
 HandleSeq get_target_neighbors(const Handle& h, Type desiredLinkType)
 {
+    if (classserver().isA(desiredLinkType, UNORDERED_LINK))
+        return HandleSeq();
+
     HandleSeq answer;
     for (const LinkPtr& link : h->getIncomingSet())
     {
         if (link->getType() != desiredLinkType) continue;
-        if (classserver().isA(link->getType(), UNORDERED_LINK)) continue;
         if (link->getOutgoingAtom(0) != h) continue;
 
         for (const Handle& handle : link->getOutgoingSet()) {
@@ -50,12 +52,14 @@ HandleSeq get_target_neighbors(const Handle& h, Type desiredLinkType)
 
 HandleSeq get_source_neighbors(const Handle& h, Type desiredLinkType)
 {
+    if (classserver().isA(desiredLinkType, UNORDERED_LINK))
+        return HandleSeq();
+
     HandleSeq answer;
 
     for (const LinkPtr& link : h->getIncomingSet())
     {
         if (link->getType() != desiredLinkType) continue;
-        if (classserver().isA(link->getType(), UNORDERED_LINK)) continue;
         if (link->getOutgoingAtom(0) == h) continue;
 
         for (const Handle& handle : link->getOutgoingSet()) {
