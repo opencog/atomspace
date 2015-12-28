@@ -67,15 +67,9 @@ bool are_similar(const Handle& h1, const Handle& h2, bool strict_type_match);
  * returning their outgoing sets.
  *
  * @param h Get neighbours for the atom this handle points to.
- * @param fanin Whether directional (ordered) links point to this
- *              node should beconsidered.
- * @param fanout Whether directional (ordered) links point from this
- *               node to another should be considered.
  * @param linkType Follow only these types of links.
- * @param subClasses Follow subtypes of linkType too.
  */
-HandleSeq get_neighbors(const Handle&, bool fanin=true, bool fanout=true,
-                        Type linkType=LINK, bool subClasses=true);
+HandleSeq get_neighbors(const Handle&, Type linkType=LINK);
 
 /**
  * Return all atoms connected to h up to a given distance. Both

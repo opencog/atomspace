@@ -122,7 +122,7 @@ unsigned int Target::rule_count(const Rule& r) const
 	if (htarget == Handle::UNDEFINED)
 		return 0;
 
-	HandleSeq q = get_neighbors(htarget, false, true, SET_LINK, false);
+	HandleSeq q = get_neighbors(htarget, SET_LINK);
 
 	return std::count(q.begin(), q.end(), hname);
 }

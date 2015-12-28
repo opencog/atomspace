@@ -113,25 +113,21 @@ bool are_similar(const Handle& h1, const Handle& h2, bool strict_type_match)
     return false;
 }
 
-HandleSeq get_neighbors(const Handle& h, bool fanin,
-                        bool fanout, Type desiredLinkType,
-                        bool subClasses)
+HandleSeq get_neighbors(const Handle& h, Type desiredLinkType)
 {
     if (h == NULL) {
         throw InvalidParamException(TRACE_INFO,
             "Handle %d doesn't refer to a Atom", h.value());
     }
-    HandleSeq answer;
 
+    HandleSeq answer;
     for (const LinkPtr& link : h->getIncomingSet())
     {
-        Type linkType = link->getType();
-        if ((linkType == desiredLinkType)
-            or (subClasses && classserver().isA(linkType, desiredLinkType))) {
+        if (link->isTarget(h)) continue;
+        if (link->getType() == desiredLinkType)
+        {
             for (const Handle& handle : link->getOutgoingSet()) {
                 if (handle == h) continue;
-                if (!fanout && link->isSource(h)) continue;
-                if (!fanin && link->isTarget(h)) continue;
                 answer.emplace_back(handle);
             }
         }
