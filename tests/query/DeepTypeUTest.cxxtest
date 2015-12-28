@@ -66,6 +66,7 @@ public:
 	void setUp(void);
 	void tearDown(void);
 
+	void test_is_type(void);
 	void test_get_signature(void);
 };
 
@@ -75,8 +76,54 @@ void DeepTypeUTest::tearDown(void)
 
 void DeepTypeUTest::setUp(void)
 {
+	as->clear();
 }
 
+/*
+ * Basic deep-type unit test.
+ */
+void DeepTypeUTest::test_is_type(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+	config().set("SCM_PRELOAD", "tests/query/deep-types.scm");
+	load_scm_files_from_config(*as);
+
+	std::string rv = eval->eval(
+		"(cog-value-is-type? "
+		"	(Signature (Inheritance (Concept \"foo\") (Type \"ConceptNode\")))"
+		"	(Inheritance (Concept \"foo\") (ConceptNode \"bar\")))");
+
+	printf("expect true, got %s", rv.c_str());
+	TSM_ASSERT("Expected true", rv == "#t\n");
+
+	rv = eval->eval(
+		"(cog-value-is-type? "
+		"	(Signature (Inheritance (Concept \"foo\") (Type \"ConceptNode\")))"
+		"	(Inheritance (Concept \"failure-mode\") (ConceptNode \"bar\")))");
+
+	printf("expect false, got %s", rv.c_str());
+	TSM_ASSERT("Expected false", rv == "#f\n");
+
+	rv = eval->eval(
+		"(cog-value-is-type? "
+		"	(DefinedType \"My foo type\")"
+		"	(Inheritance (Concept \"foo\") (ConceptNode \"bar\")))");
+
+	printf("expect true, got %s", rv.c_str());
+	TSM_ASSERT("Expected true", rv == "#t\n");
+
+	rv = eval->eval(
+		"(cog-value-is-type? "
+		"	(DefinedType \"My foo type\")"
+		"	(Inheritance (Concept \"failure-mode\") (ConceptNode \"bar\")))");
+
+	printf("expect false, got %s", rv.c_str());
+	TSM_ASSERT("Expected false", rv == "#f\n");
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
 /*
  * Basic deep-type unit test.
  */

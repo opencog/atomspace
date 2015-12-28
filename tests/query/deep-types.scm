@@ -73,3 +73,32 @@
 		(AndLink (Variable "$x"))))
 
 ; (cog-execute! predicate-search)
+; =============================================================
+
+; The cog-value-is-type? function allows signatures to be
+; directly validated. Consider these examples:
+
+; Should evaluate to true.
+;(cog-value-is-type?
+;   (Signature (Inheritance (Concept "foo") (Type "ConceptNode")))
+;   (Inheritance (Concept "foo") (ConceptNode "bar")))
+
+; Should evaluate to false.
+;(cog-value-is-type?
+;   (Signature (Inheritance (Concept "foo") (Type "ConceptNode")))
+;   (Inheritance (Concept "failure-mode") (ConceptNode "bar")))
+
+; We can define new types, too.
+(DefineLink
+   (DefinedType "My foo type")
+   (Signature (Inheritance (Concept "foo") (Type "ConceptNode"))))
+
+; Should evaluate to true
+;(cog-value-is-type?
+;   (DefinedType "My foo type")
+;   (Inheritance (Concept "foo") (ConceptNode "bar")))
+
+; Should evaluate to false.
+;(cog-value-is-type?
+;   (DefinedType "My foo type")
+;   (Inheritance (Concept "failure-mode") (ConceptNode "bar")))
