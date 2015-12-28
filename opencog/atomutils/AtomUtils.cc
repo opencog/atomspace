@@ -31,55 +31,6 @@ namespace opencog
 {
 
 /**
- * Get all the nodes within a link and its sublinks.
- *
- * @param h     the top level link
- * @return      a HandleSeq of nodes
- */
-HandleSeq get_all_nodes(Handle h)
-{
-    HandleSeq results;
-
-    LinkPtr lll(LinkCast(h));
-    if (lll)
-        for (const Handle& o : lll->getOutgoingSet())
-        {
-            HandleSeq sub = get_all_nodes(o);
-            results.insert(results.end(), sub.begin(), sub.end());
-        }
-    else
-        results.emplace_back(h);
-
-    // Handle is copy safe, but in this case C++11 would move it
-    return results;
-}
-
-/**
- * Get all unique nodes within a link and its sublinks.
- *
- * Similar to getAllNodes except there will be no repetition.
- *
- * @param h     the top level link
- * @return      a UnorderedHandleSet of nodes
- */
-UnorderedHandleSet get_all_unique_nodes(Handle h)
-{
-    UnorderedHandleSet results;
-
-    LinkPtr lll(LinkCast(h));
-    if (lll)
-        for (const Handle& o : lll->getOutgoingSet())
-        {
-            UnorderedHandleSet sub = get_all_unique_nodes(o);
-            results.insert(sub.begin(), sub.end());
-        }
-    else
-        results.insert(h);
-
-    return results;
-}
-
-/**
  * Get all the atoms within a link and its sublinks.
  *
  * @param h     the top level link

@@ -44,8 +44,6 @@ const bool NO_SUBCLASSES = false;
  */
 HandleSeq get_all_nodes(Handle h);
 
-UnorderedHandleSet get_all_unique_nodes(Handle h);
-
 HandleSeq get_all_atoms(Handle h);
 
 UnorderedHandleSet get_all_unique_atoms(Handle h);

@@ -29,6 +29,32 @@
 
 using namespace opencog;
 
+/**
+ * Get all the nodes within a link and its sublinks.
+ *
+ * @param h     the top level link
+ * @return      a HandleSeq of nodes
+ */
+static HandleSeq get_all_nodes(const Handle& h)
+{
+    HandleSeq results;
+
+    LinkPtr lll(LinkCast(h));
+    if (lll)
+        for (const Handle& o : lll->getOutgoingSet())
+        {
+            HandleSeq sub = get_all_nodes(o);
+            results.insert(results.end(), sub.begin(), sub.end());
+        }
+    else
+        results.emplace_back(h);
+
+    // Handle is copy safe, but in this case C++11 would move it
+    return results;
+}
+
+}
+
 /** Set up the target. */
 void FuzzyMatchBasic::start_search(const Handle& trg)
 {
