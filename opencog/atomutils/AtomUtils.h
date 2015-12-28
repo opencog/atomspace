@@ -1,5 +1,5 @@
 /*
- * CythonUtils.h
+ * AtomUtils.h
  *
  * Copyright (C) 2014 OpenCog Foundation
  *

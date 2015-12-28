@@ -1,5 +1,5 @@
 /*
- * CythonUtils.cc
+ * AtomUtils.cc
  *
  * Copyright (C) 2014 OpenCog Foundation
  *
@@ -25,7 +25,7 @@
 
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include "CythonUtils.h"
+#include "AtomUtils.h"
 
 namespace opencog
 {

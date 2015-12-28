@@ -1,5 +1,6 @@
 
 ADD_LIBRARY (atomutils SHARED
+	AtomUtils
 	FindUtils
 	FuzzyMatch
 	FuzzyMatchBasic
@@ -22,6 +23,7 @@ ELSE (CYGWIN)
 ENDIF (CYGWIN)
 
 INSTALL (FILES
+	AtomUtils.h
 	FindUtils.h
 	FollowLink.h
 	ForeachChaseLink.h
