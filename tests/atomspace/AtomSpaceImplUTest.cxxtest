@@ -83,13 +83,6 @@ bool isLink(Handle h)
 bool isNode(Handle h) 
 { return classserver().isA(h->getType(), NODE); }
 
-bool isSource(Handle source, Handle link)
-{
-    LinkPtr l(LinkCast(link));
-    if (l) return l->isSource(source);
-    return false;
-}
-
 HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
 {
     char buf[256];
@@ -660,16 +653,6 @@ public:
         outgoing2.push_back(l1);
         Handle l2 = atomSpace->add_link(EVALUATION_LINK, outgoing2);
         l2->setTruthValue(tv2);
-
-        // Ensure first in outgoing is the source
-        TS_ASSERT(isSource(h1,l2));
-        // Ensure second in outgoing is not the source
-        TS_ASSERT(!isSource(l1,l2));
-
-        // Ensure all in the outgoing set of unordered link are considered a source
-        TS_ASSERT(isSource(h2,l1));
-        TS_ASSERT(isSource(h3,l1));
-
     }
 
     void testGetHandle_bugfix1() {
