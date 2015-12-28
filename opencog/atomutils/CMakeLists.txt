@@ -4,6 +4,7 @@ ADD_LIBRARY (atomutils SHARED
 	FindUtils
 	FuzzyMatch
 	FuzzyMatchBasic
+	Neighbors
 )
 
 ADD_DEPENDENCIES(atomutils opencog_atom_types)
@@ -30,6 +31,7 @@ INSTALL (FILES
 	FuzzyMatch.h
 	FuzzyMatchBasic.h
 	HandleMap.h
+	Neighbors.h
 	Substitutor.h
 	DESTINATION "include/opencog/atomutils"
 )

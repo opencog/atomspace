@@ -62,28 +62,6 @@ void get_outgoing_nodes(const Handle& hinput,
  */
 bool are_similar(const Handle& h1, const Handle& h2, bool strict_type_match);
 
-/**
- * Returns neighboring atoms, following incoming links and
- * returning their outgoing sets.
- *
- * @param h Get neighbours for the atom this handle points to.
- * @param linkType Follow only these types of links.
- */
-HandleSeq get_neighbors(const Handle&, Type linkType=LINK);
-
-/**
- * Return all atoms connected to h up to a given distance. Both
- * incomings and outgoings are considered (unlike getNeighbors).
- *
- * @param h     the center atom
- * @param dist  the maximum distance, or none if negative
- * @return      an UnorderedHandleSet of neighbors
- *
- * XXX FIXME -- this function is curently not used anywhere. Perhaps
- * it should be deleted?
- */
-UnorderedHandleSet get_distant_neighbors(const Handle& h, int dist = 1);
-
 /** @}*/
 }
 
