@@ -21,13 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/ClassServer.h>
 
 #include <opencog/atoms/TypeNode.h>
-
 #include <opencog/atoms/core/DefineLink.h>
+
+#include "TypeUtils.h"
 
 using namespace opencog;
 
@@ -36,7 +36,7 @@ using namespace opencog;
 /**
  * Type checker.  Returns true if `val` is of type `deep`.
  */
-bool is_type(Handle deep, const Handle& val)
+bool opencog::is_type(Handle deep, const Handle& val)
 {
 	Type valtype = val->getType();
 	Type dpt = deep->getType();
