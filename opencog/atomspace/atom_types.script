@@ -115,9 +115,19 @@ JOIN_LINK <- PARALLEL_LINK
 // ---------------------------------------------------------
 // Types and variables and signatures.
 
-// Type declarations
+// Core (inbuilt) type declaration, shuch as that in this file.
 TYPE_NODE <- NODE
-TYPE_CHOICE <- OR_LINK     // used for type polymorphism
+
+// User-defined type, gives SignatureLink a name, via DefineLink
+DEFINED_TYPE_NODE <- TYPE_NODE
+
+// Used for type polymorphism
+TYPE_CHOICE <- OR_LINK
+
+// Type constructor.  Corresponds to right-arrow of functional
+// functional languages, viz. arity-2, first arg is input, 2nd
+// arg is output.
+ARROW_LINK <- ORDERED_LINK
 
 // The SignatureLink implements "deep types", a way for specifying
 // the type of an entire graph, and not just some node or link.
@@ -134,7 +144,8 @@ FUZZY_LINK <- SIGNATURE_LINK
 
 // Variables and variable types
 VARIABLE_NODE <- NODE
-TYPED_VARIABLE_LINK <- ORDERED_LINK
+TYPED_ATOM_LINK <- ORDERED_LINK
+TYPED_VARIABLE_LINK <- TYPED_ATOM_LINK
 
 // A list of variables or variable declarations.
 VARIABLE_LIST <- LIST_LINK
@@ -143,6 +154,7 @@ VARIABLE_LIST <- LIST_LINK
 // sequence.  XXX TODO - this could be changed to a link, so that
 // it resenbles a FUZZY_LINK more closely?  FuzzyLink implements
 // the same idea, but in a more general fashion...
+// Variadic, the globbed values are meant to be of all same type.
 GLOB_NODE <- VARIABLE_NODE
 
 // A FreeLink is any kind of link that might have free variables in it.
