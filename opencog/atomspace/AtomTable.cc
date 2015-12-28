@@ -47,6 +47,7 @@
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/core/StateLink.h>
+#include <opencog/atoms/core/TypedAtomLink.h>
 #include <opencog/atoms/core/UniqueLink.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/core/ImplicationLink.h>
@@ -277,6 +278,9 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
     } else if (SATISFACTION_LINK == atom_type) {
         if (NULL == PatternLinkCast(atom))
             return createPatternLink(*LinkCast(atom));
+    } else if (TYPED_ATOM_LINK == atom_type) {
+        if (NULL == TypedAtomLinkCast(atom))
+            return createTypedAtomLink(*LinkCast(atom));
     } else if (UNIQUE_LINK == atom_type) {
         if (NULL == UniqueLinkCast(atom))
             return createUniqueLink(*LinkCast(atom));
@@ -373,6 +377,8 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
         return createPatternLink(*LinkCast(atom));
     if (STATE_LINK == atom_type)
         return createStateLink(*LinkCast(atom));
+    if (TYPED_ATOM_LINK == atom_type)
+        return createTypedAtomLink(*LinkCast(atom));
     if (UNIQUE_LINK == atom_type)
         return createUniqueLink(*LinkCast(atom));
     if (VARIABLE_LIST == atom_type)
