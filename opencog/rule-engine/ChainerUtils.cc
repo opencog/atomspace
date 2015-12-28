@@ -123,13 +123,13 @@ HandleSeq get_neighbors(const Handle& h, Type desiredLinkType)
     HandleSeq answer;
     for (const LinkPtr& link : h->getIncomingSet())
     {
-        if (link->isTarget(h)) continue;
-        if (link->getType() == desiredLinkType)
-        {
-            for (const Handle& handle : link->getOutgoingSet()) {
-                if (handle == h) continue;
-                answer.emplace_back(handle);
-            }
+        if (classserver().isA(link->getType(), UNORDERED_LINK)) continue;
+        if (link->getOutgoingAtom(0) != h) continue;
+        if (link->getType() != desiredLinkType) continue;
+
+        for (const Handle& handle : link->getOutgoingSet()) {
+           if (handle == h) continue;
+           answer.emplace_back(handle);
         }
     }
     return answer;
