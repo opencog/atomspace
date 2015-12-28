@@ -77,9 +77,9 @@ ADD_LIBRARY(atomspace_cython SHARED
 ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace_cython
+	CythonUtils
 	atomspace
 	clearbox
-	atomutils
 	atomspaceutils
 	atomcore
 	${COGUTIL_LIBRARY}
@@ -132,6 +132,7 @@ ADD_LIBRARY(utilities_cython SHARED
 )
 
 TARGET_LINK_LIBRARIES(utilities_cython
+	CythonUtils
 	PythonEval
 	clearbox
 	atomspace
@@ -159,6 +160,7 @@ ADD_LIBRARY(bindlink_cython SHARED
 )
 
 TARGET_LINK_LIBRARIES(bindlink_cython
+	CythonUtils
 	query
 	execution
 	${PYTHON_LIBRARIES}
@@ -202,6 +204,7 @@ IF (HAVE_GUILE)
 	)
 
 	TARGET_LINK_LIBRARIES(scheme_wrapper
+		CythonUtils
 		query
 		execution
 		smob
