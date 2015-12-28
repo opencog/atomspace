@@ -1,5 +1,5 @@
 /*
- * DefineLink.cc
+ * TypedAtomLink.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  *
@@ -23,62 +23,62 @@
 
 #include <opencog/atomspace/ClassServer.h>
 
-#include "DefineLink.h"
+#include "TypedAtomLink.h"
 
 using namespace opencog;
 
-void DefineLink::init()
+void TypedAtomLink::init()
 {
-	// Must have name and body
+	// Must have atom and type specification.
 	if (2 != _outgoing.size())
 		throw SyntaxException(TRACE_INFO,
-			"Expecting name and definition, got size %d", _outgoing.size());
+			"Expecting atom and type specification, got size %s",
+			toString().c_str());
 
 	// Perform some additional checks in the UniqueLink init method
 	UniqueLink::init(false);
 
-#if ALREADY_BROKEN
-	// Type-check. Probably not needed, probably too strict, but what
-	// the heck, since we are here... Heh. There's already code that
-	// defines shit more loosely than this. Bummer.
-	Type dtype = _outgoing[0]->getType();
-	if (DEFINED_SCHEMA_NODE != dtype and
-	    DEFINED_PREDICATE_NODE != dtype and
-	    DEFINED_TYPE_NODE != dtype)
+	// Type-check.
+	Type dtype = _outgoing[1]->getType();
+	if (TYPE_NODE != dtype and
+	    DEFINED_TYPE_NODE != dtype and
+	    TYPE_CHOICE != dtype and
+	    SIGNATURE_LINK != dtype and
+	    ARROW_LINK != dtype)
 		throw SyntaxException(TRACE_INFO,
-			"Expecting Defined-X-Node, got %s",
+			"Expecting type defintion, got %s",
 				classserver().getTypeName(dtype).c_str());
-#endif
+
 }
 
-DefineLink::DefineLink(const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: UniqueLink(DEFINE_LINK, oset, tv, av)
+TypedAtomLink::TypedAtomLink(const HandleSeq& oset,
+                             TruthValuePtr tv, AttentionValuePtr av)
+	: UniqueLink(TYPED_ATOM_LINK, oset, tv, av)
 {
 	init();
 }
 
-DefineLink::DefineLink(const Handle& name, const Handle& defn,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: UniqueLink(DEFINE_LINK, HandleSeq({name, defn}), tv, av)
+TypedAtomLink::TypedAtomLink(const Handle& name, const Handle& defn,
+                             TruthValuePtr tv, AttentionValuePtr av)
+	: UniqueLink(TYPED_ATOM_LINK, HandleSeq({name, defn}), tv, av)
 {
 	init();
 }
 
-DefineLink::DefineLink(Link &l)
+TypedAtomLink::TypedAtomLink(Link &l)
 	: UniqueLink(l)
 {
 	init();
 }
 
 /**
- * Get the definition associated with the alias.
- * This will be the second atom of some DefineLink, where
- * `alias` is the first.
+ * Get the type description associated with the alias.
+ * This will be the second atom of some TypedAtomLink, where
+ * `atom` is the first.
  */
-Handle DefineLink::get_definition(const Handle& alias)
+Handle TypedAtomLink::get_type(const Handle& atom)
 {
-	Handle uniq(get_unique(alias, DEFINE_LINK, false));
+	Handle uniq(get_unique(atom, TYPED_ATOM_LINK, false));
 	LinkPtr luniq(LinkCast(uniq));
 	return luniq->getOutgoingAtom(1);
 }
