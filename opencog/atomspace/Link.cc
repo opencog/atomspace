@@ -129,49 +129,6 @@ std::string Link::toString(const std::string& indent)
     return answer;
 }
 
-bool Link::isSource(const Handle& handle) const
-{
-    // On ordered links, only the first position in the outgoing set is a source
-    // of this link. So, if the handle given is equal to the first position,
-    // true is returned.
-    Arity arity = getArity();
-    if (classserver().isA(_type, ORDERED_LINK)) {
-        return arity > 0 && _outgoing[0] == handle;
-    } else if (classserver().isA(_type, UNORDERED_LINK)) {
-        // If the link is unordered, the outgoing set is scanned, and the
-        // method returns true if any position is equal to the handle given.
-        for (Arity i = 0; i < arity; i++) {
-            if (_outgoing[i] == handle) {
-                return true;
-            }
-        }
-        return false;
-    } else {
-        throw InvalidParamException(TRACE_INFO, "Link::isSource(Handle) unknown link type %d", _type);
-    }
-    return false;
-}
-
-bool Link::isSource(size_t i) const
-{
-    // tests if the int given is valid.
-    if (i > getArity()) {
-        throw IndexErrorException(TRACE_INFO, "Link::isSource(size_t) invalid index argument");
-    }
-
-    // on ordered links, only the first position in the outgoing set is a source
-    // of this link. So, if the int passed is 0, true is returned.
-    if (classserver().isA(_type, ORDERED_LINK)) {
-        return i == 0;
-    } else if (classserver().isA(_type, UNORDERED_LINK)) {
-        // on unordered links, the only thing that matters is if the int passed
-        // is valid (if it is within 0..arity).
-        return true;
-    } else {
-        throw InvalidParamException(TRACE_INFO, "Link::isSource(int) unknown link type %d", _type);
-    }
-}
-
 bool Link::operator==(const Atom& other) const
 {
     if (getType() != other.getType()) return false;
