@@ -138,7 +138,7 @@ struct Variables : public FreeVariables
 	std::string to_string() const;
 
 private:
-	bool is_type_rec(const Handle&, const Handle&) const;
+	bool is_type_rec(Handle, const Handle&) const;
 };
 
 /** @}*/

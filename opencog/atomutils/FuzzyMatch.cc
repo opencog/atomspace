@@ -22,7 +22,6 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FindUtils.h>
 
 #include "FuzzyMatch.h"

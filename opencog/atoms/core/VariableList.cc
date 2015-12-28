@@ -170,7 +170,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 						"Unexpected contents in SignatureLink\n"
 						"Expected arity==1, got %s", vartype->toString().c_str());
 
-				deepset.insert(sig[0]);
+				deepset.insert(ht);
 			}
 			else if (FUZZY_LINK == var_type)
 			{
@@ -180,14 +180,14 @@ void VariableList::get_vartype(const Handle& htypelink)
 						"Unexpected contents in FuzzyLink\n"
 						"Expected arity==1, got %s", vartype->toString().c_str());
 
-				fuzzset.insert(fuz[0]);
+				fuzzset.insert(ht);
 			}
 			else
 			{
 				throw InvalidParamException(TRACE_INFO,
 					"VariableChoice has unexpected content:\n"
-				              "Expected TypeNode, got %s",
-				              classserver().getTypeName(ht->getType()).c_str());
+					"Expected TypeNode, got %s",
+					    classserver().getTypeName(ht->getType()).c_str());
 			}
 		}
 
@@ -207,7 +207,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 				"Expected arity==1, got %s", vartype->toString().c_str());
 
 		std::set<Handle> ts;
-		ts.insert(tset[0]);
+		ts.insert(vartype);
 		_varlist._deep_typemap.insert({varname, ts});
 	}
 	else if (FUZZY_LINK == t)
@@ -219,7 +219,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 				"Expected arity==1, got %s", vartype->toString().c_str());
 
 		std::set<Handle> ts;
-		ts.insert(tset[0]);
+		ts.insert(vartype);
 		_varlist._fuzzy_typemap.insert({varname, ts});
 	}
 	else

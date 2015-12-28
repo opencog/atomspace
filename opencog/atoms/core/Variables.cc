@@ -28,6 +28,7 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atoms/TypeNode.h>
 
+#include "DefineLink.h"
 #include "ScopeLink.h"
 #include "VariableList.h"
 #include "Variables.h"
@@ -182,10 +183,26 @@ bool Variables::is_type(const Handle& h) const
 /**
  * Recursive deep-type checker.
  */
-bool Variables::is_type_rec(const Handle& deep, const Handle& val) const
+bool Variables::is_type_rec(Handle deep, const Handle& val) const
 {
 	Type valtype = val->getType();
 	Type dpt = deep->getType();
+
+	// If its a user-defined type, replace by it's defintion.
+	if (DEFINED_TYPE_NODE == dpt)
+	{
+		deep = DefineLink::get_definition(deep);
+		dpt = deep->getType();
+	}
+
+	// If its a signature, unpack it now.
+	if (SIGNATURE_LINK == dpt)
+	{
+		LinkPtr dptr(LinkCast(deep));
+		deep = dptr->getOutgoingAtom(0);
+		dpt = deep->getType();
+	}
+
 	if (TYPE_NODE == dpt)
 	{
 		Type deeptype = TypeNodeCast(deep)->get_value();
@@ -242,7 +259,7 @@ bool Variables::is_type_rec(const Handle& deep, const Handle& val) const
  * Type checker.
  *
  * Returns true/false if we are holding the variable `var`, and if
- * the `val` satisfies the type restructions that apply to `var`.
+ * the `val` satisfies the type restrictions that apply to `var`.
  */
 bool Variables::is_type(const Handle& var, const Handle& val) const
 {

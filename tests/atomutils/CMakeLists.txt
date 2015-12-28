@@ -5,6 +5,5 @@ LINK_LIBRARIES(
 	smob
 )
 
-ADD_CXXTEST(AtomUtilsUTest)
 ADD_CXXTEST(FindUtilsUTest)
 ADD_CXXTEST(FuzzyUTest)
