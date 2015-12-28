@@ -48,7 +48,6 @@ public:
 	void test_get_outgoing_nodes();
 	void test_get_predicates();
 	void test_get_predicates_for();
-	void test_are_similar();
 };
 
 // Test get_all_nodes()
@@ -241,41 +240,3 @@ void AtomUtilsUTest::test_get_predicates_for()
 	HandleSeq eatsBacon {dogEatsBacon, programmerEatsBacon};
 	TS_ASSERT_EQUALS(get_predicates_for(bacon, eats), eatsBacon);
 }
-
-void AtomUtilsUTest::test_are_similar()
-{
-    AtomSpace as;
-    config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
-                 "opencog/scm/utilities.scm, "
-                 "opencog/scm/av-tv.scm");
-    load_scm_files_from_config(as);
-
-    SchemeEval eval(&as);
-
-    Handle h1 = eval.eval_h("(EvaluationLink "
-                            "(PredicateNode \"chirps\")"
-                            "(ConceptNode \"Tweety\"))");
-
-    Handle h2 = eval.eval_h("(EvaluationLink"
-                            "(PredicateNode \"chirps\")"
-                            "(ConceptNode \"Peter\"))");
-    Handle h3 = eval.eval_h("(InheritanceLink"
-                            "(ConceptNode \"Peter\")"
-                            "(ConceptNode \"Frog\"))");
-    Handle h4 = eval.eval_h("(SetLink"
-                            "(PredicateNode \"chirps\")"
-                            "(ConceptNode \"X\"))"
-                            "(ConceptNode \"Z\"))"
-                            ")");
-    Handle h5 = eval.eval_h("(SetLink"
-                            "(ConceptNode \"X\"))"
-                            "(PredicateNode \"chirps\")"
-                            "(ConceptNode \"Z\"))"
-                            ")");
-
-    TS_ASSERT_EQUALS(true, are_similar(h1, h2, true));
-    TS_ASSERT_EQUALS(false, are_similar(h1, h3, true));
-    TS_ASSERT_EQUALS(true, are_similar(h1, h3, false));
-    TS_ASSERT_EQUALS(true, are_similar(h4, h5, true));
-}
-

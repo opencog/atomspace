@@ -1,0 +1,84 @@
+/*
+ * tests/rule-engine/SimilarUTest.cxxtest
+ *
+ * Copyright (C) 2015 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/util/Logger.h>
+#include <opencog/util/Config.h>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/load-file.h>
+#include <opencog/rule-engine/forwardchainer/FCStat.h>
+
+using namespace opencog;
+
+class SimilarUTest :  public CxxTest::TestSuite
+{
+private:
+
+public:
+    SimilarUTest()
+    {
+        logger().setPrintToStdoutFlag(true);
+    }
+	void test_are_similar();
+};
+
+
+void SimilarUTest::test_are_similar()
+{
+    AtomSpace as;
+    config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
+                 "opencog/scm/utilities.scm, "
+                 "opencog/scm/av-tv.scm");
+    load_scm_files_from_config(as);
+
+    SchemeEval eval(&as);
+
+    Handle h1 = eval.eval_h("(EvaluationLink "
+                            "(PredicateNode \"chirps\")"
+                            "(ConceptNode \"Tweety\"))");
+
+    Handle h2 = eval.eval_h("(EvaluationLink"
+                            "(PredicateNode \"chirps\")"
+                            "(ConceptNode \"Peter\"))");
+    Handle h3 = eval.eval_h("(InheritanceLink"
+                            "(ConceptNode \"Peter\")"
+                            "(ConceptNode \"Frog\"))");
+    Handle h4 = eval.eval_h("(SetLink"
+                            "(PredicateNode \"chirps\")"
+                            "(ConceptNode \"X\"))"
+                            "(ConceptNode \"Z\"))"
+                            ")");
+    Handle h5 = eval.eval_h("(SetLink"
+                            "(ConceptNode \"X\"))"
+                            "(PredicateNode \"chirps\")"
+                            "(ConceptNode \"Z\"))"
+                            ")");
+
+    TS_ASSERT_EQUALS(true, are_similar(h1, h2, true));
+    TS_ASSERT_EQUALS(false, are_similar(h1, h3, true));
+    TS_ASSERT_EQUALS(true, are_similar(h1, h3, false));
+    TS_ASSERT_EQUALS(true, are_similar(h4, h5, true));
+}
+

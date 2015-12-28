@@ -20,7 +20,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <opencog/atomutils/AtomUtils.h>
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
 
 #include "FCStat.h"
 
@@ -39,7 +40,7 @@ using namespace opencog;
  *
  * @return  A boolean true if similar and false otherwise.
  */
-static bool are_similar(const Handle& h1, const Handle& h2, bool strict_type_match)
+bool opencog::are_similar(const Handle& h1, const Handle& h2, bool strict_type_match)
 {
     if (h1 == h2)
         return true;
