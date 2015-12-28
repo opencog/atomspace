@@ -195,6 +195,14 @@ bool Variables::is_type_rec(Handle deep, const Handle& val) const
 		dpt = deep->getType();
 	}
 
+	// If its a signature, unpack it now.
+	if (SIGNATURE_LINK == dpt)
+	{
+		LinkPtr dptr(LinkCast(deep));
+		deep = dptr->getOutgoingAtom(0);
+		dpt = deep->getType();
+	}
+
 	if (TYPE_NODE == dpt)
 	{
 		Type deeptype = TypeNodeCast(deep)->get_value();
