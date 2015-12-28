@@ -113,40 +113,10 @@ JOIN_LINK <- PARALLEL_LINK
 // engine, the atomspace indexes, and the graph rewrite rules.
 
 // ---------------------------------------------------------
-// Types and variables and signatures.
+// Variables, Lambdas and definitions.
 
-// Core (inbuilt) type declaration, shuch as that in this file.
-TYPE_NODE <- NODE
-
-// User-defined type, gives SignatureLink a name, via DefineLink
-DEFINED_TYPE_NODE <- TYPE_NODE
-
-// Used for type polymorphism
-TYPE_CHOICE <- OR_LINK
-
-// Type constructor.  Corresponds to right-arrow of functional
-// functional languages, viz. arity-2, first arg is input, 2nd
-// arg is output.
-ARROW_LINK <- ORDERED_LINK
-
-// Type constructor.
-// The SignatureLink implements "deep types", a way for specifying
-// the type of an entire graph, and not just some node or link.
-// The type specification is "precise", in contrast to the fuzzy
-// type specification, below.
-SIGNATURE_LINK <- ORDERED_LINK
-
-// The FuzzyLink is a kind of type specification that can be imprecise.
-// It is used to specify a pattern that is then matched only
-// approximately by the pattern matcher, to find "similar" graphs.
-// See also GlobNode, which performs a more narrow kind of matching.
-// (viz. bunch-in-a-row globbing)
-FUZZY_LINK <- SIGNATURE_LINK
-
-// Variables and variable types
+// A Variable.  Use Lambda's to hide these. Use types to type them.
 VARIABLE_NODE <- NODE
-TYPED_ATOM_LINK <- ORDERED_LINK
-TYPED_VARIABLE_LINK <- TYPED_ATOM_LINK
 
 // A list of variables or variable declarations.
 VARIABLE_LIST <- LIST_LINK
@@ -255,6 +225,53 @@ QUOTE_LINK <- ORDERED_LINK
 // The QuoteLink is actually a quasi-quote. The UnquoteLink undoes the
 // quoting.  Defined to work just like in lisp/scheme.
 UNQUOTE_LINK <- ORDERED_LINK
+
+// ==============================================================
+// Types
+
+// A TypeNode can hold only core (in-built) type declarations, such
+// as that in this file. Viz it just holds an integer.
+TYPE_NODE <- NODE
+
+// User-defined type.  This iss meant to be used with DefineLink
+// to give a name to a type defintion; for example a type defintiion
+// specificed with SignatureLink or ArrowLink.
+DEFINED_TYPE_NODE <- TYPE_NODE
+
+// Used for type polymorphism
+TYPE_CHOICE <- OR_LINK
+
+// Type constructor.  Corresponds to right-arrow of functional
+// programming languages, viz. arity-2, first arg is input, 2nd
+// arg is output.
+ARROW_LINK <- ORDERED_LINK
+
+// Type constructor.
+// The SignatureLink implements "deep types", a way for specifying
+// the type of an entire graph, and not just some node or link.
+// The type specification is "precise", in contrast to the fuzzy
+// type specification, below.
+SIGNATURE_LINK <- ORDERED_LINK
+
+// The FuzzyLink is a kind of type specification that can be imprecise.
+// It is used to specify a pattern that is then matched only
+// approximately by the pattern matcher, to find "similar" graphs.
+// See also GlobNode, which performs a more narrow kind of matching.
+// (viz. bunch-in-a-row globbing)
+FUZZY_LINK <- SIGNATURE_LINK
+
+// A type binder: it binds a type to a VariableNode. Always arity-2,
+// the first position must be a Variablenode, the second must be a type.
+// Note that this is always scoped, i.e. used in lambdas and places
+// where variables are not free. Thus, unlike TypedAtomLink, this is
+// never globally unique.
+TYPED_VARIABLE_LINK <- ORDERED_LINK
+
+// A type binder for non-variable atoms. It binds a type to an atom
+// at a "global" level.  Always arity-2, the first position must be
+// a Variablenode, the second must be a type.  A given atom can only
+// ever have just one type, thus, this is unique.
+TYPED_ATOM_LINK <- UNIQUE_LINK
 
 // ==============================================================
 // Assorted PLN link types.
