@@ -172,55 +172,6 @@ bool Link::isSource(size_t i) const
     }
 }
 
-bool Link::isTarget(const Handle& handle) const
-{
-    // On ordered links, the first position of the outgoing set defines the
-    // source of the link. The other positions are targets. So, it scans the
-    // outgoing set from the second position searching for the given handle. If
-    // it is found, true is returned.
-    Arity arity = getArity();
-    if (classserver().isA(_type, ORDERED_LINK)) {
-        for (Arity i = 1; i < arity; i++) {
-            if (_outgoing[i] == handle) {
-                return true;
-            }
-        }
-        return false;
-    } else if (classserver().isA(_type, UNORDERED_LINK)) {
-        // If the links is unordered, all the outgoing set is scanned.
-        for (Arity i = 0; i < arity; i++) {
-            if (_outgoing[i] == handle) {
-                return true;
-            }
-        }
-        return false;
-    } else {
-        throw InvalidParamException(TRACE_INFO, "Link::isTarget(Handle) unknown link type %d", _type);
-    }
-    return false;
-}
-
-bool Link::isTarget(size_t i) const
-{
-    // tests if the int given is valid.
-    if (i > getArity()) {
-        throw IndexErrorException(TRACE_INFO, "Link::istarget(int) invalid index argument");
-    }
-
-    // on ordered links, the first position of the outgoing set defines the
-    // source of the link. The other positions are targets.
-    if (classserver().isA(_type, ORDERED_LINK)) {
-        return i != 0;
-    } else if (classserver().isA(_type, UNORDERED_LINK)) {
-        // on unorderd links, the only thing that matter is if the position is
-        // valid.
-        return true;
-    } else {
-        throw InvalidParamException(TRACE_INFO, "Link::isTarget(int) unkown link type");
-    }
-    return false;
-}
-
 bool Link::operator==(const Atom& other) const
 {
     if (getType() != other.getType()) return false;
