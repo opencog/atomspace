@@ -136,9 +136,6 @@ struct Variables : public FreeVariables
 
 	// Useful for debugging
 	std::string to_string() const;
-
-private:
-	bool is_type_rec(Handle, const Handle&) const;
 };
 
 /** @}*/

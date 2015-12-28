@@ -17,6 +17,7 @@ ADD_LIBRARY (atomcore SHARED
 	SleepLink.cc
 	StateLink.cc
 	TimeLink.cc
+	TypedAtomLink.cc
 	UniqueLink.cc
 	Variables.cc
 	VariableList.cc
@@ -47,6 +48,7 @@ INSTALL (FILES
 	SleepLink.h
 	StateLink.h
 	TimeLink.h
+	TypedAtomLink.h
 	UniqueLink.h
 	Variables.h
 	VariableList.h

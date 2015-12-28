@@ -6,8 +6,12 @@
  */
 
 #include <opencog/atomutils/FuzzyMatchBasic.h>
+#include <opencog/atomutils/TypeUtils.h>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeModule.h>
+#include <opencog/guile/SchemePrimitive.h>
+#include <opencog/guile/SchemeSmob.h>
 
 #include "BindLinkAPI.h"
 #include "PatternMatch.h"
@@ -17,14 +21,21 @@ using namespace opencog;
 
 // ========================================================
 // Convenience wrapper
-static Handle find_approximate_match(AtomSpace* as, const Handle& hp)
+Handle PatternSCM::find_approximate_match(Handle hp)
 {
 	FuzzyMatchBasic fpm;
 	RankedHandleSeq ranked_solns = fpm.perform_search(hp);
 	HandleSeq solns;
 	for (auto rs: ranked_solns)
 		solns.emplace_back(rs.first);
+
+	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fuzzy-match");
 	return as->add_link(LIST_LINK, solns);
+}
+
+bool PatternSCM::value_is_type(Handle type, Handle val)
+{
+	return opencog::value_is_type(type, val);
 }
 
 // ========================================================
@@ -57,10 +68,6 @@ void PatternSCM::init(void)
 	_binders.push_back(new FunctionWrap(af_bindlink,
 	                   "cog-bind-af", "query"));
 
-	// Fuzzy matching.
-	_binders.push_back(new FunctionWrap(find_approximate_match,
-	                   "cog-fuzzy-match", "query"));
-
 	// A bindlink that return a TV
 	_binders.push_back(new FunctionWrap(satisfaction_link,
 	                   "cog-satisfy", "query"));
@@ -72,6 +79,15 @@ void PatternSCM::init(void)
 	_binders.push_back(new FunctionWrap(recognize,
 	                   "cog-recognize", "query"));
 
+	// Fuzzy matching. XXX FIXME. this is not technically
+	// a query functon, and should probably be in some other
+	// module, maybe some utilities module?
+	define_scheme_primitive("cog-fuzzy-match",
+		&PatternSCM::find_approximate_match, this, "query");
+
+	// This also belongs somewhere else. Not sure where.
+	define_scheme_primitive("cog-value-is-type?",
+		&PatternSCM::value_is_type, this, "query");
 }
 
 PatternSCM::~PatternSCM()
