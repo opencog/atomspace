@@ -673,33 +673,6 @@ public:
 
     }
 
-    void testGetNeighbors()
-    {
-        Handle h1 = atomSpace->add_node(PREDICATE_NODE, "barkingAt");
-        h1->setTruthValue(SimpleTruthValue::createTV(0.001f, 0.00001f));
-        Handle h2 = atomSpace->add_node(CONCEPT_NODE, "dog1");
-        h2->setTruthValue(SimpleTruthValue::createTV(0.001f, 0.00001f));
-        Handle h3 = atomSpace->add_node(CONCEPT_NODE, "tree");
-        h3->setTruthValue(SimpleTruthValue::createTV(0.5f, 0.99f));
-        TruthValuePtr tv1 = SimpleTruthValue::createTV(0.001f, 0.00001f);
-        TruthValuePtr tv2 = SimpleTruthValue::createTV(0.001f, 0.00001f);
-        HandleSeq outgoing1;
-        outgoing1.push_back(h2);
-        outgoing1.push_back(h3);
-        Handle l1 = atomSpace->add_link(SET_LINK, outgoing1);
-        l1->setTruthValue(tv1);
-        HandleSeq outgoing2;
-        outgoing2.push_back(h1);
-        outgoing2.push_back(l1);
-        Handle l2 = atomSpace->add_link(EVALUATION_LINK, outgoing2);
-        l2->setTruthValue(tv2);
-
-        TS_ASSERT(get_neighbors(h1).size() == 1);
-        Handle badHandle(10000); 
-        TS_ASSERT_THROWS(get_neighbors(badHandle),
-                         opencog::InvalidParamException);
-    }
-
     void testGetHandle_bugfix1() {
         AtomSpace atomSpace;
         HandleSeq emptyOutgoing;
