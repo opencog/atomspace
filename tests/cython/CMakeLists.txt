@@ -19,8 +19,6 @@ LINK_LIBRARIES(
 	${GUILE_LIBRARIES}
 )
 
-ADD_CXXTEST(CythonUtilsUTest)
-
 # The PythonEvalUTest tests PythonEval independent of the CogServer. It depends
 # on the server being around for the Scheme code but it does not message
 # through a "py-eval" server request.
