@@ -29,23 +29,55 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/load-file.h>
 #include <opencog/rule-engine/forwardchainer/FCStat.h>
+#include <opencog/rule-engine/backwardchainer/ChainerUtils.h>
 
 using namespace opencog;
 
-class SimilarUTest :  public CxxTest::TestSuite
+class ChainerUtilsUTest :  public CxxTest::TestSuite
 {
 private:
 
 public:
-    SimilarUTest()
+    ChainerUtilsUTest()
     {
         logger().setPrintToStdoutFlag(true);
     }
 	void test_are_similar();
+	void test_get_distant_neighbors();
 };
 
 
-void SimilarUTest::test_are_similar()
+// Test get_distant_neighbors()
+void ChainerUtilsUTest::test_get_distant_neighbors()
+{
+	// Fill atomspace
+	AtomSpace as;
+	Handle A = as.add_node(CONCEPT_NODE, "A"),
+		B = as.add_node(CONCEPT_NODE, "B"),
+		C = as.add_node(CONCEPT_NODE, "C"),
+		D = as.add_node(CONCEPT_NODE, "D"),
+		AB = as.add_link(INHERITANCE_LINK, A, B),
+		BC = as.add_link(INHERITANCE_LINK, B, C),
+		CD = as.add_link(INHERITANCE_LINK, C, D);
+
+	// Test neighbors at distance 1 of A
+	TS_ASSERT_EQUALS(get_distant_neighbors(A, 1),
+	                 UnorderedHandleSet({AB}));
+
+	// Test neighbors at distance 1 of AB
+	TS_ASSERT_EQUALS(get_distant_neighbors(AB, 1),
+	                 UnorderedHandleSet({A, B}));
+
+	// Test neighbors at distance 2 of AB
+	TS_ASSERT_EQUALS(get_distant_neighbors(AB, 2),
+	                 UnorderedHandleSet({A, B, BC}));
+
+	// Test all neighbors of AB
+	TS_ASSERT_EQUALS(get_distant_neighbors(AB, -1),
+	                 UnorderedHandleSet({A, B, C, D, BC, CD}));
+}
+
+void ChainerUtilsUTest::test_are_similar()
 {
     AtomSpace as;
     config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
@@ -81,4 +113,3 @@ void SimilarUTest::test_are_similar()
     TS_ASSERT_EQUALS(true, are_similar(h1, h3, false));
     TS_ASSERT_EQUALS(true, are_similar(h4, h5, true));
 }
-

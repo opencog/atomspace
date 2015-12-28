@@ -30,6 +30,8 @@
 
 using namespace opencog;
 
+const bool NO_SUBCLASSES = false;
+
 class AtomUtilsUTest :  public CxxTest::TestSuite
 {
 private:
@@ -40,41 +42,11 @@ public:
         logger().setPrintToStdoutFlag(true);
     }
 
-	void test_get_distant_neighbors();
 	void test_get_outgoing_nodes();
 	void test_get_predicates();
 	void test_get_predicates_for();
 };
 
-// Test get_distant_neighbors()
-void AtomUtilsUTest::test_get_distant_neighbors()
-{
-	// Fill atomspace
-	AtomSpace as;
-	Handle A = as.add_node(CONCEPT_NODE, "A"),
-		B = as.add_node(CONCEPT_NODE, "B"),
-		C = as.add_node(CONCEPT_NODE, "C"),
-		D = as.add_node(CONCEPT_NODE, "D"),
-		AB = as.add_link(INHERITANCE_LINK, A, B),
-		BC = as.add_link(INHERITANCE_LINK, B, C),
-		CD = as.add_link(INHERITANCE_LINK, C, D);
-
-	// Test neighbors at distance 1 of A
-	TS_ASSERT_EQUALS(get_distant_neighbors(A, 1),
-	                 UnorderedHandleSet({AB}));
-
-	// Test neighbors at distance 1 of AB
-	TS_ASSERT_EQUALS(get_distant_neighbors(AB, 1),
-	                 UnorderedHandleSet({A, B}));
-
-	// Test neighbors at distance 2 of AB
-	TS_ASSERT_EQUALS(get_distant_neighbors(AB, 2),
-	                 UnorderedHandleSet({A, B, BC}));
-
-	// Test all neighbors of AB
-	TS_ASSERT_EQUALS(get_distant_neighbors(AB, -1),
-	                 UnorderedHandleSet({A, B, C, D, BC, CD}));
-}
 
 // Test get_outgoing_nodes()
 void AtomUtilsUTest::test_get_outgoing_nodes()
