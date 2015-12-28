@@ -567,7 +567,7 @@ static void get_all_unique_atoms(const Handle& h, UnorderedHandleSet& atom_set)
     atom_set.insert(h);
 
     LinkPtr lll(LinkCast(h));
-    if (not lll)
+    if (lll)
     {
         for (const Handle& o : lll->getOutgoingSet())
             get_all_unique_atoms(o, atom_set);
