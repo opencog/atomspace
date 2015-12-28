@@ -133,27 +133,27 @@ Handle URECommons::change_node_types(Handle& h,
 	return hcpy;
 }
 
-void URECommons::get_root_links(Handle h, HandleSeq& parents)
+void URECommons::get_root_links(const Handle& h, HandleSeq& parents)
 {
-	auto incoming = _as.get_incoming(h);
-	if (incoming.empty())
-		return;
-	else {
-		for (Handle hi : incoming) {
-			auto i = _as.get_incoming(hi);
-			if (i.empty()) {
-				if (find(parents.begin(), parents.end(), hi) == parents.end())
-					parents.push_back(hi);
-			} else {
-				get_root_links(hi, parents);
-			}
+	if (0 == h->getIncomingSetSize()) return;
+
+	IncomingSet incoming(h->getIncomingSet());
+	for (const LinkPtr& lp : incoming)
+	{
+		Handle hi(lp->getHandle());
+		if (0 == hi->getIncomingSetSize())
+		{
+			if (find(parents.begin(), parents.end(), hi) == parents.end())
+				parents.push_back(hi);
+		} else {
+			get_root_links(hi, parents);
 		}
 	}
 }
 
-float URECommons::tv_fitness(Handle h)
+float URECommons::tv_fitness(const Handle& h)
 {
-	TruthValuePtr ptv = _as.get_TV(h);
+	TruthValuePtr ptv(h->getTruthValue());
 	confidence_t c = ptv->getConfidence();
 	strength_t s = ptv->getMean();
 	return (pow((1 - s), FITNESS_PARAM) * (pow(c, (2 - FITNESS_PARAM))));

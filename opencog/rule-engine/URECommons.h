@@ -79,7 +79,7 @@ public:
 	 * Get top level parent of the handle
 	 * @return a Link or Handle::UNDEFINED if there is no
 	 */
-	void get_root_links(Handle h, HandleSeq& parents);
+	void get_root_links(const Handle& h, HandleSeq& parents);
 
 	/**
 	 * Randomly pick about half of the elements, and amongst those
@@ -116,7 +116,7 @@ public:
 	 * @param h - a handle
 	 * @return a fitness value
 	 */
-	float tv_fitness(Handle h);
+	float tv_fitness(const Handle& h);
 };
 
 } // ~namespace opencog
