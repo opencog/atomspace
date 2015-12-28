@@ -143,7 +143,6 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         void set_TV(cHandle h, tv_ptr tvn)
 
         vector[cHandle] get_outgoing(cHandle h)
-        bint is_source(cHandle h, cHandle source)
         vector[cHandle] get_incoming(cHandle h)
 
         # these should alias the proper types for sti/lti/vlti

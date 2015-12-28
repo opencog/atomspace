@@ -254,11 +254,6 @@ cdef class AtomSpace:
             yield Atom(temp_handle,self)
             inc(c_handle_iter)
 
-    def is_source(self, Handle source, Handle h):
-        # This logic could probably easily be implemented client side, but best to
-        # keep it all in the C++ code for now
-        return self.atomspace.is_source(deref(source.h),deref(h.h))
-
     def get_av(self, Handle h):
         # @todo this is the slow way. quicker way is to support the
         # AttentionValue object and get all values with one atomspace call
