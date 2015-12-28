@@ -30,6 +30,100 @@
 namespace opencog
 {
 
+UnorderedHandleSet get_outgoing_nodes(const Handle& hinput,
+                                      const std::vector<Type>& types)
+{
+	LinkPtr link(LinkCast(hinput));
+
+    // Recursive case
+    if (link) {
+        UnorderedHandleSet found_nodes;
+        for (const Handle& h : link->getOutgoingSet()) {
+            UnorderedHandleSet tmp = get_outgoing_nodes(h, types);
+            found_nodes.insert(tmp.begin(), tmp.end());
+        }
+        return found_nodes;
+    }
+    // Base case
+    else {
+        OC_ASSERT(NodeCast(hinput) != nullptr);
+
+        if (types.empty()) { // Empty means all kinds of nodes
+            return {hinput};
+        } else {
+            // Check if this node is in our wish list
+            Type t = NodeCast(hinput)->getType();
+            auto it = find(types.begin(), types.end(), t);
+            if (it != types.end())
+                return {hinput};
+            else
+                return UnorderedHandleSet();
+        }
+    }
+}
+
+
+/**
+ * Makes a one to one similarity matching. If the atoms
+ * are of type UnorderedLink, does one vs all similarity
+ * matching and removes the matched from matching list
+ * immediately.
+ *
+ * @param h1  A handle
+ * @param h2  A handle
+ * @param strict_type_match A flag telling how type matching should be
+ * done.
+ *
+ * @return  A boolean true if similar and false otherwise.
+ */
+bool opencog::are_similar(const Handle& h1, const Handle& h2, bool strict_type_match)
+{
+    if (h1 == h2)
+        return true;
+
+    if (NodeCast(h1) and NodeCast(h2))
+        return !strict_type_match or h1->getType() == h2->getType();
+
+    LinkPtr lh1(LinkCast(h1));
+    LinkPtr lh2(LinkCast(h2));
+
+    if (lh1 and lh2) {
+        if (strict_type_match and (lh1->getType() != lh2->getType()))
+            return false;
+
+        HandleSeq hseqh1 = lh1->getOutgoingSet();
+        HandleSeq hseqh2 = lh2->getOutgoingSet();
+
+        if (hseqh1.size() != hseqh2.size())
+            return false;
+
+        // Unordered links should be treated in a special way
+        if (classserver().isA(lh1->getType(), UNORDERED_LINK) or classserver().isA(
+                lh2->getType(), UNORDERED_LINK)) {
+
+            for (const auto& h1 : hseqh1) {
+                for (auto it = hseqh2.begin(); it != hseqh2.end(); ++it) {
+                    if (are_similar(h1, h2, strict_type_match)) {
+                        hseqh2.erase(it);
+                        break;
+                    }
+                }
+            }
+
+            // Empty means all has been mapped. Success.
+            return hseqh2.empty() or false;
+        }
+
+        for (HandleSeq::size_type i = 0; i < hseqh1.size(); i++) {
+            if (not are_similar(hseqh1[i], hseqh2[i], strict_type_match))
+                return false;
+        }
+
+        return true;
+    }
+
+    return false;
+}
 bool are_similar(const Handle& h1, const Handle& h2, bool strict_type_match)
 {
     if (h1 == h2)

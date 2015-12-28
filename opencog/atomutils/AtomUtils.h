@@ -36,24 +36,11 @@ namespace opencog
  */
 
 /**
- * Given an atom (a link or node), Return all its children nodes
- * (i.e. traversing the outgoings recursively)
- *
- * @param hinput - an atoms to be looked
- * @param types - a list of type nodes to look for. if vector
- *                is empty, all kinds of nodes are looked
- * @return - a set of nodes
- */
-UnorderedHandleSet get_outgoing_nodes(const Handle& hinput,
-                                      const std::vector<Type>& types =
-                                      std::vector<Type>());
-
-/**
  * Returns a list of all the EvaluationLinks with Predicates of the given type
  * that the atom specified by 'target' participates in. 
  * (C++ implementation of cog-get-pred)
  *
-  * For example, given existence of the following:
+ * For example, given existence of the following:
  *
  *     EvaluationLink
  *        PredicateNode "IsA"
