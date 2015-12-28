@@ -77,13 +77,11 @@ HandleSeq get_all_neighbors(const Handle& h,
 
     for (const LinkPtr& link : h->getIncomingSet())
     {
-        Type linkType = link->getType();
-        if (linkType == desiredLinkType)
+        if (link->getType() != desiredLinkType) continue;
+        for (const Handle& handle : link->getOutgoingSet())
         {
-            for (const Handle& handle : link->getOutgoingSet()) {
-                if (handle == h) continue;
-                answer.emplace_back(handle);
-            }
+            if (handle == h) continue;
+            answer.emplace_back(handle);
         }
     }
     return answer;
