@@ -67,6 +67,7 @@ public:
 	void tearDown(void);
 
 	void test_is_type(void);
+	void test_type_match(void);
 	void test_get_signature(void);
 };
 
@@ -124,6 +125,52 @@ void DeepTypeUTest::test_is_type(void)
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
+
+/*
+ * Basic deep-type unit test.
+ */
+void DeepTypeUTest::test_type_match(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rv;
+	as->clear();
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(Concept \"aaa\")"
+		"	(Concept \"aaa\"))");
+
+	printf("expect true, got %s", rv.c_str());
+	TSM_ASSERT("Expected true", rv == "#t\n");
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(Concept \"aaa\")"
+		"	(Concept \"bar\"))");
+
+	printf("expect false, got %s", rv.c_str());
+	TSM_ASSERT("Expected false", rv == "#f\n");
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(Type \"ConceptNode\")"
+		"	(Concept \"bar\"))");
+
+	printf("expect true, got %s", rv.c_str());
+	TSM_ASSERT("Expected true", rv == "#t\n");
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(Concept \"bar\")"
+		"	(Type \"ConceptNode\"))");
+
+	printf("expect false, got %s", rv.c_str());
+	TSM_ASSERT("Expected false", rv == "#f\n");
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
 /*
  * Basic deep-type unit test.
  */
