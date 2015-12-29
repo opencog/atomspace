@@ -69,6 +69,7 @@ public:
 	void test_is_type(void);
 	void test_type_match(void);
 	void test_match_signature(void);
+	void test_match_arrow(void);
 	void test_get_signature(void);
 };
 
@@ -200,7 +201,7 @@ void DeepTypeUTest::test_type_match(void)
 }
 
 /*
- * Basic deep-type unit test.
+ * Signature unit test.
  */
 void DeepTypeUTest::test_match_signature(void)
 {
@@ -219,6 +220,107 @@ void DeepTypeUTest::test_match_signature(void)
 		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\")))))");
 
 	printf("(seq) expect true, got %s", rv.c_str());
+	TSM_ASSERT("Expected true", rv == "#t\n");
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(SignatureLink (EvaluationLink "
+		"		(Type \"PredicateNode\")"
+		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\"))))"
+		"	(SignatureLink (EvaluationLink "
+		"		(Type \"PredicateNode\")"
+		"		(ListLink (Type \"NumberNode\") (Type \"NumberNode\")))))");
+
+	printf("(nn) expect false, got %s", rv.c_str());
+	TSM_ASSERT("Expected false", rv == "#f\n");
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(SignatureLink (EvaluationLink "
+		"		(Type \"PredicateNode\")"
+		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\"))))"
+		"	(SignatureLink (EvaluationLink "
+		"		(PredicateNode \"foo\")"
+		"		(ListLink (Type \"ConceptNode\") (NumberNode 42)))))");
+
+	printf("(cpred) expect true, got %s", rv.c_str());
+	TSM_ASSERT("Expected true", rv == "#t\n");
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(SignatureLink (EvaluationLink "
+		"		(Type \"PredicateNode\")"
+		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\"))))"
+		"	(EvaluationLink "
+		"		(PredicateNode \"foo\")"
+		"		(ListLink (ConceptNode \"bar\") (NumberNode 42))))");
+
+	printf("(concr) expect true, got %s", rv.c_str());
+	TSM_ASSERT("Expected true", rv == "#t\n");
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(SignatureLink (EvaluationLink "
+		"		(Type \"PredicateNode\")"
+		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\"))))"
+		"	(EvaluationLink "
+		"		(PredicateNode \"foo\")"
+		"		(ListLink (NumberNode 13) (NumberNode 42))))");
+
+	printf("(badnum) expect false, got %s", rv.c_str());
+	TSM_ASSERT("Expected false", rv == "#f\n");
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(SignatureLink (EvaluationLink "
+		"		(PredicateNode \"foo\")"
+		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\"))))"
+		"	(EvaluationLink "
+		"		(PredicateNode \"foo\")"
+		"		(ListLink (ConceptNode \"bar\") (NumberNode 42))))");
+
+	printf("(foo-concr) expect true, got %s", rv.c_str());
+	TSM_ASSERT("Expected true", rv == "#t\n");
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(SignatureLink (EvaluationLink "
+		"		(PredicateNode \"foo\")"
+		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\"))))"
+		"	(EvaluationLink "
+		"		(PredicateNode \"bar\")"
+		"		(ListLink (ConceptNode \"bar\") (NumberNode 42))))");
+
+	printf("(foobar) expect false, got %s", rv.c_str());
+	TSM_ASSERT("Expected false", rv == "#f\n");
+
+	// ----------------------
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Arrow unit test.
+ * Mostly a cut-n-paste of above signature test, but with arrows, instead.
+ */
+void DeepTypeUTest::test_match_arrow(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rv;
+	as->clear();
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(Arrow "
+		"		(EvaluationLink "
+		"			(Type \"PredicateNode\")"
+		"			(ListLink (Type \"ConceptNode\") (Type \"NumberNode\")))"
+		"		(Type \"SetLink\"))"
+		"	(SignatureLink (EvaluationLink "
+		"		(Type \"PredicateNode\")"
+		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\")))))");
+
+	printf("(aro seq) expect true, got %s", rv.c_str());
 	TSM_ASSERT("Expected true", rv == "#t\n");
 
 	rv = eval->eval(

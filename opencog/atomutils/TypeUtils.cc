@@ -112,8 +112,14 @@ bool opencog::value_is_type(const Handle& spec, const Handle& val)
 
 /* ================================================================= */
 
+/*
+ * The implementation below feels awfully hacky and bug-prone,
+ * but I don't see a better way.
+ */
 static bool type_match_rec(const Handle& left_, const Handle& right_, bool toplevel)
 {
+	if (left_ == right_) return true;
+
 	Handle left(left_);
 	Type ltype = left->getType();
 
@@ -129,9 +135,14 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	{
 		LinkPtr larrow(LinkCast(left));
 		left = larrow->getOutgoingAtom(0); // 0 == input
+		ltype = left->getType();
+printf("dduuuude left arrow %s", left->toString().c_str());
 	}
 
 	// If right is not a type, then just use value-check.
+	// We can only do this at the top level; lower levels
+	// can have value-like links (i.e. duck-types which
+	// we have to type-interence).
 	Type rtype = right_->getType();
 	if (toplevel and
 	    TYPE_NODE != rtype and
@@ -171,20 +182,36 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	{
 		right = LinkCast(right)->getOutgoingAtom(0);
 		rtype = right->getType();
+printf("dduuuude right sig %s", right->toString().c_str());
 	}
 
+	// Exact matchees are always good.
+	if (left == right) return true;
+
 	// If left is a core type, right must be that type
-	// (or a value, partly handled that above already).
+	// (or a value, partly handled that above already, for
+	// the top-level; here we do lower levels.
 	if (TYPE_NODE == ltype)
 	{
-		if (left == right) return true;
 		return TypeNodeCast(left)->get_value() == rtype;
 	}
 
 	// If left is a type choice, right must match a choice.
 	if (TYPE_CHOICE == ltype)
 	{
-// xxx what if right is choice too?
+		if (TYPE_CHOICE == rtype)
+		{
+			// Can everything in the right be found in the left?
+			// If so, then we are OK.
+			LinkPtr rch(LinkCast(right));
+			for (const Handle& rh : rch->getOutgoingSet())
+			{
+				if (not type_match_rec(left, rh, false)) return false;
+			}
+			return true;
+		}
+
+		// Does one of the left choices atch a right? Is so then good.
 		LinkPtr lch(LinkCast(left));
 		for (const Handle& lh : lch->getOutgoingSet())
 		{
@@ -192,6 +219,7 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 		}
 		return false;
 	}
+printf("duude rayyyy! \n");
 
 	// At this point we expect both left an right to be links
 	// that are not type-links, i.e. should be ordinary links,
@@ -212,6 +240,7 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	const HandleSeq& rout(rptr->getOutgoingSet());
 
 	if (lout.size() != rout.size()) return false;
+printf("duude rockin it\n");
 
 	for (size_t i=0; i< lout.size(); i++)
 	{
