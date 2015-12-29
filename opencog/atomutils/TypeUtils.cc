@@ -112,7 +112,7 @@ bool opencog::value_is_type(const Handle& spec, const Handle& val)
 
 /* ================================================================= */
 
-bool opencog::type_match(const Handle& left_, const Handle& right_)
+static bool type_match_rec(const Handle& left_, const Handle& right_, bool toplevel)
 {
 	Handle left(left_);
 	Type ltype = left->getType();
@@ -133,7 +133,8 @@ bool opencog::type_match(const Handle& left_, const Handle& right_)
 
 	// If right is not a type, then just use value-check.
 	Type rtype = right_->getType();
-	if (TYPE_NODE != rtype and
+	if (toplevel and
+	    TYPE_NODE != rtype and
 	    TYPE_CHOICE != rtype and
 	    SIGNATURE_LINK != rtype and
 	    DEFINED_TYPE_NODE != rtype and
@@ -173,17 +174,21 @@ bool opencog::type_match(const Handle& left_, const Handle& right_)
 	}
 
 	// If left is a core type, right must be that type
-	// (or a value, but we handled that above already).
+	// (or a value, partly handled that above already).
 	if (TYPE_NODE == ltype)
-		return ltype == rtype;
+	{
+		if (left == right) return true;
+		return TypeNodeCast(left)->get_value() == rtype;
+	}
 
 	// If left is a type choice, right must match a choice.
 	if (TYPE_CHOICE == ltype)
 	{
+// xxx what if right is choice too?
 		LinkPtr lch(LinkCast(left));
 		for (const Handle& lh : lch->getOutgoingSet())
 		{
-			if (type_match(lh, right)) return true;
+			if (type_match_rec(lh, right, false)) return true;
 		}
 		return false;
 	}
@@ -210,10 +215,15 @@ bool opencog::type_match(const Handle& left_, const Handle& right_)
 
 	for (size_t i=0; i< lout.size(); i++)
 	{
-		if (not type_match(lout[i], rout[i])) return false;
+		if (not type_match_rec(lout[i], rout[i], false)) return false;
 	}
 
 	return true;
+}
+
+bool opencog::type_match(const Handle& left_, const Handle& right_)
+{
+	return type_match_rec(left_, right_, true);
 }
 
 Handle opencog::type_compose(const Handle& left, const Handle& right)
