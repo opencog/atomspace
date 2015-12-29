@@ -38,6 +38,16 @@ bool PatternSCM::value_is_type(Handle type, Handle val)
 	return opencog::value_is_type(type, val);
 }
 
+bool PatternSCM::type_match(Handle left, Handle right)
+{
+	return opencog::type_match(left, right);
+}
+
+Handle PatternSCM::type_compose(Handle left, Handle right)
+{
+	return opencog::type_compose(left, right);
+}
+
 // ========================================================
 
 // XXX HACK ALERT This needs to be static, in order for python to
@@ -85,9 +95,15 @@ void PatternSCM::init(void)
 	define_scheme_primitive("cog-fuzzy-match",
 		&PatternSCM::find_approximate_match, this, "query");
 
-	// This also belongs somewhere else. Not sure where.
+	// These below also belong somewhere else. Not sure where.
 	define_scheme_primitive("cog-value-is-type?",
 		&PatternSCM::value_is_type, this, "query");
+
+	define_scheme_primitive("cog-type-match?",
+		&PatternSCM::type_match, this, "query");
+
+	define_scheme_primitive("cog-type-compose",
+		&PatternSCM::type_compose, this, "query");
 }
 
 PatternSCM::~PatternSCM()
