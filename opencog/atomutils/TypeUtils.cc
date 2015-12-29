@@ -112,7 +112,7 @@ bool opencog::value_is_type(const Handle& spec, const Handle& val)
 
 /* ================================================================= */
 
-bool type_match(const Handle& left_, const Handle& right_)
+bool opencog::type_match(const Handle& left_, const Handle& right_)
 {
 	Handle left(left_);
 	Type ltype = left->getType();
@@ -158,12 +158,65 @@ bool type_match(const Handle& left_, const Handle& right_)
 		right = rarrow->getOutgoingAtom(1); // 1 == output
 	}
 
+	// Should be safe to unpack signatures now.
+	// We must not do this earlier, it will mess up.
+	if (SIGNATURE_LINK == ltype)
+	{
+		left = LinkCast(left)->getOutgoingAtom(0);
+		ltype = left->getType();
+	}
 
+	if (SIGNATURE_LINK == rtype)
+	{
+		right = LinkCast(right)->getOutgoingAtom(0);
+		rtype = right->getType();
+	}
 
-	return false;
+	// If left is a core type, right must be that type
+	// (or a value, but we handled that above already).
+	if (TYPE_NODE == ltype)
+		return ltype == rtype;
+
+	// If left is a type choice, right must match a choice.
+	if (TYPE_CHOICE == ltype)
+	{
+		LinkPtr lch(LinkCast(left));
+		for (const Handle& lh : lch->getOutgoingSet())
+		{
+			if (type_match(lh, right)) return true;
+		}
+		return false;
+	}
+
+	// At this point we expect both left an right to be links
+	// that are not type-links, i.e. should be ordinary links,
+	// e.g. ListLink or EvaluationLink.  Compare these side-by-side.
+	if (ltype != rtype) return false;
+
+	LinkPtr lptr(LinkCast(left));
+	LinkPtr rptr(LinkCast(right));
+
+	OC_ASSERT(nullptr != lptr and nullptr != rptr, "expecting links!");
+
+	// Unordered links are a pain in the butt.
+	if (classserver().isA(ltype, UNORDERED_LINK))
+		throw RuntimeException(TRACE_INFO,
+			"Not implemented! TODO XXX FIXME");
+
+	const HandleSeq& lout(lptr->getOutgoingSet());
+	const HandleSeq& rout(rptr->getOutgoingSet());
+
+	if (lout.size() != rout.size()) return false;
+
+	for (size_t i=0; i< lout.size(); i++)
+	{
+		if (not type_match(lout[i], rout[i])) return false;
+	}
+
+	return true;
 }
 
-Handle type_compose(const Handle& left, const Handle& right)
+Handle opencog::type_compose(const Handle& left, const Handle& right)
 {
 	return Handle::UNDEFINED;
 }

@@ -19,6 +19,8 @@ class PatternSCM : public ModuleWrap
 		static std::vector<FunctionWrap*> _binders;
 		Handle find_approximate_match(Handle);
 		bool value_is_type(Handle, Handle);
+		bool type_match(Handle, Handle);
+		Handle type_compose(Handle, Handle);
 	public:
 		PatternSCM(void);
 		~PatternSCM();
