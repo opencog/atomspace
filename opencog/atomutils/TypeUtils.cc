@@ -110,4 +110,64 @@ bool opencog::value_is_type(const Handle& spec, const Handle& val)
 	return true;
 }
 
+/* ================================================================= */
+
+bool type_match(const Handle& left_, const Handle& right_)
+{
+	Handle left(left_);
+	Type ltype = left->getType();
+
+	// If it's a user-defined type, replace by it's defintion.
+	if (DEFINED_TYPE_NODE == ltype)
+	{
+		left = DefineLink::get_definition(left);
+		ltype = left->getType();
+	}
+
+	// Unpack the arrow; right must match left's input.
+	if (ARROW_LINK == ltype)
+	{
+		LinkPtr larrow(LinkCast(left));
+		left = larrow->getOutgoingAtom(0); // 0 == input
+	}
+
+	// If right is not a type, then just use value-check.
+	Type rtype = right_->getType();
+	if (TYPE_NODE != rtype and
+	    TYPE_CHOICE != rtype and
+	    SIGNATURE_LINK != rtype and
+	    DEFINED_TYPE_NODE != rtype and
+	    ARROW_LINK != rtype)
+	{
+		return value_is_type(left, right_);
+	}
+
+	Handle right(right_);
+
+	// If it's a user-defined type, replace by it's defintion.
+	if (DEFINED_TYPE_NODE == rtype)
+	{
+		right = DefineLink::get_definition(right);
+		rtype = right->getType();
+	}
+
+	// Unpack the arrow; right's output must match left.
+	if (ARROW_LINK == rtype)
+	{
+		LinkPtr rarrow(LinkCast(right));
+		right = rarrow->getOutgoingAtom(1); // 1 == output
+	}
+
+
+
+	return false;
+}
+
+Handle type_compose(const Handle& left, const Handle& right)
+{
+	return Handle::UNDEFINED;
+}
+
+
+
 /* ===================== END OF FILE ===================== */
