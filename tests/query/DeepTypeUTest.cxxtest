@@ -325,75 +325,142 @@ void DeepTypeUTest::test_match_arrow(void)
 
 	rv = eval->eval(
 		"(cog-type-match? "
-		"	(SignatureLink (EvaluationLink "
-		"		(Type \"PredicateNode\")"
-		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\"))))"
+		"	(Arrow "
+		"		(EvaluationLink "
+		"			(Type \"PredicateNode\")"
+		"			(ListLink (Type \"ConceptNode\") (Type \"NumberNode\")))"
+		"		(Type \"SetLink\"))"
 		"	(SignatureLink (EvaluationLink "
 		"		(Type \"PredicateNode\")"
 		"		(ListLink (Type \"NumberNode\") (Type \"NumberNode\")))))");
 
-	printf("(nn) expect false, got %s", rv.c_str());
+	printf("(aro nn) expect false, got %s", rv.c_str());
 	TSM_ASSERT("Expected false", rv == "#f\n");
 
 	rv = eval->eval(
 		"(cog-type-match? "
-		"	(SignatureLink (EvaluationLink "
-		"		(Type \"PredicateNode\")"
-		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\"))))"
-		"	(SignatureLink (EvaluationLink "
-		"		(PredicateNode \"foo\")"
-		"		(ListLink (Type \"ConceptNode\") (NumberNode 42)))))");
+		"	(Arrow "
+		"		(EvaluationLink "
+		"			(Type \"PredicateNode\")"
+		"			(ListLink (Type \"ConceptNode\") (Type \"NumberNode\")))"
+		"		(Type \"SetLink\"))"
+		"	(Arrow "
+		"		(Type \"MemberLink\")"
+		"		(EvaluationLink "
+		"			(Type \"PredicateNode\")"
+		"			(ListLink (Type \"ConceptNode\") (NumberNode 42)))))");
 
-	printf("(cpred) expect true, got %s", rv.c_str());
+	printf("(aro cpred) expect true, got %s", rv.c_str());
 	TSM_ASSERT("Expected true", rv == "#t\n");
 
 	rv = eval->eval(
 		"(cog-type-match? "
-		"	(SignatureLink (EvaluationLink "
-		"		(Type \"PredicateNode\")"
-		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\"))))"
-		"	(EvaluationLink "
-		"		(PredicateNode \"foo\")"
-		"		(ListLink (ConceptNode \"bar\") (NumberNode 42))))");
+		"	(Arrow "
+		"		(EvaluationLink "
+		"			(Type \"PredicateNode\")"
+		"			(ListLink (Type \"ConceptNode\") (Type \"NumberNode\")))"
+		"		(Type \"SetLink\"))"
+		"	(Arrow "
+		"		(Type \"MemberLink\")"
+		"		(EvaluationLink "
+		"			(PredicateNode \"foo\")"
+		"			(ListLink (ConceptNode \"bar\") (NumberNode 42)))))");
 
-	printf("(concr) expect true, got %s", rv.c_str());
+	printf("(aro concr) expect true, got %s", rv.c_str());
 	TSM_ASSERT("Expected true", rv == "#t\n");
 
 	rv = eval->eval(
 		"(cog-type-match? "
-		"	(SignatureLink (EvaluationLink "
-		"		(Type \"PredicateNode\")"
-		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\"))))"
-		"	(EvaluationLink "
-		"		(PredicateNode \"foo\")"
-		"		(ListLink (NumberNode 13) (NumberNode 42))))");
+		"	(Arrow "
+		"		(EvaluationLink "
+		"			(Type \"PredicateNode\")"
+		"			(ListLink (Type \"ConceptNode\") (Type \"NumberNode\")))"
+		"		(Type \"SetLink\"))"
+		"	(Arrow "
+		"		(Type \"MemberLink\")"
+		"		(EvaluationLink "
+		"			(PredicateNode \"foo\")"
+		"			(ListLink (NumberNode 13) (NumberNode 42)))))");
 
-	printf("(badnum) expect false, got %s", rv.c_str());
+	printf("(aro badnum) expect false, got %s", rv.c_str());
 	TSM_ASSERT("Expected false", rv == "#f\n");
 
 	rv = eval->eval(
 		"(cog-type-match? "
-		"	(SignatureLink (EvaluationLink "
-		"		(PredicateNode \"foo\")"
-		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\"))))"
-		"	(EvaluationLink "
-		"		(PredicateNode \"foo\")"
-		"		(ListLink (ConceptNode \"bar\") (NumberNode 42))))");
+		"	(Arrow "
+		"		(EvaluationLink "
+		"			(TypeChoice "
+		"				(Type \"PredicateNode\")"
+		"				(Type \"GroundedPredicateNode\"))"
+		"			(ListLink (Type \"ConceptNode\") (Type \"NumberNode\")))"
+		"		(Type \"SetLink\"))"
+		"	(Arrow "
+		"		(Type \"MemberLink\")"
+		"		(EvaluationLink "
+		"			(PredicateNode \"foo\")"
+		"			(ListLink (ConceptNode \"bar\") (NumberNode 42)))))");
 
-	printf("(foo-concr) expect true, got %s", rv.c_str());
+	printf("(aro choice) expect true, got %s", rv.c_str());
 	TSM_ASSERT("Expected true", rv == "#t\n");
 
 	rv = eval->eval(
 		"(cog-type-match? "
-		"	(SignatureLink (EvaluationLink "
-		"		(PredicateNode \"foo\")"
-		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\"))))"
-		"	(EvaluationLink "
-		"		(PredicateNode \"bar\")"
-		"		(ListLink (ConceptNode \"bar\") (NumberNode 42))))");
+		"	(Arrow "
+		"		(EvaluationLink "
+		"			(TypeChoice "
+		"				(PredicateNode \"foo\")"
+		"				(PredicateNode \"bar\")"
+		"				(Type \"GroundedPredicateNode\"))"
+		"			(ListLink (Type \"ConceptNode\") (Type \"NumberNode\")))"
+		"		(Type \"SetLink\"))"
+		"	(Arrow "
+		"		(Type \"MemberLink\")"
+		"		(EvaluationLink "
+		"			(PredicateNode \"foo\")"
+		"			(ListLink (ConceptNode \"bar\") (NumberNode 42)))))");
 
-	printf("(foobar) expect false, got %s", rv.c_str());
+	printf("(aro choice concr) expect true, got %s", rv.c_str());
+	TSM_ASSERT("Expected true", rv == "#t\n");
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(Arrow "
+		"		(EvaluationLink "
+		"			(TypeChoice "
+		"				(PredicateNode \"bar\")"
+		"				(Type \"GroundedPredicateNode\"))"
+		"			(ListLink (Type \"ConceptNode\") (Type \"NumberNode\")))"
+		"		(Type \"SetLink\"))"
+		"	(Arrow "
+		"		(Type \"MemberLink\")"
+		"		(EvaluationLink "
+		"			(PredicateNode \"foo\")"
+		"			(ListLink (ConceptNode \"bar\") (NumberNode 42)))))");
+
+	printf("(aro choice foobar) expect false, got %s", rv.c_str());
 	TSM_ASSERT("Expected false", rv == "#f\n");
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(Arrow "
+		"		(EvaluationLink "
+		"			(TypeChoice "
+		"				(PredicateNode \"foo\")"
+		"				(PredicateNode \"bar\")"
+		"				(PredicateNode \"baz\")"
+		"				(Type \"GroundedPredicateNode\"))"
+		"			(ListLink (Type \"ConceptNode\") (Type \"NumberNode\")))"
+		"		(Type \"SetLink\"))"
+		"	(Arrow "
+		"		(Type \"MemberLink\")"
+		"		(EvaluationLink "
+		"			(TypeChoice "
+		"				(PredicateNode \"foo\")"
+		"				(GroundedPredicateNode \"scm: stuff huff\"))"
+		"			(ListLink (ConceptNode \"bar\") (NumberNode 42)))))");
+
+	printf("(aro choice subset) expect true, got %s", rv.c_str());
+	TSM_ASSERT("Expected true", rv == "#t\n");
 
 	// ----------------------
 	logger().debug("END TEST: %s", __FUNCTION__);

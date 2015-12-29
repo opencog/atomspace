@@ -114,7 +114,9 @@ bool opencog::value_is_type(const Handle& spec, const Handle& val)
 
 /*
  * The implementation below feels awfully hacky and bug-prone,
- * but I don't see a better way.
+ * but I don't see a better way.  Since below is essentially
+ * a whizzy set-subset operation, one could go all formal operator
+ * and etc. but more abstraction seems unlikely to make it better.
  */
 static bool type_match_rec(const Handle& left_, const Handle& right_, bool toplevel)
 {
@@ -136,7 +138,6 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 		LinkPtr larrow(LinkCast(left));
 		left = larrow->getOutgoingAtom(0); // 0 == input
 		ltype = left->getType();
-printf("dduuuude left arrow %s", left->toString().c_str());
 	}
 
 	// If right is not a type, then just use value-check.
@@ -168,6 +169,7 @@ printf("dduuuude left arrow %s", left->toString().c_str());
 	{
 		LinkPtr rarrow(LinkCast(right));
 		right = rarrow->getOutgoingAtom(1); // 1 == output
+		rtype = right->getType();
 	}
 
 	// Should be safe to unpack signatures now.
@@ -182,7 +184,6 @@ printf("dduuuude left arrow %s", left->toString().c_str());
 	{
 		right = LinkCast(right)->getOutgoingAtom(0);
 		rtype = right->getType();
-printf("dduuuude right sig %s", right->toString().c_str());
 	}
 
 	// Exact matchees are always good.
@@ -219,7 +220,6 @@ printf("dduuuude right sig %s", right->toString().c_str());
 		}
 		return false;
 	}
-printf("duude rayyyy! \n");
 
 	// At this point we expect both left an right to be links
 	// that are not type-links, i.e. should be ordinary links,
@@ -229,7 +229,7 @@ printf("duude rayyyy! \n");
 	LinkPtr lptr(LinkCast(left));
 	LinkPtr rptr(LinkCast(right));
 
-	OC_ASSERT(nullptr != lptr and nullptr != rptr, "expecting links!");
+	if (nullptr == lptr or nullptr == rptr) return false;
 
 	// Unordered links are a pain in the butt.
 	if (classserver().isA(ltype, UNORDERED_LINK))
@@ -240,7 +240,6 @@ printf("duude rayyyy! \n");
 	const HandleSeq& rout(rptr->getOutgoingSet());
 
 	if (lout.size() != rout.size()) return false;
-printf("duude rockin it\n");
 
 	for (size_t i=0; i< lout.size(); i++)
 	{
