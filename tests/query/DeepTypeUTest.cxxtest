@@ -136,6 +136,7 @@ void DeepTypeUTest::test_type_match(void)
 	std::string rv;
 	as->clear();
 
+	// ----------------------
 	rv = eval->eval(
 		"(cog-type-match? "
 		"	(Concept \"aaa\")"
@@ -152,6 +153,7 @@ void DeepTypeUTest::test_type_match(void)
 	printf("expect false, got %s", rv.c_str());
 	TSM_ASSERT("Expected false", rv == "#f\n");
 
+	// ----------------------
 	rv = eval->eval(
 		"(cog-type-match? "
 		"	(Type \"ConceptNode\")"
@@ -168,6 +170,117 @@ void DeepTypeUTest::test_type_match(void)
 	printf("expect false, got %s", rv.c_str());
 	TSM_ASSERT("Expected false", rv == "#f\n");
 
+	// ----------------------
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(Type \"ConceptNode\")"
+		"	(Type \"ConceptNode\"))");
+
+	printf("expect true, got %s", rv.c_str());
+	TSM_ASSERT("Expected true", rv == "#t\n");
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(TypeChoice (Type \"ConceptNode\") (Type \"NumberNode\"))"
+		"	(Type \"ConceptNode\"))");
+
+	printf("expect true, got %s", rv.c_str());
+	TSM_ASSERT("Expected true", rv == "#t\n");
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(Type \"ConceptNode\")"
+		"	(TypeChoice (Type \"ConceptNode\") (Type \"NumberNode\")))");
+
+	printf("expect false, got %s", rv.c_str());
+	TSM_ASSERT("Expected false", rv == "#f\n");
+
+	// ----------------------
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(SignatureLink (EvaluationLink "
+		"		(Type \"PredicateNode\")"
+		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\"))))"
+		"	(SignatureLink (EvaluationLink "
+		"		(Type \"PredicateNode\")"
+		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\"))))");
+
+	printf("expect true, got %s", rv.c_str());
+	TSM_ASSERT("Expected true", rv == "#t\n");
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(SignatureLink (EvaluationLink "
+		"		(Type \"PredicateNode\")"
+		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\"))))"
+		"	(SignatureLink (EvaluationLink "
+		"		(Type \"PredicateNode\")"
+		"		(ListLink (Type \"NumberNode\") (Type \"NumberNode\"))))");
+
+	printf("expect false, got %s", rv.c_str());
+	TSM_ASSERT("Expected false", rv == "#f\n");
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(SignatureLink (EvaluationLink "
+		"		(Type \"PredicateNode\")"
+		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\"))))"
+		"	(SignatureLink (EvaluationLink "
+		"		(PredicateNode \"foo\")"
+		"		(ListLink (Type \"ConceptNode\") (NumberNode 42))))");
+
+	printf("expect true, got %s", rv.c_str());
+	TSM_ASSERT("Expected true", rv == "#t\n");
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(SignatureLink (EvaluationLink "
+		"		(Type \"PredicateNode\")"
+		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\"))))"
+		"	(EvaluationLink "
+		"		(PredicateNode \"foo\")"
+		"		(ListLink (ConceptNode \"bar\") (NumberNode 42))))");
+
+	printf("expect true, got %s", rv.c_str());
+	TSM_ASSERT("Expected true", rv == "#t\n");
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(SignatureLink (EvaluationLink "
+		"		(Type \"PredicateNode\")"
+		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\"))))"
+		"	(EvaluationLink "
+		"		(PredicateNode \"foo\")"
+		"		(ListLink (NumberNode 13) (NumberNode 42))))");
+
+	printf("expect false, got %s", rv.c_str());
+	TSM_ASSERT("Expected false", rv == "#f\n");
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(SignatureLink (EvaluationLink "
+		"		(PredicateNode \"foo\")"
+		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\"))))"
+		"	(EvaluationLink "
+		"		(PredicateNode \"foo\")"
+		"		(ListLink (ConceptNode \"bar\") (NumberNode 42))))");
+
+	printf("expect true, got %s", rv.c_str());
+	TSM_ASSERT("Expected true", rv == "#t\n");
+
+	rv = eval->eval(
+		"(cog-type-match? "
+		"	(SignatureLink (EvaluationLink "
+		"		(PredicateNode \"foo\")"
+		"		(ListLink (Type \"ConceptNode\") (Type \"NumberNode\"))))"
+		"	(EvaluationLink "
+		"		(PredicateNode \"bar\")"
+		"		(ListLink (ConceptNode \"bar\") (NumberNode 42))))");
+
+	printf("expect false, got %s", rv.c_str());
+	TSM_ASSERT("Expected false", rv == "#f\n");
+
+	// ----------------------
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
