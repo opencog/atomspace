@@ -354,7 +354,7 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
         else
             hs.push_back(implicant);
         //Actual checking here.
-        for (Handle& h : hs) {
+        for (const Handle& h : hs) {
             if (_as.get_atom(h) == Handle::UNDEFINED or (search_in_focus_set
                     and _focus_set_as.get_atom(h) == Handle::UNDEFINED ) ) {
                 return {};
@@ -395,7 +395,7 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
                     ((_as.add_link(SET_LINK, result))->toShortString()).c_str());
 
         }
-        //Search the whole atomspace
+        // Search the whole atomspace.
         else {
             AtomSpace derived_rule_as(&_as);
 
@@ -408,17 +408,18 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
 
             _log->debug("Result is %s ", (h->toShortString()).c_str());
 
-            result = derived_rule_as.get_outgoing(h);
+				LinkPtr lp(LinkCast(h));
+            if (lp) result = lp->getOutgoingSet();
         }
     }
 
-    //Add result back to atomspace
+    // Add result back to atomspace.
     if (search_in_focus_set) {
-        for (Handle h : result)
+        for (const Handle& h : result)
             _focus_set_as.add_atom(h);
 
     } else {
-        for (Handle h : result)
+        for (const Handle& h : result)
             _as.add_atom(h);
     }
 
@@ -660,7 +661,7 @@ HandleSeq ForwardChainer::substitute_rule_part(
  */
 bool ForwardChainer::unify(Handle source, Handle target, const Rule* rule)
 {
-    //exceptions
+    // exceptions
     if (not is_valid_implicant(target))
         return false;
 
@@ -671,10 +672,10 @@ bool ForwardChainer::unify(Handle source, Handle target, const Rule* rule)
     Handle sourcecpy = temp_pm_as.add_atom(source);
 
     BindLinkPtr bl =
-    createBindLink(HandleSeq { implicant_vardecl, hcpy, hcpy });
+        createBindLink(HandleSeq { implicant_vardecl, hcpy, hcpy });
     Handle blhandle = temp_pm_as.add_atom(bl);
-    Handle  result = bindlink(&temp_pm_as, blhandle);
-    HandleSeq results = temp_pm_as.get_outgoing(result);
+    Handle result = bindlink(&temp_pm_as, blhandle);
+    HandleSeq results = LinkCast(result)->getOutgoingSet();
 
     if (std::find(results.begin(), results.end(), sourcecpy) != results.end())
         return true;

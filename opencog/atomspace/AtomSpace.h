@@ -627,20 +627,6 @@ public:
         return result;
     }
 
-    /**
-     * DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this function, just copy the one-liner below.
-     * XXX ONLY the python bindings use this. XXX kill that code.
-     */
-    template <typename OutputIterator> OutputIterator
-    get_incoming_set_by_type(OutputIterator result,
-                             Handle handle,
-                             Type type,
-                             bool subclass) const
-    {
-        return handle->getIncomingSetByType(result, type, subclass);
-    }
-
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
     HandleSeq get_incoming(Handle h) const {
@@ -674,12 +660,6 @@ public:
      * If you need this, just copy the code below into your app! */
     void set_STI(Handle h, AttentionValue::sti_t stiValue) const {
         h->setSTI(stiValue);
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    void set_LTI(Handle h, AttentionValue::lti_t ltiValue) const {
-        h->setLTI(ltiValue);
     }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
@@ -746,23 +726,37 @@ public:
         return h->getTruthValue();
     }
 
+    /* ===================================================== */
+    /* Deprecated calls that only cython uses!
+     * XXX FIXME Lets fix cython aleady!
+     */
     /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    strength_t get_mean(Handle h) const {
-        return h->getTruthValue()->getMean();
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    confidence_t get_confidence(Handle h) const {
-        return h->getTruthValue()->getConfidence();
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
+     * If you need this, just copy the code below into your app!
+     */
     void set_TV(Handle h, TruthValuePtr tv) const {
         h->setTruthValue(tv);
     }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app!  */
+    void set_LTI(Handle h, AttentionValue::lti_t ltiValue) const {
+        h->setLTI(ltiValue);
+    }
+
+    /**
+     * DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this function, just copy the one-liner below.
+     * XXX ONLY the python bindings use this. XXX kill that code.
+     */
+    template <typename OutputIterator> OutputIterator
+    get_incoming_set_by_type(OutputIterator result,
+                             Handle handle,
+                             Type type,
+                             bool subclass) const
+    {
+        return handle->getIncomingSetByType(result, type, subclass);
+    }
+
 };
 
 /** @}*/
