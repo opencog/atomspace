@@ -72,11 +72,16 @@ Handle URECommons::replace_nodes_with_varnode(const Handle& handle,
 	return change_node_types(handle, node_unique_var_map);
 }
 
-string URECommons::get_unique_name(const Handle& h) const
+std::string URECommons::get_unique_name(const Handle& h) const
 {
-//xxx temporary implementation. need to be replaced by uuid generation for making sure name is always unique
-	string name = _as.get_name(h);
-	HandleSeq hs = _as.get_incoming(h);
+//xxx temporary implementation. need to be replaced by uuid
+// generation for making sure name is always unique
+
+	std::string name;
+	NodePtr nnn(NodeCast(h));
+	if (nnn) name = nnn->getName();
+	HandleSeq hs;
+	h->getIncomingSet(back_inserter(hs));
 	if (!hs.empty())
 		name.append(to_string(hs[0].value()));
 	name.append("-bcgen");
