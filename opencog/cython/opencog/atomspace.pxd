@@ -137,6 +137,10 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         bint is_valid_handle(cHandle h)
         int get_size()
+
+        # these should alias the proper types for sti/lti/vlti
+        # XXX DEPRECATED, REMOVE ASAP XXX just implement these
+        # correctly, instead of callng deprecated atomspace methods!
         string get_name(cHandle h)
         Type get_type(cHandle h)
         tv_ptr get_TV(cHandle h)
@@ -145,9 +149,6 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         vector[cHandle] get_outgoing(cHandle h)
         vector[cHandle] get_incoming(cHandle h)
 
-        # these should alias the proper types for sti/lti/vlti
-        # XXX DEPRECATED, REMOVE ASAP XXX just implement these
-        # correctly, instead of callng deprecated atomspace methods!
         short get_STI(cHandle h)
         short get_LTI(cHandle h)
         bint get_VLTI(cHandle h)
