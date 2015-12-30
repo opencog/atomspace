@@ -86,7 +86,7 @@ public:
     ~AtomSpace();
 
     /// Get the environment that this atomspace was created in.
-    AtomSpace* get_environ() {
+    AtomSpace* get_environ() const {
         AtomTable* env = atomTable.get_environ();
         if (env) return env->getAtomSpace();
         return nullptr;
@@ -100,7 +100,7 @@ public:
     inline int get_num_links() const { return atomTable.getNumLinks(); }
     inline int get_num_atoms_of_type(Type type, bool subclass = false) const
         { return atomTable.getNumAtomsOfType(type, subclass); }
-    UUID get_uuid(void) { return atomTable.get_uuid(); }
+    inline UUID get_uuid(void) const { return atomTable.get_uuid(); }
 
     //! Clear the atomspace, remove all atoms
     void clear();
@@ -212,15 +212,15 @@ public:
      * To avoid a fetch if the atom already is in the atomtable, use the
      * get_atom() method instead.
      */
-    Handle fetch_atom(Handle h);
+    Handle fetch_atom(Handle);
     Handle fetch_atom(UUID);
 
     /**
      * Get an atom from the AtomTable. If the atom is not there, then
      * return Handle::UNDEFINED.
      */
-    Handle get_atom(const Handle& h) { return atomTable.getHandle(h); }
-    Handle get_atom(UUID uuid) { return atomTable.getHandle(uuid); }
+    Handle get_atom(const Handle& h) const { return atomTable.getHandle(h); }
+    Handle get_atom(UUID uuid) const { return atomTable.getHandle(uuid); }
 
     /**
      * Load *all* atoms of the given type, but only if they are not
@@ -319,16 +319,16 @@ public:
      *        the outgoing set of the link.
     */
     Handle get_link(Type t, const HandleSeq& outgoing);
-	Handle get_link(Type t, Handle ha) {
+	inline Handle get_link(Type t, const Handle& ha) {
 		return get_link(t, HandleSeq({ha}));
 	}
-	Handle get_link(Type t, Handle ha, Handle hb) {
+	Handle get_link(Type t, const Handle& ha, const Handle& hb) {
 		return get_link(t, {ha, hb});
 	}
-	Handle get_link(Type t, Handle ha, Handle hb, Handle hc) {
+	Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc) {
 		return get_link(t, {ha, hb, hc});
 	}
-	Handle get_link(Type t, Handle ha, Handle hb, Handle hc, Handle hd) {
+	Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc, const Handle& hd) {
 		return get_link(t, {ha, hb, hc, hd});
 	}
     Handle get_handle(Type t, const HandleSeq& outgoing) {
@@ -345,7 +345,7 @@ public:
      * Return true if the handle points to an atom that is in some
      * (any) atomspace; else return false.
      */
-    bool is_valid_handle(Handle h) const {
+    bool is_valid_handle(const Handle& h) const {
         return (NULL != h) and (h->getAtomTable() != NULL);
     }
 
