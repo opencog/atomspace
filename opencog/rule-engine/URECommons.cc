@@ -93,11 +93,12 @@ bool URECommons::exists_in(const Handle& hlink, const Handle& h) const
 	if (hlink == h) {
 		return true;
 	} else {
-		if (not LinkCast(hlink))
+		LinkPtr lp(LinkCast(hlink));
+		if (nullptr == lp)
 			throw InvalidParamException(TRACE_INFO,
 					"Need a LINK type to look in");
-		auto outg = _as.get_outgoing(hlink);
-		if (find(outg.begin(), outg.end(), h) != outg.end())
+		auto outg = lp->getOutgoingSet();
+		if (std::find(outg.begin(), outg.end(), h) != outg.end())
 			return true;
 		else {
 			for (const Handle& hi : outg) {

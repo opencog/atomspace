@@ -59,12 +59,12 @@ void ForwardChainer::init(Handle hsource, HandleSeq focus_set)
     _search_focus_Set = not focus_set.empty();
     _ts_mode = TV_FITNESS_BASED;
 
-    //Set potential source.
-    HandleSeq init_sources = { };
+    // Set potential source.
+    HandleSeq init_sources;
 
-    //Accept set of initial sources wrapped in a SET_LINK
-    if (LinkCast(hsource) and hsource->getType() == SET_LINK) {
-        init_sources = _as.get_outgoing(hsource);
+    // Accept set of initial sources wrapped in a SET_LINK.
+    if (hsource->getType() == SET_LINK) {
+        init_sources = LinkCast(hsource)->getOutgoingSet();
     } else {
         init_sources.push_back(hsource);
     }
@@ -74,10 +74,10 @@ void ForwardChainer::init(Handle hsource, HandleSeq focus_set)
     if (_search_focus_Set) {
         _focus_set = focus_set;
 
-        for (Handle& h : _focus_set)
+        for (const Handle& h : _focus_set)
             _focus_set_as.add_atom(h);
 
-        for (Handle& h : _potential_sources)
+        for (const Handle& h : _potential_sources)
             _focus_set_as.add_atom(h);
     }
 

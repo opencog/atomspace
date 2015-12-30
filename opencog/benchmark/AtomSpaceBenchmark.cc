@@ -111,9 +111,9 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
         total += sizeof(AttentionValue);
     }
 
-    if (asp->is_node(h))
+    NodePtr n(NodeCast(h));
+    if (n)
     {
-        NodePtr n(NodeCast(h));
         total = sizeof(Node);
         total += n->getName().capacity();
     }
