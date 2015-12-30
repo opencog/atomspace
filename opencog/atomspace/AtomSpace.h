@@ -599,6 +599,7 @@ public:
     /* ----------------------------------------------------------- */
     /* Deprecated and obsolete code */
 
+#ifdef DEPRECATED_ATOMSPACE_CALLS
     /**
      * DEPRECATED! DO NOT USE IN NEW CODE!
      * If you need this function, just cut and paste the code below into
@@ -664,28 +665,8 @@ public:
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    void inc_VLTI(Handle h) const { h->incVLTI(); }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    void dec_VLTI(Handle h) const { h->decVLTI(); }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
     AttentionValue::sti_t get_STI(Handle h) const {
         return h->getAttentionValue()->getSTI();
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    AttentionValue::lti_t get_LTI(Handle h) const {
-        return h->getAttentionValue()->getLTI();
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    AttentionValue::vlti_t get_VLTI(Handle h) const {
-        return h->getAttentionValue()->getVLTI();
     }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
@@ -707,14 +688,6 @@ public:
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    Arity get_arity(Handle h) const {
-        LinkPtr lll(LinkCast(h));
-        if (lll) return lll->getArity();
-        return 0;
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
     Type get_type(Handle h) const {
         return h->getType();
     }
@@ -725,11 +698,13 @@ public:
     {
         return h->getTruthValue();
     }
+#endif // DEPRECATED_ATOMSPACE_CALLS
 
     /* ===================================================== */
     /* Deprecated calls that only cython uses!
      * XXX FIXME Lets fix cython aleady!
      */
+#ifdef DEPRECATED_CYTHON_CALLS
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app!
      */
@@ -741,6 +716,26 @@ public:
      * If you need this, just copy the code below into your app!  */
     void set_LTI(Handle h, AttentionValue::lti_t ltiValue) const {
         h->setLTI(ltiValue);
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    AttentionValue::lti_t get_LTI(Handle h) const {
+        return h->getAttentionValue()->getLTI();
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    void inc_VLTI(Handle h) const { h->incVLTI(); }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    void dec_VLTI(Handle h) const { h->decVLTI(); }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    AttentionValue::vlti_t get_VLTI(Handle h) const {
+        return h->getAttentionValue()->getVLTI();
     }
 
     /**
@@ -756,7 +751,7 @@ public:
     {
         return handle->getIncomingSetByType(result, type, subclass);
     }
-
+#endif // DEPRECATED_CYTHON_CALLS
 };
 
 /** @}*/
