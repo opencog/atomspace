@@ -85,7 +85,7 @@ void SudokuPuzzle::setUp(void)
 	load_scm_files_from_config(*as);
 }
 
-#define getlink(hand,pos) LinkCasts(hand)->getOutgoingSet(pos)
+#define getlink(hand,pos) LinkCasts(hand)->getOutgoingAtom(pos)
 #define getarity(hand) LinkCast(hand)->getArity()
 
 /* ========================================================================

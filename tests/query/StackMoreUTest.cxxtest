@@ -104,7 +104,7 @@ void StackMoreUTest::setUp(void)
  * Test of pattern matching on multi-variable matches with
  * confounding intermediate data.
  */
-#define getlink(hand,pos) LinkCast(hand)->getOutgoingSet(pos)
+#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
 #define getarity(hand) LinkCast(hand)->getArity()
 
 void StackMoreUTest::test_oo(void)

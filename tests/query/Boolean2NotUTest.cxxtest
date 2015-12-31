@@ -69,7 +69,7 @@ class Boolean2NotUTest :  public CxxTest::TestSuite
 #define an as->add_node
 #define al as->add_link
 #define getarity(hand) LinkCast(hand)->getArity()
-#define getlink(hand,pos) LinkCast(hand)->getOutgoingSet(pos)
+#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
 
 void Boolean2NotUTest::tearDown(void)
 {
