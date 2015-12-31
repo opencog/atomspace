@@ -144,6 +144,8 @@ bool PMCB::grounding(const std::map<Handle, Handle> &var_soln,
 	return false;
 }
 
+#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
+
 /*
  * This function sets up the following structures:
  *

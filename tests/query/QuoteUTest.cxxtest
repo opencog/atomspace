@@ -85,6 +85,8 @@ void QuoteUTest::setUp(void)
 }
 
 #define getarity(hand) LinkCast(hand)->getArity()
+#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
+#define getname(hand) NodeCast(hand)->getName()
 
 /*
  * QuoteLink unit test.  Test quoted variables.
@@ -103,7 +105,7 @@ void QuoteUTest::test_quoted_variable(void)
 
     banana = getlink(banana, 0);
     TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
-    TS_ASSERT_EQUALS(0, strcmp("banana", as->get_name(banana).c_str()));
+    TS_ASSERT_EQUALS(0, strcmp("banana", getname(banana).c_str()));
 
     // ----------------------------------------------
     logger().debug("BEGIN subtest bother: %s", __FUNCTION__);
@@ -114,7 +116,7 @@ void QuoteUTest::test_quoted_variable(void)
 
     banana = getlink(banana, 0);
     TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
-    TS_ASSERT_EQUALS(0, strcmp("banana", as->get_name(banana).c_str()));
+    TS_ASSERT_EQUALS(0, strcmp("banana", getname(banana).c_str()));
 
     // ----------------------------------------------
     logger().debug("BEGIN subtest bunbound: %s", __FUNCTION__);
@@ -125,7 +127,7 @@ void QuoteUTest::test_quoted_variable(void)
 
     banana = getlink(banana, 0);
     TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
-    TS_ASSERT_EQUALS(0, strcmp("banana", as->get_name(banana).c_str()));
+    TS_ASSERT_EQUALS(0, strcmp("banana", getname(banana).c_str()));
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -147,7 +149,7 @@ void QuoteUTest::test_nest(void)
 
     allstar = getlink(allstar, 0);
     TS_ASSERT_EQUALS(PREDICATE_NODE, allstar->getType());
-    TS_ASSERT_EQUALS(std::string("all-var"), as->get_name(allstar));
+    TS_ASSERT_EQUALS(std::string("all-var"), getname(allstar));
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -221,7 +223,7 @@ void QuoteUTest::test_double_quote(void)
 
     banana = getlink(banana, 0);
     TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
-    TS_ASSERT_EQUALS(0, strcmp("banana", as->get_name(banana).c_str()));
+    TS_ASSERT_EQUALS(0, strcmp("banana", getname(banana).c_str()));
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }

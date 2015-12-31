@@ -498,11 +498,11 @@ public:
                                        "test");
         h->setTruthValue(SimpleTruthValue::createTV(0.01,
                          SimpleTruthValue::confidenceToCount(1)));
-        atomSpace->set_STI(h, 200);
+        h->setSTI(200);
         TS_ASSERT(__testAFSignalsCounter == 1);
 
         // Remove the node from the AttentionalFocus
-        atomSpace->set_STI(h, 90);
+        h->setSTI(90);
         TS_ASSERT(__testAFSignalsCounter == 2);
 
         addAFConnection.disconnect();
