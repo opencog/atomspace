@@ -184,7 +184,7 @@ bool Variables::is_equal(const Variables& other) const
 		if (sime != _simple_typemap.end())
 		{
 			if (soth == other._simple_typemap.end()) return false;
-			if (*sime != *soth) return false;
+			if (sime->second != soth->second) return false;
 		}
 
 		// If typed, types must match.
@@ -196,7 +196,7 @@ bool Variables::is_equal(const Variables& other) const
 		if (dime != _deep_typemap.end())
 		{
 			if (doth == other._deep_typemap.end()) return false;
-			if (*dime != *doth) return false;
+			if (dime->second != doth->second) return false;
 		}
 
 		// XXX TODO fuzzy?
