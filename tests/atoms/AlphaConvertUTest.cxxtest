@@ -86,5 +86,16 @@ void AlphaConvertUTest::test_variables()
 	// x and z should be equal
 	TS_ASSERT(scox->is_equal(hscoz));
 
+	// Constraining something to be "type Atom" is not a constraint.
+	_asb.clear();
+	Handle hscow =
+	LB(SCOPE_LINK,
+		LB(TYPED_VARIABLE_LINK,
+			NB(VARIABLE_NODE, "$W"), NB(TYPE_NODE, "Atom")),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$W")));
+
+	// x and w should be equal
+	TS_ASSERT(scox->is_equal(hscow));
+
 	logger().info("END TEST: %s", __FUNCTION__);
 }

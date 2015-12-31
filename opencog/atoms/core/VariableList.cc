@@ -140,8 +140,11 @@ void VariableList::get_vartype(const Handle& htypelink)
 	if (TYPE_NODE == t)
 	{
 		Type vt = TypeNodeCast(vartype)->get_value();
-		std::set<Type> ts = {vt};
-		_varlist._simple_typemap.insert({varname, ts});
+		if (vt != ATOM)  // Atom type is same as untyped.
+		{
+			std::set<Type> ts = {vt};
+			_varlist._simple_typemap.insert({varname, ts});
+		}
 	}
 	else if (TYPE_CHOICE == t)
 	{
@@ -158,7 +161,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 			if (TYPE_NODE == var_type)
 			{
 				Type vt = TypeNodeCast(ht)->get_value();
-				typeset.insert(vt);
+				if (ATOM != vt) typeset.insert(vt);
 			}
 			else if (SIGNATURE_LINK == var_type)
 			{
