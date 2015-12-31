@@ -46,6 +46,10 @@
 ; -- min-element-by-key -- Get maximum element in a list
 ; -- cog-push-atomspace -- Create a temporary atomspace.
 ; -- cog-pop-atomspace -- Delete a temporary atomspace.
+; -- check-name? -- Check if a there is a node with the given name.
+; -- random-string -- Generate a random string of given length.
+; -- random-node-name  -- Generate a random name for a node of given type.
+; -- choose-var-name --Generate a random name for a variable.
 ;
 ;;; Code:
 ; Copyright (c) 2008, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
@@ -1019,8 +1023,63 @@
 	; but I think it helps. Do it twice; once is sometimes not enough.
 	(gc) (gc))
 
+
+; ---------------------------------------------------------------------
+(define-public (check-name? node-name node-type)
+"
+ Return #t if there is a node of type node-type with a name "node-name".
+"
+        (not (null? (cog-node node-type node-name)))
+)
+
 ; ---------------------------------------------------------------------
 
+(define-public (random-string str-length)
+"
+ random-string -- Returns a random string of length 'str-length'.
+"
+	(define alphanumeric "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+	(define str "")
+	(while (> str-length 0)
+		(set! str (string-append str (string (string-ref alphanumeric (random (string-length alphanumeric))))))
+		(set! str-length (- str-length 1))
+	)
+	str
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (random-node-name node-type random-length prepend-text)
+"
+ Creates a possible name 'node-name' of length 'random-length' for a node
+ of type 'node-type'. The 'node-name' is not used with any other node
+ of type 'node-type'. Prepend 'prepend-text' to the front.
+"
+	(define node-name (random-string random-length))
+	(define prepend-length (string-length prepend-text))
+	(if (> prepend-length 0)
+		(set! node-name (string-append prepend-text node-name))
+	)
+	(while (check-name? node-name node-type)
+		(if (> prepend-length 0)
+			(set! node-name (string-append prepend-text (random-string random-length)))
+			(set! node-name (random-string random-length))
+		)
+	)
+	node-name
+)
+
+; -----------------------------------------------------------------------
+
+(define-public (choose-var-name)
+"
+ Creates name for VariableNodes after checking whether the name is being
+ not used by other VariableNode.
+"
+    (random-node-name 'VariableNode 36 "$")
+)
+
+; -----------------------------------------------------------------------
 
 ; A list of all the public (exported) utilities in this file
 (define cog-utilities (list
@@ -1075,6 +1134,10 @@
 'cog-atomspace-stack
 'cog-push-atomspace
 'cog-pop-atomspace
+'check-name?
+'random-string
+'random-node-name
+'choose-var-name
 ))
 
 ; Compile 'em all.  This should improve performance a bit.
