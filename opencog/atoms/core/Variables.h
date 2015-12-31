@@ -110,6 +110,15 @@ struct Variables : public FreeVariables
 	VariableDeepTypeMap _deep_typemap;
 	VariableDeepTypeMap _fuzzy_typemap;
 
+	// Return true if the other Variables struct is equal to this one,
+	// up to alpha-conversion. That is, same number of variables, same
+	// type restrictions, but different actual variable names.
+	bool is_equal(const Variables&) const;
+	inline bool operator==(const Variables& other) const
+	{ return is_equal(other); }
+	inline bool operator!=(const Variables& other) const
+	{ return not is_equal(other); }
+
 	// Return true if we are holding a single variable, and the handle
 	// given as the argument satisfies the type restrictions (if any).
 	// Else return false.

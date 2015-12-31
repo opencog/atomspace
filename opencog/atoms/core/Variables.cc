@@ -160,6 +160,53 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
 }
 
 /* ================================================================= */
+
+/// Return true if the other Variables struct is equal to this one,
+/// up to alpha-conversion. That is, same number of variables, same
+/// type restrictions, but different actual variable names.
+bool Variables::is_equal(const Variables& other) const
+{
+	size_t sz = varseq.size();
+	if (other.varseq.size() != sz) return false;
+
+	// Side-by-side comparison
+	for (size_t i=0; i<sz; i++)
+	{
+		const Handle& vme(varseq[i]);
+		const Handle& voth(other.varseq[i]);
+
+		// If typed, types must match.
+		auto sime = _simple_typemap.find(vme);
+		auto soth = other._simple_typemap.find(voth);
+		if (sime == _simple_typemap.end() and
+		    soth != other._simple_typemap.end()) return false;
+
+		if (sime != _simple_typemap.end())
+		{
+			if (soth == other._simple_typemap.end()) return false;
+			if (*sime != *soth) return false;
+		}
+
+		// If typed, types must match.
+		auto dime = _deep_typemap.find(vme);
+		auto doth = other._deep_typemap.find(voth);
+		if (dime == _deep_typemap.end() and
+		    doth != other._deep_typemap.end()) return false;
+
+		if (dime != _deep_typemap.end())
+		{
+			if (doth == other._deep_typemap.end()) return false;
+			if (*dime != *doth) return false;
+		}
+
+		// XXX TODO fuzzy?
+	}
+
+	// If we got toe here, everything must be OK.
+	return true;
+}
+
+/* ================================================================= */
 /**
  * Simple type checker.
  *
