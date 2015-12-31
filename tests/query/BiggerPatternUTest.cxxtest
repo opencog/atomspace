@@ -224,7 +224,7 @@ void BiggerPatternUTest::setUp(void)
  *      $prep   = DefinedLinguisticRelationshipNode "of"
  *      $phrase = DefinedLinguisticRelationshipNode "capital_of"
  */
-#define getlink(hand,pos) as->get_outgoing(hand,pos)
+#define getlink(hand,pos) getlink(hand,pos)
 #define prtnode(str,hand) \
 	printf("%s %s\n", str, as->get_name(hand).c_str());
 

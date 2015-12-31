@@ -67,6 +67,7 @@ class BooleanUTest :  public CxxTest::TestSuite
 #define an as->add_node
 #define al as->add_link
 #define getarity(hand) LinkCast(hand)->getArity()
+#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
 
 void BooleanUTest::tearDown(void)
 {
@@ -201,9 +202,6 @@ void BooleanUTest::setUp(void)
  *          ConceptNode "Berlin"
  *          ConceptNode "city"
  */
-#define getlink(hand,pos) as->get_outgoing(hand,pos)
-#define getarity(hand) getarity(hand)
-
 void BooleanUTest::test_isa(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);

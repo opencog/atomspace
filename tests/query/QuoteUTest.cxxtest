@@ -101,7 +101,7 @@ void QuoteUTest::test_quoted_variable(void)
     Handle banana = bindlink(as, bindy);
     TS_ASSERT_EQUALS(1, getarity(banana));
 
-    banana = as->get_outgoing(banana, 0);
+    banana = getlink(banana, 0);
     TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
     TS_ASSERT_EQUALS(0, strcmp("banana", as->get_name(banana).c_str()));
 
@@ -112,7 +112,7 @@ void QuoteUTest::test_quoted_variable(void)
     banana = bindlink(as, bindy);
     TS_ASSERT_EQUALS(1, getarity(banana));
 
-    banana = as->get_outgoing(banana, 0);
+    banana = getlink(banana, 0);
     TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
     TS_ASSERT_EQUALS(0, strcmp("banana", as->get_name(banana).c_str()));
 
@@ -123,7 +123,7 @@ void QuoteUTest::test_quoted_variable(void)
     banana = bindlink(as, bindy);
     TS_ASSERT_EQUALS(1, getarity(banana));
 
-    banana = as->get_outgoing(banana, 0);
+    banana = getlink(banana, 0);
     TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
     TS_ASSERT_EQUALS(0, strcmp("banana", as->get_name(banana).c_str()));
 
@@ -145,7 +145,7 @@ void QuoteUTest::test_nest(void)
     Handle allstar = bindlink(as, bindy);
     TS_ASSERT_EQUALS(1, getarity(allstar));
 
-    allstar = as->get_outgoing(allstar, 0);
+    allstar = getlink(allstar, 0);
     TS_ASSERT_EQUALS(PREDICATE_NODE, allstar->getType());
     TS_ASSERT_EQUALS(std::string("all-var"), as->get_name(allstar));
 
@@ -197,7 +197,7 @@ void QuoteUTest::test_gpn(void)
     Handle allstar = bindlink(as, bindy);
     TS_ASSERT_EQUALS(1, getarity(allstar));
 
-    allstar = as->get_outgoing(allstar, 0);
+    allstar = getlink(allstar, 0);
     TS_ASSERT_EQUALS(LIST_LINK, allstar->getType());
     TS_ASSERT_EQUALS(2, getarity(allstar));
 
@@ -219,7 +219,7 @@ void QuoteUTest::test_double_quote(void)
     Handle banana = bindlink(as, bindy);
     TS_ASSERT_EQUALS(1, getarity(banana));
 
-    banana = as->get_outgoing(banana, 0);
+    banana = getlink(banana, 0);
     TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
     TS_ASSERT_EQUALS(0, strcmp("banana", as->get_name(banana).c_str()));
 

@@ -85,7 +85,7 @@ void EinsteinPuzzle::setUp(void)
 	load_scm_files_from_config(*as);
 }
 
-#define getlink(hand,pos) as->get_outgoing(hand,pos)
+#define getlink(hand,pos) getlink(hand,pos)
 #define getarity(hand) getarity(hand)
 
 /* ========================================================================

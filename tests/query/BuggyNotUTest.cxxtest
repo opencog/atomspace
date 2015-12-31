@@ -67,6 +67,7 @@ class BuggyNot :  public CxxTest::TestSuite
 #define an as->addNode
 #define al as->addLink
 #define getarity(hand) LinkCast(hand)->getArity()
+#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
 
 void BuggyNot::setUp(void)
 {
@@ -78,9 +79,6 @@ void BuggyNot::setUp(void)
 
 	load_scm_files_from_config(*as);
 }
-
-#define getlink(hand,pos) as->get_outgoing(hand,pos)
-#define getarity(hand) getarity(hand)
 
 /*
  * NotLink causing weird trouble.
