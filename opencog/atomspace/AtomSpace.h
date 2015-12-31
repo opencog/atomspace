@@ -86,7 +86,7 @@ public:
     ~AtomSpace();
 
     /// Get the environment that this atomspace was created in.
-    AtomSpace* get_environ() {
+    AtomSpace* get_environ() const {
         AtomTable* env = atomTable.get_environ();
         if (env) return env->getAtomSpace();
         return nullptr;
@@ -100,7 +100,7 @@ public:
     inline int get_num_links() const { return atomTable.getNumLinks(); }
     inline int get_num_atoms_of_type(Type type, bool subclass = false) const
         { return atomTable.getNumAtomsOfType(type, subclass); }
-    UUID get_uuid(void) { return atomTable.get_uuid(); }
+    inline UUID get_uuid(void) const { return atomTable.get_uuid(); }
 
     //! Clear the atomspace, remove all atoms
     void clear();
@@ -212,15 +212,15 @@ public:
      * To avoid a fetch if the atom already is in the atomtable, use the
      * get_atom() method instead.
      */
-    Handle fetch_atom(Handle h);
+    Handle fetch_atom(Handle);
     Handle fetch_atom(UUID);
 
     /**
      * Get an atom from the AtomTable. If the atom is not there, then
      * return Handle::UNDEFINED.
      */
-    Handle get_atom(const Handle& h) { return atomTable.getHandle(h); }
-    Handle get_atom(UUID uuid) { return atomTable.getHandle(uuid); }
+    Handle get_atom(const Handle& h) const { return atomTable.getHandle(h); }
+    Handle get_atom(UUID uuid) const { return atomTable.getHandle(uuid); }
 
     /**
      * Load *all* atoms of the given type, but only if they are not
@@ -319,16 +319,16 @@ public:
      *        the outgoing set of the link.
     */
     Handle get_link(Type t, const HandleSeq& outgoing);
-	Handle get_link(Type t, Handle ha) {
+	inline Handle get_link(Type t, const Handle& ha) {
 		return get_link(t, HandleSeq({ha}));
 	}
-	Handle get_link(Type t, Handle ha, Handle hb) {
+	Handle get_link(Type t, const Handle& ha, const Handle& hb) {
 		return get_link(t, {ha, hb});
 	}
-	Handle get_link(Type t, Handle ha, Handle hb, Handle hc) {
+	Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc) {
 		return get_link(t, {ha, hb, hc});
 	}
-	Handle get_link(Type t, Handle ha, Handle hb, Handle hc, Handle hd) {
+	Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc, const Handle& hd) {
 		return get_link(t, {ha, hb, hc, hd});
 	}
     Handle get_handle(Type t, const HandleSeq& outgoing) {
@@ -345,7 +345,7 @@ public:
      * Return true if the handle points to an atom that is in some
      * (any) atomspace; else return false.
      */
-    bool is_valid_handle(Handle h) const {
+    bool is_valid_handle(const Handle& h) const {
         return (NULL != h) and (h->getAtomTable() != NULL);
     }
 
@@ -599,6 +599,7 @@ public:
     /* ----------------------------------------------------------- */
     /* Deprecated and obsolete code */
 
+#ifdef DEPRECATED_ATOMSPACE_CALLS
     /**
      * DEPRECATED! DO NOT USE IN NEW CODE!
      * If you need this function, just cut and paste the code below into
@@ -625,20 +626,6 @@ public:
                 if (h) *(result++) = h; }, type);
 
         return result;
-    }
-
-    /**
-     * DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this function, just copy the one-liner below.
-     * XXX ONLY the python bindings use this. XXX kill that code.
-     */
-    template <typename OutputIterator> OutputIterator
-    get_incoming_set_by_type(OutputIterator result,
-                             Handle handle,
-                             Type type,
-                             bool subclass) const
-    {
-        return handle->getIncomingSetByType(result, type, subclass);
     }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
@@ -678,34 +665,8 @@ public:
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    void set_LTI(Handle h, AttentionValue::lti_t ltiValue) const {
-        h->setLTI(ltiValue);
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    void inc_VLTI(Handle h) const { h->incVLTI(); }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    void dec_VLTI(Handle h) const { h->decVLTI(); }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
     AttentionValue::sti_t get_STI(Handle h) const {
         return h->getAttentionValue()->getSTI();
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    AttentionValue::lti_t get_LTI(Handle h) const {
-        return h->getAttentionValue()->getLTI();
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    AttentionValue::vlti_t get_VLTI(Handle h) const {
-        return h->getAttentionValue()->getVLTI();
     }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
@@ -727,14 +688,6 @@ public:
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    Arity get_arity(Handle h) const {
-        LinkPtr lll(LinkCast(h));
-        if (lll) return lll->getArity();
-        return 0;
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
     Type get_type(Handle h) const {
         return h->getType();
     }
@@ -745,24 +698,60 @@ public:
     {
         return h->getTruthValue();
     }
+#endif // DEPRECATED_ATOMSPACE_CALLS
 
+    /* ===================================================== */
+    /* Deprecated calls that only cython uses!
+     * XXX FIXME Lets fix cython aleady!
+     */
+#ifdef DEPRECATED_CYTHON_CALLS
     /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    strength_t get_mean(Handle h) const {
-        return h->getTruthValue()->getMean();
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    confidence_t get_confidence(Handle h) const {
-        return h->getTruthValue()->getConfidence();
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
+     * If you need this, just copy the code below into your app!
+     */
     void set_TV(Handle h, TruthValuePtr tv) const {
         h->setTruthValue(tv);
     }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app!  */
+    void set_LTI(Handle h, AttentionValue::lti_t ltiValue) const {
+        h->setLTI(ltiValue);
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    AttentionValue::lti_t get_LTI(Handle h) const {
+        return h->getAttentionValue()->getLTI();
+    }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    void inc_VLTI(Handle h) const { h->incVLTI(); }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    void dec_VLTI(Handle h) const { h->decVLTI(); }
+
+    /** DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this, just copy the code below into your app! */
+    AttentionValue::vlti_t get_VLTI(Handle h) const {
+        return h->getAttentionValue()->getVLTI();
+    }
+
+    /**
+     * DEPRECATED! Do NOT USE IN NEW CODE!
+     * If you need this function, just copy the one-liner below.
+     * XXX ONLY the python bindings use this. XXX kill that code.
+     */
+    template <typename OutputIterator> OutputIterator
+    get_incoming_set_by_type(OutputIterator result,
+                             Handle handle,
+                             Type type,
+                             bool subclass) const
+    {
+        return handle->getIncomingSetByType(result, type, subclass);
+    }
+#endif // DEPRECATED_CYTHON_CALLS
 };
 
 /** @}*/

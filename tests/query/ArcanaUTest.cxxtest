@@ -81,6 +81,8 @@ void ArcanaUTest::setUp(void)
     load_scm_files_from_config(*as);
 }
 
+#define getarity(hand) LinkCast(hand)->getArity()
+
 /*
  * Miscellaneous Arcana
  * This one tests a repeated unit in a clause.
@@ -93,8 +95,8 @@ void ArcanaUTest::test_repeats(void)
     load_scm_files_from_config(*as);
 
     Handle same = eval->eval_h("(cog-bind (repeat-same))");
-    printf("same, num solutions=%d\n", as->get_arity(same));
-    TS_ASSERT_EQUALS(1, as->get_arity(same));
+    printf("same, num solutions=%d\n", getarity(same));
+    TS_ASSERT_EQUALS(1, getarity(same));
 
     Handle diff = eval->eval_h("(cog-bind (repeat-different))");
 
@@ -115,17 +117,17 @@ void ArcanaUTest::test_repeats(void)
     TS_ASSERT_EQUALS(true, pass);
 
     Handle d3d = eval->eval_h("(cog-bind (repeat-diff-thrice))");
-    printf("d3d, num solutions=%d\n", as->get_arity(d3d));
-    TS_ASSERT(1 <= as->get_arity(d3d));
-    TS_ASSERT(as->get_arity(d3d) <= 3);
+    printf("d3d, num solutions=%d\n", getarity(d3d));
+    TS_ASSERT(1 <= getarity(d3d));
+    TS_ASSERT(getarity(d3d) <= 3);
 
     Handle thrice = eval->eval_h("(cog-bind (repeat-thrice))");
-    printf("thrice, num solutions=%d\n", as->get_arity(thrice));
-    TS_ASSERT_EQUALS(1, as->get_arity(thrice));
+    printf("thrice, num solutions=%d\n", getarity(thrice));
+    TS_ASSERT_EQUALS(1, getarity(thrice));
 
     Handle once = eval->eval_h("(cog-bind (repeat-once))");
-    printf("once, num solutions=%d\n", as->get_arity(once));
-    TS_ASSERT_EQUALS(1, as->get_arity(once));
+    printf("once, num solutions=%d\n", getarity(once));
+    TS_ASSERT_EQUALS(1, getarity(once));
 
     // ----
     logger().debug("END TEST: %s", __FUNCTION__);
@@ -148,7 +150,7 @@ void ArcanaUTest::test_const(void)
     Handle answer = eval->eval_h("(cog-bind who)");
     printf("radio=%s\n", answer->toString().c_str());
 
-    TS_ASSERT_EQUALS(1, as->get_arity(answer));
+    TS_ASSERT_EQUALS(1, getarity(answer));
     LinkPtr lp = LinkCast(answer);
     Handle devel = lp->getOutgoingAtom(0);
 
@@ -159,7 +161,7 @@ void ArcanaUTest::test_const(void)
     Handle defans = eval->eval_h("(cog-bind whodfn)");
     printf("defined radio=%s\n", defans->toString().c_str());
 
-    TS_ASSERT_EQUALS(1, as->get_arity(defans));
+    TS_ASSERT_EQUALS(1, getarity(defans));
     TS_ASSERT_EQUALS(defans, answer);
 
     // ----

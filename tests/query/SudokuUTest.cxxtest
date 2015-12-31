@@ -85,8 +85,8 @@ void SudokuPuzzle::setUp(void)
 	load_scm_files_from_config(*as);
 }
 
-#define getlink(hand,pos) as->get_outgoing(hand,pos)
-#define getarity(hand) as->get_arity(hand)
+#define getlink(hand,pos) LinkCasts(hand)->getOutgoingAtom(pos)
+#define getarity(hand) LinkCast(hand)->getArity()
 
 /* ========================================================================
  * Extremely simple 2x2 puzzle solver

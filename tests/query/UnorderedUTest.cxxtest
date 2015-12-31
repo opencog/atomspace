@@ -112,8 +112,8 @@ void UnorderedUTest::setUp(void)
  * The trick is, of course, not to search too much, and not to search too
  * little.
  */
-#define getlink(hand,pos) as->get_outgoing(hand,pos)
-#define getarity(hand) as->get_arity(hand)
+#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
+#define getarity(hand) LinkCast(hand)->getArity()
 
 void UnorderedUTest::test_un1(void)
 {

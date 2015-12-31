@@ -59,6 +59,13 @@ class BiggerPatternUTest :  public CxxTest::TestSuite
 		void test_prep(void);
 };
 
+#define an as->add_node
+#define al as->add_link
+#define getarity(hand) LinkCast(hand)->getArity()
+#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
+#define prtnode(str,hand) \
+	printf("%s %s\n", str, NodeCast(hand)->getName().c_str());
+
 /*
  * This function sets up both the implication link, and the
  * input data, for a typical, real-world preposition deduction.
@@ -84,8 +91,6 @@ class BiggerPatternUTest :  public CxxTest::TestSuite
  *
  * Note that there is an implicit LemmaLink created for 'be'.
  */
-#define an as->add_node
-#define al as->add_link
 void BiggerPatternUTest::tearDown(void)
 {
 	delete as;
@@ -222,10 +227,6 @@ void BiggerPatternUTest::setUp(void)
  *      $prep   = DefinedLinguisticRelationshipNode "of"
  *      $phrase = DefinedLinguisticRelationshipNode "capital_of"
  */
-#define getlink(hand,pos) as->get_outgoing(hand,pos)
-#define prtnode(str,hand) \
-	printf("%s %s\n", str, as->get_name(hand).c_str());
-
 void BiggerPatternUTest::test_prep(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -235,7 +236,7 @@ void BiggerPatternUTest::test_prep(void)
 
 	// Expect two answers: Berlin is the capital of Germany,
 	// and of France. (just for this test case :-)
-	int arity = as->get_arity(imlist);
+	int arity = getarity(imlist);
 	TSM_ASSERT_EQUALS("incorrect arity", arity, 2);
 
 	// 0 has France, 1 has Germany

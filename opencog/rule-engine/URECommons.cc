@@ -72,11 +72,16 @@ Handle URECommons::replace_nodes_with_varnode(const Handle& handle,
 	return change_node_types(handle, node_unique_var_map);
 }
 
-string URECommons::get_unique_name(const Handle& h) const
+std::string URECommons::get_unique_name(const Handle& h) const
 {
-//xxx temporary implementation. need to be replaced by uuid generation for making sure name is always unique
-	string name = _as.get_name(h);
-	HandleSeq hs = _as.get_incoming(h);
+//xxx temporary implementation. need to be replaced by uuid
+// generation for making sure name is always unique
+
+	std::string name;
+	NodePtr nnn(NodeCast(h));
+	if (nnn) name = nnn->getName();
+	HandleSeq hs;
+	h->getIncomingSet(back_inserter(hs));
 	if (!hs.empty())
 		name.append(to_string(hs[0].value()));
 	name.append("-bcgen");
@@ -88,11 +93,12 @@ bool URECommons::exists_in(const Handle& hlink, const Handle& h) const
 	if (hlink == h) {
 		return true;
 	} else {
-		if (not LinkCast(hlink))
+		LinkPtr lp(LinkCast(hlink));
+		if (nullptr == lp)
 			throw InvalidParamException(TRACE_INFO,
 					"Need a LINK type to look in");
-		auto outg = _as.get_outgoing(hlink);
-		if (find(outg.begin(), outg.end(), h) != outg.end())
+		auto outg = lp->getOutgoingSet();
+		if (std::find(outg.begin(), outg.end(), h) != outg.end())
 			return true;
 		else {
 			for (const Handle& hi : outg) {

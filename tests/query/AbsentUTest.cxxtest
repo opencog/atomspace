@@ -84,6 +84,8 @@ void AbsentUTest::setUp(void)
 	load_scm_files_from_config(*as);
 }
 
+#define getarity(hand) LinkCast(hand)->getArity()
+
 /*
  * Single AbsentLink used to trigger an action that takes
  * place only when the atomspace is commpletely lacking something!
@@ -241,7 +243,7 @@ void AbsentUTest::test_connect_exist(void)
 
 	Handle soln = eval->eval_h("soln");
 
-	TSM_ASSERT_EQUALS("Wrong number of solutions", as->get_arity(rtn), 0);
+	TSM_ASSERT_EQUALS("Wrong number of solutions", getarity(rtn), 0);
 	TS_ASSERT_EQUALS(rtn, soln);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -258,7 +260,7 @@ void AbsentUTest::test_connect_not_exist(void)
 
 	Handle soln = eval->eval_h("soln");
 
-	TSM_ASSERT_EQUALS("Wrong number of solutions", as->get_arity(rtn), 1);
+	TSM_ASSERT_EQUALS("Wrong number of solutions", getarity(rtn), 1);
 	TS_ASSERT_EQUALS(rtn, soln);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -275,7 +277,7 @@ void AbsentUTest::test_discon_exist(void)
 
 	Handle soln = eval->eval_h("soln");
 
-	TSM_ASSERT_EQUALS("Wrong number of solutions", as->get_arity(rtn), 0);
+	TSM_ASSERT_EQUALS("Wrong number of solutions", getarity(rtn), 0);
 	TS_ASSERT_EQUALS(rtn, soln);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -292,7 +294,7 @@ void AbsentUTest::test_discon_not_exist(void)
 
 	Handle soln = eval->eval_h("soln");
 
-	TSM_ASSERT_EQUALS("Wrong number of solutions", as->get_arity(rtn), 1);
+	TSM_ASSERT_EQUALS("Wrong number of solutions", getarity(rtn), 1);
 	TS_ASSERT_EQUALS(rtn, soln);
 
 	logger().debug("END TEST: %s", __FUNCTION__);

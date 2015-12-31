@@ -75,6 +75,7 @@ void BuggyLinkUTest::setUp(void)
     load_scm_files_from_config(*as);
 }
 
+#define getarity(hand) LinkCast(hand)->getArity()
 
 /*
  * BuggyLink unit test.  Test binding to unquoted links.
@@ -96,6 +97,6 @@ void BuggyLinkUTest::test_link(void)
     Handle lily = bindlink(as, bindy);
     logger().debug() << "Result is this:\n" << lily->toString();
 
-    TS_ASSERT_EQUALS(1, as->get_arity(lily));
+    TS_ASSERT_EQUALS(1, getarity(lily));
 }
 

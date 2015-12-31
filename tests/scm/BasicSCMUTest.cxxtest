@@ -265,7 +265,7 @@ void BasicSCMUTest::check_truth_value(const TruthValue& tv)
 	Handle h = as->get_handle(NODE, node_str);
 	TSM_ASSERT("Failed to get the handle", h != Handle::UNDEFINED);
 	// hack to avoid floating error
-	bool tv_eq = tv.toString() == as->get_TV(h)->toString();
+	bool tv_eq = tv.toString() == h->getTruthValue()->toString();
 	TSM_ASSERT("TVs are different", tv_eq);
 
 	// remove Node so we can redo the test
@@ -304,7 +304,7 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 	HandleSeq::const_iterator i;
 	for (i = links.begin(); i != links.end(); ++i)
 	{
-		TruthValuePtr tv = as->get_TV(*i);
+		TruthValuePtr tv = (*i)->getTruthValue();
 		float m = tv->getMean();
 		float c = tv->getConfidence();
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(m - truth), 1.0e-6);
@@ -400,7 +400,7 @@ void BasicSCMUTest::test_link_tv_setting(void)
 	eval->clear_pending();
 	TSM_ASSERT("Failed to create a link", !eval_err);
 
-	TruthValuePtr tv = as->get_TV(inh);
+	TruthValuePtr tv = inh->getTruthValue();
 	float m = tv->getMean();
 	float c = tv->getConfidence();
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(m - 0.75), 1.0e-6);
@@ -413,7 +413,7 @@ void BasicSCMUTest::test_link_tv_setting(void)
 	eval->clear_pending();
 	TSM_ASSERT("Failed to update a link", !eval_err);
 
-	tv = as->get_TV(inh);
+	tv = inh->getTruthValue();
 	m = tv->getMean();
 	c = tv->getConfidence();
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(m - 0.6), 1.0e-6);
@@ -445,7 +445,7 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 	HandleSeq::const_iterator i;
 	for (i = links.begin(); i != links.end(); ++i)
 	{
-		TruthValuePtr tv = as->get_TV(*i);
+		TruthValuePtr tv = (*i)->getTruthValue();
 		float m = tv->getMean();
 		float c = tv->getConfidence();
 		//the link has TV 0.0

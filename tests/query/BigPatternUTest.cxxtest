@@ -75,6 +75,9 @@ class BigPatternUTest :  public CxxTest::TestSuite
  */
 #define an as->add_node
 #define al as->add_link
+#define getarity(hand) LinkCast(hand)->getArity()
+#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
+
 void BigPatternUTest::tearDown(void)
 {
 	delete as;
@@ -138,8 +141,6 @@ void BigPatternUTest::setUp(void)
  *          ConceptNode "pottery"
  *          ConceptNode "clay"
  */
-#define getlink(hand,pos) as->get_outgoing(hand,pos)
-#define getarity(hand) as->get_arity(hand)
 
 void BigPatternUTest::test_prep(void)
 {

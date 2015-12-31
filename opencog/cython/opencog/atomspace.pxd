@@ -108,7 +108,7 @@ cdef class TruthValue:
     cdef cTruthValue* _ptr(self)
     cdef tv_ptr* _tvptr(self)
     cdef _init(self, float mean, float count)
-    
+
 cdef class Handle:
     cdef cHandle *h
 
@@ -137,6 +137,10 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         bint is_valid_handle(cHandle h)
         int get_size()
+
+        # these should alias the proper types for sti/lti/vlti
+        # XXX DEPRECATED, REMOVE ASAP XXX just implement these
+        # correctly, instead of callng deprecated atomspace methods!
         string get_name(cHandle h)
         Type get_type(cHandle h)
         tv_ptr get_TV(cHandle h)
@@ -145,7 +149,6 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         vector[cHandle] get_outgoing(cHandle h)
         vector[cHandle] get_incoming(cHandle h)
 
-        # these should alias the proper types for sti/lti/vlti
         short get_STI(cHandle h)
         short get_LTI(cHandle h)
         bint get_VLTI(cHandle h)
@@ -154,6 +157,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         void inc_VLTI(cHandle h)
         void dec_VLTI(cHandle h)
 
+        # XXX DEPRECATED, REMOVE ASAP XXX just call toString, instead!!
         string atom_as_string(cHandle h, bint)
 
         # ==== query methods ====
@@ -174,7 +178,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         # vector[chandle].iterator get_handles_by_type(output_iterator, Type t, xxx bint subclass)
 
         void clear()
-        bint remove_atom(cHandle h, bint recursive) 
+        bint remove_atom(cHandle h, bint recursive)
 
 cdef AtomSpace_factory(cAtomSpace *to_wrap)
 
@@ -184,9 +188,9 @@ cdef class AtomSpace:
 
 
 cdef extern from "opencog/atomutils/AtomUtils.h" namespace "opencog":
-    # C++: 
-    #   
-    #   HandleSeq get_predicates(const Handle& target, 
+    # C++:
+    #
+    #   HandleSeq get_predicates(const Handle& target,
     #                     Type predicateType=PREDICATE_NODE,
     #                     bool subClasses=true)
     #   void finalize_opencog();

@@ -144,6 +144,8 @@ bool PMCB::grounding(const std::map<Handle, Handle> &var_soln,
 	return false;
 }
 
+#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
+
 /*
  * This function sets up the following structures:
  *
@@ -457,7 +459,7 @@ void PatternUTest::test_implication(void)
 	{
 		TSM_ASSERT("null pointer", as->is_valid_handle(ret[0]));
 
-		Handle solution = as->get_outgoing(ret[0],0);
+		Handle solution = getlink(ret[0],0);
 		TSM_ASSERT("incorrect solution", hitem_2 == solution);
 	}
 
