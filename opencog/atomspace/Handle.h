@@ -103,14 +103,11 @@ public:
         return false;
     }
 
-    inline bool operator==(std::nullptr_t) const noexcept {
-        if (_ptr.get()) return false;
-        return true;
+    inline bool operator==(const Atom* ap) const noexcept {
+        return _ptr.get() == ap;
     }
-
-    inline bool operator!=(std::nullptr_t) const noexcept {
-        if (_ptr.get()) return true;
-        return false;
+    inline bool operator!=(const Atom* ap) const noexcept {
+        return _ptr.get() != ap;
     }
 
     inline bool operator==(const Handle& h) const noexcept {
@@ -164,10 +161,10 @@ public:
 };
 
 static inline bool operator== (std::nullptr_t, const Handle& rhs) noexcept
-    { return rhs == NULL; }
+    { return rhs == nullptr; }
 
 static inline bool operator!= (std::nullptr_t, const Handle& rhs) noexcept
-    { return rhs != NULL; }
+    { return rhs != nullptr; }
 
 class HandlePredicate {
 public:
