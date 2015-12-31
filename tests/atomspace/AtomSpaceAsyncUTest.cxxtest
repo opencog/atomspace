@@ -269,6 +269,17 @@ public:
     // =================================================================
     // Test multi-threaded remove of atoms, by name.
 
+    template <typename OutputIterator> OutputIterator
+    get_handles_by_name(AtomSpace* as, OutputIterator result,
+                        const std::string& name)
+    {
+        classserver().foreachRecursive(
+            [&](Type t)->void {
+                Handle h(as->get_handle(t, name));
+                if (h) *(result++) = h; }, NODE);
+        result;
+    }
+
     void threadedRemove(int start, int interval)
     {
         for (int i = start; i < start+interval; i++) {
@@ -276,7 +287,7 @@ public:
             oss << "thread -1 node " << i;
             //std::cout << "removing " << oss.str() << std::endl;
             HandleSeq hs;
-            atomSpace->get_handles_by_name(back_inserter(hs), oss.str(), NODE);
+            get_handles_by_name(atomSpace, back_inserter(hs), oss.str());
             TS_ASSERT_EQUALS(hs.size(), 1);
             if (hs.size() != 0) {
                 //std::cout << " handle " << hs[0] << std::endl;
@@ -346,7 +357,7 @@ public:
             oss << "thread -1 node " << i;
 
             HandleSeq hs;
-            atomSpace->get_handles_by_name(back_inserter(hs), oss.str(), NODE);
+            get_handles_by_name(atomSpace, back_inserter(hs), oss.str());
             TS_ASSERT_EQUALS(hs.size(), 1);
             Handle h = hs[0];
 
@@ -410,7 +421,7 @@ public:
             oss << "thread -1 node " << i;
 
             HandleSeq hs;
-            atomSpace->get_handles_by_name(back_inserter(hs), oss.str(), NODE);
+            get_handles_by_name(atomSpace, back_inserter(hs), oss.str());
             TS_ASSERT_EQUALS(hs.size(), 1);
             Handle ha = hs[0];
 
@@ -418,7 +429,7 @@ public:
             ossb << "thread -1 node " << (2*i) % N;
 
             HandleSeq hsb;
-            atomSpace->get_handles_by_name(back_inserter(hsb), ossb.str(), NODE);
+            get_handles_by_name(atomSpace, back_inserter(hsb), ossb.str());
             TS_ASSERT_EQUALS(hsb.size(), 1);
 
             bogus ++;
