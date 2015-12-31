@@ -84,6 +84,8 @@ void QuoteUTest::setUp(void)
     load_scm_files_from_config(*as);
 }
 
+#define getarity(hand) hand->getArity()
+
 /*
  * QuoteLink unit test.  Test quoted variables.
  */
@@ -97,7 +99,7 @@ void QuoteUTest::test_quoted_variable(void)
     Handle bindy = eval->eval_h("bindy");
 
     Handle banana = bindlink(as, bindy);
-    TS_ASSERT_EQUALS(1, as->get_arity(banana));
+    TS_ASSERT_EQUALS(1, getarity(banana));
 
     banana = as->get_outgoing(banana, 0);
     TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
@@ -108,7 +110,7 @@ void QuoteUTest::test_quoted_variable(void)
     bindy = eval->eval_h("bother");
 
     banana = bindlink(as, bindy);
-    TS_ASSERT_EQUALS(1, as->get_arity(banana));
+    TS_ASSERT_EQUALS(1, getarity(banana));
 
     banana = as->get_outgoing(banana, 0);
     TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
@@ -119,7 +121,7 @@ void QuoteUTest::test_quoted_variable(void)
     bindy = eval->eval_h("bunbound");
 
     banana = bindlink(as, bindy);
-    TS_ASSERT_EQUALS(1, as->get_arity(banana));
+    TS_ASSERT_EQUALS(1, getarity(banana));
 
     banana = as->get_outgoing(banana, 0);
     TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
@@ -141,7 +143,7 @@ void QuoteUTest::test_nest(void)
     Handle bindy = eval->eval_h("bindy");
 
     Handle allstar = bindlink(as, bindy);
-    TS_ASSERT_EQUALS(1, as->get_arity(allstar));
+    TS_ASSERT_EQUALS(1, getarity(allstar));
 
     allstar = as->get_outgoing(allstar, 0);
     TS_ASSERT_EQUALS(PREDICATE_NODE, allstar->getType());
@@ -193,11 +195,11 @@ void QuoteUTest::test_gpn(void)
     Handle bindy = eval->eval_h("bindy");
 
     Handle allstar = bindlink(as, bindy);
-    TS_ASSERT_EQUALS(1, as->get_arity(allstar));
+    TS_ASSERT_EQUALS(1, getarity(allstar));
 
     allstar = as->get_outgoing(allstar, 0);
     TS_ASSERT_EQUALS(LIST_LINK, allstar->getType());
-    TS_ASSERT_EQUALS(2, as->get_arity(allstar));
+    TS_ASSERT_EQUALS(2, getarity(allstar));
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -215,7 +217,7 @@ void QuoteUTest::test_double_quote(void)
     Handle bindy = eval->eval_h("bindy");
 
     Handle banana = bindlink(as, bindy);
-    TS_ASSERT_EQUALS(1, as->get_arity(banana));
+    TS_ASSERT_EQUALS(1, getarity(banana));
 
     banana = as->get_outgoing(banana, 0);
     TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
@@ -266,10 +268,10 @@ void QuoteUTest::test_numeric_greater(void)
     Handle people_richer_than_obama = bindlink(as, richer_than_obama);
     Handle people_richer_than_gates = bindlink(as, richer_than_gates);
 
-    TS_ASSERT_EQUALS(0, as->get_arity(people_richer_than_gates));
-    TS_ASSERT_EQUALS(0, as->get_arity(people_richer_than_obama));
-    TS_ASSERT_EQUALS(1, as->get_arity(people_richer_than_george));
-    TS_ASSERT_EQUALS(2, as->get_arity(people_richer_than_susan));
+    TS_ASSERT_EQUALS(0, getarity(people_richer_than_gates));
+    TS_ASSERT_EQUALS(0, getarity(people_richer_than_obama));
+    TS_ASSERT_EQUALS(1, getarity(people_richer_than_george));
+    TS_ASSERT_EQUALS(2, getarity(people_richer_than_susan));
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -285,14 +287,14 @@ void QuoteUTest::test_crash(void)
 
     // If we can execute this without crashing, the test is succesful.
     Handle cr = eval->eval_h("(cog-bind crasher)");
-    TS_ASSERT_EQUALS(1, as->get_arity(cr));
+    TS_ASSERT_EQUALS(1, getarity(cr));
 
     // This blows out the stack in an infinite loop, if the pattern
     // matcher doesn't prevent it.
     Handle infloop = eval->eval_h("infloop");
     Handle inf = bindlink(as, infloop);
     printf("infloop is %s\n", inf->toShortString().c_str());
-    TS_ASSERT_EQUALS(4, as->get_arity(inf));
+    TS_ASSERT_EQUALS(4, getarity(inf));
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }

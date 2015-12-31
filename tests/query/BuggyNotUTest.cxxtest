@@ -66,6 +66,8 @@ class BuggyNot :  public CxxTest::TestSuite
  */
 #define an as->addNode
 #define al as->addLink
+#define getarity(hand) hand->getArity()
+
 void BuggyNot::setUp(void)
 {
 	as->clear();
@@ -78,7 +80,7 @@ void BuggyNot::setUp(void)
 }
 
 #define getlink(hand,pos) as->get_outgoing(hand,pos)
-#define getarity(hand) as->get_arity(hand)
+#define getarity(hand) getarity(hand)
 
 /*
  * NotLink causing weird trouble.

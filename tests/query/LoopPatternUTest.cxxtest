@@ -66,6 +66,8 @@ class LoopPatternUTest :  public CxxTest::TestSuite
  */
 #define an as->add_node
 #define al as->add_link
+#define getarity(hand) hand->getArity()
+
 void LoopPatternUTest::tearDown(void)
 {
 	delete as;
@@ -123,7 +125,7 @@ void LoopPatternUTest::setUp(void)
  *       ConceptNode "three"
  */
 #define getlink(hand,pos) as->get_outgoing(hand,pos)
-#define getarity(hand) as->get_arity(hand)
+#define getarity(hand) getarity(hand)
 
 void LoopPatternUTest::cycle(Handle va, Handle vb, Handle vc)
 {
@@ -167,10 +169,10 @@ void LoopPatternUTest::test_prep(void)
 #define NO_SELF_GROUNDING 1
 #ifdef NO_SELF_GROUNDING
 	// Expect three answers.
-	TSM_ASSERT_EQUALS("incorrect arity", as->get_arity(result), 3);
+	TSM_ASSERT_EQUALS("incorrect arity", getarity(result), 3);
 #else
 	// Expect five answers.
-	TSM_ASSERT_EQUALS("incorrect arity", as->get_arity(result), 5);
+	TSM_ASSERT_EQUALS("incorrect arity", getarity(result), 5);
 #endif
 
 	// Check that each answer gives the loop in cyclic order.

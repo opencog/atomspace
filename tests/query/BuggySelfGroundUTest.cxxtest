@@ -78,6 +78,8 @@ void BuggySelfGroundUTest::setUp(void)
     load_scm_files_from_config(*as);
 }
 
+#define getarity(hand) hand->getArity()
+
 void BuggySelfGroundUTest::test_crash(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -89,7 +91,7 @@ void BuggySelfGroundUTest::test_crash(void)
     TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != hbnd);
 
     Handle items = bindlink(as, hbnd);
-    TS_ASSERT_EQUALS(1, as->get_arity(items));
+    TS_ASSERT_EQUALS(1, getarity(items));
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }

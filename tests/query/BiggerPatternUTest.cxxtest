@@ -59,6 +59,8 @@ class BiggerPatternUTest :  public CxxTest::TestSuite
 		void test_prep(void);
 };
 
+#define getarity(hand) hand->getArity()
+
 /*
  * This function sets up both the implication link, and the
  * input data, for a typical, real-world preposition deduction.
@@ -235,7 +237,7 @@ void BiggerPatternUTest::test_prep(void)
 
 	// Expect two answers: Berlin is the capital of Germany,
 	// and of France. (just for this test case :-)
-	int arity = as->get_arity(imlist);
+	int arity = getarity(imlist);
 	TSM_ASSERT_EQUALS("incorrect arity", arity, 2);
 
 	// 0 has France, 1 has Germany

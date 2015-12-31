@@ -66,6 +66,8 @@ class BooleanUTest :  public CxxTest::TestSuite
  */
 #define an as->add_node
 #define al as->add_link
+#define getarity(hand) hand->getArity()
+
 void BooleanUTest::tearDown(void)
 {
 	delete as;
@@ -200,7 +202,7 @@ void BooleanUTest::setUp(void)
  *          ConceptNode "city"
  */
 #define getlink(hand,pos) as->get_outgoing(hand,pos)
-#define getarity(hand) as->get_arity(hand)
+#define getarity(hand) getarity(hand)
 
 void BooleanUTest::test_isa(void)
 {

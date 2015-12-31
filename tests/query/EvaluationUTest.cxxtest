@@ -79,6 +79,8 @@ void EvaluationUTest::setUp(void)
 	load_scm_files_from_config(*as);
 }
 
+#define getarity(hand) hand->getArity()
+
 /*
  * Evaluation most basic unit test.
  */
@@ -91,27 +93,27 @@ void EvaluationUTest::test_eval(void)
 
 	Handle five = eval->eval_h("(cog-bind (five-arcs))");
 	printf ("five: found:\n%s\n", five->toShortString().c_str());
-	TS_ASSERT_EQUALS(5, as->get_arity(five));
+	TS_ASSERT_EQUALS(5, getarity(five));
 
 	Handle one = eval->eval_h("(cog-bind (one-arc-one))");
 	printf ("one: found:\n%s\n", one->toShortString().c_str());
-	TS_ASSERT_EQUALS(1, as->get_arity(one));
+	TS_ASSERT_EQUALS(1, getarity(one));
 
 	Handle onet = eval->eval_h("(cog-bind (one-arc-three))");
 	printf ("onet: found:\n%s\n", onet->toShortString().c_str());
-	TS_ASSERT_EQUALS(1, as->get_arity(onet));
+	TS_ASSERT_EQUALS(1, getarity(onet));
 
 	Handle zero = eval->eval_h("(cog-bind (zero-arcs))");
 	printf ("zero: found:\n%s\n", zero->toShortString().c_str());
-	TS_ASSERT_EQUALS(0, as->get_arity(zero));
+	TS_ASSERT_EQUALS(0, getarity(zero));
 
 	Handle four = eval->eval_h("(cog-bind (four-arcs))");
 	printf ("four: found:\n%s\n", four->toShortString().c_str());
-	TS_ASSERT_EQUALS(4, as->get_arity(four));
+	TS_ASSERT_EQUALS(4, getarity(four));
 
 	Handle two = eval->eval_h("(cog-bind (two-arcs))");
 	printf ("two: found:\n%s\n", two->toShortString().c_str());
-	TS_ASSERT_EQUALS(2, as->get_arity(two));
+	TS_ASSERT_EQUALS(2, getarity(two));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -128,19 +130,19 @@ void EvaluationUTest::test_logic(void)
 
 	Handle four = eval->eval_h("(cog-bind (four-not))");
 	printf ("four-not: found:\n%s\n", four->toShortString().c_str());
-	TS_ASSERT_EQUALS(4, as->get_arity(four));
+	TS_ASSERT_EQUALS(4, getarity(four));
 
 	Handle two = eval->eval_h("(cog-bind (two-or))");
 	printf ("two-or: found:\n%s\n", two->toShortString().c_str());
-	TS_ASSERT_EQUALS(2, as->get_arity(two));
+	TS_ASSERT_EQUALS(2, getarity(two));
 
 	Handle three = eval->eval_h("(cog-bind (three-nor))");
 	printf ("three-nor: found:\n%s\n", three->toShortString().c_str());
-	TS_ASSERT_EQUALS(3, as->get_arity(three));
+	TS_ASSERT_EQUALS(3, getarity(three));
 
 	Handle fancy = eval->eval_h("(cog-bind (two-fancy))");
 	printf ("two-fancy: found:\n%s\n", fancy->toShortString().c_str());
-	TS_ASSERT_EQUALS(2, as->get_arity(fancy));
+	TS_ASSERT_EQUALS(2, getarity(fancy));
 
 	// Both the searches should return the same two (the first two)
 	TS_ASSERT_EQUALS(two, fancy);

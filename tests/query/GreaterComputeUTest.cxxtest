@@ -74,6 +74,8 @@ void GreaterComputeUTest::setUp(void)
     load_scm_files_from_config(*as);
 }
 
+#define getarity(hand) hand->getArity()
+
 /*
  * Computation unit test. Defines a fairly simple search pattern that
  * requires a variety of computatinos to occur within it.
@@ -90,7 +92,7 @@ void GreaterComputeUTest::test_computation(void)
     Handle crash_b = bindlink(as, try_out);
 
     std::cout << "Answer: " << crash_b->toString() << std::endl;
-    TS_ASSERT_EQUALS(1, as->get_arity(crash_b));
+    TS_ASSERT_EQUALS(1, getarity(crash_b));
 
     // Create the expected answer, and compare
     Handle expected = eval->eval_h(

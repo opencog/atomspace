@@ -87,6 +87,8 @@ void ChoiceLinkUTest::setUp(void)
     load_scm_files_from_config(*as);
 }
 
+#define getarity(hand) hand->getArity()
+
 /*
  * ChoiceLink most basic unit test.
  */
@@ -99,7 +101,7 @@ void ChoiceLinkUTest::test_basic_or(void)
 
     Handle items = eval->eval_h("(cog-bind (basic))");
 
-    TS_ASSERT_EQUALS(2, as->get_arity(items));
+    TS_ASSERT_EQUALS(2, getarity(items));
 }
 
 /*
@@ -114,7 +116,7 @@ void ChoiceLinkUTest::test_embed_or(void)
 
     Handle items = eval->eval_h("(cog-bind (embed))");
 
-    TS_ASSERT_EQUALS(2, as->get_arity(items));
+    TS_ASSERT_EQUALS(2, getarity(items));
 }
 
 /*
@@ -130,7 +132,7 @@ void ChoiceLinkUTest::test_nest_or(void)
     Handle items = eval->eval_h("(cog-bind (nest))");
 
     printf ("Nest found:\n%s\n", items->toShortString().c_str());
-    TS_ASSERT_EQUALS(5, as->get_arity(items));
+    TS_ASSERT_EQUALS(5, getarity(items));
 }
 
 /*
@@ -146,7 +148,7 @@ void ChoiceLinkUTest::test_top_nest_or(void)
     Handle items = eval->eval_h("(cog-bind (top-nest))");
 
     printf ("Top-nest found:\n%s\n", items->toShortString().c_str());
-    TS_ASSERT_EQUALS(5, as->get_arity(items));
+    TS_ASSERT_EQUALS(5, getarity(items));
 }
 
 /*
@@ -162,7 +164,7 @@ void ChoiceLinkUTest::test_nest_bad_or(void)
     Handle items = eval->eval_h("(cog-bind (nest-bad))");
 
     printf ("Nest-bad found:\n%s\n", items->toShortString().c_str());
-    TS_ASSERT_EQUALS(4, as->get_arity(items));
+    TS_ASSERT_EQUALS(4, getarity(items));
 }
 
 /*
@@ -178,7 +180,7 @@ void ChoiceLinkUTest::test_top_nest_bad_or(void)
     Handle items = eval->eval_h("(cog-bind (top-nest-bad))");
 
     printf ("Top-nest-bad found:\n%s\n", items->toShortString().c_str());
-    TS_ASSERT_EQUALS(4, as->get_arity(items));
+    TS_ASSERT_EQUALS(4, getarity(items));
 }
 
 /*
@@ -194,12 +196,12 @@ void ChoiceLinkUTest::test_top_disco(void)
     Handle items = eval->eval_h("(cog-bind (top-disco))");
 
     printf ("Top-disco found:\n%s\n", items->toShortString().c_str());
-    TS_ASSERT_EQUALS(2, as->get_arity(items));
+    TS_ASSERT_EQUALS(2, getarity(items));
 
     Handle wrap = eval->eval_h("(cog-bind (wrapped-disco))");
 
     printf ("Top-wrapped-disco found:\n%s\n", wrap->toShortString().c_str());
-    TS_ASSERT_EQUALS(2, as->get_arity(wrap));
+    TS_ASSERT_EQUALS(2, getarity(wrap));
 }
 
 /*
@@ -216,7 +218,7 @@ void ChoiceLinkUTest::test_embed_disco(void)
     Handle items = eval->eval_h("(cog-bind (embed-disco))");
 
     printf ("Embed pseudo-disco found:\n%s\n", items->toShortString().c_str());
-    TS_ASSERT_EQUALS(2, as->get_arity(items));
+    TS_ASSERT_EQUALS(2, getarity(items));
 }
 
 /*
@@ -231,7 +233,7 @@ void ChoiceLinkUTest::test_double_or(void)
 
     Handle items = eval->eval_h("(cog-bind (double))");
 
-    TS_ASSERT_EQUALS(3, as->get_arity(items));
+    TS_ASSERT_EQUALS(3, getarity(items));
 }
 
 /*
@@ -250,12 +252,12 @@ void ChoiceLinkUTest::test_unary(void)
     Handle doors = eval->eval_h("(cog-execute! (get-a))");
 
     printf("unary door-a found:\n%s\n", doors->toString().c_str());
-    TS_ASSERT_EQUALS(1, as->get_arity(doors));
+    TS_ASSERT_EQUALS(1, getarity(doors));
 
     doors = eval->eval_h("(cog-execute! (get-bc))");
 
     printf("unary door-bc found:\n%s\n", doors->toString().c_str());
-    TS_ASSERT_EQUALS(4, as->get_arity(doors));
+    TS_ASSERT_EQUALS(4, getarity(doors));
 }
 
 /*
@@ -274,5 +276,5 @@ void ChoiceLinkUTest::test_typed(void)
     Handle rules = eval->eval_h("(cog-execute! get-nodes1)");
 
     printf("typed get-nodes found:\n%s\n", rules->toString().c_str());
-    TS_ASSERT_EQUALS(2, as->get_arity(rules));
+    TS_ASSERT_EQUALS(2, getarity(rules));
 }

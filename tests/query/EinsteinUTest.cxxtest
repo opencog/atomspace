@@ -72,6 +72,8 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
  */
 #define an as->add_node
 #define al as->add_link
+#define getarity(hand) hand->getArity()
+
 void EinsteinPuzzle::setUp(void)
 {
 	as->clear();
@@ -84,7 +86,7 @@ void EinsteinPuzzle::setUp(void)
 }
 
 #define getlink(hand,pos) as->get_outgoing(hand,pos)
-#define getarity(hand) as->get_arity(hand)
+#define getarity(hand) getarity(hand)
 
 /* ========================================================================
  * Trivial deductive test -- test the is-same-person rule
