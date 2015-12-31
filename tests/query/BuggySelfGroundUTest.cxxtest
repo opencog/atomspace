@@ -78,7 +78,7 @@ void BuggySelfGroundUTest::setUp(void)
     load_scm_files_from_config(*as);
 }
 
-#define getarity(hand) hand->getArity()
+#define getarity(hand) LinkCast(hand)->getArity()
 
 void BuggySelfGroundUTest::test_crash(void)
 {

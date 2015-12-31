@@ -64,7 +64,7 @@ class BuggyStackUTest :  public CxxTest::TestSuite
  */
 #define an as->add_node
 #define al as->add_link
-#define getarity(hand) hand->getArity()
+#define getarity(hand) LinkCast(hand)->getArity()
 
 void BuggyStackUTest::setUp(void)
 {

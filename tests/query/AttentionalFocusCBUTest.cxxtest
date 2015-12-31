@@ -70,7 +70,7 @@ void AttentionalFocusCBUTest::setUp(void)
 	load_scm_files_from_config(*as);
 }
 
-#define getarity(hand) hand->getArity()
+#define getarity(hand) LinkCast(hand)->getArity()
 
 void AttentionalFocusCBUTest::test_af_bindlink(void)
 {

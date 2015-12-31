@@ -79,7 +79,7 @@ void RecognizerUTest::setUp(void)
     load_scm_files_from_config(*as);
 }
 
-#define getarity(hand) hand->getArity()
+#define getarity(hand) LinkCast(hand)->getArity()
 
 /*
  * Test a glob in the middle of a list. Should match two patterns.

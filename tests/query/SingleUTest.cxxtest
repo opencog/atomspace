@@ -74,7 +74,7 @@ void SingleUTest::setUp(void)
     load_scm_files_from_config(*as);
 }
 
-#define getarity(hand) hand->getArity()
+#define getarity(hand) LinkCast(hand)->getArity()
 
 /*
  * Basic SingleLink unit test. Defines 3 inheritance relationships,

@@ -113,7 +113,7 @@ void UnorderedUTest::setUp(void)
  * little.
  */
 #define getlink(hand,pos) LinkCast(hand)->getOutgoingSet(pos)
-#define getarity(hand) hand->getArity()
+#define getarity(hand) LinkCast(hand)->getArity()
 
 void UnorderedUTest::test_un1(void)
 {

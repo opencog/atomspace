@@ -66,7 +66,7 @@ class BuggyNot :  public CxxTest::TestSuite
  */
 #define an as->addNode
 #define al as->addLink
-#define getarity(hand) hand->getArity()
+#define getarity(hand) LinkCast(hand)->getArity()
 
 void BuggyNot::setUp(void)
 {

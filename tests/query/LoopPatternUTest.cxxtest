@@ -66,7 +66,8 @@ class LoopPatternUTest :  public CxxTest::TestSuite
  */
 #define an as->add_node
 #define al as->add_link
-#define getarity(hand) hand->getArity()
+#define getarity(hand) LinkCast(hand)->getArity()
+#define getlink(hand,pos) LinkCast(hand)->getOutgoingSet(pos)
 
 void LoopPatternUTest::tearDown(void)
 {
@@ -124,9 +125,6 @@ void LoopPatternUTest::setUp(void)
  *       ConceptNode "two"
  *       ConceptNode "three"
  */
-#define getlink(hand,pos) as->get_outgoing(hand,pos)
-#define getarity(hand) getarity(hand)
-
 void LoopPatternUTest::cycle(Handle va, Handle vb, Handle vc)
 {
 	if (va == hone)

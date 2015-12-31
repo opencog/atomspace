@@ -92,10 +92,10 @@ Handle addRealAtom(AtomSpace& as, AtomPtr atom,
     }
     const TruthValuePtr currentTV = result->getTruthValue();
     if (currentTV->isNullTv()) {
-        as.set_TV(result, newTV);
+        result->setTruthValue(newTV);
     } else {
         TruthValuePtr mergedTV = currentTV->merge(newTV);
-        as.set_TV(result, mergedTV);
+        result->setTruthValue(mergedTV);
     }
     return result;
 }
@@ -113,10 +113,10 @@ static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::i
         OC_ASSERT(as.is_valid_handle(*head_handle_ptr), "head_handle_ptr is not valid");
         TruthValuePtr currentTV((*head_handle_ptr)->getTruthValue());
         if (currentTV->isNullTv()) {
-            as.set_TV(*head_handle_ptr, tvn);
+            (*head_handle_ptr)->setTruthValue(tvn);
         } else {
             TruthValuePtr mergedTV(currentTV->merge(tvn));
-            as.set_TV(*head_handle_ptr, mergedTV);
+            (*head_handle_ptr)->setTruthValue(mergedTV);
         }
 
         return *head_handle_ptr;
