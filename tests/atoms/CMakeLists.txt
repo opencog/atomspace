@@ -10,6 +10,9 @@ IF(HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(ReductUTest atomspace smob clearbox execution)
 ENDIF(HAVE_GUILE)
 
+ADD_CXXTEST(AlphaConvertUTest)
+TARGET_LINK_LIBRARIES(AlphaConvertUTest atomspace)
+
 ADD_CXXTEST(DefineLinkUTest)
 TARGET_LINK_LIBRARIES(DefineLinkUTest atomspace)
 

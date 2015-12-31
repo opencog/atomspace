@@ -157,4 +157,24 @@ void ScopeLink::init_scoped_variables(const Handle& hvar)
 	}
 }
 
+/* ================================================================= */
+///
+/// Compare other ScopeLink, return true if it is equal to this one,
+/// to to an alpha-conversion of variables.
+///
+bool ScopeLink::is_equal(const Handle& other) const
+{
+	if (other == this) return true;
+	if (other->getType() != _type) return false;
+
+	ScopeLinkPtr scother(ScopeLinkCast(other));
+
+	// Variable declarations must match.
+	if (not _varlist.is_equal(scother->_varlist)) return false;
+
+	// Body, with substituted variables, must match.
+
+	return true;
+}
+
 /* ===================== END OF FILE ===================== */

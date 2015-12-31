@@ -92,6 +92,10 @@ public:
 	const Handle& get_vardecl(void) const { return _vardecl; }
 	const Handle& get_body(void) const { return _body; }
 
+	// Return true if the other Handle is equal to this one,
+	// i.e. is the same, up to alpha conversion.
+	bool is_equal(const Handle&) const;
+
 	// Take the list of values `vals`, and substitute them in for the
 	// variables in the body of this lambda. The values must satisfy all
 	// type restrictions, else an exception will be thrown.
