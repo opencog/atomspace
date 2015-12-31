@@ -65,6 +65,7 @@ void AlphaConvertUTest::test_variables()
 		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
 
 	ScopeLinkPtr scox(ScopeLinkCast(hscox));
+	TS_ASSERT(scox != nullptr);
 
 	Handle hscoy =
 	LB(SCOPE_LINK,
@@ -73,7 +74,17 @@ void AlphaConvertUTest::test_variables()
 
 	ScopeLinkPtr scoy(ScopeLinkCast(hscoy));
 
+	// x and y should be equal
 	TS_ASSERT(scox->is_equal(hscoy));
+
+	_asb.clear();
+	Handle hscoz =
+	LB(SCOPE_LINK,
+		LB(VARIABLE_LIST, NB(VARIABLE_NODE, "$Z")),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$Z")));
+
+	// x and z should be equal
+	TS_ASSERT(scox->is_equal(hscoz));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

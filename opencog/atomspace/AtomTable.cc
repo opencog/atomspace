@@ -236,21 +236,21 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
 {
     // Nodes of various kinds -----------
     if (NUMBER_NODE == atom_type) {
-        if (NULL == NumberNodeCast(atom))
+        if (nullptr == NumberNodeCast(atom))
             return createNumberNode(*NodeCast(atom));
     } else if (TYPE_NODE == atom_type) {
-        if (NULL == TypeNodeCast(atom))
+        if (nullptr == TypeNodeCast(atom))
             return createTypeNode(*NodeCast(atom));
 
     // Links of various kinds -----------
     } else if (BIND_LINK == atom_type) {
-        if (NULL == BindLinkCast(atom))
+        if (nullptr == BindLinkCast(atom))
             return createBindLink(*LinkCast(atom));
     } else if (PATTERN_LINK == atom_type) {
-        if (NULL == PatternLinkCast(atom))
+        if (nullptr == PatternLinkCast(atom))
             return createPatternLink(*LinkCast(atom));
     } else if (DEFINE_LINK == atom_type) {
-        if (NULL == DefineLinkCast(atom))
+        if (nullptr == DefineLinkCast(atom))
             return createDefineLink(*LinkCast(atom));
 /*
     XXX FIXME: cannot do this, due to a circular shared library
@@ -261,43 +261,47 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
 */
     } else if (EVALUATION_LINK == atom_type) {
 /*
-        if (NULL == EvaluationLinkCast(atom))
+        if (nullptr == EvaluationLinkCast(atom))
             return createEvaluationLink(*LinkCast(atom));
 */
     } else if (EXECUTION_OUTPUT_LINK == atom_type) {
 /*
-        if (NULL == ExecutionOutputLinkCast(atom))
+        if (nullptr == ExecutionOutputLinkCast(atom))
             return createExecutionOutputLink(*LinkCast(atom));
 */
     } else if (GET_LINK == atom_type) {
-        if (NULL == PatternLinkCast(atom))
+        if (nullptr == PatternLinkCast(atom))
             return createPatternLink(*LinkCast(atom));
     } else if (PUT_LINK == atom_type) {
-        if (NULL == PutLinkCast(atom))
+        if (nullptr == PutLinkCast(atom))
             return createPutLink(*LinkCast(atom));
     } else if (SATISFACTION_LINK == atom_type) {
-        if (NULL == PatternLinkCast(atom))
+        if (nullptr == PatternLinkCast(atom))
             return createPatternLink(*LinkCast(atom));
     } else if (TYPED_ATOM_LINK == atom_type) {
-        if (NULL == TypedAtomLinkCast(atom))
+        if (nullptr == TypedAtomLinkCast(atom))
             return createTypedAtomLink(*LinkCast(atom));
     } else if (UNIQUE_LINK == atom_type) {
-        if (NULL == UniqueLinkCast(atom))
+        if (nullptr == UniqueLinkCast(atom))
             return createUniqueLink(*LinkCast(atom));
     } else if (VARIABLE_LIST == atom_type) {
-        if (NULL == VariableListCast(atom))
+        if (nullptr == VariableListCast(atom))
             return createVariableList(*LinkCast(atom));
     } else if (LAMBDA_LINK == atom_type) {
-        if (NULL == LambdaLinkCast(atom))
+        if (nullptr == LambdaLinkCast(atom))
             return createLambdaLink(*LinkCast(atom));
     } else if (IMPLICATION_LINK == atom_type) {
-        if (NULL == ImplicationLinkCast(atom))
+        if (nullptr == ImplicationLinkCast(atom))
             return createImplicationLink(*LinkCast(atom));
     } else if (classserver().isA(atom_type, FUNCTION_LINK)) {
 /* More circular-dependency heart-ache
-        if (NULL == FunctionLinkCast(atom))
+        if (nullptr == FunctionLinkCast(atom))
             return FunctionLink::factory(LinkCast(atom));
 */
+    } else if (classserver().isA(atom_type, SCOPE_LINK)) {
+        // isA because we want to force alpha-conversion.
+        if (nullptr == ScopeLinkCast(atom))
+            return createScopeLink(*LinkCast(atom));
     }
 
     // Very special handling for DeleteLink's
@@ -391,6 +395,11 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
         // XXX FIXME more circular-dependency heart-ache
         // return FunctionLink::factory(LinkCast(atom));
         return createLink(*LinkCast(atom));
+
+    // isA because we want to force alpha-conversion.
+    if (classserver().isA(atom_type, SCOPE_LINK))
+        return createScopeLink(*LinkCast(atom));
+
     if (classserver().isA(atom_type, LINK))
         return createLink(*LinkCast(atom));
 
