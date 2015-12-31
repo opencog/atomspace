@@ -67,7 +67,7 @@
            (rule-name (cog-name rule-alias))
            ; Assuming a rule is a BindLink
            (rule (car (cog-chase-link 'DefineLink 'BindLink rule-alias)))
-           (weight (cadr weighted-rule)))
+           (weight (cdr weighted-rule)))
         (ure-add-rule rbs rule-name rule weight)
     )
   )
