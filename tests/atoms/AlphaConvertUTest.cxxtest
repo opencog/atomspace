@@ -44,7 +44,8 @@ public:
 
 	void tearDown() {}
 
-	void test_variables();
+	void test_untyped_variable();
+	void test_variable();
 };
 
 #define NA _asa.add_node
@@ -53,8 +54,8 @@ public:
 #define NB _asb.add_node
 #define LB _asb.add_link
 
-// Test AlphaConvert over a ConceptNode
-void AlphaConvertUTest::test_variables()
+// Test AlphaConvert over an untyped variable.
+void AlphaConvertUTest::test_untyped_variable()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -96,6 +97,76 @@ void AlphaConvertUTest::test_variables()
 
 	// x and w should be equal
 	TS_ASSERT(scox->is_equal(hscow));
+
+	_asb.clear();
+	Handle hscot =
+	LB(SCOPE_LINK,
+		LB(TYPED_VARIABLE_LINK,
+			NB(VARIABLE_NODE, "$T"),
+			LB(TYPE_CHOICE, NB(TYPE_NODE, "Atom"))),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$T")));
+
+	// x and t should be equal
+	TS_ASSERT(scox->is_equal(hscot));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test AlphaConvert over an variable types as ConceptNode.
+void AlphaConvertUTest::test_variable()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create ScopeLinks.
+	Handle hscox =
+	LA(SCOPE_LINK,
+		LA(TYPED_VARIABLE_LINK,
+			NA(VARIABLE_NODE, "$X"), NA(TYPE_NODE, "ConceptNode")),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
+
+	ScopeLinkPtr scox(ScopeLinkCast(hscox));
+	TS_ASSERT(scox != nullptr);
+
+	Handle hscoy =
+	LB(SCOPE_LINK,
+		NB(VARIABLE_NODE, "$Y"),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$Y")));
+
+	ScopeLinkPtr scoy(ScopeLinkCast(hscoy));
+
+	// x and y should be not equal
+	TS_ASSERT(not scox->is_equal(hscoy));
+
+	_asb.clear();
+	Handle hscoz =
+	LB(SCOPE_LINK,
+		LB(VARIABLE_LIST, NB(VARIABLE_NODE, "$Z")),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$Z")));
+
+	// x and z should be not equal
+	TS_ASSERT(not scox->is_equal(hscoz));
+
+	// Constraining should work.
+	_asb.clear();
+	Handle hscow =
+	LB(SCOPE_LINK,
+		LB(TYPED_VARIABLE_LINK,
+			NB(VARIABLE_NODE, "$W"), NB(TYPE_NODE, "ConceptNode")),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$W")));
+
+	// x and w should be equal
+	TS_ASSERT(scox->is_equal(hscow));
+
+	_asb.clear();
+	Handle hscot =
+	LB(SCOPE_LINK,
+		LB(TYPED_VARIABLE_LINK,
+			NB(VARIABLE_NODE, "$T"),
+			LB(TYPE_CHOICE, NB(TYPE_NODE, "Atom"), NB(TYPE_NODE, "ConceptNode"))),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$T")));
+
+	// x and t should be equal
+	TS_ASSERT(scox->is_equal(hscot));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
