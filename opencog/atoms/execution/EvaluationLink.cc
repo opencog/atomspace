@@ -22,8 +22,7 @@
 
 #include <thread>
 
-#include <opencog/atomspace/atom_types.h>
-#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/base/atom_types.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/core/DefineLink.h>
@@ -31,6 +30,8 @@
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
+
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/BindLinkAPI.h>

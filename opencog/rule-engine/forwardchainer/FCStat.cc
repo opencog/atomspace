@@ -20,8 +20,6 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
 
 #include "../ChainerUtils.h"
 #include "FCStat.h"

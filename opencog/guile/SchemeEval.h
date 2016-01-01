@@ -15,7 +15,7 @@
 #include <sstream>
 #include <cstddef>
 #include <libguile.h>
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/eval/GenericEval.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/util/exceptions.h>

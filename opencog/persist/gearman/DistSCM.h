@@ -24,7 +24,6 @@
 
 #include <libgearman/gearman.h>
 
-#include <opencog/atomspace/Handle.h>
 #include <opencog/guile/SchemeModule.h>
 
 namespace opencog {

@@ -67,7 +67,7 @@ cdef extern from "opencog/truthvalue/SimpleTruthValue.h" namespace "opencog":
 # ClassServer
 ctypedef short Type
 
-cdef extern from "opencog/atomspace/ClassServer.h" namespace "opencog":
+cdef extern from "opencog/atoms/base/ClassServer.h" namespace "opencog":
     cdef cppclass cClassServer "opencog::ClassServer":
         bint isNode(Type t)
         bint isLink(Type t)
@@ -79,13 +79,13 @@ cdef extern from "opencog/atomspace/ClassServer.h" namespace "opencog":
         Type getNumberOfClasses()
     cdef cClassServer classserver()
 
-cdef extern from "opencog/atomspace/atom_types.h" namespace "opencog":
+cdef extern from "opencog/atoms/base/atom_types.h" namespace "opencog":
     cdef Type NOTYPE
 
 # Handle
 ctypedef public long UUID
 
-cdef extern from "opencog/atomspace/Handle.h" namespace "opencog":
+cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
     cdef cppclass cHandle "opencog::Handle":
         cHandle()
         cHandle(UUID)

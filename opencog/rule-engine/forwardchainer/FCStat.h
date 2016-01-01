@@ -24,11 +24,11 @@
 #ifndef _FCSTAT_H_
 #define _FCSTAT_H_
 
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 
 namespace opencog {
 
-using HandleWeightMap = std::map<Handle,float>;
+using HandleWeightMap = std::map<Handle,double>;
 
 struct PartiaGroundingRecord
 {
