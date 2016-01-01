@@ -34,6 +34,7 @@ ADD_LIBRARY(PythonEval SHARED
 ADD_DEPENDENCIES(PythonEval atomspace_cython)
 
 TARGET_LINK_LIBRARIES(PythonEval
+	atombase
 	${PYTHON_LIBRARIES}
 	${Boost_FILESYSTEM_LIBRARY}
 )
