@@ -7,7 +7,6 @@ ADD_LIBRARY (atomspace SHARED
 	AtomSpace.cc
 	AtomSpaceInit.cc
 	AtomTable.cc
-	AttentionValue.cc
 	AttentionBank.cc
 	BackingStore.cc
 	FixedIntegerIndex.cc
@@ -40,7 +39,6 @@ INSTALL (TARGETS atomspace
 INSTALL (FILES
 	AtomSpace.h
 	AtomTable.h
-	AttentionValue.h
 	AttentionBank.h
 	BackingStore.h
 	ClassServer.h

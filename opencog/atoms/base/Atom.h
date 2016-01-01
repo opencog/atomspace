@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/Atom.h
+ * opencog/atoms/base/Atom.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -36,10 +36,10 @@
 
 #include <opencog/util/exceptions.h>
 
-#include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/TruthValue.h>
-#include <opencog/atomspace/types.h>
 
 class AtomUTest;
 

@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/Node.cc
+ * opencog/atoms/base/Node.cc
  *
  * Copyright (C) 2008-2010 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
@@ -23,10 +23,10 @@
 
 #include <stdio.h>
 
-#include <opencog/atomspace/AtomTable.h>
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/Link.h>
 #include <opencog/util/Logger.h>
+#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atomspace/AtomTable.h>
 
 #include "Node.h"
 

@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/AttentionValue.cc
+ * opencog/truthvalue/AttentionValue.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -22,7 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Atom.h"
 #include "AttentionValue.h"
 
 using namespace opencog;
@@ -45,6 +44,7 @@ std::string AttentionValue::toString() const
     return buffer;
 }
 
+#if 0
 bool AttentionValue::STISort::test(const AtomPtr& h1, const AtomPtr& h2) const
 {
     return h1->getAttentionValue()->getSTI() >
@@ -88,3 +88,4 @@ bool AttentionValue::LTIThenTVAscendingSort::test(const AtomPtr& h1, const AtomP
     tv2 = h2->getTruthValue()->getMean();
     return tv1 < tv2;
 }
+#endif

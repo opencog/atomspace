@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/Link.h
+ * opencog/atoms/base/Link.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008-2010 OpenCog Foundation
@@ -27,7 +27,7 @@
 #include <string>
 
 #include <opencog/util/oc_assert.h>
-#include <opencog/atomspace/Atom.h>
+#include <opencog/atoms/base/Atom.h>
 
 namespace opencog
 {

@@ -1,4 +1,5 @@
 ADD_LIBRARY (truthvalue SHARED
+	AttentionValue.cc
 	CountTruthValue.cc
 	FuzzyTruthValue.cc
 	GenericTruthValue.cc
@@ -18,6 +19,7 @@ INSTALL (TARGETS truthvalue
 )
 
 INSTALL (FILES
+	AttentionValue.h
 	CountTruthValue.h
 	FuzzyTruthValue.h
 	GenericTruthValue.h
