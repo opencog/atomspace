@@ -31,10 +31,10 @@
 
 #define DEPRECATED_ATOMSPACE_CALLS 1
 
-#include <opencog/atomspace/types.h>
+#include <opencog/atoms/base/types.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/Node.h>
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
