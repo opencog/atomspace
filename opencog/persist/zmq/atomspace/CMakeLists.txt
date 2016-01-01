@@ -20,7 +20,14 @@ ADD_LIBRARY (zmqatoms SHARED
 	ZMQPersistSCM
 )
 
-TARGET_LINK_LIBRARIES(zmqatoms zmq ${PROTOBUF_LIBRARY})
+TARGET_LINK_LIBRARIES(zmqatoms
+	zmq
+	atombase
+	truthvalue
+	smob
+	${COGUTIL_LIBRARY}
+	${PROTOBUF_LIBRARY}
+)
 
 INSTALL (TARGETS zmqatoms
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
