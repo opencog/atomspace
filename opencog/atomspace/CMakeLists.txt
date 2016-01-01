@@ -40,6 +40,14 @@ INSTALL (FILES
 	AtomTable.h
 	AttentionBank.h
 	BackingStore.h
+	FixedIntegerIndex.h
+	HandleSeqIndex.h
+	ImportanceIndex.h
+	LinkIndex.h
+	NameIndex.h
+	NodeIndex.h
+	StringIndex.h
+	TypeIndex.h
 	TLB.h
 	version.h
 	DESTINATION "include/opencog/atomspace"
