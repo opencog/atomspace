@@ -40,7 +40,7 @@ INSTALL (FILES
 	Link.h
 	Node.h
 	types.h
-	DESTINATION "include/opencog/atomspace"
+	DESTINATION "include/opencog/atoms/base"
 )
 
 # Install the auto-gened atom types as well
