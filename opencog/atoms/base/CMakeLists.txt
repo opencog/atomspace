@@ -14,6 +14,7 @@ ADD_LIBRARY (atombase SHARED
 	atom_types.h
 	Atom.cc
 	ClassServer.cc
+	Handle.cc
 	Link.cc
 	Node.cc
 )
@@ -35,6 +36,7 @@ INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
 	atom_types.cc
 	ClassServer.h
+	Handle.h
 	Link.h
 	Node.h
 	types.h

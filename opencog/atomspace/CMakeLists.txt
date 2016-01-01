@@ -10,7 +10,6 @@ ADD_LIBRARY (atomspace SHARED
 	AttentionBank.cc
 	BackingStore.cc
 	FixedIntegerIndex.cc
-	Handle.cc
 	HandleSeqIndex.cc
 	# HandleSetIndex.cc
 	ImportanceIndex.cc
@@ -42,7 +41,6 @@ INSTALL (FILES
 	AttentionBank.h
 	BackingStore.h
 	ClassServer.h
-	Handle.h
 	TLB.h
 	types.h
 	version.h

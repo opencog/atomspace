@@ -25,8 +25,8 @@
 #ifndef _OPENCOG_ATTENTION_VALUE_H
 #define _OPENCOG_ATTENTION_VALUE_H
 
-#include <string>
 #include <limits.h>
+#include <memory>
 
 namespace opencog
 {

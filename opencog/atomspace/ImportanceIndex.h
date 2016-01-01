@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_IMPORTANCEINDEX_H
 #define _OPENCOG_IMPORTANCEINDEX_H
 
-#include <opencog/atomspace/AttentionValue.h>
+#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
 
 namespace opencog

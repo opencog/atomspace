@@ -25,10 +25,10 @@
 #include <set>
 #include <vector>
 
-#include <opencog/atomspace/Atom.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/types.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
-#include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/types.h>
 
 namespace opencog
 {

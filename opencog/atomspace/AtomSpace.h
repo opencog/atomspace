@@ -30,13 +30,15 @@
 #include <set>
 #include <vector>
 
+#include <opencog/util/exceptions.h>
+#include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/truthvalue/TruthValue.h>
+
+#include <opencog/atoms/base/ClassServer.h>
+
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/AttentionBank.h>
-#include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/BackingStore.h>
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/truthvalue/TruthValue.h>
-#include <opencog/util/exceptions.h>
 
 namespace opencog
 {
