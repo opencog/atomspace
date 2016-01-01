@@ -172,7 +172,13 @@ bool ScopeLink::is_equal(const Handle& other) const
 	// Variable declarations must match.
 	if (not _varlist.is_equal(scother->_varlist)) return false;
 
-	// Body, with substituted variables, must match.
+	// Other body, with our ariables in place of its variables,
+	// should be same as our body.
+	Handle altbod = scother->_varlist.substitute_nocheck(scother->_body,
+	                                                  _varlist.varseq);
+
+	// Compare bodies, they should match.
+	if (*((AtomPtr)altbod) != *((AtomPtr) _body)) return false;
 
 	return true;
 }

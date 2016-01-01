@@ -46,6 +46,7 @@ public:
 
 	void test_untyped_variable();
 	void test_variable();
+	void test_body();
 };
 
 #define NA _asa.add_node
@@ -167,6 +168,33 @@ void AlphaConvertUTest::test_variable()
 
 	// x and t should be equal
 	TS_ASSERT(scox->is_equal(hscot));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test AlphaConvert for differeing bodies.
+void AlphaConvertUTest::test_body()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create ScopeLinks.
+	Handle hscox =
+	LA(SCOPE_LINK,
+		NA(VARIABLE_NODE, "$X"),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
+
+	ScopeLinkPtr scox(ScopeLinkCast(hscox));
+	TS_ASSERT(scox != nullptr);
+
+	Handle hscoy =
+	LB(SCOPE_LINK,
+		NB(VARIABLE_NODE, "$X"),
+		LB(OR_LINK, NB(VARIABLE_NODE, "$X")));
+
+	ScopeLinkPtr scoy(ScopeLinkCast(hscoy));
+
+	// x and y should be NOT equal
+	TS_ASSERT(not scox->is_equal(hscoy));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
