@@ -4,6 +4,18 @@
 
 using namespace opencog;
 
+class HandlePredicate {
+public:
+    inline bool operator()(const Handle& h) const { return this->test(h); }
+    virtual bool test(const Handle&) const = 0;
+};
+
+class AtomPredicate {
+public:
+    inline bool operator()(const AtomPtr& a) const { return this->test(a); }
+    virtual bool test(const AtomPtr&) const = 0;
+};
+
 class AtomComparator {
 public:
     inline bool operator()(const AtomPtr& a, const AtomPtr& b) const
