@@ -22,6 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <limits>
+
 #include "AttentionValue.h"
 
 using namespace opencog;
@@ -32,60 +34,14 @@ const AttentionValue::vlti_t AttentionValue::DEFAULTATOMVLTI = 0;
 
 void AttentionValue::decaySTI()
 {
-    // Prevent m_STI from wrapping around... should really compare to system
-    // constant though.
-    if (m_STI != -32768) m_STI--;
+    // Prevent m_STI from wrapping around.
+    if (m_STI > std::numeric_limits<sti_t>::min()) m_STI--;
 }
 
 std::string AttentionValue::toString() const
 {
     char buffer[256];
-    sprintf(buffer, "[%d, %d, %s]", (int)m_STI, (int)m_LTI, m_VLTI ? "NONDISPOSABLE" : "DISPOSABLE");
+    sprintf(buffer, "[%d, %d, %s]", (int)m_STI, (int)m_LTI,
+            m_VLTI ? "NONDISPOSABLE" : "DISPOSABLE");
     return buffer;
 }
-
-#if 0
-bool AttentionValue::STISort::test(const AtomPtr& h1, const AtomPtr& h2) const
-{
-    return h1->getAttentionValue()->getSTI() >
-           h2->getAttentionValue()->getSTI();
-}
-
-bool AttentionValue::LTIAndTVAscendingSort::test(const AtomPtr& h1, const AtomPtr& h2) const
-{
-    lti_t lti1, lti2;
-    float tv1, tv2;
-
-    tv1 = fabs(h1->getTruthValue()->getMean());
-    tv2 = fabs(h2->getTruthValue()->getMean());
-
-    lti1 = h1->getAttentionValue()->getLTI();
-    lti2 = h2->getAttentionValue()->getLTI();
-
-    if (lti1 < 0)
-        tv1 = lti1 * (1.0f - tv1);
-    else
-        tv1 = lti1 * tv1;
-
-    if (lti2 < 0)
-        tv2 = lti2 * (1.0f - tv2);
-    else
-        tv2 = lti2 * tv2;
-
-    return tv1 < tv2;
-}
-
-bool AttentionValue::LTIThenTVAscendingSort::test(const AtomPtr& h1, const AtomPtr& h2) const
-{
-    lti_t lti1, lti2;
-    lti1 = h1->getAttentionValue()->getLTI();
-    lti2 = h2->getAttentionValue()->getLTI();
-
-    if (lti1 != lti2) return lti1 < lti2;
-
-    float tv1, tv2;
-    tv1 = h1->getTruthValue()->getMean();
-    tv2 = h2->getTruthValue()->getMean();
-    return tv1 < tv2;
-}
-#endif

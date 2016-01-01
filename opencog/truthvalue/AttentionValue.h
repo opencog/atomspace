@@ -128,26 +128,6 @@ public:
         if (*this == *DEFAULT_AV()) return true;
         return false;
     }
-
-#if 0
-    //! functor for comparing atom's attention value
-    struct STISort : public AtomComparator  {
-        STISort() {};
-        virtual bool test(const AtomPtr&, const AtomPtr&) const;
-    };
-
-    //! functor for comparing atom's attention value
-    struct LTIAndTVAscendingSort : public AtomComparator  {
-        LTIAndTVAscendingSort() {};
-        virtual bool test(const AtomPtr&, const AtomPtr&) const;
-    };
-
-    //! functor for comparing atom's attention value
-    struct LTIThenTVAscendingSort : public AtomComparator {
-        LTIThenTVAscendingSort() {};
-        virtual bool test(const AtomPtr&, const AtomPtr&) const;
-    };
-#endif
 };
 
 
