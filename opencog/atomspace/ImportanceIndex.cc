@@ -27,7 +27,7 @@
 #include <opencog/util/oc_assert.h>
 
 #include <opencog/atomspace/ImportanceIndex.h>
-#include <opencog/atomspace/Atom.h>
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomTable.h>
 
 using namespace opencog;

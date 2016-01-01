@@ -25,9 +25,9 @@
 
 #include <map>
 
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/core/Variables.h>
-#include <opencog/atomspace/Handle.h>
 
 namespace opencog
 {

@@ -33,9 +33,9 @@
 #include <stdlib.h>
 #include <boost/bind.hpp>
 
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
+#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/TypeNode.h>

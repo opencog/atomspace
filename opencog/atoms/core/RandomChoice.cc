@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/mt19937ar.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include "../NumberNode.h"
 #include "FunctionLink.h"

@@ -36,6 +36,7 @@
 
 #include <opencog/util/exceptions.h>
 
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/truthvalue/AttentionValue.h>

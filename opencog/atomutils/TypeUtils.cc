@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/ClassServer.h>
 
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/DefineLink.h>

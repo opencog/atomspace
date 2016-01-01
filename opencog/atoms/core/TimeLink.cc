@@ -22,8 +22,8 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/NumberNode.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include "TimeLink.h"
 
