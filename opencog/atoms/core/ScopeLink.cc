@@ -183,4 +183,15 @@ bool ScopeLink::is_equal(const Handle& other) const
 	return true;
 }
 
+bool ScopeLink::operator==(const Atom& ac) const
+{
+	Atom& a = (Atom&) ac; // cast away constness, for smart ptr.
+	return is_equal(a.getHandle());
+}
+
+bool ScopeLink::operator!=(const Atom& a) const
+{
+	return not operator==(a);
+}
+
 /* ===================== END OF FILE ===================== */

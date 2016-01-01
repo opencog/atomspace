@@ -96,6 +96,10 @@ public:
 	// i.e. is the same, up to alpha conversion.
 	bool is_equal(const Handle&) const;
 
+	// Overload equality check!
+	virtual bool operator==(const Atom&) const;
+	virtual bool operator!=(const Atom&) const;
+
 	// Take the list of values `vals`, and substitute them in for the
 	// variables in the body of this lambda. The values must satisfy all
 	// type restrictions, else an exception will be thrown.

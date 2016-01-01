@@ -411,8 +411,6 @@ public:
      * @return true if the atoms are different, false otherwise.
      */
     virtual bool operator!=(const Atom&) const = 0;
-
-
 };
 
 /** @}*/
