@@ -277,7 +277,7 @@ public:
             [&](Type t)->void {
                 Handle h(as->get_handle(t, name));
                 if (h) *(result++) = h; }, NODE);
-        result;
+        return result;
     }
 
     void threadedRemove(int start, int interval)

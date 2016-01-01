@@ -157,4 +157,41 @@ void ScopeLink::init_scoped_variables(const Handle& hvar)
 	}
 }
 
+/* ================================================================= */
+///
+/// Compare other ScopeLink, return true if it is equal to this one,
+/// to to an alpha-conversion of variables.
+///
+bool ScopeLink::is_equal(const Handle& other) const
+{
+	if (other == this) return true;
+	if (other->getType() != _type) return false;
+
+	ScopeLinkPtr scother(ScopeLinkCast(other));
+
+	// Variable declarations must match.
+	if (not _varlist.is_equal(scother->_varlist)) return false;
+
+	// Other body, with our ariables in place of its variables,
+	// should be same as our body.
+	Handle altbod = scother->_varlist.substitute_nocheck(scother->_body,
+	                                                  _varlist.varseq);
+
+	// Compare bodies, they should match.
+	if (*((AtomPtr)altbod) != *((AtomPtr) _body)) return false;
+
+	return true;
+}
+
+bool ScopeLink::operator==(const Atom& ac) const
+{
+	Atom& a = (Atom&) ac; // cast away constness, for smart ptr.
+	return is_equal(a.getHandle());
+}
+
+bool ScopeLink::operator!=(const Atom& a) const
+{
+	return not operator==(a);
+}
+
 /* ===================== END OF FILE ===================== */
