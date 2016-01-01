@@ -4,6 +4,13 @@
 
 using namespace opencog;
 
+class AtomComparator {
+public:
+    inline bool operator()(const AtomPtr& a, const AtomPtr& b) const
+        { return this->test(a,b); }
+    virtual bool test(const AtomPtr&, const AtomPtr&) const = 0;
+};
+
     //! functor for comparing atom's attention value
     struct STISort : public AtomComparator  {
         STISort() {};
