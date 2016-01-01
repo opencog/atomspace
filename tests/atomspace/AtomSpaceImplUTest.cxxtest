@@ -37,6 +37,7 @@
 #include <opencog/util/Config.h>
 
 #include "makeVirtualAtom.h"
+#include "sorting.h"
 
 using namespace opencog;
 using namespace std;
@@ -198,7 +199,7 @@ struct compareAtom
  * method, which would return all entries in AtomSpace, sorted by STI:
  * @code
  *         std::list<Handle> ret;
- *         AttentionValue::STISort stiSort;
+ *         STISort stiSort;
  *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true, stiSort);
  * @endcode
  */
@@ -683,7 +684,7 @@ public:
      * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
      *          Example of call to this method, which would return all entries in TimeServer, sorted by STI:
      *         std::list<Handle> ret;
-     *         AttentionValue::STISort stiSort;
+     *         STISort stiSort;
      *         atomSpace->getHandleSet(back_inserter(ret), ATOM, true, stiSort);
      */
     void testgetSortedHandleSet()
@@ -695,7 +696,7 @@ public:
         
         logger().debug("STISort");
 
-        AttentionValue::STISort sSort;
+        STISort sSort;
         HandleSeq sAtoms;
         getSortedHandleSet(as, back_inserter(sAtoms), ATOM, true, &sSort);
         for (unsigned int i = 0; i < sAtoms.size() - 1; i++) {
@@ -704,7 +705,7 @@ public:
         
         logger().debug("LTIAndTVAscendingSort");
         
-        AttentionValue::LTIAndTVAscendingSort latvSort;
+        LTIAndTVAscendingSort latvSort;
         HandleSeq latvAtoms;
         getSortedHandleSet(as, back_inserter(latvAtoms), ATOM, true, &latvSort);
         for (unsigned int i = 0; i < latvAtoms.size() - 1; i++) {
@@ -713,7 +714,7 @@ public:
         
         logger().debug("LTIThenTVAscendingSort");
         
-        AttentionValue::LTIThenTVAscendingSort lttvSort;
+        LTIThenTVAscendingSort lttvSort;
         HandleSeq lttvAtoms;
         getSortedHandleSet(as, back_inserter(lttvAtoms), ATOM, true, &lttvSort);
         for (unsigned int i = 0; i < lttvAtoms.size() - 1; i++) {

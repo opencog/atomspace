@@ -43,6 +43,7 @@
 #include <opencog/util/oc_assert.h>
 
 #include "makeVirtualAtom.h"
+#include "sorting.h"
 
 using namespace opencog;
 using namespace std;
@@ -780,7 +781,7 @@ public:
 
         logger().debug("STISort");
 
-        AttentionValue::STISort sSort;
+        STISort sSort;
         HandleSeq sAtoms;
         getSortedHandleSet(atomSpace, back_inserter(sAtoms), ATOM, true, &sSort);
         TS_ASSERT(sAtoms.size() > 0);
@@ -792,7 +793,7 @@ public:
 
         logger().debug("LTIAndTVAscendingSort");
 
-        AttentionValue::LTIAndTVAscendingSort latvSort;
+        LTIAndTVAscendingSort latvSort;
         HandleSeq latvAtoms;
         getSortedHandleSet(atomSpace, back_inserter(latvAtoms), ATOM, true, &latvSort);
         TS_ASSERT(latvAtoms.size() > 0);
@@ -804,7 +805,7 @@ public:
 
         logger().debug("LTIThenTVAscendingSort");
 
-        AttentionValue::LTIThenTVAscendingSort lttvSort;
+        LTIThenTVAscendingSort lttvSort;
         HandleSeq lttvAtoms;
         getSortedHandleSet(atomSpace, back_inserter(lttvAtoms), ATOM, true, &lttvSort);
         TS_ASSERT(lttvAtoms.size() > 0);
