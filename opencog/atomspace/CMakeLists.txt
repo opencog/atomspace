@@ -52,9 +52,3 @@ INSTALL (FILES
 	version.h
 	DESTINATION "include/opencog/atomspace"
 )
-
-# Install the auto-genned atom types as well
-INSTALL (FILES
-	${CMAKE_CURRENT_BINARY_DIR}/core_types.scm
-   DESTINATION "${DATADIR}/scm"
-)
