@@ -59,4 +59,12 @@ import OpenCog.AtomSpace.Template       (declareAtomType)
 -- First path is when you build it inside the AtomSpace Reop
 -- Second path is for when you build it from Hackage
 -- Atomspace has to be installed in this case.
-declareAtomType "../../../atomspace/atom_types.script" "/usr/local/share/opencog/atom_types.script"
+-- XXX FIXME -- there are actually six such files, one for nlp, one
+-- for attention, one for embodiment, one for spacetime, etc.  And
+-- anyway, these are not compile-time constants: new types can be
+-- added at run-time, e.g. by fetching from the database. So doing
+-- it at compile-time here is not correct.
+-- Also, the path /usr/local/share/opencog/ is not correct either;
+-- it should be taken from the CMake install path, as it will differ,
+-- depending on the distro and OS.
+declareAtomType "../../../atoms/base/atom_types.script" "/usr/local/share/opencog/atom_types.script"
