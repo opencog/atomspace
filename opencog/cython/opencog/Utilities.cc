@@ -1,7 +1,5 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/exceptions.h>
-#include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
 

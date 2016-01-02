@@ -23,7 +23,6 @@
 #ifndef _OPENCOG_PUT_LINK_H
 #define _OPENCOG_PUT_LINK_H
 
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/ScopeLink.h>
 
 namespace opencog

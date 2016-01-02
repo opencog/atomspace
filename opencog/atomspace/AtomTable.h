@@ -34,16 +34,18 @@
 #include <opencog/util/async_method_caller.h>
 #include <opencog/util/RandGen.h>
 
-#include <opencog/atomspace/atom_types.h>
-#include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/truthvalue/TruthValue.h>
+#include <opencog/truthvalue/AttentionValue.h>
+
+#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+
 #include <opencog/atomspace/FixedIntegerIndex.h>
 #include <opencog/atomspace/ImportanceIndex.h>
-#include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/LinkIndex.h>
-#include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/NodeIndex.h>
-#include <opencog/truthvalue/TruthValue.h>
 #include <opencog/atomspace/TypeIndex.h>
 
 class AtomTableUTest;

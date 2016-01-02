@@ -1,5 +1,6 @@
 
 LINK_LIBRARIES(
+	atombase
 	atomutils
 	atomspace
 	clearbox

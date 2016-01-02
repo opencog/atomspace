@@ -27,8 +27,8 @@
 
 #include <atomic>
 
-#include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Handle.h>
 
 class TLBUTest;
 class BasicSaveUTest;

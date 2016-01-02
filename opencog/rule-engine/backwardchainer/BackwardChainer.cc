@@ -22,15 +22,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "BackwardChainer.h"
-#include "BackwardChainerPMCB.h"
-#include "UnifyPMCB.h"
-
 #include <opencog/util/random.h>
 
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atomutils/Substitutor.h>
 #include <opencog/atoms/pattern/PatternLink.h>
+
+#include "BackwardChainer.h"
+#include "BackwardChainerPMCB.h"
+#include "UnifyPMCB.h"
 
 using namespace opencog;
 

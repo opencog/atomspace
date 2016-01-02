@@ -27,7 +27,7 @@
 #include <opencog/atoms/pattern/PatternLink.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/ClassServer.h>
 
 #include "PatternMatch.h"
 #include "PatternMatchEngine.h"

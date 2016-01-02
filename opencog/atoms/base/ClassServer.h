@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/ClassServer.h
+ * opencog/atoms/base/ClassServer.h
  *
  * Copyright (C) 2011 by The OpenCog Foundation
  * All Rights Reserved
@@ -29,8 +29,8 @@
 
 #include <boost/signals2.hpp>
 
-#include <opencog/atomspace/types.h>
-#include <opencog/atomspace/atom_types.h>
+#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/base/atom_types.h>
 
 namespace opencog
 {

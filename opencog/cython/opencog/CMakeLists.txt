@@ -61,7 +61,7 @@ CYTHON_ADD_MODULE_PYX(atomspace
 	"atom.pyx" "classserver.pyx" "handle.pyx" "truth_value.pyx"
 	"atomspace_details.pyx" opencog_atom_types
 	"../../truthvalue/TruthValue.h" "../../truthvalue/SimpleTruthValue.h"
-	"../../atomspace/ClassServer.h" "../../atomspace/Handle.h"
+	"../../atoms/base/ClassServer.h" "../../atoms/base/Handle.h"
 	"../../atomspace/AtomSpace.h"
 )
 

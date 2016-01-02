@@ -23,7 +23,7 @@
 #include <dlfcn.h>
 #include <stdlib.h>
 
-#include <opencog/atomspace/atom_types.h>
+#include <opencog/atoms/base/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/cython/PythonEval.h>

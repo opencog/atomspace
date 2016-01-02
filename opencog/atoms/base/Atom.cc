@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/Atom.cc
+ * opencog/atoms/base/Atom.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -35,13 +35,14 @@
 #include <opencog/util/misc.h>
 #include <opencog/util/platform.h>
 
-#include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/AtomTable.h>
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/Link.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/Link.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/AtomTable.h>
 
 //! Atom flag
 // #define WRITE_MUTEX             1  //BIT0

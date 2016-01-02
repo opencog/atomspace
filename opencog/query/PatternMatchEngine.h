@@ -30,9 +30,9 @@
 #include <unordered_map>
 #include <vector>
 
+#include <opencog/atoms/base/ClassServer.h>
 #include <opencog/query/Pattern.h>
 #include <opencog/query/PatternMatchCallback.h>
-#include <opencog/atomspace/ClassServer.h>
 
 namespace opencog {
 

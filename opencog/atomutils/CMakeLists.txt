@@ -11,6 +11,8 @@ ADD_LIBRARY (atomutils SHARED
 ADD_DEPENDENCIES(atomutils opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomutils
+	atombase
+	atomcore
 	${COGUTIL_LIBRARY}
 )
 

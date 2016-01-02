@@ -28,13 +28,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/Atom.h>
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/TLB.h>
-#include <opencog/atomspace/atom_types.h>
+#include <opencog/atoms/base/atom_types.h>
 #include <opencog/persist/sql/AtomStorage.h>
 
 #include <opencog/util/Logger.h>

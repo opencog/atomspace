@@ -30,9 +30,9 @@
 #include <unordered_map>
 #include <vector>
 
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/types.h>  // for typedef Type
 #include <opencog/query/PatternTerm.h>
-#include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/types.h>  // for typedef Type
 
 namespace opencog {
 

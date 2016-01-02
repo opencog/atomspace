@@ -12,8 +12,8 @@
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/random.h>
 
-#include <opencog/atomspace/types.h>
-#include <opencog/atomspace/AttentionValue.h>
+#include <opencog/atoms/base/types.h>
+#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/CountTruthValue.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>

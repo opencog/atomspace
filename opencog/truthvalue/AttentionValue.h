@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/AttentionValue.h
+ * opencog/truthvalue/AttentionValue.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -25,10 +25,8 @@
 #ifndef _OPENCOG_ATTENTION_VALUE_H
 #define _OPENCOG_ATTENTION_VALUE_H
 
-#include <string>
 #include <limits.h>
-
-#include <opencog/atomspace/Handle.h>
+#include <memory>
 
 namespace opencog
 {
@@ -130,24 +128,6 @@ public:
         if (*this == *DEFAULT_AV()) return true;
         return false;
     }
-
-    //! functor for comparing atom's attention value
-    struct STISort : public AtomComparator  {
-        STISort() {};
-        virtual bool test(const AtomPtr&, const AtomPtr&) const;
-    };
-
-    //! functor for comparing atom's attention value
-    struct LTIAndTVAscendingSort : public AtomComparator  {
-        LTIAndTVAscendingSort() {};
-        virtual bool test(const AtomPtr&, const AtomPtr&) const;
-    };
-
-    //! functor for comparing atom's attention value
-    struct LTIThenTVAscendingSort : public AtomComparator {
-        LTIThenTVAscendingSort() {};
-        virtual bool test(const AtomPtr&, const AtomPtr&) const;
-    };
 };
 
 

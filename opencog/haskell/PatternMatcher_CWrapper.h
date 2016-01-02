@@ -3,10 +3,11 @@
 
 /**
  * C wrapper of the Pattern Matcher api:
- * It was developed as an interface necessary for haskell bindings.
+ * An interface necessary for haskell bindings.
  * (ghc supports FFI for c libraries)
- * Now, it doesn't have specific code related to Haskell, so this library
- * could be used by another application with same requirements.
+ * XXX FIXME: atoms must never be accessed by UUID except by the
+ * communication and database layers. The UUID is not meant to be
+ * a public interface.
  */
 
 extern "C"

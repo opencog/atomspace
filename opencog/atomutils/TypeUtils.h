@@ -24,8 +24,8 @@
 #ifndef _OPENCOG_TYPE_UTILS_H
 #define _OPENCOG_TYPE_UTILS_H
 
-#include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/types.h>
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/types.h>
 
 namespace opencog
 {

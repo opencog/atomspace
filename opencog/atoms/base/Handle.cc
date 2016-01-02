@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/Handle.cc
+ * opencog/atoms/base/Handle.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2013 Linas Vepstas <linas@linas.org>
@@ -25,8 +25,8 @@
  */
 
 #include <climits>
-#include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/Atom.h>
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomTable.h>
 
 using namespace opencog;

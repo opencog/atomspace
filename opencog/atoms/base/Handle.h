@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/Handle.h
+ * opencog/atoms/base/Handle.h
  *
  * Copyright (C) 2008-2010 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
@@ -165,24 +165,6 @@ static inline bool operator== (std::nullptr_t, const Handle& rhs) noexcept
 
 static inline bool operator!= (std::nullptr_t, const Handle& rhs) noexcept
     { return rhs != nullptr; }
-
-class HandlePredicate {
-public:
-    inline bool operator()(const Handle& h) const { return this->test(h); }
-    virtual bool test(const Handle&) const = 0;
-};
-class AtomPredicate {
-public:
-    inline bool operator()(const AtomPtr& a) const { return this->test(a); }
-    virtual bool test(const AtomPtr&) const = 0;
-};
-class AtomComparator {
-public:
-    inline bool operator()(const AtomPtr& a, const AtomPtr& b) const
-        { return this->test(a,b); }
-    virtual bool test(const AtomPtr&, const AtomPtr&) const = 0;
-};
-
 
 //! gcc-4.7.2 needs this, because std::hash<opencog::Handle> no longer works.
 //! (See very bottom of this file).

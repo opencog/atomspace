@@ -29,6 +29,11 @@ type AT = String
 
 -- | Template function to define AtomType and some util functions over it.
 --   It takes as argument a relative path to the file "atom_types.script".
+-- XXX FIXME -- there are actually six such files, one for nlp, one
+-- for attention, one for embodiment, one for spacetime, etc.  And
+-- anyway, these are not compile-time constants: new types can be
+-- added at run-time, e.g. by fetching from the database. So doing
+-- this at compile-time here is not correct.
 declareAtomType :: FilePath -> FilePath -> Q [Dec]
 declareAtomType file1 file2 = do
     file <- chooseFile file1 file2

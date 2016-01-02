@@ -1,7 +1,11 @@
 /*
- * BindLinkAPI.h
+ * opencog/atoms/base/types.h
  *
- * Copyright (C) 2014 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2002-2007 Novamente LLC
+ * All Rights Reserved
+ *
+ * Written by Thiago Maia <thiago@vettatech.com>
+ *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -19,23 +23,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_BINDLINK_API_H
-#define _OPENCOG_BINDLINK_API_H
+/**
+ * basic type definitions.
+ */
 
-#include <opencog/atoms/base/Handle.h>
-#include <opencog/truthvalue/TruthValue.h>
+#ifndef _OPENCOG_TYPES_H
+#define _OPENCOG_TYPES_H
 
-namespace opencog {
+namespace opencog
+{
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
-class AtomSpace;
+//! type of Atoms, represented as short integer (16 bits)
+typedef unsigned short Type;
 
-Handle bindlink(AtomSpace*, const Handle&);
-Handle single_bindlink (AtomSpace*, const Handle&);
-Handle af_bindlink(AtomSpace*, const Handle&);
-TruthValuePtr satisfaction_link(AtomSpace*, const Handle&);
-Handle satisfying_set(AtomSpace*, const Handle&);
-Handle recognize(AtomSpace*, const Handle&);
-
+/** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_BINDLINK_API_H
+#endif // _OPENCOG_TYPES_H

@@ -200,6 +200,17 @@ This can be done with:
  stack upload
 ```
 
+### TODO items
+
+* The haskell API currently uses UUID's for working with atoms; this,
+however, is a mis-feature, and needs to be fixed. UUID's are meant to
+be used only by the database and communications back-ends, and are not
+meant to be visible to the user (or to haskell or the haskell
+internals).  Future plans call for the eilimination of UUID's from the
+atomspace, and so expecting them to be there will result in non-working
+code. In particular, the proto-atoms are shorn of UUID's. Better to fix
+this now, rather than later.
+
 ### Adding new Atom Types
 
 Because Haskell bindings does type checking on atoms, each atom type
@@ -213,10 +224,16 @@ should update some part of the code providing information of the
 outgoing set of the new atom type (which is not provided in the file
 [atom_types.script](../atomspace/atom_types.script)).
 
-So, the steps to add a new atom type are:
+XXX FIXME This is a broken design: there are about 5 or 6 different
+`atom_types.script` files, including one for NLP, one for attention,
+one for embodiment, and one for the spacetime server.  It is faulty to
+assume that there is only one such file.   Its even worse: new atom
+types can be added at run-time: they are NOT compile-time constants.
+This can typically occur when atoms are communicated from the database
+or from other servers: the actual types are fetched from the database,
+and not in the `atom_stypes.script` file.
 
- - Ensure that it is properly included in the file:
-   [opencog/atomspace/atom_types.script](../atomspace/atom_types.script)
+So, the steps to add a new atom type are:
 
  - Update the file:
    [opencog/haskell/OpenCog/AtomSpace/Types.hs](./OpenCog/AtomSpace/Types.hs)

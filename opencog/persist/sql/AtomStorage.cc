@@ -36,16 +36,17 @@
 #include <thread>
 
 #include <opencog/util/oc_assert.h>
-#include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/CountTruthValue.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
 #include <opencog/truthvalue/ProbabilisticTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/truthvalue/TruthValue.h>
+
+#include <opencog/atomspace/TLB.h>
 
 #include "AtomStorage.h"
 #include "odbcxx.h"

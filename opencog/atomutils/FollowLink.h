@@ -16,7 +16,7 @@
 #ifndef _OPENCOG_FOLLOW_LINK_H
 #define _OPENCOG_FOLLOW_LINK_H
 
-#include <opencog/atomspace/Link.h>
+#include <opencog/atoms/base/Link.h>
 
 namespace opencog
 {
