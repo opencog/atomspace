@@ -1,0 +1,258 @@
+/*
+ * tests/atoms/AlphaConvertUTest.cxxtest
+ *
+ * Copyright (C) 2015 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/ScopeLink.h>
+
+using namespace opencog;
+
+// Test the AlphaConvert.
+//
+class AlphaConvertUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace _asa;
+	AtomSpace _asb;
+
+public:
+	AlphaConvertUTest()
+	{
+		logger().setPrintToStdoutFlag(true);
+	}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void test_untyped_variable();
+	void test_variable();
+	void test_body();
+	void test_atomspace();
+};
+
+#define NA _asa.add_node
+#define LA _asa.add_link
+
+#define NB _asb.add_node
+#define LB _asb.add_link
+
+// Test AlphaConvert over an untyped variable.
+void AlphaConvertUTest::test_untyped_variable()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create ScopeLinks.
+	Handle hscox =
+	LA(SCOPE_LINK,
+		NA(VARIABLE_NODE, "$X"),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
+
+	ScopeLinkPtr scox(ScopeLinkCast(hscox));
+	TS_ASSERT(scox != nullptr);
+
+	Handle hscoy =
+	LB(SCOPE_LINK,
+		NB(VARIABLE_NODE, "$Y"),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$Y")));
+
+	ScopeLinkPtr scoy(ScopeLinkCast(hscoy));
+
+	// x and y should be equal
+	TS_ASSERT(scox->is_equal(hscoy));
+
+	_asb.clear();
+	Handle hscoz =
+	LB(SCOPE_LINK,
+		LB(VARIABLE_LIST, NB(VARIABLE_NODE, "$Z")),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$Z")));
+
+	// x and z should be equal
+	TS_ASSERT(scox->is_equal(hscoz));
+
+	// Constraining something to be "type Atom" is not a constraint.
+	_asb.clear();
+	Handle hscow =
+	LB(SCOPE_LINK,
+		LB(TYPED_VARIABLE_LINK,
+			NB(VARIABLE_NODE, "$W"), NB(TYPE_NODE, "Atom")),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$W")));
+
+	// x and w should be equal
+	TS_ASSERT(scox->is_equal(hscow));
+
+	_asb.clear();
+	Handle hscot =
+	LB(SCOPE_LINK,
+		LB(TYPED_VARIABLE_LINK,
+			NB(VARIABLE_NODE, "$T"),
+			LB(TYPE_CHOICE, NB(TYPE_NODE, "Atom"))),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$T")));
+
+	// x and t should be equal
+	TS_ASSERT(scox->is_equal(hscot));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test AlphaConvert over an variable types as ConceptNode.
+void AlphaConvertUTest::test_variable()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create ScopeLinks.
+	Handle hscox =
+	LA(SCOPE_LINK,
+		LA(TYPED_VARIABLE_LINK,
+			NA(VARIABLE_NODE, "$X"), NA(TYPE_NODE, "ConceptNode")),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
+
+	ScopeLinkPtr scox(ScopeLinkCast(hscox));
+	TS_ASSERT(scox != nullptr);
+
+	Handle hscoy =
+	LB(SCOPE_LINK,
+		NB(VARIABLE_NODE, "$Y"),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$Y")));
+
+	ScopeLinkPtr scoy(ScopeLinkCast(hscoy));
+
+	// x and y should be not equal
+	TS_ASSERT(not scox->is_equal(hscoy));
+
+	_asb.clear();
+	Handle hscoz =
+	LB(SCOPE_LINK,
+		LB(VARIABLE_LIST, NB(VARIABLE_NODE, "$Z")),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$Z")));
+
+	// x and z should be not equal
+	TS_ASSERT(not scox->is_equal(hscoz));
+
+	// Constraining should work.
+	_asb.clear();
+	Handle hscow =
+	LB(SCOPE_LINK,
+		LB(TYPED_VARIABLE_LINK,
+			NB(VARIABLE_NODE, "$W"), NB(TYPE_NODE, "ConceptNode")),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$W")));
+
+	// x and w should be equal
+	TS_ASSERT(scox->is_equal(hscow));
+
+	_asb.clear();
+	Handle hscot =
+	LB(SCOPE_LINK,
+		LB(TYPED_VARIABLE_LINK,
+			NB(VARIABLE_NODE, "$T"),
+			LB(TYPE_CHOICE, NB(TYPE_NODE, "Atom"), NB(TYPE_NODE, "ConceptNode"))),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$T")));
+
+	// x and t should be equal
+	TS_ASSERT(scox->is_equal(hscot));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test AlphaConvert for differeing bodies.
+void AlphaConvertUTest::test_body()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create ScopeLinks.
+	Handle hscox =
+	LA(SCOPE_LINK,
+		NA(VARIABLE_NODE, "$X"),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
+
+	ScopeLinkPtr scox(ScopeLinkCast(hscox));
+	TS_ASSERT(scox != nullptr);
+
+	Handle hscoy =
+	LB(SCOPE_LINK,
+		NB(VARIABLE_NODE, "$X"),
+		LB(OR_LINK, NB(VARIABLE_NODE, "$X")));
+
+	ScopeLinkPtr scoy(ScopeLinkCast(hscoy));
+
+	// x and y should be NOT equal
+	TS_ASSERT(not scox->is_equal(hscoy));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test alpha conversion in the atomspace.
+void AlphaConvertUTest::test_atomspace()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create ScopeLinks.
+	Handle hscox =
+	LA(SCOPE_LINK,
+		NA(VARIABLE_NODE, "$X"),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
+
+	Handle hscoy =
+	LA(SCOPE_LINK,
+		NA(VARIABLE_NODE, "$Y"),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$Y")));
+
+	// x and y should be equal
+	// TS_ASSERT(hscox == hscoy);
+
+	printf("Expecting same atom: x=%s vs y=%s\n",
+		hscox->toString().c_str(), hscoy->toString().c_str());
+
+#if 0
+	Handle hscoz =
+	LA(SCOPE_LINK,
+		LA(VARIABLE_LIST, NA(VARIABLE_NODE, "$Z")),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$Z")));
+
+	// x and z should be equal
+	TS_ASSERT(scox->is_equal(hscoz));
+
+	// Constraining something to be "type Atom" is not a constraint.
+	_asb.clear();
+	Handle hscow =
+	LA(SCOPE_LINK,
+		LA(TYPED_VARIABLE_LINK,
+			NA(VARIABLE_NODE, "$W"), NA(TYPE_NODE, "Atom")),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$W")));
+
+	// x and w should be equal
+	TS_ASSERT(scox->is_equal(hscow));
+
+	_asb.clear();
+	Handle hscot =
+	LA(SCOPE_LINK,
+		LA(TYPED_VARIABLE_LINK,
+			NA(VARIABLE_NODE, "$T"),
+			LA(TYPE_CHOICE, NA(TYPE_NODE, "Atom"))),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$T")));
+
+	// x and t should be equal
+	TS_ASSERT(scox->is_equal(hscot));
+#endif
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}

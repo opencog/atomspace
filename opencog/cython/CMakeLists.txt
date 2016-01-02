@@ -28,13 +28,13 @@ file(MAKE_DIRECTORY opencog)
 file(COPY opencog/__init__.py DESTINATION opencog)
 ##
 
-
 ADD_LIBRARY(PythonEval SHARED
 	PythonEval.cc
 )
 ADD_DEPENDENCIES(PythonEval atomspace_cython)
 
 TARGET_LINK_LIBRARIES(PythonEval
+	atombase
 	${PYTHON_LIBRARIES}
 	${Boost_FILESYSTEM_LIBRARY}
 )

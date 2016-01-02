@@ -24,8 +24,8 @@
 #ifndef FUZZY_MATCH_H
 #define FUZZY_MATCH_H
 
-#include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/Link.h>
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/Link.h>
 
 namespace opencog
 {

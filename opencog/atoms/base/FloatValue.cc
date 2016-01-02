@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/LinkValue.cc
+ * opencog/atoms/base/FloatValue.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -20,23 +20,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/LinkValue.h>
+#include <opencog/atoms/base/FloatValue.h>
 
 using namespace opencog;
 
-bool LinkValue::operator==(const ProtoAtom& other) const
+bool FloatValue::operator==(const ProtoAtom& other) const
 {
-	if (LINK_VALUE != other.getType()) return false;
+	if (FLOAT_VALUE != other.getType()) return false;
 	return true;
 }
 
 // ==============================================================
 
-std::string LinkValue::toString(const std::string& indent)
+std::string FloatValue::toString(const std::string& indent)
 {
-	std::string rv = indent + "(LinkValue";
-	for (ProtoAtomPtr v :_value)
-		rv += std::string(" ") + v->toString(indent + "   ") + "\n";
+	std::string rv = indent + "(FloatValue";
+	for (double v :_value)
+		rv += std::string(" ") + std::to_string(v);
 	rv += ")";
 	return rv;
 }

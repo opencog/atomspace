@@ -11,7 +11,7 @@
 #include <cstddef>
 #include <libguile.h>
 
-#include <opencog/atomspace/AttentionValue.h>
+#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;

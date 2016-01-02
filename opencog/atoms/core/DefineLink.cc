@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/ClassServer.h>
 
 #include "DefineLink.h"
 
@@ -31,11 +31,24 @@ void DefineLink::init()
 {
 	// Must have name and body
 	if (2 != _outgoing.size())
-		throw InvalidParamException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 			"Expecting name and definition, got size %d", _outgoing.size());
 
 	// Perform some additional checks in the UniqueLink init method
 	UniqueLink::init(false);
+
+#if ALREADY_BROKEN
+	// Type-check. Probably not needed, probably too strict, but what
+	// the heck, since we are here... Heh. There's already code that
+	// defines shit more loosely than this. Bummer.
+	Type dtype = _outgoing[0]->getType();
+	if (DEFINED_SCHEMA_NODE != dtype and
+	    DEFINED_PREDICATE_NODE != dtype and
+	    DEFINED_TYPE_NODE != dtype)
+		throw SyntaxException(TRACE_INFO,
+			"Expecting Defined-X-Node, got %s",
+				classserver().getTypeName(dtype).c_str());
+#endif
 }
 
 DefineLink::DefineLink(const HandleSeq& oset,
@@ -59,7 +72,7 @@ DefineLink::DefineLink(Link &l)
 }
 
 /**
- * Get the defintion associated with the alias.
+ * Get the definition associated with the alias.
  * This will be the second atom of some DefineLink, where
  * `alias` is the first.
  */

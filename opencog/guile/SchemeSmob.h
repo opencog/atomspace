@@ -19,13 +19,14 @@
 #include <vector>
 #include <libguile.h>
 
-#include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/types.h>
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/ProtoAtom.h>
+#include <opencog/atoms/base/types.h>
+
+#include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/ProtoAtom.h>
-#include <opencog/truthvalue/TruthValue.h>
 
 namespace opencog {
 /** \addtogroup grp_smob

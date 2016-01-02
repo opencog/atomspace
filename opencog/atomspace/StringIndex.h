@@ -23,8 +23,9 @@
 #define _OPENCOG_STRINGINDEX_H
 
 #include <map>
+#include <string>
 
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 
 namespace opencog
 {

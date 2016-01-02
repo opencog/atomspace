@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/Node.h
+ * opencog/atoms/base/Node.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -27,7 +27,7 @@
 #define _OPENCOG_NODE_H
 
 #include <opencog/util/oc_assert.h>
-#include <opencog/atomspace/Atom.h>
+#include <opencog/atoms/base/Atom.h>
 
 namespace opencog
 {

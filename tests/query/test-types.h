@@ -1,5 +1,5 @@
 
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/ClassServer.h>
 
 using namespace opencog;
 

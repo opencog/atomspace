@@ -26,7 +26,7 @@
 #include <map>
 #include <set>
 
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 
 namespace opencog
 {
@@ -110,6 +110,15 @@ struct Variables : public FreeVariables
 	VariableDeepTypeMap _deep_typemap;
 	VariableDeepTypeMap _fuzzy_typemap;
 
+	// Return true if the other Variables struct is equal to this one,
+	// up to alpha-conversion. That is, same number of variables, same
+	// type restrictions, but different actual variable names.
+	bool is_equal(const Variables&) const;
+	inline bool operator==(const Variables& other) const
+	{ return is_equal(other); }
+	inline bool operator!=(const Variables& other) const
+	{ return not is_equal(other); }
+
 	// Return true if we are holding a single variable, and the handle
 	// given as the argument satisfies the type restrictions (if any).
 	// Else return false.
@@ -136,9 +145,6 @@ struct Variables : public FreeVariables
 
 	// Useful for debugging
 	std::string to_string() const;
-
-private:
-	bool is_type_rec(const Handle&, const Handle&) const;
 };
 
 /** @}*/

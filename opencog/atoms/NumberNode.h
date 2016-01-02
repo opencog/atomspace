@@ -23,8 +23,7 @@
 #ifndef _OPENCOG_NUMBER_NODE_H
 #define _OPENCOG_NUMBER_NODE_H
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Node.h>
+#include <opencog/atoms/base/Node.h>
 
 namespace opencog
 {

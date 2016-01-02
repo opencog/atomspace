@@ -13,7 +13,7 @@
 #include <cstddef>
 #include <libguile.h>
 
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/ClassServer.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
 

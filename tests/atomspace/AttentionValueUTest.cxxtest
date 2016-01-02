@@ -23,10 +23,12 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/Node.h>
+#include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
+
+#include "sorting.h"
 
 using namespace opencog;
 using namespace std;
@@ -211,7 +213,7 @@ public:
         
         logger().debug("STISort");
 
-        AttentionValue::STISort sSort;
+        STISort sSort;
         
         // an atom which has higher sti is strictly before one with lower sti
         TS_ASSERT_EQUALS(sSort(atoms[1], atoms[0]), true);
@@ -223,7 +225,7 @@ public:
         
         logger().debug("LTIAndTVAscendingSort");
 
-        AttentionValue::LTIAndTVAscendingSort latvSort;
+        LTIAndTVAscendingSort latvSort;
         
         // an atom which has higher LTI*TV is not strictly before one with lower LTI*TV
         TS_ASSERT_EQUALS(latvSort(atoms[1], atoms[0]), false);
@@ -235,7 +237,7 @@ public:
 
         logger().debug("LTIThenTVAscendingSort");
         
-        AttentionValue::LTIThenTVAscendingSort lttvSort;
+        LTIThenTVAscendingSort lttvSort;
 
         // an atom which has higher LTI is not strictly before one with lower LTI
         TS_ASSERT_EQUALS(lttvSort(atoms[1], atoms[0]), false);

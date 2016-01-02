@@ -29,10 +29,12 @@
 #include <math.h>
 #include <string.h>
 
-#include <opencog/atomspace/types.h>
+#define DEPRECATED_ATOMSPACE_CALLS 1
+
+#include <opencog/atoms/base/types.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/Node.h>
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
@@ -41,6 +43,7 @@
 #include <opencog/util/oc_assert.h>
 
 #include "makeVirtualAtom.h"
+#include "sorting.h"
 
 using namespace opencog;
 using namespace std;
@@ -88,12 +91,12 @@ Handle addRealAtom(AtomSpace& as, AtomPtr atom,
             return result;
         }
     }
-    const TruthValuePtr currentTV = as.get_TV(result);
+    const TruthValuePtr currentTV = result->getTruthValue();
     if (currentTV->isNullTv()) {
-        as.set_TV(result, newTV);
+        result->setTruthValue(newTV);
     } else {
         TruthValuePtr mergedTV = currentTV->merge(newTV);
-        as.set_TV(result, mergedTV);
+        result->setTruthValue(mergedTV);
     }
     return result;
 }
@@ -109,12 +112,12 @@ static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::i
 
     if (head_handle_ptr != NULL) {
         OC_ASSERT(as.is_valid_handle(*head_handle_ptr), "head_handle_ptr is not valid");
-        TruthValuePtr currentTV(as.get_TV(*head_handle_ptr));
+        TruthValuePtr currentTV((*head_handle_ptr)->getTruthValue());
         if (currentTV->isNullTv()) {
-            as.set_TV(*head_handle_ptr, tvn);
+            (*head_handle_ptr)->setTruthValue(tvn);
         } else {
             TruthValuePtr mergedTV(currentTV->merge(tvn));
-            as.set_TV(*head_handle_ptr, mergedTV);
+            (*head_handle_ptr)->setTruthValue(mergedTV);
         }
 
         return *head_handle_ptr;
@@ -156,18 +159,18 @@ HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
     buf[baseNameLength] = '1';
     Handle h1 = atomSpace->add_node(CONCEPT_NODE, buf);
     h1->setTruthValue(tv1);
-    atomSpace->set_STI(h1, AV1_STI);
-    atomSpace->set_LTI(h1, AV1_LTI);
+    h1->setSTI(AV1_STI);
+    h1->setLTI(AV1_LTI);
     buf[baseNameLength] = '2';
     Handle h2 = atomSpace->add_node(CONCEPT_NODE, buf);
     h2->setTruthValue(tv2);
-    atomSpace->set_STI(h2, AV2_STI);
-    atomSpace->set_LTI(h2, AV2_LTI);
+    h2->setSTI(AV2_STI);
+    h2->setLTI(AV2_LTI);
     buf[baseNameLength] = '3';
     Handle h3 = atomSpace->add_node(CONCEPT_NODE, buf);
     h3->setTruthValue(tv3);
-    atomSpace->set_STI(h3, AV3_STI);
-    atomSpace->set_LTI(h3, AV3_LTI);
+    h3->setSTI(AV3_STI);
+    h3->setLTI(AV3_LTI);
 
     HandleSeq outgoing1;
     outgoing1.push_back(h2);
@@ -394,27 +397,29 @@ public:
 
         // Check TVS
         for (int i = 0; i < NUM_NODES; i++) {
-            TruthValuePtr tv = atomSpace->get_TV(h[i]);
+            TruthValuePtr tv = h[i]->getTruthValue();
             TS_ASSERT(!tv->isNullTv());
-            logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f\n", tv->getMean(), atomSpace->get_mean(h[i]));
+            logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f\n",
+                 tv->getMean(), h[i]->getTruthValue()->getMean());
             TS_ASSERT(fabs(tv->getMean() - 0.001) < FLOAT_ACCEPTABLE_ERROR);
             logger().debug("h: confidence = %f, diff = %f, error = %f\n", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
             if (i < NUM_FORCEUSER_LINKS) {
-                TruthValuePtr tv = atomSpace->get_TV(FU[i]);
+                TruthValuePtr tv = FU[i]->getTruthValue();
                 TS_ASSERT(!tv->isNullTv());
-                logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f\n", tv->getMean(), atomSpace->get_mean(h[i]));
-                logger().debug("FU: tv mean = %f, atomSpace->getMean(FU[i]) = %f\n", tv->getMean(), atomSpace->get_mean(FU[i]));
+                logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f\n",
+                  tv->getMean(), h[i]->getTruthValue()->getMean());
+                logger().debug("FU: tv mean = %f, atomSpace->getMean(FU[i]) = %f\n",
+                 tv->getMean(), FU[i]->getTruthValue()->getMean());
                 TS_ASSERT(fabs(tv->getMean() - ForceUser[i]) < FLOAT_ACCEPTABLE_ERROR);
                 logger().debug("FU: confidence = %f, diff = %f, error = %f\n", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
             }
             if (i < NUM_HUMAN_LINKS) {
-                TruthValuePtr tv = atomSpace->get_TV(H[i]);
+                TruthValuePtr tv = H[i]->getTruthValue();
                 TS_ASSERT(!tv->isNullTv());
-                logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f\n", tv->getMean(), atomSpace->get_mean(h[i]));
-                logger().debug("FU: tv mean = %f, atomSpace->getMean(FU[i]) = %f\n", tv->getMean(), atomSpace->get_mean(FU[i]));
-                logger().debug("H: tv mean = %f,atomSpace->getMean(H[i]) = %f\n", tv->getMean(), atomSpace->get_mean(H[i]));
+                logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f\n",
+                     tv->getMean(), h[i]->getTruthValue()->getMean());
                 TS_ASSERT(fabs(tv->getMean() - Human[i]) < FLOAT_ACCEPTABLE_ERROR);
                 logger().debug("H: confidence = %f, diff = %f, error = %f\n", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
@@ -776,7 +781,7 @@ public:
 
         logger().debug("STISort");
 
-        AttentionValue::STISort sSort;
+        STISort sSort;
         HandleSeq sAtoms;
         getSortedHandleSet(atomSpace, back_inserter(sAtoms), ATOM, true, &sSort);
         TS_ASSERT(sAtoms.size() > 0);
@@ -788,7 +793,7 @@ public:
 
         logger().debug("LTIAndTVAscendingSort");
 
-        AttentionValue::LTIAndTVAscendingSort latvSort;
+        LTIAndTVAscendingSort latvSort;
         HandleSeq latvAtoms;
         getSortedHandleSet(atomSpace, back_inserter(latvAtoms), ATOM, true, &latvSort);
         TS_ASSERT(latvAtoms.size() > 0);
@@ -800,7 +805,7 @@ public:
 
         logger().debug("LTIThenTVAscendingSort");
 
-        AttentionValue::LTIThenTVAscendingSort lttvSort;
+        LTIThenTVAscendingSort lttvSort;
         HandleSeq lttvAtoms;
         getSortedHandleSet(atomSpace, back_inserter(lttvAtoms), ATOM, true, &lttvSort);
         TS_ASSERT(lttvAtoms.size() > 0);

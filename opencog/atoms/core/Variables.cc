@@ -8,8 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the
- * exceptions
- * at http://opencog.org/wiki/Licenses
+ * exceptions at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,17 +16,18 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License
- * along with this program; if not, write to:
+ * License along with this program; if not, write to:
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atomutils/TypeUtils.h>
 #include <opencog/atoms/TypeNode.h>
 
+#include "DefineLink.h"
 #include "ScopeLink.h"
 #include "VariableList.h"
 #include "Variables.h"
@@ -160,6 +160,53 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
 }
 
 /* ================================================================= */
+
+/// Return true if the other Variables struct is equal to this one,
+/// up to alpha-conversion. That is, same number of variables, same
+/// type restrictions, but different actual variable names.
+bool Variables::is_equal(const Variables& other) const
+{
+	size_t sz = varseq.size();
+	if (other.varseq.size() != sz) return false;
+
+	// Side-by-side comparison
+	for (size_t i=0; i<sz; i++)
+	{
+		const Handle& vme(varseq[i]);
+		const Handle& voth(other.varseq[i]);
+
+		// If typed, types must match.
+		auto sime = _simple_typemap.find(vme);
+		auto soth = other._simple_typemap.find(voth);
+		if (sime == _simple_typemap.end() and
+		    soth != other._simple_typemap.end()) return false;
+
+		if (sime != _simple_typemap.end())
+		{
+			if (soth == other._simple_typemap.end()) return false;
+			if (sime->second != soth->second) return false;
+		}
+
+		// If typed, types must match.
+		auto dime = _deep_typemap.find(vme);
+		auto doth = other._deep_typemap.find(voth);
+		if (dime == _deep_typemap.end() and
+		    doth != other._deep_typemap.end()) return false;
+
+		if (dime != _deep_typemap.end())
+		{
+			if (doth == other._deep_typemap.end()) return false;
+			if (dime->second != doth->second) return false;
+		}
+
+		// XXX TODO fuzzy?
+	}
+
+	// If we got toe here, everything must be OK.
+	return true;
+}
+
+/* ================================================================= */
 /**
  * Simple type checker.
  *
@@ -178,71 +225,11 @@ bool Variables::is_type(const Handle& h) const
 	return is_type(varseq[0], h);
 }
 
-/* ================================================================= */
-/**
- * Recursive deep-type checker.
- */
-bool Variables::is_type_rec(const Handle& deep, const Handle& val) const
-{
-	Type valtype = val->getType();
-	Type dpt = deep->getType();
-	if (TYPE_NODE == dpt)
-	{
-		Type deeptype = TypeNodeCast(deep)->get_value();
-		return (valtype == deeptype);
-	}
-	else if (TYPE_CHOICE == dpt)
-	{
-		LinkPtr dptr(LinkCast(deep));
-		for (const Handle& choice : dptr->getOutgoingSet())
-		{
-			if (is_type_rec(choice, val)) return true;
-		}
-		return false;
-	}
-	else if (FUZZY_LINK == dpt)
-	{
-		throw RuntimeException(TRACE_INFO,
-			"Not implemented! TODO XXX FIXME");
-	}
-
-	// If it is a node, not a link, then it is a type-constant,
-	// and thus must match perfectly.
-	LinkPtr dptr(LinkCast(deep));
-	if (nullptr == dptr)
-		return (deep == val);
-
-	// If a link, then both must be same link type.
-	if (valtype != dpt) return false;
-
-	LinkPtr vptr(LinkCast(val));
-	const HandleSeq& vlo = vptr->getOutgoingSet();
-	const HandleSeq& dpo = dptr->getOutgoingSet();
-	size_t sz = dpo.size();
-
-	// Both must be the same size...
-	if (vlo.size() != sz) return false;
-
-	// Unordered links are harder to handle...
-	if (classserver().isA(dpt, UNORDERED_LINK))
-		throw RuntimeException(TRACE_INFO,
-			"Not implemented! TODO XXX FIXME");
-
-	// Ordered links are compared side-by-side
-	for (size_t i=0; i<sz; i++)
-	{
-		if (not is_type_rec(dpo[i], vlo[i])) return false;
-	}
-
-	// If we are here, all checks must hav passed.
-	return true;
-}
-
 /**
  * Type checker.
  *
  * Returns true/false if we are holding the variable `var`, and if
- * the `val` satisfies the type restructions that apply to `var`.
+ * the `val` satisfies the type restrictions that apply to `var`.
  */
 bool Variables::is_type(const Handle& var, const Handle& val) const
 {
@@ -272,7 +259,7 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 		const std::set<Handle> &sigset = dit->second;
 		for (const Handle& sig : sigset)
 		{
-			if (is_type_rec(sig, val)) return true;
+			if (value_is_type(sig, val)) return true;
 		}
 		ret = false;
 	}

@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/Atom.h
+ * opencog/atoms/base/Atom.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -34,10 +34,12 @@
 
 #include <boost/signals2.hpp>
 
-#include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/ProtoAtom.h>
+#include <opencog/util/exceptions.h>
+
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/ProtoAtom.h>
+#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/TruthValue.h>
-#include <opencog/atomspace/types.h>
 
 class AtomUTest;
 

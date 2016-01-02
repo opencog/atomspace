@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/Atom.h>
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;

@@ -21,19 +21,37 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/Node.h>
-#include <opencog/atomutils/AtomUtils.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/atomutils/FindUtils.h>
 
 #include "FuzzyMatchBasic.h"
 
 using namespace opencog;
 
+/**
+ * Get all the nodes within a link and its sublinks.
+ *
+ * @param h     the top level link
+ * @return      a HandleSeq of nodes
+ */
+static void get_all_nodes(const Handle& h, HandleSeq& node_list)
+{
+	LinkPtr lll(LinkCast(h));
+	if (nullptr == lll)
+	{
+		node_list.emplace_back(h);
+		return;
+	}
+
+	for (const Handle& o : lll->getOutgoingSet())
+		get_all_nodes(o, node_list);
+}
+
 /** Set up the target. */
 void FuzzyMatchBasic::start_search(const Handle& trg)
 {
 	target = trg;
-	target_nodes = get_all_nodes(target);
+	get_all_nodes(target, target_nodes);
 	std::sort(target_nodes.begin(), target_nodes.end());
 }
 
@@ -69,11 +87,11 @@ bool FuzzyMatchBasic::try_match(const Handle& soln, int depth)
 	if (0 > depth) return false;
 
 	// Find out how many nodes it has in common with the pattern
-	HandleSeq common_nodes;
-	HandleSeq soln_nodes = get_all_nodes(soln);
-
+	HandleSeq soln_nodes;
+	get_all_nodes(soln, soln_nodes);
 	std::sort(soln_nodes.begin(), soln_nodes.end());
 
+	HandleSeq common_nodes;
 	std::set_intersection(target_nodes.begin(), target_nodes.end(),
 	                      soln_nodes.begin(), soln_nodes.end(),
 	                      std::back_inserter(common_nodes));

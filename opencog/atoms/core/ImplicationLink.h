@@ -28,8 +28,6 @@
 
 #include <opencog/atoms/core/ScopeLink.h>
 
-#include <opencog/util/Logger.h>
-
 namespace opencog
 {
 /** \addtogroup grp_atomspace

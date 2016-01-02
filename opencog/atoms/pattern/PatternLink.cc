@@ -24,10 +24,10 @@
  */
 
 #include <opencog/util/Logger.h>
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomutils/FindUtils.h>
-#include <opencog/atomspace/Node.h>
+#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/FreeLink.h>
+#include <opencog/atomutils/FindUtils.h>
 
 #include "PatternLink.h"
 #include "PatternUtils.h"

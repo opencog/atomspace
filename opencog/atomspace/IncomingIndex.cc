@@ -22,7 +22,7 @@
 #include <opencog/util/oc_assert.h>
 
 #include <opencog/atomspace/IncomingIndex.h>
-#include <opencog/atomspace/Link.h>
+#include <opencog/atoms/base/Link.h>
 
 using namespace opencog;
 

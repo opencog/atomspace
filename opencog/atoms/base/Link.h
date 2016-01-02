@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/Link.h
+ * opencog/atoms/base/Link.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008-2010 OpenCog Foundation
@@ -27,7 +27,7 @@
 #include <string>
 
 #include <opencog/util/oc_assert.h>
-#include <opencog/atomspace/Atom.h>
+#include <opencog/atoms/base/Atom.h>
 
 namespace opencog
 {
@@ -214,46 +214,6 @@ public:
 	using Atom::toString;
 	using Atom::toShortString;
 	
-    /**
-     * Returns whether a given handle is a source (the first outgoing
-     * if the link is ordered) of this link.
-     *
-     * @param Handle to be checked for being a link source.
-     * @return Whether a given handle is a source of this link.
-     */
-    bool isSource(Handle) const;
-
-    /**
-     * Returns whether the element in a given position in the
-     * outgoing set of this link is a source (the first outgoing
-     * if the link is ordered).
-     *
-     * @param Position in the outgoing set.
-     * @return Whether the element in a given position in the
-     *         outgoing set of this link is a source.
-     */
-    bool isSource(size_t) const;
-
-    /**
-     * Returns whether a given handle is a target (any but the first
-     * if the link is ordered) of this link.
-     *
-     * @param Handle to be checked for being a link target.
-     * @return Whether a given handle is a target of this link.
-     */
-    bool isTarget(Handle) const;
-
-    /**
-     * Returns whether the element in a given position in the
-     * outgoing set of this link is a target (any but the first
-     * if the link is ordered).
-     *
-     * @param Position in the outgoing set.
-     * @return Whether the element in a given position in the
-     *         outgoing set of this link is a target.
-     */
-    bool isTarget(size_t) const;
-
     /**
      * Returns whether a given atom is equal to the current link.
      * @param Atom to be tested.

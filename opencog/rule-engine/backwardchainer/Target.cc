@@ -22,8 +22,8 @@
  */
 
 #include <opencog/util/random.h>
-#include <opencog/atomutils/AtomUtils.h>
 
+#include <opencog/atomutils/Neighbors.h>
 #include "Target.h"
 
 using namespace opencog;
@@ -122,7 +122,7 @@ unsigned int Target::rule_count(const Rule& r) const
 	if (htarget == Handle::UNDEFINED)
 		return 0;
 
-	HandleSeq q = get_neighbors(htarget, false, true, SET_LINK, false);
+	HandleSeq q = get_target_neighbors(htarget, SET_LINK);
 
 	return std::count(q.begin(), q.end(), hname);
 }

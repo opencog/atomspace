@@ -30,7 +30,7 @@
 #include <boost/signals2.hpp>
 
 #include <opencog/util/recent_val.h>
-#include <opencog/atomspace/AttentionValue.h>
+#include <opencog/truthvalue/AttentionValue.h>
 
 namespace opencog
 {

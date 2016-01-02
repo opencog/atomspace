@@ -20,8 +20,8 @@
  */
 
 #include "TypeIndex.h"
-#include "Atom.h"
-#include "ClassServer.h"
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/ClassServer.h>
 
 using namespace opencog;
 

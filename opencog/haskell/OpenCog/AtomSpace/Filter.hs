@@ -61,5 +61,13 @@ getPhantomType = read . show . typeRep
 --     _                    -> Nothing
 --
 -- instance FilteIsChild ...
+-- XXX FIXME -- there are actually six such files, one for nlp, one
+-- for attention, one for embodiment, one for spacetime, etc.  And
+-- anyway, these are not compile-time constants: new types can be
+-- added at run-time, e.g. by fetching from the database. So doing
+-- it at compile-time here is not correct.
+-- Also, the path /usr/local/share/opencog/ is not correct either;
+-- it should be taken from the CMake install path, as it will differ,
+-- depending on the distro and OS.
 --
-declareAtomFilters "../../../atomspace/atom_types.script" "/usr/local/share/opencog/atom_types.script"
+declareAtomFilters "../../../atoms/base/atom_types.script" "/usr/local/share/opencog/atom_types.script"

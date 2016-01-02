@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/HandleMap.h
+ * opencog/atoms/base/HandleMap.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -34,8 +34,8 @@
 #include <memory>
 #include <mutex>
 
-#include <opencog/atomspace/Handle.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/atoms/base/Handle.h>
 
 namespace opencog
 {

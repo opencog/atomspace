@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/PatternLink.h
+ * opencog/atoms/pattern/PatternLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved

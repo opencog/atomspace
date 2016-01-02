@@ -57,7 +57,7 @@ namespace opencog
 ///    or your code will hang.  Bummer if your code hangs.
 ///
 /// Of the three, the last is the most important, as, right now, there
-/// is no other way of sprecifying recursive functions in the atomspace.
+/// is no other way of specifying recursive functions in the atomspace.
 ///
 class DefineLink : public UniqueLink
 {

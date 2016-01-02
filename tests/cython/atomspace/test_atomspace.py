@@ -344,21 +344,6 @@ class AtomTest(TestCase):
         # ensure arity is considered immutable
         self.assertRaises(AttributeError, setattr, l, "arity", 4)
 
-    def test_is_source(self):
-        # any out item is a source for unordered links
-        # only the fist item is a source of ordered links
-        a1 = self.space.add_node(types.Node, "test1")
-        a2 = self.space.add_node(types.Node, "test2")
-
-        l_ordered = self.space.add_link(types.OrderedLink, [a1, a2])
-        l_unordered = self.space.add_link(types.UnorderedLink, [a1, a2])
-
-        self.assertEqual(l_ordered.is_source(a1), True)
-        self.assertEqual(l_ordered.is_source(a2), False)
-
-        self.assertEqual(l_unordered.is_source(a1), True)
-        self.assertEqual(l_unordered.is_source(a2), True)
-
     def test_type(self):
         # test get out
         a = self.space.add_node(types.Node, "test2")
@@ -386,22 +371,22 @@ class AtomTest(TestCase):
         l = self.space.add_link(types.Link, [a1, a2])
 
         # test string representation
-        a1_expected = "(Node \"test1\") ; [{0}][{1}]\n".format(str(a1.h.value()), 97)
+        a1_expected = "(Node \"test1\") ; [{0}][{1}]\n".format(str(a1.h.value()), 92)
         a1_expected_long = \
             "(Node \"test1\" (stv 0.500000 0.800000)) ; [{0}][{1}]\n"\
-            .format(str(a1.h.value()), 97)
+            .format(str(a1.h.value()), 92)
 
-        a2_expected = "(Node \"test2\") ; [{0}][{1}]\n".format(str(a2.h.value()), 97)
+        a2_expected = "(Node \"test2\") ; [{0}][{1}]\n".format(str(a2.h.value()), 92)
         a2_expected_long = \
             "(Node \"test2\" (av 10 1 1) (stv 0.100000 0.300000)) ; [{0}][{1}]\n"\
-            .format(str(a2.h.value()), 97)
+            .format(str(a2.h.value()), 92)
 
         l_expected = \
             "(Link\n  {0}  {1}) ; [{2}][{3}]\n"\
-            .format(a1_expected, a2_expected, str(l.h.value()), 97)
+            .format(a1_expected, a2_expected, str(l.h.value()), 92)
         l_expected_long = \
             "(Link\n  {0}  {1}) ; [{2}][{3}]\n"\
-            .format(a1_expected_long, a2_expected_long, str(l.h.value()), 97)
+            .format(a1_expected_long, a2_expected_long, str(l.h.value()), 92)
 
         self.assertEqual(str(a1), a1_expected)
         self.assertEqual(a1.long_string(), a1_expected_long)

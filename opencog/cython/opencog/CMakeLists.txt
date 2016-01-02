@@ -5,7 +5,8 @@
 # See, for example,
 # https://groups.google.com/forum/#!topic/cython-users/JV1-KvIUeIg
 #
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
+# -DDEPRECATED_CYTHON_CALLS: cython uses the oboslete atomspace API.
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing -DDEPRECATED_ATOMSPACE_CALLS -DDEPRECATED_CYTHON_CALLS")
 
 INCLUDE_DIRECTORIES(
 	${PYTHON_INCLUDE_DIRS}
@@ -60,7 +61,7 @@ CYTHON_ADD_MODULE_PYX(atomspace
 	"atom.pyx" "classserver.pyx" "handle.pyx" "truth_value.pyx"
 	"atomspace_details.pyx" opencog_atom_types
 	"../../truthvalue/TruthValue.h" "../../truthvalue/SimpleTruthValue.h"
-	"../../atomspace/ClassServer.h" "../../atomspace/Handle.h"
+	"../../atoms/base/ClassServer.h" "../../atoms/base/Handle.h"
 	"../../atomspace/AtomSpace.h"
 )
 
@@ -78,8 +79,8 @@ ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace_cython
 	atomspace
-	clearbox
 	atomutils
+	clearbox
 	atomspaceutils
 	atomcore
 	${COGUTIL_LIBRARY}

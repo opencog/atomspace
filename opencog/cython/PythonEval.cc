@@ -31,8 +31,8 @@
 #include <opencog/util/misc.h>
 #include <opencog/util/oc_assert.h>
 
-#include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/Link.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Link.h>
 
 #include "PythonEval.h"
 

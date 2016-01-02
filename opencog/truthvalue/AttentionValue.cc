@@ -1,8 +1,10 @@
 /*
- * opencog/atomspace/FloatValue.cc
+ * opencog/truthvalue/AttentionValue.cc
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
+ *
+ * Written by Tony Lofthouse <tony_lofthouse@btinternet.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -20,23 +22,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/FloatValue.h>
+#include <limits>
+
+#include "AttentionValue.h"
 
 using namespace opencog;
 
-bool FloatValue::operator==(const ProtoAtom& other) const
+const AttentionValue::sti_t AttentionValue::DEFAULTATOMSTI = 0;
+const AttentionValue::lti_t AttentionValue::DEFAULTATOMLTI = 0;
+const AttentionValue::vlti_t AttentionValue::DEFAULTATOMVLTI = 0;
+
+void AttentionValue::decaySTI()
 {
-	if (FLOAT_VALUE != other.getType()) return false;
-	return true;
+    // Prevent m_STI from wrapping around.
+    if (m_STI > std::numeric_limits<sti_t>::min()) m_STI--;
 }
 
-// ==============================================================
-
-std::string FloatValue::toString(const std::string& indent)
+std::string AttentionValue::toString() const
 {
-	std::string rv = indent + "(FloatValue";
-	for (double v :_value)
-		rv += std::string(" ") + std::to_string(v);
-	rv += ")";
-	return rv;
+    char buffer[256];
+    sprintf(buffer, "[%d, %d, %s]", (int)m_STI, (int)m_LTI,
+            m_VLTI ? "NONDISPOSABLE" : "DISPOSABLE");
+    return buffer;
 }

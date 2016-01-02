@@ -68,6 +68,9 @@ class Boolean2NotUTest :  public CxxTest::TestSuite
  */
 #define an as->add_node
 #define al as->add_link
+#define getarity(hand) LinkCast(hand)->getArity()
+#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
+
 void Boolean2NotUTest::tearDown(void)
 {
 	delete as;
@@ -228,9 +231,6 @@ void Boolean2NotUTest::setUp(void)
  *          ConceptNode "Berlin"
  *          ConceptNode "city"
  */
-#define getlink(hand,pos) as->get_outgoing(hand,pos)
-#define getarity(hand) as->get_arity(hand)
-
 void Boolean2NotUTest::test_isa(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);

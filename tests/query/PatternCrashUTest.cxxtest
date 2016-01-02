@@ -97,6 +97,8 @@ bool PMCB::grounding(const std::map<Handle, Handle> &var_soln,
 	return true;
 }
 
+#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
+
 void PatternCrashUTest::tearDown(void)
 {
 }

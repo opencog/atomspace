@@ -26,7 +26,6 @@
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atomutils/Substitutor.h>
 #include <opencog/query/BindLinkAPI.h>
@@ -60,12 +59,12 @@ void ForwardChainer::init(Handle hsource, HandleSeq focus_set)
     _search_focus_Set = not focus_set.empty();
     _ts_mode = TV_FITNESS_BASED;
 
-    //Set potential source.
-    HandleSeq init_sources = { };
+    // Set potential source.
+    HandleSeq init_sources;
 
-    //Accept set of initial sources wrapped in a SET_LINK
-    if (LinkCast(hsource) and hsource->getType() == SET_LINK) {
-        init_sources = _as.get_outgoing(hsource);
+    // Accept set of initial sources wrapped in a SET_LINK.
+    if (hsource->getType() == SET_LINK) {
+        init_sources = LinkCast(hsource)->getOutgoingSet();
     } else {
         init_sources.push_back(hsource);
     }
@@ -75,10 +74,10 @@ void ForwardChainer::init(Handle hsource, HandleSeq focus_set)
     if (_search_focus_Set) {
         _focus_set = focus_set;
 
-        for (Handle& h : _focus_set)
+        for (const Handle& h : _focus_set)
             _focus_set_as.add_atom(h);
 
-        for (Handle& h : _potential_sources)
+        for (const Handle& h : _potential_sources)
             _focus_set_as.add_atom(h);
     }
 
@@ -355,7 +354,7 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
         else
             hs.push_back(implicant);
         //Actual checking here.
-        for (Handle& h : hs) {
+        for (const Handle& h : hs) {
             if (_as.get_atom(h) == Handle::UNDEFINED or (search_in_focus_set
                     and _focus_set_as.get_atom(h) == Handle::UNDEFINED ) ) {
                 return {};
@@ -396,7 +395,7 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
                     ((_as.add_link(SET_LINK, result))->toShortString()).c_str());
 
         }
-        //Search the whole atomspace
+        // Search the whole atomspace.
         else {
             AtomSpace derived_rule_as(&_as);
 
@@ -409,17 +408,18 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
 
             _log->debug("Result is %s ", (h->toShortString()).c_str());
 
-            result = derived_rule_as.get_outgoing(h);
+				LinkPtr lp(LinkCast(h));
+            if (lp) result = lp->getOutgoingSet();
         }
     }
 
-    //Add result back to atomspace
+    // Add result back to atomspace.
     if (search_in_focus_set) {
-        for (Handle h : result)
+        for (const Handle& h : result)
             _focus_set_as.add_atom(h);
 
     } else {
-        for (Handle h : result)
+        for (const Handle& h : result)
             _as.add_atom(h);
     }
 
@@ -556,6 +556,27 @@ void ForwardChainer::validate(Handle hsource, HandleSeq hfocus_set)
 }
 
 /**
+ * Get all unique atoms within a link and its sublinks.
+ *
+ * Similar to getAllAtoms except there will be no repetition.
+ *
+ * @param h     the top level link
+ * @return      a UnorderedHandleSet of atoms
+ */
+static void get_all_unique_atoms(const Handle& h, UnorderedHandleSet& atom_set)
+{
+    atom_set.insert(h);
+
+    LinkPtr lll(LinkCast(h));
+    if (lll)
+    {
+        for (const Handle& o : lll->getOutgoingSet())
+            get_all_unique_atoms(o, atom_set);
+    }
+}
+
+
+/**
  * Gets all unique atoms of in the implicant list of @param r.
  *
  * @param r  A rule object
@@ -566,11 +587,10 @@ UnorderedHandleSet ForwardChainer::get_subatoms(const Rule *rule)
 {
     UnorderedHandleSet output_expanded;
 
-    HandleSeq impl_members = rule->get_implicant_seq();
-    for (Handle h : impl_members) {
-        UnorderedHandleSet hs = get_all_unique_atoms(h);
-        hs.erase(h); //Already tried to unify this.
-        output_expanded.insert(hs.begin(), hs.end());
+    for (const Handle& h : rule->get_implicant_seq())
+    {
+        get_all_unique_atoms(h, output_expanded);
+        output_expanded.erase(h); // Already tried to unify this.
     }
 
     return output_expanded;
@@ -641,7 +661,7 @@ HandleSeq ForwardChainer::substitute_rule_part(
  */
 bool ForwardChainer::unify(Handle source, Handle target, const Rule* rule)
 {
-    //exceptions
+    // exceptions
     if (not is_valid_implicant(target))
         return false;
 
@@ -652,10 +672,10 @@ bool ForwardChainer::unify(Handle source, Handle target, const Rule* rule)
     Handle sourcecpy = temp_pm_as.add_atom(source);
 
     BindLinkPtr bl =
-    createBindLink(HandleSeq { implicant_vardecl, hcpy, hcpy });
+        createBindLink(HandleSeq { implicant_vardecl, hcpy, hcpy });
     Handle blhandle = temp_pm_as.add_atom(bl);
-    Handle  result = bindlink(&temp_pm_as, blhandle);
-    HandleSeq results = temp_pm_as.get_outgoing(result);
+    Handle result = bindlink(&temp_pm_as, blhandle);
+    HandleSeq results = LinkCast(result)->getOutgoingSet();
 
     if (std::find(results.begin(), results.end(), sourcecpy) != results.end())
         return true;

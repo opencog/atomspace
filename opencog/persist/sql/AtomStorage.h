@@ -32,11 +32,13 @@
 #include <vector>
 
 #include <opencog/util/async_method_caller.h>
-#include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
+
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/types.h>
+
 #include <opencog/atomspace/AtomTable.h>
-#include <opencog/atomspace/types.h>
 #include <opencog/persist/sql/odbcxx.h>
 
 namespace opencog

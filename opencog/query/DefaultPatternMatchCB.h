@@ -25,7 +25,7 @@
 #ifndef _OPENCOG_DEFAULT_PATTERN_MATCH_H
 #define _OPENCOG_DEFAULT_PATTERN_MATCH_H
 
-#include <opencog/atomspace/types.h>
+#include <opencog/atoms/base/types.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/query/PatternMatchCallback.h>

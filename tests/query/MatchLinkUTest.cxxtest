@@ -65,6 +65,9 @@ class MatchLink :  public CxxTest::TestSuite
  */
 #define an as->add_node
 #define al as->add_link
+#define getarity(hand) LinkCast(hand)->getArity()
+#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
+
 void MatchLink::setUp(void)
 {
 	as = new AtomSpace();
@@ -89,9 +92,6 @@ void MatchLink::setUp(void)
 /*
  * Basic implication link test.
  */
-#define getlink(hand,pos) as->get_outgoing(hand,pos)
-#define getarity(hand) as->get_arity(hand)
-
 void MatchLink::test_exec(void)
 {
 	Handle result;

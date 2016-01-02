@@ -22,7 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/ClassServer.h>
 
 #if defined(WIN32) && defined(_DLL)
 namespace win {

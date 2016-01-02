@@ -23,11 +23,11 @@
  */
 
 #include "ProtocolBufferSerializer.h"
-#include "opencog/atomspace/Handle.h"
-#include "opencog/atomspace/AttentionValue.h"
-#include "opencog/atomspace/Atom.h"
-#include "opencog/atomspace/Link.h"
-#include "opencog/atomspace/Node.h"
+#include "opencog/atoms/base/Handle.h"
+#include "opencog/atoms/base/Atom.h"
+#include "opencog/atoms/base/Link.h"
+#include "opencog/atoms/base/Node.h"
+#include "opencog/truthvalue/AttentionValue.h"
 #include "opencog/truthvalue/TruthValue.h"
 #include "opencog/truthvalue/CountTruthValue.h"
 #include "opencog/truthvalue/NullTruthValue.h"

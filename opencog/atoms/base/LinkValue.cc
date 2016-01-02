@@ -1,11 +1,8 @@
 /*
- * opencog/atomspace/types.h
+ * opencog/atoms/base/LinkValue.cc
  *
- * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
- *
- * Written by Thiago Maia <thiago@vettatech.com>
- *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -23,23 +20,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/**
- * basic type definitions.
- */
+#include <opencog/atoms/base/LinkValue.h>
 
-#ifndef _OPENCOG_TYPES_H
-#define _OPENCOG_TYPES_H
+using namespace opencog;
 
-namespace opencog
+bool LinkValue::operator==(const ProtoAtom& other) const
 {
-/** \addtogroup grp_atomspace
- *  @{
- */
+	if (LINK_VALUE != other.getType()) return false;
+	return true;
+}
 
-//! type of Atoms, represented as short integer (16 bits)
-typedef unsigned short Type;
+// ==============================================================
 
-/** @}*/
-} // namespace opencog
-
-#endif // _OPENCOG_TYPES_H
+std::string LinkValue::toString(const std::string& indent)
+{
+	std::string rv = indent + "(LinkValue";
+	for (ProtoAtomPtr v :_value)
+		rv += std::string(" ") + v->toString(indent + "   ") + "\n";
+	rv += ")";
+	return rv;
+}

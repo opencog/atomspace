@@ -21,8 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/ClassServer.h>
-
 #include "StateLink.h"
 
 using namespace opencog;
@@ -38,14 +36,14 @@ void StateLink::init()
 }
 
 StateLink::StateLink(const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
+                     TruthValuePtr tv, AttentionValuePtr av)
 	: UniqueLink(STATE_LINK, oset, tv, av)
 {
 	init();
 }
 
 StateLink::StateLink(const Handle& name, const Handle& defn,
-                       TruthValuePtr tv, AttentionValuePtr av)
+                     TruthValuePtr tv, AttentionValuePtr av)
 	: UniqueLink(STATE_LINK, HandleSeq({name, defn}), tv, av)
 {
 	init();

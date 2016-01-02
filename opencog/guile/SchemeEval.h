@@ -15,7 +15,7 @@
 #include <sstream>
 #include <cstddef>
 #include <libguile.h>
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/eval/GenericEval.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/util/exceptions.h>
@@ -107,8 +107,8 @@ class SchemeEval : public GenericEval
 		static void * c_wrap_eval_tv(void *);
 
 		// Apply function to arguments, returning Handle or TV
-		Handle do_apply(const std::string& func, Handle& varargs);
-		SCM do_apply_scm(const std::string& func, Handle& varargs);
+		Handle do_apply(const std::string& func, const Handle& varargs);
+		SCM do_apply_scm(const std::string& func, const Handle& varargs);
 		Handle hargs;
 		TruthValuePtr tvp;
 		static void * c_wrap_apply(void *);

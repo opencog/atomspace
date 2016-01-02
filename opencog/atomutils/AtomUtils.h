@@ -24,10 +24,9 @@
 #ifndef _OPENCOG_ATOM_UTILS_H
 #define _OPENCOG_ATOM_UTILS_H
 
-#include <opencog/atomspace/atom_types.h>
-#include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/types.h>
+#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/types.h>
 
 namespace opencog
 {
@@ -35,65 +34,12 @@ namespace opencog
  *  @{
  */
 
-const bool NO_SUBCLASSES = false;
-
-/**
- * General purpose utilities for processing atoms in the Atom.
- *
- * Contains methods and algorithms which might be useful to other processes.
- */
-HandleSeq get_all_nodes(Handle h);
-
-UnorderedHandleSet get_all_unique_nodes(Handle h);
-
-HandleSeq get_all_atoms(Handle h);
-
-UnorderedHandleSet get_all_unique_atoms(Handle h);
-
-/**
- * Returns neighboring atoms, following incoming links and
- * returning their outgoing sets.
- *
- * @param h Get neighbours for the atom this handle points to.
- * @param fanin Whether directional (ordered) links point to this
- *              node should beconsidered.
- * @param fanout Whether directional (ordered) links point from this
- *               node to another should be considered.
- * @param linkType Follow only these types of links.
- * @param subClasses Follow subtypes of linkType too.
- */
-HandleSeq get_neighbors(const Handle&, bool fanin=true, bool fanout=true,
-                        Type linkType=LINK, bool subClasses=true);
-
-/**
- * Given an atom (a link or node), Return all its children nodes
- * (i.e. traversing the outgoings recursively)
- *
- * @param hinput - an atoms to be looked
- * @param types - a list of type nodes to look for. if vector
- *                is empty, all kinds of nodes are looked
- * @return - a set of nodes
- */
-UnorderedHandleSet get_outgoing_nodes(const Handle& hinput,
-                                      const std::vector<Type>& types =
-                                      std::vector<Type>());
-
-/**
- * Return all atoms connected to h up to a given distance. Both
- * incomings and outgoings are considered (unlike getNeighbors).
- *
- * @param h     the center atom
- * @param dist  the maximum distance, or none if negative
- * @return      an UnorderedHandleSet of neighbors
- */
-UnorderedHandleSet get_distant_neighbors(const Handle& h, int dist = 1);
-
 /**
  * Returns a list of all the EvaluationLinks with Predicates of the given type
  * that the atom specified by 'target' participates in. 
  * (C++ implementation of cog-get-pred)
  *
-  * For example, given existence of the following:
+ * For example, given existence of the following:
  *
  *     EvaluationLink
  *        PredicateNode "IsA"
@@ -180,20 +126,6 @@ HandleSeq get_predicates(const Handle& target,
  */
 HandleSeq get_predicates_for(const Handle& target, 
                              const Handle& predicate);
-
-/**
- * Makes a one to one similarity matching.If the atoms
- * are of type UnorderedLink, does one vs all similarity
- * matching and removes the matched from matching list
- * immediately.
- *
- * @param h1  A handle
- * @param h2  A handle
- * @param strict_type_match A flag telling how type matching should be done.
- *
- * @return  A boolean true if similar and false otherwise.
- */
-bool are_similar(const Handle& h1,const Handle& h2,bool strict_type_match);
 
 /** @}*/
 }

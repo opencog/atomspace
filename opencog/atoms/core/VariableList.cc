@@ -8,8 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the
- * exceptions
- * at http://opencog.org/wiki/Licenses
+ * exceptions at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,13 +16,12 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License
- * along with this program; if not, write to:
+ * License along with this program; if not, write to:
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/TypeNode.h>
 
 #include "VariableList.h"
@@ -142,8 +140,11 @@ void VariableList::get_vartype(const Handle& htypelink)
 	if (TYPE_NODE == t)
 	{
 		Type vt = TypeNodeCast(vartype)->get_value();
-		std::set<Type> ts = {vt};
-		_varlist._simple_typemap.insert({varname, ts});
+		if (vt != ATOM)  // Atom type is same as untyped.
+		{
+			std::set<Type> ts = {vt};
+			_varlist._simple_typemap.insert({varname, ts});
+		}
 	}
 	else if (TYPE_CHOICE == t)
 	{
@@ -160,7 +161,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 			if (TYPE_NODE == var_type)
 			{
 				Type vt = TypeNodeCast(ht)->get_value();
-				typeset.insert(vt);
+				if (ATOM != vt) typeset.insert(vt);
 			}
 			else if (SIGNATURE_LINK == var_type)
 			{
@@ -170,7 +171,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 						"Unexpected contents in SignatureLink\n"
 						"Expected arity==1, got %s", vartype->toString().c_str());
 
-				deepset.insert(sig[0]);
+				deepset.insert(ht);
 			}
 			else if (FUZZY_LINK == var_type)
 			{
@@ -180,14 +181,14 @@ void VariableList::get_vartype(const Handle& htypelink)
 						"Unexpected contents in FuzzyLink\n"
 						"Expected arity==1, got %s", vartype->toString().c_str());
 
-				fuzzset.insert(fuz[0]);
+				fuzzset.insert(ht);
 			}
 			else
 			{
 				throw InvalidParamException(TRACE_INFO,
 					"VariableChoice has unexpected content:\n"
-				              "Expected TypeNode, got %s",
-				              classserver().getTypeName(ht->getType()).c_str());
+					"Expected TypeNode, got %s",
+					    classserver().getTypeName(ht->getType()).c_str());
 			}
 		}
 
@@ -207,7 +208,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 				"Expected arity==1, got %s", vartype->toString().c_str());
 
 		std::set<Handle> ts;
-		ts.insert(tset[0]);
+		ts.insert(vartype);
 		_varlist._deep_typemap.insert({varname, ts});
 	}
 	else if (FUZZY_LINK == t)
@@ -219,7 +220,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 				"Expected arity==1, got %s", vartype->toString().c_str());
 
 		std::set<Handle> ts;
-		ts.insert(tset[0]);
+		ts.insert(vartype);
 		_varlist._fuzzy_typemap.insert({varname, ts});
 	}
 	else

@@ -23,7 +23,6 @@
 #ifndef _OPENCOG_FUNCTION_LINK_H
 #define _OPENCOG_FUNCTION_LINK_H
 
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/FreeLink.h>
 
 namespace opencog
@@ -31,6 +30,7 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
+class AtomSpace;
 
 /**
  * The FunctionLink provides a base class with an important method:

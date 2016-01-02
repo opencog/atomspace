@@ -15,7 +15,7 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 # Perform tests in component-dependency order, as much as possible.
 # For example, since most things depends on the atomspace,
 # its is tested first.
-IF (CXXTEST_FOUND)
+IF (XCXXTEST_FOUND)
 
 	ADD_SUBDIRECTORY (atomspace)
 	ADD_SUBDIRECTORY (atoms)
@@ -47,4 +47,4 @@ IF (CXXTEST_FOUND)
          ADD_SUBDIRECTORY (haskell)
     ENDIF (HAVE_STACK)
 
-ENDIF (CXXTEST_FOUND)
+ENDIF (XCXXTEST_FOUND)

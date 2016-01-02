@@ -8,8 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the
- * exceptions
- * at http://opencog.org/wiki/Licenses
+ * exceptions at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,13 +16,12 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License
- * along with this program; if not, write to:
+ * License along with this program; if not, write to:
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/FreeLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
@@ -157,6 +155,43 @@ void ScopeLink::init_scoped_variables(const Handle& hvar)
 		VariableList vl({hvar});
 		_varlist = vl.get_variables();
 	}
+}
+
+/* ================================================================= */
+///
+/// Compare other ScopeLink, return true if it is equal to this one,
+/// to to an alpha-conversion of variables.
+///
+bool ScopeLink::is_equal(const Handle& other) const
+{
+	if (other == this) return true;
+	if (other->getType() != _type) return false;
+
+	ScopeLinkPtr scother(ScopeLinkCast(other));
+
+	// Variable declarations must match.
+	if (not _varlist.is_equal(scother->_varlist)) return false;
+
+	// Other body, with our ariables in place of its variables,
+	// should be same as our body.
+	Handle altbod = scother->_varlist.substitute_nocheck(scother->_body,
+	                                                  _varlist.varseq);
+
+	// Compare bodies, they should match.
+	if (*((AtomPtr)altbod) != *((AtomPtr) _body)) return false;
+
+	return true;
+}
+
+bool ScopeLink::operator==(const Atom& ac) const
+{
+	Atom& a = (Atom&) ac; // cast away constness, for smart ptr.
+	return is_equal(a.getHandle());
+}
+
+bool ScopeLink::operator!=(const Atom& a) const
+{
+	return not operator==(a);
 }
 
 /* ===================== END OF FILE ===================== */

@@ -21,7 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/base/Handle.h>
+
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
 #include "DistSCM.h"
 
@@ -29,23 +32,8 @@ using namespace opencog;
 
 bool DistSCM::master_mode = true;
 
-DistSCM::DistSCM(void)
-{
-	scm_with_guile(init_in_guile, this);
-}
-
-void* DistSCM::init_in_guile(void* self)
-{
-	scm_c_define_module("opencog dist-gearman", init_in_module, self);
-	scm_c_use_module("opencog dist-gearman");
-	return NULL;
-}
-
-void DistSCM::init_in_module(void* data)
-{
-	DistSCM* self = (DistSCM*) data;
-	self->init();
-}
+DistSCM::DistSCM(void) : ModuleWrap("opencog dist-gearman")
+{}
 
 void DistSCM::init(void)
 {
@@ -77,7 +65,8 @@ gearman_return_t DistSCM::worker_function(gearman_job_st *job, void *context)
 	// Can we check if handle is valid? how to get current atomspace
 	Handle result = evl->eval_h(workload);
 	UUID vl = result.value();
-	//evl->eval("(sql-store)");//store returned atom with store-atom, but let scheme code do it if required
+	// evl->eval("(sql-store)"); //store returned atom with store-atom,
+	//  but let scheme code do it if required
 	if (gearman_failed(gearman_job_send_data(job, &vl, sizeof(vl))))
 	{
 		// On gearman error return, no result is sent to master and
@@ -229,10 +218,10 @@ UUID DistSCM::dist_scm(const std::string& scm_string,
 
 DistSCM::~DistSCM()
 {
-
 }
 
 void opencog_dist_init(void)
 {
-	static DistSCM patty;
+	static DistSCM dist_scm;
+	dist_scm.module_init();
 }
