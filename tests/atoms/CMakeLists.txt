@@ -1,5 +1,5 @@
 
-IF(HAVE_GUILE)
+IF(XHAVE_GUILE)
 	ADD_CXXTEST(FreeLinkUTest)
 	TARGET_LINK_LIBRARIES(FreeLinkUTest atomspace smob)
 	ADD_CXXTEST(ParallelUTest)
@@ -8,7 +8,7 @@ IF(HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(RandomUTest atomspace smob clearbox execution)
 	ADD_CXXTEST(ReductUTest)
 	TARGET_LINK_LIBRARIES(ReductUTest atomspace smob clearbox execution)
-ENDIF(HAVE_GUILE)
+ENDIF(XHAVE_GUILE)
 
 ADD_CXXTEST(AlphaConvertUTest)
 TARGET_LINK_LIBRARIES(AlphaConvertUTest atomspace)
