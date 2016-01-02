@@ -101,7 +101,7 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 
 	// If the first atom is not explicitly a variable declaration, then
 	// there are no variable declarations. There are two cases that; can
-	// apply here: either the body is a lambda, in which casse, we copy
+	// apply here: either the body is a lambda, in which case, we copy
 	// the variables from the lambda; else we extract all free variables.
 	if (VARIABLE_LIST != decls and
 	    VARIABLE_NODE != decls and
