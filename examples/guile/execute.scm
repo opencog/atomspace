@@ -50,7 +50,7 @@
 
 (DefineLink
 	(DefinedSchemaNode "x+y*10")
-	(FunctionLink
+	(LambdaLink
 		(VariableList
 			(VariableNode "$X")
 			(VariableNode "$Y"))
@@ -67,12 +67,23 @@
 			(NumberNode "2")
 			(NumberNode "4"))))
 
+; One can also do this, although it is a bit more subtle: the
+; PutLink substitutes arguments for variables. The result of the
+; beta-reduction is executable, so cog-execute! executes it.
+
+(cog-execute!
+   (PutLink
+      (DefinedSchemaNode "x+y*10")
+      (ListLink
+         (NumberNode "2")
+         (NumberNode "4"))))
+
 ; -------------------------------------------------------------
 ; Similar to the above, except that it skips using the DefineLink
 
 (cog-execute!
 	(ExecutionOutputLink
-		(FunctionLink
+		(LambdaLink
 			(VariableList
 				(VariableNode "$X")
 				(VariableNode "$Y"))
