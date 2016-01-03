@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/reduct/FunctionLink.cc
+ * opencog/atoms/core/FunctionLink.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved

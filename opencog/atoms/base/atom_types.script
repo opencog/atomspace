@@ -382,18 +382,22 @@ LAMBDA_LINK <- SCOPE_LINK
 
 // A FunctionLink is a link that can be executed, with the result of
 // execution being some atom.  FunctionLink does NOT derive from
-// LambdaLink, which may seem counter-intutitive; here's why, so
+// LambdaLink, which may seem counter-intuitive; here's why, so
 // listen up.  All of the explicitly-named functions (e.g. PlusLink)
 // do not need to explicitly name thier arguments, and it would even
-// be confusing if they did so.  Instead, the convetion is that every
+// be confusing if they did so.  Instead, the convention is that every
 // element in the outgoing set of the FunctionLink IS an argument of
 // the function; that's all, end-of-story.
 //
 // All variables that appear underneath the FunctionLink are necessarily
 // free variables; they are neither scoped, nor bound.
+//
+// The FunctionLink is meant to be a base type for links that define
+// functions.  It is NOT meant to be used as a base type for
+// user-defined structures; users should use the LambdaLink for that.
 FUNCTION_LINK <- FREE_LINK
 
-// The ExecutionOutPutLink is a specific kind of function: it must have
+// The ExecutionOutputLink is a specific kind of function: it must have
 // a GroundedSchemeNode as its first argument.  The other kinds of
 // FunctionLinks do not have this restriction: indeed, the actual
 // function they perform is implicit in the link type.

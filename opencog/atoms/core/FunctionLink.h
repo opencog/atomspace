@@ -33,21 +33,23 @@ namespace opencog
 class AtomSpace;
 
 /**
- * The FunctionLink provides a base class with an important method:
- * execute().
- *
+ * The FunctionLink provides an important method: execute().
  * The execute() method executes the given expression, and returns
  * a Handle resulting from the execution.
  *
- * The difference between execution and reduction is this: an expression
- * that contains free variables will contain the same free variables (or
- * a subset of them) after reduction.  By contrast, it is (usually) not
- * valid to execute an expression that contains free variables; usually,
- * an error will be thrown. Thus, reduction is for open sentences,
- * execution is for closed sentences.
+ * The FunctionLink is meant to be a base class for any link type
+ * that behaves like a function; i.e. can be executed.  Observe that
+ * it derives from the FreeLink, and NOT the LambdaLink.  This may seem
+ * counter-intuitive, and deserves an explanation, so here it is:
+ * All link types inheriting from this class will always, by definition,
+ * have thier outgoing set be the arguments to that function. Think of
+ * PlusLink, for example.  Having a lambda with variable declarations
+ * in there would just be weird and create confusion.  If the arguments
+ * to PlusLink happen to include a variable, that variable is necessarily
+ * free; thus, this class dervies from FreeLink.
  *
- * Note also: EvaluationLinks can be reduced, but they can never be
- * executed (they can only be evaluated).
+ * Note that this class must NOT be used for user-defined functions;
+ * users should use the LambdaLink for that.
  */
 class FunctionLink : public FreeLink
 {
