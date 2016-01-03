@@ -35,8 +35,10 @@ namespace opencog
  */
 
 //! stores attention in three components: short-term, long-term and very long-term
+//! This class is currently read-only, and assumed to be thread-safe. Beware of
+//! possible race conditions if it is changed
 class AttentionValue;
-typedef std::shared_ptr<AttentionValue> AttentionValuePtr;
+typedef std::shared_ptr<const AttentionValue> AttentionValuePtr;
 #define createAV std::make_shared<AttentionValue>
 
 class AttentionValue
@@ -78,9 +80,9 @@ private:
     //! Private, because changing the AV without emitting a signal
     //! will confuse everyone, so we sharply limit who is allowed
     //! to do this.
+    //! Note: this function is currently not used, not breaking read-only
+    //! assumption of this class
     void  decaySTI();
-
-    friend class ImportanceIndex; // The index can change the STI.
 
 public:
    /**
@@ -132,6 +134,6 @@ public:
 
 
 /** @}*/
-} // namespace opencog 
+} // namespace opencog
 
 #endif // _OPENCOG_ATTENTION_VALUE_H
