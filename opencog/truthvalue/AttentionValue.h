@@ -77,12 +77,6 @@ private:
                    //!< atoms with VLTI get saved to permanent storage.
     static AttentionValuePtr m_defaultAV; //! default attention value
 
-    //! Decays short term importance
-    //! Private, because changing the AV without emitting a signal
-    //! will confuse everyone, so we sharply limit who is allowed
-    //! to do this. XXX this is dead code?! No one calls this.
-    void  decaySTI();
-
 public:
    /**
      * @param STI (int): The STI value to set for the atom
