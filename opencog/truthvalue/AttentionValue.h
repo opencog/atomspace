@@ -35,10 +35,14 @@ namespace opencog
  */
 
 //! The AttentionValue class stores attention in three components:
-//! short-term, long-term and very long-term.
+//! short-term, long-term and very long-term. It is immutable, in order
+//! to provide thread-safety and atomic update.  Basically, if you have
+//! a pointer to an AttentionValue, you are guaranteed that no one will
+//! change it for as long as you are holding it. The only way to change
+//! the AV on an atom is to replace it in it's entirety.
 
 class AttentionValue;
-typedef std::shared_ptr<AttentionValue> AttentionValuePtr;
+typedef std::shared_ptr<const AttentionValue> AttentionValuePtr;
 #define createAV std::make_shared<AttentionValue>
 
 class AttentionValue
@@ -68,15 +72,12 @@ public:
     }
 
 private:
-
     //CLASS FIELDS
     sti_t m_STI;   //!< short-term importance
     lti_t m_LTI;   //!< long-term importance
     vlti_t m_VLTI; //!< represents the number of subsystems that need
                    //!< this atom to persist across system reboots.
                    //!< atoms with VLTI get saved to permanent storage.
-    static AttentionValuePtr m_defaultAV; //! default attention value
-
 public:
    /**
      * @param STI (int): The STI value to set for the atom
