@@ -34,7 +34,9 @@ namespace opencog
  *  @{
  */
 
-//! stores attention in three components: short-term, long-term and very long-term
+//! The AttentionValue class stores attention in three components:
+//! short-term, long-term and very long-term.
+
 class AttentionValue;
 typedef std::shared_ptr<AttentionValue> AttentionValuePtr;
 #define createAV std::make_shared<AttentionValue>
@@ -70,17 +72,16 @@ private:
     //CLASS FIELDS
     sti_t m_STI;   //!< short-term importance
     lti_t m_LTI;   //!< long-term importance
-    vlti_t m_VLTI; //!< represents the number of processes that currently need the
-                   //!< atom as nondisposable. So it's only disposable if this is 0
+    vlti_t m_VLTI; //!< represents the number of subsystems that need
+                   //!< this atom to persist across system reboots.
+                   //!< atoms with VLTI get saved to permanent storage.
     static AttentionValuePtr m_defaultAV; //! default attention value
 
     //! Decays short term importance
     //! Private, because changing the AV without emitting a signal
     //! will confuse everyone, so we sharply limit who is allowed
-    //! to do this.
+    //! to do this. XXX this is dead code?! No one calls this.
     void  decaySTI();
-
-    friend class ImportanceIndex; // The index can change the STI.
 
 public:
    /**
@@ -132,6 +133,6 @@ public:
 
 
 /** @}*/
-} // namespace opencog 
+} // namespace opencog
 
 #endif // _OPENCOG_ATTENTION_VALUE_H
