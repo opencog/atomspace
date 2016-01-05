@@ -73,12 +73,12 @@ class GenericTruthValue
 
         GenericTruthValuePtr merge(GenericTruthValuePtr) const;
 
-        GenericTruthValuePtr clone() const
+        TruthValuePtr clone() const
         {
             return std::make_shared<GenericTruthValue>(*this);
         }
 
-        GenericTruthValue* rawclone() const
+        TruthValue* rawclone() const
         {
             return new GenericTruthValue(*this);
         }
