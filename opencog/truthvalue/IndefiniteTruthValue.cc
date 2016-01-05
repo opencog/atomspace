@@ -79,19 +79,12 @@ void IndefiniteTruthValue::init(strength_t l, strength_t u, confidence_t c)
     U = u;
     confidenceLevel = c;
 
-    // the next 4 variables are initalized to -1 to indicate that they must
-    // be calculated when accessed (using getDiff, etc)
-    diff = -1.0;
-    mean = -1.0;
-    count = -1.0;
-    confidence = -1.0;
-
     firstOrderDistribution.clear();
     symmetric = true;
 
     mean = (L + U) / 2;
 
-    strength_t W = getU()-getL();
+    strength_t W = U-L;
     // to avoid division by zero
     W = std::max(W, static_cast<strength_t>(0.0000001));
     // This is a bad heuristic that comes from c = N / (N+k). By
@@ -100,15 +93,15 @@ void IndefiniteTruthValue::init(strength_t l, strength_t u, confidence_t c)
     // estimate for 1 - W.
     count = (DEFAULT_K * (1 - W) / W);
 
-    if (U == L) {
-        diff = 0.0; // Not sure returning 0 is right
-    } else {
+    confidence = count / (count + DEFAULT_K);
+
+    diff = 0.0; // Not sure returning 0 is right
+#ifdef HANGS_ININFINITE_LOOP
+    if (U != L) {
         strength_t idiff = 0.01; // Initial diff suggestion
         diff = findDiff(idiff);
     }
-
-    count_t ccc = getCount();
-    confidence = ccc / (ccc + DEFAULT_K);
+#endif
 }
 
 void IndefiniteTruthValue::copy(const IndefiniteTruthValue& source)
@@ -156,7 +149,7 @@ strength_t IndefiniteTruthValue::findDiff(strength_t idiff) const
     strength_t max = 0.5; //diff cannot be larger than 1/2 cause symmetric case
     strength_t L1, U1;
     strength_t numerator, denominator, result;
-    strength_t expected = (1 - confidenceLevel) / 2;
+    strength_t expected = (1.0 - confidenceLevel) / 2.0;
     bool lte, gte; //smaller than expected, greater than expected
 
     //loop until convergence
@@ -167,7 +160,7 @@ strength_t IndefiniteTruthValue::findDiff(strength_t idiff) const
         numerator = DensityIntegral(U, U1, L1, U1, DEFAULT_K, s);
         denominator = DensityIntegral(L1, U1, L1, U1, DEFAULT_K, s);
 
-        if (denominator > 0) result = numerator / denominator;
+        if (denominator > 0.0) result = numerator / denominator;
         else result = 0.0;
 
         lte = result < expected - diffError;
@@ -175,13 +168,13 @@ strength_t IndefiniteTruthValue::findDiff(strength_t idiff) const
 
         if (lte) {
             min = idiff;
-            idiff = (idiff + max) / 2;
+            idiff = (idiff + max) / 2.0;
         }
         if (gte) {
             max = idiff;
-            idiff = (min + idiff) / 2;
+            idiff = (min + idiff) / 2.0;
         }
-    } while (lte || gte);
+    } while (lte or gte);
 
     return idiff;
 }
