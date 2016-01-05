@@ -53,3 +53,23 @@
 				(ListLink (Concept "bar") (Number 3)))
 		))
 )
+
+(define single-type
+	(MapLink
+		(ScopeLink
+			(TypedVariable (Variable "$x") (Type "ConceptNode"))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Variable "$x"))))
+		(SetLink
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah one")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah two")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Number 3)))
+		))
+)
