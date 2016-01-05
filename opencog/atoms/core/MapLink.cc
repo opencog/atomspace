@@ -152,10 +152,22 @@ Handle MapLink::execute(AtomSpace* scratch) const
 {
 	std::map<Handle,Handle> valmap;
 
+	// Extract values for variables.
 	if (not extract(_pattern->get_body(), _outgoing[1], valmap, scratch)) 
 		return Handle::UNDEFINED;
 
-	return Handle::UNDEFINED;
+	// Make sure each variable is grounded.
+	HandleSeq valseq;
+	for (const Handle& var : _vars->varseq)
+	{
+		auto valpair = valmap.find(var);
+		if (valmap.end() == valpair)
+			return Handle::UNDEFINED;
+		valseq.emplace_back(valpair->second);
+	}
+
+	Handle valist(createLink(LIST_LINK, valseq));
+	return valist;
 }
 
 /* ===================== END OF FILE ===================== */
