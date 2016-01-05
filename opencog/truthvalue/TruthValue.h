@@ -106,7 +106,7 @@ struct MergeCtrl
 };
 
 class TruthValue;
-typedef std::shared_ptr<TruthValue> TruthValuePtr;
+typedef std::shared_ptr<const TruthValue> TruthValuePtr;
 
 class TruthValue
     : public std::enable_shared_from_this<TruthValue>
