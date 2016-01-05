@@ -183,10 +183,14 @@ IndefiniteTruthValuePtr ProtocolBufferSerializer::deserializeIndefiniteTruthValu
 {
 	IndefiniteTruthValuePtr tv(
 			new IndefiniteTruthValue(singleTruthValue.l(), singleTruthValue.u(), singleTruthValue.confidence()));
+
+    throw RuntimeException(TRACE_INFO, "Not implemented!");
+/**********
     tv->setMean(singleTruthValue.mean());
     tv->setConfidenceLevel(singleTruthValue.confidencelevel());
     tv->setDiff(singleTruthValue.diff());
     tv->setSymmetric(singleTruthValue.symmetric());
+**********/
 
     vector<strength_t*> firstOrderDistribution(singleTruthValue.firstorderdistribution_size());
     for(int i = 0; i < singleTruthValue.firstorderdistribution_size(); i++)
@@ -195,7 +199,7 @@ IndefiniteTruthValuePtr ProtocolBufferSerializer::deserializeIndefiniteTruthValu
         strength_t* s = new strength_t(singleTruthValue.firstorderdistribution(i));
         firstOrderDistribution[i] = s;
     }
-    tv->setFirstOrderDistribution(firstOrderDistribution);
+    // tv->setFirstOrderDistribution(firstOrderDistribution);
     return tv;
 }
 
