@@ -90,11 +90,33 @@ void MapLinkUTest::test_singleton(void)
 
     Handle result = eval->eval_h("(cog-execute! single)");
 
-    Handle baz = eval->eval_h(R"(Concept "baz")");
-    printf("got %s\n", result->toString().c_str());
+    Handle baz = eval->eval_h("(Concept \"baz\")");
+    printf("got %s", result->toString().c_str());
     printf("expected %s\n", baz->toString().c_str());
 
     TS_ASSERT(result == baz);
+
+    // -------------------------------------------------
+    result = eval->eval_h("(cog-execute! single-set)");
+
+    Handle set = eval->eval_h(
+		"(SetLink "	
+		"	(Concept \"ah one\") (Concept \"ah two\") (Number 3))");
+    printf("got %s", result->toString().c_str());
+    printf("expected %s\n", set->toString().c_str());
+
+    TS_ASSERT(result == set);
+
+    // -------------------------------------------------
+    result = eval->eval_h("(cog-execute! single-list)");
+
+    Handle list = eval->eval_h(
+		"(ListLink "	
+		"	(Concept \"ah one\") (Concept \"ah two\") (Number 3))");
+    printf("got %s", result->toString().c_str());
+    printf("expected %s\n", list->toString().c_str());
+
+    TS_ASSERT(result == list);
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }

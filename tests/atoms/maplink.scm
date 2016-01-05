@@ -34,7 +34,7 @@
 		))
 )
 
-(define single-link
+(define single-list
 	(MapLink
 		(ScopeLink
 			(Variable "$x")
