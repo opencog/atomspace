@@ -73,3 +73,36 @@
 				(ListLink (Concept "bar") (Number 3)))
 		))
 )
+
+(define single-signature
+	(MapLink
+		(ScopeLink
+			(TypedVariable (Variable "$x")
+				(SignatureLink
+					(EvaluationLink
+						(Predicate "foo")
+						(ListLink (Concept "bar") (Type "ConceptNode")))))
+			(Variable "$x"))
+		(SetLink
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah one")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah two")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Number 3)))
+		))
+)
+
+(define sig-expect
+	(SetLink
+		(EvaluationLink
+			(Predicate "foo")
+			(ListLink (Concept "bar") (Concept "ah one")))
+		(EvaluationLink
+			(Predicate "foo")
+			(ListLink (Concept "bar") (Concept "ah two")))
+	)
+)
