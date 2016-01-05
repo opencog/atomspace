@@ -147,7 +147,7 @@ bool TruthValue::isDefinedTV() const
 TruthValuePtr TruthValue::higher_confidence_merge(TruthValuePtr other) const
 {
     if (other->getConfidence() > getConfidence()) {
-        return other->clone();
+        return other;
     }
-    return clone();
+    return shared_from_this();
 }

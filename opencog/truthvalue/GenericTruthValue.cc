@@ -51,6 +51,26 @@ GenericTruthValue::GenericTruthValue(GenericTruthValue const& gtv)
     entropy = gtv.entropy;
 }
 
+TruthValueType GenericTruthValue::getType() const
+{
+    return GENERIC_TRUTH_VALUE;
+}
+
+count_t GenericTruthValue::getCount() const
+{
+    return frequency;
+}
+
+confidence_t GenericTruthValue::getConfidence() const
+{
+    return confidence;
+}
+
+strength_t GenericTruthValue::getMean() const
+{
+    return totalEvidence;
+}
+
 count_t GenericTruthValue::getPositiveEvidence() const
 {
     return positiveEvidence;
@@ -91,11 +111,6 @@ strength_t GenericTruthValue::getLogFuzzyStrength() const
     return log(fuzzyStrength);
 }
 
-confidence_t GenericTruthValue::getConfidence() const
-{
-    return confidence;
-}
-
 confidence_t GenericTruthValue::getLogConfidence() const
 {
     return log(confidence);
@@ -106,8 +121,10 @@ entropy_t GenericTruthValue::getEntropy() const
     return entropy;
 }
 
-GenericTruthValuePtr GenericTruthValue::merge(GenericTruthValuePtr gtv) const
+TruthValuePtr GenericTruthValue::merge(TruthValuePtr tv, const MergeCtrl& mc) const
 {
+    GenericTruthValuePtr gtv = std::dynamic_pointer_cast<const GenericTruthValue>(tv);
+    if (NULL == gtv) return tv;
     auto other_te = gtv->getTotalEvidence();
     auto new_pe = positiveEvidence + gtv->getPositiveEvidence();
     auto new_te = totalEvidence + other_te
@@ -125,24 +142,27 @@ GenericTruthValuePtr GenericTruthValue::merge(GenericTruthValuePtr gtv) const
 }
 
 
-bool GenericTruthValue::operator==(const GenericTruthValue& rhs) const
+bool GenericTruthValue::operator==(const TruthValue& rhs) const
 {
     if (NULL == &rhs) return false;
 
+    const GenericTruthValue *gtv = dynamic_cast<const GenericTruthValue *>(&rhs);
+    if (NULL == gtv) return false;
+
 #define FLOAT_ACCEPTABLE_ERROR 0.000001
-    if (FLOAT_ACCEPTABLE_ERROR < fabs(frequency - rhs.frequency))
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(frequency - gtv->frequency))
         return false;
-    if (FLOAT_ACCEPTABLE_ERROR < fabs(fuzzyStrength - rhs.fuzzyStrength))
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(fuzzyStrength - gtv->fuzzyStrength))
         return false;
-    if (FLOAT_ACCEPTABLE_ERROR < fabs(confidence - rhs.confidence))
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(confidence - gtv->confidence))
         return false;
 
 #define DOUBLE_ACCEPTABLE_ERROR 1.0e-14
-    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (rhs.positiveEvidence/positiveEvidence)))
+    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (gtv->positiveEvidence/positiveEvidence)))
         return false;
-    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (rhs.totalEvidence/totalEvidence)))
+    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (gtv->totalEvidence/totalEvidence)))
         return false;
-    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (rhs.entropy/entropy)))
+    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (gtv->entropy/entropy)))
         return false;
 
     return true;

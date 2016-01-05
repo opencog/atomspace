@@ -28,6 +28,7 @@
 #include <memory>
 
 #include <opencog/util/exceptions.h>
+#include <opencog/truthvalue/TruthValue.h>
 
 namespace opencog
 {
@@ -38,10 +39,9 @@ typedef double count_t;
 typedef double entropy_t;
 
 class GenericTruthValue;
-typedef std::shared_ptr<GenericTruthValue> GenericTruthValuePtr;
+typedef std::shared_ptr<const GenericTruthValue> GenericTruthValuePtr;
 
-class GenericTruthValue
-        : public std::enable_shared_from_this<GenericTruthValue>
+class GenericTruthValue : public TruthValue
 {
     // Truth values are immutable
     GenericTruthValue& operator=(const GenericTruthValue& rhs) {
@@ -53,6 +53,11 @@ class GenericTruthValue
                           strength_t, strength_t,
                           confidence_t, entropy_t);
         GenericTruthValue(GenericTruthValue const&);
+
+        TruthValueType getType() const;
+        strength_t getMean() const;
+        count_t getCount() const;
+        confidence_t getConfidence() const;
 
         count_t getPositiveEvidence() const;
         count_t getLogPositiveEvidence() const;
@@ -66,24 +71,23 @@ class GenericTruthValue
         strength_t getFuzzyStrength() const;
         strength_t getLogFuzzyStrength() const;
 
-        confidence_t getConfidence() const;
         confidence_t getLogConfidence() const;
 
         entropy_t getEntropy() const;
 
-        GenericTruthValuePtr merge(GenericTruthValuePtr) const;
+        TruthValuePtr merge(TruthValuePtr, const MergeCtrl& = MergeCtrl()) const;
 
-        GenericTruthValuePtr clone() const
+        TruthValuePtr clone() const
         {
             return std::make_shared<GenericTruthValue>(*this);
         }
 
-        GenericTruthValue* rawclone() const
+        TruthValue* rawclone() const
         {
             return new GenericTruthValue(*this);
         }
 
-        virtual bool operator==(const GenericTruthValue& rhs) const;
+        bool operator==(const TruthValue&) const;
         std::string toString() const;
 
     protected:
