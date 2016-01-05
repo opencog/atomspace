@@ -25,18 +25,35 @@
 
 using namespace opencog;
 
+void MapLink::init(void)
+{
+	if (2 != _outgoing.size())
+		throw SyntaxException(TRACE_INFO,
+			"MapLink is expected to be arity-2 only!");
+
+	Type tscope = _outgoing[0]->getType();
+	if (not classserver().isA(tscope, SCOPE_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(tscope);
+		throw SyntaxException(TRACE_INFO,
+			"Expecting a ScopeLink, got %s", tname.c_str());
+	}
+
+	FunctionLink::init();
+}
+
 MapLink::MapLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: FunctionLink(MAP_LINK, oset, tv, av)
 {
-	FunctionLink::init();
+	init();
 }
 
 MapLink::MapLink(const Handle& vars, const Handle& body,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: FunctionLink(MAP_LINK, HandleSeq({vars, body}), tv, av)
 {
-	FunctionLink::init();
+	init();
 }
 
 MapLink::MapLink(Type t, const Handle& body,
@@ -45,7 +62,7 @@ MapLink::MapLink(Type t, const Handle& body,
 {
 	// Derived types have a different initialization sequence.
 	if (MAP_LINK != t) return;
-	FunctionLink::init();
+	init();
 }
 
 MapLink::MapLink(Type t, const HandleSeq& oset,
@@ -54,31 +71,32 @@ MapLink::MapLink(Type t, const HandleSeq& oset,
 {
 	// Derived types have a different initialization sequence.
 	if (MAP_LINK != t) return;
-	FunctionLink::init();
+	init();
 }
 
 MapLink::MapLink(Link &l)
 	: FunctionLink(l)
 {
 	// Type must be as expected
-	Type tscope = l.getType();
-	if (not classserver().isA(tscope, MAP_LINK))
+	Type tmap = l.getType();
+	if (not classserver().isA(tmap, MAP_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(tscope);
+		const std::string& tname = classserver().getTypeName(tmap);
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a MapLink, got %s", tname.c_str());
 	}
 
 	// Derived types have a different initialization sequence.
-	if (MAP_LINK != tscope) return;
-	FunctionLink::init();
+	if (MAP_LINK != tmap) return;
+	init();
 }
 
 // ===============================================================
 
 bool MapLink::extract(const Handle& pattern,
                       const Handle& ground,
-                      std::map<Handle,Handle>& valmap) const
+                      std::map<Handle,Handle>& valmap,
+                      AtomSpace* scratch) const
 {
 	// if 
 	return false;

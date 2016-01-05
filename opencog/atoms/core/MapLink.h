@@ -44,6 +44,8 @@ class MapLink : public FunctionLink
 {
 protected:
 
+	void init(void);
+
 	MapLink(Type, const Handle&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
@@ -53,22 +55,23 @@ protected:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	bool extract(const Handle&, const Handle&,
-	             std::map<Handle, Handle>&) const;
+	             std::map<Handle, Handle>&,
+	             AtomSpace*) const;
 
 public:
 	MapLink(const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	MapLink(const Handle& varcdecls, const Handle& body,
+	MapLink(const Handle& pattern, const Handle& term,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	MapLink(Link &l);
 
-	// Given a term, align it side-by-side with the pattern, and
-	// return the corresponding values.  If the term is not of the
-	// same type as the pattern, return the undefined handle.
+	// Align the pattern and the term side-by-side, and extract the
+	// values tht match up with the variables.  If the term is not of
+	// the same type as the pattern, return the undefined handle.
 	virtual Handle execute(AtomSpace* = NULL) const;
 };
 
