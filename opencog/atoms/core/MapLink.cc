@@ -39,6 +39,10 @@ void MapLink::init(void)
 			"Expecting a ScopeLink, got %s", tname.c_str());
 	}
 
+	_pattern = ScopeLinkCast(_outgoing[0]);
+	_vars = &_pattern->get_variables();
+	_varset = &_vars->varset;
+
 	FunctionLink::init();
 }
 
@@ -93,18 +97,42 @@ MapLink::MapLink(Link &l)
 
 // ===============================================================
 
-bool MapLink::extract(const Handle& pattern,
+bool MapLink::extract(const Handle& termpat,
                       const Handle& ground,
                       std::map<Handle,Handle>& valmap,
                       AtomSpace* scratch) const
 {
-	// if 
+	if (termpat == ground) return true;
+
+	Type t = termpat->getType();
+	// If its a variable, then see if we know its value already;
+	// If not, then record it.
+	if (VARIABLE_NODE == t and 0 < _varset->count(termpat))
+	{
+		auto val = valmap.find(termpat);
+		if (valmap.end() != val)
+		{
+			// If we already have a value, the value must be identical.
+			return (val->second == ground);
+		}
+
+		// Check the type of the value.
+		if (not _vars->is_type(termpat, ground)) return false;
+
+		// If we are here, everything looks good. Record and return.
+		valmap.emplace(std::make_pair(termpat, ground));
+		return true;
+	}
+
 	return false;
 }
 
 Handle MapLink::execute(AtomSpace* scratch) const
 {
 	std::map<Handle,Handle> valmap;
+
+	if (not extract(_pattern->get_body(), _outgoing[1], valmap, scratch)) 
+		return Handle::UNDEFINED;
 
 	return Handle::UNDEFINED;
 }

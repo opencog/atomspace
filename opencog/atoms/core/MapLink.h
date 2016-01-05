@@ -23,9 +23,8 @@
 #ifndef _OPENCOG_EXTRACT_LINK_H
 #define _OPENCOG_EXTRACT_LINK_H
 
-#include <map>
-
 #include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/core/ScopeLink.h>
 
 namespace opencog
 {
@@ -43,6 +42,9 @@ namespace opencog
 class MapLink : public FunctionLink
 {
 protected:
+	ScopeLinkPtr _pattern;
+	const Variables* _vars;
+	const std::set<Handle>* _varset;
 
 	void init(void);
 
