@@ -337,7 +337,7 @@ public:
         for (int i = 0; i < NUM_AVS; i++) {
             //logger().debug("AV[%d] = %s", i, avs[i]->toString().c_str());
             std::string str = avs[i]->toString();
-            sprintf(buffer, "[%d, %d, %s]", avs[i]->getSTI(), avs[i]->getLTI(), avs[i]->getVLTI() ? "NONDISPOSABLE" : "DISPOSABLE");
+            sprintf(buffer, "[%d, %d, %s]", avs[i]->getSTI(), avs[i]->getLTI(), avs[i]->getVLTI() ? "SAVABLE" : "DISPOSABLE");
             TS_ASSERT(!strcmp(str.c_str(), buffer));
         }
     }
