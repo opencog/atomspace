@@ -1,0 +1,100 @@
+/*
+ * tests/atoms/MapLinkUTest.cxxtest
+ *
+ * Copyright (C) 2015 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class MapLinkUTest: public CxxTest::TestSuite
+{
+private:
+        AtomSpace *as;
+        SchemeEval* eval;
+
+public:
+    MapLinkUTest(void)
+    {
+        logger().setLevel(Logger::DEBUG);
+        logger().setPrintToStdoutFlag(true);
+
+        as = new AtomSpace();
+        eval = new SchemeEval(as);
+    }
+
+    ~MapLinkUTest()
+    {
+        delete eval;
+        delete as;
+        // Erase the log file if no assertions failed.
+        if (!CxxTest::TestTracker::tracker().suiteFailed())
+                std::remove(logger().getFilename().c_str());
+    }
+
+    void setUp(void);
+    void tearDown(void);
+
+    void test_singleton(void);
+    // void test_singleton_set(void);
+};
+
+void MapLinkUTest::tearDown(void)
+{
+    as->clear();
+}
+
+void MapLinkUTest::setUp(void)
+{
+    as->clear();
+    config().set("SCM_PRELOAD",
+        "opencog/atoms/base/core_types.scm, "
+        "opencog/scm/utilities.scm, "
+        "opencog/scm/opencog/exec.scm");
+
+    load_scm_files_from_config(*as);
+}
+
+/*
+ * MapLink unit test.
+ */
+void MapLinkUTest::test_singleton(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/atoms/maplink.scm");
+    load_scm_files_from_config(*as);
+
+    Handle result = eval->eval_h("(cog-execute! single)");
+
+    Handle baz = eval->eval_h(R"(Concept "baz")");
+    printf("got %s\n", result->toString().c_str());
+    printf("expected %s\n", baz->toString().c_str());
+
+    TS_ASSERT(result == baz);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
