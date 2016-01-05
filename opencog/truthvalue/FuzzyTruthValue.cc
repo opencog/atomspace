@@ -80,9 +80,9 @@ TruthValuePtr FuzzyTruthValue::merge(TruthValuePtr other,
     }
 
     if (other->getConfidence() > getConfidence()) {
-        return other->clone();
+        return other;
     }
-    return clone();
+    return shared_from_this();
 }
 
 std::string FuzzyTruthValue::toString() const

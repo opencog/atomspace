@@ -68,6 +68,7 @@ enum TruthValueType
     INDEFINITE_TRUTH_VALUE,
     FUZZY_TRUTH_VALUE,
     PROBABILISTIC_TRUTH_VALUE,
+    GENERIC_TRUTH_VALUE,
     NUMBER_OF_TRUTH_VALUE_TYPES
 };
 
@@ -194,7 +195,7 @@ public:
      *        https://github.com/opencog/opencog/issues/1295
      */
     virtual TruthValuePtr merge(TruthValuePtr,
-                                const MergeCtrl& mc=MergeCtrl()) const = 0;
+                                const MergeCtrl& = MergeCtrl()) const = 0;
 
     /**
      * Check if this TV is a null TV.
