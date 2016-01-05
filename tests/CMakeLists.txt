@@ -17,6 +17,7 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 # its is tested first.
 IF (CXXTEST_FOUND)
 
+	ADD_SUBDIRECTORY (truthvalue)
 	ADD_SUBDIRECTORY (atomspace)
 	ADD_SUBDIRECTORY (atoms)
 	ADD_SUBDIRECTORY (atomutils)

@@ -36,7 +36,7 @@ namespace opencog
  */
 
 class CountTruthValue;
-typedef std::shared_ptr<CountTruthValue> CountTruthValuePtr;
+typedef std::shared_ptr<const CountTruthValue> CountTruthValuePtr;
 
 //! a TruthValue that stores a mean, a confidence and the number of observations
 class CountTruthValue : public TruthValue
