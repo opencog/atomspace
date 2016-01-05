@@ -38,10 +38,10 @@ namespace opencog
  */
 
 class IndefiniteTruthValue;
-typedef std::shared_ptr<IndefiniteTruthValue> IndefiniteTruthValuePtr;
+typedef std::shared_ptr<const IndefiniteTruthValue> IndefiniteTruthValuePtr;
 
 static inline IndefiniteTruthValuePtr IndefiniteTVCast(TruthValuePtr tv)
-    { return std::dynamic_pointer_cast<IndefiniteTruthValue>(tv); }
+    { return std::dynamic_pointer_cast<const IndefiniteTruthValue>(tv); }
 
 /**
  * Indefinite probabilities are in the form ([L,U],b,N). In practical work,
@@ -131,7 +131,7 @@ public:
 
     static TruthValuePtr createTV(TruthValuePtr tv)
     {
-        return std::static_pointer_cast<TruthValue>(createITV(tv));
+        return std::static_pointer_cast<const TruthValue>(createITV(tv));
     }
 
     static IndefiniteTruthValuePtr createITV(strength_t l, strength_t u,
@@ -143,7 +143,7 @@ public:
     static TruthValuePtr createTV(strength_t l, strength_t u,
                          confidence_t c = DEFAULT_CONFIDENCE_LEVEL)
     {
-        return std::static_pointer_cast<TruthValue>(createITV(l, u, c));
+        return std::static_pointer_cast<const TruthValue>(createITV(l, u, c));
     }
 
     TruthValuePtr clone() const
