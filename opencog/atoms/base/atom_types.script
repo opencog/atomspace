@@ -210,18 +210,6 @@ SCOPE_LINK <- ORDERED_LINK
 // beta-reduced when they are executed.
 PUT_LINK <- SCOPE_LINK
 
-// ExtractLink could be named UnPutLink ... it undoes a beta-reduction,
-// be extracting values for a given set of variables.  In many ways,
-// it resembles a GetLink, except that it searches only its argument
-// list, instead of the entire AtomSpace.
-EXTRACT_LINK <- SCOPE_LINK
-
-// MapLink is a convenient short-hand for an ExtractLink followed by a
-// PutLink; values are extracted from one pattern, and placed into
-// another.  It also resembles a BindLink, except that it searches only
-// its argument list, instead of the entire AtomSpace.
-MAP_LINK <- SCOPE_LINK
-
 // Pattern definition, pattern grounding/satisfaction.
 // The PatternLink implements the base class holding a pattern that
 // the pattern matcher will traverse.  Its primary role in life is to
@@ -436,3 +424,10 @@ TIME_LINK <- FUNCTION_LINK
 
 // Sleep link pauses executation for the indicated number of seconds.
 SLEEP_LINK <- FUNCTION_LINK
+
+// MapLink could be named UnPutLink ... it undoes a beta-reduction,
+// by extracting values for a given set of variables.  In many ways,
+// it resembles a GetLink, except that it searches only its argument
+// list, instead of the entire AtomSpace.  It is more-or-less analogous
+// to the standard functional-programming concept of "map".
+MAP_LINK <- FUNCTION_LINK

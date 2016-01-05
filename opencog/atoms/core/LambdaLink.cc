@@ -22,8 +22,6 @@
  */
 
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/TypeNode.h>
-#include <opencog/atoms/core/FreeLink.h>
 
 #include "LambdaLink.h"
 

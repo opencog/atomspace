@@ -6,11 +6,11 @@ ADD_LIBRARY (atomcore SHARED
 	ArityLink.cc
 	DefineLink.cc
 	DeleteLink.cc
-	ExtractLink.cc
 	FreeLink.cc
 	FunctionLink.cc
 	ImplicationLink.cc
 	LambdaLink.cc
+	MapLink.cc
 	PutLink.cc
 	RandomChoice.cc
 	RandomNumber.cc
@@ -40,10 +40,10 @@ INSTALL (FILES
 	ArityLink.h
 	DefineLink.h
 	DeleteLink.h
-	ExtractLink.h
 	FreeLink.h
 	FunctionLink.h
 	LambdaLink.h
+	MapLink.h
 	PutLink.h
 	RandomChoice.h
 	RandomNumber.h

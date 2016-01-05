@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/ExtractLink.h
+ * opencog/atoms/core/MapLink.h
  *
  * Copyright (C) 2015,2016 Linas Vepstas
  * All Rights Reserved
@@ -25,7 +25,7 @@
 
 #include <map>
 
-#include <opencog/atoms/core/ScopeLink.h>
+#include <opencog/atoms/core/FunctionLink.h>
 
 namespace opencog
 {
@@ -33,52 +33,53 @@ namespace opencog
  *  @{
  */
 
-/// The ExtractLink is a ScopeLink that undoes beta-reduction; it can
-/// be used to "extract" the values that occupy certain variable
+/// The MapLink is a FunctionLink that undoes beta-reduction; it
+/// can be used to "extract" the values that occupy certain variable
 /// locations in a formula.  It is the "opposite" of PutLink, in that
 /// PutLink substitutes values for variables; whereas this link holds
 /// a template pattrn, which can be compared to an input, and values 
 /// are extracted for the variable locations.
 ///
-class ExtractLink : public ScopeLink
+class MapLink : public FunctionLink
 {
 protected:
 
-	ExtractLink(Type, const Handle&,
+	MapLink(Type, const Handle&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	ExtractLink(Type, const HandleSeq&,
+	MapLink(Type, const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	bool extract_rec(const Handle&, std::map<Handle, Handle>&) const;
+	bool extract(const Handle&, const Handle&,
+	             std::map<Handle, Handle>&) const;
 
 public:
-	ExtractLink(const HandleSeq&,
+	MapLink(const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	ExtractLink(const Handle& varcdecls, const Handle& body,
+	MapLink(const Handle& varcdecls, const Handle& body,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	ExtractLink(Link &l);
+	MapLink(Link &l);
 
 	// Given a term, align it side-by-side with the pattern, and
 	// return the corresponding values.  If the term is not of the
 	// same type as the pattern, return the undefined handle.
-	Handle extract(const Handle&) const;
+	virtual Handle execute(AtomSpace* = NULL) const;
 };
 
-typedef std::shared_ptr<ExtractLink> ExtractLinkPtr;
-static inline ExtractLinkPtr ExtractLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<ExtractLink>(a); }
-static inline ExtractLinkPtr ExtractLinkCast(AtomPtr a)
-	{ return std::dynamic_pointer_cast<ExtractLink>(a); }
+typedef std::shared_ptr<MapLink> MapLinkPtr;
+static inline MapLinkPtr MapLinkCast(const Handle& h)
+	{ AtomPtr a(h); return std::dynamic_pointer_cast<MapLink>(a); }
+static inline MapLinkPtr MapLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<MapLink>(a); }
 
 // XXX temporary hack ...
-#define createExtractLink std::make_shared<ExtractLink>
+#define createMapLink std::make_shared<MapLink>
 
 /** @}*/
 }

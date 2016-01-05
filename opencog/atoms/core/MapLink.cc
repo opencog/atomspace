@@ -1,5 +1,5 @@
 /*
- * ExtractLink.cc
+ * opencog/atoms/core/MapLink.cc
  *
  * Copyright (C) 2015, 2016 Linas Vepstas
  *
@@ -20,72 +20,74 @@
  */
 
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/TypeNode.h>
-#include <opencog/atoms/core/FreeLink.h>
 
-#include "ExtractLink.h"
+#include "MapLink.h"
 
 using namespace opencog;
 
-ExtractLink::ExtractLink(const HandleSeq& oset,
+MapLink::MapLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(EXTRACT_LINK, oset, tv, av)
+	: FunctionLink(MAP_LINK, oset, tv, av)
 {
-	ScopeLink::init();
+	FunctionLink::init();
 }
 
-ExtractLink::ExtractLink(const Handle& vars, const Handle& body,
+MapLink::MapLink(const Handle& vars, const Handle& body,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(EXTRACT_LINK, HandleSeq({vars, body}), tv, av)
+	: FunctionLink(MAP_LINK, HandleSeq({vars, body}), tv, av)
 {
-	ScopeLink::init();
+	FunctionLink::init();
 }
 
-ExtractLink::ExtractLink(Type t, const Handle& body,
+MapLink::MapLink(Type t, const Handle& body,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(t, HandleSeq({body}), tv, av)
-{
-	// Derived types have a different initialization sequence.
-	if (EXTRACT_LINK != t) return;
-	ScopeLink::init();
-}
-
-ExtractLink::ExtractLink(Type t, const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(t, oset, tv, av)
+	: FunctionLink(t, HandleSeq({body}), tv, av)
 {
 	// Derived types have a different initialization sequence.
-	if (EXTRACT_LINK != t) return;
-	ScopeLink::init();
+	if (MAP_LINK != t) return;
+	FunctionLink::init();
 }
 
-ExtractLink::ExtractLink(Link &l)
-	: ScopeLink(l)
+MapLink::MapLink(Type t, const HandleSeq& oset,
+                       TruthValuePtr tv, AttentionValuePtr av)
+	: FunctionLink(t, oset, tv, av)
+{
+	// Derived types have a different initialization sequence.
+	if (MAP_LINK != t) return;
+	FunctionLink::init();
+}
+
+MapLink::MapLink(Link &l)
+	: FunctionLink(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
-	if (not classserver().isA(tscope, EXTRACT_LINK))
+	if (not classserver().isA(tscope, MAP_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
 		throw SyntaxException(TRACE_INFO,
-			"Expecting a ExtractLink, got %s", tname.c_str());
+			"Expecting a MapLink, got %s", tname.c_str());
 	}
 
 	// Derived types have a different initialization sequence.
-	if (EXTRACT_LINK != tscope) return;
-	ScopeLink::init();
+	if (MAP_LINK != tscope) return;
+	FunctionLink::init();
 }
 
 // ===============================================================
 
-bool ExtractLink::extract_rec(const Handle& term,
-                              std::map<Handle,Handle>& valmap) const
+bool MapLink::extract(const Handle& pattern,
+                      const Handle& ground,
+                      std::map<Handle,Handle>& valmap) const
 {
+	// if 
 	return false;
 }
 
-Handle ExtractLink::extract(const Handle& term) const
+Handle MapLink::execute(AtomSpace* scratch) const
 {
+	std::map<Handle,Handle> valmap;
+
 	return Handle::UNDEFINED;
 }
 
