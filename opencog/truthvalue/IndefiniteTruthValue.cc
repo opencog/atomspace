@@ -88,6 +88,27 @@ void IndefiniteTruthValue::init(strength_t l, strength_t u, confidence_t c)
 
     firstOrderDistribution.clear();
     symmetric = true;
+
+    mean = (L + U) / 2;
+
+    strength_t W = getU()-getL();
+    // to avoid division by zero
+    W = std::max(W, static_cast<strength_t>(0.0000001));
+    // This is a bad heuristic that comes from c = N / (N+k). By
+    // assuming c is an estimate of 1 - W we end up with this
+    // formula. The problem is that c is definitely not a good
+    // estimate for 1 - W.
+    count = (DEFAULT_K * (1 - W) / W);
+
+    if (U == L) {
+        diff = 0.0; // Not sure returning 0 is right
+    } else {
+        strength_t idiff = 0.01; // Initial diff suggestion
+        diff = findDiff(idiff);
+    }
+
+    count_t ccc = getCount();
+    confidence = ccc / (ccc + DEFAULT_K);
 }
 
 void IndefiniteTruthValue::copy(const IndefiniteTruthValue& source)
@@ -129,29 +150,7 @@ bool IndefiniteTruthValue::operator==(const TruthValue& rhs) const
     }
 }
 
-strength_t IndefiniteTruthValue::getL() const
-{
-    return L;
-}
-strength_t IndefiniteTruthValue::getU() const
-{
-    return U;
-}
-
-strength_t IndefiniteTruthValue::getDiff()
-{
-    if (diff < 0) { // Need update
-        if (U == L) {
-            diff = 0.0; // Not sure returning 0 is right
-        } else {
-            strength_t idiff = 0.01; // Initial diff suggestion
-            diff = findDiff(idiff);
-        }
-    }
-    return diff;
-}
-
-strength_t IndefiniteTruthValue::findDiff(strength_t idiff)
+strength_t IndefiniteTruthValue::findDiff(strength_t idiff) const
 {
     strength_t min = 0.0;
     strength_t max = 0.5; //diff cannot be larger than 1/2 cause symmetric case
@@ -187,113 +186,14 @@ strength_t IndefiniteTruthValue::findDiff(strength_t idiff)
     return idiff;
 }
 
-confidence_t IndefiniteTruthValue::getConfidenceLevel() const
-{
-    return confidenceLevel;
-}
-
 const std::vector<strength_t*>& IndefiniteTruthValue::getFirstOrderDistribution() const
 {
     return firstOrderDistribution;
 }
 
-strength_t IndefiniteTruthValue::getU_() const
-{
-    strength_t u = U + diff;
-// return (u > 1.0)?1.0f:u;
-    return u;
-}
-strength_t IndefiniteTruthValue::getL_() const
-{
-    strength_t l = L - diff;
-// return (l < 0.0)?0.0f:l;
-    return l;
-}
-
-void IndefiniteTruthValue::setL(strength_t l)
-{
-    this->L = l;
-
-    // the next 4 variables are set to -1 to indicate that they must
-    // be recalculated
-    diff = -1.0;
-    mean = -1.0;
-    count = -1.0;
-    confidence = -1.0;
-}
-
-void IndefiniteTruthValue::setU(strength_t u)
-{
-    this->U = u;
-
-    // the next 4 variables are set to -1 to indicate that they must
-    // be recalculated
-    diff = -1.0;
-    mean = -1.0;
-    count = -1.0;
-    confidence = -1.0;
-}
-
-void IndefiniteTruthValue::setConfidenceLevel(confidence_t c)
-{
-    this->confidenceLevel = c;
-}
-
-void IndefiniteTruthValue::setDiff(strength_t diff)
-{
-    this->diff = diff;
-}
-
-void IndefiniteTruthValue::setFirstOrderDistribution(const std::vector<strength_t*>& v)
-{
-    this->firstOrderDistribution = v;
-}
-
 TruthValueType IndefiniteTruthValue::getType() const
 {
     return INDEFINITE_TRUTH_VALUE;
-}
-
-void IndefiniteTruthValue::setMean(strength_t m)
-{
-    mean = m;
-}
-
-strength_t IndefiniteTruthValue::getMean() const
-{
-    if (mean < 0) { // mean must be updated
-        mean = (L + U) / 2;
-    }
-    return mean;
-}
-
-count_t IndefiniteTruthValue::getCount() const
-{
-    if (count < 0) { // count must be updated
-        strength_t W = getU()-getL();
-        // to avoid division by zero
-        W = std::max(W, static_cast<strength_t>(0.0000001));
-        // This is a bad heuristic that comes from c = N / (N+k). By
-        // assuming c is an estimate of 1 - W we end up with this
-        // formula. The problem is that c is definitely not a good
-        // estimate for 1 - W.
-        count = (DEFAULT_K * (1 - W) / W);
-    }
-    return count;
-}
-
-float IndefiniteTruthValue::getConfidence() const
-{
-    if (confidence < 0) { // confidence must be updated
-        count_t c = getCount();
-        confidence = c / (c + DEFAULT_K);
-    }
-    return confidence;
-}
-
-bool IndefiniteTruthValue::isSymmetric() const
-{
-    return symmetric;
 }
 
 // Merge formula, as specified by PLN.

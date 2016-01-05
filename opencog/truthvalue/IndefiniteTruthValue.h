@@ -70,9 +70,9 @@ private:
      * is correct
 	 */
 	///@{
-    mutable strength_t mean;
-    mutable count_t count;
-    mutable confidence_t confidence;
+    strength_t mean;
+    count_t count;
+    confidence_t confidence;
 	///@}
 
     std::vector<strength_t*> firstOrderDistribution;
@@ -82,7 +82,7 @@ private:
     void copy(const IndefiniteTruthValue&);
 
     //! find diff by dichotomy
-    strength_t findDiff(strength_t idiff);
+    strength_t findDiff(strength_t idiff) const;
 
 public:
     IndefiniteTruthValue();
@@ -93,26 +93,18 @@ public:
     //! it is a strict equality comparison, without error interval tolerance
     virtual bool operator==(const TruthValue& rhs) const;
 
-    strength_t getMean() const;
-    strength_t getU() const;
-    strength_t getL() const;
-    confidence_t getConfidenceLevel() const;
-    strength_t getDiff();
+    strength_t getMean() const { return mean; }
+    strength_t getU() const { return U; }
+    strength_t getL() const { return L; }
+    confidence_t getConfidenceLevel() const { return confidenceLevel; }
+    strength_t getDiff() const { return diff; }
     const std::vector<strength_t*>& getFirstOrderDistribution() const;
 
-    void setMean(strength_t);
-    void setU(strength_t);
-    void setL(strength_t);
-    void setConfidenceLevel(confidence_t);
-    void setDiff(strength_t);
-    void setFirstOrderDistribution(const std::vector<strength_t*>&);
-    void setSymmetric(bool s) { symmetric = s; }
-
-    count_t getCount() const;
-    confidence_t getConfidence() const;
-    strength_t getU_() const;
-    strength_t getL_() const;
-    bool isSymmetric() const;
+    count_t getCount() const { return count; }
+    confidence_t getConfidence() const { return confidence; }
+    strength_t getU_() const { return U + diff; }
+    strength_t getL_() const { return L - diff; }
+    bool isSymmetric() const { return symmetric; }
 
     TruthValuePtr merge(TruthValuePtr,
                         const MergeCtrl& mc=MergeCtrl()) const;
