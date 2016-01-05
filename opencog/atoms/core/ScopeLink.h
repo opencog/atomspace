@@ -23,8 +23,6 @@
 #ifndef _OPENCOG_SCOPE_LINK_H
 #define _OPENCOG_SCOPE_LINK_H
 
-#include <map>
-
 #include <opencog/atoms/core/VariableList.h>
 
 namespace opencog
@@ -93,22 +91,13 @@ public:
 	const Handle& get_body(void) const { return _body; }
 
 	// Return true if the other Handle is equal to this one,
-	// i.e. is the same, up to alpha conversion.
+	// i.e. is the same, up to alpha conversion. i.e. is the same,
+	// up to a renaming of the bound variables.
 	bool is_equal(const Handle&) const;
 
 	// Overload equality check!
 	virtual bool operator==(const Atom&) const;
 	virtual bool operator!=(const Atom&) const;
-
-	// Take the list of values `vals`, and substitute them in for the
-	// variables in the body of this lambda. The values must satisfy all
-	// type restrictions, else an exception will be thrown.
-/*
-	Handle substitute (const HandleSeq& vals) const
-	{
-		return VariableList::substitute(_body, vals);
-	}
-*/
 };
 
 typedef std::shared_ptr<ScopeLink> ScopeLinkPtr;

@@ -6,6 +6,7 @@ ADD_LIBRARY (atomcore SHARED
 	ArityLink.cc
 	DefineLink.cc
 	DeleteLink.cc
+	ExtractLink.cc
 	FreeLink.cc
 	FunctionLink.cc
 	ImplicationLink.cc
@@ -39,6 +40,7 @@ INSTALL (FILES
 	ArityLink.h
 	DefineLink.h
 	DeleteLink.h
+	ExtractLink.h
 	FreeLink.h
 	FunctionLink.h
 	LambdaLink.h

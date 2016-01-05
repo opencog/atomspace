@@ -1,9 +1,7 @@
 /*
- * LambdaLink.cc
+ * ExtractLink.cc
  *
- * Copyright (C) 2009, 2014, 2015 Linas Vepstas
- *
- * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
+ * Copyright (C) 2015, 2016 Linas Vepstas
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -25,57 +23,70 @@
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/FreeLink.h>
 
-#include "LambdaLink.h"
+#include "ExtractLink.h"
 
 using namespace opencog;
 
-LambdaLink::LambdaLink(const HandleSeq& oset,
+ExtractLink::ExtractLink(const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(LAMBDA_LINK, oset, tv, av)
+	: ScopeLink(EXTRACT_LINK, oset, tv, av)
 {
 	ScopeLink::init();
 }
 
-LambdaLink::LambdaLink(const Handle& vars, const Handle& body,
+ExtractLink::ExtractLink(const Handle& vars, const Handle& body,
                        TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(LAMBDA_LINK, HandleSeq({vars, body}), tv, av)
+	: ScopeLink(EXTRACT_LINK, HandleSeq({vars, body}), tv, av)
 {
 	ScopeLink::init();
 }
 
-LambdaLink::LambdaLink(Type t, const Handle& body,
+ExtractLink::ExtractLink(Type t, const Handle& body,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: ScopeLink(t, HandleSeq({body}), tv, av)
 {
 	// Derived types have a different initialization sequence.
-	if (LAMBDA_LINK != t) return;
+	if (EXTRACT_LINK != t) return;
 	ScopeLink::init();
 }
 
-LambdaLink::LambdaLink(Type t, const HandleSeq& oset,
+ExtractLink::ExtractLink(Type t, const HandleSeq& oset,
                        TruthValuePtr tv, AttentionValuePtr av)
 	: ScopeLink(t, oset, tv, av)
 {
 	// Derived types have a different initialization sequence.
-	if (LAMBDA_LINK != t) return;
+	if (EXTRACT_LINK != t) return;
 	ScopeLink::init();
 }
 
-LambdaLink::LambdaLink(Link &l)
+ExtractLink::ExtractLink(Link &l)
 	: ScopeLink(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();
-	if (not classserver().isA(tscope, LAMBDA_LINK))
+	if (not classserver().isA(tscope, EXTRACT_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
 		throw SyntaxException(TRACE_INFO,
-			"Expecting a LambdaLink, got %s", tname.c_str());
+			"Expecting a ExtractLink, got %s", tname.c_str());
 	}
 
 	// Derived types have a different initialization sequence.
-	if (LAMBDA_LINK != tscope) return;
+	if (EXTRACT_LINK != tscope) return;
 	ScopeLink::init();
+}
+
+// ===============================================================
+
+bool ExtractLink::extract_rec(const Handle& term,
+                              std::map<Handle,Handle>& valmap) const
+{
+	return false;
+}
+
+Handle ExtractLink::extract(const Handle& term) const
+{
+	return Handle::UNDEFINED;
 }
 
 /* ===================== END OF FILE ===================== */
