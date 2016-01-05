@@ -31,14 +31,14 @@ ctypedef float confidence_t
 ctypedef float strength_t
 
 cdef extern from "opencog/truthvalue/TruthValue.h" namespace "opencog":
-    cdef cppclass tv_ptr "std::shared_ptr<opencog::TruthValue>":
+    cdef cppclass tv_ptr "std::shared_ptr<const opencog::TruthValue>":
         tv_ptr()
         tv_ptr(tv_ptr copy)
         tv_ptr(cTruthValue* fun)
         tv_ptr(cSimpleTruthValue* fun)
         cTruthValue* get()
 
-    cdef cppclass cTruthValue "opencog::TruthValue":
+    cdef cppclass cTruthValue "const opencog::TruthValue":
         strength_t getMean()
         confidence_t getConfidence()
         count_t getCount()
