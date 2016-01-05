@@ -97,6 +97,22 @@ MapLink::MapLink(Link &l)
 
 // ===============================================================
 
+/// Recursive tree-compare-and-extract grounding values.
+///
+/// Compare the pattern tree `termpat` with the grounding tree `ground`.
+/// If a variable in `termpat` corresponds with a variable in `ground`,
+/// then add that correspondance pair to `valmap`. Type-checking is
+/// performed during the match-up, so if the variable type does not
+/// match thr ground type, false is returned.  False is also returned
+/// if the trees miscompare in other ways (mismatched link arity,
+/// mis-matched atom type, two conflicting groundings for the same
+/// variable).
+///
+/// Any executable terms in `ground` are executed prior to comparison.
+///
+/// If false is returned, the contents of valmap are invalid. If true
+/// is returned, valmap contains the extracted values.
+///
 bool MapLink::extract(const Handle& termpat,
                       const Handle& ground,
                       std::map<Handle,Handle>& valmap,
@@ -148,12 +164,12 @@ bool MapLink::extract(const Handle& termpat,
 	return true;
 }
 
-Handle MapLink::execute(AtomSpace* scratch) const
+Handle MapLink::rewrite_one(const Handle& term, AtomSpace* scratch) const
 {
 	std::map<Handle,Handle> valmap;
 
 	// Extract values for variables.
-	if (not extract(_pattern->get_body(), _outgoing[1], valmap, scratch)) 
+	if (not extract(_pattern->get_body(), term, valmap, scratch))
 		return Handle::UNDEFINED;
 
 	// Make sure each variable is grounded.
@@ -166,8 +182,35 @@ Handle MapLink::execute(AtomSpace* scratch) const
 		valseq.emplace_back(valpair->second);
 	}
 
-	Handle valist(createLink(LIST_LINK, valseq));
-	return valist;
+	// Wrap up the result in a list only if there is more than one
+	// variable.
+	if (1 < valseq.size())
+		return Handle(createLink(LIST_LINK, valseq));
+
+	return valseq[0];
+}
+
+Handle MapLink::execute(AtomSpace* scratch) const
+{
+	// Handle three different cases.
+	// If there is a single value, apply the map to the single value.
+	// If there is a set of values, apply the map to the set.
+	// If there is a link of values, apply the map to the link.
+	Type argtype = _outgoing[1]->getType();
+	if (SET_LINK == argtype or LIST_LINK == argtype)
+	{
+		HandleSeq remap;
+		LinkPtr lp(LinkCast(_outgoing[1]));
+		for (const Handle& h : lp->getOutgoingSet())
+		{
+			Handle mone = rewrite_one(h, scratch);
+			if (nullptr != mone) remap.emplace_back(mone);
+		}
+		return Handle(createLink(argtype, remap));
+	}
+
+	// Its a singleton. Just remap that.
+	return rewrite_one(_outgoing[1], scratch);
 }
 
 /* ===================== END OF FILE ===================== */

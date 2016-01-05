@@ -60,6 +60,8 @@ protected:
 	             std::map<Handle, Handle>&,
 	             AtomSpace*) const;
 
+	Handle rewrite_one(const Handle&, AtomSpace*) const;
+
 public:
 	MapLink(const HandleSeq&,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
