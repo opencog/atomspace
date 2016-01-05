@@ -124,7 +124,28 @@ bool MapLink::extract(const Handle& termpat,
 		return true;
 	}
 
-	return false;
+	// Whever they are, the type must agree.
+	if (t != ground->getType()) return false;
+
+	// If they are (non-variable) nodes, they must be identical.
+	LinkPtr tlp(LinkCast(termpat));
+	if (nullptr == tlp)
+		return (termpat == ground);
+
+	LinkPtr glp(LinkCast(ground));
+	const HandleSeq& tlo = tlp->getOutgoingSet();
+	const HandleSeq& glo = glp->getOutgoingSet();
+	size_t sz = tlo.size();
+	if (glo.size() != sz) return false;
+
+	// Compare links side-by-side.
+	for (size_t i=0; i<sz; i++)
+	{
+		if (not extract(tlo[i], glo[i], valmap, scratch))
+			return false;
+	}
+
+	return true;
 }
 
 Handle MapLink::execute(AtomSpace* scratch) const
