@@ -29,7 +29,7 @@ public:
 };
 
 void URECommonsUTest::setUp() {
-	config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
+	config().set("SCM_PRELOAD", "opencog/atoms/base/core_types.scm, "
 			"opencog/scm/utilities.scm, "
 			"opencog/python/pln_old/examples/deduction/atomspace_contents.scm");
 	load_scm_files_from_config(as_);

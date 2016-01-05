@@ -74,7 +74,7 @@ void MultiAtomSpace::setUp(void)
 	evaluator = new SchemeEval(main_as);
 
 	config().set("SCM_PRELOAD",
-		"opencog/atomspace/core_types.scm");
+		"opencog/atoms/base/core_types.scm");
 
 	load_scm_files_from_config(*main_as);
 }
