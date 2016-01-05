@@ -22,8 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <limits>
-
 #include "AttentionValue.h"
 
 using namespace opencog;
@@ -32,16 +30,10 @@ const AttentionValue::sti_t AttentionValue::DEFAULTATOMSTI = 0;
 const AttentionValue::lti_t AttentionValue::DEFAULTATOMLTI = 0;
 const AttentionValue::vlti_t AttentionValue::DEFAULTATOMVLTI = 0;
 
-void AttentionValue::decaySTI()
-{
-    // Prevent m_STI from wrapping around.
-    if (m_STI > std::numeric_limits<sti_t>::min()) m_STI--;
-}
-
 std::string AttentionValue::toString() const
 {
     char buffer[256];
     sprintf(buffer, "[%d, %d, %s]", (int)m_STI, (int)m_LTI,
-            m_VLTI ? "NONDISPOSABLE" : "DISPOSABLE");
+            m_VLTI ? "SAVABLE" : "DISPOSABLE");
     return buffer;
 }
