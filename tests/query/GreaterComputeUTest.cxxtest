@@ -67,7 +67,7 @@ void GreaterComputeUTest::tearDown(void)
 void GreaterComputeUTest::setUp(void)
 {
     config().set("SCM_PRELOAD",
-        "opencog/atomspace/core_types.scm, "
+        "opencog/atoms/base/core_types.scm, "
         "opencog/scm/opencog/exec.scm, "
         "opencog/scm/utilities.scm");
 

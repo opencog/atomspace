@@ -10,7 +10,7 @@ atomspace = AtomSpace()
 
 # Initialize Scheme
 scheme_preload = [
-                    "opencog/atomspace/core_types.scm",
+                    "opencog/atoms/base/core_types.scm",
                     "opencog/scm/utilities.scm"
                  ]
 

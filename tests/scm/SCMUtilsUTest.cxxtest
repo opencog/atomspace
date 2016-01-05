@@ -71,7 +71,7 @@ void SCMUtilsUTest::setUp(void)
 	evaluator = new SchemeEval(as);
 
 	config().set("SCM_PRELOAD",
-		"opencog/atomspace/core_types.scm, "
+		"opencog/atoms/base/core_types.scm, "
 		"tests/query/test_types.scm, "
 		"opencog/scm/utilities.scm, "
 		"tests/scm/utils-test.scm");
