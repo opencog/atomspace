@@ -26,7 +26,7 @@ class SchemeTest(TestCase):
 
         # These relative paths are horridly ugly.
         # There must be a better way ...
-        status = load_scm(self.space, "build/opencog/atomspace/core_types.scm")
+        status = load_scm(self.space, "build/opencog/atoms/base/core_types.scm")
         self.assertTrue(status)
 
         status = load_scm(self.space, "opencog/scm/utilities.scm")

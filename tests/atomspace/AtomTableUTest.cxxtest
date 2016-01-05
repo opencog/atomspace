@@ -78,7 +78,7 @@ public:
     {
         atomSpace->clear();
         /* load scm files with all necessary nodes and links  */
-        load_scm_file(*atomSpace, "opencog/atomspace/core_types.scm");
+        load_scm_file(*atomSpace, "opencog/atoms/base/core_types.scm");
         load_scm_file(*atomSpace, "tests/query/test_types.scm");
         // load_scm_file(*atomSpace, ATOM_TABLE_TEST_SCM_FILE);
     }

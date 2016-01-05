@@ -29,7 +29,7 @@ public:
 		// Disable the AF mechanism during testing!
 		_as.set_attentional_focus_boundary(AttentionValue::MINSTI);
 		config().set("SCM_PRELOAD",
-		             "opencog/atomspace/core_types.scm, "
+		             "opencog/atoms/base/core_types.scm, "
 		             "opencog/scm/utilities.scm, "
 		             "opencog/scm/av-tv.scm");
 		load_scm_files_from_config(_as);
