@@ -175,3 +175,14 @@
 				(ListLink (Concept "bar") (Number 3)))
 		))
 )
+
+(define imply-expected
+	(SetLink
+		(EvaluationLink
+			(PredicateNode "reverse-foo")
+			(ListLink (ConceptNode "ah one") (ConceptNode "bar")))
+		(EvaluationLink
+			(PredicateNode "reverse-foo")
+			(ListLink (ConceptNode "ah two") (ConceptNode "bar")))
+	)
+)
