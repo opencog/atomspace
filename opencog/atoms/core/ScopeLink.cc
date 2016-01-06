@@ -32,12 +32,6 @@ using namespace opencog;
 
 void ScopeLink::init(void)
 {
-	size_t sz = _outgoing.size();
-	if (2 < sz)
-		throw SyntaxException(TRACE_INFO,
-			"Expecting an outgoing set size of at most two, got %d for %s",
-			sz, toString().c_str());
-
 	extract_variables(_outgoing);
 }
 
