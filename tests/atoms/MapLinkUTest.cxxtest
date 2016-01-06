@@ -198,5 +198,14 @@ void MapLinkUTest::test_implication(void)
 
     TS_ASSERT(result == sete);
 
+    // ---------------------------------------------------
+    result = eval->eval_h("(cog-execute! imply-eval)");
+
+    sete = eval->eval_h("eval-expected");
+    printf("got %s", result->toString().c_str());
+    printf("expected %s\n", sete->toString().c_str());
+
+    TS_ASSERT(result == sete);
+
     logger().debug("END TEST: %s", __FUNCTION__);
 }

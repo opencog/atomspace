@@ -220,15 +220,26 @@ Handle MapLink::rewrite_one(const Handle& term, AtomSpace* scratch) const
 
 Handle MapLink::execute(AtomSpace* scratch) const
 {
+	Handle valh = _outgoing[1];
+	// XXX FIXME ... eager-executation was already done, and it shouldn't
+	// be. We should be doing a lazy-evaluation right here, and executing
+	// any DefinedSchema, etc. here. I mean, that si why we are given the
+	// scratch space in the first place: to hold execution temporaries!
+#if LAZY_EXECUTION
+	FunctionLinkPtr flp(FunctionLinkCast(valh));
+	if (flp)
+		valh = flp->execute(scratch);
+#endif
+
 	// Handle three different cases.
 	// If there is a single value, apply the map to the single value.
 	// If there is a set of values, apply the map to the set.
 	// If there is a link of values, apply the map to the link.
-	Type argtype = _outgoing[1]->getType();
+	Type argtype = valh->getType();
 	if (SET_LINK == argtype or LIST_LINK == argtype)
 	{
 		HandleSeq remap;
-		LinkPtr lp(LinkCast(_outgoing[1]));
+		LinkPtr lp(LinkCast(valh));
 		for (const Handle& h : lp->getOutgoingSet())
 		{
 			Handle mone = rewrite_one(h, scratch);
@@ -238,7 +249,7 @@ Handle MapLink::execute(AtomSpace* scratch) const
 	}
 
 	// Its a singleton. Just remap that.
-	return rewrite_one(_outgoing[1], scratch);
+	return rewrite_one(valh, scratch);
 }
 
 /* ===================== END OF FILE ===================== */

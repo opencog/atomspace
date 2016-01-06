@@ -186,3 +186,35 @@
 			(ListLink (ConceptNode "ah two") (ConceptNode "bar")))
 	)
 )
+(define imply-eval
+	(MapLink
+		(ExtensionalImplicationLink
+			(VariableList
+				(TypedVariable (Variable "$x") (Type "ConceptNode"))
+				(TypedVariable (Variable "$y") (Type "NumberNode")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Variable "$x") (Variable "$y")))
+			(EvaluationLink
+				(Predicate "reverse-foo nature")
+				(ListLink (Variable "$y") (Variable "$x"))))
+		(SetLink
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah one")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah two")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Plus (Number 3) (Number 2))))
+		))
+)
+
+(define eval-expected
+	(SetLink
+		(EvaluationLink
+			(PredicateNode "reverse-foo nature")
+			(ListLink (Number 5) (ConceptNode "bar")))
+	)
+)
