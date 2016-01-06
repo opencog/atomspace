@@ -150,3 +150,28 @@
 				(ListLink (Concept "bar") (Number 3)))
 		))
 )
+
+(define imply-map
+	(MapLink
+		(ExtensionalImplicationLink
+			(VariableList
+				(TypedVariable (Variable "$x") (Type "ConceptNode"))
+				(TypedVariable (Variable "$y") (Type "ConceptNode")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Variable "$x") (Variable "$y")))
+			(EvaluationLink
+				(Predicate "reverse-foo")
+				(ListLink (Variable "$y") (Variable "$x"))))
+		(SetLink
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah one")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah two")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Number 3)))
+		))
+)
