@@ -45,6 +45,8 @@ protected:
 	ScopeLinkPtr _pattern;
 	const Variables* _vars;
 	const std::set<Handle>* _varset;
+	bool _is_impl;
+	Handle _rewrite;
 
 	void init(void);
 

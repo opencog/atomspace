@@ -42,6 +42,28 @@ void MapLink::init(void)
 	_pattern = ScopeLinkCast(_outgoing[0]);
 	_vars = &_pattern->get_variables();
 	_varset = &_vars->varset;
+	_is_impl = false;
+
+	if (classserver().isA(tscope, IMPLICATION_LINK))
+	{
+		_is_impl = true;
+		const HandleSeq& impl = _pattern->getOutgoingSet();
+		if (impl.size() < 2)
+			throw SyntaxException(TRACE_INFO,
+				"Expecting ImplicationLink of at least size 2.");
+
+		if (_pattern->get_body() == impl[0])
+		{
+			_rewrite = impl[1];
+		}
+		else if (_pattern->get_body() == impl[1])
+		{
+			if (impl.size() < 3)
+				throw SyntaxException(TRACE_INFO,
+					"Expecting ImplicationLink of at least size 3.");
+			_rewrite = impl[2];
+		}
+	}
 
 	FunctionLink::init();
 }
@@ -180,6 +202,12 @@ Handle MapLink::rewrite_one(const Handle& term, AtomSpace* scratch) const
 		if (valmap.end() == valpair)
 			return Handle::UNDEFINED;
 		valseq.emplace_back(valpair->second);
+	}
+
+	// Perform substitution, if it's an ImplicationLink
+	if (_is_impl)
+	{
+		return _vars->substitute(_rewrite, valseq);
 	}
 
 	// Wrap up the result in a list only if there is more than one
