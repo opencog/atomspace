@@ -227,7 +227,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 	{
 		throw SyntaxException(TRACE_INFO,
 			"Unexpected contents in TypedVariableLink\n"
-			"Expected TypeNode or TypeChoice, got %s",
+			"Expected type specifier (e.g. TypeNode, TypeChoice, etc.), got %s",
 			classserver().getTypeName(t).c_str());
 	}
 
