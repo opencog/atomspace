@@ -106,3 +106,47 @@
 			(ListLink (Concept "bar") (Concept "ah two")))
 	)
 )
+
+(define double-num-set
+	(MapLink
+		(ScopeLink
+			(VariableList
+				(TypedVariable (Variable "$x") (Type "ConceptNode"))
+				(TypedVariable (Variable "$y") (Type "NumberNode")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Variable "$x") (Variable "$y"))))
+		(SetLink
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah one")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah two")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Number 3)))
+		))
+)
+
+(define double-con-set
+	(MapLink
+		(ScopeLink
+			(VariableList
+				(TypedVariable (Variable "$x") (Type "ConceptNode"))
+				(TypedVariable (Variable "$y") (Type "ConceptNode")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Variable "$x") (Variable "$y"))))
+		(SetLink
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah one")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah two")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Number 3)))
+		))
+)

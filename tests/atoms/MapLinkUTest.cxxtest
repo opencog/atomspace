@@ -60,7 +60,7 @@ public:
 
     void test_singleton(void);
     void test_signature(void);
-    // void test_singleton_set(void);
+    void test_double_set(void);
 };
 
 void MapLinkUTest::tearDown(void)
@@ -143,6 +143,37 @@ void MapLinkUTest::test_signature(void)
     Handle result = eval->eval_h("(cog-execute! single-signature)");
 
     Handle sete = eval->eval_h("sig-expect");
+    printf("got %s", result->toString().c_str());
+    printf("expected %s\n", sete->toString().c_str());
+
+    TS_ASSERT(result == sete);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void MapLinkUTest::test_double_set(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/atoms/maplink.scm");
+    load_scm_files_from_config(*as);
+
+    Handle result = eval->eval_h("(cog-execute! double-num-set)");
+
+    Handle sete = eval->eval_h(
+        "(SetLink (ListLink (Concept \"bar\") (Number 3)))");
+    printf("got %s", result->toString().c_str());
+    printf("expected %s\n", sete->toString().c_str());
+
+    TS_ASSERT(result == sete);
+
+    // ---------------------------------------------------
+    result = eval->eval_h("(cog-execute! double-con-set)");
+
+    sete = eval->eval_h(
+        "(SetLink "
+        "    (ListLink (Concept \"bar\") (Concept \"ah one\"))"
+        "    (ListLink (Concept \"bar\") (Concept \"ah two\")))");
     printf("got %s", result->toString().c_str());
     printf("expected %s\n", sete->toString().c_str());
 
