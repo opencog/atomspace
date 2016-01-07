@@ -70,7 +70,8 @@
           (cog-set-tv! AC (stv 1 1)))))
 
 ; Associate a name to the rule
-(define crisp-deduction-rule-name (Node "crisp-deduction-rule"))
+(define crisp-deduction-rule-name
+  (DefinedSchemaNode "crisp-deduction-rule"))
 (DefineLink
   crisp-deduction-rule-name
   crisp-deduction-rule)

@@ -40,8 +40,8 @@ UREConfigReader::UREConfigReader(AtomSpace& as, Handle rbs) : _as(as)
 			"UREConfigReader - invalid rulebase specified!");
 
 	// Retrieve the rules (MemberLinks) and instantiate them
-	for (Handle rule : fetch_rules(rbs))
-		_rbparams.rules.emplace_back(rule);
+	for (Handle rule_name : fetch_rule_names(rbs))
+		_rbparams.rules.emplace_back(rule_name, rbs);
 
 	// Fetch maximum number of iterations
 	_rbparams.max_iter = fetch_num_param(max_iter_name, rbs);
@@ -90,13 +90,13 @@ void UREConfigReader::set_maximum_iterations(int mi)
 	_rbparams.max_iter = mi;
 }
 
-HandleSeq UREConfigReader::fetch_rules(Handle rbs)
+HandleSeq UREConfigReader::fetch_rule_names(Handle rbs)
 {
 	// Retrieve rules
 	Handle rule_var = _as.add_node(VARIABLE_NODE, "__URE_RULE__");
 	Handle rule_pat = _as.add_link(MEMBER_LINK, rule_var, rbs);
-	Handle gl = _as.add_link(BIND_LINK, rule_pat, rule_pat);
-	Handle rule_names = bindlink(&_as, gl);
+	Handle gl = _as.add_link(GET_LINK, rule_pat);
+	Handle rule_names = satisfying_set(&_as, gl);
 
 	// Remove the GetLink pattern from the AtomSpace as it is no
 	// longer useful

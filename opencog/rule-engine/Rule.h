@@ -46,7 +46,10 @@ public:
 	//    <rule name>
 	//    <rbs>
 	Rule(Handle rule);
+	Rule(Handle rule_name, Handle rbs);
 
+	void init(Handle rule);
+	
 	// Comparison
 	bool operator==(const Rule& r) const {
 		return r.rule_handle_ == rule_handle_;
