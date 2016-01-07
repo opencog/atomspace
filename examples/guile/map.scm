@@ -42,13 +42,15 @@
 
 (define single-set
 	(MapLink
+		; The same pattern as above.  Extracts values for variable $x.
 		(ScopeLink
 			(Variable "$x")
 			(EvaluationLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Variable "$x"))))
 		(SetLink
-			; Not in alphaebtical or type-order!
+			; A set of graphs to which the above pattern should
+			; be matched.
 			(EvaluationLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Number 3)))
@@ -61,6 +63,18 @@
 		))
 )
 
+; This should return
+; (SetLink (Concept "ah one") (Concept "ah two") (Number 3))
+; since these are the three values that correspond to the variable $x.
+; Note that SetLinks are unordered links, and so the members of the
+; set may be returned in a different order than in which they were
+; specified as inputs.
+(cog-execute! single-set)
+
+
+; This example is like the above, except that a ListLink instead of
+; a SetLink is used. The ListLink is an ordered link; the ordering
+; of the list is preserved by the mapping.
 (define single-list
 	(MapLink
 		(ScopeLink
@@ -74,21 +88,34 @@
 				(ListLink (Concept "bar") (Concept "ah one")))
 			(EvaluationLink
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Concept "ah two")))
+				(ListLink (Concept "bar") (Number 3)))
 			(EvaluationLink
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Number 3)))
+				(ListLink (Concept "bar") (Concept "ah two")))
 		))
 )
 
+; This should return
+; (ListLink (Concept "ah one") (Number 3) (Concept "ah two"))
+; Note that the sequential order of the original list is preserved.
+(cog-execute! single-list)
+
+
+; Same as above, except that a type constraint is applied.
+; This causes the input to be filtered, so that any graphs
+; that don't match the type are discarded.
 (define single-type
 	(MapLink
 		(ScopeLink
+			; The type ov the variable MUST be ConceptNode!!
 			(TypedVariable (Variable "$x") (Type "ConceptNode"))
 			(EvaluationLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Variable "$x"))))
 		(SetLink
+			; A set of graphs to which the above pattern should be
+			; applied.  Note that, due to the type constraint, only
+			; two of the three can match. (Numbers not being Concepts)
 			(EvaluationLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah one")))
@@ -101,9 +128,28 @@
 		))
 )
 
+; The expected return value is
+; (SetLink (ConceptNode "ah one") (ConceptNode "ah two"))
+; Note that the NumberNode is no longer included in the result
+; of the map.
+(cog-execute! single-type)
+
+
+; The type checking that can be performed during mapping can be
+; quite sophisticated. In this example, a single variable $x is
+; used to match *every* element in the input set.  However, since
+; the variable $x is typed to have a very specific form, some of
+; the input set is rejected, as it does not match that type.
+;
+; This implements a kind of filtering, by returning a subset of
+; the original input set, and discarding those values that don't
+; match the desired type.  A similar kind of filtering can be done
+; using PutLink; see the `filter.scm` example for more.
+;
 (define single-signature
 	(MapLink
 		(ScopeLink
+         ; The variable $x must be an evaluationLink of a certain form!
 			(TypedVariable (Variable "$x")
 				(SignatureLink
 					(EvaluationLink
@@ -111,6 +157,8 @@
 						(ListLink (Concept "bar") (Type "ConceptNode")))))
 			(Variable "$x"))
 		(SetLink
+			; Of the three elements in this set, only two have the type
+			; that is specified above.
 			(EvaluationLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah one")))
@@ -122,6 +170,19 @@
 				(ListLink (Concept "bar") (Number 3)))
 		))
 )
+
+; Executing this will filter the input set down to just two members.
+; The return value should be this:
+;    (SetLink
+;       (EvaluationLink
+;          (Predicate "foo")
+;          (ListLink (Concept "bar") (Concept "ah one")))
+;       (EvaluationLink
+;          (Predicate "foo")
+;          (ListLink (Concept "bar") (Concept "ah two")))
+;    )
+;
+(cog-execute! single-signature)
 
 (define sig-expect
 	(SetLink
