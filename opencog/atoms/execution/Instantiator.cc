@@ -33,13 +33,14 @@
 
 using namespace opencog;
 
-bool Instantiator::walk_tree_eager(HandleSeq& oset_results, const HandleSeq& expr,
-                             int quotation_level)
+bool Instantiator::walk_tree(HandleSeq& oset_results, const HandleSeq& expr,
+                             int quotation_level,
+                             Handle (Instantiator::*walker)(const Handle&, int))
 {
 	bool changed = false;
 	for (const Handle& h : expr)
 	{
-		Handle hg(walk_tree_eager(h, quotation_level));
+		Handle hg((this->*walker)(h, quotation_level));
 		if (hg != h) changed = true;
 
 		// GlobNodes are grounded by a ListLink of everything that
@@ -68,7 +69,23 @@ bool Instantiator::walk_tree_eager(HandleSeq& oset_results, const HandleSeq& exp
 	return changed;
 }
 
-Handle Instantiator::walk_tree_eager(const Handle& expr, int quotation_level)
+bool Instantiator::seq_eager(HandleSeq& oset_results,
+                             const HandleSeq& expr,
+                             int quotation_level)
+{
+	return walk_tree(oset_results, expr, quotation_level,
+	                 &Instantiator::walk_eager);
+}
+
+bool Instantiator::seq_lazy(HandleSeq& oset_results,
+                            const HandleSeq& expr,
+                            int quotation_level)
+{
+	return walk_tree(oset_results, expr, quotation_level,
+	                 &Instantiator::walk_lazy);
+}
+
+Handle Instantiator::walk_eager(const Handle& expr, int quotation_level)
 {
 	Type t = expr->getType();
 	LinkPtr lexpr(LinkCast(expr));
@@ -87,7 +104,7 @@ Handle Instantiator::walk_tree_eager(const Handle& expr, int quotation_level)
 			throw InvalidParamException(TRACE_INFO,
 			                            "QuoteLink/UnquoteLink has "
 			                            "unexpected arity!");
-		return walk_tree_eager(lexpr->getOutgoingAtom(0), quotation_level);
+		return walk_eager(lexpr->getOutgoingAtom(0), quotation_level);
 	}
 
 	if (not lexpr)
@@ -98,7 +115,7 @@ Handle Instantiator::walk_tree_eager(const Handle& expr, int quotation_level)
 		// If we are here, we are a Node.
 		if (DEFINED_SCHEMA_NODE == t)
 		{
-			return walk_tree_eager(DefineLink::get_definition(expr), quotation_level);
+			return walk_eager(DefineLink::get_definition(expr), quotation_level);
 		}
 
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
@@ -119,7 +136,7 @@ Handle Instantiator::walk_tree_eager(const Handle& expr, int quotation_level)
 			return Handle(expr);
 
 		_halt = true;
-		Handle hgnd(walk_tree_eager(it->second, quotation_level));
+		Handle hgnd(walk_eager(it->second, quotation_level));
 		_halt = false;
 		return hgnd;
 	}
@@ -144,7 +161,7 @@ Handle Instantiator::walk_tree_eager(const Handle& expr, int quotation_level)
 		// Execute the values in the PutLink before doing the beta-reduction.
 		// Execute the body only after the beta-reduction has been done.
 		Handle pvals = ppp->get_values();
-		Handle gargs = walk_tree_eager(pvals, quotation_level);
+		Handle gargs = walk_eager(pvals, quotation_level);
 		if (gargs != pvals)
 		{
 			HandleSeq groset;
@@ -157,7 +174,7 @@ Handle Instantiator::walk_tree_eager(const Handle& expr, int quotation_level)
 		// Step one: beta-reduce.
 		Handle red(ppp->reduce());
 		// Step two: execute the resulting body.
-		Handle rex(walk_tree_eager(red, quotation_level));
+		Handle rex(walk_eager(red, quotation_level));
 		if (nullptr == rex)
 			return rex;
 
@@ -205,7 +222,7 @@ Handle Instantiator::walk_tree_eager(const Handle& expr, int quotation_level)
 		Handle args(eolp->get_args());
 
 		// Perform substitution on the args, only.
-		args = walk_tree_eager(args, quotation_level);
+		args = walk_eager(args, quotation_level);
 
 		// If its a DSN, obtain the correct body for it.
 		if (DEFINED_SCHEMA_NODE == sn->getType())
@@ -220,14 +237,14 @@ Handle Instantiator::walk_tree_eager(const Handle& expr, int quotation_level)
 
 			// Two-step process. First, plug the arguments into the
 			// function; i.e. perform beta-reduction. Second, actually
-			// execute the result. We execute by just calling walk_tree_eager
+			// execute the result. We execute by just calling walk_eager
 			// again.
 			Handle body(flp->get_body());
 			Variables vars(flp->get_variables());
 
 			const HandleSeq& oset(LinkCast(args)->getOutgoingSet());
 			Handle beta_reduced(vars.substitute_nocheck(body, oset));
-			return walk_tree_eager(beta_reduced, quotation_level);
+			return walk_eager(beta_reduced, quotation_level);
 		}
 
 		ExecutionOutputLinkPtr geolp(createExecutionOutputLink(sn, args));
@@ -239,7 +256,7 @@ Handle Instantiator::walk_tree_eager(const Handle& expr, int quotation_level)
 	if (DELETE_LINK == t)
 	{
 		HandleSeq oset_results;
-		walk_tree_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
+		seq_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
 		for (const Handle& h: oset_results)
 		{
 			Type ht = h->getType();
@@ -259,7 +276,7 @@ Handle Instantiator::walk_tree_eager(const Handle& expr, int quotation_level)
 		// Perform substitution on all arguments before applying the
 		// function itself.
 		HandleSeq oset_results;
-		walk_tree_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
+		seq_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
 		Handle hl(FoldLink::factory(t, oset_results));
 		FoldLinkPtr flp(FoldLinkCast(hl));
 		return flp->execute(_as);
@@ -274,7 +291,7 @@ Handle Instantiator::walk_tree_eager(const Handle& expr, int quotation_level)
 		// Perform substitution on all arguments before applying the
 		// function itself.
 		HandleSeq oset_results;
-		walk_tree_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
+		seq_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
 		Handle hl(FunctionLink::factory(t, oset_results));
 		FunctionLinkPtr flp(FunctionLinkCast(hl));
 		return flp->execute(_as);
@@ -286,7 +303,7 @@ Handle Instantiator::walk_tree_eager(const Handle& expr, int quotation_level)
 	if (GET_LINK == t)
 	{
 		HandleSeq oset_results;
-		walk_tree_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
+		seq_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
 		size_t sz = oset_results.size();
 		for (size_t i=0; i< sz; i++)
 			oset_results[i] = _as->add_atom(oset_results[i]);
@@ -300,7 +317,7 @@ mere_recursive_call:
 	// None of the above. Create a duplicate link, but with an outgoing
 	// set where the variables have been substituted by their values.
 	HandleSeq oset_results;
-	bool changed = walk_tree_eager(oset_results, lexpr->getOutgoingSet(),
+	bool changed = seq_eager(oset_results, lexpr->getOutgoingSet(),
 	                         quotation_level);
 	if (changed)
 	{
@@ -310,7 +327,7 @@ mere_recursive_call:
 	return expr;
 }
 
-Handle Instantiator::walk_tree_lazy(const Handle& expr, int quotation_level)
+Handle Instantiator::walk_lazy(const Handle& expr, int quotation_level)
 {
 	Type t = expr->getType();
 	LinkPtr lexpr(LinkCast(expr));
@@ -329,7 +346,7 @@ Handle Instantiator::walk_tree_lazy(const Handle& expr, int quotation_level)
 			throw InvalidParamException(TRACE_INFO,
 			                            "QuoteLink/UnquoteLink has "
 			                            "unexpected arity!");
-		return walk_tree_lazy(lexpr->getOutgoingAtom(0), quotation_level);
+		return walk_lazy(lexpr->getOutgoingAtom(0), quotation_level);
 	}
 
 	if (not lexpr)
@@ -340,7 +357,7 @@ Handle Instantiator::walk_tree_lazy(const Handle& expr, int quotation_level)
 		// If we are here, we are a Node.
 		if (DEFINED_SCHEMA_NODE == t)
 		{
-			return walk_tree_lazy(DefineLink::get_definition(expr), quotation_level);
+			return walk_lazy(DefineLink::get_definition(expr), quotation_level);
 		}
 
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
@@ -361,7 +378,7 @@ Handle Instantiator::walk_tree_lazy(const Handle& expr, int quotation_level)
 			return Handle(expr);
 
 		_halt = true;
-		Handle hgnd(walk_tree_lazy(it->second, quotation_level));
+		Handle hgnd(walk_lazy(it->second, quotation_level));
 		_halt = false;
 		return hgnd;
 	}
@@ -388,7 +405,7 @@ Handle Instantiator::walk_tree_lazy(const Handle& expr, int quotation_level)
 		// Step one: beta-reduce.
 		Handle red(ppp->reduce());
 		// Step two: execute the resulting body.
-		Handle rex(walk_tree_lazy(red, quotation_level));
+		Handle rex(walk_lazy(red, quotation_level));
 		if (nullptr == rex)
 			return rex;
 
@@ -444,7 +461,7 @@ Handle Instantiator::walk_tree_lazy(const Handle& expr, int quotation_level)
 		Handle args(eolp->get_args());
 
 		// Perform substitution on the args, only.
-		args = walk_tree_eager(args, quotation_level);
+		args = walk_eager(args, quotation_level);
 
 		// If its a DSN, obtain the correct body for it.
 		if (DEFINED_SCHEMA_NODE == sn->getType())
@@ -459,14 +476,14 @@ Handle Instantiator::walk_tree_lazy(const Handle& expr, int quotation_level)
 
 			// Two-step process. First, plug the arguments into the
 			// function; i.e. perform beta-reduction. Second, actually
-			// execute the result. We execute by just calling walk_tree_eager
+			// execute the result. We execute by just calling walk_eager
 			// again.
 			Handle body(flp->get_body());
 			Variables vars(flp->get_variables());
 
 			const HandleSeq& oset(LinkCast(args)->getOutgoingSet());
 			Handle beta_reduced(vars.substitute_nocheck(body, oset));
-			return walk_tree_eager(beta_reduced, quotation_level);
+			return walk_eager(beta_reduced, quotation_level);
 		}
 
 		ExecutionOutputLinkPtr geolp(createExecutionOutputLink(sn, args));
@@ -478,7 +495,7 @@ Handle Instantiator::walk_tree_lazy(const Handle& expr, int quotation_level)
 	if (DELETE_LINK == t)
 	{
 		HandleSeq oset_results;
-		walk_tree_lazy(oset_results, lexpr->getOutgoingSet(), quotation_level);
+		seq_lazy(oset_results, lexpr->getOutgoingSet(), quotation_level);
 		for (const Handle& h: oset_results)
 		{
 			Type ht = h->getType();
@@ -498,7 +515,7 @@ Handle Instantiator::walk_tree_lazy(const Handle& expr, int quotation_level)
 		// Perform substitution on all arguments before applying the
 		// function itself.
 		HandleSeq oset_results;
-		walk_tree_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
+		seq_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
 		Handle hl(FoldLink::factory(t, oset_results));
 		FoldLinkPtr flp(FoldLinkCast(hl));
 		return flp->execute(_as);
@@ -513,7 +530,7 @@ Handle Instantiator::walk_tree_lazy(const Handle& expr, int quotation_level)
 		// Perform substitution on all arguments before applying the
 		// function itself.
 		HandleSeq oset_results;
-		walk_tree_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
+		seq_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
 		Handle hl(FunctionLink::factory(t, oset_results));
 		FunctionLinkPtr flp(FunctionLinkCast(hl));
 		return flp->execute(_as);
@@ -525,7 +542,7 @@ Handle Instantiator::walk_tree_lazy(const Handle& expr, int quotation_level)
 	if (GET_LINK == t)
 	{
 		HandleSeq oset_results;
-		walk_tree_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
+		seq_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
 		size_t sz = oset_results.size();
 		for (size_t i=0; i< sz; i++)
 			oset_results[i] = _as->add_atom(oset_results[i]);
@@ -539,8 +556,8 @@ mere_recursive_call:
 	// None of the above. Create a duplicate link, but with an outgoing
 	// set where the variables have been substituted by their values.
 	HandleSeq oset_results;
-	bool changed = walk_tree_eager(oset_results, lexpr->getOutgoingSet(),
-	                         quotation_level);
+	bool changed = seq_lazy(oset_results, lexpr->getOutgoingSet(),
+	                        quotation_level);
 	if (changed)
 	{
 		LinkPtr subl = createLink(t, oset_results, expr->getTruthValue());
@@ -573,11 +590,11 @@ Handle Instantiator::instantiate(const Handle& expr,
 	_vmap = &vars;
 
 	// The returned handle is not yet in the atomspace. Add it now.
-	// We do this here, instead of in walk_tree_eager(), because adding
+	// We do this here, instead of in walk_eager(), because adding
 	// atoms to the atomspace is an expensive process.  We can save
 	// some time by doing it just once, right here, in one big batch.
-	// return _as->add_atom(walk_tree_eager(expr));
-	return _as->add_atom(walk_tree_lazy(expr));
+	// return _as->add_atom(walk_eager(expr));
+	return _as->add_atom(walk_lazy(expr));
 }
 
 /* ===================== END OF FILE ===================== */
