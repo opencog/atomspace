@@ -507,17 +507,12 @@ Handle Instantiator::walk_lazy(const Handle& expr, int quotation_level)
 
 	// FoldLink's are a kind-of FunctionLink, but are not currently
 	// handled by the FunctionLink factory below.  This should be fixed
-	// someday, when the reduct directory is re-desiged.
+	// someday, when the reduct directory is nuked.
 	if (classserver().isA(t, FOLD_LINK))
 	{
-		// At this time, no FoldLink ever has a variable declaration,
-		// and the number of arguments is not fixed, i.e. variadic.
-		// Perform substitution on all arguments before applying the
-		// function itself.
-		HandleSeq oset_results;
-		seq_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
-		Handle hl(FoldLink::factory(t, oset_results));
-		FoldLinkPtr flp(FoldLinkCast(hl));
+		FoldLinkPtr flp(FoldLinkCast(expr));
+		if (nullptr == flp)
+			flp = FoldLinkCast(FoldLink::factory(lexpr));
 		return flp->execute(_as);
 	}
 
@@ -527,12 +522,9 @@ Handle Instantiator::walk_lazy(const Handle& expr, int quotation_level)
 		// At this time, no FunctionLink that is outside of an
 		// ExecutionOutputLink ever has a variable declaration.
 		// Also, the number of arguments is not fixed, i.e. variadic.
-		// Perform substitution on all arguments before applying the
-		// function itself.
-		HandleSeq oset_results;
-		seq_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
-		Handle hl(FunctionLink::factory(t, oset_results));
-		FunctionLinkPtr flp(FunctionLinkCast(hl));
+		FunctionLinkPtr flp(FunctionLinkCast(expr));
+		if (nullptr == flp)
+			flp = FunctionLinkCast(FunctionLink::factory(lexpr));
 		return flp->execute(_as);
 	}
 
@@ -541,15 +533,7 @@ Handle Instantiator::walk_lazy(const Handle& expr, int quotation_level)
 	// PatternLink::satisfy() method.
 	if (GET_LINK == t)
 	{
-		HandleSeq oset_results;
-		seq_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
-		size_t sz = oset_results.size();
-		for (size_t i=0; i< sz; i++)
-			oset_results[i] = _as->add_atom(oset_results[i]);
-
-		LinkPtr lp(createLink(GET_LINK, oset_results));
-
-		return satisfying_set(_as, Handle(lp));
+		return satisfying_set(_as, expr);
 	}
 
 mere_recursive_call:
