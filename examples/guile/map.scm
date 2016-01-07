@@ -15,7 +15,12 @@
 ; MapLink could have been named UnPutLink, CoPutLink or ExtractLink or
 ; UnBetaReduceLink.
 ;
-; These ideas are illustrated below.
+; These ideas are illustrated below. The first 4 examples illustrate
+; the extraction of values for a single variable; this is, of un-beta-
+; reducing a single composition.  This includes a demonstration of
+; type checking, which can be used to implement filtering.  The next
+; few examples show how multi-variable extraction works, as a straight-
+; forward extension of the single-variable case.
 
 (use-modules (opencog) (opencog exec))
 
@@ -107,7 +112,7 @@
 (define single-type
 	(MapLink
 		(ScopeLink
-			; The type ov the variable MUST be ConceptNode!!
+			; The type of the variable MUST be ConceptNode!!
 			(TypedVariable (Variable "$x") (Type "ConceptNode"))
 			(EvaluationLink
 				(Predicate "foo")
@@ -184,20 +189,13 @@
 ;
 (cog-execute! single-signature)
 
-(define sig-expect
-	(SetLink
-		(EvaluationLink
-			(Predicate "foo")
-			(ListLink (Concept "bar") (Concept "ah one")))
-		(EvaluationLink
-			(Predicate "foo")
-			(ListLink (Concept "bar") (Concept "ah two")))
-	)
-)
-
+; All of the previous examples demonstrated matching to a single
+; variable. The below demonstrates matching to two variables, one of
+; which is typed to be a concept, and the other a number.
 (define double-num-set
 	(MapLink
 		(ScopeLink
+			; Two variables, $x and $y, both typed.
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "NumberNode")))
@@ -205,6 +203,7 @@
 				(Predicate "foo")
 				(ListLink (Variable "$x") (Variable "$y"))))
 		(SetLink
+			; Same input as always.
 			(EvaluationLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah one")))
@@ -217,6 +216,25 @@
 		))
 )
 
+; Extract values for both of the variables.  The expected answer is:
+;
+;    (SetLink
+;       (ListLink (Concept "bar") (Number 3)))
+;
+; There are four note-worthy things to observe about this answer:
+; First, the outermost link is a SetLink; this corresponds to the fact
+; that the input to the map was a SetLink. Next, we observe a single
+; element in the set, because only one element of the input matched.
+; That single elt then specifies the values for the two variables.
+; The variable values are ordered, in a ListLink, because we need to
+; know which value corresponded to $x and which to $y (the first and
+; the second, of course).  Without the ListLink, we would not know which
+; was which.
+;
+(cog-execute! double-num-set)
+
+; Same as above, except the variables are type differently, and soe we
+; expect two answers, not one.
 (define double-con-set
 	(MapLink
 		(ScopeLink
@@ -239,15 +257,44 @@
 		))
 )
 
+; Much like the example previous, except that there are now two elements
+; in the returned set (due to filtering on the types):
+;
+;    (SetLink
+;       (ListLink (Concept "bar") (Concept "ah one"))
+;       (ListLink (Concept "bar") (Concept "ah two")))
+;
+(cog-execute! double-con-set)
+
+; Finally, an example that shows actual mapping taking place!!
+; This is a variant of the example immediately above, except that,
+; this time, instead of returning two values for two variables,
+; the values are used in an ImplicationLink, to perform a graph
+; rewrite.  That is, an ImplicationLink is a function P(x)->Q(x),
+; so that, if P(x) matches the input P(v), then Q(v) is returned
+; (with the value `v` substituted for the variable `x` in Q(x)).
+; Actually, this example uses two variables, so the implication
+; link is in the form of P(x,y)->Q(x,y) and inputs P(a,b) are
+; re-written to Q(a,b).
+;
+; Observe that the re-writing could also be acheived by combining
+; the results of the MapLink with a PutLink.  The form below is
+; slightly less verbose, and thus, maybe more convenient than
+; using Map and Put together.
+;
 (define imply-map
 	(MapLink
-		(ExtensionalImplicationLink
+		; The ImplicationLink is the "map" that will be applied.
+		(ImplicationLink
+			; The implicationLink has two variables in it, both typed.
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "ConceptNode")))
+			; The P(x,y) part of the implication.
 			(EvaluationLink
 				(Predicate "foo")
 				(ListLink (Variable "$x") (Variable "$y")))
+			; The Q(x,y) part of the implication.
 			(EvaluationLink
 				(Predicate "reverse-foo")
 				(ListLink (Variable "$y") (Variable "$x"))))
@@ -264,16 +311,21 @@
 		))
 )
 
-(define imply-expected
-	(SetLink
-		(EvaluationLink
-			(PredicateNode "reverse-foo")
-			(ListLink (ConceptNode "ah one") (ConceptNode "bar")))
-		(EvaluationLink
-			(PredicateNode "reverse-foo")
-			(ListLink (ConceptNode "ah two") (ConceptNode "bar")))
-	)
-)
+; Executing the implication P(x,y)->Q(x,y) on P(a,b) should return
+; Q(a,b). In this example, P is `foo` and Q(x,y) is `reverse-foo(y,x)`
+; i.e. the order of the arguments is switched. The expected result is:
+;
+;    (SetLink
+;       (EvaluationLink
+;          (PredicateNode "reverse-foo")
+;          (ListLink (ConceptNode "ah one") (ConceptNode "bar")))
+;       (EvaluationLink
+;          (PredicateNode "reverse-foo")
+;          (ListLink (ConceptNode "ah two") (ConceptNode "bar")))
+;    )
+;
+(cog-execute! imply-map)
+
 (define imply-eval
 	(MapLink
 		(ExtensionalImplicationLink
