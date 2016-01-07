@@ -62,6 +62,10 @@ void DefineLinkUTest::test_define_concept()
 	Handle VA = N(VARIABLE_NODE, "$va");
 	Handle VB = N(VARIABLE_NODE, "$vb");
 	Handle aliasA = N(CONCEPT_NODE, "alias-of-A");
+
+	TS_ASSERT_THROWS_ANYTHING(L(DEFINE_LINK, aliasA, A));
+
+	aliasA = N(DEFINED_SCHEMA_NODE, "alias-of-A");
 	Handle def_concept = L(DEFINE_LINK, aliasA, A);
 
 	// Test that aliasA returns A as definition

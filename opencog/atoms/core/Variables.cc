@@ -27,7 +27,6 @@
 #include <opencog/atomutils/TypeUtils.h>
 #include <opencog/atoms/TypeNode.h>
 
-#include "DefineLink.h"
 #include "ScopeLink.h"
 #include "VariableList.h"
 #include "Variables.h"
