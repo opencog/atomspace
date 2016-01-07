@@ -38,7 +38,7 @@
 "
     ; Didn't add type checking here b/c the ure-configuration format isn't
     ; set in stone yet. And the best place to do that is in c++ UREConfigReader
-    (let ((alias (Node rule-name)))
+    (let ((alias (DefinedSchemaNode rule-name)))
         (DefineLink alias rule)
 
         (MemberLink (stv weight 1)
