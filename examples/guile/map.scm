@@ -326,35 +326,29 @@
 ;
 (cog-execute! imply-map)
 
-(define imply-eval
+(define summation
 	(MapLink
-		(ExtensionalImplicationLink
+		(ImplicationLink
 			(VariableList
-				(TypedVariable (Variable "$x") (Type "ConceptNode"))
+				(TypedVariable (Variable "$x") (Type "NumberNode"))
 				(TypedVariable (Variable "$y") (Type "NumberNode")))
 			(EvaluationLink
 				(Predicate "foo")
 				(ListLink (Variable "$x") (Variable "$y")))
-			(EvaluationLink
-				(Predicate "reverse-foo nature")
-				(ListLink (Variable "$y") (Variable "$x"))))
+			(PlusLink (Variable "$y") (Variable "$x")))
 		(SetLink
 			(EvaluationLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah one")))
 			(EvaluationLink
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Concept "ah two")))
+				(ListLink (Number 2) (Number 3)))
 			(EvaluationLink
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Plus (Number 3) (Number 2))))
+				(ListLink (Number 10) (Times (Number 3) (Number 2))))
 		))
 )
 
-(define eval-expected
-	(SetLink
-		(EvaluationLink
-			(PredicateNode "reverse-foo nature")
-			(ListLink (Number 5) (ConceptNode "bar")))
-	)
-)
+; This example is curently broken, because lazy evaluation does not
+; work!
+(cog-execute! summation)
