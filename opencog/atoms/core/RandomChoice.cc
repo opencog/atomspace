@@ -120,24 +120,20 @@ Handle RandomChoiceLink::execute(AtomSpace * as) const
 	size_t ary = _outgoing.size();
 	if (0 == ary) return Handle();
 
+	Handle ofirst = _outgoing[0];
+
+	// We need to have our first arg to be a set or a list or
+	// something of that sort.
+	FunctionLinkPtr flp(FunctionLinkCast(ofirst));
+	if (flp)
+		ofirst = flp->execute(as);
+
 	// Special-case handling for SetLinks, so it works with
 	// dynamically-evaluated PutLinks ...
-	Type ot = _outgoing[0]->getType();
+	Type ot = ofirst->getType();
 	if (1 == ary and (SET_LINK == ot or LIST_LINK == ot))
 	{
-#if LAZY_EXECUTION
-		// Already executed by the time we get here... !?
-		// XXX FIXME: this is a situation where doing "eager" execution
-		// is a bad idea; should be doing lazy execution.
-		FunctionLinkPtr flp(FunctionLinkCast(_outgoing[0]));
-		if (nullptr == flp) return _outgoing[0];
-
-		Handle h(flp->execute(as));
-		LinkPtr lll(LinkCast(h));
-		if (nullptr == lll) return h;
-#endif
-
-		LinkPtr lll(LinkCast(_outgoing[0]));
+		LinkPtr lll(LinkCast(ofirst));
 
 		// Search for ListLink pairs, w/car of pair a number.
 		HandleSeq choices;
@@ -179,7 +175,7 @@ uniform:
 	// Weighted choices cannot be sets, since sets are unordered.
 	if (2 == ary and LIST_LINK == ot)
 	{
-		LinkPtr lweights(LinkCast(_outgoing[0]));
+		LinkPtr lweights(LinkCast(ofirst));
 		LinkPtr lchoices(LinkCast(_outgoing[1]));
 
 		if (lweights->getArity() != lchoices->getArity())
