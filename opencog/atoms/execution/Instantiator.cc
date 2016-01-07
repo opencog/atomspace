@@ -577,8 +577,8 @@ Handle Instantiator::instantiate(const Handle& expr,
 	// We do this here, instead of in walk_eager(), because adding
 	// atoms to the atomspace is an expensive process.  We can save
 	// some time by doing it just once, right here, in one big batch.
-	// return _as->add_atom(walk_eager(expr));
-	return _as->add_atom(walk_lazy(expr));
+	return _as->add_atom(walk_eager(expr));
+	// return _as->add_atom(walk_lazy(expr));
 }
 
 /* ===================== END OF FILE ===================== */
