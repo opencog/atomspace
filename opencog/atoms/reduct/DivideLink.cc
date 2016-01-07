@@ -81,7 +81,7 @@ void DivideLink::init(void)
 			"Don't know how to divide that!");
 }
 
-Handle DivideLink::do_execute(const HandleSeq& oset) const
+Handle DivideLink::do_execute(AtomSpace* as, const HandleSeq& oset) const
 {
 	if (1 == oset.size())
 	{

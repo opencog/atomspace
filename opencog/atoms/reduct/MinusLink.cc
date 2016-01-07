@@ -81,7 +81,7 @@ void MinusLink::init(void)
 			"Don't know how to subract that!");
 }
 
-Handle MinusLink::do_execute(const HandleSeq& oset) const
+Handle MinusLink::do_execute(AtomSpace* as, const HandleSeq& oset) const
 {
 	if (1 == oset.size())
 	{
