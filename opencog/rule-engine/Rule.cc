@@ -36,6 +36,17 @@ using namespace opencog;
 
 Rule::Rule(Handle rule)
 {
+	init(rule);
+}
+
+Rule::Rule(Handle rule_name, Handle rbs)
+{
+	AtomSpace* as = rule_name->getAtomSpace();
+	init(as->get_link(MEMBER_LINK, rule_name, rbs));
+}
+
+void Rule::init(Handle rule)
+{
 	if (rule == Handle::UNDEFINED)
 		rule_handle_ = Handle::UNDEFINED;
 	else
@@ -46,11 +57,11 @@ Rule::Rule(Handle rule)
 		                                rule->toString().c_str());
 
 		rule_alias_ = LinkCast(rule)->getOutgoingAtom(0);
-		Handle rbs_h = LinkCast(rule)->getOutgoingAtom(1);
+		Handle rbs = LinkCast(rule)->getOutgoingAtom(1);
 
 		rule_handle_ = DefineLink::get_definition(rule_alias_);
 		name_ = NodeCast(rule_alias_)->getName();
-		category_ = NodeCast(rbs_h)->getName();
+		category_ = NodeCast(rbs)->getName();
 		weight_ = rule->getTruthValue()->getMean();
 	}
 }

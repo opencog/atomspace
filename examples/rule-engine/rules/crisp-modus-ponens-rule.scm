@@ -45,7 +45,8 @@
           (cog-set-tv! B (stv 1 1)))))
 
 ; Associate a name to the rule
-(define crisp-modus-ponens-rule-name (Node "crisp-modus-ponens-rule"))
+(define crisp-modus-ponens-rule-name
+  (DefinedSchemaNode "crisp-modus-ponens-rule"))
 (DefineLink
   crisp-modus-ponens-rule-name
   crisp-modus-ponens-rule)

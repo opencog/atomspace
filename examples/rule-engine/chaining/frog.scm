@@ -23,7 +23,7 @@
 	)
 )
 
-(define rule1-name (Node "rule1"))
+(define rule1-name (DefinedSchemaNode "rule1"))
 (DefineLink rule1-name rule1)
 
 (define rule2
@@ -42,7 +42,7 @@
 	)
 )
 
-(define rule2-name (Node "rule2"))
+(define rule2-name (DefinedSchemaNode "rule2"))
 (DefineLink rule2-name rule2)
 
 (define source
