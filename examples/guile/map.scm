@@ -2,7 +2,7 @@
 ; Mapping example.
 ;
 ; The MapLink implements a link type analogous to the `map` function
-; commmonly found in functional programming langauges, such as the
+; commmonly found in functional programming languages, such as the
 ; scheme srfi-1 `map`, or `map` in haskell.
 ;
 ; In many ways, MapLink is similar to BindLink, except that MapLink
