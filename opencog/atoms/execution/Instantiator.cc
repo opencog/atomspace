@@ -375,31 +375,20 @@ Handle Instantiator::walk_tree_lazy(const Handle& expr, int quotation_level)
 	if (quotation_level > 0)
 		goto mere_recursive_call;
 
-	// Reduce PutLinks in a lzy fashion.
-
+	// Reduce PutLinks in a lazy fashion. By "lazy" we mean that the
+	// beta-reduction is performed first, and then the result is
+	// executed. (The eager version, above, executes the arguments to
+	// the Put first, then beta-reduces, then executes again.)
 	if (PUT_LINK == t)
 	{
 		PutLinkPtr ppp(PutLinkCast(expr));
 		if (nullptr == ppp)
 			ppp = createPutLink(*lexpr);
 
-		// Execute the values in the PutLink before doing the beta-reduction.
-		// Execute the body only after the beta-reduction has been done.
-		Handle pvals = ppp->get_values();
-		Handle gargs = walk_tree_eager(pvals, quotation_level);
-		if (gargs != pvals)
-		{
-			HandleSeq groset;
-			if (ppp->get_vardecl())
-				groset.emplace_back(ppp->get_vardecl());
-			groset.emplace_back(ppp->get_body());
-			groset.emplace_back(gargs);
-			ppp = createPutLink(groset);
-		}
 		// Step one: beta-reduce.
 		Handle red(ppp->reduce());
 		// Step two: execute the resulting body.
-		Handle rex(walk_tree_eager(red, quotation_level));
+		Handle rex(walk_tree_lazy(red, quotation_level));
 		if (nullptr == rex)
 			return rex;
 
@@ -431,6 +420,14 @@ Handle Instantiator::walk_tree_lazy(const Handle& expr, int quotation_level)
 
 	// ExecutionOutputLinks are not handled by the FunctionLink factory
 	// below. This is due to a circular shared-libarary dependency.
+	//
+	// However, the evaluation method is different, too; ExOutLinks have
+	// to be evlauated in an eager fashion. This is because ExOutLinks
+	// wrap black-box scheme/python functions, and we don't know what
+	// those functions might do, and it is currently way too much to ask
+	// of the users to also implement lazy execution.  Its too subtle,
+	// too complex for ordinary users. Thus, we eagerly execute the args
+	// passed into the ExOutLink, and hand those values to the user.
 	if (EXECUTION_OUTPUT_LINK == t)
 	{
 		// XXX Force syntax checking; normally this would be done in the
@@ -481,7 +478,7 @@ Handle Instantiator::walk_tree_lazy(const Handle& expr, int quotation_level)
 	if (DELETE_LINK == t)
 	{
 		HandleSeq oset_results;
-		walk_tree_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
+		walk_tree_lazy(oset_results, lexpr->getOutgoingSet(), quotation_level);
 		for (const Handle& h: oset_results)
 		{
 			Type ht = h->getType();
