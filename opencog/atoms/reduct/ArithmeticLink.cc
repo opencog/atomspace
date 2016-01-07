@@ -188,7 +188,7 @@ Handle ArithmeticLink::execute(AtomSpace* as) const
 	{
 		Handle arg = _outgoing[0];
 		FunctionLinkPtr flp(FunctionLinkCast(arg));
-		if (flp) arg = flp->execute();
+		if (flp) arg = flp->execute(as);
 
 		if (SET_LINK == arg->getType())
 		{
