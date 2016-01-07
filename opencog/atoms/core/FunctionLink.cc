@@ -26,6 +26,7 @@
 
 #include "ArityLink.h"
 #include "DeleteLink.h"
+#include "MapLink.h"
 #include "SleepLink.h"
 #include "TimeLink.h"
 #include "RandomChoice.h"
@@ -112,6 +113,9 @@ Handle FunctionLink::factory(Type t, const HandleSeq& seq)
 {
 	if (ARITY_LINK == t)
 		return Handle(createArityLink(seq));
+
+	if (MAP_LINK == t)
+		return Handle(createMapLink(seq));
 
 	if (RANDOM_CHOICE_LINK == t)
 		return Handle(createRandomChoiceLink(seq));

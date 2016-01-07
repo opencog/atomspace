@@ -23,8 +23,6 @@
 #ifndef _OPENCOG_VARIABLE_LIST_H
 #define _OPENCOG_VARIABLE_LIST_H
 
-#include <map>
-
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/core/Variables.h>

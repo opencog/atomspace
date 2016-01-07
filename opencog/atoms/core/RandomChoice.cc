@@ -125,10 +125,10 @@ Handle RandomChoiceLink::execute(AtomSpace * as) const
 	Type ot = _outgoing[0]->getType();
 	if (1 == ary and (SET_LINK == ot or LIST_LINK == ot))
 	{
-#if 0
+#if LAZY_EXECUTION
 		// Already executed by the time we get here... !?
 		// XXX FIXME: this is a situation where doing "eager" execution
-		// is a bad idea.
+		// is a bad idea; should be doing lazy execution.
 		FunctionLinkPtr flp(FunctionLinkCast(_outgoing[0]));
 		if (nullptr == flp) return _outgoing[0];
 

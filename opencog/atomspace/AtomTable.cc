@@ -290,7 +290,7 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
     } else if (LAMBDA_LINK == atom_type) {
         if (nullptr == LambdaLinkCast(atom))
             return createLambdaLink(*LinkCast(atom));
-    } else if (IMPLICATION_LINK == atom_type) {
+    } else if (classserver().isA(atom_type, IMPLICATION_LINK)) {
         if (nullptr == ImplicationLinkCast(atom))
             return createImplicationLink(*LinkCast(atom));
     } else if (classserver().isA(atom_type, FUNCTION_LINK)) {
@@ -389,7 +389,7 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
         return createVariableList(*LinkCast(atom));
     if (LAMBDA_LINK == atom_type)
         return createLambdaLink(*LinkCast(atom));
-    if (IMPLICATION_LINK == atom_type)
+    if (classserver().isA(atom_type, IMPLICATION_LINK))
         return createImplicationLink(*LinkCast(atom));
     if (classserver().isA(atom_type, FUNCTION_LINK))
         // XXX FIXME more circular-dependency heart-ache
