@@ -61,9 +61,14 @@ private:
 	 * any execution. See also PutLink, which does substituion.
 	 * (actually, beta reduction).
 	 */
-	Handle walk_tree(const Handle& tree, int quotation_level = 0);
-	bool walk_tree(HandleSeq&, const HandleSeq& orig,
-	               int quotation_level = 0);
+	Handle walk_tree_eager(const Handle& tree, int quotation_level = 0);
+	bool walk_tree_eager(HandleSeq&, const HandleSeq& orig,
+	                     int quotation_level = 0);
+
+	/* Same as above, but does lazy execution. */
+	Handle walk_tree_lazy(const Handle& tree, int quotation_level = 0);
+	bool walk_tree_lazy(HandleSeq&, const HandleSeq& orig,
+	                     int quotation_level = 0);
 
 public:
 	Instantiator(AtomSpace* as) : _as(as) {}
