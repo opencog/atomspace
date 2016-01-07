@@ -133,7 +133,250 @@ Handle Instantiator::walk_tree_eager(const Handle& expr, int quotation_level)
 	if (quotation_level > 0)
 		goto mere_recursive_call;
 
-	// Reduce PutLinks.
+	// Reduce PutLinks in an eager fashion, by first executing the
+	// arguments to the Put, then beta-reducing, then executing again.
+	if (PUT_LINK == t)
+	{
+		PutLinkPtr ppp(PutLinkCast(expr));
+		if (nullptr == ppp)
+			ppp = createPutLink(*lexpr);
+
+		// Execute the values in the PutLink before doing the beta-reduction.
+		// Execute the body only after the beta-reduction has been done.
+		Handle pvals = ppp->get_values();
+		Handle gargs = walk_tree_eager(pvals, quotation_level);
+		if (gargs != pvals)
+		{
+			HandleSeq groset;
+			if (ppp->get_vardecl())
+				groset.emplace_back(ppp->get_vardecl());
+			groset.emplace_back(ppp->get_body());
+			groset.emplace_back(gargs);
+			ppp = createPutLink(groset);
+		}
+		// Step one: beta-reduce.
+		Handle red(ppp->reduce());
+		// Step two: execute the resulting body.
+		Handle rex(walk_tree_eager(red, quotation_level));
+		if (nullptr == rex)
+			return rex;
+
+		// Step three: XXX this is awkward, but seems to be needed...
+		// If the result is evaluatable, then evaluate it. e.g. if the
+		// result has a GroundedPredicateNode, we need to run it now.
+		// We do, however, ignore the resulting TV, which is also
+		// awkward.  I'm confused about how to handle this best.
+		// The behavior tree uses this!
+		// Anyway, do_evaluate() will throw if rex is not evaluatable.
+		if (SET_LINK == rex->getType())
+		{
+			LinkPtr slp(LinkCast(rex));
+			for (const Handle& plo : slp->getOutgoingSet())
+			{
+				try {
+					EvaluationLink::do_evaluate(_as, plo, true);
+				}
+				catch (const NotEvaluatableException& ex) {}
+			}
+			return rex;
+		}
+		try {
+			EvaluationLink::do_evaluate(_as, rex, true);
+		}
+		catch (const NotEvaluatableException& ex) {}
+		return rex;
+	}
+
+	// ExecutionOutputLinks are not handled by the FunctionLink factory
+	// below. This is due to a circular shared-libarary dependency.
+	if (EXECUTION_OUTPUT_LINK == t)
+	{
+		// XXX Force syntax checking; normally this would be done in the
+		// atomspace factory, but that is currently broken, so do it here.
+		ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(expr));
+		if (nullptr == eolp)
+			eolp = createExecutionOutputLink(lexpr->getOutgoingSet());
+
+		// At this time, the GSN or the DSN is always in position 0
+		// of the outgoing set, and the ListLink of arguments is always
+		// in position 1.  Someday in the future, there may be a variable
+		// declaration; we punt on that.
+		Handle sn(eolp->get_schema());
+		Handle args(eolp->get_args());
+
+		// Perform substitution on the args, only.
+		args = walk_tree_eager(args, quotation_level);
+
+		// If its a DSN, obtain the correct body for it.
+		if (DEFINED_SCHEMA_NODE == sn->getType())
+			sn = DefineLink::get_definition(sn);
+
+		// If its an anonymous function link, execute it here.
+		if (LAMBDA_LINK == sn->getType())
+		{
+			LambdaLinkPtr flp(LambdaLinkCast(sn));
+			if (NULL == flp)
+				flp = createLambdaLink(*LinkCast(sn));
+
+			// Two-step process. First, plug the arguments into the
+			// function; i.e. perform beta-reduction. Second, actually
+			// execute the result. We execute by just calling walk_tree_eager
+			// again.
+			Handle body(flp->get_body());
+			Variables vars(flp->get_variables());
+
+			const HandleSeq& oset(LinkCast(args)->getOutgoingSet());
+			Handle beta_reduced(vars.substitute_nocheck(body, oset));
+			return walk_tree_eager(beta_reduced, quotation_level);
+		}
+
+		ExecutionOutputLinkPtr geolp(createExecutionOutputLink(sn, args));
+		return geolp->execute(_as);
+	}
+
+	// Handle DeleteLink's before general FunctionLink's; they
+	// work differently.
+	if (DELETE_LINK == t)
+	{
+		HandleSeq oset_results;
+		walk_tree_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
+		for (const Handle& h: oset_results)
+		{
+			Type ht = h->getType();
+			if (VARIABLE_NODE != ht and GLOB_NODE != ht)
+				_as->remove_atom(h, true);
+		}
+		return Handle::UNDEFINED;
+	}
+
+	// FoldLink's are a kind-of FunctionLink, but are not currently
+	// handled by the FunctionLink factory below.  This should be fixed
+	// someday, when the reduct directory is re-desiged.
+	if (classserver().isA(t, FOLD_LINK))
+	{
+		// At this time, no FoldLink ever has a variable declaration,
+		// and the number of arguments is not fixed, i.e. variadic.
+		// Perform substitution on all arguments before applying the
+		// function itself.
+		HandleSeq oset_results;
+		walk_tree_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
+		Handle hl(FoldLink::factory(t, oset_results));
+		FoldLinkPtr flp(FoldLinkCast(hl));
+		return flp->execute(_as);
+	}
+
+	// Fire any other function links, not handled above.
+	if (classserver().isA(t, FUNCTION_LINK))
+	{
+		// At this time, no FunctionLink that is outside of an
+		// ExecutionOutputLink ever has a variable declaration.
+		// Also, the number of arguments is not fixed, i.e. variadic.
+		// Perform substitution on all arguments before applying the
+		// function itself.
+		HandleSeq oset_results;
+		walk_tree_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
+		Handle hl(FunctionLink::factory(t, oset_results));
+		FunctionLinkPtr flp(FunctionLinkCast(hl));
+		return flp->execute(_as);
+	}
+
+	// If there is a GetLink, we have to perform the get, and replace
+	// it with the results of the get. The get is implemented with the
+	// PatternLink::satisfy() method.
+	if (GET_LINK == t)
+	{
+		HandleSeq oset_results;
+		walk_tree_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
+		size_t sz = oset_results.size();
+		for (size_t i=0; i< sz; i++)
+			oset_results[i] = _as->add_atom(oset_results[i]);
+
+		LinkPtr lp(createLink(GET_LINK, oset_results));
+
+		return satisfying_set(_as, Handle(lp));
+	}
+
+mere_recursive_call:
+	// None of the above. Create a duplicate link, but with an outgoing
+	// set where the variables have been substituted by their values.
+	HandleSeq oset_results;
+	bool changed = walk_tree_eager(oset_results, lexpr->getOutgoingSet(),
+	                         quotation_level);
+	if (changed)
+	{
+		LinkPtr subl = createLink(t, oset_results, expr->getTruthValue());
+		return Handle(_as->add_atom(subl));
+	}
+	return expr;
+}
+
+Handle Instantiator::walk_tree_lazy(const Handle& expr, int quotation_level)
+{
+	Type t = expr->getType();
+	LinkPtr lexpr(LinkCast(expr));
+
+	// Quotation case
+	if (QUOTE_LINK == t)
+		quotation_level++;
+	else if (UNQUOTE_LINK == t)
+		quotation_level--;
+
+	// Discard the following QuoteLink or UnquoteLink (as it is
+	// serving its quoting or unquoting function).
+	if ((quotation_level == 1 and QUOTE_LINK == t)
+		or (quotation_level == 0 and UNQUOTE_LINK == t)) {
+		if (1 != lexpr->getArity())
+			throw InvalidParamException(TRACE_INFO,
+			                            "QuoteLink/UnquoteLink has "
+			                            "unexpected arity!");
+		return walk_tree_lazy(lexpr->getOutgoingAtom(0), quotation_level);
+	}
+
+	if (not lexpr)
+	{
+		if (quotation_level > 0)
+			return expr;
+
+		// If we are here, we are a Node.
+		if (DEFINED_SCHEMA_NODE == t)
+		{
+			return walk_tree_lazy(DefineLink::get_definition(expr), quotation_level);
+		}
+
+		if (VARIABLE_NODE != t and GLOB_NODE != t)
+			return Handle(expr);
+
+		// If we are here, we found a variable. Look it up. Return a
+		// grounding if it has one, otherwise return the variable
+		// itself.
+		std::map<Handle,Handle>::const_iterator it = _vmap->find(expr);
+		if (_vmap->end() == it) return Handle(expr);
+
+		// Not so fast, pardner. VariableNodes can be grounded by
+		// links, and those links may be executable. In that case,
+		// we have to execute them.
+
+		// halt infinite regress
+		if (_halt)
+			return Handle(expr);
+
+		_halt = true;
+		Handle hgnd(walk_tree_lazy(it->second, quotation_level));
+		_halt = false;
+		return hgnd;
+	}
+
+	// -----------------------------------------------------------
+	// If we are here, then we have a link. Walk it. In general,
+	// links may contain both bound variables, and also free variables.
+	// We must be careful to substitute only for free variables, and
+	// never for bound ones.
+
+	if (quotation_level > 0)
+		goto mere_recursive_call;
+
+	// Reduce PutLinks in a lzy fashion.
+
 	if (PUT_LINK == t)
 	{
 		PutLinkPtr ppp(PutLinkCast(expr));
@@ -336,7 +579,8 @@ Handle Instantiator::instantiate(const Handle& expr,
 	// We do this here, instead of in walk_tree_eager(), because adding
 	// atoms to the atomspace is an expensive process.  We can save
 	// some time by doing it just once, right here, in one big batch.
-	return _as->add_atom(walk_tree_eager(expr));
+	// return _as->add_atom(walk_tree_eager(expr));
+	return _as->add_atom(walk_tree_lazy(expr));
 }
 
 /* ===================== END OF FILE ===================== */
