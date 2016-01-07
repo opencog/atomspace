@@ -20,8 +20,10 @@
 ; reducing a single composition.  This includes a demonstration of
 ; type checking, which can be used to implement filtering.  The next
 ; few examples show how multi-variable extraction works, as a straight-
-; forward extension of the single-variable case.
-
+; forward extension of the single-variable case.  The final examples
+; illustrate actual "mapping", that is, graph re-writing or graph
+; transformation as a result of applying a mapping function.
+;
 (use-modules (opencog) (opencog exec))
 
 (define single
