@@ -72,17 +72,18 @@ The current list of modules that wrap C++ code includes:
 
 # Example Files
 
-* `basic.scm`   -- a very simple introduction
-* `bindlink-example.scm` -- an example of using the pattern matcher.
-* `execute.scm` -- an example of executing executable atoms, with
+* `basic.scm`   -- A very simple introduction
+* `bindlink-example.scm` -- An example of using the pattern matcher.
+* `execute.scm` -- An example of executing executable atoms, with
                    callbacks written in python or scheme.
-* `get-put.scm` -- an example of asserting facts in the AtomSpace.
-* `state.scm`   -- maintaining unique state.
-* `property.scm`-- setting properies on atoms.
-* `filter.scm`  -- filtering sets of atoms.
+* `get-put.scm` -- An example of asserting facts in the AtomSpace.
+* `state.scm`   -- Maintaining unique state.
+* `property.scm`-- Setting properies on atoms.
+* `filter.scm`  -- Filtering sets of atoms.
+* `map.scm`     -- Applying a map function to a set or list.
 * `random-choice.scm`  -- Numerical programming, including loops.
-* `logger-example.scm` -- using the built-in logger.
-* `except.scm`  -- an example of exceptions being thrown and passed.
-* `persist-example.scm` -- and example of saving atomspace data in an SQL
+* `logger-example.scm` -- Using the built-in logger.
+* `except.scm`  -- An example of exceptions being thrown and passed.
+* `persist-example.scm` -- An example of saving atomspace data in an SQL
                    database.
-* `gperf.scm`   -- some very crude performance measurements.
+* `gperf.scm`   -- Some very crude performance measurements.

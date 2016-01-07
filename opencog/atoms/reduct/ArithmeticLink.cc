@@ -157,6 +157,9 @@ static inline double get_double(AtomSpace *as, Handle h)
 
 NumberNodePtr ArithmeticLink::unwrap_set(Handle h) const
 {
+	FunctionLinkPtr flp(FunctionLinkCast(h));
+	if (flp) h = flp->execute();
+
 	// Pattern matching hack. The pattern matcher returns sets of atoms;
 	// if that set contains numbers or something numeric, then unwrap it.
 	if (SET_LINK == h->getType())
@@ -181,10 +184,20 @@ Handle ArithmeticLink::execute(AtomSpace* as) const
 {
 	// Pattern matching hack. The pattern matcher returns sets of atoms;
 	// if that set contains numbers or something numeric, then unwrap it.
-	if (SET_LINK == _type and 1 == _outgoing.size())
+	if (1 == _outgoing.size())
 	{
-		LinkPtr lp(LinkCast(_outgoing[0]));
-		return do_execute(as, lp->getOutgoingSet());
+		Handle arg = _outgoing[0];
+		FunctionLinkPtr flp(FunctionLinkCast(arg));
+		if (flp) arg = flp->execute(as);
+
+		if (SET_LINK == arg->getType())
+		{
+			LinkPtr lp(LinkCast(arg));
+			return do_execute(as, lp->getOutgoingSet());
+		}
+		HandleSeq o;
+		o.emplace_back(arg);
+		return do_execute(as, o);
 	}
 	return do_execute(as, _outgoing);
 }

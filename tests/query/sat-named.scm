@@ -37,7 +37,7 @@
 ;;; the DefineLink binds exactly the same variables that the lambda under
 ;;; it does (with SatisfactionLink being the lambda).
 (DefineLink
-	(ConceptNode "Does Tom like X?")
+	(DefinedPredicate "Does Tom like X?")
 	(SatisfactionLink
 		(VariableNode "$X")
 		(EvaluationLink
