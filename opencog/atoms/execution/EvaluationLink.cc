@@ -89,6 +89,12 @@ static NumberNodePtr unwrap_set(Handle h)
 
 	NumberNodePtr na(NumberNodeCast(h));
 	if (nullptr == na)
+	{
+		NodePtr np(NodeCast(h));
+		if (np) na = createNumberNode(*np);
+	}
+
+	if (nullptr == na)
 		throw SyntaxException(TRACE_INFO,
 			"Don't know how to compare this: %s",
 			h->toString().c_str());
