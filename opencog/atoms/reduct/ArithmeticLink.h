@@ -52,7 +52,7 @@ protected:
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	NumberNodePtr unwrap_set(Handle) const;
-	Handle do_execute(AtomSpace*, const HandleSeq&) const;
+	virtual Handle do_execute(AtomSpace*, const HandleSeq&) const;
 public:
 	ArithmeticLink(const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),

@@ -48,7 +48,7 @@ protected:
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	Handle do_execute(const HandleSeq&) const;
+	virtual Handle do_execute(AtomSpace*, const HandleSeq&) const;
 public:
 	MinusLink(const Handle& a, const Handle& b,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
@@ -58,8 +58,6 @@ public:
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 	MinusLink(Link& l);
-
-	virtual Handle execute(AtomSpace* as) const;
 };
 
 typedef std::shared_ptr<MinusLink> MinusLinkPtr;
