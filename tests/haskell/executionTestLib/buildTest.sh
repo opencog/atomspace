@@ -1,8 +1,8 @@
 BIN_DIR=$1
 SOURCE_DIR=$2
 
-libname="opencoglib"
-libver="0.1.0.0"
+libname=$(stack query | awk 'NR==2' | sed 's/://g'| sed 's/ //g')
+libver=$(stack query | awk 'NR==4' | sed 's/version: //g' | sed "s/'//g" | sed "s/ //g")
 
 if [ "$(id -u)" -ne 0 ]
 then
