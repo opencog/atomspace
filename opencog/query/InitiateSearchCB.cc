@@ -666,7 +666,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 				// Evaluatables don't exist in the atomspace, in general.
 				// Therefore, we cannot start a search with them. Unless
 				// they are all evaluatable, in which case we pick a clause
-				// that hase a variable with the narrowest type-membership.
+				// that has a variable with the narrowest type-membership.
 				if (not all_clauses_are_evaluatable and
 				    0 < _pattern->evaluatable_holders.count(cl)) continue;
 
@@ -687,7 +687,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 					_root = cl;
 					_starter_term = *fa.least_holders.begin();
 					if (all_clauses_are_evaluatable)
-						_starter_term = cl;
+						_starter_term = var;
 					count = num;
 					ptypes = typeset;
 					LAZY_LOG_FINE << "New minimum count of "
