@@ -5,7 +5,10 @@
 (define-module (opencog query))
 
 ; The atomspace libraries are located in /usr/local/lib/opencog
-(setenv "LTDL_LIBRARY_PATH" "/usr/local/lib/opencog")
+(setenv "LTDL_LIBRARY_PATH"
+	(if (getenv "LTDL_LIBRARY_PATH")
+		(string-append (getenv "LTDL_LIBRARY_PATH") ":/usr/local/lib/opencog")
+		"/usr/local/lib/opencog"))
 
 ; This is also loaded by (opencog exec) We need it here,
 ; else we get undefined symbols in libquery.
