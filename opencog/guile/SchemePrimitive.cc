@@ -159,8 +159,14 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 
 PrimitiveEnviron * PrimitiveEnviron::verify_pe(SCM spe, const char *subrname)
 {
-	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, spe))
+	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, spe))
+{
+printf("duude aieeeee %p\n", subrname);
+printf("duude aieeeee >>%s\n", subrname);
+scm_display(spe, scm_current_output_port ());
+fflush (stdout);
 		scm_wrong_type_arg_msg(subrname, 1, spe, "opencog primitive function");
+}
 
 	scm_t_bits misctype = SCM_SMOB_FLAGS(spe);
 	if (SchemeSmob::COG_EXTEND != misctype)

@@ -41,7 +41,7 @@ void PatternLink::common_init(void)
 
 	// If there are any defines in the pattern, then all bets are off
 	// as to whether it is connected or not, what's virtual, what isn't.
-	// The analysis will have to be performed at run-time, so we can
+	// The analysis will have to be performed at run-time, so we will
 	// skip doing it here.
 	if (0 < _pat.defined_terms.size())
 	{
