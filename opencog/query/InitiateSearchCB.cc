@@ -613,6 +613,17 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 {
 	const HandleSeq& clauses = _pattern->mandatory;
 
+	// Some search patterns simply do not have any groundable
+	// clauses in them. This is one common reason why a variable-
+	// based search is being performed.
+	bool all_clauses_are_evaluatable = true;
+	for (const Handle& cl : clauses)
+	{
+		if (0 < _pattern->evaluatable_holders.count(cl)) continue;
+		all_clauses_are_evaluatable = false;
+		break;
+	}
+
 	// Find the rarest variable type;
 	size_t count = SIZE_MAX;
 	std::set<Type> ptypes;
@@ -653,10 +664,12 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 			for (const Handle& cl : clauses)
 			{
 				// Evaluatables don't exist in the atomspace, in general.
-				// Cannot start a search with them.
-				if (0 < _pattern->evaluatable_holders.count(cl)) continue;
-				FindAtoms fa(var);
-				fa.search_set(cl);
+				// Therefore, we cannot start a search with them. Unless
+				// they are all evaluatable, in which case we pick a clause
+				// that hase a variable with the narrowest type-membership.
+				if (not all_clauses_are_evaluatable and
+				    0 < _pattern->evaluatable_holders.count(cl)) continue;
+
 				if (cl == var)
 				{
 					_root = cl;
@@ -666,14 +679,19 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 					LAZY_LOG_FINE << "New minimum count of " << count;
 					break;
 				}
+
+				FindAtoms fa(var);
+				fa.search_set(cl);
 				if (0 < fa.least_holders.size())
 				{
 					_root = cl;
 					_starter_term = *fa.least_holders.begin();
+					if (all_clauses_are_evaluatable)
+						_starter_term = cl;
 					count = num;
 					ptypes = typeset;
 					LAZY_LOG_FINE << "New minimum count of "
-					              << count << "(nonroot)";
+					              << count << " (nonroot)";
 					break;
 				}
 			}
@@ -683,10 +701,10 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	// There were no type restrictions!
 	if (nullptr == _root)
 	{
-		logger().fine("There were no type restrictions! That must be wrong!");
+		logger().info("Warning: There were no type restrictions! That must be wrong!");
 		if (0 == clauses.size())
 		{
-			// This is kind-of weird, it can happen if all clauses
+			// This is kind-of weird, but it can happen if all clauses
 			// are optional.
 			_search_fail = true;
 			return false;
