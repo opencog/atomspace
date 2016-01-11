@@ -221,20 +221,6 @@ bool Atom::isMarkedForRemoval() const
     return (_flags & MARKED_FOR_REMOVAL) != 0;
 }
 
-bool Atom::getFlag(int flag) const
-{
-    return (_flags & flag) != 0;
-}
-
-void Atom::setFlag(int flag, bool value)
-{
-    if (value) {
-        _flags |= flag;
-    } else {
-        _flags &= ~(flag);
-    }
-}
-
 void Atom::unsetRemovalFlag(void)
 {
     _flags &= ~MARKED_FOR_REMOVAL;
