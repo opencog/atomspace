@@ -7,7 +7,7 @@ libver=$(stack query | awk 'NR==4' | sed 's/version: //g' | sed "s/'//g" | sed "
 if [ "$(id -u)" -ne 0 ]
 then
     #Cleanup of last build if it exists
-    rm "$SOURCE_DIR/lib$libname-$libver.so"
+    rm "$SOURCE_DIR/../haskellTest/lib$libname-$libver.so"
     rm "$SOURCE_DIR/a.out"
 
     # Build haskell bindings package.
@@ -15,7 +15,7 @@ then
 
     LIB=$(find . -name "*$libname*.so" | awk 'NR==1')
 
-    cp $LIB "$SOURCE_DIR/lib$libname-$libver.so"
+    cp $LIB "$SOURCE_DIR/../haskellTest/lib$libname-$libver.so"
 else
     echo "Can't run Haskell-Tests as root"
 fi
