@@ -112,6 +112,8 @@ protected:
 	                      HandleSeq& virtual_clauses,
 	                      std::set<Handle>& black_clauses);
 
+	void add_dummies();
+
 	void trace_connectives(const std::set<Type>&,
 	                       const HandleSeq& clauses,
 	                       int quotation_level = 0);
