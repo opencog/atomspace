@@ -34,8 +34,6 @@
 
 #include <boost/signals2.hpp>
 
-#include <opencog/util/exceptions.h>
-
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/types.h>
 #include <opencog/atoms/base/ClassServer.h>
@@ -75,15 +73,12 @@ typedef boost::signals2::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
 class Atom
     : public std::enable_shared_from_this<Atom>
 {
-    friend class ::AtomUTest;     // Needs to call setFlag()
     friend class AtomStorage;     // Needs to set _uuid
     friend class AtomTable;       // Needs to call MarkedForRemoval()
     friend class AtomSpace;       // Needs to call getAtomTable()
-    friend class ImportanceIndex; // Needs to call setFlag()
+    friend class DeleteLink;      // Needs to call getAtomTable()
     friend class Handle;          // Needs to view _uuid
     friend class TLB;             // Needs to view _uuid
-    friend class CreateLink;      // Needs to call getAtomTable();
-    friend class DeleteLink;      // Needs to call getAtomTable();
     friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
 
 private:
@@ -164,21 +159,6 @@ private:
      * @return Whether this atom is marked for removal.
      */
     bool isMarkedForRemoval() const;
-
-    /** Returns an atom flag.
-     * A byte represents all flags. Each bit is one of them.
-     *
-     * @param An int indicating which of the flags will be returned.
-     * @return A boolean indicating if that flag is set or not.
-     */
-    bool getFlag(int) const;
-
-    /** Changes the value of the given flag.
-     *
-     * @param An int indicating which of the flags will be set.
-     * @param A boolean indicating the new value of the flag.
-     */
-    void setFlag(int, bool);
 
     //! Marks the atom for removal.
     void markForRemoval();
