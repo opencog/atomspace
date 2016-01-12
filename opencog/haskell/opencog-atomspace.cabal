@@ -20,13 +20,9 @@ library
   exposed-modules:   OpenCog.AtomSpace
 
   other-modules:     OpenCog.AtomSpace.Api
-                   , OpenCog.AtomSpace.AtomType
                    , OpenCog.AtomSpace.Env
-                   , OpenCog.AtomSpace.Filter
-                   , OpenCog.AtomSpace.Inheritance
                    , OpenCog.AtomSpace.Internal
                    , OpenCog.AtomSpace.Sugar
-                   , OpenCog.AtomSpace.Template
                    , OpenCog.AtomSpace.Types
                    , OpenCog.AtomSpace.Query
                    , OpenCog.AtomSpace.Utils

@@ -9,11 +9,10 @@ import Control.Monad.IO.Class      (liftIO)
 import Foreign                     (Ptr)
 import Foreign.C.Types             (CULong(..),CInt(..),CDouble(..))
 import OpenCog.AtomSpace.Api       (getByUUID,getWithUUID)
-import OpenCog.AtomSpace.Internal  (fromRawGen,toRaw,fromTVRaw,UUID)
-import OpenCog.AtomSpace.Types     (AtomGen,Atom,TruthVal)
-import OpenCog.AtomSpace.AtomType  (AtomType(BindT,SatisfactionT))
+import OpenCog.AtomSpace.Types     (TruthVal,Atom(..))
 import OpenCog.AtomSpace.Env       (AtomSpaceRef(..),AtomSpace,getAtomSpace)
 import OpenCog.AtomSpace.CUtils
+import OpenCog.AtomSpace.Internal  (UUID)
 
 --------------------------------------------------------------------------------
 
@@ -24,15 +23,15 @@ foreign import ccall "PatternMatcher_BindLink"
 
 -- | 'cogBind' calls the pattern matcher with the given bindLink.
 -- (you should insert the bindlink to the atomspace before using this function).
-cogBind :: Atom BindT -> AtomSpace (Maybe AtomGen)
+cogBind :: Atom -> AtomSpace (Maybe Atom)
 cogBind at = do
-    m <- getWithUUID $ toRaw at
+    m <- getWithUUID at
     case m of
       Just (_,handle) -> do
             asRef <- getAtomSpace
             handleRes <- liftIO $ c_pmatcher_bindlink asRef handle
-            mraw <- getByUUID handleRes
-            return $ mraw >>= fromRawGen
+            matom <- getByUUID handleRes
+            return $ matom
       Nothing -> return Nothing
 
 foreign import ccall "PatternMatcher_SatisfactionLink"
@@ -42,13 +41,13 @@ foreign import ccall "PatternMatcher_SatisfactionLink"
                       -> Ptr CDouble
                       -> IO CInt
 
-cogSatisfy :: Atom SatisfactionT -> AtomSpace (Maybe TruthVal)
+cogSatisfy :: Atom -> AtomSpace (Maybe TruthVal)
 cogSatisfy at = do
-    m <- getWithUUID $ toRaw at
+    m <- getWithUUID at
     case m of
         Just (_,handle) -> do
             asRef <- getAtomSpace
             res <- liftIO $ getTVfromC $ c_pmatcher_satisfactionlink asRef handle
-            return $ fromTVRaw <$> res
+            return res
         Nothing -> return Nothing
 
