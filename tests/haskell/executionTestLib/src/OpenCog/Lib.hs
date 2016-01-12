@@ -11,6 +11,5 @@ foreign export ccall "someFunc"
 
 c_func = exportFunction someFunc
 
-someFunc :: AtomGen -> AtomSpace AtomGen
-someFunc a = do
-    return a
+someFunc :: Atom -> AtomSpace Atom
+someFunc a = pure a

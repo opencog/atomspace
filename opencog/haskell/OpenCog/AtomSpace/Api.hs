@@ -32,12 +32,8 @@ import Control.Monad.Trans.Reader    (ReaderT,runReaderT,ask)
 import Control.Monad.IO.Class        (liftIO)
 import OpenCog.AtomSpace.Env         (AtomSpaceObj(..),AtomSpaceRef(..),(<:),
                                       AtomSpace(..),getAtomSpace,refToObj)
-import OpenCog.AtomSpace.Internal    (fromTVRaw,UUID,AtomTypeRaw,AtomRaw(..),TVRaw(..),
-                                      toRaw,fromRaw,fromRawGen,tvMAX_PARAMS)
-import OpenCog.AtomSpace.Types       (AtomGen,Atom(..),AtomName(..),TruthVal(..),
-                                     appGen)
-import OpenCog.AtomSpace.Inheritance (type (<~))
-import OpenCog.AtomSpace.AtomType    (AtomType(..))
+import OpenCog.AtomSpace.Internal    (toTVRaw,fromTVRaw,UUID,TVRaw(..),tvMAX_PARAMS)
+import OpenCog.AtomSpace.Types       (Atom(..),AtomType(..),AtomName(..),TruthVal(..))
 import OpenCog.AtomSpace.CUtils
 
 sUCCESS :: CInt
@@ -64,7 +60,7 @@ foreign import ccall "AtomSpace_addNode"
                       -> Ptr UUID
                       -> IO CInt
 
-insertNode :: AtomTypeRaw -> AtomName -> AtomSpace (Maybe UUID)
+insertNode :: AtomType -> AtomName -> AtomSpace (Maybe UUID)
 insertNode aType aName = do
     asRef <- getAtomSpace
     liftIO $ withCString aType $
@@ -86,7 +82,7 @@ foreign import ccall "AtomSpace_addLink"
                       -> Ptr UUID
                       -> IO CInt
 
-insertLink :: AtomTypeRaw -> [AtomRaw] -> AtomSpace (Maybe UUID)
+insertLink :: AtomType -> [Atom] -> AtomSpace (Maybe UUID)
 insertLink aType aOutgoing = do
     mlist <- mapM insertAndGetUUID aOutgoing
     case mapM id mlist of
@@ -104,7 +100,7 @@ insertLink aType aOutgoing = do
                           return $ Just uuid
                   else return Nothing
 
-insertAndGetUUID :: AtomRaw -> AtomSpace (Maybe UUID)
+insertAndGetUUID :: Atom -> AtomSpace (Maybe UUID)
 insertAndGetUUID i = case i of
     Node aType aName tv -> do
         h <- insertNode aType aName
@@ -120,8 +116,8 @@ insertAndGetUUID i = case i of
         return h
 
 -- | 'insert' creates a new atom on the atomspace or updates the existing one.
-insert :: Typeable a => Atom a -> AtomSpace ()
-insert i = insertAndGetUUID (toRaw i) >> return ()
+insert :: Atom -> AtomSpace ()
+insert i = insertAndGetUUID i >> return ()
 
 --------------------------------------------------------------------------------
 
@@ -132,10 +128,10 @@ foreign import ccall "AtomSpace_removeAtom"
 
 -- | 'remove' deletes an atom from the atomspace.
 -- Returns True in success or False if it couldn't locate the specified atom.
-remove :: Typeable a => Atom a -> AtomSpace Bool
+remove :: Atom -> AtomSpace Bool
 remove i = do
     asRef <- getAtomSpace
-    m <- getWithUUID $ toRaw i
+    m <- getWithUUID i
     case m of
       Just (_,handle) -> liftIO $ (==) sUCCESS <$> c_atomspace_remove asRef handle
       _               -> return False
@@ -149,7 +145,7 @@ foreign import ccall "AtomSpace_getNode"
                       -> Ptr UUID
                       -> IO CInt
 
-getNodeUUID :: AtomTypeRaw -> AtomName -> AtomSpace (Maybe UUID)
+getNodeUUID :: AtomType -> AtomName -> AtomSpace (Maybe UUID)
 getNodeUUID aType aName = do
     asRef <- getAtomSpace
     liftIO $ withCString aType $
@@ -163,7 +159,7 @@ getNodeUUID aType aName = do
                      then Just h
                      else Nothing
 
-getNode :: AtomTypeRaw -> AtomName -> AtomSpace (Maybe (TVRaw,UUID))
+getNode :: AtomType -> AtomName -> AtomSpace (Maybe (TruthVal,UUID))
 getNode aType aName = do
     m <- getNodeUUID aType aName
     case m of
@@ -183,7 +179,7 @@ foreign import ccall "AtomSpace_getLink"
                       -> Ptr UUID
                       -> IO CInt
 
-getLinkUUID :: AtomTypeRaw -> [UUID] -> AtomSpace (Maybe UUID)
+getLinkUUID :: AtomType -> [UUID] -> AtomSpace (Maybe UUID)
 getLinkUUID aType aOutgoing = do
     asRef <- getAtomSpace
     liftIO $ withCString aType $
@@ -198,7 +194,7 @@ getLinkUUID aType aOutgoing = do
                      then Just h
                      else Nothing
 
-getLink :: AtomTypeRaw -> [UUID] -> AtomSpace (Maybe (TVRaw,UUID))
+getLink :: AtomType -> [UUID] -> AtomSpace (Maybe (TruthVal,UUID))
 getLink aType aOutgoing = do
     m <- getLinkUUID aType aOutgoing
     case m of
@@ -210,11 +206,11 @@ getLink aType aOutgoing = do
               Just tv -> Just (tv,h)
               Nothing -> Nothing
 
-getWithUUID :: AtomRaw -> AtomSpace (Maybe (AtomRaw,UUID))
+getWithUUID :: Atom -> AtomSpace (Maybe (Atom,UUID))
 getWithUUID i = do
-    let onLink :: AtomTypeRaw
-               -> [AtomRaw]
-               -> AtomSpace (Maybe (TVRaw,UUID,[AtomRaw]))
+    let onLink :: AtomType
+               -> [Atom]
+               -> AtomSpace (Maybe (TruthVal,UUID,[Atom]))
         onLink aType aOutgoing = do
             ml <- sequence <$> mapM getWithUUID aOutgoing
             case ml of -- ml :: Maybe [(AtomRaw,UUID)]
@@ -240,11 +236,11 @@ getWithUUID i = do
 
 -- | 'get' looks for an atom in the atomspace and returns it.
 -- (With updated mutable information)
-get :: (a <~ AtomT) => Atom a -> AtomSpace (Maybe (Atom a))
+get :: Atom -> AtomSpace (Maybe Atom)
 get i = do
-    m <- getWithUUID $ toRaw i
+    m <- getWithUUID i
     return $ case m of
-      Just (araw,_) -> fromRaw araw i
+      Just (araw,_) -> Just araw
       _             -> Nothing
 
 --------------------------------------------------------------------------------
@@ -254,15 +250,15 @@ foreign import ccall "Exec_execute"
                     -> UUID
                     -> IO UUID
 
-execute :: Atom ExecutionOutputT -> AtomSpace (Maybe AtomGen)
+execute :: Atom -> AtomSpace (Maybe Atom)
 execute atom = do
-    m <- getWithUUID $ toRaw atom
+    m <- getWithUUID atom
     case m of
         Just (_,handle) -> do
             asRef <- getAtomSpace
             res <- liftIO $ c_exec_execute asRef handle
-            araw <- getByUUID res
-            return $ fromRawGen =<< araw
+            resAtom <- getByUUID res
+            return resAtom
         _ -> return Nothing
 
 foreign import ccall "Exec_evaluate"
@@ -272,14 +268,14 @@ foreign import ccall "Exec_evaluate"
                     -> Ptr CDouble
                     -> IO CInt
 
-evaluate :: (a <~ AtomT) => Atom a -> AtomSpace (Maybe TruthVal)
+evaluate :: Atom -> AtomSpace (Maybe TruthVal)
 evaluate atom = do
-    m <- getWithUUID $ toRaw atom
+    m <- getWithUUID atom
     case m of
         Just (_,handle) -> do
             asRef <- getAtomSpace
             res <- liftIO $ getTVfromC $ c_exec_evaluate asRef handle
-            return $ fromTVRaw <$> res
+            return $ res
         _ -> return Nothing
 
 
@@ -296,7 +292,7 @@ foreign import ccall "AtomSpace_getAtomByUUID"
                               -> Ptr CInt
                               -> IO CInt
 
-getByUUID :: UUID -> AtomSpace (Maybe AtomRaw)
+getByUUID :: UUID -> AtomSpace (Maybe Atom)
 getByUUID h = do
     asRef <- getAtomSpace
     resTv <- liftIO $ getTruthValue asRef h
@@ -348,7 +344,7 @@ foreign import ccall "AtomSpace_getTruthValue"
                             -> IO CInt
 
 -- Internal function to get an atom's truth value.
-getTruthValue :: AtomSpaceRef -> UUID -> IO (Maybe TVRaw)
+getTruthValue :: AtomSpaceRef -> UUID -> IO (Maybe TruthVal)
 getTruthValue asRef handle = do
     liftIO $ getTVfromC $ c_atomspace_getTruthValue asRef handle
 
@@ -360,8 +356,9 @@ foreign import ccall "AtomSpace_setTruthValue"
                             -> IO CInt
 
 -- Internal function to set an atom's truth value.
-setTruthValue :: UUID -> TVRaw -> AtomSpace Bool
-setTruthValue handle (TVRaw tvtype list) = do
+setTruthValue :: UUID -> TruthVal -> AtomSpace Bool
+setTruthValue handle tv = do
+    let (TVRaw tvtype list) = toTVRaw tv
     asRef <- getAtomSpace
     liftIO $ withArray (map realToFrac list) $
       \lptr -> do
@@ -369,12 +366,11 @@ setTruthValue handle (TVRaw tvtype list) = do
           return $ res == sUCCESS
 
 -- Helpfer function for creating function that can be called from C
-exportFunction :: (AtomGen -> AtomSpace (AtomGen)) -> Ptr AtomSpaceRef -> UUID -> IO (UUID)
+exportFunction :: (Atom -> AtomSpace (Atom)) -> Ptr AtomSpaceRef -> UUID -> IO (UUID)
 exportFunction f asRef id = do
     as <- refToObj asRef
-    (Just ratom) <- as <: getByUUID id
-    let (Just atom)           = fromRawGen ratom
-        (AtomSpace op)        = f atom
+    (Just atom) <- as <: getByUUID id
+    let (AtomSpace op) = f atom
     resAtom <- runReaderT op (AtomSpaceRef asRef)
-    (Just resID) <- as <: insertAndGetUUID (toRaw `appGen` resAtom :: AtomRaw)
+    (Just resID) <- as <: insertAndGetUUID resAtom
     return resID

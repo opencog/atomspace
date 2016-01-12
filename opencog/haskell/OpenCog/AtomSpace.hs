@@ -29,17 +29,8 @@ module OpenCog.AtomSpace
     , TruthVal (..)
     , AtomName (..)
     , Atom (..)
-    , Gen (..)
-    , appGen
-    , AtomGen (..)
     -- * AtomSpace Syntactic Sugar
     , module OpenCog.AtomSpace.Sugar
-    -- * AtomSpace Phantom Types
-    , AtomType(..)
-    , type (<~)
-    -- * AtomSpace Unitily Functions
-    , genInsert
-    , genGet
     -- * Function for use in GSN
     , exportFunction
     , UUID
@@ -51,9 +42,7 @@ import OpenCog.AtomSpace.Types
 import OpenCog.AtomSpace.Env         (AtomSpace(..),runOnNewAtomSpace,AtomSpaceObj,
                                       getParent,newAtomSpace,onAtomSpace,(<:),
                                       AtomSpaceRef(..))
-import OpenCog.AtomSpace.Utils       (printAtom,showAtom,genInsert,genGet)
-import OpenCog.AtomSpace.AtomType    (AtomType(..))
-import OpenCog.AtomSpace.Inheritance (type (<~))
+import OpenCog.AtomSpace.Utils       (printAtom,showAtom)
 import OpenCog.AtomSpace.Sugar
 import OpenCog.AtomSpace.Query
 import OpenCog.AtomSpace.Internal    (UUID)

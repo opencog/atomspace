@@ -22,11 +22,3 @@ library
   ghc-options:           -dynamic -shared -fPIC
   extra-libraries:       HSrts-ghc7.10.2
   default-language:      Haskell2010
-
-Test-Suite haskell-test-suite
-  type:                exitcode-stdio-1.0
-  main-is:             Main.hs
-  build-depends:       base
-                     , opencog-atomspace
-                     , directory
-  default-language:    Haskell2010
