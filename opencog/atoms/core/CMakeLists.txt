@@ -10,6 +10,7 @@ ADD_LIBRARY (atomcore SHARED
 	FunctionLink.cc
 	ImplicationLink.cc
 	LambdaLink.cc
+	MapLink.cc
 	PutLink.cc
 	RandomChoice.cc
 	RandomNumber.cc
@@ -17,6 +18,7 @@ ADD_LIBRARY (atomcore SHARED
 	SleepLink.cc
 	StateLink.cc
 	TimeLink.cc
+	TypedAtomLink.cc
 	UniqueLink.cc
 	Variables.cc
 	VariableList.cc
@@ -26,6 +28,7 @@ ADD_LIBRARY (atomcore SHARED
 ADD_DEPENDENCIES(atomcore opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomcore
+	atombase
 	${COGUTIL_LIBRARY}
 )
 
@@ -40,6 +43,7 @@ INSTALL (FILES
 	FreeLink.h
 	FunctionLink.h
 	LambdaLink.h
+	MapLink.h
 	PutLink.h
 	RandomChoice.h
 	RandomNumber.h
@@ -47,6 +51,7 @@ INSTALL (FILES
 	SleepLink.h
 	StateLink.h
 	TimeLink.h
+	TypedAtomLink.h
 	UniqueLink.h
 	Variables.h
 	VariableList.h

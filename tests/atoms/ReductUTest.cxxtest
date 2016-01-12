@@ -1,5 +1,5 @@
 /*
- * tests/query/ReductUTest.cxxtest
+ * tests/atoms/ReductUTest.cxxtest
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -72,7 +72,7 @@ void ReductUTest::setUp(void)
 {
 	as->clear();
 	config().set("SCM_PRELOAD",
-		"opencog/atomspace/core_types.scm, "
+		"opencog/atoms/base/core_types.scm, "
 		"opencog/scm/opencog/exec.scm, "
 		"opencog/scm/utilities.scm");
 

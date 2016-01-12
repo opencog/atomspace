@@ -24,13 +24,14 @@
 #ifndef _FCSTAT_H_
 #define _FCSTAT_H_
 
-#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/base/Handle.h>
 
 namespace opencog {
 
-using HandleWeightMap = std::map<Handle,float>;
+using HandleWeightMap = std::map<Handle,double>;
 
-struct PartiaGroundingRecord {
+struct PartiaGroundingRecord
+{
     const Handle hsource;
     //Partial grounding may not be in any atomspace.
     std::map<Handle, HandleWeightMap> _rule_pgroundings_map;
@@ -51,7 +52,8 @@ struct PartiaGroundingRecord {
     }
 };
 
-struct InferenceRecord {
+struct InferenceRecord
+{
     const int step;
     const Handle hsource;
     HandleSeq product;
@@ -67,7 +69,8 @@ struct InferenceRecord {
     }
 };
 
-class FCStat {
+class FCStat
+{
 private:
     std::vector<PartiaGroundingRecord> _spg_stat;
     std::vector<InferenceRecord> _inf_rec;

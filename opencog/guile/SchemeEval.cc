@@ -1002,7 +1002,7 @@ void * SchemeEval::c_wrap_apply(void * p)
  * is applied to them. If the function returns an atom handle, then
  * this is returned.
  */
-Handle SchemeEval::do_apply(const std::string &func, Handle& varargs)
+Handle SchemeEval::do_apply(const std::string &func, const Handle& varargs)
 {
 	// Apply the function to the args
 	SCM sresult = do_apply_scm (func, varargs);
@@ -1022,20 +1022,24 @@ static SCM thunk_scm_eval(void * expr)
  * atom handles. This list is unpacked, and then the fuction func
  * is applied to them. The SCM value returned by the function is returned.
  */
-SCM SchemeEval::do_apply_scm(const std::string& func, Handle& varargs )
+SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
 {
 	SCM sfunc = scm_from_utf8_symbol(func.c_str());
 	SCM expr = SCM_EOL;
 
 	// If there were args, pass the args to the function.
-	const std::vector<Handle> &oset = atomspace->get_outgoing(varargs);
-
-	// Iterate in reverse, because cons chains in reverse.
-	size_t sz = oset.size();
-	for (int i=sz-1; i>=0; i--)
+	LinkPtr lvar(LinkCast(varargs));
+	if (lvar)
 	{
-		SCM sh = SchemeSmob::handle_to_scm(oset[i]);
-		expr = scm_cons(sh, expr);
+		const std::vector<Handle> &oset = lvar->getOutgoingSet();
+
+		// Iterate in reverse, because cons chains in reverse.
+		size_t sz = oset.size();
+		for (int i=sz-1; i>=0; i--)
+		{
+			SCM sh = SchemeSmob::handle_to_scm(oset[i]);
+			expr = scm_cons(sh, expr);
+		}
 	}
 	expr = scm_cons(sfunc, expr);
 	return do_scm_eval(expr, thunk_scm_eval);

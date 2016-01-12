@@ -23,11 +23,11 @@
  */
 
 #include "ProtocolBufferSerializer.h"
-#include "opencog/atomspace/Handle.h"
-#include "opencog/atomspace/AttentionValue.h"
-#include "opencog/atomspace/Atom.h"
-#include "opencog/atomspace/Link.h"
-#include "opencog/atomspace/Node.h"
+#include "opencog/atoms/base/Handle.h"
+#include "opencog/atoms/base/Atom.h"
+#include "opencog/atoms/base/Link.h"
+#include "opencog/atoms/base/Node.h"
+#include "opencog/truthvalue/AttentionValue.h"
 #include "opencog/truthvalue/TruthValue.h"
 #include "opencog/truthvalue/CountTruthValue.h"
 #include "opencog/truthvalue/NullTruthValue.h"
@@ -183,10 +183,14 @@ IndefiniteTruthValuePtr ProtocolBufferSerializer::deserializeIndefiniteTruthValu
 {
 	IndefiniteTruthValuePtr tv(
 			new IndefiniteTruthValue(singleTruthValue.l(), singleTruthValue.u(), singleTruthValue.confidence()));
+
+    throw RuntimeException(TRACE_INFO, "Not implemented!");
+/**********
     tv->setMean(singleTruthValue.mean());
     tv->setConfidenceLevel(singleTruthValue.confidencelevel());
     tv->setDiff(singleTruthValue.diff());
     tv->setSymmetric(singleTruthValue.symmetric());
+**********/
 
     vector<strength_t*> firstOrderDistribution(singleTruthValue.firstorderdistribution_size());
     for(int i = 0; i < singleTruthValue.firstorderdistribution_size(); i++)
@@ -195,7 +199,7 @@ IndefiniteTruthValuePtr ProtocolBufferSerializer::deserializeIndefiniteTruthValu
         strength_t* s = new strength_t(singleTruthValue.firstorderdistribution(i));
         firstOrderDistribution[i] = s;
     }
-    tv->setFirstOrderDistribution(firstOrderDistribution);
+    // tv->setFirstOrderDistribution(firstOrderDistribution);
     return tv;
 }
 

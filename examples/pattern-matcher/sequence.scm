@@ -16,9 +16,9 @@
 ; the concept of a behavior tree "sequence node". See
 ; https://en.wikipedia.org/wiki/Behavior_Trees_(artificial_intelligence,_robotics_and_control)
 ;
-; The run this, you probably need to do this:
+; The run this, you might need to do this:
 ;
-; OCDIR=home/home/yourname/opencog
+; OCDIR=/home/yourname/where/you/put/opencog
 ; export LTDL_LIBRARY_PATH=$OCDIR/build/opencog/guile:$OCDIR/build/opencog/query
 ;
 ; Add the following to your ~/.guile file:
@@ -32,13 +32,10 @@
 ; and then load this file:
 ; (load-from-path "sequence.scm")
 ;
-; Then, scroll to the bottom, and some of the commented-out
+; Then, scroll to the bottom, and try some of the commented-out
 ; examples.
 ;
-(use-modules (opencog))
-(use-modules (opencog query))
-
-(load-from-path "utilities.scm")
+(use-modules (opencog) (opencog query) (opencog exec))
 
 (define green-light  (ConceptNode "green light"))
 (define red-light  (ConceptNode "red light"))

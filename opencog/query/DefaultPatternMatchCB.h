@@ -25,7 +25,7 @@
 #ifndef _OPENCOG_DEFAULT_PATTERN_MATCH_H
 #define _OPENCOG_DEFAULT_PATTERN_MATCH_H
 
-#include <opencog/atomspace/types.h>
+#include <opencog/atoms/base/types.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/query/PatternMatchCallback.h>
@@ -89,7 +89,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 
 		ClassServer& _classserver;
 
-		const VariableTypeMap* _type_restrictions = NULL;
+		const Variables* _vars = NULL;
 		const std::set<Handle>* _dynamic = NULL;
 		bool _have_evaluatables = false;
 		const std::set<Handle>* _globs = NULL;

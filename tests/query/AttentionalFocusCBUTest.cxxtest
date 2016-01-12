@@ -64,11 +64,13 @@ void AttentionalFocusCBUTest::tearDown(void)
 void AttentionalFocusCBUTest::setUp(void)
 {
 	config().set("SCM_PRELOAD",
-	      "opencog/atomspace/core_types.scm, "
+	      "opencog/atoms/base/core_types.scm, "
 			"opencog/scm/utilities.scm");
 
 	load_scm_files_from_config(*as);
 }
+
+#define getarity(hand) LinkCast(hand)->getArity()
 
 void AttentionalFocusCBUTest::test_af_bindlink(void)
 {
@@ -80,6 +82,6 @@ void AttentionalFocusCBUTest::test_af_bindlink(void)
 	// Test PatternMatch::af_bindlink, which should only return the
 	// first match
 	Handle answersSingle = af_bindlink(as, findMan);
-	TS_ASSERT_EQUALS(1, as->get_arity(answersSingle));
+	TS_ASSERT_EQUALS(1, getarity(answersSingle));
 	TS_ASSERT_EQUALS(20,as->get_attentional_focus_boundary());
 }

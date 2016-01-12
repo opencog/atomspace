@@ -22,10 +22,10 @@
 #ifndef _OPENCOG_NAMEINDEX_H
 #define _OPENCOG_NAMEINDEX_H
 
-#include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/Node.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/types.h>
 #include <opencog/atomspace/StringIndex.h>
-#include <opencog/atomspace/types.h>
 
 namespace opencog
 {

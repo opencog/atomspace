@@ -105,22 +105,21 @@ TruthValuePtr ProbabilisticTruthValue::merge(TruthValuePtr other,
                                              const MergeCtrl& mc) const
 {
     ProbabilisticTruthValuePtr oc =
-        std::dynamic_pointer_cast<ProbabilisticTruthValue>(other);
+        std::dynamic_pointer_cast<const ProbabilisticTruthValue>(other);
 
     // If other is a simple truth value, *and* its not the default TV,
     // then perhaps we should merge it in, as if it were a count truth
     // value with a count of 1?  In which case, we should add a merge
     // routine to SimpleTruthValue to do likewise... Anyway, for now,
     // just ignore this possible complication to the semantics.
-    if (NULL == oc) return std::static_pointer_cast<TruthValue>(clone());
+    if (NULL == oc) return shared_from_this();
     
     // If both this and other are counts, then accumulate to get the
     // total count, and average together the strengths, using the 
     // count as the relative weight.
-    ProbabilisticTruthValuePtr nc = std::static_pointer_cast<ProbabilisticTruthValue>(clone());
-    nc->count += oc->count;
-    nc->mean = (this->mean * this->count +
-                   oc->mean * oc->count) / nc->count;
+    count_t cnt = count + oc->count;
+    strength_t meeny = (this->mean * this->count +
+                   oc->mean * oc->count) / cnt;
 
     // XXX This is not the correct way to handle confidence ... 
     // The confidence will typically hold the log probability,
@@ -129,8 +128,8 @@ TruthValuePtr ProbabilisticTruthValue::merge(TruthValuePtr other,
     // However, this is not correct when the confidence is actually
     // holding the mutual information ... which is additive ... 
     // Argh .. what to do?
-    //    nc->confidence = oc->confidence;
+    //    confidence = oc->confidence;
     
-    return std::static_pointer_cast<TruthValue>(nc);
+    return createTV(meeny, this->confidence, cnt);
 }
 

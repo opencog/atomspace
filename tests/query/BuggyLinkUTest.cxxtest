@@ -69,12 +69,13 @@ void BuggyLinkUTest::setUp(void)
 {
     as->clear();
     config().set("SCM_PRELOAD",
-        "opencog/atomspace/core_types.scm, "
+        "opencog/atoms/base/core_types.scm, "
         "opencog/scm/utilities.scm");
 
     load_scm_files_from_config(*as);
 }
 
+#define getarity(hand) LinkCast(hand)->getArity()
 
 /*
  * BuggyLink unit test.  Test binding to unquoted links.
@@ -96,6 +97,6 @@ void BuggyLinkUTest::test_link(void)
     Handle lily = bindlink(as, bindy);
     logger().debug() << "Result is this:\n" << lily->toString();
 
-    TS_ASSERT_EQUALS(1, as->get_arity(lily));
+    TS_ASSERT_EQUALS(1, getarity(lily));
 }
 

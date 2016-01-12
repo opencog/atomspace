@@ -17,8 +17,7 @@ switch(tv->getType())
             parameters[2]=tv->getConfidence();
             break; }
         case INDEFINITE_TRUTH_VALUE: {
-            IndefiniteTruthValuePtr itv =
-                std::static_pointer_cast<IndefiniteTruthValue>(tv);
+            IndefiniteTruthValuePtr itv = IndefiniteTVCast(tv);
             parameters[0]=itv->getMean();
             parameters[1]=itv->getL();
             parameters[2]=itv->getU();

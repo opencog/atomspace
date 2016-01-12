@@ -24,11 +24,7 @@
 #ifndef _OPENCOG_IMPLICATION_LINK_H
 #define _OPENCOG_IMPLICATION_LINK_H
 
-#include <map>
-
 #include <opencog/atoms/core/ScopeLink.h>
-
-#include <opencog/util/Logger.h>
 
 namespace opencog
 {

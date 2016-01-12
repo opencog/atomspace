@@ -35,9 +35,9 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AtomTable.h>
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
+#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/guile/load-file.h>
 #include <opencog/util/Config.h>
@@ -78,7 +78,7 @@ public:
     {
         atomSpace->clear();
         /* load scm files with all necessary nodes and links  */
-        load_scm_file(*atomSpace, "opencog/atomspace/core_types.scm");
+        load_scm_file(*atomSpace, "opencog/atoms/base/core_types.scm");
         load_scm_file(*atomSpace, "tests/query/test_types.scm");
         // load_scm_file(*atomSpace, ATOM_TABLE_TEST_SCM_FILE);
     }

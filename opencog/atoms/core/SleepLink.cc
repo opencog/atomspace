@@ -8,8 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the
- * exceptions
- * at http://opencog.org/wiki/Licenses
+ * exceptions at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,8 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License
- * along with this program; if not, write to:
+ * License along with this program; if not, write to:
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
@@ -27,8 +25,8 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/NumberNode.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include "SleepLink.h"
 
@@ -41,6 +39,11 @@ SleepLink::SleepLink(const HandleSeq& oset,
 	if (1 != oset.size())
 		throw SyntaxException(TRACE_INFO,
 			"SleepLink expects only one argument");
+
+	Type t = oset[0]->getType();
+	if (NUMBER_NODE != t and classserver().isA(t, FUNCTION_LINK))
+		throw SyntaxException(TRACE_INFO,
+			"Expecting a NumberNode or something that returns a NumberNode");
 }
 
 SleepLink::SleepLink(Link &l)
@@ -60,7 +63,18 @@ SleepLink::SleepLink(Link &l)
 
 Handle SleepLink::execute(AtomSpace * as) const
 {
-	NumberNodePtr nsle = NumberNodeCast(_outgoing[0]);
+	Handle time(_outgoing[0]);
+	FunctionLinkPtr flp(FunctionLinkCast(time));
+	if (flp)
+		time = flp->execute();
+
+	NumberNodePtr nsle = NumberNodeCast(time);
+	if (nullptr == nsle)
+		throw RuntimeException(TRACE_INFO,
+			"Expecting an NumberNode, got %s",
+				(nullptr == time) ? "<invalid handle>" :
+					classserver().getTypeName(time->getType()).c_str());
+
 	double length = nsle->get_value();
 	unsigned int secs = floor(length);
 	useconds_t usec = 1000000 * (length - secs);

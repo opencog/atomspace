@@ -5,6 +5,9 @@
 ; is accomplished by using the built-in type-checking facilities
 ; that accompany any LambdaLink.
 ;
+; See also the `map.scm` example, for more general mapping of sets and
+; lists.
+;
 
 (use-modules (opencog))
 (use-modules (opencog exec))

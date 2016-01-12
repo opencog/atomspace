@@ -59,6 +59,7 @@ public:
     void tearDown(void);
 
     void test_weights(void);
+    void test_pairs(void);
 };
 
 void RandomUTest::tearDown(void)
@@ -70,7 +71,7 @@ void RandomUTest::setUp(void)
 {
     as->clear();
     config().set("SCM_PRELOAD",
-        "opencog/atomspace/core_types.scm, "
+        "opencog/atoms/base/core_types.scm, "
         "opencog/scm/utilities.scm, "
         "opencog/scm/opencog/exec.scm");
 
@@ -103,6 +104,53 @@ void RandomUTest::test_weights(void)
 
     TruthValuePtr tv = eval->eval_tv("(cog-evaluate! (DefinedPredicate \"test\"))");
     TS_ASSERT_LESS_THAN(0.5, tv->getMean());
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * RandomChoiceLink unit test.
+ */
+void RandomUTest::test_pairs(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    // Define a simple list of pairs
+    eval->eval_h(
+        "(DefineLink (DefinedSchema \"pairs\") "
+        "(RandomChoice "
+        "   (SetLink "
+        "      (ListLink (NumberNode 1) (Concept \"AAA\"))"
+        "      (ListLink (NumberNode 1) (Concept \"BBB\"))"
+        "      (ListLink (NumberNode 0.1) (Concept \"CCC\")) )))"
+    );
+
+    Handle A = eval->eval_h("(Concept \"AAA\")");
+    Handle B = eval->eval_h("(Concept \"BBB\")");
+    Handle C = eval->eval_h("(Concept \"CCC\")");
+
+    int cntA=0, cntB=0, cntC=0;
+    for (int i=0; i<1000; i++)
+    {
+        Handle pick = eval->eval_h(
+            "(cog-execute! (DefinedSchema \"pairs\"))");
+
+        if (pick == A) cntA++;
+        if (pick == B) cntB++;
+        if (pick == C) cntC++;
+    }
+
+    printf("Got counts A=%d B=%d C=%d\n", cntA, cntB, cntC);
+
+    // Loose bounds. My rand gen always gives the same answer:
+    // Got counts A=488 B=468 C=44
+    TS_ASSERT_LESS_THAN(450, cntA);
+    TS_ASSERT_LESS_THAN(450, cntB);
+    TS_ASSERT_LESS_THAN(35, cntC);
+
+    TS_ASSERT_LESS_THAN(cntA, 500);
+    TS_ASSERT_LESS_THAN(cntB, 500);
+    TS_ASSERT_LESS_THAN(cntC, 60);
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }

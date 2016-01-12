@@ -64,7 +64,7 @@ class MultiThreadUTest :  public CxxTest::TestSuite
 void MultiThreadUTest::setUp(void)
 {
 	config().set("SCM_PRELOAD",
-		"opencog/atomspace/core_types.scm");
+		"opencog/atoms/base/core_types.scm");
 }
 
 void MultiThreadUTest::tearDown(void)

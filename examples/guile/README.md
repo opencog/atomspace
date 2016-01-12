@@ -11,18 +11,24 @@ file.  These will then run every time you start guile.
 (add-to-load-path "/usr/local/share/opencog/scm")
 (add-to-load-path ".")
 ```
+
+If you want your arrow keys to work, so that you can do command-line
+editing, you should add the below to your `~/.guile` file as well.
+```
+(use-modules (ice-9 readline))
+(activate-readline)
+```
+
 Finally, start guile:
 ```
 $ guile
 ```
-
-You may want to copy the below to your `~/.guile` file as well, or you
-can copy them manually to the guile interpreter prompt:
+Next, load the opencog module:
 ```
-(use-modules (ice-9 readline))
-(activate-readline)
 (use-modules (opencog))
 ```
+In the long run, it might be convenient to add the above to `~/.guile`
+as well.
 
 After the opencog module is loaded, you can create atoms "as usual" e.g.
 ```
@@ -66,17 +72,18 @@ The current list of modules that wrap C++ code includes:
 
 # Example Files
 
-* `basic.scm`   -- a very simple introduction
-* `bindlink-example.scm` -- an example of using the pattern matcher.
-* `execute.scm` -- an example of executing executable atoms, with
+* `basic.scm`   -- A very simple introduction
+* `bindlink-example.scm` -- An example of using the pattern matcher.
+* `execute.scm` -- An example of executing executable atoms, with
                    callbacks written in python or scheme.
-* `get-put.scm` -- an example of asserting facts in the AtomSpace.
-* `state.scm`   -- maintaining unique state.
-* `property.scm`-- setting properies on atoms.
-* `filter.scm`  -- filtering sets of atoms.
+* `get-put.scm` -- An example of asserting facts in the AtomSpace.
+* `state.scm`   -- Maintaining unique state.
+* `property.scm`-- Setting properies on atoms.
+* `filter.scm`  -- Filtering sets of atoms.
+* `map.scm`     -- Applying a map function to a set or list.
 * `random-choice.scm`  -- Numerical programming, including loops.
-* `logger-example.scm` -- using the built-in logger.
-* `except.scm`  -- an example of exceptions being thrown and passed.
-* `persist-example.scm` -- and example of saving atomspace data in an SQL
+* `logger-example.scm` -- Using the built-in logger.
+* `except.scm`  -- An example of exceptions being thrown and passed.
+* `persist-example.scm` -- An example of saving atomspace data in an SQL
                    database.
-* `gperf.scm`   -- some very crude performance measurements.
+* `gperf.scm`   -- Some very crude performance measurements.

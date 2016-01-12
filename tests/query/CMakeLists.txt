@@ -29,12 +29,12 @@ ADD_CXXTEST(BiggerPatternUTest)
 ADD_CXXTEST(LoopPatternUTest)
 ADD_CXXTEST(BooleanUTest)
 ADD_CXXTEST(Boolean2NotUTest)
-ADD_CXXTEST(FuzzyPatternUTest)
 
 
-# Its a *lot* easier to write scheme, than to write C++ code!
-# These are not in alphabetical order; they are in order of
-# simpler to more complex.
+# These are NOT in alphabetical order; they are in order of
+# simpler to more complex.  Later test cses assume features
+# that are tested in earlier test cases.  DO NOT reorder this
+# list unless you are sure of what you are doing.
 IF (HAVE_GUILE)
 	ADD_CXXTEST(DisconnectedUTest)
 	ADD_CXXTEST(ImplicationUTest)
@@ -50,6 +50,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(ArcanaUTest)
 	ADD_CXXTEST(SubstitutionUTest)
 	ADD_CXXTEST(GetLinkUTest)
+	ADD_CXXTEST(DeepTypeUTest)
 
 	ADD_CXXTEST(GreaterThanUTest)
 	ADD_CXXTEST(GreaterComputeUTest)

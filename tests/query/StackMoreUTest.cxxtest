@@ -76,7 +76,7 @@ void StackMoreUTest::setUp(void)
 	as = new AtomSpace();
 
 	config().set("SCM_PRELOAD",
-		"opencog/atomspace/core_types.scm, "
+		"opencog/atoms/base/core_types.scm, "
       "tests/query/test_types.scm, "
 		"tests/query/stackmore-o-o.scm, "
 		"tests/query/stackmore-o-u.scm, "
@@ -104,8 +104,8 @@ void StackMoreUTest::setUp(void)
  * Test of pattern matching on multi-variable matches with
  * confounding intermediate data.
  */
-#define getlink(hand,pos) as->get_outgoing(hand,pos)
-#define getarity(hand) as->get_arity(hand)
+#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
+#define getarity(hand) LinkCast(hand)->getArity()
 
 void StackMoreUTest::test_oo(void)
 {

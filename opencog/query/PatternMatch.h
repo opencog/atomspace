@@ -26,7 +26,7 @@
 
 #include <set>
 
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/query/Implicator.h>
 #include <opencog/query/PatternMatchCallback.h>
 

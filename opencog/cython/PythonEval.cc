@@ -31,8 +31,8 @@
 #include <opencog/util/misc.h>
 #include <opencog/util/oc_assert.h>
 
-#include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/Link.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Link.h>
 
 #include "PythonEval.h"
 
@@ -1119,38 +1119,64 @@ void PythonEval::add_module_file(const boost::filesystem::path &file)
 */
 void PythonEval::add_modules_from_path(std::string pathString)
 {
-    if ('/' == pathString[0]) {
-        add_modules_from_abspath(pathString);
-        return;
-    }
+    std::vector<std::string> dirs;
+    std::vector<std::string> files;
 
-    bool did_load = false;
-    const char** config_paths = get_module_paths();
-    for (int i = 0; config_paths[i] != NULL; ++i) {
-        std::string abspath = config_paths[i];
-        abspath += "/";
-        abspath += pathString;
-
+    auto loadmod_prep = [&dirs,&files](const std::string& abspath,
+            const char** config_paths) {
         // If the resulting path is a directory or a regular file,
-        // then load it.
+        // then push to loading list.
         struct stat finfo;
         stat(abspath.c_str(), &finfo);
-        if (S_ISDIR(finfo.st_mode) or S_ISREG(finfo.st_mode)) {
-            add_modules_from_abspath(abspath);
-            did_load = true;
+        if (S_ISDIR(finfo.st_mode))
+            dirs.push_back(abspath);
+
+        else if (S_ISREG(finfo.st_mode))
+            files.push_back(abspath);
+
+        else {
+            Logger::Level btl = logger().getBackTraceLevel();
+            logger().setBackTraceLevel(Logger::Level::NONE);
+            logger().error() << "Failed to load python module \'"
+            << abspath << "\', searched directories:";
+            for (int i = 0; config_paths[i] != NULL; ++i) {
+                logger().error() << "Directory: " << config_paths[i];
+            }
+            logger().setBackTraceLevel(btl);
+       }
+    };
+
+    const char** config_paths = get_module_paths();
+    std::vector<std::string> paths;
+    tokenize(pathString, std::back_inserter(paths), ",");
+    for (const auto& pathString : paths) {
+        if ('/' == pathString[0]) {
+            loadmod_prep(pathString, NULL);
+            continue;
+        }
+
+        else if ('.' == pathString[0]) {
+            boost::filesystem::path base(getcwd(NULL, 0));
+            auto pypath = boost::filesystem::canonical(pathString, base);
+            loadmod_prep(pypath.string(), NULL);
+            continue;
+
+        } else {
+            for (int i = 0; config_paths[i] != NULL; ++i) {
+                std::string abspath = config_paths[i];
+                abspath += "/";
+                abspath += pathString;
+                loadmod_prep(abspath, config_paths);
+            }
         }
     }
 
-    if (not did_load) {
-        Logger::Level btl = logger().getBackTraceLevel();
-        logger().setBackTraceLevel(Logger::Level::NONE);
-        logger().error() << "Failed to load python module \'" << pathString
-                         << "\', searched directories:";
-        for (int i = 0; config_paths[i] != NULL; ++i) {
-            logger().error() << "Directory: " << config_paths[i];
-        }
-        logger().setBackTraceLevel(btl);
-    }
+    // Load First directories and then files to properly handle import dependencies.
+    dirs.insert(dirs.end(), files.begin(), files.end());
+    for (const auto& abspath : dirs)
+        add_modules_from_abspath(abspath);
+
+    return;
 }
 
 void PythonEval::add_modules_from_abspath(std::string pathString)

@@ -23,8 +23,6 @@
 #ifndef _OPENCOG_UNIQUE_LINK_H
 #define _OPENCOG_UNIQUE_LINK_H
 
-#include <map>
-
 #include <opencog/atoms/core/FreeLink.h>
 
 namespace opencog
@@ -42,7 +40,8 @@ namespace opencog
 ///
 /// This class is intended to be the base class for DefineLink, which
 /// is used to name things, and StateLink, which is used to maintain
-/// current state.
+/// current state. It is also used by TypedAtomLink to ensure that
+/// an atom, if it is typed, has a single, unique type defintion.
 ///
 class UniqueLink : public FreeLink
 {

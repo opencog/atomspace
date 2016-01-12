@@ -41,7 +41,6 @@ InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
 	_classserver(classserver()),
 	_variables(NULL),
 	_pattern(NULL),
-	_type_restrictions(NULL),
 	_dynamic(NULL),
 	_as(as)
 {
@@ -54,7 +53,6 @@ void InitiateSearchCB::set_pattern(const Variables& vars,
 
 	_variables = &vars;
 	_pattern = &pat;
-	_type_restrictions = &vars.typemap;
 	_dynamic = &pat.evaluatable_terms;
 }
 
@@ -603,7 +601,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
  * Initiate a search by looping over all atoms of the allowed
  * variable types (as set with the set_type_testrictions() method).
  * This assumes that the varset contains the variables to be searched
- * over, and that the type restrictions are set up approrpriately.
+ * over, and that the type restrictions are set up appropriately.
  *
  * If the varset is empty, or if there are no variables, then the
  * entire atomspace will be searched.  Depending on the pattern,
@@ -615,6 +613,17 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 {
 	const HandleSeq& clauses = _pattern->mandatory;
 
+	// Some search patterns simply do not have any groundable
+	// clauses in them. This is one common reason why a variable-
+	// based search is being performed.
+	bool all_clauses_are_evaluatable = true;
+	for (const Handle& cl : clauses)
+	{
+		if (0 < _pattern->evaluatable_terms.count(cl)) continue;
+		all_clauses_are_evaluatable = false;
+		break;
+	}
+
 	// Find the rarest variable type;
 	size_t count = SIZE_MAX;
 	std::set<Type> ptypes;
@@ -625,10 +634,21 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	for (const Handle& var: _variables->varset)
 	{
 		LAZY_LOG_FINE << "Examine variable " << var->toShortString();
-		auto tit = _type_restrictions->find(var);
-		if (_type_restrictions->end() == tit) continue;
+
+#ifdef _IMPLMENT_ME_LATER
+		// XXX TODO FIXME --- if there is a deep type in the mix, that
+		// will offer a far-superior place to start the search.
+		// Unfortunately, implementing this will require a bit more work,
+		// so we punt for now, as there are no users ....
+		auto dit = _variables->_deep_typemap.find(var);
+		if (_variables->_deep_typemap.end() != dit)
+			throw RuntimeException(TRACE_INFO, "Not implemented!");
+#endif
+
+		auto tit = _variables->_simple_typemap.find(var);
+		if (_variables->_simple_typemap.end() == tit) continue;
 		const std::set<Type>& typeset = tit->second;
-		LAZY_LOG_FINE << "Type-restictions set size = "
+		LAZY_LOG_FINE << "Type-restriction set size = "
 		              << typeset.size();
 
 		// Calculate the total number of atoms of typeset
@@ -643,11 +663,13 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 		{
 			for (const Handle& cl : clauses)
 			{
-				// Evaluatables dont' exist in the atomspace, in general.
-				// Cannot start a search with them.
-				if (0 < _pattern->evaluatable_holders.count(cl)) continue;
-				FindAtoms fa(var);
-				fa.search_set(cl);
+				// Evaluatables don't exist in the atomspace, in general.
+				// Therefore, we cannot start a search with them. Unless
+				// they are all evaluatable, in which case we pick a clause
+				// that has a variable with the narrowest type-membership.
+				if (not all_clauses_are_evaluatable and
+				    0 < _pattern->evaluatable_terms.count(cl)) continue;
+
 				if (cl == var)
 				{
 					_root = cl;
@@ -657,14 +679,19 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 					LAZY_LOG_FINE << "New minimum count of " << count;
 					break;
 				}
+
+				FindAtoms fa(var);
+				fa.search_set(cl);
 				if (0 < fa.least_holders.size())
 				{
 					_root = cl;
 					_starter_term = *fa.least_holders.begin();
+					if (all_clauses_are_evaluatable)
+						_starter_term = var;
 					count = num;
 					ptypes = typeset;
 					LAZY_LOG_FINE << "New minimum count of "
-					              << count << "(nonroot)";
+					              << count << " (nonroot)";
 					break;
 				}
 			}
@@ -674,10 +701,10 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	// There were no type restrictions!
 	if (nullptr == _root)
 	{
-		logger().fine("There were no type restrictions! That must be wrong!");
+		logger().info("Warning: There were no type restrictions! That must be wrong!");
 		if (0 == clauses.size())
 		{
-			// This is kind-of weird, it can happen if all clauses
+			// This is kind-of weird, but it can happen if all clauses
 			// are optional.
 			_search_fail = true;
 			return false;
@@ -756,7 +783,7 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 	if (0 == _pattern->defined_terms.size())
 		return;
 
-	// Now is the time to look up the defintions!
+	// Now is the time to look up the definitions!
 	// We loop here, so that all recursive definitions are expanded
 	// as well.  XXX Except that this is wrong, if any of the
 	// definitions are actually recursive. That is, this will be
@@ -809,7 +836,6 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 		_pattern = &_pl->get_pattern();
 	}
 
-	_type_restrictions = &_variables->typemap;
 	_dynamic = &_pattern->evaluatable_terms;
 
 	pme->set_pattern(*_variables, *_pattern);

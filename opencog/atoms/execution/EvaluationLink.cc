@@ -22,8 +22,7 @@
 
 #include <thread>
 
-#include <opencog/atomspace/atom_types.h>
-#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/base/atom_types.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/core/DefineLink.h>
@@ -31,6 +30,8 @@
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
+
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/BindLinkAPI.h>
@@ -87,6 +88,12 @@ static NumberNodePtr unwrap_set(Handle h)
 	}
 
 	NumberNodePtr na(NumberNodeCast(h));
+	if (nullptr == na)
+	{
+		NodePtr np(NodeCast(h));
+		if (np) na = createNumberNode(*np);
+	}
+
 	if (nullptr == na)
 		throw SyntaxException(TRACE_INFO,
 			"Don't know how to compare this: %s",
@@ -215,6 +222,11 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	{
 		const LinkPtr l(LinkCast(evelnk));
 		const HandleSeq& sna(l->getOutgoingSet());
+
+		if (2 != sna.size())
+			throw SyntaxException(TRACE_INFO,
+				"Incorrect number of arguments, expecting 2, got %lu",
+				sna.size());
 
 		// An ungrounded predicate evaluates to itself
 		if (sna.at(0)->getType() == PREDICATE_NODE)
@@ -351,13 +363,18 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	{
 		// Assume that the link is wrapping something executable,
 		// which we execute, but then ignore the result. Well, we need
-		// to put it in the atomspace ... but we ignore the TV on it.
+		// to put it in the (scratch) atomspace ... but we ignore the
+		// TV on it. We execute for the side-effects, of course.
+		// We put the result in the scratch space, presumably because
+		// this is some GroundedSchemaNode calling some func with some
+		// args, and its pointless to put that function+args in the
+		// atomspace.
 		const LinkPtr ll(LinkCast(evelnk));
 		if (0 < ll->getArity())
 		{
 			Instantiator inst(as);
 			Handle result(inst.execute(ll->getOutgoingAtom(0)));
-			as->add_atom(result);
+			scratch->add_atom(result);
 		}
 		if (TRUE_LINK == t)
 			return TruthValue::TRUE_TV();

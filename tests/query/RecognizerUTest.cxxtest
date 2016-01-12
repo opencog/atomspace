@@ -71,13 +71,15 @@ void RecognizerUTest::setUp(void)
 {
     as->clear();
     config().set("SCM_PRELOAD",
-        "opencog/atomspace/core_types.scm, "
+        "opencog/atoms/base/core_types.scm, "
         "tests/query/test_types.scm, "
         "opencog/scm/utilities.scm,"
         "opencog/scm/opencog/query.scm");
 
     load_scm_files_from_config(*as);
 }
+
+#define getarity(hand) LinkCast(hand)->getArity()
 
 /*
  * Test a glob in the middle of a list. Should match two patterns.
@@ -91,7 +93,7 @@ void RecognizerUTest::test_single_word(void)
 
     Handle love = eval->eval_h("(cog-recognize sent)");
     printf("love-you %s\n", love->toString().c_str());
-    TS_ASSERT_EQUALS(2, as->get_arity(love));
+    TS_ASSERT_EQUALS(2, getarity(love));
 
     Handle response = eval->eval_h(
        "(SetLink love-star star-you)");
@@ -113,7 +115,7 @@ void RecognizerUTest::test_word_phrase(void)
 
     Handle love = eval->eval_h("(cog-recognize adv-sent)");
     printf("super-love %s\n", love->toString().c_str());
-    TS_ASSERT_EQUALS(1, as->get_arity(love));
+    TS_ASSERT_EQUALS(1, getarity(love));
 
     Handle response = eval->eval_h(
        "(SetLink star-you)");

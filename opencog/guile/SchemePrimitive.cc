@@ -159,7 +159,7 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 
 PrimitiveEnviron * PrimitiveEnviron::verify_pe(SCM spe, const char *subrname)
 {
-	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, spe))
+	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, spe))
 		scm_wrong_type_arg_msg(subrname, 1, spe, "opencog primitive function");
 
 	scm_t_bits misctype = SCM_SMOB_FLAGS(spe);

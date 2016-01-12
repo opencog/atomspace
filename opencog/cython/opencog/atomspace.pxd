@@ -31,14 +31,14 @@ ctypedef float confidence_t
 ctypedef float strength_t
 
 cdef extern from "opencog/truthvalue/TruthValue.h" namespace "opencog":
-    cdef cppclass tv_ptr "std::shared_ptr<opencog::TruthValue>":
+    cdef cppclass tv_ptr "std::shared_ptr<const opencog::TruthValue>":
         tv_ptr()
         tv_ptr(tv_ptr copy)
         tv_ptr(cTruthValue* fun)
         tv_ptr(cSimpleTruthValue* fun)
         cTruthValue* get()
 
-    cdef cppclass cTruthValue "opencog::TruthValue":
+    cdef cppclass cTruthValue "const opencog::TruthValue":
         strength_t getMean()
         confidence_t getConfidence()
         count_t getCount()
@@ -67,7 +67,7 @@ cdef extern from "opencog/truthvalue/SimpleTruthValue.h" namespace "opencog":
 # ClassServer
 ctypedef short Type
 
-cdef extern from "opencog/atomspace/ClassServer.h" namespace "opencog":
+cdef extern from "opencog/atoms/base/ClassServer.h" namespace "opencog":
     cdef cppclass cClassServer "opencog::ClassServer":
         bint isNode(Type t)
         bint isLink(Type t)
@@ -79,13 +79,13 @@ cdef extern from "opencog/atomspace/ClassServer.h" namespace "opencog":
         Type getNumberOfClasses()
     cdef cClassServer classserver()
 
-cdef extern from "opencog/atomspace/atom_types.h" namespace "opencog":
+cdef extern from "opencog/atoms/base/atom_types.h" namespace "opencog":
     cdef Type NOTYPE
 
 # Handle
 ctypedef public long UUID
 
-cdef extern from "opencog/atomspace/Handle.h" namespace "opencog":
+cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
     cdef cppclass cHandle "opencog::Handle":
         cHandle()
         cHandle(UUID)
@@ -108,7 +108,7 @@ cdef class TruthValue:
     cdef cTruthValue* _ptr(self)
     cdef tv_ptr* _tvptr(self)
     cdef _init(self, float mean, float count)
-    
+
 cdef class Handle:
     cdef cHandle *h
 
@@ -137,16 +137,18 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         bint is_valid_handle(cHandle h)
         int get_size()
+
+        # these should alias the proper types for sti/lti/vlti
+        # XXX DEPRECATED, REMOVE ASAP XXX just implement these
+        # correctly, instead of callng deprecated atomspace methods!
         string get_name(cHandle h)
         Type get_type(cHandle h)
         tv_ptr get_TV(cHandle h)
         void set_TV(cHandle h, tv_ptr tvn)
 
         vector[cHandle] get_outgoing(cHandle h)
-        bint is_source(cHandle h, cHandle source)
         vector[cHandle] get_incoming(cHandle h)
 
-        # these should alias the proper types for sti/lti/vlti
         short get_STI(cHandle h)
         short get_LTI(cHandle h)
         bint get_VLTI(cHandle h)
@@ -155,6 +157,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         void inc_VLTI(cHandle h)
         void dec_VLTI(cHandle h)
 
+        # XXX DEPRECATED, REMOVE ASAP XXX just call toString, instead!!
         string atom_as_string(cHandle h, bint)
 
         # ==== query methods ====
@@ -175,7 +178,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         # vector[chandle].iterator get_handles_by_type(output_iterator, Type t, xxx bint subclass)
 
         void clear()
-        bint remove_atom(cHandle h, bint recursive) 
+        bint remove_atom(cHandle h, bint recursive)
 
 cdef AtomSpace_factory(cAtomSpace *to_wrap)
 
@@ -185,9 +188,9 @@ cdef class AtomSpace:
 
 
 cdef extern from "opencog/atomutils/AtomUtils.h" namespace "opencog":
-    # C++: 
-    #   
-    #   HandleSeq get_predicates(const Handle& target, 
+    # C++:
+    #
+    #   HandleSeq get_predicates(const Handle& target,
     #                     Type predicateType=PREDICATE_NODE,
     #                     bool subClasses=true)
     #   void finalize_opencog();

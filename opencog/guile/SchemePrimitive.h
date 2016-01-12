@@ -14,17 +14,18 @@
 
 #include <string>
 
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <libguile.h>
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/ClassServer.h>
 
 namespace opencog {
 /** \addtogroup grp_smob
  *  @{
  */
 
+class AtomSpace;
 class PrimitiveEnviron
 {
 	friend class SchemeEval;
@@ -73,6 +74,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		union
 		{
 			// signature naming convention:
+			// a == AtomSpace*
 			// b == bool
 			// d == double
 			// h == Handle
@@ -105,6 +107,8 @@ class SchemePrimitive : public PrimitiveEnviron
 			HandleSeq (T::*q_htib)(Handle, Type, int, bool);
 			HandleSeqSeq (T::*k_h)(Handle);
 			HandleSeqSeq (T::*k_hi)(Handle, int);
+			const std::string& (T::*s_as)(AtomSpace*,
+			                             const std::string&);
 			const std::string& (T::*s_s)(const std::string&);
 			const std::string& (T::*s_ss)(const std::string&,
 			                              const std::string&);
@@ -149,6 +153,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			Q_HTIB,// return HandleSeq, take handle, type, and bool
 			K_H,   // return HandleSeqSeq, take Handle
 			K_HI,  // return HandleSeqSeq, take Handle, int
+			S_AS,  // return string, take AtomSpace* and string
 			S_S,   // return string, take string
 			S_SS,  // return string, take two strings
 			S_SSS, // return string, take three strings
@@ -409,6 +414,24 @@ class SchemePrimitive : public PrimitiveEnviron
 
 					break;
 				}
+				case P_H:
+				{
+					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
+					TruthValuePtr tv((that->*method.p_h)(h));
+					rc = SchemeSmob::tv_to_scm(tv);
+					break;
+				}
+				case S_AS:
+				{
+					// First argument is an StomSpace ptr.
+					AtomSpace* as = SchemeSmob::verify_atomspace(scm_car(args), scheme_name, 1);
+					// Second argument is a string
+					std::string str(SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2));
+
+					const std::string &rs = (that->*method.s_as)(as, str);
+					rc = scm_from_utf8_string(rs.c_str());
+					break;
+				}
 				case S_S:
 				{
 					// First argument is a string
@@ -443,13 +466,6 @@ class SchemePrimitive : public PrimitiveEnviron
 				{
 					const std::string &rs = (that->*method.s_v)();
 					rc = scm_from_utf8_string(rs.c_str());
-					break;
-				}
-				case P_H:
-				{
-					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
-					TruthValuePtr tv((that->*method.p_h)(h));
-					rc = SchemeSmob::tv_to_scm(tv);
 					break;
 				}
 				case U_SSB:
@@ -511,47 +527,19 @@ class SchemePrimitive : public PrimitiveEnviron
 				}
 				case V_TI:
 				{
-					SCM input = scm_car(args);
-					//Assuming that the type is input as a string or symbol, eg
-					//(f 'SimilarityLink) or (f "SimilarityLink")
-					if (scm_is_true(scm_symbol_p(input)))
-						input = scm_symbol_to_string(input);
+					Type t = SchemeSmob::verify_atom_type(scm_car(args), scheme_name, 1);
 
-					Type t = NOTYPE;
-					if (scm_is_integer(input))
-						t = scm_to_ushort(input);
-					else
-					{
-						const char *lstr = scm_i_string_chars(input);
-						t = classserver().getType(lstr);
-					}
-
-					int i = scm_to_int(scm_cadr(args));
+					int i = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
 
 					(that->*method.v_ti)(t, i);
 					break;
 				}
 				case V_TIDI:
 				{
-					SCM input = scm_car(args);
-					//Assuming that the type is input as a string or symbol, eg
-					//(f 'SimilarityLink) or (f "SimilarityLink")
-					if (scm_is_true(scm_symbol_p(input)))
-						input = scm_symbol_to_string(input);
-
-					Type t = NOTYPE;
-					if (scm_is_integer(input))
-						t = scm_to_ushort(input);
-					else
-					{
-						const char *lstr = scm_i_string_chars(input);
-						t = classserver().getType(lstr);
-					}
-
-					int i = scm_to_int(scm_cadr(args));
-					double d = scm_to_double(scm_caddr(args));
-					int i2 = scm_to_int(scm_cadddr(args));
-
+					Type t = SchemeSmob::verify_atom_type(scm_car(args), scheme_name, 1);
+					int i = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
+					double d = SchemeSmob::verify_real(scm_caddr(args), scheme_name, 3);
+					int i2 = SchemeSmob::verify_int(scm_cadddr(args), scheme_name, 4);
 					(that->*method.v_tidi)(t, i, d, i2);
 					break;
 				}
@@ -633,43 +621,46 @@ class SchemePrimitive : public PrimitiveEnviron
 
 		// Declare and define the constructors for this class. They all have
 		// the same basic form, except for the types.
-		DECLARE_CONSTR_2(B_HI, b_hi, bool, Handle, int)
-		DECLARE_CONSTR_2(B_HH, b_hh, bool, Handle, Handle)
-		DECLARE_CONSTR_3(D_HHT, d_hht, double, Handle, Handle, Type)
+		DECLARE_CONSTR_2(B_HI,   b_hi, bool, Handle, int)
+		DECLARE_CONSTR_2(B_HH,   b_hh, bool, Handle, Handle)
+		DECLARE_CONSTR_3(D_HHT,  d_hht, double, Handle, Handle, Type)
 		DECLARE_CONSTR_4(D_HHTB, d_hhtb, double, Handle, Handle, Type, bool)
 		DECLARE_CONSTR_1(H_H,  h_h,  Handle, Handle)
 		DECLARE_CONSTR_2(H_HI, h_hi, Handle, Handle, int)
 		DECLARE_CONSTR_2(H_HH, h_hh, Handle, Handle, Handle)
 		DECLARE_CONSTR_2(H_HS, h_hs, Handle, Handle, const std::string&)
 		DECLARE_CONSTR_3(H_HTQ, h_htq, Handle, Handle, Type, const HandleSeq&)
-		DECLARE_CONSTR_2(H_SQ, h_sq, Handle, const std::string&, const HandleSeq&)
-		DECLARE_CONSTR_3(H_SQQ, h_sqq, Handle, const std::string&, const HandleSeq&, const HandleSeq&)
-		DECLARE_CONSTR_1(Q_H, q_h, HandleSeq, Handle)
-		DECLARE_CONSTR_3(Q_HTI, q_hti, HandleSeq, Handle, Type, int)
+		DECLARE_CONSTR_2(H_SQ,  h_sq, Handle, const std::string&, const HandleSeq&)
+		DECLARE_CONSTR_3(H_SQQ,  h_sqq, Handle, const std::string&,
+		                                const HandleSeq&, const HandleSeq&)
+		DECLARE_CONSTR_1(Q_H,    q_h, HandleSeq, Handle)
+		DECLARE_CONSTR_3(Q_HTI,  q_hti, HandleSeq, Handle, Type, int)
 		DECLARE_CONSTR_4(Q_HTIB, q_htib, HandleSeq, Handle, Type, int, bool)
-		DECLARE_CONSTR_1(K_H, k_h, HandleSeqSeq, Handle)
-		DECLARE_CONSTR_2(K_HI, k_hi, HandleSeqSeq, Handle, int)
-		DECLARE_CONSTR_1(S_S,  s_s,  const std::string&, const std::string&)
-		DECLARE_CONSTR_2(S_SS, s_ss, const std::string&, const std::string&,
-		                             const std::string&)
-		DECLARE_CONSTR_3(S_SSS,s_sss,const std::string&, const std::string&,
-		                             const std::string&, const std::string&)
-		DECLARE_CONSTR_3(H_HHH, h_hhh, Handle, Handle, Handle, Handle)
-		DECLARE_CONSTR_0(S_V,  s_v,  const std::string&)
-		DECLARE_CONSTR_1(P_H,  p_h,  TruthValuePtr, Handle)
-		DECLARE_CONSTR_3(U_SSB, u_ssb, UUID,const std::string&,const std::string&, bool)
-		DECLARE_CONSTR_1(V_B,  v_b,  void, bool)
-		DECLARE_CONSTR_1(V_H,  v_h,  void, Handle)
-		DECLARE_CONSTR_1(V_S,  v_s,  void, const std::string&)
-		DECLARE_CONSTR_2(V_SS, v_ss, void, const std::string&,
-		                             const std::string&)
-		DECLARE_CONSTR_3(V_SSS,v_sss,void, const std::string&,
-		                             const std::string&, const std::string&)
-		DECLARE_CONSTR_1(V_T,  v_t,  void, Type)
-		DECLARE_CONSTR_2(V_TI, v_ti, void, Type, int)
+		DECLARE_CONSTR_1(K_H,    k_h,  HandleSeqSeq, Handle)
+		DECLARE_CONSTR_2(K_HI,   k_hi, HandleSeqSeq, Handle, int)
+		DECLARE_CONSTR_2(S_AS,   s_as, const std::string&, AtomSpace*,
+		                               const std::string&)
+		DECLARE_CONSTR_1(S_S,    s_s,  const std::string&, const std::string&)
+		DECLARE_CONSTR_2(S_SS,   s_ss, const std::string&, const std::string&,
+		                               const std::string&)
+		DECLARE_CONSTR_3(S_SSS,  s_sss,const std::string&, const std::string&,
+		                               const std::string&, const std::string&)
+		DECLARE_CONSTR_3(H_HHH,  h_hhh, Handle, Handle, Handle, Handle)
+		DECLARE_CONSTR_0(S_V,    s_v,  const std::string&)
+		DECLARE_CONSTR_1(P_H,    p_h,  TruthValuePtr, Handle)
+		DECLARE_CONSTR_3(U_SSB,  u_ssb, UUID,const std::string&,const std::string&, bool)
+		DECLARE_CONSTR_1(V_B,    v_b,  void, bool)
+		DECLARE_CONSTR_1(V_H,    v_h,  void, Handle)
+		DECLARE_CONSTR_1(V_S,    v_s,  void, const std::string&)
+		DECLARE_CONSTR_2(V_SS,   v_ss, void, const std::string&,
+		                               const std::string&)
+		DECLARE_CONSTR_3(V_SSS,  v_sss,void, const std::string&,
+		                               const std::string&, const std::string&)
+		DECLARE_CONSTR_1(V_T,    v_t,  void, Type)
+		DECLARE_CONSTR_2(V_TI,   v_ti, void, Type, int)
 		DECLARE_CONSTR_4(V_TIDI, v_tidi, void, Type, int, double, int)
 
-		DECLARE_CONSTR_0(V_V,  v_v,  void);
+		DECLARE_CONSTR_0(V_V,    v_v,  void);
 };
 
 #define DECLARE_DECLARE_1(RET,ARG) \
@@ -725,6 +716,7 @@ DECLARE_DECLARE_2(Handle, Handle, Handle)
 DECLARE_DECLARE_2(Handle, Handle, const std::string&)
 DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
 DECLARE_DECLARE_2(HandleSeqSeq, Handle, int)
+DECLARE_DECLARE_2(const std::string&, AtomSpace*, const std::string&)
 DECLARE_DECLARE_2(const std::string&, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, Type, int)

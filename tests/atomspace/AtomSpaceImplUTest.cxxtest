@@ -28,8 +28,7 @@
 #include <string.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomutils/AtomUtils.h>
-#include <opencog/atomspace/Node.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/oc_assert.h>
@@ -38,6 +37,7 @@
 #include <opencog/util/Config.h>
 
 #include "makeVirtualAtom.h"
+#include "sorting.h"
 
 using namespace opencog;
 using namespace std;
@@ -83,13 +83,6 @@ bool isLink(Handle h)
 
 bool isNode(Handle h) 
 { return classserver().isA(h->getType(), NODE); }
-
-bool isSource(Handle source, Handle link)
-{
-    LinkPtr l(LinkCast(link));
-    if (l) return l->isSource(source);
-    return false;
-}
 
 HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
 {
@@ -206,7 +199,7 @@ struct compareAtom
  * method, which would return all entries in AtomSpace, sorted by STI:
  * @code
  *         std::list<Handle> ret;
- *         AttentionValue::STISort stiSort;
+ *         STISort stiSort;
  *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true, stiSort);
  * @endcode
  */
@@ -661,43 +654,6 @@ public:
         outgoing2.push_back(l1);
         Handle l2 = atomSpace->add_link(EVALUATION_LINK, outgoing2);
         l2->setTruthValue(tv2);
-
-        // Ensure first in outgoing is the source
-        TS_ASSERT(isSource(h1,l2));
-        // Ensure second in outgoing is not the source
-        TS_ASSERT(!isSource(l1,l2));
-
-        // Ensure all in the outgoing set of unordered link are considered a source
-        TS_ASSERT(isSource(h2,l1));
-        TS_ASSERT(isSource(h3,l1));
-
-    }
-
-    void testGetNeighbors()
-    {
-        Handle h1 = atomSpace->add_node(PREDICATE_NODE, "barkingAt");
-        h1->setTruthValue(SimpleTruthValue::createTV(0.001f, 0.00001f));
-        Handle h2 = atomSpace->add_node(CONCEPT_NODE, "dog1");
-        h2->setTruthValue(SimpleTruthValue::createTV(0.001f, 0.00001f));
-        Handle h3 = atomSpace->add_node(CONCEPT_NODE, "tree");
-        h3->setTruthValue(SimpleTruthValue::createTV(0.5f, 0.99f));
-        TruthValuePtr tv1 = SimpleTruthValue::createTV(0.001f, 0.00001f);
-        TruthValuePtr tv2 = SimpleTruthValue::createTV(0.001f, 0.00001f);
-        HandleSeq outgoing1;
-        outgoing1.push_back(h2);
-        outgoing1.push_back(h3);
-        Handle l1 = atomSpace->add_link(SET_LINK, outgoing1);
-        l1->setTruthValue(tv1);
-        HandleSeq outgoing2;
-        outgoing2.push_back(h1);
-        outgoing2.push_back(l1);
-        Handle l2 = atomSpace->add_link(EVALUATION_LINK, outgoing2);
-        l2->setTruthValue(tv2);
-
-        TS_ASSERT(get_neighbors(h1).size() == 1);
-        Handle badHandle(10000); 
-        TS_ASSERT_THROWS(get_neighbors(badHandle),
-                         opencog::InvalidParamException);
     }
 
     void testGetHandle_bugfix1() {
@@ -728,7 +684,7 @@ public:
      * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
      *          Example of call to this method, which would return all entries in TimeServer, sorted by STI:
      *         std::list<Handle> ret;
-     *         AttentionValue::STISort stiSort;
+     *         STISort stiSort;
      *         atomSpace->getHandleSet(back_inserter(ret), ATOM, true, stiSort);
      */
     void testgetSortedHandleSet()
@@ -740,7 +696,7 @@ public:
         
         logger().debug("STISort");
 
-        AttentionValue::STISort sSort;
+        STISort sSort;
         HandleSeq sAtoms;
         getSortedHandleSet(as, back_inserter(sAtoms), ATOM, true, &sSort);
         for (unsigned int i = 0; i < sAtoms.size() - 1; i++) {
@@ -749,7 +705,7 @@ public:
         
         logger().debug("LTIAndTVAscendingSort");
         
-        AttentionValue::LTIAndTVAscendingSort latvSort;
+        LTIAndTVAscendingSort latvSort;
         HandleSeq latvAtoms;
         getSortedHandleSet(as, back_inserter(latvAtoms), ATOM, true, &latvSort);
         for (unsigned int i = 0; i < latvAtoms.size() - 1; i++) {
@@ -758,7 +714,7 @@ public:
         
         logger().debug("LTIThenTVAscendingSort");
         
-        AttentionValue::LTIThenTVAscendingSort lttvSort;
+        LTIThenTVAscendingSort lttvSort;
         HandleSeq lttvAtoms;
         getSortedHandleSet(as, back_inserter(lttvAtoms), ATOM, true, &lttvSort);
         for (unsigned int i = 0; i < lttvAtoms.size() - 1; i++) {

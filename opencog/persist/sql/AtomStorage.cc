@@ -36,16 +36,17 @@
 #include <thread>
 
 #include <opencog/util/oc_assert.h>
-#include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/CountTruthValue.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
 #include <opencog/truthvalue/ProbabilisticTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/truthvalue/TruthValue.h>
+
+#include <opencog/atomspace/TLB.h>
 
 #include "AtomStorage.h"
 #include "odbcxx.h"
@@ -904,7 +905,7 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 			break;
 		case INDEFINITE_TRUTH_VALUE:
 		{
-			IndefiniteTruthValuePtr itv = std::static_pointer_cast<IndefiniteTruthValue>(tv);
+			IndefiniteTruthValuePtr itv = std::static_pointer_cast<const IndefiniteTruthValue>(tv);
 			STMTF("stv_mean", itv->getL());
 			STMTF("stv_count", itv->getU());
 			STMTF("stv_confidence", itv->getConfidenceLevel());

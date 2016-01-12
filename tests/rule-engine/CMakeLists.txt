@@ -5,6 +5,7 @@ LINK_LIBRARIES(
 	clearbox
 )
 
+ADD_CXXTEST(ChainerUtilsUTest)
 ADD_CXXTEST(ForwardChainerUTest)
 ADD_CXXTEST(BackwardChainerUTest)
 ADD_CXXTEST(URECommonsUTest)

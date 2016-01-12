@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_FREE_LINK_H
 #define _OPENCOG_FREE_LINK_H
 
-#include <opencog/atomspace/Link.h>
+#include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/core/Variables.h>
 
 namespace opencog

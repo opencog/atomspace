@@ -83,6 +83,9 @@ class ImplicationUTest :  public CxxTest::TestSuite
  */
 #define an as->add_node
 #define al as->add_link
+#define getarity(hand) LinkCast(hand)->getArity()
+#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
+
 void ImplicationUTest::setUp(void)
 {
 	as = new AtomSpace();
@@ -253,9 +256,6 @@ void ImplicationUTest::tearDown(void)
  *       WordSenseNode #Ingestion
  *       PredicateNode grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation
  */
-#define getlink(hand,pos) as->get_outgoing(hand,pos)
-#define getarity(hand) as->get_arity(hand)
-
 void ImplicationUTest::test_exec(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);

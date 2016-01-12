@@ -71,12 +71,14 @@ void DefineLinkUTest::setUp(void)
 {
     as->clear();
     config().set("SCM_PRELOAD",
-        "opencog/atomspace/core_types.scm, "
+        "opencog/atoms/base/core_types.scm, "
         "opencog/scm/utilities.scm, "
         "opencog/scm/opencog/query.scm");
 
     load_scm_files_from_config(*as);
 }
+
+#define getarity(hand) LinkCast(hand)->getArity()
 
 /*
  * DefineLink most basic unit test.
@@ -89,13 +91,13 @@ void DefineLinkUTest::test_basic(void)
     load_scm_files_from_config(*as);
 
     Handle items = eval->eval_h("(cog-execute! get-elect)");
-    TS_ASSERT_EQUALS(2, as->get_arity(items));
+    TS_ASSERT_EQUALS(2, getarity(items));
 
     items = eval->eval_h("(cog-execute! get-elect-bound)");
-    TS_ASSERT_EQUALS(2, as->get_arity(items));
+    TS_ASSERT_EQUALS(2, getarity(items));
 
     items = eval->eval_h("(cog-execute! get-parts)");
-    TS_ASSERT_EQUALS(2, as->get_arity(items));
+    TS_ASSERT_EQUALS(2, getarity(items));
 }
 
 /*
@@ -111,7 +113,7 @@ void DefineLinkUTest::test_schema(void)
 
     Handle timestamp = eval->eval_h(
         "(cog-execute! (DefinedSchemaNode \"set timestamp\"))");
-    TS_ASSERT_EQUALS(2, as->get_arity(timestamp));
+    TS_ASSERT_EQUALS(2, getarity(timestamp));
 
     // Executing the above should return something like this:
     // (EvaluationLink

@@ -72,11 +72,13 @@ void BuggySelfGroundUTest::setUp(void)
 {
     as->clear();
     config().set("SCM_PRELOAD",
-        "opencog/atomspace/core_types.scm, "
+        "opencog/atoms/base/core_types.scm, "
         "opencog/scm/utilities.scm ");
 
     load_scm_files_from_config(*as);
 }
+
+#define getarity(hand) LinkCast(hand)->getArity()
 
 void BuggySelfGroundUTest::test_crash(void)
 {
@@ -89,7 +91,7 @@ void BuggySelfGroundUTest::test_crash(void)
     TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != hbnd);
 
     Handle items = bindlink(as, hbnd);
-    TS_ASSERT_EQUALS(1, as->get_arity(items));
+    TS_ASSERT_EQUALS(1, getarity(items));
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }

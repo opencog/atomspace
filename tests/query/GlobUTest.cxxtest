@@ -71,13 +71,15 @@ void GlobUTest::setUp(void)
 {
     as->clear();
     config().set("SCM_PRELOAD",
-        "opencog/atomspace/core_types.scm, "
+        "opencog/atoms/base/core_types.scm, "
         "tests/query/test_types.scm, "
         "opencog/scm/utilities.scm,"
         "opencog/scm/opencog/query.scm");
 
     load_scm_files_from_config(*as);
 }
+
+#define getarity(hand) LinkCast(hand)->getArity()
 
 /*
  * Test a glob in the middle of a list.
@@ -91,7 +93,7 @@ void GlobUTest::test_glob_middle(void)
 
     Handle love = eval->eval_h("(cog-bind glob-you)");
     printf("glob-you %s\n", love->toString().c_str());
-    TS_ASSERT_EQUALS(2, as->get_arity(love));
+    TS_ASSERT_EQUALS(2, getarity(love));
 
     Handle response = eval->eval_h(
        "(SetLink"
@@ -126,7 +128,7 @@ void GlobUTest::test_glob_final(void)
 
     Handle love = eval->eval_h("(cog-bind love-glob)");
     printf("love-glob %s\n", love->toString().c_str());
-    TS_ASSERT_EQUALS(2, as->get_arity(love));
+    TS_ASSERT_EQUALS(2, getarity(love));
 
     Handle response = eval->eval_h(
        "(SetLink"

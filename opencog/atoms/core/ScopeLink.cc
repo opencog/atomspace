@@ -8,8 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the
- * exceptions
- * at http://opencog.org/wiki/Licenses
+ * exceptions at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,13 +16,12 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License
- * along with this program; if not, write to:
+ * License along with this program; if not, write to:
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/FreeLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
@@ -34,12 +32,6 @@ using namespace opencog;
 
 void ScopeLink::init(void)
 {
-	size_t sz = _outgoing.size();
-	if (2 < sz)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an outgoing set size of at most two, got %d for %s",
-			sz, toString().c_str());
-
 	extract_variables(_outgoing);
 }
 
@@ -99,11 +91,15 @@ ScopeLink::ScopeLink(Link &l)
 ///
 void ScopeLink::extract_variables(const HandleSeq& oset)
 {
+	if (oset.size() == 0)
+		throw SyntaxException(TRACE_INFO,
+			"Expecting a non-empty outgoing set.");
+
 	Type decls = oset.at(0)->getType();
 
 	// If the first atom is not explicitly a variable declaration, then
 	// there are no variable declarations. There are two cases that; can
-	// apply here: either the body is a lambda, in which casse, we copy
+	// apply here: either the body is a lambda, in which case, we copy
 	// the variables from the lambda; else we extract all free variables.
 	if (VARIABLE_LIST != decls and
 	    VARIABLE_NODE != decls and
@@ -126,6 +122,11 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 		}
 		return;
 	}
+
+	if (oset.size() < 2)
+		throw SyntaxException(TRACE_INFO,
+			"Expecting an outgoing set size of at least two; got %s",
+			oset[0]->toString().c_str());
 
 	// If we are here, then the first outgoing set member should be
 	// a variable declaration.
@@ -157,6 +158,43 @@ void ScopeLink::init_scoped_variables(const Handle& hvar)
 		VariableList vl({hvar});
 		_varlist = vl.get_variables();
 	}
+}
+
+/* ================================================================= */
+///
+/// Compare other ScopeLink, return true if it is equal to this one,
+/// to to an alpha-conversion of variables.
+///
+bool ScopeLink::is_equal(const Handle& other) const
+{
+	if (other == this) return true;
+	if (other->getType() != _type) return false;
+
+	ScopeLinkPtr scother(ScopeLinkCast(other));
+
+	// Variable declarations must match.
+	if (not _varlist.is_equal(scother->_varlist)) return false;
+
+	// Other body, with our ariables in place of its variables,
+	// should be same as our body.
+	Handle altbod = scother->_varlist.substitute_nocheck(scother->_body,
+	                                                  _varlist.varseq);
+
+	// Compare bodies, they should match.
+	if (*((AtomPtr)altbod) != *((AtomPtr) _body)) return false;
+
+	return true;
+}
+
+bool ScopeLink::operator==(const Atom& ac) const
+{
+	Atom& a = (Atom&) ac; // cast away constness, for smart ptr.
+	return is_equal(a.getHandle());
+}
+
+bool ScopeLink::operator!=(const Atom& a) const
+{
+	return not operator==(a);
 }
 
 /* ===================== END OF FILE ===================== */

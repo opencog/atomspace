@@ -68,15 +68,15 @@ void BuggyEqual::setUp(void)
 	as->clear();
 
 	config().set("SCM_PRELOAD",
-		"opencog/atomspace/core_types.scm, "
+		"opencog/atoms/base/core_types.scm, "
 		"opencog/scm/utilities.scm, "
       "opencog/scm/opencog/query.scm");
 
 	load_scm_files_from_config(*as);
 }
 
-#define getlink(hand,pos) as->get_outgoing(hand,pos)
-#define getarity(hand) as->get_arity(hand)
+#define getlink(hand,pos) hand->getOutgoingAtom(pos)
+#define getarity(hand) LinkCast(hand)->getArity()
 
 /*
  * NotLink causing weird trouble.

@@ -22,16 +22,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "BackwardChainer.h"
-#include "BackwardChainerPMCB.h"
-#include "UnifyPMCB.h"
-
 #include <opencog/util/random.h>
 
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atomutils/Substitutor.h>
-#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atoms/pattern/PatternLink.h>
+
+#include "BackwardChainer.h"
+#include "BackwardChainerPMCB.h"
+#include "UnifyPMCB.h"
 
 using namespace opencog;
 
@@ -819,6 +818,26 @@ bool BackwardChainer::unify(const Handle& hsource,
 }
 
 /**
+ * Get all unique atoms within a link and its sublinks.
+ *
+ * Similar to getAllAtoms except there will be no repetition.
+ *
+ * @param h     the top level link
+ * @return      a UnorderedHandleSet of atoms
+ */
+static void get_all_unique_atoms(const Handle& h, UnorderedHandleSet& atom_set)
+{
+    atom_set.insert(h);
+
+    LinkPtr lll(LinkCast(h));
+    if (not lll)
+    {
+        for (const Handle& o : lll->getOutgoingSet())
+            get_all_unique_atoms(o, atom_set);
+    }
+}
+
+/**
  * Select a candidate rule from all rules.
  *
  * This method will try sub-atom unification if no whole output
@@ -864,7 +883,7 @@ bool BackwardChainer::select_rule(const Target& target,
 		all_implicand_to_target_mappings.clear();
 
 		// check if any of the implicand's output can be unified to target
-		for (Handle h : output)
+		for (const Handle& h : output)
 		{
 			VarMap mapping;
 
@@ -882,14 +901,13 @@ bool BackwardChainer::select_rule(const Target& target,
 		if (all_implicand_to_target_mappings.empty())
 		{
 			UnorderedHandleSet output_expanded;
-			for (Handle h : output)
+			for (const Handle& h : output)
 			{
-				UnorderedHandleSet hs = get_all_unique_atoms(h);
-				output_expanded.insert(hs.begin(), hs.end());
+				get_all_unique_atoms(h, output_expanded);
 				output_expanded.erase(h);
 			}
 
-			for (Handle h : output_expanded)
+			for (const Handle& h : output_expanded)
 			{
 				VarMap mapping;
 

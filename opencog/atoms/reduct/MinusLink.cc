@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/atom_types.h>
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/NumberNode.h>
 #include "MinusLink.h"
 #include "PlusLink.h"
@@ -81,19 +81,7 @@ void MinusLink::init(void)
 			"Don't know how to subract that!");
 }
 
-Handle MinusLink::execute(AtomSpace* as) const
-{
-	// Pattern matching hack. The pattern matcher returns sets of atoms;
-	// if that set contains numbers or something numeric, then unwrap it.
-	if (SET_LINK == _type and 1 == _outgoing.size())
-	{
-		LinkPtr lp(LinkCast(_outgoing[0]));
-		return do_execute(lp->getOutgoingSet());
-	}
-	return do_execute(_outgoing);
-}
-
-Handle MinusLink::do_execute(const HandleSeq& oset) const
+Handle MinusLink::do_execute(AtomSpace* as, const HandleSeq& oset) const
 {
 	if (1 == oset.size())
 	{

@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/reduct/FunctionLink.cc
+ * opencog/atoms/core/FunctionLink.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -20,12 +20,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/atom_types.h>
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/base/ClassServer.h>
 #include "FunctionLink.h"
 
 #include "ArityLink.h"
 #include "DeleteLink.h"
+#include "MapLink.h"
 #include "SleepLink.h"
 #include "TimeLink.h"
 #include "RandomChoice.h"
@@ -112,6 +113,9 @@ Handle FunctionLink::factory(Type t, const HandleSeq& seq)
 {
 	if (ARITY_LINK == t)
 		return Handle(createArityLink(seq));
+
+	if (MAP_LINK == t)
+		return Handle(createMapLink(seq));
 
 	if (RANDOM_CHOICE_LINK == t)
 		return Handle(createRandomChoiceLink(seq));

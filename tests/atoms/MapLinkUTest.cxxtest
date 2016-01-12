@@ -1,0 +1,211 @@
+/*
+ * tests/atoms/MapLinkUTest.cxxtest
+ *
+ * Copyright (C) 2016 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class MapLinkUTest: public CxxTest::TestSuite
+{
+private:
+        AtomSpace *as;
+        SchemeEval* eval;
+
+public:
+    MapLinkUTest(void)
+    {
+        logger().setLevel(Logger::DEBUG);
+        logger().setPrintToStdoutFlag(true);
+
+        as = new AtomSpace();
+        eval = new SchemeEval(as);
+    }
+
+    ~MapLinkUTest()
+    {
+        delete eval;
+        delete as;
+        // Erase the log file if no assertions failed.
+        if (!CxxTest::TestTracker::tracker().suiteFailed())
+                std::remove(logger().getFilename().c_str());
+    }
+
+    void setUp(void);
+    void tearDown(void);
+
+    void test_singleton(void);
+    void test_signature(void);
+    void test_double_set(void);
+    void test_implication(void);
+};
+
+void MapLinkUTest::tearDown(void)
+{
+    as->clear();
+}
+
+void MapLinkUTest::setUp(void)
+{
+    as->clear();
+    config().set("SCM_PRELOAD",
+        "opencog/atoms/base/core_types.scm, "
+        "opencog/scm/utilities.scm, "
+        "opencog/scm/opencog/exec.scm");
+
+    load_scm_files_from_config(*as);
+}
+
+/*
+ * MapLink unit test.
+ */
+void MapLinkUTest::test_singleton(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/atoms/maplink.scm");
+    load_scm_files_from_config(*as);
+
+    Handle result = eval->eval_h("(cog-execute! single)");
+
+    Handle baz = eval->eval_h("(Concept \"baz\")");
+    printf("got %s", result->toString().c_str());
+    printf("expected %s\n", baz->toString().c_str());
+
+    TS_ASSERT(result == baz);
+
+    // -------------------------------------------------
+    result = eval->eval_h("(cog-execute! single-set)");
+
+    Handle set = eval->eval_h(
+		"(SetLink "
+		"	(Concept \"ah one\") (Concept \"ah two\") (Number 3))");
+    printf("got %s", result->toString().c_str());
+    printf("expected %s\n", set->toString().c_str());
+
+    TS_ASSERT(result == set);
+
+    // -------------------------------------------------
+    result = eval->eval_h("(cog-execute! single-list)");
+
+    Handle list = eval->eval_h(
+		"(ListLink "
+		"	(Concept \"ah one\") (Concept \"ah two\") (Number 3))");
+    printf("got %s", result->toString().c_str());
+    printf("expected %s\n", list->toString().c_str());
+
+    TS_ASSERT(result == list);
+
+    // -------------------------------------------------
+    result = eval->eval_h("(cog-execute! single-type)");
+
+    set = eval->eval_h(
+		"(SetLink "
+		"	(Concept \"ah one\") (Concept \"ah two\"))");
+    printf("got %s", result->toString().c_str());
+    printf("expected %s\n", set->toString().c_str());
+
+    TS_ASSERT(result == set);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void MapLinkUTest::test_signature(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/atoms/maplink.scm");
+    load_scm_files_from_config(*as);
+
+    Handle result = eval->eval_h("(cog-execute! single-signature)");
+
+    Handle sete = eval->eval_h("sig-expect");
+    printf("got %s", result->toString().c_str());
+    printf("expected %s\n", sete->toString().c_str());
+
+    TS_ASSERT(result == sete);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void MapLinkUTest::test_double_set(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/atoms/maplink.scm");
+    load_scm_files_from_config(*as);
+
+    Handle result = eval->eval_h("(cog-execute! double-num-set)");
+
+    Handle sete = eval->eval_h(
+        "(SetLink (ListLink (Concept \"bar\") (Number 3)))");
+    printf("got %s", result->toString().c_str());
+    printf("expected %s\n", sete->toString().c_str());
+
+    TS_ASSERT(result == sete);
+
+    // ---------------------------------------------------
+    result = eval->eval_h("(cog-execute! double-con-set)");
+
+    sete = eval->eval_h(
+        "(SetLink "
+        "    (ListLink (Concept \"bar\") (Concept \"ah one\"))"
+        "    (ListLink (Concept \"bar\") (Concept \"ah two\")))");
+    printf("got %s", result->toString().c_str());
+    printf("expected %s\n", sete->toString().c_str());
+
+    TS_ASSERT(result == sete);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void MapLinkUTest::test_implication(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/atoms/maplink.scm");
+    load_scm_files_from_config(*as);
+
+    Handle result = eval->eval_h("(cog-execute! imply-map)");
+
+    Handle sete = eval->eval_h("imply-expected");
+    printf("got %s", result->toString().c_str());
+    printf("expected %s\n", sete->toString().c_str());
+
+    TS_ASSERT(result == sete);
+
+    // ---------------------------------------------------
+    result = eval->eval_h("(cog-execute! imply-eval)");
+
+    sete = eval->eval_h("eval-expected");
+    printf("got %s", result->toString().c_str());
+    printf("expected %s\n", sete->toString().c_str());
+
+    TS_ASSERT(result == sete);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}

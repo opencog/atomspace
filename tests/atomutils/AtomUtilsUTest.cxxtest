@@ -1,5 +1,5 @@
 /*
- * tests/atomspace/AtomUtilsUTest.cxxtest
+ * tests/atomutils/AtomUtilsUTest.cxxtest
  *
  * Copyright (C) 2015 OpenCog Foundation
  * All Rights Reserved
@@ -30,6 +30,8 @@
 
 using namespace opencog;
 
+const bool NO_SUBCLASSES = false;
+
 class AtomUtilsUTest :  public CxxTest::TestSuite
 {
 private:
@@ -40,129 +42,10 @@ public:
         logger().setPrintToStdoutFlag(true);
     }
 
-	void test_get_all_nodes();
-	void test_get_all_unique_nodes();
-	void test_get_all_atoms();
-	void test_get_all_unique_atoms();
-	void test_get_distant_neighbors();
-	void test_get_outgoing_nodes();
 	void test_get_predicates();
 	void test_get_predicates_for();
-	void test_are_similar();
 };
 
-// Test get_all_nodes()
-void AtomUtilsUTest::test_get_all_nodes()
-{
-	AtomSpace as;
-	Handle A = as.add_node(CONCEPT_NODE, "A"),
-		B = as.add_node(CONCEPT_NODE, "B"),
-		P = as.add_node(PREDICATE_NODE, "P"),
-		AB = as.add_link(INHERITANCE_LINK, A, B),
-		ABAP = as.add_link(LIST_LINK, AB, A, P);
-
-	// Get all nodes from ABAP
-	TS_ASSERT_EQUALS(get_all_nodes(ABAP),
-	                 HandleSeq({A, B, A, P}));
-}
-
-// Test get_all_unqiue_nodes()
-void AtomUtilsUTest::test_get_all_unique_nodes()
-{
-	AtomSpace as;
-	Handle A = as.add_node(CONCEPT_NODE, "A"),
-		B = as.add_node(CONCEPT_NODE, "B"),
-		P = as.add_node(PREDICATE_NODE, "P"),
-		AB = as.add_link(INHERITANCE_LINK, A, B),
-		ABAP = as.add_link(LIST_LINK, AB, A, P);
-
-	// Get all unique nodes from ABAP
-	TS_ASSERT_EQUALS(get_all_unique_nodes(ABAP),
-	                 UnorderedHandleSet({A, B, P}));
-}
-
-// Test get_all_atoms()
-void AtomUtilsUTest::test_get_all_atoms()
-{
-	AtomSpace as;
-	Handle A = as.add_node(CONCEPT_NODE, "A"),
-		B = as.add_node(CONCEPT_NODE, "B"),
-		P = as.add_node(PREDICATE_NODE, "P"),
-		AB = as.add_link(INHERITANCE_LINK, A, B),
-		ABAP = as.add_link(LIST_LINK, AB, A, P);
-
-	// Get all atoms from ABAP
-	TS_ASSERT_EQUALS(get_all_atoms(ABAP),
-	                 HandleSeq({ABAP, AB, A, B, A, P}));
-}
-
-// Test get_all_unique_atoms()
-void AtomUtilsUTest::test_get_all_unique_atoms()
-{
-	AtomSpace as;
-	Handle A = as.add_node(CONCEPT_NODE, "A"),
-		B = as.add_node(CONCEPT_NODE, "B"),
-		P = as.add_node(PREDICATE_NODE, "P"),
-		AB = as.add_link(INHERITANCE_LINK, A, B),
-		ABAP = as.add_link(LIST_LINK, AB, A, P);
-
-	// Get all unique atoms from ABAP
-	TS_ASSERT_EQUALS(get_all_unique_atoms(ABAP),
-	                 UnorderedHandleSet({ABAP, AB, A, B, P}));
-}
-
-// Test get_distant_neighbors()
-void AtomUtilsUTest::test_get_distant_neighbors()
-{
-	// Fill atomspace
-	AtomSpace as;
-	Handle A = as.add_node(CONCEPT_NODE, "A"),
-		B = as.add_node(CONCEPT_NODE, "B"),
-		C = as.add_node(CONCEPT_NODE, "C"),
-		D = as.add_node(CONCEPT_NODE, "D"),
-		AB = as.add_link(INHERITANCE_LINK, A, B),
-		BC = as.add_link(INHERITANCE_LINK, B, C),
-		CD = as.add_link(INHERITANCE_LINK, C, D);
-
-	// Test neighbors at distance 1 of A
-	TS_ASSERT_EQUALS(get_distant_neighbors(A, 1),
-	                 UnorderedHandleSet({AB}));
-
-	// Test neighbors at distance 1 of AB
-	TS_ASSERT_EQUALS(get_distant_neighbors(AB, 1),
-	                 UnorderedHandleSet({A, B}));
-
-	// Test neighbors at distance 2 of AB
-	TS_ASSERT_EQUALS(get_distant_neighbors(AB, 2),
-	                 UnorderedHandleSet({A, B, BC}));
-
-	// Test all neighbors of AB
-	TS_ASSERT_EQUALS(get_distant_neighbors(AB, -1),
-	                 UnorderedHandleSet({A, B, C, D, BC, CD}));
-}
-
-// Test get_outgoing_nodes()
-void AtomUtilsUTest::test_get_outgoing_nodes()
-{
-	AtomSpace as;
-	Handle A = as.add_node(CONCEPT_NODE, "A"),
-		B = as.add_node(CONCEPT_NODE, "B"),
-		P = as.add_node(PREDICATE_NODE, "P"),
-		AB = as.add_link(INHERITANCE_LINK, A, B),
-		ABP = as.add_link(LIST_LINK, AB, P);
-
-	// Get all nodes from ABP
-	TS_ASSERT_EQUALS(get_outgoing_nodes(ABP),
-	                 UnorderedHandleSet({A, B, P}));
-
-	// Get all concept nodes from ABP
-	TS_ASSERT_EQUALS(get_outgoing_nodes(ABP, {CONCEPT_NODE}),
-	                 UnorderedHandleSet({A, B}));
-
-	// Get all predicate nodes from ABP
-	TS_ASSERT_EQUALS(get_outgoing_nodes(ABP, {PREDICATE_NODE}),
-	                 UnorderedHandleSet({P}));
-}
 
 // Test get_outgoing_nodes()
 void AtomUtilsUTest::test_get_predicates()
@@ -241,41 +124,3 @@ void AtomUtilsUTest::test_get_predicates_for()
 	HandleSeq eatsBacon {dogEatsBacon, programmerEatsBacon};
 	TS_ASSERT_EQUALS(get_predicates_for(bacon, eats), eatsBacon);
 }
-
-void AtomUtilsUTest::test_are_similar()
-{
-    AtomSpace as;
-    config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
-                 "opencog/scm/utilities.scm, "
-                 "opencog/scm/av-tv.scm");
-    load_scm_files_from_config(as);
-
-    SchemeEval eval(&as);
-
-    Handle h1 = eval.eval_h("(EvaluationLink "
-                            "(PredicateNode \"chirps\")"
-                            "(ConceptNode \"Tweety\"))");
-
-    Handle h2 = eval.eval_h("(EvaluationLink"
-                            "(PredicateNode \"chirps\")"
-                            "(ConceptNode \"Peter\"))");
-    Handle h3 = eval.eval_h("(InheritanceLink"
-                            "(ConceptNode \"Peter\")"
-                            "(ConceptNode \"Frog\"))");
-    Handle h4 = eval.eval_h("(SetLink"
-                            "(PredicateNode \"chirps\")"
-                            "(ConceptNode \"X\"))"
-                            "(ConceptNode \"Z\"))"
-                            ")");
-    Handle h5 = eval.eval_h("(SetLink"
-                            "(ConceptNode \"X\"))"
-                            "(PredicateNode \"chirps\")"
-                            "(ConceptNode \"Z\"))"
-                            ")");
-
-    TS_ASSERT_EQUALS(true, are_similar(h1, h2, true));
-    TS_ASSERT_EQUALS(false, are_similar(h1, h3, true));
-    TS_ASSERT_EQUALS(true, are_similar(h1, h3, false));
-    TS_ASSERT_EQUALS(true, are_similar(h4, h5, true));
-}
-

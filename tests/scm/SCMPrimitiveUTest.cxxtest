@@ -22,8 +22,8 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/util/Logger.h>
@@ -77,7 +77,7 @@ class MyExampleClass
 			TSM_ASSERT("Failed to get a valid handle", as->is_valid_handle(h))
 
 			logger().debug("Info: my_func instance %d received the node: %s\n",
-			               id, as->get_name(h).c_str());
+			               id, NodeCast(h)->getName().c_str());
 			Handle hlist = as->add_link(LIST_LINK, h);
 			return hlist;
 		}
@@ -158,9 +158,9 @@ void SCMPrimitiveUTest::test_H_H(void)
 	TSM_ASSERT ("undefined list handle ", as->is_valid_handle(yyy));
 
 	TSM_ASSERT ("Null handle for link ", as->is_valid_handle(yyy));
-	TSM_ASSERT ("handle isn't a link ", as->is_link(yyy));
+	TSM_ASSERT ("handle isn't a link ", LinkCast(yyy));
 
-	const std::vector<Handle>& oset = as->get_outgoing(yyy);
+	const std::vector<Handle>& oset = LinkCast(yyy)->getOutgoingSet();
 
 	TSM_ASSERT ("wrong outgoing set ", nnn == oset[0]);
 

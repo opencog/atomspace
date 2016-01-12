@@ -26,7 +26,7 @@
 
 #include <opencog/util/Config.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/load-file.h>
 
@@ -70,7 +70,7 @@ void DistScmUTest::setUp(void)
 {
 	as->clear();
 	config().set("SCM_PRELOAD",
-	             "opencog/atomspace/core_types.scm");
+	             "opencog/atoms/base/core_types.scm");
 	load_scm_files_from_config(*as);
 
 	evl->eval("(setenv \"LTDL_LIBRARY_PATH\" \"" PROJECT_BINARY_DIR

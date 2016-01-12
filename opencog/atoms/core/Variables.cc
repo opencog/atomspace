@@ -8,8 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the
- * exceptions
- * at http://opencog.org/wiki/Licenses
+ * exceptions at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,15 +16,16 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License
- * along with this program; if not, write to:
+ * License along with this program; if not, write to:
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atomutils/TypeUtils.h>
+#include <opencog/atoms/TypeNode.h>
 
 #include "ScopeLink.h"
 #include "VariableList.h"
@@ -159,6 +159,53 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
 }
 
 /* ================================================================= */
+
+/// Return true if the other Variables struct is equal to this one,
+/// up to alpha-conversion. That is, same number of variables, same
+/// type restrictions, but different actual variable names.
+bool Variables::is_equal(const Variables& other) const
+{
+	size_t sz = varseq.size();
+	if (other.varseq.size() != sz) return false;
+
+	// Side-by-side comparison
+	for (size_t i=0; i<sz; i++)
+	{
+		const Handle& vme(varseq[i]);
+		const Handle& voth(other.varseq[i]);
+
+		// If typed, types must match.
+		auto sime = _simple_typemap.find(vme);
+		auto soth = other._simple_typemap.find(voth);
+		if (sime == _simple_typemap.end() and
+		    soth != other._simple_typemap.end()) return false;
+
+		if (sime != _simple_typemap.end())
+		{
+			if (soth == other._simple_typemap.end()) return false;
+			if (sime->second != soth->second) return false;
+		}
+
+		// If typed, types must match.
+		auto dime = _deep_typemap.find(vme);
+		auto doth = other._deep_typemap.find(voth);
+		if (dime == _deep_typemap.end() and
+		    doth != other._deep_typemap.end()) return false;
+
+		if (dime != _deep_typemap.end())
+		{
+			if (doth == other._deep_typemap.end()) return false;
+			if (dime->second != doth->second) return false;
+		}
+
+		// XXX TODO fuzzy?
+	}
+
+	// If we got toe here, everything must be OK.
+	return true;
+}
+
+/* ================================================================= */
 /**
  * Simple type checker.
  *
@@ -174,22 +221,69 @@ bool Variables::is_type(const Handle& h) const
 	// The arity must be one for there to be a match.
 	if (1 != varset.size()) return false;
 
-	// No type restrictions.
-	if (typemap.empty()) return true;
+	return is_type(varseq[0], h);
+}
 
-	// Check the type restrictions.
-	VariableTypeMap::const_iterator it =
-		typemap.find(varseq[0]);
-	const std::set<Type> &tchoice = it->second;
+/**
+ * Type checker.
+ *
+ * Returns true/false if we are holding the variable `var`, and if
+ * the `val` satisfies the type restrictions that apply to `var`.
+ */
+bool Variables::is_type(const Handle& var, const Handle& val) const
+{
+	bool ret = true;
 
-	Type htype = h->getType();
-	std::set<Type>::const_iterator allow = tchoice.find(htype);
-	return allow != tchoice.end();
+	// Simple type restrictions?
+	VariableTypeMap::const_iterator tit =
+		_simple_typemap.find(var);
+	if (_simple_typemap.end() != tit)
+	{
+		const std::set<Type> &tchoice = tit->second;
+		Type htype = val->getType();
+		std::set<Type>::const_iterator allow = tchoice.find(htype);
+
+		// If the value has the simple type, then we are good to go;
+		// we are done.  Else, fall throough, and see if one of the
+		// others accept the match.
+		if (allow != tchoice.end()) return true;
+		ret = false;
+	}
+
+	// Deep type restrictions?
+	VariableDeepTypeMap::const_iterator dit =
+		_deep_typemap.find(var);
+	if (_deep_typemap.end() != dit)
+	{
+		const std::set<Handle> &sigset = dit->second;
+		for (const Handle& sig : sigset)
+		{
+			if (value_is_type(sig, val)) return true;
+		}
+		ret = false;
+	}
+
+	// Fuzzy deep type restrictions?
+	VariableDeepTypeMap::const_iterator fit =
+		_fuzzy_typemap.find(var);
+	if (_fuzzy_typemap.end() != fit)
+	{
+		// const std::set<Handle> &fuzzset = dit->second;
+		throw RuntimeException(TRACE_INFO,
+			"Not implemented! TODO XXX FIXME");
+		ret = false;
+	}
+
+	// Maybe we don't know this variable?
+	if (varset.end() == varset.find(var)) return false;
+
+	// There appear to be no type restrictions...
+	return ret;
 }
 
 /* ================================================================= */
 /**
- * Very simple type checker.
+ * Simple type checker.
  *
  * Returns true/false if the indicated handles are of the type that
  * we have memoized.
@@ -203,20 +297,11 @@ bool Variables::is_type(const HandleSeq& hseq) const
 	// The arity must be one for there to be a match.
 	size_t len = hseq.size();
 	if (varset.size() != len) return false;
-	// No type restrictions.
-	if (typemap.empty()) return true;
 
 	// Check the type restrictions.
 	for (size_t i=0; i<len; i++)
 	{
-		VariableTypeMap::const_iterator it =
-			typemap.find(varseq[i]);
-		if (it == typemap.end()) continue;  // no restriction
-
-		const std::set<Type> &tchoice = it->second;
-		Type htype = hseq[i]->getType();
-		std::set<Type>::const_iterator allow = tchoice.find(htype);
-		if (allow == tchoice.end()) return false;
+		if (not is_type(varseq[i], hseq[i])) return false;
 	}
 	return true;
 }
@@ -274,12 +359,12 @@ Handle Variables::substitute(const Handle& fun,
                              const HandleSeq& args) const
 {
 	if (args.size() != varseq.size())
-		throw InvalidParamException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 			"Incorrect number of arguments specified, expecting %lu got %lu",
 			varseq.size(), args.size());
 
 	if (not is_type(args))
-		throw InvalidParamException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 			"Arguments fail to match variable declarations");
 
 	return substitute_nocheck(fun, args);
@@ -301,12 +386,12 @@ void Variables::extend(const Variables& vset)
 			// Merge the two typemaps, if needed.
 			try
 			{
-				const std::set<Type>& tms = vset.typemap.at(h);
-				std::set<Type> mytypes = typemap[h];
+				const std::set<Type>& tms = vset._simple_typemap.at(h);
+				std::set<Type> mytypes = _simple_typemap[h];
 				for (Type t : tms)
 					mytypes.insert(t);
-				typemap.erase(h);	 // is it safe to erase if h not in already?
-				typemap.insert({h,mytypes});
+				_simple_typemap.erase(h);	 // is it safe to erase if h not in already?
+				_simple_typemap.insert({h,mytypes});
 			}
 			catch(const std::out_of_range&) {}
 		}
@@ -321,7 +406,7 @@ void Variables::extend(const Variables& vset)
 			// The at() might throw...
 			try
 			{
-				typemap.insert({h, vset.typemap.at(h)});
+				_simple_typemap.insert({h, vset._simple_typemap.at(h)});
 			}
 			catch(const std::out_of_range&) {}
 		}
@@ -331,7 +416,7 @@ void Variables::extend(const Variables& vset)
 std::string Variables::to_string() const
 {
 	std::stringstream ss;
-	for (auto& v : typemap)
+	for (auto& v : _simple_typemap)
 	{
 		ss << "{variable: " << v.first->toShortString()
 		   << "types: ";

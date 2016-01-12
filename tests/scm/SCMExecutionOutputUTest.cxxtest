@@ -22,8 +22,8 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/guile/SchemeEval.h>
@@ -50,7 +50,7 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 		logger().setLevel(Logger::DEBUG);
 		logger().setPrintToStdoutFlag(true);
 
-		config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
+		config().set("SCM_PRELOAD", "opencog/atoms/base/core_types.scm, "
 		                            "opencog/scm/opencog/exec.scm");
 		opencog_exec_init();
 	}
@@ -111,7 +111,7 @@ void SCMExecutionOutputUTest::test_execute(void)
 	CHKEV(eval);
 
 	// There is no king yet
-	TS_ASSERT_EQUALS(as->get_incoming(king).size(), 0);
+	TS_ASSERT_EQUALS(king->getIncomingSetSize(), 0);
 
 	// Use the "cog-execute!" command to fire an ExecutionOutputLink directly
 	// from the Scheme shell, containing a GroundedSchemaNode referring to
@@ -122,7 +122,7 @@ void SCMExecutionOutputUTest::test_execute(void)
 	CHKEV(eval);
 
 	// Now there should be a king
-	TS_ASSERT_EQUALS(as->get_incoming(king).size(), 1);
+	TS_ASSERT_EQUALS(king->getIncomingSetSize(), 1);
 }
 
 
@@ -206,7 +206,7 @@ void SCMExecutionOutputUTest::test_multi_threads(void)
 
 	// Everyone gets to be a king!  Yayyyy!
 	Handle king = as->add_node(CONCEPT_NODE, "king");
-	TS_ASSERT_EQUALS(as->get_incoming(king).size(), num_atoms * n_threads);
+	TS_ASSERT_EQUALS(king->getIncomingSetSize(), num_atoms * n_threads);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

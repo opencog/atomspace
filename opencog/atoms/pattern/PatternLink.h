@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/PatternLink.h
+ * opencog/atoms/pattern/PatternLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -111,6 +111,8 @@ protected:
 	                      HandleSeq& concrete_clauses,
 	                      HandleSeq& virtual_clauses,
 	                      std::set<Handle>& black_clauses);
+
+	void add_dummies();
 
 	void trace_connectives(const std::set<Type>&,
 	                       const HandleSeq& clauses,

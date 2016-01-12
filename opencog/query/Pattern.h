@@ -30,9 +30,9 @@
 #include <unordered_map>
 #include <vector>
 
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/types.h>  // for typedef Type
 #include <opencog/query/PatternTerm.h>
-#include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/types.h>  // for typedef Type
 
 namespace opencog {
 
@@ -119,6 +119,10 @@ struct Pattern
 
 	// Globby terms are terms that contain a GlobNode
 	std::set<Handle> globby_terms;     // Smallest term that has a glob.
+
+	// Terms that may be grounded in an imprecise way. Similar to a
+	// GlobNode, but uses a different algorithm.
+	std::set<Handle> fuzzy_terms;
 
 	// Maps; the value is the largest (evaluatable or executable)
 	// term containing the variable. Its a multimap, because

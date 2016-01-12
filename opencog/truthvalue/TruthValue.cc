@@ -28,7 +28,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <opencog/atomspace/ClassServer.h>
 #include <opencog/truthvalue/CountTruthValue.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/truthvalue/NullTruthValue.h>
@@ -148,7 +147,7 @@ bool TruthValue::isDefinedTV() const
 TruthValuePtr TruthValue::higher_confidence_merge(TruthValuePtr other) const
 {
     if (other->getConfidence() > getConfidence()) {
-        return other->clone();
+        return other;
     }
-    return clone();
+    return shared_from_this();
 }

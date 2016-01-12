@@ -16,7 +16,7 @@ public:
 	UREConfigReaderUTest() : _eval(&_as)
 	{
 		config().set("SCM_PRELOAD",
-		             "opencog/atomspace/core_types.scm");
+		             "opencog/atoms/base/core_types.scm");
 		load_scm_files_from_config(_as);
 
 		// add the following so that utilities.scm and av-tv.scm are

@@ -80,9 +80,6 @@ cdef class Atom(object):
     def handle_uuid(self):
         return self.handle.value()
 
-    def is_source(self,Atom a):
-        return self.atomspace.is_source(a.h,self.handle)
-
     def is_node(self):
         return is_a(self.t,types.Node)
 

@@ -13,7 +13,10 @@
 (setlocale LC_CTYPE "")
 
 ; libsmob won't be found unless we setenv where to find it!
-(setenv "LTDL_LIBRARY_PATH" "/usr/local/lib/opencog")
+(setenv "LTDL_LIBRARY_PATH"
+	(if (getenv "LTDL_LIBRARY_PATH")
+		(string-append (getenv "LTDL_LIBRARY_PATH") ":/usr/local/lib/opencog")
+		"/usr/local/lib/opencog"))
 
 ; Work-around another common usability issue...
 (add-to-load-path "/usr/local/share/opencog/scm")

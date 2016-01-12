@@ -28,7 +28,7 @@
 #include <string>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/persist/zmq/atomspace/ZMQClient.h>
 
 namespace opencog

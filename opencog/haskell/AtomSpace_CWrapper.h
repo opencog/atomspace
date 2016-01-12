@@ -109,6 +109,10 @@ extern "C"
 
     /**
      * AtomSpace_getAtomByUUID Gets an atom back from the atomspace.
+     * XXX FIXME no one should be using UUID's to work with atoms,
+     * except for the database and communications back-ends.  The
+     * UUID's were never intended as a user interface to atoms, and,
+     * in particular, language bindings should not be using them.
      *
      * @param      this_ptr      Pointer to AtomSpace instance.
      * @param      uuid          UUID of the atom.
@@ -151,6 +155,9 @@ extern "C"
     /**
      * AtomSpace_getTruthValue  Gets the truthvalue of
      *                          an atom on the atomspace.
+     * XXX FIXME the truth-value of atoms is independent of the
+     * atomspace. Truth-value is property of the atom, only.
+     * Why is this here?
      *
      * @param      this_ptr    Pointer to AtomSpace instance.
      * @param      handle      Handle id of target atom.
@@ -167,6 +174,9 @@ extern "C"
     /**
      * AtomSpace_setTruthValue  Sets the truthvalue of
      *                          an atom on the atomspace.
+     * XXX FIXME the truth-value of atoms is independent of the
+     * atomspace. Truth-value is property of the atom, only.
+     * Why is this here?
      *
      * @param      this_ptr    Pointer to AtomSpace instance.
      * @param      handle      Handle id of target atom.

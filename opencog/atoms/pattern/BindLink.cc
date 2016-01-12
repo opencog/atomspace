@@ -23,7 +23,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/FreeLink.h>
 
 #include "BindLink.h"
@@ -94,6 +94,7 @@ void BindLink::extract_variables(const HandleSeq& oset)
 
 	// If we are here, then the first outgoing set member should be
 	// a variable declaration.
+	_vardecl = oset[0];
 	_body = oset[1];
 	_implicand = oset[2];
 

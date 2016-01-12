@@ -5,10 +5,11 @@ ADD_LIBRARY (atomspaceutils SHARED
 
 ADD_DEPENDENCIES(atomspaceutils opencog_atom_types)
 
-# TARGET_LINK_LIBRARIES(atomspaceutils
-# 	atomspace
-# 	${COGUTIL_LIBRARY}
-# )
+TARGET_LINK_LIBRARIES(atomspaceutils
+	atombase
+	atomspace
+	${COGUTIL_LIBRARY}
+)
 
 IF (CYGWIN)
 	INSTALL (TARGETS atomspaceutils

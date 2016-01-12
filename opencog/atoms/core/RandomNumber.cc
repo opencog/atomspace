@@ -8,8 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the
- * exceptions
- * at http://opencog.org/wiki/Licenses
+ * exceptions at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,8 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License
- * along with this program; if not, write to:
+ * License along with this program; if not, write to:
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
@@ -101,6 +99,7 @@ Handle RandomNumberLink::execute(AtomSpace * as) const
 	// XXX This is probably wrong ... if the as is null, we should
 	// probably use the atomspace that this link is in, right?
 	// We need to make a decision here and in many other places...
+	// We should probably be doing "lazy-add-to-atomsapce" ...
 	if (NULL == as)
 		return Handle(createNumberNode(ary));
 

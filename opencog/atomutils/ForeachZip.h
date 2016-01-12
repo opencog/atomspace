@@ -9,7 +9,7 @@
 #ifndef _OPENCOG_FOREACH_ZIP_H
 #define _OPENCOG_FOREACH_ZIP_H
 
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 
 namespace opencog
 {

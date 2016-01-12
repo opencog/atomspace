@@ -19,12 +19,13 @@
 #include <vector>
 #include <libguile.h>
 
-#include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/types.h>
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/types.h>
+
+#include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/truthvalue/TruthValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/AttentionValue.h>
-#include <opencog/truthvalue/TruthValue.h>
 
 namespace opencog {
 /** \addtogroup grp_smob
@@ -140,6 +141,7 @@ private:
 	static SCM ss_as_p(SCM);
 	static SCM ss_get_as(void);
 	static SCM ss_set_as(SCM);
+	static SCM ss_as_env(SCM);
 	static SCM ss_as_uuid(SCM);
 	static SCM ss_as_clear(SCM);
 	static SCM make_as(AtomSpace *);
@@ -159,7 +161,7 @@ private:
 	static SCM ss_af_boundary(void);
 	static SCM ss_set_af_boundary(SCM);
 	static SCM ss_af(void);
-        
+
 	// Callback into misc C++ code.
 	static SCM ss_ad_hoc(SCM, SCM);
 
@@ -175,16 +177,19 @@ private:
 
 	// validate arguments coming from scheme passing into C++
 	static void throw_exception(const char *, const char *);
+	static AtomSpace* verify_atomspace(SCM, const char *, int pos = 1);
 	static Type verify_atom_type(SCM, const char *, int pos = 1);
 	static Handle verify_handle(SCM, const char *, int pos = 1);
-	static TruthValue * verify_tv(SCM, const char *, int pos = 1);
-	static AttentionValue * verify_av(SCM, const char *, int pos = 1);
+	static TruthValue* verify_tv(SCM, const char *, int pos = 1);
+	static AttentionValue* verify_av(SCM, const char *, int pos = 1);
 	static std::vector<Handle> verify_handle_list (SCM, const char *,
 	                                               int pos = 1);
 	static std::string verify_string (SCM, const char *, int pos = 1,
 	                                  const char *msg = "expecting string");
 	static int verify_int (SCM, const char *, int pos = 1,
 	                       const char *msg = "expecting integer");
+	static double verify_real (SCM, const char *, int pos = 1,
+	                           const char *msg = "expecting real number");
 
 	static SCM atomspace_fluid;
 	static void ss_set_env_as(AtomSpace *);

@@ -81,7 +81,7 @@ void UnorderedUTest::setUp(void)
 	as = new AtomSpace();
 
 	config().set("SCM_PRELOAD",
-		"opencog/atomspace/core_types.scm, "
+		"opencog/atoms/base/core_types.scm, "
 		"tests/query/test_types.scm, "
 		"tests/query/unordered.scm, "
 		"tests/query/unordered-more.scm, "
@@ -112,8 +112,8 @@ void UnorderedUTest::setUp(void)
  * The trick is, of course, not to search too much, and not to search too
  * little.
  */
-#define getlink(hand,pos) as->get_outgoing(hand,pos)
-#define getarity(hand) as->get_arity(hand)
+#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
+#define getarity(hand) LinkCast(hand)->getArity()
 
 void UnorderedUTest::test_un1(void)
 {

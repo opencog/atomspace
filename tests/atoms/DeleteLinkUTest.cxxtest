@@ -1,5 +1,5 @@
 /*
- * tests/atomspace/DeleteUTest.cxxtest
+ * tests/atoms/DeleteUTest.cxxtest
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -20,10 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/Atom.h>
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/DeleteLink.h>
-#include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atoms/execution/Instantiator.h>
 
 using namespace opencog;

@@ -70,12 +70,13 @@ void BuggyQuoteUTest::setUp(void)
 {
     as->clear();
     config().set("SCM_PRELOAD",
-        "opencog/atomspace/core_types.scm, "
+        "opencog/atoms/base/core_types.scm, "
         "opencog/scm/utilities.scm");
 
     load_scm_files_from_config(*as);
 }
 
+#define getarity(hand) LinkCast(hand)->getArity()
 
 /*
  * BuggyQuote unit test.  Test binding to unquoted links.
@@ -129,5 +130,5 @@ void BuggyQuoteUTest::test_good_form(void)
     logger().debug() << "Result is this:\n" << rslt->toString();
 
     // See buggy-crime.scm for explanation for why this is 1 not 2
-    TS_ASSERT_EQUALS(1, as->get_arity(rslt));
+    TS_ASSERT_EQUALS(1, getarity(rslt));
 }

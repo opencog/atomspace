@@ -1,7 +1,7 @@
 
 #include "AtomSpace_CWrapper.h"
 #include "Utils_CWrapper.h"
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/ClassServer.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/truthvalue/CountTruthValue.h>
@@ -178,9 +178,9 @@ int AtomSpace_setTruthValue( AtomSpace* this_ptr
                 IndefiniteTruthValue::createITV(parameters[1]
                                                ,parameters[2]
                                                ,parameters[3]);
-            iptr->setMean(parameters[0]);
-            iptr->setDiff(parameters[4]);
-            h->setTruthValue(std::static_pointer_cast<TruthValue>(iptr));
+            // iptr->setMean(parameters[0]);
+            // iptr->setDiff(parameters[4]);
+            h->setTruthValue(std::static_pointer_cast<const TruthValue>(iptr));
             break; }
         case FUZZY_TRUTH_VALUE: {
             double count = FuzzyTruthValue::confidenceToCount(parameters[1]);

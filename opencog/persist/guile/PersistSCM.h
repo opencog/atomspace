@@ -25,7 +25,7 @@
 #define _OPENCOG_PERSIST_SCM_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Handle.h>
+#include <opencog/atoms/base/Handle.h>
 
 namespace opencog
 {

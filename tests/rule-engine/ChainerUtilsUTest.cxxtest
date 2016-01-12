@@ -1,0 +1,111 @@
+/*
+ * tests/rule-engine/ChainerUtilsUTest.cxxtest
+ *
+ * Copyright (C) 2015 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/util/Logger.h>
+#include <opencog/util/Config.h>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/load-file.h>
+#include <opencog/rule-engine/ChainerUtils.h>
+
+using namespace opencog;
+
+class ChainerUtilsUTest :  public CxxTest::TestSuite
+{
+private:
+
+public:
+    ChainerUtilsUTest()
+    {
+        logger().setPrintToStdoutFlag(true);
+    }
+
+	void test_get_outgoing_nodes();
+	void test_are_similar();
+};
+
+
+// Test get_outgoing_nodes()
+void ChainerUtilsUTest::test_get_outgoing_nodes()
+{
+	AtomSpace as;
+	Handle A = as.add_node(CONCEPT_NODE, "A"),
+		B = as.add_node(CONCEPT_NODE, "B"),
+		P = as.add_node(PREDICATE_NODE, "P"),
+		AB = as.add_link(INHERITANCE_LINK, A, B),
+		ABP = as.add_link(LIST_LINK, AB, P);
+
+	// Get all nodes from ABP
+	UnorderedHandleSet abp;
+	get_outgoing_nodes(ABP, abp);
+	TS_ASSERT_EQUALS(abp, UnorderedHandleSet({A, B, P}));
+
+	// Get all concept nodes from ABP
+	UnorderedHandleSet ab;
+	get_outgoing_nodes(ABP, ab, CONCEPT_NODE);
+	TS_ASSERT_EQUALS(ab, UnorderedHandleSet({A, B}));
+
+	// Get all predicate nodes from ABP
+	UnorderedHandleSet p;
+	get_outgoing_nodes(ABP, p, PREDICATE_NODE);
+	TS_ASSERT_EQUALS(p, UnorderedHandleSet({P}));
+}
+
+void ChainerUtilsUTest::test_are_similar()
+{
+    AtomSpace as;
+    config().set("SCM_PRELOAD", "opencog/atoms/base/core_types.scm, "
+                 "opencog/scm/utilities.scm, "
+                 "opencog/scm/av-tv.scm");
+    load_scm_files_from_config(as);
+
+    SchemeEval eval(&as);
+
+    Handle h1 = eval.eval_h("(EvaluationLink "
+                            "(PredicateNode \"chirps\")"
+                            "(ConceptNode \"Tweety\"))");
+
+    Handle h2 = eval.eval_h("(EvaluationLink"
+                            "(PredicateNode \"chirps\")"
+                            "(ConceptNode \"Peter\"))");
+    Handle h3 = eval.eval_h("(InheritanceLink"
+                            "(ConceptNode \"Peter\")"
+                            "(ConceptNode \"Frog\"))");
+    Handle h4 = eval.eval_h("(SetLink"
+                            "(PredicateNode \"chirps\")"
+                            "(ConceptNode \"X\"))"
+                            "(ConceptNode \"Z\"))"
+                            ")");
+    Handle h5 = eval.eval_h("(SetLink"
+                            "(ConceptNode \"X\"))"
+                            "(PredicateNode \"chirps\")"
+                            "(ConceptNode \"Z\"))"
+                            ")");
+
+    TS_ASSERT_EQUALS(true, are_similar(h1, h2, true));
+    TS_ASSERT_EQUALS(false, are_similar(h1, h3, true));
+    TS_ASSERT_EQUALS(true, are_similar(h1, h3, false));
+    TS_ASSERT_EQUALS(true, are_similar(h4, h5, true));
+}

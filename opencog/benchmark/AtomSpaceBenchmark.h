@@ -7,7 +7,7 @@
 #include <opencog/util/mt19937ar.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/types.h>
+#include <opencog/atoms/base/types.h>
 // #undef HAVE_CYTHON
 // #undef HAVE_GUILE
 

@@ -1,5 +1,5 @@
 /*
- * tests/atomspace/StateUTest.cxxtest
+ * tests/atoms/StateUTest.cxxtest
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/Atom.h>
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/StateLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
@@ -40,7 +40,7 @@ public:
 		logger().setPrintToStdoutFlag(true);
 	}
 
-	void setUp() {}
+	void setUp() { _as.clear(); }
 
 	void tearDown() {}
 
@@ -175,6 +175,19 @@ void StateLinkUTest::test_getting()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
+	Handle empty_get =
+		L(GET_LINK,
+			L(STATE_LINK, N(ANCHOR_NODE, "fruit"), N(VARIABLE_NODE, "$x")));
+
+	Instantiator inst(&_as);
+	Handle gotten = inst.execute(empty_get);
+	printf("Got %s\n", gotten->toString().c_str());
+
+	Handle empty_set = L(SET_LINK, HandleSeq());
+
+	// The result of the get should be correct.
+	TS_ASSERT_EQUALS(gotten, empty_set);
+
 	// Set the state to apple.
 	Handle fruit, apple, bananna;
 	L(STATE_LINK,
@@ -187,8 +200,7 @@ void StateLinkUTest::test_getting()
 		L(GET_LINK,
 			L(STATE_LINK, N(ANCHOR_NODE, "fruit"), N(VARIABLE_NODE, "$x")));
 
-	Instantiator inst(&_as);
-	Handle gotten = inst.execute(get);
+	gotten = inst.execute(get);
 	printf("Got %s\n", gotten->toString().c_str());
 
 	Handle apple_set = L(SET_LINK, N(CONCEPT_NODE, "apple"));

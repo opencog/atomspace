@@ -1,6 +1,6 @@
 
                   AtomSpace Source Code
-                  -------------------
+                  ---------------------
 
 This directory contains core AtomSpace code.  Tests, example and demo
 programs have their own directories.
@@ -26,3 +26,5 @@ python,cython   -- Python langauge bindings.
 benchmark       -- Performance benchmarks.
 
 rule-engine     -- Forward and backward-chainers.
+
+x

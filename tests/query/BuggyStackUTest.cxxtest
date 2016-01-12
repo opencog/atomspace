@@ -64,12 +64,15 @@ class BuggyStackUTest :  public CxxTest::TestSuite
  */
 #define an as->add_node
 #define al as->add_link
+#define getarity(hand) LinkCast(hand)->getArity()
+#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
+
 void BuggyStackUTest::setUp(void)
 {
 	as = new AtomSpace();
 
 	config().set("SCM_PRELOAD",
-		"opencog/atomspace/core_types.scm, "
+		"opencog/atoms/base/core_types.scm, "
       "tests/query/test_types.scm, "
 		"tests/query/buggy-stack.scm");
 
@@ -86,9 +89,6 @@ void BuggyStackUTest::setUp(void)
 /*
  * Basic implication link test.
  */
-#define getlink(hand,pos) as->get_outgoing(hand,pos)
-#define getarity(hand) as->get_arity(hand)
-
 void BuggyStackUTest::test_exec(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);

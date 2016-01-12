@@ -8,8 +8,7 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the
- * exceptions
- * at http://opencog.org/wiki/Licenses
+ * exceptions at http://opencog.org/wiki/Licenses
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,13 +16,12 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License
- * along with this program; if not, write to:
+ * License along with this program; if not, write to:
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/TypeNode.h>
 
 #include "VariableList.h"
@@ -86,8 +84,6 @@ VariableList::VariableList(Link &l)
 }
 
 /* ================================================================= */
-typedef std::pair<Handle, const std::set<Type> > ATPair;
-
 /**
  * Extract the variable type(s) from a TypedVariableLink
  *
@@ -106,6 +102,22 @@ typedef std::pair<Handle, const std::set<Type> > ATPair;
  *          TypeNode  "ConceptNode"
  *          TypeNode  "NumberNode"
  *          TypeNode  "WordNode"
+ *
+ * or possibly types that are SignatureLink's or FuyzzyLink's or
+ * polymorphic combinations thereof: e.g. the following is valid:
+ *
+ *    TypedVariableLink
+ *       VariableNode "$some_var_name"
+ *       TypeChoice
+ *          TypeNode  "ConceptNode"
+ *          SignatureLink
+ *              InheritanceLink
+ *                 PredicateNode "foobar"
+ *                 TypeNode  "ListLink"
+ *          FuzzyLink
+ *              InheritanceLink
+ *                 ConceptNode "animal"
+ *                 ConceptNode "tiger"
  *
  * In either case, the variable itself is appended to "vset",
  * and the list of allowed types are associated with the variable
@@ -128,43 +140,99 @@ void VariableList::get_vartype(const Handle& htypelink)
 	if (TYPE_NODE == t)
 	{
 		Type vt = TypeNodeCast(vartype)->get_value();
-		std::set<Type> ts = {vt};
-		_varlist.typemap.insert(ATPair(varname, ts));
-		_varlist.varset.insert(varname);
-		_varlist.varseq.emplace_back(varname);
+		if (vt != ATOM)  // Atom type is same as untyped.
+		{
+			std::set<Type> ts = {vt};
+			_varlist._simple_typemap.insert({varname, ts});
+		}
 	}
 	else if (TYPE_CHOICE == t)
 	{
-		std::set<Type> ts;
+		std::set<Type> typeset;
+		std::set<Handle> deepset;
+		std::set<Handle> fuzzset;
 
-		const std::vector<Handle>& tset = LinkCast(vartype)->getOutgoingSet();
+		const HandleSeq& tset = LinkCast(vartype)->getOutgoingSet();
 		size_t tss = tset.size();
 		for (size_t i=0; i<tss; i++)
 		{
-			Handle h(tset[i]);
-			Type var_type = h->getType();
-			if (TYPE_NODE != var_type)
+			Handle ht(tset[i]);
+			Type var_type = ht->getType();
+			if (TYPE_NODE == var_type)
+			{
+				Type vt = TypeNodeCast(ht)->get_value();
+				if (ATOM != vt) typeset.insert(vt);
+			}
+			else if (SIGNATURE_LINK == var_type)
+			{
+				const HandleSeq& sig = LinkCast(ht)->getOutgoingSet();
+				if (1 != sig.size())
+					throw SyntaxException(TRACE_INFO,
+						"Unexpected contents in SignatureLink\n"
+						"Expected arity==1, got %s", vartype->toString().c_str());
+
+				deepset.insert(ht);
+			}
+			else if (FUZZY_LINK == var_type)
+			{
+				const HandleSeq& fuz = LinkCast(ht)->getOutgoingSet();
+				if (1 != fuz.size())
+					throw SyntaxException(TRACE_INFO,
+						"Unexpected contents in FuzzyLink\n"
+						"Expected arity==1, got %s", vartype->toString().c_str());
+
+				fuzzset.insert(ht);
+			}
+			else
 			{
 				throw InvalidParamException(TRACE_INFO,
 					"VariableChoice has unexpected content:\n"
-				              "Expected TypeNode, got %s",
-				              classserver().getTypeName(h->getType()).c_str());
+					"Expected TypeNode, got %s",
+					    classserver().getTypeName(ht->getType()).c_str());
 			}
-			Type vt = TypeNodeCast(h)->get_value();
-			ts.insert(vt);
 		}
 
-		_varlist.typemap.insert(ATPair(varname,ts));
-		_varlist.varset.insert(varname);
-		_varlist.varseq.emplace_back(varname);
+		if (0 < typeset.size())
+			_varlist._simple_typemap.insert({varname, typeset});
+		if (0 < deepset.size())
+			_varlist._deep_typemap.insert({varname, deepset});
+		if (0 < fuzzset.size())
+			_varlist._fuzzy_typemap.insert({varname, fuzzset});
+	}
+	else if (SIGNATURE_LINK == t)
+	{
+		const HandleSeq& tset = LinkCast(vartype)->getOutgoingSet();
+		if (1 != tset.size())
+			throw SyntaxException(TRACE_INFO,
+				"Unexpected contents in SignatureLink\n"
+				"Expected arity==1, got %s", vartype->toString().c_str());
+
+		std::set<Handle> ts;
+		ts.insert(vartype);
+		_varlist._deep_typemap.insert({varname, ts});
+	}
+	else if (FUZZY_LINK == t)
+	{
+		const HandleSeq& tset = LinkCast(vartype)->getOutgoingSet();
+		if (1 != tset.size())
+			throw SyntaxException(TRACE_INFO,
+				"Unexpected contents in FuzzyLink\n"
+				"Expected arity==1, got %s", vartype->toString().c_str());
+
+		std::set<Handle> ts;
+		ts.insert(vartype);
+		_varlist._fuzzy_typemap.insert({varname, ts});
 	}
 	else
 	{
-		throw InvalidParamException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 			"Unexpected contents in TypedVariableLink\n"
-			"Expected TypeNode or TypeChoice, got %s",
+			"Expected type specifier (e.g. TypeNode, TypeChoice, etc.), got %s",
 			classserver().getTypeName(t).c_str());
 	}
+
+	_varlist.varset.insert(varname);
+	_varlist.varseq.emplace_back(varname);
 }
 
 /* ================================================================= */

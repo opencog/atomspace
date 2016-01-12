@@ -4,16 +4,17 @@
 ADD_LIBRARY(ruleengine SHARED
 	backwardchainer/BackwardChainer.cc
 	backwardchainer/BackwardChainerPMCB.cc
-	backwardchainer/UnifyPMCB.cc
 	backwardchainer/Target.cc
-	URECommons.cc
-	forwardchainer/ForwardChainer.cc
+	backwardchainer/UnifyPMCB.cc
 	forwardchainer/FCStat.cc
-	forwardchainer/VarGroundingPMCB.h
 	forwardchainer/FocusSetPMCB.h
+	forwardchainer/ForwardChainer.cc
+	forwardchainer/VarGroundingPMCB.h
+	ChainerUtils.cc
 	InferenceSCM.cc
 	Rule.cc
-    UREConfigReader.cc
+	URECommons.cc
+	UREConfigReader.cc
 )
 
 ADD_DEPENDENCIES(ruleengine

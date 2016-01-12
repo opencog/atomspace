@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/exceptions.h>
+
 #include "UnifyPMCB.h"
 
 using namespace opencog;
@@ -51,14 +53,16 @@ bool UnifyPMCB::variable_match(const Handle& npat_h,
 	if (soltype == VARIABLE_NODE && _ext_vars->get_variables().varset.count(nsoln_h) == 1)
 	{
 		// if the variable is untyped, match immediately
-		if (_ext_vars->get_variables().typemap.count(nsoln_h) == 0
-		    || _int_vars->get_variables().typemap.count(npat_h) == 0)
+		if (_ext_vars->get_variables()._simple_typemap.count(nsoln_h) == 0
+		    || _int_vars->get_variables()._simple_typemap.count(npat_h) == 0)
 			return true;
 
 		// otherwise the two variables type need to match
-		if (_int_vars->get_variables().typemap.at(npat_h)
-		    == _ext_vars->get_variables().typemap.at(nsoln_h))
+		if (_int_vars->get_variables()._simple_typemap.at(npat_h)
+		    == _ext_vars->get_variables()._simple_typemap.at(nsoln_h))
 			return true;
+
+		// XXX TODO perform matching on deep types, if any.
 
 		return false;
 	}
@@ -76,13 +80,23 @@ bool UnifyPMCB::grounding(const std::map<Handle, Handle> &var_soln,
 	{
 		if (_int_vars->get_variables().varset.count(p.first) == 1)
 		{
-			// check if any typed variable map to a variable, and if so,
-			// store the reverse mapping
-			if (DefaultPatternMatchCB::_type_restrictions->count(p.first) == 1
-			    && DefaultPatternMatchCB::_type_restrictions->at(p.first).count(p.second->getType()) == 0)
+			// Check if any typed variable maps to a variable, and if so,
+			// store the reverse mapping. XXX This is not correct,
+			// if there are non-trivial type restrictions (i.e. deep
+			// types of fuzzy types). FIXME
+			if (DefaultPatternMatchCB::_vars->_simple_typemap.count(p.first) == 1
+			    && DefaultPatternMatchCB::_vars->_simple_typemap.at(p.first).count(p.second->getType()) == 0)
 				true_var_soln[p.second] = p.first;
 			else
 				true_var_soln[p.first] = p.second;
+
+			if (0 < DefaultPatternMatchCB::_vars->_deep_typemap.size())
+				throw RuntimeException(TRACE_INFO,
+					"Not implemented!  XXX FIXME!");
+
+			if (0 < DefaultPatternMatchCB::_vars->_fuzzy_typemap.size())
+				throw RuntimeException(TRACE_INFO,
+					"Not implemented!  XXX FIXME!");
 		}
 	}
 

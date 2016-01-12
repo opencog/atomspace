@@ -37,7 +37,7 @@
 #ifndef _OPENCOG_LINK_CHASE_H
 #define _OPENCOG_LINK_CHASE_H
 
-#include <opencog/atomspace/Link.h>
+#include <opencog/atoms/base/Link.h>
 
 namespace opencog
 {
