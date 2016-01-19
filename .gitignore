@@ -1,6 +1,5 @@
 *.a
-opencog.log
-opencog-python.log
+*.log
 .vagrant
 .DS_Store
 
@@ -71,6 +70,7 @@ GPATH
 GRTAGS
 GSYMS
 GTAGS
+*.gch
 
 # quilt
 .pc
