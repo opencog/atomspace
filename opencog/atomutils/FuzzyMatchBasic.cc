@@ -72,19 +72,10 @@ bool FuzzyMatchBasic::accept_starter(const Handle& hp)
  * Estimate how similar the proposed matching tree is to the target.
  *
  * @param soln  The proposed match.
- * @param depth The difference in depth between the target and the
- *              proposal.
  */
-bool FuzzyMatchBasic::try_match(const Handle& soln, int depth)
+bool FuzzyMatchBasic::try_match(const Handle& soln)
 {
 	if (soln == target) return false;
-
-	// For some reason, this algo only wnts to compare proposed
-	// solutions that are exactly the same size as the target.
-	// Why? I dunno. Might not a similar tree be slightly bigger or
-	// smaller?  XXX Maybe FIXME ?
-	if (0 < depth) return true;
-	if (0 > depth) return false;
 
 	// Find out how many nodes it has in common with the pattern
 	HandleSeq soln_nodes;
@@ -129,7 +120,7 @@ bool FuzzyMatchBasic::try_match(const Handle& soln, int depth)
 		solns.push_back({soln, similarity});
 	}
 
-	return false;
+	return true;
 }
 
 /* No-op; we already build "solns", just return it. */

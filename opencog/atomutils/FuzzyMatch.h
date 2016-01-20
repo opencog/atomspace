@@ -38,7 +38,7 @@ namespace opencog
  *
  * This is a virtual base class, providing three methods that must be
  * implemented.  The accept_starter() should return true, if the trees
- * attached to this leaf should be explored.  The note_match() method is
+ * attached to this leaf should be explored.  The try_match() method is
  * called to suggest a possible matching tree. It should return true to
  * continue searching.  The finished_serach() method is called when all
  * trees have been explored; it should return a list of the best
@@ -67,15 +67,9 @@ namespace opencog
  * atom in the target tree. If it returns true, then other trees that
  * share that atom are proposed to `try_match()`.  Initially, the
  * smallest such trees are proposed; as long as `try_match() returns
- * true, then larger and larger trees holding tthe starter are proposed.
+ * true, then larger and larger trees holding the starter are proposed.
  * If it returns false, then the proposal of the ever-larger trees
  * halts.
- *
- * The 'depth' parameter to `try_match()` is equal to the difference,
- * in height, from the top of the target tree to the top of the
- * proposed tree; the two trees being joined by sharing a common
- * `accept_starter()` atom. The depth is negative is the propsed tree
- * is shorter, and postive if the propsed tree is larger.
  */
 
 typedef std::vector<std::pair<Handle, double>> RankedHandleSeq;
@@ -89,12 +83,12 @@ public:
 protected:
     virtual void start_search(const Handle&) = 0;
     virtual bool accept_starter(const Handle&) = 0;
-    virtual bool try_match(const Handle&, int depth) = 0;
+    virtual bool try_match(const Handle&) = 0;
     virtual RankedHandleSeq finished_search(void) = 0;
 
 private:
-    void find_starters(const Handle& hg, const int& depth);
-    void explore(const LinkPtr&, int);
+    void find_starters(const Handle& hg);
+    void explore(const LinkPtr&);
 };
 
 } // namespace opencog
