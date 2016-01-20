@@ -29,22 +29,25 @@
 using namespace opencog;
 
 /**
- * Get all the nodes within a link and its sublinks.
+ * Get all the atoms within a link and its sublinks.
  *
- * @param h     the top level link
- * @return      a HandleSeq of nodes
+ * @param h      The top level link
+ * @param nlist  A list storeing the nodes
+ * @param alist  A list storing the atoms
  */
-static void get_all_nodes(const Handle& h, HandleSeq& node_list)
+static void get_all_atoms(const Handle& h, HandleSeq& nlist, HandleSeq& alist)
 {
+	alist.emplace_back(h);
+
 	LinkPtr lll(LinkCast(h));
 	if (nullptr == lll)
 	{
-		node_list.emplace_back(h);
+		nlist.emplace_back(h);
 		return;
 	}
 
 	for (const Handle& o : lll->getOutgoingSet())
-		get_all_nodes(o, node_list);
+		get_all_atoms(o, nlist, alist);
 }
 
 /**
@@ -55,7 +58,7 @@ static void get_all_nodes(const Handle& h, HandleSeq& node_list)
 void FuzzyMatchBasic::start_search(const Handle& trg)
 {
 	target = trg;
-	get_all_nodes(target, target_nodes);
+	get_all_atoms(target, target_nodes, target_atoms);
 	std::sort(target_nodes.begin(), target_nodes.end());
 }
 
@@ -81,11 +84,12 @@ bool FuzzyMatchBasic::accept_starter(const Handle& hp)
  */
 bool FuzzyMatchBasic::try_match(const Handle& soln)
 {
-	if (soln == target) return false;
+	if (is_atom_in_tree(target, soln)) return false;
 
-	// Find out how many nodes it has in common with the pattern
+	// Find out how many atoms it has in common with the pattern
 	HandleSeq soln_nodes;
-	get_all_nodes(soln, soln_nodes);
+	HandleSeq soln_atoms;
+	get_all_atoms(soln, soln_nodes, soln_atoms);
 	std::sort(soln_nodes.begin(), soln_nodes.end());
 
 	HandleSeq common_nodes;
@@ -94,14 +98,14 @@ bool FuzzyMatchBasic::try_match(const Handle& soln)
 	                      std::back_inserter(common_nodes));
 
 	// The size different between the pattern and the potential solution
-	size_t diff = std::abs((int)target_nodes.size() - (int)soln_nodes.size());
+	size_t diff = std::abs((int)target_atoms.size() - (int)soln_atoms.size());
 
-	double similarity = 0.0;
+	double similarity = common_nodes.size();
 
 	// Roughly estimate how "rare" each node is by using 1 / incoming set size
 	// TODO: May use Truth Value instead
-	for (const Handle& common_node : common_nodes)
-		similarity += 1.0 / common_node->getIncomingSetSize();
+	// for (const Handle& common_node : common_nodes)
+	// 	similarity += 1.0 / common_node->getIncomingSetSize();
 
 	LAZY_LOG_FINE << "\n========================================\n"
 	              << "Comparing:\n" << target->toShortString()

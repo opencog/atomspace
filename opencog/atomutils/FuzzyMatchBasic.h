@@ -48,6 +48,7 @@ protected:
     // What we are matching
     Handle target;
     HandleSeq target_nodes;
+    HandleSeq target_atoms;
 
 private:
     // The solutions that were found.
