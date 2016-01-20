@@ -47,7 +47,11 @@ static void get_all_nodes(const Handle& h, HandleSeq& node_list)
 		get_all_nodes(o, node_list);
 }
 
-/** Set up the target. */
+/**
+ * Set up the target.
+ *
+ * @param trg  The target
+ */
 void FuzzyMatchBasic::start_search(const Handle& trg)
 {
 	target = trg;
@@ -58,14 +62,16 @@ void FuzzyMatchBasic::start_search(const Handle& trg)
 /**
  * hp is a subtree of the target tree. Should we start a search
  * at that location?  Answer: yes if its a node, no, if its a link.
+ *
+ * @param hp  A subtree of the target tree
+ * @return    True if it is a node, false otherwise
  */
 bool FuzzyMatchBasic::accept_starter(const Handle& hp)
 {
 	NodePtr np(NodeCast(hp));
 	if (nullptr == np) return false;
 
-	// Ignore variables. (Why?)
-	return (np->getType() != VARIABLE_NODE);
+	return true;
 }
 
 /**

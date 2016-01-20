@@ -29,7 +29,7 @@
 namespace opencog
 {
 /**
- * The fuzzy pattern matchBasicer searches for trees which are similar but
+ * The fuzzy matcher searches for trees which are similar but
  * not identical to the input target pattern. This is done by examining
  * all possible trees that have at least one leaf node in common with
  * the target pattern.  A similarity score is assigned to each such
