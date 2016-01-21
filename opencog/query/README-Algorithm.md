@@ -127,17 +127,17 @@ of the clauses have been grounded.
 
 To summarize, there are four basic recursive methods:
 
--- tree_compare(), which recursively compares a term in the pattern
+*  tree_compare(), which recursively compares a term in the pattern
    to a proposed grounding. It moves "downwards" in the two trees;
    it only calls itself, and terminates on match or mis-match.
 
--- explore_up_branches() and do_term_up(), which alternately call each
+*  explore_up_branches() and do_term_up(), which alternately call each
    other, moving up the pattern tree and it's matching tree.
    These invoke tree_compare() to make sure the trees actually match.
    When the top of a pattern clause is reached, these call the
    do_next_clause() method.
 
--- do_next_clause(), which effectively calls itself, moving "sideways"
+*  do_next_clause(), which effectively calls itself, moving "sideways"
    from one clause to the next. "Effectively", because, actually, it
    invokes do_term_up() to perform the actual clause matching; upon
    reaching the top, it recurses to do_next_clause(). The recursion
