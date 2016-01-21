@@ -1,51 +1,46 @@
-Python Examples
-===============
+# Python Examples
 
-To run these examples, you must first set the `PYTHONPATH` to the
-atomspace python install directory.  In most cases, the following will
-suffice:
+* To run these examples, you must first set the `PYTHONPATH` to the
+  atomspace python install directory, after installing atomspace. Tun the
+  following command from your shell,
+  ```
+      export PYTHONPATH=$PYTHONPATH:/usr/local/share/opencog/python
+  ```
 
-```
-export PYTHONPATH=$PYTHONPATH:/usr/local/share/opencog/python
-```
+* From the python prompt, the following should list the opencog python modules
+  ```
+      help('opencog')
+  ```
 
-The opencog atomspace cython modules are installed here:
-```
-/usr/local/share/opencog/python/opencog
-```
-
-From the python prompt, the following should list the python
-opencog modules:
-```
-help('opencog')
-```
-The contents of a single module can be viewed by saying, for example:
-```
-import opencog.atomspace
-print dir(opencog.atomspace)
-```
-
-
-## create_atoms_by_type, create_atoms_simple
-
+* The contents of a single module can be viewed by using `dir` function.
+  For example,
+  ```
+      import opencog.atomspace
+      print dir(opencog.atomspace)
+  ```
+* You can run the examples from your shell. For example,
+  ```
+      python create_atoms_by_type.py
+  ```
+  
+## create_atoms_by_type.py, create_atoms_simple.py
 Simple examples of how to create atoms in an atomspace.
 These demonstrate two different ways in which the API can be used;
-one creates atoms according to thier types, the other creates them
+one creates atoms according to their types, the other creates them
 directly.
 
-## bindlink
-
-Example of how to use the pattern matcher BindLink functionality.
-
-## atom_type_names
-
-Example of how to obtain atom type names and atom type IDs.
-
-## stop_go
-
+## stop_go.py
 A simple example of a "behavior tree" implemented in the AtomSpace.
 
-## scheme_timer
+## Scheme through python.
+The following examples show how to use the scheme bindings through python
 
-Simple measurement of the performance of invoking the scheme
-(guile) interpreter.
+### scheme/atom_type_names.py
+Example of how to obtain atom type names and atom type IDs.
+
+### scheme/bindlink.py
+Example of how to use the pattern matcher BindLink functionality.
+
+### scheme/scheme_timer.py
+Simple measurement of the performance of invoking the scheme (guile)
+interpreter.
