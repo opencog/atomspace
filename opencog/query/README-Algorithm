@@ -34,7 +34,7 @@ substitution for the variables such that the resulting clause exists
 in the atomspace.  Thus, a grounding can be thought of as an
 "interpretation" of the clause; the pattern matcher searches for
 interpretations.  It can be thought of as a "unifier", in that ALL
-of the mandatory clauses must be grounded, and they must grounded in
+of the mandatory clauses must be grounded, and they must be grounded in
 a self-consistent way (i.e. the clauses must be grounded in
 conjunction with one-another.)
 
@@ -93,7 +93,7 @@ terminology helps to distinguish them from the atoms they are being
 matched up with. At every point of the search, the current term (and
 all of the terms that came before it) have a corresponding "match",
 "ground" or "solution", these last three names being used
-interchangably in the comments below.
+interchangeably in the comments below.
 
 From the starting term, the search moves "upwards": the parent of
 the starting term is compared to all possible parents of its match.
@@ -142,7 +142,7 @@ To summarize, there are four basic recursive methods:
    from one clause to the next. "Effectively", because, actually, it
    invokes do_term_up() to perform the actual clause matching; upon
    reaching the top, it recurses to do_next_clause(). The recursion
-   terminates when there are no more clauses to e grounded.
+   terminates when there are no more clauses to be grounded.
 
 State, Stack and Backtracking
 -----------------------------
@@ -222,7 +222,7 @@ Complications are introduced due to the following features:
 -- Evaluatable and executable links. These links are not a static
    part of the pattern, but can only be known at runtime, at the time
    the actual match must be made. Evaluatable links are those that
-   contain a GroundedPredicateNode (GPN), are are one of the equivalent
+   contain a GroundedPredicateNode (GPN), or are one of the equivalent
    stand-ins for a GPN, such as an EqualLink or GreaterThanLink.
    Whenever one of these is encountered, it must be evaluated on the
    spot to determine if a match is successful (if the predicate is
@@ -266,7 +266,7 @@ Complications are introduced due to the following features:
    performance to about 10K calls/second on current (2015) CPU's.
 
    The distinction between clear-box and black-box doesn't much
-   matter to the pattern matcher, other than that cloear-box clauses
+   matter to the pattern matcher, other than that clear-box clauses
    are tried first, so that if satisfaction is not possible, then
    perhaps some invocations to the slower black-boxes can be avoided.
 
