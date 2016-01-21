@@ -14,7 +14,8 @@
 // Special type designating that no atom type has been assigned.
 NOTYPE
 
-// Base of hierarchy
+// Base of hierarchy - NOTE: ATOM will not have a corresponding Python
+// construction function to avoid identifier conflict with the Atom object.
 ATOM
 NODE <- ATOM
 LINK <- ATOM
