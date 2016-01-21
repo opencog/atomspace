@@ -1,6 +1,7 @@
-#                  Query Processing/Pattern Matching
-                        ==================
-              Linas Vepstas <linasvepstas@gmail.com>
+
+#                 Query Processing/Pattern Matching
+                          ----------------
+               Linas Vepstas <linasvepstas@gmail.com>
                         Created 18 March 2008
                       Revised on 6 November 2014
 
@@ -18,7 +19,8 @@ rewriting, unification, satisfiability and satsifiability module theories.
 A simple example of one possible use of this code is shown in the file
 "/examples/pattern-matcher/simple.scm".
 
-## A Quick Sketch
+A Quick Sketch
+--------------
 
 The basic idea is that one can specify a pattern or template, in the
 form of a graph, some of whose nodes are variables.  The pattern
@@ -65,7 +67,8 @@ substituing for the variables. Thus, one has:
    addition), while 7 + x = 3 + x is false (not satsifiable).
 
 
-## Subgraph Isomorphism Discovery
+Subgraph Isomorphism Discovery
+------------------------------
 
 Given a small (hyper-)graph and a bigger "universe" (hyper-)graph, the
 subgraph isomorphism problem requires one to find the corresponding
@@ -151,7 +154,8 @@ in only two places: to find a set of starting points for the search
 (e.g. by finding all nodes of a given type), and as the location into
 which new graphs are inserted (during graph-re-writing).
 
-## Clauses and Groundings
+Clauses and Groundings
+----------------------
 
 The OpenCog hypergraph is most easily understood in terms of its
 corresponding incidence graph (or "Levi graph"). This, in turn, is best
@@ -273,7 +277,8 @@ product of their connected components; thus, it is pointless to
 explicitly support disconnected graphs.
 
 
-## Algorithm overview
+Algorithm overview
+------------------
 
 The following sections present the algorithm details.
 
@@ -590,7 +595,8 @@ handled, and are buggy.  Its all very confusing.
 See github bug #1091 for details.
 
 
-## Open Questions
+Open Questions
+--------------
 
 In many ways, the above algorithm resembles that of a recursive descent
 parser.  However, it does a *lot* of backtracking during its solution
@@ -607,7 +613,8 @@ efficiently?  Is there a way of cribbing ideas from the DPLL algorithm
 to help solve this?  This is entirely unclear to me...
 
 
-## Summary
+Summary
+-------
 
 The above describes a specific implementation of a subgraph matching
 algorithm. It is generic, in that it makes no reference to the
@@ -626,6 +633,7 @@ example of using the simple forward chainer.
 
 Satisfiability Modulo Theories
 ------------------------------
+
 The final decision on matching to a given query pattern is delegated
 to a callback. This allows for considerable flexibility in controlling
 matching for hypergraphs that represent crisp logic statements, or those
@@ -672,6 +680,7 @@ At this time, only one generic callback are provided:
 
 Forward Chainer
 ---------------
+
 The PatternMatch::imply() method implements a critical component for a
 forward chainer: it is able to accept, as input, an ImplicationLink, and
 return as output, a SetLink of the implicands. An ImplicationLink is
@@ -694,6 +703,7 @@ to chaining N levels deep.
 
 Hypergraph Query Language (HQL)
 -------------------------------
+
 A "hypergraph query language" is a language that allows queries to be
 expressed as strings. Given *any* way of writing down a hypergraph as
 a string, a hypergraph query language can be trivially formed by adding
@@ -781,6 +791,7 @@ it is supported.
 
 Foreach iterators
 -----------------
+
 The algorithm makes heavy use of "foreach" iterators to walk the
 incoming and outgoing edges of an atom.  The "foreach" mechanism
 has multiple advantages over other techniques, and it is important
@@ -827,7 +838,8 @@ D) The foreach abstraction allows complex iterators to be implemented.
 
 TODO
 ----
- * Atomspaces are done wrong. Grounding whould always be performed
+
+* Atomspaces are done wrong. Grounding whould always be performed
    in the atomspace of the bindlink.  Thus should be fetched directly
    from the bind-link, and not passed as a third-party parameter.
 
