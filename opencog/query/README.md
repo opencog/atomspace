@@ -1,8 +1,8 @@
 #                  Query Processing/Pattern Matching
-#                        ==================
-#              Linas Vepstas <linasvepstas@gmail.com>
-#                        Created 18 March 2008
-#                      Revised on 6 November 2014
+                        ==================
+              Linas Vepstas <linasvepstas@gmail.com>
+                        Created 18 March 2008
+                      Revised on 6 November 2014
 
 
 This directory contains code that implements a subgraph isomorphism
