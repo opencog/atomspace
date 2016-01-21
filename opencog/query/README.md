@@ -1,6 +1,5 @@
-
                   Query Processing/Pattern Matching
-                          ----------------
+                  =================================
                Linas Vepstas <linasvepstas@gmail.com>
                         Created 18 March 2008
                       Revised on 6 November 2014
@@ -22,7 +21,7 @@ A simple example of one possible use of this code is shown in the file
 A Quick Sketch
 --------------
 The basic idea is that one can specify a pattern or template, in the
-form of a graph, somoe of whose nodes are variables.  The pattern
+form of a graph, some of whose nodes are variables.  The pattern
 matcher can then find all other graphs that match the given template,
 substituing for the variables. Thus, one has:
 
@@ -46,7 +45,7 @@ substituing for the variables. Thus, one has:
 
  * When a value is found for a variable, that value is called a
    "grounding". When the entire pattern can be grounded, it can be
-   thought of as being "satsfied", in the sense of "satsifiability".
+   thought of as being "satisfied", in the sense of "satisfiability".
    Thus, the pattern matcher is a (graphical) satisfiability solver.
 
  * Certain subgraphs are "evaluatable", other subgraphs are
@@ -165,10 +164,8 @@ then a collection of such trees, sharing common nodes or links.  The
 incidence graph is an ordinary graph, not a hypergraph, and thus is
 perhaps easier to visualize.
 
-The pattern matcher is designed to search only for connected incidence
-graphs.  This simplifies the algorithm without loosing any generality:
-the user can always enumerate disconnected graphs multiplicatively.
-This is both trivial and rarely desired.
+The pattern matcher was initially designed to search only for
+connected incidence graphs but now supports disconnected graphs.
 
 Note: At this time, neither the OpenCog AtomSpace, nor the pattern
 matcher support infinite, recursive subtrees.  That is, a given
@@ -675,7 +672,7 @@ At this time, only one generic callback are provided:
 
 Forward Chainer
 ---------------
-The PattnerMatch::imply() method implements a critical component for a
+The PatternMatch::imply() method implements a critical component for a
 forward chainer: it is able to accept, as input, an ImplicationLink, and
 return as output, a SetLink of the implicands. An ImplicationLink is
 basically an IF ... THEN ... statement, expressed as an OpenCog hypergraph.
