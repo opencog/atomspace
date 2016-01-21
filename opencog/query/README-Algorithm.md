@@ -1,6 +1,5 @@
-
 Pattern Match Engine Overview
------------------------------
+=============================
 Linas Vepstas 2008-2015
 
 This README describes the internal workings of the class
