@@ -189,7 +189,7 @@ Complications
 -------------
 Complications are introduced due to the following features:
 
--- Unordered links. To compare an unordered link to it's proposed
+*  Unordered links. To compare an unordered link to it's proposed
    grounding, every possible permutation of the order must be tried.
    Thus, each permutation is a branchpoint; state must be saved and
    restored if an earlier permutation did not work out. However, it is
@@ -197,7 +197,7 @@ Complications are introduced due to the following features:
    must be performed only for the current permutation. Thus, the state
    includes the set of all permutations taken so far.
 
--- ChoiceLinks. These are similar to unordered links, and are
+*  ChoiceLinks. These are similar to unordered links, and are
    implemented similarly. Each ChoiceLink presents a (mututally-
    exclusive) choice of terms that may be grounded; only one of
    these is to be grounded.  Again, the choice represents a
@@ -218,7 +218,7 @@ Complications are introduced due to the following features:
    and it explores the different branches that the unordered and the
    choice links represent.
 
--- Evaluatable and executable links. These links are not a static
+*  Evaluatable and executable links. These links are not a static
    part of the pattern, but can only be known at runtime, at the time
    the actual match must be made. Evaluatable links are those that
    contain a GroundedPredicateNode (GPN), or are one of the equivalent
@@ -299,7 +299,7 @@ Complications are introduced due to the following features:
    message) or can depend on external data (evaluate to true/false
    depending on whether a message has been received).
 
--- Executable terms.  These are terms that contain a
+*  Executable terms.  These are terms that contain a
    GroundedSchemaNode (GSN).  These must be executed. The atom that
    results from their execution is then treated as an "ordinary"
    term, and is grounded as per usual (unless it also contains GSN's,
