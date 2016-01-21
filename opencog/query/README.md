@@ -839,7 +839,7 @@ D) The foreach abstraction allows complex iterators to be implemented.
 TODO
 ----
 
-* Atomspaces are done wrong. Grounding whould always be performed
+ * Atomspaces are done wrong. Grounding whould always be performed
    in the atomspace of the bindlink.  Thus should be fetched directly
    from the bind-link, and not passed as a third-party parameter.
 
