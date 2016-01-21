@@ -1,8 +1,8 @@
-                  Query Processing/Pattern Matching
-                  =================================
-               Linas Vepstas <linasvepstas@gmail.com>
-                        Created 18 March 2008
-                      Revised on 6 November 2014
+#                  Query Processing/Pattern Matching
+#                        ==================
+#              Linas Vepstas <linasvepstas@gmail.com>
+#                        Created 18 March 2008
+#                      Revised on 6 November 2014
 
 
 This directory contains code that implements a subgraph isomorphism
@@ -586,8 +586,8 @@ Situation D) is easily dealt with by using the existing
 backtracking infrastructure, and so presents no new challanges.
 
 Situations A, B and C are currently (Nov 2014) only paritally
-handled, and are buggy.  Its all very confusing. See github bug
-#1091 for details.
+handled, and are buggy.  Its all very confusing.
+See github bug #1091 for details.
 
 
 ## Open Questions
