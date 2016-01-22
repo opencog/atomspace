@@ -395,7 +395,7 @@ recognizing a context-free language.
    PatternMatchCallback::node_match(). The link equivalence callback is
    PatternMatchCallback::link_match().]
 
-5. Pick the first tree. Get the type of the root atom of the
+5. TODO UPDATE: Pick the first tree. Get the type of the root atom of the
    first tree. Get a list of all atoms in the universe of this type.
    These are the "candidate groundings".  Iterate over this list.
    The iterator is the next step below (step 6).
@@ -440,6 +440,7 @@ recognizing a context-free language.
    nodes that are shared between the most recently grounded clause,
    looking for an unsolved clause.
 
+   TODO UPDATE:
    [This is implemented in PatternMatchEngine::get_next_unsolved_clause()]
 
 8. If an unsolved tree is found, then tree-matching, as described in
@@ -457,12 +458,14 @@ recognizing a context-free language.
    clause is now considered to be solved. Go to step 7, to find
    other unsolved clauses.
 
+   TODO UPDATE:
    [This is implemented by two routines: PatternMatchEngine::soln_up()
    and PatternMatchEngine::term_up(). These two routines alternate
    calls to each other, by traversing the *incoming* set of the
    current node in the clause, and the candidate solution node.
    The incoming set takes one "upwards" in the tree.]
 
+   TODO UPDATE:
    [The stack of current state is maintained in PatternMatchEngine::
    term_handle_stack, etc. These are pushed as an upwards(incoming)
    edge is explored, and popped when the edge is rejected.]
