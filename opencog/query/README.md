@@ -268,13 +268,8 @@ ignored.  This is because constant clauses are "trivial": the
 groundings for them can only be themselves, trivially, and so nothings
 needs be done.
 
-The set of clauses defining a pattern must be connected by means of
-common, shared variables.  A pair of clauses are connected if they
-share a common variable. A set of clauses is connected if there is a
-transitive path through all of them.  The need for this requirement
-was mentioned before: disconnected graphs are always just a trivial
-product of their connected components; thus, it is pointless to
-explicitly support disconnected graphs.
+The clauses are partitioned in to connected components, clauses that
+share directly or indirectly the same variables.
 
 
 Algorithm overview
@@ -358,16 +353,15 @@ recognizing a context-free language.
    Thus, for example: the clause _subj(row, Steve) has _subj at the
    root of the tree, with "row" and "Steve" as leaves.
 
-   Distinct trees may have common vertices.  The common vertices
-   act to join together the trees into a single, connected graph.
-   Disconnected graphs are not allowed; the algorithm will fail to
-   find and ground disconnected components.  The graph as a whole may
-   contain loops (the decomposition into trees keeps the algorithm
-   from having to explicitly accommodate loops).
+   Distinct trees may have common vertices.  The common vertices act
+   to join together the trees into a partition of connected graph
+   components.  The algorithm will find all groundings for each
+   component separately, and form the final answer as the cartesian
+   product of all component grounding sets.
 
    A list of the common, or shared, vertices is made; this list is
    used later in the algorithm, to find all trees connected to a
-   specific vertex. [This list is implemented as
+   specific vertex. [TODO UPDATE: This list is implemented as
    PatternMatchEngine::root_map. The shared vertices are variables.]
 
    The universe graph may have any structure whatsoever; there are no
