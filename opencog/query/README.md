@@ -786,53 +786,6 @@ HQL query.  In this sense, English is the "best" query language, and
 it is supported.
 
 
-Foreach iterators
------------------
-
-The algorithm makes heavy use of "foreach" iterators to walk the
-incoming and outgoing edges of an atom.  The "foreach" mechanism
-has multiple advantages over other techniques, and it is important
-to understand these.
-
-On the other hand, given that this is C++ and not C, the correct
-solution is almost surely to re-write the for-eachs as C++ iterators,
-which offers the same advantages as foreach, but has a more mundane
-programming paradigm.
-
-A) The details of the Atom.h incoming and outgoing sets are abstracted.
-   Thus, while the outgoing set uses std:vector, the incoming set uses
-   a simple linked list. This detail is immaterial to the "foreach" user,
-   as both look the same. The only requirement is that each edge is visited
-   exactly once.
-
-B) The foreach abstraction makes multi-threaded implementation,
-   including mutex locking, much easier. In particular, the semantics
-   of atomic locking of a foreach traversal is much simpler than complexity
-   of trying to lock a naked linked list for read-only or read-write
-   traversal.
-
-C) The foreach abstraction can (and will) have performance that is
-   equal to a for-loop iteration over an array or linked list. This
-   is because, when the set to be iterated over is a simple list or
-   array, the foreach iterator can be implemented as an inline function.
-   Modern compilers are able to inline such functions correctly,
-   and optimize the result, providing performance equivalent to
-   a raw for-loop iteration.
-
-D) The foreach abstraction allows complex iterators to be implemented.
-   Thus, the foreach abstraction eliminates the data copying associated
-   with naive "filters", and thus can offer superior space *and* time
-   performance over filters. For example, consider a long linked list
-   consisting of many types of atoms, and one wants to perform a certain
-   operation only on a specific type of atom. Traditional "filters"
-   would make a copy of the list, including only the desired atom
-   types in the copied list. This requires significant overhead:
-   nodes must be copied, iterated over, and then freed.  The foreach
-   abstraction allows a zero-copy filter to be implemented: the
-   callback is invoked only for those nodes that match the filter
-   criteria.
-
-
 TODO
 ----
 
