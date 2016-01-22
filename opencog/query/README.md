@@ -793,24 +793,22 @@ TODO
    in the atomspace of the bindlink.  Thus should be fetched directly
    from the bind-link, and not passed as a third-party parameter.
 
- * Need a nested ChoiceLink unit test... or is this done in the
-   StackMoreUTest alrady ???
-
  * Enhancement: Add support for VariableLink, so that, for example,
    (VariableLink $R (VariableNode $A) (VariableNode $B)) matches
    any arity-2 link (as long as the type constraints are obeyed).
 
- * Performance improvement: Steal an idea from DPLL, viz unit_propagate.
-   That is, start with those clauses that have only a single variable
-   in them, ground that, and propagate.  Not sure, I think this could
-   should improve run-time.  Perhaps there are other ideas to steal,
-   e.g. from zChaff?
+ * Performance improvement: [[TODO: Probably outdated, there is no
+   such unit_propagate in the code]] Steal an idea from DPLL, viz
+   unit_propagate.  That is, start with those clauses that have only a
+   single variable in them, ground that, and propagate.  Not sure, I
+   think this could should improve run-time.  Perhaps there are other
+   ideas to steal, e.g. from zChaff?
 
    Anyway, the next clause to be selected is chosen by
    get_next_untried_clause(); there is a XXX note in there about this.
 
- * Invent a callback so that ChoiceLink can become a random-choice
-	or a Bayesian-probability-choice, etc. This is sort-of done, already,
+ * Invent a callback so that ChoiceLink can become a random-choice or
+   a Bayesian-probability-choice, etc. This is sort-of done, already,
    but more additional/experimental callbacks are needed.
 
  * Enhancement: Add support for IfLink, which would have the semantics
@@ -821,7 +819,7 @@ TODO
 
  * Enhancement: Allow variable type declarations to occur anywhere in
    the body, not just at the top. This is because variable-type
-   restirctions are essentially a kind-of special-case GPN, restrictiing
+   restirctions are essentially a kind-of special-case GPN, restricting
    the accept or reject... except that it is applied immediately, upon
    the initial attempt at variable grounding.
 
@@ -836,4 +834,4 @@ TODO
    'clause b' instead of spelling it out.)
 
  * Study the following some more: prolog, minikanren, mercury, curry
-   (logic programming languague), godel (logic programming langauge)
+   (logic programming languague), godel (logic programming language)
