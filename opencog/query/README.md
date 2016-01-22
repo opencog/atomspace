@@ -361,8 +361,9 @@ recognizing a context-free language.
 
    A list of the common, or shared, vertices is made; this list is
    used later in the algorithm, to find all trees connected to a
-   specific vertex. [TODO UPDATE: This list is implemented as
-   PatternMatchEngine::root_map. The shared vertices are variables.]
+   specific vertex. [This list is implemented as
+   PatternMatchEngine::_connectivity_map. The shared vertices are
+   variables.]
 
    The universe graph may have any structure whatsoever; there are no
    limitations put on it, other than that it must be "well-founded",
@@ -395,7 +396,7 @@ recognizing a context-free language.
    PatternMatchCallback::node_match(). The link equivalence callback is
    PatternMatchCallback::link_match().]
 
-5. TODO UPDATE: Pick the first tree. Get the type of the root atom of the
+5. Pick the first tree. Get the type of the root atom of the
    first tree. Get a list of all atoms in the universe of this type.
    These are the "candidate groundings".  Iterate over this list.
    The iterator is the next step below (step 6).
@@ -440,8 +441,7 @@ recognizing a context-free language.
    nodes that are shared between the most recently grounded clause,
    looking for an unsolved clause.
 
-   TODO UPDATE:
-   [This is implemented in PatternMatchEngine::get_next_unsolved_clause()]
+   [This is implemented in PatternMatchEngine::get_next_untried_clause()]
 
 8. If an unsolved tree is found, then tree-matching, as described in
    step 6, resumes. However, the tree matching resumes at the shared
@@ -458,17 +458,15 @@ recognizing a context-free language.
    clause is now considered to be solved. Go to step 7, to find
    other unsolved clauses.
 
-   TODO UPDATE:
-   [This is implemented by two routines: PatternMatchEngine::soln_up()
-   and PatternMatchEngine::term_up(). These two routines alternate
-   calls to each other, by traversing the *incoming* set of the
-   current node in the clause, and the candidate solution node.
-   The incoming set takes one "upwards" in the tree.]
+   [This is implemented by two routines: PatternMatchEngine::
+   do_term_up() and PatternMatchEngine::explore_up_branches(). These
+   two routines alternate calls to each other, by traversing the
+   *incoming* set of the current node in the clause, and the candidate
+   solution node.  The incoming set takes one "upwards" in the tree.]
 
-   TODO UPDATE:
-   [The stack of current state is maintained in PatternMatchEngine::
-   term_handle_stack, etc. These are pushed as an upwards(incoming)
-   edge is explored, and popped when the edge is rejected.]
+   [The stack of current state is maintained by PatternMatchEngine::
+   clause_stacks_push(), PatternMatchEngine::clause_stacks_pop(),
+   etc.]
 
    [Partial solutions are recorded in PatternMatchEngine::var_grounding
    and PatternMatchEngine::clause_grounding.  These partial solutions
@@ -797,8 +795,7 @@ TODO
    (VariableLink $R (VariableNode $A) (VariableNode $B)) matches
    any arity-2 link (as long as the type constraints are obeyed).
 
- * Performance improvement: [[TODO: Probably outdated, there is no
-   such unit_propagate in the code]] Steal an idea from DPLL, viz
+ * Performance improvement: Steal an idea from DPLL, viz
    unit_propagate.  That is, start with those clauses that have only a
    single variable in them, ground that, and propagate.  Not sure, I
    think this could should improve run-time.  Perhaps there are other
