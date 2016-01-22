@@ -163,15 +163,18 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
             ENDIF (NOT SHORT_NAME STREQUAL "")
         ENDIF (ISLINK STREQUAL "LINK")
 
-        # Print out the python definitions
-        IF (ISNODE STREQUAL "NODE")
-            FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(node_name, tv=None):\n")
-            FILE(APPEND "${PYTHON_FILE}" "    return atomspace.add_node(types.${TYPE_NAME}, node_name, tv)\n")
-        ENDIF (ISNODE STREQUAL "NODE")
-        IF (ISLINK STREQUAL "LINK")
-            FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(*args):\n")
-            FILE(APPEND "${PYTHON_FILE}" "    return atomspace.add_link(types.${TYPE_NAME}, args)\n")
-        ENDIF (ISLINK STREQUAL "LINK")
+        # Print out the python definitions. Note: We special-case Atom since we don't want
+        # to create a function with the same identifier as the Python Atom object.
+        IF (NOT TYPE_NAME STREQUAL "Atom")
+            IF (ISNODE STREQUAL "NODE")
+                FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(node_name, tv=None):\n")
+                FILE(APPEND "${PYTHON_FILE}" "    return atomspace.add_node(types.${TYPE_NAME}, node_name, tv)\n")
+            ENDIF (ISNODE STREQUAL "NODE")
+            IF (ISLINK STREQUAL "LINK")
+                FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(*args):\n")
+                FILE(APPEND "${PYTHON_FILE}" "    return atomspace.add_link(types.${TYPE_NAME}, args)\n")
+            ENDIF (ISLINK STREQUAL "LINK")
+        ENDIF (NOT TYPE_NAME STREQUAL "Atom")
 
         IF (PARENT_TYPES)
             STRING(REGEX REPLACE "[ 	]*,[ 	]*" ";" PARENT_TYPES "${PARENT_TYPES}")
