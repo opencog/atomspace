@@ -655,8 +655,8 @@ to match", but not strictly required.
 
 Evaluatable terms (terms and clauses that need to be evaluated at
 run-time to determine thier truth values) are evaluated in the
-evaluate_sentence() callback.  See PatternMatchCallback.h for detils:
-in breif, though, this is where the basic conception of "truth" is
+evaluate_sentence() callback.  See PatternMatchCallback.h for details:
+in brief, though, this is where the basic conception of "truth" is
 implemented. Crisp-logic theories would implement true/false truth
 values, with and-or-not as the logical connectives. Probabilistic
 theories would implement Bayesian or measure-theoretic "truth values"
@@ -664,9 +664,9 @@ ranging between 0.0 and 1.0; the logical connectives and-or-not would
 correspond to set-intersection, set-union, set-compliment. Other
 theories can implement arbitrary formulas here.
 
-At this time, only one generic callback are provided:
+One generic callback is provided:
 
-*  The DefaultPatternMatchCB. This callback implements node and link
+ * The DefaultPatternMatchCB. This callback implements node and link
    match methods that accept only strict node/link matches, unless a
    node is of type VariableNode, in which case the match is also
    accepted. All evaluatable terms (those containing a
@@ -679,9 +679,9 @@ Forward Chainer
 ---------------
 
 The PatternMatch::imply() method implements a critical component for a
-forward chainer: it is able to accept, as input, an ImplicationLink, and
-return as output, a SetLink of the implicands. An ImplicationLink is
-basically an IF ... THEN ... statement, expressed as an OpenCog hypergraph.
+forward chainer: it is able to accept a BindLink, containing a pattern
+and a rewriting rule, and basically implement a form of IF ... THEN
+... statement, expressed as an OpenCog hypergraph.
 
 Properly, one writes "IF ... THEN ..." as "IF predicate THEN implicand".
 The predicate is presumed to contain VariableNodes, while the implicand
@@ -689,13 +689,13 @@ is a hypergraph making used of those VariableNodes.  The predicate is
 run through the pattern-matching engine. When groundings for the
 variables are found, then a hypegraph is created based on the implicand,
 using the grounded values found.  Because there may be more than one
-grounding, a ListLink of all grounded implicands is returned.
+grounding, a SetLink of all grounded implicands is returned.
 
 Thus, the PattnerMatch::imply() method can be used to implement a
 simple forward-chainer. For example, one may create a collection of
-ImplicationLinks. Then, calling each in turn, from a loop, will cause
-cause each to be evaluated. Thus, N iterations of the loop is equivalent
-to chaining N levels deep.
+BindLinks. Then, calling each in turn, from a loop, will cause each to
+be evaluated. Thus, N iterations of the loop is equivalent to chaining
+N levels deep.
 
 
 Hypergraph Query Language (HQL)
