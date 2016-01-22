@@ -29,7 +29,7 @@
 namespace opencog
 {
 /**
- * The fuzzy pattern matchBasicer searches for trees which are similar but
+ * The fuzzy matcher searches for trees which are similar but
  * not identical to the input target pattern. This is done by examining
  * all possible trees that have at least one leaf node in common with
  * the target pattern.  A similarity score is assigned to each such
@@ -42,12 +42,13 @@ class FuzzyMatchBasic : public FuzzyMatch
 protected:
     virtual void start_search(const Handle&);
     virtual bool accept_starter(const Handle&);
-    virtual bool try_match(const Handle&, int);
+    virtual bool try_match(const Handle&);
     virtual RankedHandleSeq finished_search(void);
 
     // What we are matching
     Handle target;
     HandleSeq target_nodes;
+    HandleSeq target_atoms;
 
 private:
     // The solutions that were found.

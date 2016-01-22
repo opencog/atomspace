@@ -29,29 +29,31 @@
 
 using namespace opencog;
 
-
-void FuzzyMatch::explore(const LinkPtr& gl, int depth)
+/**
+ * Recursively explores the incoming set of a proposed tree until
+ * either `try_match()` returns false or the "root" is reached.
+ *
+ * @param gl  A proposed tree
+ */
+void FuzzyMatch::explore(const LinkPtr& gl)
 {
 	Handle soln(gl->getHandle());
-	bool look_for_more = try_match(soln, depth);
+	bool look_for_more = try_match(soln);
 	if (not look_for_more) return;
 
 	for (const LinkPtr& lptr : gl->getIncomingSet())
-	{
-		explore(lptr, depth-1);
-	}
+		explore(lptr);
 }
 
 /**
  * Recursively explores the target pattern and proposes each subtree
  * as a possible starting point for a similarity search. If the subtree
- * is accepted as a starting point, then all trees sharing thwe subtree
+ * is accepted as a starting point, then all trees sharing the subtree
  * are proposed as being similar.
  *
- * @param hp          A subtree of the target pattern.
- * @param depth       The depth of the subtree in the pattern.
+ * @param hp  A subtree of the target pattern.
  */
-void FuzzyMatch::find_starters(const Handle& hp, const int& depth)
+void FuzzyMatch::find_starters(const Handle& hp)
 {
 	if (accept_starter(hp))
 	{
@@ -65,7 +67,7 @@ void FuzzyMatch::find_starters(const Handle& hp, const int& depth)
 			LAZY_LOG_FINE << "Loop candidate"
 			              << lptr->toShortString() << "\n";
 
-			explore(lptr, depth-1);
+			explore(lptr);
 		}
 		return;
 	}
@@ -75,7 +77,7 @@ void FuzzyMatch::find_starters(const Handle& hp, const int& depth)
 	LinkPtr lp(LinkCast(hp));
 	if (lp) {
 		for (const Handle& h : lp->getOutgoingSet()) {
-			find_starters(h, depth + 1);
+			find_starters(h);
 		}
 	}
 }
@@ -88,7 +90,7 @@ RankedHandleSeq FuzzyMatch::perform_search(const Handle& target)
 	start_search(target);
 
 	// Find starting atoms from which to begin matches.
-	find_starters(target, 0);
+	find_starters(target);
 
 	// Give the derived class a chance to wrap things up.
 	return finished_search();
