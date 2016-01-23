@@ -1,6 +1,5 @@
-
 Pattern Match Engine Overview
------------------------------
+=============================
 Linas Vepstas 2008-2015
 
 This README describes the internal workings of the class
@@ -34,7 +33,7 @@ substitution for the variables such that the resulting clause exists
 in the atomspace.  Thus, a grounding can be thought of as an
 "interpretation" of the clause; the pattern matcher searches for
 interpretations.  It can be thought of as a "unifier", in that ALL
-of the mandatory clauses must be grounded, and they must grounded in
+of the mandatory clauses must be grounded, and they must be grounded in
 a self-consistent way (i.e. the clauses must be grounded in
 conjunction with one-another.)
 
@@ -85,7 +84,7 @@ constant node (not variable), then search can begin at this node
 grounding). If the pattern has no constant nodes, search can begin
 elsewhere, e.g. at a link; either way, the precise starting point
 is specified by a callback.  Once the callback has found a starting
-point, it calls explore_neghborhood(), which will walk the connected
+point, it calls explore_neighborhood(), which will walk the connected
 trees in the pattern and compare them to the atomspace contents.
 
 In the below, atoms belonging to the pattern are called "terms"; this
@@ -93,7 +92,7 @@ terminology helps to distinguish them from the atoms they are being
 matched up with. At every point of the search, the current term (and
 all of the terms that came before it) have a corresponding "match",
 "ground" or "solution", these last three names being used
-interchangably in the comments below.
+interchangeably in the comments below.
 
 From the starting term, the search moves "upwards": the parent of
 the starting term is compared to all possible parents of its match.
@@ -128,21 +127,22 @@ of the clauses have been grounded.
 
 To summarize, there are four basic recursive methods:
 
--- tree_compare(), which recursively compares a term in the pattern
+ * tree_compare(), which recursively compares a term in the pattern
    to a proposed grounding. It moves "downwards" in the two trees;
    it only calls itself, and terminates on match or mis-match.
 
--- explore_up_branches() and do_term_up(), which alternately call each
+ * explore_up_branches() and do_term_up(), which alternately call each
    other, moving up the pattern tree and it's matching tree.
    These invoke tree_compare() to make sure the trees actually match.
    When the top of a pattern clause is reached, these call the
    do_next_clause() method.
 
--- do_next_clause(), which effectively calls itself, moving "sideways"
+ * do_next_clause(), which effectively calls itself, moving "sideways"
    from one clause to the next. "Effectively", because, actually, it
    invokes do_term_up() to perform the actual clause matching; upon
    reaching the top, it recurses to do_next_clause(). The recursion
-   terminates when there are no more clauses to e grounded.
+   terminates when there are no more clauses to be grounded.
+
 
 State, Stack and Backtracking
 -----------------------------
@@ -177,6 +177,7 @@ The callback methods push() and pop() are invoked at these
 branchpoints, in case the callback also has state management to
 perform.
 
+
 Tree Compare
 ------------
 To simplify the implementation of tree_compare(), it has been broken
@@ -190,7 +191,7 @@ Complications
 -------------
 Complications are introduced due to the following features:
 
--- Unordered links. To compare an unordered link to it's proposed
+ * Unordered links. To compare an unordered link to it's proposed
    grounding, every possible permutation of the order must be tried.
    Thus, each permutation is a branchpoint; state must be saved and
    restored if an earlier permutation did not work out. However, it is
@@ -198,7 +199,7 @@ Complications are introduced due to the following features:
    must be performed only for the current permutation. Thus, the state
    includes the set of all permutations taken so far.
 
--- ChoiceLinks. These are similar to unordered links, and are
+ * ChoiceLinks. These are similar to unordered links, and are
    implemented similarly. Each ChoiceLink presents a (mututally-
    exclusive) choice of terms that may be grounded; only one of
    these is to be grounded.  Again, the choice represents a
@@ -219,10 +220,10 @@ Complications are introduced due to the following features:
    and it explores the different branches that the unordered and the
    choice links represent.
 
--- Evaluatable and executable links. These links are not a static
+ * Evaluatable and executable links. These links are not a static
    part of the pattern, but can only be known at runtime, at the time
    the actual match must be made. Evaluatable links are those that
-   contain a GroundedPredicateNode (GPN), are are one of the equivalent
+   contain a GroundedPredicateNode (GPN), or are one of the equivalent
    stand-ins for a GPN, such as an EqualLink or GreaterThanLink.
    Whenever one of these is encountered, it must be evaluated on the
    spot to determine if a match is successful (if the predicate is
@@ -266,7 +267,7 @@ Complications are introduced due to the following features:
    performance to about 10K calls/second on current (2015) CPU's.
 
    The distinction between clear-box and black-box doesn't much
-   matter to the pattern matcher, other than that cloear-box clauses
+   matter to the pattern matcher, other than that clear-box clauses
    are tried first, so that if satisfaction is not possible, then
    perhaps some invocations to the slower black-boxes can be avoided.
 
@@ -300,7 +301,7 @@ Complications are introduced due to the following features:
    message) or can depend on external data (evaluate to true/false
    depending on whether a message has been received).
 
--- Executable terms.  These are terms that contain a
+ * Executable terms.  These are terms that contain a
    GroundedSchemaNode (GSN).  These must be executed. The atom that
    results from their execution is then treated as an "ordinary"
    term, and is grounded as per usual (unless it also contains GSN's,

@@ -86,7 +86,7 @@ private:
 	// var_grounding map accumulates variable groundings for this
 	// clause, and all previous clauses so far.
 
-	// Map of current groundings of variables to thier grounds
+	// Map of current groundings of variables to their grounds
 	// Also contains grounds of subclauses (not sure why, this seems
 	// to be needed)
 	std::map<Handle, Handle> var_grounding;
