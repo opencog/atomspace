@@ -3,10 +3,9 @@
 #include <boost/signals2.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/AttentionValue.h>
+#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
-#include <opencog/atomspace/types.h>
 
 using namespace opencog;
 
