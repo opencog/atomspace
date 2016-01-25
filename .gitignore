@@ -1,4 +1,5 @@
 *.a
+*.so
 *.log
 .vagrant
 .DS_Store
