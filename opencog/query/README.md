@@ -268,8 +268,9 @@ ignored.  This is because constant clauses are "trivial": the
 groundings for them can only be themselves, trivially, and so nothings
 needs be done.
 
-The clauses are partitioned in to connected components, clauses that
-share directly or indirectly the same variables.
+The clauses are partitioned in to connected components. A set of
+clauses is connected if there is a transitive path through all of
+them, that is if they share directly or indirectly the same variables.
 
 
 Algorithm overview
@@ -357,7 +358,9 @@ recognizing a context-free language.
    to join together the trees into a partition of connected graph
    components.  The algorithm will find all groundings for each
    component separately, and form the final answer as the cartesian
-   product of all component grounding sets.
+   product of all component grounding sets.  The graph as a whole may
+   contain loops (the decomposition into trees keeps the algorithm
+   from having to explicitly accommodate loops).
 
    A list of the common, or shared, vertices is made; this list is
    used later in the algorithm, to find all trees connected to a
