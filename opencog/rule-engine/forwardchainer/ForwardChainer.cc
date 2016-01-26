@@ -106,7 +106,7 @@ Logger* ForwardChainer::getLogger()
 }
 
 /**
- * Does one step forward chaining and stores result.
+ * Do one step forward chaining and store result.
  *
  */
 void ForwardChainer::do_step(void)
@@ -153,13 +153,13 @@ void ForwardChainer::do_step(void)
     _log->debug("Derived rule size = %d", derived_rhandles.size());
 
     UnorderedHandleSet products;
-    //Applying all partial/full groundings.
+    // Applying all partial/full groundings.
     for (Handle rhandle : derived_rhandles) {
         HandleSeq hs = apply_rule(rhandle, _search_focus_Set);
         products.insert(hs.begin(), hs.end());
     }
 
-    //Finally store source partial groundings and inference results.
+    // Finally store source partial groundings and inference results.
     if (not derived_rhandles.empty()) {
         _potential_sources.insert(_potential_sources.end(), products.begin(),
                                   products.end());
@@ -190,7 +190,7 @@ void ForwardChainer::do_chain(void)
 
     while (_iteration < max_iter /*OR other termination criteria*/) {
         _log->debug("Iteration %d", _iteration);
-         do_step();
+        do_step();
         _iteration++;
     }
 
@@ -208,8 +208,8 @@ void ForwardChainer::apply_all_rules(bool search_focus_set /*= false*/)
         _cur_rule = rule;
         HandleSeq hs = apply_rule(rule->get_handle(), search_focus_set);
 
-        //Update
-       _fcstat.add_inference_record(Handle::UNDEFINED,hs);
+        // Update
+        _fcstat.add_inference_record(Handle::UNDEFINED,hs);
         update_potential_sources(hs);
     }
 
@@ -228,8 +228,8 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
 
     _log->debug("[ForwardChainer] %d rules to be searched",rule_weight.size());
 
-    //Select a rule among the admissible rules in the rule-base via stochastic
-    //selection,based on the weights of the rules in the current context.
+    // Select a rule among the admissible rules in the rule-base via stochastic
+    // selection, based on the weights of the rules in the current context.
     Rule* rule = nullptr;
 
     auto is_matched = [&](const Rule* rule) {
@@ -237,14 +237,14 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
             auto pgmap = _fcstat.get_rule_pg_map(hsource);
             auto it = pgmap.find(rule->get_handle());
             if (it != pgmap.end())
-            return true;
+                return true;
         }
         return false;
     };
 
     std::string match_type = subatom_match ? "sub-atom-unifying" : "unifying";
 
-    _log->debug("[ForwardChainer]%s", match_type.c_str());
+    _log->debug("[ForwardChainer] %s", match_type.c_str());
 
 
     while (not rule_weight.empty()) {
@@ -319,19 +319,19 @@ Handle ForwardChainer::choose_next_source()
     //!Prioritize new source selection.
     for (size_t i = 0; i < tournament_elem.size(); i++) {
         Handle hselected = urec.tournament_select(tournament_elem);
-        bool selected_before = (boost::find(_selected_sources, hselected)
-                != _selected_sources.end());
+        bool selected_before = (_selected_sources.find(hselected)
+                                != _selected_sources.end());
 
         if (selected_before) {
             continue;
         } else {
             hchosen = hselected;
-            _selected_sources.push_back(hchosen);
+            _selected_sources.insert(hchosen);
             break;
         }
     }
 
-    // Incase of when all sources are selected
+    // In case all sources are selected
     if (hchosen == Handle::UNDEFINED)
         return urec.tournament_select(tournament_elem);
 

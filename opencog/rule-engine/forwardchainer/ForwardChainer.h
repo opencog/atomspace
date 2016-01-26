@@ -96,7 +96,7 @@ protected:
      *
      * @return  A rule that in which @param source could ground.
      */
-    virtual Rule* choose_rule(Handle hsource, bool subatom_match );
+    virtual Rule* choose_rule(Handle hsource, bool subatom_match);
 
     /**
      * choose next source from the source list
