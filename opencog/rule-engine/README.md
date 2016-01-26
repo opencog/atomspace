@@ -36,20 +36,27 @@ to start forward chaining.
  - A single atom
  - A set of atoms wrapped in a SetLink
 
-When the source is an empty SetLink, forward chainer will apply all rules
-leaving aside source and rule selection steps on the specified focus set or on entire atomspace based on the size of the focus set as described below.
+When the source is an empty SetLink, forward chainer will apply all
+rules leaving aside source and rule selection steps on the specified
+focus set or on entire atomspace based on the size of the focus set as
+described below.
 
-*rule-base* - Is a [ConceptNode](http://wiki.opencog.org/wikihome/index.php/ConceptNode) with a particular name describing the rule base.
+*rule-base* - Is a
+ [ConceptNode](http://wiki.opencog.org/wikihome/index.php/ConceptNode)
+ with a particular name describing the rule base.
 
-*focus-set* - A set of atoms wrapped in a SetLink.If the SetLink is not empty,
-the forward chainer will apply selected rules on the atoms inside the focus set.otherwise rules will be applied on the entire atomspace.
+*focus-set* - A set of atoms wrapped in a SetLink.If the SetLink is
+not empty, the forward chainer will apply selected rules on the atoms
+inside the focus set.otherwise rules will be applied on the entire
+atomspace.
 
 When both source and focus set are empty, all rules on the whole atomspace will be applied iteratively.
 
 **Example**: suppose there is some knowledges about the ConceptNode
 Socrates then one can do a bunch of forward chaining inference by
-calling `(cog-fc (ConceptNode "Socrates") (ConceptNode "rb-pln") (SetLink [ATOMS_ASSOCIATED]))`
-from the scheme shell interface. All results of the inferences are returned wrapped in a ListLink.
+calling `(cog-fc (ConceptNode "Socrates") (ConceptNode "rb-pln")
+(SetLink [ATOMS_ASSOCIATED]))` from the scheme shell interface. All
+results of the inferences are returned wrapped in a ListLink.
 
 ### Backward chaining
 
@@ -60,16 +67,17 @@ and the backward chainer tries to find grounding for the variable.
 For truth value fullfillment query, the TV of the original target are
 updated via inference.
 
-The main C++ entry point for the backward chainer is the `do_chain` function.
+The main C++ entry point for the backward chainer is the `do_chain`
+function.
 
 There exist a scheme primitive `(cog-bc *target* *rule-base* *focus-set*)`
 for using the Backward Chainer in scheme.
 
 Here's how the criminal example located at
 https://github.com/opencog/opencog/blob/master/opencog/python/pln_old/examples/backward_chaining/criminal.scm
-could be solved by the Backward Chaining, when only the Modus
-Ponens rule is present (disclaminer: the internal implement will
-be different)
+could be solved by the Backward Chaining, when only the Modus Ponens
+rule is present (disclaminer: the internal implement will be
+different)
 
 
 ```
