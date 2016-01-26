@@ -115,10 +115,13 @@ void ForwardChainer::do_step(void)
     _log->debug("[ForwardChainer] Next source %s",
                 _cur_source->toString().c_str());
 
-    const Rule* rule;
+    const Rule* rule = nullptr;
     HandleSeq derived_rhandles = { };
 
-    auto get_derived = [&](Handle hsource) {
+    //Returns previously derived handleSeq for a given
+    //choosen rule. Empty if the rule has not been sel
+    //ected previously for this particular source atom.
+    auto get_derived = [&](const Handle& hsource) {
         auto pgmap = _fcstat.get_rule_pg_map(hsource);
         auto it = pgmap.find(rule->get_handle());
         if (it != pgmap.end()) {
@@ -128,26 +131,23 @@ void ForwardChainer::do_step(void)
         }
     };
 
-    //Look in the cache first
-    map<Rule, float> rule_weight_map;
+    bool subatom = false;
     rule = choose_rule(_cur_source, false);
+
+    //If a fully matching rule is not found, look for
+    //subatomically matching rule. 
+    if (not rule) {
+        rule = choose_rule(_cur_source, true);
+        subatom = true;
+    }
 
     if (rule) {
         _cur_rule = rule;
+        //Use previously derived rules if they exist.
         if (_fcstat.has_partial_grounding(_cur_source))
             get_derived(_cur_source);
         else
-            derived_rhandles = derive_rules(_cur_source, rule);
-
-    } else {
-        rule = choose_rule(_cur_source, true);
-        if (rule) {
-            _cur_rule = rule;
-            if (_fcstat.has_partial_grounding(_cur_source))
-                get_derived(_cur_source);
-            else
-                derived_rhandles = derive_rules(_cur_source, rule, true);
-        }
+            derived_rhandles = derive_rules(_cur_source, rule, subatom);
     }
 
     _log->debug("Derived rule size = %d", derived_rhandles.size());
@@ -166,9 +166,9 @@ void ForwardChainer::do_step(void)
 
         HandleWeightMap hwm;
         float weight = _cur_rule->get_weight();
-        for(Handle& h: derived_rhandles)  hwm[h] = weight;
-        _fcstat.add_partial_grounding(_cur_source, rule->get_handle(),
-                                      hwm);
+        for (Handle& h : derived_rhandles)
+            hwm[h] = weight;
+        _fcstat.add_partial_grounding(_cur_source, rule->get_handle(), hwm);
 
         _fcstat.add_inference_record(
                 _cur_source, HandleSeq(products.begin(), products.end()));
