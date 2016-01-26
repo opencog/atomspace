@@ -33,11 +33,11 @@
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/query/DefaultImplicator.h>
 #include <opencog/rule-engine/Rule.h>
-#include <opencog/util/Logger.h>
 
 #include "ForwardChainer.h"
 #include "FocusSetPMCB.h"
 #include "VarGroundingPMCB.h"
+#include "FCLogger.h"
 
 using namespace opencog;
 
@@ -50,7 +50,6 @@ ForwardChainer::ForwardChainer(AtomSpace& as, Handle rbs, Handle hsource,
 
 ForwardChainer::~ForwardChainer()
 {
-
 }
 
 void ForwardChainer::init(Handle hsource, HandleSeq focus_set)
@@ -89,22 +88,6 @@ void ForwardChainer::init(Handle hsource, HandleSeq focus_set)
          _rules.push_back(&r);
      }
     _cur_rule = nullptr;
-    
-    // Provide a logger
-    _log = NULL;
-    setLogger(new opencog::Logger("forward_chainer.log", Logger::FINE, true));
-}
-
-void ForwardChainer::setLogger(Logger* log)
-{
-    if (_log)
-        delete _log;
-    _log = log;
-}
-
-Logger* ForwardChainer::getLogger()
-{
-    return _log;
 }
 
 /**
@@ -114,8 +97,7 @@ Logger* ForwardChainer::getLogger()
 void ForwardChainer::do_step(void)
 {
     _cur_source = choose_next_source();
-    _log->debug("[ForwardChainer] Next source %s",
-                _cur_source->toString().c_str());
+    LAZY_FC_LOG_DEBUG << "Next source " << _cur_source->toString();
 
     const Rule* rule = nullptr;
     HandleSeq derived_rhandles = { };
@@ -152,7 +134,7 @@ void ForwardChainer::do_step(void)
             derived_rhandles = derive_rules(_cur_source, rule, subatom);
     }
 
-    _log->debug("Derived rule size = %d", derived_rhandles.size());
+    fc_logger().debug("Derived rule size = %d", derived_rhandles.size());
 
     UnorderedHandleSet products;
     // Applying all partial/full groundings.
@@ -191,12 +173,12 @@ void ForwardChainer::do_chain(void)
     auto max_iter = _configReader.get_maximum_iterations();
 
     while (_iteration < max_iter /*OR other termination criteria*/) {
-        _log->debug("Iteration %d", _iteration);
+	    fc_logger().debug("Iteration %d", _iteration);
         do_step();
         _iteration++;
     }
 
-    _log->debug("[ForwardChainer] finished forwarch chaining.");
+    fc_logger().debug("finished forwarch chaining.");
 }
 
 /**
@@ -228,7 +210,7 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
     for (Rule* r : _rules)
         rule_weight[r] = r->get_weight();
 
-    _log->debug("[ForwardChainer] %d rules to be searched",rule_weight.size());
+    fc_logger().debug("%d rules to be searched", rule_weight.size());
 
     // Select a rule among the admissible rules in the rule-base via stochastic
     // selection, based on the weights of the rules in the current context.
@@ -246,7 +228,7 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
 
     std::string match_type = subatom_match ? "sub-atom-unifying" : "unifying";
 
-    _log->debug("[ForwardChainer] %s", match_type.c_str());
+    fc_logger().debug("%s", match_type.c_str());
 
 
     while (not rule_weight.empty()) {
@@ -254,8 +236,8 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
         bool unified = false;
 
         if (is_matched(temp)) {
-            _log->debug("[ForwardChainer]Found previous matching by %s",
-                        match_type.c_str());
+            fc_logger().debug("Found previous matching by %s",
+                              match_type.c_str());
 
             rule = temp;
             break;
@@ -286,10 +268,10 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
 
 
     if(nullptr != rule)
-        _log->debug("[ForwardChainer] Selected rule is %s",
-                            (rule->get_handle())->toShortString().c_str());
+        LAZY_FC_LOG_DEBUG << "Selected rule is "
+                          << rule->get_handle()->toShortString();
     else
-       _log->debug("[ForwardChainer] No match found.");
+       fc_logger().debug("No match found.");
 
     return rule;
 };
@@ -365,7 +347,7 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
 
         Instantiator inst(&_as);
         Handle houtput = LinkCast(rhandle)->getOutgoingSet().back();
-        _log->debug("Instantiating %s ", (houtput->toShortString()).c_str());
+        LAZY_FC_LOG_DEBUG << "Instantiating " << houtput->toShortString();
 
         result.push_back(inst.instantiate(houtput, { }));
     }
@@ -385,16 +367,15 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
             FocusSetPMCB fs_pmcb(&derived_rule_as, &_as);
             fs_pmcb.implicand = bl->get_implicand();
 
-            _log->debug("Applying rule in focus set %s ",
-                        (rhcpy->toShortString()).c_str());
+            LAZY_FC_LOG_DEBUG << "Applying rule in focus set "
+                              << rhcpy->toShortString();
 
             bl->imply(fs_pmcb, false);
 
             result = fs_pmcb.get_result_list();
 
-            _log->debug(
-                    "Result is %s ",
-                    ((_as.add_link(SET_LINK, result))->toShortString()).c_str());
+            LAZY_FC_LOG_DEBUG << "Result is "
+                              << _as.add_link(SET_LINK, result)->toShortString();
 
         }
         // Search the whole atomspace.
@@ -403,12 +384,12 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=
 
             Handle rhcpy = derived_rule_as.add_atom(rhandle);
 
-            _log->debug("Applying rule on atomspace %s ",
-                        (rhcpy->toShortString()).c_str());
+            LAZY_FC_LOG_DEBUG << "Applying rule on atomspace "
+                              << rhcpy->toShortString();
 
             Handle h = bindlink(&derived_rule_as, rhcpy);
 
-            _log->debug("Result is %s ", (h->toShortString()).c_str());
+            LAZY_FC_LOG_DEBUG << "Result is " << h->toShortString();
 
 				LinkPtr lp(LinkCast(h));
             if (lp) result = lp->getOutgoingSet();

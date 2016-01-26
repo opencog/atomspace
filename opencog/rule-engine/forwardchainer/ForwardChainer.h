@@ -39,7 +39,6 @@ enum source_selection_mode {
 };
 
 class FCMemory;
-class Logger;
 class Rule;
 
 class ForwardChainer {
@@ -53,7 +52,6 @@ private:
     URECommons _rec;            // utility class
     Handle _rbs;                // rule-based system
     UREConfigReader _configReader;
-    Logger * _log;
 
     int _iteration = 0;
     source_selection_mode _ts_mode;
@@ -66,8 +64,6 @@ private:
     FCStat _fcstat;
 
     void init(Handle hsource, HandleSeq focus_set);
-    void setLogger(Logger* log);
-    Logger* getLogger(void);
 
     void apply_all_rules(bool search_focus_set = false);
 
