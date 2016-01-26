@@ -22,6 +22,8 @@
  */
 
 #include <boost/range/algorithm/find.hpp>
+#include <boost/range/algorithm/sort.hpp>
+#include <boost/range/algorithm/unique_copy.hpp>
 
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/pattern/BindLink.h>
@@ -734,8 +736,6 @@ Handle ForwardChainer::gen_sub_varlist(const Handle& parent,
 
 void ForwardChainer::update_potential_sources(HandleSeq input)
 {
-    for (Handle i : input) {
-        if (boost::find(_potential_sources, i) == _potential_sources.end())
-            _potential_sources.push_back(i);
-    }
+    boost::sort(input);
+    boost::unique_copy(input, std::back_inserter(_potential_sources));
 }

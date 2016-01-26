@@ -61,7 +61,7 @@ private:
     bool _search_focus_Set;
     const Rule* _cur_rule;
     Handle _cur_source;
-    HandleSeq _selected_sources;
+    UnorderedHandleSet _selected_sources;
 
     FCStat _fcstat;
 
