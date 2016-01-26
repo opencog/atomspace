@@ -7,23 +7,23 @@
 ; not sure)
 (MemberLink
    pln-rule-modus-ponens-name
-   (ConceptNode "URE")
+   (ConceptNode "BC_DEMO_RB")
 )
 (MemberLink (stv 1 1)
    pln-rule-deduction-name
-   (ConceptNode "URE")
+   (ConceptNode "BC_DEMO_RB")
 )
 
 ; termination criteria parameters
 (ExecutionLink
    (SchemaNode "URE:maximum-iterations")
-   (ConceptNode "URE")
+   (ConceptNode "BC_DEMO_RB")
    (NumberNode "100")
 )
 
 ; Attention allocation (set the TV strength to 0 to disable it, 1 to
 ; enable it)
 (EvaluationLink (stv 0 1)
-   (PredicateNode "URE:attention-allocation")
-   (ConceptNode "URE")
+   (PredicateNode "BC_DEMO_RB:attention-allocation")
+   (ConceptNode "BC_DEMO_RB")
 )
