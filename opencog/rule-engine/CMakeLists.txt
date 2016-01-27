@@ -2,14 +2,15 @@
 # Rule engine lib build
 #
 ADD_LIBRARY(ruleengine SHARED
-	backwardchainer/BackwardChainer.cc
-	backwardchainer/BackwardChainerPMCB.cc
-	backwardchainer/Target.cc
-	backwardchainer/UnifyPMCB.cc
-	forwardchainer/FCStat.cc
-	forwardchainer/FocusSetPMCB.h
-	forwardchainer/ForwardChainer.cc
-	forwardchainer/VarGroundingPMCB.h
+	backwardchainer/BackwardChainer
+	backwardchainer/BackwardChainerPMCB
+	backwardchainer/Target
+	backwardchainer/UnifyPMCB
+	forwardchainer/FCStat
+	forwardchainer/FocusSetPMCB
+	forwardchainer/ForwardChainer
+	forwardchainer/VarGroundingPMCB
+	forwardchainer/FCLogger
 	ChainerUtils.cc
 	InferenceSCM.cc
 	Rule.cc
