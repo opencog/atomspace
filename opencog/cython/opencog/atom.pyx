@@ -1,15 +1,25 @@
 
-# Atom wrapper object, we should really do something similar in the
-# core OpenCog API.
+# Atom wrapper object
 cdef class Atom(object):
 
-    def __init__(self,Handle h,AtomSpace a):
-        self.handle = h
+    def __cinit__(self, UUID uuid, AtomSpace a):
+        self.handle = new cHandle(uuid)
+
+    def __dealloc__(self):
+        del self.handle
+
+    def value(self):
+        return self.handle.value()
+
+    def __init__(self, UUID uuid, AtomSpace a):
+        # self.handle = h is set in __cinit__ above
+
         # cache the results after first retrieval of
         # immutable properties
         self._atom_type = None
         self._name = None
         self._outgoing = None
+
         # Not really a cache ... an atom could be moved from one
         # atomspace to another (!)
         self.atomspace = a
@@ -18,38 +28,35 @@ cdef class Atom(object):
         """ Allows boolean comparison, return false is handle is
         UNDEFINED or doesn't exist in AtomSpace """
         if self.handle:
-            return self.atomspace.is_valid(self.handle)
+            return self.atomspace.is_valid(self)
         else: return False
 
     property atomspace:
         def __get__(self):
             return self.atomspace
-
-    property h:
-        def __get__(self): return self.handle
     
     property name:
         def __get__(self):
             if self._name is None:
-                self._name = self.atomspace.get_name(self.handle)
+                self._name = self.atomspace.get_name(self)
             return self._name
 
     property tv:
         def __get__(self):
-            return self.atomspace.get_tv(self.handle)
+            return self.atomspace.get_tv(self)
         def __set__(self,val):
-            self.atomspace.set_tv(self.handle,val)
+            self.atomspace.set_tv(self,val)
 
     property av:
         def __get__(self):
-            return self.atomspace.get_av(self.handle)
+            return self.atomspace.get_av(self)
         def __set__(self,val):
-            self.atomspace.set_av(self.handle,av_dict=val)
+            self.atomspace.set_av(self,av_dict=val)
 
     property out:
         def __get__(self):
             if self._outgoing is None:
-                self._outgoing = self.atomspace.get_outgoing(self.handle)
+                self._outgoing = self.atomspace.get_outgoing(self)
             return self._outgoing
 
     property arity:
@@ -58,12 +65,12 @@ cdef class Atom(object):
 
     property incoming:
         def __get__(self):
-            return self.atomspace.get_incoming(self.handle)
+            return self.atomspace.get_incoming(self)
 
     property type:
         def __get__(self):
             if self._atom_type is None:
-                self._atom_type = self.atomspace.get_type(self.handle)
+                self._atom_type = self.atomspace.get_type(self)
             return self._atom_type
 
     property type_name:
@@ -78,7 +85,7 @@ cdef class Atom(object):
         self.tv.set_value(mean, count)
 
     def handle_uuid(self):
-        return self.handle.value()
+        return self.value()
 
     def is_node(self):
         return is_a(self.t,types.Node)
@@ -90,10 +97,10 @@ cdef class Atom(object):
         return is_a(self.t,t)
 
     def long_string(self):
-        return self.atomspace.get_atom_string(self.handle,terse=False)
+        return self.atomspace.get_atom_string(self,terse=False)
 
     def __str__(self):
-        return self.atomspace.get_atom_string(self.handle,terse=True)
+        return self.atomspace.get_atom_string(self,terse=True)
 
     def __repr__(self):
         return self.long_string()
@@ -104,33 +111,25 @@ cdef class Atom(object):
         cdef Atom a1 = a1_
         cdef Atom a2 = a2_
         
-        is_equal = True
-        if a1.atomspace != a2.atomspace:
-            is_equal = False
-        if is_equal:
-            if a1.handle != a2.handle:
-                is_equal = False
+        is_equal = (a1.atomspace == a2.atomspace and
+                     deref(a1.handle) == deref(a2.handle))
         if op == 2: # ==
             return is_equal
         elif op == 3: # !=
             return not is_equal
-        #elif op == 4: # >
-            #return deref(h1.h) > deref(h2.h)
-        #elif op == 0: # <
-            #return deref(h1.h) < deref(h2.h)
-        #elif op == 1: # <=
-            #return deref(h1.h) <= deref(h2.h)
-        #elif op == 5: # >=
-            #return deref(h1.h) >= deref(h2.h)
 
     # Necessary to prevent weirdness with RPyC
-    def __cmp__(a1, a2):
+    def __cmp__(a1_, a2_):
+        if not isinstance(a1_, Atom) or not isinstance(a2_, Atom):
+            return NotImplemented
+        cdef Atom a1 = a1_
+        cdef Atom a2 = a2_
         is_equal = (a1.atomspace == a2.atomspace and
-                     a1.handle == a2.handle)
+                     deref(a1.handle) == deref(a2.handle))
         if is_equal:
             return 0
         else:
             return -1
 
     def __hash__(a1):
-        return hash(a1.h.value())
+        return hash(a1.value())

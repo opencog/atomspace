@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle
+from opencog.atomspace import AtomSpace, TruthValue, Atom
 from opencog.atomspace import types, is_a, get_type, get_type_name
 
 class AtomSpaceTest(TestCase):
@@ -15,7 +15,7 @@ class AtomSpaceTest(TestCase):
 
         a1 = self.space.add_node(types.Node, "test")
         self.assertTrue(a1)
-        # duplicates resolve to same handle
+        # duplicates resolve to same atom
         a2 = self.space.add_node(types.Node, "test")
         self.assertEquals(a1, a2)
 
@@ -34,10 +34,11 @@ class AtomSpaceTest(TestCase):
 
         # tests with bad parameters
         # test with not a proper truthvalue
-        self.assertRaises(TypeError, self.space.add_node, types.Node, "test", 0, True)
+        self.assertRaises(TypeError, self.space.add_node, types.Node, "test", 
+                0, True)
         # test with bad type
-        self.assertRaises(TypeError, self.space.add_node, "ConceptNode",
-"test", TruthValue(0.5, 0.8))
+        self.assertRaises(TypeError, self.space.add_node, "ConceptNode", "test", 
+                TruthValue(0.5, 0.8))
 
     def test_add_link(self):
         n1 = self.space.add_node(types.Node, "test1")
@@ -51,10 +52,7 @@ class AtomSpaceTest(TestCase):
         n3 = self.space.add_node(types.Node, "test3")
         l3 = self.space.add_link(types.Link, [n1, n3], TruthValue(0.5, 0.8))
         self.assertTrue(l3 is not None)
-        # Test with a handle instead of atom
-        l4 = self.space.add_link(types.Link, [n2.h, n3], TruthValue(0.5, 0.8))
-        self.assertTrue(l4 is not None)
-
+        
         # Should fail when adding an intentionally bad type
         caught = False
         try:
@@ -64,11 +62,11 @@ class AtomSpaceTest(TestCase):
         self.assertEquals(caught, True)
 
     def test_is_valid(self):
-        h1 = self.space.add_node(types.Node, "test1")
-        # check with Handle object
-        self.assertTrue(self.space.is_valid(h1.h))
+        a1 = self.space.add_node(types.Node, "test1")
+        # check with Atom object
+        self.assertTrue(self.space.is_valid(a1))
         # check with raw UUID
-        self.assertTrue(self.space.is_valid(h1.h.value()))
+        self.assertTrue(self.space.is_valid(a1.value()))
         # check with bad UUID
         self.assertFalse(self.space.is_valid(2919))
         # check with bad type
@@ -110,66 +108,66 @@ class AtomSpaceTest(TestCase):
         self.assertEqual(len(result), 0)
 
     def test_get_by_type(self):
-        h1 = self.space.add_node(types.Node, "test1")
-        h2 = self.space.add_node(types.ConceptNode, "test2")
-        h3 = self.space.add_node(types.PredicateNode, "test3")
+        a1 = self.space.add_node(types.Node, "test1")
+        a2 = self.space.add_node(types.ConceptNode, "test2")
+        a3 = self.space.add_node(types.PredicateNode, "test3")
 
         # test recursive subtypes
         result = self.space.get_atoms_by_type(types.Node)
-        self.assertTrue(h1 in result)
-        self.assertTrue(h2 in result)
-        self.assertTrue(h3 in result)
+        self.assertTrue(a1 in result)
+        self.assertTrue(a2 in result)
+        self.assertTrue(a3 in result)
 
         # links
-        l1 = self.space.add_link(types.InheritanceLink, [h1, h2])
+        l1 = self.space.add_link(types.InheritanceLink, [a1, a2])
         result = self.space.get_atoms_by_type(types.Link)
         self.assertTrue(l1 in result)
         
         # test non-recursive subtype
         result = self.space.get_atoms_by_type(types.Node, subtype=False)
-        self.assertTrue(h1 in result)
-        self.assertTrue(h2 not in result)
-        self.assertTrue(h3 not in result)
+        self.assertTrue(a1 in result)
+        self.assertTrue(a2 not in result)
+        self.assertTrue(a3 not in result)
 
         # test empty
         result = self.space.get_atoms_by_type(types.AnchorNode, subtype=False)
         self.assertEqual(len(result), 0)
 
     def test_get_by_av(self):
-        h1 = self.space.add_node(types.ConceptNode, "test1")
-        h2 = self.space.add_node(types.ConceptNode, "test2")
-        h3 = self.space.add_link(types.InheritanceLink, [h1, h2])
-        h4 = self.space.add_node(types.ConceptNode, "test4")
-        h5 = self.space.add_node(types.ConceptNode, "test5")
+        a1 = self.space.add_node(types.ConceptNode, "test1")
+        a2 = self.space.add_node(types.ConceptNode, "test2")
+        a3 = self.space.add_link(types.InheritanceLink, [a1, a2])
+        a4 = self.space.add_node(types.ConceptNode, "test4")
+        a5 = self.space.add_node(types.ConceptNode, "test5")
 
-        self.space.set_av(h=h1.h, sti=10)
-        self.space.set_av(h=h2.h, sti=5)
-        self.space.set_av(h=h3.h, sti=4)
-        self.space.set_av(h=h4.h, sti=1)
+        self.space.set_av(atom=a1, sti=10)
+        self.space.set_av(atom=a2, sti=5)
+        self.space.set_av(atom=a3, sti=4)
+        self.space.set_av(atom=a4, sti=1)
 
         result = self.space.get_atoms_by_av(4, 10)
         assert len(result) == 3
-        assert set(result) == set([h1, h2, h3])
-        assert h4 not in result
+        assert set(result) == set([a1, a2, a3])
+        assert a4 not in result
 
         result = self.space.get_atoms_in_attentional_focus()
         assert len(result) == 4
-        assert set(result) == set([h1, h2, h3, h4])
+        assert set(result) == set([a1, a2, a3, a4])
 
     def test_get_by_target_atom(self):
-        h1 = self.space.add_node(types.Node, "test1")
-        h2 = self.space.add_node(types.ConceptNode, "test2")
-        h3 = self.space.add_node(types.PredicateNode, "test3")
+        a1 = self.space.add_node(types.Node, "test1")
+        a2 = self.space.add_node(types.ConceptNode, "test2")
+        a3 = self.space.add_node(types.PredicateNode, "test3")
 
         # test it doesn't apply to Nodes
-        result = self.space.get_atoms_by_target_atom(types.Node, h1)
-        self.assertTrue(h1 not in result)
+        result = self.space.get_atoms_by_target_atom(types.Node, a1)
+        self.assertTrue(a1 not in result)
 
         # links
-        l1 = self.space.add_link(types.InheritanceLink, [h1, h2])
-        result = self.space.get_atoms_by_target_atom(types.Link, h1)
+        l1 = self.space.add_link(types.InheritanceLink, [a1, a2])
+        result = self.space.get_atoms_by_target_atom(types.Link, a1)
         self.assertTrue(l1 in result)
-        result = self.space.get_atoms_by_target_atom(types.Link, h3)
+        result = self.space.get_atoms_by_target_atom(types.Link, a3)
         self.assertTrue(l1 not in result)
 
     def test_include_incoming_outgoing(self):
@@ -187,48 +185,41 @@ class AtomSpaceTest(TestCase):
             self.space.include_incoming(self.space.get_atoms_by_name(types.ConceptNode, "Frog")))) == 3
 
     def test_remove(self):
-        h1 = self.space.add_node(types.Node, "test1")
-        h2 = self.space.add_node(types.ConceptNode, "test2")
-        h3 = self.space.add_node(types.PredicateNode, "test3")
+        a1 = self.space.add_node(types.Node, "test1")
+        a2 = self.space.add_node(types.ConceptNode, "test2")
+        a3 = self.space.add_node(types.PredicateNode, "test3")
 
-        self.assertTrue(h1 in self.space)
-        self.assertTrue(h2 in self.space)
-        self.assertTrue(h3 in self.space)
+        self.assertTrue(a1 in self.space)
+        self.assertTrue(a2 in self.space)
+        self.assertTrue(a3 in self.space)
 
-        self.space.remove(h1)
-        self.assertTrue(h1 not in self.space)
-        self.assertTrue(h2 in self.space)
-        self.assertTrue(h3 in self.space)
+        self.space.remove(a1)
+        self.assertTrue(a1 not in self.space)
+        self.assertTrue(a2 in self.space)
+        self.assertTrue(a3 in self.space)
 
-        l = self.space.add_link(types.SimilarityLink, [h2, h3])
-        self.space.remove(h2, True) # won't remove it unless recursive is True
-        self.assertTrue(h2 not in self.space)
+        l = self.space.add_link(types.SimilarityLink, [a2, a3])
+        self.space.remove(a2, True) # won't remove it unless recursive is True
+        self.assertTrue(a2 not in self.space)
         self.assertTrue(l not in self.space)
 
     def test_clear(self):
-        h1 = self.space.add_node(types.Node, "test1")
-        h2 = self.space.add_node(types.ConceptNode, "test2")
-        h3 = self.space.add_node(types.PredicateNode, "test3")
+        a1 = self.space.add_node(types.Node, "test1")
+        a2 = self.space.add_node(types.ConceptNode, "test2")
+        a3 = self.space.add_node(types.PredicateNode, "test3")
         self.space.clear()
-        self.assertEquals(self.space.size(), 0) 
         self.assertEquals(self.space.size(), 0) 
         self.assertEquals(len(self.space), 0) 
 
     def test_container_methods(self):
         self.assertEquals(len(self.space), 0) 
-        h = Handle(100)
-        self.assertRaises(KeyError, self.space.__getitem__, "blah")
-        self.assertRaises(IndexError, self.space.__getitem__, h)
         a1 = self.space.add_node(types.Node, "test1")
         a2 = self.space.add_node(types.ConceptNode, "test2")
         a3 = self.space.add_node(types.PredicateNode, "test3")
-        h1 = a1.h
-        h2 = a2.h
-        self.assertEquals(a1, self.space[h1])
-
-        self.assertTrue(h1 in self.space)
+        
         self.assertTrue(a1 in self.space)
-        self.assertTrue(h2 in self.space)
+        self.assertTrue(a2 in self.space)
+        self.assertTrue(a3 in self.space)
 
         self.assertEquals(len(self.space), 3)
 
@@ -376,22 +367,22 @@ class AtomTest(TestCase):
         l = self.space.add_link(types.Link, [a1, a2])
 
         # test string representation
-        a1_expected = "(Node \"test1\") ; [{0}][{1}]\n".format(str(a1.h.value()), 92)
+        a1_expected = "(Node \"test1\") ; [{0}][{1}]\n".format(str(a1.value()), 91)
         a1_expected_long = \
             "(Node \"test1\" (stv 0.500000 0.800000)) ; [{0}][{1}]\n"\
-            .format(str(a1.h.value()), 92)
+            .format(str(a1.value()), 91)
 
-        a2_expected = "(Node \"test2\") ; [{0}][{1}]\n".format(str(a2.h.value()), 92)
+        a2_expected = "(Node \"test2\") ; [{0}][{1}]\n".format(str(a2.value()), 91)
         a2_expected_long = \
             "(Node \"test2\" (av 10 1 1) (stv 0.100000 0.300000)) ; [{0}][{1}]\n"\
-            .format(str(a2.h.value()), 92)
+            .format(str(a2.value()), 91)
 
         l_expected = \
             "(Link\n  {0}  {1}) ; [{2}][{3}]\n"\
-            .format(a1_expected, a2_expected, str(l.h.value()), 92)
+            .format(a1_expected, a2_expected, str(l.value()), 91)
         l_expected_long = \
             "(Link\n  {0}  {1}) ; [{2}][{3}]\n"\
-            .format(a1_expected_long, a2_expected_long, str(l.h.value()), 92)
+            .format(a1_expected_long, a2_expected_long, str(l.value()), 91)
 
         self.assertEqual(str(a1), a1_expected)
         self.assertEqual(a1.long_string(), a1_expected_long)
@@ -399,7 +390,6 @@ class AtomTest(TestCase):
         self.assertEqual(a2.long_string(), a2_expected_long)
         self.assertEqual(str(l), l_expected)
         self.assertEqual(l.long_string(), l_expected_long)
-
 
 class TypeTest(TestCase):
 

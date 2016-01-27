@@ -1,3 +1,5 @@
+from cython.operator cimport dereference as deref
+
 from atomspace cimport cTruthValue, tv_ptr
 
 cdef class TruthValue:

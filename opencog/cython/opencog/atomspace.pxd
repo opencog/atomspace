@@ -109,11 +109,8 @@ cdef class TruthValue:
     cdef tv_ptr* _tvptr(self)
     cdef _init(self, float mean, float count)
 
-cdef class Handle:
-    cdef cHandle *h
-
 cdef class Atom:
-    cdef Handle handle
+    cdef cHandle *handle
     cdef AtomSpace atomspace
     cdef object _atom_type
     cdef object _name
