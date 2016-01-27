@@ -260,9 +260,6 @@ cdef class AtomSpace:
             if vlti < 1:
                 self.atomspace.dec_VLTI(deref(atom.handle))
 
-    def get_atom_string(self, Atom atom, terse=False):
-        return self.atomspace.atom_as_string(deref(atom.handle),terse).c_str()
-
     # query methods
     def get_atoms_by_type(self, Type t, subtype = True):
         cdef vector[cHandle] handle_vector

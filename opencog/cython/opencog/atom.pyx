@@ -97,10 +97,16 @@ cdef class Atom(object):
         return is_a(self.t,t)
 
     def long_string(self):
-        return self.atomspace.get_atom_string(self,terse=False)
+        cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        if atom_ptr != NULL:
+            return atom_ptr.toString()
+        return ""
 
     def __str__(self):
-        return self.atomspace.get_atom_string(self,terse=True)
+        cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        if atom_ptr != NULL:
+            return atom_ptr.toShortString()
+        return ""
 
     def __repr__(self):
         return self.long_string()
