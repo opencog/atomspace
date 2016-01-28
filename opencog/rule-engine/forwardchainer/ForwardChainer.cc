@@ -116,13 +116,13 @@ void ForwardChainer::do_step(void)
     };
 
     bool subatom = false;
-    rule = choose_rule(_cur_source, false);
+    rule = choose_rule(_cur_source, subatom);
 
     //If a fully matching rule is not found, look for
     //subatomically matching rule. 
     if (not rule) {
-        rule = choose_rule(_cur_source, true);
         subatom = true;
+        rule = choose_rule(_cur_source, subatom);
     }
 
     if (rule) {
