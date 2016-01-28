@@ -116,13 +116,13 @@ void ForwardChainer::do_step(void)
     };
 
     bool subatom = false;
-    rule = choose_rule(_cur_source, false);
+    rule = choose_rule(_cur_source, subatom);
 
     //If a fully matching rule is not found, look for
     //subatomically matching rule. 
     if (not rule) {
-        rule = choose_rule(_cur_source, true);
         subatom = true;
+        rule = choose_rule(_cur_source, subatom);
     }
 
     if (rule) {
@@ -210,7 +210,9 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
     for (Rule* r : _rules)
         rule_weight[r] = r->get_weight();
 
-    fc_logger().debug("%d rules to be searched", rule_weight.size());
+    fc_logger().debug(
+            "Looking for a matching rule against source \n\t%s.\n%d rules to be searched.",
+            hsource->toShortString().c_str(), rule_weight.size());
 
     // Select a rule among the admissible rules in the rule-base via stochastic
     // selection, based on the weights of the rules in the current context.
@@ -228,12 +230,10 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
 
     std::string match_type = subatom_match ? "sub-atom-unifying" : "unifying";
 
-    fc_logger().debug("%s", match_type.c_str());
-
-
     while (not rule_weight.empty()) {
         Rule *temp = _rec.tournament_select(rule_weight);
-        bool unified = false;
+        fc_logger().debug("Selected rule %s to match against source by %s ",
+                          temp->get_name().c_str(), match_type.c_str());
 
         if (is_matched(temp)) {
             fc_logger().debug("Found previous matching by %s",
@@ -243,6 +243,7 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
             break;
         }
 
+        bool unified = false;
         if (subatom_match) {
             if (subatom_unify(hsource, temp)) {
                 rule = temp;
@@ -261,17 +262,21 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
             }
         }
 
-        if(unified) break;
+        if (unified) {
+            fc_logger().debug("Rule %s matched the source.",
+                              temp->get_name().c_str());
+            break;
+        } else {
+            fc_logger().debug(
+                    "Selected rule %s is not a match. Looking for another rule...",
+                    temp->get_name().c_str());
+        }
 
         rule_weight.erase(temp);
     }
 
-
-    if(nullptr != rule)
-        LAZY_FC_LOG_DEBUG << "Selected rule is "
-                          << rule->get_handle()->toShortString();
-    else
-       fc_logger().debug("No match found.");
+    if (nullptr == rule)
+        fc_logger().debug("No matching rules were found for the given source.");
 
     return rule;
 };
