@@ -102,6 +102,9 @@ cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
         string toString()
         string toShortString()
 
+        bint is_defined()
+        bint is_undefined()
+
         bint operator==(cHandle h)
         bint operator!=(cHandle h)
         bint operator<(cHandle h)

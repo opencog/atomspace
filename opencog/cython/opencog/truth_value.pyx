@@ -64,6 +64,9 @@ cdef class TruthValue:
 
     def __str__(self):
         return self._ptr().toString().c_str()
+    
+    def __repr__(self):
+        return self._ptr().toString().c_str()
 
     @staticmethod
     def confidence_to_count(float conf):
