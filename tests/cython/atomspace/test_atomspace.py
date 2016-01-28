@@ -86,6 +86,15 @@ class AtomSpaceTest(TestCase):
         self.assertTrue(tv == tv2)
         self.assertFalse(tv == tv3)
 
+        # check truth_value function of atom
+        atom = self.space.add_node(types.Node, "atom with tv")
+        default_tv = atom.tv
+        atom.truth_value(0.75, 0.9)
+        new_tv = atom.tv
+        self.assertFalse(new_tv == default_tv)
+        self.assertEqual(new_tv.mean, 0.75)
+        self.assertAlmostEqual(new_tv.confidence, 0.9, places=4)
+
     def test_get_by_name_and_type(self):
         n1 = self.space.add_node(types.Node, "test")
         n2 = self.space.add_node(types.ConceptNode, "test")
@@ -366,23 +375,25 @@ class AtomTest(TestCase):
 
         l = self.space.add_link(types.Link, [a1, a2])
 
+        last_uuid = 92
+
         # test string representation
-        a1_expected = "(Node \"test1\") ; [{0}][{1}]\n".format(str(a1.value()), 91)
+        a1_expected = "(Node \"test1\") ; [{0}][{1}]\n".format(str(a1.value()), last_uuid)
         a1_expected_long = \
             "(Node \"test1\" (stv 0.500000 0.800000)) ; [{0}][{1}]\n"\
-            .format(str(a1.value()), 91)
+            .format(str(a1.value()), last_uuid)
 
-        a2_expected = "(Node \"test2\") ; [{0}][{1}]\n".format(str(a2.value()), 91)
+        a2_expected = "(Node \"test2\") ; [{0}][{1}]\n".format(str(a2.value()), last_uuid)
         a2_expected_long = \
             "(Node \"test2\" (av 10 1 1) (stv 0.100000 0.300000)) ; [{0}][{1}]\n"\
-            .format(str(a2.value()), 91)
+            .format(str(a2.value()), last_uuid)
 
         l_expected = \
             "(Link\n  {0}  {1}) ; [{2}][{3}]\n"\
-            .format(a1_expected, a2_expected, str(l.value()), 91)
+            .format(a1_expected, a2_expected, str(l.value()), last_uuid)
         l_expected_long = \
             "(Link\n  {0}  {1}) ; [{2}][{3}]\n"\
-            .format(a1_expected_long, a2_expected_long, str(l.value()), 91)
+            .format(a1_expected_long, a2_expected_long, str(l.value()), last_uuid)
 
         self.assertEqual(str(a1), a1_expected)
         self.assertEqual(a1.long_string(), a1_expected_long)

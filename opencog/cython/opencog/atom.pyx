@@ -82,8 +82,8 @@ cdef class Atom(object):
             return self.type
 
     def truth_value(self, mean, count):
-        self.tv.set_value(mean, count)
-
+        self.tv = TruthValue(mean, count)
+    
     def handle_uuid(self):
         return self.value()
 
