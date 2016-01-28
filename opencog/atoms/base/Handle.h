@@ -97,6 +97,19 @@ public:
         return _ptr.get();
     }
 
+    // Cython can't access operator->() so we'll duplicate here.
+    inline Atom* atom_ptr() {
+        return _ptr.get();
+    }
+
+    inline bool is_defined() {
+        return *this != Handle::UNDEFINED;
+    }
+
+    inline bool is_undefined() {
+        return *this == Handle::UNDEFINED;
+    }
+
     // Allows expressions like "if(h)..." to work when h has a non-null pointer.
     explicit inline operator bool() const noexcept {
         if (_ptr.get()) return true;

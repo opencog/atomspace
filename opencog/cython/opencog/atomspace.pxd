@@ -82,6 +82,13 @@ cdef extern from "opencog/atoms/base/ClassServer.h" namespace "opencog":
 cdef extern from "opencog/atoms/base/atom_types.h" namespace "opencog":
     cdef Type NOTYPE
 
+cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
+    cdef cppclass cAtom "opencog::Atom":
+        cAtom()
+        string toString()
+        string toShortString()
+
+
 # Handle
 ctypedef public long UUID
 
@@ -89,7 +96,15 @@ cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
     cdef cppclass cHandle "opencog::Handle":
         cHandle()
         cHandle(UUID)
+        
+        cAtom* atom_ptr()
         UUID value()
+        string toString()
+        string toShortString()
+
+        bint is_defined()
+        bint is_undefined()
+
         bint operator==(cHandle h)
         bint operator!=(cHandle h)
         bint operator<(cHandle h)
@@ -109,15 +124,13 @@ cdef class TruthValue:
     cdef tv_ptr* _tvptr(self)
     cdef _init(self, float mean, float count)
 
-cdef class Handle:
-    cdef cHandle *h
-
 cdef class Atom:
-    cdef Handle handle
+    cdef cHandle *handle
     cdef AtomSpace atomspace
     cdef object _atom_type
     cdef object _name
     cdef object _outgoing
+
 
 
 # AtomSpace
@@ -156,9 +169,6 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         void set_LTI(cHandle h, short)
         void inc_VLTI(cHandle h)
         void dec_VLTI(cHandle h)
-
-        # XXX DEPRECATED, REMOVE ASAP XXX just call toString, instead!!
-        string atom_as_string(cHandle h, bint)
 
         # ==== query methods ====
         # get by type
