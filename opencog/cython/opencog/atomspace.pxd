@@ -106,6 +106,8 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         void incVLTI()
         void decVLTI()
 
+        output_iterator getIncomingSetByType(output_iterator, Type type, bint subclass)
+
 
 # Handle
 ctypedef public long UUID
@@ -184,8 +186,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         # XXX DEPRECATED, REMOVE ASAP XXX get by name
         # Just do the right thing, here...
         output_iterator get_handles_by_name(output_iterator, string& name, Type t, bint subclass)
-        # XXX DEPRECATED, REMOVE ASAP XXX get by target handle
-        output_iterator get_incoming_set_by_type(output_iterator,cHandle& h,Type t,bint subclass)
+
         # get by STI range
         output_iterator get_handles_by_AV(output_iterator, short lowerBound, short upperBound)
         output_iterator get_handles_by_AV(output_iterator, short lowerBound)

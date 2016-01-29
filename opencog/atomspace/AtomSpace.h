@@ -701,26 +701,6 @@ public:
         return h->getTruthValue();
     }
 #endif // DEPRECATED_ATOMSPACE_CALLS
-
-    /* ===================================================== */
-    /* Deprecated calls that only cython uses!
-     * XXX FIXME Lets fix cython aleady!
-     */
-#ifdef DEPRECATED_CYTHON_CALLS
-    /**
-     * DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this function, just copy the one-liner below.
-     * XXX ONLY the python bindings use this. XXX kill that code.
-     */
-    template <typename OutputIterator> OutputIterator
-    get_incoming_set_by_type(OutputIterator result,
-                             Handle handle,
-                             Type type,
-                             bool subclass) const
-    {
-        return handle->getIncomingSetByType(result, type, subclass);
-    }
-#endif // DEPRECATED_CYTHON_CALLS
 };
 
 /** @}*/
