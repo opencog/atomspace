@@ -71,6 +71,10 @@ cdef class AtomSpace:
         elif op == 3: # !=
             return not is_equal
 
+    property uuid:
+        def __get__(self):
+            return self.atomspace.get_uuid()
+
     def add(self, Type t, name=None, out=None, TruthValue tv=None):
         """ add method that determines exact method to call from type """
         if is_a(t, types.Node):

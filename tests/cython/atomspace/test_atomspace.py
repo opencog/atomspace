@@ -430,25 +430,25 @@ class AtomTest(TestCase):
 
         l = Link(a1, a2)
 
-        last_uuid = 95
+        space_uuid = self.space.uuid
 
         # test string representation
-        a1_expected = "(Node \"test1\") ; [{0}][{1}]\n".format(str(a1.value()), last_uuid)
+        a1_expected = "(Node \"test1\") ; [{0}][{1}]\n".format(str(a1.value()), space_uuid)
         a1_expected_long = \
             "(Node \"test1\" (stv 0.500000 0.800000)) ; [{0}][{1}]\n"\
-            .format(str(a1.value()), last_uuid)
+            .format(str(a1.value()), space_uuid)
 
-        a2_expected = "(Node \"test2\") ; [{0}][{1}]\n".format(str(a2.value()), last_uuid)
+        a2_expected = "(Node \"test2\") ; [{0}][{1}]\n".format(str(a2.value()), space_uuid)
         a2_expected_long = \
             "(Node \"test2\" (av 10 1 1) (stv 0.100000 0.300000)) ; [{0}][{1}]\n"\
-            .format(str(a2.value()), last_uuid)
+            .format(str(a2.value()), space_uuid)
 
         l_expected = \
             "(Link\n  {0}  {1}) ; [{2}][{3}]\n"\
-            .format(a1_expected, a2_expected, str(l.value()), last_uuid)
+            .format(a1_expected, a2_expected, str(l.value()), space_uuid)
         l_expected_long = \
             "(Link\n  {0}  {1}) ; [{2}][{3}]\n"\
-            .format(a1_expected_long, a2_expected_long, str(l.value()), last_uuid)
+            .format(a1_expected_long, a2_expected_long, str(l.value()), space_uuid)
 
         self.assertEqual(str(a1), a1_expected)
         self.assertEqual(a1.long_string(), a1_expected_long)

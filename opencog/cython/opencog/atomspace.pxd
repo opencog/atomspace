@@ -170,6 +170,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         bint is_valid_handle(cHandle h)
         int get_size()
+        UUID get_uuid()
 
         # these should alias the proper types for sti/lti/vlti
         # XXX DEPRECATED, REMOVE ASAP XXX just implement these
