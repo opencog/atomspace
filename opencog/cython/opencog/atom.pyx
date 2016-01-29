@@ -43,15 +43,65 @@ cdef class Atom(object):
 
     property tv:
         def __get__(self):
-            return self.atomspace.get_tv(self)
-        def __set__(self,val):
-            self.atomspace.set_tv(self,val)
+            cdef cAtom* atom_ptr = self.handle.atom_ptr()
+            cdef tv_ptr tvp
+            tvp = atom_ptr.getTruthValue()
+            if (not tvp.get() or tvp.get().isNullTv()):
+                pytv = TruthValue()
+                pytv.cobj = new tv_ptr(tvp) # make copy of smart pointer
+                return pytv
+            return TruthValue(tvp.get().getMean(), tvp.get().getConfidence())
+        def __set__(self,truth_value):
+            try:
+                assert isinstance(truth_value, TruthValue)
+            except AssertionError:
+                raise TypeError("atom.av property needs a TruthValue object")
+            cdef cAtom* atom_ptr = self.handle.atom_ptr()
+            atom_ptr.setTruthValue(deref((<TruthValue>truth_value)._tvptr()))
 
     property av:
         def __get__(self):
-            return self.atomspace.get_av(self)
+            cdef cAtom* atom_ptr = self.handle.atom_ptr()
+            sti = atom_ptr.getSTI()
+            lti = atom_ptr.getLTI()
+            vlti = atom_ptr.getVLTI()
+            return { "sti": sti, "lti": lti, "vlti": vlti }
+        def __set__(self, av_dict):
+            try:
+                assert isinstance(av_dict, dict)
+            except AssertionError:
+                raise TypeError("atom.av property needs a dictionary object")
+            cdef cAtom* atom_ptr = self.handle.atom_ptr()
+            if av_dict:
+                if "sti" in av_dict: sti = av_dict["sti"]
+                if "lti" in av_dict: lti = av_dict["lti"]
+                if "vlti" in av_dict: vlti = av_dict["vlti"]
+            if sti: atom_ptr.setSTI(sti)
+            if lti: atom_ptr.setLTI(lti)
+            if vlti: atom_ptr.setVLTI(vlti)
+
+    property sti:
+        def __get__(self):
+            return self.handle.atom_ptr().getSTI()
         def __set__(self,val):
-            self.atomspace.set_av(self,av_dict=val)
+            self.handle.atom_ptr().setSTI(val)
+
+    property lti:
+        def __get__(self):
+            return self.handle.atom_ptr().getLTI()
+        def __set__(self,val):
+            self.handle.atom_ptr().setLTI(val)
+
+    property vlti:
+        def __get__(self):
+            return self.handle.atom_ptr().getVLTI()
+        def __set__(self,val):
+            self.handle.atom_ptr().setVLTI(val)
+
+    def increment_vlti(self):
+        self.handle.atom_ptr().incVLTI()
+    def decrement_vlti(self):
+        self.handle.atom_ptr().decVLTI()
 
     property out:
         def __get__(self):
@@ -66,6 +116,30 @@ cdef class Atom(object):
     property incoming:
         def __get__(self):
             return self.atomspace.get_incoming(self)
+
+    def incoming_by_type(self, Type type, subtype = True):
+        cdef vector[cHandle] handle_vector
+        cdef bint subt = subtype
+        cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        atom_ptr.getIncomingSetByType(back_inserter(handle_vector), type, subt)
+        return convert_handle_seq_to_python_list(handle_vector, self.atomspace)
+
+    def xincoming_by_type(self, Type type, subtype = True):
+        cdef vector[cHandle] handle_vector
+        cdef bint subt = subtype
+        cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        atom_ptr.getIncomingSetByType(back_inserter(handle_vector), type, subt)
+
+        # This code is the same for all the x iterators but there is no
+        # way in Cython to yield out of a cdef function and no way to pass a 
+        # vector into a Python def function, so we have to repeat code. ARGGG!
+        cdef vector[cHandle].iterator c_handle_iter
+        cdef cHandle current_c_handle
+        c_handle_iter = handle_vector.begin()
+        while c_handle_iter != handle_vector.end():
+            current_c_handle = deref(c_handle_iter)
+            yield Atom(current_c_handle.value(), self.atomspace)
+            inc(c_handle_iter)
 
     property type:
         def __get__(self):
@@ -82,8 +156,9 @@ cdef class Atom(object):
             return self.type
 
     def truth_value(self, mean, count):
-        self.tv.set_value(mean, count)
-
+        self.tv = TruthValue(mean, count)
+        return self
+    
     def handle_uuid(self):
         return self.value()
 

@@ -43,9 +43,6 @@ cdef class TruthValue:
     cdef _init(self, float mean, float confidence):
         deref((<cSimpleTruthValue*>self._ptr())).initialize(mean, self.confidence_to_count(confidence))
 
-    def set_value(self, mean, confidence):
-        self._init(mean, confidence)
-
     def __richcmp__(TruthValue h1, TruthValue h2, int op):
         " @todo support the rest of the comparison operators"
         if op == 2: # ==

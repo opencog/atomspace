@@ -11,7 +11,8 @@ def initialize_opencog(AtomSpace atomspace, object config = None):
 
     # Avoid recursive intialization
     global is_initialized
-    if (is_initialized):
+    if is_initialized:
+        set_type_ctor_atomspace(atomspace)
         return
     is_initialized = True
 
@@ -24,7 +25,10 @@ def initialize_opencog(AtomSpace atomspace, object config = None):
     set_type_ctor_atomspace(atomspace)
 
 def finalize_opencog():
-    c_finalize_opencog()
+    global is_initialized
+    if is_initialized:
+        c_finalize_opencog()
+        
     set_type_ctor_atomspace(None)
 
 def configuration_load(object config):

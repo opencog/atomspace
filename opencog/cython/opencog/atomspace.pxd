@@ -82,11 +82,31 @@ cdef extern from "opencog/atoms/base/ClassServer.h" namespace "opencog":
 cdef extern from "opencog/atoms/base/atom_types.h" namespace "opencog":
     cdef Type NOTYPE
 
+
+# Atom
+ctypedef public short av_type
+
 cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
     cdef cppclass cAtom "opencog::Atom":
         cAtom()
         string toString()
         string toShortString()
+
+        tv_ptr getTruthValue()
+        void setTruthValue(tv_ptr tvp)
+
+        av_type getSTI()
+        av_type getLTI()
+        av_type getVLTI()
+
+        void setSTI(av_type stiValue)
+        void setLTI(av_type ltiValue)
+        void setVLTI(av_type vltiValue)
+
+        void incVLTI()
+        void decVLTI()
+
+        output_iterator getIncomingSetByType(output_iterator, Type type, bint subclass)
 
 
 # Handle
@@ -150,34 +170,24 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         bint is_valid_handle(cHandle h)
         int get_size()
+        UUID get_uuid()
 
         # these should alias the proper types for sti/lti/vlti
         # XXX DEPRECATED, REMOVE ASAP XXX just implement these
         # correctly, instead of callng deprecated atomspace methods!
         string get_name(cHandle h)
         Type get_type(cHandle h)
-        tv_ptr get_TV(cHandle h)
-        void set_TV(cHandle h, tv_ptr tvn)
 
         vector[cHandle] get_outgoing(cHandle h)
         vector[cHandle] get_incoming(cHandle h)
-
-        short get_STI(cHandle h)
-        short get_LTI(cHandle h)
-        bint get_VLTI(cHandle h)
-        void set_STI(cHandle h, short)
-        void set_LTI(cHandle h, short)
-        void inc_VLTI(cHandle h)
-        void dec_VLTI(cHandle h)
-
+        
         # ==== query methods ====
         # get by type
         output_iterator get_handles_by_type(output_iterator, Type t, bint subclass)
         # XXX DEPRECATED, REMOVE ASAP XXX get by name
         # Just do the right thing, here...
         output_iterator get_handles_by_name(output_iterator, string& name, Type t, bint subclass)
-        # XXX DEPRECATED, REMOVE ASAP XXX get by target handle
-        output_iterator get_incoming_set_by_type(output_iterator,cHandle& h,Type t,bint subclass)
+
         # get by STI range
         output_iterator get_handles_by_AV(output_iterator, short lowerBound, short upperBound)
         output_iterator get_handles_by_AV(output_iterator, short lowerBound)
