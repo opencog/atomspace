@@ -1,6 +1,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 #include <opencog/util/Config.h>
+#include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
 #include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/rule-engine/UREConfigReader.h>
@@ -8,6 +9,8 @@
 using namespace opencog;
 
 void backward_chain(AtomSpace&);
+
+void forward_chain(AtomSpace&);
 
 int main(int argc, char** args)
 {
@@ -22,6 +25,9 @@ int main(int argc, char** args)
     std::cout << "Backward chaining to solve the criminal problem:\n";
     backward_chain(as);
 
+    std::cout << "\nForward chaining demo:\n";
+    forward_chain(as);
+
     return 0;
 }
 
@@ -35,7 +41,7 @@ int main(int argc, char** args)
 void backward_chain(AtomSpace& as)
 {
     config().set("SCM_PRELOAD", "examples/c++-api/scm/bc-criminal.scm,"
-                 "examples/c++-api/scm/rule-base-config.scm");
+                 "examples/c++-api/scm/bc-config.scm");
     load_scm_files_from_config(as);
 
     SchemeEval eval(&as);
@@ -45,7 +51,7 @@ void backward_chain(AtomSpace& as)
                                 "   (ConceptNode \"criminal\"))");
 
     //Create BackwardChainer object.
-    Handle hrbase = as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+    Handle hrbase = as.get_node(CONCEPT_NODE, "BC_DEMO_RB");
     BackwardChainer bc(as, hrbase);
 
     bc.set_target(target);
@@ -61,3 +67,41 @@ void backward_chain(AtomSpace& as)
     for (const auto& h : results[target_var])
         std::cout << h->toShortString() << std::endl;
 }
+
+/*
+ * Demonstrates how to invoke backward chaining and retrieve results back.
+ *
+ *  @params as The atomspace where backward chaining is made.
+ */
+void forward_chain(AtomSpace& as)
+{
+    config().set("SCM_PRELOAD", "examples/c++-api/scm/deduction.scm, "
+                 "examples/c++-api/scm/fc-simple-assertions.scm, "
+                 "examples/c++-api/scm/fc-config.scm");
+    load_scm_files_from_config (as);
+
+    SchemeEval eval(&as);
+
+    //Choose source atoms to apply forward chaining on.
+    Handle source =
+            eval.eval_h(
+                    R"((ConceptNode "Socrates"))");
+
+    Handle rbs = as.get_node(CONCEPT_NODE, "FC_DEMO_RB");
+
+    //The final argument to ForwardChainer constructor is used to pass
+    //focus set atoms; when the focus set is not empty, the forward chainer
+    //is constrained to apply rules only on the focus set atoms and applies
+    //on the entire atomspace when focus set is empty.
+    ForwardChainer fc(as, rbs,source, HandleSeq { });
+
+    //Start chaining.
+    //fc.do_step(); //Single step forward chaining.
+    fc.do_chain();
+
+    std::cout << "Forward chaining on source:\n" << source->toShortString() << std::endl;
+    std::cout << "FC results:\n";
+    for(const auto& h : fc.get_chaining_result())
+        std::cout << h->toShortString() << std::endl;
+}
+
