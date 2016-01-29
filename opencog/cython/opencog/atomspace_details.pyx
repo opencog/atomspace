@@ -93,7 +93,7 @@ cdef class AtomSpace:
         if result == result.UNDEFINED: return None
         atom = Atom(result.value(), self);
         if tv :
-            self.set_tv(atom, tv)
+            atom.tv = tv
         return atom
 
     def add_link(self, Type t, outgoing, TruthValue tv=None):
@@ -112,7 +112,7 @@ cdef class AtomSpace:
         if result == result.UNDEFINED: return None
         atom = Atom(result.value(), self);
         if tv :
-            self.set_tv(atom, tv)
+            atom.tv = tv
         return atom
 
     def is_valid(self, atom):
@@ -169,20 +169,6 @@ cdef class AtomSpace:
         """ Return the number of atoms in the AtomSpace """
         return self.atomspace.get_size()
 
-    def get_tv(self, Atom atom):
-        """ Return the TruthValue of an Atom in the AtomSpace """
-        cdef tv_ptr tv
-        tv = self.atomspace.get_TV(deref(atom.handle))
-        if (not tv.get() or tv.get().isNullTv()):
-            pytv = TruthValue()
-            pytv.cobj = new tv_ptr(tv) # make copy of smart pointer
-            return pytv
-        return TruthValue(tv.get().getMean(), tv.get().getConfidence())
-
-    def set_tv(self, Atom atom, TruthValue tv):
-        """ Set the TruthValue of an Atom in the AtomSpace """
-        self.atomspace.set_TV(deref(atom.handle), deref(<tv_ptr*>(tv._tvptr())))
-
     def get_type(self, Atom atom):
         """ Get the Type of an Atom in the AtomSpace """
         return self.atomspace.get_type(deref(atom.handle))
@@ -236,29 +222,6 @@ cdef class AtomSpace:
             current_c_handle = deref(c_handle_iter)
             yield Atom(current_c_handle.value(),self)
             inc(c_handle_iter)
-
-    def get_av(self, Atom atom):
-        # @todo this is the slow way. quicker way is to support the
-        # AttentionValue object and get all values with one atomspace call
-        sti = self.atomspace.get_STI(deref(atom.handle))
-        lti = self.atomspace.get_LTI(deref(atom.handle))
-        vlti = self.atomspace.get_VLTI(deref(atom.handle))
-        return { "sti": sti, "lti": lti, "vlti": vlti }
-
-    def set_av(self, Atom atom,sti=None,lti=None,vlti=None,av_dict=None):
-        # @todo this is the slow way. quicker way is to support the
-        # AttentionValue object and get all values with one atomspace call
-        if av_dict:
-            if "sti" in av_dict: sti = av_dict["sti"]
-            if "lti" in av_dict: lti = av_dict["lti"]
-            if "vlti" in av_dict: vlti = av_dict["vlti"]
-        if sti: self.atomspace.set_STI(deref(atom.handle),sti)
-        if lti: self.atomspace.set_LTI(deref(atom.handle),lti)
-        if vlti != None:
-            if vlti >= 1: 
-                self.atomspace.inc_VLTI(deref(atom.handle))
-            if vlti < 1:
-                self.atomspace.dec_VLTI(deref(atom.handle))
 
     # query methods
     def get_atoms_by_type(self, Type t, subtype = True):

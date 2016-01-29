@@ -237,7 +237,7 @@ public:
         setAttentionValue(new_av);
     }
 
-    /** Change the Long-term Importance */
+    /** Change the Long-Term Importance */
     void setLTI(AttentionValue::lti_t ltiValue)
     {
         AttentionValuePtr old_av = getAttentionValue();
@@ -245,6 +245,17 @@ public:
             old_av->getSTI(),
             ltiValue,
             old_av->getVLTI());
+        setAttentionValue(new_av);
+    }
+
+    /** Change the Very-Long-Term Importance */
+    void setVLTI(AttentionValue::vlti_t vltiValue)
+    {
+        AttentionValuePtr old_av = getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            old_av->getSTI(),
+            old_av->getLTI(),
+            vltiValue);
         setAttentionValue(new_av);
     }
 

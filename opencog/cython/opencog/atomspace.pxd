@@ -82,11 +82,29 @@ cdef extern from "opencog/atoms/base/ClassServer.h" namespace "opencog":
 cdef extern from "opencog/atoms/base/atom_types.h" namespace "opencog":
     cdef Type NOTYPE
 
+
+# Atom
+ctypedef public short av_type
+
 cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
     cdef cppclass cAtom "opencog::Atom":
         cAtom()
         string toString()
         string toShortString()
+
+        tv_ptr getTruthValue()
+        void setTruthValue(tv_ptr tvp)
+
+        av_type getSTI()
+        av_type getLTI()
+        av_type getVLTI()
+
+        void setSTI(av_type stiValue)
+        void setLTI(av_type ltiValue)
+        void setVLTI(av_type vltiValue)
+
+        void incVLTI()
+        void decVLTI()
 
 
 # Handle
@@ -156,20 +174,10 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         # correctly, instead of callng deprecated atomspace methods!
         string get_name(cHandle h)
         Type get_type(cHandle h)
-        tv_ptr get_TV(cHandle h)
-        void set_TV(cHandle h, tv_ptr tvn)
 
         vector[cHandle] get_outgoing(cHandle h)
         vector[cHandle] get_incoming(cHandle h)
-
-        short get_STI(cHandle h)
-        short get_LTI(cHandle h)
-        bint get_VLTI(cHandle h)
-        void set_STI(cHandle h, short)
-        void set_LTI(cHandle h, short)
-        void inc_VLTI(cHandle h)
-        void dec_VLTI(cHandle h)
-
+        
         # ==== query methods ====
         # get by type
         output_iterator get_handles_by_type(output_iterator, Type t, bint subclass)
