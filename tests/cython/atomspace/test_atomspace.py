@@ -201,21 +201,6 @@ class AtomSpaceTest(TestCase):
         a2 = ConceptNode("test2")
         a3 = PredicateNode("test3")
 
-        # XXX atomspace functions deprecated
-
-        # test no incoming Node for a1
-        result = self.space.get_atoms_by_target_atom(types.Node, a1)
-        self.assertTrue(a1 not in result)
-
-        # now check links
-        l1 = InheritanceLink(a1, a2)
-        result = self.space.get_atoms_by_target_atom(types.Link, a1)
-        self.assertTrue(l1 in result)
-        result = self.space.get_atoms_by_target_atom(types.Link, a3)
-        self.assertTrue(l1 not in result)
-
-        # Repeat using atom functions
-
         # test no incoming Node for a1
         result = a1.incoming_by_type(types.Node)
         self.assertTrue(a1 not in result)
