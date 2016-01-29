@@ -196,20 +196,37 @@ class AtomSpaceTest(TestCase):
         assert len(result) == 4
         assert set(result) == set([a1, a2, a3, a4])
 
-    def test_get_by_target_atom(self):
+    def test_incoming_by_type(self):
         a1 = Node("test1")
         a2 = ConceptNode("test2")
         a3 = PredicateNode("test3")
 
-        # test it doesn't apply to Nodes
+        # XXX atomspace functions deprecated
+
+        # test no incoming Node for a1
         result = self.space.get_atoms_by_target_atom(types.Node, a1)
         self.assertTrue(a1 not in result)
 
-        # links
+        # now check links
         l1 = InheritanceLink(a1, a2)
         result = self.space.get_atoms_by_target_atom(types.Link, a1)
         self.assertTrue(l1 in result)
         result = self.space.get_atoms_by_target_atom(types.Link, a3)
+        self.assertTrue(l1 not in result)
+
+        # Repeat using atom functions
+
+        # test no incoming Node for a1
+        result = a1.incoming_by_type(types.Node)
+        self.assertTrue(a1 not in result)
+
+        # now check links
+        l1 = InheritanceLink(a1, a2)
+        result = a1.incoming_by_type(types.Link)
+        self.assertTrue(l1 in result)
+        result = a2.incoming_by_type(types.Link)
+        self.assertTrue(l1 in result)
+        result = a3.incoming_by_type(types.Link)
         self.assertTrue(l1 not in result)
 
     def test_include_incoming_outgoing(self):
