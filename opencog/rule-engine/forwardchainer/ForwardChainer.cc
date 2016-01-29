@@ -327,7 +327,8 @@ Handle ForwardChainer::choose_next_source()
     return hchosen;
 }
 
-HandleSeq ForwardChainer::apply_rule(Handle rhandle,bool search_in_focus_set /*=false*/)
+HandleSeq ForwardChainer::apply_rule(Handle rhandle,
+                                     bool search_in_focus_set /*=false*/)
 {
     HandleSeq result;
 
@@ -525,7 +526,7 @@ HandleSeq ForwardChainer::derive_rules(Handle source, const Rule* rule,
 bool ForwardChainer::is_valid_implicant(const Handle& h)
 {
     FindAtoms fv(VARIABLE_NODE);
-            fv.search_set(h);
+    fv.search_set(h);
 
     bool is_valid = (h->getType() != NOT_LINK)   and
                     (not classserver().isA(h->getType(),
