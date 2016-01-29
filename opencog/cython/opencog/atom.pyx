@@ -34,11 +34,13 @@ cdef class Atom(object):
     property atomspace:
         def __get__(self):
             return self.atomspace
-    
+
     property name:
         def __get__(self):
+            cdef cAtom* atom_ptr
             if self._name is None:
-                self._name = self.atomspace.get_name(self)
+                atom_ptr = self.handle.atom_ptr()
+                self._name = atom_ptr.getName()
             return self._name
 
     property tv:
@@ -143,8 +145,10 @@ cdef class Atom(object):
 
     property type:
         def __get__(self):
+            cdef cAtom* atom_ptr
             if self._atom_type is None:
-                self._atom_type = self.atomspace.get_type(self)
+                atom_ptr = self.handle.atom_ptr()
+                self._atom_type = atom_ptr.getType()
             return self._atom_type
 
     property type_name:

@@ -173,16 +173,6 @@ cdef class AtomSpace:
         """ Return the number of atoms in the AtomSpace """
         return self.atomspace.get_size()
 
-    def get_type(self, Atom atom):
-        """ Get the Type of an Atom in the AtomSpace """
-        return self.atomspace.get_type(deref(atom.handle))
-
-    def get_name(self, Atom atom):
-        """ Get the Name of a Node in the AtomSpace """
-        cdef string name
-        name = self.atomspace.get_name(deref(atom.handle))
-        return name.c_str()[:name.size()].decode('UTF-8')
-
     def get_outgoing(self, Atom atom):
         """ Get the outgoing set for a Link in the AtomSpace """
         cdef vector[cHandle] handle_vector

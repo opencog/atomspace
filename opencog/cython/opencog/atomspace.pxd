@@ -89,6 +89,10 @@ ctypedef public short av_type
 cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
     cdef cppclass cAtom "opencog::Atom":
         cAtom()
+
+        Type getType()
+        string getName()
+
         string toString()
         string toShortString()
 
@@ -172,12 +176,8 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         int get_size()
         UUID get_uuid()
 
-        # these should alias the proper types for sti/lti/vlti
         # XXX DEPRECATED, REMOVE ASAP XXX just implement these
         # correctly, instead of callng deprecated atomspace methods!
-        string get_name(cHandle h)
-        Type get_type(cHandle h)
-
         vector[cHandle] get_outgoing(cHandle h)
         vector[cHandle] get_incoming(cHandle h)
         

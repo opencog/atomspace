@@ -173,6 +173,11 @@ public:
 
     virtual ~Atom();
 
+    virtual const std::string& getName() const {
+        static std::string empty_string("");
+        return empty_string;
+    }
+
     //! Returns the AtomTable in which this Atom is inserted.
     AtomSpace* getAtomSpace() const;
 
