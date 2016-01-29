@@ -25,6 +25,7 @@
 #define _FCSTAT_H_
 
 #include <opencog/atoms/base/Handle.h>
+#include <map>
 
 namespace opencog {
 

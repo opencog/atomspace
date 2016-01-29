@@ -118,8 +118,8 @@ void ForwardChainer::do_step(void)
     bool subatom = false;
     rule = choose_rule(_cur_source, subatom);
 
-    //If a fully matching rule is not found, look for
-    //subatomically matching rule. 
+    // If a fully matching rule is not found, look for
+    // subatomically matching rule.
     if (not rule) {
         subatom = true;
         rule = choose_rule(_cur_source, subatom);
@@ -127,7 +127,7 @@ void ForwardChainer::do_step(void)
 
     if (rule) {
         _cur_rule = rule;
-        //Use previously derived rules if they exist.
+        // Use previously derived rules if they exist.
         if (_fcstat.has_partial_grounding(_cur_source))
             get_derived(_cur_source);
         else
@@ -440,7 +440,7 @@ HandleSeq ForwardChainer::derive_rules(Handle source, Handle target,
             gen_sub_varlist(target, rule->get_vardecl()));
     Handle sourcecpy = temp_pm_as.add_atom(source);
 
-    Handle h = temp_pm_as.add_link(BIND_LINK,HandleSeq { implicant_vardecl, hcpy, hcpy });
+    Handle h = temp_pm_as.add_link(BIND_LINK, implicant_vardecl, hcpy, hcpy);
     BindLinkPtr bl = BindLinkCast(h);
 
     VarGroundingPMCB gcb(&temp_pm_as);
@@ -660,16 +660,12 @@ bool ForwardChainer::unify(Handle source, Handle target, const Rule* rule)
             gen_sub_varlist(target, rule->get_vardecl()));
     Handle sourcecpy = temp_pm_as.add_atom(source);
 
-    BindLinkPtr bl =
-        createBindLink(HandleSeq { implicant_vardecl, hcpy, hcpy });
-    Handle blhandle = temp_pm_as.add_atom(bl);
+    Handle blhandle =
+        temp_pm_as.add_link(BIND_LINK, implicant_vardecl, hcpy, hcpy);
     Handle result = bindlink(&temp_pm_as, blhandle);
     HandleSeq results = LinkCast(result)->getOutgoingSet();
 
-    if (std::find(results.begin(), results.end(), sourcecpy) != results.end())
-        return true;
-    else
-        return false;
+    return std::find(results.begin(), results.end(), sourcecpy) != results.end();
 }
 
 /**
@@ -711,10 +707,9 @@ Handle ForwardChainer::gen_sub_varlist(const Handle& parent,
     for (const Handle& h : oset) {
         Type t = h->getType();
 
-        if (VARIABLE_NODE == t && fv.varset.count(h) == 1)
-            final_oset.push_back(h);
-        else if (TYPED_VARIABLE_LINK == t
-                and fv.varset.count(LinkCast(h)->getOutgoingSet()[0]) == 1)
+        if ((VARIABLE_NODE == t and fv.varset.count(h) == 1)
+            or (TYPED_VARIABLE_LINK == t
+                and fv.varset.count(LinkCast(h)->getOutgoingSet()[0]) == 1))
             final_oset.push_back(h);
     }
 
