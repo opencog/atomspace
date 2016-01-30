@@ -34,11 +34,13 @@ cdef class Atom(object):
     property atomspace:
         def __get__(self):
             return self.atomspace
-    
+
     property name:
         def __get__(self):
+            cdef cAtom* atom_ptr
             if self._name is None:
-                self._name = self.atomspace.get_name(self)
+                atom_ptr = self.handle.atom_ptr()
+                self._name = atom_ptr.getName()
             return self._name
 
     property tv:
@@ -103,10 +105,15 @@ cdef class Atom(object):
     def decrement_vlti(self):
         self.handle.atom_ptr().decVLTI()
 
+    def get_out(self):
+        cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        cdef vector[cHandle] handle_vector = atom_ptr.getOutgoingSet()
+        return convert_handle_seq_to_python_list(handle_vector, self.atomspace)
+
     property out:
-        def __get__(self):
+        def __get__(self):            
             if self._outgoing is None:
-                self._outgoing = self.atomspace.get_outgoing(self)
+                self._outgoing = self.get_out()
             return self._outgoing
 
     property arity:
@@ -115,7 +122,27 @@ cdef class Atom(object):
 
     property incoming:
         def __get__(self):
-            return self.atomspace.get_incoming(self)
+            cdef vector[cHandle] handle_vector
+            cdef cAtom* atom_ptr = self.handle.atom_ptr()
+            atom_ptr.getIncomingSet(back_inserter(handle_vector))
+            return convert_handle_seq_to_python_list(handle_vector, self.atomspace)
+
+    property xincoming:
+        def __get__(self):
+            cdef vector[cHandle] handle_vector
+            cdef cAtom* atom_ptr = self.handle.atom_ptr()
+            atom_ptr.getIncomingSet(back_inserter(handle_vector))
+
+            # This code is the same for all the x iterators but there is no
+            # way in Cython to yield out of a cdef function and no way to pass a 
+            # vector into a Python def function, so we have to repeat code. ARGGG!
+            cdef vector[cHandle].iterator c_handle_iter
+            cdef cHandle current_c_handle
+            c_handle_iter = handle_vector.begin()
+            while c_handle_iter != handle_vector.end():
+                current_c_handle = deref(c_handle_iter)
+                yield Atom(current_c_handle.value(),self)
+                inc(c_handle_iter)
 
     def incoming_by_type(self, Type type, subtype = True):
         cdef vector[cHandle] handle_vector
@@ -143,8 +170,10 @@ cdef class Atom(object):
 
     property type:
         def __get__(self):
+            cdef cAtom* atom_ptr
             if self._atom_type is None:
-                self._atom_type = self.atomspace.get_type(self)
+                atom_ptr = self.handle.atom_ptr()
+                self._atom_type = atom_ptr.getType()
             return self._atom_type
 
     property type_name:

@@ -173,6 +173,11 @@ public:
 
     virtual ~Atom();
 
+    virtual const std::string& getName() const {
+        static std::string empty_string("");
+        return empty_string;
+    }
+
     //! Returns the AtomTable in which this Atom is inserted.
     AtomSpace* getAtomSpace() const;
 
@@ -188,6 +193,16 @@ public:
         Type at(getType());
         if (not subclass) return t == at;
         return classserver().isA(at, t);
+    }
+
+    /** Returns the outgoing set.
+     *
+     * @return The outgoing set.
+     */
+    virtual inline const HandleSeq& getOutgoingSet() const
+    {
+        static HandleSeq no_atoms;
+        return no_atoms;
     }
 
     /** Returns the handle of the atom.
