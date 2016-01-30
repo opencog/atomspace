@@ -196,32 +196,6 @@ cdef class AtomSpace:
             yield Atom(current_c_handle.value(),self)
             inc(c_handle_iter)
 
-    def get_atoms_by_name(self, Type t, name, subtype = True):
-        cdef vector[cHandle] handle_vector
-        cdef string cname = name.encode('UTF-8')
-        cdef bint subt = subtype
-        self.atomspace.get_handles_by_name(back_inserter(handle_vector), cname,
-                t, subt)
-        return convert_handle_seq_to_python_list(handle_vector,self)
-
-    def xget_atoms_by_name(self, Type t, name, subtype = True):
-        cdef vector[cHandle] handle_vector
-        cdef string cname = name.encode('UTF-8')
-        cdef bint subt = subtype
-        self.atomspace.get_handles_by_name(back_inserter(handle_vector), cname,
-                t, subt)
-
-        # This code is the same for all the x iterators but there is no
-        # way in Cython to yield out of a cdef function and no way to pass a 
-        # vector into a Python def function, so we have to repeat code. ARGGG!
-        cdef vector[cHandle].iterator c_handle_iter
-        cdef cHandle current_c_handle
-        c_handle_iter = handle_vector.begin()
-        while c_handle_iter != handle_vector.end():
-            current_c_handle = deref(c_handle_iter)
-            yield Atom(current_c_handle.value(),self)
-            inc(c_handle_iter)
-
     def get_atoms_by_av(self, lower_bound, upper_bound=None):
         cdef vector[cHandle] handle_vector
         if upper_bound is not None:

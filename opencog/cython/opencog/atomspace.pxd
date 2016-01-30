@@ -182,13 +182,11 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         # ==== query methods ====
         # get by type
         output_iterator get_handles_by_type(output_iterator, Type t, bint subclass)
-        # XXX DEPRECATED, REMOVE ASAP XXX get by name
-        # Just do the right thing, here...
-        output_iterator get_handles_by_name(output_iterator, string& name, Type t, bint subclass)
 
         # get by STI range
         output_iterator get_handles_by_AV(output_iterator, short lowerBound, short upperBound)
         output_iterator get_handles_by_AV(output_iterator, short lowerBound)
+
         # get from AttentionalFocus
         output_iterator get_handle_set_in_attentional_focus(output_iterator)
 
