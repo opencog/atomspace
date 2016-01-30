@@ -173,50 +173,6 @@ cdef class AtomSpace:
         """ Return the number of atoms in the AtomSpace """
         return self.atomspace.get_size()
 
-    def get_outgoing(self, Atom atom):
-        """ Get the outgoing set for a Link in the AtomSpace """
-        cdef vector[cHandle] handle_vector
-        handle_vector = self.atomspace.get_outgoing(deref(atom.handle))
-        return convert_handle_seq_to_python_list(handle_vector,self)
-
-    def xget_outgoing(self, Atom atom):
-        """ Get the outgoing set for a Link in the AtomSpace """
-        cdef vector[cHandle] handle_vector
-        handle_vector = self.atomspace.get_outgoing(deref(atom.handle))
-
-        # This code is the same for all the x iterators but there is no
-        # way in Cython to yield out of a cdef function and no way to pass a 
-        # vector into a Python def function, so we have to repeat code. ARGGG!
-        cdef vector[cHandle].iterator c_handle_iter
-        cdef cHandle current_c_handle
-        c_handle_iter = handle_vector.begin()
-        while c_handle_iter != handle_vector.end():
-            current_c_handle = deref(c_handle_iter)
-            yield Atom(current_c_handle.value(),self)
-            inc(c_handle_iter)
-
-    def get_incoming(self, Atom atom):
-        """ Get the incoming set for an Atom in the AtomSpace """
-        cdef vector[cHandle] handle_vector
-        handle_vector = self.atomspace.get_incoming(deref(atom.handle))
-        return convert_handle_seq_to_python_list(handle_vector,self)
-
-    def xget_incoming(self, Atom atom):
-        """ Get the incoming set for an Atom in the AtomSpace """
-        cdef vector[cHandle] handle_vector
-        handle_vector = self.atomspace.get_incoming(deref(atom.handle))
-
-        # This code is the same for all the x iterators but there is no
-        # way in Cython to yield out of a cdef function and no way to pass a 
-        # vector into a Python def function, so we have to repeat code. ARGGG!
-        cdef vector[cHandle].iterator c_handle_iter
-        cdef cHandle current_c_handle
-        c_handle_iter = handle_vector.begin()
-        while c_handle_iter != handle_vector.end():
-            current_c_handle = deref(c_handle_iter)
-            yield Atom(current_c_handle.value(),self)
-            inc(c_handle_iter)
-
     # query methods
     def get_atoms_by_type(self, Type t, subtype = True):
         cdef vector[cHandle] handle_vector

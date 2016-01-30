@@ -96,6 +96,9 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         string toString()
         string toShortString()
 
+        vector[cHandle] getOutgoingSet()
+        output_iterator getIncomingSet(output_iterator)
+
         tv_ptr getTruthValue()
         void setTruthValue(tv_ptr tvp)
 
@@ -176,11 +179,6 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         int get_size()
         UUID get_uuid()
 
-        # XXX DEPRECATED, REMOVE ASAP XXX just implement these
-        # correctly, instead of callng deprecated atomspace methods!
-        vector[cHandle] get_outgoing(cHandle h)
-        vector[cHandle] get_incoming(cHandle h)
-        
         # ==== query methods ====
         # get by type
         output_iterator get_handles_by_type(output_iterator, Type t, bint subclass)

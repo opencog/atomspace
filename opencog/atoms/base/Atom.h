@@ -195,6 +195,16 @@ public:
         return classserver().isA(at, t);
     }
 
+    /** Returns the outgoing set.
+     *
+     * @return The outgoing set.
+     */
+    virtual inline const HandleSeq& getOutgoingSet() const
+    {
+        static HandleSeq no_atoms;
+        return no_atoms;
+    }
+
     /** Returns the handle of the atom.
      *
      * @return The handle of the atom.

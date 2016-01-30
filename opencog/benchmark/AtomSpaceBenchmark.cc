@@ -1178,7 +1178,7 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
 #if HAVE_CYTHONX
         OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
-        dss << "aspace.get_outgoing(Handle(" << h.value() << "))\n";
+        dss << "out = Atom(" << h.value() << ", aspace).out\n";
         std::string ps = dss.str();
         clock_t t_begin = clock();
         pyev->eval(ps);
@@ -1234,7 +1234,7 @@ timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
 #if HAVE_CYTHONX
         OC_ASSERT(1 == Nloops, "Looping not supported for python");
         std::ostringstream dss;
-        dss << "aspace.get_incoming(Handle(" << h.value() << "))\n";
+        dss << "incoming = Atom(" << h.value() << ").incoming\n";
         std::string ps = dss.str();
         clock_t t_begin = clock();
         pyev->eval(ps);

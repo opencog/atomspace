@@ -632,14 +632,6 @@ public:
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    HandleSeq get_incoming(Handle h) const {
-        HandleSeq hs;
-        h->getIncomingSet(back_inserter(hs));
-        return hs;
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
     bool is_node(Handle h) const { return NodeCast(h) != NULL; }
     bool is_link(Handle h) const { return LinkCast(h) != NULL; }
 
@@ -669,23 +661,6 @@ public:
      * If you need this, just copy the code below into your app! */
     AttentionValue::sti_t get_STI(Handle h) const {
         return h->getAttentionValue()->getSTI();
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    const HandleSeq& get_outgoing(Handle h) const {
-        static HandleSeq empty;
-        LinkPtr lll(LinkCast(h));
-        if (lll) return lll->getOutgoingSet();
-        return empty;
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    Handle get_outgoing(Handle h, Arity idx) const {
-        LinkPtr lll = LinkCast(h);
-        if (lll) return lll->getOutgoingAtom(idx);
-        return Handle::UNDEFINED;
     }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!

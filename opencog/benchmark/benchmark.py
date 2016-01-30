@@ -316,7 +316,7 @@ def test_get_outgoing(atomspace, prep_result):
     atom_list = atomspace.get_atoms_by_type(types.HebbianLink)
     count = 0
     for atom in atom_list:
-        outgoing_list = atomspace.get_outgoing(atom.h)
+        outgoing_list = atom.out
         for outgoing in outgoing_list:
             count += 1
     return count
@@ -325,7 +325,7 @@ def test_get_outgoing_no_list(atomspace, prep_result):
     atom_count = prep_result
     count = 0
     for atom in atomspace.get_atoms_by_type(types.HebbianLink):
-        for outgoing in atomspace.get_outgoing(atom.h):
+        for outgoing in atom.out:
             count += 1
     return count
 
