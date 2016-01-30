@@ -128,27 +128,6 @@ class AtomSpaceTest(TestCase):
         assert node.vlti == 6
         assert node.av == {"sti": 4, "lti": 5, "vlti": 6}
 
-    def test_get_by_name_and_type(self):
-        n1 = Node("test")
-        n2 = ConceptNode("test")
-        n3 = PredicateNode("test")
-
-        # test recursive subtypes
-        result = self.space.get_atoms_by_name(types.Node, "test")
-        self.assertTrue(n1 in result)
-        self.assertTrue(n2 in result)
-        self.assertTrue(n3 in result)
-
-        # test non-recursive subtype
-        result = self.space.get_atoms_by_name(types.Node, "test", subtype=False)
-        self.assertTrue(n1 in result)
-        self.assertTrue(n2 not in result)
-        self.assertTrue(n3 not in result)
-
-        # test empty
-        result = self.space.get_atoms_by_name(types.AnchorNode, "test", subtype=False)
-        self.assertEqual(len(result), 0)
-
     def test_get_by_type(self):
         a1 = Node("test1")
         a2 = ConceptNode("test2")
@@ -222,11 +201,10 @@ class AtomSpaceTest(TestCase):
         InheritanceLink(frog, animal)
         InheritanceLink(animal, thing)
 
-        assert len(self.space.include_incoming(self.space.get_atoms_by_name(types.ConceptNode, "Frog"))) == 2
+        assert len(self.space.include_incoming([ConceptNode("Frog")])) == 2
+        assert len(self.space.include_outgoing(self.space.include_incoming([ConceptNode("Frog")]))) == 3
         assert len(self.space.include_incoming(self.space.get_atoms_by_type(types.ConceptNode))) == 6
         assert len(self.space.include_outgoing(self.space.get_atoms_by_type(types.InheritanceLink))) == 5
-        assert len(self.space.include_outgoing(
-            self.space.include_incoming(self.space.get_atoms_by_name(types.ConceptNode, "Frog")))) == 3
 
     def test_remove(self):
         a1 = Node("test1")
