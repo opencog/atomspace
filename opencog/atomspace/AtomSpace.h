@@ -321,18 +321,18 @@ public:
      *        the outgoing set of the link.
     */
     Handle get_link(Type t, const HandleSeq& outgoing);
-	inline Handle get_link(Type t, const Handle& ha) {
-		return get_link(t, HandleSeq({ha}));
-	}
-	Handle get_link(Type t, const Handle& ha, const Handle& hb) {
-		return get_link(t, {ha, hb});
-	}
-	Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc) {
-		return get_link(t, {ha, hb, hc});
-	}
-	Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc, const Handle& hd) {
-		return get_link(t, {ha, hb, hc, hd});
-	}
+    inline Handle get_link(Type t, const Handle& ha) {
+	return get_link(t, HandleSeq({ha}));
+    }
+    Handle get_link(Type t, const Handle& ha, const Handle& hb) {
+	return get_link(t, {ha, hb});
+    }
+    Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc) {
+	return get_link(t, {ha, hb, hc});
+    }
+    Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc, const Handle& hd) {
+	return get_link(t, {ha, hb, hc, hd});
+    }
     Handle get_handle(Type t, const HandleSeq& outgoing) {
         return get_link(t, outgoing);
     }
