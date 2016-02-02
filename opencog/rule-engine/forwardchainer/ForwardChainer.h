@@ -73,9 +73,9 @@ private:
                                    const std::set<Handle>& vars,
                                    const std::vector<std::map<Handle, Handle>>&
                                    var_groundings);
-    bool unify(Handle source, Handle target, const Rule* rule);
+    bool unify(Handle source, Handle term, const Rule* rule);
     bool subatom_unify(Handle source, const Rule* rule);
-    HandleSeq derive_rules(Handle source, Handle target, const Rule* rule);
+    HandleSeq derive_rules(Handle source, Handle term, const Rule* rule);
     void update_potential_sources(HandleSeq input);
 
     bool is_valid_implicant(const Handle& h);
