@@ -150,7 +150,7 @@ void ForwardChainer::do_step(void)
 
         HandleWeightMap hwm;
         float weight = _cur_rule->get_weight();
-        for (Handle& h : derived_rhandles)
+        for (const Handle& h : derived_rhandles)
             hwm[h] = weight;
         _fcstat.add_partial_grounding(_cur_source, rule->get_handle(), hwm);
 
@@ -453,11 +453,11 @@ UnorderedHandleSet ForwardChainer::derive_rules(Handle source, Handle term,
 
     auto del_by_value =
             [] (std::vector<std::map<Handle,Handle>>& vec_map,const Handle& h) {
-                for (auto& map: vec_map)
-                for(auto& it:map) {if (it.second == h) map.erase(it.first);}
+        for (auto& map: vec_map)
+            for (auto& it:map) { if (it.second == h) map.erase(it.first); }
             };
 
-    //We don't want VariableList atoms to ground free-vars.
+    // We don't want VariableList atoms to ground free-vars.
     del_by_value(gcb.term_groundings, implicant_vardecl);
     del_by_value(gcb.var_groundings, implicant_vardecl);
 
