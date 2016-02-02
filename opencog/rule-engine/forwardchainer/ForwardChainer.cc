@@ -145,8 +145,7 @@ void ForwardChainer::do_step(void)
 
     // Finally store source partial groundings and inference results.
     if (not derived_rhandles.empty()) {
-        _potential_sources.insert(_potential_sources.end(), products.begin(),
-                                  products.end());
+        _potential_sources.insert(products.begin(), products.end());
 
         HandleWeightMap hwm;
         float weight = _cur_rule->get_weight();
@@ -718,6 +717,5 @@ Handle ForwardChainer::gen_sub_varlist(const Handle& parent,
 
 void ForwardChainer::update_potential_sources(HandleSeq input)
 {
-    boost::sort(input);
-    boost::unique_copy(input, std::back_inserter(_potential_sources));
+	_potential_sources.insert(input.begin(), input.end());
 }

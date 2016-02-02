@@ -83,7 +83,7 @@ private:
 
 protected:
     vector<Rule*> _rules; /*<loaded rules*/
-    HandleSeq _potential_sources;
+    UnorderedHandleSet _potential_sources;
     HandleSeq _focus_set;
 
     /**
