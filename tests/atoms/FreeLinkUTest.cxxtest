@@ -73,7 +73,7 @@ void FreeLinkUTest::setUp(void)
 {
 	as->clear();
 	config().set("SCM_PRELOAD",
-		"opencog/atomspace/core_types.scm, "
+		"opencog/atoms/base/core_types.scm, "
 		"opencog/scm/utilities.scm");
 
 	load_scm_files_from_config(*as);

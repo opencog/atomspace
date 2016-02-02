@@ -41,7 +41,7 @@ void PatternLink::common_init(void)
 
 	// If there are any defines in the pattern, then all bets are off
 	// as to whether it is connected or not, what's virtual, what isn't.
-	// The analysis will have to be performed at run-time, so we can
+	// The analysis will have to be performed at run-time, so we will
 	// skip doing it here.
 	if (0 < _pat.defined_terms.size())
 	{
@@ -56,6 +56,8 @@ void PatternLink::common_init(void)
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
 	                 _fixed, _virtual, _pat.black);
 	_num_virts = _virtual.size();
+
+	add_dummies();
 
 	// unbundle_virtual does not handle connectives. Here, we assume that
 	// we are being run with the DefaultPatternMatchCB, and so we assume
@@ -669,6 +671,43 @@ void PatternLink::unbundle_virtual(const std::set<Handle>& vars,
 
 		if (is_black)
 			black_clauses.insert(clause);
+	}
+}
+
+/* ================================================================= */
+
+/// Add dummy clauses for patterns that would otherwise not have any
+/// non-evaluatable clauses.  An example of such is
+///    (GetLink (GreaterThan (Number 42) (Variable $x)))
+/// The only clause here is the GreaterThan, and its virtual
+/// (evaluatable) so we know that in general it cannot be found in
+/// the atomspace.   Due to the pattern-matcher design, matching will
+/// fail unless there is at least one PresentLink/AbsentLink clause.
+/// We can infer, from the above, that the Variable $x must be in the
+/// atomspace, so we just add it here, as a dummy clause that can be
+/// trivially satisfied.  This can be done generically, without changing
+/// search results, for any variable that is not in an AbsentLink.
+/// (Always adding can harm performance, so we don't do it unless we
+/// absolutely have to.)
+void PatternLink::add_dummies()
+{
+	// XXX almost exactly the same as 0 < _fixed.size() ... right?
+	bool all_clauses_are_evaluatable = true;
+	for (const Handle& cl : _pat.clauses)
+	{
+		// if (0 < _pat.evaluatable_holders.count(cl)) continue;
+		if (0 < _pat.evaluatable_terms.count(cl)) continue;
+		all_clauses_are_evaluatable = false;
+		break;
+	}
+
+	if (not all_clauses_are_evaluatable) return;
+
+	for (const Handle& v: _varlist.varseq)
+	{
+		_pat.clauses.emplace_back(v);
+		_pat.cnf_clauses.emplace_back(v);
+		_pat.mandatory.emplace_back(v);
 	}
 }
 

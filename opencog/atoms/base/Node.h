@@ -72,11 +72,7 @@ public:
      * because thread-safe locking required in the gets.
      */
     Node(Node &n)
-        : Atom(n.getType(),
-               ({ TruthValuePtr tv(n.getTruthValue());
-                  tv->isDefinedTV() ? tv : tv->clone(); }),
-               ({ AttentionValuePtr av(n.getAttentionValue());
-                  av->isDefaultAV() ? av : av->clone(); }))
+        : Atom(n.getType(), n.getTruthValue(), n.getAttentionValue())
     {
         init(n._name);
     }

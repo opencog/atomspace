@@ -6,7 +6,6 @@
 # things work or not
 
 include "classserver.pyx"
-include "handle.pyx"
 include "truth_value.pyx"
 include "atomspace_details.pyx"
 include "atom.pyx"

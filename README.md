@@ -1,8 +1,7 @@
 OpenCog AtomSpace
 =================
 
-[![Build Status](
-https://circleci.com/gh/opencog/atomspace/tree/master.png?circle-token=:circle-token)](https://circleci.com/gh/opencog/atomspace/tree/master)
+[![Build Status](http://61.92.69.43:8080/buildStatus/icon?job=ci-atomspace)](http://61.92.69.43:8080/job/ci-atomspace/)
 
 The OpenCog Atomspace is the hypergraph database and query/reasoning
 engine used by OpenCog to hold data and perform reasoning on it.
@@ -143,7 +142,3 @@ unset NDEBUG. Also if the Boost assert.h is used it will be necessary
 to unset NDEBUG. Boost ublas is intended to respond to a specific
 BOOST_UBLAS_NDEBUG, however this is not available as of the current
 Ubuntu standard version (1.34).
-
--Wno-deprecated is currently enabled by default to avoid a number of
-warnings regarding hash_map being deprecated (because the alternative
-is still experimental!)

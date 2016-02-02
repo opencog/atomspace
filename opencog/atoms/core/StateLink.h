@@ -23,8 +23,6 @@
 #ifndef _OPENCOG_STATE_LINK_H
 #define _OPENCOG_STATE_LINK_H
 
-#include <map>
-
 #include <opencog/atoms/core/UniqueLink.h>
 
 namespace opencog

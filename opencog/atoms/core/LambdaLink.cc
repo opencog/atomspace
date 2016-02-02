@@ -22,8 +22,6 @@
  */
 
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/TypeNode.h>
-#include <opencog/atoms/core/FreeLink.h>
 
 #include "LambdaLink.h"
 
@@ -69,7 +67,7 @@ LambdaLink::LambdaLink(Link &l)
 	if (not classserver().isA(tscope, LAMBDA_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 			"Expecting a LambdaLink, got %s", tname.c_str());
 	}
 

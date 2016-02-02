@@ -28,8 +28,6 @@
 
 #include <stdlib.h>
 
-#include <boost/bind.hpp>
-
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 

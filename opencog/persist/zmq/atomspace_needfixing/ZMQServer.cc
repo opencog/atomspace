@@ -60,8 +60,8 @@ void ZMQServer::zmqLoop(string networkAddress)
 		{
 			case ZMQgetAtom:
 			{
-				AtomPtr atom = atomSpace->cloneAtom(
-				        Handle(requestMessage.handle()));
+				AtomPtr atom = atomSpace->get_atom(
+				        requestMessage.handle());
 				ProtocolBufferSerializer::serialize(*atom, replyMessage.mutable_atom());
 				break;
 			}

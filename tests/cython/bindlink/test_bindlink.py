@@ -1,7 +1,7 @@
 from unittest import TestCase
 import os
 
-from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle, types
+from opencog.atomspace import AtomSpace, TruthValue, Atom, types
 from opencog.bindlink import    stub_bindlink, bindlink, single_bindlink,\
                                 af_bindlink, satisfaction_link,\
                                 execute_atom, evaluate_atom
@@ -16,7 +16,7 @@ __author__ = 'Curtis Faith'
 
 class BindlinkTest(TestCase):
 
-    bindlink_handle = None
+    bindlink_atom = None
     atomspace = AtomSpace()
 
     def setUp(self):
@@ -38,7 +38,7 @@ class BindlinkTest(TestCase):
         InheritanceLink( ConceptNode("Spaceship"),  ConceptNode("machine"))
 
         # Define a graph search query
-        self.bindlink_handle =  \
+        self.bindlink_atom =  \
                 BindLink(
                     # The variable node to be grounded.
                     VariableNode("$var"),
@@ -52,7 +52,7 @@ class BindlinkTest(TestCase):
                     # The grounding to be returned.
                     VariableNode("$var")
                 # bindlink needs a handle
-                ).h
+                )
 
     def tearDown(self):
         print "tearDown - atomspace = ", self.atomspace
@@ -71,8 +71,8 @@ class BindlinkTest(TestCase):
         starting_size = self.atomspace.size()
 
         # Run bindlink.
-        result = stub_bindlink(self.atomspace, self.bindlink_handle)
-        self.assertTrue(result is not None and result.value() > 0)
+        atom = stub_bindlink(self.atomspace, self.bindlink_atom)
+        self.assertTrue(atom is not None and atom.value() > 0)
 
         # Check the ending atomspace size, it should be the same.
         ending_size = self.atomspace.size()
@@ -85,15 +85,14 @@ class BindlinkTest(TestCase):
         starting_size = self.atomspace.size()
 
         # Run bindlink.
-        result = bindlink(self.atomspace, self.bindlink_handle)
-        self.assertTrue(result is not None and result.value() > 0)
+        atom = bindlink(self.atomspace, self.bindlink_atom)
+        self.assertTrue(atom is not None and atom.value() > 0)
 
         # Check the ending atomspace size, it should have added one SetLink.
         ending_size = self.atomspace.size()
         self.assertEquals(ending_size, starting_size + 1)
 
         # The SetLink should have three items in it.
-        atom = self.atomspace[result]
         self.assertEquals(atom.arity, 3)
         self.assertEquals(atom.type, types.SetLink)
 
@@ -104,15 +103,14 @@ class BindlinkTest(TestCase):
         starting_size = self.atomspace.size()
 
         # Run bindlink.
-        result = single_bindlink(self.atomspace, self.bindlink_handle)
-        self.assertTrue(result is not None and result.value() > 0)
+        atom = single_bindlink(self.atomspace, self.bindlink_atom)
+        self.assertTrue(atom is not None and atom.value() > 0)
 
         # Check the ending atomspace size, it should have added one SetLink.
         ending_size = self.atomspace.size()
         self.assertEquals(ending_size, starting_size + 1)
 
         # The SetLink should have one item in it.
-        atom = self.atomspace[result]
         self.assertEquals(atom.arity, 1)
         self.assertEquals(atom.type, types.SetLink)
 
@@ -123,20 +121,19 @@ class BindlinkTest(TestCase):
         starting_size = self.atomspace.size()
 
         # Run bindlink.
-        result = af_bindlink(self.atomspace, self.bindlink_handle)
-        self.assertTrue(result is not None and result.value() > 0)
+        atom = af_bindlink(self.atomspace, self.bindlink_atom)
+        self.assertTrue(atom is not None and atom.value() > 0)
 
         # Check the ending atomspace size, it should have added one SetLink.
         ending_size = self.atomspace.size()
         self.assertEquals(ending_size, starting_size + 1)
 
         # The SetLink is empty. ??? Should it be.
-        atom = self.atomspace[result]
         self.assertEquals(atom.arity, 0)
         self.assertEquals(atom.type, types.SetLink)
 
     def test_satisfy(self):
-        satisfaction_handle = SatisfactionLink(
+        satisfaction_atom = SatisfactionLink(
             VariableList(),  # no variables
             SequentialAndLink(
                 EvaluationLink(
@@ -164,10 +161,10 @@ class BindlinkTest(TestCase):
                     )
                 )
             )
-        ).h
+        )
 
-        result = satisfaction_link(self.atomspace, satisfaction_handle)
-        self.assertTrue(result is not None and result.mean <= 0.5)
+        atom = satisfaction_link(self.atomspace, satisfaction_atom)
+        self.assertTrue(atom is not None and atom.mean <= 0.5)
         self.assertEquals(green_count(), 2)
         self.assertEquals(red_count(), 1)
 

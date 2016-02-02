@@ -34,8 +34,6 @@
 
 #include <boost/signals2.hpp>
 
-#include <opencog/util/exceptions.h>
-
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/ProtoAtom.h>
 #include <opencog/truthvalue/AttentionValue.h>
@@ -74,15 +72,12 @@ typedef boost::signals2::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
 class Atom
     : public ProtoAtom
 {
-    friend class ::AtomUTest;     // Needs to call setFlag()
     friend class AtomStorage;     // Needs to set _uuid
     friend class AtomTable;       // Needs to call MarkedForRemoval()
     friend class AtomSpace;       // Needs to call getAtomTable()
-    friend class ImportanceIndex; // Needs to call setFlag()
+    friend class DeleteLink;      // Needs to call getAtomTable()
     friend class Handle;          // Needs to view _uuid
     friend class TLB;             // Needs to view _uuid
-    friend class CreateLink;      // Needs to call getAtomTable();
-    friend class DeleteLink;      // Needs to call getAtomTable();
     friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
 
 private:
@@ -117,8 +112,7 @@ protected:
      * @param The type of the atom.
      * @param Outgoing set of the atom, that is, the set of atoms this
      * atom references. It must be an empty vector if the atom is a node.
-     * @param The truthValue of the atom. note: This is not cloned as
-     *        in setTruthValue.
+     * @param The truthValue of the atom.
      */
     Atom(Type t, TruthValuePtr tv = TruthValue::DEFAULT_TV(),
             AttentionValuePtr av = AttentionValue::DEFAULT_AV())
@@ -164,21 +158,6 @@ private:
      */
     bool isMarkedForRemoval() const;
 
-    /** Returns an atom flag.
-     * A byte represents all flags. Each bit is one of them.
-     *
-     * @param An int indicating which of the flags will be returned.
-     * @return A boolean indicating if that flag is set or not.
-     */
-    bool getFlag(int) const;
-
-    /** Changes the value of the given flag.
-     *
-     * @param An int indicating which of the flags will be set.
-     * @param A boolean indicating the new value of the flag.
-     */
-    void setFlag(int, bool);
-
     //! Marks the atom for removal.
     void markForRemoval();
 
@@ -192,10 +171,25 @@ public:
 
     virtual ~Atom();
 
+    virtual const std::string& getName() const {
+        static std::string empty_string("");
+        return empty_string;
+    }
+
     //! Returns the AtomTable in which this Atom is inserted.
     AtomSpace* getAtomSpace() const;
 
     inline UUID getUUID() const { return _uuid; }
+
+    /** Returns the outgoing set.
+     *
+     * @return The outgoing set.
+     */
+    virtual inline const HandleSeq& getOutgoingSet() const
+    {
+        static HandleSeq no_atoms;
+        return no_atoms;
+    }
 
     /** Returns the handle of the atom.
      *
@@ -243,7 +237,7 @@ public:
         setAttentionValue(new_av);
     }
 
-    /** Change the Long-term Importance */
+    /** Change the Long-Term Importance */
     void setLTI(AttentionValue::lti_t ltiValue)
     {
         AttentionValuePtr old_av = getAttentionValue();
@@ -251,6 +245,17 @@ public:
             old_av->getSTI(),
             ltiValue,
             old_av->getVLTI());
+        setAttentionValue(new_av);
+    }
+
+    /** Change the Very-Long-Term Importance */
+    void setVLTI(AttentionValue::vlti_t vltiValue)
+    {
+        AttentionValuePtr old_av = getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            old_av->getSTI(),
+            old_av->getLTI(),
+            vltiValue);
         setAttentionValue(new_av);
     }
 

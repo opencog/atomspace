@@ -76,7 +76,7 @@ void ChainerUtilsUTest::test_get_outgoing_nodes()
 void ChainerUtilsUTest::test_are_similar()
 {
     AtomSpace as;
-    config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
+    config().set("SCM_PRELOAD", "opencog/atoms/base/core_types.scm, "
                  "opencog/scm/utilities.scm, "
                  "opencog/scm/av-tv.scm");
     load_scm_files_from_config(as);

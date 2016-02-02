@@ -321,18 +321,18 @@ public:
      *        the outgoing set of the link.
     */
     Handle get_link(Type t, const HandleSeq& outgoing);
-	inline Handle get_link(Type t, const Handle& ha) {
-		return get_link(t, HandleSeq({ha}));
-	}
-	Handle get_link(Type t, const Handle& ha, const Handle& hb) {
-		return get_link(t, {ha, hb});
-	}
-	Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc) {
-		return get_link(t, {ha, hb, hc});
-	}
-	Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc, const Handle& hd) {
-		return get_link(t, {ha, hb, hc, hd});
-	}
+    inline Handle get_link(Type t, const Handle& ha) {
+	return get_link(t, HandleSeq({ha}));
+    }
+    Handle get_link(Type t, const Handle& ha, const Handle& hb) {
+	return get_link(t, {ha, hb});
+    }
+    Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc) {
+	return get_link(t, {ha, hb, hc});
+    }
+    Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc, const Handle& hd) {
+	return get_link(t, {ha, hb, hc, hd});
+    }
     Handle get_handle(Type t, const HandleSeq& outgoing) {
         return get_link(t, outgoing);
     }
@@ -632,14 +632,6 @@ public:
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    HandleSeq get_incoming(Handle h) const {
-        HandleSeq hs;
-        h->getIncomingSet(back_inserter(hs));
-        return hs;
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
     bool is_node(Handle h) const { return NodeCast(h) != NULL; }
     bool is_link(Handle h) const { return LinkCast(h) != NULL; }
 
@@ -673,23 +665,6 @@ public:
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
-    const HandleSeq& get_outgoing(Handle h) const {
-        static HandleSeq empty;
-        LinkPtr lll(LinkCast(h));
-        if (lll) return lll->getOutgoingSet();
-        return empty;
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    Handle get_outgoing(Handle h, Arity idx) const {
-        LinkPtr lll = LinkCast(h);
-        if (lll) return lll->getOutgoingAtom(idx);
-        return Handle::UNDEFINED;
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
     Type get_type(Handle h) const {
         return h->getType();
     }
@@ -701,59 +676,6 @@ public:
         return h->getTruthValue();
     }
 #endif // DEPRECATED_ATOMSPACE_CALLS
-
-    /* ===================================================== */
-    /* Deprecated calls that only cython uses!
-     * XXX FIXME Lets fix cython aleady!
-     */
-#ifdef DEPRECATED_CYTHON_CALLS
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app!
-     */
-    void set_TV(Handle h, TruthValuePtr tv) const {
-        h->setTruthValue(tv);
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app!  */
-    void set_LTI(Handle h, AttentionValue::lti_t ltiValue) const {
-        h->setLTI(ltiValue);
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    AttentionValue::lti_t get_LTI(Handle h) const {
-        return h->getAttentionValue()->getLTI();
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    void inc_VLTI(Handle h) const { h->incVLTI(); }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    void dec_VLTI(Handle h) const { h->decVLTI(); }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    AttentionValue::vlti_t get_VLTI(Handle h) const {
-        return h->getAttentionValue()->getVLTI();
-    }
-
-    /**
-     * DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this function, just copy the one-liner below.
-     * XXX ONLY the python bindings use this. XXX kill that code.
-     */
-    template <typename OutputIterator> OutputIterator
-    get_incoming_set_by_type(OutputIterator result,
-                             Handle handle,
-                             Type type,
-                             bool subclass) const
-    {
-        return handle->getIncomingSetByType(result, type, subclass);
-    }
-#endif // DEPRECATED_CYTHON_CALLS
 };
 
 /** @}*/

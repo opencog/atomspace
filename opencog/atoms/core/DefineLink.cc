@@ -37,18 +37,16 @@ void DefineLink::init()
 	// Perform some additional checks in the UniqueLink init method
 	UniqueLink::init(false);
 
-#if ALREADY_BROKEN
-	// Type-check. Probably not needed, probably too strict, but what
-	// the heck, since we are here... Heh. There's already code that
-	// defines shit more loosely than this. Bummer.
+	// Type-check. The execution and FunctionLink's only expand
+	// definitions anchored with these type; other definitions won't
+	// work during execution.
 	Type dtype = _outgoing[0]->getType();
 	if (DEFINED_SCHEMA_NODE != dtype and
 	    DEFINED_PREDICATE_NODE != dtype and
 	    DEFINED_TYPE_NODE != dtype)
 		throw SyntaxException(TRACE_INFO,
-			"Expecting Defined-X-Node, got %s",
+			"Expecting Defined(Schema/Predicate/Type)Node, got %s",
 				classserver().getTypeName(dtype).c_str());
-#endif
 }
 
 DefineLink::DefineLink(const HandleSeq& oset,

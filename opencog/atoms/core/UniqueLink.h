@@ -23,8 +23,6 @@
 #ifndef _OPENCOG_UNIQUE_LINK_H
 #define _OPENCOG_UNIQUE_LINK_H
 
-#include <map>
-
 #include <opencog/atoms/core/FreeLink.h>
 
 namespace opencog

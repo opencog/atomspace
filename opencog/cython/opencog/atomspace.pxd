@@ -31,14 +31,14 @@ ctypedef float confidence_t
 ctypedef float strength_t
 
 cdef extern from "opencog/truthvalue/TruthValue.h" namespace "opencog":
-    cdef cppclass tv_ptr "std::shared_ptr<opencog::TruthValue>":
+    cdef cppclass tv_ptr "std::shared_ptr<const opencog::TruthValue>":
         tv_ptr()
         tv_ptr(tv_ptr copy)
         tv_ptr(cTruthValue* fun)
         tv_ptr(cSimpleTruthValue* fun)
         cTruthValue* get()
 
-    cdef cppclass cTruthValue "opencog::TruthValue":
+    cdef cppclass cTruthValue "const opencog::TruthValue":
         strength_t getMean()
         confidence_t getConfidence()
         count_t getCount()
@@ -82,6 +82,40 @@ cdef extern from "opencog/atoms/base/ClassServer.h" namespace "opencog":
 cdef extern from "opencog/atoms/base/atom_types.h" namespace "opencog":
     cdef Type NOTYPE
 
+
+# Atom
+ctypedef public short av_type
+
+cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
+    cdef cppclass cAtom "opencog::Atom":
+        cAtom()
+
+        Type getType()
+        string getName()
+
+        string toString()
+        string toShortString()
+
+        vector[cHandle] getOutgoingSet()
+        output_iterator getIncomingSet(output_iterator)
+
+        tv_ptr getTruthValue()
+        void setTruthValue(tv_ptr tvp)
+
+        av_type getSTI()
+        av_type getLTI()
+        av_type getVLTI()
+
+        void setSTI(av_type stiValue)
+        void setLTI(av_type ltiValue)
+        void setVLTI(av_type vltiValue)
+
+        void incVLTI()
+        void decVLTI()
+
+        output_iterator getIncomingSetByType(output_iterator, Type type, bint subclass)
+
+
 # Handle
 ctypedef public long UUID
 
@@ -89,7 +123,15 @@ cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
     cdef cppclass cHandle "opencog::Handle":
         cHandle()
         cHandle(UUID)
+        
+        cAtom* atom_ptr()
         UUID value()
+        string toString()
+        string toShortString()
+
+        bint is_defined()
+        bint is_undefined()
+
         bint operator==(cHandle h)
         bint operator!=(cHandle h)
         bint operator<(cHandle h)
@@ -109,15 +151,13 @@ cdef class TruthValue:
     cdef tv_ptr* _tvptr(self)
     cdef _init(self, float mean, float count)
 
-cdef class Handle:
-    cdef cHandle *h
-
 cdef class Atom:
-    cdef Handle handle
+    cdef cHandle *handle
     cdef AtomSpace atomspace
     cdef object _atom_type
     cdef object _name
     cdef object _outgoing
+
 
 
 # AtomSpace
@@ -137,45 +177,18 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         bint is_valid_handle(cHandle h)
         int get_size()
-
-        # these should alias the proper types for sti/lti/vlti
-        # XXX DEPRECATED, REMOVE ASAP XXX just implement these
-        # correctly, instead of callng deprecated atomspace methods!
-        string get_name(cHandle h)
-        Type get_type(cHandle h)
-        tv_ptr get_TV(cHandle h)
-        void set_TV(cHandle h, tv_ptr tvn)
-
-        vector[cHandle] get_outgoing(cHandle h)
-        vector[cHandle] get_incoming(cHandle h)
-
-        short get_STI(cHandle h)
-        short get_LTI(cHandle h)
-        bint get_VLTI(cHandle h)
-        void set_STI(cHandle h, short)
-        void set_LTI(cHandle h, short)
-        void inc_VLTI(cHandle h)
-        void dec_VLTI(cHandle h)
-
-        # XXX DEPRECATED, REMOVE ASAP XXX just call toString, instead!!
-        string atom_as_string(cHandle h, bint)
+        UUID get_uuid()
 
         # ==== query methods ====
         # get by type
         output_iterator get_handles_by_type(output_iterator, Type t, bint subclass)
-        # XXX DEPRECATED, REMOVE ASAP XXX get by name
-        # Just do the right thing, here...
-        output_iterator get_handles_by_name(output_iterator, string& name, Type t, bint subclass)
-        # XXX DEPRECATED, REMOVE ASAP XXX get by target handle
-        output_iterator get_incoming_set_by_type(output_iterator,cHandle& h,Type t,bint subclass)
+
         # get by STI range
         output_iterator get_handles_by_AV(output_iterator, short lowerBound, short upperBound)
         output_iterator get_handles_by_AV(output_iterator, short lowerBound)
+
         # get from AttentionalFocus
         output_iterator get_handle_set_in_attentional_focus(output_iterator)
-
-        # vector[chandle].iterator get_handles_by_name(output_iterator, Type t, string name, bint subclass)
-        # vector[chandle].iterator get_handles_by_type(output_iterator, Type t, xxx bint subclass)
 
         void clear()
         bint remove_atom(cHandle h, bint recursive)

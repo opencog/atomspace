@@ -57,11 +57,12 @@ public:
 	{}
 
 	NumberNode(Node &n)
-		: Node(NUMBER_NODE, std::to_string(std::stod(n.getName())),
-		       n.getTruthValue()->clone(), n.getAttentionValue()->clone()),
+		: Node(n.getType(), std::to_string(std::stod(n.getName())),
+		       n.getTruthValue(), n.getAttentionValue()),
 		  value(std::stod(n.getName()))
 	{
-		OC_ASSERT(NUMBER_NODE == n.getType(), "Bad NumberNode constructor!");
+		OC_ASSERT(classserver().isA(_type, NUMBER_NODE),
+			"Bad NumberNode constructor!");
 	}
 
 	static std::string validate(const std::string& str)

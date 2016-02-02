@@ -32,12 +32,6 @@ using namespace opencog;
 
 void ScopeLink::init(void)
 {
-	size_t sz = _outgoing.size();
-	if (2 < sz)
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an outgoing set size of at most two, got %d for %s",
-			sz, toString().c_str());
-
 	extract_variables(_outgoing);
 }
 
@@ -97,11 +91,15 @@ ScopeLink::ScopeLink(Link &l)
 ///
 void ScopeLink::extract_variables(const HandleSeq& oset)
 {
+	if (oset.size() == 0)
+		throw SyntaxException(TRACE_INFO,
+			"Expecting a non-empty outgoing set.");
+
 	Type decls = oset.at(0)->getType();
 
 	// If the first atom is not explicitly a variable declaration, then
 	// there are no variable declarations. There are two cases that; can
-	// apply here: either the body is a lambda, in which casse, we copy
+	// apply here: either the body is a lambda, in which case, we copy
 	// the variables from the lambda; else we extract all free variables.
 	if (VARIABLE_LIST != decls and
 	    VARIABLE_NODE != decls and
@@ -124,6 +122,11 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 		}
 		return;
 	}
+
+	if (oset.size() < 2)
+		throw SyntaxException(TRACE_INFO,
+			"Expecting an outgoing set size of at least two; got %s",
+			oset[0]->toString().c_str());
 
 	// If we are here, then the first outgoing set member should be
 	// a variable declaration.

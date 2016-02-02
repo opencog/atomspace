@@ -81,7 +81,7 @@ private:
 	// MemberLink <TV>
 	//    <rule name>
 	//    <rbs>
-	HandleSeq fetch_rules(Handle rbs);
+	HandleSeq fetch_rule_names(Handle rbs);
 
 	AtomSpace& _as;
 

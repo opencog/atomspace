@@ -1,4 +1,4 @@
-LINK_LIBRARIES(AtomSpaceUtilsUTest
+LINK_LIBRARIES(
 	atomspaceutils
 	atomspace
 )

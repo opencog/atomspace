@@ -453,7 +453,7 @@ IF (CXXTEST_FOUND)
 		)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 	ADD_CUSTOM_TARGET(test_python
-		DEPENDS PythonModuleUTest PyEvalUTest PythonEvalUTest CogServerUTest
+		DEPENDS PythonEvalUTest
 				PythonUtilitiesUTest
 				bindlink_cython atomspace_cython
 				scheme_wrapper logger_cython utilities_cython

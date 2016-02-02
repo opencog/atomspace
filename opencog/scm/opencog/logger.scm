@@ -6,6 +6,9 @@
 
 (define-module (opencog logger))
 
+; We need this to set the LTDL_LIBRARY_PATH
+(use-modules (opencog))
+
 (load-extension "libsmob" "opencog_logger_init")
 
 ; Documentation for the functions implemented as C++ code

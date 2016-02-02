@@ -19,7 +19,8 @@ FLOAT_VALUE <- VALUE    // vector of floats, actually.
 STRING_VALUE <- VALUE
 LINK_VALUE <- VALUE     // vector of values ("link" holding values)
 
-// Base of hierarchy
+// Base of hierarchy - NOTE: ATOM will not have a corresponding Python
+// construction function to avoid identifier conflict with the Atom object.
 ATOM <- VALUE
 NODE <- ATOM
 LINK <- ATOM
@@ -133,6 +134,13 @@ VARIABLE_LIST <- LIST_LINK
 // Variadic, the globbed values are meant to be of all same type.
 GLOB_NODE <- VARIABLE_NODE
 
+// Everything under a QuoteLink is interpreted literally.
+QUOTE_LINK <- ORDERED_LINK
+
+// The QuoteLink is actually a quasi-quote. The UnquoteLink undoes the
+// quoting.  Defined to work just like in lisp/scheme.
+UNQUOTE_LINK <- ORDERED_LINK
+
 // A FreeLink is any kind of link that might have free variables in it.
 // The FreeLink exists for one purpose: to make visible/explicit all of
 // free variables in the link. The primary user is the pattern matcher.
@@ -224,26 +232,19 @@ GET_LINK <- PATTERN_LINK           // Finds all groundings, return atoms
 SATISFACTION_LINK <- PATTERN_LINK  // Finds all groundings, return TV
 BIND_LINK <- GET_LINK              // Finds all groundings and executes
 
-// Everything under a QuoteLink is interpreted literally.
-QUOTE_LINK <- ORDERED_LINK
-
-// The QuoteLink is actually a quasi-quote. The UnquoteLink undoes the
-// quoting.  Defined to work just like in lisp/scheme.
-UNQUOTE_LINK <- ORDERED_LINK
-
 // ==============================================================
-// Types
+// Types and type constructors.
 
 // A TypeNode can hold only core (in-built) type declarations, such
 // as that in this file. Viz it just holds an integer.
 TYPE_NODE <- NODE
 
-// User-defined type.  This iss meant to be used with DefineLink
-// to give a name to a type defintion; for example a type defintiion
+// User-defined type.  This is meant to be used with DefineLink
+// to give a name to a type defintion; for example, a type definition
 // specificed with SignatureLink or ArrowLink.
 DEFINED_TYPE_NODE <- TYPE_NODE
 
-// Used for type polymorphism
+// Used for type polymorphism.
 TYPE_CHOICE <- OR_LINK
 
 // Type constructor.  Corresponds to right-arrow of functional
@@ -287,7 +288,7 @@ EXISTS_LINK <- SCOPE_LINK
 
 // Average links are not really useful since they are equivalent to a
 // predicate (which could be a PredicateNode or derived, or built with
-// a LambdaLink. Note that the PLN rules should offer a way to
+// a ScopeLink. Note that the PLN rules should offer a way to
 // manipulate a predicate as if it were universally averaged quantified.
 // AVERAGE_LINK <- SCOPE_LINK
 
@@ -297,7 +298,7 @@ SATISFYING_SET_LINK <- SCOPE_LINK
 // Basic first-order logic operations
 
 // Due to ImplicationLink having a sugar syntax form, an
-// ImplicationLink *may* inherits from a ScopeLink. See
+// ImplicationLink *may* inherit from a ScopeLink. See
 // http://wiki.opencog.org/wikihome/index.php/ImplicationLink for more
 // explanation.
 IMPLICATION_LINK <- SCOPE_LINK
@@ -311,7 +312,7 @@ EXTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
 // Generic association
 ASSOCIATIVE_LINK <- ORDERED_LINK
 
-// Misc mystery links.
+// Mystery link.  Lexical attraction???
 ATTRACTION_LINK <- ORDERED_LINK
 
 // To be used with PredicateNode
@@ -387,18 +388,22 @@ LAMBDA_LINK <- SCOPE_LINK
 
 // A FunctionLink is a link that can be executed, with the result of
 // execution being some atom.  FunctionLink does NOT derive from
-// LambdaLink, which may seem counter-intutitive; here's why, so
+// LambdaLink, which may seem counter-intuitive; here's why, so
 // listen up.  All of the explicitly-named functions (e.g. PlusLink)
 // do not need to explicitly name thier arguments, and it would even
-// be confusing if they did so.  Instead, the convetion is that every
+// be confusing if they did so.  Instead, the convention is that every
 // element in the outgoing set of the FunctionLink IS an argument of
 // the function; that's all, end-of-story.
 //
 // All variables that appear underneath the FunctionLink are necessarily
 // free variables; they are neither scoped, nor bound.
+//
+// The FunctionLink is meant to be a base type for links that define
+// functions.  It is NOT meant to be used as a base type for
+// user-defined structures; users should use the LambdaLink for that.
 FUNCTION_LINK <- FREE_LINK
 
-// The ExecutionOutPutLink is a specific kind of function: it must have
+// The ExecutionOutputLink is a specific kind of function: it must have
 // a GroundedSchemeNode as its first argument.  The other kinds of
 // FunctionLinks do not have this restriction: indeed, the actual
 // function they perform is implicit in the link type.
@@ -425,3 +430,10 @@ TIME_LINK <- FUNCTION_LINK
 
 // Sleep link pauses executation for the indicated number of seconds.
 SLEEP_LINK <- FUNCTION_LINK
+
+// MapLink could be named UnPutLink ... it undoes a beta-reduction,
+// by extracting values for a given set of variables.  In many ways,
+// it resembles a GetLink, except that it searches only its argument
+// list, instead of the entire AtomSpace.  It is more-or-less analogous
+// to the standard functional-programming concept of "map".
+MAP_LINK <- FUNCTION_LINK

@@ -10,7 +10,7 @@ atomspace = AtomSpace()
 
 # Initialize Scheme
 scheme_preload = [
-                    "opencog/atomspace/core_types.scm",
+                    "opencog/atoms/base/core_types.scm",
                     "opencog/scm/utilities.scm"
                  ]
 
@@ -26,6 +26,12 @@ def add_link(atom1, atom2):
     link = ListLink(atom1, atom2)
     executed = True
     return link
+
+# Fix up the module for cog-execute. Most Python users won't be using cog-execute
+# since there is now a Cython call execute_atom which does the same thing, so we
+# don't need to add the library path below under normal Python initialization.
+scheme_eval(atomspace, '(add-to-load-path "/usr/local/share/opencog/scm")')
+scheme_eval(atomspace, '(use-modules (opencog exec))')
 
 execute_code = \
     '''

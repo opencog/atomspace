@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle
+from opencog.atomspace import AtomSpace, TruthValue, Atom
 from opencog.atomspace import types, is_a, get_type, get_type_name
 from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h
 
@@ -26,7 +26,7 @@ class SchemeTest(TestCase):
 
         # These relative paths are horridly ugly.
         # There must be a better way ...
-        status = load_scm(self.space, "build/opencog/atomspace/core_types.scm")
+        status = load_scm(self.space, "build/opencog/atoms/base/core_types.scm")
         self.assertTrue(status)
 
         status = load_scm(self.space, "opencog/scm/utilities.scm")
@@ -60,14 +60,13 @@ class SchemeTest(TestCase):
         self.assertEquals(a1.tv, expected)
 
         # Actually, the atoms overall should compare.
-        # print "eq", Atom(basic, self.space) == a1
-        self.assertEquals(a1, Atom(basic, self.space))
+        self.assertEquals(a1, basic)
 
         # Do it again, from a define in the scm file.
         again = scheme_eval_h(self.space, "wobbly")
         a2 = self.space.add_node(types.ConceptNode, "wobbly")
         self.assertTrue(a2)
-        self.assertEquals(a2, Atom(again, self.space))
+        self.assertEquals(a2, again)
 
 
     # Run the pattern-matcher/unifier/query-engine.
@@ -77,17 +76,13 @@ class SchemeTest(TestCase):
         self.assertTrue(status)
 
         scheme_eval(self.space, "(use-modules (opencog query))")
-        h = scheme_eval_h(self.space, "find-animals")
-        self.assertTrue(h)
+        question = scheme_eval_h(self.space, "find-animals")
+        self.assertTrue(question)
         print "\nThe question is:"
-        print h
-        question = Atom(h, self.space)
         print question
 
-        h = scheme_eval_h(self.space, "(cog-bind find-animals)")
-        self.assertTrue(h)
-        print h
-        answer = Atom(h, self.space)
+        answer = scheme_eval_h(self.space, "(cog-bind find-animals)")
+        self.assertTrue(answer)
         print "\nThe answer is:"
         print answer
         self.assertEqual(answer.type, types.SetLink)

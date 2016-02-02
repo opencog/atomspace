@@ -23,8 +23,6 @@
 #ifndef _OPENCOG_LAMBDA_LINK_H
 #define _OPENCOG_LAMBDA_LINK_H
 
-#include <map>
-
 #include <opencog/atoms/core/ScopeLink.h>
 
 namespace opencog

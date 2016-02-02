@@ -61,6 +61,7 @@ public:
 
     void test_repeats(void);
     void test_const(void);
+    void test_dummy(void);
     void test_numeric(void);
 };
 
@@ -73,7 +74,7 @@ void ArcanaUTest::setUp(void)
 {
     as->clear();
     config().set("SCM_PRELOAD",
-        "opencog/atomspace/core_types.scm, "
+        "opencog/atoms/base/core_types.scm, "
         "tests/query/test_types.scm, "
         "opencog/scm/utilities.scm,"
         "opencog/scm/opencog/query.scm");
@@ -163,6 +164,33 @@ void ArcanaUTest::test_const(void)
 
     TS_ASSERT_EQUALS(1, getarity(defans));
     TS_ASSERT_EQUALS(defans, answer);
+
+    // ----
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Miscellaneous Arcana
+ * This one tests addition of mandatory dummy terms.
+ */
+void ArcanaUTest::test_dummy(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    config().set("SCM_PRELOAD", "tests/query/arcana-dummy.scm");
+    load_scm_files_from_config(*as);
+
+    // ----
+    Handle answer = eval->eval_h("(cog-execute! dummy)");
+    printf("dummy=%s\n", answer->toString().c_str());
+
+    TS_ASSERT_EQUALS(SET_LINK, answer->getType());
+    TS_ASSERT_EQUALS(1, getarity(answer));
+    LinkPtr lp = LinkCast(answer);
+    Handle num = lp->getOutgoingAtom(0);
+
+    Handle fourtwo = eval->eval_h("(Number 42)");
+    TS_ASSERT_EQUALS(num, fourtwo);
 
     // ----
     logger().debug("END TEST: %s", __FUNCTION__);

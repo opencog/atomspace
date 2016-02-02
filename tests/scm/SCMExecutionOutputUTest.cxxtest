@@ -50,7 +50,7 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 		logger().setLevel(Logger::DEBUG);
 		logger().setPrintToStdoutFlag(true);
 
-		config().set("SCM_PRELOAD", "opencog/atomspace/core_types.scm, "
+		config().set("SCM_PRELOAD", "opencog/atoms/base/core_types.scm, "
 		                            "opencog/scm/opencog/exec.scm");
 		opencog_exec_init();
 	}

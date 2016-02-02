@@ -47,7 +47,7 @@ public:
 		eval = new SchemeEval(as);
 
 		config().set("SCM_PRELOAD",
-			"opencog/atomspace/core_types.scm, "
+			"opencog/atoms/base/core_types.scm, "
 			"opencog/scm/utilities.scm, "
 			"opencog/scm/opencog/exec.scm, "
 			"opencog/scm/opencog/query.scm");

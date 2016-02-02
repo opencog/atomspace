@@ -71,8 +71,7 @@ public:
      * @param Link type.
      * @param Outgoing set, which is an array of the atom handles
      *        referenced by this link.
-     * @param Link truthvalue, which will be cloned before being
-     *        stored in this Link.
+     * @param Link truthvalue.
      */
     Link(Type t, const HandleSeq& oset,
          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
@@ -133,11 +132,7 @@ public:
      * Cannot be const, because the get() functions can't be,
      * because thread-safe locking required in the gets. */
     Link(Link &l)
-        : Atom(l.getType(),
-               ({ TruthValuePtr tv(l.getTruthValue());
-                  tv->isDefinedTV() ? tv : tv->clone(); }),
-               ({ AttentionValuePtr av(l.getAttentionValue());
-                  av->isDefaultAV() ? av : av->clone(); }))
+        : Atom(l.getType(), l.getTruthValue(), l.getAttentionValue())
     {
         init(l.getOutgoingSet());
     }

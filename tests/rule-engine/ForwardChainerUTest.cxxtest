@@ -13,6 +13,8 @@
 
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
 
+#include <cxxtest/TestSuite.h>
+
 using namespace opencog;
 
 class ForwardChainerUTest: public CxxTest::TestSuite {
@@ -25,11 +27,12 @@ public:
 	{
 #undef DEBUG
 		logger().setLevel(Logger::DEBUG);
+		logger().setPrintToStdoutFlag(true);
 
 		// Disable the AF mechanism during testing!
 		_as.set_attentional_focus_boundary(AttentionValue::MINSTI);
 		config().set("SCM_PRELOAD",
-		             "opencog/atomspace/core_types.scm, "
+		             "opencog/atoms/base/core_types.scm, "
 		             "opencog/scm/utilities.scm, "
 		             "opencog/scm/av-tv.scm");
 		load_scm_files_from_config(_as);
@@ -80,7 +83,7 @@ void ForwardChainerUTest::test_do_chain()
     // Get the ConceptNode corresponding to the rule-based system
     // to test
     Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
-    ForwardChainer fc(_as, rbs,AB, HandleSeq {});
+    ForwardChainer fc(_as, rbs, AB, HandleSeq {});
 	// Run forward chainer
 	fc.do_chain();
 

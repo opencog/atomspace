@@ -224,8 +224,9 @@ void PutLink::static_typecheck_values(void)
  * an undefined handle is returned. For set substitutions, this acts as
  * a filter, removeing (filtering out) the mismatched types.
  *
- * Again, only a substitution is performed, there is no evaluation.
- * Note also that the resulting tree is NOT placed into any atomspace!
+ * Again, only a substitution is performed, there is no execution or
+ * evaluation.  Note also that the resulting tree is NOT placed into
+ * any atomspace!
  */
 Handle PutLink::do_reduce(void) const
 {

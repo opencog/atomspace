@@ -4,6 +4,9 @@
 
 (define-module (opencog query))
 
+; We need this to set the LTDL_LIBRARY_PATH
+(use-modules (opencog))
+
 ; This is also loaded by (opencog exec) We need it here,
 ; else we get undefined symbols in libquery.
 (load-extension "libexecution" "opencog_exec_init")
