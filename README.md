@@ -1,7 +1,7 @@
 OpenCog AtomSpace
 =================
 
-[[![Build Status](http://61.92.69.43:8080/buildStatus/icon?job=ci-atomspace)](http://61.92.69.43:8080/job/ci-atomspace/)
+[![Build Status](http://61.92.69.43:8080/buildStatus/icon?job=ci-atomspace)](http://61.92.69.43:8080/job/ci-atomspace/)
 
 The OpenCog Atomspace is the hypergraph database and query/reasoning
 engine used by OpenCog to hold data and perform reasoning on it.
