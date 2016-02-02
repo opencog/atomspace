@@ -101,17 +101,17 @@ void ForwardChainer::do_step(void)
                       << _cur_source->toString();
 
     const Rule* rule = nullptr;
-    HandleSeq derived_rhandles;
+    UnorderedHandleSet derived_rhandles;
 
-    //Returns previously derived handleSeq for a given
-    //choosen rule. Empty if the rule has not been sel
-    //ected previously for this particular source atom.
+    // Returns previously derived handles for a given
+    // choosen rule. Empty if the rule has not been sel
+    // ected previously for this particular source atom.
     auto get_derived = [&](const Handle& hsource) {
         auto pgmap = _fcstat.get_rule_pg_map(hsource);
         auto it = pgmap.find(rule->get_handle());
         if (it != pgmap.end()) {
             for (auto hwm : it->second) {
-                derived_rhandles.push_back(hwm.first);
+                derived_rhandles.insert(hwm.first);
             }
         }
     };
@@ -420,22 +420,22 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,
 
 /**
  * Derives new rules by replacing variables that are unfiable in @param term
- * with source.The rule handles are not added to any atomspace.
+ * with source. The rule handles are not added to any atomspace.
  *
  * @param  source    A source atom that will be matched with the term.
  * @param  term      An implicant term containing variables to be grounded form source.
  * @param  rule      A rule object that contains @param term in its implicant. *
  *
- * @return  A HandleSeq of derived rule handles.
+ * @return  A UnorderedHandleSet of derived rule handles.
  */
-HandleSeq ForwardChainer::derive_rules(Handle source, Handle term,
-                                       const Rule* rule)
+UnorderedHandleSet ForwardChainer::derive_rules(Handle source, Handle term,
+                                                const Rule* rule)
 {
     //exceptions
     if (not is_valid_implicant(term))
         return {};
 
-    HandleSeq derived_rules = { };
+    UnorderedHandleSet derived_rules;
 
     AtomSpace temp_pm_as;
     Handle hcpy = temp_pm_as.add_atom(term);
@@ -474,9 +474,8 @@ HandleSeq ForwardChainer::derive_rules(Handle source, Handle term,
                         gcb.var_groundings);
 
                 for (Handle nr : new_candidate_rules) {
-                    if (find(derived_rules.begin(), derived_rules.end(), nr) == derived_rules.end()
-                            and nr != rhandle) {
-                        derived_rules.push_back(nr);
+                    if (nr != rhandle) {
+                        derived_rules.insert(nr);
                     }
                 }
             }
@@ -496,14 +495,13 @@ HandleSeq ForwardChainer::derive_rules(Handle source, Handle term,
  *
  * @return  A HandleSeq of derived rule handles.
  */
-HandleSeq ForwardChainer::derive_rules(Handle source, const Rule* rule,
-                                       bool subatomic/*=false*/)
+UnorderedHandleSet ForwardChainer::derive_rules(Handle source, const Rule* rule,
+                                                bool subatomic/*=false*/)
 {
-    HandleSeq derived_rules = { };
+    UnorderedHandleSet derived_rules;
 
-    auto add_result = [&derived_rules] (HandleSeq result) {
-        derived_rules.insert(derived_rules.end(), result.begin(),
-                result.end());
+    auto add_result = [&derived_rules] (UnorderedHandleSet result) {
+        derived_rules.insert(result.begin(), result.end());
     };
 
     if (subatomic) {

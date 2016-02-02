@@ -75,7 +75,7 @@ private:
                                    var_groundings);
     bool unify(Handle source, Handle term, const Rule* rule);
     bool subatom_unify(Handle source, const Rule* rule);
-    HandleSeq derive_rules(Handle source, Handle term, const Rule* rule);
+    UnorderedHandleSet derive_rules(Handle source, Handle term, const Rule* rule);
     void update_potential_sources(HandleSeq input);
 
     bool is_valid_implicant(const Handle& h);
@@ -111,7 +111,8 @@ protected:
     virtual HandleSeq apply_rule(Handle rhandle, bool search_focus_set_only =
             false);
 
-    HandleSeq derive_rules(Handle source, const Rule* rule, bool subatomic = false);
+    UnorderedHandleSet derive_rules(Handle source, const Rule* rule,
+                                    bool subatomic = false);
 
 public:
     /**
