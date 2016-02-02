@@ -87,7 +87,6 @@ void ForwardChainer::init(Handle hsource, HandleSeq focus_set)
      {
          _rules.push_back(&r);
      }
-    _cur_rule = nullptr;
 }
 
 /**
@@ -103,9 +102,9 @@ void ForwardChainer::do_step(void)
     const Rule* rule = nullptr;
     UnorderedHandleSet derived_rhandles;
 
-    // Returns previously derived handles for a given
-    // choosen rule. Empty if the rule has not been sel
-    // ected previously for this particular source atom.
+    // Returns previously derived handles for a given choosen
+    // rule. Empty if the rule has not been selected previously for
+    // this particular source atom.
     auto get_derived = [&](const Handle& hsource) {
         auto pgmap = _fcstat.get_rule_pg_map(hsource);
         auto it = pgmap.find(rule->get_handle());
@@ -127,7 +126,6 @@ void ForwardChainer::do_step(void)
     }
 
     if (rule) {
-        _cur_rule = rule;
         // Use previously derived rules if they exist.
         if (_fcstat.has_partial_grounding(_cur_source))
             get_derived(_cur_source);
@@ -140,6 +138,8 @@ void ForwardChainer::do_step(void)
     UnorderedHandleSet products;
     // Applying all partial/full groundings.
     for (Handle rhandle : derived_rhandles) {
+	    LAZY_FC_LOG_FINE << "Derived rule:" << std::endl
+	                      << rhandle->toString();
         HandleSeq hs = apply_rule(rhandle, _search_focus_Set);
         products.insert(hs.begin(), hs.end());
     }
@@ -149,7 +149,7 @@ void ForwardChainer::do_step(void)
         _potential_sources.insert(products.begin(), products.end());
 
         HandleWeightMap hwm;
-        float weight = _cur_rule->get_weight();
+        float weight = rule->get_weight();
         for (const Handle& h : derived_rhandles)
             hwm[h] = weight;
         _fcstat.add_partial_grounding(_cur_source, rule->get_handle(), hwm);
@@ -189,7 +189,6 @@ void ForwardChainer::do_chain(void)
 void ForwardChainer::apply_all_rules(bool search_focus_set /*= false*/)
 {
     for (Rule* rule : _rules) {
-        _cur_rule = rule;
         HandleSeq hs = apply_rule(rule->get_handle(), search_focus_set);
 
         // Update
