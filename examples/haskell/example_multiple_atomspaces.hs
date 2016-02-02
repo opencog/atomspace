@@ -3,7 +3,7 @@
 
 -- | Simple example on creating different atomspaces and working with them.
 import OpenCog.AtomSpace        (AtomSpace,Atom(..),insert,remove,newAtomSpace,
-                                 getParent,debug,(<:),(|>),(\>),noTv,stv)
+                                 getParent,debug,(<:),noTv,stv)
 
 main :: IO ()
 main = do
@@ -11,11 +11,11 @@ main = do
     childAs <- newAtomSpace $ Just parentAs
 
     parentAs <: do
-        insert $ ConceptNode "GenConcept1" (stv 1 1)
-        insert $ ConceptNode "GenConcept2" (stv 1 1)
+        insert $ Node "ConceptNode" "GenConcept1" (stv 1 1)
+        insert $ Node "ConceptNode" "GenConcept2" (stv 1 1)
     childAs <: do
-        insert $ ConceptNode "PrivateConcept1" noTv
-        insert $ ConceptNode "PrivateConcept2" noTv
+        insert $ Node "ConceptNode" "PrivateConcept1" noTv
+        insert $ Node "ConceptNode" "PrivateConcept2" noTv
 
     case getParent childAs of
         Just parent -> if parentAs == parent
@@ -33,7 +33,7 @@ main = do
 
     putStrLn $ replicate 60 '#'
     putStrLn "State after removing GenConcept1 from Parent Atomspace:"
-    parentAs <: remove $ ConceptNode "GenConcept1" (stv 1 1)
+    parentAs <: remove $ Node "ConceptNode" "GenConcept1" (stv 1 1)
     putStrLn "- Parent AtomSpace:"
     parentAs <: debug
     putStrLn "- Child AtomSpace:"
@@ -41,7 +41,7 @@ main = do
 
     putStrLn $ replicate 60 '#'
     putStrLn "State after trying to remove GenConcept2 from Child Atomspace:"
-    childAs <: remove $ ConceptNode "GenConcept2" noTv
+    childAs <: remove $ Node "ConceptNode" "GenConcept2" noTv
     putStrLn "- Parent AtomSpace:"
     parentAs <: debug
     putStrLn "- Child AtomSpace:"
@@ -49,7 +49,7 @@ main = do
 
     putStrLn $ replicate 60 '#'
     putStrLn "State after removing PrivateConcept1 from Child Atomspace:"
-    childAs <: remove $ ConceptNode "PrivateConcept1" noTv
+    childAs <: remove $ Node "ConceptNode" "PrivateConcept1" noTv
     putStrLn "- Parent AtomSpace:"
     parentAs <: debug
     putStrLn "- Child AtomSpace:"

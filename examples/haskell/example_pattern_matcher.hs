@@ -5,35 +5,37 @@
 -- | Simple example on using the Pattern Matcher.
 import OpenCog.AtomSpace        (AtomSpace,insert,get,remove,cogBind,
                                  debug,runOnNewAtomSpace,printAtom,
-                                 Atom(..),AtomType(BindT),TruthVal(..),
-                                 Gen(..),noTv,stv)
+                                 Atom(..),TruthVal(..),noTv,stv)
 import Control.Monad.IO.Class   (liftIO)
 
-findAnimals :: Atom BindT
-findAnimals = BindLink
-                  (VariableNode "$var")
-                  (InheritanceLink noTv
-                      (VariableNode "$var")
-                      (ConceptNode "animal" noTv)
-                  )
-                  (VariableNode "$var")
+findAnimals :: Atom
+findAnimals = Link "BindLink"
+                  [Node "VariableNode" "$var" noTv
+                  ,Link "InheritanceLink"
+                      [Node "VariableNode" "$var" noTv
+                      ,Node "ConceptNode" "animal" noTv
+                      ] noTv
+                  ,Node "VariableNode" "$var" noTv
+                  ] noTv
 
 main :: IO ()
 main = runOnNewAtomSpace program
 
 program :: AtomSpace ()
 program = do
-        insert $ InheritanceLink noTv
-                   (ConceptNode "fox" noTv)
-                   (ConceptNode "animal" noTv)
-        insert $ InheritanceLink noTv
-                   (ConceptNode "cat" noTv)
-                   (ConceptNode "animal" noTv)
+        insert $ Link "InheritanceLink"
+                   [Node "ConceptNode" "fox" noTv
+                   ,Node "ConceptNode" "animal" noTv
+                   ] noTv
+        insert $ Link "InheritanceLink"
+                   [Node "ConceptNode" "cat" noTv
+                   ,Node "ConceptNode" "animal" noTv
+                   ] noTv
         insert findAnimals
         res <- cogBind findAnimals
         liftIO $ putStrLn "Result: " >> case res of
               Nothing       -> print res
-              Just (Gen at) -> printAtom at
+              Just at -> printAtom at
         liftIO $ putStrLn "-----AtomSpace state at the end:-----"
         debug
         liftIO $ putStrLn "-------------------------------------"
