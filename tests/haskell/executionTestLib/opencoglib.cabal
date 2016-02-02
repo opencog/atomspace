@@ -17,7 +17,6 @@ library
   exposed-modules:       OpenCog.Lib
   build-depends:         base >= 4.7 && < 5
                        , opencog-atomspace
-                       , transformers
   c-sources:             hsbracket.c
   ghc-options:           -dynamic -shared -fPIC
   extra-libraries:       HSrts-ghc7.10.2
