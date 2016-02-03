@@ -138,8 +138,6 @@ void ForwardChainer::do_step(void)
     UnorderedHandleSet products;
     // Applying all partial/full groundings.
     for (Handle rhandle : derived_rhandles) {
-	    LAZY_FC_LOG_FINE << "Derived rule:" << std::endl
-	                      << rhandle->toString();
         HandleSeq hs = apply_rule(rhandle, _search_focus_Set);
         products.insert(hs.begin(), hs.end());
     }
@@ -209,9 +207,8 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
     for (Rule* r : _rules)
         rule_weight[r] = r->get_weight();
 
-    fc_logger().debug(
-            "Looking for a matching rule against source \n\t%s.\n%d rules to be searched.",
-            hsource->toShortString().c_str(), rule_weight.size());
+    fc_logger().debug("%d rules to be searched as matched against the source",
+                      rule_weight.size());
 
     // Select a rule among the admissible rules in the rule-base via stochastic
     // selection, based on the weights of the rules in the current context.
@@ -262,12 +259,12 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
         }
 
         if (unified) {
-            fc_logger().debug("Rule %s matched the source.",
+            fc_logger().debug("Rule %s matched the source",
                               temp->get_name().c_str());
             break;
         } else {
             fc_logger().debug(
-                    "Selected rule %s is not a match. Looking for another rule...",
+                    "Rule %s is not a match. Looking for another rule",
                     temp->get_name().c_str());
         }
 
@@ -275,7 +272,7 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
     }
 
     if (nullptr == rule)
-        fc_logger().debug("No matching rules were found for the given source.");
+        fc_logger().debug("No matching rules were found for the given source");
 
     return rule;
 };
