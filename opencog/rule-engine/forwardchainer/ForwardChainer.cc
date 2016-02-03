@@ -102,7 +102,7 @@ void ForwardChainer::do_step(void)
     const Rule* rule = nullptr;
     UnorderedHandleSet derived_rhandles;
 
-    // Returns previously derived handles for a given choosen
+    // Return previously derived handles for a given choosen
     // rule. Empty if the rule has not been selected previously for
     // this particular source atom.
     auto get_derived = [&](const Handle& hsource) {
@@ -451,10 +451,10 @@ UnorderedHandleSet ForwardChainer::derive_rules(Handle source, Handle term,
     bl->imply(gcb, false);
 
     auto del_by_value =
-            [] (std::vector<std::map<Handle,Handle>>& vec_map,const Handle& h) {
+        [] (std::vector<std::map<Handle,Handle>>& vec_map,const Handle& h) {
         for (auto& map: vec_map)
             for (auto& it:map) { if (it.second == h) map.erase(it.first); }
-            };
+    };
 
     // We don't want VariableList atoms to ground free-vars.
     del_by_value(gcb.term_groundings, implicant_vardecl);
