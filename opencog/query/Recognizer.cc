@@ -37,7 +37,7 @@ namespace opencog {
  * Very rough, crude, experimental prototype for the idea that
  * pattern recognition is the dual of pattern matching.
  * That is, rather than using one query pattern to search a large
- * collection of data, this does the opposite: given a single peice of
+ * collection of data, this does the opposite: given a single piece of
  * data, it searches for all rules/queries which apply to it.
  *
  * The file /examples/aiml/recog.scm provides a very simple example.

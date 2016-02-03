@@ -155,7 +155,7 @@ HandleSeq Rule::get_implicant_seq() const
 	if (rule_handle_ == Handle::UNDEFINED)
 		return HandleSeq();
 
-    Handle implicant= get_implicant();
+    Handle implicant = get_implicant();
     Type t = implicant->getType();
     HandleSeq hs;
 

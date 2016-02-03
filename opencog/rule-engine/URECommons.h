@@ -91,13 +91,14 @@ public:
 	Type tournament_select(map<Type, float> tfitnes_map) {
 		// Nothing to select, return the nullptr rule
 		if (tfitnes_map.empty())
-			 throw RuntimeException(TRACE_INFO,"[URECommons] Empty fitness map provided.");
+			 throw RuntimeException(TRACE_INFO,
+			                        "[URECommons] Empty fitness map provided.");
 
 		// Something to select, randomly pick (without replacement)
 		// about half of the rules and return the best
 		// TODO change the way pick_size is calculated
 		size_t pick_size = std::max(static_cast<size_t>(1),
-				tfitnes_map.size() / 2);
+		                            tfitnes_map.size() / 2);
 		multimap<float, Type> winners;
 		dorepeat(pick_size)
 		{

@@ -11,7 +11,7 @@
 ; -- ure-add-rules -- Associate  a list of rule-alias and weight pairs to a rbs
 ; -- ure-set-num-parameter -- Set a numeric parameter of an rbs
 ; -- ure-set-fuzzy-bool-parameter -- Set a fuzzy boolean parameter of an rbs
-; -- ure-define-rbs -- Create a rbs that runs for a parituclar number of
+; -- ure-define-rbs -- Create a rbs that runs for a particular number of
 ;                      iterations.
 ;
 ; If you add more utilities don't forget to add them in the
