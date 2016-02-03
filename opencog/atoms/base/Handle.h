@@ -131,16 +131,16 @@ public:
         return _ptr.get() != h._ptr.get();
     }
     inline bool operator< (const Handle& h) const noexcept {
-       return atoms_less(_ptr.get(), h._ptr.get());
+       return deterministic_atoms_less(_ptr.get(), h._ptr.get());
     }
     inline bool operator> (const Handle& h) const noexcept {
-       return atoms_less(h._ptr.get(), _ptr.get());
+       return deterministic_atoms_less(h._ptr.get(), _ptr.get());
     }
     inline bool operator<=(const Handle& h) const noexcept {
-       return not atoms_less(h._ptr.get(), _ptr.get());
+       return not deterministic_atoms_less(h._ptr.get(), _ptr.get());
     }
     inline bool operator>=(const Handle& h) const noexcept {
-       return not atoms_less(_ptr.get(), h._ptr.get());
+       return not deterministic_atoms_less(_ptr.get(), h._ptr.get());
     }
 
     /**
