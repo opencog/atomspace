@@ -102,3 +102,11 @@ bool Node::operator!=(const Atom& other) const
 {
     return not (*this == other);
 }
+
+bool Node::operator<(const Atom& other) const
+{
+    if (getType() == other.getType())
+        return getName() < other.getName();
+    else
+        return getType() < other.getType();
+}
