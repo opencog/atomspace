@@ -77,6 +77,9 @@ public:
         init(n._name);
     }
 
+    virtual bool isNode() const { return true; }
+    virtual bool isLink() const { return false; }
+
     /**
      * Gets the name of the node.
      *

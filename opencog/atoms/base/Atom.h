@@ -187,14 +187,16 @@ public:
      */
     inline Type getType() const { return _type; }
 
+    virtual bool isNode() const = 0;
+    virtual bool isLink() const = 0;
+
     /** Returns the outgoing set.
      *
      * @return The outgoing set.
      */
-    virtual inline const HandleSeq& getOutgoingSet() const
+    virtual const HandleSeq& getOutgoingSet() const
     {
-        static HandleSeq no_atoms;
-        return no_atoms;
+        throw RuntimeException(TRACE_INFO, "Not a link!");
     }
 
     /** Returns the handle of the atom.

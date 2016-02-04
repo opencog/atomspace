@@ -142,6 +142,9 @@ public:
      */
     ~Link();
 
+    virtual bool isNode() const { return false; }
+    virtual bool isLink() const { return true; }
+
     inline Arity getArity() const {
         return _outgoing.size();
     }
