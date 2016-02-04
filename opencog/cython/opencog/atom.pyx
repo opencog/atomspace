@@ -116,7 +116,8 @@ cdef class Atom(object):
     property out:
         def __get__(self):            
             if self._outgoing is None:
-                if self.isLink():
+                atom_ptr = self.handle.atom_ptr()
+                if atom_ptr.isLink():
                      self._outgoing = self.get_out()
                 else:
                      self._outgoing = []
