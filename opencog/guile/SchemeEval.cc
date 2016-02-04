@@ -1028,7 +1028,7 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
 	SCM expr = SCM_EOL;
 
 	// If there were args, pass the args to the function.
-	if (varargs->isLink())
+	if (varargs and varargs->isLink())
 	{
 		const std::vector<Handle> &oset = varargs->getOutgoingSet();
 
