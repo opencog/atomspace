@@ -1320,8 +1320,8 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
         clock_t t_begin = clock();
         for (unsigned int i=0; i<Nclock; i++)
         {
-            LinkPtr l(LinkCast(hs[i]));
-            if (l) l->getOutgoingSet();
+            if (hs[i]->isLink())
+                hs[i]->getOutgoingSet();
         }
         clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
