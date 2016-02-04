@@ -91,12 +91,12 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         cAtom()
 
         Type getType()
-        string getName()
+        int isNode()
+        int isLink()
 
         string toString()
         string toShortString()
 
-        vector[cHandle] getOutgoingSet()
         output_iterator getIncomingSet(output_iterator)
 
         tv_ptr getTruthValue()
@@ -114,6 +114,10 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         void decVLTI()
 
         output_iterator getIncomingSetByType(output_iterator, Type type, bint subclass)
+
+        # Conditionally-valid methods. Not defined for all atoms.
+        string getName()
+        vector[cHandle] getOutgoingSet()
 
 
 # Handle
