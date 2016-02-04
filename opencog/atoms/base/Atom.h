@@ -190,12 +190,15 @@ public:
     virtual bool isNode() const = 0;
     virtual bool isLink() const = 0;
 
-    /** Returns the outgoing set.
-     *
-     * @return The outgoing set.
-     */
-    virtual const HandleSeq& getOutgoingSet() const
-    {
+    virtual Arity getArity() const {
+        throw RuntimeException(TRACE_INFO, "Not a link!");
+    }
+
+    virtual const HandleSeq& getOutgoingSet() const {
+        throw RuntimeException(TRACE_INFO, "Not a link!");
+    }
+
+    virtual Handle getOutgoingAtom(Arity) const {
         throw RuntimeException(TRACE_INFO, "Not a link!");
     }
 

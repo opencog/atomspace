@@ -145,7 +145,7 @@ public:
     virtual bool isNode() const { return false; }
     virtual bool isLink() const { return true; }
 
-    inline Arity getArity() const {
+    virtual Arity getArity() const {
         return _outgoing.size();
     }
 
@@ -155,20 +155,21 @@ public:
      *
      * @return A const reference to this atom's outgoing set.
      */
-    inline const HandleSeq& getOutgoingSet() const
+    virtual const HandleSeq& getOutgoingSet() const
     {
         return _outgoing;
     }
+
     /**
      * Returns a specific Handle in the outgoing set.
      *
      * @param The position of the handle in the array.
      * @return A specific handle in the outgoing set.
      */
-    inline Handle getOutgoingAtom(Arity pos) const
+    virtual Handle getOutgoingAtom(Arity pos) const
     {
         // Checks for a valid position
-        if (pos < getArity()) {
+        if (pos < _outgoing.size()) {
             return _outgoing[pos];
         } else {
             throw RuntimeException(TRACE_INFO, "invalid outgoing set index %d", pos);
@@ -182,7 +183,7 @@ public:
     template<class T>
     inline bool foreach_outgoing(bool (T::*cb)(const Handle&), T *data)
     {
-        for (const Handle& out_h : getOutgoingSet()) {
+        for (const Handle& out_h : _outgoing) {
             if ((data->*cb)(out_h)) return true;
         }
         return false;

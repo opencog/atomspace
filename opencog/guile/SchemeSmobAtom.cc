@@ -159,10 +159,9 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-outgoing-set");
 
-	LinkPtr lll(LinkCast(h));
-	if (NULL == lll) return SCM_EOL;
+	if (not h->isLink()) return SCM_EOL;
 
-	const HandleSeq& oset = lll->getOutgoingSet();
+	const HandleSeq& oset = h->getOutgoingSet();
 
 	SCM list = SCM_EOL;
 	for (int i = oset.size()-1; i >= 0; i--)
