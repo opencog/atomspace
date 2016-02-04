@@ -130,18 +130,20 @@ public:
     inline bool operator!=(const Handle& h) const noexcept {
         return _ptr.get() != h._ptr.get();
     }
+#define DEFAULT_ATOMS_LESS deterministic_atoms_less
     inline bool operator< (const Handle& h) const noexcept {
-       return deterministic_atoms_less(_ptr.get(), h._ptr.get());
+       return DEFAULT_ATOMS_LESS(_ptr.get(), h._ptr.get());
     }
     inline bool operator> (const Handle& h) const noexcept {
-       return deterministic_atoms_less(h._ptr.get(), _ptr.get());
+       return DEFAULT_ATOMS_LESS(h._ptr.get(), _ptr.get());
     }
     inline bool operator<=(const Handle& h) const noexcept {
-       return not deterministic_atoms_less(h._ptr.get(), _ptr.get());
+       return not DEFAULT_ATOMS_LESS(h._ptr.get(), _ptr.get());
     }
     inline bool operator>=(const Handle& h) const noexcept {
-       return not deterministic_atoms_less(_ptr.get(), h._ptr.get());
+       return not DEFAULT_ATOMS_LESS(_ptr.get(), h._ptr.get());
     }
+#undef DEFAULT_ATOMS_LESS
 
     /**
      * Returns a negative value, zero or a positive value if the first
