@@ -187,14 +187,6 @@ public:
      */
     inline Type getType() const { return _type; }
 
-    /** Basic predicate */
-    bool isType(Type t, bool subclass) const
-    {
-        Type at(getType());
-        if (not subclass) return t == at;
-        return classserver().isA(at, t);
-    }
-
     /** Returns the outgoing set.
      *
      * @return The outgoing set.
@@ -373,13 +365,16 @@ public:
     {
         if (NULL == _incoming_set) return result;
         std::lock_guard<std::mutex> lck(_mtx);
+        ClassServer& cs(classserver());
         // Sigh. I need to compose copy_if with transform. I could
         // do this wih boost range adaptors, but I don't feel like it.
         auto end = _incoming_set->_iset.end();
         for (auto w = _incoming_set->_iset.begin(); w != end; w++)
         {
             Handle h(w->lock());
-            if (h and h->isType(type, subclass)) {
+            if (nullptr == h) continue;
+            Type at(h->getType());
+            if (type == at or (subclass and cs.isA(at, type))) {
                 *result = h;
                 result ++;
             }
