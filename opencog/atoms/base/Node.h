@@ -85,7 +85,7 @@ public:
      *
      * @return The name of the node.
      */
-    inline const std::string& getName() const { return _name; }
+    virtual const std::string& getName() const { return _name; }
 
     /**
      * Returns a string representation of the node.

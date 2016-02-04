@@ -51,6 +51,9 @@ namespace opencog
 
 class AtomSpace;
 
+//! arity of Links, represented as short integer (16 bits)
+typedef unsigned short Arity;
+
 class Link;
 typedef std::shared_ptr<Link> LinkPtr;
 typedef std::vector<LinkPtr> IncomingSet; // use vector; see below.
@@ -173,11 +176,6 @@ public:
 
     virtual ~Atom();
 
-    virtual const std::string& getName() const {
-        static std::string empty_string("");
-        return empty_string;
-    }
-
     //! Returns the AtomTable in which this Atom is inserted.
     AtomSpace* getAtomSpace() const;
 
@@ -189,6 +187,10 @@ public:
 
     virtual bool isNode() const = 0;
     virtual bool isLink() const = 0;
+
+    virtual const std::string& getName() const {
+        throw RuntimeException(TRACE_INFO, "Not a node!");
+    }
 
     virtual Arity getArity() const {
         throw RuntimeException(TRACE_INFO, "Not a link!");

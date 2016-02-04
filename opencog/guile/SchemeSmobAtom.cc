@@ -52,8 +52,7 @@ SCM SchemeSmob::ss_name (SCM satom)
 {
 	std::string name;
 	Handle h = verify_handle(satom, "cog-name");
-	NodePtr nnn(NodeCast(h));
-	if (nnn) name = nnn->getName();
+	if (h->isNode()) name = h->getName();
 	SCM str = scm_from_utf8_string(name.c_str());
 	return str;
 }

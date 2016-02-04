@@ -36,14 +36,11 @@ class AtomTable;
  *  @{
  */
 
-//! arity of Links, represented as short integer (16 bits)
-typedef unsigned short Arity;
-
 /**
- * Nodes in OpenCog are connected to each other by links. Each link embodies
- * one of the basic inter-node relationships. Links do not necessarily
- * describe a binary relationship between two entities. Links may describe
- * relationships between more than two entities at once. Finally, links
+ * Atoms in OpenCog are connected to each other by links. Each link
+ * embodies a basic inter-atom relationship. Links do not necessarily
+ * describe a binary relationship between two atoms. Links may describe
+ * relationships between more than two atoms at once. Finally, links
  * describe relationships not only between nodes, but also higher-order
  * relationships between links, and between nodes and links.
  */
