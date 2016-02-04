@@ -73,8 +73,7 @@ SCM SchemeSmob::ss_arity (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-arity");
 	Arity ari = 0;
-	LinkPtr lll(LinkCast(h));
-	if (lll) ari = lll->getArity();
+	if (h->isLink()) ari = h->getArity();
 
 	/* Arity is currently an unsigned short */
 	SCM sari = scm_from_ushort(ari);
