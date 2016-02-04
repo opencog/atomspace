@@ -128,7 +128,7 @@ public:
     void doBenchmark(const std::string& methodName, BMFn methodToCall);
 
     void buildAtomSpace(long atomspaceSize=(1 << 16), float percentLinks = 0.1, 
-            bool display = true);
+                        bool display = true);
     Handle getRandomHandle();
     void setTestAllMethods() { setMethod("all"); }
 
