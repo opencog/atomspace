@@ -1255,6 +1255,7 @@ timepair_t AtomSpaceBenchmark::bm_pointerCast()
         clock_t t_begin = clock();
         for (unsigned int i=0; i<Nclock; i++)
         {
+#define MEASURE_LINKS
 #ifdef MEASURE_LINKS
             LinkPtr l(LinkCast(hs[i]));
             if (l)

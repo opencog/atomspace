@@ -1056,6 +1056,7 @@ gets removed now. The change in addNode and addLink is unclear.
 
 How fast is std::vector<Handle>, really?
 
+atomspace_bm -
 
    count             1            2           3            4
    rate           M-ops/sec    M-ops/sec   M-ops/sec    M-ops/sec
@@ -1104,3 +1105,32 @@ ProtoAtom*:     using bool atoms_less(const ProtAtom*, etc...)
 
 Conclude: switching to * from Ptr for handle compares helps. But AddLink
    still hurts; it hurts just a bit less.
+
+======================================================================
+
+4 Feb 2016
+----------
+ProtoAtom work .. how much does a cast really cost?
+i.e. a cast from Handle to NodePtr or LinkPtr ?
+
+atomspace_bm -m noop m- getType -m pointerCast -m getOutgoingSet
+
+                  previous      NodeCast        LinkCast
+   name           K-ops/sec     K-ops/sec      K-ops/sec
+   ----           ---------     ---------      ---------
+  noop              1e6         889K             864K
+  getType          75.5K         72.0K            72.0K
+  pointerCast                     6375             7354
+  getOutgoingSet    7555          7646             7797
+
+previous: copied column from above.
+
+NodeCast: perform NodeCast only.
+
+LinkCast: perform LinkCast only.
+
+Comments: we expect the pointerCast and the getOutgoingSet values to be
+nearly identical, since getOutgoingSet is just a cast, followed by a
+very simple method call.  The NodeCast and Link Cast numbers might
+differ, but not much, due to the different ratios of links and nodes in
+the sample set.
