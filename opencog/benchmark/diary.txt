@@ -1157,3 +1157,42 @@ previous: the situation before protoatoms; copied from above.
 
 ProtoAtom: this branch, including recent work on avoiding smart-pointer
     casts.
+
+=====================================================================
+
+4 Feb 2016
+----------
+New guile baseline. Fanny.  This includes the ProtoAtom code.
+
+
+                -g -M -r100    -g -r100   -g -C -r100    -A
+   test           memoize       interp      compile    AtomSpace
+   name          K-ops/sec     K-ops/sec   K-ops/sec   K-ops/sec
+   ----          ---------     ---------   ---------   ---------
+  noop             2e6          2e6         2e6         1.5e6
+  getType          393          18.3        177        78.0K
+  getTV            380          19.7        218         4261
+  setTV            230          11.2        122         1129
+  getIncomingSet   359          20.5        119         2250
+  getOutgoingSet   340          20.4        118        38.6K
+  addNode          234          17.6         87.8        145
+  addLink          282           5.02       224           67.5
+  removeAtom         3.33        6.69        34.6        186
+
+Remarks:
+ * The memoize and interpreted numbers are a little worse than
+   before. Not sure why.
+ * The removeAtom number seems to be insane, but I cannot spot a
+   bug right now.
+ * How can it be possible that memoized addNode is faster than the
+   C++ addNode? Isn't this logically impossible? Also, addLink...
+ * The compiled numbers are half of what they used to be! Or even 1/3
+   of what they used to be... And they are also worse than the
+   memoized numbers, which makes no sense.  WTF???
+ * Now that we have correctly-measured AtomSpace numbers, the guile
+   numbers are easily seen to be much worse than the C++ numbers.
+ * This is not a very good benchmark, because it does not represent
+   the way that people would "typically" program in scheme.
+
+To summarize: this test is wonky, crazy; the numbers are bizzarely
+inconsistent with expectations.
