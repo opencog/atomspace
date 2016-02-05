@@ -34,7 +34,7 @@ Get and Traverse 100K - by type                 1.473µs         679,073
 Yield Get and Traverse 100K - by type           1.035µs         966,191
 Get Outgoing                                    3.490µs         286,569
 Get Outgoing - no temporary list                3.469µs         288,235
-
+Test scheme_eval_h(+ 2 2)                      49.944µs          20,022
 ...
 
 """
@@ -332,14 +332,6 @@ def test_get_outgoing_no_list(atomspace, prep_result):
             count += 1
     return count
 
-def test_xget_outgoing(atomspace, prep_result):
-    atom_count = prep_result
-    count = 0
-    for atom in atomspace.xget_atoms_by_type(types.AssociativeLink):
-        for outgoing in atomspace.xget_outgoing(atom):
-            count += 1
-    return count
-
 
 # Bindlink tests
 
@@ -476,7 +468,6 @@ tests = [
 (['get_vs_xget'],           prep_get_100K,          test_xget_traverse,         "Yield Get and Traverse 100K - by type"),
 (['get_vs_xget'],           prep_get_outgoing,      test_get_outgoing,          "Get Outgoing"),
 (['get_vs_xget'],           prep_get_outgoing,      test_get_outgoing_no_list,  "Get Outgoing - no temporary list"),
-(['get_vs_xget'],           prep_get_outgoing,      test_xget_outgoing,         "Yield Get Outgoing"),
 
 (['all'],                   None,                   None,                       "-- Testing Bind --"),
 (['bindlink'],              prep_none,              test_stub_bindlink,         "Bind - stub_bindlink - Cython"),
