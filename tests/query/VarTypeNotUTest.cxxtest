@@ -107,7 +107,7 @@ void VarTypeNot::test_exec(void)
    catch (const RuntimeException& ex)
    {
 		logger().setLevel(Logger::INFO);
-      logger().info("Caught exception, just as expected: %s", ex.getMessage());
+      logger().info("Caught exception, just as expected: %s", ex.get_message());
 		caught = true;
    }
    TSM_ASSERT("Failed to catch expected exception", caught);
@@ -139,7 +139,7 @@ void VarTypeNot::test_exec(void)
    }
    catch (const InvalidParamException& ex)
    {
-      logger().debug("Caught exception, just as expected: %s", ex.getMessage());
+      logger().debug("Caught exception, just as expected: %s", ex.get_message());
 		caught = true;
    }
    TSM_ASSERT("Failed to catch expected exception", caught);

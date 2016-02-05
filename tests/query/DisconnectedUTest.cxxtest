@@ -107,7 +107,7 @@ void Disconnected::test_components(void)
 	}
 	catch (const InvalidParamException& ex)
 	{
-		logger().debug("Caught exception, just as expected: %s", ex.getMessage());
+		logger().debug("Caught exception, just as expected: %s", ex.get_message());
 		caught = true;
 	}
 	logger().info("Caught exception? %d\n", caught);
@@ -139,7 +139,7 @@ void Disconnected::test_variables(void)
 	}
 	catch (const RuntimeException& ex)
 	{
-		logger().debug("Caught exception, just as expected: %s", ex.getMessage());
+		logger().debug("Caught exception, just as expected: %s", ex.get_message());
 		caught = true;
 	}
 	logger().info("Caught exception? %d\n", caught);
@@ -153,7 +153,7 @@ void Disconnected::test_variables(void)
 	}
 	catch (const RuntimeException& ex)
 	{
-		logger().debug("Caught exception, just as expected: %s", ex.getMessage());
+		logger().debug("Caught exception, just as expected: %s", ex.get_message());
 		caught = true;
 	}
 	logger().info("Caught exception? %d\n", caught);
@@ -167,7 +167,7 @@ void Disconnected::test_variables(void)
 	}
 	catch (const RuntimeException& ex)
 	{
-		logger().debug("Caught exception, just as expected: %s", ex.getMessage());
+		logger().debug("Caught exception, just as expected: %s", ex.get_message());
 		caught = true;
 	}
 	logger().info("Caught exception? %d\n", caught);
@@ -197,7 +197,7 @@ void Disconnected::test_cvariables(void)
 	}
 	catch (const InvalidParamException& ex)
 	{
-		logger().debug("Caught exception, just as expected: %s", ex.getMessage());
+		logger().debug("Caught exception, just as expected: %s", ex.get_message());
 		caught = true;
 	}
 	logger().info("Caught exception? %d\n", caught);

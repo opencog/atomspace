@@ -1266,7 +1266,7 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     }
     catch (const RuntimeException &e)
     {
-        _result = e.getMessage();
+        _result = e.get_message();
         _result += "\n";
     }
     _input_line = "";
