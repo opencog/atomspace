@@ -46,7 +46,7 @@ public:
         Type numClasses = classserver().getNumberOfClasses();
         for (Type t = 0; t < numClasses; t++) {
             TS_ASSERT(classserver().isA(t, t));
-            if (t > 0) TS_ASSERT(classserver().isA(t, NODE)
+            if (t > ATOM) TS_ASSERT(classserver().isA(t, NODE)
                               or classserver().isA(t, LINK));
         }
 
@@ -70,13 +70,6 @@ public:
         TS_ASSERT(classserver().getTypeName(NODE)      == "Node");
         TS_ASSERT(classserver().getTypeName(NUMBER_NODE) == "NumberNode");
         TS_ASSERT(classserver().getTypeName(LIST_LINK) == "ListLink");
-    }
-
-    void testCodes()
-    {
-        TS_ASSERT(classserver().getType("Atom") == 0);
-        TS_ASSERT(classserver().getType("Node") <= 2);
-        TS_ASSERT(classserver().getType("Link") <= 2);
     }
 
     void testCustomTypes()

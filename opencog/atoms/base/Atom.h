@@ -35,8 +35,7 @@
 #include <boost/signals2.hpp>
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/base/types.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/ProtoAtom.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/TruthValue.h>
 
@@ -74,7 +73,7 @@ typedef boost::signals2::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
  * properties from atoms.
  */
 class Atom
-    : public std::enable_shared_from_this<Atom>
+    : public ProtoAtom
 {
     friend class AtomStorage;     // Needs to set _uuid
     friend class AtomTable;       // Needs to call MarkedForRemoval()
@@ -92,13 +91,12 @@ private:
     AtomTable *getAtomTable() const { return _atomTable; }
 
 protected:
+    // Byte of bitflags (each bit is a flag, see AtomSpaceDefinites.h)
+    // Place this first, so that is shares a word with Type.
+    char _flags;
+
     UUID _uuid;
     AtomTable *_atomTable;
-
-    Type _type;
-
-    // Byte of bitflags (each bit is a flag, see AtomSpaceDefinites.h)
-    char _flags;
 
     TruthValuePtr _truthValue;
     AttentionValuePtr _attentionValue;
@@ -121,10 +119,10 @@ protected:
      */
     Atom(Type t, TruthValuePtr tv = TruthValue::DEFAULT_TV(),
             AttentionValuePtr av = AttentionValue::DEFAULT_AV())
-      : _uuid(Handle::INVALID_UUID),
-        _atomTable(NULL),
-        _type(t),
+      : ProtoAtom(t),
         _flags(0),
+        _uuid(Handle::INVALID_UUID),
+        _atomTable(NULL),
         _truthValue(tv),
         _attentionValue(av)
     {}
@@ -179,11 +177,7 @@ public:
     //! Returns the AtomTable in which this Atom is inserted.
     AtomSpace* getAtomSpace() const;
 
-    /** Returns the type of the atom.
-     *
-     * @return The type of the atom.
-     */
-    inline Type getType() const { return _type; }
+    inline UUID getUUID() const { return _uuid; }
 
     virtual bool isNode() const = 0;
     virtual bool isLink() const = 0;
@@ -209,9 +203,8 @@ public:
      * @return The handle of the atom.
      */
     inline Handle getHandle() {
-        return Handle(shared_from_this());
+        return Handle(std::dynamic_pointer_cast<Atom>(shared_from_this()));
     }
-    inline UUID getUUID() const { return _uuid; }
 
     /** Returns the AttentionValue object of the atom.
      *
@@ -298,7 +291,7 @@ public:
      */
     inline Handle tvmerge(TruthValuePtr tv) {
         merge(tv);
-        return Handle(shared_from_this());
+        return getHandle();
     }
 
     //! Get the size of the incoming set.
@@ -418,8 +411,25 @@ public:
      *
      * @return true if the atoms are different, false otherwise.
      */
-    virtual bool operator!=(const Atom&) const = 0;
+    bool operator!=(const Atom& other) const
+    { return not operator==(other); }
+
+    virtual bool operator==(const ProtoAtom& other) const
+    {
+        if (_type != other.getType()) return false;
+        return operator==(dynamic_cast<const Atom&>(other));
+    }
 };
+
+static inline AtomPtr AtomCast(const ProtoAtomPtr& pa)
+    { return std::dynamic_pointer_cast<Atom>(pa); }
+
+static inline AtomPtr AtomCast(const Handle& h)
+    { return AtomPtr(h); }
+
+static inline Handle HandleCast(const ProtoAtomPtr& pa)
+    { return Handle(AtomCast(pa)); }
+
 
 /** @}*/
 } // namespace opencog

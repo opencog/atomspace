@@ -75,8 +75,8 @@ public:
 
 typedef std::shared_ptr<NumberNode> NumberNodePtr;
 static inline NumberNodePtr NumberNodeCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<NumberNode>(a); }
-static inline NumberNodePtr NumberNodeCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<NumberNode>(AtomCast(h)); }
+static inline NumberNodePtr NumberNodeCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<NumberNode>(a); }
 
 // XXX temporary hack ...

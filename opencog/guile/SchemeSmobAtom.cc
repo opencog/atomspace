@@ -295,7 +295,7 @@ SCM SchemeSmob::ss_type_p (SCM stype)
 {
 	if (scm_is_integer(stype)) {
 		Type t = scm_to_ushort(stype);
-		if (classserver().isValid(t))
+		if (classserver().isValue(t))
 			return SCM_BOOL_T;
 		return SCM_BOOL_F;
 	}
@@ -312,6 +312,34 @@ SCM SchemeSmob::ss_type_p (SCM stype)
 	if (NOTYPE == t) return SCM_BOOL_F;
 
 	return SCM_BOOL_T;
+}
+
+/**
+ * Return true if stype is a value type
+ */
+SCM SchemeSmob::ss_value_type_p (SCM stype)
+{
+	if (scm_is_integer(stype)) {
+		Type t = scm_to_ushort(stype);
+		if (classserver().isValue(t) and not classserver().isAtom(t))
+			return SCM_BOOL_T;
+		return SCM_BOOL_F;
+	}
+
+	if (scm_is_true(scm_symbol_p(stype)))
+		stype = scm_symbol_to_string(stype);
+
+	if (scm_is_false(scm_string_p(stype)))
+		return SCM_BOOL_F;
+
+	const char * ct = scm_i_string_chars(stype);
+	Type t = classserver().getType(ct);
+
+	if (NOTYPE == t) return SCM_BOOL_F;
+	if (classserver().isValue(t) and not classserver().isAtom(t))
+		return SCM_BOOL_T;
+
+	return SCM_BOOL_F;
 }
 
 /**
@@ -336,9 +364,9 @@ SCM SchemeSmob::ss_node_type_p (SCM stype)
 	Type t = classserver().getType(ct);
 
 	if (NOTYPE == t) return SCM_BOOL_F;
-	if (false == classserver().isA(t, NODE)) return SCM_BOOL_F;
+	if (classserver().isNode(t)) return SCM_BOOL_T;
 
-	return SCM_BOOL_T;
+	return SCM_BOOL_F;
 }
 
 /**
@@ -363,9 +391,9 @@ SCM SchemeSmob::ss_link_type_p (SCM stype)
 	Type t = classserver().getType(ct);
 
 	if (NOTYPE == t) return SCM_BOOL_F;
-	if (false == classserver().isA(t, LINK)) return SCM_BOOL_F;
+	if (classserver().isLink(t)) return SCM_BOOL_T;
 
-	return SCM_BOOL_T;
+	return SCM_BOOL_F;
 }
 
 /**
