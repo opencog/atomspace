@@ -1101,7 +1101,7 @@ Again, ProtoAtom.
 AtomPtr column: copied from above
 Atom* column:   using bool atoms_less(const Atom*, const Atom*); in
                 Handle.h (used to be AtomPtr)
-ProtoAtom*:     using bool atoms_less(const ProtAtom*, etc...)
+ProtoAtom*:     using bool atoms_less(const ProtoAtom*, etc...)
 
 Conclude: switching to * from Ptr for handle compares helps. But AddLink
    still hurts; it hurts just a bit less.
