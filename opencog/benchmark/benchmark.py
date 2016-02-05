@@ -4,10 +4,15 @@
 """
 Python binding benchmarks
 
-Displays the number of operations per second achieved under various scenarios
-utilizing the Python bindings that wrap the AtomSpace using Cython. Some of the
-tests compare the evaluation of nodes using the Python Scheme bindings which
-take much longer than their comparable Cython bindings.
+Displays the number of operations per second achieved under various
+scenarios utilizing the Python bindings that wrap the AtomSpace using
+Cython. Some of the tests compare the evaluation of nodes using the
+Python Scheme bindings which take much longer than their comparable
+Cython bindings. XXX Which is utterly false and insane -- the
+measurements are being done incorrectly, since the Scheme bindings
+normally run about 3x to 10x faster than the Python bindings do.
+Python is generally quite slow, and is very unlikely to be faster than
+scheme; something is borked with this test case.
 
 Results can be compared with the more comprehensive benchmarking code in
 the opencog/benchmark directory.
@@ -15,33 +20,28 @@ the opencog/benchmark directory.
 Example results (excerpt only):
 --- OpenCog Python Benchmark -  2015-03-12 15:44:02.614126 ---
 
--- Testing Node Adds --
 
-Add nodes - Cython
-  Total time: 0.537
-  Ops: 100,000
-  Op time in µs: 5.37
-  Ops per second: 186,219
-
-Add nodes - Cython (500K)
-  Total time: 2.792
-  Ops: 500,000
-  Op time in µs: 5.58
-  Ops per second: 179,115
-
-Add fully connected nodes
-  Total time: 5.049
-  Ops: 500,500
-  Op time in µs: 10.09
-  Ops per second: 99,132
-
+Test                                        Time per op  Ops per second
+----                                        -----------  --------------
+Add nodes - Cython                             10.324µs          96,863
+Add nodes - Cython (500K)                      10.470µs          95,515
+Add fully connected nodes                      17.018µs          58,762
+Bare atom traversal 100K - by type              0.006µs     158,508,899
+Resolve Handle 10K - by type                    0.186µs       5,376,023
+Resolve Handle 100K - by type                   0.175µs       5,717,122
+Resolve Handle 1M - by type                     0.174µs       5,737,272
+Get and Traverse 100K - by type                 1.473µs         679,073
+Yield Get and Traverse 100K - by type           1.035µs         966,191
+Get Outgoing                                    3.490µs         286,569
+Get Outgoing - no temporary list                3.469µs         288,235
+Test scheme_eval_h(+ 2 2)                      49.944µs          20,022
 ...
 
 """
 
 import argparse
 import time, datetime
-from opencog.atomspace import AtomSpace, TruthValue, Handle, Atom, types
+from opencog.atomspace import AtomSpace, TruthValue, Atom, types
 import opencog.scheme_wrapper as scheme
 from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h
 from opencog.bindlink import stub_bindlink, bindlink
@@ -137,13 +137,14 @@ def prep_get_outgoing(atomspace):
     """
     n = 1000
     offset = atomspace.add_node(types.ConceptNode, "Starting handle offset")
-    offset = offset.h.value()
+    offset = offset.value()
 
     for i in xrange(1, n+1):
         atomspace.add_node(types.ConceptNode, str(i), TruthValue(.5, .5))
         for j in xrange(1, i):
-            atomspace.add_link(types.HebbianLink,
-                       [Handle(i + offset), Handle(j + offset)],
+            # atomspace.add_link(types.HebbianLink,
+            atomspace.add_link(types.AssociativeLink,
+                       [Atom(i + offset, atomspace), Atom(j + offset, atomspace)],
                        TruthValue(.2, .3))
 
     # Number of vertices plus number of edges in a fully connected graph
@@ -152,6 +153,7 @@ def prep_get_outgoing(atomspace):
 def prep_bind(atomspace):
     for scheme_file in scheme_preload:
         load_scm(atomspace, scheme_file)
+    scheme_eval(atomspace, "(use-modules (opencog))")
 
     # Define several animals and something of a different type as well
     scheme_animals = \
@@ -262,13 +264,14 @@ def test_add_connected(atomspace, prep_handle):
     """
     n = 1000
     offset = atomspace.add_node(types.ConceptNode, "Starting handle offset")
-    offset = offset.h.value()
+    offset = offset.value()
 
     for i in xrange(1, n+1):
         atomspace.add_node(types.ConceptNode, str(i), TruthValue(.5, .5))
         for j in xrange(1, i):
-            atomspace.add_link(types.HebbianLink,
-                       [Handle(i + offset), Handle(j + offset)],
+            # atomspace.add_link(types.HebbianLink,
+            atomspace.add_link(types.AssociativeLink,
+                       [Atom(i + offset, atomspace), Atom(j + offset, atomspace)],
                        TruthValue(.2, .3))
 
     # Number of vertices plus number of edges in a fully connected graph
@@ -313,7 +316,7 @@ def test_xget_traverse(atomspace, prep_result):
 
 def test_get_outgoing(atomspace, prep_result):
     atom_count = prep_result
-    atom_list = atomspace.get_atoms_by_type(types.HebbianLink)
+    atom_list = atomspace.get_atoms_by_type(types.AssociativeLink)
     count = 0
     for atom in atom_list:
         outgoing_list = atom.out
@@ -324,16 +327,8 @@ def test_get_outgoing(atomspace, prep_result):
 def test_get_outgoing_no_list(atomspace, prep_result):
     atom_count = prep_result
     count = 0
-    for atom in atomspace.get_atoms_by_type(types.HebbianLink):
+    for atom in atomspace.get_atoms_by_type(types.AssociativeLink):
         for outgoing in atom.out:
-            count += 1
-    return count
-
-def test_xget_outgoing(atomspace, prep_result):
-    atom_count = prep_result
-    count = 0
-    for atom in atomspace.xget_atoms_by_type(types.HebbianLink):
-        for outgoing in atomspace.xget_outgoing(atom.h):
             count += 1
     return count
 
@@ -473,7 +468,6 @@ tests = [
 (['get_vs_xget'],           prep_get_100K,          test_xget_traverse,         "Yield Get and Traverse 100K - by type"),
 (['get_vs_xget'],           prep_get_outgoing,      test_get_outgoing,          "Get Outgoing"),
 (['get_vs_xget'],           prep_get_outgoing,      test_get_outgoing_no_list,  "Get Outgoing - no temporary list"),
-(['get_vs_xget'],           prep_get_outgoing,      test_xget_outgoing,         "Yield Get Outgoing"),
 
 (['all'],                   None,                   None,                       "-- Testing Bind --"),
 (['bindlink'],              prep_none,              test_stub_bindlink,         "Bind - stub_bindlink - Cython"),

@@ -57,7 +57,6 @@ private:
     source_selection_mode _ts_mode;
     bool _search_in_af;
     bool _search_focus_Set;
-    const Rule* _cur_rule;
     Handle _cur_source;
     UnorderedHandleSet _selected_sources;
 
@@ -73,9 +72,9 @@ private:
                                    const std::set<Handle>& vars,
                                    const std::vector<std::map<Handle, Handle>>&
                                    var_groundings);
-    bool unify(Handle source, Handle target, const Rule* rule);
+    bool unify(Handle source, Handle term, const Rule* rule);
     bool subatom_unify(Handle source, const Rule* rule);
-    HandleSeq derive_rules(Handle source, Handle target, const Rule* rule);
+    UnorderedHandleSet derive_rules(Handle source, Handle term, const Rule* rule);
     void update_potential_sources(HandleSeq input);
 
     bool is_valid_implicant(const Handle& h);
@@ -83,7 +82,7 @@ private:
 
 protected:
     vector<Rule*> _rules; /*<loaded rules*/
-    HandleSeq _potential_sources;
+    UnorderedHandleSet _potential_sources;
     HandleSeq _focus_set;
 
     /**
@@ -111,7 +110,8 @@ protected:
     virtual HandleSeq apply_rule(Handle rhandle, bool search_focus_set_only =
             false);
 
-    HandleSeq derive_rules(Handle source, const Rule* rule, bool subatomic = false);
+    UnorderedHandleSet derive_rules(Handle source, const Rule* rule,
+                                    bool subatomic = false);
 
 public:
     /**

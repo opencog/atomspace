@@ -88,8 +88,8 @@ public:
 
 typedef std::shared_ptr<DefineLink> DefineLinkPtr;
 static inline DefineLinkPtr DefineLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<DefineLink>(a); }
-static inline DefineLinkPtr DefineLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<DefineLink>(AtomCast(h)); }
+static inline DefineLinkPtr DefineLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<DefineLink>(a); }
 
 // XXX temporary hack ...

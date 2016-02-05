@@ -40,7 +40,10 @@ cdef class Atom(object):
             cdef cAtom* atom_ptr
             if self._name is None:
                 atom_ptr = self.handle.atom_ptr()
-                self._name = atom_ptr.getName()
+                if atom_ptr.isNode():
+                    self._name = atom_ptr.getName()
+                else:
+                    self._name = ""
             return self._name
 
     property tv:
@@ -113,7 +116,11 @@ cdef class Atom(object):
     property out:
         def __get__(self):            
             if self._outgoing is None:
-                self._outgoing = self.get_out()
+                atom_ptr = self.handle.atom_ptr()
+                if atom_ptr.isLink():
+                     self._outgoing = self.get_out()
+                else:
+                     self._outgoing = []
             return self._outgoing
 
     property arity:

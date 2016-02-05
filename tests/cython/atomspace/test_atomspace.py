@@ -365,14 +365,8 @@ class AtomTest(TestCase):
     def test_type(self):
         # test get out
         a = Node("test2")
-
-        self.assertEqual(a.type, 1)
-        self.assertEqual(a.t, 1)
-
         a2 = Node("test3")
         l = Link(a, a2)
-        self.assertEqual(l.type, 2)
-        self.assertEqual(l.t, 2)
 
         # ensure type is considered immutable
         self.assertRaises(AttributeError, setattr, l, "type", 5)

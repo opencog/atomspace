@@ -216,86 +216,92 @@ void AtomSpaceBenchmark::setMethod(std::string methodToTest)
 
     if (methodToTest == "all" or methodToTest == "noop") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_noop);
-        methodNames.push_back( "noop");
+        methodNames.push_back("noop");
         foundMethod = true;
     }
     if (methodToTest == "all" or methodToTest == "getType") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getType);
-        methodNames.push_back( "getType");
+        methodNames.push_back("getType");
         foundMethod = true;
     }
 
     if (methodToTest == "all" or methodToTest == "getTruthValue") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getTruthValue);
-        methodNames.push_back( "getTruthValue");
+        methodNames.push_back("getTruthValue");
         foundMethod = true;
     }
 
 #ifdef ZMQ_EXPERIMENT
     if (methodToTest == "all" or methodToTest == "getTruthValueZMQ") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getTruthValueZmq);
-        methodNames.push_back( "getTruthValueZMQ");
+        methodNames.push_back("getTruthValueZMQ");
         foundMethod = true;
     }
 #endif
 
     if (methodToTest == "all" or methodToTest == "setTruthValue") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_setTruthValue);
-        methodNames.push_back( "setTruthValue");
+        methodNames.push_back("setTruthValue");
         foundMethod = true;
     }
 
-    if (methodToTest == "all" or methodToTest == "getOutgoingSet") {
-        methodsToTest.push_back( &AtomSpaceBenchmark::bm_getOutgoingSet);
-        methodNames.push_back( "getOutgoingSet");
+    if (methodToTest == "all" or methodToTest == "pointerCast") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_pointerCast);
+        methodNames.push_back("pointerCast");
         foundMethod = true;
     }
 
     if (methodToTest == "all" or methodToTest == "getIncomingSet") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getIncomingSet);
-        methodNames.push_back( "getIncomingSet");
+        methodNames.push_back("getIncomingSet");
+        foundMethod = true;
+    }
+
+    if (methodToTest == "all" or methodToTest == "getOutgoingSet") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_getOutgoingSet);
+        methodNames.push_back("getOutgoingSet");
         foundMethod = true;
     }
 
     if (methodToTest == "all" or methodToTest == "addNode") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_addNode);
-        methodNames.push_back( "addNode");
+        methodNames.push_back("addNode");
         foundMethod = true;
     }
 
     if (methodToTest == "all" or methodToTest == "addLink") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_addLink);
-        methodNames.push_back( "addLink");
+        methodNames.push_back("addLink");
         foundMethod = true;
     }
 
     if (methodToTest == "all" or methodToTest == "removeAtom") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_rmAtom);
-        methodNames.push_back( "removeAtom");
+        methodNames.push_back("removeAtom");
         foundMethod = true;
     }
 
     if (methodToTest == "all" or methodToTest == "getHandlesByType") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getHandlesByType);
-        methodNames.push_back( "getHandlesByType");
+        methodNames.push_back("getHandlesByType");
         foundMethod = true;
     }
 
     if (methodToTest == "all" or methodToTest == "push_back") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_push_back);
-        methodNames.push_back( "push_back");
+        methodNames.push_back("push_back");
         foundMethod = true;
     }
 
     if (methodToTest == "all" or methodToTest == "emplace_back") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_emplace_back);
-        methodNames.push_back( "emplace_back");
+        methodNames.push_back("emplace_back");
         foundMethod = true;
     }
 
     if (methodToTest == "all" or methodToTest == "reserve") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_reserve);
-        methodNames.push_back( "reserve");
+        methodNames.push_back("reserve");
         foundMethod = true;
     }
 
@@ -898,8 +904,8 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
-#if HAVE_CYTHONX
         OC_ASSERT(1 == Nloops, "Looping not supported for python");
+#if HAVE_CYTHONX
         std::ostringstream dss;
         for (unsigned int i=0; i<Nloops; i++) {
             dss << "aspace.remove(Handle(" << h.value() << "))\n";
@@ -981,8 +987,8 @@ timepair_t AtomSpaceBenchmark::bm_getType()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
-#if HAVE_CYTHONX
         OC_ASSERT(1 == Nloops, "Looping not supported for python");
+#if HAVE_CYTHONX
         std::ostringstream dss;
         for (unsigned int i=0; i<Nloops; i++) {
             dss << "aspace.get_type(Handle(" << h.value() << "))\n";
@@ -1166,62 +1172,6 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
     return timepair_t(0,0);
 }
 
-timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
-{
-    Handle hs[Nclock];
-    for (unsigned int i=0; i<Nclock; i++)
-        hs[i] = getRandomHandle();
-
-    switch (testKind) {
-#if HAVE_CYTHON
-    case BENCH_PYTHON: {
-#if HAVE_CYTHONX
-        OC_ASSERT(1 == Nloops, "Looping not supported for python");
-        std::ostringstream dss;
-        dss << "out = Atom(" << h.value() << ", aspace).out\n";
-        std::string ps = dss.str();
-        clock_t t_begin = clock();
-        pyev->eval(ps);
-        return clock() - t_begin;
-#endif /* HAVE_CYTHON */
-    }
-#endif /* HAVE_CYTHON */
-#if HAVE_GUILE
-    case BENCH_SCM: {
-        std::string gsa[Nclock];
-        for (unsigned int i=0; i<Nclock; i++)
-        {
-            Handle h = hs[i];
-            std::ostringstream ss;
-            for (unsigned int i=0; i<Nloops; i++) {
-                ss << "(cog-outgoing-set (cog-atom " << h.value() << "))\n";
-                h = getRandomHandle();
-            }
-            std::string gs = memoize_or_compile(ss.str());
-            gsa[i] = gs;
-        }
-        clock_t t_begin = clock();
-        for (unsigned int i=0; i<Nclock; i++)
-           scm->eval(gsa[i]);
-        clock_t time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }
-#endif /* HAVE_GUILE */
-    case BENCH_AS:
-    case BENCH_TABLE: {
-        clock_t t_begin = clock();
-        for (unsigned int i=0; i<Nclock; i++)
-        {
-            LinkPtr l(LinkCast(hs[i]));
-            if (l) l->getOutgoingSet();
-        }
-        clock_t time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }
-    }
-    return timepair_t(0,0);
-}
-
 timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
 {
     Handle hs[Nclock];
@@ -1268,6 +1218,111 @@ timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
         clock_t t_begin = clock();
         for (unsigned int i=0; i<Nclock; i++)
             hs[i]->getIncomingSet();
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+    }
+    return timepair_t(0,0);
+}
+
+// How long does it take to cast?
+timepair_t AtomSpaceBenchmark::bm_pointerCast()
+{
+    Handle hs[Nclock];
+    for (unsigned int i=0; i<Nclock; i++)
+        hs[i] = getRandomHandle();
+
+    switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        return timepair_t(0,0);
+    }
+#endif /* HAVE_CYTHON */
+#if HAVE_GUILE
+    case BENCH_SCM: {
+        return timepair_t(0,0);
+    }
+#endif /* HAVE_GUILE */
+    case BENCH_AS:
+    case BENCH_TABLE: {
+        // Summing prevents the optimizer from optimizing away.
+        // We want to measure how long it takes to perform a cast.
+        // To avoid the optimizer from playing tricks, we hav to do
+        // something with the resulting pointer.  We already know that
+        // getType() is very fast -- a method call, so we treat that as
+        // a lind-of no-op.
+        int sum = 0;
+        clock_t t_begin = clock();
+        for (unsigned int i=0; i<Nclock; i++)
+        {
+#define MEASURE_LINKS
+#ifdef MEASURE_LINKS
+            LinkPtr l(LinkCast(hs[i]));
+            if (l)
+               sum += l->getType();
+#else
+            NodePtr n(NodeCast(hs[i]));
+            if (n)
+               sum += n->getType();
+#endif
+        }
+        clock_t time_taken = clock() - t_begin;
+        global += sum;
+        return timepair_t(time_taken,0);
+    }
+    }
+    return timepair_t(0,0);
+}
+
+timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
+{
+    Handle hs[Nclock];
+    for (unsigned int i=0; i<Nclock; i++)
+        hs[i] = getRandomHandle();
+
+    switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        OC_ASSERT(1 == Nloops, "Looping not supported for python");
+#if HAVE_CYTHONX
+        std::ostringstream dss;
+        dss << "out = Atom(" << h.value() << ", aspace).out\n";
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
+#endif /* HAVE_CYTHON */
+    }
+#endif /* HAVE_CYTHON */
+#if HAVE_GUILE
+    case BENCH_SCM: {
+        std::string gsa[Nclock];
+        for (unsigned int i=0; i<Nclock; i++)
+        {
+            Handle h = hs[i];
+            std::ostringstream ss;
+            for (unsigned int i=0; i<Nloops; i++) {
+                ss << "(cog-outgoing-set (cog-atom " << h.value() << "))\n";
+                h = getRandomHandle();
+            }
+            std::string gs = memoize_or_compile(ss.str());
+            gsa[i] = gs;
+        }
+        clock_t t_begin = clock();
+        for (unsigned int i=0; i<Nclock; i++)
+           scm->eval(gsa[i]);
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+#endif /* HAVE_GUILE */
+    case BENCH_AS:
+    case BENCH_TABLE: {
+        clock_t t_begin = clock();
+        for (unsigned int i=0; i<Nclock; i++)
+        {
+            if (hs[i]->isLink())
+                hs[i]->getOutgoingSet();
+        }
         clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
