@@ -44,10 +44,8 @@ INSTALL (FILES
 	HandleSeqIndex.h
 	ImportanceIndex.h
 	LinkIndex.h
-	LinkValue.h
 	NameIndex.h
 	NodeIndex.h
-	ProtoAtom.h
 	StringIndex.h
 	TypeIndex.h
 	TLB.h
