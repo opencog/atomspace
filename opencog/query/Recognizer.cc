@@ -37,7 +37,7 @@ namespace opencog {
  * Very rough, crude, experimental prototype for the idea that
  * pattern recognition is the dual of pattern matching.
  * That is, rather than using one query pattern to search a large
- * collection of data, this does the opposite: given a single peice of
+ * collection of data, this does the opposite: given a single piece of
  * data, it searches for all rules/queries which apply to it.
  *
  * The file /examples/aiml/recog.scm provides a very simple example.
@@ -103,13 +103,12 @@ using namespace opencog;
 
 bool Recognizer::do_search(PatternMatchEngine* pme, const Handle& top)
 {
-	LinkPtr ltop(LinkCast(top));
-	if (ltop)
+	if (top->isLink())
 	{
 		// Recursively drill down and explore every possible node as
 		// a search starting point. This is needed, as the patterns we
 		// compare against might not be connected.
-		for (const Handle& h : ltop->getOutgoingSet())
+		for (const Handle& h : top->getOutgoingSet())
 		{
 			_starter_term = top;
 			bool found = do_search(pme, h);
@@ -181,7 +180,7 @@ bool Recognizer::loose_match(const Handle& npat_h, const Handle& nsoln_h)
 
 	// Strict match for link types
 	if (npat_h->getType() != gtype) return false;
-	if (nullptr == NodeCast(npat_h)) return true;
+	if (not npat_h->isNode()) return true;
 
 	// if we are here, we know we have nodes. Ask for a strick match.
 	if (npat_h != nsoln_h) return false;
@@ -195,11 +194,9 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 	// if we are too rigorouos here, and have a bug, we may fail to find
 	// a good pattern.
 
-	LinkPtr lpat(LinkCast(npat_h));
-	LinkPtr lsoln(LinkCast(nsoln_h));
-	if (nullptr == lpat or nullptr == lsoln) return false;
+	if (not npat_h->isLink() or not nsoln_h->isLink()) return false;
 
-	const HandleSeq &osg = lsoln->getOutgoingSet();
+	const HandleSeq &osg = nsoln_h->getOutgoingSet();
 	size_t osg_size = osg.size();
 
 	// Lets not waste time, if there's no glob there.
@@ -214,7 +211,7 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 	}
 	if (not have_glob) return false;
 
-	const HandleSeq &osp = lpat->getOutgoingSet();
+	const HandleSeq &osp = npat_h->getOutgoingSet();
 	size_t osp_size = osp.size();
 	size_t max_size = std::max(osg_size, osp_size);
 

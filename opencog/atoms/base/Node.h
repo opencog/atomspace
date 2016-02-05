@@ -77,12 +77,15 @@ public:
         init(n._name);
     }
 
+    virtual bool isNode() const { return true; }
+    virtual bool isLink() const { return false; }
+
     /**
      * Gets the name of the node.
      *
      * @return The name of the node.
      */
-    inline const std::string& getName() const { return _name; }
+    virtual const std::string& getName() const { return _name; }
 
     /**
      * Returns a string representation of the node.

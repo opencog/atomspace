@@ -52,8 +52,7 @@ SCM SchemeSmob::ss_name (SCM satom)
 {
 	std::string name;
 	Handle h = verify_handle(satom, "cog-name");
-	NodePtr nnn(NodeCast(h));
-	if (nnn) name = nnn->getName();
+	if (h->isNode()) name = h->getName();
 	SCM str = scm_from_utf8_string(name.c_str());
 	return str;
 }
@@ -73,8 +72,7 @@ SCM SchemeSmob::ss_arity (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-arity");
 	Arity ari = 0;
-	LinkPtr lll(LinkCast(h));
-	if (lll) ari = lll->getArity();
+	if (h->isLink()) ari = h->getArity();
 
 	/* Arity is currently an unsigned short */
 	SCM sari = scm_from_ushort(ari);
@@ -159,10 +157,9 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-outgoing-set");
 
-	LinkPtr lll(LinkCast(h));
-	if (NULL == lll) return SCM_EOL;
+	if (not h->isLink()) return SCM_EOL;
 
-	const HandleSeq& oset = lll->getOutgoingSet();
+	const HandleSeq& oset = h->getOutgoingSet();
 
 	SCM list = SCM_EOL;
 	for (int i = oset.size()-1; i >= 0; i--)

@@ -40,6 +40,9 @@
 (define (LemmaNode . x)
 	(apply cog-new-node (append (list 'LemmaNode) x)))
 
+(define (LgConnectorNode . x)
+   (apply cog-new-node (append (list 'LgConnectorNode) x)))
+
 (define (ParseNode . x)
 	(apply cog-new-node (append (list 'ParseNode) x)))
 

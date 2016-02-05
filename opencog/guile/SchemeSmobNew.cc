@@ -246,7 +246,7 @@ SCM SchemeSmob::ss_node_p (SCM s)
 	if (nullptr == h)
 		return SCM_BOOL_F;
 
-	if (NodeCast(h)) return SCM_BOOL_T;
+	if (h->isNode()) return SCM_BOOL_T;
 
 	return SCM_BOOL_F;
 }
@@ -260,7 +260,7 @@ SCM SchemeSmob::ss_link_p (SCM s)
 	if (nullptr == h)
 		return SCM_BOOL_F;
 
-	if (LinkCast(h)) return SCM_BOOL_T;
+	if (h->isLink()) return SCM_BOOL_T;
 	return SCM_BOOL_F;
 }
 

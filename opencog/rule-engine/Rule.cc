@@ -51,7 +51,7 @@ void Rule::init(Handle rule)
 		rule_handle_ = Handle::UNDEFINED;
 	else
 	{
-		if (!rule->isType(MEMBER_LINK, true))
+		if (not classserver().isA(rule->getType(), MEMBER_LINK))
 			throw InvalidParamException(TRACE_INFO,
 		                                "Rule '%s' is expected to be a MemberLink",
 		                                rule->toString().c_str());
@@ -155,7 +155,7 @@ HandleSeq Rule::get_implicant_seq() const
 	if (rule_handle_ == Handle::UNDEFINED)
 		return HandleSeq();
 
-    Handle implicant= get_implicant();
+    Handle implicant = get_implicant();
     Type t = implicant->getType();
     HandleSeq hs;
 
