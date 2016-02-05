@@ -51,6 +51,9 @@ namespace opencog
 
 class AtomSpace;
 
+//! arity of Links, represented as short integer (16 bits)
+typedef unsigned short Arity;
+
 class Link;
 typedef std::shared_ptr<Link> LinkPtr;
 typedef std::vector<LinkPtr> IncomingSet; // use vector; see below.
@@ -173,11 +176,6 @@ public:
 
     virtual ~Atom();
 
-    virtual const std::string& getName() const {
-        static std::string empty_string("");
-        return empty_string;
-    }
-
     //! Returns the AtomTable in which this Atom is inserted.
     AtomSpace* getAtomSpace() const;
 
@@ -187,22 +185,23 @@ public:
      */
     inline Type getType() const { return _type; }
 
-    /** Basic predicate */
-    bool isType(Type t, bool subclass) const
-    {
-        Type at(getType());
-        if (not subclass) return t == at;
-        return classserver().isA(at, t);
+    virtual bool isNode() const = 0;
+    virtual bool isLink() const = 0;
+
+    virtual const std::string& getName() const {
+        throw RuntimeException(TRACE_INFO, "Not a node!");
     }
 
-    /** Returns the outgoing set.
-     *
-     * @return The outgoing set.
-     */
-    virtual inline const HandleSeq& getOutgoingSet() const
-    {
-        static HandleSeq no_atoms;
-        return no_atoms;
+    virtual Arity getArity() const {
+        throw RuntimeException(TRACE_INFO, "Not a link!");
+    }
+
+    virtual const HandleSeq& getOutgoingSet() const {
+        throw RuntimeException(TRACE_INFO, "Not a link!");
+    }
+
+    virtual Handle getOutgoingAtom(Arity) const {
+        throw RuntimeException(TRACE_INFO, "Not a link!");
     }
 
     /** Returns the handle of the atom.
@@ -373,13 +372,16 @@ public:
     {
         if (NULL == _incoming_set) return result;
         std::lock_guard<std::mutex> lck(_mtx);
+        ClassServer& cs(classserver());
         // Sigh. I need to compose copy_if with transform. I could
         // do this wih boost range adaptors, but I don't feel like it.
         auto end = _incoming_set->_iset.end();
         for (auto w = _incoming_set->_iset.begin(); w != end; w++)
         {
             Handle h(w->lock());
-            if (h and h->isType(type, subclass)) {
+            if (nullptr == h) continue;
+            Type at(h->getType());
+            if (type == at or (subclass and cs.isA(at, type))) {
                 *result = h;
                 result ++;
             }

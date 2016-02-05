@@ -21,6 +21,8 @@ Type LEMMA_LINK
 	= classserver().addType(LINK, "LemmaLink");
 Type LEMMA_NODE
 	= classserver().addType(NODE, "LemmaNode");
+Type LG_CONNECTOR_NODE
+	= classserver().addType(NODE, "LgConnectorNode");
 Type PARSE_LINK
 	= classserver().addType(LINK, "ParseLink");
 Type PARSE_NODE

@@ -1028,10 +1028,9 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
 	SCM expr = SCM_EOL;
 
 	// If there were args, pass the args to the function.
-	LinkPtr lvar(LinkCast(varargs));
-	if (lvar)
+	if (varargs and varargs->isLink())
 	{
-		const std::vector<Handle> &oset = lvar->getOutgoingSet();
+		const std::vector<Handle> &oset = varargs->getOutgoingSet();
 
 		// Iterate in reverse, because cons chains in reverse.
 		size_t sz = oset.size();
