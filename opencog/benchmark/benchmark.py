@@ -85,7 +85,7 @@ if args.verbose:
 test_iterations = args.iterations
 
 scheme_preload = [
-                    "opencog/atomspace/core_types.scm",
+                    "opencog/atoms/base/core_types.scm",
                     "opencog/scm/utilities.scm"
                  ]
 
