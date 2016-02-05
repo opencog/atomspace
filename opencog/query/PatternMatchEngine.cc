@@ -1870,7 +1870,7 @@ void PatternMatchEngine::log_solution(
 	const std::map<Handle, Handle> &vars,
 	const std::map<Handle, Handle> &clauses)
 {
-	if (!logger().isFineEnabled())
+	if (!logger().is_fine_enabled())
 		return;
 
 	logger().fine("Variable groundings:");

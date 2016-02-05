@@ -217,7 +217,7 @@ static bool try_to_load_modules(const char ** config_paths)
     // NOTE: Can't use get_path_as_string() yet because it is defined in a
     // Cython api which we can't import unless the sys.path is correct. So
     // we'll write it out before the imports below to aid in debugging.
-    if (logger().isDebugEnabled())
+    if (logger().is_debug_enabled())
     {
         logger().debug("Python 'sys.path' after config adds is:");
         Py_ssize_t pathSize = PyList_Size(pySysPath);
@@ -1135,14 +1135,14 @@ void PythonEval::add_modules_from_path(std::string pathString)
             files.push_back(abspath);
 
         else {
-            Logger::Level btl = logger().getBackTraceLevel();
-            logger().setBackTraceLevel(Logger::Level::NONE);
+            Logger::Level btl = logger().get_backtrace_level();
+            logger().set_backtrace_level(Logger::Level::NONE);
             logger().error() << "Failed to load python module \'"
             << abspath << "\', searched directories:";
             for (int i = 0; config_paths[i] != NULL; ++i) {
                 logger().error() << "Directory: " << config_paths[i];
             }
-            logger().setBackTraceLevel(btl);
+            logger().set_backtrace_level(btl);
        }
     };
 

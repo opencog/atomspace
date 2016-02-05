@@ -787,8 +787,8 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
                     (not iset[i]->getAtomTable()->in_environ(handle) or
                      not iset[i]->isMarkedForRemoval()))
                 {
-                    Logger::Level lev = logger().getBackTraceLevel();
-                    logger().setBackTraceLevel(Logger::ERROR);
+                    Logger::Level lev = logger().get_backtrace_level();
+                    logger().set_backtrace_level(Logger::ERROR);
                     logger().warn() << "AtomTable::extract() internal error";
                     logger().warn() << "Non-empty incoming set of size "
                                     << ilen << " First trouble at " << i;
@@ -801,7 +801,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
                         logger().warn() << "Marked: " << iset[j]->isMarkedForRemoval()
                                         << " Table: " << ((void*) iset[j]->getAtomTable());
                     }
-                    logger().setBackTraceLevel(lev);
+                    logger().set_backtrace_level(lev);
                     atom->unsetRemovalFlag();
                     throw RuntimeException(TRACE_INFO,
                         "Internal Error: Cannot extract an atom with "

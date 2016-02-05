@@ -31,29 +31,29 @@ namespace opencog {
 
 void LoggerSCM::do_logger_set_level(const std::string& level)
 {
-	logger().setLevel(Logger::getLevelFromString(level));
+	logger().set_level(Logger::get_level_from_string(level));
 }
 
 const std::string& LoggerSCM::do_logger_get_level(void)
 {
 	static std::string level_str;
-	level_str = Logger::getLevelString(logger().getLevel());
+	level_str = Logger::get_level_string(logger().get_level());
 	return level_str;;
 }
 
 void LoggerSCM::do_logger_set_filename(const std::string& filename)
 {
-	logger().setFilename(filename);
+	logger().set_filename(filename);
 }
 
 const std::string& LoggerSCM::do_logger_get_filename()
 {
-	return logger().getFilename();
+	return logger().get_filename();
 }
 
 void LoggerSCM::do_logger_set_stdout(bool enable)
 {
-	return logger().setPrintToStdoutFlag(enable);
+	return logger().set_print_to_stdout_flag(enable);
 }
 
 void LoggerSCM::do_logger_error(const std::string& msg)
