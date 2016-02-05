@@ -13,8 +13,3 @@
 ; (define shell-prompt "opencog-scheme> ")
 ; An ANSI-terminal colorized prompt!  This one is blue.
 (define shell-prompt "[0;34mopencog-scheme[1;34m> [0m")
-
-;--------------------------------------------------------------
-; The relex server host and port
-(define relex-server-host "127.0.0.1")
-(define relex-server-port 4444)
