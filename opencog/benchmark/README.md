@@ -94,7 +94,7 @@ the cython directory:
 $ export PYTHONPATH="${PYTHONPATH}:${HOME}/src/opencog/build/opencog/cython:${HOME}/src/opencog/opencog/python:${HOME}/src/opencog/opencog/nlp"
 ```
 
-and then run:
+and then run (from the atomspace directory, `/home/opencog/atomspace` on Docker):
 
 ```bash
 $ python ./opencog/benchmark/benchmark.py
