@@ -36,10 +36,11 @@ const AtomPtr Handle::NULL_POINTER;
 
 Handle::Handle(const UUID u)
 {
-	_ptr = do_res(u);
+	_ptr = do_res(u)._ptr;
 }
 
-UUID Handle::value(void) const {
+UUID Handle::value(void) const
+{
     const Atom* a = operator->();
     if (a) return a->getUUID();
     return ULONG_MAX;
@@ -57,11 +58,14 @@ bool Handle::atoms_eq(const AtomPtr& a, const AtomPtr& b)
 }
 #endif
 
-bool Handle::atoms_less(const Atom* a, const Atom* b)
+bool Handle::atoms_less(const Atom* pa, const Atom* pb)
 {
-    if (a == b) return false;
-    if (nullptr == a) return true;
-    if (nullptr == b) return false;
+    if (pa == pb) return false;
+    if (NULL == pa) return true;
+    if (NULL == pb) return false;
+
+    const Atom* a(dynamic_cast<const Atom*>(pa));
+    const Atom* b(dynamic_cast<const Atom*>(pb));
     UUID ua = a->getUUID();
     UUID ub = b->getUUID();
     if (INVALID_UUID != ua or INVALID_UUID != ub) return ua < ub;
@@ -111,11 +115,11 @@ void Handle::clear_resolver(const AtomTable* tab)
 
 // Search several atomspaces, in order.  First one to come up with
 // the atom wins.  Seems to work, for now.
-inline AtomPtr Handle::do_res(UUID uuid)
+inline Handle Handle::do_res(UUID uuid)
 {
     for (const AtomTable* at : _resolver) {
-        AtomPtr a(at->getHandle(uuid)._ptr);
-        if (a.get()) return a;
+        Handle h(at->getHandle(uuid));
+        if (NULL != h) return h;
     }
-    return NULL;
+    return Handle();
 }

@@ -47,7 +47,7 @@ public:
 	EvaluationLink(Link& l);
 
 	TruthValuePtr evaluate(AtomSpace* as) {
-	    return do_evaluate(as, Handle(shared_from_this()));
+	    return do_evaluate(as, getHandle());
 	}
 
 	static TruthValuePtr do_evaluate(AtomSpace*, const Handle&,

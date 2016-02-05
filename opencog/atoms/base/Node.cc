@@ -98,11 +98,6 @@ bool Node::operator==(const Atom& other) const
            (getName() == dynamic_cast<const Node&>(other).getName());
 }
 
-bool Node::operator!=(const Atom& other) const
-{
-    return not (*this == other);
-}
-
 bool Node::operator<(const Atom& other) const
 {
     if (getType() == other.getType())

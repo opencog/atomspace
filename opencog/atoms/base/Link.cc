@@ -150,11 +150,6 @@ bool Link::operator==(const Atom& other) const
     return true;
 }
 
-bool Link::operator!=(const Atom& other) const
-{
-    return !(*this == other);
-}
-
 bool Link::operator<(const Atom& other) const
 {
     if (getType() == other.getType()) {

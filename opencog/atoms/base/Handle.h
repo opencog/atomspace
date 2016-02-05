@@ -44,23 +44,24 @@ namespace opencog
 typedef unsigned long UUID;
 
 class Atom;
+class Handle;
 typedef std::shared_ptr<Atom> AtomPtr;
+class AtomTable;
 
 //! contains an unique identificator
-class AtomTable;
 class Handle
 {
 
+friend class Atom;
 friend class AtomTable;
 friend class AtomStorage;         // persistance
-friend class AtomspaceHTabler;    // persistance
 
 private:
     AtomPtr _ptr;
 
     static bool atoms_less(const Atom*, const Atom*);
     static bool deterministic_atoms_less(const Atom*, const Atom*);
-    static AtomPtr do_res(UUID);
+    static Handle do_res(UUID);
     static std::vector<const AtomTable*> _resolver;
 
     static void set_resolver(const AtomTable*);
@@ -85,7 +86,7 @@ public:
         return *this;
     }
 
-    Handle& operator=(const AtomPtr& a) {
+    inline Handle& operator=(const AtomPtr& a) {
         this->_ptr = a;
         return *this;
     }
@@ -96,6 +97,20 @@ public:
 
     inline Atom* operator->() const {
         return _ptr.get();
+    }
+
+#ifdef INLINE_POINTER_CHASING
+    Handle& operator=(const AtomPtr& a) {
+        this->_ptr = std::dynamic_pointer_cast<Atom>(a);
+        return *this;
+    }
+#endif
+
+    operator AtomPtr() const {
+        return _ptr;
+    }
+    operator AtomPtr() {
+        return _ptr;
     }
 
     // Cython can't access operator->() so we'll duplicate here.
@@ -162,18 +177,6 @@ public:
         if (h1 > h2) return 1;
         return 0;
     }
-
-    operator AtomPtr() const {
-        return _ptr;
-    }
-    operator AtomPtr() {
-        return _ptr;
-    }
-/***
-    operator const AtomPtr&() {
-        return _ptr;
-    }
-***/
 };
 
 static inline bool operator== (std::nullptr_t, const Handle& rhs) noexcept

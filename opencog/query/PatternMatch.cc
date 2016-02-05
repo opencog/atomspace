@@ -300,7 +300,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
  * predicate can be satisfied. Thus, for example, given the structure
  *
  *    BindLink
- *       ListLink
+ *       VariableList
  *          VariableNode "$var0"
  *          VariableNode "$var1"
  *       AndList

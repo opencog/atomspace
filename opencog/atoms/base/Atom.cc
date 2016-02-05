@@ -30,15 +30,12 @@
 #include <unistd.h>
 #endif
 
-#include <opencog/util/Logger.h>
-#include <opencog/util/exceptions.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/platform.h>
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
-#include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -195,8 +192,7 @@ void Atom::setAttentionValue(AttentionValuePtr av)
     // If the atom importance has changed its bin,
     // update the importance index.
     if (oldBin != newBin) {
-        AtomPtr a(shared_from_this());
-        _atomTable->updateImportanceIndex(a, oldBin);
+        _atomTable->updateImportanceIndex(getHandle(), oldBin);
     }
 
     // Notify any interested parties that the AV changed.
