@@ -171,7 +171,7 @@ public:
     {
         // Checks for a valid position
         if (pos < _outgoing.size()) {
-            return _outgoing[pos];
+            return Handle(AtomCast(_outgoing[pos]));
         } else {
             throw RuntimeException(TRACE_INFO, "invalid outgoing set index %d", pos);
         }
@@ -220,17 +220,10 @@ public:
      * @return true if they are equal, false otherwise.
      */
     virtual bool operator==(const Atom&) const;
-
-    /**
-     * Returns whether a given atom is different from the current link.
-     * @param Atom to be tested.
-     * @return true if they are different, false otherwise.
-     */
-    virtual bool operator!=(const Atom&) const;
 };
 
 static inline LinkPtr LinkCast(const Handle& h)
-    { AtomPtr a(h); return std::dynamic_pointer_cast<Link>(a); }
+    { return std::dynamic_pointer_cast<Link>(AtomCast(h)); }
 static inline LinkPtr LinkCast(const AtomPtr& a)
     { return std::dynamic_pointer_cast<Link>(a); }
 

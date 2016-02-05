@@ -20,6 +20,7 @@
 #include <libguile.h>
 
 #include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/ProtoAtom.h>
 #include <opencog/atoms/base/types.h>
 
 #include <opencog/truthvalue/AttentionValue.h>
@@ -67,7 +68,12 @@ private:
 	static SCM mark_misc(SCM);
 	static size_t free_misc(SCM);
 
+	static SCM handle_to_scm(const Handle&);
+	static SCM protom_to_scm(const ProtoAtomPtr&);
+	static Handle scm_to_handle(SCM);
+
 	// Atom creation and deletion functions
+	static SCM ss_new_value(SCM, SCM);
 	static SCM ss_new_node(SCM, SCM, SCM);
 	static SCM ss_new_link(SCM, SCM);
 	static SCM ss_node(SCM, SCM, SCM);
@@ -76,6 +82,7 @@ private:
 	static SCM ss_delete_recursive(SCM, SCM);
 	static SCM ss_purge(SCM, SCM);
 	static SCM ss_purge_recursive(SCM, SCM);
+	static SCM ss_value_p(SCM);
 	static SCM ss_atom_p(SCM);
 	static SCM ss_node_p(SCM);
 	static SCM ss_link_p(SCM);
@@ -111,6 +118,7 @@ private:
 	static SCM ss_get_types(void);
 	static SCM ss_get_type(SCM);
 	static SCM ss_type_p(SCM);
+	static SCM ss_value_type_p(SCM);
 	static SCM ss_node_type_p(SCM);
 	static SCM ss_link_type_p(SCM);
 	static SCM ss_get_subtypes(SCM);
@@ -184,6 +192,10 @@ private:
 	static AttentionValue* verify_av(SCM, const char *, int pos = 1);
 	static std::vector<Handle> verify_handle_list (SCM, const char *,
 	                                               int pos = 1);
+	static std::vector<double> verify_float_list (SCM, const char *,
+	                                               int pos = 1);
+	static std::vector<ProtoAtomPtr> verify_protom_list (SCM, const char *,
+	                                               int pos = 1);
 	static std::string verify_string (SCM, const char *, int pos = 1,
 	                                  const char *msg = "expecting string");
 	static int verify_int (SCM, const char *, int pos = 1,
@@ -201,12 +213,6 @@ public:
 	// This allows other users to get the atomspace that scheme is
 	// using.
 	static AtomSpace* ss_get_env_as(const char *);
-
-	// Helper functions XXX why are these public ??
-	// XXX Because the embodiment code uses them :-(
-	// The embodiment code should be refactored to not use these.
-	static SCM handle_to_scm(Handle);
-	static Handle scm_to_handle(SCM);
 public:
 
 	// Utility printing functions
