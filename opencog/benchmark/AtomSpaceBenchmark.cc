@@ -904,8 +904,8 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
-#if HAVE_CYTHONX
         OC_ASSERT(1 == Nloops, "Looping not supported for python");
+#if HAVE_CYTHONX
         std::ostringstream dss;
         for (unsigned int i=0; i<Nloops; i++) {
             dss << "aspace.remove(Handle(" << h.value() << "))\n";
