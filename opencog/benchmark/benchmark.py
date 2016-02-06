@@ -86,7 +86,8 @@ test_iterations = args.iterations
 
 scheme_preload = [
                     "opencog/atoms/base/core_types.scm",
-                    "opencog/scm/utilities.scm"
+                    "opencog/scm/utilities.scm",
+                    "opencog/scm/opencog/query.scm"
                  ]
 
 def loop_time_per_op():
@@ -154,6 +155,7 @@ def prep_bind(atomspace):
     for scheme_file in scheme_preload:
         load_scm(atomspace, scheme_file)
     scheme_eval(atomspace, "(use-modules (opencog))")
+    scheme_eval(atomspace, "(use-modules (opencog query))")
 
     # Define several animals and something of a different type as well
     scheme_animals = \
