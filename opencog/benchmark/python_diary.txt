@@ -8,7 +8,7 @@ performance changes over time. This file is a supplement to and modeled after
 diary.txt which uses the C++ benchmark atomspace_bm.
 
 
-12 March 2014
+12 March 2015
 -------------
 Benchamrks performed on 2014 MacBook Air:
    Intel Core i5
@@ -230,7 +230,7 @@ again in the bindings. In the above test, about 1% of the time for the bindlink
 is spent in the Cython bindings and 99% is spent in compiled C++ bindlink code.
 
 
-13 March 2014
+13 March 2015
 -------------
 Benchmarks performed on 2014 MacBook Air:
    Intel Core i5
@@ -323,7 +323,7 @@ trees which slow down order log N. For really large atomspaces this difference
 will be even greater.
 
 
-13 March 2014
+13 March 2015
 -------------
 
 Changed benchmark to support columnar output and added several test options:
@@ -422,3 +422,78 @@ Add nodes - ConceptNode sugar - Scheme        111.437µs           8,973
 Predicates get_predicates                       1.995µs         501,140
 Predicates get_predicates_for                   1.793µs         557,721
 Predicates cog-get-pred - Scheme              135.691µs           7,369
+
+
+----------------
+06 February 2016
+----------------
+
+Significant changed timings:
+----------------------------
+
+Slower
+------
+Add nodes at 1.25 of previous.
+Get Outgoing at 1.75 of previous
+Bindlink at 25 of previous!!! (see below)
+
+Faster
+------
+Resolve Handle at 0.4 of previous is 2.5 times faster
+
+bindlink comparison
+-------------------
+The real shocker is bindlink which was:
+
+  Bind - bindlink - Cython                       14.514µs          68,899
+
+and is now:
+
+  Bind - bindlink - Cython                      360.240µs           2,775
+
+This is 25 times slower than it was. Yikes! Need to dig into the reason why.
+
+
+Machine and Software Configuration
+----------------------------------
+As measured by Curtis on:
+  MacBook Pro - Retina, 15-inch, Early 2013
+  Intel Core i7 2.7 Ghz - Quad core
+  16GB 1600 Mhz DDR3
+
+Linux running in VirtualBox VM with boot2docker in a Docker container with:
+  docker-machine version 0.5.6, build 61388e9
+  Docker version 1.9.1, build a34a1d5
+  VirtualBox VM 5.0.14r105127
+  Ubuntu 14.04.2 LTS (trusty)
+  Python 2.7.6
+  gcc (Ubuntu 4.8.4-2ubuntu1~14.04) 4.8.4
+  guile (GNU Guile) 2.0.9
+
+(SAME basic configuration as above except gcc is 4.8.4 v 4.8.2)
+
+--- OpenCog Python Benchmark -  2016-02-06 12:59:05.183403 ---
+
+Test                                        Time per op  Ops per second
+----                                        -----------  --------------
+Add nodes - Cython                              5.727µs         174,599
+Add nodes - Cython (500K)                       5.899µs         169,511
+Add fully connected nodes                       7.553µs         132,394
+Bare atom traversal 100K - by type              0.001µs     909,038,578
+Resolve Handle 10K - by type                    0.140µs       7,128,223
+Resolve Handle 100K - by type                   0.128µs       7,842,635
+Resolve Handle 1M - by type                     0.128µs       7,787,439
+Get and Traverse 100K - by type                 0.692µs       1,445,078
+Yield Get and Traverse 100K - by type           0.483µs       2,072,007
+Get Outgoing                                    1.624µs         615,686
+Get Outgoing - no temporary list                1.627µs         614,720
+Bind - stub_bindlink - Cython                   0.376µs       2,662,691
+Bind - bindlink - Cython                      360.240µs           2,775
+Test scheme_eval_h(+ 2 2)                      76.558µs          13,062
+Bind - cog-bind - Scheme                      474.588µs           2,107
+Add nodes - cog-new-node - Scheme             127.043µs           7,871
+Add nodes - ConceptNode sugar - Scheme        110.855µs           9,020
+Predicates - get_predicates                     2.260µs         442,523
+Predicates - get_predicates_for                 1.909µs         523,728
+Predicates - cog-get-pred - Scheme            130.991µs           7,634
+
