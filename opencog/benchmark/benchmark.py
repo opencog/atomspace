@@ -7,12 +7,9 @@ Python binding benchmarks
 Displays the number of operations per second achieved under various
 scenarios utilizing the Python bindings that wrap the AtomSpace using
 Cython. Some of the tests compare the evaluation of nodes using the
-Python Scheme bindings which take much longer than their comparable
-Cython bindings. XXX Which is utterly false and insane -- the
-measurements are being done incorrectly, since the Scheme bindings
-normally run about 3x to 10x faster than the Python bindings do.
-Python is generally quite slow, and is very unlikely to be faster than
-scheme; something is borked with this test case.
+Python scheme_eval_h which takes much longer than the comparable
+Cython bindings because of the overhead of creating and initializing
+a SchemeEval object.
 
 Results can be compared with the more comprehensive benchmarking code in
 the opencog/benchmark directory.
