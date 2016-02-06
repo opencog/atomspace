@@ -215,9 +215,8 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 	// It is tested by EvaluationUTest.
 	if (ptrn->getType() == VARIABLE_NODE and
 	    grnd->getType() == EVALUATION_LINK and
-	    0 < LinkCast(grnd)->getArity() and
-	    LinkCast(grnd)->getOutgoingAtom(0)->getType() ==
-	                                     GROUNDED_PREDICATE_NODE)
+	    0 < grnd->getArity() and
+	    grnd->getOutgoingAtom(0)->getType() == GROUNDED_PREDICATE_NODE)
 	{
 		LAZY_LOG_FINE << "Evaluate the grounding clause=" << std::endl
 		              << grnd->toShortString() << std::endl;
@@ -383,13 +382,12 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 		return eval_term(top, gnds);
 	}
 
-	LinkPtr ltop(LinkCast(top));
-	if (NULL == ltop)
+	if (not top->isLink())
 		throw InvalidParamException(TRACE_INFO,
 	            "Not expecting a Node, here %s\n",
 	            top->toShortString().c_str());
 
-	const HandleSeq& oset = ltop->getOutgoingSet();
+	const HandleSeq& oset = top->getOutgoingSet();
 	if (0 == oset.size())
 		throw InvalidParamException(TRACE_INFO,
 		   "Expecting logical connective to have at least one child!");

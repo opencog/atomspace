@@ -1,5 +1,5 @@
 
-                  Query Processing/Pattern Matching
+#                 Query Processing/Pattern Matching
                           ----------------
                Linas Vepstas <linasvepstas@gmail.com>
                         Created 18 March 2008
@@ -21,8 +21,9 @@ A simple example of one possible use of this code is shown in the file
 
 A Quick Sketch
 --------------
+
 The basic idea is that one can specify a pattern or template, in the
-form of a graph, somoe of whose nodes are variables.  The pattern
+form of a graph, some of whose nodes are variables.  The pattern
 matcher can then find all other graphs that match the given template,
 substituing for the variables. Thus, one has:
 
@@ -46,7 +47,7 @@ substituing for the variables. Thus, one has:
 
  * When a value is found for a variable, that value is called a
    "grounding". When the entire pattern can be grounded, it can be
-   thought of as being "satsfied", in the sense of "satsifiability".
+   thought of as being "satisfied", in the sense of "satisfiability".
    Thus, the pattern matcher is a (graphical) satisfiability solver.
 
  * Certain subgraphs are "evaluatable", other subgraphs are
@@ -68,6 +69,7 @@ substituing for the variables. Thus, one has:
 
 Subgraph Isomorphism Discovery
 ------------------------------
+
 Given a small (hyper-)graph and a bigger "universe" (hyper-)graph, the
 subgraph isomorphism problem requires one to find the corresponding
 smaller graph within the universe graph.  The smaller graph may include
@@ -154,6 +156,7 @@ which new graphs are inserted (during graph-re-writing).
 
 Clauses and Groundings
 ----------------------
+
 The OpenCog hypergraph is most easily understood in terms of its
 corresponding incidence graph (or "Levi graph"). This, in turn, is best
 understood as a collection of trees formed by the "outgoing set" of an
@@ -165,10 +168,8 @@ then a collection of such trees, sharing common nodes or links.  The
 incidence graph is an ordinary graph, not a hypergraph, and thus is
 perhaps easier to visualize.
 
-The pattern matcher is designed to search only for connected incidence
-graphs.  This simplifies the algorithm without loosing any generality:
-the user can always enumerate disconnected graphs multiplicatively.
-This is both trivial and rarely desired.
+The pattern matcher was initially designed to search only for
+connected incidence graphs but now supports disconnected graphs.
 
 Note: At this time, neither the OpenCog AtomSpace, nor the pattern
 matcher support infinite, recursive subtrees.  That is, a given
@@ -188,8 +189,8 @@ given by a list of clauses to be matched.
 Consider the following example taken from a dependency parse of the
 English language sentence "John threw a ball":
 
-  _subj(throw, John)
-  _obj(throw, ball)
+    _subj(throw, John)
+    _obj(throw, ball)
 
 There are two distinct graphical interpretations of this dependency
 parse: the one commonly used in linguistics, and the one we want to
@@ -207,17 +208,17 @@ the hypergraph. Note that these two trees share a common node:
 In OpenCog, links cannot have names; only nodes can. Thus, the actual
 representation of the above parse, in OpenCog, will be:
 
-   EvaluationLink
-      PredicateNode "_subj"
-      ListLink
-         WordNode "throw"
-         WordNode "John"
+    EvaluationLink
+       PredicateNode "_subj"
+       ListLink
+          WordNode "throw"
+          WordNode "John"
 
-   EvaluationLink
-      PredicateNode "_obj"
-      ListLink
-         WordNode "throw"
-         WordNode "ball"
+    EvaluationLink
+       PredicateNode "_obj"
+       ListLink
+          WordNode "throw"
+          WordNode "ball"
 
 Here, the indentation level describes the tree structure. The links
 and nodes are indicated by name: the nodes are always leaves of the
@@ -228,8 +229,8 @@ For the above example, pattern matching can be used to form a simple
 question-answering system, by "filling in the blanks".  The dependency
 parse for the question "What did John throw?" can be written as:
 
-  _subj(throw, John)
-  _obj(throw, _$qVar)
+    _subj(throw, John)
+    _obj(throw, _$qVar)
 
 By comparing to the previous graph, it is obvious that the variable
 _$qVar can be directly matched to the word "ball", thus answering the
@@ -252,11 +253,11 @@ is identical to performing variable "unification".
 The pattern matcher uses VariableNodes to represent variables. The
 proper representation for the above query is thus:
 
-   EvaluationLink
-      PredicateNode "_obj"
-      ListLink
-         WordNode "throw"
-         VariableNode "_$qVar"
+    EvaluationLink
+       PredicateNode "_obj"
+       ListLink
+          WordNode "throw"
+          VariableNode "_$qVar"
 
 The query pattern consists of one or more clauses, such as the above.
 The query pattern is essentially a boolean-and of these clauses: all
@@ -267,21 +268,18 @@ ignored.  This is because constant clauses are "trivial": the
 groundings for them can only be themselves, trivially, and so nothings
 needs be done.
 
-The set of clauses defining a pattern must be connected by means of
-common, shared variables.  A pair of clauses are connected if they
-share a common variable. A set of clauses is connected if there is a
-transitive path through all of them.  The need for this requirement
-was mentioned before: disconnected graphs are always just a trivial
-product of their connected components; thus, it is pointless to
-explicitly support disconnected graphs.
+The clauses are partitioned in to connected components. A set of
+clauses is connected if there is a transitive path through all of
+them, that is if they share directly or indirectly the same variables.
 
 
 Algorithm overview
 ------------------
+
 The following sections present the algorithm details.
 
-Terminology
------------
+### Terminology
+
 The incidence graph of a hypergraph is called the "Levi graph".
 Levi graphs are bipartite; although the algorithm does not make
 use of this.
@@ -290,8 +288,8 @@ A solution that assigns a value to a variable is called a "grounding"
 of that variable. Graphs that contain variables will sometimes be
 called ungrounded graphs.
 
-The Basic Algorithmic Idea
---------------------------
+### The Basic Algorithmic Idea
+
 The basic idea is to treat the query as a graph, in which are embedded
 some number of variables or unknowns. This query graph can be loosely
 understood to be kind of like a predicate, in that the query is solved
@@ -319,9 +317,9 @@ the subgraph isomorphism problem is essentially a problem in
 recognizing a context-free language.
 
 
-Currently Implemented Algorithm
--------------------------------
-0) In the following, the word "atom" may refer to either a hypergraph
+### Currently Implemented Algorithm
+
+1. In the following, the word "atom" may refer to either a hypergraph
    node, or a hypergraph link. Corresponding to every hypergraph is
    an incidence graph. The atoms of a hypergraph are vertices of
    the incidence graph. The convention used here is that the incidence
@@ -339,7 +337,7 @@ Currently Implemented Algorithm
    the atom. Given an OpenCog Link, its outgoing set forms a tree.
    A collection of such trees is a hypergraph.]
 
-1) Input consists a sequence of the roots of incidence trees, that is,
+2. Input consists a sequence of the roots of incidence trees, that is,
    of a list of subgraphs of the incidence graph that are trees.  Thus,
    by definition, the incidence tree root must be a hypergraph link,
    as hypergraph node cannot, by definition, have a non-trivial
@@ -356,23 +354,25 @@ Currently Implemented Algorithm
    Thus, for example: the clause _subj(row, Steve) has _subj at the
    root of the tree, with "row" and "Steve" as leaves.
 
-   Distinct trees may have common vertices.  The common vertices
-   act to join together the trees into a single, connected graph.
-   Disconnected graphs are not allowed; the algorithm will fail to
-   find and ground disconnected components.  The graph as a whole may
+   Distinct trees may have common vertices.  The common vertices act
+   to join together the trees into a partition of connected graph
+   components.  The algorithm will find all groundings for each
+   component separately, and form the final answer as the cartesian
+   product of all component grounding sets.  The graph as a whole may
    contain loops (the decomposition into trees keeps the algorithm
    from having to explicitly accommodate loops).
 
    A list of the common, or shared, vertices is made; this list is
    used later in the algorithm, to find all trees connected to a
    specific vertex. [This list is implemented as
-   PatternMatchEngine::root_map. The shared vertices are variables.]
+   PatternMatchEngine::_connectivity_map. The shared vertices are
+   variables.]
 
    The universe graph may have any structure whatsoever; there are no
    limitations put on it, other than that it must be "well-founded",
    i.e. must not contain any infinite recursive graphs.
 
-2) Input includes a list of the bound variables in the clauses.
+3. Input includes a list of the bound variables in the clauses.
    Thus, for example _obj(row,_$qVar) has _$qVar as the variable
    to be solved for. The list serves to explicitly identify the
    variables, so that they do not need to be computed or guessed.
@@ -385,7 +385,7 @@ Currently Implemented Algorithm
    to the algorithm, they will not be grounded, but will instead be
    treated as if they were constants.
 
-3) Node equivalence is determined by means of a callback; the user
+4. Node equivalence is determined by means of a callback; the user
    may implement any notion at all of "equivalence".  In particular,
    the equivalence callback may be used as an alternate way to perform
    variable bindings, with the callback itself determining when a
@@ -399,10 +399,10 @@ Currently Implemented Algorithm
    PatternMatchCallback::node_match(). The link equivalence callback is
    PatternMatchCallback::link_match().]
 
-4) Pick the first tree. Get the type of the root atom of the
+5. Pick the first tree. Get the type of the root atom of the
    first tree. Get a list of all atoms in the universe of this type.
    These are the "candidate groundings".  Iterate over this list.
-   The iterator is the next step below (step 5).
+   The iterator is the next step below (step 6).
 
    [This step is implemented in PatternMatchEngine::match(), which
    calls PatternMatchEngine::explore_neighborhood() for each candidate
@@ -413,7 +413,7 @@ Currently Implemented Algorithm
    This default behaviour can be over-ridden with a user-dupplied
    callback.]
 
-5) Initiate a recursive tree matching algorithm, comparing the
+6. Initiate a recursive tree matching algorithm, comparing the
    incidence tree of the first clause to that rooted at the
    candidate grounding.
 
@@ -438,16 +438,16 @@ Currently Implemented Algorithm
    clause-match callback, is called. This callback may reject the
    grounding of the clause as a whole.
 
-6) Assuming a single tree has been successfully matched in the previous
+7. Assuming a single tree has been successfully matched in the previous
    step, the next step is to find a clause that has not yet been
    grounded.  This is done by examining the list of all (variable)
    nodes that are shared between the most recently grounded clause,
    looking for an unsolved clause.
 
-   [This is implemented in PatternMatchEngine::get_next_unsolved_clause()]
+   [This is implemented in PatternMatchEngine::get_next_untried_clause()]
 
-7) If an unsolved tree is found, then tree-matching, as described in
-   step 5), resumes. However, the tree matching resumes at the shared
+8. If an unsolved tree is found, then tree-matching, as described in
+   step 6, resumes. However, the tree matching resumes at the shared
    node of the ungrounded tree. The ungrounded tree is recursively walked
    upwards, towards its root, with a tree match attempted at every stage.
 
@@ -458,18 +458,18 @@ Currently Implemented Algorithm
    callback also needs to maintain stack state.
 
    If the upwards recursion reaches the root of the clause, the
-   clause is now considered to be solved. Go to step 6), to find
+   clause is now considered to be solved. Go to step 7, to find
    other unsolved clauses.
 
-   [This is implemented by two routines: PatternMatchEngine::soln_up()
-   and PatternMatchEngine::term_up(). These two routines alternate
-   calls to each other, by traversing the *incoming* set of the
-   current node in the clause, and the candidate solution node.
-   The incoming set takes one "upwards" in the tree.]
+   [This is implemented by two routines: PatternMatchEngine::
+   do_term_up() and PatternMatchEngine::explore_up_branches(). These
+   two routines alternate calls to each other, by traversing the
+   *incoming* set of the current node in the clause, and the candidate
+   solution node.  The incoming set takes one "upwards" in the tree.]
 
-   [The stack of current state is maintained in PatternMatchEngine::
-   term_handle_stack, etc. These are pushed as an upwards(incoming)
-   edge is explored, and popped when the edge is rejected.]
+   [The stack of current state is maintained by PatternMatchEngine::
+   clause_stacks_push(), PatternMatchEngine::clause_stacks_pop(),
+   etc.]
 
    [Partial solutions are recorded in PatternMatchEngine::var_grounding
    and PatternMatchEngine::clause_grounding.  These partial solutions
@@ -490,7 +490,7 @@ Currently Implemented Algorithm
    so that the backtracking can be performed to find other,
    overlapping solutions.
 
-8) If no ungrounded tree is found, then the matching is complete.
+9. If no ungrounded tree is found, then the matching is complete.
    The full grounding is reported via callback.  The callback may
    indicate that the search be terminated, or that it continue to
    find other possible solutions.
@@ -505,96 +505,97 @@ Currently Implemented Algorithm
    explicitly done with the crisp-boolean-logic callback.
 
 
-Virtual Links
--------------
-   Not mentioned above is a new whiz-bang feature: support for
-   VirtualLinks, which are links that do not actually exist in the
-   AtomSpace, but are evaluated on the fly, as needed.  The
-   prototypical such link is GreaterThanLink, which evaluates to
-   "exists" if the schema in it returns true; else it "doesn't
-   exist".  That is, a GreaterThanLink will match in the pattern
-   when its schema evaluates to true, behaving as if it existed in
-   the AtomSpace, else it behaves as if it does not exist in the
-   AtomSpace (and thus can't ground/match/unify).  This bit of
-   fraudulent trickery requires a bit of work: in short, all other
-   parts of the hypergraph are grounded first, leading to a possible
-   combinatoric explosion of goundings; these are then passed through
-   the virtual links to determine if a match has occured or not.
-   The code to do this is in PatternMatch::recursive_virtual()
-   (instead of in the engine proper, where you might expect it to be).
+### Virtual Links
 
-   Note that the preliminary grounding is done by removing all virtual
-   links from the hypegraph. This will typically result in a set of
-   hypergraphs that are no longer connected.  Each connected component
-   is grounded, and then these are offered up to the virtual link,
-   which either virtually (and so there is a match) or does not exist
-   (so there is no match).  Note that having multiple disconnected
-   compoents thus leads to a multiplicatively explosive search space
-   to explore.
+Not mentioned above is a new whiz-bang feature: support for
+VirtualLinks, which are links that do not actually exist in the
+AtomSpace, but are evaluated on the fly, as needed.  The
+prototypical such link is GreaterThanLink, which evaluates to
+"exists" if the schema in it returns true; else it "doesn't
+exist".  That is, a GreaterThanLink will match in the pattern
+when its schema evaluates to true, behaving as if it existed in
+the AtomSpace, else it behaves as if it does not exist in the
+AtomSpace (and thus can't ground/match/unify).  This bit of
+fraudulent trickery requires a bit of work: in short, all other
+parts of the hypergraph are grounded first, leading to a possible
+combinatoric explosion of goundings; these are then passed through
+the virtual links to determine if a match has occured or not.
+The code to do this is in PatternMatch::recursive_virtual()
+(instead of in the engine proper, where you might expect it to be).
 
-Unordered Links
----------------
-   The use of unordered links within a pattern provides a special
-   challange for the pattern matcher. This is because each possible
-   permuation of an unordered link must be explored.  Consider, for
-   example, the search pattern:
+Note that the preliminary grounding is done by removing all virtual
+links from the hypegraph. This will typically result in a set of
+hypergraphs that are no longer connected.  Each connected component
+is grounded, and then these are offered up to the virtual link,
+which either virtually (and so there is a match) or does not exist
+(so there is no match).  Note that having multiple disconnected
+compoents thus leads to a multiplicatively explosive search space
+to explore.
 
-       AndLink
-          SetLink
-             VariableNode $a
-             VariableNode $b
-          ListLink
-             VariableNode $a
-             ConceptNode "fizz"
+### Unordered Links
 
-   If the universe contains the graphs:
+The use of unordered links within a pattern provides a special
+challange for the pattern matcher. This is because each possible
+permuation of an unordered link must be explored.  Consider, for
+example, the search pattern:
 
+    AndLink
        SetLink
-          ConceptNode "dribble"
-          ConceptNode "bubble"
-
+          VariableNode $a
+          VariableNode $b
        ListLink
-          ConceptNode "bubble"
+          VariableNode $a
           ConceptNode "fizz"
 
-   then one must consider that $a might be grounded by "bubble" (and
-   so a match is found), or that $a could have been grounded by
-   "dribble" (although this is not consistent with the ListLink, and
-   so no overall match exists).  That is, all possible permutations of
-   the SetLink must be considered when searching for groundings. This
-   can lead to a combinatoric explosion.
+If the universe contains the graphs:
 
-   Backtracking through unordered links is a challenge. To better
-   understand this challange, there are four distinct scenarios that
-   can occur during pattern matcing.  These are:
+    SetLink
+       ConceptNode "dribble"
+       ConceptNode "bubble"
 
-   A) One is at the bottom, and is searching upwards, and encounters
-      an unordered link as a parent of the current atom.
+    ListLink
+       ConceptNode "bubble"
+       ConceptNode "fizz"
 
-   B) One is at the bottom, moving upwards, and during the (downward)
-      tree_compare's that must be performed at each stage, there is
-      an unordered set somwhere in a subtree.
+then one must consider that $a might be grounded by "bubble" (and
+so a match is found), or that $a could have been grounded by
+"dribble" (although this is not consistent with the ListLink, and
+so no overall match exists).  That is, all possible permutations of
+the SetLink must be considered when searching for groundings. This
+can lead to a combinatoric explosion.
 
-   C) Situations A) and B) can occur in a nested fashion, so that an
-      unordered link may have another unordered link inside of it.
-      All of this is happening within the smae clause.
+Backtracking through unordered links is a challenge. To better
+understand this challange, there are four distinct scenarios that
+can occur during pattern matcing.  These are:
 
-   D) There may be other unordered links in other clauses (possibly
-      sharing variables with the unordered links in this clause).
+A) One is at the bottom, and is searching upwards, and encounters
+   an unordered link as a parent of the current atom.
 
-   Note that, for situation A), as one continues to move upwards, the
-   downward tree-compare effectively looks like situation B).
+B) One is at the bottom, moving upwards, and during the (downward)
+   tree_compare's that must be performed at each stage, there is
+   an unordered set somwhere in a subtree.
 
-   Situation D) is easily dealt with by using the existing
-   backtracking infrastructure, and so presents no new challanges.
+C) Situations A) and B) can occur in a nested fashion, so that an
+   unordered link may have another unordered link inside of it.
+   All of this is happening within the smae clause.
 
-   Situations A, B and C are currently (Nov 2014) only paritally
-   handled, and are buggy.  Its all very confusing. See github bug
-   #1091 for details.
+D) There may be other unordered links in other clauses (possibly
+   sharing variables with the unordered links in this clause).
+
+Note that, for situation A), as one continues to move upwards, the
+downward tree-compare effectively looks like situation B).
+
+Situation D) is easily dealt with by using the existing
+backtracking infrastructure, and so presents no new challanges.
+
+Situations A, B and C are currently (Nov 2014) only paritally
+handled, and are buggy.  Its all very confusing.
+See github bug #1091 for details.
 
 
 Open Questions
 --------------
+
 In many ways, the above algorithm resembles that of a recursive descent
 parser.  However, it does a *lot* of backtracking during its solution
 search. It is thoroughly unclear as to whether the hypergraph
@@ -612,6 +613,7 @@ to help solve this?  This is entirely unclear to me...
 
 Summary
 -------
+
 The above describes a specific implementation of a subgraph matching
 algorithm. It is generic, in that it makes no reference to the
 specifics of the actual data layout, or of node equivalences in the
@@ -629,6 +631,7 @@ example of using the simple forward chainer.
 
 Satisfiability Modulo Theories
 ------------------------------
+
 The final decision on matching to a given query pattern is delegated
 to a callback. This allows for considerable flexibility in controlling
 matching for hypergraphs that represent crisp logic statements, or those
@@ -653,8 +656,8 @@ to match", but not strictly required.
 
 Evaluatable terms (terms and clauses that need to be evaluated at
 run-time to determine thier truth values) are evaluated in the
-evaluate_sentence() callback.  See PatternMatchCallback.h for detils:
-in breif, though, this is where the basic conception of "truth" is
+evaluate_sentence() callback.  See PatternMatchCallback.h for details:
+in brief, though, this is where the basic conception of "truth" is
 implemented. Crisp-logic theories would implement true/false truth
 values, with and-or-not as the logical connectives. Probabilistic
 theories would implement Bayesian or measure-theoretic "truth values"
@@ -662,9 +665,9 @@ ranging between 0.0 and 1.0; the logical connectives and-or-not would
 correspond to set-intersection, set-union, set-compliment. Other
 theories can implement arbitrary formulas here.
 
-At this time, only one generic callback are provided:
+One generic callback is provided:
 
-*) The DefaultPatternMatchCB. This callback implements node and link
+ * The DefaultPatternMatchCB. This callback implements node and link
    match methods that accept only strict node/link matches, unless a
    node is of type VariableNode, in which case the match is also
    accepted. All evaluatable terms (those containing a
@@ -675,10 +678,11 @@ At this time, only one generic callback are provided:
 
 Forward Chainer
 ---------------
-The PattnerMatch::imply() method implements a critical component for a
-forward chainer: it is able to accept, as input, an ImplicationLink, and
-return as output, a SetLink of the implicands. An ImplicationLink is
-basically an IF ... THEN ... statement, expressed as an OpenCog hypergraph.
+
+The PatternMatch::imply() method implements a critical component for a
+forward chainer: it is able to accept a BindLink, containing a pattern
+and a rewriting rule, and basically implement a form of IF ... THEN
+... statement, expressed as an OpenCog hypergraph.
 
 Properly, one writes "IF ... THEN ..." as "IF predicate THEN implicand".
 The predicate is presumed to contain VariableNodes, while the implicand
@@ -686,17 +690,18 @@ is a hypergraph making used of those VariableNodes.  The predicate is
 run through the pattern-matching engine. When groundings for the
 variables are found, then a hypegraph is created based on the implicand,
 using the grounded values found.  Because there may be more than one
-grounding, a ListLink of all grounded implicands is returned.
+grounding, a SetLink of all grounded implicands is returned.
 
 Thus, the PattnerMatch::imply() method can be used to implement a
 simple forward-chainer. For example, one may create a collection of
-ImplicationLinks. Then, calling each in turn, from a loop, will cause
-cause each to be evaluated. Thus, N iterations of the loop is equivalent
-to chaining N levels deep.
+BindLinks. Then, calling each in turn, from a loop, will cause each to
+be evaluated. Thus, N iterations of the loop is equivalent to chaining
+N levels deep.
 
 
 Hypergraph Query Language (HQL)
 -------------------------------
+
 A "hypergraph query language" is a language that allows queries to be
 expressed as strings. Given *any* way of writing down a hypergraph as
 a string, a hypergraph query language can be trivially formed by adding
@@ -708,29 +713,29 @@ outward form of SQL, SPARQL, RQL, etc.
 So, for example, a hypergraph might be written as a list
 of links, and their contents:
 
-  <hypergraph> := { <link-type> <atom> <atom> ... <atom>.
-                    <link-type> <atom> <atom> ... <atom>.
-                    ...
-                    <link-type> <atom> <atom> ... <atom>.
-                  }
+    <hypergraph> := { <link-type> <atom> <atom> ... <atom>.
+                      <link-type> <atom> <atom> ... <atom>.
+                      ...
+                      <link-type> <atom> <atom> ... <atom>.
+                    }
 
 Here, <atom> is understood to refer to a specific, constant atom.
 Let ?var be a variable.  Then define <vatom> as
 
-  <vatom> :=  <atom> | ?var
+    <vatom> :=  <atom> | ?var
 
 That is, a vatom is a constant atom, or a variable. A hypergraph
 with variables in it is then
 
-  <v-hypergraph> := { <link-type> <vatom> <vatom> ... <vatom>.
-                      <link-type> <vatom> <vatom> ... <vatom>.
-                      ...
-                      <link-type> <vatom> <vatom> ... <vatom>.
-                    }
+    <v-hypergraph> := { <link-type> <vatom> <vatom> ... <vatom>.
+                        <link-type> <vatom> <vatom> ... <vatom>.
+                        ...
+                        <link-type> <vatom> <vatom> ... <vatom>.
+                      }
 
 An HQL query, resembling the syntax used in SQL or SPARQL, is then
 
-  SELECT ?var-a ?var-b ... ?var-z WHERE <v-hypergraph>;
+    SELECT ?var-a ?var-b ... ?var-z WHERE <v-hypergraph>;
 
 So, for example, the hypergraph for
 
@@ -748,12 +753,12 @@ is somewhat complicated to write down, but vaguely resembles
 
 The query to determine what John threw would then be:
 
-  SELECT ?item WHERE
-    { ?x WORD_NODE John.
-      ?y WORD_NODE throw.
-      RELEX_LINK _subj ?y ?x.
-      RELEX_LINK _obj  ?y ?item.
-    }
+    SELECT ?item WHERE
+      { ?x WORD_NODE John.
+        ?y WORD_NODE throw.
+        RELEX_LINK _subj ?y ?x.
+        RELEX_LINK _obj  ?y ?item.
+      }
 
 There is currently no code that will actually parse such strings, and
 return the query results, although, in principle, writing such code
@@ -782,76 +787,28 @@ HQL query.  In this sense, English is the "best" query language, and
 it is supported.
 
 
-Foreach iterators
------------------
-The algorithm makes heavy use of "foreach" iterators to walk the
-incoming and outgoing edges of an atom.  The "foreach" mechanism
-has multiple advantages over other techniques, and it is important
-to understand these.
-
-On the other hand, given that this is C++ and not C, the correct
-solution is almost surely to re-write the for-eachs as C++ iterators,
-which offers the same advantages as foreach, but has a more mundane
-programming paradigm.
-
-A) The details of the Atom.h incoming and outgoing sets are abstracted.
-   Thus, while the outgoing set uses std:vector, the incoming set uses
-   a simple linked list. This detail is immaterial to the "foreach" user,
-   as both look the same. The only requirement is that each edge is visited
-   exactly once.
-
-B) The foreach abstraction makes multi-threaded implementation,
-   including mutex locking, much easier. In particular, the semantics
-   of atomic locking of a foreach traversal is much simpler than complexity
-   of trying to lock a naked linked list for read-only or read-write
-   traversal.
-
-C) The foreach abstraction can (and will) have performance that is
-   equal to a for-loop iteration over an array or linked list. This
-   is because, when the set to be iterated over is a simple list or
-   array, the foreach iterator can be implemented as an inline function.
-   Modern compilers are able to inline such functions correctly,
-   and optimize the result, providing performance equivalent to
-   a raw for-loop iteration.
-
-D) The foreach abstraction allows complex iterators to be implemented.
-   Thus, the foreach abstraction eliminates the data copying associated
-   with naive "filters", and thus can offer superior space *and* time
-   performance over filters. For example, consider a long linked list
-   consisting of many types of atoms, and one wants to perform a certain
-   operation only on a specific type of atom. Traditional "filters"
-   would make a copy of the list, including only the desired atom
-   types in the copied list. This requires significant overhead:
-   nodes must be copied, iterated over, and then freed.  The foreach
-   abstraction allows a zero-copy filter to be implemented: the
-   callback is invoked only for those nodes that match the filter
-   criteria.
-
-
 TODO
 ----
+
  * Atomspaces are done wrong. Grounding whould always be performed
    in the atomspace of the bindlink.  Thus should be fetched directly
    from the bind-link, and not passed as a third-party parameter.
-
- * Need a nested ChoiceLink unit test... or is this done in the
-   StackMoreUTest alrady ???
 
  * Enhancement: Add support for VariableLink, so that, for example,
    (VariableLink $R (VariableNode $A) (VariableNode $B)) matches
    any arity-2 link (as long as the type constraints are obeyed).
 
- * Performance improvement: Steal an idea from DPLL, viz unit_propagate.
-   That is, start with those clauses that have only a single variable
-   in them, ground that, and propagate.  Not sure, I think this could
-   should improve run-time.  Perhaps there are other ideas to steal,
-   e.g. from zChaff?
+ * Performance improvement: Steal an idea from DPLL, viz
+   unit_propagate.  That is, start with those clauses that have only a
+   single variable in them, ground that, and propagate.  Not sure, I
+   think this could should improve run-time.  Perhaps there are other
+   ideas to steal, e.g. from zChaff?
 
    Anyway, the next clause to be selected is chosen by
    get_next_untried_clause(); there is a XXX note in there about this.
 
- * Invent a callback so that ChoiceLink can become a random-choice
-	or a Bayesian-probability-choice, etc. This is sort-of done, already,
+ * Invent a callback so that ChoiceLink can become a random-choice or
+   a Bayesian-probability-choice, etc. This is sort-of done, already,
    but more additional/experimental callbacks are needed.
 
  * Enhancement: Add support for IfLink, which would have the semantics
@@ -862,7 +819,7 @@ TODO
 
  * Enhancement: Allow variable type declarations to occur anywhere in
    the body, not just at the top. This is because variable-type
-   restirctions are essentially a kind-of special-case GPN, restrictiing
+   restirctions are essentially a kind-of special-case GPN, restricting
    the accept or reject... except that it is applied immediately, upon
    the initial attempt at variable grounding.
 
@@ -877,6 +834,4 @@ TODO
    'clause b' instead of spelling it out.)
 
  * Study the following some more: prolog, minikanren, mercury, curry
-   (logic programming languague), godel (logic programming langauge)
-
- -------------------------- END OF FILE ------------------------
+   (logic programming languague), godel (logic programming language)

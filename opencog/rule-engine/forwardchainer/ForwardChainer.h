@@ -39,7 +39,6 @@ enum source_selection_mode {
 };
 
 class FCMemory;
-class Logger;
 class Rule;
 
 class ForwardChainer {
@@ -53,21 +52,17 @@ private:
     URECommons _rec;            // utility class
     Handle _rbs;                // rule-based system
     UREConfigReader _configReader;
-    Logger * _log;
 
     int _iteration = 0;
     source_selection_mode _ts_mode;
     bool _search_in_af;
     bool _search_focus_Set;
-    const Rule* _cur_rule;
     Handle _cur_source;
-    HandleSeq _selected_sources;
+    UnorderedHandleSet _selected_sources;
 
     FCStat _fcstat;
 
     void init(Handle hsource, HandleSeq focus_set);
-    void setLogger(Logger* log);
-    Logger* getLogger(void);
 
     void apply_all_rules(bool search_focus_set = false);
 
@@ -77,9 +72,9 @@ private:
                                    const std::set<Handle>& vars,
                                    const std::vector<std::map<Handle, Handle>>&
                                    var_groundings);
-    bool unify(Handle source, Handle target, const Rule* rule);
+    bool unify(Handle source, Handle term, const Rule* rule);
     bool subatom_unify(Handle source, const Rule* rule);
-    HandleSeq derive_rules(Handle source, Handle target, const Rule* rule);
+    UnorderedHandleSet derive_rules(Handle source, Handle term, const Rule* rule);
     void update_potential_sources(HandleSeq input);
 
     bool is_valid_implicant(const Handle& h);
@@ -87,7 +82,7 @@ private:
 
 protected:
     vector<Rule*> _rules; /*<loaded rules*/
-    HandleSeq _potential_sources;
+    UnorderedHandleSet _potential_sources;
     HandleSeq _focus_set;
 
     /**
@@ -96,7 +91,7 @@ protected:
      *
      * @return  A rule that in which @param source could ground.
      */
-    virtual Rule* choose_rule(Handle hsource, bool subatom_match );
+    virtual Rule* choose_rule(Handle hsource, bool subatom_match);
 
     /**
      * choose next source from the source list
@@ -115,7 +110,8 @@ protected:
     virtual HandleSeq apply_rule(Handle rhandle, bool search_focus_set_only =
             false);
 
-    HandleSeq derive_rules(Handle source, const Rule* rule, bool subatomic = false);
+    UnorderedHandleSet derive_rules(Handle source, const Rule* rule,
+                                    bool subatomic = false);
 
 public:
     /**

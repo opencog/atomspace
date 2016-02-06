@@ -14,8 +14,10 @@ ADD_LIBRARY (atombase SHARED
 	atom_types.h
 	Atom.cc
 	ClassServer.cc
+	FloatValue.cc
 	Handle.cc
 	Link.cc
+	LinkValue.cc
 	Node.cc
 )
 
@@ -36,9 +38,12 @@ INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
 	atom_types.cc
 	ClassServer.h
+	FloatValue.h
 	Handle.h
 	Link.h
+	LinkValue.h
 	Node.h
+	ProtoAtom.h
 	types.h
 	DESTINATION "include/opencog/atoms/base"
 )

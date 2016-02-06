@@ -33,10 +33,35 @@ namespace opencog
  * Experimental NumberNode class. This is a rough sketch for how things
  * like this might be done. It is not necessarily a good idea, and might
  * be replaced by something completely different, someday ...
+ *
+ * Perhaps this should be a vector of numbers???
  */
 
 class NumberNode : public Node
 {
+private:
+
+	// It turns out that std::to_string(double x) is locale-dependent
+	// See, for example, Martin B.'s comment here:
+	// http://comp.lang.cpp.moderated.narkive.com/dWGdM0Od/std-to-string-int-deviates-from-iostreams-result-deliberate
+	// Also this:
+	// https://github.com/nlohmann/json/issues/51
+	// And this:
+	// http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/p0067r0.html
+	// This was a painful discovery that ate the chatbot's lunch.
+	// So we perform a hack here.  The core issue is that the rest of the
+	// system is explcitly defined to be locale-independent, including
+	// the natural-langauge pipeline in guile/scheme. Thus, printing
+	// the European comma as a decimal separator blows up the code.
+	static std::string double_to_string(double x)
+	{
+		std::string vs(std::to_string(x));
+		std::size_t found = vs.find(',');
+		if (std::string::npos != found)
+			vs[found] = '.';
+		return vs;
+	}
+
 protected:
 	double value;
 
@@ -45,19 +70,19 @@ public:
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV())
 		// Convert to number and back to string to avoid miscompares.
-		: Node(NUMBER_NODE, std::to_string(std::stod(s)), tv, av),
+		: Node(NUMBER_NODE, double_to_string(std::stod(s)), tv, av),
 		  value(std::stod(s))
 	{}
 
 	NumberNode(double vvv,
 	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV())
-		: Node(NUMBER_NODE, std::to_string(vvv), tv, av),
+		: Node(NUMBER_NODE, double_to_string(vvv), tv, av),
 		  value(vvv)
 	{}
 
 	NumberNode(Node &n)
-		: Node(n.getType(), std::to_string(std::stod(n.getName())),
+		: Node(n.getType(), double_to_string(std::stod(n.getName())),
 		       n.getTruthValue(), n.getAttentionValue()),
 		  value(std::stod(n.getName()))
 	{
@@ -67,7 +92,7 @@ public:
 
 	static std::string validate(const std::string& str)
 	{
-		return std::to_string(std::stod(str));
+		return double_to_string(std::stod(str));
 	}
 
 	double get_value(void) { return value; }
@@ -75,8 +100,8 @@ public:
 
 typedef std::shared_ptr<NumberNode> NumberNodePtr;
 static inline NumberNodePtr NumberNodeCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<NumberNode>(a); }
-static inline NumberNodePtr NumberNodeCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<NumberNode>(AtomCast(h)); }
+static inline NumberNodePtr NumberNodeCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<NumberNode>(a); }
 
 // XXX temporary hack ...

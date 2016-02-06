@@ -5,23 +5,23 @@
 -- | Simple example on executing code in multiple threads.
 -- Note, before compiling this code you need to install the package: 'random'.
 -- Executing: stack install random
-import OpenCog.AtomSpace        (AtomSpace,insert,get,remove,AtomType(..),
-                                 debug,printAtom,(|>),(\>),newAtomSpace,(<:),
-                                 Atom(..),TruthVal(..),Gen(..),noTv,stv)
+import OpenCog.AtomSpace        (AtomSpace,insert,get,remove,
+                                 debug,printAtom,newAtomSpace,(<:),
+                                 Atom(..),TruthVal(..),noTv,stv)
 import Control.Monad.IO.Class   (liftIO)
 import Control.Concurrent       (forkIO,threadDelay)
 import System.Random            (randomIO,randomRIO)
 
-randomConcept :: Int -> AtomSpace (Atom ConceptT)
+randomConcept :: Int -> AtomSpace Atom
 randomConcept top = do
     num <- liftIO $ randomRIO (1,top)
-    return $ ConceptNode ("Concept"++show num) noTv
+    return $ Node "ConceptNode" ("Concept"++show num) noTv
 
-randomList :: Int -> Int -> AtomSpace (Atom ListT)
+randomList :: Int -> Int -> AtomSpace Atom
 randomList n m = do
     num <- liftIO $ randomRIO (1,n)
-    list <- mapM (\_ -> randomConcept m >>= return . Gen) [1..num]
-    return $ ListLink list
+    list <- mapM (\_ -> randomConcept m >>= return) [1..num]
+    return $ Link "ListLink" list noTv
 
 main :: IO ()
 main = do

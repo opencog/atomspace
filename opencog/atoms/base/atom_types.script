@@ -14,9 +14,14 @@
 // Special type designating that no atom type has been assigned.
 NOTYPE
 
+VALUE
+FLOAT_VALUE <- VALUE    // vector of floats, actually.
+STRING_VALUE <- VALUE
+LINK_VALUE <- VALUE     // vector of values ("link" holding values)
+
 // Base of hierarchy - NOTE: ATOM will not have a corresponding Python
 // construction function to avoid identifier conflict with the Atom object.
-ATOM
+ATOM <- VALUE
 NODE <- ATOM
 LINK <- ATOM
 

@@ -75,7 +75,7 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 		# SET(CMAKE_C_FLAGS "-Wl,--copy-dt-needed-entries")
 		SET(CMAKE_C_FLAGS_DEBUG "-ggdb3 -fstack-protector")
 		SET(CMAKE_C_FLAGS_PROFILE "-O2 -g3 -fstack-protector -pg")
-		SET(CMAKE_C_FLAGS_RELEASE "-O2 -g -fstack-protector")
+		SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto")
 	ENDIF (APPLE)
 
 	# 1) -Wno-variadic-macros is to avoid warnings regarding using
@@ -453,7 +453,7 @@ IF (CXXTEST_FOUND)
 		)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 	ADD_CUSTOM_TARGET(test_python
-		DEPENDS PythonModuleUTest PyEvalUTest PythonEvalUTest CogServerUTest
+		DEPENDS PythonEvalUTest
 				PythonUtilitiesUTest
 				bindlink_cython atomspace_cython
 				scheme_wrapper logger_cython utilities_cython

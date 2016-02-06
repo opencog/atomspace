@@ -1041,11 +1041,12 @@ fixed column: measured with the fixed benchmark.
 Comments:
 The get* numbers are much much higher, because the old test was
 mis-measuring these; they were under a microsecond, so the call to
-clock() was given spurious measurements. The actual performance is
+clock() was giving spurious measurements. The actual performance is
 now revealed. Its roughly equal to what one would get from the
-broken column, if one took reciprocal, subtracted the "noop",
-and took reciprocal, again. So the "broken" numbers had been failing
-to be correctly normalized.
+broken column, if one took the reciprocal, subtracted the "noop",
+and took the reciprocal, again. Basically, the "broken" numbers had
+included a hefty overhead from calling clock(), an had not been
+correctly normalized.
 
 The removeAtom numbers are faster, because only 3/4ths the atomspace
 gets removed now. The change in addNode and addLink is unclear.
@@ -1055,13 +1056,26 @@ gets removed now. The change in addNode and addLink is unclear.
 
 How fast is std::vector<Handle>, really?
 
- 
+atomspace_bm -
+
    count             1            2           3            4
    rate           M-ops/sec    M-ops/sec   M-ops/sec    M-ops/sec
    ----           ---------    ---------   ---------    ---------
   push_back         7.54         3.27        1.96         1.88
   emplace_back      7.26         3.35        1.96         1.87
   reserve           7.66         6.01        4.75         4.13
+
+count: the number of handles that are pushed/emplaced back.
+
+push_back: call the push-back method
+     example: HandleSeq oset; oset.push_back(ha); oset.push_back(hb);
+
+emplace-back: call the emplace_back method
+
+reserve: create vector of fixed size, then assign directly.
+     example: HandleSeq oset(2); oset[0] = ha; oset[1] = hb;
+
+Looks like direct assignment is a winner!
 
 ======================================================================
  15 Oct 2015
@@ -1087,7 +1101,100 @@ Again, ProtoAtom.
 AtomPtr column: copied from above
 Atom* column:   using bool atoms_less(const Atom*, const Atom*); in
                 Handle.h (used to be AtomPtr)
-ProtoAtom*:     using bool atoms_less(const ProtAtom*, etc...)
+ProtoAtom*:     using bool atoms_less(const ProtoAtom*, etc...)
 
 Conclude: switching to * from Ptr for handle compares helps. But AddLink
    still hurts; it hurts just a bit less.
+
+======================================================================
+
+4 Feb 2016
+----------
+ProtoAtom work .. how much does a cast really cost?
+i.e. a cast from Handle to NodePtr or LinkPtr ?
+
+atomspace_bm -m noop -m getType -m pointerCast -m getOutgoingSet
+
+                  previous      NodeCast        LinkCast
+   name           K-ops/sec     K-ops/sec      K-ops/sec
+   ----           ---------     ---------      ---------
+  noop              1e6         889K             864K
+  getType          75.5K         72.0K            72.0K
+  pointerCast        -            6375             7354
+  getOutgoingSet    7555          7646             7797
+
+previous: copied column from above.
+
+NodeCast: perform NodeCast only.
+
+LinkCast: perform LinkCast only.
+
+Comments: we expect the pointerCast and the getOutgoingSet values to be
+nearly identical, since getOutgoingSet is just a cast, followed by a
+very simple method call.  The NodeCast and Link Cast numbers might
+differ, but not much, due to the different ratios of links and nodes in
+the sample set.
+
+Ergo, the cost of getOutgoingSet is dominated by the LinkCast!  If we
+get rid of it, then what happens?  It goes up to 44.1M-ops/sec! Woww!
+
+
+New baseline is then
+                  previous      ProtoAtom
+   name           K-ops/sec     K-ops/sec
+   ----           ---------     ---------
+  noop              1e6          1.7e6
+  getType          75.5K         76.7K
+  getTV             4166          4291
+  setTV             1113          1133
+  getOutgoingSet    7555         38.5K
+  getIncomingSet    2276          2265
+  addNode            149           145
+  addLink             70.1          67.9
+  removeAtom         188           187
+
+previous: the situation before protoatoms; copied from above.
+
+ProtoAtom: this branch, including recent work on avoiding smart-pointer
+    casts.
+
+=====================================================================
+
+4 Feb 2016
+----------
+New guile baseline. Fanny.  This includes the ProtoAtom code.
+
+
+                -g -M -r100    -g -r100   -g -C -r100    -A
+   test           memoize       interp      compile    AtomSpace
+   name          K-ops/sec     K-ops/sec   K-ops/sec   K-ops/sec
+   ----          ---------     ---------   ---------   ---------
+  noop             2e6          2e6         2e6         1.5e6
+  getType          393          18.3        177        78.0K
+  getTV            380          19.7        218         4261
+  setTV            230          11.2        122         1129
+  getIncomingSet   359          20.5        119         2250
+  getOutgoingSet   340          20.4        118        38.6K
+  addNode          234          17.6         87.8        145
+  addLink          282           5.02       224           67.5
+  removeAtom         3.33        6.69        34.6        186
+
+Remarks:
+ * The memoize and interpreted numbers are a little worse than
+   before. Not sure why.
+ * The removeAtom number seems to be insane, but I cannot spot a
+   bug right now.
+ * How can it be possible that memoized addNode is faster than the
+   C++ addNode? Isn't this logically impossible? Also, addLink...
+ * The compiled numbers are half of what they used to be! Or even 1/3
+   of what they used to be... And they are also worse than the
+   memoized numbers, which should be impossbile.  WTF???
+ * Now that we have correctly-measured AtomSpace numbers, the guile
+   numbers are easily seen to be much worse than the C++ numbers.
+ * The uniformity of numbers in the memoize column sugggests a
+   bottleneck; I'm guessing its the ProtoAtomPtr->Handle cast.
+ * This is not a very good benchmark, because it does not represent
+   the way that people would "typically" program in scheme.
+
+To summarize: this test is wonky, crazy; the numbers are bizzarely
+inconsistent with expectations.

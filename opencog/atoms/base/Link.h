@@ -36,14 +36,11 @@ class AtomTable;
  *  @{
  */
 
-//! arity of Links, represented as short integer (16 bits)
-typedef unsigned short Arity;
-
 /**
- * Nodes in OpenCog are connected to each other by links. Each link embodies
- * one of the basic inter-node relationships. Links do not necessarily
- * describe a binary relationship between two entities. Links may describe
- * relationships between more than two entities at once. Finally, links
+ * Atoms in OpenCog are connected to each other by links. Each link
+ * embodies a basic inter-atom relationship. Links do not necessarily
+ * describe a binary relationship between two atoms. Links may describe
+ * relationships between more than two atoms at once. Finally, links
  * describe relationships not only between nodes, but also higher-order
  * relationships between links, and between nodes and links.
  */
@@ -86,8 +83,9 @@ public:
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
     {
-        HandleSeq oset;
-        oset.emplace_back(h);
+        // reserve+assign is 2x faster than push_back()/emplace_back()
+        HandleSeq oset(1);
+        oset[0] = h;
         init(oset);
     }
 
@@ -96,9 +94,10 @@ public:
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
     {
-        HandleSeq oset;
-        oset.emplace_back(ha);
-        oset.emplace_back(hb);
+        // reserve+assign is 2x faster than push_back()/emplace_back()
+        HandleSeq oset(2);
+        oset[0] = ha;
+        oset[1] = hb;
         init(oset);
     }
 
@@ -107,10 +106,11 @@ public:
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
     {
-        HandleSeq oset;
-        oset.emplace_back(ha);
-        oset.emplace_back(hb);
-        oset.emplace_back(hc);
+        // reserve+assign is 2x faster than push_back()/emplace_back()
+        HandleSeq oset(3);
+        oset[0] = ha;
+        oset[1] = hb;
+        oset[3] = hc;
         init(oset);
     }
     Link(Type t, const Handle& ha, const Handle &hb,
@@ -119,11 +119,12 @@ public:
          AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t, tv, av)
     {
-        HandleSeq oset;
-        oset.emplace_back(ha);
-        oset.emplace_back(hb);
-        oset.emplace_back(hc);
-        oset.emplace_back(hd);
+        // reserve+assign is 2x faster than push_back()/emplace_back()
+        HandleSeq oset(4);
+        oset[0] = ha;
+        oset[1] = hb;
+        oset[2] = hc;
+        oset[3] = hd;
         init(oset);
     }
 
@@ -142,7 +143,10 @@ public:
      */
     ~Link();
 
-    inline Arity getArity() const {
+    virtual bool isNode() const { return false; }
+    virtual bool isLink() const { return true; }
+
+    virtual Arity getArity() const {
         return _outgoing.size();
     }
 
@@ -152,21 +156,22 @@ public:
      *
      * @return A const reference to this atom's outgoing set.
      */
-    inline const HandleSeq& getOutgoingSet() const
+    virtual const HandleSeq& getOutgoingSet() const
     {
         return _outgoing;
     }
+
     /**
      * Returns a specific Handle in the outgoing set.
      *
      * @param The position of the handle in the array.
      * @return A specific handle in the outgoing set.
      */
-    inline Handle getOutgoingAtom(Arity pos) const
+    virtual Handle getOutgoingAtom(Arity pos) const
     {
         // Checks for a valid position
-        if (pos < getArity()) {
-            return _outgoing[pos];
+        if (pos < _outgoing.size()) {
+            return Handle(AtomCast(_outgoing[pos]));
         } else {
             throw RuntimeException(TRACE_INFO, "invalid outgoing set index %d", pos);
         }
@@ -179,7 +184,7 @@ public:
     template<class T>
     inline bool foreach_outgoing(bool (T::*cb)(const Handle&), T *data)
     {
-        for (const Handle& out_h : getOutgoingSet()) {
+        for (const Handle& out_h : _outgoing) {
             if ((data->*cb)(out_h)) return true;
         }
         return false;
@@ -215,17 +220,10 @@ public:
      * @return true if they are equal, false otherwise.
      */
     virtual bool operator==(const Atom&) const;
-
-    /**
-     * Returns whether a given atom is different from the current link.
-     * @param Atom to be tested.
-     * @return true if they are different, false otherwise.
-     */
-    virtual bool operator!=(const Atom&) const;
 };
 
 static inline LinkPtr LinkCast(const Handle& h)
-    { AtomPtr a(h); return std::dynamic_pointer_cast<Link>(a); }
+    { return std::dynamic_pointer_cast<Link>(AtomCast(h)); }
 static inline LinkPtr LinkCast(const AtomPtr& a)
     { return std::dynamic_pointer_cast<Link>(a); }
 

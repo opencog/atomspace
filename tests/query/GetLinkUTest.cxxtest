@@ -181,7 +181,7 @@ void GetLinkUTest::test_eval_clause(void)
 }
 
 /*
- * Two-variable GetLink unit test that currently return the wrong result
+ * Two-variable GetLink unit test
  */
 void GetLinkUTest::test_disconnected_binary_get(void)
 {

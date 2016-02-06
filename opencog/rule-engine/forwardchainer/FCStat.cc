@@ -28,10 +28,10 @@ using namespace opencog;
 
 bool FCStat::has_partial_grounding(const Handle& hsource)
 {
-    for (const PartiaGroundingRecord& spg : _spg_stat) {
-        if (spg.hsource == hsource)
-            return true;
-    }
+    // for (const PartiaGroundingRecord& spg : _spg_stat) {
+    //     if (spg.hsource == hsource)
+    //         return true;
+    // }
 
     return false;
 }

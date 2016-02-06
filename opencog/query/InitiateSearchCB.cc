@@ -156,8 +156,7 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 	Handle hdeepest(Handle::UNDEFINED);
 	size_t thinnest = SIZE_MAX;
 
-	LinkPtr ll(LinkCast(h));
-	for (Handle hunt : ll->getOutgoingSet())
+	for (Handle hunt : h->getOutgoingSet())
 	{
 		size_t brdepth = depth + 1;
 		size_t brwid = SIZE_MAX;
@@ -165,7 +164,7 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 
 		// Blow past the QuoteLinks, since they just screw up the search start.
 		if (QUOTE_LINK == hunt->getType())
-			hunt = LinkCast(hunt)->getOutgoingAtom(0);
+			hunt = hunt->getOutgoingAtom(0);
 
 		Handle s(find_starter_recursive(hunt, brdepth, sbr, brwid));
 
@@ -507,8 +506,7 @@ void InitiateSearchCB::find_rarest(const Handle& clause,
 	// Base case
 	if ((quotation_level < 1) and (CHOICE_LINK == t)) return;
 
-	LinkPtr lll(LinkCast(clause));
-	if (nullptr == lll) return;
+	if (not clause->isLink()) return;
 
 	if ((QUOTE_LINK == t and quotation_level > 0)
 	    or (UNQUOTE_LINK == t and quotation_level > 1)
@@ -526,7 +524,7 @@ void InitiateSearchCB::find_rarest(const Handle& clause,
 	if (QUOTE_LINK == t) quotation_level++;
 	else if (UNQUOTE_LINK == t) quotation_level--;
 
-	const HandleSeq& oset = lll->getOutgoingSet();
+	const HandleSeq& oset = clause->getOutgoingSet();
 	for (const Handle& h : oset)
 		find_rarest(h, rarest, count, quotation_level);
 }
