@@ -1,7 +1,7 @@
 from unittest import TestCase
 import os
 
-from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle, types
+from opencog.atomspace import AtomSpace, TruthValue, Atom, types
 from opencog.bindlink import    stub_bindlink, bindlink, single_bindlink,\
                                 af_bindlink, execute_atom, evaluate_atom
 from opencog.utilities import initialize_opencog, finalize_opencog
@@ -38,7 +38,7 @@ InheritanceLink( ConceptNode("Deer"),       ConceptNode("animal"))
 InheritanceLink( ConceptNode("Spaceship"),  ConceptNode("machine")).truth_value(0.5,0.5)
 
 # Define a graph search query
-bindlink_handle =  \
+bindlink_atom =  \
         BindLink(
             # The variable node to be grounded.
             VariableNode("$var"),
@@ -52,14 +52,14 @@ bindlink_handle =  \
             VariableNode("$var")
 
         # Bindlink needs a handle, not an atom.
-        ).h
+        )
 
 # Remember the starting atomspace size. This test should not
 # change the atomspace.
 starting_size = atomspace.size()
 
 # Run bindlink.
-result = stub_bindlink(atomspace, bindlink_handle)
+result = stub_bindlink(atomspace, bindlink_atom)
 assert_true(result is not None and result.value() > 0)
 
 # Check the ending atomspace size, it should be the same.
@@ -70,7 +70,7 @@ assert_equals(ending_size, starting_size)
 starting_size = atomspace.size()
 
 # Run bindlink.
-result = bindlink(atomspace, bindlink_handle)
+result = bindlink(atomspace, bindlink_atom)
 assert_true(result is not None and result.value() > 0)
 
 # Check the ending atomspace size, it should have added one SetLink.
@@ -78,9 +78,8 @@ ending_size = atomspace.size()
 assert_equals(ending_size, starting_size + 1)
 
 # The SetLink should have three items in it.
-atom = atomspace[result]
-assert_equals(atom.arity, 3)
-assert_equals(atom.type, types.SetLink)
+assert_equals(result.arity, 3)
+assert_equals(result.type, types.SetLink)
 
 result = execute_atom(atomspace, 
         ExecutionOutputLink( 
