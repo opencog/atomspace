@@ -470,7 +470,7 @@ tests = [
 (['get_vs_xget'],           prep_get_outgoing,      test_get_outgoing_no_list,  "Get Outgoing - no temporary list"),
 
 (['all'],                   None,                   None,                       "-- Testing Bind --"),
-(['bindlink'],              prep_none,              test_stub_bindlink,         "Bind - stub_bindlink - Cython"),
+(['bindlink'],              prep_bind_python,       test_stub_bindlink,         "Bind - stub_bindlink - Cython"),
 (['bindlink','spread'],     prep_bind_python,       test_bind,                  "Bind - bindlink - Cython"),
 
 (['all'],                   None,                   None,                       "-- Testing Scheme Eval --"),
