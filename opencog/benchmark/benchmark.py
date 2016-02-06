@@ -244,21 +244,21 @@ def prep_predicates(atomspace):
 
 # Tests
 
-def test_add_nodes(atomspace, prep_handle):
+def test_add_nodes(atomspace, prep_atom):
     """Add n nodes in atomspace with python bindings"""
     n = 100000
     for i in xrange(n):
         atomspace.add_node(types.ConceptNode, str(i), TruthValue(.5, .5))
     return n
 
-def test_add_nodes_large(atomspace, prep_handle):
+def test_add_nodes_large(atomspace, prep_atom):
     """Add n nodes in atomspace with python bindings"""
     n = 500000
     for i in xrange(n):
         atomspace.add_node(types.ConceptNode, str(i), TruthValue(.5, .5))
     return n
 
-def test_add_connected(atomspace, prep_handle):
+def test_add_connected(atomspace, prep_atom):
     """Add n nodes and create a complete (fully-connected) graph in atomspace
     and returns the number of items processed
     """
@@ -335,34 +335,34 @@ def test_get_outgoing_no_list(atomspace, prep_result):
 
 # Bindlink tests
 
-def test_stub_bindlink(atomspace, prep_handle):
+def test_stub_bindlink(atomspace, prep_atom):
     n = 100000
     for i in xrange(n):
-        result = stub_bindlink(atomspace, prep_handle)
+        result = stub_bindlink(atomspace, prep_atom)
     return n
 
-def test_bind(atomspace, prep_handle):
+def test_bind(atomspace, prep_atom):
     n = 10000
     for i in xrange(n):
-        result = bindlink(atomspace, prep_handle)
+        result = bindlink(atomspace, prep_atom)
     return n
 
 
 # Scheme tests
 
-def test_scheme_eval(atomspace, prep_handle):
+def test_scheme_eval(atomspace, prep_atom):
     n = 10000
     for i in xrange(n):
         result = scheme_eval_h(atomspace, '(+ 2 2)')
     return n
 
-def test_bind_scheme(atomspace, prep_handle):
+def test_bind_scheme(atomspace, prep_atom):
     n = 10000
     for i in xrange(n):
         result = scheme_eval_h(atomspace, '(cog-bind find-animals)')
     return n
 
-def test_add_nodes_scheme(atomspace, prep_handle):
+def test_add_nodes_scheme(atomspace, prep_atom):
     """Add n nodes in atomspace using scheme"""
     n = 10000
     for i in xrange(n):
@@ -371,7 +371,7 @@ def test_add_nodes_scheme(atomspace, prep_handle):
         scheme_eval_h(atomspace, scheme)
     return n
 
-def test_add_nodes_sugar(atomspace, prep_handle):
+def test_add_nodes_sugar(atomspace, prep_atom):
     """Add n nodes in atomspace using scheme with syntactic sugar"""
     n = 10000
     for i in xrange(n):
