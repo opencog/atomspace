@@ -548,7 +548,7 @@ Type AtomSpaceBenchmark::randomType(Type t)
     return candidateType;
 }
 
-clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
+clock_t AtomSpaceBenchmark::makeRandomNodes(const std::string& csi)
 {
 #ifdef FIXME_LATER
     // Some faction of the time, we create atoms with non-default
@@ -677,7 +677,7 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
     return 0;
 }
 
-clock_t AtomSpaceBenchmark::makeRandomLink()
+clock_t AtomSpaceBenchmark::makeRandomLinks()
 {
     double p = rng->randdouble();
     Type ta[Nclock];
@@ -793,7 +793,7 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
 }
 
 void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize,
-                                float _percentLinks, bool display)
+                                        float _percentLinks, bool display)
 {
     BenchType saveKind = testKind;
 #if HAVE_CYTHON
@@ -819,7 +819,7 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize,
     int diff = nodeCount / PROGRESS_BAR_LENGTH;
     if (!diff) diff = 1;
     for (i=0; i<nodeCount; i++) {
-        makeRandomNode("");
+        makeRandomNodes("");
         if (display && i % diff == 0) cerr << "." << flush;
     }
     UUID_end = TLB::getMaxUUID();
@@ -829,7 +829,7 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize,
     diff = ((atomspaceSize - nodeCount) / PROGRESS_BAR_LENGTH);
     if (!diff) diff = 1;
     for (; i < atomspaceSize/Nclock; i++) {
-        makeRandomLink();
+        makeRandomLinks();
         if (display && (i-nodeCount) % diff == 0) { cerr << "." << flush; }
     }
 
@@ -866,13 +866,13 @@ timepair_t AtomSpaceBenchmark::bm_noop()
 timepair_t AtomSpaceBenchmark::bm_addNode()
 {
     //cout << "Benchmarking AtomSpace::addNode" << endl;
-    return timepair_t(makeRandomNode(""),0);
+    return timepair_t(makeRandomNodes(""),0);
 }
 
 timepair_t AtomSpaceBenchmark::bm_addLink()
 {
     //cout << "Benchmarking AtomSpace::addLink" << endl;
-    return timepair_t(makeRandomLink(),0);
+    return timepair_t(makeRandomLinks(),0);
 }
 
 timepair_t AtomSpaceBenchmark::bm_rmAtom()
