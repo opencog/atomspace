@@ -329,7 +329,8 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
     // Must not remove more atoms than there are
     if (methodToCall == &AtomSpaceBenchmark::bm_rmAtom)
     {
-        size_t asz = asp->get_size();
+        size_t asz = (testKind == BENCH_TABLE ?
+                      atab->getSize() : asp->get_size());
         if (asz < 4*Nreps*Nclock*Nloops/3)
             Nreps = asz / (4*Nclock*Nloops/3);
     }
@@ -375,11 +376,8 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
             // Try to negate the memory increase due to adding atoms
             rssFromIncrease += (getMemUsage() - rssBeforeIncrease);
         }
-        size_t atomspaceSize;
-        if (testKind == BENCH_TABLE)
-            atomspaceSize = atab->getSize();
-        else
-            atomspaceSize = asp->get_size();
+        size_t atomspaceSize = (testKind == BENCH_TABLE ?
+                                atab->getSize() : asp->get_size());
         timepair_t timeTaken = CALL_MEMBER_FN(*this, methodToCall)();
         sumAsyncTime += get<0>(timeTaken);
         counter++;
@@ -1354,7 +1352,7 @@ timepair_t AtomSpaceBenchmark::bm_getHandlesByType()
     case BENCH_TABLE: {
         clock_t t_begin = clock();
         HandleSeq results;
-        asp->get_handles_by_type(results, t, true);
+        atab->getHandlesByType(back_inserter(results), t, true);
         clock_t time_taken = clock() - t_begin;
         return timepair_t(Nclock*time_taken,0);
     }
