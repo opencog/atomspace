@@ -9,14 +9,14 @@ the resident set size (memory) of the benchmark process.
 A simple example:
 
 ```bash
-$ ./opencog/benchmark/atomspace_bm -m "addLink" -b -k -S 100 -n 1000 -f
+$ ./opencog/benchmark/atomspace_bm -m "addLink" -k -S 100 -n 10000 -f
 ```
 
 This will run the addLink benchmark (-m "addLink"). It will also build a test
-AtomSpace before running the benchmark (-b) which consists of random graph
+AtomSpace before running the benchmark which consists of random graph
 whose size and link density can be changed on the command line.
 
-It will run and measure the speed of the addLink method 1000 times (-n 1000),
+It will run and measure the speed of the addLink method 10,000 times (-n 10000),
 but between each it will add 100 more random atoms to the AtomSpace (-S 100)
 so that you can assess how performance scales with AtomSpace size. -k
 calculates some statistics on the times (min, max, mean, etc) and -f dumps
@@ -26,20 +26,21 @@ always the method name appended by "_benchmark.csv").
 You should see output like:
 
 ```
-Building atomspace with 65536 atoms (20% links)
-Adding 52428 nodes ...................................................
-Adding 13108 links ...................................................
-Built atomspace, execution time: 1.95s
-------------------------------
-Benchmarking AtomSpace's addLink method 1000 times ........................
-Sum time for all requests: 0.056635 seconds
-Memory (max RSS) change after benchmark: 464kb
-Per operation stats, in CPU clock ticks:
-  N: 1000
-  mean: 56
-  min: 7
-  max: 1798
-  std: 222
+OpenCog Atomspace Benchmark - Version 1.0.1
+
+Random generator: MT19937
+Random seed: 1454704931
+
+Ingnore this: 32619
+Benchmarking AtomSpace's addLink method 10000 times .....
+0.226272 seconds elapsed (110486.44 per second)
+Sum clock() time for all requests: 184614 (0.184614 seconds, 135418 requests per second)
+Per operation stats, in CPU clock ticks: 
+  N: 5
+  mean: 36922
+  min: 34017
+  max: 42678
+  std: 3570
 ------------------------------
 ```
 
@@ -93,7 +94,7 @@ the cython directory:
 $ export PYTHONPATH="${PYTHONPATH}:${HOME}/src/opencog/build/opencog/cython:${HOME}/src/opencog/opencog/python:${HOME}/src/opencog/opencog/nlp"
 ```
 
-and then run:
+and then run (from the atomspace directory, `/home/opencog/atomspace` on Docker):
 
 ```bash
 $ python ./opencog/benchmark/benchmark.py

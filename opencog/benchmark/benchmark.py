@@ -7,12 +7,9 @@ Python binding benchmarks
 Displays the number of operations per second achieved under various
 scenarios utilizing the Python bindings that wrap the AtomSpace using
 Cython. Some of the tests compare the evaluation of nodes using the
-Python Scheme bindings which take much longer than their comparable
-Cython bindings. XXX Which is utterly false and insane -- the
-measurements are being done incorrectly, since the Scheme bindings
-normally run about 3x to 10x faster than the Python bindings do.
-Python is generally quite slow, and is very unlikely to be faster than
-scheme; something is borked with this test case.
+Python scheme_eval_h which takes much longer than the comparable
+Cython bindings because of the overhead of creating and initializing
+a SchemeEval object.
 
 Results can be compared with the more comprehensive benchmarking code in
 the opencog/benchmark directory.
@@ -85,8 +82,9 @@ if args.verbose:
 test_iterations = args.iterations
 
 scheme_preload = [
-                    "opencog/atomspace/core_types.scm",
-                    "opencog/scm/utilities.scm"
+                    "opencog/atoms/base/core_types.scm",
+                    "opencog/scm/utilities.scm",
+                    "opencog/scm/opencog/query.scm"
                  ]
 
 def loop_time_per_op():
@@ -154,6 +152,7 @@ def prep_bind(atomspace):
     for scheme_file in scheme_preload:
         load_scm(atomspace, scheme_file)
     scheme_eval(atomspace, "(use-modules (opencog))")
+    scheme_eval(atomspace, "(use-modules (opencog query))")
 
     # Define several animals and something of a different type as well
     scheme_animals = \
@@ -244,21 +243,21 @@ def prep_predicates(atomspace):
 
 # Tests
 
-def test_add_nodes(atomspace, prep_handle):
+def test_add_nodes(atomspace, prep_atom):
     """Add n nodes in atomspace with python bindings"""
     n = 100000
     for i in xrange(n):
         atomspace.add_node(types.ConceptNode, str(i), TruthValue(.5, .5))
     return n
 
-def test_add_nodes_large(atomspace, prep_handle):
+def test_add_nodes_large(atomspace, prep_atom):
     """Add n nodes in atomspace with python bindings"""
     n = 500000
     for i in xrange(n):
         atomspace.add_node(types.ConceptNode, str(i), TruthValue(.5, .5))
     return n
 
-def test_add_connected(atomspace, prep_handle):
+def test_add_connected(atomspace, prep_atom):
     """Add n nodes and create a complete (fully-connected) graph in atomspace
     and returns the number of items processed
     """
@@ -335,34 +334,34 @@ def test_get_outgoing_no_list(atomspace, prep_result):
 
 # Bindlink tests
 
-def test_stub_bindlink(atomspace, prep_handle):
+def test_stub_bindlink(atomspace, prep_atom):
     n = 100000
     for i in xrange(n):
-        result = stub_bindlink(atomspace, prep_handle)
+        result = stub_bindlink(atomspace, prep_atom)
     return n
 
-def test_bind(atomspace, prep_handle):
+def test_bind(atomspace, prep_atom):
     n = 10000
     for i in xrange(n):
-        result = bindlink(atomspace, prep_handle)
+        result = bindlink(atomspace, prep_atom)
     return n
 
 
 # Scheme tests
 
-def test_scheme_eval(atomspace, prep_handle):
+def test_scheme_eval(atomspace, prep_atom):
     n = 10000
     for i in xrange(n):
         result = scheme_eval_h(atomspace, '(+ 2 2)')
     return n
 
-def test_bind_scheme(atomspace, prep_handle):
+def test_bind_scheme(atomspace, prep_atom):
     n = 10000
     for i in xrange(n):
         result = scheme_eval_h(atomspace, '(cog-bind find-animals)')
     return n
 
-def test_add_nodes_scheme(atomspace, prep_handle):
+def test_add_nodes_scheme(atomspace, prep_atom):
     """Add n nodes in atomspace using scheme"""
     n = 10000
     for i in xrange(n):
@@ -371,7 +370,7 @@ def test_add_nodes_scheme(atomspace, prep_handle):
         scheme_eval_h(atomspace, scheme)
     return n
 
-def test_add_nodes_sugar(atomspace, prep_handle):
+def test_add_nodes_sugar(atomspace, prep_atom):
     """Add n nodes in atomspace using scheme with syntactic sugar"""
     n = 10000
     for i in xrange(n):
@@ -470,7 +469,7 @@ tests = [
 (['get_vs_xget'],           prep_get_outgoing,      test_get_outgoing_no_list,  "Get Outgoing - no temporary list"),
 
 (['all'],                   None,                   None,                       "-- Testing Bind --"),
-(['bindlink'],              prep_none,              test_stub_bindlink,         "Bind - stub_bindlink - Cython"),
+(['bindlink'],              prep_bind_python,       test_stub_bindlink,         "Bind - stub_bindlink - Cython"),
 (['bindlink','spread'],     prep_bind_python,       test_bind,                  "Bind - bindlink - Cython"),
 
 (['all'],                   None,                   None,                       "-- Testing Scheme Eval --"),
