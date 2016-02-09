@@ -329,7 +329,8 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
     // Must not remove more atoms than there are
     if (methodToCall == &AtomSpaceBenchmark::bm_rmAtom)
     {
-        size_t asz = asp->get_size();
+        size_t asz = (testKind == BENCH_TABLE ?
+                      atab->getSize() : asp->get_size());
         if (asz < 4*Nreps*Nclock*Nloops/3)
             Nreps = asz / (4*Nclock*Nloops/3);
     }
@@ -375,11 +376,8 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
             // Try to negate the memory increase due to adding atoms
             rssFromIncrease += (getMemUsage() - rssBeforeIncrease);
         }
-        size_t atomspaceSize;
-        if (testKind == BENCH_TABLE)
-            atomspaceSize = atab->getSize();
-        else
-            atomspaceSize = asp->get_size();
+        size_t atomspaceSize = (testKind == BENCH_TABLE ?
+                                atab->getSize() : asp->get_size());
         timepair_t timeTaken = CALL_MEMBER_FN(*this, methodToCall)();
         sumAsyncTime += get<0>(timeTaken);
         counter++;
@@ -550,7 +548,7 @@ Type AtomSpaceBenchmark::randomType(Type t)
     return candidateType;
 }
 
-clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
+clock_t AtomSpaceBenchmark::makeRandomNodes(const std::string& csi)
 {
 #ifdef FIXME_LATER
     // Some faction of the time, we create atoms with non-default
@@ -679,7 +677,7 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
     return 0;
 }
 
-clock_t AtomSpaceBenchmark::makeRandomLink()
+clock_t AtomSpaceBenchmark::makeRandomLinks()
 {
     double p = rng->randdouble();
     Type ta[Nclock];
@@ -795,7 +793,7 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
 }
 
 void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize,
-                                float _percentLinks, bool display)
+                                        float _percentLinks, bool display)
 {
     BenchType saveKind = testKind;
 #if HAVE_CYTHON
@@ -821,7 +819,7 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize,
     int diff = nodeCount / PROGRESS_BAR_LENGTH;
     if (!diff) diff = 1;
     for (i=0; i<nodeCount; i++) {
-        makeRandomNode("");
+        makeRandomNodes("");
         if (display && i % diff == 0) cerr << "." << flush;
     }
     UUID_end = TLB::getMaxUUID();
@@ -831,7 +829,7 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize,
     diff = ((atomspaceSize - nodeCount) / PROGRESS_BAR_LENGTH);
     if (!diff) diff = 1;
     for (; i < atomspaceSize/Nclock; i++) {
-        makeRandomLink();
+        makeRandomLinks();
         if (display && (i-nodeCount) % diff == 0) { cerr << "." << flush; }
     }
 
@@ -868,13 +866,13 @@ timepair_t AtomSpaceBenchmark::bm_noop()
 timepair_t AtomSpaceBenchmark::bm_addNode()
 {
     //cout << "Benchmarking AtomSpace::addNode" << endl;
-    return timepair_t(makeRandomNode(""),0);
+    return timepair_t(makeRandomNodes(""),0);
 }
 
 timepair_t AtomSpaceBenchmark::bm_addLink()
 {
     //cout << "Benchmarking AtomSpace::addLink" << endl;
-    return timepair_t(makeRandomLink(),0);
+    return timepair_t(makeRandomLinks(),0);
 }
 
 timepair_t AtomSpaceBenchmark::bm_rmAtom()
@@ -1354,7 +1352,7 @@ timepair_t AtomSpaceBenchmark::bm_getHandlesByType()
     case BENCH_TABLE: {
         clock_t t_begin = clock();
         HandleSeq results;
-        asp->get_handles_by_type(results, t, true);
+        atab->getHandlesByType(back_inserter(results), t, true);
         clock_t time_taken = clock() - t_begin;
         return timepair_t(Nclock*time_taken,0);
     }
