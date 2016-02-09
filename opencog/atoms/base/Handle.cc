@@ -80,7 +80,7 @@ bool Handle::atoms_less(const Atom* pa, const Atom* pb)
     return a < b;
 }
 
-bool Handle::deterministic_atoms_less(const Atom* a, const Atom* b)
+bool Handle::content_based_atoms_less(const Atom* a, const Atom* b)
 {
     if (a == b) return false;
     if (nullptr == a) return true;

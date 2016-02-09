@@ -60,7 +60,7 @@ private:
     AtomPtr _ptr;
 
     static bool atoms_less(const Atom*, const Atom*);
-    static bool deterministic_atoms_less(const Atom*, const Atom*);
+    static bool content_based_atoms_less(const Atom*, const Atom*);
     static Handle do_res(UUID);
     static std::vector<const AtomTable*> _resolver;
 
