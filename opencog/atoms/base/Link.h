@@ -220,6 +220,16 @@ public:
      * @return true if they are equal, false otherwise.
      */
     virtual bool operator==(const Atom&) const;
+
+    /**
+     * Returns whether this atom is less than the given atom.
+     *
+     * WARNING: the comparison is based on content, and therefore
+     * potentially expensive.
+     *
+     * @return true if this atom is less than the given one, false otherwise.
+     */
+    virtual bool operator<(const Atom&) const;
 };
 
 static inline LinkPtr LinkCast(const Handle& h)

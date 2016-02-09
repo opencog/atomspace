@@ -97,3 +97,11 @@ bool Node::operator==(const Atom& other) const
     return (getType() == other.getType()) and
            (getName() == dynamic_cast<const Node&>(other).getName());
 }
+
+bool Node::operator<(const Atom& other) const
+{
+    if (getType() == other.getType())
+        return getName() < other.getName();
+    else
+        return getType() < other.getType();
+}

@@ -80,6 +80,21 @@ bool Handle::atoms_less(const Atom* pa, const Atom* pb)
     return a < b;
 }
 
+bool Handle::content_based_atoms_less(const Atom* a, const Atom* b)
+{
+    if (a == b) return false;
+    if (nullptr == a) return true;
+    if (nullptr == b) return false;
+    UUID ua = a->getUUID();
+    UUID ub = b->getUUID();
+    if (INVALID_UUID != ua or INVALID_UUID != ub) return ua < ub;
+
+    // If both UUID's are invalid, we compare them by content. This is
+    // expensive but useful when you really want a deterministic
+    // comparison.
+    return a->operator<(*b);
+}
+
 // ===================================================
 // Handle resolution stuff.
 
