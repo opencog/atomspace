@@ -145,7 +145,7 @@ public:
     inline bool operator!=(const Handle& h) const noexcept {
         return _ptr.get() != h._ptr.get();
     }
-#define DEFAULT_ATOMS_LESS deterministic_atoms_less
+#define DEFAULT_ATOMS_LESS atoms_less
     inline bool operator< (const Handle& h) const noexcept {
        return DEFAULT_ATOMS_LESS(_ptr.get(), h._ptr.get());
     }
