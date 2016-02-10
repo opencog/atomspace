@@ -392,11 +392,21 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 		// end the search if this disconnected pure optional is found
 		if (is_pure_optional)
 		{
-			DefaultPatternMatchCB* dpmcb = dynamic_cast<DefaultPatternMatchCB*>(&pmcb);
+			DefaultPatternMatchCB* dpmcb =
+				dynamic_cast<DefaultPatternMatchCB*>(&pmcb);
 			if (dpmcb->optionals_present()) return false;
 		}
 		else
 		{
+			// If there is no solution for one component, then no need
+			// to try to solve the other components, their product
+			// will have no solution.
+			if (gcb._term_groundings.empty()) {
+				logger().fine("No solution for this component. "
+				              "Abort search as no product solution may exist.");
+				return false;
+			}
+
 			comp_var_gnds.push_back(gcb._var_groundings);
 			comp_term_gnds.push_back(gcb._term_groundings);
 		}
