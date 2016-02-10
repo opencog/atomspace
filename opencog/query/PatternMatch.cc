@@ -125,6 +125,8 @@ class PMCGroundings : public PatternMatchCallback
  *
  * The recursion step terminates when comp_var_gnds, comp_term_gnds
  * are empty, at which point the actual unification is done.
+ *
+ * Return false if no solution is found, true otherwise.
  */
 bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
             const std::vector<Handle>& virtuals,
@@ -421,8 +423,8 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	std::vector<Handle> optionals; // currently ignored
 	pmcb.set_pattern(_varlist, _pat);
 	return PatternMatch::recursive_virtual(pmcb, _virtual, optionals,
-	                  empty_vg, empty_pg,
-	                  comp_var_gnds, comp_term_gnds);
+	                                       empty_vg, empty_pg,
+	                                       comp_var_gnds, comp_term_gnds);
 }
 
 /* ===================== END OF FILE ===================== */
