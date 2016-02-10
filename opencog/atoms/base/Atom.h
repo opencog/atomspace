@@ -419,6 +419,12 @@ public:
         if (_type != other.getType()) return false;
         return operator==(dynamic_cast<const Atom&>(other));
     }
+
+    /** Returns whether this atom is less than the given atom.
+     *
+     * @return true if this atom is less than the given one, false otherwise.
+     */
+    virtual bool operator<(const Atom&) const = 0;
 };
 
 static inline AtomPtr AtomCast(const ProtoAtomPtr& pa)

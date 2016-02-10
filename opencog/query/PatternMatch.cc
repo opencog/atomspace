@@ -125,6 +125,8 @@ class PMCGroundings : public PatternMatchCallback
  *
  * The recursion step terminates when comp_var_gnds, comp_term_gnds
  * are empty, at which point the actual unification is done.
+ *
+ * Return false if no solution is found, true otherwise.
  */
 bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
             const std::vector<Handle>& virtuals,
@@ -392,11 +394,21 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 		// end the search if this disconnected pure optional is found
 		if (is_pure_optional)
 		{
-			DefaultPatternMatchCB* dpmcb = dynamic_cast<DefaultPatternMatchCB*>(&pmcb);
+			DefaultPatternMatchCB* dpmcb =
+				dynamic_cast<DefaultPatternMatchCB*>(&pmcb);
 			if (dpmcb->optionals_present()) return false;
 		}
 		else
 		{
+			// If there is no solution for one component, then no need
+			// to try to solve the other components, their product
+			// will have no solution.
+			if (gcb._term_groundings.empty()) {
+				logger().fine("No solution for this component. "
+				              "Abort search as no product solution may exist.");
+				return false;
+			}
+
 			comp_var_gnds.push_back(gcb._var_groundings);
 			comp_term_gnds.push_back(gcb._term_groundings);
 		}
@@ -411,8 +423,8 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	std::vector<Handle> optionals; // currently ignored
 	pmcb.set_pattern(_varlist, _pat);
 	return PatternMatch::recursive_virtual(pmcb, _virtual, optionals,
-	                  empty_vg, empty_pg,
-	                  comp_var_gnds, comp_term_gnds);
+	                                       empty_vg, empty_pg,
+	                                       comp_var_gnds, comp_term_gnds);
 }
 
 /* ===================== END OF FILE ===================== */

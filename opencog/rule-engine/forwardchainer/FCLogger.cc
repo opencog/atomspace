@@ -31,7 +31,7 @@ Logger& opencog::fc_logger()
 	auto fc_logger_instantiate = []() {
 		Logger tmp(logger());
 		tmp.setComponent("ForwardChainer");
-		tmp.setLevel(Logger::FINE);
+		// tmp.setLevel(Logger::FINE);
 		return tmp;
 	};
 	static Logger fc_instance(fc_logger_instantiate());

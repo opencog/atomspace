@@ -67,8 +67,13 @@ class AtomSpaceBenchmark
     Type randomType(Type t);
     Type numberOfTypes;
 
-    clock_t makeRandomNode(const std::string& s);
-    clock_t makeRandomLink();
+    // Make Nclock random nodes of name "node <counter>" where counter
+    // is incremented for each node. Or s if non empty.
+    clock_t makeRandomNodes(const std::string& s);
+
+	// Make Nclock random links with random arity and random
+	// outgoings.
+	clock_t makeRandomLinks();
 
     long getMemUsage();
     int counter;

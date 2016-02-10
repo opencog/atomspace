@@ -9,19 +9,21 @@ the resident set size (memory) of the benchmark process.
 A simple example:
 
 ```bash
-$ ./opencog/benchmark/atomspace_bm -m "addLink" -k -S 100 -n 10000 -f
+$ cd <BUILD_DIR>/opencog/benchmark
+$ ./atomspace_bm -m "addLink" -k -S 100 -n 10000 -f
 ```
 
-This will run the addLink benchmark (-m "addLink"). It will also build a test
-AtomSpace before running the benchmark which consists of random graph
-whose size and link density can be changed on the command line.
+This will run the addLink benchmark (-m "addLink"). It will also build
+a test AtomSpace before running the benchmark which consists of random
+graph whose size and link density can be changed on the command line.
 
-It will run and measure the speed of the addLink method 10,000 times (-n 10000),
-but between each it will add 100 more random atoms to the AtomSpace (-S 100)
-so that you can assess how performance scales with AtomSpace size. -k
-calculates some statistics on the times (min, max, mean, etc) and -f dumps
-the records to a file called addLink_benchmark.csv (the filename used is
-always the method name appended by "_benchmark.csv").
+It will run and measure the speed of the addLink method 10,000 times
+(-n 10000), but between each it will add 100 more random atoms to the
+AtomSpace (-S 100) so that you can assess how performance scales with
+AtomSpace size. -k calculates some statistics on the run times (min,
+max, mean, etc) of the specified method, and -f dumps the records to a
+file called addLink_benchmark.csv (the filename used is always the
+method name appended by "_benchmark.csv").
 
 You should see output like:
 
