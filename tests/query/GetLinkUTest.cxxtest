@@ -30,6 +30,9 @@
 
 using namespace opencog;
 
+#define al as->add_link
+#define an as->add_node
+
 class GetLinkUTest: public CxxTest::TestSuite
 {
 private:
@@ -70,6 +73,8 @@ public:
 	void test_free_bound(void);
 	void test_eval_clause(void);
 	void test_disconnected_binary_get(void);
+	void test_disconnected_empty(void);
+	// void test_disconnected_const_eval(void);
 };
 
 void GetLinkUTest::tearDown(void)
@@ -204,3 +209,71 @@ void GetLinkUTest::test_disconnected_binary_get(void)
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
+
+/*
+ * Two disconnected components, only one of them has a solution, so
+ * the whole request has no solution. It should stop at the first
+ * component with no solution, no need to explore the second
+ * component.
+ */
+void GetLinkUTest::test_disconnected_empty(void) {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+
+	Handle inh_ground = al(INHERITANCE_LINK,
+	                       an(CONCEPT_NODE, "A"),
+	                       an(CONCEPT_NODE, "B")),
+		comp_1 = al(INHERITANCE_LINK,
+		            an(VARIABLE_NODE, "$A"),
+		            an(VARIABLE_NODE, "$B")),
+		comp_2 = al(IMPLICATION_LINK,
+		            an(VARIABLE_NODE, "$X"),
+		            an(VARIABLE_NODE, "$Y")),
+		pat = al(AND_LINK, comp_1, comp_2),
+		gl = al(GET_LINK, pat),
+		result = satisfying_set(as, gl),
+		expect = al(SET_LINK, HandleSeq());
+
+	printf("Expected this: %s\n", expect->toString().c_str());
+	printf("Found this answer: %s\n", result->toString().c_str());
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// This crashes the pattern matcher so is disabled for now.
+// /*
+//  * Two disconnected components, one evaluatable is constant
+//  */
+// void GetLinkUTest::test_disconnected_const_eval(void) {
+// 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+// 	as->clear();
+
+// 	Handle inh_ground = al(INHERITANCE_LINK,
+// 	                       an(CONCEPT_NODE, "A"),
+// 	                       an(CONCEPT_NODE, "B")),
+// 		real_comp = al(INHERITANCE_LINK,
+// 		               an(VARIABLE_NODE, "$A"),
+// 		               an(VARIABLE_NODE, "$B")),
+// 		virt_comp = al(EVALUATION_LINK,
+// 		               an(GROUNDED_PREDICATE_NODE, "dummy"),
+// 		               al(LIST_LINK,
+// 		                  an(CONCEPT_NODE, "A"))),
+// 		pat = al(AND_LINK, real_comp, virt_comp),
+// 		gl = al(GET_LINK, pat),
+// 		result = satisfying_set(as, gl),
+// 		expect = al(SET_LINK, HandleSeq());
+
+// 	printf("Expected this: %s\n", expect->toString().c_str());
+// 	printf("Found this answer: %s\n", result->toString().c_str());
+
+// 	TS_ASSERT_EQUALS(result, expect);
+
+// 	logger().debug("END TEST: %s", __FUNCTION__);
+// }
+
+#undef al
+#undef an
