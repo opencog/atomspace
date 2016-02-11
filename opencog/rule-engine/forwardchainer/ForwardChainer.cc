@@ -229,12 +229,12 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
 
     while (not rule_weight.empty()) {
         Rule *temp = _rec.tournament_select(rule_weight);
-        fc_logger().debug("Selected rule %s to match against source by %s ",
-                          temp->get_name().c_str(), match_type.c_str());
+        fc_logger().fine("Selected rule %s to match against source by %s ",
+                         temp->get_name().c_str(), match_type.c_str());
 
         if (is_matched(temp)) {
-            fc_logger().debug("Found previous matching by %s",
-                              match_type.c_str());
+            fc_logger().fine("Found previous matching by %s",
+                             match_type.c_str());
 
             rule = temp;
             break;
@@ -264,9 +264,8 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
                               temp->get_name().c_str());
             break;
         } else {
-            fc_logger().debug(
-                    "Rule %s is not a match. Looking for another rule",
-                    temp->get_name().c_str());
+            fc_logger().debug("Rule %s is not a match. Looking for another rule",
+                              temp->get_name().c_str());
         }
 
         rule_weight.erase(temp);
@@ -372,7 +371,7 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,
             FocusSetPMCB fs_pmcb(&derived_rule_as, &_as);
             fs_pmcb.implicand = bl->get_implicand();
 
-            LAZY_FC_LOG_DEBUG << "Applying rule in focus set "
+            LAZY_FC_LOG_DEBUG << "In focus set, apply rule:" << std::endl
                               << rhcpy->toShortString();
 
             bl->imply(fs_pmcb, false);
@@ -389,7 +388,7 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,
 
             Handle rhcpy = derived_rule_as.add_atom(rhandle);
 
-            LAZY_FC_LOG_DEBUG << "Applying rule on atomspace:" << std::endl
+            LAZY_FC_LOG_DEBUG << "On atomspace, apply rule:" << std::endl
                               << rhcpy->toShortString();
 
             Handle h = bindlink(&derived_rule_as, rhcpy);
