@@ -60,8 +60,8 @@ void ForwardChainer::init(Handle hsource, HandleSeq focus_set)
     _search_focus_set = not focus_set.empty();
     _ts_mode = TV_FITNESS_BASED;
 
-	// Set potential source.
-	HandleSeq init_sources;
+    // Set potential source.
+    HandleSeq init_sources;
 
     // Accept set of initial sources wrapped in a SET_LINK.
     if (hsource->getType() == SET_LINK) {
@@ -158,7 +158,7 @@ void ForwardChainer::do_step(void)
 
         _fcstat.add_inference_record(_cur_source, rule,
                                      HandleSeq(products.begin(), products.end()));
-	}
+    }
 
     _iteration++;
 }
@@ -184,7 +184,7 @@ void ForwardChainer::do_chain(void)
 
 bool ForwardChainer::termination()
 {
-	return _max_iteration <= _iteration;
+    return _max_iteration <= _iteration;
 }
 
 /**
@@ -358,7 +358,7 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,
         LAZY_FC_LOG_DEBUG << "Instantiating " << houtput->toShortString();
 
         result.push_back(inst.instantiate(houtput, { }));
-	}
+    }
 
     else {
         if (search_in_focus_set) {
@@ -387,10 +387,10 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,
             LAZY_FC_LOG_DEBUG << "Result is:" << std::endl
                               << _as.add_link(SET_LINK, result)->toShortString();
 
-		}
+        }
         // Search the whole atomspace.
         else {
-			AtomSpace derived_rule_as(&_as);
+            AtomSpace derived_rule_as(&_as);
 
             Handle rhcpy = derived_rule_as.add_atom(rhandle);
 
@@ -433,7 +433,7 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,
 UnorderedHandleSet ForwardChainer::derive_rules(Handle source, Handle term,
                                                 const Rule* rule)
 {
-    //exceptions
+    // Exceptions
     if (not is_valid_implicant(term))
         return {};
 
@@ -542,7 +542,7 @@ void ForwardChainer::validate(Handle hsource, HandleSeq hfocus_set)
 {
     if (hsource == Handle::UNDEFINED)
         throw RuntimeException(TRACE_INFO, "ForwardChainer - Invalid source.");
-    //Any other validation here
+    // Any other validation here
 }
 
 /**
@@ -604,7 +604,7 @@ HandleSeq ForwardChainer::substitute_rule_part(
 {
     std::vector<std::map<Handle, Handle>> filtered_vgmap_list;
 
-    //Filter out variables not listed in vars from var-groundings
+    // Filter out variables not listed in vars from var-groundings
     for (const auto& varg_map : var_groundings) {
         std::map<Handle, Handle> filtered;
 
@@ -620,14 +620,14 @@ HandleSeq ForwardChainer::substitute_rule_part(
     HandleSeq derived_rules;
     BindLinkPtr blptr = BindLinkCast(hrule);
 
-    //Create the BindLink/Rule by substituting vars with groundings
+    // Create the BindLink/Rule by substituting vars with groundings
     for (auto& vgmap : filtered_vgmap_list) {
         Handle himplicand = Substitutor::substitute(blptr->get_implicand(),
                                                     vgmap);
         Handle himplicant = Substitutor::substitute(blptr->get_body(), vgmap);
 
-        //Assuming himplicant's set of variables are superset for himplicand's,
-        //generate varlist from himplicant.
+        // Assuming himplicant's set of variables are superset for himplicand's,
+        // generate varlist from himplicant.
         Handle hvarlist = as.add_atom(
             gen_sub_varlist(himplicant,
                             LinkCast(hrule)->getOutgoingSet()[0]));
@@ -651,7 +651,7 @@ HandleSeq ForwardChainer::substitute_rule_part(
  */
 bool ForwardChainer::unify(Handle source, Handle term, const Rule* rule)
 {
-    // exceptions
+    // Exceptions
     if (not is_valid_implicant(term))
         return false;
 
@@ -704,7 +704,7 @@ Handle ForwardChainer::gen_sub_varlist(const Handle& parent,
 
     HandleSeq final_oset;
 
-    // for each var in varlist, check if it is used in parent
+    // For each var in varlist, check if it is used in parent
     for (const Handle& h : oset) {
         Type t = h->getType();
 
