@@ -57,7 +57,7 @@ void ForwardChainer::init(Handle hsource, HandleSeq focus_set)
     validate(hsource, focus_set);
 
     _search_in_af = _configReader.get_attention_allocation();
-    _search_focus_Set = not focus_set.empty();
+    _search_focus_set = not focus_set.empty();
     _ts_mode = TV_FITNESS_BASED;
 
 	// Set potential source.
@@ -71,8 +71,8 @@ void ForwardChainer::init(Handle hsource, HandleSeq focus_set)
     }
     update_potential_sources(init_sources);
 
-    //Add focus set atoms and sources to focus_set atomspace
-    if (_search_focus_Set) {
+    // Add focus set atoms and sources to focus_set atomspace
+    if (_search_focus_set) {
         _focus_set = focus_set;
 
         for (const Handle& h : _focus_set)
@@ -82,7 +82,7 @@ void ForwardChainer::init(Handle hsource, HandleSeq focus_set)
             _focus_set_as.add_atom(h);
     }
 
-    //Set rules.
+    // Set rules.
     for(Rule& r :_configReader.get_rules())
     {
         _rules.push_back(&r);
@@ -99,9 +99,8 @@ void ForwardChainer::init(Handle hsource, HandleSeq focus_set)
  */
 void ForwardChainer::do_step(void)
 {
-    _cur_source = choose_next_source();
-    LAZY_FC_LOG_DEBUG << "Next source:" << std::endl
-                      << _cur_source->toString();
+    _cur_source = choose_source();
+    LAZY_FC_LOG_DEBUG << "Source:" << std::endl << _cur_source->toString();
 
     const Rule* rule = nullptr;
     UnorderedHandleSet derived_rhandles;
@@ -143,7 +142,7 @@ void ForwardChainer::do_step(void)
     UnorderedHandleSet products;
     // Applying all partial/full groundings.
     for (Handle rhandle : derived_rhandles) {
-        HandleSeq hs = apply_rule(rhandle, _search_focus_Set);
+        HandleSeq hs = apply_rule(rhandle, _search_focus_set);
         products.insert(hs.begin(), hs.end());
     }
 
@@ -170,7 +169,7 @@ void ForwardChainer::do_chain(void)
     // this robustly.
     if(_potential_sources.empty())
     {
-        apply_all_rules(_search_focus_Set);
+        apply_all_rules(_search_focus_set);
         return;
     }
 
@@ -284,7 +283,7 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
     return rule;
 };
 
-Handle ForwardChainer::choose_next_source()
+Handle ForwardChainer::choose_source()
 {
     URECommons urec(_as);
     map<Handle, float> tournament_elem;

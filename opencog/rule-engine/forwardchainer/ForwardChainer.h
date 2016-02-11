@@ -57,7 +57,7 @@ private:
     int _max_iteration;
     source_selection_mode _ts_mode;
     bool _search_in_af;
-    bool _search_focus_Set;
+    bool _search_focus_set;
     Handle _cur_source;
     UnorderedHandleSet _selected_sources;
 
@@ -99,7 +99,7 @@ protected:
      *
      * @return  A handle to the chosen source from source list
      */
-    virtual Handle choose_next_source(void);
+    virtual Handle choose_source();
 
     /**
      * Apply chosen rule. the default will wrap a custom PM callback class.
@@ -108,8 +108,8 @@ protected:
      * @return  A set of handles created as a result of applying current
      *          choosen rule.
      */
-    virtual HandleSeq apply_rule(Handle rhandle, bool search_focus_set_only =
-            false);
+    virtual HandleSeq apply_rule(Handle rhandle,
+                                 bool search_focus_set_only = false);
 
     UnorderedHandleSet derive_rules(Handle source, const Rule* rule,
                                     bool subatomic = false);
