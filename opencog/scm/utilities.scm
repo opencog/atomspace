@@ -16,6 +16,7 @@
 ; -- purge-hypergraph -- purge a hypergraph and everything "under" it.
 ; -- purge-type -- purge all atoms of type 'atom-type'.
 ; -- clear -- purge all atoms in the atomspace.
+; -- count-all -- Return the total number of atoms in the atomspace.
 ; -- cog-get-atoms -- Return a list of all atoms of type 'atom-type'
 ; -- cog-prt-atomspace -- Prints all atoms in the atomspace
 ; -- cog-count-atoms -- Count of the number of atoms of given type.
@@ -214,7 +215,12 @@
 	)
 )
 
+; --------------------------------------------------------------------
 (define-public (count-all)
+"
+  count-all -- Return the total number of atoms in the atomspace, it does not
+  count those in the backingstore.
+"
 	(define cnt 0)
 	(define (ink a) (set! cnt (+ cnt 1)) #f)
 	(define (cnt-type x) (cog-map-type ink x))
