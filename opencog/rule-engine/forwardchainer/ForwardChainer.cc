@@ -153,8 +153,8 @@ void ForwardChainer::do_step(void)
             hwm[h] = weight;
         _fcstat.add_partial_grounding(_cur_source, rule->get_handle(), hwm);
 
-        _fcstat.add_inference_record(
-                _cur_source, HandleSeq(products.begin(), products.end()));
+        _fcstat.add_inference_record(_cur_source, rule,
+                                     HandleSeq(products.begin(), products.end()));
     }
 
 }
@@ -191,7 +191,7 @@ void ForwardChainer::apply_all_rules(bool search_focus_set /*= false*/)
         HandleSeq hs = apply_rule(rule->get_handle(), search_focus_set);
 
         // Update
-        _fcstat.add_inference_record(Handle::UNDEFINED, hs);
+        _fcstat.add_inference_record(Handle::UNDEFINED, rule, hs);
         update_potential_sources(hs);
     }
 
