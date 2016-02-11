@@ -38,6 +38,7 @@
 ; -- cog-map-apply-link -- call proc on link between atom and atom type.
 ; -- cog-get-link -- Get list of links connecting atom to atom type.
 ; -- cog-get-pred -- Find all EvaluationLinks of given form.
+; -- cog-get-reference -- Return the referenced list entries.
 ; -- filter-hypergraph -- recursively traverse outgoing links of graph.
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
 ; -- cartesian-prod-list-only -- Alternative version of cartesian-prod.
@@ -219,7 +220,7 @@
 (define-public (count-all)
 "
   count-all -- Return the total number of atoms in the atomspace, it does not
-  count those in the backingstore.
+  count those in the backing store.
 "
 	(define cnt 0)
 	(define (ink a) (set! cnt (+ cnt 1)) #f)
