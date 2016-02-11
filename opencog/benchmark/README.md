@@ -81,6 +81,8 @@ memory measurement via max RSS isn't useful when running multiple methods).
 A better way might be to record the number of mallocs:
 http://www.gnu.org/s/libc/manual/html_node/Hooks-for-Malloc.html
 
+
+
 ## Python benchmark.py ##
 
 This tool was developed by Cosmo Harrigan and updated by Curtis Faith to
@@ -93,7 +95,7 @@ To use the python benchmark, make sure you have your PYTHONPATH set to include
 the cython directory:
 
 ```bash
-$ export PYTHONPATH="${PYTHONPATH}:${HOME}/src/opencog/build/opencog/cython:${HOME}/src/opencog/opencog/python:${HOME}/src/opencog/opencog/nlp"
+$ export PYTHONPATH="${PYTHONPATH}:${HOME}/atomspace/build/opencog/cython"
 ```
 
 and then run (from the atomspace directory, `/home/opencog/atomspace` on Docker):
