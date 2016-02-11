@@ -40,8 +40,8 @@ private:
 public:
     SequenceUTest(void)
     {
-        logger().setLevel(Logger::DEBUG);
-        logger().setPrintToStdoutFlag(true);
+        logger().set_level(Logger::DEBUG);
+        logger().set_print_to_stdout_flag(true);
 
         as = new AtomSpace();
         eval = new SchemeEval(as);
@@ -52,7 +52,7 @@ public:
         delete as;
         // Erase the log file if no assertions failed.
         if (!CxxTest::TestTracker::tracker().suiteFailed())
-                std::remove(logger().getFilename().c_str());
+                std::remove(logger().get_filename().c_str());
     }
 
     void setUp(void);
@@ -91,7 +91,7 @@ void SequenceUTest::test_sequence(void)
 
     // This should throw an exception from scheme.
     // Disable logging so as to avoid the hopeless spew of errors.
-    logger().setLevel(Logger::NONE);
+    logger().set_level(Logger::NONE);
     bool caught_exception = false;
     try
     {
@@ -102,7 +102,7 @@ void SequenceUTest::test_sequence(void)
         caught_exception = true;
     }
     TS_ASSERT_EQUALS(true, caught_exception);
-    logger().setLevel(Logger::INFO);
+    logger().set_level(Logger::INFO);
 
     // This should not throw any exceptions.
     TruthValuePtr tv = eval->eval_tv("(cog-satisfy (traffic-lights))");

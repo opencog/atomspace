@@ -35,7 +35,7 @@ private:
 public:
 	RemoveUTest()
 	{
-		logger().setPrintToStdoutFlag(true);
+		logger().set_print_to_stdout_flag(true);
 	}
 
 	void setUp() {}
