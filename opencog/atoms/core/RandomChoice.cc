@@ -162,7 +162,7 @@ Handle RandomChoiceLink::execute(AtomSpace * as) const
 		if (0 == weights.size())
 			throw RuntimeException(TRACE_INFO,
 				"Asked to choose element from empty set!");
-		return choices[randy.randDiscrete(weights)];
+		return choices[randy.rand_discrete(weights)];
 
 uniform:
 		ary = lll->getArity();
@@ -200,7 +200,7 @@ uniform:
 		if (0 == weights.size())
 			throw RuntimeException(TRACE_INFO,
 				"Asked to choose element from empty set!");
-		return lchoices->getOutgoingAtom(randy.randDiscrete(weights));
+		return lchoices->getOutgoingAtom(randy.rand_discrete(weights));
 	}
 
 	if (0 == ary)

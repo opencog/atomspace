@@ -41,15 +41,15 @@ class VarTypeNot :  public CxxTest::TestSuite
 
 		VarTypeNot(void)
 		{
-			logger().setLevel(Logger::DEBUG);
-			logger().setPrintToStdoutFlag(true);
+			logger().set_level(Logger::DEBUG);
+			logger().set_print_to_stdout_flag(true);
 		}
 
 		~VarTypeNot()
 		{
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
-				std::remove(logger().getFilename().c_str());
+				std::remove(logger().get_filename().c_str());
 		}
 
 		void setUp(void);
@@ -95,7 +95,7 @@ void VarTypeNot::test_exec(void)
 
 	// This should throw an exception.
 	// Disable logging so as to avoid the hopeless spew of errors.
-	logger().setLevel(Logger::NONE);
+	logger().set_level(Logger::NONE);
 
 	// With the new atomspace design, we can't even insert the bad atom
 	// without throwing. So really, the test doesn't get very far...
@@ -106,14 +106,14 @@ void VarTypeNot::test_exec(void)
 	}
    catch (const RuntimeException& ex)
    {
-		logger().setLevel(Logger::INFO);
-      logger().info("Caught exception, just as expected: %s", ex.getMessage());
-		caught = true;
+       logger().set_level(Logger::INFO);
+       logger().info("Caught exception, just as expected: %s", ex.get_message());
+       caught = true;
    }
    TSM_ASSERT("Failed to catch expected exception", caught);
 	delete evaluator;
 
-	logger().setLevel(Logger::INFO);
+	logger().set_level(Logger::INFO);
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != vscope_good);
@@ -139,7 +139,7 @@ void VarTypeNot::test_exec(void)
    }
    catch (const InvalidParamException& ex)
    {
-      logger().debug("Caught exception, just as expected: %s", ex.getMessage());
+      logger().debug("Caught exception, just as expected: %s", ex.get_message());
 		caught = true;
    }
    TSM_ASSERT("Failed to catch expected exception", caught);

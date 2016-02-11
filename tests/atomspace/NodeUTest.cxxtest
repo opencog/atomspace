@@ -36,8 +36,8 @@ private:
 public:
     NodeUTest()
     {
-        logger().setLevel(Logger::DEBUG);
-        logger().setPrintToStdoutFlag(true);
+        logger().set_level(Logger::DEBUG);
+        logger().set_print_to_stdout_flag(true);
     }
 
     void setUp() {}

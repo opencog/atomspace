@@ -75,7 +75,7 @@ class PersistUTest :  public CxxTest::TestSuite
 		{
 			// erase the log file if no assertions failed
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
-				std::remove(logger().getFilename().c_str());
+				std::remove(logger().get_filename().c_str());
 		}
 
 		void setUp(void);
@@ -112,10 +112,10 @@ PersistUTest:: PersistUTest(void)
 	}
 	catch (RuntimeException &e)
 	{
-		std::cerr << e.getMessage() << std::endl;
+		std::cerr << e.get_message() << std::endl;
 	}
-	logger().setLevel(Logger::DEBUG);
-	logger().setPrintToStdoutFlag(true);
+	logger().set_level(Logger::DEBUG);
+	logger().set_print_to_stdout_flag(true);
 
 	try {
 		// Get the database logins & etc from the config file.

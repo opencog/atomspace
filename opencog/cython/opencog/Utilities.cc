@@ -28,14 +28,14 @@ void opencog::initialize_opencog(AtomSpace* atomSpace, const char* configFile)
         // Setup the logger to match the log settings from the Config file.
         logFile = config()["LOG_FILE"];
         logLevelString = config()["LOG_LEVEL"];
-        logLevel = Logger::getLevelFromString(logLevelString);
+        logLevel = Logger::get_level_from_string(logLevelString);
         backtraceLevelString = config()["BACK_TRACE_LOG_LEVEL"];
-        backtraceLevel = Logger::getLevelFromString(backtraceLevelString);
+        backtraceLevel = Logger::get_level_from_string(backtraceLevelString);
         logToStdOut = config().get_bool("LOG_TO_STDOUT");
-        logger().setFilename(logFile);
-        logger().setLevel(logLevel);
-        logger().setBackTraceLevel(backtraceLevel);
-        logger().setPrintToStdoutFlag(logToStdOut);
+        logger().set_filename(logFile);
+        logger().set_level(logLevel);
+        logger().set_backtrace_level(backtraceLevel);
+        logger().set_print_to_stdout_flag(logToStdOut);
 
         logger().debug("initialize_opencog - config file loaded");
     }
