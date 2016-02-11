@@ -53,7 +53,8 @@ private:
     Handle _rbs;                // rule-based system
     UREConfigReader _configReader;
 
-    int _iteration = 0;
+    int _iteration;
+    int _max_iteration;
     source_selection_mode _ts_mode;
     bool _search_in_af;
     bool _search_focus_Set;
@@ -121,9 +122,26 @@ public:
                    HandleSeq focus_set);
     virtual ~ForwardChainer();
 
-    void do_chain(void);
-    void do_step(void);
-    HandleSeq get_chaining_result(void);
+    /**
+     * Perform a single forward chaining inference step.
+     */
+    void do_step();
+
+    /**
+     * Perform forward chaining inference till the termination
+     * criteria have been met.
+     */
+    void do_chain();
+
+    /**
+     * @return true if the termination criteria have been met.
+     */
+    bool termination();
+
+    /**
+     * @return all results in their order of inference.
+     */
+    HandleSeq get_chaining_result();
 };
 
 } // ~namespace opencog

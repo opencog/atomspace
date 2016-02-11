@@ -88,8 +88,9 @@ void ForwardChainer::init(Handle hsource, HandleSeq focus_set)
         _rules.push_back(&r);
     }
 
-    // Reset the iteration count
+    // Reset the iteration count and max count
     _iteration = 0;
+    _max_iteration = _configReader.get_maximum_iterations();
 }
 
 /**
@@ -160,6 +161,7 @@ void ForwardChainer::do_step(void)
                                      HandleSeq(products.begin(), products.end()));
 	}
 
+    _iteration++;
 }
 
 void ForwardChainer::do_chain(void)
@@ -172,15 +174,18 @@ void ForwardChainer::do_chain(void)
         return;
     }
 
-    auto max_iter = _configReader.get_maximum_iterations();
-
-    while (_iteration < max_iter /*OR other termination criteria*/) {
+    while (not termination())
+    {
         fc_logger().debug("Iteration %d", _iteration);
         do_step();
-        _iteration++;
     }
 
     fc_logger().debug("Finished forwarch chaining");
+}
+
+bool ForwardChainer::termination()
+{
+	return _max_iteration <= _iteration;
 }
 
 /**
