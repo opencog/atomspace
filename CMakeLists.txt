@@ -498,13 +498,14 @@ ADD_CUSTOM_TARGET(cscope
 
 # packaging
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The Open Cognition Framework")
-SET(CPACK_PACKAGE_NAME "opencog")
+SET(CPACK_PACKAGE_NAME "atomspace")
 SET(CPACK_PACKAGE_VENDOR "opencog.org")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 SET(CPACK_PACKAGE_VERSION_MAJOR "0")
 SET(CPACK_PACKAGE_VERSION_MINOR "1")
 SET(CPACK_PACKAGE_VERSION_PATCH "4")
+SET(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 SET(CPACK_BINARY_STGZ "OFF")
 SET(CPACK_BINARY_TBZ2 "OFF")
 SET(CPACK_BINARY_TGZ "OFF")
@@ -513,9 +514,10 @@ SET(CPACK_SOURCE_STGZ "OFF")
 SET(CPACK_SOURCE_TBZ2 "ON")
 SET(CPACK_SOURCE_TGZ "OFF")
 SET(CPACK_SOURCE_TZ "OFF")
+SET(CPACK_PACKAGE_CONTACT "team@opencog.org")
 SET(CPACK_GENERATOR "TBZ2")
 SET(CPACK_SOURCE_GENERATOR "TBZ2")
-SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
 SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}")
 SET(CPACK_SOURCE_IGNORE_FILES
 	"~$"
@@ -551,6 +553,12 @@ SET(CPACK_SOURCE_IGNORE_FILES
 	"^${PROJECT_BINARY_DIR}/examples/server/derivedserver$"
 	"^${PROJECT_BINARY_DIR}/examples/hopfield/hopfield$"
 )
+
+SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
+SET(CPACK_DEBIAN_PACKAGE_DEPENDS
+    "rlwrap (>= 0.37), guile-2.0 (>= 2.0.9), bzip2 (>= 1.0.6), cython (>= 0.20.1), python (>= 2.7.5), python-zmq (>= 14.0.1), python-simplejson (>= 3.3.1), libzmq3 (>= 4.0.4), libboost-date-time1.54.0, libboost-filesystem1.54.0, libboost-program-options1.54.0, libboost-regex1.54.0, libboost-serialization1.54.0, libboost-system1.54.0, libboost-thread1.54.0, binutils (>= 2.24), uuid (>= 1.6.2), protobuf-compiler (>= 2.5.0), libsdl-gfx1.2-4 (>= 2.0.23), libssl1.0.0 (>= 1.0.1), tcl (>= 8.6.0), tcsh (>= 6.18.01), libfreetype6 (>= 2.5.2), libatlas-base-dev, gfortran (>= 4:4.8.2), unixodbc (>= 2.2.14p2), odbc-postgresql (>= 1:09.02.0100), postgresql-client (>= 9.3), cogutils (>= 0.1.4)"
+)
+
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
 IF (WIN32)
 	# Its "not unix" is cygwin is being used.
