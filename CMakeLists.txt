@@ -76,6 +76,10 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 		SET(CMAKE_C_FLAGS_DEBUG "-ggdb3 -fstack-protector")
 		SET(CMAKE_C_FLAGS_PROFILE "-O2 -g3 -fstack-protector -pg")
 		SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto")
+		LINK_LIBRARIES(pthread)
+
+		# Workaround for circular dependencies problem
+		SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} <LINK_LIBRARIES>")
 	ENDIF (APPLE)
 
 	# 1) -Wno-variadic-macros is to avoid warnings regarding using
