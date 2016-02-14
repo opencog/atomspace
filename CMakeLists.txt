@@ -78,7 +78,11 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 		SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto")
 		LINK_LIBRARIES(pthread)
 
-		# Workaround for circular dependencies problem
+		# Workaround for circular dependencies problem. This causes
+		# LINK_LIBRARIES to appear twice in the linker line; the
+		# second appearance has the effect of resolving any circular
+		# dependencies left over from the first specification.
+		# See pull request #642 for more discussion.
 		SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} <LINK_LIBRARIES>")
 	ENDIF (APPLE)
 
