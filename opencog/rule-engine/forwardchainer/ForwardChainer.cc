@@ -99,57 +99,37 @@ void ForwardChainer::init(Handle hsource, const HandleSeq& focus_set)
  */
 void ForwardChainer::do_step(void)
 {
+    // Choose source
     _cur_source = choose_source();
     LAZY_FC_LOG_DEBUG << "Source:" << std::endl << _cur_source->toString();
 
-    const Rule* rule = nullptr;
-    UnorderedHandleSet derived_rhandles;
-
-    // Return previously derived handles for a given choosen
-    // rule. Empty if the rule has not been selected previously for
-    // this particular source atom.
-    auto get_derived = [&](const Handle& hsource) {
-        auto pgmap = _fcstat.get_rule_pg_map(hsource);
-        auto it = pgmap.find(rule->get_handle());
-        if (it != pgmap.end()) {
-            for (auto hwm : it->second) {
-                derived_rhandles.insert(hwm.first);
-            }
-        }
-    };
-
-    rule = choose_rule(_cur_source);
-
-    if (rule) {
-        // Use previously derived rules if they exist.
-        if (_fcstat.has_partial_grounding(_cur_source))
-            get_derived(_cur_source);
-        else
-            derived_rhandles = derive_rules(_cur_source, rule);
+    // Choose rule
+    const Rule* rule = choose_rule(_cur_source);
+    if (not rule) {
+        fc_logger().debug("No selected rule, abort step");
+        return;
     }
 
-    fc_logger().debug("Derived rule size = %d", derived_rhandles.size());
+    // Derive rules partially applied with the source
+    UnorderedHandleSet derived_rhandles = derive_rules(_cur_source, rule);
+    if (derived_rhandles.empty()) {
+        fc_logger().debug("No derived rule, abort step");
+        return;
+    } else {
+        fc_logger().debug("Derived rule size = %d", derived_rhandles.size());
+    }
 
+    // Applying all partial/full groundings
     UnorderedHandleSet products;
-    // Applying all partial/full groundings.
     for (Handle rhandle : derived_rhandles) {
         HandleSeq hs = apply_rule(rhandle, _search_focus_set);
         products.insert(hs.begin(), hs.end());
     }
 
-    // Finally store source partial groundings and inference results.
-    if (not derived_rhandles.empty()) {
-        _potential_sources.insert(products.begin(), products.end());
-
-        HandleWeightMap hwm;
-        float weight = rule->get_weight();
-        for (const Handle& h : derived_rhandles)
-            hwm[h] = weight;
-        _fcstat.add_partial_grounding(_cur_source, rule->get_handle(), hwm);
-
-        _fcstat.add_inference_record(_cur_source, rule,
-                                     HandleSeq(products.begin(), products.end()));
-    }
+    // Store results
+    _potential_sources.insert(products.begin(), products.end());
+    _fcstat.add_inference_record(_cur_source, rule,
+                                 HandleSeq(products.begin(), products.end()));
 
     _iteration++;
 }
@@ -212,27 +192,10 @@ Rule* ForwardChainer::choose_rule(Handle hsource)
     // selection, based on the weights of the rules in the current context.
     Rule* rule = nullptr;
 
-    auto is_matched = [&](const Rule* rule) {
-        if (_fcstat.has_partial_grounding(_cur_source)) {
-            auto pgmap = _fcstat.get_rule_pg_map(hsource);
-            auto it = pgmap.find(rule->get_handle());
-            if (it != pgmap.end())
-                return true;
-        }
-        return false;
-    };
-
     while (not rule_weight.empty()) {
         Rule *temp = _rec.tournament_select(rule_weight);
         fc_logger().fine("Selected rule %s to match against the source",
                          temp->get_name().c_str());
-
-        if (is_matched(temp)) {
-	        fc_logger().fine("Found previous matching");
-
-            rule = temp;
-            break;
-        }
 
         bool unified = false;
         HandleSeq hs = temp->get_implicant_seq();

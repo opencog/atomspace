@@ -88,6 +88,8 @@ protected:
      * Choose an applicable rules from the rule base by selecting
      * rules whose premise structurally matches with the source.
      *
+     * If no rule can be chosen return nullptr.
+     *
      * @return  A rule that in which @param source could ground.
      */
     virtual Rule* choose_rule(Handle hsource);
