@@ -65,7 +65,7 @@ private:
 
     void init(Handle hsource, const HandleSeq& focus_set);
 
-    void apply_all_rules(bool search_focus_set = false);
+    void apply_all_rules();
 
     Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);
     HandleSeq substitute_rule_part(AtomSpace& as, Handle hrule,
@@ -74,7 +74,7 @@ private:
                                    var_groundings);
     bool unify(Handle source, Handle term, const Rule* rule);
     UnorderedHandleSet derive_rules(Handle source, Handle term, const Rule* rule);
-    void update_potential_sources(HandleSeq input);
+    void update_potential_sources(const HandleSeq& input);
 
     bool is_valid_implicant(const Handle& h);
     void validate(Handle hsource, HandleSeq hfocus_set);
@@ -101,15 +101,19 @@ protected:
      */
     virtual Handle choose_source();
 
-    /**
-     * Apply chosen rule. the default will wrap a custom PM callback class.
-     * i.e invokes _pattern_matcher.
+	/**
+	 * Apply rule on the current source. Creating derived rules if
+	 * necessary.
+	 */
+    virtual UnorderedHandleSet apply_rule(const Rule* rule);
+
+	/**
+     * Apply rule handle (BindLink).
      *
      * @return  A set of handles created as a result of applying current
      *          choosen rule.
      */
-    virtual HandleSeq apply_rule(Handle rhandle,
-                                 bool search_focus_set_only = false);
+    virtual HandleSeq apply_rule(Handle rhandle);
 
     UnorderedHandleSet derive_rules(Handle source, const Rule* rule);
 
@@ -140,7 +144,7 @@ public:
     /**
      * @return all results in their order of inference.
      */
-    HandleSeq get_chaining_result();
+    UnorderedHandleSet get_chaining_result();
 };
 
 } // ~namespace opencog

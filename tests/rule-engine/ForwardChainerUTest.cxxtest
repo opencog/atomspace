@@ -90,11 +90,11 @@ void ForwardChainerUTest::test_do_chain()
 	fc.do_chain();
 
 	// Collect the results
-	HandleSeq results = fc.get_chaining_result();
+	UnorderedHandleSet results = fc.get_chaining_result();
 
 	// Check that AC is in the results
 	Handle AC = _as.add_link(IMPLICATION_LINK, A, C);
-	TS_ASSERT_DIFFERS(find(results.begin(), results.end(), AC), results.end());
+	TS_ASSERT_DIFFERS(results.find(AC), results.end());
 }
 
 void ForwardChainerUTest::test_choose_rule(void)

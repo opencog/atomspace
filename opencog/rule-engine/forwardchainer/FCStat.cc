@@ -27,28 +27,16 @@
 using namespace opencog;
 
 void FCStat::add_inference_record(Handle source, const Rule* rule,
-                                  const HandleSeq& product)
+                                  const UnorderedHandleSet& product)
 {
-    InferenceRecord ir(source, rule, product);
-    auto it = std::find(_inf_rec.begin(), _inf_rec.end(), ir);
-
-    if (it != _inf_rec.end()) {
-        for(Handle h:product)
-        {
-            HandleSeq& pd = (*it).product;
-            if(std::find(pd.begin(),pd.end(),h) == pd.end())
-                pd.push_back(h);
-        }
-    } else {
-        _inf_rec.push_back(ir);
-    }
+	_inf_rec.emplace_back(source, rule, product);
 }
 
-HandleSeq FCStat::get_all_inferences(void)
+UnorderedHandleSet FCStat::get_all_products()
 {
-    UnorderedHandleSet all;
-    for(const auto& ir : _inf_rec)
-        all.insert(ir.product.begin(),ir.product.end());
+	UnorderedHandleSet all;
+	for(const auto& ir : _inf_rec)
+		all.insert(ir.product.begin(),ir.product.end());
 
-    return HandleSeq(all.begin(), all.end());
+	return all;
 }

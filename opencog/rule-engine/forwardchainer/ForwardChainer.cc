@@ -110,26 +110,12 @@ void ForwardChainer::do_step(void)
         return;
     }
 
-    // Derive rules partially applied with the source
-    UnorderedHandleSet derived_rhandles = derive_rules(_cur_source, rule);
-    if (derived_rhandles.empty()) {
-        fc_logger().debug("No derived rule, abort step");
-        return;
-    } else {
-        fc_logger().debug("Derived rule size = %d", derived_rhandles.size());
-    }
-
-    // Applying all partial/full groundings
-    UnorderedHandleSet products;
-    for (Handle rhandle : derived_rhandles) {
-        HandleSeq hs = apply_rule(rhandle, _search_focus_set);
-        products.insert(hs.begin(), hs.end());
-    }
+    // Apply rule on _cur_source
+    UnorderedHandleSet products = apply_rule(rule);
 
     // Store results
     _potential_sources.insert(products.begin(), products.end());
-    _fcstat.add_inference_record(_cur_source, rule,
-                                 HandleSeq(products.begin(), products.end()));
+    _fcstat.add_inference_record(_cur_source, rule, products);
 
     _iteration++;
 }
@@ -140,7 +126,7 @@ void ForwardChainer::do_chain(void)
     // this robustly.
     if(_potential_sources.empty())
     {
-        apply_all_rules(_search_focus_set);
+        apply_all_rules();
         return;
     }
 
@@ -163,20 +149,21 @@ bool ForwardChainer::termination()
  *
  * @param search_focus_set flag for searching focus set.
  */
-void ForwardChainer::apply_all_rules(bool search_focus_set /*= false*/)
+void ForwardChainer::apply_all_rules()
 {
     for (Rule* rule : _rules) {
-        HandleSeq hs = apply_rule(rule->get_handle(), search_focus_set);
+        HandleSeq hs = apply_rule(rule->get_handle());
 
         // Update
-        _fcstat.add_inference_record(Handle::UNDEFINED, rule, hs);
+        _fcstat.add_inference_record(Handle::UNDEFINED, rule,
+                                     UnorderedHandleSet(hs.begin(), hs.end()));
         update_potential_sources(hs);
     }
 }
 
-HandleSeq ForwardChainer::get_chaining_result()
+UnorderedHandleSet ForwardChainer::get_chaining_result()
 {
-    return _fcstat.get_all_inferences();
+    return _fcstat.get_all_products();
 }
 
 Rule* ForwardChainer::choose_rule(Handle hsource)
@@ -270,8 +257,28 @@ Handle ForwardChainer::choose_source()
     return hchosen;
 }
 
-HandleSeq ForwardChainer::apply_rule(Handle rhandle,
-                                     bool search_in_focus_set /*=false*/)
+UnorderedHandleSet ForwardChainer::apply_rule(const Rule* rule)
+{
+    // Derive rules partially applied with the source
+    UnorderedHandleSet derived_rhandles = derive_rules(_cur_source, rule);
+    if (derived_rhandles.empty()) {
+        fc_logger().debug("No derived rule, abort step");
+        return UnorderedHandleSet();
+    } else {
+        fc_logger().debug("Derived rule size = %d", derived_rhandles.size());
+    }
+
+    // Applying all partial/full groundings
+    UnorderedHandleSet products;
+    for (Handle rhandle : derived_rhandles) {
+        HandleSeq hs = apply_rule(rhandle);
+        products.insert(hs.begin(), hs.end());
+    }
+    return products;
+}
+
+
+HandleSeq ForwardChainer::apply_rule(Handle rhandle)
 {
     HandleSeq result;
 
@@ -289,7 +296,7 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,
         // Actual checking here.
         for (const Handle& h : hs) {
             if (_as.get_atom(h) == Handle::UNDEFINED
-                or (search_in_focus_set
+                or (_search_focus_set
                     and _focus_set_as.get_atom(h) == Handle::UNDEFINED)) {
                 return {};
             }
@@ -303,7 +310,7 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,
     }
 
     else {
-        if (search_in_focus_set) {
+        if (_search_focus_set) {
 
             // rhandle may introduce a new atom that satisfies
             // condition for the output. In order to prevent this
@@ -345,12 +352,12 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,
                               << h->toShortString();
 
             LinkPtr lp(LinkCast(h));
-            if (lp) result = lp->getOutgoingSet();
+            if (lp) result = h->getOutgoingSet();
         }
     }
 
     // Add result back to atomspace.
-    if (search_in_focus_set) {
+    if (_search_focus_set) {
         for (const Handle& h : result)
             _focus_set_as.add_atom(h);
 
@@ -608,7 +615,7 @@ Handle ForwardChainer::gen_sub_varlist(const Handle& parent,
     return Handle(createVariableList(final_oset));
 }
 
-void ForwardChainer::update_potential_sources(HandleSeq input)
+void ForwardChainer::update_potential_sources(const HandleSeq& input)
 {
     _potential_sources.insert(input.begin(), input.end());
 }
