@@ -446,6 +446,11 @@ public:
         return false;
     }
 
+    /**
+     * Convert the atomspace into a string
+     */
+    std::string to_string();
+
     /* ----------------------------------------------------------- */
     /* Attentional Focus stuff */
 

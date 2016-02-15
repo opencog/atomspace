@@ -383,6 +383,13 @@ bool AtomSpace::remove_atom(Handle h, bool recursive)
     return 0 < atomTable.extract(h, recursive).size();
 }
 
+std::string AtomSpace::to_string()
+{
+	std::stringstream ss;
+	ss << *this;
+	return ss.str();
+}
+
 void AtomSpace::clear()
 {
     std::vector<Handle> allAtoms;
