@@ -172,14 +172,28 @@ bool MapLink::extract(const Handle& termpat,
 		return true;
 	}
 
+	// Special-case for ChoiceLinks in the body of the pattern.
+	// This dangles one foot over the edge of a slippery slope,
+	// of analyzing the body of the map and special-casing. Not
+	// sure if this is a good idea, or a bad idea...
+	if (CHOICE_LINK == t)
+	{
+		for (const Handle& choice : termpat->getOutgoingSet())
+		{
+			if (extract(choice, ground, valmap, scratch))
+				return true;
+		}
+		return false;
+	}
+
 	// Whatever they are, the type must agree.
 	if (t != ground->getType()) return false;
 
 	// If they are (non-variable) nodes, they must be identical.
-	LinkPtr tlp(LinkCast(termpat));
-	if (nullptr == tlp)
+	if (not termpat->isLink())
 		return (termpat == ground);
 
+	LinkPtr tlp(LinkCast(termpat));
 	LinkPtr glp(LinkCast(ground));
 	const HandleSeq& tlo = tlp->getOutgoingSet();
 	const HandleSeq& glo = glp->getOutgoingSet();
