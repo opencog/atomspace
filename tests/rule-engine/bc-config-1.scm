@@ -11,7 +11,7 @@
 ; is currently undefined, we might settled with probabilities but it's
 ; not sure)
 (MemberLink (stv 1 1)
-   pln-rule-modus-ponens-name
+   bc-modus-ponens-rule-name
    (ConceptNode "URE")
 )
 

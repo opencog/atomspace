@@ -27,7 +27,7 @@
                 (VariableNode "$B")
                 (VariableNode "$C")
             )
-            ; To avoid matching (Inheritance A B) and (Inheritance B A)
+            ;; To avoid matching (Inheritance A B) and (Inheritance B A)
             (NotLink
                 (EqualLink
                     (VariableNode "$A")
@@ -36,7 +36,7 @@
             )
         )
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-simple-deduction")
+            (GroundedSchemaNode "scm: bc-deduction-formula")
             (ListLink
                 (InheritanceLink
                     (VariableNode "$A")
@@ -59,7 +59,7 @@
 ; Deduction Formula
 ; -----------------------------------------------------------------------------
 
-(define (pln-formula-simple-deduction AB BC AC)
+(define (bc-deduction-formula AB BC AC)
     (let
         ((sAB (cog-stv-strength AB))
          (cAB (cog-stv-confidence AB))
@@ -71,7 +71,7 @@
 )
 
 ; Associate a name to the rule
-(define pln-rule-deduction-name (DefinedSchema "pln-rule-deduction"))
+(define bc-deduction-rule-name (DefinedSchema "bc-deduction-rule"))
 (DefineLink
-  pln-rule-deduction-name
-  pln-rule-deduction)
+  bc-deduction-rule-name
+  bc-deduction-rule)

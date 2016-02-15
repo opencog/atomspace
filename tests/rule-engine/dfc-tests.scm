@@ -23,7 +23,7 @@
             )
         )
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-simple-deduction")
+            (GroundedSchemaNode "scm: bc-deduction-formula")
             (ListLink
                 (InheritanceLink
                     (ConceptNode "Cat")
@@ -66,7 +66,7 @@
             )
         )
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-simple-deduction")
+            (GroundedSchemaNode "scm: bc-deduction-formula")
             (ListLink
                 (InheritanceLink
                     (VariableNode "$A")
