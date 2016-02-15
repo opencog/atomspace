@@ -150,7 +150,7 @@ void ScopeLink::init_scoped_variables(const Handle& hvar)
 	Type t = hvar->getType();
 	if (VARIABLE_LIST == t)
 	{
-		VariableList vl(LinkCast(hvar)->getOutgoingSet());
+		VariableList vl(hvar->getOutgoingSet());
 		_varlist = vl.get_variables();
 	}
 	else
