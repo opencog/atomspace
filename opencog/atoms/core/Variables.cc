@@ -128,7 +128,7 @@ void FreeVariables::find_variables(const Handle& h)
 /* ================================================================= */
 
 Handle FreeVariables::substitute_nocheck(const Handle& term,
-                                     const HandleSeq& args) const
+                                         const HandleSeq& args) const
 {
 	// If it is a singleton, just return that singleton.
 	std::map<Handle, unsigned int>::const_iterator idx;
@@ -241,7 +241,7 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 		std::set<Type>::const_iterator allow = tchoice.find(htype);
 
 		// If the value has the simple type, then we are good to go;
-		// we are done.  Else, fall throough, and see if one of the
+		// we are done.  Else, fall through, and see if one of the
 		// others accept the match.
 		if (allow != tchoice.end()) return true;
 		ret = false;
@@ -360,6 +360,10 @@ Handle Variables::substitute(const Handle& fun,
 			"Incorrect number of arguments specified, expecting %lu got %lu",
 			varseq.size(), args.size());
 
+	// XXX TODO type-checking should be lazy; if the function is not
+	// actually using one of the args, its's type should not be checked.
+	// viz, one of the values might be undefined, and that's OK, if that
+	// value is never actually used.
 	if (not is_type(args))
 		throw SyntaxException(TRACE_INFO,
 			"Arguments fail to match variable declarations");
@@ -371,6 +375,7 @@ Handle Variables::substitute(const Handle& fun,
 /**
  * Extend a set of variables.
  *
+ * That is, merge the given variables into this set.
  */
 void Variables::extend(const Variables& vset)
 {

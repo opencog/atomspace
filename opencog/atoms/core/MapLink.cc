@@ -236,7 +236,8 @@ Handle MapLink::rewrite_one(const Handle& term, AtomSpace* scratch) const
 	// Perform substitution, if it's an ImplicationLink
 	if (_is_impl)
 	{
-		return _vars->substitute(_rewrite, valseq);
+		// No type-checking; we've already done that.
+		return _vars->substitute_nocheck(_rewrite, valseq);
 	}
 
 	// Make sure each variable is grounded. (for real, this time)
