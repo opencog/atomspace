@@ -27,10 +27,13 @@ using namespace opencog;
 
 void MapLink::init(void)
 {
+	// Maps consist of a function, and the data to apply the function to.
 	if (2 != _outgoing.size())
 		throw SyntaxException(TRACE_INFO,
 			"MapLink is expected to be arity-2 only!");
 
+	// First argument must be a function of some kind.  All functions
+	// are specified using a ScopeLink, to bind the input-variables.
 	Type tscope = _outgoing[0]->getType();
 	if (not classserver().isA(tscope, SCOPE_LINK))
 	{
@@ -44,6 +47,9 @@ void MapLink::init(void)
 	_varset = &_vars->varset;
 	_is_impl = false;
 
+	// ImplicationLinks are a special type of ScopeLink.  They specify
+	// a re-write that should be performed.  Viz, ImplicationLinks are
+	// of the form P(x)->Q(x).  Here, the `_rewrite` is the Q(x)
 	if (classserver().isA(tscope, IMPLICATION_LINK))
 	{
 		_is_impl = true;
@@ -52,6 +58,10 @@ void MapLink::init(void)
 			throw SyntaxException(TRACE_INFO,
 				"Expecting ImplicationLink of at least size 2.");
 
+		// ImplicationLinks have arity 2 only if they have no type
+		// constraints, else they have arity 3.  That is, an
+		// ImplicationLink is either P(x)->Q(x) or its T(x) P(x)->Q(x)
+		// where T(x) is the type constraints on the variables.
 		if (_pattern->get_body() == impl[0])
 		{
 			_rewrite = impl[1];
@@ -125,7 +135,7 @@ MapLink::MapLink(Link &l)
 /// If a variable in `termpat` corresponds with a variable in `ground`,
 /// then add that correspondance pair to `valmap`. Type-checking is
 /// performed during the match-up, so if the variable type does not
-/// match thr ground type, false is returned.  False is also returned
+/// match the ground type, false is returned.  False is also returned
 /// if the trees miscompare in other ways (mismatched link arity,
 /// mis-matched atom type, two conflicting groundings for the same
 /// variable).
@@ -162,7 +172,7 @@ bool MapLink::extract(const Handle& termpat,
 		return true;
 	}
 
-	// Whever they are, the type must agree.
+	// Whatever they are, the type must agree.
 	if (t != ground->getType()) return false;
 
 	// If they are (non-variable) nodes, they must be identical.
