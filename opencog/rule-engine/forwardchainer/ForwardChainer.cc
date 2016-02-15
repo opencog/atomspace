@@ -114,7 +114,7 @@ void ForwardChainer::do_step(void)
     UnorderedHandleSet products = apply_rule(rule);
 
     // Store results
-    _potential_sources.insert(products.begin(), products.end());
+    update_potential_sources(products);
     _fcstat.add_inference_record(_cur_source, rule, products);
 
     _iteration++;
@@ -276,7 +276,6 @@ UnorderedHandleSet ForwardChainer::apply_rule(const Rule* rule)
     }
     return products;
 }
-
 
 HandleSeq ForwardChainer::apply_rule(Handle rhandle)
 {
@@ -613,9 +612,4 @@ Handle ForwardChainer::gen_sub_varlist(const Handle& parent,
     }
 
     return Handle(createVariableList(final_oset));
-}
-
-void ForwardChainer::update_potential_sources(const HandleSeq& input)
-{
-    _potential_sources.insert(input.begin(), input.end());
 }

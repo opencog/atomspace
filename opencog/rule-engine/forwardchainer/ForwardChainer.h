@@ -74,8 +74,10 @@ private:
                                    var_groundings);
     bool unify(Handle source, Handle term, const Rule* rule);
     UnorderedHandleSet derive_rules(Handle source, Handle term, const Rule* rule);
-    void update_potential_sources(const HandleSeq& input);
-
+	template<typename HandleContainer>
+	void update_potential_sources(const HandleContainer& input) {
+		_potential_sources.insert(input.begin(), input.end());
+	}
     bool is_valid_implicant(const Handle& h);
     void validate(Handle hsource, HandleSeq hfocus_set);
 
