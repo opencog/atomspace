@@ -193,10 +193,8 @@ bool MapLink::extract(const Handle& termpat,
 	if (not termpat->isLink())
 		return (termpat == ground);
 
-	LinkPtr tlp(LinkCast(termpat));
-	LinkPtr glp(LinkCast(ground));
-	const HandleSeq& tlo = tlp->getOutgoingSet();
-	const HandleSeq& glo = glp->getOutgoingSet();
+	const HandleSeq& tlo = termpat->getOutgoingSet();
+	const HandleSeq& glo = ground->getOutgoingSet();
 	size_t sz = tlo.size();
 	if (glo.size() != sz) return false;
 
@@ -263,8 +261,7 @@ Handle MapLink::execute(AtomSpace* scratch) const
 	if (SET_LINK == argtype or LIST_LINK == argtype)
 	{
 		HandleSeq remap;
-		LinkPtr lp(LinkCast(valh));
-		for (const Handle& h : lp->getOutgoingSet())
+		for (const Handle& h : valh->getOutgoingSet())
 		{
 			Handle mone = rewrite_one(h, scratch);
 			if (nullptr != mone) remap.emplace_back(mone);
