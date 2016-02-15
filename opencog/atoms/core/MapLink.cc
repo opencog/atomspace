@@ -217,13 +217,20 @@ Handle MapLink::rewrite_one(const Handle& term, AtomSpace* scratch) const
 		return Handle::UNDEFINED;
 
 	// Make sure each variable is grounded.
+	// Actually, not all variables need to be grounded ...
+	// re-writes might actually ignore ungrounded vars.
+	bool partial = false;
 	HandleSeq valseq;
 	for (const Handle& var : _vars->varseq)
 	{
 		auto valpair = valmap.find(var);
 		if (valmap.end() == valpair)
-			return Handle::UNDEFINED;
-		valseq.emplace_back(valpair->second);
+		{
+			partial = true;
+			valseq.emplace_back(Handle::UNDEFINED);
+		}
+		else
+			valseq.emplace_back(valpair->second);
 	}
 
 	// Perform substitution, if it's an ImplicationLink
@@ -231,6 +238,10 @@ Handle MapLink::rewrite_one(const Handle& term, AtomSpace* scratch) const
 	{
 		return _vars->substitute(_rewrite, valseq);
 	}
+
+	// Make sure each variable is grounded. (for real, this time)
+	if (partial)
+		return Handle::UNDEFINED;
 
 	// Wrap up the result in a list only if there is more than one
 	// variable.
