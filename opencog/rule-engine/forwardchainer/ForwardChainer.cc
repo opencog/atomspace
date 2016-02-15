@@ -42,17 +42,17 @@
 using namespace opencog;
 
 ForwardChainer::ForwardChainer(AtomSpace& as, Handle rbs, Handle hsource,
-                               HandleSeq focus_set) :
+                               const HandleSeq& focus_set) :
     _as(as), _rec(as), _rbs(rbs), _configReader(as, rbs)
 {
-    init(hsource,focus_set);
+    init(hsource, focus_set);
 }
 
 ForwardChainer::~ForwardChainer()
 {
 }
 
-void ForwardChainer::init(Handle hsource, HandleSeq focus_set)
+void ForwardChainer::init(Handle hsource, const HandleSeq& focus_set)
 {
     validate(hsource, focus_set);
 
@@ -118,23 +118,14 @@ void ForwardChainer::do_step(void)
         }
     };
 
-    bool subatom = false;
-    rule = choose_rule(_cur_source, subatom);
-
-    // Temporarily disable till I understand why it is needed
-    // // If a fully matching rule is not found, look for
-    // // subatomically matching rule.
-    // if (not rule) {
-    //     subatom = true;
-    //     rule = choose_rule(_cur_source, subatom);
-    // }
+    rule = choose_rule(_cur_source);
 
     if (rule) {
         // Use previously derived rules if they exist.
         if (_fcstat.has_partial_grounding(_cur_source))
             get_derived(_cur_source);
         else
-            derived_rhandles = derive_rules(_cur_source, rule, subatom);
+            derived_rhandles = derive_rules(_cur_source, rule);
     }
 
     fc_logger().debug("Derived rule size = %d", derived_rhandles.size());
@@ -208,7 +199,7 @@ HandleSeq ForwardChainer::get_chaining_result()
     return _fcstat.get_all_inferences();
 }
 
-Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
+Rule* ForwardChainer::choose_rule(Handle hsource)
 {
     std::map<Rule*, float> rule_weight;
     for (Rule* r : _rules)
@@ -231,37 +222,25 @@ Rule* ForwardChainer::choose_rule(Handle hsource, bool subatom_match)
         return false;
     };
 
-    std::string match_type = subatom_match ? "sub-atom-unifying" : "unifying";
-
     while (not rule_weight.empty()) {
         Rule *temp = _rec.tournament_select(rule_weight);
-        fc_logger().fine("Selected rule %s to match against source by %s ",
-                         temp->get_name().c_str(), match_type.c_str());
+        fc_logger().fine("Selected rule %s to match against the source",
+                         temp->get_name().c_str());
 
         if (is_matched(temp)) {
-            fc_logger().fine("Found previous matching by %s",
-                             match_type.c_str());
+	        fc_logger().fine("Found previous matching");
 
             rule = temp;
             break;
         }
 
         bool unified = false;
-        if (subatom_match) {
-            if (subatom_unify(hsource, temp)) {
+        HandleSeq hs = temp->get_implicant_seq();
+        for (Handle term : hs) {
+            if (unify(hsource, term, temp)) {
                 rule = temp;
                 unified = true;
-            }
-        }
-
-        else {
-            HandleSeq hs = temp->get_implicant_seq();
-            for (Handle term : hs) {
-                if (unify(hsource, term, temp)) {
-                    rule = temp;
-                    unified = true;
-                    break;
-                }
+                break;
             }
         }
 
@@ -357,7 +336,7 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle,
         Handle houtput = LinkCast(rhandle)->getOutgoingSet().back();
         LAZY_FC_LOG_DEBUG << "Instantiating " << houtput->toShortString();
 
-        result.push_back(inst.instantiate(houtput, { }));
+        result.push_back(inst.instantiate(houtput, {}));
     }
 
     else {
@@ -493,12 +472,10 @@ UnorderedHandleSet ForwardChainer::derive_rules(Handle source, Handle term,
  *
  * @param  source    A source atom that will be matched with the rule.
  * @param  rule      A rule object
- * @param  subatomic A flag that sets subatom unification.
  *
  * @return  A HandleSeq of derived rule handles.
  */
-UnorderedHandleSet ForwardChainer::derive_rules(Handle source, const Rule* rule,
-                                                bool subatomic/*=false*/)
+UnorderedHandleSet ForwardChainer::derive_rules(Handle source, const Rule* rule)
 {
     UnorderedHandleSet derived_rules;
 
@@ -506,15 +483,8 @@ UnorderedHandleSet ForwardChainer::derive_rules(Handle source, const Rule* rule,
         derived_rules.insert(result.begin(), result.end());
     };
 
-    if (subatomic) {
-        for (Handle subterm : get_subatoms(rule))
-            add_result(derive_rules(source, subterm, rule));
-
-    } else {
-        for (Handle term : rule->get_implicant_seq())
-            add_result(derive_rules(source, term, rule));
-
-    }
+    for (Handle term : rule->get_implicant_seq())
+        add_result(derive_rules(source, term, rule));
 
     return derived_rules;
 }
@@ -563,27 +533,6 @@ static void get_all_unique_atoms(const Handle& h, UnorderedHandleSet& atom_set)
         for (const Handle& o : lll->getOutgoingSet())
             get_all_unique_atoms(o, atom_set);
     }
-}
-
-
-/**
- * Gets all unique atoms of in the implicant list of @param r.
- *
- * @param r  A rule object
- *
- * @return   An UnoderedHandleSet of all unique atoms in the implicant.
- */
-UnorderedHandleSet ForwardChainer::get_subatoms(const Rule *rule)
-{
-    UnorderedHandleSet output_expanded;
-
-    for (const Handle& h : rule->get_implicant_seq())
-    {
-        get_all_unique_atoms(h, output_expanded);
-        output_expanded.erase(h); // Already tried to unify this.
-    }
-
-    return output_expanded;
 }
 
 /**
@@ -667,27 +616,6 @@ bool ForwardChainer::unify(Handle source, Handle term, const Rule* rule)
     HandleSeq results = LinkCast(result)->getOutgoingSet();
 
     return std::find(results.begin(), results.end(), sourcecpy) != results.end();
-}
-
-/**
- *  Checks if sub atoms of implicant lists in @param rule are unifiable with
- *  @param source.
- *
- *  @param source  An atom that might bind to variables in @param rule.
- *  @param rule    The rule object whose implicants are to be sub atom unified.
- *
- *  @return        true if source is subatom unifiable and false otherwise.
- */
-bool ForwardChainer::subatom_unify(Handle source, const Rule* rule)
-{
-    UnorderedHandleSet output_expanded = get_subatoms(rule);
-
-    for (Handle h : output_expanded) {
-        if (unify(source, h, rule))
-            return true;
-    }
-
-    return false;
 }
 
 Handle ForwardChainer::gen_sub_varlist(const Handle& parent,

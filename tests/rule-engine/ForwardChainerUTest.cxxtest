@@ -17,6 +17,9 @@
 
 using namespace opencog;
 
+#define al _as.add_link
+#define an _as.add_node
+
 class ForwardChainerUTest: public CxxTest::TestSuite {
 private:
 	AtomSpace _as;
@@ -50,16 +53,15 @@ public:
 		eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
 		          "/examples/rule-engine/crisp-deduction.scm\")");
 
-		 eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
-		                  "/tests/rule-engine/bc-config-2.scm\")");
+		eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
+		          "/tests/rule-engine/bc-config-2.scm\")");
 	}
 	void test_do_chain();
-    void test_choose_rule(void);
-    void test_apply_rule(void);
-    void test_substitute_rule_part(void);
-    void test_unify(void);
-    void test_subatom_unify(void);
-    void test_derive_rules(void);
+	void test_choose_rule();
+	void test_apply_rule();
+	void test_substitute_rule_part();
+	void test_unify();
+	void test_derive_rules();
 };
 
 void ForwardChainerUTest::test_do_chain()
@@ -83,7 +85,7 @@ void ForwardChainerUTest::test_do_chain()
     // Get the ConceptNode corresponding to the rule-based system
     // to test
     Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
-    ForwardChainer fc(_as, rbs, AB, HandleSeq {});
+    ForwardChainer fc(_as, rbs, AB);
 	// Run forward chainer
 	fc.do_chain();
 
@@ -104,178 +106,137 @@ void ForwardChainerUTest::test_choose_rule(void)
         "(InheritanceLink (ConceptNode \"cat\")(ConceptNode \"animal\"))");
     TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
 
-    Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
-    ForwardChainer fc(_as, rbs, h, HandleSeq { });
+    Handle rbs = _as.get_node(CONCEPT_NODE, "URE");
+    ForwardChainer fc(_as, rbs, h);
 
-    //full unification
-    Rule* rule = fc.choose_rule(h,false);
-    TS_ASSERT_EQUALS(nullptr,rule);
-    //Since variable nodes of deduction rule are untyped,
-    //sub-atom unification will succeed.
-    rule = fc.choose_rule(h,true);
-    TS_ASSERT_DIFFERS(nullptr,rule);
-
-    HandleSeq bindlinks;
-    _as.get_handles_by_type(back_inserter(bindlinks), BIND_LINK);
-    auto it = find(bindlinks.begin(), bindlinks.end(), rule->get_handle());
-    TS_ASSERT_DIFFERS(it, bindlinks.end());
+    // Full unification
+    Rule* rule = fc.choose_rule(h);
+    TS_ASSERT_DIFFERS(nullptr, rule);
 }
 
-void ForwardChainerUTest::test_derive_rules(void)
-{
-    config().set("SCM_PRELOAD", "tests/rule-engine/bc-deduction.scm,"
-                 "tests/rule-engine/simple-assertions.scm");
-    load_scm_files_from_config(_as);
-
-    Handle rule_handle = eval.eval_h("(MemberLink"
-                                     "   pln-rule-deduction-name"
-                                     "   (ConceptNode \"URE\"))");
-    Rule* rule = new Rule(rule_handle);
-    Handle source =
-            eval.eval_h(
-                    R"((ConceptNode "Socrates"))");
-    Handle source2 =  eval.eval_h(
-            R"((InheritanceLink (ConceptNode "Cat") (ConceptNode "Animal") ))");
-
-    Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
-    ForwardChainer fc(_as, rbs,source, HandleSeq { });
-
-    //is not unifiable
-    UnorderedHandleSet hrules = fc.derive_rules(source, rule);
-    TS_ASSERT_EQUALS(0, hrules.size());
-
-    hrules = fc.derive_rules(source2, rule);
-    TS_ASSERT_EQUALS(2, hrules.size());
-
-    //for(Handle h:hrules)
-               // std::cout << "DERIVED:\n" << h->toShortString() << std::endl;
-
-    //subatom unifiable
-    hrules = fc.derive_rules(source,rule,true);
-    TS_ASSERT_EQUALS(3,hrules.size());
-
-    hrules = fc.derive_rules(source2,rule,true);
-    TS_ASSERT_EQUALS(0,hrules.size());
-}
 void ForwardChainerUTest::test_apply_rule(void)
 {
-    //Apply rule x and see if all the inferences made
-    //are a direct result of source being part of input/premise
-    config().set(
-            "SCM_PRELOAD",
-            "tests/rule-engine/bc-deduction.scm,"
-            "tests/rule-engine/simple-assertions.scm");
-    load_scm_files_from_config(_as);
+	// Apply rule x and see if all the inferences made
+	// are a direct result of source being part of input/premise
+	config().set(
+		"SCM_PRELOAD",
+		"tests/rule-engine/simple-assertions.scm");
+	load_scm_files_from_config(_as);
 
-    Handle rule_handle = eval.eval_h("(MemberLink"
-                                     "   pln-rule-deduction-name"
-                                     "   (ConceptNode \"URE\"))");
-    vector<Rule*> rules { new Rule(rule_handle) };
-    Handle source = eval.eval_h(R"((ConceptNode "Socrates"))");
+	Handle rule_handle = eval.eval_h("(MemberLink"
+	                                 "   bc-deduction-rule-name"
+	                                 "   (ConceptNode \"URE\"))");
+	Rule rule(rule_handle);
+	Handle source = eval.eval_h("(InheritanceLink"
+	                            "  (ConceptNode \"Socrates\")"
+	                            "  (ConceptNode \"man\"))");
 
-    Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
-    ForwardChainer fc(_as, rbs,source, HandleSeq { });
+	Handle rbs = _as.get_node(CONCEPT_NODE, "URE");
+	ForwardChainer fc(_as, rbs, source);
 
-    UnorderedHandleSet derules = fc.derive_rules(source, rules[0], true);
-    TS_ASSERT_EQUALS(3, derules.size());
+	UnorderedHandleSet derules = fc.derive_rules(source, &rule);
+	TS_ASSERT_EQUALS(2, derules.size());
 
-    HandleSeq hs;
-    for(Handle h : derules)
-    {
-        HandleSeq tmp = fc.apply_rule(h);
-        hs.insert(hs.end(), tmp.begin(), tmp.end());
-    }
+	HandleSeq hs;
+	for(Handle h : derules)
+	{
+		HandleSeq tmp = fc.apply_rule(h);
+		hs.insert(hs.end(), tmp.begin(), tmp.end());
+	}
 
-
-    TS_ASSERT_EQUALS(1,hs.size());
-
-    URECommons urec(_as);
-    TS_ASSERT(urec.exists_in(hs[0],source));
-
+	TS_ASSERT_EQUALS(1, hs.size());
 }
 
 void ForwardChainerUTest::test_substitute_rule_part(void)
 {
-    config().set("SCM_PRELOAD",
-                     "tests/rule-engine/dfc-tests.scm");
-        load_scm_files_from_config(_as);
+	config().set("SCM_PRELOAD",
+	             "tests/rule-engine/dfc-tests.scm");
+	load_scm_files_from_config(_as);
 
-    Handle rule_handle = eval.eval_h("pln-rule-deduction");
+	Handle rule_handle = eval.eval_h("bc-deduction-rule");
 
-    Handle var_a = eval.eval_h("(VariableNode \"$A\")");
-    Handle var_b = eval.eval_h("(VariableNode \"$B\")");
-    Handle var_c = eval.eval_h("(VariableNode \"$C\")");
+	Handle var_a = eval.eval_h("(VariableNode \"$A\")");
+	Handle var_b = eval.eval_h("(VariableNode \"$B\")");
+	Handle var_c = eval.eval_h("(VariableNode \"$C\")");
 
-    Handle grnd_1 = eval.eval_h("(ConceptNode \"Cat\")");
-    Handle grnd_2 = eval.eval_h("(ConceptNode \"Animal\")");
+	Handle grnd_1 = eval.eval_h("(ConceptNode \"Cat\")");
+	Handle grnd_2 = eval.eval_h("(ConceptNode \"Animal\")");
 
-    //When the first premise of deduction rule is matched
-    std::map<Handle, Handle> vg_map_1 = { { var_a, grnd_1 }, { var_b, grnd_2 } };
-    //Then the second premise of deduction rule is matched
-    std::map<Handle, Handle> vg_map_2 = { { var_b, grnd_1 }, { var_c, grnd_2 } };
+	// When the first premise of deduction rule is matched
+	std::map<Handle, Handle> vg_map_1 = { { var_a, grnd_1 }, { var_b, grnd_2 } };
+	// Then the second premise of deduction rule is matched
+	std::map<Handle, Handle> vg_map_2 = { { var_b, grnd_1 }, { var_c, grnd_2 } };
 
-    std::vector<std::map<Handle, Handle>> var_groundings = { vg_map_1 };
-    std::set<Handle> vars_case_1 = { var_a, var_b };
+	std::vector<std::map<Handle, Handle>> var_groundings = { vg_map_1 };
+	std::set<Handle> vars_case_1 = { var_a, var_b };
 
-    Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
-    ForwardChainer fc(_as, rbs, grnd_2, HandleSeq { });
+	Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
+	ForwardChainer fc(_as, rbs, grnd_2);
 
-    HandleSeq rule_derivatives = fc.substitute_rule_part(_as, rule_handle,
-                                                           vars_case_1,
-                                                           var_groundings);
-    TS_ASSERT_EQUALS(rule_derivatives.size(), 1);
-    Handle hx = _as.add_atom(rule_derivatives[0]);
-    Handle hexpected = eval.eval_h("deduction-ab-substitute-1");
-    TS_ASSERT_EQUALS(hexpected, hx);
+	HandleSeq rule_derivatives = fc.substitute_rule_part(_as, rule_handle,
+	                                                     vars_case_1,
+	                                                     var_groundings);
+	TS_ASSERT_EQUALS(rule_derivatives.size(), 1);
+	Handle hx = _as.add_atom(rule_derivatives[0]);
+	Handle hexpected = eval.eval_h("deduction-ab-substitute-1");
+	TS_ASSERT_EQUALS(hexpected, hx);
 
-    var_groundings =
-    {   vg_map_2};
-    std::set<Handle> vars_case_2 = { var_b, var_c };
-    rule_derivatives = fc.substitute_rule_part(_as, rule_handle, vars_case_2,
-                                                 var_groundings);
+	var_groundings = { vg_map_2 };
+	std::set<Handle> vars_case_2 = { var_b, var_c };
+	rule_derivatives = fc.substitute_rule_part(_as, rule_handle, vars_case_2,
+	                                           var_groundings);
 
-    TS_ASSERT_EQUALS(rule_derivatives.size(), 1);
-    hx = _as.add_atom(rule_derivatives[0]);
-    hexpected = eval.eval_h("deduction-ab-substitute-2");
-    TS_ASSERT_EQUALS(hexpected, hx);
-
+	TS_ASSERT_EQUALS(rule_derivatives.size(), 1);
+	hx = _as.add_atom(rule_derivatives[0]);
+	hexpected = eval.eval_h("deduction-ab-substitute-2");
+	TS_ASSERT_EQUALS(hexpected, hx);
 }
 
 void ForwardChainerUTest::test_unify(void)
 {
-    Handle source = eval.eval_h(
-                "(InheritanceLink (ConceptNode \"Cat\")(ConceptNode \"Animal\"))");
+	Handle source = eval.eval_h("(InheritanceLink"
+	                            "   (ConceptNode \"Cat\")"
+	                            "   (ConceptNode \"Animal\"))");
 
+	Handle rule_handle = eval.eval_h("(MemberLink"
+	                                 "   bc-modus-ponens-rule-name"
+	                                 "   (ConceptNode \"URE\"))");
+	Rule rule(rule_handle);
+	Handle target = eval.eval_h("(VariableNode \"$A\")");
 
-    Handle rule_handle = eval.eval_h("(MemberLink"
-                                         "   pln-rule-modus-ponens-name"
-                                         "   (ConceptNode \"URE\"))");
-    Rule rule(rule_handle);
-    Handle target = eval.eval_h("(VariableNode \"$A\")");
+	Handle rbs = _as.get_node(CONCEPT_NODE, "URE");
+	ForwardChainer fc(_as, rbs, target);
 
-    Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
-    ForwardChainer fc(_as, rbs,target, HandleSeq { });
-
-    bool result =fc.unify(source,target,&rule);
-    TS_ASSERT_EQUALS(result,true);
-    //TODO more test cases here
+	bool result = fc.unify(source, target, &rule);
+	TS_ASSERT(result);
+	//TODO more test cases here
 }
 
-void ForwardChainerUTest::test_subatom_unify(void)
+void ForwardChainerUTest::test_derive_rules(void)
 {
-    Handle source = eval.eval_h(
-            "(ConceptNode \"Cat\")");
+	config().set("SCM_PRELOAD", "tests/rule-engine/bc-deduction.scm,"
+	             "tests/rule-engine/simple-assertions.scm");
+	load_scm_files_from_config(_as);
 
-    Handle rule_handle = eval.eval_h("(MemberLink"
-                                     "   pln-rule-modus-ponens-name"
-                                     "   (ConceptNode \"URE\"))");
-    Rule rule(rule_handle);
-    Handle target = eval.eval_h("(VariableNode \"$A\")");
+	Handle rule_handle = eval.eval_h("(MemberLink"
+	                                 "   bc-deduction-rule-name"
+	                                 "   (ConceptNode \"URE\"))");
+	Rule* rule = new Rule(rule_handle);
+	Handle source = eval.eval_h(R"((ConceptNode "Socrates"))");
+	Handle source2 =  eval.eval_h("(InheritanceLink"
+	                              "   (ConceptNode \"Cat\")"
+	                              "   (ConceptNode \"Animal\"))");
 
-    Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
-    ForwardChainer fc(_as, rbs,target, HandleSeq { });
+	Handle rbs = _as.get_node(CONCEPT_NODE, "URE");
+	ForwardChainer fc(_as, rbs,source);
 
-    bool result = fc.subatom_unify(source, &rule);
-    TS_ASSERT_EQUALS(result,true);
-    //TODO more test cases here
+	//is not unifiable
+	UnorderedHandleSet hrules = fc.derive_rules(source, rule);
+	TS_ASSERT_EQUALS(0, hrules.size());
+
+	hrules = fc.derive_rules(source2, rule);
+	TS_ASSERT_EQUALS(2, hrules.size());
 }
+
+#undef al
+#undef an

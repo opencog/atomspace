@@ -63,18 +63,16 @@ private:
 
     FCStat _fcstat;
 
-    void init(Handle hsource, HandleSeq focus_set);
+    void init(Handle hsource, const HandleSeq& focus_set);
 
     void apply_all_rules(bool search_focus_set = false);
 
-    UnorderedHandleSet get_subatoms(const Rule *rule);
     Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);
     HandleSeq substitute_rule_part(AtomSpace& as, Handle hrule,
                                    const std::set<Handle>& vars,
                                    const std::vector<std::map<Handle, Handle>>&
                                    var_groundings);
     bool unify(Handle source, Handle term, const Rule* rule);
-    bool subatom_unify(Handle source, const Rule* rule);
     UnorderedHandleSet derive_rules(Handle source, Handle term, const Rule* rule);
     void update_potential_sources(HandleSeq input);
 
@@ -92,7 +90,7 @@ protected:
      *
      * @return  A rule that in which @param source could ground.
      */
-    virtual Rule* choose_rule(Handle hsource, bool subatom_match);
+    virtual Rule* choose_rule(Handle hsource);
 
     /**
      * choose next source from the source list
@@ -111,15 +109,14 @@ protected:
     virtual HandleSeq apply_rule(Handle rhandle,
                                  bool search_focus_set_only = false);
 
-    UnorderedHandleSet derive_rules(Handle source, const Rule* rule,
-                                    bool subatomic = false);
+    UnorderedHandleSet derive_rules(Handle source, const Rule* rule);
 
 public:
     /**
      * Ctor. rbs is a Handle pointing to rule-based system.
      */
     ForwardChainer(AtomSpace& as, Handle rbs, Handle hsource,
-                   HandleSeq focus_set);
+                   const HandleSeq& focus_set = HandleSeq());
     virtual ~ForwardChainer();
 
     /**
