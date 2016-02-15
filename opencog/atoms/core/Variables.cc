@@ -61,8 +61,7 @@ void VarScraper::find_vars(HandleSeq& varseq, std::set<Handle>& varset,
 			varset.insert(h);
 		}
 
-		LinkPtr lll(LinkCast(h));
-		if (nullptr == lll) continue;
+		if (not h->isLink()) continue;
 
 		// Save the recursive state on stack.
 		bool save_quote = _in_quote;
@@ -80,16 +79,16 @@ void VarScraper::find_vars(HandleSeq& varseq, std::set<Handle>& varset,
 			bsave = _bound_vars;
 
 			// If we can cast to ScopeLink, then do so; otherwise,
-			// take the low road, and let ScopeLinka constructor
+			// take the low road, and let ScopeLink constructor
 			// do the bound-variable extraction.
-			ScopeLinkPtr sco(ScopeLinkCast(lll));
+			ScopeLinkPtr sco(ScopeLinkCast(h));
 			if (NULL == sco)
-				sco = createScopeLink(lll->getOutgoingSet());
+				sco = createScopeLink(h->getOutgoingSet());
 			const Variables& vees = sco->get_variables();
 			for (Handle v : vees.varseq) _bound_vars.insert(v);
 		}
 
-		find_vars(varseq, varset, lll->getOutgoingSet());
+		find_vars(varseq, varset, h->getOutgoingSet());
 
 		if (issco)
 			_bound_vars = bsave;
@@ -114,10 +113,9 @@ void FreeVariables::find_variables(const HandleSeq& oset)
 
 void FreeVariables::find_variables(const Handle& h)
 {
-	LinkPtr lp(LinkCast(h));
-	if (nullptr != lp)
+	if (h->isLink())
 	{
-		find_variables(lp->getOutgoingSet());
+		find_variables(h->getOutgoingSet());
 	}
 	else
 	{
@@ -140,8 +138,7 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
 
 	// If its a node, and its not a variable, then it is a constant,
 	// and just return that.
-	LinkPtr lterm(LinkCast(term));
-	if (NULL == lterm) return term;
+	if (not term->isLink()) return term;
 
 	// QuoteLinks halt the recursion
 	if (QUOTE_LINK == term->getType()) return term;
@@ -151,7 +148,7 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
 
 	// Recursively fill out the subtrees.
 	HandleSeq oset;
-	for (const Handle& h : lterm->getOutgoingSet())
+	for (const Handle& h : term->getOutgoingSet())
 	{
 		oset.emplace_back(substitute_nocheck(h, args));
 	}
