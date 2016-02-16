@@ -506,9 +506,33 @@ static void get_all_unique_atoms(const Handle& h, UnorderedHandleSet& atom_set)
     }
 }
 
+bool ForwardChainer::is_constant_clause(const Handle& hvardecls,
+                                        const Handle& hclause) const
+{
+    VariableList vl(hvardecls);
+    return not any_unquoted_unscoped_in_tree(hclause, vl.get_variables().varset);
+}
+
+/**
+ * Remove clauses that are do not contain free variables in hvardecl.
+ */
+Handle ForwardChainer::remove_constant_clauses(const Handle& hvarlist,
+                                               const Handle& himplicant)
+{
+    Type t = himplicant->getType();
+    if (t == AND_LINK) {
+        HandleSeq outgoings;
+        for (const Handle& hclause : himplicant->getOutgoingSet())
+            if (not is_constant_clause(hvarlist, hclause))
+                outgoings.push_back(hclause);
+        return Handle(createLink(t, outgoings));
+    } else
+        return himplicant;
+}
+
 /**
  * Derives new rules from @param hrule by replacing variables
- * with their groundings.In case of fully grounded rules,only
+ * with their groundings. In case of fully grounded rules, only
  * the output atoms will be added to the list returned.
  *
  * @param as             An atomspace where the handles dwell.
@@ -550,9 +574,12 @@ HandleSeq ForwardChainer::substitute_rule_part(
         // generate varlist from himplicant.
         Handle hvarlist = as.add_atom(
             gen_sub_varlist(himplicant,
-                            LinkCast(hrule)->getOutgoingSet()[0]));
+                            LinkCast(hrule)->getOutgoingAtom(0)));
+
+        // Create a simplified implicand without constant clauses
+        Handle hsimplicant = remove_constant_clauses(hvarlist, himplicant);
         Handle hderived_rule = as.add_atom(createBindLink(HandleSeq {
-                    hvarlist, himplicant, himplicand}));
+                    hvarlist, hsimplicant, himplicand}));
         derived_rules.push_back(hderived_rule);
     }
 

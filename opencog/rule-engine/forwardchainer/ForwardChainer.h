@@ -68,6 +68,9 @@ private:
     void apply_all_rules();
 
     Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);
+    bool is_constant_clause(const Handle& hvarlist, const Handle& hclause) const;
+    Handle remove_constant_clauses(const Handle& hvarlist,
+                                   const Handle& himplicand);
     HandleSeq substitute_rule_part(AtomSpace& as, Handle hrule,
                                    const std::set<Handle>& vars,
                                    const std::vector<std::map<Handle, Handle>>&

@@ -7,10 +7,6 @@
                    (TypeNode "ConceptNode")))
         (AndLink
             (InheritanceLink
-                (ConceptNode "Cat")
-                (ConceptNode "Animal")
-            )
-            (InheritanceLink
                 (ConceptNode "Animal")
                 (VariableNode "$C")
             )
@@ -52,10 +48,6 @@
             (InheritanceLink
                 (VariableNode "$A")
                 (ConceptNode  "Cat")
-            )
-            (InheritanceLink
-                (ConceptNode  "Cat")
-                (ConceptNode  "Animal")
             )
             ; To avoid matching (Inheritance A B) and (Inheritance B A)
             (NotLink
