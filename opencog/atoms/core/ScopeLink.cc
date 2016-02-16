@@ -144,20 +144,10 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 ///
 void ScopeLink::init_scoped_variables(const Handle& hvar)
 {
-	// Either it is a VariableList, or its a naked variable, or its a
-	// typed variable.  Use the VariableList class as a tool to
-	// extract the variables for us.
-	Type t = hvar->getType();
-	if (VARIABLE_LIST == t)
-	{
-		VariableList vl(LinkCast(hvar)->getOutgoingSet());
-		_varlist = vl.get_variables();
-	}
-	else
-	{
-		VariableList vl({hvar});
-		_varlist = vl.get_variables();
-	}
+	// Use the VariableList class as a tool to extract the variables
+	// for us.
+	VariableList vl(hvar);
+	_varlist = vl.get_variables();
 }
 
 /* ================================================================= */
