@@ -69,12 +69,11 @@ static NumberNodePtr unwrap_set(Handle h)
 {
 	if (SET_LINK == h->getType())
 	{
-		LinkPtr lp(LinkCast(h));
-		if (1 != lp->getArity())
+		if (1 != h->getArity())
 			throw SyntaxException(TRACE_INFO,
 				"Don't know how to do arithmetic with this: %s",
 				h->toString().c_str());
-		h = lp->getOutgoingAtom(0);
+		h = h->getOutgoingAtom(0);
 	}
 
 	NumberNodePtr na(NumberNodeCast(h));

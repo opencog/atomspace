@@ -125,7 +125,7 @@ VariableList::VariableList(Link &l)
  */
 void VariableList::get_vartype(const Handle& htypelink)
 {
-	const std::vector<Handle>& oset = LinkCast(htypelink)->getOutgoingSet();
+	const std::vector<Handle>& oset = htypelink->getOutgoingSet();
 	if (2 != oset.size())
 	{
 		throw InvalidParamException(TRACE_INFO,
@@ -152,7 +152,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 		std::set<Handle> deepset;
 		std::set<Handle> fuzzset;
 
-		const HandleSeq& tset = LinkCast(vartype)->getOutgoingSet();
+		const HandleSeq& tset = vartype->getOutgoingSet();
 		size_t tss = tset.size();
 		for (size_t i=0; i<tss; i++)
 		{
@@ -165,7 +165,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 			}
 			else if (SIGNATURE_LINK == var_type)
 			{
-				const HandleSeq& sig = LinkCast(ht)->getOutgoingSet();
+				const HandleSeq& sig = ht->getOutgoingSet();
 				if (1 != sig.size())
 					throw SyntaxException(TRACE_INFO,
 						"Unexpected contents in SignatureLink\n"
@@ -175,7 +175,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 			}
 			else if (FUZZY_LINK == var_type)
 			{
-				const HandleSeq& fuz = LinkCast(ht)->getOutgoingSet();
+				const HandleSeq& fuz = ht->getOutgoingSet();
 				if (1 != fuz.size())
 					throw SyntaxException(TRACE_INFO,
 						"Unexpected contents in FuzzyLink\n"
@@ -201,7 +201,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 	}
 	else if (SIGNATURE_LINK == t)
 	{
-		const HandleSeq& tset = LinkCast(vartype)->getOutgoingSet();
+		const HandleSeq& tset = vartype->getOutgoingSet();
 		if (1 != tset.size())
 			throw SyntaxException(TRACE_INFO,
 				"Unexpected contents in SignatureLink\n"
@@ -213,7 +213,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 	}
 	else if (FUZZY_LINK == t)
 	{
-		const HandleSeq& tset = LinkCast(vartype)->getOutgoingSet();
+		const HandleSeq& tset = vartype->getOutgoingSet();
 		if (1 != tset.size())
 			throw SyntaxException(TRACE_INFO,
 				"Unexpected contents in FuzzyLink\n"
@@ -275,7 +275,7 @@ void VariableList::validate_vardecl(const Handle& hdecls)
 	{
 		// The list of variable declarations should be .. a list of
 		// variables! Make sure its as expected.
-		const std::vector<Handle>& dset = LinkCast(hdecls)->getOutgoingSet();
+		const std::vector<Handle>& dset = hdecls->getOutgoingSet();
 		validate_vardecl(dset);
 	}
 	else
