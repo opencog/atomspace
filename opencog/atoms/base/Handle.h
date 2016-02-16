@@ -31,6 +31,7 @@
 #include <memory>
 #include <string>
 #include <sstream>
+#include <set>
 #include <unordered_set>
 #include <vector>
 
@@ -211,8 +212,13 @@ struct handle_less
 
 //! a list of handles
 typedef std::vector<Handle> HandleSeq;
+
 //! a list of lists of handles
 typedef std::vector<HandleSeq> HandleSeqSeq;
+
+//! a set of handles
+typedef std::set<Handle> HandleSet;
+
 //! a hash that associates the handle to its unique identificator
 typedef std::unordered_set<Handle, handle_hash> UnorderedHandleSet;
 
