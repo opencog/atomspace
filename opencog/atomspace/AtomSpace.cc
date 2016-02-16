@@ -181,8 +181,7 @@ Handle AtomSpace::get_node(Type t, const string& name)
     return Handle::UNDEFINED;
 }
 
-Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing,
-                           bool async)
+Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing, bool async)
 {
     // Is this atom already in the atom table?
     Handle hexist = atomTable.getHandle(t, outgoing);

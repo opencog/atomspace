@@ -369,7 +369,7 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle)
 }
 
 /**
- * Derives new rules by replacing variables that are unfiable in @param term
+ * Derives new rules by replacing variables that are unifiable in @param term
  * with source. The rule handles are not added to any atomspace.
  *
  * @param  source    A source atom that will be matched with the term.
@@ -387,6 +387,8 @@ UnorderedHandleSet ForwardChainer::derive_rules(Handle source, Handle term,
 
     UnorderedHandleSet derived_rules;
 
+    // Create a temporary atomspace with the rule term and the source
+    // inside
     AtomSpace temp_pm_as;
     Handle hcpy = temp_pm_as.add_atom(term);
     Handle implicant_vardecl = temp_pm_as.add_atom(
@@ -448,7 +450,7 @@ UnorderedHandleSet ForwardChainer::derive_rules(Handle source, const Rule* rule)
 {
     UnorderedHandleSet derived_rules;
 
-    auto add_result = [&derived_rules] (UnorderedHandleSet result) {
+    auto add_result = [&derived_rules] (const UnorderedHandleSet& result) {
         derived_rules.insert(result.begin(), result.end());
     };
 
@@ -522,12 +524,12 @@ HandleSeq ForwardChainer::substitute_rule_part(
 {
     std::vector<std::map<Handle, Handle>> filtered_vgmap_list;
 
-    // Filter out variables not listed in vars from var-groundings
+    // Filter out variables not listed in vars from var_groundings
     for (const auto& varg_map : var_groundings) {
         std::map<Handle, Handle> filtered;
 
         for (const auto& iv : varg_map) {
-            if (find(vars.begin(), vars.end(), iv.first) != vars.end()) {
+            if (vars.find(iv.first) != vars.end()) {
                 filtered[iv.first] = iv.second;
             }
         }
