@@ -99,6 +99,8 @@ void ForwardChainer::init(Handle hsource, const HandleSeq& focus_set)
  */
 void ForwardChainer::do_step(void)
 {
+    _iteration++;
+
     // Choose source
     _cur_source = choose_source();
     LAZY_FC_LOG_DEBUG << "Source:" << std::endl << _cur_source->toString();
@@ -116,8 +118,6 @@ void ForwardChainer::do_step(void)
     // Store results
     update_potential_sources(products);
     _fcstat.add_inference_record(_cur_source, rule, products);
-
-    _iteration++;
 }
 
 void ForwardChainer::do_chain(void)
