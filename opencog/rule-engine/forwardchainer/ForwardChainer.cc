@@ -523,7 +523,7 @@ Handle ForwardChainer::remove_constant_clauses(const Handle& hvarlist,
     if (t == AND_LINK) {
         HandleSeq outgoings;
         for (const Handle& hclause : himplicant->getOutgoingSet())
-            if (not is_constant_clause(hvarlist, hclause))
+            if (outgoings.size() == 0 or not is_constant_clause(hvarlist, hclause))
                 outgoings.push_back(hclause);
         return Handle(createLink(t, outgoings));
     } else
