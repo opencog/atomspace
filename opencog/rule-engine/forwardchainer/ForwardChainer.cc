@@ -214,6 +214,21 @@ Rule* ForwardChainer::choose_rule(Handle hsource)
 
 Handle ForwardChainer::choose_source()
 {
+    // If all sources haved selected before then insert the sources'
+    // children in the set of potential sources
+    if (_selected_sources == _potential_sources) {
+        fc_logger().debug() << "All sources have already been selected. "
+                            << "Let's add the sources' children as potential sources";
+
+        for (const Handle& h : _selected_sources) {
+            LinkPtr l = LinkCast(h);
+            if (l) {
+                const HandleSeq& outgoings = l->getOutgoingSet();
+                _potential_sources.insert(outgoings.begin(), outgoings.end());
+            }
+        }
+    }
+
     URECommons urec(_as);
     map<Handle, float> tournament_elem;
 
