@@ -23,6 +23,7 @@
 
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/TypeNode.h>
+#include <opencog/atoms/core/DefineLink.h>
 
 #include "VariableList.h"
 
@@ -132,11 +133,18 @@ void VariableList::get_vartype(const Handle& htypelink)
 			"TypedVariableLink has wrong size, got %lu", oset.size());
 	}
 
-	Handle varname = oset[0];
-	Handle vartype = oset[1];
+	Handle varname(oset[0]);
+	Handle vartype(oset[1]);
+
+	// If its a defined type, unbundle it.
+	Type t = vartype->getType();
+	if (DEFINED_TYPE_NODE == t)
+	{
+		vartype = DefineLink::get_definition(vartype);
+		t = vartype->getType();
+	}
 
 	// The vartype is either a single type name, or a list of typenames.
-	Type t = vartype->getType();
 	if (TYPE_NODE == t)
 	{
 		Type vt = TypeNodeCast(vartype)->get_value();
