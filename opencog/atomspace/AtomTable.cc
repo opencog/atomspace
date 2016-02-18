@@ -71,7 +71,7 @@ AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient)
     _as = holder;
     _environ = parent;
     _uuid = TLB::reserve_extent(1);
-    size = 0;
+    _size = 0;
     size_t ntypes = classserver().getNumberOfClasses();
     _size_by_type.resize(ntypes);
 
@@ -111,24 +111,6 @@ AtomTable::~AtomTable()
             }
         }
     }
-}
-
-bool AtomTable::isCleared(void) const
-{
-    // XXX Currently only check if stuff in derived space is gone. No
-    // checking is done on the parent. This is inline with how clear()
-    // is expected to work.
-
-    if (size != 0) {
-        DPRINTF("AtomTable::size is not 0\n");
-        return false;
-    }
-
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
-    // if (nameIndex.size() != 0) return false;
-    if (typeIndex.size() != 0) return false;
-    if (importanceIndex.size() != 0) return false;
-    return true;
 }
 
 AtomTable& AtomTable::operator=(const AtomTable& other)
@@ -590,7 +572,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
        TLB::reserve_upto(atom->_uuid);
     }
     Handle h(atom->getHandle());
-    size++;
+    _size++;
     _size_by_type[atom->_type] ++;
     _atom_set.insert({atom->_uuid, h});
 
@@ -637,7 +619,7 @@ void AtomTable::barrier()
 
 size_t AtomTable::getSize() const
 {
-    return size;
+    return _size;
 }
 
 size_t AtomTable::getNumNodes() const
@@ -834,7 +816,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     lck.lock();
 
     // Decrements the size of the table
-    size--;
+    _size--;
     _size_by_type[atom->_type] --;
     _atom_set.erase(atom->_uuid);
 

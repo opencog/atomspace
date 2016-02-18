@@ -112,9 +112,9 @@ public:
     void testIsCleared()
     {
         atomSpace->clear();
-        TS_ASSERT(table->isCleared());
+        TS_ASSERT(0 == table->getSize());
         Handle word = table->add(createNode(NUMBER_NODE, "1"), false);
-        TS_ASSERT(!table->isCleared());
+        TS_ASSERT(1 == table->getSize());
     }
 
     void doRecursiveAdd(Type list_type)

@@ -88,7 +88,7 @@ private:
     static std::recursive_mutex _mtx;
 
     // Cached count of the number of atoms in the table.
-    size_t size;
+    size_t _size;
 
     // Cached count of the number of atoms of each type.
     std::vector<size_t> _size_by_type;
@@ -134,9 +134,6 @@ private:
 
     /** Signal emitted when the AV changes. */
     AVCHSigl _AVChangedSignal;
-
-    // JUST FOR TESTS:
-    bool isCleared() const;
 
     /// Parent environment for this table.  Null if top-level.
     /// This allows atomspaces to be nested; atoms in this atomspace
