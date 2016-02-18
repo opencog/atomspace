@@ -84,7 +84,7 @@ protected:
     void unregisterBackingStore(BackingStore *);
 
 public:
-    AtomSpace(AtomSpace* parent = NULL);
+    AtomSpace(AtomSpace* parent = NULL, bool transient = false);
     ~AtomSpace();
 
     /// Get the environment that this atomspace was created in.

@@ -51,8 +51,8 @@ using namespace opencog;
 
 // ====================================================================
 
-AtomSpace::AtomSpace(AtomSpace* parent) :
-    atomTable(parent? &parent->atomTable : NULL, this),
+AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
+    atomTable(parent? &parent->atomTable : NULL, this, transient),
     bank(atomTable),
     backing_store(NULL)
 {
