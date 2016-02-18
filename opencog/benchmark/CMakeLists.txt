@@ -28,3 +28,16 @@ TARGET_LINK_LIBRARIES (atomspace_bm
 	clearbox
 	${COGUTIL_LIBRARY}
 )
+
+ADD_EXECUTABLE (profile_bindlink
+	profile_bindlink.cc
+)
+
+TARGET_LINK_LIBRARIES (profile_bindlink
+	atomspace
+	execution
+	query
+	execution
+	clearbox
+	${COGUTIL_LIBRARY}
+)
