@@ -61,7 +61,8 @@ public:
 	void test_apply_rule();
 	void test_substitute_rule_part();
 	void test_unify();
-	void test_derive_rules();
+	void test_derive_rules_1();
+	void test_derive_rules_2();
 };
 
 void ForwardChainerUTest::test_do_chain()
@@ -212,7 +213,7 @@ void ForwardChainerUTest::test_unify(void)
 	//TODO more test cases here
 }
 
-void ForwardChainerUTest::test_derive_rules(void)
+void ForwardChainerUTest::test_derive_rules_1(void)
 {
 	config().set("SCM_PRELOAD", "tests/rule-engine/bc-deduction.scm,"
 	             "tests/rule-engine/simple-assertions.scm");
@@ -221,21 +222,51 @@ void ForwardChainerUTest::test_derive_rules(void)
 	Handle rule_handle = eval.eval_h("(MemberLink"
 	                                 "   bc-deduction-rule-name"
 	                                 "   (ConceptNode \"URE\"))");
-	Rule* rule = new Rule(rule_handle);
+	Rule rule(rule_handle);
 	Handle source = eval.eval_h(R"((ConceptNode "Socrates"))");
 	Handle source2 =  eval.eval_h("(InheritanceLink"
 	                              "   (ConceptNode \"Cat\")"
 	                              "   (ConceptNode \"Animal\"))");
 
 	Handle rbs = _as.get_node(CONCEPT_NODE, "URE");
-	ForwardChainer fc(_as, rbs,source);
+	ForwardChainer fc(_as, rbs, source);
 
-	//is not unifiable
-	UnorderedHandleSet hrules = fc.derive_rules(source, rule);
+	// is not unifiable
+	UnorderedHandleSet hrules = fc.derive_rules(source, &rule);
 	TS_ASSERT_EQUALS(0, hrules.size());
 
-	hrules = fc.derive_rules(source2, rule);
+	hrules = fc.derive_rules(source2, &rule);
 	TS_ASSERT_EQUALS(2, hrules.size());
+}
+
+void ForwardChainerUTest::test_derive_rules_2()
+{
+	_as.clear();
+
+	config().set("SCM_PRELOAD",
+	             "tests/rule-engine/implication-construction-rule.scm");
+	load_scm_files_from_config(_as);
+
+	Handle source = eval.eval_h("(LambdaLink"
+	                            "   (TypedVariableLink"
+	                            "      (VariableNode \"$X\")"
+	                            "      (TypeNode \"ConceptNode\"))"
+	                            "   (EvaluationLink"
+	                            "      (PredicateNode \"take\")"
+	                            "      (ListLink"
+	                            "         (VariableNode \"$X\")"
+	                            "         (ConceptNode \"treatment-1\"))))");
+	Handle rule_handle = eval.eval_h("(MemberLink"
+	                                 "   implication-construction-rule-name"
+	                                 "   (ConceptNode \"URE\"))");
+	Rule rule(rule_handle);
+
+	Handle rbs = _as.get_node(CONCEPT_NODE, "URE");
+
+	ForwardChainer fc(_as, rbs, source);
+
+	UnorderedHandleSet hrules = fc.derive_rules(source, &rule);
+	TS_ASSERT_EQUALS(0, hrules.size());
 }
 
 #undef al
