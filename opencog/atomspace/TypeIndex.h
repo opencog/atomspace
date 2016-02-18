@@ -64,7 +64,6 @@ class TypeIndex : public FixedIntegerIndex
 		{
 			remove(a->getType(), a);
 		}
-		size_t getNumAtomsOfType(Type type, bool subclass) const;
 
 		class iterator
 			: public std::iterator<std::forward_iterator_tag, Handle>
