@@ -217,10 +217,31 @@ typedef std::vector<Handle> HandleSeq;
 typedef std::vector<HandleSeq> HandleSeqSeq;
 
 //! a set of handles
-typedef std::set<Handle> HandleSet;
+typedef std::set<Handle> OrderedHandleSet;
 
 //! a hash that associates the handle to its unique identificator
 typedef std::unordered_set<Handle, handle_hash> UnorderedHandleSet;
+
+// Convenient functions to print collections of atoms and debugging in
+// gdb. I tried to use to_string, but then gcc complains.
+template <typename C>
+std::string handle_container_to_string(const C& hs)
+{
+	unsigned i = 0;
+	std::stringstream ss;
+	for (const Handle& h : hs) {
+		ss << "atom[" << i << "]:" << std::endl
+		   << h->toString();
+		i++;
+	}
+	return ss.str();
+}
+#define instantiate_handle_container_to_string(T) \
+	template std::string \
+	handle_container_to_string<T>(const T&)
+instantiate_handle_container_to_string(HandleSeq);
+instantiate_handle_container_to_string(OrderedHandleSet);
+instantiate_handle_container_to_string(UnorderedHandleSet);
 
 struct handle_seq_less
 {
