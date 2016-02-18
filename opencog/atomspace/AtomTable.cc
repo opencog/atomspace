@@ -72,6 +72,8 @@ AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient)
     _environ = parent;
     _uuid = TLB::reserve_extent(1);
     size = 0;
+    size_t ntypes = classserver().getNumberOfClasses();
+    _size_by_type.resize(ntypes);
 
     // Set resolver before doing anything else, such as getting
     // the atom-added signals.  Just in case some other thread
