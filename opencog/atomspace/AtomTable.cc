@@ -65,8 +65,8 @@ using namespace opencog;
 
 std::recursive_mutex AtomTable::_mtx;
 
-AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder)
-    : _index_queue(this, &AtomTable::put_atom_into_index)
+AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient)
+    : _index_queue(this, &AtomTable::put_atom_into_index, transient?0:4)
 {
     _as = holder;
     _environ = parent;
