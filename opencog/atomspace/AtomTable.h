@@ -87,7 +87,11 @@ private:
     // them during add/remove.
     static std::recursive_mutex _mtx;
 
+    // Cached count of the number of atoms in the table.
     size_t size;
+
+    // Cached count of the number of atoms of each type.
+    std::vector<size_t> _size_by_type;
 
     // Holds all atoms in the table.  Provides lookup between numeric
     // handle uuid and the actual atom pointer. To some degree, this info

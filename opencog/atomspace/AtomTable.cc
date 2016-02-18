@@ -589,6 +589,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     }
     Handle h(atom->getHandle());
     size++;
+    _size_by_type[atom->_type] ++;
     _atom_set.insert({atom->_uuid, h});
 
     atom->keep_incoming_set();
@@ -652,7 +653,18 @@ size_t AtomTable::getNumLinks() const
 size_t AtomTable::getNumAtomsOfType(Type type, bool subclass) const
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    size_t result = typeIndex.getNumAtomsOfType(type, subclass);
+
+    size_t result = _size_by_type[type];
+    if (subclass)
+    {
+        // Also count subclasses of this type, if need be.
+        Type ntypes = _size_by_type.size();
+        for (Type t = ATOM; t<ntypes; t++)
+        {
+            if (t != type and classserver().isA(type, t))
+                result += _size_by_type[t];
+        }
+    }
 
     if (_environ)
         result += _environ->getNumAtomsOfType(type, subclass);
@@ -821,6 +833,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
 
     // Decrements the size of the table
     size--;
+    _size_by_type[atom->_type] --;
     _atom_set.erase(atom->_uuid);
 
     Atom* pat = atom.operator->();
@@ -850,6 +863,8 @@ void AtomTable::typeAdded(Type t)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     //resize all Type-based indexes
+    size_t new_size = classserver().getNumberOfClasses();
+    _size_by_type.resize(new_size);
     nodeIndex.resize();
     linkIndex.resize();
     typeIndex.resize();
