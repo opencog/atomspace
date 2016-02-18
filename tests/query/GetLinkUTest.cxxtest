@@ -266,12 +266,12 @@ void GetLinkUTest::test_not_equal(void) {
 		          al(NOT_LINK,
 		             al(EQUAL_LINK, P, Qvar)),
 		          Qvar),
-		gl = al(GET_LINK, body);
+		gl = al(GET_LINK, vardecl, body);
 
 	Q->setTruthValue(SimpleTruthValue::TRUE_TV());
 
 	Handle result = satisfying_set(as, gl);
-	Handle expect = al(SET_LINK, HandleSeq());
+	Handle expect = al(SET_LINK, Q);
 
 	printf("Expected this: %s\n", expect->toString().c_str());
 	printf("Found this answer: %s\n", result->toString().c_str());
