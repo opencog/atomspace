@@ -156,8 +156,15 @@ public:
 
     /**
      * Constructor and destructor for this class.
+     *
+     * If 'transient' is true, then some non-essential initialization
+     * is skipped.  This makes the constructor run faster. This is
+     * useful when the AtomTable is being used only for holding
+     * temporary, scratch results, e.g. as a result of evaluation
+     * or inference.
      */
-    AtomTable(AtomTable* parent = NULL, AtomSpace* holder = NULL);
+    AtomTable(AtomTable* parent = NULL, AtomSpace* holder = NULL,
+              bool transient = false);
     ~AtomTable();
     UUID get_uuid(void) const { return _uuid; }
     AtomTable* get_environ(void) const { return _environ; }
