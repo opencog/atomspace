@@ -51,9 +51,17 @@ using namespace opencog;
 
 // ====================================================================
 
+/**
+ * Transient atomspaces skip some of the initialization steps,
+ * so that they can be constructed more quickly.  Transient atomspaces
+ * are typically used as scratch spaces, to hold temporary results
+ * during evaluation, pattern matching and inference. Such temporary
+ * spaces don't need some of the heavier-weight crud that atomspaces
+ * are festooned with.
+ */
 AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     atomTable(parent? &parent->atomTable : NULL, this, transient),
-    bank(atomTable),
+    bank(atomTable, transient),
     backing_store(NULL)
 {
 }
@@ -67,7 +75,7 @@ AtomSpace::~AtomSpace()
 
 AtomSpace::AtomSpace(const AtomSpace&) :
     atomTable(NULL),
-    bank(atomTable),
+    bank(atomTable, true),
     backing_store(NULL)
 {
      throw opencog::RuntimeException(TRACE_INFO,
