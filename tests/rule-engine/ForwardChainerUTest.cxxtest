@@ -266,7 +266,7 @@ void ForwardChainerUTest::test_derive_rules_2()
 	ForwardChainer fc(_as, rbs, source);
 
 	UnorderedHandleSet hrules = fc.derive_rules(source, &rule);
-	TS_ASSERT_EQUALS(0, hrules.size());
+	TS_ASSERT_EQUALS(2, hrules.size());
 }
 
 #undef al
