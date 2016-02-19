@@ -108,6 +108,16 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
 
+# The default case for non-profile builds is to use shared libraries. So don't
+# use explicit SHARED in the ADD_LIBRARY calls in CMakeLists.txt instances or
+# this flag won't work since it only affects the default.
+IF (CMAKE_BUILD_TYPE STREQUAL "Profile")
+	SET(BUILD_SHARED_LIBS OFF)
+ELSE (CMAKE_BUILD_TYPE STREQUAL "Profile")
+	SET(BUILD_SHARED_LIBS ON)
+ENDIF (CMAKE_BUILD_TYPE STREQUAL "Profile")
+
+
 # Do the windows build
 IF (WIN32)
 	ADD_DEFINITIONS(-DWIN32)

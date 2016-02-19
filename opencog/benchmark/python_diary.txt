@@ -451,7 +451,16 @@ and is now:
 
   Bind - bindlink - Cython                      360.240µs           2,775
 
-This is 25 times slower than it was. Yikes! Need to dig into the reason why.
+This is 25 times slower than it was. Yikes! The slowdown was introduced here:
+
+commit 13be76e0f24603c43fe67a745da473fad97e570e
+Author: Linas Vepstas <linasvepstas@gmail.com>
+Date:   Sun Apr 12 08:04:44 2015 -0500
+    Remove the old virtual-link API
+
+Which appears to have had a counter-intuitive effect as this change looks like
+it would speed things up by saving the creation and deletion of a stack-based
+temporary atomspace.
 
 
 Machine and Software Configuration

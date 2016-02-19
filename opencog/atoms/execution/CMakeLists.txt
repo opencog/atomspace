@@ -6,7 +6,7 @@ IF (HAVE_CYTHON)
 	INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 ENDIF (HAVE_CYTHON)
 
-ADD_LIBRARY (execution SHARED
+ADD_LIBRARY (execution
 	EvaluationLink.cc
 	ExecutionOutputLink.cc
 	Instantiator.cc

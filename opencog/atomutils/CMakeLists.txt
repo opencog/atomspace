@@ -1,5 +1,5 @@
 
-ADD_LIBRARY (atomutils SHARED
+ADD_LIBRARY (atomutils
 	AtomUtils
 	FindUtils
 	FuzzyMatch
@@ -11,8 +11,8 @@ ADD_LIBRARY (atomutils SHARED
 ADD_DEPENDENCIES(atomutils opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomutils
-	atombase
 	atomcore
+	atombase
 	${COGUTIL_LIBRARY}
 )
 
