@@ -36,6 +36,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/FloatValue.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
@@ -111,9 +112,9 @@ public:
     void testIsCleared()
     {
         atomSpace->clear();
-        TS_ASSERT(table->isCleared());
+        TS_ASSERT(0 == table->getSize());
         Handle word = table->add(createNode(NUMBER_NODE, "1"), false);
-        TS_ASSERT(!table->isCleared());
+        TS_ASSERT(1 == table->getSize());
     }
 
     void doRecursiveAdd(Type list_type)
@@ -271,5 +272,18 @@ public:
         TS_ASSERT(table->getHandlex("1", MY_NUMBER_NODE) != Handle::UNDEFINED);
         TS_ASSERT(table->getHandlex("28675194", MY_CONCEPT_NODE) != Handle::UNDEFINED);
         TS_ASSERT(table->getHandle(MY_INHERITANCE_LINK, os) != Handle::UNDEFINED);
+    }
+
+    void testValue()
+    {
+/*
+        Handle time(createNode(TIME_NODE, "1"));
+        ProtoAtomPtr fvalue(createFloatValue(2.222));
+        Handle sense(createNode(CONCEPT_NODE, "28675194"));
+
+        Handle inh = table->add(createLink(INHERITANCE_LINK, time, fvalue, sense), true);
+        table->barrier();
+        TS_ASSERT(inh==nullptr);
+*/
     }
 };

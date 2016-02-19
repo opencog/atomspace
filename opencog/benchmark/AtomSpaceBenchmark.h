@@ -67,8 +67,13 @@ class AtomSpaceBenchmark
     Type randomType(Type t);
     Type numberOfTypes;
 
-    clock_t makeRandomNode(const std::string& s);
-    clock_t makeRandomLink();
+    // Make Nclock random nodes of name "node <counter>" where counter
+    // is incremented for each node. Or s if non empty.
+    clock_t makeRandomNodes(const std::string& s);
+
+	// Make Nclock random links with random arity and random
+	// outgoings.
+	clock_t makeRandomLinks();
 
     long getMemUsage();
     int counter;
@@ -128,20 +133,13 @@ public:
     void doBenchmark(const std::string& methodName, BMFn methodToCall);
 
     void buildAtomSpace(long atomspaceSize=(1 << 16), float percentLinks = 0.1, 
-            bool display = true);
+                        bool display = true);
     Handle getRandomHandle();
     void setTestAllMethods() { setMethod("all"); }
 
     timepair_t bm_noop();
-    timepair_t bm_addNode();
-    timepair_t bm_addLink();
-    timepair_t bm_rmAtom();
 
     timepair_t bm_getType();
-    timepair_t bm_getHandlesByType();
-    timepair_t bm_getOutgoingSet();
-    timepair_t bm_getIncomingSet();
-
     // Get and set TV and AV
     float chanceUseDefaultTV; // if set, this will use default TV for new atoms and bm_setTruthValue
     timepair_t bm_getTruthValue();
@@ -150,6 +148,15 @@ public:
 #ifdef ZMQ_EXPERIMENT
     timepair_t bm_getTruthValueZmq();
 #endif
+
+    timepair_t bm_pointerCast();
+    timepair_t bm_getIncomingSet();
+    timepair_t bm_getOutgoingSet();
+    timepair_t bm_getHandlesByType();
+
+    timepair_t bm_addNode();
+    timepair_t bm_addLink();
+    timepair_t bm_rmAtom();
 
     timepair_t bm_push_back();
     timepair_t bm_emplace_back();

@@ -75,7 +75,15 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 		# SET(CMAKE_C_FLAGS "-Wl,--copy-dt-needed-entries")
 		SET(CMAKE_C_FLAGS_DEBUG "-ggdb3 -fstack-protector")
 		SET(CMAKE_C_FLAGS_PROFILE "-O2 -g3 -fstack-protector -pg")
-		SET(CMAKE_C_FLAGS_RELEASE "-O2 -g -fstack-protector")
+		SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto")
+		LINK_LIBRARIES(pthread)
+
+		# Workaround for circular dependencies problem. This causes
+		# LINK_LIBRARIES to appear twice in the linker line; the
+		# second appearance has the effect of resolving any circular
+		# dependencies left over from the first specification.
+		# See pull request #642 for more discussion.
+		SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} <LINK_LIBRARIES>")
 	ENDIF (APPLE)
 
 	# 1) -Wno-variadic-macros is to avoid warnings regarding using
@@ -99,6 +107,16 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 		LINK_LIBRARIES(gcov)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
+
+# The default case for non-profile builds is to use shared libraries. So don't
+# use explicit SHARED in the ADD_LIBRARY calls in CMakeLists.txt instances or
+# this flag won't work since it only affects the default.
+IF (CMAKE_BUILD_TYPE STREQUAL "Profile")
+	SET(BUILD_SHARED_LIBS OFF)
+ELSE (CMAKE_BUILD_TYPE STREQUAL "Profile")
+	SET(BUILD_SHARED_LIBS ON)
+ENDIF (CMAKE_BUILD_TYPE STREQUAL "Profile")
+
 
 # Do the windows build
 IF (WIN32)

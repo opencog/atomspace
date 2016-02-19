@@ -28,15 +28,16 @@ using namespace opencog;
 
 bool FCStat::has_partial_grounding(const Handle& hsource)
 {
-    for (const PartiaGroundingRecord& spg : _spg_stat) {
-        if (spg.hsource == hsource)
-            return true;
-    }
+    // for (const PartiaGroundingRecord& spg : _spg_stat) {
+    //     if (spg.hsource == hsource)
+    //         return true;
+    // }
 
     return false;
 }
 
-void FCStat::add_partial_grounding(Handle source, Handle hrule, HandleWeightMap pgroundings)
+void FCStat::add_partial_grounding(Handle source, Handle hrule,
+                                   HandleWeightMap pgroundings)
 {
     if (hrule == Handle::UNDEFINED) {
         PartiaGroundingRecord pgr(source);
@@ -83,21 +84,22 @@ std::map<Handle,HandleWeightMap> FCStat::get_rule_pg_map(const Handle& hsource)
  * @return  A handleSeq of similar sources that have partialgrouding
  *          record.
  */
-HandleSeq FCStat::get_pg_similar_sources(const Handle& hsource,bool strict)
+HandleSeq FCStat::get_pg_similar_sources(const Handle& hsource, bool strict)
 {
     HandleSeq simsources = { };
 
     for (const auto& spg : _spg_stat) {
-        if (are_similar(spg.hsource, hsource,strict))
+        if (are_similar(spg.hsource, hsource, strict))
             simsources.push_back(spg.hsource);
     }
 
     return simsources;
 }
 
-void FCStat::add_inference_record(Handle source,HandleSeq product)
+void FCStat::add_inference_record(Handle source, const Rule* rule,
+                                  const HandleSeq& product)
 {
-    InferenceRecord ir(source, product);
+    InferenceRecord ir(source, rule, product);
     auto it = std::find(_inf_rec.begin(), _inf_rec.end(), ir);
 
     if (it != _inf_rec.end()) {
@@ -112,12 +114,11 @@ void FCStat::add_inference_record(Handle source,HandleSeq product)
     }
 }
 
-HandleSeq FCStat::get_all_inferences(void){
-  UnorderedHandleSet all;
-  for(const auto& ir : _inf_rec)
-  {
-      all.insert(ir.product.begin(),ir.product.end());
-  }
+HandleSeq FCStat::get_all_inferences(void)
+{
+    UnorderedHandleSet all;
+    for(const auto& ir : _inf_rec)
+        all.insert(ir.product.begin(),ir.product.end());
 
-  return HandleSeq(all.begin(),all.end());
+    return HandleSeq(all.begin(), all.end());
 }

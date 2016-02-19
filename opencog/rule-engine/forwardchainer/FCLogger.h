@@ -33,11 +33,11 @@ namespace opencog
 Logger& fc_logger();
 
 // Macros to not evaluate the stream if log level is disabled
-#define LAZY_FC_LOG_ERROR if(fc_logger().isErrorEnabled()) fc_logger().error()
-#define LAZY_FC_LOG_WARN if(fc_logger().isWarnEnabled()) fc_logger().warn()
-#define LAZY_FC_LOG_INFO if(fc_logger().isInfoEnabled()) fc_logger().info()
-#define LAZY_FC_LOG_DEBUG if(fc_logger().isDebugEnabled()) fc_logger().debug()
-#define LAZY_FC_LOG_FINE if(fc_logger().isFineEnabled()) fc_logger().fine()
+#define LAZY_FC_LOG_ERROR if(fc_logger().is_error_enabled()) fc_logger().error()
+#define LAZY_FC_LOG_WARN if(fc_logger().is_warn_enabled()) fc_logger().warn()
+#define LAZY_FC_LOG_INFO if(fc_logger().is_info_enabled()) fc_logger().info()
+#define LAZY_FC_LOG_DEBUG if(fc_logger().is_debug_enabled()) fc_logger().debug()
+#define LAZY_FC_LOG_FINE if(fc_logger().is_fine_enabled()) fc_logger().fine()
 
 } // ~namespace opencog
 

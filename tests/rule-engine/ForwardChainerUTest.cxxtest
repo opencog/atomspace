@@ -26,8 +26,8 @@ public:
 	ForwardChainerUTest() : eval(&_as)
 	{
 #undef DEBUG
-		logger().setLevel(Logger::DEBUG);
-		logger().setPrintToStdoutFlag(true);
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
 
 		// Disable the AF mechanism during testing!
 		_as.set_attentional_focus_boundary(AttentionValue::MINSTI);
@@ -97,8 +97,8 @@ void ForwardChainerUTest::test_do_chain()
 
 void ForwardChainerUTest::test_choose_rule(void)
 {
-    logger().setPrintToStdoutFlag(true);
-    logger().setLevel(Logger::DEBUG);
+    logger().set_print_to_stdout_flag(true);
+    logger().set_level(Logger::DEBUG);
 
     Handle h = eval.eval_h(
         "(InheritanceLink (ConceptNode \"cat\")(ConceptNode \"animal\"))");
@@ -141,11 +141,11 @@ void ForwardChainerUTest::test_derive_rules(void)
     ForwardChainer fc(_as, rbs,source, HandleSeq { });
 
     //is not unifiable
-    HandleSeq hrules = fc.derive_rules(source,rule);
-    TS_ASSERT_EQUALS(0,hrules.size());
+    UnorderedHandleSet hrules = fc.derive_rules(source, rule);
+    TS_ASSERT_EQUALS(0, hrules.size());
 
-    hrules = fc.derive_rules(source2,rule);
-    TS_ASSERT_EQUALS(2,hrules.size());
+    hrules = fc.derive_rules(source2, rule);
+    TS_ASSERT_EQUALS(2, hrules.size());
 
     //for(Handle h:hrules)
                // std::cout << "DERIVED:\n" << h->toShortString() << std::endl;
@@ -176,14 +176,14 @@ void ForwardChainerUTest::test_apply_rule(void)
     Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
     ForwardChainer fc(_as, rbs,source, HandleSeq { });
 
-    HandleSeq derules = fc.derive_rules(source,rules[0],true);
-    TS_ASSERT_EQUALS(3,derules.size());
+    UnorderedHandleSet derules = fc.derive_rules(source, rules[0], true);
+    TS_ASSERT_EQUALS(3, derules.size());
 
     HandleSeq hs;
-    for(Handle h:derules)
+    for(Handle h : derules)
     {
-    HandleSeq tmp = fc.apply_rule(h);
-    hs.insert(hs.end(),tmp.begin(),tmp.end());
+        HandleSeq tmp = fc.apply_rule(h);
+        hs.insert(hs.end(), tmp.begin(), tmp.end());
     }
 
 

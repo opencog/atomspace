@@ -10,12 +10,14 @@ ADD_CUSTOM_TARGET(opencog_atom_types DEPENDS atom_types.h)
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
-ADD_LIBRARY (atombase SHARED
+ADD_LIBRARY (atombase
 	atom_types.h
 	Atom.cc
 	ClassServer.cc
+	FloatValue.cc
 	Handle.cc
 	Link.cc
+	LinkValue.cc
 	Node.cc
 )
 
@@ -36,9 +38,12 @@ INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
 	atom_types.cc
 	ClassServer.h
+	FloatValue.h
 	Handle.h
 	Link.h
+	LinkValue.h
 	Node.h
+	ProtoAtom.h
 	types.h
 	DESTINATION "include/opencog/atoms/base"
 )

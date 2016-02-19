@@ -331,8 +331,8 @@ private:
 
 public:
     AtomSpaceUTest() {
-        logger().setLevel(Logger::INFO);
-        logger().setPrintToStdoutFlag(true);
+        logger().set_level(Logger::INFO);
+        logger().set_print_to_stdout_flag(true);
     }
 
     void setUp() {

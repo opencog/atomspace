@@ -125,6 +125,8 @@ class PMCGroundings : public PatternMatchCallback
  *
  * The recursion step terminates when comp_var_gnds, comp_term_gnds
  * are empty, at which point the actual unification is done.
+ *
+ * Return false if no solution is found, true otherwise.
  */
 bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
             const std::vector<Handle>& virtuals,
@@ -141,7 +143,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
 	// what they've got to say about it.
 	if (0 == comp_var_gnds.size())
 	{
-		if (logger().isFineEnabled())
+		if (logger().is_fine_enabled())
 		{
 			logger().fine("Explore one possible combinatoric grounding "
 			              "(var_gnds.size = %zu, term_gnds.size = %zu):",
@@ -300,7 +302,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
  * predicate can be satisfied. Thus, for example, given the structure
  *
  *    BindLink
- *       ListLink
+ *       VariableList
  *          VariableNode "$var0"
  *          VariableNode "$var1"
  *       AndList
@@ -356,7 +358,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	// grounding combination through the virtual link, for the final
 	// accept/reject determination.
 
-	if (logger().isFineEnabled())
+	if (logger().is_fine_enabled())
 	{
 		logger().fine("VIRTUAL PATTERN: ====== "
 		              "num comp=%zd num virts=%zd\n", _num_comps, _num_virts);
@@ -392,11 +394,21 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 		// end the search if this disconnected pure optional is found
 		if (is_pure_optional)
 		{
-			DefaultPatternMatchCB* dpmcb = dynamic_cast<DefaultPatternMatchCB*>(&pmcb);
+			DefaultPatternMatchCB* dpmcb =
+				dynamic_cast<DefaultPatternMatchCB*>(&pmcb);
 			if (dpmcb->optionals_present()) return false;
 		}
 		else
 		{
+			// If there is no solution for one component, then no need
+			// to try to solve the other components, their product
+			// will have no solution.
+			if (gcb._term_groundings.empty()) {
+				logger().fine("No solution for this component. "
+				              "Abort search as no product solution may exist.");
+				return false;
+			}
+
 			comp_var_gnds.push_back(gcb._var_groundings);
 			comp_term_gnds.push_back(gcb._term_groundings);
 		}
@@ -411,8 +423,8 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	std::vector<Handle> optionals; // currently ignored
 	pmcb.set_pattern(_varlist, _pat);
 	return PatternMatch::recursive_virtual(pmcb, _virtual, optionals,
-	                  empty_vg, empty_pg,
-	                  comp_var_gnds, comp_term_gnds);
+	                                       empty_vg, empty_pg,
+	                                       comp_var_gnds, comp_term_gnds);
 }
 
 /* ===================== END OF FILE ===================== */

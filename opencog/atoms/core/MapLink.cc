@@ -27,10 +27,13 @@ using namespace opencog;
 
 void MapLink::init(void)
 {
+	// Maps consist of a function, and the data to apply the function to.
 	if (2 != _outgoing.size())
 		throw SyntaxException(TRACE_INFO,
 			"MapLink is expected to be arity-2 only!");
 
+	// First argument must be a function of some kind.  All functions
+	// are specified using a ScopeLink, to bind the input-variables.
 	Type tscope = _outgoing[0]->getType();
 	if (not classserver().isA(tscope, SCOPE_LINK))
 	{
@@ -44,6 +47,9 @@ void MapLink::init(void)
 	_varset = &_vars->varset;
 	_is_impl = false;
 
+	// ImplicationLinks are a special type of ScopeLink.  They specify
+	// a re-write that should be performed.  Viz, ImplicationLinks are
+	// of the form P(x)->Q(x).  Here, the `_rewrite` is the Q(x)
 	if (classserver().isA(tscope, IMPLICATION_LINK))
 	{
 		_is_impl = true;
@@ -52,6 +58,10 @@ void MapLink::init(void)
 			throw SyntaxException(TRACE_INFO,
 				"Expecting ImplicationLink of at least size 2.");
 
+		// ImplicationLinks have arity 2 only if they have no type
+		// constraints, else they have arity 3.  That is, an
+		// ImplicationLink is either P(x)->Q(x) or its T(x) P(x)->Q(x)
+		// where T(x) is the type constraints on the variables.
 		if (_pattern->get_body() == impl[0])
 		{
 			_rewrite = impl[1];
@@ -125,7 +135,7 @@ MapLink::MapLink(Link &l)
 /// If a variable in `termpat` corresponds with a variable in `ground`,
 /// then add that correspondance pair to `valmap`. Type-checking is
 /// performed during the match-up, so if the variable type does not
-/// match thr ground type, false is returned.  False is also returned
+/// match the ground type, false is returned.  False is also returned
 /// if the trees miscompare in other ways (mismatched link arity,
 /// mis-matched atom type, two conflicting groundings for the same
 /// variable).
@@ -162,17 +172,29 @@ bool MapLink::extract(const Handle& termpat,
 		return true;
 	}
 
-	// Whever they are, the type must agree.
+	// Special-case for ChoiceLinks in the body of the pattern.
+	// This dangles one foot over the edge of a slippery slope,
+	// of analyzing the body of the map and special-casing. Not
+	// sure if this is a good idea, or a bad idea...
+	if (CHOICE_LINK == t)
+	{
+		for (const Handle& choice : termpat->getOutgoingSet())
+		{
+			if (extract(choice, ground, valmap, scratch))
+				return true;
+		}
+		return false;
+	}
+
+	// Whatever they are, the type must agree.
 	if (t != ground->getType()) return false;
 
 	// If they are (non-variable) nodes, they must be identical.
-	LinkPtr tlp(LinkCast(termpat));
-	if (nullptr == tlp)
+	if (not termpat->isLink())
 		return (termpat == ground);
 
-	LinkPtr glp(LinkCast(ground));
-	const HandleSeq& tlo = tlp->getOutgoingSet();
-	const HandleSeq& glo = glp->getOutgoingSet();
+	const HandleSeq& tlo = termpat->getOutgoingSet();
+	const HandleSeq& glo = ground->getOutgoingSet();
 	size_t sz = tlo.size();
 	if (glo.size() != sz) return false;
 
@@ -195,20 +217,32 @@ Handle MapLink::rewrite_one(const Handle& term, AtomSpace* scratch) const
 		return Handle::UNDEFINED;
 
 	// Make sure each variable is grounded.
+	// Actually, not all variables need to be grounded ...
+	// re-writes might actually ignore ungrounded vars.
+	bool partial = false;
 	HandleSeq valseq;
 	for (const Handle& var : _vars->varseq)
 	{
 		auto valpair = valmap.find(var);
 		if (valmap.end() == valpair)
-			return Handle::UNDEFINED;
-		valseq.emplace_back(valpair->second);
+		{
+			partial = true;
+			valseq.emplace_back(Handle::UNDEFINED);
+		}
+		else
+			valseq.emplace_back(valpair->second);
 	}
 
 	// Perform substitution, if it's an ImplicationLink
 	if (_is_impl)
 	{
-		return _vars->substitute(_rewrite, valseq);
+		// No type-checking; we've already done that.
+		return _vars->substitute_nocheck(_rewrite, valseq);
 	}
+
+	// Make sure each variable is grounded. (for real, this time)
+	if (partial)
+		return Handle::UNDEFINED;
 
 	// Wrap up the result in a list only if there is more than one
 	// variable.
@@ -239,8 +273,7 @@ Handle MapLink::execute(AtomSpace* scratch) const
 	if (SET_LINK == argtype or LIST_LINK == argtype)
 	{
 		HandleSeq remap;
-		LinkPtr lp(LinkCast(valh));
-		for (const Handle& h : lp->getOutgoingSet())
+		for (const Handle& h : valh->getOutgoingSet())
 		{
 			Handle mone = rewrite_one(h, scratch);
 			if (nullptr != mone) remap.emplace_back(mone);

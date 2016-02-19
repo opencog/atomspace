@@ -52,13 +52,13 @@ void SchemeEval::init(void)
 	_in_eval = false;
 
 	// User error and crash management
-	error_string = SCM_EOL;
-	error_string = scm_gc_protect_object(error_string);
+	_error_string = SCM_EOL;
+	_error_string = scm_gc_protect_object(_error_string);
 
-	captured_stack = SCM_BOOL_F;
-	captured_stack = scm_gc_protect_object(captured_stack);
+	_captured_stack = SCM_BOOL_F;
+	_captured_stack = scm_gc_protect_object(_captured_stack);
 
-	pexpr = NULL;
+	_pexpr = NULL;
 	_eval_done = false;
 	_poll_done = false;
 
@@ -170,8 +170,8 @@ void SchemeEval::finish(void)
 		scm_gc_unprotect_object(_pipe);
 	}
 
-	scm_gc_unprotect_object(error_string);
-	scm_gc_unprotect_object(captured_stack);
+	scm_gc_unprotect_object(_error_string);
+	scm_gc_unprotect_object(_captured_stack);
 
 	// Force garbage collection
 	scm_gc();
@@ -189,15 +189,15 @@ void * SchemeEval::c_wrap_finish(void *p)
 void SchemeEval::set_captured_stack(SCM newstack)
 {
 	// protect before unprotecting, to avoid multi-threaded races.
-	SCM oldstack = captured_stack;
-	captured_stack = scm_gc_protect_object(newstack);
+	SCM oldstack = _captured_stack;
+	_captured_stack = scm_gc_protect_object(newstack);
 	scm_gc_unprotect_object(oldstack);
 }
 
 void SchemeEval::set_error_string(SCM newerror)
 {
-	SCM olderror = error_string;
-	error_string = scm_gc_protect_object(newerror);
+	SCM olderror = _error_string;
+	_error_string = scm_gc_protect_object(newerror);
 	scm_gc_unprotect_object(olderror);
 }
 
@@ -308,7 +308,7 @@ SchemeEval::SchemeEval(AtomSpace* as)
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
-	atomspace = as;
+	_atomspace = as;
 
 	scm_with_guile(c_wrap_init, this);
 
@@ -432,7 +432,7 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 		if (nargs >= 4)
 			rest = SCM_CADDDR (throw_args);
 
-		if (scm_is_true (captured_stack))
+		if (scm_is_true (_captured_stack))
 		{
 			SCM highlights;
 
@@ -443,16 +443,16 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 				highlights = SCM_EOL;
 
 			scm_puts ("Backtrace:\n", port);
-			scm_display_backtrace_with_highlights (captured_stack, port,
+			scm_display_backtrace_with_highlights (_captured_stack, port,
 			                                       SCM_BOOL_F, SCM_BOOL_F,
 			                                       highlights);
 			scm_newline (port);
 		}
 #ifdef HAVE_GUILE2
-		if (SCM_STACK_LENGTH (captured_stack))
-			set_captured_stack(scm_stack_ref (captured_stack, SCM_INUM0));
+		if (SCM_STACK_LENGTH (_captured_stack))
+			set_captured_stack(scm_stack_ref (_captured_stack, SCM_INUM0));
 #endif
-		scm_display_error (captured_stack, port, subr, message, parts, rest);
+		scm_display_error (_captured_stack, port, subr, message, parts, rest);
 	}
 	else
 	{
@@ -501,7 +501,7 @@ void SchemeEval::eval_expr(const std::string &expr)
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
-	pexpr = &expr;
+	_pexpr = &expr;
 	_in_shell = true;
 	_in_eval = true;
 	scm_with_guile(c_wrap_eval, this);
@@ -516,14 +516,14 @@ void SchemeEval::eval_expr(const std::string &expr)
 void* SchemeEval::c_wrap_poll(void* p)
 {
 	SchemeEval* self = (SchemeEval*) p;
-	self->answer = self->do_poll_result();
+	self->_answer = self->do_poll_result();
 	return p;
 }
 
 std::string SchemeEval::poll_result()
 {
 	scm_with_guile(c_wrap_poll, this);
-	return answer;
+	return _answer;
 }
 
 void* SchemeEval::c_wrap_eval(void* p)
@@ -534,9 +534,9 @@ void* SchemeEval::c_wrap_eval(void* p)
 	// But sometimes, a heavily loaded server can crash here.
 	// Trying to figure out why ...
 	OC_ASSERT(self, "c_wrap_eval got null pointer!");
-	OC_ASSERT(self->pexpr, "c_wrap_eval got null expression!");
+	OC_ASSERT(self->_pexpr, "c_wrap_eval got null expression!");
 
-	self->do_eval(*(self->pexpr));
+	self->do_eval(*(self->_pexpr));
 	return self;
 }
 
@@ -584,13 +584,13 @@ void SchemeEval::do_eval(const std::string &expr)
 {
 	per_thread_init();
 
-	// Set global atomspace variable in the execution environment.
+	// Set global _atomspace variable in the execution environment.
 	AtomSpace* saved_as = NULL;
-	if (atomspace)
+	if (_atomspace)
 	{
 		saved_as = SchemeSmob::ss_get_env_as("do_eval");
-		if (saved_as != atomspace)
-			SchemeSmob::ss_set_env_as(atomspace);
+		if (saved_as != _atomspace)
+			SchemeSmob::ss_set_env_as(_atomspace);
 		else
 			saved_as = NULL;
 	}
@@ -600,7 +600,7 @@ void SchemeEval::do_eval(const std::string &expr)
 	redirect_output();
 	_caught_error = false;
 	_pending_input = false;
-	error_msg.clear();
+	_error_msg.clear();
 	set_captured_stack(SCM_BOOL_F);
 	scm_gc_unprotect_object(_rc);
 	SCM eval_str = scm_from_utf8_string(_input_line.c_str());
@@ -723,7 +723,7 @@ std::string SchemeEval::do_poll_result()
 	{
 		std::string rv = poll_port();
 
-		char * str = scm_to_utf8_string(error_string);
+		char * str = scm_to_utf8_string(_error_string);
 		rv += str;
 		free(str);
 		set_error_string(SCM_EOL);
@@ -767,11 +767,11 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 
 	// Set global atomspace variable in the execution environment.
 	AtomSpace* saved_as = NULL;
-	if (atomspace)
+	if (_atomspace)
 	{
 		saved_as = SchemeSmob::ss_get_env_as("do_scm_eval");
-		if (saved_as != atomspace)
-			SchemeSmob::ss_set_env_as(atomspace);
+		if (saved_as != _atomspace)
+			SchemeSmob::ss_set_env_as(_atomspace);
 		else
 			saved_as = NULL;
 	}
@@ -781,7 +781,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 		redirect_output();
 
 	_caught_error = false;
-	error_msg.clear();
+	_error_msg.clear();
 	set_captured_stack(SCM_BOOL_F);
 	SCM rc = scm_c_catch (SCM_BOOL_T,
 	                 evo, (void *) sexpr,
@@ -799,7 +799,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 
 	if (_caught_error)
 	{
-		char * str = scm_to_utf8_string(error_string);
+		char * str = scm_to_utf8_string(_error_string);
 		// Don't blank out the error string yet.... we need it later.
 		// (probably because someone called cog-bind with an
 		// ExecutionOutputLink in it with a bad scheme schema node.)
@@ -812,15 +812,15 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 		// Stick the guile stack trace into a string. Anyone who called
 		// us is responsible for checking for an error, and handling
 		// it as needed.
-		error_msg = str;
-		error_msg += "\n";
+		_error_msg = str;
+		_error_msg += "\n";
 
 		free(str);
 		return SCM_EOL;
 	}
 
 	// Get the contents of the output port, and log it
-	if (_in_server and logger().isInfoEnabled())
+	if (_in_server and logger().is_info_enabled())
 	{
 		std::string str(poll_port());
 		if (0 < str.size())
@@ -871,7 +871,7 @@ Handle SchemeEval::eval_h(const std::string &expr)
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
-	pexpr = &expr;
+	_pexpr = &expr;
 	_in_eval = true;
 	scm_with_guile(c_wrap_eval_h, this);
 	_in_eval = false;
@@ -882,18 +882,18 @@ Handle SchemeEval::eval_h(const std::string &expr)
 
 	// Convert evaluation errors into C++ exceptions.
 	if (eval_error())
-		throw RuntimeException(TRACE_INFO, "%s", error_msg.c_str());
+		throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
 
-	return hargs;
+	return _hargs;
 }
 
 void * SchemeEval::c_wrap_eval_h(void * p)
 {
 	SchemeEval *self = (SchemeEval *) p;
 	// scm_from_utf8_string is lots faster than scm_from_locale_string
-	SCM expr_str = scm_from_utf8_string(self->pexpr->c_str());
+	SCM expr_str = scm_from_utf8_string(self->_pexpr->c_str());
 	SCM rc = self->do_scm_eval(expr_str, recast_scm_eval_string);
-	self->hargs = SchemeSmob::scm_to_handle(rc);
+	self->_hargs = SchemeSmob::scm_to_handle(rc);
 	return self;
 }
 
@@ -921,7 +921,7 @@ TruthValuePtr SchemeEval::eval_tv(const std::string &expr)
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
-	pexpr = &expr;
+	_pexpr = &expr;
 	_in_eval = true;
 	scm_with_guile(c_wrap_eval_tv, this);
 	_in_eval = false;
@@ -932,22 +932,22 @@ TruthValuePtr SchemeEval::eval_tv(const std::string &expr)
 
 	// Convert evaluation errors into C++ exceptions.
 	if (eval_error())
-		throw RuntimeException(TRACE_INFO, "%s", error_msg.c_str());
+		throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
 
-	return tvp;
+	return _tvp;
 }
 
 void * SchemeEval::c_wrap_eval_tv(void * p)
 {
 	SchemeEval *self = (SchemeEval *) p;
 	// scm_from_utf8_string is lots faster than scm_from_locale_string
-	SCM expr_str = scm_from_utf8_string(self->pexpr->c_str());
+	SCM expr_str = scm_from_utf8_string(self->_pexpr->c_str());
 	SCM rc = self->do_scm_eval(expr_str, recast_scm_eval_string);
 
 	// Pass evaluation errors out of the wrapper.
 	if (self->eval_error()) return self;
 
-	self->tvp = SchemeSmob::to_tv(rc);
+	self->_tvp = SchemeSmob::to_tv(rc);
 	return self;
 }
 
@@ -973,8 +973,8 @@ Handle SchemeEval::apply(const std::string &func, Handle varargs)
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
-	pexpr = &func;
-	hargs = varargs;
+	_pexpr = &func;
+	_hargs = varargs;
 	_in_eval = true;
 	scm_with_guile(c_wrap_apply, this);
 	_in_eval = false;
@@ -983,15 +983,15 @@ Handle SchemeEval::apply(const std::string &func, Handle varargs)
 	thread_unlock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 	if (eval_error())
-		throw RuntimeException(TRACE_INFO, "%s", error_msg.c_str());
+		throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
 
-	return hargs;
+	return _hargs;
 }
 
 void * SchemeEval::c_wrap_apply(void * p)
 {
 	SchemeEval *self = (SchemeEval *) p;
-	self->hargs = self->do_apply(*self->pexpr, self->hargs);
+	self->_hargs = self->do_apply(*self->_pexpr, self->_hargs);
 	return self;
 }
 
@@ -1028,10 +1028,9 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
 	SCM expr = SCM_EOL;
 
 	// If there were args, pass the args to the function.
-	LinkPtr lvar(LinkCast(varargs));
-	if (lvar)
+	if (varargs and varargs->isLink())
 	{
-		const std::vector<Handle> &oset = lvar->getOutgoingSet();
+		const std::vector<Handle> &oset = varargs->getOutgoingSet();
 
 		// Iterate in reverse, because cons chains in reverse.
 		size_t sz = oset.size();
@@ -1070,8 +1069,8 @@ TruthValuePtr SchemeEval::apply_tv(const std::string &func, Handle varargs)
 	thread_lock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
-	pexpr = &func;
-	hargs = varargs;
+	_pexpr = &func;
+	_hargs = varargs;
 	_in_eval = true;
 	scm_with_guile(c_wrap_apply_tv, this);
 	_in_eval = false;
@@ -1080,21 +1079,21 @@ TruthValuePtr SchemeEval::apply_tv(const std::string &func, Handle varargs)
 	thread_unlock();
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 	if (eval_error())
-		throw RuntimeException(TRACE_INFO, "%s", error_msg.c_str());
+		throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
 
-	// We do not want this->tvp to point at anything after we return.
+	// We do not want this->_tvp to point at anything after we return.
 	// This is so that we do not hold a long-term reference to the TV.
 	TruthValuePtr rtv;
-	swap(rtv, tvp);
+	swap(rtv, _tvp);
 	return rtv;
 }
 
 void * SchemeEval::c_wrap_apply_tv(void * p)
 {
 	SchemeEval *self = (SchemeEval *) p;
-	SCM tv_smob = self->do_apply_scm(*self->pexpr, self->hargs);
+	SCM tv_smob = self->do_apply_scm(*self->_pexpr, self->_hargs);
 	if (self->eval_error()) return self;
-	self->tvp = SchemeSmob::to_tv(tv_smob);
+	self->_tvp = SchemeSmob::to_tv(tv_smob);
 	return self;
 }
 
@@ -1155,7 +1154,7 @@ SchemeEval* SchemeEval::get_evaluator(AtomSpace* as)
 				// calling delete will lead to a crash in c_wrap_finish().
 				// It would be nice if we got called before guile did, but
 				// there is no way in TLS to control execution order...
-				evaluator->atomspace = NULL;
+				evaluator->_atomspace = NULL;
 				return_to_pool(evaluator);
 			}
 		}
@@ -1167,7 +1166,7 @@ SchemeEval* SchemeEval::get_evaluator(AtomSpace* as)
 		return ev->second;
 
 	SchemeEval* evaluator = get_from_pool();
-	evaluator->atomspace = as;
+	evaluator->_atomspace = as;
 	issued[as] = evaluator;
 	return evaluator;
 

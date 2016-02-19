@@ -30,17 +30,17 @@ public:
         try {
             config().load(configFile.c_str(), false);
         } catch (RuntimeException &e) {
-            std::cerr << e.getMessage() << std::endl;
+            std::cerr << e.get_message() << std::endl;
             exit(1);
         }
 
-        logger().setPrintToStdoutFlag(true);
+        logger().set_print_to_stdout_flag(true);
 
         // setup global logger
-        logger().setFilename(config()["LOG_FILE"]);
-        logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
-        logger().setBackTraceLevel(Logger::getLevelFromString(config()["BACK_TRACE_LOG_LEVEL"]));
-        logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+        logger().set_filename(config()["LOG_FILE"]);
+        logger().set_level(Logger::get_level_from_string(config()["LOG_LEVEL"]));
+        logger().set_backtrace_level(Logger::get_level_from_string(config()["BACK_TRACE_LOG_LEVEL"]));
+        logger().set_print_to_stdout_flag(config().get_bool("LOG_TO_STDOUT"));
     }
 
     ~PythonEvalUTest() {}
@@ -108,7 +108,7 @@ public:
                     );
         pySysPath = PySys_GetObject((char*)"path");
 
-        if (logger().isDebugEnabled()) {
+        if (logger().is_debug_enabled()) {
             logger().debug("    Python 'sys.path' after OpenCog config adds is:");
             Py_ssize_t pathSize = PyList_Size(pySysPath);
             for (int pathIndex = 0; pathIndex < pathSize; pathIndex++) {

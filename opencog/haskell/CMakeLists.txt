@@ -1,4 +1,4 @@
-ADD_LIBRARY (atomspace-cwrapper SHARED
+ADD_LIBRARY (atomspace-cwrapper
     AtomSpace_CWrapper.cpp
     PatternMatcher_CWrapper.cpp
     Exec_CWrapper.cpp
@@ -21,5 +21,5 @@ ADD_CUSTOM_TARGET(haskell-atomspace-lib ALL
 )
 
 INSTALL (TARGETS atomspace-cwrapper
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )

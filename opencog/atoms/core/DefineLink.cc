@@ -77,8 +77,7 @@ DefineLink::DefineLink(Link &l)
 Handle DefineLink::get_definition(const Handle& alias)
 {
 	Handle uniq(get_unique(alias, DEFINE_LINK, false));
-	LinkPtr luniq(LinkCast(uniq));
-	return luniq->getOutgoingAtom(1);
+	return uniq->getOutgoingAtom(1);
 }
 
 /* ===================== END OF FILE ===================== */

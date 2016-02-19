@@ -75,21 +75,21 @@ class SchemeEval : public GenericEval
 		static void * c_wrap_finish(void *);
 
 		// Things related to (async) cogserver shell-evaluation
-		void do_eval(const std::string &);
-		std::string do_poll_result();
-		static void * c_wrap_eval(void *);
-		static void * c_wrap_poll(void *);
-		const std::string *pexpr;
-		std::string answer;
+		const std::string *_pexpr;
+		std::string _answer;
 		SCM _rc;
 		bool _eval_done;
 		bool _poll_done;
 		std::mutex _poll_mtx;
 		std::condition_variable _wait_done;
-		std::string poll_port();
 		SCM _pipe;
 		int _pipeno;
-
+		void do_eval(const std::string &);
+		std::string do_poll_result();
+		std::string poll_port();
+		static void * c_wrap_eval(void *);
+		static void * c_wrap_poll(void *);
+		
 		// Output port, for any printing done by scheme code.
 		SCM _outport;
 		SCM _saved_outport;
@@ -107,18 +107,18 @@ class SchemeEval : public GenericEval
 		static void * c_wrap_eval_tv(void *);
 
 		// Apply function to arguments, returning Handle or TV
+		Handle _hargs;
+		TruthValuePtr _tvp;
 		Handle do_apply(const std::string& func, const Handle& varargs);
 		SCM do_apply_scm(const std::string& func, const Handle& varargs);
-		Handle hargs;
-		TruthValuePtr tvp;
 		static void * c_wrap_apply(void *);
 		static void * c_wrap_apply_tv(void *);
 
 		// Exception and error handling stuff
-		SCM error_string;
-		std::string error_msg;
+		SCM _error_string;
+		std::string _error_msg;
+		SCM _captured_stack;
 		void set_error_string(SCM);
-		SCM captured_stack;
 		void set_captured_stack(SCM);
 		static SCM preunwind_handler_wrapper(void *, SCM, SCM);
 		static SCM catch_handler_wrapper(void *, SCM, SCM);
@@ -129,7 +129,7 @@ class SchemeEval : public GenericEval
 		static std::string prt(SCM);
 
 		static void * c_wrap_set_atomspace(void *);
-		AtomSpace* atomspace;
+		AtomSpace* _atomspace;
 		int _gc_ctr;
 		bool _in_eval;
 

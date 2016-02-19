@@ -1,4 +1,4 @@
-ADD_LIBRARY (truthvalue SHARED
+ADD_LIBRARY (truthvalue
 	AttentionValue.cc
 	CountTruthValue.cc
 	FuzzyTruthValue.cc

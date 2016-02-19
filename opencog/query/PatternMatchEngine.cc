@@ -114,8 +114,7 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 
 	// VariableNode had better be an actual node!
 	// If it's not then we are very very confused ...
-	NodePtr np(NodeCast(hp));
-	OC_ASSERT (NULL != np,
+	OC_ASSERT (hp->isNode(),
 	           "ERROR: expected variable to be a node, got this: %s\n",
 	           hp->toShortString().c_str());
 
@@ -706,7 +705,7 @@ bool PatternMatchEngine::clause_compare(const PatternTermPtr& ptm,
 {
 	return ptm->getHandle() == clause
 		or (clause->getType() == QUOTE_LINK
-		    and ptm->getHandle() == LinkCast(clause)->getOutgoingAtom(0));
+		    and ptm->getHandle() == clause->getOutgoingAtom(0));
 }
 
 /// Return the saved unordered-link permutation for this
@@ -837,17 +836,15 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 		return self_compare(ptm);
 
 	// If both are nodes, compare them as such.
-	NodePtr np(NodeCast(hp));
-	NodePtr ng(NodeCast(hg));
-	if (np and ng)
+	if (hp->isNode() and hg->isNode())
 		return node_compare(hp, hg);
 
 	// If they're not both links, then it is clearly a mismatch.
-	LinkPtr lp(LinkCast(hp));
-	LinkPtr lg(LinkCast(hg));
-	if (not (lp and lg)) return _pmc.fuzzy_match(hp, hg);
+	if (not (hp->isLink() and hg->isLink())) return _pmc.fuzzy_match(hp, hg);
 
 	// Let the callback perform basic checking.
+	LinkPtr lp(LinkCast(hp));
+	LinkPtr lg(LinkCast(hg));
 	bool match = _pmc.link_match(lp, lg);
 	if (not match) return false;
 
@@ -1873,7 +1870,7 @@ void PatternMatchEngine::log_solution(
 	const std::map<Handle, Handle> &vars,
 	const std::map<Handle, Handle> &clauses)
 {
-	if (!logger().isFineEnabled())
+	if (!logger().is_fine_enabled())
 		return;
 
 	logger().fine("Variable groundings:");

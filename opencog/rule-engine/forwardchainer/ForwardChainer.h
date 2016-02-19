@@ -53,11 +53,11 @@ private:
     Handle _rbs;                // rule-based system
     UREConfigReader _configReader;
 
-    int _iteration = 0;
+    int _iteration;
+    int _max_iteration;
     source_selection_mode _ts_mode;
     bool _search_in_af;
-    bool _search_focus_Set;
-    const Rule* _cur_rule;
+    bool _search_focus_set;
     Handle _cur_source;
     UnorderedHandleSet _selected_sources;
 
@@ -73,9 +73,9 @@ private:
                                    const std::set<Handle>& vars,
                                    const std::vector<std::map<Handle, Handle>>&
                                    var_groundings);
-    bool unify(Handle source, Handle target, const Rule* rule);
+    bool unify(Handle source, Handle term, const Rule* rule);
     bool subatom_unify(Handle source, const Rule* rule);
-    HandleSeq derive_rules(Handle source, Handle target, const Rule* rule);
+    UnorderedHandleSet derive_rules(Handle source, Handle term, const Rule* rule);
     void update_potential_sources(HandleSeq input);
 
     bool is_valid_implicant(const Handle& h);
@@ -83,7 +83,7 @@ private:
 
 protected:
     vector<Rule*> _rules; /*<loaded rules*/
-    HandleSeq _potential_sources;
+    UnorderedHandleSet _potential_sources;
     HandleSeq _focus_set;
 
     /**
@@ -99,7 +99,7 @@ protected:
      *
      * @return  A handle to the chosen source from source list
      */
-    virtual Handle choose_next_source(void);
+    virtual Handle choose_source();
 
     /**
      * Apply chosen rule. the default will wrap a custom PM callback class.
@@ -108,10 +108,11 @@ protected:
      * @return  A set of handles created as a result of applying current
      *          choosen rule.
      */
-    virtual HandleSeq apply_rule(Handle rhandle, bool search_focus_set_only =
-            false);
+    virtual HandleSeq apply_rule(Handle rhandle,
+                                 bool search_focus_set_only = false);
 
-    HandleSeq derive_rules(Handle source, const Rule* rule, bool subatomic = false);
+    UnorderedHandleSet derive_rules(Handle source, const Rule* rule,
+                                    bool subatomic = false);
 
 public:
     /**
@@ -121,9 +122,26 @@ public:
                    HandleSeq focus_set);
     virtual ~ForwardChainer();
 
-    void do_chain(void);
-    void do_step(void);
-    HandleSeq get_chaining_result(void);
+    /**
+     * Perform a single forward chaining inference step.
+     */
+    void do_step();
+
+    /**
+     * Perform forward chaining inference till the termination
+     * criteria have been met.
+     */
+    void do_chain();
+
+    /**
+     * @return true if the termination criteria have been met.
+     */
+    bool termination();
+
+    /**
+     * @return all results in their order of inference.
+     */
+    HandleSeq get_chaining_result();
 };
 
 } // ~namespace opencog

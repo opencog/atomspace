@@ -23,16 +23,16 @@ cdef extern from "opencog/util/Logger.h" namespace "opencog":
     cdef cppclass cLogger "opencog::Logger":
         cLogger()
         cLogger(string s)
-        void setLevel(loglevel lvl)
-        loglevel getLevel()
-        void setPrintToStdoutFlag(bool flag)
+        void set_level(loglevel lvl)
+        loglevel get_level()
+        void set_print_to_stdout_flag(bool flag)
 
         void log(loglevel lvl, string txt)
 
-        bool isEnabled(loglevel lvl)
+        bool is_enabled(loglevel lvl)
 
-    cdef loglevel string_to_log_level "opencog::Logger::getLevelFromString"(string s)
-    cdef string log_level_to_string "opencog::Logger::getLevelString"(loglevel lvl)
+    cdef loglevel string_to_log_level "opencog::Logger::get_level_from_string"(string s)
+    cdef string log_level_to_string "opencog::Logger::get_level_string"(loglevel lvl)
     cLogger& logger()
 
 def create_logger(filename):
@@ -69,7 +69,7 @@ cdef class Logger:
     property FINE:
         def __get__(self): return FINE
     cdef _set_level(self,int lvl):
-        self.clog.setLevel(<loglevel>lvl)
+        self.clog.set_level(<loglevel>lvl)
     def set_level(self,level_name):
         if type(level_name) is not str:
             raise TypeError("Expecting a string")
@@ -80,7 +80,7 @@ cdef class Logger:
         loglvl = string_to_log_level(deref(c_level_name))
         del c_level_name
         if (loglvl == BAD_LEVEL): raise ValueError("Bad level name")
-        self.clog.setLevel(loglvl)
+        self.clog.set_level(loglvl)
         return loglvl
 
     def string_as_level(self, lvlname):
@@ -93,7 +93,7 @@ cdef class Logger:
         return loglvl
     cdef _level_as_string(self):
         cdef string level_name
-        level_name = log_level_to_string(<loglevel>self.clog.getLevel())
+        level_name = log_level_to_string(<loglevel>self.clog.get_level())
         return level_name.c_str()[:level_name.size()].decode('UTF-8')
     def get_level(self):
         return self._level_as_string()
@@ -123,9 +123,9 @@ cdef class Logger:
         self.log(FINE,txt)
 
     def is_enabled(self, int lvl):
-        return self.clog.isEnabled(<loglevel>lvl)
+        return self.clog.is_enabled(<loglevel>lvl)
     def use_stdout(self,use_it=True):
-        self.clog.setPrintToStdoutFlag(use_it)
+        self.clog.set_print_to_stdout_flag(use_it)
 
 # This is the singlton instance created by cogutils.
 log = Logger()

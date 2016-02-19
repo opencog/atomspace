@@ -31,13 +31,17 @@
 
 using namespace opencog;
 
-AttentionBank::AttentionBank(AtomTable& atab)
+AttentionBank::AttentionBank(AtomTable& atab, bool transient)
 {
+    /* Do not boether with initialization, if this is transient */
+    if (transient) { _zombie = true; return; }
+    _zombie = false;
+
     startingFundsSTI = fundsSTI = config().get_int("STARTING_STI_FUNDS");
     startingFundsLTI = fundsLTI = config().get_int("STARTING_LTI_FUNDS");
     attentionalFocusBoundary = 1;
 
-    AVChangedConnection = 
+    AVChangedConnection =
         atab.AVChangedSignal().connect(
             boost::bind(&AttentionBank::AVChanged, this, _1, _2, _3));
 }
@@ -48,6 +52,7 @@ AttentionBank::AttentionBank(AtomTable& atab)
 /// is a tacky hack to fix a design bug.
 void AttentionBank::shutdown(void)
 {
+    if (_zombie) return;  /* no-op, if a zombie */
     AVChangedConnection.disconnect();
 }
 
@@ -61,7 +66,7 @@ void AttentionBank::AVChanged(Handle h, AttentionValuePtr old_av,
     // subtract the new attention values from the AtomSpace funds
     updateSTIFunds(old_av->getSTI() - new_av->getSTI());
     updateLTIFunds(old_av->getLTI() - new_av->getLTI());
-    
+
     logger().fine("AVChanged: fundsSTI = %d, old_av: %d, new_av: %d",
                    fundsSTI, old_av->getSTI(), new_av->getSTI());
 

@@ -150,8 +150,26 @@ bool Link::operator==(const Atom& other) const
     return true;
 }
 
-bool Link::operator!=(const Atom& other) const
+bool Link::operator<(const Atom& other) const
 {
-    return !(*this == other);
+    if (getType() == other.getType()) {
+        const HandleSeq& outgoing = getOutgoingSet();
+        const HandleSeq& other_outgoing = other.getOutgoingSet();
+        Arity arity = outgoing.size();
+        Arity other_arity = other_outgoing.size();
+        if (arity == other_arity) {
+            Arity i = 0;
+            while (i < arity) {
+                Handle ll = outgoing[i];
+                Handle rl = other_outgoing[i];
+                if (ll == rl)
+                    i++;
+                else
+                    return ll->operator<(*rl.atom_ptr());
+            }
+            return false;
+        } else
+            return arity < other_arity;
+    } else
+        return getType() < other.getType();
 }
-
