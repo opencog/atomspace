@@ -186,8 +186,8 @@ Rule* ForwardChainer::choose_rule(Handle hsource)
 
         bool unified = false;
         HandleSeq hs = temp->get_implicant_seq();
-        for (Handle term : hs) {
-            if (unify(hsource, term, temp)) {
+        for (Handle premise_pat : hs) {
+            if (unify(hsource, premise_pat, temp)) {
                 rule = temp;
                 unified = true;
                 break;
@@ -384,30 +384,29 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle)
 }
 
 /**
- * Derives new rules by replacing variables that are unifiable in @param term
- * with source. The rule handles are not added to any atomspace.
+ * Derives new rules by replacing variables that are unifiable in
+ * @param pattern with source. The rule handles are not added to any
+ * atomspace.
  *
- * @param  source    A source atom that will be matched with the term.
- * @param  term      An implicant term containing variables to be grounded form source.
- * @param  rule      A rule object that contains @param term in its implicant. *
+ * @param  source    A source atom that will be matched with the pattern.
+ * @param  pattern   An implicant term containing variables to be grounded form source.
+ * @param  rule      A rule object that contains @param pattern in its implicant. *
  *
  * @return  A UnorderedHandleSet of derived rule handles.
  */
-UnorderedHandleSet ForwardChainer::derive_rules(Handle source, Handle term,
+UnorderedHandleSet ForwardChainer::derive_rules(Handle source, Handle pattern,
                                                 const Rule* rule)
 {
     // Exceptions
-    if (not is_valid_implicant(term))
+    if (not is_valid_implicant(pattern))
         return {};
 
-    UnorderedHandleSet derived_rules;
-
-    // Create a temporary atomspace with the rule term and the source
-    // inside
+    // Create a temporary atomspace with the rule pattern and the
+    // source inside
     AtomSpace temp_pm_as;
-    Handle hcpy = temp_pm_as.add_atom(term);
+    Handle hcpy = temp_pm_as.add_atom(pattern);
     Handle implicant_vardecl = temp_pm_as.add_atom(
-        gen_sub_varlist(term, rule->get_vardecl()));
+        gen_sub_varlist(pattern, rule->get_vardecl()));
     Handle sourcecpy = temp_pm_as.add_atom(source);
 
     Handle h = temp_pm_as.add_link(BIND_LINK, implicant_vardecl, hcpy, hcpy);
@@ -418,32 +417,45 @@ UnorderedHandleSet ForwardChainer::derive_rules(Handle source, Handle term,
 
     bl->imply(gcb, false);
 
-    auto del_by_value =
-        [] (std::vector<std::map<Handle,Handle>>& vec_map,const Handle& h) {
-        for (auto& map: vec_map)
-            for (auto& it:map) { if (it.second == h) map.erase(it.first); }
-    };
+    // Remove all groundings that doesn't match the source
+    auto tgit = gcb.term_groundings.begin();
+    auto vgit = gcb.var_groundings.begin();
+    for (; tgit != gcb.term_groundings.end();) {
+        auto it = tgit->find(hcpy);
+        if (it == tgit->end() or it->second != sourcecpy) {
+            tgit = gcb.term_groundings.erase(tgit);
+            vgit = gcb.var_groundings.erase(vgit);
+        } else {
+            tgit++;
+            vgit++;
+        }
+    }
 
-    // We don't want VariableList atoms to ground free-vars.
-    del_by_value(gcb.term_groundings, implicant_vardecl);
-    del_by_value(gcb.var_groundings, implicant_vardecl);
+    if (gcb.term_groundings.empty())
+        return {};
 
+    OC_ASSERT(gcb.term_groundings.size() == 1,
+              "There should be only one way to have a "
+              "premise clause ground a source");
+
+    UnorderedHandleSet derived_rules;
+
+    // Generate the derived rules
     FindAtoms fv(VARIABLE_NODE);
-    for (const auto& termg_map : gcb.term_groundings) {
-        for (const auto& it : termg_map) {
-            if (it.second == sourcecpy) {
+    const auto& termg_map = gcb.term_groundings.back();
+    for (const auto& it : termg_map) {
+        if (it.second == sourcecpy) {
 
-                fv.search_set(it.first);
+            fv.search_set(it.first);
 
-                Handle rhandle = rule->get_handle();
-                HandleSeq new_candidate_rules = substitute_rule_part(
-                    temp_pm_as, temp_pm_as.add_atom(rhandle), fv.varset,
-                    gcb.var_groundings);
+            Handle rhandle = rule->get_handle();
+            HandleSeq new_candidate_rules = substitute_rule_part(
+                temp_pm_as, temp_pm_as.add_atom(rhandle), fv.varset,
+                gcb.var_groundings);
 
-                for (Handle nr : new_candidate_rules) {
-                    if (nr != rhandle) {
-                        derived_rules.insert(nr);
-                    }
+            for (Handle nr : new_candidate_rules) {
+                if (nr != rhandle) {
+                    derived_rules.insert(nr);
                 }
             }
         }
@@ -469,8 +481,8 @@ UnorderedHandleSet ForwardChainer::derive_rules(Handle source, const Rule* rule)
         derived_rules.insert(result.begin(), result.end());
     };
 
-    for (Handle term : rule->get_implicant_seq())
-        add_result(derive_rules(source, term, rule));
+    for (Handle premise_pat : rule->get_implicant_seq())
+        add_result(derive_rules(source, premise_pat, rule));
 
     return derived_rules;
 }
@@ -606,21 +618,21 @@ HandleSeq ForwardChainer::substitute_rule_part(
  * new rules using @param rule as a template.
  *
  * @param source  An atom that might bind to variables in @param rule.
- * @param term  An atom to be unified with @param source
+ * @param pattern An atom to be unified with @param source
  * @rule  rule    The rule object whose implicants are to be unified.
  *
  * @return        true on successful unification and false otherwise.
  */
-bool ForwardChainer::unify(Handle source, Handle term, const Rule* rule)
+bool ForwardChainer::unify(Handle source, Handle pattern, const Rule* rule)
 {
     // Exceptions
-    if (not is_valid_implicant(term))
+    if (not is_valid_implicant(pattern))
         return false;
 
     AtomSpace temp_pm_as;
-    Handle hcpy = temp_pm_as.add_atom(term);
+    Handle hcpy = temp_pm_as.add_atom(pattern);
     Handle implicant_vardecl = temp_pm_as.add_atom(
-        gen_sub_varlist(term, rule->get_vardecl()));
+        gen_sub_varlist(pattern, rule->get_vardecl()));
     Handle sourcecpy = temp_pm_as.add_atom(source);
 
     Handle blhandle =

@@ -75,8 +75,9 @@ private:
                                    const std::set<Handle>& vars,
                                    const std::vector<std::map<Handle, Handle>>&
                                    var_groundings);
-    bool unify(Handle source, Handle term, const Rule* rule);
-    UnorderedHandleSet derive_rules(Handle source, Handle term, const Rule* rule);
+    bool unify(Handle source, Handle pattern, const Rule* rule);
+    UnorderedHandleSet derive_rules(Handle source, Handle pattern,
+                                    const Rule* rule);
 	template<typename HandleContainer>
     void update_potential_sources(const HandleContainer& input) {
         _potential_sources.insert(input.begin(), input.end());
