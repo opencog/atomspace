@@ -174,17 +174,16 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 /// is the bad handle.
 Handle AtomTable::getHandle(const AtomPtr& a) const
 {
+    if (nullptr == a) return Handle::UNDEFINED;
+
     if (in_environ(a))
         return a->getHandle();
 
-    NodePtr nnn(NodeCast(a));
-    if (nnn)
-        return getHandle(nnn->getType(), nnn->getName());
-    else {
-        LinkPtr lll(LinkCast(a));
-        if (lll)
-            return getHandle(lll->getType(), lll->getOutgoingSet());
-    }
+    if (a->isNode())
+        return getHandle(a->getType(), a->getName());
+    else if (a->isLink())
+        return getHandle(a->getType(), a->getOutgoingSet());
+
     return Handle::UNDEFINED;
 }
 
