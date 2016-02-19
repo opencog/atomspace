@@ -51,9 +51,17 @@ using namespace opencog;
 
 // ====================================================================
 
-AtomSpace::AtomSpace(AtomSpace* parent) :
-    atomTable(parent? &parent->atomTable : NULL, this),
-    bank(atomTable),
+/**
+ * Transient atomspaces skip some of the initialization steps,
+ * so that they can be constructed more quickly.  Transient atomspaces
+ * are typically used as scratch spaces, to hold temporary results
+ * during evaluation, pattern matching and inference. Such temporary
+ * spaces don't need some of the heavier-weight crud that atomspaces
+ * are festooned with.
+ */
+AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
+    atomTable(parent? &parent->atomTable : NULL, this, transient),
+    bank(atomTable, transient),
     backing_store(NULL)
 {
 }
@@ -67,7 +75,7 @@ AtomSpace::~AtomSpace()
 
 AtomSpace::AtomSpace(const AtomSpace&) :
     atomTable(NULL),
-    bank(atomTable),
+    bank(atomTable, true),
     backing_store(NULL)
 {
      throw opencog::RuntimeException(TRACE_INFO,
@@ -391,8 +399,8 @@ void AtomSpace::clear()
 
     DPRINTF("atoms in allAtoms: %lu\n", allAtoms.size());
 
-    // Logger::Level save = logger().get_level();
-    // logger().set_level(Logger::DEBUG);
+    Logger::Level save = logger().get_level();
+    logger().set_level(Logger::DEBUG);
 
     // XXX FIXME TODO This is a stunningly inefficient way to clear the
     // atomspace! This will take minutes on any decent-sized atomspace!
@@ -405,7 +413,7 @@ void AtomSpace::clear()
     atomTable.getHandlesByType(back_inserter(allAtoms), ATOM, true, false);
     assert(allAtoms.size() == 0);
 
-    // logger().set_level(save);
+    logger().set_level(save);
 }
 
 namespace std {

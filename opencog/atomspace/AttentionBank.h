@@ -46,6 +46,12 @@ class AtomTable;
 
 class AttentionBank
 {
+    /** If true, then this AttentionBank is not being used.
+     * Yes, this is totally bogus, but is needed, due to design
+     * flaws related to attention allocation.
+     */
+    bool _zombie;
+
     /** The connection by which we are notified of AV changes */
     boost::signals2::connection AVChangedConnection;
     void AVChanged(Handle, AttentionValuePtr, AttentionValuePtr);
@@ -79,7 +85,7 @@ class AttentionBank
 
 public:
     /** The table notifies us about AV changes */
-    AttentionBank(AtomTable&);
+    AttentionBank(AtomTable&, bool);
     ~AttentionBank();
     void shutdown(void);
 

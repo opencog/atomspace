@@ -102,7 +102,7 @@ private:
     std::unordered_map<UUID, Handle> _atom_set;
 
     //!@{
-    //! Index for quick retreival of certain kinds of atoms.
+    //! Index for quick retrieval of certain kinds of atoms.
     TypeIndex typeIndex;
     NodeIndex nodeIndex;
     LinkIndex linkIndex;
@@ -156,8 +156,15 @@ public:
 
     /**
      * Constructor and destructor for this class.
+     *
+     * If 'transient' is true, then some non-essential initialization
+     * is skipped.  This makes the constructor run faster. This is
+     * useful when the AtomTable is being used only for holding
+     * temporary, scratch results, e.g. as a result of evaluation
+     * or inference.
      */
-    AtomTable(AtomTable* parent = NULL, AtomSpace* holder = NULL);
+    AtomTable(AtomTable* parent = NULL, AtomSpace* holder = NULL,
+              bool transient = false);
     ~AtomTable();
     UUID get_uuid(void) const { return _uuid; }
     AtomTable* get_environ(void) const { return _environ; }
@@ -277,8 +284,8 @@ public:
      * XXX The async code path doesn't really do anything yet, since
      * it also uses the big global lock, at the moment.  This needs
      * fixing, mostly be creating a second mutex for the atom insertion,
-     * and also giving each index its own uique mutex, to avoid
-     * collsions.  So teh API is here, but more work is stil needed.
+     * and also giving each index its own unique mutex, to avoid
+     * collisions.  So the API is here, but more work is still needed.
      *
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
