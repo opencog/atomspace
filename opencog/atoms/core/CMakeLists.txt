@@ -2,7 +2,7 @@
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
-ADD_LIBRARY (atomcore SHARED
+ADD_LIBRARY (atomcore
 	ArityLink.cc
 	DefineLink.cc
 	DeleteLink.cc

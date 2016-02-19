@@ -3,7 +3,7 @@
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
-ADD_LIBRARY (atomspace SHARED
+ADD_LIBRARY (atomspace
 	AtomSpace.cc
 	AtomSpaceInit.cc
 	AtomTable.cc
@@ -24,7 +24,7 @@ ADD_LIBRARY (atomspace SHARED
 ADD_DEPENDENCIES(atomspace opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace
-	atombase
+    atombase
 	truthvalue  
 	lambda
 	${COGUTIL_LIBRARY}

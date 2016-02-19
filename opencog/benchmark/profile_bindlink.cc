@@ -38,11 +38,9 @@ void load_scheme()
     // Load some scheme for the setup
     config().set("SCM_PRELOAD",
         "opencog/atoms/base/core_types.scm, "
-        "opencog/scm/utilities.scm, "
-        "opencog/scm/opencog/query.scm");
+        "opencog/scm/utilities.scm");
     load_scm_files_from_config(*atomspace);
     scheme->eval("(use-modules (opencog))");
-    scheme->eval("(use-modules (opencog query))");
 
     // Define several animals and something of a different type as well
     std::string scheme_animals = 

@@ -10,7 +10,7 @@ TARGET_LINK_LIBRARIES(PrimitiveExample
 	clearbox
 )
 
-ADD_LIBRARY (example SHARED
+ADD_LIBRARY (example
 	ExampleSCM.cc
 )
 
