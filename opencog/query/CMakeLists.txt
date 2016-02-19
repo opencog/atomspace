@@ -1,6 +1,6 @@
 
 # Build the query shlib
-ADD_LIBRARY(query SHARED
+ADD_LIBRARY(query
 	AttentionalFocusCB.cc
 	DefaultPatternMatchCB.cc
 	Implicator.cc

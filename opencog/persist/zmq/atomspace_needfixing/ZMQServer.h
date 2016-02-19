@@ -56,7 +56,7 @@ Setup:
 How to compile:
      Add new files and libs to opencog/atomspace/CMakeLists.txt
          add ZMQMessages.pb.cc, ZMQServer.cc, ZMQClient.cc, ProtocolBufferSerializer.cc
-                 to ADD_LIBRARY (atomspace SHARED
+                 to ADD_LIBRARY (atomspace
          add protobuf to SET(ATOMSPACE_LINK_LIBS
          add ZMQMessages.pb.h, ZMQServer.h, ZMQClient.h, ProtocolBufferSerializer.h
                  to INSTALL (FILES
