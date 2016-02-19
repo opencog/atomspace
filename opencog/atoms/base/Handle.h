@@ -222,27 +222,6 @@ typedef std::set<Handle> OrderedHandleSet;
 //! a hash that associates the handle to its unique identificator
 typedef std::unordered_set<Handle, handle_hash> UnorderedHandleSet;
 
-// Convenient functions to print collections of atoms and debugging in
-// gdb. I tried to use to_string, but then gcc complains.
-template <typename C>
-std::string handle_container_to_string(const C& hs)
-{
-	unsigned i = 0;
-	std::stringstream ss;
-	for (const Handle& h : hs) {
-		ss << "atom[" << i << "]:" << std::endl
-		   << h->toString();
-		i++;
-	}
-	return ss.str();
-}
-#define instantiate_handle_container_to_string(T) \
-	template std::string \
-	handle_container_to_string<T>(const T&)
-instantiate_handle_container_to_string(HandleSeq);
-instantiate_handle_container_to_string(OrderedHandleSet);
-instantiate_handle_container_to_string(UnorderedHandleSet);
-
 struct handle_seq_less
 {
    bool operator()(const HandleSeq& hsl, const HandleSeq& hsr) const
@@ -292,11 +271,20 @@ static inline std::string operator+ (const std::string &lhs, Handle h)
 } // namespace opencog
 
 namespace std {
-inline std::ostream& operator<<(std::ostream& out, const opencog::Handle& h)
+inline ostream& operator<<(ostream& out, const opencog::Handle& h)
 {
     out << h.value();
     return out;
 }
+
+ostream& operator<<(ostream& out, const opencog::HandleSeq& hs);
+ostream& operator<<(ostream& out, const opencog::OrderedHandleSet& hs);
+ostream& operator<<(ostream& out, const opencog::UnorderedHandleSet& hs);
+
+// Debugging helpers, very convenient to print Handle sets in gdb
+string handle_container_to_string(const opencog::HandleSeq& hs);
+string handle_container_to_string(const opencog::OrderedHandleSet& hs);
+string handle_container_to_string(const opencog::UnorderedHandleSet& hs);
 
 #ifdef THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
 // The below used to work, but broke in gcc-4.7.2. The reason it
@@ -329,7 +317,7 @@ struct hash<opencog::Handle>
 
 #endif // THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
 
-} //namespace std
+} // ~namespace std
 
 /** @}*/
 #endif // _OPENCOG_HANDLE_H
