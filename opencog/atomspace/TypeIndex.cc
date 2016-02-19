@@ -112,6 +112,7 @@ TypeIndex::iterator& TypeIndex::iterator::operator++()
 	return operator++(1);
 }
 
+// XXX this is broken, for i != 1 ... FIXME.
 TypeIndex::iterator& TypeIndex::iterator::operator++(int i)
 {
 	if (s == send) return *this;
@@ -119,14 +120,19 @@ TypeIndex::iterator& TypeIndex::iterator::operator++(int i)
 	++se;
 	if (se == s->end())
 	{
+		// If we are not subclassing, then we are really really done.
+		if (not subclass)
+		{
+			s = send;
+			return *this;
+		}
 		do
 		{
 			++s;
 			currtype++;
 
 			// Find the first type which is a subtype, and start iteration there.
-			if ((type == currtype) || 
-			    (subclass && (classserver().isA(currtype, type))))
+			if (classserver().isA(currtype, type))
 			{
 				se = s->begin();
 				if (se != s->end()) return *this;
