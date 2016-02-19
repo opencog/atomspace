@@ -550,8 +550,14 @@ Handle ForwardChainer::remove_constant_clauses(const Handle& hvarlist,
     if (t == AND_LINK) {
         HandleSeq outgoings;
         for (const Handle& hclause : himplicant->getOutgoingSet())
-            if (outgoings.size() == 0 or not is_constant_clause(hvarlist, hclause))
+            if (not is_constant_clause(hvarlist, hclause))
                 outgoings.push_back(hclause);
+        // The pattern matcher crashes if given an empty AndLink, so
+        // we add whatever comes first to avoid that
+        if (outgoings.empty()) {
+            OC_ASSERT(not himplicant->getOutgoingSet().empty());
+            outgoings.push_back(himplicant->getOutgoingSet()[0]);
+        }
         return Handle(createLink(t, outgoings));
     } else
         return himplicant;
