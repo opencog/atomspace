@@ -43,13 +43,29 @@ TypeIndex::iterator TypeIndex::begin(Type t, bool sub) const
 	iterator it(t, sub);
 	it.send = idx.end();
 
+	// A subclass of t is NEVER smaller than t.
+	// Thus, we can start our search there.
 	it.s = idx.begin();
-	it.currtype = 0;
+	it.s += t;
+	it.currtype = t;
+	it.se = it.s->begin();
+
+	// If its not empty, then go for it.
+	if (it.se != it.s->end()) return it;
+
+	// If its the emptyset, and we are not subclassing, then we're done.
+	if (not sub)
+	{
+		it.s = it.send;
+		return it;
+	}
+
+	// Find the first type which is a subtype, and is not empty.
+	it.s++;
+	it.currtype++;
 	while (it.s != it.send)
 	{
-		// Find the first type which is a subtype, and start iteration there.
-		if ((it.type == it.currtype) || 
-		    (sub && (classserver().isA(it.currtype, it.type))))
+		if (classserver().isA(it.currtype, it.type))
 		{
 			it.se = it.s->begin();
 			if (it.se != it.s->end()) return it;
@@ -126,6 +142,8 @@ TypeIndex::iterator& TypeIndex::iterator::operator++(int i)
 			s = send;
 			return *this;
 		}
+
+		// Otherwise, move on to the next type.
 		do
 		{
 			++s;
