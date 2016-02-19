@@ -524,7 +524,7 @@ SET(CPACK_SOURCE_STGZ "OFF")
 SET(CPACK_SOURCE_TBZ2 "ON")
 SET(CPACK_SOURCE_TGZ "OFF")
 SET(CPACK_SOURCE_TZ "OFF")
-SET(CPACK_PACKAGE_CONTACT "team@opencog.org")
+SET(CPACK_PACKAGE_CONTACT "opencog@googlegroups.com")
 SET(CPACK_GENERATOR "TBZ2")
 SET(CPACK_SOURCE_GENERATOR "TBZ2")
 SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
@@ -566,7 +566,7 @@ SET(CPACK_SOURCE_IGNORE_FILES
 
 SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
 SET(CPACK_DEBIAN_PACKAGE_DEPENDS
-    "rlwrap (>= 0.37), guile-2.0 (>= 2.0.9), bzip2 (>= 1.0.6), cython (>= 0.20.1), python (>= 2.7.5), python-zmq (>= 14.0.1), python-simplejson (>= 3.3.1), libzmq3 (>= 4.0.4), libboost-date-time1.54.0, libboost-filesystem1.54.0, libboost-program-options1.54.0, libboost-regex1.54.0, libboost-serialization1.54.0, libboost-system1.54.0, libboost-thread1.54.0, binutils (>= 2.24), uuid (>= 1.6.2), protobuf-compiler (>= 2.5.0), libssl1.0.0 (>= 1.0.1), libatlas-base-dev, gfortran (>= 4:4.8.2), unixodbc (>= 2.2.14p2), odbc-postgresql (>= 1:09.02.0100), postgresql-client (>= 9.3), cogutils (>= 0.1.4)"
+    "guile-2.0 (>= 2.0.9), python (>= 2.7.5), libzmq3 (>= 4.0.4), libboost-date-time1.54.0, libboost-filesystem1.54.0, libboost-program-options1.54.0, libboost-regex1.54.0, libboost-serialization1.54.0, libboost-system1.54.0, libboost-thread1.54.0, protobuf-compiler (>= 2.5.0), libssl1.0.0 (>= 1.0.1), libatlas-base-dev, unixodbc (>= 2.2.14p2), odbc-postgresql (>= 1:09.02.0100), cogutils (>= 2.0.2)"
 )
 
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
