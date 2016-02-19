@@ -870,7 +870,7 @@ bool BackwardChainer::select_rule(const Target& target,
 	while (not rules.empty())
 	{
 		// Select the rule that has been applied least
-		int index = randGen().randDiscrete(weights);
+		int index = randGen().rand_discrete(weights);
 
 		// unify against the standardized version, so the result will match
 		// with what we will be applying against at later step

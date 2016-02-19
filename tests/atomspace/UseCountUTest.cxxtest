@@ -66,8 +66,8 @@ public:
         rm_cnt.resize(n_removal_threads, 0);
         rm_cycles.resize(n_removal_threads, 0);
         num_atoms = 13000;
-        logger().setLevel(Logger::INFO);
-        logger().setPrintToStdoutFlag(true);
+        logger().set_level(Logger::INFO);
+        logger().set_print_to_stdout_flag(true);
     }
 
     void setUp()

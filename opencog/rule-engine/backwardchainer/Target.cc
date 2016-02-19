@@ -207,7 +207,7 @@ Target& TargetSet::select()
 		weights.push_back(_total_selection - p.second.get_selection_count() + 1);
 	}
 
-	Target& t = _targets_map.at(handles[randGen().randDiscrete(weights)]);
+	Target& t = _targets_map.at(handles[randGen().rand_discrete(weights)]);
 	t.increment_selection_count();
 
 	_total_selection++;

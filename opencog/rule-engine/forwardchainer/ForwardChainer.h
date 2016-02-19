@@ -53,10 +53,11 @@ private:
     Handle _rbs;                // rule-based system
     UREConfigReader _configReader;
 
-    int _iteration = 0;
+    int _iteration;
+    int _max_iteration;
     source_selection_mode _ts_mode;
     bool _search_in_af;
-    bool _search_focus_Set;
+    bool _search_focus_set;
     Handle _cur_source;
     UnorderedHandleSet _selected_sources;
 
@@ -98,7 +99,7 @@ protected:
      *
      * @return  A handle to the chosen source from source list
      */
-    virtual Handle choose_next_source(void);
+    virtual Handle choose_source();
 
     /**
      * Apply chosen rule. the default will wrap a custom PM callback class.
@@ -107,8 +108,8 @@ protected:
      * @return  A set of handles created as a result of applying current
      *          choosen rule.
      */
-    virtual HandleSeq apply_rule(Handle rhandle, bool search_focus_set_only =
-            false);
+    virtual HandleSeq apply_rule(Handle rhandle,
+                                 bool search_focus_set_only = false);
 
     UnorderedHandleSet derive_rules(Handle source, const Rule* rule,
                                     bool subatomic = false);
@@ -121,9 +122,26 @@ public:
                    HandleSeq focus_set);
     virtual ~ForwardChainer();
 
-    void do_chain(void);
-    void do_step(void);
-    HandleSeq get_chaining_result(void);
+    /**
+     * Perform a single forward chaining inference step.
+     */
+    void do_step();
+
+    /**
+     * Perform forward chaining inference till the termination
+     * criteria have been met.
+     */
+    void do_chain();
+
+    /**
+     * @return true if the termination criteria have been met.
+     */
+    bool termination();
+
+    /**
+     * @return all results in their order of inference.
+     */
+    HandleSeq get_chaining_result();
 };
 
 } // ~namespace opencog

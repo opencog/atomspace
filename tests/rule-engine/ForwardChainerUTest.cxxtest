@@ -26,8 +26,8 @@ public:
 	ForwardChainerUTest() : eval(&_as)
 	{
 #undef DEBUG
-		logger().setLevel(Logger::DEBUG);
-		logger().setPrintToStdoutFlag(true);
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
 
 		// Disable the AF mechanism during testing!
 		_as.set_attentional_focus_boundary(AttentionValue::MINSTI);
@@ -97,8 +97,8 @@ void ForwardChainerUTest::test_do_chain()
 
 void ForwardChainerUTest::test_choose_rule(void)
 {
-    logger().setPrintToStdoutFlag(true);
-    logger().setLevel(Logger::DEBUG);
+    logger().set_print_to_stdout_flag(true);
+    logger().set_level(Logger::DEBUG);
 
     Handle h = eval.eval_h(
         "(InheritanceLink (ConceptNode \"cat\")(ConceptNode \"animal\"))");

@@ -27,6 +27,8 @@
 #include <opencog/atoms/base/Handle.h>
 #include <map>
 
+#include "../Rule.h"
+
 namespace opencog {
 
 using HandleWeightMap = std::map<Handle,double>;
@@ -56,16 +58,19 @@ struct InferenceRecord
 {
     const int step;
     const Handle hsource;
+    const Rule* rule;
     HandleSeq product;
 
-    InferenceRecord(Handle h, HandleSeq p, int s = 0) :
-        step(s), hsource(h), product(p)
+    InferenceRecord(Handle h, const Rule* r, const HandleSeq& p, int s = 0) :
+        step(s), hsource(h), rule(r), product(p)
     {
     }
 
     inline bool operator==(const InferenceRecord& ir)
     {
-        return ir.hsource == hsource;
+        return (ir.hsource == hsource
+                and ir.rule == rule
+                and ir.product == product);
     }
 };
 
@@ -78,12 +83,14 @@ private:
 public:
     // PartialGroundingRecord queries.
     bool has_partial_grounding(const Handle& hsource);
-    void add_partial_grounding(Handle source, Handle hrule, HandleWeightMap pgroundings);
+    void add_partial_grounding(Handle source, Handle hrule,
+                               HandleWeightMap pgroundings);
     std::map<Handle,HandleWeightMap> get_rule_pg_map(const Handle& hsource);
-    HandleSeq get_pg_similar_sources(const Handle& hsource,bool strict);
+    HandleSeq get_pg_similar_sources(const Handle& hsource, bool strict);
 
     // InferenceRecord queries.
-    void add_inference_record(Handle source,HandleSeq prodcut);
+    void add_inference_record(Handle source, const Rule* rule,
+                              const HandleSeq& product);
     HandleSeq get_all_inferences(void);
 };
 

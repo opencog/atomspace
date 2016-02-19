@@ -391,8 +391,8 @@ void AtomSpace::clear()
 
     DPRINTF("atoms in allAtoms: %lu\n", allAtoms.size());
 
-    // Logger::Level save = logger().getLevel();
-    // logger().setLevel(Logger::DEBUG);
+    // Logger::Level save = logger().get_level();
+    // logger().set_level(Logger::DEBUG);
 
     // XXX FIXME TODO This is a stunningly inefficient way to clear the
     // atomspace! This will take minutes on any decent-sized atomspace!
@@ -405,7 +405,7 @@ void AtomSpace::clear()
     atomTable.getHandlesByType(back_inserter(allAtoms), ATOM, true, false);
     assert(allAtoms.size() == 0);
 
-    // logger().setLevel(save);
+    // logger().set_level(save);
 }
 
 namespace std {

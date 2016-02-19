@@ -820,7 +820,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 	}
 
 	// Get the contents of the output port, and log it
-	if (_in_server and logger().isInfoEnabled())
+	if (_in_server and logger().is_info_enabled())
 	{
 		std::string str(poll_port());
 		if (0 < str.size())
