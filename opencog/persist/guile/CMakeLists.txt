@@ -1,5 +1,5 @@
 
-ADD_LIBRARY (persist SHARED
+ADD_LIBRARY (persist
 	PersistSCM.cc
 )
 
@@ -9,7 +9,7 @@ TARGET_LINK_LIBRARIES(persist
 )
 
 INSTALL (TARGETS persist
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
 INSTALL (FILES

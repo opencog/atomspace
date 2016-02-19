@@ -43,7 +43,7 @@ CYTHON_ADD_MODULE_PYX(logger)
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "logger.cpp"
 	"../../util/Logger.h")
 
-ADD_LIBRARY(logger_cython SHARED
+ADD_LIBRARY(logger_cython
 	logger.cpp
 )
 
@@ -69,7 +69,7 @@ CYTHON_ADD_MODULE_PYX(atomspace
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace_api.h")
 
 # opencog.atomspace Python bindings
-ADD_LIBRARY(atomspace_cython SHARED
+ADD_LIBRARY(atomspace_cython
 	atomspace.cpp
 )
 
@@ -107,7 +107,7 @@ CYTHON_ADD_MODULE_PYX(type_constructors
 
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "type_constructors.cpp")
 
-ADD_LIBRARY(type_constructors SHARED
+ADD_LIBRARY(type_constructors
 	type_constructors.cpp
 )
 
@@ -127,7 +127,7 @@ CYTHON_ADD_MODULE_PYX(utilities
 
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "utilities.cpp")
 
-ADD_LIBRARY(utilities_cython SHARED
+ADD_LIBRARY(utilities_cython
 	Utilities.cc
 	utilities.cpp
 )
@@ -154,7 +154,7 @@ CYTHON_ADD_MODULE_PYX(bindlink
 
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "bindlink.cpp")
 
-ADD_LIBRARY(bindlink_cython SHARED
+ADD_LIBRARY(bindlink_cython
 	BindlinkStub.cc
 	bindlink.cpp
 )
@@ -186,7 +186,7 @@ ELSE (WIN32)
 		logger_cython
 		type_constructors
 		utilities_cython
-		LIBRARY DESTINATION "${DATADIR}/python/opencog")
+		DESTINATION "${DATADIR}/python/opencog")
 ENDIF (WIN32)
 
 IF (HAVE_GUILE)
@@ -197,7 +197,7 @@ IF (HAVE_GUILE)
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
 
-	ADD_LIBRARY(scheme_wrapper SHARED
+	ADD_LIBRARY(scheme_wrapper
 		PyScheme
 		scheme_wrapper.cpp
 	)
@@ -220,7 +220,7 @@ IF (HAVE_GUILE)
 	ELSE (WIN32)
 		INSTALL (TARGETS
 			scheme_wrapper
-			LIBRARY DESTINATION "${DATADIR}/python/opencog")
+			DESTINATION "${DATADIR}/python/opencog")
 	ENDIF (WIN32)
 
 ENDIF (HAVE_GUILE)
