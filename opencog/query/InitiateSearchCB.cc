@@ -617,7 +617,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	bool all_clauses_are_evaluatable = true;
 	for (const Handle& cl : clauses)
 	{
-		if (0 < _pattern->evaluatable_terms.count(cl)) continue;
+		if (0 < _pattern->evaluatable_holders.count(cl)) continue;
 		all_clauses_are_evaluatable = false;
 		break;
 	}
@@ -666,7 +666,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 				// they are all evaluatable, in which case we pick a clause
 				// that has a variable with the narrowest type-membership.
 				if (not all_clauses_are_evaluatable and
-				    0 < _pattern->evaluatable_terms.count(cl)) continue;
+				    0 < _pattern->evaluatable_holders.count(cl)) continue;
 
 				if (cl == var)
 				{
