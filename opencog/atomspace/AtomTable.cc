@@ -477,14 +477,13 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // then we need to clone it. We cannot insert it into this atomtable
     // as-is.  (We already know that its not in this atomspace, or its
     // environ.)
-    LinkPtr lll(LinkCast(atom));
-    if (lll) {
+    if (atom->isLink()) {
         // Well, if the link was in some other atomspace, then
         // the outgoing set will probably be too. (It might not
         // be if the other atomspace is a child of this one).
         // So we recursively clone that too.
         HandleSeq closet;
-        for (const Handle& h : lll->getOutgoingSet()) {
+        for (const Handle& h : atom->getOutgoingSet()) {
             // operator->() will be null if its a ProtoAtom that is
             // not an atom.
             if (nullptr == h.operator->()) return Handle::UNDEFINED;
@@ -517,9 +516,8 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // no pointers to actual atoms.  We want to have the actual atoms,
     // because later steps need the pointers to do stuff, in particular,
     // to make sure the child atoms are in an atomtable, too.
-    lll = LinkCast(atom);
-    if (lll) {
-        const HandleSeq& ogs(lll->getOutgoingSet());
+    if (atom->isLink()) {
+        const HandleSeq& ogs(atom->getOutgoingSet());
         size_t arity = ogs.size();
 
         // First, make sure that every member of the outgoing set has
