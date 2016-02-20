@@ -36,31 +36,6 @@ void TypeIndex::resize(void)
 	FixedIntegerIndex::resize(num_types + 1);
 }
 
-size_t TypeIndex::getNumAtomsOfType(Type type, bool count_subclasses) const
-{
-    iterator it(type, count_subclasses);
-    size_t atom_count = 0;
-    it.s = idx.begin();
-    it.send = idx.end();
-
-    // Loop over all the types looking for type and optional subclasses.
-    Type current_type = 0;
-    while (it.s != it.send)
-    {
-        // If this type is a match...
-        if ((type == current_type) || 
-            (count_subclasses && (classserver().isA(type, it.type))))
-        {
-            // Add the size of the atom set for this type.
-            atom_count += idx.at(current_type).size();
-        }
-        current_type++;
-        ++it.s;
-    }
-
-    return atom_count;
-}
-
 // ================================================================
 
 TypeIndex::iterator TypeIndex::begin(Type t, bool sub) const
@@ -68,13 +43,29 @@ TypeIndex::iterator TypeIndex::begin(Type t, bool sub) const
 	iterator it(t, sub);
 	it.send = idx.end();
 
+	// A subclass of t is NEVER smaller than t.
+	// Thus, we can start our search there.
 	it.s = idx.begin();
-	it.currtype = 0;
+	it.s += t;
+	it.currtype = t;
+	it.se = it.s->begin();
+
+	// If its not empty, then go for it.
+	if (it.se != it.s->end()) return it;
+
+	// If its the emptyset, and we are not subclassing, then we're done.
+	if (not sub)
+	{
+		it.s = it.send;
+		return it;
+	}
+
+	// Find the first type which is a subtype, and is not empty.
+	it.s++;
+	it.currtype++;
 	while (it.s != it.send)
 	{
-		// Find the first type which is a subtype, and start iteration there.
-		if ((it.type == it.currtype) || 
-		    (sub && (classserver().isA(it.currtype, it.type))))
+		if (classserver().isA(it.currtype, it.type))
 		{
 			it.se = it.s->begin();
 			if (it.se != it.s->end()) return it;
@@ -137,6 +128,7 @@ TypeIndex::iterator& TypeIndex::iterator::operator++()
 	return operator++(1);
 }
 
+// XXX this is broken, for i != 1 ... FIXME.
 TypeIndex::iterator& TypeIndex::iterator::operator++(int i)
 {
 	if (s == send) return *this;
@@ -144,14 +136,21 @@ TypeIndex::iterator& TypeIndex::iterator::operator++(int i)
 	++se;
 	if (se == s->end())
 	{
+		// If we are not subclassing, then we are really really done.
+		if (not subclass)
+		{
+			s = send;
+			return *this;
+		}
+
+		// Otherwise, move on to the next type.
 		do
 		{
 			++s;
 			currtype++;
 
 			// Find the first type which is a subtype, and start iteration there.
-			if ((type == currtype) || 
-			    (subclass && (classserver().isA(currtype, type))))
+			if (classserver().isA(currtype, type))
 			{
 				se = s->begin();
 				if (se != s->end()) return *this;
