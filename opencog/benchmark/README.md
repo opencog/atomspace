@@ -164,6 +164,7 @@ there will be a program `profile_bindlink` in the directory:
 ```
 opencog/benchmark/
 ```
+
 within the profile build directory. Running:
 
 ```
@@ -173,11 +174,15 @@ within the profile build directory. Running:
 from that directory will run the executable and after few seconds it will
 exit and generate a file:
 
-`gmon.out`
+```
+gmon.out
+```
 
 Now execute the following command:
 
-`gprof profile_bindlink gmon.out > analysis.txt`
+```
+gprof profile_bindlink gmon.out > analysis.txt
+```
 
 this will take the binary profiling information in gmon.out and format it so 
 that you can read it in a file called `analysis.txt`. Open `analysis.txt` in a 
