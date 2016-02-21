@@ -184,7 +184,7 @@ Now execute the following command:
 gprof profile_bindlink gmon.out > analysis.txt
 ```
 
-this will take the binary profiling information in gmon.out and format it so 
+This will take the binary profiling information in gmon.out and format it so 
 that you can read it in a file called `analysis.txt`. Open `analysis.txt` in a 
 text viewer and you will see the results of the profiling.
 
