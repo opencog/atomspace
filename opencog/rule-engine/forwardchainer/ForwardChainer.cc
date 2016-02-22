@@ -417,7 +417,7 @@ UnorderedHandleSet ForwardChainer::derive_rules(Handle source, Handle pattern,
 
     bl->imply(gcb, false);
 
-    // Remove all groundings that doesn't match the source
+    // Remove all groundings that don't match the source
     auto tgit = gcb.term_groundings.begin();
     auto vgit = gcb.var_groundings.begin();
     for (; tgit != gcb.term_groundings.end();) {
@@ -434,9 +434,9 @@ UnorderedHandleSet ForwardChainer::derive_rules(Handle source, Handle pattern,
     if (gcb.term_groundings.empty())
         return {};
 
-    OC_ASSERT(gcb.term_groundings.size() == 1,
-              "There should be only one way to have a "
-              "premise clause ground a source");
+    // OC_ASSERT(gcb.term_groundings.size() == 1,
+    //           "There should be only one way to have a "
+    //           "premise clause ground a source");
 
     UnorderedHandleSet derived_rules;
 
