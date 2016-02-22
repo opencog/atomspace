@@ -94,7 +94,7 @@ AtomTable::~AtomTable()
     // No one who shall look at these atoms shall ever again
     // find a reference to this atomtable.
     UUID undef = Handle::INVALID_UUID;
-    for (auto pr : _atom_set) {
+    for (auto& pr : _atom_set) {
         pr.second->_atomTable = NULL;
         pr.second->_uuid = undef;
         // Aiee ... We added this link to every incoming set;
