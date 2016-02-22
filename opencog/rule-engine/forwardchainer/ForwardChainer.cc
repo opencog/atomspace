@@ -217,8 +217,9 @@ Handle ForwardChainer::choose_source()
     // If all sources haved selected before then insert the sources'
     // children in the set of potential sources
     if (_selected_sources == _potential_sources) {
-        fc_logger().debug() << "All sources have already been selected. "
-                            << "Let's add the sources' children as potential sources";
+        fc_logger().debug() << "All " << _selected_sources.size()
+                            << " sources have already been selected. Let's add"
+                            << " the sources' children as potential sources";
 
         for (const Handle& h : _selected_sources) {
             LinkPtr l = LinkCast(h);
@@ -227,6 +228,9 @@ Handle ForwardChainer::choose_source()
                 _potential_sources.insert(outgoings.begin(), outgoings.end());
             }
         }
+    } else {
+	    fc_logger().debug() << "Selected sources so far " << _selected_sources.size()
+                            << "/"<< _potential_sources.size();
     }
 
     URECommons urec(_as);
@@ -250,15 +254,14 @@ Handle ForwardChainer::choose_source()
 
     Handle hchosen = Handle::UNDEFINED;
 
-    //!Prioritize new source selection.
+    //! Prioritize new source selection.
     for (size_t i = 0; i < tournament_elem.size(); i++) {
         Handle hselected = urec.tournament_select(tournament_elem);
+        tournament_elem.erase(hselected);
+
         bool selected_before = (_selected_sources.find(hselected)
                                 != _selected_sources.end());
-
-        if (selected_before) {
-            continue;
-        } else {
+        if (not selected_before) {
             hchosen = hselected;
             _selected_sources.insert(hchosen);
             break;
@@ -266,8 +269,11 @@ Handle ForwardChainer::choose_source()
     }
 
     // In case all sources are selected
-    if (hchosen == Handle::UNDEFINED)
+    if (hchosen == Handle::UNDEFINED) {
+        fc_logger().debug() << "All sources have been selected. Pick one up anyway";
+        OC_ASSERT(false);
         return urec.tournament_select(tournament_elem);
+    }
 
     return hchosen;
 }
