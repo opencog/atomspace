@@ -41,7 +41,7 @@ private:
 	void init(void);
 public:
 	PythonSCM();
-	void eval(const std::string&);
+	const std::string& eval(const std::string&);
 }; // class
 
 /** @}*/
@@ -55,6 +55,7 @@ void opencog_python_init(void);
 #endif // _OPENCOG_PYTHON_SCM_H
 
 #include <opencog/guile/SchemePrimitive.h>
+#include <opencog/cython/PythonEval.h>
 
 using namespace opencog;
 
@@ -90,9 +91,16 @@ void PythonSCM::init(void)
 #endif
 }
 
-void PythonSCM::eval(const std::string& pystr)
+const std::string& PythonSCM::eval(const std::string& pystr)
 {
-	// return "ola";
+	// This assumes that python is already initialized. If not,
+	// I guess it creahes and burns...
+	static PythonEval& pyev = PythonEval::instance();
+
+	// This assumes that python is being invoked from a single thread.
+	static std::string rv;
+	rv = pyev.eval(pystr);
+	return rv;
 }
 
 void opencog_python_init(void)
