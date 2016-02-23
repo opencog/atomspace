@@ -166,6 +166,73 @@ UnorderedHandleSet ForwardChainer::get_chaining_result()
     return _fcstat.get_all_products();
 }
 
+Handle ForwardChainer::choose_source()
+{
+    size_t selsrc_size = _selected_sources.size();
+    // If all sources have been selected then insert the sources'
+    // children in the set of potential sources
+    if (_selected_sources == _potential_sources) {
+        fc_logger().debug() << "All " << selsrc_size
+                            << " sources have already been selected";
+        for (const Handle& h : _selected_sources) {
+            LinkPtr l = LinkCast(h);
+            if (l) {
+                const HandleSeq& outgoings = l->getOutgoingSet();
+                _potential_sources.insert(outgoings.begin(), outgoings.end());
+            }
+        }
+        fc_logger().debug() << (_potential_sources.size() - selsrc_size)
+                            << " sources' children have been added as "
+                            << "potential sources";
+    }
+    fc_logger().debug() << "Selected sources so far "
+                        << _selected_sources.size()
+                        << "/" << _potential_sources.size();
+
+    URECommons urec(_as);
+    map<Handle, float> tournament_elem;
+
+    if (selsrc_size == _potential_sources.size())
+        fc_logger().debug() << "No more new sources to try. "
+                            << "Let's try again with old ones."
+
+    auto to_select = [&](const Handle& h) {
+        if (selsrc_size == _potential_sources.size())
+            // They all been tried. What can we do? Let's try again,
+            // it's better than crashing.
+            return true;
+	    return _selected_sources.find(h) == _selected_sources.end();
+    };
+
+    switch (_ts_mode) {
+    case TV_FITNESS_BASED:
+	    for (Handle s : _potential_sources) {
+            if (to_select(s))
+                tournament_elem[s] = urec.tv_fitness(s);
+	    }
+        break;
+
+    case STI_BASED:
+        for (Handle s : _potential_sources) {
+            if (to_select(s))
+                tournament_elem[s] = s->getSTI();
+        }
+        break;
+
+    default:
+        throw RuntimeException(TRACE_INFO, "Unknown source selection mode.");
+        break;
+    }
+
+    OC_ASSERT(not tournament_elem.empty());
+
+    //! Prioritize new source selection.
+    Handle hchosen = urec.tournament_select(tournament_elem);
+    _selected_sources.insert(hchosen);
+
+    return hchosen;
+}
+
 Rule* ForwardChainer::choose_rule(Handle hsource)
 {
     std::map<Rule*, float> rule_weight;
@@ -211,72 +278,6 @@ Rule* ForwardChainer::choose_rule(Handle hsource)
 
     return rule;
 };
-
-Handle ForwardChainer::choose_source()
-{
-    // If all sources haved selected before then insert the sources'
-    // children in the set of potential sources
-    if (_selected_sources == _potential_sources) {
-        fc_logger().debug() << "All " << _selected_sources.size()
-                            << " sources have already been selected. Let's add"
-                            << " the sources' children as potential sources";
-
-        for (const Handle& h : _selected_sources) {
-            LinkPtr l = LinkCast(h);
-            if (l) {
-                const HandleSeq& outgoings = l->getOutgoingSet();
-                _potential_sources.insert(outgoings.begin(), outgoings.end());
-            }
-        }
-    } else {
-	    fc_logger().debug() << "Selected sources so far " << _selected_sources.size()
-                            << "/"<< _potential_sources.size();
-    }
-
-    URECommons urec(_as);
-    map<Handle, float> tournament_elem;
-
-    switch (_ts_mode) {
-    case TV_FITNESS_BASED:
-        for (Handle s : _potential_sources)
-            tournament_elem[s] = urec.tv_fitness(s);
-        break;
-
-    case STI_BASED:
-        for (Handle s : _potential_sources)
-            tournament_elem[s] = s->getSTI();
-        break;
-
-    default:
-        throw RuntimeException(TRACE_INFO, "Unknown source selection mode.");
-        break;
-    }
-
-    Handle hchosen = Handle::UNDEFINED;
-
-    //! Prioritize new source selection.
-    for (size_t i = 0; i < tournament_elem.size(); i++) {
-        Handle hselected = urec.tournament_select(tournament_elem);
-        tournament_elem.erase(hselected);
-
-        bool selected_before = (_selected_sources.find(hselected)
-                                != _selected_sources.end());
-        if (not selected_before) {
-            hchosen = hselected;
-            _selected_sources.insert(hchosen);
-            break;
-        }
-    }
-
-    // In case all sources are selected
-    if (hchosen == Handle::UNDEFINED) {
-        fc_logger().debug() << "All sources have been selected. Pick one up anyway";
-        OC_ASSERT(false);
-        return urec.tournament_select(tournament_elem);
-    }
-
-    return hchosen;
-}
 
 UnorderedHandleSet ForwardChainer::apply_rule(const Rule* rule)
 {
