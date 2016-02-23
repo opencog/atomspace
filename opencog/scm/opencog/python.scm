@@ -7,4 +7,4 @@
 ; We need this to set the LTDL_LIBRARY_PATH
 (use-modules (opencog))
 
-;(load-extension "libexecution" "opencog_exec_init")
+(load-extension "libPythonSCM" "opencog_python_init")

@@ -51,3 +51,18 @@ INSTALL (FILES
 	opencog/__init__.py
 	DESTINATION "${DATADIR}/python/opencog"
 )
+
+# ----------------------------------------------------------------
+# The scheme wrapper for PythonEval. Allows python snippets to be
+# called from scheme.
+#
+ADD_LIBRARY(PythonSCM
+	PythonSCM.cc
+)
+ADD_DEPENDENCIES(PythonSCM PythonEval)
+
+TARGET_LINK_LIBRARIES(PythonSCM
+	smob
+)
+
+INSTALL (TARGETS PythonSCM DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
