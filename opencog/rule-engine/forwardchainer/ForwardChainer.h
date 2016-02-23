@@ -34,8 +34,8 @@ class ForwardChainerUTest;
 namespace opencog
 {
 
-enum source_selection_mode {
-    TV_FITNESS_BASED, STI_BASED
+enum class source_selection_mode {
+	TV_FITNESS, STI, UNIFORM
 };
 
 class FCMemory;

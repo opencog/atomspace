@@ -58,7 +58,7 @@ void ForwardChainer::init(Handle hsource, const HandleSeq& focus_set)
 
     _search_in_af = _configReader.get_attention_allocation();
     _search_focus_set = not focus_set.empty();
-    _ts_mode = TV_FITNESS_BASED;
+    _ts_mode = source_selection_mode::UNIFORM;
 
     // Set potential source.
     HandleSeq init_sources;
@@ -174,27 +174,37 @@ Handle ForwardChainer::choose_source()
     if (_selected_sources == _potential_sources) {
         fc_logger().debug() << "All " << selsrc_size
                             << " sources have already been selected";
-        for (const Handle& h : _selected_sources) {
-            LinkPtr l = LinkCast(h);
-            if (l) {
-                const HandleSeq& outgoings = l->getOutgoingSet();
-                _potential_sources.insert(outgoings.begin(), outgoings.end());
+
+        // Hack to help to exhaust sources with
+        // multiple matching rules. This would be
+        // better used with a memory of which
+        // source x rule pairs have been
+        // tried. But choose_source would still
+        // remain a hack anyway.
+        if (biased_randbool(0.01)) {
+            for (const Handle& h : _selected_sources) {
+                LinkPtr l = LinkCast(h);
+                if (l) {
+                    const HandleSeq& outgoings = l->getOutgoingSet();
+                    _potential_sources.insert(outgoings.begin(),
+                                              outgoings.end());
+                }
             }
+            fc_logger().debug() << (_potential_sources.size() - selsrc_size)
+                                << " sources' children have been added as "
+                                << "potential sources";
+        } else {
+            fc_logger().debug() << "No added sources, "
+                                << "retry existing sources instead";
         }
-        fc_logger().debug() << (_potential_sources.size() - selsrc_size)
-                            << " sources' children have been added as "
-                            << "potential sources";
     }
+
     fc_logger().debug() << "Selected sources so far "
                         << _selected_sources.size()
                         << "/" << _potential_sources.size();
 
     URECommons urec(_as);
     map<Handle, float> tournament_elem;
-
-    if (selsrc_size == _potential_sources.size())
-        fc_logger().debug() << "No more new sources to try. "
-                            << "Let's try again with old ones."
 
     auto to_select = [&](const Handle& h) {
         if (selsrc_size == _potential_sources.size())
@@ -205,17 +215,24 @@ Handle ForwardChainer::choose_source()
     };
 
     switch (_ts_mode) {
-    case TV_FITNESS_BASED:
+    case source_selection_mode::TV_FITNESS:
 	    for (Handle s : _potential_sources) {
             if (to_select(s))
                 tournament_elem[s] = urec.tv_fitness(s);
 	    }
         break;
 
-    case STI_BASED:
+    case source_selection_mode::STI:
         for (Handle s : _potential_sources) {
             if (to_select(s))
                 tournament_elem[s] = s->getSTI();
+        }
+        break;
+
+    case source_selection_mode::UNIFORM:
+        for (Handle s : _potential_sources) {
+            if (to_select(s))
+                tournament_elem[s] = 1.0;
         }
         break;
 
@@ -225,6 +242,11 @@ Handle ForwardChainer::choose_source()
     }
 
     OC_ASSERT(not tournament_elem.empty());
+
+    // for (const auto& e : tournament_elem) {
+    //     fc_logger().debug() << "tournament_elem = {" << e.first->toString()
+    //                         << ", " << e.second << "}";
+    // }
 
     //! Prioritize new source selection.
     Handle hchosen = urec.tournament_select(tournament_elem);
