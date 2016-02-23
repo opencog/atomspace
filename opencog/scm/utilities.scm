@@ -95,16 +95,26 @@
 )
 
 ; -----------------------------------------------------------------------
-; analogs of car, cdr, etc. but for atoms.
+; Analogs of car, cdr, etc. but for atoms.
 ; (define (gar x) (if (cog-atom? x) (car (cog-outgoing-set x)) (car x)))
 ; (define (gdr x) (if (cog-atom? x) (cadr (cog-outgoing-set x)) (cdr x)))
 
 (define-public (gar x) (car (cog-outgoing-set x)) )
 (define-public (gdr x) (cadr (cog-outgoing-set x)) )
+(define-public (gaar x) (gar (gar x)) )
 (define-public (gadr x) (gar (gdr x)) )
+(define-public (gdar x) (gdr (gar x)) )
 (define-public (gddr x) (gdr (gdr x)) )
-(define-public (gaddr x) (gar (gddr x)) )
-(define-public (gdddr x) (gdr (gddr x)) )
+
+(define-public (gaaar x) (gar (gar (gar x))) )
+(define-public (gaadr x) (gar (gar (gdr x))) )
+(define-public (gadar x) (gar (gdr (gar x))) )
+(define-public (gaddr x) (gar (gdr (gdr x))) )
+
+(define-public (gdaar x) (gdr (gar (gar x))) )
+(define-public (gdadr x) (gdr (gar (gdr x))) )
+(define-public (gddar x) (gdr (gdr (gar x))) )
+(define-public (gdddr x) (gdr (gdr (gdr x))) )
 
 ; A more agressive way of doing the above:
 ; (define car (let ((oldcar car)) (lambda (x) (if (cog-atom? x) (oldcar (cog-outgoing-set x)) (oldcar x)))))
