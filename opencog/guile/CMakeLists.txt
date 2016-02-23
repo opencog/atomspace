@@ -2,7 +2,7 @@ INCLUDE_DIRECTORIES(
 	${GUILE_INCLUDE_DIR}
 )
 
-ADD_LIBRARY (smob SHARED
+ADD_LIBRARY (smob
 	SchemeEval.cc
 	SchemeModule.cc
 	SchemePrimitive.cc

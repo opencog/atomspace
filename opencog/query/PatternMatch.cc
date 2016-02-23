@@ -143,7 +143,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
 	// what they've got to say about it.
 	if (0 == comp_var_gnds.size())
 	{
-		if (logger().isFineEnabled())
+		if (logger().is_fine_enabled())
 		{
 			logger().fine("Explore one possible combinatoric grounding "
 			              "(var_gnds.size = %zu, term_gnds.size = %zu):",
@@ -358,7 +358,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	// grounding combination through the virtual link, for the final
 	// accept/reject determination.
 
-	if (logger().isFineEnabled())
+	if (logger().is_fine_enabled())
 	{
 		logger().fine("VIRTUAL PATTERN: ====== "
 		              "num comp=%zd num virts=%zd\n", _num_comps, _num_virts);

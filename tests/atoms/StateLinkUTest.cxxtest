@@ -37,7 +37,7 @@ private:
 public:
 	StateLinkUTest()
 	{
-		logger().setPrintToStdoutFlag(true);
+		logger().set_print_to_stdout_flag(true);
 	}
 
 	void setUp() { _as.clear(); }

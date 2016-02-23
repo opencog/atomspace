@@ -13,7 +13,7 @@ ADD_CUSTOM_COMMAND(
 	COMMENT "Serializing with protobuf"
 )
 
-ADD_LIBRARY (zmqatoms SHARED
+ADD_LIBRARY (zmqatoms
 	ZMQMessages.pb.cc ZMQMessages.pb.h
 	ProtocolBufferSerializer
 	ZMQClient
@@ -30,7 +30,7 @@ TARGET_LINK_LIBRARIES(zmqatoms
 )
 
 INSTALL (TARGETS zmqatoms
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
 INSTALL (FILES

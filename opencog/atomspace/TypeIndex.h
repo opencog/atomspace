@@ -43,7 +43,7 @@ namespace opencog
  * The primary interface for this is an iterator, and that is because
  * the index will typically contain millions of atoms, and this is far
  * too much to try to return in some temporary array.  Iterating is much
- * safer.
+ * faster.
  *
  * @todo The iterator is NOT thread-safe against the insertion or
  * removal of atoms!  Either inserting or removing an atom will cause
@@ -64,7 +64,6 @@ class TypeIndex : public FixedIntegerIndex
 		{
 			remove(a->getType(), a);
 		}
-   		size_t getNumAtomsOfType(Type type, bool subclass) const;
 
 		class iterator
 			: public std::iterator<std::forward_iterator_tag, Handle>

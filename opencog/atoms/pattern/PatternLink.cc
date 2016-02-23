@@ -907,7 +907,7 @@ void PatternLink::check_connectivity(const std::vector<HandleSeq>& components)
 
 void PatternLink::debug_log(void) const
 {
-	if (!logger().isFineEnabled())
+	if (!logger().is_fine_enabled())
 		return;
 
 	// Log the predicate ...

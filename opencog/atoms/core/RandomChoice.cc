@@ -133,17 +133,14 @@ Handle RandomChoiceLink::execute(AtomSpace * as) const
 	Type ot = ofirst->getType();
 	if (1 == ary and (SET_LINK == ot or LIST_LINK == ot))
 	{
-		LinkPtr lll(LinkCast(ofirst));
-
 		// Search for ListLink pairs, w/car of pair a number.
 		HandleSeq choices;
 		std::vector<double> weights;
-		for (const Handle& h : lll->getOutgoingSet())
+		for (const Handle& h : ofirst->getOutgoingSet())
 		{
 			if (LIST_LINK != h->getType()) goto uniform;
 
-			LinkPtr lpair(LinkCast(h));
-			const HandleSeq& oset = lpair->getOutgoingSet();
+			const HandleSeq& oset = h->getOutgoingSet();
 			if (2 != oset.size()) goto uniform;
 
 			Handle hw = oset[0];
@@ -162,29 +159,29 @@ Handle RandomChoiceLink::execute(AtomSpace * as) const
 		if (0 == weights.size())
 			throw RuntimeException(TRACE_INFO,
 				"Asked to choose element from empty set!");
-		return choices[randy.randDiscrete(weights)];
+		return choices[randy.rand_discrete(weights)];
 
 uniform:
-		ary = lll->getArity();
+		ary = ofirst->getArity();
 		if (0 == ary)
 			throw RuntimeException(TRACE_INFO,
 				"Asked to choose element from empty set!");
-		return lll->getOutgoingAtom(randy.randint(ary));
+		return ofirst->getOutgoingAtom(randy.randint(ary));
 	}
 
 	// Weighted choices cannot be sets, since sets are unordered.
 	if (2 == ary and LIST_LINK == ot)
 	{
-		LinkPtr lweights(LinkCast(ofirst));
-		LinkPtr lchoices(LinkCast(_outgoing[1]));
+		const Handle& choices(_outgoing[1]);
 
-		if (lweights->getArity() != lchoices->getArity())
+		// ofirst are the weights
+		if (ofirst->getArity() != choices->getArity())
 			throw SyntaxException(TRACE_INFO,
 				"Weights and choices must be the same size");
 
 		// Weights need to be numbers, or must evaluate to numbers.
 		std::vector<double> weights;
-		for (Handle h : lweights->getOutgoingSet())
+		for (Handle h : ofirst->getOutgoingSet())
 		{
 			FunctionLinkPtr flp(FunctionLinkCast(h));
 			if (nullptr != flp)
@@ -200,7 +197,7 @@ uniform:
 		if (0 == weights.size())
 			throw RuntimeException(TRACE_INFO,
 				"Asked to choose element from empty set!");
-		return lchoices->getOutgoingAtom(randy.randDiscrete(weights));
+		return choices->getOutgoingAtom(randy.rand_discrete(weights));
 	}
 
 	if (0 == ary)

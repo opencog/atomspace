@@ -22,9 +22,29 @@ IF (HAVE_CYTHON)
 	)
 ENDIF(HAVE_CYTHON)
 
-TARGET_LINK_LIBRARIES (atomspace_bm
+TARGET_LINK_LIBRARIES (atomspace_bm m
+	atomutils
 	atomspace
 	execution
 	clearbox
 	${COGUTIL_LIBRARY}
+	atomutils
+	atomcore
+)
+
+ADD_EXECUTABLE (profile_bindlink
+	profile_bindlink.cc
+)
+
+TARGET_LINK_LIBRARIES (profile_bindlink m
+	atomutils
+	atomspace
+	execution
+	query
+	execution
+	clearbox
+	${COGUTIL_LIBRARY}
+	atomcore
+	atomutils
+	dl
 )

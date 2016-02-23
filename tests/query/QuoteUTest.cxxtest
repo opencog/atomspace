@@ -40,8 +40,8 @@ private:
 public:
     QuoteUTest(void)
     {
-        logger().setLevel(Logger::DEBUG);
-        logger().setPrintToStdoutFlag(true);
+        logger().set_level(Logger::DEBUG);
+        logger().set_print_to_stdout_flag(true);
 
         as = new AtomSpace();
         eval = new SchemeEval(as);
@@ -53,7 +53,7 @@ public:
         delete eval;
         // Erase the log file if no assertions failed.
         if (!CxxTest::TestTracker::tracker().suiteFailed())
-                std::remove(logger().getFilename().c_str());
+                std::remove(logger().get_filename().c_str());
     }
 
     void setUp(void);

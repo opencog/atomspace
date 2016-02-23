@@ -121,7 +121,7 @@ list of source files:
 # CMakeList.txt
 OPENCOG_ADD_ATOM_TYPES(atom_types.script atom_types.h atom_types.definitions atom_types.inheritance)
 
-ADD_LIBRARY(sample SHARED
+ADD_LIBRARY(sample
     atom_types.h
     Sample1.cc
     Sample2.cc
