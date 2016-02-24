@@ -63,6 +63,7 @@ ADD_LIBRARY(PythonSCM
 ADD_DEPENDENCIES(PythonSCM PythonEval)
 
 TARGET_LINK_LIBRARIES(PythonSCM
+	PythonEval
 	smob
 )
 
