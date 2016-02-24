@@ -10,8 +10,6 @@ IF(HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(RandomUTest clearbox execution smob atomspace)
 	ADD_CXXTEST(ReductUTest)
 	TARGET_LINK_LIBRARIES(ReductUTest clearbox execution smob atomspace)
-	ADD_CXXTEST(VariableListUTest)
-	TARGET_LINK_LIBRARIES(VariableListUTest  clearbox execution smob atomspace)
 ENDIF(HAVE_GUILE)
 
 ADD_CXXTEST(AlphaConvertUTest)
