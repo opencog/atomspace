@@ -71,6 +71,7 @@ public:
 	void test_match_signature(void);
 	void test_match_arrow(void);
 	void test_get_signature(void);
+	void test_unbundle_defined_type_node(void);
 };
 
 void DeepTypeUTest::tearDown(void)
@@ -523,4 +524,33 @@ void DeepTypeUTest::test_get_signature(void)
 	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test to make sure that the unbundling of DefinedType in
+ * TypedVariableLink is taking place.
+ */
+void DeepTypeUTest::test_unbundle_defined_type_node(void)
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD", "tests/query/deep-types.scm");
+	load_scm_files_from_config(*as);
+
+	Handle result = eval->eval_h("(cog-execute! predicate-search-typed)");
+	Handle result_expected = eval->eval_h(
+		"(SetLink "
+		"   (EvaluationLink"
+		"      (PredicateNode \"foo\")"
+		"      (ListLink"
+		"         (ConceptNode \"bingo\")"
+		"         (ConceptNode \"yes!\")))"
+		"   (EvaluationLink"
+		"      (AnchorNode \"bar\")"
+		"      (ListLink"
+		"         (ConceptNode \"hurrah\")"
+		"         (ConceptNode \"yay!\"))))");
+
+	TSM_ASSERT("Didn't get expected result", result == result_expected);
+	logger().info("END TEST: %s", __FUNCTION__);
 }
