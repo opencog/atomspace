@@ -24,6 +24,7 @@ INSTALL (FILES
 	opencog/persist.scm
 	opencog/persist-sql.scm
 	opencog/persist-zmq.scm
+	opencog/python.scm
 	opencog/query.scm
 	opencog/rule-engine.scm
 	DESTINATION "${DATADIR}/scm/opencog"
