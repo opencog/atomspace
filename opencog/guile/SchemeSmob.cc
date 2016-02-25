@@ -147,7 +147,8 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 
 /* ============================================================== */
 
-void SchemeSmob::throw_exception(const char *msg, const char * func)
+[[ noreturn ]] void SchemeSmob::throw_exception(const char *msg,
+                                                const char * func)
 {
 	if (msg and msg[0] != 0)
 	{
@@ -166,6 +167,7 @@ void SchemeSmob::throw_exception(const char *msg, const char * func)
 	}
 	else
 	{
+		logger().error("Guile caught unknown C++ exception");
 		// scm_misc_error(fe->get_name(), "unknown C++ exception", SCM_EOL);
 		scm_error_scm(
 			scm_from_utf8_symbol("C++ exception"),
@@ -173,8 +175,11 @@ void SchemeSmob::throw_exception(const char *msg, const char * func)
 			scm_from_utf8_string("unknown C++ exception"),
 			SCM_EOL,
 			SCM_EOL);
-		logger().error("Guile caught unknown C++ exception");
+		// Hmm. scm_error never returns.
 	}
+
+	// The scm functions never return, so this throw can never occur.
+	throw "Impossible, this can't happen";
 }
 
 /* ============================================================== */
