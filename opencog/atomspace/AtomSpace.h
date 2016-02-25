@@ -67,29 +67,34 @@ class AtomSpace
     AtomSpace& operator=(const AtomSpace&);
     AtomSpace(const AtomSpace&);
 
-    AtomTable atomTable;
-    AttentionBank bank;
+    AtomTable _atom_table;
+    AttentionBank _bank;
     /**
      * Used to fetch atoms from disk.
      */
-    BackingStore *backing_store;
+    BackingStore* _backing_store;
 
-    AtomTable& get_atomtable(void) { return atomTable; }
+    AtomTable& get_atomtable(void) { return _atom_table; }
+
+    bool _transient;
 protected:
 
     /**
      * Register a provider of backing storage.
      */
-    void registerBackingStore(BackingStore *);
-    void unregisterBackingStore(BackingStore *);
+    void registerBackingStore(BackingStore*);
+    void unregisterBackingStore(BackingStore*);
 
 public:
     AtomSpace(AtomSpace* parent = NULL, bool transient = false);
     ~AtomSpace();
 
+    void ready_transient(AtomSpace* parent);
+    void clear_transient();
+
     /// Get the environment that this atomspace was created in.
     AtomSpace* get_environ() const {
-        AtomTable* env = atomTable.get_environ();
+        AtomTable* env = _atom_table.get_environ();
         if (env) return env->getAtomSpace();
         return nullptr;
     }
@@ -97,12 +102,12 @@ public:
     /**
      * Return the number of atoms contained in the space.
      */
-    inline int get_size() const { return atomTable.getSize(); }
-    inline int get_num_nodes() const { return atomTable.getNumNodes(); }
-    inline int get_num_links() const { return atomTable.getNumLinks(); }
+    inline int get_size() const { return _atom_table.getSize(); }
+    inline int get_num_nodes() const { return _atom_table.getNumNodes(); }
+    inline int get_num_links() const { return _atom_table.getNumLinks(); }
     inline int get_num_atoms_of_type(Type type, bool subclass = false) const
-        { return atomTable.getNumAtomsOfType(type, subclass); }
-    inline UUID get_uuid(void) const { return atomTable.get_uuid(); }
+        { return _atom_table.getNumAtomsOfType(type, subclass); }
+    inline UUID get_uuid(void) const { return _atom_table.get_uuid(); }
 
     //! Clear the atomspace, remove all atoms
     void clear();
@@ -195,8 +200,8 @@ public:
      * NB: at this time, we don't distinguish barrier and flush.
      */
     void barrier(void) {
-        atomTable.barrier();
-        if (backing_store) backing_store->barrier();
+        _atom_table.barrier();
+        if (_backing_store) _backing_store->barrier();
     }
 
     /**
@@ -221,17 +226,17 @@ public:
      * Get an atom from the AtomTable. If the atom is not there, then
      * return Handle::UNDEFINED.
      */
-    Handle get_atom(const Handle& h) const { return atomTable.getHandle(h); }
-    Handle get_atom(UUID uuid) const { return atomTable.getHandle(uuid); }
+    Handle get_atom(const Handle& h) const { return _atom_table.getHandle(h); }
+    Handle get_atom(UUID uuid) const { return _atom_table.getHandle(uuid); }
 
     /**
      * Load *all* atoms of the given type, but only if they are not
      * already in the AtomTable.
      */
     void fetch_all_atoms_of_type(Type t) {
-        if (NULL == backing_store)
+        if (NULL == _backing_store)
             throw RuntimeException(TRACE_INFO, "No backing store");
-        backing_store->loadType(atomTable, t);
+        _backing_store->loadType(_atom_table, t);
     }
 
 
@@ -271,7 +276,7 @@ public:
      *         removed. False, otherwise.
      */
     bool purge_atom(Handle h, bool recursive = false) {
-        return 0 < atomTable.extract(h, recursive).size();
+        return 0 < _atom_table.extract(h, recursive).size();
     }
 
     /**
@@ -377,7 +382,7 @@ public:
         size_t initial_size = appendToHandles.size();
 
         // Determine the number of atoms we'll be adding.
-        size_t size_of_append = atomTable.getNumAtomsOfType(type, subclass);
+        size_t size_of_append = _atom_table.getNumAtomsOfType(type, subclass);
 
         // Now reserve size for the addition. This is faster for large
         // append iterations since appends to the list won't require new
@@ -413,7 +418,7 @@ public:
                         Type type,
                         bool subclass = false) const
     {
-        return atomTable.getHandlesByType(result, type, subclass);
+        return _atom_table.getHandlesByType(result, type, subclass);
     }
 
     /* ----------------------------------------------------------- */
@@ -461,7 +466,7 @@ public:
      * @return normalised STI between -1..1
      */
     float get_normalised_STI(Handle h, bool average=true, bool clip=false) const {
-        return bank.getNormalisedSTI(h->getAttentionValue(), average, clip);
+        return _bank.getNormalisedSTI(h->getAttentionValue(), average, clip);
     }
 
     /** Retrieve the linearly normalised Short-Term Importance between 0..1
@@ -475,7 +480,7 @@ public:
      * @return normalised STI between 0..1
      */
     float get_normalised_zero_to_one_STI(Handle h, bool average=true, bool clip=false) const {
-        return bank.getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip);
+        return _bank.getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip);
     }
 
     /**
@@ -492,7 +497,7 @@ public:
                       AttentionValue::sti_t lowerBound,
                       AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
     {
-        UnorderedHandleSet hs = atomTable.getHandlesByAV(lowerBound, upperBound);
+        UnorderedHandleSet hs = _atom_table.getHandlesByAV(lowerBound, upperBound);
         return std::copy(hs.begin(), hs.end(), result);
     }
 
@@ -516,7 +521,7 @@ public:
      * @return Short Term Importance threshold value
      */
     AttentionValue::sti_t get_attentional_focus_boundary() const {
-        return bank.getAttentionalFocusBoundary();
+        return _bank.getAttentionalFocusBoundary();
     }
 
     /** Change the attentional focus boundary.
@@ -527,7 +532,7 @@ public:
      */
     AttentionValue::sti_t set_attentional_focus_boundary(
         AttentionValue::sti_t s) {
-        return bank.setAttentionalFocusBoundary(s);
+        return _bank.setAttentionalFocusBoundary(s);
     }
 
     /** Get the maximum STI observed in the AtomSpace.
@@ -536,7 +541,7 @@ public:
      * @return Maximum STI
      */
     AttentionValue::sti_t get_max_STI(bool average=true) const
-    { return bank.getMaxSTI(average); }
+    { return _bank.getMaxSTI(average); }
 
     /** Get the minimum STI observed in the AtomSpace.
      *
@@ -545,7 +550,7 @@ public:
      * @return Minimum STI
      */
     AttentionValue::sti_t get_min_STI(bool average=true) const
-    { return bank.getMinSTI(average); }
+    { return _bank.getMinSTI(average); }
 
     /** Update the minimum STI observed in the AtomSpace.
      * Min/max are not updated on setSTI because average is calculate by lobe
@@ -554,7 +559,7 @@ public:
      * @warning Should only be used by attention allocation system.
      * @param m New minimum STI
      */
-    void update_min_STI(AttentionValue::sti_t m) { bank.updateMinSTI(m); }
+    void update_min_STI(AttentionValue::sti_t m) { _bank.updateMinSTI(m); }
 
     /**
      * Update the maximum STI observed in the AtomSpace. Min/max are not updated
@@ -564,38 +569,38 @@ public:
      * @warning Should only be used by attention allocation system.
      * @param m New maximum STI
      */
-    void update_max_STI(AttentionValue::sti_t m) { bank.updateMaxSTI(m); }
-    void update_STI_funds(AttentionValue::sti_t m) { bank.updateSTIFunds(m); }
-    void update_LTI_funds(AttentionValue::lti_t m) { bank.updateLTIFunds(m); }
-    long get_STI_funds() const { return bank.getSTIFunds(); }
-    long get_LTI_funds() const { return bank.getLTIFunds(); }
+    void update_max_STI(AttentionValue::sti_t m) { _bank.updateMaxSTI(m); }
+    void update_STI_funds(AttentionValue::sti_t m) { _bank.updateSTIFunds(m); }
+    void update_LTI_funds(AttentionValue::lti_t m) { _bank.updateLTIFunds(m); }
+    long get_STI_funds() const { return _bank.getSTIFunds(); }
+    long get_LTI_funds() const { return _bank.getLTIFunds(); }
 
     /* ----------------------------------------------------------- */
     // ---- Signals
 
     boost::signals2::connection addAtomSignal(const AtomSignal::slot_type& function)
     {
-        return atomTable.addAtomSignal().connect(function);
+        return _atom_table.addAtomSignal().connect(function);
     }
     boost::signals2::connection removeAtomSignal(const AtomPtrSignal::slot_type& function)
     {
-        return atomTable.removeAtomSignal().connect(function);
+        return _atom_table.removeAtomSignal().connect(function);
     }
     boost::signals2::connection AVChangedSignal(const AVCHSigl::slot_type& function)
     {
-        return atomTable.AVChangedSignal().connect(function);
+        return _atom_table.AVChangedSignal().connect(function);
     }
     boost::signals2::connection TVChangedSignal(const TVCHSigl::slot_type& function)
     {
-        return atomTable.TVChangedSignal().connect(function);
+        return _atom_table.TVChangedSignal().connect(function);
     }
     boost::signals2::connection AddAFSignal(const AVCHSigl::slot_type& function)
     {
-        return bank.AddAFSignal().connect(function);
+        return _bank.AddAFSignal().connect(function);
     }
     boost::signals2::connection RemoveAFSignal(const AVCHSigl::slot_type& function)
     {
-        return bank.RemoveAFSignal().connect(function);
+        return _bank.RemoveAFSignal().connect(function);
     }
 
     /* ----------------------------------------------------------- */

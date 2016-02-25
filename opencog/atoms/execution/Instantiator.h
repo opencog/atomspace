@@ -76,6 +76,18 @@ private:
 public:
 	Instantiator(AtomSpace* as) : _as(as) {}
 
+	void ready(AtomSpace* as)
+	{
+		_as = as;
+		_halt = false;
+	}
+
+	void clear()
+	{
+		_as = NULL;
+		_vmap = NULL;
+	}
+
 	Handle instantiate(const Handle& expr, const std::map<Handle, Handle> &vars);
 	Handle execute(const Handle& expr)
 	{

@@ -146,6 +146,8 @@ private:
 
     // The AtomSpace that is holding us (if any). Needed for DeleteLink operation
     AtomSpace* _as;
+    bool _transient;
+
     /**
      * Override and declare copy constructor and equals operator as
      * private.  This is to prevent large object copying by mistake.
@@ -167,6 +169,10 @@ public:
     AtomTable(AtomTable* parent = NULL, AtomSpace* holder = NULL,
               bool transient = false);
     ~AtomTable();
+
+    void ready_transient(AtomTable* parent, AtomSpace* holder);
+    void clear_transient();
+
     UUID get_uuid(void) const { return _uuid; }
     AtomTable* get_environ(void) const { return _environ; }
     AtomSpace* getAtomSpace(void) const { return _as; }
@@ -203,7 +209,6 @@ public:
     AtomPtr factory(Type atom_type, AtomPtr atom);
     AtomPtr clone_factory(Type, AtomPtr);
 
-public:
     /**
      * Returns the set of atoms of a given type (subclasses optionally).
      *
@@ -273,7 +278,7 @@ public:
     /**
      * Adds an atom to the table. If the atom already is in the
      * atomtable, then the truth values and attention values of the
-     * two are merged (how, exactly? Is this doe corrrectly!?)
+     * two are merged (how, exactly? Is this done corrrectly!?)
      *
      * If the async flag is set, then the atom addition is performed
      * asynchronously; the atom might not be fully added by the time
