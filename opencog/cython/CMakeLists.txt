@@ -35,6 +35,7 @@ ADD_DEPENDENCIES(PythonEval atomspace_cython)
 
 TARGET_LINK_LIBRARIES(PythonEval
 	atombase
+	atomspace
 	${PYTHON_LIBRARIES}
 	${Boost_FILESYSTEM_LIBRARY}
 )
@@ -51,3 +52,19 @@ INSTALL (FILES
 	opencog/__init__.py
 	DESTINATION "${DATADIR}/python/opencog"
 )
+
+# ----------------------------------------------------------------
+# The scheme wrapper for PythonEval. Allows python snippets to be
+# called from scheme.
+#
+ADD_LIBRARY(PythonSCM
+	PythonSCM.cc
+)
+ADD_DEPENDENCIES(PythonSCM PythonEval)
+
+TARGET_LINK_LIBRARIES(PythonSCM
+	PythonEval
+	smob
+)
+
+INSTALL (TARGETS PythonSCM DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")

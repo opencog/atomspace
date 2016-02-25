@@ -60,14 +60,20 @@ and more generally
 The current list of modules that wrap C++ code includes:
 ```
 (use-modules (opencog))
-(use-modules (opencog logger))
-(use-modules (opencog query))
 (use-modules (opencog exec))
-(use-modules (opencog rule-engine))
-(use-modules (opencog nlp lg-dict))
-(use-modules (opencog nlp sureal))
+(use-modules (opencog logger))
 (use-modules (opencog persist))
 (use-modules (opencog persist-sql))
+(use-modules (opencog query))
+(use-modules (opencog rule-engine))
+(use-modules (opencog atom-types))
+(use-modules (opencog cogserver))
+(use-modules (opencog nlp chatbot))
+(use-modules (opencog nlp chatbot-eva))
+(use-modules (opencog nlp fuzzy))
+(use-modules (opencog nlp lg-dict))
+(use-modules (opencog nlp relex2logic))
+(use-modules (opencog nlp sureal))
 ```
 
 # Example Files
