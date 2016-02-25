@@ -72,6 +72,23 @@
 						(Type "ConceptNode") (Type "ConceptNode")))))
 		(AndLink (Variable "$x"))))
 
+(DefineLink
+	(DefinedType "predicate-type")
+	(Signature
+		(EvaluationLink
+			(TypeChoice
+				(TypeNode "PredicateNode")
+				(TypeNode "AnchorNode"))
+			(ListLink
+				(Type "ConceptNode") (Type "ConceptNode")))))
+
+(define predicate-search-typed
+	(GetLink
+		(TypedVariable
+			(Variable "$x")
+			(DefinedType "predicate-type"))
+		(AndLink (Variable "$x"))))
+
 ; (cog-execute! predicate-search)
 ; =============================================================
 
