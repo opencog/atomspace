@@ -506,3 +506,127 @@ Predicates - get_predicates                     2.260µs         442,523
 Predicates - get_predicates_for                 1.909µs         523,728
 Predicates - cog-get-pred - Scheme            130.991µs           7,634
 
+
+----------------
+20 February 2016
+----------------
+
+Significant changed timings:
+----------------------------
+
+bindlink comparison
+-------------------
+Linas's changes to bindlink made it 80% faster. It was:
+
+  Bind - bindlink - Cython                      360.240µs           2,775
+
+and is now:
+
+  Bind - bindlink - Cython                      202.252µs           4,944
+
+
+Machine and Software Configuration
+----------------------------------
+As measured by Curtis on:
+  MacBook Pro - Retina, 15-inch, Early 2013
+  Intel Core i7 2.7 Ghz - Quad core
+  16GB 1600 Mhz DDR3
+
+Linux running in VirtualBox VM with boot2docker in a Docker container with:
+  docker-machine version 0.5.6, build 61388e9
+  Docker version 1.9.1, build a34a1d5
+  VirtualBox VM 5.0.14r105127
+  Ubuntu 14.04.2 LTS (trusty)
+  Python 2.7.6
+  gcc (Ubuntu 4.8.4-2ubuntu1~14.04) 4.8.4
+  guile (GNU Guile) 2.0.9
+
+(SAME configuration as last test)
+
+--- OpenCog Python Benchmark -  2016-02-20 14:49:56.407353 ---
+
+Test                                        Time per op  Ops per second
+----                                        -----------  --------------
+Add nodes - Cython                              6.305µs         158,606
+Add nodes - Cython (500K)                       6.545µs         152,790
+Add fully connected nodes                       7.979µs         125,332
+Bare atom traversal 100K - by type              0.000µs   3,104,592,153
+Resolve Handle 10K - by type                    0.188µs       5,320,722
+Resolve Handle 100K - by type                   0.104µs       9,633,795
+Resolve Handle 1M - by type                     0.101µs       9,928,881
+Get and Traverse 100K - by type                 0.691µs       1,447,246
+Yield Get and Traverse 100K - by type           0.517µs       1,935,545
+Get Outgoing                                    1.619µs         617,701
+Get Outgoing - no temporary list                1.613µs         620,017
+Bind - stub_bindlink - Cython                   0.304µs       3,287,742
+Bind - bindlink - Cython                      202.252µs           4,944
+Test scheme_eval_h(+ 2 2)                      72.558µs          13,782
+Bind - cog-bind - Scheme                      301.144µs           3,320
+Add nodes - cog-new-node - Scheme             123.117µs           8,122
+Add nodes - ConceptNode sugar - Scheme        107.173µs           9,330
+Predicates - get_predicates                     2.116µs         472,529
+Predicates - get_predicates_for                 1.740µs         574,785
+Predicates - cog-get-pred - Scheme            126.158µs           7,926
+
+
+----------------
+25 February 2016
+----------------
+
+Significant changed timings:
+----------------------------
+
+bindlink comparison
+-------------------
+Implementing a multi-threaded cache for the transient atomspaces 
+made binklink 5X faster. It was:
+
+  Bind - bindlink - Cython                      202.252µs           4,944
+
+and is now:
+
+  Bind - bindlink - Cython                       39.998µs          25,001
+
+
+Machine and Software Configuration
+----------------------------------
+As measured by Curtis on:
+  MacBook Pro - Retina, 15-inch, Early 2013
+  Intel Core i7 2.7 Ghz - Quad core
+  16GB 1600 Mhz DDR3
+
+Linux running in VirtualBox VM with boot2docker in a Docker container with:
+  docker-machine version 0.5.6, build 61388e9
+  Docker version 1.9.1, build a34a1d5
+  VirtualBox VM 5.0.14r105127
+  Ubuntu 14.04.2 LTS (trusty)
+  Python 2.7.6
+  gcc (Ubuntu 4.8.4-2ubuntu1~14.04) 4.8.4
+  guile (GNU Guile) 2.0.9
+
+(SAME configuration as last test)
+
+--- OpenCog Python Benchmark -  2016-02-25 20:27:05.746033 ---
+
+Test                                        Time per op  Ops per second
+----                                        -----------  --------------
+Add nodes - Cython                              5.829µs         171,556
+Add nodes - Cython (500K)                       5.992µs         166,878
+Add fully connected nodes                       7.583µs         131,875
+Bare atom traversal 100K - by type              0.000µs   4,048,555,984
+Resolve Handle 10K - by type                    0.130µs       7,689,607
+Resolve Handle 100K - by type                   0.108µs       9,291,273
+Resolve Handle 1M - by type                     0.102µs       9,761,448
+Get and Traverse 100K - by type                 0.702µs       1,424,480
+Yield Get and Traverse 100K - by type           0.483µs       2,070,468
+Get Outgoing                                    1.610µs         621,246
+Get Outgoing - no temporary list                1.610µs         621,106
+Bind - stub_bindlink - Cython                   0.288µs       3,469,004
+Bind - bindlink - Cython                       39.998µs          25,001
+Test scheme_eval_h(+ 2 2)                      74.616µs          13,401
+Bind - cog-bind - Scheme                      128.871µs           7,759
+Add nodes - cog-new-node - Scheme             124.144µs           8,055
+Add nodes - ConceptNode sugar - Scheme        108.928µs           9,180
+Predicates - get_predicates                     2.242µs         446,015
+Predicates - get_predicates_for                 1.784µs         560,684
+Predicates - cog-get-pred - Scheme            126.182µs           7,925
