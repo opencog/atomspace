@@ -26,6 +26,7 @@
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/pattern/PatternLink.h>
@@ -485,19 +486,29 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const HandleSeq& sna)
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
                                     const Handle& pn, const Handle& args)
 {
+	if (LIST_LINK != args->getType())
+	{
+		throw RuntimeException(TRACE_INFO,
+			"Expecting arguments to EvaluationLink!");
+	}
+
 	Type pntype = pn->getType();
 	if (DEFINED_PREDICATE_NODE == pntype)
 	{
-printf("duuuude hola %s\n", pn->toString().c_str());
 		Handle defn = DefineLink::get_definition(pn);
-printf("duuuude defn %s\n", defn->toString().c_str());
 
-return TruthValue::TRUE_TV();
-	}
+		// If its not a LambdaLink, then I don't know what to do...
+		Type dtype = defn->getType();
+		if (LAMBDA_LINK != dtype)
+			throw RuntimeException(TRACE_INFO,
+				"Expecting defintion to be a LambdaLink, got %s",
+				defn->toString().c_str());
 
-	if (LIST_LINK != args->getType())
-	{
-		throw RuntimeException(TRACE_INFO, "Expecting arguments to EvaluationLink!");
+		// Treat it as if it were a PutLink -- perform the
+		// beta-reduction, and evaluate the result.
+		LambdaLinkPtr lam(LambdaLinkCast(defn));
+		Handle reduct = lam->substitute(args->getOutgoingSet());
+		return do_evaluate(as, reduct);
 	}
 
 	if (GROUNDED_PREDICATE_NODE != pntype)
