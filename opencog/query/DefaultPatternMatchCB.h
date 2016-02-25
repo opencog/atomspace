@@ -91,7 +91,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 	    /**
 	     * The mutex used to control access to the transient atomspace cache.
 	     */
-	    static std::mutex _transient_cache_mutex;
+	    static std::mutex s_transient_cache_mutex;
 
 	    /**
 	     * The transient atomspace cache.

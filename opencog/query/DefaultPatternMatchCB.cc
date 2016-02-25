@@ -36,7 +36,7 @@ const bool TRANSIENT_SPACE = true;
 const int MAX_CACHED_TRANSIENTS = 8;
 
 // Allocated storage for the transient atomspace cache static variables.
-std::mutex DefaultPatternMatchCB::_transient_cache_mutex;
+std::mutex DefaultPatternMatchCB::s_transient_cache_mutex;
 std::vector<AtomSpace*> DefaultPatternMatchCB::s_transient_cache;
 
 /* ======================================================== */
@@ -77,7 +77,7 @@ AtomSpace* DefaultPatternMatchCB::grab_transient_atomspace(AtomSpace* parent)
 	if (s_transient_cache.size() > 0)
 	{
 		// Grab the mutex lock.
-		std::unique_lock<std::mutex> cache_lock(_transient_cache_mutex);
+		std::unique_lock<std::mutex> cache_lock(s_transient_cache_mutex);
 
 		// Check to make sure the cache still has one now that we have
 		// the mutex.
@@ -107,7 +107,7 @@ void DefaultPatternMatchCB::release_transient_atomspace(AtomSpace* atomspace)
 	if (s_transient_cache.size() < MAX_CACHED_TRANSIENTS)
 	{
 		// Grab the mutex lock.
-		std::unique_lock<std::mutex> cache_lock(_transient_cache_mutex);
+		std::unique_lock<std::mutex> cache_lock(s_transient_cache_mutex);
 
 		// Check it again since we only now have the mutex locked.
 		if (s_transient_cache.size() < MAX_CACHED_TRANSIENTS)
