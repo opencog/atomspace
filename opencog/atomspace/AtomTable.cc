@@ -74,6 +74,7 @@ AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient)
     _size = 0;
     size_t ntypes = classserver().getNumberOfClasses();
     _size_by_type.resize(ntypes);
+    _transient = transient;
 
     // Set resolver before doing anything else, such as getting
     // the atom-added signals.  Just in case some other thread
@@ -95,22 +96,82 @@ AtomTable::~AtomTable()
 
     // No one who shall look at these atoms shall ever again
     // find a reference to this atomtable.
-    UUID undef = Handle::INVALID_UUID;
     for (auto pr : _atom_set) {
-        pr.second->_atomTable = NULL;
-        pr.second->_uuid = undef;
+        Handle& atom_to_delete = pr.second;
+        atom_to_delete->_atomTable = NULL;
+        atom_to_delete->_uuid = Handle::INVALID_UUID;
+
         // Aiee ... We added this link to every incoming set;
         // thus, it is our responsibility to remove it as well.
         // This is a stinky design, but I see no other way,
         // because it seems that we can't do this in the Atom
         // destructor (which is where this should be happening).
-        LinkPtr lll(LinkCast(pr.second));
-        if (lll) {
-            for (AtomPtr a : lll->_outgoing) {
-                a->remove_atom(lll);
+        if (atom_to_delete->isLink()) {
+            LinkPtr link_to_delete = LinkCast(atom_to_delete);
+            for (AtomPtr atom_in_out_set : atom_to_delete->getOutgoingSet()) {
+                atom_in_out_set->remove_atom(link_to_delete);
             }
         }
     }
+}
+
+void AtomTable::ready_transient(AtomTable* parent, AtomSpace* holder)
+{
+    if (not _transient)
+        throw opencog::RuntimeException(TRACE_INFO,
+                "AtomTable - ready called on non-transient atom table.");
+    
+    // Set the new parent environment and holder atomspace.
+    _environ = parent;
+    _as = holder;
+
+    // We can now resolve handles.
+    Handle::set_resolver(this);
+}
+
+
+void AtomTable::clear_transient()
+{
+    if (not _transient)
+        throw opencog::RuntimeException(TRACE_INFO,
+                "AtomTable - clear called on non-transient atom table.");
+
+    // We are no longer a resolver for handles.
+    Handle::clear_resolver(this);
+
+    // Reset the size to zero.
+    _size = 0;
+
+    // Clear the by-type size cache.
+    Type total_types = _size_by_type.size();
+    for (Type type = ATOM; type < total_types; type++)
+        _size_by_type[type] = 0;
+
+    // Clear the atoms in the set.
+    for (auto pr : _atom_set) {
+        Handle& atom_to_clear = pr.second;
+        atom_to_clear->_atomTable = NULL;
+        atom_to_clear->_uuid = Handle::INVALID_UUID;
+
+        // If this is a link we need to remove this atom from the incoming
+        // sets for any atoms in this atom's outgoing set. See note in
+        // the analogous loop in ~AtomTable above.
+        if (atom_to_clear->isLink()) {
+            LinkPtr link_to_clear = LinkCast(atom_to_clear);
+            for (AtomPtr atom_in_out_set : atom_to_clear->getOutgoingSet()) {
+                atom_in_out_set->remove_atom(link_to_clear);
+            }
+        }
+    }
+
+    // Clear the atom set. This will delete all the atoms since this will be
+    // the last shared_ptr referecence, and set the size of the set to 0.
+    _atom_set.clear();
+
+    // Clear the  parent environment and holder atomspace.
+    _environ = NULL;
+    _as = NULL;
+
 }
 
 AtomTable& AtomTable::operator=(const AtomTable& other)
@@ -576,14 +637,14 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     atom->keep_incoming_set();
     atom->setAtomTable(this);
 
-    if (not async)
+    if (not _transient and not async)
         put_atom_into_index(atom);
 
     // We can now unlock, since we are done.
     lck.unlock();
 
     // Update the indexes asynchronously
-    if (async)
+    if (not _transient and async)
         _index_queue.enqueue(atom);
 
     DPRINTF("Atom added: %ld => %s\n", atom->_uuid, atom->toString().c_str());
@@ -592,6 +653,10 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 
 void AtomTable::put_atom_into_index(AtomPtr& atom)
 {
+    if (_transient)
+        throw RuntimeException(TRACE_INFO,
+          "AtomTable - transient should not index atoms!");
+
     std::unique_lock<std::recursive_mutex> lck(_mtx);
     Atom* pat = atom.operator->();
     nodeIndex.insertAtom(pat);

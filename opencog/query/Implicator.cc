@@ -136,8 +136,13 @@ static Handle do_imply(AtomSpace* as,
  */
 Handle bindlink(AtomSpace* as, const Handle& hbindlink)
 {
-	// Now perform the search.
+#ifdef CACHED_IMPLICATOR
+	CachedDefaultImplicator impl(as);
+#else
 	DefaultImplicator impl(as);
+#endif
+	
+	// Now perform the search.
 	return do_imply(as, hbindlink, impl);
 }
 
