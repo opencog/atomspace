@@ -120,7 +120,7 @@ void AtomTable::ready_transient(AtomTable* parent, AtomSpace* holder)
     if (not _transient)
         throw opencog::RuntimeException(TRACE_INFO,
                 "AtomTable - ready called on non-transient atom table.");
-    
+
     // Set the new parent environment and holder atomspace.
     _environ = parent;
     _as = holder;
