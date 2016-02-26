@@ -27,9 +27,9 @@
 (load-from-path "crisp-deduction-config.scm")
 
 ; Define knowledge base
-(define A (ConceptNode "A" (stv 1 1)))
-(define B (ConceptNode "B"))
-(define C (ConceptNode "C"))
+(define A (PredicateNode "A" (stv 1 1)))
+(define B (PredicateNode "B"))
+(define C (PredicateNode "C"))
 (define AB (ImplicationLink (stv 1 1) A B))
 (define BC (ImplicationLink (stv 1 1) B C))
 
@@ -40,8 +40,8 @@
 ; Expected output should be something like
 ;; $1 = (ListLink
 ;;    (ImplicationLink (stv 1 0.99999982)
-;;       (ConceptNode "A")
-;;       (ConceptNode "C")
+;;       (PredicateNode "A")
+;;       (PredicateNode "C")
 ;;    )
 ;; )
 
@@ -49,8 +49,8 @@
 ; sure the results you're getting aren't provided by the forward
 ; chainer command above)
 
-;; scheme@(guile-user)> (define AC (ImplicationLink (ConceptNode "A")
-;;                                                  (ConceptNode "C")))
+;; scheme@(guile-user)> (define AC (ImplicationLink (PredicateNode "A")
+;;                                                  (PredicateNode "C")))
 ;; scheme@(guile-user)> (crisp-deduction-bc AC)
 
 ;; Expected output will be empty
@@ -61,6 +61,6 @@
 
 ;; scheme@(guile-user)> AC
 ;; $2 = (ImplicationLink (stv 1 0.99999982)
-;;    (ConceptNode "A" (stv 1 0.99999982))
-;;    (ConceptNode "C")
+;;    (PredicateNode "A" (stv 1 0.99999982))
+;;    (PredicateNode "C")
 ;; )

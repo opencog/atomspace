@@ -56,6 +56,11 @@ void LoggerSCM::do_logger_set_stdout(bool enable)
 	return logger().set_print_to_stdout_flag(enable);
 }
 
+void LoggerSCM::do_logger_set_sync(bool enable)
+{
+	return logger().set_sync_flag(enable);
+}
+
 void LoggerSCM::do_logger_error(const std::string& msg)
 {
 	logger().error(msg);
@@ -99,6 +104,8 @@ void LoggerSCM::init(void)
 		&LoggerSCM::do_logger_get_filename, this, "logger");
 	define_scheme_primitive("cog-logger-set-stdout",
 		&LoggerSCM::do_logger_set_stdout, this, "logger");
+	define_scheme_primitive("cog-logger-set-sync",
+		&LoggerSCM::do_logger_set_sync, this, "logger");
 	define_scheme_primitive("cog-logger-error-str",
 		&LoggerSCM::do_logger_error, this, "logger");
 	define_scheme_primitive("cog-logger-warn-str",
