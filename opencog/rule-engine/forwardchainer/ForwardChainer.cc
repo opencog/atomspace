@@ -168,91 +168,98 @@ UnorderedHandleSet ForwardChainer::get_chaining_result()
 
 Handle ForwardChainer::choose_source()
 {
-    size_t selsrc_size = _selected_sources.size();
-    // If all sources have been selected then insert the sources'
-    // children in the set of potential sources
-    if (_selected_sources == _potential_sources) {
-        fc_logger().debug() << "All " << selsrc_size
-                            << " sources have already been selected";
+	size_t selsrc_size = _selected_sources.size();
+	// If all sources have been selected then insert the sources'
+	// children in the set of potential sources
+	if (_unselected_sources.empty()) {
+		fc_logger().debug() << "All " << selsrc_size
+		                    << " sources have already been selected";
 
-        // Hack to help to exhaust sources with
-        // multiple matching rules. This would be
-        // better used with a memory of which
-        // source x rule pairs have been
-        // tried. But choose_source would still
-        // remain a hack anyway.
-        if (biased_randbool(0.01)) {
-            for (const Handle& h : _selected_sources) {
-                LinkPtr l = LinkCast(h);
-                if (l) {
-                    const HandleSeq& outgoings = l->getOutgoingSet();
-                    _potential_sources.insert(outgoings.begin(),
-                                              outgoings.end());
-                }
-            }
-            fc_logger().debug() << (_potential_sources.size() - selsrc_size)
-                                << " sources' children have been added as "
-                                << "potential sources";
-        } else {
-            fc_logger().debug() << "No added sources, "
-                                << "retry existing sources instead";
-        }
-    }
+		// Hack to help to exhaust sources with
+		// multiple matching rules. This would be
+		// better used with a memory of which
+		// source x rule pairs have been
+		// tried. But choose_source would still
+		// remain a hack anyway.
+		if (biased_randbool(0.01)) {
+			for (const Handle& h : _selected_sources) {
+				LinkPtr l = LinkCast(h);
+				if (l) {
+					const HandleSeq& outgoings = l->getOutgoingSet();
+					update_potential_sources(outgoings);
+				}
+			}
+			fc_logger().debug() << (_potential_sources.size() - selsrc_size)
+			                    << " sources' children have been added as "
+			                    << "potential sources";
+		} else {
+			fc_logger().debug() << "No added sources, "
+			                    << "retry existing sources instead";
+		}
+	}
 
-    fc_logger().debug() << "Selected sources so far "
-                        << _selected_sources.size()
-                        << "/" << _potential_sources.size();
+	fc_logger().debug() << "Selected sources so far "
+	                    << selsrc_size << "/" << _potential_sources.size();
 
-    URECommons urec(_as);
-    map<Handle, float> tournament_elem;
+	// URECommons urec(_as);
+	// map<Handle, float> tournament_elem;
 
-    auto to_select = [&](const Handle& h) {
-        if (selsrc_size == _potential_sources.size())
-            // They all been tried. What can we do? Let's try again,
-            // it's better than crashing.
-            return true;
-	    return _selected_sources.find(h) == _selected_sources.end();
-    };
+	// auto to_select = [&](const Handle& h) {
+	//     if (selsrc_size == _potential_sources.size())
+	//         // They all been tried. What can we do? Let's try again,
+	//         // it's better than crashing.
+	//         return true;
+	//     return _selected_sources.find(h) == _selected_sources.end();
+	// };
 
-    switch (_ts_mode) {
-    case source_selection_mode::TV_FITNESS:
-	    for (Handle s : _potential_sources) {
-            if (to_select(s))
-                tournament_elem[s] = urec.tv_fitness(s);
-	    }
-        break;
+	// switch (_ts_mode) {
+	// case source_selection_mode::TV_FITNESS:
+	//     for (const Handle& s : _potential_sources) {
+	//         if (to_select(s))
+	//             tournament_elem[s] = urec.tv_fitness(s);
+	//     }
+	//     break;
 
-    case source_selection_mode::STI:
-        for (Handle s : _potential_sources) {
-            if (to_select(s))
-                tournament_elem[s] = s->getSTI();
-        }
-        break;
+	// case source_selection_mode::STI:
+	//     for (const Handle& s : _potential_sources) {
+	//         if (to_select(s))
+	//             tournament_elem[s] = s->getSTI();
+	//     }
+	//     break;
 
-    case source_selection_mode::UNIFORM:
-        for (Handle s : _potential_sources) {
-            if (to_select(s))
-                tournament_elem[s] = 1.0;
-        }
-        break;
+	// case source_selection_mode::UNIFORM:
+	//     for (const Handle& s : _potential_sources) {
+	//         if (to_select(s))
+	//             tournament_elem[s] = 1.0;
+	//     }
+	//     break;
 
-    default:
-        throw RuntimeException(TRACE_INFO, "Unknown source selection mode.");
-        break;
-    }
+	// default:
+	//     throw RuntimeException(TRACE_INFO, "Unknown source selection mode.");
+	//     break;
+	// }
 
-    OC_ASSERT(not tournament_elem.empty());
+	// OC_ASSERT(not tournament_elem.empty());
 
-    // for (const auto& e : tournament_elem) {
-    //     fc_logger().debug() << "tournament_elem = {" << e.first->toString()
-    //                         << ", " << e.second << "}";
-    // }
+	// // for (const auto& e : tournament_elem) {
+	// //     fc_logger().debug() << "tournament_elem = {" << e.first->toString()
+	// //                         << ", " << e.second << "}";
+	// // }
 
-    //! Prioritize new source selection.
-    Handle hchosen = urec.tournament_select(tournament_elem);
-    _selected_sources.insert(hchosen);
+	// //! Prioritize new source selection.
+	// Handle hchosen = urec.tournament_select(tournament_elem);
 
-    return hchosen;
+	// Replace all the above by a much cheaper sampling method. It is
+	// stupider but computationally very efficient. To be replaced
+	// by a smart one in the future.
+
+	Handle hchosen = rand_element(_unselected_sources.empty() ?
+	                              _potential_sources : _unselected_sources);
+
+	_selected_sources.insert(hchosen);
+	_unselected_sources.erase(hchosen);
+
+	return hchosen;
 }
 
 Rule* ForwardChainer::choose_rule(Handle hsource)

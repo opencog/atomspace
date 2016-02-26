@@ -59,7 +59,11 @@ private:
     bool _search_in_af;
     bool _search_focus_set;
     Handle _cur_source;
+
+	// We maintain both a selected and unselected sources to speed up
+	// choose_source
     UnorderedHandleSet _selected_sources;
+    UnorderedHandleSet _unselected_sources;
 
     FCStat _fcstat;
 
@@ -80,7 +84,14 @@ private:
                                     const Rule* rule);
 	template<typename HandleContainer>
     void update_potential_sources(const HandleContainer& input) {
-        _potential_sources.insert(input.begin(), input.end());
+		UnorderedHandleSet input_minus_selected;
+		for (const Handle h : input)
+			if (_selected_sources.find(h) == _selected_sources.end())
+				input_minus_selected.insert(h);
+		_potential_sources.insert(input_minus_selected.begin(),
+		                          input_minus_selected.end());
+        _unselected_sources.insert(input_minus_selected.begin(),
+                                   input_minus_selected.end());
     }
     bool is_valid_implicant(const Handle& h);
     void validate(Handle hsource, HandleSeq hfocus_set);
