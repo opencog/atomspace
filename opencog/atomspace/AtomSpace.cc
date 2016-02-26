@@ -200,8 +200,7 @@ Handle AtomSpace::get_node(Type t, const string& name)
     return Handle::UNDEFINED;
 }
 
-Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing,
-                           bool async)
+Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing, bool async)
 {
     // Is this atom already in the atom table?
     Handle hexist = _atom_table.getHandle(t, outgoing);
@@ -400,6 +399,13 @@ bool AtomSpace::remove_atom(Handle h, bool recursive)
         throw RuntimeException(TRACE_INFO, "Not implemented!!!");
     }
     return 0 < _atom_table.extract(h, recursive).size();
+}
+
+std::string AtomSpace::to_string()
+{
+	std::stringstream ss;
+	ss << *this;
+	return ss.str();
 }
 
 void AtomSpace::clear()

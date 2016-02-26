@@ -130,8 +130,10 @@ private:
 	//    <input>
 	//    NumberNode <num>
 	//
-	// Return the number associated to <num>
-	double fetch_num_param(const std::string& schema_name, Handle input);
+	// Return the number associated to <num> or default_value in case
+	// no such ExecutionLink exists.
+	double fetch_num_param(const std::string& schema_name, Handle input,
+	                       double default_value = 0.0);
 
 	// Given <pred_name> and <input> in
 	//
@@ -139,7 +141,8 @@ private:
 	//    PredicateNode <pred_name>
 	//    <input>
 	//
-	// Return TV.mean > 0.5
+	// Return TV.mean > 0.5 or default_value in case no such
+	// EvaluationLink exists.
 	bool fetch_bool_param(const std::string& pred_name, Handle input);
 };
 

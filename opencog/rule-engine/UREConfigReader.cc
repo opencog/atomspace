@@ -135,7 +135,8 @@ HandleSeq UREConfigReader::fetch_execution_outputs(Handle schema,
 	return LinkCast(outputs)->getOutgoingSet();
 }
 
-double UREConfigReader::fetch_num_param(const string& schema_name, Handle input)
+double UREConfigReader::fetch_num_param(const string& schema_name, Handle input,
+                                        double default_value)
 {
 	Handle param_schema = _as.add_node(SCHEMA_NODE, schema_name);
 	HandleSeq outputs = fetch_execution_outputs(param_schema, input, NUMBER_NODE);
@@ -144,9 +145,16 @@ double UREConfigReader::fetch_num_param(const string& schema_name, Handle input)
 		Type input_type = input->getType();
 		string input_str =
 			classserver().getTypeName(input_type) + " \"" + input_name + "\"";
-		OC_ASSERT(outputs.size() == 1,
+		if (outputs.size() == 0) {
+			logger().warn() << "Could not retrieve parameter " << schema_name
+			                << " for rule-based system " << input_name
+			                << ". Use default value " << default_value
+			                << " instead.";
+			return default_value;
+		} else {
+			OC_ASSERT(outputs.size() == 1,
 		          "Could not retrieve parameter %s for rule-based system %s. "
-		          "There should be one and only one output for\n"
+		          "There should be only one output for\n"
 		          "ExecutionLink\n"
 		          "   SchemaNode \"%s\"\n"
 		          "   %s\n"
@@ -154,8 +162,9 @@ double UREConfigReader::fetch_num_param(const string& schema_name, Handle input)
 		          "instead there are %u",
 		          schema_name.c_str(), input_name.c_str(),
 		          schema_name.c_str(), input_str.c_str(), outputs.size());
+			return NumberNodeCast(outputs.front())->get_value();
+		}
 	}
-	return NumberNodeCast(outputs.front())->get_value();
 }
 
 bool UREConfigReader::fetch_bool_param(const string& pred_name, Handle input)
