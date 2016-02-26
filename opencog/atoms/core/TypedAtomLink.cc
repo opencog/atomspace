@@ -85,8 +85,7 @@ TypedAtomLink::TypedAtomLink(Link &l)
 Handle TypedAtomLink::get_type(const Handle& atom)
 {
 	Handle uniq(get_unique(atom, TYPED_ATOM_LINK, false));
-	LinkPtr luniq(LinkCast(uniq));
-	return luniq->getOutgoingAtom(1);
+	return uniq->getOutgoingAtom(1);
 }
 
 /* ===================== END OF FILE ===================== */

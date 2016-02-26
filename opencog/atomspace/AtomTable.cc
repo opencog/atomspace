@@ -65,13 +65,16 @@ using namespace opencog;
 
 std::recursive_mutex AtomTable::_mtx;
 
-AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder)
-    : _index_queue(this, &AtomTable::put_atom_into_index)
+AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient)
+    : _index_queue(this, &AtomTable::put_atom_into_index, transient?0:4)
 {
     _as = holder;
     _environ = parent;
     _uuid = TLB::reserve_extent(1);
-    size = 0;
+    _size = 0;
+    size_t ntypes = classserver().getNumberOfClasses();
+    _size_by_type.resize(ntypes);
+    _transient = transient;
 
     // Set resolver before doing anything else, such as getting
     // the atom-added signals.  Just in case some other thread
@@ -93,40 +96,82 @@ AtomTable::~AtomTable()
 
     // No one who shall look at these atoms shall ever again
     // find a reference to this atomtable.
-    UUID undef = Handle::INVALID_UUID;
     for (auto& pr : _atom_set) {
-        pr.second->_atomTable = NULL;
-        pr.second->_uuid = undef;
+        Handle& atom_to_delete = pr.second;
+        atom_to_delete->_atomTable = NULL;
+        atom_to_delete->_uuid = Handle::INVALID_UUID;
+
         // Aiee ... We added this link to every incoming set;
         // thus, it is our responsibility to remove it as well.
         // This is a stinky design, but I see no other way,
         // because it seems that we can't do this in the Atom
         // destructor (which is where this should be happening).
-        LinkPtr lll(LinkCast(pr.second));
-        if (lll) {
-            for (AtomPtr a : lll->_outgoing) {
-                a->remove_atom(lll);
+        if (atom_to_delete->isLink()) {
+            LinkPtr link_to_delete = LinkCast(atom_to_delete);
+            for (AtomPtr atom_in_out_set : atom_to_delete->getOutgoingSet()) {
+                atom_in_out_set->remove_atom(link_to_delete);
             }
         }
     }
 }
 
-bool AtomTable::isCleared(void) const
+void AtomTable::ready_transient(AtomTable* parent, AtomSpace* holder)
 {
-    // XXX Currently only check if stuff in derived space is gone. No
-    // checking is done on the parent. This is inline with how clear()
-    // is expected to work.
+    if (not _transient)
+        throw opencog::RuntimeException(TRACE_INFO,
+                "AtomTable - ready called on non-transient atom table.");
+    
+    // Set the new parent environment and holder atomspace.
+    _environ = parent;
+    _as = holder;
 
-    if (size != 0) {
-        DPRINTF("AtomTable::size is not 0\n");
-        return false;
+    // We can now resolve handles.
+    Handle::set_resolver(this);
+}
+
+
+void AtomTable::clear_transient()
+{
+    if (not _transient)
+        throw opencog::RuntimeException(TRACE_INFO,
+                "AtomTable - clear called on non-transient atom table.");
+
+    // We are no longer a resolver for handles.
+    Handle::clear_resolver(this);
+
+    // Reset the size to zero.
+    _size = 0;
+
+    // Clear the by-type size cache.
+    Type total_types = _size_by_type.size();
+    for (Type type = ATOM; type < total_types; type++)
+        _size_by_type[type] = 0;
+
+    // Clear the atoms in the set.
+    for (auto pr : _atom_set) {
+        Handle& atom_to_clear = pr.second;
+        atom_to_clear->_atomTable = NULL;
+        atom_to_clear->_uuid = Handle::INVALID_UUID;
+
+        // If this is a link we need to remove this atom from the incoming
+        // sets for any atoms in this atom's outgoing set. See note in
+        // the analogous loop in ~AtomTable above.
+        if (atom_to_clear->isLink()) {
+            LinkPtr link_to_clear = LinkCast(atom_to_clear);
+            for (AtomPtr atom_in_out_set : atom_to_clear->getOutgoingSet()) {
+                atom_in_out_set->remove_atom(link_to_clear);
+            }
+        }
     }
 
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
-    // if (nameIndex.size() != 0) return false;
-    if (typeIndex.size() != 0) return false;
-    if (importanceIndex.size() != 0) return false;
-    return true;
+    // Clear the atom set. This will delete all the atoms since this will be
+    // the last shared_ptr referecence, and set the size of the set to 0.
+    _atom_set.clear();
+
+    // Clear the  parent environment and holder atomspace.
+    _environ = NULL;
+    _as = NULL;
+
 }
 
 AtomTable& AtomTable::operator=(const AtomTable& other)
@@ -190,17 +235,16 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 /// is the bad handle.
 Handle AtomTable::getHandle(const AtomPtr& a) const
 {
+    if (nullptr == a) return Handle::UNDEFINED;
+
     if (in_environ(a))
         return a->getHandle();
 
-    NodePtr nnn(NodeCast(a));
-    if (nnn)
-        return getHandle(nnn->getType(), nnn->getName());
-    else {
-        LinkPtr lll(LinkCast(a));
-        if (lll)
-            return getHandle(lll->getType(), lll->getOutgoingSet());
-    }
+    if (a->isNode())
+        return getHandle(a->getType(), a->getName());
+    else if (a->isLink())
+        return getHandle(a->getType(), a->getOutgoingSet());
+
     return Handle::UNDEFINED;
 }
 
@@ -494,14 +538,13 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // then we need to clone it. We cannot insert it into this atomtable
     // as-is.  (We already know that its not in this atomspace, or its
     // environ.)
-    LinkPtr lll(LinkCast(atom));
-    if (lll) {
+    if (atom->isLink()) {
         // Well, if the link was in some other atomspace, then
         // the outgoing set will probably be too. (It might not
         // be if the other atomspace is a child of this one).
         // So we recursively clone that too.
         HandleSeq closet;
-        for (const Handle& h : lll->getOutgoingSet()) {
+        for (const Handle& h : atom->getOutgoingSet()) {
             // operator->() will be null if its a ProtoAtom that is
             // not an atom.
             if (nullptr == h.operator->()) return Handle::UNDEFINED;
@@ -534,9 +577,8 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // no pointers to actual atoms.  We want to have the actual atoms,
     // because later steps need the pointers to do stuff, in particular,
     // to make sure the child atoms are in an atomtable, too.
-    lll = LinkCast(atom);
-    if (lll) {
-        const HandleSeq& ogs(lll->getOutgoingSet());
+    if (atom->isLink()) {
+        const HandleSeq& ogs(atom->getOutgoingSet());
         size_t arity = ogs.size();
 
         // First, make sure that every member of the outgoing set has
@@ -588,20 +630,21 @@ Handle AtomTable::add(AtomPtr atom, bool async)
        TLB::reserve_upto(atom->_uuid);
     }
     Handle h(atom->getHandle());
-    size++;
+    _size++;
+    _size_by_type[atom->_type] ++;
     _atom_set.insert({atom->_uuid, h});
 
     atom->keep_incoming_set();
     atom->setAtomTable(this);
 
-    if (not async)
+    if (not _transient and not async)
         put_atom_into_index(atom);
 
     // We can now unlock, since we are done.
     lck.unlock();
 
     // Update the indexes asynchronously
-    if (async)
+    if (not _transient and async)
         _index_queue.enqueue(atom);
 
     DPRINTF("Atom added: %ld => %s\n", atom->_uuid, atom->toString().c_str());
@@ -610,6 +653,10 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 
 void AtomTable::put_atom_into_index(AtomPtr& atom)
 {
+    if (_transient)
+        throw RuntimeException(TRACE_INFO,
+          "AtomTable - transient should not index atoms!");
+
     std::unique_lock<std::recursive_mutex> lck(_mtx);
     Atom* pat = atom.operator->();
     nodeIndex.insertAtom(pat);
@@ -634,7 +681,7 @@ void AtomTable::barrier()
 
 size_t AtomTable::getSize() const
 {
-    return size;
+    return _size;
 }
 
 size_t AtomTable::getNumNodes() const
@@ -652,7 +699,18 @@ size_t AtomTable::getNumLinks() const
 size_t AtomTable::getNumAtomsOfType(Type type, bool subclass) const
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    size_t result = typeIndex.getNumAtomsOfType(type, subclass);
+
+    size_t result = _size_by_type[type];
+    if (subclass)
+    {
+        // Also count subclasses of this type, if need be.
+        Type ntypes = _size_by_type.size();
+        for (Type t = ATOM; t<ntypes; t++)
+        {
+            if (t != type and classserver().isA(type, t))
+                result += _size_by_type[t];
+        }
+    }
 
     if (_environ)
         result += _environ->getNumAtomsOfType(type, subclass);
@@ -820,7 +878,8 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     lck.lock();
 
     // Decrements the size of the table
-    size--;
+    _size--;
+    _size_by_type[atom->_type] --;
     _atom_set.erase(atom->_uuid);
 
     Atom* pat = atom.operator->();
@@ -850,6 +909,8 @@ void AtomTable::typeAdded(Type t)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     //resize all Type-based indexes
+    size_t new_size = classserver().getNumberOfClasses();
+    _size_by_type.resize(new_size);
     nodeIndex.resize();
     linkIndex.resize();
     typeIndex.resize();

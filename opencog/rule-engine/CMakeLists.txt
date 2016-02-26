@@ -1,7 +1,7 @@
 #
 # Rule engine lib build
 #
-ADD_LIBRARY(ruleengine SHARED
+ADD_LIBRARY(ruleengine
 	backwardchainer/BackwardChainer
 	backwardchainer/BackwardChainerPMCB
 	backwardchainer/Target

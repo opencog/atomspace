@@ -38,13 +38,49 @@ using namespace opencog;
 /* ======================================================== */
 
 InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
-	_classserver(classserver()),
-	_variables(NULL),
-	_pattern(NULL),
-	_dynamic(NULL),
-	_as(as)
+	_classserver(classserver())
 {
+#ifdef CACHED_IMPLICATOR
+	InitiateSearchCB::clear();
+	InitiateSearchCB::ready(as);
+#else
+	_variables = NULL;
+	_pattern = NULL;
+	_dynamic = NULL;
+	_pl = NULL;
+
+	_root = Handle::UNDEFINED;
+	_starter_term = Handle::UNDEFINED;
+
+	_curr_clause = 0;
+	_choices.clear();
+ 	_search_fail = false;
+	_as = as;
+#endif
 }
+
+#ifdef CACHED_IMPLICATOR
+void InitiateSearchCB::ready(AtomSpace* as)
+{
+	_as = as;
+}
+
+void InitiateSearchCB::clear()
+{
+	_variables = NULL;
+	_pattern = NULL;
+	_dynamic = NULL;
+	_pl = NULL;
+
+	_root = Handle::UNDEFINED;
+	_starter_term = Handle::UNDEFINED;
+
+	_curr_clause = 0;
+	_choices.clear();
+ 	_search_fail = false;
+	_as = NULL;
+}
+#endif
 
 void InitiateSearchCB::set_pattern(const Variables& vars,
                                    const Pattern& pat)

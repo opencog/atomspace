@@ -87,7 +87,11 @@ private:
     // them during add/remove.
     static std::recursive_mutex _mtx;
 
-    size_t size;
+    // Cached count of the number of atoms in the table.
+    size_t _size;
+
+    // Cached count of the number of atoms of each type.
+    std::vector<size_t> _size_by_type;
 
     // Holds all atoms in the table.  Provides lookup between numeric
     // handle uuid and the actual atom pointer. To some degree, this info
@@ -102,7 +106,7 @@ private:
     std::unordered_map<UUID, Handle> _atom_set;
 
     //!@{
-    //! Index for quick retreival of certain kinds of atoms.
+    //! Index for quick retrieval of certain kinds of atoms.
     TypeIndex typeIndex;
     NodeIndex nodeIndex;
     LinkIndex linkIndex;
@@ -131,9 +135,6 @@ private:
     /** Signal emitted when the AV changes. */
     AVCHSigl _AVChangedSignal;
 
-    // JUST FOR TESTS:
-    bool isCleared() const;
-
     /// Parent environment for this table.  Null if top-level.
     /// This allows atomspaces to be nested; atoms in this atomspace
     /// can reference those in the parent environment.
@@ -145,6 +146,8 @@ private:
 
     // The AtomSpace that is holding us (if any). Needed for DeleteLink operation
     AtomSpace* _as;
+    bool _transient;
+
     /**
      * Override and declare copy constructor and equals operator as
      * private.  This is to prevent large object copying by mistake.
@@ -156,9 +159,20 @@ public:
 
     /**
      * Constructor and destructor for this class.
+     *
+     * If 'transient' is true, then some non-essential initialization
+     * is skipped.  This makes the constructor run faster. This is
+     * useful when the AtomTable is being used only for holding
+     * temporary, scratch results, e.g. as a result of evaluation
+     * or inference.
      */
-    AtomTable(AtomTable* parent = NULL, AtomSpace* holder = NULL);
+    AtomTable(AtomTable* parent = NULL, AtomSpace* holder = NULL,
+              bool transient = false);
     ~AtomTable();
+
+    void ready_transient(AtomTable* parent, AtomSpace* holder);
+    void clear_transient();
+
     UUID get_uuid(void) const { return _uuid; }
     AtomTable* get_environ(void) const { return _environ; }
     AtomSpace* getAtomSpace(void) const { return _as; }
@@ -195,7 +209,6 @@ public:
     AtomPtr factory(Type atom_type, AtomPtr atom);
     AtomPtr clone_factory(Type, AtomPtr);
 
-public:
     /**
      * Returns the set of atoms of a given type (subclasses optionally).
      *
@@ -265,7 +278,7 @@ public:
     /**
      * Adds an atom to the table. If the atom already is in the
      * atomtable, then the truth values and attention values of the
-     * two are merged (how, exactly? Is this doe corrrectly!?)
+     * two are merged (how, exactly? Is this done corrrectly!?)
      *
      * If the async flag is set, then the atom addition is performed
      * asynchronously; the atom might not be fully added by the time
@@ -277,8 +290,8 @@ public:
      * XXX The async code path doesn't really do anything yet, since
      * it also uses the big global lock, at the moment.  This needs
      * fixing, mostly be creating a second mutex for the atom insertion,
-     * and also giving each index its own uique mutex, to avoid
-     * collsions.  So teh API is here, but more work is stil needed.
+     * and also giving each index its own unique mutex, to avoid
+     * collisions.  So the API is here, but more work is still needed.
      *
      * @param The new atom to be added.
      * @return The handle of the newly added atom.

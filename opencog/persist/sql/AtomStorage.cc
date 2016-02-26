@@ -860,6 +860,20 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 			qname += n->getName();
 			qname += "$ocp$ ";
 #endif
+			// The Atoms table has a UNIQUE constraint on the
+			// node name.  If a node name is too long, a postgres
+			// error is generated:
+			// ERROR: index row size 4440 exceeds maximum 2712
+			// for index "atoms_type_name_key"
+			// There's not much that can be done about this, without
+			// a redesign of the table format, in some way. Maybe
+			// we could hash the long node names, store the hash,
+			// and make sure that is unique.
+			if (2700 < qname.size())
+			{
+				throw RuntimeException(TRACE_INFO,
+					"Error: do_store_single_atom: Maxiumum Node name size is 2700.\n");
+			}
 			STMT("name", qname);
 
 			// Nodes have a height of zero by definition.
@@ -875,6 +889,22 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 			if (l)
 			{
 				int arity = l->getArity();
+
+				// The Atoms table has a UNIQUE constraint on the
+				// outgoing set.  If a link is too large, a postgres
+				// error is generated:
+				// ERROR: index row size 4440 exceeds maximum 2712
+				// for index "atoms_type_outgoing_key"
+				// The simplest solution that I see requires a database
+				// redesign.  One could hash together the UUID's in the
+				// outgoing set, and then force a unique constraint on
+				// the hash.
+				if (330 < arity)
+				{
+					throw RuntimeException(TRACE_INFO,
+						"Error: do_store_single_atom: Maxiumum Link size is 330.\n");
+				}
+
 				if (arity)
 				{
 					cols += ", outgoing";

@@ -32,20 +32,129 @@
 
 using namespace opencog;
 
+const bool TRANSIENT_SPACE = true;
+const int MAX_CACHED_TRANSIENTS = 8;
+
+// Allocated storage for the transient atomspace cache static variables.
+std::mutex DefaultPatternMatchCB::s_transient_cache_mutex;
+std::vector<AtomSpace*> DefaultPatternMatchCB::s_transient_cache;
+
 /* ======================================================== */
 
 DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
-	_classserver(classserver()),
-	_temp_aspace(as),
-	_instor(&_temp_aspace),
-	_as(as)
+	_classserver(classserver())
 {
+	_temp_aspace = grab_transient_atomspace(as);
+	_instor = new Instantiator(_temp_aspace);
+
 	_connectives.insert(SEQUENTIAL_AND_LINK);
 	_connectives.insert(SEQUENTIAL_OR_LINK);
 	_connectives.insert(AND_LINK);
 	_connectives.insert(OR_LINK);
 	_connectives.insert(NOT_LINK);
+
+	_as = as;
 }
+
+DefaultPatternMatchCB::~DefaultPatternMatchCB()
+{
+	// If we have a transient atomspace, release it.
+	if (_temp_aspace)
+	{
+		release_transient_atomspace(_temp_aspace);
+		_temp_aspace = NULL;
+	}
+
+	// Delete the instantiator.
+	delete _instor;	
+}
+
+AtomSpace* DefaultPatternMatchCB::grab_transient_atomspace(AtomSpace* parent)
+{
+	AtomSpace* transient_atomspace = NULL;
+
+	// See if the cache has one...
+	if (s_transient_cache.size() > 0)
+	{
+		// Grab the mutex lock.
+		std::unique_lock<std::mutex> cache_lock(s_transient_cache_mutex);
+
+		// Check to make sure the cache still has one now that we have
+		// the mutex.
+		if (s_transient_cache.size() > 0)
+		{
+			// Pop the last transient atomspace off the cache stack.
+			transient_atomspace = s_transient_cache.back();
+			s_transient_cache.pop_back();
+
+			// Ready it for the new parent atomspace.
+			transient_atomspace->ready_transient(parent);
+		}
+	}
+
+	// If we didn't get one from the cache, then create a new one.
+	if (!transient_atomspace)
+		transient_atomspace = new AtomSpace(parent, TRANSIENT_SPACE);
+
+	return transient_atomspace;
+}
+
+void DefaultPatternMatchCB::release_transient_atomspace(AtomSpace* atomspace)
+{
+	bool atomspace_cached = false;
+
+	// If the cache is not full...
+	if (s_transient_cache.size() < MAX_CACHED_TRANSIENTS)
+	{
+		// Grab the mutex lock.
+		std::unique_lock<std::mutex> cache_lock(s_transient_cache_mutex);
+
+		// Check it again since we only now have the mutex locked.
+		if (s_transient_cache.size() < MAX_CACHED_TRANSIENTS)
+		{
+			// Clear this transient atomspace.
+			atomspace->clear_transient();
+
+			// Place this transient into the cache.
+			s_transient_cache.push_back(atomspace);
+
+			// The atomspace has been cached.
+			atomspace_cached = true;
+		}
+	}
+
+	// If we didn't cache the atomspace, then delete it.
+	if (!atomspace_cached)
+		delete atomspace;
+}
+
+#ifdef CACHED_IMPLICATOR
+void DefaultPatternMatchCB::ready(AtomSpace* as)
+{
+	_temp_aspace = grab_transient_atomspace(as);
+	_instor->ready(_temp_aspace);
+
+	_as = as;
+}
+
+void DefaultPatternMatchCB::clear()
+{
+	_vars = NULL;
+	_dynamic = NULL;
+	_have_evaluatables = false;
+	_globs = NULL;
+
+	_have_variables = false;
+	_pattern_body = Handle::UNDEFINED;
+
+	release_transient_atomspace(_temp_aspace);
+	_temp_aspace = NULL;
+	_instor->clear();
+
+	_optionals_present = false;
+	_as = NULL;
+}
+#endif
 
 void DefaultPatternMatchCB::set_pattern(const Variables& vars,
                                         const Pattern& pat)
@@ -57,7 +166,6 @@ void DefaultPatternMatchCB::set_pattern(const Variables& vars,
 	_pattern_body = pat.body;
 	_globs = &pat.globby_terms;
 }
-
 
 /* ======================================================== */
 
@@ -228,8 +336,8 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 		// which seems reasonable, except that everything else in the
 		// default callback ignores the TV on EvaluationLinks. So this
 		// is kind-of schizophrenic here.  Not sure what else to do.
-		_temp_aspace.clear();
-		TruthValuePtr tvp(EvaluationLink::do_eval_scratch(_as, grnd, &_temp_aspace));
+		_temp_aspace->clear();
+		TruthValuePtr tvp(EvaluationLink::do_eval_scratch(_as, grnd, _temp_aspace));
 
 		LAZY_LOG_FINE << "Clause_match evaluation yeilded tv"
 		              << std::endl << tvp->toString() << std::endl;
@@ -276,7 +384,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	// grounding might be insane.  So we put it here. This is probably
 	// not very efficient, but will do for now...
 
-	Handle gvirt(_instor.instantiate(virt, gnds));
+	Handle gvirt(_instor->instantiate(virt, gnds));
 
 	LAZY_LOG_FINE << "Enter eval_term CB with virt=" << std::endl
 	              << virt->toShortString() << std::endl;
@@ -329,10 +437,10 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	}
 	else
 	{
-		_temp_aspace.clear();
+		_temp_aspace->clear();
 		try
 		{
-			tvp = EvaluationLink::do_eval_scratch(_as, gvirt, &_temp_aspace, true);
+			tvp = EvaluationLink::do_eval_scratch(_as, gvirt, _temp_aspace, true);
 		}
 		catch (const NotEvaluatableException& ex)
 		{

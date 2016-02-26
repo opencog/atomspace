@@ -23,6 +23,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <dlfcn.h>
+
 #include <boost/filesystem/operations.hpp>
 
 #include <opencog/util/Config.h>
@@ -263,6 +265,18 @@ static bool try_to_load_modules(const char ** config_paths)
 
 void opencog::global_python_initialize()
 {
+    // Calling "import rospy" exhibits bug
+    // https://github.com/opencog/atomspace/issues/669
+    // Error message:
+    //    Python error :
+    //    /usr/lib/python2.7/lib-dynload/datetime.x86_64-linux-gnu.so:
+    //    undefined symbol: PyExc_SystemError
+    // Googling for the above error messge reveals that the "feature"
+    // is as old as the wind. The solution of using dlopen() is given
+    // here:
+    // https://mail.python.org/pipermail/new-bugs-announce/2008-November/003322.html
+    dlopen("libpython2.7.so", RTLD_LAZY | RTLD_GLOBAL);
+
     // We don't really know the gstate yet but we'll set it here to avoid
     // compiler warnings below.
     PyGILState_STATE gstate = PyGILState_UNLOCKED;
@@ -356,7 +370,7 @@ PythonEval::PythonEval(AtomSpace* atomspace)
     // Initialize Python objects and imports.
     //
     // Strange but true: one can use the atomspace, and put atoms
-    // in it .. useing the type constructors and everything (e.g.
+    // in it .. using the type constructors and everything (e.g.
     // the demos in the /examples/python directory) and never ever
     // actually call global_python_initialize() ... it might never
     // be called, if the python evaluator (i.e. this object) is

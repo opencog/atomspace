@@ -5,7 +5,7 @@ INCLUDE_DIRECTORIES (
 	${ODBC_INCLUDE_DIRS}
 )
 
-ADD_LIBRARY (persist-sql SHARED
+ADD_LIBRARY (persist-sql
 	odbcxx.cc
 	AtomStorage.cc
 	SQLPersistSCM.cc
@@ -33,11 +33,13 @@ TARGET_LINK_LIBRARIES(sniff
 	execution
 	clearbox
 	smob
+	atomcore
+	atomutils
 	${ODBC_LIBRARIES}
 )
 
 INSTALL (TARGETS persist-sql
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
 INSTALL (FILES

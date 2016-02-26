@@ -1,7 +1,7 @@
 
 # Build the GearMan based distributed system.
 #
-ADD_LIBRARY(dist-gearman SHARED
+ADD_LIBRARY(dist-gearman
 	DistSCM.cc
 )
 

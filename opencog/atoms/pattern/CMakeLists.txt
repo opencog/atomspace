@@ -2,7 +2,7 @@
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
-ADD_LIBRARY (lambda SHARED
+ADD_LIBRARY (lambda
 	BindLink.cc
 	PatternLink.cc
 	PatternUtils.cc
@@ -24,7 +24,7 @@ IF (CYGWIN)
 	)
 ELSE (CYGWIN)
 	INSTALL (TARGETS lambda
-		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 	)
 ENDIF (CYGWIN)
 

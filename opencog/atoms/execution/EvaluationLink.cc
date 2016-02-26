@@ -26,6 +26,7 @@
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/pattern/PatternLink.h>
@@ -188,9 +189,16 @@ static void thread_eval_tv(AtomSpace* as,
 	*tv = EvaluationLink::do_eval_scratch(as, evelnk, scratch, silent);
 }
 
-/// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
+/// do_evaluate -- evaluate any Node or Link types that can meaningfully
+/// result in a truth value.
 ///
-/// Expects the argument to be an EvaluationLink, which should have the
+/// For example, evaluating a TrueLink returns TruthValue::TRUE_TV, and
+/// evaluating a FalseLink returns TruthValue::FALSE_TV.  Evaluating
+/// AndLink, OrLink returns the boolean and, or of their respective
+/// arguments.  A wide variety of Link types are evaluatable, this
+/// handles them all.
+///
+/// If the argument to be an EvaluationLink, it should have the
 /// following structure:
 ///
 ///     EvaluationLink
@@ -471,25 +479,46 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const HandleSeq& sna)
 
 /// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
 ///
-/// Expects "gsn" to be a GroundedPredicateNode
+/// Expects "pn" to be a GroundedPredicateNode or a DefinedPredicateNode
 /// Expects "args" to be a ListLink
 /// Executes the GroundedPredicateNode, supplying the args as argument
 ///
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
-                                    const Handle& gsn, const Handle& args)
+                                    const Handle& pn, const Handle& args)
 {
-	if (GROUNDED_PREDICATE_NODE != gsn->getType())
+	if (LIST_LINK != args->getType())
+	{
+		throw RuntimeException(TRACE_INFO,
+			"Expecting arguments to EvaluationLink!");
+	}
+
+	Type pntype = pn->getType();
+	if (DEFINED_PREDICATE_NODE == pntype)
+	{
+		Handle defn = DefineLink::get_definition(pn);
+
+		// If its not a LambdaLink, then I don't know what to do...
+		Type dtype = defn->getType();
+		if (LAMBDA_LINK != dtype)
+			throw RuntimeException(TRACE_INFO,
+				"Expecting defintion to be a LambdaLink, got %s",
+				defn->toString().c_str());
+
+		// Treat it as if it were a PutLink -- perform the
+		// beta-reduction, and evaluate the result.
+		LambdaLinkPtr lam(LambdaLinkCast(defn));
+		Handle reduct = lam->substitute(args->getOutgoingSet());
+		return do_evaluate(as, reduct);
+	}
+
+	if (GROUNDED_PREDICATE_NODE != pntype)
 	{
 		// Throw a silent exception; this is called in some try..catch blocks.
 		throw NotEvaluatableException();
 	}
-	if (LIST_LINK != args->getType())
-	{
-		throw RuntimeException(TRACE_INFO, "Expecting arguments to EvaluationLink!");
-	}
 
 	// Get the schema name.
-	const std::string& schema = NodeCast(gsn)->getName();
+	const std::string& schema = pn->getName();
 	// printf ("Grounded schema name: %s\n", schema.c_str());
 
 	// A very special-case C++ comparison.

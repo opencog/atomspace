@@ -61,12 +61,10 @@ public:
 	// Take the list of values `vals`, and substitute them in for the
 	// variables in the body of this lambda. The values must satisfy all
 	// type restrictions, else an exception will be thrown.
-/*
 	Handle substitute(const HandleSeq& vals) const
 	{
-		return VariableList::substitute(_body, vals);
+		return get_variables().substitute(_body, vals);
 	}
-*/
 };
 
 typedef std::shared_ptr<LambdaLink> LambdaLinkPtr;

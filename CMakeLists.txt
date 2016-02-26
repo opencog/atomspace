@@ -76,6 +76,14 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 		SET(CMAKE_C_FLAGS_DEBUG "-ggdb3 -fstack-protector")
 		SET(CMAKE_C_FLAGS_PROFILE "-O2 -g3 -fstack-protector -pg")
 		SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto")
+		LINK_LIBRARIES(pthread)
+
+		# Workaround for circular dependencies problem. This causes
+		# LINK_LIBRARIES to appear twice in the linker line; the
+		# second appearance has the effect of resolving any circular
+		# dependencies left over from the first specification.
+		# See pull request #642 for more discussion.
+		SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} <LINK_LIBRARIES>")
 	ENDIF (APPLE)
 
 	# 1) -Wno-variadic-macros is to avoid warnings regarding using
@@ -99,6 +107,16 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 		LINK_LIBRARIES(gcov)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
+
+# The default case for non-profile builds is to use shared libraries. So don't
+# use explicit SHARED in the ADD_LIBRARY calls in CMakeLists.txt instances or
+# this flag won't work since it only affects the default.
+IF (CMAKE_BUILD_TYPE STREQUAL "Profile")
+	SET(BUILD_SHARED_LIBS OFF)
+ELSE (CMAKE_BUILD_TYPE STREQUAL "Profile")
+	SET(BUILD_SHARED_LIBS ON)
+ENDIF (CMAKE_BUILD_TYPE STREQUAL "Profile")
+
 
 # Do the windows build
 IF (WIN32)
@@ -498,13 +516,24 @@ ADD_CUSTOM_TARGET(cscope
 
 # packaging
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The Open Cognition Framework")
-SET(CPACK_PACKAGE_NAME "opencog")
+SET(CPACK_PACKAGE_NAME "atomspace")
 SET(CPACK_PACKAGE_VENDOR "opencog.org")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-SET(CPACK_PACKAGE_VERSION_MAJOR "0")
-SET(CPACK_PACKAGE_VERSION_MINOR "1")
-SET(CPACK_PACKAGE_VERSION_PATCH "4")
+FILE(READ "${CMAKE_SOURCE_DIR}/opencog/atomspace/version.h" _ATOMSPACE_H_CONTENTS)
+STRING(REGEX MATCH
+    "#define ATOMSPACE_MAJOR_VERSION ([0-9]+)"
+    _ "${_ATOMSPACE_H_CONTENTS}")
+SET(CPACK_PACKAGE_VERSION_MAJOR ${CMAKE_MATCH_1})
+STRING(REGEX MATCH
+    "#define ATOMSPACE_MINOR_VERSION ([0-9]+)"
+    _ "${_ATOMSPACE_H_CONTENTS}")
+SET(CPACK_PACKAGE_VERSION_MINOR ${CMAKE_MATCH_1})
+STRING(REGEX MATCH
+    "#define ATOMSPACE_MICRO_VERSION ([0-9]+)"
+    _ "${_ATOMSPACE_H_CONTENTS}")
+SET(CPACK_PACKAGE_VERSION_PATCH ${CMAKE_MATCH_1})
+SET(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 SET(CPACK_BINARY_STGZ "OFF")
 SET(CPACK_BINARY_TBZ2 "OFF")
 SET(CPACK_BINARY_TGZ "OFF")
@@ -513,9 +542,10 @@ SET(CPACK_SOURCE_STGZ "OFF")
 SET(CPACK_SOURCE_TBZ2 "ON")
 SET(CPACK_SOURCE_TGZ "OFF")
 SET(CPACK_SOURCE_TZ "OFF")
+SET(CPACK_PACKAGE_CONTACT "opencog@googlegroups.com")
 SET(CPACK_GENERATOR "TBZ2")
 SET(CPACK_SOURCE_GENERATOR "TBZ2")
-SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
 SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}")
 SET(CPACK_SOURCE_IGNORE_FILES
 	"~$"
@@ -551,6 +581,12 @@ SET(CPACK_SOURCE_IGNORE_FILES
 	"^${PROJECT_BINARY_DIR}/examples/server/derivedserver$"
 	"^${PROJECT_BINARY_DIR}/examples/hopfield/hopfield$"
 )
+
+SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
+SET(CPACK_DEBIAN_PACKAGE_DEPENDS
+    "guile-2.0 (>= 2.0.9), python (>= 2.7.5), libzmq3 (>= 4.0.4), libboost-date-time1.54.0, libboost-filesystem1.54.0, libboost-program-options1.54.0, libboost-regex1.54.0, libboost-serialization1.54.0, libboost-system1.54.0, libboost-thread1.54.0, protobuf-compiler (>= 2.5.0), libssl1.0.0 (>= 1.0.1), libatlas-base-dev, unixodbc (>= 2.2.14p2), odbc-postgresql (>= 1:09.02.0100), cogutils (>= 2.0.2)"
+)
+
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
 IF (WIN32)
 	# Its "not unix" is cygwin is being used.

@@ -122,6 +122,10 @@ void PutLink::static_typecheck_values(void)
 	if (DEFINED_PREDICATE_NODE == btype)
 		return;
 
+	// If its part of a signature, there is nothing to do.
+	if (TYPE_NODE == btype or TYPE_CHOICE == btype)
+		return;
+
 	size_t sz = _varlist.varseq.size();
 	Type vtype = _values->getType();
 
@@ -136,21 +140,21 @@ void PutLink::static_typecheck_values(void)
 		return;
 	}
 
-	LinkPtr lval(LinkCast(_values));
+	// The standard, default case is to get a ListLink as an argument.
 	if (LIST_LINK == vtype)
 	{
-		if (not _varlist.is_type(lval->getOutgoingSet()))
+		if (not _varlist.is_type(_values->getOutgoingSet()))
 		{
 			if (_vardecl)
 				throw SyntaxException(TRACE_INFO,
 					"PutLink has mismatched value list! vardecl=%s\nvals=%s",
 					_vardecl->toString().c_str(),
-					lval->toString().c_str());
+					_values->toString().c_str());
 			else
 				throw SyntaxException(TRACE_INFO,
 					"PutLink has mismatched value list! body=%s\nvals=%s",
 					_body->toString().c_str(),
-					lval->toString().c_str());
+					_values->toString().c_str());
 		}
 		return;
 	}
@@ -159,21 +163,25 @@ void PutLink::static_typecheck_values(void)
 	if (GET_LINK == vtype)
 		return;
 
+	// If its part of a signature, there is nothing to do.
+	if (TYPE_NODE == vtype or TYPE_CHOICE == vtype)
+		return;
+
+	// The only remaining possibility is that there is set of ListLinks.
 	if (SET_LINK != vtype)
 		throw InvalidParamException(TRACE_INFO,
 			"PutLink was expecting a ListLink, SetLink or GetLink!");
 
 	if (1 < sz)
 	{
-		for (const Handle& h : lval->getOutgoingSet())
+		for (const Handle& h : _values->getOutgoingSet())
 		{
-			LinkPtr lse(LinkCast(h));
 			// If the arity is greater than one, then the values must be in a list.
-		   if (lse->getType() != LIST_LINK)
+		   if (h->getType() != LIST_LINK)
 				throw InvalidParamException(TRACE_INFO,
 					"PutLink expected value list!");
 
-			if (not _varlist.is_type(lse->getOutgoingSet()))
+			if (not _varlist.is_type(h->getOutgoingSet()))
 				throw InvalidParamException(TRACE_INFO,
 					"PutLink bad value list!");
 		}
@@ -181,7 +189,7 @@ void PutLink::static_typecheck_values(void)
 	}
 
 	// If the arity is one, the values must obey type constraint.
-	for (const Handle& h : lval->getOutgoingSet())
+	for (const Handle& h : _values->getOutgoingSet())
 	{
 		if (not _varlist.is_type(h))
 			throw InvalidParamException(TRACE_INFO,
@@ -271,7 +279,7 @@ Handle PutLink::do_reduce(void) const
 
 		// Iterate over the set...
 		HandleSeq bset;
-		for (Handle h : LinkCast(_values)->getOutgoingSet())
+		for (const Handle& h : _values->getOutgoingSet())
 		{
 			HandleSeq oset;
 			oset.emplace_back(h);
@@ -285,7 +293,7 @@ Handle PutLink::do_reduce(void) const
 	}
 	if (LIST_LINK == vtype)
 	{
-		const HandleSeq& oset = LinkCast(_values)->getOutgoingSet();
+		const HandleSeq& oset = _values->getOutgoingSet();
 		try
 		{
 			return vars.substitute(bods, oset);
@@ -300,9 +308,9 @@ Handle PutLink::do_reduce(void) const
 		"Should have caught this earlier, in the ctor");
 
 	HandleSeq bset;
-	for (Handle h : LinkCast(_values)->getOutgoingSet())
+	for (const Handle& h : _values->getOutgoingSet())
 	{
-		const HandleSeq& oset = LinkCast(h)->getOutgoingSet();
+		const HandleSeq& oset = h->getOutgoingSet();
 		try
 		{
 			bset.emplace_back(vars.substitute(bods, oset));
