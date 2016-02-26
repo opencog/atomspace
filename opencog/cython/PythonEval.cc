@@ -281,7 +281,7 @@ void opencog::global_python_initialize()
     // compiler warnings below.
     PyGILState_STATE gstate = PyGILState_UNLOCKED;
 
-    logger().debug("[global_python_initialize] Start");
+    logger().info("[global_python_initialize] Start");
 
     // Throw an exception if this is called more than once.
     if (already_initialized) {
@@ -316,7 +316,7 @@ void opencog::global_python_initialize()
         PySys_SetArgv(1, (char **) &argv0);
     }
 
-    logger().debug("[global_python_initialize] Adding OpenCog sys.path "
+    logger().info("[global_python_initialize] Adding OpenCog sys.path "
             "directories");
 
     // Get starting "sys.path".
@@ -338,7 +338,7 @@ void opencog::global_python_initialize()
     else
         PyEval_ReleaseLock();
 
-    logger().debug("[global_python_initialize] Finish");
+    logger().info("[global_python_initialize] Finish");
 }
 
 void opencog::global_python_finalize()
@@ -680,8 +680,8 @@ PyObject* PythonEval::module_for_function(  const std::string& moduleFunction,
  *
  * On error throws an exception.
  */
-PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
-                                            Handle arguments)
+PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
+                                         Handle arguments)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
