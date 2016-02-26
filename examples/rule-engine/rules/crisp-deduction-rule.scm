@@ -1,13 +1,13 @@
-; =============================================================================
-; Deduction Rule.
-;
-; A->B
-; B->C
-; |-
-; A->C
-;
-; See examples/rule-engine/README.md for more details.
-; -----------------------------------------------------------------------------
+;; =============================================================================
+;; Deduction Rule.
+;;
+;; A->B
+;; B->C
+;; |-
+;; A->C
+;;
+;; See examples/rule-engine/README.md for more details.
+;; -----------------------------------------------------------------------------
 
 (define crisp-deduction-rule
     (BindLink
@@ -25,7 +25,7 @@
                 (VariableNode "$B")
                 (VariableNode "$C")
             )
-            ; To avoid matching (Implication A B) and (Implication B A)
+            ;; To avoid matching (Implication A B) and (Implication B A)
             (NotLink
                 (EqualLink
                     (VariableNode "$A")
@@ -41,8 +41,7 @@
                     (VariableNode "$B"))
                 (ImplicationLink
                     (VariableNode "$B")
-                    (VariableNode "$C")
-                )
+                    (VariableNode "$C"))
                 (ImplicationLink
                     (VariableNode "$A")
                     (VariableNode "$C")
@@ -53,12 +52,12 @@
 )
 
 
-; -----------------------------------------------------------------------------
-; Deduction Formula
-;
-; If both confidence and strength of A->B and B->C are above 0.5 then
-; set the TV of A->C to (stv 1 1)
-; -----------------------------------------------------------------------------
+;; -----------------------------------------------------------------------------
+;; Deduction Formula
+;;
+;; If both confidence and strength of A->B and B->C are above 0.5 then
+;; set the TV of A->C to (stv 1 1)
+;; -----------------------------------------------------------------------------
 
 (define (crisp-deduction-formula AB BC AC)
     (let
@@ -69,7 +68,7 @@
       (if (and (>= sAB 0.5) (>= cAB 0.5) (>= sBC 0.5) (>= cBC 0.5))
           (cog-set-tv! AC (stv 1 1)))))
 
-; Associate a name to the rule
+;; Associate a name to the rule
 (define crisp-deduction-rule-name
   (DefinedSchemaNode "crisp-deduction-rule"))
 (DefineLink

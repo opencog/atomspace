@@ -31,67 +31,25 @@
 
 namespace opencog {
 
-using HandleWeightMap = std::map<Handle,double>;
-
-struct PartiaGroundingRecord
-{
-    const Handle hsource;
-    // Partial grounding may not be in any atomspace.
-    std::map<Handle, HandleWeightMap> _rule_pgroundings_map;
-
-    PartiaGroundingRecord(Handle source, Handle hrule,
-                          HandleWeightMap pgroundings) : hsource(source)
-    {
-        _rule_pgroundings_map[hrule] = pgroundings;
-    }
-
-    // When no matching rule is found
-    PartiaGroundingRecord(Handle source) : hsource(source) { }
-
-    inline bool operator==(const PartiaGroundingRecord& spg)
-    {
-        return (spg.hsource == hsource) ? true : false;
-    }
-};
-
 struct InferenceRecord
 {
-    const int step;
-    const Handle hsource;
-    const Rule* rule;
-    HandleSeq product;
+	const Handle hsource;
+	const Rule* rule;
+	UnorderedHandleSet product;
 
-    InferenceRecord(Handle h, const Rule* r, const HandleSeq& p, int s = 0) :
-        step(s), hsource(h), rule(r), product(p)
-    {
-    }
-
-    inline bool operator==(const InferenceRecord& ir)
-    {
-        return (ir.hsource == hsource
-                and ir.rule == rule
-                and ir.product == product);
-    }
+	InferenceRecord(Handle h, const Rule* r, const UnorderedHandleSet& p)
+		: hsource(h), rule(r), product(p) {}
 };
 
 class FCStat
 {
 private:
-    std::vector<PartiaGroundingRecord> _spg_stat;
-    std::vector<InferenceRecord> _inf_rec;
+	std::vector<InferenceRecord> _inf_rec;
 
 public:
-    // PartialGroundingRecord queries.
-    bool has_partial_grounding(const Handle& hsource);
-    void add_partial_grounding(Handle source, Handle hrule,
-                               HandleWeightMap pgroundings);
-    std::map<Handle,HandleWeightMap> get_rule_pg_map(const Handle& hsource);
-    HandleSeq get_pg_similar_sources(const Handle& hsource, bool strict);
-
-    // InferenceRecord queries.
-    void add_inference_record(Handle source, const Rule* rule,
-                              const HandleSeq& product);
-    HandleSeq get_all_inferences(void);
+	void add_inference_record(Handle source, const Rule* rule,
+	                          const UnorderedHandleSet& product);
+	UnorderedHandleSet get_all_products();
 };
 
 }

@@ -51,15 +51,27 @@ void VariableList::validate_vardecl(const HandleSeq& oset)
 	build_index();
 }
 
+VariableList::VariableList(const Handle& hvardecls,
+                           TruthValuePtr tv, AttentionValuePtr av)
+	: Link(VARIABLE_LIST,
+	       // Either it is a VariableList, or its a naked variable, or
+	       // its a typed variable.
+	       hvardecls->getType() == VARIABLE_LIST ?
+	       LinkCast(hvardecls)->getOutgoingSet() : HandleSeq({hvardecls}),
+	       tv, av)
+{
+	validate_vardecl(getOutgoingSet());
+}
+
 VariableList::VariableList(const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
+                           TruthValuePtr tv, AttentionValuePtr av)
 	: Link(VARIABLE_LIST, oset, tv, av)
 {
 	validate_vardecl(oset);
 }
 
 VariableList::VariableList(Type t, const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
+                           TruthValuePtr tv, AttentionValuePtr av)
 	: Link(t, oset, tv, av)
 {
 	// derived classes have a different initialization order

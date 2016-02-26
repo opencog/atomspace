@@ -220,10 +220,14 @@ void BackwardChainerUTest::test_tvq_impossible_bc()
 	bc.get_config().set_maximum_iterations(300);
 	bc.do_chain();
 
-	TSM_ASSERT("Incorrect strength of target after BC!", target->getTruthValue()->getMean() < 0.1f);
-	TSM_ASSERT("Incorrect confidence of target after BC!", target->getTruthValue()->getConfidence() < 0.1f);
-	TSM_ASSERT("Incorrect strength of sub-target after BC!", hidden->getTruthValue()->getMean() > 0.9f);
-	TSM_ASSERT("Incorrect confidence of sub-target after BC!", hidden->getTruthValue()->getConfidence() > 0.9f);
+	TSM_ASSERT("Incorrect strength of target after BC!",
+	           target->getTruthValue()->getMean() < 0.1f);
+	TSM_ASSERT("Incorrect confidence of target after BC!",
+	           target->getTruthValue()->getConfidence() < 0.1f);
+	TSM_ASSERT("Incorrect strength of sub-target after BC!",
+	           hidden->getTruthValue()->getMean() > 0.9f);
+	TSM_ASSERT("Incorrect confidence of sub-target after BC!",
+	           hidden->getTruthValue()->getConfidence() > 0.9f);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

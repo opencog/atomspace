@@ -22,6 +22,7 @@
 
 #include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
@@ -74,6 +75,7 @@ public:
 	void test_eval_clause(void);
 	void test_disconnected_binary_get(void);
 	void test_disconnected_empty(void);
+	void test_not_equal(void);
 	// void test_disconnected_const_eval(void);
 };
 
@@ -234,6 +236,42 @@ void GetLinkUTest::test_disconnected_empty(void) {
 		gl = al(GET_LINK, pat),
 		result = satisfying_set(as, gl),
 		expect = al(SET_LINK, HandleSeq());
+
+	printf("Expected this: %s\n", expect->toString().c_str());
+	printf("Found this answer: %s\n", result->toString().c_str());
+
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Two disconnected components, only one of them has a solution, so
+ * the whole request has no solution. It should stop at the first
+ * component with no solution, no need to explore the second
+ * component.
+ */
+void GetLinkUTest::test_not_equal(void) {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+
+	Handle P = an(PREDICATE_NODE, "P"),
+		Q = an(PREDICATE_NODE, "Q"),
+		Qvar = an(VARIABLE_NODE, "$Q"),
+		Qtype = an(TYPE_NODE, "PredicateNode"),
+		vardecl = al(VARIABLE_LIST,
+		             al(TYPED_VARIABLE_LINK, Qvar, Qtype)),
+		body = al(AND_LINK,
+		          al(NOT_LINK,
+		             al(EQUAL_LINK, P, Qvar)),
+		          Qvar),
+		gl = al(GET_LINK, vardecl, body);
+
+	Q->setTruthValue(SimpleTruthValue::TRUE_TV());
+
+	Handle result = satisfying_set(as, gl);
+	Handle expect = al(SET_LINK, Q);
 
 	printf("Expected this: %s\n", expect->toString().c_str());
 	printf("Found this answer: %s\n", result->toString().c_str());

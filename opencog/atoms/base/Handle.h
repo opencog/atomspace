@@ -31,6 +31,7 @@
 #include <memory>
 #include <string>
 #include <sstream>
+#include <set>
 #include <unordered_set>
 #include <vector>
 
@@ -211,8 +212,13 @@ struct handle_less
 
 //! a list of handles
 typedef std::vector<Handle> HandleSeq;
+
 //! a list of lists of handles
 typedef std::vector<HandleSeq> HandleSeqSeq;
+
+//! a set of handles
+typedef std::set<Handle> OrderedHandleSet;
+
 //! a hash that associates the handle to its unique identificator
 typedef std::unordered_set<Handle, handle_hash> UnorderedHandleSet;
 
@@ -265,11 +271,20 @@ static inline std::string operator+ (const std::string &lhs, Handle h)
 } // namespace opencog
 
 namespace std {
-inline std::ostream& operator<<(std::ostream& out, const opencog::Handle& h)
+inline ostream& operator<<(ostream& out, const opencog::Handle& h)
 {
     out << h.value();
     return out;
 }
+
+ostream& operator<<(ostream& out, const opencog::HandleSeq& hs);
+ostream& operator<<(ostream& out, const opencog::OrderedHandleSet& hs);
+ostream& operator<<(ostream& out, const opencog::UnorderedHandleSet& hs);
+
+// Debugging helpers, very convenient to print Handle sets in gdb
+string handle_container_to_string(const opencog::HandleSeq& hs);
+string handle_container_to_string(const opencog::OrderedHandleSet& hs);
+string handle_container_to_string(const opencog::UnorderedHandleSet& hs);
 
 #ifdef THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
 // The below used to work, but broke in gcc-4.7.2. The reason it
@@ -302,7 +317,7 @@ struct hash<opencog::Handle>
 
 #endif // THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
 
-} //namespace std
+} // ~namespace std
 
 /** @}*/
 #endif // _OPENCOG_HANDLE_H

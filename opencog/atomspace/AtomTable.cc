@@ -96,7 +96,7 @@ AtomTable::~AtomTable()
 
     // No one who shall look at these atoms shall ever again
     // find a reference to this atomtable.
-    for (auto pr : _atom_set) {
+    for (auto& pr : _atom_set) {
         Handle& atom_to_delete = pr.second;
         atom_to_delete->_atomTable = NULL;
         atom_to_delete->_uuid = Handle::INVALID_UUID;
@@ -120,7 +120,7 @@ void AtomTable::ready_transient(AtomTable* parent, AtomSpace* holder)
     if (not _transient)
         throw opencog::RuntimeException(TRACE_INFO,
                 "AtomTable - ready called on non-transient atom table.");
-    
+
     // Set the new parent environment and holder atomspace.
     _environ = parent;
     _as = holder;
