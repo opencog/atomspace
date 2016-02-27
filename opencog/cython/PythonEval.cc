@@ -926,7 +926,7 @@ TruthValuePtr PythonEval::apply_tv(AtomSpace *as, const std::string& func, Handl
  * On error throws an exception.
  */
 void PythonEval::apply_as(const std::string& moduleFunction,
-                          AtomSpace* as)
+                          AtomSpace* as_argument)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
@@ -999,7 +999,7 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     // Create the Python tuple for the function call with python
     // atomspace.
     PyObject* pyArguments = PyTuple_New(1);
-    PyObject* pyAtomSpace = this->atomspace_py_object(_atomspace);
+    PyObject* pyAtomSpace = this->atomspace_py_object(as_argument);
 
     PyTuple_SetItem(pyArguments, 0, pyAtomSpace);
     // Py_DECREF(pyAtomSpace);
