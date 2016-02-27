@@ -31,9 +31,11 @@ class AtomSpace;
 
 Handle bindlink(AtomSpace*, const Handle&);
 Handle single_bindlink (AtomSpace*, const Handle&);
+Handle first_n_bindlink (AtomSpace*, unsigned int, const Handle&);
 Handle af_bindlink(AtomSpace*, const Handle&);
 TruthValuePtr satisfaction_link(AtomSpace*, const Handle&);
 Handle satisfying_set(AtomSpace*, const Handle&);
+Handle first_n_satisfying_set(AtomSpace*, unsigned int, const Handle&);
 Handle recognize(AtomSpace*, const Handle&);
 
 } // namespace opencog

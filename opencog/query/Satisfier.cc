@@ -93,7 +93,9 @@ bool SatisfyingSet::grounding(const std::map<Handle, Handle> &var_soln,
 	if (1 == _varseq.size())
 	{
 		_satisfying_set.emplace(var_soln.at(_varseq[0]));
-		return false;
+
+		// If we found as many as we want, then stop looking for more.
+		return (_satisfying_set.size() >= max_results);
 	}
 
 	// If more than one variable, encapsulate in sequential order,
@@ -105,8 +107,8 @@ bool SatisfyingSet::grounding(const std::map<Handle, Handle> &var_soln,
 	}
 	_satisfying_set.emplace(Handle(createLink(LIST_LINK, vargnds)));
 
-	// Look for more groundings.
-	return false;
+	// If we found as many as we want, then stop looking for more.
+	return (_satisfying_set.size() >= max_results);
 }
 
 TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
@@ -128,7 +130,7 @@ TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
 	return sater._result;
 }
 
-Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink)
+static Handle _satisfying_set(AtomSpace* as, const Handle& hlink, SatisfyingSet& sater)
 {
 	PatternLinkPtr bl(PatternLinkCast(hlink));
 	if (NULL == bl)
@@ -141,7 +143,6 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink)
 			bl = createPatternLink(hlink);
 	}
 
-	SatisfyingSet sater(as);
 	bl->satisfy(sater);
 
 	// Ugh. We used an std::set to avoid duplicates. But now, we need a
@@ -151,6 +152,19 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink)
 		satvec.push_back(h);
 
 	return as->add_link(SET_LINK, satvec);
+}
+
+Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink)
+{
+	SatisfyingSet sater(as);
+	return _satisfying_set(as, hlink, sater);
+}
+
+Handle opencog::first_n_satisfying_set(AtomSpace* as, unsigned int first_n, const Handle& hlink)
+{
+	SatisfyingSet sater(as);
+	sater.max_results = first_n;
+	return _satisfying_set(as, hlink, sater);
 }
 
 /* ===================== END OF FILE ===================== */

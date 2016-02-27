@@ -69,7 +69,7 @@ void PatternSCM::init(void)
 	// BindLink containing variables, a pattern and a rewrite rules.
 	_binders.push_back(new FunctionWrap(bindlink, "cog-bind", "query"));
 
-	// Identical to do_bindlink above, except that it only returns the
+	// Identical to bindlink above, except that it only returns the
 	// first match.
 	_binders.push_back(new FunctionWrap(single_bindlink,
 	                   "cog-bind-single", "query"));

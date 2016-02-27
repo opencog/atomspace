@@ -132,7 +132,7 @@ static Handle do_imply(AtomSpace* as,
  * atoms that could be a ground are found in the atomspace, then they
  * will be reported.
  *
- * See the do_bindlink function documentation for details.
+ * See the do_imply function documentation for details.
  */
 Handle bindlink(AtomSpace* as, const Handle& hbindlink)
 {
@@ -152,13 +152,29 @@ Handle bindlink(AtomSpace* as, const Handle& hbindlink)
  * Returns the first match only. Otherwise, the behavior is identical to
  * PatternMatch::bindlink above.
  *
- * See the do_bindlink function documentation for details.
+ * See the do_imply function documentation for details.
  */
 Handle single_bindlink (AtomSpace* as, const Handle& hbindlink)
 {
 	// Now perform the search.
 	DefaultImplicator impl(as);
 	impl.max_results = 1;
+	return do_imply(as, hbindlink, impl);
+}
+
+/**
+ * Evaluate an pattern and rewrite rule embedded in a BindLink
+ *
+ * Returns the first N matches. Otherwise, the behavior is identical to
+ * PatternMatch::bindlink above.
+ *
+ * See the do_imply function documentation for details.
+ */
+Handle first_n_bindlink (AtomSpace* as, unsigned int first_n, const Handle& hbindlink)
+{
+	// Now perform the search.
+	DefaultImplicator impl(as);
+	impl.max_results = first_n;
 	return do_imply(as, hbindlink, impl);
 }
 
