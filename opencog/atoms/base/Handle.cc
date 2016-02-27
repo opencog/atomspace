@@ -119,3 +119,26 @@ inline Handle Handle::do_res(UUID uuid)
     }
     return Handle();
 }
+
+namespace std {
+
+// Hack around the lack template use in Handle.h due to circular dependencies
+#define GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(T) \
+ostream& operator<<(ostream& out, const T& hs) { \
+	size_t i = 0; \
+	for (const Handle& h : hs) { \
+		out << "atom[" << i << "]:" << endl << h->toString(); \
+		i++; \
+	} \
+	return out; \
+} \
+string handle_container_to_string(const T& hs) \
+{ \
+	stringstream ss; ss << hs; return ss.str(); \
+}
+GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::HandleSeq)
+GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::OrderedHandleSet)
+GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::UnorderedHandleSet)
+
+} // ~namespace std
+

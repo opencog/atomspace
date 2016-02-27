@@ -26,6 +26,7 @@
 #define _OPENCOG_PYTHON_SCM_H
 
 #include <string>
+#include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog
 {
@@ -42,6 +43,7 @@ private:
 public:
 	PythonSCM();
 	const std::string& eval(const std::string&);
+	void apply_as(const std::string&, AtomSpace*);
 }; // class
 
 /** @}*/
@@ -55,8 +57,6 @@ void opencog_python_init(void);
 #endif // _OPENCOG_PYTHON_SCM_H
 
 // ===================================================================
-
-#include <mutex>
 
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/cython/PythonEval.h>
@@ -92,25 +92,28 @@ void PythonSCM::init(void)
 {
 #ifdef HAVE_GUILE
 	define_scheme_primitive("python-eval", &PythonSCM::eval, this, "python");
+	define_scheme_primitive("python-call-with-as", &PythonSCM::apply_as, this, "python");
 #endif
 }
 
 const std::string& PythonSCM::eval(const std::string& pystr)
 {
-	// This assumes that python is already initialized. If not,
-	// I guess it creahes and burns...
 	static PythonEval& pyev = PythonEval::instance();
-	static std::mutex pythr;
-	static std::string rv;
 
-	// Python is necessarily single-threaded. However, scheme is not,
-	// so we don't know if we are being called from multiple threads.
-	// So serialize access to the python evaluator.
-	// XXX FIXME -- the const std::string& return value is not
-	// protected!! WTF!! (this means there is a tiny race window).
-	std::lock_guard<std::mutex> lock(pythr);
+	// Because we are returning a reference to string(!!), we need to
+	// keep a thread-local copy of it around, for the caller to fetch.
+	// Note that PythonEval appears to be thread-safe, so we don't
+	// need any locks here.
+	thread_local std::string rv;
 	rv = pyev.eval(pystr);
 	return rv;
+}
+
+void PythonSCM::apply_as(const std::string& pystr, AtomSpace* as)
+{
+	static PythonEval& pyev = PythonEval::instance();
+
+	pyev.apply_as(pystr, as);
 }
 
 void opencog_python_init(void)

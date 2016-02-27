@@ -27,9 +27,9 @@
 (load-from-path "crisp-config.scm")
 
 ; Define knowledge base
-(define A (ConceptNode "A" (stv 1 1)))
-(define B (ConceptNode "B"))
-(define C (ConceptNode "C"))
+(define A (PredicateNode "A" (stv 1 1)))
+(define B (PredicateNode "B"))
+(define C (PredicateNode "C"))
 (define AB (ImplicationLink (stv 1 1) A B))
 (define BC (ImplicationLink (stv 1 1) B C))
 
@@ -38,8 +38,8 @@
 ;; scheme@(guile-user)> (crisp-fc AB)
 ;; $1 = (ListLink
 ;;    (ImplicationLink (stv 1 0.99999982)
-;;       (ConceptNode "A")
-;;       (ConceptNode "C")
+;;       (PredicateNode "A")
+;;       (PredicateNode "C")
 ;;    )
 ;; )
 
@@ -52,4 +52,4 @@
 ; while the TV of C will be suitably updated.
 
 ;; scheme@(guile-user)> C
-;; $2 = (ConceptNode "C" (stv 1 0.99999982))
+;; $2 = (PredicateNode "C" (stv 1 0.99999982))
