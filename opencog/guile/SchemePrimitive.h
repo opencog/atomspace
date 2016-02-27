@@ -117,10 +117,11 @@ class SchemePrimitive : public PrimitiveEnviron
 			                               const std::string&);
 			const std::string& (T::*s_v)(void);
 			TruthValuePtr (T::*p_h)(Handle);
-			UUID (T::*u_ssb)(const std::string&,const std::string&,bool);
+			UUID (T::*u_ssb)(const std::string&, const std::string&, bool);
 			void (T::*v_b)(bool);
 			void (T::*v_h)(Handle);
 			void (T::*v_s)(const std::string&);
+			void (T::*v_sa)(const std::string&, AtomSpace*);
 			void (T::*v_ss)(const std::string&,
 			                const std::string&);
 			void (T::*v_sss)(const std::string&,
@@ -163,6 +164,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			V_B,   // return void, take bool
 			V_H,   // return void, take Handle
 			V_S,   // return void, take string
+			V_SA,  // return void, take string, Atomspace
 			V_SS,  // return void, take two strings
 			V_SSS, // return void, take three strings
 			V_T,   // return void, take Type
@@ -500,6 +502,16 @@ class SchemePrimitive : public PrimitiveEnviron
 					(that->*method.v_s)(str);
 					break;
 				}
+				case V_SA:
+				{
+					// First argument is a string
+					std::string str(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
+
+					// Second argument is an AtomSpace
+					AtomSpace* as = SchemeSmob::verify_atomspace(scm_car(args), scheme_name, 2);
+					(that->*method.v_sa)(str,as);
+					break;
+				}
 				case V_SS:
 				{
 					// All args are strings
@@ -652,6 +664,8 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_1(V_B,    v_b,  void, bool)
 		DECLARE_CONSTR_1(V_H,    v_h,  void, Handle)
 		DECLARE_CONSTR_1(V_S,    v_s,  void, const std::string&)
+		DECLARE_CONSTR_2(V_SA,   v_sa, void, const std::string&,
+		                               AtomSpace*)
 		DECLARE_CONSTR_2(V_SS,   v_ss, void, const std::string&,
 		                               const std::string&)
 		DECLARE_CONSTR_3(V_SSS,  v_sss,void, const std::string&,
@@ -718,6 +732,7 @@ DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
 DECLARE_DECLARE_2(HandleSeqSeq, Handle, int)
 DECLARE_DECLARE_2(const std::string&, AtomSpace*, const std::string&)
 DECLARE_DECLARE_2(const std::string&, const std::string&, const std::string&)
+DECLARE_DECLARE_2(void, const std::string&, AtomSpace*)
 DECLARE_DECLARE_2(void, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, Type, int)
 DECLARE_DECLARE_3(double, Handle, Handle, Type)
