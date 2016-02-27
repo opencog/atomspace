@@ -15,5 +15,5 @@
     Evaluate the STRING within the current python evaluator. The STRING
     argument can be any valid python code.
 
-    Example: (python-eval "print ('hello! ' + str(2+2))")
+    Example: (python-eval \"print ('hello! ' + str(2+2))\")
 ")
