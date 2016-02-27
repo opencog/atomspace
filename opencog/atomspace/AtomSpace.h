@@ -110,7 +110,8 @@ public:
     inline UUID get_uuid(void) const { return _atom_table.get_uuid(); }
 
     //! Clear the atomspace, remove all atoms
-    void clear();
+    void clear()
+        { _atom_table.clear(); }
 
     /**
      * Add an atom to the Atom Table.  If the atom already exists

@@ -129,15 +129,32 @@ void AtomTable::ready_transient(AtomTable* parent, AtomSpace* holder)
     Handle::set_resolver(this);
 }
 
-
 void AtomTable::clear_transient()
 {
     if (not _transient)
         throw opencog::RuntimeException(TRACE_INFO,
-                "AtomTable - clear called on non-transient atom table.");
+                "AtomTable - clear_transient called on non-transient atom table.");
 
     // We are no longer a resolver for handles.
     Handle::clear_resolver(this);
+
+    // Clear all the atoms
+    clear_all_atoms();
+
+    // Clear the  parent environment and holder atomspace.
+    _environ = NULL;
+    _as = NULL;
+
+}
+
+void AtomTable::clear_all_atoms()
+{
+    // For now, this only works for transient atomspaces which do not
+    // index the atoms. So throw an exception to warn against use in 
+    // normal atomspaces.
+    if (not _transient)
+        throw opencog::RuntimeException(TRACE_INFO,
+                "AtomTable - clear_all_atoms called on non-transient atom table.");
 
     // Reset the size to zero.
     _size = 0;
@@ -168,10 +185,40 @@ void AtomTable::clear_transient()
     // the last shared_ptr referecence, and set the size of the set to 0.
     _atom_set.clear();
 
-    // Clear the  parent environment and holder atomspace.
-    _environ = NULL;
-    _as = NULL;
+}
 
+void AtomTable::clear()
+{
+    if (_transient)
+    {
+        // Do the fast clear since we're a transient atom table.
+        clear_all_atoms();
+    }
+    else
+    {
+        std::vector<Handle> allAtoms;
+
+        getHandlesByType(back_inserter(allAtoms), ATOM, true, false);
+
+        DPRINTF("atoms in allAtoms: %lu\n", allAtoms.size());
+
+        // Uncomment to turn on logging at DEBUG level.
+        // Logger::Level save = logger().get_level();
+        // logger().set_level(Logger::DEBUG);
+
+        // XXX FIXME TODO This is a stunningly inefficient way to clear the
+        // atomtable! This will take minutes on any decent-sized atomspace!
+        std::vector<Handle>::iterator i;
+        for (i = allAtoms.begin(); i != allAtoms.end(); ++i) {
+            extract(*i, true);
+        }
+
+        allAtoms.clear();
+        getHandlesByType(back_inserter(allAtoms), ATOM, true, false);
+        assert(allAtoms.size() == 0);
+
+        // logger().set_level(save);
+    }
 }
 
 AtomTable& AtomTable::operator=(const AtomTable& other)
