@@ -17,3 +17,15 @@
 
     Example: (python-eval \"print ('hello! ' + str(2+2))\")
 ")
+
+(set-procedure-property! python-call-with-as 'documentation
+"
+ python-call-with-as FUNC ATOMSPACE
+    Call the python function FUNC, passing the ATOMSPACE as an argument.
+    The FUNC should be a scheme string.  This is meant to allow both
+    scheme and python to share a common atomspace, by using the example
+    below.
+
+    Example:
+      (python-call-with-as \"set_type_ctor_atomspace\" (cog-atomspace))
+")
