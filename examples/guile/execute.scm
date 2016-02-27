@@ -25,6 +25,15 @@
 			(ConceptNode "1")
 			(ConceptNode "2"))))
 
+; Similar to the above, but, in this case, a truth value is returned.
+; Notice that cog-evaluate! is used instead of cog-execute!
+(cog-evaluate!
+	(EvaluationLink
+		(GroundedPredicateNode "py:my_py_predicate")
+		(ListLink
+			(ConceptNode "3")
+			(ConceptNode "4"))))
+
 ; -------------------------------------------------------------
 ; Equivalent example, invokes scheme code.
 ;
