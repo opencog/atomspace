@@ -26,6 +26,7 @@
 #define _OPENCOG_PYTHON_SCM_H
 
 #include <string>
+#include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog
 {
@@ -42,7 +43,7 @@ private:
 public:
 	PythonSCM();
 	const std::string& eval(const std::string&);
-	void apply_as(const std::string&);
+	void apply_as(const std::string&, AtomSpace*);
 }; // class
 
 /** @}*/
@@ -108,11 +109,11 @@ const std::string& PythonSCM::eval(const std::string& pystr)
 	return rv;
 }
 
-void PythonSCM::apply_as(const std::string& pystr)
+void PythonSCM::apply_as(const std::string& pystr, AtomSpace* as)
 {
 	static PythonEval& pyev = PythonEval::instance();
 
-	pyev.apply_as(pystr, NULL);
+	pyev.apply_as(pystr, as);
 }
 
 void opencog_python_init(void)
