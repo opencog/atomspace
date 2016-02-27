@@ -336,7 +336,12 @@ void opencog::global_python_initialize()
     if (initialized_outside_opencog)
         PyGILState_Release(gstate);
     else
-        PyEval_ReleaseLock();
+        // Several websites suggest that `PyEval_ReleaseLock()`
+        // should be used here. However, this results in bug
+        // opencog/atomspace#671. A closer reading of the official
+        // python docs suggests that `PyEval_SaveThread` be used
+        // instead, and indeed ... that works! Woo hoo!
+        PyEval_SaveThread();
 
     logger().info("[global_python_initialize] Finish");
 }
