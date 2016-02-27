@@ -352,7 +352,10 @@ void opencog::global_python_finalize()
 
     // Cleanup Python.
     if (!initialized_outside_opencog)
+    {
+        PyGILState_Ensure(); // yes this is needed, see bug #671
         Py_Finalize();
+    }
 
     // No longer initialized.
     already_initialized = false;
