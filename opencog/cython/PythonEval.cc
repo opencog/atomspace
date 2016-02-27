@@ -516,7 +516,7 @@ PyObject* PythonEval::atomspace_py_object(AtomSpace* atomspace)
     // The py_atomspace function pointer will be NULL if the
     // opencopg.atomspace cython module failed to load. Avert
     // a hard-to-debug crash on null-pointer-deref, and replace
-    // it by a hard-to-debug error message.
+    // it by a slightly less hard-to-debug error message.
     if (NULL == py_atomspace) {
         logger().error("PythonEval::%s Failed to load the"
                        "opencog.atomspace module", __FUNCTION__);
@@ -756,8 +756,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
         throw RuntimeException(TRACE_INFO,
             "Expecting arguments to be a ListLink!");
     }
-    LinkPtr linkArguments(LinkCast(arguments));
-    int actualArgumentCount = linkArguments->getArity();
+    int actualArgumentCount = arguments->getArity();
 
     // Now make sure the expected count matches the actual argument count.
     if (expectedArgumentCount != actualArgumentCount) {
@@ -772,7 +771,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     // atoms for each of the atoms in the link arguments.
     PyObject* pyArguments = PyTuple_New(actualArgumentCount);
     PyObject* pyAtomSpace = this->atomspace_py_object(_atomspace);
-    const HandleSeq& argumentHandles = linkArguments->getOutgoingSet();
+    const HandleSeq& argumentHandles = arguments->getOutgoingSet();
     int tupleItem = 0;
     for (HandleSeq::const_iterator it = argumentHandles.begin();
         it != argumentHandles.end(); ++it) {
@@ -917,6 +916,119 @@ TruthValuePtr PythonEval::apply_tv(AtomSpace *as, const std::string& func, Handl
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
     return tvp;
+}
+
+/**
+ * Call the user defined function with the provide atomspace argument.
+ * This is a cut-n-paste of PythonEval::call_user_function but with
+ * assorted hacks to handle the different argument type.
+ *
+ * On error throws an exception.
+ */
+void PythonEval::apply_as(const std::string& moduleFunction,
+                          AtomSpace* as)
+{
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+
+    PyObject *pyError, *pyModule, *pyUserFunc;
+    PyObject *pyDict;
+    std::string functionName;
+    std::string errorString;
+
+    // Grab the GIL.
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+
+    // Get the module and stripped function name.
+    pyModule = this->module_for_function(moduleFunction, functionName);
+
+    // If we can't find that module then throw an exception.
+    if (!pyModule) {
+        PyGILState_Release(gstate);
+        logger().error("Python module for '%s' not found!", moduleFunction.c_str());
+        throw RuntimeException(TRACE_INFO,
+            "Python module for '%s' not found!",
+            moduleFunction.c_str());
+    }
+
+    // Get a reference to the user function.
+    pyDict = PyModule_GetDict(pyModule);
+    pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
+
+    // PyModule_GetDict returns a borrowed reference, so don't do this:
+    // Py_DECREF(pyDict);
+
+    // If we can't find that function then throw an exception.
+    if (!pyUserFunc) {
+        PyGILState_Release(gstate);
+        throw RuntimeException(TRACE_INFO,
+            "Python function '%s' not found!",
+            moduleFunction.c_str());
+    }
+
+    // Promote the borrowed reference for pyUserFunc since it will
+    // be passed to a Python C API function later that "steals" it.
+    Py_INCREF(pyUserFunc);
+
+    // Make sure the function is callable.
+    if (!PyCallable_Check(pyUserFunc)) {
+        Py_DECREF(pyUserFunc);
+        PyGILState_Release(gstate);
+        throw RuntimeException(TRACE_INFO,
+            "Python function '%s' not callable!", moduleFunction.c_str());
+    }
+
+    // Get the expected argument count.
+    int expectedArgumentCount = this->argument_count(pyUserFunc);
+    if (expectedArgumentCount == MISSING_FUNC_CODE) {
+        PyGILState_Release(gstate);
+        throw RuntimeException(TRACE_INFO,
+            "Python function '%s' error missing 'func_code'!",
+            moduleFunction.c_str());
+    }
+
+    // Make sure the argument count is 1 (just the atomspace)
+    if (1 != expectedArgumentCount) {
+        PyGILState_Release(gstate);
+        throw RuntimeException(TRACE_INFO,
+            "Python function '%s' which expects '%d arguments,"
+            " should have one atomspace argument!",
+            moduleFunction.c_str(), expectedArgumentCount);
+    }
+
+    // Create the Python tuple for the function call with python
+    // atomspace.
+    PyObject* pyArguments = PyTuple_New(1);
+    PyObject* pyAtomSpace = this->atomspace_py_object(_atomspace);
+
+    PyTuple_SetItem(pyArguments, 0, pyAtomSpace);
+    // Py_DECREF(pyAtomSpace);
+
+    // Execute the user function.
+    PyObject_CallObject(pyUserFunc, pyArguments);
+
+    // Cleanup the reference counts for Python objects we no longer reference.
+    // Since we promoted the borrowed pyExecuteUserFunc reference, we need
+    // to decrement it here. Do this before error checking below since we'll
+    // need to decrement these references even if there is an error.
+    Py_DECREF(pyUserFunc);
+    Py_DECREF(pyArguments);
+
+    // Check for errors.
+    pyError = PyErr_Occurred();
+    if (pyError) {
+
+        // Construct the error message and throw an exception.
+        this->build_python_error_message(moduleFunction.c_str(), errorString);
+        PyGILState_Release(gstate);
+        throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
+
+        // PyErr_Occurred returns a borrowed reference, so don't do this:
+        // Py_DECREF(pyError);
+    }
+
+    // Release the GIL. No Python API allowed beyond this point.
+    PyGILState_Release(gstate);
 }
 
 std::string PythonEval::apply_script(const std::string& script)
