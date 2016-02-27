@@ -176,11 +176,11 @@ SCM SchemeSmob::ss_as_p (SCM s)
 AtomSpace* SchemeSmob::ss_to_atomspace(SCM sas)
 {
 	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sas))
-		return NULL;
+		return nullptr;
 
 	scm_t_bits misctype = SCM_SMOB_FLAGS(sas);
 	if (COG_AS != misctype)
-		return NULL;
+		return nullptr;
 
 	AtomSpace* as = (AtomSpace *) SCM_SMOB_DATA(sas);
 	scm_remember_upto_here_1(sas);
