@@ -1216,6 +1216,27 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
     PyGILState_Release(gstate);
 }
 
+void PythonEval::eval_expr(const std::string& partial_expr)
+{
+    // XXX FIXME this does a lot of wasteful string copying.
+    std::string expr = partial_expr;
+    size_t nl = expr.find_first_of("\n\r");
+    while (std::string::npos != nl)
+    {
+        if ('\r' == expr[nl]) nl++;
+        if ('\n' == expr[nl]) nl++;
+        std::string part = expr.substr(0, nl);
+        eval_expr_line(part);
+        expr = expr.substr(nl);
+        nl = expr.find_first_of("\n\r");
+    }
+    eval_expr_line(expr);
+}
+
+/// Like eval_expr(), except that it assumes that there is only
+/// one line per call, i.e. that partial expr has been split up
+/// into lines.
+//
 // The python interpreter chokes if we send it lines, instead of
 // blocks. Thus, we have to save up whole blocks.  A block consists
 // of:
@@ -1224,7 +1245,7 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
 //    end-of-file.
 // 2) Anything surrounded by parenthesis, regardless of indentation.
 //
-void PythonEval::eval_expr(const std::string& partial_expr)
+void PythonEval::eval_expr_line(const std::string& partial_expr)
 {
     // Trim whitespace, and comments before doing anything,
     // Otherwise, the various checks below fail.
@@ -1244,7 +1265,6 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     if (0 < part_size) c = part[0];
 
     logger().debug("[PythonEval] get line:\n%s\n", partial_expr.c_str());
-
     // Check if there are open parentheses. If so, then we must
     // assume there will be more input that closes them off.
     {
