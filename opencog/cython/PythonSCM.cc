@@ -42,6 +42,7 @@ private:
 public:
 	PythonSCM();
 	const std::string& eval(const std::string&);
+	void apply_as(const std::string&);
 }; // class
 
 /** @}*/
@@ -90,6 +91,7 @@ void PythonSCM::init(void)
 {
 #ifdef HAVE_GUILE
 	define_scheme_primitive("python-eval", &PythonSCM::eval, this, "python");
+	define_scheme_primitive("python-call-with-as", &PythonSCM::apply_as, this, "python");
 #endif
 }
 
@@ -97,13 +99,20 @@ const std::string& PythonSCM::eval(const std::string& pystr)
 {
 	static PythonEval& pyev = PythonEval::instance();
 
-	// Because we are returning a refernce to string (!!) we need to
+	// Because we are returning a reference to string(!!), we need to
 	// keep a thread-local copy of it around, for the caller to fetch.
 	// Note that PythonEval appears to be thread-safe, so we don't
 	// need any locks here.
 	thread_local std::string rv;
 	rv = pyev.eval(pystr);
 	return rv;
+}
+
+void PythonSCM::apply_as(const std::string& pystr)
+{
+	static PythonEval& pyev = PythonEval::instance();
+
+	pyev.apply_as(pystr, NULL);
 }
 
 void opencog_python_init(void)
