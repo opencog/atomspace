@@ -28,4 +28,16 @@
 
     Example:
       (python-call-with-as \"set_type_ctor_atomspace\" (cog-atomspace))
+
+    A more complicated example:
+      (python-eval \"
+      from opencog.atomspace import AtomSpace, TruthValue
+      from opencog.atomspace import types
+
+      def foo(asp):
+          TV = TruthValue(0.42, 0.69)
+          asp.add_node(types.ConceptNode, 'Apple', TV)
+      \")
+      (python-call-with-as \"foo\" (cog-atomspace))
+      (cog-node 'ConceptNode \"Apple\")
 ")
