@@ -508,7 +508,7 @@ class SchemePrimitive : public PrimitiveEnviron
 					std::string str(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
 
 					// Second argument is an AtomSpace
-					AtomSpace* as = SchemeSmob::verify_atomspace(scm_car(args), scheme_name, 2);
+					AtomSpace* as = SchemeSmob::verify_atomspace(scm_cadr(args), scheme_name, 2);
 					(that->*method.v_sa)(str,as);
 					break;
 				}
