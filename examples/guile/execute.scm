@@ -1,5 +1,6 @@
 ;
 ; Several ExecutionOutputLink examples.
+;
 ; An example of using the cog-execute! function to trigger the execution
 ; of ExecutationOutputLink's.  This example illustrates using functions
 ; defined in scheme, python and 'atomese'.
@@ -9,18 +10,14 @@
 ;
 (use-modules (opencog))
 (use-modules (opencog exec))
+(use-modules (opencog python))
 
-; Using python code in an execution link. Be sure to set the PYTHONPATH
-; environment varialbe first, so that the cython and python libraries
-; can be found. Something similar to this should do:
-;
-; export PYTHONPATH=/usr/local/opencog/cython:/usr/local/opencog/python:./examples/guile
-; or maybe this:
-; export PYTHONPATH=/usr/localbuild/opencog/cython:./opencog/python:./opencog/python/opencog:./examples/guile
-;
-; Also, be sure that my_py_func.py is loaded.
-; XXX -- Seems that Python is currently borken; don't know how to fix.
-;
+; The below demonstrates the use of python code in an execution link.
+; Begin by loading the python code. (See `python.scm` for more details).
+(python-eval "execfile('my_py_func.py')")
+
+; Execute the python function `my_py_func`. The python function shhould
+; return an atom, which is then printed.
 (cog-execute!
 	(ExecutionOutputLink
 		(GroundedSchemaNode "py:my_py_func")

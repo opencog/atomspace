@@ -1,5 +1,14 @@
+#
+# A short python snippet that is used in the execute.scm example.
+#
+from opencog.atomspace import AtomSpace, TruthValue
+from opencog.atomspace import types
 
-# This python snippet goes with the execute.scm example ...
+asp = AtomSpace()
 
 def my_py_func(atoma, atomb):
-	print("Hello world")
+	print("Python received two arguments:\n" + str(atoma) + str(atomb))
+	av = float(atoma.name)
+	bv = float(atomb.name)
+	cv = av + bv       # Add numeric values!
+	return asp.add_node(types.ConceptNode, str(cv))
