@@ -105,10 +105,12 @@ class SchemeEval : public GenericEval
 		SCM do_scm_eval(SCM, SCM (*)(void *));
 		static void * c_wrap_eval_h(void *);
 		static void * c_wrap_eval_tv(void *);
+		static void * c_wrap_eval_as(void *);
 
 		// Apply function to arguments, returning Handle or TV
 		Handle _hargs;
 		TruthValuePtr _tvp;
+		AtomSpace* _retas;
 		Handle do_apply(const std::string& func, const Handle& varargs);
 		SCM do_apply_scm(const std::string& func, const Handle& varargs);
 		static void * c_wrap_apply(void *);
@@ -164,6 +166,9 @@ class SchemeEval : public GenericEval
 		// Evaluate expression, returning TV.
 		TruthValuePtr eval_tv(const std::string&);
 		TruthValuePtr eval_tv(const std::stringstream& ss) { return eval_tv(ss.str()); }
+
+		// Evaluate expression, returning AtomSpace.
+		AtomSpace* eval_as(const std::string&);
 
 		// Apply expression to args, returning Handle or TV
 		Handle apply(const std::string& func, Handle varargs);

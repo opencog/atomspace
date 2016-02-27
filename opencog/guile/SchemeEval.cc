@@ -951,6 +951,62 @@ void * SchemeEval::c_wrap_eval_tv(void * p)
 	return self;
 }
 
+/**
+ * Evaluate a string containing a scheme expression, returning an
+ * AtomSpace.
+ * If an evaluation error occurs, an exception is thrown, and the stack
+ * trace is logged to the log file.
+ */
+AtomSpace* SchemeEval::eval_as(const std::string &expr)
+{
+	// If we are recursing, then we already are in the guile
+	// environment, and don't need to do any additional setup.
+	// Just go.
+	if (_in_eval) {
+		// scm_from_utf8_string is lots faster than scm_from_locale_string
+		SCM expr_str = scm_from_utf8_string(expr.c_str());
+		SCM rc = do_scm_eval(expr_str, recast_scm_eval_string);
+
+		// Pass evaluation errors out of the wrapper.
+		if (eval_error()) return nullptr;
+		return SchemeSmob::ss_to_atomspace(rc);
+	}
+
+#ifdef WORK_AROUND_GUILE_THREADING_BUG
+	thread_lock();
+#endif /* WORK_AROUND_GUILE_THREADING_BUG */
+
+	_pexpr = &expr;
+	_in_eval = true;
+	scm_with_guile(c_wrap_eval_as, this);
+	_in_eval = false;
+
+#ifdef WORK_AROUND_GUILE_THREADING_BUG
+	thread_unlock();
+#endif /* WORK_AROUND_GUILE_THREADING_BUG */
+
+	// Convert evaluation errors into C++ exceptions.
+	if (eval_error())
+		throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
+
+	return _retas;
+}
+
+void * SchemeEval::c_wrap_eval_as(void * p)
+{
+	SchemeEval *self = (SchemeEval *) p;
+	// scm_from_utf8_string is lots faster than scm_from_locale_string
+	SCM expr_str = scm_from_utf8_string(self->_pexpr->c_str());
+	SCM rc = self->do_scm_eval(expr_str, recast_scm_eval_string);
+
+	// Pass evaluation errors out of the wrapper.
+	if (self->eval_error()) return self;
+
+	self->_retas = SchemeSmob::ss_to_atomspace(rc);
+	return self;
+}
+
+/* ============================================================== */
 /* ============================================================== */
 /**
  * apply -- apply named function func to arguments in ListLink
