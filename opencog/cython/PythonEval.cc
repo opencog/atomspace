@@ -447,13 +447,14 @@ PythonEval& PythonEval::instance(AtomSpace* atomspace)
 
 #define CHECK_SINGLETON
 #ifdef CHECK_SINGLETON
-        // Someone is trying to initialize the Python interpreter on a
-        // different AtomSpace.  Because of the singleton design of the
-        // the CosgServer+AtomSpace, there is no easy way to support this...
-        throw RuntimeException(TRACE_INFO,
-            "Trying to re-initialize python interpreter with different\n"
-            "AtomSpace ptr! Current ptr=%p New ptr=%p\n",
-            singletonInstance->_atomspace, atomspace);
+        if (nullptr != singletonInstance->_atomspace)
+            // Someone is trying to initialize the Python interpreter on a
+            // different AtomSpace.  Because of the singleton design of the
+            // the CosgServer+AtomSpace, there is no easy way to support this...
+            throw RuntimeException(TRACE_INFO,
+                "Trying to re-initialize python interpreter with different\n"
+                "AtomSpace ptr! Current ptr=%p New ptr=%p\n",
+                singletonInstance->_atomspace, atomspace);
 #else
         // We need to be able to call the python interpreter with
         // different atomspaces; for example, we need to use temporary
@@ -514,7 +515,7 @@ void PythonEval::initialize_python_objects_and_imports(void)
 PyObject* PythonEval::atomspace_py_object(AtomSpace* atomspace)
 {
     // The py_atomspace function pointer will be NULL if the
-    // opencopg.atomspace cython module failed to load. Avert
+    // opencog.atomspace cython module failed to load. Avert
     // a hard-to-debug crash on null-pointer-deref, and replace
     // it by a slightly less hard-to-debug error message.
     if (NULL == py_atomspace) {
@@ -574,8 +575,8 @@ void PythonEval::print_dictionary(PyObject* obj)
  *
  * Only call this when PyErr_Occurred() returns a non-null PyObject*.
  */
-void PythonEval::build_python_error_message(    const char* function_name,
-                                                std::string& errorMessage)
+void PythonEval::build_python_error_message(const char* function_name,
+                                            std::string& errorMessage)
 {
     PyObject *pyErrorType, *pyError, *pyTraceback, *pyErrorString;
     std::stringstream errorStringStream;
