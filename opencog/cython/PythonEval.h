@@ -142,6 +142,7 @@ class PythonEval : public GenericEval
 
         std::string _result;
         int _paren_count;
+        void eval_expr_line(const std::string&);
 
     public:
         PythonEval(AtomSpace*);
