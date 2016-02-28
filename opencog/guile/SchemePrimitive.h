@@ -310,8 +310,8 @@ class SchemePrimitive : public PrimitiveEnviron
 				}
 				case H_UH:
 				{
-					unsigned int u = SchemeSmob::verify_uint(scm_cadr(args), scheme_name, 1);
-					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name, 2));
+					unsigned int u = SchemeSmob::verify_uint(scm_car(args), scheme_name, 1);
+					Handle h(SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2));
 					Handle rh((that->*method.h_uh)(u,h));
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;

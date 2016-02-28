@@ -90,6 +90,10 @@ bool SatisfyingSet::grounding(const std::map<Handle, Handle> &var_soln,
 {
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 
+	// Do not accept new solution if maximum number has been already reached
+	if (_satisfying_set.size() >= max_results)
+		return true;
+
 	if (1 == _varseq.size())
 	{
 		_satisfying_set.emplace(var_soln.at(_varseq[0]));

@@ -45,13 +45,16 @@ bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
                            const std::map<Handle, Handle> &term_soln)
 {
 	// PatternMatchEngine::print_solution(term_soln,var_soln);
+
+	// Do not accept new solution if maximum number has been already reached
+	if (_result_set.size() >= max_results)
+		return true;
+
 	Handle h = inst.instantiate(implicand, var_soln);
 	insert_result(h);
 
 	// If we found as many as we want, then stop looking for more.
-	if (_result_set.size() < max_results)
-		return false;
-	return true;
+	return (_result_set.size() >= max_results);
 }
 
 void Implicator::insert_result(const Handle& h)
