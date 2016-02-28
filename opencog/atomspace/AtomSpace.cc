@@ -408,32 +408,6 @@ std::string AtomSpace::to_string()
 	return ss.str();
 }
 
-void AtomSpace::clear()
-{
-    std::vector<Handle> allAtoms;
-
-    _atom_table.getHandlesByType(back_inserter(allAtoms), ATOM, true, false);
-
-    DPRINTF("atoms in allAtoms: %lu\n", allAtoms.size());
-
-    // Uncomment to turn on logging at DEBUG level.
-    // Logger::Level save = logger().get_level();
-    // logger().set_level(Logger::DEBUG);
-
-    // XXX FIXME TODO This is a stunningly inefficient way to clear the
-    // atomspace! This will take minutes on any decent-sized atomspace!
-    std::vector<Handle>::iterator i;
-    for (i = allAtoms.begin(); i != allAtoms.end(); ++i) {
-        purge_atom(*i, true);
-    }
-
-    allAtoms.clear();
-    _atom_table.getHandlesByType(back_inserter(allAtoms), ATOM, true, false);
-    assert(allAtoms.size() == 0);
-
-    // logger().set_level(save);
-}
-
 namespace std {
 
 ostream& operator<<(ostream& out, const opencog::AtomSpace& as) {
