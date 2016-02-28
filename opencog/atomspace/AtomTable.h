@@ -173,6 +173,9 @@ public:
     void ready_transient(AtomTable* parent, AtomSpace* holder);
     void clear_transient();
 
+    void clear_all_atoms();
+    void clear();
+
     UUID get_uuid(void) const { return _uuid; }
     AtomTable* get_environ(void) const { return _environ; }
     AtomSpace* getAtomSpace(void) const { return _as; }

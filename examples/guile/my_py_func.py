@@ -1,5 +1,25 @@
+#
+# A short python snippet that is used in the execute.scm example.
+#
+from opencog.atomspace import AtomSpace, TruthValue
+from opencog.atomspace import types
 
-# This python snippet goes with the execute.scm example ...
+asp = AtomSpace()
 
+# Python function taking two atoms, converting thier string-names to
+# floats, adding the floats, and returning a new atom holding the sum.
 def my_py_func(atoma, atomb):
-	print("Hello world")
+	print("Python received two arguments:\n" + str(atoma) + str(atomb))
+	av = float(atoma.name)
+	bv = float(atomb.name)
+	cv = av + bv       # Add numeric values!
+	print("The sum is " + str(cv))
+	return asp.add_node(types.ConceptNode, str(cv))
+
+# Similar to the above, but returning a truth value.
+def my_py_predicate(atoma, atomb):
+	print("Python predicate received two arguments:\n" + str(atoma) + str(atomb))
+	av = float(atoma.name)
+	bv = float(atomb.name)
+	TV = TruthValue(1.0/av, 1.0/bv)
+	return TV
