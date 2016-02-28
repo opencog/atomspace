@@ -121,7 +121,7 @@ void FirstNUTest::test_disconnected_satisfying_set(void)
     Handle find_0_pairs = eval->eval_h("(cog-satisfying-set-first-n 0 get-disconnected)");
     TS_ASSERT_EQUALS(0, getarity(find_0_pairs));
 
-    Handle find_2_pairs = eval->eval_h("cog-satisfying-set-first-n 2 get-disconnected)");
+    Handle find_2_pairs = eval->eval_h("(cog-satisfying-set-first-n 2 get-disconnected)");
     TS_ASSERT_EQUALS(2, getarity(find_2_pairs));
 
     Handle find_7_pairs = eval->eval_h("(cog-satisfying-set-first-n 7 get-disconnected)");
@@ -136,7 +136,7 @@ void FirstNUTest::test_wrong_args_satisfying_set(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    _test_wrong_args("cog-satisfying-set-first-n get-men");
+    _test_wrong_args("(cog-satisfying-set-first-n get-men)");
     _test_wrong_args("(cog-satisfying-set-first-n -1 get-men)");
     _test_wrong_args("(cog-satisfying-set-first-n \"blah\" get-men)");
     _test_wrong_args("(cog-satisfying-set-first-n (1 get-men))");
@@ -147,17 +147,17 @@ void FirstNUTest::test_simple_bindlink(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    Handle find_0_men = eval->eval_h("cog-bind-first-n 0 bind-men");
+    Handle find_0_men = eval->eval_h("(cog-bind-first-n 0 bind-men)");
     TS_ASSERT_EQUALS(0, getarity(find_0_men));
 
-    Handle find_1_man = eval->eval_h("cog-bind-first-n 1 bind-men");
+    Handle find_1_man = eval->eval_h("(cog-bind-first-n 1 bind-men)");
     TS_ASSERT_EQUALS(1, getarity(find_1_man));
 
-    Handle find_3_men = eval->eval_h("cog-bind-first-n 3 bind-men");
+    Handle find_3_men = eval->eval_h("(cog-bind-first-n 3 bind-men)");
     TS_ASSERT_EQUALS(3, getarity(find_3_men));
 
     // only 3 men present
-    Handle find_5_men = eval->eval_h("cog-bind-first-n 5 bind-men");
+    Handle find_5_men = eval->eval_h("(cog-bind-first-n 5 bind-men)");
     TS_ASSERT_EQUALS(3, getarity(find_3_men));
 }
 
@@ -165,17 +165,17 @@ void FirstNUTest::test_disconnected_bindlink(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    Handle find_0_pairs = eval->eval_h("cog-bind-first-n 0 bind-disconnected");
+    Handle find_0_pairs = eval->eval_h("(cog-bind-first-n 0 bind-disconnected)");
     TS_ASSERT_EQUALS(0, getarity(find_0_pairs));
 
-    Handle find_2_pairs = eval->eval_h("cog-bind-first-n 2 bind-disconnected");
+    Handle find_2_pairs = eval->eval_h("(cog-bind-first-n 2 bind-disconnected)");
     TS_ASSERT_EQUALS(2, getarity(find_2_pairs));
 
-    Handle find_7_pairs = eval->eval_h("cog-bind-first-n 7 bind-disconnected");
+    Handle find_7_pairs = eval->eval_h("(cog-bind-first-n 7 bind-disconnected)");
     TS_ASSERT_EQUALS(7, getarity(find_7_pairs));
 
     // only 9 pairs present
-    Handle find_12_pairs = eval->eval_h("cog-bind-first-n 12 bind-disconnected");
+    Handle find_12_pairs = eval->eval_h("(cog-bind-first-n 12 bind-disconnected)");
     TS_ASSERT_EQUALS(9, getarity(find_12_pairs));
 }
 
@@ -183,7 +183,7 @@ void FirstNUTest::test_wrong_args_bindlink(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    _test_wrong_args("cog-bind-first-n bind-men");
+    _test_wrong_args("(cog-bind-first-n bind-men)");
     _test_wrong_args("(cog-bind-first-n -1 bind-men)");
     _test_wrong_args("(cog-bind-first-n \"blah\" bind-men)");
     _test_wrong_args("(cog-bind-first-n (1 bind-men))");
