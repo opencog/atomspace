@@ -84,6 +84,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			// s == string
 			// p == TruthValuePtr
 			// t == Type
+			// u == unsigned int
 			// v == void
 			// Extend the above, if required.
 
@@ -102,6 +103,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			Handle (T::*h_sq)(const std::string&, const HandleSeq&);
 			Handle (T::*h_sqq)(const std::string&,
 			                   const HandleSeq&, const HandleSeq&);
+			Handle (T::*h_uh)(unsigned int, Handle);
 			HandleSeq (T::*q_h)(Handle);
 			HandleSeq (T::*q_hti)(Handle, Type, int);
 			HandleSeq (T::*q_htib)(Handle, Type, int, bool);
@@ -148,6 +150,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			H_HTQ, // return handle, take handle, type, and HandleSeq
 			H_SQ,  // return handle, take string and HandleSeq
 			H_SQQ, // return handle, take string, HandleSeq and HandleSeq
+			H_UH,  // return handle, take unsigned int and handle
 			Q_H,   // return HandleSeq, take handle
 			Q_HTI, // return HandleSeq, take handle, type, and int
 			Q_HTIB,// return HandleSeq, take handle, type, and bool
@@ -302,6 +305,14 @@ class SchemePrimitive : public PrimitiveEnviron
 					HandleSeq seq2 = SchemeSmob::verify_handle_list(list2, scheme_name, 3);
 
 					Handle rh((that->*method.h_sqq)(str, seq1, seq2));
+					rc = SchemeSmob::handle_to_scm(rh);
+					break;
+				}
+				case H_UH:
+				{
+					unsigned int u = SchemeSmob::verify_uint(scm_cadr(args), scheme_name, 1);
+					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name, 2));
+					Handle rh((that->*method.h_uh)(u,h));
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
@@ -633,6 +644,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_2(H_SQ,  h_sq, Handle, const std::string&, const HandleSeq&)
 		DECLARE_CONSTR_3(H_SQQ,  h_sqq, Handle, const std::string&,
 		                                const HandleSeq&, const HandleSeq&)
+		DECLARE_CONSTR_2(H_UH, h_uh, Handle, unsigned int, Handle)
 		DECLARE_CONSTR_1(Q_H,    q_h, HandleSeq, Handle)
 		DECLARE_CONSTR_3(Q_HTI,  q_hti, HandleSeq, Handle, Type, int)
 		DECLARE_CONSTR_4(Q_HTIB, q_htib, HandleSeq, Handle, Type, int, bool)
@@ -715,6 +727,7 @@ DECLARE_DECLARE_2(Handle, Handle, int)
 DECLARE_DECLARE_2(Handle, Handle, Handle)
 DECLARE_DECLARE_2(Handle, Handle, const std::string&)
 DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
+DECLARE_DECLARE_2(Handle, unsigned int, Handle)
 DECLARE_DECLARE_2(HandleSeqSeq, Handle, int)
 DECLARE_DECLARE_2(const std::string&, AtomSpace*, const std::string&)
 DECLARE_DECLARE_2(const std::string&, const std::string&, const std::string&)

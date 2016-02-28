@@ -321,6 +321,19 @@ int SchemeSmob::verify_int (SCM sint, const char *subrname,
 	return scm_to_int(sint);
 }
 
+/**
+ * Check that the argument is an unsigned int, else throw errors.
+ * Return the unsigned int.
+ */
+unsigned int SchemeSmob::verify_uint (SCM sint, const char *subrname,
+                                      int pos, const char * msg)
+{
+	if (scm_is_unsigned_integer(sint, 0, UINT_MAX))
+		scm_wrong_type_arg_msg(subrname, pos, sint, msg);
+
+	return scm_to_uint(sint);
+}
+
 /* ============================================================== */
 /**
  * Convert argument into a list of floats.

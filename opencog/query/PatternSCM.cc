@@ -74,6 +74,12 @@ void PatternSCM::init(void)
 	_binders.push_back(new FunctionWrap(single_bindlink,
 	                   "cog-bind-single", "query"));
 
+	// Identical to bindlink above, except that it only returns the
+	// first N matches, assuming that N is the first argument and
+	// the second is a BindLink handle.
+	_binders.push_back(new FunctionWrap(first_n_bindlink,
+	                   "cog-bind-first-n", "query"));
+
 	// Attentional Focus function
 	_binders.push_back(new FunctionWrap(af_bindlink,
 	                   "cog-bind-af", "query"));
@@ -82,8 +88,16 @@ void PatternSCM::init(void)
 	_binders.push_back(new FunctionWrap(satisfaction_link,
 	                   "cog-satisfy", "query"));
 
+	// Finds set of all variable groundings, assuming that the argument is
+	// a handle to pattern.
 	_binders.push_back(new FunctionWrap(satisfying_set,
 	                   "cog-satisfying-set", "query"));
+
+	// Identical to satisfying_set above, except it only returns the
+	// first N matches, assuming that N is the first argument and
+	// the second is a pattern handle.
+	_binders.push_back(new FunctionWrap(first_n_satisfying_set,
+	                   "cog-satisfying-set-first-n", "query"));
 
 	// Rule recognition.
 	_binders.push_back(new FunctionWrap(recognize,

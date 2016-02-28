@@ -200,6 +200,8 @@ private:
 	                                  const char *msg = "expecting string");
 	static int verify_int (SCM, const char *, int pos = 1,
 	                       const char *msg = "expecting integer");
+	static unsigned int verify_uint (SCM, const char *, int pos = 1,
+	                        const char *msg = "expecting unsigned integer");
 	static double verify_real (SCM, const char *, int pos = 1,
 	                           const char *msg = "expecting real number");
 
