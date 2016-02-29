@@ -197,11 +197,13 @@ private:
 	static std::vector<ProtoAtomPtr> verify_protom_list (SCM, const char *,
 	                                               int pos = 1);
 	static std::string verify_string (SCM, const char *, int pos = 1,
-	                                  const char *msg = "expecting string");
+	                                  const char *msg = "string");
 	static int verify_int (SCM, const char *, int pos = 1,
-	                       const char *msg = "expecting integer");
+	                       const char *msg = "integer");
+	static unsigned int verify_uint (SCM, const char *, int pos = 1,
+	                        const char *msg = "unsigned integer");
 	static double verify_real (SCM, const char *, int pos = 1,
-	                           const char *msg = "expecting real number");
+	                           const char *msg = "real number");
 
 	static SCM atomspace_fluid;
 	static void ss_set_env_as(AtomSpace *);
