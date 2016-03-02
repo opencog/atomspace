@@ -13,12 +13,32 @@
 
 (load-extension "libquery" "opencog_query_init")
 
+(define-public (cog-bind handle)
+	(cog-bind-first-n handle -1)
+)
+(define-public (cog-bind-single handle)
+	(cog-bind-first-n handle 1)
+)
+(define-public (cog-satisfying-set handle)
+	(cog-satisfying-set-first-n handle -1)
+)
+(define-public (cog-satisfying-element handle)
+	(cog-satisfying-set-first-n handle 1)
+)
+
 (set-procedure-property! cog-bind 'documentation
 "
  cog-bind handle
     Run pattern matcher on handle.  handle must be a BindLink.
     Uses crisp (non-probabilistic) logic during the evaluation
     of evaluatable terms.
+")
+
+(set-procedure-property! cog-bind-first-n 'documentation
+"
+ cog-bind-first-n
+    Run pattern matcher on handle.  handle must be a BindLink.
+    The search is terminated after the first N matches are found.
 ")
 
 (set-procedure-property! cog-bind-single 'documentation

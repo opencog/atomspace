@@ -322,16 +322,16 @@ int SchemeSmob::verify_int (SCM sint, const char *subrname,
 }
 
 /**
- * Check that the argument is an unsigned int, else throw errors.
- * Return the unsigned int.
+ * Check that the argument is an int, else throw errors.
+ * Use C++ casting to convert the int to size_t. Return the size_t.
  */
-unsigned int SchemeSmob::verify_uint (SCM sint, const char *subrname,
-                                      int pos, const char * msg)
+size_t SchemeSmob::verify_size (SCM sint, const char *subrname,
+                                int pos, const char * msg)
 {
-	if (!scm_is_unsigned_integer(sint, 0, UINT_MAX))
+	if (scm_is_false(scm_integer_p(sint)))
 		scm_wrong_type_arg_msg(subrname, pos, sint, msg);
 
-	return scm_to_uint(sint);
+	return (size_t) scm_to_int(sint);
 }
 
 /* ============================================================== */
