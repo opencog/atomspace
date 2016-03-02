@@ -1,5 +1,7 @@
 from opencog.atomspace cimport cHandle, tv_ptr, cAtomSpace
 
+ctypedef size_t cSize
+
 cdef extern from "opencog/cython/opencog/BindlinkStub.h" namespace "opencog":
     # C++: 
     #   Handle stub_bindlink(AtomSpace*, Handle);
@@ -15,8 +17,7 @@ cdef extern from "opencog/query/BindLinkAPI.h" namespace "opencog":
     #   Handle af_bindlink(AtomSpace*, Handle);
     #   TruthValuePtr satisfaction_link(AtomSpace*, Handle);
     #
-    cdef cHandle c_bindlink "bindlink" (cAtomSpace*, cHandle)
-    cdef cHandle c_single_bindlink "single_bindlink" (cAtomSpace*, cHandle)
+    cdef cHandle c_bindlink "bindlink" (cAtomSpace*, cHandle, cSize)
     cdef cHandle c_af_bindlink "af_bindlink" (cAtomSpace*, cHandle)
     cdef tv_ptr c_satisfaction_link "satisfaction_link" (cAtomSpace*, cHandle)
 

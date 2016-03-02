@@ -1,5 +1,4 @@
-(use-modules (opencog))
-(use-modules (opencog query))
+(use-modules ((opencog query)))
 
 ; Socrates, Einstein, and Peirce are all men.
 (InheritanceLink
