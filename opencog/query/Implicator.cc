@@ -45,13 +45,16 @@ bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
                            const std::map<Handle, Handle> &term_soln)
 {
 	// PatternMatchEngine::print_solution(term_soln,var_soln);
+
+	// Do not accept new solution if maximum number has been already reached
+	if (_result_set.size() >= max_results)
+		return true;
+
 	Handle h = inst.instantiate(implicand, var_soln);
 	insert_result(h);
 
 	// If we found as many as we want, then stop looking for more.
-	if (_result_set.size() < max_results)
-		return false;
-	return true;
+	return (_result_set.size() >= max_results);
 }
 
 void Implicator::insert_result(const Handle& h)
@@ -132,7 +135,7 @@ static Handle do_imply(AtomSpace* as,
  * atoms that could be a ground are found in the atomspace, then they
  * will be reported.
  *
- * See the do_bindlink function documentation for details.
+ * See the do_imply function documentation for details.
  */
 Handle bindlink(AtomSpace* as, const Handle& hbindlink)
 {
@@ -152,13 +155,29 @@ Handle bindlink(AtomSpace* as, const Handle& hbindlink)
  * Returns the first match only. Otherwise, the behavior is identical to
  * PatternMatch::bindlink above.
  *
- * See the do_bindlink function documentation for details.
+ * See the do_imply function documentation for details.
  */
 Handle single_bindlink (AtomSpace* as, const Handle& hbindlink)
 {
 	// Now perform the search.
 	DefaultImplicator impl(as);
 	impl.max_results = 1;
+	return do_imply(as, hbindlink, impl);
+}
+
+/**
+ * Evaluate an pattern and rewrite rule embedded in a BindLink
+ *
+ * Returns the first N matches. Otherwise, the behavior is identical to
+ * PatternMatch::bindlink above.
+ *
+ * See the do_imply function documentation for details.
+ */
+Handle first_n_bindlink (AtomSpace* as, unsigned int first_n, const Handle& hbindlink)
+{
+	// Now perform the search.
+	DefaultImplicator impl(as);
+	impl.max_results = first_n;
 	return do_imply(as, hbindlink, impl);
 }
 
