@@ -14,14 +14,14 @@ def stub_bindlink(AtomSpace atomspace, Atom atom):
 def bindlink(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("bindlink atom is: None")
     cdef cHandle c_result = c_bindlink(atomspace.atomspace,
-                                       deref(atom.handle))
+                                       deref(atom.handle), -1)
     cdef Atom result = Atom(c_result.value(), atomspace)
     return result
 
 def single_bindlink(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("single_bindlink atom is: None")
-    cdef cHandle c_result = c_single_bindlink(atomspace.atomspace,
-                                              deref(atom.handle))
+    cdef cHandle c_result = c_bindlink(atomspace.atomspace,
+                                       deref(atom.handle), 1)
     cdef Atom result = Atom(c_result.value(), atomspace)
     return result
 

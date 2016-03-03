@@ -137,47 +137,16 @@ static Handle do_imply(AtomSpace* as,
  *
  * See the do_imply function documentation for details.
  */
-Handle bindlink(AtomSpace* as, const Handle& hbindlink)
+Handle bindlink(AtomSpace* as, const Handle& hbindlink, size_t max_results)
 {
 #ifdef CACHED_IMPLICATOR
-	CachedDefaultImplicator impl(as);
+	CachedDefaultImplicator cachedImpl(as);
+	Implicator& impl = cachedImpl;
 #else
 	DefaultImplicator impl(as);
 #endif
-	
+	impl.max_results = max_results;
 	// Now perform the search.
-	return do_imply(as, hbindlink, impl);
-}
-
-/**
- * Evaluate an pattern and rewrite rule embedded in a BindLink
- *
- * Returns the first match only. Otherwise, the behavior is identical to
- * PatternMatch::bindlink above.
- *
- * See the do_imply function documentation for details.
- */
-Handle single_bindlink (AtomSpace* as, const Handle& hbindlink)
-{
-	// Now perform the search.
-	DefaultImplicator impl(as);
-	impl.max_results = 1;
-	return do_imply(as, hbindlink, impl);
-}
-
-/**
- * Evaluate an pattern and rewrite rule embedded in a BindLink
- *
- * Returns the first N matches. Otherwise, the behavior is identical to
- * PatternMatch::bindlink above.
- *
- * See the do_imply function documentation for details.
- */
-Handle first_n_bindlink (AtomSpace* as, unsigned int first_n, const Handle& hbindlink)
-{
-	// Now perform the search.
-	DefaultImplicator impl(as);
-	impl.max_results = first_n;
 	return do_imply(as, hbindlink, impl);
 }
 

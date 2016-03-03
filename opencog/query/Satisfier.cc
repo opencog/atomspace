@@ -134,7 +134,7 @@ TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
 	return sater._result;
 }
 
-static Handle _satisfying_set(AtomSpace* as, const Handle& hlink, SatisfyingSet& sater)
+Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_results)
 {
 	PatternLinkPtr bl(PatternLinkCast(hlink));
 	if (NULL == bl)
@@ -147,6 +147,8 @@ static Handle _satisfying_set(AtomSpace* as, const Handle& hlink, SatisfyingSet&
 			bl = createPatternLink(hlink);
 	}
 
+	SatisfyingSet sater(as);
+	sater.max_results = max_results;
 	bl->satisfy(sater);
 
 	// Ugh. We used an std::set to avoid duplicates. But now, we need a
@@ -156,19 +158,6 @@ static Handle _satisfying_set(AtomSpace* as, const Handle& hlink, SatisfyingSet&
 		satvec.push_back(h);
 
 	return as->add_link(SET_LINK, satvec);
-}
-
-Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink)
-{
-	SatisfyingSet sater(as);
-	return _satisfying_set(as, hlink, sater);
-}
-
-Handle opencog::first_n_satisfying_set(AtomSpace* as, unsigned int first_n, const Handle& hlink)
-{
-	SatisfyingSet sater(as);
-	sater.max_results = first_n;
-	return _satisfying_set(as, hlink, sater);
 }
 
 /* ===================== END OF FILE ===================== */
