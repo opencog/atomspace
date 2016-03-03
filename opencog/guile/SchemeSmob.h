@@ -200,8 +200,8 @@ private:
 	                                  const char *msg = "string");
 	static int verify_int (SCM, const char *, int pos = 1,
 	                       const char *msg = "integer");
-	static unsigned int verify_uint (SCM, const char *, int pos = 1,
-	                        const char *msg = "unsigned integer");
+	static size_t verify_size (SCM, const char *, int pos = 1,
+	                           const char *msg = "size integer");
 	static double verify_real (SCM, const char *, int pos = 1,
 	                           const char *msg = "real number");
 

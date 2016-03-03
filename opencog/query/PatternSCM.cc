@@ -65,19 +65,10 @@ PatternSCM::PatternSCM(void) :
 /// Thus, all the definitions below happen in that module.
 void PatternSCM::init(void)
 {
-	// Run implication, assuming that the argument is a handle to an
+	// Run implication, assuming that the first argument is a handle to a
 	// BindLink containing variables, a pattern and a rewrite rules.
-	_binders.push_back(new FunctionWrap(bindlink, "cog-bind", "query"));
-
-	// Identical to bindlink above, except that it only returns the
-	// first match.
-	_binders.push_back(new FunctionWrap(single_bindlink,
-	                   "cog-bind-single", "query"));
-
-	// Identical to bindlink above, except that it only returns the
-	// first N matches, assuming that N is the first argument and
-	// the second is a BindLink handle.
-	_binders.push_back(new FunctionWrap(first_n_bindlink,
+	// Returns the first N matches, assuming that N is the second argument.
+	_binders.push_back(new FunctionWrap(bindlink,
 	                   "cog-bind-first-n", "query"));
 
 	// Attentional Focus function
@@ -88,15 +79,10 @@ void PatternSCM::init(void)
 	_binders.push_back(new FunctionWrap(satisfaction_link,
 	                   "cog-satisfy", "query"));
 
-	// Finds set of all variable groundings, assuming that the argument is
-	// a handle to pattern.
+	// Finds set of all variable groundings, assuming that the first
+	// argument is a handle to pattern. Returns the first N matches,
+	// assuming that N is the second argument.
 	_binders.push_back(new FunctionWrap(satisfying_set,
-	                   "cog-satisfying-set", "query"));
-
-	// Identical to satisfying_set above, except it only returns the
-	// first N matches, assuming that N is the first argument and
-	// the second is a pattern handle.
-	_binders.push_back(new FunctionWrap(first_n_satisfying_set,
 	                   "cog-satisfying-set-first-n", "query"));
 
 	// Rule recognition.

@@ -69,7 +69,9 @@ void SingleUTest::setUp(void)
 {
     config().set("SCM_PRELOAD",
         "opencog/atoms/base/core_types.scm, "
-        "opencog/scm/utilities.scm");
+        "opencog/scm/utilities.scm, "
+        "opencog/scm/opencog/exec.scm, "
+        "opencog/scm/opencog/query.scm");
 
     load_scm_files_from_config(*as);
 }
@@ -85,19 +87,17 @@ void SingleUTest::setUp(void)
 void SingleUTest::test_single_bindlink(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
-    
+
     config().set("SCM_PRELOAD", "tests/query/single.scm");
     load_scm_files_from_config(*as);    
-    
-    Handle findMan = eval->eval_h("find-man");
-    
+
     // First, get all the solutions. There should be 3 of them:
     // Socrates, Einstein and Peirce all inherit from man
-    Handle answersAll = bindlink(as, findMan);
+    Handle answersAll = eval->eval_h("(cog-bind find-man)");
     TS_ASSERT_EQUALS(3, getarity(answersAll));
-    
+
     // Test PatternMatch::single_bindlink, which should only return the
     // first match
-    Handle answersSingle = single_bindlink(as, findMan);
+    Handle answersSingle = eval->eval_h("(cog-bind-single find-man)");
     TS_ASSERT_EQUALS(1, getarity(answersSingle));
 }
