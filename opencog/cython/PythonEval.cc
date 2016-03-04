@@ -388,9 +388,21 @@ PythonEval::PythonEval(AtomSpace* atomspace)
     this->initialize_python_objects_and_imports();
 
     // Add the preload functions
-    if (config().has("PYTHON_PRELOAD_FUNCTIONS")) {
+    if (config().has("PYTHON_PRELOAD_FUNCTIONS"))
+    {
         string preloadDirectory = config()["PYTHON_PRELOAD_FUNCTIONS"];
-        this->add_modules_from_path(preloadDirectory);
+
+        // According to the mailing list, boost throws exceptions
+        // on  vagrant box, when the opencog.conf file is
+        // misconfigured .. and the default seems to be.
+        try
+        {
+            this->add_modules_from_path(preloadDirectory);
+        }
+        catch (const std::exception& ex)
+        {
+            logger().error() << ex.what();
+        }
     }
 }
 
