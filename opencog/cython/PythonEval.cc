@@ -388,9 +388,21 @@ PythonEval::PythonEval(AtomSpace* atomspace)
     this->initialize_python_objects_and_imports();
 
     // Add the preload functions
-    if (config().has("PYTHON_PRELOAD_FUNCTIONS")) {
+    if (config().has("PYTHON_PRELOAD_FUNCTIONS"))
+    {
         string preloadDirectory = config()["PYTHON_PRELOAD_FUNCTIONS"];
-        this->add_modules_from_path(preloadDirectory);
+
+        // According to the mailing list, boost throws exceptions
+        // on  vagrant box, when the opencog.conf file is
+        // misconfigured .. and the default seems to be.
+        try
+        {
+            this->add_modules_from_path(preloadDirectory);
+        }
+        catch (const std::exception& ex)
+        {
+            logger().error() << ex.what();
+        }
     }
 }
 
@@ -1190,10 +1202,12 @@ void PythonEval::add_module_directory(const boost::filesystem::path &directory)
 
     // Loop over the files in the directory looking for Python files.
     copy(boost::filesystem::directory_iterator(directory),
-            boost::filesystem::directory_iterator(), back_inserter(files));
-    for(vector<boost::filesystem::path>::const_iterator it(files.begin());
-            it != files.end(); ++it) {
-        if(it->extension() == boost::filesystem::path(".py"))
+         boost::filesystem::directory_iterator(), back_inserter(files));
+
+    for (vector<boost::filesystem::path>::const_iterator it(files.begin());
+            it != files.end(); ++it)
+    {
+        if (it->extension() == boost::filesystem::path(".py"))
             pyFiles.push_back(*it);
     }
 
@@ -1213,7 +1227,7 @@ void PythonEval::add_module_directory(const boost::filesystem::path &directory)
     PyObject* pyFromList = PyList_New(0);
 
     // Import each of the ".py" files as a Python module.
-    for(vector<boost::filesystem::path>::const_iterator it(pyFiles.begin());
+    for (vector<boost::filesystem::path>::const_iterator it(pyFiles.begin());
             it != pyFiles.end(); ++it)
         this->import_module(*it, pyFromList);
 
@@ -1258,7 +1272,8 @@ void PythonEval::add_modules_from_path(std::string pathString)
     std::vector<std::string> files;
 
     auto loadmod_prep = [&dirs,&files](const std::string& abspath,
-            const char** config_paths) {
+            const char** config_paths)
+    {
         // If the resulting path is a directory or a regular file,
         // then push to loading list.
         struct stat finfo;
@@ -1284,7 +1299,8 @@ void PythonEval::add_modules_from_path(std::string pathString)
     const char** config_paths = get_module_paths();
     std::vector<std::string> paths;
     tokenize(pathString, std::back_inserter(paths), ",");
-    for (const auto& pathString : paths) {
+    for (const auto& pathString : paths)
+    {
         if ('/' == pathString[0]) {
             loadmod_prep(pathString, NULL);
             continue;
@@ -1306,7 +1322,8 @@ void PythonEval::add_modules_from_path(std::string pathString)
         }
     }
 
-    // Load First directories and then files to properly handle import dependencies.
+    // Load First directories and then files to properly handle
+    // import dependencies.
     dirs.insert(dirs.end(), files.begin(), files.end());
     for (const auto& abspath : dirs)
         add_modules_from_abspath(abspath);
