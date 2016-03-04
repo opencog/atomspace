@@ -45,6 +45,17 @@ private:
 	AtomSpace *_as;
 	const std::map<Handle, Handle> *_vmap;
 	bool _halt = false;
+	int _quotation_level = 0;
+
+	/**
+	 * Instatiator removes first level QuoteLinks and in such cases
+	 * returns verbatim atoms. This is sometimes incorrect if the first
+	 * level QuoteLinks are placed below some kind of atoms e.g. GetLink
+	 * or ExecutionOutputLink that take care of handling QuoteLinks
+	 * on their own. We need to avoid discarding quotes for this atoms
+	 * it will be done later according given atom type semantics.
+	 */
+	int _avoid_discarding_quotes_level = 0;
 
 	/**
 	 * Recursively walk a tree starting with the root of the
@@ -61,17 +72,15 @@ private:
 	 * any execution. See also PutLink, which does substituion.
 	 * (actually, beta reduction).
 	 */
-	Handle walk_eager(const Handle& tree, int quotation_level = 0);
-	bool seq_eager(HandleSeq&, const HandleSeq& orig,
-	                     int quotation_level = 0);
+	Handle walk_eager(const Handle& tree);
+	bool seq_eager(HandleSeq&, const HandleSeq& orig);
 
 	/* Same as above, but does lazy execution. */
-	Handle walk_lazy(const Handle& tree, int quotation_level = 0);
-	bool seq_lazy(HandleSeq&, const HandleSeq& orig,
-	                     int quotation_level = 0);
+	Handle walk_lazy(const Handle& tree);
+	bool seq_lazy(HandleSeq&, const HandleSeq& orig);
 
-	bool walk_tree(HandleSeq&, const HandleSeq&, int,
-	               Handle (Instantiator::*)(const Handle&, int));
+	bool walk_tree(HandleSeq&, const HandleSeq&,
+	               Handle (Instantiator::*)(const Handle&));
 
 public:
 	Instantiator(AtomSpace* as) : _as(as) {}
