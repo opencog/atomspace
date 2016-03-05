@@ -165,7 +165,7 @@ void AtomTable::clear_all_atoms()
         _size_by_type[type] = 0;
 
     // Clear the atoms in the set.
-    for (auto pr : _atom_set) {
+    for (auto& pr : _atom_set) {
         Handle& atom_to_clear = pr.second;
         atom_to_clear->_atomTable = NULL;
         atom_to_clear->_uuid = Handle::INVALID_UUID;

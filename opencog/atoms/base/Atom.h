@@ -170,6 +170,10 @@ private:
     /** Change the Very-Long-Term Importance */
     void chgVLTI(int unit);
 
+    // Set the UUID
+    void setUUID(UUID new_UUID)
+        { _uuid = new_UUID; }
+
 public:
 
     virtual ~Atom();

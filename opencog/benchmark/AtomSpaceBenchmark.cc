@@ -536,7 +536,7 @@ Type AtomSpaceBenchmark::randomType(Type t)
     // since that type can't handle randomly generated names. Also skip
     // BIND_LINK and other validated types since the validation will fail.
     do {
-        candidateType = ATOM + randomGenerator->randint(numberOfTypes-1);
+        candidateType = ATOM + randomGenerator->randint(numberOfTypes - ATOM - 1);
     } while (!classserver().isA(candidateType, t) or
         classserver().isA(candidateType, FREE_LINK) or
         classserver().isA(candidateType, SCOPE_LINK) or

@@ -24,6 +24,8 @@
 
 #include "BackingStore.h"
 
+#include <opencog/atomspace/AtomSpace.h>
+
 using namespace opencog;
 
 
@@ -44,5 +46,15 @@ bool BackingStore::ignoreAtom(Handle h) const
 	if (std::any_of(hs.begin(), hs.end(), [this](Handle ho) { return ignoreAtom(ho); }))
 		return true;
 	return false;
+}
+
+void BackingStore::registerWith(AtomSpace* atomspace)
+{
+	atomspace->registerBackingStore(this);
+}
+
+void BackingStore::unregisterWith(AtomSpace* atomspace)
+{
+	atomspace->unregisterBackingStore(this);
 }
 

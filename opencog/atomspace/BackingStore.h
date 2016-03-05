@@ -117,6 +117,16 @@ class BackingStore
 		 * The set of ignored atom types.
 		 */
 		std::set<Type> _ignored_types;
+
+		/**
+		 * Register this backing store with the atomspace.
+		 */
+		void registerWith(AtomSpace* atomspace);
+
+		/**
+		 * Unregister this backing store with the atomspace.
+		 */
+		void unregisterWith(AtomSpace* atomspace);
 };
 
 /** @}*/
