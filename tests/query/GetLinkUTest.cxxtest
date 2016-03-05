@@ -76,7 +76,7 @@ public:
 	void test_disconnected_binary_get(void);
 	void test_disconnected_empty(void);
 	void test_not_equal(void);
-	// void test_disconnected_const_eval(void);
+	void test_disconnected_const_eval(void);
 };
 
 void GetLinkUTest::tearDown(void)
@@ -281,37 +281,49 @@ void GetLinkUTest::test_not_equal(void) {
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-// This crashes the pattern matcher so is disabled for now.
-// /*
-//  * Two disconnected components, one evaluatable is constant
-//  */
-// void GetLinkUTest::test_disconnected_const_eval(void) {
-// 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+/*
+ * Two disconnected components, one evaluatable is constant
+ */
+void GetLinkUTest::test_disconnected_const_eval(void) {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-// 	as->clear();
+	as->clear();
 
-// 	Handle inh_ground = al(INHERITANCE_LINK,
-// 	                       an(CONCEPT_NODE, "A"),
-// 	                       an(CONCEPT_NODE, "B")),
-// 		real_comp = al(INHERITANCE_LINK,
-// 		               an(VARIABLE_NODE, "$A"),
-// 		               an(VARIABLE_NODE, "$B")),
-// 		virt_comp = al(EVALUATION_LINK,
-// 		               an(GROUNDED_PREDICATE_NODE, "dummy"),
-// 		               al(LIST_LINK,
-// 		                  an(CONCEPT_NODE, "A"))),
-// 		pat = al(AND_LINK, real_comp, virt_comp),
-// 		gl = al(GET_LINK, pat),
-// 		result = satisfying_set(as, gl),
-// 		expect = al(SET_LINK, HandleSeq());
+	Handle inh_ground = al(INHERITANCE_LINK,
+	                       an(CONCEPT_NODE, "A"),
+	                       an(CONCEPT_NODE, "B")),
+		real_comp = al(INHERITANCE_LINK,
+		               an(VARIABLE_NODE, "$A"),
+		               an(VARIABLE_NODE, "$B")),
+		virt_comp_pos = al(EVALUATION_LINK,
+		                   an(GROUNDED_PREDICATE_NODE, "scm: cog-tv"),
+		                      al(LIST_LINK,
+		                         an(CONCEPT_NODE, "A"))),
+		virt_comp_neg = al(NOT_LINK, virt_comp_pos),
+		pattern_pos = al(AND_LINK, real_comp, virt_comp_pos),
+		pattern_neg = al(AND_LINK, real_comp, virt_comp_neg),
+		getlink_pos = al(GET_LINK, pattern_pos),
+		getlink_neg = al(GET_LINK, pattern_neg);
 
-// 	printf("Expected this: %s\n", expect->toString().c_str());
-// 	printf("Found this answer: %s\n", result->toString().c_str());
+	// Evaluatable constant clause is satisfied
+	Handle result = satisfying_set(as, getlink_pos);
+	Handle expect = al(SET_LINK,
+	                   al(LIST_LINK,
+	                      an(CONCEPT_NODE, "A"),
+	                      an(CONCEPT_NODE, "B")));
+	printf("Expected this: %s\n", expect->toString().c_str());
+	printf("Found this answer: %s\n", result->toString().c_str());
+	TS_ASSERT_EQUALS(result, expect);
 
-// 	TS_ASSERT_EQUALS(result, expect);
+	// Evaluatable constant clause is not satisfied
+	result = satisfying_set(as, getlink_neg);
+	expect = al(SET_LINK, HandleSeq());
+	printf("Expected this: %s\n", expect->toString().c_str());
+	printf("Found this answer: %s\n", result->toString().c_str());
+	TS_ASSERT_EQUALS(result, expect);
 
-// 	logger().debug("END TEST: %s", __FUNCTION__);
-// }
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
 
 #undef al
 #undef an
