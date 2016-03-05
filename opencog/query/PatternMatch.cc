@@ -66,8 +66,7 @@ class PMCGroundings : public PatternMatchCallback
 		}
 		bool evaluate_sentence(const Handle& link_h,
 		                       const std::map<Handle, Handle> &gnds) {
-			throw InvalidParamException(TRACE_INFO,
-			              "Not expecting a virtual link here!");
+			return _cb.evaluate_sentence(link_h,gnds);
 		}
 		bool clause_match(const Handle& pattrn_link_h, const Handle& grnd_link_h) {
 			return _cb.clause_match(pattrn_link_h, grnd_link_h);
