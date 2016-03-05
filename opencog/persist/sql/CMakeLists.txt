@@ -92,9 +92,11 @@ INSTALL (TARGETS persist-sql
 
 INSTALL (FILES
 	AtomStorage.h
+	ODBCAtomStorage.h
+	PGAtomStorage.h
+	SQLBackingStore.h
 	odbcxx.h
 	SQLPersistSCM.h
-	PGAtomStorage.h
 	PGSQLPersistSCM.h
 	DESTINATION "include/opencog/persist/sql"
 )
