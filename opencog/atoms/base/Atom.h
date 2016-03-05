@@ -210,6 +210,21 @@ public:
         return Handle(std::dynamic_pointer_cast<Atom>(shared_from_this()));
     }
 
+    /** Returns whether this atom is marked checked. This is a public utility 
+     * flag that can be used during testing.
+     *
+     * @return is atom checked.
+     */
+    bool isChecked() const;
+
+    /** Sets this atom as checked.
+     */
+    void setChecked();
+
+    /** Sets this atom as unchecked.
+     */
+    void setUnchecked();
+
     /** Returns the AttentionValue object of the atom.
      *
      * @return The pointer to the AttentionValue object

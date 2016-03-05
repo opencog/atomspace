@@ -42,6 +42,11 @@
 
 namespace opencog
 {
+const bool EMIT_DIAGNOSTICS = true;
+const bool DONT_EMIT_DIAGNOSTICS = false;
+const bool CHECK_TRUTH_VALUES = true;
+const bool DONT_CHECK_TRUTH_VALUES = false;
+
 /** \addtogroup grp_atomspace
  *  @{
  */
@@ -99,6 +104,16 @@ public:
         if (env) return env->getAtomSpace();
         return nullptr;
     }
+
+    /**
+     * Compare atomspaces for equality. Useful during testing.
+     */
+    static bool compare_atomspaces(const AtomSpace& first,
+                                   const AtomSpace& second,
+                                   bool check_truth_values = CHECK_TRUTH_VALUES,
+                                   bool emit_diagnostics = DONT_EMIT_DIAGNOSTICS);
+    bool operator==(const AtomSpace& other) const;
+    bool operator!=(const AtomSpace& other) const;
 
     /**
      * Return the number of atoms contained in the space.
@@ -359,6 +374,57 @@ public:
     }
 
     /**
+     * Gets all the atoms of any type and appends them to the HandleSeq.
+     *
+     * @param appendToHandles the HandleSeq to which to append the handles.
+     *
+     * Example of call to this method:
+     * @code
+     *         std::list<Handle> atoms;
+     *         atomSpace.get_all_atoms(atoms);
+     * @endcode
+     */
+    void get_all_atoms(HandleSeq& appendToHandles) const
+    {
+        // Defer to handles by type for ATOMs and subclasses.
+        get_handles_by_type(appendToHandles, ATOM, true);
+    }
+
+    /**
+     * Gets all the nodes of any type and appends them to the HandleSeq.
+     *
+     * @param appendToHandles the HandleSeq to which to append the handles.
+     *
+     * Example of call to this method:
+     * @code
+     *         std::list<Handle> nodes;
+     *         atomSpace.get_all_nodes(nodes);
+     * @endcode
+     */
+    void get_all_nodes(HandleSeq& appendToHandles) const
+    {
+        // Defer to handles by type for NODEs and subclasses.
+        get_handles_by_type(appendToHandles, NODE, true);
+    }
+
+    /**
+     * Gets all the links of any type and appends them to the HandleSeq.
+     *
+     * @param appendToHandles the HandleSeq to which to append the handles.
+     *
+     * Example of call to this method:
+     * @code
+     *         std::list<Handle> links;
+     *         atomSpace.get_all_links(links, LINK, true);
+     * @endcode
+     */
+    void get_all_links(HandleSeq& appendToHandles) const
+    {
+        // Defer to handles by type for LINKs and subclasses.
+        get_handles_by_type(appendToHandles, LINK, true);
+    }
+
+    /**
      * Gets a set of handles that matches with the given type
      * (subclasses optionally).
      *
@@ -369,11 +435,11 @@ public:
      * @note The matched entries are appended to a container whose
      *        OutputIterator is passed as the first argument.
      *
-     * Example of call to this method, which would return all entries
-     * in AtomSpace:
+     * Example of call to this method, which would return all ConceptNodes
+     * in the AtomSpace:
      * @code
-     *         std::list<Handle> ret;
-     *         atomSpace.getHandlesByType(back_inserter(ret), ATOM, true);
+     *         std::list<Handle> atoms;
+     *         atomSpace.getHandlesByType(atoms, CONCEPT_NODE);
      * @endcode
      */
     void get_handles_by_type(HandleSeq& appendToHandles,
