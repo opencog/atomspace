@@ -34,19 +34,18 @@
 using namespace opencog;
 
 bool Instantiator::walk_tree(HandleSeq& oset_results, const HandleSeq& expr,
-                             int quotation_level,
-                             Handle (Instantiator::*walker)(const Handle&, int))
+                             Handle (Instantiator::*walker)(const Handle&))
 {
 	bool changed = false;
 	for (const Handle& h : expr)
 	{
-		Handle hg((this->*walker)(h, quotation_level));
+		Handle hg((this->*walker)(h));
 		if (hg != h) changed = true;
 
 		// GlobNodes are grounded by a ListLink of everything that
 		// the GlobNode matches. Unwrap the list, and insert each
 		// of the glob elements in sequence.
-		if (quotation_level == 0 and GLOB_NODE == h->getType() and hg != h)
+		if (_quotation_level == 0 and GLOB_NODE == h->getType() and hg != h)
 		{
 			LinkPtr lp(LinkCast(hg));
 			OC_ASSERT(nullptr != lp, "Expecting glob list");
@@ -69,53 +68,48 @@ bool Instantiator::walk_tree(HandleSeq& oset_results, const HandleSeq& expr,
 	return changed;
 }
 
-bool Instantiator::seq_eager(HandleSeq& oset_results,
-                             const HandleSeq& expr,
-                             int quotation_level)
+bool Instantiator::seq_eager(HandleSeq& oset_results, const HandleSeq& expr)
 {
-	return walk_tree(oset_results, expr, quotation_level,
-	                 &Instantiator::walk_eager);
+	return walk_tree(oset_results, expr, &Instantiator::walk_eager);
 }
 
-bool Instantiator::seq_lazy(HandleSeq& oset_results,
-                            const HandleSeq& expr,
-                            int quotation_level)
+bool Instantiator::seq_lazy(HandleSeq& oset_results, const HandleSeq& expr)
 {
-	return walk_tree(oset_results, expr, quotation_level,
-	                 &Instantiator::walk_lazy);
+	return walk_tree(oset_results, expr, &Instantiator::walk_lazy);
 }
 
-Handle Instantiator::walk_eager(const Handle& expr, int quotation_level)
+Handle Instantiator::walk_eager(const Handle& expr)
 {
 	Type t = expr->getType();
 	LinkPtr lexpr(LinkCast(expr));
 
 	// Quotation case
 	if (QUOTE_LINK == t)
-		quotation_level++;
+		_quotation_level++;
 	else if (UNQUOTE_LINK == t)
-		quotation_level--;
+		_quotation_level--;
 
 	// Discard the following QuoteLink or UnquoteLink (as it is
 	// serving its quoting or unquoting function).
-	if ((quotation_level == 1 and QUOTE_LINK == t)
-		or (quotation_level == 0 and UNQUOTE_LINK == t)) {
+	if (((_avoid_discarding_quotes_level == 0)
+		and (_quotation_level == 1 and QUOTE_LINK == t))
+		or (_quotation_level == 0 and UNQUOTE_LINK == t)) {
 		if (1 != lexpr->getArity())
 			throw InvalidParamException(TRACE_INFO,
 			                            "QuoteLink/UnquoteLink has "
 			                            "unexpected arity!");
-		return walk_eager(lexpr->getOutgoingAtom(0), quotation_level);
+		return walk_eager(lexpr->getOutgoingAtom(0));
 	}
 
 	if (not lexpr)
 	{
-		if (quotation_level > 0)
+		if (_quotation_level > 0)
 			return expr;
 
 		// If we are here, we are a Node.
 		if (DEFINED_SCHEMA_NODE == t)
 		{
-			return walk_eager(DefineLink::get_definition(expr), quotation_level);
+			return walk_eager(DefineLink::get_definition(expr));
 		}
 
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
@@ -136,7 +130,7 @@ Handle Instantiator::walk_eager(const Handle& expr, int quotation_level)
 			return Handle(expr);
 
 		_halt = true;
-		Handle hgnd(walk_eager(it->second, quotation_level));
+		Handle hgnd(walk_eager(it->second));
 		_halt = false;
 		return hgnd;
 	}
@@ -147,7 +141,7 @@ Handle Instantiator::walk_eager(const Handle& expr, int quotation_level)
 	// We must be careful to substitute only for free variables, and
 	// never for bound ones.
 
-	if (quotation_level > 0)
+	if (_quotation_level > 0)
 		goto mere_recursive_call;
 
 	// Reduce PutLinks in an eager fashion, by first executing the
@@ -161,7 +155,7 @@ Handle Instantiator::walk_eager(const Handle& expr, int quotation_level)
 		// Execute the values in the PutLink before doing the beta-reduction.
 		// Execute the body only after the beta-reduction has been done.
 		Handle pvals = ppp->get_values();
-		Handle gargs = walk_eager(pvals, quotation_level);
+		Handle gargs = walk_eager(pvals);
 		if (gargs != pvals)
 		{
 			HandleSeq groset;
@@ -174,7 +168,7 @@ Handle Instantiator::walk_eager(const Handle& expr, int quotation_level)
 		// Step one: beta-reduce.
 		Handle red(ppp->reduce());
 		// Step two: execute the resulting body.
-		Handle rex(walk_eager(red, quotation_level));
+		Handle rex(walk_eager(red));
 		if (nullptr == rex)
 			return rex;
 
@@ -221,8 +215,10 @@ Handle Instantiator::walk_eager(const Handle& expr, int quotation_level)
 		Handle sn(eolp->get_schema());
 		Handle args(eolp->get_args());
 
-		// Perform substitution on the args, only.
-		args = walk_eager(args, quotation_level);
+		// Perform substitution on the args, only. Do not discard any quotes.
+		_avoid_discarding_quotes_level++;
+		args = walk_eager(args);
+		_avoid_discarding_quotes_level--;
 
 		// If its a DSN, obtain the correct body for it.
 		if (DEFINED_SCHEMA_NODE == sn->getType())
@@ -244,7 +240,7 @@ Handle Instantiator::walk_eager(const Handle& expr, int quotation_level)
 
 			const HandleSeq& oset(LinkCast(args)->getOutgoingSet());
 			Handle beta_reduced(vars.substitute_nocheck(body, oset));
-			return walk_eager(beta_reduced, quotation_level);
+			return walk_eager(beta_reduced);
 		}
 
 		ExecutionOutputLinkPtr geolp(createExecutionOutputLink(sn, args));
@@ -256,7 +252,7 @@ Handle Instantiator::walk_eager(const Handle& expr, int quotation_level)
 	if (DELETE_LINK == t)
 	{
 		HandleSeq oset_results;
-		seq_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
+		seq_eager(oset_results, lexpr->getOutgoingSet());
 		for (const Handle& h: oset_results)
 		{
 			Type ht = h->getType();
@@ -276,7 +272,7 @@ Handle Instantiator::walk_eager(const Handle& expr, int quotation_level)
 		// Perform substitution on all arguments before applying the
 		// function itself.
 		HandleSeq oset_results;
-		seq_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
+		seq_eager(oset_results, lexpr->getOutgoingSet());
 		Handle hl(FoldLink::factory(t, oset_results));
 		FoldLinkPtr flp(FoldLinkCast(hl));
 		return flp->execute(_as);
@@ -291,7 +287,7 @@ Handle Instantiator::walk_eager(const Handle& expr, int quotation_level)
 		// Perform substitution on all arguments before applying the
 		// function itself.
 		HandleSeq oset_results;
-		seq_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
+		seq_eager(oset_results, lexpr->getOutgoingSet());
 		Handle hl(FunctionLink::factory(t, oset_results));
 		FunctionLinkPtr flp(FunctionLinkCast(hl));
 		return flp->execute(_as);
@@ -303,7 +299,10 @@ Handle Instantiator::walk_eager(const Handle& expr, int quotation_level)
 	if (GET_LINK == t)
 	{
 		HandleSeq oset_results;
-		seq_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
+		_avoid_discarding_quotes_level++;
+		seq_eager(oset_results, lexpr->getOutgoingSet());
+		_avoid_discarding_quotes_level--;
+
 		size_t sz = oset_results.size();
 		for (size_t i=0; i< sz; i++)
 			oset_results[i] = _as->add_atom(oset_results[i]);
@@ -317,8 +316,7 @@ mere_recursive_call:
 	// None of the above. Create a duplicate link, but with an outgoing
 	// set where the variables have been substituted by their values.
 	HandleSeq oset_results;
-	bool changed = seq_eager(oset_results, lexpr->getOutgoingSet(),
-	                         quotation_level);
+	bool changed = seq_eager(oset_results, lexpr->getOutgoingSet());
 	if (changed)
 	{
 		LinkPtr subl = createLink(t, oset_results, expr->getTruthValue());
@@ -327,37 +325,38 @@ mere_recursive_call:
 	return expr;
 }
 
-Handle Instantiator::walk_lazy(const Handle& expr, int quotation_level)
+Handle Instantiator::walk_lazy(const Handle& expr)
 {
 	Type t = expr->getType();
 	LinkPtr lexpr(LinkCast(expr));
 
 	// Quotation case
 	if (QUOTE_LINK == t)
-		quotation_level++;
+		_quotation_level++;
 	else if (UNQUOTE_LINK == t)
-		quotation_level--;
+		_quotation_level--;
 
 	// Discard the following QuoteLink or UnquoteLink (as it is
 	// serving its quoting or unquoting function).
-	if ((quotation_level == 1 and QUOTE_LINK == t)
-		or (quotation_level == 0 and UNQUOTE_LINK == t)) {
+	if (((_avoid_discarding_quotes_level == 0)
+		and (_quotation_level == 1 and QUOTE_LINK == t))
+		or (_quotation_level == 0 and UNQUOTE_LINK == t)) {
 		if (1 != lexpr->getArity())
 			throw InvalidParamException(TRACE_INFO,
 			                            "QuoteLink/UnquoteLink has "
 			                            "unexpected arity!");
-		return walk_lazy(lexpr->getOutgoingAtom(0), quotation_level);
+		return walk_lazy(lexpr->getOutgoingAtom(0));
 	}
 
 	if (not lexpr)
 	{
-		if (quotation_level > 0)
+		if (_quotation_level > 0)
 			return expr;
 
 		// If we are here, we are a Node.
 		if (DEFINED_SCHEMA_NODE == t)
 		{
-			return walk_lazy(DefineLink::get_definition(expr), quotation_level);
+			return walk_lazy(DefineLink::get_definition(expr));
 		}
 
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
@@ -378,7 +377,7 @@ Handle Instantiator::walk_lazy(const Handle& expr, int quotation_level)
 			return Handle(expr);
 
 		_halt = true;
-		Handle hgnd(walk_lazy(it->second, quotation_level));
+		Handle hgnd(walk_lazy(it->second));
 		_halt = false;
 		return hgnd;
 	}
@@ -389,7 +388,7 @@ Handle Instantiator::walk_lazy(const Handle& expr, int quotation_level)
 	// We must be careful to substitute only for free variables, and
 	// never for bound ones.
 
-	if (quotation_level > 0)
+	if (_quotation_level > 0)
 		goto mere_recursive_call;
 
 	// Reduce PutLinks in a lazy fashion. By "lazy" we mean that the
@@ -405,7 +404,7 @@ Handle Instantiator::walk_lazy(const Handle& expr, int quotation_level)
 		// Step one: beta-reduce.
 		Handle red(ppp->reduce());
 		// Step two: execute the resulting body.
-		Handle rex(walk_lazy(red, quotation_level));
+		Handle rex(walk_lazy(red));
 		if (nullptr == rex)
 			return rex;
 
@@ -461,7 +460,7 @@ Handle Instantiator::walk_lazy(const Handle& expr, int quotation_level)
 		Handle args(eolp->get_args());
 
 		// Perform substitution on the args, only.
-		args = walk_eager(args, quotation_level);
+		args = walk_eager(args);
 
 		// If its a DSN, obtain the correct body for it.
 		if (DEFINED_SCHEMA_NODE == sn->getType())
@@ -483,7 +482,7 @@ Handle Instantiator::walk_lazy(const Handle& expr, int quotation_level)
 
 			const HandleSeq& oset(LinkCast(args)->getOutgoingSet());
 			Handle beta_reduced(vars.substitute_nocheck(body, oset));
-			return walk_eager(beta_reduced, quotation_level);
+			return walk_eager(beta_reduced);
 		}
 
 		ExecutionOutputLinkPtr geolp(createExecutionOutputLink(sn, args));
@@ -495,7 +494,7 @@ Handle Instantiator::walk_lazy(const Handle& expr, int quotation_level)
 	if (DELETE_LINK == t)
 	{
 		HandleSeq oset_results;
-		seq_lazy(oset_results, lexpr->getOutgoingSet(), quotation_level);
+		seq_lazy(oset_results, lexpr->getOutgoingSet());
 		for (const Handle& h: oset_results)
 		{
 			Type ht = h->getType();
@@ -540,8 +539,7 @@ mere_recursive_call:
 	// None of the above. Create a duplicate link, but with an outgoing
 	// set where the variables have been substituted by their values.
 	HandleSeq oset_results;
-	bool changed = seq_lazy(oset_results, lexpr->getOutgoingSet(),
-	                        quotation_level);
+	bool changed = seq_lazy(oset_results, lexpr->getOutgoingSet());
 	if (changed)
 	{
 		LinkPtr subl = createLink(t, oset_results, expr->getTruthValue());
@@ -570,6 +568,9 @@ Handle Instantiator::instantiate(const Handle& expr,
 	if (nullptr == expr)
 		throw InvalidParamException(TRACE_INFO,
 			"Asked to ground a null expression");
+
+	_quotation_level = 0;
+	_avoid_discarding_quotes_level = 0;
 
 	_vmap = &vars;
 

@@ -2,9 +2,11 @@ from unittest import TestCase
 import os
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom, types
-from opencog.bindlink import    stub_bindlink, bindlink, single_bindlink,\
-                                af_bindlink, satisfaction_link,\
-                                execute_atom, evaluate_atom
+from opencog.bindlink import stub_bindlink, bindlink, single_bindlink,\
+                             first_n_bindlink, af_bindlink, \
+                             satisfaction_link, satisfying_set, \
+                             satisfying_element, first_n_satisfying_set, \
+                             execute_atom, evaluate_atom
 
 from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.type_constructors import *
@@ -17,10 +19,15 @@ __author__ = 'Curtis Faith'
 class BindlinkTest(TestCase):
 
     bindlink_atom = None
+    getlink_atom = None
     atomspace = AtomSpace()
+    starting_size = 0
 
     def setUp(self):
         print "setUp - atomspace = ", self.atomspace
+
+        # Clear atoms from previous test
+        self.atomspace.clear()
 
         # Get the config file name in a manner not dependent on the
         # starting working directory.
@@ -54,6 +61,19 @@ class BindlinkTest(TestCase):
                 # bindlink needs a handle
                 )
 
+        # Define a pattern to be grounded
+        self.getlink_atom =  \
+            GetLink(
+                InheritanceLink(
+                    VariableNode("$var"),
+                    ConceptNode("animal")
+                )
+            )
+
+        # Remember the starting atomspace size.
+        self.starting_size = self.atomspace.size()
+
+
     def tearDown(self):
         print "tearDown - atomspace = ", self.atomspace
 
@@ -78,59 +98,47 @@ class BindlinkTest(TestCase):
         ending_size = self.atomspace.size()
         self.assertEquals(ending_size, starting_size)
 
+    def _check_result_setlink(self, atom, expected_arity):
+
+        # Check if the atom is a SetLink
+        self.assertTrue(atom is not None and atom.value() > 0)
+        self.assertEquals(atom.type, types.SetLink)
+
+        # Check the ending atomspace size, it should have added one SetLink.
+        ending_size = self.atomspace.size()
+        self.assertEquals(ending_size, self.starting_size + 1)
+
+        # The SetLink should have expected_arity items in it.
+        self.assertEquals(atom.arity, expected_arity)
 
     def test_bindlink(self):
-
-        # Remember the starting atomspace size.
-        starting_size = self.atomspace.size()
-
-        # Run bindlink.
         atom = bindlink(self.atomspace, self.bindlink_atom)
-        self.assertTrue(atom is not None and atom.value() > 0)
-
-        # Check the ending atomspace size, it should have added one SetLink.
-        ending_size = self.atomspace.size()
-        self.assertEquals(ending_size, starting_size + 1)
-
-        # The SetLink should have three items in it.
-        self.assertEquals(atom.arity, 3)
-        self.assertEquals(atom.type, types.SetLink)
-
+        self._check_result_setlink(atom, 3)
 
     def test_single_bindlink(self):
-
-        # Remember the starting atomspace size.
-        starting_size = self.atomspace.size()
-
-        # Run bindlink.
         atom = single_bindlink(self.atomspace, self.bindlink_atom)
-        self.assertTrue(atom is not None and atom.value() > 0)
+        self._check_result_setlink(atom, 1)
 
-        # Check the ending atomspace size, it should have added one SetLink.
-        ending_size = self.atomspace.size()
-        self.assertEquals(ending_size, starting_size + 1)
-
-        # The SetLink should have one item in it.
-        self.assertEquals(atom.arity, 1)
-        self.assertEquals(atom.type, types.SetLink)
-
+    def test_first_n_bindlink(self):
+        atom = first_n_bindlink(self.atomspace, self.bindlink_atom, 5)
+        self._check_result_setlink(atom, 3)
 
     def test_af_bindlink(self):
-
-        # Remember the starting atomspace size.
-        starting_size = self.atomspace.size()
-
-        # Run bindlink.
         atom = af_bindlink(self.atomspace, self.bindlink_atom)
-        self.assertTrue(atom is not None and atom.value() > 0)
-
-        # Check the ending atomspace size, it should have added one SetLink.
-        ending_size = self.atomspace.size()
-        self.assertEquals(ending_size, starting_size + 1)
-
         # The SetLink is empty. ??? Should it be.
-        self.assertEquals(atom.arity, 0)
-        self.assertEquals(atom.type, types.SetLink)
+        self._check_result_setlink(atom, 0)
+
+    def test_satisfying_set(self):
+        atom = satisfying_set(self.atomspace, self.getlink_atom)
+        self._check_result_setlink(atom, 3)
+
+    def test_satisfying_element(self):
+        atom = satisfying_element(self.atomspace, self.getlink_atom)
+        self._check_result_setlink(atom, 1)
+
+    def test_first_n_satisfying_set(self):
+        atom = first_n_satisfying_set(self.atomspace, self.getlink_atom, 5)
+        self._check_result_setlink(atom, 3)
 
     def test_satisfy(self):
         satisfaction_atom = SatisfactionLink(
