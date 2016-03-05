@@ -298,26 +298,32 @@ int main (int argc, char **argv)
 	std::string db_user = "opencog_tester";
 	std::string db_password = "cheese";
 	int atom_count = 100;
+	bool verbose = false;
 
     const char* usage_description = 
     "PostgreSQL Storage Tester\n\n"
 	"Usage: test_pg_storage[options]\n"
+    "  -h           \tdisplay this message showing options\n\n"
+    "  -v           \tverbose output (default: false)\n\n"
 	"  -d <db>      \tdatabase name (default: opencog_test)\n\n"
 	"  -u <user>    \tuser name (default: opencog_tester)\n\n"
 	"  -p <pw>      \tpassword (default: cheese)\n\n"
-    "  -s <int>     \tAtoms in test (minimum: 20, default: 100)\n\n";
+    "  -s <int>     \ttest size (minimum: 20, default: 100)\n\n";
 
     // Don't report option errors except via '?' argument
     opterr = 0;
     int c;
 
     // Get each command line option...
-    while ((c = getopt (argc, argv, "hd:u:p:s:")) != -1) {
+    while ((c = getopt (argc, argv, "hvd:u:p:s:")) != -1) {
 		switch (c)
 		{
 			case 'h':
 				fprintf (stderr, "%s", usage_description);
 				return 0;
+			case 'v':
+				verbose = true;
+				break;
 			case 'd':
 				db_database = optarg;
 				break;
@@ -366,18 +372,21 @@ int main (int argc, char **argv)
 	}
 
 	// Create a test atomspace.
-	AtomSpace* atomspace = new AtomSpace();
+	AtomSpace* test_atomspace = new AtomSpace();
 
 	// Generate some nodes and links.
-	generate_random_atoms(atomspace, atom_count);
+	generate_random_atoms(test_atomspace, atom_count);
 
 	// Get the atomspace as a string.
 	std::stringstream atom_stream;
-	atom_stream << *atomspace;
-	std::string original_atomspace_string = atom_stream.str();
+	atom_stream << *test_atomspace;
 
-	std::cout << "Dumping atomspace: " << std::endl << std::endl;
-	std::cout << original_atomspace_string << std::endl << std::endl;
+	// Dump the database.
+	if (verbose)
+	{
+		std::cout << "Dumping atomspace: " << std::endl << std::endl;
+		std::cout << atom_stream.str() << std::endl << std::endl;
+	}
 
 	// Create a new atom storage object.
 	PGAtomStorage* pg_atom_storage = new PGAtomStorage(db_database, db_user, db_password);
@@ -401,10 +410,10 @@ int main (int argc, char **argv)
 	backing_store->set_store(pg_atom_storage);
 
 	// Register the backing store with the atomspace.
-	backing_store->registerWith(atomspace);
+	backing_store->registerWith(test_atomspace);
 
 	// Store the atomspace into the PostgresSQL storage.
-	pg_atom_storage->storeAtomSpace(atomspace);
+	pg_atom_storage->storeAtomSpace(test_atomspace);
 
 	// Test inserting atoms.
 	//insert_atoms_exec(connection, DONT_USE_TRANSACTIONS, DONT_GROUP_INSERTS);
@@ -413,11 +422,7 @@ int main (int argc, char **argv)
 	//insert_atoms_exec(connection, USE_TRANSACTIONS, GROUP_INSERTS);
 
 	// Unregister the backing store with the atomspace.
-	backing_store->unregisterWith(atomspace);
-
-    // Delete the atomspace.
-    delete atomspace;
-    atomspace = NULL;
+	backing_store->unregisterWith(test_atomspace);
  
 	// Create a new atomspace.
 	AtomSpace* new_atomspace = new AtomSpace();
@@ -433,22 +438,41 @@ int main (int argc, char **argv)
 	new_atom_stream << *new_atomspace;
 	std::string new_atomspace_string = new_atom_stream.str();
 
-	// Check if they match.
-	if (new_atomspace_string == original_atomspace_string)
+	// Check if this new atomspace matches.
+	if (AtomSpace::compare_atomspaces(test_atomspace, new_atomspace, 
+				CHECK_TRUTH_VALUES, EMIT_DIAGNOSTICS))
 	{
 		std::cout << "Loaded atomspace MATCHES original" << std::endl;
 	}
 	else
 	{
-		std::cout << "Loaded atomspace DOES NOT MATCH original" << std::endl << std::endl;
-		std::cout << "Dumping loaded atomspace: " << std::endl << std::endl;
-		std::cout << new_atomspace_string << std::endl << std::endl;
+		std::cout << "Loaded atomspace DOES NOT MATCH original" << std::endl 
+				<< std::endl;
+		if (verbose)
+		{
+			std::cout << "Dumping loaded atomspace: " << std::endl << std::endl;
+			std::cout << new_atom_stream.str() << std::endl << std::endl;
+		}
+	}
+
+	// Compare using AtomSpace's operator !=.
+	if (*test_atomspace != *new_atomspace)
+	{
+		std::cout << "Loaded atomspace DOES NOT MATCH original" << std::endl;
+	}
+
+	// Compare using AtomSpace's operator ==.
+	if (not (*test_atomspace == *new_atomspace))
+	{
+		std::cout << "Loaded atomspace DOES NOT MATCH original" << std::endl;
 	}
 
 	// Unregister the backing store with the atomspace.
 	backing_store->unregisterWith(new_atomspace);
 
-    // Delete the new atomspace.
+    // Delete the test and new atomspace.
+    delete test_atomspace;
+    test_atomspace = NULL;
     delete new_atomspace;
     new_atomspace = NULL;
 
