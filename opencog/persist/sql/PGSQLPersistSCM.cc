@@ -1,5 +1,5 @@
 /*
- * opencog/persist/sql/SQLPersistSCM.cc
+ * opencog/persist/sql/PGSQLPersistSCM.cc
  *
  * Copyright (c) 2008 by OpenCog Foundation
  * Copyright (c) 2008, 2009, 2013, 2015 Linas Vepstas <linasvepstas@gmail.com>
@@ -25,16 +25,13 @@
 #include <opencog/atomspace/BackingStore.h>
 #include <opencog/guile/SchemePrimitive.h>
 
-#include "SQLPersistSCM.h"
-#include "ODBCAtomStorage.h"
+#include "PGSQLPersistSCM.h"
+#include "PGAtomStorage.h"
 #include "SQLBackingStore.h"
 
 using namespace opencog;
 
-
-// =================================================================
-
-SQLPersistSCM::SQLPersistSCM(AtomSpace *as)
+PGSQLPersistSCM::PGSQLPersistSCM(AtomSpace *as)
 {
 	_as = as;
 	_store = NULL;
@@ -74,41 +71,41 @@ SQLPersistSCM::SQLPersistSCM(AtomSpace *as)
 #endif
 }
 
-void* SQLPersistSCM::init_in_guile(void* self)
+void* PGSQLPersistSCM::init_in_guile(void* self)
 {
 #ifdef HAVE_GUILE
-	scm_c_define_module("opencog persist-sql", init_in_module, self);
-	scm_c_use_module("opencog persist-sql");
+	scm_c_define_module("opencog persist-pgsql", init_in_module, self);
+	scm_c_use_module("opencog persist-pgsql");
 #endif
 	return NULL;
 }
 
-void SQLPersistSCM::init_in_module(void* data)
+void PGSQLPersistSCM::init_in_module(void* data)
 {
-   SQLPersistSCM* self = (SQLPersistSCM*) data;
+   PGSQLPersistSCM* self = (PGSQLPersistSCM*) data;
    self->init();
 }
 
-void SQLPersistSCM::init(void)
+void PGSQLPersistSCM::init(void)
 {
 #ifdef HAVE_GUILE
-	define_scheme_primitive("sql-open", &SQLPersistSCM::do_open, this, "persist-sql");
-	define_scheme_primitive("sql-close", &SQLPersistSCM::do_close, this, "persist-sql");
-	define_scheme_primitive("sql-load", &SQLPersistSCM::do_load, this, "persist-sql");
-	define_scheme_primitive("sql-store", &SQLPersistSCM::do_store, this, "persist-sql");
+	define_scheme_primitive("pgsql-open", &PGSQLPersistSCM::do_open, this, "persist-pgsql");
+	define_scheme_primitive("pgsql-close", &PGSQLPersistSCM::do_close, this, "persist-pgsql");
+	define_scheme_primitive("pgsql-load", &PGSQLPersistSCM::do_load, this, "persist-pgsql");
+	define_scheme_primitive("pgsql-store", &PGSQLPersistSCM::do_store, this, "persist-pgsql");
 #endif
 }
 
-SQLPersistSCM::~SQLPersistSCM()
+PGSQLPersistSCM::~PGSQLPersistSCM()
 {
 	delete _backing;
 }
 
-void SQLPersistSCM::do_open(const std::string& dbname,
+void PGSQLPersistSCM::do_open(const std::string& dbname,
                          const std::string& username,
                          const std::string& auth)
 {
-	_store = new ODBCAtomStorage(dbname, username, auth);
+	_store = new PGAtomStorage(dbname, username, auth);
 	if (!_store)
 		throw RuntimeException(TRACE_INFO,
 			"sql-open: Error: Unable to open the database");
@@ -132,7 +129,7 @@ void SQLPersistSCM::do_open(const std::string& dbname,
 	_backing->registerWith(as);
 }
 
-void SQLPersistSCM::do_close(void)
+void PGSQLPersistSCM::do_close(void)
 {
 	if (_store == NULL)
 		throw RuntimeException(TRACE_INFO,
@@ -144,12 +141,13 @@ void SQLPersistSCM::do_close(void)
 		as = SchemeSmob::ss_get_env_as("sql-close");
 #endif
 	_backing->unregisterWith(as);
+
 	_backing->set_store(NULL);
 	delete _store;
 	_store = NULL;
 }
 
-void SQLPersistSCM::do_load(void)
+void PGSQLPersistSCM::do_load(void)
 {
 	if (_store == NULL)
 		throw RuntimeException(TRACE_INFO,
@@ -165,7 +163,7 @@ void SQLPersistSCM::do_load(void)
 }
 
 
-void SQLPersistSCM::do_store(void)
+void PGSQLPersistSCM::do_store(void)
 {
 	if (_store == NULL)
 		throw RuntimeException(TRACE_INFO,
@@ -182,5 +180,5 @@ void SQLPersistSCM::do_store(void)
 
 void opencog_persist_sql_init(void)
 {
-   static SQLPersistSCM patty(NULL);
+   static PGSQLPersistSCM patty(NULL);
 }

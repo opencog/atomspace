@@ -1,6 +1,7 @@
 
 ADD_LIBRARY (atomspaceutils
 	AtomSpaceUtils
+	RandomAtomGenerator
 )
 
 ADD_DEPENDENCIES(atomspaceutils opencog_atom_types)

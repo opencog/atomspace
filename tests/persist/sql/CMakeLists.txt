@@ -24,6 +24,10 @@ LINK_LIBRARIES(
 FIND_PROGRAM(PSQL_EXECUTABLE psql)
 IF (PSQL_EXECUTABLE)
 	SET(PG_HOST $ENV{PGHOST})
+	SET(PG_PASSWORD $ENV{PGPASSWORD})
+	IF(NOT PG_PASSWORD)
+		SET(ENV{PGPASSWORD} "cheese")
+	ENDIF(NOT PG_PASSWORD)
 	IF (PG_HOST)
 		EXECUTE_PROCESS(COMMAND ${PSQL_EXECUTABLE} -c "SELECT * from TypeCodes;" -d opencog_test -U opencog_tester
 			OUTPUT_VARIABLE OUT
@@ -39,7 +43,10 @@ IF (PSQL_EXECUTABLE)
 			RESULT_VARIABLE RC)
 	ENDIF(PG_HOST)
 	UNSET(ENV{PG_HOST})
-
+	IF(NOT PG_PASSWORD)
+		UNSET(ENV{PGPASSWORD})
+	ENDIF(NOT PG_PASSWORD)
+	
 	# Check the return code from PSQL; if it failed, try a second time.
 	# The most likely cause of failure is that "-h localhost" requires
 	# a tcp socket to be open; it might not be. So we retest; then,

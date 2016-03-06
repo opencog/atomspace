@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_SQL_PERSIST_SCM_H
-#define _OPENCOG_SQL_PERSIST_SCM_H
+#ifndef _OPENCOG_PGSQL_PERSIST_SCM_H
+#define _OPENCOG_PGSQL_PERSIST_SCM_H
 
 #include <vector>
 #include <string>
@@ -30,7 +30,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/persist/sql/SQLBackingStore.h>
-#include <opencog/persist/sql/ODBCAtomStorage.h>
+#include <opencog/persist/sql/PGAtomStorage.h>
 
 namespace opencog
 {
@@ -38,8 +38,7 @@ namespace opencog
  *  @{
  */
 
-class SQLBackingStore;
-class SQLPersistSCM
+class PGSQLPersistSCM
 {
 private:
 	static void* init_in_guile(void*);
@@ -47,12 +46,12 @@ private:
 	void init(void);
 
 	SQLBackingStore *_backing;
-	ODBCAtomStorage *_store;
+	PGAtomStorage *_store;
 	AtomSpace *_as;
 
 public:
-	SQLPersistSCM(AtomSpace*);
-	~SQLPersistSCM();
+	PGSQLPersistSCM(AtomSpace*);
+	~PGSQLPersistSCM();
 
 	void do_open(const std::string&, const std::string&, const std::string&);
 	void do_close(void);
@@ -68,4 +67,4 @@ extern "C" {
 void opencog_persist_sql_init(void);
 };
 
-#endif // _OPENCOG_SQL_PERSIST_SCM_H
+#endif // _OPENCOG_PGSQL_PERSIST_SCM_H

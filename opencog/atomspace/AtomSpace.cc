@@ -99,6 +99,156 @@ AtomSpace& AtomSpace::operator=(const AtomSpace&)
          "AtomSpace - Cannot copy an object of this class");
 }
 
+bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
+                                   const AtomSpace& space_second,
+                                   bool check_truth_values,
+                                   bool emit_diagnostics)
+{
+    // Compare sizes
+    if (space_first.get_size() != space_second.get_size())
+    {
+        if (emit_diagnostics)
+            std::cout << "compare_atomspaces - size " << 
+                    space_first.get_size() << " != size " << 
+                    space_second.get_size() << std::endl;
+        return false;
+    }
+
+    // Compare node count
+    if (space_first.get_num_nodes() != space_second.get_num_nodes())
+    {
+        if (emit_diagnostics)
+            std::cout << "compare_atomspaces - node count " << 
+                    space_first.get_num_nodes() << " != node count " << 
+                    space_second.get_num_nodes() << std::endl;
+        return false;
+    }
+
+    // Compare link count
+    if (space_first.get_num_links() != space_second.get_num_links())
+    {
+        if (emit_diagnostics)
+            std::cout << "compare_atomspaces - link count " << 
+                    space_first.get_num_links() << " != link count " << 
+                    space_second.get_num_links() << std::endl;
+        return false;
+    }
+
+    // If we get this far, we need to compare each individual atom.
+
+    // Get the atoms in each atomspace.
+    HandleSeq atomsInFirstSpace, atomsInSecondSpace;
+    space_first.get_all_atoms(atomsInFirstSpace);
+    space_second.get_all_atoms(atomsInSecondSpace);
+
+    // Uncheck each atom in the second atomspace.
+    for (auto atom : atomsInSecondSpace)
+        atom->setUnchecked();
+
+    // Loop to see if each atom in the first has a match in the second.
+    const AtomTable& table_second = space_second._atom_table;
+    for (auto atom_first : atomsInFirstSpace)
+    {
+        Handle atom_second = table_second.getHandle(atom_first);
+
+        if( false)
+        {
+        Handle atom_second;
+        if (atom_first->isNode())
+        {
+            atom_second = table_second.getHandle(atom_first->getType(),
+                        atom_first->getName());
+        }
+        else if (atom_first->isLink())
+        {
+            atom_second =  table_second.getHandle(atom_first->getType(),
+                        atom_first->getOutgoingSet());
+        }
+        else
+        {
+             throw opencog::RuntimeException(TRACE_INFO,
+                 "AtomSpace::compare_atomspaces - atom not Node or Link");
+        }
+        }
+
+        // If the atoms don't match because one of them is NULL.
+        if ((atom_first and not atom_second) or
+            (atom_second and not atom_first))
+        {
+            if (emit_diagnostics)
+            {
+                if (atom_first)
+                    std::cout << "compare_atomspaces - first atom " << 
+                            atom_first->toString() << " != NULL " << 
+                            std::endl;
+                if (atom_second)
+                    std::cout << "compare_atomspaces - first atom "  << 
+                            "NULL != second atom " << 
+                            atom_second->toString() << std::endl;
+            }
+            return false;
+        }
+
+        // If the atoms don't match... Compare the atoms not the pointers
+        // which is the default if we just use Handle operator ==.
+        if (*((AtomPtr) atom_first) != *((AtomPtr) atom_second))
+        {
+            if (emit_diagnostics)
+                std::cout << "compare_atomspaces - first atom " << 
+                        atom_first->toString() << " != second atom " << 
+                        atom_second->toString() << std::endl;
+            return false;
+        }
+
+        // Check the truth values...
+        if (check_truth_values)
+        {
+            TruthValuePtr truth_first = atom_first->getTruthValue();
+            TruthValuePtr truth_second = atom_second->getTruthValue();
+            if (*truth_first != *truth_second)
+            {
+                if (emit_diagnostics)
+                    std::cout << "compare_atomspaces - first truth " << 
+                            atom_first->toString() << " != second truth " << 
+                            atom_second->toString() << std::endl;
+                return false;
+            }
+        }
+
+        // Set the check for the second atom.
+        atom_second->setChecked();
+    }
+
+    // Make sure each atom in the second atomspace has been checked.
+    bool all_checked = true;
+    for (auto atom : atomsInSecondSpace)
+    {
+        if (!atom->isChecked())
+        {
+            if (emit_diagnostics)
+                std::cout << "compare_atomspaces - unchecked space atom " << 
+                        atom->toString() << std::endl;
+            all_checked = false;
+        }
+    }
+    if (!all_checked)
+        return false;
+
+    // If we get this far, then the spaces are equal.
+    return true;
+}
+
+bool AtomSpace::operator==(const AtomSpace& other) const
+{
+    return compare_atomspaces(*this, other, CHECK_TRUTH_VALUES, 
+            DONT_EMIT_DIAGNOSTICS);
+}
+
+bool AtomSpace::operator!=(const AtomSpace& other) const
+{
+    return not operator==(other);
+}
+
 
 // ====================================================================
 

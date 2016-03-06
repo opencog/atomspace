@@ -34,7 +34,7 @@
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atoms/base/atom_types.h>
-#include <opencog/persist/sql/AtomStorage.h>
+#include <opencog/persist/sql/ODBCAtomStorage.h>
 #include <opencog/persist/sql/SQLPersistSCM.h>
 
 #include <opencog/util/Logger.h>
@@ -165,10 +165,10 @@ void PersistUTest::tearDown(void)
 
 void PersistUTest::kill_data(void)
 {
-	AtomStorage* astore = new AtomStorage(dbname, username, passwd);
+	ODBCAtomStorage* astore = new ODBCAtomStorage(dbname, username, passwd);
 	if (!astore->connected())
 	{
-		logger().info("setUp: AtomStorage cannot connect to database");
+		logger().info("setUp: ODBCAtomStorage cannot connect to database");
 		friendlyFailMessage();
 		exit(1);
 	}
