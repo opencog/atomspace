@@ -8,7 +8,7 @@
  * Updated test by Curtis Faith for PostgreSQL storage - Feb 29 2016
  */
 
-#ifdef HAVE_SQL_STORAGE
+#ifdef HAVE_PGSQL_STORAGE
 
 #include <time.h>
 #include <ctime>
@@ -261,7 +261,9 @@ void insert_atoms_exec(PGconn* connection,
 void generate_random_atoms(AtomSpace* atomspace, int total_atoms)
 {
 	unsigned long rand_seed = 10101010;
-	RandomAtomGenerator random_atom_generator(atomspace, rand_seed);
+	float link_size_mean = 5.0f;
+	RandomAtomGenerator random_atom_generator(atomspace, rand_seed,
+		link_size_mean);
 
 	fprintf(stdout,"Generating random atoms ");
 	print_time();
@@ -483,8 +485,8 @@ int main (int argc, char **argv)
 }
 
 
-#else /* HAVE_SQL_STORAGE */
+#else /* HAVE_PGSQL_STORAGE */
 int main () { return 1; }
-#endif /* HAVE_SQL_STORAGE */
+#endif /* HAVE_PGSQL_STORAGE */
 
 /* ============================= END OF FILE ================= */
