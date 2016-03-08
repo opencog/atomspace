@@ -42,6 +42,7 @@ FIND_LIBRARY(KRB5_LIBRARY
 	PATHS
 		/usr/lib
 		/usr/local/lib
+		/usr/lib/x86_64-linux-gnu/
 		/usr/lib/x86_64-linux-gnu/mit-krb5/
 		)
 
