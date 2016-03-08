@@ -157,7 +157,9 @@ public:
     timepair_t bm_rmAtom();
 
     timepair_t bm_push_back();
+    timepair_t bm_push_back_reserve();
     timepair_t bm_emplace_back();
+    timepair_t bm_emplace_back_reserve();
     timepair_t bm_reserve();
 };
 
