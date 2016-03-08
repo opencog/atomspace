@@ -1198,3 +1198,74 @@ Remarks:
 
 To summarize: this test is wonky, crazy; the numbers are bizzarely
 inconsistent with expectations.
+
+======================================================================
+7 March 2015
+
+How fast is std::vector<Handle>, really?
+
+Revisited.
+
+While working on the ODBC version of the new Edges table, since I can't
+know how many rows there are since ODBC gives no way to know until you
+reach the end of the rows using SQLFetch, I can't use the size and place
+directly method, so I wanted to see if doing pre-reserve allocations was
+worth the effort. This caused me to look at the existing atomspace_bm code
+which did this analysis to see how much slower emplace_back was. So I
+added calls to vector.reserve() to see if this would speed things up.
+
+I created two new benchmark tests with calls to call vector.reserve(N) before 
+push_back and emplace_back.
+
+The previous attempt to reserve was sizing the vector using the constructor.
+This still caused push_back and emplace_back to allocate each time. For example,
+sizing to 4 then doing 4 emplace_backs, for example would resize to 5, 6,
+7, then 8. In contrast, the call to vector.reserve(N) changes only the storage 
+but not the vector size, so vector.resize(4) followed by 4 emplace_backs or
+push_backs results in only one memory allocation but 4 vector size changes. 
+It appears that all vectors reserve sufficient space for one element which
+accounts for all five methods having essentially the same timing for a single
+operation.
+
+Using vector.reserve() makes both push_back and emplace_back essentially the
+same speed as the 'reserve' test.
+
+atomspace_bm -
+
+   count                  1            2           3            4
+   rate               M-ops/sec    M-ops/sec   M-ops/sec    M-ops/sec
+   ----               ---------    ---------   ---------    ---------
+  push_back             13.90         6.99        4.11         4.04
+  push_back_reserve     14.24        11.79       10.01         8.54
+  emplace_back          13.82         6.63        4.02         3.94
+  emplace_back_reserve  13.96        11.18        9.66         8.78
+  reserve               14.39        11.59        9.52         8.79
+
+count: the number of handles that are pushed/emplaced back.
+
+push_back: call the push-back method
+  example:
+    HandleSeq oset; oset.push_back(ha); oset.push_back(hb);
+
+push_back_reserve: reserve count, then call the push-back method
+  example:
+    HandleSeq oset; oset.reserve(2); oset.push_back(ha); oset.push_back(hb);
+
+emplace-back: call the emplace_back method
+  example:
+     HandleSeq oset; oset.emplace_back(ha); oset.emplace_back(hb);
+
+emplace_back_reserve-back: reserve count, then call the emplace_back method
+  example:
+    HandleSeq oset; oset.reserve(2);  oset.emplace_back(ha); oset.emplace_back(hb);
+
+reserve: create vector of fixed count size, then assign directly.
+  example:
+    HandleSeq oset(2); oset[0] = ha; oset[1] = hb;
+
+So it appears that the big issue is avoiding the resizing of the vector which
+involves both memory allocations and copies into the new memory. The differences
+between push_back_reserve, emplace_back_reserve, and reserve now appear to be 
+smaller than the jitter noise of the benchmark timings.
+
+

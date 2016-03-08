@@ -293,9 +293,21 @@ void AtomSpaceBenchmark::setMethod(std::string methodToTest)
         foundMethod = true;
     }
 
+    if (methodToTest == "all" or methodToTest == "push_back_reserve") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_push_back_reserve);
+        methodNames.push_back("push_back_reserve");
+        foundMethod = true;
+    }
+
     if (methodToTest == "all" or methodToTest == "emplace_back") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_emplace_back);
         methodNames.push_back("emplace_back");
+        foundMethod = true;
+    }
+
+    if (methodToTest == "all" or methodToTest == "emplace_back_reserve") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_emplace_back_reserve);
+        methodNames.push_back("emplace_back_reserve");
         foundMethod = true;
     }
 
@@ -1383,7 +1395,7 @@ timepair_t AtomSpaceBenchmark::bm_push_back()
         for (unsigned int i = 0; i<Nclock; i++)
         {
             // HandleSeq oset;
-            HandleSeq oset(Nreserve);
+            HandleSeq oset;
             oset.push_back(ha);
         }
         clock_t time_taken = clock() - t_begin;
@@ -1396,7 +1408,7 @@ timepair_t AtomSpaceBenchmark::bm_push_back()
         for (unsigned int i = 0; i<Nclock; i++)
         {
             // HandleSeq oset;
-            HandleSeq oset(Nreserve);
+            HandleSeq oset;
             oset.push_back(ha);
             oset.push_back(hb);
         }
@@ -1410,7 +1422,7 @@ timepair_t AtomSpaceBenchmark::bm_push_back()
         for (unsigned int i = 0; i<Nclock; i++)
         {
             // HandleSeq oset;
-            HandleSeq oset(Nreserve);
+            HandleSeq oset;
             oset.push_back(ha);
             oset.push_back(hb);
             oset.push_back(hc);
@@ -1425,7 +1437,80 @@ timepair_t AtomSpaceBenchmark::bm_push_back()
         for (unsigned int i = 0; i<Nclock; i++)
         {
             // HandleSeq oset;
-            HandleSeq oset(Nreserve);
+            HandleSeq oset;
+            oset.push_back(ha);
+            oset.push_back(hb);
+            oset.push_back(hc);
+            oset.push_back(hd);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    return timepair_t(0,0);
+}
+
+
+timepair_t AtomSpaceBenchmark::bm_push_back_reserve()
+{
+    Handle ha = getRandomHandle();
+    Handle hb = getRandomHandle();
+    Handle hc = getRandomHandle();
+    Handle hd = getRandomHandle();
+
+    if (1 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            // HandleSeq oset;
+            HandleSeq oset;
+            oset.reserve(Nreserve);
+            oset.push_back(ha);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    if (2 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            // HandleSeq oset;
+            HandleSeq oset;
+            oset.reserve(Nreserve);
+            oset.push_back(ha);
+            oset.push_back(hb);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    if (3 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            // HandleSeq oset;
+            HandleSeq oset;
+            oset.reserve(Nreserve);
+            oset.push_back(ha);
+            oset.push_back(hb);
+            oset.push_back(hc);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    if (4 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            // HandleSeq oset;
+            HandleSeq oset;
+            oset.reserve(Nreserve);
             oset.push_back(ha);
             oset.push_back(hb);
             oset.push_back(hc);
@@ -1490,6 +1575,74 @@ timepair_t AtomSpaceBenchmark::bm_emplace_back()
         for (unsigned int i = 0; i<Nclock; i++)
         {
             HandleSeq oset;
+            oset.emplace_back(ha);
+            oset.emplace_back(hb);
+            oset.emplace_back(hc);
+            oset.emplace_back(hd);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    return timepair_t(0,0);
+}
+
+timepair_t AtomSpaceBenchmark::bm_emplace_back_reserve()
+{
+    Handle ha = getRandomHandle();
+    Handle hb = getRandomHandle();
+    Handle hc = getRandomHandle();
+    Handle hd = getRandomHandle();
+
+    if (1 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            HandleSeq oset;
+            oset.reserve(Nreserve);
+            oset.emplace_back(ha);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    if (2 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            HandleSeq oset;
+            oset.reserve(Nreserve);
+            oset.emplace_back(ha);
+            oset.emplace_back(hb);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    if (3 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            HandleSeq oset;
+            oset.reserve(Nreserve);
+            oset.emplace_back(ha);
+            oset.emplace_back(hb);
+            oset.emplace_back(hc);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    if (4 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            HandleSeq oset;
+            oset.reserve(Nreserve);
             oset.emplace_back(ha);
             oset.emplace_back(hb);
             oset.emplace_back(hc);
