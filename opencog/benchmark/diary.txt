@@ -1221,7 +1221,7 @@ The previous attempt to reserve was sizing the vector using the constructor.
 This still caused push_back and emplace_back to allocate each time. For example,
 sizing to 4 then doing 4 emplace_backs, for example would resize to 5, 6,
 7, then 8. In contrast, the call to vector.reserve(N) changes only the storage 
-but not the vector size, so vector.resize(4) followed by 4 emplace_backs or
+but not the vector size, so vector.reserve(4) followed by 4 emplace_backs or
 push_backs results in only one memory allocation but 4 vector size changes. 
 It appears that all vectors reserve sufficient space for one element which
 accounts for all five methods having essentially the same timing for a single
