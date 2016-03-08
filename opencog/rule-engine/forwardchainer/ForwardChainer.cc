@@ -201,61 +201,37 @@ Handle ForwardChainer::choose_source()
 	fc_logger().debug() << "Selected sources so far "
 	                    << selsrc_size << "/" << _potential_sources.size();
 
-	// URECommons urec(_as);
-	// map<Handle, float> tournament_elem;
+	URECommons urec(_as);
+	map<Handle, float> tournament_elem;
 
-	// auto to_select = [&](const Handle& h) {
-	//     if (selsrc_size == _potential_sources.size())
-	//         // They all been tried. What can we do? Let's try again,
-	//         // it's better than crashing.
-	//         return true;
-	//     return _selected_sources.find(h) == _selected_sources.end();
-	// };
+	const UnorderedHandleSet& to_select_sources =
+		_unselected_sources.empty() ? _potential_sources : _unselected_sources;
 
-	// switch (_ts_mode) {
-	// case source_selection_mode::TV_FITNESS:
-	//     for (const Handle& s : _potential_sources) {
-	//         if (to_select(s))
-	//             tournament_elem[s] = urec.tv_fitness(s);
-	//     }
-	//     break;
+	Handle hchosen;
+	switch (_ts_mode) {
+	case source_selection_mode::TV_FITNESS:
+	    for (const Handle& s : to_select_sources)
+		    tournament_elem[s] = urec.tv_fitness(s);
+	    hchosen = urec.tournament_select(tournament_elem);
+	    break;
 
-	// case source_selection_mode::STI:
-	//     for (const Handle& s : _potential_sources) {
-	//         if (to_select(s))
-	//             tournament_elem[s] = s->getSTI();
-	//     }
-	//     break;
+	case source_selection_mode::STI:
+	    for (const Handle& s : to_select_sources)
+		    tournament_elem[s] = s->getSTI();
+	    hchosen = urec.tournament_select(tournament_elem);
+	    break;
 
-	// case source_selection_mode::UNIFORM:
-	//     for (const Handle& s : _potential_sources) {
-	//         if (to_select(s))
-	//             tournament_elem[s] = 1.0;
-	//     }
-	//     break;
+	case source_selection_mode::UNIFORM:
+		hchosen = rand_element(to_select_sources);
+	    break;
 
-	// default:
-	//     throw RuntimeException(TRACE_INFO, "Unknown source selection mode.");
-	//     break;
-	// }
+	default:
+	    throw RuntimeException(TRACE_INFO, "Unknown source selection mode.");
+	    break;
+	}
 
-	// OC_ASSERT(not tournament_elem.empty());
-
-	// // for (const auto& e : tournament_elem) {
-	// //     fc_logger().debug() << "tournament_elem = {" << e.first->toString()
-	// //                         << ", " << e.second << "}";
-	// // }
-
-	// //! Prioritize new source selection.
-	// Handle hchosen = urec.tournament_select(tournament_elem);
-
-	// Replace all the above by a much cheaper sampling method. It is
-	// stupider but computationally very efficient. To be replaced
-	// by a smart one in the future.
-
-	Handle hchosen = rand_element(_unselected_sources.empty() ?
-	                              _potential_sources : _unselected_sources);
-
+	OC_ASSERT(hchosen != Handle::UNDEFINED);
+	
 	_selected_sources.insert(hchosen);
 	_unselected_sources.erase(hchosen);
 
