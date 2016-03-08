@@ -38,7 +38,7 @@ typedef std::map<Handle, UnorderedHandleSet> VarMultimap;
 typedef std::map<Handle, Handle> VarMap;
 
 /**
- * Backward chaining falls in to two cases
+ * Backward chaining falls into two cases
  *
  * 1. Truth value query - Given a target atom whose truth value is not
  *    known and a pool of atoms, find a way to estimate the truth
@@ -75,10 +75,10 @@ typedef std::map<Handle, Handle> VarMap;
  *
  * 3. Reverse ground R's input to restrict the permises search
  *
- * 4. Find all permises that matches the restricted R's input by Pattern
+ * 4. Find all premises that matches the restricted R's input by Pattern
  *    Matching
  *
- * 5. For each set of permies, Forward Chain (a.k.a apply the rule, or
+ * 5. For each set of premises, Forward Chain (a.k.a apply the rule, or
  *    Pattern Matching) on the R to see if it can solve the target.
  *
  * 6. If not, add the permises to the targets list (in addition to some
