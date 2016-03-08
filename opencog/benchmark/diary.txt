@@ -1255,7 +1255,7 @@ emplace-back: call the emplace_back method
   example:
      HandleSeq oset; oset.emplace_back(ha); oset.emplace_back(hb);
 
-emplace_back_reserve-back: reserve count, then call the emplace_back method
+emplace_back_reserve: reserve count, then call the emplace_back method
   example:
     HandleSeq oset; oset.reserve(2);  oset.emplace_back(ha); oset.emplace_back(hb);
 
