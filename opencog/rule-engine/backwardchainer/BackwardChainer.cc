@@ -31,14 +31,15 @@
 #include "BackwardChainer.h"
 #include "BackwardChainerPMCB.h"
 #include "UnifyPMCB.h"
+#include "BCLogger.h"
 
 using namespace opencog;
 
 BackwardChainer::BackwardChainer(AtomSpace& as, Handle rbs)
 	: _as(as), _configReader(as, rbs),
-	  // create a garbage superspace with _as as parent, so codes acting on
-	  // _garbage will see stuff in _as, but codes acting on _as will not
-	  // see stuff in _garbage
+	  // create a garbage superspace with _as as parent, so codes
+	  // acting on _garbage_superspace will see stuff in _as, but
+	  // codes acting on _as will not see stuff in _garbage_superspace
 	  _garbage_superspace(&_as) {}
 
 /**
@@ -108,22 +109,24 @@ void BackwardChainer::do_chain()
  */
 void BackwardChainer::do_step()
 {	
-	logger().debug("[BackwardChainer] ==========================================");
-	logger().debug("[BackwardChainer] Start of a single BC step");
-	logger().debug("[BackwardChainer] %d potential targets", _targets_set.size());
-	logger().debug("[BackwardChainer] %d in focus set", _focus_space.get_size());
+	bc_logger().debug("==========================================");
+	bc_logger().debug("Start of a single BC step");
+	bc_logger().debug("%d potential targets", _targets_set.size());
+	bc_logger().debug("%d in focus set", _focus_space.get_size());
 
 	// do target selection using some criteria
 	// XXX for example, choose target with low TV 50% of the time
 	Target& selected_target = _targets_set.select();
 
-	logger().debug("[BackwardChainer] Selected target " + selected_target.get_handle()->toShortString());
-	logger().debug("[BackwardChainer] with var_decl " + selected_target.get_vardecl()->toShortString());
+	LAZY_BC_LOG_DEBUG << "Selected target "
+	                  << selected_target.get_handle()->toShortString()
+	                  << "With var_decl "
+	                  << selected_target.get_vardecl()->toShortString();
 
 	if (selected_target.get_varseq().empty())
-		logger().debug("[BackwardChainer] Target is 'Truth Value Query'");
+		bc_logger().debug("Target is 'Truth Value Query'");
 	else
-		logger().debug("[BackwardChainer] Target is 'Variable Fullfillment Query'");
+		bc_logger().debug("Target is 'Variable Fullfillment Query'");
 
 	process_target(selected_target);
 
@@ -131,7 +134,7 @@ void BackwardChainer::do_step()
 	// in both the garbage and main atomspace
 	_garbage_superspace.clear();
 
-	logger().debug("[BackwardChainer] End of a single BC step");
+	bc_logger().debug("End of a single BC step");
 }
 
 /**
@@ -167,8 +170,8 @@ void BackwardChainer::process_target(Target& target)
 	// Check whether this target is a virtual link and is useless to explore
 	if (classserver().isA(htarget->getType(), VIRTUAL_LINK))
 	{
-		logger().debug("[BackwardChainer] Boring virtual link goal, "
-		               "skipping " + htarget->toShortString());
+		LAZY_BC_LOG_DEBUG << "Boring virtual link goal, skipping "
+		                  << htarget->toShortString();
 		return;
 	}
 
@@ -188,8 +191,8 @@ void BackwardChainer::process_target(Target& target)
 
 		if (all_virtual)
 		{
-			logger().debug("[BackwardChainer] Boring logical link all virtual, "
-			               "skipping " + htarget->toShortString());
+			LAZY_BC_LOG_DEBUG << "Boring logical link all virtual, skipping "
+			                  << htarget->toShortString();
 			return;
 		}
 	}
@@ -206,16 +209,15 @@ void BackwardChainer::process_target(Target& target)
 		// any grounding as a possible solution for this target
 		if (not kb_match.empty())
 		{
-			logger().debug("[BackwardChainer] Matched something in knowledge base, "
-			               "storing the grounding");
+			bc_logger().debug("Matched something in knowledge base, "
+			                  "storing the grounding");
 
 			for (size_t i = 0; i < kb_match.size(); ++i)
 			{
 				Handle& soln = kb_match[i];
 				VarMap& vgm = kb_vmap[i];
 
-				logger().debug("[BackwardChainer] Looking at grounding "
-				               + soln->toShortString());
+				LAZY_BC_LOG_DEBUG << "Looking at grounding " << soln->toShortString();
 
 				// add whatever it matched as Target (so new variables can be
 				// filled, and TV updated)
@@ -230,7 +232,7 @@ void BackwardChainer::process_target(Target& target)
 	// If logical link, break it up, add each to new targets and return
 	if (_logical_link_types.count(htarget->getType()) == 1)
 	{
-		logger().debug("[BackwardChainer] Breaking into sub-targets");
+		bc_logger().debug("Breaking into sub-targets");
 
 		HandleSeq sub_premises = LinkCast(htarget)->getOutgoingSet();
 
@@ -252,10 +254,10 @@ void BackwardChainer::process_target(Target& target)
 	if (not select_rule(target, selected_rule, standardized_rule, all_implicand_to_target_mappings))
 		return;
 
-	logger().debug("[BackwardChainer] Selected rule "
-	               + standardized_rule.get_handle()->toShortString());
-	logger().debug("[BackwardChainer] Found %d implicand's output unifiable",
-	               all_implicand_to_target_mappings.size());
+	LAZY_BC_LOG_DEBUG << "Selected rule "
+	                  << standardized_rule.get_handle()->toShortString();
+	bc_logger().debug("Found %d implicand's output unifiable",
+	                  all_implicand_to_target_mappings.size());
 
 	// Randomly select one of the mapping (so that each time the
 	// same target is visited, and the same rule is selected, it is
@@ -267,9 +269,9 @@ void BackwardChainer::process_target(Target& target)
 	// possible output mappings
 	VarMap implicand_mapping = rand_element(all_implicand_to_target_mappings);
 	for (auto& p : implicand_mapping)
-		logger().debug("[BackwardChainer] Chosen mapping is "
-		               + p.first->toShortString()
-		               + " to " + p.second->toShortString());
+		LAZY_BC_LOG_DEBUG << "Chosen mapping is "
+		                  << p.first->toShortString()
+		                  << " to " << p.second->toShortString();
 
 	Handle hrule_implicant_reverse_grounded;
 	std::vector<VarMap> premises_vmap_list;
@@ -282,7 +284,7 @@ void BackwardChainer::process_target(Target& target)
 	                                            hrule_implicant_reverse_grounded,
 	                                            premises_vmap_list);
 
-	logger().debug("[BackwardChainer] %d possible permises", possible_premises.size());
+	bc_logger().debug("%d possible permises", possible_premises.size());
 
 	// If no possible premises, then the reverse grounded rule's implicant
 	// could be added as potential target.  Note that however, such target are
@@ -294,7 +296,7 @@ void BackwardChainer::process_target(Target& target)
 	// apart version of the rule, and should not be added to the main space.
 	if (possible_premises.size() == 0)
 	{
-		logger().debug("[BackwardChainer] Adding rule's grounded input as Target");
+		bc_logger().debug("Adding rule's grounded input as Target");
 
 		target.store_step(selected_rule, { hrule_implicant_reverse_grounded });
 		_targets_set.emplace(hrule_implicant_reverse_grounded,
@@ -313,7 +315,7 @@ void BackwardChainer::process_target(Target& target)
 		Handle hp = possible_premises[i];
 		VarMap vm = premises_vmap_list[i];
 
-		logger().debug("[BackwardChainer] Checking permises " + hp->toShortString());
+		LAZY_BC_LOG_DEBUG << "Checking permises " << hp->toShortString();
 
 		// Reverse ground the rule's outputs with the mapping to the premise
 		// so that when we ground the premise, we know how to generate
@@ -322,9 +324,11 @@ void BackwardChainer::process_target(Target& target)
 		// Adding to _garbage_superspace because the mapping are from within
 		// the garbage space.
 		Handle output_grounded = _garbage_superspace.add_atom(Substitutor::substitute(standardized_rule.get_implicand(), implicand_mapping));
-		logger().debug("[BackwardChainer] Output reverse grounded step 1 as " + output_grounded->toShortString());
+		LAZY_BC_LOG_DEBUG << "Output reverse grounded step 1 as "
+		                  << output_grounded->toShortString();
 		output_grounded = _garbage_superspace.add_atom(Substitutor::substitute(output_grounded, vm));
-		logger().debug("[BackwardChainer] Output reverse grounded step 2 as " + output_grounded->toShortString());
+		LAZY_BC_LOG_DEBUG << "Output reverse grounded step 2 as "
+		                  << output_grounded->toShortString();
 
 		HandleSeq output_grounded_seq;
 		for (const auto& h : standardized_rule.get_implicand_seq())
@@ -351,8 +355,8 @@ void BackwardChainer::process_target(Target& target)
 			Handle& g = grounded_premises[i];
 			VarMap& m = vm_list.at(i);
 
-			logger().debug("[BackwardChainer] Checking possible permises grounding "
-			               + g->toShortString());
+			LAZY_BC_LOG_DEBUG << "Checking possible permises grounding "
+			                  << g->toShortString();
 
 			// XXX should this only search for free var?
 			FindAtoms fv(VARIABLE_NODE);
@@ -372,7 +376,8 @@ void BackwardChainer::process_target(Target& target)
 			Instantiator inst(&_as);
 			Handle added = inst.instantiate(output_grounded, m);
 
-			logger().debug("[BackwardChainer] Added " + added->toShortString() + " to _as");
+			LAZY_BC_LOG_DEBUG << "Added "
+			                  << added->toShortString() << " to _as";
 
 			for (const auto& h : output_grounded_seq)
 			{
@@ -381,7 +386,8 @@ void BackwardChainer::process_target(Target& target)
 				added = _as.add_atom(Substitutor::substitute(h, m));
 				if (_focus_space.get_size() > 0 )
 					_focus_space.add_atom(added);
-				logger().debug("[BackwardChainer] Added " + added->toShortString() + " to _as");
+				LAZY_BC_LOG_DEBUG << "Added "
+				                  << added->toShortString() << " to _as";
 			}
 
 			// Add the grounding to the return results
@@ -394,8 +400,6 @@ void BackwardChainer::process_target(Target& target)
 		// XXX TODO premise selection would be done here to
 		// determine whether to BC on a premise
 
-
-
 		// non-logical link can be added straight to targets list
 		if (_logical_link_types.count(hp->getType()) == 0)
 		{			
@@ -404,7 +408,7 @@ void BackwardChainer::process_target(Target& target)
 			continue;
 		}
 
-		logger().debug("[BackwardChainer] Before breaking apart into sub-premises");
+		bc_logger().debug("Before breaking apart into sub-premises");
 
 		// Else break out any logical link and add to targets
 		HandleSeq sub_premises = LinkCast(hp)->getOutgoingSet();
@@ -456,10 +460,10 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
 	else
 		hpattern_vardecl = working_garbage_superspace->add_atom(hpattern_vardecl);
 
-	logger().debug("[BackwardChainer] Matching knowledge base with "
-	               " %s and variables %s",
-	               hpattern->toShortString().c_str(),
-	               hpattern_vardecl->toShortString().c_str());
+	LAZY_BC_LOG_DEBUG << "Matching knowledge base with "
+	                  << hpattern->toShortString()
+	                  << " and variables "
+	                  << hpattern_vardecl->toShortString();
 
 	// if no variables at all
 	if (VariableListCast(hpattern_vardecl)->get_variables().varseq.empty())
@@ -489,8 +493,7 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
 
 	HandleSeq results;
 
-	logger().debug("[BackwardChainer] Pattern matcher found %d matches",
-	               var_solns.size());
+	bc_logger().debug("Pattern matcher found %d matches", var_solns.size());
 
 	for (size_t i = 0; i < var_solns.size(); i++)
 	{
@@ -504,7 +507,7 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
 			if (std::any_of(rules.begin(), rules.end(), [&](Rule& r) {
 						return is_atom_in_tree(r.get_handle(), p.second); }))
 			{
-				logger().debug("[BackwardChainer] matched clause in rule");
+				bc_logger().debug("matched clause in rule");
 				break;
 			}
 
@@ -512,14 +515,16 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
 			if (std::any_of(rules.begin(), rules.end(), [&](Rule& r) {
 						return is_atom_in_tree(p.second, r.get_handle()); }))
 			{
-				logger().debug("[BackwardChainer] matched clause wrapping rule");
+				bc_logger().debug("matched clause wrapping rule");
 				break;
 			}
 
 			// don't want matched clause that is not in the focus set or parent _as
 			if (working_space->get_atom(p.second) == Handle::UNDEFINED)
 			{
-				logger().debug("[BackwardChainer] matched clause " + p.second->toShortString() + "not in target search space");
+				LAZY_BC_LOG_DEBUG << "matched clause "
+				                  << p.second->toShortString()
+				                  << "not in target search space";
 				break;
 			}
 
@@ -578,8 +583,8 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
 	hrule_implicant_reverse_grounded = Substitutor::substitute(hrule_implicant, implicand_mapping);
 	hrule_implicant_reverse_grounded = _garbage_superspace.add_atom(hrule_implicant_reverse_grounded);
 
-	logger().debug("[BackwardChainer] Reverse grounded as "
-	               + hrule_implicant_reverse_grounded->toShortString());
+	LAZY_BC_LOG_DEBUG << "Reverse grounded as "
+	                  << hrule_implicant_reverse_grounded->toShortString();
 
 	// Find all matching premises matching the implicant, where premises_vmap_list
 	// will be the mapping from free variables in himplicant to stuff in a premise
@@ -685,7 +690,7 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 			                                        sub_premises);
 	}
 
-	logger().debug("[BackwardChainer] Grounding " + premises->toShortString());
+	LAZY_BC_LOG_DEBUG << "Grounding " << premises->toShortString();
 
 	std::vector<VarMap> temp_vmap_list;
 
