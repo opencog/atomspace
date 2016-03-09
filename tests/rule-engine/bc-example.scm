@@ -33,7 +33,7 @@
 )
 
 (ImplicationLink (stv 1.0 1.0)
- (InheritanceLink 
+ (InheritanceLink
   (VariableNode "$Z")
   (ConceptNode "Frog")
  )
