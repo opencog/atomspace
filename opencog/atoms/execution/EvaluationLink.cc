@@ -377,11 +377,10 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		// this is some GroundedSchemaNode calling some func with some
 		// args, and its pointless to put that function+args in the
 		// atomspace.
-		const LinkPtr ll(LinkCast(evelnk));
-		if (0 < ll->getArity())
+		if (0 < evelnk->getArity())
 		{
-			Instantiator inst(as);
-			Handle result(inst.execute(ll->getOutgoingAtom(0)));
+			Instantiator inst(scratch);
+			Handle result(inst.execute(evelnk->getOutgoingAtom(0)));
 			scratch->add_atom(result);
 		}
 		if (TRUE_LINK == t)
