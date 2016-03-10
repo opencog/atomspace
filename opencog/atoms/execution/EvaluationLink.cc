@@ -369,19 +369,28 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (TRUE_LINK == t or FALSE_LINK == t)
 	{
-		// Assume that the link is wrapping something executable,
-		// which we execute, but then ignore the result. Well, we need
-		// to put it in the (scratch) atomspace ... but we ignore the
-		// TV on it. We execute for the side-effects, of course.
-		// We put the result in the scratch space, presumably because
-		// this is some GroundedSchemaNode calling some func with some
-		// args, and its pointless to put that function+args in the
-		// atomspace.
+		// Assume that the link is wrapping something executable (or
+		// evaluatable), which we execute (or evaluate), but then
+		// ignore the result.  The executale ones, we need to put the
+		// result in the (scratch) atomspace ... but in either case,
+		// we ignore the TV on it. We are doing this for the side-effects,
+		// of course -- the True/FalseLinks are pure side-effect atoms.
+		//
+		// We put results in the scratch space because putting them
+		// anywhere else is likely to garbage up the main atomsoace.
 		if (0 < evelnk->getArity())
 		{
-			Instantiator inst(scratch);
-			Handle result(inst.execute(evelnk->getOutgoingAtom(0)));
-			scratch->add_atom(result);
+			const Handle& term = evelnk->getOutgoingAtom(0);
+			if (classserver().isA(t, EVALUATABLE_LINK))
+			{
+				EvaluationLink::do_eval_scratch(as, term, scratch, silent);
+			}
+			else
+			{
+				Instantiator inst(scratch);
+				Handle result(inst.execute(term));
+				scratch->add_atom(result);
+			}
 		}
 		if (TRUE_LINK == t)
 			return TruthValue::TRUE_TV();
