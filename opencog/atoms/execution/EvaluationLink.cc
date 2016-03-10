@@ -376,8 +376,12 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		// we ignore the TV on it. We are doing this for the side-effects,
 		// of course -- the True/FalseLinks are pure side-effect atoms.
 		//
-		// We put results in the scratch space because putting them
-		// anywhere else is likely to garbage up the main atomsoace.
+		// We instantiate/evaluate in the main atomspace, however.
+		// This is subtle, so listen-up: one of the side effects
+		// might involve evaluating some condition, which then pokes
+		// atoms into the atomspace, to signal some event or state.
+		// These cannot be discarded. This is explictly tested by
+		// SequenceUTest::test_or_put().
 		if (0 < evelnk->getArity())
 		{
 			const Handle& term = evelnk->getOutgoingAtom(0);
@@ -387,7 +391,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 			}
 			else
 			{
-				Instantiator inst(scratch);
+				Instantiator inst(as);
 				Handle result(inst.execute(term));
 				scratch->add_atom(result);
 			}

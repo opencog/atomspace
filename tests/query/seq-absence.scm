@@ -1,9 +1,9 @@
 ;;
 ;; seq-absence.scm
 ;;
-;; Test the AbsentLink inside a SequentialAnLink.
+;; Test the AbsentLink inside a SequentialAndLink.
 ;;
-;; Check to see if the atomspace does NOT the link
+;; Check to see if the atomspace does NOT contain the link
 ;;    (EvaluationLink
 ;;        (PredicateNode "visible")
 ;;            (ListLink
