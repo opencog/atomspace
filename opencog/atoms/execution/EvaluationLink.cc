@@ -381,7 +381,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		if (0 < evelnk->getArity())
 		{
 			const Handle& term = evelnk->getOutgoingAtom(0);
-			if (classserver().isA(t, EVALUATABLE_LINK))
+			if (classserver().isA(term->getType(), EVALUATABLE_LINK))
 			{
 				EvaluationLink::do_eval_scratch(as, term, scratch, silent);
 			}
