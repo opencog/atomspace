@@ -42,9 +42,11 @@
 using namespace opencog;
 
 ForwardChainer::ForwardChainer(AtomSpace& as, Handle rbs, Handle hsource,
-                               const HandleSeq& focus_set) :
-    _as(as), _rec(as), _rbs(rbs), _configReader(as, rbs)
+                               const HandleSeq& focus_set /* = HandleSeq()*/,
+                               source_selection_mode sm /*= source_selection_mode::UNIFORM */) :
+        _as(as), _rec(as), _rbs(rbs), _configReader(as, rbs)
 {
+    _ts_mode = sm;
     init(hsource, focus_set);
 }
 
@@ -58,7 +60,6 @@ void ForwardChainer::init(Handle hsource, const HandleSeq& focus_set)
 
     _search_in_af = _configReader.get_attention_allocation();
     _search_focus_set = not focus_set.empty();
-    _ts_mode = source_selection_mode::UNIFORM;
 
     // Set potential source.
     HandleSeq init_sources;
