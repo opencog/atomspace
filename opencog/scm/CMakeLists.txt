@@ -23,6 +23,7 @@ INSTALL (FILES
 	opencog/logger.scm
 	opencog/persist.scm
 	opencog/persist-sql.scm
+	opencog/persist-pgsql.scm
 	opencog/persist-zmq.scm
 	opencog/python.scm
 	opencog/query.scm

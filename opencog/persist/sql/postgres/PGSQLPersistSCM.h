@@ -78,7 +78,7 @@ public:
 }  // namespace
 
 extern "C" {
-void opencog_persist_sql_init(void);
+void opencog_persist_pgsql_init(void);
 };
 
 #endif // _OPENCOG_PGSQL_PERSIST_SCM_H

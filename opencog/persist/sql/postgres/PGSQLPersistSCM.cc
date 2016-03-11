@@ -195,7 +195,7 @@ void PGSQLPersistSCM::disable_testing_mode()
     _store->disable_testing_mode();
 }
 
-void opencog_persist_sql_init(void)
+void opencog_persist_pgsql_init(void)
 {
    static PGSQLPersistSCM patty(NULL);
 }
