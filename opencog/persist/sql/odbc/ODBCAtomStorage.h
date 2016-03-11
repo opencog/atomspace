@@ -39,9 +39,9 @@
 #include <opencog/atoms/base/types.h>
 
 #include <opencog/atomspace/AtomTable.h>
-
-#include <opencog/persist/sql/odbcxx.h>
 #include <opencog/persist/sql/AtomStorage.h>
+
+#include "odbcxx.h"
 
 namespace opencog
 {
