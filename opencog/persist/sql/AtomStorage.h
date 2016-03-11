@@ -62,9 +62,6 @@ class AtomStorage
 		// Store entire contents of AtomTable
 		virtual void store(const AtomTable &) = 0;
 
-		// Reserve range of UUID's
-		virtual void reserve(void) = 0;
-
 		// Helper function so caller can access protected atomspace function.
 		void storeAtomSpace(AtomSpace*);
 		void loadAtomSpace(AtomSpace*);

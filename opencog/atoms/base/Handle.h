@@ -222,6 +222,9 @@ typedef std::set<Handle> OrderedHandleSet;
 //! a hash that associates the handle to its unique identificator
 typedef std::unordered_set<Handle, handle_hash> UnorderedHandleSet;
 
+//! a handle iterator
+typedef std::iterator<std::forward_iterator_tag, Handle> HandleIterator;
+
 struct handle_seq_less
 {
    bool operator()(const HandleSeq& hsl, const HandleSeq& hsr) const

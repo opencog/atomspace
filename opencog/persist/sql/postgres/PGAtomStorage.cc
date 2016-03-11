@@ -34,7 +34,7 @@
 #include <chrono>
 #include <memory>
 #include <thread>
-
+#include <opencog/util/random.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
@@ -77,7 +77,8 @@ using namespace opencog;
 
 #define BUFFER_SIZE 250
 
-
+// Column MAX limits
+#define MAX_NODE_NAME_LENGTH 2700
 
 /* ================================================================ */
 
@@ -92,301 +93,583 @@ using namespace opencog;
  */
 class PGAtomStorage::Database
 {
-	public:
-		ODBCRecordSet *_result_set;
-		ODBCConnection* _db_connection;
+public:
+	ODBCRecordSet *_result_set;
+	ODBCConnection* _db_connection;
 
-		// Temporary cache of info about atom being assembled.
-		UUID uuid;
-		int itype;
-		const char * name;
-		int tv_type;
-		double mean;
-		double confidence;
-		double count;
-		const char *outlist;
-		int differentiator;
-		int height;
+	// Temporary cache of info about atom being assembled.
+	UUID uuid;
+	int itype;
+	const char * name;
+	int tv_type;
+	double mean;
+	double confidence;
+	double count;
+	const char *outlist;
+	int differentiator;
+	int height;
 
-		AtomTable *table;
-		PGAtomStorage *_atom_storage;
+	bool _inserting;
+	std::string _table;
+	std::vector<std::string> _columns;
+	std::vector<std::string> _values;
 
-		Database(PGAtomStorage * atom_store)
+	AtomTable *_atom_table;
+	PGAtomStorage *_atom_storage;
+
+	Database(PGAtomStorage * atom_store, AtomTable* atom_table = NULL)
+	{
+		_atom_storage = atom_store;
+		_atom_table = atom_table;
+		init();
+
+		// Grab a connection from the pool.
+		_db_connection = _atom_storage->_conn_pool.pop();
+	}
+
+	~Database()
+	{
+		// Release the result set if it was used and reset the variables.
+		if (_result_set)
+			_result_set->release();
+
+		// Put the connection back into the pool.
+		_atom_storage->_conn_pool.push(_db_connection);
+	}
+
+	void init()
+	{
+		type_name = "";
+		itype = 0;
+		_result_set = NULL;
+		_inserting = false;
+	}
+
+	void execute(const char* statement)
+	{
+		// Release the existing result set if we have one, and reset the
+		// statement variables. That way you can call execute multiple
+		// times without having to worry about memory leaking result sets.
+		if (_result_set)
 		{
-			_atom_storage = atom_store;
+			_result_set->release();
 			init();
-
-			// Grab a connection from the pool.
-			_db_connection = _atom_storage->_conn_pool.pop();
 		}
 
-		~Database()
+		// Print the statement.
+		if (_atom_storage->printStatements())
 		{
-			// Release the result set if it was used and reset the variables.
-			if (_result_set)
-				_result_set->release();
-
-			// Put the connection back into the pool.
-			_atom_storage->_conn_pool.push(_db_connection);
+			fprintf(stdout, "%5d - %s\n", _atom_storage->_query_count, 
+					statement);
 		}
 
-		void init()
+		// Increment the query count.
+		if (_atom_storage)
+			_atom_storage->_query_count++;
+
+		// Execute the statement and store the result set.
+		_result_set = _db_connection->exec(statement);
+
+		// Sometimes there are no results and _result_set will be NULL
+		// even though there is no error.
+	}
+
+	void for_each_column(bool (Database::*callback)(const char *,
+												    const char *))
+	{
+		if (_result_set)
+			_result_set->foreach_column(callback, this);
+	}
+
+
+	void for_each_row(bool (Database::*callback)(void))
+	{
+		if (_result_set)
+			_result_set->foreach_row(callback, this);
+	}
+
+	unsigned long get_int_result()
+	{
+		// Get the result row as an unsigned long and return it.
+		_result_set->fetch_row();
+		const char* column_chars = _result_set->get_column_value(0);
+		return strtoul(column_chars, NULL, 10);
+	}
+
+	void start_insert(const char* table)
+	{
+		_table = table;
+		_inserting = true;
+		_columns.clear();
+		_values.clear();
+	}
+
+	void start_update(const char* table)
+	{
+		_table = table;
+		_inserting = false;
+		_columns.clear();
+		_values.clear();
+	}
+
+	void add_column_quoted_string(const char* column, 
+						   		  const std::string& value,
+						      	  unsigned max_length = 0)
+	{
+		add_column_quoted_string(column, value.c_str(), max_length);
+	}
+
+	void add_column_quoted_string(const char* column, 
+						   		  const char* value,
+						      	  unsigned max_length = 0)
+	{
+		if (max_length and max_length < strlen(value))
 		{
-			type_name = "";
-			itype = 0;
-			_result_set = NULL;
+			throw RuntimeException(TRACE_INFO,
+					"add_column - maximum length for %s column %s[%d] "
+					" exceeded by value %s",
+					_table.c_str(), column, max_length, value);
 		}
 
-		void execute(const char* statement)
+		// Use postgres $-quoting to make unicode strings
+		// easier to deal with.
+		std::string quoted_value = "$$";
+		quoted_value += value;
+		quoted_value += "$$";
+
+		// Add the quoted value.
+		_columns.emplace_back(std::string(column));
+		_values.emplace_back(quoted_value);
+	}
+
+	void add_column_string(const char* column, 
+						   const std::string& value,
+						   unsigned max_length = 0)
+	{
+		add_column_string(column, value.c_str(), max_length);
+	}
+
+	void add_column_string(const char* column, 
+						   const char* value,
+						   unsigned max_length = 0)
+	{
+		// Check the max length against the string.
+		if (max_length and max_length < strlen(value))
 		{
-			// Release the existing result set if we have one, and reset the
-			// statement variables. That way you can call execute multiple
-			// times without having to worry about memory leaking result sets.
-			if (_result_set)
-			{
-				_result_set->release();
-				init();
-			}
-
-			// Print the statement.
-			if (_atom_storage->printStatements())
-			{
-				fprintf(stdout, "%5d - %s\n", _atom_storage->_query_count, 
-						statement);
-			}
-
-			// Increment the query count.
-			if (_atom_storage)
-				_atom_storage->_query_count++;
-
-			// Execute the statement and store the result set.
-			_result_set = _db_connection->exec(statement);
-
-			// Sometimes there are no results and _result_set will be NULL
-			// even though there is no error.
+			throw RuntimeException(TRACE_INFO,
+					"add_column - maximum length for %s column %s[%d] "
+					" exceeded by value %s",
+					_table.c_str(), column, max_length, value);
 		}
 
-		void for_each_column(bool (Database::*callback)(const char *,
-													    const char *))
+		// Add the value.
+		_columns.emplace_back(std::string(column));
+		_values.emplace_back(std::string(value));
+	}
+
+	void add_column_unsigned(const char* column, unsigned value)
+	{
+		_columns.emplace_back(std::string(column));
+		char value_chars[BUFFER_SIZE];
+		snprintf(value_chars, BUFFER_SIZE, "%u", value);
+		_values.emplace_back(std::string(value_chars));
+	}
+
+	void add_column_bigint(const char* column, int64_t value)
+	{
+		_columns.emplace_back(std::string(column));
+		_values.emplace_back(std::to_string(value));
+	}
+
+	void add_column_double(const char* column, double value)
+	{
+		_columns.emplace_back(std::string(column));
+		char value_chars[BUFFER_SIZE];
+		snprintf(value_chars, BUFFER_SIZE, "%12.8g", value);
+		_values.emplace_back(std::string(value_chars));
+	}
+
+	std::string build_insert_statement()
+	{
+		// Add the insert header.
+		std::string statement = "INSERT INTO ";
+		statement += _table;
+		statement += " (";
+
+		// Add the column names.
+		int column_index = 0;
+		for (auto& column : _columns)
 		{
-			if (_result_set)
-				_result_set->foreach_column(callback, this);
+			if (column_index > 0)
+				statement += ", ";
+			statement += column;
+			column_index++;
 		}
 
-
-		void for_each_row(bool (Database::*callback)(void))
+		// Now add the values.
+		statement += ") VALUES (";
+		column_index = 0;
+		for (auto& value : _values)
 		{
-			if (_result_set)
-				_result_set->foreach_row(callback, this);
+			if (column_index > 0)
+				statement += ", ";
+			statement += value;
+			column_index++;
 		}
 
-		unsigned long get_int_result()
+		// Close up the statement and return.
+		statement += ");";
+		return statement;
+	}
+
+	std::string build_update_where(const char* where_clause)
+	{
+		// Add the update header.
+		std::string statement = "UPDATE ";
+		statement += _table;
+		statement += " SET ";
+
+		// Now loop over all the column value pairs adding each
+		// to the SET clause.
+		int column_index = 0;
+		for (auto& column : _columns)
 		{
-			// Get the result row as an unsigned long and return it.
-			_result_set->fetch_row();
-			const char* column_chars = _result_set->get_column_value(0);
-			return strtoul(column_chars, NULL, 10);
+			// Add the comma after the first column.
+			if (column_index > 0)
+				statement += ", ";
+
+			// Set "column = value" for this pair.
+			statement += column;
+			statement += " = ";
+			statement += _values[column_index];
+			column_index++;
 		}
 
-		bool has_results()
+		// Close up the statement and return.
+		statement += ";";
+		return statement;
+	}
+
+	std::string build_update_where(const char* column, int64_t key)
+	{
+		// Build the where clause from the supplied column and key.
+		std::string where_clause = " WHERE ";
+		where_clause += column;
+		where_clause += " = ";
+		where_clause += std::to_string(key);
+		where_clause += ";";
+
+		// Defer to the more general update statement build.
+		return build_update_where(where_clause.c_str());
+	}
+
+	bool has_results()
+	{
+		return (_result_set != NULL);
+	}
+
+	int column_count()
+	{
+		return _result_set->get_column_count();
+	}
+
+	const char* column_value(int column)
+	{
+		return _result_set->get_column_value(column);
+	}
+
+	int fetch_next_row()
+	{
+		if (_result_set)
+			return _result_set->fetch_row();
+		else
+			return 0;
+	}
+
+	// Begin Callbacks
+
+	bool create_atom_column_cb(const char *colname, const char * colvalue)
+	{
+		// printf ("%s = %s\n", colname, colvalue);
+		if (!strcmp(colname, "type"))
 		{
-			return (_result_set != NULL);
+			itype = atoi(colvalue);
 		}
-
-		int column_count()
+		else if (!strcmp(colname, "name"))
 		{
-			return _result_set->get_column_count();
+			name = colvalue;
 		}
-
-		const char* column_value(int column)
+		else if (not _atom_storage->_store_edges and 
+				 !strcmp(colname, "outgoing"))
 		{
-			return _result_set->get_column_value(column);
+			outlist = colvalue;
 		}
-
-		int fetch_next_row()
+		else if (_atom_storage->_store_edges and 
+				 !strcmp(colname, "out_differentiator"))
 		{
-			if (_result_set)
-				return _result_set->fetch_row();
-			else
-				return 0;
+			differentiator = atoi(colvalue);
 		}
-
-		// Begin Callbacks
-
-		bool create_atom_column_cb(const char *colname, const char * colvalue)
+		else if (!strcmp(colname, "tv_type"))
 		{
-			// printf ("%s = %s\n", colname, colvalue);
-			if (!strcmp(colname, "type"))
-			{
-				itype = atoi(colvalue);
-			}
-			else if (!strcmp(colname, "name"))
-			{
-				name = colvalue;
-			}
-			else if (not _atom_storage->_store_edges and 
-					 !strcmp(colname, "outgoing"))
-			{
-				outlist = colvalue;
-			}
-			else if (_atom_storage->_store_edges and 
-					 !strcmp(colname, "out_differentiator"))
-			{
-				differentiator = atoi(colvalue);
-			}
-			else if (!strcmp(colname, "tv_type"))
-			{
-				tv_type = atoi(colvalue);
-			}
-			else if (!strcmp(colname, "stv_mean"))
-			{
-				mean = atof(colvalue);
-			}
-			else if (!strcmp(colname, "stv_confidence"))
-			{
-				confidence = atof(colvalue);
-			}
-			else if (!strcmp(colname, "stv_count"))
-			{
-				count = atof(colvalue);
-			}
-			else if (!strcmp(colname, "uuid"))
-			{
-				uuid = strtoul(colvalue, NULL, 10);
-			}
-			return false;
+			tv_type = atoi(colvalue);
 		}
-		int row_count;
-		bool create_atom_cb(void)
+		else if (!strcmp(colname, "stv_mean"))
 		{
-			// printf ("---- New atom found ----\n");
-			_result_set->foreach_column(&Database::create_atom_column_cb, this);
-			row_count++;
-			return false;
+			mean = atof(colvalue);
 		}
-
-		bool load_all_atoms_cb(void)
+		else if (!strcmp(colname, "stv_confidence"))
 		{
-			// printf ("---- New atom found ----\n");
-			_result_set->foreach_column(&Database::create_atom_column_cb, this);
+			confidence = atof(colvalue);
+		}
+		else if (!strcmp(colname, "stv_count"))
+		{
+			count = atof(colvalue);
+		}
+		else if (!strcmp(colname, "uuid"))
+		{
+			uuid = strtoul(colvalue, NULL, 10);
+		}
+		return false;
+	}
+	int row_count;
+	bool create_atom_cb(void)
+	{
+		// printf ("---- New atom found ----\n");
+		_result_set->foreach_column(&Database::create_atom_column_cb, this);
+		row_count++;
+		return false;
+	}
 
+	bool load_all_atoms_cb(void)
+	{
+		// printf ("---- New atom found ----\n");
+		_result_set->foreach_column(&Database::create_atom_column_cb, this);
+
+		PseudoPtr p(_atom_storage->make_pseudo_atom(*this, uuid));
+		AtomPtr atom(get_recursive_if_not_exists(p));
+		_atom_table->add(atom, true);
+		return false;
+	}
+
+	// Load an atom into the atom table, but only if it's not in
+	// it already.  The goal is to avoid clobbering the truth value
+	// that is currently in the AtomTable.  Adding an atom to the
+	// atom table that already exists causes the two TV's to be
+	// merged, which is probably not what was wanted...
+	bool load_if_not_exists_cb(void)
+	{
+		// printf ("---- New atom found ----\n");
+		_result_set->foreach_column(&Database::create_atom_column_cb, this);
+
+		Handle h(uuid);
+		if (nullptr == _atom_table->getHandle(h))
+		{
 			PseudoPtr p(_atom_storage->make_pseudo_atom(*this, uuid));
 			AtomPtr atom(get_recursive_if_not_exists(p));
-			table->add(atom, true);
-			return false;
+			_atom_table->add(atom, true);
 		}
+		return false;
+	}
 
-		// Load an atom into the atom table, but only if it's not in
-		// it already.  The goal is to avoid clobbering the truth value
-		// that is currently in the AtomTable.  Adding an atom to the
-		// atom table that already exists causes the two TV's to be
-		// merged, which is probably not what was wanted...
-		bool load_if_not_exists_cb(void)
+	HandleSeq *hvec;
+	bool fetch_incoming_set_cb(void)
+	{
+		// printf ("---- New atom found ----\n");
+		_result_set->foreach_column(&Database::create_atom_column_cb, this);
+
+		// Note, unlike the above 'load' routines, this merely fetches
+		// the atoms, and returns a vector of them.  They are loaded
+		// into the atomspace later, by the caller.
+		PseudoPtr p(_atom_storage->make_pseudo_atom(*this, uuid));
+		AtomPtr atom(get_recursive_if_not_exists(p));
+		hvec->emplace_back(atom->getHandle());
+		return false;
+	}
+
+	// Helper function for above.  The problem is that, when
+	// adding links of unknown provenance, it could happen that
+	// the outgoing set of the link has not yet been loaded.  In
+	// that case, we have to load the outgoing set first.
+	AtomPtr get_recursive_if_not_exists(PseudoPtr p)
+	{
+		if (classserver().isA(p->type, NODE))
 		{
-			// printf ("---- New atom found ----\n");
-			_result_set->foreach_column(&Database::create_atom_column_cb, this);
-
-			Handle h(uuid);
-			if (nullptr == table->getHandle(h))
+			NodePtr node(createNode(p->type, p->name, p->tv));
+			setAtomUUID(node, p->uuid);
+			return node;
+		}
+		HandleSeq resolved_oset;
+		for (UUID idu : p->oset)
+		{
+			Handle h(idu);
+			h = _atom_table->getHandle(h);
+			if (h)
 			{
-				PseudoPtr p(_atom_storage->make_pseudo_atom(*this, uuid));
-				AtomPtr atom(get_recursive_if_not_exists(p));
-				table->add(atom, true);
+				resolved_oset.emplace_back(h);
+				continue;
 			}
-			return false;
+			PseudoPtr po = _atom_storage->load_pseudo_atom_with_uuid(idu);
+			AtomPtr ra = get_recursive_if_not_exists(po);
+			resolved_oset.emplace_back(ra->getHandle());
 		}
+		LinkPtr link(createLink(p->type, resolved_oset, p->tv));
+		setAtomUUID(link, p->uuid);
+		return link;
+	}
 
-		HandleSeq *hvec;
-		bool fetch_incoming_set_cb(void)
-		{
-			// printf ("---- New atom found ----\n");
-			_result_set->foreach_column(&Database::create_atom_column_cb, this);
+	bool row_exists;
+	bool row_exists_cb(void)
+	{
+		row_exists = true;
+		return false;
+	}
 
-			// Note, unlike the above 'load' routines, this merely fetches
-			// the atoms, and returns a vector of them.  They are loaded
-			// into the atomspace later, by the caller.
-			PseudoPtr p(_atom_storage->make_pseudo_atom(*this, uuid));
-			AtomPtr atom(get_recursive_if_not_exists(p));
-			hvec->emplace_back(atom->getHandle());
-			return false;
+	// deal twith the type-to-id map
+	bool type_cb(void)
+	{
+		_result_set->foreach_column(&Database::type_column_cb, this);
+		_atom_storage->map_database_type(itype, type_name);
+		return false;
+	}
+	const char * type_name;
+	bool type_column_cb(const char *colname, const char * colvalue)
+	{
+		if (!strcmp(colname, "type"))
+		{
+			itype = atoi(colvalue);
 		}
+		else if (!strcmp(colname, "typename"))
+		{
+			type_name = colvalue;
+		}
+		return false;
+	}
 
-		// Helper function for above.  The problem is that, when
-		// adding links of unknown provenance, it could happen that
-		// the outgoing set of the link has not yet been loaded.  In
-		// that case, we have to load the outgoing set first.
-		AtomPtr get_recursive_if_not_exists(PseudoPtr p)
-		{
-			if (classserver().isA(p->type, NODE))
-			{
-				NodePtr node(createNode(p->type, p->name, p->tv));
-				setAtomUUID(node, p->uuid);
-				return node;
-			}
-			HandleSeq resolved_oset;
-			for (UUID idu : p->oset)
-			{
-				Handle h(idu);
-				h = table->getHandle(h);
-				if (h)
-				{
-					resolved_oset.emplace_back(h);
-					continue;
-				}
-				PseudoPtr po = _atom_storage->load_pseudo_atom_with_uuid(idu);
-				AtomPtr ra = get_recursive_if_not_exists(po);
-				resolved_oset.emplace_back(ra->getHandle());
-			}
-			LinkPtr link(createLink(p->type, resolved_oset, p->tv));
-			setAtomUUID(link, p->uuid);
-			return link;
-		}
-
-		bool row_exists;
-		bool row_exists_cb(void)
-		{
-			row_exists = true;
-			return false;
-		}
-
-		// deal twith the type-to-id map
-		bool type_cb(void)
-		{
-			_result_set->foreach_column(&Database::type_column_cb, this);
-			_atom_storage->map_database_type(itype, type_name);
-			return false;
-		}
-		const char * type_name;
-		bool type_column_cb(const char *colname, const char * colvalue)
-		{
-			if (!strcmp(colname, "type"))
-			{
-				itype = atoi(colvalue);
-			}
-			else if (!strcmp(colname, "typename"))
-			{
-				type_name = colvalue;
-			}
-			return false;
-		}
-
-		// Get all handles in the database.
-		std::set<UUID> *id_set;
-		bool note_id_cb(void)
-		{
-			_result_set->foreach_column(&Database::note_id_column_cb, this);
-			return false;
-		}
-		bool note_id_column_cb(const char *colname, const char * colvalue)
-		{
-			// we're not going to bother to check the column name ...
-			UUID id = strtoul(colvalue, NULL, 10);
-			id_set->insert(id);
-			return false;
-		}
+	// Get all handles in the database.
+	std::set<UUID> *id_set;
+	bool note_id_cb(void)
+	{
+		_result_set->foreach_column(&Database::note_id_column_cb, this);
+		return false;
+	}
+	bool note_id_column_cb(const char *colname, const char * colvalue)
+	{
+		// we're not going to bother to check the column name ...
+		UUID id = strtoul(colvalue, NULL, 10);
+		id_set->insert(id);
+		return false;
+	}
 };
 
+
 /* ================================================================ */
+// Constructors
+
+void PGAtomStorage::init(const char * dbname,
+                         const char * username,
+                         const char * authentication)
+{
+#ifdef DEBUG
+	_verbose = true;
+	_print_statements = true;
+#else
+	_verbose = false;
+	_print_statements = false;
+#endif
+	_store_edges = true;
+	_query_count = 0;
+	_generate_collisions = false;
+	_collission_count = 0;
+	_transaction_chunk = 0;
+	_hash_seed = 0x38aa725897239ecf;
+
+	// Generate random numbers using our hash seed.
+	_random_generator = new MT19937RandGen(_hash_seed);
+
+	// int random_integer = _random_generator->randint(100);
+
+	// Create the connection pool.
+	for (int i=0; i < CONNECTION_POOL_SIZE; i++)
+	{
+		ODBCConnection* db_conn = new ODBCConnection(dbname, username,
+				authentication);
+		_conn_pool.push(db_conn);
+	}
+	type_map_was_loaded = false;
+	max_height = 0;
+
+	for (int i=0; i< TYPEMAP_SZ; i++)
+	{
+		_database_type_names[i] = NULL;
+	}
+
+	local_id_cache_is_inited = false;
+	table_cache_is_inited = false;
+	if (!connected()) return;
+
+	// Reserve a range of UUID's with TLB that includes the
+	// maximum found in Atoms. 
+	reserve_max_atoms_uuid();
+
+	// Load the types and setup the type map.
+	setup_type_map();
+
+	// Reset the query count since all the priors were housekeeping. Unless
+	// we were already printing statements, in which case, we'll keep the
+	// numbers since they'll make sense in that context.
+	if (_print_statements)
+		_query_count = 0;
+}
+
+PGAtomStorage::PGAtomStorage(const char * dbname,
+                         const char * username,
+                         const char * authentication)
+	: _write_queue(this, &PGAtomStorage::vdo_store_atom)
+{
+	init(dbname, username, authentication);
+}
+
+PGAtomStorage::PGAtomStorage(const std::string& dbname,
+                         const std::string& username,
+                         const std::string& authentication)
+	: _write_queue(this, &PGAtomStorage::vdo_store_atom)
+{
+	init(dbname.c_str(), username.c_str(), authentication.c_str());
+}
+
+PGAtomStorage::~PGAtomStorage()
+{
+	if (_random_generator)
+		delete _random_generator;
+
+	if (connected())
+		store_max_height_global(load_max_atoms_height());
+
+	while (not _conn_pool.is_empty())
+	{
+		ODBCConnection* db_conn = _conn_pool.pop();
+		delete db_conn;
+	}
+
+	for (int i=0; i<TYPEMAP_SZ; i++)
+	{
+		if (_database_type_names[i]) free(_database_type_names[i]);
+	}
+}
+
+/* ================================================================ */
+
+void PGAtomStorage::enable_testing_mode()
+{
+	_print_statements = false;
+	_generate_collisions = true;
+}
+
+void PGAtomStorage::disable_testing_mode()
+{
+	_print_statements = false;
+	_generate_collisions = false;
+}
 
 bool PGAtomStorage::query_uuid_exists(UUID uuid)
 {
@@ -401,8 +684,6 @@ bool PGAtomStorage::query_uuid_exists(UUID uuid)
 	database.for_each_row(&Database::row_exists_cb);
 	return database.row_exists;
 }
-
-/* ================================================================ */
 
 /**
  * Store the outgoing set of the atom in the Edges table.
@@ -467,86 +748,6 @@ void PGAtomStorage::store_outgoing_edges(AtomPtr atom)
 	}
 }
 
-/* ================================================================ */
-// Constructors
-
-void PGAtomStorage::init(const char * dbname,
-                         const char * username,
-                         const char * authentication)
-{
-	_verbose = false;
-	_print_statements = false;
-	_store_edges = true;
-	_query_count = 0;
-	_transaction_chunk = 0;
-	_hash_seed = 0x38aa725897239ecf;
-
-	// Create the connection pool.
-	for (int i=0; i < CONNECTION_POOL_SIZE; i++)
-	{
-		ODBCConnection* db_conn = new ODBCConnection(dbname, username,
-				authentication);
-		_conn_pool.push(db_conn);
-	}
-	type_map_was_loaded = false;
-	max_height = 0;
-
-	for (int i=0; i< TYPEMAP_SZ; i++)
-	{
-		_database_type_names[i] = NULL;
-	}
-
-	local_id_cache_is_inited = false;
-	table_cache_is_inited = false;
-	if (!connected()) return;
-
-	// Reserve a range of UUID's with TLB that includes the
-	// maximum found in Atoms. 
-	reserve_max_atoms_uuid();
-
-	// Load the types and setup the type map.
-	setup_type_map();
-
-	// Reset the query count since all the priors were housekeeping. Unless
-	// we were already printing statements, in which case, we'll keep the
-	// numbers since they'll make sense in that context.
-	if (_print_statements)
-		_query_count = 0;
-}
-
-PGAtomStorage::PGAtomStorage(const char * dbname,
-                         const char * username,
-                         const char * authentication)
-	: _write_queue(this, &PGAtomStorage::vdo_store_atom)
-{
-	init(dbname, username, authentication);
-}
-
-PGAtomStorage::PGAtomStorage(const std::string& dbname,
-                         const std::string& username,
-                         const std::string& authentication)
-	: _write_queue(this, &PGAtomStorage::vdo_store_atom)
-{
-	init(dbname.c_str(), username.c_str(), authentication.c_str());
-}
-
-PGAtomStorage::~PGAtomStorage()
-{
-	if (connected())
-		store_max_height_global(load_max_atoms_height());
-
-	while (not _conn_pool.is_empty())
-	{
-		ODBCConnection* db_conn = _conn_pool.pop();
-		delete db_conn;
-	}
-
-	for (int i=0; i<TYPEMAP_SZ; i++)
-	{
-		if (_database_type_names[i]) free(_database_type_names[i]);
-	}
-}
-
 /**
  * connected -- return true if a successful connection to the
  * database exists; else return false.  Note that this may block,
@@ -590,34 +791,7 @@ void PGAtomStorage::store_atomtable_id(const AtomTable& at)
 }
 
 
-/* ================================================================ */
-
-#define STMT(colname,val) { \
-	if (atom_needs_insert) { \
-		if (notfirst) { cols += ", "; vals += ", "; } else notfirst = 1; \
-		cols += colname; \
-		vals += val; \
-	} else { \
-		if (notfirst) { cols += ", "; } else notfirst = 1; \
-		cols += colname; \
-		cols += " = "; \
-		cols += val; \
-	} \
-}
-
-#define STMTI(colname,ival) { \
-	char value[BUFFER_SIZE]; \
-	snprintf(value, BUFFER_SIZE, "%u", ival); \
-	STMT(colname, value); \
-}
-
-#define STMTF(colname,fval) { \
-	char value[BUFFER_SIZE]; \
-	snprintf(value, BUFFER_SIZE, "%12.8g", fval); \
-	STMT(colname, value); \
-}
-
-/* ================================================================== */
+//* ================================================================== */
 
 /**
  * Return largest distance from this atom to any node under it.
@@ -647,12 +821,12 @@ int PGAtomStorage::get_height(AtomPtr atom)
 
 /* ================================================================ */
 
-std::string PGAtomStorage::oset_to_string(const std::vector<Handle>& out)
+std::string PGAtomStorage::outgoing_set_to_string(const HandleSeq& outgoing)
 {
 	std::string str;
 	str += "\'{";
 	bool first_atom = true;
-	for (auto& atom : out)
+	for (auto& atom : outgoing)
 	{
 		// Add the comma delimiter if this is not the first atom.
 		if (not first_atom)
@@ -662,7 +836,7 @@ std::string PGAtomStorage::oset_to_string(const std::vector<Handle>& out)
         if (atom == NULL)
         {
             throw RuntimeException(TRACE_INFO, "Fatal Error: PGAtomStorage::"
-            		"oset_to_string - NULL handle in outgoing set\n");
+            		"outgoing_set_to_string - NULL handle in outgoing set\n");
         }
 		
 		// Add this atom's UUID.
@@ -674,6 +848,33 @@ std::string PGAtomStorage::oset_to_string(const std::vector<Handle>& out)
 	str += "}\'";
 	// fprintf(stdout, "%s\n", str.c_str());
 	return str;
+}
+
+/* ================================================================ */
+#define COLLIDE_INTERVAL 10
+std::string PGAtomStorage::outgoing_set_to_hash_string(const HandleSeq& outgoing)
+{
+	// Hash the outgoing set.
+	int64_t hash = hash_outgoing(outgoing, _hash_seed);
+
+	// If the hash matches our mask, then we'll fake a collision.
+	// This is used during testing to test the collision handling.
+	if (_generate_collisions)
+	{
+		if (hash % COLLIDE_INTERVAL == 0)
+		{
+			// We'll collide to something that uses all the bits but that
+			// we can easily recognize like: 1010101010101010101 decimal
+			int64_t new_hash = 0xe04998456557eb5;
+			_collission_count++;
+			fprintf(stdout, "test colliding %ld to %ld\n", hash, new_hash);
+			hash = new_hash;
+		}
+	}
+
+	// Add the SQL for the hash columns.
+	std::string hash_buff = std::to_string(hash);
+	return hash_buff;
 }
 
 /* ================================================================ */
@@ -722,18 +923,10 @@ void PGAtomStorage::storeAtom(AtomPtr atom, bool synchronous)
  */
 int PGAtomStorage::do_store_atom_recursive(Database& database, AtomPtr atom)
 {
-	int height;
+	int height = 0;
 
-	// If this is a node...
-	if (atom->isNode())
-	{
-		// Nodes are zero height.
-		height = 0;
-
-		// Store the node.
-		do_store_atom_single(database, atom, height);
-	}
-	else
+	// If this is a link...
+	if (atom->isLink())
 	{
 		// Handle the link case...
 		OC_ASSERT(atom->isLink(), "atom Not Link or Node ???");
@@ -754,8 +947,10 @@ int PGAtomStorage::do_store_atom_recursive(Database& database, AtomPtr atom)
 		// Height of this link is, by definition, one more than tallest
 		// atom in outgoing set.
 		height = max_out_atom_height + 1;
-		do_store_atom_single(database, atom, height);
 	}
+
+	// Store the atom.
+	do_store_atom_single(database, atom, height);
 
 	// Return the height of this atom so callers can know their height 
 	// if this was called recursively.
@@ -768,18 +963,175 @@ void PGAtomStorage::vdo_store_atom(AtomPtr& atom)
 	do_store_atom_recursive(database, atom);
 }
 
+void PGAtomStorage::add_truth_value_columns(Database& database,
+											AtomPtr atom)
+{
+	// Store the truth value into the columns
+
+	// Store the truth value type...
+	TruthValuePtr truth_ptr(atom->getTruthValue());
+	TruthValueType truth_type = NULL_TRUTH_VALUE;
+	if (truth_ptr)
+		truth_type = truth_ptr->getType();
+	database.add_column_unsigned("tv_type", truth_type);
+
+	// Store the mean, confidence and count according to the type.
+	switch (truth_type)
+	{
+		case NULL_TRUTH_VALUE:
+			break;
+		case SIMPLE_TRUTH_VALUE:
+		case COUNT_TRUTH_VALUE:
+		case PROBABILISTIC_TRUTH_VALUE:
+			database.add_column_double("stv_mean", truth_ptr->getMean());
+			database.add_column_double("stv_count", truth_ptr->getCount());
+			database.add_column_double("stv_confidence", 
+					truth_ptr->getConfidence());
+			break;
+		case INDEFINITE_TRUTH_VALUE:
+		{
+			IndefiniteTruthValuePtr intentional_ptr = 
+					std::static_pointer_cast<const IndefiniteTruthValue>(
+					truth_ptr);
+			database.add_column_double("stv_mean", intentional_ptr->getL());
+			database.add_column_double("stv_count", intentional_ptr->getU());
+			database.add_column_double("stv_confidence",
+					intentional_ptr->getConfidenceLevel());
+			break;
+		}
+		default:
+			throw RuntimeException(TRACE_INFO,
+				"Error: store_single: Unknown truth value type\n");
+	}
+}
+
+std::string PGAtomStorage::build_atom_insert(Database& database,
+											 AtomPtr atom,
+											 int height,
+										     int out_differentiator)
+{
+	// Begin the insert...
+	database.start_insert("Atoms");
+
+	// Store the atom's UUID.
+	UUID uuid = atom->getUUID();
+	database.add_column_bigint("uuid", uuid);
+
+	// Store the atomspace UUID. Since we allow storage of atoms that
+	// don't belong to an atomspace, we need to handle that here by
+	// adding a 0 space. The spaces table has a zero space entry so 
+	// the reference constraint isn't violated by these inserts.
+	AtomTable * atom_table = getAtomTable(atom);
+	if (atom_table)
+		database.add_column_bigint("space", atom_table->get_uuid());
+	else
+		database.add_column_bigint("space", 0);
+
+	// Store the atom type mapped to the database type.
+	Type atom_type = atom->getType();
+	int database_type = _storing_type_map[atom_type];
+	database.add_column_unsigned("type", database_type);
+
+	// Store the node name, if its a node
+	if (atom->isNode())
+	{
+		// The Atoms table has a UNIQUE constraint on the
+		// node name.  If a node name is too long, a postgres
+		// error is generated:
+		// ERROR: index row size 4440 exceeds maximum 2712
+		// for index "atoms_type_name_key"
+		// There's not much that can be done about this, without
+		// a redesign of the table format, in some way. Maybe
+		// we could hash the long node names, store the hash,
+		// and make sure that is unique.
+		database.add_column_quoted_string("name", atom->getName(), 
+				MAX_NODE_NAME_LENGTH);
+
+		// Nodes have a height of zero by definition.
+		database.add_column_unsigned("height", 0);
+	}
+	else
+	{
+		// Handle the Link case
+		OC_ASSERT(atom->isLink(), "atom Not Link or Node ???");
+
+		// See if this height is a new max.
+		if (max_height < height)
+			max_height = height;
+
+		// Setup the height column
+		database.add_column_unsigned("height", height);
+
+		// If this is a link and we're not storing edges separately.
+		int arity = atom->getArity();
+		if (_store_edges)
+		{
+			if (arity)
+			{
+				// Hash the outgoing set.
+				const HandleSeq& outgoing = atom->getOutgoingSet();
+				std::string hash = outgoing_set_to_hash_string(outgoing);
+
+				// Add the SQL for the hash columns.
+				database.add_column_string("out_hash", hash);
+				database.add_column_unsigned("out_differentiator",
+						out_differentiator);
+			}
+		}
+		else
+		{
+			// The Atoms table has a UNIQUE constraint on the
+			// outgoing set.  If a link is too large, a postgres
+			// error is generated:
+			// ERROR: index row size 4440 exceeds maximum 2712
+			// for index "atoms_type_outgoing_key"
+			// The simplest solution that I see requires a database
+			// redesign.  One could hash together the UUID's in the
+			// outgoing set, and then force a unique constraint on
+			// the hash.
+			if (arity)
+			{
+				if (arity > 330)
+				{
+					throw RuntimeException(TRACE_INFO, "Error: "
+						"do_store_atom_single: Maxiumum Link size is 330.\n");
+				}
+
+				const HandleSeq& outgoing_set = atom->getOutgoingSet();
+				std::string outgoing = outgoing_set_to_string(outgoing_set);
+				database.add_column_string("outgoing", outgoing.c_str());
+			}
+		}
+	} 
+
+	// // Add the truth value columns to the update.
+	add_truth_value_columns(database, atom);
+
+	// Build the statement and return it.
+	std::string statement = database.build_insert_statement();
+	return statement;
+}
+
+std::string PGAtomStorage::build_atom_update(Database& database,
+											 AtomPtr atom)
+{
+	// Start the update statement.
+	database.start_update("Atoms");
+
+	// Add the truth value columns to the update.
+	add_truth_value_columns(database, atom);
+
+	// Build the statement and return it.
+	UUID uuid = atom->getUUID();
+	std::string statement = database.build_update_where("uuid", uuid);
+	return statement;
+}
+
+
 void PGAtomStorage::do_store_atom_single(Database& database, 
 										 AtomPtr atom,
-										 int height,
-										 int out_differentiator)
+										 int height)
 {
-	int notfirst = 0;
-	std::string cols;
-	std::string vals;
-	std::string coda;
-	Type atom_type = atom->getType();;
-	int64_t hash = 0;
-
 	// Use the TLB Handle as the UUID.
 	Handle h(atom->getHandle());
 	if (isInvalidHandle(h))
@@ -788,9 +1140,8 @@ void PGAtomStorage::do_store_atom_single(Database& database,
 				"Trying to save atom with an invalid handle!");
 	}
 
+	// Check the lock to see if this atom has been inserted or not.
 	UUID uuid = h->getUUID();
-	std::string uuidbuff = std::to_string(uuid);
-
 	std::unique_lock<std::mutex> lck = maybe_create_id(uuid);
 	bool atom_needs_insert = lck.owns_lock();
 
@@ -798,154 +1149,13 @@ void PGAtomStorage::do_store_atom_single(Database& database,
 	// first time ever. Once an atom is in an atom table, it's
 	// name can type cannot be changed. Only its truth value can
 	// change.
+	std::string statement;
 	if (atom_needs_insert)
-	{
-		cols = "INSERT INTO Atoms (";
-		vals = ") VALUES (";
-		coda = ");";
-
-		// Store the UUID
-		STMT("uuid", uuidbuff);
-
-		// Store the atomspace UUID
-		AtomTable * at = getAtomTable(atom);
-		// We allow storage of atoms that don't belong to an atomspace.
-		if (at) uuidbuff = std::to_string(at->get_uuid());
-		else uuidbuff = "0";
-		STMT("space", uuidbuff);
-
-		// Store the atom type mapped to the database type.
-		int database_type = _storing_type_map[atom_type];
-		STMTI("type", database_type);
-
-		// Store the node name, if its a node
-		if (atom->isNode())
-		{
-			// Use postgres $-quoting to make unicode strings
-			// easier to deal with.
-			std::string qname = " $$";
-			qname += atom->getName();
-			qname += "$$ ";
-
-			// The Atoms table has a UNIQUE constraint on the
-			// node name.  If a node name is too long, a postgres
-			// error is generated:
-			// ERROR: index row size 4440 exceeds maximum 2712
-			// for index "atoms_type_name_key"
-			// There's not much that can be done about this, without
-			// a redesign of the table format, in some way. Maybe
-			// we could hash the long node names, store the hash,
-			// and make sure that is unique.
-			if (2700 < qname.size())
-			{
-				throw RuntimeException(TRACE_INFO,
-						"Error: do_store_atom_single: Maxiumum Node name "
-						"size is 2700.\n");
-			}
-			STMT("name", qname);
-
-			// Nodes have a height of zero by definition.
-			STMTI("height", 0);
-		}
-		else
-		{
-			// Handle the Link case
-			OC_ASSERT(atom->isLink(), "atom Not Link or Node ???");
-
-			// See if this height is a new max.
-			if (max_height < height)
-				max_height = height;
-
-			// Setup the height column
-			STMTI("height", height);
-
-			// If this is a link and we're not storing edges separately.
-			int arity = atom->getArity();
-			if (_store_edges)
-			{
-				if (arity)
-				{
-					// Hash the outgoing set.
-					hash = hash_outgoing(atom->getOutgoingSet(), _hash_seed);
-
-					// Add the SQL for the hash columns.
-					std::string hash_buff = std::to_string(hash);
-					STMT("out_hash", hash_buff);
-					STMTI("out_differentiator", out_differentiator);
-				}
-			}
-			else
-			{
-				// The Atoms table has a UNIQUE constraint on the
-				// outgoing set.  If a link is too large, a postgres
-				// error is generated:
-				// ERROR: index row size 4440 exceeds maximum 2712
-				// for index "atoms_type_outgoing_key"
-				// The simplest solution that I see requires a database
-				// redesign.  One could hash together the UUID's in the
-				// outgoing set, and then force a unique constraint on
-				// the hash.
-				if (330 < arity)
-				{
-					throw RuntimeException(TRACE_INFO, "Error: "
-						"do_store_atom_single: Maxiumum Link size is 330.\n");
-				}
-
-				if (arity)
-				{
-					const HandleSeq& outgoing_set = atom->getOutgoingSet();
-					std::string outgoing = oset_to_string(outgoing_set);
-					STMT("outgoing", outgoing.c_str());
-				}
-			}
-		} 
-	}
+		statement = build_atom_insert(database, atom, height);
 	else
-	{
-		// Update the atom's truth value. This is the only kind of update
-		// that is permitted because atoms themselves cannot be changed
-		// once written.
-		cols = "UPDATE Atoms SET ";
-		vals = "";
-		coda = " WHERE uuid = ";
-		coda += uuidbuff;
-		coda += ";";
-	}
-
-
-	// Store the truth value
-	TruthValuePtr tv(atom->getTruthValue());
-	TruthValueType tvt = NULL_TRUTH_VALUE;
-	if (tv) tvt = tv->getType();
-	STMTI("tv_type", tvt);
-
-	switch (tvt)
-	{
-		case NULL_TRUTH_VALUE:
-			break;
-		case SIMPLE_TRUTH_VALUE:
-		case COUNT_TRUTH_VALUE:
-		case PROBABILISTIC_TRUTH_VALUE:
-			STMTF("stv_mean", tv->getMean());
-			STMTF("stv_confidence", tv->getConfidence());
-			STMTF("stv_count", tv->getCount());
-			break;
-		case INDEFINITE_TRUTH_VALUE:
-		{
-			IndefiniteTruthValuePtr itv = 
-					std::static_pointer_cast<const IndefiniteTruthValue>(tv);
-			STMTF("stv_mean", itv->getL());
-			STMTF("stv_count", itv->getU());
-			STMTF("stv_confidence", itv->getConfidenceLevel());
-			break;
-		}
-		default:
-			throw RuntimeException(TRACE_INFO,
-				"Error: store_single: Unknown truth value type\n");
-	}
-
+		statement = build_atom_update(database, atom);
+	
 	// Execute the statement.
-	std::string statement = cols + vals + coda;
 	database.execute(statement.c_str());
 
 	// If there was an error on an insert...
@@ -975,19 +1185,21 @@ void PGAtomStorage::do_store_atom_single(Database& database,
 		if (not database.has_results() and _store_edges and atom->isLink())
 		{
 			// Get a new diffentiator for this atom's uuid.
-			out_differentiator = load_max_hash_differentiator(atom_type, hash);
+			int differentiator = load_max_hash_differentiator(atom->getType(), 
+					atom->getOutgoingSet());
 
-			// Try again with an incremented out_differentiator. We'll return
+			// Try again with an incremented differentiator. We'll return
 			// from here since the atom will have been added after this call.
-			out_differentiator++;
-			do_store_atom_single(database, atom, height, out_differentiator);
-			return;
+			differentiator++;
+
+			// Now try storing again with this new differentiator.
+			statement = build_atom_insert(database, atom, height, 
+					differentiator);
+			database.execute(statement.c_str());
 		}
 	}
 
-	// Store the outgoing handles only if we are storing for the first
-	// time, otherwise do nothing. The semantics is that, once the
-	// outgoing set has been determined, it cannot be changed.
+	// Store the outgoing handles.
 	if (atom_needs_insert)
 	{
 		// If this is a link then store it's edges...
@@ -1283,15 +1495,15 @@ void PGAtomStorage::get_outgoing_edges(UUID uuid, std::vector<UUID>& outgoing)
 }
 
 int PGAtomStorage::load_max_hash_differentiator(Type t, 
-										        unsigned long out_hash)
+										        const HandleSeq& outgoing)
 {
 	Database database(this);
 	int db_type = _storing_type_map[t];
 	char statement[BUFFER_SIZE];
-	std::string out_hash_str = std::to_string(out_hash);
+	std::string hash = outgoing_set_to_hash_string(outgoing);
 	snprintf(statement, BUFFER_SIZE, "SELECT MAX(out_differentiator) "
 			"FROM Atoms WHERE "
-			" type = %d AND out_hash = %lu;", db_type, out_hash_str.c_str());
+			" type = %d AND out_hash = %s;", db_type, hash.c_str());
 	database.execute(statement);
 	return database.get_int_result();
 }
@@ -1472,17 +1684,20 @@ LinkPtr PGAtomStorage::getLink(Type type, const HandleSeq& outgoing)
 	// If we're storing edges...
 	if (_store_edges)
 	{
-		// Hash the outgoing set.
-		int64_t out_hash = 0;
-		std::string out_string = oset_to_string(outgoing);
-		fprintf(stdout, "getLink - outgoing = %s\n", out_string.c_str());
-		out_hash = hash_outgoing(outgoing, _hash_seed);
-		std::string out_hash_str = std::to_string(out_hash);
+		// Print out the outgoing set for verbose debugging.
+		if (_verbose)
+		{
+			std::string out_string = outgoing_set_to_string(outgoing);
+			fprintf(stdout, "getLink - outgoing = %s\n", out_string.c_str());
+		}
+
+		// Hash the outgoing set.	
+		std::string hash = outgoing_set_to_hash_string(outgoing);
 
 		// Execute the select statement.
 		snprintf(statement, BUFFER_SIZE,
 		    	"SELECT * FROM Atoms WHERE type = %hu AND out_hash = %s;",
-		    	_storing_type_map[type], out_hash_str.c_str());
+		    	_storing_type_map[type], hash.c_str());
 		database.execute(statement);
 
 		// Since we could have a hash collision, we can't assume we have a 
@@ -1506,7 +1721,7 @@ LinkPtr PGAtomStorage::getLink(Type type, const HandleSeq& outgoing)
 	}
 	else
 	{
-		std::string out_string = oset_to_string(outgoing);
+		std::string out_string = outgoing_set_to_string(outgoing);
 		snprintf(statement, BUFFER_SIZE,
 		    "SELECT * FROM Atoms WHERE type = %hu AND outgoing = %s;",
 		    _storing_type_map[type], out_string.c_str());
@@ -1736,9 +1951,9 @@ void PGAtomStorage::cache_edges_where(const char * where_clause)
 
 /* ================================================================ */
 
-void PGAtomStorage::load(AtomTable &table)
+void PGAtomStorage::load(AtomTable &atom_table)
 {
-	Database database(this);
+	Database database(this, &atom_table);
 
 	// Reserve the UUID range.
 	UUID max_uuid = reserve_max_atoms_uuid();
@@ -1748,8 +1963,6 @@ void PGAtomStorage::load(AtomTable &table)
 	// available because we can load bottom up.
 	max_height = load_max_atoms_height();
 	fprintf(stderr, "  Max Height is %d\n", max_height);
-
-	database.table = &table;
 
 	// Load the trees in bottom up order:
 	//
@@ -1802,12 +2015,12 @@ void PGAtomStorage::load(AtomTable &table)
 		(unsigned long) load_count);
 
 	// Synchronize!
-	table.barrier();
+	atom_table.barrier();
 }
 
-void PGAtomStorage::loadType(AtomTable &table, Type atom_type)
+void PGAtomStorage::loadType(AtomTable &atom_table, Type atom_type)
 {
-	Database database(this);
+	Database database(this, &atom_table);
 
 	// Reserve the UUIDs up to the max in the atoms table.
 	unsigned long max_uuid = reserve_max_atoms_uuid();
@@ -1823,8 +2036,6 @@ void PGAtomStorage::loadType(AtomTable &table, Type atom_type)
 		max_height = load_max_atoms_height();
 	logger().debug("PGAtomStorage::loadType: Max Height is %d\n", max_height);
 	int db_atom_type = _storing_type_map[atom_type];
-
-	database.table = &table;
 
 	for (int height=0; height <= max_height; height++)
 	{
@@ -1866,7 +2077,7 @@ void PGAtomStorage::loadType(AtomTable &table, Type atom_type)
 			" in total\n", (unsigned long) load_count);
 
 	// Synchronize!
-	table.barrier();
+	atom_table.barrier();
 }
 
 void PGAtomStorage::store(const AtomTable &table)
@@ -2042,6 +2253,11 @@ void PGAtomStorage::kill_data(void)
 
 	// Reset the max height global.
 	database.execute("UPDATE Global SET max_height = 0;");
+
+	// Report and reset the collision count.
+	if (_generate_collisions)
+		fprintf(stderr, "  Generated %d test collisions.\n", _collission_count);
+	_collission_count = 0;
 
 	// Reset the query count.
 	_query_count = 0;

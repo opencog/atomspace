@@ -31,6 +31,10 @@
 
 using namespace opencog;
 
+#ifndef DEBUG_SQL_STATEMENTS
+#define DEBUG_SQL_STATEMENTS 0
+#endif
+
 PGSQLPersistSCM::PGSQLPersistSCM(AtomSpace *as)
 {
 	_as = as;
@@ -125,10 +129,11 @@ void PGSQLPersistSCM::do_open(const std::string& dbname,
 		as = SchemeSmob::ss_get_env_as("sql-open");
 #endif
 
+#if DEBUG_SQL_STATEMENTS
 	_store->setVerbose();
 	_store->setPrintStatements();
-	// _store->setDontStoreEdges();
-
+	_store->setDontStoreEdges();
+#endif
 	_backing->registerWith(as);
 }
 
@@ -165,7 +170,6 @@ void PGSQLPersistSCM::do_load(void)
 	_store->loadAtomSpace(as);
 }
 
-
 void PGSQLPersistSCM::do_store(void)
 {
 	if (_store == NULL)
@@ -181,7 +185,18 @@ void PGSQLPersistSCM::do_store(void)
 	_store->storeAtomSpace(as);
 }
 
+void PGSQLPersistSCM::enable_testing_mode()
+{
+	_store->enable_testing_mode();
+}
+
+void PGSQLPersistSCM::disable_testing_mode()
+{
+	_store->disable_testing_mode();
+}
+
 void opencog_persist_sql_init(void)
 {
    static PGSQLPersistSCM patty(NULL);
 }
+

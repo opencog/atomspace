@@ -58,6 +58,20 @@ public:
 	void do_load(void);
 	void do_store(void);
 
+	void enable_testing_mode();
+	void disable_testing_mode();
+
+	bool printStatements()
+		{ return _store->printStatements(); }
+	void setPrintStatements()
+		{ _store->setPrintStatements(); }
+	void setPrintStatementsOff()
+		{ _store->setPrintStatementsOff(); }
+
+	void resetQueryCount()
+		{ _store->resetQueryCount(); }
+	int queryCount()
+		{ return _store->queryCount(); }
 }; // class
 
 /** @}*/

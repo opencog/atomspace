@@ -49,6 +49,8 @@ namespace opencog
  *  @{
  */
 
+class MT19937RandGen;
+
 class PGAtomStorage : public AtomStorage
 {
 	private:
@@ -99,16 +101,28 @@ class PGAtomStorage : public AtomStorage
 		// globals table value after bulk stores.
 		int load_max_atoms_height(void);
 
+		// Helpers for storing calls
+		void add_truth_value_columns(Database& database,
+									 AtomPtr atom);
+		std::string build_atom_insert(Database& database,
+									  AtomPtr atom,
+									  int height,
+									  int out_differentiator = 0);
+		std::string build_atom_update(Database& database,
+									  AtomPtr atom);
+
+		// The actual storing calls.
 		int do_store_atom_recursive(Database&, AtomPtr);
 		void vdo_store_atom(AtomPtr&);
-		void do_store_atom_single(Database&, AtomPtr, int, int = 0);
+		void do_store_atom_single(Database&, AtomPtr, int);
 
-		std::mutex out_hash_mutex;
-		std::string oset_to_string(const HandleSeq&);
+		std::string outgoing_set_to_string(const HandleSeq&);
+		std::string outgoing_set_to_hash_string(const HandleSeq&);
 		void cache_edges_where(const char * where_clause);
 		void store_outgoing_edges(AtomPtr);
 		void get_outgoing_edges(UUID uuid, std::vector<UUID>&);
-		int load_max_hash_differentiator(Type t, unsigned long out_hash);
+		int load_max_hash_differentiator(Type t, 
+										 const HandleSeq& outgoing);
 		bool outgoing_matches_uuids(const HandleSeq& handles,
 									std::vector<UUID> uuids);
 
@@ -161,7 +175,11 @@ class PGAtomStorage : public AtomStorage
 		bool _verbose;
 		bool _print_statements;
 		bool _store_edges;
+		bool _generate_collisions;
+		int _collission_count;
+		MT19937RandGen* _random_generator;
 		int _query_count;
+
 		int _transaction_chunk;
 		uint64_t _hash_seed;
 
@@ -210,6 +228,13 @@ class PGAtomStorage : public AtomStorage
 
 		void setTransactionChunk(int transaction_chunk)
 			{ _transaction_chunk = transaction_chunk; }
+
+		// Enable stress tests and output suitable for testing.
+		// Among other things, this will generate collisions for
+		// a consistent set of outgoing set hashs to test the
+		// handlings of collisions.
+		void enable_testing_mode();
+		void disable_testing_mode();
 
 		// AtomStorage interface
 		NodePtr getNode(Type, const char *);

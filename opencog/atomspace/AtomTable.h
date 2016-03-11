@@ -250,6 +250,18 @@ public:
              });
     }
 
+    /* Exposes the type iterators so we can do more complicated 
+     * looping without having to create a vector to hold the handles.
+     *
+     * @param The desired type.
+     * @param Whether type subclasses should be considered.
+     * @return The handle iterator for the given type.
+     */
+    TypeIndex::iterator beginType(Type type, bool subclass) const
+        { return typeIndex.begin(type, subclass); }
+    TypeIndex::iterator endType(void) const
+        { return typeIndex.end(); }
+
     /**
      * Returns the set of atoms within the given importance range.
      *
