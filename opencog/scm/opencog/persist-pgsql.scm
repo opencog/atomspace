@@ -1,5 +1,5 @@
 ;
-; OpenCog SQL Persistance module
+; OpenCog PostgreSQL Persistance module
 ;
 
 (define-module (opencog persist-pgsql))
