@@ -39,8 +39,6 @@
 
 #ifdef HAVE_SQL_STORAGE
 
-#include "odbcxx.h"
-
 #include <stack>
 #include <string>
 
@@ -49,6 +47,9 @@
 #include <stdio.h>
 
 #include <opencog/util/platform.h>
+
+#include "odbcxx.h"
+
 
 // cheesy hack for missing PERR
 #define PERR printf

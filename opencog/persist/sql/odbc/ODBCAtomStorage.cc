@@ -45,8 +45,9 @@
 #include <opencog/truthvalue/ProbabilisticTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
-#include "opencog/persist/sql/ODBCAtomStorage.h"
-#include "opencog/persist/sql/odbcxx.h"
+
+#include "odbcxx.h"
+#include "ODBCAtomStorage.h"
 
 using namespace opencog;
 
