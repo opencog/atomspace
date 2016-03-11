@@ -41,46 +41,46 @@ namespace opencog
 
 class AtomStorage
 {
-	public:
-		AtomStorage();
-		virtual ~AtomStorage();
+    public:
+        AtomStorage();
+        virtual ~AtomStorage();
 
-		// AtomStorage interface
-		virtual NodePtr getNode(Type, const char *) = 0;
-		virtual LinkPtr getLink(Type, const std::vector<Handle>&) = 0;
-		virtual AtomPtr getAtom(UUID) = 0;
-		virtual std::vector<Handle> getIncomingSet(Handle) = 0;
-		virtual void storeAtom(AtomPtr atomPtr, bool synchronous = false) = 0;
-		virtual void loadType(AtomTable &, Type) = 0;
-		virtual void flushStoreQueue() = 0;
+        // AtomStorage interface
+        virtual NodePtr getNode(Type, const char *) = 0;
+        virtual LinkPtr getLink(Type, const std::vector<Handle>&) = 0;
+        virtual AtomPtr getAtom(UUID) = 0;
+        virtual std::vector<Handle> getIncomingSet(Handle) = 0;
+        virtual void storeAtom(AtomPtr atomPtr, bool synchronous = false) = 0;
+        virtual void loadType(AtomTable &, Type) = 0;
+        virtual void flushStoreQueue() = 0;
 
-		// Large-scale loads and saves
+        // Large-scale loads and saves
 
-		// Load entire contents of DB
-		virtual void load(AtomTable &) = 0;
+        // Load entire contents of DB
+        virtual void load(AtomTable &) = 0;
 
-		// Store entire contents of AtomTable
-		virtual void store(const AtomTable &) = 0;
+        // Store entire contents of AtomTable
+        virtual void store(const AtomTable &) = 0;
 
-		// Helper function so caller can access protected atomspace function.
-		void storeAtomSpace(AtomSpace*);
-		void loadAtomSpace(AtomSpace*);
-		void clearAndLoadAtomSpace(AtomSpace*);
+        // Helper function so caller can access protected atomspace function.
+        void storeAtomSpace(AtomSpace*);
+        void loadAtomSpace(AtomSpace*);
+        void clearAndLoadAtomSpace(AtomSpace*);
 
-	protected:
-		// For accessing TLB through friend relationship in subclasses.
-		static bool isInvalidHandle(Handle& handle) 
-			{ return TLB::isInvalidHandle(handle); }
-		static void reserveMaxUUID(unsigned long maxUUID)
-			{ TLB::reserve_upto(maxUUID); }
-		static unsigned long getMaxUUID()
-			{ return TLB::getMaxUUID(); }
-		
-		// For accessing Atom through friend relationship in subclasses.
-		static void setAtomUUID(AtomPtr atom, UUID newUUID)
-			{ atom->setUUID(newUUID); }
-		static AtomTable* getAtomTable(AtomPtr atom)
-			{ return atom->getAtomTable(); }
+    protected:
+        // For accessing TLB through friend relationship in subclasses.
+        static bool isInvalidHandle(Handle& handle) 
+            { return TLB::isInvalidHandle(handle); }
+        static void reserveMaxUUID(unsigned long maxUUID)
+            { TLB::reserve_upto(maxUUID); }
+        static unsigned long getMaxUUID()
+            { return TLB::getMaxUUID(); }
+        
+        // For accessing Atom through friend relationship in subclasses.
+        static void setAtomUUID(AtomPtr atom, UUID newUUID)
+            { atom->setUUID(newUUID); }
+        static AtomTable* getAtomTable(AtomPtr atom)
+            { return atom->getAtomTable(); }
 
 };
 

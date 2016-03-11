@@ -65,261 +65,261 @@ using namespace opencog;
  */
 class ODBCAtomStorage::Response
 {
-	public:
-		ODBCRecordSet *rs;
+    public:
+        ODBCRecordSet *rs;
 
-		// Temporary cache of info about atom being assembled.
-		UUID uuid;
-		int itype;
-		const char * name;
-		int tv_type;
-		double mean;
-		double confidence;
-		double count;
-		const char *outlist;
-		int height;
+        // Temporary cache of info about atom being assembled.
+        UUID uuid;
+        int itype;
+        const char * name;
+        int tv_type;
+        double mean;
+        double confidence;
+        double count;
+        const char *outlist;
+        int height;
 
-		Response()
-		{
-			tname = "";
-			itype = 0;
-			intval = 0;
-		}
+        Response()
+        {
+            tname = "";
+            itype = 0;
+            intval = 0;
+        }
 
-		bool create_atom_column_cb(const char *colname, const char * colvalue)
-		{
-			// printf ("%s = %s\n", colname, colvalue);
-			if (!strcmp(colname, "type"))
-			{
-				itype = atoi(colvalue);
-			}
-			else if (!strcmp(colname, "name"))
-			{
-				name = colvalue;
-			}
-			else if (!strcmp(colname, "outgoing"))
-			{
-				outlist = colvalue;
-			}
-			if (!strcmp(colname, "tv_type"))
-			{
-				tv_type = atoi(colvalue);
-			}
-			else if (!strcmp(colname, "stv_mean"))
-			{
-				mean = atof(colvalue);
-			}
-			else if (!strcmp(colname, "stv_confidence"))
-			{
-				confidence = atof(colvalue);
-			}
-			else if (!strcmp(colname, "stv_count"))
-			{
-				count = atof(colvalue);
-			}
-			else if (!strcmp(colname, "uuid"))
-			{
-				uuid = strtoul(colvalue, NULL, 10);
-			}
-			return false;
-		}
-		bool create_atom_cb(void)
-		{
-			// printf ("---- New atom found ----\n");
-			rs->foreach_column(&Response::create_atom_column_cb, this);
+        bool create_atom_column_cb(const char *colname, const char * colvalue)
+        {
+            // printf ("%s = %s\n", colname, colvalue);
+            if (!strcmp(colname, "type"))
+            {
+                itype = atoi(colvalue);
+            }
+            else if (!strcmp(colname, "name"))
+            {
+                name = colvalue;
+            }
+            else if (!strcmp(colname, "outgoing"))
+            {
+                outlist = colvalue;
+            }
+            if (!strcmp(colname, "tv_type"))
+            {
+                tv_type = atoi(colvalue);
+            }
+            else if (!strcmp(colname, "stv_mean"))
+            {
+                mean = atof(colvalue);
+            }
+            else if (!strcmp(colname, "stv_confidence"))
+            {
+                confidence = atof(colvalue);
+            }
+            else if (!strcmp(colname, "stv_count"))
+            {
+                count = atof(colvalue);
+            }
+            else if (!strcmp(colname, "uuid"))
+            {
+                uuid = strtoul(colvalue, NULL, 10);
+            }
+            return false;
+        }
+        bool create_atom_cb(void)
+        {
+            // printf ("---- New atom found ----\n");
+            rs->foreach_column(&Response::create_atom_column_cb, this);
 
-			return false;
-		}
+            return false;
+        }
 
-		AtomTable *table;
-		ODBCAtomStorage *store;
-		bool load_all_atoms_cb(void)
-		{
-			// printf ("---- New atom found ----\n");
-			rs->foreach_column(&Response::create_atom_column_cb, this);
+        AtomTable *table;
+        ODBCAtomStorage *store;
+        bool load_all_atoms_cb(void)
+        {
+            // printf ("---- New atom found ----\n");
+            rs->foreach_column(&Response::create_atom_column_cb, this);
 
-			PseudoPtr p(store->makeAtom(*this, uuid));
-			AtomPtr atom(get_recursive_if_not_exists(p));
-			table->add(atom, true);
-			return false;
-		}
+            PseudoPtr p(store->makeAtom(*this, uuid));
+            AtomPtr atom(get_recursive_if_not_exists(p));
+            table->add(atom, true);
+            return false;
+        }
 
-		// Load an atom into the atom table, but only if it's not in
-		// it already.  The goal is to avoid clobbering the truth value
-		// that is currently in the AtomTable.  Adding an atom to the
-		// atom table that already exists causes the two TV's to be
-		// merged, which is probably not what was wanted...
-		bool load_if_not_exists_cb(void)
-		{
-			// printf ("---- New atom found ----\n");
-			rs->foreach_column(&Response::create_atom_column_cb, this);
+        // Load an atom into the atom table, but only if it's not in
+        // it already.  The goal is to avoid clobbering the truth value
+        // that is currently in the AtomTable.  Adding an atom to the
+        // atom table that already exists causes the two TV's to be
+        // merged, which is probably not what was wanted...
+        bool load_if_not_exists_cb(void)
+        {
+            // printf ("---- New atom found ----\n");
+            rs->foreach_column(&Response::create_atom_column_cb, this);
 
-			Handle h(uuid);
-			if (nullptr == table->getHandle(h))
-			{
-				PseudoPtr p(store->makeAtom(*this, uuid));
-				AtomPtr atom(get_recursive_if_not_exists(p));
-				table->add(atom, true);
-			}
-			return false;
-		}
+            Handle h(uuid);
+            if (nullptr == table->getHandle(h))
+            {
+                PseudoPtr p(store->makeAtom(*this, uuid));
+                AtomPtr atom(get_recursive_if_not_exists(p));
+                table->add(atom, true);
+            }
+            return false;
+        }
 
-		HandleSeq *hvec;
-		bool fetch_incoming_set_cb(void)
-		{
-			// printf ("---- New atom found ----\n");
-			rs->foreach_column(&Response::create_atom_column_cb, this);
+        HandleSeq *hvec;
+        bool fetch_incoming_set_cb(void)
+        {
+            // printf ("---- New atom found ----\n");
+            rs->foreach_column(&Response::create_atom_column_cb, this);
 
-			// Note, unlike the above 'load' routines, this merely fetches
-			// the atoms, and returns a vector of them.  They are loaded
-			// into the atomspace later, by the caller.
-			PseudoPtr p(store->makeAtom(*this, uuid));
-			AtomPtr atom(get_recursive_if_not_exists(p));
-			hvec->emplace_back(atom->getHandle());
-			return false;
-		}
+            // Note, unlike the above 'load' routines, this merely fetches
+            // the atoms, and returns a vector of them.  They are loaded
+            // into the atomspace later, by the caller.
+            PseudoPtr p(store->makeAtom(*this, uuid));
+            AtomPtr atom(get_recursive_if_not_exists(p));
+            hvec->emplace_back(atom->getHandle());
+            return false;
+        }
 
-		// Helper function for above.  The problem is that, when
-		// adding links of unknown provenance, it could happen that
-		// the outgoing set of the link has not yet been loaded.  In
-		// that case, we have to load the outgoing set first.
-		AtomPtr get_recursive_if_not_exists(PseudoPtr p)
-		{
-			if (classserver().isA(p->type, NODE))
-			{
-				NodePtr node(createNode(p->type, p->name, p->tv));
-				setAtomUUID(node, p->uuid);
-				return node;
-			}
-			HandleSeq resolved_oset;
-			for (UUID idu : p->oset)
-			{
-				Handle h(idu);
-				h = table->getHandle(h);
-				if (h)
-				{
-					resolved_oset.emplace_back(h);
-					continue;
-				}
-				PseudoPtr po(store->petAtom(idu));
-				AtomPtr ra = get_recursive_if_not_exists(po);
-				resolved_oset.emplace_back(ra->getHandle());
-			}
-			LinkPtr link(createLink(p->type, resolved_oset, p->tv));
-			setAtomUUID(link, p->uuid);
-			return link;
-		}
+        // Helper function for above.  The problem is that, when
+        // adding links of unknown provenance, it could happen that
+        // the outgoing set of the link has not yet been loaded.  In
+        // that case, we have to load the outgoing set first.
+        AtomPtr get_recursive_if_not_exists(PseudoPtr p)
+        {
+            if (classserver().isA(p->type, NODE))
+            {
+                NodePtr node(createNode(p->type, p->name, p->tv));
+                setAtomUUID(node, p->uuid);
+                return node;
+            }
+            HandleSeq resolved_oset;
+            for (UUID idu : p->oset)
+            {
+                Handle h(idu);
+                h = table->getHandle(h);
+                if (h)
+                {
+                    resolved_oset.emplace_back(h);
+                    continue;
+                }
+                PseudoPtr po(store->petAtom(idu));
+                AtomPtr ra = get_recursive_if_not_exists(po);
+                resolved_oset.emplace_back(ra->getHandle());
+            }
+            LinkPtr link(createLink(p->type, resolved_oset, p->tv));
+            setAtomUUID(link, p->uuid);
+            return link;
+        }
 
-		bool row_exists;
-		bool row_exists_cb(void)
-		{
-			row_exists = true;
-			return false;
-		}
+        bool row_exists;
+        bool row_exists_cb(void)
+        {
+            row_exists = true;
+            return false;
+        }
 
 #ifndef USE_INLINE_EDGES
-		// Temporary cache of info about the outgoing set.
-		std::vector<Handle> *outvec;
-		Handle dst;
-		int pos;
+        // Temporary cache of info about the outgoing set.
+        std::vector<Handle> *outvec;
+        Handle dst;
+        int pos;
 
-		bool create_edge_cb(void)
-		{
-			// printf ("---- New edge found ----\n");
-			rs->foreach_column(&Response::create_edge_column_cb, this);
-			int sz = outvec->size();
-			if (sz <= pos) outvec->resize(pos+1);
-			outvec->at(pos) = dst;
-			return false;
-		}
-		bool create_edge_column_cb(const char *colname, const char * colvalue)
-		{
-			// printf ("%s = %s\n", colname, colvalue);
-			if (!strcmp(colname, "dst_uuid"))
-			{
-				dst = Handle(strtoul(colvalue, (char **) NULL, 10));
-			}
-			else if (!strcmp(colname, "pos"))
-			{
-				pos = atoi(colvalue);
-			}
-			return false;
-		}
+        bool create_edge_cb(void)
+        {
+            // printf ("---- New edge found ----\n");
+            rs->foreach_column(&Response::create_edge_column_cb, this);
+            int sz = outvec->size();
+            if (sz <= pos) outvec->resize(pos+1);
+            outvec->at(pos) = dst;
+            return false;
+        }
+        bool create_edge_column_cb(const char *colname, const char * colvalue)
+        {
+            // printf ("%s = %s\n", colname, colvalue);
+            if (!strcmp(colname, "dst_uuid"))
+            {
+                dst = Handle(strtoul(colvalue, (char **) NULL, 10));
+            }
+            else if (!strcmp(colname, "pos"))
+            {
+                pos = atoi(colvalue);
+            }
+            return false;
+        }
 #endif /* USE_INLINE_EDGES */
 
-		// deal twith the type-to-id map
-		bool type_cb(void)
-		{
-			rs->foreach_column(&Response::type_column_cb, this);
-			store->set_typemap(itype, tname);
-			return false;
-		}
-		const char * tname;
-		bool type_column_cb(const char *colname, const char * colvalue)
-		{
-			if (!strcmp(colname, "type"))
-			{
-				itype = atoi(colvalue);
-			}
-			else if (!strcmp(colname, "typename"))
-			{
-				tname = colvalue;
-			}
-			return false;
-		}
+        // deal twith the type-to-id map
+        bool type_cb(void)
+        {
+            rs->foreach_column(&Response::type_column_cb, this);
+            store->set_typemap(itype, tname);
+            return false;
+        }
+        const char * tname;
+        bool type_column_cb(const char *colname, const char * colvalue)
+        {
+            if (!strcmp(colname, "type"))
+            {
+                itype = atoi(colvalue);
+            }
+            else if (!strcmp(colname, "typename"))
+            {
+                tname = colvalue;
+            }
+            return false;
+        }
 #ifdef OUT_OF_LINE_TVS
-		// Callbacks for SimpleTruthValues
-		int tvid;
-		bool create_tv_cb(void)
-		{
-			// printf ("---- New SimpleTV found ----\n");
-			rs->foreach_column(&Response::create_tv_column_cb, this);
-			return false;
-		}
-		bool create_tv_column_cb(const char *colname, const char * colvalue)
-		{
-			printf ("%s = %s\n", colname, colvalue);
-			if (!strcmp(colname, "mean"))
-			{
-				mean = atof(colvalue);
-			}
-			else if (!strcmp(colname, "count"))
-			{
-				count = atof(colvalue);
-			}
-			return false;
-		}
+        // Callbacks for SimpleTruthValues
+        int tvid;
+        bool create_tv_cb(void)
+        {
+            // printf ("---- New SimpleTV found ----\n");
+            rs->foreach_column(&Response::create_tv_column_cb, this);
+            return false;
+        }
+        bool create_tv_column_cb(const char *colname, const char * colvalue)
+        {
+            printf ("%s = %s\n", colname, colvalue);
+            if (!strcmp(colname, "mean"))
+            {
+                mean = atof(colvalue);
+            }
+            else if (!strcmp(colname, "count"))
+            {
+                count = atof(colvalue);
+            }
+            return false;
+        }
 
 #endif /* OUT_OF_LINE_TVS */
 
-		// get generic positive integer values
-		unsigned long intval;
-		bool intval_cb(void)
-		{
-			rs->foreach_column(&Response::intval_column_cb, this);
-			return false;
-		}
-		bool intval_column_cb(const char *colname, const char * colvalue)
-		{
-			// we're not going to bother to check the column name ...
-			intval = strtoul(colvalue, NULL, 10);
-			return false;
-		}
+        // get generic positive integer values
+        unsigned long intval;
+        bool intval_cb(void)
+        {
+            rs->foreach_column(&Response::intval_column_cb, this);
+            return false;
+        }
+        bool intval_column_cb(const char *colname, const char * colvalue)
+        {
+            // we're not going to bother to check the column name ...
+            intval = strtoul(colvalue, NULL, 10);
+            return false;
+        }
 
-		// Get all handles in the database.
-		std::set<UUID> *id_set;
-		bool note_id_cb(void)
-		{
-			rs->foreach_column(&Response::note_id_column_cb, this);
-			return false;
-		}
-		bool note_id_column_cb(const char *colname, const char * colvalue)
-		{
-			// we're not going to bother to check the column name ...
-			UUID id = strtoul(colvalue, NULL, 10);
-			id_set->insert(id);
-			return false;
-		}
+        // Get all handles in the database.
+        std::set<UUID> *id_set;
+        bool note_id_cb(void)
+        {
+            rs->foreach_column(&Response::note_id_column_cb, this);
+            return false;
+        }
+        bool note_id_column_cb(const char *colname, const char * colvalue)
+        {
+            // we're not going to bother to check the column name ...
+            UUID id = strtoul(colvalue, NULL, 10);
+            id_set->insert(id);
+            return false;
+        }
 };
 
 /* ================================================================ */
@@ -334,27 +334,27 @@ class ODBCAtomStorage::Response
 /// Get an ODBC connection
 ODBCConnection* ODBCAtomStorage::get_conn()
 {
-	return conn_pool.pop();
+    return conn_pool.pop();
 }
 
 /// Put an ODBC connection back into the pool.
 void ODBCAtomStorage::put_conn(ODBCConnection* db_conn)
 {
-	conn_pool.push(db_conn);
+    conn_pool.push(db_conn);
 }
 
 /* ================================================================ */
 
 bool ODBCAtomStorage::idExists(const char * buff)
 {
-	ODBCConnection* db_conn = get_conn();
-	Response rp;
-	rp.row_exists = false;
-	rp.rs = db_conn->exec(buff);
-	rp.rs->foreach_row(&Response::row_exists_cb, &rp);
-	rp.rs->release();
-	put_conn(db_conn);
-	return rp.row_exists;
+    ODBCConnection* db_conn = get_conn();
+    Response rp;
+    rp.row_exists = false;
+    rp.rs = db_conn->exec(buff);
+    rp.rs->foreach_row(&Response::row_exists_cb, &rp);
+    rp.rs->release();
+    put_conn(db_conn);
+    return rp.row_exists;
 }
 
 /* ================================================================ */
@@ -367,32 +367,32 @@ bool ODBCAtomStorage::idExists(const char * buff)
  */
 class ODBCAtomStorage::Outgoing
 {
-	private:
-		ODBCConnection *db_conn;
-		unsigned int pos;
-		Handle src_handle;
-	public:
-		Outgoing (ODBCConnection *c, Handle h)
-		{
-			db_conn = c;
-			src_handle = h;
-			pos = 0;
-		}
-		bool each_handle (Handle h)
-		{
-			char buff[BUFSZ];
-			UUID src_uuid = src_handle->getUUID();
-			UUID dst_uuid = h->getUUID();
-			snprintf(buff, BUFSZ, "INSERT  INTO Edges "
-			        "(src_uuid, dst_uuid, pos) VALUES (%lu, %lu, %u);",
-			        src_uuid, dst_uuid, pos);
+    private:
+        ODBCConnection *db_conn;
+        unsigned int pos;
+        Handle src_handle;
+    public:
+        Outgoing (ODBCConnection *c, Handle h)
+        {
+            db_conn = c;
+            src_handle = h;
+            pos = 0;
+        }
+        bool each_handle (Handle h)
+        {
+            char buff[BUFSZ];
+            UUID src_uuid = src_handle->getUUID();
+            UUID dst_uuid = h->getUUID();
+            snprintf(buff, BUFSZ, "INSERT  INTO Edges "
+                    "(src_uuid, dst_uuid, pos) VALUES (%lu, %lu, %u);",
+                    src_uuid, dst_uuid, pos);
 
-			Response rp;
-			rp.rs = db_conn->exec(buff);
-			rp.rs->release();
-			pos ++;
-			return false;
-		}
+            Response rp;
+            rp.rs = db_conn->exec(buff);
+            rp.rs->release();
+            pos ++;
+            return false;
+        }
 };
 
 /**
@@ -402,9 +402,9 @@ class ODBCAtomStorage::Outgoing
  */
 void ODBCAtomStorage::storeOutgoing(AtomPtr atom, Handle h)
 {
-	Outgoing out(db_conn, h);
+    Outgoing out(db_conn, h);
 
-	foreach_outgoing_handle(h, &Outgoing::each_handle, &out);
+    foreach_outgoing_handle(h, &Outgoing::each_handle, &out);
 }
 
 #endif /* USE_INLINE_EDGES */
@@ -416,61 +416,61 @@ void ODBCAtomStorage::init(const char * dbname,
                        const char * username,
                        const char * authentication)
 {
-	// Create six, by default ... maybe make more?
-	// There should probably be a few more here, than the number of
-	// startWriterThread() calls below.
+    // Create six, by default ... maybe make more?
+    // There should probably be a few more here, than the number of
+    // startWriterThread() calls below.
 #define DEFAULT_NUM_CONNS 6
-	for (int i=0; i<DEFAULT_NUM_CONNS; i++)
-	{
-		ODBCConnection* db_conn = new ODBCConnection(dbname, username, authentication);
-		conn_pool.push(db_conn);
-	}
-	type_map_was_loaded = false;
-	max_height = 0;
+    for (int i=0; i<DEFAULT_NUM_CONNS; i++)
+    {
+        ODBCConnection* db_conn = new ODBCConnection(dbname, username, authentication);
+        conn_pool.push(db_conn);
+    }
+    type_map_was_loaded = false;
+    max_height = 0;
 
-	for (int i=0; i< TYPEMAP_SZ; i++)
-	{
-		db_typename[i] = NULL;
-	}
+    for (int i=0; i< TYPEMAP_SZ; i++)
+    {
+        db_typename[i] = NULL;
+    }
 
-	local_id_cache_is_inited = false;
-	table_cache_is_inited = false;
-	if (!connected()) return;
+    local_id_cache_is_inited = false;
+    table_cache_is_inited = false;
+    if (!connected()) return;
 
-	reserve();
+    reserve();
 }
 
 ODBCAtomStorage::ODBCAtomStorage(const char * dbname,
                          const char * username,
                          const char * authentication)
-	: _write_queue(this, &ODBCAtomStorage::vdo_store_atom)
+    : _write_queue(this, &ODBCAtomStorage::vdo_store_atom)
 {
-	init(dbname, username, authentication);
+    init(dbname, username, authentication);
 }
 
 ODBCAtomStorage::ODBCAtomStorage(const std::string& dbname,
                          const std::string& username,
                          const std::string& authentication)
-	: _write_queue(this, &ODBCAtomStorage::vdo_store_atom)
+    : _write_queue(this, &ODBCAtomStorage::vdo_store_atom)
 {
-	init(dbname.c_str(), username.c_str(), authentication.c_str());
+    init(dbname.c_str(), username.c_str(), authentication.c_str());
 }
 
 ODBCAtomStorage::~ODBCAtomStorage()
 {
-	if (connected())
-		setMaxHeight(getMaxObservedHeight());
+    if (connected())
+        setMaxHeight(getMaxObservedHeight());
 
-	while (not conn_pool.is_empty())
-	{
-		ODBCConnection* db_conn = conn_pool.pop();
-		delete db_conn;
-	}
+    while (not conn_pool.is_empty())
+    {
+        ODBCConnection* db_conn = conn_pool.pop();
+        delete db_conn;
+    }
 
-	for (int i=0; i<TYPEMAP_SZ; i++)
-	{
-		if (db_typename[i]) free(db_typename[i]);
-	}
+    for (int i=0; i<TYPEMAP_SZ; i++)
+    {
+        if (db_typename[i]) free(db_typename[i]);
+    }
 }
 
 /**
@@ -480,10 +480,10 @@ ODBCAtomStorage::~ODBCAtomStorage()
  */
 bool ODBCAtomStorage::connected(void)
 {
-	ODBCConnection* db_conn = get_conn();
-	bool have_connection = db_conn->connected();
-	put_conn(db_conn);
-	return have_connection;
+    ODBCConnection* db_conn = get_conn();
+    bool have_connection = db_conn->connected();
+    put_conn(db_conn);
+    return have_connection;
 }
 
 /* ================================================================== */
@@ -491,59 +491,59 @@ bool ODBCAtomStorage::connected(void)
 
 void ODBCAtomStorage::store_atomtable_id(const AtomTable& at)
 {
-	UUID tab_id = at.get_uuid();
-	if (table_id_cache.count(tab_id)) return;
+    UUID tab_id = at.get_uuid();
+    if (table_id_cache.count(tab_id)) return;
 
-	table_id_cache.insert(tab_id);
+    table_id_cache.insert(tab_id);
 
-	// Get the parent table as well.
-	UUID parent_id = 1;
-	AtomTable *env = at.get_environ();
-	if (env)
-	{
-		parent_id = env->get_uuid();
-		store_atomtable_id(*env);
-	}
+    // Get the parent table as well.
+    UUID parent_id = 1;
+    AtomTable *env = at.get_environ();
+    if (env)
+    {
+        parent_id = env->get_uuid();
+        store_atomtable_id(*env);
+    }
 
-	char buff[BUFSZ];
-	snprintf(buff, BUFSZ,
-		"INSERT INTO Spaces (space, parent) VALUES (%ld, %ld);",
-		tab_id, parent_id);
+    char buff[BUFSZ];
+    snprintf(buff, BUFSZ,
+        "INSERT INTO Spaces (space, parent) VALUES (%ld, %ld);",
+        tab_id, parent_id);
 
-	std::unique_lock<std::mutex> lock(table_cache_mutex);
-	ODBCConnection* db_conn = get_conn();
-	Response rp;
-	rp.rs = db_conn->exec(buff);
-	rp.rs->release();
-	put_conn(db_conn);
+    std::unique_lock<std::mutex> lock(table_cache_mutex);
+    ODBCConnection* db_conn = get_conn();
+    Response rp;
+    rp.rs = db_conn->exec(buff);
+    rp.rs->release();
+    put_conn(db_conn);
 }
 
 
 /* ================================================================ */
 
 #define STMT(colname,val) { \
-	if (update) { \
-		if (notfirst) { cols += ", "; } else notfirst = 1; \
-		cols += colname; \
-		cols += " = "; \
-		cols += val; \
-	} else { \
-		if (notfirst) { cols += ", "; vals += ", "; } else notfirst = 1; \
-		cols += colname; \
-		vals += val; \
-	} \
+    if (update) { \
+        if (notfirst) { cols += ", "; } else notfirst = 1; \
+        cols += colname; \
+        cols += " = "; \
+        cols += val; \
+    } else { \
+        if (notfirst) { cols += ", "; vals += ", "; } else notfirst = 1; \
+        cols += colname; \
+        vals += val; \
+    } \
 }
 
 #define STMTI(colname,ival) { \
-	char buff[BUFSZ]; \
-	snprintf(buff, BUFSZ, "%u", ival); \
-	STMT(colname, buff); \
+    char buff[BUFSZ]; \
+    snprintf(buff, BUFSZ, "%u", ival); \
+    STMT(colname, buff); \
 }
 
 #define STMTF(colname,fval) { \
-	char buff[BUFSZ]; \
-	snprintf(buff, BUFSZ, "%12.8g", fval); \
-	STMT(colname, buff); \
+    char buff[BUFSZ]; \
+    snprintf(buff, BUFSZ, "%12.8g", fval); \
+    STMT(colname, buff); \
 }
 
 /* ================================================================ */
@@ -554,9 +554,9 @@ void ODBCAtomStorage::store_atomtable_id(const AtomTable& at)
  */
 bool ODBCAtomStorage::tvExists(int tvid)
 {
-	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "SELECT tvid FROM SimpleTVs WHERE tvid = %u;", tvid);
-	return idExists(buff);
+    char buff[BUFSZ];
+    snprintf(buff, BUFSZ, "SELECT tvid FROM SimpleTVs WHERE tvid = %u;", tvid);
+    return idExists(buff);
 }
 
 /**
@@ -566,55 +566,55 @@ bool ODBCAtomStorage::tvExists(int tvid)
  */
 int ODBCAtomStorage::storeTruthValue(AtomPtr atom, Handle h)
 {
-	int notfirst = 0;
-	std::string cols;
-	std::string vals;
-	std::string coda;
+    int notfirst = 0;
+    std::string cols;
+    std::string vals;
+    std::string coda;
 
-	const TruthValue &tv = atom->getTruthValue();
+    const TruthValue &tv = atom->getTruthValue();
 
-	const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&tv);
-	if (NULL == stv)
-	{
-		fprintf(stderr, "Error: non-simple truth values are not handled\n");
-		return 0;
-	}
+    const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&tv);
+    if (NULL == stv)
+    {
+        fprintf(stderr, "Error: non-simple truth values are not handled\n");
+        return 0;
+    }
 
-	int tvid = TVID(tv);
+    int tvid = TVID(tv);
 
-	// If its a stock truth value, there is nothing to do.
-	if (tvid <= 4) return tvid;
+    // If its a stock truth value, there is nothing to do.
+    if (tvid <= 4) return tvid;
 
-	// Use the TLB Handle as the UUID.
-	char tvidbuff[BUFSZ];
-	snprintf(tvidbuff, BUFSZ, "%u", tvid);
+    // Use the TLB Handle as the UUID.
+    char tvidbuff[BUFSZ];
+    snprintf(tvidbuff, BUFSZ, "%u", tvid);
 
-	bool update = tvExists(tvid);
-	if (update)
-	{
-		cols = "UPDATE SimpleTVs SET ";
-		vals = "";
-		coda = " WHERE tvid = ";
-		coda += tvidbuff;
-		coda += ";";
-	}
-	else
-	{
-		cols = "INSERT INTO SimpleTVs (";
-		vals = ") VALUES (";
-		coda = ");";
-		STMT("tvid", tvidbuff);
-	}
+    bool update = tvExists(tvid);
+    if (update)
+    {
+        cols = "UPDATE SimpleTVs SET ";
+        vals = "";
+        coda = " WHERE tvid = ";
+        coda += tvidbuff;
+        coda += ";";
+    }
+    else
+    {
+        cols = "INSERT INTO SimpleTVs (";
+        vals = ") VALUES (";
+        coda = ");";
+        STMT("tvid", tvidbuff);
+    }
 
-	STMTF("mean", tv.getMean());
-	STMTF("count", tv.getCount());
+    STMTF("mean", tv.getMean());
+    STMTF("count", tv.getCount());
 
-	std::string qry = cols + vals + coda;
-	Response rp;
-	rp.rs = db_conn->exec(qry.c_str());
-	rp.rs->release();
+    std::string qry = cols + vals + coda;
+    Response rp;
+    rp.rs = db_conn->exec(qry.c_str());
+    rp.rs->release();
 
-	return tvid;
+    return tvid;
 }
 
 /**
@@ -622,37 +622,37 @@ int ODBCAtomStorage::storeTruthValue(AtomPtr atom, Handle h)
  */
 int ODBCAtomStorage::TVID(const TruthValue &tv)
 {
-	if (tv == TruthValue::NULL_TV()) return 0;
-	if (tv == TruthValue::TRIVIAL_TV()) return 1;
-	if (tv == TruthValue::FALSE_TV()) return 2;
-	if (tv == TruthValue::TRUE_TV()) return 3;
-	if (tv == TruthValue::DEFAULT_TV()) return 4;
+    if (tv == TruthValue::NULL_TV()) return 0;
+    if (tv == TruthValue::TRIVIAL_TV()) return 1;
+    if (tv == TruthValue::FALSE_TV()) return 2;
+    if (tv == TruthValue::TRUE_TV()) return 3;
+    if (tv == TruthValue::DEFAULT_TV()) return 4;
 
-	Response rp;
-	rp.rs = db_conn->exec("SELECT NEXTVAL('tvid_seq');");
-	rp.rs->foreach_row(&Response::tvid_seq_cb, &rp);
-	rp.rs->release();
-	return rp.tvid;
+    Response rp;
+    rp.rs = db_conn->exec("SELECT NEXTVAL('tvid_seq');");
+    rp.rs->foreach_row(&Response::tvid_seq_cb, &rp);
+    rp.rs->release();
+    return rp.tvid;
 }
 
 TruthValue* ODBCAtomStorage::getTV(int tvid)
 {
-	if (0 == tvid) return (TruthValue *) & TruthValue::NULL_TV();
-	if (1 == tvid) return (TruthValue *) & TruthValue::DEFAULT_TV();
-	if (2 == tvid) return (TruthValue *) & TruthValue::FALSE_TV();
-	if (3 == tvid) return (TruthValue *) & TruthValue::TRUE_TV();
-	if (4 == tvid) return (TruthValue *) & TruthValue::TRIVIAL_TV();
+    if (0 == tvid) return (TruthValue *) & TruthValue::NULL_TV();
+    if (1 == tvid) return (TruthValue *) & TruthValue::DEFAULT_TV();
+    if (2 == tvid) return (TruthValue *) & TruthValue::FALSE_TV();
+    if (3 == tvid) return (TruthValue *) & TruthValue::TRUE_TV();
+    if (4 == tvid) return (TruthValue *) & TruthValue::TRIVIAL_TV();
 
-	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "SELECT * FROM SimpleTVs WHERE tvid = %u;", tvid);
+    char buff[BUFSZ];
+    snprintf(buff, BUFSZ, "SELECT * FROM SimpleTVs WHERE tvid = %u;", tvid);
 
-	Response rp;
-	rp.rs = db_conn->exec(buff);
-	rp.rs->foreach_row(&Response::create_tv_cb, &rp);
-	rp.rs->release();
+    Response rp;
+    rp.rs = db_conn->exec(buff);
+    rp.rs->foreach_row(&Response::create_tv_cb, &rp);
+    rp.rs->release();
 
-	SimpleTruthValue *stv = new SimpleTruthValue(rp.mean,rp.count);
-	return stv;
+    SimpleTruthValue *stv = new SimpleTruthValue(rp.mean,rp.count);
+    return stv;
 }
 
 #endif /* OUT_OF_LINE_TVS */
@@ -669,20 +669,20 @@ TruthValue* ODBCAtomStorage::getTV(int tvid)
  */
 int ODBCAtomStorage::get_height(AtomPtr atom)
 {
-	LinkPtr l(LinkCast(atom));
-	if (NULL == l) return 0;
+    LinkPtr l(LinkCast(atom));
+    if (NULL == l) return 0;
 
-	int maxd = 0;
-	int arity = l->getArity();
+    int maxd = 0;
+    int arity = l->getArity();
 
-	const HandleSeq& out = l->getOutgoingSet();
-	for (int i=0; i<arity; i++)
-	{
-		Handle h = out[i];
-		int d = get_height(h);
-		if (maxd < d) maxd = d;
-	}
-	return maxd +1;
+    const HandleSeq& out = l->getOutgoingSet();
+    for (int i=0; i<arity; i++)
+    {
+        Handle h = out[i];
+        int d = get_height(h);
+        if (maxd < d) maxd = d;
+    }
+    return maxd +1;
 }
 
 /* ================================================================ */
@@ -690,16 +690,16 @@ int ODBCAtomStorage::get_height(AtomPtr atom)
 std::string ODBCAtomStorage::oset_to_string(const std::vector<Handle>& out,
                                         int arity)
 {
-	std::string str;
-	str += "\'{";
-	for (int i=0; i<arity; i++)
-	{
-		Handle h = out[i];
-		if (i != 0) str += ", ";
-		str += std::to_string(h->getUUID());
-	}
-	str += "}\'";
-	return str;
+    std::string str;
+    str += "\'{";
+    for (int i=0; i<arity; i++)
+    {
+        Handle h = out[i];
+        if (i != 0) str += ", ";
+        str += std::to_string(h->getUUID());
+    }
+    str += "}\'";
+    return str;
 }
 
 /* ================================================================ */
@@ -711,7 +711,7 @@ std::string ODBCAtomStorage::oset_to_string(const std::vector<Handle>& out,
 /// this...
 void ODBCAtomStorage::flushStoreQueue()
 {
-	_write_queue.flush_queue();
+    _write_queue.flush_queue();
 }
 
 /* ================================================================ */
@@ -727,15 +727,15 @@ void ODBCAtomStorage::flushStoreQueue()
  */
 void ODBCAtomStorage::storeAtom(AtomPtr atom, bool synchronous)
 {
-	get_ids();
+    get_ids();
 
-	// If a synchronous store, avoid the queues entirely.
-	if (synchronous)
-	{
-		do_store_atom(atom);
-		return;
-	}
-	_write_queue.enqueue(atom);
+    // If a synchronous store, avoid the queues entirely.
+    if (synchronous)
+    {
+        do_store_atom(atom);
+        return;
+    }
+    _write_queue.enqueue(atom);
 }
 
 /**
@@ -745,33 +745,33 @@ void ODBCAtomStorage::storeAtom(AtomPtr atom, bool synchronous)
  */
 int ODBCAtomStorage::do_store_atom(AtomPtr atom)
 {
-	LinkPtr l(LinkCast(atom));
-	if (NULL == l)
-	{
-		do_store_single_atom(atom, 0);
-		return 0;
-	}
+    LinkPtr l(LinkCast(atom));
+    if (NULL == l)
+    {
+        do_store_single_atom(atom, 0);
+        return 0;
+    }
 
-	int lheight = 0;
-	int arity = l->getArity();
-	const HandleSeq& out = l->getOutgoingSet();
-	for (int i=0; i<arity; i++)
-	{
-		// Recurse.
-		int heig = do_store_atom(out[i]);
-		if (lheight < heig) lheight = heig;
-	}
+    int lheight = 0;
+    int arity = l->getArity();
+    const HandleSeq& out = l->getOutgoingSet();
+    for (int i=0; i<arity; i++)
+    {
+        // Recurse.
+        int heig = do_store_atom(out[i]);
+        if (lheight < heig) lheight = heig;
+    }
 
-	// Height of this link is, by definition, one more than tallest
-	// atom in outgoing set.
-	lheight ++;
-	do_store_single_atom(atom, lheight);
-	return lheight;
+    // Height of this link is, by definition, one more than tallest
+    // atom in outgoing set.
+    lheight ++;
+    do_store_single_atom(atom, lheight);
+    return lheight;
 }
 
 void ODBCAtomStorage::vdo_store_atom(AtomPtr& atom)
 {
-	do_store_atom(atom);
+    do_store_atom(atom);
 }
 
 /* ================================================================ */
@@ -782,192 +782,192 @@ void ODBCAtomStorage::vdo_store_atom(AtomPtr& atom)
  */
 void ODBCAtomStorage::storeSingleAtom(AtomPtr atom)
 {
-	get_ids();
-	int height = get_height(atom);
-	do_store_single_atom(atom, height);
+    get_ids();
+    int height = get_height(atom);
+    do_store_single_atom(atom, height);
 }
 
 void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 {
-	setup_typemap();
+    setup_typemap();
 
-	int notfirst = 0;
-	std::string cols;
-	std::string vals;
-	std::string coda;
+    int notfirst = 0;
+    std::string cols;
+    std::string vals;
+    std::string coda;
 
-	// Use the TLB Handle as the UUID.
-	Handle h(atom->getHandle());
-	if (isInvalidHandle(h))
-		throw RuntimeException(TRACE_INFO, "Trying to save atom with an invalid handle!");
+    // Use the TLB Handle as the UUID.
+    Handle h(atom->getHandle());
+    if (isInvalidHandle(h))
+        throw RuntimeException(TRACE_INFO, "Trying to save atom with an invalid handle!");
 
-	UUID uuid = h->getUUID();
-	std::string uuidbuff = std::to_string(uuid);
+    UUID uuid = h->getUUID();
+    std::string uuidbuff = std::to_string(uuid);
 
-	std::unique_lock<std::mutex> lck = maybe_create_id(uuid);
-	bool update = not lck.owns_lock();
-	if (update)
-	{
-		cols = "UPDATE Atoms SET ";
-		vals = "";
-		coda = " WHERE uuid = ";
-		coda += uuidbuff;
-		coda += ";";
-	}
-	else
-	{
-		cols = "INSERT INTO Atoms (";
-		vals = ") VALUES (";
-		coda = ");";
+    std::unique_lock<std::mutex> lck = maybe_create_id(uuid);
+    bool update = not lck.owns_lock();
+    if (update)
+    {
+        cols = "UPDATE Atoms SET ";
+        vals = "";
+        coda = " WHERE uuid = ";
+        coda += uuidbuff;
+        coda += ";";
+    }
+    else
+    {
+        cols = "INSERT INTO Atoms (";
+        vals = ") VALUES (";
+        coda = ");";
 
-		STMT("uuid", uuidbuff);
-	}
+        STMT("uuid", uuidbuff);
+    }
 
-	// Store the atom type and node name only if storing for the
-	// first time ever. Once an atom is in an atom table, it's
-	// name can type cannot be changed. Only its truth value can
-	// change.
-	if (false == update)
-	{
-		// Store the atomspace UUID
-		AtomTable * at = getAtomTable(atom);
-		// We allow storage of atoms that don't belong to an atomspace.
-		if (at) uuidbuff = std::to_string(at->get_uuid());
-		else uuidbuff = "0";
-		STMT("space", uuidbuff);
+    // Store the atom type and node name only if storing for the
+    // first time ever. Once an atom is in an atom table, it's
+    // name can type cannot be changed. Only its truth value can
+    // change.
+    if (false == update)
+    {
+        // Store the atomspace UUID
+        AtomTable * at = getAtomTable(atom);
+        // We allow storage of atoms that don't belong to an atomspace.
+        if (at) uuidbuff = std::to_string(at->get_uuid());
+        else uuidbuff = "0";
+        STMT("space", uuidbuff);
 
-		// Store the atom UUID
-		Type t = atom->getType();
-		int dbtype = storing_typemap[t];
-		STMTI("type", dbtype);
+        // Store the atom UUID
+        Type t = atom->getType();
+        int dbtype = storing_typemap[t];
+        STMTI("type", dbtype);
 
-		// Store the node name, if its a node
-		NodePtr n(NodeCast(atom));
-		if (n)
-		{
-			// Use postgres $-quoting to make unicode strings
-			// easier to deal with.
-			std::string qname = " $$";
-			qname += n->getName();
-			qname += "$$ ";
+        // Store the node name, if its a node
+        NodePtr n(NodeCast(atom));
+        if (n)
+        {
+            // Use postgres $-quoting to make unicode strings
+            // easier to deal with.
+            std::string qname = " $$";
+            qname += n->getName();
+            qname += "$$ ";
 
-			// The Atoms table has a UNIQUE constraint on the
-			// node name.  If a node name is too long, a postgres
-			// error is generated:
-			// ERROR: index row size 4440 exceeds maximum 2712
-			// for index "atoms_type_name_key"
-			// There's not much that can be done about this, without
-			// a redesign of the table format, in some way. Maybe
-			// we could hash the long node names, store the hash,
-			// and make sure that is unique.
-			if (2700 < qname.size())
-			{
-				throw RuntimeException(TRACE_INFO,
-					"Error: do_store_single_atom: Maxiumum Node name size is 2700.\n");
-			}
-			STMT("name", qname);
+            // The Atoms table has a UNIQUE constraint on the
+            // node name.  If a node name is too long, a postgres
+            // error is generated:
+            // ERROR: index row size 4440 exceeds maximum 2712
+            // for index "atoms_type_name_key"
+            // There's not much that can be done about this, without
+            // a redesign of the table format, in some way. Maybe
+            // we could hash the long node names, store the hash,
+            // and make sure that is unique.
+            if (2700 < qname.size())
+            {
+                throw RuntimeException(TRACE_INFO,
+                    "Error: do_store_single_atom: Maxiumum Node name size is 2700.\n");
+            }
+            STMT("name", qname);
 
-			// Nodes have a height of zero by definition.
-			STMTI("height", 0);
-		}
-		else
-		{
-			if (max_height < aheight) max_height = aheight;
-			STMTI("height", aheight);
+            // Nodes have a height of zero by definition.
+            STMTI("height", 0);
+        }
+        else
+        {
+            if (max_height < aheight) max_height = aheight;
+            STMTI("height", aheight);
 
 #ifdef USE_INLINE_EDGES
-			LinkPtr l(LinkCast(atom));
-			if (l)
-			{
-				int arity = l->getArity();
+            LinkPtr l(LinkCast(atom));
+            if (l)
+            {
+                int arity = l->getArity();
 
-				// The Atoms table has a UNIQUE constraint on the
-				// outgoing set.  If a link is too large, a postgres
-				// error is generated:
-				// ERROR: index row size 4440 exceeds maximum 2712
-				// for index "atoms_type_outgoing_key"
-				// The simplest solution that I see requires a database
-				// redesign.  One could hash together the UUID's in the
-				// outgoing set, and then force a unique constraint on
-				// the hash.
-				if (330 < arity)
-				{
-					throw RuntimeException(TRACE_INFO,
-						"Error: do_store_single_atom: Maxiumum Link size is 330.\n");
-				}
+                // The Atoms table has a UNIQUE constraint on the
+                // outgoing set.  If a link is too large, a postgres
+                // error is generated:
+                // ERROR: index row size 4440 exceeds maximum 2712
+                // for index "atoms_type_outgoing_key"
+                // The simplest solution that I see requires a database
+                // redesign.  One could hash together the UUID's in the
+                // outgoing set, and then force a unique constraint on
+                // the hash.
+                if (330 < arity)
+                {
+                    throw RuntimeException(TRACE_INFO,
+                        "Error: do_store_single_atom: Maxiumum Link size is 330.\n");
+                }
 
-				if (arity)
-				{
-					cols += ", outgoing";
-					vals += ", ";
-					vals += oset_to_string(l->getOutgoingSet(), arity);
-				}
-			}
+                if (arity)
+                {
+                    cols += ", outgoing";
+                    vals += ", ";
+                    vals += oset_to_string(l->getOutgoingSet(), arity);
+                }
+            }
 #endif /* USE_INLINE_EDGES */
-		}
-	}
+        }
+    }
 
-	// Store the truth value
-	TruthValuePtr tv(atom->getTruthValue());
-	TruthValueType tvt = NULL_TRUTH_VALUE;
-	if (tv) tvt = tv->getType();
-	STMTI("tv_type", tvt);
+    // Store the truth value
+    TruthValuePtr tv(atom->getTruthValue());
+    TruthValueType tvt = NULL_TRUTH_VALUE;
+    if (tv) tvt = tv->getType();
+    STMTI("tv_type", tvt);
 
-	switch (tvt)
-	{
-		case NULL_TRUTH_VALUE:
-			break;
-		case SIMPLE_TRUTH_VALUE:
-		case COUNT_TRUTH_VALUE:
-		case PROBABILISTIC_TRUTH_VALUE:
-			STMTF("stv_mean", tv->getMean());
-			STMTF("stv_confidence", tv->getConfidence());
-			STMTF("stv_count", tv->getCount());
-			break;
-		case INDEFINITE_TRUTH_VALUE:
-		{
-			IndefiniteTruthValuePtr itv = std::static_pointer_cast<const IndefiniteTruthValue>(tv);
-			STMTF("stv_mean", itv->getL());
-			STMTF("stv_count", itv->getU());
-			STMTF("stv_confidence", itv->getConfidenceLevel());
-			break;
-		}
-		default:
-			throw RuntimeException(TRACE_INFO,
-				"Error: store_single: Unknown truth value type\n");
-	}
+    switch (tvt)
+    {
+        case NULL_TRUTH_VALUE:
+            break;
+        case SIMPLE_TRUTH_VALUE:
+        case COUNT_TRUTH_VALUE:
+        case PROBABILISTIC_TRUTH_VALUE:
+            STMTF("stv_mean", tv->getMean());
+            STMTF("stv_confidence", tv->getConfidence());
+            STMTF("stv_count", tv->getCount());
+            break;
+        case INDEFINITE_TRUTH_VALUE:
+        {
+            IndefiniteTruthValuePtr itv = std::static_pointer_cast<const IndefiniteTruthValue>(tv);
+            STMTF("stv_mean", itv->getL());
+            STMTF("stv_count", itv->getU());
+            STMTF("stv_confidence", itv->getConfidenceLevel());
+            break;
+        }
+        default:
+            throw RuntimeException(TRACE_INFO,
+                "Error: store_single: Unknown truth value type\n");
+    }
 
-	// We may have to store the atom table UUID and try again...
-	// We waste CPU cycles to store the atomtable, only if it failed.
-	bool try_again = false;
-	std::string qry = cols + vals + coda;
-	ODBCConnection* db_conn = get_conn();
-	Response rp;
-	rp.rs = db_conn->exec(qry.c_str());
-	if (NULL == rp.rs) try_again = true;
-	rp.rs->release();
+    // We may have to store the atom table UUID and try again...
+    // We waste CPU cycles to store the atomtable, only if it failed.
+    bool try_again = false;
+    std::string qry = cols + vals + coda;
+    ODBCConnection* db_conn = get_conn();
+    Response rp;
+    rp.rs = db_conn->exec(qry.c_str());
+    if (NULL == rp.rs) try_again = true;
+    rp.rs->release();
 
-	if (try_again)
-	{
-		AtomTable *at = getAtomTable(atom);
-		if (at) store_atomtable_id(*at);
-		rp.rs = db_conn->exec(qry.c_str());
-		rp.rs->release();
-	}
-	put_conn(db_conn);
+    if (try_again)
+    {
+        AtomTable *at = getAtomTable(atom);
+        if (at) store_atomtable_id(*at);
+        rp.rs = db_conn->exec(qry.c_str());
+        rp.rs->release();
+    }
+    put_conn(db_conn);
 
 #ifndef USE_INLINE_EDGES
-	// Store the outgoing handles only if we are storing for the first
-	// time, otherwise do nothing. The semantics is that, once the
-	// outgoing set has been determined, it cannot be changed.
-	if (false == update)
-	{
-		storeOutgoing(atom);
-	}
+    // Store the outgoing handles only if we are storing for the first
+    // time, otherwise do nothing. The semantics is that, once the
+    // outgoing set has been determined, it cannot be changed.
+    if (false == update)
+    {
+        storeOutgoing(atom);
+    }
 #endif /* USE_INLINE_EDGES */
 
-	// Make note of the fact that this atom has been stored.
-	add_id_to_cache(uuid);
+    // Make note of the fact that this atom has been stored.
+    add_id_to_cache(uuid);
 }
 
 /* ================================================================ */
@@ -1000,84 +1000,84 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
  */
 void ODBCAtomStorage::setup_typemap(void)
 {
-	/* Only need to set up the typemap once. */
-	if (type_map_was_loaded) return;
-	type_map_was_loaded = true;
+    /* Only need to set up the typemap once. */
+    if (type_map_was_loaded) return;
+    type_map_was_loaded = true;
 
-	// If we are here, we need to reconcile the types currently in
-	// use, with a possibly pre-existing typemap. New types must be
-	// stored.  So we start by loading a map from SQL (if its there).
-	//
-	// Be careful to initialize the typemap with invalid types,
-	// in case there are unexpected holes in the map!
-	for (int i=0; i< TYPEMAP_SZ; i++)
-	{
-		loading_typemap[i] = NOTYPE;
-		storing_typemap[i] = -1;
-		db_typename[i] = NULL;
-	}
+    // If we are here, we need to reconcile the types currently in
+    // use, with a possibly pre-existing typemap. New types must be
+    // stored.  So we start by loading a map from SQL (if its there).
+    //
+    // Be careful to initialize the typemap with invalid types,
+    // in case there are unexpected holes in the map!
+    for (int i=0; i< TYPEMAP_SZ; i++)
+    {
+        loading_typemap[i] = NOTYPE;
+        storing_typemap[i] = -1;
+        db_typename[i] = NULL;
+    }
 
-	ODBCConnection* db_conn = get_conn();
-	Response rp;
-	rp.rs = db_conn->exec("SELECT * FROM TypeCodes;");
-	rp.store = this;
-	rp.rs->foreach_row(&Response::type_cb, &rp);
-	rp.rs->release();
+    ODBCConnection* db_conn = get_conn();
+    Response rp;
+    rp.rs = db_conn->exec("SELECT * FROM TypeCodes;");
+    rp.store = this;
+    rp.rs->foreach_row(&Response::type_cb, &rp);
+    rp.rs->release();
 
-	unsigned int numberOfTypes = classserver().getNumberOfClasses();
-	for (Type t=0; t<numberOfTypes; t++)
-	{
-		int sqid = storing_typemap[t];
-		/* If this typename is not yet known, record it */
-		if (-1 == sqid)
-		{
-			const char * tname = classserver().getTypeName(t).c_str();
+    unsigned int numberOfTypes = classserver().getNumberOfClasses();
+    for (Type t=0; t<numberOfTypes; t++)
+    {
+        int sqid = storing_typemap[t];
+        /* If this typename is not yet known, record it */
+        if (-1 == sqid)
+        {
+            const char * tname = classserver().getTypeName(t).c_str();
 
-			// Let the sql id be the same as the current type number,
-			// unless this sql number is already in use, in which case
-			// we need to find another, unused one.  Its in use if we
-			// have a string name associated to it.
-			sqid = t;
+            // Let the sql id be the same as the current type number,
+            // unless this sql number is already in use, in which case
+            // we need to find another, unused one.  Its in use if we
+            // have a string name associated to it.
+            sqid = t;
 
-			if ((db_typename[sqid] != NULL) &&
-			    (loading_typemap[sqid] != t))
-			{
-				// Find some (any) unused type index to use in the
-				// sql table. Use the lowest unused value that we
-				// can find.
-				for (sqid = 0; sqid<TYPEMAP_SZ; sqid++)
-				{
-					if (NULL == db_typename[sqid]) break;
-				}
+            if ((db_typename[sqid] != NULL) &&
+                (loading_typemap[sqid] != t))
+            {
+                // Find some (any) unused type index to use in the
+                // sql table. Use the lowest unused value that we
+                // can find.
+                for (sqid = 0; sqid<TYPEMAP_SZ; sqid++)
+                {
+                    if (NULL == db_typename[sqid]) break;
+                }
 
-				if (TYPEMAP_SZ <= sqid)
-				{
-					put_conn(db_conn);
-					fprintf(stderr, "Fatal Error: type table overflow!\n");
-					abort();
-				}
-			}
+                if (TYPEMAP_SZ <= sqid)
+                {
+                    put_conn(db_conn);
+                    fprintf(stderr, "Fatal Error: type table overflow!\n");
+                    abort();
+                }
+            }
 
-			char buff[BUFSZ];
-			snprintf(buff, BUFSZ,
-			         "INSERT INTO TypeCodes (type, typename) "
-			         "VALUES (%d, \'%s\');",
-			         sqid, tname);
-			rp.rs = db_conn->exec(buff);
-			rp.rs->release();
-			set_typemap(sqid, tname);
-		}
-	}
-	put_conn(db_conn);
+            char buff[BUFSZ];
+            snprintf(buff, BUFSZ,
+                     "INSERT INTO TypeCodes (type, typename) "
+                     "VALUES (%d, \'%s\');",
+                     sqid, tname);
+            rp.rs = db_conn->exec(buff);
+            rp.rs->release();
+            set_typemap(sqid, tname);
+        }
+    }
+    put_conn(db_conn);
 }
 
 void ODBCAtomStorage::set_typemap(int dbval, const char * tname)
 {
-	Type realtype = classserver().getType(tname);
-	loading_typemap[dbval] = realtype;
-	storing_typemap[realtype] = dbval;
-	if (db_typename[dbval] != NULL) free (db_typename[dbval]);
-	db_typename[dbval] = strdup(tname);
+    Type realtype = classserver().getType(tname);
+    loading_typemap[dbval] = realtype;
+    storing_typemap[realtype] = dbval;
+    if (db_typename[dbval] != NULL) free (db_typename[dbval]);
+    db_typename[dbval] = strdup(tname);
 }
 
 /* ================================================================ */
@@ -1088,13 +1088,13 @@ void ODBCAtomStorage::set_typemap(int dbval, const char * tname)
 bool ODBCAtomStorage::atomExists(Handle h)
 {
 #ifdef ASK_SQL_SERVER
-	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", h->getUUID());
-	return idExists(buff);
+    char buff[BUFSZ];
+    snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", h->getUUID());
+    return idExists(buff);
 #else
-	std::unique_lock<std::mutex> lock(id_cache_mutex);
-	// look at the local cache of id's to see if the atom is in storage or not.
-	return local_id_cache.count(h->getUUID());
+    std::unique_lock<std::mutex> lock(id_cache_mutex);
+    // look at the local cache of id's to see if the atom is in storage or not.
+    return local_id_cache.count(h->getUUID());
 #endif
 }
 
@@ -1104,15 +1104,15 @@ bool ODBCAtomStorage::atomExists(Handle h)
  */
 void ODBCAtomStorage::add_id_to_cache(UUID uuid)
 {
-	std::unique_lock<std::mutex> lock(id_cache_mutex);
-	local_id_cache.insert(uuid);
+    std::unique_lock<std::mutex> lock(id_cache_mutex);
+    local_id_cache.insert(uuid);
 
-	// If we were previously making this ID, then we are done.
-	// The other half of this is in maybe_create_id() below.
-	if (0 < id_create_cache.count(uuid))
-	{
-		id_create_cache.erase(uuid);
-	}
+    // If we were previously making this ID, then we are done.
+    // The other half of this is in maybe_create_id() below.
+    if (0 < id_create_cache.count(uuid))
+    {
+        id_create_cache.erase(uuid);
+    }
 }
 
 /**
@@ -1127,39 +1127,39 @@ void ODBCAtomStorage::add_id_to_cache(UUID uuid)
  */
 std::unique_lock<std::mutex> ODBCAtomStorage::maybe_create_id(UUID uuid)
 {
-	std::unique_lock<std::mutex> create_lock(id_create_mutex);
-	std::unique_lock<std::mutex> cache_lock(id_cache_mutex);
-	// Look at the local cache of id's to see if the atom is in storage or not.
-	if (0 < local_id_cache.count(uuid))
-		return std::unique_lock<std::mutex>();
+    std::unique_lock<std::mutex> create_lock(id_create_mutex);
+    std::unique_lock<std::mutex> cache_lock(id_cache_mutex);
+    // Look at the local cache of id's to see if the atom is in storage or not.
+    if (0 < local_id_cache.count(uuid))
+        return std::unique_lock<std::mutex>();
 
-	// Is some other thread in the process of adding this ID?
-	if (0 < id_create_cache.count(uuid))
-	{
-		cache_lock.unlock();
-		while (true)
-		{
-			// If we are here, some other thread is making this UUID,
-			// and so we need to wait till they're done. Wait by stalling
-			// on the creation lock.
-			std::unique_lock<std::mutex> local_create_lock(id_create_mutex);
-			// If we are here, then someone finished creating some UUID.
-			// Was it our ID? If so, we are done; if not, wait some more.
-			cache_lock.lock();
-			if (0 == id_create_cache.count(uuid))
-			{
-				OC_ASSERT(0 < local_id_cache.count(uuid),
-					"Atom for UUID was not created!");
-				return std::unique_lock<std::mutex>();
-			}
-			cache_lock.unlock();
-		}
-	}
+    // Is some other thread in the process of adding this ID?
+    if (0 < id_create_cache.count(uuid))
+    {
+        cache_lock.unlock();
+        while (true)
+        {
+            // If we are here, some other thread is making this UUID,
+            // and so we need to wait till they're done. Wait by stalling
+            // on the creation lock.
+            std::unique_lock<std::mutex> local_create_lock(id_create_mutex);
+            // If we are here, then someone finished creating some UUID.
+            // Was it our ID? If so, we are done; if not, wait some more.
+            cache_lock.lock();
+            if (0 == id_create_cache.count(uuid))
+            {
+                OC_ASSERT(0 < local_id_cache.count(uuid),
+                    "Atom for UUID was not created!");
+                return std::unique_lock<std::mutex>();
+            }
+            cache_lock.unlock();
+        }
+    }
 
-	// If we are here, then no one has attempted to make this UUID before.
-	// Grab the maker lock, and make the damned thing already.
-	id_create_cache.insert(uuid);
-	return create_lock;
+    // If we are here, then no one has attempted to make this UUID before.
+    // Grab the maker lock, and make the damned thing already.
+    id_create_cache.insert(uuid);
+    return create_lock;
 }
 
 /**
@@ -1167,37 +1167,37 @@ std::unique_lock<std::mutex> ODBCAtomStorage::maybe_create_id(UUID uuid)
  */
 void ODBCAtomStorage::get_ids(void)
 {
-	std::unique_lock<std::mutex> lock(id_cache_mutex);
+    std::unique_lock<std::mutex> lock(id_cache_mutex);
 
-	if (local_id_cache_is_inited) return;
-	local_id_cache_is_inited = true;
+    if (local_id_cache_is_inited) return;
+    local_id_cache_is_inited = true;
 
-	local_id_cache.clear();
-	ODBCConnection* db_conn = get_conn();
+    local_id_cache.clear();
+    ODBCConnection* db_conn = get_conn();
 
-	// It appears that, when the select statment returns more than
-	// about a 100K to a million atoms or so, some sort of heap
-	// corruption occurs in the odbc code, causing future mallocs
-	// to fail. So limit the number of records processed in one go.
-	// It also appears that asking for lots of records increases
-	// the memory fragmentation (and/or there's a memory leak in odbc??)
+    // It appears that, when the select statment returns more than
+    // about a 100K to a million atoms or so, some sort of heap
+    // corruption occurs in the odbc code, causing future mallocs
+    // to fail. So limit the number of records processed in one go.
+    // It also appears that asking for lots of records increases
+    // the memory fragmentation (and/or there's a memory leak in odbc??)
 #define USTEP 12003
-	unsigned long rec;
-	unsigned long max_nrec = getMaxObservedUUID();
-	for (rec = 0; rec <= max_nrec; rec += USTEP)
-	{
-		char buff[BUFSZ];
-		snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE "
-		        "uuid > %lu AND uuid <= %lu;",
-		         rec, rec+USTEP);
+    unsigned long rec;
+    unsigned long max_nrec = getMaxObservedUUID();
+    for (rec = 0; rec <= max_nrec; rec += USTEP)
+    {
+        char buff[BUFSZ];
+        snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE "
+                "uuid > %lu AND uuid <= %lu;",
+                 rec, rec+USTEP);
 
-		Response rp;
-		rp.id_set = &local_id_cache;
-		rp.rs = db_conn->exec(buff);
-		rp.rs->foreach_row(&Response::note_id_cb, &rp);
-		rp.rs->release();
-	}
-	put_conn(db_conn);
+        Response rp;
+        rp.id_set = &local_id_cache;
+        rp.rs = db_conn->exec(buff);
+        rp.rs->foreach_row(&Response::note_id_cb, &rp);
+        rp.rs->release();
+    }
+    put_conn(db_conn);
 }
 
 /* ================================================================ */
@@ -1205,17 +1205,17 @@ void ODBCAtomStorage::get_ids(void)
 #ifndef USE_INLINE_EDGES
 void ODBCAtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
 {
-	char buff[BUFSZ];
-	UUID uuid = h->getUUID();
-	snprintf(buff, BUFSZ, "SELECT * FROM Edges WHERE src_uuid = %lu;", uuid);
+    char buff[BUFSZ];
+    UUID uuid = h->getUUID();
+    snprintf(buff, BUFSZ, "SELECT * FROM Edges WHERE src_uuid = %lu;", uuid);
 
-	ODBCConnection* db_conn = get_conn();
-	Response rp;
-	rp.rs = db_conn->exec(buff);
-	rp.outvec = &outv;
-	rp.rs->foreach_row(&Response::create_edge_cb, &rp);
-	rp.rs->release();
-	put_conn(db_conn);
+    ODBCConnection* db_conn = get_conn();
+    Response rp;
+    rp.rs = db_conn->exec(buff);
+    rp.outvec = &outv;
+    rp.rs->foreach_row(&Response::create_edge_cb, &rp);
+    rp.rs->release();
+    put_conn(db_conn);
 }
 #endif /* USE_INLINE_EDGES */
 
@@ -1224,35 +1224,35 @@ void ODBCAtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
 /* One-size-fits-all atom fetcher */
 ODBCAtomStorage::PseudoPtr ODBCAtomStorage::getAtom(const char * query, int height)
 {
-	ODBCConnection* db_conn = get_conn();
-	Response rp;
-	rp.uuid = Handle::INVALID_UUID;
-	rp.rs = db_conn->exec(query);
-	rp.rs->foreach_row(&Response::create_atom_cb, &rp);
+    ODBCConnection* db_conn = get_conn();
+    Response rp;
+    rp.uuid = Handle::INVALID_UUID;
+    rp.rs = db_conn->exec(query);
+    rp.rs->foreach_row(&Response::create_atom_cb, &rp);
 
-	// Did we actually find anything?
-	// DO NOT USE IsInvalidHandle() HERE! It won't work, duhh!
-	if (rp.uuid == Handle::INVALID_UUID)
-	{
-		rp.rs->release();
-		put_conn(db_conn);
-		return NULL;
-	}
+    // Did we actually find anything?
+    // DO NOT USE IsInvalidHandle() HERE! It won't work, duhh!
+    if (rp.uuid == Handle::INVALID_UUID)
+    {
+        rp.rs->release();
+        put_conn(db_conn);
+        return NULL;
+    }
 
-	rp.height = height;
-	PseudoPtr atom(makeAtom(rp, rp.uuid));
-	rp.rs->release();
-	put_conn(db_conn);
-	return atom;
+    rp.height = height;
+    PseudoPtr atom(makeAtom(rp, rp.uuid));
+    rp.rs->release();
+    put_conn(db_conn);
+    return atom;
 }
 
 ODBCAtomStorage::PseudoPtr ODBCAtomStorage::petAtom(UUID uuid)
 {
-	setup_typemap();
-	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE uuid = %lu;", uuid);
+    setup_typemap();
+    char buff[BUFSZ];
+    snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE uuid = %lu;", uuid);
 
-	return getAtom(buff, -1);
+    return getAtom(buff, -1);
 }
 
 /**
@@ -1265,23 +1265,23 @@ ODBCAtomStorage::PseudoPtr ODBCAtomStorage::petAtom(UUID uuid)
  */
 AtomPtr ODBCAtomStorage::getAtom(UUID uuid)
 {
-	PseudoPtr p(petAtom(uuid));
-	if (NULL == p) return NULL;
+    PseudoPtr p(petAtom(uuid));
+    if (NULL == p) return NULL;
 
-	if (classserver().isA(p->type, NODE))
-	{
-		NodePtr node(createNode(p->type, p->name, p->tv));
-		setAtomUUID( node, p->uuid );
-		return node;
-	}
+    if (classserver().isA(p->type, NODE))
+    {
+        NodePtr node(createNode(p->type, p->name, p->tv));
+        setAtomUUID( node, p->uuid );
+        return node;
+    }
 
-	HandleSeq oset;
-	for (UUID idu : p->oset)
-		oset.emplace_back(getAtom(idu)->getHandle());
+    HandleSeq oset;
+    for (UUID idu : p->oset)
+        oset.emplace_back(getAtom(idu)->getHandle());
 
-	LinkPtr link(createLink(p->type, oset, p->tv));
-	setAtomUUID( link, p->uuid );
-	return link;
+    LinkPtr link(createLink(p->type, oset, p->tv));
+    setAtomUUID( link, p->uuid );
+    return link;
 }
 
 /**
@@ -1289,31 +1289,31 @@ AtomPtr ODBCAtomStorage::getAtom(UUID uuid)
  */
 std::vector<Handle> ODBCAtomStorage::getIncomingSet(Handle h)
 {
-	std::vector<Handle> iset;
+    std::vector<Handle> iset;
 
-	setup_typemap();
-	char buff[BUFSZ];
-	snprintf(buff, BUFSZ,
-		"SELECT * FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
-		h->getUUID());
+    setup_typemap();
+    char buff[BUFSZ];
+    snprintf(buff, BUFSZ,
+        "SELECT * FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
+        h->getUUID());
 
-	// Note: "select * from atoms where outgoing@>array[556];" will return
-	// all links with atom 556 in the outgoing set -- i.e. the incoming set of 556.
-	// Could also use && here instead of @> Don't know if one is faster or not.
-	// The cast to BIGINT is needed, as otherwise on gets
-	// ERROR:  operator does not exist: bigint[] @> integer[]
+    // Note: "select * from atoms where outgoing@>array[556];" will return
+    // all links with atom 556 in the outgoing set -- i.e. the incoming set of 556.
+    // Could also use && here instead of @> Don't know if one is faster or not.
+    // The cast to BIGINT is needed, as otherwise on gets
+    // ERROR:  operator does not exist: bigint[] @> integer[]
 
-	ODBCConnection* db_conn = get_conn();
-	Response rp;
-	rp.store = this;
-	rp.height = -1;
-	rp.hvec = &iset;
-	rp.rs = db_conn->exec(buff);
-	rp.rs->foreach_row(&Response::fetch_incoming_set_cb, &rp);
-	rp.rs->release();
-	put_conn(db_conn);
+    ODBCConnection* db_conn = get_conn();
+    Response rp;
+    rp.store = this;
+    rp.height = -1;
+    rp.hvec = &iset;
+    rp.rs = db_conn->exec(buff);
+    rp.rs->foreach_row(&Response::fetch_incoming_set_cb, &rp);
+    rp.rs->release();
+    put_conn(db_conn);
 
-	return iset;
+    return iset;
 }
 
 /**
@@ -1326,27 +1326,27 @@ std::vector<Handle> ODBCAtomStorage::getIncomingSet(Handle h)
  */
 NodePtr ODBCAtomStorage::getNode(Type t, const char * str)
 {
-	setup_typemap();
-	char buff[40*BUFSZ];
+    setup_typemap();
+    char buff[40*BUFSZ];
 
-	// Use postgres $-quoting to make unicode strings easier to deal with.
-	int nc = snprintf(buff, 4*BUFSZ, "SELECT * FROM Atoms WHERE "
-	    "type = %hu AND name = $ocp$%s$ocp$ ;", storing_typemap[t], str);
+    // Use postgres $-quoting to make unicode strings easier to deal with.
+    int nc = snprintf(buff, 4*BUFSZ, "SELECT * FROM Atoms WHERE "
+        "type = %hu AND name = $ocp$%s$ocp$ ;", storing_typemap[t], str);
 
-	if (40*BUFSZ-1 <= nc)
-	{
-		fprintf(stderr, "Error: ODBCAtomStorage::getNode: buffer overflow!\n");
-		buff[40*BUFSZ-1] = 0x0;
-		fprintf(stderr, "\tnc=%d buffer=>>%s<<\n", nc, buff);
-		return NULL;
-	}
+    if (40*BUFSZ-1 <= nc)
+    {
+        fprintf(stderr, "Error: ODBCAtomStorage::getNode: buffer overflow!\n");
+        buff[40*BUFSZ-1] = 0x0;
+        fprintf(stderr, "\tnc=%d buffer=>>%s<<\n", nc, buff);
+        return NULL;
+    }
 
-	PseudoPtr p(getAtom(buff, 0));
-	if (NULL == p) return NULL;
+    PseudoPtr p(getAtom(buff, 0));
+    if (NULL == p) return NULL;
 
-	NodePtr node = createNode(t, str, p->tv);
-	setAtomUUID(node, p->uuid);
-	return node;
+    NodePtr node = createNode(t, str, p->tv);
+    setAtomUUID(node, p->uuid);
+    return node;
 }
 
 /**
@@ -1359,23 +1359,23 @@ NodePtr ODBCAtomStorage::getNode(Type t, const char * str)
  */
 LinkPtr ODBCAtomStorage::getLink(Type t, const HandleSeq& oset)
 {
-	setup_typemap();
+    setup_typemap();
 
-	char buff[BUFSZ];
-	snprintf(buff, BUFSZ,
-	    "SELECT * FROM Atoms WHERE type = %hu AND outgoing = ",
-	    storing_typemap[t]);
+    char buff[BUFSZ];
+    snprintf(buff, BUFSZ,
+        "SELECT * FROM Atoms WHERE type = %hu AND outgoing = ",
+        storing_typemap[t]);
 
-	std::string ostr = buff;
-	ostr += oset_to_string(oset, oset.size());
-	ostr += ";";
+    std::string ostr = buff;
+    ostr += oset_to_string(oset, oset.size());
+    ostr += ";";
 
-	PseudoPtr p = getAtom(ostr.c_str(), 1);
-	if (NULL == p) return NULL;
+    PseudoPtr p = getAtom(ostr.c_str(), 1);
+    if (NULL == p) return NULL;
 
-	LinkPtr link = createLink(t, oset, p->tv);
-	setAtomUUID(link, p->uuid);
-	return link;
+    LinkPtr link = createLink(t, oset, p->tv);
+    setAtomUUID(link, p->uuid);
+    return link;
 }
 
 /**
@@ -1383,348 +1383,348 @@ LinkPtr ODBCAtomStorage::getLink(Type t, const HandleSeq& oset)
  */
 ODBCAtomStorage::PseudoPtr ODBCAtomStorage::makeAtom(Response &rp, UUID uuid)
 {
-	// Now that we know everything about an atom, actually construct one.
-	Type realtype = loading_typemap[rp.itype];
+    // Now that we know everything about an atom, actually construct one.
+    Type realtype = loading_typemap[rp.itype];
 
-	if (NOTYPE == realtype)
-	{
-		throw RuntimeException(TRACE_INFO,
-			"Fatal Error: OpenCog does not have a type called %s\n",
-			db_typename[rp.itype]);
-		return NULL;
-	}
+    if (NOTYPE == realtype)
+    {
+        throw RuntimeException(TRACE_INFO,
+            "Fatal Error: OpenCog does not have a type called %s\n",
+            db_typename[rp.itype]);
+        return NULL;
+    }
 
-	PseudoPtr atom(createPseudo());
+    PseudoPtr atom(createPseudo());
 
-	// All height zero atoms are nodes,
-	// All positive height atoms are links.
-	// A negative height is "unknown" and must be checked.
-	if ((0 == rp.height) or
-	    ((-1 == rp.height) and classserver().isA(realtype, NODE)))
-	{
-		atom->name = rp.name;
-	}
-	else
-	{
-		char *p = (char *) rp.outlist;
-		while (p)
-		{
-			// Break if there are no more atoms in the outgoing set
-			// or if the outgoing set is empty in the first place.
-			if (*p == '}' or *p == '\0') break;
-			UUID out(strtoul(p+1, &p, 10));
-			atom->oset.emplace_back(out);
-		}
-	}
+    // All height zero atoms are nodes,
+    // All positive height atoms are links.
+    // A negative height is "unknown" and must be checked.
+    if ((0 == rp.height) or
+        ((-1 == rp.height) and classserver().isA(realtype, NODE)))
+    {
+        atom->name = rp.name;
+    }
+    else
+    {
+        char *p = (char *) rp.outlist;
+        while (p)
+        {
+            // Break if there are no more atoms in the outgoing set
+            // or if the outgoing set is empty in the first place.
+            if (*p == '}' or *p == '\0') break;
+            UUID out(strtoul(p+1, &p, 10));
+            atom->oset.emplace_back(out);
+        }
+    }
 
-	// Give the atom the correct UUID. The AtomTable will need this.
-	atom->type = realtype;
-	atom->uuid = uuid;
+    // Give the atom the correct UUID. The AtomTable will need this.
+    atom->type = realtype;
+    atom->uuid = uuid;
 
-	// Now get the truth value
-	switch (rp.tv_type)
-	{
-		case NULL_TRUTH_VALUE:
-			break;
+    // Now get the truth value
+    switch (rp.tv_type)
+    {
+        case NULL_TRUTH_VALUE:
+            break;
 
-		case SIMPLE_TRUTH_VALUE:
-		{
-			TruthValuePtr stv(SimpleTruthValue::createTV(rp.mean, rp.count));
-			atom->tv = stv;
-			break;
-		}
-		case COUNT_TRUTH_VALUE:
-		{
-			TruthValuePtr ctv(CountTruthValue::createTV(rp.mean, rp.confidence, rp.count));
-			atom->tv = ctv;
-			break;
-		}
-		case INDEFINITE_TRUTH_VALUE:
-		{
-			TruthValuePtr itv(IndefiniteTruthValue::createTV(rp.mean, rp.count, rp.confidence));
-			atom->tv = itv;
-			break;
-		}
-		case PROBABILISTIC_TRUTH_VALUE:
-		{
-			TruthValuePtr ptv(ProbabilisticTruthValue::createTV(rp.mean, rp.confidence, rp.count));
-			atom->tv = ptv;
-			break;
-		}
-		default:
-			throw RuntimeException(TRACE_INFO,
-				"Error: makeAtom: Unknown truth value type\n");
-	}
+        case SIMPLE_TRUTH_VALUE:
+        {
+            TruthValuePtr stv(SimpleTruthValue::createTV(rp.mean, rp.count));
+            atom->tv = stv;
+            break;
+        }
+        case COUNT_TRUTH_VALUE:
+        {
+            TruthValuePtr ctv(CountTruthValue::createTV(rp.mean, rp.confidence, rp.count));
+            atom->tv = ctv;
+            break;
+        }
+        case INDEFINITE_TRUTH_VALUE:
+        {
+            TruthValuePtr itv(IndefiniteTruthValue::createTV(rp.mean, rp.count, rp.confidence));
+            atom->tv = itv;
+            break;
+        }
+        case PROBABILISTIC_TRUTH_VALUE:
+        {
+            TruthValuePtr ptv(ProbabilisticTruthValue::createTV(rp.mean, rp.confidence, rp.count));
+            atom->tv = ptv;
+            break;
+        }
+        default:
+            throw RuntimeException(TRACE_INFO,
+                "Error: makeAtom: Unknown truth value type\n");
+    }
 
-	load_count ++;
-	if (load_count%10000 == 0)
-	{
-		fprintf(stderr, "\tLoaded %lu atoms.\n", (unsigned long) load_count);
-	}
+    load_count ++;
+    if (load_count%10000 == 0)
+    {
+        fprintf(stderr, "\tLoaded %lu atoms.\n", (unsigned long) load_count);
+    }
 
-	add_id_to_cache(uuid);
-	return atom;
+    add_id_to_cache(uuid);
+    return atom;
 }
 
 /* ================================================================ */
 
 void ODBCAtomStorage::load(AtomTable &table)
 {
-	unsigned long max_nrec = getMaxObservedUUID();
-	reserveMaxUUID(max_nrec);
-	fprintf(stderr, "Max observed UUID is %lu\n", max_nrec);
-	load_count = 0;
-	max_height = getMaxObservedHeight();
-	fprintf(stderr, "Max Height is %d\n", max_height);
+    unsigned long max_nrec = getMaxObservedUUID();
+    reserveMaxUUID(max_nrec);
+    fprintf(stderr, "Max observed UUID is %lu\n", max_nrec);
+    load_count = 0;
+    max_height = getMaxObservedHeight();
+    fprintf(stderr, "Max Height is %d\n", max_height);
 
-	setup_typemap();
+    setup_typemap();
 
-	ODBCConnection* db_conn = get_conn();
-	Response rp;
-	rp.table = &table;
-	rp.store = this;
+    ODBCConnection* db_conn = get_conn();
+    Response rp;
+    rp.table = &table;
+    rp.store = this;
 
-	for (int hei=0; hei<=max_height; hei++)
-	{
-		unsigned long cur = load_count;
+    for (int hei=0; hei<=max_height; hei++)
+    {
+        unsigned long cur = load_count;
 
 #if GET_ONE_BIG_BLOB
-		char buff[BUFSZ];
-		snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE height = %d;", hei);
-		rp.height = hei;
-		rp.rs = db_conn->exec(buff);
-		rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
-		rp.rs->release();
+        char buff[BUFSZ];
+        snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE height = %d;", hei);
+        rp.height = hei;
+        rp.rs = db_conn->exec(buff);
+        rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
+        rp.rs->release();
 #else
-		// It appears that, when the select statement returns more than
-		// about a 100K to a million atoms or so, some sort of heap
-		// corruption occurs in the iodbc code, causing future mallocs
-		// to fail. So limit the number of records processed in one go.
-		// It also appears that asking for lots of records increases
-		// the memory fragmentation (and/or there's a memory leak in iodbc??)
-		// XXX Not clear is UnixODBC suffers from this same problem.
-		// Whatever, seems to be a better strategy overall, anyway.
+        // It appears that, when the select statement returns more than
+        // about a 100K to a million atoms or so, some sort of heap
+        // corruption occurs in the iodbc code, causing future mallocs
+        // to fail. So limit the number of records processed in one go.
+        // It also appears that asking for lots of records increases
+        // the memory fragmentation (and/or there's a memory leak in iodbc??)
+        // XXX Not clear is UnixODBC suffers from this same problem.
+        // Whatever, seems to be a better strategy overall, anyway.
 #define STEP 12003
-		unsigned long rec;
-		for (rec = 0; rec <= max_nrec; rec += STEP)
-		{
-			char buff[BUFSZ];
-			snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE "
-			        "height = %d AND uuid > %lu AND uuid <= %lu;",
-			         hei, rec, rec+STEP);
-			rp.height = hei;
-			rp.rs = db_conn->exec(buff);
-			rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
-			rp.rs->release();
-		}
+        unsigned long rec;
+        for (rec = 0; rec <= max_nrec; rec += STEP)
+        {
+            char buff[BUFSZ];
+            snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE "
+                    "height = %d AND uuid > %lu AND uuid <= %lu;",
+                     hei, rec, rec+STEP);
+            rp.height = hei;
+            rp.rs = db_conn->exec(buff);
+            rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
+            rp.rs->release();
+        }
 #endif
-		fprintf(stderr, "Loaded %lu atoms at height %d\n", load_count - cur, hei);
-	}
-	put_conn(db_conn);
-	fprintf(stderr, "Finished loading %lu atoms in total\n",
-		(unsigned long) load_count);
+        fprintf(stderr, "Loaded %lu atoms at height %d\n", load_count - cur, hei);
+    }
+    put_conn(db_conn);
+    fprintf(stderr, "Finished loading %lu atoms in total\n",
+        (unsigned long) load_count);
 
-	// synchrnonize!
-	table.barrier();
+    // synchrnonize!
+    table.barrier();
 }
 
 void ODBCAtomStorage::loadType(AtomTable &table, Type atom_type)
 {
-	unsigned long max_nrec = getMaxObservedUUID();
-	reserveMaxUUID(max_nrec);
-	logger().debug("ODBCAtomStorage::loadType: Max observed UUID is %lu\n", max_nrec);
-	load_count = 0;
+    unsigned long max_nrec = getMaxObservedUUID();
+    reserveMaxUUID(max_nrec);
+    logger().debug("ODBCAtomStorage::loadType: Max observed UUID is %lu\n", max_nrec);
+    load_count = 0;
 
-	// For links, assume a worst-case height.
-	// For nodes, its easy ... max_height is zero.
-	if (classserver().isNode(atom_type))
-		max_height = 0;
-	else
-		max_height = getMaxObservedHeight();
-	logger().debug("ODBCAtomStorage::loadType: Max Height is %d\n", max_height);
+    // For links, assume a worst-case height.
+    // For nodes, its easy ... max_height is zero.
+    if (classserver().isNode(atom_type))
+        max_height = 0;
+    else
+        max_height = getMaxObservedHeight();
+    logger().debug("ODBCAtomStorage::loadType: Max Height is %d\n", max_height);
 
-	setup_typemap();
-	int db_atom_type = storing_typemap[atom_type];
+    setup_typemap();
+    int db_atom_type = storing_typemap[atom_type];
 
-	ODBCConnection* db_conn = get_conn();
-	Response rp;
-	rp.table = &table;
-	rp.store = this;
+    ODBCConnection* db_conn = get_conn();
+    Response rp;
+    rp.table = &table;
+    rp.store = this;
 
-	for (int hei=0; hei<=max_height; hei++)
-	{
-		unsigned long cur = load_count;
+    for (int hei=0; hei<=max_height; hei++)
+    {
+        unsigned long cur = load_count;
 
 #if GET_ONE_BIG_BLOB
-		char buff[BUFSZ];
-		snprintf(buff, BUFSZ,
-			"SELECT * FROM Atoms WHERE height = %d AND type = %d;",
-			 hei, db_atom_type);
-		rp.height = hei;
-		rp.rs = db_conn->exec(buff);
-		rp.rs->foreach_row(&Response::load_if_not_exists_cb, &rp);
-		rp.rs->release();
+        char buff[BUFSZ];
+        snprintf(buff, BUFSZ,
+            "SELECT * FROM Atoms WHERE height = %d AND type = %d;",
+             hei, db_atom_type);
+        rp.height = hei;
+        rp.rs = db_conn->exec(buff);
+        rp.rs->foreach_row(&Response::load_if_not_exists_cb, &rp);
+        rp.rs->release();
 #else
-		// It appears that, when the select statment returns more than
-		// about a 100K to a million atoms or so, some sort of heap
-		// corruption occurs in the iodbc code, causing future mallocs
-		// to fail. So limit the number of records processed in one go.
-		// It also appears that asking for lots of records increases
-		// the memory fragmentation (and/or there's a memory leak in iodbc??)
-		// XXX Not clear is UnixODBC suffers from this same problem.
+        // It appears that, when the select statment returns more than
+        // about a 100K to a million atoms or so, some sort of heap
+        // corruption occurs in the iodbc code, causing future mallocs
+        // to fail. So limit the number of records processed in one go.
+        // It also appears that asking for lots of records increases
+        // the memory fragmentation (and/or there's a memory leak in iodbc??)
+        // XXX Not clear is UnixODBC suffers from this same problem.
 #define STEP 12003
-		unsigned long rec;
-		for (rec = 0; rec <= max_nrec; rec += STEP)
-		{
-			char buff[BUFSZ];
-			snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE type = %d "
-			        "AND height = %d AND uuid > %lu AND uuid <= %lu;",
-			         db_atom_type, hei, rec, rec+STEP);
-			rp.height = hei;
-			rp.rs = db_conn->exec(buff);
-			rp.rs->foreach_row(&Response::load_if_not_exists_cb, &rp);
-			rp.rs->release();
-		}
+        unsigned long rec;
+        for (rec = 0; rec <= max_nrec; rec += STEP)
+        {
+            char buff[BUFSZ];
+            snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE type = %d "
+                    "AND height = %d AND uuid > %lu AND uuid <= %lu;",
+                     db_atom_type, hei, rec, rec+STEP);
+            rp.height = hei;
+            rp.rs = db_conn->exec(buff);
+            rp.rs->foreach_row(&Response::load_if_not_exists_cb, &rp);
+            rp.rs->release();
+        }
 #endif
-		logger().debug("ODBCAtomStorage::loadType: Loaded %lu atoms of type %d at height %d\n",
-			load_count - cur, db_atom_type, hei);
-	}
-	put_conn(db_conn);
-	logger().debug("ODBCAtomStorage::loadType: Finished loading %lu atoms in total\n",
-		(unsigned long) load_count);
+        logger().debug("ODBCAtomStorage::loadType: Loaded %lu atoms of type %d at height %d\n",
+            load_count - cur, db_atom_type, hei);
+    }
+    put_conn(db_conn);
+    logger().debug("ODBCAtomStorage::loadType: Finished loading %lu atoms in total\n",
+        (unsigned long) load_count);
 
-	// Synchronize!
-	table.barrier();
+    // Synchronize!
+    table.barrier();
 }
 
 bool ODBCAtomStorage::store_cb(AtomPtr atom)
 {
-	storeSingleAtom(atom);
-	store_count ++;
-	if (store_count%1000 == 0)
-	{
-		fprintf(stderr, "\tStored %lu atoms.\n", (unsigned long) store_count);
-	}
-	return false;
+    storeSingleAtom(atom);
+    store_count ++;
+    if (store_count%1000 == 0)
+    {
+        fprintf(stderr, "\tStored %lu atoms.\n", (unsigned long) store_count);
+    }
+    return false;
 }
 
 void ODBCAtomStorage::store(const AtomTable &table)
 {
-	max_height = 0;
-	store_count = 0;
+    max_height = 0;
+    store_count = 0;
 
 #ifdef ALTER
-	rename_tables();
-	create_tables();
+    rename_tables();
+    create_tables();
 #endif
 
-	get_ids();
-	UUID max_uuid = getMaxUUID();
-	fprintf(stderr, "Max UUID is %lu\n", max_uuid);
+    get_ids();
+    UUID max_uuid = getMaxUUID();
+    fprintf(stderr, "Max UUID is %lu\n", max_uuid);
 
-	setup_typemap();
+    setup_typemap();
 
-	ODBCConnection* db_conn = get_conn();
-	Response rp;
+    ODBCConnection* db_conn = get_conn();
+    Response rp;
 
 #ifndef USE_INLINE_EDGES
-	// Drop indexes, for faster loading.
-	// But this only matters for the non-inline eges...
-	rp.rs = db_conn->exec("DROP INDEX src_idx;");
-	rp.rs->release();
+    // Drop indexes, for faster loading.
+    // But this only matters for the non-inline eges...
+    rp.rs = db_conn->exec("DROP INDEX src_idx;");
+    rp.rs->release();
 #endif
 
-	table.foreachHandleByType(
-	    [&](Handle h)->void { store_cb(h); }, ATOM, true);
+    table.foreachHandleByType(
+        [&](Handle h)->void { store_cb(h); }, ATOM, true);
 
 #ifndef USE_INLINE_EDGES
-	// Create indexes
-	rp.rs = db_conn->exec("CREATE INDEX src_idx ON Edges (src_uuid);");
-	rp.rs->release();
+    // Create indexes
+    rp.rs = db_conn->exec("CREATE INDEX src_idx ON Edges (src_uuid);");
+    rp.rs->release();
 #endif /* USE_INLINE_EDGES */
 
-	rp.rs = db_conn->exec("VACUUM ANALYZE;");
-	rp.rs->release();
-	put_conn(db_conn);
+    rp.rs = db_conn->exec("VACUUM ANALYZE;");
+    rp.rs->release();
+    put_conn(db_conn);
 
-	setMaxHeight(getMaxObservedHeight());
-	fprintf(stderr, "\tFinished storing %lu atoms total.\n",
-		(unsigned long) store_count);
+    setMaxHeight(getMaxObservedHeight());
+    fprintf(stderr, "\tFinished storing %lu atoms total.\n",
+        (unsigned long) store_count);
 }
 
 /* ================================================================ */
 
 void ODBCAtomStorage::rename_tables(void)
 {
-	ODBCConnection* db_conn = get_conn();
-	Response rp;
+    ODBCConnection* db_conn = get_conn();
+    Response rp;
 
-	rp.rs = db_conn->exec("ALTER TABLE Atoms RENAME TO Atoms_Backup;");
-	rp.rs->release();
+    rp.rs = db_conn->exec("ALTER TABLE Atoms RENAME TO Atoms_Backup;");
+    rp.rs->release();
 #ifndef USE_INLINE_EDGES
-	rp.rs = db_conn->exec("ALTER TABLE Edges RENAME TO Edges_Backup;");
-	rp.rs->release();
+    rp.rs = db_conn->exec("ALTER TABLE Edges RENAME TO Edges_Backup;");
+    rp.rs->release();
 #endif /* USE_INLINE_EDGES */
-	rp.rs = db_conn->exec("ALTER TABLE Global RENAME TO Global_Backup;");
-	rp.rs->release();
-	rp.rs = db_conn->exec("ALTER TABLE TypeCodes RENAME TO TypeCodes_Backup;");
-	rp.rs->release();
-	put_conn(db_conn);
+    rp.rs = db_conn->exec("ALTER TABLE Global RENAME TO Global_Backup;");
+    rp.rs->release();
+    rp.rs = db_conn->exec("ALTER TABLE TypeCodes RENAME TO TypeCodes_Backup;");
+    rp.rs->release();
+    put_conn(db_conn);
 }
 
 void ODBCAtomStorage::create_tables(void)
 {
-	ODBCConnection* db_conn = get_conn();
-	Response rp;
+    ODBCConnection* db_conn = get_conn();
+    Response rp;
 
-	// See the file "atom.sql" for detailed documentation as to the
-	// structure of the SQL tables.
-	rp.rs = db_conn->exec("CREATE TABLE Spaces ("
-	                      "space     BIGINT PRIMARY KEY,"
-	                      "parent    BIGINT);");
-	rp.rs->release();
+    // See the file "atom.sql" for detailed documentation as to the
+    // structure of the SQL tables.
+    rp.rs = db_conn->exec("CREATE TABLE Spaces ("
+                          "space     BIGINT PRIMARY KEY,"
+                          "parent    BIGINT);");
+    rp.rs->release();
 
-	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (0,0);");
-	rp.rs->release();
-	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (1,1);");
-	rp.rs->release();
+    rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (0,0);");
+    rp.rs->release();
+    rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (1,1);");
+    rp.rs->release();
 
-	rp.rs = db_conn->exec("CREATE TABLE Atoms ("
-	                      "uuid     BIGINT PRIMARY KEY,"
-	                      "space    BIGINT REFERENCES spaces(space),"
-	                      "type     SMALLINT,"
-	                      "type_tv  SMALLINT,"
-	                      "stv_mean FLOAT,"
-	                      "stv_confidence FLOAT,"
-	                      "stv_count DOUBLE PRECISION,"
-	                      "height   SMALLINT,"
-	                      "name     TEXT,"
-	                      "outgoing BIGINT[],"
-	                      "UNIQUE (type, name),"
-	                      "UNIQUE (type, outgoing));");
-	rp.rs->release();
+    rp.rs = db_conn->exec("CREATE TABLE Atoms ("
+                          "uuid     BIGINT PRIMARY KEY,"
+                          "space    BIGINT REFERENCES spaces(space),"
+                          "type     SMALLINT,"
+                          "type_tv  SMALLINT,"
+                          "stv_mean FLOAT,"
+                          "stv_confidence FLOAT,"
+                          "stv_count DOUBLE PRECISION,"
+                          "height   SMALLINT,"
+                          "name     TEXT,"
+                          "outgoing BIGINT[],"
+                          "UNIQUE (type, name),"
+                          "UNIQUE (type, outgoing));");
+    rp.rs->release();
 
 #ifndef USE_INLINE_EDGES
-	rp.rs = db_conn->exec("CREATE TABLE Edges ("
-	                      "src_uuid  INT,"
-	                      "dst_uuid  INT,"
-	                      "pos INT);");
-	rp.rs->release();
+    rp.rs = db_conn->exec("CREATE TABLE Edges ("
+                          "src_uuid  INT,"
+                          "dst_uuid  INT,"
+                          "pos INT);");
+    rp.rs->release();
 #endif /* USE_INLINE_EDGES */
 
-	rp.rs = db_conn->exec("CREATE TABLE TypeCodes ("
-	                      "type SMALLINT UNIQUE,"
-	                      "typename TEXT UNIQUE);");
-	rp.rs->release();
-	type_map_was_loaded = false;
+    rp.rs = db_conn->exec("CREATE TABLE TypeCodes ("
+                          "type SMALLINT UNIQUE,"
+                          "typename TEXT UNIQUE);");
+    rp.rs->release();
+    type_map_was_loaded = false;
 
-	rp.rs = db_conn->exec("CREATE TABLE Global ("
-	                      "max_height INT);");
-	rp.rs->release();
-	rp.rs = db_conn->exec("INSERT INTO Global (max_height) VALUES (0);");
-	rp.rs->release();
+    rp.rs = db_conn->exec("CREATE TABLE Global ("
+                          "max_height INT);");
+    rp.rs->release();
+    rp.rs = db_conn->exec("INSERT INTO Global (max_height) VALUES (0);");
+    rp.rs->release();
 
-	put_conn(db_conn);
+    put_conn(db_conn);
 }
 
 /**
@@ -1734,85 +1734,85 @@ void ODBCAtomStorage::create_tables(void)
  */
 void ODBCAtomStorage::kill_data(void)
 {
-	ODBCConnection* db_conn = get_conn();
-	Response rp;
+    ODBCConnection* db_conn = get_conn();
+    Response rp;
 
-	// See the file "atom.sql" for detailed documentation as to the
-	// structure of the SQL tables.
-	rp.rs = db_conn->exec("DELETE from Atoms;");
-	rp.rs->release();
+    // See the file "atom.sql" for detailed documentation as to the
+    // structure of the SQL tables.
+    rp.rs = db_conn->exec("DELETE from Atoms;");
+    rp.rs->release();
 
-	// Delete the atomspaces as well!
-	rp.rs = db_conn->exec("DELETE from Spaces;");
-	rp.rs->release();
+    // Delete the atomspaces as well!
+    rp.rs = db_conn->exec("DELETE from Spaces;");
+    rp.rs->release();
 
-	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (0,0);");
-	rp.rs->release();
-	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (1,1);");
-	rp.rs->release();
+    rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (0,0);");
+    rp.rs->release();
+    rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (1,1);");
+    rp.rs->release();
 
-	rp.rs = db_conn->exec("UPDATE Global SET max_height = 0;");
-	rp.rs->release();
-	put_conn(db_conn);
+    rp.rs = db_conn->exec("UPDATE Global SET max_height = 0;");
+    rp.rs->release();
+    put_conn(db_conn);
 }
 
 /* ================================================================ */
 
 void ODBCAtomStorage::setMaxHeight(int sqmax)
 {
-	// Max height of db contents can only get larger!
-	if (max_height < sqmax) max_height = sqmax;
+    // Max height of db contents can only get larger!
+    if (max_height < sqmax) max_height = sqmax;
 
-	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "UPDATE Global SET max_height = %d;", max_height);
+    char buff[BUFSZ];
+    snprintf(buff, BUFSZ, "UPDATE Global SET max_height = %d;", max_height);
 
-	ODBCConnection* db_conn = get_conn();
-	Response rp;
-	rp.rs = db_conn->exec(buff);
-	rp.rs->release();
-	put_conn(db_conn);
+    ODBCConnection* db_conn = get_conn();
+    Response rp;
+    rp.rs = db_conn->exec(buff);
+    rp.rs->release();
+    put_conn(db_conn);
 }
 
 int ODBCAtomStorage::getMaxHeight(void)
 {
-	ODBCConnection* db_conn = get_conn();
-	Response rp;
-	rp.rs = db_conn->exec("SELECT max_height FROM Global;");
-	rp.rs->foreach_row(&Response::intval_cb, &rp);
-	rp.rs->release();
-	put_conn(db_conn);
-	return rp.intval;
+    ODBCConnection* db_conn = get_conn();
+    Response rp;
+    rp.rs = db_conn->exec("SELECT max_height FROM Global;");
+    rp.rs->foreach_row(&Response::intval_cb, &rp);
+    rp.rs->release();
+    put_conn(db_conn);
+    return rp.intval;
 }
 
 UUID ODBCAtomStorage::getMaxObservedUUID(void)
 {
-	ODBCConnection* db_conn = get_conn();
-	Response rp;
-	rp.intval = 0;
-	rp.rs = db_conn->exec("SELECT uuid FROM Atoms ORDER BY uuid DESC LIMIT 1;");
-	rp.rs->foreach_row(&Response::intval_cb, &rp);
-	rp.rs->release();
-	put_conn(db_conn);
-	return rp.intval;
+    ODBCConnection* db_conn = get_conn();
+    Response rp;
+    rp.intval = 0;
+    rp.rs = db_conn->exec("SELECT uuid FROM Atoms ORDER BY uuid DESC LIMIT 1;");
+    rp.rs->foreach_row(&Response::intval_cb, &rp);
+    rp.rs->release();
+    put_conn(db_conn);
+    return rp.intval;
 }
 
 int ODBCAtomStorage::getMaxObservedHeight(void)
 {
-	ODBCConnection* db_conn = get_conn();
-	Response rp;
-	rp.intval = 0;
-	rp.rs = db_conn->exec("SELECT height FROM Atoms ORDER BY height DESC LIMIT 1;");
-	rp.rs->foreach_row(&Response::intval_cb, &rp);
-	rp.rs->release();
-	put_conn(db_conn);
-	return rp.intval;
+    ODBCConnection* db_conn = get_conn();
+    Response rp;
+    rp.intval = 0;
+    rp.rs = db_conn->exec("SELECT height FROM Atoms ORDER BY height DESC LIMIT 1;");
+    rp.rs->foreach_row(&Response::intval_cb, &rp);
+    rp.rs->release();
+    put_conn(db_conn);
+    return rp.intval;
 }
 
 void ODBCAtomStorage::reserve(void)
 {
-	UUID max_observed_id = getMaxObservedUUID();
-	fprintf(stderr, "Reserving UUID up to %lu\n", max_observed_id);
-	reserveMaxUUID(max_observed_id);
+    UUID max_observed_id = getMaxObservedUUID();
+    fprintf(stderr, "Reserving UUID up to %lu\n", max_observed_id);
+    reserveMaxUUID(max_observed_id);
 }
 
 #endif /* HAVE_SQL_STORAGE */

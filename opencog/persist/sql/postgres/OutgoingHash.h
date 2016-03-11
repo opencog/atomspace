@@ -37,7 +37,7 @@ namespace opencog
      *
      * @return 64-bit hash of the full outgoing sequence.
      */
-	int64_t hash_outgoing(const HandleSeq& outgoing, uint64_t seed);
+    int64_t hash_outgoing(const HandleSeq& outgoing, uint64_t seed);
 
 /** @}*/
 } // namespace opencog

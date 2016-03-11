@@ -42,22 +42,22 @@ class SQLBackingStore;
 class SQLPersistSCM
 {
 private:
-	static void* init_in_guile(void*);
-	static void init_in_module(void*);
-	void init(void);
+    static void* init_in_guile(void*);
+    static void init_in_module(void*);
+    void init(void);
 
-	SQLBackingStore *_backing;
-	ODBCAtomStorage *_store;
-	AtomSpace *_as;
+    SQLBackingStore *_backing;
+    ODBCAtomStorage *_store;
+    AtomSpace *_as;
 
 public:
-	SQLPersistSCM(AtomSpace*);
-	~SQLPersistSCM();
+    SQLPersistSCM(AtomSpace*);
+    ~SQLPersistSCM();
 
-	void do_open(const std::string&, const std::string&, const std::string&);
-	void do_close(void);
-	void do_load(void);
-	void do_store(void);
+    void do_open(const std::string&, const std::string&, const std::string&);
+    void do_close(void);
+    void do_load(void);
+    void do_store(void);
 
 }; // class
 

@@ -5,8 +5,8 @@
 -- atomspace as a parent.
 
 CREATE TABLE Spaces (
-	space  BIGINT PRIMARY KEY,
-	parent BIGINT
+    space  BIGINT PRIMARY KEY,
+    parent BIGINT
 );
 
 -- Space 0 is used primarily (only) in testing of raw atoms.
@@ -18,41 +18,41 @@ INSERT INTO Spaces VALUES (1,1); -- default root
 --
 
 CREATE TABLE Atoms (
-	-- The uuid maps to the atom handle.
-	-- Must be unique, and must be non-null. Ergo, primary key.
-	-- Use 64-bit int to match the C++ range.
-	uuid	BIGINT PRIMARY KEY,
+    -- The uuid maps to the atom handle.
+    -- Must be unique, and must be non-null. Ergo, primary key.
+    -- Use 64-bit int to match the C++ range.
+    uuid    BIGINT PRIMARY KEY,
 
-	-- The atomspace that this atom belongs to.
-	space BIGINT REFERENCES spaces(space),
+    -- The atomspace that this atom belongs to.
+    space BIGINT REFERENCES spaces(space),
 
-	-- Atom type, e.g. Link, Node, etc.
-	type  SMALLINT,
+    -- Atom type, e.g. Link, Node, etc.
+    type  SMALLINT,
 
-	-- maps to TruthValue ID
-	-- tvid INT, -- not used, just inline the truth value
+    -- maps to TruthValue ID
+    -- tvid INT, -- not used, just inline the truth value
 
-	-- Inlined (simple) truth values
-	tv_type  SMALLINT,
-	stv_mean FLOAT,
-	stv_confidence FLOAT,
-	stv_count DOUBLE PRECISION,
+    -- Inlined (simple) truth values
+    tv_type  SMALLINT,
+    stv_mean FLOAT,
+    stv_confidence FLOAT,
+    stv_count DOUBLE PRECISION,
 
-	-- distance from this link to farthest Node in the outgoing
-	-- set of this atom. 
-	-- height of Nodes is by definition zero.
-	-- height of Links containing only nodes is one, etc.
-	height SMALLINT,
+    -- distance from this link to farthest Node in the outgoing
+    -- set of this atom. 
+    -- height of Nodes is by definition zero.
+    -- height of Links containing only nodes is one, etc.
+    height SMALLINT,
 
-	-- The node name, non-empty only for nodes
-	name    TEXT,
+    -- The node name, non-empty only for nodes
+    name    TEXT,
 
-	-- An array of the outgoing edges; non-empty only for links
-	outgoing BIGINT[],
+    -- An array of the outgoing edges; non-empty only for links
+    outgoing BIGINT[],
 
-	-- Force the uniqueness of atoms!!
-	UNIQUE (type, name),
-	UNIQUE (type, outgoing)
+    -- Force the uniqueness of atoms!!
+    UNIQUE (type, name),
+    UNIQUE (type, outgoing)
 );
 
 -- Indexes, needed for fast node and link lookup.
@@ -79,9 +79,9 @@ CREATE TABLE Atoms (
 -- is the order, starting with 0.
 --
 -- CREATE TABLE Edges (
--- 	src_uuid  BIGINT,
--- 	dst_uuid  BIGINT,
--- 	pos INT
+--  src_uuid  BIGINT,
+--  dst_uuid  BIGINT,
+--  pos INT
 -- );
 -- CREATE INDEX inidx ON Edges(src_uuid);
 -- CREATE INDEX outidx ON Edges(dst_uuid);
@@ -93,15 +93,15 @@ CREATE TABLE Atoms (
 -- numbers.
 
 CREATE TABLE TypeCodes (
-	type SMALLINT UNIQUE,
-	typename TEXT UNIQUE
+    type SMALLINT UNIQUE,
+    typename TEXT UNIQUE
 );
 
 -- -----------------------------------------------------------
 -- Global state
 
 CREATE TABLE Global (
-	max_height INT          -- max height of all links.
+    max_height INT          -- max height of all links.
 );
 
 INSERT INTO Global (max_height) VALUES (0); -- largest height observed.
@@ -114,9 +114,9 @@ INSERT INTO Global (max_height) VALUES (0); -- largest height observed.
 -- So its commented out below, and left behind as FYI.
 --
 -- CREATE TABLE SimpleTVs (
--- 	tvid INT PRIMARY KEY,
--- 	mean FLOAT,
--- 	count FLOAT
+--  tvid INT PRIMARY KEY,
+--  mean FLOAT,
+--  count FLOAT
 -- );
 -- 
 -- 

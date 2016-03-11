@@ -28,29 +28,29 @@ using namespace opencog;
 
 AtomStorage::AtomStorage()
 {
-	// Nothing to do in the base class.
+    // Nothing to do in the base class.
 }
 
 
 AtomStorage::~AtomStorage()
 {
-	// Nothing to do in the base class.
+    // Nothing to do in the base class.
 }
 
 void AtomStorage::storeAtomSpace(AtomSpace* atomspace)
 { 
-	store(atomspace->get_atomtable());
+    store(atomspace->get_atomtable());
 }
 
 void AtomStorage::loadAtomSpace(AtomSpace* atomspace)
 {
-	load(atomspace->get_atomtable());
+    load(atomspace->get_atomtable());
 }
 
 void AtomStorage::clearAndLoadAtomSpace(AtomSpace* atomspace)
 { 
-	atomspace->clear(); 
-	load(atomspace->get_atomtable());
+    atomspace->clear(); 
+    load(atomspace->get_atomtable());
 }
 
 
