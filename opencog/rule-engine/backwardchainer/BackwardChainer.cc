@@ -248,7 +248,8 @@ void BackwardChainer::process_target(Target& target)
 	if (not select_rule(target, selected_rule, standardized_rule, all_implicand_to_target_mappings))
 		return;
 
-	LAZY_BC_LOG_DEBUG << "Selected rule "
+	bc_logger().debug("Selected rule %s", selected_rule.get_name().c_str());
+	LAZY_BC_LOG_DEBUG << "Standardized rule "
 	                  << standardized_rule.get_handle()->toShortString();
 	bc_logger().debug("Found %d implicand's output unifiable",
 	                  all_implicand_to_target_mappings.size());
