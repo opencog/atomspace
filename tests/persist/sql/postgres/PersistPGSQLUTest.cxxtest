@@ -471,7 +471,6 @@ void PersistUTest::test_huge_links()
     _as->clear();
     TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
 
-
     // Make sure we can reload the large link.
 
     // Verify that the link can be fetched from storage by the uuid.
@@ -482,18 +481,6 @@ void PersistUTest::test_huge_links()
     _as->barrier();
     _as->clear();
     TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
-
-    // Once more for good measure.
-
-    // Verify that the link can be fetched from storage by the uuid.
-    huge_loaded_link = _as->fetch_atom(huge_link_uuid);
-    TSM_ASSERT("Huge link didn't load by fetch_atom", huge_loaded_link);
-
-    // Purge atoms from the AtomSpace again.
-    _as->barrier();
-    _as->clear();
-    TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
-
 
     // Now let's try loading by type and outgoing set.
 
