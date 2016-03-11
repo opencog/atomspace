@@ -67,6 +67,7 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 
 	void test_execute(void);
 	void test_evaluate(void);
+	void test_wrapped_evaluate(void);
 
 	void test_multi_threads(void);
 	void threadedAdd(int thread_id, int N);
@@ -410,6 +411,44 @@ void SCMExecutionOutputUTest::test_evaluate(void)
 	eval->eval("(chk-tv (ConceptNode \"bogus\" (cog-new-stv 0.3 0.42)))");
 	CHKEV(eval);
 	eval->eval("(chk-tv (ConceptNode \"glurg\" (cog-new-ctv 0.123 0.456 789)))");
+	CHKEV(eval);
+}
+
+
+// the fix for bug #695 (contents of True/False links not evaluated)
+void SCMExecutionOutputUTest::test_wrapped_evaluate(void)
+{
+	// Define a Scheme procedure that return a TV
+	eval->eval(
+		"(define (copy-tv x) "
+		"    (begin (ConceptNode \"cpy\" (cog-tv x)) (cog-new-stv 1 1)))");
+	CHKEV(eval);
+
+	// Wrap the proceedure, returning a TV
+	eval->eval(
+		"(define (cevl-tv x) "
+		"   (cog-evaluate! "
+		"      (FalseLink "
+		"          (EvaluationLink "
+		"              (GroundedPredicateNode \"scm: copy-tv\") "
+		"              (ListLink x)))))"
+	);
+	CHKEV(eval);
+
+	// Compare the TV's that were obtained in two different ways.
+	eval->eval(
+		"(define (chk-copied-tv x) "
+		"  (begin "
+		"     (cevl-tv x) "
+		"     (if (not (equal? (cog-tv (ConceptNode \"cpy\")) (cog-tv x))) "
+		"        (throw 'bad-tv-compate \"chk-tv\" \"test case failed\"))))"
+	);
+	CHKEV(eval);
+
+	// Perform the actual checks
+	eval->eval("(chk-copied-tv (ConceptNode \"bogus\" (cog-new-stv 0.3 0.42)))");
+	CHKEV(eval);
+	eval->eval("(chk-copied-tv (ConceptNode \"glurg\" (cog-new-ctv 0.123 0.456 789)))");
 	CHKEV(eval);
 }
 
