@@ -40,7 +40,8 @@ BackwardChainer::BackwardChainer(AtomSpace& as, Handle rbs)
 	  // create a garbage superspace with _as as parent, so codes
 	  // acting on _garbage_superspace will see stuff in _as, but
 	  // codes acting on _as will not see stuff in _garbage_superspace
-	  _garbage_superspace(&_as) {}
+	  _garbage_superspace(&_as),
+	  _iteration(0) {}
 
 /**
  * Set the initial target for backward chaining.
@@ -83,25 +84,17 @@ const UREConfigReader& BackwardChainer::get_config() const
 	return _configReader;
 }
 
-/**
- * The public entry point for full backward chaining.
- *
- * @param max_steps   The maximum number of backward chain steps
- *
- * XXX TODO add more stopping param like fitness criterion, etc
- */
 void BackwardChainer::do_chain()
 {
-	int i = 0;
-
-	while (i != _configReader.get_maximum_iterations())
+	while (not termination())
 	{
 		do_step();
-
-		// XXX TODO check the TV of the initial target to see if we want more steps
-
-		i++;
 	}
+}
+
+bool BackwardChainer::termination()
+{
+	return _configReader.get_maximum_iterations() <= _iteration;
 }
 
 /**
@@ -109,8 +102,9 @@ void BackwardChainer::do_chain()
  */
 void BackwardChainer::do_step()
 {	
-	bc_logger().debug("==========================================");
-	bc_logger().debug("Start of a single BC step");
+	bc_logger().debug("Start single BC step. Iteration %d", _iteration);
+	_iteration++;
+
 	bc_logger().debug("%d potential targets", _targets_set.size());
 	bc_logger().debug("%d in focus set", _focus_space.get_size());
 
@@ -134,7 +128,7 @@ void BackwardChainer::do_step()
 	// in both the garbage and main atomspace
 	_garbage_superspace.clear();
 
-	bc_logger().debug("End of a single BC step");
+	bc_logger().debug("End single BC step");
 }
 
 /**

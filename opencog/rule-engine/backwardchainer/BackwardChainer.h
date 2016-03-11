@@ -98,8 +98,21 @@ public:
 	UREConfigReader& get_config();
 	const UREConfigReader& get_config() const;
 
-	void do_chain();
+	/**
+	 * Perform a single backward chaining inference step.
+	 */
 	void do_step();
+
+	/**
+	 * Perform backward chaining inference till the termination
+	 * criteria have been met.
+	 */
+	void do_chain();
+
+	/**
+	 * @return true if the termination criteria have been met.
+	 */
+	bool termination();
 
 	VarMultimap get_chaining_result();
 
@@ -134,6 +147,7 @@ private:
 	AtomSpace _garbage_superspace;
 	Handle _init_target;
 	AtomSpace _focus_space;
+	int _iteration;
 
 	TargetSet _targets_set;
 
