@@ -1,5 +1,5 @@
 /*
- * tests/persist/sql/PersistUTest.cxxtest
+ * tests/persist/sql/odbc/PersistUTest.cxxtest
  *
  * Test AtomSpace persistance.  Assumes BasicSaveUTest is passing.
  *

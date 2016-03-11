@@ -1,5 +1,5 @@
 /*
- * tests/persist/sql/PersistPGSQLUTest.cxxtest
+ * tests/persist/sql/postgres/PersistPGSQLUTest.cxxtest
  *
  * Test AtomSpace persistance.  Assumes BasicSaveUTest is passing.
  *
@@ -105,7 +105,7 @@ class PersistUTest :  public CxxTest::TestSuite
 		void check_empty(int, AtomSpace *);
 
 		void test_atomspace();
-		void dont_test_huge_links();
+		void test_huge_links();
 		void test_many_deep_links();
 };
 
@@ -427,7 +427,7 @@ void PersistUTest::test_atomspace()
 }
 
 
-void PersistUTest::dont_test_huge_links()
+void PersistUTest::test_huge_links()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -533,7 +533,6 @@ void PersistUTest::test_many_deep_links()
 	Handle node_2 = _as->add_node(SCHEMA_NODE, "deep test depth 0 - 2");
 	Handle first_out = node_1;
 	Handle second_out = node_2;
-
 
 	HandleSeq links;
 	links.reserve(DEEP_LINK_SIZE);

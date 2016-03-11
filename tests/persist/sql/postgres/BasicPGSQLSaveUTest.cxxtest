@@ -1,5 +1,5 @@
 /*
- * tests/persist/sql/BasicPGSQLSaveUTest.cxxtest
+ * tests/persist/sql/postgres/BasicPGSQLSaveUTest.cxxtest
  *
  * Most basic, simplest sniff test, saves and restores a few atoms.
  *
