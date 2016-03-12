@@ -1549,8 +1549,10 @@ PGAtomStorage::PseudoPtr PGAtomStorage::load_pseudo_atom_with_uuid(UUID uuid)
  *
  * This method does *not* register the atom with any atomtable.
  */
+std::string s_indent("");
 AtomPtr PGAtomStorage::getAtom(UUID uuid)
 {
+    fprintf(stdout, "%sgetAtom(%lu)\n", s_indent.c_str(), uuid);
     PseudoPtr p(load_pseudo_atom_with_uuid(uuid));
     if (NULL == p) return NULL;
 
@@ -1561,9 +1563,11 @@ AtomPtr PGAtomStorage::getAtom(UUID uuid)
         return node;
     }
 
+    s_indent += "  ";
     HandleSeq oset;
     for (UUID idu : p->oset)
         oset.emplace_back(getAtom(idu)->getHandle());
+    s_indent.resize(s_indent.size() - 2);
 
     LinkPtr link(createLink(p->type, oset, p->tv));
     setAtomUUID( link, p->uuid );
