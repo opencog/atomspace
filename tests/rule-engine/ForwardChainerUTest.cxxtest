@@ -99,9 +99,8 @@ void ForwardChainerUTest::test_do_chain()
 		                  "    (PredicateNode \"B\")"
 		                  "    (PredicateNode \"C\"))");
 
-    // Get the ConceptNode corresponding to the rule-based system
-    // to test
-    Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
+    // Get the ConceptNode corresponding to the rule-based system to test
+    Handle rbs = eval.eval_h("(ConceptNode \"crisp-deduction-rule-base\")");
     ForwardChainer fc(_as, rbs, AB);
 	// Run forward chainer
 	fc.do_chain();
