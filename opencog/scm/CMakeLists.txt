@@ -11,7 +11,6 @@ INSTALL (FILES
 	file-utils.scm
 	opencog.scm
 	repl-shell.scm
-	rule-engine-utils.scm
 	utilities.scm
 	DESTINATION "${DATADIR}/scm"
 )
@@ -28,4 +27,9 @@ INSTALL (FILES
 	opencog/query.scm
 	opencog/rule-engine.scm
 	DESTINATION "${DATADIR}/scm/opencog"
+)
+
+INSTALL (FILES
+	rule-engine-utils.scm
+	DESTINATION "${DATADIR}/scm/opencog/rule-engine"
 )
