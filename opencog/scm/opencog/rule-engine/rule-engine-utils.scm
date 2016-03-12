@@ -24,7 +24,7 @@
 (use-modules (opencog))
 (use-modules (opencog query))
 
-(define (ure-add-rule rbs rule-name rule weight)
+(define-public (ure-add-rule rbs rule-name rule weight)
 "
   Adds a rule to a rulebase and sets its weight and returns the rule node.
 
@@ -49,7 +49,7 @@
     )
 )
 
-(define (ure-add-rules rbs rules)
+(define-public (ure-add-rules rbs rules)
 "
   Given a rbs and a list of pairs (rule-alias weight) create for each rule
 
@@ -124,7 +124,7 @@
      rbs)
 )
 
-(define (ure-define-rbs rbs iteration)
+(define-public (ure-define-rbs rbs iteration)
 "
   Transforms the atom into a node that represents a rulebase and returns it.
 
