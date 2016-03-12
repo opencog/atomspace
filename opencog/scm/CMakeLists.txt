@@ -30,6 +30,6 @@ INSTALL (FILES
 )
 
 INSTALL (FILES
-	rule-engine-utils.scm
+	opencog/rule-engine/rule-engine-utils.scm
 	DESTINATION "${DATADIR}/scm/opencog/rule-engine"
 )
