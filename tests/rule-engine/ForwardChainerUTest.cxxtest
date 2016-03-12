@@ -66,6 +66,8 @@ public:
 		// Load the simple deduction example to test it
 		eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
 		          "/tests/rule-engine/crisp-deduction.scm\")");
+		eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
+		          "/tests/rule-engine/crisp-deduction-config.scm\")");
 		CHKERR;
 
 		eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
