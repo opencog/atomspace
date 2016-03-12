@@ -2,11 +2,12 @@
 ; config.scm
 ;
 ; General cog-server configuration, for scheme.
-; XXX TODO This stuff really should be unified with the opencog.conf
-; file aka the util/config.h mechanisms.  But, for now, these
-; remain separate. I'm too lazy to "improve" this right now.
-;
 ;--------------------------------------------------------------
+;
+; Saying `(use-modules (opencog blah))` at the cogserver prompt
+; will blow up without this.
+(add-to-load-path "/usr/local/share/opencog/scm")
+;
 ; The scheme shell listen port.
 (define shell-port 18001)
 ; A plain simple prompt
