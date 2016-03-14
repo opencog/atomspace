@@ -6,8 +6,6 @@
 (use-modules (opencog))
 (use-modules (opencog query))
 
-; (load-from-path "utilities.scm")
-
 ; --------------------------------------------------------------------
 ; First, some data to populate the atomspace
 

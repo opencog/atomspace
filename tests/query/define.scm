@@ -7,8 +7,6 @@
 (use-modules (opencog query))
 (use-modules (opencog exec))
 
-; (load-from-path "utilities.scm")
-
 ;; Some data to populate the atomspace.
 (InheritanceLink
 	(ConceptNode "battery")

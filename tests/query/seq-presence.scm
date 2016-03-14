@@ -9,8 +9,6 @@
 ;; If the atomspace does contain the above, then the print-msg function
 ;; is run.
 
-; (load-from-path "utilities.scm")
-
 ;; Is the room empty, or is someone in it?
 ;; One of several different states can be linked to the state variable.
 (define room-state (AnchorNode "Room State"))
