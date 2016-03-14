@@ -199,6 +199,17 @@ void SchemeSmob::module_init(void*)
 	register_procs();
 
 	// The portion of (opencog) done in scm files.
+	// This needs to stay in sync with /opencog/scm/opencog.scm
+	scm_c_eval_string("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+
+	scm_primitive_load_path(scm_from_utf8_string("core_types.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("config.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("core-docs.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("utilities.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("apply.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("av-tv.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("file-utils.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("debug-trace.scm"));
 }
 
 #ifdef HAVE_GUILE2
