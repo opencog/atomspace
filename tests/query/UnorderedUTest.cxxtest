@@ -81,7 +81,6 @@ void UnorderedUTest::setUp(void)
 	as = new AtomSpace();
 
 	config().set("SCM_PRELOAD",
-		"opencog/atoms/base/core_types.scm, "
 		"tests/query/test_types.scm, "
 		"tests/query/unordered.scm, "
 		"tests/query/unordered-more.scm, "

@@ -76,7 +76,6 @@ void StackMoreUTest::setUp(void)
 	as = new AtomSpace();
 
 	config().set("SCM_PRELOAD",
-		"opencog/atoms/base/core_types.scm, "
       "tests/query/test_types.scm, "
 		"tests/query/stackmore-o-o.scm, "
 		"tests/query/stackmore-o-u.scm, "

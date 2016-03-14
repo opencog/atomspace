@@ -77,14 +77,9 @@ void FirstNUTest::tearDown(void)
 
 void FirstNUTest::setUp(void)
 {
-    config().set("SCM_PRELOAD",
-        "opencog/atoms/base/core_types.scm, "
-        "opencog/scm/utilities.scm, "
-        "opencog/scm/opencog/exec.scm, "
-        "opencog/scm/opencog/query.scm, "
-        "tests/query/firstn.scm");
-
+    config().set("SCM_PRELOAD", "tests/query/firstn.scm");
     load_scm_files_from_config(*as);
+    eval->eval("(use-modules (opencog exec) (opencog query))");
 }
 
 #define getarity(hand) LinkCast(hand)->getArity()

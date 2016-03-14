@@ -71,12 +71,7 @@ void SequenceUTest::tearDown(void)
 
 void SequenceUTest::setUp(void)
 {
-    config().set("SCM_PRELOAD",
-        "opencog/atoms/base/core_types.scm, "
-        "opencog/scm/utilities.scm,"
-        "opencog/scm/opencog/query.scm");
-
-    load_scm_files_from_config(*as);
+    eval->eval("(use-modules (opencog query))");
 }
 
 /*

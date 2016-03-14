@@ -74,14 +74,9 @@ void AbsentUTest::tearDown(void)
 void AbsentUTest::setUp(void)
 {
 	as->clear();
-	config().set("SCM_PRELOAD",
-		"opencog/atoms/base/core_types.scm, "
-		"tests/query/test_types.scm, "
-		"opencog/scm/utilities.scm,"
-		"opencog/scm/opencog/exec.scm, "
-		"opencog/scm/opencog/query.scm");
-
+	config().set("SCM_PRELOAD", "tests/query/test_types.scm");
 	load_scm_files_from_config(*as);
+	eval->eval("(use-modules (opencog exec) (opencog query))");
 }
 
 #define getarity(hand) LinkCast(hand)->getArity()
