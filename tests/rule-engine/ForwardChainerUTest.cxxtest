@@ -54,7 +54,7 @@ public:
 		          "/examples/rule-engine/crisp-deduction.scm\")");
 
 		eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
-		          "/tests/rule-engine/bc-config-2.scm\")");
+		          "/tests/rule-engine/bc-config.scm\")");
 	}
 	void test_do_chain();
 	void test_choose_rule();

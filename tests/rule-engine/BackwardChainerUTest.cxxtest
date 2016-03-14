@@ -32,9 +32,10 @@ public:
 	void setUp();
 	void tearDown();
 
-	void test_1rule_bc();
-	void test_1rule_impossible_bc();
-	void test_2rules_bc();
+	void test_1_rule_bc_modus_ponens();
+	void test_1_rule_bc_deduction();
+	void test_1_rule_impossible_bc();
+	void test_2_rules_bc();
 
 	void test_tvq_bc();
 	void test_tvq_impossible_bc();
@@ -56,12 +57,14 @@ void BackwardChainerUTest::tearDown()
 	as_.clear();
 }
 
-void BackwardChainerUTest::test_1rule_bc()
+void BackwardChainerUTest::test_1_rule_bc_modus_ponens()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+	as_.clear();
+
 	config().set("SCM_PRELOAD",
-	             "tests/rule-engine/bc-config-1.scm,"
+	             "tests/rule-engine/bc-modus-ponens-config.scm,"
 	             "tests/rule-engine/bc-example.scm");
 	load_scm_files_from_config(as_);
 	randGen().seed(0);
@@ -89,12 +92,21 @@ void BackwardChainerUTest::test_1rule_bc()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void BackwardChainerUTest::test_1rule_impossible_bc()
+void BackwardChainerUTest::test_1_rule_bc_deduction()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	TS_ASSERT(true);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void BackwardChainerUTest::test_1_rule_impossible_bc()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+	as_.clear();
+
 	config().set("SCM_PRELOAD",
-	             "tests/rule-engine/bc-config-1.scm,"
+	             "tests/rule-engine/bc-modus-ponens-config.scm,"
 	             "tests/rule-engine/bc-criminal.scm");
 	load_scm_files_from_config(as_);
 	randGen().seed(0);
@@ -125,12 +137,14 @@ void BackwardChainerUTest::test_1rule_impossible_bc()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void BackwardChainerUTest::test_2rules_bc()
+void BackwardChainerUTest::test_2_rules_bc()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+	as_.clear();
+
 	config().set("SCM_PRELOAD",
-	             "tests/rule-engine/bc-config-2.scm,"
+	             "tests/rule-engine/bc-config.scm,"
 	             "tests/rule-engine/bc-criminal.scm");
 	load_scm_files_from_config(as_);
 	randGen().seed(500);
@@ -164,8 +178,10 @@ void BackwardChainerUTest::test_tvq_bc()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+	as_.clear();
+
 	config().set("SCM_PRELOAD",
-	             "tests/rule-engine/bc-config-1.scm,"
+	             "tests/rule-engine/bc-modus-ponens-config.scm,"
 	             "tests/rule-engine/bc-example.scm");
 	load_scm_files_from_config(as_);
 	randGen().seed(500);
@@ -195,8 +211,10 @@ void BackwardChainerUTest::test_tvq_impossible_bc()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+	as_.clear();
+
 	config().set("SCM_PRELOAD",
-	             "tests/rule-engine/bc-config-1.scm,"
+	             "tests/rule-engine/bc-modus-ponens-config.scm,"
 	             "tests/rule-engine/bc-example.scm");
 	load_scm_files_from_config(as_);
 	randGen().seed(0);
@@ -236,8 +254,10 @@ void BackwardChainerUTest::test_focus_set()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+	as_.clear();
+
 	config().set("SCM_PRELOAD",
-	             "tests/rule-engine/bc-config-1.scm,"
+	             "tests/rule-engine/bc-modus-ponens-config.scm,"
 	             "tests/rule-engine/bc-example.scm");
 	load_scm_files_from_config(as_);
 	randGen().seed(0);
