@@ -53,7 +53,8 @@ private:
 	};
 
 	static std::atomic_flag is_inited;
-	static void register_procs(void*);
+	static void module_init(void*);
+	static void register_procs();
 	static void register_proc(const char*, int, int, int, scm_t_subr);
 
 	// The cog_misc_tag are for all other opencog types, such

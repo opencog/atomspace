@@ -45,7 +45,7 @@ void SchemeSmob::init()
 	if (is_inited.test_and_set()) return;
 
 	init_smob_type();
-	scm_c_define_module("opencog", register_procs, NULL);
+	scm_c_define_module("opencog", module_init, NULL);
 	scm_c_use_module("opencog");
 
 	atomspace_fluid = scm_make_fluid();
@@ -184,13 +184,30 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 
 /* ============================================================== */
 
+/// Define the (opencog) module.
+//
+// This is implemented somewhat awkwardly, in that *scm files are
+// being loaded here.  This is due to a design tangle where C++ code
+// needs to call the scheme evaluator; each evaluator uses its own
+// atomspace in each thread (stored in a fluid); thus, the C++ code
+// must link to the module definition, which is thus incomplete without
+// the load of the *.scm files.
+//
+void SchemeSmob::module_init(void*)
+{
+	// The portion of (opencog) done in C++
+	register_procs();
+
+	// The portion of (opencog) done in scm files.
+}
+
 #ifdef HAVE_GUILE2
  #define C(X) ((scm_t_subr) X)
 #else
  #define C(X) ((SCM (*) ()) X)
 #endif
 
-void SchemeSmob::register_procs(void*)
+void SchemeSmob::register_procs()
 {
 	register_proc("cog-atom",              1, 0, 0, C(ss_atom));
 	register_proc("cog-handle",            1, 0, 0, C(ss_handle));
