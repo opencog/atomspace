@@ -69,9 +69,12 @@ static NumberNodePtr unwrap_set(Handle h)
 {
 	if (SET_LINK == h->getType())
 	{
+		if (0 == h->getArity())
+			throw SyntaxException(TRACE_INFO,
+				"Expecting a number, got the empty set!\n");
 		if (1 != h->getArity())
 			throw SyntaxException(TRACE_INFO,
-				"Don't know how to do arithmetic with this: %s",
+				"Expecting only one number, got more than that: %s",
 				h->toString().c_str());
 		h = h->getOutgoingAtom(0);
 	}
@@ -79,7 +82,7 @@ static NumberNodePtr unwrap_set(Handle h)
 	NumberNodePtr na(NumberNodeCast(h));
 	if (nullptr == na)
 		throw SyntaxException(TRACE_INFO,
-			"Don't know how to do arithmetic with this: %s",
+			"Expecting a number, got this: %s",
 			h->toString().c_str());
 	return na;
 }
