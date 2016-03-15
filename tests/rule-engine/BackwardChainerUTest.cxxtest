@@ -65,7 +65,7 @@ void BackwardChainerUTest::test_1_rule_bc_modus_ponens()
 
 	config().set("SCM_PRELOAD",
 	             "tests/rule-engine/bc-modus-ponens-config.scm,"
-	             "tests/rule-engine/bc-example.scm");
+	             "tests/rule-engine/bc-animals.scm");
 	load_scm_files_from_config(as_);
 	randGen().seed(0);
 
@@ -95,7 +95,6 @@ void BackwardChainerUTest::test_1_rule_bc_modus_ponens()
 void BackwardChainerUTest::test_1_rule_bc_deduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	TS_ASSERT(true);
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -182,7 +181,7 @@ void BackwardChainerUTest::test_tvq_bc()
 
 	config().set("SCM_PRELOAD",
 	             "tests/rule-engine/bc-modus-ponens-config.scm,"
-	             "tests/rule-engine/bc-example.scm");
+	             "tests/rule-engine/bc-animals.scm");
 	load_scm_files_from_config(as_);
 	randGen().seed(500);
 
@@ -215,7 +214,7 @@ void BackwardChainerUTest::test_tvq_impossible_bc()
 
 	config().set("SCM_PRELOAD",
 	             "tests/rule-engine/bc-modus-ponens-config.scm,"
-	             "tests/rule-engine/bc-example.scm");
+	             "tests/rule-engine/bc-animals.scm");
 	load_scm_files_from_config(as_);
 	randGen().seed(0);
 
@@ -258,7 +257,7 @@ void BackwardChainerUTest::test_focus_set()
 
 	config().set("SCM_PRELOAD",
 	             "tests/rule-engine/bc-modus-ponens-config.scm,"
-	             "tests/rule-engine/bc-example.scm");
+	             "tests/rule-engine/bc-animals.scm");
 	load_scm_files_from_config(as_);
 	randGen().seed(0);
 
