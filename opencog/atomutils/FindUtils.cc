@@ -295,7 +295,12 @@ HandleSeq get_free_vars_in_tree(const Handle& tree)
 
 		// XXX FIXME Add support for UNQUOTE_LINK
 		if (t == QUOTE_LINK) return;
-		if (classserver().isA(t, SCOPE_LINK)) return;
+		if (classserver().isA(t, SCOPE_LINK)
+		    // A sugary version of ImplicationLink can be a ScopeLink
+		    // only if it has 3 arguments
+		    and (not classserver().isA(t, IMPLICATION_LINK)
+		         or h->getArity() == 3))
+			return;
 
 		LinkPtr l(LinkCast(h));
 		if (l)
