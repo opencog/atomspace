@@ -376,7 +376,7 @@ void BackwardChainer::process_target(Target& target)
 			Handle added = inst.instantiate(output_grounded, m);
 
 			LAZY_BC_LOG_DEBUG << "Added:" << std::endl
-			                  << added->toShortString() << " to _as";
+			                  << added->toShortString() << "to _as";
 
 			for (const auto& h : output_grounded_seq)
 			{
@@ -386,7 +386,7 @@ void BackwardChainer::process_target(Target& target)
 				if (_focus_space.get_size() > 0 )
 					_focus_space.add_atom(added);
 				LAZY_BC_LOG_DEBUG << "Added:" << std::endl
-				                  << added->toShortString() << " to _as";
+				                  << added->toShortString() << "to _as";
 			}
 
 			// Add the grounding to the return results
