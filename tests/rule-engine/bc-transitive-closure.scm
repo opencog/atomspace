@@ -1,14 +1,14 @@
 ;; Little example using the backward chainer to get the transitive
-;; closure of A's implications
+;; closure of A's inheritance
 
-(Implication (stv 1 1)
- (Predicate "A")
- (Predicate "B"))
+(Inheritance (stv 1 1)
+ (Concept "A")
+ (Concept "B"))
 
-(Implication (stv 1 1)
- (Predicate "B")
- (Predicate "C"))
+(Inheritance (stv 1 1)
+ (Concept "B")
+ (Concept "C"))
 
-(Implication (stv 1 1)
- (Predicate "C")
- (Predicate "D"))
+(Inheritance (stv 1 1)
+ (Concept "C")
+ (Concept "D"))
