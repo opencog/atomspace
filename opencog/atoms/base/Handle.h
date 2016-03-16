@@ -56,6 +56,7 @@ class Handle
 friend class Atom;
 friend class AtomTable;
 friend class AtomStorage;         // persistance
+friend class content_based_atom_ptr_less;
 
 private:
     AtomPtr _ptr;
@@ -222,18 +223,26 @@ typedef std::set<Handle> OrderedHandleSet;
 //! a hash that associates the handle to its unique identificator
 typedef std::unordered_set<Handle, handle_hash> UnorderedHandleSet;
 
+struct content_based_atom_ptr_less
+{
+    bool operator()(const Atom* al, const Atom* ar) const
+    {
+        return Handle::content_based_atoms_less(al, ar);
+    }
+};
+
 struct handle_seq_less
 {
-   bool operator()(const HandleSeq& hsl, const HandleSeq& hsr) const
-   {
-       size_t sl = hsl.size();
-       size_t sr = hsr.size();
-       if (sl != sr) return sl < sr;
-       for (size_t i=0; i<sl; i++) {
-           if (hsl[i] != hsr[i]) return hsl[i] < hsr[i];
-       }
-       return false;
-   }
+    bool operator()(const HandleSeq& hsl, const HandleSeq& hsr) const
+    {
+        size_t sl = hsl.size();
+        size_t sr = hsr.size();
+        if (sl != sr) return sl < sr;
+        for (size_t i=0; i<sl; i++) {
+            if (hsl[i] != hsr[i]) return hsl[i] < hsr[i];
+        }
+        return false;
+    }
 };
 
 struct handle_seq_ptr_less
