@@ -329,7 +329,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// If there is a GetLink, we have to perform the get, and replace
 	// it with the results of the get. The get is implemented with the
 	// PatternLink::satisfy() method.
-	if (GET_LINK == t)
+	if (classserver().isA(t, GET_LINK))
 	{
 		if (_eager)
 		{
@@ -338,11 +338,13 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			walk_sequence(oset_results, lexpr->getOutgoingSet());
 			_avoid_discarding_quotes_level--;
 
+			// We do have to poke the results into the atomspace,
+			// else the Get will fail.
 			size_t sz = oset_results.size();
 			for (size_t i=0; i< sz; i++)
 				oset_results[i] = _as->add_atom(oset_results[i]);
 
-			LinkPtr lp(createLink(GET_LINK, oset_results));
+			LinkPtr lp(createLink(t, oset_results));
 
 			return satisfying_set(_as, Handle(lp));
 		}
