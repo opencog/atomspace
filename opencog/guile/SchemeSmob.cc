@@ -147,9 +147,10 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 
 /* ============================================================== */
 
-[[ noreturn ]] void SchemeSmob::throw_exception(const char *msg,
-                                                const char * func)
+[[ noreturn ]] void SchemeSmob::throw_exception(const std::exception& ex,
+                                                const char *func)
 {
+	const char * msg = ex.what();
 	if (msg and msg[0] != 0)
 	{
 		// Should we even bother to log this?  Probably not ...
