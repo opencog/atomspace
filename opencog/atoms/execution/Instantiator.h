@@ -45,16 +45,15 @@ private:
 	AtomSpace *_as;
 	const std::map<Handle, Handle> *_vmap;
 	bool _halt = false;
-	int _quotation_level = 0;
 
 	/**
 	 * Instatiator removes first level QuoteLinks and in such cases
-	 * returns verbatim atoms. This is sometimes incorrect if the first
-	 * level QuoteLinks are placed below some kind of atoms e.g. GetLink
-	 * or ExecutionOutputLink that take care of handling QuoteLinks
-	 * on their own. We need to avoid discarding quotes for this atoms
-	 * it will be done later according given atom type semantics.
+	 * returns verbatim atoms. This is incorrect when the QuoteLink
+	 * occurs in any scoped link (anything inheriting from ScopeLink,
+	 * (e.g. GetLink, BindLink), since these handle QuoteLinks within
+	 * thier own scope. We must avoid damaging quotes for these atoms.
 	 */
+	int _quotation_level = 0;
 	int _avoid_discarding_quotes_level = 0;
 
 	/**
