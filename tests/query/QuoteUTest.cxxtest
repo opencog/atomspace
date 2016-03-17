@@ -278,8 +278,7 @@ void QuoteUTest::test_crash(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "opencog/scm/opencog/query.scm, "
-                                "tests/query/quote-crash.scm");
+    config().set("SCM_PRELOAD", "tests/query/quote-crash.scm");
 
     load_scm_files_from_config(*as);
 
