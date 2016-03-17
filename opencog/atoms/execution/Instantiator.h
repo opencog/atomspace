@@ -77,8 +77,8 @@ private:
 	 * by default.
 	 */
 	bool _eager = true;
-	Handle walk_eager(const Handle& tree);
-	bool seq_eager(HandleSeq&, const HandleSeq&);
+	Handle walk_tree(const Handle& tree);
+	bool walk_sequence(HandleSeq&, const HandleSeq&);
 
 public:
 	Instantiator(AtomSpace* as) : _as(as) {}
