@@ -70,7 +70,13 @@ private:
 	 * which will simply perform a substitution, without performing
 	 * any execution. See also PutLink, which does substituion.
 	 * (actually, beta reduction).
+	 *
+	 * There are two ways to do this: via eager execution, and via
+	 * lazy execution. Lazy would be nicer, performance-wise, but this
+	 * is still buggy, and unit tests will fail. So do eager execution
+	 * by default.
 	 */
+	bool _eager = true;
 	Handle walk_eager(const Handle& tree);
 	bool seq_eager(HandleSeq&, const HandleSeq& orig);
 

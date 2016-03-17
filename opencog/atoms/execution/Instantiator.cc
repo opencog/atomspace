@@ -144,27 +144,40 @@ Handle Instantiator::walk_eager(const Handle& expr)
 	if (_quotation_level > 0)
 		goto mere_recursive_call;
 
-	// Reduce PutLinks in an eager fashion, by first executing the
-	// arguments to the Put, then beta-reducing, then executing again.
+	// Reduce PutLinks. There are two ways to do this: eager execution
+	// and lazy execution.  The algos are this:
+	//
+	//    Eager: first, execute the arguments to the Put, then beta-
+	//    reduce, then execute again.
+	//
+	//    Lazy: beta-reduce first, then execute.  Lazy helps avoid
+	//    un-needed executations, and has better control over infinite
+	//    recursion. However, unit tests currently fail on it.
+	//
 	if (PUT_LINK == t)
 	{
 		PutLinkPtr ppp(PutLinkCast(expr));
 		if (nullptr == ppp)
 			ppp = createPutLink(*lexpr);
 
-		// Execute the values in the PutLink before doing the beta-reduction.
-		// Execute the body only after the beta-reduction has been done.
-		Handle pvals = ppp->get_values();
-		Handle gargs = walk_eager(pvals);
-		if (gargs != pvals)
+		if (_eager)
 		{
-			HandleSeq groset;
-			if (ppp->get_vardecl())
-				groset.emplace_back(ppp->get_vardecl());
-			groset.emplace_back(ppp->get_body());
-			groset.emplace_back(gargs);
-			ppp = createPutLink(groset);
+			// Execute the values in the PutLink before doing the
+			// beta-reduction. Execute the body only after the
+			// beta-reduction has been done.
+			Handle pvals = ppp->get_values();
+			Handle gargs = walk_eager(pvals);
+			if (gargs != pvals)
+			{
+				HandleSeq groset;
+				if (ppp->get_vardecl())
+					groset.emplace_back(ppp->get_vardecl());
+				groset.emplace_back(ppp->get_body());
+				groset.emplace_back(gargs);
+				ppp = createPutLink(groset);
+			}
 		}
+
 		// Step one: beta-reduce.
 		Handle red(ppp->reduce());
 		// Step two: execute the resulting body.
@@ -200,6 +213,13 @@ Handle Instantiator::walk_eager(const Handle& expr)
 
 	// ExecutionOutputLinks are not handled by the FunctionLink factory
 	// below. This is due to a circular shared-libarary dependency.
+	//
+	// Even for the case of lazy execution, we still have to do eager
+	// execution of the arguments passed to the ExOutLink.  This is
+	// because the ExOutLink is a black box, and we cannot guess what
+	// it might do.  It would be great if the authors of ExOutLinks
+	// did the lazy execution themselves... but this is too much to
+	// ask for. So we always eager-evaluate those args.
 	if (EXECUTION_OUTPUT_LINK == t)
 	{
 		// XXX Force syntax checking; normally this would be done in the
@@ -264,18 +284,28 @@ Handle Instantiator::walk_eager(const Handle& expr)
 
 	// FoldLink's are a kind-of FunctionLink, but are not currently
 	// handled by the FunctionLink factory below.  This should be fixed
-	// someday, when the reduct directory is re-desiged.
+	// someday, when the reduct directory is nuked.
 	if (classserver().isA(t, FOLD_LINK))
 	{
-		// At this time, no FoldLink ever has a variable declaration,
-		// and the number of arguments is not fixed, i.e. variadic.
-		// Perform substitution on all arguments before applying the
-		// function itself.
-		HandleSeq oset_results;
-		seq_eager(oset_results, lexpr->getOutgoingSet());
-		Handle hl(FoldLink::factory(t, oset_results));
-		FoldLinkPtr flp(FoldLinkCast(hl));
-		return flp->execute(_as);
+		// A FoldLink never has a variable declaration (at this time).
+		// The number of arguments is never fixed, its always variadic.
+		if (_eager)
+		{
+			// Perform substitution on all arguments before applying the
+			// function itself.
+			HandleSeq oset_results;
+			seq_eager(oset_results, lexpr->getOutgoingSet());
+			Handle hl(FoldLink::factory(t, oset_results));
+			FoldLinkPtr flp(FoldLinkCast(hl));
+			return flp->execute(_as);
+		}
+		else
+		{
+			FoldLinkPtr flp(FoldLinkCast(expr));
+			if (nullptr == flp)
+				flp = FoldLinkCast(FoldLink::factory(lexpr));
+			return flp->execute(_as);
+		}
 	}
 
 	// Fire any other function links, not handled above.
@@ -283,14 +313,24 @@ Handle Instantiator::walk_eager(const Handle& expr)
 	{
 		// At this time, no FunctionLink that is outside of an
 		// ExecutionOutputLink ever has a variable declaration.
-		// Also, the number of arguments is not fixed, i.e. variadic.
+		// Also, the number of arguments is not fixed, its always variadic.
 		// Perform substitution on all arguments before applying the
 		// function itself.
-		HandleSeq oset_results;
-		seq_eager(oset_results, lexpr->getOutgoingSet());
-		Handle hl(FunctionLink::factory(t, oset_results));
-		FunctionLinkPtr flp(FunctionLinkCast(hl));
-		return flp->execute(_as);
+		if (_eager)
+		{
+			HandleSeq oset_results;
+			seq_eager(oset_results, lexpr->getOutgoingSet());
+			Handle hl(FunctionLink::factory(t, oset_results));
+			FunctionLinkPtr flp(FunctionLinkCast(hl));
+			return flp->execute(_as);
+		}
+		else
+		{
+			FunctionLinkPtr flp(FunctionLinkCast(expr));
+			if (nullptr == flp)
+				flp = FunctionLinkCast(FunctionLink::factory(lexpr));
+			return flp->execute(_as);
+		}
 	}
 
 	// If there is a GetLink, we have to perform the get, and replace
@@ -298,18 +338,25 @@ Handle Instantiator::walk_eager(const Handle& expr)
 	// PatternLink::satisfy() method.
 	if (GET_LINK == t)
 	{
-		HandleSeq oset_results;
-		_avoid_discarding_quotes_level++;
-		seq_eager(oset_results, lexpr->getOutgoingSet());
-		_avoid_discarding_quotes_level--;
+		if (_eager)
+		{
+			HandleSeq oset_results;
+			_avoid_discarding_quotes_level++;
+			seq_eager(oset_results, lexpr->getOutgoingSet());
+			_avoid_discarding_quotes_level--;
 
-		size_t sz = oset_results.size();
-		for (size_t i=0; i< sz; i++)
-			oset_results[i] = _as->add_atom(oset_results[i]);
+			size_t sz = oset_results.size();
+			for (size_t i=0; i< sz; i++)
+				oset_results[i] = _as->add_atom(oset_results[i]);
 
-		LinkPtr lp(createLink(GET_LINK, oset_results));
+			LinkPtr lp(createLink(GET_LINK, oset_results));
 
-		return satisfying_set(_as, Handle(lp));
+			return satisfying_set(_as, Handle(lp));
+		}
+		else
+		{
+			return satisfying_set(_as, expr);
+		}
 	}
 
 mere_recursive_call:
