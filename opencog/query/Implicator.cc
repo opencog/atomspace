@@ -93,6 +93,7 @@ static Handle do_imply(AtomSpace* as,
 
 	bl->imply(impl, do_conn_check);
 
+	// If we got a non-empty answer, just return it.
 	if (0 < impl.get_result_list().size())
 	{
 		// The result_list contains a list of the grounded expressions.
@@ -102,6 +103,8 @@ static Handle do_imply(AtomSpace* as,
 		return gl;
 	}
 
+	// If we are here, then there were zero mathces.
+	//
 	// There are certain useful queries, where the goal of the query
 	// is to determine that some clause or set of clauses are absent
 	// from the AtomSpace. If the clauses are jointly not found, after
