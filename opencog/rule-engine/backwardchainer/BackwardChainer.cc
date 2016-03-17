@@ -259,7 +259,8 @@ void BackwardChainer::process_target(Target& target)
 	std::vector<VarMap> all_implicand_to_target_mappings;
 
 	// If no rules to backward chain on, no way to solve this target
-	if (not select_rule(target, selected_rule, standardized_rule, all_implicand_to_target_mappings))
+	if (not select_rule(target, selected_rule, standardized_rule,
+	                    all_implicand_to_target_mappings))
 		return;
 
 	bc_logger().debug("Selected rule %s", selected_rule.get_name().c_str());
@@ -626,7 +627,8 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
 		possible_premises.insert(possible_premises.end(),
 		                         possible_premises_alt.begin(),
 		                         possible_premises_alt.end());
-		premises_vmap_list.insert(premises_vmap_list.end(), premises_vmap_list_alt.begin(),
+		premises_vmap_list.insert(premises_vmap_list.end(),
+		                          premises_vmap_list_alt.begin(),
 		                          premises_vmap_list_alt.end());
 	}
 
