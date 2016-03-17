@@ -78,14 +78,7 @@ private:
 	 */
 	bool _eager = true;
 	Handle walk_eager(const Handle& tree);
-	bool seq_eager(HandleSeq&, const HandleSeq& orig);
-
-	/* Same as above, but does lazy execution. */
-	Handle walk_lazy(const Handle& tree);
-	bool seq_lazy(HandleSeq&, const HandleSeq& orig);
-
-	bool walk_tree(HandleSeq&, const HandleSeq&,
-	               Handle (Instantiator::*)(const Handle&));
+	bool seq_eager(HandleSeq&, const HandleSeq&);
 
 public:
 	Instantiator(AtomSpace* as) : _as(as) {}
