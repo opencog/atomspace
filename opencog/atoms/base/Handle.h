@@ -291,9 +291,9 @@ ostream& operator<<(ostream& out, const opencog::OrderedHandleSet& hs);
 ostream& operator<<(ostream& out, const opencog::UnorderedHandleSet& hs);
 
 // Debugging helpers, very convenient to print Handle sets in gdb
-string handle_container_to_string(const opencog::HandleSeq& hs);
-string handle_container_to_string(const opencog::OrderedHandleSet& hs);
-string handle_container_to_string(const opencog::UnorderedHandleSet& hs);
+string hs_to_string(const opencog::HandleSeq& hs);
+string ohs_to_string(const opencog::OrderedHandleSet& ohs);
+string uhs_to_string(const opencog::UnorderedHandleSet& uhs);
 
 #ifdef THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
 // The below used to work, but broke in gcc-4.7.2. The reason it
