@@ -185,7 +185,7 @@ private:
 	static AtomSpace *get_as_from_list(SCM);
 
 	// validate arguments coming from scheme passing into C++
-	static void throw_exception(const char *, const char *);
+	static void throw_exception(const std::exception&, const char *);
 	static AtomSpace* verify_atomspace(SCM, const char *, int pos = 1);
 	static Type verify_atom_type(SCM, const char *, int pos = 1);
 	static Handle verify_handle(SCM, const char *, int pos = 1);

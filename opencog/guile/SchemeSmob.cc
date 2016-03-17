@@ -147,13 +147,19 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 
 /* ============================================================== */
 
-[[ noreturn ]] void SchemeSmob::throw_exception(const char *msg,
-                                                const char * func)
+[[ noreturn ]] void SchemeSmob::throw_exception(const std::exception& ex,
+                                                const char *func)
 {
+	const char * msg = ex.what();
 	if (msg and msg[0] != 0)
 	{
-		// Should we even bother to log this?  Probably not ...
-		logger().info("Guile caught C++ exception: %s", msg);
+		// We do NOT log normal opencog exceptions -- the user presumably
+		// knows what they are doing. We DO log other exceptions, since
+		// they are almost surely due to internal errors.
+		if (nullptr == dynamic_cast<const StandardException*>(&ex))
+		{
+			logger().error("Guile caught C++ exception: %s", msg);
+		}
 
 		// scm_misc_error(fe->get_name(), msg, SCM_EOL);
 		scm_throw(
