@@ -35,6 +35,18 @@
 
 using namespace opencog;
 
+std::string varmap_to_string(const VarMap& varmap)
+{
+	stringstream ss;
+	int i = 0;
+	for (const auto& p : varmap) {
+		ss << "key[" << i << "]:" << std::endl << p.first->toString()
+		   << "value[" << i << "]:" << std::endl << p.second->toString();
+		i++;
+	}
+	return ss.str();
+}
+
 BackwardChainer::BackwardChainer(AtomSpace& as, Handle rbs)
 	: _as(as), _configReader(as, rbs),
 	  // create a garbage superspace with _as as parent, so codes

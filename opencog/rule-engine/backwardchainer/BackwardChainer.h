@@ -37,6 +37,8 @@ namespace opencog
 typedef std::map<Handle, UnorderedHandleSet> VarMultimap;
 typedef std::map<Handle, Handle> VarMap;
 
+std::string varmap_to_string(const VarMap&);
+
 /**
  * Backward chaining falls into two cases
  *
