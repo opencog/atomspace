@@ -102,9 +102,9 @@ static NumberNodePtr unwrap_set(Handle h)
 }
 
 // Perform a GreaterThan check
-static TruthValuePtr greater(AtomSpace* as, const LinkPtr& ll)
+static TruthValuePtr greater(AtomSpace* as, const Handle& h)
 {
-	const HandleSeq& oset = ll->getOutgoingSet();
+	const HandleSeq& oset = h->getOutgoingSet();
 	if (2 != oset.size())
 		throw RuntimeException(TRACE_INFO,
 		     "GreaterThankLink expects two arguments");
@@ -122,9 +122,9 @@ static TruthValuePtr greater(AtomSpace* as, const LinkPtr& ll)
 		return TruthValue::FALSE_TV();
 }
 
-static TruthValuePtr equal(AtomSpace* as, const LinkPtr& ll)
+static TruthValuePtr equal(AtomSpace* as, const Handle& h)
 {
-	const HandleSeq& oset = ll->getOutgoingSet();
+	const HandleSeq& oset = h->getOutgoingSet();
 	if (2 != oset.size())
 		throw RuntimeException(TRACE_INFO,
 		     "EqualLink expects two arguments");
@@ -244,11 +244,11 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (EQUAL_LINK == t)
 	{
-		return equal(scratch, LinkCast(evelnk));
+		return equal(scratch, evelnk);
 	}
 	else if (GREATER_THAN_LINK == t)
 	{
-		return greater(scratch, LinkCast(evelnk));
+		return greater(scratch, evelnk);
 	}
 	else if (NOT_LINK == t)
 	{
@@ -525,7 +525,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	// Hard-coded in C++ for speed. (well, and for convenience ...)
 	if (0 == schema.compare("c++:greater"))
 	{
-		return greater(as, LinkCast(args));
+		return greater(as, args);
 	}
 
 	// A very special-case C++ comparison.
