@@ -55,13 +55,51 @@ void EqualLinkUTest::test_equality()
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	Handle thing_a = N(CONCEPT_NODE, "thing A");
+	Handle thing_b = N(CONCEPT_NODE, "thing B");
 	Handle semantic_a =
 		L(PUT_LINK, N(VARIABLE_NODE, "$x"), thing_a);
 
-	Handle ident_aa = L(IDENTICAL_LINK, thing_a, thing_a);
+	Handle semantic_b =
+		L(PUT_LINK, N(VARIABLE_NODE, "$x"), thing_b);
 
-	TruthValuePtr iyes = EvaluationLink::do_evaluate(&_as, ident_aa);
-	TS_ASSERT_LESS_THAN(0.5, iyes->getMean());
+	Handle ident_aa = L(IDENTICAL_LINK, thing_a, thing_a);
+	Handle ident_asa = L(IDENTICAL_LINK, thing_a, semantic_a);
+
+	Handle ident_ab = L(IDENTICAL_LINK, thing_a, thing_b);
+	Handle ident_asb = L(IDENTICAL_LINK, thing_a, semantic_b);
+
+	// -------
+	Handle equal_aa = L(EQUAL_LINK, thing_a, thing_a);
+	Handle equal_asa = L(EQUAL_LINK, thing_a, semantic_a);
+
+	Handle equal_ab = L(EQUAL_LINK, thing_a, thing_b);
+	Handle equal_asb = L(EQUAL_LINK, thing_a, semantic_b);
+
+	// -------
+	TruthValuePtr tv = EvaluationLink::do_evaluate(&_as, ident_aa);
+	TS_ASSERT_LESS_THAN(0.5, tv->getMean());  // true
+
+	tv = EvaluationLink::do_evaluate(&_as, ident_asa);
+	TS_ASSERT_LESS_THAN(tv->getMean(), 0.5); // false
+
+	tv = EvaluationLink::do_evaluate(&_as, ident_ab);
+	TS_ASSERT_LESS_THAN(tv->getMean(), 0.5); // false
+
+	tv = EvaluationLink::do_evaluate(&_as, ident_asb);
+	TS_ASSERT_LESS_THAN(tv->getMean(), 0.5); // false
+
+	// -------
+	tv = EvaluationLink::do_evaluate(&_as, equal_aa);
+	TS_ASSERT_LESS_THAN(0.5, tv->getMean());  // true
+
+	tv = EvaluationLink::do_evaluate(&_as, equal_asa);
+	TS_ASSERT_LESS_THAN(0.5, tv->getMean());  // true
+
+	tv = EvaluationLink::do_evaluate(&_as, equal_ab);
+	TS_ASSERT_LESS_THAN(tv->getMean(), 0.5); // false
+
+	tv = EvaluationLink::do_evaluate(&_as, equal_asb);
+	TS_ASSERT_LESS_THAN(tv->getMean(), 0.5); // false
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
