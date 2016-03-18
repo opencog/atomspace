@@ -80,12 +80,11 @@ static NumberNodePtr unwrap_set(Handle h)
 {
 	if (SET_LINK == h->getType())
 	{
-		LinkPtr lp(LinkCast(h));
-		if (1 != lp->getArity())
+		if (1 != h->getArity())
 			throw SyntaxException(TRACE_INFO,
 				"Don't know how to do arithmetic with this: %s",
 				h->toString().c_str());
-		h = lp->getOutgoingAtom(0);
+		h = h->getOutgoingAtom(0);
 	}
 
 	NumberNodePtr na(NumberNodeCast(h));
@@ -103,9 +102,9 @@ static NumberNodePtr unwrap_set(Handle h)
 }
 
 // Perform a GreaterThan check
-static TruthValuePtr greater(AtomSpace* as, const LinkPtr& ll)
+static TruthValuePtr greater(AtomSpace* as, const Handle& h)
 {
-	const HandleSeq& oset = ll->getOutgoingSet();
+	const HandleSeq& oset = h->getOutgoingSet();
 	if (2 != oset.size())
 		throw RuntimeException(TRACE_INFO,
 		     "GreaterThankLink expects two arguments");
@@ -123,9 +122,9 @@ static TruthValuePtr greater(AtomSpace* as, const LinkPtr& ll)
 		return TruthValue::FALSE_TV();
 }
 
-static TruthValuePtr equal(AtomSpace* as, const LinkPtr& ll)
+static TruthValuePtr equal(AtomSpace* as, const Handle& h)
 {
-	const HandleSeq& oset = ll->getOutgoingSet();
+	const HandleSeq& oset = h->getOutgoingSet();
 	if (2 != oset.size())
 		throw RuntimeException(TRACE_INFO,
 		     "EqualLink expects two arguments");
@@ -142,8 +141,7 @@ static TruthValuePtr equal(AtomSpace* as, const LinkPtr& ll)
 
 static bool is_evaluatable_sat(const Handle& satl)
 {
-	LinkPtr lp(LinkCast(satl));
-	if (1 != lp->getArity())
+	if (1 != satl->getArity())
 		return false;
 
 	PatternLinkPtr plp(PatternLinkCast(satl));
@@ -168,8 +166,7 @@ static bool is_tail_rec(const Handle& thish, const Handle& tail)
 	if (not is_evaluatable_sat(defn))
 		return false;
 
-	LinkPtr l(LinkCast(defn));
-	if (thish == l->getOutgoingAtom(0))
+	if (thish == defn->getOutgoingAtom(0))
 		return true;
 
 	return false;
@@ -228,8 +225,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	Type t = evelnk->getType();
 	if (EVALUATION_LINK == t)
 	{
-		const LinkPtr l(LinkCast(evelnk));
-		const HandleSeq& sna(l->getOutgoingSet());
+		const HandleSeq& sna(evelnk->getOutgoingSet());
 
 		if (2 != sna.size())
 			throw SyntaxException(TRACE_INFO,
@@ -248,23 +244,21 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (EQUAL_LINK == t)
 	{
-		return equal(scratch, LinkCast(evelnk));
+		return equal(scratch, evelnk);
 	}
 	else if (GREATER_THAN_LINK == t)
 	{
-		return greater(scratch, LinkCast(evelnk));
+		return greater(scratch, evelnk);
 	}
 	else if (NOT_LINK == t)
 	{
-		LinkPtr l(LinkCast(evelnk));
-		TruthValuePtr tv(do_eval_scratch(as, l->getOutgoingAtom(0), scratch));
+		TruthValuePtr tv(do_eval_scratch(as, evelnk->getOutgoingAtom(0), scratch));
 		return SimpleTruthValue::createTV(
 		              1.0 - tv->getMean(), tv->getCount());
 	}
 	else if (AND_LINK == t)
 	{
-		LinkPtr l(LinkCast(evelnk));
-		for (const Handle& h : l->getOutgoingSet())
+		for (const Handle& h : evelnk->getOutgoingSet())
 		{
 			TruthValuePtr tv(do_eval_scratch(as, h, scratch));
 			if (tv->getMean() < 0.5)
@@ -274,8 +268,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (OR_LINK == t)
 	{
-		LinkPtr l(LinkCast(evelnk));
-		for (const Handle& h : l->getOutgoingSet())
+		for (const Handle& h : evelnk->getOutgoingSet())
 		{
 			TruthValuePtr tv(do_eval_scratch(as, h, scratch));
 			if (0.5 < tv->getMean())
@@ -285,8 +278,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (SEQUENTIAL_AND_LINK == t)
 	{
-		LinkPtr l(LinkCast(evelnk));
-		const HandleSeq& oset = l->getOutgoingSet();
+		const HandleSeq& oset = evelnk->getOutgoingSet();
 		size_t arity = oset.size();
 		if (0 == arity) return TruthValue::TRUE_TV();
 
@@ -308,8 +300,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (SEQUENTIAL_OR_LINK == t)
 	{
-		LinkPtr l(LinkCast(evelnk));
-		const HandleSeq& oset = l->getOutgoingSet();
+		const HandleSeq& oset = evelnk->getOutgoingSet();
 		size_t arity = oset.size();
 		if (0 == arity) return TruthValue::FALSE_TV();
 
@@ -331,8 +322,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (JOIN_LINK == t)
 	{
-		LinkPtr l(LinkCast(evelnk));
-		const HandleSeq& oset = l->getOutgoingSet();
+		const HandleSeq& oset = evelnk->getOutgoingSet();
 		size_t arity = oset.size();
 		std::vector<TruthValuePtr> tvp(arity);
 
@@ -357,10 +347,8 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (PARALLEL_LINK == t)
 	{
-		LinkPtr l(LinkCast(evelnk));
-
 		// Create and detach threads; return immediately.
-		for (const Handle& h : l->getOutgoingSet())
+		for (const Handle& h : evelnk->getOutgoingSet())
 		{
 			std::thread thr(&thread_eval, as, h, scratch, silent);
 			thr.detach();
@@ -409,8 +397,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		// directly, instead of going through the pattern matcher.
 		// The only reason we want to do even this much is to do
 		// tail-recursion optimization, if possible.
-		LinkPtr l(LinkCast(evelnk));
-		return do_eval_scratch(as, l->getOutgoingAtom(0), scratch);
+		return do_eval_scratch(as, evelnk->getOutgoingAtom(0), scratch);
 	}
 	else if (PUT_LINK == t)
 	{
@@ -538,7 +525,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	// Hard-coded in C++ for speed. (well, and for convenience ...)
 	if (0 == schema.compare("c++:greater"))
 	{
-		return greater(as, LinkCast(args));
+		return greater(as, args);
 	}
 
 	// A very special-case C++ comparison.
@@ -546,12 +533,11 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	// Hard-coded in C++ for speed. (well, and for convenience ...)
 	if (0 == schema.compare("c++:exclusive"))
 	{
-		LinkPtr ll(LinkCast(args));
-		Arity sz = ll->getArity();
+		Arity sz = args->getArity();
 		for (Arity i=0; i<sz-1; i++) {
-			Handle h1(ll->getOutgoingAtom(i));
+			Handle h1(args->getOutgoingAtom(i));
 			for (Arity j=i+1; j<sz; j++) {
-				Handle h2(ll->getOutgoingAtom(j));
+				Handle h2(args->getOutgoingAtom(j));
 				if (h1 == h2) return TruthValue::FALSE_TV();
 			}
 		}
