@@ -381,10 +381,12 @@ Handle Variables::substitute(const Handle& func,
 			"Incorrect number of arguments specified, expecting %lu got %lu",
 			varseq.size(), args.size());
 
-	// XXX TODO type-checking should be lazy; if the function is not
+	// XXX TODO type-checking could be lazy; if the function is not
 	// actually using one of the args, it's type should not be checked.
 	// Viz., one of the values might be undefined, and that's OK, if that
-	// value is never actually used.
+	// value is never actually used.  Fixing this requires a cut-n-paste
+	// of the substitute_nocheck code. I'm too lazy to do this ... no one
+	// wants this whizzy-ness just right yet.
 	if (not is_type(args))
 		throw SyntaxException(TRACE_INFO,
 			"Arguments fail to match variable declarations");

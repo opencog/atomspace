@@ -81,6 +81,8 @@ struct FreeVariables
 	// Given the tree `tree` containing variables in it, create and
 	// return a new tree with the indicated values `vals` substituted
 	// for the variables.  "nocheck" == no type checking is done.
+	// This performs an almost pure, syntactic beta-reduction; its
+	// almost-pure because it does honour the semantics of QuoteLink.
 	Handle substitute_nocheck(const Handle&, const HandleSeq&, int = 0) const;
 };
 
