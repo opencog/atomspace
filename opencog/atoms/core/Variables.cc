@@ -67,7 +67,7 @@ void VarScraper::find_vars(HandleSeq& varseq, std::set<Handle>& varset,
 		bool save_quote = _in_quote;
 		if (QUOTE_LINK == t)
 			_in_quote = true;
-
+		else
 		if (UNQUOTE_LINK == t)
 			_in_quote = false;
 
@@ -128,16 +128,22 @@ void FreeVariables::find_variables(const Handle& h)
 /* ================================================================= */
 
 Handle FreeVariables::substitute_nocheck(const Handle& term,
-                                         const HandleSeq& args,
-                                         int quotation_level) const
+                                         const HandleSeq& args) const
+{
+	return substitute_scoped(term, args, index, 0);
+}
+
+Handle FreeVariables::substitute_scoped(const Handle& term,
+                                        const HandleSeq& args,
+                                        const IndexMap& index_map,
+                                        int quotation_level) const
 {
 	// If we are not in a quote context, and `term` is a variable,
 	// then just return the corresponding value.
 	if (0 == quotation_level)
 	{
-		std::map<Handle, unsigned int>::const_iterator idx;
-		idx = index.find(term);
-		if (idx != index.end())
+		IndexMap::const_iterator idx = index_map.find(term);
+		if (idx != index_map.end())
 			return args.at(idx->second);
 	}
 
@@ -163,7 +169,7 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
 	HandleSeq oset;
 	for (const Handle& h : term->getOutgoingSet())
 	{
-		oset.emplace_back(substitute_nocheck(h, args, quotation_level));
+		oset.emplace_back(substitute_scoped(h, args, index_map, quotation_level));
 	}
 	return Handle(createLink(term->getType(), oset));
 }

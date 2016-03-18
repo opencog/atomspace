@@ -57,7 +57,8 @@ struct FreeVariables
 	/// aka "PutLink") method.
 	HandleSeq varseq;
 	std::set<Handle> varset;
-	std::map<Handle, unsigned int> index;
+	typedef std::map<Handle, unsigned int> IndexMap;
+	IndexMap index;
 
 	/// Create an ordered set of the free variables in the given oset.
 	///
@@ -84,7 +85,10 @@ struct FreeVariables
 	// for the variables.  "nocheck" == no type checking is done.
 	// This performs an almost pure, syntactic beta-reduction; its
 	// almost-pure because it does honour the semantics of QuoteLink.
-	Handle substitute_nocheck(const Handle&, const HandleSeq&, int = 0) const;
+	Handle substitute_nocheck(const Handle&, const HandleSeq&) const;
+protected:
+	Handle substitute_scoped(const Handle&, const HandleSeq&,
+	                         const IndexMap&, int) const;
 };
 
 typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
