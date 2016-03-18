@@ -50,9 +50,7 @@ bool Instantiator::walk_sequence(HandleSeq& oset_results, const HandleSeq& expr)
 		// of the glob elements in sequence.
 		if (_quotation_level == 0 and GLOB_NODE == h->getType() and hg != h)
 		{
-			LinkPtr lp(LinkCast(hg));
-			OC_ASSERT(nullptr != lp, "Expecting glob list");
-			for (const Handle& gloe: lp->getOutgoingSet())
+			for (const Handle& gloe: hg->getOutgoingSet())
 			{
 				if (NULL != gloe)
 					oset_results.emplace_back(gloe);
@@ -186,8 +184,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		// Anyway, do_evaluate() will throw if rex is not evaluatable.
 		if (SET_LINK == rex->getType())
 		{
-			LinkPtr slp(LinkCast(rex));
-			for (const Handle& plo : slp->getOutgoingSet())
+			for (const Handle& plo : rex->getOutgoingSet())
 			{
 				try {
 					EvaluationLink::do_evaluate(_as, plo, true);
@@ -250,7 +247,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			Handle body(flp->get_body());
 			Variables vars(flp->get_variables());
 
-			const HandleSeq& oset(LinkCast(args)->getOutgoingSet());
+			const HandleSeq& oset(args->getOutgoingSet());
 			Handle beta_reduced(vars.substitute_nocheck(body, oset));
 			return walk_tree(beta_reduced);
 		}
@@ -287,8 +284,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			// function itself.
 			HandleSeq oset_results;
 			walk_sequence(oset_results, expr->getOutgoingSet());
-			Handle hl(FoldLink::factory(t, oset_results));
-			FoldLinkPtr flp(FoldLinkCast(hl));
+			FoldLinkPtr flp(FoldLink::factory(t, oset_results));
 			return flp->execute(_as);
 		}
 		else
