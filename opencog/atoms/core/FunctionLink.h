@@ -51,6 +51,8 @@ class AtomSpace;
  * Note that this class must NOT be used for user-defined functions;
  * users should use the LambdaLink for that.
  */
+class FunctionLink;
+typedef std::shared_ptr<FunctionLink> FunctionLinkPtr;
 class FunctionLink : public FreeLink
 {
 protected:
@@ -74,11 +76,10 @@ public:
 	virtual Handle execute(AtomSpace* = NULL) const;
 	static Handle do_execute(AtomSpace*, const Handle&);
 
-	static LinkPtr factory(LinkPtr);
-	static Handle factory(Type, const HandleSeq&);
+	static FunctionLinkPtr factory(const Handle&);
+	static FunctionLinkPtr factory(Type, const HandleSeq&);
 };
 
-typedef std::shared_ptr<FunctionLink> FunctionLinkPtr;
 static inline FunctionLinkPtr FunctionLinkCast(const Handle& h)
    { return std::dynamic_pointer_cast<FunctionLink>(AtomCast(h)); }
 static inline FunctionLinkPtr FunctionLinkCast(const AtomPtr& a)
