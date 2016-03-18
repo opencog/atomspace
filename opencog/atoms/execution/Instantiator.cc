@@ -74,7 +74,6 @@ bool Instantiator::walk_sequence(HandleSeq& oset_results, const HandleSeq& expr)
 Handle Instantiator::walk_tree(const Handle& expr)
 {
 	Type t = expr->getType();
-	LinkPtr lexpr(LinkCast(expr));
 
 	// Quotation case
 	if (QUOTE_LINK == t)
@@ -87,14 +86,14 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	if (((_avoid_discarding_quotes_level == 0)
 		and (_quotation_level == 1 and QUOTE_LINK == t))
 		or (_quotation_level == 0 and UNQUOTE_LINK == t)) {
-		if (1 != lexpr->getArity())
+		if (1 != expr->getArity())
 			throw InvalidParamException(TRACE_INFO,
 			                            "QuoteLink/UnquoteLink has "
 			                            "unexpected arity!");
-		return walk_tree(lexpr->getOutgoingAtom(0));
+		return walk_tree(expr->getOutgoingAtom(0));
 	}
 
-	if (not lexpr)
+	if (expr->isNode())
 	{
 		if (_quotation_level > 0)
 			return expr;
@@ -151,7 +150,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	{
 		PutLinkPtr ppp(PutLinkCast(expr));
 		if (nullptr == ppp)
-			ppp = createPutLink(*lexpr);
+			ppp = createPutLink(*LinkCast(expr));
 
 		if (_eager)
 		{
@@ -219,7 +218,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		// atomspace factory, but that is currently broken, so do it here.
 		ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(expr));
 		if (nullptr == eolp)
-			eolp = createExecutionOutputLink(lexpr->getOutgoingSet());
+			eolp = createExecutionOutputLink(expr->getOutgoingSet());
 
 		// At this time, the GSN or the DSN is always in position 0
 		// of the outgoing set, and the ListLink of arguments is always
@@ -265,7 +264,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	if (DELETE_LINK == t)
 	{
 		HandleSeq oset_results;
-		walk_sequence(oset_results, lexpr->getOutgoingSet());
+		walk_sequence(oset_results, expr->getOutgoingSet());
 		for (const Handle& h: oset_results)
 		{
 			Type ht = h->getType();
@@ -287,7 +286,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			// Perform substitution on all arguments before applying the
 			// function itself.
 			HandleSeq oset_results;
-			walk_sequence(oset_results, lexpr->getOutgoingSet());
+			walk_sequence(oset_results, expr->getOutgoingSet());
 			Handle hl(FoldLink::factory(t, oset_results));
 			FoldLinkPtr flp(FoldLinkCast(hl));
 			return flp->execute(_as);
@@ -296,7 +295,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		{
 			FoldLinkPtr flp(FoldLinkCast(expr));
 			if (nullptr == flp)
-				flp = FoldLinkCast(FoldLink::factory(lexpr));
+				flp = FoldLinkCast(FoldLink::factory(LinkCast(expr)));
 			return flp->execute(_as);
 		}
 	}
@@ -312,7 +311,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		if (_eager)
 		{
 			HandleSeq oset_results;
-			walk_sequence(oset_results, lexpr->getOutgoingSet());
+			walk_sequence(oset_results, expr->getOutgoingSet());
 			Handle hl(FunctionLink::factory(t, oset_results));
 			FunctionLinkPtr flp(FunctionLinkCast(hl));
 			return flp->execute(_as);
@@ -321,7 +320,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		{
 			FunctionLinkPtr flp(FunctionLinkCast(expr));
 			if (nullptr == flp)
-				flp = FunctionLinkCast(FunctionLink::factory(lexpr));
+				flp = FunctionLinkCast(FunctionLink::factory(LinkCast(expr)));
 			return flp->execute(_as);
 		}
 	}
@@ -335,7 +334,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		{
 			HandleSeq oset_results;
 			_avoid_discarding_quotes_level++;
-			walk_sequence(oset_results, lexpr->getOutgoingSet());
+			walk_sequence(oset_results, expr->getOutgoingSet());
 			_avoid_discarding_quotes_level--;
 
 			size_t sz = oset_results.size();
@@ -356,7 +355,7 @@ mere_recursive_call:
 	// None of the above. Create a duplicate link, but with an outgoing
 	// set where the variables have been substituted by their values.
 	HandleSeq oset_results;
-	bool changed = walk_sequence(oset_results, lexpr->getOutgoingSet());
+	bool changed = walk_sequence(oset_results, expr->getOutgoingSet());
 	if (changed)
 	{
 		LinkPtr subl = createLink(t, oset_results, expr->getTruthValue());
