@@ -293,9 +293,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		}
 		else
 		{
-			FoldLinkPtr flp(FoldLinkCast(expr));
-			if (nullptr == flp)
-				flp = FoldLinkCast(FoldLink::factory(LinkCast(expr)));
+			FoldLinkPtr flp(FoldLink::factory(expr));
 			return flp->execute(_as);
 		}
 	}
