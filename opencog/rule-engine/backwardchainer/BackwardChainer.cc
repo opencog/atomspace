@@ -245,7 +245,8 @@ void BackwardChainer::process_target(Target& target)
 		HandleSeq sub_premises = LinkCast(htarget)->getOutgoingSet();
 
 		for (Handle& h : sub_premises)
-			_targets_set.emplace(h, _garbage_superspace.add_atom(gen_sub_varlist(h, htarget_vardecl, std::set<Handle>())));
+			_targets_set.emplace(h, gen_sub_varlist(h, htarget_vardecl,
+			                                        std::set<Handle>()));
 
 		return;
 	}
@@ -311,10 +312,9 @@ void BackwardChainer::process_target(Target& target)
 
 		target.store_step(selected_rule, { hrule_implicant_reverse_grounded });
 		_targets_set.emplace(hrule_implicant_reverse_grounded,
-		                     _garbage_superspace.add_atom(
-		                         gen_sub_varlist(hrule_implicant_reverse_grounded,
-		                                         standardized_rule.get_vardecl(),
-		                                         additional_free_var)));
+		                     gen_sub_varlist(hrule_implicant_reverse_grounded,
+		                                     standardized_rule.get_vardecl(),
+		                                     additional_free_var));
 		return;
 	}
 
@@ -602,10 +602,9 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
 	// will be the mapping from free variables in himplicant to stuff in a premise
 	HandleSeq possible_premises =
 		match_knowledge_base(hrule_implicant_reverse_grounded,
-	                         _garbage_superspace.add_atom(
-	                             gen_sub_varlist(hrule_implicant_reverse_grounded,
-	                                             hrule_vardecl,
-	                                             additional_free_varset)),
+		                     gen_sub_varlist(hrule_implicant_reverse_grounded,
+		                                     hrule_vardecl,
+		                                     additional_free_varset),
 	                         premises_vmap_list);
 
 	// Do another match but without the target's free var as variable, so they
@@ -616,10 +615,9 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
 
 		HandleSeq possible_premises_alt =
 		        match_knowledge_base(hrule_implicant_reverse_grounded,
-		                             _garbage_superspace.add_atom(
-		                                 gen_sub_varlist(hrule_implicant_reverse_grounded,
-		                                                 hrule_vardecl,
-		                                                 std::set<Handle>())),
+		                             gen_sub_varlist(hrule_implicant_reverse_grounded,
+		                                             hrule_vardecl,
+		                                             std::set<Handle>()),
 		                             premises_vmap_list_alt,
 		                             true);
 
@@ -908,7 +906,7 @@ bool BackwardChainer::select_rule(const Target& target,
 
 			if (not unify(h,
 			              htarget,
-			              _garbage_superspace.add_atom(gen_sub_varlist(h, hrule_vardecl, std::set<Handle>())),
+			              gen_sub_varlist(h, hrule_vardecl, std::set<Handle>()),
 			              htarget_vardecl,
 			              mapping))
 				continue;
@@ -932,7 +930,8 @@ bool BackwardChainer::select_rule(const Target& target,
 
 				if (not unify(h,
 				              htarget,
-				              _garbage_superspace.add_atom(gen_sub_varlist(h, hrule_vardecl, std::set<Handle>())),
+				              gen_sub_varlist(h, hrule_vardecl,
+				                              std::set<Handle>()),
 				              htarget_vardecl,
 				              mapping))
 					continue;
@@ -953,7 +952,8 @@ bool BackwardChainer::select_rule(const Target& target,
 }
 
 /**
- * Given a VariableList, generate a new VariableList of only the specific vars.
+ * Given a VariableList, generate a new VariableList of only the
+ * specific vars and add it to the _garbage_superspace.
  *
  * Mostly to keep the typed definition from the original VariableList.  Also
  * put any "free" variables not inside the original VariableList in the new
@@ -1007,6 +1007,6 @@ Handle BackwardChainer::gen_sub_varlist(const Handle& parent,
 			final_oset.push_back(h);
 	}
 
-	return Handle(createVariableList(final_oset));
+	return _garbage_superspace.add_atom(createVariableList(final_oset));
 }
 
