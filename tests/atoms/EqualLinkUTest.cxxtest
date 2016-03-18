@@ -1,0 +1,67 @@
+/*
+ * tests/atoms/EqualUTest.cxxtest
+ *
+ * Copyright (C) 2016 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
+
+using namespace opencog;
+
+// Test the EqualLink.
+//
+class EqualLinkUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+
+public:
+	EqualLinkUTest()
+	{
+		logger().set_print_to_stdout_flag(true);
+	}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void test_equality();
+};
+
+#define N _as.add_node
+#define L _as.add_link
+
+// Test equality vs. identity
+void EqualLinkUTest::test_equality()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle thing_a = N(CONCEPT_NODE, "thing A");
+	Handle semantic_a =
+		L(PUT_LINK, N(VARIABLE_NODE, "$x"), thing_a);
+
+	Handle ident_aa = L(IDENTICAL_LINK, thing_a, thing_a);
+
+	TruthValuePtr iyes = EvaluationLink::do_evaluate(&_as, ident_aa);
+	TS_ASSERT_LESS_THAN(0.5, iyes->getMean());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
