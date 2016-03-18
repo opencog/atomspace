@@ -27,7 +27,7 @@
             )
             ;; To avoid matching (Implication A B) and (Implication B A)
             (NotLink
-                (EqualLink
+                (IdenticalLink
                     (VariableNode "$A")
                     (VariableNode "$C")
                 )

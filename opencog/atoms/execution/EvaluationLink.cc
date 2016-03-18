@@ -122,6 +122,21 @@ static TruthValuePtr greater(AtomSpace* as, const Handle& h)
 		return TruthValue::FALSE_TV();
 }
 
+/// Check for syntactic equality
+static TruthValuePtr identical(const Handle& h)
+{
+	const HandleSeq& oset = h->getOutgoingSet();
+	if (2 != oset.size())
+		throw RuntimeException(TRACE_INFO,
+		     "IdenticalLink expects two arguments");
+
+	if (oset[0] == oset[1])
+		return TruthValue::TRUE_TV();
+	else
+		return TruthValue::FALSE_TV();
+}
+
+/// Check for semantic equality
 static TruthValuePtr equal(AtomSpace* as, const Handle& h)
 {
 	const HandleSeq& oset = h->getOutgoingSet();
@@ -241,6 +256,10 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		Handle args(inst.execute(sna.at(1)));
 
 		return do_evaluate(scratch, sna.at(0), args);
+	}
+	else if (IDENTICAL_LINK == t)
+	{
+		return identical(evelnk);
 	}
 	else if (EQUAL_LINK == t)
 	{
