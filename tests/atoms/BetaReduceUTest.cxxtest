@@ -56,7 +56,7 @@ void BetaReduceUTest::test_unquote()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	// Create ScopeLinks.
+	// Create ScopeLink.
 	Handle body =
 		L(SET_LINK,
 			N(VARIABLE_NODE, "$X"),
@@ -107,6 +107,66 @@ void BetaReduceUTest::test_unquote()
 void BetaReduceUTest::test_alpha_hiding()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create ScopeLink with one variable.
+	Handle xbody =
+		L(SET_LINK,
+			N(VARIABLE_NODE, "$X"),
+			L(QUOTE_LINK, N(VARIABLE_NODE, "$X")),
+			L(QUOTE_LINK,
+				L(SET_LINK,
+					N(VARIABLE_NODE, "$X"),
+					L(UNQUOTE_LINK, N(VARIABLE_NODE, "$X")))));
+
+	Handle hscox =
+		L(SCOPE_LINK, N(VARIABLE_NODE, "$X"), xbody);
+
+	// A scope link with two variables, and $X is clobbered/hidden
+	// aka alpha-conversion-conflicted by the inner ScopeLink.
+	Handle xybody =
+		L(SET_LINK,
+			N(VARIABLE_NODE, "$X"),
+			N(VARIABLE_NODE, "$Y"),
+			L(QUOTE_LINK, N(VARIABLE_NODE, "$X")),
+			L(QUOTE_LINK, N(VARIABLE_NODE, "$Y")),
+			hscox);
+
+	Handle hscoxy =
+		L(SCOPE_LINK,
+			L(VARIABLE_LIST,
+				N(VARIABLE_NODE, "$X"),
+				N(VARIABLE_NODE, "$Y")),
+			xybody);
+
+	ScopeLinkPtr scoxy(ScopeLinkCast(hscoxy));
+	TS_ASSERT(scoxy != nullptr);
+
+	// Create values to plug in;
+	Handle chick = N(CONCEPT_NODE, "hippy chick");
+	Handle dude = N(CONCEPT_NODE, "smelly dude");
+	HandleSeq vals;
+	vals.push_back(chick);
+	vals.push_back(dude);
+
+	// Perform beta reduction
+	const Variables& vars = scoxy->get_variables();
+	Handle redox = vars.substitute(xybody, vals);
+	redox = _as.add_atom(redox);
+	TS_ASSERT(redox != nullptr);
+
+	printf("reduced set=%s\n", redox->toString().c_str());
+
+	// What we expect to get.
+	Handle xypect =
+		L(SET_LINK, chick, dude,
+			L(QUOTE_LINK, N(VARIABLE_NODE, "$X")),
+			L(QUOTE_LINK, N(VARIABLE_NODE, "$Y")),
+			hscox);
+
+	printf("expected set=%s\n", xypect->toString().c_str());
+
+	// the reduced and the expected sets should be identical.
+	TS_ASSERT(redox == xypect);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
