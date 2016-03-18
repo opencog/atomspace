@@ -57,7 +57,8 @@ struct FreeVariables
 	/// aka "PutLink") method.
 	HandleSeq varseq;
 	std::set<Handle> varset;
-	std::map<Handle, unsigned int> index;
+	typedef std::map<Handle, unsigned int> IndexMap;
+	IndexMap index;
 
 	/// Create an ordered set of the free variables in the given oset.
 	///
@@ -72,16 +73,22 @@ struct FreeVariables
 	///
 	/// Variables that are bound inside of some deeper link are ignored;
 	/// they are not free, and thus must not be collected up.  That is,
-	/// any bound variables appearing in a GetLink, BindLink,
-	/// SatisfactionLink, etc. will not be collected.  Any *free* variables
-	/// in these same links *will* be collected (since they are free!)
+	/// any bound variables appearing in a ScopeLink (such as GetLink,
+	/// BindLink, SatisfactionLink, etc.) will not be collected.  Any
+	/// *free* variables in these same links *will* be collected (since
+	/// they are free!)
 	void find_variables(const Handle&);
 	void find_variables(const HandleSeq&);
 
 	// Given the tree `tree` containing variables in it, create and
 	// return a new tree with the indicated values `vals` substituted
 	// for the variables.  "nocheck" == no type checking is done.
+	// This performs an almost pure, syntactic beta-reduction; its
+	// almost-pure because it does honour the semantics of QuoteLink.
 	Handle substitute_nocheck(const Handle&, const HandleSeq&) const;
+protected:
+	Handle substitute_scoped(const Handle&, const HandleSeq&,
+	                         const IndexMap&, int) const;
 };
 
 typedef std::map<Handle, const std::set<Type> > VariableTypeMap;

@@ -6,6 +6,7 @@ ADD_LIBRARY(ruleengine
 	backwardchainer/BackwardChainerPMCB
 	backwardchainer/Target
 	backwardchainer/UnifyPMCB
+	backwardchainer/BCLogger
 	forwardchainer/FCStat
 	forwardchainer/FocusSetPMCB
 	forwardchainer/ForwardChainer

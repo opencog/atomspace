@@ -97,7 +97,8 @@ private:
 	// the rule to the RBS)
 	float weight_;
 
-	Handle standardize_helper(AtomSpace* as, Handle, std::map<Handle, Handle>&);
+	Handle standardize_helper(AtomSpace* as, const Handle&,
+	                          std::map<Handle, Handle>&);
 };
 
 } // ~namespace opencog
