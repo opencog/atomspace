@@ -103,13 +103,13 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		}
 
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
-			return Handle(expr);
+			return expr;
 
 		// If we are here, we found a variable. Look it up. Return a
 		// grounding if it has one, otherwise return the variable
 		// itself.
 		std::map<Handle,Handle>::const_iterator it = _vmap->find(expr);
-		if (_vmap->end() == it) return Handle(expr);
+		if (_vmap->end() == it) return expr;
 
 		// Not so fast, pardner. VariableNodes can be grounded by
 		// links, and those links may be executable. In that case,
@@ -117,7 +117,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 
 		// halt infinite regress
 		if (_halt)
-			return Handle(expr);
+			return expr;
 
 		_halt = true;
 		Handle hgnd(walk_tree(it->second));
@@ -344,9 +344,34 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		}
 	}
 
-mere_recursive_call:
+	// I beleive that all the VirtualLink's are capable of doing
+	// lazy evaluation on thier own. Therefore, we merely perform
+	// subsitution on them, and let some later evaluator force
+	// evaluation, if necesssary.
+	if (classserver().isA(t, VIRTUAL_LINK))
+	{
+		if (_vmap->empty()) return expr;
+
+		// XXX crud.  Stupid inefficient format conversion. FIXME.
+		// FreeVariables::substitute_nocheck() performs beta-reduction
+		// correctly, so we just use that. But it takes a specific
+		// format, and a variable-value map is not one of them.
+		HandleSeq vals;
+		FreeVariables crud;
+		unsigned int idx = 0;
+		for (const auto& pr : *_vmap)
+		{
+			crud.varseq.push_back(pr.first);
+			crud.index.insert({pr.first, idx});
+			vals.push_back(pr.second);
+			idx++;
+		}
+		return crud.substitute_nocheck(expr, vals);
+	}
+
 	// None of the above. Create a duplicate link, but with an outgoing
 	// set where the variables have been substituted by their values.
+mere_recursive_call:
 	HandleSeq oset_results;
 	bool changed = walk_sequence(oset_results, expr->getOutgoingSet());
 	if (changed)
