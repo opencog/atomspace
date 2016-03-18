@@ -59,7 +59,7 @@
 (define (one-arc-one)
 	(wrapper
 		(list one->x x->one
-			(EqualLink (VariableNode "$x") (ConceptNode "idea one"))
+			(IdenticalLink (VariableNode "$x") (ConceptNode "idea one"))
 		)
 	)
 )
@@ -67,7 +67,7 @@
 (define (one-arc-three)
 	(wrapper
 		(list one->x x->one
-			(EqualLink (VariableNode "$x") (ConceptNode "idea three"))
+			(IdenticalLink (VariableNode "$x") (ConceptNode "idea three"))
 		)
 	)
 )
@@ -76,8 +76,8 @@
 (define (zero-arcs)
 	(wrapper
 		(list one->x x->one
-			(EqualLink (VariableNode "$x") (ConceptNode "idea three"))
-			(EqualLink (VariableNode "$x") (ConceptNode "idea four"))
+			(IdenticalLink (VariableNode "$x") (ConceptNode "idea three"))
+			(IdenticalLink (VariableNode "$x") (ConceptNode "idea four"))
 		)
 	)
 )
@@ -87,7 +87,7 @@
 	(wrapper
 		(list one->x x->one
 			(AbsentLink
-				(EqualLink (VariableNode "$x") (ConceptNode "idea three"))
+				(IdenticalLink (VariableNode "$x") (ConceptNode "idea three"))
 			)
 		)
 	)
@@ -98,13 +98,13 @@
 	(wrapper
 		(list one->x x->one
 			(AbsentLink
-				(EqualLink (VariableNode "$x") (ConceptNode "idea three"))
+				(IdenticalLink (VariableNode "$x") (ConceptNode "idea three"))
 			)
 			(AbsentLink
-				(EqualLink (VariableNode "$x") (ConceptNode "idea four"))
+				(IdenticalLink (VariableNode "$x") (ConceptNode "idea four"))
 			)
 			(AbsentLink
-				(EqualLink (VariableNode "$x") (ConceptNode "idea five"))
+				(IdenticalLink (VariableNode "$x") (ConceptNode "idea five"))
 			)
 		)
 	)
@@ -118,7 +118,7 @@
 	(wrapper
 		(list one->x x->one
 			(NotLink
-				(EqualLink (VariableNode "$x") (ConceptNode "idea one"))
+				(IdenticalLink (VariableNode "$x") (ConceptNode "idea one"))
 			)
 		)
 	)
@@ -129,8 +129,8 @@
 	(wrapper
 		(list one->x x->one
 			(OrLink
-				(EqualLink (VariableNode "$x") (ConceptNode "idea one"))
-				(EqualLink (VariableNode "$x") (ConceptNode "idea two"))
+				(IdenticalLink (VariableNode "$x") (ConceptNode "idea one"))
+				(IdenticalLink (VariableNode "$x") (ConceptNode "idea two"))
 			)
 		)
 	)
@@ -142,8 +142,8 @@
 		(list one->x x->one
 			(NotLink
 				(OrLink
-					(EqualLink (VariableNode "$x") (ConceptNode "idea one"))
-					(EqualLink (VariableNode "$x") (ConceptNode "idea two"))
+					(IdenticalLink (VariableNode "$x") (ConceptNode "idea one"))
+					(IdenticalLink (VariableNode "$x") (ConceptNode "idea two"))
 				)
 			)
 		)
@@ -156,12 +156,12 @@
 		(list one->x x->one
 			(AndLink
 				(NotLink
-					(EqualLink (VariableNode "$x") (ConceptNode "idea three"))
+					(IdenticalLink (VariableNode "$x") (ConceptNode "idea three"))
 				)
 				(NotLink
 					(OrLink
-						(EqualLink (VariableNode "$x") (ConceptNode "idea four"))
-						(EqualLink (VariableNode "$x") (ConceptNode "idea five"))
+						(IdenticalLink (VariableNode "$x") (ConceptNode "idea four"))
+						(IdenticalLink (VariableNode "$x") (ConceptNode "idea five"))
 					)
 				)
 			)

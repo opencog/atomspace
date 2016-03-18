@@ -57,6 +57,12 @@ SIMILARITY_LINK <- UNORDERED_LINK
 EXTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 
+// Evaluatable link. Any link type which might be evaluated, resulting
+// in a truth-value, should inherit from this type.  It is a mixin-type,
+// it does nothing by itself, but is used to identify boolean-ish,
+// probabilisitic-TV-valued link types.
+EVALUATABLE_LINK <- LINK
+
 // Boolean set operations, logical constants.
 // These are used by the pattern matcher to compute crisp-logic
 // boolean combinations of predicates.
@@ -65,13 +71,13 @@ INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 // behavior-tree Sequence and Fallback to be implemented: they guarantee
 // sequential execution until the first failure or the first success.
 //
-TRUE_LINK <- ORDERED_LINK
-FALSE_LINK <- ORDERED_LINK
-AND_LINK <- UNORDERED_LINK
-OR_LINK <- UNORDERED_LINK
-NOT_LINK <- UNORDERED_LINK
-SEQUENTIAL_AND_LINK <- ORDERED_LINK
-SEQUENTIAL_OR_LINK <- ORDERED_LINK
+TRUE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
+FALSE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
+AND_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
+OR_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
+NOT_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
+SEQUENTIAL_AND_LINK <- ORDERED_LINK,EVALUATABLE_LINK
+SEQUENTIAL_OR_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 
 // The 'intuitionist logic' version of NOT_LINK is ABSENT_LINK.
 // In 'intuitionist logic', the opposite of "true" is not "false",
@@ -79,7 +85,7 @@ SEQUENTIAL_OR_LINK <- ORDERED_LINK
 // don't-know link.  Currently, it is used during pattern matching
 // to find clauses that may or may not be present: clauses that are
 // optionally present.
-ABSENT_LINK <- UNORDERED_LINK
+ABSENT_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
 
 // The 'intuitionist logic' version of OR_LINK is 'multiple choice'
 // (the 'axiom of choice', by terrible abuse of terminology).  The
@@ -102,7 +108,7 @@ CHOICE_LINK <- ORDERED_LINK
 // of AbsentLink, and is dual to ChoiceLink, since it requires that all
 // terms are AND'ed together.
 //
-PRESENT_LINK <- ORDERED_LINK
+PRESENT_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 
 // Performance scripting links.
 // ParallelLink launches multiple threads, but does not wait for any of
@@ -229,7 +235,7 @@ PUT_LINK <- SCOPE_LINK
 // ImplicationLink, except that its imperative, not declarative.
 PATTERN_LINK <- SCOPE_LINK         // A pattern encapsulated in a Link.
 GET_LINK <- PATTERN_LINK           // Finds all groundings, return atoms
-SATISFACTION_LINK <- PATTERN_LINK  // Finds all groundings, return TV
+SATISFACTION_LINK <- PATTERN_LINK,EVALUATABLE_LINK  // Finds all groundings, return TV
 BIND_LINK <- GET_LINK              // Finds all groundings and executes
 
 // ==============================================================
@@ -316,7 +322,7 @@ ASSOCIATIVE_LINK <- ORDERED_LINK
 ATTRACTION_LINK <- ORDERED_LINK
 
 // To be used with PredicateNode
-EVALUATION_LINK <- FREE_LINK
+EVALUATION_LINK <- FREE_LINK,EVALUATABLE_LINK
 
 EXECUTION_LINK <- ORDERED_LINK
 
@@ -334,7 +340,7 @@ GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
 
 // PredicateNodes are TV-valued.
 PREDICATE_NODE <- PROCEDURE_NODE
-DEFINED_PREDICATE_NODE <- PREDICATE_NODE
+DEFINED_PREDICATE_NODE <- PREDICATE_NODE,EVALUATABLE_LINK
 GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 
 // Huh?? XXX What are these? I don't understand them Do we use them
@@ -373,6 +379,12 @@ QUANTITY_LINK <- ORDERED_LINK
 // link type.)
 VIRTUAL_LINK <- EVALUATION_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK
+
+// IdenticalLink tests for syntactic equality.  It does NOT execute its
+// arguments; it true only if both sides are the same atom.
+// EqualLink tests for semantic equality: the two sides are equal, if,
+// after execution, they evaluate to the same atom.
+IDENTICAL_LINK <- VIRTUAL_LINK
 EQUAL_LINK <- VIRTUAL_LINK
 
 // --------------------------------------------------------------

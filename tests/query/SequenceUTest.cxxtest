@@ -291,7 +291,7 @@ void SequenceUTest::test_or_put(void)
     TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
 
     // Check the state. Should have a list of length 1,
-    // with a variable only; the state was NOT set.
+    // with a variable only; that is, the state was NOT set.
     Handle iset = eval->eval_h(
           "(cdr (cog-incoming-set (AnchorNode \"state\")))");
     TS_ASSERT_EQUALS(iset, Handle::UNDEFINED);
