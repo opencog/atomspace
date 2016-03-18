@@ -81,7 +81,7 @@ struct FreeVariables
 	// Given the tree `tree` containing variables in it, create and
 	// return a new tree with the indicated values `vals` substituted
 	// for the variables.  "nocheck" == no type checking is done.
-	Handle substitute_nocheck(const Handle&, const HandleSeq&) const;
+	Handle substitute_nocheck(const Handle&, const HandleSeq&, int = 0) const;
 };
 
 typedef std::map<Handle, const std::set<Type> > VariableTypeMap;

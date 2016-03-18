@@ -128,29 +128,42 @@ void FreeVariables::find_variables(const Handle& h)
 /* ================================================================= */
 
 Handle FreeVariables::substitute_nocheck(const Handle& term,
-                                         const HandleSeq& args) const
+                                         const HandleSeq& args,
+                                         int quotation_level) const
 {
-	// If it is a singleton, just return that singleton.
-	std::map<Handle, unsigned int>::const_iterator idx;
-	idx = index.find(term);
-	if (idx != index.end())
-		return args.at(idx->second);
+	// If we are not in a quote context, and `term` is a variable,
+	// then just return the corresponding value.
+	if (0 == quotation_level)
+	{
+		std::map<Handle, unsigned int>::const_iterator idx;
+		idx = index.find(term);
+		if (idx != index.end())
+			return args.at(idx->second);
+	}
 
 	// If its a node, and its not a variable, then it is a constant,
 	// and just return that.
 	if (not term->isLink()) return term;
 
-	// QuoteLinks halt the recursion
-	if (QUOTE_LINK == term->getType()) return term;
-
-	if (UNQUOTE_LINK == term->getType())
-		throw RuntimeException(TRACE_INFO, "Not implemented!");
+	// QuoteLinks halt the reduction
+	Type ty = term->getType();
+	if (QUOTE_LINK == ty)
+	{
+		quotation_level++;
+	}
+	else
+	if (UNQUOTE_LINK == ty)
+	{
+		quotation_level--;
+		if (quotation_level < 0)
+			throw SyntaxException(TRACE_INFO, "Unbalanced quotes!");
+	}
 
 	// Recursively fill out the subtrees.
 	HandleSeq oset;
 	for (const Handle& h : term->getOutgoingSet())
 	{
-		oset.emplace_back(substitute_nocheck(h, args));
+		oset.emplace_back(substitute_nocheck(h, args, quotation_level));
 	}
 	return Handle(createLink(term->getType(), oset));
 }
@@ -369,8 +382,8 @@ Handle Variables::substitute(const Handle& func,
 			varseq.size(), args.size());
 
 	// XXX TODO type-checking should be lazy; if the function is not
-	// actually using one of the args, its's type should not be checked.
-	// viz, one of the values might be undefined, and that's OK, if that
+	// actually using one of the args, it's type should not be checked.
+	// Viz., one of the values might be undefined, and that's OK, if that
 	// value is never actually used.
 	if (not is_type(args))
 		throw SyntaxException(TRACE_INFO,
