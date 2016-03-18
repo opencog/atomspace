@@ -35,6 +35,12 @@ namespace opencog
 
 typedef std::unordered_set<Atom*> UnorderedAtomSet;
 
+// This is possibly very costly and only used to get deterministic
+// behavior
+typedef std::set<Atom*, content_based_atom_ptr_less> ContentBasedOrderedAtomSet;
+
+typedef UnorderedAtomSet AtomSet;
+
 /**
  * Implements a vector of atom sets; each set can be found via an
  * integer index.
@@ -42,7 +48,7 @@ typedef std::unordered_set<Atom*> UnorderedAtomSet;
 class FixedIntegerIndex
 {
 	protected:
-		std::vector<UnorderedAtomSet> idx;
+		std::vector<AtomSet> idx;
 		void resize(size_t sz)
 		{
 			idx.resize(sz);
@@ -52,19 +58,19 @@ class FixedIntegerIndex
 		~FixedIntegerIndex() {}
 		void insert(size_t i, Atom* a)
 		{
-			UnorderedAtomSet &s(idx.at(i));
+			AtomSet &s(idx.at(i));
 			s.insert(a);
 		}
 
 		void remove(size_t i, Atom* a)
 		{
-			UnorderedAtomSet &s = idx.at(i);
+			AtomSet &s = idx.at(i);
 			s.erase(a);
 		}
 
 		size_t size(size_t i) const
 		{
-			const UnorderedAtomSet &s(idx.at(i));
+			const AtomSet &s(idx.at(i));
 			return s.size();
 		}
 

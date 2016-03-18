@@ -1,7 +1,9 @@
 /*
- * opencog/atomspace/FixedIntegerIndex.cc
+ * BCLogger.cc
  *
- * Copyright (C) 2008 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2016 OpenCog Foundation
+ *
+ * Author: Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -19,16 +21,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/FixedIntegerIndex.h>
+#include "BCLogger.h"
 
 using namespace opencog;
 
-size_t FixedIntegerIndex::size(void) const
+// Create and return the single instance
+Logger& opencog::bc_logger()
 {
-	size_t cnt = 0;
-	for (const auto& s : idx)
-		cnt += s.size();
-	return cnt;
+	auto bc_logger_instantiate = []() {
+		Logger tmp(logger());
+		tmp.set_component("BackwardChainer");
+		// tmp.set_level(Logger::FINE);
+		return tmp;
+	};
+	static Logger bc_instance(bc_logger_instantiate());
+    return bc_instance;
 }
-
-// ================================================================
