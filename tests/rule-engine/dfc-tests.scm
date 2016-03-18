@@ -12,7 +12,7 @@
             )
             ; To avoid matching (Inheritance A B) and (Inheritance B A)
             (NotLink
-                (EqualLink
+                (IdenticalLink
                     (ConceptNode "Cat")
                     (VariableNode "$C")
                 )
@@ -51,7 +51,7 @@
             )
             ; To avoid matching (Inheritance A B) and (Inheritance B A)
             (NotLink
-                (EqualLink
+                (IdenticalLink
                     (VariableNode "$A")
                     (ConceptNode  "Animal")
                 )
