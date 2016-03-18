@@ -426,7 +426,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	// the TV value on the resulting atom.
 	//
 	// However, we also want to have a side-effect: the result of
-	// exeuctng one of these things should be placed into the atomspace.
+	// executing one of these things should be placed into the atomspace.
 	Type vty = virt->getType();
 	if (EXECUTION_OUTPUT_LINK == vty or
 	    DEFINED_SCHEMA_NODE == vty or
