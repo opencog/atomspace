@@ -305,13 +305,15 @@ bool Variables::is_type(const HandleSeq& hseq) const
 
 /* ================================================================= */
 /**
- * Substitute variables occuring in a tree with the indicated values.
- * This is a lot like applying the function `func` to the argument list
- * `args`, except that no actual evaluation is performed; only
- * substitution.  The resulting tree is NOT placed into any atomspace,
- * either. If you want that, you must do it yourself.  If you want
- * evaluation or execution to happen during sustitution, use either
- * the EvaluationLink, the ExecutionOutputLink, or the Instantiator.
+ * Substitute the given values for the variables occuring in a tree.
+ * That is, perform beta-reduction.  This is a lot like applying the
+ * function `func` to the argument list `args`, except that no actual
+ * evaluation is performed; only substitution.
+ *
+ * The resulting tree is NOT placed into any atomspace. If you want
+ * that, you must do it yourself.  If you want evaluation or execution
+ * to happen during sustitution, use either the EvaluationLink, the
+ * ExecutionOutputLink, or the Instantiator.
  *
  * So, for example, if this VariableList contains:
  *
@@ -346,8 +348,14 @@ bool Variables::is_type(const HandleSeq& hseq) const
  * case, the corresponding `arg` is returned. So, for example, if the
  * `func` was simply `$b`, then `2.0` would be returned.
  *
- * Type checking is performed before subsitution; if the args fail to
+ * Type checking is performed before substitution; if the args fail to
  * satisfy the type constraints, an exception is thrown.
+ *
+ * The substitution is almost purely syntactic... with one exception:
+ * the semantics of QuoteLink and UnquoteLink are honoured.  That is,
+ * no variable reduction is performed into any part of the tree which
+ * is quoted. (QuoteLink is like scheme's quasi-quote, in that each
+ * UnquoteLink undoes one level of quotation.)
  *
  * Again, only a substitution is performed, there is no evaluation.
  * Note also that the resulting tree is NOT placed into any atomspace!
