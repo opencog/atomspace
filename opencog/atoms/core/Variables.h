@@ -72,9 +72,10 @@ struct FreeVariables
 	///
 	/// Variables that are bound inside of some deeper link are ignored;
 	/// they are not free, and thus must not be collected up.  That is,
-	/// any bound variables appearing in a GetLink, BindLink,
-	/// SatisfactionLink, etc. will not be collected.  Any *free* variables
-	/// in these same links *will* be collected (since they are free!)
+	/// any bound variables appearing in a ScopeLink (such as GetLink,
+	/// BindLink, SatisfactionLink, etc.) will not be collected.  Any
+	/// *free* variables in these same links *will* be collected (since
+	/// they are free!)
 	void find_variables(const Handle&);
 	void find_variables(const HandleSeq&);
 
