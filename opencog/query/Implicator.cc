@@ -122,8 +122,7 @@ static Handle do_imply(AtomSpace* as,
 	if (0 == pat.mandatory.size() and 0 < pat.optionals.size()
 	    and not intu->optionals_present())
 	{
-		std::map<Handle, Handle> empty_map;
-		Handle h = impl.inst.instantiate(impl.implicand, empty_map);
+		Handle h = impl.inst.execute(impl.implicand);
 		impl.insert_result(h);
 	}
 
