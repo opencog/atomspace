@@ -141,6 +141,8 @@ private:
 	bool unify(const Handle& hsource, const Handle& hmatch,
 	           Handle hsource_vardecl, Handle hmatch_vardecl, VarMap& result);
 
+	Handle garbage_substitute(const Handle& term, const VarMap& vm);
+	
 	Handle gen_varlist(const Handle& target);
 
 	Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist,

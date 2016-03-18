@@ -209,7 +209,8 @@ void BackwardChainer::process_target(Target& target)
 	{
 		std::vector<VarMap> kb_vmap;
 
-		HandleSeq kb_match = match_knowledge_base(htarget, htarget_vardecl, kb_vmap);
+		HandleSeq kb_match = match_knowledge_base(htarget, htarget_vardecl,
+		                                          kb_vmap);
 
 		// Matched something in the knowledge base? Then need to store
 		// any grounding as a possible solution for this target
@@ -333,20 +334,19 @@ void BackwardChainer::process_target(Target& target)
 		// any), and the other contains the actual output vector sequence.
 		// Adding to _garbage_superspace because the mapping are from within
 		// the garbage space.
-		Handle output_grounded = _garbage_superspace.add_atom(Substitutor::substitute(standardized_rule.get_implicand(), implicand_mapping));
+		Handle output_grounded =
+			garbage_substitute(standardized_rule.get_implicand(),
+			                   implicand_mapping);
 		LAZY_BC_LOG_DEBUG << "Output reverse grounded step 1 as:" << std::endl
 		                  << output_grounded->toShortString();
-		output_grounded = _garbage_superspace.add_atom(Substitutor::substitute(output_grounded, vm));
+		output_grounded = garbage_substitute(output_grounded, vm);
 		LAZY_BC_LOG_DEBUG << "Output reverse grounded step 2 as:" << std::endl
 		                  << output_grounded->toShortString();
 
 		HandleSeq output_grounded_seq;
 		for (const auto& h : standardized_rule.get_implicand_seq())
 			output_grounded_seq.push_back(
-			            _garbage_superspace.get_atom(
-			                Substitutor::substitute(
-			                    _garbage_superspace.get_atom(
-			                        Substitutor::substitute(h, implicand_mapping)), vm)));
+				garbage_substitute(garbage_substitute(h, implicand_mapping), vm));
 
 		std::vector<VarMap> vm_list;
 
@@ -590,8 +590,8 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
 
 	// Reverse ground the implicant with the grounding we found from
 	// unifying the implicand
-	hrule_implicant_reverse_grounded = Substitutor::substitute(hrule_implicant, implicand_mapping);
-	hrule_implicant_reverse_grounded = _garbage_superspace.add_atom(hrule_implicant_reverse_grounded);
+	hrule_implicant_reverse_grounded = garbage_substitute(hrule_implicant,
+	                                                      implicand_mapping);
 
 	LAZY_BC_LOG_DEBUG << "Reverse grounded as:" << std::endl
 	                  << hrule_implicant_reverse_grounded->toShortString();
@@ -947,6 +947,11 @@ bool BackwardChainer::select_rule(const Target& target,
 	}
 
 	return false;
+}
+
+Handle BackwardChainer::garbage_substitute(const Handle& term, const VarMap& vm)
+{
+	return _garbage_superspace.add_atom(Substitutor::substitute(term, vm));
 }
 
 /**
