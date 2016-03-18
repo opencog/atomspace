@@ -82,6 +82,9 @@ void BetaReduceUTest::test_unquote()
 	Handle redox = vars.substitute(body, vals);
 	TS_ASSERT(redox != nullptr);
 
+	redox = _as.add_atom(redox);
+	printf("reduced set=%s\n", redox->toString().c_str());
+
 	// This is the answer we expect to get:
 	Handle oxy =
 		L(SET_LINK,
@@ -91,6 +94,8 @@ void BetaReduceUTest::test_unquote()
 				L(SET_LINK,
 					N(VARIABLE_NODE, "$X"),
 					L(UNQUOTE_LINK, concept))));
+
+	printf("expected set=%s\n", oxy->toString().c_str());
 
 	// the reduced and the expected sets should be identical.
 	TS_ASSERT(redox == oxy);
