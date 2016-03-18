@@ -82,10 +82,10 @@ void VarScraper::find_vars(HandleSeq& varseq, std::set<Handle>& varset,
 			// take the low road, and let ScopeLink constructor
 			// do the bound-variable extraction.
 			ScopeLinkPtr sco(ScopeLinkCast(h));
-			if (NULL == sco)
+			if (nullptr == sco)
 				sco = createScopeLink(h->getOutgoingSet());
 			const Variables& vees = sco->get_variables();
-			for (Handle v : vees.varseq) _bound_vars.insert(v);
+			for (const Handle& v : vees.varseq) _bound_vars.insert(v);
 		}
 
 		find_vars(varseq, varset, h->getOutgoingSet());
@@ -133,6 +133,13 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
 	return substitute_scoped(term, args, index, 0);
 }
 
+/// Perform beta-reduction on the term.  This is more-or-less a purely
+/// syntactic beta-reduction, except for two "tiny" semantic parts:
+/// The semantics of QuoteLink, UnquoteLink is honoured, so that quoted
+/// variables are not reduced, and the semantics of scoping
+/// (alpha-conversion) is honored, so that any bound variables with the
+/// same name as the free variables are alpha-hidden in the region where
+/// the bound variable has scope.
 Handle FreeVariables::substitute_scoped(const Handle& term,
                                         const HandleSeq& args,
                                         const IndexMap& index_map,
@@ -163,6 +170,60 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		quotation_level--;
 		if (quotation_level < 0)
 			throw SyntaxException(TRACE_INFO, "Unbalanced quotes!");
+	}
+	else
+	if (0 == quotation_level and classserver().isA(ty, SCOPE_LINK))
+	{
+		// Perform alpha-conversion duck-n-cover.  We don't actually need
+		// to alpha-convert anything, if we happen to encounter a bound
+		// variable that happens to have the same name as a free variable.
+		// Instead, the bound variable simply "hides" the free variable
+		// for as long as the bound variable is in scope. We hide it by
+		// removing it from the index.
+		ScopeLinkPtr sco(ScopeLinkCast(term));
+		if (nullptr == sco)
+			sco = createScopeLink(term->getOutgoingSet());
+		const Variables& vees = sco->get_variables();
+		bool alpha_hide = false;
+		for (const Handle& v : vees.varseq)
+		{
+			IndexMap::const_iterator idx = index_map.find(v);
+			if (idx != index_map.end())
+			{
+				alpha_hide = true;
+				break;
+			}
+		}
+
+		// Hiding is expensive, so perform it only if we really have to.
+		if (alpha_hide)
+		{
+			// Make a copy... this is what's computatinoally expensive.
+			IndexMap hidden_map = index_map;
+			// Remove the alpha-hidden variables.
+			for (const Handle& v : vees.varseq)
+			{
+				IndexMap::const_iterator idx = hidden_map.find(v);
+				if (idx != hidden_map.end())
+				{
+					hidden_map.erase(idx);
+				}
+			}
+
+			// If the hidden map is empty, then there is no more
+			// substitution to be done.
+			if (hidden_map.empty())
+				return term;
+
+			// Recursively fill out the subtrees. Same as below, but
+			// using the alpha-renamed variable index map.
+			HandleSeq oset;
+			for (const Handle& h : term->getOutgoingSet())
+			{
+				oset.emplace_back(substitute_scoped(h, args, hidden_map, quotation_level));
+			}
+			return Handle(createLink(term->getType(), oset));
+		}
 	}
 
 	// Recursively fill out the subtrees.
