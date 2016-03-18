@@ -100,6 +100,7 @@ void ForwardChainer::init(Handle hsource, const HandleSeq& focus_set)
  */
 void ForwardChainer::do_step(void)
 {
+    fc_logger().debug("Iteration %d", _iteration);
     _iteration++;
 
     // Choose source
@@ -133,7 +134,6 @@ void ForwardChainer::do_chain(void)
 
     while (not termination())
     {
-        fc_logger().debug("Iteration %d", _iteration);
         do_step();
     }
 

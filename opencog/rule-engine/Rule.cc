@@ -280,7 +280,8 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
  * @param dict   a mapping of old VariableNode and new VariableNode
  * @return       the new atom
  */
-Handle Rule::standardize_helper(AtomSpace* as, const Handle h, std::map<Handle, Handle>& dict)
+Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
+                                std::map<Handle, Handle>& dict)
 {
 	if (LinkCast(h))
 	{
