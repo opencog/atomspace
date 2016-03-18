@@ -127,18 +127,28 @@ namespace std {
 ostream& operator<<(ostream& out, const T& hs) { \
 	size_t i = 0; \
 	for (const Handle& h : hs) { \
-		out << "atom[" << i << "]:" << endl << h->toString(); \
+		out << "atom[" << i << "]:" << endl; \
+		if ((AtomPtr)h != nullptr) out << h->toString(); \
 		i++; \
 	} \
 	return out; \
-} \
-string handle_container_to_string(const T& hs) \
-{ \
-	stringstream ss; ss << hs; return ss.str(); \
 }
 GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::HandleSeq)
 GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::OrderedHandleSet)
 GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::UnorderedHandleSet)
+
+string hs_to_string(const HandleSeq& hs)
+{
+	stringstream ss; ss << hs; return ss.str();
+}
+string ohs_to_string(const OrderedHandleSet& ohs)
+{
+	stringstream ss; ss << ohs; return ss.str();
+}
+string uhs_to_string(const UnorderedHandleSet& uhs)
+{
+	stringstream ss; ss << uhs; return ss.str();
+}
 
 } // ~namespace std
 

@@ -11,7 +11,7 @@
 ;; Associate the rules to the rule base (with weights, their semantics
 ;; is currently undefined, we might settled with probabilities but it's
 ;; not sure)
-(MemberLink
+(MemberLink (stv 1 1)
    bc-modus-ponens-rule-name
    (ConceptNode "URE")
 )
