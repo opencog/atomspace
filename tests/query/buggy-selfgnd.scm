@@ -17,6 +17,8 @@
 ; If $lnk was bound to the BindLink (which it could be, because there
 ; is no type restriction on $lnk), this causes the BindLink to be run
 ; again .. and again .. infinite regress.
+;
+; To avoid infinite regress, use IdenticalLink instead of EqualLink.
 (define bnd
     (BindLink
         (AndLink
@@ -24,7 +26,8 @@
             (EvaluationLink
                 (VariableNode "$a")
                 (VariableNode "$b"))
-            (EqualLink
+            ; (EqualLink
+            (IdenticalLink
                 (VariableNode "$lnk")
                 (EvaluationLink
                     (VariableNode "$a")
