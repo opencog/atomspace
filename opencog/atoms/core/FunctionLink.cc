@@ -86,48 +86,43 @@ Handle FunctionLink::execute(AtomSpace* as) const
 
 Handle FunctionLink::do_execute(AtomSpace* as, const Handle& h)
 {
-	// If h is of the right form already, its just a matter of calling
-	// it.  Otherwise, we have to create
-	FunctionLinkPtr flp(FunctionLinkCast(factory(LinkCast(h))));
-	if (NULL == flp)
-		throw RuntimeException(TRACE_INFO, "Not executable!");
-
+	FunctionLinkPtr flp(factory(h));
 	return flp->execute(as);
 }
 
-LinkPtr FunctionLink::factory(LinkPtr lp)
+FunctionLinkPtr FunctionLink::factory(const Handle& h)
 {
-	if (NULL == lp)
-		throw RuntimeException(TRACE_INFO, "Not executable!");
-
 	// If h is of the right form already, its just a matter of calling
 	// it.  Otherwise, we have to create
-	FunctionLinkPtr flp(FunctionLinkCast(lp));
-	if (flp) return lp;
+	FunctionLinkPtr flp(FunctionLinkCast(h));
+	if (flp) return flp;
 
-	return LinkCast(factory(lp->getType(), lp->getOutgoingSet()));
+	if (nullptr == h)
+		throw RuntimeException(TRACE_INFO, "Not executable!");
+
+	return factory(h->getType(), h->getOutgoingSet());
 }
 
 // Basic type factory.
-Handle FunctionLink::factory(Type t, const HandleSeq& seq)
+FunctionLinkPtr FunctionLink::factory(Type t, const HandleSeq& seq)
 {
 	if (ARITY_LINK == t)
-		return Handle(createArityLink(seq));
+		return createArityLink(seq);
 
 	if (MAP_LINK == t)
-		return Handle(createMapLink(seq));
+		return createMapLink(seq);
 
 	if (RANDOM_CHOICE_LINK == t)
-		return Handle(createRandomChoiceLink(seq));
+		return createRandomChoiceLink(seq);
 
 	if (RANDOM_NUMBER_LINK == t)
-		return Handle(createRandomNumberLink(seq));
+		return createRandomNumberLink(seq);
 
 	if (SLEEP_LINK == t)
-		return Handle(createSleepLink(seq));
+		return createSleepLink(seq);
 
 	if (TIME_LINK == t)
-		return Handle(createTimeLink(seq));
+		return createTimeLink(seq);
 
 	// XXX FIXME In principle, we should manufacture the
 	// ExecutionOutputLink as well. In practice, we can't, due to a

@@ -310,15 +310,12 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		{
 			HandleSeq oset_results;
 			walk_sequence(oset_results, expr->getOutgoingSet());
-			Handle hl(FunctionLink::factory(t, oset_results));
-			FunctionLinkPtr flp(FunctionLinkCast(hl));
+			FunctionLinkPtr flp(FunctionLink::factory(t, oset_results));
 			return flp->execute(_as);
 		}
 		else
 		{
-			FunctionLinkPtr flp(FunctionLinkCast(expr));
-			if (nullptr == flp)
-				flp = FunctionLinkCast(FunctionLink::factory(LinkCast(expr)));
+			FunctionLinkPtr flp(FunctionLink::factory(expr));
 			return flp->execute(_as);
 		}
 	}
