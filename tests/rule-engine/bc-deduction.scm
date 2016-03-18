@@ -29,7 +29,7 @@
             )
             ;; To avoid matching (Inheritance A B) and (Inheritance B A)
             (NotLink
-                (EqualLink
+                (IdenticalLink
                     (VariableNode "$A")
                     (VariableNode "$C")
                 )
