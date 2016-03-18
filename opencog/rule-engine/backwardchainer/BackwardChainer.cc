@@ -68,8 +68,7 @@ void BackwardChainer::set_target(Handle init_target, Handle focus_link)
 	_targets_set.clear();
 	_focus_space.clear();
 
-	_targets_set.emplace(_init_target,
-	                     _garbage_superspace.add_atom(createVariableList(get_free_vars_in_tree(init_target))));
+	_targets_set.emplace(_init_target, gen_varlist(_init_target));
 
 	// get the stuff under the SetLink
 	LinkPtr lll(LinkCast(focus_link));
@@ -229,8 +228,7 @@ void BackwardChainer::process_target(Target& target)
 
 				// add whatever it matched as Target (so new variables can be
 				// filled, and TV updated)
-				_targets_set.emplace(soln,
-					                 _garbage_superspace.add_atom(createVariableList(get_free_vars_in_tree(soln))));
+				_targets_set.emplace(soln, gen_varlist(soln));
 
 				target.store_varmap(vgm);
 			}
@@ -416,7 +414,7 @@ void BackwardChainer::process_target(Target& target)
 		if (_logical_link_types.count(hp->getType()) == 0)
 		{			
 			target.store_step(selected_rule, { hp });
-			_targets_set.emplace(hp, _garbage_superspace.add_atom(createVariableList(get_free_vars_in_tree(hp))));
+			_targets_set.emplace(hp, gen_varlist(hp));
 			continue;
 		}
 
@@ -427,7 +425,7 @@ void BackwardChainer::process_target(Target& target)
 		target.store_step(selected_rule, sub_premises);
 
 		for (Handle& s : sub_premises)
-			_targets_set.emplace(s, _garbage_superspace.add_atom(createVariableList(get_free_vars_in_tree(s))));
+			_targets_set.emplace(s, gen_varlist(s));
 	}
 
 	return;
@@ -949,6 +947,16 @@ bool BackwardChainer::select_rule(const Target& target,
 	}
 
 	return false;
+}
+
+/**
+ * Generate a VariableList of the free variables of a given target,
+ * and add it to _garbage_superspace.
+ */
+Handle BackwardChainer::gen_varlist(const Handle& target)
+{
+	HandleSeq target_vars = get_free_vars_in_tree(target);
+	return _garbage_superspace.add_atom(createVariableList(target_vars));
 }
 
 /**

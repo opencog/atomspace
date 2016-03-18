@@ -141,6 +141,8 @@ private:
 	bool unify(const Handle& hsource, const Handle& hmatch,
 	           Handle hsource_vardecl, Handle hmatch_vardecl, VarMap& result);
 
+	Handle gen_varlist(const Handle& target);
+
 	Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist,
 	                       std::set<Handle> additional_free_varset);
 
