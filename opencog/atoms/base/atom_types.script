@@ -379,6 +379,12 @@ QUANTITY_LINK <- ORDERED_LINK
 // link type.)
 VIRTUAL_LINK <- EVALUATION_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK
+
+// IdenticalLink tests for syntactic equality.  It does NOT execute its
+// arguments; it true only if both sides are the same atom.
+// EqualLink tests for semantic equality: the two sides are equal, if,
+// after execution, they evaluate to the same atom.
+IDENTICAL_LINK <- VIRTUAL_LINK
 EQUAL_LINK <- VIRTUAL_LINK
 
 // --------------------------------------------------------------
