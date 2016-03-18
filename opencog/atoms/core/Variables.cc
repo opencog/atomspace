@@ -305,9 +305,9 @@ bool Variables::is_type(const HandleSeq& hseq) const
 
 /* ================================================================= */
 /**
- * Substitute variables in tree with the indicated values.
- * This is a lot like applying the function fun to the argument list
- * args, except that no actual evaluation is performed; only
+ * Substitute variables occuring in a tree with the indicated values.
+ * This is a lot like applying the function `func` to the argument list
+ * `args`, except that no actual evaluation is performed; only
  * substitution.  The resulting tree is NOT placed into any atomspace,
  * either. If you want that, you must do it yourself.  If you want
  * evaluation or execution to happen during sustitution, use either
@@ -319,7 +319,7 @@ bool Variables::is_type(const HandleSeq& hseq) const
  *       VariableNode $a
  *       VariableNode $b
  *
- * and func is the template:
+ * and `func` is the template:
  *
  *   EvaluationLink
  *      PredicateNode "something"
@@ -327,7 +327,7 @@ bool Variables::is_type(const HandleSeq& hseq) const
  *         VariableNode $b      ; note the reversed order
  *         VariableNode $a
  *
- * and the args is a list
+ * and the `args` is a list
  *
  *      ConceptNode "one"
  *      NumberNode 2.0000
@@ -340,11 +340,11 @@ bool Variables::is_type(const HandleSeq& hseq) const
  *          NumberNode 2.0000    ; note reversed order here, also
  *          ConceptNode "one"
  *
- * That is, the values "one" and 2.0 were substituted for $a and $b.
+ * That is, the values `one` and `2.0` were substituted for `$a` and `$b`.
  *
- * The func can be, for example, a single variable name(!) In this
- * case, the corresponding arg is returned. So, for example, if the
- * func was simple $b, then 2.0 would be returned.
+ * The `func` can be, for example, a single variable name(!) In this
+ * case, the corresponding `arg` is returned. So, for example, if the
+ * `func` was simply `$b`, then `2.0` would be returned.
  *
  * Type checking is performed before subsitution; if the args fail to
  * satisfy the type constraints, an exception is thrown.
@@ -352,7 +352,7 @@ bool Variables::is_type(const HandleSeq& hseq) const
  * Again, only a substitution is performed, there is no evaluation.
  * Note also that the resulting tree is NOT placed into any atomspace!
  */
-Handle Variables::substitute(const Handle& fun,
+Handle Variables::substitute(const Handle& func,
                              const HandleSeq& args) const
 {
 	if (args.size() != varseq.size())
@@ -368,7 +368,7 @@ Handle Variables::substitute(const Handle& fun,
 		throw SyntaxException(TRACE_INFO,
 			"Arguments fail to match variable declarations");
 
-	return substitute_nocheck(fun, args);
+	return substitute_nocheck(func, args);
 }
 
 /* ================================================================= */
