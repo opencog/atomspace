@@ -165,7 +165,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	// printf ("Grounded schema name: %s\n", schema.c_str());
 
 	// At this point, we only run scheme, python schemas and functions from
-    // libraries loaded at runtime.
+	// libraries loaded at runtime.
 	if (0 == schema.compare(0,4,"scm:", 4))
 	{
 #ifdef HAVE_GUILE
@@ -215,44 +215,44 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		size_t pos = 4;
 		while (' ' == schema[pos]) pos++;
 
-        //Get the name of the Library and Function
-        //They should be sperated by a .
-        std::size_t dotpos = schema.find("\\");
-        if (dotpos == std::string::npos)
-        {
-            throw RuntimeException(TRACE_INFO,
-                "LibName and FunctionName not seperated by a '\\'");
-        }
-        std::string libName  = schema.substr(pos,dotpos-pos);
-        std::string funcName = schema.substr(dotpos+1);
+		//Get the name of the Library and Function
+		//They should be sperated by a .
+		std::size_t dotpos = schema.find("\\");
+		if (dotpos == std::string::npos)
+		{
+			throw RuntimeException(TRACE_INFO,
+				"LibName and FunctionName not seperated by a '\\'");
+		}
+		std::string libName  = schema.substr(pos,dotpos-pos);
+		std::string funcName = schema.substr(dotpos+1);
 
-        void *libHandle;
-        void * tmp;
-        UUID (*func)(AtomSpace* ,UUID);
+		void *libHandle;
+		void * tmp;
+		UUID (*func)(AtomSpace*, UUID);
 
-        // Try and load the Library and the Function
-        if ( (libHandle = dlopen(libName.c_str(), RTLD_LAZY)) == NULL ||
-             (tmp       = dlsym(libHandle, funcName.c_str())) == NULL )
-        {
-            std::string err(dlerror());
-            std::string msg = "Cannot Load function: " + funcName +" from lib: " + libName + " Error: " + err;
-            throw RuntimeException(TRACE_INFO,
-                msg.c_str());
-        }
+		// Try and load the Library and the Function
+		if ( (libHandle = dlopen(libName.c_str(), RTLD_LAZY)) == NULL ||
+			 (tmp	   = dlsym(libHandle, funcName.c_str())) == NULL )
+		{
+			std::string err(dlerror());
+			std::string msg = "Cannot Load function: " + funcName +" from lib: " + libName + " Error: " + err;
+			throw RuntimeException(TRACE_INFO,
+				msg.c_str());
+		}
 
-        // Convert the Void* pointer to the correct function Type
-        func = reinterpret_cast<UUID (*)(AtomSpace *, UUID)>(tmp);
+		// Convert the Void* pointer to the correct function Type
+		func = reinterpret_cast<UUID (*)(AtomSpace *, UUID)>(tmp);
 
-        // Execute the Function
+		// Execute the Function
 		Handle h(func(as,args.value()));
 
-        //Close Library after Use
-        dlclose(libHandle);
+		//Close Library after Use
+		dlclose(libHandle);
 
-        //Return the handle
+		//Return the handle
 		return h;
 	}
 	// Unkown proceedure type.
 	throw RuntimeException(TRACE_INFO,
-	    "Cannot evaluate unknown GroundedSchemaNode!");
+		"Cannot evaluate unknown GroundedSchemaNode!");
 }
