@@ -33,6 +33,31 @@
 
 using namespace opencog;
 
+
+/// Perform beta-reduction on the expression `expr`, using the `vmap`
+/// to fish out values for variables.  The map holds pairs: the first
+/// membr of the pair is the variable; the second is the value that
+/// should be used as its replacement.  (Note that "variables" do not
+/// have to actually be VariableNode's; they can be any atom.)
+static Handle beta_reduce(const Handle& expr, const std::map<Handle, Handle> vmap)
+{
+	// XXX crud.  Stupid inefficient format conversion. FIXME.
+	// FreeVariables::substitute_nocheck() performs beta-reduction
+	// correctly, so we just use that. But it takes a specific
+	// format, and a variable-value map is not one of them.
+	HandleSeq vals;
+	FreeVariables crud;
+	unsigned int idx = 0;
+	for (const auto& pr : vmap)
+	{
+		crud.varseq.push_back(pr.first);
+		crud.index.insert({pr.first, idx});
+		vals.push_back(pr.second);
+		idx++;
+	}
+	return crud.substitute_nocheck(expr, vals);
+}
+
 /// Same as walk tree, except that it handles a handle sequence,
 /// instead of a single handle. The returned result is in oset_results.
 /// Returns true if the results differ from the input, i.e. if the
@@ -351,22 +376,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	if (classserver().isA(t, VIRTUAL_LINK))
 	{
 		if (_vmap->empty()) return expr;
-
-		// XXX crud.  Stupid inefficient format conversion. FIXME.
-		// FreeVariables::substitute_nocheck() performs beta-reduction
-		// correctly, so we just use that. But it takes a specific
-		// format, and a variable-value map is not one of them.
-		HandleSeq vals;
-		FreeVariables crud;
-		unsigned int idx = 0;
-		for (const auto& pr : *_vmap)
-		{
-			crud.varseq.push_back(pr.first);
-			crud.index.insert({pr.first, idx});
-			vals.push_back(pr.second);
-			idx++;
-		}
-		return crud.substitute_nocheck(expr, vals);
+		return beta_reduce(expr, *_vmap);
 	}
 
 	// None of the above. Create a duplicate link, but with an outgoing
