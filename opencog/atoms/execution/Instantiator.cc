@@ -346,7 +346,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// PatternLink::satisfy() method.
 	if (classserver().isA(t, GET_LINK))
 	{
-		if (_eager)
+		if (false and _eager)
 		{
 			HandleSeq oset_results;
 			_avoid_discarding_quotes_level++;
