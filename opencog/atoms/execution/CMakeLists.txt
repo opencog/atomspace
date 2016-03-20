@@ -7,6 +7,7 @@ IF (HAVE_CYTHON)
 ENDIF (HAVE_CYTHON)
 
 ADD_LIBRARY (execution
+	Eager.cc
 	EvaluationLink.cc
 	ExecutionOutputLink.cc
 	Instantiator.cc
@@ -32,6 +33,7 @@ ENDIF (HAVE_CYTHON)
 INSTALL (TARGETS execution DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
+	Eager.h
 	EvaluationLink.h
 	ExecutionOutputLink.h
 	Instantiator.h

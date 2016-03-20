@@ -33,6 +33,31 @@
 
 using namespace opencog;
 
+
+/// Perform beta-reduction on the expression `expr`, using the `vmap`
+/// to fish out values for variables.  The map holds pairs: the first
+/// membr of the pair is the variable; the second is the value that
+/// should be used as its replacement.  (Note that "variables" do not
+/// have to actually be VariableNode's; they can be any atom.)
+static Handle beta_reduce(const Handle& expr, const std::map<Handle, Handle> vmap)
+{
+	// XXX crud.  Stupid inefficient format conversion. FIXME.
+	// FreeVariables::substitute_nocheck() performs beta-reduction
+	// correctly, so we just use that. But it takes a specific
+	// format, and a variable-value map is not one of them.
+	HandleSeq vals;
+	FreeVariables crud;
+	unsigned int idx = 0;
+	for (const auto& pr : vmap)
+	{
+		crud.varseq.push_back(pr.first);
+		crud.index.insert({pr.first, idx});
+		vals.push_back(pr.second);
+		idx++;
+	}
+	return crud.substitute_nocheck(expr, vals);
+}
+
 /// Same as walk tree, except that it handles a handle sequence,
 /// instead of a single handle. The returned result is in oset_results.
 /// Returns true if the results differ from the input, i.e. if the
@@ -321,27 +346,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// PatternLink::satisfy() method.
 	if (classserver().isA(t, GET_LINK))
 	{
-		if (_eager)
-		{
-			HandleSeq oset_results;
-			_avoid_discarding_quotes_level++;
-			walk_sequence(oset_results, expr->getOutgoingSet());
-			_avoid_discarding_quotes_level--;
-
-			// We do have to poke the results into the atomspace,
-			// else the Get will fail.
-			size_t sz = oset_results.size();
-			for (size_t i=0; i< sz; i++)
-				oset_results[i] = _as->add_atom(oset_results[i]);
-
-			LinkPtr lp(createLink(t, oset_results));
-
-			return satisfying_set(_as, Handle(lp));
-		}
-		else
-		{
-			return satisfying_set(_as, expr);
-		}
+		return satisfying_set(_as, expr);
 	}
 
 	// I beleive that all the VirtualLink's are capable of doing
@@ -351,22 +356,15 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	if (classserver().isA(t, VIRTUAL_LINK))
 	{
 		if (_vmap->empty()) return expr;
+		return beta_reduce(expr, *_vmap);
+	}
 
-		// XXX crud.  Stupid inefficient format conversion. FIXME.
-		// FreeVariables::substitute_nocheck() performs beta-reduction
-		// correctly, so we just use that. But it takes a specific
-		// format, and a variable-value map is not one of them.
-		HandleSeq vals;
-		FreeVariables crud;
-		unsigned int idx = 0;
-		for (const auto& pr : *_vmap)
-		{
-			crud.varseq.push_back(pr.first);
-			crud.index.insert({pr.first, idx});
-			vals.push_back(pr.second);
-			idx++;
-		}
-		return crud.substitute_nocheck(expr, vals);
+	// If an atom is wrapped by the DontExecLink, then unwrap it,
+	// beta-reduce it, but don't execute it.
+	if (DONT_EXEC_LINK == t)
+	{
+		if (_vmap->empty()) return expr;
+		return beta_reduce(expr, *_vmap);
 	}
 
 	// None of the above. Create a duplicate link, but with an outgoing
