@@ -69,11 +69,6 @@ void BuggyQuoteUTest::tearDown(void)
 void BuggyQuoteUTest::setUp(void)
 {
     as->clear();
-    config().set("SCM_PRELOAD",
-        "opencog/atoms/base/core_types.scm, "
-        "opencog/scm/utilities.scm");
-
-    load_scm_files_from_config(*as);
 }
 
 #define getarity(hand) LinkCast(hand)->getArity()

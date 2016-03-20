@@ -70,9 +70,7 @@ void Disconnected::setUp(void)
 	as = new AtomSpace();
 	eval = new SchemeEval(as);
 
-	config().set("SCM_PRELOAD",
-		"opencog/atoms/base/core_types.scm, "
-		"tests/query/test_types.scm");
+	config().set("SCM_PRELOAD", "tests/query/test_types.scm");
 	load_scm_files_from_config(*as);
 }
 

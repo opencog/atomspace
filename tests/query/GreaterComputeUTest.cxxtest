@@ -66,12 +66,7 @@ void GreaterComputeUTest::tearDown(void)
 
 void GreaterComputeUTest::setUp(void)
 {
-    config().set("SCM_PRELOAD",
-        "opencog/atoms/base/core_types.scm, "
-        "opencog/scm/opencog/exec.scm, "
-        "opencog/scm/utilities.scm");
-
-    load_scm_files_from_config(*as);
+    eval->eval("(use-modules (opencog exec))");
 }
 
 #define getarity(hand) LinkCast(hand)->getArity()
