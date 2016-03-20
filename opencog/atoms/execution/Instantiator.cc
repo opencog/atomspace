@@ -346,27 +346,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// PatternLink::satisfy() method.
 	if (classserver().isA(t, GET_LINK))
 	{
-		if (false and _eager)
-		{
-			HandleSeq oset_results;
-			_avoid_discarding_quotes_level++;
-			walk_sequence(oset_results, expr->getOutgoingSet());
-			_avoid_discarding_quotes_level--;
-
-			// We do have to poke the results into the atomspace,
-			// else the Get will fail.
-			size_t sz = oset_results.size();
-			for (size_t i=0; i< sz; i++)
-				oset_results[i] = _as->add_atom(oset_results[i]);
-
-			LinkPtr lp(createLink(t, oset_results));
-
-			return satisfying_set(_as, Handle(lp));
-		}
-		else
-		{
-			return satisfying_set(_as, expr);
-		}
+		return satisfying_set(_as, expr);
 	}
 
 	// I beleive that all the VirtualLink's are capable of doing
