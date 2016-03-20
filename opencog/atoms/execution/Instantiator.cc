@@ -363,8 +363,8 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// beta-reduce it, but don't execute it.
 	if (DONT_EXEC_LINK == t)
 	{
-		if (_vmap->empty()) return expr->getOutgoingAtom(0);
-		return beta_reduce(expr->getOutgoingAtom(0), *_vmap);
+		if (_vmap->empty()) return expr;
+		return beta_reduce(expr, *_vmap);
 	}
 
 	// None of the above. Create a duplicate link, but with an outgoing
