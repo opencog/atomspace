@@ -208,6 +208,24 @@ void SchemeSmob::module_init(void*)
 	// This needs to stay in sync with /opencog/scm/opencog.scm
 	scm_c_eval_string("(add-to-load-path \"/usr/local/share/opencog/scm\")");
 
+#define DO_THE_UBER_BAD_HACKERY_FOR_EFFING_UNIT_TESTS_GRRRR
+#ifdef DO_THE_UBER_BAD_HACKERY_FOR_EFFING_UNIT_TESTS_GRRRR
+	// These nasty, icky, broken-design, doomed-cause-endless failures
+	// and confusion and hard-to-debug bugs that everyone has been
+	// cursing, and will continue to curse, from now until forever,
+	// is due to a vain-glorious requreiment that unit tests run
+	// before a valid install step is performed. Which kind-of
+	// invalidates THE WHOLE FUCKING POINT OF HAVING UNIT TESTS.
+	// Duhh. I mean, why the fuck bother running the tests, if they
+	// test you build directory, INSTEAD OF YOUR SYSTEM?  The people
+	// who insist on this stuff clearly don't have a clue about testing.
+	// Whatever.  So we will live with the harm and the pain until
+	// someone else comes along and sees the light.  See issue
+	// https://github.com/opencog/atomspace/issues/705 for details.
+	scm_c_eval_string("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm\")");
+	scm_c_eval_string("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/atoms/base\")");
+#endif
+
 	scm_primitive_load_path(scm_from_utf8_string("core_types.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("config.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("core-docs.scm"));
