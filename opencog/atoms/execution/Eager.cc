@@ -31,9 +31,10 @@ using namespace opencog;
 /// Utility -- Perform eager execution of black-box arguments.
 ///
 /// Perform eager execution of the arguments. We have to do this,
-/// because the user-defined functions are black-boxes, and cannot
-/// be trusted to do lazy execution correctly. Right now, this is
-/// the policy. It could be changed ... I suppose ...
+/// because the user-defined functions are black-boxes, and cannot be
+/// trusted to do lazy execution correctly. Right now, this is the
+/// policy. I guess we could add "scm-lazy:" and "py-lazy:" URI's
+/// for user-defined functions smart enough to do lazy evaluation.
 ///
 /// When executing, if the results are different, add the new
 /// results to the atomspace. We need to do this, because scheme,

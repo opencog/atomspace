@@ -30,7 +30,7 @@
 #include <opencog/guile/SchemeEval.h>
 
 #include "ExecutionOutputLink.h"
-#include "Instantiator.h"
+#include "Eager.h"
 
 using namespace opencog;
 
@@ -124,48 +124,9 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	// Perform eager execution of the arguments. We have to do this,
 	// because the user-defined functions are black-boxes, and cannot
 	// be trusted to do lazy execution correctly. Right now, this is
-	// the policy. It could be changed ... I suppose ...
-	//
-	// When executing, if the results are different, add the new
-	// results to the atomspace. We need to do this, because scheme,
-	// and python expects to find thier arguments in the atomspace.
-	// This is arguably broken, as it pollutes the atomspace with
-	// junk that is never cleaned up.  We punt for now, but something
-	// should be done about this. XXX FIXME ... Well ... except that
-	// all callers of this method are invited to create a temporary
-	// scratch atomspace, and use that. This presumably avoids the
-	// pollution concerns.
-	//
-	Instantiator inst(as);
-	Handle args(cargs);
-	if (LIST_LINK == cargs->getType())
-	{
-		std::vector<Handle> new_oset;
-		bool changed = false;
-		for (const Handle& ho : cargs->getOutgoingSet())
-		{
-			Handle nh(inst.execute(ho));
-			// nh might be NULL if ho was a DeleteLink
-			if (nullptr == nh)
-			{
-				changed = true;
-				continue;
-			}
-
-			// Unwrap the top-most DontExecLink's.  Lower ones are left
-			// untouched.  We do this as a sop for issue opencog/atomspace#704
-			// but maybe we should not?
-			if (DONT_EXEC_LINK == nh->getType())
-			{
-				nh = nh->getOutgoingAtom(0);
-			}
-			new_oset.emplace_back(nh);
-
-			if (nh != ho) changed = true;
-		}
-		if (changed)
-			args = as->add_link(LIST_LINK, new_oset);
-	}
+	// the policy. I guess we could add "scm-lazy:" and "py-lazy:" URI's
+	// for user-defined functions smart enough to do lazy evaluation.
+	Handle args = eager_execute(as, cargs);
 
 	// Get the schema name.
 	const std::string& schema = NodeCast(gsn)->getName();
@@ -173,7 +134,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 
 	// At this point, we only run scheme, python schemas and functions from
 	// libraries loaded at runtime.
-	if (0 == schema.compare(0,4,"scm:", 4))
+	if (0 == schema.compare(0, 4, "scm:", 4))
 	{
 #ifdef HAVE_GUILE
 		// Be friendly, and strip leading white-space, if any.
@@ -195,7 +156,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 #endif /* HAVE_GUILE */
 	}
 
-	if (0 == schema.compare(0, 3,"py:", 3))
+	if (0 == schema.compare(0, 3, "py:", 3))
 	{
 #ifdef HAVE_CYTHON
 		// Be friendly, and strip leading white-space, if any.

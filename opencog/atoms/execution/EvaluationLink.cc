@@ -36,6 +36,8 @@
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/BindLinkAPI.h>
+
+#include "Eager.h"
 #include "EvaluationLink.h"
 
 using namespace opencog;
@@ -502,9 +504,9 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const HandleSeq& sna)
 /// Executes the GroundedPredicateNode, supplying the args as argument
 ///
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
-                                    const Handle& pn, const Handle& args)
+                                    const Handle& pn, const Handle& cargs)
 {
-	if (LIST_LINK != args->getType())
+	if (LIST_LINK != cargs->getType())
 	{
 		throw RuntimeException(TRACE_INFO,
 			"Expecting arguments to EvaluationLink!");
@@ -525,7 +527,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		// Treat it as if it were a PutLink -- perform the
 		// beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
-		Handle reduct = lam->substitute(args->getOutgoingSet());
+		Handle reduct = lam->substitute(cargs->getOutgoingSet());
 		return do_evaluate(as, reduct);
 	}
 
@@ -534,6 +536,13 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		// Throw a silent exception; this is called in some try..catch blocks.
 		throw NotEvaluatableException();
 	}
+
+	// Perform eager execution of the arguments. We have to do this,
+	// because the user-defined functions are black-boxes, and cannot
+	// be trusted to do lazy execution correctly. Right now, this is
+	// the policy. I guess we could add "scm-lazy:" and "py-lazy:" URI's
+	// for user-defined functions smart enough to do lazy evaluation.
+	Handle args = eager_execute(as, cargs);
 
 	// Get the schema name.
 	const std::string& schema = pn->getName();
@@ -564,7 +573,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	}
 
 	// At this point, we only run scheme and python schemas.
-	if (0 == schema.compare(0,4,"scm:", 4))
+	if (0 == schema.compare(0, 4, "scm:", 4))
 	{
 #ifdef HAVE_GUILE
 		// Be friendly, and strip leading white-space, if any.
@@ -579,7 +588,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 #endif /* HAVE_GUILE */
 	}
 
-	if (0 == schema.compare(0, 3,"py:", 3))
+	if (0 == schema.compare(0, 3, "py:", 3))
 	{
 #ifdef HAVE_CYTHON
 		// Be friendly, and strip leading white-space, if any.
