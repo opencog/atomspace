@@ -379,6 +379,14 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		return beta_reduce(expr, *_vmap);
 	}
 
+	// If an atom is wrapped by the DontExecLink, then unwrap it,
+	// beta-reduce it, but don't execute it.
+	if (DONT_EXEC_LINK == t)
+	{
+		if (_vmap->empty()) return expr->getOutgoingAtom(0);
+		return beta_reduce(expr->getOutgoingAtom(0), *_vmap);
+	}
+
 	// None of the above. Create a duplicate link, but with an outgoing
 	// set where the variables have been substituted by their values.
 mere_recursive_call:
