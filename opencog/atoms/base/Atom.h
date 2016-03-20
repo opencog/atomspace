@@ -455,7 +455,6 @@ static inline AtomPtr AtomCast(const Handle& h)
 static inline Handle HandleCast(const ProtoAtomPtr& pa)
     { return Handle(AtomCast(pa)); }
 
-
 /** @}*/
 } // namespace opencog
 
