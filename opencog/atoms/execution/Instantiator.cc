@@ -171,12 +171,13 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	//
 	if (PUT_LINK == t)
 	{
-		PutLinkPtr ppp(PutLinkCast(expr));
-		if (nullptr == ppp)
-			ppp = createPutLink(*LinkCast(expr));
+		PutLinkPtr ppp;
 
 		if (_eager)
 		{
+			ppp = PutLinkCast(expr);
+			if (nullptr == ppp)
+				ppp = createPutLink(*LinkCast(expr));
 			// Execute the values in the PutLink before doing the
 			// beta-reduction. Execute the body only after the
 			// beta-reduction has been done.
@@ -191,6 +192,13 @@ Handle Instantiator::walk_tree(const Handle& expr)
 				groset.emplace_back(gargs);
 				ppp = createPutLink(groset);
 			}
+		}
+		else
+		{
+			Handle hexpr(beta_reduce(expr, *_vmap));
+			ppp = PutLinkCast(hexpr);
+			if (nullptr == ppp)
+				ppp = createPutLink(*LinkCast(hexpr));
 		}
 
 		// Step one: beta-reduce.
@@ -236,6 +244,15 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// ask for. So we always eager-evaluate those args.
 	if (EXECUTION_OUTPUT_LINK == t)
 	{
+#if SIMPLER_EXOUT
+		Handle hexpr(beta_reduce(expr, *_vmap));
+		ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(hexpr));
+		if (nullptr == eolp)
+			eolp = createExecutionOutputLink(hexpr->getOutgoingSet());
+
+		return eolp->execute(_as);
+
+#else
 		// XXX Force syntax checking; normally this would be done in the
 		// atomspace factory, but that is currently broken, so do it here.
 		ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(expr));
@@ -279,6 +296,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 
 		ExecutionOutputLinkPtr geolp(createExecutionOutputLink(sn, args));
 		return geolp->execute(_as);
+#endif
 	}
 
 	// Handle DeleteLink's before general FunctionLink's; they
@@ -314,7 +332,8 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		}
 		else
 		{
-			FoldLinkPtr flp(FoldLink::factory(expr));
+			Handle hexpr(beta_reduce(expr, *_vmap));
+			FoldLinkPtr flp(FoldLink::factory(hexpr));
 			return flp->execute(_as);
 		}
 	}
