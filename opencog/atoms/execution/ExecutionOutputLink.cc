@@ -130,18 +130,30 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	// junk that is never cleaned up.  We punt for now, but something
 	// should be done about this. XXX FIXME ...
 	Instantiator inst(as);
-	LinkPtr largs(LinkCast(cargs));
 	Handle args(cargs);
-	if (largs)
+	if (cargs->isLink())
 	{
 		std::vector<Handle> new_oset;
 		bool changed = false;
-		for (Handle ho : largs->getOutgoingSet())
+		for (Handle ho : cargs->getOutgoingSet())
 		{
 			Handle nh(inst.execute(ho));
 			// nh might be NULL if ho was a DeleteLink
-			if (nh != NULL)
-				new_oset.emplace_back(nh);
+			if (nullptr == nh)
+			{
+				changed = true;
+				continue;
+			}
+
+			// Unwrap the top-most DontExecLink's.  Lower ones are left
+			// untouched.  We do this as a sop for issue opencog/atomspace#704
+			// but maybe we should not?
+			if (DONT_EXEC_LINK == nh->getType())
+			{
+				nh = nh->getOutgoingAtom(0);
+			}
+			new_oset.emplace_back(nh);
+
 			if (nh != ho) changed = true;
 		}
 		if (changed)
@@ -218,7 +230,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
         void * tmp;
         UUID (*func)(AtomSpace* ,UUID);
 
-        //Try and load the Library and the Function
+        // Try and load the Library and the Function
         if ( (libHandle = dlopen(libName.c_str(), RTLD_LAZY)) == NULL ||
              (tmp       = dlsym(libHandle, funcName.c_str())) == NULL )
         {
@@ -228,10 +240,10 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
                 msg.c_str());
         }
 
-        //Convert the Void* pointer to the correct function Type
+        // Convert the Void* pointer to the correct function Type
         func = reinterpret_cast<UUID (*)(AtomSpace *, UUID)>(tmp);
 
-        //Execute the Function
+        // Execute the Function
 		Handle h(func(as,args.value()));
 
         //Close Library after Use
