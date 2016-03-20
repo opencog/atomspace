@@ -1,10 +1,7 @@
 ;; =============================================================================
-;; Deduction Rule.
+;; Crisp logic entailment (Deduction) Rule.
 ;;
-;; A->B
-;; B->C
-;; |-
-;; A->C
+;;   A->B and B->C  |-  A->C
 ;;
 ;; See examples/rule-engine/README.md for more details.
 ;; -----------------------------------------------------------------------------
@@ -14,8 +11,7 @@
         (VariableList
             (VariableNode "$A")
             (VariableNode "$B")
-            (VariableNode "$C")
-            )
+            (VariableNode "$C"))
         (AndLink
             (ImplicationLink
                 (VariableNode "$A")
@@ -44,8 +40,7 @@
                     (VariableNode "$C"))
                 (ImplicationLink
                     (VariableNode "$A")
-                    (VariableNode "$C")
-                )
+                    (VariableNode "$C"))
             )
         )
     )
@@ -60,17 +55,16 @@
 ;; -----------------------------------------------------------------------------
 
 (define (crisp-deduction-formula AB BC AC)
-    (let
-        ((sAB (cog-stv-strength AB))
-         (cAB (cog-stv-confidence AB))
-         (sBC (cog-stv-strength BC))
-         (cBC (cog-stv-confidence BC)))
-      (if (and (>= sAB 0.5) (>= cAB 0.5) (>= sBC 0.5) (>= cBC 0.5))
-          (cog-set-tv! AC (stv 1 1)))))
+    (let (  (sAB (cog-stv-strength AB))
+            (cAB (cog-stv-confidence AB))
+            (sBC (cog-stv-strength BC))
+            (cBC (cog-stv-confidence BC)))
+        (if (and (>= sAB 0.5) (>= cAB 0.5) (>= sBC 0.5) (>= cBC 0.5))
+            (cog-set-tv! AC (stv 1 1)))))
 
 ;; Associate a name to the rule
 (define crisp-deduction-rule-name
-  (DefinedSchemaNode "crisp-deduction-rule"))
+    (DefinedSchemaNode "crisp-deduction-rule"))
 (DefineLink
-  crisp-deduction-rule-name
-  crisp-deduction-rule)
+    crisp-deduction-rule-name
+    crisp-deduction-rule)

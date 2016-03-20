@@ -36,7 +36,7 @@
 
 (define find-humans
     (BindLink
-        (VariableNode "$X")
+        (TypedVariable (Variable "$X") (Type "ConceptNode"))
         (InheritanceLink
             (VariableNode "$X")
             (ConceptNode "human"))

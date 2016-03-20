@@ -669,7 +669,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	{
 		LAZY_LOG_FINE << "Examine variable " << var->toShortString();
 
-#ifdef _IMPLMENT_ME_LATER
+#ifdef _IMPLEMENT_ME_LATER
 		// XXX TODO FIXME --- if there is a deep type in the mix, that
 		// will offer a far-superior place to start the search.
 		// Unfortunately, implementing this will require a bit more work,
@@ -735,7 +735,24 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	// There were no type restrictions!
 	if (nullptr == _root)
 	{
-		logger().info("Warning: There were no type restrictions! That must be wrong!");
+
+#if THROW_HARD_ERROR
+		throw SyntaxException(TRACE_INFO,
+			"Error: There were no type restrictions! That's infinite-recursive!");
+#else
+		if (not _variables->_deep_typemap.empty())
+		{
+			logger().warn("Warning: Full deep-type support not implemented!");
+		}
+		else
+		{
+			logger().warn("Warning: No type restrictions! Your code has a bug in it!");
+			for (const Handle& var: _variables->varset)
+				logger().warn("Offending variable=%s\n", var->toString().c_str());
+			for (const Handle& cl : clauses)
+				logger().warn("Offending clauses=%s\n", cl->toString().c_str());
+		}
+
 		if (0 == clauses.size())
 		{
 			// This is kind-of weird, but it can happen if all clauses
@@ -744,6 +761,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 			return false;
 		}
 		_root = _starter_term = clauses[0];
+#endif
 	}
 
 	HandleSeq handle_set;
