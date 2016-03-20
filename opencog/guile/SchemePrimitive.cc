@@ -147,11 +147,12 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 	}
 	catch (const std::exception& ex)
 	{
-		SchemeSmob::throw_exception(ex.what(), fe->get_name());
+		SchemeSmob::throw_exception(ex, fe->get_name());
 	}
 	catch (...)
 	{
-		SchemeSmob::throw_exception(NULL, fe->get_name());
+		std::exception ex;
+		SchemeSmob::throw_exception(ex, fe->get_name());
 	}
 	scm_remember_upto_here_1(sfe);
 	return rc;
