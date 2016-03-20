@@ -46,7 +46,7 @@ using namespace opencog;
 /// scratch atomspace, and use that. This presumably avoids the
 /// pollution concerns.
 ///
-Handle eager_execute(AtomSpace* as, const Handle& cargs)
+Handle opencog::eager_execute(AtomSpace* as, const Handle& cargs)
 {
 	Instantiator inst(as);
 	Handle args(cargs);
