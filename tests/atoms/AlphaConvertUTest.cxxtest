@@ -173,7 +173,7 @@ void AlphaConvertUTest::test_variable()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
-// Test AlphaConvert for differeing bodies.
+// Test AlphaConvert for differing bodies.
 void AlphaConvertUTest::test_body()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);

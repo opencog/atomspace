@@ -564,7 +564,7 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 /// get a very different (and more complex) treatment from the pattern
 /// matcher.
 ///
-/// Virtual cluases are hard for the pattern matcher in two different
+/// Virtual clauses are hard for the pattern matcher in two different
 /// ways: first, any variables in them must be grounded before they can
 /// be evaluated, and that grounding has to occur *before* evaluation.
 /// Thus, non-virtual clasues must be grounded first. Another problem

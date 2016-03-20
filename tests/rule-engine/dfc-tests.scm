@@ -1,10 +1,10 @@
 ; Substitution case where $A = Cat and $B = Animal
 (define deduction-ab-substitute-1
     (BindLink
-        (VariableList                
-                (TypedVariableLink
-                   (VariableNode "$C")
-                   (TypeNode "ConceptNode")))
+        (VariableList
+            (TypedVariableLink
+                (VariableNode "$C")
+                (TypeNode "ConceptNode")))
         (AndLink
             (InheritanceLink
                 (ConceptNode "Animal")
@@ -41,9 +41,9 @@
 (define deduction-ab-substitute-2
     (BindLink
         (VariableList
-                (TypedVariableLink
-                   (VariableNode "$A")
-                   (TypeNode "ConceptNode")))
+            (TypedVariableLink
+                (VariableNode "$A")
+                (TypeNode "ConceptNode")))
         (AndLink
             (InheritanceLink
                 (VariableNode "$A")
@@ -74,4 +74,4 @@
             )
         )
     )
-  )
+)
