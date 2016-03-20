@@ -140,12 +140,19 @@ VARIABLE_LIST <- LIST_LINK
 // Variadic, the globbed values are meant to be of all same type.
 GLOB_NODE <- VARIABLE_NODE
 
-// Everything under a QuoteLink is interpreted literally.
+// Everything under a QuoteLink is interpreted literally. Variable
+// substitution (beta-reduction) is not performed into quoted variables.
 QUOTE_LINK <- ORDERED_LINK
 
 // The QuoteLink is actually a quasi-quote. The UnquoteLink undoes the
 // quoting.  Defined to work just like in lisp/scheme.
 UNQUOTE_LINK <- ORDERED_LINK
+
+// Everything under a DontExecLink is not executed. This is typically
+// used during pattern matching, to halt infinite recursion, when the
+// matched pattern is itself executable. Vaguely like QuoteLink, but
+// instead of block beta-reduction, it blocks execution.
+DONT_EXEC_LINK <- ORDERED_LINK
 
 // A FreeLink is any kind of link that might have free variables in it.
 // The FreeLink exists for one purpose: to make visible/explicit all of
