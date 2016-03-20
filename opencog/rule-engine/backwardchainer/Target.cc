@@ -25,6 +25,7 @@
 
 #include <opencog/atomutils/Neighbors.h>
 #include "Target.h"
+#include "BCLogger.h"
 
 using namespace opencog;
 
@@ -170,7 +171,8 @@ void TargetSet::emplace(Handle h, Handle hvardecl)
 
 	hvardecl = _history_space.add_atom(hvardecl);
 
-	logger().debug("[Target] Adding " + h->toShortString() + " to target set");
+	LAZY_BC_LOG_DEBUG << "[Target] Adding:" << std::endl
+	                  << h->toShortString() << "to target set";
 
 	_targets_map.insert(std::pair<Handle, Target>(h, Target(_history_space, h, hvardecl)));
 }
