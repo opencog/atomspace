@@ -209,7 +209,9 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 #endif /* HAVE_CYTHON */
 	}
 
-	if (0 == schema.compare(0,4,"lib:", 4))
+	// This is used by the Haskel bindings.  XXX -- it uses a broken
+	// API, namely the UUID's, and should be fixed....
+	if (0 == schema.compare(0, 4, "lib:", 4))
 	{
 		// Be friendly, and strip leading white-space, if any.
 		size_t pos = 4;
@@ -218,40 +220,43 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		//Get the name of the Library and Function
 		//They should be sperated by a .
 		std::size_t dotpos = schema.find("\\");
-		if (dotpos == std::string::npos)
+		if (std::string::npos == dotpos)
 		{
 			throw RuntimeException(TRACE_INFO,
-				"LibName and FunctionName not seperated by a '\\'");
+				"Library name and function name must be separated by a '\\'");
 		}
-		std::string libName  = schema.substr(pos,dotpos-pos);
-		std::string funcName = schema.substr(dotpos+1);
+		std::string libName  = schema.substr(pos, dotpos - pos);
+		std::string funcName = schema.substr(dotpos + 1);
 
-		void *libHandle;
-		void * tmp;
+		// Try and load the library and function.
+		void* libHandle = dlopen(libName.c_str(), RTLD_LAZY);
+		if (nullptr == libHandle)
+			throw RuntimeException(TRACE_INFO,
+				"Cannot open library: %s - %s", libName.c_str(), dlerror());
+
+		void* sym = dlsym(libHandle, funcName.c_str());
+		if (nullptr == sym)
+			throw RuntimeException(TRACE_INFO,
+				"Cannot find symbol %s in library: %s - %s",
+				funcName.c_str(), libName.c_str(), dlerror());
+
+		// Convert the void* pointer to the correct function type.
+		// XXX FIXME -- it is incorrect to use UUID's for this purpose!
+		// UUID's are meant for storage, not for the library API.
+		// (The UUID lookup on the receiving side is going to be slow).
 		UUID (*func)(AtomSpace*, UUID);
+		func = reinterpret_cast<UUID (*)(AtomSpace *, UUID)>(sym);
 
-		// Try and load the Library and the Function
-		if ( (libHandle = dlopen(libName.c_str(), RTLD_LAZY)) == NULL ||
-			 (tmp	   = dlsym(libHandle, funcName.c_str())) == NULL )
-		{
-			std::string err(dlerror());
-			std::string msg = "Cannot Load function: " + funcName +" from lib: " + libName + " Error: " + err;
-			throw RuntimeException(TRACE_INFO,
-				msg.c_str());
-		}
+		// Execute the function.
+		Handle h(func(as, args.value()));
 
-		// Convert the Void* pointer to the correct function Type
-		func = reinterpret_cast<UUID (*)(AtomSpace *, UUID)>(tmp);
-
-		// Execute the Function
-		Handle h(func(as,args.value()));
-
-		//Close Library after Use
+		// Close library after use.
 		dlclose(libHandle);
 
-		//Return the handle
+		// Return the handle.
 		return h;
 	}
+
 	// Unkown proceedure type.
 	throw RuntimeException(TRACE_INFO,
 		"Cannot evaluate unknown GroundedSchemaNode!");
