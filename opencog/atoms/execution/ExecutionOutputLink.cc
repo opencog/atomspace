@@ -121,21 +121,28 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	LAZY_LOG_FINE << "Execute gsn: " << gsn->toShortString()
 	              << "with arguments: " << cargs->toShortString();
 
-	// Search for additional execution links, and execute them too.
-	// We will know that happend if the returned handle differs from
-	// the input handle. If the results are different, add the new
+	// Perform eager execution of the arguments. We have to do this,
+	// because the user-defined functions are black-boxes, and cannot
+	// be trusted to do lazy execution correctly. Right now, this is
+	// the policy. It could be changed ... I suppose ...
+	//
+	// When executing, if the results are different, add the new
 	// results to the atomspace. We need to do this, because scheme,
-	// and python expects to find thier arguments in the atomspace,
-	// but this is arguably broken, as it pollutes the atomspace with
+	// and python expects to find thier arguments in the atomspace.
+	// This is arguably broken, as it pollutes the atomspace with
 	// junk that is never cleaned up.  We punt for now, but something
-	// should be done about this. XXX FIXME ...
+	// should be done about this. XXX FIXME ... Well ... except that
+	// all callers of this method are invited to create a temporary
+	// scratch atomspace, and use that. This presumably avoids the
+	// pollution concerns.
+	//
 	Instantiator inst(as);
 	Handle args(cargs);
-	if (cargs->isLink())
+	if (LIST_LINK == cargs->getType())
 	{
 		std::vector<Handle> new_oset;
 		bool changed = false;
-		for (Handle ho : cargs->getOutgoingSet())
+		for (const Handle& ho : cargs->getOutgoingSet())
 		{
 			Handle nh(inst.execute(ho));
 			// nh might be NULL if ho was a DeleteLink
