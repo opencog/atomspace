@@ -164,12 +164,11 @@ NumberNodePtr ArithmeticLink::unwrap_set(Handle h) const
 	// if that set contains numbers or something numeric, then unwrap it.
 	if (SET_LINK == h->getType())
 	{
-		LinkPtr lp(LinkCast(h));
-		if (1 != lp->getArity())
+		if (1 != h->getArity())
 			throw SyntaxException(TRACE_INFO,
 				"Don't know how to do arithmetic with this: %s",
 				h->toString().c_str());
-		h = lp->getOutgoingAtom(0);
+		h = h->getOutgoingAtom(0);
 	}
 
 	NumberNodePtr na(NumberNodeCast(h));
@@ -192,8 +191,7 @@ Handle ArithmeticLink::execute(AtomSpace* as) const
 
 		if (SET_LINK == arg->getType())
 		{
-			LinkPtr lp(LinkCast(arg));
-			return do_execute(as, lp->getOutgoingSet());
+			return do_execute(as, arg->getOutgoingSet());
 		}
 		HandleSeq o;
 		o.emplace_back(arg);

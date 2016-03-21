@@ -4,13 +4,12 @@
                     Linas Vepstas, May 2008
 
 
-This directory contains an implementation of the Scheme shell for the
-OpenCog server.  Scheme is a dialect of Lisp; the shell allows scheme
-code to manipulate the contents of an OpenCog AtomSpace.
+This directory contains an implementation of Scheme bindings for the
+AtomSpace. It allows the contents of the Atomspace to be manipulated
+directly from Scheme.
 
-This binding is intended to be used for day-to-day maintenance
-activities, experimentation, and MindAgent development.  The shell is
-implemented in [http://www.gnu.org/software/guile/guile.html guile];
+The bindings are implemented via
+[http://www.gnu.org/software/guile/guile.html guile];
 the [http://www.gnu.org/software/guile/manual/ guile reference manual
 is here]. The best book on the Scheme programming language (never-mind
 the language, it's one of the best books written on programming, no
@@ -35,65 +34,23 @@ which creates a link connnecting a concept node and a word node, having
 a simple truth value. Any valid node or link name can be used in this way.
 
 A number of utilities and handy functions can be found in the directory
-''opencog/scm''. These should be automatically loaded during cog-server
-startup, as they are enumerated in lib/opencog.conf.  Additional
-NLP-related utilities and MindAgents are located in ''opencog/nlp/scm'';
-not all of these are automatically loaded, but can be manually loaded by
-running ''opencog/nlp/scm/load-nlp.sh''.
+''opencog/scm''.  These can be loaded from the guile REPL by saying
+`(use-modules (opencog))`.
 
 Much of this README is reproduced at http://opencog.org/wiki/Scheme
 
+See that page for addtional information.
+
 == Running ==
 --------------
-There are '''two''' scheme shells available for opencog. One is the
-low-level, built-in shell, the other is a high-level, bells-n-whistles
-shell that is a bit easier to use, since it provides the standard
-guile REPL.
+There are multiple ways to access the scheme bindings:
 
-The shells are available only if the [[cogserver]] was compiled with
-guile support, and the guile module was loaded. The guile module should
-be loaded automatically; it is specified in <tt>lib/opencog.conf</tt>.
-
-=== The high-level shell ===
----------------------------
-
-The high-level shell may be accessed via telnet, at port 18001,
-(''not'' port 17001).
-
-   telnet localhost 18001
-
-or
-
-   rlwrap telnet localhost 18001
-
-This second form will provide an editable command-line history.
-
-To leave the shell, type ,q on a line all by itself.
-
-Scheme scripts can be loaded by using netcat or socat; it is recommended
-that the low-level shell be used for this. The high-level shell is
-implemented in <tt>opencog/scm/repl-shell.scm</tt>.
-
-=== The low-level shell ===
----------------------------
-The low-level shell may be invoked by typing "scm" at the opencog prompt.
-To get to the opencog shell, say
-
-   telnet localhost 17001
-
-or
-
-   rlwrap telnet localhost 17001
-
-This second form will provide an editable command-line history.
-
-To leave the shell, place a single . on the line, and hit enter.
-Alternately, hit ^D.
-
+* By directly running the guile REPL
+* By starting the cogserver, and telneting to port 17001
+* By starting the cogserver, and telneting to port 18001
 
 == On-line documentation ==
 ---------------------------
-
 Documentation for some (a small number, but growing) routines and
 utilities can be pulled up at the scheme shell prompt, by saying
 <tt>(display (procedure-documentation name-of-proc))</tt>.  Otherwise, you'll
@@ -104,7 +61,7 @@ have to consult the individual scm files for more info.
 -------------
 Currently OpenCog's scheme functions are broken into four different
 scheme modules: (opencog), (opencog query), (opencog persist) and
-(opencog extension).  The contents of the query module (fo example)
+(opencog extension).  The contents of the query module, for example,
 can be listed with the following code:
 
 (module-for-each (lambda (symbol value) (display symbol) (newline))
@@ -756,14 +713,6 @@ This assumes the scheme code is in "filename", that the cogserver is
 running on "localhost", and is listening on port 17001 (which is the
 default port for the cogserver).
 
-=== Utilities ===
-A number of handy utilities can be found in
-<tt>opencog/scm/utilities.scm</tt> as well as [[NLP]]-specific utilities
-in <tt>opencog/nlp/scm/nlp-utils.scm</tt>.  These include small, simple
-routines for following a link from one atom type to another, finding all
-[[EvaluationLink]]s having some given form, filtering lists based on
-atom types, and so on.
-
 ====Delete a list of atoms ====
 Below is a simple example of scheme code for deleting all of the atoms
 in a list.
@@ -850,7 +799,3 @@ ToDo
    make some fairly simple checks on the C stack in order to avoid
    data corruption. However, guile needs to be fixed to change this
    behaviour.
-
--- Finish the modularization work for scheme, so that most or all
-   parts no longer require the cogserver to be rrunning, and can
-   be accessed directly from th guile REPL.

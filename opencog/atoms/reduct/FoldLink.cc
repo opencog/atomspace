@@ -192,7 +192,7 @@ Handle FoldLink::reduce(void)
 		// If j is (DistType x a) and i is identical to x,
 		// then call kons, because kons is distributive.
 		do_kons |= (jt == distributive_type and
-		            LinkCast(hj)->getOutgoingAtom(0) == hi);
+		            hj->getOutgoingAtom(0) == hi);
 
 		if (do_kons)
 		{
