@@ -64,7 +64,7 @@ static Handle ss_reduce(AtomSpace* atomspace, const Handle& h)
 
 	if (DELETE_LINK == hr->getType())
 	{
-		for (const Handle& ho : LinkCast(hr)->getOutgoingSet())
+		for (const Handle& ho : hr->getOutgoingSet())
 			atomspace->remove_atom(ho, true);
 		return Handle::UNDEFINED;
 	}
