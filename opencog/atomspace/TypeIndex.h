@@ -66,7 +66,7 @@ class TypeIndex : public FixedIntegerIndex
 		}
 
 		class iterator
-			: public std::iterator<std::forward_iterator_tag, Handle>
+			: public HandleIterator
 		{
 			friend class TypeIndex;
 			public:

@@ -1,8 +1,9 @@
 /*
  * FUNCTION:
- * Persistent Atom storage base class.
+ * Base class for SQL-backed persistent storage.
  *
- * Copyright (c) 2008,2009,2013 Linas Vepstas <linas@linas.org>
+ * HISTORY:
+ * Copyright (c) 2016 Linas Vepstas <linasvepstas@gmail.com>
  *
  * LICENSE:
  * This program is free software; you can redistribute it and/or modify
@@ -21,37 +22,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/persist/sql/AtomStorage.h>
+#ifndef _OPENCOG_OUTGOING_HASH_H
+#define _OPENCOG_OUTGOING_HASH_H
 
-using namespace opencog;
+#include <opencog/atoms/base/Handle.h>
 
-AtomStorage::AtomStorage()
+namespace opencog
 {
-    // Nothing to do in the base class.
-}
+/** \addtogroup grp_persist
+ *  @{
+ */
+    /** Returns a hash of the handle sequence used for unique indexing for
+     * SQL persistence.
+     *
+     * @return 64-bit hash of the full outgoing sequence.
+     */
+    int64_t hash_outgoing(const HandleSeq& outgoing, uint64_t seed);
 
+/** @}*/
+} // namespace opencog
 
-AtomStorage::~AtomStorage()
-{
-    // Nothing to do in the base class.
-}
-
-void AtomStorage::storeAtomSpace(AtomSpace* atomspace)
-{ 
-    store(atomspace->get_atomtable());
-}
-
-void AtomStorage::loadAtomSpace(AtomSpace* atomspace)
-{
-    load(atomspace->get_atomtable());
-}
-
-void AtomStorage::clearAndLoadAtomSpace(AtomSpace* atomspace)
-{ 
-    atomspace->clear(); 
-    load(atomspace->get_atomtable());
-}
-
-
-/* ============================= END OF FILE ================= */
+#endif // _OPENCOG_OUTGOING_HASH_H

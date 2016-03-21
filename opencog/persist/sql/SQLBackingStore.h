@@ -46,20 +46,20 @@ namespace opencog
  */
 class SQLBackingStore : public BackingStore
 {
-	private:
-		AtomStorage *_store;
+    private:
+        AtomStorage *_store;
 
-	public:
-		SQLBackingStore();
-		void set_store(AtomStorage *);
+    public:
+        SQLBackingStore();
+        void set_store(AtomStorage *);
 
-		virtual NodePtr getNode(Type, const char *) const;
-		virtual LinkPtr getLink(Type, const HandleSeq&) const;
-		virtual AtomPtr getAtom(UUID) const;
-		virtual HandleSeq getIncomingSet(Handle) const;
-		virtual void storeAtom(Handle);
-		virtual void loadType(AtomTable&, Type);
-		virtual void barrier();
+        virtual NodePtr getNode(Type, const char *) const;
+        virtual LinkPtr getLink(Type, const HandleSeq&) const;
+        virtual AtomPtr getAtom(UUID) const;
+        virtual HandleSeq getIncomingSet(Handle) const;
+        virtual void storeAtom(Handle);
+        virtual void loadType(AtomTable&, Type);
+        virtual void barrier();
 };
 
 
