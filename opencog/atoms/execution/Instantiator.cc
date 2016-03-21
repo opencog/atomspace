@@ -244,15 +244,6 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// ask for. So we always eager-evaluate those args.
 	if (EXECUTION_OUTPUT_LINK == t)
 	{
-#if SIMPLER_EXOUT
-		Handle hexpr(beta_reduce(expr, *_vmap));
-		ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(hexpr));
-		if (nullptr == eolp)
-			eolp = createExecutionOutputLink(hexpr->getOutgoingSet());
-
-		return eolp->execute(_as);
-
-#else
 		// XXX Force syntax checking; normally this would be done in the
 		// atomspace factory, but that is currently broken, so do it here.
 		ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(expr));
@@ -265,11 +256,6 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		// declaration; we punt on that.
 		Handle sn(eolp->get_schema());
 		Handle args(eolp->get_args());
-
-		// Perform substitution on the args, only. Do not discard any quotes.
-		_avoid_discarding_quotes_level++;
-		args = walk_tree(args);
-		_avoid_discarding_quotes_level--;
 
 		// If its a DSN, obtain the correct body for it.
 		if (DEFINED_SCHEMA_NODE == sn->getType())
@@ -289,14 +275,28 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			Handle body(flp->get_body());
 			Variables vars(flp->get_variables());
 
+			// Perform substitution on the args, only.
+			if (_eager)
+			{
+				_avoid_discarding_quotes_level++;
+				args = walk_tree(args);
+				_avoid_discarding_quotes_level--;
+			}
+			else
+			{
+				args = beta_reduce(args, *_vmap);
+			}
+
 			const HandleSeq& oset(args->getOutgoingSet());
 			Handle beta_reduced(vars.substitute_nocheck(body, oset));
 			return walk_tree(beta_reduced);
 		}
 
+		// Perform substitution on the args, only.
+		args = beta_reduce(args, *_vmap);
+
 		ExecutionOutputLinkPtr geolp(createExecutionOutputLink(sn, args));
 		return geolp->execute(_as);
-#endif
 	}
 
 	// Handle DeleteLink's before general FunctionLink's; they
