@@ -952,7 +952,7 @@ void PatternLink::debug_log(void) const
 	// Print out the bound variables in the predicate.
 	for (const Handle& h : _varlist.varset)
 	{
-		if (NodeCast(h))
+		if (h->isNode())
 			logger().fine() << "Bound var: " << h->toShortString();
 	}
 

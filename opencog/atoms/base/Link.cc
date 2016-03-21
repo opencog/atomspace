@@ -139,13 +139,21 @@ bool Link::operator==(const Atom& other) const
     if (arity != olink.getArity()) return false;
     for (Arity i = 0; i < arity; i++)
     {
-        NodePtr tn(NodeCast(_outgoing[i]));
-        NodePtr on(NodeCast(olink._outgoing[i]));
-        if (tn and on and *tn != *on) return false;
+        if (_outgoing[i]->getType() != olink._outgoing[i]->getType())
+            return false;
 
-        LinkPtr tl(LinkCast(_outgoing[i]));
-        LinkPtr ol(LinkCast(olink._outgoing[i]));
-        if (tl and ol and *tl != *ol) return false;
+        if (_outgoing[i]->isNode())
+        {
+            NodePtr tn(NodeCast(_outgoing[i]));
+            NodePtr on(NodeCast(olink._outgoing[i]));
+            if (*tn != *on) return false;
+        }
+        else if (_outgoing[i]->isLink())
+        {
+            LinkPtr tl(LinkCast(_outgoing[i]));
+            LinkPtr ol(LinkCast(olink._outgoing[i]));
+            if (*tl != *ol) return false;
+        }
     }
     return true;
 }
