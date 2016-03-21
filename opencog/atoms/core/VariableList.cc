@@ -54,11 +54,11 @@ void VariableList::validate_vardecl(const HandleSeq& oset)
 VariableList::VariableList(const Handle& hvardecls,
                            TruthValuePtr tv, AttentionValuePtr av)
 	: Link(VARIABLE_LIST,
-	       // Either it is a VariableList, or its a naked variable, or
-	       // its a typed variable.
-	       hvardecls->getType() == VARIABLE_LIST ?
-	       LinkCast(hvardecls)->getOutgoingSet() : HandleSeq({hvardecls}),
-	       tv, av)
+	    // Either it is a VariableList, or its a naked variable, or
+	    // its a typed variable.
+	    hvardecls->getType() == VARIABLE_LIST ?
+	          hvardecls->getOutgoingSet() : HandleSeq({hvardecls}),
+	    tv, av)
 {
 	validate_vardecl(getOutgoingSet());
 }
