@@ -319,11 +319,11 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	_pat.body = hbody;
 	if (PRESENT_LINK == t)
 	{
-		_pat.clauses = LinkCast(hbody)->getOutgoingSet();
+		_pat.clauses = hbody->getOutgoingSet();
 	}
 	else if (AND_LINK == t)
 	{
-		const HandleSeq& oset = LinkCast(hbody)->getOutgoingSet();
+		const HandleSeq& oset = hbody->getOutgoingSet();
 		for (const Handle& ho : oset)
 		{
 			Type ot = ho->getType();
@@ -331,7 +331,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 			// then pull clauses out of it.
 			if (PRESENT_LINK == ot)
 			{
-				const HandleSeq& pset = LinkCast(ho)->getOutgoingSet();
+				const HandleSeq& pset = ho->getOutgoingSet();
 				for (const Handle& ph : pset)
 					_pat.clauses.emplace_back(ph);
 			}
@@ -345,7 +345,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		// working with the DefaultPatternMatchCB, which uses these.
 		std::set<Type> connectives({AND_LINK, SEQUENTIAL_AND_LINK,
 		                            OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
-		const HandleSeq& oset = LinkCast(hbody)->getOutgoingSet();
+		const HandleSeq& oset = hbody->getOutgoingSet();
 		unbundle_clauses_rec(connectives, oset);
 
 		_pat.clauses.emplace_back(hbody);
@@ -368,29 +368,26 @@ void PatternLink::unbundle_clauses_rec(const std::set<Type>& connectives,
 		Type ot = ho->getType();
 		if (PRESENT_LINK == ot)
 		{
-			const HandleSeq& pset = LinkCast(ho)->getOutgoingSet();
+			const HandleSeq& pset = ho->getOutgoingSet();
 			for (const Handle& ph : pset)
 				_pat.clauses.emplace_back(ph);
 		}
 		else if (ABSENT_LINK == ot)
 		{
-			LinkPtr lopt(LinkCast(ho));
-
 			// We insist on an arity of 1, because anything else is
 			// ambiguous: consider absent(A B) is that: "both A and B must
 			// be absent"?  Or is it "if any of A and B are absent, then .."
-			if (1 != lopt->getArity())
+			if (1 != ho->getArity())
 				throw InvalidParamException(TRACE_INFO,
 					"AbsentLink can have an arity of one only!");
 
-			const Handle& inv(lopt->getOutgoingAtom(0));
+			const Handle& inv(ho->getOutgoingAtom(0));
 			_pat.optionals.insert(inv);
 			_pat.cnf_clauses.emplace_back(inv);
 		}
 		else if (connectives.find(ot) != connectives.end())
 		{
-			LinkPtr lnest(LinkCast(ho));
-			unbundle_clauses_rec(connectives, lnest->getOutgoingSet());
+			unbundle_clauses_rec(connectives, ho->getOutgoingSet());
 		}
 	}
 }
@@ -493,16 +490,14 @@ void PatternLink::extract_optionals(const std::set<Handle> &vars,
 		Type t = h->getType();
 		if (ABSENT_LINK == t)
 		{
-			LinkPtr lopt(LinkCast(h));
-
 			// We insist on an arity of 1, because anything else is
 			// ambiguous: consider absent(A B) is that: "both A and B must
 			// be absent"?  Or is it "if any of A and B are absent, then .."
-			if (1 != lopt->getArity())
+			if (1 != h->getArity())
 				throw InvalidParamException(TRACE_INFO,
 					"AbsentLink can have an arity of one only!");
 
-			const Handle& inv(lopt->getOutgoingAtom(0));
+			const Handle& inv(h->getOutgoingAtom(0));
 			_pat.optionals.insert(inv);
 			_pat.cnf_clauses.emplace_back(inv);
 		}
@@ -521,9 +516,8 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
                        const Handle& key, const Handle& value)
 {
 	if (key->getType() == VARIABLE_NODE) map.insert({key, value});
-	LinkPtr lll(LinkCast(key));
-	if (NULL == lll) return;
-	const HandleSeq& oset = lll->getOutgoingSet();
+	if (not key->isLink()) return;
+	const HandleSeq& oset = key->getOutgoingSet();
 	for (const Handle& ho : oset) add_to_map(map, ho, value);
 }
 
@@ -739,9 +733,8 @@ void PatternLink::trace_connectives(const std::set<Type>& connectives,
 		    or connectives.find(t) == connectives.end()) continue;
 		_pat.evaluatable_holders.insert(term);
 		add_to_map(_pat.in_evaluatable, term, term);
-		LinkPtr lp(LinkCast(term));
-		if (lp)
-			trace_connectives(connectives, lp->getOutgoingSet(),
+		if (term->isLink())
+			trace_connectives(connectives, term->getOutgoingSet(),
 			                  quotation_level);
 	}
 }
@@ -781,10 +774,9 @@ void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 {
 	_pat.connectivity_map[h].emplace_back(root);
 
-	LinkPtr l(LinkCast(h));
-	if (l)
+	if (h->isLink())
 	{
-		for (const Handle& ho: l->getOutgoingSet())
+		for (const Handle& ho: h->getOutgoingSet())
 			make_map_recursive(root, ho);
 	}
 }
@@ -841,12 +833,11 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	// Ignore quoting and unquoting nodes in the PatternTerm
 	if ((not parent->isQuoted() and QUOTE_LINK == t)
 	    or (parent->getQuotationLevel() == 1 and UNQUOTE_LINK == t)) {
-		LinkPtr lp(LinkCast(h));
-		if (1 != lp->getArity())
+		if (1 != h->getArity())
 			throw InvalidParamException(TRACE_INFO,
 			                            "QuoteLink/UnquoteLink has "
 			                            "unexpected arity!");
-		h = lp->getOutgoingAtom(0);
+		h = h->getOutgoingAtom(0);
 	}
 
 	PatternTermPtr ptm(std::make_shared<PatternTerm>(parent, h));
@@ -872,9 +863,8 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 		return;
 	}
 
-	LinkPtr l(LinkCast(h));
-	if (l)
-		for (const Handle& ho: l->getOutgoingSet())
+	if (h->isLink())
+		for (const Handle& ho: h->getOutgoingSet())
 			make_term_tree_recursive(root, ho, ptm);
 }
 
