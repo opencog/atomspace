@@ -124,9 +124,7 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj)
 		bool do_add = false;
 		HandleSeq rest;
 
-		LinkPtr ilp = LinkCast(fi);
-		LinkPtr jlp = LinkCast(fj);
-		Handle exx = jlp->getOutgoingAtom(0);
+		Handle exx = fj->getOutgoingAtom(0);
 
 		// Handle the (a+1) case described above.
 		if (fi == exx)
@@ -138,9 +136,9 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj)
 
 		// Handle the (a+b) case described above.
 		else if (fi->getType() == TIMES_LINK and
-		         ilp->getOutgoingAtom(0) == exx)
+		         fi->getOutgoingAtom(0) == exx)
 		{
-			const HandleSeq& ilpo = ilp->getOutgoingSet();
+			const HandleSeq& ilpo = fi->getOutgoingSet();
 			size_t ilpsz = ilpo.size();
 			for (size_t k=1; k<ilpsz; k++)
 				rest.push_back(ilpo[k]);
@@ -149,7 +147,7 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj)
 
 		if (do_add)
 		{
-			const HandleSeq& jlpo = jlp->getOutgoingSet();
+			const HandleSeq& jlpo = fj->getOutgoingSet();
 			size_t jlpsz = jlpo.size();
 			for (size_t k=1; k<jlpsz; k++)
 				rest.push_back(jlpo[k]);

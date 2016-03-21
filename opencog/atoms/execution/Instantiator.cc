@@ -171,12 +171,13 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	//
 	if (PUT_LINK == t)
 	{
-		PutLinkPtr ppp(PutLinkCast(expr));
-		if (nullptr == ppp)
-			ppp = createPutLink(*LinkCast(expr));
+		PutLinkPtr ppp;
 
 		if (_eager)
 		{
+			ppp = PutLinkCast(expr);
+			if (nullptr == ppp)
+				ppp = createPutLink(*LinkCast(expr));
 			// Execute the values in the PutLink before doing the
 			// beta-reduction. Execute the body only after the
 			// beta-reduction has been done.
@@ -191,6 +192,13 @@ Handle Instantiator::walk_tree(const Handle& expr)
 				groset.emplace_back(gargs);
 				ppp = createPutLink(groset);
 			}
+		}
+		else
+		{
+			Handle hexpr(beta_reduce(expr, *_vmap));
+			ppp = PutLinkCast(hexpr);
+			if (nullptr == ppp)
+				ppp = createPutLink(*LinkCast(hexpr));
 		}
 
 		// Step one: beta-reduce.
@@ -249,11 +257,6 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		Handle sn(eolp->get_schema());
 		Handle args(eolp->get_args());
 
-		// Perform substitution on the args, only. Do not discard any quotes.
-		_avoid_discarding_quotes_level++;
-		args = walk_tree(args);
-		_avoid_discarding_quotes_level--;
-
 		// If its a DSN, obtain the correct body for it.
 		if (DEFINED_SCHEMA_NODE == sn->getType())
 			sn = DefineLink::get_definition(sn);
@@ -272,9 +275,38 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			Handle body(flp->get_body());
 			Variables vars(flp->get_variables());
 
+			// Perform substitution on the args, only.
+			if (_eager)
+			{
+				_avoid_discarding_quotes_level++;
+				args = walk_tree(args);
+				_avoid_discarding_quotes_level--;
+			}
+			else
+			{
+				args = beta_reduce(args, *_vmap);
+			}
+
 			const HandleSeq& oset(args->getOutgoingSet());
 			Handle beta_reduced(vars.substitute_nocheck(body, oset));
 			return walk_tree(beta_reduced);
+		}
+
+		// Perform substitution on the args, only.
+		if (_eager)
+		{
+			// XXX I don't get it ... something is broken here, because
+			// the ExecutionOutputLink below *also* performs eager
+			// execution of its arguments. So the step below should not
+			// be neeeded -- yet, it is ... Funny thing is, it only
+			// breaks the BackwardChainerUTest ... why?
+			_avoid_discarding_quotes_level++;
+			args = walk_tree(args);
+			_avoid_discarding_quotes_level--;
+		}
+		else
+		{
+			args = beta_reduce(args, *_vmap);
 		}
 
 		ExecutionOutputLinkPtr geolp(createExecutionOutputLink(sn, args));
@@ -314,7 +346,8 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		}
 		else
 		{
-			FoldLinkPtr flp(FoldLink::factory(expr));
+			Handle hexpr(beta_reduce(expr, *_vmap));
+			FoldLinkPtr flp(FoldLink::factory(hexpr));
 			return flp->execute(_as);
 		}
 	}

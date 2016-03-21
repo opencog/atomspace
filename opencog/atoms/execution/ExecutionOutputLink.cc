@@ -129,7 +129,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	Handle args = eager_execute(as, cargs);
 
 	// Get the schema name.
-	const std::string& schema = NodeCast(gsn)->getName();
+	const std::string& schema = gsn->getName();
 	// printf ("Grounded schema name: %s\n", schema.c_str());
 
 	// At this point, we only run scheme, python schemas and functions from
@@ -227,5 +227,5 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 
 	// Unkown proceedure type.
 	throw RuntimeException(TRACE_INFO,
-		"Cannot evaluate unknown GroundedSchemaNode!");
+		"Cannot evaluate unknown Schema %s", gsn->toString().c_str());
 }
