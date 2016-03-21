@@ -293,7 +293,21 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		}
 
 		// Perform substitution on the args, only.
-		args = beta_reduce(args, *_vmap);
+		if (_eager)
+		{
+			// XXX I don't get it ... something is broken here, because
+			// the ExecutionOutputLink below *also* performs eager
+			// execution of its arguments. So the step below should not
+			// be neeeded -- yet, it is ... Funny thing is, it only
+			// breaks the BackwardChainerUTest ... why?
+			_avoid_discarding_quotes_level++;
+			args = walk_tree(args);
+			_avoid_discarding_quotes_level--;
+		}
+		else
+		{
+			args = beta_reduce(args, *_vmap);
+		}
 
 		ExecutionOutputLinkPtr geolp(createExecutionOutputLink(sn, args));
 		return geolp->execute(_as);
