@@ -56,6 +56,7 @@ class Handle
 friend class Atom;
 friend class AtomTable;
 friend class AtomStorage;         // persistance
+friend class content_based_atom_ptr_less;
 
 private:
     AtomPtr _ptr;
@@ -225,18 +226,26 @@ typedef std::unordered_set<Handle, handle_hash> UnorderedHandleSet;
 //! a handle iterator
 typedef std::iterator<std::forward_iterator_tag, Handle> HandleIterator;
 
+struct content_based_atom_ptr_less
+{
+    bool operator()(const Atom* al, const Atom* ar) const
+    {
+        return Handle::content_based_atoms_less(al, ar);
+    }
+};
+
 struct handle_seq_less
 {
-   bool operator()(const HandleSeq& hsl, const HandleSeq& hsr) const
-   {
-       size_t sl = hsl.size();
-       size_t sr = hsr.size();
-       if (sl != sr) return sl < sr;
-       for (size_t i=0; i<sl; i++) {
-           if (hsl[i] != hsr[i]) return hsl[i] < hsr[i];
-       }
-       return false;
-   }
+    bool operator()(const HandleSeq& hsl, const HandleSeq& hsr) const
+    {
+        size_t sl = hsl.size();
+        size_t sr = hsr.size();
+        if (sl != sr) return sl < sr;
+        for (size_t i=0; i<sl; i++) {
+            if (hsl[i] != hsr[i]) return hsl[i] < hsr[i];
+        }
+        return false;
+    }
 };
 
 struct handle_seq_ptr_less
@@ -285,9 +294,9 @@ ostream& operator<<(ostream& out, const opencog::OrderedHandleSet& hs);
 ostream& operator<<(ostream& out, const opencog::UnorderedHandleSet& hs);
 
 // Debugging helpers, very convenient to print Handle sets in gdb
-string handle_container_to_string(const opencog::HandleSeq& hs);
-string handle_container_to_string(const opencog::OrderedHandleSet& hs);
-string handle_container_to_string(const opencog::UnorderedHandleSet& hs);
+string hs_to_string(const opencog::HandleSeq& hs);
+string ohs_to_string(const opencog::OrderedHandleSet& ohs);
+string uhs_to_string(const opencog::UnorderedHandleSet& uhs);
 
 #ifdef THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
 // The below used to work, but broke in gcc-4.7.2. The reason it

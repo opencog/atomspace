@@ -104,12 +104,6 @@ void PatternCrashUTest::tearDown(void)
 }
 void PatternCrashUTest::setUp(void)
 {
-	config().set("SCM_PRELOAD",
-	             "opencog/atoms/base/core_types.scm, "
-	             "opencog/scm/utilities.scm, "
-	             "opencog/scm/av-tv.scm"
-	             );
-	load_scm_files_from_config(*_as);
 }
 
 void PatternCrashUTest::test_one_thing(void)

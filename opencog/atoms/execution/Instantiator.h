@@ -45,16 +45,15 @@ private:
 	AtomSpace *_as;
 	const std::map<Handle, Handle> *_vmap;
 	bool _halt = false;
-	int _quotation_level = 0;
 
 	/**
 	 * Instatiator removes first level QuoteLinks and in such cases
-	 * returns verbatim atoms. This is sometimes incorrect if the first
-	 * level QuoteLinks are placed below some kind of atoms e.g. GetLink
-	 * or ExecutionOutputLink that take care of handling QuoteLinks
-	 * on their own. We need to avoid discarding quotes for this atoms
-	 * it will be done later according given atom type semantics.
+	 * returns verbatim atoms. This is incorrect when the QuoteLink
+	 * occurs in any scoped link (anything inheriting from ScopeLink,
+	 * (e.g. GetLink, BindLink), since these handle QuoteLinks within
+	 * thier own scope. We must avoid damaging quotes for these atoms.
 	 */
+	int _quotation_level = 0;
 	int _avoid_discarding_quotes_level = 0;
 
 	/**
@@ -71,16 +70,15 @@ private:
 	 * which will simply perform a substitution, without performing
 	 * any execution. See also PutLink, which does substituion.
 	 * (actually, beta reduction).
+	 *
+	 * There are two ways to do this: via eager execution, and via
+	 * lazy execution. Lazy would be nicer, performance-wise, but this
+	 * is still buggy, and unit tests will fail. So do eager execution
+	 * by default.
 	 */
-	Handle walk_eager(const Handle& tree);
-	bool seq_eager(HandleSeq&, const HandleSeq& orig);
-
-	/* Same as above, but does lazy execution. */
-	Handle walk_lazy(const Handle& tree);
-	bool seq_lazy(HandleSeq&, const HandleSeq& orig);
-
-	bool walk_tree(HandleSeq&, const HandleSeq&,
-	               Handle (Instantiator::*)(const Handle&));
+	bool _eager = true;
+	Handle walk_tree(const Handle& tree);
+	bool walk_sequence(HandleSeq&, const HandleSeq&);
 
 public:
 	Instantiator(AtomSpace* as) : _as(as) {}

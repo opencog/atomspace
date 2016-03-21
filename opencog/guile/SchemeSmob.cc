@@ -45,7 +45,7 @@ void SchemeSmob::init()
 	if (is_inited.test_and_set()) return;
 
 	init_smob_type();
-	scm_c_define_module("opencog", register_procs, NULL);
+	scm_c_define_module("opencog", module_init, NULL);
 	scm_c_use_module("opencog");
 
 	atomspace_fluid = scm_make_fluid();
@@ -147,13 +147,19 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 
 /* ============================================================== */
 
-[[ noreturn ]] void SchemeSmob::throw_exception(const char *msg,
-                                                const char * func)
+[[ noreturn ]] void SchemeSmob::throw_exception(const std::exception& ex,
+                                                const char *func)
 {
+	const char * msg = ex.what();
 	if (msg and msg[0] != 0)
 	{
-		// Should we even bother to log this?  Probably not ...
-		logger().info("Guile caught C++ exception: %s", msg);
+		// We do NOT log normal opencog exceptions -- the user presumably
+		// knows what they are doing. We DO log other exceptions, since
+		// they are almost surely due to internal errors.
+		if (nullptr == dynamic_cast<const StandardException*>(&ex))
+		{
+			logger().error("Guile caught C++ exception: %s", msg);
+		}
 
 		// scm_misc_error(fe->get_name(), msg, SCM_EOL);
 		scm_throw(
@@ -184,13 +190,59 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 
 /* ============================================================== */
 
+/// Define the (opencog) module.
+//
+// This is implemented somewhat awkwardly, in that *scm files are
+// being loaded here.  This is due to a design tangle where C++ code
+// needs to call the scheme evaluator; each evaluator uses its own
+// atomspace in each thread (stored in a fluid); thus, the C++ code
+// must link to the module definition, which is thus incomplete without
+// the load of the *.scm files.
+//
+void SchemeSmob::module_init(void*)
+{
+	// The portion of (opencog) done in C++
+	register_procs();
+
+	// The portion of (opencog) done in scm files.
+	// This needs to stay in sync with /opencog/scm/opencog.scm
+	scm_c_eval_string("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+
+#define DO_THE_UBER_BAD_HACKERY_FOR_EFFING_UNIT_TESTS_GRRRR
+#ifdef DO_THE_UBER_BAD_HACKERY_FOR_EFFING_UNIT_TESTS_GRRRR
+	// These nasty, icky, broken-design, doomed-cause-endless failures
+	// and confusion and hard-to-debug bugs that everyone has been
+	// cursing, and will continue to curse, from now until forever,
+	// is due to a vain-glorious requreiment that unit tests run
+	// before a valid install step is performed. Which kind-of
+	// invalidates THE WHOLE FUCKING POINT OF HAVING UNIT TESTS.
+	// Duhh. I mean, why the fuck bother running the tests, if they
+	// test you build directory, INSTEAD OF YOUR SYSTEM?  The people
+	// who insist on this stuff clearly don't have a clue about testing.
+	// Whatever.  So we will live with the harm and the pain until
+	// someone else comes along and sees the light.  See issue
+	// https://github.com/opencog/atomspace/issues/705 for details.
+	scm_c_eval_string("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm\")");
+	scm_c_eval_string("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/atoms/base\")");
+#endif
+
+	scm_primitive_load_path(scm_from_utf8_string("core_types.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("config.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("core-docs.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("utilities.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("apply.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("av-tv.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("file-utils.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("debug-trace.scm"));
+}
+
 #ifdef HAVE_GUILE2
  #define C(X) ((scm_t_subr) X)
 #else
  #define C(X) ((SCM (*) ()) X)
 #endif
 
-void SchemeSmob::register_procs(void*)
+void SchemeSmob::register_procs()
 {
 	register_proc("cog-atom",              1, 0, 0, C(ss_atom));
 	register_proc("cog-handle",            1, 0, 0, C(ss_handle));

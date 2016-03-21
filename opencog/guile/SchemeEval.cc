@@ -9,6 +9,8 @@
 
 #ifdef HAVE_GUILE
 
+#include <atomic>
+
 #include <unistd.h>
 #include <fcntl.h>
 

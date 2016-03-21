@@ -15,11 +15,17 @@ ENDIF(HAVE_GUILE)
 ADD_CXXTEST(AlphaConvertUTest)
 TARGET_LINK_LIBRARIES(AlphaConvertUTest atomspace)
 
+ADD_CXXTEST(BetaReduceUTest)
+TARGET_LINK_LIBRARIES(BetaReduceUTest atomspace)
+
 ADD_CXXTEST(DefineLinkUTest)
 TARGET_LINK_LIBRARIES(DefineLinkUTest atomspace)
 
 ADD_CXXTEST(DeleteLinkUTest)
 TARGET_LINK_LIBRARIES(DeleteLinkUTest execution atomspace)
+
+ADD_CXXTEST(EqualLinkUTest)
+TARGET_LINK_LIBRARIES(EqualLinkUTest execution atomspace)
 
 ADD_CXXTEST(PutLinkUTest)
 TARGET_LINK_LIBRARIES(PutLinkUTest execution atomspace)

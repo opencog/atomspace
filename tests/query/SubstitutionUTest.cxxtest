@@ -45,14 +45,8 @@ public:
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
-		config().set("SCM_PRELOAD",
-			"opencog/atoms/base/core_types.scm, "
-			"opencog/scm/utilities.scm");
-
-		load_scm_files_from_config(*as);
 
 		config().set("SCM_PRELOAD", "tests/query/substitution.scm");
-
 		load_scm_files_from_config(*as);
 	}
 

@@ -67,7 +67,7 @@ void VarScraper::find_vars(HandleSeq& varseq, std::set<Handle>& varset,
 		bool save_quote = _in_quote;
 		if (QUOTE_LINK == t)
 			_in_quote = true;
-
+		else
 		if (UNQUOTE_LINK == t)
 			_in_quote = false;
 
@@ -82,10 +82,10 @@ void VarScraper::find_vars(HandleSeq& varseq, std::set<Handle>& varset,
 			// take the low road, and let ScopeLink constructor
 			// do the bound-variable extraction.
 			ScopeLinkPtr sco(ScopeLinkCast(h));
-			if (NULL == sco)
+			if (nullptr == sco)
 				sco = createScopeLink(h->getOutgoingSet());
 			const Variables& vees = sco->get_variables();
-			for (Handle v : vees.varseq) _bound_vars.insert(v);
+			for (const Handle& v : vees.varseq) _bound_vars.insert(v);
 		}
 
 		find_vars(varseq, varset, h->getOutgoingSet());
@@ -130,27 +130,107 @@ void FreeVariables::find_variables(const Handle& h)
 Handle FreeVariables::substitute_nocheck(const Handle& term,
                                          const HandleSeq& args) const
 {
-	// If it is a singleton, just return that singleton.
-	std::map<Handle, unsigned int>::const_iterator idx;
-	idx = index.find(term);
-	if (idx != index.end())
-		return args.at(idx->second);
+	return substitute_scoped(term, args, index, 0);
+}
+
+/// Perform beta-reduction on the term.  This is more-or-less a purely
+/// syntactic beta-reduction, except for two "tiny" semantic parts:
+/// The semantics of QuoteLink, UnquoteLink is honoured, so that quoted
+/// variables are not reduced, and the semantics of scoping
+/// (alpha-conversion) is honored, so that any bound variables with the
+/// same name as the free variables are alpha-hidden in the region where
+/// the bound variable has scope.
+Handle FreeVariables::substitute_scoped(const Handle& term,
+                                        const HandleSeq& args,
+                                        const IndexMap& index_map,
+                                        int quotation_level) const
+{
+	// If we are not in a quote context, and `term` is a variable,
+	// then just return the corresponding value.
+	if (0 == quotation_level)
+	{
+		IndexMap::const_iterator idx = index_map.find(term);
+		if (idx != index_map.end())
+			return args.at(idx->second);
+	}
 
 	// If its a node, and its not a variable, then it is a constant,
 	// and just return that.
 	if (not term->isLink()) return term;
 
-	// QuoteLinks halt the recursion
-	if (QUOTE_LINK == term->getType()) return term;
+	// QuoteLinks halt the reduction
+	Type ty = term->getType();
+	if (QUOTE_LINK == ty)
+	{
+		quotation_level++;
+	}
+	else
+	if (UNQUOTE_LINK == ty)
+	{
+		quotation_level--;
+		if (quotation_level < 0)
+			throw SyntaxException(TRACE_INFO, "Unbalanced quotes!");
+	}
+	else
+	if (0 == quotation_level and classserver().isA(ty, SCOPE_LINK))
+	{
+		// Perform alpha-conversion duck-n-cover.  We don't actually need
+		// to alpha-convert anything, if we happen to encounter a bound
+		// variable that happens to have the same name as a free variable.
+		// Instead, the bound variable simply "hides" the free variable
+		// for as long as the bound variable is in scope. We hide it by
+		// removing it from the index.
+		ScopeLinkPtr sco(ScopeLinkCast(term));
+		if (nullptr == sco)
+			sco = createScopeLink(term->getOutgoingSet());
+		const Variables& vees = sco->get_variables();
+		bool alpha_hide = false;
+		for (const Handle& v : vees.varseq)
+		{
+			IndexMap::const_iterator idx = index_map.find(v);
+			if (idx != index_map.end())
+			{
+				alpha_hide = true;
+				break;
+			}
+		}
 
-	if (UNQUOTE_LINK == term->getType())
-		throw RuntimeException(TRACE_INFO, "Not implemented!");
+		// Hiding is expensive, so perform it only if we really have to.
+		if (alpha_hide)
+		{
+			// Make a copy... this is what's computatinoally expensive.
+			IndexMap hidden_map = index_map;
+			// Remove the alpha-hidden variables.
+			for (const Handle& v : vees.varseq)
+			{
+				IndexMap::const_iterator idx = hidden_map.find(v);
+				if (idx != hidden_map.end())
+				{
+					hidden_map.erase(idx);
+				}
+			}
+
+			// If the hidden map is empty, then there is no more
+			// substitution to be done.
+			if (hidden_map.empty())
+				return term;
+
+			// Recursively fill out the subtrees. Same as below, but
+			// using the alpha-renamed variable index map.
+			HandleSeq oset;
+			for (const Handle& h : term->getOutgoingSet())
+			{
+				oset.emplace_back(substitute_scoped(h, args, hidden_map, quotation_level));
+			}
+			return Handle(createLink(term->getType(), oset));
+		}
+	}
 
 	// Recursively fill out the subtrees.
 	HandleSeq oset;
 	for (const Handle& h : term->getOutgoingSet())
 	{
-		oset.emplace_back(substitute_nocheck(h, args));
+		oset.emplace_back(substitute_scoped(h, args, index_map, quotation_level));
 	}
 	return Handle(createLink(term->getType(), oset));
 }
@@ -305,13 +385,15 @@ bool Variables::is_type(const HandleSeq& hseq) const
 
 /* ================================================================= */
 /**
- * Substitute variables in tree with the indicated values.
- * This is a lot like applying the function fun to the argument list
- * args, except that no actual evaluation is performed; only
- * substitution.  The resulting tree is NOT placed into any atomspace,
- * either. If you want that, you must do it yourself.  If you want
- * evaluation or execution to happen during sustitution, use either
- * the EvaluationLink, the ExecutionOutputLink, or the Instantiator.
+ * Substitute the given values for the variables occuring in a tree.
+ * That is, perform beta-reduction.  This is a lot like applying the
+ * function `func` to the argument list `args`, except that no actual
+ * evaluation is performed; only substitution.
+ *
+ * The resulting tree is NOT placed into any atomspace. If you want
+ * that, you must do it yourself.  If you want evaluation or execution
+ * to happen during sustitution, use either the EvaluationLink, the
+ * ExecutionOutputLink, or the Instantiator.
  *
  * So, for example, if this VariableList contains:
  *
@@ -319,7 +401,7 @@ bool Variables::is_type(const HandleSeq& hseq) const
  *       VariableNode $a
  *       VariableNode $b
  *
- * and func is the template:
+ * and `func` is the template:
  *
  *   EvaluationLink
  *      PredicateNode "something"
@@ -327,7 +409,7 @@ bool Variables::is_type(const HandleSeq& hseq) const
  *         VariableNode $b      ; note the reversed order
  *         VariableNode $a
  *
- * and the args is a list
+ * and the `args` is a list
  *
  *      ConceptNode "one"
  *      NumberNode 2.0000
@@ -340,19 +422,25 @@ bool Variables::is_type(const HandleSeq& hseq) const
  *          NumberNode 2.0000    ; note reversed order here, also
  *          ConceptNode "one"
  *
- * That is, the values "one" and 2.0 were substituted for $a and $b.
+ * That is, the values `one` and `2.0` were substituted for `$a` and `$b`.
  *
- * The func can be, for example, a single variable name(!) In this
- * case, the corresponding arg is returned. So, for example, if the
- * func was simple $b, then 2.0 would be returned.
+ * The `func` can be, for example, a single variable name(!) In this
+ * case, the corresponding `arg` is returned. So, for example, if the
+ * `func` was simply `$b`, then `2.0` would be returned.
  *
- * Type checking is performed before subsitution; if the args fail to
+ * Type checking is performed before substitution; if the args fail to
  * satisfy the type constraints, an exception is thrown.
+ *
+ * The substitution is almost purely syntactic... with one exception:
+ * the semantics of QuoteLink and UnquoteLink are honoured.  That is,
+ * no variable reduction is performed into any part of the tree which
+ * is quoted. (QuoteLink is like scheme's quasi-quote, in that each
+ * UnquoteLink undoes one level of quotation.)
  *
  * Again, only a substitution is performed, there is no evaluation.
  * Note also that the resulting tree is NOT placed into any atomspace!
  */
-Handle Variables::substitute(const Handle& fun,
+Handle Variables::substitute(const Handle& func,
                              const HandleSeq& args) const
 {
 	if (args.size() != varseq.size())
@@ -360,15 +448,17 @@ Handle Variables::substitute(const Handle& fun,
 			"Incorrect number of arguments specified, expecting %lu got %lu",
 			varseq.size(), args.size());
 
-	// XXX TODO type-checking should be lazy; if the function is not
-	// actually using one of the args, its's type should not be checked.
-	// viz, one of the values might be undefined, and that's OK, if that
-	// value is never actually used.
+	// XXX TODO type-checking could be lazy; if the function is not
+	// actually using one of the args, it's type should not be checked.
+	// Viz., one of the values might be undefined, and that's OK, if that
+	// value is never actually used.  Fixing this requires a cut-n-paste
+	// of the substitute_nocheck code. I'm too lazy to do this ... no one
+	// wants this whizzy-ness just right yet.
 	if (not is_type(args))
 		throw SyntaxException(TRACE_INFO,
 			"Arguments fail to match variable declarations");
 
-	return substitute_nocheck(fun, args);
+	return substitute_nocheck(func, args);
 }
 
 /* ================================================================= */

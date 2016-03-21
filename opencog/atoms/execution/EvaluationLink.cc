@@ -36,6 +36,8 @@
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/BindLinkAPI.h>
+
+#include "Eager.h"
 #include "EvaluationLink.h"
 
 using namespace opencog;
@@ -80,12 +82,11 @@ static NumberNodePtr unwrap_set(Handle h)
 {
 	if (SET_LINK == h->getType())
 	{
-		LinkPtr lp(LinkCast(h));
-		if (1 != lp->getArity())
+		if (1 != h->getArity())
 			throw SyntaxException(TRACE_INFO,
 				"Don't know how to do arithmetic with this: %s",
 				h->toString().c_str());
-		h = lp->getOutgoingAtom(0);
+		h = h->getOutgoingAtom(0);
 	}
 
 	NumberNodePtr na(NumberNodeCast(h));
@@ -103,9 +104,9 @@ static NumberNodePtr unwrap_set(Handle h)
 }
 
 // Perform a GreaterThan check
-static TruthValuePtr greater(AtomSpace* as, const LinkPtr& ll)
+static TruthValuePtr greater(AtomSpace* as, const Handle& h)
 {
-	const HandleSeq& oset = ll->getOutgoingSet();
+	const HandleSeq& oset = h->getOutgoingSet();
 	if (2 != oset.size())
 		throw RuntimeException(TRACE_INFO,
 		     "GreaterThankLink expects two arguments");
@@ -123,9 +124,24 @@ static TruthValuePtr greater(AtomSpace* as, const LinkPtr& ll)
 		return TruthValue::FALSE_TV();
 }
 
-static TruthValuePtr equal(AtomSpace* as, const LinkPtr& ll)
+/// Check for syntactic equality
+static TruthValuePtr identical(const Handle& h)
 {
-	const HandleSeq& oset = ll->getOutgoingSet();
+	const HandleSeq& oset = h->getOutgoingSet();
+	if (2 != oset.size())
+		throw RuntimeException(TRACE_INFO,
+		     "IdenticalLink expects two arguments");
+
+	if (oset[0] == oset[1])
+		return TruthValue::TRUE_TV();
+	else
+		return TruthValue::FALSE_TV();
+}
+
+/// Check for semantic equality
+static TruthValuePtr equal(AtomSpace* as, const Handle& h)
+{
+	const HandleSeq& oset = h->getOutgoingSet();
 	if (2 != oset.size())
 		throw RuntimeException(TRACE_INFO,
 		     "EqualLink expects two arguments");
@@ -142,8 +158,7 @@ static TruthValuePtr equal(AtomSpace* as, const LinkPtr& ll)
 
 static bool is_evaluatable_sat(const Handle& satl)
 {
-	LinkPtr lp(LinkCast(satl));
-	if (1 != lp->getArity())
+	if (1 != satl->getArity())
 		return false;
 
 	PatternLinkPtr plp(PatternLinkCast(satl));
@@ -168,8 +183,7 @@ static bool is_tail_rec(const Handle& thish, const Handle& tail)
 	if (not is_evaluatable_sat(defn))
 		return false;
 
-	LinkPtr l(LinkCast(defn));
-	if (thish == l->getOutgoingAtom(0))
+	if (thish == defn->getOutgoingAtom(0))
 		return true;
 
 	return false;
@@ -228,8 +242,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	Type t = evelnk->getType();
 	if (EVALUATION_LINK == t)
 	{
-		const LinkPtr l(LinkCast(evelnk));
-		const HandleSeq& sna(l->getOutgoingSet());
+		const HandleSeq& sna(evelnk->getOutgoingSet());
 
 		if (2 != sna.size())
 			throw SyntaxException(TRACE_INFO,
@@ -246,25 +259,27 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 
 		return do_evaluate(scratch, sna.at(0), args);
 	}
+	else if (IDENTICAL_LINK == t)
+	{
+		return identical(evelnk);
+	}
 	else if (EQUAL_LINK == t)
 	{
-		return equal(scratch, LinkCast(evelnk));
+		return equal(scratch, evelnk);
 	}
 	else if (GREATER_THAN_LINK == t)
 	{
-		return greater(scratch, LinkCast(evelnk));
+		return greater(scratch, evelnk);
 	}
 	else if (NOT_LINK == t)
 	{
-		LinkPtr l(LinkCast(evelnk));
-		TruthValuePtr tv(do_eval_scratch(as, l->getOutgoingAtom(0), scratch));
+		TruthValuePtr tv(do_eval_scratch(as, evelnk->getOutgoingAtom(0), scratch));
 		return SimpleTruthValue::createTV(
 		              1.0 - tv->getMean(), tv->getCount());
 	}
 	else if (AND_LINK == t)
 	{
-		LinkPtr l(LinkCast(evelnk));
-		for (const Handle& h : l->getOutgoingSet())
+		for (const Handle& h : evelnk->getOutgoingSet())
 		{
 			TruthValuePtr tv(do_eval_scratch(as, h, scratch));
 			if (tv->getMean() < 0.5)
@@ -274,8 +289,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (OR_LINK == t)
 	{
-		LinkPtr l(LinkCast(evelnk));
-		for (const Handle& h : l->getOutgoingSet())
+		for (const Handle& h : evelnk->getOutgoingSet())
 		{
 			TruthValuePtr tv(do_eval_scratch(as, h, scratch));
 			if (0.5 < tv->getMean())
@@ -285,8 +299,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (SEQUENTIAL_AND_LINK == t)
 	{
-		LinkPtr l(LinkCast(evelnk));
-		const HandleSeq& oset = l->getOutgoingSet();
+		const HandleSeq& oset = evelnk->getOutgoingSet();
 		size_t arity = oset.size();
 		if (0 == arity) return TruthValue::TRUE_TV();
 
@@ -308,8 +321,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (SEQUENTIAL_OR_LINK == t)
 	{
-		LinkPtr l(LinkCast(evelnk));
-		const HandleSeq& oset = l->getOutgoingSet();
+		const HandleSeq& oset = evelnk->getOutgoingSet();
 		size_t arity = oset.size();
 		if (0 == arity) return TruthValue::FALSE_TV();
 
@@ -331,8 +343,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (JOIN_LINK == t)
 	{
-		LinkPtr l(LinkCast(evelnk));
-		const HandleSeq& oset = l->getOutgoingSet();
+		const HandleSeq& oset = evelnk->getOutgoingSet();
 		size_t arity = oset.size();
 		std::vector<TruthValuePtr> tvp(arity);
 
@@ -357,10 +368,8 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (PARALLEL_LINK == t)
 	{
-		LinkPtr l(LinkCast(evelnk));
-
 		// Create and detach threads; return immediately.
-		for (const Handle& h : l->getOutgoingSet())
+		for (const Handle& h : evelnk->getOutgoingSet())
 		{
 			std::thread thr(&thread_eval, as, h, scratch, silent);
 			thr.detach();
@@ -409,8 +418,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		// directly, instead of going through the pattern matcher.
 		// The only reason we want to do even this much is to do
 		// tail-recursion optimization, if possible.
-		LinkPtr l(LinkCast(evelnk));
-		return do_eval_scratch(as, l->getOutgoingAtom(0), scratch);
+		return do_eval_scratch(as, evelnk->getOutgoingAtom(0), scratch);
 	}
 	else if (PUT_LINK == t)
 	{
@@ -496,9 +504,9 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const HandleSeq& sna)
 /// Executes the GroundedPredicateNode, supplying the args as argument
 ///
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
-                                    const Handle& pn, const Handle& args)
+                                    const Handle& pn, const Handle& cargs)
 {
-	if (LIST_LINK != args->getType())
+	if (LIST_LINK != cargs->getType())
 	{
 		throw RuntimeException(TRACE_INFO,
 			"Expecting arguments to EvaluationLink!");
@@ -519,7 +527,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		// Treat it as if it were a PutLink -- perform the
 		// beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
-		Handle reduct = lam->substitute(args->getOutgoingSet());
+		Handle reduct = lam->substitute(cargs->getOutgoingSet());
 		return do_evaluate(as, reduct);
 	}
 
@@ -528,6 +536,13 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		// Throw a silent exception; this is called in some try..catch blocks.
 		throw NotEvaluatableException();
 	}
+
+	// Perform eager execution of the arguments. We have to do this,
+	// because the user-defined functions are black-boxes, and cannot
+	// be trusted to do lazy execution correctly. Right now, this is
+	// the policy. I guess we could add "scm-lazy:" and "py-lazy:" URI's
+	// for user-defined functions smart enough to do lazy evaluation.
+	Handle args = eager_execute(as, cargs);
 
 	// Get the schema name.
 	const std::string& schema = pn->getName();
@@ -538,7 +553,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	// Hard-coded in C++ for speed. (well, and for convenience ...)
 	if (0 == schema.compare("c++:greater"))
 	{
-		return greater(as, LinkCast(args));
+		return greater(as, args);
 	}
 
 	// A very special-case C++ comparison.
@@ -546,12 +561,11 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	// Hard-coded in C++ for speed. (well, and for convenience ...)
 	if (0 == schema.compare("c++:exclusive"))
 	{
-		LinkPtr ll(LinkCast(args));
-		Arity sz = ll->getArity();
+		Arity sz = args->getArity();
 		for (Arity i=0; i<sz-1; i++) {
-			Handle h1(ll->getOutgoingAtom(i));
+			Handle h1(args->getOutgoingAtom(i));
 			for (Arity j=i+1; j<sz; j++) {
-				Handle h2(ll->getOutgoingAtom(j));
+				Handle h2(args->getOutgoingAtom(j));
 				if (h1 == h2) return TruthValue::FALSE_TV();
 			}
 		}
@@ -559,7 +573,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	}
 
 	// At this point, we only run scheme and python schemas.
-	if (0 == schema.compare(0,4,"scm:", 4))
+	if (0 == schema.compare(0, 4, "scm:", 4))
 	{
 #ifdef HAVE_GUILE
 		// Be friendly, and strip leading white-space, if any.
@@ -574,7 +588,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 #endif /* HAVE_GUILE */
 	}
 
-	if (0 == schema.compare(0, 3,"py:", 3))
+	if (0 == schema.compare(0, 3, "py:", 3))
 	{
 #ifdef HAVE_CYTHON
 		// Be friendly, and strip leading white-space, if any.
