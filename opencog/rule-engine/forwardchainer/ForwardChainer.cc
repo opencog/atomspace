@@ -385,12 +385,12 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle)
 
     // Add result back to atomspace.
     if (_search_focus_set) {
-        for (const Handle& h : result)
-            _focus_set_as.add_atom(h);
+        for (Handle& h : result)
+            h = _focus_set_as.add_atom(h);
 
     } else {
-        for (const Handle& h : result)
-            _as.add_atom(h);
+        for (Handle& h : result)
+            h = _as.add_atom(h);
     }
 
     return result;
