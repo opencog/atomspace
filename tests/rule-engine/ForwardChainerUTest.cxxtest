@@ -116,14 +116,12 @@ void ForwardChainerUTest::test_do_chain()
 
 void ForwardChainerUTest::test_choose_rule(void)
 {
-    logger().set_print_to_stdout_flag(true);
-    logger().set_level(Logger::DEBUG);
-
-    Handle h = eval.eval_h(
-        "(InheritanceLink (ConceptNode \"cat\")(ConceptNode \"animal\"))");
+    Handle h = eval.eval_h("(ImplicationLink"
+                           "   (PredicateNode \"is_cat\")"
+                           "   (PredicateNode \"is_animal\"))");
     TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
 
-    Handle rbs = _as.get_node(CONCEPT_NODE, "URE");
+    Handle rbs = eval.eval_h("(ConceptNode \"crisp-deduction-rule-base\")");
     ForwardChainer fc(_as, rbs, h);
 
     // Full unification
