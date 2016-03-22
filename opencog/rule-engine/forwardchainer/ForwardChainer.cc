@@ -44,7 +44,7 @@ using namespace opencog;
 ForwardChainer::ForwardChainer(AtomSpace& as, Handle rbs, Handle hsource,
                                const HandleSeq& focus_set /* = HandleSeq()*/,
                                source_selection_mode sm /*= source_selection_mode::UNIFORM */) :
-        _as(as), _rec(as), _rbs(rbs), _configReader(as, rbs)
+    _as(as), _rec(as), _rbs(rbs), _configReader(as, rbs), _fcstat(as)
 {
     _ts_mode = sm;
     init(hsource, focus_set);

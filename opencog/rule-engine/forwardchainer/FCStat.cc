@@ -30,6 +30,12 @@ void FCStat::add_inference_record(Handle source, const Rule* rule,
                                   const UnorderedHandleSet& product)
 {
 	_inf_rec.emplace_back(source, rule, product);
+
+	_as.add_link(EXECUTION_LINK,
+	             rule->get_alias(),
+	             source,
+	             _as.add_link(SET_LINK,
+	                          HandleSeq(product.begin(), product.end())));
 }
 
 UnorderedHandleSet FCStat::get_all_products()
