@@ -1031,15 +1031,16 @@
  cog-pop-atomspace -- Delete a temporary atomspace.
     See cog-push-atomspace for an explanation.
 "
-	(if (null-list? cog-atomspace-stack)
-		(throw 'badpop "More pops than pushes!"))
-	(cog-set-atomspace! (car cog-atomspace-stack))
-	(set! cog-atomspace-stack (cdr cog-atomspace-stack))
-	; Performing a gc here helps ensure that the removed atomspace
-	; is deleted, thus cleaning up incoming sets of many atoms.
-	; The pattern matcher will work correctly without this cleanup,
-	; but I think it helps. Do it twice; once is sometimes not enough.
-	(gc) (gc))
+	(begin
+		(if (null-list? cog-atomspace-stack)
+			(throw 'badpop "More pops than pushes!"))
+		(cog-set-atomspace! (car cog-atomspace-stack))
+		(set! cog-atomspace-stack (cdr cog-atomspace-stack))
+		; Performing a gc here helps ensure that the removed atomspace
+		; is deleted, thus cleaning up incoming sets of many atoms.
+		; The pattern matcher will work correctly without this cleanup,
+		; but I think it helps. Do it twice; once is sometimes not enough.
+		(gc) (gc)))
 
 
 ; ---------------------------------------------------------------------
