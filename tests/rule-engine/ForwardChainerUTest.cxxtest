@@ -232,19 +232,31 @@ void ForwardChainerUTest::test_unify_1(void)
 
 void ForwardChainerUTest::test_unify_2(void)
 {
-	Handle source = eval.eval_h("(ImplicationLink"
-                                "   (PredicateNode \"is_cat\")"
-                                "   (PredicateNode \"is_animal\"))");
+	config().set("SCM_PRELOAD", "tests/rule-engine/rules/pln-implication-and-lambda-factorization-rule.scm");
+	load_scm_files_from_config(_as);
 
-    Handle rbs = eval.eval_h("(ConceptNode \"crisp-deduction-rule-base\")");
+	Handle source = eval.eval_h
+		("(AndLink"
+		 "  (LambdaLink"
+		 "    (TypedVariableLink"
+		 "      (VariableNode \"$X\")"
+		 "      (TypeNode \"ConceptNode\"))"
+		 "    (PredicateNode \"P\"))"
+		 "  (LambdaLink"
+		 "    (TypedVariableLink"
+		 "      (VariableNode \"$X\")"
+		 "      (TypeNode \"ConceptNode\"))"
+		 "    (EvaluationLink"
+		 "      (PredicateNode \"Q\")"
+		 "      (VariableNode \"$X\"))))");
+
+    Handle rbs = eval.eval_h("(ConceptNode \"PLN\")");
 
 	Handle rule_handle = eval.eval_h("(MemberLink"
-	                                 "   crisp-deduction-rule-name"
-	                                 "   (ConceptNode \"crisp-deduction-rule-base\"))");
+	                                 "   implication-and-lambda-factorization-rule-name"
+	                                 "   (ConceptNode \"PLN\"))");
 	Rule rule(rule_handle);
-	Handle premise_pat = eval.eval_h("(ImplicationLink"
-	                                 "   (VariableNode \"$A\")"
-	                                 "   (VariableNode \"$B\"))");
+	Handle premise_pat = eval.eval_h("implication-and-lambda-factorization-body");
 
 	ForwardChainer fc(_as, rbs, source);
 
