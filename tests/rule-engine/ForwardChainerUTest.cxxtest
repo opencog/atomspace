@@ -78,6 +78,7 @@ public:
 	void test_apply_rule();
 	void test_substitute_rule_part();
 	void test_unify_1();
+	void test_unify_2();
 	void test_derive_rules_1();
 	void test_derive_rules_2();
 };
@@ -229,6 +230,28 @@ void ForwardChainerUTest::test_unify_1(void)
 	TS_ASSERT(result);
 }
 
+void ForwardChainerUTest::test_unify_2(void)
+{
+	Handle source = eval.eval_h("(ImplicationLink"
+                                "   (PredicateNode \"is_cat\")"
+                                "   (PredicateNode \"is_animal\"))");
+
+    Handle rbs = eval.eval_h("(ConceptNode \"crisp-deduction-rule-base\")");
+
+	Handle rule_handle = eval.eval_h("(MemberLink"
+	                                 "   crisp-deduction-rule-name"
+	                                 "   (ConceptNode \"crisp-deduction-rule-base\"))");
+	Rule rule(rule_handle);
+	Handle premise_pat = eval.eval_h("(ImplicationLink"
+	                                 "   (VariableNode \"$A\")"
+	                                 "   (VariableNode \"$B\"))");
+
+	ForwardChainer fc(_as, rbs, source);
+
+	bool result = fc.unify(source, premise_pat, &rule);
+	TS_ASSERT(result);
+}
+
 void ForwardChainerUTest::test_derive_rules_1(void)
 {
 	config().set("SCM_PRELOAD", "tests/rule-engine/rules/bc-deduction.scm,"
@@ -260,7 +283,7 @@ void ForwardChainerUTest::test_derive_rules_2()
 	_as.clear();
 
 	config().set("SCM_PRELOAD",
-	             "tests/rule-engine/implication-construction-rule.scm");
+	             "tests/rule-engine/rules/implication-construction-rule.scm");
 	load_scm_files_from_config(_as);
 
 	Handle source = eval.eval_h("(LambdaLink"
