@@ -359,10 +359,6 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle)
             bl->imply(fs_pmcb, false);
 
             result = fs_pmcb.get_result_list();
-
-            LAZY_FC_LOG_DEBUG << "Result is:" << std::endl
-                              << _as.add_link(SET_LINK, result)->toShortString();
-
         }
         // Search the whole atomspace.
         else {
@@ -375,11 +371,7 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle)
 
             Handle h = bindlink(&derived_rule_as, rhcpy);
 
-            LAZY_FC_LOG_DEBUG << "Result is:" << std::endl
-                              << h->toShortString();
-
-            LinkPtr lp(LinkCast(h));
-            if (lp) result = h->getOutgoingSet();
+            result = h->getOutgoingSet();
         }
     }
 
@@ -392,6 +384,9 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle)
         for (Handle& h : result)
             h = _as.add_atom(h);
     }
+
+    LAZY_FC_LOG_DEBUG << "Result is:" << std::endl
+                      << _as.add_link(SET_LINK, result)->toShortString();
 
     return result;
 }
