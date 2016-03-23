@@ -77,7 +77,7 @@ public:
 	void test_choose_rule();
 	void test_apply_rule();
 	void test_substitute_rule_part();
-	void test_unify();
+	void test_unify_1();
 	void test_derive_rules_1();
 	void test_derive_rules_2();
 };
@@ -207,7 +207,7 @@ void ForwardChainerUTest::test_substitute_rule_part(void)
 	TS_ASSERT_EQUALS(hexpected, hx);
 }
 
-void ForwardChainerUTest::test_unify(void)
+void ForwardChainerUTest::test_unify_1(void)
 {
     Handle source = eval.eval_h("(ImplicationLink"
                                 "   (PredicateNode \"is_cat\")"
@@ -231,7 +231,7 @@ void ForwardChainerUTest::test_unify(void)
 
 void ForwardChainerUTest::test_derive_rules_1(void)
 {
-	config().set("SCM_PRELOAD", "tests/rule-engine/bc-deduction.scm,"
+	config().set("SCM_PRELOAD", "tests/rule-engine/rules/bc-deduction.scm,"
 	             "tests/rule-engine/simple-assertions.scm");
 	load_scm_files_from_config(_as);
 

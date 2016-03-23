@@ -5,8 +5,8 @@
 ;; To be loaded first
 
 ;; Load the rules (use load for relative path w.r.t. to that file)
-(load "bc-modus-ponens.scm")
-(load "bc-deduction.scm")
+(load "rules/bc-modus-ponens-rule.scm")
+(load "rules/bc-deduction-rule.scm")
 
 ;; Associate the rules to the rule base (with weights, their semantics
 ;; is currently undefined, we might settled with probabilities but it's
