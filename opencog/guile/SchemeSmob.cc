@@ -224,17 +224,6 @@ void SchemeSmob::module_init(void*)
 	// https://github.com/opencog/atomspace/issues/705 for details.
 	scm_c_eval_string("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm\")");
 	scm_c_eval_string("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/atoms/base\")");
-
-	// The following do not even occur in this repo; they are in the
-	// opencog repo. XXX FIXME ... figure out who needs these, and fix
-	// that stuff.  Its some unit tests that are incorrectly written.
-	scm_c_eval_string("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/nlp\")");
-	scm_c_eval_string("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/nlp/types\")");
-	scm_c_eval_string("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/nlp/scm\")");
-	scm_c_eval_string("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/nlp/microplanning\")");
-	scm_c_eval_string("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/nlp/relex2logic\")");
-	scm_c_eval_string("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/nlp/relex2logic/loader\")");
-	scm_c_eval_string("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/nlp/sureal\")");
 #endif
 
 	scm_primitive_load_path(scm_from_utf8_string("core_types.scm"));
