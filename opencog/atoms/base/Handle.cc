@@ -173,6 +173,10 @@ std::string varmultimap_to_string(const VarMultimap& varmultimap)
 	}
 	return ss.str();
 }
+std::string atomtype_to_string(Type type)
+{
+	return classserver().getTypeName(type);
+}
 
 } // ~namespace std
 

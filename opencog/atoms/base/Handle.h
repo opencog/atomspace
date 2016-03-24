@@ -36,6 +36,8 @@
 #include <vector>
 #include <map>
 
+#include <opencog/atoms/base/types.h>
+
 /** \addtogroup grp_atomspace
  *  @{
  */
@@ -306,6 +308,7 @@ string ohs_to_string(const opencog::OrderedHandleSet& ohs);
 string uhs_to_string(const opencog::UnorderedHandleSet& uhs);
 string varmap_to_string(const opencog::VarMap& vm);
 string varmultimap_to_string(const opencog::VarMultimap& vmm);
+string atomtype_to_string(opencog::Type type);
 
 #ifdef THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
 // The below used to work, but broke in gcc-4.7.2. The reason it
