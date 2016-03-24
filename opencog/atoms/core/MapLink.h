@@ -76,7 +76,7 @@ public:
 	MapLink(Link &l);
 
 	// Align the pattern and the term side-by-side, and extract the
-	// values tht match up with the variables.  If the term is not of
+	// values that match up with the variables.  If the term is not of
 	// the same type as the pattern, return the undefined handle.
 	virtual Handle execute(AtomSpace* = NULL) const;
 };
