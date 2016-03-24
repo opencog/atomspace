@@ -342,6 +342,7 @@ void BasicSaveUTest::test_single_atom(void)
     single_atom_save_restore("ccc ");
     single_atom_save_restore("ddd ");
     single_atom_save_restore("eee ");
+    single_atom_save_restore("$$$ ");
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
