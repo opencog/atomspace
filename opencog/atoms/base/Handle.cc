@@ -149,6 +149,30 @@ string uhs_to_string(const UnorderedHandleSet& uhs)
 {
 	stringstream ss; ss << uhs; return ss.str();
 }
+std::string varmap_to_string(const VarMap& varmap)
+{
+	stringstream ss;
+	int i = 0;
+	for (const auto& p : varmap) {
+		ss << "key[" << i << "]:" << std::endl << p.first->toString()
+		   << "value[" << i << "]:" << std::endl << p.second->toString();
+		i++;
+	}
+	return ss.str();
+}
+std::string varmultimap_to_string(const VarMultimap& varmultimap)
+{
+	stringstream ss;
+	int i = 0;
+	for (const auto& p : varmultimap) {
+		ss << "key[" << i << "]:" << std::endl << p.first->toString()
+		   << "value[" << i << "]:" << std::endl;
+		for (const auto s : p.second)
+			ss << s->toString();
+		i++;
+	}
+	return ss.str();
+}
 
 } // ~namespace std
 
