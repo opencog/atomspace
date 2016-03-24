@@ -647,18 +647,22 @@ bool ForwardChainer::unify(const Handle& source, const Handle& pattern,
     if (not is_valid_implicant(pattern))
         return false;
 
-    AtomSpace temp_pm_as;
-    Handle hcpy = temp_pm_as.add_atom(pattern);
-    Handle implicant_vardecl = temp_pm_as.add_atom(
-        gen_sub_varlist(pattern, rule->get_vardecl()));
-    Handle sourcecpy = temp_pm_as.add_atom(source);
+    AtomSpace tmp_as;
+    Handle pattern_cpy = tmp_as.add_atom(pattern);
+    Handle pattern_vardecl =
+	    tmp_as.add_atom(gen_sub_varlist(pattern, rule->get_vardecl()));
+    Handle source_cpy = tmp_as.add_atom(source);
 
-    Handle blhandle =
-        temp_pm_as.add_link(BIND_LINK, implicant_vardecl, hcpy, hcpy);
-    Handle result = bindlink(&temp_pm_as, blhandle);
-    HandleSeq results = LinkCast(result)->getOutgoingSet();
+    Handle ml = tmp_as.add_link(MAP_LINK,
+                                tmp_as.add_link(SCOPE_LINK,
+                                                pattern_vardecl,
+                                                pattern_cpy),
+                                source_cpy);
 
-    return std::find(results.begin(), results.end(), sourcecpy) != results.end();
+    Instantiator inst(&tmp_as);
+    Handle result = inst.execute(ml);
+
+    return result != Handle::UNDEFINED;
 }
 
 Handle ForwardChainer::gen_sub_varlist(const Handle& parent,
