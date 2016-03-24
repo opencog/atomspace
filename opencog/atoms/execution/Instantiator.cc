@@ -65,9 +65,11 @@ static Handle beta_reduce(const Handle& expr, const std::map<Handle, Handle> vma
 bool Instantiator::walk_sequence(HandleSeq& oset_results, const HandleSeq& expr)
 {
 	bool changed = false;
+	int quotation_level = _quotation_level;
 	for (const Handle& h : expr)
 	{
 		Handle hg(walk_tree(h));
+		_quotation_level = quotation_level;
 		if (hg != h) changed = true;
 
 		// GlobNodes are grounded by a ListLink of everything that

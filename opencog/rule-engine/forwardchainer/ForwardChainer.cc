@@ -41,10 +41,11 @@
 
 using namespace opencog;
 
-ForwardChainer::ForwardChainer(AtomSpace& as, Handle rbs, Handle hsource,
+ForwardChainer::ForwardChainer(AtomSpace& as, const Handle& rbs,
+                               const Handle& hsource,
                                const HandleSeq& focus_set /* = HandleSeq()*/,
                                source_selection_mode sm /*= source_selection_mode::UNIFORM */) :
-        _as(as), _rec(as), _rbs(rbs), _configReader(as, rbs)
+    _as(as), _rec(as), _rbs(rbs), _configReader(as, rbs), _fcstat(as)
 {
     _ts_mode = sm;
     init(hsource, focus_set);
@@ -54,7 +55,7 @@ ForwardChainer::~ForwardChainer()
 {
 }
 
-void ForwardChainer::init(Handle hsource, const HandleSeq& focus_set)
+void ForwardChainer::init(const Handle& hsource, const HandleSeq& focus_set)
 {
     validate(hsource, focus_set);
 
@@ -98,7 +99,7 @@ void ForwardChainer::init(Handle hsource, const HandleSeq& focus_set)
  * Do one step forward chaining and store result.
  *
  */
-void ForwardChainer::do_step(void)
+void ForwardChainer::do_step()
 {
     fc_logger().debug("Iteration %d", _iteration);
     _iteration++;
@@ -122,7 +123,7 @@ void ForwardChainer::do_step(void)
     _fcstat.add_inference_record(_cur_source, rule, products);
 }
 
-void ForwardChainer::do_chain(void)
+void ForwardChainer::do_chain()
 {
     // Relex2Logic uses this. TODO make a separate class to handle
     // this robustly.
@@ -239,7 +240,7 @@ Handle ForwardChainer::choose_source()
 	return hchosen;
 }
 
-Rule* ForwardChainer::choose_rule(Handle hsource)
+Rule* ForwardChainer::choose_rule(const Handle& hsource)
 {
     std::map<Rule*, float> rule_weight;
     for (Rule* r : _rules)
@@ -305,7 +306,7 @@ UnorderedHandleSet ForwardChainer::apply_rule(const Rule* rule)
     return products;
 }
 
-HandleSeq ForwardChainer::apply_rule(Handle rhandle)
+HandleSeq ForwardChainer::apply_rule(const Handle& rhandle)
 {
     HandleSeq result;
 
@@ -359,10 +360,6 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle)
             bl->imply(fs_pmcb, false);
 
             result = fs_pmcb.get_result_list();
-
-            LAZY_FC_LOG_DEBUG << "Result is:" << std::endl
-                              << _as.add_link(SET_LINK, result)->toShortString();
-
         }
         // Search the whole atomspace.
         else {
@@ -375,23 +372,22 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle)
 
             Handle h = bindlink(&derived_rule_as, rhcpy);
 
-            LAZY_FC_LOG_DEBUG << "Result is:" << std::endl
-                              << h->toShortString();
-
-            LinkPtr lp(LinkCast(h));
-            if (lp) result = h->getOutgoingSet();
+            result = h->getOutgoingSet();
         }
     }
 
     // Add result back to atomspace.
     if (_search_focus_set) {
-        for (const Handle& h : result)
-            _focus_set_as.add_atom(h);
+        for (Handle& h : result)
+            h = _focus_set_as.add_atom(h);
 
     } else {
-        for (const Handle& h : result)
-            _as.add_atom(h);
+        for (Handle& h : result)
+            h = _as.add_atom(h);
     }
+
+    LAZY_FC_LOG_DEBUG << "Result is:" << std::endl
+                      << _as.add_link(SET_LINK, result)->toShortString();
 
     return result;
 }
@@ -407,7 +403,8 @@ HandleSeq ForwardChainer::apply_rule(Handle rhandle)
  *
  * @return  A UnorderedHandleSet of derived rule handles.
  */
-UnorderedHandleSet ForwardChainer::derive_rules(Handle source, Handle pattern,
+UnorderedHandleSet ForwardChainer::derive_rules(const Handle& source,
+                                                const Handle& pattern,
                                                 const Rule* rule)
 {
     // Exceptions
@@ -486,7 +483,8 @@ UnorderedHandleSet ForwardChainer::derive_rules(Handle source, Handle pattern,
  *
  * @return  A HandleSeq of derived rule handles.
  */
-UnorderedHandleSet ForwardChainer::derive_rules(Handle source, const Rule* rule)
+UnorderedHandleSet ForwardChainer::derive_rules(const Handle& source,
+                                                const Rule* rule)
 {
     UnorderedHandleSet derived_rules;
 
@@ -519,7 +517,7 @@ bool ForwardChainer::is_valid_implicant(const Handle& h)
     return is_valid;
 }
 
-void ForwardChainer::validate(Handle hsource, HandleSeq hfocus_set)
+void ForwardChainer::validate(const Handle& hsource, const HandleSeq& hfocus_set)
 {
     if (hsource == Handle::UNDEFINED)
         throw RuntimeException(TRACE_INFO, "ForwardChainer - Invalid source.");
@@ -589,7 +587,7 @@ Handle ForwardChainer::remove_constant_clauses(const Handle& hvarlist,
  * @return A HandleSeq of all possible derived rules
  */
 HandleSeq ForwardChainer::substitute_rule_part(
-        AtomSpace& as, Handle hrule, const std::set<Handle>& vars,
+        AtomSpace& as, const Handle& hrule, const std::set<Handle>& vars,
         const std::vector<std::map<Handle, Handle>>& var_groundings)
 {
     std::vector<std::map<Handle, Handle>> filtered_vgmap_list;
@@ -642,24 +640,29 @@ HandleSeq ForwardChainer::substitute_rule_part(
  *
  * @return        true on successful unification and false otherwise.
  */
-bool ForwardChainer::unify(Handle source, Handle pattern, const Rule* rule)
+bool ForwardChainer::unify(const Handle& source, const Handle& pattern,
+                           const Rule* rule)
 {
     // Exceptions
     if (not is_valid_implicant(pattern))
         return false;
 
-    AtomSpace temp_pm_as;
-    Handle hcpy = temp_pm_as.add_atom(pattern);
-    Handle implicant_vardecl = temp_pm_as.add_atom(
-        gen_sub_varlist(pattern, rule->get_vardecl()));
-    Handle sourcecpy = temp_pm_as.add_atom(source);
+    AtomSpace tmp_as;
+    Handle pattern_cpy = tmp_as.add_atom(pattern);
+    Handle pattern_vardecl =
+	    tmp_as.add_atom(gen_sub_varlist(pattern, rule->get_vardecl()));
+    Handle source_cpy = tmp_as.add_atom(source);
 
-    Handle blhandle =
-        temp_pm_as.add_link(BIND_LINK, implicant_vardecl, hcpy, hcpy);
-    Handle result = bindlink(&temp_pm_as, blhandle);
-    HandleSeq results = LinkCast(result)->getOutgoingSet();
+    Handle ml = tmp_as.add_link(MAP_LINK,
+                                tmp_as.add_link(SCOPE_LINK,
+                                                pattern_vardecl,
+                                                pattern_cpy),
+                                source_cpy);
 
-    return std::find(results.begin(), results.end(), sourcecpy) != results.end();
+    Instantiator inst(&tmp_as);
+    Handle result = inst.execute(ml);
+
+    return result != Handle::UNDEFINED;
 }
 
 Handle ForwardChainer::gen_sub_varlist(const Handle& parent,

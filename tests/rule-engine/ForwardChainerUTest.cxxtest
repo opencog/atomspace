@@ -77,7 +77,8 @@ public:
 	void test_choose_rule();
 	void test_apply_rule();
 	void test_substitute_rule_part();
-	void test_unify();
+	void test_unify_1();
+	void test_unify_2();
 	void test_derive_rules_1();
 	void test_derive_rules_2();
 };
@@ -116,14 +117,12 @@ void ForwardChainerUTest::test_do_chain()
 
 void ForwardChainerUTest::test_choose_rule(void)
 {
-    logger().set_print_to_stdout_flag(true);
-    logger().set_level(Logger::DEBUG);
-
-    Handle h = eval.eval_h(
-        "(InheritanceLink (ConceptNode \"cat\")(ConceptNode \"animal\"))");
+    Handle h = eval.eval_h("(ImplicationLink"
+                           "   (PredicateNode \"is_cat\")"
+                           "   (PredicateNode \"is_animal\"))");
     TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
 
-    Handle rbs = _as.get_node(CONCEPT_NODE, "URE");
+    Handle rbs = eval.eval_h("(ConceptNode \"crisp-deduction-rule-base\")");
     ForwardChainer fc(_as, rbs, h);
 
     // Full unification
@@ -209,35 +208,65 @@ void ForwardChainerUTest::test_substitute_rule_part(void)
 	TS_ASSERT_EQUALS(hexpected, hx);
 }
 
-void ForwardChainerUTest::test_unify(void)
+void ForwardChainerUTest::test_unify_1(void)
 {
-	Handle source = eval.eval_h("(InheritanceLink"
-	                            "   (ConceptNode \"Cat\")"
-	                            "   (ConceptNode \"Animal\"))");
+    Handle source = eval.eval_h("(ImplicationLink"
+                                "   (PredicateNode \"is_cat\")"
+                                "   (PredicateNode \"is_animal\"))");
+
+    Handle rbs = eval.eval_h("(ConceptNode \"crisp-deduction-rule-base\")");
 
 	Handle rule_handle = eval.eval_h("(MemberLink"
-	                                 "   bc-modus-ponens-rule-name"
-	                                 "   (ConceptNode \"URE\"))");
+	                                 "   crisp-deduction-rule-name"
+	                                 "   (ConceptNode \"crisp-deduction-rule-base\"))");
 	Rule rule(rule_handle);
-	Handle target = eval.eval_h("(VariableNode \"$A\")");
+	Handle premise_pat = eval.eval_h("(ImplicationLink"
+	                                 "   (VariableNode \"$A\")"
+	                                 "   (VariableNode \"$B\"))");
 
-	Handle rbs = _as.get_node(CONCEPT_NODE, "URE");
-	ForwardChainer fc(_as, rbs, target);
+	ForwardChainer fc(_as, rbs, source);
 
-	// Currently, the unifier is broken: the below causes the following
-	// to be generated:
-	// (BindLink (Variable $a) (Variable $a) (Variable $a))
-	// which, when evaluated, leads to infinite recursion (since $a can
-	// be the BindLink itself, causing it to be evaluated over and over
-	// and over ...)
-	// bool result = fc.unify(source, target, &rule);
-	// TS_ASSERT(result);
-	//TODO more test cases here
+	bool result = fc.unify(source, premise_pat, &rule);
+	TS_ASSERT(result);
+}
+
+void ForwardChainerUTest::test_unify_2(void)
+{
+	config().set("SCM_PRELOAD", "tests/rule-engine/rules/pln-implication-and-lambda-factorization-rule.scm");
+	load_scm_files_from_config(_as);
+
+	Handle source = eval.eval_h
+		("(AndLink"
+		 "  (LambdaLink"
+		 "    (TypedVariableLink"
+		 "      (VariableNode \"$X\")"
+		 "      (TypeNode \"ConceptNode\"))"
+		 "    (PredicateNode \"P\"))"
+		 "  (LambdaLink"
+		 "    (TypedVariableLink"
+		 "      (VariableNode \"$X\")"
+		 "      (TypeNode \"ConceptNode\"))"
+		 "    (EvaluationLink"
+		 "      (PredicateNode \"Q\")"
+		 "      (VariableNode \"$X\"))))");
+
+    Handle rbs = eval.eval_h("(ConceptNode \"PLN\")");
+
+	Handle rule_handle = eval.eval_h("(MemberLink"
+	                                 "   implication-and-lambda-factorization-rule-name"
+	                                 "   (ConceptNode \"PLN\"))");
+	Rule rule(rule_handle);
+	Handle premise_pat = eval.eval_h("implication-and-lambda-factorization-body");
+
+	ForwardChainer fc(_as, rbs, source);
+
+	bool result = fc.unify(source, premise_pat, &rule);
+	TS_ASSERT(result);
 }
 
 void ForwardChainerUTest::test_derive_rules_1(void)
 {
-	config().set("SCM_PRELOAD", "tests/rule-engine/bc-deduction.scm,"
+	config().set("SCM_PRELOAD", "tests/rule-engine/rules/bc-deduction.scm,"
 	             "tests/rule-engine/simple-assertions.scm");
 	load_scm_files_from_config(_as);
 
@@ -266,7 +295,7 @@ void ForwardChainerUTest::test_derive_rules_2()
 	_as.clear();
 
 	config().set("SCM_PRELOAD",
-	             "tests/rule-engine/implication-construction-rule.scm");
+	             "tests/rule-engine/rules/implication-construction-rule.scm");
 	load_scm_files_from_config(_as);
 
 	Handle source = eval.eval_h("(LambdaLink"

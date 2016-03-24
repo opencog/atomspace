@@ -45,8 +45,26 @@ class FCStat
 {
 private:
 	std::vector<InferenceRecord> _inf_rec;
+	AtomSpace& _as;
 
 public:
+	FCStat(AtomSpace& as) : _as(as) {}
+
+	/**
+	 * Record the inference step into memory, as well as in the
+	 * atomspace according to the following format:
+	 *
+	 * ExecutionLink
+	 *    <rule>
+	 *    <source>
+	 *    <product>
+	 *
+	 * where
+	 *
+	 * 1. <rule> is DefinedSchemaNode <rule-name>
+	 * 2. <source> is the source
+	 * 3. <product> is a SetLink <p1> ... <pn> where pi are the products
+	 */
 	void add_inference_record(Handle source, const Rule* rule,
 	                          const UnorderedHandleSet& product);
 	UnorderedHandleSet get_all_products();
