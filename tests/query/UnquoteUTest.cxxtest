@@ -153,25 +153,7 @@ void UnquoteUTest::test_and_2(void)
 	logger().fine() << "result = " << result->toString();
 	logger().fine() << "expected = " << expected->toString();
 
-	// The current behavior is clearly wrong as it returns
-	//
-	//	result = (SetLink
-	//  (AndLink
-	//    (ConceptNode "A") ; [8][1]
-	//    (UnquoteLink
-	//      (ConceptNode "B") ; [9][1]
-	//    ) ; [17][1]
-	//  ) ; [18][1]
-	//  (AndLink
-	//    (ConceptNode "B") ; [9][1]
-	//    (UnquoteLink
-	//      (ConceptNode "A") ; [8][1]
-	//    ) ; [19][1]
-	//  ) ; [20][1]
-	//) ; [21][1]
-
-	// TS_ASSERT_EQUALS(result, expected);
-	TS_ASSERT(true);
+	TS_ASSERT_EQUALS(result, expected);
 	
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
