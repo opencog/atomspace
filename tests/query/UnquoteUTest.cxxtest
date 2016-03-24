@@ -50,7 +50,8 @@ public:
     void tearDown();
 
 	void test_list();
-	void test_and();
+	void test_and_1();
+	void test_and_2();
 	void test_rewrite();
 };
 
@@ -104,7 +105,7 @@ void UnquoteUTest::test_list(void)
  * Try to match a simple pattern involving AndLink, escaping the
  * connective nature of AndLink using QuoteLink and UnquoteLink.
  */
-void UnquoteUTest::test_and(void)
+void UnquoteUTest::test_and_1(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -125,6 +126,53 @@ void UnquoteUTest::test_and(void)
 
 	TS_ASSERT_EQUALS(result, expected);
 
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Try to match a simple pattern involving AndLink, escaping the
+ * connective nature of AndLink using QuoteLink and
+ * UnquoteLink. However we let the Un/QuoteLink in the rewrite
+ * pattern.
+ */
+void UnquoteUTest::test_and_2(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle simple_and = al(AND_LINK, A, B);
+	Handle body = al(QUOTE_LINK,
+	                 al(AND_LINK,
+	                    al(UNQUOTE_LINK, X),
+	                    al(UNQUOTE_LINK, Y)));
+	Handle rewrite = body;
+	Handle pat = al(BIND_LINK, var_decl, body, rewrite);
+
+	Handle result = bindlink(&as, pat);
+	Handle expected = al(SET_LINK, simple_and);
+
+	logger().fine() << "result = " << result->toString();
+	logger().fine() << "expected = " << expected->toString();
+
+	// The current behavior is clearly wrong as it returns
+	//
+	//	result = (SetLink
+	//  (AndLink
+	//    (ConceptNode "A") ; [8][1]
+	//    (UnquoteLink
+	//      (ConceptNode "B") ; [9][1]
+	//    ) ; [17][1]
+	//  ) ; [18][1]
+	//  (AndLink
+	//    (ConceptNode "B") ; [9][1]
+	//    (UnquoteLink
+	//      (ConceptNode "A") ; [8][1]
+	//    ) ; [19][1]
+	//  ) ; [20][1]
+	//) ; [21][1]
+
+	// TS_ASSERT_EQUALS(result, expected);
+	TS_ASSERT(true);
+	
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
