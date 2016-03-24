@@ -98,7 +98,7 @@ public:
 	Handle instantiate(const Handle& expr, const std::map<Handle, Handle> &vars);
 	Handle execute(const Handle& expr)
 	{
-			return instantiate(expr, std::map<Handle, Handle>());
+		return instantiate(expr, std::map<Handle, Handle>());
 	}
 };
 
