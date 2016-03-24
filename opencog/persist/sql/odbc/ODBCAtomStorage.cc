@@ -848,9 +848,9 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
         {
             // Use postgres $-quoting to make unicode strings
             // easier to deal with.
-            std::string qname = " $$";
+            std::string qname = " $ocp$";
             qname += n->getName();
-            qname += "$$ ";
+            qname += "$ocp$ ";
 
             // The Atoms table has a UNIQUE constraint on the
             // node name.  If a node name is too long, a postgres
