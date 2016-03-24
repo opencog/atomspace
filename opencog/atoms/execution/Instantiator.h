@@ -81,7 +81,7 @@ private:
 	bool walk_sequence(HandleSeq&, const HandleSeq&);
 
 public:
-	Instantiator(AtomSpace* as) : _as(as) {}
+	Instantiator(AtomSpace* as) : _as(as), _vmap(nullptr) {}
 
 	void ready(AtomSpace* as)
 	{
@@ -91,8 +91,8 @@ public:
 
 	void clear()
 	{
-		_as = NULL;
-		_vmap = NULL;
+		_as = nullptr;
+		_vmap = nullptr;
 	}
 
 	Handle instantiate(const Handle& expr, const std::map<Handle, Handle> &vars);
