@@ -45,7 +45,7 @@
 using namespace opencog;
 
 #define HUGE_LINK_SIZE  100000
-#define DEEP_LINK_SIZE  5
+#define DEEP_LINK_SIZE  20
 
 class PersistUTest :  public CxxTest::TestSuite
 {

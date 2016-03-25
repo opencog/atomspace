@@ -70,6 +70,11 @@ using namespace opencog;
 // normal case we only need to cache for a full depth get.
 #define EDGE_CACHE_MAX_SIZE 1000
 
+// Atom cache for handling nested atoms. Set to the expected number of
+// atoms to be retrieved as a result of a single get operation of a
+// parent link.
+#define ATOM_CACHE_SIZE 1000
+
 // Initial growth for outgoing sets
 #define INITIAL_GROWTH_CHUNK 8
 
@@ -233,9 +238,9 @@ public:
 
         // Use postgres $-quoting to make unicode strings
         // easier to deal with.
-        std::string quoted_value = "$$";
+        std::string quoted_value = "$ocp$";
         quoted_value += value;
-        quoted_value += "$$";
+        quoted_value += "$ocp$";
 
         // Add the quoted value.
         _columns.emplace_back(std::string(column));
@@ -867,7 +872,8 @@ std::string PGAtomStorage::outgoing_set_to_hash_string(const HandleSeq& outgoing
             // we can easily recognize like: 1010101010101010101 decimal
             int64_t new_hash = 0xe04998456557eb5;
             _collission_count++;
-            fprintf(stdout, "test colliding %ld to %ld\n", hash, new_hash);
+            if (_verbose)
+                fprintf(stdout, "test colliding %ld to %ld\n", hash, new_hash);
             hash = new_hash;
         }
     }
@@ -1541,6 +1547,30 @@ PGAtomStorage::PseudoPtr PGAtomStorage::load_pseudo_atom_with_uuid(UUID uuid)
     return load_pseudo_atom(statement, -1);
 }
 
+void PGAtomStorage::cache_atom(UUID uuid, AtomPtr atom)
+{
+    // Remove an atom if we've reached the cache size.
+    if (_atom_cache.size() > ATOM_CACHE_SIZE)
+        _atom_cache.erase(_atom_cache.begin());
+
+    // Add the new atom to the cache.
+    _atom_cache.emplace(uuid, atom);
+}
+
+AtomPtr PGAtomStorage::get_cached_atom(UUID uuid)
+{
+    // Remove an atom if we've reached the cache size.
+     auto search = _atom_cache.find(uuid);
+    if(search != _atom_cache.end())
+    {
+        // fprintf(stdout, "get_cached_atom - found %lu\n", uuid);
+        return search->second;
+    }
+
+    // We didn't find the UUID..
+    return NULL;
+}
+
 /**
  * Create a new atom, retrieved from storage. This is a recursive-get;
  * if the atom is a link, then the outgoing set will be fetched too.
@@ -1552,25 +1582,53 @@ PGAtomStorage::PseudoPtr PGAtomStorage::load_pseudo_atom_with_uuid(UUID uuid)
 std::string s_indent("");
 AtomPtr PGAtomStorage::getAtom(UUID uuid)
 {
-    fprintf(stdout, "%sgetAtom(%lu)\n", s_indent.c_str(), uuid);
+    if (_verbose)
+        fprintf(stdout, "%sgetAtom(%lu)\n", s_indent.c_str(), uuid);
+
+    // First check the recent Atom cache.
+    AtomPtr atom = get_cached_atom(uuid);
+    if (atom)
+    {
+        if (_verbose)
+            fprintf(stdout, "%s - cached(%lu)\n", s_indent.c_str(), uuid);
+        return atom;
+    }
+
+    // If not found then load the pseudo-atom SQL.
+    if (_verbose)
+        fprintf(stdout, "%s - NOT cached, loading(%lu)\n", s_indent.c_str(), uuid);
     PseudoPtr p(load_pseudo_atom_with_uuid(uuid));
     if (NULL == p) return NULL;
 
+    // If the Atom retrieved is a NODE.
     if (classserver().isA(p->type, NODE))
     {
+        // Create the Node...
         NodePtr node(createNode(p->type, p->name, p->tv));
-        setAtomUUID( node, p->uuid );
+        setAtomUUID(node, uuid);
+
+        // Cache and return it.
+        cache_atom(uuid, node);
         return node;
     }
 
-    s_indent += "  ";
-    HandleSeq oset;
-    for (UUID idu : p->oset)
-        oset.emplace_back(getAtom(idu)->getHandle());
-    s_indent.resize(s_indent.size() - 2);
+    // Must be a LINK... so build the Link's outgoing set by getting
+    // each of the Atoms using the UUID and putting them into the
+    // outgoing HandleSeq set after retrieving the Handles from the Atoms.
+    if (_verbose)
+        s_indent += "  ";
+    HandleSeq outgoing_set;
+    for (UUID atom_uuid : p->oset)
+        outgoing_set.emplace_back(getAtom(atom_uuid)->getHandle());
+    if (_verbose)
+        s_indent.resize(s_indent.size() - 2);
 
-    LinkPtr link(createLink(p->type, oset, p->tv));
-    setAtomUUID( link, p->uuid );
+    // Now create the Link with the outgoing set.
+    LinkPtr link(createLink(p->type, outgoing_set, p->tv));
+    setAtomUUID( link, uuid );
+
+    // Cache and return it.
+    cache_atom(uuid, link);
     return link;
 }
 
@@ -1627,7 +1685,7 @@ NodePtr PGAtomStorage::getNode(Type t, const char * str)
 
     // Use postgres $-quoting to make unicode strings easier to deal with.
     int nc = snprintf(statement, 4*BUFFER_SIZE, "SELECT * FROM Atoms WHERE "
-        "type = %hu AND name = $$%s$$ ;", _storing_type_map[t], str);
+        "type = %hu AND name = $ocp$%s$ocp$ ;", _storing_type_map[t], str);
 
     if (40*BUFFER_SIZE-1 <= nc)
     {
