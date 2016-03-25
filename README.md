@@ -76,22 +76,22 @@ use the Dockerfile to quickly build a container in which OpenCog will
 be built and run.
 
 ###### boost
-> C++ utilities package.
-> http://www.boost.org/ | libboost-dev
+* C++ utilities package.
+* `http://www.boost.org/ | libboost-dev`
 
 ###### cmake
-> Build management tool; v2.8 or higher recommended.
-> http://www.cmake.org/ | cmake
+* Build management tool; v2.8 or higher recommended.
+* `http://www.cmake.org/ | cmake`
 
 ###### cogutil
-> Common OpenCog C++ utilities.
-> http://github.com/opencog/cogutils
-> It uses exactly the same build procedure as this package. Be sure
+* Common OpenCog C++ utilities.
+* `http://github.com/opencog/cogutils`
+* It uses exactly the same build procedure as this package. Be sure
   to `sudo make install` at the end.
 
 ###### guile
-> Embedded scheme REPL (version 2.0.9 or newer is required)
-> http://www.gnu.org/software/guile/guile.html | guile-2.0-dev
+* Embedded scheme REPL (version 2.0.9 or newer is required).
+* `http://www.gnu.org/software/guile/guile.html | guile-2.0-dev`
 
 Optional Prerequisites
 ----------------------
@@ -100,40 +100,40 @@ optional parts of the AtomSpace will not be built.  The CMake command,
 during the build, will be more precise as to which parts will not be built.
 
 ###### cxxtest
-> Test framework
-> Optional but recommended; required for running unit tests.
-> http://cxxtest.sourceforge.net/ | https://launchpad.net/~opencog-dev/+archive/ppa
+* Test framework
+* Optional but recommended; required for running unit tests.
+* `http://cxxtest.sourceforge.net/ | https://launchpad.net/~opencog-dev/+archive/ppa`
 
 ###### Cython
-> C bindings for Python.
-> Strongly recommended, as many examples and important subsystems
+* C bindings for Python.
+* Strongly recommended, as many examples and important subsystems
   assume python bindings.
-> http://cython.org
+* `http://cython.org`
 
 ###### Haskell
-> Haskell bindings (experimental).
-> Optional; almost no existing code makes use of haskell.
-> https://www.haskell.org/
+* Haskell bindings (experimental).
+* Optional; almost no existing code makes use of haskell.
+* `https://www.haskell.org/`
 
 ###### Postgres
-> Distributed, multi-client networked storage.
-> Needed for "remembering" things between shutdowns.
-> http://postgres.org
+* Distributed, multi-client networked storage.
+* Needed for "remembering" things between shutdowns.
+* `http://postgres.org`
 
 ###### unixODBC
-> Generic SQL Database client access libraries.
-> Required for the distributed-processing atomspace.
-> http://www.unixodbc.org/ | unixodbc-dev
+* Generic SQL Database client access libraries.
+* Required for the distributed-processing atomspace.
+* `http://www.unixodbc.org/ | unixodbc-dev`
 
 ###### ZeroMQ (version 3.2.4 or higher)
-> Asynchronous messaging library
-> Optional, almost completely unused, mostly due to poor performance.
-> http://zeromq.org/intro:get-the-software | libzmq3-dev
+* Asynchronous messaging library.
+* Optional, almost completely unused, mostly due to poor performance.
+* `http://zeromq.org/intro:get-the-software | libzmq3-dev`
 
 ###### Google Protocol Buffers
-> Google's data interchange format (used by ZeroMQ)
-> Optional, needed only for ZMQ, above.
-> https://developers.google.com/protocol-buffers | libprotobuf-dev
+* Google's data interchange format (used by ZeroMQ).
+* Optional, needed only for ZMQ, above.
+* `https://developers.google.com/protocol-buffers | libprotobuf-dev`
 
 
 Building AtomSpace
