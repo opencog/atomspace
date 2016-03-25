@@ -43,7 +43,7 @@ and programming tasks in mind, nor with scalability; but rather, it
 was designed to allow the generalized manipulation of networks of
 probabilistic data by means of rules and inferences and reasoning
 systems.  It extends the idea of probabilistic logic networks to a
-generalized system for automatically maniuplating and managing data.
+generalized system for automatically manipulating and managing data.
 
 The use of the AtomSpace, and the operation and utility of Atomese,
 remains a topic of ongoing research and change, as various dependent
@@ -55,7 +55,8 @@ psychological systems.  Each of these impose sharply conflicting
 requirements on the system architecture; the AtomSpace and "Atomese"
 is the current best-effort KR system for satisfying all these various
 needs in an integrated way.  It is likely to change, as the various
-current short-comings and design flaws are corrected.
+current short-comings, design flaws, performance and scalability
+issues are corrected.
 
 The main project site is at http://opencog.org
 
@@ -77,21 +78,21 @@ be built and run.
 
 ###### boost
 * C++ utilities package.
-* `http://www.boost.org/ | libboost-dev`
+* http://www.boost.org/ | `apt-get install libboost-dev`
 
 ###### cmake
 * Build management tool; v2.8 or higher recommended.
-* `http://www.cmake.org/ | cmake`
+* http://www.cmake.org/ | `apt-get install cmake`
 
 ###### cogutil
 * Common OpenCog C++ utilities.
-* `http://github.com/opencog/cogutils`
+* http://github.com/opencog/cogutils
 * It uses exactly the same build procedure as this package. Be sure
   to `sudo make install` at the end.
 
 ###### guile
 * Embedded scheme REPL (version 2.0.9 or newer is required).
-* `http://www.gnu.org/software/guile/guile.html | guile-2.0-dev`
+* http://www.gnu.org/software/guile/guile.html | `apt-get install guile-2.0-dev`
 
 Optional Prerequisites
 ----------------------
@@ -102,38 +103,38 @@ during the build, will be more precise as to which parts will not be built.
 ###### cxxtest
 * Test framework
 * Optional but recommended; required for running unit tests.
-* `http://cxxtest.sourceforge.net/ | https://launchpad.net/~opencog-dev/+archive/ppa`
+* http://cxxtest.sourceforge.net/ | https://launchpad.net/~opencog-dev/+archive/ppa
 
 ###### Cython
 * C bindings for Python.
 * Strongly recommended, as many examples and important subsystems
   assume python bindings.
-* `http://cython.org`
+* http://cython.org | `apt-get install cython`
 
 ###### Haskell
 * Haskell bindings (experimental).
 * Optional; almost no existing code makes use of haskell.
-* `https://www.haskell.org/`
+* https://www.haskell.org/
 
 ###### Postgres
 * Distributed, multi-client networked storage.
 * Needed for "remembering" things between shutdowns.
-* `http://postgres.org`
+* http://postgres.org | `apt-get install postgresql postgresql-client`
 
 ###### unixODBC
 * Generic SQL Database client access libraries.
 * Required for the distributed-processing atomspace.
-* `http://www.unixodbc.org/ | unixodbc-dev`
+* http://www.unixodbc.org/ | `apt-get install unixodbc-dev`
 
 ###### ZeroMQ (version 3.2.4 or higher)
 * Asynchronous messaging library.
 * Optional, almost completely unused, mostly due to poor performance.
-* `http://zeromq.org/intro:get-the-software | libzmq3-dev`
+* http://zeromq.org/intro:get-the-software | `apt-get install libzmq3-dev`
 
 ###### Google Protocol Buffers
 * Google's data interchange format (used by ZeroMQ).
 * Optional, needed only for ZMQ, above.
-* `https://developers.google.com/protocol-buffers | libprotobuf-dev`
+* https://developers.google.com/protocol-buffers | `apt-get install libprotobuf-dev`
 
 
 Building AtomSpace
