@@ -3,7 +3,7 @@ OpenCog AtomSpace
 
 [![Build Status](http://61.92.69.43:8080/buildStatus/icon?job=ci-atomspace)](http://61.92.69.43:8080/job/ci-atomspace/)
 
-The OpenCog Atomspace is a knowledge representation (KR) database and
+The OpenCog AtomSpace is a knowledge representation (KR) database and
 the associated query/reasoning engine to fetch and manipulate that data,
 and perform reasoning on it. Data is represented in the form of graphs,
 and more generally, as hypergraphs; thus the AtomSpace is a kind of
@@ -27,7 +27,7 @@ construction (dependent types and type variables TBD).
 
 Because of these many and varied Atom types, constructing graphs to
 represent knowledge looks kind-of-like "programming"; the programming
-language is informally refered to as "Atomese".  It vaguely resembles
+language is informally referred to as "Atomese".  It vaguely resembles
 a strange mashup of SQL (due to queriability), prolog/datalog (due to
 the logic and reasoning components), lisp/scheme (due to lambda
 expressions), haskell/caml (due to the type system) and rule engines
@@ -65,7 +65,7 @@ The [examples](https://github.com/opencog/atomspace/blob/master/examples)
 directory contains demonstrations of the various components of the
 AtomSpace, including the python and scheme bindings, the pattern
 matcher, the rule engine, and many of the various different atom types
-and thier use for solving various different tasks.
+and their use for solving various different tasks.
 
 
 Prerequisites
@@ -179,7 +179,7 @@ them.  For examples, see the `/examples/guile` and the
 `/examples/pattern-matcher` directories.
 
 Python is more familiar than scheme (guile) to most programmers, and
-it offers another way of intrfacing to the atomspace. See the
+it offers another way of interfacing to the atomspace. See the
 `/examples/python` directory for how to use python with the AtomSpace.
 
 The OpenCog cogserver provides a network server interface to OpenCog.
