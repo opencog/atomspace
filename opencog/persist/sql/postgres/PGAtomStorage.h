@@ -185,6 +185,11 @@ class PGAtomStorage : public AtomStorage
 
         std::unordered_map<UUID, std::vector<UUID>> _edge_cache;
 
+        // Atom Caching for getAtom optimization...
+        std::unordered_map<UUID, AtomPtr> _atom_cache;
+        void cache_atom(UUID uuid, AtomPtr atom);
+        AtomPtr get_cached_atom(UUID uuid);
+
     public:
         PGAtomStorage(const std::string& dbname, 
                     const std::string& username,
