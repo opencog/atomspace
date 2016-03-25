@@ -35,7 +35,7 @@
 
 using namespace opencog;
 
-BackwardChainer::BackwardChainer(AtomSpace& as, Handle rbs)
+BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs)
 	: _as(as), _configReader(as, rbs),
 	  // create a garbage superspace with _as as parent, so codes
 	  // acting on _garbage_superspace will see stuff in _as, but
@@ -49,7 +49,7 @@ BackwardChainer::BackwardChainer(AtomSpace& as, Handle rbs)
  * @param init_target   Handle of the target
  * @param focus_link    The SetLink containing the optional focus set.
  */
-void BackwardChainer::set_target(Handle init_target, Handle focus_link)
+void BackwardChainer::set_target(const Handle& init_target, const Handle& focus_link)
 {
 	_init_target = init_target;
 
@@ -569,7 +569,7 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
  */
 HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
                                          const VarMap& implicand_mapping,
-                                         const std::set<Handle> additional_free_varset,
+                                         const std::set<Handle>& additional_free_varset,
                                          Handle& hrule_implicant_reverse_grounded,
                                          std::vector<VarMap>& premises_vmap_list)
 {
@@ -747,8 +747,8 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
  */
 bool BackwardChainer::unify(const Handle& hsource,
                             const Handle& hmatch,
-                            Handle hsource_vardecl,
-                            Handle hmatch_vardecl,
+                            const Handle& hsource_vardecl,
+                            const Handle& hmatch_vardecl,
                             VarMap& result)
 {
 	// lazy way of restricting PM to be between two atoms
