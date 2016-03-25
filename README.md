@@ -20,9 +20,10 @@ for-all, there-exists; for Bayesian and other probabilistic relations;
 for intuitionist logic, such as absence and choice; for parallel
 (threaded) synchronous and asynchronous execution; for expressions with
 variables and for lambda expressions and for beta-reduction and mapping;
-for uniqueness constraints and for state; for searching and
-satisfiability and graph re-writing; for the specification of types and
-type signatures, including type polymorphism and type construction.
+for uniqueness constraints, state and a messaging "blackboard"; for
+searching and satisfiability and graph re-writing; for the specification
+of types and type signatures, including type polymorphism and type
+construction (dependent types and type variables TBD).
 
 Because of these many and varied Atom types, constructing graphs to
 represent knowledge looks kind-of-like "programming"; the programming
