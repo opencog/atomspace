@@ -49,7 +49,8 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs)
  * @param init_target   Handle of the target
  * @param focus_link    The SetLink containing the optional focus set.
  */
-void BackwardChainer::set_target(const Handle& init_target, const Handle& focus_link)
+void BackwardChainer::set_target(const Handle& init_target,
+                                 const Handle& focus_link)
 {
 	_init_target = init_target;
 
@@ -695,7 +696,8 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 	// XXX TODO when all VariableNode are unique, we will be able to tell what
 	// type a random VariableNode is in the AtomSpace by looking at its
 	// antecedent; so the type should be included in the future
-	HandleSeq temp_results = match_knowledge_base(premises, Handle::UNDEFINED, temp_vmap_list);
+	HandleSeq temp_results = match_knowledge_base(premises, Handle::UNDEFINED,
+	                                              temp_vmap_list);
 
 	// chase the variables so that if a variable A were mapped to another
 	// variable B in premise_vmap, and after pattern matching, B now map
@@ -772,7 +774,8 @@ bool BackwardChainer::unify(const Handle& hsource,
 	}
 
 	PatternLinkPtr sl(createPatternLink(temp_hsource_vardecl, temp_hsource));
-	UnifyPMCB pmcb(&temp_space, VariableListCast(temp_hsource_vardecl), VariableListCast(temp_hmatch_vardecl));
+	UnifyPMCB pmcb(&temp_space, VariableListCast(temp_hsource_vardecl),
+	               VariableListCast(temp_hmatch_vardecl));
 
 	sl->satisfy(pmcb);
 
@@ -785,7 +788,8 @@ bool BackwardChainer::unify(const Handle& hsource,
 
 	VarMap good_map;
 
-	// go thru each solution, and get the first one that map the whole temp_hmatch
+	// Go thru each solution, and get the first one that map the whole
+	// temp_hmatch
 	//
 	// XXX TODO branch on the various groundings?  how to properly handle
 	// multiple possible unify option????
@@ -804,7 +808,7 @@ bool BackwardChainer::unify(const Handle& hsource,
 
 	// if none of the mapping map the whole temp_hmatch (possible in the case
 	// of sub-atom unification that map a typed variable to another variable)
-	if (good_map.size() == 0)
+	if (good_map.empty())
 		return false;
 
 	// change the mapping from temp_atomspace to current atomspace
