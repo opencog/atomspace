@@ -653,16 +653,12 @@ bool ForwardChainer::unify(const Handle& source, const Handle& pattern,
 	    tmp_as.add_atom(gen_sub_varlist(pattern, rule->get_vardecl()));
     Handle source_cpy = tmp_as.add_atom(source);
 
-    Handle ml = tmp_as.add_link(MAP_LINK,
-                                tmp_as.add_link(SCOPE_LINK,
-                                                pattern_vardecl,
-                                                pattern_cpy),
-                                source_cpy);
+    Handle bl =
+        tmp_as.add_link(BIND_LINK, pattern_vardecl, pattern_cpy, pattern_cpy);
+    Handle result = bindlink(&tmp_as, bl);
+    HandleSeq results = LinkCast(result)->getOutgoingSet();
 
-    Instantiator inst(&tmp_as);
-    Handle result = inst.execute(ml);
-
-    return result != Handle::UNDEFINED;
+    return std::find(results.begin(), results.end(), source_cpy) != results.end();
 }
 
 Handle ForwardChainer::gen_sub_varlist(const Handle& parent,
