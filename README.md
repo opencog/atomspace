@@ -179,7 +179,7 @@ them.  For examples, see the `/examples/guile` and the
 `/examples/pattern-matcher` directories.
 
 Python is more familiar than scheme (guile) to most programmers, and
-it offers another way of intrfacing to the atomspace. See the
+it offers another way of interfacing to the atomspace. See the
 `/examples/python` directory for how to use python with the AtomSpace.
 
 The OpenCog cogserver provides a network server interface to OpenCog.
