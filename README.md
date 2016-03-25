@@ -3,14 +3,15 @@ OpenCog AtomSpace
 
 [![Build Status](http://61.92.69.43:8080/buildStatus/icon?job=ci-atomspace)](http://61.92.69.43:8080/job/ci-atomspace/)
 
-The OpenCog Atomspace is a knowledge representation database and the
-associated query/reasoning engine to fetch and manipulate that data,
+The OpenCog Atomspace is a knowledge representation (KR) database and
+the associated query/reasoning engine to fetch and manipulate that data,
 and perform reasoning on it. Data is represented in the form of graphs,
 and more generally, as hypergraphs; thus the AtomSpace is a kind of
-graph database, and the query engine is a general graph re-writing
-system.  The vertices and edges of a graph, known as "Atoms", are used
-to represent not only "data" but also "proceedures", and thus, many
-graphs represent (are) executable programs.
+graph database, the query engine is a general graph re-writing system,
+and the rule-engine is a generalized rule-driven inferencing system.
+The vertices and edges of a graph, known as "Atoms", are used to
+represent not only "data", but also "procedures"; thus, many graphs
+are executable programs as well as data structures.
 
 There are pre-defined Atoms for many basic knowledge-representation and
 computer-science concepts. These include Atoms for relations, such as
@@ -28,7 +29,7 @@ represent knowledge looks kind-of-like "programming"; the programming
 language is informally refered to as "Atomese".  It vaguely resembles
 a strange mashup of SQL (due to queriability), prolog/datalog (due to
 the logic and reasoning components), lisp/scheme (due to lambda
-expressions), haskel/caml (due to the type system) and rule engines
+expressions), haskell/caml (due to the type system) and rule engines
 (due to the graph rewriting and forward/backward chaining inference
 systems).  This "programming language" is NOT designed for use by
 human programmers (it is too verbose and awkward for that); it is
@@ -75,54 +76,64 @@ use the Dockerfile to quickly build a container in which OpenCog will
 be built and run.
 
 ###### boost
-> C++ utilities package
-> http://www.boost.org/ | libboost-dev
+* C++ utilities package.
+* `http://www.boost.org/ | libboost-dev`
 
 ###### cmake
-> Build management tool; v2.8 or higher recommended.
-> http://www.cmake.org/ | cmake
+* Build management tool; v2.8 or higher recommended.
+* `http://www.cmake.org/ | cmake`
 
 ###### cogutil
-> Common OpenCog C++ utilities
-> http://github.com/opencog/cogutils
-> It uses exactly the same build procedure as this package. Be sure
+* Common OpenCog C++ utilities.
+* `http://github.com/opencog/cogutils`
+* It uses exactly the same build procedure as this package. Be sure
   to `sudo make install` at the end.
 
-###### cxxtest
-> Test framework
-> http://cxxtest.sourceforge.net/ | https://launchpad.net/~opencog-dev/+archive/ppa
-
 ###### guile
-> Embedded scheme interpreter (version 2.0.9 or newer is required)
-> http://www.gnu.org/software/guile/guile.html | guile-2.0-dev
+* Embedded scheme REPL (version 2.0.9 or newer is required).
+* `http://www.gnu.org/software/guile/guile.html | guile-2.0-dev`
 
 Optional Prerequisites
 ----------------------
 The following packages are optional. If they are not installed, some
-optional parts of OpenCog will not be built.  The CMake command, during
-the build, will be more precise as to which parts will not be built.
+optional parts of the AtomSpace will not be built.  The CMake command,
+during the build, will be more precise as to which parts will not be built.
 
-###### HyperTable
-> Distributed storage
-> http://hypertable.org
-> This requires SIGAR as well
+###### cxxtest
+* Test framework
+* Optional but recommended; required for running unit tests.
+* `http://cxxtest.sourceforge.net/ | https://launchpad.net/~opencog-dev/+archive/ppa`
 
-###### Threading Building Blocks
-> C++ template library for parallel programming
-> https://www.threadingbuildingblocks.org/download | libtbb-dev
+###### Cython
+* C bindings for Python.
+* Strongly recommended, as many examples and important subsystems
+  assume python bindings.
+* `http://cython.org`
+
+###### Haskell
+* Haskell bindings (experimental).
+* Optional; almost no existing code makes use of haskell.
+* `https://www.haskell.org/`
+
+###### Postgres
+* Distributed, multi-client networked storage.
+* Needed for "remembering" things between shutdowns.
+* `http://postgres.org`
 
 ###### unixODBC
-> Generic SQL Database client access libraries
-> Required for the distributed-processing atomspace.
-> http://www.unixodbc.org/ | unixodbc-dev
+* Generic SQL Database client access libraries.
+* Required for the distributed-processing atomspace.
+* `http://www.unixodbc.org/ | unixodbc-dev`
 
 ###### ZeroMQ (version 3.2.4 or higher)
-> Asynchronous messaging library
-> http://zeromq.org/intro:get-the-software | libzmq3-dev
+* Asynchronous messaging library.
+* Optional, almost completely unused, mostly due to poor performance.
+* `http://zeromq.org/intro:get-the-software | libzmq3-dev`
 
 ###### Google Protocol Buffers
-> Google's data interchange format (used by ZeroMQ)
-> https://developers.google.com/protocol-buffers | libprotobuf-dev
+* Google's data interchange format (used by ZeroMQ).
+* Optional, needed only for ZMQ, above.
+* `https://developers.google.com/protocol-buffers | libprotobuf-dev`
 
 
 Building AtomSpace
