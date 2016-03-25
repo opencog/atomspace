@@ -43,7 +43,7 @@ and programming tasks in mind, nor with scalability; but rather, it
 was designed to allow the generalized manipulation of networks of
 probabilistic data by means of rules and inferences and reasoning
 systems.  It extends the idea of probabilistic logic networks to a
-generalized system for automatically maniuplating and managing data.
+generalized system for automatically manipulating and managing data.
 
 The use of the AtomSpace, and the operation and utility of Atomese,
 remains a topic of ongoing research and change, as various dependent
@@ -55,7 +55,8 @@ psychological systems.  Each of these impose sharply conflicting
 requirements on the system architecture; the AtomSpace and "Atomese"
 is the current best-effort KR system for satisfying all these various
 needs in an integrated way.  It is likely to change, as the various
-current short-comings and design flaws are corrected.
+current short-comings, design flaws, performance and scalability
+issues are corrected.
 
 The main project site is at http://opencog.org
 
