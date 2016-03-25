@@ -3,14 +3,67 @@ OpenCog AtomSpace
 
 [![Build Status](http://61.92.69.43:8080/buildStatus/icon?job=ci-atomspace)](http://61.92.69.43:8080/job/ci-atomspace/)
 
-The OpenCog Atomspace is the hypergraph database and query/reasoning
-engine used by OpenCog to hold data and perform reasoning on it.
+The OpenCog Atomspace is a knowledge representation database and the
+associated query/reasoning engine to fetch and manipulate that data,
+and perform reasoning on it. Data is represented in the form of graphs,
+and more generally, as hypergraphs; thus the AtomSpace is a kind of
+graph database, and the query engine is a general graph re-writing
+system.  The vertices and edges of a graph, known as "Atoms", are used
+to represent not only "data" but also "proceedures", and thus, many
+graphs represent (are) executable programs.
+
+There are pre-defined Atoms for many basic knowledge-representation and
+computer-science concepts. These include Atoms for relations, such as
+similarity, inheritance and subsets; for logic, such as Boolean and, or,
+for-all, there-exists; for Bayesian and other probabilistic relations;
+for intuitionist logic, such as absence and choice; for parallel
+(threaded) synchronous and asynchronous execution; for expressions with
+variables and for lambda expressions and for beta-reduction and mapping;
+for uniqueness constraints and for state; for searching and
+satisfiability and graph re-writing; for the specification of types and
+type signatures, including type polymorphism and type construction.
+
+Because of these many and varied Atom types, constructing graphs to
+represent knowledge looks kind-of-like "programming"; the programming
+language is informally refered to as "Atomese".  It vaguely resembles
+a strange mashup of SQL (due to queriability), prolog/datalog (due to
+the logic and reasoning components), lisp/scheme (due to lambda
+expressions), haskel/caml (due to the type system) and rule engines
+(due to the graph rewriting and forward/backward chaining inference
+systems).  This "programming language" is NOT designed for use by
+human programmers (it is too verbose and awkward for that); it is
+designed for automation and machine learning.  That is, like any
+knowledge representation system, the data and procedures encoded
+in "Atomese" are meant to be accessed by other automated subsystems
+manipulating and querying and inferencing over the data/programs.
+Also, viewed as a programming language, it can be very slow and
+inefficient and not scalable; it was not designed with efficiency
+and programming tasks in mind, nor with scalability; but rather, it
+was designed to allow the generalized manipulation of networks of
+probabilistic data by means of rules and inferences and reasoning
+systems.  It extends the idea of probabilistic logic networks to a
+generalized system for automatically maniuplating and managing data.
+
+The use of the AtomSpace, and the operation and utility of Atomese,
+remains a topic of ongoing research and change, as various dependent
+subsystems are brought online. These include machine learning,
+natural language processing, motion control and animation, planning
+and constraint solving, pattern mining and data mining, question
+answering and common-sense systems, and emotional and behavioral
+psychological systems.  Each of these impose sharply conflicting
+requirements on the system architecture; the AtomSpace and "Atomese"
+is the current best-effort KR system for satisfying all these various
+needs in an integrated way.  It is likely to change, as the various
+current short-comings and design flaws are corrected.
 
 The main project site is at http://opencog.org
 
-An interactive tutorial for getting started is available at:
-https://github.com/opencog/opencog/blob/master/TUTORIAL.md
-See also https://github.com/opencog/atomspace/blob/master/examples
+The [examples](https://github.com/opencog/atomspace/blob/master/examples)
+directory contains demonstrations of the various components of the
+AtomSpace, including the python and scheme bindings, the pattern
+matcher, the rule engine, and many of the various different atom types
+and thier use for solving various different tasks.
+
 
 Prerequisites
 -------------
