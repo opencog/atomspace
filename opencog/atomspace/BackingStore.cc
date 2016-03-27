@@ -28,9 +28,20 @@
 
 using namespace opencog;
 
+#define DEBUG_IGNORE 0
+
+#if DEBUG_IGNORE
+std::string s_indent("");
+int s_ignore_count = 0;
+#endif
 
 bool BackingStore::ignoreAtom(Handle h) const
 {
+#if DEBUG_IGNORE
+    fprintf(stderr, "%signoreAtom(%lu) %d\n", s_indent.c_str(), h->getUUID(),
+    		s_ignore_count++);
+#endif
+
 	// If the handle is a uuid only, and no atom, we can't ignore it.
 	AtomPtr a(h);
 	if (NULL == a) return false;
@@ -42,10 +53,18 @@ bool BackingStore::ignoreAtom(Handle h) const
 	LinkPtr l(LinkCast(a));
 	if (NULL == l) return false;
 
+#if DEBUG_IGNORE
+    s_indent += "  ";
+#endif
+    bool should_ignore = false;
 	const HandleSeq& hs = l->getOutgoingSet();
 	if (std::any_of(hs.begin(), hs.end(), [this](Handle ho) { return ignoreAtom(ho); }))
-		return true;
-	return false;
+		should_ignore = true;
+#if DEBUG_IGNORE
+	s_indent.resize(max(s_indent.size() - 2, 0));
+#endif
+
+	return should_ignore;
 }
 
 void BackingStore::registerWith(AtomSpace* atomspace)

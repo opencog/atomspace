@@ -28,6 +28,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <sys/resource.h>
+
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
@@ -45,7 +47,8 @@
 using namespace opencog;
 
 #define HUGE_LINK_SIZE  100000
-#define DEEP_LINK_SIZE  20
+#define DEEP_LINK_SIZE  1000
+#define DEGENERATE_LINK_SIZE  20
 
 class PersistUTest :  public CxxTest::TestSuite
 {
@@ -106,6 +109,7 @@ class PersistUTest :  public CxxTest::TestSuite
 
         void test_atomspace();
         void test_huge_links();
+        void test_degenerate_deep_links();
         void test_many_deep_links();
 };
 
@@ -507,13 +511,13 @@ return;
 }
 
 
-void PersistUTest::test_many_deep_links()
+void PersistUTest::test_degenerate_deep_links()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
     TSM_ASSERT("Persist Module not loaded", _pm);
 
-    fprintf(stderr, "test_many_deep_links - depth: %d\n", DEEP_LINK_SIZE);
+    fprintf(stderr, "test_degenerate_deep_links - depth: %d\n", DEGENERATE_LINK_SIZE);
 
     fprintf(stderr, "creating nodes\n");
 
@@ -524,9 +528,9 @@ void PersistUTest::test_many_deep_links()
     Handle second_out = node_2;
 
     HandleSeq links;
-    links.reserve(DEEP_LINK_SIZE);
+    links.reserve(DEGENERATE_LINK_SIZE);
     _pm->resetQueryCount();
-    for (int depth = 0; depth < DEEP_LINK_SIZE; depth++)
+    for (int depth = 0; depth < DEGENERATE_LINK_SIZE; depth++)
     {
         fprintf(stderr, "  creating node at depth %d\n", depth);
 
@@ -539,6 +543,8 @@ void PersistUTest::test_many_deep_links()
         second_out = first_out;
         first_out = link;
     }
+
+    fprintf(stderr, "after create - query count: %d \n", _pm->queryCount());
 
     // Get the UUID for the last link we created so we can fetch it
     // later which will reload all of the atoms.
@@ -576,7 +582,92 @@ void PersistUTest::test_many_deep_links()
     TSM_ASSERT("Many deep links fetch_atom for last link failed", link);
     fprintf(stderr, "fetch last node - query count: %d \n", _pm->queryCount());
 
-return;
+    // Purge atoms from the AtomSpace.
+    _as->barrier();
+    _as->clear();
+    TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
+
+    // Now let's try loading all the links one by one.
+
+    // Fetch each of the links by UUID.
+    _pm->resetQueryCount();
+    for (auto& uuid : link_uuds)
+    {
+        Handle link = _as->fetch_atom(uuid);
+        TSM_ASSERT("Many deep links fetch_atom failed", link);
+    }
+    fprintf(stderr, "fetch all nodes - query count: %d \n", _pm->queryCount());
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+
+void PersistUTest::test_many_deep_links()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    TSM_ASSERT("Persist Module not loaded", _pm);
+
+    fprintf(stderr, "test_many_deep_links - depth: %d\n", DEEP_LINK_SIZE);
+
+    fprintf(stderr, "creating nodes\n");
+
+    // Create some nodes to prime level zero.
+    Handle node_1 = _as->add_node(SCHEMA_NODE, "deep test depth 0 - 1");
+    Handle node_2 = _as->add_node(SCHEMA_NODE, "deep test depth 0 - 2");
+    Handle first_out = node_1;
+
+    HandleSeq links;
+    links.reserve(DEEP_LINK_SIZE);
+    _pm->resetQueryCount();
+    for (int depth = 0; depth < DEEP_LINK_SIZE; depth++)
+    {
+        // Now add the link chaining the last link together with node 2.
+        Handle link = _as->add_link(LINK, first_out, node_2);
+        TSM_ASSERT("Many deep links add_link failed", link);
+        links.emplace_back(link);
+
+        // Chain the links
+        first_out = link;
+    }
+
+    fprintf(stderr, "after create - query count: %d \n", _pm->queryCount());
+
+    // Get the UUID for the last link we created so we can fetch it
+    // later which will reload all of the atoms.
+    UUID last_link_uuid = first_out->getUUID();
+
+    // Make a copy of the uuids.
+    std::vector<UUID> link_uuds;
+    for (auto& atom : links)
+        link_uuds.push_back(atom->getUUID());
+
+    // Push all atoms out to the SQL DB
+    _pm->resetQueryCount();
+    _pm->do_store();
+    fprintf(stderr, "storing nodes - query count: %d \n", _pm->queryCount());
+
+    // Purge atoms from the AtomSpace.
+    _as->barrier();
+    _as->clear();
+    TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
+
+    // Just for sanity. Show the normal load.
+    _pm->resetQueryCount();
+    _pm->do_load();
+    fprintf(stderr, "load optimized - query count: %d \n", _pm->queryCount());
+
+    // Purge atoms from the AtomSpace.
+    _as->barrier();
+    _as->clear();
+    TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
+
+    // Now let's try loading all the links recursively by just
+    // fetching the last one.
+    _pm->resetQueryCount();
+    Handle link = _as->fetch_atom(last_link_uuid);
+    TSM_ASSERT("Many deep links fetch_atom for last link failed", link);
+    fprintf(stderr, "fetch last node - query count: %d \n", _pm->queryCount());
 
     // Purge atoms from the AtomSpace.
     _as->barrier();
