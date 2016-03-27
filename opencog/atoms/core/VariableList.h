@@ -62,9 +62,13 @@ protected:
 
 	void build_index(void);
 public:
+	VariableList(const Handle& hvardecls,
+	             TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
 	VariableList(const HandleSeq& vardecls,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	             TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	VariableList(Link&);
 

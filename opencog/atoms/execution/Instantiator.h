@@ -47,6 +47,16 @@ private:
 	bool _halt = false;
 
 	/**
+	 * Instatiator removes first level QuoteLinks and in such cases
+	 * returns verbatim atoms. This is incorrect when the QuoteLink
+	 * occurs in any scoped link (anything inheriting from ScopeLink,
+	 * (e.g. GetLink, BindLink), since these handle QuoteLinks within
+	 * thier own scope. We must avoid damaging quotes for these atoms.
+	 */
+	int _quotation_level = 0;
+	int _avoid_discarding_quotes_level = 0;
+
+	/**
 	 * Recursively walk a tree starting with the root of the
 	 * hypergraph to instantiate (typically an ExecutionOutputLink).
 	 *
@@ -60,26 +70,35 @@ private:
 	 * which will simply perform a substitution, without performing
 	 * any execution. See also PutLink, which does substituion.
 	 * (actually, beta reduction).
+	 *
+	 * There are two ways to do this: via eager execution, and via
+	 * lazy execution. Lazy would be nicer, performance-wise, but this
+	 * is still buggy, and unit tests will fail. So do eager execution
+	 * by default.
 	 */
-	Handle walk_eager(const Handle& tree, int quotation_level = 0);
-	bool seq_eager(HandleSeq&, const HandleSeq& orig,
-	                     int quotation_level = 0);
-
-	/* Same as above, but does lazy execution. */
-	Handle walk_lazy(const Handle& tree, int quotation_level = 0);
-	bool seq_lazy(HandleSeq&, const HandleSeq& orig,
-	                     int quotation_level = 0);
-
-	bool walk_tree(HandleSeq&, const HandleSeq&, int,
-	               Handle (Instantiator::*)(const Handle&, int));
+	bool _eager = true;
+	Handle walk_tree(const Handle& tree);
+	bool walk_sequence(HandleSeq&, const HandleSeq&);
 
 public:
-	Instantiator(AtomSpace* as) : _as(as) {}
+	Instantiator(AtomSpace* as) : _as(as), _vmap(nullptr) {}
+
+	void ready(AtomSpace* as)
+	{
+		_as = as;
+		_halt = false;
+	}
+
+	void clear()
+	{
+		_as = nullptr;
+		_vmap = nullptr;
+	}
 
 	Handle instantiate(const Handle& expr, const std::map<Handle, Handle> &vars);
 	Handle execute(const Handle& expr)
 	{
-			return instantiate(expr, std::map<Handle, Handle>());
+		return instantiate(expr, std::map<Handle, Handle>());
 	}
 };
 

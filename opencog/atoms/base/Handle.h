@@ -31,8 +31,12 @@
 #include <memory>
 #include <string>
 #include <sstream>
+#include <set>
 #include <unordered_set>
 #include <vector>
+#include <map>
+
+#include <opencog/atoms/base/types.h>
 
 /** \addtogroup grp_atomspace
  *  @{
@@ -55,6 +59,7 @@ class Handle
 friend class Atom;
 friend class AtomTable;
 friend class AtomStorage;         // persistance
+friend class content_based_atom_ptr_less;
 
 private:
     AtomPtr _ptr;
@@ -211,23 +216,45 @@ struct handle_less
 
 //! a list of handles
 typedef std::vector<Handle> HandleSeq;
+
 //! a list of lists of handles
 typedef std::vector<HandleSeq> HandleSeqSeq;
+
+//! a set of handles
+typedef std::set<Handle> OrderedHandleSet;
+
 //! a hash that associates the handle to its unique identificator
 typedef std::unordered_set<Handle, handle_hash> UnorderedHandleSet;
 
+//! an ordered map from Handle to Handle set
+typedef std::map<Handle, UnorderedHandleSet> VarMultimap;
+
+//! an ordered map from Handle to Handle
+typedef std::map<Handle, Handle> VarMap;
+
+//! a handle iterator
+typedef std::iterator<std::forward_iterator_tag, Handle> HandleIterator;
+
+struct content_based_atom_ptr_less
+{
+    bool operator()(const Atom* al, const Atom* ar) const
+    {
+        return Handle::content_based_atoms_less(al, ar);
+    }
+};
+
 struct handle_seq_less
 {
-   bool operator()(const HandleSeq& hsl, const HandleSeq& hsr) const
-   {
-       size_t sl = hsl.size();
-       size_t sr = hsr.size();
-       if (sl != sr) return sl < sr;
-       for (size_t i=0; i<sl; i++) {
-           if (hsl[i] != hsr[i]) return hsl[i] < hsr[i];
-       }
-       return false;
-   }
+    bool operator()(const HandleSeq& hsl, const HandleSeq& hsr) const
+    {
+        size_t sl = hsl.size();
+        size_t sr = hsr.size();
+        if (sl != sr) return sl < sr;
+        for (size_t i=0; i<sl; i++) {
+            if (hsl[i] != hsr[i]) return hsl[i] < hsr[i];
+        }
+        return false;
+    }
 };
 
 struct handle_seq_ptr_less
@@ -265,11 +292,23 @@ static inline std::string operator+ (const std::string &lhs, Handle h)
 } // namespace opencog
 
 namespace std {
-inline std::ostream& operator<<(std::ostream& out, const opencog::Handle& h)
+inline ostream& operator<<(ostream& out, const opencog::Handle& h)
 {
     out << h.value();
     return out;
 }
+
+ostream& operator<<(ostream& out, const opencog::HandleSeq& hs);
+ostream& operator<<(ostream& out, const opencog::OrderedHandleSet& hs);
+ostream& operator<<(ostream& out, const opencog::UnorderedHandleSet& hs);
+
+// Debugging helpers, very convenient to print Handle sets in gdb
+string hs_to_string(const opencog::HandleSeq& hs);
+string ohs_to_string(const opencog::OrderedHandleSet& ohs);
+string uhs_to_string(const opencog::UnorderedHandleSet& uhs);
+string varmap_to_string(const opencog::VarMap& vm);
+string varmultimap_to_string(const opencog::VarMultimap& vmm);
+string atomtype_to_string(opencog::Type type);
 
 #ifdef THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
 // The below used to work, but broke in gcc-4.7.2. The reason it
@@ -302,7 +341,7 @@ struct hash<opencog::Handle>
 
 #endif // THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
 
-} //namespace std
+} // ~namespace std
 
 /** @}*/
 #endif // _OPENCOG_HANDLE_H

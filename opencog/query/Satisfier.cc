@@ -90,10 +90,16 @@ bool SatisfyingSet::grounding(const std::map<Handle, Handle> &var_soln,
 {
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 
+	// Do not accept new solution if maximum number has been already reached
+	if (_satisfying_set.size() >= max_results)
+		return true;
+
 	if (1 == _varseq.size())
 	{
 		_satisfying_set.emplace(var_soln.at(_varseq[0]));
-		return false;
+
+		// If we found as many as we want, then stop looking for more.
+		return (_satisfying_set.size() >= max_results);
 	}
 
 	// If more than one variable, encapsulate in sequential order,
@@ -105,8 +111,8 @@ bool SatisfyingSet::grounding(const std::map<Handle, Handle> &var_soln,
 	}
 	_satisfying_set.emplace(Handle(createLink(LIST_LINK, vargnds)));
 
-	// Look for more groundings.
-	return false;
+	// If we found as many as we want, then stop looking for more.
+	return (_satisfying_set.size() >= max_results);
 }
 
 TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
@@ -128,20 +134,31 @@ TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
 	return sater._result;
 }
 
-Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink)
+Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_results)
 {
+	// Special case the BindLink. We probably shouldn't have to, and
+	// the C++ code for handling this case could maybe be rafactored
+	// to handle BindLink as well as GetLink in one place... but right
+	// now, it doesn't.
+	Type blt = hlink->getType();
+	if (BIND_LINK == blt)
+	{
+		return bindlink(as, hlink, max_results);
+	}
+
 	PatternLinkPtr bl(PatternLinkCast(hlink));
 	if (NULL == bl)
 	{
 		// If it is a BindLink (for example), we want to use that ctor
-		// instead of the default ctor.
-		if (classserver().isA(hlink->getType(), GET_LINK))
+		// instead of the default ctor.  Note BindLink isA GetLink.
+		if (classserver().isA(blt, GET_LINK))
 			bl = createPatternLink(*LinkCast(hlink));
 		else
 			bl = createPatternLink(hlink);
 	}
 
 	SatisfyingSet sater(as);
+	sater.max_results = max_results;
 	bl->satisfy(sater);
 
 	// Ugh. We used an std::set to avoid duplicates. But now, we need a

@@ -1,29 +1,25 @@
 ; Substitution case where $A = Cat and $B = Animal
 (define deduction-ab-substitute-1
     (BindLink
-        (VariableList                
-                (TypedVariableLink
-                   (VariableNode "$C")
-                   (TypeNode "ConceptNode")))
+        (VariableList
+            (TypedVariableLink
+                (VariableNode "$C")
+                (TypeNode "ConceptNode")))
         (AndLink
-            (InheritanceLink
-                (ConceptNode "Cat")
-                (ConceptNode "Animal")
-            )
             (InheritanceLink
                 (ConceptNode "Animal")
                 (VariableNode "$C")
             )
             ; To avoid matching (Inheritance A B) and (Inheritance B A)
             (NotLink
-                (EqualLink
+                (IdenticalLink
                     (ConceptNode "Cat")
                     (VariableNode "$C")
                 )
             )
         )
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-simple-deduction")
+            (GroundedSchemaNode "scm: bc-deduction-formula")
             (ListLink
                 (InheritanceLink
                     (ConceptNode "Cat")
@@ -45,28 +41,24 @@
 (define deduction-ab-substitute-2
     (BindLink
         (VariableList
-                (TypedVariableLink
-                   (VariableNode "$A")
-                   (TypeNode "ConceptNode")))
+            (TypedVariableLink
+                (VariableNode "$A")
+                (TypeNode "ConceptNode")))
         (AndLink
             (InheritanceLink
                 (VariableNode "$A")
                 (ConceptNode  "Cat")
             )
-            (InheritanceLink
-                (ConceptNode  "Cat")
-                (ConceptNode  "Animal")
-            )
             ; To avoid matching (Inheritance A B) and (Inheritance B A)
             (NotLink
-                (EqualLink
+                (IdenticalLink
                     (VariableNode "$A")
                     (ConceptNode  "Animal")
                 )
             )
         )
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: pln-formula-simple-deduction")
+            (GroundedSchemaNode "scm: bc-deduction-formula")
             (ListLink
                 (InheritanceLink
                     (VariableNode "$A")
@@ -82,4 +74,4 @@
             )
         )
     )
-  )
+)

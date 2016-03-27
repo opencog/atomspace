@@ -29,11 +29,10 @@ namespace opencog {
 
 class AtomSpace;
 
-Handle bindlink(AtomSpace*, const Handle&);
-Handle single_bindlink (AtomSpace*, const Handle&);
+Handle bindlink(AtomSpace*, const Handle&, size_t max_results=SIZE_MAX);
 Handle af_bindlink(AtomSpace*, const Handle&);
 TruthValuePtr satisfaction_link(AtomSpace*, const Handle&);
-Handle satisfying_set(AtomSpace*, const Handle&);
+Handle satisfying_set(AtomSpace*, const Handle&, size_t max_results=SIZE_MAX);
 Handle recognize(AtomSpace*, const Handle&);
 
 } // namespace opencog

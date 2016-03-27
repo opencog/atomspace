@@ -73,7 +73,6 @@ void MatchLink::setUp(void)
 	as = new AtomSpace();
 
 	config().set("SCM_PRELOAD",
-		"opencog/atoms/base/core_types.scm, "
       "tests/query/test_types.scm, "
 		"tests/query/match-link.scm");
 

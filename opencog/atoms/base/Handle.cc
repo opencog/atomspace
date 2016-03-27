@@ -119,3 +119,64 @@ inline Handle Handle::do_res(UUID uuid)
     }
     return Handle();
 }
+
+namespace std {
+
+// Hack around the lack template use in Handle.h due to circular dependencies
+#define GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(T) \
+ostream& operator<<(ostream& out, const T& hs) { \
+	size_t i = 0; \
+	for (const Handle& h : hs) { \
+		out << "atom[" << i << "]:" << endl; \
+		if ((AtomPtr)h != nullptr) out << h->toString(); \
+		i++; \
+	} \
+	return out; \
+}
+GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::HandleSeq)
+GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::OrderedHandleSet)
+GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::UnorderedHandleSet)
+
+string hs_to_string(const HandleSeq& hs)
+{
+	stringstream ss; ss << hs; return ss.str();
+}
+string ohs_to_string(const OrderedHandleSet& ohs)
+{
+	stringstream ss; ss << ohs; return ss.str();
+}
+string uhs_to_string(const UnorderedHandleSet& uhs)
+{
+	stringstream ss; ss << uhs; return ss.str();
+}
+std::string varmap_to_string(const VarMap& varmap)
+{
+	stringstream ss;
+	int i = 0;
+	for (const auto& p : varmap) {
+		ss << "key[" << i << "]:" << std::endl << p.first->toString()
+		   << "value[" << i << "]:" << std::endl << p.second->toString();
+		i++;
+	}
+	return ss.str();
+}
+std::string varmultimap_to_string(const VarMultimap& varmultimap)
+{
+	stringstream ss;
+	int i = 0;
+	for (const auto& p : varmultimap) {
+		ss << "key[" << i << "]:" << std::endl << p.first->toString()
+		   << "value[" << i << "]:" << std::endl;
+		for (const auto s : p.second)
+			ss << s->toString();
+		i++;
+	}
+	return ss.str();
+}
+std::string atomtype_to_string(Type type)
+{
+	return classserver().getTypeName(type);
+}
+
+} // ~namespace std
+

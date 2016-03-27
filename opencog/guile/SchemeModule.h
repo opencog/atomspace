@@ -26,7 +26,9 @@ class FunctionWrap
 
 		// These wrappers abstract the atomspace away.
 		Handle (*_func_h_ah)(AtomSpace*, const Handle&);
+		Handle (*_func_h_ahz)(AtomSpace*, const Handle&, size_t);
 		Handle as_wrapper_h_h(Handle);
+		Handle as_wrapper_h_hz(Handle, size_t);
 
 		// These wrappers return a TruthValuePtr and abstract the
 		// atomspace away.
@@ -36,6 +38,8 @@ class FunctionWrap
 		const char *_name;  // scheme name of the c++ function.
 	public:
 		FunctionWrap(Handle (*)(AtomSpace*, const Handle&),
+		             const char*, const char*);
+		FunctionWrap(Handle (*)(AtomSpace*, const Handle&, size_t),
 		             const char*, const char*);
 		FunctionWrap(TruthValuePtr (*)(AtomSpace*, const Handle&),
 		             const char*, const char*);

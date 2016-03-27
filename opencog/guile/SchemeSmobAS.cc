@@ -58,13 +58,13 @@ SCM SchemeSmob::make_as (AtomSpace *as)
  * use count for it; XXX but under what circumstance would that not be
  * zero? If its racing with another thread ?? I'm confused.
  *
- * Note that if the atomspace was given to use externally, e.g. by the
+ * Note that if the atomspace was given to us externally, e.g. by the
  * cogserver, then it will not even have a use-count (and thus, it's
  * never deleted here.)
  */
 void SchemeSmob::release_as (AtomSpace *as)
 {
-	std::lock_guard<std::mutex> lck(as_mtx);
+	std::unique_lock<std::mutex> lck(as_mtx);
 	auto has = deleteable_as.find(as);
 	if (deleteable_as.end() == has) return;
 	deleteable_as[as] --;
@@ -73,6 +73,7 @@ void SchemeSmob::release_as (AtomSpace *as)
 	{
 		AtomSpace* env = as->get_environ();
 		deleteable_as.erase(has);
+		lck.unlock();
 		scm_gc_unregister_collectable_memory (as,
 	                  sizeof(*as), "opencog atomspace");
 		delete as;
@@ -176,11 +177,11 @@ SCM SchemeSmob::ss_as_p (SCM s)
 AtomSpace* SchemeSmob::ss_to_atomspace(SCM sas)
 {
 	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sas))
-		return NULL;
+		return nullptr;
 
 	scm_t_bits misctype = SCM_SMOB_FLAGS(sas);
 	if (COG_AS != misctype)
-		return NULL;
+		return nullptr;
 
 	AtomSpace* as = (AtomSpace *) SCM_SMOB_DATA(sas);
 	scm_remember_upto_here_1(sas);

@@ -23,6 +23,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <dlfcn.h>
+
 #include <boost/filesystem/operations.hpp>
 
 #include <opencog/util/Config.h>
@@ -263,11 +265,23 @@ static bool try_to_load_modules(const char ** config_paths)
 
 void opencog::global_python_initialize()
 {
+    // Calling "import rospy" exhibits bug
+    // https://github.com/opencog/atomspace/issues/669
+    // Error message:
+    //    Python error :
+    //    /usr/lib/python2.7/lib-dynload/datetime.x86_64-linux-gnu.so:
+    //    undefined symbol: PyExc_SystemError
+    // Googling for the above error messge reveals that the "feature"
+    // is as old as the wind. The solution of using dlopen() is given
+    // here:
+    // https://mail.python.org/pipermail/new-bugs-announce/2008-November/003322.html
+    dlopen("libpython2.7.so", RTLD_LAZY | RTLD_GLOBAL);
+
     // We don't really know the gstate yet but we'll set it here to avoid
     // compiler warnings below.
     PyGILState_STATE gstate = PyGILState_UNLOCKED;
 
-    logger().debug("[global_python_initialize] Start");
+    logger().info("[global_python_initialize] Start");
 
     // Throw an exception if this is called more than once.
     if (already_initialized) {
@@ -302,7 +316,7 @@ void opencog::global_python_initialize()
         PySys_SetArgv(1, (char **) &argv0);
     }
 
-    logger().debug("[global_python_initialize] Adding OpenCog sys.path "
+    logger().info("[global_python_initialize] Adding OpenCog sys.path "
             "directories");
 
     // Get starting "sys.path".
@@ -322,9 +336,14 @@ void opencog::global_python_initialize()
     if (initialized_outside_opencog)
         PyGILState_Release(gstate);
     else
-        PyEval_ReleaseLock();
+        // Several websites suggest that `PyEval_ReleaseLock()`
+        // should be used here. However, this results in bug
+        // opencog/atomspace#671. A closer reading of the official
+        // python docs suggests that `PyEval_SaveThread` be used
+        // instead, and indeed ... that works! Woo hoo!
+        PyEval_SaveThread();
 
-    logger().debug("[global_python_initialize] Finish");
+    logger().info("[global_python_initialize] Finish");
 }
 
 void opencog::global_python_finalize()
@@ -333,7 +352,10 @@ void opencog::global_python_finalize()
 
     // Cleanup Python.
     if (!initialized_outside_opencog)
+    {
+        PyGILState_Ensure(); // yes this is needed, see bug #671
         Py_Finalize();
+    }
 
     // No longer initialized.
     already_initialized = false;
@@ -356,7 +378,7 @@ PythonEval::PythonEval(AtomSpace* atomspace)
     // Initialize Python objects and imports.
     //
     // Strange but true: one can use the atomspace, and put atoms
-    // in it .. useing the type constructors and everything (e.g.
+    // in it .. using the type constructors and everything (e.g.
     // the demos in the /examples/python directory) and never ever
     // actually call global_python_initialize() ... it might never
     // be called, if the python evaluator (i.e. this object) is
@@ -366,9 +388,21 @@ PythonEval::PythonEval(AtomSpace* atomspace)
     this->initialize_python_objects_and_imports();
 
     // Add the preload functions
-    if (config().has("PYTHON_PRELOAD_FUNCTIONS")) {
+    if (config().has("PYTHON_PRELOAD_FUNCTIONS"))
+    {
         string preloadDirectory = config()["PYTHON_PRELOAD_FUNCTIONS"];
-        this->add_modules_from_path(preloadDirectory);
+
+        // According to the mailing list, boost throws exceptions
+        // on  vagrant box, when the opencog.conf file is
+        // misconfigured .. and the default seems to be.
+        try
+        {
+            this->add_modules_from_path(preloadDirectory);
+        }
+        catch (const std::exception& ex)
+        {
+            logger().error() << ex.what();
+        }
     }
 }
 
@@ -425,13 +459,14 @@ PythonEval& PythonEval::instance(AtomSpace* atomspace)
 
 #define CHECK_SINGLETON
 #ifdef CHECK_SINGLETON
-        // Someone is trying to initialize the Python interpreter on a
-        // different AtomSpace.  Because of the singleton design of the
-        // the CosgServer+AtomSpace, there is no easy way to support this...
-        throw RuntimeException(TRACE_INFO,
-            "Trying to re-initialize python interpreter with different\n"
-            "AtomSpace ptr! Current ptr=%p New ptr=%p\n",
-            singletonInstance->_atomspace, atomspace);
+        if (nullptr != singletonInstance->_atomspace)
+            // Someone is trying to initialize the Python interpreter on a
+            // different AtomSpace.  Because of the singleton design of the
+            // the CosgServer+AtomSpace, there is no easy way to support this...
+            throw RuntimeException(TRACE_INFO,
+                "Trying to re-initialize python interpreter with different\n"
+                "AtomSpace ptr! Current ptr=%p New ptr=%p\n",
+                singletonInstance->_atomspace, atomspace);
 #else
         // We need to be able to call the python interpreter with
         // different atomspaces; for example, we need to use temporary
@@ -492,9 +527,9 @@ void PythonEval::initialize_python_objects_and_imports(void)
 PyObject* PythonEval::atomspace_py_object(AtomSpace* atomspace)
 {
     // The py_atomspace function pointer will be NULL if the
-    // opencopg.atomspace cython module failed to load. Avert
+    // opencog.atomspace cython module failed to load. Avert
     // a hard-to-debug crash on null-pointer-deref, and replace
-    // it by a hard-to-debug error message.
+    // it by a slightly less hard-to-debug error message.
     if (NULL == py_atomspace) {
         logger().error("PythonEval::%s Failed to load the"
                        "opencog.atomspace module", __FUNCTION__);
@@ -552,8 +587,8 @@ void PythonEval::print_dictionary(PyObject* obj)
  *
  * Only call this when PyErr_Occurred() returns a non-null PyObject*.
  */
-void PythonEval::build_python_error_message(    const char* function_name,
-                                                std::string& errorMessage)
+void PythonEval::build_python_error_message(const char* function_name,
+                                            std::string& errorMessage)
 {
     PyObject *pyErrorType, *pyError, *pyTraceback, *pyErrorString;
     std::stringstream errorStringStream;
@@ -666,8 +701,8 @@ PyObject* PythonEval::module_for_function(  const std::string& moduleFunction,
  *
  * On error throws an exception.
  */
-PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
-                                            Handle arguments)
+PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
+                                         Handle arguments)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
@@ -734,8 +769,7 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
         throw RuntimeException(TRACE_INFO,
             "Expecting arguments to be a ListLink!");
     }
-    LinkPtr linkArguments(LinkCast(arguments));
-    int actualArgumentCount = linkArguments->getArity();
+    int actualArgumentCount = arguments->getArity();
 
     // Now make sure the expected count matches the actual argument count.
     if (expectedArgumentCount != actualArgumentCount) {
@@ -750,7 +784,7 @@ PyObject* PythonEval::call_user_function(   const std::string& moduleFunction,
     // atoms for each of the atoms in the link arguments.
     PyObject* pyArguments = PyTuple_New(actualArgumentCount);
     PyObject* pyAtomSpace = this->atomspace_py_object(_atomspace);
-    const HandleSeq& argumentHandles = linkArguments->getOutgoingSet();
+    const HandleSeq& argumentHandles = arguments->getOutgoingSet();
     int tupleItem = 0;
     for (HandleSeq::const_iterator it = argumentHandles.begin();
         it != argumentHandles.end(); ++it) {
@@ -895,6 +929,119 @@ TruthValuePtr PythonEval::apply_tv(AtomSpace *as, const std::string& func, Handl
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
     return tvp;
+}
+
+/**
+ * Call the user defined function with the provide atomspace argument.
+ * This is a cut-n-paste of PythonEval::call_user_function but with
+ * assorted hacks to handle the different argument type.
+ *
+ * On error throws an exception.
+ */
+void PythonEval::apply_as(const std::string& moduleFunction,
+                          AtomSpace* as_argument)
+{
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+
+    PyObject *pyError, *pyModule, *pyUserFunc;
+    PyObject *pyDict;
+    std::string functionName;
+    std::string errorString;
+
+    // Grab the GIL.
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+
+    // Get the module and stripped function name.
+    pyModule = this->module_for_function(moduleFunction, functionName);
+
+    // If we can't find that module then throw an exception.
+    if (!pyModule) {
+        PyGILState_Release(gstate);
+        logger().error("Python module for '%s' not found!", moduleFunction.c_str());
+        throw RuntimeException(TRACE_INFO,
+            "Python module for '%s' not found!",
+            moduleFunction.c_str());
+    }
+
+    // Get a reference to the user function.
+    pyDict = PyModule_GetDict(pyModule);
+    pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
+
+    // PyModule_GetDict returns a borrowed reference, so don't do this:
+    // Py_DECREF(pyDict);
+
+    // If we can't find that function then throw an exception.
+    if (!pyUserFunc) {
+        PyGILState_Release(gstate);
+        throw RuntimeException(TRACE_INFO,
+            "Python function '%s' not found!",
+            moduleFunction.c_str());
+    }
+
+    // Promote the borrowed reference for pyUserFunc since it will
+    // be passed to a Python C API function later that "steals" it.
+    Py_INCREF(pyUserFunc);
+
+    // Make sure the function is callable.
+    if (!PyCallable_Check(pyUserFunc)) {
+        Py_DECREF(pyUserFunc);
+        PyGILState_Release(gstate);
+        throw RuntimeException(TRACE_INFO,
+            "Python function '%s' not callable!", moduleFunction.c_str());
+    }
+
+    // Get the expected argument count.
+    int expectedArgumentCount = this->argument_count(pyUserFunc);
+    if (expectedArgumentCount == MISSING_FUNC_CODE) {
+        PyGILState_Release(gstate);
+        throw RuntimeException(TRACE_INFO,
+            "Python function '%s' error missing 'func_code'!",
+            moduleFunction.c_str());
+    }
+
+    // Make sure the argument count is 1 (just the atomspace)
+    if (1 != expectedArgumentCount) {
+        PyGILState_Release(gstate);
+        throw RuntimeException(TRACE_INFO,
+            "Python function '%s' which expects '%d arguments,"
+            " should have one atomspace argument!",
+            moduleFunction.c_str(), expectedArgumentCount);
+    }
+
+    // Create the Python tuple for the function call with python
+    // atomspace.
+    PyObject* pyArguments = PyTuple_New(1);
+    PyObject* pyAtomSpace = this->atomspace_py_object(as_argument);
+
+    PyTuple_SetItem(pyArguments, 0, pyAtomSpace);
+    // Py_DECREF(pyAtomSpace);
+
+    // Execute the user function.
+    PyObject_CallObject(pyUserFunc, pyArguments);
+
+    // Cleanup the reference counts for Python objects we no longer reference.
+    // Since we promoted the borrowed pyExecuteUserFunc reference, we need
+    // to decrement it here. Do this before error checking below since we'll
+    // need to decrement these references even if there is an error.
+    Py_DECREF(pyUserFunc);
+    Py_DECREF(pyArguments);
+
+    // Check for errors.
+    pyError = PyErr_Occurred();
+    if (pyError) {
+
+        // Construct the error message and throw an exception.
+        this->build_python_error_message(moduleFunction.c_str(), errorString);
+        PyGILState_Release(gstate);
+        throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
+
+        // PyErr_Occurred returns a borrowed reference, so don't do this:
+        // Py_DECREF(pyError);
+    }
+
+    // Release the GIL. No Python API allowed beyond this point.
+    PyGILState_Release(gstate);
 }
 
 std::string PythonEval::apply_script(const std::string& script)
@@ -1055,10 +1202,12 @@ void PythonEval::add_module_directory(const boost::filesystem::path &directory)
 
     // Loop over the files in the directory looking for Python files.
     copy(boost::filesystem::directory_iterator(directory),
-            boost::filesystem::directory_iterator(), back_inserter(files));
-    for(vector<boost::filesystem::path>::const_iterator it(files.begin());
-            it != files.end(); ++it) {
-        if(it->extension() == boost::filesystem::path(".py"))
+         boost::filesystem::directory_iterator(), back_inserter(files));
+
+    for (vector<boost::filesystem::path>::const_iterator it(files.begin());
+            it != files.end(); ++it)
+    {
+        if (it->extension() == boost::filesystem::path(".py"))
             pyFiles.push_back(*it);
     }
 
@@ -1078,7 +1227,7 @@ void PythonEval::add_module_directory(const boost::filesystem::path &directory)
     PyObject* pyFromList = PyList_New(0);
 
     // Import each of the ".py" files as a Python module.
-    for(vector<boost::filesystem::path>::const_iterator it(pyFiles.begin());
+    for (vector<boost::filesystem::path>::const_iterator it(pyFiles.begin());
             it != pyFiles.end(); ++it)
         this->import_module(*it, pyFromList);
 
@@ -1123,7 +1272,8 @@ void PythonEval::add_modules_from_path(std::string pathString)
     std::vector<std::string> files;
 
     auto loadmod_prep = [&dirs,&files](const std::string& abspath,
-            const char** config_paths) {
+            const char** config_paths)
+    {
         // If the resulting path is a directory or a regular file,
         // then push to loading list.
         struct stat finfo;
@@ -1149,7 +1299,8 @@ void PythonEval::add_modules_from_path(std::string pathString)
     const char** config_paths = get_module_paths();
     std::vector<std::string> paths;
     tokenize(pathString, std::back_inserter(paths), ",");
-    for (const auto& pathString : paths) {
+    for (const auto& pathString : paths)
+    {
         if ('/' == pathString[0]) {
             loadmod_prep(pathString, NULL);
             continue;
@@ -1171,7 +1322,8 @@ void PythonEval::add_modules_from_path(std::string pathString)
         }
     }
 
-    // Load First directories and then files to properly handle import dependencies.
+    // Load First directories and then files to properly handle
+    // import dependencies.
     dirs.insert(dirs.end(), files.begin(), files.end());
     for (const auto& abspath : dirs)
         add_modules_from_abspath(abspath);
@@ -1202,6 +1354,27 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
     PyGILState_Release(gstate);
 }
 
+void PythonEval::eval_expr(const std::string& partial_expr)
+{
+    // XXX FIXME this does a lot of wasteful string copying.
+    std::string expr = partial_expr;
+    size_t nl = expr.find_first_of("\n\r");
+    while (std::string::npos != nl)
+    {
+        if ('\r' == expr[nl]) nl++;
+        if ('\n' == expr[nl]) nl++;
+        std::string part = expr.substr(0, nl);
+        eval_expr_line(part);
+        expr = expr.substr(nl);
+        nl = expr.find_first_of("\n\r");
+    }
+    eval_expr_line(expr);
+}
+
+/// Like eval_expr(), except that it assumes that there is only
+/// one line per call, i.e. that partial expr has been split up
+/// into lines.
+//
 // The python interpreter chokes if we send it lines, instead of
 // blocks. Thus, we have to save up whole blocks.  A block consists
 // of:
@@ -1210,7 +1383,7 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
 //    end-of-file.
 // 2) Anything surrounded by parenthesis, regardless of indentation.
 //
-void PythonEval::eval_expr(const std::string& partial_expr)
+void PythonEval::eval_expr_line(const std::string& partial_expr)
 {
     // Trim whitespace, and comments before doing anything,
     // Otherwise, the various checks below fail.
@@ -1230,7 +1403,6 @@ void PythonEval::eval_expr(const std::string& partial_expr)
     if (0 < part_size) c = part[0];
 
     logger().debug("[PythonEval] get line:\n%s\n", partial_expr.c_str());
-
     // Check if there are open parentheses. If so, then we must
     // assume there will be more input that closes them off.
     {

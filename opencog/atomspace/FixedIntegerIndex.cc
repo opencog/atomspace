@@ -26,7 +26,7 @@ using namespace opencog;
 size_t FixedIntegerIndex::size(void) const
 {
 	size_t cnt = 0;
-	for (const UnorderedAtomSet& s : idx)
+	for (const auto& s : idx)
 		cnt += s.size();
 	return cnt;
 }

@@ -42,7 +42,8 @@ private:
 public:
     FocusSetPMCB(AtomSpace* pm_as, AtomSpace* inst_as) :
             Implicator(pm_as), InitiateSearchCB(pm_as),
-                    DefaultPatternMatchCB(pm_as), DefaultImplicator(pm_as),_inst_as(inst_as)
+            DefaultPatternMatchCB(pm_as), DefaultImplicator(pm_as),
+            _inst_as(inst_as)
     {
         _inst = new Instantiator(inst_as);
     }

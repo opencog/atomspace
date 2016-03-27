@@ -1,12 +1,10 @@
 ;
 ; buggy-equal.scm
 ;
-; Unit test for github bug report #1520
+; Unit test for github bug report opencog/opencog#1520
 ;
 (use-modules (opencog))
 (use-modules (opencog query))
-
-; (load-from-path "utilities.scm")
 
 ; --------------------------------------------------------------------
 ; First, some data to populate the atomspace
@@ -24,7 +22,7 @@
 
 
 ; --------------------------------------------------------------------
-;; The Bindlink from bug #1520, with one change:
+;; The Bindlink from bug opencog/opencog#1520, with one change:
 ;; Use NotLink instead of AbsentLink.
 ;;
 ;; Absence is looking for the lack of a pattern.
@@ -137,7 +135,7 @@
             )
             ; To avoid matching (Inheritance A B) and (Inheritance B A)
             (NotLink
-                (EqualLink
+                (IdenticalLink
                     (VariableNode "$A")
                     (VariableNode "$C")
                 )

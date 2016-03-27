@@ -52,6 +52,7 @@
 ; -- random-string -- Generate a random string of given length.
 ; -- random-node-name  -- Generate a random name for a node of given type.
 ; -- choose-var-name --Generate a random name for a variable.
+; -- cog-new-flattened-link -- Create flattened link
 ;
 ;;; Code:
 ; Copyright (c) 2008, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
@@ -1030,15 +1031,16 @@
  cog-pop-atomspace -- Delete a temporary atomspace.
     See cog-push-atomspace for an explanation.
 "
-	(if (null-list? cog-atomspace-stack)
-		(throw 'badpop "More pops than pushes!"))
-	(cog-set-atomspace! (car cog-atomspace-stack))
-	(set! cog-atomspace-stack (cdr cog-atomspace-stack))
-	; Performing a gc here helps ensure that the removed atomspace
-	; is deleted, thus cleaning up incoming sets of many atoms.
-	; The pattern matcher will work correctly without this cleanup,
-	; but I think it helps. Do it twice; once is sometimes not enough.
-	(gc) (gc))
+	(begin
+		(if (null-list? cog-atomspace-stack)
+			(throw 'badpop "More pops than pushes!"))
+		(cog-set-atomspace! (car cog-atomspace-stack))
+		(set! cog-atomspace-stack (cdr cog-atomspace-stack))
+		; Performing a gc here helps ensure that the removed atomspace
+		; is deleted, thus cleaning up incoming sets of many atoms.
+		; The pattern matcher will work correctly without this cleanup,
+		; but I think it helps. Do it twice; once is sometimes not enough.
+		(gc) (gc)))
 
 
 ; ---------------------------------------------------------------------
@@ -1094,6 +1096,52 @@
  not used by other VariableNode.
 "
     (random-node-name 'VariableNode 36 "$")
+)
+
+; -----------------------------------------------------------------------
+
+(define-public (cog-new-flattened-link link-type . args)
+"
+ Creates a new flattened link, for instance
+
+ (cog-new-flattened-link 'AndLink (AndLink A B) C)
+
+ will create the following
+
+ (AndLink A B C)
+
+ It will not however attempt to flatten the children. So for instance
+
+ (cog-new-flattened-link 'AndLink (AndLink A (AndLink B)) C)
+
+ will not produce
+
+ (AndLink A B C)
+
+ but will produce instead
+
+ (AndLink A (AndLink B) C)
+
+ Note that it will also remove duplicates, for instance
+
+ (cog-new-flattened-link 'AndLink (AndLink A B C) C)
+
+ will create the following
+
+ (AndLink A B C)
+
+ WARNING: TVs are not supported. If the links to be flattened
+          have non-null confidence it will raise an error.
+"
+  (define (flatten e r)
+    (append r (if (and (cog-link? e)
+                       (equal? (cog-type e) link-type))
+                  (if (< 0 (tv-conf (cog-tv e)))
+                      (error "You cannot flatten non-null confidence links")
+                      (cog-outgoing-set e))
+                  (list e))))
+  (let ((flat (delete-duplicates (fold flatten '() args))))
+    (apply cog-new-link link-type flat))
 )
 
 ; -----------------------------------------------------------------------
@@ -1155,6 +1203,7 @@
 'random-string
 'random-node-name
 'choose-var-name
+'cog-new-flattened-link
 ))
 
 ; Compile 'em all.  This should improve performance a bit.

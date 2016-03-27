@@ -66,7 +66,7 @@ class TypeIndex : public FixedIntegerIndex
 		}
 
 		class iterator
-			: public std::iterator<std::forward_iterator_tag, Handle>
+			: public HandleIterator
 		{
 			friend class TypeIndex;
 			public:
@@ -80,10 +80,10 @@ class TypeIndex : public FixedIntegerIndex
 			private:
 				Type type;
 				bool subclass;
-				std::vector<UnorderedAtomSet>::const_iterator s;
-				std::vector<UnorderedAtomSet>::const_iterator send;
+				std::vector<AtomSet>::const_iterator s;
+				std::vector<AtomSet>::const_iterator send;
 				Type currtype;
-				UnorderedAtomSet::const_iterator se;
+				AtomSet::const_iterator se;
 		};
 
 		iterator begin(Type, bool) const;

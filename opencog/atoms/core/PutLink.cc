@@ -122,6 +122,10 @@ void PutLink::static_typecheck_values(void)
 	if (DEFINED_PREDICATE_NODE == btype)
 		return;
 
+	// If its part of a signature, there is nothing to do.
+	if (TYPE_NODE == btype or TYPE_CHOICE == btype)
+		return;
+
 	size_t sz = _varlist.varseq.size();
 	Type vtype = _values->getType();
 
@@ -136,6 +140,7 @@ void PutLink::static_typecheck_values(void)
 		return;
 	}
 
+	// The standard, default case is to get a ListLink as an argument.
 	if (LIST_LINK == vtype)
 	{
 		if (not _varlist.is_type(_values->getOutgoingSet()))
@@ -158,6 +163,11 @@ void PutLink::static_typecheck_values(void)
 	if (GET_LINK == vtype)
 		return;
 
+	// If its part of a signature, there is nothing to do.
+	if (TYPE_NODE == vtype or TYPE_CHOICE == vtype)
+		return;
+
+	// The only remaining possibility is that there is set of ListLinks.
 	if (SET_LINK != vtype)
 		throw InvalidParamException(TRACE_INFO,
 			"PutLink was expecting a ListLink, SetLink or GetLink!");

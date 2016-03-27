@@ -53,7 +53,8 @@ private:
 	};
 
 	static std::atomic_flag is_inited;
-	static void register_procs(void*);
+	static void module_init(void*);
+	static void register_procs();
 	static void register_proc(const char*, int, int, int, scm_t_subr);
 
 	// The cog_misc_tag are for all other opencog types, such
@@ -184,7 +185,7 @@ private:
 	static AtomSpace *get_as_from_list(SCM);
 
 	// validate arguments coming from scheme passing into C++
-	static void throw_exception(const char *, const char *);
+	static void throw_exception(const std::exception&, const char *);
 	static AtomSpace* verify_atomspace(SCM, const char *, int pos = 1);
 	static Type verify_atom_type(SCM, const char *, int pos = 1);
 	static Handle verify_handle(SCM, const char *, int pos = 1);
@@ -197,11 +198,13 @@ private:
 	static std::vector<ProtoAtomPtr> verify_protom_list (SCM, const char *,
 	                                               int pos = 1);
 	static std::string verify_string (SCM, const char *, int pos = 1,
-	                                  const char *msg = "expecting string");
+	                                  const char *msg = "string");
 	static int verify_int (SCM, const char *, int pos = 1,
-	                       const char *msg = "expecting integer");
+	                       const char *msg = "integer");
+	static size_t verify_size (SCM, const char *, int pos = 1,
+	                           const char *msg = "size integer");
 	static double verify_real (SCM, const char *, int pos = 1,
-	                           const char *msg = "expecting real number");
+	                           const char *msg = "real number");
 
 	static SCM atomspace_fluid;
 	static void ss_set_env_as(AtomSpace *);

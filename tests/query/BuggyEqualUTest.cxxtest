@@ -66,13 +66,7 @@ class BuggyEqual :  public CxxTest::TestSuite
 void BuggyEqual::setUp(void)
 {
 	as->clear();
-
-	config().set("SCM_PRELOAD",
-		"opencog/atoms/base/core_types.scm, "
-		"opencog/scm/utilities.scm, "
-      "opencog/scm/opencog/query.scm");
-
-	load_scm_files_from_config(*as);
+	eval->eval("(use-modules (opencog query))");
 }
 
 #define getlink(hand,pos) hand->getOutgoingAtom(pos)

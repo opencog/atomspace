@@ -145,13 +145,7 @@ Handle FoldLink::reduce(void)
 
 		if (classserver().isA(t, FOLD_LINK))
 		{
-			FoldLinkPtr fff(FoldLinkCast(h));
-			// Arghh.  The cast should have been enough, but we currently
-			// can't store these in the atomsapce, due to circular shared
-			// lib dependencies.
-			if (NULL == fff)
-				fff = FoldLinkCast(FoldLink::factory(LinkCast(h)));
-
+			FoldLinkPtr fff(factory(h));
 			Handle redh = fff->reduce();
 			if (h != redh)
 			{
@@ -198,7 +192,7 @@ Handle FoldLink::reduce(void)
 		// If j is (DistType x a) and i is identical to x,
 		// then call kons, because kons is distributive.
 		do_kons |= (jt == distributive_type and
-		            LinkCast(hj)->getOutgoingAtom(0) == hi);
+		            hj->getOutgoingAtom(0) == hi);
 
 		if (do_kons)
 		{
@@ -228,13 +222,7 @@ Handle FoldLink::reduce(void)
 			if (_atomTable)
 				foo = _atomTable->getAtomSpace()->add_atom(foo);
 
-			FoldLinkPtr flp = FoldLinkCast(foo);
-
-			// Arghh.  The cast should have been enough, but we currently
-			// can't store these in the atomsapce, due to circular shared
-			// lib dependencies.
-			if (NULL == flp)
-				flp = FoldLinkCast(FoldLink::factory(LinkCast(foo)));
+			FoldLinkPtr flp = factory(foo);
 			DO_RETURN(Handle(flp->reduce()));
 		}
 	}
@@ -248,30 +236,30 @@ Handle FoldLink::reduce(void)
 
 // ===========================================================
 
-LinkPtr FoldLink::factory(LinkPtr lp)
+FoldLinkPtr FoldLink::factory(const Handle& h)
 {
-	if (NULL == lp)
-		throw RuntimeException(TRACE_INFO, "Not executable!");
-
 	// If h is of the right form already, its just a matter of calling
 	// it.  Otherwise, we have to create
-	FoldLinkPtr flp(FoldLinkCast(lp));
-	if (flp) return lp;
+	FoldLinkPtr flp(FoldLinkCast(h));
+	if (flp) return flp;
 
-	return LinkCast(FoldLink::factory(lp->getType(), lp->getOutgoingSet()));
+	if (nullptr == h)
+		throw RuntimeException(TRACE_INFO, "Null FoldLink handle!");
+
+	return FoldLink::factory(h->getType(), h->getOutgoingSet());
 }
 
 // Basic type factory.
-Handle FoldLink::factory(Type t, const HandleSeq& seq)
+FoldLinkPtr FoldLink::factory(Type t, const HandleSeq& seq)
 {
 	if (DIVIDE_LINK == t)
-		return Handle(createDivideLink(seq));
+		return createDivideLink(seq);
 	if (MINUS_LINK == t)
-		return Handle(createMinusLink(seq));
+		return createMinusLink(seq);
 	if (PLUS_LINK == t)
-		return Handle(createPlusLink(seq));
+		return createPlusLink(seq);
 	if (TIMES_LINK == t)
-		return Handle(createTimesLink(seq));
+		return createTimesLink(seq);
 
 	throw RuntimeException(TRACE_INFO, "Not a FoldLink!");
 }

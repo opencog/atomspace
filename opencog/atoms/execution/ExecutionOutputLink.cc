@@ -30,7 +30,7 @@
 #include <opencog/guile/SchemeEval.h>
 
 #include "ExecutionOutputLink.h"
-#include "Instantiator.h"
+#include "Eager.h"
 
 using namespace opencog;
 
@@ -121,40 +121,20 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	LAZY_LOG_FINE << "Execute gsn: " << gsn->toShortString()
 	              << "with arguments: " << cargs->toShortString();
 
-	// Search for additional execution links, and execute them too.
-	// We will know that happend if the returned handle differs from
-	// the input handle. If the results are different, add the new
-	// results to the atomspace. We need to do this, because scheme,
-	// and python expects to find thier arguments in the atomspace,
-	// but this is arguably broken, as it pollutes the atomspace with
-	// junk that is never cleaned up.  We punt for now, but something
-	// should be done about this. XXX FIXME ...
-	Instantiator inst(as);
-	LinkPtr largs(LinkCast(cargs));
-	Handle args(cargs);
-	if (largs)
-	{
-		std::vector<Handle> new_oset;
-		bool changed = false;
-		for (Handle ho : largs->getOutgoingSet())
-		{
-			Handle nh(inst.execute(ho));
-			// nh might be NULL if ho was a DeleteLink
-			if (nh != NULL)
-				new_oset.emplace_back(nh);
-			if (nh != ho) changed = true;
-		}
-		if (changed)
-			args = as->add_link(LIST_LINK, new_oset);
-	}
+	// Perform eager execution of the arguments. We have to do this,
+	// because the user-defined functions are black-boxes, and cannot
+	// be trusted to do lazy execution correctly. Right now, this is
+	// the policy. I guess we could add "scm-lazy:" and "py-lazy:" URI's
+	// for user-defined functions smart enough to do lazy evaluation.
+	Handle args = eager_execute(as, cargs);
 
 	// Get the schema name.
-	const std::string& schema = NodeCast(gsn)->getName();
+	const std::string& schema = gsn->getName();
 	// printf ("Grounded schema name: %s\n", schema.c_str());
 
 	// At this point, we only run scheme, python schemas and functions from
-    // libraries loaded at runtime.
-	if (0 == schema.compare(0,4,"scm:", 4))
+	// libraries loaded at runtime.
+	if (0 == schema.compare(0, 4, "scm:", 4))
 	{
 #ifdef HAVE_GUILE
 		// Be friendly, and strip leading white-space, if any.
@@ -176,7 +156,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 #endif /* HAVE_GUILE */
 	}
 
-	if (0 == schema.compare(0, 3,"py:", 3))
+	if (0 == schema.compare(0, 3, "py:", 3))
 	{
 #ifdef HAVE_CYTHON
 		// Be friendly, and strip leading white-space, if any.
@@ -197,50 +177,55 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 #endif /* HAVE_CYTHON */
 	}
 
-	if (0 == schema.compare(0,4,"lib:", 4))
+	// This is used by the Haskel bindings.  XXX -- it uses a broken
+	// API, namely the UUID's, and should be fixed....
+	if (0 == schema.compare(0, 4, "lib:", 4))
 	{
 		// Be friendly, and strip leading white-space, if any.
 		size_t pos = 4;
 		while (' ' == schema[pos]) pos++;
 
-        //Get the name of the Library and Function
-        //They should be sperated by a .
-        std::size_t dotpos = schema.find("\\");
-        if (dotpos == std::string::npos)
-        {
-            throw RuntimeException(TRACE_INFO,
-                "LibName and FunctionName not seperated by a '\\'");
-        }
-        std::string libName  = schema.substr(pos,dotpos-pos);
-        std::string funcName = schema.substr(dotpos+1);
+		//Get the name of the Library and Function
+		//They should be sperated by a .
+		std::size_t dotpos = schema.find("\\");
+		if (std::string::npos == dotpos)
+		{
+			throw RuntimeException(TRACE_INFO,
+				"Library name and function name must be separated by a '\\'");
+		}
+		std::string libName  = schema.substr(pos, dotpos - pos);
+		std::string funcName = schema.substr(dotpos + 1);
 
-        void *libHandle;
-        void * tmp;
-        UUID (*func)(AtomSpace* ,UUID);
+		// Try and load the library and function.
+		void* libHandle = dlopen(libName.c_str(), RTLD_LAZY);
+		if (nullptr == libHandle)
+			throw RuntimeException(TRACE_INFO,
+				"Cannot open library: %s - %s", libName.c_str(), dlerror());
 
-        //Try and load the Library and the Function
-        if ( (libHandle = dlopen(libName.c_str(), RTLD_LAZY)) == NULL ||
-             (tmp       = dlsym(libHandle, funcName.c_str())) == NULL )
-        {
-            std::string err(dlerror());
-            std::string msg = "Cannot Load function: " + funcName +" from lib: " + libName + " Error: " + err;
-            throw RuntimeException(TRACE_INFO,
-                msg.c_str());
-        }
+		void* sym = dlsym(libHandle, funcName.c_str());
+		if (nullptr == sym)
+			throw RuntimeException(TRACE_INFO,
+				"Cannot find symbol %s in library: %s - %s",
+				funcName.c_str(), libName.c_str(), dlerror());
 
-        //Convert the Void* pointer to the correct function Type
-        func = reinterpret_cast<UUID (*)(AtomSpace *, UUID)>(tmp);
+		// Convert the void* pointer to the correct function type.
+		// XXX FIXME -- it is incorrect to use UUID's for this purpose!
+		// UUID's are meant for storage, not for the library API.
+		// (The UUID lookup on the receiving side is going to be slow).
+		UUID (*func)(AtomSpace*, UUID);
+		func = reinterpret_cast<UUID (*)(AtomSpace *, UUID)>(sym);
 
-        //Execute the Function
-		Handle h(func(as,args.value()));
+		// Execute the function.
+		Handle h(func(as, args.value()));
 
-        //Close Library after Use
-        dlclose(libHandle);
+		// Close library after use.
+		dlclose(libHandle);
 
-        //Return the handle
+		// Return the handle.
 		return h;
 	}
+
 	// Unkown proceedure type.
 	throw RuntimeException(TRACE_INFO,
-	    "Cannot evaluate unknown GroundedSchemaNode!");
+		"Cannot evaluate unknown Schema %s", gsn->toString().c_str());
 }

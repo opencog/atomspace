@@ -43,6 +43,10 @@ static TruthValuePtr ss_evaluate(AtomSpace* atomspace, const Handle& h)
 
 /**
  * cog-reduce! reduces a FoldLink with free variables in it.
+ *
+ * XXX this routine is strongly deprecated, and should be, will be
+ * removed!  The correct way to do reduction is in the atomspace, and
+ * not in C++ code!
  */
 static Handle ss_reduce(AtomSpace* atomspace, const Handle& h)
 {
@@ -55,17 +59,12 @@ static Handle ss_reduce(AtomSpace* atomspace, const Handle& h)
 			"Expecting a FoldLink (PlusLink, TimesLink, etc");
 	}
 
-	// Arghh.  The cast should have been enough, but we currently
-	// can't store these in the atomspace, due to circular shared
-	// lib dependencies.
-	FoldLinkPtr fff(FoldLinkCast(h));
-	if (NULL == fff)
-		fff = FoldLinkCast(FoldLink::factory(LinkCast(h)));
+	FoldLinkPtr fff(FoldLink::factory(h));
 	Handle hr(fff->reduce());
 
 	if (DELETE_LINK == hr->getType())
 	{
-		for (const Handle& ho : LinkCast(hr)->getOutgoingSet())
+		for (const Handle& ho : hr->getOutgoingSet())
 			atomspace->remove_atom(ho, true);
 		return Handle::UNDEFINED;
 	}

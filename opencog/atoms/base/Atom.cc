@@ -48,6 +48,7 @@
 // #define FIRED_ACTIVATION        8  //BIT3
 // #define HYPOTETHICAL_FLAG       16 //BIT4
 // #define REMOVED_BY_DECAY        32 //BIT5
+#define CHECKED                 64  //BIT6
 
 //#define DPRINTF printf
 #define DPRINTF(...)
@@ -225,6 +226,21 @@ void Atom::unsetRemovalFlag(void)
 void Atom::markForRemoval(void)
 {
     _flags |= MARKED_FOR_REMOVAL;
+}
+
+bool Atom::isChecked() const
+{
+    return (_flags & CHECKED) != 0;
+}
+
+void Atom::setChecked(void)
+{
+    _flags |= CHECKED;
+}
+
+void Atom::setUnchecked(void)
+{
+    _flags &= ~CHECKED;
 }
 
 // ==============================================================

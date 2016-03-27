@@ -34,8 +34,8 @@ class ForwardChainerUTest;
 namespace opencog
 {
 
-enum source_selection_mode {
-    TV_FITNESS_BASED, STI_BASED
+enum class source_selection_mode {
+	TV_FITNESS, STI, UNIFORM
 };
 
 class FCMemory;
@@ -59,40 +59,47 @@ private:
     bool _search_in_af;
     bool _search_focus_set;
     Handle _cur_source;
+
+	// We maintain both a selected and unselected sources to speed up
+	// choose_source
     UnorderedHandleSet _selected_sources;
+    UnorderedHandleSet _unselected_sources;
 
     FCStat _fcstat;
 
-    void init(Handle hsource, HandleSeq focus_set);
+    void init(const Handle& hsource, const HandleSeq& focus_set);
 
-    void apply_all_rules(bool search_focus_set = false);
+    void apply_all_rules();
 
-    UnorderedHandleSet get_subatoms(const Rule *rule);
     Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);
-    HandleSeq substitute_rule_part(AtomSpace& as, Handle hrule,
+    bool is_constant_clause(const Handle& hvarlist, const Handle& hclause) const;
+    Handle remove_constant_clauses(const Handle& hvarlist,
+                                   const Handle& himplicand);
+    HandleSeq substitute_rule_part(AtomSpace& as, const Handle& hrule,
                                    const std::set<Handle>& vars,
                                    const std::vector<std::map<Handle, Handle>>&
                                    var_groundings);
-    bool unify(Handle source, Handle term, const Rule* rule);
-    bool subatom_unify(Handle source, const Rule* rule);
-    UnorderedHandleSet derive_rules(Handle source, Handle term, const Rule* rule);
-    void update_potential_sources(HandleSeq input);
-
+    bool unify(const Handle& source, const Handle& pattern, const Rule* rule);
+    UnorderedHandleSet derive_rules(const Handle& source, const Handle& pattern,
+                                    const Rule* rule);
+	template<typename HandleContainer>
+    void update_potential_sources(const HandleContainer& input) {
+		UnorderedHandleSet input_minus_selected;
+		for (const Handle& h : input)
+			if (_selected_sources.find(h) == _selected_sources.end())
+				input_minus_selected.insert(h);
+		_potential_sources.insert(input_minus_selected.begin(),
+		                          input_minus_selected.end());
+        _unselected_sources.insert(input_minus_selected.begin(),
+                                   input_minus_selected.end());
+    }
     bool is_valid_implicant(const Handle& h);
-    void validate(Handle hsource, HandleSeq hfocus_set);
+    void validate(const Handle& hsource, const HandleSeq& hfocus_set);
 
 protected:
     vector<Rule*> _rules; /*<loaded rules*/
     UnorderedHandleSet _potential_sources;
     HandleSeq _focus_set;
-
-    /**
-     * Choose an applicable rules from the rule base by selecting
-     * rules whose premise structurally matches with the source.
-     *
-     * @return  A rule that in which @param source could ground.
-     */
-    virtual Rule* choose_rule(Handle hsource, bool subatom_match);
 
     /**
      * choose next source from the source list
@@ -101,25 +108,39 @@ protected:
      */
     virtual Handle choose_source();
 
-    /**
-     * Apply chosen rule. the default will wrap a custom PM callback class.
-     * i.e invokes _pattern_matcher.
+	/**
+     * Choose an applicable rules from the rule base by selecting
+     * rules whose premise structurally matches with the source.
+     *
+     * If no rule can be chosen return nullptr.
+     *
+     * @return  A rule that in which @param source could ground.
+     */
+    virtual Rule* choose_rule(const Handle& hsource);
+
+	/**
+	 * Apply rule on the current source. Creating derived rules if
+	 * necessary.
+	 */
+    virtual UnorderedHandleSet apply_rule(const Rule* rule);
+
+	/**
+     * Apply rule handle (BindLink).
      *
      * @return  A set of handles created as a result of applying current
      *          choosen rule.
      */
-    virtual HandleSeq apply_rule(Handle rhandle,
-                                 bool search_focus_set_only = false);
+    virtual HandleSeq apply_rule(const Handle& rhandle);
 
-    UnorderedHandleSet derive_rules(Handle source, const Rule* rule,
-                                    bool subatomic = false);
+    UnorderedHandleSet derive_rules(const Handle& source, const Rule* rule);
 
 public:
     /**
      * Ctor. rbs is a Handle pointing to rule-based system.
      */
-    ForwardChainer(AtomSpace& as, Handle rbs, Handle hsource,
-                   HandleSeq focus_set);
+    ForwardChainer(AtomSpace& as, const Handle& rbs, const Handle& hsource,
+                   const HandleSeq& focus_set = HandleSeq(),
+                   source_selection_mode sm = source_selection_mode::UNIFORM);
     virtual ~ForwardChainer();
 
     /**
@@ -141,7 +162,7 @@ public:
     /**
      * @return all results in their order of inference.
      */
-    HandleSeq get_chaining_result();
+    UnorderedHandleSet get_chaining_result();
 };
 
 } // ~namespace opencog

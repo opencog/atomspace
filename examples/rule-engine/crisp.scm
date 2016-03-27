@@ -17,19 +17,19 @@
 
 ; I still don't understand this module thing, it still crashes so I
 ; still need to have that
-(load-from-path "av-tv.scm")
-(load-from-path "utilities.scm")
-(load-from-path "rule-engine-utils.scm")
+; (load-from-path "av-tv.scm")
+; (load-from-path "utilities.scm")
+; (load-from-path "rule-engine-utils.scm")
 
 ; Load URE configuration (add the current file dir so it can be loaded
 ; from anywhere)
-(add-to-load-path (dirname (current-filename)))
-(load-from-path "crisp-config.scm")
+; (add-to-load-path (dirname (current-filename)))
+(load "crisp-config.scm")
 
 ; Define knowledge base
-(define A (ConceptNode "A" (stv 1 1)))
-(define B (ConceptNode "B"))
-(define C (ConceptNode "C"))
+(define A (PredicateNode "A" (stv 1 1)))
+(define B (PredicateNode "B"))
+(define C (PredicateNode "C"))
 (define AB (ImplicationLink (stv 1 1) A B))
 (define BC (ImplicationLink (stv 1 1) B C))
 
@@ -38,8 +38,8 @@
 ;; scheme@(guile-user)> (crisp-fc AB)
 ;; $1 = (ListLink
 ;;    (ImplicationLink (stv 1 0.99999982)
-;;       (ConceptNode "A")
-;;       (ConceptNode "C")
+;;       (PredicateNode "A")
+;;       (PredicateNode "C")
 ;;    )
 ;; )
 
@@ -52,4 +52,4 @@
 ; while the TV of C will be suitably updated.
 
 ;; scheme@(guile-user)> C
-;; $2 = (ConceptNode "C" (stv 1 0.99999982))
+;; $2 = (PredicateNode "C" (stv 1 0.99999982))

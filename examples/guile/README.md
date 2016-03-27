@@ -80,6 +80,7 @@ The current list of modules that wrap C++ code includes:
 
 * `basic.scm`   -- A very simple introduction
 * `bindlink-example.scm` -- An example of using the pattern matcher.
+* `python.scm`  -- loading python code from scheme.
 * `execute.scm` -- An example of executing executable atoms, with
                    callbacks written in python or scheme.
 * `get-put.scm` -- An example of asserting facts in the AtomSpace.

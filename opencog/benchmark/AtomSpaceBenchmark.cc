@@ -52,7 +52,7 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
     defaultLinkType = INHERITANCE_LINK;
     chanceOfNonDefaultLink = 0.4f;
     linkSize_mean = 2.0f;
-    prg = new std::poisson_distribution<unsigned>(linkSize_mean);
+    poissonDistribution = new std::poisson_distribution<unsigned>(linkSize_mean);
 
     counter = 0;
     showTypeSizes = false;
@@ -75,13 +75,13 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
 
     asp = NULL;
     atab = NULL;
-    rng = NULL;
+    randomGenerator = NULL;
 }
 
 AtomSpaceBenchmark::~AtomSpaceBenchmark()
 {
-    delete prg;
-    delete rng;
+    delete poissonDistribution;
+    delete randomGenerator;
 }
 
 // This is wrong, because it fails to also count the amount of RAM
@@ -293,9 +293,21 @@ void AtomSpaceBenchmark::setMethod(std::string methodToTest)
         foundMethod = true;
     }
 
+    if (methodToTest == "all" or methodToTest == "push_back_reserve") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_push_back_reserve);
+        methodNames.push_back("push_back_reserve");
+        foundMethod = true;
+    }
+
     if (methodToTest == "all" or methodToTest == "emplace_back") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_emplace_back);
         methodNames.push_back("emplace_back");
+        foundMethod = true;
+    }
+
+    if (methodToTest == "all" or methodToTest == "emplace_back_reserve") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_emplace_back_reserve);
+        methodNames.push_back("emplace_back_reserve");
         foundMethod = true;
     }
 
@@ -429,13 +441,13 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
 
     // Initialize the random number generator with the seed which might
     // have been passed in on the command line.
-    if (rng)
-        delete rng;
-    rng = new opencog::MT19937RandGen(randomseed);
+    if (randomGenerator)
+        delete randomGenerator;
+    randomGenerator = new opencog::MT19937RandGen(randomseed);
 
     // Make sure we are using the correct link mean!
-    if (prg) delete prg;
-    prg = new std::poisson_distribution<unsigned>(linkSize_mean);
+    if (poissonDistribution) delete poissonDistribution;
+    poissonDistribution = new std::poisson_distribution<unsigned>(linkSize_mean);
 
     // num threads does nothing at the moment;
     if (showTypeSizes) printTypeSizes();
@@ -536,7 +548,7 @@ Type AtomSpaceBenchmark::randomType(Type t)
     // since that type can't handle randomly generated names. Also skip
     // BIND_LINK and other validated types since the validation will fail.
     do {
-        candidateType = ATOM + rng->randint(numberOfTypes-1);
+        candidateType = ATOM + randomGenerator->randint(numberOfTypes - ATOM - 1);
     } while (!classserver().isA(candidateType, t) or
         classserver().isA(candidateType, FREE_LINK) or
         classserver().isA(candidateType, SCOPE_LINK) or
@@ -553,17 +565,17 @@ clock_t AtomSpaceBenchmark::makeRandomNodes(const std::string& csi)
 #ifdef FIXME_LATER
     // Some faction of the time, we create atoms with non-default
     // truth values.  XXX implement this for making of links too...
-    bool useDefaultTV = (rng->randfloat() < chanceUseDefaultTV);
+    bool useDefaultTV = (randomGenerator->randfloat() < chanceUseDefaultTV);
     SimpleTruthValue stv(TruthValue::DEFAULT_TV());
 
     if (not useDefaultTV) {
-        float strength = rng->randfloat();
-        float conf = rng->randfloat();
+        float strength = randomGenerator->randfloat();
+        float conf = randomGenerator->randfloat();
         stv = SimpleTruthValue(strength, conf);
     }
 #endif
 
-    double p = rng->randdouble();
+    double p = randomGenerator->randdouble();
     Type ta[Nclock];
     std::string nn[Nclock];
     for (unsigned int i = 0; i<Nclock; i++)
@@ -614,7 +626,7 @@ clock_t AtomSpaceBenchmark::makeRandomNodes(const std::string& csi)
                    << classserver().getTypeName(t)
                    << " \"" << scp << "\")\n";
 
-                p = rng->randdouble();
+                p = randomGenerator->randdouble();
                 t = defaultNodeType;
                 if (p < chanceOfNonDefaultNode)
                     t = randomType(NODE);
@@ -649,7 +661,7 @@ clock_t AtomSpaceBenchmark::makeRandomNodes(const std::string& csi)
             if (memoize) dss << "    ";   // indentation
             dss << "aspace.add_node (" << t << ", \"" << scp << "\")\n";
 
-            p = rng->randdouble();
+            p = randomGenerator->randdouble();
             t = defaultNodeType;
             if (p < chanceOfNonDefaultNode)
                 t = randomType(NODE);
@@ -679,7 +691,7 @@ clock_t AtomSpaceBenchmark::makeRandomNodes(const std::string& csi)
 
 clock_t AtomSpaceBenchmark::makeRandomLinks()
 {
-    double p = rng->randdouble();
+    double p = randomGenerator->randdouble();
     Type ta[Nclock];
     HandleSeq og[Nclock];
     for (unsigned int i = 0; i<Nclock; i++)
@@ -688,7 +700,7 @@ clock_t AtomSpaceBenchmark::makeRandomLinks()
         if (p < chanceOfNonDefaultLink) t = randomType(LINK);
         ta[i] = t;
 
-        size_t arity = (*prg)(randgen);
+        size_t arity = (*poissonDistribution)(*randomGenerator);
         if (arity == 0) { ++arity; };
 
         // AtomSpace will throw if the context link has bad arity
@@ -753,10 +765,10 @@ clock_t AtomSpaceBenchmark::makeRandomLinks()
                 ss << ")\n";
 
                 t = defaultLinkType;
-                p = rng->randdouble();
+                p = randomGenerator->randdouble();
                 if (p < chanceOfNonDefaultLink) t = randomType(LINK);
 
-                arity = (*prg)(randgen);
+                arity = (*poissonDistribution)(*randomGenerator);
                 if (arity == 0) { ++arity; };
 
                 // AtomSpace will throw if the context link has bad arity
@@ -850,7 +862,7 @@ timepair_t AtomSpaceBenchmark::bm_noop()
     int n[Nclock];
     for (unsigned int i=0; i<Nclock; i++)
     {
-        n[i] = rng->randint(42);
+        n[i] = randomGenerator->randint(42);
     }
 
     clock_t t_begin = clock();
@@ -967,7 +979,7 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
 
 Handle AtomSpaceBenchmark::getRandomHandle()
 {
-    Handle h(UUID_begin + rng->randint(UUID_end-1-UUID_begin));
+    Handle h(UUID_begin + randomGenerator->randint(UUID_end-1-UUID_begin));
     // operator->() can return NULL when there's no atom for the uuid,
     // because the atom was deleted in a previous pass! Dohh!
     while (NULL == h.operator->()) {
@@ -1108,8 +1120,8 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
     for (unsigned int i=0; i<Nclock; i++)
     {
         hs[i] = getRandomHandle();
-        strg[i] = rng->randfloat();
-        conf[i] = rng->randfloat();
+        strg[i] = randomGenerator->randfloat();
+        conf[i] = randomGenerator->randfloat();
     }
 
     switch (testKind) {
@@ -1142,8 +1154,8 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
                    << ")\n";
 
                 h = getRandomHandle();
-                strength = rng->randfloat();
-                cnf = rng->randfloat();
+                strength = randomGenerator->randfloat();
+                cnf = randomGenerator->randfloat();
             }
             std::string gs = memoize_or_compile(ss.str());
             gsa[i] = gs;
@@ -1383,7 +1395,7 @@ timepair_t AtomSpaceBenchmark::bm_push_back()
         for (unsigned int i = 0; i<Nclock; i++)
         {
             // HandleSeq oset;
-            HandleSeq oset(Nreserve);
+            HandleSeq oset;
             oset.push_back(ha);
         }
         clock_t time_taken = clock() - t_begin;
@@ -1396,7 +1408,7 @@ timepair_t AtomSpaceBenchmark::bm_push_back()
         for (unsigned int i = 0; i<Nclock; i++)
         {
             // HandleSeq oset;
-            HandleSeq oset(Nreserve);
+            HandleSeq oset;
             oset.push_back(ha);
             oset.push_back(hb);
         }
@@ -1410,7 +1422,7 @@ timepair_t AtomSpaceBenchmark::bm_push_back()
         for (unsigned int i = 0; i<Nclock; i++)
         {
             // HandleSeq oset;
-            HandleSeq oset(Nreserve);
+            HandleSeq oset;
             oset.push_back(ha);
             oset.push_back(hb);
             oset.push_back(hc);
@@ -1425,7 +1437,80 @@ timepair_t AtomSpaceBenchmark::bm_push_back()
         for (unsigned int i = 0; i<Nclock; i++)
         {
             // HandleSeq oset;
-            HandleSeq oset(Nreserve);
+            HandleSeq oset;
+            oset.push_back(ha);
+            oset.push_back(hb);
+            oset.push_back(hc);
+            oset.push_back(hd);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    return timepair_t(0,0);
+}
+
+
+timepair_t AtomSpaceBenchmark::bm_push_back_reserve()
+{
+    Handle ha = getRandomHandle();
+    Handle hb = getRandomHandle();
+    Handle hc = getRandomHandle();
+    Handle hd = getRandomHandle();
+
+    if (1 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            // HandleSeq oset;
+            HandleSeq oset;
+            oset.reserve(Nreserve);
+            oset.push_back(ha);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    if (2 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            // HandleSeq oset;
+            HandleSeq oset;
+            oset.reserve(Nreserve);
+            oset.push_back(ha);
+            oset.push_back(hb);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    if (3 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            // HandleSeq oset;
+            HandleSeq oset;
+            oset.reserve(Nreserve);
+            oset.push_back(ha);
+            oset.push_back(hb);
+            oset.push_back(hc);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    if (4 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            // HandleSeq oset;
+            HandleSeq oset;
+            oset.reserve(Nreserve);
             oset.push_back(ha);
             oset.push_back(hb);
             oset.push_back(hc);
@@ -1490,6 +1575,74 @@ timepair_t AtomSpaceBenchmark::bm_emplace_back()
         for (unsigned int i = 0; i<Nclock; i++)
         {
             HandleSeq oset;
+            oset.emplace_back(ha);
+            oset.emplace_back(hb);
+            oset.emplace_back(hc);
+            oset.emplace_back(hd);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    return timepair_t(0,0);
+}
+
+timepair_t AtomSpaceBenchmark::bm_emplace_back_reserve()
+{
+    Handle ha = getRandomHandle();
+    Handle hb = getRandomHandle();
+    Handle hc = getRandomHandle();
+    Handle hd = getRandomHandle();
+
+    if (1 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            HandleSeq oset;
+            oset.reserve(Nreserve);
+            oset.emplace_back(ha);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    if (2 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            HandleSeq oset;
+            oset.reserve(Nreserve);
+            oset.emplace_back(ha);
+            oset.emplace_back(hb);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    if (3 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            HandleSeq oset;
+            oset.reserve(Nreserve);
+            oset.emplace_back(ha);
+            oset.emplace_back(hb);
+            oset.emplace_back(hc);
+        }
+        clock_t time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+
+    if (4 == Nreserve)
+    {
+        clock_t t_begin = clock();
+        for (unsigned int i = 0; i<Nclock; i++)
+        {
+            HandleSeq oset;
+            oset.reserve(Nreserve);
             oset.emplace_back(ha);
             oset.emplace_back(hb);
             oset.emplace_back(hc);

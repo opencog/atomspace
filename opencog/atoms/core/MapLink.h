@@ -66,17 +66,17 @@ protected:
 
 public:
 	MapLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	        TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	        AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	MapLink(const Handle& pattern, const Handle& term,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	        TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	        AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	MapLink(Link &l);
 
 	// Align the pattern and the term side-by-side, and extract the
-	// values tht match up with the variables.  If the term is not of
+	// values that match up with the variables.  If the term is not of
 	// the same type as the pattern, return the undefined handle.
 	virtual Handle execute(AtomSpace* = NULL) const;
 };

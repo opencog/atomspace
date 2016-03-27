@@ -33,24 +33,51 @@
 
 using namespace opencog;
 
-bool Instantiator::walk_tree(HandleSeq& oset_results, const HandleSeq& expr,
-                             int quotation_level,
-                             Handle (Instantiator::*walker)(const Handle&, int))
+
+/// Perform beta-reduction on the expression `expr`, using the `vmap`
+/// to fish out values for variables.  The map holds pairs: the first
+/// membr of the pair is the variable; the second is the value that
+/// should be used as its replacement.  (Note that "variables" do not
+/// have to actually be VariableNode's; they can be any atom.)
+static Handle beta_reduce(const Handle& expr, const std::map<Handle, Handle> vmap)
+{
+	// XXX crud.  Stupid inefficient format conversion. FIXME.
+	// FreeVariables::substitute_nocheck() performs beta-reduction
+	// correctly, so we just use that. But it takes a specific
+	// format, and a variable-value map is not one of them.
+	HandleSeq vals;
+	FreeVariables crud;
+	unsigned int idx = 0;
+	for (const auto& pr : vmap)
+	{
+		crud.varseq.push_back(pr.first);
+		crud.index.insert({pr.first, idx});
+		vals.push_back(pr.second);
+		idx++;
+	}
+	return crud.substitute_nocheck(expr, vals);
+}
+
+/// Same as walk tree, except that it handles a handle sequence,
+/// instead of a single handle. The returned result is in oset_results.
+/// Returns true if the results differ from the input, i.e. if the
+/// result of execution/evaluation changed something.
+bool Instantiator::walk_sequence(HandleSeq& oset_results, const HandleSeq& expr)
 {
 	bool changed = false;
+	int quotation_level = _quotation_level;
 	for (const Handle& h : expr)
 	{
-		Handle hg((this->*walker)(h, quotation_level));
+		Handle hg(walk_tree(h));
+		_quotation_level = quotation_level;
 		if (hg != h) changed = true;
 
 		// GlobNodes are grounded by a ListLink of everything that
 		// the GlobNode matches. Unwrap the list, and insert each
 		// of the glob elements in sequence.
-		if (quotation_level == 0 and GLOB_NODE == h->getType() and hg != h)
+		if (_quotation_level == 0 and GLOB_NODE == h->getType() and hg != h)
 		{
-			LinkPtr lp(LinkCast(hg));
-			OC_ASSERT(nullptr != lp, "Expecting glob list");
-			for (const Handle& gloe: lp->getOutgoingSet())
+			for (const Handle& gloe: hg->getOutgoingSet())
 			{
 				if (NULL != gloe)
 					oset_results.emplace_back(gloe);
@@ -69,63 +96,47 @@ bool Instantiator::walk_tree(HandleSeq& oset_results, const HandleSeq& expr,
 	return changed;
 }
 
-bool Instantiator::seq_eager(HandleSeq& oset_results,
-                             const HandleSeq& expr,
-                             int quotation_level)
-{
-	return walk_tree(oset_results, expr, quotation_level,
-	                 &Instantiator::walk_eager);
-}
-
-bool Instantiator::seq_lazy(HandleSeq& oset_results,
-                            const HandleSeq& expr,
-                            int quotation_level)
-{
-	return walk_tree(oset_results, expr, quotation_level,
-	                 &Instantiator::walk_lazy);
-}
-
-Handle Instantiator::walk_eager(const Handle& expr, int quotation_level)
+Handle Instantiator::walk_tree(const Handle& expr)
 {
 	Type t = expr->getType();
-	LinkPtr lexpr(LinkCast(expr));
 
 	// Quotation case
 	if (QUOTE_LINK == t)
-		quotation_level++;
+		_quotation_level++;
 	else if (UNQUOTE_LINK == t)
-		quotation_level--;
+		_quotation_level--;
 
 	// Discard the following QuoteLink or UnquoteLink (as it is
 	// serving its quoting or unquoting function).
-	if ((quotation_level == 1 and QUOTE_LINK == t)
-		or (quotation_level == 0 and UNQUOTE_LINK == t)) {
-		if (1 != lexpr->getArity())
+	if (((_avoid_discarding_quotes_level == 0)
+		and (_quotation_level == 1 and QUOTE_LINK == t))
+		or (_quotation_level == 0 and UNQUOTE_LINK == t)) {
+		if (1 != expr->getArity())
 			throw InvalidParamException(TRACE_INFO,
 			                            "QuoteLink/UnquoteLink has "
 			                            "unexpected arity!");
-		return walk_eager(lexpr->getOutgoingAtom(0), quotation_level);
+		return walk_tree(expr->getOutgoingAtom(0));
 	}
 
-	if (not lexpr)
+	if (expr->isNode())
 	{
-		if (quotation_level > 0)
+		if (_quotation_level > 0)
 			return expr;
 
 		// If we are here, we are a Node.
 		if (DEFINED_SCHEMA_NODE == t)
 		{
-			return walk_eager(DefineLink::get_definition(expr), quotation_level);
+			return walk_tree(DefineLink::get_definition(expr));
 		}
 
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
-			return Handle(expr);
+			return expr;
 
 		// If we are here, we found a variable. Look it up. Return a
 		// grounding if it has one, otherwise return the variable
 		// itself.
 		std::map<Handle,Handle>::const_iterator it = _vmap->find(expr);
-		if (_vmap->end() == it) return Handle(expr);
+		if (_vmap->end() == it) return expr;
 
 		// Not so fast, pardner. VariableNodes can be grounded by
 		// links, and those links may be executable. In that case,
@@ -133,10 +144,10 @@ Handle Instantiator::walk_eager(const Handle& expr, int quotation_level)
 
 		// halt infinite regress
 		if (_halt)
-			return Handle(expr);
+			return expr;
 
 		_halt = true;
-		Handle hgnd(walk_eager(it->second, quotation_level));
+		Handle hgnd(walk_tree(it->second));
 		_halt = false;
 		return hgnd;
 	}
@@ -147,265 +158,55 @@ Handle Instantiator::walk_eager(const Handle& expr, int quotation_level)
 	// We must be careful to substitute only for free variables, and
 	// never for bound ones.
 
-	if (quotation_level > 0)
+	if (_quotation_level > 0)
 		goto mere_recursive_call;
 
-	// Reduce PutLinks in an eager fashion, by first executing the
-	// arguments to the Put, then beta-reducing, then executing again.
+	// Reduce PutLinks. There are two ways to do this: eager execution
+	// and lazy execution.  The algos are this:
+	//
+	//    Eager: first, execute the arguments to the Put, then beta-
+	//    reduce, then execute again.
+	//
+	//    Lazy: beta-reduce first, then execute.  Lazy helps avoid
+	//    un-needed executations, and has better control over infinite
+	//    recursion. However, unit tests currently fail on it.
+	//
 	if (PUT_LINK == t)
 	{
-		PutLinkPtr ppp(PutLinkCast(expr));
-		if (nullptr == ppp)
-			ppp = createPutLink(*lexpr);
+		PutLinkPtr ppp;
 
-		// Execute the values in the PutLink before doing the beta-reduction.
-		// Execute the body only after the beta-reduction has been done.
-		Handle pvals = ppp->get_values();
-		Handle gargs = walk_eager(pvals, quotation_level);
-		if (gargs != pvals)
+		if (_eager)
 		{
-			HandleSeq groset;
-			if (ppp->get_vardecl())
-				groset.emplace_back(ppp->get_vardecl());
-			groset.emplace_back(ppp->get_body());
-			groset.emplace_back(gargs);
-			ppp = createPutLink(groset);
-		}
-		// Step one: beta-reduce.
-		Handle red(ppp->reduce());
-		// Step two: execute the resulting body.
-		Handle rex(walk_eager(red, quotation_level));
-		if (nullptr == rex)
-			return rex;
-
-		// Step three: XXX this is awkward, but seems to be needed...
-		// If the result is evaluatable, then evaluate it. e.g. if the
-		// result has a GroundedPredicateNode, we need to run it now.
-		// We do, however, ignore the resulting TV, which is also
-		// awkward.  I'm confused about how to handle this best.
-		// The behavior tree uses this!
-		// Anyway, do_evaluate() will throw if rex is not evaluatable.
-		if (SET_LINK == rex->getType())
-		{
-			LinkPtr slp(LinkCast(rex));
-			for (const Handle& plo : slp->getOutgoingSet())
+			ppp = PutLinkCast(expr);
+			if (nullptr == ppp)
+				ppp = createPutLink(*LinkCast(expr));
+			// Execute the values in the PutLink before doing the
+			// beta-reduction. Execute the body only after the
+			// beta-reduction has been done.
+			Handle pvals = ppp->get_values();
+			Handle gargs = walk_tree(pvals);
+			if (gargs != pvals)
 			{
-				try {
-					EvaluationLink::do_evaluate(_as, plo, true);
-				}
-				catch (const NotEvaluatableException& ex) {}
+				HandleSeq groset;
+				if (ppp->get_vardecl())
+					groset.emplace_back(ppp->get_vardecl());
+				groset.emplace_back(ppp->get_body());
+				groset.emplace_back(gargs);
+				ppp = createPutLink(groset);
 			}
-			return rex;
 		}
-		try {
-			EvaluationLink::do_evaluate(_as, rex, true);
-		}
-		catch (const NotEvaluatableException& ex) {}
-		return rex;
-	}
-
-	// ExecutionOutputLinks are not handled by the FunctionLink factory
-	// below. This is due to a circular shared-libarary dependency.
-	if (EXECUTION_OUTPUT_LINK == t)
-	{
-		// XXX Force syntax checking; normally this would be done in the
-		// atomspace factory, but that is currently broken, so do it here.
-		ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(expr));
-		if (nullptr == eolp)
-			eolp = createExecutionOutputLink(lexpr->getOutgoingSet());
-
-		// At this time, the GSN or the DSN is always in position 0
-		// of the outgoing set, and the ListLink of arguments is always
-		// in position 1.  Someday in the future, there may be a variable
-		// declaration; we punt on that.
-		Handle sn(eolp->get_schema());
-		Handle args(eolp->get_args());
-
-		// Perform substitution on the args, only.
-		args = walk_eager(args, quotation_level);
-
-		// If its a DSN, obtain the correct body for it.
-		if (DEFINED_SCHEMA_NODE == sn->getType())
-			sn = DefineLink::get_definition(sn);
-
-		// If its an anonymous function link, execute it here.
-		if (LAMBDA_LINK == sn->getType())
+		else
 		{
-			LambdaLinkPtr flp(LambdaLinkCast(sn));
-			if (NULL == flp)
-				flp = createLambdaLink(*LinkCast(sn));
-
-			// Two-step process. First, plug the arguments into the
-			// function; i.e. perform beta-reduction. Second, actually
-			// execute the result. We execute by just calling walk_eager
-			// again.
-			Handle body(flp->get_body());
-			Variables vars(flp->get_variables());
-
-			const HandleSeq& oset(LinkCast(args)->getOutgoingSet());
-			Handle beta_reduced(vars.substitute_nocheck(body, oset));
-			return walk_eager(beta_reduced, quotation_level);
+			Handle hexpr(beta_reduce(expr, *_vmap));
+			ppp = PutLinkCast(hexpr);
+			if (nullptr == ppp)
+				ppp = createPutLink(*LinkCast(hexpr));
 		}
-
-		ExecutionOutputLinkPtr geolp(createExecutionOutputLink(sn, args));
-		return geolp->execute(_as);
-	}
-
-	// Handle DeleteLink's before general FunctionLink's; they
-	// work differently.
-	if (DELETE_LINK == t)
-	{
-		HandleSeq oset_results;
-		seq_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
-		for (const Handle& h: oset_results)
-		{
-			Type ht = h->getType();
-			if (VARIABLE_NODE != ht and GLOB_NODE != ht)
-				_as->remove_atom(h, true);
-		}
-		return Handle::UNDEFINED;
-	}
-
-	// FoldLink's are a kind-of FunctionLink, but are not currently
-	// handled by the FunctionLink factory below.  This should be fixed
-	// someday, when the reduct directory is re-desiged.
-	if (classserver().isA(t, FOLD_LINK))
-	{
-		// At this time, no FoldLink ever has a variable declaration,
-		// and the number of arguments is not fixed, i.e. variadic.
-		// Perform substitution on all arguments before applying the
-		// function itself.
-		HandleSeq oset_results;
-		seq_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
-		Handle hl(FoldLink::factory(t, oset_results));
-		FoldLinkPtr flp(FoldLinkCast(hl));
-		return flp->execute(_as);
-	}
-
-	// Fire any other function links, not handled above.
-	if (classserver().isA(t, FUNCTION_LINK))
-	{
-		// At this time, no FunctionLink that is outside of an
-		// ExecutionOutputLink ever has a variable declaration.
-		// Also, the number of arguments is not fixed, i.e. variadic.
-		// Perform substitution on all arguments before applying the
-		// function itself.
-		HandleSeq oset_results;
-		seq_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
-		Handle hl(FunctionLink::factory(t, oset_results));
-		FunctionLinkPtr flp(FunctionLinkCast(hl));
-		return flp->execute(_as);
-	}
-
-	// If there is a GetLink, we have to perform the get, and replace
-	// it with the results of the get. The get is implemented with the
-	// PatternLink::satisfy() method.
-	if (GET_LINK == t)
-	{
-		HandleSeq oset_results;
-		seq_eager(oset_results, lexpr->getOutgoingSet(), quotation_level);
-		size_t sz = oset_results.size();
-		for (size_t i=0; i< sz; i++)
-			oset_results[i] = _as->add_atom(oset_results[i]);
-
-		LinkPtr lp(createLink(GET_LINK, oset_results));
-
-		return satisfying_set(_as, Handle(lp));
-	}
-
-mere_recursive_call:
-	// None of the above. Create a duplicate link, but with an outgoing
-	// set where the variables have been substituted by their values.
-	HandleSeq oset_results;
-	bool changed = seq_eager(oset_results, lexpr->getOutgoingSet(),
-	                         quotation_level);
-	if (changed)
-	{
-		LinkPtr subl = createLink(t, oset_results, expr->getTruthValue());
-		return Handle(_as->add_atom(subl));
-	}
-	return expr;
-}
-
-Handle Instantiator::walk_lazy(const Handle& expr, int quotation_level)
-{
-	Type t = expr->getType();
-	LinkPtr lexpr(LinkCast(expr));
-
-	// Quotation case
-	if (QUOTE_LINK == t)
-		quotation_level++;
-	else if (UNQUOTE_LINK == t)
-		quotation_level--;
-
-	// Discard the following QuoteLink or UnquoteLink (as it is
-	// serving its quoting or unquoting function).
-	if ((quotation_level == 1 and QUOTE_LINK == t)
-		or (quotation_level == 0 and UNQUOTE_LINK == t)) {
-		if (1 != lexpr->getArity())
-			throw InvalidParamException(TRACE_INFO,
-			                            "QuoteLink/UnquoteLink has "
-			                            "unexpected arity!");
-		return walk_lazy(lexpr->getOutgoingAtom(0), quotation_level);
-	}
-
-	if (not lexpr)
-	{
-		if (quotation_level > 0)
-			return expr;
-
-		// If we are here, we are a Node.
-		if (DEFINED_SCHEMA_NODE == t)
-		{
-			return walk_lazy(DefineLink::get_definition(expr), quotation_level);
-		}
-
-		if (VARIABLE_NODE != t and GLOB_NODE != t)
-			return Handle(expr);
-
-		// If we are here, we found a variable. Look it up. Return a
-		// grounding if it has one, otherwise return the variable
-		// itself.
-		std::map<Handle,Handle>::const_iterator it = _vmap->find(expr);
-		if (_vmap->end() == it) return Handle(expr);
-
-		// Not so fast, pardner. VariableNodes can be grounded by
-		// links, and those links may be executable. In that case,
-		// we have to execute them.
-
-		// halt infinite regress
-		if (_halt)
-			return Handle(expr);
-
-		_halt = true;
-		Handle hgnd(walk_lazy(it->second, quotation_level));
-		_halt = false;
-		return hgnd;
-	}
-
-	// -----------------------------------------------------------
-	// If we are here, then we have a link. Walk it. In general,
-	// links may contain both bound variables, and also free variables.
-	// We must be careful to substitute only for free variables, and
-	// never for bound ones.
-
-	if (quotation_level > 0)
-		goto mere_recursive_call;
-
-	// Reduce PutLinks in a lazy fashion. By "lazy" we mean that the
-	// beta-reduction is performed first, and then the result is
-	// executed. (The eager version, above, executes the arguments to
-	// the Put first, then beta-reduces, then executes again.)
-	if (PUT_LINK == t)
-	{
-		PutLinkPtr ppp(PutLinkCast(expr));
-		if (nullptr == ppp)
-			ppp = createPutLink(*lexpr);
 
 		// Step one: beta-reduce.
 		Handle red(ppp->reduce());
 		// Step two: execute the resulting body.
-		Handle rex(walk_lazy(red, quotation_level));
+		Handle rex(walk_tree(red));
 		if (nullptr == rex)
 			return rex;
 
@@ -418,8 +219,7 @@ Handle Instantiator::walk_lazy(const Handle& expr, int quotation_level)
 		// Anyway, do_evaluate() will throw if rex is not evaluatable.
 		if (SET_LINK == rex->getType())
 		{
-			LinkPtr slp(LinkCast(rex));
-			for (const Handle& plo : slp->getOutgoingSet())
+			for (const Handle& plo : rex->getOutgoingSet())
 			{
 				try {
 					EvaluationLink::do_evaluate(_as, plo, true);
@@ -438,20 +238,19 @@ Handle Instantiator::walk_lazy(const Handle& expr, int quotation_level)
 	// ExecutionOutputLinks are not handled by the FunctionLink factory
 	// below. This is due to a circular shared-libarary dependency.
 	//
-	// However, the evaluation method is different, too; ExOutLinks have
-	// to be evlauated in an eager fashion. This is because ExOutLinks
-	// wrap black-box scheme/python functions, and we don't know what
-	// those functions might do, and it is currently way too much to ask
-	// of the users to also implement lazy execution.  Its too subtle,
-	// too complex for ordinary users. Thus, we eagerly execute the args
-	// passed into the ExOutLink, and hand those values to the user.
+	// Even for the case of lazy execution, we still have to do eager
+	// execution of the arguments passed to the ExOutLink.  This is
+	// because the ExOutLink is a black box, and we cannot guess what
+	// it might do.  It would be great if the authors of ExOutLinks
+	// did the lazy execution themselves... but this is too much to
+	// ask for. So we always eager-evaluate those args.
 	if (EXECUTION_OUTPUT_LINK == t)
 	{
 		// XXX Force syntax checking; normally this would be done in the
 		// atomspace factory, but that is currently broken, so do it here.
 		ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(expr));
 		if (nullptr == eolp)
-			eolp = createExecutionOutputLink(lexpr->getOutgoingSet());
+			eolp = createExecutionOutputLink(expr->getOutgoingSet());
 
 		// At this time, the GSN or the DSN is always in position 0
 		// of the outgoing set, and the ListLink of arguments is always
@@ -459,9 +258,6 @@ Handle Instantiator::walk_lazy(const Handle& expr, int quotation_level)
 		// declaration; we punt on that.
 		Handle sn(eolp->get_schema());
 		Handle args(eolp->get_args());
-
-		// Perform substitution on the args, only.
-		args = walk_eager(args, quotation_level);
 
 		// If its a DSN, obtain the correct body for it.
 		if (DEFINED_SCHEMA_NODE == sn->getType())
@@ -476,14 +272,43 @@ Handle Instantiator::walk_lazy(const Handle& expr, int quotation_level)
 
 			// Two-step process. First, plug the arguments into the
 			// function; i.e. perform beta-reduction. Second, actually
-			// execute the result. We execute by just calling walk_eager
+			// execute the result. We execute by just calling walk_tree
 			// again.
 			Handle body(flp->get_body());
 			Variables vars(flp->get_variables());
 
-			const HandleSeq& oset(LinkCast(args)->getOutgoingSet());
+			// Perform substitution on the args, only.
+			if (_eager)
+			{
+				_avoid_discarding_quotes_level++;
+				args = walk_tree(args);
+				_avoid_discarding_quotes_level--;
+			}
+			else
+			{
+				args = beta_reduce(args, *_vmap);
+			}
+
+			const HandleSeq& oset(args->getOutgoingSet());
 			Handle beta_reduced(vars.substitute_nocheck(body, oset));
-			return walk_eager(beta_reduced, quotation_level);
+			return walk_tree(beta_reduced);
+		}
+
+		// Perform substitution on the args, only.
+		if (_eager)
+		{
+			// XXX I don't get it ... something is broken here, because
+			// the ExecutionOutputLink below *also* performs eager
+			// execution of its arguments. So the step below should not
+			// be neeeded -- yet, it is ... Funny thing is, it only
+			// breaks the BackwardChainerUTest ... why?
+			_avoid_discarding_quotes_level++;
+			args = walk_tree(args);
+			_avoid_discarding_quotes_level--;
+		}
+		else
+		{
+			args = beta_reduce(args, *_vmap);
 		}
 
 		ExecutionOutputLinkPtr geolp(createExecutionOutputLink(sn, args));
@@ -495,7 +320,7 @@ Handle Instantiator::walk_lazy(const Handle& expr, int quotation_level)
 	if (DELETE_LINK == t)
 	{
 		HandleSeq oset_results;
-		seq_lazy(oset_results, lexpr->getOutgoingSet(), quotation_level);
+		walk_sequence(oset_results, expr->getOutgoingSet());
 		for (const Handle& h: oset_results)
 		{
 			Type ht = h->getType();
@@ -510,10 +335,23 @@ Handle Instantiator::walk_lazy(const Handle& expr, int quotation_level)
 	// someday, when the reduct directory is nuked.
 	if (classserver().isA(t, FOLD_LINK))
 	{
-		FoldLinkPtr flp(FoldLinkCast(expr));
-		if (nullptr == flp)
-			flp = FoldLinkCast(FoldLink::factory(lexpr));
-		return flp->execute(_as);
+		// A FoldLink never has a variable declaration (at this time).
+		// The number of arguments is never fixed, its always variadic.
+		if (_eager)
+		{
+			// Perform substitution on all arguments before applying the
+			// function itself.
+			HandleSeq oset_results;
+			walk_sequence(oset_results, expr->getOutgoingSet());
+			FoldLinkPtr flp(FoldLink::factory(t, oset_results));
+			return flp->execute(_as);
+		}
+		else
+		{
+			Handle hexpr(beta_reduce(expr, *_vmap));
+			FoldLinkPtr flp(FoldLink::factory(hexpr));
+			return flp->execute(_as);
+		}
 	}
 
 	// Fire any other function links, not handled above.
@@ -521,27 +359,54 @@ Handle Instantiator::walk_lazy(const Handle& expr, int quotation_level)
 	{
 		// At this time, no FunctionLink that is outside of an
 		// ExecutionOutputLink ever has a variable declaration.
-		// Also, the number of arguments is not fixed, i.e. variadic.
-		FunctionLinkPtr flp(FunctionLinkCast(expr));
-		if (nullptr == flp)
-			flp = FunctionLinkCast(FunctionLink::factory(lexpr));
-		return flp->execute(_as);
+		// Also, the number of arguments is not fixed, its always variadic.
+		// Perform substitution on all arguments before applying the
+		// function itself.
+		if (_eager)
+		{
+			HandleSeq oset_results;
+			walk_sequence(oset_results, expr->getOutgoingSet());
+			FunctionLinkPtr flp(FunctionLink::factory(t, oset_results));
+			return flp->execute(_as);
+		}
+		else
+		{
+			FunctionLinkPtr flp(FunctionLink::factory(expr));
+			return flp->execute(_as);
+		}
 	}
 
 	// If there is a GetLink, we have to perform the get, and replace
 	// it with the results of the get. The get is implemented with the
 	// PatternLink::satisfy() method.
-	if (GET_LINK == t)
+	if (classserver().isA(t, GET_LINK))
 	{
 		return satisfying_set(_as, expr);
 	}
 
-mere_recursive_call:
+	// I beleive that all the VirtualLink's are capable of doing
+	// lazy evaluation on thier own. Therefore, we merely perform
+	// subsitution on them, and let some later evaluator force
+	// evaluation, if necesssary.
+	if (classserver().isA(t, VIRTUAL_LINK))
+	{
+		if (_vmap->empty()) return expr;
+		return beta_reduce(expr, *_vmap);
+	}
+
+	// If an atom is wrapped by the DontExecLink, then unwrap it,
+	// beta-reduce it, but don't execute it.
+	if (DONT_EXEC_LINK == t)
+	{
+		if (_vmap->empty()) return expr;
+		return beta_reduce(expr, *_vmap);
+	}
+
 	// None of the above. Create a duplicate link, but with an outgoing
 	// set where the variables have been substituted by their values.
+mere_recursive_call:
 	HandleSeq oset_results;
-	bool changed = seq_lazy(oset_results, lexpr->getOutgoingSet(),
-	                        quotation_level);
+	bool changed = walk_sequence(oset_results, expr->getOutgoingSet());
 	if (changed)
 	{
 		LinkPtr subl = createLink(t, oset_results, expr->getTruthValue());
@@ -571,14 +436,16 @@ Handle Instantiator::instantiate(const Handle& expr,
 		throw InvalidParamException(TRACE_INFO,
 			"Asked to ground a null expression");
 
+	_quotation_level = 0;
+	_avoid_discarding_quotes_level = 0;
+
 	_vmap = &vars;
 
 	// The returned handle is not yet in the atomspace. Add it now.
-	// We do this here, instead of in walk_eager(), because adding
+	// We do this here, instead of in walk_tree(), because adding
 	// atoms to the atomspace is an expensive process.  We can save
 	// some time by doing it just once, right here, in one big batch.
-	return _as->add_atom(walk_eager(expr));
-	// return _as->add_atom(walk_lazy(expr));
+	return _as->add_atom(walk_tree(expr));
 }
 
 /* ===================== END OF FILE ===================== */

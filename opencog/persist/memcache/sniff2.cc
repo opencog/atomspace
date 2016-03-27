@@ -155,7 +155,7 @@ int main ()
 #endif
 
 #if 0
-	AtomStorage *store = new AtomStorage("opencog", "linas", NULL);
+	AtomStorage *store = new ODBCAtomStorage("opencog", "linas", NULL);
 
 	AtomTable *table = new AtomTable();
 	store->load(*table);

@@ -59,10 +59,8 @@ class AtomSpaceBenchmark
     PythonEval* pyev;
 #endif
 
-    MT19937RandGen* rng;
-
-    std::default_random_engine randgen;
-    std::poisson_distribution<unsigned> *prg;
+    MT19937RandGen* randomGenerator;
+    std::poisson_distribution<unsigned> *poissonDistribution;
 
     Type randomType(Type t);
     Type numberOfTypes;
@@ -159,7 +157,9 @@ public:
     timepair_t bm_rmAtom();
 
     timepair_t bm_push_back();
+    timepair_t bm_push_back_reserve();
     timepair_t bm_emplace_back();
+    timepair_t bm_emplace_back_reserve();
     timepair_t bm_reserve();
 };
 

@@ -71,12 +71,8 @@ void EvaluationUTest::tearDown(void)
 void EvaluationUTest::setUp(void)
 {
 	as->clear();
-	config().set("SCM_PRELOAD",
-		"opencog/atoms/base/core_types.scm, "
-		"opencog/scm/utilities.scm, "
-		"opencog/scm/opencog/query.scm");
-
-	load_scm_files_from_config(*as);
+	eval->eval("(use-modules (opencog exec))");
+	eval->eval("(use-modules (opencog query))");
 }
 
 #define getarity(hand) LinkCast(hand)->getArity()
@@ -91,27 +87,27 @@ void EvaluationUTest::test_eval(void)
 	config().set("SCM_PRELOAD", "tests/query/evaluation.scm");
 	load_scm_files_from_config(*as);
 
-	Handle five = eval->eval_h("(cog-bind (five-arcs))");
+	Handle five = eval->eval_h("(cog-execute! (five-arcs))");
 	printf ("five: found:\n%s\n", five->toShortString().c_str());
 	TS_ASSERT_EQUALS(5, getarity(five));
 
-	Handle one = eval->eval_h("(cog-bind (one-arc-one))");
+	Handle one = eval->eval_h("(cog-execute! (one-arc-one))");
 	printf ("one: found:\n%s\n", one->toShortString().c_str());
 	TS_ASSERT_EQUALS(1, getarity(one));
 
-	Handle onet = eval->eval_h("(cog-bind (one-arc-three))");
+	Handle onet = eval->eval_h("(cog-execute! (one-arc-three))");
 	printf ("onet: found:\n%s\n", onet->toShortString().c_str());
 	TS_ASSERT_EQUALS(1, getarity(onet));
 
-	Handle zero = eval->eval_h("(cog-bind (zero-arcs))");
+	Handle zero = eval->eval_h("(cog-execute! (zero-arcs))");
 	printf ("zero: found:\n%s\n", zero->toShortString().c_str());
 	TS_ASSERT_EQUALS(0, getarity(zero));
 
-	Handle four = eval->eval_h("(cog-bind (four-arcs))");
+	Handle four = eval->eval_h("(cog-execute! (four-arcs))");
 	printf ("four: found:\n%s\n", four->toShortString().c_str());
 	TS_ASSERT_EQUALS(4, getarity(four));
 
-	Handle two = eval->eval_h("(cog-bind (two-arcs))");
+	Handle two = eval->eval_h("(cog-execute! (two-arcs))");
 	printf ("two: found:\n%s\n", two->toShortString().c_str());
 	TS_ASSERT_EQUALS(2, getarity(two));
 
@@ -128,19 +124,19 @@ void EvaluationUTest::test_logic(void)
 	config().set("SCM_PRELOAD", "tests/query/evaluation.scm");
 	load_scm_files_from_config(*as);
 
-	Handle four = eval->eval_h("(cog-bind (four-not))");
+	Handle four = eval->eval_h("(cog-execute! (four-not))");
 	printf ("four-not: found:\n%s\n", four->toShortString().c_str());
 	TS_ASSERT_EQUALS(4, getarity(four));
 
-	Handle two = eval->eval_h("(cog-bind (two-or))");
+	Handle two = eval->eval_h("(cog-execute! (two-or))");
 	printf ("two-or: found:\n%s\n", two->toShortString().c_str());
 	TS_ASSERT_EQUALS(2, getarity(two));
 
-	Handle three = eval->eval_h("(cog-bind (three-nor))");
+	Handle three = eval->eval_h("(cog-execute! (three-nor))");
 	printf ("three-nor: found:\n%s\n", three->toShortString().c_str());
 	TS_ASSERT_EQUALS(3, getarity(three));
 
-	Handle fancy = eval->eval_h("(cog-bind (two-fancy))");
+	Handle fancy = eval->eval_h("(cog-execute! (two-fancy))");
 	printf ("two-fancy: found:\n%s\n", fancy->toShortString().c_str());
 	TS_ASSERT_EQUALS(2, getarity(fancy));
 
@@ -174,7 +170,7 @@ void EvaluationUTest::test_varval(void)
 
 	TS_ASSERT_EQUALS(expected, do_things_results);
 
-	Handle ndostuff = eval->eval_h("(cog-bind (do-nthings))");
+	Handle ndostuff = eval->eval_h("(cog-execute! (do-nthings))");
 	printf ("do-nthings: \n%s\n", ndostuff->toShortString().c_str());
 
 	// Of the two possibilities, we only expect one to pass.
@@ -186,7 +182,7 @@ void EvaluationUTest::test_varval(void)
 
 	TS_ASSERT_EQUALS(rejected, ndostuff);
 
-	Handle nndostuff = eval->eval_h("(cog-bind (do-nnthings))");
+	Handle nndostuff = eval->eval_h("(cog-execute! (do-nnthings))");
 	printf ("do-nnthings: \n%s\n", nndostuff->toShortString().c_str());
 
 	// Of the two possibilities, we only expect one to pass.

@@ -38,13 +38,49 @@ using namespace opencog;
 /* ======================================================== */
 
 InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
-	_classserver(classserver()),
-	_variables(NULL),
-	_pattern(NULL),
-	_dynamic(NULL),
-	_as(as)
+	_classserver(classserver())
 {
+#ifdef CACHED_IMPLICATOR
+	InitiateSearchCB::clear();
+	InitiateSearchCB::ready(as);
+#else
+	_variables = NULL;
+	_pattern = NULL;
+	_dynamic = NULL;
+	_pl = NULL;
+
+	_root = Handle::UNDEFINED;
+	_starter_term = Handle::UNDEFINED;
+
+	_curr_clause = 0;
+	_choices.clear();
+ 	_search_fail = false;
+	_as = as;
+#endif
 }
+
+#ifdef CACHED_IMPLICATOR
+void InitiateSearchCB::ready(AtomSpace* as)
+{
+	_as = as;
+}
+
+void InitiateSearchCB::clear()
+{
+	_variables = NULL;
+	_pattern = NULL;
+	_dynamic = NULL;
+	_pl = NULL;
+
+	_root = Handle::UNDEFINED;
+	_starter_term = Handle::UNDEFINED;
+
+	_curr_clause = 0;
+	_choices.clear();
+ 	_search_fail = false;
+	_as = NULL;
+}
+#endif
 
 void InitiateSearchCB::set_pattern(const Variables& vars,
                                    const Pattern& pat)
@@ -617,7 +653,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	bool all_clauses_are_evaluatable = true;
 	for (const Handle& cl : clauses)
 	{
-		if (0 < _pattern->evaluatable_terms.count(cl)) continue;
+		if (0 < _pattern->evaluatable_holders.count(cl)) continue;
 		all_clauses_are_evaluatable = false;
 		break;
 	}
@@ -633,7 +669,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	{
 		LAZY_LOG_FINE << "Examine variable " << var->toShortString();
 
-#ifdef _IMPLMENT_ME_LATER
+#ifdef _IMPLEMENT_ME_LATER
 		// XXX TODO FIXME --- if there is a deep type in the mix, that
 		// will offer a far-superior place to start the search.
 		// Unfortunately, implementing this will require a bit more work,
@@ -666,7 +702,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 				// they are all evaluatable, in which case we pick a clause
 				// that has a variable with the narrowest type-membership.
 				if (not all_clauses_are_evaluatable and
-				    0 < _pattern->evaluatable_terms.count(cl)) continue;
+				    0 < _pattern->evaluatable_holders.count(cl)) continue;
 
 				if (cl == var)
 				{
@@ -699,7 +735,24 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	// There were no type restrictions!
 	if (nullptr == _root)
 	{
-		logger().info("Warning: There were no type restrictions! That must be wrong!");
+
+#if THROW_HARD_ERROR
+		throw SyntaxException(TRACE_INFO,
+			"Error: There were no type restrictions! That's infinite-recursive!");
+#else
+		if (not _variables->_deep_typemap.empty())
+		{
+			logger().warn("Warning: Full deep-type support not implemented!");
+		}
+		else
+		{
+			logger().warn("Warning: No type restrictions! Your code has a bug in it!");
+			for (const Handle& var: _variables->varset)
+				logger().warn("Offending variable=%s\n", var->toString().c_str());
+			for (const Handle& cl : clauses)
+				logger().warn("Offending clauses=%s\n", cl->toString().c_str());
+		}
+
 		if (0 == clauses.size())
 		{
 			// This is kind-of weird, but it can happen if all clauses
@@ -708,6 +761,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 			return false;
 		}
 		_root = _starter_term = clauses[0];
+#endif
 	}
 
 	HandleSeq handle_set;

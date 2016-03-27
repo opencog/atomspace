@@ -92,6 +92,11 @@ protected:
 	virtual bool variable_search(PatternMatchEngine *);
 	virtual bool no_search(PatternMatchEngine *);
 
+#ifdef CACHED_IMPLICATOR
+	virtual void ready(AtomSpace*);
+	virtual void clear();
+#endif
+
 	AtomSpace *_as;
 };
 

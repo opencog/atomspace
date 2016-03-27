@@ -20,8 +20,6 @@
 (use-modules (opencog))
 (use-modules (opencog query))
 
-; (load-from-path "utilities.scm")
-
 ; Clause to match during query
 (define query 
 	(EvaluationLink

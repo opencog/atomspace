@@ -63,6 +63,7 @@ class TLB
     friend class Atom;
     friend class AtomSpaceBenchmark;
     friend class AtomStorage;
+    friend class RandomAtomGenerator;
     friend class AtomTable;
     friend class ::TLBUTest;
     friend class ::BasicSaveUTest;

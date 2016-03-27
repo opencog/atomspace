@@ -321,6 +321,19 @@ int SchemeSmob::verify_int (SCM sint, const char *subrname,
 	return scm_to_int(sint);
 }
 
+/**
+ * Check that the argument is an int, else throw errors.
+ * Use C++ casting to convert the int to size_t. Return the size_t.
+ */
+size_t SchemeSmob::verify_size (SCM sint, const char *subrname,
+                                int pos, const char * msg)
+{
+	if (scm_is_false(scm_integer_p(sint)))
+		scm_wrong_type_arg_msg(subrname, pos, sint, msg);
+
+	return (size_t) scm_to_int(sint);
+}
+
 /* ============================================================== */
 /**
  * Convert argument into a list of floats.
@@ -464,7 +477,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	}
 	catch (const std::exception& ex)
 	{
-		throw_exception(ex.what(), "cog-new-node");
+		throw_exception(ex, "cog-new-node");
 	}
 
 	scm_remember_upto_here_1(kv_pairs);
@@ -595,7 +608,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	}
 	catch (const std::exception& ex)
 	{
-		throw_exception(ex.what(), "cog-new-link");
+		throw_exception(ex, "cog-new-link");
 	}
 	scm_remember_upto_here_1(satom_list);
 	return handle_to_scm (h);

@@ -61,10 +61,9 @@ namespace opencog {
  *
  * @return             A ListLink containing the result of FC inference.
  */
-Handle InferenceSCM::do_forward_chaining(
-                           Handle hsource,
-                           Handle rbs,
-                           Handle hfocus_set)
+Handle InferenceSCM::do_forward_chaining(Handle hsource,
+                                         Handle rbs,
+                                         Handle hfocus_set)
 {
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fc");
     HandleSeq focus_set = {};
@@ -78,15 +77,14 @@ Handle InferenceSCM::do_forward_chaining(
 
     ForwardChainer fc(*as, rbs, hsource, focus_set);
     fc.do_chain();
-    HandleSeq result = fc.get_chaining_result();
+    UnorderedHandleSet result = fc.get_chaining_result();
 
-    return as->add_link(LIST_LINK, result);
+    return as->add_link(SET_LINK, HandleSeq(result.begin(), result.end()));
 }
 
-Handle InferenceSCM::do_backward_chaining(
-                            Handle h,
-                            Handle rbs,
-                            Handle focus_link)
+Handle InferenceSCM::do_backward_chaining(Handle h,
+                                          Handle rbs,
+                                          Handle focus_link)
 {
     if (Handle::UNDEFINED == rbs)
         throw RuntimeException(TRACE_INFO,

@@ -42,6 +42,7 @@ protected:
 	void do_logger_set_filename(const std::string& filename);
 	const std::string& do_logger_get_filename(void);
 	void do_logger_set_stdout(bool);
+	void do_logger_set_sync(bool);
 	void do_logger_error(const std::string& msg);
 	void do_logger_warn(const std::string& msg);
 	void do_logger_info(const std::string& msg);

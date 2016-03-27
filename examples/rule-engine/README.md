@@ -35,22 +35,22 @@ it is false, TV.strength >= 0.5 means it is true.
 
 For instance
 ```
-(ConceptNode "A" (stv 1 0.9))
+(PredicateNode "A" (stv 1 0.9))
 ```
 means "A" is true.
 ```
-(ConceptNode "B" (stv 0 0))
+(PredicateNode "B" (stv 0 0))
 ```
 means "B" is unknown
 
 Given the knowledge
 ```
-(define A (ConceptNode "A" (stv 1 0.9)))
-(define B (ConceptNode "B" (stv 0 0)))
+(define A (PredicateNode "A" (stv 1 0.9)))
+(define B (PredicateNode "B" (stv 0 0)))
 (define AB (ImplicationLink A B (stv 1 0.9)))
 ```
 The inference system should be able to produce
 ```
-(ConceptNode "B" (stv 1 1))
+(PredicateNode "B" (stv 1 1))
 ```
 by application of the crisp modus ponens rule.

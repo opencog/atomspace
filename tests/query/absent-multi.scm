@@ -10,8 +10,6 @@
 (use-modules (opencog query))
 (use-modules (opencog exec))
 
-; (load-from-path "utilities.scm")
-
 ; Clause to match during query - are Agents Mulder and Scully around?
 (define mulder
 	(EvaluationLink
