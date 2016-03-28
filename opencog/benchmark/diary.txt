@@ -941,11 +941,11 @@ Observations:
   half since March.  Why?  Well, comparing the March No-op results to
   to these suggests that these were near the limit of measurability (as
   currently done, which is poorly). These functions could-be/were rate
-  limited by the speed of dererencing AtomPtr.  Why this changed is ...
+  limited by the speed of derefrencing AtomPtr.  Why this changed is ...
   unknown to me.  A git bisect would be useful. XXXX WTF. If measured
   one at a time, i.e. -m getIncomingSet, instead of in bulk, -A then
   the results are on parity. So .. is something wrong with the -A flag?
-  What could possibly be different? The remesrued results below.
+  What could possibly be different? The remeasured results below.
 
 * The addNode and removeAtom operations are unchanged by the de-uuid
   process.  That addLink got slower is dissappointing, but may be due
@@ -955,7 +955,7 @@ Observations:
 
 * That all three addNode addLink and removeAtom are in the same ballpark
   indicates that the primary bottleneck here is the update of the
-  atomspace indexes (eitehr add or remove in these).
+  atomspace indexes (either add or remove in these).
 
 
 Below: same as above, except remeasured with -m testName -n 2000000
@@ -1200,7 +1200,9 @@ To summarize: this test is wonky, crazy; the numbers are bizzarely
 inconsistent with expectations.
 
 ======================================================================
-7 March 2015
+
+7 March 2016
+------------
 
 How fast is std::vector<Handle>, really?
 
@@ -1214,8 +1216,8 @@ worth the effort. This caused me to look at the existing atomspace_bm code
 which did this analysis to see how much slower emplace_back was. So I
 added calls to vector.reserve() to see if this would speed things up.
 
-I created two new benchmark tests with calls to call vector.reserve(N) before 
-push_back and emplace_back.
+I created two new benchmark tests with calls to call vector.reserve(N)
+before push_back and emplace_back.
 
 The previous attempt to reserve was sizing the vector using the constructor.
 This still caused push_back and emplace_back to allocate each time. For example,
@@ -1263,9 +1265,8 @@ reserve: create vector of fixed count size, then assign directly.
   example:
     HandleSeq oset(2); oset[0] = ha; oset[1] = hb;
 
-So it appears that the big issue is avoiding the resizing of the vector which
-involves both memory allocations and copies into the new memory. The differences
-between push_back_reserve, emplace_back_reserve, and reserve now appear to be 
-smaller than the jitter noise of the benchmark timings.
-
-
+So it appears that the big issue is avoiding the resizing of the vector
+which involves both memory allocations and copies into the new memory.
+The differences between push_back_reserve, emplace_back_reserve, and
+reserve now appear to be smaller than the jitter noise of the benchmark
+timings.
