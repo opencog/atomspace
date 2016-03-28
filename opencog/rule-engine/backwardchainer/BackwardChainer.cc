@@ -835,11 +835,9 @@ static void get_all_unique_atoms(const Handle& h, UnorderedHandleSet& atom_set)
 {
     atom_set.insert(h);
 
-/*
     if (h->isLink())
         for (const Handle& o : h->getOutgoingSet())
             get_all_unique_atoms(o, atom_set);
-*/
 }
 
 /**
