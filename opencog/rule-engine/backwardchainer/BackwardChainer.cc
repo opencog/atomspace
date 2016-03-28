@@ -35,7 +35,7 @@
 
 using namespace opencog;
 
-BackwardChainer::BackwardChainer(AtomSpace& as, Handle rbs)
+BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs)
 	: _as(as), _configReader(as, rbs),
 	  // create a garbage superspace with _as as parent, so codes
 	  // acting on _garbage_superspace will see stuff in _as, but
@@ -49,7 +49,8 @@ BackwardChainer::BackwardChainer(AtomSpace& as, Handle rbs)
  * @param init_target   Handle of the target
  * @param focus_link    The SetLink containing the optional focus set.
  */
-void BackwardChainer::set_target(Handle init_target, Handle focus_link)
+void BackwardChainer::set_target(const Handle& init_target,
+                                 const Handle& focus_link)
 {
 	_init_target = init_target;
 
@@ -569,7 +570,7 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
  */
 HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
                                          const VarMap& implicand_mapping,
-                                         const std::set<Handle> additional_free_varset,
+                                         const std::set<Handle>& additional_free_varset,
                                          Handle& hrule_implicant_reverse_grounded,
                                          std::vector<VarMap>& premises_vmap_list)
 {
@@ -584,8 +585,9 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
 	LAZY_BC_LOG_DEBUG << "Reverse grounded as:" << std::endl
 	                  << hrule_implicant_reverse_grounded->toShortString();
 
-	// Find all matching premises matching the implicant, where premises_vmap_list
-	// will be the mapping from free variables in himplicant to stuff in a premise
+	// Find all matching premises matching the implicant, where
+	// premises_vmap_list will be the mapping from free variables in
+	// himplicant to stuff in a premise
 	HandleSeq possible_premises =
 		match_knowledge_base(hrule_implicant_reverse_grounded,
 		                     gen_sub_varlist(hrule_implicant_reverse_grounded,
@@ -695,9 +697,10 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 	// XXX TODO when all VariableNode are unique, we will be able to tell what
 	// type a random VariableNode is in the AtomSpace by looking at its
 	// antecedent; so the type should be included in the future
-	HandleSeq temp_results = match_knowledge_base(premises, Handle::UNDEFINED, temp_vmap_list);
+	HandleSeq temp_results = match_knowledge_base(premises, Handle::UNDEFINED,
+	                                              temp_vmap_list);
 
-	// chase the variables so that if a variable A were mapped to another
+	// Chase the variables so that if a variable A were mapped to another
 	// variable B in premise_vmap, and after pattern matching, B now map
 	// to some solution, change A to map to the same solution
 	for (unsigned int i = 0; i < temp_results.size(); ++i)
@@ -747,11 +750,11 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
  */
 bool BackwardChainer::unify(const Handle& hsource,
                             const Handle& hmatch,
-                            Handle hsource_vardecl,
-                            Handle hmatch_vardecl,
+                            const Handle& hsource_vardecl,
+                            const Handle& hmatch_vardecl,
                             VarMap& result)
 {
-	// lazy way of restricting PM to be between two atoms
+	// Lazy way of restricting PM to be between two atoms
 	AtomSpace temp_space;
 
 	Handle temp_hsource = temp_space.add_atom(hsource);
@@ -772,7 +775,8 @@ bool BackwardChainer::unify(const Handle& hsource,
 	}
 
 	PatternLinkPtr sl(createPatternLink(temp_hsource_vardecl, temp_hsource));
-	UnifyPMCB pmcb(&temp_space, VariableListCast(temp_hsource_vardecl), VariableListCast(temp_hmatch_vardecl));
+	UnifyPMCB pmcb(&temp_space, VariableListCast(temp_hsource_vardecl),
+	               VariableListCast(temp_hmatch_vardecl));
 
 	sl->satisfy(pmcb);
 
@@ -785,7 +789,8 @@ bool BackwardChainer::unify(const Handle& hsource,
 
 	VarMap good_map;
 
-	// go thru each solution, and get the first one that map the whole temp_hmatch
+	// Go thru each solution, and get the first one that map the whole
+	// temp_hmatch
 	//
 	// XXX TODO branch on the various groundings?  how to properly handle
 	// multiple possible unify option????
@@ -802,12 +807,12 @@ bool BackwardChainer::unify(const Handle& hsource,
 		}
 	}
 
-	// if none of the mapping map the whole temp_hmatch (possible in the case
+	// If none of the mapping map the whole temp_hmatch (possible in the case
 	// of sub-atom unification that map a typed variable to another variable)
-	if (good_map.size() == 0)
+	if (good_map.empty())
 		return false;
 
-	// change the mapping from temp_atomspace to current atomspace
+	// Change the mapping from temp_atomspace to current atomspace
 	for (auto& p : good_map)
 	{
 		Handle var = p.first;
