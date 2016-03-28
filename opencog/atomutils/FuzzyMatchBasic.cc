@@ -39,15 +39,17 @@ static void get_all_atoms(const Handle& h, HandleSeq& nlist, HandleSeq& alist)
 {
 	alist.emplace_back(h);
 
-	LinkPtr lll(LinkCast(h));
-	if (nullptr == lll)
+	if (h->isNode())
 	{
 		nlist.emplace_back(h);
 		return;
 	}
 
-	for (const Handle& o : lll->getOutgoingSet())
-		get_all_atoms(o, nlist, alist);
+	if (h->isLink())
+	{
+		for (const Handle& o : h->getOutgoingSet())
+			get_all_atoms(o, nlist, alist);
+	}
 }
 
 /**

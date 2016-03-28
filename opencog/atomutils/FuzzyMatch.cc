@@ -74,9 +74,8 @@ void FuzzyMatch::find_starters(const Handle& hp)
 
 	// Proposed start was not accepted. Look farther down, at it's
 	// sub-trees.
-	LinkPtr lp(LinkCast(hp));
-	if (lp) {
-		for (const Handle& h : lp->getOutgoingSet()) {
+	if (hp->isLink()) {
+		for (const Handle& h : hp->getOutgoingSet()) {
 			find_starters(h);
 		}
 	}

@@ -58,15 +58,12 @@ private:
 		if (vmap.end() != it )
 			return it->second;
 
-		LinkPtr lexpr(LinkCast(expr));
-
 		// If not a link, and not mapped, just return it.
-		if (not lexpr)
-			return Handle(expr);
+		if (not expr->isLink()) return expr;
 
 		HandleSeq oset_results;
 		bool changed = false;
-		for (const Handle& h : lexpr->getOutgoingSet())
+		for (const Handle& h : expr->getOutgoingSet())
 		{
 			Handle hg = walk_tree(vmap, h);
 			if (hg != h) changed = true;

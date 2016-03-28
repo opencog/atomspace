@@ -88,12 +88,11 @@ FindAtoms::Loco FindAtoms::find_rec(const Handle& h, int quotation_level)
 		if (classserver().isA(t, stopper)) return NOPE;
 	}
 
-	LinkPtr l(LinkCast(h));
-	if (l)
+	if (h->isLink())
 	{
 		bool held = false;
 		bool imm = false;
-		for (const Handle& oh : l->getOutgoingSet())
+		for (const Handle& oh : h->getOutgoingSet())
 		{
 			Loco where = find_rec(oh, quotation_level);
 			if (NOPE != where) held = true;
@@ -112,11 +111,10 @@ FindAtoms::Loco FindAtoms::find_rec(const Handle& h, int quotation_level)
 bool is_atom_in_tree(const Handle& tree, const Handle& atom)
 {
 	if (tree == atom) return true;
-	LinkPtr ltree(LinkCast(tree));
-	if (NULL == ltree) return false;
+	if (not tree->isLink()) return false;
 
 	// Recurse downwards...
-	for (const Handle h: ltree->getOutgoingSet()) {
+	for (const Handle& h: tree->getOutgoingSet()) {
 		if (is_atom_in_tree(h, atom)) return true;
 	}
 	return false;
@@ -138,14 +136,13 @@ int min_quotation_level(const Handle& tree,
 {
 	// Base case
 	if (tree == atom) return level_from_root;
-	LinkPtr ltree(LinkCast(tree));
-	if (nullptr == ltree) return std::numeric_limits<int>::max();
+	if (not tree->isLink()) return std::numeric_limits<int>::max();
 
 	// Recursive case
 	if (tree->getType() == QUOTE_LINK) level_from_root++;
 	else if (tree->getType() == UNQUOTE_LINK) level_from_root--;
 	int result = std::numeric_limits<int>::max();
-	for (const Handle& h : ltree->getOutgoingSet())
+	for (const Handle& h : tree->getOutgoingSet())
 		result = std::min(result, min_quotation_level(h, atom, level_from_root));
 	return result;
 }
@@ -156,14 +153,13 @@ int max_quotation_level(const Handle& tree,
 {
 	// Base case
 	if (tree == atom) return level_from_root;
-	LinkPtr ltree(LinkCast(tree));
-	if (nullptr == ltree) return std::numeric_limits<int>::min();
+	if (not tree->isLink()) return std::numeric_limits<int>::min();
 
 	// Recursive case
 	if (tree->getType() == QUOTE_LINK) level_from_root++;
 	else if (tree->getType() == UNQUOTE_LINK) level_from_root--;
 	int result = std::numeric_limits<int>::min();
-	for (const Handle& h : ltree->getOutgoingSet())
+	for (const Handle& h : tree->getOutgoingSet())
 		result = std::max(result, max_quotation_level(h, atom, level_from_root));
 	return result;
 }
@@ -172,8 +168,7 @@ bool is_unscoped_in_tree(const Handle& tree, const Handle& atom)
 {
 	// Base cases
 	if (tree == atom) return true;
-	LinkPtr ltree(LinkCast(tree));
-	if (nullptr == ltree) return false;
+	if (not tree->isLink()) return false;
 	ScopeLinkPtr stree(ScopeLinkCast(tree));
 	if (nullptr != stree) {
 		const std::set<Handle>& varset = stree->get_variables().varset;
@@ -182,7 +177,7 @@ bool is_unscoped_in_tree(const Handle& tree, const Handle& atom)
 	}
 
 	// Recursive case
-	for (const Handle& h : ltree->getOutgoingSet())
+	for (const Handle& h : tree->getOutgoingSet())
 		if (is_unscoped_in_tree(h, atom))
 			return true;
 	return false;
@@ -260,10 +255,9 @@ bool contains_atomtype(const Handle& clause, Type atom_type)
 	if (QUOTE_LINK == clause_type) return false;
 	// if (classserver().isA(clause_type, SCOPE_LINK)) return false;
 
-	LinkPtr lc(LinkCast(clause));
-	if (not lc) return false;
+	if (not clause->isLink()) return false;
 
-	for (const Handle& subclause: lc->getOutgoingSet())
+	for (const Handle& subclause: clause->getOutgoingSet())
 	{
 		if (contains_atomtype(subclause, atom_type)) return true;
 	}
@@ -302,10 +296,9 @@ HandleSeq get_free_vars_in_tree(const Handle& tree)
 		    //      or h->getArity() == 3))
 			return;
 
-		LinkPtr l(LinkCast(h));
-		if (l)
+		if (h->isLink())
 		{
-			for (const Handle& oh : l->getOutgoingSet())
+			for (const Handle& oh : h->getOutgoingSet())
 				find_rec(oh);
 		}
 	};
