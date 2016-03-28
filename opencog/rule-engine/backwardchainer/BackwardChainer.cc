@@ -813,7 +813,7 @@ bool BackwardChainer::unify(const Handle& hsource,
 		return false;
 
 	// Change the mapping from temp_atomspace to current atomspace
-	for (auto& p : good_map)
+	for (const auto& p : good_map)
 	{
 		Handle var = p.first;
 		Handle grn = p.second;

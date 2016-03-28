@@ -76,7 +76,7 @@ bool UnifyPMCB::grounding(const std::map<Handle, Handle> &var_soln,
 	std::map<Handle, Handle> true_var_soln;
 
 	// get rid of non-var mapping
-	for (auto& p : var_soln)
+	for (const auto& p : var_soln)
 	{
 		if (_int_vars->get_variables().varset.count(p.first) == 1)
 		{
