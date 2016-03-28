@@ -60,7 +60,7 @@ void BackwardChainer::set_target(const Handle& init_target,
 	_targets_set.emplace(_init_target, gen_varlist(_init_target));
 
 	// get the stuff under the SetLink
-	if (focus_link->isLink())
+	if (focus_link and focus_link->isLink())
 	{
 		HandleSeq focus_set = focus_link->getOutgoingSet();
 		for (const auto& h : focus_set)
@@ -835,8 +835,11 @@ static void get_all_unique_atoms(const Handle& h, UnorderedHandleSet& atom_set)
 {
     atom_set.insert(h);
 
-    for (const Handle& o : h->getOutgoingSet())
-        get_all_unique_atoms(o, atom_set);
+/*
+    if (h->isLink())
+        for (const Handle& o : h->getOutgoingSet())
+            get_all_unique_atoms(o, atom_set);
+*/
 }
 
 /**
