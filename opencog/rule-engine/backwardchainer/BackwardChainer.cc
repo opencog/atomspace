@@ -762,11 +762,11 @@ bool BackwardChainer::unify(const Handle& hsource,
 	Handle temp_hsource_vardecl = temp_space.add_atom(hsource_vardecl);
 	Handle temp_hmatch_vardecl = temp_space.add_atom(hmatch_vardecl);
 
-	FindAtoms fv(VARIABLE_NODE);
-	fv.search_set(hsource);
-
 	if (temp_hsource_vardecl == Handle::UNDEFINED)
 	{
+		FindAtoms fv(VARIABLE_NODE);
+		fv.search_set(hsource);
+
 		HandleSeq vars;
 		for (const Handle& h : fv.varset)
 			vars.push_back(h);
