@@ -46,17 +46,18 @@ Handle add_prefixed_node(AtomSpace& as, Type t, const std::string& prefix)
     return as.add_node(t, name);
 }
 
-bool remove_hypergraph(AtomSpace& as, Handle h)
+/// Return true if all of h was removed.
+bool remove_hypergraph(AtomSpace& as, const Handle& h)
 {
-    LinkPtr link(LinkCast(h));
-
     // Recursive case
-    if (link) {
-        HandleSeq oset = link->getOutgoingSet();
+    if (h->isLink()) {
+        HandleSeq oset = h->getOutgoingSet();
         bool success = as.remove_atom(h);
-        if (success)
+        if (success) {
+            // Return true only if entire subgraph was removed.
             for (const Handle& oh : oset)
-                success &= remove_hypergraph(as, oh);
+                if (not remove_hypergraph(as, oh)) success = false;
+        }
         return success;
     }
     // Base case
