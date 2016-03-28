@@ -227,10 +227,10 @@ typedef std::set<Handle> OrderedHandleSet;
 typedef std::unordered_set<Handle, handle_hash> UnorderedHandleSet;
 
 //! an ordered map from Handle to Handle set
-typedef std::map<Handle, UnorderedHandleSet> VarMultimap;
+typedef std::map<Handle, UnorderedHandleSet> HandleMultimap;
 
 //! an ordered map from Handle to Handle
-typedef std::map<Handle, Handle> VarMap;
+typedef std::map<Handle, Handle> HandleMap;
 
 //! a handle iterator
 typedef std::iterator<std::forward_iterator_tag, Handle> HandleIterator;
@@ -306,8 +306,8 @@ ostream& operator<<(ostream& out, const opencog::UnorderedHandleSet& hs);
 string hs_to_string(const opencog::HandleSeq& hs);
 string ohs_to_string(const opencog::OrderedHandleSet& ohs);
 string uhs_to_string(const opencog::UnorderedHandleSet& uhs);
-string varmap_to_string(const opencog::VarMap& vm);
-string varmultimap_to_string(const opencog::VarMultimap& vmm);
+string varmap_to_string(const opencog::HandleMap& vm);
+string varmultimap_to_string(const opencog::HandleMultimap& vmm);
 string atomtype_to_string(opencog::Type type);
 
 #ifdef THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472

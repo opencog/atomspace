@@ -149,7 +149,7 @@ string uhs_to_string(const UnorderedHandleSet& uhs)
 {
 	stringstream ss; ss << uhs; return ss.str();
 }
-std::string varmap_to_string(const VarMap& varmap)
+std::string varmap_to_string(const HandleMap& varmap)
 {
 	stringstream ss;
 	int i = 0;
@@ -160,7 +160,7 @@ std::string varmap_to_string(const VarMap& varmap)
 	}
 	return ss.str();
 }
-std::string varmultimap_to_string(const VarMultimap& varmultimap)
+std::string varmultimap_to_string(const HandleMultimap& varmultimap)
 {
 	stringstream ss;
 	int i = 0;
