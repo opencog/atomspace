@@ -36,15 +36,11 @@ void IncomingIndex::resize()
 
 void IncomingIndex::insertAtom(const AtomPtr& a)
 {
-	LinkPtr l(LinkCast(a));
-	if (NULL == l) return;
+	if (not a->isLink()) return;
 
 	Handle hin = a->getHandle();
-	const std::vector<Handle>& oset = l->getOutgoingSet();
-	for (std::vector<Handle>::const_iterator it = oset.begin(); it != oset.end(); ++it)
+	for (const Handle& h : a->getOutgoingSet())
 	{
-		Handle h = *it;
-		
 		const UnorderedHandleSet& oldset = idx.get(h);
 
 		// Check to see if h is already listed; it should not be...
@@ -69,15 +65,11 @@ void IncomingIndex::insertAtom(const AtomPtr& a)
 
 void IncomingIndex::removeAtom(const AtomPtr& a)
 {
-	LinkPtr l(LinkCast(a));
-	if (NULL == l) return;
+	if (not a->isLink()) return;
 
 	Handle hin = a->getHandle();
-	const std::vector<Handle>& oset = l->getOutgoingSet();
-	for (std::vector<Handle>::const_iterator it = oset.begin(); it != oset.end(); ++it)
+	for (const Handle& h: a->getOutgoingSet())
 	{
-		Handle h = *it;
-		
 		const UnorderedHandleSet& oldset = idx.get(h);
 		UnorderedHandleSet inset = oldset;
 

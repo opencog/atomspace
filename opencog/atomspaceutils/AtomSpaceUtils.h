@@ -57,7 +57,7 @@ Handle add_prefixed_node(AtomSpace&, Type, const std::string& prefix = "");
  *
  * will remove the InheritanceLink, ConceptNode "A" and ConceptNode "B".
  */
-bool remove_hypergraph(AtomSpace& as, Handle h);
+bool remove_hypergraph(AtomSpace& as, const Handle& h);
 
 /** @}*/
 }

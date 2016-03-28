@@ -53,8 +53,7 @@ bool opencog::value_is_type(const Handle& spec, const Handle& val)
 	// If it's a signature, unpack it now.
 	if (SIGNATURE_LINK == dpt)
 	{
-		LinkPtr dptr(LinkCast(deep));
-		deep = dptr->getOutgoingAtom(0);
+		deep = deep->getOutgoingAtom(0);
 		dpt = deep->getType();
 	}
 
@@ -65,8 +64,7 @@ bool opencog::value_is_type(const Handle& spec, const Handle& val)
 	}
 	else if (TYPE_CHOICE == dpt)
 	{
-		LinkPtr dptr(LinkCast(deep));
-		for (const Handle& choice : dptr->getOutgoingSet())
+		for (const Handle& choice : deep->getOutgoingSet())
 		{
 			if (value_is_type(choice, val)) return true;
 		}
@@ -80,16 +78,14 @@ bool opencog::value_is_type(const Handle& spec, const Handle& val)
 
 	// If it is a node, not a link, then it is a type-constant,
 	// and thus must match perfectly.
-	LinkPtr dptr(LinkCast(deep));
-	if (nullptr == dptr)
+	if (deep->isNode())
 		return (deep == val);
 
 	// If a link, then both must be same link type.
 	if (valtype != dpt) return false;
 
-	LinkPtr vptr(LinkCast(val));
-	const HandleSeq& vlo = vptr->getOutgoingSet();
-	const HandleSeq& dpo = dptr->getOutgoingSet();
+	const HandleSeq& vlo = val->getOutgoingSet();
+	const HandleSeq& dpo = deep->getOutgoingSet();
 	size_t sz = dpo.size();
 
 	// Both must be the same size...
@@ -135,8 +131,7 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	// Unpack the arrow; right must match left's input.
 	if (ARROW_LINK == ltype)
 	{
-		LinkPtr larrow(LinkCast(left));
-		left = larrow->getOutgoingAtom(0); // 0 == input
+		left = left->getOutgoingAtom(0); // 0 == input
 		ltype = left->getType();
 	}
 
@@ -167,8 +162,7 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	// Unpack the arrow; right's output must match left.
 	if (ARROW_LINK == rtype)
 	{
-		LinkPtr rarrow(LinkCast(right));
-		right = rarrow->getOutgoingAtom(1); // 1 == output
+		right = right->getOutgoingAtom(1); // 1 == output
 		rtype = right->getType();
 	}
 
@@ -176,13 +170,13 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	// We must not do this earlier, it will mess up.
 	if (SIGNATURE_LINK == ltype)
 	{
-		left = LinkCast(left)->getOutgoingAtom(0);
+		left = left->getOutgoingAtom(0);
 		ltype = left->getType();
 	}
 
 	if (SIGNATURE_LINK == rtype)
 	{
-		right = LinkCast(right)->getOutgoingAtom(0);
+		right = right->getOutgoingAtom(0);
 		rtype = right->getType();
 	}
 
@@ -204,8 +198,7 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 		{
 			// Can everything in the right be found in the left?
 			// If so, then we are OK.
-			LinkPtr rch(LinkCast(right));
-			for (const Handle& rh : rch->getOutgoingSet())
+			for (const Handle& rh : right->getOutgoingSet())
 			{
 				if (not type_match_rec(left, rh, false)) return false;
 			}
@@ -213,8 +206,7 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 		}
 
 		// Does one of the left choices atch a right? Is so then good.
-		LinkPtr lch(LinkCast(left));
-		for (const Handle& lh : lch->getOutgoingSet())
+		for (const Handle& lh : left->getOutgoingSet())
 		{
 			if (type_match_rec(lh, right, false)) return true;
 		}
@@ -226,18 +218,15 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	// e.g. ListLink or EvaluationLink.  Compare these side-by-side.
 	if (ltype != rtype) return false;
 
-	LinkPtr lptr(LinkCast(left));
-	LinkPtr rptr(LinkCast(right));
-
-	if (nullptr == lptr or nullptr == rptr) return false;
+	if (not left->isLink() or not right->isLink()) return false;
 
 	// Unordered links are a pain in the butt.
 	if (classserver().isA(ltype, UNORDERED_LINK))
 		throw RuntimeException(TRACE_INFO,
 			"Not implemented! TODO XXX FIXME");
 
-	const HandleSeq& lout(lptr->getOutgoingSet());
-	const HandleSeq& rout(rptr->getOutgoingSet());
+	const HandleSeq& lout(left->getOutgoingSet());
+	const HandleSeq& rout(right->getOutgoingSet());
 
 	if (lout.size() != rout.size()) return false;
 

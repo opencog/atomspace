@@ -278,15 +278,11 @@ Handle AtomSpace::add_atom(AtomPtr atom, bool async)
     if (_backing_store and not _backing_store->ignoreType(t))
     {
         AtomPtr ba;
-        NodePtr n(NodeCast(atom));
-        if (n) {
-            ba = _backing_store->getNode(n->getType(),
-                                        n->getName().c_str());
+        if (atom->isNode()) {
+            ba = _backing_store->getNode(t, atom->getName().c_str());
         } else {
-            LinkPtr l(LinkCast(atom));
-            if (l)
-                 ba = _backing_store->getLink(l->getType(),
-                                             l->getOutgoingSet());
+            if (atom->isLink())
+                 ba = _backing_store->getLink(t, atom->getOutgoingSet());
         }
         if (ba) {
             return _atom_table.add(ba, async);
@@ -458,15 +454,13 @@ Handle AtomSpace::fetch_atom(Handle h)
     // This atom is not yet in any (this??) atomspace; go get it.
     if (NULL == h->getAtomTable()) {
         AtomPtr ba;
-        NodePtr n(NodeCast(h));
-        if (n) {
-            ba = _backing_store->getNode(n->getType(),
-                                        n->getName().c_str());
+        if (h->isNode()) {
+            ba = _backing_store->getNode(h->getType(),
+                                         h->getName().c_str());
         } else {
-            LinkPtr l(LinkCast(h));
-            if (l)
-                 ba = _backing_store->getLink(l->getType(),
-                                             l->getOutgoingSet());
+            if (h->isLink())
+                 ba = _backing_store->getLink(h->getType(),
+                                              h->getOutgoingSet());
         }
 
         // If we still don't have an atom, then the requested UUID

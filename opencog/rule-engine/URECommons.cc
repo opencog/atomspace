@@ -33,9 +33,9 @@ URECommons::URECommons(AtomSpace& as) : _as(as) {}
 
 Handle URECommons::create_bindLink(Handle himplicant, bool vnode_is_typedv)
 {
-	if (!LinkCast(himplicant)) {
+	//xxx why?
+	if (not himplicant->isLink())
 		throw InvalidParamException(TRACE_INFO, "Input must be a link type ");
-	} //xxx why?
 
 	//if(vnode_is_typedv)
 	himplicant = replace_nodes_with_varnode(himplicant);
@@ -78,8 +78,7 @@ std::string URECommons::get_unique_name(const Handle& h) const
 // generation for making sure name is always unique
 
 	std::string name;
-	NodePtr nnn(NodeCast(h));
-	if (nnn) name = nnn->getName();
+	if (h->isNode()) name = h->getName();
 	HandleSeq hs;
 	h->getIncomingSet(back_inserter(hs));
 	if (!hs.empty())
@@ -93,16 +92,15 @@ bool URECommons::exists_in(const Handle& hlink, const Handle& h) const
 	if (hlink == h) {
 		return true;
 	} else {
-		LinkPtr lp(LinkCast(hlink));
-		if (nullptr == lp)
+		if (nullptr == hlink or not hlink->isLink())
 			throw InvalidParamException(TRACE_INFO,
 					"Need a LINK type to look in");
-		auto outg = lp->getOutgoingSet();
+		auto outg = hlink->getOutgoingSet();
 		if (std::find(outg.begin(), outg.end(), h) != outg.end())
 			return true;
 		else {
 			for (const Handle& hi : outg) {
-				if (LinkCast(hi) and exists_in(hi, h))
+				if (hi->isLink() and exists_in(hi, h))
 					return true;
 			}
 		}
@@ -114,24 +112,23 @@ Handle URECommons::change_node_types(const Handle& h,
 		map<Handle, Handle>& replacement_map)
 {
 	Handle hcpy;
-	LinkPtr lp(LinkCast(h));
 
-	if (lp) {
+	if (h->isLink()) {
 		HandleSeq hs_cpy;
-		HandleSeq hs = lp->getOutgoingSet();
+		HandleSeq hs = h->getOutgoingSet();
 		for (const Handle& hi : hs) {
-			if (NodeCast(hi)) {
+			if (hi->isNode()) {
 				if (replacement_map.find(hi) != replacement_map.end())
 					hs_cpy.push_back(replacement_map[hi]);
 				else
 					hs_cpy.push_back(hi);
-			} else if (LinkCast(hi)) {
+			} else if (hi->isLink()) {
 				hs_cpy.push_back(change_node_types(hi, replacement_map));
 			}
 		}
 		hcpy = _as.add_link(h->getType(), hs_cpy);
 		hcpy->setTruthValue(h->getTruthValue());
-	} else if (NodeCast(h)) {
+	} else if (h->isNode()) {
 		if (replacement_map.find(h) != replacement_map.end())
 			hcpy = replacement_map[h];
 		else

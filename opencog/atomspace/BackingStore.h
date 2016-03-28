@@ -111,7 +111,7 @@ class BackingStore
 		 * either because it is of an ignorable type, or is a link
 		 * which contains an atom that is of an ignorable type.
 		 */
-		virtual bool ignoreAtom(Handle) const;
+		virtual bool ignoreAtom(const Handle&) const;
 
 		/**
 		 * The set of ignored atom types.
