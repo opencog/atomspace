@@ -71,9 +71,7 @@ void FuzzyMatchBasic::start_search(const Handle& trg)
  */
 bool FuzzyMatchBasic::accept_starter(const Handle& hp)
 {
-	NodePtr np(NodeCast(hp));
-	if (nullptr == np) return false;
-
+	if (hp->isLink()) return false;
 	return true;
 }
 
