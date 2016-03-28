@@ -35,7 +35,7 @@
 
 using namespace opencog;
 
-BackwardChainer::BackwardChainer(AtomSpace& as, Handle rbs)
+BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs)
 	: _as(as), _configReader(as, rbs),
 	  // create a garbage superspace with _as as parent, so codes
 	  // acting on _garbage_superspace will see stuff in _as, but
@@ -49,7 +49,8 @@ BackwardChainer::BackwardChainer(AtomSpace& as, Handle rbs)
  * @param init_target   Handle of the target
  * @param focus_link    The SetLink containing the optional focus set.
  */
-void BackwardChainer::set_target(Handle init_target, Handle focus_link)
+void BackwardChainer::set_target(const Handle& init_target,
+                                 const Handle& focus_link)
 {
 	_init_target = init_target;
 
@@ -134,12 +135,12 @@ void BackwardChainer::do_step()
 /**
  * Get the current result on the initial target, if any.
  *
- * @return a VarMultimap mapping each variable to all possible solutions
+ * @return a HandleMultimap mapping each variable to all possible solutions
  */
-VarMultimap BackwardChainer::get_chaining_result()
+HandleMultimap BackwardChainer::get_chaining_result()
 {
-	VarMultimap temp_result = _targets_set.get(_init_target).get_varmap();
-	VarMultimap result;
+	HandleMultimap temp_result = _targets_set.get(_init_target).get_varmap();
+	HandleMultimap result;
 	for (auto& p : temp_result)
 	{
 		UnorderedHandleSet s;
@@ -195,7 +196,7 @@ void BackwardChainer::process_target(Target& target)
 	// vardecl can already be grounded
 	if (not target.get_varseq().empty())
 	{
-		std::vector<VarMap> kb_vmap;
+		std::vector<HandleMap> kb_vmap;
 
 		HandleSeq kb_match = match_knowledge_base(htarget, htarget_vardecl,
 		                                          kb_vmap);
@@ -210,7 +211,7 @@ void BackwardChainer::process_target(Target& target)
 			for (size_t i = 0; i < kb_match.size(); ++i)
 			{
 				Handle& soln = kb_match[i];
-				VarMap& vgm = kb_vmap[i];
+				HandleMap& vgm = kb_vmap[i];
 
 				LAZY_BC_LOG_DEBUG << "Looking at grounding:" << std::endl
 				                  << soln->toShortString();
@@ -244,7 +245,7 @@ void BackwardChainer::process_target(Target& target)
 
 	Rule selected_rule(Handle::UNDEFINED);
 	Rule standardized_rule(Handle::UNDEFINED);
-	std::vector<VarMap> all_implicand_to_target_mappings;
+	std::vector<HandleMap> all_implicand_to_target_mappings;
 
 	// If no rules to backward chain on, no way to solve this target
 	if (not select_rule(target, selected_rule, standardized_rule,
@@ -265,7 +266,7 @@ void BackwardChainer::process_target(Target& target)
 	// all, and add all resulting new targets to targets list; this will
 	// avoid having to visit the target multiple times to get all
 	// possible output mappings
-	VarMap implicand_mapping = rand_element(all_implicand_to_target_mappings);
+	HandleMap implicand_mapping = rand_element(all_implicand_to_target_mappings);
 	for (auto& p : implicand_mapping)
 		LAZY_BC_LOG_DEBUG << "Chosen mapping is:" << std::endl
 		                  << p.first->toShortString()
@@ -273,7 +274,7 @@ void BackwardChainer::process_target(Target& target)
 		                  << p.second->toShortString();
 
 	Handle hrule_implicant_reverse_grounded;
-	std::vector<VarMap> premises_vmap_list;
+	std::vector<HandleMap> premises_vmap_list;
 	std::set<Handle> additional_free_var;
 	for (auto& h : target.get_varset())
 		additional_free_var.insert(_garbage_superspace.get_atom(h));
@@ -311,7 +312,7 @@ void BackwardChainer::process_target(Target& target)
 	for (size_t i = 0; i < possible_premises.size(); i++)
 	{
 		Handle hp = possible_premises[i];
-		VarMap vm = premises_vmap_list[i];
+		HandleMap vm = premises_vmap_list[i];
 
 		LAZY_BC_LOG_DEBUG << "Checking premises:" << std::endl
 		                  << hp->toShortString();
@@ -336,7 +337,7 @@ void BackwardChainer::process_target(Target& target)
 			output_grounded_seq.push_back(
 				garbage_substitute(garbage_substitute(h, implicand_mapping), vm));
 
-		std::vector<VarMap> vm_list;
+		std::vector<HandleMap> vm_list;
 
 		// include the implicand mapping into vm so we can do variable chasing
 		vm.insert(implicand_mapping.begin(), implicand_mapping.end());
@@ -349,9 +350,9 @@ void BackwardChainer::process_target(Target& target)
 		// Check each grounding to see if any has no variable
 		for (size_t i = 0; i < grounded_premises.size(); ++i)
 		{
-			VarMultimap results;
+			HandleMultimap results;
 			Handle& g = grounded_premises[i];
-			VarMap& m = vm_list.at(i);
+			HandleMap& m = vm_list.at(i);
 
 			LAZY_BC_LOG_DEBUG << "Checking possible permises grounding:"
 			                  << std::endl << g->toShortString();
@@ -429,7 +430,7 @@ void BackwardChainer::process_target(Target& target)
  */
 HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
                                                 Handle hpattern_vardecl,
-                                                vector<VarMap>& vmap,
+                                                vector<HandleMap>& vmap,
                                                 bool enable_var_name_check)
 {
 	AtomSpace focus_garbage_superspace(&_focus_space);
@@ -470,7 +471,7 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
 		Handle hself = working_space->get_atom(hpattern);
 		if (hself != Handle::UNDEFINED)
 		{
-			vmap.push_back(VarMap());
+			vmap.push_back(HandleMap());
 			return { _as.get_atom(hself) };
 		}
 
@@ -568,10 +569,10 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
  * @return                                  a vector of premises
  */
 HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
-                                         const VarMap& implicand_mapping,
-                                         const std::set<Handle> additional_free_varset,
+                                         const HandleMap& implicand_mapping,
+                                         const std::set<Handle>& additional_free_varset,
                                          Handle& hrule_implicant_reverse_grounded,
-                                         std::vector<VarMap>& premises_vmap_list)
+                                         std::vector<HandleMap>& premises_vmap_list)
 {
 	Handle hrule_implicant = standardized_rule.get_implicant();
 	Handle hrule_vardecl = standardized_rule.get_vardecl();
@@ -597,7 +598,7 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
 	// are constant; mostly to handle where PM cannot map a variable to itself
 	if (not additional_free_varset.empty())
 	{
-		std::vector<VarMap> premises_vmap_list_alt;
+		std::vector<HandleMap> premises_vmap_list_alt;
 
 		HandleSeq possible_premises_alt =
 		        match_knowledge_base(hrule_implicant_reverse_grounded,
@@ -629,8 +630,8 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
  * @return              the mapping of the hpremise
  */
 HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
-                                           const VarMap& premise_vmap,
-                                           std::vector<VarMap>& vmap_list)
+                                           const HandleMap& premise_vmap,
+                                           std::vector<HandleMap>& vmap_list)
 {
 	HandleSeq results;
 
@@ -639,8 +640,8 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 	// if the target is already fully grounded
 	if (varseq.empty())
 	{
-		VarMap old_map = premise_vmap;
-		VarMap new_map;
+		HandleMap old_map = premise_vmap;
+		HandleMap new_map;
 
 		// do variable chasing
 		for (const auto& p : premise_vmap)
@@ -690,20 +691,21 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 	LAZY_BC_LOG_DEBUG << "Grounding:" << std::endl
 	                  << premises->toShortString();
 
-	std::vector<VarMap> temp_vmap_list;
+	std::vector<HandleMap> temp_vmap_list;
 
 	// XXX TODO when all VariableNode are unique, we will be able to tell what
 	// type a random VariableNode is in the AtomSpace by looking at its
 	// antecedent; so the type should be included in the future
-	HandleSeq temp_results = match_knowledge_base(premises, Handle::UNDEFINED, temp_vmap_list);
+	HandleSeq temp_results = match_knowledge_base(premises, Handle::UNDEFINED,
+	                                              temp_vmap_list);
 
 	// chase the variables so that if a variable A were mapped to another
 	// variable B in premise_vmap, and after pattern matching, B now map
 	// to some solution, change A to map to the same solution
 	for (unsigned int i = 0; i < temp_results.size(); ++i)
 	{
-		VarMap& tvm = temp_vmap_list[i];
-		VarMap this_map;
+		HandleMap& tvm = temp_vmap_list[i];
+		HandleMap this_map;
 
 		for (const auto& p : premise_vmap)
 		{
@@ -742,14 +744,14 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
  * @param hmatch           the atom to which hsource will be unified to
  * @param hsource_vardecl  the typed VariableList of the variables in hsource
  * @param hmatch_vardecl   the VariableList of the free variables in hmatch
- * @param result           an output VarMap mapping varibles from hsource to hmatch
+ * @param result           an output HandleMap mapping varibles from hsource to hmatch
  * @return                 true if the two atoms can be unified
  */
 bool BackwardChainer::unify(const Handle& hsource,
                             const Handle& hmatch,
-                            Handle hsource_vardecl,
-                            Handle hmatch_vardecl,
-                            VarMap& result)
+                            const Handle& hsource_vardecl,
+                            const Handle& hmatch_vardecl,
+                            HandleMap& result)
 {
 	// lazy way of restricting PM to be between two atoms
 	AtomSpace temp_space;
@@ -772,7 +774,8 @@ bool BackwardChainer::unify(const Handle& hsource,
 	}
 
 	PatternLinkPtr sl(createPatternLink(temp_hsource_vardecl, temp_hsource));
-	UnifyPMCB pmcb(&temp_space, VariableListCast(temp_hsource_vardecl), VariableListCast(temp_hmatch_vardecl));
+	UnifyPMCB pmcb(&temp_space, VariableListCast(temp_hsource_vardecl),
+	               VariableListCast(temp_hmatch_vardecl));
 
 	sl->satisfy(pmcb);
 
@@ -783,9 +786,10 @@ bool BackwardChainer::unify(const Handle& hsource,
 	std::vector<std::map<Handle, Handle>> pred_list = pmcb.get_pred_list();
 	std::vector<std::map<Handle, Handle>> var_list = pmcb.get_var_list();
 
-	VarMap good_map;
+	HandleMap good_map;
 
-	// go thru each solution, and get the first one that map the whole temp_hmatch
+	// Go thru each solution, and get the first one that map the whole
+	// temp_hmatch
 	//
 	// XXX TODO branch on the various groundings?  how to properly handle
 	// multiple possible unify option????
@@ -804,7 +808,7 @@ bool BackwardChainer::unify(const Handle& hsource,
 
 	// if none of the mapping map the whole temp_hmatch (possible in the case
 	// of sub-atom unification that map a typed variable to another variable)
-	if (good_map.size() == 0)
+	if (good_map.empty())
 		return false;
 
 	// change the mapping from temp_atomspace to current atomspace
@@ -858,7 +862,7 @@ static void get_all_unique_atoms(const Handle& h, UnorderedHandleSet& atom_set)
 bool BackwardChainer::select_rule(const Target& target,
                                   Rule& selected_rule,
                                   Rule& standardized_rule,
-                                  std::vector<VarMap>& all_implicand_to_target_mappings)
+                                  std::vector<HandleMap>& all_implicand_to_target_mappings)
 {
 	Handle htarget = _garbage_superspace.add_atom(target.get_handle());
 	Handle htarget_vardecl = _garbage_superspace.add_atom(target.get_vardecl());
@@ -888,7 +892,7 @@ bool BackwardChainer::select_rule(const Target& target,
 		// check if any of the implicand's output can be unified to target
 		for (const Handle& h : output)
 		{
-			VarMap mapping;
+			HandleMap mapping;
 
 			if (not unify(h,
 			              htarget,
@@ -912,7 +916,7 @@ bool BackwardChainer::select_rule(const Target& target,
 
 			for (const Handle& h : output_expanded)
 			{
-				VarMap mapping;
+				HandleMap mapping;
 
 				if (not unify(h,
 				              htarget,
@@ -937,7 +941,7 @@ bool BackwardChainer::select_rule(const Target& target,
 	return false;
 }
 
-Handle BackwardChainer::garbage_substitute(const Handle& term, const VarMap& vm)
+Handle BackwardChainer::garbage_substitute(const Handle& term, const HandleMap& vm)
 {
 	return _garbage_superspace.add_atom(Substitutor::substitute(term, vm));
 }
