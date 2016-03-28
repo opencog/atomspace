@@ -79,7 +79,7 @@ private:
 
 		cnt = -1;
 		to_atom = Handle::UNDEFINED;
-		if (h->isLink()) h->foreach_outgoing(&FollowLink::pursue_link, this);
+		if (h->isLink()) LinkCast(h)->foreach_outgoing(&FollowLink::pursue_link, this);
 		if (to_atom) return true;
 		return false;
 	}

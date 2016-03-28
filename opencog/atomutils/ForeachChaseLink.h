@@ -193,7 +193,8 @@ private:
 		cnt = -1;
 		to_atom = Handle::UNDEFINED;
 		// foreach_outgoing_handle(link_h, PrivateUseOnlyChaseLink::endpoint_matcher, this);
-		link_h->foreach_outgoing(endpoint_matcher, this);
+
+		LinkCast(link_h)->foreach_outgoing(endpoint_matcher, this);
 
 		bool rc = false;
 		if (to_atom)
