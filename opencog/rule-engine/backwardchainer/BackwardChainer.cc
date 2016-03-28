@@ -60,11 +60,9 @@ void BackwardChainer::set_target(const Handle& init_target,
 	_targets_set.emplace(_init_target, gen_varlist(_init_target));
 
 	// get the stuff under the SetLink
-	LinkPtr lll(LinkCast(focus_link));
-
-	if (lll)
+	if (focus_link->isLink())
 	{
-		HandleSeq focus_set = lll->getOutgoingSet();
+		HandleSeq focus_set = focus_link->getOutgoingSet();
 		for (const auto& h : focus_set)
 			_focus_space.add_atom(h);
 
@@ -175,7 +173,7 @@ void BackwardChainer::process_target(Target& target)
 	if (_logical_link_types.count(htarget->getType()) == 1)
 	{
 		bool all_virtual = true;
-		for (const Handle& h : LinkCast(htarget)->getOutgoingSet())
+		for (const Handle& h : htarget->getOutgoingSet())
 		{
 			if (classserver().isA(h->getType(), VIRTUAL_LINK))
 				continue;
@@ -230,7 +228,7 @@ void BackwardChainer::process_target(Target& target)
 	{
 		bc_logger().debug("Breaking into sub-targets");
 
-		HandleSeq sub_premises = LinkCast(htarget)->getOutgoingSet();
+		HandleSeq sub_premises = htarget->getOutgoingSet();
 
 		for (Handle& h : sub_premises)
 			_targets_set.emplace(h, gen_sub_varlist(h, htarget_vardecl,
@@ -410,7 +408,7 @@ void BackwardChainer::process_target(Target& target)
 		bc_logger().debug("Before breaking apart into sub-premises");
 
 		// Else break out any logical link and add to targets
-		HandleSeq sub_premises = LinkCast(hp)->getOutgoingSet();
+		HandleSeq sub_premises = hp->getOutgoingSet();
 		target.store_step(selected_rule, sub_premises);
 
 		for (Handle& s : sub_premises)
@@ -671,7 +669,7 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 	if (_logical_link_types.count(premises->getType()) == 1)
 	{
 		HandleSeq sub_premises;
-		HandleSeq oset = LinkCast(hpremise)->getOutgoingSet();
+		HandleSeq oset = hpremise->getOutgoingSet();
 
 		for (const Handle& h : oset)
 		{
@@ -977,8 +975,8 @@ Handle BackwardChainer::gen_sub_varlist(const Handle& parent,
 	fv.search_set(parent);
 
 	HandleSeq oset;
-	if (LinkCast(parent_varlist))
-		oset = LinkCast(parent_varlist)->getOutgoingSet();
+	if (parent_varlist->isLink())
+		oset = parent_varlist->getOutgoingSet();
 	else
 		oset.push_back(parent_varlist);
 
@@ -994,10 +992,10 @@ Handle BackwardChainer::gen_sub_varlist(const Handle& parent,
 			additional_free_varset.erase(h);
 		}
 		else if (TYPED_VARIABLE_LINK == t
-			     and fv.varset.count(LinkCast(h)->getOutgoingSet()[0]) == 1)
+			     and fv.varset.count(h->getOutgoingSet()[0]) == 1)
 		{
 			final_oset.push_back(h);
-			additional_free_varset.erase(LinkCast(h)->getOutgoingSet()[0]);
+			additional_free_varset.erase(h->getOutgoingSet()[0]);
 		}
 	}
 
