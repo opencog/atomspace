@@ -409,7 +409,7 @@ UnorderedHandleSet ForwardChainer::derive_rules(const Handle& source,
 {
     // Exceptions
     if (not is_valid_implicant(pattern))
-        return {};
+	    return UnorderedHandleSet();
 
     // Create a temporary atomspace with the rule pattern and the
     // source inside
@@ -442,7 +442,7 @@ UnorderedHandleSet ForwardChainer::derive_rules(const Handle& source,
     }
 
     if (gcb.term_groundings.empty())
-        return {};
+	    return UnorderedHandleSet();
 
     // OC_ASSERT(gcb.term_groundings.size() == 1,
     //           "There should be only one way to have a "
