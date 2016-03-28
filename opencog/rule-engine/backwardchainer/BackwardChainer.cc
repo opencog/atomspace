@@ -585,8 +585,9 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
 	LAZY_BC_LOG_DEBUG << "Reverse grounded as:" << std::endl
 	                  << hrule_implicant_reverse_grounded->toShortString();
 
-	// Find all matching premises matching the implicant, where premises_vmap_list
-	// will be the mapping from free variables in himplicant to stuff in a premise
+	// Find all matching premises matching the implicant, where
+	// premises_vmap_list will be the mapping from free variables in
+	// himplicant to stuff in a premise
 	HandleSeq possible_premises =
 		match_knowledge_base(hrule_implicant_reverse_grounded,
 		                     gen_sub_varlist(hrule_implicant_reverse_grounded,
@@ -699,7 +700,7 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 	HandleSeq temp_results = match_knowledge_base(premises, Handle::UNDEFINED,
 	                                              temp_vmap_list);
 
-	// chase the variables so that if a variable A were mapped to another
+	// Chase the variables so that if a variable A were mapped to another
 	// variable B in premise_vmap, and after pattern matching, B now map
 	// to some solution, change A to map to the same solution
 	for (unsigned int i = 0; i < temp_results.size(); ++i)
@@ -753,7 +754,7 @@ bool BackwardChainer::unify(const Handle& hsource,
                             const Handle& hmatch_vardecl,
                             VarMap& result)
 {
-	// lazy way of restricting PM to be between two atoms
+	// Lazy way of restricting PM to be between two atoms
 	AtomSpace temp_space;
 
 	Handle temp_hsource = temp_space.add_atom(hsource);
@@ -806,12 +807,12 @@ bool BackwardChainer::unify(const Handle& hsource,
 		}
 	}
 
-	// if none of the mapping map the whole temp_hmatch (possible in the case
+	// If none of the mapping map the whole temp_hmatch (possible in the case
 	// of sub-atom unification that map a typed variable to another variable)
 	if (good_map.empty())
 		return false;
 
-	// change the mapping from temp_atomspace to current atomspace
+	// Change the mapping from temp_atomspace to current atomspace
 	for (auto& p : good_map)
 	{
 		Handle var = p.first;
