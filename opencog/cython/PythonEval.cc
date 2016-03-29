@@ -27,7 +27,6 @@
 
 #include <boost/filesystem/operations.hpp>
 
-#include <opencog/util/Config.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/misc.h>
@@ -64,7 +63,11 @@ static bool initialized_outside_opencog = false;
 std::recursive_mutex PythonEval::_mtx;
 
 /*
- * @todo When can we remove the singleton instance?
+ * @todo When can we remove the singleton instance? Answer: never,
+ * as long as python is single-threaded. Currently, python fakes
+ * multi-thread support by grabbing a lock and only allowing just
+ * one thread to run at a time.  Our singleton instance mirrors this
+ * python limitation.
  *
  * NOTE: The Python C API reference counting is very tricky and the
  * API inconsistently handles PyObject* object ownership.
@@ -76,7 +79,8 @@ std::recursive_mutex PythonEval::_mtx;
  * reference. When you pass PyObject* objects to the API, don't assume
  * you still need to decrement the reference count until you verify
  * that the exact API call you are making does not "steal" the
- * reference: SEE: https://docs.python.org/2/c-api/intro.html?highlight=steals#reference-count-details
+ * reference: SEE:
+ *   https://docs.python.org/2/c-api/intro.html?highlight=steals#reference-count-details
  * Remember to look to verify the behavior of each and every Py_ API call.
  */
 
@@ -125,12 +129,21 @@ static const char* PROJECT_PYTHON_MODULE_PATHS[] =
 // This is just plain fucked up, but I cannot find a better solution.
 static const char** get_module_paths()
 {
+    static const char** paths = nullptr;
+
+    if (paths) return paths;
+
     unsigned nproj = sizeof(PROJECT_PYTHON_MODULE_PATHS) / sizeof(char**);
     unsigned ndefp = sizeof(DEFAULT_PYTHON_MODULE_PATHS) / sizeof(char**);
-    // static const char* paths[ndefp + nproj];
-    static const char* paths[
-        (sizeof(DEFAULT_PYTHON_MODULE_PATHS) / sizeof(char**)) +
-        (sizeof(PROJECT_PYTHON_MODULE_PATHS) / sizeof(char**))];
+
+    unsigned nenv = 0;
+    char* pypath = secure_getenv("PYTHONPATH");
+    if (pypath) {
+        char *p = pypath;
+        while (p) { p = strchr(p+1, ':'); nenv++; }
+    }
+
+    paths = (const char**) malloc(sizeof(char *) * (nproj + ndefp + nenv + 1));
 
     // Get current working directory.
     char* cwd = getcwd(NULL, 0);
@@ -140,9 +153,9 @@ static const char** get_module_paths()
         in_project = true;
     free(cwd);
 
-    // The the currrent working directory is the projet build or source
+    // If the currrent working directory is the projet build or source
     // directory, then search those first.
-    int ip=0;
+    int ip = 0;
     if (in_project) {
         for (unsigned i=0; i < nproj-1; i++) {
             paths[ip] = PROJECT_PYTHON_MODULE_PATHS[i];
@@ -154,6 +167,20 @@ static const char** get_module_paths()
     for (unsigned i=0; i < ndefp-1; i++) {
         paths[ip] = DEFAULT_PYTHON_MODULE_PATHS[i];
         ip++;
+    }
+
+    // Finally, use the environment variable.
+    if (pypath) {
+        char* p = strdup(pypath);
+        char* q = strchr(p, ':');
+        while (true) {
+           if (q) *q = '\0';
+           paths[ip] = p;
+           ip++;
+           if (nullptr == q) break;
+           p = q+1;
+           q = strchr(p, ':');
+       }
     }
     paths[ip] = NULL;
 
@@ -176,7 +203,7 @@ static bool try_to_load_modules(const char ** config_paths)
 {
     PyObject* pySysPath = PySys_GetObject((char*)"path");
 
-    // Add default OpenCog module directories to the Python interprator's path.
+    // Add default OpenCog module directories to the Python interpreter's path.
     for (int i = 0; config_paths[i] != NULL; ++i)
     {
         struct stat finfo;
@@ -190,38 +217,12 @@ static bool try_to_load_modules(const char ** config_paths)
         }
     }
 
-    // Add custom paths for python modules from the config file.
-    if (config().has("PYTHON_EXTENSION_DIRS"))
-    {
-        std::vector<string> pythonpaths;
-        // For debugging current path
-        tokenize(config()["PYTHON_EXTENSION_DIRS"],
-                std::back_inserter(pythonpaths), ", ");
-
-        for (std::vector<string>::const_iterator it = pythonpaths.begin();
-             it != pythonpaths.end(); ++it)
-        {
-            struct stat finfo;
-            stat(it->c_str(), &finfo);
-            if (S_ISDIR(finfo.st_mode))
-            {
-                PyObject* pyModulePath = PyBytes_FromString(it->c_str());
-                PyList_Append(pySysPath, pyModulePath);
-                Py_DECREF(pyModulePath);
-            } else {
-                logger().warn("%s: "
-                    "Could not find custom python extension directory: %s ",
-                    __FUNCTION__, it->c_str() );
-            }
-        }
-    }
-
     // NOTE: Can't use get_path_as_string() yet because it is defined in a
     // Cython api which we can't import unless the sys.path is correct. So
     // we'll write it out before the imports below to aid in debugging.
     if (logger().is_debug_enabled())
     {
-        logger().debug("Python 'sys.path' after config adds is:");
+        logger().debug("Python 'sys.path' is:");
         Py_ssize_t pathSize = PyList_Size(pySysPath);
         for (int i = 0; i < pathSize; i++)
         {
@@ -243,7 +244,7 @@ static bool try_to_load_modules(const char ** config_paths)
     // opencopg.atomspace cython module failed to load. Avert
     // a hard-to-debug crash on null-pointer-deref, and replace
     // it by a hard-to-debug error message.
-    if (NULL == py_atomspace) {
+    if (nullptr == py_atomspace) {
         PyErr_Print();
         logger().warn("PythonEval::%s Failed to load the "
                        "opencog.atomspace module", __FUNCTION__);
@@ -254,7 +255,7 @@ static bool try_to_load_modules(const char ** config_paths)
     // When it fails, it fails silently, leaving get_path_as_string
     // with a NULL PLT/GOT entry (i.e. calling the subroutine is a
     // null-pointer deref).
-    if (NULL != get_path_as_string)
+    if (nullptr != get_path_as_string)
         logger().info("Python 'sys.path' after OpenCog config adds is: " +
                get_path_as_string());
 
@@ -386,24 +387,6 @@ PythonEval::PythonEval(AtomSpace* atomspace)
     // mention it here.
     global_python_initialize();
     this->initialize_python_objects_and_imports();
-
-    // Add the preload functions
-    if (config().has("PYTHON_PRELOAD_FUNCTIONS"))
-    {
-        string preloadDirectory = config()["PYTHON_PRELOAD_FUNCTIONS"];
-
-        // According to the mailing list, boost throws exceptions
-        // on  vagrant box, when the opencog.conf file is
-        // misconfigured .. and the default seems to be.
-        try
-        {
-            this->add_modules_from_path(preloadDirectory);
-        }
-        catch (const std::exception& ex)
-        {
-            logger().error() << ex.what();
-        }
-    }
 }
 
 PythonEval::~PythonEval()
@@ -672,27 +655,33 @@ int PythonEval::argument_count(PyObject* pyFunction)
 /**
  * Get the Python module and stripped function name given the identifer of
  * the form 'module.function'.
- *
  */
-PyObject* PythonEval::module_for_function(  const std::string& moduleFunction,
-                                            std::string& functionName)
+PyObject* PythonEval::module_for_function(const std::string& moduleFunction,
+                                          std::string& functionName)
 {
-    PyObject* pyModule;
-    std::string moduleName;
-
     // Get the correct module and extract the function name.
     int index = moduleFunction.find_first_of('.');
-    if (index < 0){
-        pyModule = _pyRootModule;
-        functionName = moduleFunction;
-        moduleName = "__main__";
-    } else {
-        moduleName = moduleFunction.substr(0, index);
-        pyModule = _modules[moduleName];
-        functionName = moduleFunction.substr(index+1);
-    }
+    if (0 < index) {
+        std::string moduleName = moduleFunction.substr(0, index);
+        PyObject* pyModule = _modules[moduleName];
 
-    return pyModule;
+        // If not found, try loading it.
+        // We have to guess, if its a single file, or an entire
+        // directory with an __init__.py file in it ...
+        if (nullptr == pyModule) {
+            add_modules_from_path(moduleName);
+            add_modules_from_path(moduleName + ".py");
+            pyModule = _modules[moduleName];
+        }
+
+        // If found, we are done.
+        if (pyModule) {
+            functionName = moduleFunction.substr(index+1);
+            return pyModule;
+        }
+    }
+    functionName = moduleFunction;
+    return _pyRootModule;
 }
 
 /**
@@ -706,17 +695,12 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
-    PyObject *pyError, *pyModule, *pyUserFunc, *pyReturnValue = NULL;
-    PyObject *pyDict;
-    std::string functionName;
-    std::string errorString;
-
     // Grab the GIL.
-    PyGILState_STATE gstate;
-    gstate = PyGILState_Ensure();
+    PyGILState_STATE gstate = PyGILState_Ensure();
 
     // Get the module and stripped function name.
-    pyModule = this->module_for_function(moduleFunction, functionName);
+    std::string functionName;
+    PyObject* pyModule = this->module_for_function(moduleFunction, functionName);
 
     // If we can't find that module then throw an exception.
     if (!pyModule) {
@@ -728,8 +712,8 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     }
 
     // Get a reference to the user function.
-    pyDict = PyModule_GetDict(pyModule);
-    pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
+    PyObject* pyDict = PyModule_GetDict(pyModule);
+    PyObject* pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
 
     // PyModule_GetDict returns a borrowed reference, so don't do this:
     // Py_DECREF(pyDict);
@@ -769,9 +753,9 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
         throw RuntimeException(TRACE_INFO,
             "Expecting arguments to be a ListLink!");
     }
-    int actualArgumentCount = arguments->getArity();
 
     // Now make sure the expected count matches the actual argument count.
+    int actualArgumentCount = arguments->getArity();
     if (expectedArgumentCount != actualArgumentCount) {
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
@@ -786,11 +770,10 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     PyObject* pyAtomSpace = this->atomspace_py_object(_atomspace);
     const HandleSeq& argumentHandles = arguments->getOutgoingSet();
     int tupleItem = 0;
-    for (HandleSeq::const_iterator it = argumentHandles.begin();
-        it != argumentHandles.end(); ++it) {
-
+    for (const Handle& h: argumentHandles)
+    {
         // Place a Python atom object for this handle into the tuple.
-        PyObject* pyAtom = py_atom(it->value(), pyAtomSpace);
+        PyObject* pyAtom = py_atom(h.value(), pyAtomSpace);
         PyTuple_SetItem(pyArguments, tupleItem, pyAtom);
 
         // PyTuple_SetItem steals it's item so don't do this:
@@ -801,7 +784,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     Py_DECREF(pyAtomSpace);
 
     // Execute the user function and store its return value.
-    pyReturnValue = PyObject_CallObject(pyUserFunc, pyArguments);
+    PyObject* pyReturnValue = PyObject_CallObject(pyUserFunc, pyArguments);
 
     // Cleanup the reference counts for Python objects we no longer reference.
     // Since we promoted the borrowed pyExecuteUserFunc reference, we need
@@ -811,10 +794,9 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     Py_DECREF(pyArguments);
 
     // Check for errors.
-    pyError = PyErr_Occurred();
-    if (pyError) {
-
+    if (PyErr_Occurred()) {
         // Construct the error message and throw an exception.
+        std::string errorString;
         this->build_python_error_message(moduleFunction.c_str(), errorString);
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
@@ -852,7 +834,7 @@ Handle PythonEval::apply(AtomSpace* as, const std::string& func, Handle varargs)
 
         // Make sure we got an atom UUID.
         PyObject* pyError = PyErr_Occurred();
-        if (pyError || !pyAtomUUID) {
+        if (pyError or nullptr == pyAtomUUID) {
             PyGILState_Release(gstate);
             throw RuntimeException(TRACE_INFO,
                 "Python function '%s' did not return Atom!", func.c_str());
@@ -1131,8 +1113,8 @@ void PythonEval::add_to_sys_path(std::string path)
 
 const int ABSOLUTE_IMPORTS_ONLY = 0;
 
-void PythonEval::import_module( const boost::filesystem::path &file,
-                                PyObject* pyFromList)
+void PythonEval::import_module(const boost::filesystem::path &file,
+                               PyObject* pyFromList)
 {
     // The pyFromList parameter corresponds to what would appear in an
     // import statement after the import:
@@ -1163,7 +1145,7 @@ void PythonEval::import_module( const boost::filesystem::path &file,
 
         // Add the ATOMSPACE object to this module
         PyObject* pyAtomSpaceObject = this->atomspace_py_object(_atomspace);
-        PyDict_SetItemString(pyModuleDictionary,"ATOMSPACE",
+        PyDict_SetItemString(pyModuleDictionary, "ATOMSPACE",
                 pyAtomSpaceObject);
 
         // This decrement is needed because PyDict_SetItemString does
@@ -1184,11 +1166,10 @@ void PythonEval::import_module( const boost::filesystem::path &file,
 
     // otherwise, handle the error.
     } else {
-        if(PyErr_Occurred())
+        if (PyErr_Occurred())
             PyErr_Print();
         logger().warn() << "Couldn't import '" << moduleName << "' module";
     }
-
 }
 
 /**
@@ -1263,9 +1244,9 @@ void PythonEval::add_module_file(const boost::filesystem::path &file)
 }
 
 /**
-* Get a path and determine if it is a file or directory, then call the
-* corresponding function specific to directories and files.
-*/
+ * Get a path and determine if it is a file or directory, then call the
+ * corresponding function specific to directories and files.
+ */
 void PythonEval::add_modules_from_path(std::string pathString)
 {
     std::vector<std::string> dirs;
@@ -1288,7 +1269,7 @@ void PythonEval::add_modules_from_path(std::string pathString)
             Logger::Level btl = logger().get_backtrace_level();
             logger().set_backtrace_level(Logger::Level::NONE);
             logger().error() << "Failed to load python module \'"
-            << abspath << "\', searched directories:";
+                << abspath << "\', searched directories:";
             for (int i = 0; config_paths[i] != NULL; ++i) {
                 logger().error() << "Directory: " << config_paths[i];
             }
@@ -1327,8 +1308,6 @@ void PythonEval::add_modules_from_path(std::string pathString)
     dirs.insert(dirs.end(), files.begin(), files.end());
     for (const auto& abspath : dirs)
         add_modules_from_abspath(abspath);
-
-    return;
 }
 
 void PythonEval::add_modules_from_abspath(std::string pathString)

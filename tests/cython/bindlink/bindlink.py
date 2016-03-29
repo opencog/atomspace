@@ -7,6 +7,8 @@ from opencog.bindlink import    stub_bindlink, bindlink, single_bindlink,\
 from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.type_constructors import *
 
+import test_functions
+
 __author__ = 'Curtis Faith'
 
 def assert_equals(object_one, object_two):
@@ -22,14 +24,8 @@ def add_link(atom_one, atom_two):
 
 atomspace = AtomSpace()
 
-# Get the config file name in a manner not dependent on the
-# starting working directory.
-full_path = os.path.realpath(__file__)
-config_file_name = os.path.dirname(full_path) + "/bindlink_test.conf"
-print config_file_name
-
 # Initialize Python
-initialize_opencog(atomspace, config_file_name)
+initialize_opencog(atomspace, "")
 
 # Define several animals and something of a different type as well
 InheritanceLink( ConceptNode("Frog"),       ConceptNode("animal"))

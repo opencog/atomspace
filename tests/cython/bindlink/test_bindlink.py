@@ -29,13 +29,8 @@ class BindlinkTest(TestCase):
         # Clear atoms from previous test
         self.atomspace.clear()
 
-        # Get the config file name in a manner not dependent on the
-        # starting working directory.
-        full_path = os.path.realpath(__file__)
-        config_file_name = os.path.dirname(full_path) + "/bindlink_test.conf"
-
         # Initialize Python
-        initialize_opencog(self.atomspace, config_file_name)
+        initialize_opencog(self.atomspace, "")
         set_type_ctor_atomspace(self.atomspace)
 
         # Define several animals and something of a different type as well
