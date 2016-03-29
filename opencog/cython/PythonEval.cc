@@ -672,27 +672,22 @@ int PythonEval::argument_count(PyObject* pyFunction)
 /**
  * Get the Python module and stripped function name given the identifer of
  * the form 'module.function'.
- *
  */
-PyObject* PythonEval::module_for_function(  const std::string& moduleFunction,
-                                            std::string& functionName)
+PyObject* PythonEval::module_for_function(const std::string& moduleFunction,
+                                          std::string& functionName)
 {
-    PyObject* pyModule;
-    std::string moduleName;
-
     // Get the correct module and extract the function name.
     int index = moduleFunction.find_first_of('.');
-    if (index < 0){
-        pyModule = _pyRootModule;
-        functionName = moduleFunction;
-        moduleName = "__main__";
-    } else {
-        moduleName = moduleFunction.substr(0, index);
-        pyModule = _modules[moduleName];
-        functionName = moduleFunction.substr(index+1);
+    if (0 < index) {
+        std::string moduleName = moduleFunction.substr(0, index);
+        PyObject* pyModule = _modules[moduleName];
+        if (pyModule) {
+            functionName = moduleFunction.substr(index+1);
+            return pyModule;
+        }
     }
-
-    return pyModule;
+    functionName = moduleFunction;
+    return _pyRootModule;
 }
 
 /**
@@ -852,7 +847,7 @@ Handle PythonEval::apply(AtomSpace* as, const std::string& func, Handle varargs)
 
         // Make sure we got an atom UUID.
         PyObject* pyError = PyErr_Occurred();
-        if (pyError || !pyAtomUUID) {
+        if (pyError or nullptr == pyAtomUUID) {
             PyGILState_Release(gstate);
             throw RuntimeException(TRACE_INFO,
                 "Python function '%s' did not return Atom!", func.c_str());
