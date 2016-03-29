@@ -64,7 +64,11 @@ static bool initialized_outside_opencog = false;
 std::recursive_mutex PythonEval::_mtx;
 
 /*
- * @todo When can we remove the singleton instance?
+ * @todo When can we remove the singleton instance? Answer: never,
+ * as long as python is single-threaded. Currently, python fakes
+ * multi-thread support by grabbing a lock and only allowing just
+ * one thread to run at a time.  Our singleton instance mirrors this
+ * python limitation.
  *
  * NOTE: The Python C API reference counting is very tricky and the
  * API inconsistently handles PyObject* object ownership.
@@ -76,7 +80,8 @@ std::recursive_mutex PythonEval::_mtx;
  * reference. When you pass PyObject* objects to the API, don't assume
  * you still need to decrement the reference count until you verify
  * that the exact API call you are making does not "steal" the
- * reference: SEE: https://docs.python.org/2/c-api/intro.html?highlight=steals#reference-count-details
+ * reference: SEE:
+ *   https://docs.python.org/2/c-api/intro.html?highlight=steals#reference-count-details
  * Remember to look to verify the behavior of each and every Py_ API call.
  */
 
@@ -140,9 +145,9 @@ static const char** get_module_paths()
         in_project = true;
     free(cwd);
 
-    // The the currrent working directory is the projet build or source
+    // If the currrent working directory is the projet build or source
     // directory, then search those first.
-    int ip=0;
+    int ip = 0;
     if (in_project) {
         for (unsigned i=0; i < nproj-1; i++) {
             paths[ip] = PROJECT_PYTHON_MODULE_PATHS[i];
@@ -243,7 +248,7 @@ static bool try_to_load_modules(const char ** config_paths)
     // opencopg.atomspace cython module failed to load. Avert
     // a hard-to-debug crash on null-pointer-deref, and replace
     // it by a hard-to-debug error message.
-    if (NULL == py_atomspace) {
+    if (nullptr == py_atomspace) {
         PyErr_Print();
         logger().warn("PythonEval::%s Failed to load the "
                        "opencog.atomspace module", __FUNCTION__);
@@ -254,7 +259,7 @@ static bool try_to_load_modules(const char ** config_paths)
     // When it fails, it fails silently, leaving get_path_as_string
     // with a NULL PLT/GOT entry (i.e. calling the subroutine is a
     // null-pointer deref).
-    if (NULL != get_path_as_string)
+    if (nullptr != get_path_as_string)
         logger().info("Python 'sys.path' after OpenCog config adds is: " +
                get_path_as_string());
 
@@ -684,7 +689,7 @@ PyObject* PythonEval::module_for_function(const std::string& moduleFunction,
 
         // If not found, try loading it.
         if (nullptr == pyModule) {
-            add_module_file(moduleName);
+            add_modules_from_path(moduleName);
             pyModule = _modules[moduleName];
         }
 
@@ -1258,9 +1263,9 @@ void PythonEval::add_module_file(const boost::filesystem::path &file)
 }
 
 /**
-* Get a path and determine if it is a file or directory, then call the
-* corresponding function specific to directories and files.
-*/
+ * Get a path and determine if it is a file or directory, then call the
+ * corresponding function specific to directories and files.
+ */
 void PythonEval::add_modules_from_path(std::string pathString)
 {
     std::vector<std::string> dirs;
@@ -1283,7 +1288,7 @@ void PythonEval::add_modules_from_path(std::string pathString)
             Logger::Level btl = logger().get_backtrace_level();
             logger().set_backtrace_level(Logger::Level::NONE);
             logger().error() << "Failed to load python module \'"
-            << abspath << "\', searched directories:";
+                << abspath << "\', searched directories:";
             for (int i = 0; config_paths[i] != NULL; ++i) {
                 logger().error() << "Directory: " << config_paths[i];
             }
@@ -1322,8 +1327,6 @@ void PythonEval::add_modules_from_path(std::string pathString)
     dirs.insert(dirs.end(), files.begin(), files.end());
     for (const auto& abspath : dirs)
         add_modules_from_abspath(abspath);
-
-    return;
 }
 
 void PythonEval::add_modules_from_abspath(std::string pathString)
