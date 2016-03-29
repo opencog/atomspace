@@ -27,7 +27,6 @@
 
 #include <boost/filesystem/operations.hpp>
 
-#include <opencog/util/Config.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/misc.h>
@@ -204,7 +203,7 @@ static bool try_to_load_modules(const char ** config_paths)
 {
     PyObject* pySysPath = PySys_GetObject((char*)"path");
 
-    // Add default OpenCog module directories to the Python interprator's path.
+    // Add default OpenCog module directories to the Python interpreter's path.
     for (int i = 0; config_paths[i] != NULL; ++i)
     {
         struct stat finfo;
@@ -218,38 +217,12 @@ static bool try_to_load_modules(const char ** config_paths)
         }
     }
 
-    // Add custom paths for python modules from the config file.
-    if (config().has("PYTHON_EXTENSION_DIRS"))
-    {
-        std::vector<string> pythonpaths;
-        // For debugging current path
-        tokenize(config()["PYTHON_EXTENSION_DIRS"],
-                std::back_inserter(pythonpaths), ", ");
-
-        for (std::vector<string>::const_iterator it = pythonpaths.begin();
-             it != pythonpaths.end(); ++it)
-        {
-            struct stat finfo;
-            stat(it->c_str(), &finfo);
-            if (S_ISDIR(finfo.st_mode))
-            {
-                PyObject* pyModulePath = PyBytes_FromString(it->c_str());
-                PyList_Append(pySysPath, pyModulePath);
-                Py_DECREF(pyModulePath);
-            } else {
-                logger().warn("%s: "
-                    "Could not find custom python extension directory: %s ",
-                    __FUNCTION__, it->c_str() );
-            }
-        }
-    }
-
     // NOTE: Can't use get_path_as_string() yet because it is defined in a
     // Cython api which we can't import unless the sys.path is correct. So
     // we'll write it out before the imports below to aid in debugging.
     if (logger().is_debug_enabled())
     {
-        logger().debug("Python 'sys.path' after config adds is:");
+        logger().debug("Python 'sys.path' is:");
         Py_ssize_t pathSize = PyList_Size(pySysPath);
         for (int i = 0; i < pathSize; i++)
         {
@@ -414,24 +387,6 @@ PythonEval::PythonEval(AtomSpace* atomspace)
     // mention it here.
     global_python_initialize();
     this->initialize_python_objects_and_imports();
-
-    // Add the preload functions
-    if (config().has("PYTHON_PRELOAD_FUNCTIONS"))
-    {
-        string preloadDirectory = config()["PYTHON_PRELOAD_FUNCTIONS"];
-
-        // According to the mailing list, boost throws exceptions
-        // on  vagrant box, when the opencog.conf file is
-        // misconfigured .. and the default seems to be.
-        try
-        {
-            this->add_modules_from_path(preloadDirectory);
-        }
-        catch (const std::exception& ex)
-        {
-            logger().error() << ex.what();
-        }
-    }
 }
 
 PythonEval::~PythonEval()
