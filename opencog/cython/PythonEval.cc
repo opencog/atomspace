@@ -759,9 +759,9 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
         throw RuntimeException(TRACE_INFO,
             "Expecting arguments to be a ListLink!");
     }
-    int actualArgumentCount = arguments->getArity();
 
     // Now make sure the expected count matches the actual argument count.
+    int actualArgumentCount = arguments->getArity();
     if (expectedArgumentCount != actualArgumentCount) {
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
@@ -776,11 +776,10 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     PyObject* pyAtomSpace = this->atomspace_py_object(_atomspace);
     const HandleSeq& argumentHandles = arguments->getOutgoingSet();
     int tupleItem = 0;
-    for (HandleSeq::const_iterator it = argumentHandles.begin();
-        it != argumentHandles.end(); ++it) {
-
+    for (const Handle& h: argumentHandles)
+    {
         // Place a Python atom object for this handle into the tuple.
-        PyObject* pyAtom = py_atom(it->value(), pyAtomSpace);
+        PyObject* pyAtom = py_atom(h.value(), pyAtomSpace);
         PyTuple_SetItem(pyArguments, tupleItem, pyAtom);
 
         // PyTuple_SetItem steals it's item so don't do this:
