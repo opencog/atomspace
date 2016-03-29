@@ -701,17 +701,12 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
-    PyObject *pyError, *pyModule, *pyUserFunc, *pyReturnValue = NULL;
-    PyObject *pyDict;
-    std::string functionName;
-    std::string errorString;
-
     // Grab the GIL.
-    PyGILState_STATE gstate;
-    gstate = PyGILState_Ensure();
+    PyGILState_STATE gstate = PyGILState_Ensure();
 
     // Get the module and stripped function name.
-    pyModule = this->module_for_function(moduleFunction, functionName);
+    std::string functionName;
+    PyObject* pyModule = this->module_for_function(moduleFunction, functionName);
 
     // If we can't find that module then throw an exception.
     if (!pyModule) {
@@ -723,8 +718,8 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     }
 
     // Get a reference to the user function.
-    pyDict = PyModule_GetDict(pyModule);
-    pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
+    PyObject* pyDict = PyModule_GetDict(pyModule);
+    PyObject* pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
 
     // PyModule_GetDict returns a borrowed reference, so don't do this:
     // Py_DECREF(pyDict);
@@ -796,7 +791,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     Py_DECREF(pyAtomSpace);
 
     // Execute the user function and store its return value.
-    pyReturnValue = PyObject_CallObject(pyUserFunc, pyArguments);
+    PyObject* pyReturnValue = PyObject_CallObject(pyUserFunc, pyArguments);
 
     // Cleanup the reference counts for Python objects we no longer reference.
     // Since we promoted the borrowed pyExecuteUserFunc reference, we need
@@ -806,10 +801,9 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     Py_DECREF(pyArguments);
 
     // Check for errors.
-    pyError = PyErr_Occurred();
-    if (pyError) {
-
+    if (PyErr_Occurred()) {
         // Construct the error message and throw an exception.
+        std::string errorString;
         this->build_python_error_message(moduleFunction.c_str(), errorString);
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
