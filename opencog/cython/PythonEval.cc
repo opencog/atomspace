@@ -711,8 +711,11 @@ PyObject* PythonEval::module_for_function(const std::string& moduleFunction,
         PyObject* pyModule = _modules[moduleName];
 
         // If not found, try loading it.
+        // We have to guess, if its a single file, or an entire
+        // directory with an __init__.py file in it ...
         if (nullptr == pyModule) {
             add_modules_from_path(moduleName);
+            add_modules_from_path(moduleName + ".py");
             pyModule = _modules[moduleName];
         }
 
