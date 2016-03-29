@@ -130,12 +130,21 @@ static const char* PROJECT_PYTHON_MODULE_PATHS[] =
 // This is just plain fucked up, but I cannot find a better solution.
 static const char** get_module_paths()
 {
+    static const char** paths = nullptr;
+
+    if (paths) return paths;
+
     unsigned nproj = sizeof(PROJECT_PYTHON_MODULE_PATHS) / sizeof(char**);
     unsigned ndefp = sizeof(DEFAULT_PYTHON_MODULE_PATHS) / sizeof(char**);
-    // static const char* paths[ndefp + nproj];
-    static const char* paths[
-        (sizeof(DEFAULT_PYTHON_MODULE_PATHS) / sizeof(char**)) +
-        (sizeof(PROJECT_PYTHON_MODULE_PATHS) / sizeof(char**))];
+
+    unsigned nenv = 0;
+    char* pypath = secure_getenv("PYTHONPATH");
+    if (pypath) {
+        char *p = pypath;
+        while (p) { p = strchr(p+1, ':'); nenv++; }
+    }
+
+    paths = (const char**) malloc(sizeof(char *) * (nproj + ndefp + nenv + 1));
 
     // Get current working directory.
     char* cwd = getcwd(NULL, 0);
@@ -159,6 +168,20 @@ static const char** get_module_paths()
     for (unsigned i=0; i < ndefp-1; i++) {
         paths[ip] = DEFAULT_PYTHON_MODULE_PATHS[i];
         ip++;
+    }
+
+    // Finally, use the environment variable.
+    if (pypath) {
+        char* p = strdup(pypath);
+        char* q = strchr(p, ':');
+        while (true) {
+           if (q) *q = '\0';
+           paths[ip] = p;
+           ip++;
+           if (nullptr == q) break;
+           p = q+1;
+           q = strchr(p, ':');
+       }
     }
     paths[ip] = NULL;
 
