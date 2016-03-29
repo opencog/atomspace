@@ -1,14 +1,8 @@
 Using Python with the AtomSpace
 ===============================
 
-#### Installation and Usage
+## Tutorial ##
 
-See [Python's Cython Bindings](../cython/README.md) for detailed
-instructions.
+The OpenCog wiki contains the Python tutorial:
 
-#### Client API
-
-Once the instructions above have been performed, you can run Python
-scripts found in the ```~/opencog/opencog/python``` folder, and you
-can also download and use the Python Client API available here:
-https://github.com/opencog/python-client
+http://wiki.opencog.org/w/Python
