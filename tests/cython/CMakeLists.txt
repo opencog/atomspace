@@ -24,8 +24,6 @@ LINK_LIBRARIES(
 # through a "py-eval" server request.
 #
 ADD_CXXTEST(PythonEvalUTest)
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/cython/pythoneval.conf
-	${PROJECT_BINARY_DIR}/tests/cython/pythoneval.conf)
 
 TARGET_LINK_LIBRARIES(PythonEvalUTest
 	atomspace
