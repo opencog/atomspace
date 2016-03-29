@@ -35,7 +35,7 @@
 
 using namespace opencog;
 
-BackwardChainer::BackwardChainer(AtomSpace& as, Handle rbs)
+BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs)
 	: _as(as), _configReader(as, rbs),
 	  // create a garbage superspace with _as as parent, so codes
 	  // acting on _garbage_superspace will see stuff in _as, but
@@ -49,7 +49,8 @@ BackwardChainer::BackwardChainer(AtomSpace& as, Handle rbs)
  * @param init_target   Handle of the target
  * @param focus_link    The SetLink containing the optional focus set.
  */
-void BackwardChainer::set_target(Handle init_target, Handle focus_link)
+void BackwardChainer::set_target(const Handle& init_target,
+                                 const Handle& focus_link)
 {
 	_init_target = init_target;
 
@@ -59,11 +60,9 @@ void BackwardChainer::set_target(Handle init_target, Handle focus_link)
 	_targets_set.emplace(_init_target, gen_varlist(_init_target));
 
 	// get the stuff under the SetLink
-	LinkPtr lll(LinkCast(focus_link));
-
-	if (lll)
+	if (focus_link and focus_link->isLink())
 	{
-		HandleSeq focus_set = lll->getOutgoingSet();
+		HandleSeq focus_set = focus_link->getOutgoingSet();
 		for (const auto& h : focus_set)
 			_focus_space.add_atom(h);
 
@@ -174,7 +173,7 @@ void BackwardChainer::process_target(Target& target)
 	if (_logical_link_types.count(htarget->getType()) == 1)
 	{
 		bool all_virtual = true;
-		for (const Handle& h : LinkCast(htarget)->getOutgoingSet())
+		for (const Handle& h : htarget->getOutgoingSet())
 		{
 			if (classserver().isA(h->getType(), VIRTUAL_LINK))
 				continue;
@@ -229,7 +228,7 @@ void BackwardChainer::process_target(Target& target)
 	{
 		bc_logger().debug("Breaking into sub-targets");
 
-		HandleSeq sub_premises = LinkCast(htarget)->getOutgoingSet();
+		HandleSeq sub_premises = htarget->getOutgoingSet();
 
 		for (Handle& h : sub_premises)
 			_targets_set.emplace(h, gen_sub_varlist(h, htarget_vardecl,
@@ -409,7 +408,7 @@ void BackwardChainer::process_target(Target& target)
 		bc_logger().debug("Before breaking apart into sub-premises");
 
 		// Else break out any logical link and add to targets
-		HandleSeq sub_premises = LinkCast(hp)->getOutgoingSet();
+		HandleSeq sub_premises = hp->getOutgoingSet();
 		target.store_step(selected_rule, sub_premises);
 
 		for (Handle& s : sub_premises)
@@ -569,7 +568,7 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
  */
 HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
                                          const VarMap& implicand_mapping,
-                                         const std::set<Handle> additional_free_varset,
+                                         const std::set<Handle>& additional_free_varset,
                                          Handle& hrule_implicant_reverse_grounded,
                                          std::vector<VarMap>& premises_vmap_list)
 {
@@ -584,8 +583,9 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
 	LAZY_BC_LOG_DEBUG << "Reverse grounded as:" << std::endl
 	                  << hrule_implicant_reverse_grounded->toShortString();
 
-	// Find all matching premises matching the implicant, where premises_vmap_list
-	// will be the mapping from free variables in himplicant to stuff in a premise
+	// Find all matching premises matching the implicant, where
+	// premises_vmap_list will be the mapping from free variables in
+	// himplicant to stuff in a premise
 	HandleSeq possible_premises =
 		match_knowledge_base(hrule_implicant_reverse_grounded,
 		                     gen_sub_varlist(hrule_implicant_reverse_grounded,
@@ -669,7 +669,7 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 	if (_logical_link_types.count(premises->getType()) == 1)
 	{
 		HandleSeq sub_premises;
-		HandleSeq oset = LinkCast(hpremise)->getOutgoingSet();
+		HandleSeq oset = hpremise->getOutgoingSet();
 
 		for (const Handle& h : oset)
 		{
@@ -695,9 +695,10 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 	// XXX TODO when all VariableNode are unique, we will be able to tell what
 	// type a random VariableNode is in the AtomSpace by looking at its
 	// antecedent; so the type should be included in the future
-	HandleSeq temp_results = match_knowledge_base(premises, Handle::UNDEFINED, temp_vmap_list);
+	HandleSeq temp_results = match_knowledge_base(premises, Handle::UNDEFINED,
+	                                              temp_vmap_list);
 
-	// chase the variables so that if a variable A were mapped to another
+	// Chase the variables so that if a variable A were mapped to another
 	// variable B in premise_vmap, and after pattern matching, B now map
 	// to some solution, change A to map to the same solution
 	for (unsigned int i = 0; i < temp_results.size(); ++i)
@@ -747,11 +748,11 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
  */
 bool BackwardChainer::unify(const Handle& hsource,
                             const Handle& hmatch,
-                            Handle hsource_vardecl,
-                            Handle hmatch_vardecl,
+                            const Handle& hsource_vardecl,
+                            const Handle& hmatch_vardecl,
                             VarMap& result)
 {
-	// lazy way of restricting PM to be between two atoms
+	// Lazy way of restricting PM to be between two atoms
 	AtomSpace temp_space;
 
 	Handle temp_hsource = temp_space.add_atom(hsource);
@@ -759,11 +760,11 @@ bool BackwardChainer::unify(const Handle& hsource,
 	Handle temp_hsource_vardecl = temp_space.add_atom(hsource_vardecl);
 	Handle temp_hmatch_vardecl = temp_space.add_atom(hmatch_vardecl);
 
-	FindAtoms fv(VARIABLE_NODE);
-	fv.search_set(hsource);
-
 	if (temp_hsource_vardecl == Handle::UNDEFINED)
 	{
+		FindAtoms fv(VARIABLE_NODE);
+		fv.search_set(hsource);
+
 		HandleSeq vars;
 		for (const Handle& h : fv.varset)
 			vars.push_back(h);
@@ -772,7 +773,8 @@ bool BackwardChainer::unify(const Handle& hsource,
 	}
 
 	PatternLinkPtr sl(createPatternLink(temp_hsource_vardecl, temp_hsource));
-	UnifyPMCB pmcb(&temp_space, VariableListCast(temp_hsource_vardecl), VariableListCast(temp_hmatch_vardecl));
+	UnifyPMCB pmcb(&temp_space, VariableListCast(temp_hsource_vardecl),
+	               VariableListCast(temp_hmatch_vardecl));
 
 	sl->satisfy(pmcb);
 
@@ -785,7 +787,8 @@ bool BackwardChainer::unify(const Handle& hsource,
 
 	VarMap good_map;
 
-	// go thru each solution, and get the first one that map the whole temp_hmatch
+	// Go thru each solution, and get the first one that map the whole
+	// temp_hmatch
 	//
 	// XXX TODO branch on the various groundings?  how to properly handle
 	// multiple possible unify option????
@@ -802,13 +805,13 @@ bool BackwardChainer::unify(const Handle& hsource,
 		}
 	}
 
-	// if none of the mapping map the whole temp_hmatch (possible in the case
+	// If none of the mapping map the whole temp_hmatch (possible in the case
 	// of sub-atom unification that map a typed variable to another variable)
-	if (good_map.size() == 0)
+	if (good_map.empty())
 		return false;
 
-	// change the mapping from temp_atomspace to current atomspace
-	for (auto& p : good_map)
+	// Change the mapping from temp_atomspace to current atomspace
+	for (const auto& p : good_map)
 	{
 		Handle var = p.first;
 		Handle grn = p.second;
@@ -832,12 +835,9 @@ static void get_all_unique_atoms(const Handle& h, UnorderedHandleSet& atom_set)
 {
     atom_set.insert(h);
 
-    LinkPtr lll(LinkCast(h));
-    if (not lll)
-    {
-        for (const Handle& o : lll->getOutgoingSet())
+    if (h->isLink())
+        for (const Handle& o : h->getOutgoingSet())
             get_all_unique_atoms(o, atom_set);
-    }
 }
 
 /**
@@ -976,8 +976,8 @@ Handle BackwardChainer::gen_sub_varlist(const Handle& parent,
 	fv.search_set(parent);
 
 	HandleSeq oset;
-	if (LinkCast(parent_varlist))
-		oset = LinkCast(parent_varlist)->getOutgoingSet();
+	if (parent_varlist->isLink())
+		oset = parent_varlist->getOutgoingSet();
 	else
 		oset.push_back(parent_varlist);
 
@@ -993,10 +993,10 @@ Handle BackwardChainer::gen_sub_varlist(const Handle& parent,
 			additional_free_varset.erase(h);
 		}
 		else if (TYPED_VARIABLE_LINK == t
-			     and fv.varset.count(LinkCast(h)->getOutgoingSet()[0]) == 1)
+			     and fv.varset.count(h->getOutgoingSet()[0]) == 1)
 		{
 			final_oset.push_back(h);
-			additional_free_varset.erase(LinkCast(h)->getOutgoingSet()[0]);
+			additional_free_varset.erase(h->getOutgoingSet()[0]);
 		}
 	}
 

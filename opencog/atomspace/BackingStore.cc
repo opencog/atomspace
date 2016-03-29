@@ -35,29 +35,27 @@ std::string s_indent("");
 int s_ignore_count = 0;
 #endif
 
-bool BackingStore::ignoreAtom(Handle h) const
+bool BackingStore::ignoreAtom(const Handle& h) const
 {
 #if DEBUG_IGNORE
-    fprintf(stderr, "%signoreAtom(%lu) %d\n", s_indent.c_str(), h->getUUID(),
-    		s_ignore_count++);
+	fprintf(stderr, "%signoreAtom(%lu) %d\n", s_indent.c_str(), h->getUUID(),
+	        s_ignore_count++);
 #endif
 
 	// If the handle is a uuid only, and no atom, we can't ignore it.
-	AtomPtr a(h);
-	if (NULL == a) return false;
+	if (nullptr == h) return false;
 
 	// If the atom is of an ignoreable type, then ignore.
-	if (ignoreType(a->getType())) return true;
+	if (ignoreType(h->getType())) return true;
 
 	// If its a link, then scan the outgoing set.
-	LinkPtr l(LinkCast(a));
-	if (NULL == l) return false;
+	if (not h->isLink()) return false;
 
 #if DEBUG_IGNORE
-    s_indent += "  ";
+	s_indent += "  ";
 #endif
-    bool should_ignore = false;
-	const HandleSeq& hs = l->getOutgoingSet();
+	bool should_ignore = false;
+	const HandleSeq& hs = h->getOutgoingSet();
 	if (std::any_of(hs.begin(), hs.end(), [this](Handle ho) { return ignoreAtom(ho); }))
 		should_ignore = true;
 #if DEBUG_IGNORE

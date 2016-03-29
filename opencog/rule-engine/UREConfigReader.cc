@@ -102,7 +102,7 @@ HandleSeq UREConfigReader::fetch_rule_names(Handle rbs)
 	// longer useful
 	remove_hypergraph(_as, gl);
 
-	return LinkCast(rule_names)->getOutgoingSet();
+	return rule_names->getOutgoingSet();
 }
 
 HandleSeq UREConfigReader::fetch_execution_outputs(Handle schema,
@@ -132,7 +132,7 @@ HandleSeq UREConfigReader::fetch_execution_outputs(Handle schema,
 	// longer useful
 	remove_hypergraph(_as, gl);
 
-	return LinkCast(outputs)->getOutgoingSet();
+	return outputs->getOutgoingSet();
 }
 
 double UREConfigReader::fetch_num_param(const string& schema_name, Handle input,
@@ -141,7 +141,7 @@ double UREConfigReader::fetch_num_param(const string& schema_name, Handle input,
 	Handle param_schema = _as.add_node(SCHEMA_NODE, schema_name);
 	HandleSeq outputs = fetch_execution_outputs(param_schema, input, NUMBER_NODE);
 	{
-		string input_name = NodeCast(input)->getName();
+		string input_name = input->getName();
 		Type input_type = input->getType();
 		string input_str =
 			classserver().getTypeName(input_type) + " \"" + input_name + "\"";

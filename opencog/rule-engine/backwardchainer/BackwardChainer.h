@@ -89,9 +89,10 @@ class BackwardChainer
     friend class ::BackwardChainerUTest;
 
 public:
-	BackwardChainer(AtomSpace& as, Handle rbs);
+	BackwardChainer(AtomSpace& as, const Handle& rbs);
 
-	void set_target(Handle init_target, Handle focus_link = Handle::UNDEFINED);
+	void set_target(const Handle& init_target,
+	                const Handle& focus_link = Handle::UNDEFINED);
 	UREConfigReader& get_config();
 	const UREConfigReader& get_config() const;
 
@@ -128,13 +129,14 @@ private:
 	                               bool enable_var_name_check = false);
 	HandleSeq find_premises(const Rule& standardized_rule,
 	                        const VarMap& implicand_mapping,
-	                        const std::set<Handle> additional_free_varset,
+	                        const std::set<Handle>& additional_free_varset,
 	                        Handle& hrule_implicant_reverse_grounded,
 	                        std::vector<VarMap>& premises_vmap_list);
 	HandleSeq ground_premises(const Handle& htarget, const VarMap& vmap,
 	                          std::vector<VarMap>& vmap_list);
 	bool unify(const Handle& hsource, const Handle& hmatch,
-	           Handle hsource_vardecl, Handle hmatch_vardecl, VarMap& result);
+	           const Handle& hsource_vardecl, const Handle& hmatch_vardecl,
+	           VarMap& result);
 
 	Handle garbage_substitute(const Handle& term, const VarMap& vm);
 	

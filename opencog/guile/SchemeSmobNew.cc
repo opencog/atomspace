@@ -63,12 +63,11 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 	// to file, and then restored, as needed.
 	std::string ret = "";
 	for (int i=0; i< indent; i++) ret += "   ";
-	NodePtr nnn(NodeCast(h));
-	if (nnn) {
+	if (h->isNode()) {
 		ret += "(";
 		ret += classserver().getTypeName(h->getType());
 		ret += " \"";
-		ret += nnn->getName();
+		ret += h->getName();
 		ret += "\"";
 
 		// Print the truth value only after the node name
@@ -88,8 +87,7 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 		return ret;
 	}
 
-	LinkPtr lll(LinkCast(h));
-	if (lll) {
+	if (h->isLink()) {
 		ret += "(";
 		ret += classserver().getTypeName(h->getType());
 
@@ -109,7 +107,7 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 
 		// print the outgoing link set.
 		ret += "\n";
-		std::vector<Handle> oset = lll->getOutgoingSet();
+		const HandleSeq& oset = h->getOutgoingSet();
 		unsigned int arity = oset.size();
 		for (unsigned int i=0; i<arity; i++) {
 			//ret += " ";

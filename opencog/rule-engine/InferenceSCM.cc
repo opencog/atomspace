@@ -69,7 +69,7 @@ Handle InferenceSCM::do_forward_chaining(Handle hsource,
     HandleSeq focus_set = {};
 
     if (hfocus_set->getType() == SET_LINK)
-        focus_set = LinkCast(hfocus_set)->getOutgoingSet();
+        focus_set = hfocus_set->getOutgoingSet();
     else
         throw RuntimeException(
                 TRACE_INFO,

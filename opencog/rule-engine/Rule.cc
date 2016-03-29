@@ -56,12 +56,12 @@ void Rule::init(Handle rule)
 		                                "Rule '%s' is expected to be a MemberLink",
 		                                rule->toString().c_str());
 
-		rule_alias_ = LinkCast(rule)->getOutgoingAtom(0);
-		Handle rbs = LinkCast(rule)->getOutgoingAtom(1);
+		rule_alias_ = rule->getOutgoingAtom(0);
+		Handle rbs = rule->getOutgoingAtom(1);
 
 		rule_handle_ = DefineLink::get_definition(rule_alias_);
-		name_ = NodeCast(rule_alias_)->getName();
-		category_ = NodeCast(rbs)->getName();
+		name_ = rule_alias_->getName();
+		category_ = rbs->getName();
 		weight_ = rule->getTruthValue()->getMean();
 	}
 }
@@ -126,7 +126,7 @@ Handle Rule::get_vardecl() const
 	if (rule_handle_ == Handle::UNDEFINED)
 		return Handle::UNDEFINED;
 
-	return LinkCast(rule_handle_)->getOutgoingAtom(0);
+	return rule_handle_->getOutgoingAtom(0);
 }
 
 /**
@@ -160,7 +160,7 @@ HandleSeq Rule::get_implicant_seq() const
     HandleSeq hs;
 
     if (t == AND_LINK or t == OR_LINK)
-        hs = LinkCast(implicant)->getOutgoingSet();
+        hs = implicant->getOutgoingSet();
     else
         hs.push_back(implicant);
 
@@ -202,7 +202,7 @@ HandleSeq Rule::get_implicand_seq() const
 	// skip the top level ListLink
 	if (implicand->getType() == LIST_LINK)
 	{
-		for (Handle h : LinkCast(implicand)->getOutgoingSet())
+		for (const Handle& h : implicand->getOutgoingSet())
 			pre_output.push(h);
 	}
 	else
@@ -219,9 +219,9 @@ HandleSeq Rule::get_implicand_seq() const
 		if (hfront->getType() == EXECUTION_OUTPUT_LINK)
 		{
 			// get the ListLink containing the arguments of the ExecutionOutputLink
-			Handle harg = LinkCast(hfront)->getOutgoingSet()[1];
+			Handle harg = hfront->getOutgoingSet()[1];
 
-			for (Handle h : LinkCast(harg)->getOutgoingSet())
+			for (const Handle& h : harg->getOutgoingSet())
 				pre_output.push(h);
 
 			continue;
@@ -283,9 +283,9 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
 Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
                                 std::map<Handle, Handle>& dict)
 {
-	if (LinkCast(h))
+	if (h->isLink())
 	{
-		HandleSeq old_outgoing = LinkCast(h)->getOutgoingSet();
+		HandleSeq old_outgoing = h->getOutgoingSet();
 		HandleSeq new_outgoing;
 
 		for (auto ho : old_outgoing)
@@ -303,7 +303,7 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 	// want to generate a completely unique variable
 	if (dict.count(h) == 0)
 	{
-		std::string new_name = NodeCast(h)->getName() + "-" + to_string(boost::uuids::random_generator()());
+		std::string new_name = h->getName() + "-" + to_string(boost::uuids::random_generator()());
 		Handle hcpy = as->add_atom(createNode(h->getType(), new_name, h->getTruthValue()));
 
 		dict[h] = hcpy;
@@ -315,7 +315,7 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 	if (dict.at(h) != Handle::UNDEFINED)
 		return dict[h];
 
-	std::string new_name = NodeCast(h)->getName() + "-" + name_;
+	std::string new_name = h->getName() + "-" + name_;
 	Handle hcpy = as->add_atom(createNode(h->getType(), new_name, h->getTruthValue()));
 
 	dict[h] = hcpy;

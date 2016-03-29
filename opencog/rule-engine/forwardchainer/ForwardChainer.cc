@@ -67,7 +67,7 @@ void ForwardChainer::init(const Handle& hsource, const HandleSeq& focus_set)
 
     // Accept set of initial sources wrapped in a SET_LINK.
     if (hsource->getType() == SET_LINK) {
-        init_sources = LinkCast(hsource)->getOutgoingSet();
+        init_sources = hsource->getOutgoingSet();
     } else {
         init_sources.push_back(hsource);
     }
@@ -185,9 +185,8 @@ Handle ForwardChainer::choose_source()
 		// remain a hack anyway.
 		if (biased_randbool(0.01)) {
 			for (const Handle& h : _selected_sources) {
-				LinkPtr l = LinkCast(h);
-				if (l) {
-					const HandleSeq& outgoings = l->getOutgoingSet();
+				if (h->isLink()) {
+					const HandleSeq& outgoings = h->getOutgoingSet();
 					update_potential_sources(outgoings);
 				}
 			}
@@ -318,7 +317,7 @@ HandleSeq ForwardChainer::apply_rule(const Handle& rhandle)
         Handle implicant = BindLinkCast(rhandle)->get_body();
         HandleSeq hs;
         if (implicant->getType() == AND_LINK or implicant->getType() == OR_LINK)
-            hs = LinkCast(implicant)->getOutgoingSet();
+            hs = implicant->getOutgoingSet();
         else
             hs.push_back(implicant);
         // Actual checking here.
@@ -331,7 +330,7 @@ HandleSeq ForwardChainer::apply_rule(const Handle& rhandle)
         }
 
         Instantiator inst(&_as);
-        Handle houtput = LinkCast(rhandle)->getOutgoingSet().back();
+        Handle houtput = rhandle->getOutgoingSet().back();
         LAZY_FC_LOG_DEBUG << "Instantiating " << houtput->toShortString();
 
         result.push_back(inst.instantiate(houtput, {}));
@@ -409,7 +408,7 @@ UnorderedHandleSet ForwardChainer::derive_rules(const Handle& source,
 {
     // Exceptions
     if (not is_valid_implicant(pattern))
-        return {};
+	    return UnorderedHandleSet();
 
     // Create a temporary atomspace with the rule pattern and the
     // source inside
@@ -442,7 +441,7 @@ UnorderedHandleSet ForwardChainer::derive_rules(const Handle& source,
     }
 
     if (gcb.term_groundings.empty())
-        return {};
+	    return UnorderedHandleSet();
 
     // OC_ASSERT(gcb.term_groundings.size() == 1,
     //           "There should be only one way to have a "
@@ -535,11 +534,9 @@ void ForwardChainer::validate(const Handle& hsource, const HandleSeq& hfocus_set
 static void get_all_unique_atoms(const Handle& h, UnorderedHandleSet& atom_set)
 {
     atom_set.insert(h);
-
-    LinkPtr lll(LinkCast(h));
-    if (lll)
+    if (h->isLink())
     {
-        for (const Handle& o : lll->getOutgoingSet())
+        for (const Handle& o : h->getOutgoingSet())
             get_all_unique_atoms(o, atom_set);
     }
 }
@@ -618,7 +615,7 @@ HandleSeq ForwardChainer::substitute_rule_part(
         // generate varlist from himplicant.
         Handle hvarlist = as.add_atom(
             gen_sub_varlist(himplicant,
-                            LinkCast(hrule)->getOutgoingAtom(0)));
+                            hrule->getOutgoingAtom(0)));
 
         // Create a simplified implicand without constant clauses
         Handle hsimplicant = remove_constant_clauses(hvarlist, himplicant);
@@ -656,7 +653,7 @@ bool ForwardChainer::unify(const Handle& source, const Handle& pattern,
     Handle bl =
         tmp_as.add_link(BIND_LINK, pattern_vardecl, pattern_cpy, pattern_cpy);
     Handle result = bindlink(&tmp_as, bl);
-    HandleSeq results = LinkCast(result)->getOutgoingSet();
+    HandleSeq results = result->getOutgoingSet();
 
     return std::find(results.begin(), results.end(), source_cpy) != results.end();
 }
@@ -668,8 +665,8 @@ Handle ForwardChainer::gen_sub_varlist(const Handle& parent,
     fv.search_set(parent);
 
     HandleSeq oset;
-    if (LinkCast(parent_varlist))
-        oset = LinkCast(parent_varlist)->getOutgoingSet();
+    if (parent_varlist->isLink())
+        oset = parent_varlist->getOutgoingSet();
     else
         oset.push_back(parent_varlist);
 
@@ -681,7 +678,7 @@ Handle ForwardChainer::gen_sub_varlist(const Handle& parent,
 
         if ((VARIABLE_NODE == t and fv.varset.count(h) == 1)
             or (TYPED_VARIABLE_LINK == t
-                and fv.varset.count(LinkCast(h)->getOutgoingSet()[0]) == 1))
+                and fv.varset.count(h->getOutgoingAtom(0)) == 1))
             final_oset.push_back(h);
     }
 

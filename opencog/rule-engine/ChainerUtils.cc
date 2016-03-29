@@ -34,17 +34,16 @@ void get_outgoing_nodes(const Handle& hinput,
                         UnorderedHandleSet& node_set,
                         Type type)
 {
-    LinkPtr link(LinkCast(hinput));
     // Recursive case
-    if (link) {
-        for (const Handle& h : link->getOutgoingSet())
+    if (hinput->isLink()) {
+        for (const Handle& h : hinput->getOutgoingSet())
             get_outgoing_nodes(h, node_set, type);
         return;
     }
 
     // Base case
     if (NODE == type or // Empty means all kinds of nodes
-        NodeCast(hinput)->getType() == type)
+        hinput->getType() == type)
     {
         node_set.insert(hinput);
     }
@@ -69,27 +68,24 @@ bool are_similar(const Handle& h1, const Handle& h2, bool strict_type_match)
     if (h1 == h2)
         return true;
 
-    if (NodeCast(h1) and NodeCast(h2))
+    if (h1->isNode() and h2->isNode())
         return !strict_type_match or h1->getType() == h2->getType();
 
-    LinkPtr lh1(LinkCast(h1));
-    LinkPtr lh2(LinkCast(h2));
-
-    if (lh1 and lh2) {
-        if (strict_type_match and (lh1->getType() != lh2->getType()))
+    if (h1->isLink() and h2->isLink()) {
+        if (strict_type_match and (h1->getType() != h2->getType()))
             return false;
 
-        HandleSeq hseqh1 = lh1->getOutgoingSet();
-        HandleSeq hseqh2 = lh2->getOutgoingSet();
+        const HandleSeq& hseqh1 = h1->getOutgoingSet();
+        HandleSeq hseqh2 = h2->getOutgoingSet();
 
         if (hseqh1.size() != hseqh2.size())
             return false;
 
         // Unordered links should be treated in a special way
-        if (classserver().isA(lh1->getType(), UNORDERED_LINK) or classserver().isA(
-                lh2->getType(), UNORDERED_LINK)) {
-
-            for (const auto& h1 : hseqh1) {
+        if (classserver().isA(h1->getType(), UNORDERED_LINK) or
+            classserver().isA(h2->getType(), UNORDERED_LINK))
+        {
+            for (const Handle& h1 : hseqh1) {
                 for (auto it = hseqh2.begin(); it != hseqh2.end(); ++it) {
                     if (are_similar(h1, h2, strict_type_match)) {
                         hseqh2.erase(it);
