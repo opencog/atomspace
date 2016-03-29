@@ -681,6 +681,14 @@ PyObject* PythonEval::module_for_function(const std::string& moduleFunction,
     if (0 < index) {
         std::string moduleName = moduleFunction.substr(0, index);
         PyObject* pyModule = _modules[moduleName];
+
+        // If not found, try loading it.
+        if (nullptr == pyModule) {
+            add_module_file(moduleName);
+            pyModule = _modules[moduleName];
+        }
+
+        // If found, we are done.
         if (pyModule) {
             functionName = moduleFunction.substr(index+1);
             return pyModule;
@@ -1119,8 +1127,8 @@ void PythonEval::add_to_sys_path(std::string path)
 
 const int ABSOLUTE_IMPORTS_ONLY = 0;
 
-void PythonEval::import_module( const boost::filesystem::path &file,
-                                PyObject* pyFromList)
+void PythonEval::import_module(const boost::filesystem::path &file,
+                               PyObject* pyFromList)
 {
     // The pyFromList parameter corresponds to what would appear in an
     // import statement after the import:
@@ -1151,7 +1159,7 @@ void PythonEval::import_module( const boost::filesystem::path &file,
 
         // Add the ATOMSPACE object to this module
         PyObject* pyAtomSpaceObject = this->atomspace_py_object(_atomspace);
-        PyDict_SetItemString(pyModuleDictionary,"ATOMSPACE",
+        PyDict_SetItemString(pyModuleDictionary, "ATOMSPACE",
                 pyAtomSpaceObject);
 
         // This decrement is needed because PyDict_SetItemString does
@@ -1172,11 +1180,10 @@ void PythonEval::import_module( const boost::filesystem::path &file,
 
     // otherwise, handle the error.
     } else {
-        if(PyErr_Occurred())
+        if (PyErr_Occurred())
             PyErr_Print();
         logger().warn() << "Couldn't import '" << moduleName << "' module";
     }
-
 }
 
 /**
