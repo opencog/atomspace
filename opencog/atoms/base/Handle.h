@@ -227,10 +227,13 @@ typedef std::set<Handle> OrderedHandleSet;
 typedef std::unordered_set<Handle, handle_hash> UnorderedHandleSet;
 
 //! an ordered map from Handle to Handle set
-typedef std::map<Handle, UnorderedHandleSet> VarMultimap;
+typedef std::map<Handle, UnorderedHandleSet> HandleMultimap;
 
 //! an ordered map from Handle to Handle
-typedef std::map<Handle, Handle> VarMap;
+typedef std::map<Handle, Handle> HandleMap;
+
+//! a sequence of ordered handle map
+typedef std::vector<HandleMap> HandleMapSeq;
 
 //! a handle iterator
 typedef std::iterator<std::forward_iterator_tag, Handle> HandleIterator;
@@ -303,11 +306,13 @@ ostream& operator<<(ostream& out, const opencog::OrderedHandleSet& hs);
 ostream& operator<<(ostream& out, const opencog::UnorderedHandleSet& hs);
 
 // Debugging helpers, very convenient to print Handle sets in gdb
+string h_to_string(const opencog::Handle& h);
 string hs_to_string(const opencog::HandleSeq& hs);
 string ohs_to_string(const opencog::OrderedHandleSet& ohs);
 string uhs_to_string(const opencog::UnorderedHandleSet& uhs);
-string varmap_to_string(const opencog::VarMap& vm);
-string varmultimap_to_string(const opencog::VarMultimap& vmm);
+string hmap_to_string(const opencog::HandleMap& hm);
+string hmultimap_to_string(const opencog::HandleMultimap& hmm);
+string hmaps_to_string(const opencog::HandleMapSeq& hms);
 string atomtype_to_string(opencog::Type type);
 
 #ifdef THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472

@@ -86,7 +86,7 @@ void BackwardChainerUTest::test_1_rule_bc_modus_ponens()
 	bc.get_config().set_maximum_iterations(300);
 	bc.do_chain();
 
-	VarMultimap results = bc.get_chaining_result();
+	HandleMultimap results = bc.get_chaining_result();
 
 	TS_ASSERT_EQUALS(results[target_var].size(), 2);
 	TS_ASSERT_EQUALS(results[target_var].count(soln), 1);
@@ -122,7 +122,7 @@ void BackwardChainerUTest::test_1_rule_bc_modus_ponens()
 // 	bc.get_config().set_maximum_iterations(200);
 // 	bc.do_chain();
 
-// 	VarMultimap results = bc.get_chaining_result();
+// 	HandleMultimap results = bc.get_chaining_result();
 
 // 	TS_ASSERT_EQUALS(results[target_var].size(), 3);
 // 	TS_ASSERT_EQUALS(results[target_var].count(B), 1);
@@ -160,7 +160,7 @@ void BackwardChainerUTest::test_1_rule_impossible_bc()
 	bc.get_config().set_maximum_iterations(1000);
 	bc.do_chain();
 
-	VarMultimap results = bc.get_chaining_result();
+	HandleMultimap results = bc.get_chaining_result();
 
 	TSM_ASSERT("Incorrect number of solution found!",
 	           results[target_var].size() == 1);
@@ -197,7 +197,7 @@ void BackwardChainerUTest::test_2_rules_bc()
 	bc.get_config().set_maximum_iterations(1000);
 	bc.do_chain();
 
-	VarMultimap results = bc.get_chaining_result();
+	HandleMultimap results = bc.get_chaining_result();
 
 	TSM_ASSERT("Incorrect number of solution found!",
 	           results[target_var].size() == 2);
@@ -329,7 +329,7 @@ void BackwardChainerUTest::test_focus_set()
 	bc.get_config().set_maximum_iterations(300);
 	bc.do_chain();
 
-	VarMultimap results = bc.get_chaining_result();
+	HandleMultimap results = bc.get_chaining_result();
 
 	TS_ASSERT_EQUALS(results[target_var].size(), 2);
 	TS_ASSERT_EQUALS(results[target_var].count(soln1), 1);

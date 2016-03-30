@@ -30,8 +30,8 @@
 
 using namespace opencog;
 
-bool Satisfier::grounding(const std::map<Handle, Handle> &var_soln,
-                          const std::map<Handle, Handle> &term_soln)
+bool Satisfier::grounding(const HandleMap &var_soln,
+                          const HandleMap &term_soln)
 {
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 	_result = TruthValue::TRUE_TV();
@@ -85,8 +85,8 @@ bool Satisfier::search_finished(bool done)
 
 // ===========================================================
 
-bool SatisfyingSet::grounding(const std::map<Handle, Handle> &var_soln,
-                              const std::map<Handle, Handle> &term_soln)
+bool SatisfyingSet::grounding(const HandleMap &var_soln,
+                              const HandleMap &term_soln)
 {
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 

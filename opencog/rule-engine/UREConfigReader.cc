@@ -33,14 +33,14 @@ const std::string UREConfigReader::top_rbs_name = "URE";
 const std::string UREConfigReader::attention_alloc_name = "URE:attention-allocation";
 const std::string UREConfigReader::max_iter_name = "URE:maximum-iterations";
 
-UREConfigReader::UREConfigReader(AtomSpace& as, Handle rbs) : _as(as)
+UREConfigReader::UREConfigReader(AtomSpace& as, const Handle& rbs) : _as(as)
 {
 	if (Handle::UNDEFINED == rbs)
 		throw RuntimeException(TRACE_INFO,
 			"UREConfigReader - invalid rulebase specified!");
 
 	// Retrieve the rules (MemberLinks) and instantiate them
-	for (Handle rule_name : fetch_rule_names(rbs))
+	for (const Handle& rule_name : fetch_rule_names(rbs))
 		_rbparams.rules.emplace_back(rule_name, rbs);
 
 	// Fetch maximum number of iterations
@@ -90,23 +90,25 @@ void UREConfigReader::set_maximum_iterations(int mi)
 	_rbparams.max_iter = mi;
 }
 
-HandleSeq UREConfigReader::fetch_rule_names(Handle rbs)
+HandleSeq UREConfigReader::fetch_rule_names(const Handle& rbs)
 {
 	// Retrieve rules
-	Handle rule_var = _as.add_node(VARIABLE_NODE, "__URE_RULE__");
-	Handle rule_pat = _as.add_link(MEMBER_LINK, rule_var, rbs);
-	Handle gl = _as.add_link(GET_LINK, rule_pat);
-	Handle rule_names = satisfying_set(&_as, gl);
+	Handle rule_var = _as.add_node(VARIABLE_NODE, "__URE_RULE__"),
+		rule_pat = _as.add_link(MEMBER_LINK, rule_var, rbs),
+		gl = _as.add_link(GET_LINK, rule_pat),
+		results = satisfying_set(&_as, gl);
+	HandleSeq rule_names = results->getOutgoingSet();
 
-	// Remove the GetLink pattern from the AtomSpace as it is no
-	// longer useful
+	// Remove the GetLink pattern and other no longer useful atoms
+	// from the AtomSpace
 	remove_hypergraph(_as, gl);
-
-	return rule_names->getOutgoingSet();
+	_as.remove_atom(results);
+		
+	return rule_names;
 }
 
-HandleSeq UREConfigReader::fetch_execution_outputs(Handle schema,
-                                                   Handle input,
+HandleSeq UREConfigReader::fetch_execution_outputs(const Handle& schema,
+                                                   const Handle& input,
                                                    Type type)
 {
 	// Retrieve rules
@@ -126,16 +128,19 @@ HandleSeq UREConfigReader::fetch_execution_outputs(Handle schema,
 		                               schema,
 		                               input,
 		                               var_node)),
-		outputs = satisfying_set(&_as, gl);
+		results = satisfying_set(&_as, gl);
+	HandleSeq outputs = results->getOutgoingSet();
 
-	// Remove the GetLink pattern from the AtomSpace as it is no
-	// longer useful
+	// Remove the GetLink pattern and other no longer useful atoms
+	// from the AtomSpace
 	remove_hypergraph(_as, gl);
+	_as.remove_atom(results);
 
-	return outputs->getOutgoingSet();
+	return outputs;
 }
 
-double UREConfigReader::fetch_num_param(const string& schema_name, Handle input,
+double UREConfigReader::fetch_num_param(const string& schema_name,
+                                        const Handle& input,
                                         double default_value)
 {
 	Handle param_schema = _as.add_node(SCHEMA_NODE, schema_name);
@@ -167,7 +172,8 @@ double UREConfigReader::fetch_num_param(const string& schema_name, Handle input,
 	}
 }
 
-bool UREConfigReader::fetch_bool_param(const string& pred_name, Handle input)
+bool UREConfigReader::fetch_bool_param(const string& pred_name,
+                                       const Handle& input)
 {
 	Handle pred = _as.add_node(PREDICATE_NODE, pred_name);
 	TruthValuePtr tv =

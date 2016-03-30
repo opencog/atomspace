@@ -24,8 +24,6 @@ LINK_LIBRARIES(
 # through a "py-eval" server request.
 #
 ADD_CXXTEST(PythonEvalUTest)
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/cython/pythoneval.conf
-	${PROJECT_BINARY_DIR}/tests/cython/pythoneval.conf)
 
 TARGET_LINK_LIBRARIES(PythonEvalUTest
 	atomspace
@@ -90,7 +88,7 @@ IF (HAVE_NOSETESTS)
 		SET_TESTS_PROPERTIES(CythonBindlink
 			PROPERTIES
 			ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
-			ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_SOURCE_DIR}/opencog/python")
+			ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython/:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/bindlink")
 	ENDIF (HAVE_ATOMSPACE)
 
 	IF (HAVE_ATOMSPACE AND HAVE_GUILE)

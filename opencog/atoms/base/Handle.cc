@@ -127,8 +127,7 @@ namespace std {
 ostream& operator<<(ostream& out, const T& hs) { \
 	size_t i = 0; \
 	for (const Handle& h : hs) { \
-		out << "atom[" << i << "]:" << endl; \
-		if ((AtomPtr)h != nullptr) out << h->toString(); \
+		out << "atom[" << i << "]:" << endl << h_to_string(h); \
 		i++; \
 	} \
 	return out; \
@@ -137,6 +136,13 @@ GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::HandleSeq)
 GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::OrderedHandleSet)
 GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::UnorderedHandleSet)
 
+string h_to_string(const Handle& h)
+{
+	if ((AtomPtr)h == nullptr)
+		return "nullatom\n";
+	else
+		return h->toString();
+}
 string hs_to_string(const HandleSeq& hs)
 {
 	stringstream ss; ss << hs; return ss.str();
@@ -149,28 +155,36 @@ string uhs_to_string(const UnorderedHandleSet& uhs)
 {
 	stringstream ss; ss << uhs; return ss.str();
 }
-std::string varmap_to_string(const VarMap& varmap)
+std::string hmap_to_string(const HandleMap& hmap)
 {
 	stringstream ss;
 	int i = 0;
-	for (const auto& p : varmap) {
-		ss << "key[" << i << "]:" << std::endl << p.first->toString()
-		   << "value[" << i << "]:" << std::endl << p.second->toString();
+	for (const auto& p : hmap) {
+		ss << "key[" << i << "]:" << std::endl << h_to_string(p.first)
+		   << "value[" << i << "]:" << std::endl << h_to_string(p.second);
 		i++;
 	}
 	return ss.str();
 }
-std::string varmultimap_to_string(const VarMultimap& varmultimap)
+std::string hmultimap_to_string(const HandleMultimap& hmultimap)
 {
 	stringstream ss;
 	int i = 0;
-	for (const auto& p : varmultimap) {
-		ss << "key[" << i << "]:" << std::endl << p.first->toString()
+	for (const auto& p : hmultimap) {
+		ss << "key[" << i << "]:" << std::endl << h_to_string(p.first)
 		   << "value[" << i << "]:" << std::endl;
 		for (const auto s : p.second)
-			ss << s->toString();
+			ss << h_to_string(s);
 		i++;
 	}
+	return ss.str();
+}
+std::string hmaps_to_string(const HandleMapSeq& hms)
+{
+	stringstream ss;
+	for (unsigned i = 0; i < hms.size(); i++)
+		ss << "--- map[" << i << "] ---" << std::endl
+		   << hmap_to_string(hms[i]);
 	return ss.str();
 }
 std::string atomtype_to_string(Type type)
@@ -179,4 +193,3 @@ std::string atomtype_to_string(Type type)
 }
 
 } // ~namespace std
-

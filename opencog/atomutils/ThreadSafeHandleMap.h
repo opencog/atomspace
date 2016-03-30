@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/base/HandleMap.h
+ * opencog/atoms/base/ThreadSafeHandleMap.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -23,7 +23,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/** \file HandleMap.h
+/** \file ThreadSafeHandleMap.h
  * red-black tree maps Handle keys to type T elements
  */
 
@@ -43,17 +43,17 @@ namespace opencog
  *  @{
  */
 
-template<class T> class HandleMapIterator;
+template<class T> class ThreadSafeHandleMapIterator;
 
 //! red-black tree maps Handle keys to type T elements
 /**
  * This is an Adapter to stl's HashMap.
  */
 template<class T>
-class HandleMap
-    : public std::enable_shared_from_this<HandleMap<T>>
+class ThreadSafeHandleMap
+    : public std::enable_shared_from_this<ThreadSafeHandleMap<T>>
 {
-    friend class HandleMapIterator<T>;
+    friend class ThreadSafeHandleMapIterator<T>;
 
 private:
 
@@ -75,8 +75,8 @@ private:
 
 public:
 
-    typedef std::shared_ptr<HandleMap<T>> MapPtr;
-    HandleMap() {} 
+    typedef std::shared_ptr<ThreadSafeHandleMap<T>> MapPtr;
+    ThreadSafeHandleMap() {} 
 
     /**
      * Adds a new entry to the hash table.
@@ -115,7 +115,7 @@ public:
         if (ti == _handle_map.end())
         {
             throw AssertionException(
-                "HandleMap: key (%ld) does not exist in this map",
+                "ThreadSafeHandleMap: key (%ld) does not exist in this map",
                 key.value());  
         }
         return ti->second;
@@ -197,18 +197,18 @@ public:
      *
      * @return An iterator through all keys stored in the hash table.
      */
-    HandleMapIterator<T>* keys()
+    ThreadSafeHandleMapIterator<T>* keys()
     {
-        MapPtr mp = std::enable_shared_from_this<HandleMap<T>>::shared_from_this();
-        return new HandleMapIterator<T>(mp);
+        MapPtr mp = std::enable_shared_from_this<ThreadSafeHandleMap<T>>::shared_from_this();
+        return new ThreadSafeHandleMapIterator<T>(mp);
     }
 
 };
 
 template<class T>
-class HandleMapIterator
+class ThreadSafeHandleMapIterator
 {
-    friend class HandleMap<T>;
+    friend class ThreadSafeHandleMap<T>;
 
 private:
 
@@ -221,15 +221,15 @@ private:
     /**
      * Stores the handleMap.
      */
-    typedef std::shared_ptr<HandleMap<T>> MapPtr;
+    typedef std::shared_ptr<ThreadSafeHandleMap<T>> MapPtr;
     MapPtr map;
 
     /**
      * Constructor for this class.
      *
-     * @param HandleMap object to be iterated.
+     * @param ThreadSafeHandleMap object to be iterated.
      */
-    HandleMapIterator(MapPtr m)
+    ThreadSafeHandleMapIterator(MapPtr m)
     {
         map = m;
         std::lock_guard<std::mutex> lck(map->_mtx);
@@ -258,7 +258,7 @@ public:
     Handle next()
     {
         if (!has_next()) {
-            throw IndexErrorException(TRACE_INFO, "HandleMapIterator out of bounds");
+            throw IndexErrorException(TRACE_INFO, "ThreadSafeHandleMapIterator out of bounds");
         }
 
         std::lock_guard<std::mutex> lck(map->_mtx);

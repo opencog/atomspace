@@ -81,8 +81,8 @@ private:
 	static SCM ss_link(SCM, SCM);
 	static SCM ss_delete(SCM, SCM);
 	static SCM ss_delete_recursive(SCM, SCM);
-	static SCM ss_purge(SCM, SCM);
-	static SCM ss_purge_recursive(SCM, SCM);
+	static SCM ss_extract(SCM, SCM);
+	static SCM ss_extract_recursive(SCM, SCM);
 	static SCM ss_value_p(SCM);
 	static SCM ss_atom_p(SCM);
 	static SCM ss_node_p(SCM);

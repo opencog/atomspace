@@ -29,9 +29,6 @@
 namespace opencog
 {
 
-typedef std::map<Handle, UnorderedHandleSet> VarMultimap;
-typedef std::map<Handle, Handle> VarMap;
-
 class Target
 {
 	friend class TargetSet;
@@ -51,8 +48,8 @@ public:
 	}
 
 	void store_step(const Rule& r, const HandleSeq& premises);
-	void store_varmap(VarMultimap& vm);
-	void store_varmap(VarMap& vm);
+	void store_varmap(HandleMultimap& vm);
+	void store_varmap(HandleMap& vm);
 	unsigned int rule_count(const Rule& r) const;
 
 	/**
@@ -94,9 +91,9 @@ public:
 	/**
 	 * Get the stored free variable mappings.
 	 *
-	 * @return a VarMultimap object of the mappings
+	 * @return a HandleMultimap object of the mappings
 	 */
-	const VarMultimap& get_varmap() const { return _varmap; }
+	const HandleMultimap& get_varmap() const { return _varmap; }
 
 	unsigned int get_selection_count() const { return _selection_count; }
 
@@ -117,7 +114,7 @@ private:
 	unsigned int _selection_count;
 
 	Handle _vardecl;
-	VarMultimap _varmap;
+	HandleMultimap _varmap;
 
 	AtomSpace& _as;
 };

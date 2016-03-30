@@ -53,8 +53,8 @@ public:
         delete _inst;
     }
 
-    virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-                           const std::map<Handle, Handle> &term_soln)
+    virtual bool grounding(const HandleMap &var_soln,
+                           const HandleMap &term_soln)
     {
         Handle h = _inst->instantiate(implicand, var_soln);
 

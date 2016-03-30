@@ -99,7 +99,7 @@ Handle InferenceSCM::do_backward_chaining(Handle h,
     bc.do_chain();
 
     logger().debug("[BackwardChainer] After do_chain");
-    map<Handle, UnorderedHandleSet> soln = bc.get_chaining_result();
+    HandleMultimap soln = bc.get_chaining_result();
 
     HandleSeq soln_list_link;
     for (auto it = soln.begin(); it != soln.end(); ++it) {

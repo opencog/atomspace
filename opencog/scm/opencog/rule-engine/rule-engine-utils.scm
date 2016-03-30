@@ -105,7 +105,7 @@
        ; Delete any previous value for that parameter
        (cog-bind del-prev-val)
        ; Delete pattern to not create to much junk in the atomspace
-       (purge-hypergraph del-prev-val)
+       (extract-hypergraph del-prev-val)
   )
 
   ; Set new value for that parameter

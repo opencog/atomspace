@@ -253,7 +253,7 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
 
 	// clone the Rule
 	Rule st_ver = *this;
-	std::map<Handle, Handle> dict;
+	HandleMap dict;
 
 	Handle vdecl = get_vardecl();
 	std::set<Handle> varset;
@@ -281,7 +281,7 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
  * @return       the new atom
  */
 Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
-                                std::map<Handle, Handle>& dict)
+                                HandleMap& dict)
 {
 	if (h->isLink())
 	{

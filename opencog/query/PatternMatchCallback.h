@@ -234,8 +234,8 @@ class PatternMatchCallback
 		 * Note that the callback may be called many times reporting
 		 * the same result.
 		 */
-		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-		                       const std::map<Handle, Handle> &term_soln) = 0;
+		virtual bool grounding(const HandleMap &var_soln,
+		                       const HandleMap &term_soln) = 0;
 
 		/**
 		 * Called whenever the incoming set of an atom is to be explored.

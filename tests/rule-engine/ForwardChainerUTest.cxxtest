@@ -179,11 +179,11 @@ void ForwardChainerUTest::test_substitute_rule_part(void)
 	Handle grnd_2 = eval.eval_h("(ConceptNode \"Animal\")");
 
 	// When the first premise of deduction rule is matched
-	std::map<Handle, Handle> vg_map_1 = { { var_a, grnd_1 }, { var_b, grnd_2 } };
+	HandleMap vg_map_1 = { { var_a, grnd_1 }, { var_b, grnd_2 } };
 	// Then the second premise of deduction rule is matched
-	std::map<Handle, Handle> vg_map_2 = { { var_b, grnd_1 }, { var_c, grnd_2 } };
+	HandleMap vg_map_2 = { { var_b, grnd_1 }, { var_c, grnd_2 } };
 
-	std::vector<std::map<Handle, Handle>> var_groundings = { vg_map_1 };
+	HandleMapSeq var_groundings = { vg_map_1 };
 	std::set<Handle> vars_case_1 = { var_a, var_b };
 
 	Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");

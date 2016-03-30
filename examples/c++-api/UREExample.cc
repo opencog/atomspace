@@ -60,7 +60,7 @@ void backward_chain(AtomSpace& as)
     bc.get_config().set_maximum_iterations(1000);
     bc.do_chain();
 
-    VarMultimap results = bc.get_chaining_result();
+    HandleMultimap results = bc.get_chaining_result();
 
     std::cout << "Query:\n" << target->toShortString() << std::endl;
     std::cout << "Answer:\n";

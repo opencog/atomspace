@@ -72,8 +72,8 @@ class Implicator :
 		{ inst.clear(); implicand = Handle::UNDEFINED; }
 #endif
 
-		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-		                       const std::map<Handle, Handle> &term_soln);
+		virtual bool grounding(const HandleMap &var_soln,
+		                       const HandleMap &term_soln);
 
 		virtual void insert_result(const Handle&);
 		virtual UnorderedHandleSet get_result_set() { return _result_set; }

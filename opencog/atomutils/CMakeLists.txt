@@ -33,7 +33,7 @@ INSTALL (FILES
 	ForeachChaseLink.h
 	FuzzyMatch.h
 	FuzzyMatchBasic.h
-	HandleMap.h
+	ThreadSafeHandleMap.h
 	Neighbors.h
 	Substitutor.h
 	TypeUtils.h

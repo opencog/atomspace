@@ -275,12 +275,18 @@ public:
     void store_atom(Handle h);
 
     /**
-     * Purge an atom from the atomspace.  This only removes the atom
-     * from the AtomSpace; it may still remain in persistent storage.
-     * To also delete from persistant storage, use the removeAtom()
-     * method.  The atom remains valid as long as there are Handles
-     * or AtomPtr's that reference it; it is deleted only when the
-     * last reference goes away.
+     * Extract an atom from the atomspace.  This only removes the atom
+     * from the (local, in-RAM) AtomSpace (in this process); any copies
+     * of the atom in persistent storage orin other address spaces are
+     * unaffected.  To also delete from persistant storage, use the
+     * removeAtom() method. Of course, the AtomSpace must be connected
+     * to storage in order for removeAtom() to reach out that far; if
+     * the AtomSpace is not connected to a backend, there is no
+     * difference between remove and extract.
+     *
+     * The atom itself remains valid as long as there are Handles or
+     * AtomPtr's that reference it; the RAM associated with the atom is
+     * freed only when the last reference goes away.
      *
      * @param h The Handle of the atom to be removed.
      * @param recursive Recursive-removal flag. If the flag is set,
@@ -292,7 +298,7 @@ public:
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
      */
-    bool purge_atom(Handle h, bool recursive = false) {
+    bool extract_atom(Handle h, bool recursive = false) {
         return 0 < _atom_table.extract(h, recursive).size();
     }
 

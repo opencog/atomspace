@@ -25,15 +25,6 @@ public:
 
     PythonEvalUTest()
     {
-        // Load special config file for the test
-        string configFile = PROJECT_BINARY_DIR"/tests/cython/pythoneval.conf";
-        try {
-            config().load(configFile.c_str(), false);
-        } catch (RuntimeException &e) {
-            std::cerr << e.get_message() << std::endl;
-            exit(1);
-        }
-
         logger().set_print_to_stdout_flag(true);
 
         // setup global logger
@@ -109,7 +100,7 @@ public:
         pySysPath = PySys_GetObject((char*)"path");
 
         if (logger().is_debug_enabled()) {
-            logger().debug("    Python 'sys.path' after OpenCog config adds is:");
+            logger().debug("    unit-test Python 'sys.path' is:");
             Py_ssize_t pathSize = PyList_Size(pySysPath);
             for (int pathIndex = 0; pathIndex < pathSize; pathIndex++) {
                 PyObject* pySysPathLine = PyList_GetItem(pySysPath, pathIndex);

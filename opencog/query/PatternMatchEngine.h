@@ -89,9 +89,9 @@ private:
 	// Map of current groundings of variables to their grounds
 	// Also contains grounds of subclauses (not sure why, this seems
 	// to be needed)
-	std::map<Handle, Handle> var_grounding;
+	HandleMap var_grounding;
 	// Map of clauses to their current groundings
-	std::map<Handle, Handle> clause_grounding;
+	HandleMap clause_grounding;
 
 	void clear_current_state(void);  // clear the stuff above
 
@@ -152,7 +152,7 @@ private:
 	void solution_drop(void);
 
 	// Stacks containing partial groundings.
-	typedef std::map<Handle, Handle> SolnMap;
+	typedef HandleMap SolnMap;
 	std::stack<SolnMap> var_solutn_stack;
 	std::stack<SolnMap> term_solutn_stack;
 
@@ -224,8 +224,8 @@ public:
 	bool explore_neighborhood(const Handle&, const Handle&, const Handle&);
 
 	// Handy-dandy utilities
-	static void log_solution(const std::map<Handle, Handle> &vars,
-	                         const std::map<Handle, Handle> &clauses);
+	static void log_solution(const HandleMap &vars,
+	                         const HandleMap &clauses);
 
 	static void log_term(const std::set<Handle> &vars,
 	                     const std::vector<Handle> &clauses);

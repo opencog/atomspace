@@ -585,13 +585,13 @@ Handle ForwardChainer::remove_constant_clauses(const Handle& hvarlist,
  */
 HandleSeq ForwardChainer::substitute_rule_part(
         AtomSpace& as, const Handle& hrule, const std::set<Handle>& vars,
-        const std::vector<std::map<Handle, Handle>>& var_groundings)
+        const HandleMapSeq& var_groundings)
 {
-    std::vector<std::map<Handle, Handle>> filtered_vgmap_list;
+    HandleMapSeq filtered_vgmap_list;
 
     // Filter out variables not listed in vars from var_groundings
     for (const auto& varg_map : var_groundings) {
-        std::map<Handle, Handle> filtered;
+        HandleMap filtered;
 
         for (const auto& iv : varg_map) {
             if (vars.find(iv.first) != vars.end()) {

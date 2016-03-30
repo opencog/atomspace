@@ -39,7 +39,7 @@ using namespace opencog;
 /// membr of the pair is the variable; the second is the value that
 /// should be used as its replacement.  (Note that "variables" do not
 /// have to actually be VariableNode's; they can be any atom.)
-static Handle beta_reduce(const Handle& expr, const std::map<Handle, Handle> vmap)
+static Handle beta_reduce(const Handle& expr, const HandleMap vmap)
 {
 	// XXX crud.  Stupid inefficient format conversion. FIXME.
 	// FreeVariables::substitute_nocheck() performs beta-reduction
@@ -429,7 +429,7 @@ mere_recursive_call:
  * added to the atomspace, and its handle is returned.
  */
 Handle Instantiator::instantiate(const Handle& expr,
-                                 const std::map<Handle, Handle> &vars)
+                                 const HandleMap &vars)
 {
 	// throw, not assert, because this is a user error ...
 	if (nullptr == expr)

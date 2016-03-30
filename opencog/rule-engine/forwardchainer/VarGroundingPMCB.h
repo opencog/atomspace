@@ -42,8 +42,8 @@ public:
     }
     virtual ~VarGroundingPMCB(){}
 
-    virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-                           const std::map<Handle, Handle> &term_soln)
+    virtual bool grounding(const HandleMap &var_soln,
+                           const HandleMap &term_soln)
     {
 
         var_groundings.push_back(var_soln);
@@ -52,8 +52,8 @@ public:
         return false;
     }
 
-    std::vector<std::map<Handle, Handle>> var_groundings;
-    std::vector<std::map<Handle, Handle>> term_groundings;
+    HandleMapSeq var_groundings;
+    HandleMapSeq term_groundings;
 };
 
 } /* namespace opencog */
