@@ -486,8 +486,8 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
 
 	sl->satisfy(pmcb);
 
-	vector<map<Handle, Handle>> var_solns = pmcb.get_var_list();
-	vector<map<Handle, Handle>> pred_solns = pmcb.get_pred_list();
+	vector<HandleMap> var_solns = pmcb.get_var_list();
+	vector<HandleMap> pred_solns = pmcb.get_pred_list();
 
 	HandleSeq results;
 
@@ -546,7 +546,7 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
 		results.push_back(this_result);
 
 		// convert the working_space mapping to _as
-		std::map<Handle, Handle> converted_vmap;
+		HandleMap converted_vmap;
 		for (auto& p : var_solns[i])
 			converted_vmap[_garbage_superspace.get_atom(p.first)]
 			        = _as.get_atom(p.second);
@@ -783,8 +783,8 @@ bool BackwardChainer::unify(const Handle& hsource,
 	if (pmcb.get_var_list().size() == 0)
 		return false;
 
-	std::vector<std::map<Handle, Handle>> pred_list = pmcb.get_pred_list();
-	std::vector<std::map<Handle, Handle>> var_list = pmcb.get_var_list();
+	std::vector<HandleMap> pred_list = pmcb.get_pred_list();
+	std::vector<HandleMap> var_list = pmcb.get_var_list();
 
 	HandleMap good_map;
 

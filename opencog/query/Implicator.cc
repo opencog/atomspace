@@ -41,8 +41,8 @@ using namespace opencog;
  * to continue hunting for more, we return `false` here. We want to
  * find all possible groundings.)
  */
-bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
-                           const std::map<Handle, Handle> &term_soln)
+bool Implicator::grounding(const HandleMap &var_soln,
+                           const HandleMap &term_soln)
 {
 	// PatternMatchEngine::print_solution(term_soln,var_soln);
 

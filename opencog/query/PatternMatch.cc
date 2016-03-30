@@ -65,7 +65,7 @@ class PMCGroundings : public PatternMatchCallback
 			return _cb.fuzzy_match(h1, h2);
 		}
 		bool evaluate_sentence(const Handle& link_h,
-		                       const std::map<Handle, Handle> &gnds) {
+		                       const HandleMap &gnds) {
 			return _cb.evaluate_sentence(link_h,gnds);
 		}
 		bool clause_match(const Handle& pattrn_link_h, const Handle& grnd_link_h) {
@@ -97,16 +97,16 @@ class PMCGroundings : public PatternMatchCallback
 
 		// This one we don't pass through. Instead, we collect the
 		// groundings.
-		bool grounding(const std::map<Handle, Handle> &var_soln,
-		               const std::map<Handle, Handle> &term_soln)
+		bool grounding(const HandleMap &var_soln,
+		               const HandleMap &term_soln)
 		{
 			_term_groundings.push_back(term_soln);
 			_var_groundings.push_back(var_soln);
 			return false;
 		}
 
-		std::vector<std::map<Handle, Handle>> _term_groundings;
-		std::vector<std::map<Handle, Handle>> _var_groundings;
+		std::vector<HandleMap> _term_groundings;
+		std::vector<HandleMap> _var_groundings;
 };
 
 /**
@@ -130,11 +130,11 @@ class PMCGroundings : public PatternMatchCallback
 bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
             const std::vector<Handle>& virtuals,
             const std::vector<Handle>& negations, // currently ignored
-            const std::map<Handle, Handle>& var_gnds,
-            const std::map<Handle, Handle>& term_gnds,
+            const HandleMap& var_gnds,
+            const HandleMap& term_gnds,
             // copies, NOT references!
-            std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds,
-            std::vector<std::vector<std::map<Handle, Handle>>> comp_term_gnds)
+            std::vector<std::vector<HandleMap>> comp_var_gnds,
+            std::vector<std::vector<HandleMap>> comp_term_gnds)
 {
 	// If we are done with the recursive step, then we have one of the
 	// many combinatoric possibilities in the var_gnds and term_gnds
@@ -197,9 +197,9 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
 	// vg and vp will be the collection of all of the different possible
 	// groundings for one of the components (well, its for component m,
 	// in the above notation.) So the loop below tries every possibility.
-	std::vector<std::map<Handle, Handle>> vg = comp_var_gnds.back();
+	std::vector<HandleMap> vg = comp_var_gnds.back();
 	comp_var_gnds.pop_back();
-	std::vector<std::map<Handle, Handle>> pg = comp_term_gnds.back();
+	std::vector<HandleMap> pg = comp_term_gnds.back();
 	comp_term_gnds.pop_back();
 
 	size_t ngnds = vg.size();
@@ -208,11 +208,11 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
 		// Given a set of groundings, tack on those for this component,
 		// and recurse, with one less component. We need to make a copy,
 		// of course.
-		std::map<Handle, Handle> rvg(var_gnds);
-		std::map<Handle, Handle> rpg(term_gnds);
+		HandleMap rvg(var_gnds);
+		HandleMap rpg(term_gnds);
 
-		const std::map<Handle, Handle>& cand_vg(vg[i]);
-		const std::map<Handle, Handle>& cand_pg(pg[i]);
+		const HandleMap& cand_vg(vg[i]);
+		const HandleMap& cand_pg(pg[i]);
 		rvg.insert(cand_vg.begin(), cand_vg.end());
 		rpg.insert(cand_pg.begin(), cand_pg.end());
 
@@ -371,8 +371,8 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 		}
 	}
 
-	std::vector<std::vector<std::map<Handle, Handle>>> comp_term_gnds;
-	std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds;
+	std::vector<std::vector<HandleMap>> comp_term_gnds;
+	std::vector<std::vector<HandleMap>> comp_var_gnds;
 
 	for (size_t i=0; i<_num_comps; i++)
 	{
@@ -417,8 +417,8 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	LAZY_LOG_FINE << "BEGIN component recursion: ====================== "
 	              << "num comp=" << comp_var_gnds.size()
 	              << " num virts=" << _virtual.size();
-	std::map<Handle, Handle> empty_vg;
-	std::map<Handle, Handle> empty_pg;
+	HandleMap empty_vg;
+	HandleMap empty_pg;
 	std::vector<Handle> optionals; // currently ignored
 	pmcb.set_pattern(_varlist, _pat);
 	return PatternMatch::recursive_virtual(pmcb, _virtual, optionals,

@@ -77,7 +77,7 @@ private:
                                    const Handle& himplicand);
     HandleSeq substitute_rule_part(AtomSpace& as, const Handle& hrule,
                                    const std::set<Handle>& vars,
-                                   const std::vector<std::map<Handle, Handle>>&
+                                   const std::vector<HandleMap>&
                                    var_groundings);
     bool unify(const Handle& source, const Handle& pattern, const Rule* rule);
     UnorderedHandleSet derive_rules(const Handle& source, const Handle& pattern,

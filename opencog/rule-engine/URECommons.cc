@@ -65,7 +65,7 @@ Handle URECommons::replace_nodes_with_varnode(const Handle& handle,
 {
 	UnorderedHandleSet hvars;
 	get_outgoing_nodes(handle, hvars, t);
-	map<Handle, Handle> node_unique_var_map;
+	HandleMap node_unique_var_map;
 	for (const Handle& h : hvars)
 		node_unique_var_map[h] = _as.add_node(VARIABLE_NODE,
 				get_unique_name(h)); //TODO get_uuid is not implemented
@@ -109,7 +109,7 @@ bool URECommons::exists_in(const Handle& hlink, const Handle& h) const
 }
 
 Handle URECommons::change_node_types(const Handle& h,
-		map<Handle, Handle>& replacement_map)
+		HandleMap& replacement_map)
 {
 	Handle hcpy;
 

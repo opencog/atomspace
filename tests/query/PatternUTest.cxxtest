@@ -110,12 +110,12 @@ class PMCB : public InitiateSearchCB, public DefaultPatternMatchCB
 		}
 
 		virtual bool node_match(Node *, Node *);
-		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-		                       const std::map<Handle, Handle> &pred_soln);
+		virtual bool grounding(const HandleMap &var_soln,
+		                       const HandleMap &pred_soln);
 
 		int found;
-		std::map<Handle, Handle> preds;
-		std::map<Handle, Handle> vars;
+		HandleMap preds;
+		HandleMap vars;
 };
 
 bool PMCB::node_match(Node *npat, Node *nsoln)
@@ -135,8 +135,8 @@ bool PMCB::node_match(Node *npat, Node *nsoln)
 	return npat == nsoln;
 }
 
-bool PMCB::grounding(const std::map<Handle, Handle> &var_soln,
-                     const std::map<Handle, Handle> &pred_soln)
+bool PMCB::grounding(const HandleMap &var_soln,
+                     const HandleMap &pred_soln)
 {
 	found ++;
 	preds = pred_soln;

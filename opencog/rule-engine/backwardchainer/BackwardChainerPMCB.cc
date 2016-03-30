@@ -82,11 +82,11 @@ bool BackwardChainerPMCB::node_match(const Handle& npat_h, const Handle& nsoln_h
 	return false;
 }
 
-bool BackwardChainerPMCB::grounding(const std::map<Handle, Handle> &var_soln,
-                               const std::map<Handle, Handle> &pred_soln)
+bool BackwardChainerPMCB::grounding(const HandleMap &var_soln,
+                               const HandleMap &pred_soln)
 {
-	std::map<Handle, Handle> true_var_soln;
-	std::map<Handle, Handle> true_pred_soln;
+	HandleMap true_var_soln;
+	HandleMap true_pred_soln;
 
 	// get rid of non-var mapping
 	for (auto& p : var_soln)
@@ -111,11 +111,11 @@ bool BackwardChainerPMCB::grounding(const std::map<Handle, Handle> &var_soln,
 	return false;
 }
 
-std::vector<std::map<Handle, Handle>> BackwardChainerPMCB::get_var_list()
+std::vector<HandleMap> BackwardChainerPMCB::get_var_list()
 {
 	return var_solns_;
 }
-std::vector<std::map<Handle, Handle>> BackwardChainerPMCB::get_pred_list()
+std::vector<HandleMap> BackwardChainerPMCB::get_pred_list()
 {
 	return pred_solns_;
 }

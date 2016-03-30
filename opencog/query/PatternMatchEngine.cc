@@ -1867,8 +1867,8 @@ void PatternMatchEngine::set_pattern(const Variables& v,
 /* ======================================================== */
 
 void PatternMatchEngine::log_solution(
-	const std::map<Handle, Handle> &vars,
-	const std::map<Handle, Handle> &clauses)
+	const HandleMap &vars,
+	const HandleMap &clauses)
 {
 	if (!logger().is_fine_enabled())
 		return;
@@ -1876,8 +1876,8 @@ void PatternMatchEngine::log_solution(
 	logger().fine("Variable groundings:");
 
 	// Print out the bindings of solutions to variables.
-	std::map<Handle, Handle>::const_iterator j = vars.begin();
-	std::map<Handle, Handle>::const_iterator jend = vars.end();
+	HandleMap::const_iterator j = vars.begin();
+	HandleMap::const_iterator jend = vars.end();
 	for (; j != jend; ++j)
 	{
 		Handle var(j->first);
@@ -1901,7 +1901,7 @@ void PatternMatchEngine::log_solution(
 
 	// Print out the full binding to all of the clauses.
 	logger().fine("Grounded clauses:");
-	std::map<Handle, Handle>::const_iterator m;
+	HandleMap::const_iterator m;
 	int i = 0;
 	for (m = clauses.begin(); m != clauses.end(); ++m, ++i)
 	{

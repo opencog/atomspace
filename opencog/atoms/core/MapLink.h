@@ -59,7 +59,7 @@ protected:
 	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	bool extract(const Handle&, const Handle&,
-	             std::map<Handle, Handle>&,
+	             HandleMap&,
 	             AtomSpace*) const;
 
 	Handle rewrite_one(const Handle&, AtomSpace*) const;

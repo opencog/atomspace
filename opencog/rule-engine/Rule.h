@@ -98,7 +98,7 @@ private:
 	float weight_;
 
 	Handle standardize_helper(AtomSpace* as, const Handle&,
-	                          std::map<Handle, Handle>&);
+	                          HandleMap&);
 };
 
 } // ~namespace opencog
