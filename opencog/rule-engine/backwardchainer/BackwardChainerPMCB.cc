@@ -111,11 +111,11 @@ bool BackwardChainerPMCB::grounding(const HandleMap &var_soln,
 	return false;
 }
 
-std::vector<HandleMap> BackwardChainerPMCB::get_var_list()
+HandleMapSeq BackwardChainerPMCB::get_var_list()
 {
 	return var_solns_;
 }
-std::vector<HandleMap> BackwardChainerPMCB::get_pred_list()
+HandleMapSeq BackwardChainerPMCB::get_pred_list()
 {
 	return pred_solns_;
 }

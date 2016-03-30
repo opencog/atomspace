@@ -105,8 +105,8 @@ class PMCGroundings : public PatternMatchCallback
 			return false;
 		}
 
-		std::vector<HandleMap> _term_groundings;
-		std::vector<HandleMap> _var_groundings;
+		HandleMapSeq _term_groundings;
+		HandleMapSeq _var_groundings;
 };
 
 /**
@@ -133,8 +133,8 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
             const HandleMap& var_gnds,
             const HandleMap& term_gnds,
             // copies, NOT references!
-            std::vector<std::vector<HandleMap>> comp_var_gnds,
-            std::vector<std::vector<HandleMap>> comp_term_gnds)
+            std::vector<HandleMapSeq> comp_var_gnds,
+            std::vector<HandleMapSeq> comp_term_gnds)
 {
 	// If we are done with the recursive step, then we have one of the
 	// many combinatoric possibilities in the var_gnds and term_gnds
@@ -197,9 +197,9 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
 	// vg and vp will be the collection of all of the different possible
 	// groundings for one of the components (well, its for component m,
 	// in the above notation.) So the loop below tries every possibility.
-	std::vector<HandleMap> vg = comp_var_gnds.back();
+	HandleMapSeq vg = comp_var_gnds.back();
 	comp_var_gnds.pop_back();
-	std::vector<HandleMap> pg = comp_term_gnds.back();
+	HandleMapSeq pg = comp_term_gnds.back();
 	comp_term_gnds.pop_back();
 
 	size_t ngnds = vg.size();
@@ -371,8 +371,8 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 		}
 	}
 
-	std::vector<std::vector<HandleMap>> comp_term_gnds;
-	std::vector<std::vector<HandleMap>> comp_var_gnds;
+	std::vector<HandleMapSeq> comp_term_gnds;
+	std::vector<HandleMapSeq> comp_var_gnds;
 
 	for (size_t i=0; i<_num_comps; i++)
 	{

@@ -194,7 +194,7 @@ void BackwardChainer::process_target(Target& target)
 	// vardecl can already be grounded
 	if (not target.get_varseq().empty())
 	{
-		std::vector<HandleMap> kb_vmap;
+		HandleMapSeq kb_vmap;
 
 		HandleSeq kb_match = match_knowledge_base(htarget, htarget_vardecl,
 		                                          kb_vmap);
@@ -243,7 +243,7 @@ void BackwardChainer::process_target(Target& target)
 
 	Rule selected_rule(Handle::UNDEFINED);
 	Rule standardized_rule(Handle::UNDEFINED);
-	std::vector<HandleMap> all_implicand_to_target_mappings;
+	HandleMapSeq all_implicand_to_target_mappings;
 
 	// If no rules to backward chain on, no way to solve this target
 	if (not select_rule(target, selected_rule, standardized_rule,
@@ -273,7 +273,7 @@ void BackwardChainer::process_target(Target& target)
 		                  << p.second->toShortString();
 
 	Handle hrule_implicant_reverse_grounded;
-	std::vector<HandleMap> premises_vmap_list;
+	HandleMapSeq premises_vmap_list;
 	std::set<Handle> additional_free_var;
 	for (auto& h : target.get_varset())
 		additional_free_var.insert(_garbage_superspace.get_atom(h));
@@ -336,7 +336,7 @@ void BackwardChainer::process_target(Target& target)
 			output_grounded_seq.push_back(
 				garbage_substitute(garbage_substitute(h, implicand_mapping), vm));
 
-		std::vector<HandleMap> vm_list;
+		HandleMapSeq vm_list;
 
 		// include the implicand mapping into vm so we can do variable chasing
 		vm.insert(implicand_mapping.begin(), implicand_mapping.end());
@@ -429,7 +429,7 @@ void BackwardChainer::process_target(Target& target)
  */
 HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
                                                 Handle hpattern_vardecl,
-                                                vector<HandleMap>& vmap,
+                                                HandleMapSeq& vmap,
                                                 bool enable_var_name_check)
 {
 	AtomSpace focus_garbage_superspace(&_focus_space);
@@ -486,8 +486,8 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
 
 	sl->satisfy(pmcb);
 
-	vector<HandleMap> var_solns = pmcb.get_var_list();
-	vector<HandleMap> pred_solns = pmcb.get_pred_list();
+	HandleMapSeq var_solns = pmcb.get_var_list();
+	HandleMapSeq pred_solns = pmcb.get_pred_list();
 
 	HandleSeq results;
 
@@ -571,7 +571,7 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
                                          const HandleMap& implicand_mapping,
                                          const std::set<Handle>& additional_free_varset,
                                          Handle& hrule_implicant_reverse_grounded,
-                                         std::vector<HandleMap>& premises_vmap_list)
+                                         HandleMapSeq& premises_vmap_list)
 {
 	Handle hrule_implicant = standardized_rule.get_implicant();
 	Handle hrule_vardecl = standardized_rule.get_vardecl();
@@ -598,7 +598,7 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
 	// are constant; mostly to handle where PM cannot map a variable to itself
 	if (not additional_free_varset.empty())
 	{
-		std::vector<HandleMap> premises_vmap_list_alt;
+		HandleMapSeq premises_vmap_list_alt;
 
 		HandleSeq possible_premises_alt =
 		        match_knowledge_base(hrule_implicant_reverse_grounded,
@@ -631,7 +631,7 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
  */
 HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
                                            const HandleMap& premise_vmap,
-                                           std::vector<HandleMap>& vmap_list)
+                                           HandleMapSeq& vmap_list)
 {
 	HandleSeq results;
 
@@ -691,7 +691,7 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 	LAZY_BC_LOG_DEBUG << "Grounding:" << std::endl
 	                  << premises->toShortString();
 
-	std::vector<HandleMap> temp_vmap_list;
+	HandleMapSeq temp_vmap_list;
 
 	// XXX TODO when all VariableNode are unique, we will be able to tell what
 	// type a random VariableNode is in the AtomSpace by looking at its
@@ -783,8 +783,8 @@ bool BackwardChainer::unify(const Handle& hsource,
 	if (pmcb.get_var_list().size() == 0)
 		return false;
 
-	std::vector<HandleMap> pred_list = pmcb.get_pred_list();
-	std::vector<HandleMap> var_list = pmcb.get_var_list();
+	HandleMapSeq pred_list = pmcb.get_pred_list();
+	HandleMapSeq var_list = pmcb.get_var_list();
 
 	HandleMap good_map;
 
@@ -859,7 +859,7 @@ static void get_all_unique_atoms(const Handle& h, UnorderedHandleSet& atom_set)
 bool BackwardChainer::select_rule(const Target& target,
                                   Rule& selected_rule,
                                   Rule& standardized_rule,
-                                  std::vector<HandleMap>& all_implicand_to_target_mappings)
+                                  HandleMapSeq& all_implicand_to_target_mappings)
 {
 	Handle htarget = _garbage_superspace.add_atom(target.get_handle());
 	Handle htarget_vardecl = _garbage_superspace.add_atom(target.get_vardecl());

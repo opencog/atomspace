@@ -39,8 +39,8 @@ protected:
 	VariableListPtr _int_vars;
 	bool _enable_var_name_check;
 
-	std::vector<HandleMap> var_solns_;
-	std::vector<HandleMap> pred_solns_;
+	HandleMapSeq var_solns_;
+	HandleMapSeq pred_solns_;
 
 public:
 	BackwardChainerPMCB(AtomSpace*, VariableListPtr, bool);
@@ -61,8 +61,8 @@ public:
      * Return list of matching results found by the pattern matcher
      * @return
      */
-	std::vector<HandleMap> get_var_list();
-	std::vector<HandleMap> get_pred_list();
+	HandleMapSeq get_var_list();
+	HandleMapSeq get_pred_list();
 };
 
 } // ~namespace opencog

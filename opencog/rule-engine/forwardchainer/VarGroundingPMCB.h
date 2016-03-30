@@ -52,8 +52,8 @@ public:
         return false;
     }
 
-    std::vector<HandleMap> var_groundings;
-    std::vector<HandleMap> term_groundings;
+    HandleMapSeq var_groundings;
+    HandleMapSeq term_groundings;
 };
 
 } /* namespace opencog */

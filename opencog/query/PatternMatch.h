@@ -44,8 +44,8 @@ class PatternMatch
 		            const std::vector<Handle>& negations,
 		            const HandleMap& var_gnds,
 		            const HandleMap& term_gnds,
-		            std::vector<std::vector<HandleMap>> comp_var_gnds,
-		            std::vector<std::vector<HandleMap>> comp_term_gnds);
+		            std::vector<HandleMapSeq> comp_var_gnds,
+		            std::vector<HandleMapSeq> comp_term_gnds);
 };
 
 } // namespace opencog

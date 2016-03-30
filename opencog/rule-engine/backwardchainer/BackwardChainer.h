@@ -121,19 +121,19 @@ private:
 	bool select_rule(const Target& target,
 	                 Rule& selected_rule,
 	                 Rule& standardized_rule,
-	                 std::vector<HandleMap>& all_implicand_to_target_mappings);
+	                 HandleMapSeq& all_implicand_to_target_mappings);
 
 	HandleSeq match_knowledge_base(Handle htarget,
 	                               Handle htarget_vardecl,
-	                               std::vector<HandleMap>& vmap,
+	                               HandleMapSeq& vmap,
 	                               bool enable_var_name_check = false);
 	HandleSeq find_premises(const Rule& standardized_rule,
 	                        const HandleMap& implicand_mapping,
 	                        const std::set<Handle>& additional_free_varset,
 	                        Handle& hrule_implicant_reverse_grounded,
-	                        std::vector<HandleMap>& premises_vmap_list);
+	                        HandleMapSeq& premises_vmap_list);
 	HandleSeq ground_premises(const Handle& htarget, const HandleMap& vmap,
-	                          std::vector<HandleMap>& vmap_list);
+	                          HandleMapSeq& vmap_list);
 	bool unify(const Handle& hsource, const Handle& hmatch,
 	           const Handle& hsource_vardecl, const Handle& hmatch_vardecl,
 	           HandleMap& result);
