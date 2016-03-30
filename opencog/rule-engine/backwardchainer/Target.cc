@@ -70,9 +70,9 @@ void Target::store_step(const Rule& r, const HandleSeq& premises)
 /**
  * Store new variable mappings.
  *
- * @param vm  a VarMultimap object containing additional mappings
+ * @param vm  a HandleMultimap object containing additional mappings
  */
-void Target::store_varmap(VarMultimap& vm)
+void Target::store_varmap(HandleMultimap& vm)
 {
 	for (auto& p : vm)
 	{
@@ -89,9 +89,9 @@ void Target::store_varmap(VarMultimap& vm)
 /**
  * Store new variable mapping.
  *
- * @param vm  a VarMap object containing additional mapping
+ * @param vm  a HandleMap object containing additional mapping
  */
-void Target::store_varmap(VarMap& vm)
+void Target::store_varmap(HandleMap& vm)
 {
 	for (auto& p : vm)
 	{
