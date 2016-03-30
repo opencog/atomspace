@@ -1,5 +1,5 @@
 /*
- * tests/atomspace/HandleMapUTest.cxxtest
+ * tests/atomspace/ThreadSafeHandleMapUTest.cxxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -23,7 +23,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomutils/HandleMap.h>
+#include <opencog/atomutils/ThreadSafeHandleMap.h>
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/numeric.h>
@@ -33,16 +33,16 @@ using namespace std;
 
 #define N_HANDLES 10
 
-class HandleMapUTest :  public CxxTest::TestSuite
+class ThreadSafeHandleMapUTest :  public CxxTest::TestSuite
 {
 private:
     AtomSpace as;
     Handle handles[N_HANDLES];
     char *content[N_HANDLES];
 
-    HandleMap<char*>::MapPtr handleMap;
+    ThreadSafeHandleMap<char*>::MapPtr handleMap;
 public:
-    HandleMapUTest() {
+    ThreadSafeHandleMapUTest() {
         for (int i = 0; i < N_HANDLES; i++) {
             ostringstream oss;
             oss << "hello " << i;
@@ -53,7 +53,7 @@ public:
 
 
     void setUp() {
-        handleMap = std::make_shared<HandleMap<char*>>();
+        handleMap = std::make_shared<ThreadSafeHandleMap<char*>>();
     }
 
     void tearDown() {
@@ -91,7 +91,7 @@ public:
         for (int i = 0; i < N_HANDLES; i++) {
             handleMap->add(handles[i], content[i]);
         }
-        HandleMapIterator<char*>* it = handleMap->keys();
+        ThreadSafeHandleMapIterator<char*>* it = handleMap->keys();
         for (int i = 0; i < N_HANDLES; i++) {
             TS_ASSERT(it->has_next());
             Handle h = it->next();
@@ -114,7 +114,7 @@ public:
         MT19937RandGen rng(12345678);
         int size = rng.randint(N_HANDLES);
         delete(handleMap);
-        handleMap = new HandleMap<char *>(size);
+        handleMap = new ThreadSafeHandleMap<char *>(size);
         TS_ASSERT(handleMap->getSize() >= size);
         handleMap->resize(size + 1);
         TS_ASSERT(handleMap->getSize() >= size + 1);
