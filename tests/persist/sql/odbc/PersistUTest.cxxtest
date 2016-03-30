@@ -360,9 +360,9 @@ void PersistUTest::test_atomspace(void)
     /* Push all atoms out to the SQL DB */
     _pm->do_store();
 
-    /* Purge atoms from the AtomSpace. This does not delete them from
+    /* Extract atoms from the AtomSpace. This does not delete them from
      * the SQL storage, though; to do that, they must be deleted, not
-    * purged.
+     * extractd.
      */
     _as->barrier();
     _as->clear();
