@@ -43,7 +43,7 @@ class Instantiator
 {
 private:
 	AtomSpace *_as;
-	const std::map<Handle, Handle> *_vmap;
+	const HandleMap *_vmap;
 	bool _halt = false;
 
 	/**
@@ -95,10 +95,10 @@ public:
 		_vmap = nullptr;
 	}
 
-	Handle instantiate(const Handle& expr, const std::map<Handle, Handle> &vars);
+	Handle instantiate(const Handle& expr, const HandleMap &vars);
 	Handle execute(const Handle& expr)
 	{
-		return instantiate(expr, std::map<Handle, Handle>());
+		return instantiate(expr, HandleMap());
 	}
 };
 

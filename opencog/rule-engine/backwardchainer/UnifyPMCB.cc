@@ -70,10 +70,10 @@ bool UnifyPMCB::variable_match(const Handle& npat_h,
 	return BackwardChainerPMCB::variable_match(npat_h, nsoln_h);
 }
 
-bool UnifyPMCB::grounding(const std::map<Handle, Handle> &var_soln,
-                          const std::map<Handle, Handle> &pred_soln)
+bool UnifyPMCB::grounding(const HandleMap &var_soln,
+                          const HandleMap &pred_soln)
 {
-	std::map<Handle, Handle> true_var_soln;
+	HandleMap true_var_soln;
 
 	// get rid of non-var mapping
 	for (const auto& p : var_soln)

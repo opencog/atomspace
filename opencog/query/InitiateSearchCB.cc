@@ -847,7 +847,7 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 	while (0 < _pattern->defined_terms.size())
 	{
 		Variables vset;
-		std::map<Handle, Handle> defnmap;
+		HandleMap defnmap;
 		for (const Handle& name : _pattern->defined_terms)
 		{
 			Handle defn = DefineLink::get_definition(name);

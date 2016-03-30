@@ -375,7 +375,7 @@ IncomingSet DefaultPatternMatchCB::get_incoming_set(const Handle& h)
 /* ======================================================== */
 
 bool DefaultPatternMatchCB::eval_term(const Handle& virt,
-                                      const std::map<Handle, Handle>& gnds)
+                                      const HandleMap& gnds)
 {
 	// Evaluation of the link requires working with an atomspace
 	// of some sort, so that the atoms can be communicated to scheme or
@@ -480,7 +480,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
  * variables to values.
  */
 bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
-                              const std::map<Handle, Handle>& gnds)
+                              const HandleMap& gnds)
 {
 	LAZY_LOG_FINE << "Enter eval_sentence CB with top=" << std::endl
 	              << top->toShortString() << std::endl;

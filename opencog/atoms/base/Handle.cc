@@ -155,22 +155,22 @@ string uhs_to_string(const UnorderedHandleSet& uhs)
 {
 	stringstream ss; ss << uhs; return ss.str();
 }
-std::string varmap_to_string(const VarMap& varmap)
+std::string hmap_to_string(const HandleMap& hmap)
 {
 	stringstream ss;
 	int i = 0;
-	for (const auto& p : varmap) {
+	for (const auto& p : hmap) {
 		ss << "key[" << i << "]:" << std::endl << h_to_string(p.first)
 		   << "value[" << i << "]:" << std::endl << h_to_string(p.second);
 		i++;
 	}
 	return ss.str();
 }
-std::string varmultimap_to_string(const VarMultimap& varmultimap)
+std::string hmultimap_to_string(const HandleMultimap& hmultimap)
 {
 	stringstream ss;
 	int i = 0;
-	for (const auto& p : varmultimap) {
+	for (const auto& p : hmultimap) {
 		ss << "key[" << i << "]:" << std::endl << h_to_string(p.first)
 		   << "value[" << i << "]:" << std::endl;
 		for (const auto s : p.second)

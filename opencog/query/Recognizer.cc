@@ -81,8 +81,8 @@ class Recognizer :
 		virtual bool node_match(const Handle&, const Handle&);
 		virtual bool link_match(const LinkPtr&, const LinkPtr&);
 		virtual bool fuzzy_match(const Handle&, const Handle&);
-		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-		                       const std::map<Handle, Handle> &term_soln);
+		virtual bool grounding(const HandleMap &var_soln,
+		                       const HandleMap &term_soln);
 };
 
 } // namespace opencog
@@ -245,8 +245,8 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 	return true;
 }
 
-bool Recognizer::grounding(const std::map<Handle, Handle> &var_soln,
-                           const std::map<Handle, Handle> &term_soln)
+bool Recognizer::grounding(const HandleMap &var_soln,
+                           const HandleMap &term_soln)
 {
 	Handle rule = term_soln.at(_root);
 

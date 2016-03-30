@@ -85,8 +85,8 @@ class TestPMCB :
 		return anch == grnd;
 	}
 
-	virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-	                       const std::map<Handle, Handle> &pred_soln)
+	virtual bool grounding(const HandleMap &var_soln,
+	                       const HandleMap &pred_soln)
 	{
 		scnt ++;
 		return false;
