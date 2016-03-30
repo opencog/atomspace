@@ -179,6 +179,14 @@ std::string hmultimap_to_string(const HandleMultimap& hmultimap)
 	}
 	return ss.str();
 }
+std::string hmaps_to_string(const HandleMapSeq& hms)
+{
+	stringstream ss;
+	for (unsigned i = 0; i < hms.size(); i++)
+		ss << "--- map[" << i << "] ---" << std::endl
+		   << hmap_to_string(hms[i]);
+	return ss.str();
+}
 std::string atomtype_to_string(Type type)
 {
 	return classserver().getTypeName(type);
