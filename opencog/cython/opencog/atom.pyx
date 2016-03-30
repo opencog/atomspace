@@ -35,6 +35,10 @@ cdef class Atom(object):
         def __get__(self):
             return self.atomspace
 
+    property uuid:
+        def __get__(self):
+            return self.handle.value()
+
     property name:
         def __get__(self):
             cdef cAtom* atom_ptr
