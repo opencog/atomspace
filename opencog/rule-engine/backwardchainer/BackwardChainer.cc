@@ -591,7 +591,7 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
 		                     gen_sub_varlist(hrule_implicant_reverse_grounded,
 		                                     hrule_vardecl,
 		                                     additional_free_varset),
-	                         premises_vmap_list);
+		                     premises_vmap_list);
 
 	// Do another match but without the target's free var as variable, so they
 	// are constant; mostly to handle where PM cannot map a variable to itself

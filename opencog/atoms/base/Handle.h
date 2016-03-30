@@ -303,6 +303,7 @@ ostream& operator<<(ostream& out, const opencog::OrderedHandleSet& hs);
 ostream& operator<<(ostream& out, const opencog::UnorderedHandleSet& hs);
 
 // Debugging helpers, very convenient to print Handle sets in gdb
+string h_to_string(const opencog::Handle& h);
 string hs_to_string(const opencog::HandleSeq& hs);
 string ohs_to_string(const opencog::OrderedHandleSet& ohs);
 string uhs_to_string(const opencog::UnorderedHandleSet& uhs);

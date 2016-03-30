@@ -47,7 +47,7 @@ public:
 	// Ctor
 
 	// rbs is a Handle pointing to a rule-based system is as
-	UREConfigReader(AtomSpace& as, Handle rbs);
+	UREConfigReader(AtomSpace& as, const Handle& rbs);
 
 	// Access methods, return parameters given a rule-based system
 	const std::vector<Rule>& get_rules() const;
@@ -81,7 +81,7 @@ private:
 	// MemberLink <TV>
 	//    <rule name>
 	//    <rbs>
-	HandleSeq fetch_rule_names(Handle rbs);
+	HandleSeq fetch_rule_names(const Handle& rbs);
 
 	AtomSpace& _as;
 
@@ -116,7 +116,8 @@ private:
 	// The type (or subtype) can be used to avoid fetching patterns
 	// (if <type> is choosen not to have VARIABLE_NODE inherit from
 	// it).
-	HandleSeq fetch_execution_outputs(Handle schema, Handle input,
+	HandleSeq fetch_execution_outputs(const Handle& schema,
+	                                  const Handle& input,
 	                                  Type type = ATOM);
 
 	// Similar to above but takes instead the schema name instead of
@@ -132,7 +133,8 @@ private:
 	//
 	// Return the number associated to <num> or default_value in case
 	// no such ExecutionLink exists.
-	double fetch_num_param(const std::string& schema_name, Handle input,
+	double fetch_num_param(const std::string& schema_name,
+	                       const Handle& input,
 	                       double default_value = 0.0);
 
 	// Given <pred_name> and <input> in
@@ -143,7 +145,7 @@ private:
 	//
 	// Return TV.mean > 0.5 or default_value in case no such
 	// EvaluationLink exists.
-	bool fetch_bool_param(const std::string& pred_name, Handle input);
+	bool fetch_bool_param(const std::string& pred_name, const Handle& input);
 };
 
 } // ~namespace opencog
