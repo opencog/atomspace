@@ -310,8 +310,9 @@ string h_to_string(const opencog::Handle& h);
 string hs_to_string(const opencog::HandleSeq& hs);
 string ohs_to_string(const opencog::OrderedHandleSet& ohs);
 string uhs_to_string(const opencog::UnorderedHandleSet& uhs);
-string hmap_to_string(const opencog::HandleMap& vm);
-string hmultimap_to_string(const opencog::HandleMultimap& vmm);
+string hmap_to_string(const opencog::HandleMap& hm);
+string hmultimap_to_string(const opencog::HandleMultimap& hmm);
+string hmaps_to_string(const opencog::HandleMapSeq& hms);
 string atomtype_to_string(opencog::Type type);
 
 #ifdef THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
