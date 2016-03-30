@@ -119,6 +119,19 @@ cdef class AtomSpace:
             atom.tv = tv
         return atom
 
+    def get_atom_with_uuid(self, uuid):
+        """ Retrieve the atom associated with the uuid
+        """
+        # Convert to an Atom object
+        try:
+            atom = self.get_atom(uuid)
+        except ValueError, TypeError:
+            raise TypeError("Need UUID")
+        if self.atomspace.is_valid_handle(deref((<Atom>atom).handle)):
+            return atom
+        else:
+            return None
+
     def is_valid(self, atom):
         """ Check whether the passed handle refers to an actual atom
         """

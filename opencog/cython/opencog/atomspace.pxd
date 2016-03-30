@@ -179,6 +179,8 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         cHandle get_handle(Type t, string s)
         cHandle get_handle(Type t, vector[cHandle])
 
+        cHandle get_atom(UUID uuid)
+
         bint is_valid_handle(cHandle h)
         int get_size()
         UUID get_uuid()
