@@ -139,7 +139,7 @@ GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::UnorderedHandleSet)
 string h_to_string(const Handle& h)
 {
 	if ((AtomPtr)h == nullptr)
-		return "nullatom";
+		return "nullatom\n";
 	else
 		return h->toString();
 }
