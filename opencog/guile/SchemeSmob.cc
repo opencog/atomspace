@@ -254,8 +254,8 @@ void SchemeSmob::register_procs()
 	register_proc("cog-link",              1, 0, 1, C(ss_link));
 	register_proc("cog-delete",            1, 0, 1, C(ss_delete));
 	register_proc("cog-delete-recursive",  1, 0, 1, C(ss_delete_recursive));
-	register_proc("cog-purge",             1, 0, 1, C(ss_purge));
-	register_proc("cog-purge-recursive",   1, 0, 1, C(ss_purge_recursive));
+	register_proc("cog-extract",           1, 0, 1, C(ss_extract));
+	register_proc("cog-extract-recursive", 1, 0, 1, C(ss_extract_recursive));
 	register_proc("cog-value?",            1, 0, 1, C(ss_value_p));
 	register_proc("cog-atom?",             1, 0, 1, C(ss_atom_p));
 	register_proc("cog-node?",             1, 0, 1, C(ss_node_p));

@@ -661,7 +661,7 @@ be slow.
 Once stored, the atom may be deleted from the AtomSpace; it will
 remain in storage, and can be recreated at will:
 ```
-    guile> (cog-purge y)
+    guile> (cog-extract y)
     #t
     guile> y
     #<Invalid handle>
@@ -673,7 +673,7 @@ Notice, in the above, that the truth value is the same as it was before.
 That is because the truth value was fetched from the database when the
 atom is recreated.
 
-The UUID associated with the atom will NOT change between purges
+The UUID associated with the atom will NOT change between extracts
 and server restarts. This can be verified with the cog-handle command,
 which returns the UUID:
 ```
@@ -681,24 +681,25 @@ which returns the UUID:
     2
 ```
 
-Purging vs. Deletion
---------------------
-There are four related but distinct concepts of atom deletion: purge and
-delete, each of which may also be done recursively. "Purge" with remove
-the atom from the atomspace; it will NOT remove it from the database!
-"Delete" will remove the atom from both the atomspace, and from the
-database; thus, deletion is permanent!  (Well, if there are two
-cogservers attached to one database, and one cogserver deletes the atom
-from the database, it will still not be deleted from the second
-cogserver, and so that second cogserver could still save that atom.
-There is currently no way to broadcast a distributed system-wide
-delete message. Its not even obvious that such a broadcast is evn a good
-idea.)
+Extraction vs. Deletion
+-----------------------
+There are four related but distinct concepts of atom deletion: extract
+and delete, each of which may also be done recursively. "Extract" will
+remove the atom from the (local, in-RAM) atomspace; it will NOT remove
+it from the database!  "Delete" will remove the atom from both the
+atomspace, and from the database; thus, deletion is permanent!
+(Caution: there are pathological situations. For example, if there are
+two atomspaces attached to one database, and delete is used in one
+atomspace (thus deleting the atom in the database), there may still be
+a copy in the second atomspace.  If the second atomspace stores that
+atom, it will be re-created in the database.  There is no way to
+broadcast a distributed system-wide delete message.  Such a message
+does not seem to be a good idea, anyway.)
 
-Atoms can also be deleted or purged recusrively. Thus, normally, a
-purge/delete will succeed only if the atom has no incoming set.
-The recursive forms, `cog-purge-recursive` and `cog-delete-recursive`
-purge/delete the atom and avery link that contains that atom, and so
+Atoms can also be extracted or deleted recusrively. Thus, normally, a
+extract/delete will succeed only if the atom has no incoming set.
+The recursive forms, `cog-extract-recursive` and `cog-delete-recursive`
+extract/delete the atom and avery link that contains that atom, and so
 on.
 
 

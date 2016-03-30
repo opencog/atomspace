@@ -703,29 +703,25 @@ SCM SchemeSmob::ss_delete_recursive (SCM satom, SCM kv_pairs)
 
 /* ============================================================== */
 /**
- * Purge the atom from the atomspace, but only if it has no incoming links.
- * Return SCM_BOOL_T if the atom was deleted, else return SCM_BOOL_F
- * This does NOT remove the atom from any attached backing store, only
- * from the atomspace.
+ * Extract the atom from the atomspace, but only if it has no incoming
+ * links. Return `SCM_BOOL_T` if the atom was successfully extracted,
+ * else return `SCM_BOOL_F`.  This does NOT remove the atom from any
+ * attached backing store/persistant storage, only from the (local,
+ * in-RAM) atomspace.
  */
-SCM SchemeSmob::ss_purge (SCM satom, SCM kv_pairs)
+SCM SchemeSmob::ss_extract (SCM satom, SCM kv_pairs)
 {
-	Handle h = verify_handle(satom, "cog-purge");
+	Handle h = verify_handle(satom, "cog-extract");
 
-	// It can happen that the atom has already been purged, but we're
-	// still holding on to its UUID.  This is rare... but possible. So
-	// don't crash when it happens. XXX Is it really possible? How?
-	if (NULL == h.operator->()) return SCM_BOOL_F;
-
-	// The purge will fail/log warning if the incoming set isn't null.
+	// The extract will fail/log warning if the incoming set isn't null.
 	if (h->getIncomingSetSize() > 0) return SCM_BOOL_F;
 
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-purge");
+	if (NULL == atomspace) atomspace = ss_get_env_as("cog-extract");
 
-	// AtomSpace::purgeAtom() returns true if atom was purged,
+	// AtomSpace::extract_atom() returns true if atom was extracted,
 	// else returns false
-	bool rc = atomspace->purge_atom(h, false);
+	bool rc = atomspace->extract_atom(h, false);
 
 	// Clobber the handle, too.
 	*((Handle *) SCM_SMOB_DATA(satom)) = Handle::UNDEFINED;
@@ -738,18 +734,18 @@ SCM SchemeSmob::ss_purge (SCM satom, SCM kv_pairs)
 
 /* ============================================================== */
 /**
- * Purge the atom, and everything pointing to it.
+ * Extract the atom, and everything pointing to it.
  * This does NOT remove the atom from any attached backing store, only
  * from the atomspace.
  */
-SCM SchemeSmob::ss_purge_recursive (SCM satom, SCM kv_pairs)
+SCM SchemeSmob::ss_extract_recursive (SCM satom, SCM kv_pairs)
 {
-	Handle h = verify_handle(satom, "cog-purge-recursive");
+	Handle h = verify_handle(satom, "cog-extract-recursive");
 
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-purge-recursive");
+	if (NULL == atomspace) atomspace = ss_get_env_as("cog-extract-recursive");
 
-	bool rc = atomspace->purge_atom(h, true);
+	bool rc = atomspace->extract_atom(h, true);
 
 	// Clobber the handle, too.
 	*((Handle *) SCM_SMOB_DATA(satom)) = Handle::UNDEFINED;
