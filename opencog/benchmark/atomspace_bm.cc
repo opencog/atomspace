@@ -28,7 +28,7 @@ int main(int argc, char** argv)
      "-r <int>  \tLooping count; how many times a python/scheme operation is looped\n"
      "-u <int>  \tInner looping count\n"
      "          \t(default: 2000)\n"
-     "-h <int>  \tstd::vector<Handle>::reserve() count\n"
+     "-h <int>  \tHandleSeq::reserve() count\n"
      "          \t(default: 0)\n"
      "-R <int>  \tUse specific randomseed; useful for benchmark comparisons\n"
      "          \t(default: time(NULL))\n"

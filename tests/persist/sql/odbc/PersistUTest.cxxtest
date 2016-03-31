@@ -258,7 +258,7 @@ void PersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
     h4[idx]->setTruthValue(stv4);
     n4[idx] = NodeCast(h4[idx]);
 
-    std::vector<Handle> hvec;
+    HandleSeq hvec;
     hvec.push_back(h1[idx]);
     hvec.push_back(h2[idx]);
     hvec.push_back(h3[idx]);
@@ -288,7 +288,7 @@ void PersistUTest::check_space(int idx, AtomSpace *space)
     Handle hb4 = space->get_handle(n4[idx]->getType(), n4[idx]->getName());
     atomCompare(h4[idx], hb4);
 
-    std::vector<Handle> hvec;
+    HandleSeq hvec;
     hvec.push_back(hb1);
     hvec.push_back(hb2);
     hvec.push_back(hb3);
@@ -320,7 +320,7 @@ void PersistUTest::check_empty(int idx, AtomSpace *space)
     Handle hb4 = space->get_handle(n4[idx]->getType(), n4[idx]->getName());
     TSM_ASSERT("Should not find this atom", hb4 == Handle::UNDEFINED);
 
-    std::vector<Handle> hvec;
+    HandleSeq hvec;
     hvec.push_back(h1[idx]);
     hvec.push_back(h2[idx]);
     hvec.push_back(h3[idx]);

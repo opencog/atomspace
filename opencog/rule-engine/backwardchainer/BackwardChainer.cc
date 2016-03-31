@@ -232,7 +232,7 @@ void BackwardChainer::process_target(Target& target)
 
 		for (Handle& h : sub_premises)
 			_targets_set.emplace(h, gen_sub_varlist(h, htarget_vardecl,
-			                                        std::set<Handle>()));
+			                                        OrderedHandleSet()));
 
 		return;
 	}
@@ -274,7 +274,7 @@ void BackwardChainer::process_target(Target& target)
 
 	Handle hrule_implicant_reverse_grounded;
 	HandleMapSeq premises_vmap_list;
-	std::set<Handle> additional_free_var;
+	OrderedHandleSet additional_free_var;
 	for (auto& h : target.get_varset())
 		additional_free_var.insert(_garbage_superspace.get_atom(h));
 	HandleSeq possible_premises = find_premises(standardized_rule,
@@ -569,7 +569,7 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
  */
 HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
                                          const HandleMap& implicand_mapping,
-                                         const std::set<Handle>& additional_free_varset,
+                                         const OrderedHandleSet& additional_free_varset,
                                          Handle& hrule_implicant_reverse_grounded,
                                          HandleMapSeq& premises_vmap_list)
 {
@@ -604,7 +604,7 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
 		        match_knowledge_base(hrule_implicant_reverse_grounded,
 		                             gen_sub_varlist(hrule_implicant_reverse_grounded,
 		                                             hrule_vardecl,
-		                                             std::set<Handle>()),
+		                                             OrderedHandleSet()),
 		                             premises_vmap_list_alt,
 		                             true);
 
@@ -893,7 +893,7 @@ bool BackwardChainer::select_rule(const Target& target,
 
 			if (not unify(h,
 			              htarget,
-			              gen_sub_varlist(h, hrule_vardecl, std::set<Handle>()),
+			              gen_sub_varlist(h, hrule_vardecl, OrderedHandleSet()),
 			              htarget_vardecl,
 			              mapping))
 				continue;
@@ -918,7 +918,7 @@ bool BackwardChainer::select_rule(const Target& target,
 				if (not unify(h,
 				              htarget,
 				              gen_sub_varlist(h, hrule_vardecl,
-				                              std::set<Handle>()),
+				                              OrderedHandleSet()),
 				              htarget_vardecl,
 				              mapping))
 					continue;
@@ -972,7 +972,7 @@ Handle BackwardChainer::gen_varlist(const Handle& target)
  */
 Handle BackwardChainer::gen_sub_varlist(const Handle& parent,
                                         const Handle& parent_varlist,
-                                        std::set<Handle> additional_free_varset)
+                                        OrderedHandleSet additional_free_varset)
 {
 	FindAtoms fv(VARIABLE_NODE);
 	fv.search_set(parent);

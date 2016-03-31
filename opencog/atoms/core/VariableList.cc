@@ -138,7 +138,7 @@ VariableList::VariableList(Link &l)
  */
 void VariableList::get_vartype(const Handle& htypelink)
 {
-	const std::vector<Handle>& oset = htypelink->getOutgoingSet();
+	const HandleSeq& oset = htypelink->getOutgoingSet();
 	if (2 != oset.size())
 	{
 		throw InvalidParamException(TRACE_INFO,
@@ -169,8 +169,8 @@ void VariableList::get_vartype(const Handle& htypelink)
 	else if (TYPE_CHOICE == t)
 	{
 		std::set<Type> typeset;
-		std::set<Handle> deepset;
-		std::set<Handle> fuzzset;
+		OrderedHandleSet deepset;
+		OrderedHandleSet fuzzset;
 
 		const HandleSeq& tset = vartype->getOutgoingSet();
 		size_t tss = tset.size();
@@ -227,7 +227,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 				"Unexpected contents in SignatureLink\n"
 				"Expected arity==1, got %s", vartype->toString().c_str());
 
-		std::set<Handle> ts;
+		OrderedHandleSet ts;
 		ts.insert(vartype);
 		_varlist._deep_typemap.insert({varname, ts});
 	}
@@ -239,7 +239,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 				"Unexpected contents in FuzzyLink\n"
 				"Expected arity==1, got %s", vartype->toString().c_str());
 
-		std::set<Handle> ts;
+		OrderedHandleSet ts;
 		ts.insert(vartype);
 		_varlist._fuzzy_typemap.insert({varname, ts});
 	}
@@ -295,7 +295,7 @@ void VariableList::validate_vardecl(const Handle& hdecls)
 	{
 		// The list of variable declarations should be .. a list of
 		// variables! Make sure its as expected.
-		const std::vector<Handle>& dset = hdecls->getOutgoingSet();
+		const HandleSeq& dset = hdecls->getOutgoingSet();
 		validate_vardecl(dset);
 	}
 	else

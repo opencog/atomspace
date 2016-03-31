@@ -72,7 +72,7 @@ bool Handle::atoms_less(const Atom* pa, const Atom* pb)
 
     // If both UUID's are invalid, we still need to compare
     // the atoms somehow. The need to compare in some "reasonable"
-    // way, so that std::set<Handle> works correctly when it uses
+    // way, so that OrderedHandleSet works correctly when it uses
     // the std::less<Handle> operator, which calls this function.
     // Performing an address-space comparison is all I can think
     // of...

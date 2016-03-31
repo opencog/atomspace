@@ -40,8 +40,8 @@ class PatternMatch
 
 	protected:
 		static bool recursive_virtual(PatternMatchCallback& cb,
-		            const std::vector<Handle>& virtuals,
-		            const std::vector<Handle>& negations,
+		            const HandleSeq& virtuals,
+		            const HandleSeq& negations,
 		            const HandleMap& var_gnds,
 		            const HandleMap& term_gnds,
 		            std::vector<HandleMapSeq> comp_var_gnds,

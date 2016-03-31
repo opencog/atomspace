@@ -76,7 +76,7 @@ private:
     Handle remove_constant_clauses(const Handle& hvarlist,
                                    const Handle& himplicand);
     HandleSeq substitute_rule_part(AtomSpace& as, const Handle& hrule,
-                                   const std::set<Handle>& vars,
+                                   const OrderedHandleSet& vars,
                                    const HandleMapSeq&
                                    var_groundings);
     bool unify(const Handle& source, const Handle& pattern, const Rule* rule);

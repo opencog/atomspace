@@ -584,7 +584,7 @@ Handle ForwardChainer::remove_constant_clauses(const Handle& hvarlist,
  * @return A HandleSeq of all possible derived rules
  */
 HandleSeq ForwardChainer::substitute_rule_part(
-        AtomSpace& as, const Handle& hrule, const std::set<Handle>& vars,
+        AtomSpace& as, const Handle& hrule, const OrderedHandleSet& vars,
         const HandleMapSeq& var_groundings)
 {
     HandleMapSeq filtered_vgmap_list;

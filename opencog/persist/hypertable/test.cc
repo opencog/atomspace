@@ -26,8 +26,8 @@ int atomCompare(Atom *a, Atom *b) //TODO: Test name, use == ?
             --rc;
         }
             if (0 < na->getArity()) {
-            std::vector<Handle> outa = na->getOutgoingSet();
-            std::vector<Handle> outb = nb->getOutgoingSet();
+            HandleSeq outa = na->getOutgoingSet();
+            HandleSeq outb = nb->getOutgoingSet();
             for (int i =0; i< na->getArity(); i++) {
                 if (outa[i] != outb[i]) {
                     fprintf(stderr, "Error, outgoing set mis-match:");
@@ -102,7 +102,7 @@ int main (int argc, char **argv){
 	    // TLB::addAtom(a2);
 	    // table.storeAtom(TLB::getHandle(a2));
 
-	    std::vector<Handle> hvec;
+	    HandleSeq hvec;
 	    // hvec.push_back(TLB::getHandle(a));
 	    // hvec.push_back(TLB::getHandle(a2));
 

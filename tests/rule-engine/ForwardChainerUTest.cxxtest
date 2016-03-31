@@ -184,7 +184,7 @@ void ForwardChainerUTest::test_substitute_rule_part(void)
 	HandleMap vg_map_2 = { { var_b, grnd_1 }, { var_c, grnd_2 } };
 
 	HandleMapSeq var_groundings = { vg_map_1 };
-	std::set<Handle> vars_case_1 = { var_a, var_b };
+	OrderedHandleSet vars_case_1 = { var_a, var_b };
 
 	Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
 	ForwardChainer fc(_as, rbs, grnd_2);
@@ -198,7 +198,7 @@ void ForwardChainerUTest::test_substitute_rule_part(void)
 	TS_ASSERT_EQUALS(hexpected, hx);
 
 	var_groundings = { vg_map_2 };
-	std::set<Handle> vars_case_2 = { var_b, var_c };
+	OrderedHandleSet vars_case_2 = { var_b, var_c };
 	rule_derivatives = fc.substitute_rule_part(_as, rule_handle, vars_case_2,
 	                                           var_groundings);
 

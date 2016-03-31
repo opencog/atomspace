@@ -44,7 +44,7 @@ class MapLink : public FunctionLink
 protected:
 	ScopeLinkPtr _pattern;
 	const Variables* _vars;
-	const std::set<Handle>* _varset;
+	const OrderedHandleSet* _varset;
 	bool _is_impl;
 	Handle _rewrite;
 

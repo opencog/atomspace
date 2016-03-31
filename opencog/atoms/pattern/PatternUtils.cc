@@ -50,14 +50,14 @@ namespace opencog {
  *
  * Returns true if the list of clauses was modified, else returns false.
  */
-bool remove_constants(const std::set<Handle> &vars,
-                      std::vector<Handle> &clauses,
-                      std::vector<Handle> &constants)
+bool remove_constants(const OrderedHandleSet &vars,
+                      HandleSeq &clauses,
+                      HandleSeq &constants)
 {
 	bool modified = false;
 
 	// Caution: this loop modifies the clauses list!
-	std::vector<Handle>::iterator i;
+	HandleSeq::iterator i;
 	for (i = clauses.begin(); i != clauses.end(); )
 	{
 		Handle clause(*i);
@@ -116,18 +116,18 @@ bool remove_constants(const std::set<Handle> &vars,
  * in them.  These end up in thier own component, which can be extremely
  * confusing.
  */
-void get_connected_components(const std::set<Handle>& vars,
+void get_connected_components(const OrderedHandleSet& vars,
                               const HandleSeq& clauses,
                               std::vector<HandleSeq>& components,
-                              std::vector<std::set<Handle>>& component_vars)
+                              std::vector<OrderedHandleSet>& component_vars)
 {
-	std::vector<Handle> todo(clauses);
+	HandleSeq todo(clauses);
 
 	while (0 < todo.size())
 	{
 		// no_con_yet == clauses that failed to connect to any existing
 		// component.
-		std::vector<Handle> no_con_yet;
+		HandleSeq no_con_yet;
 		bool did_at_least_one = false;
 
 		for (const Handle& cl: todo)
@@ -138,7 +138,7 @@ void get_connected_components(const std::set<Handle>& vars,
 			size_t nc = components.size();
 			for (size_t i = 0; i<nc; i++)
 			{
-				std::set<Handle>& cur_vars(component_vars[i]);
+				OrderedHandleSet& cur_vars(component_vars[i]);
 				// If clause cl is connected to this component, then add it
 				// to this component.
 				if (any_unquoted_in_tree(cl, cur_vars))

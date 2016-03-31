@@ -43,8 +43,8 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
  * variables and clauses, using the indicated callback.
  */
 static inline void match(PatternMatchCallback& pmcb,
-                         const std::set<Handle> &vars,
-                         const std::vector<Handle> &clauses)
+                         const OrderedHandleSet &vars,
+                         const HandleSeq &clauses)
 {
 	PatternLinkPtr slp(createPatternLink(vars, clauses));
 	slp->satisfy(pmcb);

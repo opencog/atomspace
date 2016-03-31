@@ -329,7 +329,7 @@ public:
 
     //! Place incoming set into STL container of Handles.
     //! Example usage:
-    //!     std::vector<Handle> hvect;
+    //!     HandleSeq hvect;
     //!     atom->getIncomingSet(back_inserter(hvect));
     //! The resulting vector hvect will contain only valid handles
     //! that were actually part of the incoming set at the time of

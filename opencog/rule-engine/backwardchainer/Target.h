@@ -77,11 +77,11 @@ public:
 	}
 
 	/**
-	 * Get the "free" variables list in set<Handle>
+	 * Get the "free" variables list in OrderedHandleSet
 	 *
-	 * @return the std::set<Handle>
+	 * @return the OrderedHandleSet
 	 */
-	std::set<Handle> get_varset() const
+	OrderedHandleSet get_varset() const
 	{
 		return VariableListCast(_vardecl)->get_variables().varset;
 	}

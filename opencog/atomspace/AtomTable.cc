@@ -196,7 +196,7 @@ void AtomTable::clear()
     }
     else
     {
-        std::vector<Handle> allAtoms;
+        HandleSeq allAtoms;
 
         getHandlesByType(back_inserter(allAtoms), ATOM, true, false);
 
@@ -208,7 +208,7 @@ void AtomTable::clear()
 
         // XXX FIXME TODO This is a stunningly inefficient way to clear the
         // atomtable! This will take minutes on any decent-sized atomspace!
-        std::vector<Handle>::iterator i;
+        HandleSeq::iterator i;
         for (i = allAtoms.begin(); i != allAtoms.end(); ++i) {
             extract(*i, true);
         }

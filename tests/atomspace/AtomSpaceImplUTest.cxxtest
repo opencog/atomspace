@@ -211,7 +211,7 @@ getSortedHandleSet(AtomSpace*as,
              Compare compare)
 {
     // get the handle set as a vector and sort it.
-    std::vector<Handle> hs;
+    HandleSeq hs;
 
     as->get_handles_by_type(back_inserter(hs), type, subclass);
     std::sort(hs.begin(), hs.end(), compareAtom<AtomComparator>(compare));

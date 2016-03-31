@@ -165,9 +165,9 @@ class ODBCAtomStorage : public AtomStorage
 
         // AtomStorage interface
         NodePtr getNode(Type, const char *);
-        LinkPtr getLink(Type, const std::vector<Handle>&);
+        LinkPtr getLink(Type, const HandleSeq&);
         AtomPtr getAtom(UUID);
-        std::vector<Handle> getIncomingSet(Handle);
+        HandleSeq getIncomingSet(Handle);
         void storeAtom(AtomPtr atomPtr, bool synchronous = false);
         void loadType(AtomTable &, Type);
         void flushStoreQueue();

@@ -160,10 +160,10 @@ void ZMQClient::load(AtomTable &table) {
 /**
  * Retrieve the entire incoming set of the indicated atom.
  */
-std::vector<Handle> ZMQClient::getIncomingSet(Handle h)
+HandleSeq ZMQClient::getIncomingSet(Handle h)
 {
 	// TODO: implement
-	std::vector<Handle> handles;
+	HandleSeq handles;
 	return handles;
 }
 
@@ -208,7 +208,7 @@ NodePtr ZMQClient::getNode(Type t, const char * str)
  * However, it does register with the TLB, as the SQL uuids and the
  * TLB Handles must be kept in sync, or all hell breaks loose.
  */
-LinkPtr ZMQClient::getLink(Type t, const std::vector<Handle>&oset)
+LinkPtr ZMQClient::getLink(Type t, const HandleSeq&oset)
 {
     ZMQRequestMessage req;
     ZMQReplyMessage rep;

@@ -239,7 +239,7 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
  * exist in the atomspace, anyway.
  */
 Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
-                                       const std::set<Handle>& evl,
+                                       const OrderedHandleSet& evl,
                                        Handle& starter_term,
                                        size_t& bestclause)
 {
@@ -809,7 +809,7 @@ bool InitiateSearchCB::no_search(PatternMatchEngine *pme)
 
 	// The one-and-only clause must be evaluatable!
 	const HandleSeq& clauses = _pattern->mandatory;
-	const std::set<Handle>& evl = _pattern->evaluatable_holders;
+	const OrderedHandleSet& evl = _pattern->evaluatable_holders;
 	if (0 == evl.count(clauses[0]))
 	{
 		_search_fail = true;

@@ -44,7 +44,7 @@ NodePtr SQLBackingStore::getNode(Type t, const char *name) const
 	return _store->getNode(t, name);
 }
 
-LinkPtr SQLBackingStore::getLink(Type t, const std::vector<Handle>& oset) const
+LinkPtr SQLBackingStore::getLink(Type t, const HandleSeq& oset) const
 {
 	return _store->getLink(t, oset);
 }

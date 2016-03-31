@@ -153,7 +153,7 @@ void AtomspaceHTabler::clearData(void)
  * This is a two-pass lookup: we get the handle from Outsettable
  * and use it to index into the main Atomtable.
  */
-Link * AtomspaceHTabler::getLink(Type t, const std::vector<Handle>& handles) const
+Link * AtomspaceHTabler::getLink(Type t, const HandleSeq& handles) const
 {
     TableScannerPtr scanner_ptr;
     ScanSpecBuilder ssb;
@@ -162,7 +162,7 @@ Link * AtomspaceHTabler::getLink(Type t, const std::vector<Handle>& handles) con
 
     ssb.add_column("handle");
     row << t;
-    std::vector<Handle>::const_iterator iter;
+    HandleSeq::const_iterator iter;
     for (iter = handles.begin(); iter != handles.end(); ++iter)
     {
         row << ',';
@@ -269,7 +269,7 @@ void AtomspaceHTabler::storeAtom(Handle h)
     {
         // Store the outgoing set
         int arity = as->getArity(h);
-        const std::vector<Handle> &out = as->getOutgoing(h);
+        const HandleSeq &out = as->getOutgoing(h);
         std::stringstream ss;
         for (int i = 0; i < arity; ++i)
         {
@@ -290,7 +290,7 @@ void AtomspaceHTabler::storeAtom(Handle h)
         char r[BUFF_SIZE];
         int len = snprintf(r, BUFF_SIZE, "%hu", as->getType(h));
 
-        std::vector<Handle>::const_iterator iter;
+        HandleSeq::const_iterator iter;
         for (iter = as->getOutgoing(h).begin();
              iter != as->getOutgoing(h).end(); ++iter)
         {
@@ -369,12 +369,12 @@ void AtomspaceHTabler::storeAtom(Handle h)
  * Return a vector containing the handles of the entire incoming
  * set of the indicated handle.
  */
-std::vector<Handle> AtomspaceHTabler::getIncomingSet(Handle h) const
+HandleSeq AtomspaceHTabler::getIncomingSet(Handle h) const
 {
     TableScannerPtr scanner_ptr;
     ScanSpecBuilder ssb;
     Cell cell;
-    std::vector<Handle> handles;
+    HandleSeq handles;
 
     ssb.add_column("incoming");
     char rowbuff[BUFF_SIZE];
@@ -434,7 +434,7 @@ Atom * AtomspaceHTabler::getAtom(Handle h) const
     const char* stv = 0;
     std::string stv_str;
     int type;
-    std::vector<Handle> handles;
+    HandleSeq handles;
     short sti;
     short lti;
     unsigned short vlti;

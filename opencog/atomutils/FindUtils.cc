@@ -55,7 +55,7 @@ FindAtoms::FindAtoms(const Handle& atom)
 	  _target_atoms({atom})
 {}
 
-FindAtoms::FindAtoms(const std::set<Handle>& selection)
+FindAtoms::FindAtoms(const OrderedHandleSet& selection)
 	: _target_types(),
 	  _target_atoms(selection)
 {}
@@ -65,7 +65,7 @@ void FindAtoms::search_set(const Handle& h)
 	find_rec(h);
 }
 
-void FindAtoms::search_set(const std::vector<Handle>& hlist)
+void FindAtoms::search_set(const HandleSeq& hlist)
 {
 	for (const Handle& h : hlist) find_rec(h);
 }
@@ -171,7 +171,7 @@ bool is_unscoped_in_tree(const Handle& tree, const Handle& atom)
 	if (not tree->isLink()) return false;
 	ScopeLinkPtr stree(ScopeLinkCast(tree));
 	if (nullptr != stree) {
-		const std::set<Handle>& varset = stree->get_variables().varset;
+		const OrderedHandleSet& varset = stree->get_variables().varset;
 		if (varset.find(atom) != varset.cend())
 			return false;
 	}
@@ -183,7 +183,7 @@ bool is_unscoped_in_tree(const Handle& tree, const Handle& atom)
 	return false;
 }
 
-bool any_atom_in_tree(const Handle& tree, const std::set<Handle>& atoms)
+bool any_atom_in_tree(const Handle& tree, const OrderedHandleSet& atoms)
 {
 	for (const Handle& n: atoms)
 	{
@@ -192,7 +192,7 @@ bool any_atom_in_tree(const Handle& tree, const std::set<Handle>& atoms)
 	return false;
 }
 
-bool any_unquoted_in_tree(const Handle& tree, const std::set<Handle>& atoms)
+bool any_unquoted_in_tree(const Handle& tree, const OrderedHandleSet& atoms)
 {
 	for (const Handle& n: atoms)
 	{
@@ -201,7 +201,7 @@ bool any_unquoted_in_tree(const Handle& tree, const std::set<Handle>& atoms)
 	return false;
 }
 
-bool any_unscoped_in_tree(const Handle& tree, const std::set<Handle>& atoms)
+bool any_unscoped_in_tree(const Handle& tree, const OrderedHandleSet& atoms)
 {
 	for (const Handle& n: atoms)
 		if (is_unscoped_in_tree(tree, n)) return true;
@@ -209,7 +209,7 @@ bool any_unscoped_in_tree(const Handle& tree, const std::set<Handle>& atoms)
 }
 
 bool any_unquoted_unscoped_in_tree(const Handle& tree,
-                                   const std::set<Handle>& atoms)
+                                   const OrderedHandleSet& atoms)
 {
 	for (const Handle& n: atoms)
 		if (is_unquoted_in_tree(tree, n) and is_unscoped_in_tree(tree, n))
@@ -218,7 +218,7 @@ bool any_unquoted_unscoped_in_tree(const Handle& tree,
 }
 
 unsigned int num_unquoted_in_tree(const Handle& tree,
-                                  const std::set<Handle>& atoms)
+                                  const OrderedHandleSet& atoms)
 {
 	unsigned int count = 0;
 	for (const Handle& n: atoms)
@@ -228,7 +228,7 @@ unsigned int num_unquoted_in_tree(const Handle& tree,
 	return count;
 }
 
-bool is_atom_in_any_tree(const std::vector<Handle>& trees,
+bool is_atom_in_any_tree(const HandleSeq& trees,
                          const Handle& atom)
 {
 	for (const Handle& tree: trees)
@@ -238,7 +238,7 @@ bool is_atom_in_any_tree(const std::vector<Handle>& trees,
 	return false;
 }
 
-bool is_unquoted_in_any_tree(const std::vector<Handle>& trees,
+bool is_unquoted_in_any_tree(const HandleSeq& trees,
                              const Handle& atom)
 {
 	for (const Handle& tree: trees)
@@ -276,7 +276,7 @@ bool contains_atomtype(const HandleSeq& clauses, Type atom_type)
 
 HandleSeq get_free_vars_in_tree(const Handle& tree)
 {
-	std::set<Handle> varset;
+	OrderedHandleSet varset;
 
 	std::function<void (const Handle&)> find_rec = [&](const Handle& h)
 	{

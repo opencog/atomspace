@@ -27,8 +27,8 @@ namespace opencog
  * Returns true if all calls return true, return false otherwise.
  */
 template<class T>
-inline bool foreach_atom_pair(const std::vector<Handle> &va,
-                              const std::vector<Handle> &vb,
+inline bool foreach_atom_pair(const HandleSeq &va,
+                              const HandleSeq &vb,
                               bool (T::*cb)(const Handle&, const Handle&), T *data)
 {
     size_t vasz = va.size();

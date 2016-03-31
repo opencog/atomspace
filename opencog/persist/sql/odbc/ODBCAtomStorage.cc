@@ -220,7 +220,7 @@ class ODBCAtomStorage::Response
 
 #ifndef USE_INLINE_EDGES
         // Temporary cache of info about the outgoing set.
-        std::vector<Handle> *outvec;
+        HandleSeq *outvec;
         Handle dst;
         int pos;
 
@@ -688,7 +688,7 @@ int ODBCAtomStorage::get_height(AtomPtr atom)
 
 /* ================================================================ */
 
-std::string ODBCAtomStorage::oset_to_string(const std::vector<Handle>& out,
+std::string ODBCAtomStorage::oset_to_string(const HandleSeq& out,
                                         int arity)
 {
     std::string str;
@@ -1204,7 +1204,7 @@ void ODBCAtomStorage::get_ids(void)
 /* ================================================================ */
 
 #ifndef USE_INLINE_EDGES
-void ODBCAtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
+void ODBCAtomStorage::getOutgoing(HandleSeq &outv, Handle h)
 {
     char buff[BUFSZ];
     UUID uuid = h->getUUID();
@@ -1288,9 +1288,9 @@ AtomPtr ODBCAtomStorage::getAtom(UUID uuid)
 /**
  * Retreive the entire incoming set of the indicated atom.
  */
-std::vector<Handle> ODBCAtomStorage::getIncomingSet(Handle h)
+HandleSeq ODBCAtomStorage::getIncomingSet(Handle h)
 {
-    std::vector<Handle> iset;
+    HandleSeq iset;
 
     setup_typemap();
     char buff[BUFSZ];

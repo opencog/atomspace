@@ -128,8 +128,8 @@ class PMCGroundings : public PatternMatchCallback
  * Return false if no solution is found, true otherwise.
  */
 bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
-            const std::vector<Handle>& virtuals,
-            const std::vector<Handle>& negations, // currently ignored
+            const HandleSeq& virtuals,
+            const HandleSeq& negations, // currently ignored
             const HandleMap& var_gnds,
             const HandleMap& term_gnds,
             // copies, NOT references!
@@ -419,7 +419,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	              << " num virts=" << _virtual.size();
 	HandleMap empty_vg;
 	HandleMap empty_pg;
-	std::vector<Handle> optionals; // currently ignored
+	HandleSeq optionals; // currently ignored
 	pmcb.set_pattern(_varlist, _pat);
 	return PatternMatch::recursive_virtual(pmcb, _virtual, optionals,
 	                                       empty_vg, empty_pg,
