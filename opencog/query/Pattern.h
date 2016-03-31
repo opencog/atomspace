@@ -49,7 +49,7 @@ struct Pattern
 {
 	// Private, locally scoped typedefs, not used outside of this class.
 	// XXX TODO Replace by unordered multimap...
-	typedef std::vector<Handle> RootList;
+	typedef HandleSeq RootList;
 	typedef std::map<Handle, RootList> ConnectMap;
 	typedef std::pair<Handle, RootList> ConnectPair;
 
@@ -95,34 +95,34 @@ struct Pattern
 	// The optional clauses don't have to be grounded, but they might be.
 	// This is where the absent clauses are held, so e.g. if these do get
 	// grounded, they might be rejected (depending on the callback).
-	std::set<Handle> optionals;    // Optional clauses
+	OrderedHandleSet optionals;    // Optional clauses
 
 	// Black-box clauses. These are clauses that contain GPN's. These
 	// have to drop into scheme or python to get evaluated, which means
 	// that they will be slow.  So, we leave these for last, so that the
 	// faster clauses can run first, and rule out un-needed evaluations.
-	std::set<Handle> black;       // Black-box clauses
+	OrderedHandleSet black;       // Black-box clauses
 
 	// Evaluatable terms are those that hold a GroundedPredicateNode
 	// (GPN) in them, or are stand-ins (e.g. GreaterThanLink, EqualLink).
-	std::set<Handle> evaluatable_terms;   // smallest term that is evaluatable
-	std::set<Handle> evaluatable_holders; // holds something evaluatable.
+	OrderedHandleSet evaluatable_terms;   // smallest term that is evaluatable
+	OrderedHandleSet evaluatable_holders; // holds something evaluatable.
 
 	// Executable terms are those that inherit from FunctionLink;
 	// this includes ExecutionOutputLink's.
-	std::set<Handle> executable_terms;    // smallest term that is executable
-	std::set<Handle> executable_holders;  // holds something executable.
+	OrderedHandleSet executable_terms;    // smallest term that is executable
+	OrderedHandleSet executable_holders;  // holds something executable.
 
 	// Defined terms are terms that are a DefinedPredicateNode (DPN)
 	// or a DefineSchemaNode (DSN).
-	std::set<Handle> defined_terms;    // The DPN/DSN itself.
+	OrderedHandleSet defined_terms;    // The DPN/DSN itself.
 
 	// Globby terms are terms that contain a GlobNode
-	std::set<Handle> globby_terms;     // Smallest term that has a glob.
+	OrderedHandleSet globby_terms;     // Smallest term that has a glob.
 
 	// Terms that may be grounded in an imprecise way. Similar to a
 	// GlobNode, but uses a different algorithm.
-	std::set<Handle> fuzzy_terms;
+	OrderedHandleSet fuzzy_terms;
 
 	// Maps; the value is the largest (evaluatable or executable)
 	// term containing the variable. Its a multimap, because

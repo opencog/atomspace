@@ -103,7 +103,7 @@ Old-style, raw access to naked array (don't do this):
    MyClass::do_something(Handle handle)
    {
       Atom *atom = TLB::getAtom(handle);
-      const std::vector<Handle> &vect = atom->getOutgoingSet();
+      const HandleSeq &vect = atom->getOutgoingSet();
       for (size_t i=0; i<vect.size(); i++)
       {
          Handle h = vect[i];

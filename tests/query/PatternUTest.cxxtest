@@ -239,10 +239,10 @@ void PatternUTest::test_simple_link(void)
 	Handle hvar = as->add_node(VARIABLE_NODE, "variable node");
 	Handle he = as->add_link(INHERITANCE_LINK, hconst_1, hvar);
 
-	std::set<Handle> vars;
+	OrderedHandleSet vars;
 	vars.insert(hvar);
 
-	std::vector<Handle> preds;
+	HandleSeq preds;
 	preds.push_back(he);
 
 	PMCB pmcb(as);
@@ -292,10 +292,10 @@ void PatternUTest::test_two_links(void)
 
 	Handle hv = as->add_link(VARIABLE_LIST, hx);
 
-	std::set<Handle> vars;
+	OrderedHandleSet vars;
 	vars.insert(hx);
 
-	std::vector<Handle> preds;
+	HandleSeq preds;
 	preds.push_back(hl1);
 	preds.push_back(hl2);
 
@@ -351,11 +351,11 @@ void PatternUTest::test_eval(void)
 
 	heval = as->add_link(EVALUATION_LINK, hprn, hl);
 
-	std::set<Handle> vars;
+	OrderedHandleSet vars;
 	vars.insert(hprn);
 	vars.insert(h2);
 
-	std::vector<Handle> preds;
+	HandleSeq preds;
 	preds.push_back(heval);
 
 	PMCB pmcb(as);
@@ -376,11 +376,11 @@ void PatternUTest::test_eval(void)
 
 	hshort_eval = as->add_link(EVALUATION_LINK, hprns, hls);
 
-	std::set<Handle> svars;
+	OrderedHandleSet svars;
 	svars.insert(hprns);
 	svars.insert(h2);
 
-	std::vector<Handle> spreds;
+	HandleSeq spreds;
 	spreds.push_back(hshort_eval);
 
 	pmcb.found = 0; // reset the counter !!
@@ -451,7 +451,7 @@ void PatternUTest::test_implication(void)
 	//
 	// Be sure to explicitly check that we got hitem_2 as the result
 
-	std::vector<Handle> ret;
+	HandleSeq ret;
 	as->get_handles_by_type(back_inserter(ret), PARSE_LINK);
 
 	TSM_ASSERT_EQUALS("incorrect implication", ret.size(), 1);

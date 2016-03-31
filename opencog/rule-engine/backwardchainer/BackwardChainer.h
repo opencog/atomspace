@@ -129,7 +129,7 @@ private:
 	                               bool enable_var_name_check = false);
 	HandleSeq find_premises(const Rule& standardized_rule,
 	                        const HandleMap& implicand_mapping,
-	                        const std::set<Handle>& additional_free_varset,
+	                        const OrderedHandleSet& additional_free_varset,
 	                        Handle& hrule_implicant_reverse_grounded,
 	                        HandleMapSeq& premises_vmap_list);
 	HandleSeq ground_premises(const Handle& htarget, const HandleMap& vmap,
@@ -143,7 +143,7 @@ private:
 	Handle gen_varlist(const Handle& target);
 
 	Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist,
-	                       std::set<Handle> additional_free_varset);
+	                       OrderedHandleSet additional_free_varset);
 
 	AtomSpace& _as;
 	UREConfigReader _configReader;

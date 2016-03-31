@@ -184,7 +184,7 @@ public:
 
     void testVLTI() {
         AtomSpace* atomSpace = new AtomSpace();
-        vector<Handle> atoms = createSimpleGraph(atomSpace, "vlti");
+        HandleSeq atoms = createSimpleGraph(atomSpace, "vlti");
         
         TS_ASSERT(getVLTI(atoms[0])==AttentionValue::DISPOSABLE);
         incVLTI(atoms[0]);//VLTI=1
@@ -209,7 +209,7 @@ public:
         logger().debug("BEGIN TEST:");
         
         AtomSpace* atomSpace = new AtomSpace();
-        vector<Handle> atoms = createSimpleGraph(atomSpace, "comparisons");
+        HandleSeq atoms = createSimpleGraph(atomSpace, "comparisons");
         
         logger().debug("STISort");
 
@@ -255,9 +255,9 @@ public:
     }
 
     // copied from AtomSpaceUTest.cxxtest, but modified for the test testComparisons 
-    vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName) {
+    HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName) {
         char buf[256];
-        vector<Handle> testAtoms;
+        HandleSeq testAtoms;
         int baseNameLength;
 
         memset(buf, 0, 256);

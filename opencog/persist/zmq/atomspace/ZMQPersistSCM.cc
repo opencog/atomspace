@@ -71,7 +71,7 @@ NodePtr ZMQBackingStore::getNode(Type t, const char *name) const
 	return _store->getNode(t, name);
 }
 
-LinkPtr ZMQBackingStore::getLink(Type t, const std::vector<Handle>& oset) const
+LinkPtr ZMQBackingStore::getLink(Type t, const HandleSeq& oset) const
 {
 	return _store->getLink(t, oset);
 }

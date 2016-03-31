@@ -1509,7 +1509,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 // of this "optimization" can add un-necessarily to the overhead.
 //
 unsigned int PatternMatchEngine::thickness(const Handle& clause,
-                                           const std::set<Handle>& live)
+                                           const OrderedHandleSet& live)
 {
 	// If there are only zero or one ungrounded vars, then any clause
 	// will do. Blow this pop stand.
@@ -1544,7 +1544,7 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 	bool unsolved = false;
 
 	// Make a list of the as-yet ungrounded variables.
-	std::set<Handle> ungrounded_vars;
+	OrderedHandleSet ungrounded_vars;
 
 	// Grounded variables ordered by the size of their grounding incoming set
 	std::multimap<std::size_t, Handle> thick_vars;
@@ -1920,8 +1920,8 @@ void PatternMatchEngine::log_solution(
  * For debug logging only
  */
 void PatternMatchEngine::log_term(
-                  const std::set<Handle> &vars,
-                  const std::vector<Handle> &clauses)
+                  const OrderedHandleSet &vars,
+                  const HandleSeq &clauses)
 {
 	logger().fine("Clauses:");
 	for (Handle h : clauses) log(h);

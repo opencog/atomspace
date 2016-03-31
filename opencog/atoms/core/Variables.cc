@@ -36,8 +36,8 @@ using namespace opencog;
 struct VarScraper
 {
 	bool _in_quote;
-	std::set<Handle> _bound_vars;
-	void find_vars(HandleSeq&, std::set<Handle>&, const HandleSeq&);
+	OrderedHandleSet _bound_vars;
+	void find_vars(HandleSeq&, OrderedHandleSet&, const HandleSeq&);
 };
 
 /* ================================================================= */
@@ -45,7 +45,7 @@ struct VarScraper
 // The work-horse that does the actual heavy-lifting.
 // See the find_variables() method for the description of what
 // this does, and why.
-void VarScraper::find_vars(HandleSeq& varseq, std::set<Handle>& varset,
+void VarScraper::find_vars(HandleSeq& varseq, OrderedHandleSet& varset,
                            const HandleSeq& oset)
 {
 	for (const Handle& h : oset)
@@ -72,7 +72,7 @@ void VarScraper::find_vars(HandleSeq& varseq, std::set<Handle>& varset,
 			_in_quote = false;
 
 		bool issco = classserver().isA(t, SCOPE_LINK);
-		std::set<Handle> bsave = _bound_vars;
+		OrderedHandleSet bsave = _bound_vars;
 		if (issco)
 		{
 			// Save the current set of bound variables...
@@ -332,7 +332,7 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 		_deep_typemap.find(var);
 	if (_deep_typemap.end() != dit)
 	{
-		const std::set<Handle> &sigset = dit->second;
+		const OrderedHandleSet &sigset = dit->second;
 		for (const Handle& sig : sigset)
 		{
 			if (value_is_type(sig, val)) return true;
@@ -345,7 +345,7 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 		_fuzzy_typemap.find(var);
 	if (_fuzzy_typemap.end() != fit)
 	{
-		// const std::set<Handle> &fuzzset = dit->second;
+		// const OrderedHandleSet &fuzzset = dit->second;
 		throw RuntimeException(TRACE_INFO,
 			"Not implemented! TODO XXX FIXME");
 		ret = false;

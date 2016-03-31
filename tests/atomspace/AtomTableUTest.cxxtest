@@ -93,7 +93,7 @@ public:
         Handle time = table->add(createNode(TIME_NODE, "1"), true);
         Handle word = table->add(createNode(NUMBER_NODE, "1"), true);
         Handle sense = table->add(createNode(CONCEPT_NODE, "28675194"), true);
-        std::vector<Handle> os;
+        HandleSeq os;
         os.push_back(time);
         os.push_back(word);
         os.push_back(sense);
@@ -229,7 +229,7 @@ public:
         Handle hn1 = table->add(n1, false);
         Handle hn2 = table->add(n2, false);
 
-        std::vector<Handle> os;
+        HandleSeq os;
         os.push_back(hn1); os.push_back(hn1); os.push_back(hn2);
         LinkPtr l1(createLink(LIST_LINK, os));
         Handle hl1 = table->add(l1, false);
@@ -262,7 +262,7 @@ public:
         Handle word = table->add(wp, false);
         NodePtr sp = createNode(MY_CONCEPT_NODE, "28675194");
         Handle sense = table->add(sp, false);
-        std::vector<Handle> os;
+        HandleSeq os;
         os.push_back(word);
         os.push_back(sense);
         LinkPtr lp = createLink(MY_INHERITANCE_LINK, os);

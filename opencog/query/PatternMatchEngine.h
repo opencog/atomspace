@@ -134,11 +134,11 @@ private:
 	bool clause_accepted;
 	void get_next_untried_clause(void);
 	bool get_next_thinnest_clause(bool, bool, bool);
-	unsigned int thickness(const Handle&, const std::set<Handle>&);
+	unsigned int thickness(const Handle&, const OrderedHandleSet&);
 	Handle next_clause;
 	Handle next_joint;
 	// Set of clauses for which a grounding is currently being attempted.
-	typedef std::set<Handle> IssuedSet;
+	typedef OrderedHandleSet IssuedSet;
 	IssuedSet issued;     // stacked on issued_stack
 
 	// -------------------------------------------
@@ -227,8 +227,8 @@ public:
 	static void log_solution(const HandleMap &vars,
 	                         const HandleMap &clauses);
 
-	static void log_term(const std::set<Handle> &vars,
-	                     const std::vector<Handle> &clauses);
+	static void log_term(const OrderedHandleSet &vars,
+	                     const HandleSeq &clauses);
 };
 
 } // namespace opencog

@@ -521,7 +521,7 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 /**
  * Convert argument into a list of handles.
  */
-std::vector<Handle>
+HandleSeq
 SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
 {
 	// Verify that second arg is an actual list. Allow null list
@@ -530,7 +530,7 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
 	if (!scm_is_pair(satom_list) and !scm_is_null(satom_list))
 		scm_wrong_type_arg_msg(subrname, pos, satom_list, "a list of atoms");
 
-	std::vector<Handle> outgoing_set;
+	HandleSeq outgoing_set;
 	SCM sl = satom_list;
 	pos = 2;
 	while (scm_is_pair(sl)) {
@@ -546,9 +546,9 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
 			// (cog-new-link 'ListLink (list x y z))
 			// Do this via a recursive call, flattening nested lists
 			// as we go along.
-			const std::vector<Handle> &oset =
+			const HandleSeq &oset =
 				verify_handle_list(satom, subrname, pos);
-			std::vector<Handle>::const_iterator it;
+			HandleSeq::const_iterator it;
 			for (it = oset.begin(); it != oset.end(); ++it) {
 				outgoing_set.emplace_back(*it);
 			}
@@ -580,7 +580,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	Handle h;
 	Type t = verify_atom_type(stype, "cog-new-link", 1);
 
-	std::vector<Handle> outgoing_set;
+	HandleSeq outgoing_set;
 	outgoing_set = verify_handle_list(satom_list, "cog-new-link", 2);
 
 	AtomSpace* atomspace = get_as_from_list(satom_list);
@@ -621,7 +621,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 {
 	Type t = verify_atom_type(stype, "cog-link", 1);
 
-	std::vector<Handle> outgoing_set;
+	HandleSeq outgoing_set;
 	outgoing_set = verify_handle_list (satom_list, "cog-link", 2);
 
 	AtomSpace* atomspace = get_as_from_list(satom_list);

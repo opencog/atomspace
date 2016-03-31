@@ -87,14 +87,14 @@ class FindAtoms
 {
 public:
 	std::set<Type> stopset;
-	std::set<Handle> varset;
-	std::set<Handle> holders;
-	std::set<Handle> least_holders;
+	OrderedHandleSet varset;
+	OrderedHandleSet holders;
+	OrderedHandleSet least_holders;
 
 	FindAtoms(Type t, bool subclass = false);
 	FindAtoms(Type ta, Type tb, bool subclass = false);
 	FindAtoms(const Handle& atom);
-	FindAtoms(const std::set<Handle>& selection);
+	FindAtoms(const OrderedHandleSet& selection);
 
 	/**
 	 * Given a handle to be searched, create a set of all of the
@@ -102,7 +102,7 @@ public:
 	 * (recursively).
 	 */
 	void search_set(const Handle& h);
-	void search_set(const std::vector<Handle>& hlist);
+	void search_set(const HandleSeq& hlist);
 private:
 	typedef enum
 	{
@@ -115,7 +115,7 @@ private:
 
 private:
 	std::set<Type> _target_types;
-	std::set<Handle> _target_atoms;
+	OrderedHandleSet _target_atoms;
 };
 
 /**
@@ -199,7 +199,7 @@ bool is_unscoped_in_tree(const Handle& tree, const Handle& atom);
  * the tree (that is, in the tree spanned by the outgoing set.)
  */
 bool any_atom_in_tree(const Handle& tree,
-                      const std::set<Handle>& atoms);
+                      const OrderedHandleSet& atoms);
 
 /**
  * Return true if any of the indicated atoms occur somewhere in
@@ -209,21 +209,21 @@ bool any_atom_in_tree(const Handle& tree,
  * longer a variable.
  */
 bool any_unquoted_in_tree(const Handle& tree,
-                          const std::set<Handle>& atoms);
+                          const OrderedHandleSet& atoms);
 
 /**
  * Return true if any of the atoms (variables) occur unscoped
  * somewhere in the tree.
  */
 bool any_unscoped_in_tree(const Handle& tree,
-                          const std::set<Handle>& atoms);
+                          const OrderedHandleSet& atoms);
 
 /**
  * Return true if any of the atoms (variables) occur unquoted and
  * unscoped somewhere in the tree.
  */
 bool any_unquoted_unscoped_in_tree(const Handle& tree,
-                                   const std::set<Handle>& atoms);
+                                   const OrderedHandleSet& atoms);
 
 /**
  * Return how many of the indicated atoms occur somewhere in
@@ -233,12 +233,12 @@ bool any_unquoted_unscoped_in_tree(const Handle& tree,
  * longer a variable.
  */
 unsigned int num_unquoted_in_tree(const Handle& tree,
-                                  const std::set<Handle>& atoms);
+                                  const OrderedHandleSet& atoms);
 
 /**
  * Return true if the indicated atom occurs somewhere in any of the trees.
  */
-bool is_atom_in_any_tree(const std::vector<Handle>& trees,
+bool is_atom_in_any_tree(const HandleSeq& trees,
                          const Handle& atom);
 
 /**
@@ -246,7 +246,7 @@ bool is_atom_in_any_tree(const std::vector<Handle>& trees,
  * but only if it is not quoted.  This is intended to be used to search
  * for variables, which cease to be variable when they are quoted.
  */
-bool is_unquoted_in_any_tree(const std::vector<Handle>& trees,
+bool is_unquoted_in_any_tree(const HandleSeq& trees,
                              const Handle& atom);
 
 /**

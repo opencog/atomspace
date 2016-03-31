@@ -191,7 +191,7 @@ private:
 	static Handle verify_handle(SCM, const char *, int pos = 1);
 	static TruthValue* verify_tv(SCM, const char *, int pos = 1);
 	static AttentionValue* verify_av(SCM, const char *, int pos = 1);
-	static std::vector<Handle> verify_handle_list (SCM, const char *,
+	static HandleSeq verify_handle_list (SCM, const char *,
 	                                               int pos = 1);
 	static std::vector<double> verify_float_list (SCM, const char *,
 	                                               int pos = 1);

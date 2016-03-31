@@ -160,7 +160,7 @@ void SCMPrimitiveUTest::test_H_H(void)
 	TSM_ASSERT ("Null handle for link ", as->is_valid_handle(yyy));
 	TSM_ASSERT ("handle isn't a link ", LinkCast(yyy));
 
-	const std::vector<Handle>& oset = LinkCast(yyy)->getOutgoingSet();
+	const HandleSeq& oset = LinkCast(yyy)->getOutgoingSet();
 
 	TSM_ASSERT ("wrong outgoing set ", nnn == oset[0]);
 

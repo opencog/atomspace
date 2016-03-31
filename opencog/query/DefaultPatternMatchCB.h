@@ -101,9 +101,9 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		ClassServer& _classserver;
 
 		const Variables* _vars = NULL;
-		const std::set<Handle>* _dynamic = NULL;
+		const OrderedHandleSet* _dynamic = NULL;
 		bool _have_evaluatables = false;
-		const std::set<Handle>* _globs = NULL;
+		const OrderedHandleSet* _globs = NULL;
 
 		bool _have_variables;
 		Handle _pattern_body;

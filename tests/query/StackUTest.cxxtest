@@ -169,11 +169,11 @@ void StackUTest::test_stack(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	std::set<Handle> vars;
+	OrderedHandleSet vars;
 	vars.insert(svar);
 	vars.insert(wvar);
 
-	std::vector<Handle> preds;
+	HandleSeq preds;
 	preds.push_back(p1);
 	preds.push_back(p2);
 

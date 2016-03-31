@@ -52,7 +52,7 @@ Handle opencog::eager_execute(AtomSpace* as, const Handle& cargs)
 	Handle args(cargs);
 	if (LIST_LINK == cargs->getType())
 	{
-		std::vector<Handle> new_oset;
+		HandleSeq new_oset;
 		bool changed = false;
 		for (const Handle& ho : cargs->getOutgoingSet())
 		{

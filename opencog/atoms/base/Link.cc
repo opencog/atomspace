@@ -45,7 +45,7 @@ void Link::resort(void)
     std::sort(_outgoing.begin(), _outgoing.end(), handle_less());
 }
 
-void Link::init(const std::vector<Handle>& outgoingVector)
+void Link::init(const HandleSeq& outgoingVector)
 {
     if (not classserver().isA(_type, LINK)) {
         throw InvalidParamException(TRACE_INFO,

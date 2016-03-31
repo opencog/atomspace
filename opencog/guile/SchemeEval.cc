@@ -1088,7 +1088,7 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
 	// If there were args, pass the args to the function.
 	if (varargs and varargs->isLink())
 	{
-		const std::vector<Handle> &oset = varargs->getOutgoingSet();
+		const HandleSeq &oset = varargs->getOutgoingSet();
 
 		// Iterate in reverse, because cons chains in reverse.
 		size_t sz = oset.size();

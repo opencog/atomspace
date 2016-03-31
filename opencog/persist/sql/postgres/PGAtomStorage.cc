@@ -1635,11 +1635,11 @@ AtomPtr PGAtomStorage::getAtom(UUID uuid)
 /**
  * Retreive the entire incoming set of the indicated atom.
  */
-std::vector<Handle> PGAtomStorage::getIncomingSet(Handle h)
+HandleSeq PGAtomStorage::getIncomingSet(Handle h)
 {
     Database database(this);
     char statement[BUFFER_SIZE];
-    std::vector<Handle> incoming_set;
+    HandleSeq incoming_set;
 
     if (_store_edges)
     {
