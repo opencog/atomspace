@@ -231,7 +231,7 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 		// matching at the end of the glob.
 		if ((jg+1) == osg_size) return true;
 
-		Handle post(osg[jg+1]);
+		const Handle& post(osg[jg+1]);
 		ip++;
 		while (ip < max_size and not loose_match(osp[ip], post))
 		{
@@ -240,6 +240,10 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 		// If ip ran past the end, then the post was not found. This is
 		// a mismatch.
 		if (not (ip < max_size)) return false;
+
+		// Go around again, look for more GlobNodes. Back up by one, so
+		// that the for-loop increment gets us back on track.
+		ip--;
 	}
 
 	return true;
