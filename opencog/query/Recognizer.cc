@@ -49,7 +49,7 @@ namespace opencog {
  * -- AIML wants a left-to-right traversal, this does an omni-
  *    directional exploration. (which is OK, but is not how AIML is
  *    defined...)
- * -- This hasn't been thought through thoroughly There are almost
+ * -- This hasn't been thought through thoroughly. There are almost
  *    surely some weird gotcha's.
  */
 class Recognizer :
@@ -167,7 +167,7 @@ bool Recognizer::link_match(const LinkPtr& lpat, const LinkPtr& lsoln)
 
 	// Globs are arity-changing. But there is a minimum length.
 	// Note that the inequality is backwards, here: the soln has the
-	// globs!
+	// globs! (and so lpat must have arity equal or greater than soln)
 	if (lpat->getArity() < lsoln->getArity()) return false;
 	return true;
 }
@@ -178,11 +178,11 @@ bool Recognizer::loose_match(const Handle& npat_h, const Handle& nsoln_h)
 	// Variable matches anything; move to next.
 	if (VARIABLE_NODE == gtype) return true;
 
-	// Strict match for link types
+	// Strict match for link types.
 	if (npat_h->getType() != gtype) return false;
 	if (not npat_h->isNode()) return true;
 
-	// if we are here, we know we have nodes. Ask for a strick match.
+	// If we are here, we know we have nodes. Ask for a strict match.
 	if (npat_h != nsoln_h) return false;
 	return true;
 }
@@ -191,7 +191,7 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 {
 	// If we are here, then there are probably glob nodes in the soln.
 	// Try to match them, rigorously. This might be a bad idea, though;
-	// if we are too rigorouos here, and have a bug, we may fail to find
+	// if we are too rigorous here, and have a bug, we may fail to find
 	// a good pattern.
 
 	if (not npat_h->isLink() or not nsoln_h->isLink()) return false;
@@ -231,7 +231,7 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 		// matching at the end of the glob.
 		if ((jg+1) == osg_size) return true;
 
-		Handle post(osg[jg+1]);
+		const Handle& post(osg[jg+1]);
 		ip++;
 		while (ip < max_size and not loose_match(osp[ip], post))
 		{
@@ -240,6 +240,10 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 		// If ip ran past the end, then the post was not found. This is
 		// a mismatch.
 		if (not (ip < max_size)) return false;
+
+		// Go around again, look for more GlobNodes. Back up by one, so
+		// that the for-loop increment gets us back on track.
+		ip--;
 	}
 
 	return true;

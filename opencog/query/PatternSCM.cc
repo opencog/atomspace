@@ -54,7 +54,7 @@ Handle PatternSCM::type_compose(Handle left, Handle right)
 // work correctly.  The problem is that python keeps creating and
 // destroying this class, but it expects things to stick around.
 // Oh well. I guess that's OK, since the definition is meant to be
-// for the lifetime of the server, anyway.
+// for the lifetime of the process, anyway.
 std::vector<FunctionWrap*> PatternSCM::_binders;
 
 PatternSCM::PatternSCM(void) :
@@ -89,13 +89,15 @@ void PatternSCM::init(void)
 	_binders.push_back(new FunctionWrap(recognize,
 	                   "cog-recognize", "query"));
 
-	// Fuzzy matching. XXX FIXME. this is not technically
+	// Fuzzy matching. XXX FIXME. This is not technically
 	// a query functon, and should probably be in some other
 	// module, maybe some utilities module?
 	define_scheme_primitive("cog-fuzzy-match",
 		&PatternSCM::find_approximate_match, this, "query");
 
 	// These below also belong somewhere else. Not sure where.
+	// Perhaps a deep-type module or type-reasoning module?
+	// dependent-type module? We don't have dependent types, yet.
 	define_scheme_primitive("cog-value-is-type?",
 		&PatternSCM::value_is_type, this, "query");
 

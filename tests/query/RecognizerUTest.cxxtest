@@ -1,7 +1,7 @@
 /*
  * tests/query/RecognizerUTest.cxxtest
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015,2016 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,12 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -33,46 +29,48 @@ using namespace opencog;
 class RecognizerUTest: public CxxTest::TestSuite
 {
 private:
-        AtomSpace *as;
-        SchemeEval* eval;
+	AtomSpace *as;
+	SchemeEval* eval;
 
 public:
-    RecognizerUTest(void)
-    {
-        logger().set_level(Logger::DEBUG);
-        logger().set_print_to_stdout_flag(true);
+	RecognizerUTest(void)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
 
-        as = new AtomSpace();
-        eval = new SchemeEval(as);
-    }
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+	}
 
-    ~RecognizerUTest()
-    {
-        delete eval;
-        delete as;
-        // Erase the log file if no assertions failed.
-        if (!CxxTest::TestTracker::tracker().suiteFailed())
-                std::remove(logger().get_filename().c_str());
-    }
+	~RecognizerUTest()
+	{
+		delete eval;
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+	}
 
-    void setUp(void);
-    void tearDown(void);
+	void setUp(void);
+	void tearDown(void);
 
-    void test_single_word(void);
-    void test_word_phrase(void);
+	void test_single_word(void);
+	void test_word_phrase(void);
+	void test_double_glob(void);
 };
 
 void RecognizerUTest::tearDown(void)
 {
-    as->clear();
+	as->clear();
 }
 
 void RecognizerUTest::setUp(void)
 {
-    as->clear();
-    config().set("SCM_PRELOAD", "tests/query/test_types.scm");
-    load_scm_files_from_config(*as);
-    eval->eval("(use-modules (opencog query))");
+	as->clear();
+	eval->eval("(add-to-load-path \"..\")");
+	eval->eval("(add-to-load-path \"../../..\")");
+	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
+	eval->eval("(use-modules (opencog query))");
 }
 
 #define getarity(hand) LinkCast(hand)->getArity()
@@ -82,21 +80,20 @@ void RecognizerUTest::setUp(void)
  */
 void RecognizerUTest::test_single_word(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/recognizer.scm");
-    load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/recognizer.scm\")");
 
-    Handle love = eval->eval_h("(cog-recognize sent)");
-    printf("love-you %s\n", love->toString().c_str());
-    TS_ASSERT_EQUALS(2, getarity(love));
+	Handle love = eval->eval_h("(cog-recognize sent)");
+	printf("love-you %s\n", love->toString().c_str());
+	TS_ASSERT_EQUALS(2, getarity(love));
 
-    Handle response = eval->eval_h(
-       "(SetLink love-star star-you)");
-    TS_ASSERT_EQUALS(love, response);
+	Handle response = eval->eval_h(
+	   "(SetLink love-star star-you)");
+	TS_ASSERT_EQUALS(love, response);
 
-    // ----
-    logger().debug("END TEST: %s", __FUNCTION__);
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /*
@@ -104,19 +101,39 @@ void RecognizerUTest::test_single_word(void)
  */
 void RecognizerUTest::test_word_phrase(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/recognizer.scm");
-    load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/recognizer.scm\")");
 
-    Handle love = eval->eval_h("(cog-recognize adv-sent)");
-    printf("super-love %s\n", love->toString().c_str());
-    TS_ASSERT_EQUALS(1, getarity(love));
+	Handle love = eval->eval_h("(cog-recognize adv-sent)");
+	printf("super-love %s\n", love->toString().c_str());
+	TS_ASSERT_EQUALS(1, getarity(love));
 
-    Handle response = eval->eval_h(
-       "(SetLink star-you)");
-    TS_ASSERT_EQUALS(love, response);
+	Handle response = eval->eval_h(
+	   "(SetLink star-you)");
+	TS_ASSERT_EQUALS(love, response);
 
-    // ----
-    logger().debug("END TEST: %s", __FUNCTION__);
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+//
+// Test an expression with two globs.  This previously exhibited
+// bug # 724 -- an off-by-one error in the recognizer.
+void RecognizerUTest::test_double_glob(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/recognizer.scm\")");
+
+	Handle hate = eval->eval_h("(cog-recognize hate-speech)");
+	printf("haters hating %s\n", hate->toString().c_str());
+	TS_ASSERT_EQUALS(1, getarity(hate));
+
+	Handle response = eval->eval_h(
+	   "(SetLink a-hate-b)");
+	TS_ASSERT_EQUALS(hate, response);
+
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
