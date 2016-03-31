@@ -123,8 +123,15 @@
 ;-------------------------------------------------------
 
 ; A pattern with two globs in it.
+; The types of the globs are constrained, because, if not constrained
+; the globs can sometimes pick up on parts of the various patterns
+; created above.  We really want them to only pick up on the "sentences"
+; (strings of ConceptNodes).
 (define a-love-b
 	(BindLink
+		(VariableList
+			(TypedVariable (Glob "$A") (Type "ConceptNode"))
+			(TypedVariable (Glob "$B") (Type "ConceptNode")))
 		(ListLink
 			(GlobNode "$A")
 			(ConceptNode "love")
