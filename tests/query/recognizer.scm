@@ -64,3 +64,36 @@
 
 ;; Perform the search.
 ; (cog-recognize adv-sent)
+;-------------------------------------------------------
+
+; A pattern with two globs in it.
+(define a-hate-b
+	(BindLink
+		(ListLink
+			(GlobNode "$A")
+			(ConceptNode "hates")
+			(GlobNode "$B"))
+		(ListLink
+			(ConceptNode "I'm")
+			(ConceptNode "sure")
+			(ConceptNode "that")
+			(GlobNode "$A")
+			(ConceptNode "hates")
+			(GlobNode "$B"))))
+
+(define hate-speech
+	;; A pretend "sentence" that should trigger the above.
+	(PatternLink
+		(BindLink
+			(ListLink
+				(ConceptNode "Mike")
+				(ConceptNode "really")
+				(ConceptNode "hates")
+				(ConceptNode "Sue")
+				(ConceptNode "a")
+				(ConceptNode "lot"))
+			(VariableNode "$impl"))))
+
+;-------------------------------------------------------
+
+*unspecified*

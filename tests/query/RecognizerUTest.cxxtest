@@ -1,7 +1,7 @@
 /*
  * tests/query/RecognizerUTest.cxxtest
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015,2016 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -56,6 +56,7 @@ public:
 
 	void test_single_word(void);
 	void test_word_phrase(void);
+	void test_double_glob(void);
 };
 
 void RecognizerUTest::tearDown(void)
@@ -67,6 +68,7 @@ void RecognizerUTest::setUp(void)
 {
 	as->clear();
 	eval->eval("(add-to-load-path \"..\")");
+	eval->eval("(add-to-load-path \"../../..\")");
 	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 	eval->eval("(use-modules (opencog query))");
 }
@@ -110,6 +112,27 @@ void RecognizerUTest::test_word_phrase(void)
 	Handle response = eval->eval_h(
 	   "(SetLink star-you)");
 	TS_ASSERT_EQUALS(love, response);
+
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+//
+// Test an expression with two globs.  This previously exhibited
+// bug # 724 -- an off-by-one error in the recognizer.
+void RecognizerUTest::test_double_glob(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/recognizer.scm\")");
+
+	Handle hate = eval->eval_h("(cog-recognize hate-speech)");
+	printf("haters hating %s\n", hate->toString().c_str());
+	TS_ASSERT_EQUALS(1, getarity(hate));
+
+	Handle response = eval->eval_h(
+	   "(SetLink a-hate-b)");
+	TS_ASSERT_EQUALS(hate, response);
 
 	// ----
 	logger().debug("END TEST: %s", __FUNCTION__);
