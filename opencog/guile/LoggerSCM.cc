@@ -59,19 +59,25 @@ const std::string& LoggerSCM::do_logger_get_filename()
 	return logger().get_filename();
 }
 
-void LoggerSCM::do_logger_set_stdout(bool enable)
+bool LoggerSCM::do_logger_set_stdout(bool enable)
 {
-	return logger().set_print_to_stdout_flag(enable);
+	bool previous_setting = logger().get_print_to_stdout_flag();
+	logger().set_print_to_stdout_flag(enable);
+	return previous_setting;
 }
 
-void LoggerSCM::do_logger_set_sync(bool enable)
+bool LoggerSCM::do_logger_set_sync(bool enable)
 {
-	return logger().set_sync_flag(enable);
+	bool previous_setting = logger().get_sync_flag();
+	logger().set_sync_flag(enable);
+	return previous_setting;
 }
 
-void LoggerSCM::do_logger_set_timestamp(bool enable)
+bool LoggerSCM::do_logger_set_timestamp(bool enable)
 {
-	return logger().set_timestamp_flag(enable);
+	bool previous_setting = logger().get_timestamp_flag();
+	logger().set_timestamp_flag(enable);
+	return previous_setting;
 }
 
 void LoggerSCM::do_logger_error(const std::string& msg)
