@@ -125,6 +125,7 @@ namespace std {
 // Hack around the lack template use in Handle.h due to circular dependencies
 #define GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(T) \
 ostream& operator<<(ostream& out, const T& hs) { \
+	out << "size = " << hs.size() << endl; \
 	size_t i = 0; \
 	for (const Handle& h : hs) { \
 		out << "atom[" << i << "]:" << endl << h_to_string(h); \
@@ -155,9 +156,10 @@ string uhs_to_string(const UnorderedHandleSet& uhs)
 {
 	stringstream ss; ss << uhs; return ss.str();
 }
-std::string hmap_to_string(const HandleMap& hmap)
+string hmap_to_string(const HandleMap& hmap)
 {
 	stringstream ss;
+	ss << "size = " << hmap.size() << std::endl;
 	int i = 0;
 	for (const auto& p : hmap) {
 		ss << "key[" << i << "]:" << std::endl << h_to_string(p.first)
@@ -166,9 +168,10 @@ std::string hmap_to_string(const HandleMap& hmap)
 	}
 	return ss.str();
 }
-std::string hmultimap_to_string(const HandleMultimap& hmultimap)
+string hmultimap_to_string(const HandleMultimap& hmultimap)
 {
 	stringstream ss;
+	ss << "size = " << hmultimap.size() << std::endl;
 	int i = 0;
 	for (const auto& p : hmultimap) {
 		ss << "key[" << i << "]:" << std::endl << h_to_string(p.first)
@@ -179,15 +182,36 @@ std::string hmultimap_to_string(const HandleMultimap& hmultimap)
 	}
 	return ss.str();
 }
-std::string hmaps_to_string(const HandleMapSeq& hms)
+string hmaps_to_string(const HandleMapSeq& hms)
 {
 	stringstream ss;
+	ss << "size = " << hms.size() << std::endl;
 	for (unsigned i = 0; i < hms.size(); i++)
 		ss << "--- map[" << i << "] ---" << std::endl
 		   << hmap_to_string(hms[i]);
 	return ss.str();
 }
-std::string atomtype_to_string(Type type)
+string hs_to_string(const OrderedHandleSet& hs)
+{
+	return ohs_to_string(hs);
+}
+string hs_to_string(const opencog::UnorderedHandleSet& uhs)
+{
+	return uhs_to_string(uhs);
+}
+string hs_to_string(const opencog::HandleMap& hm)
+{
+	return hmap_to_string(hm);
+}
+string hs_to_string(const opencog::HandleMultimap& hmm)
+{
+	return hmultimap_to_string(hmm);
+}
+string hs_to_string(const opencog::HandleMapSeq& hms)
+{
+	return hmaps_to_string(hms);
+}
+string atomtype_to_string(Type type)
 {
 	return classserver().getTypeName(type);
 }
