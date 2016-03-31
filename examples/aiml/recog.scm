@@ -144,5 +144,22 @@
 			(ConceptNode "love")
 			(GlobNode "$B"))))
 
+; Lets see if the above can be found!
+(cog-recognize adv-sent)
+
+(define constrained-adv-sent
+	(PatternLink
+		(BindLink
+			(VariableNode "$type constraints")
+			(ListLink
+				(ConceptNode "I")
+				(ConceptNode "really")
+				(ConceptNode "truly")
+				(ConceptNode "love")
+				(ConceptNode "you"))
+			(VariableNode "$impl"))))
+
+(cog-recognize constrained-adv-sent)
+
 ;-------------------------------------------------------
 *unspecified*
