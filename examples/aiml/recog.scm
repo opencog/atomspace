@@ -50,7 +50,7 @@
 ;; should match.
 (cog-recognize sent)
 
-;; At this time, the above will return the below:
+;; The above should return the below:
 ;; The BindLinks are NOT evaluated!  To evaluate, see bottom.
 (SetLink
 	(BindLink
@@ -119,3 +119,23 @@
       (ConceptNode "you")
       (ConceptNode "a")
       (ConceptNode "lot!"))))
+
+;-------------------------------------------------------
+
+; A pattern with two globs in it.
+(define a-love-b
+	(BindLink
+		(ListLink
+			(GlobNode "$A")
+			(ConceptNode "love")
+			(GlobNode "$B"))
+		(ListLink
+			(ConceptNode "I'm")
+			(ConceptNode "sure")
+			(ConceptNode "that")
+			(GlobNode "$A")
+			(ConceptNode "love")
+			(GlobNode "$B"))))
+
+;-------------------------------------------------------
+*unspecified*
