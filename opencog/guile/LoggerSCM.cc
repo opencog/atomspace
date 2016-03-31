@@ -29,21 +29,29 @@ using namespace opencog;
 
 namespace opencog {
 
-void LoggerSCM::do_logger_set_level(const std::string& level)
+/// Set level, return previous level.
+const std::string& LoggerSCM::do_logger_set_level(const std::string& level)
 {
+	static std::string prev_level;
+	prev_level = Logger::get_level_string(logger().get_level());
 	logger().set_level(Logger::get_level_from_string(level));
+	return prev_level;
 }
 
 const std::string& LoggerSCM::do_logger_get_level(void)
 {
 	static std::string level_str;
 	level_str = Logger::get_level_string(logger().get_level());
-	return level_str;;
+	return level_str;
 }
 
-void LoggerSCM::do_logger_set_filename(const std::string& filename)
+/// Set logfile, return previous file.
+const std::string& LoggerSCM::do_logger_set_filename(const std::string& filename)
 {
+	static std::string old_file;
+	old_file = logger().get_filename();
 	logger().set_filename(filename);
+	return old_file;
 }
 
 const std::string& LoggerSCM::do_logger_get_filename()
@@ -59,6 +67,11 @@ void LoggerSCM::do_logger_set_stdout(bool enable)
 void LoggerSCM::do_logger_set_sync(bool enable)
 {
 	return logger().set_sync_flag(enable);
+}
+
+void LoggerSCM::do_logger_set_timestamp(bool enable)
+{
+	return logger().set_timestamp_flag(enable);
 }
 
 void LoggerSCM::do_logger_error(const std::string& msg)
@@ -94,18 +107,20 @@ LoggerSCM::LoggerSCM() : ModuleWrap("opencog logger") {}
 /// Thus, all the definitions below happen in that module.
 void LoggerSCM::init(void)
 {
-	define_scheme_primitive("cog-logger-set-level",
+	define_scheme_primitive("cog-logger-set-level!",
 		&LoggerSCM::do_logger_set_level, this, "logger");
 	define_scheme_primitive("cog-logger-get-level",
 		&LoggerSCM::do_logger_get_level, this, "logger");
-	define_scheme_primitive("cog-logger-set-filename",
+	define_scheme_primitive("cog-logger-set-filename!",
 		&LoggerSCM::do_logger_set_filename, this, "logger");
 	define_scheme_primitive("cog-logger-get-filename",
 		&LoggerSCM::do_logger_get_filename, this, "logger");
-	define_scheme_primitive("cog-logger-set-stdout",
+	define_scheme_primitive("cog-logger-set-stdout!",
 		&LoggerSCM::do_logger_set_stdout, this, "logger");
-	define_scheme_primitive("cog-logger-set-sync",
+	define_scheme_primitive("cog-logger-set-sync!",
 		&LoggerSCM::do_logger_set_sync, this, "logger");
+	define_scheme_primitive("cog-logger-set-timestamp!",
+		&LoggerSCM::do_logger_set_timestamp, this, "logger");
 	define_scheme_primitive("cog-logger-error-str",
 		&LoggerSCM::do_logger_error, this, "logger");
 	define_scheme_primitive("cog-logger-warn-str",
