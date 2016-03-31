@@ -14,8 +14,11 @@ ADD_LIBRARY (smob
 	SchemeSmobNew.cc
 	SchemeSmobTV.cc
 	SchemeSmobAF.cc
-	LoggerSCM.cc
 	load-file
+)
+
+ADD_LIBRARY (logger
+	LoggerSCM.cc
 )
 
 TARGET_LINK_LIBRARIES(smob
@@ -24,7 +27,13 @@ TARGET_LINK_LIBRARIES(smob
 	${GUILE_LIBRARIES}
 )
 
+TARGET_LINK_LIBRARIES(logger
+	${COGUTIL_LIBRARY}
+	${GUILE_LIBRARIES}
+)
+
 INSTALL (TARGETS smob DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+INSTALL (TARGETS logger DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	SchemeEval.h
