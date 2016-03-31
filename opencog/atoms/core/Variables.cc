@@ -31,7 +31,7 @@
 #include "VariableList.h"
 #include "Variables.h"
 
-using namespace opencog;
+namespace opencog {
 
 struct VarScraper
 {
@@ -519,4 +519,9 @@ std::string Variables::to_string() const
 	return ss.str();
 }
 
-/* ===================== END OF FILE ===================== */
+std::string oc_to_string(const Variables& var)
+{
+	return var.to_string();
+}
+
+} // ~namespace opencog
