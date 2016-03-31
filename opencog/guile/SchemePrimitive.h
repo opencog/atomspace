@@ -90,6 +90,7 @@ class SchemePrimitive : public PrimitiveEnviron
 
 			// Below is the list of currently supported signatures.
 			// Extend as needed.
+			bool (T::*b_b)(bool);
 			bool (T::*b_hi)(Handle, int);
 			bool (T::*b_hh)(Handle, Handle);
 			double (T::*d_hht)(Handle, Handle, Type);
@@ -139,6 +140,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		const char *scheme_name;
 		enum
 		{
+			B_B,   // return boolean, take boolean
 			B_HI,  // return boolean, take handle and int
 			B_HH,  // return boolean, take handle and handle
 			D_HHT, // return double, take handle, handle, and type
@@ -181,6 +183,13 @@ class SchemePrimitive : public PrimitiveEnviron
 			SCM rc = SCM_EOL;
 			switch (signature)
 			{
+				case B_B:
+				{
+					bool b = scm_to_bool(scm_car(args));
+					bool rb = (that->*method.b_b)(b);
+					if (rb) { rc = SCM_BOOL_T; } else { rc = SCM_BOOL_F; }
+					break;
+				}
 				case B_HI:
 				{
 					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name));
@@ -644,6 +653,7 @@ class SchemePrimitive : public PrimitiveEnviron
 
 		// Declare and define the constructors for this class. They all have
 		// the same basic form, except for the types.
+		DECLARE_CONSTR_1(B_B,    b_b,  bool, bool)
 		DECLARE_CONSTR_2(B_HI,   b_hi, bool, Handle, int)
 		DECLARE_CONSTR_2(B_HH,   b_hh, bool, Handle, Handle)
 		DECLARE_CONSTR_3(D_HHT,  d_hht, double, Handle, Handle, Type)
@@ -724,6 +734,7 @@ inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2,ARG
 	new SchemePrimitive<T>(module, name, cb, data); \
 }
 
+DECLARE_DECLARE_1(bool, bool)
 DECLARE_DECLARE_1(Handle, Handle)
 DECLARE_DECLARE_1(HandleSeq, Handle)
 DECLARE_DECLARE_1(HandleSeqSeq, Handle)
