@@ -20,12 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -70,8 +66,8 @@ void RecognizerUTest::tearDown(void)
 void RecognizerUTest::setUp(void)
 {
 	as->clear();
-	config().set("SCM_PRELOAD", "tests/query/test_types.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(add-to-load-path \"..\")");
+	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 	eval->eval("(use-modules (opencog query))");
 }
 
@@ -84,8 +80,7 @@ void RecognizerUTest::test_single_word(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/recognizer.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/recognizer.scm\")");
 
 	Handle love = eval->eval_h("(cog-recognize sent)");
 	printf("love-you %s\n", love->toString().c_str());
@@ -106,8 +101,7 @@ void RecognizerUTest::test_word_phrase(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/recognizer.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/recognizer.scm\")");
 
 	Handle love = eval->eval_h("(cog-recognize adv-sent)");
 	printf("super-love %s\n", love->toString().c_str());
