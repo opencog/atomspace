@@ -292,6 +292,14 @@ static inline std::string operator+ (const std::string &lhs, Handle h)
     return lhs + buff;
 }
 
+// In case your gdb supports overloading
+std::string oc_to_string(const opencog::Handle& h);
+std::string oc_to_string(const opencog::OrderedHandleSet& hs);
+std::string oc_to_string(const opencog::UnorderedHandleSet& uhs);
+std::string oc_to_string(const opencog::HandleMap& hm);
+std::string oc_to_string(const opencog::HandleMultimap& hmm);
+std::string oc_to_string(const opencog::HandleMapSeq& hms);
+
 } // namespace opencog
 
 namespace std {
@@ -314,13 +322,6 @@ string hmap_to_string(const opencog::HandleMap& hm);
 string hmultimap_to_string(const opencog::HandleMultimap& hmm);
 string hmaps_to_string(const opencog::HandleMapSeq& hms);
 string atomtype_to_string(opencog::Type type);
-
-// In case your gdb supports overloading
-string hs_to_string(const opencog::OrderedHandleSet& hs);
-string hs_to_string(const opencog::UnorderedHandleSet& uhs);
-string hs_to_string(const opencog::HandleMap& hm);
-string hs_to_string(const opencog::HandleMultimap& hmm);
-string hs_to_string(const opencog::HandleMapSeq& hms);
 
 #ifdef THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
 // The below used to work, but broke in gcc-4.7.2. The reason it

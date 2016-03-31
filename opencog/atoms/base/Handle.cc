@@ -29,7 +29,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomTable.h>
 
-using namespace opencog;
+namespace opencog {
 
 const Handle Handle::UNDEFINED;
 const AtomPtr Handle::NULL_POINTER;
@@ -120,6 +120,37 @@ inline Handle Handle::do_res(UUID uuid)
     return Handle();
 }
 
+std::string oc_to_string(const Handle& h)
+{
+	return std::h_to_string(h);
+}
+std::string oc_to_string(const OrderedHandleSet& hs)
+{
+	return std::ohs_to_string(hs);
+}
+std::string oc_to_string(const UnorderedHandleSet& uhs)
+{
+	return std::uhs_to_string(uhs);
+}
+std::string oc_to_string(const HandleMap& hm)
+{
+	return std::hmap_to_string(hm);
+}
+std::string oc_to_string(const HandleMultimap& hmm)
+{
+	return std::hmultimap_to_string(hmm);
+}
+std::string oc_to_string(const HandleMapSeq& hms)
+{
+	return std::hmaps_to_string(hms);
+}
+std::string oc_to_string(Type type)
+{
+	return classserver().getTypeName(type);
+}
+
+} // ~namespace opencog
+
 namespace std {
 
 // Hack around the lack template use in Handle.h due to circular dependencies
@@ -127,7 +158,7 @@ namespace std {
 ostream& operator<<(ostream& out, const T& hs) { \
 	out << "size = " << hs.size() << endl; \
 	size_t i = 0; \
-	for (const Handle& h : hs) { \
+	for (const opencog::Handle& h : hs) { \
 		out << "atom[" << i << "]:" << endl << h_to_string(h); \
 		i++; \
 	} \
@@ -137,26 +168,26 @@ GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::HandleSeq)
 GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::OrderedHandleSet)
 GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::UnorderedHandleSet)
 
-string h_to_string(const Handle& h)
+string h_to_string(const opencog::Handle& h)
 {
-	if ((AtomPtr)h == nullptr)
+	if ((opencog::AtomPtr)h == nullptr)
 		return "nullatom\n";
 	else
 		return h->toString();
 }
-string hs_to_string(const HandleSeq& hs)
+string hs_to_string(const opencog::HandleSeq& hs)
 {
 	stringstream ss; ss << hs; return ss.str();
 }
-string ohs_to_string(const OrderedHandleSet& ohs)
+string ohs_to_string(const opencog::OrderedHandleSet& ohs)
 {
 	stringstream ss; ss << ohs; return ss.str();
 }
-string uhs_to_string(const UnorderedHandleSet& uhs)
+string uhs_to_string(const opencog::UnorderedHandleSet& uhs)
 {
 	stringstream ss; ss << uhs; return ss.str();
 }
-string hmap_to_string(const HandleMap& hmap)
+string hmap_to_string(const opencog::HandleMap& hmap)
 {
 	stringstream ss;
 	ss << "size = " << hmap.size() << std::endl;
@@ -168,7 +199,7 @@ string hmap_to_string(const HandleMap& hmap)
 	}
 	return ss.str();
 }
-string hmultimap_to_string(const HandleMultimap& hmultimap)
+string hmultimap_to_string(const opencog::HandleMultimap& hmultimap)
 {
 	stringstream ss;
 	ss << "size = " << hmultimap.size() << std::endl;
@@ -182,7 +213,7 @@ string hmultimap_to_string(const HandleMultimap& hmultimap)
 	}
 	return ss.str();
 }
-string hmaps_to_string(const HandleMapSeq& hms)
+string hmaps_to_string(const opencog::HandleMapSeq& hms)
 {
 	stringstream ss;
 	ss << "size = " << hms.size() << std::endl;
@@ -190,30 +221,6 @@ string hmaps_to_string(const HandleMapSeq& hms)
 		ss << "--- map[" << i << "] ---" << std::endl
 		   << hmap_to_string(hms[i]);
 	return ss.str();
-}
-string hs_to_string(const OrderedHandleSet& hs)
-{
-	return ohs_to_string(hs);
-}
-string hs_to_string(const opencog::UnorderedHandleSet& uhs)
-{
-	return uhs_to_string(uhs);
-}
-string hs_to_string(const opencog::HandleMap& hm)
-{
-	return hmap_to_string(hm);
-}
-string hs_to_string(const opencog::HandleMultimap& hmm)
-{
-	return hmultimap_to_string(hmm);
-}
-string hs_to_string(const opencog::HandleMapSeq& hms)
-{
-	return hmaps_to_string(hms);
-}
-string atomtype_to_string(Type type)
-{
-	return classserver().getTypeName(type);
 }
 
 } // ~namespace std

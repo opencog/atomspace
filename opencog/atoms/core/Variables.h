@@ -154,6 +154,9 @@ struct Variables : public FreeVariables
 	std::string to_string() const;
 };
 
+// For gdb
+std::string oc_to_string(const Variables& var);
+
 /** @}*/
 }
 
