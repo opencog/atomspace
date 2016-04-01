@@ -40,6 +40,8 @@ public:
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
+		eval->eval("(add-to-load-path \"..\")");
+		eval->eval("(add-to-load-path \"../../..\")");
 	}
 
 	~ChoiceLinkUTest()
@@ -87,8 +89,7 @@ void ChoiceLinkUTest::test_basic_or(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/choice-link.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-link.scm\")");
 
 	Handle items = eval->eval_h("(cog-bind (basic))");
 
@@ -102,8 +103,7 @@ void ChoiceLinkUTest::test_embed_or(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/choice-embed.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-embed.scm\")");
 
 	Handle items = eval->eval_h("(cog-bind (embed))");
 
@@ -117,8 +117,7 @@ void ChoiceLinkUTest::test_nest_or(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/choice-nest.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-nest.scm\")");
 
 	Handle items = eval->eval_h("(cog-bind (nest))");
 
@@ -133,8 +132,7 @@ void ChoiceLinkUTest::test_top_nest_or(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/choice-top-nest.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-top-nest.scm\")");
 
 	Handle items = eval->eval_h("(cog-bind (top-nest))");
 
@@ -149,8 +147,7 @@ void ChoiceLinkUTest::test_nest_bad_or(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/choice-nest.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-nest.scm\")");
 
 	Handle items = eval->eval_h("(cog-bind (nest-bad))");
 
@@ -165,8 +162,7 @@ void ChoiceLinkUTest::test_top_nest_bad_or(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/choice-top-nest.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-top-nest.scm\")");
 
 	Handle items = eval->eval_h("(cog-bind (top-nest-bad))");
 
@@ -181,8 +177,7 @@ void ChoiceLinkUTest::test_top_disco(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/choice-disconnected.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-dicsonnected.scm\")");
 
 	Handle items = eval->eval_h("(cog-bind (top-disco))");
 
@@ -203,8 +198,7 @@ void ChoiceLinkUTest::test_embed_disco(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/choice-embed-disco.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-embed-disco.scm\")");
 
 	Handle items = eval->eval_h("(cog-bind (embed-disco))");
 
@@ -219,8 +213,7 @@ void ChoiceLinkUTest::test_double_or(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/choice-double.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-double.scm\")");
 
 	Handle items = eval->eval_h("(cog-bind (double))");
 
@@ -234,8 +227,7 @@ void ChoiceLinkUTest::test_unary(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/choice-unary.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-unary.scm\")");
 
 	// Needed to define cog-execute!
 	eval->eval("(use-modules (opencog exec))");
@@ -258,8 +250,7 @@ void ChoiceLinkUTest::test_typed(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/choice-typed.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-typed.scm\")");
 
 	// Needed to define cog-execute!
 	eval->eval("(use-modules (opencog exec))");
