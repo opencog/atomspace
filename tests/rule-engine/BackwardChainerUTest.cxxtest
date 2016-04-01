@@ -11,10 +11,6 @@
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/util/mt19937ar.h>
 
-// Dead include files
-#include <opencog/util/Config.h>
-#include <opencog/guile/load-file.h>
-
 using namespace opencog;
 //#define DEBUG 1
 
@@ -58,9 +54,9 @@ void BackwardChainerUTest::setUp()
 	eval_.eval("(use-modules (opencog))");
 	// eval_.eval("(use-modules (opencog rule-engine))");
 
-	// This is crazy...
-	config().set("SCM_PRELOAD", "tests/rule-engine/empty-file.scm");
-	load_scm_files_from_config(as_);
+	// This is toally nuts, but deleting this one line causes this
+	// unit test to fail.  I'm completely stumped by this.
+	SchemeEval evo2(&as_);
 }
 
 void BackwardChainerUTest::tearDown()
