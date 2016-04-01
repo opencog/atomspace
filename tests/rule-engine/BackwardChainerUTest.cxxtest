@@ -7,12 +7,9 @@
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 #include <opencog/rule-engine/backwardchainer/BackwardChainerPMCB.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/mt19937ar.h>
-#include <opencog/guile/load-file.h>
 
 using namespace opencog;
 //#define DEBUG 1
@@ -52,11 +49,10 @@ public:
 
 void BackwardChainerUTest::setUp()
 {
-	config().set("SCM_PRELOAD",
-	             "opencog/atoms/base/core_types.scm, "
-	             "opencog/scm/utilities.scm, "
-	             "opencog/scm/av-tv.scm");
-	load_scm_files_from_config(as_);
+	eval_.eval("(add-to-load-path \"..\")");
+	eval_.eval("(add-to-load-path \"../../..\")");
+	eval_.eval("(use-modules (opencog))");
+	// eval_.eval("(use-modules (opencog rule-engine))");
 }
 
 void BackwardChainerUTest::tearDown()
@@ -70,10 +66,8 @@ void BackwardChainerUTest::test_1_rule_bc_modus_ponens()
 
 	as_.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/rule-engine/bc-modus-ponens-config.scm,"
-	             "tests/rule-engine/bc-animals.scm");
-	load_scm_files_from_config(as_);
+	eval_.eval("(load-from-path \"tests/rule-engine/bc-modus-ponens-config.scm\")");
+	eval_.eval("(load-from-path \"tests/rule-engine/bc-animals.scm\")");
 	randGen().seed(0);
 
 	// load 1 modus ponens rule
@@ -82,9 +76,9 @@ void BackwardChainerUTest::test_1_rule_bc_modus_ponens()
 
 	Handle target_var = eval_.eval_h("(VariableNode \"$what\")");
 	Handle target =
-	    eval_.eval_h("(InheritanceLink"
-	                  "   (VariableNode \"$what\")"
-					  "   (ConceptNode \"green\"))");
+		eval_.eval_h("(InheritanceLink"
+		             "   (VariableNode \"$what\")"
+		             "   (ConceptNode \"green\"))");
 	Handle soln = eval_.eval_h("(ConceptNode \"Fritz\")");
 
 	bc.set_target(target);
@@ -105,10 +99,8 @@ void BackwardChainerUTest::test_1_rule_bc_deduction()
 
 	as_.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/rule-engine/bc-deduction-config.scm,"
-	             "tests/rule-engine/bc-transitive-closure.scm");
-	load_scm_files_from_config(as_);
+	eval_.eval("(load-from-path \"tests/rule-engine/bc-deduction-config.scm\")");
+	eval_.eval("(load-from-path \"tests/rule-engine/bc-transitive-closure.scm\")");
 	randGen().seed(0);
 
 	// load 1 deduction rule
@@ -143,10 +135,8 @@ void BackwardChainerUTest::test_1_rule_impossible_bc()
 
 	as_.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/rule-engine/bc-modus-ponens-config.scm,"
-	             "tests/rule-engine/bc-criminal.scm");
-	load_scm_files_from_config(as_);
+	eval_.eval("(load-from-path \"tests/rule-engine/bc-modus-ponens-config.scm\")");
+	eval_.eval("(load-from-path \"tests/rule-engine/bc-criminal.scm\")");
 	randGen().seed(0);
 
 	// load modus ponens rule
@@ -181,10 +171,8 @@ void BackwardChainerUTest::test_2_rules_bc()
 
 	as_.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/rule-engine/bc-config.scm,"
-	             "tests/rule-engine/bc-criminal.scm");
-	load_scm_files_from_config(as_);
+	eval_.eval("(load-from-path \"tests/rule-engine/bc-config.scm\")");
+	eval_.eval("(load-from-path \"tests/rule-engine/bc-criminal.scm\")");
 	randGen().seed(500);
 
 	// load modus ponens & deduction rules
@@ -193,9 +181,9 @@ void BackwardChainerUTest::test_2_rules_bc()
 
 	Handle target_var = eval_.eval_h("(VariableNode \"$who\")");
 	Handle target =
-	    eval_.eval_h("(InheritanceLink"
-	                  "   (VariableNode \"$who\")"
-					  "   (ConceptNode \"criminal\"))");
+		eval_.eval_h("(InheritanceLink"
+		             "   (VariableNode \"$who\")"
+		             "   (ConceptNode \"criminal\"))");
 	Handle soln = eval_.eval_h("(ConceptNode \"West\")");
 
 	bc.set_target(target);
@@ -218,10 +206,8 @@ void BackwardChainerUTest::test_tvq_bc()
 
 	as_.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/rule-engine/bc-modus-ponens-config.scm,"
-	             "tests/rule-engine/bc-animals.scm");
-	load_scm_files_from_config(as_);
+	eval_.eval("(load-from-path \"tests/rule-engine/bc-modus-ponens-config.scm\")");
+	eval_.eval("(load-from-path \"tests/rule-engine/bc-animals.scm\")");
 	randGen().seed(500);
 
 	// load modus ponens
@@ -249,12 +235,15 @@ void BackwardChainerUTest::test_tvq_impossible_bc()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+	// This is kind of crazy, but ... but deleting the forced garbage
+	// collection below causes the NEXT unit test to fail!  I don't
+	// understand what's at the root of this bug. Some weird
+	// indeterminism?
+	eval_.eval("(gc)");
 	as_.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/rule-engine/bc-modus-ponens-config.scm,"
-	             "tests/rule-engine/bc-animals.scm");
-	load_scm_files_from_config(as_);
+	eval_.eval("(load-from-path \"tests/rule-engine/bc-modus-ponens-config.scm\")");
+	eval_.eval("(load-from-path \"tests/rule-engine/bc-animals.scm\")");
 	randGen().seed(0);
 
 	// load modus ponens
@@ -294,10 +283,8 @@ void BackwardChainerUTest::test_focus_set()
 
 	as_.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/rule-engine/bc-modus-ponens-config.scm,"
-	             "tests/rule-engine/bc-animals.scm");
-	load_scm_files_from_config(as_);
+	eval_.eval("(load-from-path \"tests/rule-engine/bc-modus-ponens-config.scm\")");
+	eval_.eval("(load-from-path \"tests/rule-engine/bc-animals.scm\")");
 	randGen().seed(0);
 
 	// load 1 modus ponens rule

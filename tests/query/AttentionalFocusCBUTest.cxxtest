@@ -20,12 +20,9 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -42,6 +39,8 @@ public:
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
+		eval->eval("(add-to-load-path \"..\")");
+		eval->eval("(add-to-load-path \"../../..\")");
 	}
 
 	~AttentionalFocusCBUTest()
@@ -71,8 +70,8 @@ void AttentionalFocusCBUTest::test_af_bindlink(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	as->set_attentional_focus_boundary(20); //for test purpose
-	config().set("SCM_PRELOAD", "tests/query/af-filtering-test.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/af-filtering-test.scm\")");
+
 	Handle findMan = eval->eval_h("find-man");
 	// Test PatternMatch::af_bindlink, which should only return the
 	// first match

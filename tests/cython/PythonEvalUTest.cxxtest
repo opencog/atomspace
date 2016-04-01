@@ -1,12 +1,9 @@
 #include <string>
 #include <cstdio>
 
-#include <opencog/util/Config.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
-#include <opencog/guile/load-file.h>
 
 using std::string;
 
@@ -14,24 +11,16 @@ using namespace opencog;
 
 const int NO_SIGNAL_HANDLERS = 0;
 
-
 class PythonEvalUTest :  public CxxTest::TestSuite
 {
-
-private:
-
-
 public:
-
     PythonEvalUTest()
     {
         logger().set_print_to_stdout_flag(true);
 
         // setup global logger
-        logger().set_filename(config()["LOG_FILE"]);
-        logger().set_level(Logger::get_level_from_string(config()["LOG_LEVEL"]));
-        logger().set_backtrace_level(Logger::get_level_from_string(config()["BACK_TRACE_LOG_LEVEL"]));
-        logger().set_print_to_stdout_flag(config().get_bool("LOG_TO_STDOUT"));
+        logger().set_level(Logger::DEBUG);
+        logger().set_print_to_stdout_flag(true);
     }
 
     ~PythonEvalUTest() {}
@@ -54,7 +43,6 @@ public:
         // Stop Python.
         Py_Finalize();
 
-
         // Try it again to make sure the Python library cleans up properly.
 
         // Start up Python.
@@ -66,7 +54,6 @@ public:
 
         // Stop Python.
         Py_Finalize();
-
 
         // And again...
 
@@ -80,8 +67,8 @@ public:
         // Stop Python.
         Py_Finalize();
 
-         logger().debug("[PythonEvalUTest] testRawPythonInitialization() DONE");
-   }
+        logger().debug("[PythonEvalUTest] testRawPythonInitialization() DONE");
+    }
 
     void testRawPythonInitializeWithGetSys()
     {
@@ -253,13 +240,9 @@ public:
         // Initialize Python.
         global_python_initialize();
 
-        config().set("SCM_PRELOAD",
-                     "opencog/atoms/base/core_types.scm, "
-		               "opencog/scm/opencog/exec.scm");
         AtomSpace *as = new AtomSpace();
         PythonEval::create_singleton_instance(as);
         PythonEval* python = &PythonEval::instance();
-        load_scm_files_from_config(*as);
 
         // Define python functions for use by scheme.
         python->eval(

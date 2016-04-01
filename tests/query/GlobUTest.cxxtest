@@ -11,7 +11,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
@@ -20,12 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -33,46 +29,47 @@ using namespace opencog;
 class GlobUTest: public CxxTest::TestSuite
 {
 private:
-        AtomSpace *as;
-        SchemeEval* eval;
+	AtomSpace *as;
+	SchemeEval* eval;
 
 public:
-    GlobUTest(void)
-    {
-        logger().set_level(Logger::DEBUG);
-        logger().set_print_to_stdout_flag(true);
+	GlobUTest(void)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
 
-        as = new AtomSpace();
-        eval = new SchemeEval(as);
-    }
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+		eval->eval("(add-to-load-path \"..\")");
+		eval->eval("(add-to-load-path \"../../..\")");
+		eval->eval("(use-modules (opencog query))");
+	}
 
-    ~GlobUTest()
-    {
-        delete eval;
-        delete as;
-        // Erase the log file if no assertions failed.
-        if (!CxxTest::TestTracker::tracker().suiteFailed())
-                std::remove(logger().get_filename().c_str());
-    }
+	~GlobUTest()
+	{
+		delete eval;
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
 
-    void setUp(void);
-    void tearDown(void);
+	void setUp(void);
+	void tearDown(void);
 
-    void test_glob_middle(void);
-    void test_glob_final(void);
+	void test_glob_middle(void);
+	void test_glob_final(void);
 };
 
 void GlobUTest::tearDown(void)
 {
-    as->clear();
+	as->clear();
 }
 
 void GlobUTest::setUp(void)
 {
-    as->clear();
-    config().set("SCM_PRELOAD", "tests/query/test_types.scm");
-    load_scm_files_from_config(*as);
-    eval->eval("(use-modules (opencog query))");
+	as->clear();
+	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 }
 
 /*
@@ -80,34 +77,33 @@ void GlobUTest::setUp(void)
  */
 void GlobUTest::test_glob_middle(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/glob-basic.scm");
-    load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-    Handle love = eval->eval_h("(cog-bind glob-you)");
-    printf("glob-you %s\n", love->toString().c_str());
-    TS_ASSERT_EQUALS(2, love->getArity());
+	Handle love = eval->eval_h("(cog-bind glob-you)");
+	printf("glob-you %s\n", love->toString().c_str());
+	TS_ASSERT_EQUALS(2, love->getArity());
 
-    Handle response = eval->eval_h(
-       "(SetLink"
-       "  (ListLink"
-       "    (ConceptNode \"I\")"
-       "    (ConceptNode \"love\")"
-       "    (ConceptNode \"you\")"
-       "    (ConceptNode \"too\"))"
-       "  (ListLink"
-       "    (ConceptNode \"I\")"
-       "    (ConceptNode \"really\")"
-       "    (ConceptNode \"totally\")"
-       "    (ConceptNode \"need\")"
-       "    (ConceptNode \"you\")"
-       "    (ConceptNode \"too\")))"
-    );
-    TS_ASSERT_EQUALS(love, response);
+	Handle response = eval->eval_h(
+		"(SetLink"
+		"  (ListLink"
+		"    (ConceptNode \"I\")"
+		"    (ConceptNode \"love\")"
+		"    (ConceptNode \"you\")"
+		"    (ConceptNode \"too\"))"
+		"  (ListLink"
+		"    (ConceptNode \"I\")"
+		"    (ConceptNode \"really\")"
+		"    (ConceptNode \"totally\")"
+		"    (ConceptNode \"need\")"
+		"    (ConceptNode \"you\")"
+		"    (ConceptNode \"too\")))"
+	);
+	TS_ASSERT_EQUALS(love, response);
 
-    // ----
-    logger().debug("END TEST: %s", __FUNCTION__);
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 /*
@@ -115,35 +111,34 @@ void GlobUTest::test_glob_middle(void)
  */
 void GlobUTest::test_glob_final(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/glob-basic.scm");
-    load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-    Handle love = eval->eval_h("(cog-bind love-glob)");
-    printf("love-glob %s\n", love->toString().c_str());
-    TS_ASSERT_EQUALS(2, love->getArity());
+	Handle love = eval->eval_h("(cog-bind love-glob)");
+	printf("love-glob %s\n", love->toString().c_str());
+	TS_ASSERT_EQUALS(2, love->getArity());
 
-    Handle response = eval->eval_h(
-       "(SetLink"
-       "  (ListLink"
-       "    (ConceptNode \"Hey!\")"
-       "    (ConceptNode \"I\")"
-       "    (ConceptNode \"like\")"
-       "    (ConceptNode \"you\")"
-       "    (ConceptNode \"also\"))"
-       "  (ListLink"
-       "    (ConceptNode \"Hey!\")"
-       "    (ConceptNode \"I\")"
-       "    (ConceptNode \"like\")"
-       "    (ConceptNode \"teddy\")"
-       "    (ConceptNode \"bears\")"
-       "    (ConceptNode \"a\")"
-       "    (ConceptNode \"lot\")"
-       "    (ConceptNode \"also\")))"
-    );
-    TS_ASSERT_EQUALS(love, response);
+	Handle response = eval->eval_h(
+		"(SetLink"
+		"  (ListLink"
+		"    (ConceptNode \"Hey!\")"
+		"    (ConceptNode \"I\")"
+		"    (ConceptNode \"like\")"
+		"    (ConceptNode \"you\")"
+		"    (ConceptNode \"also\"))"
+		"  (ListLink"
+		"    (ConceptNode \"Hey!\")"
+		"    (ConceptNode \"I\")"
+		"    (ConceptNode \"like\")"
+		"    (ConceptNode \"teddy\")"
+		"    (ConceptNode \"bears\")"
+		"    (ConceptNode \"a\")"
+		"    (ConceptNode \"lot\")"
+		"    (ConceptNode \"also\")))"
+	);
+	TS_ASSERT_EQUALS(love, response);
 
-    // ----
-    logger().debug("END TEST: %s", __FUNCTION__);
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
 }

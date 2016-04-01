@@ -1,7 +1,5 @@
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/util/Config.h>
 
 #include <opencog/rule-engine/UREConfigReader.h>
 
@@ -15,14 +13,14 @@ private:
 public:
 	UREConfigReaderUTest() : _eval(&_as)
 	{
-		config().set("SCM_PRELOAD",
-		             "opencog/atoms/base/core_types.scm");
-		load_scm_files_from_config(_as);
-
 		// Module loading is borked from the C++ environment, so
 		// add the following paths so that utilities.scm is found.
 		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm\")");
 		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm/opencog\")");
+
+		_eval.eval("(add-to-load-path \"..\")");
+		_eval.eval("(add-to-load-path \"../../..\")");
+		_eval.eval("(use-modules (opencog) (opencog query))");
 
 		// Load the simple crisp system example to test it
 		string eval_output =

@@ -20,12 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -33,53 +29,55 @@ using namespace opencog;
 class ChoiceLinkUTest: public CxxTest::TestSuite
 {
 private:
-        AtomSpace *as;
-        SchemeEval* eval;
+	AtomSpace *as;
+	SchemeEval* eval;
 
 public:
-    ChoiceLinkUTest(void)
-    {
-        logger().set_level(Logger::DEBUG);
-        logger().set_print_to_stdout_flag(true);
+	ChoiceLinkUTest(void)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
 
-        as = new AtomSpace();
-        eval = new SchemeEval(as);
-    }
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+		eval->eval("(add-to-load-path \"..\")");
+		eval->eval("(add-to-load-path \"../../..\")");
+	}
 
-    ~ChoiceLinkUTest()
-    {
-        delete eval;
-        delete as;
-        // Erase the log file if no assertions failed.
-        if (!CxxTest::TestTracker::tracker().suiteFailed())
-                std::remove(logger().get_filename().c_str());
-    }
+	~ChoiceLinkUTest()
+	{
+		delete eval;
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+	}
 
-    void setUp(void);
-    void tearDown(void);
+	void setUp(void);
+	void tearDown(void);
 
-    void test_basic_or(void);
-    void test_embed_or(void);
-    void test_nest_or(void);
-    void test_top_nest_or(void);
-    void test_nest_bad_or(void);
-    void test_top_nest_bad_or(void);
-    void test_top_disco(void);
-    void test_embed_disco(void);
-    void test_double_or(void);
-    void test_unary(void);
-    void test_typed(void);
+	void test_basic_or(void);
+	void test_embed_or(void);
+	void test_nest_or(void);
+	void test_top_nest_or(void);
+	void test_nest_bad_or(void);
+	void test_top_nest_bad_or(void);
+	void test_top_disco(void);
+	void test_embed_disco(void);
+	void test_double_or(void);
+	void test_unary(void);
+	void test_typed(void);
 };
 
 void ChoiceLinkUTest::tearDown(void)
 {
-    as->clear();
+	as->clear();
 }
 
 void ChoiceLinkUTest::setUp(void)
 {
-    as->clear();
-    eval->eval("(use-modules (opencog query))");
+	as->clear();
+	eval->eval("(use-modules (opencog query))");
 }
 
 #define getarity(hand) LinkCast(hand)->getArity()
@@ -89,14 +87,13 @@ void ChoiceLinkUTest::setUp(void)
  */
 void ChoiceLinkUTest::test_basic_or(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/choice-link.scm");
-    load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-link.scm\")");
 
-    Handle items = eval->eval_h("(cog-bind (basic))");
+	Handle items = eval->eval_h("(cog-bind (basic))");
 
-    TS_ASSERT_EQUALS(2, getarity(items));
+	TS_ASSERT_EQUALS(2, getarity(items));
 }
 
 /*
@@ -104,14 +101,13 @@ void ChoiceLinkUTest::test_basic_or(void)
  */
 void ChoiceLinkUTest::test_embed_or(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/choice-embed.scm");
-    load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-embed.scm\")");
 
-    Handle items = eval->eval_h("(cog-bind (embed))");
+	Handle items = eval->eval_h("(cog-bind (embed))");
 
-    TS_ASSERT_EQUALS(2, getarity(items));
+	TS_ASSERT_EQUALS(2, getarity(items));
 }
 
 /*
@@ -119,15 +115,14 @@ void ChoiceLinkUTest::test_embed_or(void)
  */
 void ChoiceLinkUTest::test_nest_or(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/choice-nest.scm");
-    load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-nest.scm\")");
 
-    Handle items = eval->eval_h("(cog-bind (nest))");
+	Handle items = eval->eval_h("(cog-bind (nest))");
 
-    printf ("Nest found:\n%s\n", items->toShortString().c_str());
-    TS_ASSERT_EQUALS(5, getarity(items));
+	printf ("Nest found:\n%s\n", items->toShortString().c_str());
+	TS_ASSERT_EQUALS(5, getarity(items));
 }
 
 /*
@@ -135,15 +130,14 @@ void ChoiceLinkUTest::test_nest_or(void)
  */
 void ChoiceLinkUTest::test_top_nest_or(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/choice-top-nest.scm");
-    load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-top-nest.scm\")");
 
-    Handle items = eval->eval_h("(cog-bind (top-nest))");
+	Handle items = eval->eval_h("(cog-bind (top-nest))");
 
-    printf ("Top-nest found:\n%s\n", items->toShortString().c_str());
-    TS_ASSERT_EQUALS(5, getarity(items));
+	printf ("Top-nest found:\n%s\n", items->toShortString().c_str());
+	TS_ASSERT_EQUALS(5, getarity(items));
 }
 
 /*
@@ -151,15 +145,14 @@ void ChoiceLinkUTest::test_top_nest_or(void)
  */
 void ChoiceLinkUTest::test_nest_bad_or(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/choice-nest.scm");
-    load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-nest.scm\")");
 
-    Handle items = eval->eval_h("(cog-bind (nest-bad))");
+	Handle items = eval->eval_h("(cog-bind (nest-bad))");
 
-    printf ("Nest-bad found:\n%s\n", items->toShortString().c_str());
-    TS_ASSERT_EQUALS(4, getarity(items));
+	printf ("Nest-bad found:\n%s\n", items->toShortString().c_str());
+	TS_ASSERT_EQUALS(4, getarity(items));
 }
 
 /*
@@ -167,15 +160,14 @@ void ChoiceLinkUTest::test_nest_bad_or(void)
  */
 void ChoiceLinkUTest::test_top_nest_bad_or(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/choice-top-nest.scm");
-    load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-top-nest.scm\")");
 
-    Handle items = eval->eval_h("(cog-bind (top-nest-bad))");
+	Handle items = eval->eval_h("(cog-bind (top-nest-bad))");
 
-    printf ("Top-nest-bad found:\n%s\n", items->toShortString().c_str());
-    TS_ASSERT_EQUALS(4, getarity(items));
+	printf ("Top-nest-bad found:\n%s\n", items->toShortString().c_str());
+	TS_ASSERT_EQUALS(4, getarity(items));
 }
 
 /*
@@ -183,20 +175,19 @@ void ChoiceLinkUTest::test_top_nest_bad_or(void)
  */
 void ChoiceLinkUTest::test_top_disco(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/choice-disconnected.scm");
-    load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-disconnected.scm\")");
 
-    Handle items = eval->eval_h("(cog-bind (top-disco))");
+	Handle items = eval->eval_h("(cog-bind (top-disco))");
 
-    printf ("Top-disco found:\n%s\n", items->toShortString().c_str());
-    TS_ASSERT_EQUALS(2, getarity(items));
+	printf ("Top-disco found:\n%s\n", items->toShortString().c_str());
+	TS_ASSERT_EQUALS(2, getarity(items));
 
-    Handle wrap = eval->eval_h("(cog-bind (wrapped-disco))");
+	Handle wrap = eval->eval_h("(cog-bind (wrapped-disco))");
 
-    printf ("Top-wrapped-disco found:\n%s\n", wrap->toShortString().c_str());
-    TS_ASSERT_EQUALS(2, getarity(wrap));
+	printf ("Top-wrapped-disco found:\n%s\n", wrap->toShortString().c_str());
+	TS_ASSERT_EQUALS(2, getarity(wrap));
 }
 
 /*
@@ -205,15 +196,14 @@ void ChoiceLinkUTest::test_top_disco(void)
  */
 void ChoiceLinkUTest::test_embed_disco(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/choice-embed-disco.scm");
-    load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-embed-disco.scm\")");
 
-    Handle items = eval->eval_h("(cog-bind (embed-disco))");
+	Handle items = eval->eval_h("(cog-bind (embed-disco))");
 
-    printf ("Embed pseudo-disco found:\n%s\n", items->toShortString().c_str());
-    TS_ASSERT_EQUALS(2, getarity(items));
+	printf ("Embed pseudo-disco found:\n%s\n", items->toShortString().c_str());
+	TS_ASSERT_EQUALS(2, getarity(items));
 }
 
 /*
@@ -221,14 +211,13 @@ void ChoiceLinkUTest::test_embed_disco(void)
  */
 void ChoiceLinkUTest::test_double_or(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/choice-double.scm");
-    load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-double.scm\")");
 
-    Handle items = eval->eval_h("(cog-bind (double))");
+	Handle items = eval->eval_h("(cog-bind (double))");
 
-    TS_ASSERT_EQUALS(3, getarity(items));
+	TS_ASSERT_EQUALS(3, getarity(items));
 }
 
 /*
@@ -236,23 +225,22 @@ void ChoiceLinkUTest::test_double_or(void)
  */
 void ChoiceLinkUTest::test_unary(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/choice-unary.scm");
-    load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-unary.scm\")");
 
-    // Needed to define cog-execute!
-    eval->eval("(use-modules (opencog exec))");
+	// Needed to define cog-execute!
+	eval->eval("(use-modules (opencog exec))");
 
-    Handle doors = eval->eval_h("(cog-execute! (get-a))");
+	Handle doors = eval->eval_h("(cog-execute! (get-a))");
 
-    printf("unary door-a found:\n%s\n", doors->toString().c_str());
-    TS_ASSERT_EQUALS(1, getarity(doors));
+	printf("unary door-a found:\n%s\n", doors->toString().c_str());
+	TS_ASSERT_EQUALS(1, getarity(doors));
 
-    doors = eval->eval_h("(cog-execute! (get-bc))");
+	doors = eval->eval_h("(cog-execute! (get-bc))");
 
-    printf("unary door-bc found:\n%s\n", doors->toString().c_str());
-    TS_ASSERT_EQUALS(4, getarity(doors));
+	printf("unary door-bc found:\n%s\n", doors->toString().c_str());
+	TS_ASSERT_EQUALS(4, getarity(doors));
 }
 
 /*
@@ -260,16 +248,15 @@ void ChoiceLinkUTest::test_unary(void)
  */
 void ChoiceLinkUTest::test_typed(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/choice-typed.scm");
-    load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/choice-typed.scm\")");
 
-    // Needed to define cog-execute!
-    eval->eval("(use-modules (opencog exec))");
+	// Needed to define cog-execute!
+	eval->eval("(use-modules (opencog exec))");
 
-    Handle rules = eval->eval_h("(cog-execute! get-nodes1)");
+	Handle rules = eval->eval_h("(cog-execute! get-nodes1)");
 
-    printf("typed get-nodes found:\n%s\n", rules->toString().c_str());
-    TS_ASSERT_EQUALS(2, getarity(rules));
+	printf("typed get-nodes found:\n%s\n", rules->toString().c_str());
+	TS_ASSERT_EQUALS(2, getarity(rules));
 }

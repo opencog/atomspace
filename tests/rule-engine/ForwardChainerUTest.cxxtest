@@ -6,9 +6,7 @@
  */
 #include <boost/range/algorithm/find.hpp>
 
-#include <opencog/util/Config.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
@@ -39,39 +37,22 @@ public:
 
 		// Disable the AF mechanism during testing!
 		_as.set_attentional_focus_boundary(AttentionValue::MINSTI);
-		config().set("SCM_PRELOAD",
-		             "opencog/atoms/base/core_types.scm, "
-		             "opencog/scm/utilities.scm, "
-		             "opencog/scm/av-tv.scm");
-		load_scm_files_from_config(_as);
 
+		eval.eval("(add-to-load-path \"..\")");
+		eval.eval("(add-to-load-path \"../../..\")");
 		eval.eval("(use-modules (opencog))");
-		CHKERR;
-
 		eval.eval("(use-modules (opencog rule-engine))");
 		CHKERR;
 
-		// add the following so that utilities.scm and av-tv.scm are
-		// correctly loaded from crisp-deduction.scm
-		eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm\")");
-		CHKERR;
-
-		// Load utilities.scm and rule-engine-utils.scm. Apparently
-		// the modules' functions are not loaded
-		eval.eval("(load-from-path \"utilities.scm\")");
-		CHKERR;
-		eval.eval("(load-from-path \"opencog/rule-engine/rule-engine-utils.scm\")");
-		CHKERR;
-
 		// Load the simple deduction example to test it
-		eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
-		          "/tests/rule-engine/crisp-deduction.scm\")");
-		eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
-		          "/tests/rule-engine/crisp-deduction-config.scm\")");
+		eval.eval("(load-from-path \""
+		          "tests/rule-engine/crisp-deduction.scm\")");
+		eval.eval("(load-from-path \""
+		          "tests/rule-engine/crisp-deduction-config.scm\")");
 		CHKERR;
 
-		eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
-		          "/tests/rule-engine/bc-config.scm\")");
+		eval.eval("(load-from-path \""
+		          "tests/rule-engine/bc-config.scm\")");
 	}
 	void test_do_chain();
 	void test_choose_rule();
@@ -87,10 +68,11 @@ void ForwardChainerUTest::test_do_chain()
 {
 	// Test simple deduction
 	//
-	// InheritanceLink A B
-	// InheritanceLink B C
-	// |-
-	// InheritanceLink A C
+	//   InheritanceLink A B
+	//   InheritanceLink B C
+	//   |-
+	//   InheritanceLink A C
+	//
 	Handle A = eval.eval_h("(PredicateNode \"A\" (stv 1 1))"),
 		B = eval.eval_h("(PredicateNode \"B\" (stv 1 1))"),
 		C = eval.eval_h("(PredicateNode \"C\" (stv 1 1))"),
@@ -134,10 +116,7 @@ void ForwardChainerUTest::test_apply_rule(void)
 {
 	// Apply rule x and see if all the inferences made
 	// are a direct result of source being part of input/premise
-	config().set(
-		"SCM_PRELOAD",
-		"tests/rule-engine/simple-assertions.scm");
-	load_scm_files_from_config(_as);
+	eval.eval("(load-from-path \"tests/rule-engine/simple-assertions.scm\")");
 
 	Handle rule_handle = eval.eval_h("(MemberLink"
 	                                 "   bc-deduction-rule-name"
@@ -165,9 +144,7 @@ void ForwardChainerUTest::test_apply_rule(void)
 
 void ForwardChainerUTest::test_substitute_rule_part(void)
 {
-	config().set("SCM_PRELOAD",
-	             "tests/rule-engine/dfc-tests.scm");
-	load_scm_files_from_config(_as);
+	eval.eval("(load-from-path \"tests/rule-engine/dfc-tests.scm\")");
 
 	Handle rule_handle = eval.eval_h("bc-deduction-rule");
 
@@ -232,8 +209,7 @@ void ForwardChainerUTest::test_unify_1(void)
 
 void ForwardChainerUTest::test_unify_2(void)
 {
-	config().set("SCM_PRELOAD", "tests/rule-engine/rules/pln-implication-and-lambda-factorization-rule.scm");
-	load_scm_files_from_config(_as);
+	eval.eval("(load-from-path \"tests/rule-engine/rules/pln-implication-and-lambda-factorization-rule.scm\")");
 
 	Handle source = eval.eval_h
 		("(AndLink"
@@ -266,9 +242,8 @@ void ForwardChainerUTest::test_unify_2(void)
 
 void ForwardChainerUTest::test_derive_rules_1(void)
 {
-	config().set("SCM_PRELOAD", "tests/rule-engine/rules/bc-deduction.scm,"
-	             "tests/rule-engine/simple-assertions.scm");
-	load_scm_files_from_config(_as);
+	eval.eval("(load-from-path \"tests/rule-engine/rules/bc-deduction.scm\")");
+	eval.eval("(load-from-path \"tests/rule-engine/rules/simple-assertions.scm\")");
 
 	Handle rule_handle = eval.eval_h("(MemberLink"
 	                                 "   bc-deduction-rule-name"
@@ -294,9 +269,7 @@ void ForwardChainerUTest::test_derive_rules_2()
 {
 	_as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/rule-engine/rules/implication-construction-rule.scm");
-	load_scm_files_from_config(_as);
+	eval.eval("(load-from-path \"tests/rule-engine/rules/implication-construction-rule.scm\")");
 
 	Handle source = eval.eval_h("(LambdaLink"
 	                            "   (TypedVariableLink"

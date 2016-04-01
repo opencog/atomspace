@@ -20,12 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -73,9 +70,11 @@ void EvaluationUTest::setUp(void)
 	as->clear();
 	eval->eval("(use-modules (opencog exec))");
 	eval->eval("(use-modules (opencog query))");
+	eval->eval("(add-to-load-path \"..\")");
+	eval->eval("(add-to-load-path \"../../..\")");
 }
 
-#define getarity(hand) LinkCast(hand)->getArity()
+#define getarity(hand) hand->getArity()
 
 /*
  * Evaluation most basic unit test.
@@ -84,8 +83,7 @@ void EvaluationUTest::test_eval(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/evaluation.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/evaluation.scm\")");
 
 	Handle five = eval->eval_h("(cog-execute! (five-arcs))");
 	printf ("five: found:\n%s\n", five->toShortString().c_str());
@@ -121,8 +119,7 @@ void EvaluationUTest::test_logic(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/evaluation.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/evaluation.scm\")");
 
 	Handle four = eval->eval_h("(cog-execute! (four-not))");
 	printf ("four-not: found:\n%s\n", four->toShortString().c_str());
@@ -154,8 +151,7 @@ void EvaluationUTest::test_varval(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/eval-var.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/eval-var.scm\")");
 
 	Handle do_things = eval->eval_h("(do-things)");
 	Handle do_things_results = bindlink(as, do_things);
