@@ -20,13 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
-#include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
+#include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -45,6 +41,10 @@ public:
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
+		eval->eval("(add-to-load-path \"..\")");
+		eval->eval("(add-to-load-path \"../../..\")");
+		eval->eval("(use-modules (opencog query))");
+		eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 	}
 
 	~ArcanaUTest()
@@ -53,7 +53,7 @@ public:
 		delete as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
-				std::remove(logger().get_filename().c_str());
+			std::remove(logger().get_filename().c_str());
 	}
 
 	void setUp(void);
@@ -73,11 +73,6 @@ void ArcanaUTest::tearDown(void)
 void ArcanaUTest::setUp(void)
 {
 	as->clear();
-	config().set("SCM_PRELOAD",
-		"tests/query/test_types.scm, "
-		"opencog/scm/opencog/query.scm");
-	load_scm_files_from_config(*as);
-	eval->eval("(use-modules (opencog query))");
 }
 
 #define getarity(hand) LinkCast(hand)->getArity()
@@ -90,8 +85,7 @@ void ArcanaUTest::test_repeats(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/arcana-repeat.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/arcana-repeat.scm\")");
 
 	Handle same = eval->eval_h("(cog-bind (repeat-same))");
 	printf("same, num solutions=%d\n", getarity(same));
@@ -140,8 +134,7 @@ void ArcanaUTest::test_const(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/arcana-const.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/arcana-const.scm\")");
 
 	// ----
 	Handle marconi = eval->eval_h("marconi");
@@ -175,8 +168,7 @@ void ArcanaUTest::test_dummy(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/arcana-dummy.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/arcana-dummy.scm\")");
 
 	// ----
 	Handle answer = eval->eval_h("(cog-execute! dummy)");
@@ -202,13 +194,12 @@ void ArcanaUTest::test_numeric(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/arcana-numeric.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/arcana-numeric.scm\")");
 
 	// ----
 	Handle sl = eval->eval_h("(StateLink"
-							 "   (SchemaNode \"start-interaction-timestamp\")"
-							 "   (TimeLink))");
+	                         "   (SchemaNode \"start-interaction-timestamp\")"
+	                         "   (TimeLink))");
 	Instantiator(as).execute(sl);
   
 	TruthValuePtr too_soon = eval->eval_tv(
