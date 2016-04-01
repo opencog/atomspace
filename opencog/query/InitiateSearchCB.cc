@@ -736,21 +736,23 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	if (nullptr == _root)
 	{
 
-#if THROW_HARD_ERROR
-		throw SyntaxException(TRACE_INFO,
-			"Error: There were no type restrictions! That's infinite-recursive!");
-#else
 		if (not _variables->_deep_typemap.empty())
 		{
 			logger().warn("Warning: Full deep-type support not implemented!");
 		}
 		else
 		{
+// #define THROW_HARD_ERROR 1
+#ifdef THROW_HARD_ERROR
+			throw SyntaxException(TRACE_INFO,
+				"Error: There were no type restrictions! That's infinite-recursive!");
+#else
 			logger().warn("Warning: No type restrictions! Your code has a bug in it!");
 			for (const Handle& var: _variables->varset)
 				logger().warn("Offending variable=%s\n", var->toString().c_str());
 			for (const Handle& cl : clauses)
 				logger().warn("Offending clauses=%s\n", cl->toString().c_str());
+#endif
 		}
 
 		if (0 == clauses.size())
@@ -761,7 +763,6 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 			return false;
 		}
 		_root = _starter_term = clauses[0];
-#endif
 	}
 
 	HandleSeq handle_set;
