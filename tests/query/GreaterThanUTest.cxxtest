@@ -20,12 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -44,6 +41,8 @@ public:
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
+		eval->eval("(add-to-load-path \"..\")");
+		eval->eval("(add-to-load-path \"../../..\")");
 	}
 
 	~GreaterThanUTest()
@@ -51,7 +50,7 @@ public:
 		delete as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
-				std::remove(logger().get_filename().c_str());
+			std::remove(logger().get_filename().c_str());
 	}
 
 	void setUp(void);
@@ -81,8 +80,7 @@ void GreaterThanUTest::test_numeric_greater(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/greater_than.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/greater_than.scm\")");
 
 	Handle richer_than_george = eval->eval_h("(richer-than-george)");
 	Handle richer_than_susan = eval->eval_h("(richer-than-susan)");
@@ -115,8 +113,7 @@ void GreaterThanUTest::test_scm_greater(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/greater_than.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/greater_than.scm\")");
 
 	Handle richer_than_george = eval->eval_h("(scm-than-george)");
 	Handle richer_than_susan = eval->eval_h("(scm-than-susan)");
@@ -138,8 +135,7 @@ void GreaterThanUTest::test_builtin_greater(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/greater_than.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/greater_than.scm\")");
 
 	Handle richer_than_george = eval->eval_h("(builtin-than-george)");
 	Handle richer_than_susan = eval->eval_h("(builtin-than-susan)");
