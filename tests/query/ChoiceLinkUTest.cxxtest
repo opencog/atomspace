@@ -177,7 +177,7 @@ void ChoiceLinkUTest::test_top_disco(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/query/choice-dicsonnected.scm\")");
+	eval->eval("(load-from-path \"tests/query/choice-disconnected.scm\")");
 
 	Handle items = eval->eval_h("(cog-bind (top-disco))");
 
