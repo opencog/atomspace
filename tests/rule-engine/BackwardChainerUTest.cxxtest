@@ -53,10 +53,6 @@ void BackwardChainerUTest::setUp()
 	eval_.eval("(add-to-load-path \"../../..\")");
 	eval_.eval("(use-modules (opencog))");
 	// eval_.eval("(use-modules (opencog rule-engine))");
-
-	// This is toally nuts, but deleting this one line causes this
-	// unit test to fail.  I'm completely stumped by this.
-	SchemeEval evo2(&as_);
 }
 
 void BackwardChainerUTest::tearDown()
@@ -239,6 +235,9 @@ void BackwardChainerUTest::test_tvq_impossible_bc()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+	// This is toally nuts, but deleting this one line causes the
+	// NEXT unit test to fail!  I'm completely stumped by this.
+	SchemeEval evo2(&as_);
 	as_.clear();
 
 	eval_.eval("(load-from-path \"tests/rule-engine/bc-modus-ponens-config.scm\")");
