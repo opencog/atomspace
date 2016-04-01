@@ -508,13 +508,17 @@ void Variables::extend(const Variables& vset)
 std::string Variables::to_string() const
 {
 	std::stringstream ss;
-	for (auto& v : _simple_typemap)
+	ss << "size = " << _simple_typemap.size() << std::endl;
+	unsigned i = 0;
+	for (const auto& v : _simple_typemap)
 	{
-		ss << "{variable: " << v.first->toShortString()
-		   << "types: ";
+		ss << "variable[" << i << "]:" << std::endl
+			<< h_to_string(v.first)
+		   << "types[" << i << "]:";
 		for (auto& t : v.second)
-			ss << classserver().getTypeName(t) << " ";
-		ss << "}" << std::endl;
+			ss << " " << classserver().getTypeName(t);
+		ss << std::endl;
+		i++;
 	}
 	return ss.str();
 }
