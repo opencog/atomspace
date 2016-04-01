@@ -20,11 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 #include "test-types.h"
@@ -35,6 +33,7 @@ class VarTypeNot :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *as;
+		SchemeEval* eval;
 		Handle vscope_good, vscope_bad;
 
 	public:
@@ -66,12 +65,11 @@ class VarTypeNot :  public CxxTest::TestSuite
 void VarTypeNot::setUp(void)
 {
 	as = new AtomSpace();
-
-	config().set("SCM_PRELOAD",
-		"tests/query/test_types.scm, "
-		"tests/query/var-type-not.scm");
-
-	load_scm_files_from_config(*as);
+	eval = new SchemeEval(as);
+	eval->eval("(add-to-load-path \"..\")");
+	eval->eval("(add-to-load-path \"../../..\")");
+	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
+	eval->eval("(load-from-path \"tests/query/var-type-not.scm\")");
 }
 
 void VarTypeNot::tearDown(void)
@@ -89,8 +87,7 @@ void VarTypeNot::test_exec(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Create an implication link that will be tested.
-	SchemeEval* evaluator = new SchemeEval(as);
-	vscope_good = evaluator->apply("rule-good", Handle::UNDEFINED);
+	vscope_good = eval->apply("rule-good", Handle::UNDEFINED);
 
 	// This should throw an exception.
 	// Disable logging so as to avoid the hopeless spew of errors.
@@ -101,7 +98,7 @@ void VarTypeNot::test_exec(void)
 	bool caught = false;
 	try
 	{
-		vscope_bad = evaluator->apply("rule-bad", Handle::UNDEFINED);
+		vscope_bad = eval->apply("rule-bad", Handle::UNDEFINED);
 	}
    catch (const RuntimeException& ex)
    {
@@ -110,7 +107,6 @@ void VarTypeNot::test_exec(void)
        caught = true;
    }
    TSM_ASSERT("Failed to catch expected exception", caught);
-	delete evaluator;
 
 	logger().set_level(Logger::INFO);
 
@@ -121,7 +117,7 @@ void VarTypeNot::test_exec(void)
 
 /*****************
 	In the good old days, it was the pattern matcher that threw the exception
-	for the bad variable type. Now, it is thown much earlier, by the
+	for the bad variable type. Now, it is thrown much earlier, by the
 	atomspace, so the remainder of this test is irrelevant.
 
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != vscope_bad);
