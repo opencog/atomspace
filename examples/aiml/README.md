@@ -8,7 +8,7 @@ Under development, very incomplete.
 # Goal
 Map AIML expressions to equivalent atomspace graphs, in such a
 way that the OpenCog pattern matcher can perform all of the same
-funcitons that AIML currently performs.
+funcitions that AIML currently performs.
 
 # Lightning reivew of AIML
 Some example sentences.
