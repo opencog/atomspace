@@ -20,12 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
-#include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
+#include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -44,6 +40,9 @@ public:
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
+		eval->eval("(add-to-load-path \"..\")");
+		eval->eval("(add-to-load-path \"../../..\")");
+		eval->eval("(use-modules (opencog exec) (opencog query))");
 	}
 
 	~AbsentUTest()
@@ -74,9 +73,7 @@ void AbsentUTest::tearDown(void)
 void AbsentUTest::setUp(void)
 {
 	as->clear();
-	config().set("SCM_PRELOAD", "tests/query/test_types.scm");
-	load_scm_files_from_config(*as);
-	eval->eval("(use-modules (opencog exec) (opencog query))");
+	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 }
 
 #define getarity(hand) LinkCast(hand)->getArity()
@@ -89,8 +86,7 @@ void AbsentUTest::test_single(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/absent.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/absent.scm\")");
 
 	Handle empty = eval->eval_h("(ConceptNode \"room empty\")");
 	Handle full = eval->eval_h("(ConceptNode \"room nonempty\")");
@@ -141,8 +137,7 @@ void AbsentUTest::test_double(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/absent-multi.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/absent-multi.scm\")");
 
 	Handle denied = eval->eval_h("(get-denied)");
 	Handle exists = eval->eval_h("(get-exists)");
@@ -231,8 +226,7 @@ void AbsentUTest::test_connect_exist(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/absent-conn1.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/absent-conn1.scm\")");
 
 	Handle rtn = eval->eval_h("(cog-bind test)");
 
@@ -248,8 +242,7 @@ void AbsentUTest::test_connect_not_exist(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/absent-conn2.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/absent-conn2.scm\")");
 
 	Handle rtn = eval->eval_h("(cog-bind test)");
 
@@ -265,8 +258,7 @@ void AbsentUTest::test_discon_exist(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/absent-disconn1.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/absent-disconn1.scm\")");
 
 	Handle rtn = eval->eval_h("(cog-bind test)");
 
@@ -282,8 +274,7 @@ void AbsentUTest::test_discon_not_exist(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/absent-disconn2.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/absent-disconn2.scm\")");
 
 	Handle rtn = eval->eval_h("(cog-bind test)");
 
