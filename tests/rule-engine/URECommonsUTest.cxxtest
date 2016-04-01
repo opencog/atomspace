@@ -7,10 +7,8 @@
 
 #include <opencog/rule-engine/URECommons.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/util/Config.h>
-#include <opencog/guile/load-file.h>
+
 //TODO test choose_target
 using namespace opencog;
 class URECommonsUTest: public CxxTest::TestSuite {
@@ -28,18 +26,17 @@ public:
 
 };
 
-void URECommonsUTest::setUp() {
-	config().set("SCM_PRELOAD", "opencog/atoms/base/core_types.scm, "
-			"opencog/scm/utilities.scm, "
-			"opencog/python/pln_old/examples/deduction/atomspace_contents.scm");
-	load_scm_files_from_config(as_);
+void URECommonsUTest::setUp()
+{
 }
 
-void URECommonsUTest::tearDown() {
+void URECommonsUTest::tearDown()
+{
 	as_.clear();
 }
 
-void URECommonsUTest::test_get_root_links(void) {
+void URECommonsUTest::test_get_root_links(void)
+{
 	string bindlink =
 			"(BindLink"
 					"   (VariableList"
@@ -85,8 +82,9 @@ void URECommonsUTest::test_get_root_links(void) {
 	TS_ASSERT_EQUALS(1, rootsx.size());
 }
 
-void URECommonsUTest::test_create_bindLink() {
-//TODO expand this test
+void URECommonsUTest::test_create_bindLink()
+{
+	//TODO expand this test
 	Handle himplicant = eval_.eval_h("(InheritanceLink"
 	                                 "   (VariableNode \"$var-rich\")"
 	                                 "   (ConceptNode \"happy\"))");
@@ -94,4 +92,3 @@ void URECommonsUTest::test_create_bindLink() {
 
 	TS_ASSERT_EQUALS(BIND_LINK, h->getType());
 }
-
