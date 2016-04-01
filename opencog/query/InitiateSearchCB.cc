@@ -752,6 +752,19 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 				logger().warn("Offending variable=%s\n", var->toString().c_str());
 			for (const Handle& cl : clauses)
 				logger().warn("Offending clauses=%s\n", cl->toString().c_str());
+
+			// Terrible, terrible hack for detecting infinite loops.
+			// When the world is ready for us, we should instead just
+			// throw the hard error, as ifdef'ed above.
+			static const Pattern* prev = nullptr;
+			static unsigned int count = 0;
+			if (prev != _pattern) { prev = _pattern; count = 0; }
+			else {
+				count++;
+				if (5 < count)
+					throw RuntimeException(TRACE_INFO,
+						"Infinite Loop detected! Recursed %u times!", count);
+			}
 #endif
 		}
 
