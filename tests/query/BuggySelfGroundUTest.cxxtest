@@ -22,12 +22,9 @@
  * Created by Jacek Świergocki <jswiergo@gmail.com> August 2015
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -35,8 +32,8 @@ using namespace opencog;
 class BuggySelfGroundUTest: public CxxTest::TestSuite
 {
 private:
-        AtomSpace *as;
-        SchemeEval* eval;
+    AtomSpace *as;
+    SchemeEval* eval;
 
 public:
     BuggySelfGroundUTest(void)
@@ -46,6 +43,8 @@ public:
 
         as = new AtomSpace();
         eval = new SchemeEval(as);
+        eval->eval("(add-to-load-path \"..\")");
+        eval->eval("(add-to-load-path \"../../..\")");
     }
 
     ~BuggySelfGroundUTest()
@@ -54,7 +53,7 @@ public:
         delete as;
         // Erase the log file if no assertions failed.
         if (!CxxTest::TestTracker::tracker().suiteFailed())
-                std::remove(logger().get_filename().c_str());
+            std::remove(logger().get_filename().c_str());
     }
 
     void setUp(void);
@@ -79,8 +78,7 @@ void BuggySelfGroundUTest::test_crash(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/buggy-selfgnd.scm");
-    load_scm_files_from_config(*as);
+    eval->eval("(load-from-path \"tests/query/buggy-selfgnd.scm\")");
 
     Handle hbnd = eval->eval_h("bnd");
     TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != hbnd);
