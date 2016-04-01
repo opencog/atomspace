@@ -20,13 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/StateLink.h>
-#include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
+// #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -34,8 +31,8 @@ using namespace opencog;
 class SequenceUTest: public CxxTest::TestSuite
 {
 private:
-		AtomSpace *as;
-		SchemeEval* eval;
+	AtomSpace *as;
+	SchemeEval* eval;
 
 public:
 	SequenceUTest(void)
@@ -45,6 +42,9 @@ public:
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
+		eval->eval("(add-to-load-path \"..\")");
+		eval->eval("(add-to-load-path \"../../..\")");
+		eval->eval("(use-modules (opencog query))");
 	}
 
 	~SequenceUTest()
@@ -52,7 +52,7 @@ public:
 		delete as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
-				std::remove(logger().get_filename().c_str());
+			std::remove(logger().get_filename().c_str());
 	}
 
 	void setUp(void);
@@ -71,7 +71,6 @@ void SequenceUTest::tearDown(void)
 
 void SequenceUTest::setUp(void)
 {
-	eval->eval("(use-modules (opencog query))");
 }
 
 /*
@@ -81,8 +80,7 @@ void SequenceUTest::test_sequence(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/sequence.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/sequence.scm\")");
 
 	// This should throw an exception from scheme.
 	// Disable logging so as to avoid the hopeless spew of errors.
@@ -149,8 +147,7 @@ void SequenceUTest::test_presence(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/seq-presence.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/seq-presence.scm\")");
 
 	TruthValuePtr tv = eval->eval_tv("(cog-satisfy empty-sequence)");
 	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
@@ -165,8 +162,7 @@ void SequenceUTest::test_fallback(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/sequence.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/sequence.scm\")");
 
 	// This should not throw any exceptions.
 	TruthValuePtr tv = eval->eval_tv("(cog-satisfy drag-race)");
@@ -190,8 +186,7 @@ void SequenceUTest::test_pass_presence(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/seq-absence.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/seq-absence.scm\")");
 
 	TruthValuePtr tv = eval->eval_tv("(cog-satisfy or-presence)");
 	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
@@ -274,8 +269,7 @@ void SequenceUTest::test_or_put(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/seq-absence.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/seq-absence.scm\")");
 
 	// ----
 	// Insert eval link to prevent it from tripping.
