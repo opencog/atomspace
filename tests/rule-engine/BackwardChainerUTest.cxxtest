@@ -365,23 +365,23 @@ void BackwardChainerUTest::test_focus_set()
  *
  * on the the following data:
  *
- * (InheritanceLink (stv 1.000000 1.000000)
- *  (ConceptNode "A") ; [29][1]
- *   (ConceptNode "B") ; [30][1]
- * ) ; [31][1]
+ * (InheritanceLink
+ *  (ConceptNode "A")
+ *   (ConceptNode "B")
+ * )
  *
  * (InheritanceLink
- *   (ConceptNode "A") ; [29][1]
- *   (VariableNode "$X") ; [50][1]
- * ) ; [51][1]
+ *   (ConceptNode "A")
+ *   (VariableNode "$X")
+ * )
  *
- * (InheritanceLink (stv 1.000000 1.000000)
- *   (ConceptNode "B") ; [30][1]
- *   (ConceptNode "C") ; [32][1]
- * ) ; [33][1]
+ * (InheritanceLink
+ *   (ConceptNode "B")
+ *   (ConceptNode "C")
+ * )
  *
  */
-void BackwardChainerUTest::test_virtual_no_grnd(void)
+void BackwardChainerUTest::test_virtual_no_grnd()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
