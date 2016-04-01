@@ -80,6 +80,7 @@ void SCMExecutionOutputUTest::setUp(void)
 {
 	as = new AtomSpace();
 	eval = new SchemeEval(as);
+	eval->eval("(use-modules (opencog exec))");
 }
 
 void SCMExecutionOutputUTest::tearDown(void)
