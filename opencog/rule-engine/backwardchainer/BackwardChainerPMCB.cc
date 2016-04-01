@@ -26,7 +26,9 @@
 
 using namespace opencog;
 
-BackwardChainerPMCB::BackwardChainerPMCB(AtomSpace* as, VariableListPtr int_vars, bool name_check)
+BackwardChainerPMCB::BackwardChainerPMCB(AtomSpace* as,
+                                         VariableListPtr int_vars,
+                                         bool name_check)
     : InitiateSearchCB(as),
       DefaultPatternMatchCB(as),
       _as(as),
@@ -83,7 +85,7 @@ bool BackwardChainerPMCB::node_match(const Handle& npat_h, const Handle& nsoln_h
 }
 
 bool BackwardChainerPMCB::grounding(const HandleMap &var_soln,
-                               const HandleMap &pred_soln)
+                                    const HandleMap &pred_soln)
 {
 	HandleMap true_var_soln;
 	HandleMap true_pred_soln;
@@ -111,11 +113,11 @@ bool BackwardChainerPMCB::grounding(const HandleMap &var_soln,
 	return false;
 }
 
-HandleMapSeq BackwardChainerPMCB::get_var_list()
+const HandleMapSeq& BackwardChainerPMCB::get_var_list() const
 {
 	return var_solns_;
 }
-HandleMapSeq BackwardChainerPMCB::get_pred_list()
+const HandleMapSeq& BackwardChainerPMCB::get_pred_list() const
 {
 	return pred_solns_;
 }
