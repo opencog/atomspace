@@ -20,12 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -44,6 +40,9 @@ public:
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
+		eval->eval("(add-to-load-path \"..\")");
+		eval->eval("(add-to-load-path \"../../..\")");
+		eval->eval("(use-modules (opencog query))");
 	}
 
 	~DefineLinkUTest()
@@ -70,7 +69,6 @@ void DefineLinkUTest::tearDown(void)
 void DefineLinkUTest::setUp(void)
 {
 	as->clear();
-	eval->eval("(use-modules (opencog query))");
 }
 
 #define getarity(hand) LinkCast(hand)->getArity()
@@ -82,8 +80,7 @@ void DefineLinkUTest::test_basic(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/define.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/define.scm\")");
 
 	Handle items = eval->eval_h("(cog-execute! get-elect)");
 	TS_ASSERT_EQUALS(2, getarity(items));
@@ -103,8 +100,7 @@ void DefineLinkUTest::test_schema(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/define-schema.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/define-schema.scm\")");
 
 	Handle timestamp = eval->eval_h(
 		"(cog-execute! (DefinedSchemaNode \"set timestamp\"))");
