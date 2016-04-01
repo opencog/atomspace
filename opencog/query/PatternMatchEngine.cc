@@ -1307,9 +1307,12 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 	}
 	if (not match) return false;
 
-	clause_grounding[clause_root] = hg;
-	logmsg("---------------------\nclause:", clause_root);
-	logmsg("ground:", hg);
+	if (not is_evaluatable(clause_root))
+	{
+		clause_grounding[clause_root] = hg;
+		logmsg("---------------------\nclause:", clause_root);
+		logmsg("ground:", hg);
+	}
 
 	// Now go and do more clauses.
 	return do_next_clause();
