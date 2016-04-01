@@ -235,9 +235,11 @@ void BackwardChainerUTest::test_tvq_impossible_bc()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	// This is toally nuts, but deleting this one line causes the
-	// NEXT unit test to fail!  I'm completely stumped by this.
-	SchemeEval evo2(&as_);
+	// This is kind of crazy, but ... but deleting the forced garbage
+	// collection below causes the NEXT unit test to fail!  I don't
+	// understand what's at the root of this bug. Some weird
+	// indeterminism?
+	eval_.eval("(gc)");
 	as_.clear();
 
 	eval_.eval("(load-from-path \"tests/rule-engine/bc-modus-ponens-config.scm\")");
