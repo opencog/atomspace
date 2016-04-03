@@ -671,8 +671,10 @@ void PatternLink::unbundle_virtual(const OrderedHandleSet& vars,
 /* ================================================================= */
 
 /// Add dummy clauses for patterns that would otherwise not have any
-/// non-evaluatable clauses.  An example of such is
+/// non-evaluatable clauses.  One example of such is
+///
 ///    (GetLink (GreaterThan (Number 42) (Variable $x)))
+///
 /// The only clause here is the GreaterThan, and its virtual
 /// (evaluatable) so we know that in general it cannot be found in
 /// the atomspace.   Due to the pattern-matcher design, matching will
@@ -683,19 +685,24 @@ void PatternLink::unbundle_virtual(const OrderedHandleSet& vars,
 /// search results, for any variable that is not in an AbsentLink.
 /// (Always adding can harm performance, so we don't do it unless we
 /// absolutely have to.)
+///
+/// Another example is
+///
+///    (GetLink (Equal (Variable "$whole") (Implication ...)))
+///
+/// where the ImlicationLink may itself contain more variables.
+///
 void PatternLink::add_dummies()
 {
-	// XXX almost exactly the same as 0 < _fixed.size() ... right?
-	bool all_clauses_are_evaluatable = true;
+	// The below is almost but not quite the same as
+	// if (0 < _fixed.size()) return; because fixe can be
+	// non-zero, if the virtual term has only one variable
+	// in it.
 	for (const Handle& cl : _pat.clauses)
 	{
-		// if (0 < _pat.evaluatable_holders.count(cl)) continue;
-		if (0 < _pat.evaluatable_terms.count(cl)) continue;
-		all_clauses_are_evaluatable = false;
-		break;
+		// if (0 == _pat.evaluatable_holders.count(cl)) return;
+		if (0 == _pat.evaluatable_terms.count(cl)) return;
 	}
-
-	if (not all_clauses_are_evaluatable) return;
 
 	for (const Handle& v: _varlist.varseq)
 	{

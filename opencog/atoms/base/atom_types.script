@@ -58,9 +58,10 @@ EXTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 
 // Evaluatable link. Any link type which might be evaluated, resulting
-// in a truth-value, should inherit from this type.  It is a mixin-type,
+// in a truth-value, should inherit from this type.  This is a mixin-type,
 // it does nothing by itself, but is used to identify boolean-ish,
-// probabilisitic-TV-valued link types.
+// probabilisitic-TV-valued link types, so that they can be handled
+// properly.
 EVALUATABLE_LINK <- LINK
 
 // Boolean set operations, logical constants.
