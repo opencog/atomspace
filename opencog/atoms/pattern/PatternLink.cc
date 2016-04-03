@@ -433,11 +433,11 @@ void PatternLink::validate_clauses(OrderedHandleSet& vars,
                                    HandleSeq& constants)
 
 {
-	// The Fuzzy matcher does some strange things: it declares no
-	// vars at all, only clauses, and then uses the pattern matcher
-	// to automatically explore nearby atoms. As a result, all of
-	// its clauses are "constant", and we allow this special case.
-	// Need to review the rationality of this design...
+	// XXX FIXME The AIML ruleset includes BindLinks that have no
+	// variables in them, and the clauses are all constant.  This
+	// is kind of uncomfortably weird.  Does this really happen?
+	// There is a unit test for this - arcana-const.scm Should
+	// this unit test be disabled?
 	if (0 < vars.size())
 	{
 		// Make sure that the user did not pass in bogus clauses.
@@ -690,9 +690,15 @@ void PatternLink::unbundle_virtual(const OrderedHandleSet& vars,
 ///
 ///    (GetLink (Equal (Variable "$whole") (Implication ...)))
 ///
-/// where the ImlicationLink may itself contain more variables.
+/// where the ImplicationLink may itself contain more variables.
+/// If the ImplicationLink is suitably simple, it can be added
+/// added s a ordinary clause, and searched for as if it was "present".
+/// XXX FIXME: the code here assumes that the situation is indeed
+/// simple: more complex cases are not handled correctly.  Doing this
+/// correctly would require iteratating again, and examining the
+/// contents of the left and right side of the EqualLink... ugh.
 ///
-void PatternLink::add_dummies()
+bool PatternLink::add_dummies()
 {
 	// The below is almost but not quite the same as
 	// if (0 < _fixed.size()) return; because fixe can be
@@ -701,15 +707,37 @@ void PatternLink::add_dummies()
 	for (const Handle& cl : _pat.clauses)
 	{
 		// if (0 == _pat.evaluatable_holders.count(cl)) return;
-		if (0 == _pat.evaluatable_terms.count(cl)) return;
+		if (0 == _pat.evaluatable_terms.count(cl)) return false;
 	}
 
-	for (const Handle& v: _varlist.varseq)
+	for (const Handle& t : _pat.evaluatable_terms)
 	{
-		_pat.clauses.emplace_back(v);
-		_pat.cnf_clauses.emplace_back(v);
-		_pat.mandatory.emplace_back(v);
+		Type tt = t->getType();
+		if (EQUAL_LINK == tt or
+		    GREATER_THAN_LINK == tt or
+		    IDENTICAL_LINK == tt)
+		{
+			const Handle& left = t->getOutgoingAtom(0);
+			if (any_unquoted_in_tree(left, _varlist.varset))
+			{
+				_pat.clauses.emplace_back(left);
+				_pat.cnf_clauses.emplace_back(left);
+				_pat.mandatory.emplace_back(left);
+				_fixed.emplace_back(left);
+			}
+
+			const Handle& right = t->getOutgoingAtom(1);
+			if (any_unquoted_in_tree(right, _varlist.varset))
+			{
+				_pat.clauses.emplace_back(right);
+				_pat.cnf_clauses.emplace_back(right);
+				_pat.mandatory.emplace_back(right);
+				_fixed.emplace_back(right);
+			}
+		}
 	}
+
+	return true;
 }
 
 /* ================================================================= */
