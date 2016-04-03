@@ -1,5 +1,5 @@
 ;
-; Unit testing for a constant pattern
+; Unit testing for addition of "dummy" clauses into pattern.
 ;
 (use-modules (opencog))
 (use-modules (opencog query) (opencog exec))
