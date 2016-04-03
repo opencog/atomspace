@@ -20,12 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/VariableList.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 
@@ -45,9 +42,9 @@ public:
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
-
-		config().set("SCM_PRELOAD", "tests/query/substitution.scm");
-		load_scm_files_from_config(*as);
+		eval->eval("(add-to-load-path \"..\")");
+		eval->eval("(add-to-load-path \"../../..\")");
+		eval->eval("(load-from-path \"tests/query/substitution.scm\")");
 	}
 
 	~SubstitutionUTest()

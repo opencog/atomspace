@@ -292,13 +292,25 @@ static inline std::string operator+ (const std::string &lhs, Handle h)
     return lhs + buff;
 }
 
+// Debugging helpers, very convenient to print Handle sets in gdb
+std::string h_to_string(const Handle& h);
+std::string hs_to_string(const HandleSeq& hs);
+std::string ohs_to_string(const OrderedHandleSet& ohs);
+std::string uhs_to_string(const UnorderedHandleSet& uhs);
+std::string hmap_to_string(const HandleMap& hm);
+std::string hmultimap_to_string(const HandleMultimap& hmm);
+std::string hmaps_to_string(const HandleMapSeq& hms);
+std::string atomtype_to_string(Type type);
+
 // In case your gdb supports overloading
-std::string oc_to_string(const opencog::Handle& h);
-std::string oc_to_string(const opencog::OrderedHandleSet& hs);
-std::string oc_to_string(const opencog::UnorderedHandleSet& uhs);
-std::string oc_to_string(const opencog::HandleMap& hm);
-std::string oc_to_string(const opencog::HandleMultimap& hmm);
-std::string oc_to_string(const opencog::HandleMapSeq& hms);
+std::string oc_to_string(const Handle& h);
+std::string oc_to_string(const HandleSeq& hs);
+std::string oc_to_string(const OrderedHandleSet& hs);
+std::string oc_to_string(const UnorderedHandleSet& uhs);
+std::string oc_to_string(const HandleMap& hm);
+std::string oc_to_string(const HandleMultimap& hmm);
+std::string oc_to_string(const HandleMapSeq& hms);
+std::string oc_to_string(Type type);
 
 } // namespace opencog
 
@@ -312,16 +324,6 @@ inline ostream& operator<<(ostream& out, const opencog::Handle& h)
 ostream& operator<<(ostream& out, const opencog::HandleSeq& hs);
 ostream& operator<<(ostream& out, const opencog::OrderedHandleSet& hs);
 ostream& operator<<(ostream& out, const opencog::UnorderedHandleSet& hs);
-
-// Debugging helpers, very convenient to print Handle sets in gdb
-string h_to_string(const opencog::Handle& h);
-string hs_to_string(const opencog::HandleSeq& hs);
-string ohs_to_string(const opencog::OrderedHandleSet& ohs);
-string uhs_to_string(const opencog::UnorderedHandleSet& uhs);
-string hmap_to_string(const opencog::HandleMap& hm);
-string hmultimap_to_string(const opencog::HandleMultimap& hmm);
-string hmaps_to_string(const opencog::HandleMapSeq& hms);
-string atomtype_to_string(opencog::Type type);
 
 #ifdef THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
 // The below used to work, but broke in gcc-4.7.2. The reason it

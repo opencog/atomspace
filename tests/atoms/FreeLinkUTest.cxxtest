@@ -20,12 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/FreeLink.h>
 #include <opencog/atoms/core/VariableList.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -33,8 +31,8 @@ using namespace opencog;
 class FreeLinkUTest: public CxxTest::TestSuite
 {
 private:
-		AtomSpace *as;
-		SchemeEval* eval;
+	AtomSpace *as;
+	SchemeEval* eval;
 
 public:
 	FreeLinkUTest(void)
@@ -52,7 +50,7 @@ public:
 		delete eval;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
-				std::remove(logger().get_filename().c_str());
+			std::remove(logger().get_filename().c_str());
 	}
 
 	void setUp(void);
@@ -72,11 +70,6 @@ void FreeLinkUTest::tearDown(void)
 void FreeLinkUTest::setUp(void)
 {
 	as->clear();
-	config().set("SCM_PRELOAD",
-		"opencog/atoms/base/core_types.scm, "
-		"opencog/scm/utilities.scm");
-
-	load_scm_files_from_config(*as);
 }
 
 /*

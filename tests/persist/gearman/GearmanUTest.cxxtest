@@ -24,11 +24,9 @@
 #include <thread>
 #include <string>
 
-#include <opencog/util/Config.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/load-file.h>
 
 #include <opencog/persist/gearman/DistSCM.h>
 
@@ -69,10 +67,6 @@ class DistScmUTest :  public CxxTest::TestSuite
 void DistScmUTest::setUp(void)
 {
 	as->clear();
-	config().set("SCM_PRELOAD",
-	             "opencog/atoms/base/core_types.scm");
-	load_scm_files_from_config(*as);
-
 	evl->eval("(setenv \"LTDL_LIBRARY_PATH\" \"" PROJECT_BINARY_DIR
 	         "/opencog/persist/gearman:/usr/local/lib/opencog\")");
 	evl->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm\")");

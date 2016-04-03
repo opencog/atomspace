@@ -20,10 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 #include "../query/test-types.h"
@@ -69,14 +67,10 @@ void SCMUtilsUTest::setUp(void)
 {
 	as = new AtomSpace();
 	evaluator = new SchemeEval(as);
-
-	config().set("SCM_PRELOAD",
-		"opencog/atoms/base/core_types.scm, "
-		"tests/query/test_types.scm, "
-		"opencog/scm/utilities.scm, "
-		"tests/scm/utils-test.scm");
-
-	load_scm_files_from_config(*as);
+	evaluator->eval("(add-to-load-path \"..\")");
+	evaluator->eval("(add-to-load-path \"../../..\")");
+	evaluator->eval("(load-from-path \"tests/query/test_types.scm\")");
+	evaluator->eval("(load-from-path \"tests/scm/utils-test.scm\")");
 }
 
 void SCMUtilsUTest::tearDown(void)

@@ -20,12 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -44,6 +41,9 @@ public:
 
         as = new AtomSpace();
         eval = new SchemeEval(as);
+        eval->eval("(use-modules (opencog exec))");
+        eval->eval("(add-to-load-path \"..\")");
+        eval->eval("(add-to-load-path \"../../..\")");
     }
 
     ~GreaterComputeUTest()
@@ -66,7 +66,6 @@ void GreaterComputeUTest::tearDown(void)
 
 void GreaterComputeUTest::setUp(void)
 {
-    eval->eval("(use-modules (opencog exec))");
 }
 
 #define getarity(hand) LinkCast(hand)->getArity()
@@ -79,8 +78,7 @@ void GreaterComputeUTest::test_computation(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/greater-compute.scm");
-    load_scm_files_from_config(*as);
+    eval->eval("(load-from-path \"tests/query/greater-compute.scm\")");
 
     Handle try_out = eval->eval_h("(threshold)");
 

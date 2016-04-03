@@ -20,10 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -72,11 +70,8 @@ void MultiAtomSpace::setUp(void)
 {
 	main_as = new AtomSpace();
 	evaluator = new SchemeEval(main_as);
-
-	config().set("SCM_PRELOAD",
-		"opencog/atoms/base/core_types.scm");
-
-	load_scm_files_from_config(*main_as);
+	evaluator->eval("(add-to-load-path \"..\")");
+	evaluator->eval("(add-to-load-path \"../../..\")");
 }
 
 void MultiAtomSpace::tearDown(void)
@@ -217,19 +212,10 @@ void MultiAtomSpace::test_load(void)
 	AtomSpace* as1 = new AtomSpace();
 	AtomSpace* as2 = new AtomSpace();
 
-	config().set("SCM_PRELOAD",
-		"opencog/atomspace/core_types.scm, "
-		"opencog/nlp/types/nlp_types.scm, "
-		"opencog/scm/utilities.scm, "
-		"tests/scm/utils-test.scm");
-
-	load_scm_files_from_config(*as1);
-	load_scm_files_from_config(*as2);
-	// load_scm_file(*as1, "tests/scm/utils-test.scm");
-	// load_scm_file(*as2, "tests/scm/utils-test.scm");
-
 	SchemeEval* ev1 = new SchemeEval(as1);
 	SchemeEval* ev2 = new SchemeEval(as2);
+	ev1->eval("(load-from-path \"tests/scm/utils-test.scm\")");
+	ev2->eval("(load-from-path \"tests/scm/utils-test.scm\")");
 
 	// The below is a complicated multi-atom-space version of part of 
 	// the SCMUtilsUTest suite.  Different atoms in different spaces...
@@ -324,9 +310,8 @@ void MultiAtomSpace::test_nest(void)
 	TSM_ASSERT("Expect one link in local atomspace", 1 == locas->get_num_links());
 
 	// The outgoing set should not be copied, but should be the original.
-	LinkPtr lll(LinkCast(hl));
-	TSM_ASSERT("Expect atom a in position 0", ha == lll->getOutgoingAtom(0));
-	TSM_ASSERT("Expect atom b in position 1", hb == lll->getOutgoingAtom(1));
+	TSM_ASSERT("Expect atom a in position 0", ha == hl->getOutgoingAtom(0));
+	TSM_ASSERT("Expect atom b in position 1", hb == hl->getOutgoingAtom(1));
 
 	delete lev;
 	delete locas;
@@ -336,10 +321,10 @@ void MultiAtomSpace::test_nest(void)
 	TSM_ASSERT("Still two nodes in main atomspace", 2 == main_as->get_num_nodes());
 	TSM_ASSERT("Still zero links in main atomspace", 0 == main_as->get_num_links());
 
-	// The pointer lll should still be alive, even though the atomspace
+	// The pointer hl should still be alive, even though the atomspace
 	// is gone.
-	TSM_ASSERT("Still atom a in position 0", ha == lll->getOutgoingAtom(0));
-	TSM_ASSERT("Still atom b in position 1", hb == lll->getOutgoingAtom(1));
+	TSM_ASSERT("Still atom a in position 0", ha == hl->getOutgoingAtom(0));
+	TSM_ASSERT("Still atom b in position 1", hb == hl->getOutgoingAtom(1));
 }
 
 void MultiAtomSpace::test_nest_scm(void)

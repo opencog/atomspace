@@ -20,12 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
 
@@ -49,6 +47,8 @@ public:
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
 		eval->eval("(use-modules (opencog exec) (opencog query))");
+		eval->eval("(add-to-load-path \"..\")");
+		eval->eval("(add-to-load-path \"../../..\")");
 	}
 
 	~GetLinkUTest()
@@ -88,8 +88,7 @@ void GetLinkUTest::test_unary_get(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
-	config().set("SCM_PRELOAD", "tests/query/get-link.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/get-link.scm\")");
 
 	Handle hgnd = eval->eval_h("(cog-satisfying-set is-human)");
 	Handle hans = eval->eval_h(
@@ -111,8 +110,7 @@ void GetLinkUTest::test_binary_get(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
-	config().set("SCM_PRELOAD", "tests/query/get-link.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/get-link.scm\")");
 
 	Handle hgnd = eval->eval_h("(cog-satisfying-set is-something)");
 	Handle hans = eval->eval_h(
@@ -136,8 +134,7 @@ void GetLinkUTest::test_free_bound(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/get-link.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/get-link.scm\")");
 
 	Handle hgnd = eval->eval_h("(cog-satisfying-set is-query)");
 
@@ -159,8 +156,7 @@ void GetLinkUTest::test_eval_clause(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
-	config().set("SCM_PRELOAD", "tests/query/get-link-eval.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/get-link-eval.scm\")");
 
 	Handle hgnd = eval->eval_h("(cog-satisfying-set get)");
 
@@ -188,8 +184,7 @@ void GetLinkUTest::test_disconnected_binary_get(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
-	config().set("SCM_PRELOAD", "tests/query/get-link.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/get-link.scm\")");
 
 	Handle g_take_contain = eval->eval_h("g-take-contain");
 	Handle hgnd = satisfying_set(as, g_take_contain);

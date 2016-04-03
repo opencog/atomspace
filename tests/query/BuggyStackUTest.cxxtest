@@ -20,11 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 #include "test-types.h"
@@ -64,25 +63,21 @@ class BuggyStackUTest :  public CxxTest::TestSuite
  */
 #define an as->add_node
 #define al as->add_link
-#define getarity(hand) LinkCast(hand)->getArity()
-#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
+#define getarity(hand) hand->getArity()
+#define getlink(hand,pos) hand->getOutgoingAtom(pos)
 
 void BuggyStackUTest::setUp(void)
 {
 	as = new AtomSpace();
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(add-to-load-path \"..\")");
+	eval->eval("(add-to-load-path \"../../..\")");
+	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
+	eval->eval("(load-from-path \"tests/query/buggy-stack.scm\")");
 
-	config().set("SCM_PRELOAD",
-      "tests/query/test_types.scm, "
-		"tests/query/buggy-stack.scm");
-
-	load_scm_files_from_config(*as);
-
-#ifdef HAVE_GUILE
 	// Create an implication link that will be tested.
-	SchemeEval* ev = new SchemeEval(as);
-	restrict = ev->apply("impy", Handle::UNDEFINED);
-	delete ev;
-#endif /* HAVE_GUILE */
+	restrict = eval->apply("impy", Handle::UNDEFINED);
+	delete eval;
 }
 
 /*

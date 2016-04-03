@@ -480,7 +480,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
  * variables to values.
  */
 bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
-                              const HandleMap& gnds)
+                                          const HandleMap& gnds)
 {
 	LAZY_LOG_FINE << "Enter eval_sentence CB with top=" << std::endl
 	              << top->toShortString() << std::endl;

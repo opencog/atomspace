@@ -20,11 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 #include "test-types.h"
@@ -47,6 +46,9 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 
 			as = new AtomSpace();
 			eval = new SchemeEval(as);
+			eval->eval("(add-to-load-path \"..\")");
+			eval->eval("(add-to-load-path \"../../..\")");
+			eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 		}
 
 		~EinsteinPuzzle()
@@ -72,15 +74,12 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
  */
 #define an as->add_node
 #define al as->add_link
-#define getarity(hand) LinkCast(hand)->getArity()
-#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
+#define getarity(hand) hand->getArity()
+#define getlink(hand,pos) hand->getOutgoingAtom(pos)
 
 void EinsteinPuzzle::setUp(void)
 {
 	as->clear();
-
-	config().set("SCM_PRELOAD", "tests/query/test_types.scm");
-	load_scm_files_from_config(*as);
 }
 
 /* ========================================================================
@@ -90,10 +89,8 @@ void EinsteinPuzzle::test_trivial_deduct(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD",
-		"tests/query/deduct-trivial.scm, "
-		"tests/query/deduct-rules.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/deduct-trivial.scm\")");
+	eval->eval("(load-from-path \"tests/query/deduct-rules.scm\")");
 
 	// Create an implication link that will be tested.
 	Handle puzzle_rules = eval->apply("is-same-rule", Handle::UNDEFINED);
@@ -124,11 +121,9 @@ void EinsteinPuzzle::test_trivial_keep(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD",
-	             "tests/query/deduct-trivial.scm, "
-	             "tests/query/deduct-rules.scm, "
-	             "tests/query/deduct-keep.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/deduct-trivial.scm\")");
+	eval->eval("(load-from-path \"tests/query/deduct-rules.scm\")");
+	eval->eval("(load-from-path \"tests/query/deduct-keep.scm\")");
 
 	// Create an implication link that will be tested.
 	Handle same_rule = eval->apply("is-same-rule", Handle::UNDEFINED);
@@ -176,10 +171,8 @@ void EinsteinPuzzle::test_full(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD",
-	             "tests/query/deduct-einstein.scm, "
-	             "tests/query/deduct-rules.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/deduct-einstein.scm\")");
+	eval->eval("(load-from-path \"tests/query/deduct-rules.scm\")");
 
 	// Create an implication link that will be tested.
 	Handle same_rule = eval->apply("is-same-rule", Handle::UNDEFINED);

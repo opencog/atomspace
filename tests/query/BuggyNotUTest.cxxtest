@@ -20,11 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 #include "test-types.h"
@@ -35,6 +34,7 @@ class BuggyNot :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *as;
+		SchemeEval* eval;
 
 	public:
 
@@ -44,6 +44,9 @@ class BuggyNot :  public CxxTest::TestSuite
 			logger().set_print_to_stdout_flag(true);
 
 			as = new AtomSpace();
+			eval = new SchemeEval(as);
+			eval->eval("(add-to-load-path \"..\")");
+			eval->eval("(add-to-load-path \"../../..\")");
 		}
 
 		~BuggyNot()
@@ -66,15 +69,13 @@ class BuggyNot :  public CxxTest::TestSuite
  */
 #define an as->addNode
 #define al as->addLink
-#define getarity(hand) LinkCast(hand)->getArity()
-#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
+#define getarity(hand) hand->getArity()
+#define getlink(hand,pos) hand->getOutgoingAtom(pos)
 
 void BuggyNot::setUp(void)
 {
 	as->clear();
-
-	config().set("SCM_PRELOAD", "tests/query/test_types.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 }
 
 /*
@@ -84,11 +85,9 @@ void BuggyNot::test_bugnot(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/buggy-not.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/buggy-not.scm\")");
 
 	// Create an implication link that will be tested.
-	SchemeEval* eval = new SchemeEval(as);
 	Handle same_rule = eval->apply("is-same-rule", Handle::UNDEFINED);
 	Handle trans_rule = eval->apply("transitive-rule", Handle::UNDEFINED);
 	delete eval;

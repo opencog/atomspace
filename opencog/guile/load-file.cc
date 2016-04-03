@@ -66,6 +66,8 @@ int load_scm_file (AtomSpace& as, const std::string& filename)
  * Load scheme file, with the filename specified as a relative path,
  * and the search paths prepended to the relative path.  If the search
  * paths are null, a list of defaults search paths are used.
+ *
+ * XXX FIXME DEPRECATED! -- DO NOT USE IN NEW CODE!
  */
 int load_scm_file_relative (AtomSpace& as, const std::string& filename,
                             std::vector<std::string> search_paths)
@@ -76,7 +78,6 @@ int load_scm_file_relative (AtomSpace& as, const std::string& filename,
         // XXX This is fairly tacky/broken, and needs a better fix.
         for (auto p : DEFAULT_MODULE_PATHS) {
             search_paths.push_back(p);
-            search_paths.push_back(p + "/examples/rule-engine");
             search_paths.push_back(p + "/opencog");
             search_paths.push_back(p + "/build");
             search_paths.push_back(p + "/build/opencog");
@@ -108,6 +109,8 @@ int load_scm_file_relative (AtomSpace& as, const std::string& filename,
 /**
  * Pull the names of scm files out of the config file, the SCM_PRELOAD
  * key, and try to load those, relative to the search paths.
+ *
+ * XXX FIXME DEPRECATED! -- DO NOT USE IN NEW CODE!
  */
 void load_scm_files_from_config(AtomSpace& atomSpace,
                                 std::vector<std::string> search_paths)

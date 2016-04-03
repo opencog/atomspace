@@ -20,12 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -33,33 +30,35 @@ using namespace opencog;
 class GreaterThanUTest: public CxxTest::TestSuite
 {
 private:
-        AtomSpace *as;
-        SchemeEval* eval;
+	AtomSpace *as;
+	SchemeEval* eval;
 
 public:
-    GreaterThanUTest(void)
-    {
-        logger().set_level(Logger::DEBUG);
-        logger().set_print_to_stdout_flag(true);
+	GreaterThanUTest(void)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
 
-        as = new AtomSpace();
-        eval = new SchemeEval(as);
-    }
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+		eval->eval("(add-to-load-path \"..\")");
+		eval->eval("(add-to-load-path \"../../..\")");
+	}
 
-    ~GreaterThanUTest()
-    {
-        delete as;
-        // Erase the log file if no assertions failed.
-        if (!CxxTest::TestTracker::tracker().suiteFailed())
-                std::remove(logger().get_filename().c_str());
-    }
+	~GreaterThanUTest()
+	{
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
 
-    void setUp(void);
-    void tearDown(void);
+	void setUp(void);
+	void tearDown(void);
 
-    void test_numeric_greater(void);
-    void test_scm_greater(void);
-    void test_builtin_greater(void);
+	void test_numeric_greater(void);
+	void test_scm_greater(void);
+	void test_builtin_greater(void);
 };
 
 void GreaterThanUTest::tearDown(void)
@@ -79,80 +78,77 @@ void GreaterThanUTest::setUp(void)
  */
 void GreaterThanUTest::test_numeric_greater(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/greater_than.scm");
-    load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/greater_than.scm\")");
 
-    Handle richer_than_george = eval->eval_h("(richer-than-george)");
-    Handle richer_than_susan = eval->eval_h("(richer-than-susan)");
-    Handle richer_than_obama = eval->eval_h("(richer-than-obama)");
-    Handle richer_than_gates = eval->eval_h("(richer-than-gates)");
+	Handle richer_than_george = eval->eval_h("(richer-than-george)");
+	Handle richer_than_susan = eval->eval_h("(richer-than-susan)");
+	Handle richer_than_obama = eval->eval_h("(richer-than-obama)");
+	Handle richer_than_gates = eval->eval_h("(richer-than-gates)");
 
-    TSM_ASSERT("Failed to load test data", richer_than_george);
-    TSM_ASSERT("Failed to load test data", richer_than_susan);
-    TSM_ASSERT("Failed to load test data", richer_than_obama);
-    TSM_ASSERT("Failed to load test data", richer_than_gates);
+	TSM_ASSERT("Failed to load test data", richer_than_george);
+	TSM_ASSERT("Failed to load test data", richer_than_susan);
+	TSM_ASSERT("Failed to load test data", richer_than_obama);
+	TSM_ASSERT("Failed to load test data", richer_than_gates);
 
-    Handle people_richer_than_george = bindlink(as, richer_than_george);
-    Handle people_richer_than_susan = bindlink(as, richer_than_susan);
-    Handle people_richer_than_obama = bindlink(as, richer_than_obama);
-    Handle people_richer_than_gates = bindlink(as, richer_than_gates);
+	Handle people_richer_than_george = bindlink(as, richer_than_george);
+	Handle people_richer_than_susan = bindlink(as, richer_than_susan);
+	Handle people_richer_than_obama = bindlink(as, richer_than_obama);
+	Handle people_richer_than_gates = bindlink(as, richer_than_gates);
 
-    TSM_ASSERT("Failed to run test", people_richer_than_george);
-    TSM_ASSERT("Failed to run test", people_richer_than_susan);
-    TSM_ASSERT("Failed to run test", people_richer_than_obama);
-    TSM_ASSERT("Failed to run test", people_richer_than_gates);
+	TSM_ASSERT("Failed to run test", people_richer_than_george);
+	TSM_ASSERT("Failed to run test", people_richer_than_susan);
+	TSM_ASSERT("Failed to run test", people_richer_than_obama);
+	TSM_ASSERT("Failed to run test", people_richer_than_gates);
 
-    TS_ASSERT_EQUALS(0, getarity(people_richer_than_gates));
-    TS_ASSERT_EQUALS(1, getarity(people_richer_than_obama));
-    TS_ASSERT_EQUALS(2, getarity(people_richer_than_george));
-    TS_ASSERT_EQUALS(3, getarity(people_richer_than_susan));
+	TS_ASSERT_EQUALS(0, getarity(people_richer_than_gates));
+	TS_ASSERT_EQUALS(1, getarity(people_richer_than_obama));
+	TS_ASSERT_EQUALS(2, getarity(people_richer_than_george));
+	TS_ASSERT_EQUALS(3, getarity(people_richer_than_susan));
 }
 
 // Same test as above, but using a scheme func for the compares
 void GreaterThanUTest::test_scm_greater(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/greater_than.scm");
-    load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/greater_than.scm\")");
 
-    Handle richer_than_george = eval->eval_h("(scm-than-george)");
-    Handle richer_than_susan = eval->eval_h("(scm-than-susan)");
-    Handle richer_than_obama = eval->eval_h("(scm-than-obama)");
-    Handle richer_than_gates = eval->eval_h("(scm-than-gates)");
+	Handle richer_than_george = eval->eval_h("(scm-than-george)");
+	Handle richer_than_susan = eval->eval_h("(scm-than-susan)");
+	Handle richer_than_obama = eval->eval_h("(scm-than-obama)");
+	Handle richer_than_gates = eval->eval_h("(scm-than-gates)");
 
-    Handle people_richer_than_george = bindlink(as, richer_than_george);
-    Handle people_richer_than_susan = bindlink(as, richer_than_susan);
-    Handle people_richer_than_obama = bindlink(as, richer_than_obama);
-    Handle people_richer_than_gates = bindlink(as, richer_than_gates);
+	Handle people_richer_than_george = bindlink(as, richer_than_george);
+	Handle people_richer_than_susan = bindlink(as, richer_than_susan);
+	Handle people_richer_than_obama = bindlink(as, richer_than_obama);
+	Handle people_richer_than_gates = bindlink(as, richer_than_gates);
 
-    TS_ASSERT_EQUALS(0, getarity(people_richer_than_gates));
-    TS_ASSERT_EQUALS(1, getarity(people_richer_than_obama));
-    TS_ASSERT_EQUALS(2, getarity(people_richer_than_george));
-    TS_ASSERT_EQUALS(3, getarity(people_richer_than_susan));
+	TS_ASSERT_EQUALS(0, getarity(people_richer_than_gates));
+	TS_ASSERT_EQUALS(1, getarity(people_richer_than_obama));
+	TS_ASSERT_EQUALS(2, getarity(people_richer_than_george));
+	TS_ASSERT_EQUALS(3, getarity(people_richer_than_susan));
 }
 // Same test as above, but using the built-in GreaterThanLink
 void GreaterThanUTest::test_builtin_greater(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/greater_than.scm");
-    load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/greater_than.scm\")");
 
-    Handle richer_than_george = eval->eval_h("(builtin-than-george)");
-    Handle richer_than_susan = eval->eval_h("(builtin-than-susan)");
-    Handle richer_than_obama = eval->eval_h("(builtin-than-obama)");
-    Handle richer_than_gates = eval->eval_h("(builtin-than-gates)");
+	Handle richer_than_george = eval->eval_h("(builtin-than-george)");
+	Handle richer_than_susan = eval->eval_h("(builtin-than-susan)");
+	Handle richer_than_obama = eval->eval_h("(builtin-than-obama)");
+	Handle richer_than_gates = eval->eval_h("(builtin-than-gates)");
 
-    Handle people_richer_than_george = bindlink(as, richer_than_george);
-    Handle people_richer_than_susan = bindlink(as, richer_than_susan);
-    Handle people_richer_than_obama = bindlink(as, richer_than_obama);
-    Handle people_richer_than_gates = bindlink(as, richer_than_gates);
+	Handle people_richer_than_george = bindlink(as, richer_than_george);
+	Handle people_richer_than_susan = bindlink(as, richer_than_susan);
+	Handle people_richer_than_obama = bindlink(as, richer_than_obama);
+	Handle people_richer_than_gates = bindlink(as, richer_than_gates);
 
-    TS_ASSERT_EQUALS(0, getarity(people_richer_than_gates));
-    TS_ASSERT_EQUALS(1, getarity(people_richer_than_obama));
-    TS_ASSERT_EQUALS(2, getarity(people_richer_than_george));
-    TS_ASSERT_EQUALS(3, getarity(people_richer_than_susan));
+	TS_ASSERT_EQUALS(0, getarity(people_richer_than_gates));
+	TS_ASSERT_EQUALS(1, getarity(people_richer_than_obama));
+	TS_ASSERT_EQUALS(2, getarity(people_richer_than_george));
+	TS_ASSERT_EQUALS(3, getarity(people_richer_than_susan));
 }

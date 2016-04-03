@@ -138,7 +138,25 @@ struct Pattern
 	ConnectMap       connectivity_map;     // setup by make_connectivity_map()
 
 	ConnectTermMap   connected_terms_map;  // setup by make_term_trees()
+
+	std::string to_string() const
+	{
+		std::stringstream ss;
+		if (not constants.empty())
+			ss << "constants:" << std::endl << hs_to_string(constants);
+		if (not mandatory.empty())
+			ss << "mandatory:" << std::endl << hs_to_string(mandatory);
+		if (not optionals.empty())
+			ss << "optionals:" << std::endl << ohs_to_string(optionals);
+		return ss.str();
+	}
 };
+
+// For gdb
+static std::string oc_to_string(const Pattern& pattern)
+{
+	return pattern.to_string();
+}
 
 /** @}*/
 } // namespace opencog

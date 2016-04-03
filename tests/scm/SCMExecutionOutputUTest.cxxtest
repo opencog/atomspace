@@ -24,12 +24,10 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/Config.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/ExecSCM.h>
@@ -49,10 +47,6 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
-
-		config().set("SCM_PRELOAD", "opencog/atoms/base/core_types.scm, "
-		                            "opencog/scm/opencog/exec.scm");
-		opencog_exec_init();
 	}
 
 	~SCMExecutionOutputUTest()
@@ -84,8 +78,8 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 void SCMExecutionOutputUTest::setUp(void)
 {
 	as = new AtomSpace();
-	load_scm_files_from_config(*as);
 	eval = new SchemeEval(as);
+	eval->eval("(use-modules (opencog exec))");
 }
 
 void SCMExecutionOutputUTest::tearDown(void)

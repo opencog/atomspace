@@ -61,8 +61,8 @@ public:
      * Return list of matching results found by the pattern matcher
      * @return
      */
-	HandleMapSeq get_var_list();
-	HandleMapSeq get_pred_list();
+	const HandleMapSeq& get_var_list() const;
+	const HandleMapSeq& get_pred_list() const;
 };
 
 } // ~namespace opencog

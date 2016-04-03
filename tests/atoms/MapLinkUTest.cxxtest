@@ -20,12 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -33,8 +29,8 @@ using namespace opencog;
 class MapLinkUTest: public CxxTest::TestSuite
 {
 private:
-        AtomSpace *as;
-        SchemeEval* eval;
+    AtomSpace *as;
+    SchemeEval* eval;
 
 public:
     MapLinkUTest(void)
@@ -44,6 +40,9 @@ public:
 
         as = new AtomSpace();
         eval = new SchemeEval(as);
+        eval->eval("(add-to-load-path \"..\")");
+        eval->eval("(add-to-load-path \"../../..\")");
+        eval->eval("(use-modules (opencog exec))");
     }
 
     ~MapLinkUTest()
@@ -52,7 +51,7 @@ public:
         delete as;
         // Erase the log file if no assertions failed.
         if (!CxxTest::TestTracker::tracker().suiteFailed())
-                std::remove(logger().get_filename().c_str());
+            std::remove(logger().get_filename().c_str());
     }
 
     void setUp(void);
@@ -72,12 +71,6 @@ void MapLinkUTest::tearDown(void)
 void MapLinkUTest::setUp(void)
 {
     as->clear();
-    config().set("SCM_PRELOAD",
-        "opencog/atoms/base/core_types.scm, "
-        "opencog/scm/utilities.scm, "
-        "opencog/scm/opencog/exec.scm");
-
-    load_scm_files_from_config(*as);
 }
 
 /*
@@ -87,8 +80,7 @@ void MapLinkUTest::test_singleton(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/atoms/maplink.scm");
-    load_scm_files_from_config(*as);
+    eval->eval("(load-from-path \"tests/atoms/maplink.scm\")");
 
     Handle result = eval->eval_h("(cog-execute! single)");
 
@@ -138,8 +130,7 @@ void MapLinkUTest::test_signature(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/atoms/maplink.scm");
-    load_scm_files_from_config(*as);
+    eval->eval("(load-from-path \"tests/atoms/maplink.scm\")");
 
     Handle result = eval->eval_h("(cog-execute! single-signature)");
 
@@ -156,8 +147,7 @@ void MapLinkUTest::test_double_set(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/atoms/maplink.scm");
-    load_scm_files_from_config(*as);
+    eval->eval("(load-from-path \"tests/atoms/maplink.scm\")");
 
     Handle result = eval->eval_h("(cog-execute! double-num-set)");
 
@@ -187,8 +177,7 @@ void MapLinkUTest::test_implication(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/atoms/maplink.scm");
-    load_scm_files_from_config(*as);
+    eval->eval("(load-from-path \"tests/atoms/maplink.scm\")");
 
     Handle result = eval->eval_h("(cog-execute! imply-map)");
 
