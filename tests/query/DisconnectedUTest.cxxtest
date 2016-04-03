@@ -124,6 +124,7 @@ void Disconnected::test_variables(void)
 
 	eval->eval("(load-from-path \"tests/query/disco-vars.scm\")");
 
+#if DO_NOT_TEST_THIS_IS_NOW_LEGAL
 	// We expect to catch an error here. ------------------------------
 	bool caught = false;
 	try
@@ -137,9 +138,10 @@ void Disconnected::test_variables(void)
 	}
 	logger().info("Caught exception? %d\n", caught);
 	TSM_ASSERT("Failed to catch expected exception", caught);
+#endif
 
 	// We expect to catch an error here. ------------------------------
-	caught = false;
+	bool caught = false;
 	try
 	{
 		eval->eval_h("(Ba)");

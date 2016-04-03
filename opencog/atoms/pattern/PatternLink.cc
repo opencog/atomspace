@@ -433,11 +433,11 @@ void PatternLink::validate_clauses(OrderedHandleSet& vars,
                                    HandleSeq& constants)
 
 {
-	// The Fuzzy matcher does some strange things: it declares no
-	// vars at all, only clauses, and then uses the pattern matcher
-	// to automatically explore nearby atoms. As a result, all of
-	// its clauses are "constant", and we allow this special case.
-	// Need to review the rationality of this design...
+	// XXX FIXME The AIML ruleset includes BindLinks that have no
+	// variables in them, and the clauses are all constant.  This
+	// is kind of uncomfortably weird.  Does this really happen?
+	// There is a unit test for this - arcana-const.scm Should
+	// this unit test be disabled?
 	if (0 < vars.size())
 	{
 		// Make sure that the user did not pass in bogus clauses.
@@ -671,8 +671,10 @@ void PatternLink::unbundle_virtual(const OrderedHandleSet& vars,
 /* ================================================================= */
 
 /// Add dummy clauses for patterns that would otherwise not have any
-/// non-evaluatable clauses.  An example of such is
+/// non-evaluatable clauses.  One example of such is
+///
 ///    (GetLink (GreaterThan (Number 42) (Variable $x)))
+///
 /// The only clause here is the GreaterThan, and its virtual
 /// (evaluatable) so we know that in general it cannot be found in
 /// the atomspace.   Due to the pattern-matcher design, matching will
@@ -683,26 +685,59 @@ void PatternLink::unbundle_virtual(const OrderedHandleSet& vars,
 /// search results, for any variable that is not in an AbsentLink.
 /// (Always adding can harm performance, so we don't do it unless we
 /// absolutely have to.)
-void PatternLink::add_dummies()
+///
+/// Another example is
+///
+///    (GetLink (Equal (Variable "$whole") (Implication ...)))
+///
+/// where the ImplicationLink may itself contain more variables.
+/// If the ImplicationLink is suitably simple, it can be added
+/// added s a ordinary clause, and searched for as if it was "present".
+/// XXX FIXME: the code here assumes that the situation is indeed
+/// simple: more complex cases are not handled correctly.  Doing this
+/// correctly would require iteratating again, and examining the
+/// contents of the left and right side of the EqualLink... ugh.
+///
+bool PatternLink::add_dummies()
 {
-	// XXX almost exactly the same as 0 < _fixed.size() ... right?
-	bool all_clauses_are_evaluatable = true;
+	// The below is almost but not quite the same as
+	// if (0 < _fixed.size()) return; because fixe can be
+	// non-zero, if the virtual term has only one variable
+	// in it.
 	for (const Handle& cl : _pat.clauses)
 	{
-		// if (0 < _pat.evaluatable_holders.count(cl)) continue;
-		if (0 < _pat.evaluatable_terms.count(cl)) continue;
-		all_clauses_are_evaluatable = false;
-		break;
+		// if (0 == _pat.evaluatable_holders.count(cl)) return;
+		if (0 == _pat.evaluatable_terms.count(cl)) return false;
 	}
 
-	if (not all_clauses_are_evaluatable) return;
-
-	for (const Handle& v: _varlist.varseq)
+	for (const Handle& t : _pat.evaluatable_terms)
 	{
-		_pat.clauses.emplace_back(v);
-		_pat.cnf_clauses.emplace_back(v);
-		_pat.mandatory.emplace_back(v);
+		Type tt = t->getType();
+		if (EQUAL_LINK == tt or
+		    GREATER_THAN_LINK == tt or
+		    IDENTICAL_LINK == tt)
+		{
+			const Handle& left = t->getOutgoingAtom(0);
+			if (any_unquoted_in_tree(left, _varlist.varset))
+			{
+				_pat.clauses.emplace_back(left);
+				_pat.cnf_clauses.emplace_back(left);
+				_pat.mandatory.emplace_back(left);
+				_fixed.emplace_back(left);
+			}
+
+			const Handle& right = t->getOutgoingAtom(1);
+			if (any_unquoted_in_tree(right, _varlist.varset))
+			{
+				_pat.clauses.emplace_back(right);
+				_pat.cnf_clauses.emplace_back(right);
+				_pat.mandatory.emplace_back(right);
+				_fixed.emplace_back(right);
+			}
+		}
 	}
+
+	return true;
 }
 
 /* ================================================================= */

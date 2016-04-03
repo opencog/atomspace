@@ -1,7 +1,7 @@
 /*
  * tests/query/ArcanaUTest.cxxtest
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015,2016 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -62,6 +62,7 @@ public:
 	void test_repeats(void);
 	void test_const(void);
 	void test_dummy(void);
+	void test_bigger_dummy(void);
 	void test_numeric(void);
 };
 
@@ -75,7 +76,7 @@ void ArcanaUTest::setUp(void)
 	as->clear();
 }
 
-#define getarity(hand) LinkCast(hand)->getArity()
+#define getarity(hand) hand->getArity()
 
 /*
  * Miscellaneous Arcana
@@ -96,8 +97,7 @@ void ArcanaUTest::test_repeats(void)
 	// Either one or two solutions are acceptable, as long as the
 	// two are identical. One solution is prefered, but seems
 	// not possible with the current algo.
-	LinkPtr lll(LinkCast(diff));
-	const HandleSeq& oset = lll->getOutgoingSet();
+	const HandleSeq& oset = diff->getOutgoingSet();
 	size_t nsol = oset.size();
 	bool pass = false;
 	if (1 == nsol) pass = true;
@@ -143,8 +143,7 @@ void ArcanaUTest::test_const(void)
 	printf("radio=%s\n", answer->toString().c_str());
 
 	TS_ASSERT_EQUALS(1, getarity(answer));
-	LinkPtr lp = LinkCast(answer);
-	Handle devel = lp->getOutgoingAtom(0);
+	Handle devel = answer->getOutgoingAtom(0);
 
 	TS_ASSERT_EQUALS(marconi, devel);
 
@@ -176,11 +175,34 @@ void ArcanaUTest::test_dummy(void)
 
 	TS_ASSERT_EQUALS(SET_LINK, answer->getType());
 	TS_ASSERT_EQUALS(1, getarity(answer));
-	LinkPtr lp = LinkCast(answer);
-	Handle num = lp->getOutgoingAtom(0);
+	Handle num = answer->getOutgoingAtom(0);
 
 	Handle fourtwo = eval->eval_h("(Number 42)");
 	TS_ASSERT_EQUALS(num, fourtwo);
+
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Miscellaneous Arcana
+ * This one tests addition of complicated dummy terms.
+ */
+void ArcanaUTest::test_bigger_dummy(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/arcana-bigger-dummy.scm\")");
+
+	// ----
+	Handle answer = eval->eval_h("(cog-execute! bigger-dummy)");
+	printf("dummy=%s\n", answer->toString().c_str());
+
+	TS_ASSERT_EQUALS(SET_LINK, answer->getType());
+	TS_ASSERT_EQUALS(1, getarity(answer));
+
+	Handle stfu = eval->eval_h("stfu");
+	TS_ASSERT_EQUALS(answer, stfu);
 
 	// ----
 	logger().debug("END TEST: %s", __FUNCTION__);

@@ -426,5 +426,10 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	                                       comp_var_gnds, comp_term_gnds);
 }
 
-/* ===================== END OF FILE ===================== */
+// For gdb
+std::string oc_to_string(const Pattern& pattern)
+{
+   return pattern.to_string();
+}
 
+/* ===================== END OF FILE ===================== */

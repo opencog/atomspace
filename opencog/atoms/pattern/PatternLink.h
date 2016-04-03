@@ -112,7 +112,7 @@ protected:
 	                      HandleSeq& virtual_clauses,
 	                      OrderedHandleSet& black_clauses);
 
-	void add_dummies();
+	bool add_dummies();
 
 	void trace_connectives(const std::set<Type>&,
 	                       const HandleSeq& clauses,

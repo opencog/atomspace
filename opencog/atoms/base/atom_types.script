@@ -58,9 +58,10 @@ EXTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 
 // Evaluatable link. Any link type which might be evaluated, resulting
-// in a truth-value, should inherit from this type.  It is a mixin-type,
+// in a truth-value, should inherit from this type.  This is a mixin-type,
 // it does nothing by itself, but is used to identify boolean-ish,
-// probabilisitic-TV-valued link types.
+// probabilisitic-TV-valued link types, so that they can be handled
+// properly.
 EVALUATABLE_LINK <- LINK
 
 // Boolean set operations, logical constants.
@@ -244,6 +245,13 @@ PATTERN_LINK <- SCOPE_LINK         // A pattern encapsulated in a Link.
 GET_LINK <- PATTERN_LINK           // Finds all groundings, return atoms
 SATISFACTION_LINK <- PATTERN_LINK,EVALUATABLE_LINK  // Finds all groundings, return TV
 BIND_LINK <- GET_LINK              // Finds all groundings and executes
+
+// Adjoints to the GetLink and BindLink. They are "adjoint" in the sense
+// that the roles of the pattern and the grounding are reversed: given a
+// grounding, the collection of patterns that are grounded by it can be
+// searched-for.
+DUAL_GET_LINK <- PATTERN_LINK
+DUAL_BIND_LINK <- DUAL_GET_LINK
 
 // ==============================================================
 // Types and type constructors.

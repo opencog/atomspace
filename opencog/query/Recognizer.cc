@@ -43,7 +43,6 @@ namespace opencog {
  * The file /examples/aiml/recog.scm provides a very simple example.
  * The implementation here is very minimalistic, and does many things
  * wrong:
- * -- it fails to identify the actual GetLink/BindLink that was matched.
  * -- it fails to perform any type-checking to make sure the variable
  *    constraints are satisfied.
  * -- AIML wants a left-to-right traversal, this does an omni-

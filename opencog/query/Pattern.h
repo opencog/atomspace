@@ -153,10 +153,7 @@ struct Pattern
 };
 
 // For gdb
-static std::string oc_to_string(const Pattern& pattern)
-{
-	return pattern.to_string();
-}
+std::string oc_to_string(const Pattern&);
 
 /** @}*/
 } // namespace opencog
