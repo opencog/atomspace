@@ -761,7 +761,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 			if (prev != _pattern) { prev = _pattern; count = 0; }
 			else {
 				count++;
-				if (5 < count)
+				if (100 < count)
 					throw RuntimeException(TRACE_INFO,
 						"Infinite Loop detected! Recursed %u times!", count);
 			}
