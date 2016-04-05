@@ -34,18 +34,18 @@
 
 using namespace opencog;
 
-Rule::Rule(Handle rule)
+Rule::Rule(const Handle& rule)
 {
 	init(rule);
 }
 
-Rule::Rule(Handle rule_name, Handle rbs)
+Rule::Rule(const Handle& rule_name, const Handle& rbs)
 {
 	AtomSpace* as = rule_name->getAtomSpace();
 	init(as->get_link(MEMBER_LINK, rule_name, rbs));
 }
 
-void Rule::init(Handle rule)
+void Rule::init(const Handle& rule)
 {
 	if (rule == Handle::UNDEFINED)
 		rule_handle_ = Handle::UNDEFINED;
@@ -101,7 +101,7 @@ const string& Rule::get_name() const
 	return name_;
 }
 
-void Rule::set_handle(Handle h)
+void Rule::set_handle(const Handle& h)
 {
 	rule_handle_ = h;
 }
@@ -115,18 +115,33 @@ Handle Rule::get_alias() const
 {
 	return rule_alias_;
 }
+
 /**
  * Get the typed variable list of the Rule.
  *
  * @return the VariableList or the lone VariableNode
  */
-Handle Rule::get_vardecl() const
+Handle Rule::get_forward_vardecl() const
 {
 	// if the rule's handle has not been set yet
-	if (rule_handle_ == Handle::UNDEFINED)
+	if (forward_rule_handle_ == Handle::UNDEFINED)
 		return Handle::UNDEFINED;
 
-	return rule_handle_->getOutgoingAtom(0);
+	return forward_rule_handle_->getOutgoingAtom(0);
+}
+
+/**
+ * Get the typed variable list of the Rule.
+ *
+ * @return the VariableList or the lone VariableNode
+ */
+Handle Rule::get_backward_vardecl() const
+{
+	// if the rule's handle has not been set yet
+	if (backward_rule_handle_ == Handle::UNDEFINED)
+		return Handle::UNDEFINED;
+
+	return backward_rule_handle_->getOutgoingAtom(0);
 }
 
 /**
@@ -134,7 +149,7 @@ Handle Rule::get_vardecl() const
  *
  * @return the Handle of the implicant
  */
-Handle Rule::get_implicant() const
+Handle Rule::get_forward_implicant() const
 {
 	// if the rule's handle has not been set yet
 	if (rule_handle_ == Handle::UNDEFINED)
@@ -167,11 +182,11 @@ HandleSeq Rule::get_implicant_seq() const
     return hs;
 }
 /**
- * Get the implicand (output) of the rule defined in a BindLink.
+ * Get the conclusion (output) of the rule.  defined in a BindLink.
  *
  * @return the Handle of the implicand
  */
-Handle Rule::get_implicand() const
+Handle Rule::get_conclusion() const
 {
 	// if the rule's handle has not been set yet
 	if (rule_handle_ == Handle::UNDEFINED)
@@ -249,7 +264,8 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
 {
 	if (rule_handle_ == Handle::UNDEFINED)
 		throw InvalidParamException(TRACE_INFO,
-		                            "Attempted standardized-apart on invalid Rule");
+		                            "Attempted standardized-apart on "
+		                            "invalid Rule");
 
 	// clone the Rule
 	Rule st_ver = *this;
@@ -291,7 +307,8 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 		for (auto ho : old_outgoing)
 			new_outgoing.push_back(standardize_helper(as, ho, dict));
 
-		return as->add_atom(createLink(h->getType(), new_outgoing, h->getTruthValue()));
+		return as->add_atom(createLink(h->getType(), new_outgoing,
+		                               h->getTruthValue()));
 	}
 
 	// normal node does not need to be changed
@@ -303,8 +320,10 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 	// want to generate a completely unique variable
 	if (dict.count(h) == 0)
 	{
-		std::string new_name = h->getName() + "-" + to_string(boost::uuids::random_generator()());
-		Handle hcpy = as->add_atom(createNode(h->getType(), new_name, h->getTruthValue()));
+		std::string new_name = h->getName() + "-"
+			+ to_string(boost::uuids::random_generator()());
+		Handle hcpy = as->add_atom(createNode(h->getType(), new_name,
+		                                      h->getTruthValue()));
 
 		dict[h] = hcpy;
 
@@ -316,7 +335,8 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 		return dict[h];
 
 	std::string new_name = h->getName() + "-" + name_;
-	Handle hcpy = as->add_atom(createNode(h->getType(), new_name, h->getTruthValue()));
+	Handle hcpy = as->add_atom(createNode(h->getType(), new_name,
+	                                      h->getTruthValue()));
 
 	dict[h] = hcpy;
 
