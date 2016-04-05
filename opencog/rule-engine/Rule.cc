@@ -48,7 +48,7 @@ Rule::Rule(const Handle& rule_name, const Handle& rbs)
 void Rule::init(const Handle& rule)
 {
 	if (rule == Handle::UNDEFINED)
-		rule_handle_ = Handle::UNDEFINED;
+		forward_rule_handle_ = Handle::UNDEFINED;
 	else
 	{
 		if (not classserver().isA(rule->getType(), MEMBER_LINK))
@@ -59,7 +59,7 @@ void Rule::init(const Handle& rule)
 		rule_alias_ = rule->getOutgoingAtom(0);
 		Handle rbs = rule->getOutgoingAtom(1);
 
-		rule_handle_ = DefineLink::get_definition(rule_alias_);
+		forward_rule_handle_ = DefineLink::get_definition(rule_alias_);
 		name_ = rule_alias_->getName();
 		category_ = rbs->getName();
 		weight_ = rule->getTruthValue()->getMean();
@@ -103,12 +103,12 @@ const string& Rule::get_name() const
 
 void Rule::set_handle(const Handle& h)
 {
-	rule_handle_ = h;
+	forward_rule_handle_ = h;
 }
 
 Handle Rule::get_handle() const
 {
-	return rule_handle_;
+	return forward_rule_handle_;
 }
 
 Handle Rule::get_alias() const
@@ -152,10 +152,10 @@ Handle Rule::get_backward_vardecl() const
 Handle Rule::get_forward_implicant() const
 {
 	// if the rule's handle has not been set yet
-	if (rule_handle_ == Handle::UNDEFINED)
+	if (forward_rule_handle_ == Handle::UNDEFINED)
 		return Handle::UNDEFINED;
 
-	return BindLinkCast(rule_handle_)->get_body();
+	return BindLinkCast(forward_rule_handle_)->get_body();
 }
 
 /**
@@ -164,13 +164,13 @@ Handle Rule::get_forward_implicant() const
  *
  * @return HandleSeq of members of the implicant
  */
-HandleSeq Rule::get_implicant_seq() const
+HandleSeq Rule::get_premises(const Handle& conclusion) const
 {
 	// if the rule's handle has not been set yet
-	if (rule_handle_ == Handle::UNDEFINED)
+	if (forward_rule_handle_ == Handle::UNDEFINED)
 		return HandleSeq();
 
-    Handle implicant = get_implicant();
+    Handle implicant = get_forward_implicant();
     Type t = implicant->getType();
     HandleSeq hs;
 
@@ -189,10 +189,10 @@ HandleSeq Rule::get_implicant_seq() const
 Handle Rule::get_conclusion() const
 {
 	// if the rule's handle has not been set yet
-	if (rule_handle_ == Handle::UNDEFINED)
+	if (forward_rule_handle_ == Handle::UNDEFINED)
 		return Handle::UNDEFINED;
 
-	return BindLinkCast(rule_handle_)->get_implicand();
+	return BindLinkCast(forward_rule_handle_)->get_implicand();
 }
 
 /**
@@ -203,13 +203,13 @@ Handle Rule::get_conclusion() const
  *
  * @return the HandleSeq of the implicand
  */
-HandleSeq Rule::get_implicand_seq() const
+HandleSeq Rule::get_conclusion_seq() const
 {
 	// if the rule's handle has not been set yet
-	if (rule_handle_ == Handle::UNDEFINED)
+	if (forward_rule_handle_ == Handle::UNDEFINED)
 		return HandleSeq();
 
-	Handle implicand = BindLinkCast(rule_handle_)->get_implicand();
+	Handle implicand = BindLinkCast(forward_rule_handle_)->get_implicand();
 
 	std::queue<Handle> pre_output;
 	HandleSeq final_output;
@@ -262,7 +262,7 @@ void Rule::set_weight(float p)
  */
 Rule Rule::gen_standardize_apart(AtomSpace* as)
 {
-	if (rule_handle_ == Handle::UNDEFINED)
+	if (forward_rule_handle_ == Handle::UNDEFINED)
 		throw InvalidParamException(TRACE_INFO,
 		                            "Attempted standardized-apart on "
 		                            "invalid Rule");
@@ -271,7 +271,7 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
 	Rule st_ver = *this;
 	HandleMap dict;
 
-	Handle vdecl = get_vardecl();
+	Handle vdecl = get_forward_vardecl();
 	OrderedHandleSet varset;
 
 	if (VariableListCast(vdecl))
@@ -282,7 +282,7 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
 	for (auto& h : varset)
 		dict[h] = Handle::UNDEFINED;
 
-	Handle st_bindlink = standardize_helper(as, rule_handle_, dict);
+	Handle st_bindlink = standardize_helper(as, forward_rule_handle_, dict);
 	st_ver.set_handle(st_bindlink);
 
 	return st_ver;

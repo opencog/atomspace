@@ -124,7 +124,7 @@ public:
 	Rule(const Handle& rule);
 	Rule(const Handle& rule_alias, const Handle& rbs);
 
-	void init(Handle rule);
+	void init(const Handle& rule);
 	
 	// Comparison
 	bool operator==(const Rule& r) const {
@@ -160,11 +160,16 @@ public:
 	 */
 	HandleSeq get_premises(const Handle& conclusion = Handle::UNDEFINED) const;
 	Handle get_conclusion() const;
-	HandleSeq get_conclusion_seq() const; float get_weight() const;
+	HandleSeq get_conclusion_seq() const;
+	float get_weight() const;
 
 	Rule gen_standardize_apart(AtomSpace* as);
 
 private:
+	// // Rule handle, a BindLink or a ListLink of forward and backward rule
+	// Maybe not useful
+	// Handle rule_handle_;
+
 	// Forward rule handle, typically a BindLink
 	Handle forward_rule_handle_;
 

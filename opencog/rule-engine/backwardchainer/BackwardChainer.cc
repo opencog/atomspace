@@ -300,7 +300,7 @@ void BackwardChainer::process_target(Target& target)
 		target.store_step(selected_rule, { hrule_implicant_reverse_grounded });
 		_targets_set.emplace(hrule_implicant_reverse_grounded,
 		                     gen_sub_varlist(hrule_implicant_reverse_grounded,
-		                                     standardized_rule.get_vardecl(),
+		                                     standardized_rule.get_forward_vardecl(),
 		                                     additional_free_var));
 		return;
 	}
@@ -323,7 +323,7 @@ void BackwardChainer::process_target(Target& target)
 		// Adding to _garbage_superspace because the mapping are from within
 		// the garbage space.
 		Handle output_grounded =
-			garbage_substitute(standardized_rule.get_implicand(),
+			garbage_substitute(standardized_rule.get_conclusion(),
 			                   implicand_mapping);
 		LAZY_BC_LOG_DEBUG << "Output reverse grounded step 1 as:" << std::endl
 		                  << output_grounded->toShortString();
@@ -332,7 +332,7 @@ void BackwardChainer::process_target(Target& target)
 		                  << output_grounded->toShortString();
 
 		HandleSeq output_grounded_seq;
-		for (const auto& h : standardized_rule.get_implicand_seq())
+		for (const auto& h : standardized_rule.get_conclusion_seq())
 			output_grounded_seq.push_back(
 				garbage_substitute(garbage_substitute(h, implicand_mapping), vm));
 
@@ -573,8 +573,8 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
                                          Handle& hrule_implicant_reverse_grounded,
                                          HandleMapSeq& premises_vmap_list)
 {
-	Handle hrule_implicant = standardized_rule.get_implicant();
-	Handle hrule_vardecl = standardized_rule.get_vardecl();
+	Handle hrule_implicant = standardized_rule.get_forward_implicant();
+	Handle hrule_vardecl = standardized_rule.get_forward_vardecl();
 
 	// Reverse ground the implicant with the grounding we found from
 	// unifying the implicand
@@ -881,8 +881,8 @@ bool BackwardChainer::select_rule(const Target& target,
 		selected_rule = rules[index];
 		standardized_rule = selected_rule.gen_standardize_apart(&_garbage_superspace);
 
-		Handle hrule_vardecl = standardized_rule.get_vardecl();
-		HandleSeq output = standardized_rule.get_implicand_seq();
+		Handle hrule_vardecl = standardized_rule.get_forward_vardecl();
+		HandleSeq output = standardized_rule.get_conclusion_seq();
 
 		all_implicand_to_target_mappings.clear();
 
