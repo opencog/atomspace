@@ -258,8 +258,7 @@ Rule* ForwardChainer::choose_rule(const Handle& hsource)
                          temp->get_name().c_str());
 
         bool unified = false;
-        HandleSeq hs = temp->get_conclusion_seq();
-        for (Handle premise_pat : hs) {
+        for (Handle premise_pat : temp->get_premises()) {
             if (unify(hsource, premise_pat, temp)) {
                 rule = temp;
                 unified = true;
