@@ -323,7 +323,7 @@ void BackwardChainer::process_target(Target& target)
 		// Adding to _garbage_superspace because the mapping are from within
 		// the garbage space.
 		Handle output_grounded =
-			garbage_substitute(standardized_rule.get_conclusion(),
+			garbage_substitute(standardized_rule.get_forward_conclusion(),
 			                   implicand_mapping);
 		LAZY_BC_LOG_DEBUG << "Output reverse grounded step 1 as:" << std::endl
 		                  << output_grounded->toShortString();

@@ -159,7 +159,7 @@ public:
 	 * computed based on the backward rule.
 	 */
 	HandleSeq get_premises(const Handle& conclusion = Handle::UNDEFINED) const;
-	Handle get_conclusion() const;
+	Handle get_forward_conclusion() const;
 	HandleSeq get_conclusion_seq() const;
 	float get_weight() const;
 

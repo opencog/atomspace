@@ -197,7 +197,7 @@ HandleSeq Rule::get_premises(const Handle& conclusion) const
  *
  * @return the Handle of the implicand
  */
-Handle Rule::get_conclusion() const
+Handle Rule::get_forward_conclusion() const
 {
 	// if the rule's handle has not been set yet
 	if (forward_rule_handle_ == Handle::UNDEFINED)
