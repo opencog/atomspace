@@ -159,7 +159,17 @@ public:
 	 * computed based on the backward rule.
 	 */
 	HandleSeq get_premises(const Handle& conclusion = Handle::UNDEFINED) const;
+
+	/**
+	 * Return the conclusion on the forward rule. Used for applying a
+	 * forward step.
+	 */
 	Handle get_forward_conclusion() const;
+
+	/**
+	 * Return the list of conclusion patterns. Used for finding out is
+	 * the rule matches a certain target.
+	 */
 	HandleSeq get_conclusion_seq() const;
 	float get_weight() const;
 
