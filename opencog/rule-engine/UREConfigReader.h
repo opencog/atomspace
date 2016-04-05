@@ -93,7 +93,7 @@ private:
 		const Rule& get_rule(const Handle& h) const
 		{
 			for (const auto& rule : rules) {
-				if (rule.get_handle() == h)
+				if (rule.get_forward_handle() == h)
 					return rule;
 			}
 

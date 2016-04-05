@@ -252,7 +252,7 @@ void BackwardChainer::process_target(Target& target)
 
 	bc_logger().debug("Selected rule %s", selected_rule.get_name().c_str());
 	LAZY_BC_LOG_DEBUG << "Standardized rule:" << std::endl
-	                  << standardized_rule.get_handle()->toShortString();
+	                  << standardized_rule.get_forward_handle()->toShortString();
 	bc_logger().debug("Found %d implicand's output unifiable",
 	                  all_implicand_to_target_mappings.size());
 
@@ -368,6 +368,9 @@ void BackwardChainer::process_target(Target& target)
 			// apply it by using the mapping to ground the target, and add
 			// it to _as since this is not garbage; this should generate
 			// all the outputs of the rule, and execute any evaluatable
+			//
+			// In other words apply forward chaining for that
+			// grounded conclusion.
 			//
 			// XXX TODO the TV of the original "Variable Fullfillment" target
 			// need to be changed here... right?
@@ -503,7 +506,8 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
 			// don't want matched clause that is part of a rule
 			auto& rules = _configReader.get_rules();
 			if (std::any_of(rules.begin(), rules.end(), [&](Rule& r) {
-						return is_atom_in_tree(r.get_handle(), p.second); }))
+						return is_atom_in_tree(r.get_forward_handle(), p.second);
+					}))
 			{
 				bc_logger().debug("matched clause in rule");
 				break;
@@ -511,7 +515,8 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
 
 			// don't want matched stuff with some part of a rule inside
 			if (std::any_of(rules.begin(), rules.end(), [&](Rule& r) {
-						return is_atom_in_tree(p.second, r.get_handle()); }))
+						return is_atom_in_tree(p.second, r.get_forward_handle());
+					}))
 			{
 				bc_logger().debug("matched clause wrapping rule");
 				break;

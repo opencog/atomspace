@@ -34,9 +34,11 @@
 
 using namespace opencog;
 
-Rule::Rule(const Handle& rule)
+Rule::Rule(const Handle& rule_ml)
+	: forward_rule_handle_(Handle::UNDEFINED),
+	  backward_rule_handle_(Handle::UNDEFINED)
 {
-	init(rule);
+	init(rule_ml);
 }
 
 Rule::Rule(const Handle& rule_name, const Handle& rbs)
@@ -45,21 +47,30 @@ Rule::Rule(const Handle& rule_name, const Handle& rbs)
 	init(as->get_link(MEMBER_LINK, rule_name, rbs));
 }
 
-void Rule::init(const Handle& rule)
+void Rule::init(const Handle& rule_ml)
 {
-	if (rule == Handle::UNDEFINED)
-		forward_rule_handle_ = Handle::UNDEFINED;
-	else
+	if (rule_ml != Handle::UNDEFINED)
 	{
-		if (not classserver().isA(rule->getType(), MEMBER_LINK))
+		if (not classserver().isA(rule_ml->getType(), MEMBER_LINK))
 			throw InvalidParamException(TRACE_INFO,
 		                                "Rule '%s' is expected to be a MemberLink",
-		                                rule->toString().c_str());
+		                                rule_ml->toString().c_str());
 
-		rule_alias_ = rule->getOutgoingAtom(0);
-		Handle rbs = rule->getOutgoingAtom(1);
+		rule_alias_ = rule_ml->getOutgoingAtom(0);
+		Handle rbs = rule_ml->getOutgoingAtom(1);
 
-		forward_rule_handle_ = DefineLink::get_definition(rule_alias_);
+		Handle rule = DefineLink::get_definition(rule_alias_);
+		if (rule->getType() == LIST_LINK)
+		{
+			// Split the rule into a forward and backward parts
+			forward_rule_handle_ = rule->getOutgoingSet()[0];
+			backward_rule_handle_ = rule->getOutgoingSet()[1];
+		}
+		else
+		{
+			OC_ASSERT(rule->getType() == BIND_LINK);
+			forward_rule_handle_ = rule;
+		}
 		name_ = rule_alias_->getName();
 		category_ = rbs->getName();
 		weight_ = rule->getTruthValue()->getMean();
@@ -101,12 +112,12 @@ const string& Rule::get_name() const
 	return name_;
 }
 
-void Rule::set_handle(const Handle& h)
+void Rule::set_forward_handle(const Handle& h)
 {
 	forward_rule_handle_ = h;
 }
 
-Handle Rule::get_handle() const
+Handle Rule::get_forward_handle() const
 {
 	return forward_rule_handle_;
 }
@@ -283,7 +294,7 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
 		dict[h] = Handle::UNDEFINED;
 
 	Handle st_bindlink = standardize_helper(as, forward_rule_handle_, dict);
-	st_ver.set_handle(st_bindlink);
+	st_ver.set_forward_handle(st_bindlink);
 
 	return st_ver;
 }

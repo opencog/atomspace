@@ -137,7 +137,7 @@ public:
 	}
 
 	// Modifiers
-	void set_handle(const Handle& h /* Member <rule alias> <rbs> */);
+	void set_forward_handle(const Handle& h);
 	void set_name(const string& name);
 	void set_category(const string& name);
 	void set_weight(float p);
@@ -147,7 +147,7 @@ public:
 	const string& get_name() const;
 	string& get_category();
 	const string& get_category() const;
-	Handle get_handle() const;
+	Handle get_forward_handle() const;
 	Handle get_alias() const;
 	Handle get_forward_vardecl() const;
 	Handle get_backward_vardecl() const;
