@@ -48,34 +48,32 @@ Rule::Rule(const Handle& rule_name, const Handle& rbs)
 
 void Rule::init(const Handle& rule_ml)
 {
-	if (rule_ml != Handle::UNDEFINED)
+	OC_ASSERT(rule_ml != Handle::UNDEFINED);
+	if (not classserver().isA(rule_ml->getType(), MEMBER_LINK))
+		throw InvalidParamException(TRACE_INFO,
+		                            "Rule '%s' is expected to be a MemberLink",
+		                            rule_ml->toString().c_str());
+
+	rule_alias_ = rule_ml->getOutgoingAtom(0);
+	Handle rbs = rule_ml->getOutgoingAtom(1);
+
+	Handle rule = DefineLink::get_definition(rule_alias_);
+	if (rule->getType() == LIST_LINK)
 	{
-		if (not classserver().isA(rule_ml->getType(), MEMBER_LINK))
-			throw InvalidParamException(TRACE_INFO,
-		                                "Rule '%s' is expected to be a MemberLink",
-		                                rule_ml->toString().c_str());
-
-		rule_alias_ = rule_ml->getOutgoingAtom(0);
-		Handle rbs = rule_ml->getOutgoingAtom(1);
-
-		Handle rule = DefineLink::get_definition(rule_alias_);
-		if (rule->getType() == LIST_LINK)
-		{
-			OC_ASSERT(rule->getArity() > 0);
-			// Split the rule into a forward and backward parts
-			forward_rule_handle_ = rule->getOutgoingAtom(0);
-			for (unsigned i = 1; i < rule->getArity(); i++)
-				backward_rule_handles_.push_back(rule->getOutgoingAtom(i));
-		}
-		else
-		{
-			OC_ASSERT(rule->getType() == BIND_LINK);
-			forward_rule_handle_ = rule;
-		}
-		name_ = rule_alias_->getName();
-		category_ = rbs->getName();
-		weight_ = rule->getTruthValue()->getMean();
+		OC_ASSERT(rule->getArity() > 0);
+		// Split the rule into a forward and backward parts
+		forward_rule_handle_ = rule->getOutgoingAtom(0);
+		for (unsigned i = 1; i < rule->getArity(); i++)
+			backward_rule_handles_.push_back(rule->getOutgoingAtom(i));
 	}
+	else
+	{
+		OC_ASSERT(rule->getType() == BIND_LINK);
+		forward_rule_handle_ = rule;
+	}
+	name_ = rule_alias_->getName();
+	category_ = rbs->getName();
+	weight_ = rule->getTruthValue()->getMean();
 }
 
 float Rule::get_weight() const
