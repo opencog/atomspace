@@ -81,7 +81,7 @@ void GlobUTest::test_glob_middle(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-	Handle love = eval->eval_h("(cog-bind glob-you)");
+	Handle love = eval->eval_h("(cog-execute! glob-you)");
 	printf("glob-you %s\n", love->toString().c_str());
 	TS_ASSERT_EQUALS(2, love->getArity());
 
@@ -115,7 +115,7 @@ void GlobUTest::test_glob_final(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-	Handle love = eval->eval_h("(cog-bind love-glob)");
+	Handle love = eval->eval_h("(cog-execute! love-glob)");
 	printf("love-glob %s\n", love->toString().c_str());
 	TS_ASSERT_EQUALS(2, love->getArity());
 
