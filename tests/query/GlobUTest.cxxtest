@@ -1,7 +1,7 @@
 /*
  * tests/query/GlobUTest.cxxtest
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2016 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -59,6 +59,7 @@ public:
 
 	void test_glob_middle(void);
 	void test_glob_final(void);
+	void test_glob_type(void);
 };
 
 void GlobUTest::tearDown(void)
@@ -117,10 +118,16 @@ void GlobUTest::test_glob_final(void)
 
 	Handle love = eval->eval_h("(cog-execute! love-glob)");
 	printf("love-glob %s\n", love->toString().c_str());
-	TS_ASSERT_EQUALS(2, love->getArity());
+	TS_ASSERT_EQUALS(3, love->getArity());
 
 	Handle response = eval->eval_h(
 		"(SetLink"
+		"  (ListLink"
+		"    (ConceptNode \"Hey!\")"
+		"    (ConceptNode \"I\")"
+		"    (ConceptNode \"like\")"
+		"    (NumberNode  42)"
+		"    (ConceptNode \"also\"))"
 		"  (ListLink"
 		"    (ConceptNode \"Hey!\")"
 		"    (ConceptNode \"I\")"
@@ -135,6 +142,34 @@ void GlobUTest::test_glob_final(void)
 		"    (ConceptNode \"bears\")"
 		"    (ConceptNode \"a\")"
 		"    (ConceptNode \"lot\")"
+		"    (ConceptNode \"also\")))"
+	);
+	TS_ASSERT_EQUALS(love, response);
+
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test a glob with type restrictions
+ */
+void GlobUTest::test_glob_type(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
+
+	Handle love = eval->eval_h("(cog-execute! love-type-glob)");
+	printf("love-type-glob %s\n", love->toString().c_str());
+	TS_ASSERT_EQUALS(1, love->getArity());
+
+	Handle response = eval->eval_h(
+		"(SetLink"
+		"  (ListLink"
+		"    (ConceptNode \"Hey!\")"
+		"    (ConceptNode \"I\")"
+		"    (ConceptNode \"like\")"
+		"    (NumberNode  42)"
 		"    (ConceptNode \"also\")))"
 	);
 	TS_ASSERT_EQUALS(love, response);
