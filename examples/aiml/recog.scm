@@ -4,8 +4,9 @@
 ; This is a rough sketch of the idea that pattern recognition
 ; is the dual of pattern matching.  There are many things wrong
 ; with the below; its just a sketch. However, it does work.
+;
 
-(use-modules (opencog))
+(use-modules (opencog) (opencog exec))
 (use-modules (opencog query))
 
 ; Two different pseudo-AIML rules:
@@ -14,70 +15,59 @@
 ;
 (BindLink
 	(ListLink
-		(ConceptNode "I")
-		(GlobNode "$star")
-		(ConceptNode "you"))
+		(Concept "I") (Glob "$star") (Concept "you"))
 	(ListLink
-		(ConceptNode "I")
-		(GlobNode "$star")
-		(ConceptNode "you")
-		(ConceptNode "too")))
+		(Concept "I") (Glob "$star") (Concept "you") (Concept "too")))
 
 (BindLink
 	(ListLink
-		(ConceptNode "I")
-		(ConceptNode "love")
-		(GlobNode "$star"))
+		(Concept "I")
+		(Concept "love")
+		(Glob "$star"))
 	(ListLink
-		(ConceptNode "I")
-		(ConceptNode "like")
-		(GlobNode "$star")
-		(ConceptNode "a")
-		(ConceptNode "lot!")))
+		(Concept "I")
+		(Concept "like")
+		(Glob "$star")
+		(Concept "a")
+		(Concept "lot!")))
 
 ;-------------------------------------------------------
+;; A pretend "sentence" that is the "input".
 (define sent
-	;; A pretend "sentence" that is the "input".
-	(PatternLink
-		(BindLink
-			(ListLink
-				(ConceptNode "I")
-				(ConceptNode "love")
-				(ConceptNode "you"))
-			(VariableNode "$impl"))))
+	(ListLink (Concept "I") (Concept "love") (Concept "you")))
 
 ;; Search for patterns that match the sentence. Both of the above
 ;; should match.
-(cog-recognize sent)
+(cog-execute! (DualLink sent))
 
 ;; The above should return the below:
 ;; The BindLinks are NOT evaluated!  To evaluate, see bottom.
 (SetLink
 	(BindLink
 		(ListLink
-			(ConceptNode "I")
-			(GlobNode "$star")
-			(ConceptNode "you")
+			(Concept "I")
+			(Glob "$star")
+			(Concept "you")
 		)
 		(ListLink
-			(ConceptNode "I")
-			(GlobNode "$star")
-			(ConceptNode "you")
-			(ConceptNode "too")
+			(Concept "I")
+			(Glob "$star")
+			(Concept "you")
+			(Concept "too")
 		)
 	)
 	(BindLink
 		(ListLink
-			(ConceptNode "I")
-			(ConceptNode "love")
-			(GlobNode "$star")
+			(Concept "I")
+			(Concept "love")
+			(Glob "$star")
 		)
 		(ListLink
-			(ConceptNode "I")
-			(ConceptNode "like")
-			(GlobNode "$star")
-			(ConceptNode "a")
-			(ConceptNode "lot!")
+			(Concept "I")
+			(Concept "like")
+			(Glob "$star")
+			(Concept "a")
+			(Concept "lot!")
 		)
 	)
 )
@@ -89,12 +79,12 @@
 	(PatternLink
 		(BindLink
 			(ListLink
-				(ConceptNode "I")
-				(ConceptNode "really")
-				(ConceptNode "truly")
-				(ConceptNode "love")
-				(ConceptNode "you"))
-			(VariableNode "$impl"))))
+				(Concept "I")
+				(Concept "really")
+				(Concept "truly")
+				(Concept "love")
+				(Concept "you"))
+			(Variable "$impl"))))
 
 ;; Perform the search.
 (cog-recognize adv-sent)
@@ -108,17 +98,17 @@
 ; For the non-adverbial sentence this returns the below:
 ((SetLink
    (ListLink
-      (ConceptNode "I")
-      (ConceptNode "love")
-      (ConceptNode "you")
-      (ConceptNode "too")))
+      (Concept "I")
+      (Concept "love")
+      (Concept "you")
+      (Concept "too")))
  (SetLink
    (ListLink
-      (ConceptNode "I")
-      (ConceptNode "like")
-      (ConceptNode "you")
-      (ConceptNode "a")
-      (ConceptNode "lot!"))))
+      (Concept "I")
+      (Concept "like")
+      (Concept "you")
+      (Concept "a")
+      (Concept "lot!"))))
 
 ;-------------------------------------------------------
 
@@ -126,23 +116,23 @@
 ; The types of the globs are constrained, because, if not constrained
 ; the globs can sometimes pick up on parts of the various patterns
 ; created above.  We really want them to only pick up on the "sentences"
-; (strings of ConceptNodes).
+; (strings of Concepts).
 (define a-love-b
 	(BindLink
 		(VariableList
-			(TypedVariable (Glob "$A") (Type "ConceptNode"))
-			(TypedVariable (Glob "$B") (Type "ConceptNode")))
+			(TypedVariable (Glob "$A") (Type "Concept"))
+			(TypedVariable (Glob "$B") (Type "Concept")))
 		(ListLink
-			(GlobNode "$A")
-			(ConceptNode "love")
-			(GlobNode "$B"))
+			(Glob "$A")
+			(Concept "love")
+			(Glob "$B"))
 		(ListLink
-			(ConceptNode "I'm")
-			(ConceptNode "sure")
-			(ConceptNode "that")
-			(GlobNode "$A")
-			(ConceptNode "love")
-			(GlobNode "$B"))))
+			(Concept "I'm")
+			(Concept "sure")
+			(Concept "that")
+			(Glob "$A")
+			(Concept "love")
+			(Glob "$B"))))
 
 ; Lets see if the above can be found!
 (cog-recognize adv-sent)
@@ -150,14 +140,14 @@
 (define constrained-adv-sent
 	(PatternLink
 		(BindLink
-			(VariableNode "$type constraints")
+			(Variable "$type constraints")
 			(ListLink
-				(ConceptNode "I")
-				(ConceptNode "really")
-				(ConceptNode "truly")
-				(ConceptNode "love")
-				(ConceptNode "you"))
-			(VariableNode "$impl"))))
+				(Concept "I")
+				(Concept "really")
+				(Concept "truly")
+				(Concept "love")
+				(Concept "you"))
+			(Variable "$impl"))))
 
 (cog-recognize constrained-adv-sent)
 
