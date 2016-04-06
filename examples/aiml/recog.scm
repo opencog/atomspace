@@ -7,7 +7,6 @@
 ;
 
 (use-modules (opencog) (opencog exec))
-(use-modules (opencog query))
 
 ; Two different pseudo-AIML rules:
 ;    I * you   --> I * you too
@@ -40,35 +39,23 @@
 ;; should match.
 (cog-execute! (DualLink sent))
 
-;; The above should return the below:
-;; The BindLinks are NOT evaluated!  To evaluate, see bottom.
+;; The above should return the below.  Note how fragments of the above
+;; BindLink's are matched.
 (SetLink
-	(BindLink
-		(ListLink
-			(Concept "I")
-			(Glob "$star")
-			(Concept "you")
-		)
-		(ListLink
-			(Concept "I")
-			(Glob "$star")
-			(Concept "you")
-			(Concept "too")
-		)
+	(ListLink
+		(Concept "I")
+		(Glob "$star")
+		(Concept "you")
 	)
-	(BindLink
-		(ListLink
-			(Concept "I")
-			(Concept "love")
-			(Glob "$star")
-		)
-		(ListLink
-			(Concept "I")
-			(Concept "like")
-			(Glob "$star")
-			(Concept "a")
-			(Concept "lot!")
-		)
+	(ListLink
+		(Concept "I")
+		(Concept "love")
+		(Glob "$star")
+	)
+	(ListLink
+		(Concept "I")
+		(Concept "love")
+		(Concept "you")
 	)
 )
 
@@ -76,18 +63,15 @@
 ;; Another sentence, but with adverbs.  It will match one of the
 ;; patterns, but not the other.
 (define adv-sent
-	(PatternLink
-		(BindLink
-			(ListLink
-				(Concept "I")
-				(Concept "really")
-				(Concept "truly")
-				(Concept "love")
-				(Concept "you"))
-			(Variable "$impl"))))
+	(ListLink
+		(Concept "I")
+		(Concept "really")
+		(Concept "truly")
+		(Concept "love")
+		(Concept "you")))
 
 ;; Perform the search.
-(cog-recognize adv-sent)
+(cog-execute! (DualLink adv-sent))
 
 ;-------------------------------------------------------
 ;; Evaluate each of the bind links that were found.
