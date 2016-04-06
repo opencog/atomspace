@@ -32,30 +32,30 @@
 ;; says "I * you" -> "I * you too".
 (define glob-you
 	(BindLink
-	(ListLink
-		(ConceptNode "I")
-		(GlobNode "$star")
-		(ConceptNode "you"))
-	(ListLink
-		(ConceptNode "I")
-		(GlobNode "$star")
-		(ConceptNode "you")
-		(ConceptNode "too"))))
+		(ListLink
+			(ConceptNode "I")
+			(GlobNode "$star")
+			(ConceptNode "you"))
+		(ListLink
+			(ConceptNode "I")
+			(GlobNode "$star")
+			(ConceptNode "you")
+			(ConceptNode "too"))))
 
 ;; This one implements "I love *" -> "Hey! I love * too"
 (define love-glob
 	(BindLink
-	(ListLink
-		(ConceptNode "I")
-		(ConceptNode "love")
-		(GlobNode "$star"))
-	(ListLink
-		(ConceptNode "Hey!")
-		(ConceptNode "I")
-		(ConceptNode "like")
-		(GlobNode "$star")
-		(ConceptNode "also"))))
+		(ListLink
+			(ConceptNode "I")
+			(ConceptNode "love")
+			(GlobNode "$star"))
+		(ListLink
+			(ConceptNode "Hey!")
+			(ConceptNode "I")
+			(ConceptNode "like")
+			(GlobNode "$star")
+			(ConceptNode "also"))))
 
 ;; Both of these patterns should "work as expected".
-; (cog-bind glob-you)
-; (cog-bind love-glob)
+; (cog-execute! glob-you)
+; (cog-execute! love-glob)
