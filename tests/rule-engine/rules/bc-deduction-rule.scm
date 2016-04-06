@@ -40,7 +40,8 @@
             (ListLink
                 (InheritanceLink
                     (VariableNode "$A")
-                    (VariableNode "$B"))
+                    (VariableNode "$B")
+                )
                 (InheritanceLink
                     (VariableNode "$B")
                     (VariableNode "$C")

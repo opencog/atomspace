@@ -9,7 +9,7 @@
 ;;    Q
 ;;
 ;; To properly deal with this we should support deep type and infer
-;; that P and Q are over the same domain.
+;; that P and Q have non empty intersection.
 ;;
 ;; Overlaps:
 ;;

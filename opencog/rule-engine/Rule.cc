@@ -251,12 +251,13 @@ HandleSeq Rule::get_conclusion_seq() const
 			if (hfront->getType() == EXECUTION_OUTPUT_LINK)
 			{
 				// get the ListLink containing the arguments of the
-				// ExecutionOutputLink. WARNING: only the *first*
+				// ExecutionOutputLink. WARNING: only the last
 				// argument is to be used to represent the conclusion
 				// pattern.
 				Handle list_h = hfront->getOutgoingAtom(1);
-				OC_ASSERT(list_h->getType() == LIST_LINK);
-				pre_output.push(list_h->getOutgoingAtom(0));
+				OC_ASSERT(list_h->getType() == LIST_LINK
+				          and list_h->getArity() > 0);
+				pre_output.push(list_h->getOutgoingAtom(list_h->getArity()-1));
 				continue;
 			}
 
