@@ -75,7 +75,7 @@ void PatternSCM::init(void)
 	_binders.push_back(new FunctionWrap(af_bindlink,
 	                   "cog-bind-af", "query"));
 
-	// A bindlink that return a TV
+	// A bindlink that returns a TV
 	_binders.push_back(new FunctionWrap(satisfaction_link,
 	                   "cog-satisfy", "query"));
 

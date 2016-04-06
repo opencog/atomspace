@@ -376,10 +376,9 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		}
 	}
 
-	// If there is a GetLink, we have to perform the get, and replace
-	// it with the results of the get. The get is implemented with the
-	// PatternLink::satisfy() method.
-	if (classserver().isA(t, GET_LINK))
+	// If there is a SatisfyingLink, we have to perform it
+	// and return the saisfying set.
+	if (classserver().isA(t, SATISFYING_LINK))
 	{
 		return satisfying_set(_as, expr);
 	}

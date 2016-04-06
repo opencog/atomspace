@@ -137,7 +137,7 @@ TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
 Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_results)
 {
 	// Special case the BindLink. We probably shouldn't have to, and
-	// the C++ code for handling this case could maybe be rafactored
+	// the C++ code for handling this case could maybe be refactored
 	// to handle BindLink as well as GetLink in one place... but right
 	// now, it doesn't.
 	Type blt = hlink->getType();

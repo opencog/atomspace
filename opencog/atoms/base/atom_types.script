@@ -236,20 +236,26 @@ PUT_LINK <- SCOPE_LINK
 // enable a C++ class that unpacks all the arguments and types, etc.
 // into assorted C++ structures. It does not have any semantics in and
 // of itself, it just holds machinery.
-//
+PATTERN_LINK <- SCOPE_LINK         // A pattern encapsulated in a Link.
+
+// We subdivide patterns into two types: one type returns a TV when it
+// is evaluated.  The other type returns a set of atoms when it is
+// executed.  The distinction is made for the benefit of the C++ code,
+// so that it can dispatch appropriately, based on the base type.
+SATISFACTION_LINK <- PATTERN_LINK,EVALUATABLE_LINK  // Finds all groundings, return TV
+SATISFYING_LINK <- PATTERN_LINK           // Finds all groundings, return SetLink
+
 // The GetLink is almost exactly the same thing as a SatsifyingSetLink,
 // except that GetLink is imperative, while SatisfyingSetLink is
 // declarative.  Likewise, BindLink is exactly the same thing as an
 // ImplicationLink, except that its imperative, not declarative.
-PATTERN_LINK <- SCOPE_LINK         // A pattern encapsulated in a Link.
-GET_LINK <- PATTERN_LINK           // Finds all groundings, return atoms
-SATISFACTION_LINK <- PATTERN_LINK,EVALUATABLE_LINK  // Finds all groundings, return TV
-BIND_LINK <- GET_LINK              // Finds all groundings and executes
+GET_LINK <- SATISFYING_LINK        // Finds all groundings, returns them
+BIND_LINK <- SATISFYING_LINK       // Finds all groundings, substitutes.
 
 // Adjoint to the GetLink. This is "adjoint" in the sense that the roles
 // of the pattern and the grounding are reversed: given a grounding, the
 // collection of patterns that are grounded by it can be searched-for.
-DUAL_LINK <- PATTERN_LINK
+DUAL_LINK <- SATISFYING_LINK
 
 // ==============================================================
 // Types and type constructors.
