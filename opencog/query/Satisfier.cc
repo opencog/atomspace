@@ -145,15 +145,15 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_re
 	{
 		return bindlink(as, hlink, max_results);
 	}
+	if (DUAL_LINK == blt)
+	{
+		return recognize(as, hlink);
+	}
 
 	PatternLinkPtr bl(PatternLinkCast(hlink));
 	if (NULL == bl)
 	{
-		// Use the correct constructor for derived types.
-		if (classserver().isA(blt, SATISFYING_LINK))
-			bl = createPatternLink(*LinkCast(hlink));
-		else
-			bl = createPatternLink(hlink);
+		bl = createPatternLink(*LinkCast(hlink));
 	}
 
 	SatisfyingSet sater(as);
