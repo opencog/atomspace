@@ -35,8 +35,7 @@
 using namespace opencog;
 
 Rule::Rule(const Handle& rule_ml)
-	: forward_rule_handle_(Handle::UNDEFINED),
-	  backward_rule_handle_(Handle::UNDEFINED)
+	: forward_rule_handle_(Handle::UNDEFINED)
 {
 	init(rule_ml);
 }
@@ -62,9 +61,11 @@ void Rule::init(const Handle& rule_ml)
 		Handle rule = DefineLink::get_definition(rule_alias_);
 		if (rule->getType() == LIST_LINK)
 		{
+			OC_ASSERT(rule->getArity() > 0);
 			// Split the rule into a forward and backward parts
-			forward_rule_handle_ = rule->getOutgoingSet()[0];
-			backward_rule_handle_ = rule->getOutgoingSet()[1];
+			forward_rule_handle_ = rule->getOutgoingAtom(0);
+			for (unsigned i = 1; i < rule->getArity(); i++)
+				backward_rule_handles_.push_back(rule->getOutgoingAtom(i));
 		}
 		else
 		{
@@ -146,13 +147,12 @@ Handle Rule::get_forward_vardecl() const
  *
  * @return the VariableList or the lone VariableNode
  */
-Handle Rule::get_backward_vardecl() const
+HandleSeq Rule::get_backward_vardecls() const
 {
-	// if the rule's handle has not been set yet
-	if (backward_rule_handle_ == Handle::UNDEFINED)
-		return Handle::UNDEFINED;
-
-	return backward_rule_handle_->getOutgoingAtom(0);
+	HandleSeq results;
+	for (const Handle& h : backward_rule_handles_)
+		results.push_back(h->getOutgoingAtom(0));
+	return results;
 }
 
 /**
@@ -217,18 +217,19 @@ Handle Rule::get_forward_conclusion() const
  */
 HandleSeq Rule::get_conclusion_seq() const
 {
+	HandleSeq results;
+
 	// If the rule's handle has not been set yet
 	if (forward_rule_handle_ == Handle::UNDEFINED)
 		return HandleSeq();
 
 	// If no backward rule then extract the conclusions from the
 	// forward rule
-	if (backward_rule_handle_ == Handle::UNDEFINED)
+	if (backward_rule_handles_.empty())
 	{
 		Handle implicand = BindLinkCast(forward_rule_handle_)->get_implicand();
 
 		std::queue<Handle> pre_output;
-		HandleSeq final_output;
 
 		// skip the top level ListLink
 		if (implicand->getType() == LIST_LINK)
@@ -250,28 +251,31 @@ HandleSeq Rule::get_conclusion_seq() const
 			if (hfront->getType() == EXECUTION_OUTPUT_LINK)
 			{
 				// get the ListLink containing the arguments of the
-				// ExecutionOutputLink
-				Handle harg = hfront->getOutgoingSet()[1];
-
-				for (const Handle& h : harg->getOutgoingSet())
-					pre_output.push(h);
-
+				// ExecutionOutputLink. WARNING: only the *first*
+				// argument is to be used to represent the conclusion
+				// pattern.
+				Handle list_h = hfront->getOutgoingAtom(1);
+				OC_ASSERT(list_h->getType() == LIST_LINK);
+				pre_output.push(list_h->getOutgoingAtom(0));
 				continue;
 			}
 
 			// if not an ExecutionOutputLink, it is a final output
-			final_output.push_back(hfront);
+			results.push_back(hfront);
 		}
-
-		return final_output;
 	}
-	// The is a backward rule so return directly its body
+	// There are backward rules so return directly their patterns
 	else
 	{
-		Type t = backward_rule_handle_->getType();
-		OC_ASSERT(t == BIND_LINK or t == GET_LINK);
-		return { backward_rule_handle_->getOutgoingSet()[1] };
+		for (const Handle& h : backward_rule_handles_)
+		{
+			Type t = h->getType();
+			OC_ASSERT(t == BIND_LINK or t == GET_LINK);
+			results.push_back(h->getOutgoingAtom(1));
+		}
 	}
+
+	return results;
 }
 
 void Rule::set_weight(float p)

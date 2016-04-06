@@ -58,54 +58,43 @@ using namespace std;
  *
  * <conclusion> may represent explicitly the conclusion pattern, or
  * (most of the cases) it may be obfuscated in a grounded schema
- * node. In the such a case one the following 2 formats may be used.
+ * node. In the such a case one the following format may be used.
  *
- * 2. A pair of forward and backward rules. The backward part allows
- * to easily obtain the conclusion pattern and possibly reconstruct
- * the premises given the conclusion. In such a case a rule pair is
- * represented as follows
- *
- * ListLink
- *    BindLink     ; Forward form
- *       <variables>
- *       AndLink
- *          <premise-1>
- *          ...
- *          <premise-n>
- *       <conclusion>
- *    BindLink     ; Backward form
- *       <variables>
- *       <conclusion>
- *       AndLink
- *          <premise-1>
- *          ...
- *          <premise-n>
- *
- * Of course grounded schemata can be used in either of these 2
- * notations. Also a conclusion could be a disjunction of different
- * conclusion terms (if the pattern matcher supports that). The second
- * notation (forward and backward pair) is necessary when the forward
- * rule output is obfuscated by a grounded schema and can as well be
- * useful when the transformations going from conclusion to premises
- * is not trivial.
- *
- * 3. In case we only care about de-obfuscating the conclusion a rule
- * may simply take the following form
+ * 2. A list starting with a forward format and optionally 1 or more
+ * backward forms. The backward forms allow to easily obtain
+ * conclusion patterns and possibly reconstruct premises given a
+ * conclusion. In such a case a rule is represented as follows
  *
  * ListLink
- *    BindLink     ; Forward form
+ *    <forward>
+ *    <backward-1>
+ *    ...
+ *    <backward-n>
+ *
+ * Where <forward> is described as in 1. and backward-i is either
+ *
+ *    BindLink
  *       <variables>
+ *       <conclusion>
  *       AndLink
  *          <premise-1>
  *          ...
  *          <premise-n>
- *       <conclusion>
- *    GetLink      ; backward form (conclusion only)
+ *
+ * or if we don't need to translate a certain conclusion into premises
+ *
+ *    GetLink
  *       <variables>
  *       <conclusion>
  *
- * Note that the variables in the forward and backward formats (1. and
- * 2.) need not to be the same as their scopes are disjoint.
+ * That second notation (forward and backward forms) is necessary when
+ * the forward rule output(s) is obfuscated by a grounded schema(ta)
+ * or can as well be useful when the transformations going from
+ * conclusion to premises is non trivial. The reason we have several
+ * backward forms is because a forward rule output several conclusions
+ * (take for instance the PLN equivalence-to-double-implication rule
+ * that given A<->B outputs A-> and B->A).
+ *
  */
 class Rule : public boost::less_than_comparable<Rule>,
              public boost::equality_comparable<Rule>
@@ -129,8 +118,7 @@ public:
 	// Comparison
 	bool operator==(const Rule& r) const {
 		return r.forward_rule_handle_ == forward_rule_handle_
-			and r.backward_rule_handle_ == backward_rule_handle_
-			;
+			and r.backward_rule_handles_ == backward_rule_handles_;
 	}
 	bool operator<(const Rule& r) const {
 		return weight_ < r.weight_;
@@ -150,7 +138,7 @@ public:
 	Handle get_forward_handle() const;
 	Handle get_alias() const;
 	Handle get_forward_vardecl() const;
-	Handle get_backward_vardecl() const;
+	HandleSeq get_backward_vardecls() const;
 	Handle get_forward_implicant() const;
 
 	/**
@@ -183,8 +171,8 @@ private:
 	// Forward rule handle, typically a BindLink
 	Handle forward_rule_handle_;
 
-	// Backward rule handle, a BindLink or a GetLink
-	Handle backward_rule_handle_;
+	// Backward rule handles, BindLinks or a GetLinks
+	HandleSeq backward_rule_handles_;
 
 	// Rule alias: (DefineLink rule_alias_ rule_handle_)
 	Handle rule_alias_;
