@@ -257,7 +257,9 @@ bool Recognizer::grounding(const HandleMap &var_soln,
 {
 	Handle rule = term_soln.at(_root);
 
-	_rules.insert(rule);
+	if (rule != _root) {
+		_rules.insert(rule);
+	}
 
 	// Look for more groundings.
 	return false;
