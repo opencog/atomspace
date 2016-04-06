@@ -52,11 +52,6 @@
 		(Concept "love")
 		(Glob "$star")
 	)
-	(ListLink
-		(Concept "I")
-		(Concept "love")
-		(Concept "you")
-	)
 )
 
 ;-------------------------------------------------------
