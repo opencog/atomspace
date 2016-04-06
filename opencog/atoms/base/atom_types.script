@@ -246,12 +246,10 @@ GET_LINK <- PATTERN_LINK           // Finds all groundings, return atoms
 SATISFACTION_LINK <- PATTERN_LINK,EVALUATABLE_LINK  // Finds all groundings, return TV
 BIND_LINK <- GET_LINK              // Finds all groundings and executes
 
-// Adjoints to the GetLink and BindLink. They are "adjoint" in the sense
-// that the roles of the pattern and the grounding are reversed: given a
-// grounding, the collection of patterns that are grounded by it can be
-// searched-for.
-DUAL_GET_LINK <- PATTERN_LINK
-DUAL_BIND_LINK <- DUAL_GET_LINK
+// Adjoint to the GetLink. This is "adjoint" in the sense that the roles
+// of the pattern and the grounding are reversed: given a grounding, the
+// collection of patterns that are grounded by it can be searched-for.
+DUAL_LINK <- PATTERN_LINK
 
 // ==============================================================
 // Types and type constructors.
