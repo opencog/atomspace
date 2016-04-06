@@ -149,9 +149,8 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_re
 	PatternLinkPtr bl(PatternLinkCast(hlink));
 	if (NULL == bl)
 	{
-		// If it is a BindLink (for example), we want to use that ctor
-		// instead of the default ctor.  Note BindLink isA GetLink.
-		if (classserver().isA(blt, GET_LINK))
+		// Use the correct constructor for derived types.
+		if (classserver().isA(blt, SATISFYING_LINK))
 			bl = createPatternLink(*LinkCast(hlink));
 		else
 			bl = createPatternLink(hlink);
