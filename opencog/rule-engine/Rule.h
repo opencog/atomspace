@@ -138,7 +138,7 @@ public:
 	const string& get_name() const;
 	string& get_category();
 	const string& get_category() const;
-	Handle get_forward_handle() const;
+	Handle get_forward_rule() const;
 	Handle get_alias() const;
 	Handle get_forward_vardecl() const;
 	HandleSeq get_backward_vardecls() const;

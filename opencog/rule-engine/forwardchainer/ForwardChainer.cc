@@ -154,7 +154,7 @@ bool ForwardChainer::termination()
 void ForwardChainer::apply_all_rules()
 {
     for (Rule* rule : _rules) {
-        HandleSeq hs = apply_rule(rule->get_forward_handle());
+        HandleSeq hs = apply_rule(rule->get_forward_rule());
 
         // Update
         _fcstat.add_inference_record(Handle::UNDEFINED, rule,
@@ -456,7 +456,7 @@ UnorderedHandleSet ForwardChainer::derive_rules(const Handle& source,
 
             fv.search_set(it.first);
 
-            Handle rhandle = rule->get_forward_handle();
+            Handle rhandle = rule->get_forward_rule();
             HandleSeq new_candidate_rules = substitute_rule_part(
                 temp_pm_as, temp_pm_as.add_atom(rhandle), fv.varset,
                 gcb.var_groundings);

@@ -252,7 +252,7 @@ void BackwardChainer::process_target(Target& target)
 
 	bc_logger().debug("Selected rule %s", selected_rule.get_name().c_str());
 	LAZY_BC_LOG_DEBUG << "Standardized rule:" << std::endl
-	                  << standardized_rule.get_forward_handle()->toShortString();
+	                  << standardized_rule.get_forward_rule()->toShortString();
 	bc_logger().debug("Found %d implicand's output unifiable",
 	                  all_implicand_to_target_mappings.size());
 
@@ -506,7 +506,7 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
 			// don't want matched clause that is part of a rule
 			auto& rules = _configReader.get_rules();
 			if (std::any_of(rules.begin(), rules.end(), [&](Rule& r) {
-						return is_atom_in_tree(r.get_forward_handle(), p.second);
+						return is_atom_in_tree(r.get_forward_rule(), p.second);
 					}))
 			{
 				bc_logger().debug("matched clause in rule");
@@ -515,7 +515,7 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
 
 			// don't want matched stuff with some part of a rule inside
 			if (std::any_of(rules.begin(), rules.end(), [&](Rule& r) {
-						return is_atom_in_tree(p.second, r.get_forward_handle());
+						return is_atom_in_tree(p.second, r.get_forward_rule());
 					}))
 			{
 				bc_logger().debug("matched clause wrapping rule");

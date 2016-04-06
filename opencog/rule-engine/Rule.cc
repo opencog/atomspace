@@ -118,7 +118,7 @@ void Rule::set_forward_handle(const Handle& h)
 	forward_rule_handle_ = h;
 }
 
-Handle Rule::get_forward_handle() const
+Handle Rule::get_forward_rule() const
 {
 	return forward_rule_handle_;
 }
