@@ -8,6 +8,7 @@ The first set of demos provide a basic introduction to various
 main features.
 
 * simple.scm: A basic introduction to pattern matching.
+* glob.scm: Matching multiple atoms at once.
 * choice.scm: Using the ChoiceLink to explore alternatives.
 * gsn.scm: Calling arbitrary functions upon a match.
 * gpn.scm: Calling arbitrary functions to decide a match.

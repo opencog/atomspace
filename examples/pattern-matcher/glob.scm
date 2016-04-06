@@ -3,9 +3,19 @@
 ;
 ; Demonstration of globbing.
 ;
+; GlobNodes are like VariableNodes, except that they can match multiple
+; atoms in a sequence.  By contrast, a single VariableNode can match
+; only a single atom at a time.  Thus, globs resemble the * character
+; in regular expressions (regexes).
+;
+; To be precise: Globs are like regex + (1 or more in a sequence) and
+; not regex * (zero or more in sequence).  A GlobNode has to match at
+; least one atom. At this time, there is no atomese equivalent to 
+; regex ? (zero or one matches) nor to the * (zero or more matches).
+; This may change; ask on the mailing list or open a github feature
+; request.
 
-(use-modules (opencog))
-(use-modules (opencog query))
+(use-modules (opencog) (opencog exec))
 
 ;;; Populate the atomspace with some "sentences".
 (ListLink
