@@ -58,7 +58,10 @@ using namespace std;
  *
  * <conclusion> may represent explicitly the conclusion pattern, or
  * (most of the cases) it may be obfuscated in a grounded schema
- * node. In the such a case one the following format may be used.
+ * node. In the such a case one the following format may be used. Note
+ * that if the rule uses a GroundedSchema and no backward form in used
+ * (as described below) then the last argument of the GroundedSchema
+ * will represent the rule's conclusion pattern.
  *
  * 2. A list starting with a forward format and optionally 1 or more
  * backward forms. The backward forms allow to easily obtain
