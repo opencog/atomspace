@@ -33,17 +33,20 @@
 (define AB (ImplicationLink (stv 1 1) A B))
 (define BC (ImplicationLink (stv 1 1) B C))
 
-; 1. Test forward chaining (based on the deduction rule)
+; 1. Test forward chaining (based on the deduction rule and modus ponens)
 
 ;; scheme@(guile-user)> (crisp-fc AB)
-;; $1 = (ListLink
+;; $1 = (SetLink
 ;;    (ImplicationLink (stv 1 0.99999982)
-;;       (PredicateNode "A")
-;;       (PredicateNode "C")
+;;       (PredicateNode "A" (stv 1 0.99999982))
+;;       (PredicateNode "C" (stv 1 0.99999982))
 ;;    )
+;;    (PredicateNode "B" (stv 1 0.99999982))
+;;    (PredicateNode "C" (stv 1 0.99999982))
 ;; )
 
-; 2. Test backward chaining (based on the modus ponens rule)
+; 2. WARNING: not currently working.
+;    Test backward chaining (based on the modus ponens rule)
 
 ;; scheme@(guile-user)> (crisp-bc C)
 ;; $1 = (ListLink
