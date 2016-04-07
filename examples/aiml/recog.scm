@@ -2,14 +2,14 @@
 ; recog.scm
 ;
 ; Pattern recognition is dual to pattern matching!
-; aka the "dynamic Rete algorithm"!
+; AKA the "dynamic Rete algorithm".
 ;
 ; When designing a rule engine, one is (eventually) faced with the task
 ; of determining which rules can be applied at some given point of the
 ; calculations.  One can blindly try all of the rules, and see which
 ; ones fire.  When there are more than a few dozen rules, this becomes
 ; impractical.  This issue was observed, and resolved in the 1970's and
-; 1980's with the Rete algorithm: one organizes the set of rules into
+; 1980's, with the Rete algorithm: one organizes the set of rules into
 ; a trie, which is then very easily and quickly walked, to determine
 ; which ones can fire.
 ;
@@ -31,7 +31,7 @@
 ;
 ; The Atomese construct for accomplishing this is the DualLink. It is
 ; roughly the opposite of the GetLink, "opposite" in the cat-theory
-; sense of reversing arrows.  Its "rough", in that the tye constraints
+; sense of reversing arrows.  Its "rough", in that the type constraints
 ; that are possible in GetLink are ignored by the DualLink.
 ;
 ; The example below is based on an AIML-like search, simply because
@@ -40,8 +40,10 @@
 ; pattern recognition.  The atomese DualLink is, however, a general
 ; pattern recognizer: it can be used in a general setting, not just
 ; for AIML-like structures.
-
-
+;
+; -------------------------------------------------------------------
+;
+(use-modules (srfi srfi-1))
 (use-modules (opencog) (opencog exec))
 
 ; Two different pseudo-AIML rules:
@@ -105,7 +107,37 @@
 (cog-execute! (DualLink adv-sent))
 
 ;-------------------------------------------------------
-; At this point, one will typically want to know the full rule
+; At this point, one will typically want to know the full rule to which
+; the dual is just a fragment of. At this time, there is no direct
+; atomese expression to accomplish this, and so here, we do this in a
+; bit of an ad-hoc way, mixing scheme and atomese.  Its ad-hoc simply
+; because the requirements for finding rules are not yet clear.  Its
+; not just a matter of "finding rules"; there are a half-dozen other
+; issues tangled in, including imprecise (fuzzy) matching, Bayesian
+; or Markovian or other probilistic wieghting, and amenability to
+; learning algorithms, e.g. MOSES-inspired genetic mutation and search.
+; So we proceed with an ad-hoc solution.
+
+(define (get-consequents ANTECEDENT)
+"
+  get-consequents ANTECEDENT -- given the ANTECEDENT, return a set of
+  all of the consequents of a rule.
+"
+
+	(cog-execute!
+		(GetLink
+			(Variable "$consequent")
+			(Quote (BindLink ANTECEDENT (Unquote (Variable "$consequent"))))
+		)))
+
+(define (get-rules ANTECEDENT)
+"
+  get-rules ANTECEDENT -- given the ANTECEDENT, return a set of all
+  rules that can be applied to it.
+"
+  (map 
+)
+
 
 ;-------------------------------------------------------
 ;-------------------------------------------------------
