@@ -24,9 +24,11 @@
 (use-modules (opencog))
 (use-modules (opencog query))
 
-(define-public (ure-add-rule rbs rule-name rule weight)
+(define-public (ure-define-add-rule rbs rule-name rule weight)
 "
-  Adds a rule to a rulebase and sets its weight and returns the rule node.
+
+  Associate a rule name and a rule content, and adds it to a rulebase
+  with a given weight and returns the rule alias (DefinedSchemaNode <rule-name>).
 
   rbs: The ConceptNode that represents a rulebase.
 
@@ -49,6 +51,19 @@
     )
 )
 
+(define-public (ure-add-rule rbs rule-alias weight)
+"
+  Adds a rule to a rulebase and sets its weight.
+
+  rbs: The ConceptNode that represents a rulebase.
+
+  rule-alias : A string that names the rule.
+
+  weight: A number that is used to represent the priority of the rule.
+"
+    (MemberLink (stv weight 1) rule-alias rbs)
+)
+
 (define-public (ure-add-rules rbs rules)
 "
   Given a rbs and a list of pairs (rule-alias weight) create for each rule
@@ -64,11 +79,8 @@
 "
   (define (expand-pair weighted-rule)
     (let* ((rule-alias (car weighted-rule))
-           (rule-name (cog-name rule-alias))
-           ; Assuming a rule is a BindLink
-           (rule (car (cog-chase-link 'DefineLink 'BindLink rule-alias)))
            (weight (cadr weighted-rule)))
-        (ure-add-rule rbs rule-name rule weight)
+        (ure-add-rule rbs rule-alias weight)
     )
   )
   (for-each expand-pair rules)
