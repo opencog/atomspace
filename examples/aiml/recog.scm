@@ -124,6 +124,7 @@
 ; To work up to the final, working example, several simpler expressions
 ; are constructed first.
 
+; ------------------
 
 (define (get-consequents ANTECEDENT)
 "
@@ -134,7 +135,7 @@
      (get-consequents (List (Concept \"I\") (Glob \"$star\") (Concept \"you\")))
 "
 
-	; Accept only cnsequents that are ListLink's
+	; Accept only consequents that are ListLink's
 	(cog-execute!
 		(GetLink
 			(TypedVariable (Variable "$consequent") (Type "ListLink"))
@@ -246,7 +247,7 @@
 ;-------------------------------------------------------
 
 ; A pattern with two globs in it.
-; The types of the globs are constrained, because, if not constrained
+; The types of the globs are constrained, because, if not constrained,
 ; the globs can sometimes pick up on parts of the various patterns
 ; created above.  We really want them to only pick up on the "sentences"
 ; (strings of Concepts).
@@ -257,32 +258,55 @@
 			(TypedVariable (Glob "$B") (Type "ConceptNode")))
 		(ListLink
 			(Glob "$A")
-			(Concept "love")
+			(Concept "loves")
 			(Glob "$B"))
 		(ListLink
 			(Concept "I'm")
 			(Concept "sure")
 			(Concept "that")
 			(Glob "$A")
-			(Concept "love")
+			(Concept "loves")
 			(Glob "$B"))))
 
-; Lets see if the above can be found!
-(cog-recognize adv-sent)
+(define mary-n-joe
+	(List (Concept "Mary") (Concept "loves") (Concept "Joe")))
 
-(define constrained-adv-sent
-	(PatternLink
-		(BindLink
-			(Variable "$type constraints")
-			(ListLink
-				(Concept "I")
-				(Concept "really")
-				(Concept "truly")
-				(Concept "love")
-				(Concept "you"))
-			(Variable "$impl"))))
+; Try it!  Not much different, here:
+(cog-execute! (Dual mary-n-joe))
 
-(cog-recognize constrained-adv-sent)
+; Because this rule includes a variable typing section, the above above
+; (naively-constructed) mechanisms will choke: the typing restrictions
+; cause a mis-match.  Thus, we repeat the above tools, this time, with
+; a typing section.
+
+; ------------------
+
+(define (get-conseq-typed ANTECEDENT)
+"
+  get-conseq-typed ANTECEDENT -- given the ANTECEDENT, return a set of
+  all of the consequents of a rule.
+
+  Example usage:
+     (get-conseq-typed (List (Glob \"$A\") (Concept \"loves\") (Glob \"$B\")))
+"
+
+	; Accept only consequents that are ListLink's
+	(cog-execute!
+		(GetLink
+			(VariableList
+				(TypedVariable (Variable "$vardecl") (Type "VariableList"))
+				(TypedVariable (Variable "$consequent") (Type "ListLink")))
+			(Quote (BindLink
+					(Unquote (Variable "$vardecl"))
+					ANTECEDENT
+					(Unquote (Variable "$consequent"))))
+		)
+	)
+)
+
+; Try it!
+; (get-conseq-typed (List (Glob "$A") (Concept "loves") (Glob "$B")))
+
 
 ; ---------------------------------------------------------------------
 
