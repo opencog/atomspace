@@ -110,8 +110,8 @@ void PutLink::init(void)
 
 /// Check that the values in the PutLink obey the type constraints.
 /// This only performs "static" typechecking, at construction-time;
-/// the values may be dynamically obtained at run-time, we cannot check
-/// these here.
+/// since the values may be dynamically obtained at run-time, we cannot
+/// check these here.
 void PutLink::static_typecheck_values(void)
 {
 	// Cannot typecheck at this pont in time, because the schema
@@ -132,7 +132,8 @@ void PutLink::static_typecheck_values(void)
 	if (1 == sz)
 	{
 		if (not _varlist.is_type(_values)
-		    and SET_LINK != vtype)
+		    and SET_LINK != vtype
+		    and not (classserver().isA(vtype, SATISFYING_LINK)))
 		{
 				throw InvalidParamException(TRACE_INFO,
 					"PutLink mismatched type!");
@@ -159,8 +160,8 @@ void PutLink::static_typecheck_values(void)
 		return;
 	}
 
-	// GetLinks are evaluated dynamically, later.
-	if (GET_LINK == vtype)
+	// GetLinks (and the like) are evaluated dynamically, later.
+	if (classserver().isA(vtype, SATISFYING_LINK))
 		return;
 
 	// If its part of a signature, there is nothing to do.
@@ -196,6 +197,7 @@ void PutLink::static_typecheck_values(void)
 					"PutLink bad type!");
 	}
 }
+
 /* ================================================================= */
 
 /**
