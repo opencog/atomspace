@@ -153,6 +153,13 @@
     rbs
 )
 
+(define-public (ure-get-forward-rule rule)
+"
+  Given a rule return the forward form
+"
+  (let ((rule-type (cog-type rule)))
+    (if (eq? rule-type 'ListLink) (gar rule) rule))
+)
 
 (define (export-rule-engine-utils)
   (export ure-add-rule
@@ -160,5 +167,6 @@
           ure-set-num-parameter
           ure-set-fuzzy-bool-parameter
           ure-define-rbs
+          ure-get-forward-rule
           export-rule-engine-utils)
 )
