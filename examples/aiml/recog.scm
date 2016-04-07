@@ -224,15 +224,17 @@
 ; impediment is that each rule is wrapped with a SetLink, and needs to be
 ; unwrapped. You can see this wrapping in the "Try it!" result, above.
 ;
-(define recognized-rules
-   (get-untyped-rules (List (Concept "I") (Concept "love") (Concept "you"))))
 
 ; ruleset is the unwrapped rules.  Use cog-outgoing-set to unwrap them.
-(define ruleset
+(define (unwrap-rules RULES)
    (fold
 		(lambda (s li) (cons (car (cog-outgoing-set s)) li))
 		'()
-		(cog-outgoing-set recognized-rules)))
+		(cog-outgoing-set RULES)))
+
+(define ruleset
+	(unwrap-rules
+		(get-untyped-rules (List (Concept "I") (Concept "love") (Concept "you")))))
 
 (map cog-execute! ruleset)
 
@@ -379,5 +381,24 @@
 ; Try it!
 ; (get-typed-rules (List (Concept "Mary") (Concept "loves") (Concept "Joe")))
 ;
-;-------------------------------------------------------
+; Just as before, unwrap the rules from the multiple nested SetLinks
+; that get wedged in.  Finally, execute the resulting rules!
+(define ruleset
+	(unwrap-rules
+		(get-typed-rules (List (Concept "Mary") (Concept "loves") (Concept "Joe")))))
+
+; Try it!  Ta-DAHHH!
+(map cog-execute! ruleset)
+
+; At last, we get the expected response:
+(SetLink
+   (ListLink
+      (ConceptNode "I'm")
+      (ConceptNode "sure")
+      (ConceptNode "that")
+      (ConceptNode "Mary")
+      (ConceptNode "loves")
+      (ConceptNode "Joe")))
+
+; ---------------------------------------------------------------------
 *unspecified*
