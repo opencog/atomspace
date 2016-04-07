@@ -43,7 +43,6 @@
 ;
 ; -------------------------------------------------------------------
 ;
-(use-modules (srfi srfi-1))
 (use-modules (opencog) (opencog exec))
 
 ; Two different pseudo-AIML rules:
@@ -128,14 +127,30 @@
 		(GetLink
 			(Variable "$consequent")
 			(Quote (BindLink ANTECEDENT (Unquote (Variable "$consequent"))))
-		)))
+		)
+	)
+)
 
 (define (get-rules ANTECEDENT)
 "
   get-rules ANTECEDENT -- given the ANTECEDENT, return a set of all
   rules that can be applied to it.
 "
-  (map 
+	; The GetLink below returns all of the consequents.
+	; The TypedVariable filters out and rejects all consequents that
+	;   are not ListLinks.
+	; The PutLink reconstructs the rule, out of the antecedent and
+	;   the consequent.
+	(cog-execute!
+		(Put
+			(TypedVariable (Variable "$list") (Type "ListLink"))
+			(Quote (Bind ANTECEDENT (Unquote (Variable "$list"))))
+			(Get
+				(Variable "$consequent")
+				(Quote (BindLink ANTECEDENT (Unquote (Variable "$consequent"))))
+			)
+		)
+	)
 )
 
 
