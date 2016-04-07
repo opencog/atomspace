@@ -107,20 +107,30 @@
 
 ;-------------------------------------------------------
 ; At this point, one will typically want to know the full rule to which
-; the dual is just a fragment of. At this time, there is no direct
-; atomese expression to accomplish this, and so here, we do this in a
-; bit of an ad-hoc way, mixing scheme and atomese.  Its ad-hoc simply
-; because the requirements for finding rules are not yet clear.  Its
-; not just a matter of "finding rules"; there are a half-dozen other
-; issues tangled in, including imprecise (fuzzy) matching, Bayesian
-; or Markovian or other probilistic wieghting, and amenability to
-; learning algorithms, e.g. MOSES-inspired genetic mutation and search.
-; So we proceed with an ad-hoc solution.
+; the dual is just a fragment of.  That is, the DualLink just returns
+; the antecedent of a rule, not the rule itself; one wants the full rule,
+; so that it can be applied.
+;
+; This can be done in several ways: one could write pure scheme code
+; (or C++ or python) to trace the incoming set of the antecedent and
+; find every rule its embedded in. This isn't hard to do: just use the
+; `cog-chase-link` utility.  Alternately, one can write the entire
+; thing in pure Atomese. This second option is explored below.  There's
+; no particularly strong reason to do it this way.  It will seem a bit
+; complicated, and will be slower than a pure-scheme solution. But its
+; illustrative of what one can do with Atomese, so we do that here.
+;
+; To work up to the final, working example, several simpler expressions
+; are constructed first.
+
 
 (define (get-consequents ANTECEDENT)
 "
   get-consequents ANTECEDENT -- given the ANTECEDENT, return a set of
   all of the consequents of a rule.
+
+  Example usage:
+     (get-consequents (List (Concept \"I\") (Glob \"$star\") (Concept \"you\")))
 "
 
 	(cog-execute!
@@ -131,10 +141,13 @@
 	)
 )
 
-(define (get-rules ANTECEDENT)
+(define (get-rules-for-ante ANTECEDENT)
 "
-  get-rules ANTECEDENT -- given the ANTECEDENT, return a set of all
-  rules that can be applied to it.
+  get-rules-for-ante ANTECEDENT -- given the ANTECEDENT, return a set
+  of all rules that can be applied to it.
+
+  Example usage:
+     (get-rules-for-ante (List (Concept \"I\") (Glob \"$star\") (Concept \"you\")))
 "
 	; The GetLink below returns all of the consequents.
 	; The TypedVariable filters out and rejects all consequents that
@@ -153,6 +166,32 @@
 	)
 )
 
+(define (get-untyped-rules DATA)
+"
+  get-untyped-rules DATA -- given the graph DATA, return a set of all
+  rules that can be applied to it.
+
+  Example usage:
+     (get-untyped-rules (List (Concept \"I\") (Concept \"love\") (Concept \"you\")))
+"
+	(cog-execute!
+		(Put
+			(TypedVariable (Variable "$ante") (Type "ListLink"))
+			(Put
+				(TypedVariable (Variable "$list") (Type "ListLink"))
+				(Quote (BindLink
+					(Unquote (Variable "$ante"))
+					(Unquote (Variable "$list"))
+				))
+				(GetLink
+					(Variable "$consequent")
+					(Quote (BindLink
+						(Unquote (Variable "$ante"))
+						(Unquote (Variable "$consequent"))))
+				))
+			(Dual DATA)
+		))
+)
 
 ;-------------------------------------------------------
 ;-------------------------------------------------------
