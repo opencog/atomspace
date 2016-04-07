@@ -100,7 +100,13 @@ void PutLink::init(void)
 	ScopeLink::extract_variables(_outgoing);
 
 	if (2 == sz)
+	{
+		// If the body is just a single variable, and there are no
+		// type declarations for it, then ScopeLink gets confused.
+		_vardecl = Handle::UNDEFINED;
+		_body = _outgoing[0];
 		_values = _outgoing[1];
+	}
 	else
 		_values = _outgoing[2];
 
@@ -230,7 +236,7 @@ void PutLink::static_typecheck_values(void)
  *         ConceptNode "hot patootie"
  *
  * Type checking is performed during substitution; if the values fail to
- * have the desired types, no substituion is performed.  In this case,
+ * have the desired types, no substitution is performed.  In this case,
  * an undefined handle is returned. For set substitutions, this acts as
  * a filter, removeing (filtering out) the mismatched types.
  *
