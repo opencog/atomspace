@@ -294,7 +294,11 @@
 	(cog-execute!
 		(GetLink
 			(VariableList
-				(TypedVariable (Variable "$vardecl") (Type "VariableList"))
+				(TypedVariable (Variable "$vardecl")
+					(TypeChoice  ; three different kinds of typedecls are possible.
+						(Type "VariableNode")
+						(Type "TypedVariableLink")
+						(Type "VariableList")))
 				(TypedVariable (Variable "$consequent") (Type "ListLink")))
 			(Quote (BindLink
 					(Unquote (Variable "$vardecl"))
@@ -307,6 +311,55 @@
 ; Try it!
 ; (get-conseq-typed (List (Glob "$A") (Concept "loves") (Glob "$B")))
 
+; ------------------
+; The below is just like `get-rules-for-ante`, except that its for typed rules.
+
+(define (get-typed-rules-for-ante ANTECEDENT)
+"
+  get-typed-rules-for-ante ANTECEDENT -- given the ANTECEDENT, return a set
+  of all rules (with type declarations in them) that can be applied to it.
+
+  Example usage:
+     (get-typed-rules-for-ante (List (Glob \"$A\") (Concept \"loves\") (Glob \"$B\")))
+"
+	(define (getter ANTE)
+		(GetLink
+			(VariableList
+				(TypedVariable (Variable "$vardecl")
+					(TypeChoice  ; three different kinds of typedecls are possible.
+						(Type "VariableNode")
+						(Type "TypedVariableLink")
+						(Type "VariableList")))
+				(TypedVariable (Variable "$consequent") (Type "ListLink")))
+			(Quote (BindLink
+					(Unquote (Variable "$vardecl"))
+					ANTE
+					(Unquote (Variable "$consequent"))))
+		)
+	)
+	; The GetLink above returns all of the vardels and consequents.
+	; The TypedVariable filters out and rejects all consequents that
+	;   are not ListLinks.
+	; The PutLink reconstructs the rule, out of the antecedent and
+	;   the consequent.
+	; The Quotes are used to avoid accidentally running the BindLink
+	;   that is being assembled.
+	(cog-execute!
+		(Put
+			(VariableList
+				(Variable "$decls")
+				(Variable "$sequent"))
+			(Quote (Bind
+					(Unquote (Variable "$decls"))
+					ANTECEDENT
+					(Unquote (Variable "$sequent"))))
+			(getter ANTECEDENT)
+		)
+	)
+)
+
+; Try it!
+; (get-typed-rules-for-ante (List (Glob "$A") (Concept "loves") (Glob "$B")))
 
 ; ---------------------------------------------------------------------
 
