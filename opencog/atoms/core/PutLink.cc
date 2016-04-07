@@ -139,6 +139,7 @@ void PutLink::static_typecheck_values(void)
 	{
 		if (not _varlist.is_type(_values)
 		    and SET_LINK != vtype
+		    and PUT_LINK != vtype
 		    and not (classserver().isA(vtype, SATISFYING_LINK)))
 		{
 				throw InvalidParamException(TRACE_INFO,
