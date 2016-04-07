@@ -1,10 +1,46 @@
 ;
 ; recog.scm
 ;
-; This is a rough sketch of the idea that pattern recognition
-; is the dual of pattern matching.  There are many things wrong
-; with the below; its just a sketch. However, it does work.
+; Pattern recognition is dual to pattern matching!
+; aka the "dynamic Rete algorithm"!
 ;
+; When designing a rule engine, one is (eventually) faced with the task
+; of determining which rules can be applied at some given point of the
+; calculations.  One can blindly try all of the rules, and see which
+; ones fire.  When there are more than a few dozen rules, this becomes
+; impractical.  This issue was observed, and resolved in the 1970's and
+; 1980's with the Rete algorithm: one organizes the set of rules into
+; a trie, which is then very easily and quickly walked, to determine
+; which ones can fire.
+;
+; OpenCog and the AtomSpace do NOT (explicitly) implement tries or Rete!
+; However, the general (hyper-)graph structure of OpenCog Atoms already
+; contains enough connectivity information to accomplish more or less
+; the same thing: a kind-of "dynamic Rete", where rulesets can be
+; searched for, on-demand, at runtime.
+;
+; The core idea is that pattern recognition is dual to pattern matching.
+; If we define "pattern matching" as the idea of finding all data that
+; matches a pattern, then "pattern recognition" is the act of finding
+; all patterns that match the data.  In pattern matching, where a
+; pattern has variables in it, one finds all groundings (concrete values
+; for the variables) that cause the pattern expression to evaluate to
+; "true". In pattern recognition, one has a single "grounding", and asks
+; for all pattern expressions that evaluate to "true" when applied to
+; this grounding.
+;
+; The Atomese construct for accomplishing this is the DualLink. It is
+; roughly the opposite of the GetLink, "opposite" in the cat-theory
+; sense of reversing arrows.  Its "rough", in that the tye constraints
+; that are possible in GetLink are ignored by the DualLink.
+;
+; The example below is based on an AIML-like search, simply because
+; this is easy to explain and demonstrate. Note that all AIML chatbots
+; maintain a trie of AIML rules, and so AIML is a "natural" example of
+; pattern recognition.  The atomese DualLink is, however, a general
+; pattern recognizer: it can be used in a general setting, not just
+; for AIML-like structures.
+
 
 (use-modules (opencog) (opencog exec))
 
@@ -69,6 +105,12 @@
 (cog-execute! (DualLink adv-sent))
 
 ;-------------------------------------------------------
+; At this point, one will typically want to know the full rule
+
+;-------------------------------------------------------
+;-------------------------------------------------------
+;-------------------------------------------------------
+;-------------------------------------------------------
 ;; Evaluate each of the bind links that were found.
 (define ruleset (cog-recognize sent))
 
@@ -99,8 +141,8 @@
 (define a-love-b
 	(BindLink
 		(VariableList
-			(TypedVariable (Glob "$A") (Type "Concept"))
-			(TypedVariable (Glob "$B") (Type "Concept")))
+			(TypedVariable (Glob "$A") (Type "ConceptNode"))
+			(TypedVariable (Glob "$B") (Type "ConceptNode")))
 		(ListLink
 			(Glob "$A")
 			(Concept "love")
