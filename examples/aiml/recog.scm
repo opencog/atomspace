@@ -280,6 +280,26 @@
 ; a typing section.
 
 ; ------------------
+; The below is just like `get-consequents` above, but for typed rules.
+
+; Utility, from which the other parts are made. Similar to
+; `get-consequents`, above, except that the `cog-execute!` step
+; is skipped. So, this only defines a GetLink.
+(define (pattern-getter ANTECEDENT)
+	(GetLink
+		(VariableList
+			(TypedVariable (Variable "$vardecl")
+				(TypeChoice  ; three different kinds of typedecls are possible.
+					(Type "VariableNode")
+					(Type "TypedVariableLink")
+					(Type "VariableList")))
+			(TypedVariable (Variable "$consequent") (Type "ListLink")))
+		(Quote (BindLink
+				(Unquote (Variable "$vardecl"))
+				ANTECEDENT
+				(Unquote (Variable "$consequent"))))
+	)
+)
 
 (define (get-conseq-typed ANTECEDENT)
 "
@@ -290,22 +310,7 @@
      (get-conseq-typed (List (Glob \"$A\") (Concept \"loves\") (Glob \"$B\")))
 "
 
-	; Accept only consequents that are ListLink's
-	(cog-execute!
-		(GetLink
-			(VariableList
-				(TypedVariable (Variable "$vardecl")
-					(TypeChoice  ; three different kinds of typedecls are possible.
-						(Type "VariableNode")
-						(Type "TypedVariableLink")
-						(Type "VariableList")))
-				(TypedVariable (Variable "$consequent") (Type "ListLink")))
-			(Quote (BindLink
-					(Unquote (Variable "$vardecl"))
-					ANTECEDENT
-					(Unquote (Variable "$consequent"))))
-		)
-	)
+	(cog-execute! (pattern-getter ANTECEDENT))
 )
 
 ; Try it!
@@ -313,6 +318,26 @@
 
 ; ------------------
 ; The below is just like `get-rules-for-ante`, except that its for typed rules.
+
+(define (rule-getter ANTECEDENT)
+	; The GetLink returns all of the vardecls and consequents.
+	; The TypedVariable filters out and rejects all consequents that
+	;   are not ListLinks.
+	; The PutLink reconstructs the rule, out of the antecedent and
+	;   the consequent.
+	; The Quotes are used to avoid accidentally running the BindLink
+	;   that is being assembled.
+	(Put
+		(VariableList
+			(Variable "$decls")
+			(Variable "$sequent"))
+		(Quote (Bind
+				(Unquote (Variable "$decls"))
+				ANTECEDENT
+				(Unquote (Variable "$sequent"))))
+		(pattern-getter ANTECEDENT)
+	)
+)
 
 (define (get-typed-rules-for-ante ANTECEDENT)
 "
@@ -322,46 +347,23 @@
   Example usage:
      (get-typed-rules-for-ante (List (Glob \"$A\") (Concept \"loves\") (Glob \"$B\")))
 "
-	(define (getter ANTE)
-		(GetLink
-			(VariableList
-				(TypedVariable (Variable "$vardecl")
-					(TypeChoice  ; three different kinds of typedecls are possible.
-						(Type "VariableNode")
-						(Type "TypedVariableLink")
-						(Type "VariableList")))
-				(TypedVariable (Variable "$consequent") (Type "ListLink")))
-			(Quote (BindLink
-					(Unquote (Variable "$vardecl"))
-					ANTE
-					(Unquote (Variable "$consequent"))))
-		)
-	)
-	; The GetLink above returns all of the vardels and consequents.
-	; The TypedVariable filters out and rejects all consequents that
-	;   are not ListLinks.
-	; The PutLink reconstructs the rule, out of the antecedent and
-	;   the consequent.
-	; The Quotes are used to avoid accidentally running the BindLink
-	;   that is being assembled.
-	(cog-execute!
-		(Put
-			(VariableList
-				(Variable "$decls")
-				(Variable "$sequent"))
-			(Quote (Bind
-					(Unquote (Variable "$decls"))
-					ANTECEDENT
-					(Unquote (Variable "$sequent"))))
-			(getter ANTECEDENT)
-		)
-	)
+	(cog-execute! (rule-getter ANTECEDENT))
 )
 
 ; Try it!
 ; (get-typed-rules-for-ante (List (Glob "$A") (Concept "loves") (Glob "$B")))
 
 ; ---------------------------------------------------------------------
+; The below is just like `get-untyped-rules` above, except its for
+; typed rules.
+
+(define (rule-recognizer DATA)
+	(Put
+		(TypedVariable (Variable "$ante") (Type "ListLink"))
+		(rule-getter (Unquote (Variable "$ante")))
+		(Dual DATA)
+	)
+)
 
 (define (get-typed-rules DATA)
 "
@@ -371,24 +373,11 @@
   Example usage:
      (get-typed-rules (List (Concept \"I\") (Concept \"love\") (Concept \"you\")))
 "
-	(cog-execute!
-		(Put
-			(TypedVariable (Variable "$ante") (Type "ListLink"))
-			(Put
-				(TypedVariable (Variable "$list") (Type "ListLink"))
-				(Quote (BindLink
-					(Unquote (Variable "$ante"))
-					(Unquote (Variable "$list"))
-				))
-				(GetLink
-					(Variable "$consequent")
-					(Quote (BindLink
-						(Unquote (Variable "$ante"))
-						(Unquote (Variable "$consequent"))))
-				))
-			(Dual DATA)
-		))
+	(cog-execute! (rule-recognizer DATA))
 )
 
+; Try it!
+; (get-typed-rules (List (Concept "Mary") (Concept "loves") (Concept "Joe")))
+;
 ;-------------------------------------------------------
 *unspecified*
