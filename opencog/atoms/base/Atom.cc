@@ -25,6 +25,7 @@
  */
 
 #include <set>
+#include <sstream>
 
 #ifndef WIN32
 #include <unistd.h>
@@ -55,7 +56,7 @@
 
 #undef Type
 
-using namespace opencog;
+namespace opencog {
 
 #define _avmtx _mtx
 
@@ -366,3 +367,14 @@ IncomingSet Atom::getIncomingSetByType(Type type, bool subclass)
         inlinks.emplace_back(LinkCast(h));
     return inlinks;
 }
+
+std::string oc_to_string(const IncomingSet& iset)
+{
+	std::stringstream ss;
+	ss << "size = " << iset.size() << std::endl;
+	for (unsigned i = 0; i < iset.size(); i++)
+		ss << "link[" << i << "]:" << std::endl << iset[i]->toString();
+	return ss.str();
+}
+
+} // ~namespace opencog
