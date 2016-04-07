@@ -252,7 +252,7 @@ void BackwardChainer::process_target(Target& target)
 
 	bc_logger().debug("Selected rule %s", selected_rule.get_name().c_str());
 	LAZY_BC_LOG_DEBUG << "Standardized rule:" << std::endl
-	                  << standardized_rule.get_handle()->toShortString();
+	                  << standardized_rule.get_forward_rule()->toShortString();
 	bc_logger().debug("Found %d implicand's output unifiable",
 	                  all_implicand_to_target_mappings.size());
 
@@ -300,7 +300,7 @@ void BackwardChainer::process_target(Target& target)
 		target.store_step(selected_rule, { hrule_implicant_reverse_grounded });
 		_targets_set.emplace(hrule_implicant_reverse_grounded,
 		                     gen_sub_varlist(hrule_implicant_reverse_grounded,
-		                                     standardized_rule.get_vardecl(),
+		                                     standardized_rule.get_forward_vardecl(),
 		                                     additional_free_var));
 		return;
 	}
@@ -323,7 +323,7 @@ void BackwardChainer::process_target(Target& target)
 		// Adding to _garbage_superspace because the mapping are from within
 		// the garbage space.
 		Handle output_grounded =
-			garbage_substitute(standardized_rule.get_implicand(),
+			garbage_substitute(standardized_rule.get_forward_conclusion(),
 			                   implicand_mapping);
 		LAZY_BC_LOG_DEBUG << "Output reverse grounded step 1 as:" << std::endl
 		                  << output_grounded->toShortString();
@@ -332,7 +332,7 @@ void BackwardChainer::process_target(Target& target)
 		                  << output_grounded->toShortString();
 
 		HandleSeq output_grounded_seq;
-		for (const auto& h : standardized_rule.get_implicand_seq())
+		for (const auto& h : standardized_rule.get_conclusion_seq())
 			output_grounded_seq.push_back(
 				garbage_substitute(garbage_substitute(h, implicand_mapping), vm));
 
@@ -368,6 +368,9 @@ void BackwardChainer::process_target(Target& target)
 			// apply it by using the mapping to ground the target, and add
 			// it to _as since this is not garbage; this should generate
 			// all the outputs of the rule, and execute any evaluatable
+			//
+			// In other words apply forward chaining for that
+			// grounded conclusion.
 			//
 			// XXX TODO the TV of the original "Variable Fullfillment" target
 			// need to be changed here... right?
@@ -503,7 +506,8 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
 			// don't want matched clause that is part of a rule
 			auto& rules = _configReader.get_rules();
 			if (std::any_of(rules.begin(), rules.end(), [&](Rule& r) {
-						return is_atom_in_tree(r.get_handle(), p.second); }))
+						return is_atom_in_tree(r.get_forward_rule(), p.second);
+					}))
 			{
 				bc_logger().debug("matched clause in rule");
 				break;
@@ -511,7 +515,8 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
 
 			// don't want matched stuff with some part of a rule inside
 			if (std::any_of(rules.begin(), rules.end(), [&](Rule& r) {
-						return is_atom_in_tree(p.second, r.get_handle()); }))
+						return is_atom_in_tree(p.second, r.get_forward_rule());
+					}))
 			{
 				bc_logger().debug("matched clause wrapping rule");
 				break;
@@ -573,8 +578,8 @@ HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
                                          Handle& hrule_implicant_reverse_grounded,
                                          HandleMapSeq& premises_vmap_list)
 {
-	Handle hrule_implicant = standardized_rule.get_implicant();
-	Handle hrule_vardecl = standardized_rule.get_vardecl();
+	Handle hrule_implicant = standardized_rule.get_forward_implicant();
+	Handle hrule_vardecl = standardized_rule.get_forward_vardecl();
 
 	// Reverse ground the implicant with the grounding we found from
 	// unifying the implicand
@@ -881,8 +886,8 @@ bool BackwardChainer::select_rule(const Target& target,
 		selected_rule = rules[index];
 		standardized_rule = selected_rule.gen_standardize_apart(&_garbage_superspace);
 
-		Handle hrule_vardecl = standardized_rule.get_vardecl();
-		HandleSeq output = standardized_rule.get_implicand_seq();
+		Handle hrule_vardecl = standardized_rule.get_forward_vardecl();
+		HandleSeq output = standardized_rule.get_conclusion_seq();
 
 		all_implicand_to_target_mappings.clear();
 

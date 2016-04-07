@@ -116,7 +116,7 @@ void BackwardChainerUTest::test_1_rule_bc_deduction()
 	Handle D = eval_.eval_h("(Concept \"D\")");
 
 	bc.set_target(target);
-	bc.get_config().set_maximum_iterations(200);
+	bc.get_config().set_maximum_iterations(100);
 	bc.do_chain();
 
 	HandleMultimap results = bc.get_chaining_result();
@@ -355,8 +355,8 @@ void BackwardChainerUTest::test_focus_set()
  * (InheritanceLink
  *  (ConceptNode "A")
  *   (ConceptNode "B")
- * )
- *
+ * )/
+*
  * (InheritanceLink
  *   (ConceptNode "A")
  *   (VariableNode "$X")

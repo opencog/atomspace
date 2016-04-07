@@ -17,10 +17,10 @@
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: bc-modus-ponens-formula")
             (ListLink
-                (VariableNode "$B")
                 (ImplicationLink
                     (VariableNode "$A")
-                    (VariableNode "$B"))))))
+                    (VariableNode "$B"))
+                (VariableNode "$B")))))
 
 ; -----------------------------------------------------------------------------
 ; Modus Ponens Formula
@@ -30,7 +30,7 @@
 ; Side-effect: TruthValue of AC may be updated
 ; -----------------------------------------------------------------------------
 
-(define (bc-modus-ponens-formula B AB)
+(define (bc-modus-ponens-formula AB B)
     (cog-set-tv!
         B
         (bc-modus-ponens-side-effect-free-formula
