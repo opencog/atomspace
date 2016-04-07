@@ -41,8 +41,9 @@
 ; pattern recognizer: it can be used in a general setting, not just
 ; for AIML-like structures.
 ;
-; -------------------------------------------------------------------
+; ---------------------------------------------------------------------
 ;
+(use-modules (srfi srfi-1))
 (use-modules (opencog) (opencog exec))
 
 ; Two different pseudo-AIML rules:
@@ -67,7 +68,7 @@
 		(Concept "a")
 		(Concept "lot!")))
 
-;-------------------------------------------------------
+; ---------------------------------------------------------------------
 ;; A pretend "sentence" that is the "input".
 (define sent
 	(ListLink (Concept "I") (Concept "love") (Concept "you")))
@@ -91,7 +92,7 @@
 	)
 )
 
-;-------------------------------------------------------
+; ---------------------------------------------------------------------
 ;; Another sentence, but with adverbs.  It will match one of the
 ;; patterns, but not the other.
 (define adv-sent
@@ -105,7 +106,7 @@
 ;; Perform the search.
 (cog-execute! (DualLink adv-sent))
 
-;-------------------------------------------------------
+; ---------------------------------------------------------------------
 ; At this point, one will typically want to know the full rule to which
 ; the dual is just a fragment of.  That is, the DualLink just returns
 ; the antecedent of a rule, not the rule itself; one wants the full rule,
@@ -133,13 +134,22 @@
      (get-consequents (List (Concept \"I\") (Glob \"$star\") (Concept \"you\")))
 "
 
+	; Accept only cnsequents that are ListLink's
 	(cog-execute!
 		(GetLink
-			(Variable "$consequent")
+			(TypedVariable (Variable "$consequent") (Type "ListLink"))
 			(Quote (BindLink ANTECEDENT (Unquote (Variable "$consequent"))))
 		)
 	)
 )
+
+; Try it!
+; (get-consequents (List (Concept "I") (Glob "$star") (Concept "you")))
+
+; ------------------
+; The below takes the above GetLink, and uses it to generate values
+; that are then installed in place by a PutLink. That is, the PutLink
+; re-assembles the rule from the antecedent and the consequent.
 
 (define (get-rules-for-ante ANTECEDENT)
 "
@@ -154,6 +164,8 @@
 	;   are not ListLinks.
 	; The PutLink reconstructs the rule, out of the antecedent and
 	;   the consequent.
+	; The Quotes are used to avoid accidentally running the BindLink
+	;   that is being assembled.
 	(cog-execute!
 		(Put
 			(TypedVariable (Variable "$list") (Type "ListLink"))
@@ -165,6 +177,15 @@
 		)
 	)
 )
+
+; Try it!
+; (get-rules-for-ante (List (Concept "I") (Glob "$star") (Concept "you")))
+
+; ------------------
+; The below takes the above rule generator, and turns it into a
+; bona-fide rule recognizer.  It does this by running the DualLink to
+; find the antencedents, and then using a PutLink to plug these into
+; the rule generator.
 
 (define (get-untyped-rules DATA)
 "
@@ -193,30 +214,35 @@
 		))
 )
 
-;-------------------------------------------------------
-;-------------------------------------------------------
-;-------------------------------------------------------
-;-------------------------------------------------------
-;; Evaluate each of the bind links that were found.
-(define ruleset (cog-recognize sent))
+; Try it!
+; (get-untyped-rules (List (Concept "I") (Concept "love") (Concept "you")))
 
-(map cog-bind (cog-outgoing-set ruleset))
+; ---------------------------------------------------------------------
+; To complete the example, one typically needs to run the rules after
+; finding them. We do this below, in an ad-hoc fashion.  The primary
+; impediment is that each rule is wrapped with a SetLink, and needs to be
+; unwrapped. You can see this wrapping in the "Try it!" result, above.
+;
+(define recognized-rules
+   (get-untyped-rules (List (Concept "I") (Concept "love") (Concept "you"))))
 
-; For the non-adverbial sentence this returns the below:
-((SetLink
-   (ListLink
-      (Concept "I")
-      (Concept "love")
-      (Concept "you")
-      (Concept "too")))
- (SetLink
-   (ListLink
-      (Concept "I")
-      (Concept "like")
-      (Concept "you")
-      (Concept "a")
-      (Concept "lot!"))))
+; ruleset is the unwrapped rules.  Use cog-outgoing-set to unwrap them.
+(define ruleset
+   (fold
+		(lambda (s li) (cons (car (cog-outgoing-set s)) li))
+		'()
+		(cog-outgoing-set recognized-rules)))
 
+(map cog-execute! ruleset)
+
+; When the above code is executed, you will get back a bunch of
+; sentences: that's because the atomspace already contains a bunch of
+; sentences in it, and the rule-set will find ALL of them, and get
+; applied to all of them.  To avoid this behavior, you need to tag
+; the one sentence you are interested in in some way,  e.g. by using
+; a link to connect it to `(AnchorNode "the current sentnece")` and
+; then including the AnchorNode in each AIML rule.
+;
 ;-------------------------------------------------------
 
 ; A pattern with two globs in it.
@@ -257,6 +283,35 @@
 			(Variable "$impl"))))
 
 (cog-recognize constrained-adv-sent)
+
+; ---------------------------------------------------------------------
+
+(define (get-typed-rules DATA)
+"
+  get-typed-rules DATA -- given the graph DATA, return a set of all
+  rules that (that have type declarations) that can be applied to it.
+
+  Example usage:
+     (get-typed-rules (List (Concept \"I\") (Concept \"love\") (Concept \"you\")))
+"
+	(cog-execute!
+		(Put
+			(TypedVariable (Variable "$ante") (Type "ListLink"))
+			(Put
+				(TypedVariable (Variable "$list") (Type "ListLink"))
+				(Quote (BindLink
+					(Unquote (Variable "$ante"))
+					(Unquote (Variable "$list"))
+				))
+				(GetLink
+					(Variable "$consequent")
+					(Quote (BindLink
+						(Unquote (Variable "$ante"))
+						(Unquote (Variable "$consequent"))))
+				))
+			(Dual DATA)
+		))
+)
 
 ;-------------------------------------------------------
 *unspecified*
