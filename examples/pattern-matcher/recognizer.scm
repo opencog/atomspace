@@ -402,7 +402,11 @@
 
 ; ---------------------------------------------------------------------
 ; And now ... some simple, cheap, cheesy glue to implement a simple
-; AIML-like system.
+; AIML-like system.  To actually use this, copy this file, and edit it
+; to remove the example sentences (they'll pollute the output) and add
+; more rules, in the format similar to the above.  Make sure that the
+; rules are typed; this is using the typed variant of the above
+; examples.
 
 ; Give a string sentence SENT, generate a rule-driven reply.
 ; Example: (aiml-reply "Anne loves Richard")
@@ -423,6 +427,7 @@
 	)
 
 	; Convert a ListLink of Nodes into a scheme list of strings
+	; Add a padding blank to the end.
 	(define (atoms-to-strings NODELIST)
 		(fold-right
 			(lambda (s li) (cons (string-append (cog-name s) " ") li))
