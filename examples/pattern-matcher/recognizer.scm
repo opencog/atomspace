@@ -1,5 +1,5 @@
 ;
-; recog.scm
+; recognizer.scm
 ;
 ; Pattern recognition is dual to pattern matching!
 ; AKA the "dynamic Rete algorithm".
@@ -399,6 +399,57 @@
       (ConceptNode "Mary")
       (ConceptNode "loves")
       (ConceptNode "Joe")))
+
+; ---------------------------------------------------------------------
+; And now ... some simple, cheap, cheesy glue to implement a simple
+; AIML-like system.
+
+; Give a string sentence SENT, generate a rule-driven reply.
+; Example: (aiml-reply "Anne loves Richard")
+(define (aiml-reply SENT)
+
+	; Split a string into words.
+	; Example: (split-sentence "I love you")
+	(define (split-sentence SENT)
+		(ListLink
+			(map (lambda (word) (Concept word)) (string-split SENT #\ ))))
+
+	; Get the result of applying rules.
+	; Example: (get-aiml-response "I love you")
+	(define (get-aiml-response SENT)
+		(define ruleset
+			(unwrap-rules (get-typed-rules (split-sentence SENT))))
+		(map cog-execute! ruleset)
+	)
+
+	; Convert a ListLink of Nodes into a scheme list of strings
+	(define (atoms-to-strings NODELIST)
+		(fold-right
+			(lambda (s li) (cons (string-append (cog-name s) " ") li))
+			'()
+			(cog-outgoing-set NODELIST)))
+
+	; Concatenate a list of strings into one string.
+	(define (make-sent NODELIST)
+		(string-concatenate (atoms-to-strings NODELIST)))
+
+	; Create a list of reply sentences.
+	; Example: (make-reply "I love you")
+	(define (make-reply SENT)
+		(map make-sent
+			(cog-outgoing-set (car (get-aiml-response SENT)))))
+
+	; Now, actually do stuff.  Push and pop the atomspace, to avoid
+	; polluting it with sentences.  The push and pop here is a hack;
+	; a more elegant solution is to use anchors to point at the
+	; current sentence, and have the rules look for it there.
+	(define reply "")
+	(begin
+		(cog-push-atomspace)
+		(set! reply (make-reply SENT))
+		(cog-pop-atomspace)
+		reply)
+)
 
 ; ---------------------------------------------------------------------
 *unspecified*
