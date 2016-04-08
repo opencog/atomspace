@@ -100,7 +100,13 @@ void PutLink::init(void)
 	ScopeLink::extract_variables(_outgoing);
 
 	if (2 == sz)
+	{
+		// If the body is just a single variable, and there are no
+		// type declarations for it, then ScopeLink gets confused.
+		_vardecl = Handle::UNDEFINED;
+		_body = _outgoing[0];
 		_values = _outgoing[1];
+	}
 	else
 		_values = _outgoing[2];
 
@@ -110,8 +116,8 @@ void PutLink::init(void)
 
 /// Check that the values in the PutLink obey the type constraints.
 /// This only performs "static" typechecking, at construction-time;
-/// the values may be dynamically obtained at run-time, we cannot check
-/// these here.
+/// since the values may be dynamically obtained at run-time, we cannot
+/// check these here.
 void PutLink::static_typecheck_values(void)
 {
 	// Cannot typecheck at this pont in time, because the schema
@@ -132,7 +138,9 @@ void PutLink::static_typecheck_values(void)
 	if (1 == sz)
 	{
 		if (not _varlist.is_type(_values)
-		    and SET_LINK != vtype)
+		    and SET_LINK != vtype
+		    and PUT_LINK != vtype
+		    and not (classserver().isA(vtype, SATISFYING_LINK)))
 		{
 				throw InvalidParamException(TRACE_INFO,
 					"PutLink mismatched type!");
@@ -159,8 +167,8 @@ void PutLink::static_typecheck_values(void)
 		return;
 	}
 
-	// GetLinks are evaluated dynamically, later.
-	if (GET_LINK == vtype)
+	// GetLinks (and the like) are evaluated dynamically, later.
+	if (classserver().isA(vtype, SATISFYING_LINK))
 		return;
 
 	// If its part of a signature, there is nothing to do.
@@ -196,6 +204,7 @@ void PutLink::static_typecheck_values(void)
 					"PutLink bad type!");
 	}
 }
+
 /* ================================================================= */
 
 /**
@@ -228,7 +237,7 @@ void PutLink::static_typecheck_values(void)
  *         ConceptNode "hot patootie"
  *
  * Type checking is performed during substitution; if the values fail to
- * have the desired types, no substituion is performed.  In this case,
+ * have the desired types, no substitution is performed.  In this case,
  * an undefined handle is returned. For set substitutions, this acts as
  * a filter, removeing (filtering out) the mismatched types.
  *
@@ -245,16 +254,20 @@ Handle PutLink::do_reduce(void) const
 	if (DEFINED_SCHEMA_NODE == btype or
 	    DEFINED_PREDICATE_NODE == btype)
 	{
-		Handle dfn(DefineLink::get_definition(_body));
+		bods = DefineLink::get_definition(bods);
+		btype = bods->getType();
 		// XXX TODO we should perform a type-check on the function.
-		if (not classserver().isA(dfn->getType(), LAMBDA_LINK))
+		if (not classserver().isA(btype, LAMBDA_LINK))
 			throw InvalidParamException(TRACE_INFO,
 					"Expecting a LambdaLink, got %s",
-			      dfn->toString().c_str());
+			      bods->toString().c_str());
+	}
 
-		LambdaLinkPtr lam(LambdaLinkCast(dfn));
+	if (LAMBDA_LINK == btype)
+	{
+		LambdaLinkPtr lam(LambdaLinkCast(bods));
 		if (NULL == lam)
-			lam = createLambdaLink(*LinkCast(dfn));
+			lam = createLambdaLink(*LinkCast(bods));
 		bods = lam->get_body();
 		vars = lam->get_variables();
 	}

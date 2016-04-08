@@ -137,7 +137,7 @@ TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
 Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_results)
 {
 	// Special case the BindLink. We probably shouldn't have to, and
-	// the C++ code for handling this case could maybe be rafactored
+	// the C++ code for handling this case could maybe be refactored
 	// to handle BindLink as well as GetLink in one place... but right
 	// now, it doesn't.
 	Type blt = hlink->getType();
@@ -145,16 +145,15 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_re
 	{
 		return bindlink(as, hlink, max_results);
 	}
+	if (DUAL_LINK == blt)
+	{
+		return recognize(as, hlink);
+	}
 
 	PatternLinkPtr bl(PatternLinkCast(hlink));
 	if (NULL == bl)
 	{
-		// If it is a BindLink (for example), we want to use that ctor
-		// instead of the default ctor.  Note BindLink isA GetLink.
-		if (classserver().isA(blt, GET_LINK))
-			bl = createPatternLink(*LinkCast(hlink));
-		else
-			bl = createPatternLink(hlink);
+		bl = createPatternLink(*LinkCast(hlink));
 	}
 
 	SatisfyingSet sater(as);

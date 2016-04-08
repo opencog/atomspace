@@ -189,9 +189,8 @@ bool Recognizer::loose_match(const Handle& npat_h, const Handle& nsoln_h)
 bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 {
 	// If we are here, then there are probably glob nodes in the soln.
-	// Try to match them, rigorously. This might be a bad idea, though;
-	// if we are too rigorous here, and have a bug, we may fail to find
-	// a good pattern.
+	// Try to match them, fairly rigorously. Exactly what constitutes
+	// an OK match is still a bit up in the air.
 
 	if (not npat_h->isLink() or not nsoln_h->isLink()) return false;
 
@@ -217,7 +216,8 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 	// Do a side-by-side compare. This is not as rigorous as
 	// PatternMatchEngine::tree_compare() nor does it handle the bells
 	// and whistles (ChoiceLink, QuoteLink, etc).
-	for (size_t ip=0, jg=0; ip<osp_size and jg<osg_size; ip++, jg++)
+	size_t ip=0, jg=0;
+	for (; ip<osp_size and jg<osg_size; ip++, jg++)
 	{
 		if (GLOB_NODE != osg[jg]->getType())
 		{
@@ -245,6 +245,10 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 		ip--;
 	}
 
+	// If we are here, then we should have matched up all the atoms;
+	// if we exited the loop because pattern or grounding was short,
+	// then its a mis-match.
+	if (ip != osp_size or jg != osg_size) return false;
 	return true;
 }
 
@@ -253,7 +257,9 @@ bool Recognizer::grounding(const HandleMap &var_soln,
 {
 	Handle rule = term_soln.at(_root);
 
-	_rules.insert(rule);
+	if (rule != _root) {
+		_rules.insert(rule);
+	}
 
 	// Look for more groundings.
 	return false;
@@ -263,7 +269,7 @@ Handle opencog::recognize(AtomSpace* as, const Handle& hlink)
 {
 	PatternLinkPtr bl(PatternLinkCast(hlink));
 	if (NULL == bl)
-		bl = createPatternLink(hlink);
+		bl = createPatternLink(*LinkCast(hlink));
 
 	Recognizer reco(as);
 	bl->satisfy(reco);

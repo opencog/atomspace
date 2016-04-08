@@ -43,6 +43,20 @@ void VariableList::validate_vardecl(const HandleSeq& oset)
 		{
 			get_vartype(h);
 		}
+
+		// Sigh. This UnquoteLink check is a bit of hackery. It can
+		// happen, during pattern-recognition, that we are *searching*
+		// for BindLink's/GetLink's, and need to construct a dummy
+		// variable to match a variable list.  This dummy will be
+		// unquoted first.  Its not unquoting an actual VariableList,
+		// though, its just unquoting a dummy, and so there's nothing
+		// there, its empty, there's nothing to do.  So just pass on
+		// the whole she-bang.  See the `recog.scm` example for a
+		// a real-world example of this happening.
+		else if (UNQUOTE_LINK == t)
+		{
+			return;
+		}
 		else
 			throw InvalidParamException(TRACE_INFO,
 				"Expected a VariableNode or a TypedVariableLink, got: %s",

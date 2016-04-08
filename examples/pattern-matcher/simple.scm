@@ -29,8 +29,8 @@
      ; The result of grounding this will be all things
      ; that could ever possibly be $H
      (InheritanceLink
-        (VariableNode "$H")
-        (ConceptNode "human")
+        (Variable "$H")
+        (Concept "human")
      )
   )
 )
@@ -42,14 +42,14 @@
    (BindLink
       ; This is the pattern that will be matched ...
       (InheritanceLink
-         (VariableNode "$H")
-         (ConceptNode "human")
+         (Variable "$H")
+         (Concept "human")
       )
       ; This is the hypergraph that will be created if the
       ; above pattern is found.
       (InheritanceLink
-         (VariableNode "$H")
-         (ConceptNode "animal")
+         (Variable "$H")
+         (Concept "animal")
       )
    )
 )
@@ -60,11 +60,11 @@
    (BindLink
       ; This is the pattern that will be matched ...
       (InheritanceLink
-         (VariableNode "$H")
-         (ConceptNode "human")
+         (Variable "$H")
+         (Concept "human")
       )
       (ExecutionOutputLink
-         (GroundedSchemaNode "scm: modify-stv")
+         (GroundedSchema "scm: modify-stv")
          ; This is the list of arguments to pass to the formula.
          ; Notice that *two* arguments are passed.  The first
          ; argument is a repeat of the pattern that was matched,
@@ -73,13 +73,13 @@
          (ListLink
             ; The schema will take the truth value from this link ...
             (InheritanceLink
-               (VariableNode "$H")
-               (ConceptNode "human")
+               (Variable "$H")
+               (Concept "human")
             )
             ; and it will set the truth value here, after scaling by 0.3.
             (InheritanceLink
-               (VariableNode "$H")
-               (ConceptNode "animal")
+               (Variable "$H")
+               (Concept "animal")
             )
          )
       )
@@ -104,13 +104,13 @@
 
 ; Some data to populate the atomspace:
 (InheritanceLink (stv 1 0.99)  ; a non-zero truth value is needed!
-  (ConceptNode "Ben")
-  (ConceptNode "human")
+  (Concept "Ben")
+  (Concept "human")
 )
 
 (InheritanceLink (stv 1 0.99)  ; a non-zero truth value is needed!
-  (ConceptNode "Linas")
-  (ConceptNode "human")
+  (Concept "Linas")
+  (Concept "human")
 )
 
 ;;;; Run the Pattern-Mather by invoking any of the following.
@@ -122,22 +122,22 @@
 ;;;; Expected output for each case above:
 
 ; (SetLink
-;    (ConceptNode "Ben")
-;    (ConceptNode "Linas")
+;    (Concept "Ben")
+;    (Concept "Linas")
 ; )
 
 ; (SetLink
-;     (InheritanceLink (ConceptNode "Linas") (ConceptNode "animal"))
-;     (InheritanceLink (ConceptNode "Ben") (ConceptNode "animal"))
+;     (InheritanceLink (Concept "Linas") (Concept "animal"))
+;     (InheritanceLink (Concept "Ben") (Concept "animal"))
 ; )
 
 ; (SetLink
 ;    (InheritanceLink (stv 0.30000001 0.99000001)
-;       (ConceptNode "Linas")
-;       (ConceptNode "animal")
+;       (Concept "Linas")
+;       (Concept "animal")
 ;    )
 ;    (InheritanceLink (stv 0.30000001 0.99000001)
-;       (ConceptNode "Ben")
-;       (ConceptNode "animal")
+;       (Concept "Ben")
+;       (Concept "animal")
 ;    )
 ; )

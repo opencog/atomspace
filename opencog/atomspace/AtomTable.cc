@@ -337,9 +337,11 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
     } else if (BIND_LINK == atom_type) {
         if (nullptr == BindLinkCast(atom))
             return createBindLink(*LinkCast(atom));
-    } else if (PATTERN_LINK == atom_type) {
+
+    } else if (classserver().isA(atom_type, PATTERN_LINK)) {
         if (nullptr == PatternLinkCast(atom))
             return createPatternLink(*LinkCast(atom));
+
     } else if (DEFINE_LINK == atom_type) {
         if (nullptr == DefineLinkCast(atom))
             return createDefineLink(*LinkCast(atom));
@@ -360,15 +362,9 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
         if (nullptr == ExecutionOutputLinkCast(atom))
             return createExecutionOutputLink(*LinkCast(atom));
 */
-    } else if (GET_LINK == atom_type) {
-        if (nullptr == PatternLinkCast(atom))
-            return createPatternLink(*LinkCast(atom));
     } else if (PUT_LINK == atom_type) {
         if (nullptr == PutLinkCast(atom))
             return createPutLink(*LinkCast(atom));
-    } else if (SATISFACTION_LINK == atom_type) {
-        if (nullptr == PatternLinkCast(atom))
-            return createPatternLink(*LinkCast(atom));
     } else if (TYPED_ATOM_LINK == atom_type) {
         if (nullptr == TypedAtomLinkCast(atom))
             return createTypedAtomLink(*LinkCast(atom));
@@ -387,7 +383,7 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
     } else if (classserver().isA(atom_type, FUNCTION_LINK)) {
 /* More circular-dependency heart-ache
         if (nullptr == FunctionLinkCast(atom))
-            return FunctionLink::factory(LinkCast(atom));
+            return FunctionLink::factory(Handle(atom));
 */
     } else if (classserver().isA(atom_type, SCOPE_LINK)) {
         // isA because we want to force alpha-conversion.
@@ -448,8 +444,10 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
     // Links of various kinds -----------
     if (BIND_LINK == atom_type)
         return createBindLink(*LinkCast(atom));
-    if (PATTERN_LINK == atom_type)
+
+    if (classserver().isA(atom_type, PATTERN_LINK))
         return createPatternLink(*LinkCast(atom));
+
     if (DEFINE_LINK == atom_type)
         return createDefineLink(*LinkCast(atom));
 /*
@@ -464,12 +462,8 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
     if (EXECUTION_OUTPUT_LINK == atom_type)
         //return createExecutionOutputLink(*LinkCast(atom));
         return createLink(*LinkCast(atom));
-    if (GET_LINK == atom_type)
-        return createPatternLink(*LinkCast(atom));
     if (PUT_LINK == atom_type)
         return createPutLink(*LinkCast(atom));
-    if (SATISFACTION_LINK == atom_type)
-        return createPatternLink(*LinkCast(atom));
     if (STATE_LINK == atom_type)
         return createStateLink(*LinkCast(atom));
     if (TYPED_ATOM_LINK == atom_type)
@@ -484,7 +478,7 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
         return createImplicationLink(*LinkCast(atom));
     if (classserver().isA(atom_type, FUNCTION_LINK))
         // XXX FIXME more circular-dependency heart-ache
-        // return FunctionLink::factory(LinkCast(atom));
+        // return FunctionLink::factory(Handle(atom));
         return createLink(*LinkCast(atom));
 
     // isA because we want to force alpha-conversion.
