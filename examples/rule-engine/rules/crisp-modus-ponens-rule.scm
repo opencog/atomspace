@@ -12,8 +12,12 @@
 (define crisp-modus-ponens-rule
     (BindLink
         (VariableList
-            (VariableNode "$A")
-            (VariableNode "$B"))
+            (TypedVariable
+                (VariableNode "$A")
+                (TypeNode "PredicateNode"))
+            (TypedVariable
+                (VariableNode "$B")
+                (TypeNode "PredicateNode")))
         (AndLink
             (ImplicationLink
                 (VariableNode "$A")

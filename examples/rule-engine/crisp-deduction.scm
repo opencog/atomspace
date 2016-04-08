@@ -40,14 +40,15 @@
 ; Expected output should be something like
 ;; $1 = (ListLink
 ;;    (ImplicationLink (stv 1 0.99999982)
-;;       (PredicateNode "A")
+;;       (PredicateNode "A" (stv 1 0.99999982))
 ;;       (PredicateNode "C")
 ;;    )
 ;; )
 
-; 2. Test backward chaining (you need to quite guile and restart to be
-; sure the results you're getting aren't provided by the forward
-; chainer command above)
+; 2. WARNING: not current working.
+;    Test backward chaining (you need to quite guile and restart to be
+;    sure the results you're getting aren't provided by the forward
+;    chainer command above)
 
 ;; scheme@(guile-user)> (define AC (ImplicationLink (PredicateNode "A")
 ;;                                                  (PredicateNode "C")))

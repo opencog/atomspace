@@ -25,7 +25,7 @@ public:
 		// Load the simple crisp system example to test it
 		string eval_output =
 			_eval.eval("(load \"" PROJECT_SOURCE_DIR
-			           "/tests/rule-engine/crisp.scm\")");
+			           "/tests/rule-engine/fc.scm\")");
 		std::cout << "eval_output = " << eval_output << std::endl;
 
 		std::cout << "AtomSpace = " << _as << std::endl;
@@ -35,7 +35,7 @@ public:
 	{
 		// Get the ConceptNode corresponding to the rule-based system
 		// to test
-		Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-rule-base");
+		Handle rbs = _as.get_node(CONCEPT_NODE, "fc-rule-base");
 
 		UREConfigReader cr(_as, rbs);
 

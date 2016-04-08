@@ -6,22 +6,28 @@
 ;; See examples/rule-engine/README.md for more details.
 ;; -----------------------------------------------------------------------------
 
-(define crisp-deduction-rule
+(define fc-deduction-rule
     (BindLink
         (VariableList
-            (VariableNode "$A")
-            (VariableNode "$B")
-            (VariableNode "$C"))
+            (TypedVariableLink
+                (VariableNode "$A")
+                (TypeNode "ConceptNode"))
+            (TypedVariableLink
+                (VariableNode "$B")
+                (TypeNode "ConceptNode"))
+            (TypedVariableLink
+                (VariableNode "$C")
+                (TypeNode "ConceptNode")))
         (AndLink
-            (ImplicationLink
+            (InheritanceLink
                 (VariableNode "$A")
                 (VariableNode "$B")
             )
-            (ImplicationLink
+            (InheritanceLink
                 (VariableNode "$B")
                 (VariableNode "$C")
             )
-            ;; To avoid matching (Implication A B) and (Implication B A)
+            ;; To avoid matching (Inheritance A B) and (Inheritance B A)
             (NotLink
                 (IdenticalLink
                     (VariableNode "$A")
@@ -30,15 +36,15 @@
             )
         )
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: crisp-deduction-formula")
+            (GroundedSchemaNode "scm: fc-deduction-formula")
             (ListLink
-                (ImplicationLink
+                (InheritanceLink
                     (VariableNode "$A")
                     (VariableNode "$B"))
-                (ImplicationLink
+                (InheritanceLink
                     (VariableNode "$B")
                     (VariableNode "$C"))
-                (ImplicationLink
+                (InheritanceLink
                     (VariableNode "$A")
                     (VariableNode "$C"))
             )
@@ -54,7 +60,7 @@
 ;; set the TV of A->C to (stv 1 1)
 ;; -----------------------------------------------------------------------------
 
-(define (crisp-deduction-formula AB BC AC)
+(define (fc-deduction-formula AB BC AC)
     (let (  (sAB (cog-stv-strength AB))
             (cAB (cog-stv-confidence AB))
             (sBC (cog-stv-strength BC))
@@ -63,8 +69,8 @@
             (cog-set-tv! AC (stv 1 1)))))
 
 ;; Associate a name to the rule
-(define crisp-deduction-rule-name
-    (DefinedSchemaNode "crisp-deduction-rule"))
+(define fc-deduction-rule-name
+    (DefinedSchemaNode "fc-deduction-rule"))
 (DefineLink
-    crisp-deduction-rule-name
-    crisp-deduction-rule)
+    fc-deduction-rule-name
+    fc-deduction-rule)

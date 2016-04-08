@@ -13,6 +13,7 @@
 ; -- ure-set-fuzzy-bool-parameter -- Set a fuzzy boolean parameter of an rbs
 ; -- ure-define-rbs -- Create a rbs that runs for a particular number of
 ;                      iterations.
+; -- ure-get-forward-rule -- Return the forward form of a rule
 ;
 ; If you add more utilities don't forget to add them in the
 ; export-rule-engine-utils function.

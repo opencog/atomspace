@@ -455,6 +455,9 @@ static inline AtomPtr AtomCast(const Handle& h)
 static inline Handle HandleCast(const ProtoAtomPtr& pa)
     { return Handle(AtomCast(pa)); }
 
+// gdb helper
+std::string oc_to_string(const IncomingSet& iset);
+
 /** @}*/
 } // namespace opencog
 

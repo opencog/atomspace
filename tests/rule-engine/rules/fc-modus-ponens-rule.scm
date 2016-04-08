@@ -6,18 +6,26 @@
 ; See examples/rule-engine/README.md for more details.
 ; -----------------------------------------------------------------------------
 
-(define crisp-modus-ponens-rule
+(define fc-modus-ponens-rule
     (BindLink
         (VariableList
-            (VariableNode "$A")
-            (VariableNode "$B"))
+            (TypedVariable
+                (VariableNode "$A")
+                (TypeChoice
+                    (Type "LambdaLink")
+                    (Type "PredicateNode")))
+            (TypedVariable
+                (VariableNode "$B")
+                (TypeChoice
+                    (Type "LambdaLink")
+                    (Type "PredicateNode"))))
         (AndLink
             (ImplicationLink
                 (VariableNode "$A")
                 (VariableNode "$B"))
             (VariableNode "$A"))
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: crisp-modus-ponens-formula")
+            (GroundedSchemaNode "scm: fc-modus-ponens-formula")
             (ListLink
                 (VariableNode "$A")
                 (ImplicationLink
@@ -32,7 +40,7 @@
 ; the TV of B to (stv 1 1)
 ; -----------------------------------------------------------------------------
 
-(define (crisp-modus-ponens-formula A AB B)
+(define (fc-modus-ponens-formula A AB B)
     (let (  (sA (cog-stv-strength A))
             (cA (cog-stv-confidence A))
             (sAB (cog-stv-strength AB))
@@ -41,9 +49,9 @@
             (cog-set-tv! B (stv 1 1)))))
 
 ; Associate a name to the rule
-(define crisp-modus-ponens-rule-name
-    (DefinedSchemaNode "crisp-modus-ponens-rule"))
+(define fc-modus-ponens-rule-name
+    (DefinedSchemaNode "fc-modus-ponens-rule"))
 
 (DefineLink
-    crisp-modus-ponens-rule-name
-    crisp-modus-ponens-rule)
+    fc-modus-ponens-rule-name
+    fc-modus-ponens-rule)
