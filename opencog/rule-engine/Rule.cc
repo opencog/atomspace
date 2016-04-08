@@ -34,6 +34,9 @@
 
 using namespace opencog;
 
+Rule::Rule()
+	: forward_rule_handle_(Handle::UNDEFINED), rule_alias_(Handle::UNDEFINED) {}
+
 Rule::Rule(const Handle& rule_ml)
 	: forward_rule_handle_(Handle::UNDEFINED)
 {

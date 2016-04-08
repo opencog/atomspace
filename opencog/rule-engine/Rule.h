@@ -113,6 +113,7 @@ public:
 	 * where <rule alias> is a DefinedSchemaNode elsewhere defined via
 	 * a DefineLink.
 	 */
+	Rule();
 	Rule(const Handle& rule);
 	Rule(const Handle& rule_alias, const Handle& rbs);
 

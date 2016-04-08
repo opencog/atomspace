@@ -241,8 +241,8 @@ void BackwardChainer::process_target(Target& target)
 	/**** This is where the actual BC step starts ****/
 	/*************************************************/
 
-	Rule selected_rule(Handle::UNDEFINED);
-	Rule standardized_rule(Handle::UNDEFINED);
+	Rule selected_rule;
+	Rule standardized_rule;
 	HandleMapSeq all_implicand_to_target_mappings;
 
 	// If no rules to backward chain on, no way to solve this target
