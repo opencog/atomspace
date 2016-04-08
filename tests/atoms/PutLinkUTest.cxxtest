@@ -92,7 +92,10 @@ void PutLinkUTest::test_filtering()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	// copied from /examples/guile/filter.scm
+	// Copied from /examples/guile/filter.scm
+	// This test must pass; it is used in multiple wiki pages
+	// as an example, including PutLink, LambdaLink,
+	// DefinedSchemaLink, etc.
 	Handle foo, bar;
 	Handle filt =
 		L(PUT_LINK,
