@@ -254,16 +254,20 @@ Handle PutLink::do_reduce(void) const
 	if (DEFINED_SCHEMA_NODE == btype or
 	    DEFINED_PREDICATE_NODE == btype)
 	{
-		Handle dfn(DefineLink::get_definition(_body));
+		bods = DefineLink::get_definition(bods);
+		btype = bods->getType();
 		// XXX TODO we should perform a type-check on the function.
-		if (not classserver().isA(dfn->getType(), LAMBDA_LINK))
+		if (not classserver().isA(btype, LAMBDA_LINK))
 			throw InvalidParamException(TRACE_INFO,
 					"Expecting a LambdaLink, got %s",
-			      dfn->toString().c_str());
+			      bods->toString().c_str());
+	}
 
-		LambdaLinkPtr lam(LambdaLinkCast(dfn));
+	if (LAMBDA_LINK == btype)
+	{
+		LambdaLinkPtr lam(LambdaLinkCast(bods));
 		if (NULL == lam)
-			lam = createLambdaLink(*LinkCast(dfn));
+			lam = createLambdaLink(*LinkCast(bods));
 		bods = lam->get_body();
 		vars = lam->get_variables();
 	}
