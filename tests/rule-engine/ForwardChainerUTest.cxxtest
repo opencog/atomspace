@@ -38,19 +38,18 @@ public:
 		// Disable the AF mechanism during testing!
 		_as.set_attentional_focus_boundary(AttentionValue::MINSTI);
 
-		eval.eval("(add-to-load-path \"..\")");
 		eval.eval("(add-to-load-path \"../../..\")");
 		eval.eval("(use-modules (opencog))");
 		eval.eval("(use-modules (opencog rule-engine))");
 		CHKERR;
 
 		// Load the simple deduction rbs to test it
-		eval.eval("(load-from-path \""
+		string result = eval.eval("(load-from-path \""
 		          "tests/rule-engine/fc-deduction-config.scm\")");
 		CHKERR;
 
 		// Load the simple deduction + modus ponens rbs to test it
-		eval.eval("(load-from-path \""
+		result = eval.eval("(load-from-path \""
 		          "tests/rule-engine/fc-config.scm\")");
 		CHKERR;
 	}

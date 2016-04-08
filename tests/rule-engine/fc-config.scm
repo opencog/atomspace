@@ -4,9 +4,9 @@
 ;
 ; Before running any inference you must load that file
 
-; Load the rules (use load for relative path w.r.t. to that file)
-(load "rules/fc-modus-ponens-rule.scm")
-(load "rules/fc-deduction-rule.scm")
+; Load the rules
+(load-from-path "tests/rule-engine/rules/fc-modus-ponens-rule.scm")
+(load-from-path "tests/rule-engine/rules/fc-deduction-rule.scm")
 
 ; Define a new rule base (aka rule-based system)
 (define fc-rbs (ConceptNode "fc-rule-base"))

@@ -4,8 +4,8 @@
 ;;
 ;; Before running any inference you must load that file
 
-;; Load the rules (use load for relative path w.r.t. to that file)
-(load "rules/fc-deduction-rule.scm")
+;; Load the rules
+(load-from-path "tests/rule-engine/rules/fc-deduction-rule.scm")
 
 ;; Define a new rule base (aka rule-based system)
 (define fc-deduction-rbs (ConceptNode "fc-deduction-rule-base"))

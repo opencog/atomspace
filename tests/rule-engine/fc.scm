@@ -5,12 +5,6 @@
 (use-modules (opencog))
 (use-modules (opencog rule-engine))
 
-; I still don't understand this module thing, it still crashes so I
-; still need to have that
-; (load-from-path "av-tv.scm")
-;; (load-from-path "utilities.scm")
-;; (load-from-path "rule-engine/rule-engine-utils.scm")
-
 ; Load URE configuration (add the current file dir so it can be loaded
 ; from anywhere)
 ; (add-to-load-path (dirname (current-filename)))
