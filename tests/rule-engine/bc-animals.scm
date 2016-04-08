@@ -1,82 +1,72 @@
-(ImplicationLink (stv 1.0 1.0)
- (AndLink (stv 1.0 1.0)
-  (EvaluationLink 
-   (PredicateNode "croaks")
-   (VariableNode "$X")
-  )
-  (EvaluationLink 
-    (PredicateNode "eats_flies")
-    (VariableNode "$X")
-  )
- )
- (InheritanceLink
-  (VariableNode "$X")
-  (ConceptNode "Frog")
- )
-)
+(Implication (stv 1.0 1.0)
+   (TypedVariable
+      (Variable "$X")
+      (Type "ConceptNode"))
+   (And (stv 1.0 1.0)
+      (Evaluation
+         (Predicate "croaks")
+         (Variable "$X"))
+      (Evaluation
+         (Predicate "eats_flies")
+         (Variable "$X")))
+   (Inheritance
+      (Variable "$X")
+      (Concept "Frog")))
 
-(ImplicationLink (stv 1.0 1.0)
- (AndLink (stv 1.0 1.0)
-  (EvaluationLink 
-   (PredicateNode "chirps")
-   (VariableNode "$Y")
-  )
-  (EvaluationLink
-   (PredicateNode "sings")
-   (VariableNode "$Y")
-  )
- )
- (InheritanceLink
-  (VariableNode "$Y")
-  (ConceptNode "Canary")
- )
-)
+(Implication (stv 1.0 1.0)
+   (TypedVariable
+      (Variable "$X")
+      (Type "ConceptNode"))
+   (And (stv 1.0 1.0)
+      (Evaluation
+         (Predicate "chirps")
+         (Variable "$X"))
+      (Evaluation
+         (Predicate "sings")
+         (Variable "$X")))
+   (Inheritance
+      (Variable "$X")
+      (Concept "Canary")))
 
-(ImplicationLink (stv 1.0 1.0)
- (InheritanceLink
-  (VariableNode "$Z")
-  (ConceptNode "Frog")
- )
- (InheritanceLink
-  (VariableNode "$Z")
-  (ConceptNode "green")
- )
-)
+(Implication (stv 1.0 1.0)
+   (TypedVariable
+      (Variable "$X")
+      (Type "ConceptNode"))
+   (Inheritance
+      (Variable "$X")
+      (Concept "Frog"))
+   (Inheritance
+      (Variable "$X")
+      (Concept "green")))
 
-(ImplicationLink (stv 1.0 1.0)
- (InheritanceLink 
-  (VariableNode "$A")
-  (ConceptNode "Canary")
- )
- (InheritanceLink
-  (VariableNode "$A")
-  (ConceptNode "yellow")
- )
-)
+(Implication (stv 1.0 1.0)
+   (TypedVariable
+      (Variable "$X")
+      (Type "ConceptNode"))
+   (Inheritance
+      (Variable "$X")
+      (Concept "Canary"))
+   (Inheritance
+      (Variable "$X")
+      (Concept "yellow")))
 
 ;KB
-(EvaluationLink (stv 1.0 1.0)
- (PredicateNode "croaks")
- (ConceptNode "Fritz")
-)
+(Evaluation (stv 1.0 1.0)
+   (Predicate "croaks")
+   (Concept "Fritz"))
 
-(EvaluationLink (stv 1.0 1.0)
- (PredicateNode "chirps")
- (ConceptNode "Tweety")
-)
+(Evaluation (stv 1.0 1.0)
+   (Predicate "chirps")
+   (Concept "Tweety"))
 
-(InheritanceLink (stv 1.0 1.0)
- (ConceptNode "Tweety")
- (ConceptNode "yellow")
-)
+(Inheritance (stv 1.0 1.0)
+   (Concept "Tweety")
+   (Concept "yellow"))
 
-(EvaluationLink (stv 1.0 1.0)
- (PredicateNode "eats_flies")
- (ConceptNode "Tweety")
-)
+(Evaluation (stv 1.0 1.0)
+   (Predicate "eats_flies")
+   (Concept "Tweety"))
 
-(EvaluationLink (stv 1.0 1.0)
- (PredicateNode "eats_flies")
- (ConceptNode "Fritz")
-)
-
+(Evaluation (stv 1.0 1.0)
+   (Predicate "eats_flies")
+   (Concept "Fritz"))
