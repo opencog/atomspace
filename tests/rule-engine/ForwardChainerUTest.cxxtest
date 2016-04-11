@@ -38,6 +38,7 @@ public:
 		// Disable the AF mechanism during testing!
 		_as.set_attentional_focus_boundary(AttentionValue::MINSTI);
 
+		eval.eval("(add-to-load-path \"..\")");
 		eval.eval("(add-to-load-path \"../../..\")");
 		eval.eval("(use-modules (opencog))");
 		eval.eval("(use-modules (opencog rule-engine))");
