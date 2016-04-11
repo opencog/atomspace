@@ -37,10 +37,11 @@ public:
 	void setUp();
 	void tearDown();
 
-	void test_1_rule_bc_modus_ponens();
-	void test_1_rule_bc_deduction();
-	void test_1_rule_impossible_bc();
-	void test_2_rules_bc();
+	void test_implication_instantiation();
+	void test_bc_modus_ponens();
+	void test_bc_deduction();
+	void test_impossible_bc();
+	void test_bc_modus_ponens_deduction();
 	void test_tvq_bc();
 	void test_tvq_impossible_bc();
 	void test_focus_set();
@@ -67,7 +68,50 @@ void BackwardChainerUTest::tearDown()
 	as_.clear();
 }
 
-void BackwardChainerUTest::test_1_rule_bc_modus_ponens()
+void BackwardChainerUTest::test_implication_instantiation()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as_.clear();
+
+	string result = eval_.eval("(load-from-path \"tests/rule-engine/implication-instantiation-config.scm\")");
+
+	logger().debug() << "result = " << result;
+	
+	result = eval_.eval("(load-from-path \"tests/rule-engine/bc-friends.scm\")");
+	randGen().seed(0);
+
+	// load 1 modus ponens rule
+	Handle top_rbs = as_.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	BackwardChainer bc(as_, top_rbs);
+
+	Handle are_friends = an(PREDICATE_NODE, "are-friends"),
+		john = an(CONCEPT_NODE, "John"),
+		mary = an(CONCEPT_NODE, "Mary"),
+		edward = an(CONCEPT_NODE, "Edward"),
+		cyril = an(CONCEPT_NODE, "Cyril"),
+		target_var = an(VARIABLE_NODE, "$what"),
+		target = al(EVALUATION_LINK,
+		            are_friends,
+		            al(LIST_LINK,
+		               john,
+		               target_var));
+
+	bc.set_target(target);
+	bc.get_config().set_maximum_iterations(30);
+	bc.do_chain();
+
+	HandleMultimap results = bc.get_chaining_result();
+
+	TS_ASSERT_EQUALS(results[target_var].size(), 3);
+	TS_ASSERT_EQUALS(results[target_var].count(mary), 1);
+	TS_ASSERT_EQUALS(results[target_var].count(edward), 1);
+	TS_ASSERT_EQUALS(results[target_var].count(cyril), 1);
+
+	logger().debug("END TEST: %s", __FUNCTION__);	
+}
+
+void BackwardChainerUTest::test_bc_modus_ponens()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -101,7 +145,7 @@ void BackwardChainerUTest::test_1_rule_bc_modus_ponens()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void BackwardChainerUTest::test_1_rule_bc_deduction()
+void BackwardChainerUTest::test_bc_deduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -137,7 +181,7 @@ void BackwardChainerUTest::test_1_rule_bc_deduction()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void BackwardChainerUTest::test_1_rule_impossible_bc()
+void BackwardChainerUTest::test_impossible_bc()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -173,7 +217,7 @@ void BackwardChainerUTest::test_1_rule_impossible_bc()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void BackwardChainerUTest::test_2_rules_bc()
+void BackwardChainerUTest::test_bc_modus_ponens_deduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
