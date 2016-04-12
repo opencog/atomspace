@@ -4,6 +4,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (lambda
 	BindLink.cc
+	DualLink.cc
 	PatternLink.cc
 	PatternUtils.cc
 )
@@ -30,6 +31,7 @@ ENDIF (CYGWIN)
 
 INSTALL (FILES
 	BindLink.h
+	DualLink.h
 	PatternLink.h
 	PatternUtils.h
 	DESTINATION "include/opencog/atoms/pattern"

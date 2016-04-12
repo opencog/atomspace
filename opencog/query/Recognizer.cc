@@ -252,9 +252,15 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 	return true;
 }
 
-bool Recognizer::grounding(const HandleMap &var_soln,
-                           const HandleMap &term_soln)
+bool Recognizer::grounding(const HandleMap& var_soln,
+                           const HandleMap& term_soln)
 {
+printf("duuude found ground, but yada root= %p\n", _root.operator->());
+if (_root) printf("its %s\n", _root->toString().c_str());
+for (auto p: term_soln) {
+printf("its first %s\n",p.first->toString().c_str());
+printf("its first %s\n",p.second->toString().c_str());
+}
 	Handle rule = term_soln.at(_root);
 
 	if (rule != _root) {

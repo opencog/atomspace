@@ -139,8 +139,12 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 	// If the C++ code throws any exceptions, and no one else
 	// has caught them, then we have to catch them, and print
 	// an error message to the shell. Actually, we'll be nice
-	// nice about this, and convert the C++ exception into a
-	// scheme exception.
+	// about this, and convert the C++ exception into a scheme
+	// exception. If the exception is an OpenCog exception, then
+	// we can have a stack trace. If its some C++ exception, then
+	// there is no stack trace, and we sould need to overload
+	// __cxa_throw() to get it to work. Yuck, so we don't do that.
+	// Use gdb if you hit this situation.
 	try
 	{
 		rc = fe->invoke(arglist);
