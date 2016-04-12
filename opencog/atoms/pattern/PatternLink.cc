@@ -264,6 +264,9 @@ PatternLink::PatternLink(Type t, const HandleSeq& hseq,
                          TruthValuePtr tv, AttentionValuePtr av)
 	: ScopeLink(t, hseq, tv, av)
 {
+	// BindLink uses a different initialization sequence.
+	if (BIND_LINK == t) return;
+	if (DUAL_LINK == t) return;
 	init();
 }
 
@@ -279,6 +282,9 @@ PatternLink::PatternLink(Link &l)
 			"Expecting a PatternLink, got %s", tname.c_str());
 	}
 
+	// BindLink uses a different initialization sequence.
+	if (BIND_LINK == t) return;
+	if (DUAL_LINK == t) return;
 	init();
 }
 
