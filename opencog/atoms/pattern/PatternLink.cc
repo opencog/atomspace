@@ -283,8 +283,8 @@ PatternLink::PatternLink(Link &l)
 	}
 
 	// BindLink uses a different initialization sequence.
-	if (BIND_LINK == t) return;
-	if (DUAL_LINK == t) return;
+	if (BIND_LINK == tscope) return;
+	if (DUAL_LINK == tscope) return;
 	init();
 }
 
