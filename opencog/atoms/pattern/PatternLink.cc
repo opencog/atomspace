@@ -901,8 +901,10 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	}
 
 	if (h->isLink())
+	{
 		for (const Handle& ho: h->getOutgoingSet())
 			make_term_tree_recursive(root, ho, ptm);
+	}
 }
 
 /* ================================================================= */
