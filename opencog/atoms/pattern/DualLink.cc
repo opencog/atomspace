@@ -31,6 +31,24 @@ using namespace opencog;
 void DualLink::init(void)
 {
 	_pat.redex_name = "anonymous DualLink";
+
+	_num_virts = 1;
+	_num_comps = 1;
+
+	// At this time, we don't support DualLinks with variables.
+	// We could be we don't.
+	if (1 < _outgoing.size())
+		throw InvalidParamException(TRACE_INFO,
+			"DualLinks with variables are currently not supported.\n");
+
+	_pat.clauses.emplace_back(_body);    // XXX ???
+	_pat.cnf_clauses.emplace_back(_body); // XXX ???
+	_pat.mandatory.emplace_back(_body);
+	_fixed.emplace_back(_body);
+
+	_pat.body = _body;
+
+	make_term_trees();
 }
 
 DualLink::DualLink(const HandleSeq& hseq,

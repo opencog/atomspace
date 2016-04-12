@@ -128,7 +128,7 @@ protected:
 	void make_term_tree_recursive(const Handle&, Handle,
 	                              PatternTermPtr&);
 
-	void init(void);
+	virtual void init(void);
 	void common_init(void);
 	void setup_components(void);
 
