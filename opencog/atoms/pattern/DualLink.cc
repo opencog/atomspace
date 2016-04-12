@@ -36,13 +36,14 @@ void DualLink::init(void)
 	_num_comps = 1;
 
 	// At this time, we don't support DualLinks with variables.
-	// We could be we don't.
+	// We could, be we don't. Thus, the initialization here is
+	// extremely simple.
 	if (1 < _outgoing.size())
 		throw InvalidParamException(TRACE_INFO,
 			"DualLinks with variables are currently not supported.\n");
 
-	_pat.clauses.emplace_back(_body);    // XXX ???
-	_pat.cnf_clauses.emplace_back(_body); // XXX ???
+	_pat.clauses.emplace_back(_body);
+	_pat.cnf_clauses.emplace_back(_body);
 	_pat.mandatory.emplace_back(_body);
 	_fixed.emplace_back(_body);
 
