@@ -24,7 +24,6 @@
  */
 
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/core/FreeLink.h>
 
 #include "BindLink.h"
 

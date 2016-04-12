@@ -252,8 +252,8 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 	return true;
 }
 
-bool Recognizer::grounding(const HandleMap &var_soln,
-                           const HandleMap &term_soln)
+bool Recognizer::grounding(const HandleMap& var_soln,
+                           const HandleMap& term_soln)
 {
 	Handle rule = term_soln.at(_root);
 

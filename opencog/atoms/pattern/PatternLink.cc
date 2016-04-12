@@ -264,8 +264,9 @@ PatternLink::PatternLink(Type t, const HandleSeq& hseq,
                          TruthValuePtr tv, AttentionValuePtr av)
 	: ScopeLink(t, hseq, tv, av)
 {
-	// BindLink has other init sequences
+	// BindLink uses a different initialization sequence.
 	if (BIND_LINK == t) return;
+	if (DUAL_LINK == t) return;
 	init();
 }
 
@@ -281,9 +282,9 @@ PatternLink::PatternLink(Link &l)
 			"Expecting a PatternLink, got %s", tname.c_str());
 	}
 
-	// BindLink has other init sequences
+	// BindLink uses a different initialization sequence.
 	if (BIND_LINK == tscope) return;
-
+	if (DUAL_LINK == tscope) return;
 	init();
 }
 
@@ -437,7 +438,8 @@ void PatternLink::validate_clauses(OrderedHandleSet& vars,
 	// variables in them, and the clauses are all constant.  This
 	// is kind of uncomfortably weird.  Does this really happen?
 	// There is a unit test for this - arcana-const.scm Should
-	// this unit test be disabled?
+	// this unit test be disabled? XXX DualLink makes this obsolete.
+	// This if statement should be removed.
 	if (0 < vars.size())
 	{
 		// Make sure that the user did not pass in bogus clauses.
@@ -899,8 +901,10 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	}
 
 	if (h->isLink())
+	{
 		for (const Handle& ho: h->getOutgoingSet())
 			make_term_tree_recursive(root, ho, ptm);
+	}
 }
 
 /* ================================================================= */
@@ -932,7 +936,7 @@ void PatternLink::check_connectivity(const std::vector<HandleSeq>& components)
 
 void PatternLink::debug_log(void) const
 {
-	if (!logger().is_fine_enabled())
+	if (not logger().is_fine_enabled())
 		return;
 
 	// Log the predicate ...

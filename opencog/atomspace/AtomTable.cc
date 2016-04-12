@@ -40,6 +40,7 @@
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/pattern/BindLink.h>
+#include <opencog/atoms/pattern/DualLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/DeleteLink.h>
@@ -338,6 +339,10 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
         if (nullptr == BindLinkCast(atom))
             return createBindLink(*LinkCast(atom));
 
+    } else if (DUAL_LINK == atom_type) {
+        if (nullptr == DualLinkCast(atom))
+            return createDualLink(*LinkCast(atom));
+
     } else if (classserver().isA(atom_type, PATTERN_LINK)) {
         if (nullptr == PatternLinkCast(atom))
             return createPatternLink(*LinkCast(atom));
@@ -444,6 +449,9 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
     // Links of various kinds -----------
     if (BIND_LINK == atom_type)
         return createBindLink(*LinkCast(atom));
+
+    if (DUAL_LINK == atom_type)
+        return createDualLink(*LinkCast(atom));
 
     if (classserver().isA(atom_type, PATTERN_LINK))
         return createPatternLink(*LinkCast(atom));

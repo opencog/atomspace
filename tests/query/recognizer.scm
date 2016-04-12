@@ -88,5 +88,19 @@
 		(ConceptNode "lot")))
 
 ;-------------------------------------------------------
+; Search for generic patterns.
+
+(Implication
+   (And (Variable "$x") (Concept "B"))
+   (Concept "C"))
+
+(Implication
+   (And (Concept "A") (Variable "$x"))
+   (Concept "C"))
+
+(define a-and-b (And (Concept "A") (Concept "B")))
+
+
+;-------------------------------------------------------
 
 *unspecified*

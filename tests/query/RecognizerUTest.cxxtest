@@ -57,6 +57,7 @@ public:
 	void test_single_word(void);
 	void test_word_phrase(void);
 	void test_double_glob(void);
+	void test_generic(void);
 };
 
 void RecognizerUTest::tearDown(void)
@@ -129,6 +130,27 @@ void RecognizerUTest::test_double_glob(void)
 
 	Handle response = eval->eval_h("(SetLink a-hate-b)");
 	TS_ASSERT_EQUALS(hate, response);
+
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void RecognizerUTest::test_generic(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/recognizer.scm\")");
+
+	Handle anb = eval->eval_h("(cog-execute! (DualLink a-and-b))");
+	printf("A and B %s\n", anb->toString().c_str());
+	TS_ASSERT_EQUALS(2, getarity(anb));
+
+	Handle response = eval->eval_h(
+		"(SetLink "
+		"   (AndLink (Variable \"$x\") (Concept \"B\"))"
+		"   (AndLink (Variable \"$x\") (Concept \"A\")))");
+
+	TS_ASSERT_EQUALS(anb, response);
 
 	// ----
 	logger().debug("END TEST: %s", __FUNCTION__);
