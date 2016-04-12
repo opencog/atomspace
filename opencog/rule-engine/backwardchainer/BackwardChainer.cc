@@ -904,31 +904,31 @@ bool BackwardChainer::select_rule(const Target& target,
 			all_implicand_to_target_mappings.push_back(mapping);
 		}
 
-		// if not unifiable, try sub-atom unification
-		if (all_implicand_to_target_mappings.empty())
-		{
-			UnorderedHandleSet output_expanded;
-			for (const Handle& h : output)
-			{
-				get_all_unique_atoms(h, output_expanded);
-				output_expanded.erase(h);
-			}
+		// // if not unifiable, try sub-atom unification
+		// if (all_implicand_to_target_mappings.empty())
+		// {
+		// 	UnorderedHandleSet output_expanded;
+		// 	for (const Handle& h : output)
+		// 	{
+		// 		get_all_unique_atoms(h, output_expanded);
+		// 		output_expanded.erase(h);
+		// 	}
 
-			for (const Handle& h : output_expanded)
-			{
-				HandleMap mapping;
+		// 	for (const Handle& h : output_expanded)
+		// 	{
+		// 		HandleMap mapping;
 
-				if (not unify(h,
-				              htarget,
-				              gen_sub_varlist(h, hrule_vardecl,
-				                              OrderedHandleSet()),
-				              htarget_vardecl,
-				              mapping))
-					continue;
+		// 		if (not unify(h,
+		// 		              htarget,
+		// 		              gen_sub_varlist(h, hrule_vardecl,
+		// 		                              OrderedHandleSet()),
+		// 		              htarget_vardecl,
+		// 		              mapping))
+		// 			continue;
 
-				all_implicand_to_target_mappings.push_back(mapping);
-			}
-		}
+		// 		all_implicand_to_target_mappings.push_back(mapping);
+		// 	}
+		// }
 
 		if (not all_implicand_to_target_mappings.empty())
 			return true;
