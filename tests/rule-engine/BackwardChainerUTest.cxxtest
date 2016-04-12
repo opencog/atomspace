@@ -204,13 +204,12 @@ void BackwardChainerUTest::test_bc_deduction_2()
 	Handle top_rbs = as_.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 	BackwardChainer bc(as_, top_rbs);
 
-	Handle target_var = eval_.eval_h("(Variable \"$X\")");
 	Handle target = eval_.eval_h("(Inheritance"
 	                             "   (Concept \"A\")"
-	                             "   (Variable \"D\"))");
+	                             "   (Concept \"D\"))");
 
 	bc.set_target(target);
-	bc.get_config().set_maximum_iterations(1000);
+	bc.get_config().set_maximum_iterations(100);
 	bc.do_chain();
 
 	TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, 1e-10);
