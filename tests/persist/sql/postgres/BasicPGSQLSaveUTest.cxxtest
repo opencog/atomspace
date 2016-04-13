@@ -274,19 +274,19 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
 {
     // Create an atom ...
     n1[idx] = createNode(SCHEMA_NODE, id + "fromNode");
-    TruthValuePtr stv(SimpleTruthValue::createTV(0.11, 100+idx));
+    TruthValuePtr stv(SimpleTruthValue::createTV(0.11, 1.0/(100.0+idx)));
     n1[idx]->setTruthValue(stv);
     n1[idx] = NodeCast(table->add(n1[idx], false));
     a1[idx] = n1[idx];
 
     n2[idx] = createNode(SCHEMA_NODE, id + "toNode");
-    TruthValuePtr stv2(SimpleTruthValue::createTV(0.22, 200+idx));
+    TruthValuePtr stv2(SimpleTruthValue::createTV(0.22, 1.0/(200.0+idx)));
     n2[idx]->setTruthValue(stv2);
     n2[idx] = NodeCast(table->add(n2[idx], false));
     a2[idx] = n2[idx];
 
     n3[idx] = createNode(SCHEMA_NODE, id + "third wheel");
-    TruthValuePtr stv3(SimpleTruthValue::createTV(0.33, 300+idx));
+    TruthValuePtr stv3(SimpleTruthValue::createTV(0.33, 1.0/(300.0+idx)));
     n3[idx]->setTruthValue(stv3);
     n3[idx] = NodeCast(table->add(n3[idx], false));
     a3[idx] = n3[idx];
@@ -295,7 +295,7 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
     // and should thus elicit any errors in clone uuid handling.
     char buf[40]; sprintf(buf, "%f", idx+0.14159265358979);
     n4[idx] = createNode(NUMBER_NODE, buf);
-    TruthValuePtr stv4(SimpleTruthValue::createTV(0.44, 400+idx));
+    TruthValuePtr stv4(SimpleTruthValue::createTV(0.44, 1.0/(400.0+idx)));
     n4[idx]->setTruthValue(stv4);
     n4[idx] = NodeCast(table->add(n4[idx], false));
     a4[idx] = n4[idx];

@@ -369,7 +369,7 @@ public:
         Handle h[NUM_NODES];
         for (int i = 0; i < NUM_NODES; i++) {
             h[i] = atomSpace->add_node(CONCEPT_NODE, nodeNames[i]);
-            h[i]->setTruthValue(SimpleTruthValue::createTV(0.001f, SimpleTruthValue::confidenceToCount(0.99f)));
+            h[i]->setTruthValue(SimpleTruthValue::createTV(0.001f, 0.99f));
         }
         //logger().debug("Nodes created\n");
 
@@ -380,7 +380,7 @@ public:
             temp[0] = h[i];
             temp[1] = h[4];
             FU[i] = atomSpace->add_link(SUBSET_LINK, temp);
-            FU[i]->setTruthValue(SimpleTruthValue::createTV(ForceUser[i], SimpleTruthValue::confidenceToCount(0.99f)));
+            FU[i]->setTruthValue(SimpleTruthValue::createTV(ForceUser[i], 0.99f));
         }
         //logger().debug("ForceUser links created\n");
 
@@ -391,7 +391,7 @@ public:
             out[i].push_back(h[i]);
             out[i].push_back(h[5]);
             H[i] = atomSpace->add_link(INHERITANCE_LINK, out[i]);
-            H[i]->setTruthValue(SimpleTruthValue::createTV(Human[i], SimpleTruthValue::confidenceToCount(0.99f)));
+            H[i]->setTruthValue(SimpleTruthValue::createTV(Human[i], 0.99f));
         }
         //logger().debug("Human links created\n");
 
