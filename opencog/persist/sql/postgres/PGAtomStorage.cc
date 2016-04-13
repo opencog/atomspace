@@ -1894,7 +1894,7 @@ PGAtomStorage::PseudoPtr PGAtomStorage::make_pseudo_atom(Database &database,
         case SIMPLE_TRUTH_VALUE:
         {
             TruthValuePtr stv(SimpleTruthValue::createTV(database.mean,
-                    database.count));
+                    database.confidence));
             pseudo_atom->tv = stv;
             break;
         }
