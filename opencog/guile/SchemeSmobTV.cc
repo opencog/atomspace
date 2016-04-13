@@ -238,8 +238,7 @@ SCM SchemeSmob::ss_new_stv (SCM smean, SCM sconfidence)
 	double mean = scm_to_double(smean);
 	double confidence = scm_to_double(sconfidence);
 
-	float cnt = SimpleTruthValue::confidenceToCount(confidence);
-	TruthValue *tv = new SimpleTruthValue(mean, cnt);
+	TruthValue *tv = new SimpleTruthValue(mean, confidence);
 	return take_tv(tv);
 }
 

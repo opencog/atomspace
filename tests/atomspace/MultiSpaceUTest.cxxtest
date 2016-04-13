@@ -53,8 +53,8 @@ public:
 	{
 		// Create three TV's
 		TruthValuePtr tv1(SimpleTruthValue::createTV(0.5, 1.0));
-		TruthValuePtr tv2(SimpleTruthValue::createTV(0.5, 2.0));
-		TruthValuePtr tv3(SimpleTruthValue::createTV(0.5, 3.0));
+		TruthValuePtr tv2(SimpleTruthValue::createTV(0.5, 1.0/2.0));
+		TruthValuePtr tv3(SimpleTruthValue::createTV(0.5, 1.0/3.0));
 
 		// Create three atoms in three different atomspaces
 		Handle h1 = as1.add_node(CONCEPT_NODE, "1");
@@ -119,8 +119,8 @@ public:
 	{
 		// Create three TV's
 		TruthValuePtr tv1(SimpleTruthValue::createTV(0.4, 1.0));
-		TruthValuePtr tv2(SimpleTruthValue::createTV(0.4, 2.0));
-		TruthValuePtr tv3(SimpleTruthValue::createTV(0.4, 3.0));
+		TruthValuePtr tv2(SimpleTruthValue::createTV(0.4, 1.0/2.0));
+		TruthValuePtr tv3(SimpleTruthValue::createTV(0.4, 1.0/3.0));
 
 		// Create three nodes
 		NodePtr n1(createNode(CONCEPT_NODE, "uni-1"));
@@ -135,7 +135,7 @@ public:
 		Handle hnd3(n3);
 
 		// Create three links holding these three
-		TruthValuePtr tv(SimpleTruthValue::createTV(0.33, 3.0));
+		TruthValuePtr tv(SimpleTruthValue::createTV(0.33, 1.0/3.0));
 
 		// Create three copies of this link in three atomspaces
 		Handle h1 = as1.add_link(LIST_LINK, hnd1, hnd2, hnd3);
@@ -380,8 +380,8 @@ public:
 
 		// Create three TV's
 		TruthValuePtr tv1(SimpleTruthValue::createTV(0.4, 1.0));
-		TruthValuePtr tv2(SimpleTruthValue::createTV(0.4, 2.0));
-		TruthValuePtr tv3(SimpleTruthValue::createTV(0.4, 3.0));
+		TruthValuePtr tv2(SimpleTruthValue::createTV(0.4, 1.0/2.0));
+		TruthValuePtr tv3(SimpleTruthValue::createTV(0.4, 1.0/3.0));
 
 		// Create three nodes in the base atomspace
 		Handle hnd1 = nas1.add_node(CONCEPT_NODE, "nest-1");
@@ -392,7 +392,7 @@ public:
 		hnd3->setTruthValue(tv3);
 
 		// Create three links holding these three
-		TruthValuePtr tv(SimpleTruthValue::createTV(0.33, 3.0));
+		TruthValuePtr tv(SimpleTruthValue::createTV(0.33, 1.0/3.0));
 
 		// Create a link in the middle atomspace
 		Handle h2 = nas2.add_link(LIST_LINK, hnd1, hnd2, hnd3);

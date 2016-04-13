@@ -231,7 +231,8 @@ public:
             oss << "thread " << thread_id << " node " << counter;
             counter++;
 
-            TruthValuePtr tv(SimpleTruthValue::createTV(((double) i) / ((double) N), i));
+            confidence_t cnf = ((double) i) / ((double) i + 800.0);
+            TruthValuePtr tv(SimpleTruthValue::createTV(((double) i) / ((double) N), cnf));
             atomSpace->add_node(t, oss.str())->setTruthValue(tv);
         }
     }
@@ -364,7 +365,8 @@ public:
             bogus ++;
             bogus %= N;
 
-            TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, bogus+i));
+            confidence_t cnf = ((double) bogus+i) / ((double) (bogus+i) + 800.0);
+            TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, cnf));
             h->setTruthValue(tv);
         }
     }
@@ -435,7 +437,8 @@ public:
             bogus ++;
             bogus %= N;
 
-            TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, bogus+i));
+            confidence_t cnf = ((double) bogus+i) / ((double) (bogus+i) + 800.0);
+            TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, cnf));
 
             Type t = LIST_LINK;
             hs.push_back(ha);
@@ -507,8 +510,7 @@ public:
         // Add a node to the AttentionalFocus
         Handle h = atomSpace->add_node(CONCEPT_NODE,
                                        "test");
-        h->setTruthValue(SimpleTruthValue::createTV(0.01,
-                         SimpleTruthValue::confidenceToCount(1)));
+        h->setTruthValue(SimpleTruthValue::createTV(0.01, 1));
         h->setSTI(200);
         TS_ASSERT(__testAFSignalsCounter == 1);
 
@@ -549,7 +551,8 @@ public:
 
             bogus ++;
             bogus %= N;
-            TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, bogus+i));
+            confidence_t cnf = ((double) bogus+i) / ((double) (bogus+i) + 800.0);
+            TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, cnf));
             atomSpace->add_link(EVALUATION_LINK, hp, hl)->setTruthValue(tv);
         }
     }

@@ -38,38 +38,23 @@ namespace opencog
 class SimpleTruthValue;
 typedef std::shared_ptr<SimpleTruthValue> SimpleTruthValuePtr;
 
-//! a TruthValue that stores a mean and the number of observations (strength and confidence)
+//! a TruthValue that stores a strength and confidence.
 class SimpleTruthValue : public TruthValue
 {
 protected:
 
-    /// Mean of the strength of the TV over all observations
-    strength_t mean;
+    /// Mean of the strength of the TV over all observations.
+    strength_t _mean;
 
-    /// Total number of observations used to estimate the mean 
-    count_t count;
+    /// Estimate of confidence of the observation.
+    confidence_t _confidence;
 
 public:
-    void initialize(strength_t new_mean, count_t new_count)
-            { mean = new_mean; count = new_count; }
-
-    SimpleTruthValue(strength_t mean, count_t count);
+    SimpleTruthValue(strength_t, confidence_t);
     SimpleTruthValue(const TruthValue&);
     SimpleTruthValue(SimpleTruthValue const&);
 
     virtual bool operator==(const TruthValue& rhs) const;
-
-    /// Heuristic to compute the count given the confidence (according
-    /// to the PLN book)
-    /// count =  confidence * k / (1 - confidence)
-    /// where k is the look-ahead
-    static count_t confidenceToCount(confidence_t);
-
-    /// Heuristic to compute the confidence given the count (according
-    /// to the PLN book)
-    /// confidence = count / (count + k)
-    /// where k is the look-ahead
-    static confidence_t countToConfidence(count_t);
 
     std::string toString() const;
     TruthValueType getType() const;
@@ -88,13 +73,13 @@ public:
     TruthValuePtr merge(TruthValuePtr,
                         const MergeCtrl& mc=MergeCtrl()) const;
 
-    static SimpleTruthValuePtr createSTV(strength_t mean, count_t count)
+    static SimpleTruthValuePtr createSTV(strength_t mean, confidence_t conf)
     {
-        return std::make_shared<SimpleTruthValue>(mean, count);
+        return std::make_shared<SimpleTruthValue>(mean, conf);
     }
-    static TruthValuePtr createTV(strength_t mean, count_t count)
+    static TruthValuePtr createTV(strength_t mean, confidence_t conf)
     {
-        return std::static_pointer_cast<TruthValue>(createSTV(mean, count));
+        return std::static_pointer_cast<TruthValue>(createSTV(mean, conf));
     }
 
     TruthValuePtr clone() const

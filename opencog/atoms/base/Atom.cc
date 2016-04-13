@@ -37,7 +37,6 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AtomTable.h>

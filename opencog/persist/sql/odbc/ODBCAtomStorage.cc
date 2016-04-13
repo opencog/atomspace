@@ -652,7 +652,7 @@ TruthValue* ODBCAtomStorage::getTV(int tvid)
     rp.rs->foreach_row(&Response::create_tv_cb, &rp);
     rp.rs->release();
 
-    SimpleTruthValue *stv = new SimpleTruthValue(rp.mean,rp.count);
+    SimpleTruthValue *stv = new SimpleTruthValue(rp.mean, rp.confidence);
     return stv;
 }
 
@@ -1430,7 +1430,7 @@ ODBCAtomStorage::PseudoPtr ODBCAtomStorage::makeAtom(Response &rp, UUID uuid)
 
         case SIMPLE_TRUTH_VALUE:
         {
-            TruthValuePtr stv(SimpleTruthValue::createTV(rp.mean, rp.count));
+            TruthValuePtr stv(SimpleTruthValue::createTV(rp.mean, rp.confidence));
             atom->tv = stv;
             break;
         }

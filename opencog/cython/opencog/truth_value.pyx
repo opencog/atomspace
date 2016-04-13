@@ -16,7 +16,7 @@ cdef class TruthValue:
 
     def __cinit__(self, strength=1.0, confidence=0.0):
         # By default create a SimpleTruthValue
-        self.cobj = new tv_ptr(new cSimpleTruthValue(strength, self.confidence_to_count(confidence))) 
+        self.cobj = new tv_ptr(new cSimpleTruthValue(strength, confidence))
 
     def __dealloc__(self):
         # This deletes the *smart pointer*, not the actual pointer
@@ -41,13 +41,13 @@ cdef class TruthValue:
         return self._ptr().getCount()
 
     cdef _init(self, float mean, float confidence):
-        deref((<cSimpleTruthValue*>self._ptr())).initialize(mean, self.confidence_to_count(confidence))
+        self.cobj = new tv_ptr(new cSimpleTruthValue(mean, confidence))
 
     def __richcmp__(TruthValue h1, TruthValue h2, int op):
         " @todo support the rest of the comparison operators"
         if op == 2: # ==
             return deref(h1._ptr()) == deref(h2._ptr())
-        
+
         raise ValueError, "TruthValue does not yet support most comparison operators"
 
     cdef cTruthValue* _ptr(self):
@@ -61,14 +61,14 @@ cdef class TruthValue:
 
     def __str__(self):
         return self._ptr().toString().c_str()
-    
+
     def __repr__(self):
         return self._ptr().toString().c_str()
 
-    @staticmethod
-    def confidence_to_count(float conf):
-        return (<cSimpleTruthValue*> 0).confidenceToCount(conf)
-
-    @staticmethod
-    def count_to_confidence(float count):
-        return (<cSimpleTruthValue*> 0).countToConfidence(count)
+#    @staticmethod
+#    def confidence_to_count(float conf):
+#        return (<cSimpleTruthValue*> 0).confidenceToCount(conf)
+#
+#    @staticmethod
+#    def count_to_confidence(float count):
+#        return (<cSimpleTruthValue*> 0).countToConfidence(count)
