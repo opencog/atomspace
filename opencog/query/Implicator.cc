@@ -22,7 +22,6 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/pattern/BindLink.h>
 
 #include "BindLinkAPI.h"

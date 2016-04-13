@@ -95,7 +95,6 @@ struct MergeCtrl
     {
         HIGHER_CONFIDENCE,  // TV with higher confidence overwrite the other
         PLN_BOOK_REVISION   // PLN book Section 5.10.2 revision rule
-
     };
 
     TVFormula tv_formula;
@@ -165,8 +164,6 @@ public:
      */
     static TruthValuePtr TRIVIAL_TV();
 
-// PURE VIRTUAL METHODS:
-
     virtual strength_t getMean()  const = 0;
     virtual confidence_t getConfidence()  const = 0;
     virtual count_t getCount()  const = 0;
@@ -184,8 +181,6 @@ public:
     virtual bool operator==(const TruthValue& rhs) const = 0;
     inline bool operator!=(const TruthValue& rhs) const
          { return !(*this == rhs); }
-
-// VIRTUAL METHODS:
 
     /**
      * Merge this TV object with the given TV object argument.
@@ -217,7 +212,8 @@ protected:
 } // namespace opencog
 
 // overload of operator<< to print TruthValue
-namespace std {
+namespace std
+{
     template<typename Out>
     Out& operator<<(Out& out, const opencog::TruthValue& tv)
     {

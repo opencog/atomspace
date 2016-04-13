@@ -295,7 +295,9 @@ void ProtocolBufferSerializer::serializeNullTruthValue(
 SimpleTruthValuePtr ProtocolBufferSerializer::deserializeSimpleTruthValue(
         const ZMQSingleTruthValueMessage& singleTruthValue)
 {
-	SimpleTruthValuePtr tv(new SimpleTruthValue(singleTruthValue.mean(), singleTruthValue.count()));
+	count_t cn = singleTruthValue.count();
+	confidence_t cf = cn / (cn + TruthValue::DEFAULT_K);
+	SimpleTruthValuePtr tv(new SimpleTruthValue(singleTruthValue.mean(), cf));
 	return tv;
 }
 

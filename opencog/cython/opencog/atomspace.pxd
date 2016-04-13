@@ -50,7 +50,6 @@ cdef extern from "opencog/truthvalue/TruthValue.h" namespace "opencog":
 
 cdef extern from "opencog/truthvalue/SimpleTruthValue.h" namespace "opencog":
     cdef cppclass cSimpleTruthValue "opencog::SimpleTruthValue":
-        void initialize(float,float)
         cSimpleTruthValue(float, float)
         strength_t getMean()
         confidence_t getConfidence()

@@ -23,20 +23,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <typeinfo>
-
 #include <stdio.h>
-#include <stdlib.h>
 
-#include <opencog/truthvalue/CountTruthValue.h>
-#include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/truthvalue/NullTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
-#include <opencog/util/platform.h>
-
-//#define DPRINTF printf
-#define DPRINTF(...)
 
 using namespace opencog;
 
@@ -52,21 +43,21 @@ TruthValuePtr TruthValue::NULL_TV()
 TruthValuePtr TruthValue::DEFAULT_TV()
 {
     // True, but no confidence.
-    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 0.0));
+    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 0.0f));
     return instance;
 }
 
 TruthValuePtr TruthValue::TRUE_TV()
 {
     // True, with maximum confidence.
-    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 1.0e35));
+    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 1.0f));
     return instance;
 }
 
 TruthValuePtr TruthValue::FALSE_TV()
 {
     // False, with maximum confidence.
-    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0.0f, 1.0e35));
+    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0.0f, 1.0f));
     return instance;
 }
 
@@ -88,7 +79,7 @@ bool TruthValue::isDefaultTV() const
     if (dtv.get() == this) return true;
     if (getType() == dtv->getType() and
         getMean() == dtv->getMean() and
-        getCount() == dtv->getCount())
+        getConfidence() == dtv->getConfidence())
     {
         return true;
     }
@@ -104,7 +95,7 @@ bool TruthValue::isDefinedTV() const
     if (dtv.get() == this) return true;
     if (getType() == dtv->getType() and
         getMean() == dtv->getMean() and
-        getCount() == dtv->getCount())
+        getConfidence() == dtv->getConfidence())
     {
         return true;
     }
@@ -121,7 +112,7 @@ bool TruthValue::isDefinedTV() const
     dtv = TRUE_TV();
     if (getType() == dtv->getType() and
         getMean() == dtv->getMean() and
-        getCount() == dtv->getCount())
+        getConfidence() == dtv->getConfidence())
     {
         return true;
     }
@@ -129,7 +120,7 @@ bool TruthValue::isDefinedTV() const
     dtv = FALSE_TV();
     if (getType() == dtv->getType() and
         getMean() == dtv->getMean() and
-        getCount() == dtv->getCount())
+        getConfidence() == dtv->getConfidence())
     {
         return true;
     }
@@ -137,7 +128,7 @@ bool TruthValue::isDefinedTV() const
     dtv = TRIVIAL_TV();
     if (getType() == dtv->getType() and
         getMean() == dtv->getMean() and
-        getCount() == dtv->getCount())
+        getConfidence() == dtv->getConfidence())
     {
         return true;
     }

@@ -165,8 +165,7 @@ int AtomSpace_setTruthValue( AtomSpace* this_ptr
     switch(type)
     {
         case SIMPLE_TRUTH_VALUE: {
-            double count = SimpleTruthValue::confidenceToCount(parameters[1]);
-            h->setTruthValue(SimpleTruthValue::createTV(parameters[0],count));
+            h->setTruthValue(SimpleTruthValue::createTV(parameters[0],parameters[1]));
             break; }
         case COUNT_TRUTH_VALUE: {
             h->setTruthValue(CountTruthValue::createTV(parameters[0]

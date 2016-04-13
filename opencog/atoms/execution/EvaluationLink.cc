@@ -275,7 +275,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	{
 		TruthValuePtr tv(do_eval_scratch(as, evelnk->getOutgoingAtom(0), scratch));
 		return SimpleTruthValue::createTV(
-		              1.0 - tv->getMean(), tv->getCount());
+		              1.0 - tv->getMean(), tv->getConfidence());
 	}
 	else if (AND_LINK == t)
 	{
