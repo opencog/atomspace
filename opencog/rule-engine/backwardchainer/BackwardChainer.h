@@ -100,6 +100,7 @@ public:
 	 * Perform a single backward chaining inference step.
 	 */
 	void do_step();
+	void do_step_old();
 
 	/**
 	 * Perform backward chaining inference till the termination
@@ -115,13 +116,29 @@ public:
 	HandleMultimap get_chaining_result();
 
 private:
+	// Expand the back-inference tree of a target
+	void expand_bit(Target& target, const Rule& rule);
+
+	Target& select_target();
+
+	// Select a valid rule given a target.
+	const Rule& select_rule(const Target& target);
+
+	// Return all valid rules, in the sense that these rules may
+	// possibly be used to infer the target.
+	vector<const Rule*> get_valid_rules(const Target& target);
+
+	// Fulfill, apply possible inferences and pattern matchings in
+	// order to fulfill the given target
+	void fulfill_target(Target& target);
+
+#if 0
+	bool select_rule_old(const Target& target,
+	                     Rule& selected_rule,
+	                     Rule& standardized_rule,
+	                     HandleMapSeq& all_implicand_to_target_mappings);
 
 	void process_target(Target& target);
-
-	bool select_rule(const Target& target,
-	                 Rule& selected_rule,
-	                 Rule& standardized_rule,
-	                 HandleMapSeq& all_implicand_to_target_mappings);
 
 	HandleSeq match_knowledge_base(Handle htarget,
 	                               Handle htarget_vardecl,
@@ -144,7 +161,7 @@ private:
 
 	Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist,
 	                       OrderedHandleSet additional_free_varset);
-
+#endif
 	AtomSpace& _as;
 	UREConfigReader _configReader;
 	AtomSpace _garbage_superspace;
@@ -152,7 +169,9 @@ private:
 	AtomSpace _focus_space;
 	int _iteration;
 
-	TargetSet _targets_set;
+	TargetSet _target_set;
+
+	const std::vector<Rule> _rules;
 
 	// XXX any additional link should be reflected
 	unordered_set<Type> _logical_link_types = { AND_LINK, OR_LINK, NOT_LINK };

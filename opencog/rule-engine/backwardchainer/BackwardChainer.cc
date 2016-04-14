@@ -52,24 +52,26 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs)
 void BackwardChainer::set_target(const Handle& init_target,
                                  const Handle& focus_link)
 {
-	_init_target = init_target;
+	OC_ASSERT(false, "TODO");
 
-	_targets_set.clear();
-	_focus_space.clear();
+	// _init_target = init_target;
 
-	_targets_set.emplace(_init_target, gen_varlist(_init_target));
+	// _targets_set.clear();
+	// _focus_space.clear();
 
-	// get the stuff under the SetLink
-	if (focus_link and focus_link->isLink())
-	{
-		HandleSeq focus_set = focus_link->getOutgoingSet();
-		for (const auto& h : focus_set)
-			_focus_space.add_atom(h);
+	// _targets_set.emplace(_init_target, gen_varlist(_init_target));
 
-		// the target itself should be part of the focus set
-		if (focus_set.size() > 0)
-			_focus_space.add_atom(init_target);
-	}
+	// // get the stuff under the SetLink
+	// if (focus_link and focus_link->isLink())
+	// {
+	// 	HandleSeq focus_set = focus_link->getOutgoingSet();
+	// 	for (const auto& h : focus_set)
+	// 		_focus_space.add_atom(h);
+
+	// 	// the target itself should be part of the focus set
+	// 	if (focus_set.size() > 0)
+	// 		_focus_space.add_atom(init_target);
+	// }
 }
 
 UREConfigReader& BackwardChainer::get_config()
@@ -100,6 +102,75 @@ bool BackwardChainer::termination()
  */
 void BackwardChainer::do_step()
 {	
+	bc_logger().debug("Iteration %d", _iteration);
+	_iteration++;
+
+	// Select target
+	Target& target = select_target();
+	// LAZY_BC_LOG_DEBUG << "Target:" << std::endl << target.to_string();
+
+	// Select a valid rule
+	const Rule& rule = select_rule(target);
+
+	// Expand the back-inference tree of this target
+	expand_bit(target, rule);
+
+	// Fulfill target
+	fulfill_target(target);
+}
+
+void BackwardChainer::expand_bit(Target& target, const Rule& rule)
+{
+	// TODO
+}
+
+Target& BackwardChainer::select_target()
+{
+	// For now selection is uniform random
+	return rand_element(_target_set).second;
+}
+
+const Rule& BackwardChainer::select_rule(const Target& target)
+{
+	// For now the rule is uniform random amongst the valid ones
+	return *rand_element(get_valid_rules(target));
+}
+
+vector<const Rule*> BackwardChainer::get_valid_rules(const Target& target)
+{
+	// TODO
+	return vector<const Rule*>();
+}
+
+void BackwardChainer::fulfill_target(Target& target)
+{
+	// TODO
+}
+
+/**
+ * Get the current result on the initial target, if any.
+ *
+ * @return a HandleMultimap mapping each variable to all possible solutions
+ */
+HandleMultimap BackwardChainer::get_chaining_result()
+{
+	OC_ASSERT(false, "TODO");
+	HandleMultimap temp_result;// = _target_set.get(_init_target).get_varmap();
+	HandleMultimap result;
+	for (auto& p : temp_result)
+	{
+		UnorderedHandleSet s;
+		for (auto& h : p.second)
+			s.insert(_as.get_atom(h));
+		result[_as.get_atom(p.first)] = s;
+	}
+
+	return result;
+}
+
+#if 0
+void BackwardChainer::do_step_old()
+{
 	bc_logger().debug("Start single BC step.");
 	bc_logger().debug("Iteration %d", _iteration);
 	_iteration++;
@@ -128,26 +199,6 @@ void BackwardChainer::do_step()
 	_garbage_superspace.clear();
 
 	bc_logger().debug("End single BC step");
-}
-
-/**
- * Get the current result on the initial target, if any.
- *
- * @return a HandleMultimap mapping each variable to all possible solutions
- */
-HandleMultimap BackwardChainer::get_chaining_result()
-{
-	HandleMultimap temp_result = _targets_set.get(_init_target).get_varmap();
-	HandleMultimap result;
-	for (auto& p : temp_result)
-	{
-		UnorderedHandleSet s;
-		for (auto& h : p.second)
-			s.insert(_as.get_atom(h));
-		result[_as.get_atom(p.first)] = s;
-	}
-
-	return result;
 }
 
 /**
@@ -859,10 +910,10 @@ static void get_all_unique_atoms(const Handle& h, UnorderedHandleSet& atom_set)
  * @param all_implicand_to_target_mappings  the output implicand to target mapping
  * @return                   true if a rule is selected
  */
-bool BackwardChainer::select_rule(const Target& target,
-                                  Rule& selected_rule,
-                                  Rule& standardized_rule,
-                                  HandleMapSeq& all_implicand_to_target_mappings)
+bool BackwardChainer::select_rule_old(const Target& target,
+                                      Rule& selected_rule,
+                                      Rule& standardized_rule,
+                                      HandleMapSeq& all_implicand_to_target_mappings)
 {
 	Handle htarget = _garbage_superspace.add_atom(target.get_handle());
 	Handle htarget_vardecl = _garbage_superspace.add_atom(target.get_vardecl());
@@ -1015,4 +1066,4 @@ Handle BackwardChainer::gen_sub_varlist(const Handle& parent,
 
 	return _garbage_superspace.add_atom(createVariableList(final_oset));
 }
-
+#endif
