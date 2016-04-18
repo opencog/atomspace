@@ -30,6 +30,8 @@
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/pattern/BindLink.h>
 
+#include <opencog/atomutils/TypeUtils.h>
+
 #include "Rule.h"
 
 using namespace opencog;
@@ -170,6 +172,11 @@ Handle Rule::get_forward_implicant() const
 	return BindLinkCast(forward_rule_handle_)->get_body();
 }
 
+Handle Rule::get_forward_implicand() const
+{
+	return BindLinkCast(forward_rule_handle_)->get_implicand();
+}
+
 /**
  * Get the set of members of the implicant which are
  * connected by a root logical link.
@@ -208,63 +215,21 @@ Handle Rule::get_forward_conclusion() const
 	return BindLinkCast(forward_rule_handle_)->get_implicand();
 }
 
-/**
- * Get the implicand (output) of the rule defined in a BindLink.
- *
- * This function does extra processing to find the real output over an
- * ExecutionOutputLink.  ie, skip to the ListLink under the ExLink.
- *
- * @return the HandleSeq of the implicand
- */
-HandleSeq Rule::get_conclusion_seq() const
+HandlePairSeq Rule::get_conclusions() const
 {
-	HandleSeq results;
+	HandlePairSeq results;
 
 	// If the rule's handle has not been set yet
 	if (forward_rule_handle_ == Handle::UNDEFINED)
-		return HandleSeq();
+		return HandlePairSeq();
 
 	// If no backward rule then extract the conclusions from the
 	// forward rule
 	if (backward_rule_handles_.empty())
 	{
-		Handle implicand = BindLinkCast(forward_rule_handle_)->get_implicand();
-
-		std::queue<Handle> pre_output;
-
-		// skip the top level ListLink
-		if (implicand->getType() == LIST_LINK)
-		{
-			for (const Handle& h : implicand->getOutgoingSet())
-				pre_output.push(h);
-		}
-		else
-		{
-			pre_output.push(implicand);
-		}
-
-		// check all output of ExecutionOutputLink
-		while (not pre_output.empty())
-		{
-			Handle hfront = pre_output.front();
-			pre_output.pop();
-
-			if (hfront->getType() == EXECUTION_OUTPUT_LINK)
-			{
-				// get the ListLink containing the arguments of the
-				// ExecutionOutputLink. WARNING: only the last
-				// argument is to be used to represent the conclusion
-				// pattern.
-				Handle list_h = hfront->getOutgoingAtom(1);
-				OC_ASSERT(list_h->getType() == LIST_LINK
-				          and list_h->getArity() > 0);
-				pre_output.push(list_h->getOutgoingAtom(list_h->getArity()-1));
-				continue;
-			}
-
-			// if not an ExecutionOutputLink, it is a final output
-			results.push_back(hfront);
-		}
+		Handle vardecl = get_forward_vardecl();
+		for (const Handle& c : get_forward_conclusion_bodies())
+			results.push_back({filter_vardecl(vardecl, c), c});
 	}
 	// There are backward rules so return directly their patterns
 	else
@@ -273,7 +238,7 @@ HandleSeq Rule::get_conclusion_seq() const
 		{
 			Type t = h->getType();
 			OC_ASSERT(t == BIND_LINK or t == GET_LINK);
-			results.push_back(h->getOutgoingAtom(1));
+			results.push_back({h->getOutgoingAtom(0), h->getOutgoingAtom(1)});
 		}
 	}
 
@@ -372,4 +337,33 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 	dict[h] = hcpy;
 
 	return hcpy;
+}
+
+HandleSeq Rule::get_forward_conclusion_bodies() const
+{
+	HandleSeq results;
+	Handle implicand = get_forward_implicand();
+	Type t = implicand->getType();
+	if (EXECUTION_OUTPUT_LINK == t) {
+		results.push_back(get_execution_output_last_argument(implicand));
+	} else if (LIST_LINK == t) {
+		for (const Handle& h : implicand->getOutgoingSet()) {
+			t = h->getType();
+			if (EXECUTION_OUTPUT_LINK == t)
+				results.push_back(get_execution_output_last_argument(h));
+			else
+				results.push_back(h);
+		}
+	} else {
+		results.push_back(implicand);
+	}
+	return results;
+}
+
+Handle Rule::get_execution_output_last_argument(const Handle& h) const
+{
+	OC_ASSERT(h->getType() == EXECUTION_OUTPUT_LINK);
+	Handle args = h->getOutgoingAtom(1);
+	OC_ASSERT(args->getType() == LIST_LINK and args->getArity() > 0);
+	return args->getOutgoingAtom(args->getArity()-1);
 }
