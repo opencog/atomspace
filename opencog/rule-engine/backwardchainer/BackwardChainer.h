@@ -128,6 +128,11 @@ private:
 	// possibly be used to infer the target.
 	vector<const Rule*> get_valid_rules(const Target& target);
 
+	// Return true if a given target matches a given rule's
+	// conclusion. In other words whether the rule is a potential
+	// candidate for back-inference tree expansion.
+	bool match_conclusion(const Target& target, const Rule& rule);
+
 	// Fulfill, apply possible inferences and pattern matchings in
 	// order to fulfill the given target
 	void fulfill_target(Target& target);

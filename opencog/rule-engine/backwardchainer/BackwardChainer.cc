@@ -132,14 +132,28 @@ Target& BackwardChainer::select_target()
 
 const Rule& BackwardChainer::select_rule(const Target& target)
 {
-	// For now the rule is uniform random amongst the valid ones
+	// For now the rule is uniform randomly selected amongst the valid
+	// ones
 	return *rand_element(get_valid_rules(target));
 }
 
 vector<const Rule*> BackwardChainer::get_valid_rules(const Target& target)
 {
-	// TODO
-	return vector<const Rule*>();
+	vector<const Rule*> valid_rules;
+	for (const Rule& rule : _rules)
+		if (match_conclusion(target, rule))
+			valid_rules.push_back(&rule);
+	return valid_rules;
+}
+
+bool BackwardChainer::match_conclusion(const Target& target, const Rule& rule)
+{
+	for (const std::pair<Handle, Handle>& hp : rule.get_conclusions())
+	{
+		// TODO
+		return true;
+	}
+	return false;
 }
 
 void BackwardChainer::fulfill_target(Target& target)
