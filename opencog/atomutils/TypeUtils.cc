@@ -26,6 +26,9 @@
 
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/core/VariableList.h>
+
+#include "FindUtils.h"
 
 #include "TypeUtils.h"
 
@@ -248,6 +251,17 @@ Handle opencog::type_compose(const Handle& left, const Handle& right)
 	return Handle::UNDEFINED;
 }
 
-
+Handle opencog::filter_vardecl(const Handle& vardecl, const Handle& body)
+{
+	HandleSeq subvardecls;
+	for (const Handle& v : vardecl->getOutgoingSet()) {
+		Type t = v->getType();
+		if ((VARIABLE_NODE == t and is_unquoted_unscoped_in_tree(body, v))
+		    or (TYPED_VARIABLE_LINK == t
+		        and is_unquoted_unscoped_in_tree(body, v->getOutgoingAtom(0))))
+			subvardecls.push_back(v);
+	}
+	return Handle(createVariableList(subvardecls));
+}
 
 /* ===================== END OF FILE ===================== */
