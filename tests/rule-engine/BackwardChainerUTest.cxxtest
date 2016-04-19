@@ -37,6 +37,7 @@ public:
 	void setUp();
 	void tearDown();
 
+	void test_select_rule();
 	void test_implication_instantiation();
 	void test_bc_modus_ponens();
 	void test_bc_deduction_1();
@@ -69,6 +70,30 @@ void BackwardChainerUTest::tearDown()
 	as_.clear();
 }
 
+void BackwardChainerUTest::test_select_rule()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as_.clear();
+
+	string eval_result =
+		eval_.eval("(load-from-path \"tests/rule-engine/bc-config.scm\")");
+
+	std::cout << "eval_result = " << eval_result << std::endl;
+
+	Handle top_rbs = as_.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	BackwardChainer bc(as_, top_rbs);
+
+	Handle target_h = eval_.eval_h("(Inheritance"
+	                               "   (Concept \"A\")"
+	                               "   (Concept \"B\"))");
+	Target target(target_h);
+
+	const Rule& selected_rule = bc.select_rule(target);
+
+	TS_ASSERT_EQUALS(selected_rule.get_name(), "bc-deduction-rule");
+}
+
 void BackwardChainerUTest::test_implication_instantiation()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -78,7 +103,7 @@ void BackwardChainerUTest::test_implication_instantiation()
 	string result = eval_.eval("(load-from-path \"tests/rule-engine/implication-instantiation-config.scm\")");
 
 	logger().debug() << "result = " << result;
-	
+
 	result = eval_.eval("(load-from-path \"tests/rule-engine/bc-friends.scm\")");
 	randGen().seed(0);
 
@@ -109,7 +134,7 @@ void BackwardChainerUTest::test_implication_instantiation()
 	TS_ASSERT_EQUALS(results[target_var].count(edward), 1);
 	TS_ASSERT_EQUALS(results[target_var].count(cyril), 1);
 
-	logger().debug("END TEST: %s", __FUNCTION__);	
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 void BackwardChainerUTest::test_bc_modus_ponens()
