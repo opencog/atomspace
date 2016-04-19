@@ -28,6 +28,8 @@
 #include <opencog/atomutils/Substitutor.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 
+#include <opencog/query/BindLinkAPI.h>
+
 #include "BackwardChainer.h"
 #include "BackwardChainerPMCB.h"
 #include "UnifyPMCB.h"
@@ -41,7 +43,8 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs)
 	  // acting on _garbage_superspace will see stuff in _as, but
 	  // codes acting on _as will not see stuff in _garbage_superspace
 	  _garbage_superspace(&_as),
-	  _iteration(0) {}
+	  _iteration(0),
+	  _rules(_configReader.get_rules()) {}
 
 /**
  * Set the initial target for backward chaining.
@@ -148,17 +151,26 @@ vector<const Rule*> BackwardChainer::get_valid_rules(const Target& target)
 
 bool BackwardChainer::match_conclusion(const Target& target, const Rule& rule)
 {
-	for (const std::pair<Handle, Handle>& hp : rule.get_conclusions())
-	{
-		// TODO
-		return true;
-	}
+	for (const HandlePair& hp : rule.get_conclusions())
+		if (unify(target.handle, hp.first, hp.second))
+		    return true;
 	return false;
 }
 
 void BackwardChainer::fulfill_target(Target& target)
 {
 	// TODO
+}
+
+bool BackwardChainer::unify(const Handle& h, const Handle& vardecl,
+                            const Handle& body)
+{
+	AtomSpace tmp_as;
+	Handle tmp_h = tmp_as.add_atom(h),
+		tmp_bl = tmp_as.add_link(BIND_LINK, vardecl, body, body),
+		result = bindlink(&tmp_as, tmp_bl);
+	HandleSeq results = result->getOutgoingSet();
+	return std::find(results.begin(), results.end(), tmp_h) != results.end();
 }
 
 /**

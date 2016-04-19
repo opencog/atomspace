@@ -240,6 +240,9 @@ typedef std::map<Handle, Handle> HandleMap;
 //! a sequence of ordered handle maps
 typedef std::vector<HandleMap> HandleMapSeq;
 
+//! a pair of handles
+typedef std::pair<Handle, Handle> HandlePair;
+
 //! a sequence of handle pairs
 typedef std::vector<std::pair<Handle, Handle>> HandlePairSeq;
 

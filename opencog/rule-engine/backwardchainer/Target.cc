@@ -29,6 +29,8 @@
 
 using namespace opencog;
 
+Target::Target(const Handle& h) : handle(h) {}
+
 #if 0
 /**
  * Constructor of Target.

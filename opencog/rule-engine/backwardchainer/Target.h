@@ -39,8 +39,11 @@ class TargetFitness
 // A Target, also a back-inference tree node.
 class Target
 {
+public:
+	Target(const Handle& h);
+
 	// Target handle
-	Handle target;
+	Handle handle;
 
 	// Target fitness
 	TargetFitness fitness;

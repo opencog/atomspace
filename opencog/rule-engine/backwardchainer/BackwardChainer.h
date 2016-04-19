@@ -137,6 +137,10 @@ private:
 	// order to fulfill the given target
 	void fulfill_target(Target& target);
 
+	// Check that h is matched by a given pattern body with a given
+	// variable declaration vardecl.
+	bool unify(const Handle& h, const Handle& vardecl, const Handle& body);
+
 #if 0
 	bool select_rule_old(const Target& target,
 	                     Rule& selected_rule,
@@ -176,7 +180,7 @@ private:
 
 	TargetSet _target_set;
 
-	const std::vector<Rule> _rules;
+	const std::vector<Rule>& _rules;
 
 	// XXX any additional link should be reflected
 	unordered_set<Type> _logical_link_types = { AND_LINK, OR_LINK, NOT_LINK };
