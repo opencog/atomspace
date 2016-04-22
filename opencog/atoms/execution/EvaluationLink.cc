@@ -454,6 +454,10 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	{
 		return do_eval_scratch(as, DefineLink::get_definition(evelnk), scratch);
 	}
+	else if (INHERITANCE_LINK == t)
+	{
+		return evelnk->getTruthValue();
+	}
 
 	// We get exceptions here in two differet ways: (a) due to user
 	// error, in which case we need to print an error, and (b) intentionally,
@@ -469,7 +473,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		throw NotEvaluatableException();
 
 	throw SyntaxException(TRACE_INFO,
-		"Expecting to get an EvaluationLink, got %s",
+		"Either incorrect or not implemented yet. Cannot evaluate %s",
 		evelnk->toString().c_str());
 }
 

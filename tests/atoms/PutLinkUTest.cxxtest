@@ -50,6 +50,7 @@ public:
 	void test_filtering();
 	void test_lambda();
 	void test_lambda_partial_substitution();
+	void test_eval_inheritance();
 };
 
 #define N _as.add_node
@@ -193,6 +194,86 @@ void PutLinkUTest::test_lambda_partial_substitution()
 	printf("Expecting %s\n", expected_putted->toString().c_str());
 	printf("Got %s\n", putted->toString().c_str());
 	TS_ASSERT_EQUALS(putted, expected_putted);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * This test is for the case where PutLink has to evaluate the beta
+ * reduced pattern and this pattern contains an inheritance link. For
+ * instance
+ *
+ * (PutLink
+ *    (LambdaLink
+ *       (VariableList
+ *          (TypedVariableLink
+ *             (VariableNode "$X")
+ *             (TypeNode "ConceptNode")
+ *          )
+ *          (TypedVariableLink
+ *             (VariableNode "$Y")
+ *             (TypeNode "ConceptNode")
+ *          )
+ *       )
+ *       (AndLink
+ *          (InheritanceLink
+ *             (VariableNode "$X")
+ *             (ConceptNode "human")
+ *          )
+ *          (InheritanceLink
+ *             (VariableNode "$Y")
+ *             (ConceptNode "human")
+ *          )
+ *          (EvaluationLink
+ *             (PredicateNode "acquainted")
+ *             (ListLink
+ *                (VariableNode "$X")
+ *                (VariableNode "$Y")
+ *             )
+ *          )
+ *       )
+ *    )
+ *    (ListLink
+ *       (ConceptNode "Self")
+ *       (ConceptNode "Bob")
+ *    )
+ * )
+ */
+void PutLinkUTest::test_eval_inheritance()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle X = N(VARIABLE_NODE, "$X"),
+		Y = N(VARIABLE_NODE, "$Y"),
+		Concept = N(TYPE_NODE, "ConceptNode"),
+		human = N(CONCEPT_NODE, "human"),
+		Self = N(CONCEPT_NODE, "Self"),
+		Bob = N(CONCEPT_NODE, "Bob"),
+		acquainted = N(PREDICATE_NODE, "acquainted"),
+		X_human = L(INHERITANCE_LINK, X, human),
+		Y_human = L(INHERITANCE_LINK, Y, human),
+		Self_human = L(INHERITANCE_LINK, Self, human),
+		Bob_human = L(INHERITANCE_LINK, Bob, human),
+		X_Y_acquainted = L(EVALUATION_LINK,
+		                   acquainted,
+		                   L(LIST_LINK, X, Y)),
+		Self_Bob_acquainted = L(EVALUATION_LINK,
+		                        acquainted,
+		                        L(LIST_LINK, Self, Bob)),
+		vardecl = L(VARIABLE_LIST,
+		            L(TYPED_VARIABLE_LINK, X, Concept),
+		            L(TYPED_VARIABLE_LINK, Y, Concept)),
+		body = L(AND_LINK, X_human, Y_human, X_Y_acquainted),
+		args = L(LIST_LINK, Self, Bob),
+		put = L(PUT_LINK, L(LAMBDA_LINK, vardecl, body), args);
+
+	Instantiator inst(&_as);
+	Handle putted = inst.execute(put);
+	Handle expected = L(AND_LINK, Self_human, Bob_human, Self_Bob_acquainted);
+
+	printf("Expecting %s\n", expected->toString().c_str());
+	printf("Got %s\n", putted->toString().c_str());
+	TS_ASSERT_EQUALS(putted, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
