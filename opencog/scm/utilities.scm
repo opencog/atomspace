@@ -1130,15 +1130,13 @@
 
  (AndLink A B C)
 
- WARNING: TVs are not supported. If the links to be flattened
-          have non-null confidence it will raise an error.
+ WARNING: TVs are not ignored. There is absolutely no guaranty that
+          the flattened link will have the right TV on it.
 "
   (define (flatten e r)
     (append r (if (and (cog-link? e)
                        (equal? (cog-type e) link-type))
-                  (if (< 0 (tv-conf (cog-tv e)))
-                      (error "You cannot flatten non-null confidence links")
-                      (cog-outgoing-set e))
+                  (cog-outgoing-set e)
                   (list e))))
   (let ((flat (delete-duplicates (fold flatten '() args))))
     (apply cog-new-link link-type flat))

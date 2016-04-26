@@ -272,6 +272,12 @@ bool contains_atomtype(const HandleSeq& clauses, Type atom_type);
  */
 HandleSeq get_free_vars_in_tree(const Handle& tree);
 
+/**
+ * Return true if h has free variables (unscoped and unquoted) in it,
+ * false otherwise.
+ */
+bool has_free_vars(const Handle& h);
+
 } // namespace opencog
 
 #endif // _OPENCOG_FIND_UTILS_H

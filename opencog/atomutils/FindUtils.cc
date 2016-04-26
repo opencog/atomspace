@@ -308,4 +308,9 @@ HandleSeq get_free_vars_in_tree(const Handle& tree)
 	return HandleSeq(varset.begin(), varset.end());
 }
 
+bool has_free_vars(const Handle& h)
+{
+	return not get_free_vars_in_tree(h).empty();
+}
+
 } // namespace opencog
