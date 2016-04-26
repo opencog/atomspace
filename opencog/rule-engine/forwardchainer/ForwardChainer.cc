@@ -187,7 +187,12 @@ Handle ForwardChainer::choose_source()
 			for (const Handle& h : _selected_sources) {
 				if (h->isLink()) {
 					const HandleSeq& outgoings = h->getOutgoingSet();
-					update_potential_sources(outgoings);
+					HandleSeq no_free_vars_outgoings;
+					// Only add children with no free variables in them
+					for (const Handle& h : outgoings)
+						if (not has_free_vars(h))
+							no_free_vars_outgoings.push_back(h);
+					update_potential_sources(no_free_vars_outgoings);
 				}
 			}
 			fc_logger().debug() << (_potential_sources.size() - selsrc_size)
