@@ -168,7 +168,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	//    reduce, then execute again.
 	//
 	//    Lazy: beta-reduce first, then execute.  Lazy helps avoid
-	//    un-needed executations, and has better control over infinite
+	//    un-needed executions, and has better control over infinite
 	//    recursion. However, unit tests currently fail on it.
 	//
 	if (PUT_LINK == t)
@@ -383,10 +383,16 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		return satisfying_set(_as, expr);
 	}
 
-	// I beleive that all the VirtualLink's are capable of doing
-	// lazy evaluation on thier own. Therefore, we merely perform
-	// subsitution on them, and let some later evaluator force
-	// evaluation, if necesssary.
+	// Ideally, we should not evaluate any EvaluatableLinks.
+	// However, some of these may hold embedded executable links
+	// inside of them, which the current unit tests and code
+	// expect to be executed.  Thus, for right now, we only avoid
+	// evaluating VirtualLinks, as these all are capable of thier
+	// own lazy-evaluation, and so, if evaluation is needed,
+	// it will be triggered by something else.
+	// Non-virtual evaluatables fall through and are handled
+	// below.
+	// if (classserver().isA(t, EVALUATABLE_LINK))
 	if (classserver().isA(t, VIRTUAL_LINK))
 	{
 		if (_vmap->empty()) return expr;

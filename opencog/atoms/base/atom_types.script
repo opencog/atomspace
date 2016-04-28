@@ -152,7 +152,7 @@ UNQUOTE_LINK <- ORDERED_LINK
 // Everything under a DontExecLink is not executed. This is typically
 // used during pattern matching, to halt infinite recursion, when the
 // matched pattern is itself executable. Vaguely like QuoteLink, but
-// instead of block beta-reduction, it blocks execution.
+// instead of blocking beta-reduction, it blocks execution.
 DONT_EXEC_LINK <- ORDERED_LINK
 
 // A FreeLink is any kind of link that might have free variables in it.
