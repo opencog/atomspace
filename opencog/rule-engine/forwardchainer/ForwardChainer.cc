@@ -120,7 +120,10 @@ void ForwardChainer::do_step()
 
     // Store results
     update_potential_sources(products);
-    _fcstat.add_inference_record(_cur_source, rule, products);
+    _fcstat.add_inference_record(_iteration - 1, // _iteration has
+                                                 // already been
+                                                 // incremented
+                                 _cur_source, rule, products);
 }
 
 void ForwardChainer::do_chain()
@@ -157,7 +160,7 @@ void ForwardChainer::apply_all_rules()
         HandleSeq hs = apply_rule(rule->get_forward_rule());
 
         // Update
-        _fcstat.add_inference_record(Handle::UNDEFINED, rule,
+        _fcstat.add_inference_record(_iteration, Handle::UNDEFINED, rule,
                                      UnorderedHandleSet(hs.begin(), hs.end()));
         update_potential_sources(hs);
     }
