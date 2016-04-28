@@ -382,14 +382,28 @@ HandleSeq ForwardChainer::apply_rule(const Handle& rhandle)
         }
     }
 
+    // Take the results from applying the rule and add them in the
+    // given AtomSpace
+    auto add_results = [](AtomSpace& as, HandleSeq& result) {
+	    for (Handle& h : result)
+	    {
+		    Type t = h->getType();
+		    // If it's a List then add all the results. That kinda
+		    // means you can't infer List itself, maybe something to
+		    // look after.
+		    if (t == LIST_LINK)
+			    for (const Handle& hc : h->getOutgoingSet())
+				    as.add_atom(hc);
+		    else
+			    h = as.add_atom(h);
+	    }
+    };
+
     // Add result back to atomspace.
     if (_search_focus_set) {
-        for (Handle& h : result)
-            h = _focus_set_as.add_atom(h);
-
+	    add_results(_focus_set_as, result);
     } else {
-        for (Handle& h : result)
-            h = _as.add_atom(h);
+	    add_results(_as, result);
     }
 
     LAZY_FC_LOG_DEBUG << "Result is:" << std::endl
