@@ -168,7 +168,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	//    reduce, then execute again.
 	//
 	//    Lazy: beta-reduce first, then execute.  Lazy helps avoid
-	//    un-needed executations, and has better control over infinite
+	//    un-needed executions, and has better control over infinite
 	//    recursion. However, unit tests currently fail on it.
 	//
 	if (PUT_LINK == t)
@@ -385,7 +385,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 
 	// I beleive that all the VirtualLink's are capable of doing
 	// lazy evaluation on thier own. Therefore, we merely perform
-	// subsitution on them, and let some later evaluator force
+	// substitution on them, and let some later evaluator force
 	// evaluation, if necesssary.
 	if (classserver().isA(t, VIRTUAL_LINK))
 	{
