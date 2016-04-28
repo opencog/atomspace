@@ -56,16 +56,19 @@ public:
 	 *
 	 * ExecutionLink
 	 *    <rule>
+	 *    <step>
 	 *    <source>
 	 *    <product>
 	 *
 	 * where
 	 *
 	 * 1. <rule> is DefinedSchemaNode <rule-name>
-	 * 2. <source> is the source
-	 * 3. <product> is a SetLink <p1> ... <pn> where pi are the products
+	 * 2. <rule> is NumberNode <#iteration>
+	 * 3. <source> is the source
+	 * 4. <product> is a SetLink <p1> ... <pn> where pi are the products
 	 */
-	void add_inference_record(Handle source, const Rule* rule,
+	void add_inference_record(unsigned iteration, Handle source,
+	                          const Rule* rule,
 	                          const UnorderedHandleSet& product);
 	UnorderedHandleSet get_all_products();
 };

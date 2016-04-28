@@ -26,16 +26,17 @@
 
 using namespace opencog;
 
-void FCStat::add_inference_record(Handle source, const Rule* rule,
+void FCStat::add_inference_record(unsigned iteration, Handle source,
+                                  const Rule* rule,
                                   const UnorderedHandleSet& product)
 {
 	_inf_rec.emplace_back(source, rule, product);
 
-	_as.add_link(EXECUTION_LINK,
-	             rule->get_alias(),
-	             source,
-	             _as.add_link(SET_LINK,
-	                          HandleSeq(product.begin(), product.end())));
+	for (const Handle& p : product)
+		_as.add_link(EXECUTION_LINK,
+		             rule->get_alias(),
+		             _as.add_node(NUMBER_NODE, to_string(iteration)),
+		             source, p);
 }
 
 UnorderedHandleSet FCStat::get_all_products()
