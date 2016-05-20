@@ -40,15 +40,17 @@ void MapLink::init(void)
 	if (classserver().isA(tscope, SCOPE_LINK))
 	{
 		_pattern = ScopeLinkCast(_outgoing[0]);
-		_vars = &_pattern->get_variables();
-		_varset = &_vars->varset;
 	}
 	else
 	{
-		const std::string& tname = classserver().getTypeName(tscope);
-		throw SyntaxException(TRACE_INFO,
-			"Expecting a ScopeLink, got %s", tname.c_str());
+		const Handle& body = _outgoing[0];
+		FreeVariables fv;
+		fv.find_variables(body);
+		Handle decl(createVariableList(fv.varseq));
+		_pattern = createScopeLink(decl, body);
 	}
+	_vars = &_pattern->get_variables();
+	_varset = &_vars->varset;
 
 	// ImplicationLinks are a special type of ScopeLink.  They specify
 	// a re-write that should be performed.  Viz, ImplicationLinks are
