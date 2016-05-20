@@ -102,6 +102,15 @@ void MapLinkUTest::test_singleton(void)
     TS_ASSERT(result == set);
 
     // -------------------------------------------------
+    // Uses same expected result as above.
+    result = eval->eval_h("(cog-execute! single-set-noscope)");
+
+    printf("got %s", result->toString().c_str());
+    printf("expected %s\n", set->toString().c_str());
+
+    TS_ASSERT(result == set);
+
+    // -------------------------------------------------
     result = eval->eval_h("(cog-execute! single-list)");
 
     Handle list = eval->eval_h(

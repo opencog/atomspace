@@ -34,6 +34,26 @@
 		))
 )
 
+; Same as above, but implicit scoping
+(define single-set-noscope
+	(MapLink
+		(EvaluationLink
+			(Predicate "foo")
+			(ListLink (Concept "bar") (Variable "$x")))
+		(SetLink
+			; Not in alphaebtical or type-order!
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Number 3)))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah two")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah one")))
+		))
+)
+
 (define single-list
 	(MapLink
 		(ScopeLink
