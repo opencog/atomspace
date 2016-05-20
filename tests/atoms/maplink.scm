@@ -34,6 +34,28 @@
 		))
 )
 
+; Like above but does filtering.
+(define single-set-filter
+	(MapLink
+		(ScopeLink
+			(Variable "$x")
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Variable "$x"))))
+		(SetLink
+			; Not in alphaebtical or type-order!
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Number 3)))
+			(EvaluationLink
+				(Predicate "oof dah")
+				(ListLink (Concept "bar") (Concept "ah two")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah one")))
+		))
+)
+
 ; Same as above, but implicit scoping
 (define single-set-noscope
 	(MapLink
@@ -47,6 +69,26 @@
 				(ListLink (Concept "bar") (Number 3)))
 			(EvaluationLink
 				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah two")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah one")))
+		))
+)
+
+; Like above but does implicit scope and filtering.
+(define single-set-filter-noscope
+	(MapLink
+		(EvaluationLink
+			(Predicate "foo")
+			(ListLink (Concept "bar") (Variable "$x")))
+		(SetLink
+			; Not in alphaebtical or type-order!
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Number 3)))
+			(EvaluationLink
+				(Predicate "oof dah")
 				(ListLink (Concept "bar") (Concept "ah two")))
 			(EvaluationLink
 				(Predicate "foo")
