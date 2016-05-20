@@ -28,6 +28,8 @@ using namespace opencog;
 void MapLink::init(void)
 {
 	// Maps consist of a function, and the data to apply the function to.
+	// The function can be explicit (inheriting from ScopeLink) or
+	// implicit (we automatically fish out free variables).
 	if (2 != _outgoing.size())
 		throw SyntaxException(TRACE_INFO,
 			"MapLink is expected to be arity-2 only!");
@@ -35,21 +37,23 @@ void MapLink::init(void)
 	// First argument must be a function of some kind.  All functions
 	// are specified using a ScopeLink, to bind the input-variables.
 	Type tscope = _outgoing[0]->getType();
-	if (not classserver().isA(tscope, SCOPE_LINK))
+	if (classserver().isA(tscope, SCOPE_LINK))
+	{
+		_pattern = ScopeLinkCast(_outgoing[0]);
+		_vars = &_pattern->get_variables();
+		_varset = &_vars->varset;
+	}
+	else
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a ScopeLink, got %s", tname.c_str());
 	}
 
-	_pattern = ScopeLinkCast(_outgoing[0]);
-	_vars = &_pattern->get_variables();
-	_varset = &_vars->varset;
-	_is_impl = false;
-
 	// ImplicationLinks are a special type of ScopeLink.  They specify
 	// a re-write that should be performed.  Viz, ImplicationLinks are
 	// of the form P(x)->Q(x).  Here, the `_rewrite` is the Q(x)
+	_is_impl = false;
 	if (classserver().isA(tscope, IMPLICATION_LINK))
 	{
 		_is_impl = true;
