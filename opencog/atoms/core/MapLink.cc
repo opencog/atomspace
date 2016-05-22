@@ -20,6 +20,7 @@
  */
 
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atomutils/FindUtils.h>
 
 #include "MapLink.h"
 
@@ -80,6 +81,12 @@ void MapLink::init(void)
 			_rewrite = impl[2];
 		}
 	}
+
+	// Locate all GlobNodes in the pattern
+	FindAtoms fgn(GLOB_NODE, true);
+	fgn.search_set(_pattern->get_body());
+	for (const Handle& sh : fgn.least_holders)
+		_globby_terms.insert(sh);
 
 	FunctionLink::init();
 }
@@ -190,6 +197,13 @@ bool MapLink::extract(const Handle& termpat,
 				return true;
 		}
 		return false;
+	}
+
+printf("duuude glob term=%d\n", _globby_terms.count(termpat));
+	// if (GLOB_NODE == t and 0 < _varset->count(termpat))
+	if (GLOB_NODE == t)
+	{
+printf ("duuude its globby %d\n",_varset->count(termpat));
 	}
 
 	// Whatever they are, the type must agree.

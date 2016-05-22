@@ -36,7 +36,7 @@ namespace opencog
 /// can be used to "extract" the values that occupy certain variable
 /// locations in a formula.  It is the "opposite" of PutLink, in that
 /// PutLink substitutes values for variables; whereas this link holds
-/// a template pattrn, which can be compared to an input, and values 
+/// a template pattern, which can be compared to an input, and values 
 /// are extracted for the variable locations.
 ///
 class MapLink : public FunctionLink
@@ -45,6 +45,10 @@ protected:
 	ScopeLinkPtr _pattern;
 	const Variables* _vars;
 	const OrderedHandleSet* _varset;
+
+	// Globby terms are terms that contain a GlobNode
+	OrderedHandleSet _globby_terms;     // Smallest term that has a glob.
+
 	bool _is_impl;
 	Handle _rewrite;
 
