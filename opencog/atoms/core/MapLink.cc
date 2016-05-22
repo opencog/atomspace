@@ -224,63 +224,60 @@ bool MapLink::extract(const Handle& termpat,
 
 		return true;
 	}
-printf("duuude glob term=%d\n", _globby_terms.count(termpat));
+
 	// If we are here, there is a glob node in the pattern.  A glob can
 	// match one or more atoms in a row. Thus, we have a more
 	// complicated search ...
-	size_t max_sz = std::max(tsz, gsz);
 	for (size_t ip=0, jg=0; ip<tsz and jg<gsz; ip++, jg++)
 	{
 		bool tc = false;
 		Type ptype = tlo[ip]->getType();
 		if (GLOB_NODE == ptype)
 		{
-#if 0
 			HandleSeq glob_seq;
-			PatternTermPtr glob(osp[ip]);
+			Handle glob(tlo[ip]);
 			// Globs at the end are handled differently than globs
 			// which are followed by other stuff. So, is there
 			// anything after the glob?
-			PatternTermPtr post_glob;
+			Handle post_glob;
 			bool have_post = false;
-			if (ip+1 < osp_size)
+			if (ip+1 < tsz)
 			{
 				have_post = true;
-				post_glob = (osp[ip+1]);
+				post_glob = tlo[ip+1];
 			}
 
 			// Match at least one.
-			tc = tree_compare(glob, osg[jg], CALL_GLOB);
+			tc = extract(tlo[ip], glo[jg], valmap, scratch);
 			if (not tc)
-			{
-				match = false;
-				break;
-			}
-			glob_seq.push_back(osg[jg]);
+				return false;
+
+			glob_seq.push_back(glo[jg]);
 			jg++;
 
 			// Can we match more?
-			while (tc and jg<osg_size)
+			while (tc and jg<gsz)
 			{
 				if (have_post)
 				{
 					// If the atom after the glob matches, then we are done.
-					tc = tree_compare(post_glob, osg[jg], CALL_GLOB);
+					tc = extract(post_glob, glo[jg], valmap, scratch);
 					if (tc) break;
 				}
-				tc = tree_compare(glob, osg[jg], CALL_GLOB);
-				if (tc) glob_seq.push_back(osg[jg]);
+				tc = extract(glob, glo[jg], valmap, scratch);
+				if (tc) glob_seq.push_back(glo[jg]);
 				jg ++;
 			}
 			jg --;
 			if (not tc)
 			{
-				match = false;
-				break;
+				return false;
 			}
 
 			// If we are here, we've got a match; record the glob.
 			LinkPtr glp(createLink(LIST_LINK, glob_seq));
+printf("duuude glob match=%s\n", glp->toString().c_str());
+#if 0
 			var_grounding[glob->getHandle()] = glp->getHandle();
 #endif
 		}
