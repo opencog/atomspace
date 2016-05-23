@@ -185,7 +185,7 @@ bool MapLink::extract(const Handle& termpat,
 		return true;
 	}
 
-	if (GLOB_NODE == t)
+	if (GLOB_NODE == t and 0 < _varset->count(termpat))
 	{
 		// Check the type of the value.
 		if (not _vars->is_type(termpat, ground)) return false;
@@ -235,7 +235,8 @@ bool MapLink::extract(const Handle& termpat,
 	// If we are here, there is a glob node in the pattern.  A glob can
 	// match one or more atoms in a row. Thus, we have a more
 	// complicated search ...
-	for (size_t ip=0, jg=0; ip<tsz and jg<gsz; ip++, jg++)
+	size_t ip=0, jg=0;
+	for (ip=0, jg=0; ip<tsz and jg<gsz; ip++, jg++)
 	{
 		Type ptype = tlo[ip]->getType();
 		if (GLOB_NODE == ptype)
@@ -290,7 +291,7 @@ bool MapLink::extract(const Handle& termpat,
 				return false;
 		}
 	}
-	return true;
+	return (ip == tsz) and (jg == gsz);
 }
 
 Handle MapLink::rewrite_one(const Handle& term, AtomSpace* scratch) const
@@ -342,7 +343,7 @@ Handle MapLink::execute(AtomSpace* scratch) const
 	Handle valh = _outgoing[1];
 	// XXX FIXME ... eager-executation was already done, and it shouldn't
 	// be. We should be doing a lazy-evaluation right here, and executing
-	// any DefinedSchema, etc. here. I mean, that si why we are given the
+	// any DefinedSchema, etc. here. I mean, that is why we are given the
 	// scratch space in the first place: to hold execution temporaries!
 #if LAZY_EXECUTION
 	FunctionLinkPtr flp(FunctionLinkCast(valh));
