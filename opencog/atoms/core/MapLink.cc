@@ -280,7 +280,23 @@ bool MapLink::extract(const Handle& termpat,
 				return false;
 			}
 
-			// If we are here, we've got a match; record the glob.
+			// If we already have a value, the value must be identical.
+			auto val = valmap.find(glob);
+			if (valmap.end() != val)
+			{
+				// Have to have same arity and contents.
+				const Handle& already = val->second;
+				const HandleSeq& alo = already->getOutgoingSet();
+				size_t asz = alo.size();
+				if (asz != glob_seq.size()) return false;
+				for (size_t i=0; i< asz; i++)
+				{
+					if (glob_seq[i] != alo[i]) return false;
+				}
+				return true;
+			}
+
+			// If we are here, we've got a match. Record it.
 			LinkPtr glp(createLink(LIST_LINK, glob_seq));
 			valmap.emplace(std::make_pair(glob, glp->getHandle()));
 		}
