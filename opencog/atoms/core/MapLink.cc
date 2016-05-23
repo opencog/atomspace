@@ -185,6 +185,13 @@ bool MapLink::extract(const Handle& termpat,
 		return true;
 	}
 
+	if (GLOB_NODE == t)
+	{
+		// Check the type of the value.
+		if (not _vars->is_type(termpat, ground)) return false;
+		return true;
+	}
+
 	// Special-case for ChoiceLinks in the body of the pattern.
 	// This dangles one foot over the edge of a slippery slope,
 	// of analyzing the body of the map and special-casing. Not
@@ -247,15 +254,13 @@ bool MapLink::extract(const Handle& termpat,
 			}
 
 			// Match at least one.
-			// XXX We should verify the type here: i.e. that glo[jg]
-			// is of the declared type of the GlobNode (if the GlobNode
-			// has a type declaration on it). XXX FIXME later.
+			bool tc = extract(glob, glo[jg], valmap, scratch);
+			if (not tc) return false;
 
 			glob_seq.push_back(glo[jg]);
 			jg++;
 
 			// Can we match more?
-			bool tc = true;
 			while (tc and jg<gsz)
 			{
 				if (have_post)
