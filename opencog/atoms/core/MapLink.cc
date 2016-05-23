@@ -212,9 +212,9 @@ bool MapLink::extract(const Handle& termpat,
 	size_t gsz = glo.size();
 
 	// If no glob nodes, just compare links side-by-side.
-	if (0 == _globby_terms.count(termpat));
+	if (0 == _globby_terms.count(termpat))
 	{
-		// If the sizes are mismatched, sghould we do a fuzzy match?
+		// If the sizes are mismatched, should we do a fuzzy match?
 		if (gsz != tsz) return false;
 		for (size_t i=0; i<tsz; i++)
 		{
@@ -230,7 +230,6 @@ bool MapLink::extract(const Handle& termpat,
 	// complicated search ...
 	for (size_t ip=0, jg=0; ip<tsz and jg<gsz; ip++, jg++)
 	{
-		bool tc = false;
 		Type ptype = tlo[ip]->getType();
 		if (GLOB_NODE == ptype)
 		{
@@ -248,14 +247,15 @@ bool MapLink::extract(const Handle& termpat,
 			}
 
 			// Match at least one.
-			tc = extract(tlo[ip], glo[jg], valmap, scratch);
-			if (not tc)
-				return false;
+			// XXX We should verify the type here: i.e. that glo[jg]
+			// is of the declared type of the GlobNode (if the GlobNode
+			// has a type declaration on it). XXX FIXME later.
 
 			glob_seq.push_back(glo[jg]);
 			jg++;
 
 			// Can we match more?
+			bool tc = true;
 			while (tc and jg<gsz)
 			{
 				if (have_post)
@@ -276,10 +276,7 @@ bool MapLink::extract(const Handle& termpat,
 
 			// If we are here, we've got a match; record the glob.
 			LinkPtr glp(createLink(LIST_LINK, glob_seq));
-printf("duuude glob match=%s\n", glp->toString().c_str());
-#if 0
-			var_grounding[glob->getHandle()] = glp->getHandle();
-#endif
+			valmap.emplace(std::make_pair(glob, glp->getHandle()));
 		}
 		else
 		{
@@ -288,6 +285,7 @@ printf("duuude glob match=%s\n", glp->toString().c_str());
 				return false;
 		}
 	}
+	return true;
 }
 
 Handle MapLink::rewrite_one(const Handle& term, AtomSpace* scratch) const
