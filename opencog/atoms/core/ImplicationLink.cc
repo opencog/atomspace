@@ -61,26 +61,23 @@ ImplicationLink::ImplicationLink(Link &l)
 void ImplicationLink::extract_variables(const HandleSeq& oset)
 {
 	size_t sz = _outgoing.size();
-	// For now we assume no implicit scoping, so the number of
-	// arguments is 2 when sugar syntax isn't used (no scoping), or 3
-	// when the sugar syntax (scoping) is used.
+
 	if (sz < 2 or 3 < sz)
 		throw InvalidParamException(TRACE_INFO,
-			"Expecting an outgoing set size of at most two, got %d", sz);
+			"Expecting an outgoing set of size 2 or 3, got %d", sz);
 
-	// No sugar syntax
+	// If there is an explicit variable declaration, then use that.
+	// If there is no variable declaration, then assume that all of
+	// the free variables in the link are scoped.
+	ScopeLink::extract_variables(oset);
+
 	if (2 == sz)
 	{
-		_body = oset[0];
 		_implicand = oset[1];
 		return;
 	}
 
 	// If we are here, then the first outgoing set member should be
 	// a variable declaration.
-	_body = oset[1];
 	_implicand = oset[2];
-
-	// Initialize _varlist with the scoped variables
-	init_scoped_variables(oset[0]);
 }

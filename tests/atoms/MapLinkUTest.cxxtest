@@ -62,6 +62,7 @@ public:
     void test_double_set(void);
     void test_implication(void);
     void test_glob(void);
+    void test_implication_nodecl(void);
 };
 
 void MapLinkUTest::tearDown(void)
@@ -270,5 +271,29 @@ void MapLinkUTest::test_glob(void)
 
     TS_ASSERT(result == sete);
 
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void MapLinkUTest::test_implication_nodecl(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/maplink.scm\")");
+
+    Handle result = eval->eval_h("(cog-execute! imply-map-nodecl)");
+
+    Handle sete = eval->eval_h("imply-expected");
+    printf("nodecl got %s", result->toString().c_str());
+    printf("expected %s\n", sete->toString().c_str());
+
+    TS_ASSERT(result == sete);
+    // ---------------------------------------------------
+    result = eval->eval_h("(cog-execute! imply-glob-nodecl)");
+
+    sete = eval->eval_h("imply-glob-expected");
+    printf("imply-glob got %s", result->toString().c_str());
+    printf("expected %s\n", sete->toString().c_str());
+
+    TS_ASSERT(result == sete);
     logger().debug("END TEST: %s", __FUNCTION__);
 }

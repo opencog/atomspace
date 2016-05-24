@@ -213,6 +213,9 @@
 		))
 )
 
+;; -------------------------------------------------------------
+;; ImplicationLink tests.
+
 (define imply-map
 	(MapLink
 		(ExtensionalImplicationLink
@@ -279,6 +282,69 @@
 		(EvaluationLink
 			(PredicateNode "reverse-foo nature")
 			(ListLink (Number 5) (ConceptNode "bar")))
+	)
+)
+
+;; -------------------------------------------------------------
+;; Implicit-variable ImplicationLink tests.
+
+(define imply-map-nodecl
+	(MapLink
+		(ExtensionalImplicationLink
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Variable "$x") (Variable "$y")))
+			(EvaluationLink
+				(Predicate "reverse-foo")
+				(ListLink (Variable "$y") (Variable "$x"))))
+		(SetLink
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah one")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "ah two")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar") (Concept "too") (Concept "much")))
+		))
+)
+
+; Above expects "imply-expected"
+
+(define imply-glob-nodecl
+	(MapLink
+		(ExtensionalImplicationLink
+			(EvaluationLink
+				(Predicate "goo")
+				(ListLink (Concept "bar") (Glob "$y")))
+			(EvaluationLink
+				(Predicate "goo nature")
+				(ListLink (Concept "gar") (Glob "$y"))))
+		(SetLink
+			(EvaluationLink
+				(Predicate "goo")
+				(ListLink (Concept "bar")))
+			(EvaluationLink
+				(Predicate "goo")
+				(ListLink (Concept "bar") (Concept "ah one")))
+			(EvaluationLink
+				(Predicate "goo")
+				(ListLink (Concept "bar") (Concept "two") (Concept "three")))
+			(EvaluationLink
+				(Predicate "foo")
+				(ListLink (Concept "bar")))
+		))
+)
+
+(define imply-glob-expected
+	(SetLink
+		(EvaluationLink
+			(Predicate "goo nature")
+			(ListLink (Concept "gar") (Concept "ah one")))
+		(EvaluationLink
+			(Predicate "goo nature")
+			(ListLink (Concept "gar") (Concept "two") (Concept "three")))
 	)
 )
 
