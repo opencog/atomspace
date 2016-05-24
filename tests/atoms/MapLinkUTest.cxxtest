@@ -283,10 +283,17 @@ void MapLinkUTest::test_implication_nodecl(void)
     Handle result = eval->eval_h("(cog-execute! imply-map-nodecl)");
 
     Handle sete = eval->eval_h("imply-expected");
-    printf("got %s", result->toString().c_str());
+    printf("nodecl got %s", result->toString().c_str());
+    printf("expected %s\n", sete->toString().c_str());
+
+    TS_ASSERT(result == sete);
+    // ---------------------------------------------------
+    result = eval->eval_h("(cog-execute! imply-glob-nodecl)");
+
+    sete = eval->eval_h("imply-glob-expected");
+    printf("imply-glob got %s", result->toString().c_str());
     printf("expected %s\n", sete->toString().c_str());
 
     TS_ASSERT(result == sete);
     logger().debug("END TEST: %s", __FUNCTION__);
 }
-

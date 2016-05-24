@@ -340,14 +340,11 @@
 (define imply-glob-expected
 	(SetLink
 		(EvaluationLink
-			(PredicateNode "goo nature")
-				(ListLink (Concept "bar")))
-			(EvaluationLink
-				(Predicate "goo nature")
-				(ListLink (Concept "bar") (Concept "ah one")))
-			(EvaluationLink
-				(Predicate "goo nature")
-				(ListLink (Concept "bar") (Concept "two") (Concept "three")))
+			(Predicate "goo nature")
+			(ListLink (Concept "gar") (Concept "ah one")))
+		(EvaluationLink
+			(Predicate "goo nature")
+			(ListLink (Concept "gar") (Concept "two") (Concept "three")))
 	)
 )
 
