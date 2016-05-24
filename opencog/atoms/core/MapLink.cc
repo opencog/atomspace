@@ -344,7 +344,7 @@ Handle MapLink::rewrite_one(const Handle& term, AtomSpace* scratch) const
 	{
 		// Beta reduce, and execute. No type-checking during
 		// beta-reduction; we've already done that.
-		Instantiator inst;
+		Instantiator inst(scratch);
 		return inst.execute(
 			_mvars->substitute_nocheck(_rewrite, valseq));
 	}
