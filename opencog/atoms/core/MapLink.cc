@@ -20,6 +20,7 @@
  */
 
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atomutils/FindUtils.h>
 
 #include "MapLink.h"
 
@@ -28,6 +29,8 @@ using namespace opencog;
 void MapLink::init(void)
 {
 	// Maps consist of a function, and the data to apply the function to.
+	// The function can be explicit (inheriting from ScopeLink) or
+	// implicit (we automatically fish out free variables).
 	if (2 != _outgoing.size())
 		throw SyntaxException(TRACE_INFO,
 			"MapLink is expected to be arity-2 only!");
@@ -35,21 +38,25 @@ void MapLink::init(void)
 	// First argument must be a function of some kind.  All functions
 	// are specified using a ScopeLink, to bind the input-variables.
 	Type tscope = _outgoing[0]->getType();
-	if (not classserver().isA(tscope, SCOPE_LINK))
+	if (classserver().isA(tscope, SCOPE_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(tscope);
-		throw SyntaxException(TRACE_INFO,
-			"Expecting a ScopeLink, got %s", tname.c_str());
+		_pattern = ScopeLinkCast(_outgoing[0]);
 	}
-
-	_pattern = ScopeLinkCast(_outgoing[0]);
+	else
+	{
+		const Handle& body = _outgoing[0];
+		FreeVariables fv;
+		fv.find_variables(body);
+		Handle decl(createVariableList(fv.varseq));
+		_pattern = createScopeLink(decl, body);
+	}
 	_vars = &_pattern->get_variables();
 	_varset = &_vars->varset;
-	_is_impl = false;
 
 	// ImplicationLinks are a special type of ScopeLink.  They specify
 	// a re-write that should be performed.  Viz, ImplicationLinks are
 	// of the form P(x)->Q(x).  Here, the `_rewrite` is the Q(x)
+	_is_impl = false;
 	if (classserver().isA(tscope, IMPLICATION_LINK))
 	{
 		_is_impl = true;
@@ -74,6 +81,12 @@ void MapLink::init(void)
 			_rewrite = impl[2];
 		}
 	}
+
+	// Locate all GlobNodes in the pattern
+	FindAtoms fgn(GLOB_NODE, true);
+	fgn.search_set(_pattern->get_body());
+	for (const Handle& sh : fgn.least_holders)
+		_globby_terms.insert(sh);
 
 	FunctionLink::init();
 }
@@ -172,6 +185,13 @@ bool MapLink::extract(const Handle& termpat,
 		return true;
 	}
 
+	if (GLOB_NODE == t and 0 < _varset->count(termpat))
+	{
+		// Check the type of the value.
+		if (not _vars->is_type(termpat, ground)) return false;
+		return true;
+	}
+
 	// Special-case for ChoiceLinks in the body of the pattern.
 	// This dangles one foot over the edge of a slippery slope,
 	// of analyzing the body of the map and special-casing. Not
@@ -195,17 +215,99 @@ bool MapLink::extract(const Handle& termpat,
 
 	const HandleSeq& tlo = termpat->getOutgoingSet();
 	const HandleSeq& glo = ground->getOutgoingSet();
-	size_t sz = tlo.size();
-	if (glo.size() != sz) return false;
+	size_t tsz = tlo.size();
+	size_t gsz = glo.size();
 
-	// Compare links side-by-side.
-	for (size_t i=0; i<sz; i++)
+	// If no glob nodes, just compare links side-by-side.
+	if (0 == _globby_terms.count(termpat))
 	{
-		if (not extract(tlo[i], glo[i], valmap, scratch))
-			return false;
+		// If the sizes are mismatched, should we do a fuzzy match?
+		if (gsz != tsz) return false;
+		for (size_t i=0; i<tsz; i++)
+		{
+			if (not extract(tlo[i], glo[i], valmap, scratch))
+				return false;
+		}
+
+		return true;
 	}
 
-	return true;
+	// If we are here, there is a glob node in the pattern.  A glob can
+	// match one or more atoms in a row. Thus, we have a more
+	// complicated search ...
+	size_t ip=0, jg=0;
+	for (ip=0, jg=0; ip<tsz and jg<gsz; ip++, jg++)
+	{
+		Type ptype = tlo[ip]->getType();
+		if (GLOB_NODE == ptype)
+		{
+			HandleSeq glob_seq;
+			Handle glob(tlo[ip]);
+			// Globs at the end are handled differently than globs
+			// which are followed by other stuff. So, is there
+			// anything after the glob?
+			Handle post_glob;
+			bool have_post = false;
+			if (ip+1 < tsz)
+			{
+				have_post = true;
+				post_glob = tlo[ip+1];
+			}
+
+			// Match at least one.
+			bool tc = extract(glob, glo[jg], valmap, scratch);
+			if (not tc) return false;
+
+			glob_seq.push_back(glo[jg]);
+			jg++;
+
+			// Can we match more?
+			while (tc and jg<gsz)
+			{
+				if (have_post)
+				{
+					// If the atom after the glob matches, then we are done.
+					tc = extract(post_glob, glo[jg], valmap, scratch);
+					if (tc) break;
+				}
+				tc = extract(glob, glo[jg], valmap, scratch);
+				if (tc) glob_seq.push_back(glo[jg]);
+				jg ++;
+			}
+			jg --;
+			if (not tc)
+			{
+				return false;
+			}
+
+			// If we already have a value, the value must be identical.
+			auto val = valmap.find(glob);
+			if (valmap.end() != val)
+			{
+				// Have to have same arity and contents.
+				const Handle& already = val->second;
+				const HandleSeq& alo = already->getOutgoingSet();
+				size_t asz = alo.size();
+				if (asz != glob_seq.size()) return false;
+				for (size_t i=0; i< asz; i++)
+				{
+					if (glob_seq[i] != alo[i]) return false;
+				}
+				return true;
+			}
+
+			// If we are here, we've got a match. Record it.
+			LinkPtr glp(createLink(LIST_LINK, glob_seq));
+			valmap.emplace(std::make_pair(glob, glp->getHandle()));
+		}
+		else
+		{
+			// If we are here, we are not comparing to a glob.
+			if (not extract(tlo[ip], glo[jg], valmap, scratch))
+				return false;
+		}
+	}
+	return (ip == tsz) and (jg == gsz);
 }
 
 Handle MapLink::rewrite_one(const Handle& term, AtomSpace* scratch) const
@@ -257,7 +359,7 @@ Handle MapLink::execute(AtomSpace* scratch) const
 	Handle valh = _outgoing[1];
 	// XXX FIXME ... eager-executation was already done, and it shouldn't
 	// be. We should be doing a lazy-evaluation right here, and executing
-	// any DefinedSchema, etc. here. I mean, that si why we are given the
+	// any DefinedSchema, etc. here. I mean, that is why we are given the
 	// scratch space in the first place: to hold execution temporaries!
 #if LAZY_EXECUTION
 	FunctionLinkPtr flp(FunctionLinkCast(valh));

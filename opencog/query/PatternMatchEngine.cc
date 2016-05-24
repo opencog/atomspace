@@ -207,7 +207,6 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 
 	size_t osg_size = osg.size();
 	size_t osp_size = osp.size();
-	size_t max_size = std::max(osg_size, osp_size);
 
 	// The recursion step: traverse down the tree.
 	// In principle, we could/should push the current groundings
@@ -238,7 +237,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 		}
 		else
 		{
-			for (size_t i=0; i<max_size; i++)
+			for (size_t i=0; i<osp_size; i++)
 			{
 				if (not tree_compare(osp[i], osg[i], CALL_ORDER))
 				{
