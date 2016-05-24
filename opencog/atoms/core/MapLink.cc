@@ -20,6 +20,7 @@
  */
 
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/exec/Instantiator.h>
 #include <opencog/atomutils/FindUtils.h>
 
 #include "MapLink.h"
@@ -341,8 +342,11 @@ Handle MapLink::rewrite_one(const Handle& term, AtomSpace* scratch) const
 	// Perform substitution, if it's an ImplicationLink
 	if (_is_impl)
 	{
-		// No type-checking; we've already done that.
-		return _mvars->substitute_nocheck(_rewrite, valseq);
+		// Beta reduce, and execute. No type-checking during
+		// beta-reduction; we've already done that.
+		Instantiator inst;
+		return inst.execute(
+			_mvars->substitute_nocheck(_rewrite, valseq));
 	}
 
 	// Make sure each variable is grounded. (for real, this time)
@@ -362,7 +366,7 @@ Handle MapLink::rewrite_one(const Handle& term, AtomSpace* scratch) const
 Handle MapLink::execute(AtomSpace* scratch) const
 {
 	Handle valh = _outgoing[1];
-	// XXX FIXME ... eager-executation was already done, and it shouldn't
+	// XXX FIXME ... eager-execution was already done, and it shouldn't
 	// be. We should be doing a lazy-evaluation right here, and executing
 	// any DefinedSchema, etc. here. I mean, that is why we are given the
 	// scratch space in the first place: to hold execution temporaries!
