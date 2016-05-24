@@ -43,7 +43,7 @@ class MapLink : public FunctionLink
 {
 protected:
 	ScopeLinkPtr _pattern;
-	const Variables* _vars;
+	const Variables* _mvars;
 	const OrderedHandleSet* _varset;
 
 	// Globby terms are terms that contain a GlobNode

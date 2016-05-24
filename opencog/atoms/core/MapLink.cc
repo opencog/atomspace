@@ -50,8 +50,8 @@ void MapLink::init(void)
 		Handle decl(createVariableList(fv.varseq));
 		_pattern = createScopeLink(decl, body);
 	}
-	_vars = &_pattern->get_variables();
-	_varset = &_vars->varset;
+	_mvars = &_pattern->get_variables();
+	_varset = &_mvars->varset;
 
 	// ImplicationLinks are a special type of ScopeLink.  They specify
 	// a re-write that should be performed.  Viz, ImplicationLinks are
@@ -88,7 +88,9 @@ void MapLink::init(void)
 	for (const Handle& sh : fgn.least_holders)
 		_globby_terms.insert(sh);
 
-	FunctionLink::init();
+	// FunctionLink::init() will extract free variables. But we don't
+	// really need this for anything, so don't run it.
+	// FunctionLink::init();
 }
 
 MapLink::MapLink(const HandleSeq& oset,
@@ -178,7 +180,7 @@ bool MapLink::extract(const Handle& termpat,
 		}
 
 		// Check the type of the value.
-		if (not _vars->is_type(termpat, ground)) return false;
+		if (not _mvars->is_type(termpat, ground)) return false;
 
 		// If we are here, everything looks good. Record and return.
 		valmap.emplace(std::make_pair(termpat, ground));
@@ -188,7 +190,7 @@ bool MapLink::extract(const Handle& termpat,
 	if (GLOB_NODE == t and 0 < _varset->count(termpat))
 	{
 		// Check the type of the value.
-		if (not _vars->is_type(termpat, ground)) return false;
+		if (not _mvars->is_type(termpat, ground)) return false;
 		return true;
 	}
 
@@ -324,7 +326,7 @@ Handle MapLink::rewrite_one(const Handle& term, AtomSpace* scratch) const
 	// If it does use a variable, it must have a grounding.
 	bool partial = false;
 	HandleSeq valseq;
-	for (const Handle& var : _vars->varseq)
+	for (const Handle& var : _mvars->varseq)
 	{
 		auto valpair = valmap.find(var);
 		if (valmap.end() == valpair)
@@ -340,7 +342,7 @@ Handle MapLink::rewrite_one(const Handle& term, AtomSpace* scratch) const
 	if (_is_impl)
 	{
 		// No type-checking; we've already done that.
-		return _vars->substitute_nocheck(_rewrite, valseq);
+		return _mvars->substitute_nocheck(_rewrite, valseq);
 	}
 
 	// Make sure each variable is grounded. (for real, this time)
