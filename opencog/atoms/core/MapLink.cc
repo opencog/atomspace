@@ -318,9 +318,10 @@ Handle MapLink::rewrite_one(const Handle& term, AtomSpace* scratch) const
 	if (not extract(_pattern->get_body(), term, valmap, scratch))
 		return Handle::UNDEFINED;
 
-	// Make sure each variable is grounded.
-	// Actually, not all variables need to be grounded ...
-	// re-writes might actually ignore ungrounded vars.
+	// Make sure each variable is grounded. Place the groundings
+	// into a sequence, for easy access. Not all variables need to
+	// be grounded, because the re-write might not use all variables.
+	// If it does use a variable, it must have a grounding.
 	bool partial = false;
 	HandleSeq valseq;
 	for (const Handle& var : _vars->varseq)
@@ -370,7 +371,7 @@ Handle MapLink::execute(AtomSpace* scratch) const
 	// Handle three different cases.
 	// If there is a single value, apply the map to the single value.
 	// If there is a set of values, apply the map to the set.
-	// If there is a link of values, apply the map to the link.
+	// If there is a list of values, apply the map to the list.
 	Type argtype = valh->getType();
 	if (SET_LINK == argtype or LIST_LINK == argtype)
 	{
