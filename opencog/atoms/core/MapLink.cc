@@ -20,7 +20,6 @@
  */
 
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atomutils/FindUtils.h>
 
 #include "MapLink.h"
@@ -313,11 +312,15 @@ bool MapLink::extract(const Handle& termpat,
 	return (ip == tsz) and (jg == gsz);
 }
 
-Handle MapLink::rewrite_one(const Handle& term, AtomSpace* scratch) const
+Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 {
-	std::map<Handle,Handle> valmap;
+	Handle term(cterm);
+	FunctionLinkPtr flp(FunctionLinkCast(term));
+	if (flp)
+		term = flp->execute(scratch);
 
 	// Extract values for variables.
+	std::map<Handle,Handle> valmap;
 	if (not extract(_pattern->get_body(), term, valmap, scratch))
 		return Handle::UNDEFINED;
 
@@ -344,9 +347,11 @@ Handle MapLink::rewrite_one(const Handle& term, AtomSpace* scratch) const
 	{
 		// Beta reduce, and execute. No type-checking during
 		// beta-reduction; we've already done that.
-		Instantiator inst(scratch);
-		return inst.execute(
-			_mvars->substitute_nocheck(_rewrite, valseq));
+		Handle red(_mvars->substitute_nocheck(_rewrite, valseq));
+		FunctionLinkPtr flp(FunctionLinkCast(red));
+		if (flp)
+			red = flp->execute(scratch);
+		return red;
 	}
 
 	// Make sure each variable is grounded. (for real, this time)
@@ -365,16 +370,7 @@ Handle MapLink::rewrite_one(const Handle& term, AtomSpace* scratch) const
 
 Handle MapLink::execute(AtomSpace* scratch) const
 {
-	Handle valh = _outgoing[1];
-	// XXX FIXME ... eager-execution was already done, and it shouldn't
-	// be. We should be doing a lazy-evaluation right here, and executing
-	// any DefinedSchema, etc. here. I mean, that is why we are given the
-	// scratch space in the first place: to hold execution temporaries!
-#if LAZY_EXECUTION
-	FunctionLinkPtr flp(FunctionLinkCast(valh));
-	if (flp)
-		valh = flp->execute(scratch);
-#endif
+	const Handle& valh = _outgoing[1];
 
 	// Handle three different cases.
 	// If there is a single value, apply the map to the single value.
