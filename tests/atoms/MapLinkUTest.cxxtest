@@ -238,7 +238,7 @@ void MapLinkUTest::test_glob(void)
     Handle result = eval->eval_h("(cog-execute! glob-simple)");
 
     Handle sete = eval->eval_h("glob-simple-expected");
-    printf("got %s", result->toString().c_str());
+    printf("simp got %s", result->toString().c_str());
     printf("expected %s\n", sete->toString().c_str());
 
     TS_ASSERT(result == sete);
@@ -247,7 +247,7 @@ void MapLinkUTest::test_glob(void)
     result = eval->eval_h("(cog-execute! glob-simple-tail)");
 
     sete = eval->eval_h("glob-simple-tail-expected");
-    printf("got %s", result->toString().c_str());
+    printf("tail got %s", result->toString().c_str());
     printf("expected %s\n", sete->toString().c_str());
 
     TS_ASSERT(result == sete);
@@ -256,7 +256,7 @@ void MapLinkUTest::test_glob(void)
     result = eval->eval_h("(cog-execute! glob-double)");
 
     sete = eval->eval_h("glob-double-expected");
-    printf("got %s", result->toString().c_str());
+    printf("double got %s", result->toString().c_str());
     printf("expected %s\n", sete->toString().c_str());
 
     TS_ASSERT(result == sete);
@@ -265,7 +265,7 @@ void MapLinkUTest::test_glob(void)
     result = eval->eval_h("(cog-execute! glob-glob)");
 
     sete = eval->eval_h("glob-glob-expected");
-    printf("got %s", result->toString().c_str());
+    printf("glob-glob got %s", result->toString().c_str());
     printf("expected %s\n", sete->toString().c_str());
 
     TS_ASSERT(result == sete);

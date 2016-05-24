@@ -304,8 +304,7 @@
 
 (define glob-simple-expected
 	(SetLink
-		(EvaluationLink (Predicate "goo")
-			(ListLink (Concept "bar") (Concept "baz") (Concept "bif")))
+		(ListLink (Concept "baz"))
 	))
 
 (define glob-simple-tail
@@ -327,8 +326,9 @@
 
 (define glob-simple-tail-expected
 	(SetLink
-		(EvaluationLink (Predicate "goo")
-			(ListLink (Concept "bar") (Concept "baz")))
+		(ListLink (Concept "baz"))
+		(ListLink (Concept "baz") (Concept "gif"))
+		(ListLink (Concept "baz") (Concept "bif"))
 	))
 
 (define glob-double
@@ -350,8 +350,7 @@
 
 (define glob-double-expected
 	(SetLink
-		(EvaluationLink (Predicate "goo")
-			(ListLink (Concept "bar") (Concept "baz") (Concept "bif") (Concept "baz")))
+		(ListLink (Concept "baz"))
 	))
 
 (define glob-glob
@@ -388,9 +387,6 @@
 
 (define glob-glob-expected
 	(SetLink
-		(EvaluationLink (Predicate "goo")
-			(ListLink (Concept "bar")
-				(Concept "baz") (Concept "ni") (Concept "goh")
-				(Concept "bif")
-				(Concept "baz") (Concept "ni") (Concept "goh")))
+		(ListLink
+			(Concept "baz") (Concept "ni") (Concept "goh"))
 	))
