@@ -230,7 +230,18 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 	HandleSeq oset;
 	for (const Handle& h : term->getOutgoingSet())
 	{
-		oset.emplace_back(substitute_scoped(h, args, index_map, quotation_level));
+		// GlobNodes are matched with a list of one or more values.
+		// Those values need to be in-lined, stripping off the list
+		// that wraps them up.  See MapLinkUTest for examples.
+		if (GLOB_NODE == h->getType())
+		{
+			Handle glst(substitute_scoped(h, args, index_map, quotation_level));
+			for (const Handle& gl : glst->getOutgoingSet())
+				oset.emplace_back(gl);
+		}
+		else
+			oset.emplace_back(
+				substitute_scoped(h, args, index_map, quotation_level));
 	}
 	return Handle(createLink(term->getType(), oset));
 }
