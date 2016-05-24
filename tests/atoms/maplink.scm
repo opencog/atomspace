@@ -248,6 +248,7 @@
 			(ListLink (ConceptNode "ah two") (ConceptNode "bar")))
 	)
 )
+
 (define imply-eval
 	(MapLink
 		(ExtensionalImplicationLink
@@ -280,3 +281,113 @@
 			(ListLink (Number 5) (ConceptNode "bar")))
 	)
 )
+
+(define glob-simple
+	(MapLink
+		(EvaluationLink (Predicate "goo")
+			(ListLink (Concept "bar") (Glob "$x") (Concept "bif")))
+		(SetLink
+			(EvaluationLink (Predicate "foo")
+				(ListLink (Concept "bar") (Concept "baz") (Concept "bif")))
+			(EvaluationLink (Predicate "goo")
+				(ListLink (Concept "bar") (Concept "baz") (Concept "bif")))
+			(EvaluationLink (Predicate "goo")
+				(ListLink (Concept "bar") (Concept "baz") (Concept "gif")))
+			(EvaluationLink (Predicate "goo")
+				(ListLink (Concept "gar") (Concept "baz") (Concept "bif")))
+			(EvaluationLink (Predicate "goo")
+				(ListLink (Concept "bar") (Concept "baz")))
+		)))
+
+(define glob-simple-expected
+	(SetLink
+		(EvaluationLink (Predicate "goo")
+			(ListLink (Concept "bar") (Concept "baz") (Concept "bif")))
+	))
+
+(define glob-simple-tail
+	(MapLink
+		(EvaluationLink (Predicate "goo")
+			(ListLink (Concept "bar") (Glob "$x")))
+		(SetLink
+			(EvaluationLink (Predicate "foo")
+				(ListLink (Concept "bar") (Concept "baz")))
+			(EvaluationLink (Predicate "goo")
+				(ListLink (Concept "bar") (Concept "baz") (Concept "bif")))
+			(EvaluationLink (Predicate "goo")
+				(ListLink (Concept "bar") (Concept "baz") (Concept "gif")))
+			(EvaluationLink (Predicate "goo")
+				(ListLink (Concept "gar") (Concept "baz")))
+			(EvaluationLink (Predicate "goo")
+				(ListLink (Concept "bar") (Concept "baz")))
+		)))
+
+(define glob-simple-tail-expected
+	(SetLink
+		(EvaluationLink (Predicate "goo")
+			(ListLink (Concept "bar") (Concept "baz")))
+	))
+
+(define glob-double
+	(MapLink
+		(EvaluationLink (Predicate "goo")
+			(ListLink (Concept "bar") (Glob "$x") (Concept "bif") (Glob "$x")))
+		(SetLink
+			(EvaluationLink (Predicate "foo")
+				(ListLink (Concept "bar") (Concept "baz") (Concept "bif") (Concept "baz")))
+			(EvaluationLink (Predicate "goo")
+				(ListLink (Concept "bar") (Concept "baz") (Concept "bif") (Concept "baz")))
+			(EvaluationLink (Predicate "goo")
+				(ListLink (Concept "bar") (Concept "baz") (Concept "gif") (Concept "baz")))
+			(EvaluationLink (Predicate "goo")
+				(ListLink (Concept "gar") (Concept "baz") (Concept "bif") (Concept "baz")))
+			(EvaluationLink (Predicate "goo")
+				(ListLink (Concept "bar") (Concept "baz") (Concept "baz")))
+		)))
+
+(define glob-double-expected
+	(SetLink
+		(EvaluationLink (Predicate "goo")
+			(ListLink (Concept "bar") (Concept "baz") (Concept "bif") (Concept "baz")))
+	))
+
+(define glob-glob
+	(MapLink
+		(EvaluationLink (Predicate "goo")
+			(ListLink (Concept "bar") (Glob "$x") (Concept "bif") (Glob "$x")))
+		(SetLink
+			(EvaluationLink (Predicate "foo")
+				(ListLink (Concept "bar")
+					(Concept "baz") (Concept "ni") (Concept "goh")
+					(Concept "bif")
+					(Concept "baz") (Concept "ni") (Concept "goh")))
+			(EvaluationLink (Predicate "goo")
+				(ListLink (Concept "bar")
+					(Concept "baz") (Concept "ni") (Concept "goh")
+					(Concept "bif")
+					(Concept "baz") (Concept "ni") (Concept "goh")))
+			(EvaluationLink (Predicate "goo")
+				(ListLink (Concept "gar")
+					(Concept "baz") (Concept "ni") (Concept "goh")
+					(Concept "bif")
+					(Concept "baz") (Concept "ni") (Concept "goh")))
+			(EvaluationLink (Predicate "goo")
+				(ListLink (Concept "bar")
+					(Concept "baz") (Concept "ni") (Concept "goh")
+					(Concept "gif")
+					(Concept "baz") (Concept "ni") (Concept "goh")))
+			(EvaluationLink (Predicate "goo")
+				(ListLink (Concept "bar")
+					(Concept "baz") (Concept "ni") (Concept "goh")
+					(Concept "bif")
+					(Concept "baz") (Concept "goh") (Concept "goh")))
+		)))
+
+(define glob-glob-expected
+	(SetLink
+		(EvaluationLink (Predicate "goo")
+			(ListLink (Concept "bar")
+				(Concept "baz") (Concept "ni") (Concept "goh")
+				(Concept "bif")
+				(Concept "baz") (Concept "ni") (Concept "goh")))
+	))
