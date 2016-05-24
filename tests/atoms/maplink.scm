@@ -282,6 +282,9 @@
 	)
 )
 
+;; -------------------------------------------------------------
+;; Assorted glob tests
+
 (define glob-simple
 	(MapLink
 		(EvaluationLink (Predicate "goo")

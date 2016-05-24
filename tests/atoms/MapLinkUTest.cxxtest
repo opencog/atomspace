@@ -61,6 +61,7 @@ public:
     void test_signature(void);
     void test_double_set(void);
     void test_implication(void);
+    void test_glob(void);
 };
 
 void MapLinkUTest::tearDown(void)
@@ -220,6 +221,50 @@ void MapLinkUTest::test_implication(void)
     result = eval->eval_h("(cog-execute! imply-eval)");
 
     sete = eval->eval_h("eval-expected");
+    printf("got %s", result->toString().c_str());
+    printf("expected %s\n", sete->toString().c_str());
+
+    TS_ASSERT(result == sete);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void MapLinkUTest::test_glob(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/maplink.scm\")");
+
+    Handle result = eval->eval_h("(cog-execute! glob-simple)");
+
+    Handle sete = eval->eval_h("glob-simple-expected");
+    printf("got %s", result->toString().c_str());
+    printf("expected %s\n", sete->toString().c_str());
+
+    TS_ASSERT(result == sete);
+
+    // ---------------------------------------------------
+    result = eval->eval_h("(cog-execute! glob-simple-tail)");
+
+    sete = eval->eval_h("glob-simple-tail-expected");
+    printf("got %s", result->toString().c_str());
+    printf("expected %s\n", sete->toString().c_str());
+
+    TS_ASSERT(result == sete);
+
+    // ---------------------------------------------------
+    result = eval->eval_h("(cog-execute! glob-double)");
+
+    sete = eval->eval_h("glob-double-expected");
+    printf("got %s", result->toString().c_str());
+    printf("expected %s\n", sete->toString().c_str());
+
+    TS_ASSERT(result == sete);
+
+    // ---------------------------------------------------
+    result = eval->eval_h("(cog-execute! glob-glob)");
+
+    sete = eval->eval_h("glob-glob-expected");
     printf("got %s", result->toString().c_str());
     printf("expected %s\n", sete->toString().c_str());
 
