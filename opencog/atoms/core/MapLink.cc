@@ -351,10 +351,12 @@ Handle MapLink::rewrite_one(const Handle& term, AtomSpace* scratch) const
 
 	// Wrap up the result in a list only if there is more than one
 	// variable.
-	if (1 < valseq.size())
+	size_t nv = valseq.size();
+	if (1 < nv)
 		return Handle(createLink(LIST_LINK, valseq));
-
-	return valseq[0];
+	else if (1 == nv)
+		return valseq[0];
+	return Handle::UNDEFINED;
 }
 
 Handle MapLink::execute(AtomSpace* scratch) const
