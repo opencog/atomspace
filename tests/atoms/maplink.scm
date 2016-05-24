@@ -306,7 +306,7 @@
 				(ListLink (Concept "bar") (Concept "ah two")))
 			(EvaluationLink
 				(Predicate "foo")
-				(ListLink (Concept "bar") (Concept "too") (Cconcept "much")))
+				(ListLink (Concept "bar") (Concept "too") (Concept "much")))
 		))
 )
 
@@ -320,7 +320,7 @@
 				(ListLink (Concept "bar") (Glob "$y")))
 			(EvaluationLink
 				(Predicate "goo nature")
-				(ListLink (Concept "gar") (Variable "$y"))))
+				(ListLink (Concept "gar") (Glob "$y"))))
 		(SetLink
 			(EvaluationLink
 				(Predicate "goo")
