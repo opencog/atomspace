@@ -23,6 +23,8 @@
 
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
+// #include <opencog/atoms/core/MapLink.h>
+#include "MapLink.h"  // fucking python
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
@@ -352,6 +354,14 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			FoldLinkPtr flp(FoldLink::factory(hexpr));
 			return flp->execute(_as);
 		}
+	}
+
+	// MapLink is a FunctionLink, but circular shared-library
+	// dependencies prevent the factory from handling it.
+	if (classserver().isA(t, MAP_LINK))
+	{
+		FunctionLinkPtr flp(createMapLink(expr->getOutgoingSet()));
+		return flp->execute(_as);
 	}
 
 	// Fire any other function links, not handled above.
