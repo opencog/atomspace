@@ -356,17 +356,17 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		}
 	}
 
-	// MapLink is a FunctionLink, but circular shared-library
-	// dependencies prevent the factory from handling it.
-	if (classserver().isA(t, MAP_LINK))
-	{
-		FunctionLinkPtr flp(createMapLink(expr->getOutgoingSet()));
-		return flp->execute(_as);
-	}
-
 	// Fire any other function links, not handled above.
 	if (classserver().isA(t, FUNCTION_LINK))
 	{
+		// MapLink is a FunctionLink, but circular shared-library
+		// dependencies prevent the factory from handling it.
+		if (classserver().isA(t, MAP_LINK))
+		{
+			FunctionLinkPtr flp(createMapLink(expr->getOutgoingSet()));
+			return flp->execute(_as);
+		}
+
 		// At this time, no FunctionLink that is outside of an
 		// ExecutionOutputLink ever has a variable declaration.
 		// Also, the number of arguments is not fixed, its always variadic.
