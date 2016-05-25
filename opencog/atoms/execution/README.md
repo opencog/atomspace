@@ -2,15 +2,16 @@
 Execution and Evaluation Support
 ================================
 
-The code here implements a very crude form of execution support for
-the AtomSpace. Its crude and painfully slow and inefficient.
-Unfortunately, it is no longer simple, straight-forward.
+The code here implements a crude form of execution support for the
+AtomSpace. It is painfully slow and inefficient.  Unfortunately, it is
+no longer simple or straight-forward.
 
 Vocabulary
 ----------
 Some vocabulary:
 
-* "Substitution" means the substitution of values for thier place holders.
+* "Substitution" or "beta reduction" means the substitution of values
+  for thier place holders.
   There are several variants:
   -- The substitution of grounded values for variables (done by look-up
      in a map from variables to values)
@@ -29,8 +30,9 @@ Some vocabulary:
   it's return value. There are black-box and clear-box variants of
   these.
 
-The distinction between execution and evaluation is artificial, here:
-at some abstract level, its the same thing; we just use the word
+The distinction between execution and evaluation is artificial, but
+is motivated by the design of the atom-type hierarchy.  At some
+abstract level, the two are the same thing; we just use the word
 'evaluation' only when talking about functions that return TV's, and
 'execution' when talking about functions that return atoms.
 
@@ -46,6 +48,19 @@ here is why execution is complex:
   the function can be executed.  That is, execution does NOT
   commute with substitution.
 
+* There is no clear distinction between lazy execution and eager
+  executation in the current design. The current code base is a
+  mixture of both. Eager execution is "easier": some external agent
+  executes all of the arguments to a function before calling the
+  function itself.  Although this is easy, it leads to assorted
+  difficulties, most noticably in MapLink, and in tail recursion.
+  Lazy execution allows a function to execute an argument only if
+  it actually needs the value of that argument.  This requires some
+  cleverness in the function itself. If there is any beta-reduction
+  "above" the function, that must have been already performed (by some
+  outside agent).  This leads to some tension and confusion in the
+  order of operations.
+
 * Substitution has to be done recursviely, but with care: Not all
   variables are free; not all variables are bound. Thus, for example,
   the PutLink has two parts: all variables in the body of the PutLink
@@ -56,13 +71,14 @@ here is why execution is complex:
 * The beta reduction of PutLink does commute with execution.
   That is, execution can be performed either before or after
   beta reduction. It is easier to handle execution of e.g.
-  delete links if execution is done before beta reduction.
+  DeleteLink's, if execution is done before beta reduction.
 
 * The execution of black-box links requires that the argument atoms
-  be placed into the atomspace, first. This is for two reasons:
+  be placed into the atomspace, prior to execution. This is for two
+  reasons:
   -- Both python and guile rely on the atomspace to find atoms.
      If the argument to a scheme/python function is not in the
-     atomspace, bad things will probably happen.
+     atomspace, bad things (crashes, exceptions) will happen.
   -- Black-box functions potentially need to examine the TV on the
      atom.  It is impossible to get an accurate TV value for an
      atom, unless that atom has been fished out of the atomspace.
@@ -76,10 +92,30 @@ here is why execution is complex:
   atomspace does not send an "insert" message to the atoms being
   inserted.
 
-* Execution is currently done in an eager fashion, and should be
-  done in a lazy fashion. Until recently, this did not matter, because
-  conditional links were no much used... well, now they are (e.g. the
-  RandomChoiceLink -- only one branch needs to be instantiated/executed).
+* Execution is currently done in a mix of eager and delayed (lazy)
+  fashion. Some link types MUST be done lazily:
+  -- MapLink: If the MapLink has an ImplicationLink in it, and the
+     implicand is executable, then it cannot be executed until after
+     the beta reduction step.
+  -- RandomChoiceLink: only one branch (randomly chosen) can be
+     executed.  Execution of the other branches will lead to unwanted
+     effects.
+  -- SequantialAnd, SequentialOr: later atoms ust be evaluated only
+     if the earlier atoms evaluated to true/false, respectively. Note
+     that both of these links support tail recursion.
+
+
+Circular Shared Library Dependencies
+------------------------------------
+Currently, the python bindings depend on ExecutionOutputLink, and
+ExecutionOutputLink depends on the python bindings. This percolates
+through the code all over the place -- it affects the AtomTable, it
+affects the FunctionLink, it affects the MapLink (which should not
+be in this directory), and so on. Its a real pain in the neck.  The
+python bindings need to be fixed.
+
+After that, the MapLink can be moved back to the core directory, and
+the XXX in FunctionLink and in the AtomTable can be fixed.
 
 
 Garbage Collection

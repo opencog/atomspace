@@ -10,7 +10,6 @@ ADD_LIBRARY (atomcore
 	FunctionLink.cc
 	ImplicationLink.cc
 	LambdaLink.cc
-	MapLink.cc
 	PutLink.cc
 	RandomChoice.cc
 	RandomNumber.cc
@@ -43,7 +42,6 @@ INSTALL (FILES
 	FreeLink.h
 	FunctionLink.h
 	LambdaLink.h
-	MapLink.h
 	PutLink.h
 	RandomChoice.h
 	RandomNumber.h

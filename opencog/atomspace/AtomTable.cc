@@ -362,11 +362,6 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
         if (nullptr == EvaluationLinkCast(atom))
             return createEvaluationLink(*LinkCast(atom));
 */
-    } else if (EXECUTION_OUTPUT_LINK == atom_type) {
-/*
-        if (nullptr == ExecutionOutputLinkCast(atom))
-            return createExecutionOutputLink(*LinkCast(atom));
-*/
     } else if (PUT_LINK == atom_type) {
         if (nullptr == PutLinkCast(atom))
             return createPutLink(*LinkCast(atom));
@@ -466,9 +461,6 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
 */
     if (EVALUATION_LINK == atom_type)
         // return createEvaluationLink(*LinkCast(atom));
-        return createLink(*LinkCast(atom));
-    if (EXECUTION_OUTPUT_LINK == atom_type)
-        //return createExecutionOutputLink(*LinkCast(atom));
         return createLink(*LinkCast(atom));
     if (PUT_LINK == atom_type)
         return createPutLink(*LinkCast(atom));

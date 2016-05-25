@@ -26,7 +26,7 @@
 
 #include "ArityLink.h"
 #include "DeleteLink.h"
-#include "MapLink.h"
+// #include "MapLink.h"   goddamned python bindings
 #include "SleepLink.h"
 #include "TimeLink.h"
 #include "RandomChoice.h"
@@ -109,9 +109,6 @@ FunctionLinkPtr FunctionLink::factory(Type t, const HandleSeq& seq)
 	if (ARITY_LINK == t)
 		return createArityLink(seq);
 
-	if (MAP_LINK == t)
-		return createMapLink(seq);
-
 	if (RANDOM_CHOICE_LINK == t)
 		return createRandomChoiceLink(seq);
 
@@ -132,6 +129,10 @@ FunctionLinkPtr FunctionLink::factory(Type t, const HandleSeq& seq)
 	if (EXECUTION_OUTPUT_LINK == t)
 		// return Handle(createExecutionOutputLink(seq));
 		throw SyntaxException(TRACE_INFO, "Can't be a factory for this!");
+
+	if (MAP_LINK == t)
+		// return createMapLink(seq);
+		throw SyntaxException(TRACE_INFO, "Can't be a factory for MapLink!");
 
 	throw SyntaxException(TRACE_INFO,
 		"FunctionLink is not a factory for %s",

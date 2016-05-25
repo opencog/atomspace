@@ -11,6 +11,7 @@ ADD_LIBRARY (execution
 	EvaluationLink.cc
 	ExecutionOutputLink.cc
 	Instantiator.cc
+	MapLink.cc
 	ExecSCM.cc
 )
 
@@ -38,4 +39,11 @@ INSTALL (FILES
 	ExecutionOutputLink.h
 	Instantiator.h
 	DESTINATION "include/opencog/atoms/execution"
+)
+
+# This does not belong, but cannot be fixed until the Python bindings
+# are fixed, first.
+INSTALL (FILES
+	MapLink.h
+	DESTINATION "include/opencog/atoms/core"
 )

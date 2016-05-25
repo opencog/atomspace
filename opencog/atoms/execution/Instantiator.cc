@@ -23,6 +23,8 @@
 
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
+// #include <opencog/atoms/core/MapLink.h>
+#include "MapLink.h"  // fucking python
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
@@ -36,7 +38,7 @@ using namespace opencog;
 
 /// Perform beta-reduction on the expression `expr`, using the `vmap`
 /// to fish out values for variables.  The map holds pairs: the first
-/// membr of the pair is the variable; the second is the value that
+/// member of the pair is the variable; the second is the value that
 /// should be used as its replacement.  (Note that "variables" do not
 /// have to actually be VariableNode's; they can be any atom.)
 static Handle beta_reduce(const Handle& expr, const HandleMap vmap)
@@ -357,23 +359,21 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// Fire any other function links, not handled above.
 	if (classserver().isA(t, FUNCTION_LINK))
 	{
+		// MapLink is a FunctionLink, but circular shared-library
+		// dependencies prevent the factory from handling it.
+		if (classserver().isA(t, MAP_LINK))
+		{
+			FunctionLinkPtr flp(createMapLink(expr->getOutgoingSet()));
+			return flp->execute(_as);
+		}
+
 		// At this time, no FunctionLink that is outside of an
 		// ExecutionOutputLink ever has a variable declaration.
 		// Also, the number of arguments is not fixed, its always variadic.
 		// Perform substitution on all arguments before applying the
 		// function itself.
-		if (_eager)
-		{
-			HandleSeq oset_results;
-			walk_sequence(oset_results, expr->getOutgoingSet());
-			FunctionLinkPtr flp(FunctionLink::factory(t, oset_results));
-			return flp->execute(_as);
-		}
-		else
-		{
-			FunctionLinkPtr flp(FunctionLink::factory(expr));
-			return flp->execute(_as);
-		}
+		FunctionLinkPtr flp(FunctionLink::factory(expr));
+		return flp->execute(_as);
 	}
 
 	// If there is a SatisfyingLink, we have to perform it
