@@ -20,6 +20,7 @@
  */
 
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atomutils/FindUtils.h>
 
 #include "MapLink.h"
@@ -314,10 +315,8 @@ bool MapLink::extract(const Handle& termpat,
 
 Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 {
-	Handle term(cterm);
-	FunctionLinkPtr flp(FunctionLinkCast(term));
-	if (flp)
-		term = flp->execute(scratch);
+	Instantiator inst(scratch);
+	Handle term(inst.execute(cterm));
 
 	// Extract values for variables.
 	std::map<Handle,Handle> valmap;
@@ -349,13 +348,8 @@ Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 		// beta-reduction; we've already done that.
 		Handle red(_mvars->substitute_nocheck(_rewrite, valseq));
 printf("duuude post reduction=%s\n", red->toString().c_str());
-		if (classserver().isA(red->getType(), FUNCTION_LINK))
-		{
-			red = FunctionLink::factory(red);
-			FunctionLinkPtr flp(FunctionLinkCast(red));
-			red = flp->execute(scratch);
-printf("duuude yes its an flp result=%s\n", red->toString().c_str());
-		}
+		red = inst.execute(red);
+printf("duuude yes its exec result=%s\n", red->toString().c_str());
 		return red;
 	}
 

@@ -225,10 +225,7 @@ void MapLinkUTest::test_implication(void)
     printf("got %s", result->toString().c_str());
     printf("expected %s\n", sete->toString().c_str());
 
-    // Disable this test, for just right now; evaluating arguments
-    // that are not FunctionLinks is problematic due to the
-    // scheme/python circular dependency.
-    // TS_ASSERT(result == sete);
+    TS_ASSERT(result == sete);
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
