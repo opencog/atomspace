@@ -348,9 +348,14 @@ Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 		// Beta reduce, and execute. No type-checking during
 		// beta-reduction; we've already done that.
 		Handle red(_mvars->substitute_nocheck(_rewrite, valseq));
-		FunctionLinkPtr flp(FunctionLinkCast(red));
-		if (flp)
+printf("duuude post reduction=%s\n", red->toString().c_str());
+		if (classserver().isA(red->getType(), FUNCTION_LINK))
+		{
+			red = FunctionLink::factory(red);
+			FunctionLinkPtr flp(FunctionLinkCast(red));
 			red = flp->execute(scratch);
+printf("duuude yes its an flp result=%s\n", red->toString().c_str());
+		}
 		return red;
 	}
 
