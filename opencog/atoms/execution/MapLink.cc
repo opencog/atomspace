@@ -347,10 +347,7 @@ Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 		// Beta reduce, and execute. No type-checking during
 		// beta-reduction; we've already done that.
 		Handle red(_mvars->substitute_nocheck(_rewrite, valseq));
-printf("duuude post reduction=%s\n", red->toString().c_str());
-		red = inst.execute(red);
-printf("duuude yes its exec result=%s\n", red->toString().c_str());
-		return red;
+		return inst.execute(red);
 	}
 
 	// Make sure each variable is grounded. (for real, this time)
