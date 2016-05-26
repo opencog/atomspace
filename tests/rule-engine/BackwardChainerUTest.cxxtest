@@ -49,8 +49,15 @@ public:
 
 void BackwardChainerUTest::setUp()
 {
-	eval_.eval("(add-to-load-path \"..\")");
-	eval_.eval("(add-to-load-path \"../../..\")");
+	string cur_pp_dir = string(PROJECT_SOURCE_DIR),
+		cur_p_dir = cur_pp_dir + "/tests",
+		cur_dir = cur_p_dir + "/rule-engine";
+	vector<string> load_paths = {cur_pp_dir, cur_p_dir, cur_dir};
+	for (string& p : load_paths)
+	{
+		string eval_str = string("(add-to-load-path \"") + p + string("\")");
+		eval_.eval(eval_str);
+	}
 	eval_.eval("(use-modules (opencog))");
 	// eval_.eval("(use-modules (opencog rule-engine))");
 }
@@ -66,7 +73,8 @@ void BackwardChainerUTest::test_1_rule_bc_modus_ponens()
 
 	as_.clear();
 
-	eval_.eval("(load-from-path \"tests/rule-engine/bc-modus-ponens-config.scm\")");
+	string result = eval_.eval("(load-from-path \"tests/rule-engine/bc-modus-ponens-config.scm\")");
+	std::cout << result << std::endl;
 	eval_.eval("(load-from-path \"tests/rule-engine/bc-animals.scm\")");
 	randGen().seed(0);
 
