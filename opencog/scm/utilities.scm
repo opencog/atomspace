@@ -100,8 +100,24 @@
 ; (define (gar x) (if (cog-atom? x) (car (cog-outgoing-set x)) (car x)))
 ; (define (gdr x) (if (cog-atom? x) (cadr (cog-outgoing-set x)) (cdr x)))
 
-(define-public (gar x) (car (cog-outgoing-set x)) )
-(define-public (gdr x) (cadr (cog-outgoing-set x)) )
+(define-public (gar LINK)
+"
+  gar LINK - return first element of a Link atom.
+  Return null if teh LINK is empty.
+"
+	(define oset (cog-outgoing-set LINK))
+	(if (null? oset) '() (car oset)) )
+
+(define-public (gdr LINK)
+"
+  gdr LINK - return second element of a Link atom.
+  Return null if teh LINK is empty or has only one element.
+"
+	(define oset (cog-outgoing-set LINK))
+	(if (null? oset) '()
+		(let ((dohset (cdr oset)))
+			(if (null? dohset) '() (car dohset)))) )
+
 (define-public (gaar x) (gar (gar x)) )
 (define-public (gadr x) (gar (gdr x)) )
 (define-public (gdar x) (gdr (gar x)) )
