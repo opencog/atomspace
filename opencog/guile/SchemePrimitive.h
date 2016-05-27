@@ -123,6 +123,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			UUID (T::*u_ssb)(const std::string&, const std::string&, bool);
 			void (T::*v_b)(bool);
 			void (T::*v_h)(Handle);
+			void (T::*v_hs)(Handle, short);
 			void (T::*v_s)(const std::string&);
 			void (T::*v_sa)(const std::string&, AtomSpace*);
 			void (T::*v_ss)(const std::string&,
@@ -168,6 +169,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			U_SSB, // return UUID, take string,string,boolean
 			V_B,   // return void, take bool
 			V_H,   // return void, take Handle
+			V_HS,  // return void, take Handle and short
 			V_S,   // return void, take string
 			V_SA,  // return void, take string, Atomspace
 			V_SS,  // return void, take two strings
@@ -513,6 +515,14 @@ class SchemePrimitive : public PrimitiveEnviron
 					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name));
 					(that->*method.v_h)(h);
 					break;
+				} 
+				case V_HS:
+				{
+					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name, 1);
+					short s = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
+
+					(that->*method.v_hs)(h, s);
+					break;
 				}
 				case V_S:
 				{
@@ -685,6 +695,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_3(U_SSB,  u_ssb, UUID,const std::string&,const std::string&, bool)
 		DECLARE_CONSTR_1(V_B,    v_b,  void, bool)
 		DECLARE_CONSTR_1(V_H,    v_h,  void, Handle)
+		DECLARE_CONSTR_2(V_HS,   v_hs, void, Handle, short)
 		DECLARE_CONSTR_1(V_S,    v_s,  void, const std::string&)
 		DECLARE_CONSTR_2(V_SA,   v_sa, void, const std::string&,
 		                               AtomSpace*)
@@ -759,6 +770,7 @@ DECLARE_DECLARE_2(const std::string&, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, const std::string&, AtomSpace*)
 DECLARE_DECLARE_2(void, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, Type, int)
+DECLARE_DECLARE_2(void, Handle, short)
 DECLARE_DECLARE_3(double, Handle, Handle, Type)
 DECLARE_DECLARE_3(Handle, Handle, Type, const HandleSeq&)
 DECLARE_DECLARE_3(Handle, const std::string&, const HandleSeq&, const HandleSeq&)
