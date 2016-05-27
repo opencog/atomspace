@@ -228,6 +228,9 @@ typedef std::vector<HandleSeq> HandleSeqSeq;
 //! a set of handles
 typedef std::set<Handle> OrderedHandleSet;
 
+//! a pair of handles
+typedef std::pair<Handle, Handle> HandlePair;
+
 //! a hash that associates the handle to its unique identificator
 typedef std::unordered_set<Handle, handle_hash> UnorderedHandleSet;
 
@@ -244,7 +247,7 @@ typedef std::vector<HandleMap> HandleMapSeq;
 typedef std::pair<Handle, Handle> HandlePair;
 
 //! a sequence of handle pairs
-typedef std::vector<std::pair<Handle, Handle>> HandlePairSeq;
+typedef std::vector<HandlePair> HandlePairSeq;
 
 //! a handle iterator
 typedef std::iterator<std::forward_iterator_tag, Handle> HandleIterator;
