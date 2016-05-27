@@ -123,6 +123,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			UUID (T::*u_ssb)(const std::string&, const std::string&, bool);
 			void (T::*v_b)(bool);
 			void (T::*v_h)(Handle);
+			void (T::*v_hs)(Handle, short);
 			void (T::*v_s)(const std::string&);
 			void (T::*v_sa)(const std::string&, AtomSpace*);
 			void (T::*v_ss)(const std::string&,
@@ -132,7 +133,6 @@ class SchemePrimitive : public PrimitiveEnviron
 			                 const std::string&);
 			void (T::*v_t)(Type);
 			void (T::*v_ti)(Type, int);
-                	void (T::*v_hs)(Handle, short);
 			void (T::*v_tidi)(Type, int, double, int);
 			void (T::*v_v)(void);
 		} method;
@@ -169,13 +169,13 @@ class SchemePrimitive : public PrimitiveEnviron
 			U_SSB, // return UUID, take string,string,boolean
 			V_B,   // return void, take bool
 			V_H,   // return void, take Handle
+			V_HS,  // return void, take Handle and short
 			V_S,   // return void, take string
 			V_SA,  // return void, take string, Atomspace
 			V_SS,  // return void, take two strings
 			V_SSS, // return void, take three strings
 			V_T,   // return void, take Type
 			V_TI,  // return void, take Type and int
-                	V_HS,  // return void, take Handle and short
 			V_TIDI,// return void, take Type, int, double, and int
 			V_V    // return void, take void
 		} signature;
@@ -515,6 +515,14 @@ class SchemePrimitive : public PrimitiveEnviron
 					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name));
 					(that->*method.v_h)(h);
 					break;
+				} 
+				case V_HS:
+				{
+					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name, 1);
+					short s = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
+
+					(that->*method.v_hs)(h, s);
+					break;
 				}
 				case V_S:
 				{
@@ -566,15 +574,6 @@ class SchemePrimitive : public PrimitiveEnviron
 					int i = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
 
 					(that->*method.v_ti)(t, i);
-					break;
-				}
-                                case V_HS:
-				{
-					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name, 1);
-
-					short s = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
-
-					(that->*method.v_hs)(h, s);
 					break;
 				}
 				case V_TIDI:
@@ -696,6 +695,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_3(U_SSB,  u_ssb, UUID,const std::string&,const std::string&, bool)
 		DECLARE_CONSTR_1(V_B,    v_b,  void, bool)
 		DECLARE_CONSTR_1(V_H,    v_h,  void, Handle)
+		DECLARE_CONSTR_2(V_HS,   v_hs, void, Handle, short)
 		DECLARE_CONSTR_1(V_S,    v_s,  void, const std::string&)
 		DECLARE_CONSTR_2(V_SA,   v_sa, void, const std::string&,
 		                               AtomSpace*)
@@ -705,7 +705,6 @@ class SchemePrimitive : public PrimitiveEnviron
 		                               const std::string&, const std::string&)
 		DECLARE_CONSTR_1(V_T,    v_t,  void, Type)
 		DECLARE_CONSTR_2(V_TI,   v_ti, void, Type, int)
-        	DECLARE_CONSTR_2(V_HS,   v_hs, void, Handle, short)
 		DECLARE_CONSTR_4(V_TIDI, v_tidi, void, Type, int, double, int)
 
 		DECLARE_CONSTR_0(V_V,    v_v,  void);
