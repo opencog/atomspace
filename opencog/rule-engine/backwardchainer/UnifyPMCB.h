@@ -37,7 +37,7 @@ public:
 
 	virtual bool variable_match(const Handle&, const Handle&);
 	virtual bool grounding(const HandleMap &var_soln,
-			const HandleMap &pred_soln);
+	                       const HandleMap &pred_soln);
 
 private:
 	VariableListPtr _ext_vars;

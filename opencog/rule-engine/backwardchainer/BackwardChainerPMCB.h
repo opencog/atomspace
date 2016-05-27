@@ -55,7 +55,7 @@ public:
 
 	virtual bool node_match(const Handle&, const Handle&);
 	virtual bool grounding(const HandleMap &var_soln,
-			const HandleMap &pred_soln);
+	                       const HandleMap &pred_soln);
 
     /**
      * Return list of matching results found by the pattern matcher
