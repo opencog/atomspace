@@ -350,16 +350,16 @@
 )
 
 ; -----------------------------------------------------------------------
-(define-public (cog-get-root atom)
+(define-public (cog-get-root ATOM)
 "
-  cog-get-root -- Return all hypergraph roots containing 'atom'
+  cog-get-root -- Return all hypergraph roots containing `ATOM`.
 
-  Return the root links of a specific 'atom'; basically get the root link
-  with no incoming set.
+  Return all links that contain ATOM and are also roots, in the sense
+  contains them.
 "
-	(define iset (cog-incoming-set atom))
+	(define iset (cog-incoming-set ATOM))
 	(if (null? iset)
-		(list atom)
+		(list ATOM)
 		(append-map cog-get-root iset))
 )
 
