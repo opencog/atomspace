@@ -25,7 +25,7 @@
 ; -- cog-get-all-nodes -- Get all the nodes within a link and its sublinks
 ; -- cog-get-partner -- Return other atom of a link connecting two atoms.
 ; -- cog-pred-get-partner -- Get the partner in an EvaluationLink.
-; -- cog-filter -- return a list of atoms of given type.
+; -- cog-filter -- filter a list of atoms, keeping the given type.
 ; -- cog-chase-link -- Return other atom of a link connecting two atoms.
 ; -- cog-chase-link-chk -- chase a link, with checking
 ; -- cog-map-chase-link -- Invoke proc on atoms connected through type.
@@ -428,14 +428,13 @@
 )
 
 ; -----------------------------------------------------------------------
-(define-public (cog-filter atom-type atom-list)
+(define-public (cog-filter ATOM-TYPE ATOM-LIST)
 "
-  cog-filter -- return a list of atoms of given type.
-
-  Given a list of atoms, return a list of atoms that are of 'atom-type'
+  cog-filter ATOM-TYPE ATOM-LIST -- filter the scheme list
+  ATOM-LIST, keeping only the atoms of ATOM-TYPE.
 "
-	(define (is-type? atom) (eq? atom-type (cog-type atom)))
-	(filter is-type? atom-list)
+	(define (is-type? atom) (eq? ATOM-TYPE (cog-type atom)))
+	(filter is-type? ATOM-LIST)
 )
 
 ; -----------------------------------------------------------------------
