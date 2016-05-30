@@ -22,6 +22,7 @@
 ; -- cog-count-atoms -- Count of the number of atoms of given type.
 ; -- cog-report-counts -- Return an association list of counts.
 ; -- cog-get-root -- Return all hypergraph roots containing 'atom'
+; -- cog-get-trunk -- Return all hypergraphs containing `ATOM`.
 ; -- cog-get-all-nodes -- Get all the nodes within a link and its sublinks
 ; -- cog-get-partner -- Return other atom of a link connecting two atoms.
 ; -- cog-pred-get-partner -- Get the partner in an EvaluationLink.
@@ -354,8 +355,8 @@
 "
   cog-get-root -- Return all hypergraph roots containing `ATOM`.
 
-  Return all links that contain ATOM and are also roots, in the sense
-  contains them.
+  Return all links that contain ATOM and are also roots. A root
+  is any atom that has a null incoming set.
 "
 	(define iset (cog-incoming-set ATOM))
 	(if (null? iset)
@@ -364,18 +365,33 @@
 )
 
 ; -----------------------------------------------------------------------
-(define-public (cog-get-all-nodes link)
+(define-public (cog-get-trunk ATOM)
 "
-  cog-get-all-nodes -- Get all the nodes within a link and its sublinks
+  cog-get-trunk -- Return all hypergraphs containing `ATOM`.
+
+  Return all links that contain ATOM at some level.  Unlike cog-get-root,
+  these are not necessarily roots.
+"
+	(define iset (cog-incoming-set ATOM))
+	(if (null? iset)
+		'()
+		(concatenate (list iset
+			(append-map cog-get-trunk iset))))
+)
+
+; -----------------------------------------------------------------------
+(define-public (cog-get-all-nodes LINK)
+"
+  cog-get-all-nodes -- Get all the nodes within `LINK` and its sublinks
 
   Get all the nodes (non-link atoms) within a hypergraph, and return as
   a list.
 "
-	(define oset (cog-outgoing-set link))
-	(define (recursive-helper atom)
-		(if (cog-link? atom)
-			(cog-get-all-nodes atom)
-			(list atom)
+	(define oset (cog-outgoing-set LINK))
+	(define (recursive-helper ATOM)
+		(if (cog-link? ATOM)
+			(cog-get-all-nodes ATOM)
+			(list ATOM)
 		)
 	)
 
