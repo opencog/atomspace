@@ -22,10 +22,11 @@
 ; -- cog-count-atoms -- Count of the number of atoms of given type.
 ; -- cog-report-counts -- Return an association list of counts.
 ; -- cog-get-root -- Return all hypergraph roots containing 'atom'
+; -- cog-get-trunk -- Return all hypergraphs containing `ATOM`.
 ; -- cog-get-all-nodes -- Get all the nodes within a link and its sublinks
 ; -- cog-get-partner -- Return other atom of a link connecting two atoms.
 ; -- cog-pred-get-partner -- Get the partner in an EvaluationLink.
-; -- cog-filter -- return a list of atoms of given type.
+; -- cog-filter -- filter a list of atoms, keeping the given type.
 ; -- cog-chase-link -- Return other atom of a link connecting two atoms.
 ; -- cog-chase-link-chk -- chase a link, with checking
 ; -- cog-map-chase-link -- Invoke proc on atoms connected through type.
@@ -350,32 +351,47 @@
 )
 
 ; -----------------------------------------------------------------------
-(define-public (cog-get-root atom)
+(define-public (cog-get-root ATOM)
 "
-  cog-get-root -- Return all hypergraph roots containing 'atom'
+  cog-get-root -- Return all hypergraph roots containing `ATOM`.
 
-  Return the root links of a specific 'atom'; basically get the root link
-  with no incoming set.
+  Return all links that contain ATOM and are also roots. A root
+  is any atom that has a null incoming set.
 "
-	(define iset (cog-incoming-set atom))
+	(define iset (cog-incoming-set ATOM))
 	(if (null? iset)
-		(list atom)
+		(list ATOM)
 		(append-map cog-get-root iset))
 )
 
 ; -----------------------------------------------------------------------
-(define-public (cog-get-all-nodes link)
+(define-public (cog-get-trunk ATOM)
 "
-  cog-get-all-nodes -- Get all the nodes within a link and its sublinks
+  cog-get-trunk -- Return all hypergraphs containing `ATOM`.
+
+  Return all links that contain ATOM at some level.  Unlike cog-get-root,
+  these are not necessarily roots.
+"
+	(define iset (cog-incoming-set ATOM))
+	(if (null? iset)
+		'()
+		(concatenate (list iset
+			(append-map cog-get-trunk iset))))
+)
+
+; -----------------------------------------------------------------------
+(define-public (cog-get-all-nodes LINK)
+"
+  cog-get-all-nodes -- Get all the nodes within `LINK` and its sublinks
 
   Get all the nodes (non-link atoms) within a hypergraph, and return as
   a list.
 "
-	(define oset (cog-outgoing-set link))
-	(define (recursive-helper atom)
-		(if (cog-link? atom)
-			(cog-get-all-nodes atom)
-			(list atom)
+	(define oset (cog-outgoing-set LINK))
+	(define (recursive-helper ATOM)
+		(if (cog-link? ATOM)
+			(cog-get-all-nodes ATOM)
+			(list ATOM)
 		)
 	)
 
@@ -428,14 +444,13 @@
 )
 
 ; -----------------------------------------------------------------------
-(define-public (cog-filter atom-type atom-list)
+(define-public (cog-filter ATOM-TYPE ATOM-LIST)
 "
-  cog-filter -- return a list of atoms of given type.
-
-  Given a list of atoms, return a list of atoms that are of 'atom-type'
+  cog-filter ATOM-TYPE ATOM-LIST -- filter the scheme list
+  ATOM-LIST, keeping only the atoms of ATOM-TYPE.
 "
-	(define (is-type? atom) (eq? atom-type (cog-type atom)))
-	(filter is-type? atom-list)
+	(define (is-type? atom) (eq? ATOM-TYPE (cog-type atom)))
+	(filter is-type? ATOM-LIST)
 )
 
 ; -----------------------------------------------------------------------

@@ -145,7 +145,7 @@
  cog-delete ATOM
     Delete the indicated ATOM, but only if it has no incoming links.
 
-    Returns #t if the atom was deleted, else returns #f if not deleted.\"
+    Returns #t if the atom was deleted, else returns #f if not deleted.
 ")
 
 (set-procedure-property! cog-delete-recursive 'documentation
