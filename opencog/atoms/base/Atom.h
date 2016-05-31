@@ -127,7 +127,7 @@ protected:
         _atomTable(NULL),
         _truthValue(tv),
         _attentionValue(av),
-        _value(pv);
+        _value(pv)
     {}
 
     struct InSet
@@ -170,6 +170,14 @@ private:
     //! Unsets removal flag.
     void unsetRemovalFlag();
 
+    /** Returns whether this atom is marked checked.
+     *
+     * @return is atom checked.
+     */
+    bool isChecked() const;
+    void setChecked();
+    void setUnchecked();
+
     /** Change the Very-Long-Term Importance */
     void chgVLTI(int unit);
 
@@ -209,21 +217,6 @@ public:
     inline Handle getHandle() {
         return Handle(std::dynamic_pointer_cast<Atom>(shared_from_this()));
     }
-
-    /** Returns whether this atom is marked checked. This is a public utility 
-     * flag that can be used during testing.
-     *
-     * @return is atom checked.
-     */
-    bool isChecked() const;
-
-    /** Sets this atom as checked.
-     */
-    void setChecked();
-
-    /** Sets this atom as unchecked.
-     */
-    void setUnchecked();
 
     ProtoAtomPtr getValue();
     void setValue(ProtoAtomPtr);
