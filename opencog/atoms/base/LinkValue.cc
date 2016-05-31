@@ -34,7 +34,7 @@ bool LinkValue::operator==(const ProtoAtom& other) const
 
 std::string LinkValue::toString(const std::string& indent)
 {
-	std::string rv = indent + "(LinkValue";
+	std::string rv = indent + "(LinkValue\n";
 	for (ProtoAtomPtr v :_value)
 		rv += std::string(" ") + v->toString(indent + "   ") + "\n";
 	rv += ")";
