@@ -84,6 +84,37 @@ AtomSpace* Atom::getAtomSpace() const
 }
 
 // ==============================================================
+// Setting and getting of generic values.
+
+void Atom::setValue(ProtoAtomPtr newValue)
+{
+    // We need to make sure that only one thread is writing this at a
+    // time. std:shared_ptr is NOT thread-safe against multiple writers:
+    // "Example 5" in
+    // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
+    std::lock_guard<std::mutex> lck(_mtx);
+    _value = newValue;
+}
+
+ProtoAtomPtr Atom::getValue()
+{
+    // OK. The atomic thread-safety of shared-pointers is subtle. See
+    // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
+    // and http://cppwisdom.quora.com/shared_ptr-is-almost-thread-safe
+    // What it boils down to here is that we must *always* make a copy
+    // of _truthValue before we use it, since it can go out of scope
+    // because it can get set in another thread.  Viz, using it to
+    // dereference can return a raw pointer to an object that has been
+    // deconstructed.  The AtomSpaceAsyncUTest will hit this, as will
+    // the multi-threaded async atom store in the SQL peristance backend.
+    // Furthermore, we must make a copy while holding the lock! Got that?
+
+    std::lock_guard<std::mutex> lck(_mtx);
+    ProtoAtomPtr local(_value);
+    return local;
+}
+
+// ==============================================================
 // Whole lotta truthiness going on here.  Does it really need to be
 // this complicated!?
 
@@ -100,7 +131,7 @@ void Atom::setTruthValue(TruthValuePtr newTV)
     // writing this at a time. std:shared_ptr is NOT thread-safe against
     // multiple writers: see "Example 5" in
     // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
-    std::unique_lock<std::mutex> lck (_mtx);
+    std::unique_lock<std::mutex> lck(_mtx);
     _truthValue = newTV;
     lck.unlock();
 
