@@ -63,6 +63,9 @@ public:
 		return classserver().isA(at, t);
 	}
 
+	virtual bool isNode() const { return false; }
+	virtual bool isLink() const { return false; }
+
 	/** Returns a string representation of the node.
 	 *
 	 * @return A string representation of the node.

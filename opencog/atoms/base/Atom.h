@@ -183,9 +183,6 @@ public:
 
     inline UUID getUUID() const { return _uuid; }
 
-    virtual bool isNode() const = 0;
-    virtual bool isLink() const = 0;
-
     virtual const std::string& getName() const {
         throw RuntimeException(TRACE_INFO, "Not a node!");
     }
