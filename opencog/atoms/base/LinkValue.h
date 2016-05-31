@@ -50,19 +50,14 @@ public:
 	virtual ~LinkValue() {}
 
 	std::vector<ProtoAtomPtr>& value() { return _value; }
+	void setValue(const std::vector<ProtoAtomPtr>& v) { _value = v; }
 
-	/** Returns a string representation of the value.
-	 *
-	 * @return A string representation of the value.
-	 */
+	/** Returns a string representation of the value.  */
 	virtual std::string toString(const std::string& indent);
 	virtual std::string toShortString(const std::string& indent)
 	{ return toString(indent); }
 
-	/** Returns whether two atoms are equal.
-	 *
-	 * @return true if the atoms are equal, false otherwise.
-	 */
+	/** Returns true if the two atoms are equal, else false.  */
 	virtual bool operator==(const ProtoAtom&) const;
 };
 

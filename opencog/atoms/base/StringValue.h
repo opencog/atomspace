@@ -50,19 +50,17 @@ public:
 	virtual ~StringValue() {}
 
 	std::vector<std::string>& value() { return _value; }
+	void setValue(const std::vector<std::string>& v) { _value = v; }
+	void setValue(const std::string& v) {
+		_value = std::vector<std::string>({v}); }
 
-	/** Returns a string representation of the value.
-	 *
-	 * @return A string representation of the value.
-	 */
+
+	/** Returns a string representation of the value.  */
 	virtual std::string toString(const std::string& indent);
 	virtual std::string toShortString(const std::string& indent)
 	{ return toString(indent); }
 
-	/** Returns whether two atoms are equal.
-	 *
-	 * @return true if the atoms are equal, false otherwise.
-	 */
+	/** Returns true if the two atoms are equal.  */
 	virtual bool operator==(const ProtoAtom&) const;
 };
 
