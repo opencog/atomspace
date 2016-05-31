@@ -17,6 +17,7 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/FloatValue.h>
 #include <opencog/atoms/base/LinkValue.h>
+#include <opencog/atoms/base/StringValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
@@ -393,6 +394,35 @@ SchemeSmob::verify_protom_list (SCM svalue_list, const char * subrname, int pos)
 }
 
 /**
+ * Convert argument into a list of strings.
+ */
+std::vector<std::string>
+SchemeSmob::verify_string_list (SCM svalue_list, const char * subrname, int pos)
+{
+	// Verify that second arg is an actual list. Allow null list
+	// (which is rather unusual, but legit.  Allow embedded nulls
+	// as this can be convenient for writing scheme code.
+	if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
+		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a list of (string) values");
+
+	std::vector<std::string> valist;
+	SCM sl = svalue_list;
+	pos = 2;
+	while (scm_is_pair(sl)) {
+		SCM svalue = SCM_CAR(sl);
+
+		if (not scm_is_null(svalue)) {
+			char * v = scm_to_utf8_string(svalue);
+			valist.emplace_back(v);
+		}
+		sl = SCM_CDR(sl);
+		pos++;
+	}
+
+	return valist;
+}
+
+/**
  * Create a new value, of named type stype, and value vector svect
  */
 SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
@@ -412,6 +442,13 @@ SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
 		std::vector<ProtoAtomPtr> valist;
 		valist = verify_protom_list(svalue_list, "cog-new-value", 2);
 		pa = createLinkValue(valist);
+	}
+
+	else if (STRING_VALUE == t)
+	{
+		std::vector<std::string> valist;
+		valist = verify_string_list(svalue_list, "cog-new-value", 2);
+		pa = createStringValue(valist);
 	}
 
 	scm_remember_upto_here_1(svalue_list);

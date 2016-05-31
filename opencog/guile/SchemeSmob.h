@@ -197,6 +197,8 @@ private:
 	                                               int pos = 1);
 	static std::vector<ProtoAtomPtr> verify_protom_list (SCM, const char *,
 	                                               int pos = 1);
+	static std::vector<std::string> verify_string_list (SCM, const char *,
+	                                               int pos = 1);
 	static std::string verify_string (SCM, const char *, int pos = 1,
 	                                  const char *msg = "string");
 	static int verify_int (SCM, const char *, int pos = 1,
