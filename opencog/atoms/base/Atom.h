@@ -100,6 +100,7 @@ protected:
 
     TruthValuePtr _truthValue;
     AttentionValuePtr _attentionValue;
+    ProtoAtomPtr _value;
 
     // Lock, used to serialize changes.
     // This costs 40 bytes per atom.  Tried using a single, global lock,
@@ -118,13 +119,15 @@ protected:
      * @param The truthValue of the atom.
      */
     Atom(Type t, TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-            AttentionValuePtr av = AttentionValue::DEFAULT_AV())
+         AttentionValuePtr av = AttentionValue::DEFAULT_AV(),
+         ProtoAtomPtr pv = NULL)
       : ProtoAtom(t),
         _flags(0),
         _uuid(Handle::INVALID_UUID),
         _atomTable(NULL),
         _truthValue(tv),
-        _attentionValue(av)
+        _attentionValue(av),
+        _value(pv);
     {}
 
     struct InSet
@@ -221,6 +224,9 @@ public:
     /** Sets this atom as unchecked.
      */
     void setUnchecked();
+
+    ProtoAtomPtr getValue();
+    void setValue(ProtoAtomPtr);
 
     /** Returns the AttentionValue object of the atom.
      *
