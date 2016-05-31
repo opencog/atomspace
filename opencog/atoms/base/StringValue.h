@@ -64,13 +64,6 @@ public:
 	 * @return true if the atoms are equal, false otherwise.
 	 */
 	virtual bool operator==(const ProtoAtom&) const;
-
-	/** Returns whether two atoms are different.
-	 *
-	 * @return true if the atoms are different, false otherwise.
-	 */
-	bool operator!=(const ProtoAtom& other) const
-	{  return not operator==(other); }
 };
 
 typedef std::shared_ptr<StringValue> StringValuePtr;

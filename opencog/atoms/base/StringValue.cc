@@ -26,7 +26,7 @@ using namespace opencog;
 
 bool StringValue::operator==(const ProtoAtom& other) const
 {
-	if (FLOAT_VALUE != other.getType()) return false;
+	if (STRING_VALUE != other.getType()) return false;
 	return true;
 }
 
