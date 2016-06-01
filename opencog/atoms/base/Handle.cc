@@ -42,7 +42,10 @@ Handle::Handle(const UUID u)
 UUID Handle::value(void) const
 {
     const Atom* a = operator->();
-    if (a) return a->getUUID();
+    // The is link/node is a low-cost way of checking if the
+    // pointer really is an atom pointer, and not just protoAtom,
+    // which does not have a uuid.
+    if (a and (a->isLink() or a->isNode())) return a->getUUID();
     return ULONG_MAX;
 }
 
