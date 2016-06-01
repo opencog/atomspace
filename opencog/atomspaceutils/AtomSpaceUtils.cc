@@ -47,23 +47,33 @@ Handle add_prefixed_node(AtomSpace& as, Type t, const std::string& prefix)
 }
 
 /// Return true if all of h was removed.
-bool remove_hypergraph(AtomSpace& as, const Handle& h)
+bool do_hypergraph_removal(AtomSpace& as, const Handle& h, bool from_storage)
 {
     // Recursive case
     if (h->isLink()) {
         HandleSeq oset = h->getOutgoingSet();
-        bool success = as.remove_atom(h);
+        bool success = (from_storage)? as.remove_atom(h) : as.extract_atom(h);
         if (success) {
             // Return true only if entire subgraph was removed.
             for (const Handle& oh : oset)
-                if (not remove_hypergraph(as, oh)) success = false;
+                if (not do_hypergraph_removal(as, oh, from_storage))
+                    success = false;
         }
         return success;
     }
     // Base case
     else {
-        return as.remove_atom(h);
+        return (from_storage)? as.remove_atom(h) : as.extract_atom(h);
     }
 }
 
+bool remove_hypergraph(AtomSpace& as, const Handle& h)
+{
+    return do_hypergraph_removal(as, h, true);
+}
+
+bool extract_hypergraph(AtomSpace& as, const Handle& h)
+{
+    return do_hypergraph_removal(as, h, false);
+}
 } // namespace opencog
