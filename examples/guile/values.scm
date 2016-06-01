@@ -30,3 +30,16 @@
 
 ; The attached value can be fetched.
 (cog-value a)
+
+(define l (LinkValue
+	(Concept "foobar") (StringValue "property") (FloatValue 42)))
+
+; The following should throw errors.
+(cog-value v)
+(cog-value l)
+
+; The value can be changed ...
+(cog-set-value! a l)
+
+; Verify that the value changed.
+(cog-value a)
