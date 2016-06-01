@@ -72,6 +72,7 @@ private:
 	static SCM handle_to_scm(const Handle&);
 	static SCM protom_to_scm(const ProtoAtomPtr&);
 	static Handle scm_to_handle(SCM);
+	static ProtoAtomPtr scm_to_protom(SCM);
 
 	// Atom creation and deletion functions
 	static SCM ss_new_value(SCM, SCM);
@@ -191,6 +192,7 @@ private:
 	static AtomSpace* verify_atomspace(SCM, const char *, int pos = 1);
 	static Type verify_atom_type(SCM, const char *, int pos = 1);
 	static Handle verify_handle(SCM, const char *, int pos = 1);
+	static ProtoAtomPtr verify_protom(SCM, const char *, int pos = 1);
 	static TruthValue* verify_tv(SCM, const char *, int pos = 1);
 	static AttentionValue* verify_av(SCM, const char *, int pos = 1);
 	static HandleSeq verify_handle_list (SCM, const char *,

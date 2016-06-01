@@ -14,6 +14,8 @@
 #include <libguile.h>
 
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/ProtoAtom.h>
+#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
@@ -42,6 +44,15 @@ Handle SchemeSmob::verify_handle (SCM satom, const char * subrname, int pos)
 		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
 
 	return h;
+}
+
+ProtoAtomPtr SchemeSmob::verify_protom (SCM satom, const char * subrname, int pos)
+{
+	ProtoAtomPtr pv(scm_to_protom(satom));
+	if (nullptr == pv)
+		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog value");
+
+	return pv;
 }
 
 /* ============================================================== */
@@ -128,16 +139,13 @@ SCM SchemeSmob::ss_value (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-value");
 	ProtoAtomPtr pav = h->getValue();
-	ProtoAtomPtr pav = h->getValue();
-	return protom_to_scm(pav)
+	return protom_to_scm(pav);
 }
 
 SCM SchemeSmob::ss_set_value (SCM satom, SCM pav)
 {
 	Handle h = verify_handle(satom, "cog-set-value!");
-	Handle hpv = verify_handle(sav, "cog-set-value!", 2);
-
-	ProtoAtomPtr pv = dynamic_cast<ProtoAtomPtr>((AtomPtr) hpv);
+	ProtoAtomPtr pv = verify_protom(pav, "cog-set-value!", 2);
 
 	h->setValue(pv);
 	return satom;

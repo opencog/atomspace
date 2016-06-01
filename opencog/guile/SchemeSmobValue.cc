@@ -109,8 +109,7 @@ SchemeSmob::verify_protom_list (SCM svalue_list, const char * subrname, int pos)
 		SCM svalue = SCM_CAR(sl);
 
 		if (not scm_is_null(svalue)) {
-			Handle h(scm_to_handle(svalue));
-			ProtoAtomPtr pa(AtomCast(h));
+			ProtoAtomPtr pa(scm_to_protom(svalue));
 			valist.emplace_back(pa);
 		}
 		sl = SCM_CDR(sl);
