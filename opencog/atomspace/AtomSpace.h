@@ -279,8 +279,8 @@ public:
      * from the (local, in-RAM) AtomSpace (in this process); any copies
      * of the atom in persistent storage orin other address spaces are
      * unaffected.  To also delete from persistant storage, use the
-     * removeAtom() method. Of course, the AtomSpace must be connected
-     * to storage in order for removeAtom() to reach out that far; if
+     * remove_atom() method. Of course, the AtomSpace must be connected
+     * to storage in order for remove_atom() to reach out that far; if
      * the AtomSpace is not connected to a backend, there is no
      * difference between remove and extract.
      *
