@@ -139,11 +139,11 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
         STRING(REGEX MATCH "NODE$" ISNODE ${TYPE})
         STRING(REGEX MATCH "LINK$" ISLINK ${TYPE})
 
-        # If not named as a node or a link, assume its a value.
-        # This is kind of hacky, but I don't know what else to do ...
-        IF (NOT ISNODE STREQUAL "NODE" AND NOT ISLINK STREQUAL "LINK")
-            SET(ISVALUE "VALUE")
-        ENDIF (NOT ISNODE STREQUAL "NODE" AND NOT ISLINK STREQUAL "LINK")
+        # If not explicitly named, assume its a link. This is kind of
+        # hacky, but is needed for e.g. "VariableList" ...
+        IF (NOT ISNODE STREQUAL "NODE" AND NOT ISVALUE STREQUAL "VALUE")
+            SET(ISLINK "LINK")
+        ENDIF (NOT ISNODE STREQUAL "NODE" AND NOT ISVALUE STREQUAL "VALUE")
 
         # Print out the scheme definitions
         FILE(APPEND "${SCM_FILE}" "(define-public ${TYPE_NAME}Type (cog-type->int '${TYPE_NAME}))\n")
