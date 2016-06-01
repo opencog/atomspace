@@ -59,6 +59,12 @@ Handle add_prefixed_node(AtomSpace&, Type, const std::string& prefix = "");
  */
 bool remove_hypergraph(AtomSpace& as, const Handle& h);
 
+/**
+ * Similar to remove_hypergraph(), but only remove the hypergraph from
+ * atomspace (local, in RAM) but not in any persistent storage.
+ */
+bool extract_hypergraph(AtomSpace& as, const Handle& h);
+
 /** @}*/
 }
 
