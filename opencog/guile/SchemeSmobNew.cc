@@ -160,7 +160,7 @@ SCM SchemeSmob::protom_to_scm (const ProtoAtomPtr& pa)
 	return smob;
 }
 
-ProtoAtomPtr SchemeSmob::scm_to_protoatom (SCM sh)
+ProtoAtomPtr SchemeSmob::scm_to_protom (SCM sh)
 {
 	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sh))
 		return nullptr;
@@ -171,7 +171,7 @@ ProtoAtomPtr SchemeSmob::scm_to_protoatom (SCM sh)
 
 	ProtoAtomPtr pv(*((ProtoAtomPtr *) SCM_SMOB_DATA(sh)));
 	scm_remember_upto_here_1(sh);
-	return h;
+	return pv;
 }
 
 Handle SchemeSmob::scm_to_handle (SCM sh)
