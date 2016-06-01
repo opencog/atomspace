@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_ASSO_VALUE_H
 #define _OPENCOG_ASSO_VALUE_H
 
-#include <vector>
+#include <map>
 #include <opencog/atoms/base/ProtoAtom.h>
 #include <opencog/atoms/base/atom_types.h>
 
@@ -41,24 +41,25 @@ class AssoValue
 	: public ProtoAtom
 {
 protected:
-	std::vector<std::string> _value;
+	std::map<const ProtoAtomPtr, ProtoAtomPtr> _map;
 
 public:
-	AssoValue(std::string v) : ProtoAtom(ASSO_VALUE) { _value.push_back(v); }
-	AssoValue(std::vector<std::string> v) : ProtoAtom(ASSO_VALUE), _value(v) {}
+	AssoValue(const ProtoAtomPtr key, ProtoAtomPtr val) :
+		ProtoAtom(ASSO_VALUE) { _map.insert({key, val}); }
+	AssoValue(std::map<const ProtoAtomPtr, ProtoAtomPtr> v) :
+		ProtoAtom(ASSO_VALUE), _map(v) {}
 
 	virtual ~AssoValue() {}
 
-	std::vector<std::string>& value() { return _value; }
-	void setValue(const std::vector<std::string>& v) { _value = v; }
-	void setValue(const std::string& v) {
-		_value = std::vector<std::string>({v}); }
+	ProtoAtomPtr value(const ProtoAtomPtr key) { return _map.at(key); }
+	void addPair(const ProtoAtomPtr key, ProtoAtomPtr val) { _map[key] = val; }
+	void removeKey(const ProtoAtomPtr key) { _map.erase(key); }
 
 
 	/** Returns a string representation of the value.  */
-	virtual std::string toAsso(const std::string& indent);
-	virtual std::string toShortAsso(const std::string& indent)
-	{ return toAsso(indent); }
+	virtual std::string toString(const std::string& indent);
+	virtual std::string toShortString(const std::string& indent)
+	{ return toString(indent); }
 
 	/** Returns true if the two atoms are equal.  */
 	virtual bool operator==(const ProtoAtom&) const;

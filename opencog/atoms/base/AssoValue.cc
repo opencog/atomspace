@@ -20,23 +20,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <string>
 #include <opencog/atoms/base/AssoValue.h>
 
 using namespace opencog;
 
 bool AssoValue::operator==(const ProtoAtom& other) const
 {
-	if (STRING_VALUE != other.getType()) return false;
+	if (ASSO_VALUE != other.getType()) return false;
 	return true;
 }
 
 // ==============================================================
 
-std::string AssoValue::toAsso(const std::string& indent)
+std::string AssoValue::toString(const std::string& indent)
 {
-	std::string rv = indent + "(AssoValue";
-	for (std::string v :_value)
-		rv += std::string(" \"") + v + "\"";
-	rv += ")";
+	std::string rv = indent + "(AssoValue (list";
+	for (auto& pr :_map)
+		rv += std::string("(list ") + pr.first->toString()
+			+ pr.second->toString() + ")\n";
+	rv += "))";
 	return rv;
 }

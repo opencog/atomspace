@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_STRING_VALUE_H
 #define _OPENCOG_STRING_VALUE_H
 
+#include <string>
 #include <vector>
 #include <opencog/atoms/base/ProtoAtom.h>
 #include <opencog/atoms/base/atom_types.h>
