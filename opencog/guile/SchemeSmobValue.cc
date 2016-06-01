@@ -9,41 +9,14 @@
 #include <cstddef>
 #include <libguile.h>
 
-#include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/atoms/base/AssoValue.h>
+#include <opencog/atoms/base/FloatValue.h>
+#include <opencog/atoms/base/LinkValue.h>
+#include <opencog/atoms/base/StringValue.h>
+
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
-
-/* ============================================================== */
-#if 0
-/**
- * Search for an attention value in a list of values.
- * Return the attention value if found, else return null.
- * Throw errors if the list is not stictly just key-value pairs
- */
-AttentionValue * SchemeSmob::get_av_from_list(SCM slist)
-{
-	while (scm_is_pair(slist))
-	{
-		SCM sval = SCM_CAR(slist);
-		if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sval))
-		{
-			scm_t_bits misctype = SCM_SMOB_FLAGS(sval);
-			switch (misctype)
-			{
-				case COG_Value:
-					return (AttentionValue *) SCM_SMOB_DATA(sval);
-				default:
-					break;
-			}
-		}
-
-		slist = SCM_CDR(slist);
-	}
-
-	return NULL;
-}
-#endif
 
 /* ============================================================== */
 /** Return true if s is a value */
@@ -157,7 +130,13 @@ SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
 	Type t = verify_atom_type(stype, "cog-new-value", 1);
 
 	ProtoAtomPtr pa;
-	if (FLOAT_VALUE == t)
+	if (ASSO_VALUE == t)
+	{
+		throw RuntimeException(TRACE_INFO, "Not im plemented!");
+		// pa = createAssoValue(valist);
+	}
+
+	else if (FLOAT_VALUE == t)
 	{
 		std::vector<double> valist;
 		valist = verify_float_list(svalue_list, "cog-new-value", 2);

@@ -15,9 +15,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/base/FloatValue.h>
-#include <opencog/atoms/base/LinkValue.h>
-#include <opencog/atoms/base/StringValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
