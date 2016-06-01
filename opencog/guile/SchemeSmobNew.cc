@@ -15,8 +15,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/base/FloatValue.h>
-#include <opencog/atoms/base/LinkValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
@@ -159,6 +157,20 @@ SCM SchemeSmob::protom_to_scm (const ProtoAtomPtr& pa)
 	return smob;
 }
 
+ProtoAtomPtr SchemeSmob::scm_to_protom (SCM sh)
+{
+	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sh))
+		return nullptr;
+
+	scm_t_bits misctype = SCM_SMOB_FLAGS(sh);
+	if (COG_HANDLE != misctype)
+		return nullptr;
+
+	ProtoAtomPtr pv(*((ProtoAtomPtr *) SCM_SMOB_DATA(sh)));
+	scm_remember_upto_here_1(sh);
+	return pv;
+}
+
 Handle SchemeSmob::scm_to_handle (SCM sh)
 {
 	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sh))
@@ -207,21 +219,6 @@ SCM SchemeSmob::ss_handle (SCM satom)
 SCM SchemeSmob::ss_undefined_handle (void)
 {
 	return scm_from_ulong(Handle::INVALID_UUID);
-}
-
-/* ============================================================== */
-/** Return true if s is a value */
-
-SCM SchemeSmob::ss_value_p (SCM s)
-{
-	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
-		return SCM_BOOL_F;
-
-	scm_t_bits misctype = SCM_SMOB_FLAGS(s);
-	if (COG_HANDLE == misctype)
-		return SCM_BOOL_T;
-
-	return SCM_BOOL_F;
 }
 
 /* ============================================================== */
@@ -291,22 +288,6 @@ Type SchemeSmob::verify_atom_type (SCM stype, const char *subrname, int pos)
 
 
 /**
- * Check that the argument is a string, else throw errors.
- * Return the string, in C.
- */
-std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
-                                       int pos, const char * msg)
-{
-	if (scm_is_false(scm_string_p(sname)))
-		scm_wrong_type_arg_msg(subrname, pos, sname, msg);
-
-	char * cname = scm_to_utf8_string(sname);
-	std::string name(cname);
-	free(cname);
-	return name;
-}
-
-/**
  * Check that the argument is an int, else throw errors.
  * Return the int.
  */
@@ -317,6 +298,19 @@ int SchemeSmob::verify_int (SCM sint, const char *subrname,
 		scm_wrong_type_arg_msg(subrname, pos, sint, msg);
 
 	return scm_to_int(sint);
+}
+
+/**
+ * Check that the argument is convertible to a real, else throw errors.
+ * Return as a float.
+ */
+double SchemeSmob::verify_real (SCM sreal, const char *subrname,
+                                int pos, const char * msg)
+{
+	if (scm_is_false(scm_real_p(sreal)))
+		scm_wrong_type_arg_msg(subrname, pos, sreal, msg);
+
+	return scm_to_double(sreal);
 }
 
 /**
@@ -332,106 +326,23 @@ size_t SchemeSmob::verify_size (SCM sint, const char *subrname,
 	return (size_t) scm_to_int(sint);
 }
 
-/* ============================================================== */
 /**
- * Convert argument into a list of floats.
+ * Check that the argument is a string, else throw errors.
+ * Return the string, in C.
  */
-std::vector<double>
-SchemeSmob::verify_float_list (SCM svalue_list, const char * subrname, int pos)
+std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
+                                       int pos, const char * msg)
 {
-	// Verify that second arg is an actual list. Allow null list
-	// (which is rather unusual, but legit.  Allow embedded nulls
-	// as this can be convenient for writing scheme code.
-	if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
-		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a list of (float-pt) values");
+	if (scm_is_false(scm_string_p(sname)))
+		scm_wrong_type_arg_msg(subrname, pos, sname, msg);
 
-	std::vector<double> valist;
-	SCM sl = svalue_list;
-	pos = 2;
-	while (scm_is_pair(sl)) {
-		SCM svalue = SCM_CAR(sl);
-
-		if (not scm_is_null(svalue)) {
-			double v = scm_to_double(svalue);
-			valist.emplace_back(v);
-		}
-		sl = SCM_CDR(sl);
-		pos++;
-	}
-
-	return valist;
-}
-
-/**
- * Convert argument into a list of protoatoms.
- */
-std::vector<ProtoAtomPtr>
-SchemeSmob::verify_protom_list (SCM svalue_list, const char * subrname, int pos)
-{
-	// Verify that second arg is an actual list. Allow null list
-	// (which is rather unusual, but legit.  Allow embedded nulls
-	// as this can be convenient for writing scheme code.
-	if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
-		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a list of (protoato) values");
-
-	std::vector<ProtoAtomPtr> valist;
-	SCM sl = svalue_list;
-	pos = 2;
-	while (scm_is_pair(sl)) {
-		SCM svalue = SCM_CAR(sl);
-
-		if (not scm_is_null(svalue)) {
-			Handle h(scm_to_handle(svalue));
-			ProtoAtomPtr pa(AtomCast(h));
-			valist.emplace_back(pa);
-		}
-		sl = SCM_CDR(sl);
-		pos++;
-	}
-
-	return valist;
-}
-
-/**
- * Create a new value, of named type stype, and value vector svect
- */
-SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
-{
-	Type t = verify_atom_type(stype, "cog-new-value", 1);
-
-	ProtoAtomPtr pa;
-	if (FLOAT_VALUE == t)
-	{
-		std::vector<double> valist;
-		valist = verify_float_list(svalue_list, "cog-new-value", 2);
-		pa = createFloatValue(valist);
-	}
-
-	else if (LINK_VALUE == t)
-	{
-		std::vector<ProtoAtomPtr> valist;
-		valist = verify_protom_list(svalue_list, "cog-new-value", 2);
-		pa = createLinkValue(valist);
-	}
-
-	scm_remember_upto_here_1(svalue_list);
-	return protom_to_scm(pa);
+	char * cname = scm_to_utf8_string(sname);
+	std::string name(cname);
+	free(cname);
+	return name;
 }
 
 /* ============================================================== */
-/**
- * Check that the argument is convertible to a real, else throw errors.
- * Return as a float.
- */
-double SchemeSmob::verify_real (SCM sreal, const char *subrname,
-                                int pos, const char * msg)
-{
-	if (scm_is_false(scm_real_p(sreal)))
-		scm_wrong_type_arg_msg(subrname, pos, sreal, msg);
-
-	return scm_to_double(sreal);
-}
-
 /**
  * Create a new node, of named type stype, and string name sname
  */

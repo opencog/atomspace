@@ -100,6 +100,7 @@ protected:
 
     TruthValuePtr _truthValue;
     AttentionValuePtr _attentionValue;
+    ProtoAtomPtr _value;
 
     // Lock, used to serialize changes.
     // This costs 40 bytes per atom.  Tried using a single, global lock,
@@ -118,13 +119,15 @@ protected:
      * @param The truthValue of the atom.
      */
     Atom(Type t, TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-            AttentionValuePtr av = AttentionValue::DEFAULT_AV())
+         AttentionValuePtr av = AttentionValue::DEFAULT_AV(),
+         ProtoAtomPtr pv = NULL)
       : ProtoAtom(t),
         _flags(0),
         _uuid(Handle::INVALID_UUID),
         _atomTable(NULL),
         _truthValue(tv),
-        _attentionValue(av)
+        _attentionValue(av),
+        _value(pv)
     {}
 
     struct InSet
@@ -167,6 +170,14 @@ private:
     //! Unsets removal flag.
     void unsetRemovalFlag();
 
+    /** Returns whether this atom is marked checked.
+     *
+     * @return is atom checked.
+     */
+    bool isChecked() const;
+    void setChecked();
+    void setUnchecked();
+
     /** Change the Very-Long-Term Importance */
     void chgVLTI(int unit);
 
@@ -182,9 +193,6 @@ public:
     AtomSpace* getAtomSpace() const;
 
     inline UUID getUUID() const { return _uuid; }
-
-    virtual bool isNode() const = 0;
-    virtual bool isLink() const = 0;
 
     virtual const std::string& getName() const {
         throw RuntimeException(TRACE_INFO, "Not a node!");
@@ -210,20 +218,8 @@ public:
         return Handle(std::dynamic_pointer_cast<Atom>(shared_from_this()));
     }
 
-    /** Returns whether this atom is marked checked. This is a public utility 
-     * flag that can be used during testing.
-     *
-     * @return is atom checked.
-     */
-    bool isChecked() const;
-
-    /** Sets this atom as checked.
-     */
-    void setChecked();
-
-    /** Sets this atom as unchecked.
-     */
-    void setUnchecked();
+    ProtoAtomPtr getValue();
+    void setValue(ProtoAtomPtr);
 
     /** Returns the AttentionValue object of the atom.
      *

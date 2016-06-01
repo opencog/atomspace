@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/base/LinkValue.h
+ * opencog/atoms/base/StringValue.h
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2016 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,9 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_LINK_VALUE_H
-#define _OPENCOG_LINK_VALUE_H
+#ifndef _OPENCOG_STRING_VALUE_H
+#define _OPENCOG_STRING_VALUE_H
 
+#include <string>
 #include <vector>
 #include <opencog/atoms/base/ProtoAtom.h>
 #include <opencog/atoms/base/atom_types.h>
@@ -35,41 +36,44 @@ namespace opencog
  */
 
 /**
- * LinkValue holds an ordered vector of protoatoms.
- * (i.e. its a link, but for values)
+ * StringValues hold an ordered vector of std::strings.
  */
-class LinkValue
+class StringValue
 	: public ProtoAtom
 {
 protected:
-	std::vector<ProtoAtomPtr> _value;
+	std::vector<std::string> _value;
 
 public:
-	LinkValue(std::vector<ProtoAtomPtr> v) : ProtoAtom(LINK_VALUE), _value(v) {}
+	StringValue(std::string v) : ProtoAtom(STRING_VALUE) { _value.push_back(v); }
+	StringValue(std::vector<std::string> v) : ProtoAtom(STRING_VALUE), _value(v) {}
 
-	virtual ~LinkValue() {}
+	virtual ~StringValue() {}
 
-	std::vector<ProtoAtomPtr>& value() { return _value; }
-	void setValue(const std::vector<ProtoAtomPtr>& v) { _value = v; }
+	std::vector<std::string>& value() { return _value; }
+	void setValue(const std::vector<std::string>& v) { _value = v; }
+	void setValue(const std::string& v) {
+		_value = std::vector<std::string>({v}); }
+
 
 	/** Returns a string representation of the value.  */
 	virtual std::string toString(const std::string& indent);
 	virtual std::string toShortString(const std::string& indent)
 	{ return toString(indent); }
 
-	/** Returns true if the two atoms are equal, else false.  */
+	/** Returns true if the two atoms are equal.  */
 	virtual bool operator==(const ProtoAtom&) const;
 };
 
-typedef std::shared_ptr<LinkValue> LinkValuePtr;
-static inline LinkValuePtr LinkValueCast(const ProtoAtomPtr& a)
-	{ return std::dynamic_pointer_cast<LinkValue>(a); }
+typedef std::shared_ptr<StringValue> StringValuePtr;
+static inline StringValuePtr StringValueCast(const ProtoAtomPtr& a)
+	{ return std::dynamic_pointer_cast<StringValue>(a); }
 
 // XXX temporary hack ...
-#define createLinkValue std::make_shared<LinkValue>
+#define createStringValue std::make_shared<StringValue>
 
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_LINK_VALUE_H
+#endif // _OPENCOG_STRING_VALUE_H

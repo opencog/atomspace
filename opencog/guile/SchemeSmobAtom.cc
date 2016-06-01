@@ -14,6 +14,8 @@
 #include <libguile.h>
 
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/ProtoAtom.h>
+#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
@@ -41,7 +43,23 @@ Handle SchemeSmob::verify_handle (SCM satom, const char * subrname, int pos)
 	if (nullptr == h)
 		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
 
+	// In the current C++ code, handles can also be pointers to
+	// protoAtoms.  Howerver, in the guile wrapper, we expect all
+	// handles to be pointers to atoms; use verify_protom() instead,
+	// if you just want ProtoAtoms.
+	if (not (h->isLink() or h->isNode()))
+		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
+
 	return h;
+}
+
+ProtoAtomPtr SchemeSmob::verify_protom (SCM satom, const char * subrname, int pos)
+{
+	ProtoAtomPtr pv(scm_to_protom(satom));
+	if (nullptr == pv)
+		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog value");
+
+	return pv;
 }
 
 /* ============================================================== */
@@ -79,6 +97,9 @@ SCM SchemeSmob::ss_arity (SCM satom)
 	return sari;
 }
 
+/* ============================================================== */
+/* Truth value setters/getters */
+
 SCM SchemeSmob::ss_tv (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-tv");
@@ -107,6 +128,8 @@ SCM SchemeSmob::ss_merge_tv (SCM satom, SCM stv)
 	return satom;
 }
 
+// XXX FIXME -- this should NOT be a part of the API, it should be
+// a utility function!
 SCM SchemeSmob::ss_merge_hi_conf_tv (SCM satom, SCM stv)
 {
 	Handle h = verify_handle(satom, "cog-merge-hi-conf-tv!");
@@ -116,6 +139,27 @@ SCM SchemeSmob::ss_merge_hi_conf_tv (SCM satom, SCM stv)
 	scm_remember_upto_here_1(stv);
 	return satom;
 }
+
+/* ============================================================== */
+
+SCM SchemeSmob::ss_value (SCM satom)
+{
+	Handle h = verify_handle(satom, "cog-value");
+	ProtoAtomPtr pav = h->getValue();
+	return protom_to_scm(pav);
+}
+
+SCM SchemeSmob::ss_set_value (SCM satom, SCM pav)
+{
+	Handle h = verify_handle(satom, "cog-set-value!");
+	ProtoAtomPtr pv = verify_protom(pav, "cog-set-value!", 2);
+
+	h->setValue(pv);
+	return satom;
+}
+
+/* ============================================================== */
+/* Attention-Value stuff */
 
 SCM SchemeSmob::ss_av (SCM satom)
 {

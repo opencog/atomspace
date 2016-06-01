@@ -1,12 +1,10 @@
 /*
- * SchemeSmobMisc.c
+ * SchemeSmobGC.cc
  *
  * Scheme small objects (SMOBS) garbage-collection methods
  *
  * Copyright (c) 2008,2009,2014 Linas Vepstas <linas@linas.org>
  */
-
-#ifdef HAVE_GUILE
 
 #include <cstddef>
 #include <libguile.h>
@@ -162,7 +160,4 @@ int SchemeSmob::print_misc(SCM node, SCM port, scm_print_state * ps)
 	return 1; //non-zero means success
 }
 
-/* ============================================================== */
-
-#endif /* HAVE_GUILE */
 /* ===================== END OF FILE ============================ */

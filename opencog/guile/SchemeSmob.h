@@ -72,6 +72,7 @@ private:
 	static SCM handle_to_scm(const Handle&);
 	static SCM protom_to_scm(const ProtoAtomPtr&);
 	static Handle scm_to_handle(SCM);
+	static ProtoAtomPtr scm_to_protom(SCM);
 
 	// Atom creation and deletion functions
 	static SCM ss_new_value(SCM, SCM);
@@ -97,6 +98,7 @@ private:
 	static SCM ss_undefined_handle(void);
 
 	// Set properties of atoms
+	static SCM ss_set_value(SCM, SCM);
 	static SCM ss_set_av(SCM, SCM);
 	static SCM ss_set_tv(SCM, SCM);
 	static SCM ss_merge_tv(SCM, SCM);
@@ -111,6 +113,7 @@ private:
 	static SCM ss_as(SCM);
 	static SCM ss_av(SCM);
 	static SCM ss_tv(SCM);
+	static SCM ss_value(SCM);
 	static SCM ss_incoming_set(SCM);
 	static SCM ss_outgoing_set(SCM);
 
@@ -189,6 +192,7 @@ private:
 	static AtomSpace* verify_atomspace(SCM, const char *, int pos = 1);
 	static Type verify_atom_type(SCM, const char *, int pos = 1);
 	static Handle verify_handle(SCM, const char *, int pos = 1);
+	static ProtoAtomPtr verify_protom(SCM, const char *, int pos = 1);
 	static TruthValue* verify_tv(SCM, const char *, int pos = 1);
 	static AttentionValue* verify_av(SCM, const char *, int pos = 1);
 	static HandleSeq verify_handle_list (SCM, const char *,
@@ -196,6 +200,8 @@ private:
 	static std::vector<double> verify_float_list (SCM, const char *,
 	                                               int pos = 1);
 	static std::vector<ProtoAtomPtr> verify_protom_list (SCM, const char *,
+	                                               int pos = 1);
+	static std::vector<std::string> verify_string_list (SCM, const char *,
 	                                               int pos = 1);
 	static std::string verify_string (SCM, const char *, int pos = 1,
 	                                  const char *msg = "string");

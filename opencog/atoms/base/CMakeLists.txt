@@ -11,6 +11,7 @@ ADD_CUSTOM_TARGET(opencog_atom_types DEPENDS atom_types.h)
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
 ADD_LIBRARY (atombase
+	AssoValue.cc
 	atom_types.h
 	Atom.cc
 	ClassServer.cc
@@ -19,6 +20,7 @@ ADD_LIBRARY (atombase
 	Link.cc
 	LinkValue.cc
 	Node.cc
+	StringValue.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -34,6 +36,7 @@ INSTALL (TARGETS atombase
 )
 
 INSTALL (FILES
+	AssoValue.h
 	Atom.h
 	${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
 	atom_types.cc
@@ -44,6 +47,7 @@ INSTALL (FILES
 	LinkValue.h
 	Node.h
 	ProtoAtom.h
+	StringValue.h
 	types.h
 	DESTINATION "include/opencog/atoms/base"
 )

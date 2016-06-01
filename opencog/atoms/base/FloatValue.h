@@ -50,27 +50,16 @@ public:
 	virtual ~FloatValue() {}
 
 	std::vector<double>& value() { return _value; }
+	void setValue(const std::vector<double>& v) { _value = v; }
+	void setValue(double v) { _value = std::vector<double>({v}); }
 
-	/** Returns a string representation of the value.
-	 *
-	 * @return A string representation of the value.
-	 */
+	/** Returns a string representation of the value.  */
 	virtual std::string toString(const std::string& indent);
 	virtual std::string toShortString(const std::string& indent)
 	{ return toString(indent); }
 
-	/** Returns whether two atoms are equal.
-	 *
-	 * @return true if the atoms are equal, false otherwise.
-	 */
+	/** Returns true if two atoms are equal.  */
 	virtual bool operator==(const ProtoAtom&) const;
-
-	/** Returns whether two atoms are different.
-	 *
-	 * @return true if the atoms are different, false otherwise.
-	 */
-	bool operator!=(const ProtoAtom& other) const
-	{  return not operator==(other); }
 };
 
 typedef std::shared_ptr<FloatValue> FloatValuePtr;

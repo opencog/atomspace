@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/base/LinkValue.h
+ * opencog/atoms/base/AssoValue.h
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2016 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_LINK_VALUE_H
-#define _OPENCOG_LINK_VALUE_H
+#ifndef _OPENCOG_ASSO_VALUE_H
+#define _OPENCOG_ASSO_VALUE_H
 
-#include <vector>
+#include <map>
 #include <opencog/atoms/base/ProtoAtom.h>
 #include <opencog/atoms/base/atom_types.h>
 
@@ -35,41 +35,45 @@ namespace opencog
  */
 
 /**
- * LinkValue holds an ordered vector of protoatoms.
- * (i.e. its a link, but for values)
+ * AssoValues hold an bag of key-value pairs.
  */
-class LinkValue
+class AssoValue
 	: public ProtoAtom
 {
 protected:
-	std::vector<ProtoAtomPtr> _value;
+	std::map<const ProtoAtomPtr, ProtoAtomPtr> _map;
 
 public:
-	LinkValue(std::vector<ProtoAtomPtr> v) : ProtoAtom(LINK_VALUE), _value(v) {}
+	AssoValue(const ProtoAtomPtr key, ProtoAtomPtr val) :
+		ProtoAtom(ASSO_VALUE) { _map.insert({key, val}); }
+	AssoValue(std::map<const ProtoAtomPtr, ProtoAtomPtr> v) :
+		ProtoAtom(ASSO_VALUE), _map(v) {}
 
-	virtual ~LinkValue() {}
+	virtual ~AssoValue() {}
 
-	std::vector<ProtoAtomPtr>& value() { return _value; }
-	void setValue(const std::vector<ProtoAtomPtr>& v) { _value = v; }
+	ProtoAtomPtr value(const ProtoAtomPtr key) { return _map.at(key); }
+	void addPair(const ProtoAtomPtr key, ProtoAtomPtr val) { _map[key] = val; }
+	void removeKey(const ProtoAtomPtr key) { _map.erase(key); }
+
 
 	/** Returns a string representation of the value.  */
 	virtual std::string toString(const std::string& indent);
 	virtual std::string toShortString(const std::string& indent)
 	{ return toString(indent); }
 
-	/** Returns true if the two atoms are equal, else false.  */
+	/** Returns true if the two atoms are equal.  */
 	virtual bool operator==(const ProtoAtom&) const;
 };
 
-typedef std::shared_ptr<LinkValue> LinkValuePtr;
-static inline LinkValuePtr LinkValueCast(const ProtoAtomPtr& a)
-	{ return std::dynamic_pointer_cast<LinkValue>(a); }
+typedef std::shared_ptr<AssoValue> AssoValuePtr;
+static inline AssoValuePtr AssoValueCast(const ProtoAtomPtr& a)
+	{ return std::dynamic_pointer_cast<AssoValue>(a); }
 
 // XXX temporary hack ...
-#define createLinkValue std::make_shared<LinkValue>
+#define createAssoValue std::make_shared<AssoValue>
 
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_LINK_VALUE_H
+#endif // _OPENCOG_ASSO_VALUE_H

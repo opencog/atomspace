@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/base/LinkValue.cc
+ * opencog/atoms/base/AssoValue.cc
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2016 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,23 +20,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/LinkValue.h>
+#include <string>
+#include <opencog/atoms/base/AssoValue.h>
 
 using namespace opencog;
 
-bool LinkValue::operator==(const ProtoAtom& other) const
+bool AssoValue::operator==(const ProtoAtom& other) const
 {
-	if (LINK_VALUE != other.getType()) return false;
+	if (ASSO_VALUE != other.getType()) return false;
 	return true;
 }
 
 // ==============================================================
 
-std::string LinkValue::toString(const std::string& indent)
+std::string AssoValue::toString(const std::string& indent)
 {
-	std::string rv = indent + "(LinkValue\n";
-	for (ProtoAtomPtr v :_value)
-		rv += std::string(" ") + v->toString(indent + "   ") + "\n";
-	rv += ")";
+	std::string rv = indent + "(AssoValue (list";
+	for (auto& pr :_map)
+		rv += std::string("(list ") + pr.first->toString()
+			+ pr.second->toString() + ")\n";
+	rv += "))";
 	return rv;
 }

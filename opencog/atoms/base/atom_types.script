@@ -18,6 +18,7 @@ VALUE
 FLOAT_VALUE <- VALUE    // vector of floats, actually.
 STRING_VALUE <- VALUE
 LINK_VALUE <- VALUE     // vector of values ("link" holding values)
+ASSO_VALUE <- VALUE     // Associative array of values.
 
 // Base of hierarchy - NOTE: ATOM will not have a corresponding Python
 // construction function to avoid identifier conflict with the Atom object.
