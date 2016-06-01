@@ -22,3 +22,11 @@
 	(StringValue "property")
 	(FloatValue 42)
 )
+
+; Values can be attached to atoms:
+(define a (Concept "some atom"))
+(define v (LinkValue (StringValue "property") (FloatValue 42)))
+(cog-set-value! a v)
+
+; The attached value can be fetched.
+(cog-value a)
