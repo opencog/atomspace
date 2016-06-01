@@ -79,6 +79,9 @@ SCM SchemeSmob::ss_arity (SCM satom)
 	return sari;
 }
 
+/* ============================================================== */
+/* Truth value setters/getters */
+
 SCM SchemeSmob::ss_tv (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-tv");
@@ -107,6 +110,8 @@ SCM SchemeSmob::ss_merge_tv (SCM satom, SCM stv)
 	return satom;
 }
 
+// XXX FIXME -- this should NOT be a part of the API, it should be
+// a utility function!
 SCM SchemeSmob::ss_merge_hi_conf_tv (SCM satom, SCM stv)
 {
 	Handle h = verify_handle(satom, "cog-merge-hi-conf-tv!");
@@ -116,6 +121,30 @@ SCM SchemeSmob::ss_merge_hi_conf_tv (SCM satom, SCM stv)
 	scm_remember_upto_here_1(stv);
 	return satom;
 }
+
+/* ============================================================== */
+
+SCM SchemeSmob::ss_value (SCM satom)
+{
+	Handle h = verify_handle(satom, "cog-value");
+	ProtoAtomPtr pav = h->getValue();
+	ProtoAtomPtr pav = h->getValue();
+	return protom_to_scm(pav)
+}
+
+SCM SchemeSmob::ss_set_value (SCM satom, SCM pav)
+{
+	Handle h = verify_handle(satom, "cog-set-value!");
+	Handle hpv = verify_handle(sav, "cog-set-value!", 2);
+
+	ProtoAtomPtr pv = dynamic_cast<ProtoAtomPtr>((AtomPtr) hpv);
+
+	h->setValue(pv);
+	return satom;
+}
+
+/* ============================================================== */
+/* Attention-Value stuff */
 
 SCM SchemeSmob::ss_av (SCM satom)
 {
