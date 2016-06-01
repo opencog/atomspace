@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/base/StringValue.cc
+ * opencog/atoms/base/AssoValue.cc
  *
  * Copyright (C) 2015, 2016 Linas Vepstas
  * All Rights Reserved
@@ -20,11 +20,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/StringValue.h>
+#include <opencog/atoms/base/AssoValue.h>
 
 using namespace opencog;
 
-bool StringValue::operator==(const ProtoAtom& other) const
+bool AssoValue::operator==(const ProtoAtom& other) const
 {
 	if (STRING_VALUE != other.getType()) return false;
 	return true;
@@ -32,9 +32,9 @@ bool StringValue::operator==(const ProtoAtom& other) const
 
 // ==============================================================
 
-std::string StringValue::toString(const std::string& indent)
+std::string AssoValue::toAsso(const std::string& indent)
 {
-	std::string rv = indent + "(StringValue";
+	std::string rv = indent + "(AssoValue";
 	for (std::string v :_value)
 		rv += std::string(" \"") + v + "\"";
 	rv += ")";
