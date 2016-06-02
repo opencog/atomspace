@@ -262,7 +262,6 @@ void SchemeSmob::register_procs()
 	register_proc("cog-link?",             1, 0, 1, C(ss_link_p));
 
 	// property setters on atoms
-	register_proc("cog-set-value!",        2, 0, 0, C(ss_set_value));
 	register_proc("cog-set-av!",           2, 0, 0, C(ss_set_av));
 	register_proc("cog-set-tv!",           2, 0, 0, C(ss_set_tv));
 	register_proc("cog-merge-tv!",         2, 0, 0, C(ss_merge_tv));
@@ -276,7 +275,6 @@ void SchemeSmob::register_procs()
 	register_proc("cog-arity",             1, 0, 0, C(ss_arity));
 	register_proc("cog-incoming-set",      1, 0, 0, C(ss_incoming_set));
 	register_proc("cog-outgoing-set",      1, 0, 0, C(ss_outgoing_set));
-	register_proc("cog-value",             1, 0, 0, C(ss_value));
 	register_proc("cog-tv",                1, 0, 0, C(ss_tv));
 	register_proc("cog-av",                1, 0, 0, C(ss_av));
 	register_proc("cog-as",                1, 0, 0, C(ss_as));

@@ -9,7 +9,6 @@
 #include <cstddef>
 #include <libguile.h>
 
-#include <opencog/atoms/base/AssoValue.h>
 #include <opencog/atoms/base/FloatValue.h>
 #include <opencog/atoms/base/LinkValue.h>
 #include <opencog/atoms/base/StringValue.h>
@@ -130,13 +129,7 @@ SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
 	Type t = verify_atom_type(stype, "cog-new-value", 1);
 
 	ProtoAtomPtr pa;
-	if (ASSO_VALUE == t)
-	{
-		throw RuntimeException(TRACE_INFO, "Not im plemented!");
-		// pa = createAssoValue(valist);
-	}
-
-	else if (FLOAT_VALUE == t)
+	if (FLOAT_VALUE == t)
 	{
 		std::vector<double> valist;
 		valist = verify_float_list(svalue_list, "cog-new-value", 2);
