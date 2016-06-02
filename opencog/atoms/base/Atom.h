@@ -218,9 +218,6 @@ public:
         return Handle(std::dynamic_pointer_cast<Atom>(shared_from_this()));
     }
 
-    ProtoAtomPtr getValue();
-    void setValue(ProtoAtomPtr);
-
     /** Returns the AttentionValue object of the atom.
      *
      * @return The pointer to the AttentionValue object

@@ -141,24 +141,6 @@ SCM SchemeSmob::ss_merge_hi_conf_tv (SCM satom, SCM stv)
 }
 
 /* ============================================================== */
-
-SCM SchemeSmob::ss_value (SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-value");
-	ProtoAtomPtr pav = h->getValue();
-	return protom_to_scm(pav);
-}
-
-SCM SchemeSmob::ss_set_value (SCM satom, SCM pav)
-{
-	Handle h = verify_handle(satom, "cog-set-value!");
-	ProtoAtomPtr pv = verify_protom(pav, "cog-set-value!", 2);
-
-	h->setValue(pv);
-	return satom;
-}
-
-/* ============================================================== */
 /* Attention-Value stuff */
 
 SCM SchemeSmob::ss_av (SCM satom)
