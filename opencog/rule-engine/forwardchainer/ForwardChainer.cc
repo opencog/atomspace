@@ -157,6 +157,7 @@ bool ForwardChainer::termination()
 void ForwardChainer::apply_all_rules()
 {
     for (Rule* rule : _rules) {
+        fc_logger().debug("Apply rule %s", rule->get_name().c_str());
         HandleSeq hs = apply_rule(rule->get_forward_rule());
 
         // Update
