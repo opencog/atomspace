@@ -157,10 +157,13 @@ bool ForwardChainer::termination()
 void ForwardChainer::apply_all_rules()
 {
     for (Rule* rule : _rules) {
+        fc_logger().debug("Apply rule %s", rule->get_name().c_str());
         HandleSeq hs = apply_rule(rule->get_forward_rule());
 
         // Update
-        _fcstat.add_inference_record(_iteration, Handle::UNDEFINED, rule,
+        _fcstat.add_inference_record(_iteration,
+                                     _as.add_node(CONCEPT_NODE, "dummy-source"),
+                                     rule,
                                      UnorderedHandleSet(hs.begin(), hs.end()));
         update_potential_sources(hs);
     }
