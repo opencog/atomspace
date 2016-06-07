@@ -196,7 +196,7 @@ Handle ForwardChainer::choose_source()
 					HandleSeq no_free_vars_outgoings;
 					// Only add children with no free variables in them
 					for (const Handle& h : outgoings)
-						if (not has_free_vars(h))
+						if (is_closed(h))
 							no_free_vars_outgoings.push_back(h);
 					update_potential_sources(no_free_vars_outgoings);
 				}

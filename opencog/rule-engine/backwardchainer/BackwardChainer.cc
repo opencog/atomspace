@@ -455,8 +455,8 @@ HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
 
 	if (hpattern_vardecl == Handle::UNDEFINED)
 	{
-		HandleSeq vars = get_free_vars_in_tree(hpattern);
-		hpattern_vardecl = working_garbage_superspace->add_atom(createVariableList(vars));
+		OrderedHandleSet vars = get_free_variables(hpattern);
+		hpattern_vardecl = working_garbage_superspace->add_atom(createVariableList(HandleSeq(vars.begin(), vars.end())));
 	}
 	else
 		hpattern_vardecl = working_garbage_superspace->add_atom(hpattern_vardecl);
@@ -640,10 +640,8 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 {
 	HandleSeq results;
 
-	HandleSeq varseq = get_free_vars_in_tree(hpremise);
-
 	// if the target is already fully grounded
-	if (varseq.empty())
+	if (is_closed(hpremise))
 	{
 		HandleMap old_map = premise_vmap;
 		HandleMap new_map;
@@ -680,7 +678,7 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 		for (const Handle& h : oset)
 		{
 			// ignore premises with no free var
-			if (get_free_vars_in_tree(h).empty())
+			if (is_closed(h))
 				continue;
 
 			sub_premises.push_back(h);
@@ -955,8 +953,8 @@ Handle BackwardChainer::garbage_substitute(const Handle& term,
  */
 Handle BackwardChainer::gen_varlist(const Handle& target)
 {
-	HandleSeq target_vars = get_free_vars_in_tree(target);
-	return _garbage_superspace.add_atom(createVariableList(target_vars));
+	OrderedHandleSet target_vars = get_free_variables(target);
+	return _garbage_superspace.add_atom(createVariableList(HandleSeq(target_vars.begin(), target_vars.end())));
 }
 
 /**
