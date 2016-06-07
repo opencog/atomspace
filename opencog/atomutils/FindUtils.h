@@ -261,22 +261,29 @@ bool contains_atomtype(const Handle& clause, Type atom_type);
  */
 bool contains_atomtype(const HandleSeq& clauses, Type atom_type);
 
-
 /**
- * Search for free VariableNode in a tree.
+ * Search for free (unscoped and unquoted) VariableNode in a tree.
  *
- * Currently assume any variables within a LambdaLink (and its subtype)
- * are bound, since some subtype does implicit binding.
+ * For example: applying this function over
  *
- * Treat $A in something like (AndLink $A (LambdaLink $A ...)) as free.
+ *  AndLink
+ *     VariableNode "$X"
+ *     LambdaLink
+ *        VariableNode "$X"
+ *        EvaluationLink
+ *           PredicateNode "P"
+ *           VariableNode "$X"
+ *
+ * returns {VariableNode "$X"}, because although $X is scoped by the
+ * lambda it is also unscoped in the And.
  */
-HandleSeq get_free_vars_in_tree(const Handle& tree);
+OrderedHandleSet get_free_variables(const Handle& h, int quotation_level = 0);
 
 /**
- * Return true if h has free variables (unscoped and unquoted) in it,
+ * Return true if h has no free variable (unscoped or unquoted) in it,
  * false otherwise.
  */
-bool has_free_vars(const Handle& h);
+bool is_closed(const Handle& h);
 
 } // namespace opencog
 

@@ -17,6 +17,7 @@
 #include <opencog/atoms/base/ProtoAtom.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atomutils/FindUtils.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
@@ -453,6 +454,15 @@ SCM SchemeSmob::ss_subtype_p (SCM stype, SCM schild)
 	if (classserver().isA(child, parent)) return SCM_BOOL_T;
 
 	return SCM_BOOL_F;
+}
+
+/**
+ * Return true if the atom is closed (has no variable)
+ */
+SCM SchemeSmob::ss_is_closed(SCM satom)
+{
+	Handle h = verify_handle(satom, "cog-closed?");
+	return is_closed(h) ? SCM_BOOL_T : SCM_BOOL_F;
 }
 
 #endif

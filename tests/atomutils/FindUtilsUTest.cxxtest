@@ -46,6 +46,7 @@ public:
 	void test_is_unscoped_in_tree();
 	void test_min_quotation_level();
 	void test_max_quotation_level();
+	void test_is_closed();
 };
 
 void FindUtilsUTest::setUp(void)
@@ -101,4 +102,12 @@ void FindUtilsUTest::test_max_quotation_level()
 {
 	TS_ASSERT_EQUALS(max_quotation_level(quotation, X), 2);
 	TS_ASSERT_EQUALS(max_quotation_level(quotation, Y), 1);
+}
+
+// Test is_closed()
+void FindUtilsUTest::test_is_closed()
+{
+	TS_ASSERT(not is_closed(free_evaluation));
+	TS_ASSERT(is_closed(scoped_implication));
+	TS_ASSERT(not is_closed(quotation));
 }

@@ -273,44 +273,39 @@ bool contains_atomtype(const HandleSeq& clauses, Type atom_type)
 	return false;
 }
 
-
-HandleSeq get_free_vars_in_tree(const Handle& tree)
+OrderedHandleSet get_free_variables(const Handle& h, int quotation_level)
 {
-	OrderedHandleSet varset;
+	Type t = h->getType();
 
-	std::function<void (const Handle&)> find_rec = [&](const Handle& h)
-	{
-		Type t = h->getType();
-		if (t == VARIABLE_NODE)
-		{
-			varset.insert(h);
-			return;
-		}
+	// Base cases
+	if (t == VARIABLE_NODE and quotation_level < 1)
+		return {h};
+	if (h->isNode())
+		return {};
 
-		// XXX FIXME Add support for UNQUOTE_LINK
-		if (t == QUOTE_LINK) return;
-		if (classserver().isA(t, SCOPE_LINK))
-		    // // A sugary version of ImplicationLink can be a ScopeLink
-		    // // only if it has 3 arguments
-		    // and (not classserver().isA(t, IMPLICATION_LINK)
-		    //      or h->getArity() == 3))
-			return;
-
-		if (h->isLink())
-		{
-			for (const Handle& oh : h->getOutgoingSet())
-				find_rec(oh);
-		}
-	};
-
-	find_rec(tree);
-
-	return HandleSeq(varset.begin(), varset.end());
+	// Recursive cases
+	OrderedHandleSet results;
+	OC_ASSERT(h->isLink());
+	if (t == QUOTE_LINK) quotation_level++;
+	else if (t == UNQUOTE_LINK) quotation_level--;
+	for (const Handle& ch : h->getOutgoingSet()) {
+		OrderedHandleSet ch_free_var = get_free_variables(ch, quotation_level);
+		results.insert(ch_free_var.begin(), ch_free_var.end());
+	}
+	// If the link was a scope link then remove the scoped
+	// variables from the free variables found.
+	ScopeLinkPtr sh(ScopeLinkCast(h));
+	if (nullptr != sh) {
+		const OrderedHandleSet& varset = sh->get_variables().varset;
+		for (auto& v : varset)
+			results.erase(v);
+	}
+	return results;
 }
 
-bool has_free_vars(const Handle& h)
+bool is_closed(const Handle& h)
 {
-	return not get_free_vars_in_tree(h).empty();
+	return get_free_variables(h).empty();
 }
 
 } // namespace opencog

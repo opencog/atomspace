@@ -327,6 +327,9 @@ void SchemeSmob::register_procs()
 
 	// Iterators
 	register_proc("cog-map-type",          2, 0, 0, C(ss_map_type));
+
+	// Closed Atoms (no free variables)
+	register_proc("cog-closed?",           1, 0, 0, C(ss_is_closed));
 }
 
 void SchemeSmob::register_proc(const char* name, int req, int opt, int rst, scm_t_subr fcn)
