@@ -1,7 +1,7 @@
 OpenCog AtomSpace
 =================
 
-[![Build Status](http://61.92.69.39:8080/buildStatus/icon?job=ci-atomspace2)](http://61.92.69.39:8080/job/ci-atomspace2/)
+[![Build Status](http://61.92.69.39:8080/buildStatus/icon?job=ci-atomspace)](http://61.92.69.39:8080/job/ci-atomspace/)
 
 The OpenCog AtomSpace is a knowledge representation (KR) database and
 the associated query/reasoning engine to fetch and manipulate that data,
