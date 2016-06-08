@@ -359,6 +359,18 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// Fire any other function links, not handled above.
 	if (classserver().isA(t, FUNCTION_LINK))
 	{
+		// MapLink is a FunctionLink, but circular shared-library
+		// dependencies prevent the factory from handling it.
+		// Anyway, we avoid doing eager evaluation on the MapLink,
+		// It can do that, itself. If we did do eager evaluation of teh
+		// MapLink, we'd need to get eager only on its argument list,
+		// and not on its body.
+		if (classserver().isA(t, MAP_LINK))
+		{
+			FunctionLinkPtr flp(createMapLink(expr->getOutgoingSet()));
+			return flp->execute(_as);
+		}
+
 		if (_eager)
 		{
 			// Perform substitution on all arguments before applying the
@@ -373,24 +385,11 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			HandleSeq oset_results;
 			walk_sequence(oset_results, expr->getOutgoingSet());
 
-			if (classserver().isA(t, MAP_LINK))
-			{
-				FunctionLinkPtr flp(createMapLink(oset_results));
-				return flp->execute(_as);
-			}
 			FunctionLinkPtr flp(FunctionLink::factory(t, oset_results));
 			return flp->execute(_as);
 		}
 		else
 		{
-			// MapLink is a FunctionLink, but circular shared-library
-			// dependencies prevent the factory from handling it.
-			if (classserver().isA(t, MAP_LINK))
-			{
-				FunctionLinkPtr flp(createMapLink(expr->getOutgoingSet()));
-				return flp->execute(_as);
-			}
-
 			// At this time, no FunctionLink that is outside of an
 			// ExecutionOutputLink ever has a variable declaration.
 			// Also, the number of arguments is not fixed, its always variadic.
