@@ -30,7 +30,7 @@ class BindlinkTest(TestCase):
         self.atomspace.clear()
 
         # Initialize Python
-        initialize_opencog(self.atomspace, "")
+        initialize_opencog(self.atomspace)
         set_type_ctor_atomspace(self.atomspace)
 
         # Define several animals and something of a different type as well
