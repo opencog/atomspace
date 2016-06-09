@@ -38,20 +38,29 @@ public:
 		// Disable the AF mechanism during testing!
 		_as.set_attentional_focus_boundary(AttentionValue::MINSTI);
 
-		eval.eval("(add-to-load-path \"..\")");
-		eval.eval("(add-to-load-path \"../../..\")");
+		string source_dir = string(PROJECT_SOURCE_DIR),
+			test_dir = source_dir + "/tests",
+			test_ure_dir = test_dir + "/rule-engine",
+			ure_dir = source_dir + "/opencog/scm/opencog/rule-engine";
+		vector<string> load_paths = {source_dir, test_dir, test_ure_dir,
+		                             ure_dir};
+		for (string& p : load_paths)
+		{
+			string eval_str = string("(add-to-load-path \"") + p + string("\")");
+			eval.eval(eval_str);
+		}
+
 		eval.eval("(use-modules (opencog))");
 		eval.eval("(use-modules (opencog rule-engine))");
 		CHKERR;
 
 		// Load the simple deduction rbs to test it
-		string result = eval.eval("(load-from-path \""
-		          "tests/rule-engine/fc-deduction-config.scm\")");
+		string result; // to be able to read load errors
+		result = eval.eval("(load-from-path \"fc-deduction-config.scm\")");
 		CHKERR;
 
 		// Load the simple deduction + modus ponens rbs to test it
-		result = eval.eval("(load-from-path \""
-		          "tests/rule-engine/fc-config.scm\")");
+		result = eval.eval("(load-from-path \"fc-config.scm\")");
 		CHKERR;
 	}
 	void test_do_chain();
