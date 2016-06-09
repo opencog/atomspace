@@ -67,7 +67,6 @@ AtomSpace, including the python and scheme bindings, the pattern
 matcher, the rule engine, and many of the various different atom types
 and their use for solving various different tasks.
 
-
 Prerequisites
 -------------
 To build the OpenCog AtomSpace, the packages listed below are required.
@@ -137,6 +136,13 @@ during the build, will be more precise as to which parts will not be built.
 * Optional, needed only for ZMQ, above.
 * https://developers.google.com/protocol-buffers | `apt-get install libprotobuf-dev`
 
+Stable and master branches
+--------------------------
+
+The `stable` branch of this repository is protected by a build and test check
+using Jenkins. Code on that branch will always compile and pass the unit tests.
+Code on the `master` branch should also always work, but that's not guaranteed
+by any tool. External users should most likely work with the stable branch.
 
 Building AtomSpace
 ------------------
