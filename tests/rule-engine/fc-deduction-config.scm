@@ -2,9 +2,21 @@
 ;; Configuration file for the example crisp rule base system (used by
 ;; fc-deduction.scm)
 ;;
-;; Before running any inference you must load that file
 
-;; Load the rules
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Load required modules and utils ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-modules (opencog))
+(use-modules (opencog rule-engine))
+
+(load-from-path "utilities.scm")
+(load-from-path "av-tv.scm")
+(load-from-path "rule-engine-utils.scm")
+
+;;;;;;;;;;;;;;;;
+;; Load rules ;;
+;;;;;;;;;;;;;;;;
 (load-from-path "tests/rule-engine/rules/fc-deduction-rule.scm")
 
 ;; Define a new rule base (aka rule-based system)
