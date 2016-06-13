@@ -51,6 +51,8 @@ class Atom;
 class Handle;
 typedef std::shared_ptr<Atom> AtomPtr;
 class AtomTable;
+class Link;
+typedef std::shared_ptr<Link> LinkPtr;
 
 //! contains an unique identificator
 class Handle
@@ -301,6 +303,7 @@ std::string hmap_to_string(const HandleMap& hm);
 std::string hmultimap_to_string(const HandleMultimap& hmm);
 std::string hmaps_to_string(const HandleMapSeq& hms);
 std::string atomtype_to_string(Type type);
+std::string lptr_to_string(const LinkPtr& gl);
 
 // In case your gdb supports overloading
 std::string oc_to_string(const Handle& h);
@@ -311,6 +314,7 @@ std::string oc_to_string(const HandleMap& hm);
 std::string oc_to_string(const HandleMultimap& hmm);
 std::string oc_to_string(const HandleMapSeq& hms);
 std::string oc_to_string(Type type);
+std::string oc_to_string(const LinkPtr& gl);
 
 } // namespace opencog
 
