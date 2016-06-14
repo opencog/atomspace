@@ -40,8 +40,10 @@ namespace opencog
  * @param h Get neighbours for the atom this handle points to.
  * @param linkType Follow only these types of links.
  */
-HandleSeq get_target_neighbors(const Handle& h, Type desiredLinkType);
-HandleSeq get_source_neighbors(const Handle& h, Type desiredLinkType);
+HandleSeq get_target_neighbors(const Handle& h, Type desiredLinkType,
+                               bool match_subtype = false);
+HandleSeq get_source_neighbors(const Handle& h, Type desiredLinkType,
+                               bool match_subtype = false);
 HandleSeq get_all_neighbors(const Handle& h, Type desiredLinkType);
 
 
