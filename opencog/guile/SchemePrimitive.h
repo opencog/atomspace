@@ -243,8 +243,8 @@ class SchemePrimitive : public PrimitiveEnviron
                                 {
                                         std::string str1(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
                                         double x = SchemeSmob::verify_real(scm_cadr(args), scheme_name, 2);
-                                        double y = SchemeSmob::verify_real(scm_cadr(args), scheme_name, 3);
-                                        double z = SchemeSmob::verify_real(scm_cadr(args), scheme_name, 4);
+                                        double y = SchemeSmob::verify_real(scm_caddr(args), scheme_name, 3);
+                                        double z = SchemeSmob::verify_real(scm_cadddr(args), scheme_name, 4);
                                         bool b = (that->*method.b_sddd)(str1,x,y,z);
                                         if (b)
                                                 rc = SCM_BOOL_T;
@@ -257,8 +257,8 @@ class SchemePrimitive : public PrimitiveEnviron
                                 {
                                         std::string str1(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
                                         double x = SchemeSmob::verify_real(scm_cadr(args), scheme_name, 2);
-                                        int i1 = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 3);
-                                        int i2 = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 4);
+                                        int i1 = SchemeSmob::verify_int(scm_caddr(args), scheme_name, 3);
+                                        int i2 = SchemeSmob::verify_int(scm_cadddr(args), scheme_name, 4);
                                         bool b = (that->*method.b_sdii)(str1,x,i1,i2);
                                         if (b)
                                                 rc = SCM_BOOL_T;
@@ -271,9 +271,9 @@ class SchemePrimitive : public PrimitiveEnviron
                                 {
                                         std::string str1(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
                                         Handle h(SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2));
-                                        double x = SchemeSmob::verify_real(scm_cadr(args), scheme_name, 3);
-                                        double y = SchemeSmob::verify_real(scm_cadr(args), scheme_name, 4);
-                                        double z = SchemeSmob::verify_real(scm_cadr(args), scheme_name, 5);
+                                        double x = SchemeSmob::verify_real(scm_caddr(args), scheme_name, 3);
+                                        double y = SchemeSmob::verify_real(scm_cadddr(args), scheme_name, 4);
+                                        double z = SchemeSmob::verify_real(scm_cadr(scm_cdddr(args)), scheme_name, 5);
                                         bool b = (that->*method.b_shddd)(str1,h,x,y,z);
                                         if (b)
                                                 rc = SCM_BOOL_T;
@@ -286,9 +286,9 @@ class SchemePrimitive : public PrimitiveEnviron
                                 {
                                         std::string str1(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
                                         int i = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
-                                        double x = SchemeSmob::verify_real(scm_cadr(args), scheme_name, 3);
-                                        double y = SchemeSmob::verify_real(scm_cadr(args), scheme_name, 4);
-                                        double z = SchemeSmob::verify_real(scm_cadr(args), scheme_name, 5);
+                                        double x = SchemeSmob::verify_real(scm_caddr(args), scheme_name, 3);
+                                        double y = SchemeSmob::verify_real(scm_cadddr(args), scheme_name, 4);
+                                        double z = SchemeSmob::verify_real(scm_cadr(scm_cdddr(args)), scheme_name, 5);
                                         bool b = (that->*method.b_siddd)(str1,i,x,y,z);
                                         if (b)
                                                 rc = SCM_BOOL_T;
@@ -395,8 +395,8 @@ class SchemePrimitive : public PrimitiveEnviron
                                 {
                                         std::string str1(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
                                         double x = SchemeSmob::verify_real(scm_cadr(args), scheme_name, 2);
-                                        double y = SchemeSmob::verify_real(scm_cadr(args), scheme_name, 3);
-                                        double z = SchemeSmob::verify_real(scm_cadr(args), scheme_name, 4);
+                                        double y = SchemeSmob::verify_real(scm_caddr(args), scheme_name, 3);
+                                        double z = SchemeSmob::verify_real(scm_cadddr(args), scheme_name, 4);
                                         Handle rh = (that->*method.h_sddd)(str1,x,y,z);
                                         rc = SchemeSmob::handle_to_scm(rh);
                                         break;
@@ -404,7 +404,7 @@ class SchemePrimitive : public PrimitiveEnviron
                                 case H_SH:
                                 {
                                          std::string str1(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
-                                         Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name, 2));
+                                         Handle h(SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2));
                                          Handle rh = (that->*method.h_sh)(str1,h);
                                          rc = SchemeSmob::handle_to_scm(rh);
                                          break;
@@ -413,9 +413,9 @@ class SchemePrimitive : public PrimitiveEnviron
                                 {
                                         std::string str1(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
                                         Handle h(SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2));
-                                        double x = SchemeSmob::verify_real(scm_cadr(args), scheme_name, 3);
-                                        double y = SchemeSmob::verify_real(scm_cadr(args), scheme_name, 4);
-                                        double z = SchemeSmob::verify_real(scm_cadr(args), scheme_name, 5);
+                                        double x = SchemeSmob::verify_real(scm_caddr(args), scheme_name, 3);
+                                        double y = SchemeSmob::verify_real(scm_cadddr(args), scheme_name, 4);
+                                        double z = SchemeSmob::verify_real(scm_cadr(scm_cdddr(args)), scheme_name, 5);
                                         Handle rh = (that->*method.h_shddd)(str1,h,x,y,z);
                                         rc = SchemeSmob::handle_to_scm(rh);
                                         break;
@@ -424,7 +424,7 @@ class SchemePrimitive : public PrimitiveEnviron
                                 {
                                         std::string str1(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
                                         Handle h(SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2));
-                                        int i = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 3);
+                                        int i = SchemeSmob::verify_int(scm_caddr(args), scheme_name, 3);
                                         Handle rh = (that->*method.h_shi)(str1,h,i);
                                         rc = SchemeSmob::handle_to_scm(rh);
                                         break;
@@ -433,9 +433,9 @@ class SchemePrimitive : public PrimitiveEnviron
                                 {
                                         std::string str1(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
                                         int i = (SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2));
-                                        double x = SchemeSmob::verify_real(scm_cadr(args), scheme_name, 3);
-                                        double y = SchemeSmob::verify_real(scm_cadr(args), scheme_name, 4);
-                                        double z = SchemeSmob::verify_real(scm_cadr(args), scheme_name, 5);
+                                        double x = SchemeSmob::verify_real(scm_caddr(args), scheme_name, 3);
+                                        double y = SchemeSmob::verify_real(scm_cadddr(args), scheme_name, 4);
+                                        double z = SchemeSmob::verify_real(scm_cadr(scm_cdddr(args)), scheme_name, 5);
                                         Handle rh = (that->*method.h_siddd)(str1,i,x,y,z);
                                         rc = SchemeSmob::handle_to_scm(rh);
                                         break;
@@ -694,15 +694,15 @@ class SchemePrimitive : public PrimitiveEnviron
                                 case V_SH:
                                 {
                                         std::string str(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
-                                        Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name, 2);
+                                        Handle h = SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2);
                                         (that->*method.v_sh)(str,h);
                                         break;
                                 }
                                 case V_SHI:
                                 {
                                         std::string str(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
-                                        Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name, 2);
-                                        int i = SchemeSmob::verify_int(scm_car(args), scheme_name, 3);
+                                        Handle h = SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2);
+                                        int i = SchemeSmob::verify_int(scm_caddr(args), scheme_name, 3);
                                         (that->*method.v_shi)(str,h,i);
                                         break;
                                 }
@@ -833,7 +833,7 @@ class SchemePrimitive : public PrimitiveEnviron
                 scheme_module = module; \
                 scheme_name = name; \
                 signature = SIG; \
-                do_register(module, name, 5); /* cb has 4 args */ \
+                do_register(module, name, 5); /* cb has 5 args */ \
         }
 
 		// Declare and define the constructors for this class. They all have
