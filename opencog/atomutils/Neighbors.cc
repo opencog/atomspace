@@ -30,7 +30,8 @@
 namespace opencog
 {
 
-HandleSeq get_target_neighbors(const Handle& h, Type desiredLinkType)
+HandleSeq get_target_neighbors(const Handle& h, Type desiredLinkType,
+                               bool match_subtype/* = false*/)
 {
     if (classserver().isA(desiredLinkType, UNORDERED_LINK))
         return HandleSeq();
@@ -38,7 +39,10 @@ HandleSeq get_target_neighbors(const Handle& h, Type desiredLinkType)
     HandleSeq answer;
     for (const LinkPtr& link : h->getIncomingSet())
     {
-        if (link->getType() != desiredLinkType) continue;
+        Type t = link->getType();
+        if (not(t == desiredLinkType or
+               (match_subtype and classserver().isA(t, desiredLinkType))))
+	    continue;
         if (link->getOutgoingAtom(0) != h) continue;
 
         for (const Handle& handle : link->getOutgoingSet()) {
@@ -50,7 +54,8 @@ HandleSeq get_target_neighbors(const Handle& h, Type desiredLinkType)
 }
 
 
-HandleSeq get_source_neighbors(const Handle& h, Type desiredLinkType)
+HandleSeq get_source_neighbors(const Handle& h, Type desiredLinkType,
+                               bool match_subtype/* = false*/)
 {
     if (classserver().isA(desiredLinkType, UNORDERED_LINK))
         return HandleSeq();
@@ -59,7 +64,10 @@ HandleSeq get_source_neighbors(const Handle& h, Type desiredLinkType)
 
     for (const LinkPtr& link : h->getIncomingSet())
     {
-        if (link->getType() != desiredLinkType) continue;
+        Type t = link->getType();
+        if (not(t == desiredLinkType or
+               (match_subtype and classserver().isA(t, desiredLinkType))))
+	    continue;
         if (link->getOutgoingAtom(0) == h) continue;
 
         for (const Handle& handle : link->getOutgoingSet()) {
