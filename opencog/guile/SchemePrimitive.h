@@ -114,7 +114,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			Handle (T::*h_siddd)(const std::string&,int,double,double,double);
 			Handle (T::*h_sq)(const std::string&, const HandleSeq&);
 			Handle (T::*h_sqq)(const std::string&,
-                               const HandleSeq&, const HandleSeq&);
+                                           const HandleSeq&, const HandleSeq&);
 			HandleSeq (T::*q_h)(Handle);
 			HandleSeq (T::*q_hti)(Handle, Type, int);
 			HandleSeq (T::*q_htib)(Handle, Type, int, bool);
@@ -122,13 +122,13 @@ class SchemePrimitive : public PrimitiveEnviron
 			HandleSeqSeq (T::*k_hi)(Handle, int);
 			int (T::*i_s)(const std::string&);
 			const std::string& (T::*s_as)(AtomSpace*,
-                                          const std::string&);
+                                                      const std::string&);
 			const std::string& (T::*s_s)(const std::string&);
 			const std::string& (T::*s_ss)(const std::string&,
-                                          const std::string&);
+                                                      const std::string&);
 			const std::string& (T::*s_sss)(const std::string&,
-                                           const std::string&,
-                                           const std::string&);
+                                                       const std::string&,
+                                                       const std::string&);
 			const std::string& (T::*s_v)(void);
 			TruthValuePtr (T::*p_h)(Handle);
 			UUID (T::*u_ssb)(const std::string&, const std::string&, bool);
@@ -859,7 +859,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_5(H_SIDDD, h_siddd,Handle,const std::string&,int,double,double,double)
 		DECLARE_CONSTR_2(H_SQ,  h_sq, Handle, const std::string&, const HandleSeq&)
 		DECLARE_CONSTR_3(H_SQQ,  h_sqq, Handle, const std::string&,
-                         const HandleSeq&, const HandleSeq&)
+                                 const HandleSeq&, const HandleSeq&)
 		DECLARE_CONSTR_1(I_S,	i_s, int, const std::string&)
 		DECLARE_CONSTR_1(Q_H,	q_h, HandleSeq, Handle)
 		DECLARE_CONSTR_3(Q_HTI,  q_hti, HandleSeq, Handle, Type, int)
@@ -867,12 +867,12 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_1(K_H,	k_h,  HandleSeqSeq, Handle)
 		DECLARE_CONSTR_2(K_HI,   k_hi, HandleSeqSeq, Handle, int)
 		DECLARE_CONSTR_2(S_AS,   s_as, const std::string&, AtomSpace*,
-                         const std::string&)
+                                 const std::string&)
 		DECLARE_CONSTR_1(S_S,	s_s,  const std::string&, const std::string&)
 		DECLARE_CONSTR_2(S_SS,   s_ss, const std::string&, const std::string&,
-                         const std::string&)
+                                 const std::string&)
 		DECLARE_CONSTR_3(S_SSS,  s_sss,const std::string&, const std::string&,
-                         const std::string&, const std::string&)
+                                 const std::string&, const std::string&)
 		DECLARE_CONSTR_3(H_HHH,  h_hhh, Handle, Handle, Handle, Handle)
 		DECLARE_CONSTR_0(S_V,	s_v,  const std::string&)
 		DECLARE_CONSTR_1(P_H,	p_h,  TruthValuePtr, Handle)
@@ -882,15 +882,15 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_2(V_HS,   v_hs, void, Handle, short)
 		DECLARE_CONSTR_1(V_S,	v_s,  void, const std::string&)
 		DECLARE_CONSTR_2(V_SA,   v_sa, void, const std::string&,
-                         AtomSpace*)
+                                 AtomSpace*)
 		DECLARE_CONSTR_2(V_SH,   v_sh, void, const std::string&,
-                         Handle)
+                                 Handle)
 		DECLARE_CONSTR_3(V_SHI,  v_shi,void, const std::string&,
-                         Handle, int)
+                                 Handle, int)
 		DECLARE_CONSTR_2(V_SS,   v_ss, void, const std::string&,
-                         const std::string&)
+                                 const std::string&)
 		DECLARE_CONSTR_3(V_SSS,  v_sss,void, const std::string&,
-                         const std::string&, const std::string&)
+                                 const std::string&, const std::string&)
 		DECLARE_CONSTR_1(V_T,	v_t,  void, Type)
 		DECLARE_CONSTR_2(V_TI,   v_ti, void, Type, int)
 		DECLARE_CONSTR_4(V_TIDI, v_tidi, void, Type, int, double, int)
