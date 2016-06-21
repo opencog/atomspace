@@ -79,8 +79,6 @@ void SchemeEval::init(void)
 ///
 void SchemeEval::capture_port(void)
 {
-	static SCM no_buffering = scm_from_utf8_symbol("none");
-
 	// If we've already captured, don't do it again.
 	if (_in_server) return;
 
@@ -108,7 +106,13 @@ void SchemeEval::capture_port(void)
 	_outport = scm_cdr(pair);
 	_outport = scm_gc_protect_object(_outport);
 	// Make the port be unbuffered -- we want bytes right away!
+#if (SCM_MAJOR_VERSION==2 && SCM_MINOR_VERSION==1 && SCM_MICRO_VERSION>=3)
+	// As of version 2.1.3, the API changed in an incompatible way...
+	static SCM no_buffering = scm_from_utf8_symbol("none");
 	scm_setvbuf(_outport, no_buffering, SCM_UNDEFINED);
+#else
+	scm_setvbuf(_outport, scm_from_int(_IONBF), SCM_UNDEFINED);
+#endif
 
 	// We want non-blocking reads.
 	int flags = fcntl(_pipeno, F_GETFL, 0);
