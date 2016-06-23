@@ -172,7 +172,8 @@ private:
 	static SCM ss_set_af_boundary(SCM);
 	static SCM ss_af(void);
 
-	// Closed Atoms (no free variables)
+	// Free variables
+	static SCM ss_get_free_variables(SCM);
 	static SCM ss_is_closed(SCM);
 
 	// Callback into misc C++ code.
