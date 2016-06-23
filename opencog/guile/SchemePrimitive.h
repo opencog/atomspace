@@ -100,6 +100,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			double (T::*d_hht)(Handle, Handle, Type);
 			double (T::*d_hhtb)(Handle, Handle, Type, bool);
 			double (T::*d_s)(const std::string&);
+                        double (T::*d_shhi)(const std::string&, Handle, Handle,int);
 			Handle (T::*h_h)(Handle);
 			Handle (T::*h_hi)(Handle, int);
 			Handle (T::*h_hh)(Handle, Handle);
@@ -121,6 +122,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			HandleSeqSeq (T::*k_h)(Handle);
 			HandleSeqSeq (T::*k_hi)(Handle, int);
 			int (T::*i_s)(const std::string&);
+			int (T::*i_shhhi)(const std::string&, Handle, Handle,Handle,int);
 			const std::string& (T::*s_as)(AtomSpace*,
                                                       const std::string&);
 			const std::string& (T::*s_s)(const std::string&);
@@ -164,6 +166,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			D_HHT, // return double, take handle, handle, and type
 			D_HHTB,// return double, take handle, handle, and type
 			D_S,
+			D_SHHI,
 			H_H,   // return handle, take handle
 			H_HI,  // return handle, take handle and int
 			H_HH,  // return handle, take handle and handle
@@ -179,6 +182,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			H_SQ,  // return handle, take string and HandleSeq
 			H_SQQ, // return handle, take string, HandleSeq and HandleSeq
 			I_S,
+			I_SHHHI,
 			Q_H,   // return HandleSeq, take handle
 			Q_HTI, // return HandleSeq, take handle, type, and int
 			Q_HTIB,// return HandleSeq, take handle, type, and bool
@@ -320,10 +324,20 @@ class SchemePrimitive : public PrimitiveEnviron
 				}
 				case D_S:
 				{
-						std::string str1(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
-						double x = (that->*method.d_s)(str1);
-						rc = scm_from_double(x);
-						break;
+					std::string str1(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
+					double x = (that->*method.d_s)(str1);
+					rc = scm_from_double(x);
+					break;
+				}
+				case D_SHHI:
+				{
+					std::string str1(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
+					Handle h1(SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2));
+					Handle h2(SchemeSmob::verify_handle(scm_caddr(args), scheme_name, 3));
+					int i = SchemeSmob::verify_int(scm_cadddr(args), scheme_name, 4);
+					double x = (that->*method.d_shhi)(str1,h1,h2,i);
+					rc = scm_from_double(x);
+					break;
 				}
 				case H_H:
 				{
@@ -471,10 +485,21 @@ class SchemePrimitive : public PrimitiveEnviron
 				}
 				case I_S:
 				{
-					  std::string str = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
-					  int i = (that->*method.i_s)(str);
-					  rc = scm_from_int(i);
-					  break;
+					std::string str = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
+					int i = (that->*method.i_s)(str);
+					rc = scm_from_int(i);
+					break;
+				}
+				case I_SHHHI:
+				{
+					std::string str1(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
+					Handle h1(SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2));
+					Handle h2(SchemeSmob::verify_handle(scm_caddr(args), scheme_name, 3));
+ 					Handle h3(SchemeSmob::verify_handle(scm_cadddr(args), scheme_name, 4));
+					int p = SchemeSmob::verify_int(scm_cadr(scm_cdddr(args)), scheme_name, 5);
+					int i = (that->*method.i_shhhi)(str1,h1,h2,h3,p);
+					rc = scm_from_int(i);
+					break;
 				}
 				case Q_H:
 				{
@@ -846,6 +871,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_3(D_HHT,  d_hht, double, Handle, Handle, Type)
 		DECLARE_CONSTR_4(D_HHTB, d_hhtb, double, Handle, Handle, Type, bool)
 		DECLARE_CONSTR_1(D_S,	d_s,  double, const std::string&)
+		DECLARE_CONSTR_4(D_SHHI,   d_shhi,  double, const std::string&,Handle,Handle,int)
 		DECLARE_CONSTR_1(H_H,  h_h,  Handle, Handle)
 		DECLARE_CONSTR_2(H_HI, h_hi, Handle, Handle, int)
 		DECLARE_CONSTR_2(H_HH, h_hh, Handle, Handle, Handle)
@@ -861,6 +887,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_3(H_SQQ,  h_sqq, Handle, const std::string&,
                                  const HandleSeq&, const HandleSeq&)
 		DECLARE_CONSTR_1(I_S,	i_s, int, const std::string&)
+		DECLARE_CONSTR_5(I_SHHHI,   i_shhhi, int, const std::string&,Handle,Handle,Handle,int)
 		DECLARE_CONSTR_1(Q_H,	q_h, HandleSeq, Handle)
 		DECLARE_CONSTR_3(Q_HTI,  q_hti, HandleSeq, Handle, Type, int)
 		DECLARE_CONSTR_4(Q_HTIB, q_htib, HandleSeq, Handle, Type, int, bool)
@@ -986,11 +1013,13 @@ DECLARE_DECLARE_3(Handle, Handle, Handle, Handle)
 DECLARE_DECLARE_4(bool, const std::string&, double, double, double)
 DECLARE_DECLARE_4(Handle, const std::string&, double, double, double)
 DECLARE_DECLARE_4(bool, const std::string&, double, int, int)
+DECLARE_DECLARE_4(double, const std::string&, Handle, Handle, int)
 DECLARE_DECLARE_4(double, Handle, Handle, Type, bool)
 DECLARE_DECLARE_4(void, Type, int, double, int)
 DECLARE_DECLARE_4(HandleSeq, Handle, Type, int, bool)
 DECLARE_DECLARE_5(bool, const std::string&,Handle,double, double, double)
 DECLARE_DECLARE_5(bool, const std::string&,int,double, double, double)
+DECLARE_DECLARE_5(int, const std::string&, Handle, Handle, Handle, int)
 DECLARE_DECLARE_5(Handle, const std::string&,Handle,double, double, double)
 DECLARE_DECLARE_5(Handle, const std::string&,int,double, double, double)
 //** @}*/
