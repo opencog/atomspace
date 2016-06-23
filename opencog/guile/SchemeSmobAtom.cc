@@ -456,6 +456,17 @@ SCM SchemeSmob::ss_subtype_p (SCM stype, SCM schild)
 	return SCM_BOOL_F;
 }
 
+SCM SchemeSmob::ss_get_free_variables(SCM satom)
+{
+	Handle h = verify_handle(satom, "cog-free-variables");
+
+	SCM list = SCM_EOL;
+	for (const Handle& fv : get_free_variables(h))
+		list = scm_cons(handle_to_scm(fv), list);
+
+	return list;
+}
+
 /**
  * Return true if the atom is closed (has no variable)
  */
