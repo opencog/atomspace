@@ -100,7 +100,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			double (T::*d_hht)(Handle, Handle, Type);
 			double (T::*d_hhtb)(Handle, Handle, Type, bool);
 			double (T::*d_s)(const std::string&);
-                        double (T::*d_shhi)(const std::string&, Handle, Handle,int);
+			double (T::*d_shhi)(const std::string&, Handle, Handle,int);
 			Handle (T::*h_h)(Handle);
 			Handle (T::*h_hi)(Handle, int);
 			Handle (T::*h_hh)(Handle, Handle);
