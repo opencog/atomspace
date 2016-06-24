@@ -608,14 +608,14 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	// Cases C and D fall through.
 	// If we are here, we've got possibilities to explore.
 	int num_perms = 0;
-	// if (logger().isFineEnabled())
-	// {
-	// 	num_perms = facto(mutation.size());
-	// 	logger().fine("tree_comp resume unordered search at %d of %d of term=%s "
-	// 	              "take_step=%d have_more=%d\n",
-	// 	              perm_count[Unorder(ptm, hg)], num_perms,
-	// 	              ptm->toString().c_str(), take_step, have_more);
-	// }
+	if (logger().is_fine_enabled())
+	{
+		num_perms = facto(mutation.size());
+		logger().fine("tree_comp resume unordered search at %d of %d of term=%s "
+		              "take_step=%d have_more=%d\n",
+		              perm_count[Unorder(ptm, hg)], num_perms,
+		              ptm->toString().c_str(), take_step, have_more);
+	}
 	do
 	{
 		LAZY_LOG_FINE << "tree_comp explore unordered perm "
@@ -685,8 +685,8 @@ take_next_step:
 		take_step = false; // we are taking a step, so clear the flag.
 		have_more = false; // start with a clean slate...
 		solution_pop();
-		// if (logger().isFineEnabled())
-		// 	perm_count[Unorder(ptm, hg)] ++;
+		if (logger().is_fine_enabled())
+			perm_count[Unorder(ptm, hg)] ++;
 	} while (std::next_permutation(mutation.begin(), mutation.end()));
 
 	// If we are here, we've explored all the possibilities already
@@ -741,15 +741,15 @@ bool PatternMatchEngine::have_perm(const PatternTermPtr& ptm,
 void PatternMatchEngine::perm_push(void)
 {
 	perm_stack.push(_perm_state);
-	// if (logger().isFineEnabled())
-	// 	perm_count_stack.push(perm_count);
+	if (logger().is_fine_enabled())
+		perm_count_stack.push(perm_count);
 }
 
 void PatternMatchEngine::perm_pop(void)
 {
 	POPSTK(perm_stack, _perm_state);
-	// if (logger().isFineEnabled())
-	// 	POPSTK(perm_count_stack, perm_count);
+	if (logger().is_fine_enabled())
+		POPSTK(perm_count_stack, perm_count);
 }
 
 /* ======================================================== */
