@@ -303,7 +303,8 @@ std::string hmap_to_string(const HandleMap& hm);
 std::string hmultimap_to_string(const HandleMultimap& hmm);
 std::string hmaps_to_string(const HandleMapSeq& hms);
 std::string atomtype_to_string(Type type);
-std::string lptr_to_string(const LinkPtr& gl);
+std::string aptr_to_string(const LinkPtr& aptr);
+std::string lptr_to_string(const LinkPtr& lptr);
 
 // In case your gdb supports overloading
 std::string oc_to_string(const Handle& h);
@@ -314,7 +315,8 @@ std::string oc_to_string(const HandleMap& hm);
 std::string oc_to_string(const HandleMultimap& hmm);
 std::string oc_to_string(const HandleMapSeq& hms);
 std::string oc_to_string(Type type);
-std::string oc_to_string(const LinkPtr& gl);
+std::string oc_to_string(const AtomPtr& aptr);
+std::string oc_to_string(const LinkPtr& lptr);
 
 } // namespace opencog
 

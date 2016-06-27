@@ -183,9 +183,13 @@ std::string atomtype_to_string(Type type)
 	ss << classserver().getTypeName(type) << std::endl;
 	return ss.str();
 }
-std::string lptr_to_string(const LinkPtr& gl)
+std::string aptr_to_string(const AtomPtr& aptr)
 {
-	return h_to_string(gl->getHandle());
+	return h_to_string(aptr->getHandle());
+}
+std::string lptr_to_string(const LinkPtr& lptr)
+{
+	return h_to_string(lptr->getHandle());
 }
 
 std::string oc_to_string(const Handle& h)
@@ -220,9 +224,13 @@ std::string oc_to_string(Type type)
 {
 	return atomtype_to_string(type);
 }
-std::string oc_to_string(const LinkPtr& gl)
+std::string oc_to_string(const AtomPtr& aptr)
 {
-	return lptr_to_string(gl);
+	return aptr_to_string(aptr);
+}
+std::string oc_to_string(const LinkPtr& lptr)
+{
+	return lptr_to_string(lptr);
 }
 
 } // ~namespace opencog

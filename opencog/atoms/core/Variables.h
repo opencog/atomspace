@@ -156,6 +156,7 @@ struct Variables : public FreeVariables
 
 // For gdb
 std::string oc_to_string(const Variables& var);
+std::string oc_to_string(const FreeVariables::IndexMap& imap);
 
 /** @}*/
 }
