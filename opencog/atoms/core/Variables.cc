@@ -158,7 +158,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 	// and just return that.
 	if (not term->isLink()) return term;
 
-	// QuoteLinks halt the reduction
+	// Quotation management
 	Type ty = term->getType();
 	if (QUOTE_LINK == ty)
 	{
@@ -537,6 +537,18 @@ std::string Variables::to_string() const
 std::string oc_to_string(const Variables& var)
 {
 	return var.to_string();
+}
+
+std::string oc_to_string(const FreeVariables::IndexMap& imap)
+{
+	std::stringstream ss;
+	ss << "size = " << imap.size() << std::endl;
+	for (const auto& vi : imap)
+	{
+		ss << "at[" << vi.second << "]:" << std::endl
+		   << h_to_string(vi.first);
+	}
+	return ss.str();
 }
 
 } // ~namespace opencog
