@@ -454,7 +454,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	{
 		return do_eval_scratch(as, DefineLink::get_definition(evelnk), scratch);
 	}
-	else if (INHERITANCE_LINK == t)
+	else if (INHERITANCE_LINK == t or IMPLICATION_LINK == t)
 	{
 		return evelnk->getTruthValue();
 	}

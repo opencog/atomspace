@@ -110,7 +110,7 @@ public:
         HandleSeq oset(3);
         oset[0] = ha;
         oset[1] = hb;
-        oset[3] = hc;
+        oset[2] = hc;
         init(oset);
     }
     Link(Type t, const Handle& ha, const Handle &hb,
