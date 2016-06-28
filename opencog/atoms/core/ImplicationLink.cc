@@ -38,7 +38,7 @@ ImplicationLink::ImplicationLink(const HandleSeq& hseq,
 }
 
 ImplicationLink::ImplicationLink(Type t, const HandleSeq& hseq,
-                                     TruthValuePtr tv, AttentionValuePtr av)
+                                 TruthValuePtr tv, AttentionValuePtr av)
 	: ScopeLink(t, hseq, tv, av)
 {
 	init();
@@ -66,6 +66,44 @@ void ImplicationLink::extract_variables(const HandleSeq& oset)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an outgoing set of size 2 or 3, got %d", sz);
 
+	// WARNING: The assumption that Implication implicitely scopes its
+	// free variables is damn wrong. Implication has a sugar form
+	// especially for that
+	//
+	// Implication
+	//   <variable-declaration>
+	//   <implicant>
+	//   <implicand>
+	//
+	// declaration should always used, either using the sugar form
+	// above, or using the non-sugar form by wrapping the implicant
+	// and implicand bodies with Lambdas.
+	//
+	// Perhaps one could invent a new atom type to use free variables
+	// for the declaration in place of an explicit one. For instance
+	//
+	// Implication
+	//   FreeVariableDeclarationNode
+	//   <implicant>
+	//   <implicand>
+
+	// Hack alert!!! If the variables are direct children of the
+	// Implication then there are not implicitly scoped. This is a
+	// temporary workaround for the bad code below. It really is a
+	// huge hack that will not properly handly cases where some
+	// variable are direct children and some others aren't.
+	if (2 == sz)
+	{
+		Type t0 = oset[0]->getType();
+		Type t1 = oset[1]->getType();
+		if (t0 == VARIABLE_NODE or t1 == VARIABLE_NODE)
+		{
+			_implicand = oset[1];
+			return;
+		}
+	}
+
+	// Wrong, wrong wrong ...
 	// If there is an explicit variable declaration, then use that.
 	// If there is no variable declaration, then assume that all of
 	// the free variables in the link are scoped.
