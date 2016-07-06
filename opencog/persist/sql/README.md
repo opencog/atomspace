@@ -248,10 +248,10 @@ sudo gedit /etc/odbcinst.ini &
     CommLog     = 0
 ```
 
-The above stanza associates the name `PostgreSQL Unicode` with a particular 
-driver. This name is needed for later steps.  Notice that this is a quite 
-long name, with spaces!  You can change the name, (e.g. to shorten it) if 
-you wish, however, it **MUST** be consistent with the name given in the 
+The above stanza associates the name `PostgreSQL Unicode` with a particular
+driver. This name is needed for later steps.  Notice that this is a quite
+long name, with spaces!  You can change the name, (e.g. to shorten it) if
+you wish, however, it **MUST** be consistent with the name given in the
 `.odbc.ini` file (explained below in 'ODBC Setup, Part the Second').
 
 MySQL users need the stanza below; the `/etc/odbcinst.ini` file can
@@ -343,7 +343,7 @@ try doing this, replacing 'alex' with your username.
 Verify that worked out by typing \dg to see:
 
                              List of roles
- Role name |                   Attributes                   | Member of 
+ Role name |                   Attributes                   | Member of
 -----------+------------------------------------------------+-----------
  alex      | Superuser                                      | {}
  postgres  | Superuser, Create role, Create DB, Replication | {}
@@ -388,7 +388,7 @@ Navigate to the atomspace folder you cloned from GitHub:
 So we can create the database tables:
 
 ```
-   $ cat opencog/persist/sql/atom.sql | psql mycogdata -U opencog_user -W -h localhost
+   $ cat opencog/persist/sql/postgres/pg_atom.sql | psql mycogdata -U opencog_user -W -h localhost
 ```
 
 Verify that the tables were created. Login as before:
@@ -434,8 +434,8 @@ ODBC Setup, Part the Second
 Edit `~/.odbc.ini` in your home directory to add a stanza of the form
 below. You MUST create one of these for EACH repository you plan to
 use! The name of the stanza, and of the database, can be whatever you
-wish. The name given for `Driver`, here `PostgreSQL Unicode`, **must** 
-match a stanza name in `/etc/odbcinst.ini`.  Failure to have it match 
+wish. The name given for `Driver`, here `PostgreSQL Unicode`, **must**
+match a stanza name in `/etc/odbcinst.ini`.  Failure to have it match
 will cause an error message:
 
 ```
@@ -477,9 +477,9 @@ IMPORTANT: MAKE SURE THERE ARE NO SPACES AT THE START OF EVERY LINE!
 
 Opencog Setup
 -------------
-Edit `~/opencog/build/lib/opencog.conf` and set the `STORAGE`, 
-`STORAGE_USERNAME` and `STORAGE_PASSWD` there to the same values as 
-in `~/.odbc.ini`. 
+Edit `~/opencog/build/lib/opencog.conf` and set the `STORAGE`,
+`STORAGE_USERNAME` and `STORAGE_PASSWD` there to the same values as
+in `~/.odbc.ini`.
 
 ```
 STORAGE               = "mycogdata"
@@ -494,7 +494,7 @@ start the opencog server from your build folder as:
    $ ./opencog/server/cogserver -c my.conf
 ```
 
-Verify that everything works. Start the cogserver, and bulk-save. 
+Verify that everything works. Start the cogserver, and bulk-save.
 (Actually this didn't work for me, I had to do sql-open before sql-store
 worked, as shown below, even though my opencog.conf was correct and when
 using a custom my.conf file.)
