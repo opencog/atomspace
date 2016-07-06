@@ -136,7 +136,7 @@ std::string hs_to_string(const HandleSeq& hs)
 }
 std::string ohs_to_string(const OrderedHandleSet& ohs)
 {
-	std::stringstream ss; std::operator<<(ss, ohs) << ohs; return ss.str();
+	std::stringstream ss; std::operator<<(ss, ohs); return ss.str();
 }
 std::string uhs_to_string(const UnorderedHandleSet& uhs)
 {
