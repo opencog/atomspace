@@ -135,6 +135,7 @@ std::string hp_to_string(const HandlePair& hp)
 	std::stringstream ss;
 	ss << "first:" << std::endl << h_to_string(hp.first);
 	ss << "second:" << std::endl << h_to_string(hp.second);
+	return ss.str();
 }
 std::string hs_to_string(const HandleSeq& hs)
 {
