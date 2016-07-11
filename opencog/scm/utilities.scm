@@ -1218,6 +1218,7 @@
 'cog-get-link
 'cog-get-pred
 'cog-get-reference
+'cog-get-trunk
 'filter-hypergraph
 'cartesian-prod
 'cartesian-prod-list-only
