@@ -196,17 +196,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		std::string libName  = schema.substr(pos, dotpos - pos);
 		std::string funcName = schema.substr(dotpos + 1);
 
-		// Try and load the library and function.
-		void* libHandle = dlopen(libName.c_str(), RTLD_LAZY);
-		if (nullptr == libHandle)
-			throw RuntimeException(TRACE_INFO,
-				"Cannot open library: %s - %s", libName.c_str(), dlerror());
-
-		void* sym = dlsym(libHandle, funcName.c_str());
-		if (nullptr == sym)
-			throw RuntimeException(TRACE_INFO,
-				"Cannot find symbol %s in library: %s - %s",
-				funcName.c_str(), libName.c_str(), dlerror());
+        void* sym = LibraryManager::getFunc(libName,funcName);
 
 		// Convert the void* pointer to the correct function type.
 		// XXX FIXME -- it is incorrect to use UUID's for this purpose!
@@ -218,9 +208,6 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		// Execute the function.
 		Handle h(func(as, args.value()));
 
-		// Close library after use.
-		dlclose(libHandle);
-
 		// Return the handle.
 		return h;
 	}
@@ -228,4 +215,40 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	// Unkown proceedure type.
 	throw RuntimeException(TRACE_INFO,
 		"Cannot evaluate unknown Schema %s", gsn->toString().c_str());
+}
+
+std::unordered_map<std::string, void*> LibraryManager::_librarys;
+std::unordered_map<std::string, void*> LibraryManager::_functions;
+
+void* LibraryManager::getFunc(std::string libName,std::string funcName)
+{
+    void* libHandle;
+    if (_librarys.count(libName) == 0) {
+		// Try and load the library and function.
+		libHandle = dlopen(libName.c_str(), RTLD_LAZY);
+		if (nullptr == libHandle)
+			throw RuntimeException(TRACE_INFO,
+				"Cannot open library: %s - %s", libName.c_str(), dlerror());
+        _librarys[libName] = libHandle;
+    }
+    else {
+        libHandle = _librarys[libName];
+    }
+
+    std::string funcID = libName + "\\" + funcName;
+
+    void* sym;
+    if (_functions.count(funcID) == 0){
+        sym = dlsym(libHandle, funcName.c_str());
+		if (nullptr == sym)
+			throw RuntimeException(TRACE_INFO,
+				"Cannot find symbol %s in library: %s - %s",
+				funcName.c_str(), libName.c_str(), dlerror());
+        _functions[funcID] = sym;
+    }
+    else {
+        sym = _functions[funcID];
+    }
+
+    return sym;
 }
