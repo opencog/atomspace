@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_EXECUTION_OUTPUT_LINK_H
 #define _OPENCOG_EXECUTION_OUTPUT_LINK_H
 
+#include <stdlib.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/FunctionLink.h>
 
@@ -62,6 +63,15 @@ static inline ExecutionOutputLinkPtr ExecutionOutputLinkCast(AtomPtr a)
 
 // XXX temporary hack ...
 #define createExecutionOutputLink std::make_shared<ExecutionOutputLink>
+
+class LibraryManager
+{
+private:
+    static std::unordered_map<std::string, void*> _librarys;
+    static std::unordered_map<std::string, void*> _functions;
+public:
+    static void* getFunc(std::string libName,std::string funcName);
+};
 
 /** @}*/
 }
