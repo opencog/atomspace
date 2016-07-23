@@ -34,6 +34,15 @@
 
 using namespace opencog;
 
+class LibraryManager
+{
+private:
+    static std::unordered_map<std::string, void*> _librarys;
+    static std::unordered_map<std::string, void*> _functions;
+public:
+    static void* getFunc(std::string libName,std::string funcName);
+};
+
 ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset,
                                          TruthValuePtr tv,
                                          AttentionValuePtr av)
@@ -224,11 +233,11 @@ void* LibraryManager::getFunc(std::string libName,std::string funcName)
 {
     void* libHandle;
     if (_librarys.count(libName) == 0) {
-		// Try and load the library and function.
-		libHandle = dlopen(libName.c_str(), RTLD_LAZY);
-		if (nullptr == libHandle)
-			throw RuntimeException(TRACE_INFO,
-				"Cannot open library: %s - %s", libName.c_str(), dlerror());
+        // Try and load the library and function.
+        libHandle = dlopen(libName.c_str(), RTLD_LAZY);
+        if (nullptr == libHandle)
+            throw RuntimeException(TRACE_INFO,
+                "Cannot open library: %s - %s", libName.c_str(), dlerror());
         _librarys[libName] = libHandle;
     }
     else {
@@ -240,10 +249,10 @@ void* LibraryManager::getFunc(std::string libName,std::string funcName)
     void* sym;
     if (_functions.count(funcID) == 0){
         sym = dlsym(libHandle, funcName.c_str());
-		if (nullptr == sym)
-			throw RuntimeException(TRACE_INFO,
-				"Cannot find symbol %s in library: %s - %s",
-				funcName.c_str(), libName.c_str(), dlerror());
+        if (nullptr == sym)
+            throw RuntimeException(TRACE_INFO,
+                "Cannot find symbol %s in library: %s - %s",
+                funcName.c_str(), libName.c_str(), dlerror());
         _functions[funcID] = sym;
     }
     else {
