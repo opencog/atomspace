@@ -64,15 +64,6 @@ static inline ExecutionOutputLinkPtr ExecutionOutputLinkCast(AtomPtr a)
 // XXX temporary hack ...
 #define createExecutionOutputLink std::make_shared<ExecutionOutputLink>
 
-class LibraryManager
-{
-private:
-    static std::unordered_map<std::string, void*> _librarys;
-    static std::unordered_map<std::string, void*> _functions;
-public:
-    static void* getFunc(std::string libName,std::string funcName);
-};
-
 /** @}*/
 }
 
