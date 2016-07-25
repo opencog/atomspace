@@ -269,6 +269,34 @@ static pthread_mutex_t serialize_lock;
 static pthread_key_t ser_key = 0;
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
+// This will throw an exception, when it is called.  It is used
+// to interrupt infinite loops or long-running processes, when the
+// user hits control-C at a telnet prompt.
+static SCM throw_except(void)
+{
+	scm_throw(
+		scm_from_utf8_symbol("user-interrupt"),
+		scm_list_2(
+			scm_from_utf8_string("SchemeEval::interrupt"),
+			scm_from_utf8_string("User interrupt from keyboard")));
+
+	/* not reached */ return SCM_EOL;
+}
+
+static SCM throw_thunk = SCM_EOL;
+
+void* c_wrap_init_only_once(void* p)
+{
+#ifdef HAVE_GUILE2
+ #define C(X) ((scm_t_subr) X)
+#else
+ #define C(X) ((SCM (*) ()) X)
+#endif
+	throw_thunk = scm_c_make_gsubr("cog-throw-user-interrupt",
+		0, 0, 0, C(throw_except));
+	return nullptr;
+}
+
 // Initialization that needs to be performed only once, for the entire
 // process.
 static void init_only_once(void)
@@ -284,6 +312,8 @@ static void init_only_once(void)
 	scm_with_guile(do_bogus_scm, NULL);
 	guile_user_module = scm_current_module();
 #endif /* WORK_AROUND_GUILE_185_BUG */
+
+	scm_with_guile(c_wrap_init_only_once, NULL);
 }
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
@@ -871,13 +901,7 @@ void * SchemeEval::c_wrap_interrupt(void* p)
 	SCM thr = self->_eval_thread;
 	if (SCM_EOL == thr) return self;
 
-	SCM exception = scm_throw(
-		scm_from_utf8_symbol("user-interrupt"),
-		scm_list_2(
-			scm_from_utf8_string("SchemeEval::interrupt"),
-			scm_from_utf8_string("User interrupt from keyboard")));
-
-	scm_system_async_mark_for_thread(exception, thr);
+	scm_system_async_mark_for_thread(throw_thunk, thr);
 
 	return self;
 }
