@@ -52,6 +52,7 @@ void SchemeEval::init(void)
 	_in_redirect = 0;
 	_in_shell = false;
 	_in_eval = false;
+	_eval_thread = SCM_EOL;
 
 	// User error and crash management
 	_error_string = SCM_EOL;
@@ -136,6 +137,8 @@ void SchemeEval::redirect_output(void)
 	_saved_outport = scm_gc_protect_object(_saved_outport);
 
 	scm_set_current_output_port(_outport);
+
+	_eval_thread = scm_current_thread();
 }
 
 void SchemeEval::restore_output(void)
@@ -147,6 +150,8 @@ void SchemeEval::restore_output(void)
 	if (scm_is_false(scm_port_closed_p(_saved_outport)))
 		scm_set_current_output_port(_saved_outport);
 	scm_gc_unprotect_object(_saved_outport);
+
+	_eval_thread = SCM_EOL;
 }
 
 /// Discard all chars in the outport.
@@ -264,6 +269,34 @@ static pthread_mutex_t serialize_lock;
 static pthread_key_t ser_key = 0;
 #endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
+// This will throw an exception, when it is called.  It is used
+// to interrupt infinite loops or long-running processes, when the
+// user hits control-C at a telnet prompt.
+static SCM throw_except(void)
+{
+	scm_throw(
+		scm_from_utf8_symbol("user-interrupt"),
+		scm_list_2(
+			scm_from_utf8_string("SchemeEval::interrupt"),
+			scm_from_utf8_string("User interrupt from keyboard")));
+
+	/* not reached */ return SCM_EOL;
+}
+
+static SCM throw_thunk = SCM_EOL;
+
+void* c_wrap_init_only_once(void* p)
+{
+#ifdef HAVE_GUILE2
+ #define C(X) ((scm_t_subr) X)
+#else
+ #define C(X) ((SCM (*) ()) X)
+#endif
+	throw_thunk = scm_c_make_gsubr("cog-throw-user-interrupt",
+		0, 0, 0, C(throw_except));
+	return nullptr;
+}
+
 // Initialization that needs to be performed only once, for the entire
 // process.
 static void init_only_once(void)
@@ -279,6 +312,8 @@ static void init_only_once(void)
 	scm_with_guile(do_bogus_scm, NULL);
 	guile_user_module = scm_current_module();
 #endif /* WORK_AROUND_GUILE_185_BUG */
+
+	scm_with_guile(c_wrap_init_only_once, NULL);
 }
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
@@ -458,10 +493,10 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 			scm_newline (port);
 		}
 #ifdef HAVE_GUILE2
-		if (SCM_STACK_LENGTH (_captured_stack))
+		if (SCM_STACK_LENGTH(_captured_stack))
 			set_captured_stack(scm_stack_ref (_captured_stack, SCM_INUM0));
 #endif
-		scm_display_error (_captured_stack, port, subr, message, parts, rest);
+		scm_display_error(_captured_stack, port, subr, message, parts, rest);
 	}
 	else
 	{
@@ -850,6 +885,25 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 		drain_output();
 
 	return rc;
+}
+
+/* ============================================================== */
+
+void SchemeEval::interrupt(void)
+{
+	if (SCM_EOL == _eval_thread) return;
+	scm_with_guile(c_wrap_interrupt, this);
+}
+
+void * SchemeEval::c_wrap_interrupt(void* p)
+{
+	SchemeEval *self = (SchemeEval *) p;
+	SCM thr = self->_eval_thread;
+	if (SCM_EOL == thr) return self;
+
+	scm_system_async_mark_for_thread(throw_thunk, thr);
+
+	return self;
 }
 
 /* ============================================================== */
