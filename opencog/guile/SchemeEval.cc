@@ -52,6 +52,7 @@ void SchemeEval::init(void)
 	_in_redirect = 0;
 	_in_shell = false;
 	_in_eval = false;
+	_eval_thread = SCM_EOL;
 
 	// User error and crash management
 	_error_string = SCM_EOL;
@@ -136,6 +137,8 @@ void SchemeEval::redirect_output(void)
 	_saved_outport = scm_gc_protect_object(_saved_outport);
 
 	scm_set_current_output_port(_outport);
+
+	_eval_thread = scm_current_thread();
 }
 
 void SchemeEval::restore_output(void)
@@ -147,6 +150,8 @@ void SchemeEval::restore_output(void)
 	if (scm_is_false(scm_port_closed_p(_saved_outport)))
 		scm_set_current_output_port(_saved_outport);
 	scm_gc_unprotect_object(_saved_outport);
+
+	_eval_thread = SCM_EOL;
 }
 
 /// Discard all chars in the outport.
@@ -856,6 +861,12 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 
 void SchemeEval::interrupt(void)
 {
+	if (SCM_EOL == _eval_thread) return;
+
+	static SCM exception = scm_throw(
+		scm_from_utf8_symbol("user-interrupt"),
+		scm_from_utf8_string("SchemeEval::interrupt"));
+	scm_system_async_mark_for_thread(exception, _eval_thread);
 }
 
 /* ============================================================== */

@@ -89,6 +89,9 @@ class SchemeEval : public GenericEval
 		std::string poll_port();
 		static void * c_wrap_eval(void *);
 		static void * c_wrap_poll(void *);
+
+		// Support for interruption from a shell.
+		SCM _eval_thread;
 		
 		// Output port, for any printing done by scheme code.
 		SCM _outport;
