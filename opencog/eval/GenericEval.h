@@ -78,12 +78,23 @@ class GenericEval
 		}
 
 		/**
-		 * begin_eval() must be called in the same thread as poll_result()
-		 * an it must be called before eval_expr().  The eval_expr() method
-		 * may be called in the same thread, or a different one.  The
-		 * poll_result() method can be called at any time after begin_eval().
-		 * The poll_result() method might block, until results are available.
-		 * It must return the empty string when there are no more results.
+		 * The begin_eval() method must be called in the same thread
+		 * as poll_result(), and it must be called before eval_expr().
+		 *
+		 * The eval_expr() method may be called in the same thread,
+		 * or in a different one (as long as it is called after the
+		 * begin_eval()).
+		 *
+		 * The poll_result() method can be called at any time after
+		 * begin_eval(). (It might be called before eval_expr(), e.g.
+		 * if the polling thread is racing with the evaluation thread.
+		 * Such racing is allowed, and assumed to happen.)
+		 *
+		 * The poll_result() method is allowed to block, until
+		 * results are available.  It must return the empty string
+		 * to indicated that there are no more results.  After
+		 * poll_result() returns the empty string, the caller can
+		 * safely assume that the evaluation completed.
 		 */
 		virtual void begin_eval() = 0;
 		virtual void eval_expr(const std::string&) = 0;
