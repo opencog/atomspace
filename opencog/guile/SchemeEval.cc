@@ -463,10 +463,10 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 			scm_newline (port);
 		}
 #ifdef HAVE_GUILE2
-		if (SCM_STACK_LENGTH (_captured_stack))
+		if (SCM_STACK_LENGTH(_captured_stack))
 			set_captured_stack(scm_stack_ref (_captured_stack, SCM_INUM0));
 #endif
-		scm_display_error (_captured_stack, port, subr, message, parts, rest);
+		scm_display_error(_captured_stack, port, subr, message, parts, rest);
 	}
 	else
 	{
@@ -865,7 +865,9 @@ void SchemeEval::interrupt(void)
 
 	static SCM exception = scm_throw(
 		scm_from_utf8_symbol("user-interrupt"),
-		scm_from_utf8_string("SchemeEval::interrupt"));
+		scm_list_2(
+			scm_from_utf8_string("SchemeEval::interrupt"),
+			scm_from_utf8_string("User interrupt from keyboard")));
 	scm_system_async_mark_for_thread(exception, _eval_thread);
 }
 
