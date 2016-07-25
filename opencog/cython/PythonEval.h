@@ -164,9 +164,10 @@ class PythonEval : public GenericEval
         static PythonEval & instance(AtomSpace* atomspace = NULL);
 
         // The async-output interface.
-        virtual void begin_eval() {}
+        virtual void begin_eval(void) {}
         virtual void eval_expr(const std::string&);
-        virtual std::string poll_result();
+        virtual std::string poll_result(void);
+        virtual void interrupt(void);
 
         // The synchronous-output interface.
         std::string eval(const std::string& expr)

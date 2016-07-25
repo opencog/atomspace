@@ -149,9 +149,10 @@ class SchemeEval : public GenericEval
 		static SchemeEval* get_evaluator(AtomSpace* = NULL);
 
 		// The async-output interface.
-		void begin_eval();
+		void begin_eval(void);
 		void eval_expr(const std::string&);
-		std::string poll_result();
+		std::string poll_result(void);
+		void interrupt(void);
 
 		// The synchronous-output interfaces.
 		std::string eval(const std::string& expr)

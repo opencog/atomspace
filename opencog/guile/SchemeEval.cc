@@ -854,6 +854,12 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 
 /* ============================================================== */
 
+void SchemeEval::interrupt(void)
+{
+}
+
+/* ============================================================== */
+
 SCM recast_scm_eval_string(void * expr)
 {
 	return scm_eval_string((SCM)expr);

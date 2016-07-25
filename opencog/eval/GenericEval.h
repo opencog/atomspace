@@ -95,10 +95,16 @@ class GenericEval
 		 * to indicated that there are no more results.  After
 		 * poll_result() returns the empty string, the caller can
 		 * safely assume that the evaluation completed.
+		 *
+		 * The interrupt() method allows the caller to interrupt
+		 * the thread that is running the eval_expr() method. If
+		 * there is no thread that is running eval_expr, then the
+		 * interrupt is a no-op (does nothing).
 		 */
-		virtual void begin_eval() = 0;
+		virtual void begin_eval(void) = 0;
 		virtual void eval_expr(const std::string&) = 0;
-		virtual std::string poll_result() = 0;
+		virtual std::string poll_result(void) = 0;
+		virtual void interrupt(void) = 0;
 };
 
 /** @}*/

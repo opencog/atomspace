@@ -1439,3 +1439,10 @@ std::string PythonEval::poll_result()
     _result.clear();
     return r;
 }
+
+void PythonEval::interrupt(void)
+{
+    _result += "PythonEval: interrupt not implemented!\n";
+
+    logger().warn("[PythonEval] interrupt not implemented!\n");
+}
