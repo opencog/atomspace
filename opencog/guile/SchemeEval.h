@@ -92,6 +92,7 @@ class SchemeEval : public GenericEval
 
 		// Support for interruption from a shell.
 		SCM _eval_thread;
+		static void * c_wrap_interrupt(void *);
 		
 		// Output port, for any printing done by scheme code.
 		SCM _outport;

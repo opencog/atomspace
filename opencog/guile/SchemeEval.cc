@@ -862,13 +862,24 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 void SchemeEval::interrupt(void)
 {
 	if (SCM_EOL == _eval_thread) return;
+	scm_with_guile(c_wrap_interrupt, this);
+}
 
-	static SCM exception = scm_throw(
+void * SchemeEval::c_wrap_interrupt(void* p)
+{
+	SchemeEval *self = (SchemeEval *) p;
+	SCM thr = self->_eval_thread;
+	if (SCM_EOL == thr) return self;
+
+	SCM exception = scm_throw(
 		scm_from_utf8_symbol("user-interrupt"),
 		scm_list_2(
 			scm_from_utf8_string("SchemeEval::interrupt"),
 			scm_from_utf8_string("User interrupt from keyboard")));
-	scm_system_async_mark_for_thread(exception, _eval_thread);
+
+	scm_system_async_mark_for_thread(exception, thr);
+
+	return self;
 }
 
 /* ============================================================== */
