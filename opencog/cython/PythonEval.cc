@@ -1425,14 +1425,13 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     // will crash the cogserver. Pass the exception message to
     // the user, who can read and contemplate it: it is almost
     // surely a syntax error in the python code.
-    _result = "";
     try
     {
-        _result = this->apply_script(_input_line);
+        _result += this->apply_script(_input_line);
     }
     catch (const RuntimeException &e)
     {
-        _result = e.get_message();
+        _result += e.get_message();
         _result += "\n";
     }
     _input_line = "";
