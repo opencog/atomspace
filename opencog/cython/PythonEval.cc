@@ -1043,52 +1043,21 @@ std::string PythonEval::apply_script(const std::string& script)
     // Grab the GIL
     PyGILState_STATE gstate = PyGILState_Ensure();
 
-    PyRun_SimpleString("_opencog_output_stream = StringIO.StringIO()\n"
-                       "_python_output_stream = sys.stdout\n"
-                       "_python_error_stream = sys.stderr\n"
-                       "sys.stdout = _opencog_output_stream\n"
-                       "sys.stderr = _opencog_output_stream\n");
-
     // Execute the script. NOTE: This call replaces PyRun_SimpleString
     // which was masking errors because it calls PyErr_Clear() so the
     // call to PyErr_Occurred below was returning false even when there
     // was an error.
     this->execute_string(script.c_str());
 
-    std::string result;
-    bool errorRunningScript;
+    bool errorRunningScript = false;
     std::string errorString;
 
     // Check for errors in the script.
-    PyObject* pyError = PyErr_Occurred();
-
-    // If the script executed without error...
-    if (!pyError) {
-        // Get the output stream as a string so we can return it.
-        errorRunningScript = false;
-        PyObject* pyCatcher = PyObject_GetAttrString(_pyRootModule,
-                "_opencog_output_stream");
-        PyObject* pyOutput = PyObject_CallMethod(pyCatcher,
-                (char*) "getvalue", NULL);
-        result = PyBytes_AsString(pyOutput);
-
-        // Cleanup reference counts for Python objects we no longer reference.
-        Py_DECREF(pyCatcher);
-        Py_DECREF(pyOutput);
-
-    } else {
+    if (PyErr_Occurred()) {
         // Remember the error and get the error string for the throw below.
         errorRunningScript = true;
         this->build_python_error_message(NO_FUNCTION_NAME, errorString);
-
-        // PyErr_Occurred returns a borrowed reference, so don't do this:
-        // Py_DECREF(pyError);
     }
-
-    // Close the output stream.
-    PyRun_SimpleString("sys.stdout = _python_output_stream\n"
-                       "sys.stderr = _python_error_stream\n"
-                       "_opencog_output_stream.close()\n");
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
@@ -1098,8 +1067,7 @@ std::string PythonEval::apply_script(const std::string& script)
     if (errorRunningScript)
         throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
 
-    // printf("Python says that: %s\n", result.c_str());
-    return result;
+    return "";
 }
 
 void PythonEval::add_to_sys_path(std::string path)
@@ -1431,7 +1399,7 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     // surely a syntax error in the python code.
     try
     {
-        _result += this->apply_script(_input_line);
+        this->apply_script(_input_line);
     }
     catch (const RuntimeException &e)
     {
