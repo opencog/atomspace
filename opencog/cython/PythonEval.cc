@@ -56,8 +56,6 @@ const int SIMPLE_STRING_FAILURE = -1;
 const int MISSING_FUNC_CODE = -1;
 
 // The Python functions can't take const flags.
-#define NO_COMPILER_FLAGS NULL
-
 static bool already_initialized = false;
 static bool initialized_outside_opencog = false;
 std::recursive_mutex PythonEval::_mtx;
@@ -616,10 +614,22 @@ void PythonEval::build_python_error_message(const char* function_name,
  */
 void PythonEval::execute_string(const char* command)
 {
-    PyObject *pyRootDictionary, *pyResult;
-    pyRootDictionary = PyModule_GetDict(_pyRootModule);
-    pyResult = PyRun_StringFlags(command, Py_file_input, pyRootDictionary,
-            pyRootDictionary, NO_COMPILER_FLAGS);
+    // We use Py_file_input here, instead of Py_single_input, because
+    // Py_single_input spews errors on blank lines.  However, the
+    // flip-side is that simple expressions, such as 2+2, generate no
+    // output at all when Py_file_input is used; they do generate output
+    // when Py_single_input is used.
+    //
+    // In either case, the pyResult does not have any string
+    // repesentation; using PyObject_Str(pyResult) and then
+    // PyString_AsString to print it gives "None" in all situations.
+    // Because of this, I don't know how to write a valid command
+    // interpreter for the python shell ...
+    PyObject* pyRootDictionary = PyModule_GetDict(_pyRootModule);
+    PyObject* pyResult = PyRun_StringFlags(command,
+            Py_file_input, pyRootDictionary, pyRootDictionary,
+            nullptr);
+
     if (pyResult)
         Py_DECREF(pyResult);
     Py_FlushLine();
@@ -1030,19 +1040,12 @@ std::string PythonEval::apply_script(const std::string& script)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
-    PyObject* pyError = NULL;
-    PyObject *pyCatcher = NULL;
-    PyObject *pyOutput = NULL;
-    std::string result;
-    bool errorRunningScript;
-    std::string errorString;
-
     // Grab the GIL
-    PyGILState_STATE gstate;
-    gstate = PyGILState_Ensure();
+    PyGILState_STATE gstate = PyGILState_Ensure();
 
     PyRun_SimpleString("_opencog_output_stream = StringIO.StringIO()\n"
                        "_python_output_stream = sys.stdout\n"
+                       "_python_error_stream = sys.stderr\n"
                        "sys.stdout = _opencog_output_stream\n"
                        "sys.stderr = _opencog_output_stream\n");
 
@@ -1052,16 +1055,21 @@ std::string PythonEval::apply_script(const std::string& script)
     // was an error.
     this->execute_string(script.c_str());
 
+    std::string result;
+    bool errorRunningScript;
+    std::string errorString;
+
     // Check for errors in the script.
-    pyError = PyErr_Occurred();
+    PyObject* pyError = PyErr_Occurred();
 
     // If the script executed without error...
     if (!pyError) {
         // Get the output stream as a string so we can return it.
         errorRunningScript = false;
-        pyCatcher = PyObject_GetAttrString(_pyRootModule,
+        PyObject* pyCatcher = PyObject_GetAttrString(_pyRootModule,
                 "_opencog_output_stream");
-        pyOutput = PyObject_CallMethod(pyCatcher, (char*)"getvalue", NULL);
+        PyObject* pyOutput = PyObject_CallMethod(pyCatcher,
+                (char*) "getvalue", NULL);
         result = PyBytes_AsString(pyOutput);
 
         // Cleanup reference counts for Python objects we no longer reference.
@@ -1079,7 +1087,7 @@ std::string PythonEval::apply_script(const std::string& script)
 
     // Close the output stream.
     PyRun_SimpleString("sys.stdout = _python_output_stream\n"
-                       "sys.stderr = _python_output_stream\n"
+                       "sys.stderr = _python_error_stream\n"
                        "_opencog_output_stream.close()\n");
 
     // Release the GIL. No Python API allowed beyond this point.
@@ -1403,7 +1411,8 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
 
     _input_line += part;
     _input_line += '\n';  // we stripped this off, above
-    logger().info("[PythonEval] eval_expr:\n%s", _input_line.c_str());
+    logger().info("[PythonEval] eval_expr length=%zu:\n%s",
+                  _input_line.length(), _input_line.c_str());
 
     // This is the cogserver shell-freindly evaluator. We must
     // stop all exceptions thrown in other layers, or else we
@@ -1423,6 +1432,8 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     _input_line = "";
     _paren_count = 0;
     _pending_input = false;
+    logger().info("[PythonEval] eval_expr result length=%zu:\n%s",
+                  _result.length(), _result.c_str());
     return;
 
 wait_for_more:
