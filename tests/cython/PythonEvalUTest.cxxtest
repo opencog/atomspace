@@ -254,7 +254,7 @@ public:
 
             "def return_truth(atom1, atom2):\n"
             "    print 'return_truth TruthValue(0.75, 100.0)'\n"
-            "    return TruthValue(0.75, 100.0)\n"
+            "    return TruthValue(0.75, 100.0)\n\n"
             );
 
         // Create a scheme evaluator to trigger cog-evaluate and cog-execute.
