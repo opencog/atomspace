@@ -1341,6 +1341,12 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
     PyGILState_Release(gstate);
 }
 
+void PythonEval::begin_eval()
+{
+    _eval_done = false;
+    _result = "";
+}
+
 void PythonEval::eval_expr(const std::string& partial_expr)
 {
     // XXX FIXME this does a lot of wasteful string copying.
@@ -1434,6 +1440,9 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     _pending_input = false;
     logger().info("[PythonEval] eval_expr result length=%zu:\n%s",
                   _result.length(), _result.c_str());
+
+    _eval_done = true;
+    _wait_done.notify_all();
     return;
 
 wait_for_more:
@@ -1446,6 +1455,17 @@ wait_for_more:
 
 std::string PythonEval::poll_result()
 {
+    if (not _eval_done)
+    {
+        // We don't have a real need to lock anything here; we're just
+        // using this as a hack, so that the condition variable will
+        // wake us up. The goal here is to block when there's no output
+        // to be reported.
+        auto evdone = [&](void) { return _eval_done; };
+        std::unique_lock<std::mutex> lck(_poll_mtx);
+        _wait_done.wait(lck, evdone);
+    }
+
     std::string r = _result;
     _result.clear();
     return r;
