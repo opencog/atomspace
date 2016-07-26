@@ -1391,7 +1391,11 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     // Ignore leading comments; don't ignore empty line.
     int c = 0;
     size_t part_size = part.size();
-    if (0 == part_size and 0 < partial_expr.size()) goto wait_for_more;
+    if (0 == part_size and 0 == partial_expr.size()) goto wait_for_more;
+    if (0 == part_size and
+        '\n' != partial_expr[0] and
+        '\r' != partial_expr[0])
+        goto wait_for_more;
 
     if (0 < part_size) c = part[0];
 
@@ -1445,11 +1449,14 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     return;
 
 wait_for_more:
-    _result = "";
     _pending_input = true;
     // Add this expression to our evaluation buffer.
     _input_line += part;
     _input_line += '\n';  // we stripped this off, above
+
+    _result = "";
+    _eval_done = true;
+    _wait_done.notify_all();
 }
 
 std::string PythonEval::poll_result()
