@@ -1389,7 +1389,7 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
 
     _input_line += part;
     _input_line += '\n';  // we stripped this off, above
-    logger().info("[PythonEval] eval_expr length=%zu:\n%s",
+    logger().debug("[PythonEval] eval_expr length=%zu:\n%s",
                   _input_line.length(), _input_line.c_str());
 
     // This is the cogserver shell-freindly evaluator. We must
@@ -1409,7 +1409,7 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     _input_line = "";
     _paren_count = 0;
     _pending_input = false;
-    logger().info("[PythonEval] eval_expr result length=%zu:\n%s",
+    logger().debug("[PythonEval] eval_expr result length=%zu:\n%s",
                   _result.length(), _result.c_str());
 
     _eval_done = true;
@@ -1447,6 +1447,12 @@ std::string PythonEval::poll_result()
 
 void PythonEval::interrupt(void)
 {
+    // What we want to do here is to somehow interrupt or throw an
+    // exception to the code that is running in the PyRun(), up above,
+    // in the execute_string() method. That is, we want to make it
+    // stop whatever infinite loop the user told it to run, and just
+    // return to the C code (possibly spewing exceptions, etc.)
+    // However, I cannot figure out how to implement this ...
     _result += "PythonEval: interrupt not implemented!\n";
 
     logger().warn("[PythonEval] interrupt not implemented!\n");
