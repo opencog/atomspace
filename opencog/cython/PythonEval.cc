@@ -1359,11 +1359,7 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     // Ignore leading comments; don't ignore empty line.
     int c = 0;
     size_t part_size = part.size();
-    if (0 == part_size and 0 == partial_expr.size()) goto wait_for_more;
-    if (0 == part_size and
-        '\n' != partial_expr[0] and
-        '\r' != partial_expr[0])
-        goto wait_for_more;
+    if (0 == part_size and 0 < partial_expr.size()) goto wait_for_more;
 
     if (0 < part_size) c = part[0];
 
