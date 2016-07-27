@@ -244,6 +244,8 @@ public:
         return getAttentionValue()->getVLTI();
     }
 
+    void stimulate(AtomSpace* as, float stimulus);
+
     /** Change the Short-Term Importance */
     void setSTI(AttentionValue::sti_t stiValue)
     {

@@ -201,6 +201,17 @@ void Atom::setAttentionValue(AttentionValuePtr av)
     avch(getHandle(), local, av);
 }
 
+void Atom::stimulate(AtomSpace* as, float stimulus)
+{
+    int sti = getAttentionValue()->getSTI();
+    int lti = getAttentionValue()->getLTI();
+    int stiWage = as->_bank.calculateSTIWage() * stimulus;
+    int ltiWage = as->_bank.calculateLTIWage() * stimulus;
+
+    setSTI(sti + stiWage);
+    setLTI(lti + ltiWage);
+}
+
 void Atom::chgVLTI(int unit)
 {
     AttentionValuePtr old_av = getAttentionValue();

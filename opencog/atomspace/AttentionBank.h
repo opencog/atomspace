@@ -81,6 +81,15 @@ class AttentionBank
     long startingFundsSTI;
     long startingFundsLTI;
 
+    AttentionValue::sti_t stiFundsBuffer;
+    AttentionValue::lti_t ltiFundsBuffer;
+
+    AttentionValue::sti_t targetSTI;
+    AttentionValue::lti_t targetLTI;
+
+    AttentionValue::sti_t STIAtomWage;
+    AttentionValue::lti_t LTIAtomWage;
+
     mutable std::mutex lock_funds;
 
 public:
@@ -166,6 +175,10 @@ public:
      * @return Minimum STI
      */
     AttentionValue::sti_t getMinSTI(bool average=true) const;
+
+    AttentionValue::sti_t calculateSTIWage(void);
+
+    AttentionValue::sti_t calculateLTIWage(void);
 
     /**
      * Update the minimum STI observed in the connected AtomSpace. Min/max are not updated
