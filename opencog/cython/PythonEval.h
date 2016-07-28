@@ -136,7 +136,8 @@ class PythonEval : public GenericEval
         // Computed results are typically polled in a distinct thread.
         bool _eval_done;
         std::mutex _poll_mtx;
-        std::condition_variable _wait_done;
+        std::mutex _eval_mutex;
+	    std::condition_variable _wait_done;
 
         PyObject* _pyGlobal;
         PyObject* _pyLocal;
@@ -177,7 +178,10 @@ class PythonEval : public GenericEval
 
         // The synchronous-output interface.
         std::string eval(const std::string& expr)
-            { begin_eval(); eval_expr(expr); return poll_result(); }
+        {
+            std::lock_guard<std::mutex> lock(_eval_mutex);
+            begin_eval(); eval_expr(expr); return poll_result();
+        }
 
         /**
          * Runs the Python code contained in 'script'.
