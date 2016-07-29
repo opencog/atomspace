@@ -39,6 +39,12 @@ AttentionBank::AttentionBank(AtomTable& atab, bool transient)
 
     startingFundsSTI = fundsSTI = config().get_int("STARTING_STI_FUNDS");
     startingFundsLTI = fundsLTI = config().get_int("STARTING_LTI_FUNDS");
+    stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER");
+    ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER");
+    targetLTI = config().get_int("TARGET_LTI_FUNDS");
+    targetSTI = config().get_int("TARGET_STI_FUNDS");
+    STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE");
+    LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE");
     attentionalFocusBoundary = 1;
 
     AVChangedConnection =
@@ -154,6 +160,28 @@ AttentionValue::sti_t AttentionBank::getMinSTI(bool average) const
     } else {
         return minSTI.val;
     }
+}
+
+AttentionValue::sti_t AttentionBank::calculateSTIWage()
+{
+    long funds = getSTIFunds();
+    float diff  = funds - targetSTI;
+    float ndiff = diff / stiFundsBuffer;
+    ndiff = std::min(ndiff,1.0f);
+    ndiff = std::max(ndiff,-1.0f);
+
+    return STIAtomWage + (STIAtomWage * ndiff);
+}
+
+AttentionValue::lti_t AttentionBank::calculateLTIWage()
+{
+    long funds = getLTIFunds();
+    float diff  = funds - targetLTI;
+    float ndiff = diff / ltiFundsBuffer;
+    ndiff = std::min(ndiff,1.0f);
+    ndiff = std::max(ndiff,-1.0f);
+
+    return LTIAtomWage + (LTIAtomWage * ndiff);
 }
 
 AttentionValue::sti_t AttentionBank::getAttentionalFocusBoundary() const
