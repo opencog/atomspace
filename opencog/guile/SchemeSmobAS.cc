@@ -276,7 +276,7 @@ SCM SchemeSmob::ss_as(SCM satom)
 /**
  * Return current atomspace for this dynamic state.
  */
-std::atomic<SCM> SchemeSmob::atomspace_fluid;
+SCM SchemeSmob::atomspace_fluid;
 
 SCM SchemeSmob::ss_get_as (void)
 {

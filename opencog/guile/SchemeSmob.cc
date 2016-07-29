@@ -36,7 +36,7 @@ using namespace opencog;
  * simplify that code, and probably improve performance just a bit.
  */
 
-std::atomic<scm_t_bits> SchemeSmob::cog_misc_tag;
+scm_t_bits SchemeSmob::cog_misc_tag;
 std::atomic_flag SchemeSmob::is_inited = ATOMIC_FLAG_INIT;
 SCM SchemeSmob::_radix_ten;
 
