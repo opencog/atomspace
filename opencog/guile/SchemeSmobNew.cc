@@ -17,6 +17,9 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/guile/SchemeSmob.h>
 
+//#include <cstdlib>
+//using namespace std;
+
 using namespace opencog;
 
 /* ============================================================== */
@@ -361,9 +364,16 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
 	if (NULL == atomspace) atomspace = ss_get_env_as("cog-new-node");
-
+//string ss= "echo \""+name+": "+classserver().getTypeName(t)+"\" >> debug_ato_log1.txt";
+//cout <<ss
+//system(ss.c_str());
 	Handle h;
-	if (NULL== atomspace) return handle_to_scm(h);//mandeep: null atomspace returned sometimes
+	if ((nullptr== atomspace) or (NULL==atomspace) )
+	{
+		//string ss= "echo \""+name+": "+classserver().getTypeName(t)+"\" >> debug_ato_log.txt";
+		//system(ss.c_str());
+		return handle_to_scm(h);//mandeep: null atomspace returned sometimes
+	}
 	try
 	{
 		// Now, create the actual node... in the actual atom space.
@@ -496,7 +506,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 
 	AtomSpace* atomspace = get_as_from_list(satom_list);
 	if (NULL == atomspace) atomspace = ss_get_env_as("cog-new-link");
-
+	if ((nullptr == atomspace)||(NULL==atomspace)) return handle_to_scm (h);
 	try
 	{
 		// Now, create the actual link... in the actual atom space.

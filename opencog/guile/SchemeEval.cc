@@ -362,9 +362,11 @@ SchemeEval::SchemeEval(AtomSpace* as)
 
 }
 
+static std::mutex prot_mtx;
 /* This should be called once for every new thread. */
 void SchemeEval::per_thread_init(void)
 {
+  std::lock_guard<std::mutex> lck(prot_mtx);
 	/* Avoid more than one call per thread. */
 	if (thread_is_inited) return;
 	thread_is_inited = true;
@@ -374,7 +376,7 @@ void SchemeEval::per_thread_init(void)
 #endif /* WORK_AROUND_GUILE_185_BUG */
 
 	// Arghhh!  Avoid ongoing utf8 fruitcake nutiness in guile-2.0
-	scm_c_eval_string ("(setlocale LC_ALL "")\n");
+//	scm_c_eval_string ("(setlocale LC_ALL "")\n");
 }
 
 SchemeEval::~SchemeEval()
@@ -624,10 +626,10 @@ static void do_gc(void)
  * This method *must* be called in guile mode, in order for garbage
  * collection, etc. to work correctly!
  */
+ std::mutex prot2_mtx;
 void SchemeEval::do_eval(const std::string &expr)
 {
 	per_thread_init();
-
 	// Set global _atomspace variable in the execution environment.
 	AtomSpace* saved_as = NULL;
 	if (_atomspace)
@@ -638,13 +640,13 @@ void SchemeEval::do_eval(const std::string &expr)
 		else
 			saved_as = NULL;
 	}
-
+prot2_mtx.lock();
 	_input_line += expr;
-
 	redirect_output();
 	_caught_error = false;
 	_pending_input = false;
 	_error_msg.clear();
+
 	set_captured_stack(SCM_BOOL_F);
 	scm_gc_unprotect_object(_rc);
 	SCM eval_str = scm_from_utf8_string(_input_line.c_str());
@@ -661,7 +663,7 @@ void SchemeEval::do_eval(const std::string &expr)
 		SchemeSmob::ss_set_env_as(saved_as);
 
 	if (++_gc_ctr%80 == 0) { do_gc(); _gc_ctr = 0; }
-
+prot2_mtx.unlock();
 	_eval_done = true;
 	_wait_done.notify_all();
 }
@@ -748,10 +750,12 @@ std::string SchemeEval::do_poll_result()
 	// Save the result of evaluation, and clear it. Recall that _rc is
 	// typically set in a different thread.  We want it cleared before
 	// we ever get here again, on later evals.
+  prot2_mtx.lock();
 	SCM tmp_rc = _rc;
 	scm_gc_unprotect_object(_rc);
 	_rc = SCM_EOL;
 	_rc = scm_gc_protect_object(_rc);
+  prot2_mtx.unlock();
 
 	/* An error is thrown if the input expression is incomplete,
 	 * in which case the error handler sets the _pending_input flag
