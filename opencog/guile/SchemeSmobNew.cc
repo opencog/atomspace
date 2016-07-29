@@ -363,7 +363,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	if (NULL == atomspace) atomspace = ss_get_env_as("cog-new-node");
 
 	Handle h;
-
+	if (NULL== atomspace) return handle_to_scm(h);//mandeep: null atomspace returned sometimes
 	try
 	{
 		// Now, create the actual node... in the actual atom space.
