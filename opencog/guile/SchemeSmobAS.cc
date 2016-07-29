@@ -65,7 +65,6 @@ SCM SchemeSmob::make_as (AtomSpace *as)
 void SchemeSmob::release_as (AtomSpace *as)
 {
 	std::unique_lock<std::mutex> lck(as_mtx);
-	if (as==nullptr) return;//mandeep
 	auto has = deleteable_as.find(as);
 	if (deleteable_as.end() == has) return;
 	deleteable_as[as] --;
