@@ -28,6 +28,8 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
+#include <atomic>
+
 namespace opencog {
 /** \addtogroup grp_smob
  *  @{
@@ -59,7 +61,7 @@ private:
 
 	// The cog_misc_tag are for all other opencog types, such
 	// as truth values, which are ephemeral (garbage-collected)
-	static scm_t_bits cog_misc_tag;
+	static std::atomic<scm_t_bits> cog_misc_tag;
 
 	// Initialization functions
 	static void init_smob_type(void);
@@ -214,7 +216,7 @@ private:
 	static double verify_real (SCM, const char *, int pos = 1,
 	                           const char *msg = "real number");
 
-	static SCM atomspace_fluid;
+	static std::atomic<SCM> atomspace_fluid;
 	static void ss_set_env_as(AtomSpace *);
 	SchemeSmob();
 public:
