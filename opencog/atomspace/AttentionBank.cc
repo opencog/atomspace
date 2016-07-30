@@ -37,6 +37,7 @@ AttentionBank::AttentionBank(AtomTable& atab, bool transient)
     if (transient) { _zombie = true; return; }
     _zombie = false;
 
+#if 0
     startingFundsSTI = fundsSTI = config().get_int("STARTING_STI_FUNDS");
     startingFundsLTI = fundsLTI = config().get_int("STARTING_LTI_FUNDS");
     stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER");
@@ -45,6 +46,7 @@ AttentionBank::AttentionBank(AtomTable& atab, bool transient)
     targetSTI = config().get_int("TARGET_STI_FUNDS");
     STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE");
     LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE");
+#endif
     attentionalFocusBoundary = 1;
 
     AVChangedConnection =
