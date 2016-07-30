@@ -1301,7 +1301,6 @@ SchemeEval* SchemeEval::get_evaluator(AtomSpace* as)
 
 void* SchemeEval::c_wrap_set_atomspace(void * vas)
 {
-	per_thread_init();
 	AtomSpace* as = (AtomSpace*) vas;
 	SchemeSmob::ss_set_env_as(as);
 	return vas;
