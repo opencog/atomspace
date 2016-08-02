@@ -307,6 +307,7 @@ void SchemeSmob::register_procs()
 
 	// Attention values
 	register_proc("cog-new-av",            3, 0, 0, C(ss_new_av));
+	register_proc("cog-stimulate",         2, 0, 0, C(ss_stimulate));
 	register_proc("cog-av?",               1, 0, 0, C(ss_av_p));
 	register_proc("cog-av->alist",         1, 0, 0, C(ss_av_get_value));
 

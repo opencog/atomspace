@@ -163,6 +163,7 @@ private:
 
 	// Attention values
 	static SCM ss_new_av(SCM, SCM, SCM);
+	static SCM ss_stimulate(SCM, SCM);
 	static SCM ss_av_p(SCM);
 	static SCM take_av(AttentionValue *);
 	static SCM ss_av_get_value(SCM);
