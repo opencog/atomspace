@@ -23,6 +23,7 @@
 
 #include <math.h>
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
@@ -199,8 +200,8 @@ void BasicSCMUTest::test_single_atom(void)
 	TSM_ASSERT("Failed to find handle for first atom", h != NULL);
 
 	// Load the utility definitions
-	int rc = load_scm_file(*as,PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");
-	TSM_ASSERT_EQUALS("Failed to load type definitions", 0, rc);
+	eval->eval("(add-to-load-path \".\")");
+	eval->eval("(load-from-path \"typedefs.scm\")");
 	printf("typedefs now loaded!\n");
 
 	// We should add many more nodes, but I'm feeling lazy ...
