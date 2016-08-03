@@ -32,12 +32,10 @@
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/load-file.h>
 
 #include "../query/test-types.h"
 
 #include <opencog/util/Logger.h>
-#include <opencog/util/Config.h>
 
 using namespace opencog;
 using namespace std;
