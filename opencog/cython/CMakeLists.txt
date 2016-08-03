@@ -35,6 +35,7 @@ ADD_LIBRARY(PythonEval
 ADD_DEPENDENCIES(PythonEval atomspace_cython)
 
 TARGET_LINK_LIBRARIES(PythonEval
+	smob
 	atombase
 	atomspace
 	${PYTHON_LIBRARIES}
