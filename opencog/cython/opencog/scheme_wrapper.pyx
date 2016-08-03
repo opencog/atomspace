@@ -60,7 +60,7 @@ def scheme_eval_as(char* s):
     ret = eval_scheme_as(expr)
     return AtomSpace_factory(ret)
 
-cdef extern from "opencog/guile/load-file.h" namespace "opencog":
+cdef extern from "opencog/cython/load-file.h" namespace "opencog":
     int load_scm_file_relative (cAtomSpace& as, char* filename) except +
 
 def load_scm(AtomSpace a, char* fname):

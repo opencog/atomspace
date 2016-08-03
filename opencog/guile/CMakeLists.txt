@@ -15,7 +15,6 @@ ADD_LIBRARY (smob
 	SchemeSmobNew.cc
 	SchemeSmobTV.cc
 	SchemeSmobValue.cc
-	load-file
 )
 
 ADD_LIBRARY (logger
@@ -42,6 +41,5 @@ INSTALL (FILES
 	SchemeModule.h
 	SchemePrimitive.h
 	SchemeSmob.h
-	load-file.h
 	DESTINATION "include/opencog/guile"
 )

@@ -66,8 +66,6 @@ int load_scm_file (AtomSpace& as, const std::string& filename)
  * Load scheme file, with the filename specified as a relative path,
  * and the search paths prepended to the relative path.  If the search
  * paths are null, a list of defaults search paths are used.
- *
- * XXX FIXME DEPRECATED! -- DO NOT USE IN NEW CODE!
  */
 int load_scm_file_relative (AtomSpace& as, const std::string& filename,
                             std::vector<std::string> search_paths)

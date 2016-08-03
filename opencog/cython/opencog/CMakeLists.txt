@@ -193,7 +193,7 @@ IF (HAVE_GUILE)
 	############################## scheme wrapper #####################
 	CYTHON_ADD_MODULE_PYX(scheme_wrapper
 		"PyScheme.h" "atomspace.pxd" opencog_atom_types
-		"../../guile/load-file.h" "../../query/PatternSCM.h")
+		"../load-file.h" "../../query/PatternSCM.h")
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
 
