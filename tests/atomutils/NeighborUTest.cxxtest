@@ -27,7 +27,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/load-file.h>
 #include <opencog/atomutils/Neighbors.h>
 
 using namespace opencog;

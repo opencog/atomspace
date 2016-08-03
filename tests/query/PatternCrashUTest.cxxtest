@@ -26,7 +26,6 @@
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/load-file.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/InitiateSearchCB.h>
 
