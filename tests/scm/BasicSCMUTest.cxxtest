@@ -200,8 +200,15 @@ void BasicSCMUTest::test_single_atom(void)
 	TSM_ASSERT("Failed to find handle for first atom", h != NULL);
 
 	// Load the utility definitions
-	eval->eval("(add-to-load-path \".\")");
-	eval->eval("(load-from-path \"typedefs.scm\")");
+	eval->eval("(add-to-load-path \"..\")");
+	eval->eval("(add-to-load-path \"../..\")");
+	eval->eval("(add-to-load-path \"../../..\")");
+	std::string rs = eval->eval("(load-from-path \"tests/scm/typedefs.scm\")");
+	eval_err = eval->eval_error();
+	if (eval_err)
+		printf("Ohh noooo! %s\n", rs.c_str());
+	eval->clear_pending();
+	TSM_ASSERT_EQUALS("Failed to load type definitions", false, eval_err);
 	printf("typedefs now loaded!\n");
 
 	// We should add many more nodes, but I'm feeling lazy ...
