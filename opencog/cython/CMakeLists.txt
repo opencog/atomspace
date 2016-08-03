@@ -30,10 +30,12 @@ file(COPY opencog/__init__.py DESTINATION opencog)
 
 ADD_LIBRARY(PythonEval
 	PythonEval.cc
+	load-file.cc
 )
 ADD_DEPENDENCIES(PythonEval atomspace_cython)
 
 TARGET_LINK_LIBRARIES(PythonEval
+	smob
 	atombase
 	atomspace
 	${PYTHON_LIBRARIES}

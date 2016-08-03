@@ -24,7 +24,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
 

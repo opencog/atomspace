@@ -40,8 +40,7 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/guile/load-file.h>
-#include <opencog/util/Config.h>
+#include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 #include <opencog/util/mt19937ar.h>
@@ -79,9 +78,10 @@ public:
     {
         atomSpace->clear();
         /* load scm files with all necessary nodes and links  */
-        load_scm_file(*atomSpace, "opencog/atoms/base/core_types.scm");
-        load_scm_file(*atomSpace, "tests/query/test_types.scm");
-        // load_scm_file(*atomSpace, ATOM_TABLE_TEST_SCM_FILE);
+        SchemeEval* eval = SchemeEval::get_evaluator(atomSpace);
+        eval->eval("(add-to-load-path \"..\..\")");
+        eval->eval("(load-from-path \"opencog/atoms/base/core_types.scm\")");
+        eval->eval("(load-from-path \"tests/query/test_types.scm\")");
     }
 
     void tearDown() {

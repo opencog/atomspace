@@ -24,7 +24,6 @@
 
 #include <boost/bind.hpp>
 
-#include <opencog/util/Config.h>
 #include <opencog/atoms/base/Handle.h>
 #include "AttentionBank.h"
 #include "AtomTable.h"

@@ -1,8 +1,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
-#include <opencog/util/Config.h>
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/rule-engine/UREConfigReader.h>
 
@@ -16,11 +14,12 @@ int main(int argc, char** args)
 {
     AtomSpace as;
 
-    //Load core types
-    config().set("SCM_PRELOAD", "/usr/local/share/opencog/scm/core_types.scm, "
-                 "/usr/local/share/opencog/scm/utilities.scm, "
-                 "/usr/local/share/opencog/scm/av-tv.scm");
-    load_scm_files_from_config(as);
+    // Load core types
+    SchemeEval *eval = SchemeEval::get_evaluator(&as);
+    eval->eval("(use-modules (opencog))");
+    // eval.eval("(load-from-path \"/usr/local/share/opencog/scm/core_types.scm\")");
+    // eval.eval("(load-from-path \"/usr/local/share/opencog/scm/utilities.scm\")");
+    // eval.eval("(load-from-path \"/usr/local/share/opencog/scm/av-tv.scm\")");
 
     std::cout << "Backward chaining to solve the criminal problem:\n";
     backward_chain(as);
@@ -40,13 +39,11 @@ int main(int argc, char** args)
  */
 void backward_chain(AtomSpace& as)
 {
-    config().set("SCM_PRELOAD", "examples/c++-api/scm/bc-criminal.scm,"
-                 "examples/c++-api/scm/bc-config.scm");
-    load_scm_files_from_config(as);
-
-    SchemeEval eval(&as);
-    Handle target_var = eval.eval_h("(VariableNode \"$who\")");
-    Handle target = eval.eval_h("(InheritanceLink"
+    SchemeEval *eval = SchemeEval::get_evaluator(&as);
+    eval->eval("(load-from-path \"scm/bc-criminal.scm\")");
+    eval->eval("(load-from-path \"scm/bc-config.scm\")");
+    Handle target_var = eval->eval_h("(VariableNode \"$who\")");
+    Handle target = eval->eval_h("(InheritanceLink"
                                 "   (VariableNode \"$who\")"
                                 "   (ConceptNode \"criminal\"))");
 
@@ -75,16 +72,14 @@ void backward_chain(AtomSpace& as)
  */
 void forward_chain(AtomSpace& as)
 {
-    config().set("SCM_PRELOAD", "examples/c++-api/scm/deduction.scm, "
-                 "examples/c++-api/scm/fc-simple-assertions.scm, "
-                 "examples/c++-api/scm/fc-config.scm");
-    load_scm_files_from_config (as);
-
-    SchemeEval eval(&as);
+    SchemeEval *eval = SchemeEval::get_evaluator(&as);
+    eval->eval("(load-from-path \"scm/deduction.scm\")");
+    eval->eval("(load-from-path \"scm/fc-simple-assertions.scm\")");
+    eval->eval("(load-from-path \"scm/fc-config.scm\")");
 
     //Choose source atoms to apply forward chaining on.
     Handle source =
-            eval.eval_h(
+            eval->eval_h(
                     R"((ConceptNode "Socrates"))");
 
     Handle rbs = as.get_node(CONCEPT_NODE, "FC_DEMO_RB");
