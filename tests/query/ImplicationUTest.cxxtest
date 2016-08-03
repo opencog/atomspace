@@ -91,8 +91,6 @@ void ImplicationUTest::setUp(void)
 	as = new AtomSpace();
 	eval = new SchemeEval(as);
 
-	load_scm_files_from_config(*as);
-
 	// Create initialzation
 	const char * setup = 
 	"(define (stv mean conf) (cog-new-stv mean conf))\n"
