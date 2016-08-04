@@ -379,14 +379,14 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 		LAZY_LOG_FINE << "BEGIN COMPONENT GROUNDING " << i+1
 		              << " of " << _num_comps << ": ===========\n";
 
-		Pattern pat = PatternLinkCast(_component_patterns.at(i))->get_pattern();
+		PatternLinkPtr clp(PatternLinkCast(_component_patterns.at(i)));
+		Pattern pat = clp->get_pattern();
 		bool is_pure_optional = false;
 		if (pat.mandatory.size() == 0 and pat.optionals.size() > 0)
 			is_pure_optional = true;
 
 		// Pass through the callbacks, collect up answers.
 		PMCGroundings gcb(pmcb);
-		PatternLinkPtr clp(PatternLinkCast(_component_patterns.at(i)));
 		clp->satisfy(gcb);
 
 		// Special handling for disconnected pure optionals -- Returns false to
