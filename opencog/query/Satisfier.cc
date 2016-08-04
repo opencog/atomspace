@@ -67,8 +67,8 @@ bool Satisfier::search_finished(bool done)
 	// was grounded. Ergo, its not the no-grounding case.
 	if (_optionals_present) return done;
 
-	// Evaluating the pattern bod only makes sense if it is sequential
-	// (ordered) -- if the body is an unordered AdLik, or if its a
+	// Evaluating the pattern body only makes sense if it is sequential
+	// (ordered) -- if the body is an unordered AndLink, or if its a
 	// ChoiceLink, etc, this makes no sense.
 	Type btype = _pattern_body->getType();
 	if (SEQUENTIAL_AND_LINK != btype and SEQUENTIAL_OR_LINK != btype)
