@@ -47,7 +47,7 @@ AttentionBank::AttentionBank(AtomTable& atab, bool transient)
     STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE", 10);
     LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE", 10);
 
-    attentionalFocusBoundary = 1;
+    _attentionalFocusBoundary = 1;
 
     AVChangedConnection =
         atab.AVChangedSignal().connect(
@@ -76,18 +76,18 @@ void AttentionBank::AVChanged(Handle h, AttentionValuePtr old_av,
     updateLTIFunds(old_av->getLTI() - new_av->getLTI());
 
     logger().fine("AVChanged: fundsSTI = %d, old_av: %d, new_av: %d",
-                   fundsSTI, old_av->getSTI(), new_av->getSTI());
+                   fundsSTI.load(), old_av->getSTI(), new_av->getSTI());
 
     // Check if the atom crossed into or out of the AttentionalFocus
     // and notify any interested parties
-    if (old_av->getSTI() < attentionalFocusBoundary and
-        new_av->getSTI() >= attentionalFocusBoundary)
+    if (old_av->getSTI() < getAttentionalFocusBoundary() and
+        new_av->getSTI() >= getAttentionalFocusBoundary())
     {
         AFCHSigl& afch = AddAFSignal();
         afch(h, old_av, new_av);
     }
-    else if (new_av->getSTI() < attentionalFocusBoundary and
-             old_av->getSTI() >= attentionalFocusBoundary)
+    else if (new_av->getSTI() < getAttentionalFocusBoundary() and
+             old_av->getSTI() >= getAttentionalFocusBoundary())
     {
         AFCHSigl& afch = RemoveAFSignal();
         afch(h, old_av, new_av);
@@ -96,6 +96,9 @@ void AttentionBank::AVChanged(Handle h, AttentionValuePtr old_av,
 
 void AttentionBank::stimulate(Handle& h, double stimulus)
 {
+    // XXX This is not protected and made atomic in any way ...
+    // If two different threads stiumlate the same atom at the same
+    // time, then the calculations could get wonky. Does it matter?
     int sti = h->getAttentionValue()->getSTI();
     int lti = h->getAttentionValue()->getLTI();
     int stiWage = calculateSTIWage() * stimulus;
@@ -157,17 +160,6 @@ AttentionValue::lti_t AttentionBank::calculateLTIWage()
     ndiff = std::max(ndiff, -1.0);
 
     return LTIAtomWage + (LTIAtomWage * ndiff);
-}
-
-AttentionValue::sti_t AttentionBank::getAttentionalFocusBoundary() const
-{
-    return attentionalFocusBoundary;
-}
-
-AttentionValue::sti_t AttentionBank::setAttentionalFocusBoundary(AttentionValue::sti_t boundary)
-{
-    attentionalFocusBoundary = boundary;
-    return boundary;
 }
 
 double AttentionBank::getNormalisedSTI(AttentionValuePtr av,

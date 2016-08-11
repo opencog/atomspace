@@ -63,7 +63,7 @@ class AttentionBank
      * focus of opencog. Atom's with STI less than this value are
      * not charged STI rent.
      */
-    AttentionValue::sti_t attentionalFocusBoundary;
+    AttentionValue::sti_t _attentionalFocusBoundary;
 
     /**
      * Signal emitted when an atom crosses in or out of the
@@ -171,7 +171,9 @@ public:
      *
      * @return Short Term Importance threshold value
      */
-    AttentionValue::sti_t getAttentionalFocusBoundary() const;
+    AttentionValue::sti_t getAttentionalFocusBoundary() const {
+        return _attentionalFocusBoundary;
+    }
 
     /**
      * Change the attentional focus boundary. Some situations
@@ -181,7 +183,11 @@ public:
      * @return Short Term Importance threshold value
      */
     AttentionValue::sti_t setAttentionalFocusBoundary(
-        AttentionValue::sti_t s);
+        AttentionValue::sti_t s)
+    {
+        _attentionalFocusBoundary = s;
+        return s;
+    }
 
     /**
      * Get the maximum STI observed in the AtomSpace.
