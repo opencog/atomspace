@@ -107,71 +107,71 @@ void AttentionBank::stimulate(Handle& h, double stimulus)
 
 long AttentionBank::getTotalSTI() const
 {
-    std::_lock_guard<std::mutex> lock(_lock_funds);
+    std::lock_guard<std::mutex> lock(_lock_funds);
     return startingFundsSTI - fundsSTI;
 }
 
 long AttentionBank::getTotalLTI() const
 {
-    std::_lock_guard<std::mutex> lock(_lock_funds);
+    std::lock_guard<std::mutex> lock(_lock_funds);
     return startingFundsLTI - fundsLTI;
 }
 
 long AttentionBank::getSTIFunds() const
 {
-    std::_lock_guard<std::mutex> lock(_lock_funds);
+    std::lock_guard<std::mutex> lock(_lock_funds);
     return fundsSTI;
 }
 
 long AttentionBank::getLTIFunds() const
 {
-    std::_lock_guard<std::mutex> lock(_lock_funds);
+    std::lock_guard<std::mutex> lock(_lock_funds);
     return fundsLTI;
 }
 
 long AttentionBank::updateSTIFunds(AttentionValue::sti_t diff)
 {
-    std::_lock_guard<std::mutex> lock(_lock_funds);
+    std::lock_guard<std::mutex> lock(_lock_funds);
     fundsSTI += diff;
     return fundsSTI;
 }
 
 long AttentionBank::updateLTIFunds(AttentionValue::lti_t diff)
 {
-    std::_lock_guard<std::mutex> lock(_lock_funds);
+    std::lock_guard<std::mutex> lock(_lock_funds);
     fundsLTI += diff;
     return fundsLTI;
 }
 
 void AttentionBank::updateMaxSTI(AttentionValue::sti_t m)
 {
-    std::_lock_guard<std::mutex> lock(_lock_maxSTI);
-    maxSTI.update(m);
+    std::lock_guard<std::mutex> lock(_lock_maxSTI);
+    _maxSTI.update(m);
 }
 
 void AttentionBank::updateMinSTI(AttentionValue::sti_t m)
 {
-    std::_lock_guard<std::mutex> lock(_lock_minSTI);
-    minSTI.update(m);
+    std::lock_guard<std::mutex> lock(_lock_minSTI);
+    _minSTI.update(m);
 }
 
 AttentionValue::sti_t AttentionBank::getMaxSTI(bool average) const
 {
-    std::_lock_guard<std::mutex> lock(_lock_maxSTI);
+    std::lock_guard<std::mutex> lock(_lock_maxSTI);
     if (average) {
-        return (AttentionValue::sti_t) maxSTI.recent;
+        return (AttentionValue::sti_t) _maxSTI.recent;
     } else {
-        return maxSTI.val;
+        return _maxSTI.val;
     }
 }
 
 AttentionValue::sti_t AttentionBank::getMinSTI(bool average) const
 {
-    std::_lock_guard<std::mutex> lock(_lock_minSTI);
+    std::lock_guard<std::mutex> lock(_lock_minSTI);
     if (average) {
-        return (AttentionValue::sti_t) minSTI.recent;
+        return (AttentionValue::sti_t) _minSTI.recent;
     } else {
-        return minSTI.val;
+        return _minSTI.val;
     }
 }
 

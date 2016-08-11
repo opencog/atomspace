@@ -71,8 +71,11 @@ class AttentionBank
     AFCHSigl _AddAFSignal;
     AFCHSigl _RemoveAFSignal;
 
-    opencog::recent_val<AttentionValue::sti_t> maxSTI;
-    opencog::recent_val<AttentionValue::sti_t> minSTI;
+    /**
+     * Running average min and max STI, together with locks to pretect updates.
+     */
+    opencog::recent_val<AttentionValue::sti_t> _maxSTI;
+    opencog::recent_val<AttentionValue::sti_t> _minSTI;
 
     mutable std::mutex _lock_maxSTI;
     mutable std::mutex _lock_minSTI;
