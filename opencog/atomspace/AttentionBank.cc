@@ -38,14 +38,14 @@ AttentionBank::AttentionBank(AtomTable& atab, bool transient)
     if (transient) { _zombie = true; return; }
     _zombie = false;
 
-    startingFundsSTI = fundsSTI = config().get_int("STARTING_STI_FUNDS",100000);
-    startingFundsLTI = fundsLTI = config().get_int("STARTING_LTI_FUNDS",100000);
-    stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER",10000);
-    ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER",10000);
-    targetLTI = config().get_int("TARGET_LTI_FUNDS",10000);
-    targetSTI = config().get_int("TARGET_STI_FUNDS",10000);
-    STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE",10);
-    LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE",10);
+    startingFundsSTI = fundsSTI = config().get_int("STARTING_STI_FUNDS", 100000);
+    startingFundsLTI = fundsLTI = config().get_int("STARTING_LTI_FUNDS", 100000);
+    stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER", 10000);
+    ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER", 10000);
+    targetLTI = config().get_int("TARGET_LTI_FUNDS", 10000);
+    targetSTI = config().get_int("TARGET_STI_FUNDS", 10000);
+    STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE", 10);
+    LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE", 10);
 
     attentionalFocusBoundary = 1;
 
@@ -107,57 +107,57 @@ void AttentionBank::stimulate(Handle& h, double stimulus)
 
 long AttentionBank::getTotalSTI() const
 {
-    std::lock_guard<std::mutex> lock(lock_funds);
+    std::_lock_guard<std::mutex> lock(_lock_funds);
     return startingFundsSTI - fundsSTI;
 }
 
 long AttentionBank::getTotalLTI() const
 {
-    std::lock_guard<std::mutex> lock(lock_funds);
+    std::_lock_guard<std::mutex> lock(_lock_funds);
     return startingFundsLTI - fundsLTI;
 }
 
 long AttentionBank::getSTIFunds() const
 {
-    std::lock_guard<std::mutex> lock(lock_funds);
+    std::_lock_guard<std::mutex> lock(_lock_funds);
     return fundsSTI;
 }
 
 long AttentionBank::getLTIFunds() const
 {
-    std::lock_guard<std::mutex> lock(lock_funds);
+    std::_lock_guard<std::mutex> lock(_lock_funds);
     return fundsLTI;
 }
 
 long AttentionBank::updateSTIFunds(AttentionValue::sti_t diff)
 {
-    std::lock_guard<std::mutex> lock(lock_funds);
+    std::_lock_guard<std::mutex> lock(_lock_funds);
     fundsSTI += diff;
     return fundsSTI;
 }
 
 long AttentionBank::updateLTIFunds(AttentionValue::lti_t diff)
 {
-    std::lock_guard<std::mutex> lock(lock_funds);
+    std::_lock_guard<std::mutex> lock(_lock_funds);
     fundsLTI += diff;
     return fundsLTI;
 }
 
 void AttentionBank::updateMaxSTI(AttentionValue::sti_t m)
 {
-    std::lock_guard<std::mutex> lock(lock_maxSTI);
+    std::_lock_guard<std::mutex> lock(_lock_maxSTI);
     maxSTI.update(m);
 }
 
 void AttentionBank::updateMinSTI(AttentionValue::sti_t m)
 {
-    std::lock_guard<std::mutex> lock(lock_minSTI);
+    std::_lock_guard<std::mutex> lock(_lock_minSTI);
     minSTI.update(m);
 }
 
 AttentionValue::sti_t AttentionBank::getMaxSTI(bool average) const
 {
-    std::lock_guard<std::mutex> lock(lock_maxSTI);
+    std::_lock_guard<std::mutex> lock(_lock_maxSTI);
     if (average) {
         return (AttentionValue::sti_t) maxSTI.recent;
     } else {
@@ -167,7 +167,7 @@ AttentionValue::sti_t AttentionBank::getMaxSTI(bool average) const
 
 AttentionValue::sti_t AttentionBank::getMinSTI(bool average) const
 {
-    std::lock_guard<std::mutex> lock(lock_minSTI);
+    std::_lock_guard<std::mutex> lock(_lock_minSTI);
     if (average) {
         return (AttentionValue::sti_t) minSTI.recent;
     } else {

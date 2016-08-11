@@ -74,8 +74,8 @@ class AttentionBank
     opencog::recent_val<AttentionValue::sti_t> maxSTI;
     opencog::recent_val<AttentionValue::sti_t> minSTI;
 
-    mutable std::mutex lock_maxSTI;
-    mutable std::mutex lock_minSTI;
+    mutable std::mutex _lock_maxSTI;
+    mutable std::mutex _lock_minSTI;
 
     /* These indicate the amount importance funds available in the
      * AtomSpace */
@@ -94,7 +94,7 @@ class AttentionBank
     AttentionValue::sti_t STIAtomWage;
     AttentionValue::lti_t LTIAtomWage;
 
-    mutable std::mutex lock_funds;
+    mutable std::mutex _lock_funds;
 
 public:
     /** The table notifies us about AV changes */
