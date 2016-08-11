@@ -46,7 +46,8 @@ class AtomTable;
 
 class AttentionBank
 {
-    /** If true, then this AttentionBank is not being used.
+    /**
+     * If true, then this AttentionBank is not being used.
      * Yes, this is totally bogus, but is needed, due to design
      * flaws related to attention allocation.
      */
@@ -59,11 +60,14 @@ class AttentionBank
     /**
      * Boundary at which an atom is considered within the attentional
      * focus of opencog. Atom's with STI less than this value are
-     * not charged STI rent 
+     * not charged STI rent.
      */
     AttentionValue::sti_t attentionalFocusBoundary;
 
-    /** Signal emitted when an atom crosses in or out of the AttentionalFocus */
+    /**
+     * Signal emitted when an atom crosses in or out of the
+     * AttentionalFocus.
+     */
     AFCHSigl _AddAFSignal;
     AFCHSigl _RemoveAFSignal;
 
@@ -161,8 +165,8 @@ public:
     /**
      * Get the maximum STI observed in the AtomSpace.
      *
-     * @param average If true, return an exponentially decaying average of
-     * maximum STI, otherwise return the actual maximum.
+     * @param average If true, return an exponentially decaying
+     * average of maximum STI, otherwise return the actual maximum.
      * @return Maximum STI
      */
     AttentionValue::sti_t getMaxSTI(bool average=true) const;
@@ -170,8 +174,8 @@ public:
     /**
      * Get the minimum STI observed in the AtomSpace.
      *
-     * @param average If true, return an exponentially decaying average of
-     * minimum STI, otherwise return the actual maximum.
+     * @param average If true, return an exponentially decaying
+     * average of minimum STI, otherwise return the actual maximum.
      * @return Minimum STI
      */
     AttentionValue::sti_t getMinSTI(bool average=true) const;
@@ -181,9 +185,10 @@ public:
     AttentionValue::sti_t calculateLTIWage(void);
 
     /**
-     * Update the minimum STI observed in the connected AtomSpace. Min/max are not updated
-     * on setSTI because average is calculate by lobe cycle, although this could
-     * potentially also be handled by the cogServer.
+     * Update the minimum STI observed in the connected AtomSpace.
+     * Min/max are not updated on setSTI because average is calculate
+     * by lobe cycle, although this could potentially also be handled
+     * by the cogServer.
      *
      * @warning Should only be used by attention allocation system.
      * @param m New minimum STI
@@ -191,9 +196,10 @@ public:
     void updateMinSTI(AttentionValue::sti_t m);
 
     /**
-     * Update the maximum STI observed in the connected AtomSpace. Min/max are not updated
-     * on setSTI because average is calculate by lobe cycle, although this could
-     * potentially also be handled by the cogServer.
+     * Update the maximum STI observed in the connected AtomSpace.
+     * Min/max are not updated on setSTI because average is calculate
+     * by lobe cycle, although this could potentially also be handled
+     * by the cogServer.
      *
      * @warning Should only be used by attention allocation system.
      * @param m New maximum STI
@@ -208,10 +214,10 @@ public:
      * normalised separately and linearly.
      *
      * @param h The attention value holder to get STI for
-     * @param average Should the recent average max/min STI be used, or the
-     * exact min/max?
-     * @param clip Should the returned value be clipped to -1..1? Outside this
-     * range can be return if average=true
+     * @param average Should the recent average max/min STI be used,
+     *        or the exact min/max?
+     * @param clip Should the returned value be clipped to -1..1?
+     *        Outside this range can be return if average=true
      * @return normalised STI between -1..1
      */
     float getNormalisedSTI(AttentionValuePtr, bool average, bool clip) const;
@@ -224,10 +230,10 @@ public:
      * for a given AttentionValue.
      *
      * @param h The attention value holder to get STI for
-     * @param average Should the recent average max/min STI be used, or the
-     * exact min/max?
-     * @param clip Should the returned value be clipped to 0..1? Outside this
-     * range can be return if average=true
+     * @param average Should the recent average max/min STI be used,
+     *        or the exact min/max?
+     * @param clip Should the returned value be clipped to 0..1?
+     *        Outside this range can be return if average=true
      * @return normalised STI between 0..1
      */
     float getNormalisedZeroToOneSTI(AttentionValuePtr, bool average, bool clip) const;
