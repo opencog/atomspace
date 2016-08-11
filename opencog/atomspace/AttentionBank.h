@@ -25,6 +25,7 @@
 #ifndef _OPENCOG_ATTENTION_BANK_H
 #define _OPENCOG_ATTENTION_BANK_H
 
+#include <atomic>
 #include <mutex>
 
 #include <boost/signals2.hpp>
@@ -80,10 +81,12 @@ class AttentionBank
     mutable std::mutex _lock_maxSTI;
     mutable std::mutex _lock_minSTI;
 
-    /* These indicate the amount importance funds available in the
-     * AtomSpace */
-    long fundsSTI;
-    long fundsLTI;
+    /**
+     * The amount importance funds available in the AttentionBank.
+     * Atomic, so that updates don't need a lock.
+     */
+    std::atomic_long fundsSTI;
+    std::atomic_long fundsLTI;
 
     long startingFundsSTI;
     long startingFundsLTI;
@@ -96,8 +99,6 @@ class AttentionBank
 
     AttentionValue::sti_t STIAtomWage;
     AttentionValue::lti_t LTIAtomWage;
-
-    mutable std::mutex _lock_funds;
 
 public:
     /** The table notifies us about AV changes */
