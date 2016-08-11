@@ -119,13 +119,11 @@ long AttentionBank::getTotalLTI() const
 
 long AttentionBank::getSTIFunds() const
 {
-    std::lock_guard<std::mutex> lock(_lock_funds);
     return fundsSTI;
 }
 
 long AttentionBank::getLTIFunds() const
 {
-    std::lock_guard<std::mutex> lock(_lock_funds);
     return fundsLTI;
 }
 
