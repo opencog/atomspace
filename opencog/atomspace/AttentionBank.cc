@@ -28,6 +28,8 @@
 #include "AttentionBank.h"
 #include "AtomTable.h"
 
+#include <opencog/util/Config.h>
+
 using namespace opencog;
 
 AttentionBank::AttentionBank(AtomTable& atab, bool transient)
@@ -36,16 +38,15 @@ AttentionBank::AttentionBank(AtomTable& atab, bool transient)
     if (transient) { _zombie = true; return; }
     _zombie = false;
 
-#if 0
-    startingFundsSTI = fundsSTI = config().get_int("STARTING_STI_FUNDS");
-    startingFundsLTI = fundsLTI = config().get_int("STARTING_LTI_FUNDS");
-    stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER");
-    ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER");
-    targetLTI = config().get_int("TARGET_LTI_FUNDS");
-    targetSTI = config().get_int("TARGET_STI_FUNDS");
-    STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE");
-    LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE");
-#endif
+    startingFundsSTI = fundsSTI = config().get_int("STARTING_STI_FUNDS",100000);
+    startingFundsLTI = fundsLTI = config().get_int("STARTING_LTI_FUNDS",100000);
+    stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER",10000);
+    ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER",10000);
+    targetLTI = config().get_int("TARGET_LTI_FUNDS",10000);
+    targetSTI = config().get_int("TARGET_STI_FUNDS",10000);
+    STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE",10);
+    LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE",10);
+
     attentionalFocusBoundary = 1;
 
     AVChangedConnection =
