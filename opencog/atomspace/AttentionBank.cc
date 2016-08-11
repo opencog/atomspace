@@ -105,38 +105,6 @@ void AttentionBank::stimulate(Handle& h, double stimulus)
     h->setLTI(lti + ltiWage);
 }
 
-long AttentionBank::getTotalSTI() const
-{
-    std::lock_guard<std::mutex> lock(_lock_funds);
-    return startingFundsSTI - fundsSTI;
-}
-
-long AttentionBank::getTotalLTI() const
-{
-    std::lock_guard<std::mutex> lock(_lock_funds);
-    return startingFundsLTI - fundsLTI;
-}
-
-long AttentionBank::getSTIFunds() const
-{
-    return fundsSTI;
-}
-
-long AttentionBank::getLTIFunds() const
-{
-    return fundsLTI;
-}
-
-long AttentionBank::updateSTIFunds(AttentionValue::sti_t diff)
-{
-    return fundsSTI += diff;
-}
-
-long AttentionBank::updateLTIFunds(AttentionValue::lti_t diff)
-{
-    return fundsLTI += diff;
-}
-
 void AttentionBank::updateMaxSTI(AttentionValue::sti_t m)
 {
     std::lock_guard<std::mutex> lock(_lock_maxSTI);

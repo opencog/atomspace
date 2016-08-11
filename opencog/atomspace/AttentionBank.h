@@ -128,7 +128,9 @@ public:
      *
      * @return total STI in AtomSpace
      */
-    long getTotalSTI() const;
+    long getTotalSTI() const {
+        return startingFundsSTI - fundsSTI;
+    }
 
     /**
      * Get the total amount of LTI in the AtomSpace, sum of
@@ -136,25 +138,31 @@ public:
      *
      * @return total LTI in AtomSpace
      */
-    long getTotalLTI() const;
+    long getTotalLTI() const {
+        return startingFundsLTI - fundsLTI;
+    }
 
     /**
      * Get the STI funds available in the AtomSpace pool.
      *
      * @return STI funds available
      */
-    long getSTIFunds() const;
+    long getSTIFunds() const { return fundsSTI; }
 
     /**
      * Get the LTI funds available in the AtomSpace pool.
      *
      * @return LTI funds available
-
      */
-    long getLTIFunds() const;
+    long getLTIFunds() const { return fundsLTI; }
 
-    long updateSTIFunds(AttentionValue::sti_t diff);
-    long updateLTIFunds(AttentionValue::lti_t diff);
+    long updateSTIFunds(AttentionValue::sti_t diff) {
+        return fundsSTI += diff;
+    }
+
+    long updateLTIFunds(AttentionValue::lti_t diff) {
+        return fundsLTI += diff;
+    }
 
     /**
      * Get attentional focus boundary, generally atoms below
