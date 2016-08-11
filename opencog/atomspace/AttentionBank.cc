@@ -94,6 +94,17 @@ void AttentionBank::AVChanged(Handle h, AttentionValuePtr old_av,
     }
 }
 
+void AttentionBank::stimulate(Handle& h, double stimulus)
+{
+    int sti = h->getAttentionValue()->getSTI();
+    int lti = h->getAttentionValue()->getLTI();
+    int stiWage = calculateSTIWage() * stimulus;
+    int ltiWage = calculateLTIWage() * stimulus;
+
+    h->setSTI(sti + stiWage);
+    h->setLTI(lti + ltiWage);
+}
+
 long AttentionBank::getTotalSTI() const
 {
     std::lock_guard<std::mutex> lock(lock_funds);

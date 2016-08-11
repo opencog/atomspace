@@ -110,6 +110,15 @@ public:
     AFCHSigl& RemoveAFSignal() { return _RemoveAFSignal; }
 
     /**
+     * Stimulate an atom.
+     *
+     * @warning Should only be used by attention allocation system.
+     * @param  h Handle to be stimulated
+     * @param stimulus stimulus amount
+     */
+    void stimulate(Handle&, double stimulus);
+
+    /**
      * Get the total amount of STI in the AtomSpace, sum of
      * STI across all atoms.
      *
