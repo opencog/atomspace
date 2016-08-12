@@ -31,7 +31,6 @@
 #include <vector>
 
 #include <opencog/util/exceptions.h>
-#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/TruthValue.h>
 
 #include <opencog/atoms/base/ClassServer.h>

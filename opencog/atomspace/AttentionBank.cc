@@ -23,16 +23,15 @@
  */
 
 #include <boost/bind.hpp>
+#include <opencog/util/Config.h>
 
 #include <opencog/atoms/base/Handle.h>
 #include "AttentionBank.h"
-#include "AtomTable.h"
-
-#include <opencog/util/Config.h>
+#include "AtomSpace.h"
 
 using namespace opencog;
 
-AttentionBank::AttentionBank(AtomTable& atab, bool transient)
+AttentionBank::AttentionBank(AtomSpace *asp, bool transient)
 {
     /* Do not boether with initialization, if this is transient */
     if (transient) { _zombie = true; return; }
@@ -52,20 +51,20 @@ AttentionBank::AttentionBank(AtomTable& atab, bool transient)
     // Subscribe to my own changes. This is insane and hacky; must move
     // the AV stuf out of the Atom itself.  XXX FIXME.
     _AVChangedConnection =
-        getAVChangedSignal().connect(
+        _AVChangedSignal.connect(
             boost::bind(&AttentionBank::AVChanged, this, _1, _2, _3));
     _addAtomConnection =
-        atab.addAtomSignal().connect(
+        asp->addAtomSignal(
             boost::bind(&AttentionBank::put_atom_into_index, this, _1));
     _removeAtomConnection =
-        atab.removeAtomSignal().connect(
+        asp->removeAtomSignal(
             boost::bind(&AttentionBank::remove_atom_from_index, this, _1));
 }
 
 /// This must be called before the AtomTable is destroyed. Which
 /// means that it cannot be in the destructor (since the AtomTable
-/// is probably gone by then, leading to a crash.  XXX FIXME yes this
-/// is a tacky hack to fix a design bug.
+/// is gone by then, leading to a crash.  XXX FIXME yes this is a
+/// tacky hack to fix a design bug.
 void AttentionBank::shutdown(void)
 {
     if (_zombie) return;  /* no-op, if a zombie */

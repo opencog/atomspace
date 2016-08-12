@@ -41,15 +41,17 @@ namespace opencog
  *  @{
  */
 
+/* Attention Value changed */
 typedef boost::signals2::signal<void (const Handle&,
                                       const AttentionValuePtr&,
                                       const AttentionValuePtr&)> AVCHSigl;
 
+/* Attentional Focus changed */
 typedef boost::signals2::signal<void (const Handle&,
                                       const AttentionValuePtr&,
                                       const AttentionValuePtr&)> AFCHSigl;
 
-class AtomTable;
+class AtomSpace;
 
 class AttentionBank
 {
@@ -118,7 +120,7 @@ class AttentionBank
 
 public:
     /** The table notifies us about AV changes */
-    AttentionBank(AtomTable&, bool);
+    AttentionBank(AtomSpace*, bool);
     ~AttentionBank();
     void shutdown(void);
 

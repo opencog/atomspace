@@ -35,7 +35,6 @@
 #include <opencog/util/RandGen.h>
 
 #include <opencog/truthvalue/TruthValue.h>
-#include <opencog/truthvalue/AttentionValue.h>
 
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
