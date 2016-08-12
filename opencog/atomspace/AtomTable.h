@@ -35,7 +35,6 @@
 #include <opencog/util/RandGen.h>
 
 #include <opencog/truthvalue/TruthValue.h>
-#include <opencog/truthvalue/AttentionValue.h>
 
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
@@ -43,7 +42,6 @@
 #include <opencog/atoms/base/Node.h>
 
 #include <opencog/atomspace/FixedIntegerIndex.h>
-#include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/LinkIndex.h>
 #include <opencog/atomspace/NodeIndex.h>
 #include <opencog/atomspace/TypeIndex.h>
@@ -60,9 +58,6 @@ typedef std::set<AtomPtr> AtomPtrSet;
 
 typedef boost::signals2::signal<void (const Handle&)> AtomSignal;
 typedef boost::signals2::signal<void (const AtomPtr&)> AtomPtrSignal;
-typedef boost::signals2::signal<void (const Handle&,
-                                      const AttentionValuePtr&,
-                                      const AttentionValuePtr&)> AVCHSigl;
 typedef boost::signals2::signal<void (const Handle&,
                                       const TruthValuePtr&,
                                       const TruthValuePtr&)> TVCHSigl;
@@ -110,7 +105,6 @@ private:
     TypeIndex typeIndex;
     NodeIndex nodeIndex;
     LinkIndex linkIndex;
-    ImportanceIndex importanceIndex;
 
     async_caller<AtomTable, AtomPtr> _index_queue;
     void put_atom_into_index(AtomPtr&);
@@ -131,9 +125,6 @@ private:
 
     /** Signal emitted when the TV changes. */
     TVCHSigl _TVChangedSignal;
-
-    /** Signal emitted when the AV changes. */
-    AVCHSigl _AVChangedSignal;
 
     /// Parent environment for this table.  Null if top-level.
     /// This allows atomspaces to be nested; atoms in this atomspace
@@ -263,34 +254,6 @@ public:
         { return typeIndex.end(); }
 
     /**
-     * Returns the set of atoms within the given importance range.
-     *
-     * @param Importance range lower bound (inclusive).
-     * @param Importance range upper bound (inclusive).
-     * @return The set of atoms within the given importance range.
-     */
-    UnorderedHandleSet getHandlesByAV(AttentionValue::sti_t lowerBound,
-                              AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
-    {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return importanceIndex.getHandleSet(this, lowerBound, upperBound);
-    }
-
-    /**
-     * Updates the importance index for the given atom. According to the
-     * new importance of the atom, it may change importance bins.
-     *
-     * @param The atom whose importance index will be updated.
-     * @param The old importance bin where the atom originally was.
-     */
-    void updateImportanceIndex(AtomPtr a, int bin)
-    {
-        if (a->_atomTable != this) return;
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        importanceIndex.updateImportance(a.operator->(), bin);
-    }
-
-    /**
      * Adds an atom to the table. If the atom already is in the
      * atomtable, then the truth values and attention values of the
      * two are merged (how, exactly? Is this done corrrectly!?)
@@ -373,9 +336,6 @@ public:
 
     AtomSignal& addAtomSignal() { return _addAtomSignal; }
     AtomPtrSignal& removeAtomSignal() { return _removeAtomSignal; }
-
-    /** Provide ability for others to find out about AV changes */
-    AVCHSigl& AVChangedSignal() { return _AVChangedSignal; }
 
     /** Provide ability for others to find out about TV changes */
     TVCHSigl& TVChangedSignal() { return _TVChangedSignal; }

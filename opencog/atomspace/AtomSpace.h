@@ -31,7 +31,6 @@
 #include <vector>
 
 #include <opencog/util/exceptions.h>
-#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/TruthValue.h>
 
 #include <opencog/atoms/base/ClassServer.h>
@@ -576,7 +575,7 @@ public:
                       AttentionValue::sti_t lowerBound,
                       AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
     {
-        UnorderedHandleSet hs = _atom_table.getHandlesByAV(lowerBound, upperBound);
+        UnorderedHandleSet hs = _bank.getHandlesByAV(lowerBound, upperBound);
         return std::copy(hs.begin(), hs.end(), result);
     }
 
@@ -656,6 +655,23 @@ public:
 
     /** See the AttentionBank for documentation */
     void stimulate(Handle& h, double stimulus) { _bank.stimulate(h, stimulus); }
+    void updateImportanceIndex(AtomPtr a, int bin) {
+        _bank.updateImportanceIndex(a, bin); }
+
+    // ---- AttentionBank Signals
+    boost::signals2::connection AddAFSignal(const AFCHSigl::slot_type& function)
+    {
+        return _bank.AddAFSignal().connect(function);
+    }
+    boost::signals2::connection RemoveAFSignal(const AFCHSigl::slot_type& function)
+    {
+        return _bank.RemoveAFSignal().connect(function);
+    }
+    boost::signals2::connection AVChangedSignal(const AVCHSigl::slot_type& function)
+    {
+        return _bank.getAVChangedSignal().connect(function);
+    }
+    AVCHSigl& getAVChangedSignal() { return _bank.getAVChangedSignal(); }
 
     /* ----------------------------------------------------------- */
     // ---- Signals
@@ -668,21 +684,9 @@ public:
     {
         return _atom_table.removeAtomSignal().connect(function);
     }
-    boost::signals2::connection AVChangedSignal(const AVCHSigl::slot_type& function)
-    {
-        return _atom_table.AVChangedSignal().connect(function);
-    }
     boost::signals2::connection TVChangedSignal(const TVCHSigl::slot_type& function)
     {
         return _atom_table.TVChangedSignal().connect(function);
-    }
-    boost::signals2::connection AddAFSignal(const AVCHSigl::slot_type& function)
-    {
-        return _bank.AddAFSignal().connect(function);
-    }
-    boost::signals2::connection RemoveAFSignal(const AVCHSigl::slot_type& function)
-    {
-        return _bank.RemoveAFSignal().connect(function);
     }
 
     /* ----------------------------------------------------------- */

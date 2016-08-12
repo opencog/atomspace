@@ -169,6 +169,7 @@ AttentionValuePtr Atom::getAttentionValue()
     return local;
 }
 
+// XXX TODO This is insane. All this needs to be moved to the attention bank.
 void Atom::setAttentionValue(AttentionValuePtr av)
 {
     // Must obtain a local copy of the AV, since there may be
@@ -193,11 +194,11 @@ void Atom::setAttentionValue(AttentionValuePtr av)
     // If the atom importance has changed its bin,
     // update the importance index.
     if (oldBin != newBin) {
-        _atomTable->updateImportanceIndex(getHandle(), oldBin);
+        _atomTable->getAtomSpace()->updateImportanceIndex(getHandle(), oldBin);
     }
 
     // Notify any interested parties that the AV changed.
-    AVCHSigl& avch = _atomTable->AVChangedSignal();
+    AVCHSigl& avch = _atomTable->getAtomSpace()->getAVChangedSignal();
     avch(getHandle(), local, av);
 }
 

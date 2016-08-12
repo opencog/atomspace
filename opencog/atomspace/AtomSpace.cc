@@ -61,7 +61,7 @@ using namespace opencog;
  */
 AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     _atom_table(parent? &parent->_atom_table : NULL, this, transient),
-    _bank(_atom_table, transient),
+    _bank(this, transient),
     _backing_store(NULL),
     _transient(transient)
 {
@@ -76,7 +76,7 @@ AtomSpace::~AtomSpace()
 
 AtomSpace::AtomSpace(const AtomSpace&) :
     _atom_table(NULL),
-    _bank(_atom_table, true),
+    _bank(this, true),
     _backing_store(NULL)
 {
      throw opencog::RuntimeException(TRACE_INFO,
