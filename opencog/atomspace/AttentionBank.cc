@@ -38,16 +38,16 @@ AttentionBank::AttentionBank(AtomTable& atab, bool transient)
     if (transient) { _zombie = true; return; }
     _zombie = false;
 
-    startingFundsSTI = fundsSTI = config().get_int("STARTING_STI_FUNDS",100000);
-    startingFundsLTI = fundsLTI = config().get_int("STARTING_LTI_FUNDS",100000);
-    stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER",10000);
-    ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER",10000);
-    targetLTI = config().get_int("TARGET_LTI_FUNDS",10000);
-    targetSTI = config().get_int("TARGET_STI_FUNDS",10000);
-    STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE",10);
-    LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE",10);
+    startingFundsSTI = fundsSTI = config().get_int("STARTING_STI_FUNDS", 100000);
+    startingFundsLTI = fundsLTI = config().get_int("STARTING_LTI_FUNDS", 100000);
+    stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER", 10000);
+    ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER", 10000);
+    targetLTI = config().get_int("TARGET_LTI_FUNDS", 10000);
+    targetSTI = config().get_int("TARGET_STI_FUNDS", 10000);
+    STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE", 10);
+    LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE", 10);
 
-    attentionalFocusBoundary = 1;
+    _attentionalFocusBoundary = 1;
 
     AVChangedConnection =
         atab.AVChangedSignal().connect(
@@ -76,101 +76,77 @@ void AttentionBank::AVChanged(Handle h, AttentionValuePtr old_av,
     updateLTIFunds(old_av->getLTI() - new_av->getLTI());
 
     logger().fine("AVChanged: fundsSTI = %d, old_av: %d, new_av: %d",
-                   fundsSTI, old_av->getSTI(), new_av->getSTI());
+                   fundsSTI.load(), old_av->getSTI(), new_av->getSTI());
 
     // Check if the atom crossed into or out of the AttentionalFocus
     // and notify any interested parties
-    if (old_av->getSTI() < attentionalFocusBoundary and
-        new_av->getSTI() >= attentionalFocusBoundary)
+    if (old_av->getSTI() < getAttentionalFocusBoundary() and
+        new_av->getSTI() >= getAttentionalFocusBoundary())
     {
         AFCHSigl& afch = AddAFSignal();
         afch(h, old_av, new_av);
     }
-    else if (new_av->getSTI() < attentionalFocusBoundary and
-             old_av->getSTI() >= attentionalFocusBoundary)
+    else if (new_av->getSTI() < getAttentionalFocusBoundary() and
+             old_av->getSTI() >= getAttentionalFocusBoundary())
     {
         AFCHSigl& afch = RemoveAFSignal();
         afch(h, old_av, new_av);
     }
 }
 
-long AttentionBank::getTotalSTI() const
+void AttentionBank::stimulate(Handle& h, double stimulus)
 {
-    std::lock_guard<std::mutex> lock(lock_funds);
-    return startingFundsSTI - fundsSTI;
-}
+    // XXX This is not protected and made atomic in any way ...
+    // If two different threads stiumlate the same atom at the same
+    // time, then the calculations could get wonky. Does it matter?
+    int sti = h->getAttentionValue()->getSTI();
+    int lti = h->getAttentionValue()->getLTI();
+    int stiWage = calculateSTIWage() * stimulus;
+    int ltiWage = calculateLTIWage() * stimulus;
 
-long AttentionBank::getTotalLTI() const
-{
-    std::lock_guard<std::mutex> lock(lock_funds);
-    return startingFundsLTI - fundsLTI;
-}
-
-long AttentionBank::getSTIFunds() const
-{
-    std::lock_guard<std::mutex> lock(lock_funds);
-    return fundsSTI;
-}
-
-long AttentionBank::getLTIFunds() const
-{
-    std::lock_guard<std::mutex> lock(lock_funds);
-    return fundsLTI;
-}
-
-long AttentionBank::updateSTIFunds(AttentionValue::sti_t diff)
-{
-    std::lock_guard<std::mutex> lock(lock_funds);
-    fundsSTI += diff;
-    return fundsSTI;
-}
-
-long AttentionBank::updateLTIFunds(AttentionValue::lti_t diff)
-{
-    std::lock_guard<std::mutex> lock(lock_funds);
-    fundsLTI += diff;
-    return fundsLTI;
+    h->setSTI(sti + stiWage);
+    h->setLTI(lti + ltiWage);
 }
 
 void AttentionBank::updateMaxSTI(AttentionValue::sti_t m)
 {
-    std::lock_guard<std::mutex> lock(lock_maxSTI);
-    maxSTI.update(m);
+    std::lock_guard<std::mutex> lock(_lock_maxSTI);
+    _maxSTI.update(m);
 }
 
 void AttentionBank::updateMinSTI(AttentionValue::sti_t m)
 {
-    std::lock_guard<std::mutex> lock(lock_minSTI);
-    minSTI.update(m);
+    std::lock_guard<std::mutex> lock(_lock_minSTI);
+    _minSTI.update(m);
 }
 
 AttentionValue::sti_t AttentionBank::getMaxSTI(bool average) const
 {
-    std::lock_guard<std::mutex> lock(lock_maxSTI);
+    std::lock_guard<std::mutex> lock(_lock_maxSTI);
     if (average) {
-        return (AttentionValue::sti_t) maxSTI.recent;
+        return (AttentionValue::sti_t) _maxSTI.recent;
     } else {
-        return maxSTI.val;
+        return _maxSTI.val;
     }
 }
 
 AttentionValue::sti_t AttentionBank::getMinSTI(bool average) const
 {
-    std::lock_guard<std::mutex> lock(lock_minSTI);
+    std::lock_guard<std::mutex> lock(_lock_minSTI);
     if (average) {
-        return (AttentionValue::sti_t) minSTI.recent;
+        return (AttentionValue::sti_t) _minSTI.recent;
     } else {
-        return minSTI.val;
+        return _minSTI.val;
     }
 }
 
 AttentionValue::sti_t AttentionBank::calculateSTIWage()
 {
     long funds = getSTIFunds();
-    float diff  = funds - targetSTI;
-    float ndiff = diff / stiFundsBuffer;
-    ndiff = std::min(ndiff,1.0f);
-    ndiff = std::max(ndiff,-1.0f);
+    double diff  = funds - targetSTI;
+    double ndiff = diff / stiFundsBuffer;
+    ndiff = std::min(ndiff, 1.0);
+    ndiff = std::max(ndiff, -1.0);
 
     return STIAtomWage + (STIAtomWage * ndiff);
 }
@@ -178,52 +154,35 @@ AttentionValue::sti_t AttentionBank::calculateSTIWage()
 AttentionValue::lti_t AttentionBank::calculateLTIWage()
 {
     long funds = getLTIFunds();
-    float diff  = funds - targetLTI;
-    float ndiff = diff / ltiFundsBuffer;
-    ndiff = std::min(ndiff,1.0f);
-    ndiff = std::max(ndiff,-1.0f);
+    double diff  = funds - targetLTI;
+    double ndiff = diff / ltiFundsBuffer;
+    ndiff = std::min(ndiff, 1.0);
+    ndiff = std::max(ndiff, -1.0);
 
     return LTIAtomWage + (LTIAtomWage * ndiff);
 }
 
-AttentionValue::sti_t AttentionBank::getAttentionalFocusBoundary() const
+double AttentionBank::getNormalisedSTI(AttentionValuePtr av,
+                                   bool average, bool clip) const
 {
-    return attentionalFocusBoundary;
-}
-
-AttentionValue::sti_t AttentionBank::setAttentionalFocusBoundary(AttentionValue::sti_t boundary)
-{
-    attentionalFocusBoundary = boundary;
-    return boundary;
-}
-
-float AttentionBank::getNormalisedSTI(AttentionValuePtr av, bool average, bool clip) const
-{
+    double val;
     // get normalizer (maxSTI - attention boundary)
-    int normaliser;
-    float val;
     AttentionValue::sti_t s = av->getSTI();
     if (s > getAttentionalFocusBoundary()) {
-        normaliser = (int) getMaxSTI(average) - getAttentionalFocusBoundary();
-        if (normaliser == 0) {
-            return 0.0f;
-        }
-        val = (s - getAttentionalFocusBoundary()) / (float) normaliser;
+        int normaliser = (int) getMaxSTI(average) - getAttentionalFocusBoundary();
+        if (normaliser == 0) return 0.0;
+        val = (s - getAttentionalFocusBoundary()) / (double) normaliser;
     } else {
-        normaliser = -((int) getMinSTI(average) + getAttentionalFocusBoundary());
-        if (normaliser == 0) {
-            return 0.0f;
-        }
-        val = (s + getAttentionalFocusBoundary()) / (float) normaliser;
+        int normaliser = -((int) getMinSTI(average) + getAttentionalFocusBoundary());
+        if (normaliser == 0) return 0.0;
+        val = (s + getAttentionalFocusBoundary()) / (double) normaliser;
     }
-    if (clip) {
-        return std::max(-1.0f, std::min(val,1.0f));
-    } else {
-        return val;
-    }
+
+    if (clip) return std::max(-1.0, std::min(val, 1.0));
+    return val;
 }
 
-float AttentionBank::getNormalisedSTI(AttentionValuePtr av) const
+double AttentionBank::getNormalisedSTI(AttentionValuePtr av) const
 {
     AttentionValue::sti_t s = av->getSTI();
     auto normaliser =
@@ -232,19 +191,14 @@ float AttentionBank::getNormalisedSTI(AttentionValuePtr av) const
     return (s / normaliser);
 }
 
-float AttentionBank::getNormalisedZeroToOneSTI(AttentionValuePtr av, bool average, bool clip) const
+double AttentionBank::getNormalisedZeroToOneSTI(AttentionValuePtr av,
+                                    bool average, bool clip) const
 {
-    int normaliser;
-    float val;
     AttentionValue::sti_t s = av->getSTI();
-    normaliser = getMaxSTI(average) - getMinSTI(average);
-    if (normaliser == 0) {
-        return 0.0f;
-    }
-    val = (s - getMinSTI(average)) / (float) normaliser;
-    if (clip) {
-        return std::max(0.0f, std::min(val,1.0f));
-    } else {
-        return val;
-    }
+    int normaliser = getMaxSTI(average) - getMinSTI(average);
+    if (normaliser == 0) return 0.0;
+
+    double val = (s - getMinSTI(average)) / (double) normaliser;
+    if (clip) return std::max(0.0, std::min(val, 1.0));
+    return val;
 }

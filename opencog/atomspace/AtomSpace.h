@@ -654,14 +654,9 @@ public:
     long get_STI_funds() const { return _bank.getSTIFunds(); }
     long get_LTI_funds() const { return _bank.getLTIFunds(); }
 
-    /**
-     * Stimulate an atom.
-     *
-     * @warning Should only be used by attention allocation system.
-     * @param  h Handle to be stimulated
-     * @param stimulus stimulus amount
-     */
-    void stimulate(Handle& h, double stimulus);
+    /** See the AttentionBank for documentation */
+    void stimulate(Handle& h, double stimulus) { _bank.stimulate(h, stimulus); }
+
     /* ----------------------------------------------------------- */
     // ---- Signals
 

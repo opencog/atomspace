@@ -552,18 +552,6 @@ std::string AtomSpace::to_string()
 	return ss.str();
 }
 
-void AtomSpace::stimulate(Handle& h, double stimulus)
-{
-    int sti = h->getAttentionValue()->getSTI();
-    int lti = h->getAttentionValue()->getLTI();
-    int stiWage = _bank.calculateSTIWage() * stimulus;
-    int ltiWage = _bank.calculateLTIWage() * stimulus;
-
-    h->setSTI(sti + stiWage);
-    h->setLTI(lti + ltiWage);
-}
-
-
 namespace std {
 
 ostream& operator<<(ostream& out, const opencog::AtomSpace& as) {
