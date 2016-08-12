@@ -49,9 +49,15 @@ AttentionBank::AttentionBank(AtomTable& atab, bool transient)
 
     _attentionalFocusBoundary = 1;
 
-    AVChangedConnection =
+    _AVChangedConnection =
         atab.AVChangedSignal().connect(
             boost::bind(&AttentionBank::AVChanged, this, _1, _2, _3));
+    _addAtomConnection =
+        atab.addAtomSignal().connect(
+            boost::bind(&AttentionBank::put_atom_into_index, this, _1));
+    _removeAtomConnection =
+        atab.removeAtomSignal().connect(
+            boost::bind(&AttentionBank::remove_atom_from_index, this, _1));
 }
 
 /// This must be called before the AtomTable is destroyed. Which
@@ -61,14 +67,17 @@ AttentionBank::AttentionBank(AtomTable& atab, bool transient)
 void AttentionBank::shutdown(void)
 {
     if (_zombie) return;  /* no-op, if a zombie */
-    AVChangedConnection.disconnect();
+    _AVChangedConnection.disconnect();
+    _addAtomConnection.disconnect();
+    _removeAtomConnection.disconnect();
 }
 
 AttentionBank::~AttentionBank() {}
 
 
-void AttentionBank::AVChanged(Handle h, AttentionValuePtr old_av,
-                                        AttentionValuePtr new_av)
+void AttentionBank::AVChanged(const Handle& h,
+                              const AttentionValuePtr& old_av,
+                              const AttentionValuePtr& new_av)
 {
     // Add the old attention values to the AtomSpace funds and
     // subtract the new attention values from the AtomSpace funds

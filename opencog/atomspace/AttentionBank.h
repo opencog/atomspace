@@ -57,8 +57,11 @@ class AttentionBank
     bool _zombie;
 
     /** The connection by which we are notified of AV changes */
-    boost::signals2::connection AVChangedConnection;
-    void AVChanged(Handle, AttentionValuePtr, AttentionValuePtr);
+    boost::signals2::connection _AVChangedConnection;
+    void AVChanged(const Handle&, const AttentionValuePtr&, const AttentionValuePtr&);
+
+    boost::signals2::connection _addAtomConnection;
+    boost::signals2::connection _removeAtomConnection;
 
     /**
      * Boundary at which an atom is considered within the attentional
@@ -301,13 +304,13 @@ public:
         _importanceIndex.updateImportance(a.operator->(), bin);
     }
 
-    void put_atom_into_index(AtomPtr& atom)
+    void put_atom_into_index(const Handle& h)
     {
         std::lock_guard<std::recursive_mutex> lck(_lock_index);
-        _importanceIndex.insertAtom(atom.operator->());
+        _importanceIndex.insertAtom(h.operator->());
     }
 
-    void remove_atom_from_index(AtomPtr& atom)
+    void remove_atom_from_index(const AtomPtr& atom)
     {
         std::lock_guard<std::recursive_mutex> lck(_lock_index);
         _importanceIndex.removeAtom(atom.operator->());
