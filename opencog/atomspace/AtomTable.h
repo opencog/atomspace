@@ -60,9 +60,6 @@ typedef std::set<AtomPtr> AtomPtrSet;
 typedef boost::signals2::signal<void (const Handle&)> AtomSignal;
 typedef boost::signals2::signal<void (const AtomPtr&)> AtomPtrSignal;
 typedef boost::signals2::signal<void (const Handle&,
-                                      const AttentionValuePtr&,
-                                      const AttentionValuePtr&)> AVCHSigl;
-typedef boost::signals2::signal<void (const Handle&,
                                       const TruthValuePtr&,
                                       const TruthValuePtr&)> TVCHSigl;
 
@@ -129,9 +126,6 @@ private:
 
     /** Signal emitted when the TV changes. */
     TVCHSigl _TVChangedSignal;
-
-    /** Signal emitted when the AV changes. */
-    AVCHSigl _AVChangedSignal;
 
     /// Parent environment for this table.  Null if top-level.
     /// This allows atomspaces to be nested; atoms in this atomspace
@@ -343,9 +337,6 @@ public:
 
     AtomSignal& addAtomSignal() { return _addAtomSignal; }
     AtomPtrSignal& removeAtomSignal() { return _removeAtomSignal; }
-
-    /** Provide ability for others to find out about AV changes */
-    AVCHSigl& AVChangedSignal() { return _AVChangedSignal; }
 
     /** Provide ability for others to find out about TV changes */
     TVCHSigl& TVChangedSignal() { return _TVChangedSignal; }

@@ -49,8 +49,10 @@ AttentionBank::AttentionBank(AtomTable& atab, bool transient)
 
     _attentionalFocusBoundary = 1;
 
+    // Subscribe to my own changes. This is insane and hacky; must move
+    // the AV stuf out of the Atom itself.  XXX FIXME.
     _AVChangedConnection =
-        atab.AVChangedSignal().connect(
+        getAVChangedSignal().connect(
             boost::bind(&AttentionBank::AVChanged, this, _1, _2, _3));
     _addAtomConnection =
         atab.addAtomSignal().connect(

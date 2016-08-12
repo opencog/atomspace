@@ -43,6 +43,10 @@ namespace opencog
 
 typedef boost::signals2::signal<void (const Handle&,
                                       const AttentionValuePtr&,
+                                      const AttentionValuePtr&)> AVCHSigl;
+
+typedef boost::signals2::signal<void (const Handle&,
+                                      const AttentionValuePtr&,
                                       const AttentionValuePtr&)> AFCHSigl;
 
 class AtomTable;
@@ -109,6 +113,9 @@ class AttentionBank
     mutable std::recursive_mutex _lock_index;
     ImportanceIndex _importanceIndex;
 
+    /** Signal emitted when the AV changes. */
+    AVCHSigl _AVChangedSignal;
+
 public:
     /** The table notifies us about AV changes */
     AttentionBank(AtomTable&, bool);
@@ -121,6 +128,9 @@ public:
      */
     AFCHSigl& AddAFSignal() { return _AddAFSignal; }
     AFCHSigl& RemoveAFSignal() { return _RemoveAFSignal; }
+
+    /** Provide ability for others to find out about AV changes */
+    AVCHSigl& getAVChangedSignal() { return _AVChangedSignal; }
 
     /**
      * Stimulate an atom.

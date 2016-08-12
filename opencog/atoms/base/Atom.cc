@@ -198,7 +198,7 @@ void Atom::setAttentionValue(AttentionValuePtr av)
     }
 
     // Notify any interested parties that the AV changed.
-    AVCHSigl& avch = _atomTable->AVChangedSignal();
+    AVCHSigl& avch = _atomTable->getAtomSpace()->getAVChangedSignal();
     avch(getHandle(), local, av);
 }
 
