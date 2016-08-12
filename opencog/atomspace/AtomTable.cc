@@ -703,7 +703,6 @@ void AtomTable::put_atom_into_index(AtomPtr& atom)
     nodeIndex.insertAtom(pat);
     linkIndex.insertAtom(atom);
     typeIndex.insertAtom(pat);
-    importanceIndex.insertAtom(pat);
 
     // We can now unlock, since we are done. In particular, the signals
     // need to run unlocked, since they may result in more atom table
@@ -933,7 +932,6 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
             a->remove_atom(lll);
         }
     }
-    importanceIndex.removeAtom(pat);
 
     // XXX Setting the atom table causes AVChanged signals to be emitted.
     // We should really do this unlocked, but I'm too lazy to fix, and

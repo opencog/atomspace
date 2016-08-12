@@ -32,8 +32,6 @@ namespace opencog
  *  @{
  */
 
-class AtomTable;
-
 /**
  * Implements an index with additional routines needed for managing 
  * short-term importance.  This index is not thread-safe, by itself.
@@ -55,9 +53,8 @@ public:
      */
     void updateImportance(Atom*, int);
     
-    UnorderedHandleSet getHandleSet(const AtomTable*,
-                              AttentionValue::sti_t,
-                              AttentionValue::sti_t) const;
+    UnorderedHandleSet getHandleSet(AttentionValue::sti_t,
+                                    AttentionValue::sti_t) const;
 
     /**
      * This method returns which importance bin an atom with the given

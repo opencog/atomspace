@@ -576,7 +576,7 @@ public:
                       AttentionValue::sti_t lowerBound,
                       AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
     {
-        UnorderedHandleSet hs = _atom_table.getHandlesByAV(lowerBound, upperBound);
+        UnorderedHandleSet hs = _bank.getHandlesByAV(lowerBound, upperBound);
         return std::copy(hs.begin(), hs.end(), result);
     }
 
@@ -656,6 +656,8 @@ public:
 
     /** See the AttentionBank for documentation */
     void stimulate(Handle& h, double stimulus) { _bank.stimulate(h, stimulus); }
+    void updateImportanceIndex(AtomPtr a, int bin) {
+        _bank.updateImportanceIndex(a, bin); }
 
     /* ----------------------------------------------------------- */
     // ---- Signals

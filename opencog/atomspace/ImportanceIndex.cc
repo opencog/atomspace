@@ -69,7 +69,6 @@ void ImportanceIndex::removeAtom(Atom* atom)
 }
 
 UnorderedHandleSet ImportanceIndex::getHandleSet(
-        const AtomTable* atomtable,
         AttentionValue::sti_t lowerBound,
         AttentionValue::sti_t upperBound) const
 {

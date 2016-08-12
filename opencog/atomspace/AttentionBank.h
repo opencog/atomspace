@@ -2,6 +2,7 @@
  * opencog/atomspace/AttentionBank.h
  *
  * Copyright (C) 2011 OpenCog Foundation
+ * Copyright (C) 2016 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * Written by Joel Pitt <joel@opencog.org>
@@ -32,6 +33,7 @@
 
 #include <opencog/util/recent_val.h>
 #include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/atomspace/ImportanceIndex.h>
 
 namespace opencog
 {
@@ -99,6 +101,10 @@ class AttentionBank
 
     AttentionValue::sti_t STIAtomWage;
     AttentionValue::lti_t LTIAtomWage;
+
+    /** The importance index, and it's lock. */
+    mutable std::recursive_mutex _lock_index;
+    ImportanceIndex _importanceIndex;
 
 public:
     /** The table notifies us about AV changes */
@@ -267,6 +273,45 @@ public:
      * @return normalised STI between 0..1
      */
     double getNormalisedZeroToOneSTI(AttentionValuePtr, bool average, bool clip) const;
+
+    /**
+     * Returns the set of atoms within the given importance range.
+     *
+     * @param Importance range lower bound (inclusive).
+     * @param Importance range upper bound (inclusive).
+     * @return The set of atoms within the given importance range.
+     */
+    UnorderedHandleSet getHandlesByAV(AttentionValue::sti_t lowerBound,
+                  AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
+    {
+        std::lock_guard<std::recursive_mutex> lck(_lock_index);
+        return _importanceIndex.getHandleSet(lowerBound, upperBound);
+    }
+
+    /**
+     * Updates the importance index for the given atom. According to the
+     * new importance of the atom, it may change importance bins.
+     *
+     * @param The atom whose importance index will be updated.
+     * @param The old importance bin where the atom originally was.
+     */
+    void updateImportanceIndex(AtomPtr a, int bin)
+    {
+        std::lock_guard<std::recursive_mutex> lck(_lock_index);
+        _importanceIndex.updateImportance(a.operator->(), bin);
+    }
+
+    void put_atom_into_index(AtomPtr& atom)
+    {
+        std::lock_guard<std::recursive_mutex> lck(_lock_index);
+        _importanceIndex.insertAtom(atom.operator->());
+    }
+
+    void remove_atom_from_index(AtomPtr& atom)
+    {
+        std::lock_guard<std::recursive_mutex> lck(_lock_index);
+        _importanceIndex.removeAtom(atom.operator->());
+    }
 };
 
 /** @}*/

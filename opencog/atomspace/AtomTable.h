@@ -43,7 +43,6 @@
 #include <opencog/atoms/base/Node.h>
 
 #include <opencog/atomspace/FixedIntegerIndex.h>
-#include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/LinkIndex.h>
 #include <opencog/atomspace/NodeIndex.h>
 #include <opencog/atomspace/TypeIndex.h>
@@ -110,7 +109,6 @@ private:
     TypeIndex typeIndex;
     NodeIndex nodeIndex;
     LinkIndex linkIndex;
-    ImportanceIndex importanceIndex;
 
     async_caller<AtomTable, AtomPtr> _index_queue;
     void put_atom_into_index(AtomPtr&);
@@ -261,34 +259,6 @@ public:
         { return typeIndex.begin(type, subclass); }
     TypeIndex::iterator endType(void) const
         { return typeIndex.end(); }
-
-    /**
-     * Returns the set of atoms within the given importance range.
-     *
-     * @param Importance range lower bound (inclusive).
-     * @param Importance range upper bound (inclusive).
-     * @return The set of atoms within the given importance range.
-     */
-    UnorderedHandleSet getHandlesByAV(AttentionValue::sti_t lowerBound,
-                              AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
-    {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return importanceIndex.getHandleSet(this, lowerBound, upperBound);
-    }
-
-    /**
-     * Updates the importance index for the given atom. According to the
-     * new importance of the atom, it may change importance bins.
-     *
-     * @param The atom whose importance index will be updated.
-     * @param The old importance bin where the atom originally was.
-     */
-    void updateImportanceIndex(AtomPtr a, int bin)
-    {
-        if (a->_atomTable != this) return;
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        importanceIndex.updateImportance(a.operator->(), bin);
-    }
 
     /**
      * Adds an atom to the table. If the atom already is in the
