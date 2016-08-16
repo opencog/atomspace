@@ -32,6 +32,8 @@
 using namespace opencog;
 
 AttentionBank::AttentionBank(AtomSpace *asp, bool transient)
+    : _index_insert_queue(this, &AttentionBank::put_atom_into_index, transient?0:4)
+    , _index_remove_queue(this, &AttentionBank::remove_atom_from_index, transient?0:4)
 {
     /* Do not boether with initialization, if this is transient */
     if (transient) { _zombie = true; return; }
@@ -55,10 +57,12 @@ AttentionBank::AttentionBank(AtomSpace *asp, bool transient)
             boost::bind(&AttentionBank::AVChanged, this, _1, _2, _3));
     _addAtomConnection =
         asp->addAtomSignal(
-            boost::bind(&AttentionBank::put_atom_into_index, this, _1));
+            boost::bind(&AttentionBank::add_atom_to_indexInsertQueue, this, _1));
+          //boost::bind(&AttentionBank::put_atom_into_index, this, _1));
     _removeAtomConnection =
         asp->removeAtomSignal(
-            boost::bind(&AttentionBank::remove_atom_from_index, this, _1));
+            boost::bind(&AttentionBank::add_atom_to_indexRemoveQueue, this, _1));
+          //boost::bind(&AttentionBank::remove_atom_from_index, this, _1));
 }
 
 /// This must be called before the AtomTable is destroyed. Which

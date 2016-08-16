@@ -6,6 +6,8 @@ from opencog.atomspace import types, is_a, get_type, get_type_name
 from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.type_constructors import *
 
+from time import sleep
+
 class AtomSpaceTest(TestCase):
 
     def setUp(self):
@@ -165,6 +167,9 @@ class AtomSpaceTest(TestCase):
         a2.sti = 5
         a3.sti = 4
         a4.sti = 1
+
+        #ImportanceIndex is Asynchronus give it some time
+        sleep(1)
 
         result = self.space.get_atoms_by_av(4, 10)
         assert len(result) == 3
