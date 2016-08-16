@@ -692,7 +692,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     return h;
 }
 
-void AtomTable::put_atom_into_index(AtomPtr& atom)
+void AtomTable::put_atom_into_index(const AtomPtr& atom)
 {
     if (_transient)
         throw RuntimeException(TRACE_INFO,

@@ -36,7 +36,6 @@
 #include <vector>
 
 #include <zmq.hpp>
-#include <opencog/util/async_method_caller.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atoms/base/Link.h>

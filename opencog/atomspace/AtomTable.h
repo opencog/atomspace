@@ -107,7 +107,7 @@ private:
     LinkIndex linkIndex;
 
     async_caller<AtomTable, AtomPtr> _index_queue;
-    void put_atom_into_index(AtomPtr&);
+    void put_atom_into_index(const AtomPtr&);
     //!@}
 
     /**

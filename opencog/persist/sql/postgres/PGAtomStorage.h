@@ -113,7 +113,7 @@ class PGAtomStorage : public AtomStorage
 
         // The actual storing calls.
         int do_store_atom_recursive(Database&, AtomPtr);
-        void vdo_store_atom(AtomPtr&);
+        void vdo_store_atom(const AtomPtr&);
         void do_store_atom_single(Database&, AtomPtr, int);
 
         std::string outgoing_set_to_string(const HandleSeq&);
