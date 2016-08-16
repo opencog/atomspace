@@ -112,7 +112,7 @@ class AttentionBank
     AttentionValue::lti_t LTIAtomWage;
 
     /** The importance index, and it's lock. */
-    mutable std::recursive_mutex _lock_index;
+    mutable std::mutex _lock_index;
     ImportanceIndex _importanceIndex;
 
     /** Signal emitted when the AV changes. */
@@ -299,7 +299,7 @@ public:
     UnorderedHandleSet getHandlesByAV(AttentionValue::sti_t lowerBound,
                   AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
     {
-        std::lock_guard<std::recursive_mutex> lck(_lock_index);
+        std::lock_guard<std::mutex> lck(_lock_index);
         return _importanceIndex.getHandleSet(lowerBound, upperBound);
     }
 
@@ -312,19 +312,19 @@ public:
      */
     void updateImportanceIndex(AtomPtr a, int bin)
     {
-        std::lock_guard<std::recursive_mutex> lck(_lock_index);
+        std::lock_guard<std::mutex> lck(_lock_index);
         _importanceIndex.updateImportance(a.operator->(), bin);
     }
 
     void put_atom_into_index(const Handle& h)
     {
-        std::lock_guard<std::recursive_mutex> lck(_lock_index);
+        std::lock_guard<std::mutex> lck(_lock_index);
         _importanceIndex.insertAtom(h.operator->());
     }
 
     void remove_atom_from_index(const AtomPtr& atom)
     {
-        std::lock_guard<std::recursive_mutex> lck(_lock_index);
+        std::lock_guard<std::mutex> lck(_lock_index);
         _importanceIndex.removeAtom(atom.operator->());
     }
 };
