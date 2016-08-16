@@ -93,7 +93,7 @@ class ODBCAtomStorage : public AtomStorage
         int getMaxHeight(void);
 
         int do_store_atom(AtomPtr);
-        void vdo_store_atom(AtomPtr&);
+        void vdo_store_atom(const AtomPtr&);
         void do_store_single_atom(AtomPtr, int);
 
         std::string oset_to_string(const HandleSeq&, int);

@@ -770,7 +770,7 @@ int ODBCAtomStorage::do_store_atom(AtomPtr atom)
     return lheight;
 }
 
-void ODBCAtomStorage::vdo_store_atom(AtomPtr& atom)
+void ODBCAtomStorage::vdo_store_atom(const AtomPtr& atom)
 {
     do_store_atom(atom);
 }
