@@ -963,7 +963,7 @@ int PGAtomStorage::do_store_atom_recursive(Database& database, AtomPtr atom)
     return height;
 }
 
-void PGAtomStorage::vdo_store_atom(AtomPtr& atom)
+void PGAtomStorage::vdo_store_atom(const AtomPtr& atom)
 {
     Database database(this);
     do_store_atom_recursive(database, atom);
