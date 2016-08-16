@@ -48,6 +48,8 @@ AttentionBank::AttentionBank(AtomSpace *asp, bool transient)
     STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE", 10);
     LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE", 10);
 
+    bool async = config().get_bool("AttentionBank_Async",true);
+
     _attentionalFocusBoundary = 1;
 
     // Subscribe to my own changes. This is insane and hacky; must move
@@ -55,14 +57,24 @@ AttentionBank::AttentionBank(AtomSpace *asp, bool transient)
     _AVChangedConnection =
         _AVChangedSignal.connect(
             boost::bind(&AttentionBank::AVChanged, this, _1, _2, _3));
-    _addAtomConnection =
+
+    if (async) {
+     _addAtomConnection =
         asp->addAtomSignal(
             boost::bind(&AttentionBank::add_atom_to_indexInsertQueue, this, _1));
-          //boost::bind(&AttentionBank::put_atom_into_index, this, _1));
     _removeAtomConnection =
         asp->removeAtomSignal(
             boost::bind(&AttentionBank::add_atom_to_indexRemoveQueue, this, _1));
-          //boost::bind(&AttentionBank::remove_atom_from_index, this, _1));
+    }
+    else {
+     _addAtomConnection =
+        asp->addAtomSignal(
+            boost::bind(&AttentionBank::put_atom_into_index, this, _1));
+    _removeAtomConnection =
+        asp->removeAtomSignal(
+            boost::bind(&AttentionBank::remove_atom_from_index, this, _1));
+
+    }
 }
 
 /// This must be called before the AtomTable is destroyed. Which
