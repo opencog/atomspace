@@ -31,7 +31,7 @@
 
 #include <boost/signals2.hpp>
 
-#include "async_method_caller_const.h"
+#include <opencog/util/async_method_caller.h>
 #include <opencog/util/recent_val.h>
 
 #include <opencog/truthvalue/AttentionValue.h>
@@ -117,8 +117,8 @@ class AttentionBank
     mutable std::mutex _lock_index;
     ImportanceIndex _importanceIndex;
 
-    async_caller_const<AttentionBank,Handle> _index_insert_queue;
-    async_caller_const<AttentionBank,AtomPtr> _index_remove_queue;
+    async_caller<AttentionBank,Handle> _index_insert_queue;
+    async_caller<AttentionBank,AtomPtr> _index_remove_queue;
 
     /** Signal emitted when the AV changes. */
     AVCHSigl _AVChangedSignal;
