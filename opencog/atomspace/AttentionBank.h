@@ -31,7 +31,9 @@
 
 #include <boost/signals2.hpp>
 
+#include <opencog/util/async_method_caller.h>
 #include <opencog/util/recent_val.h>
+
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/atomspace/ImportanceIndex.h>
 
@@ -114,6 +116,9 @@ class AttentionBank
     /** The importance index, and it's lock. */
     mutable std::mutex _lock_index;
     ImportanceIndex _importanceIndex;
+
+    async_caller<AttentionBank,Handle> _index_insert_queue;
+    async_caller<AttentionBank,AtomPtr> _index_remove_queue;
 
     /** Signal emitted when the AV changes. */
     AVCHSigl _AVChangedSignal;
@@ -316,6 +321,16 @@ public:
         _importanceIndex.updateImportance(a.operator->(), bin);
     }
 
+    void add_atom_to_indexInsertQueue(const Handle& h)
+    {
+        _index_insert_queue.enqueue(h);
+    }
+
+    void add_atom_to_indexRemoveQueue(const AtomPtr& atom)
+    {
+        _index_remove_queue.enqueue(atom);
+    }
+
     void put_atom_into_index(const Handle& h)
     {
         std::lock_guard<std::mutex> lck(_lock_index);
@@ -327,6 +342,7 @@ public:
         std::lock_guard<std::mutex> lck(_lock_index);
         _importanceIndex.removeAtom(atom.operator->());
     }
+
 };
 
 /** @}*/
