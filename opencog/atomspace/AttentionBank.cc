@@ -48,7 +48,7 @@ AttentionBank::AttentionBank(AtomSpace *asp, bool transient)
     STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE", 10);
     LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE", 10);
 
-    bool async = config().get_bool("AttentionBank_Async",true);
+    bool async = config().get_bool("ATTENTION_BANK_ASYNC",false);
 
     _attentionalFocusBoundary = 1;
 
