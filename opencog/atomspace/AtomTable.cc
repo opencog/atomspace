@@ -428,7 +428,7 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
 
         // Get and extract the old state.
         try {
-            Handle old_state = StateLink::get_state(tails);
+            Handle old_state = StateLink::get_link(tails);
             if (old_state) this->extract(old_state, true);
         } catch(const InvalidParamException& ex) {}
 
