@@ -58,7 +58,6 @@ public:
 	StateLink(Link &l);
 	Handle get_alias(void) const { return _outgoing[0]; }
 	Handle get_state(void) const { return _outgoing[1]; }
-	Handle get_other(void) const;
 
 	/**
 	 * Given a Handle pointing to <name> in
