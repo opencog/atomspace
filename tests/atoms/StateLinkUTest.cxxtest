@@ -253,11 +253,14 @@ void StateLinkUTest::test_list()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
+	Handle fruit =
+		L(LIST_LINK, N(ANCHOR_NODE, "fruit"), N(CONCEPT_NODE, "fresh"));
+
 	// Set the state to apple.
-	Handle fruit, apple, bananna;
+	Handle apple, bananna;
 	LinkPtr link = LinkCast(
 		L(STATE_LINK,
-			fruit = LA(LIST_LINK, NA(ANCHOR_NODE, "fruit"), NA(CONCEPT_NODE, "fresh")),
+			LA(LIST_LINK, NA(ANCHOR_NODE, "fruit"), NA(CONCEPT_NODE, "fresh")),
 			apple = N(CONCEPT_NODE, "apple")));
 
 	bananna = N(CONCEPT_NODE, "bananna");
