@@ -419,12 +419,24 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
         if (NULL == slp)
             slp = createStateLink(*LinkCast(atom));
 
-        // Compare to the current state
-        Handle old_state(slp->get_other());
-        while (nullptr != old_state) {
-            this->extract(old_state, true);
-            old_state = slp->get_other();
+        // Removing the old state simply won't work, if the key is
+        // not in the atom table. So make sure the key is present.
+        Handle alias = slp->get_alias();
+        Handle tails = add(alias, false);
+        if (tails != alias)
+            slp = createStateLink(tails, slp->get_state());
+
+        // If this is a closed StateLink, (i.e. has no variables)
+        // then get and extract the old state. Otherwise, its not
+        // really "state", because we allow multiple StateLinks with
+        // variables in them.
+        if (slp->is_closed()) {
+            try {
+                Handle old_state = StateLink::get_link(tails);
+                if (old_state) this->extract(old_state, true);
+            } catch(const InvalidParamException& ex) {}
         }
+
         return slp;
     }
     return atom;
