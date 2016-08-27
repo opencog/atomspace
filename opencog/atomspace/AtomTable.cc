@@ -427,7 +427,9 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
             slp = createStateLink(tails, slp->get_state());
 
         // If this is a closed StateLink, (i.e. has no variables)
-        // then get and extract the old state.
+        // then get and extract the old state. Otherwise, its not
+        // really "state", because we allow multiple StateLinks with
+        // variables in them.
         if (slp->is_closed()) {
             try {
                 Handle old_state = StateLink::get_link(tails);
