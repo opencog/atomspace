@@ -426,11 +426,14 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
         if (tails != alias)
             slp = createStateLink(tails, slp->get_state());
 
-        // Get and extract the old state.
-        try {
-            Handle old_state = StateLink::get_link(tails);
-            if (old_state) this->extract(old_state, true);
-        } catch(const InvalidParamException& ex) {}
+        // If this is a closed StateLink, (i.e. has no variables)
+        // then get and extract the old state.
+        if (slp->is_closed()) {
+            try {
+                Handle old_state = StateLink::get_link(tails);
+                if (old_state) this->extract(old_state, true);
+            } catch(const InvalidParamException& ex) {}
+        }
 
         return slp;
     }
