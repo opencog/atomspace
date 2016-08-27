@@ -247,6 +247,8 @@ void StateLinkUTest::test_putting()
 // Test to make sure a ListLink can be used as the key.
 // Cut-n-paste of the test_setting() test, except that the
 // anchor will be a list.
+#define NA(T,S) Handle(createNode(T,S))
+#define LA(T,A1,A2) Handle(createLink(T,A1,A2))
 void StateLinkUTest::test_list()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -255,7 +257,7 @@ void StateLinkUTest::test_list()
 	Handle fruit, apple, bananna;
 	LinkPtr link = LinkCast(
 		L(STATE_LINK,
-			fruit = L(LIST_LINK, N(ANCHOR_NODE, "fruit"), N(CONCEPT_NODE, "fresh")),
+			fruit = LA(LIST_LINK, NA(ANCHOR_NODE, "fruit"), NA(CONCEPT_NODE, "fresh")),
 			apple = N(CONCEPT_NODE, "apple")));
 
 	bananna = N(CONCEPT_NODE, "bananna");
@@ -270,7 +272,7 @@ void StateLinkUTest::test_list()
 	// Change the state to bananna
 	link = LinkCast(
 		L(STATE_LINK,
-			L(LIST_LINK, N(ANCHOR_NODE, "fruit"), N(CONCEPT_NODE, "fresh")),
+			LA(LIST_LINK, NA(ANCHOR_NODE, "fruit"), NA(CONCEPT_NODE, "fresh")),
 			N(CONCEPT_NODE, "bananna")));
 
 	// The incoming set should be simple.
@@ -284,7 +286,7 @@ void StateLinkUTest::test_list()
 	// Change the state back to apple.
 	link = LinkCast(
 		L(STATE_LINK,
-			L(LIST_LINK, N(ANCHOR_NODE, "fruit"), N(CONCEPT_NODE, "fresh")),
+			LA(LIST_LINK, NA(ANCHOR_NODE, "fruit"), NA(CONCEPT_NODE, "fresh")),
 			N(CONCEPT_NODE, "apple")));
 
 	// The incoming set should be simple.
@@ -297,7 +299,7 @@ void StateLinkUTest::test_list()
 	// Change the state back to bananna, again
 	link = LinkCast(
 		L(STATE_LINK,
-			L(LIST_LINK, N(ANCHOR_NODE, "fruit"), N(CONCEPT_NODE, "fresh")),
+			LA(LIST_LINK, NA(ANCHOR_NODE, "fruit"), NA(CONCEPT_NODE, "fresh")),
 			N(CONCEPT_NODE, "bananna")));
 
 	// The incoming set should be simple.
@@ -311,7 +313,7 @@ void StateLinkUTest::test_list()
 	// Change the state back to apple, again
 	link = LinkCast(
 		L(STATE_LINK,
-			L(LIST_LINK, N(ANCHOR_NODE, "fruit"), N(CONCEPT_NODE, "fresh")),
+			LA(LIST_LINK, NA(ANCHOR_NODE, "fruit"), NA(CONCEPT_NODE, "fresh")),
 			N(CONCEPT_NODE, "apple")));
 
 	// The incoming set should be simple.
@@ -326,10 +328,10 @@ void StateLinkUTest::test_list()
 	Handle vara = N(VARIABLE_NODE, "$vara");
 	Handle varb = N(VARIABLE_NODE, "$varb");
 	L(STATE_LINK,
-		L(LIST_LINK, N(ANCHOR_NODE, "fruit"), N(CONCEPT_NODE, "fresh")),
+		LA(LIST_LINK, NA(ANCHOR_NODE, "fruit"), NA(CONCEPT_NODE, "fresh")),
 		vara);
 	L(STATE_LINK,
-		L(LIST_LINK, N(ANCHOR_NODE, "fruit"), N(CONCEPT_NODE, "fresh")),
+		LA(LIST_LINK, NA(ANCHOR_NODE, "fruit"), NA(CONCEPT_NODE, "fresh")),
 		varb);
 
 	// The incoming set should have 2 vars and one apple.
@@ -342,7 +344,7 @@ void StateLinkUTest::test_list()
 	// Change the state to bananna, again
 	link = LinkCast(
 		L(STATE_LINK,
-			L(LIST_LINK, N(ANCHOR_NODE, "fruit"), N(CONCEPT_NODE, "fresh")),
+			LA(LIST_LINK, NA(ANCHOR_NODE, "fruit"), NA(CONCEPT_NODE, "fresh")),
 			N(CONCEPT_NODE, "bananna")));
 
 	// The incoming set should have vars and bananna.
@@ -355,7 +357,7 @@ void StateLinkUTest::test_list()
 	// Change the state back to apple, again
 	link = LinkCast(
 		L(STATE_LINK,
-			L(LIST_LINK, N(ANCHOR_NODE, "fruit"), N(CONCEPT_NODE, "fresh")),
+			LA(LIST_LINK, NA(ANCHOR_NODE, "fruit"), NA(CONCEPT_NODE, "fresh")),
 			N(CONCEPT_NODE, "apple")));
 
 	// The incoming set should two vars, one apple.
