@@ -59,7 +59,8 @@ const int MISSING_FUNC_CODE = -1;
 static bool already_initialized = false;
 static bool initialized_outside_opencog = false;
 std::recursive_mutex PythonEval::_mtx;
-
+bool in_scope = false;
+uint8_t _inside_scope = 0;
 /*
  * @todo When can we remove the singleton instance? Answer: never,
  * as long as python is single-threaded. Currently, python fakes
@@ -1329,7 +1330,7 @@ void PythonEval::eval_expr(const std::string& partial_expr)
         expr = expr.substr(nl);
         nl = expr.find_first_of("\n\r");
     }
-    eval_expr_line(expr);
+     eval_expr_line(expr);
 }
 
 /// Like eval_expr(), except that it assumes that there is only
@@ -1348,6 +1349,9 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
 {
     // Trim whitespace, and comments before doing anything,
     // Otherwise, the various checks below fail.
+    // printf("THE PARTIAL EXPRESSION BEFORE SPACE-LIKE REMOVAL =====%s\n", partial_expr.c_str()); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    
+
     std::string part = partial_expr.substr(0,
                      partial_expr.find_last_not_of(" \t\n\r") + 1);
 
@@ -1359,7 +1363,10 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     // Ignore leading comments; don't ignore empty line.
     int c = 0;
     size_t part_size = part.size();
-    if (0 == part_size and 0 < partial_expr.size()) goto wait_for_more;
+    //go wait for more if actual statement is empty.
+    if (0 == part_size and 0 < partial_expr.size()) {
+        goto wait_for_more;
+    }
 
     if (0 < part_size) c = part[0];
 
@@ -1373,20 +1380,45 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
         if (0 < _paren_count) goto wait_for_more;
     }
 
+
     // If the line starts with whitespace (tab or space) then assume
     // that it is standard indentation, and wait for the first
     // unindented line (or end-of-file).
-    if (' ' == c or '\t' == c) goto wait_for_more;
+    if (' ' == c or '\t' == c){
+        _inside_scope = 1;
+        goto wait_for_more; 
+    }
 
     // If the line ends with a colon, its not a complete expression,
     // and we must wait for more input, i.e. more input is pending.
-    if (0 < part_size and part.find_last_of(":\\") + 1 == part_size)
+    if (0 < part_size and part.find_last_of(":\\") + 1 == part_size){
+        _inside_scope = 1;
         goto wait_for_more;
-
+    }
+    
     _input_line += part;
     _input_line += '\n';  // we stripped this off, above
+    
     logger().debug("[PythonEval] eval_expr length=%zu:\n%s",
                   _input_line.length(), _input_line.c_str());
+
+    /*
+        python interpreter should finish a scope 
+        when an empty line is given once. 
+        The _inside_scope integer is set to 1 when inside a scope
+            i.e when the previous line begins with a space(or \t) 
+                or when the previous line had ':' at the end
+        so _inside_scope is incremented we wait_for_more
+        but the next empty line is ignored and the expression executed
+    */
+    if (_inside_scope > 0){
+        if(_inside_scope >= 2) _inside_scope = 0;
+        else 
+        {
+            _inside_scope++;
+            goto wait_for_more;
+        }
+    }
 
     // This is the cogserver shell-freindly evaluator. We must
     // stop all exceptions thrown in other layers, or else we
@@ -1396,13 +1428,15 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     try
     {
         this->apply_script(_input_line);
+        _input_line = "";
+
     }
     catch (const RuntimeException &e)
     {
         _result += e.get_message();
         _result += "\n";
     }
-    _input_line = "";
+    // _input_line = "";
     _paren_count = 0;
     _pending_input = false;
     logger().debug("[PythonEval] eval_expr result length=%zu:\n%s",
@@ -1413,6 +1447,7 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     return;
 
 wait_for_more:
+    // in_scope = true;
     _pending_input = true;
     // Add this expression to our evaluation buffer.
     _input_line += part;
