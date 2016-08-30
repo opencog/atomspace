@@ -107,6 +107,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			Handle (T::*h_hhh)(Handle, Handle, Handle);
 			Handle (T::*h_hs)(Handle, const std::string&);
 			Handle (T::*h_htq)(Handle, Type, const HandleSeq&);
+			Handle (T::*h_htqb)(Handle, Type, const HandleSeq&, bool);
 			Handle (T::*h_hz)(Handle, size_t);
 			Handle (T::*h_sddd)(const std::string&,double,double,double);
 			Handle (T::*h_sh)(const std::string&,Handle);
@@ -173,6 +174,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			H_HS,  // return handle, take handle and string
 			H_HHH, // return handle, take handle, handle and Handle
 			H_HTQ, // return handle, take handle, type, and HandleSeq
+			H_HTQB, // return handle, take handle, type, HandleSeq and boolean
 			H_HZ,  // return handle, take handle and size_t
 			H_SDDD,
 			H_SH,
@@ -396,6 +398,22 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
+				case H_HTQB:
+				{
+					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
+
+					Type t = SchemeSmob::verify_atom_type(scm_cadr(args), scheme_name, 2);
+
+					SCM list = scm_caddr(args);
+					HandleSeq seq = SchemeSmob::verify_handle_list(list, scheme_name, 3);
+
+					bool b = scm_to_bool(scm_cadddr(args));
+
+					Handle rh((that->*method.h_htqb)(h, t, seq, b));
+					rc = SchemeSmob::handle_to_scm(rh);
+					break;
+				}
+
 				case H_HZ:
 				{
 					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
@@ -877,6 +895,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_2(H_HH, h_hh, Handle, Handle, Handle)
 		DECLARE_CONSTR_2(H_HS, h_hs, Handle, Handle, const std::string&)
 		DECLARE_CONSTR_3(H_HTQ, h_htq, Handle, Handle, Type, const HandleSeq&)
+		DECLARE_CONSTR_4(H_HTQB, h_htqb, Handle, Handle, Type, const HandleSeq&, bool)
 		DECLARE_CONSTR_2(H_HZ,  h_hz, Handle, Handle, size_t)
 		DECLARE_CONSTR_2(H_SH, h_sh,Handle,const std::string&,Handle)
 		DECLARE_CONSTR_4(H_SDDD, h_sddd,Handle,const std::string&,double,double,double)
@@ -1010,6 +1029,7 @@ DECLARE_DECLARE_3(UUID, const std::string&,const std::string&, bool)
 DECLARE_DECLARE_3(void, const std::string&,
                   const std::string&, const std::string&)
 DECLARE_DECLARE_3(Handle, Handle, Handle, Handle)
+DECLARE_DECLARE_4(Handle, Handle, Type, const HandleSeq&, bool)
 DECLARE_DECLARE_4(bool, const std::string&, double, double, double)
 DECLARE_DECLARE_4(Handle, const std::string&, double, double, double)
 DECLARE_DECLARE_4(bool, const std::string&, double, int, int)
