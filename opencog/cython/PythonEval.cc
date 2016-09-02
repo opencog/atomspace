@@ -627,9 +627,47 @@ void PythonEval::execute_string(const char* command)
     // Because of this, I don't know how to write a valid command
     // interpreter for the python shell ...
     PyObject* pyRootDictionary = PyModule_GetDict(_pyRootModule);
+    
+
+    
+/*  REDIRECTING STDOUT TO A PIPE
+    because no string representation can be found for the PyObject returned by 
+    PyRun_StringFlags after execution of expression, the only option I can see
+    is a temporary hack to redirect the stdout to a variable for the brief
+    moment PyRun_StringFlags is running and then reconnecting it back 
+    when which we can read from that variable to _result so that the execution 
+    result is displayed on the users shell and not on the stdout of cogserver
+*/
+    int _output_pipe[2];
+    int _stdout_original = dup(STDOUT_FILENO);
+
+    if(pipe(_output_pipe) == 0)
+        #define _PIPE_OPENED_OKAY_
+    #ifdef _PIPE_OPENED_OKAY_
+        dup2(_output_pipe[1], STDOUT_FILENO); //redirecting stdout to pipe
+        close(_output_pipe[1]);
+    #endif
+
+    //execute python script
     PyObject* pyResult = PyRun_StringFlags(command,
             Py_file_input, pyRootDictionary, pyRootDictionary,
             nullptr);
+
+    #ifdef _PIPE_OPENED_OKAY_
+        fflush(stdout);
+        dup2(_stdout_original, STDOUT_FILENO); //return stdout to its rightful place
+        char _result_buffer[1];
+        int c;
+        while(1)
+        {
+            c = read(_output_pipe[0], _result_buffer, 1);
+            if(c == -1 or c== 0 or errno) //if eof or error
+                break;
+            _result.append<int>(1, _result_buffer[0]);
+        }
+        //_result.append("\n");
+     
+    #endif
 
     if (pyResult)
         Py_DECREF(pyResult);
