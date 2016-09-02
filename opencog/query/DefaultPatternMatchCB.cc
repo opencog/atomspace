@@ -294,7 +294,7 @@ bool DefaultPatternMatchCB::post_link_match(const LinkPtr& lpat,
 }
 
 /**
- * Called to accept of reject a top-level clause.
+ * Called to accept or reject a top-level clause.
  *
  * This is straight-forward, except when the pattern is a VariableNode,
  * and the proposed grounding is evaluatable.  In this case, we want to
@@ -324,7 +324,8 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 	if (ptrn->getType() == VARIABLE_NODE and
 	    grnd->getType() == EVALUATION_LINK and
 	    0 < grnd->getArity() and
-	    grnd->getOutgoingAtom(0)->getType() == GROUNDED_PREDICATE_NODE)
+	    (grnd->getOutgoingAtom(0)->getType() == GROUNDED_PREDICATE_NODE or
+	    grnd->getOutgoingAtom(0)->getType() == DEFINED_PREDICATE_NODE))
 	{
 		LAZY_LOG_FINE << "Evaluate the grounding clause=" << std::endl
 		              << grnd->toShortString() << std::endl;
