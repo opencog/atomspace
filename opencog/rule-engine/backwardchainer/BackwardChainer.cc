@@ -129,14 +129,14 @@ void BackwardChainer::expand_bit(Target& target, const Rule& rule)
 
 Target& BackwardChainer::select_target()
 {
-	// For now selection is uniform random
+	// For now selection is uniformly random
 	return rand_element(_target_set).second;
 }
 
 const Rule& BackwardChainer::select_rule(const Target& target)
 {
-	// For now the rule is uniform randomly selected amongst the valid
-	// ones
+	// For now the rule is uniformly randomly selected amongst the
+	// valid ones
 	return *rand_element(get_valid_rules(target));
 }
 

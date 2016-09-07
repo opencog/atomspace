@@ -35,6 +35,8 @@ namespace opencog
 {
 
 /**
+ * TODO: update that comment
+ *
  * Backward chaining falls into two cases
  *
  * 1. Truth value query - Given a target atom whose truth value is not
@@ -133,8 +135,8 @@ private:
 	// candidate for back-inference tree expansion.
 	bool match_conclusion(const Target& target, const Rule& rule);
 
-	// Fulfill, apply possible inferences and pattern matchings in
-	// order to fulfill the given target
+	// Fulfill, apply possible inferences in a forward way and pattern
+	// matchings in order to fulfill the given target
 	void fulfill_target(Target& target);
 
 	// Check that h is matched by a given pattern body with a given
