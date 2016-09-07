@@ -638,6 +638,8 @@ void PythonEval::execute_string(const char* command)
     when which we can read from that variable to _result so that the execution 
     result is displayed on the users shell and not on the stdout of cogserver
 */
+//#define _USE_PIPE_TO_REDIRECT_STDOUT_
+#ifdef _USE_PIPE_TO_REDIRECT_STDOUT_
     int _output_pipe[2];
     int _stdout_original = dup(STDOUT_FILENO);
 
@@ -646,13 +648,15 @@ void PythonEval::execute_string(const char* command)
     #ifdef _PIPE_OPENED_OKAY_
         dup2(_output_pipe[1], STDOUT_FILENO); //redirecting stdout to pipe
         close(_output_pipe[1]);
-    #endif
+    #endif //_PIPE_OPENED_OKAY_
+#endif //_USE_PIPE_TO_REDIRECT_STDOUT_
 
     //execute python script
     PyObject* pyResult = PyRun_StringFlags(command,
             Py_file_input, pyRootDictionary, pyRootDictionary,
             nullptr);
 
+#ifdef _USE_PIPE_TO_REDIRECT_STDOUT_
     #ifdef _PIPE_OPENED_OKAY_
         fflush(stdout);
         dup2(_stdout_original, STDOUT_FILENO); //return stdout to its rightful place
@@ -667,8 +671,8 @@ void PythonEval::execute_string(const char* command)
         }
         //_result.append("\n");
      
-    #endif
-
+    #endif //_PIPE_OPENED_OKAY_
+#endif //_USE_PIPE_TO_REDIRECT_STDOUT_
     if (pyResult)
         Py_DECREF(pyResult);
     Py_FlushLine();
