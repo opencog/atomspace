@@ -152,7 +152,7 @@ vector<const Rule*> BackwardChainer::get_valid_rules(const Target& target)
 bool BackwardChainer::match_conclusion(const Target& target, const Rule& rule)
 {
 	for (const HandlePair& hp : rule.get_conclusions())
-		if (unify(target.handle, hp.first, hp.second))
+		if (unify(target.handle, Handle::UNDEFINED, hp.first, hp.second))
 		    return true;
 	return false;
 }
@@ -162,15 +162,119 @@ void BackwardChainer::fulfill_target(Target& target)
 	// TODO
 }
 
-bool BackwardChainer::unify(const Handle& h, const Handle& vardecl,
-                            const Handle& body)
+bool BackwardChainer::unify(const Handle& target, const Handle& pattern,
+                            const Handle& pattern_vardecl)
 {
 	AtomSpace tmp_as;
-	Handle tmp_h = tmp_as.add_atom(h),
-		tmp_bl = tmp_as.add_link(BIND_LINK, vardecl, body, body),
+	Handle tmp_target = tmp_as.add_atom(target),
+		tmp_bl = tmp_as.add_link(BIND_LINK, pattern_vardecl, pattern, pattern),
 		result = bindlink(&tmp_as, tmp_bl);
 	HandleSeq results = result->getOutgoingSet();
-	return std::find(results.begin(), results.end(), tmp_h) != results.end();
+	return std::find(results.begin(), results.end(), tmp_target) != results.end();
+}
+
+/**
+ * Unify two atoms, finding a mapping that makes them equal.
+ *
+ * Use the Pattern Matcher to do the heavy lifting of unification from one
+ * specific atom to another, let it handles UnorderedLink, VariableNode in
+ * QuoteLink, etc.
+ *
+ * This will in general unify pattern to target in one direction.  However, it
+ * allows a typed variable A in htarget to map to another variable B in hmatch,
+ * in which case the mapping will be returned reverse (as B->A).
+ *
+ * @param target           the atom from which to unify
+ * @param pattern          the atom to which hsource will be unified to
+ * @param target_vardecl   the typed VariableList of the variables in hsource
+ * @param pattern_vardecl  the VariableList of the free variables in hmatch
+ * @param result           an output HandleMap mapping varibles from hsource to hmatch
+ * @return                 true if the two atoms can be unified
+ */
+bool BackwardChainer::unify(const Handle& target,
+                            const Handle& pattern,
+                            const Handle& target_vardecl,
+                            const Handle& pattern_vardecl,
+                            HandleMap& result)
+{
+	// Lazy way of restricting PM to be between two atoms
+	AtomSpace temp_space;
+
+	Handle temp_target = temp_space.add_atom(target);
+	Handle temp_pattern = temp_space.add_atom(pattern);
+	Handle temp_target_vardecl = temp_space.add_atom(target_vardecl);
+	Handle temp_pattern_vardecl = temp_space.add_atom(pattern_vardecl);
+
+	if (temp_target_vardecl == Handle::UNDEFINED)
+	{
+		FindAtoms fv(VARIABLE_NODE);
+		fv.search_set(target);
+
+		HandleSeq vars;
+		for (const Handle& h : fv.varset)
+			vars.push_back(h);
+
+		temp_target_vardecl = temp_space.add_atom(createVariableList(vars));
+	}
+
+	PatternLinkPtr sl(createPatternLink(temp_pattern_vardecl, temp_pattern));
+	UnifyPMCB pmcb(&temp_space, VariableListCast(temp_pattern_vardecl),
+	               VariableListCast(temp_target_vardecl));
+
+	sl->satisfy(pmcb);
+
+	// if no grounding
+	if (pmcb.get_var_list().size() == 0)
+		return false;
+
+	HandleMapSeq pred_list = pmcb.get_pred_list();
+	HandleMapSeq var_list = pmcb.get_var_list();
+
+	HandleMap good_map;
+
+	// Go thru each solution, and get the first one that map the whole
+	// temp_pattern
+	//
+	// XXX TODO branch on the various groundings?  how to properly handle
+	// multiple possible unify option????
+	for (size_t i = 0; i < pred_list.size(); ++i)
+	{
+		for (const auto& p : pred_list[i])
+		{
+			if (is_atom_in_tree(p.second, temp_pattern))
+			{
+				good_map = var_list[i];
+				i = pred_list.size();
+				break;
+			}
+		}
+	}
+
+	// If none of the mapping map the whole temp_pattern (possible in the case
+	// of sub-atom unification that map a typed variable to another variable)
+	if (good_map.empty())
+		return false;
+
+	// Change the mapping from temp_atomspace to current atomspace
+	for (const auto& p : good_map)
+	{
+		Handle var = p.first;
+		Handle grn = p.second;
+
+		result[_garbage_superspace.get_atom(var)] =
+			_garbage_superspace.get_atom(grn);
+	}
+
+	return true;
+}
+
+bool BackwardChainer::unify(const Handle& target,
+                            const Handle& pattern,
+                            const Handle& target_vardecl,
+                            const Handle& pattern_vardecl)
+{
+	HandleMap tmp;
+	return unify(target, pattern, target_vardecl, pattern_vardecl, tmp);
 }
 
 /**
@@ -807,101 +911,6 @@ HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
 	}
 
 	return results;
-}
-
-/**
- * Unify two atoms, finding a mapping that makes them equal.
- *
- * Use the Pattern Matcher to do the heavy lifting of unification from one
- * specific atom to another, let it handles UnorderedLink, VariableNode in
- * QuoteLink, etc.
- *
- * This will in general unify htarget to hmatch in one direction.  However, it
- * allows a typed variable A in htarget to map to another variable B in hmatch,
- * in which case the mapping will be returned reverse (as B->A).
- *
- * @param hsource          the atom from which to unify
- * @param hmatch           the atom to which hsource will be unified to
- * @param hsource_vardecl  the typed VariableList of the variables in hsource
- * @param hmatch_vardecl   the VariableList of the free variables in hmatch
- * @param result           an output HandleMap mapping varibles from hsource to hmatch
- * @return                 true if the two atoms can be unified
- */
-bool BackwardChainer::unify(const Handle& hsource,
-                            const Handle& hmatch,
-                            const Handle& hsource_vardecl,
-                            const Handle& hmatch_vardecl,
-                            HandleMap& result)
-{
-	// Lazy way of restricting PM to be between two atoms
-	AtomSpace temp_space;
-
-	Handle temp_hsource = temp_space.add_atom(hsource);
-	Handle temp_hmatch = temp_space.add_atom(hmatch);
-	Handle temp_hsource_vardecl = temp_space.add_atom(hsource_vardecl);
-	Handle temp_hmatch_vardecl = temp_space.add_atom(hmatch_vardecl);
-
-	if (temp_hsource_vardecl == Handle::UNDEFINED)
-	{
-		FindAtoms fv(VARIABLE_NODE);
-		fv.search_set(hsource);
-
-		HandleSeq vars;
-		for (const Handle& h : fv.varset)
-			vars.push_back(h);
-
-		temp_hsource_vardecl = temp_space.add_atom(createVariableList(vars));
-	}
-
-	PatternLinkPtr sl(createPatternLink(temp_hsource_vardecl, temp_hsource));
-	UnifyPMCB pmcb(&temp_space, VariableListCast(temp_hsource_vardecl),
-	               VariableListCast(temp_hmatch_vardecl));
-
-	sl->satisfy(pmcb);
-
-	// if no grounding
-	if (pmcb.get_var_list().size() == 0)
-		return false;
-
-	HandleMapSeq pred_list = pmcb.get_pred_list();
-	HandleMapSeq var_list = pmcb.get_var_list();
-
-	HandleMap good_map;
-
-	// Go thru each solution, and get the first one that map the whole
-	// temp_hmatch
-	//
-	// XXX TODO branch on the various groundings?  how to properly handle
-	// multiple possible unify option????
-	for (size_t i = 0; i < pred_list.size(); ++i)
-	{
-		for (const auto& p : pred_list[i])
-		{
-			if (is_atom_in_tree(p.second, temp_hmatch))
-			{
-				good_map = var_list[i];
-				i = pred_list.size();
-				break;
-			}
-		}
-	}
-
-	// If none of the mapping map the whole temp_hmatch (possible in the case
-	// of sub-atom unification that map a typed variable to another variable)
-	if (good_map.empty())
-		return false;
-
-	// Change the mapping from temp_atomspace to current atomspace
-	for (const auto& p : good_map)
-	{
-		Handle var = p.first;
-		Handle grn = p.second;
-
-		result[_garbage_superspace.get_atom(var)] =
-			_garbage_superspace.get_atom(grn);
-	}
-
-	return true;
 }
 
 /**

@@ -39,6 +39,9 @@ public:
 	void setUp();
 	void tearDown();
 
+	void test_unify_1();
+	// void test_unify_2();
+	// void test_unify_3();
 	void test_select_rule_1();
 	void test_select_rule_2();
 	void test_select_rule_3();
@@ -87,6 +90,33 @@ void BackwardChainerUTest::reset_bc()
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 
 	_bc = new BackwardChainer(_as, top_rbs);
+}
+
+// Test select rule with a target with no variable
+void BackwardChainerUTest::test_unify_1()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	reset_bc();
+
+	Handle target = _eval.eval_h("(Inheritance"
+	                             "   (Concept \"A\")"
+	                             "   (Concept \"B\"))"),
+		pattern = _eval.eval_h("(Inheritance"
+		                       "   (Variable \"$A\")"
+		                       "   (Variable \"$B\"))"),
+		pattern_vardecl = _eval.eval_h("(VariableList"
+		                               "   (TypedVariableLink"
+		                               "       (VariableNode \"$A\")"
+		                               "       (TypeNode \"ConceptNode\"))"
+		                               "   (TypedVariableLink"
+		                               "       (VariableNode \"$B\")"
+		                               "       (TypeNode \"ConceptNode\")))");
+
+	bool unified = _bc->unify(target, pattern,
+	                          Handle::UNDEFINED, pattern_vardecl);
+
+	TS_ASSERT(unified);
 }
 
 // Test select rule with a target with no variable
