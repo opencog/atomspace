@@ -32,7 +32,8 @@
 using namespace opencog;
 
 AttentionBank::AttentionBank(AtomSpace *asp, bool transient)
-    : _index_insert_queue(this, &AttentionBank::put_atom_into_index, transient?0:4)
+    : _as(asp)
+    , _index_insert_queue(this, &AttentionBank::put_atom_into_index, transient?0:4)
     , _index_remove_queue(this, &AttentionBank::remove_atom_from_index, transient?0:4)
 {
     /* Do not boether with initialization, if this is transient */
@@ -129,9 +130,32 @@ void AttentionBank::stimulate(Handle& h, double stimulus)
     int lti = h->getAttentionValue()->getLTI();
     int stiWage = calculateSTIWage() * stimulus;
     int ltiWage = calculateLTIWage() * stimulus;
+    int newSti  = sti + stiWage;
+    int newLti = lti + ltiWage;
 
-    h->setSTI(sti + stiWage);
-    h->setLTI(lti + ltiWage);
+    h->setSTI(newSti);
+    h->setLTI(newLti);
+
+    AttentionValue::sti_t maxSTISeen = _as->get_max_STI();
+    AttentionValue::sti_t minSTISeen = _as->get_min_STI();
+    static bool first_time = true;
+
+    if(first_time){
+            minSTISeen = maxSTISeen = newSti;
+            first_time = false;
+    }else{
+        if (newSti > maxSTISeen){
+            maxSTISeen = newSti;
+        } 
+        if (newSti < maxSTISeen){
+            minSTISeen = newSti;
+        } 
+        if (minSTISeen > maxSTISeen){
+            minSTISeen = maxSTISeen;
+        }
+    }
+    _as->update_max_STI(maxSTISeen);
+    _as->update_min_STI(minSTISeen);
 }
 
 void AttentionBank::updateMaxSTI(AttentionValue::sti_t m)
