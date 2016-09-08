@@ -123,7 +123,8 @@
 "
  prt-atom-list          Send to port the list of atoms.
 
- Sends a list of atoms 'lst' to the open port 'port'.
+ Sends a list of atoms 'lst' to the open port 'port', if the atoms have
+ no incoming-set.
 "
     (if (not (null? lst))
         ; try to protect against undefined handles, although note that
@@ -151,7 +152,7 @@
  in which the opencog server was started.
 "
     (let ((port (open-file filename "w")))
-        (prt-atom-list port lst)
+        (map (lambda (atom) (display atom port)) lst)
         (close-port port)
     )
 )

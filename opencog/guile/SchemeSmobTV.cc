@@ -294,8 +294,17 @@ SCM SchemeSmob::ss_tv_p (SCM s)
 		switch (misctype)
 		{
 			case COG_TV:
+			{
+				// It si very highly unlikely that we will ever get a
+				// NullTruthValue, here -- it really should never happen.
+				// But we are going to check anyway, as otherwise... bad
+				// things have happened before.
+				TruthValue *tv = (TruthValue *) SCM_SMOB_DATA(s);
+				TruthValueType tvt = tv->getType();
+				scm_remember_upto_here_1(s);
+				if (NULL_TRUTH_VALUE == tvt) return SCM_BOOL_F;
 				return SCM_BOOL_T;
-
+			}
 			default:
 				return SCM_BOOL_F;
 		}
@@ -308,7 +317,11 @@ SCM SchemeSmob::ss_tv_p (SCM s)
  */
 inline SCM SchemeSmob::tv_p (SCM s, TruthValueType wanted)
 {
-	if (SCM_BOOL_F == ss_tv_p(s)) return SCM_BOOL_F;
+	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
+		return SCM_BOOL_F;
+
+	if (COG_TV != SCM_SMOB_FLAGS(s))
+		return SCM_BOOL_F;
 
 	TruthValue *tv = (TruthValue *) SCM_SMOB_DATA(s);
 	TruthValueType tvt = tv->getType();

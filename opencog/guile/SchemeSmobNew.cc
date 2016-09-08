@@ -196,6 +196,9 @@ SCM SchemeSmob::ss_atom (SCM suuid)
 
 	// SCM_RETURN_NEWSMOB (cog_uuid_tag, suuid);
 	UUID uuid = scm_to_ulong(suuid);
+	if (Handle::INVALID_UUID == uuid)
+		scm_wrong_type_arg_msg("cog-atom", 1, suuid, "valid opencog uuid");
+
 	return handle_to_scm(Handle(uuid));
 }
 
