@@ -205,16 +205,16 @@ bool BackwardChainer::unify(const Handle& target,
 	Handle temp_target_vardecl = temp_space.add_atom(target_vardecl);
 	Handle temp_pattern_vardecl = temp_space.add_atom(pattern_vardecl);
 
-	if (temp_target_vardecl == Handle::UNDEFINED)
+	if (temp_pattern_vardecl == Handle::UNDEFINED)
 	{
 		FindAtoms fv(VARIABLE_NODE);
-		fv.search_set(target);
+		fv.search_set(pattern);
 
 		HandleSeq vars;
 		for (const Handle& h : fv.varset)
 			vars.push_back(h);
 
-		temp_target_vardecl = temp_space.add_atom(createVariableList(vars));
+		temp_pattern_vardecl = temp_space.add_atom(createVariableList(vars));
 	}
 
 	PatternLinkPtr sl(createPatternLink(temp_pattern_vardecl, temp_pattern));
@@ -241,7 +241,7 @@ bool BackwardChainer::unify(const Handle& target,
 	{
 		for (const auto& p : pred_list[i])
 		{
-			if (is_atom_in_tree(p.second, temp_pattern))
+			if (is_atom_in_tree(p.second, temp_target))
 			{
 				good_map = var_list[i];
 				i = pred_list.size();
