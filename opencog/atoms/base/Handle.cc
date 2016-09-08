@@ -116,6 +116,7 @@ void Handle::clear_resolver(const AtomTable* tab)
 // the atom wins.  Seems to work, for now.
 inline Handle Handle::do_res(UUID uuid)
 {
+    if (INVALID_UUID == uuid) return Handle();
     for (const AtomTable* at : _resolver) {
         Handle h(at->getHandle(uuid));
         if (NULL != h) return h;
