@@ -40,8 +40,9 @@ public:
 	void tearDown();
 
 	void test_unify_1();
-	// void test_unify_2();
-	// void test_unify_3();
+	void test_unify_2();
+	void test_unify_3();
+	void test_unify_4();
 	// void test_select_rule_1();
 	// void test_select_rule_2();
 	// void test_select_rule_3();
@@ -99,22 +100,71 @@ void BackwardChainerUTest::test_unify_1()
 
 	reset_bc();
 
-	Handle target = _eval.eval_h("(Inheritance"
-	                             "   (Concept \"A\")"
-	                             "   (Concept \"B\"))"),
-		pattern = _eval.eval_h("(Inheritance"
-		                       "   (Variable \"$A\")"
-		                       "   (Variable \"$B\"))"),
-		pattern_vardecl = _eval.eval_h("(VariableList"
-		                               "   (TypedVariableLink"
-		                               "       (VariableNode \"$A\")"
-		                               "       (TypeNode \"ConceptNode\"))"
-		                               "   (TypedVariableLink"
-		                               "       (VariableNode \"$B\")"
-		                               "       (TypeNode \"ConceptNode\")))");
+	Handle target = _eval.eval_h("(Concept \"A\")"),
+		pattern = _eval.eval_h("(Variable \"$A\")"),
+		pattern_vardecl = _eval.eval_h("(TypedVariableLink"
+		                               "    (VariableNode \"$A\")"
+		                               "    (TypeNode \"ConceptNode\"))");
 
 	bool unified = _bc->unify(target, pattern,
 	                          Handle::UNDEFINED, pattern_vardecl);
+
+	TS_ASSERT(unified);
+}
+
+// Like test_unify_1 but swap the target and the pattern
+void BackwardChainerUTest::test_unify_2()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	reset_bc();
+
+	Handle target = _eval.eval_h("(Concept \"A\")"),
+		pattern = _eval.eval_h("(Variable \"$A\")"),
+		pattern_vardecl = _eval.eval_h("(TypedVariableLink"
+		                               "    (VariableNode \"$A\")"
+		                               "    (TypeNode \"ConceptNode\"))");
+
+	bool unified = _bc->unify(pattern, target,
+	                          pattern_vardecl, Handle::UNDEFINED);
+
+	TS_ASSERT(unified);
+}
+
+// Unify bigger pattern with no variable in it
+void BackwardChainerUTest::test_unify_3()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	reset_bc();
+
+	Handle target = _eval.eval_h("(Inheritance"
+	                             "   (Concept \"A\")"
+	                             "   (Concept \"B\"))"),
+		pattern = _eval.eval_h("(Variable \"$X\")");
+
+	bool unified = _bc->unify(target, pattern,
+	                          Handle::UNDEFINED, Handle::UNDEFINED);
+
+	TS_ASSERT(unified);
+}
+
+// Unify bigger pattern with variables in both sides
+void BackwardChainerUTest::test_unify_4()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	reset_bc();
+
+	Handle target = _eval.eval_h("(Inheritance"
+	                             "   (Variable \"$A\")"
+	                             "   (Concept \"B\"))"),
+		pattern = _eval.eval_h("(Inheritance"
+		                       "   (Concept \"A\")"
+		                       "   (Variable \"$B\"))");
+
+	bool unified = _bc->unify(target, pattern,
+	                          Handle::UNDEFINED, Handle::UNDEFINED);
 
 	TS_ASSERT(unified);
 }
