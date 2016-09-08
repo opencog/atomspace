@@ -299,6 +299,9 @@ Handle AtomTable::getHandle(const AtomPtr& a) const
 // If we have a uuid but no atom pointer, find the atom pointer.
 Handle AtomTable::getHandle(UUID uuid) const
 {
+    // Strange, but the find() below can crash, if uuid=-1.
+    if (Handle::INVALID_UUID == uuid) return Handle::UNDEFINED;
+
     // Read-lock for the _atom_set.
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
