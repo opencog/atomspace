@@ -41,6 +41,7 @@ BackwardChainerPMCB::~BackwardChainerPMCB()
 {
 }
 
+// TODO: probably don't need this
 bool BackwardChainerPMCB::node_match(const Handle& npat_h, const Handle& nsoln_h)
 {
 	if (npat_h == nsoln_h)
