@@ -154,6 +154,12 @@ private:
 	bool unify(const Handle& target, const Handle& pattern,
 	           const Handle& target_vardecl, const Handle& pattern_vardecl);
 
+	bool sym_unify(const Handle& lhs, const Handle& rhs,
+	               const Handle& lhs_vardecl, const Handle& rhs_vardecl);
+
+	VariableListPtr gen_varlist(const Handle& h);
+	VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl);
+
 #if 0
 	bool select_rule_old(const Target& target,
 	                     Rule& selected_rule,
@@ -176,7 +182,6 @@ private:
 	Handle garbage_substitute(const Handle& term, const HandleMap& vm);
 	
 	Handle gen_varlist(const Handle& target);
-
 	Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist,
 	                       OrderedHandleSet additional_free_varset);
 #endif

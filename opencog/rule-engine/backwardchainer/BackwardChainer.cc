@@ -198,32 +198,25 @@ bool BackwardChainer::unify(const Handle& target,
                             HandleMap& result)
 {
 	// Lazy way of restricting PM to be between two atoms
-	AtomSpace temp_space;
+	AtomSpace tmp_space;
 
-	Handle temp_target = temp_space.add_atom(target);
-	Handle temp_pattern = temp_space.add_atom(pattern);
-	Handle temp_target_vardecl = temp_space.add_atom(target_vardecl);
-	Handle temp_pattern_vardecl = temp_space.add_atom(pattern_vardecl);
+	Handle tmp_target = tmp_space.add_atom(target);
+	Handle tmp_pattern = tmp_space.add_atom(pattern);
+	Handle tmp_target_vardecl = tmp_space.add_atom(target_vardecl);
+	Handle tmp_pattern_vardecl = tmp_space.add_atom(pattern_vardecl);
 
-	if (temp_pattern_vardecl == Handle::UNDEFINED)
-	{
-		FindAtoms fv(VARIABLE_NODE);
-		fv.search_set(pattern);
+	VariableListPtr tmp_target_vardecl_vlp = gen_varlist(tmp_target, tmp_target_vardecl);
+	VariableListPtr tmp_pattern_vardecl_vlp = gen_varlist(tmp_pattern, tmp_pattern_vardecl);
 
-		HandleSeq vars;
-		for (const Handle& h : fv.varset)
-			vars.push_back(h);
+	tmp_target_vardecl = tmp_space.add_atom(tmp_target_vardecl_vlp);
+	tmp_pattern_vardecl = tmp_space.add_atom(tmp_pattern_vardecl_vlp);
 
-		temp_pattern_vardecl = temp_space.add_atom(createVariableList(vars));
-	}
-
-	PatternLinkPtr sl(createPatternLink(temp_pattern_vardecl, temp_pattern));
-	UnifyPMCB pmcb(&temp_space, VariableListCast(temp_pattern_vardecl),
-	               VariableListCast(temp_target_vardecl));
+	PatternLinkPtr sl(createPatternLink(tmp_pattern_vardecl, tmp_pattern));
+	UnifyPMCB pmcb(&tmp_space, tmp_pattern_vardecl_vlp, tmp_target_vardecl_vlp);
 
 	sl->satisfy(pmcb);
 
-	// if no grounding
+	// If no grounding
 	if (pmcb.get_var_list().size() == 0)
 		return false;
 
@@ -241,7 +234,7 @@ bool BackwardChainer::unify(const Handle& target,
 	{
 		for (const auto& p : pred_list[i])
 		{
-			if (is_atom_in_tree(p.second, temp_target))
+			if (is_atom_in_tree(p.second, tmp_target))
 			{
 				good_map = var_list[i];
 				i = pred_list.size();
@@ -277,6 +270,15 @@ bool BackwardChainer::unify(const Handle& target,
 	return unify(target, pattern, target_vardecl, pattern_vardecl, tmp);
 }
 
+bool BackwardChainer::sym_unify(const Handle& lhs,
+                                const Handle& rhs,
+                                const Handle& lhs_vardecl,
+                                const Handle& rhs_vardecl)
+{
+	return unify(lhs, rhs, lhs_vardecl, rhs_vardecl)
+		or unify(rhs, lhs, rhs_vardecl, lhs_vardecl);
+}
+
 /**
  * Get the current result on the initial target, if any.
  *
@@ -296,6 +298,36 @@ HandleMultimap BackwardChainer::get_chaining_result()
 	}
 
 	return result;
+}
+
+/**
+ * Generate a VariableList of the free variables of a given atom h.
+ */
+VariableListPtr BackwardChainer::gen_varlist(const Handle& h)
+{
+	OrderedHandleSet vars = get_free_variables(h);
+	return createVariableList(HandleSeq(vars.begin(), vars.end()));
+}
+
+/**
+ * Given an atom h and its variable declaration vardecl, turn the
+ * vardecl into a VariableList if not already, and if undefined,
+ * generate a VariableList of the free variables of h.
+ */
+VariableListPtr BackwardChainer::gen_varlist(const Handle& h, const Handle& vardecl)
+{
+	if (vardecl == Handle::UNDEFINED)
+		return gen_varlist(h);
+	else {
+		Type vardecl_t = vardecl->getType();
+		if (vardecl_t == VARIABLE_LIST)
+			return VariableListCast(vardecl);
+		else {
+			OC_ASSERT(vardecl_t == VARIABLE_NODE
+			          or vardecl_t == TYPED_VARIABLE_LINK);
+			return createVariableList(HandleSeq(1, vardecl));
+		}
+	}
 }
 
 #if 0
