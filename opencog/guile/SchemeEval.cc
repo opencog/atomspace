@@ -537,7 +537,7 @@ void SchemeEval::eval_expr(const std::string &expr)
 	// environment, and don't need to do any additional setup.
 	// Just go.
 	if (_in_eval) {
-	   do_eval(expr);
+		do_eval(expr);
 		return;
 	}
 
