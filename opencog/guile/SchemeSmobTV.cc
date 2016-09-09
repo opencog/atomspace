@@ -367,6 +367,11 @@ TruthValue * SchemeSmob::verify_tv(SCM stv, const char *subrname, int pos)
 		scm_wrong_type_arg_msg(subrname, pos, stv, "opencog truth value");
 
 	TruthValue *tv = (TruthValue *) SCM_SMOB_DATA(stv);
+
+	// The NullTruthValue is an error condition.
+	if (NULL_TRUTH_VALUE == tv->getType())
+		scm_wrong_type_arg_msg(subrname, pos, stv, "opencog truth value");
+
 	return tv;
 }
 
