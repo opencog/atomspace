@@ -977,10 +977,16 @@ TruthValuePtr SchemeEval::eval_tv(const std::string &expr)
 	if (_in_eval) {
 		// scm_from_utf8_string is lots faster than scm_from_locale_string
 		SCM expr_str = scm_from_utf8_string(expr.c_str());
-		// We evaluate the string directly, instead of wrapping it in a
-		// scm_catch (viz do_scm_eval()) so that any exceptions thrown
-		// get passed right on up the stack.
-		SCM rc = scm_eval_string(expr_str);
+		// An alternative here would be to evaluate the string directly,
+		// so that any exceptions thrown get passed right on up the stack.
+		// I think this is the right thing to do; but I'm a bit confused.
+		// The alternative would be this:
+		// SCM rc = scm_eval_string(expr_str);
+		// However, I suspect that might actually result in the exception
+		// being hidden away.  So lets be conservative, and throw.
+		SCM rc = do_scm_eval(expr_str, recast_scm_eval_string);
+		if (eval_error())
+			throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
 		return SchemeSmob::to_tv(rc);
 	}
 
