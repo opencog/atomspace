@@ -970,13 +970,17 @@ TruthValuePtr SchemeEval::eval_tv(const std::string &expr)
 	// If we are recursing, then we already are in the guile
 	// environment, and don't need to do any additional setup.
 	// Just go.
+	// In this case, "recursing" means that guile called something
+	// that triggered a GroundedPredicate/SchemaNode that called
+	// guile, again, in this very same thread.  Another possibility
+	// is that someone called cog-execute! explicitly.
 	if (_in_eval) {
 		// scm_from_utf8_string is lots faster than scm_from_locale_string
 		SCM expr_str = scm_from_utf8_string(expr.c_str());
-		SCM rc = do_scm_eval(expr_str, recast_scm_eval_string);
-
-		// Pass evaluation errors out of the wrapper.
-		if (eval_error()) return TruthValue::NULL_TV();
+		// We evaluate the string directly, instead of wrapping it in a
+		// scm_catch (viz do_scm_eval()) so that any exceptions thrown
+		// get passed right on up the stack.
+		SCM rc = scm_eval_string(expr_str);
 		return SchemeSmob::to_tv(rc);
 	}
 
