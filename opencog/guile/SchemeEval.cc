@@ -537,7 +537,7 @@ void SchemeEval::eval_expr(const std::string &expr)
 	// environment, and don't need to do any additional setup.
 	// Just go.
 	if (_in_eval) {
-	   do_eval(expr);
+		do_eval(expr);
 		return;
 	}
 
@@ -970,13 +970,17 @@ TruthValuePtr SchemeEval::eval_tv(const std::string &expr)
 	// If we are recursing, then we already are in the guile
 	// environment, and don't need to do any additional setup.
 	// Just go.
+	// In this case, "recursing" means that guile called something
+	// that triggered a GroundedPredicate/SchemaNode that called
+	// guile, again, in this very same thread.  Another possibility
+	// is that someone called cog-execute! explicitly.
 	if (_in_eval) {
 		// scm_from_utf8_string is lots faster than scm_from_locale_string
 		SCM expr_str = scm_from_utf8_string(expr.c_str());
-		SCM rc = do_scm_eval(expr_str, recast_scm_eval_string);
-
-		// Pass evaluation errors out of the wrapper.
-		if (eval_error()) return TruthValue::NULL_TV();
+		// We evaluate the string directly, instead of wrapping it in a
+		// scm_catch (viz do_scm_eval()) so that any exceptions thrown
+		// get passed right on up the stack.
+		SCM rc = scm_eval_string(expr_str);
 		return SchemeSmob::to_tv(rc);
 	}
 
@@ -1160,6 +1164,11 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
 		}
 	}
 	expr = scm_cons(sfunc, expr);
+
+	// TODO: it would be nice to pass exceptions on through, but
+	// this currently breaks unit tests.
+	// if (_in_eval)
+	//    return scm_eval(expr, scm_interaction_environment());
 	return do_scm_eval(expr, thunk_scm_eval);
 }
 
@@ -1180,7 +1189,13 @@ TruthValuePtr SchemeEval::apply_tv(const std::string &func, Handle varargs)
 	if (_in_eval) {
 		SCM tv_smob = do_apply_scm(func, varargs);
 		if (eval_error())
-			return TruthValue::NULL_TV();
+		{
+			// Rethrow.  It would be better to just allow exceptions
+			// to pass on through, but thus breaks some unit tests.
+			// XXX FIXME -- idealy we should avoid catch-and-rethrow.
+			// At any rate, we must not return a TV of any sort, here.
+			throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
+		}
 		return SchemeSmob::to_tv(tv_smob);
 	}
 
