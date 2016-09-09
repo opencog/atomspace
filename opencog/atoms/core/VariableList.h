@@ -57,8 +57,8 @@ protected:
 	void validate_vardecl(const HandleSeq&);
 
 	VariableList(Type, const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	             TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	void build_index(void);
 public:
@@ -101,6 +101,9 @@ static inline VariableListPtr VariableListCast(const AtomPtr& a)
 
 // XXX temporary hack ...
 #define createVariableList std::make_shared<VariableList>
+
+// For gdb
+std::string oc_to_string(const VariableListPtr& vlp);
 
 /** @}*/
 }

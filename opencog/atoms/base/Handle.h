@@ -317,7 +317,7 @@ std::string hmultimap_to_string(const HandleMultimap& hmm);
 std::string hmaps_to_string(const HandleMapSeq& hms);
 std::string hps_to_string(const HandlePairSeq& hps);
 std::string atomtype_to_string(Type type);
-std::string aptr_to_string(const LinkPtr& aptr);
+std::string aptr_to_string(const AtomPtr& aptr);
 std::string lptr_to_string(const LinkPtr& lptr);
 
 // In case your gdb supports overloading
