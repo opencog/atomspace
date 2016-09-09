@@ -1164,6 +1164,11 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
 		}
 	}
 	expr = scm_cons(sfunc, expr);
+
+	// TODO: it would be nice to pass exceptions on through, but
+	// this currently breaks unit tests.
+	// if (_in_eval)
+	//    return scm_eval(expr, scm_interaction_environment());
 	return do_scm_eval(expr, thunk_scm_eval);
 }
 
@@ -1184,7 +1189,13 @@ TruthValuePtr SchemeEval::apply_tv(const std::string &func, Handle varargs)
 	if (_in_eval) {
 		SCM tv_smob = do_apply_scm(func, varargs);
 		if (eval_error())
-			return TruthValue::NULL_TV();
+		{
+			// Rethrow.  It would be better to just allow exceptions
+			// to pass on through, but thus breaks some unit tests.
+			// XXX FIXME -- idealy we should avoid catch-and-rethrow.
+			// At any rate, we must not return a TV of any sort, here.
+			throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
+		}
 		return SchemeSmob::to_tv(tv_smob);
 	}
 
