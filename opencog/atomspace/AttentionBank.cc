@@ -97,11 +97,29 @@ void AttentionBank::AVChanged(const Handle& h,
                               const AttentionValuePtr& old_av,
                               const AttentionValuePtr& new_av)
 {
+    AttentionValue::sti_t newSti = new_av->getSTI();
+    
     // Add the old attention values to the AtomSpace funds and
     // subtract the new attention values from the AtomSpace funds
-    updateSTIFunds(old_av->getSTI() - new_av->getSTI());
+    updateSTIFunds(old_av->getSTI() - newSti);
     updateLTIFunds(old_av->getLTI() - new_av->getLTI());
 
+    // Update MinMax STI values
+    AttentionValue::sti_t maxSTISeen = _as->get_max_STI();
+    AttentionValue::sti_t minSTISeen = _as->get_min_STI();
+
+    if (newSti > maxSTISeen){
+        maxSTISeen = newSti;
+    } else if (newSti < maxSTISeen){
+        minSTISeen = newSti;
+    }
+
+    if (minSTISeen > maxSTISeen){
+        minSTISeen = maxSTISeen;
+    }
+    _as->update_max_STI(maxSTISeen);
+    _as->update_min_STI(minSTISeen);
+    
     logger().fine("AVChanged: fundsSTI = %d, old_av: %d, new_av: %d",
                    fundsSTI.load(), old_av->getSTI(), new_av->getSTI());
 
@@ -130,32 +148,9 @@ void AttentionBank::stimulate(Handle& h, double stimulus)
     int lti = h->getAttentionValue()->getLTI();
     int stiWage = calculateSTIWage() * stimulus;
     int ltiWage = calculateLTIWage() * stimulus;
-    int newSti  = sti + stiWage;
-    int newLti = lti + ltiWage;
 
-    h->setSTI(newSti);
-    h->setLTI(newLti);
-
-    AttentionValue::sti_t maxSTISeen = _as->get_max_STI();
-    AttentionValue::sti_t minSTISeen = _as->get_min_STI();
-    static bool first_time = true;
-
-    if(first_time){
-            minSTISeen = maxSTISeen = newSti;
-            first_time = false;
-    }else{
-        if (newSti > maxSTISeen){
-            maxSTISeen = newSti;
-        } 
-        if (newSti < maxSTISeen){
-            minSTISeen = newSti;
-        } 
-        if (minSTISeen > maxSTISeen){
-            minSTISeen = maxSTISeen;
-        }
-    }
-    _as->update_max_STI(maxSTISeen);
-    _as->update_min_STI(minSTISeen);
+    h->setSTI(sti + stiWage);
+    h->setLTI(lti + ltiWage);
 }
 
 void AttentionBank::updateMaxSTI(AttentionValue::sti_t m)
