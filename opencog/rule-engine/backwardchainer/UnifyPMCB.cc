@@ -47,6 +47,21 @@ UnifyPMCB::~UnifyPMCB()
 
 }
 
+bool UnifyPMCB::node_match(const Handle& npat_h, const Handle& nsoln_h)
+{
+	if (npat_h == nsoln_h)
+		return true;
+
+	// If the pattern is not a variable and the solution is a variable
+	// then only check whether the type of the pattern matches the one
+	// of the variable (if it has any)
+	if (nsoln_h->getType() == VARIABLE_NODE) {
+		return _ext_vars->is_type(nsoln_h, npat_h);
+	}
+
+	return false;
+}
+
 bool UnifyPMCB::variable_match(const Handle& npat_h,
                                const Handle& nsoln_h)
 {
