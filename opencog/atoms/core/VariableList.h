@@ -80,6 +80,11 @@ public:
 	// Else return false.
 	bool is_type(const Handle& h) const { return _varlist.is_type(h); }
 
+	// Return true if we are holding the variable `var`, and `val`
+	// satisfies the type restrictions that apply to `var`.
+	bool is_type(const Handle& var, const Handle& val) const
+		{ return _varlist.is_type(var, val); }
+
 	// Return true if the sequence is of the same length as the variable
 	// declarations we are holding, and if they satisfy all of the type
 	// restrictions (if any).
