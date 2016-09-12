@@ -302,7 +302,7 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 	// Sometimes, the number of mandatory clauses can be zero...
 	// or they might all be evaluatable.  In this case, its OK to
 	// start searching with an optional clause. But if there ARE
-	// mandatories, we must NOT start serch on an optional, since,
+	// mandatories, we must NOT start search on an optional, since,
 	// after all, it might be absent!
 	bool try_all = true;
 	for (const Handle& m : _pattern->mandatory)
@@ -379,7 +379,7 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 		for (size_t i = 0; i < sz; i++)
 		{
 			Handle h(iset[i]);
-			LAZY_LOG_FINE << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n"
+			LAZY_LOG_FINE << "xxxxxxxxxx neighbor_search xxxxxxxxxx\n"
 			              << "Loop candidate (" << i+1 << "/" << sz << "):\n"
 			              << h->toShortString();
 			bool found = pme->explore_neighborhood(_root, _starter_term, h);
@@ -621,7 +621,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 	size_t i = 0, hsz = handle_set.size();
 	for (const Handle& h : handle_set)
 	{
-		LAZY_LOG_FINE << "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\n"
+		LAZY_LOG_FINE << "yyyyyyyyyy link_type_search yyyyyyyyyy\n"
 		              << "Loop candidate (" << ++i << "/" << hsz << "):\n"
 		              << h->toShortString();
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
@@ -790,7 +790,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	size_t i = 0, hsz = handle_set.size();
 	for (const Handle& h : handle_set)
 	{
-		LAZY_LOG_FINE << "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz\n"
+		LAZY_LOG_FINE << "zzzzzzzzzzz variable_search zzzzzzzzzzz\n"
 		              << "Loop candidate (" << ++i << "/" << hsz << "):\n"
 		              << h->toShortString();
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
