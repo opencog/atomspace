@@ -57,8 +57,8 @@ protected:
 	void validate_vardecl(const HandleSeq&);
 
 	VariableList(Type, const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	             TruthValuePtr tv = TruthValue::DEFAULT_TV(),
+	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 	void build_index(void);
 public:
@@ -79,6 +79,11 @@ public:
 	// given as the argument satisfies the type restrictions (if any).
 	// Else return false.
 	bool is_type(const Handle& h) const { return _varlist.is_type(h); }
+
+	// Return true if we are holding the variable `var`, and `val`
+	// satisfies the type restrictions that apply to `var`.
+	bool is_type(const Handle& var, const Handle& val) const
+		{ return _varlist.is_type(var, val); }
 
 	// Return true if the sequence is of the same length as the variable
 	// declarations we are holding, and if they satisfy all of the type
@@ -101,6 +106,9 @@ static inline VariableListPtr VariableListCast(const AtomPtr& a)
 
 // XXX temporary hack ...
 #define createVariableList std::make_shared<VariableList>
+
+// For gdb
+std::string oc_to_string(const VariableListPtr& vlp);
 
 /** @}*/
 }

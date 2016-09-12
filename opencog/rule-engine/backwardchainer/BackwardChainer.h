@@ -35,6 +35,8 @@ namespace opencog
 {
 
 /**
+ * TODO: update that comment
+ *
  * Backward chaining falls into two cases
  *
  * 1. Truth value query - Given a target atom whose truth value is not
@@ -100,6 +102,7 @@ public:
 	 * Perform a single backward chaining inference step.
 	 */
 	void do_step();
+	void do_step_old();
 
 	/**
 	 * Perform backward chaining inference till the termination
@@ -115,13 +118,55 @@ public:
 	HandleMultimap get_chaining_result();
 
 private:
+	// Expand the back-inference tree of a target
+	void expand_bit(Target& target, const Rule& rule);
+
+	Target& select_target();
+
+	// Select a valid rule given a target.
+	const Rule& select_rule(const Target& target);
+
+	// Return all valid rules, in the sense that these rules may
+	// possibly be used to infer the target.
+	vector<const Rule*> get_valid_rules(const Target& target);
+
+	// Return true if a given target matches a given rule's
+	// conclusion. In other words whether the rule is a potential
+	// candidate for back-inference tree expansion.
+	bool match_conclusion(const Target& target, const Rule& rule);
+
+	// Fulfill, apply possible inferences in a forward way and pattern
+	// matchings in order to fulfill the given target
+	void fulfill_target(Target& target);
+
+	// Check that h is matched by a given pattern body with a given
+	// variable declaration vardecl.
+	bool unify(const Handle& target, const Handle& pattern,
+	           const Handle& pattern_vardecl);
+
+	// Like above but handles variables on the source as well and
+	// record the matching in the HandleMap result
+	bool unify(const Handle& target, const Handle& pattern,
+	           const Handle& target_vardecl, const Handle& pattern_vardecl,
+	           HandleMap& result);
+
+	// Like above but discard the result
+	bool unify(const Handle& target, const Handle& pattern,
+	           const Handle& target_vardecl, const Handle& pattern_vardecl);
+
+	bool sym_unify(const Handle& lhs, const Handle& rhs,
+	               const Handle& lhs_vardecl, const Handle& rhs_vardecl);
+
+	VariableListPtr gen_varlist(const Handle& h);
+	VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl);
+
+#if 0
+	bool select_rule_old(const Target& target,
+	                     Rule& selected_rule,
+	                     Rule& standardized_rule,
+	                     HandleMapSeq& all_implicand_to_target_mappings);
 
 	void process_target(Target& target);
-
-	bool select_rule(const Target& target,
-	                 Rule& selected_rule,
-	                 Rule& standardized_rule,
-	                 HandleMapSeq& all_implicand_to_target_mappings);
 
 	HandleSeq match_knowledge_base(Handle htarget,
 	                               Handle htarget_vardecl,
@@ -134,17 +179,12 @@ private:
 	                        HandleMapSeq& premises_vmap_list);
 	HandleSeq ground_premises(const Handle& htarget, const HandleMap& vmap,
 	                          HandleMapSeq& vmap_list);
-	bool unify(const Handle& hsource, const Handle& hmatch,
-	           const Handle& hsource_vardecl, const Handle& hmatch_vardecl,
-	           HandleMap& result);
-
 	Handle garbage_substitute(const Handle& term, const HandleMap& vm);
 	
 	Handle gen_varlist(const Handle& target);
-
 	Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist,
 	                       OrderedHandleSet additional_free_varset);
-
+#endif
 	AtomSpace& _as;
 	UREConfigReader _configReader;
 	AtomSpace _garbage_superspace;
@@ -152,7 +192,9 @@ private:
 	AtomSpace _focus_space;
 	int _iteration;
 
-	TargetSet _targets_set;
+	TargetSet _target_set;
+
+	const std::vector<Rule>& _rules;
 
 	// XXX any additional link should be reflected
 	unordered_set<Type> _logical_link_types = { AND_LINK, OR_LINK, NOT_LINK };

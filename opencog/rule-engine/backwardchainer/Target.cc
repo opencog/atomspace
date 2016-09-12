@@ -29,6 +29,9 @@
 
 using namespace opencog;
 
+Target::Target(const Handle& h) : handle(h) {}
+
+#if 0
 /**
  * Constructor of Target.
  *
@@ -128,6 +131,13 @@ unsigned int Target::rule_count(const Rule& r) const
 	return std::count(q.begin(), q.end(), hname);
 }
 
+std::string Target::to_string()
+{
+	stringstream ss;
+	ss << "Target handle = " << get_handle()->toShortString();
+	ss << "With var_decl = " << get_vardecl()->toShortString();
+	return ss.str();
+}
 
 //==================================================================
 
@@ -227,3 +237,4 @@ Target& TargetSet::get(Handle h)
 {
 	return _targets_map.at(_history_space.get_atom(h));
 }
+#endif

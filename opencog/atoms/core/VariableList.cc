@@ -337,4 +337,12 @@ void VariableList::build_index(void)
 	}
 }
 
+std::string opencog::oc_to_string(const VariableListPtr& vlp)
+{
+	if (vlp == nullptr)
+		return "nullvariablelist\n";
+	else
+		return oc_to_string(vlp->getHandle());
+}
+
 /* ===================== END OF FILE ===================== */

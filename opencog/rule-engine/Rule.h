@@ -144,6 +144,7 @@ public:
 	Handle get_forward_vardecl() const;
 	HandleSeq get_backward_vardecls() const;
 	Handle get_forward_implicant() const;
+	Handle get_forward_implicand() const;
 
 	/**
 	 * Return the premises of the rule. Optionally a conclusion can be
@@ -159,10 +160,11 @@ public:
 	Handle get_forward_conclusion() const;
 
 	/**
-	 * Return the list of conclusion patterns. Used for finding out is
-	 * the rule matches a certain target.
+	 * Return the list of conclusion patterns. Each pattern is a pair
+	 * of Handles (variable declaration, body). Used for finding out
+	 * is the rule matches a certain target.
 	 */
-	HandleSeq get_conclusion_seq() const;
+	HandlePairSeq get_conclusions() const;
 	float get_weight() const;
 
 	Rule gen_standardize_apart(AtomSpace* as);
@@ -192,6 +194,15 @@ private:
 	float weight_;
 
 	Handle standardize_helper(AtomSpace* as, const Handle&, HandleMap&);
+
+	// Return the conclusions of the forward conclusions. There are
+	// several of them because the conclusions can be wrapped in the
+	// ListLink. In case each conclusion is an ExecutionOutputLink
+	// then return the last argument of that ExecutionOutputLink.
+	HandleSeq get_forward_conclusion_bodies() const;
+
+	// Given an ExecutionOutputLink return its last argument
+	Handle get_execution_output_last_argument(const Handle& h) const;
 };
 
 } // ~namespace opencog

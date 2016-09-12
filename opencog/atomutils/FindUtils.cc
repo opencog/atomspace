@@ -183,6 +183,11 @@ bool is_unscoped_in_tree(const Handle& tree, const Handle& atom)
 	return false;
 }
 
+bool is_unquoted_unscoped_in_tree(const Handle& tree, const Handle& atom)
+{
+	return is_unquoted_in_tree(tree, atom) and is_unscoped_in_tree(tree, atom);
+}
+
 bool any_atom_in_tree(const Handle& tree, const OrderedHandleSet& atoms)
 {
 	for (const Handle& n: atoms)

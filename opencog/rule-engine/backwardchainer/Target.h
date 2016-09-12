@@ -29,13 +29,50 @@
 namespace opencog
 {
 
+// Contains the fitness type of the target. For instance whether the
+// target is a variable query such that the variables maximize the
+// target TV in a certain way, etc.
+class TargetFitness
+{
+};
+
+// A Target, also a back-inference tree node.
 class Target
+{
+public:
+	Target(const Handle& h);
+
+	// Target handle
+	Handle handle;
+
+	// Target fitness
+	TargetFitness fitness;
+
+	// Or-children at the rule level, as multiple rules, or rule
+	// variations (partially unified, etc) can yield the same target.
+	std::vector<Rule> rules;
+};
+
+// Back-inference tree. A back-inference tree is an and-or tree, where
+// there are 2 types of children, or-children and
+// and-children. Specifically the or-children are represented by
+// Target::rules, because multiple rules or rule variations can infer
+// the same target. Then within each rule or rule variation, the rule
+// premises are and-children because in order to apply a certain rule
+// all premises must be fulfilled.
+class TargetSet : public std::unordered_map<Handle, Target>
+{
+};
+
+// obsolete code to be removed as soon as the new code is functional
+#if 0
+class TargetOld
 {
 	friend class TargetSet;
 
 public:
 
-	~Target() {}
+	~TargetOld() {}
 
 	// Comparison
 	bool operator==(const Target& t) const
@@ -107,6 +144,8 @@ public:
 	 */
 	float get_weight() { return 1.0f; }
 
+	std::string to_string();
+
 private:
 	Target(AtomSpace& as, const Handle& h, const Handle& hvardecl);
 
@@ -119,8 +158,7 @@ private:
 	AtomSpace& _as;
 };
 
-
-class TargetSet
+class TargetSetOld
 {
 public:
 	TargetSet();
@@ -137,6 +175,7 @@ private:
 	AtomSpace _history_space;
 	unsigned int _total_selection;
 };
+#endif
 
 }
 
