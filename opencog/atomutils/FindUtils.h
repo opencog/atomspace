@@ -1,5 +1,5 @@
 /**
- * FindUtils.h
+ * opencog/atomutils/FindUtils.h
  *
  * Utilities for finding atoms in trees.
  *
