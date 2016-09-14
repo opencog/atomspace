@@ -243,6 +243,9 @@ typedef std::map<Handle, Handle> HandleMap;
 //! a sequence of ordered handle maps
 typedef std::vector<HandleMap> HandleMapSeq;
 
+//! a set of ordered handle maps
+typedef std::set<HandleMap> HandleMapSet;
+
 //! a pair of handles
 typedef std::pair<Handle, Handle> HandlePair;
 
@@ -315,6 +318,7 @@ std::string uhs_to_string(const UnorderedHandleSet& uhs);
 std::string hmap_to_string(const HandleMap& hm);
 std::string hmultimap_to_string(const HandleMultimap& hmm);
 std::string hmaps_to_string(const HandleMapSeq& hms);
+std::string hmapset_to_string(const HandleMapSet& hms);
 std::string hps_to_string(const HandlePairSeq& hps);
 std::string atomtype_to_string(Type type);
 std::string aptr_to_string(const AtomPtr& aptr);
@@ -329,6 +333,7 @@ std::string oc_to_string(const UnorderedHandleSet& uhs);
 std::string oc_to_string(const HandleMap& hm);
 std::string oc_to_string(const HandleMultimap& hmm);
 std::string oc_to_string(const HandleMapSeq& hms);
+std::string oc_to_string(const HandleMapSet& hms);
 std::string oc_to_string(const HandlePairSeq& hps);
 std::string oc_to_string(Type type);
 std::string oc_to_string(const AtomPtr& aptr);

@@ -185,6 +185,18 @@ std::string hmaps_to_string(const HandleMapSeq& hms)
 		   << hmap_to_string(hms[i]);
 	return ss.str();
 }
+std::string hmapset_to_string(const HandleMapSet& hms)
+{
+	std::stringstream ss;
+	ss << "size = " << hms.size() << std::endl;
+	unsigned i = 0;
+	for (const HandleMap& hm : hms) {
+		ss << "--- map[" << i << "] ---" << std::endl
+		   << hmap_to_string(hm);
+		++i;
+	}
+	return ss.str();
+}
 std::string hps_to_string(const HandlePairSeq& hps)
 {
 	std::stringstream ss;
@@ -243,6 +255,10 @@ std::string oc_to_string(const HandleMultimap& hmm)
 std::string oc_to_string(const HandleMapSeq& hms)
 {
 	return hmaps_to_string(hms);
+}
+std::string oc_to_string(const HandleMapSet& hms)
+{
+	return hmapset_to_string(hms);
 }
 std::string oc_to_string(const HandlePairSeq& hps)
 {
