@@ -1,0 +1,137 @@
+/**
+ * tests/atomspace/UnifyUTest.cxxtest
+ *
+ * Copyright (C) 2016 OpenCog Foundation
+ * All Rights Reserved
+ * Author: Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomutils/Unify.h>
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+class UnifyUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+	Handle X, Y, A, B, AB, XB, AY, XY;
+	
+public:
+	UnifyUTest() {}
+
+	void setUp();
+
+	void test_unify_1();
+	void test_unify_2();
+	void test_unify_3();
+	void test_unify_4();
+	// void test_unify_5();
+	void test_unify_6();
+	void test_unify_7();
+};
+
+void UnifyUTest::setUp(void)
+{
+#define al _as.add_link
+#define an _as.add_node
+
+	X = an(VARIABLE_NODE, "$X");
+	Y = an(VARIABLE_NODE, "$Y");
+	A = an(CONCEPT_NODE, "A");
+	B = an(CONCEPT_NODE, "B");
+	AB = al(INHERITANCE_LINK, A, B);
+	XB = al(INHERITANCE_LINK, X, B);
+	AY = al(INHERITANCE_LINK, A, Y);
+	XY = al(INHERITANCE_LINK, X, Y);
+
+#undef al
+#undef an
+}
+
+void UnifyUTest::test_unify_1()
+{
+	BoolHandleMapSetPair result = unify(X, A),
+		expected{true, {{{X, A}}}};
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+	
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_2()
+{
+	BoolHandleMapSetPair result = unify(A, X),
+		expected{true, {{{X, A}}}};
+	
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_3()
+{
+	BoolHandleMapSetPair result = unify(X, AB),
+		expected{true, {{{X, AB}}}};
+	
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_4()
+{
+	BoolHandleMapSetPair result = unify(XB, AY),
+		expected{true, {{{X, A}, {Y, B}}}};
+	
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+// void UnifyUTest::test_unify_5()
+// {
+// 	HandleMapSeq result = unify(XY, AY),
+// 		expected{{{X, A}, {Y, Y}}};
+
+// 	std::cout << "result = " << oc_to_string(result) << std::endl;
+// 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+// 	TS_ASSERT_EQUALS(result, expected);
+// }
+
+void UnifyUTest::test_unify_6()
+{
+	// This one is supposed to fail
+	BoolHandleMapSetPair result = unify(A, B);
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+
+	TS_ASSERT(not result.first);
+}
+
+void UnifyUTest::test_unify_7()
+{
+	// This one is supposed to fail
+	BoolHandleMapSetPair result = unify(XB, B);
+
+	TS_ASSERT(not result.first);
+}
