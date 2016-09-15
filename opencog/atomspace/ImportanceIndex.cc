@@ -31,7 +31,7 @@
 using namespace opencog;
 
 //! Each bin has STI range of 32 means 2048 importance bins.
-#define IMPORTANCE_INDEX_BIN_SIZE   (1 << 5)
+#define IMPORTANCE_INDEX_BIN_SIZE   32
 #define IMPORTANCE_INDEX_SIZE       2048
 
 ImportanceIndex::ImportanceIndex(void)
@@ -44,7 +44,7 @@ unsigned int ImportanceIndex::importanceBin(short importance)
 	// STI is in range of [-32768, 32767] so adding 32768 puts it in
 	// [0, 65535]
 	unsigned int bin = (importance + 32768) / IMPORTANCE_INDEX_BIN_SIZE;
-	assert (bin <= 2048-1);
+	assert (bin < IMPORTANCE_INDEX_SIZE);
 	return bin;
 }
 
