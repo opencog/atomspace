@@ -26,152 +26,178 @@
  */
 
 #include "Unify.h"
+
+#include <opencog/util/algorithm.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomutils/FindUtils.h>
 
 namespace opencog {
 
-BoolHandleMapSetPair unify(const Handle& lhs, const Handle& rhs,
-                           const Handle& lhs_vardecl,
-                           const Handle& rhs_vardecl)
+UnificationSolutionSet::UnificationSolutionSet(bool s,
+                                               const UnificationPartitions& p)
+	: satisfiable(s), partitions(p)
 {
-	return unify_rec(lhs, rhs, lhs_vardecl, rhs_vardecl);
 }
 
-BoolHandleMapSetPair unify_rec(const Handle& lhs, const Handle& rhs,
-                               const Handle& lhs_vardecl,
-                               const Handle& rhs_vardecl)
+UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
+                             const Handle& lhs_vardecl,
+                             const Handle& rhs_vardecl)
 {
 	// Make sure both handles are defined
 	if (lhs == Handle::UNDEFINED or rhs == Handle::UNDEFINED)
-		return {false, HandleMapSet()};
+		return UnificationSolutionSet(false);
 
 	Type lhs_type(lhs->getType());
 	Type rhs_type(rhs->getType());
-	Arity lhs_arity(lhs->isNode() ? 0 : lhs->getArity());
-	Arity rhs_arity(rhs->isNode() ? 0 : rhs->getArity());
 
 	// Base cases
-	if (lhs_arity == 0 or rhs_arity == 0) {
+	if (lhs->isNode() or rhs->isNode()) {
 		if (lhs_type == VARIABLE_NODE or rhs_type == VARIABLE_NODE) {
-			BoolHandleMapPair vares =
-				var_merge(lhs, rhs, lhs_vardecl, rhs_vardecl);
-			return {vares.first, {vares.second}};
+			return mkvarsol(lhs, rhs, lhs_vardecl, rhs_vardecl);
 		} else
-			return {lhs == rhs, HandleMapSet()};
+			return UnificationSolutionSet(lhs == rhs);
 	}
+
+	// At least one of them is a link, check if they have the same
+	// type (e.i. do they match so far)
+	if (lhs_type != rhs_type)
+		return UnificationSolutionSet(false);
+
+	// At this point they are both links, check that they have the
+	// same arity
+	Arity lhs_arity(lhs->getArity());
+	Arity rhs_arity(rhs->getArity());
 	if (lhs_arity != rhs_arity)
-		return {false, HandleMapSet()};
-	
+		return UnificationSolutionSet(false);
+
 	// Recursive cases
-	BoolHandleMapSetPair result;
-	result.first = true;
+	UnificationSolutionSet sol;
 	for (Arity i = 0; i < lhs_arity; ++i) {
-		auto res = unify_rec(lhs->getOutgoingAtom(i), rhs->getOutgoingAtom(i),
-		                     lhs_vardecl, rhs_vardecl);
-		result = mapset_merge(res, result);
-		if (not result.first)     // If unification has failed stop now
-			return result;
+		auto rs = unify(lhs->getOutgoingAtom(i), rhs->getOutgoingAtom(i),
+		                lhs_vardecl, rhs_vardecl);
+		sol = merge(sol, rs);
+		if (not sol.satisfiable)     // Stop if unification has failed
+			break;
 	}
-	return result;
+	return sol;
 }
 
-BoolHandleMapSetPair mapset_merge(const BoolHandleMapSetPair& lhs,
-                                  const BoolHandleMapSetPair& rhs)
+UnificationSolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
+                                const Handle& lhs_vardecl,
+                                const Handle& rhs_vardecl)
 {
-	// Don't bother merging is one has failed or one is empty
-	if (not lhs.first or rhs.second.empty())
-		return lhs;
-	if (not rhs.first or lhs.second.empty())
+	Handle inter = type_intersection(lhs, rhs, lhs_vardecl, rhs_vardecl);
+	if (inter == Handle::UNDEFINED)
+		return UnificationSolutionSet(false);
+	else {
+		OrderedHandleSet hset{lhs, rhs};
+		UnificationPartitions par{{{hset, inter}}};
+		return UnificationSolutionSet(true, par);
+	}
+}
+
+// TODO: very limited type intersection, should support structural
+// types, etc.
+Handle type_intersection(const Handle& lhs, const Handle& rhs,
+                         const Handle& lhs_vardecl, const Handle& rhs_vardecl)
+{
+	if (inherit(lhs, rhs, lhs_vardecl, rhs_vardecl))
 		return rhs;
-	
+	if (inherit(rhs, lhs, rhs_vardecl, lhs_vardecl))
+		return lhs;
+	return Handle::UNDEFINED;
+}
+
+UnificationSolutionSet merge(const UnificationSolutionSet& lhs,
+                             const UnificationSolutionSet& rhs)
+{
+	// Don't bother merging if one of them is invalid or empty
+	if (not lhs.satisfiable or rhs.partitions.empty())
+		return lhs;
+	if (not rhs.satisfiable or lhs.partitions.empty())
+		return rhs;
+
 	// Merge
-	BoolHandleMapSetPair result;
-	for (const HandleMap& hm : rhs.second) {
-		HandleMapSet hms(mapset_merge(lhs.second, hm));
-		result.second.insert(hms.begin(), hms.end());
+	UnificationSolutionSet result;
+	for (const UnificationPartition& rp : rhs.partitions) {
+		UnificationPartitions sol(merge(lhs.partitions, rp));
+		result.partitions.insert(sol.begin(), sol.end());
 	}
 
 	// If we get an empty merge whereas the inputs where not empty
 	// then the merge has failed
-	result.first = (not result.second.empty()) or
-		(lhs.second.empty() and rhs.second.empty());
-		
+	result.satisfiable = (not result.partitions.empty()) or
+		(lhs.partitions.empty() and rhs.partitions.empty());
+
 	return result;
 }
 
-HandleMapSet mapset_merge(const HandleMapSet& lhs, const HandleMap& rhs)
+UnificationPartitions merge(const UnificationPartitions& lhs,
+                            const UnificationPartition& rhs)
 {
-	HandleMapSet hms;
+	UnificationPartitions result;
 	if (lhs.empty())
-		hms.insert(rhs);
+		result.insert(rhs);
 	else {
-		for (const auto& hm : lhs)
-			hms.insert(map_merge(hm, rhs));
-	}
-	return hms;
-}
-	
-HandleMap map_merge(const HandleMap& lhs, const HandleMap& rhs)
-{
-	HandleMap hm(lhs);
-	for (const auto& el : rhs) {
-		auto it = hm.find(el.first);
-		if (it != hm.end()) {
-			// If inconsistent then erase incompatible mapping
-			if (it->second != el.second)
-				hm.erase(it);
-		} else {
-			// Insert unexciting mapping for this key 
-			hm.insert(el);
+		for (const auto& par : lhs) {
+			result.insert(merge(par, rhs));
 		}
 	}
-	return hm;
+	return result;
 }
 
-BoolHandleMapPair map_merge(const BoolHandleMapPair& lhs,
-                            const BoolHandleMapPair& rhs)
+UnificationPartition merge(const UnificationPartition& lhs,
+                           const UnificationPartition& rhs)
 {
-	// If one of them is invalid then don't bother merging
-	if (not lhs.first or not rhs.first)
-		return {false, HandleMap()};
+	// Don't bother merging if one of them is empty
+	if (lhs.empty())
+		return rhs;
+	if (rhs.empty())
+		return lhs;
 
-	// Both are valid
-	BoolHandleMapPair bhmp(lhs);
-	for (const auto& el : rhs.second) {
-		auto it = bhmp.second.find(el.first);
-		if (it != bhmp.second.end()) {
-			// If inconsistent set the flag as invalid
-			if (it->second != el.second) {
-				bhmp.first = false;
-				break;
+	// Do the actual merging
+	UnificationPartition result(lhs);
+	for (const auto& typed_block : rhs) {
+		for (auto it = lhs.begin(); it != lhs.end(); ++it) {
+			if (has_empty_intersection(typed_block.first, it->first)) {
+				// Merely insert this independent block
+				result.insert(typed_block);
+			} else {
+				// Merge the 2 equality related blocks
+				UnificationBlock m_typed_block = merge(typed_block, *it);
+				// If the resulting block is valid then replace *it
+				if (is_valid(m_typed_block)) {
+					result.erase(it);
+					result.insert(m_typed_block);
+				}
+				// If the resulting block is invalid then the partition is
+				// invalid as well, thus an empty partition is returned
+				else {
+					return UnificationPartition();
+				}
 			}
-		} else {
-			// Insert unexciting mapping for this key 
-			bhmp.second.insert(el);
 		}
 	}
-	return bhmp;
+	return result;
 }
 
-BoolHandleMapPair var_merge(const Handle& lhs, const Handle& rhs,
-                            const Handle& lhs_vardecl,
-                            const Handle& rhs_vardecl)
+UnificationBlock merge(const UnificationBlock& lhs, const UnificationBlock& rhs)
 {
-	return map_merge(oneway_var_merge(lhs, rhs, lhs_vardecl),
-	                 oneway_var_merge(rhs, lhs, rhs_vardecl));
+	return {set_union(lhs.first, rhs.first),
+			type_intersection(lhs.second, rhs.second)};
 }
 
-BoolHandleMapPair oneway_var_merge(const Handle& var, const Handle& val,
-                                   const Handle& vardecl)
+bool is_valid(const UnificationBlock& block)
 {
-	Type var_type(var->getType());
-	VariableListPtr vardecl_vlp(gen_varlist(var, vardecl));
+	return block.second == Handle::UNDEFINED;
+}
 
-	if (var_type == VARIABLE_NODE)
-		return {vardecl_vlp->is_type(var, val), {{{var, val}}}};
-	else
-		return {true, HandleMap()};
+bool inherit(const Handle& lhs, const Handle& rhs,
+             const Handle& lhs_vardecl, const Handle& rhs_vardecl)
+{
+	VariableListPtr vardecl_vlp(gen_varlist(lhs, lhs_vardecl));
+	// TODO: handle the case where 2 variables are compared
+	return vardecl_vlp->is_type(lhs, rhs);
 }
 
 /**
@@ -209,6 +235,39 @@ std::string oc_to_string(const BoolHandleMapSetPair& bhmsp)
 	std::stringstream ss;
 	ss << "success: " << bhmsp.first << std::endl
 	   << "mappings: " << oc_to_string(bhmsp.second);
+	return ss.str();
+}
+
+std::string oc_to_string(const UnificationPartition& up)
+{
+	std::stringstream ss;
+	ss << "size = " << up.size() << std::endl;
+	int i = 0;
+	for (const auto& p : up) {
+		ss << "block[" << i << "]:" << std::endl << oc_to_string(p.first)
+		   << "type[" << i << "]:" << std::endl << oc_to_string(p.second);
+		i++;
+	}
+	return ss.str();
+}
+
+std::string oc_to_string(const UnificationPartitions& par)
+{
+	std::stringstream ss;
+	ss << "size = " << par.size() << std::endl;
+	int i = 0;
+	for (const auto& el : par) {
+		ss << "typed partition[" << i << "]:" << std::endl << oc_to_string(el);
+		i++;
+	}
+	return ss.str();
+}
+
+std::string oc_to_string(const UnificationSolutionSet& sol)
+{
+	std::stringstream ss;
+	ss << "satisfiable: " << sol.satisfiable << std::endl
+	   << "partitions: " << oc_to_string(sol.partitions);
 	return ss.str();
 }
 

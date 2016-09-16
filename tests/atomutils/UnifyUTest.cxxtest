@@ -32,7 +32,8 @@ class UnifyUTest :  public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
-	Handle X, Y, A, B, AB, XB, AY, XY;
+	Handle X, Y, Z, A, B, AB, XB, AY, XY,
+		CT, X_vardecl, Y_vardecl, Z_vardecl, XY_vardecl, AZ, AZ_vardecl;
 	
 public:
 	UnifyUTest() {}
@@ -43,9 +44,14 @@ public:
 	void test_unify_2();
 	void test_unify_3();
 	void test_unify_4();
-	// void test_unify_5();
+	void test_unify_5();
 	void test_unify_6();
 	void test_unify_7();
+	void test_unify_8();
+	void test_unify_9();
+	void test_unify_10();
+	void test_unify_11();
+	void test_unify_12();
 };
 
 void UnifyUTest::setUp(void)
@@ -55,12 +61,22 @@ void UnifyUTest::setUp(void)
 
 	X = an(VARIABLE_NODE, "$X");
 	Y = an(VARIABLE_NODE, "$Y");
+	Z = an(VARIABLE_NODE, "$Z");
 	A = an(CONCEPT_NODE, "A");
 	B = an(CONCEPT_NODE, "B");
 	AB = al(INHERITANCE_LINK, A, B);
 	XB = al(INHERITANCE_LINK, X, B);
 	AY = al(INHERITANCE_LINK, A, Y);
 	XY = al(INHERITANCE_LINK, X, Y);
+	AZ = al(INHERITANCE_LINK, A, Z);
+	CT = an(TYPE_NODE, "ConceptNode");
+	X_vardecl = al(TYPED_VARIABLE_LINK, X, CT);
+	Y_vardecl = al(TYPED_VARIABLE_LINK, Y, CT);
+	Z_vardecl = al(TYPED_VARIABLE_LINK, Z, CT);
+	XY_vardecl = al(VARIABLE_LIST,
+	                al(TYPED_VARIABLE_LINK, X, CT),
+	                al(TYPED_VARIABLE_LINK, Y, CT));
+	AZ_vardecl = al(TYPED_VARIABLE_LINK, Z, CT);
 
 #undef al
 #undef an
@@ -68,19 +84,19 @@ void UnifyUTest::setUp(void)
 
 void UnifyUTest::test_unify_1()
 {
-	BoolHandleMapSetPair result = unify(X, A),
-		expected{true, {{{X, A}}}};
+	UnificationSolutionSet result = unify(X, A),
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
-	
+
 	TS_ASSERT_EQUALS(result, expected);
 }
 
 void UnifyUTest::test_unify_2()
 {
-	BoolHandleMapSetPair result = unify(A, X),
-		expected{true, {{{X, A}}}};
+	UnificationSolutionSet result = unify(A, X),
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}}});
 	
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -90,8 +106,8 @@ void UnifyUTest::test_unify_2()
 
 void UnifyUTest::test_unify_3()
 {
-	BoolHandleMapSetPair result = unify(X, AB),
-		expected{true, {{{X, AB}}}};
+	UnificationSolutionSet result = unify(X, AB),
+		expected = UnificationSolutionSet(true, {{{{X, AB}, AB}}});
 	
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -101,37 +117,92 @@ void UnifyUTest::test_unify_3()
 
 void UnifyUTest::test_unify_4()
 {
-	BoolHandleMapSetPair result = unify(XB, AY),
-		expected{true, {{{X, A}, {Y, B}}}};
+	UnificationSolutionSet result = unify(XB, AY),
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, B}, B}}});
 	
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
 	TS_ASSERT_EQUALS(result, expected);
 }
 
-// void UnifyUTest::test_unify_5()
-// {
-// 	HandleMapSeq result = unify(XY, AY),
-// 		expected{{{X, A}, {Y, Y}}};
+void UnifyUTest::test_unify_5()
+{
+	UnificationSolutionSet result = unify(XY, AY),
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, Y}, Y}}});
 
-// 	std::cout << "result = " << oc_to_string(result) << std::endl;
-// 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
 
-// 	TS_ASSERT_EQUALS(result, expected);
-// }
+	TS_ASSERT_EQUALS(result, expected);
+}
 
 void UnifyUTest::test_unify_6()
 {
 	// This one is supposed to fail
-	BoolHandleMapSetPair result = unify(A, B);
+	UnificationSolutionSet result = unify(A, B);
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 
-	TS_ASSERT(not result.first);
+	TS_ASSERT(not result.satisfiable);
 }
 
 void UnifyUTest::test_unify_7()
 {
 	// This one is supposed to fail
-	BoolHandleMapSetPair result = unify(XB, B);
+	UnificationSolutionSet result = unify(XB, B);
 
-	TS_ASSERT(not result.first);
+	TS_ASSERT(not result.satisfiable);
+}
+
+void UnifyUTest::test_unify_8()
+{
+	UnificationSolutionSet result = unify(XY, AZ),
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, Z}, Z}}});
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_9()
+{
+	UnificationSolutionSet result = unify(X, A, X_vardecl),
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}}});
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_10()
+{
+	UnificationSolutionSet result = unify(XY, AY, XY_vardecl, Y_vardecl),
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y}, Y}}});
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_11()
+{
+	UnificationSolutionSet result = unify(XB, AY, X_vardecl, Y_vardecl),
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, B}, B}}});
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_12()
+{
+	UnificationSolutionSet result = unify(XY, AZ, XY_vardecl, AZ_vardecl),
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, Z}, Z}}});
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
 }
