@@ -158,7 +158,7 @@ void UnifyUTest::test_unify_7()
 void UnifyUTest::test_unify_8()
 {
 	UnificationSolutionSet result = unify(XY, AZ),
-		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, Z}, Z}}});
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, Z}, Y}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -199,7 +199,7 @@ void UnifyUTest::test_unify_11()
 void UnifyUTest::test_unify_12()
 {
 	UnificationSolutionSet result = unify(XY, AZ, XY_vardecl, AZ_vardecl),
-		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, Z}, Z}}});
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, Z}, Y}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;

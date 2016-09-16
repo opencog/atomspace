@@ -102,9 +102,9 @@ Handle type_intersection(const Handle& lhs, const Handle& rhs,
                          const Handle& lhs_vardecl, const Handle& rhs_vardecl)
 {
 	if (inherit(lhs, rhs, lhs_vardecl, rhs_vardecl))
-		return rhs;
-	if (inherit(rhs, lhs, rhs_vardecl, lhs_vardecl))
 		return lhs;
+	if (inherit(rhs, lhs, rhs_vardecl, lhs_vardecl))
+		return rhs;
 	return Handle::UNDEFINED;
 }
 
@@ -195,9 +195,23 @@ bool is_valid(const UnificationBlock& block)
 bool inherit(const Handle& lhs, const Handle& rhs,
              const Handle& lhs_vardecl, const Handle& rhs_vardecl)
 {
-	VariableListPtr vardecl_vlp(gen_varlist(lhs, lhs_vardecl));
-	// TODO: handle the case where 2 variables are compared
-	return vardecl_vlp->is_type(lhs, rhs);
+	VariableListPtr rhs_vardecl_vlp(gen_varlist(rhs, rhs_vardecl));
+	const Variables& rhs_variables(rhs_vardecl_vlp->get_variables());
+	const VariableTypeMap& rhs_vtm = rhs_variables._simple_typemap;
+	if (lhs->getType() == VARIABLE_NODE) {
+		VariableListPtr lhs_vardecl_vlp(gen_varlist(lhs, lhs_vardecl));
+		// Compare the 2 variables types
+		const Variables& lhs_variables(lhs_vardecl_vlp->get_variables());
+		const VariableTypeMap& lhs_vtm = lhs_variables._simple_typemap;
+		auto lhs_it = lhs_vtm.find(rhs);
+		return rhs->getType() == VARIABLE_NODE; // TODO
+	}
+	else return rhs_vardecl_vlp->is_type(rhs, lhs);
+}
+
+bool inherit(const std::set<Type>& lhs, const std::set<Type>& rhs)
+{
+	return true; // TODO
 }
 
 /**

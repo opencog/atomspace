@@ -201,12 +201,17 @@ bool is_valid(const UnificationBlock& block);
  */
 
 /**
- * Return true if val inherit var. If val is not a variable then it
+ * Return true if lhs inherit rhs. If lhs is not a variable then it
  * relays that to VariableList::is_type, otherwise their type
  * declarations are compared.
  */
 bool inherit(const Handle& lhs, const Handle& rhs,
              const Handle& lhs_vardecl, const Handle& rhs_vardecl);
+
+/**
+ * TODO: add comment
+ */
+bool inherit(const std::set<Type>& lhs, const std::set<Type>& rhs);
 
 /**
  * Generate a VariableList of the free variables of a given atom h.
