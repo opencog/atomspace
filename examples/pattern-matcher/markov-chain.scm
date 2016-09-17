@@ -37,8 +37,6 @@
 (use-modules (opencog))
 (use-modules (opencog query))
 
-(load-from-path "utilities.scm")
-
 ;; Define three objects: a name for the current state vector,
 ;; a name for the next state vector, and a name for the state
 ;; transition matrix.

@@ -50,8 +50,6 @@
 (use-modules (opencog))
 (use-modules (opencog query))
 
-(load-from-path "utilities.scm")
-
 ; Clause to match during query.  This is the EvaluationLink whose
 ; presence or absence we will be testing for.
 (define query
