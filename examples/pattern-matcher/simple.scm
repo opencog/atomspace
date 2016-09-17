@@ -20,8 +20,6 @@
 (use-modules (opencog))
 (use-modules (opencog query))
 
-(load-from-path "utilities.scm")
-
 ; A query to find all humans
 (define human
   (GetLink
