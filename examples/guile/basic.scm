@@ -30,7 +30,7 @@
 
 ; Run the following REPL commands
 ; * Print a list of all (currently loaded) opencog functions.
-; ,apropos "cog"
+; ,apropos cog
 
 ; * Get the documentation of a a given function
 ; ,describe cog-new-node
