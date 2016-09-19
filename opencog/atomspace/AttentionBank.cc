@@ -144,13 +144,15 @@ void AttentionBank::stimulate(Handle& h, double stimulus)
     // XXX This is not protected and made atomic in any way ...
     // If two different threads stiumlate the same atom at the same
     // time, then the calculations could get wonky. Does it matter?
-    int sti = h->getAttentionValue()->getSTI();
-    int lti = h->getAttentionValue()->getLTI();
+    AttentionValue::sti_t sti   = h->getAttentionValue()->getSTI();
+    AttentionValue::lti_t lti   = h->getAttentionValue()->getLTI();
+    AttentionValue::vlti_t vlti = h->getAttentionValue()->getVLTI();
+
     int stiWage = calculateSTIWage() * stimulus;
     int ltiWage = calculateLTIWage() * stimulus;
 
-    h->setSTI(sti + stiWage);
-    h->setLTI(lti + ltiWage);
+    AttentionValuePtr new_av = createAV(sti + stiWage, lti + ltiWage, vlti);
+    h->setAttentionValue(new_av);
 }
 
 void AttentionBank::updateMaxSTI(AttentionValue::sti_t m)
