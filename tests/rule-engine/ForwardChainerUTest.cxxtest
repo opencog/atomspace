@@ -64,7 +64,7 @@ public:
 		CHKERR;
 	}
 	void test_do_chain();
-	void test_choose_rule();
+	void test_select_rule();
 	void test_apply_rule();
 	void test_substitute_rule_part();
 	void test_unify_1();
@@ -106,7 +106,7 @@ void ForwardChainerUTest::test_do_chain()
 	TS_ASSERT_DIFFERS(results.find(AC), results.end());
 }
 
-void ForwardChainerUTest::test_choose_rule(void)
+void ForwardChainerUTest::test_select_rule(void)
 {
     Handle h = eval.eval_h("(InheritanceLink"
                            "   (ConceptNode \"Cat\")"
@@ -117,7 +117,7 @@ void ForwardChainerUTest::test_choose_rule(void)
     ForwardChainer fc(_as, rbs, h);
 
     // Full unification
-    Rule* rule = fc.choose_rule(h);
+    Rule* rule = fc.select_rule(h);
     TS_ASSERT_DIFFERS(nullptr, rule);
 }
 

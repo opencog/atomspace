@@ -7,8 +7,16 @@
 (define bc-modus-ponens-rule
     (BindLink
         (VariableList
-            (VariableNode "$A")
-            (VariableNode "$B"))
+            (TypedVariable
+                (VariableNode "$A")
+                (TypeChoice
+                    (Type "LambdaLink")
+                    (Type "PredicateNode")))
+            (TypedVariable
+                (VariableNode "$B")
+                (TypeChoice
+                    (Type "LambdaLink")
+                    (Type "PredicateNode"))))
         (AndLink
             (ImplicationLink
                 (VariableNode "$A")

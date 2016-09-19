@@ -81,7 +81,8 @@ namespace opencog {
 /// atoms that occur in the clauses.
 ///
 /// Note that anything occuring below a QUOTE_LINK is not explored.
-/// Thus, a quote acts like a cut, halting recursion.
+/// Thus, a quote acts like a cut, halting recursion until it gets
+/// unquoted later on with an UNQUOTE_LINK.
 ///
 class FindAtoms
 {
@@ -193,6 +194,12 @@ int max_quotation_level(const Handle& tree,
  * tree.
  */
 bool is_unscoped_in_tree(const Handle& tree, const Handle& atom);
+
+/**
+ * Return true if the atom (variable) occurs both unquoted and
+ * unscoped somewhere in the tree.
+*/
+bool is_unquoted_unscoped_in_tree(const Handle& tree, const Handle& atom);
 
 /**
  * Return true if any of the indicated atoms occur somewhere in

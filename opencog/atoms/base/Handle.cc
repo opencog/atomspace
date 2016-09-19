@@ -185,6 +185,18 @@ std::string hmaps_to_string(const HandleMapSeq& hms)
 		   << hmap_to_string(hms[i]);
 	return ss.str();
 }
+std::string hps_to_string(const HandlePairSeq& hps)
+{
+	std::stringstream ss;
+	ss << "size = " << hps.size() << std::endl;
+	size_t i = 0;
+	for (const std::pair<Handle, Handle>& hp : hps) {
+		ss << "atom.first[" << i << "]:" << std::endl << h_to_string(hp.first);
+		ss << "atom.second[" << i << "]:" << std::endl << h_to_string(hp.second);
+		i++;
+	}
+	return ss.str();
+}
 std::string atomtype_to_string(Type type)
 {
 	std::stringstream ss;
@@ -231,6 +243,10 @@ std::string oc_to_string(const HandleMultimap& hmm)
 std::string oc_to_string(const HandleMapSeq& hms)
 {
 	return hmaps_to_string(hms);
+}
+std::string oc_to_string(const HandlePairSeq& hps)
+{
+	return hps_to_string(hps);
 }
 std::string oc_to_string(Type type)
 {

@@ -57,12 +57,14 @@ class AtomSpace;
 
 class AttentionBank
 {
+    AtomSpace* _as;
     /**
      * If true, then this AttentionBank is not being used.
      * Yes, this is totally bogus, but is needed, due to design
      * flaws related to attention allocation.
      */
     bool _zombie;
+    
 
     /** The connection by which we are notified of AV changes */
     boost::signals2::connection _AVChangedConnection;

@@ -108,6 +108,41 @@ bool type_match(const Handle&, const Handle&);
  */
 Handle type_compose(const Handle&, const Handle&);
 
+/**
+ * Given a variable declaration (VariableList) and a pattern body,
+ * filter out all variables in the declaration that are not present in
+ * the pattern body.
+ *
+ * For instance filter_vardecl applied to
+ *
+ * var_decl
+ * =
+ * (VariableList
+ *    (TypedVariableLink
+ *       (VariableNode "$X")
+ *       (TypeNode "ConceptNode"))
+ *    (TypedVariableLink
+ *       (VariableNode "$Y")
+ *       (TypeNode "ConceptNode")))
+ *
+ * body
+ * =
+ * (InheritanceLink
+ *    (ConceptNode "human")
+ *    (VariableNode "$Y"))
+ *
+ * will return
+ *
+ * (VariableList
+ *    (TypedVariableLink
+ *       (VariableNode "$Y")
+ *       (TypeNode "ConceptNode")))
+ *
+ * Not that the root link VariableList will not be added to any
+ * AtomSpace (it's up to the user to possbily do it).
+ */
+Handle filter_vardecl(const Handle& vardecl, const Handle& body);
+
 /** @}*/
 }
 

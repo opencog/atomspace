@@ -104,12 +104,12 @@ void ForwardChainer::do_step()
     fc_logger().debug("Iteration %d", _iteration);
     _iteration++;
 
-    // Choose source
-    _cur_source = choose_source();
+    // Select source
+    _cur_source = select_source();
     LAZY_FC_LOG_DEBUG << "Source:" << std::endl << _cur_source->toString();
 
-    // Choose rule
-    const Rule* rule = choose_rule(_cur_source);
+    // Select rule
+    const Rule* rule = select_rule(_cur_source);
     if (not rule) {
         fc_logger().debug("No selected rule, abort step");
         return;
@@ -174,7 +174,7 @@ UnorderedHandleSet ForwardChainer::get_chaining_result()
     return _fcstat.get_all_products();
 }
 
-Handle ForwardChainer::choose_source()
+Handle ForwardChainer::select_source()
 {
 	size_t selsrc_size = _selected_sources.size();
 	// If all sources have been selected then insert the sources'
@@ -250,7 +250,7 @@ Handle ForwardChainer::choose_source()
 	return hchosen;
 }
 
-Rule* ForwardChainer::choose_rule(const Handle& hsource)
+Rule* ForwardChainer::select_rule(const Handle& hsource)
 {
     std::map<Rule*, float> rule_weight;
     for (Rule* r : _rules)

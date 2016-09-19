@@ -17,9 +17,6 @@ int main(int argc, char** args)
     // Load core types
     SchemeEval *eval = SchemeEval::get_evaluator(&as);
     eval->eval("(use-modules (opencog))");
-    // eval.eval("(load-from-path \"/usr/local/share/opencog/scm/core_types.scm\")");
-    // eval.eval("(load-from-path \"/usr/local/share/opencog/scm/utilities.scm\")");
-    // eval.eval("(load-from-path \"/usr/local/share/opencog/scm/av-tv.scm\")");
 
     std::cout << "Backward chaining to solve the criminal problem:\n";
     backward_chain(as);
@@ -99,4 +96,3 @@ void forward_chain(AtomSpace& as)
     for(const auto& h : fc.get_chaining_result())
         std::cout << h->toShortString() << std::endl;
 }
-

@@ -28,8 +28,6 @@
 (use-modules (opencog))
 (use-modules (opencog query))
 
-(load-from-path "utilities.scm")
-
 ; Define a function that takes an atom and returns an OpenCog truth
 ; value. In this case, it randomly returns true or false, about half the
 ; time.  The function can take zero, two or more arguments, but it must
@@ -117,5 +115,6 @@
 
 ; Running the below multiple times will return different sets of
 ; selected logicians each time.
-;
-; (cog-bind find-logicians)
+(cog-bind find-logicians)
+(cog-bind find-logicians)
+(cog-bind find-logicians)

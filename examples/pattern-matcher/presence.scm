@@ -19,8 +19,6 @@
 (use-modules (opencog query))
 (use-modules (opencog exec))
 
-(load-from-path "utilities.scm")
-
 ;; Is the room empty, or is someone in it?
 ;; One of several different states can be linked to the state variable.
 (define room-state (AnchorNode "Room State"))

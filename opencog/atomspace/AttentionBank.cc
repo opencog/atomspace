@@ -32,7 +32,8 @@
 using namespace opencog;
 
 AttentionBank::AttentionBank(AtomSpace *asp, bool transient)
-    : _index_insert_queue(this, &AttentionBank::put_atom_into_index, transient?0:4)
+    : _as(asp)
+    , _index_insert_queue(this, &AttentionBank::put_atom_into_index, transient?0:4)
     , _index_remove_queue(this, &AttentionBank::remove_atom_from_index, transient?0:4)
 {
     /* Do not boether with initialization, if this is transient */
@@ -96,11 +97,29 @@ void AttentionBank::AVChanged(const Handle& h,
                               const AttentionValuePtr& old_av,
                               const AttentionValuePtr& new_av)
 {
+    AttentionValue::sti_t newSti = new_av->getSTI();
+    
     // Add the old attention values to the AtomSpace funds and
     // subtract the new attention values from the AtomSpace funds
-    updateSTIFunds(old_av->getSTI() - new_av->getSTI());
+    updateSTIFunds(old_av->getSTI() - newSti);
     updateLTIFunds(old_av->getLTI() - new_av->getLTI());
 
+    // Update MinMax STI values
+    AttentionValue::sti_t maxSTISeen = _as->get_max_STI();
+    AttentionValue::sti_t minSTISeen = _as->get_min_STI();
+
+    if (newSti > maxSTISeen){
+        maxSTISeen = newSti;
+    } else if (newSti < maxSTISeen){
+        minSTISeen = newSti;
+    }
+
+    if (minSTISeen > maxSTISeen){
+        minSTISeen = maxSTISeen;
+    }
+    _as->update_max_STI(maxSTISeen);
+    _as->update_min_STI(minSTISeen);
+    
     logger().fine("AVChanged: fundsSTI = %d, old_av: %d, new_av: %d",
                    fundsSTI.load(), old_av->getSTI(), new_av->getSTI());
 
@@ -125,13 +144,15 @@ void AttentionBank::stimulate(Handle& h, double stimulus)
     // XXX This is not protected and made atomic in any way ...
     // If two different threads stiumlate the same atom at the same
     // time, then the calculations could get wonky. Does it matter?
-    int sti = h->getAttentionValue()->getSTI();
-    int lti = h->getAttentionValue()->getLTI();
+    AttentionValue::sti_t sti   = h->getAttentionValue()->getSTI();
+    AttentionValue::lti_t lti   = h->getAttentionValue()->getLTI();
+    AttentionValue::vlti_t vlti = h->getAttentionValue()->getVLTI();
+
     int stiWage = calculateSTIWage() * stimulus;
     int ltiWage = calculateLTIWage() * stimulus;
 
-    h->setSTI(sti + stiWage);
-    h->setLTI(lti + ltiWage);
+    AttentionValuePtr new_av = createAV(sti + stiWage, lti + ltiWage, vlti);
+    h->setAttentionValue(new_av);
 }
 
 void AttentionBank::updateMaxSTI(AttentionValue::sti_t m)

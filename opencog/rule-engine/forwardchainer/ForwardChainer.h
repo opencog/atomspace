@@ -70,7 +70,7 @@ private:
     void init(const Handle& hsource, const HandleSeq& focus_set);
 
     void apply_all_rules();
-
+	
     Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);
     bool is_constant_clause(const Handle& hvarlist, const Handle& hclause) const;
     Handle remove_constant_clauses(const Handle& hvarlist,
@@ -106,7 +106,7 @@ protected:
      *
      * @return  A handle to the chosen source from source list
      */
-    virtual Handle choose_source();
+    virtual Handle select_source();
 
 	/**
      * Choose an applicable rules from the rule base by selecting
@@ -116,7 +116,7 @@ protected:
      *
      * @return  A rule that in which @param source could ground.
      */
-    virtual Rule* choose_rule(const Handle& hsource);
+    virtual Rule* select_rule(const Handle& hsource);
 
 	/**
 	 * Apply rule on the current source. Creating derived rules if
