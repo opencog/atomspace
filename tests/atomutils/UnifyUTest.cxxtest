@@ -1,0 +1,241 @@
+/**
+ * tests/atomspace/UnifyUTest.cxxtest
+ *
+ * Copyright (C) 2016 OpenCog Foundation
+ * All Rights Reserved
+ * Author: Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomutils/Unify.h>
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+class UnifyUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+	Handle X, Y, Z, W, V, A, B, AB, XB, AY, XY, AZ, AW, AV,
+		CT, PT, CPT,
+		X_vardecl, Y_vardecl, Z_vardecl, W_vardecl, V_vardecl,
+		XY_vardecl;
+	
+public:
+	UnifyUTest() {}
+
+	void setUp();
+
+	void test_unify_1();
+	void test_unify_2();
+	void test_unify_3();
+	void test_unify_4();
+	void test_unify_5();
+	void test_unify_6();
+	void test_unify_7();
+	void test_unify_8();
+	void test_unify_9();
+	void test_unify_10();
+	void test_unify_11();
+	void test_unify_12();
+	void test_unify_13();
+	void test_unify_14();
+};
+
+void UnifyUTest::setUp(void)
+{
+#define al _as.add_link
+#define an _as.add_node
+
+	X = an(VARIABLE_NODE, "$X");
+	Y = an(VARIABLE_NODE, "$Y");
+	Z = an(VARIABLE_NODE, "$Z");
+	W = an(VARIABLE_NODE, "$W");
+	V = an(VARIABLE_NODE, "$V");
+	A = an(CONCEPT_NODE, "A");
+	B = an(CONCEPT_NODE, "B");
+	AB = al(INHERITANCE_LINK, A, B);
+	XB = al(INHERITANCE_LINK, X, B);
+	AY = al(INHERITANCE_LINK, A, Y);
+	XY = al(INHERITANCE_LINK, X, Y);
+	AZ = al(INHERITANCE_LINK, A, Z);
+	AW = al(INHERITANCE_LINK, A, W);
+	AV = al(INHERITANCE_LINK, A, V);
+	CT = an(TYPE_NODE, "ConceptNode");
+	PT = an(TYPE_NODE, "PredicateNode");
+	CPT = al(TYPE_CHOICE, CT, PT);
+	X_vardecl = al(TYPED_VARIABLE_LINK, X, CT);
+	Y_vardecl = al(TYPED_VARIABLE_LINK, Y, CT);
+	Z_vardecl = al(TYPED_VARIABLE_LINK, Z, CT);
+	W_vardecl = al(TYPED_VARIABLE_LINK, W, PT);
+	V_vardecl = al(TYPED_VARIABLE_LINK, V, CPT);
+	XY_vardecl = al(VARIABLE_LIST,
+	                al(TYPED_VARIABLE_LINK, X, CT),
+	                al(TYPED_VARIABLE_LINK, Y, CT));
+
+#undef al
+#undef an
+}
+
+void UnifyUTest::test_unify_1()
+{
+	UnificationSolutionSet result = unify(X, A),
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}}});
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_2()
+{
+	UnificationSolutionSet result = unify(A, X),
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}}});
+	
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_3()
+{
+	UnificationSolutionSet result = unify(X, AB),
+		expected = UnificationSolutionSet(true, {{{{X, AB}, AB}}});
+	
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_4()
+{
+	UnificationSolutionSet result = unify(XB, AY),
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, B}, B}}});
+	
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_5()
+{
+	UnificationSolutionSet result = unify(XY, AY),
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, Y}, Y}}});
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_6()
+{
+	// This one is supposed to fail
+	UnificationSolutionSet result = unify(A, B);
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+
+	TS_ASSERT(not result.satisfiable);
+}
+
+void UnifyUTest::test_unify_7()
+{
+	// This one is supposed to fail
+	UnificationSolutionSet result = unify(XB, B);
+
+	TS_ASSERT(not result.satisfiable);
+}
+
+void UnifyUTest::test_unify_8()
+{
+	UnificationSolutionSet result = unify(XY, AZ),
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, Z}, Y}}});
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_9()
+{
+	UnificationSolutionSet result = unify(X, A, X_vardecl),
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}}});
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_10()
+{
+	UnificationSolutionSet result = unify(XY, AY, XY_vardecl, Y_vardecl),
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y}, Y}}});
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_11()
+{
+	UnificationSolutionSet result = unify(XB, AY, X_vardecl, Y_vardecl),
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, B}, B}}});
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_12()
+{
+	UnificationSolutionSet result = unify(XY, AZ, XY_vardecl, Z_vardecl),
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, Z}, Y}}});
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_13()
+{
+	// This one is supposed to fail as the types of Y and W have empty
+	// intersection.
+	UnificationSolutionSet result = unify(XY, AW, XY_vardecl, W_vardecl);
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+
+	TS_ASSERT(not result.satisfiable);
+}
+
+void UnifyUTest::test_unify_14()
+{
+	UnificationSolutionSet result = unify(XY, AV, XY_vardecl, V_vardecl),
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, V}, Y}}});
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
