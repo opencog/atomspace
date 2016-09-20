@@ -233,7 +233,7 @@ void UnifyUTest::test_unify_14()
 {
 	UnificationSolutionSet result = unify(XY, AV, XY_vardecl, V_vardecl),
 		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, V}, Y}}});
-	
+
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
 
