@@ -32,9 +32,10 @@ class UnifyUTest :  public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
-	Handle X, Y, Z, W, A, B, AB, XB, AY, XY, AZ, AW,
-		CT, PT, X_vardecl, Y_vardecl, Z_vardecl, W_vardecl,
-		XY_vardecl, AZ_vardecl, AW_vardecl;
+	Handle X, Y, Z, W, V, A, B, AB, XB, AY, XY, AZ, AW, AV,
+		CT, PT, CPT,
+		X_vardecl, Y_vardecl, Z_vardecl, W_vardecl, V_vardecl,
+		XY_vardecl;
 	
 public:
 	UnifyUTest() {}
@@ -54,6 +55,7 @@ public:
 	void test_unify_11();
 	void test_unify_12();
 	void test_unify_13();
+	void test_unify_14();
 };
 
 void UnifyUTest::setUp(void)
@@ -65,6 +67,7 @@ void UnifyUTest::setUp(void)
 	Y = an(VARIABLE_NODE, "$Y");
 	Z = an(VARIABLE_NODE, "$Z");
 	W = an(VARIABLE_NODE, "$W");
+	V = an(VARIABLE_NODE, "$V");
 	A = an(CONCEPT_NODE, "A");
 	B = an(CONCEPT_NODE, "B");
 	AB = al(INHERITANCE_LINK, A, B);
@@ -73,17 +76,18 @@ void UnifyUTest::setUp(void)
 	XY = al(INHERITANCE_LINK, X, Y);
 	AZ = al(INHERITANCE_LINK, A, Z);
 	AW = al(INHERITANCE_LINK, A, W);
+	AV = al(INHERITANCE_LINK, A, V);
 	CT = an(TYPE_NODE, "ConceptNode");
 	PT = an(TYPE_NODE, "PredicateNode");
+	CPT = al(TYPE_CHOICE, CT, PT);
 	X_vardecl = al(TYPED_VARIABLE_LINK, X, CT);
 	Y_vardecl = al(TYPED_VARIABLE_LINK, Y, CT);
 	Z_vardecl = al(TYPED_VARIABLE_LINK, Z, CT);
 	W_vardecl = al(TYPED_VARIABLE_LINK, W, PT);
+	V_vardecl = al(TYPED_VARIABLE_LINK, V, CPT);
 	XY_vardecl = al(VARIABLE_LIST,
 	                al(TYPED_VARIABLE_LINK, X, CT),
 	                al(TYPED_VARIABLE_LINK, Y, CT));
-	AZ_vardecl = al(TYPED_VARIABLE_LINK, Z, CT);
-	AW_vardecl = al(TYPED_VARIABLE_LINK, W, PT);
 
 #undef al
 #undef an
@@ -205,7 +209,7 @@ void UnifyUTest::test_unify_11()
 
 void UnifyUTest::test_unify_12()
 {
-	UnificationSolutionSet result = unify(XY, AZ, XY_vardecl, AZ_vardecl),
+	UnificationSolutionSet result = unify(XY, AZ, XY_vardecl, Z_vardecl),
 		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, Z}, Y}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
@@ -216,12 +220,22 @@ void UnifyUTest::test_unify_12()
 
 void UnifyUTest::test_unify_13()
 {
-	// This one is supposed to fail
-	UnificationSolutionSet result = unify(XY, AW, XY_vardecl, AW_vardecl);
+	// This one is supposed to fail as the types of Y and W have empty
+	// intersection.
+	UnificationSolutionSet result = unify(XY, AW, XY_vardecl, W_vardecl);
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 
 	TS_ASSERT(not result.satisfiable);
 }
 
-// TODO add unit test about set<Type>
+void UnifyUTest::test_unify_14()
+{
+	UnificationSolutionSet result = unify(XY, AV, XY_vardecl, V_vardecl),
+		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, V}, Y}}});
+	
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
