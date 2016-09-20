@@ -93,36 +93,6 @@ UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
 UnificationSolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
                                 const Handle& lhs_vardecl,
                                 const Handle& rhs_vardecl);
-	
-/**
- * Calculate type intersection. For example: say you have for a block
- * with
- *
- * X
- * ListLink(Y)
- * ListLink(Z)
- *
- * meaning that X is equal to ListLink Y which is equal to ListLink Z,
- * each having the following types at that point (i.e. not having
- * reached the fixed point yet)
- *
- * X:Atom
- * ListLink(Y):ListLink(Atom)
- * ListLink(Z):ListLink(Atom)
- *
- * then their type intersection will be
- *
- * ListLink(Atom)
- *
- * which is supposed to represent the set of all potential groundings
- * that may satisfy that block.
- *
- * TODO: this can be probably by optimized by using VariableListPtr
- *       instead of Handle, so we don't rebuild it every time.
- */
-Handle type_intersection(const Handle& lhs, const Handle& rhs,
-                         const Handle& lhs_vardecl = Handle::UNDEFINED,
-                         const Handle& rhs_vardecl = Handle::UNDEFINED);
 
 /**
  * Merge 2 solution sets. Generate the product of all consistent
@@ -201,6 +171,68 @@ bool is_valid(const UnificationBlock& block);
  */
 
 /**
+ * Calculate type intersection. For example: say you have for a block
+ * with
+ *
+ * X
+ * ListLink(Y)
+ * ListLink(Z)
+ *
+ * meaning that X is equal to ListLink Y which is equal to ListLink Z,
+ * each having the following types at that point (i.e. not having
+ * reached the fixed point yet)
+ *
+ * X:Atom
+ * ListLink(Y):ListLink(Atom)
+ * ListLink(Z):ListLink(Atom)
+ *
+ * then their type intersection will be
+ *
+ * ListLink(Atom)
+ *
+ * which is supposed to represent the set of all potential groundings
+ * that may satisfy that block.
+ *
+ * TODO: this can be probably by optimized by using VariableListPtr
+ *       instead of Handle, so we don't rebuild it every time.
+ */
+Handle type_intersection(const Handle& lhs, const Handle& rhs,
+                         const Handle& lhs_vardecl = Handle::UNDEFINED,
+                         const Handle& rhs_vardecl = Handle::UNDEFINED);
+
+/**
+ * Return shallow type intersection between lhs and rhs. Take into
+ * account type inheritance as well.
+ */
+Type type_intersection(Type lhs, Type rhs);
+std::set<Type> type_intersection(Type lhs, const std::set<Type>& rhs);
+std::set<Type> type_intersection(const std::set<Type>& lhs,
+                                 const std::set<Type>& rhs);
+
+/**
+ * Return a simplification of a type union, by eliminating all types
+ * that are redundant. For instance
+ *
+ * {Node, ConceptNode, ListLink}
+ *
+ * would return
+ *
+ * {Node, ListLink}
+ *
+ * As ConceptNode inherits Node.
+ */
+std::set<Type> simplify_type_union(std::set<Type>& type);
+
+/**
+ * Return the union type of a variable given its variable declaration.
+ * If the variable declaration is empty (Handle::UNDEFINED) then the
+ * union type is not empty, instead it contains the singleton
+ * {ATOM}. An empty union type would instead mean the bottom type
+ * (that nothing can inherit).
+ */
+std::set<Type> get_union_type(const Handle& h, const Handle& vardecl);
+
+/**
  * Return true if lhs inherit rhs. If lhs is not a variable then it
  * relays that to VariableList::is_type, otherwise their type
  * declarations are compared.
@@ -209,7 +241,18 @@ bool inherit(const Handle& lhs, const Handle& rhs,
              const Handle& lhs_vardecl, const Handle& rhs_vardecl);
 
 /**
- * TODO: add comment
+ * Return true if lhs inherits rhs.
+ */
+bool inherit(Type lhs, Type rhs);
+
+/**
+ * Return true if a type inherits a type union.
+ */
+bool inherit(Type lhs, const std::set<Type>& rhs);
+
+/**
+ * Return true if lhs inherits rhs. That is if all elements of lhs
+ * inherits rhs.
  */
 bool inherit(const std::set<Type>& lhs, const std::set<Type>& rhs);
 

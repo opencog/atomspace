@@ -96,18 +96,6 @@ UnificationSolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
 	}
 }
 
-// TODO: very limited type intersection, should support structural
-// types, etc.
-Handle type_intersection(const Handle& lhs, const Handle& rhs,
-                         const Handle& lhs_vardecl, const Handle& rhs_vardecl)
-{
-	if (inherit(lhs, rhs, lhs_vardecl, rhs_vardecl))
-		return lhs;
-	if (inherit(rhs, lhs, rhs_vardecl, lhs_vardecl))
-		return rhs;
-	return Handle::UNDEFINED;
-}
-
 UnificationSolutionSet merge(const UnificationSolutionSet& lhs,
                              const UnificationSolutionSet& rhs)
 {
@@ -192,26 +180,108 @@ bool is_valid(const UnificationBlock& block)
 	return block.second == Handle::UNDEFINED;
 }
 
+// TODO: very limited type intersection, should support structural
+// types, etc.
+Handle type_intersection(const Handle& lhs, const Handle& rhs,
+                         const Handle& lhs_vardecl, const Handle& rhs_vardecl)
+{
+	if (inherit(lhs, rhs, lhs_vardecl, rhs_vardecl))
+		return lhs;
+	if (inherit(rhs, lhs, rhs_vardecl, lhs_vardecl))
+		return rhs;
+	return Handle::UNDEFINED;
+}
+
+Type type_intersection(Type lhs, Type rhs)
+{
+	ClassServer& cs = classserver();
+	if (cs.isA(lhs, rhs))
+		return lhs;
+	if (cs.isA(rhs, lhs))
+		return rhs;
+	return NOTYPE;              // represent the bottom type
+}
+
+std::set<Type> type_intersection(Type lhs, const std::set<Type>& rhs)
+{
+	std::set<Type> res;
+	// Distribute the intersection over the union type rhs
+	for (Type rhst : rhs) {
+		Type ty = type_intersection(lhs, rhst);
+		if (ty != NOTYPE)
+			res.insert(ty);
+	}
+	return res;
+}
+
+std::set<Type> type_intersection(const std::set<Type>& lhs,
+                                 const std::set<Type>& rhs)
+{
+	// Base cases
+	if (lhs.empty())
+		return rhs;
+	if (rhs.empty())
+		return lhs;
+
+	// Recursive cases
+	std::set<Type> res;
+	for (Type ty : lhs) {
+		std::set<Type> itr = type_intersection(ty, rhs);
+		res.insert(itr.begin(), itr.end());
+	}
+	return res;
+}
+
+std::set<Type> simplify_type_union(std::set<Type>& type)
+{
+	return {}; // TODO: do we really need that?
+}
+
+std::set<Type> get_union_type(const Handle& h, const Handle& vardecl)
+{
+	VariableListPtr vardecl_vlp(gen_varlist(h, vardecl));
+	const Variables& variables(vardecl_vlp->get_variables());
+	const VariableTypeMap& vtm = variables._simple_typemap;
+	auto it = vtm.find(h);
+	if (it == vtm.end() or it->second.empty())
+		return {ATOM};
+	else {
+		return it->second;
+	}
+}
+
 bool inherit(const Handle& lhs, const Handle& rhs,
              const Handle& lhs_vardecl, const Handle& rhs_vardecl)
 {
-	VariableListPtr rhs_vardecl_vlp(gen_varlist(rhs, rhs_vardecl));
-	const Variables& rhs_variables(rhs_vardecl_vlp->get_variables());
-	const VariableTypeMap& rhs_vtm = rhs_variables._simple_typemap;
-	if (lhs->getType() == VARIABLE_NODE) {
-		VariableListPtr lhs_vardecl_vlp(gen_varlist(lhs, lhs_vardecl));
-		// Compare the 2 variables types
-		const Variables& lhs_variables(lhs_vardecl_vlp->get_variables());
-		const VariableTypeMap& lhs_vtm = lhs_variables._simple_typemap;
-		auto lhs_it = lhs_vtm.find(rhs);
-		return rhs->getType() == VARIABLE_NODE; // TODO
-	}
-	else return rhs_vardecl_vlp->is_type(rhs, lhs);
+	if (VARIABLE_NODE == lhs->getType() and VARIABLE_NODE == rhs->getType())
+		return inherit(get_union_type(lhs, lhs_vardecl),
+		               get_union_type(rhs, rhs_vardecl));
+	// It that necessary?
+	// else if (lhs == rhs)
+	// 	return true;
+	else
+		return gen_varlist(rhs, rhs_vardecl)->is_type(rhs, lhs);
+}
+
+bool inherit(Type lhs, Type rhs)
+{
+	return classserver().isA(lhs, rhs);
+}
+
+bool inherit(Type lhs, const std::set<Type>& rhs)
+{
+	for (Type ty : rhs)
+		if (inherit(lhs, ty))
+			return true;
+	return false;
 }
 
 bool inherit(const std::set<Type>& lhs, const std::set<Type>& rhs)
 {
-	return true; // TODO
+	for (Type ty : lhs)
+		if (not inherit(ty, rhs))
+			return false;
+	return true;
 }
 
 /**
