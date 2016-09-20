@@ -56,7 +56,10 @@ struct UnificationSolutionSet :
 	UnificationSolutionSet(bool s = true,
 	                       const UnificationPartitions& p = UnificationPartitions());
 
-	// Whether the unification satisfiable
+	// Whether the unification satisfiable. Not that satisfiable is
+	// different than empty. An empty solution set may still be
+	// satisfiable, that would be the case of two candidates that
+	// match but have no variables.
 	bool satisfiable;
 
 	// Set of typed partitions

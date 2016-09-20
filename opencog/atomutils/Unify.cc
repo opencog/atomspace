@@ -99,10 +99,14 @@ UnificationSolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
 UnificationSolutionSet merge(const UnificationSolutionSet& lhs,
                              const UnificationSolutionSet& rhs)
 {
-	// Don't bother merging if one of them is invalid or empty
-	if (not lhs.satisfiable or rhs.partitions.empty())
+	// No need to merge if one of them is invalid
+	if (not lhs.satisfiable or not rhs.satisfiable)
+		return UnificationSolutionSet(false);
+
+	// No need to merge if one of them is empty
+	if (rhs.partitions.empty())
 		return lhs;
-	if (not rhs.satisfiable or lhs.partitions.empty())
+	if (lhs.partitions.empty())
 		return rhs;
 
 	// Merge
