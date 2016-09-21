@@ -98,33 +98,33 @@ UnificationSolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
                                 const Handle& rhs_vardecl);
 
 /**
- * Merge 2 solution sets. Generate the product of all consistent
+ * Join 2 solution sets. Generate the product of all consistent
  * solutions (with partitions so that all blocks are typed with a
  * defined Handle).
  */
-UnificationSolutionSet merge(const UnificationSolutionSet& lhs,
+UnificationSolutionSet join(const UnificationSolutionSet& lhs,
                              const UnificationSolutionSet& rhs);
 
 // TODO: add comment. Possibly return UnificationPartitions instead of
 // UnificationSolutionSet.
-UnificationPartitions merge(const UnificationPartitions& lhs,
+UnificationPartitions join(const UnificationPartitions& lhs,
                             const UnificationPartition& rhs);
 
 /**
- * Merge 2 partitions. If the resulting partition is invalid then the
+ * Join 2 partitions. If the resulting partition is invalid then the
  * empty partition is returned.
  */
-UnificationPartition merge(const UnificationPartition& lhs,
+UnificationPartition join(const UnificationPartition& lhs,
                            const UnificationPartition& rhs);
 
 /**
- * Merge 2 blocks (supposedly valid).
+ * Join 2 blocks (supposedly valid).
  *
  * That is compute their type intersection and if defined, then build
  * the block as the union of the 2 blocks, typed with their type
  * intersection.
  */
-UnificationBlock merge(const UnificationBlock& lhs, const UnificationBlock& rhs);
+UnificationBlock join(const UnificationBlock& lhs, const UnificationBlock& rhs);
 
 /**
  * Return true if a unification block is valid. A unification block is

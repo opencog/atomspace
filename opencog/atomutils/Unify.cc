@@ -96,50 +96,50 @@ UnificationSolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
 	}
 }
 
-UnificationSolutionSet merge(const UnificationSolutionSet& lhs,
-                             const UnificationSolutionSet& rhs)
+UnificationSolutionSet join(const UnificationSolutionSet& lhs,
+                            const UnificationSolutionSet& rhs)
 {
-	// No need to merge if one of them is invalid
+	// No need to join if one of them is invalid
 	if (not lhs.satisfiable or not rhs.satisfiable)
 		return UnificationSolutionSet(false);
 
-	// No need to merge if one of them is empty
+	// No need to join if one of them is empty
 	if (rhs.partitions.empty())
 		return lhs;
 	if (lhs.partitions.empty())
 		return rhs;
 
-	// Merge
+	// Join
 	UnificationSolutionSet result;
 	for (const UnificationPartition& rp : rhs.partitions) {
-		UnificationPartitions sol(merge(lhs.partitions, rp));
+		UnificationPartitions sol(join(lhs.partitions, rp));
 		result.partitions.insert(sol.begin(), sol.end());
 	}
 
-	// If we get an empty merge whereas the inputs where not empty
-	// then the merge has failed
+	// If we get an empty join whereas the inputs where not empty
+	// then the join has failed
 	result.satisfiable = (not result.partitions.empty()) or
 		(lhs.partitions.empty() and rhs.partitions.empty());
 
 	return result;
 }
 
-UnificationPartitions merge(const UnificationPartitions& lhs,
-                            const UnificationPartition& rhs)
+UnificationPartitions join(const UnificationPartitions& lhs,
+                           const UnificationPartition& rhs)
 {
 	UnificationPartitions result;
 	if (lhs.empty())
 		result.insert(rhs);
 	else {
 		for (const auto& par : lhs) {
-			result.insert(merge(par, rhs));
+			result.insert(join(par, rhs));
 		}
 	}
 	return result;
 }
 
-UnificationPartition merge(const UnificationPartition& lhs,
-                           const UnificationPartition& rhs)
+UnificationPartition join(const UnificationPartition& lhs,
+                          const UnificationPartition& rhs)
 {
 	// Don't bother merging if one of them is empty
 	if (lhs.empty())
@@ -155,8 +155,8 @@ UnificationPartition merge(const UnificationPartition& lhs,
 				// Merely insert this independent block
 				result.insert(typed_block);
 			} else {
-				// Merge the 2 equality related blocks
-				UnificationBlock m_typed_block = merge(typed_block, *it);
+				// Join the 2 equality related blocks
+				UnificationBlock m_typed_block = join(typed_block, *it);
 				// If the resulting block is valid then replace *it
 				if (is_valid(m_typed_block)) {
 					result.erase(it);
@@ -173,7 +173,7 @@ UnificationPartition merge(const UnificationPartition& lhs,
 	return result;
 }
 
-UnificationBlock merge(const UnificationBlock& lhs, const UnificationBlock& rhs)
+UnificationBlock join(const UnificationBlock& lhs, const UnificationBlock& rhs)
 {
 	return {set_union(lhs.first, rhs.first),
 			type_intersection(lhs.second, rhs.second)};
