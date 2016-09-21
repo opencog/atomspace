@@ -33,21 +33,42 @@
 using namespace opencog;
 
 //! Each bin has STI range of 32 means 2048 importance bins.
-#define IMPORTANCE_INDEX_BIN_SIZE   32
-#define IMPORTANCE_INDEX_SIZE       2048
+#define IMPORTANCE_INDEX_SIZE   104 //(12*8)+8
 
 ImportanceIndex::ImportanceIndex(void)
 {
 	resize(IMPORTANCE_INDEX_SIZE);
 }
 
+/**
+ * The following formula is used to calculate the ammount of bins
+ * 32768 = (sum 2^b , b = 0 to x) * 8 + 8
+ * This means we have x groups with 8 bins each
+ * The range of each groups bin is doulbe the previous (2^b) and starts at 1
+ * We have to add 8 since 2^c - 1 = sum 2^b , b = 0 to (c-1) and we have 8
+ * such groups
+ */
 unsigned int ImportanceIndex::importanceBin(short importance)
 {
-	// STI is in range of [-32768, 32767] so adding 32768 puts it in
-	// [0, 65535]
-	unsigned int bin = (importance + 32768) / IMPORTANCE_INDEX_BIN_SIZE;
-	assert (bin < IMPORTANCE_INDEX_SIZE);
-	return bin;
+    if (importance <= 15)
+        return importance;
+
+    short imp = std::ceil((importance - 8.0) / 8.0);
+
+    int sum = 0;
+    int i;
+    for (i = 0; i <= 11; i++)
+    {
+        if (sum >= imp)
+            break;
+        sum = sum + std::pow(2,i);
+    }
+
+    int ad = 8 - std::ceil(importance / std::pow(2,(i-1)));
+
+    unsigned int bin = ((i * 8) - ad);
+    assert(bin <= IMPORTANCE_INDEX_SIZE);
+    return bin;
 }
 
 void ImportanceIndex::updateImportance(Atom* atom, int bin)
