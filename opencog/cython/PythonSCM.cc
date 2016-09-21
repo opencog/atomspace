@@ -78,6 +78,10 @@ void* PythonSCM::init_in_guile(void* self)
 #ifdef HAVE_GUILE
 	scm_c_define_module("opencog python", init_in_module, self);
 	scm_c_use_module("opencog python");
+
+	// Make sure that guile and python are using the same atomspace.
+	// This will avoid assorted confusion.
+	PythonEval::instance(SchemeSmob::ss_get_env_as("python-eval"));
 #endif
 	return NULL;
 }
