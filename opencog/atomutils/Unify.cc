@@ -207,7 +207,7 @@ UnificationPartition join(const UnificationPartition& lhs,
 				UnificationBlock m_typed_block = join(typed_block, *it);
 				// If the resulting block is valid then replace *it
 				if (is_valid(m_typed_block)) {
-					result.erase(it);
+					result.erase(it->first);
 					result.insert(m_typed_block);
 				}
 				// If the resulting block is invalid then the partition is
@@ -229,7 +229,7 @@ UnificationBlock join(const UnificationBlock& lhs, const UnificationBlock& rhs)
 
 bool is_valid(const UnificationBlock& block)
 {
-	return block.second == Handle::UNDEFINED;
+	return block.second != Handle::UNDEFINED;
 }
 
 // TODO: very limited type intersection, should support structural
@@ -308,9 +308,8 @@ bool inherit(const Handle& lhs, const Handle& rhs,
 	if (VARIABLE_NODE == lhs->getType() and VARIABLE_NODE == rhs->getType())
 		return inherit(get_union_type(lhs, lhs_vardecl),
 		               get_union_type(rhs, rhs_vardecl));
-	// It that necessary?
-	// else if (lhs == rhs)
-	// 	return true;
+	else if (lhs == rhs)
+		return true;
 	else
 		return gen_varlist(rhs, rhs_vardecl)->is_type(rhs, lhs);
 }
