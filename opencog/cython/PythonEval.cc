@@ -489,6 +489,8 @@ void PythonEval::initialize_python_objects_and_imports(void)
     PyObject* pyAtomSpaceObject = this->atomspace_py_object(_atomspace);
     PyDict_SetItemString(pyRootDictionary, "ATOMSPACE", pyAtomSpaceObject);
     Py_DECREF(pyAtomSpaceObject);
+    if (nullptr == _atomspace)
+        logger().warn("Python evaluator initialized with null atomspace!");
 
     // PyModule_GetDict returns a borrowed reference, so don't do this:
     // Py_DECREF(pyRootDictionary);
@@ -1086,7 +1088,6 @@ void PythonEval::add_to_sys_path(std::string path)
     Py_DECREF(pyPathString);
 }
 
-
 const int ABSOLUTE_IMPORTS_ONLY = 0;
 
 void PythonEval::import_module(const boost::filesystem::path &file,
@@ -1127,6 +1128,9 @@ void PythonEval::import_module(const boost::filesystem::path &file,
         // This decrement is needed because PyDict_SetItemString does
         // not "steal" the reference, unlike PyList_SetItem.
         Py_DECREF(pyAtomSpaceObject);
+        if (nullptr == _atomspace)
+            logger().warn("Python module initialized with null atomspace!");
+
 
         // We need to increment the pyModule reference because
         // PyModule_AddObject "steals" it and we're keeping a copy
