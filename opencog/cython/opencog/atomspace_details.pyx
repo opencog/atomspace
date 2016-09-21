@@ -191,11 +191,12 @@ cdef class AtomSpace:
         else:
             return False
 
+    # Maybe this should be called __repr__ ???
     def __str__(self):
         """ Description of the atomspace """
-        return ("Atomspace object:\n" +
-                "   addr=" + hex(<long>self.atomspace) + "\n"
-                "   owns=" + str(self.owns_atomspace) + "\n"
+        return ("<Atomspace\n" +
+                "   addr: " + hex(<long>self.atomspace) + "\n"
+                "   owns: " + str(self.owns_atomspace) + ">\n"
                )
 
     def __len__(self):
