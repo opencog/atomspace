@@ -512,16 +512,16 @@ PyObject* PythonEval::atomspace_py_object(AtomSpace* atomspace)
     // a hard-to-debug crash on null-pointer-deref, and replace
     // it by a slightly less hard-to-debug error message.
     if (NULL == py_atomspace) {
-        logger().error("PythonEval::%s Failed to load the"
-                       "opencog.atomspace module", __FUNCTION__);
+        logger().warn("PythonEval::%s Failed to load the"
+                      "opencog.atomspace module", __FUNCTION__);
         return NULL;
     }
 
 /***********
     Weird ... I guess NULL atomspaces are OK!?
     if (NULL == atomspace) {
-        logger().error("PythonEval::%s No atomspace specified!",
-                        __FUNCTION__);
+        logger().warn("PythonEval::%s No atomspace specified!",
+                       __FUNCTION__);
         return NULL;
     }
 ************/
@@ -532,8 +532,8 @@ PyObject* PythonEval::atomspace_py_object(AtomSpace* atomspace)
         if (PyErr_Occurred())
             PyErr_Print();
 
-        logger().error("PythonEval::%s Failed to get atomspace "
-                       "wrapped with python object", __FUNCTION__);
+        logger().warn("PythonEval::%s Failed to get atomspace "
+                      "wrapped with python object", __FUNCTION__);
     }
 
     return pyAtomSpace;
@@ -715,7 +715,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     // If we can't find that module then throw an exception.
     if (!pyModule) {
         PyGILState_Release(gstate);
-        logger().error("Python module for '%s' not found!", moduleFunction.c_str());
+        logger().warn("Python module for '%s' not found!", moduleFunction.c_str());
         throw RuntimeException(TRACE_INFO,
             "Python module for '%s' not found!",
             moduleFunction.c_str());
@@ -950,7 +950,7 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     // If we can't find that module then throw an exception.
     if (!pyModule) {
         PyGILState_Release(gstate);
-        logger().error("Python module for '%s' not found!", moduleFunction.c_str());
+        logger().warn("Python module for '%s' not found!", moduleFunction.c_str());
         throw RuntimeException(TRACE_INFO,
             "Python module for '%s' not found!",
             moduleFunction.c_str());
@@ -1244,10 +1244,10 @@ void PythonEval::add_modules_from_path(std::string pathString)
         else {
             Logger::Level btl = logger().get_backtrace_level();
             logger().set_backtrace_level(Logger::Level::NONE);
-            logger().error() << "Failed to load python module \'"
+            logger().warn() << "Failed to load python module \'"
                 << abspath << "\', searched directories:";
             for (int i = 0; config_paths[i] != NULL; ++i) {
-                logger().error() << "Directory: " << config_paths[i];
+                logger().warn() << "Directory: " << config_paths[i];
             }
             logger().set_backtrace_level(btl);
        }
@@ -1302,8 +1302,8 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
     else if (S_ISREG(finfo.st_mode))
         add_module_file(pathString);
     else
-        logger().error() << "Python module path \'" << pathString
-                         << "\' can't be found";
+        logger().warn() << "Python module path \'" << pathString
+                        << "\' can't be found";
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
