@@ -94,7 +94,7 @@ SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
 	OUTPUT_NAME atomspace)
 
 # The cogserver needs the atomspace pxd file to get the Handle, Atom and
-# AtomSpace defintions.
+# AtomSpace defintions during compilation. So this must be installed.
 INSTALL (FILES
 	__init__.py
 	atomspace.pxd
@@ -171,23 +171,15 @@ SET_TARGET_PROPERTIES(bindlink_cython PROPERTIES
 	PREFIX ""
 	OUTPUT_NAME bindlink)
 
-IF (WIN32)
-	INSTALL (TARGETS
-		atomspace_cython
-		bindlink_cython
-		logger_cython
-		type_constructors
-		utilities_cython
-		DESTINATION "${DATADIR}/python/opencog")
-ELSE (WIN32)
-	INSTALL (TARGETS
-		atomspace_cython
-		bindlink_cython
-		logger_cython
-		type_constructors
-		utilities_cython
-		DESTINATION "${DATADIR}/python/opencog")
-ENDIF (WIN32)
+# XXX FIXME -- there must surely be a more elegant way
+# of specifying the correct python install path ...
+INSTALL (TARGETS
+	atomspace_cython
+	bindlink_cython
+	logger_cython
+	type_constructors
+	utilities_cython
+	DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
 
 IF (HAVE_GUILE)
 	############################## scheme wrapper #####################
@@ -213,19 +205,12 @@ IF (HAVE_GUILE)
 		PREFIX ""
 		OUTPUT_NAME scheme_wrapper)
 
-	IF (WIN32)
-		INSTALL (TARGETS
-			scheme_wrapper
-			DESTINATION "${DATADIR}/python/opencog")
-	ELSE (WIN32)
-		INSTALL (TARGETS
-			scheme_wrapper
-			DESTINATION "${DATADIR}/python/opencog")
-	ENDIF (WIN32)
-
+	INSTALL (TARGETS
+		scheme_wrapper
+		DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
 ENDIF (HAVE_GUILE)
 
 
 INSTALL (FILES
 	__init__.py
-	DESTINATION "${DATADIR}/python/opencog")
+	DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
