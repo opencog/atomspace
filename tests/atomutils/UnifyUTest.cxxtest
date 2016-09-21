@@ -33,7 +33,8 @@ class UnifyUTest :  public CxxTest::TestSuite
 private:
 	AtomSpace _as;
 	Handle X, Y, Z, W, V, A, B, AB, XB, AY, XY, AZ, AW, AV,
-		AndAB, AndXA, AndXY, AndABABABABAB, AndXXXXYYYYAB,
+		AndAB, AndXA, AndXY,
+		AndAABB, AndXYAB, AndAAABBB, AndXXYYAB, AndAAAABBBB, AndXXXYYYAB,
 		CT, PT, CPT,
 		X_vardecl, Y_vardecl, Z_vardecl, W_vardecl, V_vardecl,
 		XY_vardecl;
@@ -67,9 +68,13 @@ public:
 
 	// Unordered link
 	void test_gen_permutations_1();
+	void test_gen_permutations_2();
+	void test_gen_permutations_3();
 	void test_unify_unordered_1();
 	void test_unify_unordered_2();
-	// void test_unify_unordered_3();
+	void test_unify_unordered_3();
+	// void test_unify_unordered_4();
+	// void test_unify_unordered_5();
 };
 
 void UnifyUTest::setUp(void)
@@ -94,8 +99,12 @@ void UnifyUTest::setUp(void)
 	AndAB = al(AND_LINK, A, B);
 	AndXA = al(AND_LINK, X, A);
 	AndXY = al(AND_LINK, X, Y);
-	AndABABABABAB = al(AND_LINK, {A, B, A, B, A, B, A, B, A, B});
-	AndXXXXYYYYAB = al(AND_LINK, {X, X, X, X, Y, Y, Y, Y, A, B});
+	AndAABB = al(AND_LINK, {A, A, B, B});
+	AndXYAB = al(AND_LINK, {X, Y, A, B});
+	AndAAABBB = al(AND_LINK, {A, A, A, B, B, B});
+	AndXXYYAB = al(AND_LINK, {X, X, Y, Y, A, B});
+	AndAAAABBBB = al(AND_LINK, {A, A, A, A, B, B, B, B});
+	AndXXXYYYAB = al(AND_LINK, {X, X, X, Y, Y, Y, A, B});
 	CT = an(TYPE_NODE, "ConceptNode");
 	PT = an(TYPE_NODE, "PredicateNode");
 	CPT = al(TYPE_CHOICE, CT, PT);
@@ -296,6 +305,27 @@ void UnifyUTest::test_gen_permutations_1()
 	TS_ASSERT_EQUALS(result, expected);
 }
 
+void UnifyUTest::test_gen_permutations_2()
+{
+	std::set<std::vector<Arity>> result = gen_permutations(6);
+
+	for (const auto& perm : result) {
+		for (const auto& el: perm) {
+			std::cout << el << " ";
+		}
+		std::cout << std::endl;
+	}
+
+	TS_ASSERT_EQUALS(result.size(), 720);
+}
+
+void UnifyUTest::test_gen_permutations_3()
+{
+	std::set<std::vector<Arity>> result = gen_permutations(8);
+
+	TS_ASSERT_EQUALS(result.size(), 40320);
+}
+
 void UnifyUTest::test_unify_unordered_1()
 {
 	UnificationSolutionSet result = unify(AndAB, AndXA,
@@ -318,13 +348,37 @@ void UnifyUTest::test_unify_unordered_2()
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+}
+
+void UnifyUTest::test_unify_unordered_3()
+{
+	UnificationSolutionSet result = unify(AndAABB, AndXYAB),
+		expected = UnificationSolutionSet(true,
+		                                  {{{{X, A}, A}, {{Y, B}, B}},
+			                               {{{Y, A}, A}, {{X, B}, B}}});
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
 
 	TS_ASSERT_EQUALS(result, expected);
 }
 
-// void UnifyUTest::test_unify_unordered_3()
+// void UnifyUTest::test_unify_unordered_4()
 // {
-// 	UnificationSolutionSet result = unify(AndABABABABAB, AndXXXXYYYYAB),
+// 	UnificationSolutionSet result = unify(AndAAABBB, AndXXYYAB),
+// 		expected = UnificationSolutionSet(true,
+// 		                                  {{{{X, A}, A}, {{Y, B}, B}},
+// 			                               {{{Y, A}, A}, {{X, B}, B}}});
+
+// 	std::cout << "result = " << oc_to_string(result) << std::endl;
+// 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+// 	TS_ASSERT_EQUALS(result, expected);
+// }
+
+// void UnifyUTest::test_unify_unordered_5()
+// {
+// 	UnificationSolutionSet result = unify(AndAAAABBBB, AndXXXYYYAB),
 // 		expected = UnificationSolutionSet(true,
 // 		                                  {{{{X, A}, A}, {{Y, B}, B}},
 // 			                               {{{Y, A}, A}, {{X, B}, B}}});

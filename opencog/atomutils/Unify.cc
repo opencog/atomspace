@@ -77,10 +77,13 @@ UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
 	for (const auto& perm : gen_permutations(lhs)) {
 		UnificationSolutionSet perm_sol;
 		for (Arity i = 0; i < lhs_arity; ++i) {
+			std::cout << "perm[" << i << "] = " << perm[i] << std::endl;
 			auto rs = unify(lhs->getOutgoingAtom(perm[i]),
 			                rhs->getOutgoingAtom(i),
 			                lhs_vardecl, rhs_vardecl);
+			std::cout << "rs = " << oc_to_string(rs);
 			perm_sol = join(perm_sol, rs);
+			std::cout << "perm_sol = " << oc_to_string(perm_sol);
 			if (not perm_sol.satisfiable)     // Stop if unification has failed
 				break;
 		}
@@ -370,6 +373,14 @@ std::string oc_to_string(const BoolHandleMapSetPair& bhmsp)
 	std::stringstream ss;
 	ss << "success: " << bhmsp.first << std::endl
 	   << "mappings: " << oc_to_string(bhmsp.second);
+	return ss.str();
+}
+
+std::string oc_to_string(const UnificationBlock& ub)
+{
+	std::stringstream ss;
+	ss << "block:" << std::endl << oc_to_string(ub.first)
+	   << "type:" << std::endl << oc_to_string(ub.second);
 	return ss.str();
 }
 

@@ -292,6 +292,7 @@ VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl);
 
 std::string oc_to_string(const BoolHandleMapSetPair& bhmsp);
 std::string oc_to_string(const UnificationPartition& hshm);
+std::string oc_to_string(const UnificationBlock& ub);
 std::string oc_to_string(const UnificationPartitions& par);
 std::string oc_to_string(const UnificationSolutionSet& sol);
 	
