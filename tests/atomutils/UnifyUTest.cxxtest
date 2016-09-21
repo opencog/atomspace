@@ -33,6 +33,7 @@ class UnifyUTest :  public CxxTest::TestSuite
 private:
 	AtomSpace _as;
 	Handle X, Y, Z, W, V, A, B, AB, XB, AY, XY, AZ, AW, AV,
+		AndAB, AndXA, AndXY, AndABABABABAB, AndXXXXYYYYAB,
 		CT, PT, CPT,
 		X_vardecl, Y_vardecl, Z_vardecl, W_vardecl, V_vardecl,
 		XY_vardecl;
@@ -42,20 +43,33 @@ public:
 
 	void setUp();
 
-	void test_unify_1();
-	void test_unify_2();
-	void test_unify_3();
-	void test_unify_4();
-	void test_unify_5();
-	void test_unify_6();
-	void test_unify_7();
-	void test_unify_8();
-	void test_unify_9();
-	void test_unify_10();
-	void test_unify_11();
-	void test_unify_12();
-	void test_unify_13();
-	void test_unify_14();
+	void test_unify_without_var_1();
+	void test_unify_without_var_2();
+
+	void test_unify_basic_1();
+	void test_unify_basic_2();
+	void test_unify_basic_3();
+	void test_unify_basic_4();
+	void test_unify_basic_5();
+	void test_unify_basic_6();
+	void test_unify_basic_7();
+	void test_unify_basic_8();
+
+	// Variable declaration
+	void test_unify_vardecl_1();
+	void test_unify_vardecl_2();
+	void test_unify_vardecl_3();
+	void test_unify_vardecl_4();
+	void test_unify_vardecl_5();
+
+	// Type union
+	void test_unify_type_union_1();
+
+	// Unordered link
+	void test_gen_permutations_1();
+	void test_unify_unordered_1();
+	void test_unify_unordered_2();
+	// void test_unify_unordered_3();
 };
 
 void UnifyUTest::setUp(void)
@@ -77,6 +91,11 @@ void UnifyUTest::setUp(void)
 	AZ = al(INHERITANCE_LINK, A, Z);
 	AW = al(INHERITANCE_LINK, A, W);
 	AV = al(INHERITANCE_LINK, A, V);
+	AndAB = al(AND_LINK, A, B);
+	AndXA = al(AND_LINK, X, A);
+	AndXY = al(AND_LINK, X, Y);
+	AndABABABABAB = al(AND_LINK, {A, B, A, B, A, B, A, B, A, B});
+	AndXXXXYYYYAB = al(AND_LINK, {X, X, X, X, Y, Y, Y, Y, A, B});
 	CT = an(TYPE_NODE, "ConceptNode");
 	PT = an(TYPE_NODE, "PredicateNode");
 	CPT = al(TYPE_CHOICE, CT, PT);
@@ -93,7 +112,29 @@ void UnifyUTest::setUp(void)
 #undef an
 }
 
-void UnifyUTest::test_unify_1()
+void UnifyUTest::test_unify_without_var_1()
+{
+	UnificationSolutionSet result = unify(AB, A),
+		expected(false);
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_without_var_2()
+{
+	UnificationSolutionSet result = unify(AB, AB),
+		expected(true);
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_basic_1()
 {
 	UnificationSolutionSet result = unify(X, A),
 		expected = UnificationSolutionSet(true, {{{{X, A}, A}}});
@@ -104,7 +145,7 @@ void UnifyUTest::test_unify_1()
 	TS_ASSERT_EQUALS(result, expected);
 }
 
-void UnifyUTest::test_unify_2()
+void UnifyUTest::test_unify_basic_2()
 {
 	UnificationSolutionSet result = unify(A, X),
 		expected = UnificationSolutionSet(true, {{{{X, A}, A}}});
@@ -115,7 +156,7 @@ void UnifyUTest::test_unify_2()
 	TS_ASSERT_EQUALS(result, expected);
 }
 
-void UnifyUTest::test_unify_3()
+void UnifyUTest::test_unify_basic_3()
 {
 	UnificationSolutionSet result = unify(X, AB),
 		expected = UnificationSolutionSet(true, {{{{X, AB}, AB}}});
@@ -126,7 +167,7 @@ void UnifyUTest::test_unify_3()
 	TS_ASSERT_EQUALS(result, expected);
 }
 
-void UnifyUTest::test_unify_4()
+void UnifyUTest::test_unify_basic_4()
 {
 	UnificationSolutionSet result = unify(XB, AY),
 		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, B}, B}}});
@@ -137,7 +178,7 @@ void UnifyUTest::test_unify_4()
 	TS_ASSERT_EQUALS(result, expected);
 }
 
-void UnifyUTest::test_unify_5()
+void UnifyUTest::test_unify_basic_5()
 {
 	UnificationSolutionSet result = unify(XY, AY),
 		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, Y}, Y}}});
@@ -148,7 +189,7 @@ void UnifyUTest::test_unify_5()
 	TS_ASSERT_EQUALS(result, expected);
 }
 
-void UnifyUTest::test_unify_6()
+void UnifyUTest::test_unify_basic_6()
 {
 	// This one is supposed to fail
 	UnificationSolutionSet result = unify(A, B);
@@ -158,7 +199,7 @@ void UnifyUTest::test_unify_6()
 	TS_ASSERT(not result.satisfiable);
 }
 
-void UnifyUTest::test_unify_7()
+void UnifyUTest::test_unify_basic_7()
 {
 	// This one is supposed to fail
 	UnificationSolutionSet result = unify(XB, B);
@@ -166,7 +207,7 @@ void UnifyUTest::test_unify_7()
 	TS_ASSERT(not result.satisfiable);
 }
 
-void UnifyUTest::test_unify_8()
+void UnifyUTest::test_unify_basic_8()
 {
 	UnificationSolutionSet result = unify(XY, AZ),
 		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, Z}, Y}}});
@@ -177,7 +218,7 @@ void UnifyUTest::test_unify_8()
 	TS_ASSERT_EQUALS(result, expected);
 }
 
-void UnifyUTest::test_unify_9()
+void UnifyUTest::test_unify_vardecl_1()
 {
 	UnificationSolutionSet result = unify(X, A, X_vardecl),
 		expected = UnificationSolutionSet(true, {{{{X, A}, A}}});
@@ -188,7 +229,7 @@ void UnifyUTest::test_unify_9()
 	TS_ASSERT_EQUALS(result, expected);
 }
 
-void UnifyUTest::test_unify_10()
+void UnifyUTest::test_unify_vardecl_2()
 {
 	UnificationSolutionSet result = unify(XY, AY, XY_vardecl, Y_vardecl),
 		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y}, Y}}});
@@ -199,7 +240,7 @@ void UnifyUTest::test_unify_10()
 	TS_ASSERT_EQUALS(result, expected);
 }
 
-void UnifyUTest::test_unify_11()
+void UnifyUTest::test_unify_vardecl_3()
 {
 	UnificationSolutionSet result = unify(XB, AY, X_vardecl, Y_vardecl),
 		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, B}, B}}});
@@ -207,7 +248,7 @@ void UnifyUTest::test_unify_11()
 	TS_ASSERT_EQUALS(result, expected);
 }
 
-void UnifyUTest::test_unify_12()
+void UnifyUTest::test_unify_vardecl_4()
 {
 	UnificationSolutionSet result = unify(XY, AZ, XY_vardecl, Z_vardecl),
 		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, Z}, Y}}});
@@ -218,7 +259,7 @@ void UnifyUTest::test_unify_12()
 	TS_ASSERT_EQUALS(result, expected);
 }
 
-void UnifyUTest::test_unify_13()
+void UnifyUTest::test_unify_vardecl_5()
 {
 	// This one is supposed to fail as the types of Y and W have empty
 	// intersection.
@@ -229,7 +270,7 @@ void UnifyUTest::test_unify_13()
 	TS_ASSERT(not result.satisfiable);
 }
 
-void UnifyUTest::test_unify_14()
+void UnifyUTest::test_unify_type_union_1()
 {
 	UnificationSolutionSet result = unify(XY, AV, XY_vardecl, V_vardecl),
 		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, V}, Y}}});
@@ -239,3 +280,57 @@ void UnifyUTest::test_unify_14()
 
 	TS_ASSERT_EQUALS(result, expected);
 }
+
+void UnifyUTest::test_gen_permutations_1()
+{
+	std::set<std::vector<Arity>> result = gen_permutations(3),
+		expected{{0,1,2},{0,2,1},{1,0,2},{1,2,0},{2,0,1},{2,1,0}};
+
+	for (const auto& perm : result) {
+		for (const auto& el: perm) {
+			std::cout << el << " ";
+		}
+		std::cout << std::endl;
+	}
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_unordered_1()
+{
+	UnificationSolutionSet result = unify(AndAB, AndXA,
+	                                      Handle::UNDEFINED, X_vardecl),
+		expected = UnificationSolutionSet(true, {{{{X, B}, B}}});
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_unordered_2()
+{
+	UnificationSolutionSet result = unify(AndAB, AndXY,
+	                                      Handle::UNDEFINED, XY_vardecl),
+		expected = UnificationSolutionSet(true,
+		                                  {{{{X, A}, A}, {{Y, B}, B}},
+			                               {{{Y, A}, A}, {{X, B}, B}}});
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+// void UnifyUTest::test_unify_unordered_3()
+// {
+// 	UnificationSolutionSet result = unify(AndABABABABAB, AndXXXXYYYYAB),
+// 		expected = UnificationSolutionSet(true,
+// 		                                  {{{{X, A}, A}, {{Y, B}, B}},
+// 			                               {{{Y, A}, A}, {{X, B}, B}}});
+
+// 	std::cout << "result = " << oc_to_string(result) << std::endl;
+// 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+// 	TS_ASSERT_EQUALS(result, expected);
+// }
