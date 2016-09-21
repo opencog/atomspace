@@ -28,6 +28,8 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomTable.h>
 
+#include <boost/range/adaptor/reversed.hpp>
+
 using namespace opencog;
 
 //! Each bin has STI range of 32 means 2048 importance bins.
@@ -122,4 +124,36 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
 	std::transform(set.begin(), set.end(), inserter(ret),
 	               [](Atom* atom)->Handle { return atom->getHandle(); });
 	return ret;
+}
+
+UnorderedHandleSet ImportanceIndex::getMaxBinContents()
+{
+    UnorderedHandleSet ret;
+    for (AtomSet s : boost::adaptors::reverse(idx))
+    {
+        if (s.size() > 0)
+        {
+	        std::transform(s.begin(), s.end(), inserter(ret),
+	               [](Atom* atom)->Handle { return atom->getHandle(); });
+	        return ret;
+        }
+    }
+
+    return ret;
+}
+
+UnorderedHandleSet ImportanceIndex::getMinBinContents()
+{
+    UnorderedHandleSet ret;
+    for (AtomSet s : idx)
+    {
+        if (s.size() > 0)
+        {
+	        std::transform(s.begin(), s.end(), inserter(ret),
+	               [](Atom* atom)->Handle { return atom->getHandle(); });
+	        return ret;
+        }
+    }
+
+    return ret;
 }
