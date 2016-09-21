@@ -71,15 +71,63 @@ UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
 		return UnificationSolutionSet(false);
 
 	// Recursive cases
-	UnificationSolutionSet sol;
-	for (Arity i = 0; i < lhs_arity; ++i) {
-		auto rs = unify(lhs->getOutgoingAtom(i), rhs->getOutgoingAtom(i),
-		                lhs_vardecl, rhs_vardecl);
-		sol = merge(sol, rs);
-		if (not sol.satisfiable)     // Stop if unification has failed
-			break;
+	UnificationSolutionSet sol(false);
+	// Generate all permutations TODO: replace that by some iterative
+	// perm generator that would prune all unnecessary permutations.
+	for (const auto& perm : gen_permutations(lhs)) {
+		UnificationSolutionSet perm_sol;
+		for (Arity i = 0; i < lhs_arity; ++i) {
+			auto rs = unify(lhs->getOutgoingAtom(perm[i]),
+			                rhs->getOutgoingAtom(i),
+			                lhs_vardecl, rhs_vardecl);
+			perm_sol = join(perm_sol, rs);
+			if (not perm_sol.satisfiable)     // Stop if unification has failed
+				break;
+		}
+		// Union merge satisfiable permutation
+		if (perm_sol.satisfiable) {
+			sol.satisfiable = true;
+			sol.partitions.insert(perm_sol.partitions.begin(),
+			                      perm_sol.partitions.end());
+		}
 	}
 	return sol;
+}
+
+bool is_unordered(const Handle& h)
+{
+	return classserver().isA(h->getType(), UNORDERED_LINK);
+}
+
+std::set<std::vector<Arity>> gen_permutations(const Handle& h)
+{
+	Arity n = h->getArity();
+	if (is_unordered(h)) {
+		return gen_permutations(n);
+	} else {
+		std::vector<Arity> zero2n;
+		for (Arity i = 0; i < n; ++i)
+			zero2n.push_back(i);
+		return {zero2n};
+	}
+}
+
+std::set<std::vector<Arity>> gen_permutations(Arity n)
+{
+	// Base case
+	if (n == 0)
+		return {{}};
+
+	// Recursive case
+	std::set<std::vector<Arity>> result;
+	for (const std::vector<Arity>& perm : gen_permutations(n - 1)) {
+		for (Arity i = 0; i < n; ++i) {
+			std::vector<Arity> cpy(perm);
+			cpy.insert(cpy.begin() + i, n - 1);
+			result.insert(cpy);
+		}
+	}
+	return result;
 }
 
 UnificationSolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
