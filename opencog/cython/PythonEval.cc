@@ -34,6 +34,7 @@
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include "PythonEval.h"
 
@@ -441,13 +442,25 @@ PythonEval& PythonEval::instance(AtomSpace* atomspace)
 #define CHECK_SINGLETON
 #ifdef CHECK_SINGLETON
         if (nullptr != singletonInstance->_atomspace)
+        {
             // Someone is trying to initialize the Python interpreter on a
             // different AtomSpace.  Because of the singleton design of the
             // the CosgServer+AtomSpace, there is no easy way to support this...
+            // logger().error() will print a stack tace to tell use who
+            // is doing this.
+            logger().error("PythonEval: ",
+                "Trying to re-initialize python interpreter with different\n"
+                "AtomSpace ptr! Current ptr=%p uuid=%d "
+                "New ptr=%p uuid=%d\n",
+                singletonInstance->_atomspace,
+                singletonInstance->_atomspace->get_uuid(),
+                atomspace, atomspace?atomspace->get_uuid():0);
+
             throw RuntimeException(TRACE_INFO,
                 "Trying to re-initialize python interpreter with different\n"
                 "AtomSpace ptr! Current ptr=%p New ptr=%p\n",
                 singletonInstance->_atomspace, atomspace);
+        }
 #else
         // We need to be able to call the python interpreter with
         // different atomspaces; for example, we need to use temporary
@@ -489,6 +502,8 @@ void PythonEval::initialize_python_objects_and_imports(void)
     PyObject* pyAtomSpaceObject = this->atomspace_py_object(_atomspace);
     PyDict_SetItemString(pyRootDictionary, "ATOMSPACE", pyAtomSpaceObject);
     Py_DECREF(pyAtomSpaceObject);
+    if (nullptr == _atomspace)
+        logger().warn("Python evaluator initialized with null atomspace!");
 
     // PyModule_GetDict returns a borrowed reference, so don't do this:
     // Py_DECREF(pyRootDictionary);
@@ -1086,7 +1101,6 @@ void PythonEval::add_to_sys_path(std::string path)
     Py_DECREF(pyPathString);
 }
 
-
 const int ABSOLUTE_IMPORTS_ONLY = 0;
 
 void PythonEval::import_module(const boost::filesystem::path &file,
@@ -1127,6 +1141,9 @@ void PythonEval::import_module(const boost::filesystem::path &file,
         // This decrement is needed because PyDict_SetItemString does
         // not "steal" the reference, unlike PyList_SetItem.
         Py_DECREF(pyAtomSpaceObject);
+        if (nullptr == _atomspace)
+            logger().warn("Python module initialized with null atomspace!");
+
 
         // We need to increment the pyModule reference because
         // PyModule_AddObject "steals" it and we're keeping a copy
