@@ -56,24 +56,6 @@
 namespace opencog {
 
 class AtomSpace;
-class CogServer;
-
-/**
- * Each call of the embedded python code could be easily locked by object of this class
- */
-class PythonThreadLocker
-{
-    private:
-        PyGILState_STATE state;
-
-    public:
-        PythonThreadLocker() : state(PyGILState_Ensure())
-        {}
-
-        ~PythonThreadLocker() {
-            PyGILState_Release(state);
-        }
-};
 
 /**
  * Singleton class used to initialize python interpreter in the main thread.
