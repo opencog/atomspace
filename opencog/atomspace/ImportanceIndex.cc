@@ -32,41 +32,44 @@
 
 using namespace opencog;
 
-//! Each bin has STI range of 32 means 2048 importance bins.
-#define IMPORTANCE_INDEX_SIZE   104 //(12*8)+8
+/**
+ * This formula is used to calculate the GROUP_NUM given the GROUP_SIZE
+ * 32768 = (sum 2^b , b = 0 to (GROUP_NUM-1)) * GROUP_SIZE + GROUP_SIZE
+ * for a GROUP_SIZE of 8 we get:
+ * 32768 = (sum 2^b , b = 0 to 11) * 8 + 8
+ * This means we have 12 groups with 8 bins each
+ * The range of each groups bins is double the previous (2^b) and starts at 1
+ * We have to add 8 since [2^c - 1 = sum 2^b , b = 0 to (c-1)] and we have 8
+ * such groups
+ */
+#define GROUP_SIZE 8
+#define GROUP_NUM 12
+#define IMPORTANCE_INDEX_SIZE (GROUP_NUM*GROUP_SIZE)+GROUP_NUM //104
 
 ImportanceIndex::ImportanceIndex(void)
 {
 	resize(IMPORTANCE_INDEX_SIZE);
 }
 
-/**
- * The following formula is used to calculate the ammount of bins
- * 32768 = (sum 2^b , b = 0 to x) * 8 + 8
- * This means we have x groups with 8 bins each
- * The range of each groups bin is doulbe the previous (2^b) and starts at 1
- * We have to add 8 since 2^c - 1 = sum 2^b , b = 0 to (c-1) and we have 8
- * such groups
- */
 unsigned int ImportanceIndex::importanceBin(short importance)
 {
-    if (importance <= 15)
+    if (importance < 2*GROUP_SIZE)
         return importance;
 
-    short imp = std::ceil((importance - 8.0) / 8.0);
+    short imp = std::ceil((importance - GROUP_SIZE) / GROUP_SIZE);
 
     int sum = 0;
     int i;
-    for (i = 0; i <= 11; i++)
+    for (i = 0; i <= GROUP_NUM; i++)
     {
         if (sum >= imp)
             break;
         sum = sum + std::pow(2,i);
     }
 
-    int ad = 8 - std::ceil(importance / std::pow(2,(i-1)));
+    int ad = GROUP_SIZE - std::ceil(importance / std::pow(2,(i-1)));
 
-    unsigned int bin = ((i * 8) - ad);
+    unsigned int bin = ((i * GROUP_SIZE) - ad);
     assert(bin <= IMPORTANCE_INDEX_SIZE);
     return bin;
 }
