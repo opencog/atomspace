@@ -65,6 +65,16 @@ public:
      * should be placed.
      */
     static unsigned int importanceBin(short);
+
+    /**
+     * Get the highest bin which containsAtoms
+     */
+    UnorderedHandleSet getMaxBinContents();
+
+    /**
+     * Get the lowest bin which containsAtoms
+     */
+    UnorderedHandleSet getMinBinContents();
 };
 
 /** @}*/
