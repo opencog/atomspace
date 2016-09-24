@@ -24,7 +24,6 @@
  */
 
 #include <dlfcn.h>
-#include <signal.h>
 
 #include <boost/filesystem/operations.hpp>
 
@@ -269,16 +268,6 @@ static bool try_to_load_modules(const char ** config_paths)
 
 void opencog::global_python_initialize()
 {
-    // Strange hack for broken python libraries.  Some of the python
-    // libraries, e.g. the ones that do socket i/o, somehow manage
-    // to generate signals, and they basically don't care ... for
-    // us, however, this is fatal, since it brings the whole system
-    // crashing down. So catch and ignore the SIGPIPE signal.
-    // We don't do this in the cogserver, since python can be used
-    // outside of the cogserver. See
-    // https://github.com/opencog/ros-behavior-scripting/issues/108#issuecomment-249342902
-    signal(SIGPIPE, SIG_IGN);
-
     // Calling "import rospy" exhibits bug
     // https://github.com/opencog/atomspace/issues/669
     // Error message:
