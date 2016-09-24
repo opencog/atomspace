@@ -24,6 +24,7 @@
  */
 
 #include <dlfcn.h>
+#include <signal.h>
 
 #include <boost/filesystem/operations.hpp>
 
@@ -62,11 +63,14 @@ static bool initialized_outside_opencog = false;
 std::recursive_mutex PythonEval::_mtx;
 
 /*
- * @todo When can we remove the singleton instance? Answer: never,
- * as long as python is single-threaded. Currently, python fakes
+ * @todo When can we remove the singleton instance? Answer: not sure.
+ * Python itself is single-threaded. That is, currently, python fakes
  * multi-thread support by grabbing a lock and only allowing just
  * one thread to run at a time.  Our singleton instance mirrors this
- * python limitation.
+ * python limitation.  However, if we could set a per-thread atomspace,
+ * then we could maybe still have python be callable in mutiple threads,
+ * with different atomspaces. Clearly python would become a major
+ * bottleneck, but this is why we strongly discourage using python.
  *
  * NOTE: The Python C API reference counting is very tricky and the
  * API inconsistently handles PyObject* object ownership.
@@ -265,6 +269,16 @@ static bool try_to_load_modules(const char ** config_paths)
 
 void opencog::global_python_initialize()
 {
+    // Strange hack for broken python libraries.  Some of the python
+    // libraries, e.g. the ones that do socket i/o, somehow manage
+    // to generate signals, and they basically don't care ... for
+    // us, however, this is fatal, since it brings the whole system
+    // crashing down. So catch and ignore the SIGPIPE signal.
+    // We don't do this in the cogserver, since python can be used
+    // outside of the cogserver. See
+    // https://github.com/opencog/ros-behavior-scripting/issues/108#issuecomment-249342902
+    signal(SIGPIPE, SIG_IGN);
+
     // Calling "import rospy" exhibits bug
     // https://github.com/opencog/atomspace/issues/669
     // Error message:
