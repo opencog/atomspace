@@ -34,7 +34,6 @@ cdef class AtomSpace:
     #cdef cAtomSpace *atomspace
     #cdef bint owns_atomspace
 
-    # TODO how do we do a copy constructor that shares the AtomSpaceImpl?
     def __cinit__(self):
         self.owns_atomspace = False
 

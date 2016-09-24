@@ -124,6 +124,9 @@ inline Handle Handle::do_res(UUID uuid)
     return Handle();
 }
 
+// The rest of this file is devoted to printing utilities used only
+// during GDB debugging.  Thus, you won't find these anywhere in the
+// code base.
 std::string h_to_string(const Handle& h)
 {
 	if ((AtomPtr)h == nullptr)
