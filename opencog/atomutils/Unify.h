@@ -144,10 +144,6 @@ struct UnificationSolutionSet :
 UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
                              const Handle& lhs_vardecl = Handle::UNDEFINED,
                              const Handle& rhs_vardecl = Handle::UNDEFINED);
-UnificationSolutionSet unify(bool unordered,
-                             const HandleSeq& lhs, const HandleSeq& rhs,
-                             const Handle& lhs_vardecl,
-                             const Handle& rhs_vardecl);
 UnificationSolutionSet unordered_unify(const HandleSeq& lhs,
                                        const HandleSeq& rhs,
                                        const Handle& lhs_vardecl,
@@ -161,6 +157,11 @@ UnificationSolutionSet ordered_unify(const HandleSeq& lhs,
  * Return if the atom is an unordered link.
  */
 bool is_unordered(const Handle& h);
+
+/**
+ * Return a copy of a HandleSeq with the ith element removed.
+ */
+HandleSeq cp_erase(const HandleSeq& hs, Arity i);
 
 /**
  * Generate set of all index permutations if h is unordered, otherwise
