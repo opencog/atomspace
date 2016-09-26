@@ -71,15 +71,65 @@ UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
 		return UnificationSolutionSet(false);
 
 	// Recursive cases
-	UnificationSolutionSet sol;
-	for (Arity i = 0; i < lhs_arity; ++i) {
-		auto rs = unify(lhs->getOutgoingAtom(i), rhs->getOutgoingAtom(i),
-		                lhs_vardecl, rhs_vardecl);
-		sol = merge(sol, rs);
-		if (not sol.satisfiable)     // Stop if unification has failed
-			break;
+	UnificationSolutionSet sol(false);
+	// Generate all permutations
+	//
+	// TODO: replace that by some iterative perm generator that would
+	// prune all unnecessary permutations.
+	for (const auto& perm : gen_permutations(lhs)) {
+		UnificationSolutionSet perm_sol;
+		for (Arity i = 0; i < lhs_arity; ++i) {
+			auto rs = unify(lhs->getOutgoingAtom(perm[i]),
+			                rhs->getOutgoingAtom(i),
+			                lhs_vardecl, rhs_vardecl);
+			perm_sol = join(perm_sol, rs);
+			if (not perm_sol.satisfiable)     // Stop if unification has failed
+				break;
+		}
+		// Union merge satisfiable permutation
+		if (perm_sol.satisfiable) {
+			sol.satisfiable = true;
+			sol.partitions.insert(perm_sol.partitions.begin(),
+			                      perm_sol.partitions.end());
+		}
 	}
 	return sol;
+}
+
+bool is_unordered(const Handle& h)
+{
+	return classserver().isA(h->getType(), UNORDERED_LINK);
+}
+
+std::set<std::vector<Arity>> gen_permutations(const Handle& h)
+{
+	Arity n = h->getArity();
+	if (is_unordered(h)) {
+		return gen_permutations(n);
+	} else {
+		std::vector<Arity> zero2n;
+		for (Arity i = 0; i < n; ++i)
+			zero2n.push_back(i);
+		return {zero2n};
+	}
+}
+
+std::set<std::vector<Arity>> gen_permutations(Arity n)
+{
+	// Base case
+	if (n == 0)
+		return {{}};
+
+	// Recursive case
+	std::set<std::vector<Arity>> result;
+	for (const std::vector<Arity>& perm : gen_permutations(n - 1)) {
+		for (Arity i = 0; i < n; ++i) {
+			std::vector<Arity> cpy(perm);
+			cpy.insert(cpy.begin() + i, n - 1);
+			result.insert(cpy);
+		}
+	}
+	return result;
 }
 
 UnificationSolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
@@ -96,58 +146,62 @@ UnificationSolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
 	}
 }
 
-UnificationSolutionSet merge(const UnificationSolutionSet& lhs,
-                             const UnificationSolutionSet& rhs)
+UnificationSolutionSet join(const UnificationSolutionSet& lhs,
+                            const UnificationSolutionSet& rhs)
 {
-	// No need to merge if one of them is invalid
+	// No need to join if one of them is non satisfiable
 	if (not lhs.satisfiable or not rhs.satisfiable)
 		return UnificationSolutionSet(false);
 
-	// No need to merge if one of them is empty
+	// No need to join if one of them is empty
 	if (rhs.partitions.empty())
 		return lhs;
 	if (lhs.partitions.empty())
 		return rhs;
 
-	// Merge
+	// By now both are satisfiable and non empty, join them
 	UnificationSolutionSet result;
 	for (const UnificationPartition& rp : rhs.partitions) {
-		UnificationPartitions sol(merge(lhs.partitions, rp));
+		UnificationPartitions sol(join(lhs.partitions, rp));
 		result.partitions.insert(sol.begin(), sol.end());
 	}
 
-	// If we get an empty merge whereas the inputs where not empty
-	// then the merge has failed
-	result.satisfiable = (not result.partitions.empty()) or
-		(lhs.partitions.empty() and rhs.partitions.empty());
+	// If we get an empty join while the inputs where not empty then
+	// the join has failed
+	result.satisfiable = not result.partitions.empty();
 
 	return result;
 }
 
-UnificationPartitions merge(const UnificationPartitions& lhs,
-                            const UnificationPartition& rhs)
+UnificationPartitions join(const UnificationPartitions& lhs,
+                           const UnificationPartition& rhs)
 {
-	UnificationPartitions result;
+	// Base cases
+	if (rhs.empty())
+		return lhs;
 	if (lhs.empty())
-		result.insert(rhs);
-	else {
-		for (const auto& par : lhs) {
-			result.insert(merge(par, rhs));
-		}
+		return {rhs};
+
+	// Recursive case (a loop actually)
+	UnificationPartitions result;
+	for (const auto& par : lhs) {
+		UnificationPartition jo = join(par, rhs);
+		if (not jo.empty())
+			result.insert(jo);
 	}
 	return result;
 }
 
-UnificationPartition merge(const UnificationPartition& lhs,
-                           const UnificationPartition& rhs)
+UnificationPartition join(const UnificationPartition& lhs,
+                          const UnificationPartition& rhs)
 {
-	// Don't bother merging if one of them is empty
+	// Don't bother joining if one of them is empty
 	if (lhs.empty())
 		return rhs;
 	if (rhs.empty())
 		return lhs;
 
-	// Do the actual merging
+	// Join
 	UnificationPartition result(lhs);
 	for (const auto& typed_block : rhs) {
 		for (auto it = lhs.begin(); it != lhs.end(); ++it) {
@@ -155,15 +209,16 @@ UnificationPartition merge(const UnificationPartition& lhs,
 				// Merely insert this independent block
 				result.insert(typed_block);
 			} else {
-				// Merge the 2 equality related blocks
-				UnificationBlock m_typed_block = merge(typed_block, *it);
-				// If the resulting block is valid then replace *it
-				if (is_valid(m_typed_block)) {
-					result.erase(it);
+				// Join the 2 equality related blocks
+				UnificationBlock m_typed_block = join(typed_block, *it);
+				// If the resulting block is satisfiable then replace *it
+				if (is_satisfiable(m_typed_block)) {
+					result.erase(it->first);
 					result.insert(m_typed_block);
 				}
-				// If the resulting block is invalid then the partition is
-				// invalid as well, thus an empty partition is returned
+				// If the resulting block is non satisfiable then the
+				// partition is non satisfiable as well, thus an empty
+				// partition is returned
 				else {
 					return UnificationPartition();
 				}
@@ -173,15 +228,15 @@ UnificationPartition merge(const UnificationPartition& lhs,
 	return result;
 }
 
-UnificationBlock merge(const UnificationBlock& lhs, const UnificationBlock& rhs)
+UnificationBlock join(const UnificationBlock& lhs, const UnificationBlock& rhs)
 {
 	return {set_union(lhs.first, rhs.first),
 			type_intersection(lhs.second, rhs.second)};
 }
 
-bool is_valid(const UnificationBlock& block)
+bool is_satisfiable(const UnificationBlock& block)
 {
-	return block.second == Handle::UNDEFINED;
+	return block.second != Handle::UNDEFINED;
 }
 
 // TODO: very limited type intersection, should support structural
@@ -260,9 +315,8 @@ bool inherit(const Handle& lhs, const Handle& rhs,
 	if (VARIABLE_NODE == lhs->getType() and VARIABLE_NODE == rhs->getType())
 		return inherit(get_union_type(lhs, lhs_vardecl),
 		               get_union_type(rhs, rhs_vardecl));
-	// It that necessary?
-	// else if (lhs == rhs)
-	// 	return true;
+	else if (lhs == rhs)
+		return true;
 	else
 		return gen_varlist(rhs, rhs_vardecl)->is_type(rhs, lhs);
 }
@@ -318,11 +372,11 @@ VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl)
 	}
 }
 
-std::string oc_to_string(const BoolHandleMapSetPair& bhmsp)
+std::string oc_to_string(const UnificationBlock& ub)
 {
 	std::stringstream ss;
-	ss << "success: " << bhmsp.first << std::endl
-	   << "mappings: " << oc_to_string(bhmsp.second);
+	ss << "block:" << std::endl << oc_to_string(ub.first)
+	   << "type:" << std::endl << oc_to_string(ub.second);
 	return ss.str();
 }
 
