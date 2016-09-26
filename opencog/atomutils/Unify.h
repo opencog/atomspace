@@ -144,6 +144,18 @@ struct UnificationSolutionSet :
 UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
                              const Handle& lhs_vardecl = Handle::UNDEFINED,
                              const Handle& rhs_vardecl = Handle::UNDEFINED);
+UnificationSolutionSet unify(bool unordered,
+                             const HandleSeq& lhs, const HandleSeq& rhs,
+                             const Handle& lhs_vardecl,
+                             const Handle& rhs_vardecl);
+UnificationSolutionSet unordered_unify(const HandleSeq& lhs,
+                                       const HandleSeq& rhs,
+                                       const Handle& lhs_vardecl,
+                                       const Handle& rhs_vardecl);
+UnificationSolutionSet ordered_unify(const HandleSeq& lhs,
+                                     const HandleSeq& rhs,
+                                     const Handle& lhs_vardecl,
+                                     const Handle& rhs_vardecl);
 
 /**
  * Return if the atom is an unordered link.
