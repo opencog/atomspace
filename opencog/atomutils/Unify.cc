@@ -151,37 +151,6 @@ HandleSeq cp_erase(const HandleSeq& hs, Arity i)
 	return hs_cp;
 }
 
-std::set<std::vector<Arity>> gen_permutations(const Handle& h)
-{
-	Arity n = h->getArity();
-	if (is_unordered(h)) {
-		return gen_permutations(n);
-	} else {
-		std::vector<Arity> zero2n;
-		for (Arity i = 0; i < n; ++i)
-			zero2n.push_back(i);
-		return {zero2n};
-	}
-}
-
-std::set<std::vector<Arity>> gen_permutations(Arity n)
-{
-	// Base case
-	if (n == 0)
-		return {{}};
-
-	// Recursive case
-	std::set<std::vector<Arity>> result;
-	for (const std::vector<Arity>& perm : gen_permutations(n - 1)) {
-		for (Arity i = 0; i < n; ++i) {
-			std::vector<Arity> cpy(perm);
-			cpy.insert(cpy.begin() + i, n - 1);
-			result.insert(cpy);
-		}
-	}
-	return result;
-}
-
 UnificationSolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
                                 const Handle& lhs_vardecl,
                                 const Handle& rhs_vardecl)

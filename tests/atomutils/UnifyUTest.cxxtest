@@ -70,9 +70,6 @@ public:
 	void test_unify_type_union_1();
 
 	// Unordered link
-	void test_gen_permutations_1();
-	void test_gen_permutations_2();
-	void test_gen_permutations_3();
 	void test_unify_unordered_1();
 	void test_unify_unordered_2();
 	void test_unify_unordered_3();
@@ -311,42 +308,6 @@ void UnifyUTest::test_unify_type_union_1()
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
 
 	TS_ASSERT_EQUALS(result, expected);
-}
-
-void UnifyUTest::test_gen_permutations_1()
-{
-	std::set<std::vector<Arity>> result = gen_permutations(3),
-		expected{{0,1,2},{0,2,1},{1,0,2},{1,2,0},{2,0,1},{2,1,0}};
-
-	for (const auto& perm : result) {
-		for (const auto& el: perm) {
-			std::cout << el << " ";
-		}
-		std::cout << std::endl;
-	}
-
-	TS_ASSERT_EQUALS(result, expected);
-}
-
-void UnifyUTest::test_gen_permutations_2()
-{
-	std::set<std::vector<Arity>> result = gen_permutations(6);
-
-	for (const auto& perm : result) {
-		for (const auto& el: perm) {
-			std::cout << el << " ";
-		}
-		std::cout << std::endl;
-	}
-
-	TS_ASSERT_EQUALS(result.size(), 720);
-}
-
-void UnifyUTest::test_gen_permutations_3()
-{
-	std::set<std::vector<Arity>> result = gen_permutations(8);
-
-	TS_ASSERT_EQUALS(result.size(), 40320);
 }
 
 void UnifyUTest::test_unify_unordered_1()

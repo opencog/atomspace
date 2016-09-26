@@ -164,20 +164,6 @@ bool is_unordered(const Handle& h);
 HandleSeq cp_erase(const HandleSeq& hs, Arity i);
 
 /**
- * Generate set of all index permutations if h is unordered, otherwise
- * return the singleton with {[0..h->getArity()]}.
- */
-std::set<std::vector<Arity>> gen_permutations(const Handle& h);
-
-/**
- * Generate the set of all permutations of size n.
- *
- * TODO: Add a conditional to ignore dead-end permutations to save
- * lots of computations.
- */
-std::set<std::vector<Arity>> gen_permutations(Arity n);
-
-/**
  * Build elementary solution set between 2 atoms given that at least
  * one of them is a variable.
  */
