@@ -33,7 +33,7 @@ class UnifyUTest :  public CxxTest::TestSuite
 private:
 	AtomSpace _as;
 	Handle X, Y, Z, W, V, A, B, AB, XB, AY, XY, AZ, AW, AV,
-		AndAB, AndAY, AndXB, AndXY,
+		AndAA, AndAB, AndAY, AndXB, AndXY,
 		AndAABB, AndXYAB, AndAAABBB, AndXXYYAB, AndAAAABBBB, AndXXXYYYAB,
 		AndAAAAABBBBB, AndXXXXYYYYAB,
 		CT, PT, CPT,
@@ -70,9 +70,6 @@ public:
 	void test_unify_type_union_1();
 
 	// Unordered link
-	void test_gen_permutations_1();
-	void test_gen_permutations_2();
-	void test_gen_permutations_3();
 	void test_unify_unordered_1();
 	void test_unify_unordered_2();
 	void test_unify_unordered_3();
@@ -80,6 +77,7 @@ public:
 	void test_unify_unordered_5();
 	void test_unify_unordered_6();
 	void test_unify_unordered_7();
+	void test_unify_unordered_8();
 };
 
 void UnifyUTest::setUp(void)
@@ -101,6 +99,7 @@ void UnifyUTest::setUp(void)
 	AZ = al(INHERITANCE_LINK, A, Z);
 	AW = al(INHERITANCE_LINK, A, W);
 	AV = al(INHERITANCE_LINK, A, V);
+	AndAA = al(AND_LINK, A, A);
 	AndAB = al(AND_LINK, A, B);
 	AndAY = al(AND_LINK, A, Y);
 	AndXB = al(AND_LINK, X, B);
@@ -311,43 +310,16 @@ void UnifyUTest::test_unify_type_union_1()
 	TS_ASSERT_EQUALS(result, expected);
 }
 
-void UnifyUTest::test_gen_permutations_1()
-{
-	std::set<std::vector<Arity>> result = gen_permutations(3),
-		expected{{0,1,2},{0,2,1},{1,0,2},{1,2,0},{2,0,1},{2,1,0}};
-
-	for (const auto& perm : result) {
-		for (const auto& el: perm) {
-			std::cout << el << " ";
-		}
-		std::cout << std::endl;
-	}
-
-	TS_ASSERT_EQUALS(result, expected);
-}
-
-void UnifyUTest::test_gen_permutations_2()
-{
-	std::set<std::vector<Arity>> result = gen_permutations(6);
-
-	for (const auto& perm : result) {
-		for (const auto& el: perm) {
-			std::cout << el << " ";
-		}
-		std::cout << std::endl;
-	}
-
-	TS_ASSERT_EQUALS(result.size(), 720);
-}
-
-void UnifyUTest::test_gen_permutations_3()
-{
-	std::set<std::vector<Arity>> result = gen_permutations(8);
-
-	TS_ASSERT_EQUALS(result.size(), 40320);
-}
-
 void UnifyUTest::test_unify_unordered_1()
+{
+	UnificationSolutionSet result = unify(AndAA, AndAB);
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+
+	TS_ASSERT(not result.satisfiable);
+}
+
+void UnifyUTest::test_unify_unordered_2()
 {
 	UnificationSolutionSet result = unify(AndAB, AndAY,
 	                                      Handle::UNDEFINED, Y_vardecl),
@@ -359,7 +331,7 @@ void UnifyUTest::test_unify_unordered_1()
 	TS_ASSERT_EQUALS(result, expected);
 }
 
-void UnifyUTest::test_unify_unordered_2()
+void UnifyUTest::test_unify_unordered_3()
 {
 	UnificationSolutionSet result = unify(AndAY, AndXB),
 		expected = UnificationSolutionSet(true,
@@ -371,7 +343,7 @@ void UnifyUTest::test_unify_unordered_2()
 	TS_ASSERT_EQUALS(result, expected);
 }
 
-void UnifyUTest::test_unify_unordered_3()
+void UnifyUTest::test_unify_unordered_4()
 {
 	UnificationSolutionSet result = unify(AndAB, AndXY,
 	                                      Handle::UNDEFINED, XY_vardecl),
@@ -383,7 +355,7 @@ void UnifyUTest::test_unify_unordered_3()
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
 }
 
-void UnifyUTest::test_unify_unordered_4()
+void UnifyUTest::test_unify_unordered_5()
 {
 	UnificationSolutionSet result = unify(AndAABB, AndXYAB),
 		expected = UnificationSolutionSet(true,
@@ -396,7 +368,7 @@ void UnifyUTest::test_unify_unordered_4()
 	TS_ASSERT_EQUALS(result, expected);
 }
 
-void UnifyUTest::test_unify_unordered_5()
+void UnifyUTest::test_unify_unordered_6()
 {
 	UnificationSolutionSet result = unify(AndAAABBB, AndXXYYAB),
 		expected = UnificationSolutionSet(true,
@@ -409,7 +381,7 @@ void UnifyUTest::test_unify_unordered_5()
 	TS_ASSERT_EQUALS(result, expected);
 }
 
-void UnifyUTest::test_unify_unordered_6()
+void UnifyUTest::test_unify_unordered_7()
 {
 	UnificationSolutionSet result = unify(AndAAAABBBB, AndXXXYYYAB),
 		expected = UnificationSolutionSet(true,
@@ -422,7 +394,7 @@ void UnifyUTest::test_unify_unordered_6()
 	TS_ASSERT_EQUALS(result, expected);
 }
 
-void UnifyUTest::test_unify_unordered_7()
+void UnifyUTest::test_unify_unordered_8()
 {
 	UnificationSolutionSet result = unify(AndAAAAABBBBB, AndXXXXYYYYAB),
 		expected = UnificationSolutionSet(true,

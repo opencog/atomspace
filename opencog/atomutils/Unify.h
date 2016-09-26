@@ -144,6 +144,14 @@ struct UnificationSolutionSet :
 UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
                              const Handle& lhs_vardecl = Handle::UNDEFINED,
                              const Handle& rhs_vardecl = Handle::UNDEFINED);
+UnificationSolutionSet unordered_unify(const HandleSeq& lhs,
+                                       const HandleSeq& rhs,
+                                       const Handle& lhs_vardecl,
+                                       const Handle& rhs_vardecl);
+UnificationSolutionSet ordered_unify(const HandleSeq& lhs,
+                                     const HandleSeq& rhs,
+                                     const Handle& lhs_vardecl,
+                                     const Handle& rhs_vardecl);
 
 /**
  * Return if the atom is an unordered link.
@@ -151,18 +159,9 @@ UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
 bool is_unordered(const Handle& h);
 
 /**
- * Generate set of all index permutations if h is unordered, otherwise
- * return the singleton with {[0..h->getArity()]}.
+ * Return a copy of a HandleSeq with the ith element removed.
  */
-std::set<std::vector<Arity>> gen_permutations(const Handle& h);
-
-/**
- * Generate the set of all permutations of size n.
- *
- * TODO: Add a conditional to ignore dead-end permutations to save
- * lots of computations.
- */
-std::set<std::vector<Arity>> gen_permutations(Arity n);
+HandleSeq cp_erase(const HandleSeq& hs, Arity i);
 
 /**
  * Build elementary solution set between 2 atoms given that at least

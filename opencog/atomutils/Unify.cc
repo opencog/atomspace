@@ -43,6 +43,10 @@ UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
                              const Handle& lhs_vardecl,
                              const Handle& rhs_vardecl)
 {
+	///////////////////
+	// Base cases    //
+	///////////////////
+
 	// Make sure both handles are defined
 	if (lhs == Handle::UNDEFINED or rhs == Handle::UNDEFINED)
 		return UnificationSolutionSet(false);
@@ -50,7 +54,7 @@ UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
 	Type lhs_type(lhs->getType());
 	Type rhs_type(rhs->getType());
 
-	// Base cases
+	// If one is a node
 	if (lhs->isNode() or rhs->isNode()) {
 		if (lhs_type == VARIABLE_NODE or rhs_type == VARIABLE_NODE) {
 			return mkvarsol(lhs, rhs, lhs_vardecl, rhs_vardecl);
@@ -63,73 +67,88 @@ UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
 	if (lhs_type != rhs_type)
 		return UnificationSolutionSet(false);
 
-	// At this point they are both links, check that they have the
-	// same arity
+	// At this point they are both links of the same type, check that
+	// they have the same arity
 	Arity lhs_arity(lhs->getArity());
 	Arity rhs_arity(rhs->getArity());
 	if (lhs_arity != rhs_arity)
 		return UnificationSolutionSet(false);
 
-	// Recursive cases
+	////////////////////////
+	// Recursive cases    //
+	////////////////////////
+
+	if (is_unordered(rhs))
+		return unordered_unify(lhs->getOutgoingSet(), rhs->getOutgoingSet(),
+		                       lhs_vardecl, rhs_vardecl);
+	else
+		return ordered_unify(lhs->getOutgoingSet(), rhs->getOutgoingSet(),
+		                     lhs_vardecl, rhs_vardecl);
+}
+
+UnificationSolutionSet unordered_unify(const HandleSeq& lhs,
+                                       const HandleSeq& rhs,
+                                       const Handle& lhs_vardecl,
+                                       const Handle& rhs_vardecl)
+{
+	Arity lhs_arity(lhs.size());
+	Arity rhs_arity(rhs.size());
+	OC_ASSERT(lhs_arity == rhs_arity);
+
+	// Base case
+	if (lhs_arity == 0)
+		return UnificationSolutionSet();
+
+	// Recursive case
 	UnificationSolutionSet sol(false);
-	// Generate all permutations
-	//
-	// TODO: replace that by some iterative perm generator that would
-	// prune all unnecessary permutations.
-	for (const auto& perm : gen_permutations(lhs)) {
-		UnificationSolutionSet perm_sol;
-		for (Arity i = 0; i < lhs_arity; ++i) {
-			auto rs = unify(lhs->getOutgoingAtom(perm[i]),
-			                rhs->getOutgoingAtom(i),
-			                lhs_vardecl, rhs_vardecl);
-			perm_sol = join(perm_sol, rs);
-			if (not perm_sol.satisfiable)     // Stop if unification has failed
-				break;
-		}
-		// Union merge satisfiable permutation
-		if (perm_sol.satisfiable) {
-			sol.satisfiable = true;
-			sol.partitions.insert(perm_sol.partitions.begin(),
-			                      perm_sol.partitions.end());
+	for (Arity i = 0; i < lhs_arity; ++i) {
+		auto head_sol = unify(lhs[i], rhs[0], lhs_vardecl, rhs_vardecl);
+		if (head_sol.satisfiable) {
+			HandleSeq lhs_tail(cp_erase(lhs, i));
+			HandleSeq rhs_tail(cp_erase(rhs, 0));
+			auto tail_sol = unordered_unify(lhs_tail, rhs_tail,
+			                                lhs_vardecl, rhs_vardecl);
+			UnificationSolutionSet perm_sol = join(head_sol, tail_sol);
+			// Union merge satisfiable permutations
+			if (perm_sol.satisfiable) {
+				sol.satisfiable = true;
+				sol.partitions.insert(perm_sol.partitions.begin(),
+				                      perm_sol.partitions.end());
+			}
 		}
 	}
 	return sol;
 }
 
+UnificationSolutionSet ordered_unify(const HandleSeq& lhs,
+                                     const HandleSeq& rhs,
+                                     const Handle& lhs_vardecl,
+                                     const Handle& rhs_vardecl)
+{
+	Arity lhs_arity(lhs.size());
+	Arity rhs_arity(rhs.size());
+	OC_ASSERT(lhs_arity == rhs_arity);
+
+	UnificationSolutionSet sol;
+	for (Arity i = 0; i < lhs_arity; ++i) {
+		auto rs = unify(lhs[i], rhs[i], lhs_vardecl, rhs_vardecl);
+		sol = join(sol, rs);
+		if (not sol.satisfiable)     // Stop if unification has failed
+			break;
+	}
+	return sol;
+}
+	
 bool is_unordered(const Handle& h)
 {
 	return classserver().isA(h->getType(), UNORDERED_LINK);
 }
 
-std::set<std::vector<Arity>> gen_permutations(const Handle& h)
+HandleSeq cp_erase(const HandleSeq& hs, Arity i)
 {
-	Arity n = h->getArity();
-	if (is_unordered(h)) {
-		return gen_permutations(n);
-	} else {
-		std::vector<Arity> zero2n;
-		for (Arity i = 0; i < n; ++i)
-			zero2n.push_back(i);
-		return {zero2n};
-	}
-}
-
-std::set<std::vector<Arity>> gen_permutations(Arity n)
-{
-	// Base case
-	if (n == 0)
-		return {{}};
-
-	// Recursive case
-	std::set<std::vector<Arity>> result;
-	for (const std::vector<Arity>& perm : gen_permutations(n - 1)) {
-		for (Arity i = 0; i < n; ++i) {
-			std::vector<Arity> cpy(perm);
-			cpy.insert(cpy.begin() + i, n - 1);
-			result.insert(cpy);
-		}
-	}
-	return result;
+	HandleSeq hs_cp(hs);
+	hs_cp.erase(hs_cp.begin() + i);
+	return hs_cp;
 }
 
 UnificationSolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
