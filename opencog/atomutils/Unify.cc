@@ -72,18 +72,17 @@ UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
 
 	// Recursive cases
 	UnificationSolutionSet sol(false);
-	// Generate all permutations TODO: replace that by some iterative
-	// perm generator that would prune all unnecessary permutations.
+	// Generate all permutations
+	//
+	// TODO: replace that by some iterative perm generator that would
+	// prune all unnecessary permutations.
 	for (const auto& perm : gen_permutations(lhs)) {
 		UnificationSolutionSet perm_sol;
 		for (Arity i = 0; i < lhs_arity; ++i) {
-			std::cout << "perm[" << i << "] = " << perm[i] << std::endl;
 			auto rs = unify(lhs->getOutgoingAtom(perm[i]),
 			                rhs->getOutgoingAtom(i),
 			                lhs_vardecl, rhs_vardecl);
-			std::cout << "rs = " << oc_to_string(rs);
 			perm_sol = join(perm_sol, rs);
-			std::cout << "perm_sol = " << oc_to_string(perm_sol);
 			if (not perm_sol.satisfiable)     // Stop if unification has failed
 				break;
 		}
@@ -150,7 +149,7 @@ UnificationSolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
 UnificationSolutionSet join(const UnificationSolutionSet& lhs,
                             const UnificationSolutionSet& rhs)
 {
-	// No need to join if one of them is invalid
+	// No need to join if one of them is non satisfiable
 	if (not lhs.satisfiable or not rhs.satisfiable)
 		return UnificationSolutionSet(false);
 
@@ -160,17 +159,16 @@ UnificationSolutionSet join(const UnificationSolutionSet& lhs,
 	if (lhs.partitions.empty())
 		return rhs;
 
-	// Join
+	// By now both are satisfiable and non empty, join them
 	UnificationSolutionSet result;
 	for (const UnificationPartition& rp : rhs.partitions) {
 		UnificationPartitions sol(join(lhs.partitions, rp));
 		result.partitions.insert(sol.begin(), sol.end());
 	}
 
-	// If we get an empty join whereas the inputs where not empty
-	// then the join has failed
-	result.satisfiable = (not result.partitions.empty()) or
-		(lhs.partitions.empty() and rhs.partitions.empty());
+	// If we get an empty join while the inputs where not empty then
+	// the join has failed
+	result.satisfiable = not result.partitions.empty();
 
 	return result;
 }
@@ -178,13 +176,18 @@ UnificationSolutionSet join(const UnificationSolutionSet& lhs,
 UnificationPartitions join(const UnificationPartitions& lhs,
                            const UnificationPartition& rhs)
 {
-	UnificationPartitions result;
+	// Base cases
+	if (rhs.empty())
+		return lhs;
 	if (lhs.empty())
-		result.insert(rhs);
-	else {
-		for (const auto& par : lhs) {
-			result.insert(join(par, rhs));
-		}
+		return {rhs};
+
+	// Recursive case (a loop actually)
+	UnificationPartitions result;
+	for (const auto& par : lhs) {
+		UnificationPartition jo = join(par, rhs);
+		if (not jo.empty())
+			result.insert(jo);
 	}
 	return result;
 }
@@ -192,13 +195,13 @@ UnificationPartitions join(const UnificationPartitions& lhs,
 UnificationPartition join(const UnificationPartition& lhs,
                           const UnificationPartition& rhs)
 {
-	// Don't bother merging if one of them is empty
+	// Don't bother joining if one of them is empty
 	if (lhs.empty())
 		return rhs;
 	if (rhs.empty())
 		return lhs;
 
-	// Do the actual merging
+	// Join
 	UnificationPartition result(lhs);
 	for (const auto& typed_block : rhs) {
 		for (auto it = lhs.begin(); it != lhs.end(); ++it) {
@@ -208,13 +211,14 @@ UnificationPartition join(const UnificationPartition& lhs,
 			} else {
 				// Join the 2 equality related blocks
 				UnificationBlock m_typed_block = join(typed_block, *it);
-				// If the resulting block is valid then replace *it
-				if (is_valid(m_typed_block)) {
+				// If the resulting block is satisfiable then replace *it
+				if (is_satisfiable(m_typed_block)) {
 					result.erase(it->first);
 					result.insert(m_typed_block);
 				}
-				// If the resulting block is invalid then the partition is
-				// invalid as well, thus an empty partition is returned
+				// If the resulting block is non satisfiable then the
+				// partition is non satisfiable as well, thus an empty
+				// partition is returned
 				else {
 					return UnificationPartition();
 				}
@@ -230,7 +234,7 @@ UnificationBlock join(const UnificationBlock& lhs, const UnificationBlock& rhs)
 			type_intersection(lhs.second, rhs.second)};
 }
 
-bool is_valid(const UnificationBlock& block)
+bool is_satisfiable(const UnificationBlock& block)
 {
 	return block.second != Handle::UNDEFINED;
 }
@@ -366,14 +370,6 @@ VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl)
 			return createVariableList(HandleSeq(1, vardecl));
 		}
 	}
-}
-
-std::string oc_to_string(const BoolHandleMapSetPair& bhmsp)
-{
-	std::stringstream ss;
-	ss << "success: " << bhmsp.first << std::endl
-	   << "mappings: " << oc_to_string(bhmsp.second);
-	return ss.str();
 }
 
 std::string oc_to_string(const UnificationBlock& ub)

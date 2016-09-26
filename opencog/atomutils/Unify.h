@@ -44,11 +44,6 @@ typedef std::map<OrderedHandleSet, Handle> UnificationPartition;
 typedef UnificationPartition::value_type UnificationBlock;
 typedef std::set<UnificationPartition> UnificationPartitions;
 
-// Bool represents whether the mapping is valid
-typedef std::pair<bool, HandleMap> BoolHandleMapPair;
-typedef std::pair<bool, HandleMapSet> BoolHandleMapSetPair;
-typedef std::pair<bool, UnificationPartition> BoolUnificationPartitionPair;
-
 struct UnificationSolutionSet :
 		public boost::equality_comparable<UnificationSolutionSet>
 {
@@ -75,15 +70,76 @@ struct UnificationSolutionSet :
  * This algorithm perform unification by recursively
  *
  * 1. Generate all equality partitions
- * 2. Check that each partition is satisfiable
  *
- * To solve 2., for each partition block, it computes the type that
+ * 2. Decorate partition blocks with types
+ *
+ * 3. Check that each partition is satisfiable
+ *
+ * For now the types in 2. are represented by the substitutions, for
+ * instance the typed block {{X, A}, A} means that X is A. Later one
+ * we will replace that by deep types as to represents things like
+ * {{X, Y}, ConceptNode} meaning that X and Y must be concept nodes is
+ * order to be satisfiable, of course the deep will still need to
+ * capture grounds such as {{X, A}, A}, it's not clear excatly how,
+ * maybe Linas deep type implementation can already do that.
+ *
+ * To solve 3, for each partition block, it computes the type that
  * intersects all its elements and repeat till a fixed point is
  * reached. To do that efficiently we would need to build a dependency
- * DAG, but at first we just compute type intersections is random
- * order.
+ * DAG, but at first we can afford to compute type intersections is
+ * random order.
  *
- * TODO: Improve comments, adding the old unify comments
+ * Also, permutations are supported though very slow.
+ *
+ * Examples:
+ *
+ * 1.
+ *
+ * unify((Variable "$X"), (Concept "A"))
+ * ->
+ * {{<{(Variable "$X"), (Concept "A")}, (Concept "A")>}}
+ *
+ * meaning that the partition block {(Variable "$X"), (Concept "A")}
+ * has type (Concept "A"), and there is only one partition in the
+ * solution set.
+ *
+ * 2.
+ *
+ * unify((Concept "A"), (Concept "$X"))
+ * ->
+ * {{<{(Variable "$X"), (Concept "A")}, (Concept "A")>}}
+ *
+ * 3.
+ *
+ * unify((Inheritance (Concept "A") (Concept "B")), (Variable "$X"))
+ * ->
+ * {{<{(Variable "$X"), (Inheritance (Concept "A") (Concept "B"))},
+ *    (Inheritance (Concept "A") (Concept "B"))>}}
+ *
+ * 4.
+ *
+ * unify((Inheritance (Concept "A") (Variable "$Y")),
+ *       (Inheritance (Variable "$X") (Concept "B"))
+ * ->
+ * {{<{(Variable "$X"), (Concept "A")}, (Concept "A")>,
+ *   <{(Variable "$Y"), (Concept "B")}, (Concept "B")>}}
+ *
+ * 5.
+ *
+ * unify((And (Concept "A") (Concept "B")),
+ *       (And (Variable "$X") (Variable "$Y"))
+ * ->
+ * {
+ *  {<{(Variable "$X"), (Concept "A")}, (Concept "A")>,
+ *   <{(Variable "$Y"), (Concept "B")}, (Concept "B")>},
+ *
+ *  {<{(Variable "$X"), (Concept "B")}, (Concept "B")>,
+ *   <{(Variable "$Y"), (Concept "A")}, (Concept "A")>}
+ * }
+ *
+ * mean that the solution set has 2 partitions, one where X unifies to
+ * A and Y unifies to B, and another one where X unifies to B and Y
+ * unifies to A.
  */
 UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
                              const Handle& lhs_vardecl = Handle::UNDEFINED,
@@ -130,14 +186,14 @@ UnificationPartitions join(const UnificationPartitions& lhs,
                             const UnificationPartition& rhs);
 
 /**
- * Join 2 partitions. If the resulting partition is invalid then the
- * empty partition is returned.
+ * Join 2 partitions. If the resulting partition is satisfiable then
+ * the empty partition is returned.
  */
 UnificationPartition join(const UnificationPartition& lhs,
                            const UnificationPartition& rhs);
 
 /**
- * Join 2 blocks (supposedly valid).
+ * Join 2 blocks (supposedly satisfiable).
  *
  * That is compute their type intersection and if defined, then build
  * the block as the union of the 2 blocks, typed with their type
@@ -146,10 +202,10 @@ UnificationPartition join(const UnificationPartition& lhs,
 UnificationBlock join(const UnificationBlock& lhs, const UnificationBlock& rhs);
 
 /**
- * Return true if a unification block is valid. A unification block is
- * invalid if it's type is undefined (bottom).
+ * Return true if a unification block is satisfiable. A unification
+ * block is non satisfiable if it's type is undefined (bottom).
  */
-bool is_valid(const UnificationBlock& block);
+bool is_satisfiable(const UnificationBlock& block);
 
 /**
  * TODO: adjust this comment to reflect the new implementation.
@@ -290,7 +346,6 @@ VariableListPtr gen_varlist(const Handle& h);
  */
 VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl);
 
-std::string oc_to_string(const BoolHandleMapSetPair& bhmsp);
 std::string oc_to_string(const UnificationPartition& hshm);
 std::string oc_to_string(const UnificationBlock& ub);
 std::string oc_to_string(const UnificationPartitions& par);
