@@ -46,7 +46,7 @@ public:
 	void test_unify_5();
 	void test_select_rule_1();
 	void test_select_rule_2();
-	// void test_select_rule_3();
+	void test_select_rule_3();
 	// void test_implication_instantiation();
 	// void test_bc_modus_ponens();
 	// void test_bc_deduction_1();
@@ -234,24 +234,28 @@ void BackwardChainerUTest::test_select_rule_2()
 	TS_ASSERT_EQUALS(selected_rule.get_name(), "bc-deduction-rule");
 }
 
-// // Test select rule with a target with variables with the same name as
-// // the variable in the rule
-// void BackwardChainerUTest::test_select_rule_3()
-// {
-// 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+// Test select rule with a target with variables with the same name as
+// the variable in the rule.
+//
+// TODO: This one works but it's the result of unify not being able to
+// detect its inconsistency rather than select_rule performing an
+// alpha-conversion.
+void BackwardChainerUTest::test_select_rule_3()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-// 	reset_bc();
+	reset_bc();
 
-// 	Handle target_h = _eval.eval_h("(Variable \"$C\")"),
-// 		vardecl_h = _eval.eval_h("(TypedVariable"
-// 		                         "   (Variable \"$C\")"
-// 		                         "   (Type \"InheritanceLink\")");
-// 	Target target(target_h, vardecl_h);
+	Handle target_h = _eval.eval_h("(Variable \"$C\")"),
+		vardecl_h = _eval.eval_h("(TypedVariable"
+		                         "   (Variable \"$C\")"
+		                         "   (Type \"InheritanceLink\"))");
+	Target target(target_h, vardecl_h);
 
-// 	Rule selected_rule = _bc->select_rule(target);
+	Rule selected_rule = _bc->select_rule(target);
 
-// 	TS_ASSERT_EQUALS(selected_rule.get_name(), "bc-deduction-rule");
-// }
+	TS_ASSERT_EQUALS(selected_rule.get_name(), "bc-deduction-rule");
+}
 
 // void BackwardChainerUTest::test_implication_instantiation()
 // {
