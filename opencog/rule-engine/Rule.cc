@@ -391,6 +391,7 @@ std::string oc_to_string(const RuleSeq& rules)
 	for (size_t i = 0; i < rules.size(); ++i)
 		ss << "rule[" << i << "]:" << std::endl
 		   << oc_to_string(rules[i]) << std::endl;
+	return ss.str();
 }
 
 } // ~namespace opencog
