@@ -170,6 +170,14 @@ public:
 	HandlePairSeq get_conclusions() const;
 	float get_weight() const;
 
+	/**
+	 * Create a new rule where all variables are uniquely renamed.
+	 *
+	 * @param as  pointer to the atomspace where the new BindLink will be added
+	 * @return    a new Rule object with its own new BindLink
+	 *
+	 * TODO: support backward rule handles.
+	 */
 	Rule gen_standardize_apart(AtomSpace* as);
 
 	std::string to_string() const;

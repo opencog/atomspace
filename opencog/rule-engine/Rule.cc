@@ -255,12 +255,6 @@ void Rule::set_weight(float p)
 	weight_ = p;
 }
 
-/**
- * Create a new rule where all variables are renamed.
- *
- * @param as  pointer to the atomspace where the new BindLink will be added
- * @return    a new Rule object with its own new BindLink
- */
 Rule Rule::gen_standardize_apart(AtomSpace* as)
 {
 	if (forward_rule_handle_ == Handle::UNDEFINED)
