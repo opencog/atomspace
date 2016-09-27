@@ -198,7 +198,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		// Hiding is expensive, so perform it only if we really have to.
 		if (alpha_hide)
 		{
-			// Make a copy... this is what's computatinoally expensive.
+			// Make a copy... this is what's computationally expensive.
 			IndexMap hidden_map = index_map;
 			// Remove the alpha-hidden variables.
 			for (const Handle& v : vees.varseq)
