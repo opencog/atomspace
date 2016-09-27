@@ -121,14 +121,18 @@ private:
 	// Expand the back-inference tree of a target
 	void expand_bit(Target& target, const Rule& rule);
 
+	// Select the target to expand
 	Target& select_target();
 
-	// Select a valid rule given a target.
-	const Rule& select_rule(const Target& target);
+	// Select a valid rule given a target. The selected is a new
+	// object because a new rule is created, its variables are
+	// uniquely renamed, possibly some partial substitutions are
+	// applied.
+	Rule select_rule(const Target& target);
 
 	// Return all valid rules, in the sense that these rules may
 	// possibly be used to infer the target.
-	vector<const Rule*> get_valid_rules(const Target& target);
+	RuleSeq get_valid_rules(const Target& target);
 
 	// Return true if a given target matches a given rule's
 	// conclusion. In other words whether the rule is a potential
@@ -143,31 +147,31 @@ private:
 	bool unifiable(const Handle& target, const Handle& pattern,
 	               const Handle& target_vardecl, const Handle& pattern_vardecl);
 
-#if 0
-	bool select_rule_old(const Target& target,
-	                     Rule& selected_rule,
-	                     Rule& standardized_rule,
-	                     HandleMapSeq& all_implicand_to_target_mappings);
+// #if 0
+// 	bool select_rule_old(const Target& target,
+// 	                     Rule& selected_rule,
+// 	                     Rule& standardized_rule,
+// 	                     HandleMapSeq& all_implicand_to_target_mappings);
 
-	void process_target(Target& target);
+// 	void process_target(Target& target);
 
-	HandleSeq match_knowledge_base(Handle htarget,
-	                               Handle htarget_vardecl,
-	                               HandleMapSeq& vmap,
-	                               bool enable_var_name_check = false);
-	HandleSeq find_premises(const Rule& standardized_rule,
-	                        const HandleMap& implicand_mapping,
-	                        const OrderedHandleSet& additional_free_varset,
-	                        Handle& hrule_implicant_reverse_grounded,
-	                        HandleMapSeq& premises_vmap_list);
-	HandleSeq ground_premises(const Handle& htarget, const HandleMap& vmap,
-	                          HandleMapSeq& vmap_list);
-	Handle garbage_substitute(const Handle& term, const HandleMap& vm);
+// 	HandleSeq match_knowledge_base(Handle htarget,
+// 	                               Handle htarget_vardecl,
+// 	                               HandleMapSeq& vmap,
+// 	                               bool enable_var_name_check = false);
+// 	HandleSeq find_premises(const Rule& standardized_rule,
+// 	                        const HandleMap& implicand_mapping,
+// 	                        const OrderedHandleSet& additional_free_varset,
+// 	                        Handle& hrule_implicant_reverse_grounded,
+// 	                        HandleMapSeq& premises_vmap_list);
+// 	HandleSeq ground_premises(const Handle& htarget, const HandleMap& vmap,
+// 	                          HandleMapSeq& vmap_list);
+// 	Handle garbage_substitute(const Handle& term, const HandleMap& vm);
 
-	Handle gen_varlist(const Handle& target);
-	Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist,
-	                       OrderedHandleSet additional_free_varset);
-#endif
+// 	Handle gen_varlist(const Handle& target);
+// 	Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist,
+// 	                       OrderedHandleSet additional_free_varset);
+// #endif
 	AtomSpace& _as;
 	UREConfigReader _configReader;
 	AtomSpace _garbage_superspace;
