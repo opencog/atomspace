@@ -153,7 +153,7 @@ vector<const Rule*> BackwardChainer::get_valid_rules(const Target& target)
 bool BackwardChainer::match_conclusion(const Target& target, const Rule& rule)
 {
 	for (const HandlePair& hp : rule.get_conclusions())
-		if (unify(target.handle, Handle::UNDEFINED, hp.first, hp.second))
+		if (unifiable(target.handle, hp.first, Handle::UNDEFINED, hp.second))
 		    return true;
 	return false;
 }
@@ -163,121 +163,13 @@ void BackwardChainer::fulfill_target(Target& target)
 	// TODO
 }
 
-bool BackwardChainer::unify(const Handle& target, const Handle& pattern,
-                            const Handle& pattern_vardecl)
+bool BackwardChainer::unifiable(const Handle& target, const Handle& pattern,
+                                const Handle& target_vardecl,
+                                const Handle& pattern_vardecl)
 {
-	AtomSpace tmp_as;
-	Handle tmp_target = tmp_as.add_atom(target),
-		tmp_bl = tmp_as.add_link(BIND_LINK, pattern_vardecl, pattern, pattern),
-		result = bindlink(&tmp_as, tmp_bl);
-	HandleSeq results = result->getOutgoingSet();
-	return std::find(results.begin(), results.end(), tmp_target) != results.end();
-}
-
-/**
- * Unify two atoms, finding a mapping that makes them equal.
- *
- * Use the Pattern Matcher to do the heavy lifting of unification from one
- * specific atom to another, let it handles UnorderedLink, VariableNode in
- * QuoteLink, etc.
- *
- * This will in general unify pattern to target in one direction.  However, it
- * allows a typed variable A in htarget to map to another variable B in hmatch,
- * in which case the mapping will be returned reverse (as B->A).
- *
- * @param target           the atom from which to unify
- * @param pattern          the atom to which hsource will be unified to
- * @param target_vardecl   the typed VariableList of the variables in hsource
- * @param pattern_vardecl  the VariableList of the free variables in hmatch
- * @param result           an output HandleMap mapping varibles from hsource to hmatch
- * @return                 true if the two atoms can be unified
- */
-bool BackwardChainer::unify(const Handle& target,
-                            const Handle& pattern,
-                            const Handle& target_vardecl,
-                            const Handle& pattern_vardecl,
-                            HandleMap& result)
-{
-	// Lazy way of restricting PM to be between two atoms
-	AtomSpace tmp_space;
-
-	Handle tmp_target = tmp_space.add_atom(target);
-	Handle tmp_pattern = tmp_space.add_atom(pattern);
-	Handle tmp_target_vardecl = tmp_space.add_atom(target_vardecl);
-	Handle tmp_pattern_vardecl = tmp_space.add_atom(pattern_vardecl);
-
-	VariableListPtr tmp_target_vardecl_vlp = gen_varlist(tmp_target, tmp_target_vardecl);
-	VariableListPtr tmp_pattern_vardecl_vlp = gen_varlist(tmp_pattern, tmp_pattern_vardecl);
-
-	tmp_target_vardecl = tmp_space.add_atom(tmp_target_vardecl_vlp);
-	tmp_pattern_vardecl = tmp_space.add_atom(tmp_pattern_vardecl_vlp);
-
-	PatternLinkPtr sl(createPatternLink(tmp_pattern_vardecl, tmp_pattern));
-	UnifyPMCB pmcb(&tmp_space, tmp_pattern_vardecl_vlp, tmp_target_vardecl_vlp);
-
-	sl->satisfy(pmcb);
-
-	// If no grounding
-	if (pmcb.get_var_list().size() == 0)
-		return false;
-
-	HandleMapSeq pred_list = pmcb.get_pred_list();
-	HandleMapSeq var_list = pmcb.get_var_list();
-
-	HandleMap good_map;
-
-	// Go thru each solution, and get the first one that map the whole
-	// temp_pattern
-	//
-	// XXX TODO branch on the various groundings?  how to properly handle
-	// multiple possible unify option????
-	for (size_t i = 0; i < pred_list.size(); ++i)
-	{
-		for (const auto& p : pred_list[i])
-		{
-			if (is_atom_in_tree(p.second, tmp_target))
-			{
-				good_map = var_list[i];
-				i = pred_list.size();
-				break;
-			}
-		}
-	}
-
-	// If none of the mapping map the whole temp_pattern (possible in the case
-	// of sub-atom unification that map a typed variable to another variable)
-	if (good_map.empty())
-		return false;
-
-	// Change the mapping from temp_atomspace to current atomspace
-	for (const auto& p : good_map)
-	{
-		Handle var = p.first;
-		Handle grn = p.second;
-
-		result[_garbage_superspace.get_atom(var)] =
-			_garbage_superspace.get_atom(grn);
-	}
-
-	return true;
-}
-
-bool BackwardChainer::unify(const Handle& target,
-                            const Handle& pattern,
-                            const Handle& target_vardecl,
-                            const Handle& pattern_vardecl)
-{
-	HandleMap tmp;
-	return unify(target, pattern, target_vardecl, pattern_vardecl, tmp);
-}
-
-bool BackwardChainer::sym_unify(const Handle& lhs,
-                                const Handle& rhs,
-                                const Handle& lhs_vardecl,
-                                const Handle& rhs_vardecl)
-{
-	return unify(lhs, rhs, lhs_vardecl, rhs_vardecl)
-		or unify(rhs, lhs, rhs_vardecl, lhs_vardecl);
+	UnificationSolutionSet sol =
+		unify(target, pattern, target_vardecl, pattern_vardecl);
+	return sol.satisfiable;
 }
 
 /**

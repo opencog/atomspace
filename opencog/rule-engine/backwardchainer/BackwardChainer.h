@@ -139,23 +139,9 @@ private:
 	// matchings in order to fulfill the given target
 	void fulfill_target(Target& target);
 
-	// Check that h is matched by a given pattern body with a given
-	// variable declaration vardecl.
-	bool unify(const Handle& target, const Handle& pattern,
-	           const Handle& pattern_vardecl);
-
-	// Like above but handles variables on the source as well and
-	// record the matching in the HandleMap result
-	bool unify(const Handle& target, const Handle& pattern,
-	           const Handle& target_vardecl, const Handle& pattern_vardecl,
-	           HandleMap& result);
-
-	// Like above but discard the result
-	bool unify(const Handle& target, const Handle& pattern,
-	           const Handle& target_vardecl, const Handle& pattern_vardecl);
-
-	bool sym_unify(const Handle& lhs, const Handle& rhs,
-	               const Handle& lhs_vardecl, const Handle& rhs_vardecl);
+	// Check that target and pattern are unifiable/satisfiable
+	bool unifiable(const Handle& target, const Handle& pattern,
+	               const Handle& target_vardecl, const Handle& pattern_vardecl);
 
 #if 0
 	bool select_rule_old(const Target& target,
