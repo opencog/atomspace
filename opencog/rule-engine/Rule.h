@@ -146,6 +146,9 @@ public:
 	Handle get_forward_implicant() const;
 	Handle get_forward_implicand() const;
 
+	// Properties
+	bool is_valid() const;
+
 	/**
 	 * Return the premises of the rule. Optionally a conclusion can be
 	 * provided in argument. In such a case the premises will be
@@ -168,6 +171,8 @@ public:
 	float get_weight() const;
 
 	Rule gen_standardize_apart(AtomSpace* as);
+
+	std::string to_string() const;
 
 private:
 	// // Rule handle, a BindLink or a ListLink of forward and backward rule
@@ -204,6 +209,12 @@ private:
 	// Given an ExecutionOutputLink return its last argument
 	Handle get_execution_output_last_argument(const Handle& h) const;
 };
+
+typedef std::vector<Rule> RuleSeq;
+
+// For Gdb debugging
+std::string oc_to_string(const Rule& rule);
+std::string oc_to_string(const RuleSeq& rules);
 
 } // ~namespace opencog
 
