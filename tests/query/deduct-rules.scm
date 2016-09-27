@@ -7,7 +7,7 @@
 ;; 'ordinary' common-sense deductive rules.  In particular, they are
 ;; not written to predispose the problem into a 5x5 solution grid
 ;; (although this is what they eventually must lead to). In other
-;; words, there is no effort made to make this teh most "efficient"
+;; words, there is no effort made to make this the most "efficient"
 ;; possible set of rules; instead, they're the most "natural" or
 ;; "common-sense-like" for this task.
 

@@ -362,7 +362,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		// MapLink is a FunctionLink, but circular shared-library
 		// dependencies prevent the factory from handling it.
 		// Anyway, we avoid doing eager evaluation on the MapLink,
-		// It can do that, itself. If we did do eager evaluation of teh
+		// It can do that, itself. If we did do eager evaluation of the
 		// MapLink, we'd need to get eager only on its argument list,
 		// and not on its body.
 		if (classserver().isA(t, MAP_LINK))

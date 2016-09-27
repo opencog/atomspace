@@ -34,7 +34,7 @@ namespace opencog
 /// The StateLink is used to maintain unique state. Given an atom,
 /// the atomspace can only contain one instance of a StateLink with
 /// that atom in the first position.  Adding another StateLink with
-/// the same first-atom causes teh previous StateLink to be removed!
+/// the same first-atom causes the previous StateLink to be removed!
 ///
 /// This class is intended for holding single-valued state in a safe,
 /// automated fashion. Of course, a user can also store unique state
