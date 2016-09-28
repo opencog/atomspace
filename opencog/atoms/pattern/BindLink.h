@@ -42,6 +42,9 @@ protected:
 	// will initialize the rewrite term _implicand.
 	void extract_variables(const HandleSeq& oset);
 
+	// Used to properly update the bodies of the underlying ScopeLink
+	void set_implicand(const Handle& implicand);
+
 	BindLink(Type, const HandleSeq&,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
