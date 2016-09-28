@@ -66,8 +66,8 @@ public:
 	void test_unify_vardecl_4();
 	void test_unify_vardecl_5();
 
-	// Cyclic dependence
-	void test_unify_cyclic_dependence_1();
+	// // Cyclic dependence
+	// void test_unify_cyclic_dependence_1();
 
 	// // Type union
 	// TODO: for that we need to support more powerful type
@@ -305,16 +305,16 @@ void UnifyUTest::test_unify_vardecl_5()
 	TS_ASSERT(not result.satisfiable);
 }
 
-void UnifyUTest::test_unify_cyclic_dependence_1()
-{
-	// This one is supposed to fail as X cannot be an Inheritance link
-	// and a ConceptNode as specified by its type declaration.
-	UnificationSolutionSet result = unify(XY, X, XY_vardecl, X_cyclic_vardecl);
+// void UnifyUTest::test_unify_cyclic_dependence_1()
+// {
+// 	// This one is supposed to fail as X cannot be an Inheritance link
+// 	// and a ConceptNode as specified by its type declaration.
+// 	UnificationSolutionSet result = unify(XY, X, XY_vardecl, X_cyclic_vardecl);
 
-	std::cout << "result = " << oc_to_string(result) << std::endl;
+// 	std::cout << "result = " << oc_to_string(result) << std::endl;
 
-	TS_ASSERT(not result.satisfiable);
-}
+// 	TS_ASSERT(not result.satisfiable);
+// }
 
 // void UnifyUTest::test_unify_type_union_1()
 // {
