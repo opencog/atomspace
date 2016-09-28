@@ -176,6 +176,12 @@ bool ScopeLink::is_equal(const Handle& other) const
 	return true;
 }
 
+Handle ScopeLink::alpha_conversion() const
+{
+	// TODO
+	return Handle::UNDEFINED;
+}
+
 bool ScopeLink::operator==(const Atom& ac) const
 {
 	Atom& a = (Atom&) ac; // cast away constness, for smart ptr.

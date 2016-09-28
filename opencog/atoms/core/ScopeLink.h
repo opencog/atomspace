@@ -95,6 +95,11 @@ public:
 	// up to a renaming of the bound variables.
 	bool is_equal(const Handle&) const;
 
+	// Return an alpha converted copy of the given handle. The new
+	// variables names correspond to the old names appened with a
+	// random string.
+	Handle alpha_conversion() const;
+
 	// Overload equality check!
 	virtual bool operator==(const Atom&) const;
 	virtual bool operator!=(const Atom&) const;
