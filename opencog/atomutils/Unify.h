@@ -140,6 +140,8 @@ struct UnificationSolutionSet :
  * mean that the solution set has 2 partitions, one where X unifies to
  * A and Y unifies to B, and another one where X unifies to B and Y
  * unifies to A.
+ *
+ * TODO: take care of Un/Quote and Scope links.
  */
 UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
                              const Handle& lhs_vardecl = Handle::UNDEFINED,
