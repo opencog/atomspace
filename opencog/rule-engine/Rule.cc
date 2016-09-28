@@ -34,7 +34,7 @@
 
 #include "Rule.h"
 
-using namespace opencog;
+namespace opencog {
 
 Rule::Rule()
 	: forward_rule_handle_(Handle::UNDEFINED), rule_alias_(Handle::UNDEFINED) {}
@@ -177,6 +177,11 @@ Handle Rule::get_forward_implicand() const
 	return BindLinkCast(forward_rule_handle_)->get_implicand();
 }
 
+bool Rule::is_valid() const
+{
+	return forward_rule_handle_ != Handle::UNDEFINED;
+}
+
 /**
  * Get the set of members of the implicant which are
  * connected by a root logical link.
@@ -250,12 +255,6 @@ void Rule::set_weight(float p)
 	weight_ = p;
 }
 
-/**
- * Create a new rule where all variables are renamed.
- *
- * @param as  pointer to the atomspace where the new BindLink will be added
- * @return    a new Rule object with its own new BindLink
- */
 Rule Rule::gen_standardize_apart(AtomSpace* as)
 {
 	if (forward_rule_handle_ == Handle::UNDEFINED)
@@ -316,8 +315,9 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 	// want to generate a completely unique variable
 	if (dict.count(h) == 0)
 	{
+		// TODO: use opencog's random generator
 		std::string new_name = h->getName() + "-"
-			+ to_string(boost::uuids::random_generator()());
+			+ boost::uuids::to_string(boost::uuids::random_generator()());
 		Handle hcpy = as->add_atom(createNode(h->getType(), new_name,
 		                                      h->getTruthValue()));
 
@@ -367,3 +367,25 @@ Handle Rule::get_execution_output_last_argument(const Handle& h) const
 	OC_ASSERT(args->getType() == LIST_LINK and args->getArity() > 0);
 	return args->getOutgoingAtom(args->getArity()-1);
 }
+
+std::string Rule::to_string() const
+{
+	return name_;
+}
+
+std::string oc_to_string(const Rule& rule)
+{
+	return rule.to_string();
+}
+
+std::string oc_to_string(const RuleSeq& rules)
+{
+	std::stringstream ss;
+	ss << "size = " << rules.size() << std::endl;
+	for (size_t i = 0; i < rules.size(); ++i)
+		ss << "rule[" << i << "]:" << std::endl
+		   << oc_to_string(rules[i]) << std::endl;
+	return ss.str();
+}
+
+} // ~namespace opencog

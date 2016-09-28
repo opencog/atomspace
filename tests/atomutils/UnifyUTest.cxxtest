@@ -36,8 +36,8 @@ private:
 		AndAA, AndAB, AndAY, AndXB, AndXY,
 		AndAABB, AndXYAB, AndAAABBB, AndXXYYAB, AndAAAABBBB, AndXXXYYYAB,
 		AndAAAAABBBBB, AndXXXXYYYYAB,
-		CT, PT, CPT,
-		X_vardecl, Y_vardecl, Z_vardecl, W_vardecl, V_vardecl,
+		CT, PT, IT, CPT,
+		X_vardecl, X_cyclic_vardecl, Y_vardecl, Z_vardecl, W_vardecl, V_vardecl,
 		XY_vardecl;
 	
 public:
@@ -66,8 +66,12 @@ public:
 	void test_unify_vardecl_4();
 	void test_unify_vardecl_5();
 
-	// Type union
-	void test_unify_type_union_1();
+	// Cyclic dependence
+	void test_unify_cyclic_dependence_1();
+
+	// // Type union
+	// TODO: for that we need to support more powerful type
+	// void test_unify_type_union_1();
 
 	// Unordered link
 	void test_unify_unordered_1();
@@ -114,8 +118,10 @@ void UnifyUTest::setUp(void)
 	AndXXXXYYYYAB = al(AND_LINK, {X, X, X, X, Y, Y, Y, Y, A, B});
 	CT = an(TYPE_NODE, "ConceptNode");
 	PT = an(TYPE_NODE, "PredicateNode");
+	IT = an(TYPE_NODE, "InheritanceLink");
 	CPT = al(TYPE_CHOICE, CT, PT);
 	X_vardecl = al(TYPED_VARIABLE_LINK, X, CT);
+	X_cyclic_vardecl = al(TYPED_VARIABLE_LINK, X, IT);
 	Y_vardecl = al(TYPED_VARIABLE_LINK, Y, CT);
 	Z_vardecl = al(TYPED_VARIABLE_LINK, Z, CT);
 	W_vardecl = al(TYPED_VARIABLE_LINK, W, PT);
@@ -299,16 +305,27 @@ void UnifyUTest::test_unify_vardecl_5()
 	TS_ASSERT(not result.satisfiable);
 }
 
-void UnifyUTest::test_unify_type_union_1()
+void UnifyUTest::test_unify_cyclic_dependence_1()
 {
-	UnificationSolutionSet result = unify(XY, AV, XY_vardecl, V_vardecl),
-		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, V}, Y}}});
+	// This one is supposed to fail as X cannot be an Inheritance link
+	// and a ConceptNode as specified by its type declaration.
+	UnificationSolutionSet result = unify(XY, X, XY_vardecl, X_cyclic_vardecl);
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
-	std::cout << "expected = " << oc_to_string(expected) << std::endl;
 
-	TS_ASSERT_EQUALS(result, expected);
+	TS_ASSERT(not result.satisfiable);
 }
+
+// void UnifyUTest::test_unify_type_union_1()
+// {
+// 	UnificationSolutionSet result = unify(XY, AV, XY_vardecl, V_vardecl),
+// 		expected = UnificationSolutionSet(true, {{{{X, A}, A}, {{Y, V}, Y}}});
+
+// 	std::cout << "result = " << oc_to_string(result) << std::endl;
+// 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+// 	TS_ASSERT_EQUALS(result, expected);
+// }
 
 void UnifyUTest::test_unify_unordered_1()
 {

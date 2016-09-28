@@ -652,7 +652,7 @@ HandleSeq ForwardChainer::substitute_rule_part(
 }
 
 /**
- * Tries to unify the @param source with @parama term and derives
+ * Tries to unify the @param source with @param pattern and derives
  * new rules using @param rule as a template.
  *
  * @param source  An atom that might bind to variables in @param rule.

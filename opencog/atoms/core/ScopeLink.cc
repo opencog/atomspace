@@ -153,7 +153,7 @@ void ScopeLink::init_scoped_variables(const Handle& hvar)
 /* ================================================================= */
 ///
 /// Compare other ScopeLink, return true if it is equal to this one,
-/// to to an alpha-conversion of variables.
+/// up to an alpha-conversion of variables.
 ///
 bool ScopeLink::is_equal(const Handle& other) const
 {
@@ -165,7 +165,7 @@ bool ScopeLink::is_equal(const Handle& other) const
 	// Variable declarations must match.
 	if (not _varlist.is_equal(scother->_varlist)) return false;
 
-	// Other body, with our ariables in place of its variables,
+	// Other body, with our variables in place of its variables,
 	// should be same as our body.
 	Handle altbod = scother->_varlist.substitute_nocheck(scother->_body,
 	                                                  _varlist.varseq);
