@@ -96,7 +96,7 @@ public:
 	bool is_equal(const Handle&) const;
 
 	// Return an alpha converted copy of the given handle. The new
-	// variables names correspond to the old names appened with a
+	// variables names correspond to the old names appended with a
 	// random string.
 	Handle alpha_conversion() const;
 
