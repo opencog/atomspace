@@ -35,6 +35,15 @@ void ScopeLink::init(void)
 	extract_variables(_outgoing);
 }
 
+void ScopeLink::set_body(const Handle& body)
+{
+	_body = body;
+	if (_bodies.empty())
+		_bodies.push_back(body);
+	else
+		_bodies[0] = body;
+}
+
 ScopeLink::ScopeLink(const HandleSeq& oset,
                      TruthValuePtr tv, AttentionValuePtr av)
 	: Link(SCOPE_LINK, oset, tv, av)
@@ -106,7 +115,7 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 	    TYPED_VARIABLE_LINK != decls and
 	    GLOB_NODE != decls)
 	{
-		_body = oset[0];
+		set_body(oset[0]);
 
 		if (classserver().isA(_body->getType(), LAMBDA_LINK))
 		{
@@ -114,7 +123,7 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 			if (nullptr == lam)
 				lam = createLambdaLink(*LinkCast(_body));
 			_varlist = lam->get_variables();
-			_body = lam->get_body();
+			set_body(lam->get_body());
 		}
 		else
 		{
@@ -131,7 +140,7 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 	// If we are here, then the first outgoing set member should be
 	// a variable declaration.
 	_vardecl = oset[0];
-	_body = oset[1];
+	set_body(oset[1]);
 
 	// Initialize _varlist with the scoped variables
 	init_scoped_variables(_vardecl);
@@ -165,13 +174,14 @@ bool ScopeLink::is_equal(const Handle& other) const
 	// Variable declarations must match.
 	if (not _varlist.is_equal(scother->_varlist)) return false;
 
-	// Other body, with our variables in place of its variables,
-	// should be same as our body.
-	Handle altbod = scother->_varlist.substitute_nocheck(scother->_body,
-	                                                  _varlist.varseq);
-
-	// Compare bodies, they should match.
-	if (*((AtomPtr)altbod) != *((AtomPtr) _body)) return false;
+	// Other body(ies), with our variables in place of its variables,
+	// should be same as our body(ies).
+	for (size_t i = 0; i < _bodies.size(); ++i) {
+		Handle altbod = scother->_varlist.substitute_nocheck(scother->_bodies[i],
+		                                                     _varlist.varseq);
+		// Compare bodies, they should match.
+		if (*((AtomPtr)altbod) != *((AtomPtr) _bodies[i])) return false;
+	}
 
 	return true;
 }

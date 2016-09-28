@@ -104,15 +104,14 @@ void PutLink::init(void)
 		// If the body is just a single variable, and there are no
 		// type declarations for it, then ScopeLink gets confused.
 		_vardecl = Handle::UNDEFINED;
-		_body = _outgoing[0];
-		_values = _outgoing[1];
+		set_body(_outgoing[0]);
+		set_values(_outgoing[1]);
 	}
 	else
 		_values = _outgoing[2];
 
 	static_typecheck_values();
 }
-
 
 /// Check that the values in the PutLink obey the type constraints.
 /// This only performs "static" typechecking, at construction-time;
@@ -203,6 +202,17 @@ void PutLink::static_typecheck_values(void)
 			throw InvalidParamException(TRACE_INFO,
 					"PutLink bad type!");
 	}
+}
+
+void PutLink::set_values(const Handle& values)
+{
+	_values = values;
+	if (_bodies.size() == 1)
+		_bodies.push_back(values);
+	else if (_bodies.size() == 2)
+		_bodies[1] = values;
+	else OC_ASSERT(false, "There must be a bug. "
+	               "Please always set the body before the values");
 }
 
 /* ================================================================= */
