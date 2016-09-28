@@ -22,6 +22,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <string>
+
+#include <opencog/util/mt19937ar.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/FreeLink.h>
@@ -192,8 +195,18 @@ bool ScopeLink::is_equal(const Handle& other) const
 
 Handle ScopeLink::alpha_conversion() const
 {
-	// TODO
-	return Handle::UNDEFINED;
+	// Generate new variable names
+	HandleSeq new_vars;
+	for (const Handle& h : _varlist.varseq) {
+		int rnd_uuid = randGen().randint();
+		std::string new_var_name = h->getName() + "-" + std::to_string(rnd_uuid);
+		new_vars.emplace_back(createNode(VARIABLE_NODE, new_var_name));
+	}
+	HandleSeq hs;
+	for (size_t i = 0; i < getArity(); ++i)
+		hs.push_back(_varlist.substitute_nocheck(getOutgoingAtom(i),
+		                                         _varlist.varseq));
+	return Handle(createLink(getType(), hs));
 }
 
 bool ScopeLink::operator==(const Atom& ac) const
