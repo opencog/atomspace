@@ -29,6 +29,11 @@
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/FreeLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atoms/core/PutLink.h>
+#include <opencog/atoms/core/ImplicationLink.h>
+#include <opencog/atoms/pattern/PatternLink.h>
+#include <opencog/atoms/pattern/DualLink.h>
+#include <opencog/atoms/pattern/BindLink.h>
 
 #include "ScopeLink.h"
 
@@ -226,6 +231,39 @@ bool ScopeLink::operator==(const Atom& ac) const
 bool ScopeLink::operator!=(const Atom& a) const
 {
 	return not operator==(a);
+}
+
+ScopeLinkPtr ScopeLink::factory(const Handle& h)
+{
+	return factory(h->getType(), h->getOutgoingSet());
+}
+
+ScopeLinkPtr ScopeLink::factory(Type t, const HandleSeq& seq)
+{
+	if (SCOPE_LINK == t)
+		return createScopeLink(seq);
+
+	if (PUT_LINK == t)
+		return createPutLink(seq);
+
+	if (LAMBDA_LINK == t)
+		return createLambdaLink(seq);
+
+	if (IMPLICATION_LINK == t)
+		return createImplicationLink(seq);
+
+	if (PATTERN_LINK == t)
+		return createPatternLink(seq);
+
+	if (DUAL_LINK == t)
+		return createDualLink(seq);
+
+	if (BIND_LINK == t)
+		return createBindLink(seq);
+
+	throw SyntaxException(TRACE_INFO,
+		"ScopeLink is not a factory for %s",
+		classserver().getTypeName(t).c_str());
 }
 
 /* ===================== END OF FILE ===================== */
