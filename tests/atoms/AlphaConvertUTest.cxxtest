@@ -48,6 +48,7 @@ public:
 	void test_variable();
 	void test_body();
 	void test_atomspace();
+	void test_bindlink();
 };
 
 #define NA _asa.add_node
@@ -253,6 +254,54 @@ void AlphaConvertUTest::test_atomspace()
 	// x and t should be equal
 	TS_ASSERT(scox->is_equal(hscot));
 #endif
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test is_equal for BindLink.
+void AlphaConvertUTest::test_bindlink()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create BindLink
+	Handle hscox =
+	LA(BIND_LINK,
+		NA(VARIABLE_NODE, "$X"),
+		LA(OR_LINK, NA(VARIABLE_NODE, "$X")),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
+
+	ScopeLinkPtr scox(ScopeLinkCast(hscox));
+	TS_ASSERT(scox != nullptr);
+
+	_asb.clear();
+	Handle hscoy =
+	LB(BIND_LINK,
+		NB(VARIABLE_NODE, "$X"),
+		LB(OR_LINK, NB(VARIABLE_NODE, "$X")),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$X")));
+
+	// x and y should be equal
+	TS_ASSERT(scox->is_equal(hscoy));
+
+	_asb.clear();
+	hscoy =
+	LB(BIND_LINK,
+		LB(OR_LINK, NB(VARIABLE_NODE, "$X")),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$X")));
+
+	// x and y should be equal
+	TS_ASSERT(scox->is_equal(hscoy));
+
+	_asb.clear();
+	hscoy =
+	LB(BIND_LINK,
+		NB(VARIABLE_NODE, "$X"),
+		LB(OR_LINK, NA(VARIABLE_NODE, "$X")),
+		LB(OR_LINK, NB(VARIABLE_NODE, "$X")));
+
+	// x and y should be NOT equal because their implicants are not
+	// alpha-equivalent.
+	TS_ASSERT(not scox->is_equal(hscoy));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

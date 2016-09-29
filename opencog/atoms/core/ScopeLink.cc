@@ -1,3 +1,4 @@
+
 /*
  * ScopeLink.cc
  *
@@ -162,16 +163,29 @@ bool ScopeLink::is_equal(const Handle& other) const
 
 	ScopeLinkPtr scother(ScopeLinkCast(other));
 
+	// In case we're dealing with a class inheriting from ScopeLink,
+	// like BindLink, that has more than one scoped terms, like
+	// implicand, etc, then we need to check the alpha equivalence
+	// over all terms. Before that let's check that they have the same
+	// number of terms.
+	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
+	Arity other_vardecl_offset = scother->_vardecl != Handle::UNDEFINED;
+	Arity n_scoped_terms = getArity() - vardecl_offset;
+	Arity other_n_scoped_terms = other->getArity() - other_vardecl_offset;
+	if (n_scoped_terms != other_n_scoped_terms) return false;
+
 	// Variable declarations must match.
 	if (not _varlist.is_equal(scother->_varlist)) return false;
 
-	// Other body, with our variables in place of its variables,
-	// should be same as our body.
-	Handle altbod = scother->_varlist.substitute_nocheck(scother->_body,
-	                                                  _varlist.varseq);
-
-	// Compare bodies, they should match.
-	if (*((AtomPtr)altbod) != *((AtomPtr) _body)) return false;
+	// Other terms, with our variables in place of its variables,
+	// should be same as our terms.
+	for (Arity i = 0; i < n_scoped_terms; ++i) {
+		Handle h = getOutgoingAtom(i + vardecl_offset);
+		Handle other_h = other->getOutgoingAtom(i + other_vardecl_offset);
+		other_h = scother->_varlist.substitute_nocheck(other_h, _varlist.varseq);
+ 		// Compare them, they should match.
+ 		if (*((AtomPtr)h) != *((AtomPtr) other_h)) return false;
+ 	}
 
 	return true;
 }
