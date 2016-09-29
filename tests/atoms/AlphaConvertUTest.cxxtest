@@ -48,6 +48,7 @@ public:
 	void test_variable();
 	void test_body();
 	void test_atomspace();
+	void test_alpha_conversion();
 };
 
 #define NA _asa.add_node
@@ -253,6 +254,24 @@ void AlphaConvertUTest::test_atomspace()
 	// x and t should be equal
 	TS_ASSERT(scox->is_equal(hscot));
 #endif
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test ScopeLink::alpha_conversion
+void AlphaConvertUTest::test_alpha_conversion()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test simple ScopeLink
+	Handle hsc =
+	LA(SCOPE_LINK,
+		NA(VARIABLE_NODE, "$X"),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
+
+	ScopeLinkPtr sc(ScopeLinkCast(hsc));
+	Handle scac = sc->alpha_conversion();
+	TS_ASSERT(sc->is_equal(scac));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

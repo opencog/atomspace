@@ -21,10 +21,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <string>
+
+#include <opencog/util/mt19937ar.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/FreeLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atoms/core/PutLink.h>
+#include <opencog/atoms/core/ImplicationLink.h>
+#include <opencog/atoms/pattern/PatternLink.h>
+#include <opencog/atoms/pattern/DualLink.h>
+#include <opencog/atoms/pattern/BindLink.h>
 
 #include "ScopeLink.h"
 
@@ -163,7 +171,8 @@ bool ScopeLink::is_equal(const Handle& other) const
 	ScopeLinkPtr scother(ScopeLinkCast(other));
 
 	// Variable declarations must match.
-	if (not _varlist.is_equal(scother->_varlist)) return false;
+	if (scother == nullptr or not _varlist.is_equal(scother->_varlist))
+		return false;
 
 	// Other body, with our variables in place of its variables,
 	// should be same as our body.
@@ -176,6 +185,29 @@ bool ScopeLink::is_equal(const Handle& other) const
 	return true;
 }
 
+inline std::string rand_hex_str()
+{
+	int rnd_id = randGen().randint();
+	std::stringstream ss;
+	ss << std::hex << rnd_id;
+	return ss.str();
+}
+
+Handle ScopeLink::alpha_conversion() const
+{
+	// Generate new variable names
+	HandleSeq new_vars;
+	for (const Handle& h : _varlist.varseq) {
+		std::string new_var_name = h->getName() + "-" + rand_hex_str();
+		new_vars.emplace_back(createNode(VARIABLE_NODE, new_var_name));
+	}
+	HandleSeq hs;
+	for (size_t i = 0; i < getArity(); ++i)
+		hs.push_back(_varlist.substitute_nocheck(getOutgoingAtom(i),
+		                                         new_vars));
+	return Handle(factory(getType(), hs));
+}
+
 bool ScopeLink::operator==(const Atom& ac) const
 {
 	Atom& a = (Atom&) ac; // cast away constness, for smart ptr.
@@ -185,6 +217,39 @@ bool ScopeLink::operator==(const Atom& ac) const
 bool ScopeLink::operator!=(const Atom& a) const
 {
 	return not operator==(a);
+}
+
+ScopeLinkPtr ScopeLink::factory(const Handle& h)
+{
+	return factory(h->getType(), h->getOutgoingSet());
+}
+
+ScopeLinkPtr ScopeLink::factory(Type t, const HandleSeq& seq)
+{
+	if (SCOPE_LINK == t)
+		return createScopeLink(seq);
+
+	if (PUT_LINK == t)
+		return createPutLink(seq);
+
+	if (LAMBDA_LINK == t)
+		return createLambdaLink(seq);
+
+	if (IMPLICATION_LINK == t)
+		return createImplicationLink(seq);
+
+	if (PATTERN_LINK == t)
+		return createPatternLink(seq);
+
+	if (DUAL_LINK == t)
+		return createDualLink(seq);
+
+	if (BIND_LINK == t)
+		return createBindLink(seq);
+
+	throw SyntaxException(TRACE_INFO,
+		"ScopeLink is not a factory for %s",
+		classserver().getTypeName(t).c_str());
 }
 
 /* ===================== END OF FILE ===================== */
