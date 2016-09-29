@@ -85,8 +85,8 @@ void BindLink::extract_variables(const HandleSeq& oset)
 	// declarations; extract all free variables.
 	if (2 == sz)
 	{
-		set_body(oset[0]);
-		set_implicand(oset[1]);
+		_body = oset[0];
+		_implicand = oset[1];
 		_varlist.find_variables(oset[0]);
 		return;
 	}
@@ -94,22 +94,11 @@ void BindLink::extract_variables(const HandleSeq& oset)
 	// If we are here, then the first outgoing set member should be
 	// a variable declaration.
 	_vardecl = oset[0];
-	set_body(oset[1]);
-	set_implicand(oset[2]);
+	_body = oset[1];
+	_implicand = oset[2];
 
 	// Initialize _varlist with the scoped variables
 	init_scoped_variables(oset[0]);
-}
-
-void BindLink::set_implicand(const Handle& implicand)
-{
-	_implicand = implicand;
-	if (_bodies.size() == 1)
-		_bodies.push_back(implicand);
-	else if (_bodies.size() == 2)
-		_bodies[1] = implicand;
-	else OC_ASSERT(false, "There must be a bug. "
-	               "Please always set the body before the implicand");
 }
 
 /* ===================== END OF FILE ===================== */

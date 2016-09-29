@@ -146,7 +146,7 @@ PatternLink::PatternLink(const Variables& vars, const Handle& body)
 	_pat.redex_name = "jit PatternLink";
 
 	_varlist = vars;
-	set_body(body);
+	_body = body;
 	unbundle_clauses(_body);
 	common_init();
 	setup_components();

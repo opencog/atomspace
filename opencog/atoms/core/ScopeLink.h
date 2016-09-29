@@ -52,8 +52,7 @@ protected:
 	Handle _vardecl;
 	/// Handle of the body of the expression.
 	Handle _body;
-	/// HandleSeq of the bodies of the expression
-	HandleSeq _bodies;
+
 
 	/// Variables bound in the body.
 	Variables _varlist;
@@ -69,9 +68,6 @@ protected:
 	void init(void);
 	void extract_variables(const HandleSeq& oset);
 	void init_scoped_variables(const Handle& hvar);
-
-	// Used to properly update the bodies of the underlying ScopeLink
-	void set_body(const Handle& body);
 
 	// utility debug print
 	static void prt(const Handle& h)

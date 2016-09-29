@@ -54,11 +54,7 @@ protected:
 	Handle _values;
 
 	void init(void);
-
 	void static_typecheck_values(void);
-
-	// Used to properly update the bodies of the underlying ScopeLink
-	void set_values(const Handle& values);
 
 	Handle do_reduce(void) const;
 
