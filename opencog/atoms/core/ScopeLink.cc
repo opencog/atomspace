@@ -219,7 +219,7 @@ Handle ScopeLink::alpha_conversion() const
 	for (size_t i = 0; i < getArity(); ++i)
 		hs.push_back(_varlist.substitute_nocheck(getOutgoingAtom(i),
 		                                         new_vars));
-	return Handle(createLink(getType(), hs));
+	return Handle(factory(getType(), hs));
 }
 
 bool ScopeLink::operator==(const Atom& ac) const
