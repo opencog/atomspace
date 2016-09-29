@@ -45,6 +45,8 @@ namespace opencog
 /// the point of unpacked variables is to act as a memo or cache,
 /// speeding up later calculations.
 ///
+class ScopeLink;
+typedef std::shared_ptr<ScopeLink> ScopeLinkPtr;
 class ScopeLink : public Link
 {
 protected:
@@ -103,9 +105,11 @@ public:
 	// Overload equality check!
 	virtual bool operator==(const Atom&) const;
 	virtual bool operator!=(const Atom&) const;
+
+	static ScopeLinkPtr factory(const Handle&);
+	static ScopeLinkPtr factory(Type, const HandleSeq&);
 };
 
-typedef std::shared_ptr<ScopeLink> ScopeLinkPtr;
 static inline ScopeLinkPtr ScopeLinkCast(const Handle& h)
 	{ return std::dynamic_pointer_cast<ScopeLink>(AtomCast(h)); }
 static inline ScopeLinkPtr ScopeLinkCast(const AtomPtr& a)
