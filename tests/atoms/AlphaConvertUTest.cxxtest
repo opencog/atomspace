@@ -49,6 +49,7 @@ public:
 	void test_body();
 	void test_atomspace();
 	void test_bindlink();
+	void test_alpha_conversion();
 };
 
 #define NA _asa.add_node
@@ -302,6 +303,24 @@ void AlphaConvertUTest::test_bindlink()
 	// x and y should be NOT equal because their implicants are not
 	// alpha-equivalent.
 	TS_ASSERT(not scox->is_equal(hscoy));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test ScopeLink::alpha_conversion
+void AlphaConvertUTest::test_alpha_conversion()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test simple ScopeLink
+	Handle hsc =
+	LA(SCOPE_LINK,
+		NA(VARIABLE_NODE, "$X"),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
+
+	ScopeLinkPtr sc(ScopeLinkCast(hsc));
+	Handle scac = sc->alpha_conversion();
+	TS_ASSERT(sc->is_equal(scac));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
