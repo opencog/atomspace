@@ -166,7 +166,8 @@ bool ScopeLink::is_equal(const Handle& other) const
 	ScopeLinkPtr scother(ScopeLinkCast(other));
 
 	// Variable declarations must match.
-	if (not _varlist.is_equal(scother->_varlist)) return false;
+	if (scother == nullptr or not _varlist.is_equal(scother->_varlist))
+		return false;
 
 	// Other body, with our variables in place of its variables,
 	// should be same as our body.
