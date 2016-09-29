@@ -193,19 +193,26 @@ bool ScopeLink::is_equal(const Handle& other) const
 	return true;
 }
 
+inline std::string rand_hex_str()
+{
+	int rnd_id = randGen().randint();
+	std::stringstream ss;
+	ss << std::hex << rnd_id;
+	return ss.str();
+}
+
 Handle ScopeLink::alpha_conversion() const
 {
 	// Generate new variable names
 	HandleSeq new_vars;
 	for (const Handle& h : _varlist.varseq) {
-		int rnd_uuid = randGen().randint();
-		std::string new_var_name = h->getName() + "-" + std::to_string(rnd_uuid);
+		std::string new_var_name = h->getName() + "-" + rand_hex_str();
 		new_vars.emplace_back(createNode(VARIABLE_NODE, new_var_name));
 	}
 	HandleSeq hs;
 	for (size_t i = 0; i < getArity(); ++i)
 		hs.push_back(_varlist.substitute_nocheck(getOutgoingAtom(i),
-		                                         _varlist.varseq));
+		                                         new_vars));
 	return Handle(createLink(getType(), hs));
 }
 
