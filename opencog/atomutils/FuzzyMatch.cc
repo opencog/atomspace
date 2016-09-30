@@ -33,16 +33,17 @@ using namespace opencog;
  * Recursively explores the incoming set of a proposed tree until
  * either `try_match()` returns false or the "root" is reached.
  *
- * @param gl  A proposed tree
+ * @param h  A proposed tree
  */
-void FuzzyMatch::explore(const LinkPtr& gl)
+void FuzzyMatch::explore(const Handle& h)
 {
-	Handle soln(gl->getHandle());
-	bool look_for_more = try_match(soln);
-	if (not look_for_more) return;
+	for (const LinkPtr& lptr : h->getIncomingSet())
+	{
+		Handle soln(lptr->getHandle());
+		bool look_for_more = try_match(soln);
 
-	for (const LinkPtr& lptr : gl->getIncomingSet())
-		explore(lptr);
+		if (look_for_more) explore(soln);
+	}
 }
 
 /**
@@ -56,21 +57,13 @@ void FuzzyMatch::explore(const LinkPtr& gl)
 void FuzzyMatch::find_starters(const Handle& hp)
 {
 	if (accept_starter(hp))
-	{
-		for (const LinkPtr& lptr: hp->getIncomingSet())
-		{
-			explore(lptr);
-		}
-		return;
-	}
+		explore(hp);
 
 	// Proposed start was not accepted. Look farther down, at it's
 	// sub-trees.
-	if (hp->isLink()) {
-		for (const Handle& h : hp->getOutgoingSet()) {
+	if (hp->isLink())
+		for (const Handle& h : hp->getOutgoingSet())
 			find_starters(h);
-		}
-	}
 }
 
 /**
