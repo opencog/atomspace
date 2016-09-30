@@ -57,16 +57,8 @@ void FuzzyMatch::find_starters(const Handle& hp)
 {
 	if (accept_starter(hp))
 	{
-		LAZY_LOG_FINE << "\n========================================\n"
-		              << "Initiating the fuzzy match... ("
-		              << "Starter:\n" << hp->toShortString() << "\n"
-		              << "========================================\n";
-
 		for (const LinkPtr& lptr: hp->getIncomingSet())
 		{
-			LAZY_LOG_FINE << "Loop candidate"
-			              << lptr->toShortString() << "\n";
-
 			explore(lptr);
 		}
 		return;
