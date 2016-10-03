@@ -180,6 +180,24 @@ public:
 	 */
 	Rule gen_standardize_apart(AtomSpace* as);
 
+	/**
+	 * Given a source, generate all rule variations that may be
+	 * applied over this source. The variables in the rules are
+	 * renamed to almost certainly avoid name collision.
+	 *
+	 * TODO: we probably want to support a vector of sources for rules
+	 * with multiple premises.
+	 */
+	std::vector<Rule> forward_unified_rules(const Handle& source,
+	                                        const Handle& vardecl);
+	/**
+	 * Given a target, generate all rule variations that may infer
+	 * this target. The variables in the rules are renamed to almost
+	 * certainly avoid name collision.
+	 */
+	std::vector<Rule> backward_unified_rules(const Handle& target,
+	                                         const Handle& vardecl);
+
 	std::string to_string() const;
 
 private:
