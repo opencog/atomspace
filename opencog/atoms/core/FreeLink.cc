@@ -25,6 +25,7 @@
 #include "FreeLink.h"
 #include "DefineLink.h"
 #include "FunctionLink.h"
+#include "StateLink.h"
 #include "TypedAtomLink.h"
 #include "UniqueLink.h"
 
@@ -127,6 +128,9 @@ FreeLinkPtr FreeLink::factory(Type t, const HandleSeq& seq)
 
 	if (classserver().isA(t, FUNCTION_LINK))
 		return FunctionLink::factory(t, seq);
+
+	if (STATE_LINK == t)
+		return createStateLink(seq);
 
 	if (TYPED_ATOM_LINK == t)
 		return createTypedAtomLink(seq);
