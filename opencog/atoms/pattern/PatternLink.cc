@@ -1016,7 +1016,7 @@ PatternLinkPtr PatternLink::factory(Type t, const HandleSeq& seq)
 
 	// Handle all of the others
 	if (classserver().isA(t, PATTERN_LINK))
-		return createPatternLink(seq);
+		return createPatternLink(t, seq);
 
 	throw SyntaxException(TRACE_INFO,
 		"PatternLink is not a factory for %s",

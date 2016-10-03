@@ -134,11 +134,14 @@ protected:
 	void common_init(void);
 	void setup_components(void);
 
+public:
 	// Only derived classes can call this
+	// XXX Need to make this public, so that the factory can call it!
 	PatternLink(Type, const HandleSeq&,
 	            TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	            AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
+protected:
 	// utility debug print
 	static void prt(const Handle& h)
 	{
