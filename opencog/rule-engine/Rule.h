@@ -121,11 +121,11 @@ public:
 	
 	// Comparison
 	bool operator==(const Rule& r) const {
-		return r.forward_rule_handle_ == forward_rule_handle_
-			and r.backward_rule_handles_ == backward_rule_handles_;
+		return r._forward_rule_handle == _forward_rule_handle
+			and r._backward_rule_handles == _backward_rule_handles;
 	}
 	bool operator<(const Rule& r) const {
-		return weight_ < r.weight_;
+		return _weight < r._weight;
 	}
 
 	// Modifiers
@@ -190,6 +190,7 @@ public:
 	 */
 	std::vector<Rule> forward_unified_rules(const Handle& source,
 	                                        const Handle& vardecl);
+
 	/**
 	 * Given a target, generate all rule variations that may infer
 	 * this target. The variables in the rules are renamed to almost
@@ -203,26 +204,34 @@ public:
 private:
 	// // Rule handle, a BindLink or a ListLink of forward and backward rule
 	// Maybe not useful
-	// Handle rule_handle_;
+	// Handle _rule_handle;
 
 	// Forward rule handle, typically a BindLink
-	Handle forward_rule_handle_;
+	//
+	// Maybe replace that by ScopeLinkPtr
+	Handle _forward_rule_handle;
 
 	// Backward rule handles, BindLinks or a GetLinks
-	HandleSeq backward_rule_handles_;
+	//
+	// Maybe replace that by vector<ScopeLinkPtr>
+	HandleSeq _backward_rule_handles;
 
 	// Rule alias: (DefineLink rule_alias_ rule_handle_)
-	Handle rule_alias_;
+	Handle _rule_alias;
 
 	// Rule name, the name of the node referring to the rule body
-	string name_;
+	string _name;
 
 	// Rule-based system name
-	string category_;
+	string _category;
 
 	// Rule weight (indicated by the TV strength of the membership of
 	// the rule to the RBS)
-	float weight_;
+	float _weight;
+
+	// Return a copy of the rule with the variables alpha-converted
+	// into random variable names.
+	Rule rand_alpha_converted() const;
 
 	Handle standardize_helper(AtomSpace* as, const Handle&, HandleMap&);
 
