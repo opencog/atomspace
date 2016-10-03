@@ -135,7 +135,7 @@ FreeLinkPtr FreeLink::factory(Type t, const HandleSeq& seq)
 		return createUniqueLink(seq);
 
 	if (classserver().isA(t, FREE_LINK))
-		return createFreeLink(seq);
+		return createFreeLink(t, seq);
 
 	throw SyntaxException(TRACE_INFO,
 		"FreeLink is not a factory for %s",

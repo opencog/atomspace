@@ -251,7 +251,7 @@ ScopeLinkPtr ScopeLink::factory(Type t, const HandleSeq& seq)
 		return PatternLink::factory(t, seq);
 
 	if (classserver().isA(t, SCOPE_LINK))
-		return createScopeLink(seq);
+		return createScopeLink(t, seq);
 
 	throw SyntaxException(TRACE_INFO,
 		"ScopeLink is not a factory for %s",

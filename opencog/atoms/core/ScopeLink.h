@@ -63,10 +63,12 @@ protected:
 	          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
+public:
+	// XXX Need to make this public, so that the factory can call it!
 	ScopeLink(Type, const HandleSeq&,
 	          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
+protected:
 	void init(void);
 	void extract_variables(const HandleSeq& oset);
 	void init_scoped_variables(const Handle& hvar);

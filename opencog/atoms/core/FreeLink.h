@@ -47,10 +47,13 @@ protected:
 
 	void init(void);
 
+public:
 	FreeLink(Type, const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
+protected:
+	// XXX Need to make this public, so that the factory can call it!
 	FreeLink(Type, const Handle& a,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
