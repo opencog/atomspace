@@ -23,8 +23,10 @@
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include "FreeLink.h"
-#include "ScopeLink.h"
-#include "VariableList.h"
+#include "DefineLink.h"
+#include "FunctionLink.h"
+#include "TypedAtomLink.h"
+#include "UniqueLink.h"
 
 using namespace opencog;
 
@@ -100,4 +102,42 @@ FreeLink::FreeLink(Link& l)
 void FreeLink::init(void)
 {
 	_vars.find_variables(_outgoing);
+}
+
+/* ================================================================= */
+
+FreeLinkPtr FreeLink::factory(const Handle& h)
+{
+	// If h is of the right form already, its just a matter of calling
+	// it.  Otherwise, we have to create
+	FreeLinkPtr flp(FreeLinkCast(h));
+	if (flp) return flp;
+
+	if (nullptr == h)
+		throw RuntimeException(TRACE_INFO, "Not executable!");
+
+	return factory(h->getType(), h->getOutgoingSet());
+}
+
+// Basic type factory.
+FreeLinkPtr FreeLink::factory(Type t, const HandleSeq& seq)
+{
+	if (DEFINE_LINK == t)
+		return createDefineLink(seq);
+
+	if (classserver().isA(t, FUNCTION_LINK))
+		return FunctionLink::factory(t, seq);
+
+	if (TYPED_ATOM_LINK == t)
+		return createTypedAtomLink(seq);
+
+	if (UNIQUE_LINK == t)
+		return createUniqueLink(seq);
+
+	if (classserver().isA(t, FREE_LINK))
+		return createFreeLink(seq);
+
+	throw SyntaxException(TRACE_INFO,
+		"FreeLink is not a factory for %s",
+		classserver().getTypeName(t).c_str());
 }
