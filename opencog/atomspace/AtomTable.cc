@@ -338,18 +338,6 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
             return createTypeNode(*NodeCast(atom));
 
     // Links of various kinds -----------
-    } else if (BIND_LINK == atom_type) {
-        if (nullptr == BindLinkCast(atom))
-            return createBindLink(*LinkCast(atom));
-
-    } else if (DUAL_LINK == atom_type) {
-        if (nullptr == DualLinkCast(atom))
-            return createDualLink(*LinkCast(atom));
-
-    } else if (classserver().isA(atom_type, PATTERN_LINK)) {
-        if (nullptr == PatternLinkCast(atom))
-            return createPatternLink(*LinkCast(atom));
-
     } else if (DEFINE_LINK == atom_type) {
         if (nullptr == DefineLinkCast(atom))
             return createDefineLink(*LinkCast(atom));
@@ -365,9 +353,6 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
         if (nullptr == EvaluationLinkCast(atom))
             return createEvaluationLink(*LinkCast(atom));
 */
-    } else if (PUT_LINK == atom_type) {
-        if (nullptr == PutLinkCast(atom))
-            return createPutLink(*LinkCast(atom));
     } else if (TYPED_ATOM_LINK == atom_type) {
         if (nullptr == TypedAtomLinkCast(atom))
             return createTypedAtomLink(*LinkCast(atom));
@@ -377,12 +362,6 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
     } else if (VARIABLE_LIST == atom_type) {
         if (nullptr == VariableListCast(atom))
             return createVariableList(*LinkCast(atom));
-    } else if (LAMBDA_LINK == atom_type) {
-        if (nullptr == LambdaLinkCast(atom))
-            return createLambdaLink(*LinkCast(atom));
-    } else if (classserver().isA(atom_type, IMPLICATION_LINK)) {
-        if (nullptr == ImplicationLinkCast(atom))
-            return createImplicationLink(*LinkCast(atom));
     } else if (classserver().isA(atom_type, FUNCTION_LINK)) {
 /* More circular-dependency heart-ache
         if (nullptr == FunctionLinkCast(atom))
@@ -391,7 +370,8 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
     } else if (classserver().isA(atom_type, SCOPE_LINK)) {
         // isA because we want to force alpha-conversion.
         if (nullptr == ScopeLinkCast(atom))
-            return createScopeLink(*LinkCast(atom));
+            // return createScopeLink(*LinkCast(atom));
+            return ScopeLink::factory(Handle(atom));
     }
 
     // Very special handling for DeleteLink's
@@ -457,15 +437,6 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
         return createNode(*NodeCast(atom));
 
     // Links of various kinds -----------
-    if (BIND_LINK == atom_type)
-        return createBindLink(*LinkCast(atom));
-
-    if (DUAL_LINK == atom_type)
-        return createDualLink(*LinkCast(atom));
-
-    if (classserver().isA(atom_type, PATTERN_LINK))
-        return createPatternLink(*LinkCast(atom));
-
     if (DEFINE_LINK == atom_type)
         return createDefineLink(*LinkCast(atom));
 /*
@@ -477,8 +448,6 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
     if (EVALUATION_LINK == atom_type)
         // return createEvaluationLink(*LinkCast(atom));
         return createLink(*LinkCast(atom));
-    if (PUT_LINK == atom_type)
-        return createPutLink(*LinkCast(atom));
     if (STATE_LINK == atom_type)
         return createStateLink(*LinkCast(atom));
     if (TYPED_ATOM_LINK == atom_type)
@@ -487,10 +456,6 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
         return createUniqueLink(*LinkCast(atom));
     if (VARIABLE_LIST == atom_type)
         return createVariableList(*LinkCast(atom));
-    if (LAMBDA_LINK == atom_type)
-        return createLambdaLink(*LinkCast(atom));
-    if (classserver().isA(atom_type, IMPLICATION_LINK))
-        return createImplicationLink(*LinkCast(atom));
     if (classserver().isA(atom_type, FUNCTION_LINK))
         // XXX FIXME more circular-dependency heart-ache
         // return FunctionLink::factory(Handle(atom));
@@ -498,7 +463,7 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
 
     // isA because we want to force alpha-conversion.
     if (classserver().isA(atom_type, SCOPE_LINK))
-        return createScopeLink(*LinkCast(atom));
+        return ScopeLink::factory(Handle(atom));
 
     if (classserver().isA(atom_type, LINK))
         return createLink(*LinkCast(atom));
