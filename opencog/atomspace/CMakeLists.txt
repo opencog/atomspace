@@ -24,9 +24,10 @@ ADD_LIBRARY (atomspace
 ADD_DEPENDENCIES(atomspace opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace
+	atomcore
+	lambda
 	atombase
 	truthvalue  
-	lambda
 	${COGUTIL_LIBRARY}
 	${Boost_THREAD_LIBRARY}
 )
