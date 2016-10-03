@@ -39,9 +39,6 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/TypeNode.h>
-#include <opencog/atoms/pattern/BindLink.h>
-#include <opencog/atoms/pattern/DualLink.h>
-#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/DeleteLink.h>
 #include <opencog/atoms/core/FunctionLink.h>
@@ -54,6 +51,7 @@
 #include <opencog/atoms/core/ImplicationLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
+#include <opencog/atoms/execution/MapLink.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
@@ -362,15 +360,9 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
     } else if (VARIABLE_LIST == atom_type) {
         if (nullptr == VariableListCast(atom))
             return createVariableList(*LinkCast(atom));
-    } else if (classserver().isA(atom_type, FUNCTION_LINK)) {
-/* More circular-dependency heart-ache
-        if (nullptr == FunctionLinkCast(atom))
-            return FunctionLink::factory(Handle(atom));
-*/
     } else if (classserver().isA(atom_type, SCOPE_LINK)) {
         // isA because we want to force alpha-conversion.
         if (nullptr == ScopeLinkCast(atom))
-            // return createScopeLink(*LinkCast(atom));
             return ScopeLink::factory(Handle(atom));
     }
 
@@ -421,6 +413,18 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
         }
 
         return slp;
+
+    // Handle MapLinks before FunctionLink
+    } else if (EXECUTION_OUTPUT_LINK == atom_type) {
+    } else if (MAP_LINK == atom_type) {
+        // if (nullptr == TypedAtomLinkCast(atom))
+            // return createMapLink(*LinkCast(atom));
+
+    // Handle FunctionLinks only after special treatment for State,
+    // Delete, above.
+    } else if (classserver().isA(atom_type, FUNCTION_LINK)) {
+        if (nullptr == FunctionLinkCast(atom))
+            return FunctionLink::factory(Handle(atom));
     }
     return atom;
 }
@@ -456,10 +460,16 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
         return createUniqueLink(*LinkCast(atom));
     if (VARIABLE_LIST == atom_type)
         return createVariableList(*LinkCast(atom));
-    if (classserver().isA(atom_type, FUNCTION_LINK))
-        // XXX FIXME more circular-dependency heart-ache
-        // return FunctionLink::factory(Handle(atom));
+
+    // Handle MapLink *before* FunctionLink.
+    if (EXECUTION_OUTPUT_LINK == atom_type)
+        // return createExecutionOutputLink(*LinkCast(atom));
         return createLink(*LinkCast(atom));
+    if (MAP_LINK == atom_type)
+        // return createMapLink(*LinkCast(atom));
+        return createLink(*LinkCast(atom));
+    if (classserver().isA(atom_type, FUNCTION_LINK))
+        return FunctionLink::factory(Handle(atom));
 
     // isA because we want to force alpha-conversion.
     if (classserver().isA(atom_type, SCOPE_LINK))
