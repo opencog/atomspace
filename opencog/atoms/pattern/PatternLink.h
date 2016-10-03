@@ -73,6 +73,8 @@ namespace opencog
 ///
 /// The (cog-satisfy) and (cog-execute!) scheme calls can ground this
 /// link, and return a truth value.
+class PatternLink;
+typedef std::shared_ptr<PatternLink> PatternLinkPtr;
 class PatternLink : public ScopeLink
 {
 protected:
@@ -182,9 +184,11 @@ public:
 	bool satisfy(PatternMatchCallback&) const;
 
 	void debug_log(void) const;
+
+	static PatternLinkPtr factory(const Handle&);
+	static PatternLinkPtr factory(Type, const HandleSeq&);
 };
 
-typedef std::shared_ptr<PatternLink> PatternLinkPtr;
 static inline PatternLinkPtr PatternLinkCast(const Handle& h)
 	{ AtomPtr a(h); return std::dynamic_pointer_cast<PatternLink>(a); }
 static inline PatternLinkPtr PatternLinkCast(AtomPtr a)

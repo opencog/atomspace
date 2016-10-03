@@ -29,6 +29,8 @@
 #include <opencog/atoms/core/FreeLink.h>
 #include <opencog/atomutils/FindUtils.h>
 
+#include "BindLink.h"
+#include "DualLink.h"
 #include "PatternLink.h"
 #include "PatternUtils.h"
 
@@ -987,6 +989,38 @@ void PatternLink::debug_log(void) const
 
 	if (_varlist.varset.empty())
 		logger().fine("There are no bound vars in this pattern");
+}
+
+/* ================================================================= */
+
+PatternLinkPtr PatternLink::factory(const Handle& h)
+{
+	// If h is of the right form already, its just a matter of calling
+	// it.  Otherwise, we have to create
+	PatternLinkPtr plp(PatternLinkCast(h));
+	if (plp) return plp;
+
+	if (nullptr == h)
+		throw RuntimeException(TRACE_INFO, "Null pointer exception!");
+
+	return factory(h->getType(), h->getOutgoingSet());
+}
+
+// Basic type factory.
+PatternLinkPtr PatternLink::factory(Type t, const HandleSeq& seq)
+{
+	if (BIND_LINK == t)
+		return createBindLink(seq);
+	if (DUAL_LINK == t)
+		return createDualLink(seq);
+
+	// Handle all of the others
+	if (classserver().isA(t, PATTERN_LINK))
+		return createPatternLink(seq);
+
+	throw SyntaxException(TRACE_INFO,
+		"PatternLink is not a factory for %s",
+		classserver().getTypeName(t).c_str());
 }
 
 /* ===================== END OF FILE ===================== */
