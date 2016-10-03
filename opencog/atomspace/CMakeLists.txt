@@ -26,6 +26,7 @@ ADD_DEPENDENCIES(atomspace opencog_atom_types)
 TARGET_LINK_LIBRARIES(atomspace
 	atomcore
 	lambda
+	clearbox
 	atombase
 	truthvalue  
 	${COGUTIL_LIBRARY}
