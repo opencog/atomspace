@@ -32,8 +32,6 @@
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/core/ImplicationLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/atoms/pattern/DualLink.h>
-#include <opencog/atoms/pattern/BindLink.h>
 
 #include "ScopeLink.h"
 
@@ -240,26 +238,20 @@ ScopeLinkPtr ScopeLink::factory(const Handle& h)
 
 ScopeLinkPtr ScopeLink::factory(Type t, const HandleSeq& seq)
 {
-	if (SCOPE_LINK == t)
-		return createScopeLink(seq);
-
 	if (PUT_LINK == t)
 		return createPutLink(seq);
 
 	if (LAMBDA_LINK == t)
 		return createLambdaLink(seq);
 
-	if (IMPLICATION_LINK == t)
-		return createImplicationLink(seq);
+	if (classserver().isA(t, IMPLICATION_LINK))
+		return createImplicationLink(t, seq);
 
-	if (PATTERN_LINK == t)
-		return createPatternLink(seq);
+	if (classserver().isA(t, PATTERN_LINK))
+		return PatternLink::factory(t, seq);
 
-	if (DUAL_LINK == t)
-		return createDualLink(seq);
-
-	if (BIND_LINK == t)
-		return createBindLink(seq);
+	if (classserver().isA(t, SCOPE_LINK))
+		return createScopeLink(t, seq);
 
 	throw SyntaxException(TRACE_INFO,
 		"ScopeLink is not a factory for %s",

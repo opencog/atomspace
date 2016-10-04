@@ -26,6 +26,7 @@
 
 #include "ArityLink.h"
 #include "DeleteLink.h"
+#include "../reduct/FoldLink.h"
 // #include "MapLink.h"   goddamned python bindings
 #include "SleepLink.h"
 #include "TimeLink.h"
@@ -121,6 +122,9 @@ FunctionLinkPtr FunctionLink::factory(Type t, const HandleSeq& seq)
 	if (TIME_LINK == t)
 		return createTimeLink(seq);
 
+	if (classserver().isA(t, FOLD_LINK))
+		return FoldLink::factory(t, seq);
+
 	// XXX FIXME In principle, we should manufacture the
 	// ExecutionOutputLink as well. In practice, we can't, due to a
 	// circular shared library dependency between python and itself.
@@ -133,6 +137,9 @@ FunctionLinkPtr FunctionLink::factory(Type t, const HandleSeq& seq)
 	if (MAP_LINK == t)
 		// return createMapLink(seq);
 		throw SyntaxException(TRACE_INFO, "Can't be a factory for MapLink!");
+
+	if (classserver().isA(t, FUNCTION_LINK))
+		return createFunctionLink(t, seq);
 
 	throw SyntaxException(TRACE_INFO,
 		"FunctionLink is not a factory for %s",
