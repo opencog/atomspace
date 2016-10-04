@@ -319,18 +319,30 @@ std::vector<Rule> Rule::backward_unified_rules(const Handle& target,
 	if (_backward_rule_handles.empty())
 	{
 		Handle forward_rule_vardecl = alpha_converted_rule.get_forward_vardecl();
-		for (const Handle& c :
+		for (const Handle& cpat :
 			     alpha_converted_rule.get_forward_conclusion_bodies())
 		{
 			UnificationSolutionSet sol =
-				unify(target, vardecl, c, forward_rule_vardecl);
+				unify(target, vardecl, cpat, forward_rule_vardecl);
 			if (sol.satisfiable) {
 				TypedSubstitutions tss = typed_substitutions(sol);
-				// TODO: turns the mapping into a sequence of values
+				// TODO: turn the mapping into a sequence of values
 				// according to the forward rule vardecl
 				const Variables alpha_converted_variables =
 					alpha_converted_rule._forward_rule_scope_link->get_variables();
-				alpha_converted_variables
+				// TODO
+				for (const auto& typed_substitution : tss) {
+					// Generate substitution value vector
+					HandleSeq values;
+					for (const Handle& v : alpha_converted_variables.varseq) {
+						auto it = typed_substitution.second.varset.find(v);
+						if (it == typed_substitution.second.varset.end())
+							values.push_back(v);
+						else {
+							// it values.push_back();
+						}
+					}
+				}
 			} else return {};
 		}
 	}
@@ -345,7 +357,6 @@ std::vector<Rule> Rule::backward_unified_rules(const Handle& target,
 	// 		results.push_back({h->getOutgoingAtom(0), h->getOutgoingAtom(1)});
 	// 	}
 	// }
-
 
 	return {};
 }
