@@ -26,8 +26,8 @@
 
 #include <boost/operators.hpp>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atoms/core/VariableList.h>
-
 
 namespace opencog {
 
@@ -130,6 +130,7 @@ public:
 
 	// Modifiers
 	void set_forward_handle(const Handle& h);
+	void set_backward_handles(const HandleSeq& hs);
 	void set_name(const string& name);
 	void set_category(const string& name);
 	void set_weight(float p);
@@ -208,13 +209,15 @@ private:
 
 	// Forward rule handle, typically a BindLink
 	//
-	// Maybe replace that by ScopeLinkPtr
+	// TODO: Maybe replace that by ScopeLinkPtr
 	Handle _forward_rule_handle;
+	ScopeLinkPtr _forward_rule_scope_link;
 
 	// Backward rule handles, BindLinks or a GetLinks
 	//
-	// Maybe replace that by vector<ScopeLinkPtr>
+	// TODO: Maybe replace that by vector<ScopeLinkPtr>
 	HandleSeq _backward_rule_handles;
+	vector<ScopeLinkPtr> _backward_rule_scope_links;
 
 	// Rule alias: (DefineLink rule_alias_ rule_handle_)
 	Handle _rule_alias;

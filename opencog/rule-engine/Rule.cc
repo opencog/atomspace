@@ -31,6 +31,7 @@
 #include <opencog/atoms/pattern/BindLink.h>
 
 #include <opencog/atomutils/TypeUtils.h>
+#include <opencog/atomutils/Unify.h>
 
 #include "Rule.h"
 
@@ -68,13 +69,18 @@ void Rule::init(const Handle& rule_ml)
 		OC_ASSERT(rule->getArity() > 0);
 		// Split the rule into a forward and backward parts
 		_forward_rule_handle = rule->getOutgoingAtom(0);
-		for (unsigned i = 1; i < rule->getArity(); i++)
-			_backward_rule_handles.push_back(rule->getOutgoingAtom(i));
+		_forward_rule_scope_link = ScopeLinkCast(_forward_rule_handle);
+		for (unsigned i = 1; i < rule->getArity(); i++) {
+			Handle bch = rule->getOutgoingAtom(i);
+			_backward_rule_handles.push_back(bch);
+			_backward_rule_scope_links.push_back(ScopeLinkCast(bch));
+		}
 	}
 	else
 	{
 		OC_ASSERT(rule->getType() == BIND_LINK);
 		_forward_rule_handle = rule;
+		_forward_rule_scope_link = ScopeLinkCast(rule);
 	}
 	_name = _rule_alias->getName();
 	_category = rbs->getName();
@@ -119,6 +125,15 @@ const string& Rule::get_name() const
 void Rule::set_forward_handle(const Handle& h)
 {
 	_forward_rule_handle = h;
+	_forward_rule_scope_link = ScopeLinkCast(h);
+}
+
+void Rule::set_backward_handles(const HandleSeq& hs)
+{
+	_backward_rule_handles = hs;
+	_backward_rule_scope_links.clear();
+	for (const Handle& h : hs)
+		_backward_rule_scope_links.push_back(ScopeLinkCast(h));
 }
 
 Handle Rule::get_forward_rule() const
@@ -293,7 +308,45 @@ std::vector<Rule> Rule::forward_unified_rules(const Handle& source,
 std::vector<Rule> Rule::backward_unified_rules(const Handle& target,
                                                const Handle& vardecl)
 {
-	// TODO
+	// If the rule's handle has not been set yet
+	if (_forward_rule_handle == Handle::UNDEFINED)
+		return {};
+
+	Rule alpha_converted_rule = rand_alpha_converted();
+
+	// If no backward rule then only consider the conclusions from the
+	// forward rule
+	if (_backward_rule_handles.empty())
+	{
+		Handle forward_rule_vardecl = alpha_converted_rule.get_forward_vardecl();
+		for (const Handle& c :
+			     alpha_converted_rule.get_forward_conclusion_bodies())
+		{
+			UnificationSolutionSet sol =
+				unify(target, vardecl, c, forward_rule_vardecl);
+			if (sol.satisfiable) {
+				TypedSubstitutions tss = typed_substitutions(sol);
+				// TODO: turns the mapping into a sequence of values
+				// according to the forward rule vardecl
+				const Variables alpha_converted_variables =
+					alpha_converted_rule._forward_rule_scope_link->get_variables();
+				alpha_converted_variables
+			} else return {};
+		}
+	}
+	// There are backward rules so return directly their patterns
+	else
+		OC_ASSERT(false, "TODO: support backward rules");
+	// {
+	// 	for (const Handle& h : _backward_rule_handles)
+	// 	{
+	// 		Type t = h->getType();
+	// 		OC_ASSERT(t == BIND_LINK or t == GET_LINK);
+	// 		results.push_back({h->getOutgoingAtom(0), h->getOutgoingAtom(1)});
+	// 	}
+	// }
+
+
 	return {};
 }
 
@@ -303,12 +356,14 @@ Rule Rule::rand_alpha_converted() const
 	Rule result = *this;
 
 	// Alpha convert the forward rule
-	ScopeLinkPtr forward_rule_scope_link = ScopeLinkCast(_forward_rule_handle);
-	result._forward_rule_handle =
-		Handle(forward_rule_scope_link->rand_alpha_converted());
+	result.set_forward_handle(_forward_rule_scope_link->rand_alpha_converted());
 
-	// // Alpha convert the backward rules
-	// for ( : _backward_rule_handles)
+	// Alpha convert the backward rules
+	HandleSeq bhs;
+	for (ScopeLinkPtr sc : _backward_rule_scope_links)
+		bhs.push_back(Handle(sc->rand_alpha_converted()));
+	result.set_backward_handles(bhs);
+
 	return result;
 }
 
