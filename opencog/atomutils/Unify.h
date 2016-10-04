@@ -70,14 +70,16 @@ struct UnificationSolutionSet :
 
 typedef std::map<HandleMap, Variables> TypedSubstitutions;
 
-// Generate typed substitution rules, HandleMap associated to a
-// variable declaration, given a UnificationSolutionSet on a
-// satisfiable solution.
-//
-// TODO: for now the types of the Variables are ignored, i.e. no type
-// restrictions.
-//
-// You need to select the prefered side.
+/**
+ * Generate typed substitution rules, HandleMap associated to a
+ * variable declaration, given a UnificationSolutionSet on a
+ * satisfiable solution.
+ *
+ * TODO: for now the types of the Variables are ignored, i.e. no type
+ * restrictions.
+ *
+ * You need to select the prefered side.
+ */
 TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol);
 
 /**
@@ -168,10 +170,6 @@ UnificationSolutionSet ordered_unify(const HandleSeq& lhs,
                                      const HandleSeq& rhs,
                                      const Handle& lhs_vardecl,
                                      const Handle& rhs_vardecl);
-
-/**
- * Turns a solution set into a substitution set.
- */
 
 /**
  * Return if the atom is an unordered link.
