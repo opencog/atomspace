@@ -80,7 +80,10 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 		# SET(CMAKE_C_FLAGS "-Wl,--copy-dt-needed-entries")
 		SET(CMAKE_C_FLAGS_DEBUG "-ggdb3 -fstack-protector")
 		SET(CMAKE_C_FLAGS_PROFILE "-O2 -g3 -fstack-protector -pg")
-		SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto")
+		# -flto is good for performance, but wow is it slow to link...
+		# XXX disable for now ... its just to painful, in daily life.
+		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto")
+		SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector")
 		LINK_LIBRARIES(pthread)
 
 		# Workaround for circular dependencies problem. This causes
