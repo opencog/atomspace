@@ -10,6 +10,7 @@ ADD_LIBRARY (atomspace
 	AttentionBank.cc
 	BackingStore.cc
 	FixedIntegerIndex.cc
+    ThreadSafeFixedIntegerIndex.cc
 	HandleSeqIndex.cc
 	# HandleSetIndex.cc
 	ImportanceIndex.cc
@@ -25,7 +26,7 @@ ADD_DEPENDENCIES(atomspace opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace
 	atombase
-	truthvalue  
+	truthvalue
 	lambda
 	${COGUTIL_LIBRARY}
 	${Boost_THREAD_LIBRARY}
@@ -41,6 +42,7 @@ INSTALL (FILES
 	AttentionBank.h
 	BackingStore.h
 	FixedIntegerIndex.h
+	ThreadSafeFixedIntegerIndex.h
 	HandleSeqIndex.h
 	ImportanceIndex.h
 	LinkIndex.h
