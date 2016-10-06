@@ -32,6 +32,8 @@
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/core/ImplicationLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
+#include <opencog/atomutils/TypeUtils.h>
+
 
 #include "ScopeLink.h"
 
@@ -205,18 +207,43 @@ inline std::string rand_hex_str()
 	return ss.str();
 }
 
-Handle ScopeLink::rand_alpha_converted() const
+inline HandleSeq append_rand_str(const HandleSeq& vars)
 {
-	// Generate new variable names
 	HandleSeq new_vars;
-	for (const Handle& h : _varlist.varseq) {
+	for (const Handle& h : vars) {
 		std::string new_var_name = h->getName() + "-" + rand_hex_str();
 		new_vars.emplace_back(createNode(VARIABLE_NODE, new_var_name));
 	}
+	return new_vars;
+}
+
+Handle ScopeLink::alpha_conversion(HandleSeq vars, Handle vardecl) const
+{
+	// If hs is empty then generate new variable names
+	if (vars.empty())
+		vars = append_rand_str(_varlist.varseq);
+
+	// Perform alpha conversion
 	HandleSeq hs;
 	for (size_t i = 0; i < getArity(); ++i)
-		hs.push_back(_varlist.substitute_nocheck(getOutgoingAtom(i),
-		                                         new_vars));
+		hs.push_back(_varlist.substitute_nocheck(getOutgoingAtom(i), vars));
+
+	// Replace vardecl by the substituted version if any
+	if (vardecl.is_undefined() and _vardecl.is_defined())
+		vardecl = hs[0];
+
+	// Remove the optional variable declaration from hs
+	if (_vardecl.is_defined())
+		hs.erase(hs.begin());
+
+	// Filter vardecl
+	vardecl = filter_vardecl(vardecl, hs);
+
+	// Insert vardecl back in hs if defined
+	if (vardecl.is_defined())
+		hs.insert(hs.begin(), vardecl);
+
+	// Create the alpha converted scope link
 	return Handle(factory(getType(), hs));
 }
 

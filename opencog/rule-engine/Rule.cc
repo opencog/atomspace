@@ -369,12 +369,12 @@ Rule Rule::rand_alpha_converted() const
 	Rule result = *this;
 
 	// Alpha convert the forward rule
-	result.set_forward_handle(_forward_rule_scope_link->rand_alpha_converted());
+	result.set_forward_handle(_forward_rule_scope_link->alpha_conversion());
 
 	// Alpha convert the backward rules
 	HandleSeq bhs;
 	for (ScopeLinkPtr sc : _backward_rule_scope_links)
-		bhs.push_back(Handle(sc->rand_alpha_converted()));
+		bhs.push_back(Handle(sc->alpha_conversion()));
 	result.set_backward_handles(bhs);
 
 	return result;
