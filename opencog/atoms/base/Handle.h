@@ -125,11 +125,11 @@ public:
         return _ptr.get();
     }
 
-    inline bool is_defined() {
+    inline bool is_defined() const {
         return *this != Handle::UNDEFINED;
     }
 
-    inline bool is_undefined() {
+    inline bool is_undefined() const {
         return *this == Handle::UNDEFINED;
     }
 

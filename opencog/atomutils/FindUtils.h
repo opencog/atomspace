@@ -202,6 +202,13 @@ bool is_unscoped_in_tree(const Handle& tree, const Handle& atom);
 bool is_unquoted_unscoped_in_tree(const Handle& tree, const Handle& atom);
 
 /**
+ * Return true if the atom (variable) occurs both unquoted and
+ * unscoped somewhere in any of the trees.
+*/
+bool is_unquoted_unscoped_in_any_tree(const HandleSeq& trees,
+                                      const Handle& atom);
+
+/**
  * Return true if any of the indicated atoms occur somewhere in
  * the tree (that is, in the tree spanned by the outgoing set.)
  */

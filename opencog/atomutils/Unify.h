@@ -72,6 +72,8 @@ struct UnificationSolutionSet :
 // subtitution
 typedef std::map<HandleMap, Variables> TypedSubstitutions;
 
+// // Given a HandleMap from variables to values (values being possibly
+// // variables) and a Variable
 // get_subtitution_values(HandleMap
 
 /**
@@ -82,7 +84,10 @@ typedef std::map<HandleMap, Variables> TypedSubstitutions;
  * TODO: for now the types of the Variables are ignored, i.e. no type
  * restrictions.
  *
- * You need to select the prefered side.
+ * TODO: need to select the prefered side, for that the initial
+ * variable declarations will have to be taken into account and we
+ * could say that by convention the left side would be chosen as value
+ * over the right side.
  */
 TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol);
 
