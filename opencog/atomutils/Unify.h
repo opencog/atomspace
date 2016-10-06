@@ -68,7 +68,11 @@ struct UnificationSolutionSet :
 	}
 };
 
+// Variables contain the types of all variables involved in the
+// subtitution
 typedef std::map<HandleMap, Variables> TypedSubstitutions;
+
+// get_subtitution_values(HandleMap
 
 /**
  * Generate typed substitution rules, HandleMap associated to a
