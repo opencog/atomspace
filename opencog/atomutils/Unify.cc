@@ -39,6 +39,34 @@ UnificationSolutionSet::UnificationSolutionSet(bool s,
 {
 }
 
+TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol)
+{
+	OC_ASSERT(sol.satisfiable);
+
+	TypedSubstitutions result;
+	for (const UnificationPartition& partition : sol.partitions) {
+		std::pair<HandleMap, Variables> typed_substitution;
+		for (const UnificationPartition::value_type& typed_block : partition) {
+			Handle least_abstract;
+			for (const Handle& h : typed_block.first) {
+				// Find the least abstract atom
+				if (inherit(least_abstract, h))
+					least_abstract = h;
+
+				// Build Variables
+				if (h->getType() == VARIABLE_NODE)
+					typed_substitution.second.varset.insert(h);
+			}
+			// Build substitution
+			for (const Handle& var : typed_substitution.second.varset)
+				typed_substitution.first.insert({var, least_abstract});
+			// TODO you need to select the prefered side
+		}
+		result.insert(typed_substitution);
+	}
+	return result;
+}
+
 UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
                              const Handle& lhs_vardecl,
                              const Handle& rhs_vardecl)
@@ -340,6 +368,11 @@ bool inherit(const Handle& lhs, const Handle& rhs,
 		return gen_varlist(rhs, rhs_vardecl)->is_type(rhs, lhs);
 }
 
+bool inherit(const Handle& lhs, const Handle& rhs)
+{
+	return VARIABLE_NODE == rhs->getType() or lhs == rhs;
+}
+
 bool inherit(Type lhs, Type rhs)
 {
 	return classserver().isA(lhs, rhs);
@@ -386,7 +419,7 @@ VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl)
 		else {
 			OC_ASSERT(vardecl_t == VARIABLE_NODE
 			          or vardecl_t == TYPED_VARIABLE_LINK);
-			return createVariableList(HandleSeq(1, vardecl));
+			return createVariableList(vardecl);
 		}
 	}
 }

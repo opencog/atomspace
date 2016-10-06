@@ -44,6 +44,8 @@ typedef std::map<OrderedHandleSet, Handle> UnificationPartition;
 typedef UnificationPartition::value_type UnificationBlock;
 typedef std::set<UnificationPartition> UnificationPartitions;
 
+// TODO: the type of a typed block is currently a handle of the
+// variable or ground it is exists, instead of an actual type.
 struct UnificationSolutionSet :
 		public boost::equality_comparable<UnificationSolutionSet>
 {
@@ -65,6 +67,24 @@ struct UnificationSolutionSet :
 			and partitions == other.partitions;
 	}
 };
+
+// Variables contain the types of all variables involved in the
+// subtitution
+typedef std::map<HandleMap, Variables> TypedSubstitutions;
+
+// get_subtitution_values(HandleMap
+
+/**
+ * Generate typed substitution rules, HandleMap associated to a
+ * variable declaration, given a UnificationSolutionSet on a
+ * satisfiable solution.
+ *
+ * TODO: for now the types of the Variables are ignored, i.e. no type
+ * restrictions.
+ *
+ * You need to select the prefered side.
+ */
+TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol);
 
 /**
  * This algorithm perform unification by recursively
@@ -209,47 +229,6 @@ UnificationBlock join(const UnificationBlock& lhs, const UnificationBlock& rhs);
 bool is_satisfiable(const UnificationBlock& block);
 
 /**
- * TODO: adjust this comment to reflect the new implementation.
- *
- * Unify 2 atoms with variables on both sides and return a sequence of
- * mapping these variables to their corresponding matches.
- *
- * For instance (variable declarations left aside for simplicity):
- *
- * 1.
- *
- * unify((Variable "$X"), (Concept "A"))
- * ->
- * [{(Variable "$X"):(Concept "A")}]
- * 
- * 2.
- * 
- * unify((Concept "A"), (Concept "$X"))
- * ->
- * [{(Variable "$X"):(Concept "A")}]
- * 
- * 3.
- * 
- * unify((Inheritance (Concept "A") (Concept "B")), (Variable "$X"))
- * ->
- * [{(Variable "$X"):(Inheritance (Concept "A") (Concept "B"))}]
- * 
- * 4.
- * 
- * unify((Inheritance (Concept "A") (Variable "$Y")),
- *       (Inheritance (Variable "$X") (Concept "B"))
- * ->
- * [{(Variable "$X"):(Concept "A"),
- *   (Variable "$Y"):(Concept "B")}]
- *
- * I didn't give an example with multiple mappings but they would
- * occur if for instance one uses an unordered link, thus containing
- * multiple possible permutations.
- *
- * The boolean indicates whether the unification was successful.
- */
-
-/**
  * Calculate type intersection. For example: say you have for a block
  * with
  *
@@ -318,6 +297,13 @@ std::set<Type> get_union_type(const Handle& h, const Handle& vardecl);
  */
 bool inherit(const Handle& lhs, const Handle& rhs,
              const Handle& lhs_vardecl, const Handle& rhs_vardecl);
+
+/**
+ * Extreme crude version of the above when we have no variable
+ * declarations. Basically 2 variables inherits each other and a non
+ * variable inherits a variable. Everything else return false.
+ */
+bool inherit(const Handle& lhs, const Handle& rhs);
 
 /**
  * Return true if lhs inherits rhs.

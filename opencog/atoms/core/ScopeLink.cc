@@ -205,7 +205,7 @@ inline std::string rand_hex_str()
 	return ss.str();
 }
 
-Handle ScopeLink::alpha_conversion() const
+Handle ScopeLink::rand_alpha_converted() const
 {
 	// Generate new variable names
 	HandleSeq new_vars;

@@ -53,7 +53,7 @@ struct FreeVariables
 	///
 	/// The index is a reversed index into varseq: given a variable,
 	/// it returns the ordinal of that variable in the varseq. It is
-	/// used to implement the variable substitution (aka beta-reducation
+	/// used to implement the variable substitution (aka beta-reduction
 	/// aka "PutLink") method.
 	HandleSeq varseq;
 	OrderedHandleSet varset;

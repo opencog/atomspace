@@ -319,7 +319,7 @@ void AlphaConvertUTest::test_alpha_conversion()
 		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
 
 	ScopeLinkPtr sc(ScopeLinkCast(hsc));
-	Handle scac = sc->alpha_conversion();
+	Handle scac = sc->rand_alpha_converted();
 	TS_ASSERT(sc->is_equal(scac));
 
 	logger().info("END TEST: %s", __FUNCTION__);

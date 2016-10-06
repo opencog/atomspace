@@ -102,7 +102,7 @@ public:
 	// Return an alpha converted copy of the given handle. The new
 	// variables names correspond to the old names appended with a
 	// random string.
-	Handle alpha_conversion() const;
+	Handle rand_alpha_converted() const;
 
 	// Overload equality check!
 	virtual bool operator==(const Atom&) const;
