@@ -347,16 +347,18 @@ std::vector<Rule> Rule::backward_unified_rules(const Handle& target,
 		}
 	}
 	// There are backward rules so return directly their patterns
-	else
+	else {
 		OC_ASSERT(false, "TODO: support backward rules");
-	// {
-	// 	for (const Handle& h : _backward_rule_handles)
-	// 	{
-	// 		Type t = h->getType();
-	// 		OC_ASSERT(t == BIND_LINK or t == GET_LINK);
-	// 		results.push_back({h->getOutgoingAtom(0), h->getOutgoingAtom(1)});
-	// 	}
-	// }
+		//
+		// {
+		// 	for (const Handle& h : _backward_rule_handles)
+		// 	{
+		// 		Type t = h->getType();
+		// 		OC_ASSERT(t == BIND_LINK or t == GET_LINK);
+		// 		results.push_back({h->getOutgoingAtom(0), h->getOutgoingAtom(1)});
+		// 	}
+		// }
+	}
 
 	return {};
 }

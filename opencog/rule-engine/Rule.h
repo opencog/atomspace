@@ -183,7 +183,7 @@ public:
 
 	/**
 	 * Given a source, generate all rule variations that may be
-	 * applied over this source. The variables in the rules are
+	 * applied over a given source. The variables in the rules are
 	 * renamed to almost certainly avoid name collision.
 	 *
 	 * TODO: we probably want to support a vector of sources for rules
