@@ -133,15 +133,27 @@ Handle type_compose(const Handle&, const Handle&);
  *
  * will return
  *
- * (VariableList
- *    (TypedVariableLink
- *       (VariableNode "$Y")
- *       (TypeNode "ConceptNode")))
+ * (TypedVariableLink
+ *    (VariableNode "$Y")
+ *    (TypeNode "ConceptNode"))
  *
- * Not that the root link VariableList will not be added to any
- * AtomSpace (it's up to the user to possbily do it).
+ * Special cases:
+ *
+ * 1. The VariableListLink is discarded if the resulting variable
+ *    declaration contains only one variable.
+ *
+ * 2. If nothing is left after filtering it returns Handle::UNDEFINED
+ *
+ * Also, the resulting variable declaration will not be added to any
+ * AtomSpace, it's up to the user to possibly do it.
  */
 Handle filter_vardecl(const Handle& vardecl, const Handle& body);
+
+/**
+ * Like filter_vardecl(const Handle& vardecl, const Handle& body)
+ * except that the variable needs to be in at least one body of hs.
+ */
+Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs);
 
 /** @}*/
 }

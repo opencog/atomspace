@@ -253,14 +253,36 @@ Handle opencog::type_compose(const Handle& left, const Handle& right)
 
 Handle opencog::filter_vardecl(const Handle& vardecl, const Handle& body)
 {
+	return filter_vardecl(vardecl, HandleSeq{body});
+}
+
+Handle opencog::filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
+{
+	// Base case
+	Type t = vardecl->getType();
+	if (VARIABLE_NODE == t) {
+		if (is_unquoted_unscoped_in_any_tree(hs, vardecl))
+			return vardecl;
+		else
+			return Handle::UNDEFINED;
+	} else if (TYPED_VARIABLE_LINK == t) {
+		if (is_unquoted_unscoped_in_any_tree(hs, vardecl->getOutgoingAtom(0)))
+			return vardecl;
+		else
+			return Handle::UNDEFINED;
+	}
+
+	// Recursive case
+	OC_ASSERT(VARIABLE_LIST == t);
 	HandleSeq subvardecls;
 	for (const Handle& v : vardecl->getOutgoingSet()) {
-		Type t = v->getType();
-		if ((VARIABLE_NODE == t and is_unquoted_unscoped_in_tree(body, v))
-		    or (TYPED_VARIABLE_LINK == t
-		        and is_unquoted_unscoped_in_tree(body, v->getOutgoingAtom(0))))
+		if (filter_vardecl(v, hs).is_defined())
 			subvardecls.push_back(v);
 	}
+	if (subvardecls.empty())
+		return Handle::UNDEFINED;
+	if (subvardecls.size() == 1)
+		return subvardecls[0];
 	return Handle(createVariableList(subvardecls));
 }
 
