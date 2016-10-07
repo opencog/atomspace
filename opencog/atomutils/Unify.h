@@ -71,6 +71,7 @@ struct UnificationSolutionSet :
 // Subtitution values and their corresponding variable declaration
 // (cause some values will be variables).
 typedef std::map<HandleMap, Handle> TypedSubstitutions;
+typedef TypedSubstitutions::value_type TypedSubstitution;
 
 /**
  * Generate typed substitution rules, given a UnificationSolutionSet
@@ -333,6 +334,8 @@ std::string oc_to_string(const UnificationPartition& hshm);
 std::string oc_to_string(const UnificationBlock& ub);
 std::string oc_to_string(const UnificationPartitions& par);
 std::string oc_to_string(const UnificationSolutionSet& sol);
+std::string oc_to_string(const TypedSubstitutions& tss);
+std::string oc_to_string(const TypedSubstitution& ts);
 	
 } // namespace opencog
 

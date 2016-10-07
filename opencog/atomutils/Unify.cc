@@ -466,4 +466,23 @@ std::string oc_to_string(const UnificationSolutionSet& sol)
 	return ss.str();
 }
 
+std::string oc_to_string(const TypedSubstitutions& tss)
+{
+	std::stringstream ss;
+	ss << "size = " << tss.size() << std::endl;
+	int i = 0;
+	for (const auto& ts : tss)
+		ss << "typed substitution[" << i << "]:" << std::endl
+		   << oc_to_string(ts);
+	return ss.str();
+}
+
+std::string oc_to_string(const TypedSubstitution& ts)
+{
+	std::stringstream ss;
+	ss << "substitution:" << std::endl << oc_to_string(ts.first)
+	   << "type:" << std::endl << oc_to_string(ts.second);
+	return ss.str();
+}
+
 } // namespace opencog
