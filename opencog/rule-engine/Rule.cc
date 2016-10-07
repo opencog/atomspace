@@ -298,21 +298,23 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
 	return st_ver;
 }
 
-std::vector<Rule> Rule::forward_unified_rules(const Handle& source,
-                                              const Handle& vardecl)
+std::vector<Rule> Rule::unify_source(const Handle& source,
+                                     const Handle& vardecl)
 {
 	// TODO
 	return {};
 }
 
-std::vector<Rule> Rule::backward_unified_rules(const Handle& target,
-                                               const Handle& vardecl)
+std::vector<Rule> Rule::unify_target(const Handle& target,
+                                     const Handle& vardecl)
 {
 	// If the rule's handle has not been set yet
 	if (_forward_rule_handle == Handle::UNDEFINED)
 		return {};
 
 	Rule alpha_converted_rule = rand_alpha_converted();
+
+	std::vector<Rule> unified_rules;
 
 	// If no backward rule then only consider the conclusions from the
 	// forward rule
@@ -325,42 +327,25 @@ std::vector<Rule> Rule::backward_unified_rules(const Handle& target,
 			UnificationSolutionSet sol =
 				unify(target, vardecl, cpat, forward_rule_vardecl);
 			if (sol.satisfiable) {
-				TypedSubstitutions tss = typed_substitutions(sol);
-				// TODO: turn the mapping into a sequence of values
-				// according to the forward rule vardecl
-				const Variables alpha_converted_variables =
-					alpha_converted_rule._forward_rule_scope_link->get_variables();
-				// TODO
-				for (const auto& typed_substitution : tss) {
-					// Generate substitution value vector
-					HandleSeq values;
-					for (const Handle& v : alpha_converted_variables.varseq) {
-						auto it = typed_substitution.second.varset.find(v);
-						if (it == typed_substitution.second.varset.end())
-							values.push_back(v);
-						else {
-							// it values.push_back();
-						}
-					}
+				TypedSubstitutions tss = typed_substitutions(sol, target);
+				for (const auto& ts : tss) {
+					HandleSeq values =
+						_forward_rule_scope_link->get_variables().make_values(ts.first);
+					Handle h =
+						_forward_rule_scope_link->alpha_conversion(values, ts.second);
+					Rule unified_rule(alpha_converted_rule);
+					unified_rule.set_forward_handle(h);
+					unified_rules.push_back(unified_rule);
 				}
-			} else return {};
+			}
 		}
 	}
 	// There are backward rules so return directly their patterns
 	else {
 		OC_ASSERT(false, "TODO: support backward rules");
-		//
-		// {
-		// 	for (const Handle& h : _backward_rule_handles)
-		// 	{
-		// 		Type t = h->getType();
-		// 		OC_ASSERT(t == BIND_LINK or t == GET_LINK);
-		// 		results.push_back({h->getOutgoingAtom(0), h->getOutgoingAtom(1)});
-		// 	}
-		// }
 	}
 
-	return {};
+	return unified_rules;
 }
 
 Rule Rule::rand_alpha_converted() const
