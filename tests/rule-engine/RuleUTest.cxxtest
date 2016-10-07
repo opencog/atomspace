@@ -23,12 +23,71 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/rule-engine/Rule.h>
 
 using namespace opencog;
 
+#define al _as.add_link
+#define an _as.add_node
+
 class RuleUTest: public CxxTest::TestSuite
 {
-	// TODO add test about partial substitution, etc.
-	void test_TODO();
+private:
+	AtomSpace _as;
+	SchemeEval _eval;
+	Handle deduction_rule_h, X, A, CT;
+
+public:
+	RuleUTest() : _eval(&_as)
+	{
+	}
+
+	void setUp();
+	void tearDown();
+
+	void test_unify_target();
 };
+
+void RuleUTest::setUp()
+{
+	string cur_pp_dir = string(PROJECT_SOURCE_DIR),
+		cur_p_dir = cur_pp_dir + "/tests",
+		cur_dir = cur_p_dir + "/rule-engine";
+	vector<string> load_paths = {cur_pp_dir, cur_p_dir, cur_dir};
+	for (string& p : load_paths)
+	{
+		string eval_str = string("(add-to-load-path \"") + p + string("\")");
+		_eval.eval(eval_str);
+	}
+	_eval.eval("(use-modules (opencog))");
+	// _eval.eval("(use-modules (opencog rule-engine))");
+
+	string eval_result =
+		_eval.eval("(load-from-path \"tests/rule-engine/bc-config.scm\")");
+
+	deduction_rule_h = _eval.eval_h("(MemberLink (stv 1 1)"
+	                                "   bc-deduction-rule-name"
+	                                "   (ConceptNode \"URE\"))");
+	X = an(VARIABLE_NODE, "$X");
+	A = an(CONCEPT_NODE, "$A");
+	CT = an(TYPE_NODE, "ConceptNode");
+}
+
+void RuleUTest::tearDown()
+{
+	_as.clear();
+}
+
+void RuleUTest::test_unify_target()
+{
+	Rule deduction_rule(deduction_rule_h);
+	Handle target = al(INHERITANCE_LINK, X, A),
+		vardecl = al(TYPED_VARIABLE_LINK, X, CT);
+	RuleSeq rules = deduction_rule.unify_target(target, vardecl);
+
+	std::cout << "rules = " << oc_to_string(rules);
+
+	TS_ASSERT(true);
+}
