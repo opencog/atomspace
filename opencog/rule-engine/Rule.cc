@@ -312,7 +312,7 @@ std::vector<Rule> Rule::unify_target(const Handle& target,
 	if (_forward_rule_handle == Handle::UNDEFINED)
 		return {};
 
-	Rule alpha_converted_rule = rand_alpha_converted();
+	Rule alpha_rule = rand_alpha_converted();
 
 	std::vector<Rule> unified_rules;
 
@@ -320,20 +320,20 @@ std::vector<Rule> Rule::unify_target(const Handle& target,
 	// forward rule
 	if (_backward_rule_handles.empty())
 	{
-		Handle forward_rule_vardecl = alpha_converted_rule.get_forward_vardecl();
-		for (const Handle& cpat :
-			     alpha_converted_rule.get_forward_conclusion_bodies())
+		Handle alpha_vardecl = alpha_rule.get_forward_vardecl();
+		ScopeLinkPtr alpha_sc = alpha_rule._forward_rule_scope_link;
+		for (const Handle& alpha_pat : alpha_rule.get_forward_conclusion_bodies())
 		{
 			UnificationSolutionSet sol =
-				unify(target, cpat, vardecl, forward_rule_vardecl);
+				unify(target, alpha_pat, vardecl, alpha_vardecl);
 			if (sol.satisfiable) {
 				TypedSubstitutions tss = typed_substitutions(sol, target);
 				for (const auto& ts : tss) {
-					HandleSeq values =
-						_forward_rule_scope_link->get_variables().make_values(ts.first);
-					Handle h =
-						_forward_rule_scope_link->alpha_conversion(values, ts.second);
-					Rule unified_rule(alpha_converted_rule);
+					// For each typed substitution produce an alpha
+					// converted, possibly partially substituted rule
+					HandleSeq values = alpha_sc->get_variables().make_values(ts.first);
+					Handle h = alpha_sc->alpha_conversion(values, ts.second);
+					Rule unified_rule(alpha_rule);
 					unified_rule.set_forward_handle(h);
 					unified_rules.push_back(unified_rule);
 				}
