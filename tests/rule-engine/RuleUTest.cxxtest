@@ -89,5 +89,12 @@ void RuleUTest::test_unify_target()
 
 	std::cout << "rules = " << oc_to_string(rules);
 
+	TS_ASSERT_EQUALS(rules.size(), 1);
+
+	Handle forward_rule = rules[0].get_forward_rule(); //,
+		// expected up to an alpha conversion
+		// expected_vardecl = // TODO
+		// expected = // TODO al(BIND_LINK, 
+
 	TS_ASSERT(true);
 }
