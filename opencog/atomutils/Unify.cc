@@ -29,6 +29,7 @@
 
 #include <opencog/util/algorithm.h>
 #include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/atomutils/FindUtils.h>
 
 namespace opencog {
@@ -48,14 +49,18 @@ TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol,
 	for (const UnificationPartition& partition : sol.partitions) {
 		std::pair<HandleMap, Handle> ts;
 		for (const UnificationPartition::value_type& typed_block : partition) {
-			Handle least_abstract;
+			Handle least_abstract(Handle(createNode(VARIABLE_NODE,
+			                                        "__dummy_top__")));
 			for (const Handle& h : typed_block.first) {
 				// Find the least abstract atom
-				// TODO you need to select the prefered side
-				if (inherit(least_abstract, h))
+				if (inherit(h, least_abstract) and
+				    // If h is a variable, only consider it as value
+				    // if it is in pre (stands for precedence)
+				    (h->getType() != VARIABLE_NODE
+				     or is_unquoted_unscoped_in_tree(pre, h)))
 					least_abstract = h;
 
-				// TODO take care of ts type
+				// TODO: take care of ts type
 			}
 			// Build variable mapping
 			for (const Handle& var : typed_block.first) {
