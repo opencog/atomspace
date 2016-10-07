@@ -33,6 +33,9 @@ namespace opencog {
 
 using namespace std;
 
+class Rule;
+typedef vector<Rule> RuleSeq;
+
 /**
  * Class for managing rules in the URE.
  *
@@ -190,8 +193,7 @@ public:
 	 * TODO: we probably want to support a vector of sources for rules
 	 * with multiple premises.
 	 */
-	std::vector<Rule> unify_source(const Handle& source,
-	                               const Handle& vardecl);
+	RuleSeq unify_source(const Handle& source, const Handle& vardecl);
 
 	/**
 	 * Used by the backward chainer to select rules. Given a target,
@@ -199,8 +201,7 @@ public:
 	 * variables in the rules are renamed to almost certainly avoid
 	 * name collision.
 	 */
-	std::vector<Rule> unify_target(const Handle& target,
-	                               const Handle& vardecl);
+	RuleSeq unify_target(const Handle& target, const Handle& vardecl);
 
 	std::string to_string() const;
 
@@ -249,8 +250,6 @@ private:
 	// Given an ExecutionOutputLink return its last argument
 	Handle get_execution_output_last_argument(const Handle& h) const;
 };
-
-typedef std::vector<Rule> RuleSeq;
 
 // For Gdb debugging
 std::string oc_to_string(const Rule& rule);
