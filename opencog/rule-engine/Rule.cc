@@ -452,7 +452,13 @@ Handle Rule::get_execution_output_last_argument(const Handle& h) const
 
 std::string Rule::to_string() const
 {
-	return _name;
+	std::stringstream ss;
+	ss << "name: " << _name << std::endl
+	   << "forward rule:" << std::endl
+	   << oc_to_string(_forward_rule_handle)
+	   << "backward rules:" << std::endl
+	   << oc_to_string(_backward_rule_handles);
+	return ss.str();
 }
 
 std::string oc_to_string(const Rule& rule)
