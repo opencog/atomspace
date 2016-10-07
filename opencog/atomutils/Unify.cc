@@ -39,30 +39,31 @@ UnificationSolutionSet::UnificationSolutionSet(bool s,
 {
 }
 
-TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol)
+TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol,
+                                       const Handle& pre)
 {
 	OC_ASSERT(sol.satisfiable);
 
 	TypedSubstitutions result;
 	for (const UnificationPartition& partition : sol.partitions) {
-		std::pair<HandleMap, Variables> typed_substitution;
+		std::pair<HandleMap, Handle> ts;
 		for (const UnificationPartition::value_type& typed_block : partition) {
 			Handle least_abstract;
 			for (const Handle& h : typed_block.first) {
 				// Find the least abstract atom
+				// TODO you need to select the prefered side
 				if (inherit(least_abstract, h))
 					least_abstract = h;
 
-				// Build Variables
-				if (h->getType() == VARIABLE_NODE)
-					typed_substitution.second.varset.insert(h);
+				// TODO take care of ts type
 			}
-			// Build substitution
-			for (const Handle& var : typed_substitution.second.varset)
-				typed_substitution.first.insert({var, least_abstract});
-			// TODO you need to select the prefered side
+			// Build variable mapping
+			for (const Handle& var : typed_block.first) {
+				if (var->getType() == VARIABLE_NODE)
+					ts.first.insert({var, least_abstract});
+			}
 		}
-		result.insert(typed_substitution);
+		result.insert(ts);
 	}
 	return result;
 }
