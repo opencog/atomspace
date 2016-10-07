@@ -325,7 +325,7 @@ std::vector<Rule> Rule::unify_target(const Handle& target,
 			     alpha_converted_rule.get_forward_conclusion_bodies())
 		{
 			UnificationSolutionSet sol =
-				unify(target, vardecl, cpat, forward_rule_vardecl);
+				unify(target, cpat, vardecl, forward_rule_vardecl);
 			if (sol.satisfiable) {
 				TypedSubstitutions tss = typed_substitutions(sol, target);
 				for (const auto& ts : tss) {
