@@ -146,6 +146,10 @@ private:
     AtomTable& operator=(const AtomTable&);
     AtomTable(const AtomTable&);
 
+    AtomPtr do_factory(Type atom_type, AtomPtr atom);
+    AtomPtr factory(Type atom_type, AtomPtr atom);
+    AtomPtr clone_factory(Type atom_type, AtomPtr atom);
+
 public:
 
     /**
@@ -198,10 +202,6 @@ public:
     Handle getHandle(Type, const HandleSeq&) const;
     Handle getHandle(const AtomPtr&) const;
     Handle getHandle(UUID) const;
-
-    AtomPtr do_factory(Type atom_type, AtomPtr atom);
-    AtomPtr factory(Type atom_type, AtomPtr atom);
-    AtomPtr clone_factory(Type, AtomPtr);
 
     /**
      * Returns the set of atoms of a given type (subclasses optionally).

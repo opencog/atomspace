@@ -478,8 +478,8 @@ AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
 	// Copy the UUID ONLY if the atom does not belong to some other
 	// atomspace. This is the situation that applies to atoms being
 	// delivered to us from the backing store: the UUID is set, but
-	// they are othrwise "fresh" atoms.
-	if (NULL == atom->getAtomTable())
+	// they are otherwise "fresh" atoms.
+	if (nullptr == atom->getAtomTable())
 		clone->_uuid = atom->_uuid;
 	return clone;
 }
