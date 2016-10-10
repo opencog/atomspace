@@ -85,29 +85,31 @@ void RuleUTest::test_unify_target()
 {
 	Rule deduction_rule(deduction_rule_h);
 	Handle target = al(INHERITANCE_LINK, X, A),
-		vardecl = al(TYPED_VARIABLE_LINK, X, CT);
-	RuleSeq rules = deduction_rule.unify_target(target, vardecl);
-
-	std::cout << "rules = " << oc_to_string(rules);
+		target_vardecl = al(TYPED_VARIABLE_LINK, X, CT);
+	RuleSeq rules = deduction_rule.unify_target(target, target_vardecl);
 
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
 	Handle forward_rule = rules[0].get_forward_rule(),
 		// expected up to an alpha conversion
-		expected_vardecl = al(VARIABLE_LIST,
-		                      al(TYPED_VARIABLE_LINK, X, CT),
-		                      al(TYPED_VARIABLE_LINK, V, CT)),
+		vardecl = al(VARIABLE_LIST,
+		             al(TYPED_VARIABLE_LINK, X, CT),
+		             al(TYPED_VARIABLE_LINK, V, CT)),
 		XV = al(INHERITANCE_LINK, X, V),
 		VA = al(INHERITANCE_LINK, V, A),
 		XA = al(INHERITANCE_LINK, X, A),
 		XnotA = al(NOT_LINK, al(IDENTICAL_LINK, X, A)),
-		expected_body = al(AND_LINK, XV, VA, XnotA),
+		body = al(AND_LINK, XV, VA, XnotA),
 		schema = an(GROUNDED_SCHEMA_NODE, "scm: bc-deduction-formula"),
-		expected_rewrite = al(EXECUTION_OUTPUT_LINK,
-		                      schema,
-		                      al(LIST_LINK, XV, VA, XA));
-		                         
-		// expected = // TODO al(BIND_LINK, 
+		rewrite = al(EXECUTION_OUTPUT_LINK,
+		             schema,
+		             al(LIST_LINK, XV, VA, XA)),
+		expected = al(BIND_LINK, vardecl, body, rewrite);
 
-	TS_ASSERT(true);
+	std::cout << "forward_rule = " << oc_to_string(forward_rule);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
+
+	TS_ASSERT(expected_sc->is_equal(forward_rule));
 }
