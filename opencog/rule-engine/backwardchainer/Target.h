@@ -40,144 +40,151 @@ class TargetFitness
 class Target
 {
 public:
-	Target(const Handle& h);
+	Target(const Handle& body, const Handle& vardecl = Handle::UNDEFINED);
 
 	// Target handle
-	Handle handle;
+	Handle body;
+
+	// Target variable declaration
+	Handle vardecl;
 
 	// Target fitness
 	TargetFitness fitness;
 
 	// Or-children at the rule level, as multiple rules, or rule
 	// variations (partially unified, etc) can yield the same target.
-	std::vector<Rule> rules;
+	RuleSeq rules;
+
+	std::string to_string() const;
 };
 
 // Back-inference tree. A back-inference tree is an and-or tree, where
-// there are 2 types of children, or-children and
-// and-children. Specifically the or-children are represented by
-// Target::rules, because multiple rules or rule variations can infer
-// the same target. Then within each rule or rule variation, the rule
-// premises are and-children because in order to apply a certain rule
-// all premises must be fulfilled.
+// there are 2 types of children, or-children and and-children. The
+// or-children are represented by Target::rules, because multiple
+// rules or rule variations can infer the same target. Then within
+// each rule or rule variation, the rule premises are and-children
+// because in order to apply a certain rule all premises must be
+// fulfilled.
 class TargetSet : public std::unordered_map<Handle, Target>
 {
 };
 
-// obsolete code to be removed as soon as the new code is functional
-#if 0
-class TargetOld
-{
-	friend class TargetSet;
+// Gdb debugging
+std::string oc_to_string(const Target& target);
 
-public:
+// // obsolete code to be removed as soon as the new code is functional
+// #if 0
+// class TargetOld
+// {
+// 	friend class TargetSet;
 
-	~TargetOld() {}
+// public:
 
-	// Comparison
-	bool operator==(const Target& t) const
-	{
-		return _htarget == t._htarget;
-	}
-	bool operator<(const Target& t) const
-	{
-		return _htarget < t._htarget;
-	}
+// 	~TargetOld() {}
 
-	void store_step(const Rule& r, const HandleSeq& premises);
-	void store_varmap(HandleMultimap& vm);
-	void store_varmap(HandleMap& vm);
-	unsigned int rule_count(const Rule& r) const;
+// 	// Comparison
+// 	bool operator==(const Target& t) const
+// 	{
+// 		return _htarget == t._htarget;
+// 	}
+// 	bool operator<(const Target& t) const
+// 	{
+// 		return _htarget < t._htarget;
+// 	}
 
-	/**
-	 * Increment the internal counter.
-	 *
-	 * Useful for storing how many times a Target is selected.
-	 */
-	void increment_selection_count() { _selection_count++; }
+// 	void store_step(const Rule& r, const HandleSeq& premises);
+// 	void store_varmap(HandleMultimap& vm);
+// 	void store_varmap(HandleMap& vm);
+// 	unsigned int rule_count(const Rule& r) const;
 
-	/**
-	 * Get the external Handle referred to be Target.
-	 *
-	 * @return the handle
-	 */
-	Handle get_handle() const { return _htarget; }
+// 	/**
+// 	 * Increment the internal counter.
+// 	 *
+// 	 * Useful for storing how many times a Target is selected.
+// 	 */
+// 	void increment_selection_count() { _selection_count++; }
 
-	/**
-	 * Get the "free" variables list in HandleSeq.
-	 *
-	 * @return the HandleSeq
-	 */
-	HandleSeq get_varseq() const
-	{
-		return VariableListCast(_vardecl)->get_variables().varseq;
-	}
+// 	/**
+// 	 * Get the external Handle referred to be Target.
+// 	 *
+// 	 * @return the handle
+// 	 */
+// 	Handle get_handle() const { return _htarget; }
 
-	/**
-	 * Get the "free" variables list in OrderedHandleSet
-	 *
-	 * @return the OrderedHandleSet
-	 */
-	OrderedHandleSet get_varset() const
-	{
-		return VariableListCast(_vardecl)->get_variables().varset;
-	}
+// 	/**
+// 	 * Get the "free" variables list in HandleSeq.
+// 	 *
+// 	 * @return the HandleSeq
+// 	 */
+// 	HandleSeq get_varseq() const
+// 	{
+// 		return VariableListCast(_vardecl)->get_variables().varseq;
+// 	}
 
-	Handle get_vardecl() const { return _vardecl; }
+// 	/**
+// 	 * Get the "free" variables list in OrderedHandleSet
+// 	 *
+// 	 * @return the OrderedHandleSet
+// 	 */
+// 	OrderedHandleSet get_varset() const
+// 	{
+// 		return VariableListCast(_vardecl)->get_variables().varset;
+// 	}
 
-	/**
-	 * Get the stored free variable mappings.
-	 *
-	 * @return a HandleMultimap object of the mappings
-	 */
-	const HandleMultimap& get_varmap() const { return _varmap; }
+// 	Handle get_vardecl() const { return _vardecl; }
 
-	unsigned int get_selection_count() const { return _selection_count; }
+// 	/**
+// 	 * Get the stored free variable mappings.
+// 	 *
+// 	 * @return a HandleMultimap object of the mappings
+// 	 */
+// 	const HandleMultimap& get_varmap() const { return _varmap; }
 
-	/**
-	 * Get the weight associated with this Target.
-	 *
-	 * Useful for perhaps target selection.
-	 * XXX TODO actually calculate something here
-	 *
-	 * @return the weight in float
-	 */
-	float get_weight() { return 1.0f; }
+// 	unsigned int get_selection_count() const { return _selection_count; }
 
-	std::string to_string();
+// 	/**
+// 	 * Get the weight associated with this Target.
+// 	 *
+// 	 * Useful for perhaps target selection.
+// 	 * XXX TODO actually calculate something here
+// 	 *
+// 	 * @return the weight in float
+// 	 */
+// 	float get_weight() { return 1.0f; }
 
-private:
-	Target(AtomSpace& as, const Handle& h, const Handle& hvardecl);
+// 	std::string to_string();
 
-	Handle _htarget;
-	unsigned int _selection_count;
+// private:
+// 	Target(AtomSpace& as, const Handle& h, const Handle& hvardecl);
 
-	Handle _vardecl;
-	HandleMultimap _varmap;
+// 	Handle _htarget;
+// 	unsigned int _selection_count;
 
-	AtomSpace& _as;
-};
+// 	Handle _vardecl;
+// 	HandleMultimap _varmap;
 
-class TargetSetOld
-{
-public:
-	TargetSet();
-	~TargetSet();
+// 	AtomSpace& _as;
+// };
 
-	void clear();
-	void emplace(Handle h, Handle hvardecl);
-	unsigned int size();
-	Target& select();
-	Target& get(Handle h);
+// class TargetSetOld
+// {
+// public:
+// 	TargetSet();
+// 	~TargetSet();
 
-private:
-	std::map<Handle, Target> _targets_map;
-	AtomSpace _history_space;
-	unsigned int _total_selection;
-};
-#endif
+// 	void clear();
+// 	void emplace(Handle h, Handle hvardecl);
+// 	unsigned int size();
+// 	Target& select();
+// 	Target& get(Handle h);
 
-}
+// private:
+// 	std::map<Handle, Target> _targets_map;
+// 	AtomSpace _history_space;
+// 	unsigned int _total_selection;
+// };
+// #endif
 
+} // ~namespace opencog
 
 #endif // TARGET_H

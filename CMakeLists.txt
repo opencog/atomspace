@@ -80,6 +80,9 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 		# SET(CMAKE_C_FLAGS "-Wl,--copy-dt-needed-entries")
 		SET(CMAKE_C_FLAGS_DEBUG "-ggdb3 -fstack-protector")
 		SET(CMAKE_C_FLAGS_PROFILE "-O2 -g3 -fstack-protector -pg")
+		# -flto is good for performance, but wow is it slow to link...
+		# XXX disable for now ... its just to painful, in daily life.
+		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector")
 		SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto")
 		LINK_LIBRARIES(pthread)
 
@@ -97,8 +100,8 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 	#
 	# 2) -fopenmp for multithreading support
 	#
-	# 3) -std=gnu++0x for C++0x and GNU extensions support
-	SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-variadic-macros -fopenmp -std=gnu++0x")
+	# 3) -std=gnu++11 for C++11 and GNU extensions support
+	SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-variadic-macros -fopenmp -std=gnu++11")
 
 	SET(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
 	SET(CMAKE_CXX_FLAGS_PROFILE ${CMAKE_C_FLAGS_PROFILE})

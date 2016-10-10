@@ -146,6 +146,10 @@ private:
     AtomTable& operator=(const AtomTable&);
     AtomTable(const AtomTable&);
 
+    AtomPtr do_factory(Type atom_type, AtomPtr atom);
+    AtomPtr factory(Type atom_type, AtomPtr atom);
+    AtomPtr clone_factory(Type atom_type, AtomPtr atom);
+
 public:
 
     /**
@@ -198,10 +202,6 @@ public:
     Handle getHandle(Type, const HandleSeq&) const;
     Handle getHandle(const AtomPtr&) const;
     Handle getHandle(UUID) const;
-
-    AtomPtr do_factory(Type atom_type, AtomPtr atom);
-    AtomPtr factory(Type atom_type, AtomPtr atom);
-    AtomPtr clone_factory(Type, AtomPtr);
 
     /**
      * Returns the set of atoms of a given type (subclasses optionally).
@@ -288,28 +288,6 @@ public:
      */
     bool holds(const Handle& h) const {
         return (NULL != h) and h->getAtomTable() == this;
-    }
-
-    /** Get Node object already in the AtomTable.
-     *
-     * @param h Handle of the node to retrieve.
-     * @return pointer to Node object, NULL if no atom within this AtomTable is
-     * associated with handle or if the atom is a link.
-     */
-    inline NodePtr getNode(Handle& h) const {
-        h = getHandle(h); // force resolution of uuid into atom pointer.
-        return NodeCast(h);
-    }
-
-    /** Get Link object already in the AtomTable.
-     *
-     * @param h Handle of the link to retrieve.
-     * @return pointer to Link object, NULL if no atom within this AtomTable is
-     * associated with handle or if the atom is a node.
-     */
-    inline LinkPtr getLink(Handle& h) const {
-        h = getHandle(h); // force resolution of uuid into atom pointer.
-        return LinkCast(h);
     }
 
     /**

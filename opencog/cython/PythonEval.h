@@ -56,24 +56,6 @@
 namespace opencog {
 
 class AtomSpace;
-class CogServer;
-
-/**
- * Each call of the embedded python code could be easily locked by object of this class
- */
-class PythonThreadLocker
-{
-    private:
-        PyGILState_STATE state;
-
-    public:
-        PythonThreadLocker() : state(PyGILState_Ensure())
-        {}
-
-        ~PythonThreadLocker() {
-            PyGILState_Release(state);
-        }
-};
 
 /**
  * Singleton class used to initialize python interpreter in the main thread.
@@ -137,7 +119,7 @@ class PythonEval : public GenericEval
         bool _eval_done;
         std::mutex _poll_mtx;
         std::mutex _eval_mutex;
-	    std::condition_variable _wait_done;
+        std::condition_variable _wait_done;
 
         PyObject* _pyGlobal;
         PyObject* _pyLocal;

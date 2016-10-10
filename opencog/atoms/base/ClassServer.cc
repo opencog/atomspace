@@ -33,9 +33,8 @@
 #include <boost/bind.hpp>
 
 #include <opencog/atoms/base/atom_types.h>
-#include "types.h"
-#include <opencog/util/Logger.h>
 
+#include "types.h"
 #include "opencog/atoms/base/atom_types.definitions"
 
 //#define DPRINTF printf
@@ -45,7 +44,6 @@ using namespace opencog;
 
 ClassServer::ClassServer(void)
 {
-    logger().info("Initializing ClassServer");
     nTypes = 0;
 }
 

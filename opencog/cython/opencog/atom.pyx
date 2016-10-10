@@ -19,9 +19,6 @@ cdef class Atom(object):
         self._atom_type = None
         self._name = None
         self._outgoing = None
-
-        # Not really a cache ... an atom could be moved from one
-        # atomspace to another (!)
         self.atomspace = a
 
     def __nonzero__(self):
@@ -44,6 +41,8 @@ cdef class Atom(object):
             cdef cAtom* atom_ptr
             if self._name is None:
                 atom_ptr = self.handle.atom_ptr()
+                if atom_ptr == NULL:   # avoid null-pointer deref
+                    return None
                 if atom_ptr.isNode():
                     self._name = atom_ptr.getName()
                 else:
@@ -54,23 +53,30 @@ cdef class Atom(object):
         def __get__(self):
             cdef cAtom* atom_ptr = self.handle.atom_ptr()
             cdef tv_ptr tvp
+            if atom_ptr == NULL:   # avoid null-pointer deref
+                return None
             tvp = atom_ptr.getTruthValue()
             if (not tvp.get() or tvp.get().isNullTv()):
                 pytv = TruthValue()
                 pytv.cobj = new tv_ptr(tvp) # make copy of smart pointer
                 return pytv
             return TruthValue(tvp.get().getMean(), tvp.get().getConfidence())
+
         def __set__(self,truth_value):
             try:
                 assert isinstance(truth_value, TruthValue)
             except AssertionError:
                 raise TypeError("atom.av property needs a TruthValue object")
             cdef cAtom* atom_ptr = self.handle.atom_ptr()
+            if atom_ptr == NULL:   # avoid null-pointer deref
+                return
             atom_ptr.setTruthValue(deref((<TruthValue>truth_value)._tvptr()))
 
     property av:
         def __get__(self):
             cdef cAtom* atom_ptr = self.handle.atom_ptr()
+            if atom_ptr == NULL:   # avoid null-pointer deref
+                return None
             sti = atom_ptr.getSTI()
             lti = atom_ptr.getLTI()
             vlti = atom_ptr.getVLTI()
@@ -81,6 +87,8 @@ cdef class Atom(object):
             except AssertionError:
                 raise TypeError("atom.av property needs a dictionary object")
             cdef cAtom* atom_ptr = self.handle.atom_ptr()
+            if atom_ptr == NULL:   # avoid null-pointer deref
+                return
             if av_dict:
                 if "sti" in av_dict: sti = av_dict["sti"]
                 if "lti" in av_dict: lti = av_dict["lti"]
@@ -91,29 +99,56 @@ cdef class Atom(object):
 
     property sti:
         def __get__(self):
-            return self.handle.atom_ptr().getSTI()
+            cdef cAtom* atom_ptr = self.handle.atom_ptr()
+            if atom_ptr == NULL:   # avoid null-pointer deref
+                return None
+            return atom_ptr.getSTI()
         def __set__(self,val):
-            self.handle.atom_ptr().setSTI(val)
+            cdef cAtom* atom_ptr = self.handle.atom_ptr()
+            if atom_ptr == NULL:   # avoid null-pointer deref
+                return
+            atom_ptr.setSTI(val)
 
     property lti:
         def __get__(self):
-            return self.handle.atom_ptr().getLTI()
+            cdef cAtom* atom_ptr = self.handle.atom_ptr()
+            if atom_ptr == NULL:   # avoid null-pointer deref
+                return None
+            return atom_ptr.getLTI()
         def __set__(self,val):
-            self.handle.atom_ptr().setLTI(val)
+            cdef cAtom* atom_ptr = self.handle.atom_ptr()
+            if atom_ptr == NULL:   # avoid null-pointer deref
+                return
+            atom_ptr.setLTI(val)
 
     property vlti:
         def __get__(self):
-            return self.handle.atom_ptr().getVLTI()
+            cdef cAtom* atom_ptr = self.handle.atom_ptr()
+            if atom_ptr == NULL:   # avoid null-pointer deref
+                return None
+            return atom_ptr.getVLTI()
         def __set__(self,val):
-            self.handle.atom_ptr().setVLTI(val)
+            cdef cAtom* atom_ptr = self.handle.atom_ptr()
+            if atom_ptr == NULL:   # avoid null-pointer deref
+                return
+            atom_ptr.setVLTI(val)
 
     def increment_vlti(self):
-        self.handle.atom_ptr().incVLTI()
+        cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        if atom_ptr == NULL:   # avoid null-pointer deref
+            return
+        atom_ptr.incVLTI()
+
     def decrement_vlti(self):
-        self.handle.atom_ptr().decVLTI()
+        cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        if atom_ptr == NULL:   # avoid null-pointer deref
+            return
+        atom_ptr.decVLTI()
 
     def get_out(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        if atom_ptr == NULL:   # avoid null-pointer deref
+            return None
         cdef vector[cHandle] handle_vector = atom_ptr.getOutgoingSet()
         return convert_handle_seq_to_python_list(handle_vector, self.atomspace)
 
@@ -121,10 +156,12 @@ cdef class Atom(object):
         def __get__(self):            
             if self._outgoing is None:
                 atom_ptr = self.handle.atom_ptr()
+                if atom_ptr == NULL:   # avoid null-pointer deref
+                    return None
                 if atom_ptr.isLink():
-                     self._outgoing = self.get_out()
+                    self._outgoing = self.get_out()
                 else:
-                     self._outgoing = []
+                    self._outgoing = []
             return self._outgoing
 
     property arity:
@@ -135,6 +172,8 @@ cdef class Atom(object):
         def __get__(self):
             cdef vector[cHandle] handle_vector
             cdef cAtom* atom_ptr = self.handle.atom_ptr()
+            if atom_ptr == NULL:   # avoid null-pointer deref
+                return None
             atom_ptr.getIncomingSet(back_inserter(handle_vector))
             return convert_handle_seq_to_python_list(handle_vector, self.atomspace)
 
@@ -142,6 +181,8 @@ cdef class Atom(object):
         def __get__(self):
             cdef vector[cHandle] handle_vector
             cdef cAtom* atom_ptr = self.handle.atom_ptr()
+            if atom_ptr == NULL:   # avoid null-pointer deref
+                return None
             atom_ptr.getIncomingSet(back_inserter(handle_vector))
 
             # This code is the same for all the x iterators but there is no
@@ -159,6 +200,8 @@ cdef class Atom(object):
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        if atom_ptr == NULL:   # avoid null-pointer deref
+            return None
         atom_ptr.getIncomingSetByType(back_inserter(handle_vector), type, subt)
         return convert_handle_seq_to_python_list(handle_vector, self.atomspace)
 
@@ -166,6 +209,8 @@ cdef class Atom(object):
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        if atom_ptr == NULL:   # avoid null-pointer deref
+            return None
         atom_ptr.getIncomingSetByType(back_inserter(handle_vector), type, subt)
 
         # This code is the same for all the x iterators but there is no
@@ -184,6 +229,8 @@ cdef class Atom(object):
             cdef cAtom* atom_ptr
             if self._atom_type is None:
                 atom_ptr = self.handle.atom_ptr()
+                if atom_ptr == NULL:   # avoid null-pointer deref
+                    return None
                 self._atom_type = atom_ptr.getType()
             return self._atom_type
 
@@ -203,13 +250,13 @@ cdef class Atom(object):
         return self.value()
 
     def is_node(self):
-        return is_a(self.t,types.Node)
+        return is_a(self.t, types.Node)
 
     def is_link(self):
-        return is_a(self.t,types.Link)
+        return is_a(self.t, types.Link)
 
     def is_a(self,t):
-        return is_a(self.t,t)
+        return is_a(self.t, t)
 
     def long_string(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()

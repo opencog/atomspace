@@ -105,12 +105,12 @@ void AttentionBank::AVChanged(const Handle& h,
     updateLTIFunds(old_av->getLTI() - new_av->getLTI());
 
     // Update MinMax STI values
-    AttentionValue::sti_t maxSTISeen = _as->get_max_STI();
-    AttentionValue::sti_t minSTISeen = _as->get_min_STI();
+    AttentionValue::sti_t maxSTISeen = AttentionValue::MINSTI;
+    AttentionValue::sti_t minSTISeen = AttentionValue::MAXSTI;
 
     if (newSti > maxSTISeen){
         maxSTISeen = newSti;
-    } else if (newSti < maxSTISeen){
+    } else if (newSti < minSTISeen){
         minSTISeen = newSti;
     }
 
@@ -119,7 +119,7 @@ void AttentionBank::AVChanged(const Handle& h,
     }
     _as->update_max_STI(maxSTISeen);
     _as->update_min_STI(minSTISeen);
-    
+   
     logger().fine("AVChanged: fundsSTI = %d, old_av: %d, new_av: %d",
                    fundsSTI.load(), old_av->getSTI(), new_av->getSTI());
 

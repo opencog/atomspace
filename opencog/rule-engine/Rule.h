@@ -26,8 +26,8 @@
 
 #include <boost/operators.hpp>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atoms/core/VariableList.h>
-
 
 namespace opencog {
 
@@ -121,15 +121,16 @@ public:
 	
 	// Comparison
 	bool operator==(const Rule& r) const {
-		return r.forward_rule_handle_ == forward_rule_handle_
-			and r.backward_rule_handles_ == backward_rule_handles_;
+		return r._forward_rule_handle == _forward_rule_handle
+			and r._backward_rule_handles == _backward_rule_handles;
 	}
 	bool operator<(const Rule& r) const {
-		return weight_ < r.weight_;
+		return _weight < r._weight;
 	}
 
 	// Modifiers
 	void set_forward_handle(const Handle& h);
+	void set_backward_handles(const HandleSeq& hs);
 	void set_name(const string& name);
 	void set_category(const string& name);
 	void set_weight(float p);
@@ -145,6 +146,9 @@ public:
 	HandleSeq get_backward_vardecls() const;
 	Handle get_forward_implicant() const;
 	Handle get_forward_implicand() const;
+
+	// Properties
+	bool is_valid() const;
 
 	/**
 	 * Return the premises of the rule. Optionally a conclusion can be
@@ -167,31 +171,70 @@ public:
 	HandlePairSeq get_conclusions() const;
 	float get_weight() const;
 
+	/**
+	 * Create a new rule where all variables are uniquely renamed.
+	 *
+	 * @param as  pointer to the atomspace where the new BindLink will be added
+	 * @return    a new Rule object with its own new BindLink
+	 *
+	 * TODO: support backward rule handles.
+	 */
 	Rule gen_standardize_apart(AtomSpace* as);
+
+	/**
+	 * Given a source, generate all rule variations that may be
+	 * applied over a given source. The variables in the rules are
+	 * renamed to almost certainly avoid name collision.
+	 *
+	 * TODO: we probably want to support a vector of sources for rules
+	 * with multiple premises.
+	 */
+	std::vector<Rule> forward_unified_rules(const Handle& source,
+	                                        const Handle& vardecl);
+
+	/**
+	 * Given a target, generate all rule variations that may infer
+	 * this target. The variables in the rules are renamed to almost
+	 * certainly avoid name collision.
+	 */
+	std::vector<Rule> backward_unified_rules(const Handle& target,
+	                                         const Handle& vardecl);
+
+	std::string to_string() const;
 
 private:
 	// // Rule handle, a BindLink or a ListLink of forward and backward rule
 	// Maybe not useful
-	// Handle rule_handle_;
+	// Handle _rule_handle;
 
 	// Forward rule handle, typically a BindLink
-	Handle forward_rule_handle_;
+	//
+	// TODO: Maybe replace that by ScopeLinkPtr
+	Handle _forward_rule_handle;
+	ScopeLinkPtr _forward_rule_scope_link;
 
 	// Backward rule handles, BindLinks or a GetLinks
-	HandleSeq backward_rule_handles_;
+	//
+	// TODO: Maybe replace that by vector<ScopeLinkPtr>
+	HandleSeq _backward_rule_handles;
+	vector<ScopeLinkPtr> _backward_rule_scope_links;
 
 	// Rule alias: (DefineLink rule_alias_ rule_handle_)
-	Handle rule_alias_;
+	Handle _rule_alias;
 
 	// Rule name, the name of the node referring to the rule body
-	string name_;
+	string _name;
 
 	// Rule-based system name
-	string category_;
+	string _category;
 
 	// Rule weight (indicated by the TV strength of the membership of
 	// the rule to the RBS)
-	float weight_;
+	float _weight;
+
+	// Return a copy of the rule with the variables alpha-converted
+	// into random variable names.
+	Rule rand_alpha_converted() const;
 
 	Handle standardize_helper(AtomSpace* as, const Handle&, HandleMap&);
 
@@ -204,6 +247,12 @@ private:
 	// Given an ExecutionOutputLink return its last argument
 	Handle get_execution_output_last_argument(const Handle& h) const;
 };
+
+typedef std::vector<Rule> RuleSeq;
+
+// For Gdb debugging
+std::string oc_to_string(const Rule& rule);
+std::string oc_to_string(const RuleSeq& rules);
 
 } // ~namespace opencog
 

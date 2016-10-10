@@ -34,6 +34,7 @@
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include "PythonEval.h"
 
@@ -62,11 +63,14 @@ std::recursive_mutex PythonEval::_mtx;
 bool in_scope = false;
 uint8_t _inside_scope = 0;
 /*
- * @todo When can we remove the singleton instance? Answer: never,
- * as long as python is single-threaded. Currently, python fakes
+ * @todo When can we remove the singleton instance? Answer: not sure.
+ * Python itself is single-threaded. That is, currently, python fakes
  * multi-thread support by grabbing a lock and only allowing just
  * one thread to run at a time.  Our singleton instance mirrors this
- * python limitation.
+ * python limitation.  However, if we could set a per-thread atomspace,
+ * then we could maybe still have python be callable in mutiple threads,
+ * with different atomspaces. Clearly python would become a major
+ * bottleneck, but this is why we strongly discourage using python.
  *
  * NOTE: The Python C API reference counting is very tricky and the
  * API inconsistently handles PyObject* object ownership.
@@ -442,13 +446,25 @@ PythonEval& PythonEval::instance(AtomSpace* atomspace)
 #define CHECK_SINGLETON
 #ifdef CHECK_SINGLETON
         if (nullptr != singletonInstance->_atomspace)
+        {
             // Someone is trying to initialize the Python interpreter on a
             // different AtomSpace.  Because of the singleton design of the
             // the CosgServer+AtomSpace, there is no easy way to support this...
+            // logger().error() will print a stack tace to tell use who
+            // is doing this.
+            logger().error("PythonEval: ",
+                "Trying to re-initialize python interpreter with different\n"
+                "AtomSpace ptr! Current ptr=%p uuid=%d "
+                "New ptr=%p uuid=%d\n",
+                singletonInstance->_atomspace,
+                singletonInstance->_atomspace->get_uuid(),
+                atomspace, atomspace?atomspace->get_uuid():0);
+
             throw RuntimeException(TRACE_INFO,
                 "Trying to re-initialize python interpreter with different\n"
                 "AtomSpace ptr! Current ptr=%p New ptr=%p\n",
                 singletonInstance->_atomspace, atomspace);
+        }
 #else
         // We need to be able to call the python interpreter with
         // different atomspaces; for example, we need to use temporary
@@ -490,6 +506,8 @@ void PythonEval::initialize_python_objects_and_imports(void)
     PyObject* pyAtomSpaceObject = this->atomspace_py_object(_atomspace);
     PyDict_SetItemString(pyRootDictionary, "ATOMSPACE", pyAtomSpaceObject);
     Py_DECREF(pyAtomSpaceObject);
+    if (nullptr == _atomspace)
+        logger().warn("Python evaluator initialized with null atomspace!");
 
     // PyModule_GetDict returns a borrowed reference, so don't do this:
     // Py_DECREF(pyRootDictionary);
@@ -513,16 +531,16 @@ PyObject* PythonEval::atomspace_py_object(AtomSpace* atomspace)
     // a hard-to-debug crash on null-pointer-deref, and replace
     // it by a slightly less hard-to-debug error message.
     if (NULL == py_atomspace) {
-        logger().error("PythonEval::%s Failed to load the"
-                       "opencog.atomspace module", __FUNCTION__);
+        logger().warn("PythonEval::%s Failed to load the"
+                      "opencog.atomspace module", __FUNCTION__);
         return NULL;
     }
 
 /***********
     Weird ... I guess NULL atomspaces are OK!?
     if (NULL == atomspace) {
-        logger().error("PythonEval::%s No atomspace specified!",
-                        __FUNCTION__);
+        logger().warn("PythonEval::%s No atomspace specified!",
+                       __FUNCTION__);
         return NULL;
     }
 ************/
@@ -533,8 +551,8 @@ PyObject* PythonEval::atomspace_py_object(AtomSpace* atomspace)
         if (PyErr_Occurred())
             PyErr_Print();
 
-        logger().error("PythonEval::%s Failed to get atomspace "
-                       "wrapped with python object", __FUNCTION__);
+        logger().warn("PythonEval::%s Failed to get atomspace "
+                      "wrapped with python object", __FUNCTION__);
     }
 
     return pyAtomSpace;
@@ -758,7 +776,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     // If we can't find that module then throw an exception.
     if (!pyModule) {
         PyGILState_Release(gstate);
-        logger().error("Python module for '%s' not found!", moduleFunction.c_str());
+        logger().warn("Python module for '%s' not found!", moduleFunction.c_str());
         throw RuntimeException(TRACE_INFO,
             "Python module for '%s' not found!",
             moduleFunction.c_str());
@@ -993,7 +1011,7 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     // If we can't find that module then throw an exception.
     if (!pyModule) {
         PyGILState_Release(gstate);
-        logger().error("Python module for '%s' not found!", moduleFunction.c_str());
+        logger().warn("Python module for '%s' not found!", moduleFunction.c_str());
         throw RuntimeException(TRACE_INFO,
             "Python module for '%s' not found!",
             moduleFunction.c_str());
@@ -1129,7 +1147,6 @@ void PythonEval::add_to_sys_path(std::string path)
     Py_DECREF(pyPathString);
 }
 
-
 const int ABSOLUTE_IMPORTS_ONLY = 0;
 
 void PythonEval::import_module(const boost::filesystem::path &file,
@@ -1170,6 +1187,9 @@ void PythonEval::import_module(const boost::filesystem::path &file,
         // This decrement is needed because PyDict_SetItemString does
         // not "steal" the reference, unlike PyList_SetItem.
         Py_DECREF(pyAtomSpaceObject);
+        if (nullptr == _atomspace)
+            logger().warn("Python module initialized with null atomspace!");
+
 
         // We need to increment the pyModule reference because
         // PyModule_AddObject "steals" it and we're keeping a copy
@@ -1287,10 +1307,10 @@ void PythonEval::add_modules_from_path(std::string pathString)
         else {
             Logger::Level btl = logger().get_backtrace_level();
             logger().set_backtrace_level(Logger::Level::NONE);
-            logger().error() << "Failed to load python module \'"
+            logger().warn() << "Failed to load python module \'"
                 << abspath << "\', searched directories:";
             for (int i = 0; config_paths[i] != NULL; ++i) {
-                logger().error() << "Directory: " << config_paths[i];
+                logger().warn() << "Directory: " << config_paths[i];
             }
             logger().set_backtrace_level(btl);
        }
@@ -1345,8 +1365,8 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
     else if (S_ISREG(finfo.st_mode))
         add_module_file(pathString);
     else
-        logger().error() << "Python module path \'" << pathString
-                         << "\' can't be found";
+        logger().warn() << "Python module path \'" << pathString
+                        << "\' can't be found";
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);

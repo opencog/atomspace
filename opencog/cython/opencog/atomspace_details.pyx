@@ -34,7 +34,6 @@ cdef class AtomSpace:
     #cdef cAtomSpace *atomspace
     #cdef bint owns_atomspace
 
-    # TODO how do we do a copy constructor that shares the AtomSpaceImpl?
     def __cinit__(self):
         self.owns_atomspace = False
 
@@ -52,7 +51,8 @@ cdef class AtomSpace:
 
     def __dealloc__(self):
         if self.owns_atomspace:
-            del self.atomspace
+            if self.atomspace:
+                del self.atomspace
 
     def __richcmp__(as_1, as_2, int op):
         if not isinstance(as_1, AtomSpace) or not isinstance(as_2, AtomSpace):
@@ -73,6 +73,8 @@ cdef class AtomSpace:
 
     property uuid:
         def __get__(self):
+            if self.atomspace == NULL:
+                return 0
             return self.atomspace.get_uuid()
 
     def add(self, Type t, name=None, out=None, TruthValue tv=None):
@@ -91,6 +93,8 @@ cdef class AtomSpace:
         @todo support type name for type.
         @returns the newly created Atom
         """
+        if self.atomspace == NULL:
+            return None
         cdef string name = atom_name.encode('UTF-8')
         cdef cHandle result = self.atomspace.add_node(t, name)
 
@@ -106,6 +110,8 @@ cdef class AtomSpace:
         @todo support type name for type.
         @returns handle referencing the newly created Atom
         """
+        if self.atomspace == NULL:
+            return None
         # create temporary cpp vector
         cdef vector[cHandle] handle_vector
         for atom in outgoing:
@@ -122,6 +128,8 @@ cdef class AtomSpace:
     def get_atom_with_uuid(self, uuid):
         """ Retrieve the atom associated with the uuid
         """
+        if self.atomspace == NULL:
+            return None
         # Convert to an Atom object
         try:
             result = self.atomspace.get_atom(uuid)
@@ -137,6 +145,8 @@ cdef class AtomSpace:
     def is_valid(self, atom):
         """ Check whether the passed handle refers to an actual atom
         """
+        if self.atomspace == NULL:
+            return False
         try:
             assert isinstance(atom, Atom)
         except AssertionError:
@@ -161,11 +171,15 @@ cdef class AtomSpace:
         Returns True if the Atom was successfully removed. False, otherwise.
 
         """
+        if self.atomspace == NULL:
+            return None
         cdef bint recurse = recursive
         return self.atomspace.remove_atom(deref(atom.handle),recurse)
 
     def clear(self):
         """ Remove all atoms from the AtomSpace """
+        if self.atomspace == NULL:
+            return None
         self.atomspace.clear()
 
     # Methods to make the atomspace act more like a standard Python container
@@ -176,26 +190,42 @@ cdef class AtomSpace:
         else:
             return False
 
+    # Maybe this should be called __repr__ ???
+    def __str__(self):
+        """ Description of the atomspace """
+        return ("<Atomspace\n" +
+                "   addr: " + hex(<long>self.atomspace) + "\n"
+                "   owns: " + str(self.owns_atomspace) + ">\n"
+               )
+
     def __len__(self):
         """ Return the number of atoms in the AtomSpace """
         return self.size()
 
     def __iter__(self):
         """ Support iterating across all atoms in the atomspace """
+        if self.atomspace == NULL:
+            return None
         return iter(self.get_atoms_by_type(0))
 
     def size(self):
         """ Return the number of atoms in the AtomSpace """
+        if self.atomspace == NULL:
+            return 0
         return self.atomspace.get_size()
 
     # query methods
     def get_atoms_by_type(self, Type t, subtype = True):
+        if self.atomspace == NULL:
+            return None
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
         self.atomspace.get_handles_by_type(back_inserter(handle_vector),t,subt)
         return convert_handle_seq_to_python_list(handle_vector,self)
 
     def xget_atoms_by_type(self, Type t, subtype = True):
+        if self.atomspace == NULL:
+            return None
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
         self.atomspace.get_handles_by_type(back_inserter(handle_vector),t,subt)
@@ -212,6 +242,8 @@ cdef class AtomSpace:
             inc(c_handle_iter)
 
     def get_atoms_by_av(self, lower_bound, upper_bound=None):
+        if self.atomspace == NULL:
+            return None
         cdef vector[cHandle] handle_vector
         if upper_bound is not None:
             self.atomspace.get_handles_by_AV(back_inserter(handle_vector),
@@ -222,6 +254,8 @@ cdef class AtomSpace:
         return convert_handle_seq_to_python_list(handle_vector, self)
 
     def xget_atoms_by_av(self, lower_bound, upper_bound=None):
+        if self.atomspace == NULL:
+            return None
         cdef vector[cHandle] handle_vector
         if upper_bound is not None:
             self.atomspace.get_handles_by_AV(back_inserter(handle_vector),
@@ -242,12 +276,16 @@ cdef class AtomSpace:
             inc(c_handle_iter)
 
     def get_atoms_in_attentional_focus(self):
+        if self.atomspace == NULL:
+            return None
         cdef vector[cHandle] handle_vector
         self.atomspace.get_handle_set_in_attentional_focus(
                 back_inserter(handle_vector))
         return convert_handle_seq_to_python_list(handle_vector, self)
 
     def xget_atoms_in_attentional_focus(self):
+        if self.atomspace == NULL:
+            return None
         cdef vector[cHandle] handle_vector
         self.atomspace.get_handle_set_in_attentional_focus(
                 back_inserter(handle_vector))
@@ -267,6 +305,8 @@ cdef class AtomSpace:
                        Atom target,
                        Type predicate_type = types.PredicateNode,
                        subclasses=True):
+        if self.atomspace == NULL:
+            return None
         cdef vector[cHandle] handle_vector
         cdef bint want_subclasses = subclasses
         handle_vector = c_get_predicates(deref(target.handle), predicate_type,
@@ -277,6 +317,8 @@ cdef class AtomSpace:
                         Atom target,
                         Type predicate_type = types.PredicateNode,
                         subclasses=True):
+        if self.atomspace == NULL:
+            return None
         cdef vector[cHandle] handle_vector
         cdef bint want_subclasses = subclasses
         handle_vector = c_get_predicates(deref(target.handle), predicate_type,
@@ -294,12 +336,16 @@ cdef class AtomSpace:
             inc(c_handle_iter)
 
     def get_predicates_for(self, Atom target, Atom predicate):
+        if self.atomspace == NULL:
+            return None
         cdef vector[cHandle] handle_vector
         handle_vector = c_get_predicates_for(deref(target.handle),
                                              deref(predicate.handle))
         return convert_handle_seq_to_python_list(handle_vector, self)
 
     def xget_predicates_for(self, Atom target, Atom predicate):
+        if self.atomspace == NULL:
+            return None
         cdef vector[cHandle] handle_vector
         handle_vector = c_get_predicates_for(deref(target.handle),
                                              deref(predicate.handle))

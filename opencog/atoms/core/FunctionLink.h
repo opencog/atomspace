@@ -66,6 +66,7 @@ protected:
 	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
 public:
+	// XXX Need to make this public, so that the factory can call it!
 	FunctionLink(Type, const HandleSeq& oset,
 	             TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());

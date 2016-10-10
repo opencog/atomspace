@@ -42,11 +42,11 @@ public:
 	void test_unify_1();
 	void test_unify_2();
 	void test_unify_3();
-	// void test_unify_4();
+	void test_unify_4();
 	void test_unify_5();
-	// void test_select_rule_1();
-	// void test_select_rule_2();
-	// void test_select_rule_3();
+	void test_select_rule_1();
+	void test_select_rule_2();
+	void test_select_rule_3();
 	// void test_implication_instantiation();
 	// void test_bc_modus_ponens();
 	// void test_bc_deduction_1();
@@ -107,7 +107,7 @@ void BackwardChainerUTest::test_unify_1()
 		                               "    (VariableNode \"$A\")"
 		                               "    (TypeNode \"ConceptNode\"))");
 
-	bool unified = _bc->sym_unify(target, pattern,
+	bool unified = _bc->unifiable(target, pattern,
 	                              Handle::UNDEFINED, pattern_vardecl);
 
 	TS_ASSERT(unified);
@@ -126,7 +126,7 @@ void BackwardChainerUTest::test_unify_2()
 		                               "    (VariableNode \"$A\")"
 		                               "    (TypeNode \"ConceptNode\"))");
 
-	bool unified = _bc->sym_unify(pattern, target,
+	bool unified = _bc->unifiable(pattern, target,
 	                              pattern_vardecl, Handle::UNDEFINED);
 
 	TS_ASSERT(unified);
@@ -144,31 +144,31 @@ void BackwardChainerUTest::test_unify_3()
 	                             "   (Concept \"B\"))"),
 		pattern = _eval.eval_h("(Variable \"$X\")");
 
-	bool unified = _bc->sym_unify(target, pattern,
+	bool unified = _bc->unifiable(target, pattern,
 	                              Handle::UNDEFINED, Handle::UNDEFINED);
 
 	TS_ASSERT(unified);
 }
 
-// // Unify bigger pattern with variables in both sides
-// void BackwardChainerUTest::test_unify_4()
-// {
-// 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+// Unify bigger pattern with variables in both sides
+void BackwardChainerUTest::test_unify_4()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-// 	reset_bc();
+	reset_bc();
 
-// 	Handle target = _eval.eval_h("(Inheritance"
-// 	                             "   (Variable \"$A\")"
-// 	                             "   (Concept \"B\"))"),
-// 		pattern = _eval.eval_h("(Inheritance"
-// 		                       "   (Concept \"A\")"
-// 		                       "   (Variable \"$B\"))");
+	Handle target = _eval.eval_h("(Inheritance"
+	                             "   (Variable \"$A\")"
+	                             "   (Concept \"B\"))"),
+		pattern = _eval.eval_h("(Inheritance"
+		                       "   (Concept \"A\")"
+		                       "   (Variable \"$B\"))");
 
-// 	bool unified = _bc->sym_unify(target, pattern,
-// 	                              Handle::UNDEFINED, Handle::UNDEFINED);
+	bool unified = _bc->unifiable(target, pattern,
+	                              Handle::UNDEFINED, Handle::UNDEFINED);
 
-// 	TS_ASSERT(unified);
-// }
+	TS_ASSERT(unified);
+}
 
 // Unify bigger pattern with variables in both sides
 void BackwardChainerUTest::test_unify_5()
@@ -194,63 +194,68 @@ void BackwardChainerUTest::test_unify_5()
 		                               "      (Variable \"$B\")"
 		                               "      (Type \"ConceptNode\")))");
 
-	bool unified = _bc->sym_unify(target, pattern,
+	bool unified = _bc->unifiable(target, pattern,
 	                              target_vardecl, pattern_vardecl);
 
 	TS_ASSERT(unified);
 }
 
-// // Test select rule with a target with no variable
-// void BackwardChainerUTest::test_select_rule_1()
-// {
-// 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+// Test select rule with a target with no variable
+void BackwardChainerUTest::test_select_rule_1()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-// 	reset_bc();
+	reset_bc();
 
-// 	Handle target_h = _eval.eval_h("(Inheritance"
-// 	                               "   (Concept \"A\")"
-// 	                               "   (Concept \"B\"))");
-// 	Target target(target_h);
+	Handle target_h = _eval.eval_h("(Inheritance"
+	                               "   (Concept \"A\")"
+	                               "   (Concept \"B\"))");
+	Target target(target_h);
 
-// 	const Rule& selected_rule = _bc->select_rule(target);
+	Rule selected_rule = _bc->select_rule(target);
 
-// 	TS_ASSERT_EQUALS(selected_rule.get_name(), "bc-deduction-rule");
-// }
+	TS_ASSERT_EQUALS(selected_rule.get_name(), "bc-deduction-rule");
+}
 
-// // Test select rule with a target with variables
-// void BackwardChainerUTest::test_select_rule_2()
-// {
-// 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+// Test select rule with a target with variables
+void BackwardChainerUTest::test_select_rule_2()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-// 	reset_bc();
+	reset_bc();
 
-// 	Handle target_h = _eval.eval_h("(Inheritance"
-// 	                               "   (Concept \"A\")"
-// 	                               "   (Variable \"$X\"))");
-// 	Target target(target_h);
+	Handle target_h = _eval.eval_h("(Inheritance"
+	                               "   (Concept \"A\")"
+	                               "   (Variable \"$X\"))");
+	Target target(target_h);
 
-// 	const Rule& selected_rule = _bc->select_rule(target);
+	Rule selected_rule = _bc->select_rule(target);
 
-// 	TS_ASSERT_EQUALS(selected_rule.get_name(), "bc-deduction-rule");
-// }
+	TS_ASSERT_EQUALS(selected_rule.get_name(), "bc-deduction-rule");
+}
 
-// // Test select rule with a target with variables with the same name as
-// // the variable in the rule
-// void BackwardChainerUTest::test_select_rule_3()
-// {
-// 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+// Test select rule with a target with variables with the same name as
+// the variable in the rule.
+//
+// TODO: This one works but it's the result of unify not being able to
+// detect its inconsistency rather than select_rule performing an
+// alpha-conversion.
+void BackwardChainerUTest::test_select_rule_3()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-// 	reset_bc();
+	reset_bc();
 
-// 	Handle target_h = _eval.eval_h("(Inheritance"
-// 	                               "   (Concept \"A\")"
-// 	                               "   (Variable \"$B\"))");
-// 	Target target(target_h);
+	Handle target_h = _eval.eval_h("(Variable \"$C\")"),
+		vardecl_h = _eval.eval_h("(TypedVariable"
+		                         "   (Variable \"$C\")"
+		                         "   (Type \"InheritanceLink\"))");
+	Target target(target_h, vardecl_h);
 
-// 	const Rule& selected_rule = _bc->select_rule(target);
+	Rule selected_rule = _bc->select_rule(target);
 
-// 	TS_ASSERT_EQUALS(selected_rule.get_name(), "bc-deduction-rule");
-// }
+	TS_ASSERT_EQUALS(selected_rule.get_name(), "bc-deduction-rule");
+}
 
 // void BackwardChainerUTest::test_implication_instantiation()
 // {

@@ -134,7 +134,7 @@
 (define-public (gar LINK)
 "
   gar LINK - return first element of a Link atom.
-  Return null if teh LINK is empty.
+  Return null if the LINK is empty.
 "
 	(define oset (cog-outgoing-set LINK))
 	(if (null? oset) '() (car oset)) )
@@ -142,7 +142,7 @@
 (define-public (gdr LINK)
 "
   gdr LINK - return second element of a Link atom.
-  Return null if teh LINK is empty or has only one element.
+  Return null if the LINK is empty or has only one element.
 "
 	(define oset (cog-outgoing-set LINK))
 	(if (null? oset) '()

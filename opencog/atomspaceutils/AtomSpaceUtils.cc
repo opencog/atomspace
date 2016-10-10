@@ -23,6 +23,8 @@
 #include <opencog/atoms/base/Link.h>
 #include "AtomSpaceUtils.h"
 
+#include <opencog/util/mt19937ar.h>
+
 namespace opencog {
 
 Handle add_prefixed_node(AtomSpace& as, Type t, const std::string& prefix)
@@ -38,7 +40,7 @@ Handle add_prefixed_node(AtomSpace& as, Type t, const std::string& prefix)
     do {
         name = prefix;
         for (int i = 0; i < len; ++i) {
-            name += alphanum[rand() % (sizeof(alphanum) - 1)];
+            name += alphanum[randGen().randint() % (sizeof(alphanum) - 1)];
         }
         result = as.get_handle(t, name);
     } while (as.is_valid_handle(result));

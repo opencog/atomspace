@@ -50,11 +50,6 @@ INSTALL (FILES
 	DESTINATION "include/opencog/cython"
 )
 
-INSTALL (FILES 
-	opencog/__init__.py
-	DESTINATION "${DATADIR}/python/opencog"
-)
-
 # ----------------------------------------------------------------
 # The scheme wrapper for PythonEval. Allows python snippets to be
 # called from scheme.
