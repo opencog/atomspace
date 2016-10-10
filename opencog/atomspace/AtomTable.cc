@@ -317,8 +317,7 @@ bool AtomTable::in_environ(const AtomPtr& atom) const
     return false;
 }
 
-// Experimental C++ atom types support code
-// Try to cast, if possible.
+// C++ atom types support.  Try to cast, if possible.
 AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
 {
     // Nodes of various kinds -----------
@@ -527,7 +526,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         throw RuntimeException(TRACE_INFO,
             "AtomTable - Cannot insert null atom! ");
 
-    // Factory implements experimental C++ atom types support code
+    // Factory implements C++ atom types.
     AtomPtr orig(atom);
     Type atom_type = atom->getType();
     atom = factory(atom_type, atom);
