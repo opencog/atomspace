@@ -298,7 +298,9 @@ Handle AtomTable::getLinkHandle(AtomPtr& a) const
     TypeIndex::iterator candidate = typeIndex.begin(t, false);
     const TypeIndex::iterator end = typeIndex.end();
     for (; candidate != end; candidate++) {
-        if (wanted->is_equal(*candidate)) return Handle(wanted);
+        if (wanted->is_equal(*candidate)) {
+            return Handle(*candidate);
+        }
     }
 
     if (_environ) {
