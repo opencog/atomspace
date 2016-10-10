@@ -137,21 +137,69 @@ bool Link::operator==(const Atom& other) const
 
     Arity arity = getArity();
     if (arity != olink.getArity()) return false;
-    for (Arity i = 0; i < arity; i++)
+
+    // If the type is unordered and one of the uuids are invalid we
+    // need to reorder by content to be sure that the children are
+    // aligned.
+    if (classserver().isA(getType(), UNORDERED_LINK) and
+        (_uuid != Handle::INVALID_UUID
+         or other.getUUID() != Handle::INVALID_UUID))
     {
-        if (_outgoing[i]->getType() != olink._outgoing[i]->getType())
+        ContentBasedOrderedHandleSet
+            outgoing(_outgoing.begin(), _outgoing.end()),
+            other_outgoing(olink._outgoing.begin(), olink._outgoing.end());
+        return content_based_equal(outgoing, other_outgoing);
+    }
+
+    // No need to reorder, compare the children directly
+    return operator==(olink._outgoing);
+}
+
+bool Link::operator==(const HandleSeq& other_outgoing) const
+{
+	for (Arity i = 0; i < getArity(); i++)
+    {
+        if (_outgoing[i]->getType() != other_outgoing[i]->getType())
             return false;
 
         if (_outgoing[i]->isNode())
         {
             NodePtr tn(NodeCast(_outgoing[i]));
-            NodePtr on(NodeCast(olink._outgoing[i]));
+            NodePtr on(NodeCast(other_outgoing[i]));
             if (*tn != *on) return false;
         }
         else if (_outgoing[i]->isLink())
         {
             LinkPtr tl(LinkCast(_outgoing[i]));
-            LinkPtr ol(LinkCast(olink._outgoing[i]));
+            LinkPtr ol(LinkCast(other_outgoing[i]));
+            if (*tl != *ol) return false;
+        }
+    }
+    return true;
+}
+
+bool Link::content_based_equal(const ContentBasedOrderedHandleSet& lhs,
+                               const ContentBasedOrderedHandleSet& rhs) const
+{
+    ContentBasedOrderedHandleSet::iterator
+        it = lhs.begin(),
+        other_it = rhs.begin();
+
+    for (; it != lhs.end(); it++, other_it++)
+    {
+        if ((*it)->getType() != (*other_it)->getType())
+            return false;
+
+        if ((*it)->isNode())
+        {
+            NodePtr tn(NodeCast(*it));
+            NodePtr on(NodeCast(*other_it));
+            if (*tn != *on) return false;
+        }
+        else if ((*it)->isLink())
+        {
+            LinkPtr tl(LinkCast(*it));
+            LinkPtr ol(LinkCast(*other_it));
             if (*tl != *ol) return false;
         }
     }
