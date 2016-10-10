@@ -433,9 +433,9 @@ void AlphaConvertUTest::test_unordered()
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	Handle
-		X = NA(VARIABLE_NODE, "$X"),
-		Y = NA(VARIABLE_NODE, "$Y"),
-		Z = NA(VARIABLE_NODE, "$Z"),
+		X = NA(VARIABLE_NODE, "$X-origin"),
+		Y = NA(VARIABLE_NODE, "$Y-origin"),
+		Z = NA(VARIABLE_NODE, "$Z-origin"),
 		and1 = LA(AND_LINK, X, Y),
 		and2 = LA(AND_LINK, Z, Y),
 		vardecl = LA(VARIABLE_LIST, X, Y, Z),
