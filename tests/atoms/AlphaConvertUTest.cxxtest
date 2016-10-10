@@ -54,6 +54,7 @@ public:
 	void test_vardecl_alpha_conversion();
 	void test_vardecl_bindlink_alpha_conversion();
 	void test_values_alpha_conversion();
+	void test_unordered();
 };
 
 #define NA _asa.add_node
@@ -422,6 +423,42 @@ void AlphaConvertUTest::test_values_alpha_conversion()
 	std::cout << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test ScopeLink::is_equal with undordered links
+void AlphaConvertUTest::test_unordered()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle
+		X = NA(VARIABLE_NODE, "$X"),
+		Y = NA(VARIABLE_NODE, "$Y"),
+		Z = NA(VARIABLE_NODE, "$Z"),
+		and1 = LA(AND_LINK, X, Y),
+		and2 = LA(AND_LINK, Z, Y),
+		vardecl = LA(VARIABLE_LIST, X, Y, Z),
+		body = LA(OR_LINK, and1, and2),
+		sc = LA(SCOPE_LINK, vardecl, body);
+
+	ScopeLinkPtr sc_p(ScopeLinkCast(sc));
+	TS_ASSERT(sc_p != nullptr);
+
+	Handle
+		alpha_X = NA(VARIABLE_NODE, "$X-alpha"),
+		alpha_Y = NA(VARIABLE_NODE, "$Y-alpha"),
+		alpha_Z = NA(VARIABLE_NODE, "$Z-alpha"),
+		alpha_and2 = LA(AND_LINK, alpha_Z, alpha_Y),
+		alpha_and1 = LA(AND_LINK, alpha_X, alpha_Y),
+		alpha_vardecl = LA(VARIABLE_LIST, alpha_X, alpha_Y, alpha_Z),
+		alpha_body = LA(OR_LINK, alpha_and1, alpha_and2),
+		alpha_sc = LA(SCOPE_LINK, alpha_vardecl, alpha_body);
+
+	std::cout << "sc = " << oc_to_string(sc);
+	std::cout << "alpha_sc = " << oc_to_string(alpha_sc);
+	
+	TS_ASSERT(sc_p->is_equal(alpha_sc));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
