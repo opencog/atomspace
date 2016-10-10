@@ -19,7 +19,7 @@ cdef convert_handle_seq_to_python_list(vector[cHandle] handles, AtomSpace atomsp
     handle_iter = handles.begin()
     while handle_iter != handles.end():
         handle = deref(handle_iter)
-        result.append(Atom(handle.value(), atomspace))
+        result.append(Atom(void_from_candle(handle), atomspace))
         inc(handle_iter)
     return result
 
@@ -93,7 +93,7 @@ cdef class AtomSpace:
         cdef cHandle result = self.atomspace.add_node(t, name)
 
         if result == result.UNDEFINED: return None
-        atom = Atom(result.value(), self);
+        atom = Atom(void_from_candle(result), self);
         if tv :
             atom.tv = tv
         return atom
@@ -114,7 +114,7 @@ cdef class AtomSpace:
         cdef cHandle result
         result = self.atomspace.add_link(t, handle_vector)
         if result == result.UNDEFINED: return None
-        atom = Atom(result.value(), self);
+        atom = Atom(void_from_candle(result), self);
         if tv :
             atom.tv = tv
         return atom
@@ -210,7 +210,7 @@ cdef class AtomSpace:
         c_handle_iter = handle_vector.begin()
         while c_handle_iter != handle_vector.end():
             current_c_handle = deref(c_handle_iter)
-            yield Atom(current_c_handle.value(),self)
+            yield Atom(void_from_candle(current_c_handle), self)
             inc(c_handle_iter)
 
     def get_atoms_by_av(self, lower_bound, upper_bound=None):
@@ -244,7 +244,7 @@ cdef class AtomSpace:
         c_handle_iter = handle_vector.begin()
         while c_handle_iter != handle_vector.end():
             current_c_handle = deref(c_handle_iter)
-            yield Atom(current_c_handle.value(),self)
+            yield Atom(void_from_candle(current_c_handle), self)
             inc(c_handle_iter)
 
     def get_atoms_in_attentional_focus(self):
@@ -270,7 +270,7 @@ cdef class AtomSpace:
         c_handle_iter = handle_vector.begin()
         while c_handle_iter != handle_vector.end():
             current_c_handle = deref(c_handle_iter)
-            yield Atom(current_c_handle.value(),self)
+            yield Atom(void_from_candle(current_c_handle), self)
             inc(c_handle_iter)
 
     def get_predicates(self,
@@ -304,7 +304,7 @@ cdef class AtomSpace:
         c_handle_iter = handle_vector.begin()
         while c_handle_iter != handle_vector.end():
             current_c_handle = deref(c_handle_iter)
-            yield Atom(current_c_handle.value(),self)
+            yield Atom(void_from_candle(current_c_handle), self)
             inc(c_handle_iter)
 
     def get_predicates_for(self, Atom target, Atom predicate):
@@ -330,7 +330,7 @@ cdef class AtomSpace:
         c_handle_iter = handle_vector.begin()
         while c_handle_iter != handle_vector.end():
             current_c_handle = deref(c_handle_iter)
-            yield Atom(current_c_handle.value(),self)
+            yield Atom(void_from_candle(current_c_handle),self)
             inc(c_handle_iter)
 
     @classmethod

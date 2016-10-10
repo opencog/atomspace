@@ -801,8 +801,9 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     for (const Handle& h: argumentHandles)
     {
         // Place a Python atom object for this handle into the tuple.
-        Atom* patom = h.operator->();
-        PyObject* pyAtom = py_atom((long int) patom, pyAtomSpace);
+
+        long int patom = (long int) &h;
+        PyObject* pyAtom = py_atom(patom, pyAtomSpace);
         PyTuple_SetItem(pyArguments, tupleItem, pyAtom);
 
         // PyTuple_SetItem steals it's item so don't do this:
@@ -855,8 +856,8 @@ Handle PythonEval::apply(AtomSpace* as, const std::string& func, Handle varargs)
         PyGILState_STATE gstate;
         gstate = PyGILState_Ensure();
 
-        // Get the handle UUID from the atom.
-        PyObject* pyAtomPATOM = PyObject_CallMethod(pyReturnAtom, (char*) "handle_aptr",
+        // Get the handle from the atom.
+        PyObject* pyAtomPATOM = PyObject_CallMethod(pyReturnAtom, (char*) "handle_ptr",
                 NULL);
 
         // Make sure we got an atom pointer.
@@ -868,7 +869,7 @@ Handle PythonEval::apply(AtomSpace* as, const std::string& func, Handle varargs)
         }
 
         // Get the atom pointer from the python atom pointer.
-        Atom* aptr = (Atom*)(PyLong_AsLong(pyAtomPATOM));
+        Handle* hptr = (Handle*)(PyLong_AsLong(pyAtomPATOM));
 
         // Cleanup the reference counts.
         Py_DECREF(pyReturnAtom);
@@ -877,7 +878,7 @@ Handle PythonEval::apply(AtomSpace* as, const std::string& func, Handle varargs)
         // Release the GIL. No Python API allowed beyond this point.
         PyGILState_Release(gstate);
 
-        return Handle(AtomPtr(aptr));
+        return *hptr;
     } else {
 
         throw RuntimeException(TRACE_INFO,

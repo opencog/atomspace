@@ -9,9 +9,15 @@ cdef extern from "Python.h":
     # Needed to return truth value pointers to C++ callers.
     cdef object PyLong_FromVoidPtr(void *p)
 
+ctypedef public long PATOM
+
 cdef extern from "Cast.h":
-    # Tacky hack to pass atomspace pointer to AtomSpace ctor.
-    cdef cHandle atom_from_the_void(void* p)
+    # Tacky hack to pass atom pointer to Atom ctor.
+    cdef cHandle atom_from_the_void(long p)
+
+    # Tacky hack to convert C objects into Python objects.
+    cdef PATOM   void_from_candle(const cHandle& h)
+    cdef PATOM   void_from_cptr(cHandle* hp)
 
 
 # Basic wrapping for std::string conversion.
@@ -124,15 +130,12 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
 
 
 # Handle
-ctypedef public long PATOM
-
 cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
     cdef cppclass cHandle "opencog::Handle":
         cHandle()
-        cHandle(cHandle)
+        cHandle(const cHandle&)
         
         cAtom* atom_ptr()
-        PATOM value()
         string toString()
         string toShortString()
 
