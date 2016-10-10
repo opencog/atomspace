@@ -290,28 +290,6 @@ public:
         return (NULL != h) and h->getAtomTable() == this;
     }
 
-    /** Get Node object already in the AtomTable.
-     *
-     * @param h Handle of the node to retrieve.
-     * @return pointer to Node object, NULL if no atom within this AtomTable is
-     * associated with handle or if the atom is a link.
-     */
-    inline NodePtr getNode(Handle& h) const {
-        h = getHandle(h); // force resolution of uuid into atom pointer.
-        return NodeCast(h);
-    }
-
-    /** Get Link object already in the AtomTable.
-     *
-     * @param h Handle of the link to retrieve.
-     * @return pointer to Link object, NULL if no atom within this AtomTable is
-     * associated with handle or if the atom is a node.
-     */
-    inline LinkPtr getLink(Handle& h) const {
-        h = getHandle(h); // force resolution of uuid into atom pointer.
-        return LinkCast(h);
-    }
-
     /**
      * Extracts atoms from the table. Table will not contain the
      * extracted atoms anymore.
