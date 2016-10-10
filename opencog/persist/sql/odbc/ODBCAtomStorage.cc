@@ -155,8 +155,7 @@ class ODBCAtomStorage::Response
             // printf ("---- New atom found ----\n");
             rs->foreach_column(&Response::create_atom_column_cb, this);
 
-            Handle h(uuid);
-            if (nullptr == table->getHandle(h))
+            if (nullptr == table->getHandle(uuid))
             {
                 PseudoPtr p(store->makeAtom(*this, uuid));
                 AtomPtr atom(get_recursive_if_not_exists(p));
@@ -195,8 +194,7 @@ class ODBCAtomStorage::Response
             HandleSeq resolved_oset;
             for (UUID idu : p->oset)
             {
-                Handle h(idu);
-                h = table->getHandle(h);
+                Handle h = table->getHandle(idu);
                 if (h)
                 {
                     resolved_oset.emplace_back(h);

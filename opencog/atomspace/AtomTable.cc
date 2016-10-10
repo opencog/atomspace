@@ -317,8 +317,7 @@ bool AtomTable::in_environ(const AtomPtr& atom) const
     return false;
 }
 
-// Experimental C++ atom types support code
-// Try to cast, if possible.
+// C++ atom types support.  Try to cast, if possible.
 AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
 {
     // Nodes of various kinds -----------
@@ -478,8 +477,8 @@ AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
 	// Copy the UUID ONLY if the atom does not belong to some other
 	// atomspace. This is the situation that applies to atoms being
 	// delivered to us from the backing store: the UUID is set, but
-	// they are othrwise "fresh" atoms.
-	if (NULL == atom->getAtomTable())
+	// they are otherwise "fresh" atoms.
+	if (nullptr == atom->getAtomTable())
 		clone->_uuid = atom->_uuid;
 	return clone;
 }
@@ -527,7 +526,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         throw RuntimeException(TRACE_INFO,
             "AtomTable - Cannot insert null atom! ");
 
-    // Factory implements experimental C++ atom types support code
+    // Factory implements C++ atom types.
     AtomPtr orig(atom);
     Type atom_type = atom->getType();
     atom = factory(atom_type, atom);

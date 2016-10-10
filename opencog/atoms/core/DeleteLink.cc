@@ -22,8 +22,6 @@
  */
 
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomutils/FindUtils.h>
 
 #include "DeleteLink.h"
