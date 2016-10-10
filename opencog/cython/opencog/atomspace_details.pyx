@@ -71,12 +71,6 @@ cdef class AtomSpace:
         elif op == 3: # !=
             return not is_equal
 
-    property uuid:
-        def __get__(self):
-            if self.atomspace == NULL:
-                return 0
-            return self.atomspace.get_uuid()
-
     def add(self, Type t, name=None, out=None, TruthValue tv=None):
         """ add method that determines exact method to call from type """
         if is_a(t, types.Node):
@@ -125,23 +119,6 @@ cdef class AtomSpace:
             atom.tv = tv
         return atom
 
-    def get_atom_with_uuid(self, uuid):
-        """ Retrieve the atom associated with the uuid
-        """
-        if self.atomspace == NULL:
-            return None
-        # Convert to an Atom object
-        try:
-            result = self.atomspace.get_atom(uuid)
-            if result == result.UNDEFINED: return None
-            atom = Atom(result.value(), self)
-        except ValueError, TypeError:
-            raise TypeError("Need UUID")
-        if self.atomspace.is_valid_handle(deref((<Atom>atom).handle)):
-            return atom
-        else:
-            return None
-
     def is_valid(self, atom):
         """ Check whether the passed handle refers to an actual atom
         """
@@ -150,12 +127,7 @@ cdef class AtomSpace:
         try:
             assert isinstance(atom, Atom)
         except AssertionError:
-            # Try to convert to an Atom object
-            try:
-                uuid = int(atom)
-                atom = Atom(uuid,self)
-            except ValueError, TypeError:
-                raise TypeError("Need UUID or Atom object")
+            raise TypeError("Need Atom object")
         if self.atomspace.is_valid_handle(deref((<Atom>atom).handle)):
             return True
         return False
@@ -393,6 +365,6 @@ cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
     cdef AtomSpace atomspace = AtomSpace_factory(c_atomspace)
     return atomspace
 
-cdef api object py_atom(UUID uuid, object atomspace):
-    cdef Atom atom = Atom(uuid, atomspace)
+cdef api object py_atom(PATOM lptr, object atomspace):
+    cdef Atom atom = Atom(lptr, atomspace)
     return atom

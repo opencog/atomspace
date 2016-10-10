@@ -801,7 +801,8 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     for (const Handle& h: argumentHandles)
     {
         // Place a Python atom object for this handle into the tuple.
-        PyObject* pyAtom = py_atom(h.value(), pyAtomSpace);
+        Atom* patom = h.operator->();
+        PyObject* pyAtom = py_atom((long int) patom, pyAtomSpace);
         PyTuple_SetItem(pyArguments, tupleItem, pyAtom);
 
         // PyTuple_SetItem steals it's item so don't do this:
@@ -844,8 +845,6 @@ Handle PythonEval::apply(AtomSpace* as, const std::string& func, Handle varargs)
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     RAII raii(this, as);
 
-    UUID uuid = 0;
-
     // Get the atom object returned by this user function.
     PyObject* pyReturnAtom = this->call_user_function(func, varargs);
 
@@ -857,34 +856,35 @@ Handle PythonEval::apply(AtomSpace* as, const std::string& func, Handle varargs)
         gstate = PyGILState_Ensure();
 
         // Get the handle UUID from the atom.
-        PyObject* pyAtomUUID = PyObject_CallMethod(pyReturnAtom, (char*) "handle_uuid",
+        PyObject* pyAtomPATOM = PyObject_CallMethod(pyReturnAtom, (char*) "handle_aptr",
                 NULL);
 
-        // Make sure we got an atom UUID.
+        // Make sure we got an atom pointer.
         PyObject* pyError = PyErr_Occurred();
-        if (pyError or nullptr == pyAtomUUID) {
+        if (pyError or nullptr == pyAtomPATOM) {
             PyGILState_Release(gstate);
             throw RuntimeException(TRACE_INFO,
                 "Python function '%s' did not return Atom!", func.c_str());
         }
 
-        // Get the UUID from the python UUID.
-        uuid = static_cast<unsigned long>(PyLong_AsLong(pyAtomUUID));
+        // Get the atom pointer from the python atom pointer.
+        Atom* aptr = (Atom*)(PyLong_AsLong(pyAtomPATOM));
 
         // Cleanup the reference counts.
         Py_DECREF(pyReturnAtom);
-        Py_DECREF(pyAtomUUID);
+        Py_DECREF(pyAtomPATOM);
 
         // Release the GIL. No Python API allowed beyond this point.
         PyGILState_Release(gstate);
 
+        return Handle(AtomPtr(aptr));
     } else {
 
         throw RuntimeException(TRACE_INFO,
             "Python function '%s' did not return Atom!", func.c_str());
     }
 
-    return Handle(uuid);
+    return Handle::UNDEFINED;
 }
 
 /**

@@ -2,16 +2,18 @@
 # Atom wrapper object
 cdef class Atom(object):
 
-    def __cinit__(self, UUID uuid, AtomSpace a):
-        self.handle = new cHandle(uuid)
+    def __cinit__(self, PATOM lptr, AtomSpace a):
+        vptr = PyLong_AsVoidPtr(lptr)
+        atomo = atom_from_the_void(vptr)
+        self.handle = new cHandle(atomo)
 
     def __dealloc__(self):
         del self.handle
 
     def value(self):
-        return self.handle.value()
+        return PyLong_FromVoidPtr(self.handle.atom_ptr())
 
-    def __init__(self, UUID uuid, AtomSpace a):
+    def __init__(self, PATOM lptr, AtomSpace a):
         # self.handle = h is set in __cinit__ above
 
         # cache the results after first retrieval of
@@ -34,7 +36,7 @@ cdef class Atom(object):
 
     property uuid:
         def __get__(self):
-            return self.handle.value()
+            return PyLong_FromVoidPtr(self.handle.atom_ptr())
 
     property name:
         def __get__(self):
@@ -246,7 +248,7 @@ cdef class Atom(object):
         self.tv = TruthValue(mean, count)
         return self
     
-    def handle_uuid(self):
+    def handle_aptr(self):
         return self.value()
 
     def is_node(self):
