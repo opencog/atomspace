@@ -37,7 +37,7 @@ class RuleUTest: public CxxTest::TestSuite
 private:
 	AtomSpace _as;
 	SchemeEval _eval;
-	Handle deduction_rule_h, X, A, CT;
+	Handle deduction_rule_h, X, A, V, CT;
 
 public:
 	RuleUTest() : _eval(&_as)
@@ -72,6 +72,7 @@ void RuleUTest::setUp()
 	                                "   (ConceptNode \"URE\"))");
 	X = an(VARIABLE_NODE, "$X");
 	A = an(CONCEPT_NODE, "$A");
+	V = an(VARIABLE_NODE, "$V");
 	CT = an(TYPE_NODE, "ConceptNode");
 }
 
@@ -91,9 +92,21 @@ void RuleUTest::test_unify_target()
 
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
-	Handle forward_rule = rules[0].get_forward_rule(); //,
+	Handle forward_rule = rules[0].get_forward_rule(),
 		// expected up to an alpha conversion
-		// expected_vardecl = // TODO
+		expected_vardecl = al(VARIABLE_LIST,
+		                      al(TYPED_VARIABLE_LINK, X, CT),
+		                      al(TYPED_VARIABLE_LINK, V, CT)),
+		XV = al(INHERITANCE_LINK, X, V),
+		VA = al(INHERITANCE_LINK, V, A),
+		XA = al(INHERITANCE_LINK, X, A),
+		XnotA = al(NOT_LINK, al(IDENTICAL_LINK, X, A)),
+		expected_body = al(AND_LINK, XV, VA, XnotA),
+		schema = an(GROUNDED_SCHEMA_NODE, "scm: bc-deduction-formula"),
+		expected_rewrite = al(EXECUTION_OUTPUT_LINK,
+		                      schema,
+		                      al(LIST_LINK, XV, VA, XA));
+		                         
 		// expected = // TODO al(BIND_LINK, 
 
 	TS_ASSERT(true);
