@@ -62,6 +62,7 @@ friend class Atom;
 friend class AtomTable;
 friend class AtomStorage;         // persistance
 friend class content_based_atom_ptr_less;
+friend class content_based_handle_less;
 
 private:
     AtomPtr _ptr;
@@ -122,6 +123,10 @@ public:
 
     // Cython can't access operator->() so we'll duplicate here.
     inline Atom* atom_ptr() {
+        return _ptr.get();
+    }
+
+    inline const Atom* const_atom_ptr() const {
         return _ptr.get();
     }
 
@@ -262,6 +267,17 @@ struct content_based_atom_ptr_less
         return Handle::content_based_atoms_less(al, ar);
     }
 };
+
+struct content_based_handle_less
+{
+    bool operator()(const Handle& hl, const Handle& hr) const
+    {
+        return Handle::content_based_atoms_less(hl.const_atom_ptr(),
+                                                hr.const_atom_ptr());
+    }
+};
+
+typedef std::set<Handle, content_based_handle_less> ContentBasedOrderedHandleSet;
 
 struct handle_seq_less
 {
