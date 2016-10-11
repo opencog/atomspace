@@ -33,10 +33,6 @@ cdef class Atom(object):
         def __get__(self):
             return self.atomspace
 
-    property uuid:
-        def __get__(self):
-            return void_from_cptr(self.handle)
-
     property name:
         def __get__(self):
             cdef cAtom* atom_ptr
