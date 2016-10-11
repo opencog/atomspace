@@ -233,17 +233,10 @@ public:
 
 private:
     /**
-     * Return true if the outgoings are equal. It is assumed that the
-     * size of the input vector is equal to the arity.
+     * Return true if the content outgoings are equal. It is assumed
+     * that they both have the same size.
      */
-    bool operator==(const HandleSeq&) const;
-
-    /**
-     * Return true if the ordered by content outgoings are equal. It
-     * is assumed that they both have the same size.
-     */
-    bool content_based_equal(const ContentBasedOrderedHandleSet& lhs,
-                             const ContentBasedOrderedHandleSet& rhs) const;
+    static bool outgoings_equal(const HandleSeq& lhs, const HandleSeq& rhs);
 };
 
 static inline LinkPtr LinkCast(const Handle& h)

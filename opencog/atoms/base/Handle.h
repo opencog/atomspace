@@ -277,8 +277,6 @@ struct content_based_handle_less
     }
 };
 
-typedef std::set<Handle, content_based_handle_less> ContentBasedOrderedHandleSet;
-
 struct handle_seq_less
 {
     bool operator()(const HandleSeq& hsl, const HandleSeq& hsr) const

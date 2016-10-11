@@ -30,6 +30,8 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomTable.h>
 
+#include <boost/range/algorithm.hpp>
+
 #include "Link.h"
 
 //#define DPRINTF printf
@@ -145,63 +147,38 @@ bool Link::operator==(const Atom& other) const
         (_uuid != Handle::INVALID_UUID
          or other.getUUID() != Handle::INVALID_UUID))
     {
-        ContentBasedOrderedHandleSet
-            outgoing(_outgoing.begin(), _outgoing.end()),
-            other_outgoing(olink._outgoing.begin(), olink._outgoing.end());
-        return content_based_equal(outgoing, other_outgoing);
+        HandleSeq sorted_outgoing(_outgoing),
+            sorted_other_outgoing(olink._outgoing);
+        boost::sort(sorted_outgoing, content_based_handle_less());
+        boost::sort(sorted_other_outgoing, content_based_handle_less());
+        return outgoings_equal(sorted_outgoing, sorted_other_outgoing);
     }
 
     // No need to reorder, compare the children directly
-    return operator==(olink._outgoing);
+    return outgoings_equal(_outgoing, olink._outgoing);
 }
 
-bool Link::operator==(const HandleSeq& other_outgoing) const
+bool Link::outgoings_equal(const HandleSeq& lhs, const HandleSeq& rhs)
 {
-	for (Arity i = 0; i < getArity(); i++)
+    for (Arity i = 0; i < lhs.size(); i++)
     {
-        if (_outgoing[i]->getType() != other_outgoing[i]->getType())
+        if (lhs[i]->getType() != rhs[i]->getType())
             return false;
 
-        if (_outgoing[i]->isNode())
+        if (lhs[i]->isNode())
         {
-            NodePtr tn(NodeCast(_outgoing[i]));
-            NodePtr on(NodeCast(other_outgoing[i]));
+            NodePtr tn(NodeCast(lhs[i]));
+            NodePtr on(NodeCast(rhs[i]));
             if (*tn != *on) return false;
         }
-        else if (_outgoing[i]->isLink())
+        else if (lhs[i]->isLink())
         {
-            LinkPtr tl(LinkCast(_outgoing[i]));
-            LinkPtr ol(LinkCast(other_outgoing[i]));
+            LinkPtr tl(LinkCast(lhs[i]));
+            LinkPtr ol(LinkCast(rhs[i]));
             if (*tl != *ol) return false;
         }
-    }
-    return true;
-}
-
-bool Link::content_based_equal(const ContentBasedOrderedHandleSet& lhs,
-                               const ContentBasedOrderedHandleSet& rhs) const
-{
-    ContentBasedOrderedHandleSet::iterator
-        it = lhs.begin(),
-        other_it = rhs.begin();
-
-    for (; it != lhs.end(); it++, other_it++)
-    {
-        if ((*it)->getType() != (*other_it)->getType())
-            return false;
-
-        if ((*it)->isNode())
-        {
-            NodePtr tn(NodeCast(*it));
-            NodePtr on(NodeCast(*other_it));
-            if (*tn != *on) return false;
-        }
-        else if ((*it)->isLink())
-        {
-            LinkPtr tl(LinkCast(*it));
-            LinkPtr ol(LinkCast(*other_it));
-            if (*tl != *ol) return false;
-        }
+        // if (lhs[i] != rhs[i])
+        //     return false;
     }
     return true;
 }
