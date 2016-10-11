@@ -205,7 +205,9 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		std::string libName  = schema.substr(pos, dotpos - pos);
 		std::string funcName = schema.substr(dotpos + 1);
 
-        void* sym = LibraryManager::getFunc(libName,funcName);
+#define BROKEN_CODE 1
+#ifdef BROKEN_CODE
+		void* sym = LibraryManager::getFunc(libName,funcName);
 
 		// Convert the void* pointer to the correct function type.
 		// XXX FIXME -- it is incorrect to use UUID's for this purpose!
@@ -219,6 +221,9 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 
 		// Return the handle.
 		return h;
+#else
+		return Handle();
+#endif
 	}
 
 	// Unkown proceedure type.

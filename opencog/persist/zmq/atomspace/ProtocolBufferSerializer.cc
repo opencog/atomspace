@@ -245,7 +245,7 @@ LinkPtr ProtocolBufferSerializer::deserializeLink(
 	HandleSeq oset(atomMessage.outgoing_size());
     for(int i = 0; i < atomMessage.outgoing_size(); i++)
     {
-    	oset[i] = Handle(atomMessage.outgoing(i));
+		// oset[i] = Handle(atomMessage.outgoing(i));
     }
 
     TruthValuePtr tv;

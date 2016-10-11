@@ -2,16 +2,17 @@
 # Atom wrapper object
 cdef class Atom(object):
 
-    def __cinit__(self, UUID uuid, AtomSpace a):
-        self.handle = new cHandle(uuid)
+    def __cinit__(self, PATOM lptr, AtomSpace a):
+        atomo = atom_from_the_void(lptr)
+        self.handle = new cHandle(atomo)
 
     def __dealloc__(self):
         del self.handle
 
     def value(self):
-        return self.handle.value()
+        return void_from_cptr(self.handle)
 
-    def __init__(self, UUID uuid, AtomSpace a):
+    def __init__(self, PATOM lptr, AtomSpace a):
         # self.handle = h is set in __cinit__ above
 
         # cache the results after first retrieval of
@@ -31,10 +32,6 @@ cdef class Atom(object):
     property atomspace:
         def __get__(self):
             return self.atomspace
-
-    property uuid:
-        def __get__(self):
-            return self.handle.value()
 
     property name:
         def __get__(self):
@@ -62,7 +59,7 @@ cdef class Atom(object):
                 return pytv
             return TruthValue(tvp.get().getMean(), tvp.get().getConfidence())
 
-        def __set__(self,truth_value):
+        def __set__(self, truth_value):
             try:
                 assert isinstance(truth_value, TruthValue)
             except AssertionError:
@@ -193,7 +190,7 @@ cdef class Atom(object):
             c_handle_iter = handle_vector.begin()
             while c_handle_iter != handle_vector.end():
                 current_c_handle = deref(c_handle_iter)
-                yield Atom(current_c_handle.value(),self)
+                yield Atom(void_from_candle(current_c_handle),self)
                 inc(c_handle_iter)
 
     def incoming_by_type(self, Type type, subtype = True):
@@ -221,7 +218,7 @@ cdef class Atom(object):
         c_handle_iter = handle_vector.begin()
         while c_handle_iter != handle_vector.end():
             current_c_handle = deref(c_handle_iter)
-            yield Atom(current_c_handle.value(), self.atomspace)
+            yield Atom(void_from_candle(current_c_handle), self.atomspace)
             inc(c_handle_iter)
 
     property type:
@@ -246,8 +243,8 @@ cdef class Atom(object):
         self.tv = TruthValue(mean, count)
         return self
     
-    def handle_uuid(self):
-        return self.value()
+    def handle_ptr(self):
+        return PyLong_FromVoidPtr(self.handle)
 
     def is_node(self):
         return is_a(self.t, types.Node)
@@ -300,4 +297,7 @@ cdef class Atom(object):
             return -1
 
     def __hash__(a1):
-        return hash(a1.value())
+        # Use the address of the atom in memory as the hash.
+        # This should be globally unique, because the atomspace
+        # does not allow more than one, ever.
+        return hash(PyLong_FromVoidPtr(a1.handle.atom_ptr()))

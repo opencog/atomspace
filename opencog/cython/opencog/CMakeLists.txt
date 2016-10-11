@@ -70,6 +70,7 @@ list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace_api.h")
 
 # opencog.atomspace Python bindings
 ADD_LIBRARY(atomspace_cython
+	Cast.cc
 	atomspace.cpp
 )
 
@@ -98,6 +99,7 @@ SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
 INSTALL (FILES
 	__init__.py
 	atomspace.pxd
+	Cast.h
 	DESTINATION "include/opencog/cython/opencog"
 )
 
@@ -160,6 +162,7 @@ ADD_LIBRARY(bindlink_cython
 )
 
 TARGET_LINK_LIBRARIES(bindlink_cython
+	atomspace_cython
 	query
 	execution
 	${PYTHON_LIBRARIES}
@@ -195,6 +198,7 @@ IF (HAVE_GUILE)
 	)
 
 	TARGET_LINK_LIBRARIES(scheme_wrapper
+		atomspace_cython
 		query
 		execution
 		smob

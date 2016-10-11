@@ -191,6 +191,9 @@ Handle SchemeSmob::scm_to_handle (SCM sh)
  */
 SCM SchemeSmob::ss_atom (SCM suuid)
 {
+	scm_misc_error("cog-atom", "Obsolete! Do not use!", suuid);
+	return SCM_EOL;
+#ifdef OLD_DEAD_CODE
 	if (scm_is_false(scm_integer_p(suuid)))
 		scm_wrong_type_arg_msg("cog-atom", 1, suuid, "integer opencog uuid");
 
@@ -200,6 +203,7 @@ SCM SchemeSmob::ss_atom (SCM suuid)
 		scm_wrong_type_arg_msg("cog-atom", 1, suuid, "valid opencog uuid");
 
 	return handle_to_scm(Handle(uuid));
+#endif
 }
 
 /* ============================================================== */

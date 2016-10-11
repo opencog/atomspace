@@ -11,7 +11,8 @@ Also refer to the list of .scm type definition files in opencog.conf
 """
 
 from cython.operator cimport dereference as deref
-from opencog.atomspace cimport cAtomSpace, Atom, AtomSpace, cHandle, AtomSpace_factory
+from opencog.atomspace cimport cAtomSpace, Atom, AtomSpace, cAtom, cHandle, AtomSpace_factory, void_from_candle
+
 
 # basic wrapping for std::string conversion
 cdef extern from "<string>" namespace "std":
@@ -45,7 +46,7 @@ def scheme_eval_h(AtomSpace a, char* s):
     cdef string expr
     expr = string(s)
     ret = eval_scheme_h(deref(a.atomspace), expr)
-    return Atom(ret.value(), a)
+    return Atom(void_from_candle(ret), a)
 
 cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
     cAtomSpace* eval_scheme_as(const string& s) except +
