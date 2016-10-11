@@ -299,14 +299,14 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
 }
 
 std::vector<Rule> Rule::unify_source(const Handle& source,
-                                     const Handle& vardecl)
+                                     const Handle& vardecl) const
 {
 	// TODO
 	return {};
 }
 
 std::vector<Rule> Rule::unify_target(const Handle& target,
-                                     const Handle& vardecl)
+                                     const Handle& vardecl) const
 {
 	// If the rule's handle has not been set yet
 	if (_forward_rule_handle == Handle::UNDEFINED)
