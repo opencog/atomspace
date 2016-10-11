@@ -11,7 +11,7 @@ cdef extern from "Python.h":
 
 ctypedef public long PATOM
 
-cdef extern from "Cast.h":
+cdef extern from "opencog/cython/opencog/Cast.h":
     # Tacky hack to pass atom pointer to Atom ctor.
     cdef cHandle atom_from_the_void(long p)
 
