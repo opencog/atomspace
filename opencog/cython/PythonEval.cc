@@ -48,6 +48,9 @@ using namespace opencog;
 //#define DPRINTF printf
 #define DPRINTF(...)
 
+
+
+
 PythonEval* PythonEval::singletonInstance = NULL;
 
 const int NO_SIGNAL_HANDLERS = 0;
@@ -60,8 +63,7 @@ const int MISSING_FUNC_CODE = -1;
 static bool already_initialized = false;
 static bool initialized_outside_opencog = false;
 std::recursive_mutex PythonEval::_mtx;
-bool in_scope = false;
-uint8_t _inside_scope = 0;
+
 /*
  * @todo When can we remove the singleton instance? Answer: not sure.
  * Python itself is single-threaded. That is, currently, python fakes
@@ -645,52 +647,72 @@ void PythonEval::execute_string(const char* command)
     // Because of this, I don't know how to write a valid command
     // interpreter for the python shell ...
     PyObject* pyRootDictionary = PyModule_GetDict(_pyRootModule);
-    
 
-    
-/*  REDIRECTING STDOUT TO A PIPE
-    because no string representation can be found for the PyObject returned by 
-    PyRun_StringFlags after execution of expression, the only option I can see
-    is a temporary hack to redirect the stdout to a variable for the brief
-    moment PyRun_StringFlags is running and then reconnecting it back 
-    when which we can read from that variable to _result so that the execution 
-    result is displayed on the users shell and not on the stdout of cogserver
-*/
-//#define _USE_PIPE_TO_REDIRECT_STDOUT_
-#ifdef _USE_PIPE_TO_REDIRECT_STDOUT_
-    int _output_pipe[2];
-    int _stdout_original = dup(STDOUT_FILENO);
+#define PERFORM_STDOUT_DUPLICATION 1
+#ifdef PERFORM_STDOUT_DUPLICATION
+static std::mutex _stdout_redirect_mutex;
 
-    if(pipe(_output_pipe) == 0)
-        #define _PIPE_OPENED_OKAY_
-    #ifdef _PIPE_OPENED_OKAY_
-        dup2(_output_pipe[1], STDOUT_FILENO); //redirecting stdout to pipe
-        close(_output_pipe[1]);
-    #endif //_PIPE_OPENED_OKAY_
-#endif //_USE_PIPE_TO_REDIRECT_STDOUT_
+    // What used to be stdout will now go to the pipe.
+    int pipefd[2];
+    int stdout_backup = -1;
+{    
+    std::lock_guard<std::mutex> lock(_stdout_redirect_mutex);
+    int rc = pipe2(pipefd, 0);  // O_NONBLOCK);
+    OC_ASSERT(0 == rc, "GenericShell pipe creation failure");
+    stdout_backup = dup(fileno(stdout));
+    OC_ASSERT(0 < stdout_backup, "GenericShell stdout dup failure");
+    rc = dup2(pipefd[1], fileno(stdout));
+    OC_ASSERT(0 < rc, "GenericShell pipe splice failure");
+}
+#endif // PERFORM_STDOUT_DUPLICATION
 
-    //execute python script
     PyObject* pyResult = PyRun_StringFlags(command,
             Py_file_input, pyRootDictionary, pyRootDictionary,
             nullptr);
 
-#ifdef _USE_PIPE_TO_REDIRECT_STDOUT_
-    #ifdef _PIPE_OPENED_OKAY_
-        fflush(stdout);
-        dup2(_stdout_original, STDOUT_FILENO); //return stdout to its rightful place
-        char _result_buffer[1];
-        int c;
-        while(1)
+
+#ifdef PERFORM_STDOUT_DUPLICATION
+ {   
+    std::lock_guard<std::mutex> lock(_stdout_redirect_mutex);
+    // Restore stdout
+    fflush(stdout);
+    int rc = write(pipefd[1], "", 1); // null-terminated string!
+    OC_ASSERT(0 < rc, "GenericShell pipe termination failure");
+    rc = close(pipefd[1]);
+    OC_ASSERT(0 == rc, "GenericShell pipe close failure");
+    rc = dup2(stdout_backup, fileno(stdout)); // restore stdout
+    OC_ASSERT(0 < rc, "GenericShell restore stdout failure");
+
+    // Drain the pipe
+    auto drain_wrapper = [&](void)
+    {
+        char buf[4097];
+        int nr = read(pipefd[0], buf, sizeof(buf)-1);
+        OC_ASSERT(0 < rc, "GenericShell pipe read failure");
+        while (0 < nr)
         {
-            c = read(_output_pipe[0], _result_buffer, 1);
-            if(c == -1 or c== 0 or errno) //if eof or error
-                break;
-            _result.append<int>(1, _result_buffer[0]);
+            buf[nr] = 0;
+            if (1 < nr or 0 != buf[0])
+            {
+                //printf("hey hye hey %s", buf); // print to the cogservers
+                _result =  buf;//socket->Send(buf);
+            }
+            nr = read(pipefd[0], buf, sizeof(buf)-1);
+            OC_ASSERT(0 < rc, "GenericShell pipe read failure");
         }
-        //_result.append("\n");
-     
-    #endif //_PIPE_OPENED_OKAY_
-#endif //_USE_PIPE_TO_REDIRECT_STDOUT_
+
+        // Cleanup.
+        close(pipefd[0]);
+        close(stdout_backup);
+    };
+
+    drain_wrapper();
+}  
+  // stdout_thr = new std::thread(drain_wrapper);
+#endif // PERFORM_STDOUT_DUPLICATION
+
+
+
     if (pyResult)
         Py_DECREF(pyResult);
     Py_FlushLine();
@@ -1380,19 +1402,15 @@ void PythonEval::begin_eval()
 
 void PythonEval::eval_expr(const std::string& partial_expr)
 {
-    // XXX FIXME this does a lot of wasteful string copying.
-    std::string expr = partial_expr;
-    size_t nl = expr.find_first_of("\n\r");
-    while (std::string::npos != nl)
-    {
-        if ('\r' == expr[nl]) nl++;
-        if ('\n' == expr[nl]) nl++;
-        std::string part = expr.substr(0, nl);
-        eval_expr_line(part);
-        expr = expr.substr(nl);
-        nl = expr.find_first_of("\n\r");
-    }
-     eval_expr_line(expr);
+    /*
+        I'm assuming since this is the python shell, one wouldn't put 
+        empty lines in scopes and not expect exiting the scope. 
+
+        if an empty line i.e. only a "\n" character from pressing return 
+        is passed then eval_expr_line would recieve just an empty string 
+        so it could end the scope. 
+    */
+    eval_expr_line((strcmp(partial_expr.c_str(), "\n")==0)? "" : partial_expr);
 }
 
 /// Like eval_expr(), except that it assumes that there is only
@@ -1411,9 +1429,6 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
 {
     // Trim whitespace, and comments before doing anything,
     // Otherwise, the various checks below fail.
-    // printf("THE PARTIAL EXPRESSION BEFORE SPACE-LIKE REMOVAL =====%s\n", partial_expr.c_str()); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    
-
     std::string part = partial_expr.substr(0,
                      partial_expr.find_last_not_of(" \t\n\r") + 1);
 
@@ -1425,10 +1440,7 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     // Ignore leading comments; don't ignore empty line.
     int c = 0;
     size_t part_size = part.size();
-    //go wait for more if actual statement is empty.
-    if (0 == part_size and 0 < partial_expr.size()) {
-        goto wait_for_more;
-    }
+    if (0 == part_size and 0 < partial_expr.size()) goto wait_for_more;
 
     if (0 < part_size) c = part[0];
 
@@ -1442,45 +1454,20 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
         if (0 < _paren_count) goto wait_for_more;
     }
 
-
     // If the line starts with whitespace (tab or space) then assume
     // that it is standard indentation, and wait for the first
     // unindented line (or end-of-file).
-    if (' ' == c or '\t' == c){
-        _inside_scope = 1;
-        goto wait_for_more; 
-    }
+    if (' ' == c or '\t' == c) goto wait_for_more;
 
     // If the line ends with a colon, its not a complete expression,
     // and we must wait for more input, i.e. more input is pending.
-    if (0 < part_size and part.find_last_of(":\\") + 1 == part_size){
-        _inside_scope = 1;
+    if (0 < part_size and part.find_last_of(":\\") + 1 == part_size)
         goto wait_for_more;
-    }
-    
+
     _input_line += part;
     _input_line += '\n';  // we stripped this off, above
-    
     logger().debug("[PythonEval] eval_expr length=%zu:\n%s",
                   _input_line.length(), _input_line.c_str());
-
-    /*
-        python interpreter should finish a scope 
-        when an empty line is given once. 
-        The _inside_scope integer is set to 1 when inside a scope
-            i.e when the previous line begins with a space(or \t) 
-                or when the previous line had ':' at the end
-        so _inside_scope is incremented we wait_for_more
-        but the next empty line is ignored and the expression executed
-    */
-    if (_inside_scope > 0){
-        if(_inside_scope >= 2) _inside_scope = 0;
-        else 
-        {
-            _inside_scope++;
-            goto wait_for_more;
-        }
-    }
 
     // This is the cogserver shell-freindly evaluator. We must
     // stop all exceptions thrown in other layers, or else we
@@ -1490,15 +1477,13 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     try
     {
         this->apply_script(_input_line);
-        _input_line = "";
-
     }
     catch (const RuntimeException &e)
     {
         _result += e.get_message();
         _result += "\n";
     }
-    // _input_line = "";
+    _input_line = "";
     _paren_count = 0;
     _pending_input = false;
     logger().debug("[PythonEval] eval_expr result length=%zu:\n%s",
@@ -1509,7 +1494,6 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
     return;
 
 wait_for_more:
-    // in_scope = true;
     _pending_input = true;
     // Add this expression to our evaluation buffer.
     _input_line += part;
