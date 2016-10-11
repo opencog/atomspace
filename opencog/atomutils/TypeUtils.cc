@@ -259,6 +259,10 @@ Handle opencog::filter_vardecl(const Handle& vardecl, const Handle& body)
 Handle opencog::filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 {
 	// Base cases
+
+	if (vardecl.is_undefined())
+		return Handle::UNDEFINED;
+
 	Type t = vardecl->getType();
 	if (vardecl->isNode()) {
 		if (VARIABLE_NODE == t and is_free_in_any_tree(hs, vardecl))
@@ -268,8 +272,10 @@ Handle opencog::filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 	}
 
 	// Recursive cases
+
 	if (TYPED_VARIABLE_LINK == t)
-		return filter_vardecl(vardecl->getOutgoingAtom(0), hs);
+		if (filter_vardecl(vardecl->getOutgoingAtom(0), hs).is_defined())
+			return vardecl;
 
 	if (VARIABLE_LIST == t) {
 		HandleSeq subvardecls;
