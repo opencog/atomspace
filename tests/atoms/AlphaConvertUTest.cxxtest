@@ -388,10 +388,19 @@ void AlphaConvertUTest::test_vardecl_bindlink_alpha_conversion()
 		CT = NA(TYPE_NODE, "ConceptNode"),
 		Y_vardecl = LA(TYPED_VARIABLE_LINK, Y, CT),
 		hsc = LA(BIND_LINK, LA(AND_LINK, X), LA(OR_LINK, X)),
+		expected_wo_vardecl = LA(BIND_LINK,
+		                         LA(AND_LINK, Y), LA(OR_LINK, Y)),
 		expected = LA(BIND_LINK, Y_vardecl,
 		              LA(AND_LINK, Y), LA(OR_LINK, Y));
 
 	ScopeLinkPtr sc(ScopeLinkCast(hsc));
+	Handle result_wo_vardecl = _asa.add_atom(sc->alpha_conversion({Y}));
+
+	std::cout << "result_wo_vardecl = " << oc_to_string(result_wo_vardecl);
+	std::cout << "expected_wo_vardecl = " << oc_to_string(expected_wo_vardecl);
+
+	TS_ASSERT_EQUALS(result_wo_vardecl, expected_wo_vardecl);
+
 	Handle result = _asa.add_atom(sc->alpha_conversion({Y}, Y_vardecl));
 
 	std::cout << "result = " << oc_to_string(result);

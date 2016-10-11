@@ -29,6 +29,7 @@
 
 #include <opencog/util/algorithm.h>
 #include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/atomutils/FindUtils.h>
 
 namespace opencog {
@@ -39,30 +40,35 @@ UnificationSolutionSet::UnificationSolutionSet(bool s,
 {
 }
 
-TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol)
+TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol,
+                                       const Handle& pre)
 {
 	OC_ASSERT(sol.satisfiable);
 
 	TypedSubstitutions result;
 	for (const UnificationPartition& partition : sol.partitions) {
-		std::pair<HandleMap, Variables> typed_substitution;
+		std::pair<HandleMap, Handle> ts;
 		for (const UnificationPartition::value_type& typed_block : partition) {
-			Handle least_abstract;
+			Handle least_abstract(Handle(createNode(VARIABLE_NODE,
+			                                        "__dummy_top__")));
 			for (const Handle& h : typed_block.first) {
 				// Find the least abstract atom
-				if (inherit(least_abstract, h))
+				if (inherit(h, least_abstract) and
+				    // If h is a variable, only consider it as value
+				    // if it is in pre (stands for precedence)
+				    (h->getType() != VARIABLE_NODE
+				     or is_unquoted_unscoped_in_tree(pre, h)))
 					least_abstract = h;
 
-				// Build Variables
-				if (h->getType() == VARIABLE_NODE)
-					typed_substitution.second.varset.insert(h);
+				// TODO: take care of ts type
 			}
-			// Build substitution
-			for (const Handle& var : typed_substitution.second.varset)
-				typed_substitution.first.insert({var, least_abstract});
-			// TODO you need to select the prefered side
+			// Build variable mapping
+			for (const Handle& var : typed_block.first) {
+				if (var->getType() == VARIABLE_NODE)
+					ts.first.insert({var, least_abstract});
+			}
 		}
-		result.insert(typed_substitution);
+		result.insert(ts);
 	}
 	return result;
 }
@@ -462,6 +468,25 @@ std::string oc_to_string(const UnificationSolutionSet& sol)
 	std::stringstream ss;
 	ss << "satisfiable: " << sol.satisfiable << std::endl
 	   << "partitions: " << oc_to_string(sol.partitions);
+	return ss.str();
+}
+
+std::string oc_to_string(const TypedSubstitutions& tss)
+{
+	std::stringstream ss;
+	ss << "size = " << tss.size() << std::endl;
+	int i = 0;
+	for (const auto& ts : tss)
+		ss << "typed substitution[" << i << "]:" << std::endl
+		   << oc_to_string(ts);
+	return ss.str();
+}
+
+std::string oc_to_string(const TypedSubstitution& ts)
+{
+	std::stringstream ss;
+	ss << "substitution:" << std::endl << oc_to_string(ts.first)
+	   << "type:" << std::endl << oc_to_string(ts.second);
 	return ss.str();
 }
 

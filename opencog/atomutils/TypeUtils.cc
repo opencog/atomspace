@@ -258,32 +258,39 @@ Handle opencog::filter_vardecl(const Handle& vardecl, const Handle& body)
 
 Handle opencog::filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 {
-	// Base case
+	// Base cases
+
+	if (vardecl.is_undefined())
+		return Handle::UNDEFINED;
+
 	Type t = vardecl->getType();
-	if (VARIABLE_NODE == t) {
-		if (is_unquoted_unscoped_in_any_tree(hs, vardecl))
-			return vardecl;
-		else
-			return Handle::UNDEFINED;
-	} else if (TYPED_VARIABLE_LINK == t) {
-		if (is_unquoted_unscoped_in_any_tree(hs, vardecl->getOutgoingAtom(0)))
+	if (vardecl->isNode()) {
+		if (VARIABLE_NODE == t and is_free_in_any_tree(hs, vardecl))
 			return vardecl;
 		else
 			return Handle::UNDEFINED;
 	}
 
-	// Recursive case
-	OC_ASSERT(VARIABLE_LIST == t);
-	HandleSeq subvardecls;
-	for (const Handle& v : vardecl->getOutgoingSet()) {
-		if (filter_vardecl(v, hs).is_defined())
-			subvardecls.push_back(v);
+	// Recursive cases
+
+	if (TYPED_VARIABLE_LINK == t)
+		if (filter_vardecl(vardecl->getOutgoingAtom(0), hs).is_defined())
+			return vardecl;
+
+	if (VARIABLE_LIST == t) {
+		HandleSeq subvardecls;
+		for (const Handle& v : vardecl->getOutgoingSet()) {
+			if (filter_vardecl(v, hs).is_defined())
+				subvardecls.push_back(v);
+		}
+		if (subvardecls.empty())
+			return Handle::UNDEFINED;
+		if (subvardecls.size() == 1)
+			return subvardecls[0];
+		return Handle(createVariableList(subvardecls));
 	}
-	if (subvardecls.empty())
-		return Handle::UNDEFINED;
-	if (subvardecls.size() == 1)
-		return subvardecls[0];
-	return Handle(createVariableList(subvardecls));
+
+	return Handle::UNDEFINED;
 }
 
 /* ===================== END OF FILE ===================== */
