@@ -25,6 +25,7 @@
 #include <vector>
 #include <mutex>
 #include <atomic>
+#include <memory>
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
@@ -54,17 +55,22 @@ class ThreadSafeFixedIntegerIndex : public FixedIntegerIndex
 	private:
 		using FixedIntegerIndex::idx;
         mutable std::vector<std::unique_ptr<std::mutex>> _locks;
-        //mutable std::mutex lock;
+        //mutable std::vector<std::mutex> _locks;
 
         void resize(size_t sz)
         {
             FixedIntegerIndex::resize(sz);
-
+            //std::vector<std::mutex> new_locks(sz);
+            _locks.resize(sz);
+            for (auto iter = _locks.begin(); iter != _locks.end(); ++iter)
+                (*iter) = std::unique_ptr<std::mutex>(new std::mutex());
         }
 
-
 	public:
-        ThreadSafeFixedIntegerIndex(size_t);
+        ThreadSafeFixedIntegerIndex(size_t size)
+        {
+            resize(size);
+        }
 		~ThreadSafeFixedIntegerIndex () {}
 
         void insert(size_t i, Atom* a)

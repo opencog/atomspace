@@ -23,11 +23,6 @@
 
 using namespace opencog;
 
-ThreadSafeFixedIntegerIndex::ThreadSafeFixedIntegerIndex(size_t size)
-{
-    resize(size);
-}
-
 size_t ThreadSafeFixedIntegerIndex::size() const
 {
     size_t cnt = 0;

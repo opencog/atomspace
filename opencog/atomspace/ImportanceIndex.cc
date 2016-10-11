@@ -47,12 +47,14 @@ using namespace opencog;
 #define IMPORTANCE_INDEX_SIZE (GROUP_NUM*GROUP_SIZE)+GROUP_NUM //104
 
 ImportanceIndex::ImportanceIndex()
-    : _index(IMPORTANCE_INDEX_SIZE)
+    : _index(IMPORTANCE_INDEX_SIZE+1)
 {
 }
 
 unsigned int ImportanceIndex::importanceBin(short importance)
 {
+    if (importance < 0)
+        return 0;
     if (importance < 2*GROUP_SIZE)
         return importance;
 
@@ -70,6 +72,8 @@ unsigned int ImportanceIndex::importanceBin(short importance)
     int ad = GROUP_SIZE - std::ceil(importance / std::pow(2,(i-1)));
 
     unsigned int bin = ((i * GROUP_SIZE) - ad);
+    if (bin > 104)
+        std::cout << "ibin: "<< bin << "\n";
     assert(bin <= IMPORTANCE_INDEX_SIZE);
     return bin;
 }
@@ -102,10 +106,14 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
         AttentionValue::sti_t upperBound) const
 {
     AtomSet set;
+    UnorderedHandleSet ret;
+
+    if (lowerBound < 0 || upperBound < 0)
+        return ret;
 
     // The indexes for the lower bound and upper bound lists is returned.
-    int lowerBin = importanceBin(lowerBound);
-    int upperBin = importanceBin(upperBound);
+    unsigned int lowerBin = importanceBin(lowerBound);
+    unsigned int upperBin = importanceBin(upperBound);
 
     // Build a list of atoms whose importance is equal to the lower bound.
     // For the lower bound and upper bound index, the list is filtered,
@@ -124,7 +132,6 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
     // If both lower and upper bounds are in the same bin,
     // Then we are done.
     if (lowerBin == upperBin) {
-        UnorderedHandleSet ret;
         std::transform(set.begin(), set.end(), inserter(ret),
                        [](Atom* atom)->Handle { return atom->getHandle(); });
         return ret;
@@ -139,7 +146,6 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
     // The two lists are concatenated.
     _index.getContentIf(upperBin,inserter(set),pred);
 
-    UnorderedHandleSet ret;
     std::transform(set.begin(), set.end(), inserter(ret),
                    [](Atom* atom)->Handle { return atom->getHandle(); });
     return ret;
