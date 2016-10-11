@@ -172,10 +172,10 @@ bool ScopeLink::is_equal(const Handle& other) const
 	ScopeLinkPtr scother(ScopeLinkCast(other));
 
 	// In case we're dealing with a class inheriting from ScopeLink,
-	// like BindLink, that has more than one scoped terms, like
+	// like BindLink, that has more than one scoped term, like
 	// implicand, etc, then we need to check the alpha equivalence
-	// over all terms. Before that let's check that they have the same
-	// number of terms.
+	// over all terms. Before that, let's check that they have the
+	// same number of terms.
 	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
 	Arity other_vardecl_offset = scother->_vardecl != Handle::UNDEFINED;
 	Arity n_scoped_terms = getArity() - vardecl_offset;
