@@ -148,10 +148,10 @@ bool Link::operator==(const Atom& other) const
          or other.getUUID() != Handle::INVALID_UUID))
     {
         HandleSeq sorted_outgoing(_outgoing),
-            sorted_other_outgoing(olink._outgoing);
+            other_sorted_outgoing(olink._outgoing);
         boost::sort(sorted_outgoing, content_based_handle_less());
-        boost::sort(sorted_other_outgoing, content_based_handle_less());
-        return outgoings_equal(sorted_outgoing, sorted_other_outgoing);
+        boost::sort(other_sorted_outgoing, content_based_handle_less());
+        return outgoings_equal(sorted_outgoing, other_sorted_outgoing);
     }
 
     // No need to reorder, compare the children directly
