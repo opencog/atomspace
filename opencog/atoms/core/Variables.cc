@@ -246,6 +246,8 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		if (GLOB_NODE == h->getType())
 		{
 			Handle glst(substitute_scoped(h, args, index_map, quotation_level));
+			if (glst->isNode())
+				return glst;
 			for (const Handle& gl : glst->getOutgoingSet())
 				oset.emplace_back(gl);
 		}
@@ -260,7 +262,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 
 /// Return true if the other Variables struct is equal to this one,
 /// up to alpha-conversion. That is, same number of variables, same
-/// type restrictions, but different actual variable names.
+/// type restrictions, but possibly different variable names.
 bool Variables::is_equal(const Variables& other) const
 {
 	size_t sz = varseq.size();
@@ -271,6 +273,10 @@ bool Variables::is_equal(const Variables& other) const
 	{
 		const Handle& vme(varseq[i]);
 		const Handle& voth(other.varseq[i]);
+
+		// If one is a GlobNode, and the other a VariableNode,
+		// then its a mismatch.
+		if (vme->getType() != voth->getType()) return false;
 
 		// If typed, types must match.
 		auto sime = _simple_typemap.find(vme);
@@ -413,8 +419,8 @@ bool Variables::is_type(const HandleSeq& hseq) const
  *
  * The resulting tree is NOT placed into any atomspace. If you want
  * that, you must do it yourself.  If you want evaluation or execution
- * to happen during sustitution, use either the EvaluationLink, the
- * ExecutionOutputLink, or the Instantiator.
+ * to happen during sustitution, then use either the EvaluationLink,
+ * the ExecutionOutputLink, or the Instantiator.
  *
  * So, for example, if this VariableList contains:
  *
@@ -450,7 +456,10 @@ bool Variables::is_type(const HandleSeq& hseq) const
  * `func` was simply `$b`, then `2.0` would be returned.
  *
  * Type checking is performed before substitution; if the args fail to
- * satisfy the type constraints, an exception is thrown.
+ * satisfy the type constraints, an exception is thrown. If `silent`
+ * is true, then the exception is non-printing, and so this method can
+ * be used for "filtering", i.e. for automatically rejecting arguments
+ * that fail the type check.
  *
  * The substitution is almost purely syntactic... with one exception:
  * the semantics of QuoteLink and UnquoteLink are honoured.  That is,
@@ -462,7 +471,8 @@ bool Variables::is_type(const HandleSeq& hseq) const
  * Note also that the resulting tree is NOT placed into any atomspace!
  */
 Handle Variables::substitute(const Handle& func,
-                             const HandleSeq& args) const
+                             const HandleSeq& args,
+                             bool silent) const
 {
 	if (args.size() != varseq.size())
 		throw SyntaxException(TRACE_INFO,
@@ -476,8 +486,11 @@ Handle Variables::substitute(const Handle& func,
 	// of the substitute_nocheck code. I'm too lazy to do this ... no one
 	// wants this whizzy-ness just right yet.
 	if (not is_type(args))
+	{
+		if (silent) throw TypeCheckException();
 		throw SyntaxException(TRACE_INFO,
 			"Arguments fail to match variable declarations");
+	}
 
 	return substitute_nocheck(func, args);
 }

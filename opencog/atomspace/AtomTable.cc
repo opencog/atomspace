@@ -227,9 +227,11 @@ AtomTable::AtomTable(const AtomTable& other)
             "AtomTable - Cannot copy an object of this class");
 }
 
-Handle AtomTable::getHandle(Type t, std::string name) const
+Handle AtomTable::getHandle(Type t, const std::string& n) const
 {
     // Special types need validation
+    // Sigh. Need to copy for NumberNode to work...
+    std::string name = n;
     try {
         if (NUMBER_NODE == t) {
             name = NumberNode::validate(name);
@@ -247,12 +249,22 @@ Handle AtomTable::getHandle(Type t, std::string name) const
     return Handle::UNDEFINED;
 }
 
-Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
+Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
 {
+    AtomPtr a(createLink(t, seq));
+    return getLinkHandle(a);
+}
+
+Handle AtomTable::getLinkHandle(AtomPtr& a) const
+{
+    Type t = a->getType();
+    const HandleSeq &seq = a->getOutgoingSet();
+
     // Make sure all the atoms in the outgoing set are resolved :-)
     HandleSeq resolved_seq;
-    for (Handle ho : seq) {
-        resolved_seq.emplace_back(getHandle(ho));
+    for (const Handle& ho : seq) {
+        AtomPtr ao(ho);
+        resolved_seq.emplace_back(getHandle(ao));
     }
 
     // Aiieee! unordered link!
@@ -264,16 +276,44 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
     }
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
+
+    // If it is NOT a ScopeLink, then it is easy to find the equivalent
+    // atom --  we pull it out of the linkIndex. But if it is a
+    // ScopeLink, then we need to search for any alpha-converted forms.
     Handle h(linkIndex.getHandle(t, resolved_seq));
-    if (_environ and nullptr == h)
-        return _environ->getHandle(t, resolved_seq);
-    return h;
+    if (nullptr != h) return h;
+
+    if (not classserver().isA(t, SCOPE_LINK)) {
+        if (_environ and nullptr == h) {
+            return _environ->getHandle(a);
+        }
+        return h;
+    }
+
+    ScopeLinkPtr wanted = ScopeLinkCast(a);
+    if (nullptr == wanted)
+        wanted = ScopeLink::factory(Handle(a));
+
+    // Look at each and every ScopeLink.
+    TypeIndex::iterator candidate = typeIndex.begin(t, false);
+    const TypeIndex::iterator end = typeIndex.end();
+    for (; candidate != end; candidate++) {
+        if (wanted->is_equal(*candidate)) {
+            return Handle(*candidate);
+        }
+    }
+
+    if (_environ) {
+        AtomPtr aw(wanted);
+        return _environ->getHandle(aw);
+    }
+    return Handle::UNDEFINED;
 }
 
 /// Find an equivalent atom that is exactly the same as the arg. If
 /// such an atom is in the table, it is returned, else the return
 /// is the bad handle.
-Handle AtomTable::getHandle(const AtomPtr& a) const
+Handle AtomTable::getHandle(AtomPtr& a) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
 
@@ -283,7 +323,7 @@ Handle AtomTable::getHandle(const AtomPtr& a) const
     if (a->isNode())
         return getHandle(a->getType(), a->getName());
     else if (a->isLink())
-        return getHandle(a->getType(), a->getOutgoingSet());
+        return getLinkHandle(a);
 
     return Handle::UNDEFINED;
 }
@@ -749,8 +789,8 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
 
     // Make sure the atom is fully resolved before we go about
     // deleting it.
-    handle = getHandle(handle);
     AtomPtr atom(handle);
+    atom = getHandle(atom);
     if (nullptr == atom or atom->isMarkedForRemoval()) return result;
 
     // Perhaps the atom is not in any table? Or at least, not in this

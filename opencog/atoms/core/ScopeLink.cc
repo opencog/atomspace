@@ -1,4 +1,3 @@
-
 /*
  * ScopeLink.cc
  *
@@ -58,12 +57,30 @@ ScopeLink::ScopeLink(const Handle& vars, const Handle& body,
 	init();
 }
 
+bool ScopeLink::skip_init(Type t)
+{
+	// Type must be as expected.
+	if (not classserver().isA(t, SCOPE_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a ScopeLink, got %s", tname.c_str());
+	}
+
+	// Certain derived classes want to have a different initialization
+	// sequence. We can't use virtual init() in the ctor, so just
+	// do an if-statement here.
+	if (IMPLICATION_LINK == t) return true;
+	if (PUT_LINK == t) return true;
+	if (classserver().isA(t, PATTERN_LINK)) return true;
+	return false;
+}
+
 ScopeLink::ScopeLink(Type t, const Handle& body,
                      TruthValuePtr tv, AttentionValuePtr av)
 	: Link(t, HandleSeq({body}), tv, av)
 {
-	// Derived classes have a different initialization sequence
-	if (SCOPE_LINK != t) return;
+	if (skip_init(t)) return;
 	init();
 }
 
@@ -71,25 +88,14 @@ ScopeLink::ScopeLink(Type t, const HandleSeq& oset,
                      TruthValuePtr tv, AttentionValuePtr av)
 	: Link(t, oset, tv, av)
 {
-	// Derived classes have a different initialization sequence
-	if (SCOPE_LINK != t) return;
+	if (skip_init(t)) return;
 	init();
 }
 
 ScopeLink::ScopeLink(Link &l)
 	: Link(l)
 {
-	// Type must be as expected.
-	Type tscope = l.getType();
-	if (not classserver().isA(tscope, SCOPE_LINK))
-	{
-		const std::string& tname = classserver().getTypeName(tscope);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a ScopeLink, got %s", tname.c_str());
-	}
-
-	// Derived types have a different initialization sequence.
-	if (SCOPE_LINK != tscope) return;
+	if (skip_init(l.getType())) return;
 	init();
 }
 
@@ -172,10 +178,10 @@ bool ScopeLink::is_equal(const Handle& other) const
 	ScopeLinkPtr scother(ScopeLinkCast(other));
 
 	// In case we're dealing with a class inheriting from ScopeLink,
-	// like BindLink, that has more than one scoped terms, like
+	// like BindLink, that has more than one scoped term, like
 	// implicand, etc, then we need to check the alpha equivalence
-	// over all terms. Before that let's check that they have the same
-	// number of terms.
+	// over all terms. Before that, let's check that they have the
+	// same number of terms.
 	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
 	Arity other_vardecl_offset = scother->_vardecl != Handle::UNDEFINED;
 	Arity n_scoped_terms = getArity() - vardecl_offset;

@@ -73,11 +73,8 @@ protected:
 	void extract_variables(const HandleSeq& oset);
 	void init_scoped_variables(const Handle& hvar);
 
-	// utility debug print
-	static void prt(const Handle& h)
-	{
-		printf("%s\n", h->toShortString().c_str());
-	}
+	bool skip_init(Type);
+
 public:
 	ScopeLink(const HandleSeq&,
 	          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
