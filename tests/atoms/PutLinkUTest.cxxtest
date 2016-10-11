@@ -352,6 +352,7 @@ void PutLinkUTest::test_eval_implication()
 	Handle putted = inst.execute(put);
 	Handle expected = L(AND_LINK, Self_human, Bob_human, Self_Bob_acquainted);
 
+	printf("Executing %s\n", put->toString().c_str());
 	printf("Expecting %s\n", expected->toString().c_str());
 	printf("Got %s\n", putted->toString().c_str());
 	TS_ASSERT_EQUALS(putted, expected);
