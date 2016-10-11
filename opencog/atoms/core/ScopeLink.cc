@@ -67,8 +67,11 @@ bool ScopeLink::skip_init(Type t)
 			"Expecting a ScopeLink, got %s", tname.c_str());
 	}
 
-	// Derived classes have a different initialization sequence
-	if (SCOPE_LINK != t) return true;
+	// Certain derived classes want to have a different initialization
+	// sequence. We can't use virtual init() in the ctor, so just
+	// do an if-statement here.
+	if (PUT_LINK == t) return true;
+	if (classserver().isA(t, PATTERN_LINK)) return true;
 	return false;
 }
 
