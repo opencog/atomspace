@@ -297,4 +297,7 @@ cdef class Atom(object):
             return -1
 
     def __hash__(a1):
-        return hash(a1.value())
+        # Use the address of the atom in memory as the hash.
+        # This should be globally unique, because the atomspace
+        # does not allow more than one, ever.
+        return hash(PyLong_FromVoidPtr(a1.handle.atom_ptr()))
