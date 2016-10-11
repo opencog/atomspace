@@ -261,25 +261,28 @@ Handle opencog::filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 	// Base cases
 
 	if (vardecl.is_undefined())
-		return Handle::UNDEFINED;
+		return Handle::UNDEFINED;  // XXX TODO .. return?? or throw?
 
 	Type t = vardecl->getType();
-	if (vardecl->isNode()) {
-		if (VARIABLE_NODE == t and is_free_in_any_tree(hs, vardecl))
+	if (VARIABLE_NODE == t)
+	{
+		if (is_free_in_any_tree(hs, vardecl))
 			return vardecl;
-		else
-			return Handle::UNDEFINED;
 	}
 
 	// Recursive cases
 
-	if (TYPED_VARIABLE_LINK == t)
+	else if (TYPED_VARIABLE_LINK == t)
+	{
 		if (filter_vardecl(vardecl->getOutgoingAtom(0), hs).is_defined())
 			return vardecl;
+	}
 
-	if (VARIABLE_LIST == t) {
+	else if (VARIABLE_LIST == t)
+	{
 		HandleSeq subvardecls;
-		for (const Handle& v : vardecl->getOutgoingSet()) {
+		for (const Handle& v : vardecl->getOutgoingSet())
+		{
 			if (filter_vardecl(v, hs).is_defined())
 				subvardecls.push_back(v);
 		}
@@ -290,6 +293,7 @@ Handle opencog::filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 		return Handle(createVariableList(subvardecls));
 	}
 
+	// XXX TODO .. undefined?? or throw?
 	return Handle::UNDEFINED;
 }
 
