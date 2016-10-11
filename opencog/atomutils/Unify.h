@@ -68,28 +68,20 @@ struct UnificationSolutionSet :
 	}
 };
 
-// Variables contain the types of all variables involved in the
-// subtitution
-typedef std::map<HandleMap, Variables> TypedSubstitutions;
-
-// // Given a HandleMap from variables to values (values being possibly
-// // variables) and a Variable
-// get_subtitution_values(HandleMap
+// Subtitution values and their corresponding variable declaration
+// (cause some values will be variables).
+typedef std::map<HandleMap, Handle> TypedSubstitutions;
+typedef TypedSubstitutions::value_type TypedSubstitution;
 
 /**
- * Generate typed substitution rules, HandleMap associated to a
- * variable declaration, given a UnificationSolutionSet on a
- * satisfiable solution.
+ * Generate typed substitution rules, given a UnificationSolutionSet
+ * and the term from which to select the variables as values in case
+ * multiple choices are possible.
  *
- * TODO: for now the types of the Variables are ignored, i.e. no type
- * restrictions.
- *
- * TODO: need to select the prefered side, for that the initial
- * variable declarations will have to be taken into account and we
- * could say that by convention the left side would be chosen as value
- * over the right side.
+ * TODO: support generating the associated type declartion.
  */
-TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol);
+TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol,
+                                       const Handle& pre);
 
 /**
  * This algorithm perform unification by recursively
@@ -342,6 +334,8 @@ std::string oc_to_string(const UnificationPartition& hshm);
 std::string oc_to_string(const UnificationBlock& ub);
 std::string oc_to_string(const UnificationPartitions& par);
 std::string oc_to_string(const UnificationSolutionSet& sol);
+std::string oc_to_string(const TypedSubstitutions& tss);
+std::string oc_to_string(const TypedSubstitution& ts);
 	
 } // namespace opencog
 

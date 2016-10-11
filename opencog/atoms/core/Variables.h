@@ -80,6 +80,10 @@ struct FreeVariables
 	void find_variables(const Handle&);
 	void find_variables(const HandleSeq&);
 
+	// Given a mapping from variables to values to create values
+	// sequence to be passed to substitute
+	HandleSeq make_values(const HandleMap&) const;
+
 	// Given the tree `tree` containing variables in it, create and
 	// return a new tree with the indicated values `vals` substituted
 	// for the variables.  "nocheck" == no type checking is done.

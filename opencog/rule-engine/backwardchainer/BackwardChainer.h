@@ -134,18 +134,9 @@ private:
 	// possibly be used to infer the target.
 	RuleSeq get_valid_rules(const Target& target);
 
-	// Return true if a given target matches a given rule's
-	// conclusion. In other words whether the rule is a potential
-	// candidate for back-inference tree expansion.
-	bool match_conclusion(const Target& target, const Rule& rule);
-
 	// Fulfill, apply possible inferences in a forward way and pattern
 	// matchings in order to fulfill the given target
 	void fulfill_target(Target& target);
-
-	// Check that target and pattern are unifiable/satisfiable
-	bool unifiable(const Handle& target, const Handle& pattern,
-	               const Handle& target_vardecl, const Handle& pattern_vardecl);
 
 // #if 0
 // 	bool select_rule_old(const Target& target,

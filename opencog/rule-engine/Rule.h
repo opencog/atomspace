@@ -33,6 +33,9 @@ namespace opencog {
 
 using namespace std;
 
+class Rule;
+typedef vector<Rule> RuleSeq;
+
 /**
  * Class for managing rules in the URE.
  *
@@ -182,23 +185,23 @@ public:
 	Rule gen_standardize_apart(AtomSpace* as);
 
 	/**
-	 * Given a source, generate all rule variations that may be
-	 * applied over a given source. The variables in the rules are
-	 * renamed to almost certainly avoid name collision.
+	 * Used by the forward chainer to select rules. Given a source,
+	 * generate all rule variations that may be applied over a given
+	 * source. The variables in the rules are renamed to almost
+	 * certainly avoid name collision.
 	 *
 	 * TODO: we probably want to support a vector of sources for rules
 	 * with multiple premises.
 	 */
-	std::vector<Rule> forward_unified_rules(const Handle& source,
-	                                        const Handle& vardecl);
+	RuleSeq unify_source(const Handle& source, const Handle& vardecl) const;
 
 	/**
-	 * Given a target, generate all rule variations that may infer
-	 * this target. The variables in the rules are renamed to almost
-	 * certainly avoid name collision.
+	 * Used by the backward chainer to select rules. Given a target,
+	 * generate all rule variations that may infer this target. The
+	 * variables in the rules are renamed to almost certainly avoid
+	 * name collision.
 	 */
-	std::vector<Rule> backward_unified_rules(const Handle& target,
-	                                         const Handle& vardecl);
+	RuleSeq unify_target(const Handle& target, const Handle& vardecl) const;
 
 	std::string to_string() const;
 
@@ -247,8 +250,6 @@ private:
 	// Given an ExecutionOutputLink return its last argument
 	Handle get_execution_output_last_argument(const Handle& h) const;
 };
-
-typedef std::vector<Rule> RuleSeq;
 
 // For Gdb debugging
 std::string oc_to_string(const Rule& rule);
