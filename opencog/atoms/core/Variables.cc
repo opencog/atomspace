@@ -236,6 +236,8 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		if (GLOB_NODE == h->getType())
 		{
 			Handle glst(substitute_scoped(h, args, index_map, quotation_level));
+			if (glst->isNode())
+				return glst;
 			for (const Handle& gl : glst->getOutgoingSet())
 				oset.emplace_back(gl);
 		}
@@ -250,7 +252,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 
 /// Return true if the other Variables struct is equal to this one,
 /// up to alpha-conversion. That is, same number of variables, same
-/// type restrictions, but different actual variable names.
+/// type restrictions, but possibly different variable names.
 bool Variables::is_equal(const Variables& other) const
 {
 	size_t sz = varseq.size();
@@ -261,6 +263,10 @@ bool Variables::is_equal(const Variables& other) const
 	{
 		const Handle& vme(varseq[i]);
 		const Handle& voth(other.varseq[i]);
+
+		// If one is a GlobNode, and the other a VariableNode,
+		// then its a mismatch.
+		if (vme->getType() != voth->getType()) return false;
 
 		// If typed, types must match.
 		auto sime = _simple_typemap.find(vme);
