@@ -30,6 +30,8 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomTable.h>
 
+#include <boost/range/algorithm.hpp>
+
 #include "Link.h"
 
 //#define DPRINTF printf
@@ -137,23 +139,39 @@ bool Link::operator==(const Atom& other) const
 
     Arity arity = getArity();
     if (arity != olink.getArity()) return false;
-    for (Arity i = 0; i < arity; i++)
-    {
-        if (_outgoing[i]->getType() != olink._outgoing[i]->getType())
-            return false;
 
-        if (_outgoing[i]->isNode())
-        {
-            NodePtr tn(NodeCast(_outgoing[i]));
-            NodePtr on(NodeCast(olink._outgoing[i]));
-            if (*tn != *on) return false;
-        }
-        else if (_outgoing[i]->isLink())
-        {
-            LinkPtr tl(LinkCast(_outgoing[i]));
-            LinkPtr ol(LinkCast(olink._outgoing[i]));
-            if (*tl != *ol) return false;
-        }
+    // If the type is unordered and one of the uuids are invalid we
+    // need to reorder by content to be sure that the children are
+    // aligned.
+    if (classserver().isA(getType(), UNORDERED_LINK) and
+        (_uuid != Handle::INVALID_UUID
+         or other.getUUID() != Handle::INVALID_UUID))
+    {
+        HandleSeq sorted_outgoing(_outgoing),
+            other_sorted_outgoing(olink._outgoing);
+        boost::sort(sorted_outgoing, content_based_handle_less());
+        boost::sort(other_sorted_outgoing, content_based_handle_less());
+        return outgoings_equal(sorted_outgoing, other_sorted_outgoing);
+    }
+
+    // No need to reorder, compare the children directly
+    return outgoings_equal(_outgoing, olink._outgoing);
+}
+
+bool Link::outgoings_equal(const HandleSeq& lhs, const HandleSeq& rhs)
+{
+    for (Arity i = 0; i < lhs.size(); i++)
+    {
+        // TODO: may be replace this by
+        //
+        //     if (lhs[i] != rhs[i])
+        //         return false;
+        //
+        // once Handle::operator== is fixed when comparing defined and
+        // undefined handles.
+
+        if (lhs[i]->operator!=(*(rhs[i].const_atom_ptr())))
+            return false;
     }
     return true;
 }
