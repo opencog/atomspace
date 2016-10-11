@@ -869,7 +869,8 @@ Handle PythonEval::apply(AtomSpace* as, const std::string& func, Handle varargs)
         }
 
         // Get the atom pointer from the python atom pointer.
-        Handle* hptr = (Handle*)(PyLong_AsLong(pyAtomPATOM));
+        // Save it, because the DECREF will blow it away.
+        Handle hresult = *((Handle*)(PyLong_AsLong(pyAtomPATOM)));
 
         // Cleanup the reference counts.
         Py_DECREF(pyReturnAtom);
@@ -878,7 +879,7 @@ Handle PythonEval::apply(AtomSpace* as, const std::string& func, Handle varargs)
         // Release the GIL. No Python API allowed beyond this point.
         PyGILState_Release(gstate);
 
-        return *hptr;
+        return hresult;
     } else {
 
         throw RuntimeException(TRACE_INFO,
