@@ -58,6 +58,10 @@ public:
 	std::string to_string() const;
 };
 
+// TODO: we need a set of and-branches. Each and-branch wil composed
+// of its leaves (not necessarily being without children) and the
+// associated atomese representation.
+	
 // Back-inference tree. A back-inference tree is an and-or tree, where
 // there are 2 types of children, or-children and and-children. The
 // or-children are represented by Target::rules, because multiple
