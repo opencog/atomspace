@@ -143,9 +143,12 @@ struct Variables : public FreeVariables
 	// Given the tree `tree` containing variables in it, create and
 	// return a new tree with the indicated values `vals` substituted
 	// for the variables. The vals must pass the typecheck, else an
-	// exception is thrown. An exception is thrown if the vals are not
-	// of the types specified in this class.
-	Handle substitute(const Handle& tree, const HandleSeq& vals) const;
+	// exception is thrown. If "silent" is true, then the exception
+	// will not be logged; this allows this method to be used for
+	// filtering, where type mis-checks are expected and normal.
+	Handle substitute(const Handle& tree,
+	                  const HandleSeq& vals,
+	                  bool silent = false) const;
 
 	// Extend this variable set by adding in the given variable set.
 	void extend(const Variables&);

@@ -282,9 +282,9 @@ Handle PutLink::do_reduce(void) const
 			oset.emplace_back(_values);
 			try
 			{
-				return vars.substitute(bods, oset);
+				return vars.substitute(bods, oset, /* silent */ true);
 			}
-			catch (...)
+			catch (const TypeCheckException& ex)
 			{
 				return Handle::UNDEFINED;
 			}
@@ -298,9 +298,9 @@ Handle PutLink::do_reduce(void) const
 			oset.emplace_back(h);
 			try
 			{
-				bset.emplace_back(vars.substitute(bods, oset));
+				bset.emplace_back(vars.substitute(bods, oset, /* silent */ true));
 			}
-			catch (...) {}
+			catch (const TypeCheckException& ex) {}
 		}
 		return Handle(createLink(SET_LINK, bset));
 	}
@@ -309,9 +309,9 @@ Handle PutLink::do_reduce(void) const
 		const HandleSeq& oset = _values->getOutgoingSet();
 		try
 		{
-			return vars.substitute(bods, oset);
+			return vars.substitute(bods, oset, /* silent */ true);
 		}
-		catch (...)
+		catch (const TypeCheckException& ex)
 		{
 			return Handle::UNDEFINED;
 		}
@@ -326,9 +326,9 @@ Handle PutLink::do_reduce(void) const
 		const HandleSeq& oset = h->getOutgoingSet();
 		try
 		{
-			bset.emplace_back(vars.substitute(bods, oset));
+			bset.emplace_back(vars.substitute(bods, oset, /* silent */ true));
 		}
-		catch (...) {}
+		catch (const TypeCheckException& ex) {}
 	}
 	return Handle(createLink(SET_LINK, bset));
 }
