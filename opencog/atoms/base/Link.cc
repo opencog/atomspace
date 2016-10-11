@@ -162,23 +162,16 @@ bool Link::outgoings_equal(const HandleSeq& lhs, const HandleSeq& rhs)
 {
     for (Arity i = 0; i < lhs.size(); i++)
     {
-        if (lhs[i]->getType() != rhs[i]->getType())
-            return false;
+        // TODO: may be replace this by
+        //
+        //     if (lhs[i] != rhs[i])
+        //         return false;
+        //
+        // once Handle::operator== is fixed when comparing defined and
+        // undefined handles.
 
-        if (lhs[i]->isNode())
-        {
-            NodePtr tn(NodeCast(lhs[i]));
-            NodePtr on(NodeCast(rhs[i]));
-            if (*tn != *on) return false;
-        }
-        else if (lhs[i]->isLink())
-        {
-            LinkPtr tl(LinkCast(lhs[i]));
-            LinkPtr ol(LinkCast(rhs[i]));
-            if (*tl != *ol) return false;
-        }
-        // if (lhs[i] != rhs[i])
-        //     return false;
+        if (lhs[i]->operator!=(*(rhs[i].const_atom_ptr())))
+            return false;
     }
     return true;
 }
