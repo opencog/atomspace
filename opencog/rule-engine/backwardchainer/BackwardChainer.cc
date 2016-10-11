@@ -152,32 +152,17 @@ Rule BackwardChainer::select_rule(const Target& target)
 RuleSeq BackwardChainer::get_valid_rules(const Target& target)
 {
 	RuleSeq valid_rules;
-	for (const Rule& rule : _rules)
-		if (match_conclusion(target, rule))
-			valid_rules.push_back(rule);
+	for (const Rule& rule : _rules) {
+		RuleSeq unified_rules = rule.unify_target(target.body, target.vardecl);
+		valid_rules.insert(valid_rules.end(),
+		                   unified_rules.begin(), unified_rules.end());
+	}
 	return valid_rules;
-}
-
-bool BackwardChainer::match_conclusion(const Target& target, const Rule& rule)
-{
-	for (const HandlePair& hp : rule.get_conclusions())
-		if (unifiable(target.body, hp.second, target.vardecl, hp.first))
-		    return true;
-	return false;
 }
 
 void BackwardChainer::fulfill_target(Target& target)
 {
 	// TODO
-}
-
-bool BackwardChainer::unifiable(const Handle& target, const Handle& pattern,
-                                const Handle& target_vardecl,
-                                const Handle& pattern_vardecl)
-{
-	UnificationSolutionSet sol =
-		unify(target, pattern, target_vardecl, pattern_vardecl);
-	return sol.satisfiable;
 }
 
 /**
