@@ -152,7 +152,7 @@ void Atom::merge(TruthValuePtr tvn, const MergeCtrl& mc)
 
 // ==============================================================
 
-AttentionValuePtr Atom::getAttentionValue()
+AttentionValuePtr Atom::getAttentionValue() const
 {
     // OK. The atomic thread-safety of shared-pointers is subtle. See
     // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety

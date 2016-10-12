@@ -223,7 +223,7 @@ public:
      * @return The pointer to the AttentionValue object
      * of the atom.
      */
-    AttentionValuePtr getAttentionValue();
+    AttentionValuePtr getAttentionValue() const;
 
     //! Sets the AttentionValue object of the atom.
     void setAttentionValue(AttentionValuePtr);
