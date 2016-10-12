@@ -92,6 +92,8 @@ static inline void logmsg(const char * msg, const Handle& h)
 /// Compare a VariableNode in the pattern to the proposed grounding.
 ///
 /// Handle hp is from the pattern clause.
+//
+// XXX the self-grounding code should maybe move to the callback ??
 bool PatternMatchEngine::variable_compare(const Handle& hp,
                                           const Handle& hg)
 {
@@ -789,12 +791,6 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 {
 	const Handle& hp = ptm->getHandle();
 
-	// If the pattern link is a quote, then we compare the quoted
-	// contents. This is done recursively, of course.  The QuoteLink
-	// must have only one child; anything else beyond that is ignored
-	// (as its not clear what else could possibly be done).
-	Type tp = hp->getType();
-
 	// If the pattern link is executable, then we should execute, and
 	// use the result of that execution. (This isn't implemented yet,
 	// because all variables in an executable link need to be grounded,
@@ -803,6 +799,8 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	if (is_executable(hp))
 		throw RuntimeException(TRACE_INFO, "Not implemented!!");
 
+	Type tp = hp->getType();
+
 	// If the pattern is a DefinedSchemaNode, we need to substitute
 	// its definition. XXX TODO.
 	if (DEFINED_SCHEMA_NODE == tp)
@@ -810,10 +808,14 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// Handle hp is from the pattern clause, and it might be one
 	// of the bound variables. If so, then declare a match.
-	if (not ptm->isQuoted() and
-	    _varlist->varset.end() != _varlist->varset.find(hp))
+	if (not ptm->isQuoted())
 	{
-		return variable_compare(hp, hg);
+		if (_varlist->varset.end() != _varlist->varset.find(hp))
+			return variable_compare(hp, hg);
+
+		// Report other variables that might be found.
+		if (VARIABLE_NODE == tp)
+			return _pmc.scope_match(hp, hg);
 	}
 
 	// If they're the same atom, then clearly they match.

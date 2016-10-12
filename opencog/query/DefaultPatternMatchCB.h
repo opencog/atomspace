@@ -60,6 +60,8 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 
 		virtual bool node_match(const Handle&, const Handle&);
 		virtual bool variable_match(const Handle&, const Handle&);
+		virtual bool scope_match(const Handle&, const Handle&);
+
 		virtual bool link_match(const Handle&, const Handle&);
 		virtual bool post_link_match(const Handle&, const Handle&);
 

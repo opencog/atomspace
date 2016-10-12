@@ -208,8 +208,21 @@ bool DefaultPatternMatchCB::node_match(const Handle& npat_h,
 bool DefaultPatternMatchCB::variable_match(const Handle& npat_h,
                                            const Handle& nsoln_h)
 {
+	// If the ungrounded term is not of type VariableNode, then just
+	// accept the match. This allows any kind of node types to be
+	// explicitly bound as variables.  However, the type VariableNode
+	// gets special handling, below.
 	Type pattype = npat_h->getType();
+	if (VARIABLE_NODE != pattype and GLOB_NODE != pattype) return true;
 
+	// If the ungrounded term is a variable, then see if there
+	// are any restrictions on the variable type.
+	return _vars->is_type(npat_h, nsoln_h);
+}
+
+bool DefaultPatternMatchCB::scope_match(const Handle& npat_h,
+                                        const Handle& nsoln_h)
+{
 	// If there are scoped vars, then accept anything that is
 	// alpha-equivalent. (i.e. equivalent after alpha-conversion)
 	if (_pat_bound_vars and _pat_bound_vars->is_in_varset(npat_h))
@@ -219,15 +232,8 @@ bool DefaultPatternMatchCB::variable_match(const Handle& npat_h,
 		return aok;
 	}
 
-	// If the ungrounded term is not of type VariableNode, then just
-	// accept the match. This allows any kind of node types to be
-	// explicitly bound as variables.  However, the type VariableNode
-	// gets special handling, below.
-	if (VARIABLE_NODE != pattype and GLOB_NODE != pattype) return true;
-
-	// If the ungrounded term is a variable, then see if there
-	// are any restrictions on the variable type.
-	return _vars->is_type(npat_h, nsoln_h);
+	// Else, these need to be an exact match...
+	return npat_h == nsoln_h;
 }
 
 /**
@@ -272,7 +278,11 @@ bool DefaultPatternMatchCB::link_match(const Handle& lpat,
 	// alpha-conversion of the bound variables in the scope link.
 	if (_classserver.isA(pattype, SCOPE_LINK))
 	{
-		assert(nullptr == _pat_bound_vars,
+		// XXX The assert below -- if we hit this, then we have nested
+		// scoped links. The correct fix would be to push these onto a
+		// stack, and then alter scope_match() to walk the stack,
+		// verifying alpha-convertability.
+		OC_ASSERT(nullptr == _pat_bound_vars,
 			"Not implemented! Need to implement a stack, here.");
 		_pat_bound_vars = & ScopeLinkCast(lpat)->get_variables();
 		_gnd_bound_vars = & ScopeLinkCast(lsoln)->get_variables();
@@ -293,6 +303,7 @@ bool DefaultPatternMatchCB::link_match(const Handle& lpat,
 bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
                                             const Handle& lgnd)
 {
+	Type pattype = lpat->getType();
 	if (_pat_bound_vars and _classserver.isA(pattype, SCOPE_LINK))
 	{
 		_pat_bound_vars = nullptr;
@@ -306,7 +317,7 @@ bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
 	// the StateLink has a single, unique closed-term value (or possibly
 	// no value at all), and the check below discards all matches that
 	// aren't closed form, i.e. all StateLinks with a variable as state.
-	if (STATE_LINK == lpat->getType())
+	if (STATE_LINK == pattype)
 	{
 		try
 		{

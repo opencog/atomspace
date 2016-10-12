@@ -849,9 +849,9 @@ void PatternLink::check_satisfiability(const OrderedHandleSet& vars,
 	}
 }
 
-// Hack alert: Definitely it should not be here. Though some refactoring
+// Hack alert: The line below should not be here. Though some refactoring
 // regarding shared libraries circular dependencies (liblambda and libquery)
-// need to be done before fixing...
+// needs to be done before this becomes fixable...
 const PatternTermPtr PatternTerm::UNDEFINED(std::make_shared<PatternTerm>());
 
 void PatternLink::make_term_trees()
@@ -869,6 +869,11 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 {
 	Type t = h->getType();
 
+	// If the pattern link is a quote, then we compare the quoted
+	// contents. This is done recursively, of course.  The QuoteLink
+	// must have only one child; anything else beyond that is ignored
+	// (as its not clear what else could possibly be done).
+	//
 	// Ignore quoting and unquoting nodes in the PatternTerm
 	if ((not parent->isQuoted() and QUOTE_LINK == t)
 	    or (parent->getQuotationLevel() == 1 and UNQUOTE_LINK == t)) {

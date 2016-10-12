@@ -68,6 +68,21 @@ class PatternMatchCallback
 		                            const Handle& grnd_node) = 0;
 
 		/**
+		 * Called when there is a variable in the template
+		 * pattern, but it is not bound into the template
+		 * itself: its just some other variable, not eligable
+		 * for handling by variable_match() above. This variable
+		 * is possibly free in the template, and it is possibly
+		 * a bound variable that the matcher has stumbled across.
+		 * If its a free variable, this callback can do as it
+		 * wishes, but if it is a bound variable, this callback
+		 * should probably respect that, and allow a match if and
+		 * only if it is alpha-convertible to the proposed grounding.
+		 */
+		virtual bool scope_match(const Handle& patt_node,
+		                         const Handle& grnd_node) = 0;
+
+		/**
 		 * Called right before link in the template pattern
 		 * is to be compared to a possibly matching link in
 		 * the atomspace. The first argument is a link from
