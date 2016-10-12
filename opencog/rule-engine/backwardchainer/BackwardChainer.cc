@@ -95,15 +95,15 @@ void BackwardChainer::do_step()
 	expand_bit(target, rule);
 }
 
-void BackwardChainer::expand_bit(Target& target, const Rule& rule)
-{
-	// TODO
-}
-
 Target& BackwardChainer::select_target()
 {
 	// For now selection is uniformly random
 	return rand_element(_target_set).second;
+}
+
+void BackwardChainer::fulfill_target(Target& target)
+{
+	// TODO
 }
 
 Rule BackwardChainer::select_rule(const Target& target)
@@ -127,7 +127,7 @@ RuleSeq BackwardChainer::get_valid_rules(const Target& target)
 	return valid_rules;
 }
 
-void BackwardChainer::fulfill_target(Target& target)
+void BackwardChainer::expand_bit(Target& target, const Rule& rule)
 {
 	// TODO
 }

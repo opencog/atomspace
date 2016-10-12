@@ -118,11 +118,12 @@ public:
 	HandleMultimap get_chaining_result();
 
 private:
-	// Expand the back-inference tree of a target
-	void expand_bit(Target& target, const Rule& rule);
-
 	// Select the target to expand
 	Target& select_target();
+
+	// Fulfill, apply possible inferences in a forward way and pattern
+	// matchings in order to fulfill the given target
+	void fulfill_target(Target& target);
 
 	// Select a valid rule given a target. The selected is a new
 	// object because a new rule is created, its variables are
@@ -134,9 +135,8 @@ private:
 	// possibly be used to infer the target.
 	RuleSeq get_valid_rules(const Target& target);
 
-	// Fulfill, apply possible inferences in a forward way and pattern
-	// matchings in order to fulfill the given target
-	void fulfill_target(Target& target);
+	// Expand the back-inference tree of a target
+	void expand_bit(Target& target, const Rule& rule);
 
 	AtomSpace& _as;
 	UREConfigReader _configReader;
