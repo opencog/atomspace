@@ -55,10 +55,10 @@ class PMCGroundings : public PatternMatchCallback
 		bool variable_match(const Handle& node1, const Handle& node2) {
 			return _cb.variable_match(node1, node2);
 		}
-		bool link_match(const LinkPtr& link1, const LinkPtr& link2) {
+		bool link_match(const Handle& link1, const Handle& link2) {
 			return _cb.link_match(link1, link2);
 		}
-		bool post_link_match(const LinkPtr& link1, const LinkPtr& link2) {
+		bool post_link_match(const Handle& link1, const Handle& link2) {
 			return _cb.post_link_match(link1, link2);
 		}
 		bool fuzzy_match(const Handle& h1, const Handle& h2) {

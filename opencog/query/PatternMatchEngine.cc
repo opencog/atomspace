@@ -329,11 +329,11 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 
 	// If we've found a grounding, lets see if the
 	// post-match callback likes this grounding.
-	match = _pmc.post_link_match(lp, lg);
+	const Handle &hp = ptm->getHandle();
+	match = _pmc.post_link_match(hp, hg);
 	if (not match) return false;
 
 	// If we've found a grounding, record it.
-	const Handle &hp = ptm->getHandle();
 	if (hp != hg) var_grounding[hp] = hg;
 
 	return true;
@@ -388,7 +388,7 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 		{
 			// If we've found a grounding, lets see if the
 			// post-match callback likes this grounding.
-			match = _pmc.post_link_match(lp, lg);
+			match = _pmc.post_link_match(hp, hg);
 			if (match)
 			{
 				// Even the stack, *without* erasing the discovered grounding.
@@ -658,7 +658,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		{
 			// If we've found a grounding, lets see if the
 			// post-match callback likes this grounding.
-			match = _pmc.post_link_match(lp, lg);
+			match = _pmc.post_link_match(hp, hg);
 			if (match)
 			{
 				// Even the stack, *without* erasing the discovered grounding.
@@ -844,7 +844,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	// Let the callback perform basic checking.
 	LinkPtr lp(LinkCast(hp));
 	LinkPtr lg(LinkCast(hg));
-	bool match = _pmc.link_match(lp, lg);
+	bool match = _pmc.link_match(hp, hg);
 	if (not match) return false;
 
 	LAZY_LOG_FINE << "depth=" << depth;
