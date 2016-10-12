@@ -32,42 +32,21 @@
 
 using namespace opencog;
 
+/* ======================================================== */
+// Cache for temp (transient) atomsapaces.  The evaluation of
+// expressions during pattern matching requires having a temporary
+// atomspace, treated as a scratch space to hold temporary results.
+// These are then discarded, after the match is confirmed or denied.
+// The issue is that creating an atomspace is CPU-intensive, so its
+// cheaper to just have a cache of empty atomspaces, hanging around,
+// and ready to go. The code in this section implements this.
+
 const bool TRANSIENT_SPACE = true;
 const int MAX_CACHED_TRANSIENTS = 8;
 
 // Allocated storage for the transient atomspace cache static variables.
 std::mutex DefaultPatternMatchCB::s_transient_cache_mutex;
 std::vector<AtomSpace*> DefaultPatternMatchCB::s_transient_cache;
-
-/* ======================================================== */
-
-DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
-	_classserver(classserver())
-{
-	_temp_aspace = grab_transient_atomspace(as);
-	_instor = new Instantiator(_temp_aspace);
-
-	_connectives.insert(SEQUENTIAL_AND_LINK);
-	_connectives.insert(SEQUENTIAL_OR_LINK);
-	_connectives.insert(AND_LINK);
-	_connectives.insert(OR_LINK);
-	_connectives.insert(NOT_LINK);
-
-	_as = as;
-}
-
-DefaultPatternMatchCB::~DefaultPatternMatchCB()
-{
-	// If we have a transient atomspace, release it.
-	if (_temp_aspace)
-	{
-		release_transient_atomspace(_temp_aspace);
-		_temp_aspace = NULL;
-	}
-
-	// Delete the instantiator.
-	delete _instor;	
-}
 
 AtomSpace* DefaultPatternMatchCB::grab_transient_atomspace(AtomSpace* parent)
 {
@@ -126,6 +105,36 @@ void DefaultPatternMatchCB::release_transient_atomspace(AtomSpace* atomspace)
 	// If we didn't cache the atomspace, then delete it.
 	if (!atomspace_cached)
 		delete atomspace;
+}
+
+/* ======================================================== */
+
+DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
+	_classserver(classserver())
+{
+	_temp_aspace = grab_transient_atomspace(as);
+	_instor = new Instantiator(_temp_aspace);
+
+	_connectives.insert(SEQUENTIAL_AND_LINK);
+	_connectives.insert(SEQUENTIAL_OR_LINK);
+	_connectives.insert(AND_LINK);
+	_connectives.insert(OR_LINK);
+	_connectives.insert(NOT_LINK);
+
+	_as = as;
+}
+
+DefaultPatternMatchCB::~DefaultPatternMatchCB()
+{
+	// If we have a transient atomspace, release it.
+	if (_temp_aspace)
+	{
+		release_transient_atomspace(_temp_aspace);
+		_temp_aspace = NULL;
+	}
+
+	// Delete the instantiator.
+	delete _instor;
 }
 
 #ifdef CACHED_IMPLICATOR
@@ -240,13 +249,16 @@ bool DefaultPatternMatchCB::link_match(const Handle& lpat,
 
 	// Reject mis-sized compares, unless the pattern has a glob in it.
 	if (0 == _globs->count(lpat))
-	{ 
+	{
 		if (lpat->getArity() != lsoln->getArity()) return false;
 	}
 	else
 	{
 		if (lpat->getArity() > lsoln->getArity()) return false;
 	}
+
+	// If the link is a ScopeLink, we need to deal with the
+	// alpha-conversion of the bound variables in the scope link.
 
 	// No reason to reject; proceed with the compare.
 	return true;
