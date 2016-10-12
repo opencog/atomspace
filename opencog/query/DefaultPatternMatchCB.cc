@@ -122,6 +122,8 @@ DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
 	_connectives.insert(NOT_LINK);
 
 	_as = as;
+	_pat_bound_vars = nullptr;
+	_gnd_bound_vars = nullptr;
 }
 
 DefaultPatternMatchCB::~DefaultPatternMatchCB()
@@ -208,6 +210,15 @@ bool DefaultPatternMatchCB::variable_match(const Handle& npat_h,
 {
 	Type pattype = npat_h->getType();
 
+	// If there are scoped vars, then accept anything that is
+	// alpha-equivalent. (i.e. equivalent after alpha-conversion)
+	if (_pat_bound_vars and _pat_bound_vars->is_in_varset(npat_h))
+	{
+		bool aok = _pat_bound_vars->is_alpha_convertible(npat_h,
+		                  nsoln_h, *_gnd_bound_vars);
+		return aok;
+	}
+
 	// If the ungrounded term is not of type VariableNode, then just
 	// accept the match. This allows any kind of node types to be
 	// explicitly bound as variables.  However, the type VariableNode
@@ -259,6 +270,21 @@ bool DefaultPatternMatchCB::link_match(const Handle& lpat,
 
 	// If the link is a ScopeLink, we need to deal with the
 	// alpha-conversion of the bound variables in the scope link.
+	if (_classserver.isA(pattype, SCOPE_LINK))
+	{
+		assert(nullptr == _pat_bound_vars,
+			"Not implemented! Need to implement a stack, here.");
+		_pat_bound_vars = & ScopeLinkCast(lpat)->get_variables();
+		_gnd_bound_vars = & ScopeLinkCast(lsoln)->get_variables();
+
+		if (not _pat_bound_vars->is_equal(*_gnd_bound_vars))
+		{
+			_pat_bound_vars = nullptr;
+			_gnd_bound_vars = nullptr;
+			return false;
+		}
+		return true;
+	}
 
 	// No reason to reject; proceed with the compare.
 	return true;
@@ -267,6 +293,12 @@ bool DefaultPatternMatchCB::link_match(const Handle& lpat,
 bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
                                             const Handle& lgnd)
 {
+	if (_pat_bound_vars and _classserver.isA(pattype, SCOPE_LINK))
+	{
+		_pat_bound_vars = nullptr;
+		_gnd_bound_vars = nullptr;
+	}
+
 	// The if (STATE_LINK) thing is a temp hack until we get a nicer
 	// solution, viz, get around to implementing executable terms in
 	// the search pattern. So: an executable term is anything that
