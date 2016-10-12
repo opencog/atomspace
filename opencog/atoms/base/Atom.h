@@ -107,7 +107,7 @@ protected:
     // but there seemed to be too much contention for it, so instead,
     // we are using a lock-per-atom, even though this makes the atom
     // kind-of fat.
-    std::mutex _mtx;
+    mutable std::mutex _mtx;
 
     /**
      * Constructor for this class. Protected; no user should call this
@@ -288,7 +288,7 @@ public:
      *
      * @return The const referent to the TruthValue object of the atom.
      */
-    TruthValuePtr getTruthValue();
+    TruthValuePtr getTruthValue() const;
 
     //! Sets the TruthValue object of the atom.
     void setTruthValue(TruthValuePtr);

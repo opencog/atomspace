@@ -110,7 +110,7 @@ void Atom::setTruthValue(TruthValuePtr newTV)
     }
 }
 
-TruthValuePtr Atom::getTruthValue()
+TruthValuePtr Atom::getTruthValue() const
 {
     // OK. The atomic thread-safety of shared-pointers is subtle. See
     // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
