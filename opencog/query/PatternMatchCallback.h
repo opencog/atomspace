@@ -92,8 +92,8 @@ class PatternMatchCallback
 		 * type, and to proceed with the search, or cut it
 		 * off, based on these values.
 		 */
-		virtual bool link_match(const LinkPtr& patt_link,
-		                        const LinkPtr& grnd_link) = 0;
+		virtual bool link_match(const Handle& patt_link,
+		                        const Handle& grnd_link) = 0;
 
 		/**
 		 * Called after a candidate grounding has been found
@@ -111,8 +111,8 @@ class PatternMatchCallback
 		 * The first link is from the pattern, the second is
 		 * from the proposed grounding.
 		 */
-		virtual bool post_link_match(const LinkPtr& patt_link,
-		                             const LinkPtr& grnd_link)
+		virtual bool post_link_match(const Handle& patt_link,
+		                             const Handle& grnd_link)
 		{
 			return true; // Accept the match, by default.
 		}

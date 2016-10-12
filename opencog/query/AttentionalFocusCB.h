@@ -29,11 +29,6 @@ namespace opencog {
 
 class AttentionalFocusCB: public virtual DefaultPatternMatchCB
 {
-private:
-	static bool compare_sti(LinkPtr lptr1, LinkPtr lptr2)
-	{
-		return lptr1->getSTI() > lptr2->getSTI();
-	}
 public:
 	AttentionalFocusCB(AtomSpace*);
 
@@ -41,7 +36,7 @@ public:
 	bool node_match(const Handle&, const Handle&);
 
 	// Only match links if they are in the attentional focus
-	bool link_match(const LinkPtr&, const LinkPtr&);
+	bool link_match(const Handle&, const Handle&);
 
 	// Only get incoming sets that are in the attentional focus
 	IncomingSet get_incoming_set(const Handle&);

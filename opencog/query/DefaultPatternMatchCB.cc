@@ -222,8 +222,8 @@ bool DefaultPatternMatchCB::variable_match(const Handle& npat_h,
  * By default, the search continues if the link
  * arity and the link types match.
  */
-bool DefaultPatternMatchCB::link_match(const LinkPtr& lpat,
-                                       const LinkPtr& lsoln)
+bool DefaultPatternMatchCB::link_match(const Handle& lpat,
+                                       const Handle& lsoln)
 {
 	// If the pattern is exactly the same link as the proposed
 	// grounding, then its a perfect match.
@@ -239,7 +239,7 @@ bool DefaultPatternMatchCB::link_match(const LinkPtr& lpat,
 	if (pattype != soltype) return false;
 
 	// Reject mis-sized compares, unless the pattern has a glob in it.
-	if (0 == _globs->count(lpat->getHandle()))
+	if (0 == _globs->count(lpat))
 	{ 
 		if (lpat->getArity() != lsoln->getArity()) return false;
 	}
@@ -252,8 +252,8 @@ bool DefaultPatternMatchCB::link_match(const LinkPtr& lpat,
 	return true;
 }
 
-bool DefaultPatternMatchCB::post_link_match(const LinkPtr& lpat,
-                                            const LinkPtr& lgnd)
+bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
+                                            const Handle& lgnd)
 {
 	// The if (STATE_LINK) thing is a temp hack until we get a nicer
 	// solution, viz, get around to implementing executable terms in

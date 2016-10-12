@@ -78,7 +78,7 @@ class Recognizer :
 
 		virtual bool initiate_search(PatternMatchEngine*);
 		virtual bool node_match(const Handle&, const Handle&);
-		virtual bool link_match(const LinkPtr&, const LinkPtr&);
+		virtual bool link_match(const Handle&, const Handle&);
 		virtual bool fuzzy_match(const Handle&, const Handle&);
 		virtual bool grounding(const HandleMap &var_soln,
 		                       const HandleMap &term_soln);
@@ -156,7 +156,7 @@ bool Recognizer::node_match(const Handle& npat_h, const Handle& nsoln_h)
 	return false;
 }
 
-bool Recognizer::link_match(const LinkPtr& lpat, const LinkPtr& lsoln)
+bool Recognizer::link_match(const Handle& lpat, const Handle& lsoln)
 {
 	// Self-compares always proceed.
 	if (lpat == lsoln) return true;

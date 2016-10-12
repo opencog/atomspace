@@ -37,10 +37,15 @@ bool AttentionalFocusCB::node_match(const Handle& node1, const Handle& node2)
 		node2->getSTI() > _as->get_attentional_focus_boundary();
 }
 
-bool AttentionalFocusCB::link_match(const LinkPtr& lpat, const LinkPtr& lsoln)
+bool AttentionalFocusCB::link_match(const Handle& lpat, const Handle& lsoln)
 {
 	return DefaultPatternMatchCB::link_match(lpat, lsoln)
 		and lsoln->getSTI() > _as->get_attentional_focus_boundary();
+}
+
+static bool compare_sti(const LinkPtr& lptr1, const LinkPtr& lptr2)
+{
+	return lptr1->getSTI() > lptr2->getSTI();
 }
 
 IncomingSet AttentionalFocusCB::get_incoming_set(const Handle& h)
