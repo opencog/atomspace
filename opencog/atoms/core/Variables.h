@@ -130,6 +130,14 @@ struct Variables : public FreeVariables
 	inline bool operator!=(const Variables& other) const
 	{ return not is_equal(other); }
 
+	// Return true if the variable `othervar` in `other` is
+	// alpha-convertible to the variable `var` in this. That is,
+	// return true if they are the same variable, differing only
+	// in name.
+	bool is_alpha_convertible(const Handle& var,
+	                          const Handle& othervar,
+	                          const Variables& other) const;
+
 	// Return true if we are holding a single variable, and the handle
 	// given as the argument satisfies the type restrictions (if any).
 	// Else return false.

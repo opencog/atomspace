@@ -305,8 +305,25 @@ bool Variables::is_equal(const Variables& other) const
 		// XXX TODO fuzzy?
 	}
 
-	// If we got toe here, everything must be OK.
+	// If we got to here, everything must be OK.
 	return true;
+}
+
+/* ================================================================= */
+
+/// Return true if the variable `othervar` in `other` is
+/// alpha-convertible to the variable `var` in this. That is,
+/// return true if they are the same variable, differing only
+/// in name.
+
+bool Variables::is_alpha_convertible(const Handle& var,
+                                     const Handle& othervar,
+                                     const Variables& other) const
+{
+	IndexMap::const_iterator idx = other.index.find(othervar);
+	if (other.index.end() == idx) return false;
+	if (varseq.at(idx->second) == var) return true;
+	return false;
 }
 
 /* ================================================================= */

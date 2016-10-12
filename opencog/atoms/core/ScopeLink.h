@@ -55,7 +55,6 @@ protected:
 	/// Handle of the body of the expression.
 	Handle _body;
 
-
 	/// Variables bound in the body.
 	Variables _varlist;
 
