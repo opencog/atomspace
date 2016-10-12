@@ -62,7 +62,7 @@ std::string Node::toShortString(const std::string& indent)
     return nam;
 }
 
-std::string Node::toString(const std::string& indent)
+std::string Node::toString(const std::string& indent) const
 {
     std::string tmpname = _name;
     if (_name == "")

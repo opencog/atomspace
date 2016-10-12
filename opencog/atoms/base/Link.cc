@@ -97,7 +97,7 @@ std::string Link::toShortString(const std::string& indent)
     return answer.str();
 }
 
-std::string Link::toString(const std::string& indent)
+std::string Link::toString(const std::string& indent) const
 {
     std::string answer = indent;
     std::string more_indent = indent + "  ";

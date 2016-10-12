@@ -54,7 +54,7 @@ public:
 	void setValue(double v) { _value = std::vector<double>({v}); }
 
 	/** Returns a string representation of the value.  */
-	virtual std::string toString(const std::string& indent);
+	virtual std::string toString(const std::string& indent) const;
 	virtual std::string toShortString(const std::string& indent)
 	{ return toString(indent); }
 

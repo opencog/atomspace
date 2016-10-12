@@ -195,7 +195,7 @@ public:
      *
      * @return A string representation of the link.
      */
-    std::string toString(const std::string& indent);
+    std::string toString(const std::string& indent) const;
 
     /**
      * Returns a short string representation of the link.
