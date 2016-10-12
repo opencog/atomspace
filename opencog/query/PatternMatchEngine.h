@@ -188,12 +188,9 @@ private:
 	bool variable_compare(const Handle&, const Handle&);
 	bool self_compare(const PatternTermPtr&);
 	bool node_compare(const Handle&, const Handle&);
-	bool choice_compare(const PatternTermPtr&, const Handle&,
-	                    const LinkPtr&, const LinkPtr&);
-	bool ordered_compare(const PatternTermPtr&, const Handle&,
-	                     const LinkPtr&, const LinkPtr&);
-	bool unorder_compare(const PatternTermPtr&, const Handle&,
-	                     const LinkPtr&, const LinkPtr&);
+	bool choice_compare(const PatternTermPtr&, const Handle&);
+	bool ordered_compare(const PatternTermPtr&, const Handle&);
+	bool unorder_compare(const PatternTermPtr&, const Handle&);
 	bool clause_compare(const PatternTermPtr&, const Handle&);
 
 	// -------------------------------------------

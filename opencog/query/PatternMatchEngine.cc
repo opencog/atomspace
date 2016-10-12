@@ -198,12 +198,10 @@ bool PatternMatchEngine::node_compare(const Handle& hp,
 /// If the two links are both ordered, its enough to compare
 /// them "side-by-side".
 bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
-                                         const Handle& hg,
-                                         const LinkPtr& lp,
-                                         const LinkPtr& lg)
+                                         const Handle& hg)
 {
 	PatternTermSeq osp = ptm->getOutgoingSet();
-	const HandleSeq &osg = lg->getOutgoingSet();
+	const HandleSeq &osg = hg->getOutgoingSet();
 
 	size_t osg_size = osg.size();
 	size_t osp_size = osp.size();
@@ -228,7 +226,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	// kind of fuzzy matching). If there are no globs, and the arity is
 	// mis-matched, then perform fuzzy matching.
 	bool match = true;
-	if (0 == _pat->globby_terms.count(lp->getHandle()))
+	if (0 == _pat->globby_terms.count(ptm->getHandle()))
 	{
 		// If the arities are mis-matched, do a fuzzy compare instead.
 		if (osp_size != osg_size)
@@ -349,9 +347,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 /// the ChoiceLink as a whole can be considered to be grounded.
 ///
 bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
-                                        const Handle& hg,
-                                        const LinkPtr& lp,
-                                        const LinkPtr& lg)
+                                        const Handle& hg)
 {
 	const Handle& hp = ptm->getHandle();
 	PatternTermSeq osp = ptm->getOutgoingSet();
@@ -582,12 +578,10 @@ they call compare_tree.
 ******************************************************************/
 
 bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
-                                         const Handle& hg,
-                                         const LinkPtr& lp,
-                                         const LinkPtr& lg)
+                                         const Handle& hg)
 {
 	const Handle& hp = ptm->getHandle();
-	const HandleSeq& osg = lg->getOutgoingSet();
+	const HandleSeq& osg = hg->getOutgoingSet();
 	PatternTermSeq osp = ptm->getOutgoingSet();
 	size_t arity = osp.size();
 
@@ -842,8 +836,6 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	if (not (hp->isLink() and hg->isLink())) return _pmc.fuzzy_match(hp, hg);
 
 	// Let the callback perform basic checking.
-	LinkPtr lp(LinkCast(hp));
-	LinkPtr lg(LinkCast(hg));
 	bool match = _pmc.link_match(hp, hg);
 	if (not match) return false;
 
@@ -856,15 +848,15 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	// the ChoiceLink as a whole can be considered to be grounded.
 	//
 	if (CHOICE_LINK == tp)
-		return choice_compare(ptm, hg, lp, lg);
+		return choice_compare(ptm, hg);
 
 	// If the two links are both ordered, its enough to compare
 	// them "side-by-side".
-	if (2 > lp->getArity() or _classserver.isA(tp, ORDERED_LINK))
-		return ordered_compare(ptm, hg, lp, lg);
+	if (2 > hp->getArity() or _classserver.isA(tp, ORDERED_LINK))
+		return ordered_compare(ptm, hg);
 
 	// If we are here, we are dealing with an unordered link.
-	return unorder_compare(ptm, hg, lp, lg);
+	return unorder_compare(ptm, hg);
 }
 
 /* ======================================================== */
