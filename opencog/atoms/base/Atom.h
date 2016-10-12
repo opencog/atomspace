@@ -410,8 +410,8 @@ public:
     // Work around gdb's incapability to build a string on the fly,
     // see http://stackoverflow.com/questions/16734783 for more
     // explanation.
-    std::string toString() { return toString(""); }
-    std::string toShortString() { return toShortString(""); }
+    std::string toString() const { return toString(""); }
+    std::string toShortString() const { return toShortString(""); }
 
     /** Returns whether two atoms are equal.
      *
