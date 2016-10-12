@@ -29,7 +29,8 @@
 
 namespace opencog {
 
-Target::Target(const Handle& bd, const Handle& vd) : body(bd), vardecl(vd) {}
+Target::Target(const Handle& bd, const Handle& vd, const TargetFitness& fit)
+	: body(bd), vardecl(vd), TargetFitness(fit) {}
 
 std::string	Target::to_string() const
 {

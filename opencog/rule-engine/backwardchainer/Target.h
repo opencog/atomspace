@@ -41,7 +41,8 @@ class TargetFitness
 class Target
 {
 public:
-	Target(const Handle& body, const Handle& vardecl = Handle::UNDEFINED);
+	Target(const Handle& body, const Handle& vardecl = Handle::UNDEFINED,
+	       const TargetFitness& fit = TargetFitness());
 
 	// Target handle
 	Handle body;

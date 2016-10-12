@@ -40,10 +40,16 @@ using namespace opencog;
 
 BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
                                  const Handle& htarget,
-                                 const Handle& hfocus_set,
+                                 // TODO: add target vardecl
+                                 const Handle& hfocus_set, // TODO:
+                                                           // support
+                                                           // focus_set
                                  const TargetFitness& fitness)
-	: _as(as), _configReader(as, rbs), _iteration(0),
-	  _rules(_configReader.get_rules()) {}
+	: _as(as), _configReader(as, rbs), _init_target(htarget),
+	  _iteration(0), _rules(_configReader.get_rules())
+{
+	// TODO _target_set.insert();
+}
 
 UREConfigReader& BackwardChainer::get_config()
 {
