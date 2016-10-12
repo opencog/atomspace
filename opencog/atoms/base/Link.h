@@ -195,7 +195,7 @@ public:
      *
      * @return A string representation of the link.
      */
-    std::string toString(const std::string& indent);
+    std::string toString(const std::string& indent) const;
 
     /**
      * Returns a short string representation of the link.
@@ -205,7 +205,7 @@ public:
      *
      * @return A short string representation of the link.
      */
-    std::string toShortString(const std::string& indent);
+    std::string toShortString(const std::string& indent) const;
 
 	// Work around gdb's incapability to build a string on the fly,
 	// see http://stackoverflow.com/questions/16734783 and

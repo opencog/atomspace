@@ -32,7 +32,7 @@ bool FloatValue::operator==(const ProtoAtom& other) const
 
 // ==============================================================
 
-std::string FloatValue::toString(const std::string& indent)
+std::string FloatValue::toString(const std::string& indent) const
 {
 	std::string rv = indent + "(FloatValue";
 	for (double v :_value)

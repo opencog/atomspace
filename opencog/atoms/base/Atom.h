@@ -107,7 +107,7 @@ protected:
     // but there seemed to be too much contention for it, so instead,
     // we are using a lock-per-atom, even though this makes the atom
     // kind-of fat.
-    std::mutex _mtx;
+    mutable std::mutex _mtx;
 
     /**
      * Constructor for this class. Protected; no user should call this
@@ -223,23 +223,23 @@ public:
      * @return The pointer to the AttentionValue object
      * of the atom.
      */
-    AttentionValuePtr getAttentionValue();
+    AttentionValuePtr getAttentionValue() const;
 
     //! Sets the AttentionValue object of the atom.
     void setAttentionValue(AttentionValuePtr);
 
     /// Handy-dandy convenience getters for attention values.
-    AttentionValue::sti_t getSTI()
+    AttentionValue::sti_t getSTI() const
     {
         return getAttentionValue()->getSTI();
     }
 
-    AttentionValue::lti_t getLTI()
+    AttentionValue::lti_t getLTI() const
     {
         return getAttentionValue()->getLTI();
     }
 
-    AttentionValue::vlti_t getVLTI()
+    AttentionValue::vlti_t getVLTI() const
     {
         return getAttentionValue()->getVLTI();
     }
@@ -288,7 +288,7 @@ public:
      *
      * @return The const referent to the TruthValue object of the atom.
      */
-    TruthValuePtr getTruthValue();
+    TruthValuePtr getTruthValue() const;
 
     //! Sets the TruthValue object of the atom.
     void setTruthValue(TruthValuePtr);
@@ -307,7 +307,7 @@ public:
     }
 
     //! Get the size of the incoming set.
-    size_t getIncomingSetSize();
+    size_t getIncomingSetSize() const;
 
     //! Return the incoming set of this atom.
     //! If the AtomSpace pointer is non-null, then only those atoms
@@ -404,14 +404,14 @@ public:
      * @return A string representation of the node.
      * cannot be const, because observing the TV and AV requires a lock.
      */
-    virtual std::string toString(const std::string& indent) = 0;
-    virtual std::string toShortString(const std::string& indent) = 0;
+    virtual std::string toString(const std::string& indent) const = 0;
+    virtual std::string toShortString(const std::string& indent) const = 0;
 
     // Work around gdb's incapability to build a string on the fly,
     // see http://stackoverflow.com/questions/16734783 for more
     // explanation.
-    std::string toString() { return toString(""); }
-    std::string toShortString() { return toShortString(""); }
+    std::string toString() const { return toString(""); }
+    std::string toShortString() const { return toShortString(""); }
 
     /** Returns whether two atoms are equal.
      *

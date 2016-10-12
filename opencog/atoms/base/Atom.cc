@@ -110,7 +110,7 @@ void Atom::setTruthValue(TruthValuePtr newTV)
     }
 }
 
-TruthValuePtr Atom::getTruthValue()
+TruthValuePtr Atom::getTruthValue() const
 {
     // OK. The atomic thread-safety of shared-pointers is subtle. See
     // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
@@ -152,7 +152,7 @@ void Atom::merge(TruthValuePtr tvn, const MergeCtrl& mc)
 
 // ==============================================================
 
-AttentionValuePtr Atom::getAttentionValue()
+AttentionValuePtr Atom::getAttentionValue() const
 {
     // OK. The atomic thread-safety of shared-pointers is subtle. See
     // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
@@ -317,7 +317,7 @@ void Atom::remove_atom(LinkPtr a)
     _incoming_set->_iset.erase(a);
 }
 
-size_t Atom::getIncomingSetSize()
+size_t Atom::getIncomingSetSize() const
 {
     if (NULL == _incoming_set) return 0;
     std::lock_guard<std::mutex> lck (_mtx);
