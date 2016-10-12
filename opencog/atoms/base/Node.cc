@@ -43,7 +43,7 @@ void Node::init(const std::string& cname)
     _name = cname;
 }
 
-std::string Node::toShortString(const std::string& indent)
+std::string Node::toShortString(const std::string& indent) const
 {
     std::string tmpname = _name;
     if (_name == "")
