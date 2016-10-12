@@ -88,16 +88,6 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		bool optionals_present(void) { return _optionals_present; }
 	protected:
 
-	    /**
-	     * The mutex used to control access to the transient atomspace cache.
-	     */
-	    static std::mutex s_transient_cache_mutex;
-
-	    /**
-	     * The transient atomspace cache.
-	     */
-		static std::vector<AtomSpace*> s_transient_cache;
-
 		ClassServer& _classserver;
 
 		const Variables* _vars = NULL;
@@ -112,6 +102,12 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		AtomSpace* _temp_aspace;
 		Instantiator* _instor;
 
+		// The transient atomspace cache. The goal here is to
+		// avoid the overhead of constantly creating/deleting
+		// the temp atomspaces above. So instead, just keep a
+		// cache of empty ones, ready to go.
+		static std::mutex s_transient_cache_mutex;
+		static std::vector<AtomSpace*> s_transient_cache;
 		static AtomSpace* grab_transient_atomspace(AtomSpace* parent);
 		static void release_transient_atomspace(AtomSpace* atomspace);
 
