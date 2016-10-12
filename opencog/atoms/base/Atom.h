@@ -307,7 +307,7 @@ public:
     }
 
     //! Get the size of the incoming set.
-    size_t getIncomingSetSize();
+    size_t getIncomingSetSize() const;
 
     //! Return the incoming set of this atom.
     //! If the AtomSpace pointer is non-null, then only those atoms

@@ -317,7 +317,7 @@ void Atom::remove_atom(LinkPtr a)
     _incoming_set->_iset.erase(a);
 }
 
-size_t Atom::getIncomingSetSize()
+size_t Atom::getIncomingSetSize() const
 {
     if (NULL == _incoming_set) return 0;
     std::lock_guard<std::mutex> lck (_mtx);
