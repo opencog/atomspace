@@ -1,7 +1,8 @@
 /*
  * Target.h
  *
- * Author: William Ma <https://github.com/williampma>
+ * Authors: William Ma <https://github.com/williampma>
+ *          Nil Geisweiller
  *
  * Copyright (C) 2015 OpenCog Foundation
  *

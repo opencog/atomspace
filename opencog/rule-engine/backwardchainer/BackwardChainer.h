@@ -91,10 +91,10 @@ class BackwardChainer
     friend class ::BackwardChainerUTest;
 
 public:
-	BackwardChainer(AtomSpace& as, const Handle& rbs);
-
-	void set_target(const Handle& init_target,
-	                const Handle& focus_link = Handle::UNDEFINED);
+	BackwardChainer(AtomSpace& as, const Handle& rbs,
+	                const Handle& htarget,
+	                const Handle& hfocus_set = Handle::UNDEFINED,
+	                const TargetFitness& fitness = TargetFitness());
 	UREConfigReader& get_config();
 	const UREConfigReader& get_config() const;
 
@@ -138,34 +138,8 @@ private:
 	// matchings in order to fulfill the given target
 	void fulfill_target(Target& target);
 
-// #if 0
-// 	bool select_rule_old(const Target& target,
-// 	                     Rule& selected_rule,
-// 	                     Rule& standardized_rule,
-// 	                     HandleMapSeq& all_implicand_to_target_mappings);
-
-// 	void process_target(Target& target);
-
-// 	HandleSeq match_knowledge_base(Handle htarget,
-// 	                               Handle htarget_vardecl,
-// 	                               HandleMapSeq& vmap,
-// 	                               bool enable_var_name_check = false);
-// 	HandleSeq find_premises(const Rule& standardized_rule,
-// 	                        const HandleMap& implicand_mapping,
-// 	                        const OrderedHandleSet& additional_free_varset,
-// 	                        Handle& hrule_implicant_reverse_grounded,
-// 	                        HandleMapSeq& premises_vmap_list);
-// 	HandleSeq ground_premises(const Handle& htarget, const HandleMap& vmap,
-// 	                          HandleMapSeq& vmap_list);
-// 	Handle garbage_substitute(const Handle& term, const HandleMap& vm);
-
-// 	Handle gen_varlist(const Handle& target);
-// 	Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist,
-// 	                       OrderedHandleSet additional_free_varset);
-// #endif
 	AtomSpace& _as;
 	UREConfigReader _configReader;
-	AtomSpace _garbage_superspace;
 	Handle _init_target;
 	AtomSpace _focus_space;
 	int _iteration;

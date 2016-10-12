@@ -86,7 +86,7 @@ void BackwardChainerUTest::reset_bc()
 
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 
-	_bc = new BackwardChainer(_as, top_rbs);
+	_bc = new BackwardChainer(_as, top_rbs, Handle::UNDEFINED);
 }
 
 // Test select rule with a target with no variable
