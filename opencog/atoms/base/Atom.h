@@ -229,17 +229,17 @@ public:
     void setAttentionValue(AttentionValuePtr);
 
     /// Handy-dandy convenience getters for attention values.
-    AttentionValue::sti_t getSTI()
+    AttentionValue::sti_t getSTI() const
     {
         return getAttentionValue()->getSTI();
     }
 
-    AttentionValue::lti_t getLTI()
+    AttentionValue::lti_t getLTI() const
     {
         return getAttentionValue()->getLTI();
     }
 
-    AttentionValue::vlti_t getVLTI()
+    AttentionValue::vlti_t getVLTI() const
     {
         return getAttentionValue()->getVLTI();
     }
