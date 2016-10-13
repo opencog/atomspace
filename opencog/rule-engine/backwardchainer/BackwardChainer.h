@@ -144,7 +144,12 @@ private:
 	AtomSpace _focus_space;
 	int _iteration;
 
-	HandleBITNodePtrMap _h2t;
+	// Collection of and-BITs associated with their forward chaining
+	// strategies
+	AndBITFCMap _andbit2fc;
+
+	// Mapping from handles to their corresponding BITNode bodies
+	HandleBITNodePtrMap _handle2bitnode;
 
 	const std::vector<Rule>& _rules;
 };

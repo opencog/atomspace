@@ -81,7 +81,7 @@ typedef std::shared_ptr<BITNode> BITNodePtr;
  * https://github.com/opencog/atomspace/issues/903. TODO: copy/paste
  * the doc here and in the wiki as well.
  */
-typedef std::unordered_map<OrderedHandleSet, Handle> AndTreeFCMap;
+typedef std::map<OrderedHandleSet, Handle> AndBITFCMap;
 
 /**
  * Mapping from Handle to BITNodePtr in order to quickly access the

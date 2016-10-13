@@ -107,8 +107,11 @@ void BackwardChainer::do_step()
 
 BITNodePtr BackwardChainer::select_target()
 {
+	if (_handle2bitnode.empty())
+		return nullptr;
+
 	// For now selection is uniformly random
-	return rand_element(_h2t).second;
+	return rand_element(_handle2bitnode).second;
 }
 
 void BackwardChainer::fulfill_target(BITNode& target)
