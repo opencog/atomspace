@@ -99,7 +99,7 @@ void BackwardChainerUTest::test_select_rule_1()
 	Handle target_h = _eval.eval_h("(Inheritance"
 	                               "   (Concept \"A\")"
 	                               "   (Concept \"B\"))");
-	Target target(target_h);
+	BITNode target(target_h);
 
 	Rule selected_rule = _bc->select_rule(target);
 
@@ -116,7 +116,7 @@ void BackwardChainerUTest::test_select_rule_2()
 	Handle target_h = _eval.eval_h("(Inheritance"
 	                               "   (Concept \"A\")"
 	                               "   (Variable \"$X\"))");
-	Target target(target_h);
+	BITNode target(target_h);
 
 	Rule selected_rule = _bc->select_rule(target);
 
@@ -135,7 +135,7 @@ void BackwardChainerUTest::test_select_rule_3()
 		vardecl_h = _eval.eval_h("(TypedVariable"
 		                         "   (Variable \"$C\")"
 		                         "   (Type \"InheritanceLink\"))");
-	Target target(target_h, vardecl_h);
+	BITNode target(target_h, vardecl_h);
 
 	Rule selected_rule = _bc->select_rule(target);
 
