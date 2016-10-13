@@ -110,7 +110,7 @@ void BackwardChainer::fulfill_target(BITNode& target)
 
 void BackwardChainer::reduce_bit()
 {
-	// TODO
+	// TODO: avoid having the BIT grow arbitrarily large
 }
 
 Rule BackwardChainer::select_rule(const BITNode& target)
@@ -137,13 +137,12 @@ RuleSeq BackwardChainer::get_valid_rules(const BITNode& target)
 void BackwardChainer::expand_bit()
 {
 	if (_handle2bitnode.empty()) {
+		// Initialize the and-BIT of the initial target
 		insert_h2b(_init_target, _init_vardecl, _init_fitness);
 		init_andbits();
 	} else {
-		// Select an and-BIT for expansion
+		// Select an and-BIT and expand it
 		const AndBITFCMap::value_type& andbit = select_andbit();
-
-		// Expand that andbit
 		expand_bit(andbit);
 	}
 }
