@@ -27,7 +27,7 @@
 #include <opencog/rule-engine/Rule.h>
 #include <opencog/rule-engine/UREConfigReader.h>
 
-#include "Target.h"
+#include "BIT.h"
 
 class BackwardChainerUTest;
 
@@ -94,7 +94,7 @@ public:
 	BackwardChainer(AtomSpace& as, const Handle& rbs,
 	                const Handle& htarget,
 	                const Handle& hfocus_set = Handle::UNDEFINED,
-	                const TargetFitness& fitness = TargetFitness());
+	                const BITFitness& fitness = BITFitness());
 
 	UREConfigReader& get_config();
 	const UREConfigReader& get_config() const;
@@ -119,24 +119,24 @@ public:
 
 private:
 	// Select the target to expand
-	TargetPtr select_target();
+	BITNodePtr select_target();
 
 	// Fulfill, apply possible inferences in a forward way and pattern
 	// matchings in order to fulfill the given target
-	void fulfill_target(Target& target);
+	void fulfill_target(BITNode& target);
 
 	// Select a valid rule given a target. The selected is a new
 	// object because a new rule is created, its variables are
 	// uniquely renamed, possibly some partial substitutions are
 	// applied.
-	Rule select_rule(const Target& target);
+	Rule select_rule(const BITNode& target);
 
 	// Return all valid rules, in the sense that these rules may
 	// possibly be used to infer the target.
-	RuleSeq get_valid_rules(const Target& target);
+	RuleSeq get_valid_rules(const BITNode& target);
 
 	// Expand the back-inference tree of a target
-	void expand_bit(Target& target, const Rule& rule);
+	void expand_bit(BITNode& target, const Rule& rule);
 
 	AtomSpace& _as;
 	UREConfigReader _configReader;
@@ -144,7 +144,7 @@ private:
 	AtomSpace _focus_space;
 	int _iteration;
 
-	HandleTargetPtrMap _h2t;
+	HandleBITNodePtrMap _h2t;
 
 	const std::vector<Rule>& _rules;
 };

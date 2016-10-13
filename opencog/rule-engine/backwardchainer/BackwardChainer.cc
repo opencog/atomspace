@@ -44,7 +44,7 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
                                  const Handle& hfocus_set, // TODO:
                                                            // support
                                                            // focus_set
-                                 const TargetFitness& fitness)
+                                 const BITFitness& fitness)
 	: _as(as), _configReader(as, rbs), _init_target(htarget),
 	  _iteration(0), _rules(_configReader.get_rules())
 {
@@ -83,7 +83,7 @@ void BackwardChainer::do_step()
 	_iteration++;
 
 	// Select target
-	TargetPtr target = select_target();
+	BITNodePtr target = select_target();
 	if (not target) {
 		bc_logger().warn("No valid target");
 		return;
@@ -105,18 +105,18 @@ void BackwardChainer::do_step()
 	expand_bit(*target, rule);
 }
 
-TargetPtr BackwardChainer::select_target()
+BITNodePtr BackwardChainer::select_target()
 {
 	// For now selection is uniformly random
 	return rand_element(_h2t).second;
 }
 
-void BackwardChainer::fulfill_target(Target& target)
+void BackwardChainer::fulfill_target(BITNode& target)
 {
 	// TODO
 }
 
-Rule BackwardChainer::select_rule(const Target& target)
+Rule BackwardChainer::select_rule(const BITNode& target)
 {
 	// For now the rule is uniformly randomly selected amongst the
 	// valid ones
@@ -126,7 +126,7 @@ Rule BackwardChainer::select_rule(const Target& target)
 	return rand_element(valid_rules);
 }
 
-RuleSeq BackwardChainer::get_valid_rules(const Target& target)
+RuleSeq BackwardChainer::get_valid_rules(const BITNode& target)
 {
 	RuleSeq valid_rules;
 	for (const Rule& rule : _rules) {
@@ -137,7 +137,7 @@ RuleSeq BackwardChainer::get_valid_rules(const Target& target)
 	return valid_rules;
 }
 
-void BackwardChainer::expand_bit(Target& target, const Rule& rule)
+void BackwardChainer::expand_bit(BITNode& target, const Rule& rule)
 {
 	// TODO
 }

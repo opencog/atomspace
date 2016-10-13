@@ -1,5 +1,5 @@
 /*
- * Target.cc
+ * BIT.cc
  *
  * Author: William Ma <https://github.com/williampma>
  *
@@ -24,15 +24,15 @@
 #include <opencog/util/random.h>
 
 #include <opencog/atomutils/Neighbors.h>
-#include "Target.h"
+#include "BIT.h"
 #include "BCLogger.h"
 
 namespace opencog {
 
-Target::Target(const Handle& bd, const Handle& vd, const TargetFitness& fit)
+BITNode::BITNode(const Handle& bd, const Handle& vd, const BITFitness& fit)
 	: body(bd), vardecl(vd), fitness(fit) {}
 
-std::string	Target::to_string() const
+std::string	BITNode::to_string() const
 {
 	stringstream ss;
 	ss << "body:" << std::endl << oc_to_string(body)
@@ -41,14 +41,14 @@ std::string	Target::to_string() const
 	return ss.str();
 }
 
-std::string oc_to_string(const Target& target)
+std::string oc_to_string(const BITNode& bitnode)
 {
-	return target.to_string();
+	return bitnode.to_string();
 }
 
-std::string oc_to_string(const TargetPtr& target_ptr)
+std::string oc_to_string(const BITNodePtr& bitnode_ptr)
 {
-	return target_ptr->to_string();
+	return bitnode_ptr->to_string();
 }
 
 } // ~namespace opencog
