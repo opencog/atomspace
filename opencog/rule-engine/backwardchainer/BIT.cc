@@ -46,9 +46,4 @@ std::string oc_to_string(const BITNode& bitnode)
 	return bitnode.to_string();
 }
 
-std::string oc_to_string(const BITNodePtr& bitnode_ptr)
-{
-	return bitnode_ptr->to_string();
-}
-
 } // ~namespace opencog

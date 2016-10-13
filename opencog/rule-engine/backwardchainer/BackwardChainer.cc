@@ -48,7 +48,8 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
 	: _as(as), _configReader(as, rbs), _init_target(htarget),
 	  _iteration(0), _rules(_configReader.get_rules())
 {
-	// TODO _target_set.insert();
+	BITNode bit_target(htarget, Handle::UNDEFINED, fitness);
+	_handle2bitnode[_init_target] = bit_target;
 }
 
 UREConfigReader& BackwardChainer::get_config()
@@ -83,7 +84,7 @@ void BackwardChainer::do_step()
 	_iteration++;
 
 	// Select target
-	BITNodePtr target = select_target();
+	BITNode* target = select_target();
 	if (not target) {
 		bc_logger().warn("No valid target");
 		return;
@@ -105,13 +106,13 @@ void BackwardChainer::do_step()
 	expand_bit(*target, rule);
 }
 
-BITNodePtr BackwardChainer::select_target()
+BITNode* BackwardChainer::select_target()
 {
 	if (_handle2bitnode.empty())
 		return nullptr;
 
 	// For now selection is uniformly random
-	return rand_element(_handle2bitnode).second;
+	return &(rand_element(_handle2bitnode).second);
 }
 
 void BackwardChainer::fulfill_target(BITNode& target)

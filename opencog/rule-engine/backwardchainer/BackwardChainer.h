@@ -119,7 +119,7 @@ public:
 
 private:
 	// Select the target to expand
-	BITNodePtr select_target();
+	BITNode* select_target();
 
 	// Fulfill, apply possible inferences in a forward way and pattern
 	// matchings in order to fulfill the given target
@@ -148,8 +148,9 @@ private:
 	// strategies
 	AndBITFCMap _andbit2fc;
 
-	// Mapping from handles to their corresponding BITNode bodies
-	HandleBITNodePtrMap _handle2bitnode;
+	// Mapping from handles to their corresponding BITNode
+	// bodies. Also where the BITNode are acutally instantiated.
+	HandleBITNodeMap _handle2bitnode;
 
 	const std::vector<Rule>& _rules;
 };

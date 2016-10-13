@@ -52,7 +52,8 @@ class BITFitness
 class BITNode
 {
 public:
-	BITNode(const Handle& body, const Handle& vardecl = Handle::UNDEFINED,
+	BITNode(const Handle& body = Handle::UNDEFINED,
+	        const Handle& vardecl = Handle::UNDEFINED,
 	        const BITFitness& fitness = BITFitness());
 
 	// BITNode handle
@@ -71,8 +72,6 @@ public:
 	std::string to_string() const;
 };
 
-typedef std::shared_ptr<BITNode> BITNodePtr;
-
 /**
  * Mappings from and-tree to forward chaining strategy. The and-tree is
  * represented by its set of leaves.
@@ -88,12 +87,11 @@ typedef std::map<OrderedHandleSet, Handle> AndBITFCMap;
  * BITNode of a certain body. This is useful because the premises of a
  * rule are returned in terms of Handle, not BITNode.
  */
-typedef std::unordered_map<Handle, BITNodePtr> HandleBITNodePtrMap;
+typedef std::unordered_map<Handle, BITNode> HandleBITNodeMap;
 	
 // Gdb debugging, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const BITNode& bitnode);
-std::string oc_to_string(const BITNodePtr& bitnode_ptr);
 
 } // ~namespace opencog
 
