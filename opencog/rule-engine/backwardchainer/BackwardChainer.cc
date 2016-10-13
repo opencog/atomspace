@@ -46,12 +46,9 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
                                                            // support
                                                            // focus_set
                                  const BITFitness& fitness)
-	: _as(as), _configReader(as, rbs), _init_target(htarget),
-	  _iteration(0), _rules(_configReader.get_rules())
-{
-	insert_h2b(_init_target, vardecl, fitness);
-	init_andbit2fc(_init_target, vardecl);
-}
+	: _as(as), _configReader(as, rbs),
+	  _init_target(htarget), _init_vardecl(vardecl), _init_fitness(fitness),
+	  _iteration(0), _rules(_configReader.get_rules()) {}
 
 void BackwardChainer::do_chain()
 {
@@ -61,35 +58,14 @@ void BackwardChainer::do_chain()
 	}
 }
 
-/**
- * Do a single step of backward chaining.
- */
 void BackwardChainer::do_step()
-{	
+{
 	bc_logger().debug("Iteration %d", _iteration);
 	_iteration++;
 
-	// Select target
-	BITNode* target = select_target();
-	if (not target) {
-		bc_logger().warn("No valid target");
-		return;
-	}
-	LAZY_BC_LOG_DEBUG << "Target:" << std::endl << oc_to_string(target);
-
-	// Fulfill target
-	fulfill_target(*target);
-
-	// Select a valid rule
-	Rule rule = select_rule(*target);
-	if (not rule.is_valid()) {
-		bc_logger().warn("No valid rule for the selected target");
-		return;
-	}
-	LAZY_BC_LOG_DEBUG << "Rule: " << rule.get_name();
-
-	// Expand the back-inference tree from this target
-	expand_bit(*target, rule);
+	expand_bit();
+	fulfill_bit();
+	reduce_bit();
 }
 
 bool BackwardChainer::termination()
@@ -107,25 +83,15 @@ const UREConfigReader& BackwardChainer::get_config() const
 	return _configReader;
 }
 
-/**
- * Get the current result on the initial target, if any.
- *
- * @return a HandleMultimap mapping each variable to all possible solutions
- */
-HandleMultimap BackwardChainer::get_chaining_result()
+const AndBITFCMap::value_type& BackwardChainer::select_andbit()
 {
-	OC_ASSERT(false, "TODO");
-	HandleMultimap temp_result;// = _target_set.get(_init_target).get_varmap();
-	HandleMultimap result;
-	for (auto& p : temp_result)
-	{
-		UnorderedHandleSet s;
-		for (auto& h : p.second)
-			s.insert(_as.get_atom(h));
-		result[_as.get_atom(p.first)] = s;
-	}
+	return rand_element(_andbits);
+}
 
-	return result;
+BITNode& BackwardChainer::select_bitleaf(const AndBITFCMap::value_type& andbit)
+{
+	// For now selection is uniformly random
+	return _handle2bitnode[rand_element(andbit.first)];
 }
 
 BITNode* BackwardChainer::select_target()
@@ -138,6 +104,11 @@ BITNode* BackwardChainer::select_target()
 }
 
 void BackwardChainer::fulfill_target(BITNode& target)
+{
+	// TODO
+}
+
+void BackwardChainer::reduce_bit()
 {
 	// TODO
 }
@@ -163,7 +134,56 @@ RuleSeq BackwardChainer::get_valid_rules(const BITNode& target)
 	return valid_rules;
 }
 
-void BackwardChainer::expand_bit(BITNode& target, const Rule& rule)
+void BackwardChainer::expand_bit()
+{
+	if (_handle2bitnode.empty()) {
+		insert_h2b(_init_target, _init_vardecl, _init_fitness);
+		init_andbits();
+	} else {
+		// Select an and-BIT for expansion
+		const AndBITFCMap::value_type& andbit = select_andbit();
+
+		// Expand that andbit
+		expand_bit(andbit);
+	}
+}
+
+void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit)
+{
+	// Select leaf
+	BITNode& bitleaf = select_bitleaf(andbit);
+
+	// Select a valid rule
+	Rule rule = select_rule(bitleaf);
+	if (not rule.is_valid()) {
+		bc_logger().warn("No valid rule for the selected bitleaf");
+		return;
+	}
+	LAZY_BC_LOG_DEBUG << "Rule: " << rule.get_name();
+
+	// Expand the back-inference tree from this target
+	expand_bit(andbit, bitleaf, rule);
+}
+
+void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit,
+                                 BITNode& leaf, const Rule& rule)
+{
+	// TODO
+}
+
+void BackwardChainer::fulfill_bit()
+{
+	if (_andbits.empty()) {
+		bc_logger().warn("Cannot fulfill an empty BIT");
+		return;
+	}
+
+	// Select an and-BIT for fulfillment
+	const AndBITFCMap::value_type& andbit = select_andbit();
+	fulfill_andbit(andbit);
+}
+
+void BackwardChainer::fulfill_andbit(const AndBITFCMap::value_type& andbit)
 {
 	// TODO
 }
@@ -177,14 +197,30 @@ void BackwardChainer::insert_h2b(const Handle& body, const Handle& vardecl,
 	_handle2bitnode[body] = BITNode(body, vardecl, fitness);
 }
 
-void BackwardChainer::init_andbit2fc(const Handle& body, const Handle& vardecl)
+void BackwardChainer::init_andbits()
 {
-	if (body.is_undefined())
+	if (_init_target.is_undefined())
 		return;
 
-	HandleSeq bl{body, body};
-	if (vardecl.is_defined())
-		bl.insert(bl.begin(), vardecl);
+	HandleSeq bl{_init_target, _init_target};
+	if (_init_vardecl.is_defined())
+		bl.insert(bl.begin(), _init_vardecl);
 	Handle fcs = Handle(createBindLink(bl));
-	_andbit2fc[{body}] = fcs;
+	_andbits[{_init_target}] = fcs;
+}
+
+HandleMultimap BackwardChainer::get_chaining_result()
+{
+	OC_ASSERT(false, "TODO");
+	HandleMultimap temp_result;// = _target_set.get(_init_target).get_varmap();
+	HandleMultimap result;
+	for (auto& p : temp_result)
+	{
+		UnorderedHandleSet s;
+		for (auto& h : p.second)
+			s.insert(_as.get_atom(h));
+		result[_as.get_atom(p.first)] = s;
+	}
+
+	return result;
 }

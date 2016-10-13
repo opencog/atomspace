@@ -118,9 +118,41 @@ public:
 	UREConfigReader& get_config();
 	const UREConfigReader& get_config() const;
 
+	/**
+	 * Get the current result on the initial target, if any.
+	 *
+	 * @return a HandleMultimap mapping each variable to all possible solutions
+	 */
 	HandleMultimap get_chaining_result();
 
 private:
+	// Expand the BIT
+	void expand_bit();
+
+	// Expand the BIT given a and-BIT as parent
+	void expand_bit(const AndBITFCMap::value_type& andbit);
+
+	// Expand the BIT given a and-BIT as parent, a BITNode as leaf of
+	// that and-BIT and an inference rule
+	void expand_bit(const AndBITFCMap::value_type& andbit,
+	                BITNode& leaf, const Rule& rule);
+
+	// Fulfill the BIT. That is run some or all its and-BITs
+	void fulfill_bit();
+
+	// Fulfill an and-BIT. That is run its associated forward chaining
+	// strategy.
+	void fulfill_andbit(const AndBITFCMap::value_type& andbit);
+
+	// Reduce the BIT. Remove some and-BITs.
+	void reduce_bit();
+
+	// Select an and-BIT
+	const AndBITFCMap::value_type& select_andbit();
+
+	// Select a leaf of an and-BIT for subsequent expansion
+	BITNode& select_bitleaf(const AndBITFCMap::value_type& andbit);
+
 	// Select the target to expand
 	BITNode* select_target();
 
@@ -138,29 +170,38 @@ private:
 	// possibly be used to infer the target.
 	RuleSeq get_valid_rules(const BITNode& target);
 
-	// Expand the back-inference tree of a target
-	void expand_bit(BITNode& target, const Rule& rule);
-
 	// Build the corresponding bitnode of a handle and insert it in
 	// _handle2bitnode
 	void insert_h2b(const Handle& body, const Handle& vardecl,
 	                const BITFitness& fitness);
 
-	void init_andbit2fc(const Handle& target, const Handle& vardecl);
+	// Initialize the _andbits container with
+	//
+	// {_init_target}
+	// ->
+	// BindLink
+	//   _init_vardecl
+	//   _init_target
+	//   _init_target
+	void init_andbits();
 
 	AtomSpace& _as;
 	UREConfigReader _configReader;
-	Handle _init_target;
-	AtomSpace _focus_space;
-	int _iteration;
 
-	// Collection of and-BITs associated with their forward chaining
-	// strategies
-	AndBITFCMap _andbit2fc;
+	Handle _init_target;
+	Handle _init_vardecl;
+	BITFitness _init_fitness;
+
+	int _iteration;
+	AtomSpace _focus_space;
 
 	// Mapping from handles to their corresponding BITNode
-	// bodies. Also where the BITNode are acutally instantiated.
+	// bodies. Also where the BITNode are actually instantiated.
 	HandleBITNodeMap _handle2bitnode;
+
+	// Collection of and-BITs associated with their forward chaining
+	// strategies.
+	AndBITFCMap _andbits;
 
 	const std::vector<Rule>& _rules;
 };
