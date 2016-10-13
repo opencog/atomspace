@@ -137,6 +137,10 @@ private:
 	void expand_bit(const AndBITFCMap::value_type& andbit,
 	                BITNode& leaf, const Rule& rule);
 
+	// Given an atomese forward chaining strategy and other arguments,
+	// generate a new forward chaining strategy
+	Handle expand_fcs(/* TODO */);
+
 	// Fulfill the BIT. That is run some or all its and-BITs
 	void fulfill_bit();
 

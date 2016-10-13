@@ -85,6 +85,7 @@ const UREConfigReader& BackwardChainer::get_config() const
 
 const AndBITFCMap::value_type& BackwardChainer::select_andbit()
 {
+	// For now selection is uniformly random
 	return rand_element(_andbits);
 }
 
@@ -166,6 +167,29 @@ void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit)
 
 void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit,
                                  BITNode& leaf, const Rule& rule)
+{
+	// TODO: support fitness function
+
+	// Expand the leaf
+	// 1. Append the rule to it
+	// 2. Instantiate the premises as BITNodes
+	HandleSeq premises(rule.get_premises());
+	leaf.rules.push_back(rule);
+	for (const Handle& premise : premises)
+		insert_h2b(premise, rule.get_forward_vardecl(), BITFitness());
+
+	// Expand the associated atomese forward chaining strategy
+	Handle fcs = expand_fcs(/* TODO */);
+
+	// Define new and-BIT and associate new forward chaining strategy
+	// to it
+	AndBITFCMap::key_type new_leaves(andbit.first);
+	new_leaves.erase(leaf.body);
+	new_leaves.insert(premises.begin(), premises.end());
+	_andbits[new_leaves] = fcs;
+}
+
+Handle BackwardChainer::expand_fcs(/* TODO */)
 {
 	// TODO
 }
