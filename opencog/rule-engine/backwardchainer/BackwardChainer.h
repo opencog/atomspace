@@ -93,16 +93,9 @@ class BackwardChainer
 public:
 	BackwardChainer(AtomSpace& as, const Handle& rbs,
 	                const Handle& htarget,
+	                const Handle& vardecl = Handle::UNDEFINED,
 	                const Handle& hfocus_set = Handle::UNDEFINED,
 	                const BITFitness& fitness = BITFitness());
-
-	UREConfigReader& get_config();
-	const UREConfigReader& get_config() const;
-
-	/**
-	 * Perform a single backward chaining inference step.
-	 */
-	void do_step();
 
 	/**
 	 * Perform backward chaining inference till the termination
@@ -111,9 +104,19 @@ public:
 	void do_chain();
 
 	/**
+	 * Perform a single backward chaining inference step.
+	 */
+	void do_step();
+
+	/**
 	 * @return true if the termination criteria have been met.
 	 */
 	bool termination();
+
+    // Accessors
+
+	UREConfigReader& get_config();
+	const UREConfigReader& get_config() const;
 
 	HandleMultimap get_chaining_result();
 
@@ -137,6 +140,13 @@ private:
 
 	// Expand the back-inference tree of a target
 	void expand_bit(BITNode& target, const Rule& rule);
+
+	// Build the corresponding bitnode of a handle and insert it in
+	// _handle2bitnode
+	void insert_h2b(const Handle& body, const Handle& vardecl,
+	                const BITFitness& fitness);
+
+	void init_andbit2fc(const Handle& target, const Handle& vardecl);
 
 	AtomSpace& _as;
 	UREConfigReader _configReader;

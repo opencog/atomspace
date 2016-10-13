@@ -28,6 +28,7 @@
 #include <opencog/atomutils/Substitutor.h>
 #include <opencog/atomutils/Unify.h>
 #include <opencog/atoms/pattern/PatternLink.h>
+#include <opencog/atoms/pattern/BindLink.h>
 
 #include <opencog/query/BindLinkAPI.h>
 
@@ -40,7 +41,7 @@ using namespace opencog;
 
 BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
                                  const Handle& htarget,
-                                 // TODO: add target vardecl
+                                 const Handle& vardecl,
                                  const Handle& hfocus_set, // TODO:
                                                            // support
                                                            // focus_set
@@ -48,18 +49,8 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
 	: _as(as), _configReader(as, rbs), _init_target(htarget),
 	  _iteration(0), _rules(_configReader.get_rules())
 {
-	BITNode bit_target(htarget, Handle::UNDEFINED, fitness);
-	_handle2bitnode[_init_target] = bit_target;
-}
-
-UREConfigReader& BackwardChainer::get_config()
-{
-	return _configReader;
-}
-
-const UREConfigReader& BackwardChainer::get_config() const
-{
-	return _configReader;
+	insert_h2b(_init_target, vardecl, fitness);
+	init_andbit2fc(_init_target, vardecl);
 }
 
 void BackwardChainer::do_chain()
@@ -68,11 +59,6 @@ void BackwardChainer::do_chain()
 	{
 		do_step();
 	}
-}
-
-bool BackwardChainer::termination()
-{
-	return _configReader.get_maximum_iterations() <= _iteration;
 }
 
 /**
@@ -104,6 +90,42 @@ void BackwardChainer::do_step()
 
 	// Expand the back-inference tree from this target
 	expand_bit(*target, rule);
+}
+
+bool BackwardChainer::termination()
+{
+	return _configReader.get_maximum_iterations() <= _iteration;
+}
+
+UREConfigReader& BackwardChainer::get_config()
+{
+	return _configReader;
+}
+
+const UREConfigReader& BackwardChainer::get_config() const
+{
+	return _configReader;
+}
+
+/**
+ * Get the current result on the initial target, if any.
+ *
+ * @return a HandleMultimap mapping each variable to all possible solutions
+ */
+HandleMultimap BackwardChainer::get_chaining_result()
+{
+	OC_ASSERT(false, "TODO");
+	HandleMultimap temp_result;// = _target_set.get(_init_target).get_varmap();
+	HandleMultimap result;
+	for (auto& p : temp_result)
+	{
+		UnorderedHandleSet s;
+		for (auto& h : p.second)
+			s.insert(_as.get_atom(h));
+		result[_as.get_atom(p.first)] = s;
+	}
+
+	return result;
 }
 
 BITNode* BackwardChainer::select_target()
@@ -146,23 +168,23 @@ void BackwardChainer::expand_bit(BITNode& target, const Rule& rule)
 	// TODO
 }
 
-/**
- * Get the current result on the initial target, if any.
- *
- * @return a HandleMultimap mapping each variable to all possible solutions
- */
-HandleMultimap BackwardChainer::get_chaining_result()
+void BackwardChainer::insert_h2b(const Handle& body, const Handle& vardecl,
+                                 const BITFitness& fitness)
 {
-	OC_ASSERT(false, "TODO");
-	HandleMultimap temp_result;// = _target_set.get(_init_target).get_varmap();
-	HandleMultimap result;
-	for (auto& p : temp_result)
-	{
-		UnorderedHandleSet s;
-		for (auto& h : p.second)
-			s.insert(_as.get_atom(h));
-		result[_as.get_atom(p.first)] = s;
-	}
+	if (body.is_undefined())
+		return;
 
-	return result;
+	_handle2bitnode[body] = BITNode(body, vardecl, fitness);
+}
+
+void BackwardChainer::init_andbit2fc(const Handle& body, const Handle& vardecl)
+{
+	if (body.is_undefined())
+		return;
+
+	HandleSeq bl{body, body};
+	if (vardecl.is_defined())
+		bl.insert(bl.begin(), vardecl);
+	Handle fcs = Handle(createBindLink(bl));
+	_andbit2fc[{body}] = fcs;
 }
