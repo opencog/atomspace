@@ -119,11 +119,10 @@ public:
 	const UREConfigReader& get_config() const;
 
 	/**
-	 * Get the current result on the initial target, if any.
-	 *
-	 * @return a HandleMultimap mapping each variable to all possible solutions
+	 * Get the current result on the initial target, a SetLink with
+	 * all inferred atoms matching the target.
 	 */
-	HandleMultimap get_chaining_result();
+	Handle get_results() const;
 
 private:
 	// Expand the BIT
@@ -204,6 +203,8 @@ private:
 	AndBITFCMap _andbits;
 
 	const std::vector<Rule>& _rules;
+
+	OrderedHandleSet _results;
 };
 
 

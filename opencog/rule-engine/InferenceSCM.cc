@@ -93,23 +93,9 @@ Handle InferenceSCM::do_backward_chaining(Handle h,
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
     BackwardChainer bc(*as, rbs, h, focus_link);
 
-    logger().debug("[BackwardChainer] Before do_chain");
-
     bc.do_chain();
 
-    logger().debug("[BackwardChainer] After do_chain");
-    HandleMultimap soln = bc.get_chaining_result();
-
-    HandleSeq soln_list_link;
-    for (auto it = soln.begin(); it != soln.end(); ++it) {
-        HandleSeq hs;
-        hs.push_back(it->first);
-        hs.insert(hs.end(), it->second.begin(), it->second.end());
-
-        soln_list_link.push_back(as->add_link(LIST_LINK, hs));
-    }
-
-    return as->add_link(LIST_LINK, soln_list_link);
+    return bc.get_results();
 }
 
 HandleSeq InferenceSCM::get_rulebase_rules(Handle rbs)

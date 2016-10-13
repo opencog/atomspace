@@ -203,7 +203,9 @@ void BackwardChainer::fulfill_bit()
 
 void BackwardChainer::fulfill_andbit(const AndBITFCMap::value_type& andbit)
 {
-	// TODO
+	Handle hresult = bindlink(&_as, andbit.second);
+	const HandleSeq& results = hresult->getOutgoingSet();
+	_results.insert(results.begin(), results.end());
 }
 
 void BackwardChainer::insert_h2b(const Handle& body, const Handle& vardecl,
@@ -227,18 +229,8 @@ void BackwardChainer::init_andbits()
 	_andbits[{_init_target}] = fcs;
 }
 
-HandleMultimap BackwardChainer::get_chaining_result()
+Handle BackwardChainer::get_results() const
 {
-	OC_ASSERT(false, "TODO");
-	HandleMultimap temp_result;// = _target_set.get(_init_target).get_varmap();
-	HandleMultimap result;
-	for (auto& p : temp_result)
-	{
-		UnorderedHandleSet s;
-		for (auto& h : p.second)
-			s.insert(_as.get_atom(h));
-		result[_as.get_atom(p.first)] = s;
-	}
-
-	return result;
+	HandleSeq results(_results.begin(), _results.end());
+	return _as.add_link(SET_LINK, results);
 }
