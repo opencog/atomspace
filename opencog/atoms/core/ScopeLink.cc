@@ -176,6 +176,8 @@ bool ScopeLink::is_equal(const Handle& other) const
 	if (other->getType() != _type) return false;
 
 	ScopeLinkPtr scother(ScopeLinkCast(other));
+	if (nullptr == scother)
+		scother = createScopeLink(*LinkCast(other));
 
 	// In case we're dealing with a class inheriting from ScopeLink,
 	// like BindLink, that has more than one scoped term, like
@@ -189,8 +191,7 @@ bool ScopeLink::is_equal(const Handle& other) const
 	if (n_scoped_terms != other_n_scoped_terms) return false;
 
 	// Variable declarations must match.
-	if (scother == nullptr or not _varlist.is_equal(scother->_varlist))
-		return false;
+	if (not _varlist.is_equal(scother->_varlist)) return false;
 
 	// Other terms, with our variables in place of its variables,
 	// should be same as our terms.
