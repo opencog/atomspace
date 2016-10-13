@@ -46,4 +46,9 @@ std::string oc_to_string(const Target& target)
 	return target.to_string();
 }
 
+std::string oc_to_string(const TargetPtr& target_ptr)
+{
+	return target_ptr->to_string();
+}
+
 } // ~namespace opencog

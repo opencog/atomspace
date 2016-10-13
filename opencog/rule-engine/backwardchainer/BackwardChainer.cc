@@ -83,14 +83,18 @@ void BackwardChainer::do_step()
 	_iteration++;
 
 	// Select target
-	Target& target = select_target();
-	LAZY_BC_LOG_DEBUG << "Target:" << std::endl << oc_to_string(target.body);
+	TargetPtr target = select_target();
+	if (not target) {
+		bc_logger().warn("No valid target");
+		return;
+	}
+	LAZY_BC_LOG_DEBUG << "Target:" << std::endl << oc_to_string(target);
 
 	// Fulfill target
-	fulfill_target(target);
+	fulfill_target(*target);
 
 	// Select a valid rule
-	Rule rule = select_rule(target);
+	Rule rule = select_rule(*target);
 	if (not rule.is_valid()) {
 		bc_logger().warn("No valid rule for the selected target");
 		return;
@@ -98,13 +102,13 @@ void BackwardChainer::do_step()
 	LAZY_BC_LOG_DEBUG << "Rule: " << rule.get_name();
 
 	// Expand the back-inference tree from this target
-	expand_bit(target, rule);
+	expand_bit(*target, rule);
 }
 
-Target& BackwardChainer::select_target()
+TargetPtr BackwardChainer::select_target()
 {
 	// For now selection is uniformly random
-	return rand_element(_target_set).second;
+	return rand_element(_h2t).second;
 }
 
 void BackwardChainer::fulfill_target(Target& target)

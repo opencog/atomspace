@@ -26,18 +26,30 @@
 #define _OPENCOG_TARGET_H
 
 #include <opencog/rule-engine/Rule.h>
+#include <opencog/atoms/base/Handle.h>
 
 namespace opencog
 {
 
-// Contains the fitness type of the target. For instance whether the
-// target is a variable query such that the variables maximize the
-// target TV in a certain way, etc.
+/**
+ * Contains the fitness type of the target. For instance whether the
+ * target is a variable query such that the variables maximize the
+ * target TV in a certain way, etc.
+ */
 class TargetFitness
 {
 };
 
-// A Target, also a back-inference tree node.
+/**
+ * A Target, also a back-inference tree node and how to related to the
+ * back-inference tree. A back-inference tree is an and-or-tree, where
+ * there are 2 types of children, or-children and and-children. The
+ * or-children are represented by Target::rules, because multiple
+ * rules or rule variations can infer the same target. Then within
+ * each rule or rule variation, the rule premises are and-children
+ * because in order to apply a certain rule all premises must be
+ * fulfilled.
+ */
 class Target
 {
 public:
@@ -60,24 +72,29 @@ public:
 	std::string to_string() const;
 };
 
-// TODO: we need a set of and-branches. Each and-branch wil composed
-// of its leaves (not necessarily being without children) and the
-// associated atomese representation.
-	
-// Back-inference tree. A back-inference tree is an and-or tree, where
-// there are 2 types of children, or-children and and-children. The
-// or-children are represented by Target::rules, because multiple
-// rules or rule variations can infer the same target. Then within
-// each rule or rule variation, the rule premises are and-children
-// because in order to apply a certain rule all premises must be
-// fulfilled.
-class TargetSet : public std::unordered_map<Handle, Target>
-{
-};
+typedef std::shared_ptr<Target> TargetPtr;
 
+/**
+ * Mappings from and-tree to forward chaining strategy. The and-tree is
+ * represented by its set of leaves.
+ *
+ * The forward chaining strategy is represented according to
+ * https://github.com/opencog/atomspace/issues/903. TODO: copy/paste
+ * the doc here and in the wiki as well.
+ */
+typedef std::unordered_map<OrderedHandleSet, Handle> AndTreeFCMap;
+
+/**
+ * Mapping from Handle to TargetPtr in order to quickly access the
+ * Target of a certain body. This is useful because the premises of a
+ * rule are returned in terms of Handle, not Target.
+ */
+typedef std::unordered_map<Handle, TargetPtr> HandleTargetPtrMap;
+	
 // Gdb debugging, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const Target& target);
+std::string oc_to_string(const TargetPtr& target_ptr);
 
 } // ~namespace opencog
 

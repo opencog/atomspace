@@ -95,6 +95,7 @@ public:
 	                const Handle& htarget,
 	                const Handle& hfocus_set = Handle::UNDEFINED,
 	                const TargetFitness& fitness = TargetFitness());
+
 	UREConfigReader& get_config();
 	const UREConfigReader& get_config() const;
 
@@ -102,7 +103,6 @@ public:
 	 * Perform a single backward chaining inference step.
 	 */
 	void do_step();
-	void do_step_old();
 
 	/**
 	 * Perform backward chaining inference till the termination
@@ -119,7 +119,7 @@ public:
 
 private:
 	// Select the target to expand
-	Target& select_target();
+	TargetPtr select_target();
 
 	// Fulfill, apply possible inferences in a forward way and pattern
 	// matchings in order to fulfill the given target
@@ -144,12 +144,9 @@ private:
 	AtomSpace _focus_space;
 	int _iteration;
 
-	TargetSet _target_set;
+	HandleTargetPtrMap _h2t;
 
 	const std::vector<Rule>& _rules;
-
-	// XXX any additional link should be reflected
-	unordered_set<Type> _logical_link_types = { AND_LINK, OR_LINK, NOT_LINK };
 };
 
 
