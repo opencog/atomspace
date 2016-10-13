@@ -96,5 +96,58 @@
    )
 )
 
+; Same as above, but apha-renamed deduction. Should get the same
+; results.
+(define (member-to-evaluation-2-1-alt)
+   (BindLink
+      (VariableList
+         (VariableNode "$B")
+         (VariableNode "$C")
+         (TypedVariableLink
+            (VariableNode "$D")
+            (TypeNode "PredicateNode")
+         )
+      )
+      (MemberLink
+         (VariableNode "$B")
+         (SatisfyingSetLink
+            (VariableNode "$X-M2E")
+            (EvaluationLink
+               (VariableNode "$D")
+               (ListLink
+                  (VariableNode "$X-M2E")
+                  (VariableNode "$C")
+               )
+            )
+         )
+      )
+      (ExecutionOutputLink
+         (GroundedSchemaNode "scm: member-to-evaluation-formula")
+         (ListLink
+            (EvaluationLink
+               (VariableNode "$D")
+               (ListLink
+                  (VariableNode "$B")
+                  (VariableNode "$C")
+               )
+            )
+            (MemberLink
+               (VariableNode "$B")
+               (SatisfyingSetLink
+                  (VariableNode "$some-bound-var")
+                  (EvaluationLink
+                     (VariableNode "$D")
+                     (ListLink
+                        (VariableNode "$some-bound-var")
+                        (VariableNode "$C")
+                     )
+                  )
+               )
+            )
+         )
+      )
+   )
+)
+
 (define (member-to-evaluation-formula EVAL MEM)
    (cog-set-tv! EVAL (cog-tv MEM)))
