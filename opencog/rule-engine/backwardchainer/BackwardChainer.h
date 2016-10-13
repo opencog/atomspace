@@ -160,10 +160,6 @@ private:
 	// Select the target to expand
 	BITNode* select_target();
 
-	// Fulfill, apply possible inferences in a forward way and pattern
-	// matchings in order to fulfill the given target
-	void fulfill_target(BITNode& target);
-
 	// Select a valid rule given a target. The selected is a new
 	// object because a new rule is created, its variables are
 	// uniquely renamed, possibly some partial substitutions are

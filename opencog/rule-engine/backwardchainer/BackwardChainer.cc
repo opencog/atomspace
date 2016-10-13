@@ -104,11 +104,6 @@ BITNode* BackwardChainer::select_target()
 	return &(rand_element(_handle2bitnode).second);
 }
 
-void BackwardChainer::fulfill_target(BITNode& target)
-{
-	// TODO
-}
-
 void BackwardChainer::reduce_bit()
 {
 	// TODO: avoid having the BIT grow arbitrarily large
