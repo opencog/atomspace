@@ -330,6 +330,22 @@ VariableListPtr gen_varlist(const Handle& h);
  */
 VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl);
 
+/**
+ * Merge two vardecls into one. If a variable is present in both
+ * vardecls then the more restrictive one replaces the less
+ * restrictive one.
+ *
+ * TODO: give example.
+ *
+ * TODO: this might be moved to TypeUtils.{h,cc}
+ */
+Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl);
+
+/**
+ * TODO
+ */
+Handle find_variable(const Handle& vardecl, const Handle& variable);
+
 std::string oc_to_string(const UnificationPartition& hshm);
 std::string oc_to_string(const UnificationBlock& ub);
 std::string oc_to_string(const UnificationPartitions& par);

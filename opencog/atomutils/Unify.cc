@@ -430,6 +430,30 @@ VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl)
 	}
 }
 
+Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl)
+{
+	if (lhs_vardecl.is_undefined())
+		return rhs_vardecl;
+	if (rhs_vardecl.is_undefined())
+		return lhs_vardecl;
+
+	Type lhs_t = lhs_vardecl->getType();
+	if (lhs_t == VARIABLE_NODE) {
+		Handle common_vardecl = find_variable(rhs_vardecl, lhs_vardecl);
+		if (common_vardecl.is_defined()) {
+			// TODO
+		}
+		else {
+			// TODO
+		}
+	}
+}
+
+Handle find_variable(const Handle& vardecl, const Handle& variable)
+{
+	return Handle::UNDEFINED;
+}
+
 std::string oc_to_string(const UnificationBlock& ub)
 {
 	std::stringstream ss;
