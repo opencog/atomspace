@@ -129,6 +129,8 @@ struct Variables : public FreeVariables
 	// Return true if the other Variables struct is equal to this one,
 	// up to alpha-conversion. That is, same number of variables, same
 	// type restrictions, but different actual variable names.
+	// Same as satisfying this->is_type(other->varseq) and also
+	// other->is_type(this->varseq) -- the equality is symmetric.
 	bool is_equal(const Variables&) const;
 	inline bool operator==(const Variables& other) const
 	{ return is_equal(other); }

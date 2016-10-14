@@ -263,6 +263,11 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 /// Return true if the other Variables struct is equal to this one,
 /// up to alpha-conversion. That is, same number of variables, same
 /// type restrictions, but possibly different variable names.
+///
+/// This should give exactly the same answer as performing the tests
+///    this->is_type(other->varseq) and other->is_type(this->varseq)
+/// That is, the variables in this instance should have the same type
+/// restrictions as the variables in the other class.
 bool Variables::is_equal(const Variables& other) const
 {
 	size_t sz = varseq.size();
