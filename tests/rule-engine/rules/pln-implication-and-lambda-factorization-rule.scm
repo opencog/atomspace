@@ -91,7 +91,7 @@
 
 (define (implication-and-lambda-factorization-formula var1 var2 a1 a2)
   (let ((and-lamb (AndLink (LambdaLink var1 a1) (LambdaLink var2 a2)))
-        (lamb (LambdaLink var1 (cog-new-flattened-link 'AndLink a1 a2))))
+        (lamb (LambdaLink (Variable "$flat") (cog-new-flattened-link 'AndLink a1 a2))))
     (cog-set-tv! lamb (cog-tv and-lamb))
     (cog-set-tv! (ImplicationLink and-lamb lamb) (stv 1 1))))
 
