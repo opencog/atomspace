@@ -100,6 +100,12 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 #ifdef NO_SELF_GROUNDING
 	// But... if handle hg happens to also be a bound var,
 	// then its a mismatch.
+	// XXX However, this reasoning is wrong: hg may just happen to have
+	// the same name as a variable bound in this pattern, but may,
+	// in fact, also be bound by a ScopeLink inside the pattern. In
+	// that case, instead of rejecting the match as below, it should be
+	// passed on to the scope_match() callback. In general, this whole
+	// self-grounding code needs to be re-thought, reworked.
 	if (_varlist->varset.end() != _varlist->varset.find(hg)) return false;
 #endif
 
@@ -121,12 +127,12 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 	           hp->toShortString().c_str());
 
 #ifdef NO_SELF_GROUNDING
-	// Disallow matches that contain a bound variable in the
-	// grounding, unless they are quoted. However, a bound variable can be
-	// legitimately grounded by a free variable, because free variables are
-	// effectively constant literals, during the pattern match.
-	if (any_unquoted_unscoped_in_tree(hg, _varlist->varset))
+	// Disallow matches where the grounding contains (an unquoted)
+	// variable that is bound by this template.
+	if (hg->isLink() and any_unquoted_unscoped_in_tree(hg, _varlist->varset))
 	{
+		if (not logger().is_fine_enabled()) return false;
+
 		for (Handle vh: _varlist->varset)
 		{
 			// OK, which variable is it?
