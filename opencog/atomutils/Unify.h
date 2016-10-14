@@ -338,6 +338,10 @@ VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl);
  * TODO: give example.
  *
  * TODO: this might be moved to TypeUtils.{h,cc}
+ *
+ * This might correspond to type product, I'm not sure.
+ *
+ * TODO: use Variables::extend
  */
 Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl);
 

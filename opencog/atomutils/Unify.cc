@@ -437,16 +437,12 @@ Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl)
 	if (rhs_vardecl.is_undefined())
 		return lhs_vardecl;
 
-	Type lhs_t = lhs_vardecl->getType();
-	if (lhs_t == VARIABLE_NODE) {
-		Handle common_vardecl = find_variable(rhs_vardecl, lhs_vardecl);
-		if (common_vardecl.is_defined()) {
-			// TODO
-		}
-		else {
-			// TODO
-		}
-	}
+	VariableList
+		lhs_vl(lhs_vardecl),
+		rhs_vl(rhs_vardecl);
+
+	// TODO
+	return Handle::UNDEFINED;
 }
 
 Handle find_variable(const Handle& vardecl, const Handle& variable)
