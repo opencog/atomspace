@@ -296,6 +296,46 @@ Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 	return Handle::UNDEFINED;
 }
 
+Type type_intersection(Type lhs, Type rhs)
+{
+	ClassServer& cs = classserver();
+	if (cs.isA(lhs, rhs))
+		return lhs;
+	if (cs.isA(rhs, lhs))
+		return rhs;
+	return NOTYPE;              // represent the bottom type
+}
+
+std::set<Type> type_intersection(Type lhs, const std::set<Type>& rhs)
+{
+	std::set<Type> res;
+	// Distribute the intersection over the union type rhs
+	for (Type rhst : rhs) {
+		Type ty = type_intersection(lhs, rhst);
+		if (ty != NOTYPE)
+			res.insert(ty);
+	}
+	return res;
+}
+
+std::set<Type> type_intersection(const std::set<Type>& lhs,
+                                 const std::set<Type>& rhs)
+{
+	// Base cases
+	if (lhs.empty())
+		return rhs;
+	if (rhs.empty())
+		return lhs;
+
+	// Recursive cases
+	std::set<Type> res;
+	for (Type ty : lhs) {
+		std::set<Type> itr = type_intersection(ty, rhs);
+		res.insert(itr.begin(), itr.end());
+	}
+	return res;
+}
+
 } // ~namespace opencog
 
 /* ===================== END OF FILE ===================== */

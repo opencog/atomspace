@@ -33,6 +33,7 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/core/VariableList.h>
+#include <opencog/atomutils/TypeUtils.h>
 
 // TODO: turn this into a class because there are way too many
 // auxiliary functions
@@ -254,15 +255,6 @@ bool is_satisfiable(const UnificationBlock& block);
 Handle type_intersection(const Handle& lhs, const Handle& rhs,
                          const Handle& lhs_vardecl = Handle::UNDEFINED,
                          const Handle& rhs_vardecl = Handle::UNDEFINED);
-
-/**
- * Return shallow type intersection between lhs and rhs. Take into
- * account type inheritance as well.
- */
-Type type_intersection(Type lhs, Type rhs);
-std::set<Type> type_intersection(Type lhs, const std::set<Type>& rhs);
-std::set<Type> type_intersection(const std::set<Type>& lhs,
-                                 const std::set<Type>& rhs);
 
 /**
  * Return a simplification of a type union, by eliminating all types
