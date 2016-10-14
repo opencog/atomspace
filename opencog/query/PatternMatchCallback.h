@@ -133,6 +133,20 @@ class PatternMatchCallback
 		}
 
 		/**
+		 * Called after a failed attempt to ground a link.
+		 * After every call to link_match(), above, there will
+		 * be a call either to post_link_match() above, or to
+		 * this method. Thus, the total number of calls to these
+		 * methods will always be balanced. This allows the
+		 * callback system to maintain a per-link stack, where a
+		 * stack push is performed by link_match(), and a stack
+		 * pop is done either in post_link_match() or here.
+		 */
+		virtual void post_link_mismatch(const Handle& patt_link,
+		                                const Handle& grnd_link)
+		{}
+
+		/**
 		 * Called when the template pattern and the candidate grounding
 		 * do not have the same type, or if one of them is undefined.
 		 * By default, this is a mismatch, but, if overloaded, it can be
@@ -213,10 +227,8 @@ class PatternMatchCallback
 		virtual bool clause_match(const Handle& pattrn_link_h,
 		                          const Handle& grnd_link_h)
 		{
-			// By default, reject a clause that is grounded by itself.
-			// XXX someone commented this out... why??? Do you really
-			// want self-grounding???
-			//	if (pattrn_link_h == grnd_link_h) return false;
+			// Reject templates grounded by themselves.
+			if (pattrn_link_h == grnd_link_h) return false;
 			return true;
 		}
 

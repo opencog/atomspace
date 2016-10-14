@@ -353,6 +353,17 @@ bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
 	return tv->getMean() >= 0.5;
 }
 
+void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
+                                               const Handle& lgnd)
+{
+	Type pattype = lpat->getType();
+	if (_pat_bound_vars and _classserver.isA(pattype, SCOPE_LINK))
+	{
+		_pat_bound_vars = nullptr;
+		_gnd_bound_vars = nullptr;
+	}
+}
+
 /**
  * Called to accept or reject a top-level clause.
  *
