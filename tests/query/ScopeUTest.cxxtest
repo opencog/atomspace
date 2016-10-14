@@ -62,6 +62,7 @@ public:
 	void test_search(void);
 	void test_search_reverse(void);
 	void test_search_alt(void);
+	void test_pushpop(void);
 };
 
 void ScopeUTest::tearDown(void)
@@ -162,6 +163,30 @@ void ScopeUTest::test_search_alt(void)
 
 	Handle c1 = eval->eval_h("(content-1)");
 	Handle r1 = eval->eval_h("(cog-bind (member-to-evaluation-2-1-alt))");
+
+	Handle c2 = eval->eval_h("(content-2)");
+	Handle r2 = eval->eval_h("(cog-bind (member-to-evaluation-2-1-rule))");
+
+	TS_ASSERT_EQUALS(c1, c2);
+	TS_ASSERT_EQUALS(r1, r2);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test search of embedded scope links.
+ * This time, the dataset includes data that fails to
+ * match, and thus might corrupt the search stack.
+ */
+void ScopeUTest::test_pushpop(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/scope-search.scm\")");
+	eval->eval("(load-from-path \"tests/query/scope-confound.scm\")");
+
+	Handle c1 = eval->eval_h("(content-1)");
+	Handle em = eval->eval_h("(evaluation-to-member-2-rule)");
+	Handle r1 = eval->eval_h("(cog-bind (member-to-evaluation-2-1-rule))");
 
 	Handle c2 = eval->eval_h("(content-2)");
 	Handle r2 = eval->eval_h("(cog-bind (member-to-evaluation-2-1-rule))");
