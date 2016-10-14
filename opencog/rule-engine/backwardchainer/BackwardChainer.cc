@@ -1,10 +1,11 @@
 /*
  * BackwardChainer.cc
  *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2014-2016 OpenCog Foundation
  *
- * Author: Misgana Bayetta <misgana.bayetta@gmail.com>  October 2014
- *         William Ma <https://github.com/williampma>
+ * Authors: Misgana Bayetta <misgana.bayetta@gmail.com>  October 2014
+ *          William Ma <https://github.com/williampma>
+ *          Nil Geisweiller 2016
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
