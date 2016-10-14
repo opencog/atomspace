@@ -527,6 +527,9 @@ Handle Variables::substitute(const Handle& func,
  * Extend a set of variables.
  *
  * That is, merge the given variables into this set.
+ *
+ * If a variable is both in *this and vset then its type intersection
+ * is assigned to it.
  */
 void Variables::extend(const Variables& vset)
 {
@@ -540,11 +543,11 @@ void Variables::extend(const Variables& vset)
 			try
 			{
 				const std::set<Type>& tms = vset._simple_typemap.at(h);
-				std::set<Type> mytypes = _simple_typemap[h];
-				for (Type t : tms)
-					mytypes.insert(t);
-				_simple_typemap.erase(h);	 // is it safe to erase if h not in already?
-				_simple_typemap.insert({h,mytypes});
+				std::set<Type> mytypes =
+					type_intersection(_simple_typemap[h], tms);
+				_simple_typemap.erase(h);	 // is it safe to erase if
+                                             // h not in already?
+				_simple_typemap.insert({h, mytypes});
 			}
 			catch(const std::out_of_range&) {}
 		}
