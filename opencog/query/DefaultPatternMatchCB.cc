@@ -32,42 +32,21 @@
 
 using namespace opencog;
 
+/* ======================================================== */
+// Cache for temp (transient) atomsapaces.  The evaluation of
+// expressions during pattern matching requires having a temporary
+// atomspace, treated as a scratch space to hold temporary results.
+// These are then discarded, after the match is confirmed or denied.
+// The issue is that creating an atomspace is CPU-intensive, so its
+// cheaper to just have a cache of empty atomspaces, hanging around,
+// and ready to go. The code in this section implements this.
+
 const bool TRANSIENT_SPACE = true;
 const int MAX_CACHED_TRANSIENTS = 8;
 
 // Allocated storage for the transient atomspace cache static variables.
 std::mutex DefaultPatternMatchCB::s_transient_cache_mutex;
 std::vector<AtomSpace*> DefaultPatternMatchCB::s_transient_cache;
-
-/* ======================================================== */
-
-DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
-	_classserver(classserver())
-{
-	_temp_aspace = grab_transient_atomspace(as);
-	_instor = new Instantiator(_temp_aspace);
-
-	_connectives.insert(SEQUENTIAL_AND_LINK);
-	_connectives.insert(SEQUENTIAL_OR_LINK);
-	_connectives.insert(AND_LINK);
-	_connectives.insert(OR_LINK);
-	_connectives.insert(NOT_LINK);
-
-	_as = as;
-}
-
-DefaultPatternMatchCB::~DefaultPatternMatchCB()
-{
-	// If we have a transient atomspace, release it.
-	if (_temp_aspace)
-	{
-		release_transient_atomspace(_temp_aspace);
-		_temp_aspace = NULL;
-	}
-
-	// Delete the instantiator.
-	delete _instor;	
-}
 
 AtomSpace* DefaultPatternMatchCB::grab_transient_atomspace(AtomSpace* parent)
 {
@@ -126,6 +105,38 @@ void DefaultPatternMatchCB::release_transient_atomspace(AtomSpace* atomspace)
 	// If we didn't cache the atomspace, then delete it.
 	if (!atomspace_cached)
 		delete atomspace;
+}
+
+/* ======================================================== */
+
+DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
+	_classserver(classserver())
+{
+	_temp_aspace = grab_transient_atomspace(as);
+	_instor = new Instantiator(_temp_aspace);
+
+	_connectives.insert(SEQUENTIAL_AND_LINK);
+	_connectives.insert(SEQUENTIAL_OR_LINK);
+	_connectives.insert(AND_LINK);
+	_connectives.insert(OR_LINK);
+	_connectives.insert(NOT_LINK);
+
+	_as = as;
+	_pat_bound_vars = nullptr;
+	_gnd_bound_vars = nullptr;
+}
+
+DefaultPatternMatchCB::~DefaultPatternMatchCB()
+{
+	// If we have a transient atomspace, release it.
+	if (_temp_aspace)
+	{
+		release_transient_atomspace(_temp_aspace);
+		_temp_aspace = NULL;
+	}
+
+	// Delete the instantiator.
+	delete _instor;
 }
 
 #ifdef CACHED_IMPLICATOR
@@ -197,17 +208,32 @@ bool DefaultPatternMatchCB::node_match(const Handle& npat_h,
 bool DefaultPatternMatchCB::variable_match(const Handle& npat_h,
                                            const Handle& nsoln_h)
 {
-	Type pattype = npat_h->getType();
-
 	// If the ungrounded term is not of type VariableNode, then just
 	// accept the match. This allows any kind of node types to be
 	// explicitly bound as variables.  However, the type VariableNode
 	// gets special handling, below.
+	Type pattype = npat_h->getType();
 	if (VARIABLE_NODE != pattype and GLOB_NODE != pattype) return true;
 
 	// If the ungrounded term is a variable, then see if there
 	// are any restrictions on the variable type.
 	return _vars->is_type(npat_h, nsoln_h);
+}
+
+bool DefaultPatternMatchCB::scope_match(const Handle& npat_h,
+                                        const Handle& nsoln_h)
+{
+	// If there are scoped vars, then accept anything that is
+	// alpha-equivalent. (i.e. equivalent after alpha-conversion)
+	if (_pat_bound_vars and _pat_bound_vars->is_in_varset(npat_h))
+	{
+		bool aok = _pat_bound_vars->is_alpha_convertible(npat_h,
+		                  nsoln_h, *_gnd_bound_vars);
+		return aok;
+	}
+
+	// Else, these need to be an exact match...
+	return npat_h == nsoln_h;
 }
 
 /**
@@ -240,12 +266,34 @@ bool DefaultPatternMatchCB::link_match(const Handle& lpat,
 
 	// Reject mis-sized compares, unless the pattern has a glob in it.
 	if (0 == _globs->count(lpat))
-	{ 
+	{
 		if (lpat->getArity() != lsoln->getArity()) return false;
 	}
 	else
 	{
 		if (lpat->getArity() > lsoln->getArity()) return false;
+	}
+
+	// If the link is a ScopeLink, we need to deal with the
+	// alpha-conversion of the bound variables in the scope link.
+	if (_classserver.isA(pattype, SCOPE_LINK))
+	{
+		// XXX The assert below -- if we hit this, then we have nested
+		// scoped links. The correct fix would be to push these onto a
+		// stack, and then alter scope_match() to walk the stack,
+		// verifying alpha-convertability.
+		OC_ASSERT(nullptr == _pat_bound_vars,
+			"Not implemented! Need to implement a stack, here.");
+		_pat_bound_vars = & ScopeLinkCast(lpat)->get_variables();
+		_gnd_bound_vars = & ScopeLinkCast(lsoln)->get_variables();
+
+		if (not _pat_bound_vars->is_equal(*_gnd_bound_vars))
+		{
+			_pat_bound_vars = nullptr;
+			_gnd_bound_vars = nullptr;
+			return false;
+		}
+		return true;
 	}
 
 	// No reason to reject; proceed with the compare.
@@ -255,6 +303,13 @@ bool DefaultPatternMatchCB::link_match(const Handle& lpat,
 bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
                                             const Handle& lgnd)
 {
+	Type pattype = lpat->getType();
+	if (_pat_bound_vars and _classserver.isA(pattype, SCOPE_LINK))
+	{
+		_pat_bound_vars = nullptr;
+		_gnd_bound_vars = nullptr;
+	}
+
 	// The if (STATE_LINK) thing is a temp hack until we get a nicer
 	// solution, viz, get around to implementing executable terms in
 	// the search pattern. So: an executable term is anything that
@@ -262,7 +317,7 @@ bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
 	// the StateLink has a single, unique closed-term value (or possibly
 	// no value at all), and the check below discards all matches that
 	// aren't closed form, i.e. all StateLinks with a variable as state.
-	if (STATE_LINK == lpat->getType())
+	if (STATE_LINK == pattype)
 	{
 		try
 		{

@@ -55,6 +55,9 @@ class PMCGroundings : public PatternMatchCallback
 		bool variable_match(const Handle& node1, const Handle& node2) {
 			return _cb.variable_match(node1, node2);
 		}
+		bool scope_match(const Handle& node1, const Handle& node2) {
+			return _cb.scope_match(node1, node2);
+		}
 		bool link_match(const Handle& link1, const Handle& link2) {
 			return _cb.link_match(link1, link2);
 		}

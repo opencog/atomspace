@@ -32,7 +32,7 @@ ADD_CXXTEST(Boolean2NotUTest)
 
 
 # These are NOT in alphabetical order; they are in order of
-# simpler to more complex.  Later test cses assume features
+# simpler to more complex.  Later test cases assume features
 # that are tested in earlier test cases.  DO NOT reorder this
 # list unless you are sure of what you are doing.
 IF (HAVE_GUILE)
@@ -67,6 +67,8 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(FiniteStateMachineUTest)
 	ADD_CXXTEST(AbsentUTest)
 	ADD_CXXTEST(SingleUTest)
+	ADD_CXXTEST(ScopeUTest)
+
 	ADD_CXXTEST(FirstNUTest)
 	ADD_CXXTEST(AttentionalFocusCBUTest)
 	ADD_CXXTEST(SudokuUTest)

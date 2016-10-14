@@ -60,6 +60,11 @@ struct FreeVariables
 	typedef std::map<Handle, unsigned int> IndexMap;
 	IndexMap index;
 
+	/// Return true if variable `var` is in this variableset.
+	bool is_in_varset(const Handle& v) const {
+		return varset.end() != varset.find(v);
+	}
+
 	/// Create an ordered set of the free variables in the given oset.
 	///
 	/// By "ordered set" it is meant: a list of variables, in traversal
@@ -129,6 +134,14 @@ struct Variables : public FreeVariables
 	{ return is_equal(other); }
 	inline bool operator!=(const Variables& other) const
 	{ return not is_equal(other); }
+
+	// Return true if the variable `othervar` in `other` is
+	// alpha-convertible to the variable `var` in this. That is,
+	// return true if they are the same variable, differing only
+	// in name.
+	bool is_alpha_convertible(const Handle& var,
+	                          const Handle& othervar,
+	                          const Variables& other) const;
 
 	// Return true if we are holding a single variable, and the handle
 	// given as the argument satisfies the type restrictions (if any).

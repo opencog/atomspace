@@ -60,6 +60,8 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 
 		virtual bool node_match(const Handle&, const Handle&);
 		virtual bool variable_match(const Handle&, const Handle&);
+		virtual bool scope_match(const Handle&, const Handle&);
+
 		virtual bool link_match(const Handle&, const Handle&);
 		virtual bool post_link_match(const Handle&, const Handle&);
 
@@ -88,16 +90,6 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		bool optionals_present(void) { return _optionals_present; }
 	protected:
 
-	    /**
-	     * The mutex used to control access to the transient atomspace cache.
-	     */
-	    static std::mutex s_transient_cache_mutex;
-
-	    /**
-	     * The transient atomspace cache.
-	     */
-		static std::vector<AtomSpace*> s_transient_cache;
-
 		ClassServer& _classserver;
 
 		const Variables* _vars = NULL;
@@ -108,10 +100,21 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		bool _have_variables;
 		Handle _pattern_body;
 
+		// Variables that should be ignored, bacause they are bound
+		// (scoped) in the current context.
+		const Variables* _pat_bound_vars;
+		const Variables* _gnd_bound_vars;
+
 		// Temp atomspace used for test-groundings of virtual links.
 		AtomSpace* _temp_aspace;
 		Instantiator* _instor;
 
+		// The transient atomspace cache. The goal here is to
+		// avoid the overhead of constantly creating/deleting
+		// the temp atomspaces above. So instead, just keep a
+		// cache of empty ones, ready to go.
+		static std::mutex s_transient_cache_mutex;
+		static std::vector<AtomSpace*> s_transient_cache;
 		static AtomSpace* grab_transient_atomspace(AtomSpace* parent);
 		static void release_transient_atomspace(AtomSpace* atomspace);
 
