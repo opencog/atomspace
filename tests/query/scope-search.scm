@@ -1,3 +1,6 @@
+;
+; Test Data from bug opencog/atomspace #910
+;
 
 (use-modules (opencog))
 (use-modules (opencog query))
@@ -7,7 +10,7 @@
 ; (cog-logger-set-stdout! #t)
 ; (cog-logger-set-timestamp! #f)
 
-;; -----------------------------------------------------------------------------
+;; ----------------------------------------------------------------
 ;; Helper functions
 
 (define (content-1)
