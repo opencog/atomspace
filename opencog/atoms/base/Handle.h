@@ -356,15 +356,10 @@ std::string oc_to_string(const LinkPtr& lptr);
 } // namespace opencog
 
 namespace std {
-inline ostream& operator<<(ostream& out, const opencog::Handle& h)
-{
-    out << h.value();
-    return out;
-}
-
-ostream& operator<<(ostream& out, const opencog::HandleSeq& hs);
-ostream& operator<<(ostream& out, const opencog::OrderedHandleSet& hs);
-ostream& operator<<(ostream& out, const opencog::UnorderedHandleSet& hs);
+ostream& operator<<(ostream&, const opencog::Handle&);
+ostream& operator<<(ostream&, const opencog::HandleSeq&);
+ostream& operator<<(ostream&, const opencog::OrderedHandleSet&);
+ostream& operator<<(ostream&, const opencog::UnorderedHandleSet&);
 
 #ifdef THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
 // The below used to work, but broke in gcc-4.7.2. The reason it

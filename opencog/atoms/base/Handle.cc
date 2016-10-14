@@ -126,10 +126,11 @@ inline Handle Handle::do_res(UUID uuid)
 
 // The rest of this file is devoted to printing utilities used only
 // during GDB debugging.  Thus, you won't find these anywhere in the
-// code base.
+// code base. XXX How are these supposed to be used inside of GDB??
+// Examples, please?
 std::string h_to_string(const Handle& h)
 {
-	if ((AtomPtr)h == nullptr)
+	if (h == nullptr)
 		return "nullatom\n";
 	else
 		return h->toString();
@@ -283,6 +284,13 @@ std::string oc_to_string(const LinkPtr& lptr)
 } // ~namespace opencog
 
 namespace std {
+
+ostream& operator<<(ostream& out, const opencog::Handle& h)
+{
+    if (h) out << h->toString();
+    else out << "Invalid Handle";
+    return out;
+}
 
 // Hack around the lack template use in Handle.h due to circular dependencies
 #define GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(T) \
