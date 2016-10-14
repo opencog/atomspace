@@ -32,14 +32,13 @@
 
 #include "TypeUtils.h"
 
-using namespace opencog;
-
+namespace opencog {
 
 /* ================================================================= */
 /**
  * Type checker.  Returns true if `val` is of type `deep`.
  */
-bool opencog::value_is_type(const Handle& spec, const Handle& val)
+bool value_is_type(const Handle& spec, const Handle& val)
 {
 	Handle deep(spec);
 
@@ -241,22 +240,22 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	return true;
 }
 
-bool opencog::type_match(const Handle& left_, const Handle& right_)
+bool type_match(const Handle& left_, const Handle& right_)
 {
 	return type_match_rec(left_, right_, true);
 }
 
-Handle opencog::type_compose(const Handle& left, const Handle& right)
+Handle type_compose(const Handle& left, const Handle& right)
 {
 	return Handle::UNDEFINED;
 }
 
-Handle opencog::filter_vardecl(const Handle& vardecl, const Handle& body)
+Handle filter_vardecl(const Handle& vardecl, const Handle& body)
 {
 	return filter_vardecl(vardecl, HandleSeq{body});
 }
 
-Handle opencog::filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
+Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 {
 	// Base cases
 
@@ -296,5 +295,7 @@ Handle opencog::filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 	// XXX TODO .. undefined?? or throw?
 	return Handle::UNDEFINED;
 }
+
+} // ~namespace opencog
 
 /* ===================== END OF FILE ===================== */
