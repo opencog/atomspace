@@ -224,16 +224,16 @@ void ForwardChainerUTest::test_unify_2(void)
 		("(AndLink"
 		 "  (LambdaLink"
 		 "    (TypedVariableLink"
-		 "      (VariableNode \"$X\")"
+		 "      (VariableNode \"$Xaaaa\")"
 		 "      (TypeNode \"ConceptNode\"))"
 		 "    (PredicateNode \"P\"))"
 		 "  (LambdaLink"
 		 "    (TypedVariableLink"
-		 "      (VariableNode \"$X\")"
+		 "      (VariableNode \"$Xbee\")"
 		 "      (TypeNode \"ConceptNode\"))"
 		 "    (EvaluationLink"
 		 "      (PredicateNode \"Q\")"
-		 "      (VariableNode \"$X\"))))");
+		 "      (VariableNode \"$Xbee\"))))");
 
     Handle rbs = eval.eval_h("(ConceptNode \"PLN\")");
 
