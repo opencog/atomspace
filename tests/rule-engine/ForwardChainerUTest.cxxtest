@@ -245,6 +245,8 @@ void ForwardChainerUTest::test_unify_2(void)
 
 	ForwardChainer fc(_as, rbs, source);
 
+	printf("source is %s\n", source->toString().c_str());
+	printf("premise_pat is %s\n", premise_pat->toString().c_str());
 	bool result = fc.unify(source, premise_pat, &rule);
 	TS_ASSERT(result);
 }
