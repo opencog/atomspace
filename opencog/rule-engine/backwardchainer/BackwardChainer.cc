@@ -52,6 +52,16 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
 	  _init_target(htarget), _init_vardecl(vardecl), _init_fitness(fitness),
 	  _iteration(0), _rules(_configReader.get_rules()) {}
 
+UREConfigReader& BackwardChainer::get_config()
+{
+	return _configReader;
+}
+
+const UREConfigReader& BackwardChainer::get_config() const
+{
+	return _configReader;
+}
+
 void BackwardChainer::do_chain()
 {
 	while (not termination())
@@ -75,61 +85,10 @@ bool BackwardChainer::termination()
 	return _configReader.get_maximum_iterations() <= _iteration;
 }
 
-UREConfigReader& BackwardChainer::get_config()
+Handle BackwardChainer::get_results() const
 {
-	return _configReader;
-}
-
-const UREConfigReader& BackwardChainer::get_config() const
-{
-	return _configReader;
-}
-
-const AndBITFCMap::value_type& BackwardChainer::select_andbit()
-{
-	// For now selection is uniformly random
-	return rand_element(_andbits);
-}
-
-BITNode& BackwardChainer::select_bitleaf(const AndBITFCMap::value_type& andbit)
-{
-	// For now selection is uniformly random
-	return _handle2bitnode[rand_element(andbit.first)];
-}
-
-BITNode* BackwardChainer::select_target()
-{
-	if (_handle2bitnode.empty())
-		return nullptr;
-
-	// For now selection is uniformly random
-	return &(rand_element(_handle2bitnode).second);
-}
-
-void BackwardChainer::reduce_bit()
-{
-	// TODO: avoid having the BIT grow arbitrarily large
-}
-
-Rule BackwardChainer::select_rule(const BITNode& target)
-{
-	// For now the rule is uniformly randomly selected amongst the
-	// valid ones
-	RuleSeq valid_rules = get_valid_rules(target);
-	if (valid_rules.empty())
-		return Rule();
-	return rand_element(valid_rules);
-}
-
-RuleSeq BackwardChainer::get_valid_rules(const BITNode& target)
-{
-	RuleSeq valid_rules;
-	for (const Rule& rule : _rules) {
-		RuleSeq unified_rules = rule.unify_target(target.body, target.vardecl);
-		valid_rules.insert(valid_rules.end(),
-		                   unified_rules.begin(), unified_rules.end());
-	}
-	return valid_rules;
+	HandleSeq results(_results.begin(), _results.end());
+	return _as.add_link(SET_LINK, results);
 }
 
 void BackwardChainer::expand_bit()
@@ -265,6 +224,53 @@ void BackwardChainer::fulfill_andbit(const AndBITFCMap::value_type& andbit)
 	_results.insert(results.begin(), results.end());
 }
 
+const AndBITFCMap::value_type& BackwardChainer::select_andbit()
+{
+	// For now selection is uniformly random
+	return rand_element(_andbits);
+}
+
+BITNode& BackwardChainer::select_bitleaf(const AndBITFCMap::value_type& andbit)
+{
+	// For now selection is uniformly random
+	return _handle2bitnode[rand_element(andbit.first)];
+}
+
+BITNode* BackwardChainer::select_target()
+{
+	if (_handle2bitnode.empty())
+		return nullptr;
+
+	// For now selection is uniformly random
+	return &(rand_element(_handle2bitnode).second);
+}
+
+void BackwardChainer::reduce_bit()
+{
+	// TODO: avoid having the BIT grow arbitrarily large
+}
+
+Rule BackwardChainer::select_rule(const BITNode& target)
+{
+	// For now the rule is uniformly randomly selected amongst the
+	// valid ones
+	RuleSeq valid_rules = get_valid_rules(target);
+	if (valid_rules.empty())
+		return Rule();
+	return rand_element(valid_rules);
+}
+
+RuleSeq BackwardChainer::get_valid_rules(const BITNode& target)
+{
+	RuleSeq valid_rules;
+	for (const Rule& rule : _rules) {
+		RuleSeq unified_rules = rule.unify_target(target.body, target.vardecl);
+		valid_rules.insert(valid_rules.end(),
+		                   unified_rules.begin(), unified_rules.end());
+	}
+	return valid_rules;
+}
+
 void BackwardChainer::insert_h2b(const Handle& body, const Handle& vardecl,
                                  const BITFitness& fitness)
 {
@@ -284,10 +290,4 @@ void BackwardChainer::init_andbits()
 		bl.insert(bl.begin(), _init_vardecl);
 	Handle fcs = Handle(createBindLink(bl));
 	_andbits[{_init_target}] = fcs;
-}
-
-Handle BackwardChainer::get_results() const
-{
-	HandleSeq results(_results.begin(), _results.end());
-	return _as.add_link(SET_LINK, results);
 }

@@ -99,6 +99,12 @@ public:
 	                const BITFitness& fitness = BITFitness());
 
 	/**
+	 * URE configuration accessors
+	 */
+	UREConfigReader& get_config();
+	const UREConfigReader& get_config() const;
+
+	/**
 	 * Perform backward chaining inference till the termination
 	 * criteria have been met.
 	 */
@@ -113,11 +119,6 @@ public:
 	 * @return true if the termination criteria have been met.
 	 */
 	bool termination();
-
-    // Accessors
-
-	UREConfigReader& get_config();
-	const UREConfigReader& get_config() const;
 
 	/**
 	 * Get the current result on the initial target, a SetLink with
