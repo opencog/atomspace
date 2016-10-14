@@ -331,11 +331,15 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	depth --;
 	LAZY_LOG_FINE << "tree_comp down link match=" << match;
 
-	if (not match) return false;
+	const Handle &hp = ptm->getHandle();
+	if (not match)
+	{
+		_pmc.post_link_mismatch(hp, hg);
+		return false;
+	}
 
 	// If we've found a grounding, lets see if the
 	// post-match callback likes this grounding.
-	const Handle &hp = ptm->getHandle();
 	match = _pmc.post_link_match(hp, hg);
 	if (not match) return false;
 
@@ -404,6 +408,10 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 				_choice_state[GndChoice(ptm, hg)] = icurr;
 				return true;
 			}
+		}
+		else
+		{
+			_pmc.post_link_mismatch(hp, hg);
 		}
 		solution_pop();
 		choose_next = false; // we are taking a step, so clear the flag.
@@ -678,6 +686,10 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				_perm_state[Unorder(ptm, hg)] = mutation;
 				return true;
 			}
+		}
+		else
+		{
+			_pmc.post_link_mismatch(hp, hg);
 		}
 		// If we are here, we are handling case 8.
 		LAZY_LOG_FINE << "Above permuation " << perm_count[Unorder(ptm, hg)]

@@ -64,6 +64,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 
 		virtual bool link_match(const Handle&, const Handle&);
 		virtual bool post_link_match(const Handle&, const Handle&);
+		virtual void post_link_mismatch(const Handle&, const Handle&);
 
 		virtual bool clause_match(const Handle&, const Handle&);
 		/**
