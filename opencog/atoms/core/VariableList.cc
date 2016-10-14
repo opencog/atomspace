@@ -110,6 +110,14 @@ VariableList::VariableList(Link &l)
 	validate_vardecl(_outgoing);
 }
 
+VariableList::VariableList(const Variables& varlist,
+                           TruthValuePtr tv, AttentionValuePtr av)
+	: Link(VARIABLE_LIST, /* TODO */HandleSeq())
+{
+	// TODO
+	OC_ASSERT(false, "TODO");
+}
+
 /* ================================================================= */
 /**
  * Extract the variable type(s) from a TypedVariableLink
