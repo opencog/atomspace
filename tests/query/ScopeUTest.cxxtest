@@ -185,13 +185,14 @@ void ScopeUTest::test_pushpop(void)
 	eval->eval("(load-from-path \"tests/query/scope-confound.scm\")");
 
 	Handle c1 = eval->eval_h("(content-1)");
-	Handle em = eval->eval_h("(evaluation-to-member-2-rule)");
-	Handle r1 = eval->eval_h("(cog-bind (member-to-evaluation-2-1-rule))");
+	eval->eval_h("(evaluation-to-member-2-rule-loose)");
+	eval->eval_h("(evaluation-to-member-2-rule)");
+	eval->eval_h("(cog-bind (member-to-evaluation-2-1-rule))");
 
-	Handle c2 = eval->eval_h("(content-2)");
-	Handle r2 = eval->eval_h("(cog-bind (member-to-evaluation-2-1-rule))");
+	Handle em = eval->eval_h("(cog-bind (evaluation-to-member-2-rule))");
+	TS_ASSERT_EQUALS(1, em->getArity());
+	Handle c2 = em->getOutgoingAtom(0);
 
 	TS_ASSERT_EQUALS(c1, c2);
-	TS_ASSERT_EQUALS(r1, r2);
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
