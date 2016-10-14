@@ -133,13 +133,35 @@ private:
 	void expand_bit(const AndBITFCMap::value_type& andbit);
 
 	// Expand the BIT given a and-BIT as parent, a BITNode as leaf of
-	// that and-BIT and an inference rule
+	// that and-BIT and an inference rule.
+	//
+	// TODO: support fitness function.
 	void expand_bit(const AndBITFCMap::value_type& andbit,
 	                BITNode& leaf, const Rule& rule);
 
-	// Given an atomese forward chaining strategy and other arguments,
-	// generate a new forward chaining strategy
-	Handle expand_fcs(/* TODO */);
+	// Given an atomese forward chaining strategy, a leaf of it to
+	// expand, and a rule, return a new forward chaining strategy
+	// where the leaf has been substituted by the rule premises and
+	// rule application.
+	//
+	// TODO: give examples.
+	Handle expand_fcs(const Handle& fcs, const Handle& leaf, const Rule& rule);
+
+	// Given the pattern term of an atomese forward chaining strategy,
+	// the leaf from which to expand and premises, replace the leaf by
+	// the premises.
+	//
+	// TODO: give examples.
+	Handle expand_fcs_pattern(const Handle& fcs_pattern,
+	                          const Handle& leaf, const HandleSeq& premises);
+
+	// Given the rewrite term of an atomese forward chaining strategy,
+	// the leaf from which to expand and a rule rewrite term, replace
+	// the leaf by the rule rewrite term.
+	//
+	// TODO: give examples.
+	Handle expand_fcs_rewrite(const Handle& fcs_rewrite,
+	                          const Handle& leaf, const Handle& rule_rewrite);
 
 	// Fulfill the BIT. That is run some or all its and-BITs
 	void fulfill_bit();

@@ -164,8 +164,6 @@ void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit)
 void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit,
                                  BITNode& leaf, const Rule& rule)
 {
-	// TODO: support fitness function
-
 	// Expand the leaf
 	// 1. Append the rule to it
 	// 2. Instantiate the premises as BITNodes
@@ -175,7 +173,7 @@ void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit,
 		insert_h2b(premise, rule.get_forward_vardecl(), BITFitness());
 
 	// Expand the associated atomese forward chaining strategy
-	Handle fcs = expand_fcs(/* TODO */);
+	Handle fcs = expand_fcs(andbit.second, leaf.body, rule);
 
 	// Define new and-BIT and associate new forward chaining strategy
 	// to it
@@ -185,9 +183,66 @@ void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit,
 	_andbits[new_leaves] = fcs;
 }
 
-Handle BackwardChainer::expand_fcs(/* TODO */)
+Handle BackwardChainer::expand_fcs(const Handle& fcs, const Handle& leaf,
+                                   const Rule& rule)
 {
-	// TODO
+	BindLinkPtr fcs_bl(BindLinkCast(fcs));
+	Handle fcs_vardecl = fcs_bl->get_vardecl();
+	Handle fcs_pattern = fcs_bl->get_body();
+	Handle fcs_rewrite = fcs_bl->get_implicand();
+	Handle rule_vardecl = rule.get_forward_vardecl();
+	HandleSeq premises = rule.get_premises();
+	Handle rule_rewrite = rule.get_forward_implicand();
+
+	// Generate new pattern term
+	Handle npattern = expand_fcs_pattern(fcs_pattern, leaf, premises);
+
+	// Generate new rewrite term
+	Handle nrewrite = expand_fcs_rewrite(fcs_rewrite, leaf, rule_rewrite);
+
+	// Generate new vardecl
+	Handle nvardecl = filter_vardecl(merge_vardecl(fcs_vardecl, rule_vardecl),
+	                                 {npattern, nrewrite});
+
+	// Generate new atomese forward chaining strategy
+	HandleSeq noutgoings({npattern, nrewrite});
+	if (nvardecl.is_defined())
+		noutgoings.insert(noutgoings.begin(), nvardecl);
+	Handle nfcs = Handle(createBindLink(noutgoings));
+
+	return nfcs;
+}
+
+Handle BackwardChainer::expand_fcs_pattern(const Handle& fcs_pattern,
+                                           const Handle& leaf,
+                                           const HandleSeq& premises)
+{
+	if (fcs_pattern == leaf)
+		return Handle(createLink(AND_LINK, premises));
+
+	OC_ASSERT(fcs_pattern->getType() == AND_LINK);
+	HandleSeq outgoings = fcs_pattern->getOutgoingSet();
+	auto it = std::find(outgoings.begin(), outgoings.end(), leaf);
+	OC_ASSERT(it != outgoings.end());
+	outgoings.erase(it);
+	outgoings.insert(outgoings.end(), premises.begin(), premises.end());
+	return Handle(createLink(AND_LINK, outgoings));
+}
+
+Handle BackwardChainer::expand_fcs_rewrite(const Handle& fcs_rewrite,
+                                           const Handle& leaf,
+                                           const Handle& rule_rewrite)
+{
+	// Base case
+	if (fcs_rewrite == leaf)
+		return rule_rewrite;
+
+	// Recursive case
+	Type t = fcs_rewrite->getType();
+	HandleSeq outgoings;
+	for (const Handle& h : fcs_rewrite->getOutgoingSet())
+		outgoings.push_back(expand_fcs_rewrite(h, leaf, rule_rewrite));
+	return Handle(createLink(t, outgoings)); // TODO: maybe need a factory
 }
 
 void BackwardChainer::fulfill_bit()
