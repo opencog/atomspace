@@ -255,16 +255,23 @@ Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
     return getLinkHandle(a);
 }
 
-Handle AtomTable::getLinkHandle(AtomPtr& a) const
+Handle AtomTable::getLinkHandle(AtomPtr& a, int quotelevel) const
 {
     Type t = a->getType();
     const HandleSeq &seq = a->getOutgoingSet();
+
+    // We need to keep track of the quote nesting, as this affects
+    // how embedded ScopeLinks are treated, below.  That is, unquoted
+    // ScopeLinks really do have to be atomspace-unique, but if they
+    // are quoted, then the checks are not to be performed.
+    if (QUOTE_LINK == t) quotelevel++;
+    else if (UNQUOTE_LINK == t) quotelevel--;
 
     // Make sure all the atoms in the outgoing set are resolved :-)
     HandleSeq resolved_seq;
     for (const Handle& ho : seq) {
         AtomPtr ao(ho);
-        resolved_seq.emplace_back(getHandle(ao));
+        resolved_seq.emplace_back(getHandle(ao, quotelevel));
     }
 
     // Aiieee! unordered link!
@@ -279,13 +286,14 @@ Handle AtomTable::getLinkHandle(AtomPtr& a) const
 
     // If it is NOT a ScopeLink, then it is easy to find the equivalent
     // atom --  we pull it out of the linkIndex. But if it is a
-    // ScopeLink, then we need to search for any alpha-converted forms.
+    // ScopeLink, and it is not quoted, then we need to search for
+    // any alpha-converted forms.
     Handle h(linkIndex.getHandle(t, resolved_seq));
     if (nullptr != h) return h;
 
-    if (not classserver().isA(t, SCOPE_LINK)) {
+    if (0 != quotelevel or not classserver().isA(t, SCOPE_LINK)) {
         if (_environ and nullptr == h) {
-            return _environ->getHandle(a);
+            return _environ->getHandle(a, quotelevel);
         }
         return h;
     }
@@ -294,18 +302,24 @@ Handle AtomTable::getLinkHandle(AtomPtr& a) const
     if (nullptr == wanted)
         wanted = ScopeLink::factory(Handle(a));
 
-    // Look at each and every ScopeLink.
+    // Look at each and every ScopeLink.  Some of the ScopeLinks
+    // are going to have badly-nested QuoteLinks in them (this is
+    // unavoidable, as they might be parts of more complex
+    // expressions) and so we have to be able to silently ignore
+    // these exceptions.
     TypeIndex::iterator candidate = typeIndex.begin(t, false);
     const TypeIndex::iterator end = typeIndex.end();
     for (; candidate != end; candidate++) {
-        if (wanted->is_equal(*candidate)) {
-            return Handle(*candidate);
-        }
+        try {
+            if (wanted->is_equal(*candidate, true)) {
+                return Handle(*candidate);
+            }
+        } catch (const NestingException& ex) {}
     }
 
     if (_environ) {
         AtomPtr aw(wanted);
-        return _environ->getHandle(aw);
+        return _environ->getHandle(aw, quotelevel);
     }
     return Handle::UNDEFINED;
 }
@@ -313,7 +327,7 @@ Handle AtomTable::getLinkHandle(AtomPtr& a) const
 /// Find an equivalent atom that is exactly the same as the arg. If
 /// such an atom is in the table, it is returned, else the return
 /// is the bad handle.
-Handle AtomTable::getHandle(AtomPtr& a) const
+Handle AtomTable::getHandle(AtomPtr& a, int quotelevel) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
 
@@ -323,7 +337,7 @@ Handle AtomTable::getHandle(AtomPtr& a) const
     if (a->isNode())
         return getHandle(a->getType(), a->getName());
     else if (a->isLink())
-        return getLinkHandle(a);
+        return getLinkHandle(a, quotelevel);
 
     return Handle::UNDEFINED;
 }
