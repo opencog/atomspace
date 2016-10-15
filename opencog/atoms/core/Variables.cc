@@ -138,9 +138,10 @@ HandleSeq FreeVariables::make_values(const HandleMap& varmap) const
 /* ================================================================= */
 
 Handle FreeVariables::substitute_nocheck(const Handle& term,
-                                         const HandleSeq& args) const
+                                         const HandleSeq& args,
+                                         bool silent) const
 {
-	return substitute_scoped(term, args, index, 0);
+	return substitute_scoped(term, args, silent, index, 0);
 }
 
 /// Perform beta-reduction on the term.  This is more-or-less a purely
@@ -152,6 +153,7 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
 /// the bound variable has scope.
 Handle FreeVariables::substitute_scoped(const Handle& term,
                                         const HandleSeq& args,
+                                        bool silent,
                                         const IndexMap& index_map,
                                         int quotation_level) const
 {
@@ -179,7 +181,10 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 	{
 		quotation_level--;
 		if (quotation_level < 0)
+		{
+			if (silent) throw NestingException();
 			throw SyntaxException(TRACE_INFO, "Unbalanced quotes!");
+		}
 	}
 	else
 	if (0 == quotation_level and classserver().isA(ty, SCOPE_LINK))
@@ -230,7 +235,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 			HandleSeq oset;
 			for (const Handle& h : term->getOutgoingSet())
 			{
-				oset.emplace_back(substitute_scoped(h, args, hidden_map, quotation_level));
+				oset.emplace_back(substitute_scoped(h, args, silent, hidden_map, quotation_level));
 			}
 			return Handle(createLink(term->getType(), oset));
 		}
@@ -245,7 +250,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		// that wraps them up.  See MapLinkUTest for examples.
 		if (GLOB_NODE == h->getType())
 		{
-			Handle glst(substitute_scoped(h, args, index_map, quotation_level));
+			Handle glst(substitute_scoped(h, args, silent, index_map, quotation_level));
 			if (glst->isNode())
 				return glst;
 			for (const Handle& gl : glst->getOutgoingSet())
@@ -253,7 +258,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		}
 		else
 			oset.emplace_back(
-				substitute_scoped(h, args, index_map, quotation_level));
+				substitute_scoped(h, args, silent, index_map, quotation_level));
 	}
 	return Handle(createLink(term->getType(), oset));
 }

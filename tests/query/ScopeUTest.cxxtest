@@ -63,6 +63,7 @@ public:
 	void test_search_reverse(void);
 	void test_search_alt(void);
 	void test_pushpop(void);
+	void test_quote(void);
 };
 
 void ScopeUTest::tearDown(void)
@@ -194,5 +195,27 @@ void ScopeUTest::test_pushpop(void)
 	Handle c2 = em->getOutgoingAtom(0);
 
 	TS_ASSERT_EQUALS(c1, c2);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test search of embedded scope links.
+ * The search pattern inculdes QuoteLinks that have to be navigated
+ * correctly, in order for thins to work.
+ */
+void ScopeUTest::test_quote(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/scope-quote.scm\")");
+
+	Handle list = eval->eval_h("(cog-bind blist)");
+	Handle andl = eval->eval_h("(cog-bind bland)");
+
+	Handle elist = eval->eval_h("(SetLink (OrderedLink p-lamb q-lamb)) ");
+	Handle eandl = eval->eval_h("(SetLink (UnorderedLink p-lamb q-lamb)) ");
+
+	TS_ASSERT_EQUALS(list, elist);
+	TS_ASSERT_EQUALS(andl, eandl);
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

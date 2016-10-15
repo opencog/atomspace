@@ -200,10 +200,10 @@ public:
      */
     Handle getHandle(Type, const std::string&) const;
     Handle getHandle(Type, const HandleSeq&) const;
-    Handle getLinkHandle(AtomPtr&) const;
-    Handle getHandle(AtomPtr&) const;
-    Handle getHandle(const Handle& h) const {
-        AtomPtr a(h); return getHandle(a);
+    Handle getLinkHandle(AtomPtr&, int=0) const;
+    Handle getHandle(AtomPtr&, int=0) const;
+    Handle getHandle(const Handle& h, int quotelevel=0) const {
+        AtomPtr a(h); return getHandle(a, quotelevel);
     }
     Handle getHandle(UUID) const;
 
