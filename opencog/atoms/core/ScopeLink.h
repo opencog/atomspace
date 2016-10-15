@@ -93,7 +93,7 @@ public:
 	// Return true if the other Handle is equal to this one,
 	// i.e. is the same, up to alpha conversion. i.e. is the same,
 	// up to a renaming of the bound variables.
-	bool is_equal(const Handle&) const;
+	bool is_equal(const Handle&, bool silent=false) const;
 
 	/**
 	 * Return an alpha converted copy of itself. One can provide in

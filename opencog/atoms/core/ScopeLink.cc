@@ -170,7 +170,7 @@ void ScopeLink::init_scoped_variables(const Handle& hvar)
 /// Compare other ScopeLink, return true if it is equal to this one,
 /// up to an alpha-conversion of variables.
 ///
-bool ScopeLink::is_equal(const Handle& other) const
+bool ScopeLink::is_equal(const Handle& other, bool silent) const
 {
 	if (other == this) return true;
 	if (other->getType() != _type) return false;
@@ -198,7 +198,8 @@ bool ScopeLink::is_equal(const Handle& other) const
 	for (Arity i = 0; i < n_scoped_terms; ++i) {
 		Handle h = getOutgoingAtom(i + vardecl_offset);
 		Handle other_h = other->getOutgoingAtom(i + other_vardecl_offset);
-		other_h = scother->_varlist.substitute_nocheck(other_h, _varlist.varseq);
+		other_h = scother->_varlist.substitute_nocheck(other_h,
+		                                         _varlist.varseq, silent);
  		// Compare them, they should match.
 		if (*((AtomPtr)h) != *((AtomPtr) other_h)) return false;
  	}
