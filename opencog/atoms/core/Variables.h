@@ -94,9 +94,9 @@ struct FreeVariables
 	// for the variables.  "nocheck" == no type checking is done.
 	// This performs an almost pure, syntactic beta-reduction; its
 	// almost-pure because it does honour the semantics of QuoteLink.
-	Handle substitute_nocheck(const Handle&, const HandleSeq&) const;
+	Handle substitute_nocheck(const Handle&, const HandleSeq&, bool silent=false) const;
 protected:
-	Handle substitute_scoped(const Handle&, const HandleSeq&,
+	Handle substitute_scoped(const Handle&, const HandleSeq&, bool,
 	                         const IndexMap&, int) const;
 };
 
