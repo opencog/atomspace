@@ -20,13 +20,14 @@
 
 
 ; Sample data
-; The ListLink variant
-(ListLink
+(define p-lamb
   (LambdaLink
     (TypedVariableLink
       (VariableNode "$Xaaaa")
       (TypeNode "ConceptNode"))
-    (PredicateNode "P"))
+    (PredicateNode "P")))
+
+(define q-lamb
   (LambdaLink
     (TypedVariableLink
       (VariableNode "$Xbee")
@@ -34,22 +35,12 @@
     (EvaluationLink
       (PredicateNode "Q")
       (VariableNode "$Xbee"))))
+
+; The ListLink variant
+(ListLink p-lamb q-lamb)
 
 ; The AndLink variant -- same as above, except uses AndLink.
-(AndLink
-  (LambdaLink
-    (TypedVariableLink
-      (VariableNode "$Xaaaa")
-      (TypeNode "ConceptNode"))
-    (PredicateNode "P"))
-  (LambdaLink
-    (TypedVariableLink
-      (VariableNode "$Xbee")
-      (TypeNode "ConceptNode"))
-    (EvaluationLink
-      (PredicateNode "Q")
-      (VariableNode "$Xbee"))))
-
+(AndLink p-lamb q-lamb)
 
 ; The pattern matcher, looks for the List variant
 (define blist
@@ -85,7 +76,7 @@
           (UnquoteLink
             (VariableNode "$A2")))))
     ; result
-    (ListLink
+    (OrderedLink
       (LambdaLink
         (VariableNode "$TyVs-one")
         (VariableNode "$A1"))
@@ -129,7 +120,7 @@
           (UnquoteLink
             (VariableNode "$A2")))))
     ; output result
-    (AndLink
+    (UnorderedLink
       (LambdaLink
         (VariableNode "$TyVs-one")
         (VariableNode "$A1"))
