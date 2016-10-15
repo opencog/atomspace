@@ -18,7 +18,24 @@
 (use-modules (opencog))
 (use-modules (opencog query))
 
+
 ; Sample data
+; The ListLink variant
+(ListLink
+  (LambdaLink
+    (TypedVariableLink
+      (VariableNode "$Xaaaa")
+      (TypeNode "ConceptNode"))
+    (PredicateNode "P"))
+  (LambdaLink
+    (TypedVariableLink
+      (VariableNode "$Xbee")
+      (TypeNode "ConceptNode"))
+    (EvaluationLink
+      (PredicateNode "Q")
+      (VariableNode "$Xbee"))))
+
+; The AndLink variant -- same as above, except uses AndLink.
 (AndLink
   (LambdaLink
     (TypedVariableLink
@@ -34,6 +51,51 @@
       (VariableNode "$Xbee"))))
 
 
+; The pattern matcher, looks for the List variant
+(define blist
+  (BindLink
+    (VariableList
+      (TypedVariableLink
+        (VariableNode "$TyVs-one")
+        (TypeChoice
+          (TypeNode "TypedVariableLink")
+          (TypeNode "VariableNode")
+          (TypeNode "VariableList")))
+      (TypedVariableLink
+        (VariableNode "$TyVs-two")
+        (TypeChoice
+          (TypeNode "TypedVariableLink")
+          (TypeNode "VariableNode")
+          (TypeNode "VariableList")))
+      (VariableNode "$A1")
+      (VariableNode "$A2")
+    )
+    ; pattern
+    (ListLink
+      (QuoteLink
+        (LambdaLink
+          (UnquoteLink
+            (VariableNode "$TyVs-one"))
+          (UnquoteLink
+            (VariableNode "$A1"))))
+      (QuoteLink
+        (LambdaLink
+          (UnquoteLink
+            (VariableNode "$TyVs-two"))
+          (UnquoteLink
+            (VariableNode "$A2")))))
+    ; result
+    (ListLink
+      (LambdaLink
+        (VariableNode "$TyVs-one")
+        (VariableNode "$A1"))
+      (LambdaLink
+        (VariableNode "$TyVs-two")
+        (VariableNode "$A2"))))
+)
+
+; The pattern matcher, looks for the And variant. Notice that
+; the quoting is different from the above.
 (define bland
   (BindLink
     ; Variable declaration
