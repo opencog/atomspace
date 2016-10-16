@@ -2,5 +2,5 @@ flags: {}
 packages:
 - '.'
 extra-deps: []
-resolver: lts-3.5
+resolver: lts-7.3
 extra-lib-dirs: [/usr/local/lib/opencog]

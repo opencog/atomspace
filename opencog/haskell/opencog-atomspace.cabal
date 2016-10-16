@@ -32,4 +32,3 @@ library
                    , transformers     >=0.3
 
   extra-libraries:   atomspace-cwrapper
-  ghc-options:       -fcontext-stack=500

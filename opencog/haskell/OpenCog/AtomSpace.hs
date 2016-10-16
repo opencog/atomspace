@@ -33,7 +33,8 @@ module OpenCog.AtomSpace
     , module OpenCog.AtomSpace.Sugar
     -- * Function for use in GSN
     , exportFunction
-    , UUID
+    , Handle
+    , HandleSeq
     , AtomSpaceRef
     ) where
 
@@ -45,4 +46,4 @@ import OpenCog.AtomSpace.Env         (AtomSpace(..),runOnNewAtomSpace,AtomSpaceO
 import OpenCog.AtomSpace.Utils       (printAtom,showAtom)
 import OpenCog.AtomSpace.Sugar
 import OpenCog.AtomSpace.Query
-import OpenCog.AtomSpace.Internal    (UUID)
+import OpenCog.AtomSpace.Internal    (Handle,HandleSeq)

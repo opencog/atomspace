@@ -186,8 +186,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 #endif /* HAVE_CYTHON */
 	}
 
-	// This is used by the Haskel bindings.  XXX -- it uses a broken
-	// API, namely the UUID's, and should be fixed....
+	// This is used by the Haskel bindings.
 	if (0 == schema.compare(0, 4, "lib:", 4))
 	{
 		// Be friendly, and strip leading white-space, if any.
@@ -210,14 +209,11 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		void* sym = LibraryManager::getFunc(libName,funcName);
 
 		// Convert the void* pointer to the correct function type.
-		// XXX FIXME -- it is incorrect to use UUID's for this purpose!
-		// UUID's are meant for storage, not for the library API.
-		// (The UUID lookup on the receiving side is going to be slow).
-		UUID (*func)(AtomSpace*, UUID);
-		func = reinterpret_cast<UUID (*)(AtomSpace *, UUID)>(sym);
+		Handle* (*func)(AtomSpace*, Handle*);
+		func = reinterpret_cast<Handle* (*)(AtomSpace *, Handle*)>(sym);
 
 		// Execute the function.
-		Handle h(func(as, args.value()));
+		Handle h = *func(as, &args);
 
 		// Return the handle.
 		return h;

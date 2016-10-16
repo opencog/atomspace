@@ -7,7 +7,8 @@
 -- with the AtomSpace C wrapper library.
 -- Intended for internal use only.
 module OpenCog.AtomSpace.Internal (
-      UUID(..)
+      Handle(..)
+    , HandleSeq(..)
     , TVRaw(..)
     , fromTVRaw
     , toTVRaw
@@ -15,15 +16,15 @@ module OpenCog.AtomSpace.Internal (
     , tvMAX_PARAMS
     ) where
 
-import Foreign.C.Types               (CULong(..))
+import Foreign                       (Ptr)
 import Data.Functor                  ((<$>))
 import Data.Typeable                 (cast,Typeable)
 import OpenCog.AtomSpace.Sugar       (noTv)
 import OpenCog.AtomSpace.Types       (AtomName(..),AtomType(..)
                                      ,Atom(..),TruthVal(..))
 
--- Data type to hold atoms's UUID.
-type UUID = CULong
+type Handle = Ptr ()
+type HandleSeq = Ptr Handle
 -- Constant with the maximum number of parameters in any type of TV.
 tvMAX_PARAMS :: Int
 tvMAX_PARAMS = 5
