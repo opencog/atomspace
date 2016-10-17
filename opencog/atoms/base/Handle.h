@@ -144,18 +144,17 @@ public:
         return false;
     }
 
-    inline bool operator==(const Atom* ap) const noexcept {
-        return _ptr.get() == ap;
-    }
+    bool operator==(const Atom* ap) const noexcept;
+
     inline bool operator!=(const Atom* ap) const noexcept {
-        return _ptr.get() != ap;
+        return not operator==(ap);
     }
 
     inline bool operator==(const Handle& h) const noexcept {
-        return _ptr.get() == h._ptr.get();
+        return operator==(h._ptr.get());
     }
     inline bool operator!=(const Handle& h) const noexcept {
-        return _ptr.get() != h._ptr.get();
+        return operator!=(h._ptr.get());
     }
 #define DEFAULT_ATOMS_LESS atoms_less
     inline bool operator< (const Handle& h) const noexcept {
