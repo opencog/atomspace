@@ -124,6 +124,19 @@ inline Handle Handle::do_res(UUID uuid)
     return Handle();
 }
 
+bool Handle::operator==(const Atom* other) const noexcept {
+	// If both are defined and are in no atomspace or different
+	// atomspaces, compare them by content
+	if (_ptr.get() and other) {
+		AtomSpace* as = _ptr.get()->getAtomSpace();
+		AtomSpace* other_as = other->getAtomSpace();
+		if ((!as and !other_as) or (as != other_as))
+			return *_ptr.get() == *other;
+	}
+	// Otherwise compare by pointer address
+	return _ptr.get() == other;
+}
+
 // The rest of this file is devoted to printing utilities used only
 // during GDB debugging.  Thus, you won't find these anywhere in the
 // code base. You may call that directly from gdb
