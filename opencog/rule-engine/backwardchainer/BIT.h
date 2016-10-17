@@ -93,6 +93,8 @@ typedef std::unordered_map<Handle, BITNode> HandleBITNodeMap;
 // Gdb debugging, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const BITNode& bitnode);
+std::string oc_to_string(const AndBITFCMap& abfc);
+std::string oc_to_string(const HandleBITNodeMap& hbn);
 
 } // ~namespace opencog
 

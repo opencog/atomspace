@@ -46,4 +46,32 @@ std::string oc_to_string(const BITNode& bitnode)
 	return bitnode.to_string();
 }
 
+std::string oc_to_string(const AndBITFCMap& abfc)
+{
+	stringstream ss;
+	ss << "size = " << abfc.size() << std::endl;
+	size_t i = 0;
+	for (const auto& el : abfc) {
+		ss << "And-BIT leaves[" << i << "]:" << std::endl
+		   << oc_to_string(el.first)
+		   << "Forward chaining strategy[" << i << "]:" << std::endl
+		   << oc_to_string(el.second);
+	}
+	return ss.str();
+}
+
+std::string oc_to_string(const HandleBITNodeMap& hbn)
+{
+	stringstream ss;
+	ss << "size = " << hbn.size() << std::endl;
+	size_t i = 0;
+	for (const auto& el : hbn) {
+		ss << "Handle[" << i << "]:" << std::endl
+		   << oc_to_string(el.first)
+		   << "BITNode[" << i << "]:" << std::endl
+		   << oc_to_string(el.second);
+	}
+	return ss.str();
+}
+
 } // ~namespace opencog
