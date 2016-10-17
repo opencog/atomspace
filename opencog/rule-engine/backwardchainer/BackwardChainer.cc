@@ -124,6 +124,10 @@ void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit)
 void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit,
                                  BITNode& leaf, const Rule& rule)
 {
+	// Make sure that the rule is not a or-child of leaf.
+	if (is_in(rule, leaf))
+		return;
+
 	// Expand the leaf
 	// 1. Append the rule to it
 	// 2. Instantiate the premises as BITNodes
@@ -290,4 +294,12 @@ void BackwardChainer::init_andbits()
 		bl.insert(bl.begin(), _init_vardecl);
 	Handle fcs = Handle(createBindLink(bl));
 	_andbits[{_init_target}] = fcs;
+}
+
+bool BackwardChainer::is_in(const Rule& rule, const BITNode& bitnode)
+{
+	for (const Rule& bnr : bitnode.rules)
+		if (rule.is_alpha_equivalent(bnr))
+			return true;
+	return false;
 }

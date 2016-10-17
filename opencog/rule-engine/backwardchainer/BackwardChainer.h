@@ -208,6 +208,10 @@ private:
 	//   _init_target
 	void init_andbits();
 
+	// Return true if the rule is already an or-children of bitnode up
+	// to an alpha conversion.
+	bool is_in(const Rule& rule, const BITNode& bitnode);
+
 	AtomSpace& _as;
 	UREConfigReader _configReader;
 
