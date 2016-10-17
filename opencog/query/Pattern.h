@@ -152,7 +152,8 @@ struct Pattern
 	}
 };
 
-// For gdb
+// For gdb, see
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const Pattern&);
 
 /** @}*/

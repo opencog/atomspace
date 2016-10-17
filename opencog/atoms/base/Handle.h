@@ -338,7 +338,8 @@ std::string atomtype_to_string(Type type);
 std::string aptr_to_string(const AtomPtr& aptr);
 std::string lptr_to_string(const LinkPtr& lptr);
 
-// In case your gdb supports overloading
+// In case your gdb supports overloading, see
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const Handle& h);
 std::string oc_to_string(const HandlePair& hp);
 std::string oc_to_string(const HandleSeq& hs);

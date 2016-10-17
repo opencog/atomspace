@@ -448,7 +448,8 @@ static inline AtomPtr AtomCast(const Handle& h)
 static inline Handle HandleCast(const ProtoAtomPtr& pa)
     { return Handle(AtomCast(pa)); }
 
-// gdb helper
+// gdb helper, see
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const IncomingSet& iset);
 
 /** @}*/

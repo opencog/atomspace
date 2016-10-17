@@ -107,7 +107,8 @@ static inline VariableListPtr VariableListCast(const AtomPtr& a)
 // XXX temporary hack ...
 #define createVariableList std::make_shared<VariableList>
 
-// For gdb
+// For gdb, see
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const VariableListPtr& vlp);
 
 /** @}*/
