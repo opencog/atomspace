@@ -401,13 +401,12 @@ Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl)
 		lhs_vl(lhs_vardecl),
 		rhs_vl(rhs_vardecl);
 
-	// TODO
-	return Handle::UNDEFINED;
-}
+	const Variables& lhs_vars = lhs_vl.get_variables();
+	Variables new_vars = rhs_vl.get_variables();
 
-Handle find_variable(const Handle& vardecl, const Handle& variable)
-{
-	return Handle::UNDEFINED;
+	new_vars.extend(lhs_vars);
+
+	return Handle(createVariableList(new_vars));
 }
 
 std::string oc_to_string(const UnificationBlock& ub)

@@ -112,10 +112,8 @@ VariableList::VariableList(Link &l)
 
 VariableList::VariableList(const Variables& varlist,
                            TruthValuePtr tv, AttentionValuePtr av)
-	: Link(VARIABLE_LIST, /* TODO */HandleSeq())
+	: VariableList(/* TODO */HandleSeq(), tv, av)
 {
-	// TODO
-	OC_ASSERT(false, "TODO");
 }
 
 /* ================================================================= */
