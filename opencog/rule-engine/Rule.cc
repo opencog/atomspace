@@ -87,6 +87,22 @@ void Rule::init(const Handle& rule_ml)
 	_weight = rule->getTruthValue()->getMean();
 }
 
+bool Rule::is_alpha_equivalent(const Rule& r) const
+{
+	if (not _forward_rule_scope_link->is_equal(r._forward_rule_handle))
+		return false;
+
+	size_t n_backrules = r._backward_rule_scope_links.size();
+	if (n_backrules != _backward_rule_scope_links.size())
+		return false;
+
+	for (size_t i = 0; i < n_backrules; i++) {
+		if (not _backward_rule_scope_links[i]->is_equal(r._backward_rule_handles[i]))
+			return false;
+	}
+	return true;
+}
+
 float Rule::get_weight() const
 {
 	return _weight;

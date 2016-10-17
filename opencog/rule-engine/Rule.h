@@ -130,6 +130,7 @@ public:
 	bool operator<(const Rule& r) const {
 		return _weight < r._weight;
 	}
+	bool is_alpha_equivalent(const Rule& r) const;
 
 	// Modifiers
 	void set_forward_handle(const Handle& h);
