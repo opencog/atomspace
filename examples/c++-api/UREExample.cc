@@ -46,20 +46,18 @@ void backward_chain(AtomSpace& as)
 
     //Create BackwardChainer object.
     Handle hrbase = as.get_node(CONCEPT_NODE, "BC_DEMO_RB");
-    BackwardChainer bc(as, hrbase);
+    BackwardChainer bc(as, hrbase, target);
 
-    bc.set_target(target);
     //Set maximum number of iteration(backward chaining steps).
     //See http://wiki.opencog.org/w/Unified_Rule_Engine#Overall_Backward_Chaining_Process
     bc.get_config().set_maximum_iterations(1000);
     bc.do_chain();
 
-    HandleMultimap results = bc.get_chaining_result();
+    Handle results = bc.get_results();
 
     std::cout << "Query:\n" << target->toShortString() << std::endl;
     std::cout << "Answer:\n";
-    for (const auto& h : results[target_var])
-        std::cout << h->toShortString() << std::endl;
+    std::cout << results->toShortString() << std::endl;
 }
 
 /*

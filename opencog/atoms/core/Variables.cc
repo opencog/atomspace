@@ -527,6 +527,9 @@ Handle Variables::substitute(const Handle& func,
  * Extend a set of variables.
  *
  * That is, merge the given variables into this set.
+ *
+ * If a variable is both in *this and vset then its type intersection
+ * is assigned to it.
  */
 void Variables::extend(const Variables& vset)
 {
@@ -540,11 +543,11 @@ void Variables::extend(const Variables& vset)
 			try
 			{
 				const std::set<Type>& tms = vset._simple_typemap.at(h);
-				std::set<Type> mytypes = _simple_typemap[h];
-				for (Type t : tms)
-					mytypes.insert(t);
-				_simple_typemap.erase(h);	 // is it safe to erase if h not in already?
-				_simple_typemap.insert({h,mytypes});
+				std::set<Type> mytypes =
+					type_intersection(_simple_typemap[h], tms);
+				_simple_typemap.erase(h);	 // is it safe to erase if
+                                             // h not in already?
+				_simple_typemap.insert({h, mytypes});
 			}
 			catch(const std::out_of_range&) {}
 		}
@@ -564,6 +567,46 @@ void Variables::extend(const Variables& vset)
 			catch(const std::out_of_range&) {}
 		}
 	}
+}
+
+Handle Variables::get_vardecl() const
+{
+	HandleSeq vars;
+	for (const Handle& var : varseq) {
+
+		// Simple type info
+		auto sit = _simple_typemap.find(var);
+		if (sit != _simple_typemap.end()) {
+			HandleSeq types;
+			for (Type t : sit->second)
+				types.push_back(Handle(createTypeNode(t)));
+			vars.push_back(Handle(createLink(TYPE_CHOICE, types)));
+			continue;
+		}
+
+		auto dit = _deep_typemap.find(var);
+		if (dit != _deep_typemap.end()) {
+			OC_ASSERT(false, "TODO: support deep type info");
+			continue;
+		}
+
+		auto fit = _fuzzy_typemap.find(var);
+		if (fit != _fuzzy_typemap.end()) {
+			OC_ASSERT(false, "TODO: support fuzzy type info");
+			continue;
+		}
+
+		// No type info
+		vars.push_back(var);
+	}
+
+	if (vars.empty())
+		return Handle::UNDEFINED; // or throw an exception???
+
+	if (vars.size() == 1)
+		return vars[0];
+
+	return Handle(createVariableList(vars));
 }
 
 std::string Variables::to_string() const

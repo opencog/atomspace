@@ -33,6 +33,7 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/core/VariableList.h>
+#include <opencog/atomutils/TypeUtils.h>
 
 // TODO: turn this into a class because there are way too many
 // auxiliary functions
@@ -256,15 +257,6 @@ Handle type_intersection(const Handle& lhs, const Handle& rhs,
                          const Handle& rhs_vardecl = Handle::UNDEFINED);
 
 /**
- * Return shallow type intersection between lhs and rhs. Take into
- * account type inheritance as well.
- */
-Type type_intersection(Type lhs, Type rhs);
-std::set<Type> type_intersection(Type lhs, const std::set<Type>& rhs);
-std::set<Type> type_intersection(const std::set<Type>& lhs,
-                                 const std::set<Type>& rhs);
-
-/**
  * Return a simplification of a type union, by eliminating all types
  * that are redundant. For instance
  *
@@ -329,6 +321,15 @@ VariableListPtr gen_varlist(const Handle& h);
  * generate a VariableList of the free variables of h.
  */
 VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl);
+
+/**
+ * Merge two vardecls into one. If a variable is present in both
+ * vardecls then the more restrictive one replaces the less
+ * restrictive one.
+ *
+ * TODO: give example.
+ */
+Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl);
 
 std::string oc_to_string(const UnificationPartition& hshm);
 std::string oc_to_string(const UnificationBlock& ub);

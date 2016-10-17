@@ -155,6 +155,15 @@ Handle filter_vardecl(const Handle& vardecl, const Handle& body);
  */
 Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs);
 
+/**
+ * Return shallow type intersection between lhs and rhs. Take into
+ * account type inheritance as well.
+ */
+Type type_intersection(Type lhs, Type rhs);
+std::set<Type> type_intersection(Type lhs, const std::set<Type>& rhs);
+std::set<Type> type_intersection(const std::set<Type>& lhs,
+                                 const std::set<Type>& rhs);
+
 /** @}*/
 }
 

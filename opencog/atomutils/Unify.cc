@@ -304,46 +304,6 @@ Handle type_intersection(const Handle& lhs, const Handle& rhs,
 	return Handle::UNDEFINED;
 }
 
-Type type_intersection(Type lhs, Type rhs)
-{
-	ClassServer& cs = classserver();
-	if (cs.isA(lhs, rhs))
-		return lhs;
-	if (cs.isA(rhs, lhs))
-		return rhs;
-	return NOTYPE;              // represent the bottom type
-}
-
-std::set<Type> type_intersection(Type lhs, const std::set<Type>& rhs)
-{
-	std::set<Type> res;
-	// Distribute the intersection over the union type rhs
-	for (Type rhst : rhs) {
-		Type ty = type_intersection(lhs, rhst);
-		if (ty != NOTYPE)
-			res.insert(ty);
-	}
-	return res;
-}
-
-std::set<Type> type_intersection(const std::set<Type>& lhs,
-                                 const std::set<Type>& rhs)
-{
-	// Base cases
-	if (lhs.empty())
-		return rhs;
-	if (rhs.empty())
-		return lhs;
-
-	// Recursive cases
-	std::set<Type> res;
-	for (Type ty : lhs) {
-		std::set<Type> itr = type_intersection(ty, rhs);
-		res.insert(itr.begin(), itr.end());
-	}
-	return res;
-}
-
 std::set<Type> simplify_type_union(std::set<Type>& type)
 {
 	return {}; // TODO: do we really need that?
@@ -428,6 +388,25 @@ VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl)
 			return createVariableList(vardecl);
 		}
 	}
+}
+
+Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl)
+{
+	if (lhs_vardecl.is_undefined())
+		return rhs_vardecl;
+	if (rhs_vardecl.is_undefined())
+		return lhs_vardecl;
+
+	VariableList
+		lhs_vl(lhs_vardecl),
+		rhs_vl(rhs_vardecl);
+
+	const Variables& lhs_vars = lhs_vl.get_variables();
+	Variables new_vars = rhs_vl.get_variables();
+
+	new_vars.extend(lhs_vars);
+
+	return new_vars.get_vardecl();
 }
 
 std::string oc_to_string(const UnificationBlock& ub)

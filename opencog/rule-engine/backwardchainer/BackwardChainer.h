@@ -1,10 +1,11 @@
 /*
  * BackwardChainer.h
  *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2014-2016 OpenCog Foundation
  *
- * Author: Misgana Bayetta <misgana.bayetta@gmail.com>  October 2014
- *         William Ma <https://github.com/williampma>
+ * Authors: Misgana Bayetta <misgana.bayetta@gmail.com>  October 2014
+ *          William Ma <https://github.com/williampma>
+ *          Nil Geisweiller 2016
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -27,7 +28,7 @@
 #include <opencog/rule-engine/Rule.h>
 #include <opencog/rule-engine/UREConfigReader.h>
 
-#include "Target.h"
+#include "BIT.h"
 
 class BackwardChainerUTest;
 
@@ -91,18 +92,17 @@ class BackwardChainer
     friend class ::BackwardChainerUTest;
 
 public:
-	BackwardChainer(AtomSpace& as, const Handle& rbs);
-
-	void set_target(const Handle& init_target,
-	                const Handle& focus_link = Handle::UNDEFINED);
-	UREConfigReader& get_config();
-	const UREConfigReader& get_config() const;
+	BackwardChainer(AtomSpace& as, const Handle& rbs,
+	                const Handle& htarget,
+	                const Handle& vardecl = Handle::UNDEFINED,
+	                const Handle& hfocus_set = Handle::UNDEFINED,
+	                const BITFitness& fitness = BITFitness());
 
 	/**
-	 * Perform a single backward chaining inference step.
+	 * URE configuration accessors
 	 */
-	void do_step();
-	void do_step_old();
+	UREConfigReader& get_config();
+	const UREConfigReader& get_config() const;
 
 	/**
 	 * Perform backward chaining inference till the termination
@@ -111,71 +111,128 @@ public:
 	void do_chain();
 
 	/**
+	 * Perform a single backward chaining inference step.
+	 */
+	void do_step();
+
+	/**
 	 * @return true if the termination criteria have been met.
 	 */
 	bool termination();
 
-	HandleMultimap get_chaining_result();
+	/**
+	 * Get the current result on the initial target, a SetLink with
+	 * all inferred atoms matching the target.
+	 */
+	Handle get_results() const;
 
 private:
-	// Expand the back-inference tree of a target
-	void expand_bit(Target& target, const Rule& rule);
+	// Expand the BIT
+	void expand_bit();
+
+	// Expand the BIT given a and-BIT as parent
+	void expand_bit(const AndBITFCMap::value_type& andbit);
+
+	// Expand the BIT given a and-BIT as parent, a BITNode as leaf of
+	// that and-BIT and an inference rule.
+	//
+	// TODO: support fitness function.
+	void expand_bit(const AndBITFCMap::value_type& andbit,
+	                BITNode& leaf, const Rule& rule);
+
+	// Given an atomese forward chaining strategy, a leaf of it to
+	// expand, and a rule, return a new forward chaining strategy
+	// where the leaf has been substituted by the rule premises and
+	// rule application.
+	//
+	// TODO: give examples.
+	Handle expand_fcs(const Handle& fcs, const Handle& leaf, const Rule& rule);
+
+	// Given the pattern term of an atomese forward chaining strategy,
+	// the leaf from which to expand and premises, replace the leaf by
+	// the premises.
+	//
+	// TODO: give examples.
+	Handle expand_fcs_pattern(const Handle& fcs_pattern,
+	                          const Handle& leaf, const HandleSeq& premises);
+
+	// Given the rewrite term of an atomese forward chaining strategy,
+	// the leaf from which to expand and a rule rewrite term, replace
+	// the leaf by the rule rewrite term.
+	//
+	// TODO: give examples.
+	Handle expand_fcs_rewrite(const Handle& fcs_rewrite,
+	                          const Handle& leaf, const Handle& rule_rewrite);
+
+	// Fulfill the BIT. That is run some or all its and-BITs
+	void fulfill_bit();
+
+	// Fulfill an and-BIT. That is run its associated forward chaining
+	// strategy.
+	void fulfill_andbit(const AndBITFCMap::value_type& andbit);
+
+	// Reduce the BIT. Remove some and-BITs.
+	void reduce_bit();
+
+	// Select an and-BIT
+	const AndBITFCMap::value_type& select_andbit();
+
+	// Select a leaf of an and-BIT for subsequent expansion
+	BITNode& select_bitleaf(const AndBITFCMap::value_type& andbit);
 
 	// Select the target to expand
-	Target& select_target();
+	BITNode* select_target();
 
 	// Select a valid rule given a target. The selected is a new
 	// object because a new rule is created, its variables are
 	// uniquely renamed, possibly some partial substitutions are
 	// applied.
-	Rule select_rule(const Target& target);
+	Rule select_rule(const BITNode& target);
 
 	// Return all valid rules, in the sense that these rules may
 	// possibly be used to infer the target.
-	RuleSeq get_valid_rules(const Target& target);
+	RuleSeq get_valid_rules(const BITNode& target);
 
-	// Fulfill, apply possible inferences in a forward way and pattern
-	// matchings in order to fulfill the given target
-	void fulfill_target(Target& target);
+	// Build the corresponding bitnode of a handle and insert it in
+	// _handle2bitnode
+	void insert_h2b(const Handle& body, const Handle& vardecl,
+	                const BITFitness& fitness);
 
-// #if 0
-// 	bool select_rule_old(const Target& target,
-// 	                     Rule& selected_rule,
-// 	                     Rule& standardized_rule,
-// 	                     HandleMapSeq& all_implicand_to_target_mappings);
+	// Initialize the _andbits container with
+	//
+	// {_init_target}
+	// ->
+	// BindLink
+	//   _init_vardecl
+	//   _init_target
+	//   _init_target
+	void init_andbits();
 
-// 	void process_target(Target& target);
+	// Return true if the rule is already an or-children of bitnode up
+	// to an alpha conversion.
+	bool is_in(const Rule& rule, const BITNode& bitnode);
 
-// 	HandleSeq match_knowledge_base(Handle htarget,
-// 	                               Handle htarget_vardecl,
-// 	                               HandleMapSeq& vmap,
-// 	                               bool enable_var_name_check = false);
-// 	HandleSeq find_premises(const Rule& standardized_rule,
-// 	                        const HandleMap& implicand_mapping,
-// 	                        const OrderedHandleSet& additional_free_varset,
-// 	                        Handle& hrule_implicant_reverse_grounded,
-// 	                        HandleMapSeq& premises_vmap_list);
-// 	HandleSeq ground_premises(const Handle& htarget, const HandleMap& vmap,
-// 	                          HandleMapSeq& vmap_list);
-// 	Handle garbage_substitute(const Handle& term, const HandleMap& vm);
-
-// 	Handle gen_varlist(const Handle& target);
-// 	Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist,
-// 	                       OrderedHandleSet additional_free_varset);
-// #endif
 	AtomSpace& _as;
 	UREConfigReader _configReader;
-	AtomSpace _garbage_superspace;
-	Handle _init_target;
-	AtomSpace _focus_space;
-	int _iteration;
 
-	TargetSet _target_set;
+	Handle _init_target;
+	Handle _init_vardecl;
+	BITFitness _init_fitness;
+
+	int _iteration;
+	AtomSpace _focus_space;
+
+	// Mapping from handles to their corresponding BITNode
+	// bodies. Also where the BITNode are actually instantiated.
+	HandleBITNodeMap _handle2bitnode;
+
+	// Collection of and-BITs associated with their forward chaining
+	// strategies.
+	AndBITFCMap _andbits;
 
 	const std::vector<Rule>& _rules;
 
-	// XXX any additional link should be reflected
-	unordered_set<Type> _logical_link_types = { AND_LINK, OR_LINK, NOT_LINK };
+	OrderedHandleSet _results;
 };
 
 

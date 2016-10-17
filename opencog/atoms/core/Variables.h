@@ -172,6 +172,13 @@ struct Variables : public FreeVariables
 	// Extend this variable set by adding in the given variable set.
 	void extend(const Variables&);
 
+	/// This is the dual of VariableList::validate_vartype. convert a
+	/// Variables object into a Handle variable declaration usable by
+	/// by ScopeLink.
+	///
+	/// TODO: support deep and fuzzy typemaps.
+	Handle get_vardecl() const;
+
 	// Useful for debugging
 	std::string to_string() const;
 };

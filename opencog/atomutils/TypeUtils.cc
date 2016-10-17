@@ -32,14 +32,13 @@
 
 #include "TypeUtils.h"
 
-using namespace opencog;
-
+namespace opencog {
 
 /* ================================================================= */
 /**
  * Type checker.  Returns true if `val` is of type `deep`.
  */
-bool opencog::value_is_type(const Handle& spec, const Handle& val)
+bool value_is_type(const Handle& spec, const Handle& val)
 {
 	Handle deep(spec);
 
@@ -241,22 +240,22 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	return true;
 }
 
-bool opencog::type_match(const Handle& left_, const Handle& right_)
+bool type_match(const Handle& left_, const Handle& right_)
 {
 	return type_match_rec(left_, right_, true);
 }
 
-Handle opencog::type_compose(const Handle& left, const Handle& right)
+Handle type_compose(const Handle& left, const Handle& right)
 {
 	return Handle::UNDEFINED;
 }
 
-Handle opencog::filter_vardecl(const Handle& vardecl, const Handle& body)
+Handle filter_vardecl(const Handle& vardecl, const Handle& body)
 {
 	return filter_vardecl(vardecl, HandleSeq{body});
 }
 
-Handle opencog::filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
+Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 {
 	// Base cases
 
@@ -296,5 +295,47 @@ Handle opencog::filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 	// XXX TODO .. undefined?? or throw?
 	return Handle::UNDEFINED;
 }
+
+Type type_intersection(Type lhs, Type rhs)
+{
+	ClassServer& cs = classserver();
+	if (cs.isA(lhs, rhs))
+		return lhs;
+	if (cs.isA(rhs, lhs))
+		return rhs;
+	return NOTYPE;              // represent the bottom type
+}
+
+std::set<Type> type_intersection(Type lhs, const std::set<Type>& rhs)
+{
+	std::set<Type> res;
+	// Distribute the intersection over the union type rhs
+	for (Type rhst : rhs) {
+		Type ty = type_intersection(lhs, rhst);
+		if (ty != NOTYPE)
+			res.insert(ty);
+	}
+	return res;
+}
+
+std::set<Type> type_intersection(const std::set<Type>& lhs,
+                                 const std::set<Type>& rhs)
+{
+	// Base cases
+	if (lhs.empty())
+		return rhs;
+	if (rhs.empty())
+		return lhs;
+
+	// Recursive cases
+	std::set<Type> res;
+	for (Type ty : lhs) {
+		std::set<Type> itr = type_intersection(ty, rhs);
+		res.insert(itr.begin(), itr.end());
+	}
+	return res;
+}
+
+} // ~namespace opencog
 
 /* ===================== END OF FILE ===================== */
