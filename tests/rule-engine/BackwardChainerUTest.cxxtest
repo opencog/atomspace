@@ -240,8 +240,8 @@ void BackwardChainerUTest::test_select_rule_3()
 // 		                      "   (Concept \"A\")"
 // 		                      "   (Variable \"$X\"))"),
 // 		B = _eval.eval_h("(Concept \"B\")"),
-// 		B1 = _eval.eval_h("(Concept \"B\")"),
-// 		B2 = _eval.eval_h("(Concept \"B\")"),
+// 		B1 = _eval.eval_h("(Concept \"B1\")"),
+// 		B2 = _eval.eval_h("(Concept \"B2\")"),
 // 		C = _eval.eval_h("(Concept \"C\")"),
 // 		C1 = _eval.eval_h("(Concept \"C1\")"),
 // 		C2 = _eval.eval_h("(Concept \"C2\")"),
@@ -277,14 +277,12 @@ void BackwardChainerUTest::test_select_rule_3()
 
 // 	// load 1 deduction rule
 // 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
-// 	BackwardChainer bc(_as, top_rbs);
-
 // 	Handle target = _eval.eval_h("(Inheritance"
 // 	                             "   (Concept \"A\")"
 // 	                             "   (Concept \"D\"))");
 
-// 	bc.set_target(target);
-// 	bc.get_config().set_maximum_iterations(100);
+// 	BackwardChainer bc(_as, top_rbs, target);
+// 	bc.get_config().set_maximum_iterations(10);
 // 	bc.do_chain();
 
 // 	TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, 1e-10);
