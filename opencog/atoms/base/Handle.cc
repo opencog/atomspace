@@ -126,8 +126,11 @@ inline Handle Handle::do_res(UUID uuid)
 
 // The rest of this file is devoted to printing utilities used only
 // during GDB debugging.  Thus, you won't find these anywhere in the
-// code base. XXX How are these supposed to be used inside of GDB??
-// Examples, please?
+// code base. You may call that directly from gdb
+// (opencog::h_to_string, etc), but very likely your version of GDB
+// supports overloading and in this case you can simply configure GDB
+// as follows
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string h_to_string(const Handle& h)
 {
 	if (h == nullptr)

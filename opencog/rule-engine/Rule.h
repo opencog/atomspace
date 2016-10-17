@@ -251,7 +251,8 @@ private:
 	Handle get_execution_output_last_argument(const Handle& h) const;
 };
 
-// For Gdb debugging
+// For Gdb debugging, see
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const Rule& rule);
 std::string oc_to_string(const RuleSeq& rules);
 

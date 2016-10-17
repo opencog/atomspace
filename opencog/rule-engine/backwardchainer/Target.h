@@ -69,7 +69,8 @@ class TargetSet : public std::unordered_map<Handle, Target>
 {
 };
 
-// Gdb debugging
+// Gdb debugging, see
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const Target& target);
 
 // // obsolete code to be removed as soon as the new code is functional

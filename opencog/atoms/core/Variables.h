@@ -176,7 +176,8 @@ struct Variables : public FreeVariables
 	std::string to_string() const;
 };
 
-// For gdb
+// For gdb, see
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const Variables& var);
 std::string oc_to_string(const FreeVariables::IndexMap& imap);
 
