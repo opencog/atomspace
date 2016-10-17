@@ -197,11 +197,17 @@ Handle BackwardChainer::expand_fcs_rewrite(const Handle& fcs_rewrite,
                                            const Handle& leaf,
                                            const Handle& rule_rewrite)
 {
-	// Base case
+	// Base cases
+
+	// Replace the fcs rewrite atoms by the rule_rewrite if leaf
 	if (fcs_rewrite == leaf)
 		return rule_rewrite;
+	// If node and isn't leaf leave alone
+	if (fcs_rewrite->isNode())
+		return fcs_rewrite;
 
 	// Recursive case
+
 	Type t = fcs_rewrite->getType();
 	HandleSeq outgoings;
 	for (const Handle& h : fcs_rewrite->getOutgoingSet())
