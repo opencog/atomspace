@@ -406,7 +406,7 @@ Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl)
 
 	new_vars.extend(lhs_vars);
 
-	return Handle(createVariableList(new_vars));
+	return new_vars.get_vardecl();
 }
 
 std::string oc_to_string(const UnificationBlock& ub)
