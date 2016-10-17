@@ -70,10 +70,6 @@ public:
 	             TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-	VariableList(const Variables& varlist,
-	             TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
 	VariableList(Link&);
 
 	// Return the list of variables we are holding.
