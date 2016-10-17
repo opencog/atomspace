@@ -1,0 +1,73 @@
+/*
+ * tests/atoms/HandleUTest.cxxtest
+ *
+ * Copyright (C) 2016 OpenCog Foundation
+ * All Rights Reserved
+ * Author: Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+class HandleUTest :  public CxxTest::TestSuite
+{
+private:
+
+public:
+	HandleUTest() {}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void test_operator_equal();
+};
+
+// Test Handle::operator== and Handle::operator!= for atoms that are
+// and are not yet in any atomspace.
+void HandleUTest::test_operator_equal()
+{
+	// Test equality of 2 atoms not in any atomspace
+	Handle
+		A = Handle(createNode(CONCEPT_NODE, "A")),
+		A_clone = Handle(createNode(CONCEPT_NODE, "A"));
+
+	TS_ASSERT_EQUALS(A, A_clone);
+
+	// Test equality of 2 atoms in the same atomspace
+	AtomSpace as;
+	Handle
+		as_A = as.add_node(CONCEPT_NODE, "A"),
+		as_A_clone = as.add_node(CONCEPT_NODE, "A");
+	TS_ASSERT_EQUALS(as_A, as_A_clone);
+
+	// Test equality of 2 atoms, one in an atomspace, the other one not.
+	TS_ASSERT_EQUALS(A, as_A);
+
+	// Test equality of 2 atoms in different atomspaces
+	AtomSpace other_as;
+	Handle other_as_A = other_as.add_node(CONCEPT_NODE, "A");
+	TS_ASSERT_EQUALS(as_A, other_as_A);
+}
