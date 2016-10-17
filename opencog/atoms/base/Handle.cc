@@ -124,7 +124,7 @@ inline Handle Handle::do_res(UUID uuid)
     return Handle();
 }
 
-inline bool Handle::operator==(const Atom* other) const noexcept {
+bool Handle::operator==(const Atom* other) const noexcept {
 	// If both are defined and are in no atomspace or different
 	// atomspaces, compare them by content
 	if (_ptr.get() and other) {
