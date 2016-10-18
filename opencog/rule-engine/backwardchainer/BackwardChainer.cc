@@ -122,7 +122,8 @@ void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit)
 		bc_logger().warn("No valid rule for the selected BIT-node, abort expansion");
 		return;
 	}
-	LAZY_BC_LOG_DEBUG << "Selected rule for BIT expansion: " << rule.get_name();
+	LAZY_BC_LOG_DEBUG << "Selected rule for BIT expansion:" << std::endl
+	                  << rule.to_string();
 
 	// Expand the back-inference tree from this target
 	expand_bit(andbit, bitleaf, rule);
