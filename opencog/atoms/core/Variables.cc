@@ -580,7 +580,10 @@ Handle Variables::get_vardecl() const
 			HandleSeq types;
 			for (Type t : sit->second)
 				types.push_back(Handle(createTypeNode(t)));
-			vars.push_back(Handle(createLink(TYPE_CHOICE, types)));
+			Handle types_h = types.size() == 1 ? types[0]
+				: Handle(createLink(TYPE_CHOICE, types));
+			vars.push_back(Handle(createLink(TYPED_VARIABLE_LINK,
+			                                 var, types_h)));
 			continue;
 		}
 
