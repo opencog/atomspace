@@ -8,7 +8,7 @@ ADD_LIBRARY (atomcore
 	DeleteLink.cc
 	FreeLink.cc
 	FunctionLink.cc
-	ImplicationLink.cc
+	# ImplicationLink.cc
 	LambdaLink.cc
 	PutLink.cc
 	RandomChoice.cc

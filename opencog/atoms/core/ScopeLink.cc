@@ -29,7 +29,7 @@
 #include <opencog/atoms/core/FreeLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/PutLink.h>
-#include <opencog/atoms/core/ImplicationLink.h>
+// #include <opencog/atoms/core/ImplicationLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/TypeUtils.h>
 
@@ -279,8 +279,10 @@ ScopeLinkPtr ScopeLink::factory(Type t, const HandleSeq& seq)
 	if (LAMBDA_LINK == t)
 		return createLambdaLink(seq);
 
+/*
 	if (classserver().isA(t, IMPLICATION_LINK))
 		return createImplicationLink(t, seq);
+*/
 
 	if (classserver().isA(t, PATTERN_LINK))
 		return PatternLink::factory(t, seq);
