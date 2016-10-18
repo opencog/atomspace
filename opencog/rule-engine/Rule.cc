@@ -315,14 +315,16 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
 }
 
 std::vector<Rule> Rule::unify_source(const Handle& source,
-                                     const Handle& vardecl) const
+                                     const Handle& vardecl,
+                                     AtomSpace* as) const
 {
 	// TODO
 	return {};
 }
 
 std::vector<Rule> Rule::unify_target(const Handle& target,
-                                     const Handle& vardecl) const
+                                     const Handle& vardecl,
+                                     AtomSpace* as) const
 {
 	// If the rule's handle has not been set yet
 	if (_forward_rule_handle == Handle::UNDEFINED)
@@ -349,6 +351,11 @@ std::vector<Rule> Rule::unify_target(const Handle& target,
 					// converted, possibly partially substituted rule
 					HandleSeq values = alpha_sc->get_variables().make_values(ts.first);
 					Handle h = alpha_sc->alpha_conversion(values, ts.second);
+
+					// Possibly add the rule in a provided atomspace
+					if (as)
+						h = as->add_atom(h);
+
 					Rule unified_rule(alpha_rule);
 					unified_rule.set_forward_handle(h);
 					unified_rules.push_back(unified_rule);

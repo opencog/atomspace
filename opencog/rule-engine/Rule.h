@@ -194,15 +194,19 @@ public:
 	 * TODO: we probably want to support a vector of sources for rules
 	 * with multiple premises.
 	 */
-	RuleSeq unify_source(const Handle& source, const Handle& vardecl) const;
+	RuleSeq unify_source(const Handle& source, const Handle& vardecl,
+	                     AtomSpace* as = nullptr) const;
 
 	/**
-	 * Used by the backward chainer to select rules. Given a target,
-	 * generate all rule variations that may infer this target. The
-	 * variables in the rules are renamed to almost certainly avoid
-	 * name collision.
+	 * Used by the backward chainer. Given a target, generate all rule
+	 * variations that may infer this target. The variables in the
+	 * rules are renamed to almost certainly avoid name collision.
+	 *
+	 * The rule atoms are added to the provided atomspace, or not
+	 * added at all if not provided.
 	 */
-	RuleSeq unify_target(const Handle& target, const Handle& vardecl) const;
+	RuleSeq unify_target(const Handle& target, const Handle& vardecl,
+	                     AtomSpace* as = nullptr) const;
 
 	std::string to_string() const;
 
