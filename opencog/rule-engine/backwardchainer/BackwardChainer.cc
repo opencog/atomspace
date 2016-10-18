@@ -97,9 +97,14 @@ void BackwardChainer::expand_bit()
 		// Initialize the and-BIT of the initial target
 		insert_h2b(_init_target, _init_vardecl, _init_fitness);
 		init_andbits();
+
+		LAZY_BC_LOG_DEBUG << "Initialize BIT with:" << std::endl
+		                  << _handle2bitnode[_init_target].to_string();
 	} else {
 		// Select an and-BIT and expand it
 		const AndBITFCMap::value_type& andbit = select_andbit();
+		LAZY_BC_LOG_DEBUG << "Selected and-BIT for expansion:" << std::endl
+		                  << andbit.second;
 		expand_bit(andbit);
 	}
 }
@@ -108,41 +113,45 @@ void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit)
 {
 	// Select leaf
 	BITNode& bitleaf = select_bitleaf(andbit);
+	LAZY_BC_LOG_DEBUG << "Selected BIT-node for expansion:" << std::endl
+	                  << bitleaf.to_string();
 
 	// Select a valid rule
 	Rule rule = select_rule(bitleaf);
 	if (not rule.is_valid()) {
-		bc_logger().warn("No valid rule for the selected bitleaf");
+		bc_logger().warn("No valid rule for the selected BIT-node, abort expansion");
 		return;
 	}
-	LAZY_BC_LOG_DEBUG << "Rule: " << rule.get_name();
+	LAZY_BC_LOG_DEBUG << "Selected rule for BIT expansion: " << rule.get_name();
 
 	// Expand the back-inference tree from this target
 	expand_bit(andbit, bitleaf, rule);
 }
 
 void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit,
-                                 BITNode& leaf, const Rule& rule)
+                                 BITNode& bitleaf, const Rule& rule)
 {
 	// Make sure that the rule is not a or-child of leaf.
-	if (is_in(rule, leaf))
+	if (is_in(rule, bitleaf)) {
+		bc_logger().debug() << "An equivalent rule has already expanded that BIT-node, abort expansion";
 		return;
+	}
 
 	// Expand the leaf
 	// 1. Append the rule to it
 	// 2. Instantiate the premises as BITNodes
 	HandleSeq premises(rule.get_premises());
-	leaf.rules.push_back(rule);
+	bitleaf.rules.push_back(rule);
 	for (const Handle& premise : premises)
 		insert_h2b(premise, rule.get_forward_vardecl(), BITFitness());
 
 	// Expand the associated atomese forward chaining strategy
-	Handle fcs = expand_fcs(andbit.second, leaf.body, rule);
+	Handle fcs = expand_fcs(andbit.second, bitleaf.body, rule);
 
 	// Define new and-BIT and associate new forward chaining strategy
 	// to it
 	AndBITFCMap::key_type new_leaves(andbit.first);
-	new_leaves.erase(leaf.body);
+	new_leaves.erase(bitleaf.body);
 	new_leaves.insert(premises.begin(), premises.end());
 	_andbits[new_leaves] = fcs;
 }
@@ -227,6 +236,8 @@ void BackwardChainer::fulfill_bit()
 
 	// Select an and-BIT for fulfillment
 	const AndBITFCMap::value_type& andbit = select_andbit();
+	LAZY_BC_LOG_DEBUG << "Selected and-BIT for fulfillment:" << std::endl
+	                  << andbit.second;
 	fulfill_andbit(andbit);
 }
 
@@ -234,6 +245,7 @@ void BackwardChainer::fulfill_andbit(const AndBITFCMap::value_type& andbit)
 {
 	Handle hresult = bindlink(&_as, andbit.second);
 	const HandleSeq& results = hresult->getOutgoingSet();
+	LAZY_BC_LOG_DEBUG << "Results:" << std::endl << results;
 	_results.insert(results.begin(), results.end());
 }
 
