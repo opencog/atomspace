@@ -218,11 +218,11 @@ void PutLinkUTest::test_lambda_partial_substitution()
  *       )
  *       (AndLink
  *          (InheritanceLink
- *             (VariableNode "$X-bar")
+ *             (VariableNode "$X")
  *             (ConceptNode "human")
  *          )
  *          (InheritanceLink
- *             (VariableNode "$Y-bar")
+ *             (VariableNode "$Y")
  *             (ConceptNode "human")
  *          )
  *          (EvaluationLink
@@ -298,11 +298,11 @@ void PutLinkUTest::test_eval_inheritance()
  *       )
  *       (AndLink
  *          (ImplicationLink
- *             (VariableNode "$X")
+ *             (VariableNode "$X-bar")
  *             (PredicateNode "is-human")
  *          )
  *          (ImplicationLink
- *             (VariableNode "$Y")
+ *             (VariableNode "$Y-bar")
  *             (PredicateNode "is-human")
  *          )
  *          (EvaluationLink
