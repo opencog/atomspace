@@ -239,7 +239,7 @@ void PutLink::static_typecheck_values(void)
  * Type checking is performed during substitution; if the values fail to
  * have the desired types, no substitution is performed.  In this case,
  * an undefined handle is returned. For set substitutions, this acts as
- * a filter, removeing (filtering out) the mismatched types.
+ * a filter, removing (filtering out) the mismatched types.
  *
  * Again, only a substitution is performed, there is no execution or
  * evaluation.  Note also that the resulting tree is NOT placed into
@@ -263,7 +263,7 @@ Handle PutLink::do_reduce(void) const
 			      bods->toString().c_str());
 	}
 
-	if (LAMBDA_LINK == btype)
+	if (classserver().isA(btype, LAMBDA_LINK))
 	{
 		LambdaLinkPtr lam(LambdaLinkCast(bods));
 		if (NULL == lam)
