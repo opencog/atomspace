@@ -50,7 +50,7 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
                                  const BITFitness& fitness)
 	: _as(as), _configReader(as, rbs),
 	  _init_target(htarget), _init_vardecl(vardecl), _init_fitness(fitness),
-	  _iteration(0), _rules(_configReader.get_rules()) {}
+	  _bit_as(&as), _iteration(0), _rules(_configReader.get_rules()) {}
 
 UREConfigReader& BackwardChainer::get_config()
 {
@@ -172,7 +172,10 @@ Handle BackwardChainer::expand_fcs(const Handle& fcs, const Handle& leaf,
 	HandleSeq noutgoings({npattern, nrewrite});
 	if (nvardecl.is_defined())
 		noutgoings.insert(noutgoings.begin(), nvardecl);
-	Handle nfcs = Handle(createBindLink(noutgoings));
+	Handle nfcs = _bit_as.add_link(BIND_LINK, noutgoings);
+
+	LAZY_BC_LOG_DEBUG << "Expand forward chainer strategy:" << std::endl << fcs
+	                  << "to:" << std::endl << nfcs;
 
 	return nfcs;
 }
@@ -182,7 +185,7 @@ Handle BackwardChainer::expand_fcs_pattern(const Handle& fcs_pattern,
                                            const HandleSeq& premises)
 {
 	if (fcs_pattern == leaf)
-		return Handle(createLink(AND_LINK, premises));
+		return _bit_as.add_link(AND_LINK, premises);
 
 	OC_ASSERT(fcs_pattern->getType() == AND_LINK);
 	HandleSeq outgoings = fcs_pattern->getOutgoingSet();
@@ -190,7 +193,7 @@ Handle BackwardChainer::expand_fcs_pattern(const Handle& fcs_pattern,
 	OC_ASSERT(it != outgoings.end());
 	outgoings.erase(it);
 	outgoings.insert(outgoings.end(), premises.begin(), premises.end());
-	return Handle(createLink(AND_LINK, outgoings));
+	return _bit_as.add_link(AND_LINK, outgoings);
 }
 
 Handle BackwardChainer::expand_fcs_rewrite(const Handle& fcs_rewrite,
@@ -212,7 +215,7 @@ Handle BackwardChainer::expand_fcs_rewrite(const Handle& fcs_rewrite,
 	HandleSeq outgoings;
 	for (const Handle& h : fcs_rewrite->getOutgoingSet())
 		outgoings.push_back(expand_fcs_rewrite(h, leaf, rule_rewrite));
-	return Handle(createLink(t, outgoings)); // TODO: maybe need a factory
+	return _bit_as.add_link(t, outgoings);
 }
 
 void BackwardChainer::fulfill_bit()
@@ -274,7 +277,8 @@ RuleSeq BackwardChainer::get_valid_rules(const BITNode& target)
 {
 	RuleSeq valid_rules;
 	for (const Rule& rule : _rules) {
-		RuleSeq unified_rules = rule.unify_target(target.body, target.vardecl);
+		RuleSeq unified_rules = rule.unify_target(target.body, target.vardecl,
+		                                          &_bit_as);
 		valid_rules.insert(valid_rules.end(),
 		                   unified_rules.begin(), unified_rules.end());
 	}
@@ -298,7 +302,7 @@ void BackwardChainer::init_andbits()
 	HandleSeq bl{_init_target, _init_target};
 	if (_init_vardecl.is_defined())
 		bl.insert(bl.begin(), _init_vardecl);
-	Handle fcs = Handle(createBindLink(bl));
+	Handle fcs = _bit_as.add_link(BIND_LINK, bl);
 	_andbits[{_init_target}] = fcs;
 }
 

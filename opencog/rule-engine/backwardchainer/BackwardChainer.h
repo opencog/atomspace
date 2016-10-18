@@ -219,6 +219,9 @@ private:
 	Handle _init_vardecl;
 	BITFitness _init_fitness;
 
+	// Temporary atomspace for storing the BIT
+	AtomSpace _bit_as;
+
 	int _iteration;
 	AtomSpace _focus_space;
 
