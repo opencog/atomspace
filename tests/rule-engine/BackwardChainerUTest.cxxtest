@@ -11,6 +11,8 @@
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/util/mt19937ar.h>
 
+#include <cxxtest/TestSuite.h>
+
 using namespace opencog;
 //#define DEBUG 1
 
@@ -282,7 +284,7 @@ void BackwardChainerUTest::test_bc_deduction_2()
 	                             "   (Concept \"D\"))");
 
 	BackwardChainer bc(_as, top_rbs, target);
-	bc.get_config().set_maximum_iterations(10);
+	bc.get_config().set_maximum_iterations(13);
 	bc.do_chain();
 
 	TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, 1e-10);
