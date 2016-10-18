@@ -45,7 +45,7 @@ public:
 	// void test_implication_instantiation();
 	// void test_bc_modus_ponens();
 	// void test_bc_deduction_1();
-	// void test_bc_deduction_2();
+	void test_bc_deduction_2();
 	// void test_impossible_bc();
 	// void test_bc_modus_ponens_deduction();
 	// void test_tvq_bc();
@@ -265,31 +265,31 @@ void BackwardChainerUTest::test_select_rule_3()
 // 	logger().debug("END TEST: %s", __FUNCTION__);
 // }
 
-// void BackwardChainerUTest::test_bc_deduction_2()
-// {
-// 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+void BackwardChainerUTest::test_bc_deduction_2()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-// 	_as.clear();
+	_as.clear();
 
-// 	_eval.eval("(load-from-path \"tests/rule-engine/bc-deduction-config.scm\")");
-// 	_eval.eval("(load-from-path \"tests/rule-engine/bc-transitive-closure.scm\")");
-// 	randGen().seed(0);
+	_eval.eval("(load-from-path \"tests/rule-engine/bc-deduction-config.scm\")");
+	_eval.eval("(load-from-path \"tests/rule-engine/bc-transitive-closure.scm\")");
+	randGen().seed(0);
 
-// 	// load 1 deduction rule
-// 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
-// 	Handle target = _eval.eval_h("(Inheritance"
-// 	                             "   (Concept \"A\")"
-// 	                             "   (Concept \"D\"))");
+	// load 1 deduction rule
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	Handle target = _eval.eval_h("(Inheritance"
+	                             "   (Concept \"A\")"
+	                             "   (Concept \"D\"))");
 
-// 	BackwardChainer bc(_as, top_rbs, target);
-// 	bc.get_config().set_maximum_iterations(10);
-// 	bc.do_chain();
+	BackwardChainer bc(_as, top_rbs, target);
+	bc.get_config().set_maximum_iterations(10);
+	bc.do_chain();
 
-// 	TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, 1e-10);
-// 	TS_ASSERT_DELTA(target->getTruthValue()->getConfidence(), 1, 1e-10);
+	TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, 1e-10);
+	TS_ASSERT_DELTA(target->getTruthValue()->getConfidence(), 1, 1e-10);
 
-// 	logger().debug("END TEST: %s", __FUNCTION__);
-// }
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
 
 // void BackwardChainerUTest::test_impossible_bc()
 // {
