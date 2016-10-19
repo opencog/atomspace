@@ -46,7 +46,7 @@ public:
 	void test_select_rule_3();
 	// void test_implication_instantiation();
 	// void test_bc_modus_ponens();
-	// void test_bc_deduction_1();
+	void test_bc_deduction_1();
 	void test_bc_deduction_2();
 	// void test_impossible_bc();
 	// void test_bc_modus_ponens_deduction();
@@ -223,49 +223,42 @@ void BackwardChainerUTest::test_select_rule_3()
 // 	logger().debug("END TEST: %s", __FUNCTION__);
 // }
 
-// void BackwardChainerUTest::test_bc_deduction_1()
-// {
-// 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+void BackwardChainerUTest::test_bc_deduction_1()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-// 	_as.clear();
+	_as.clear();
 
-// 	_eval.eval("(load-from-path \"tests/rule-engine/bc-deduction-config.scm\")");
-// 	_eval.eval("(load-from-path \"tests/rule-engine/bc-transitive-closure.scm\")");
-// 	randGen().seed(0);
+	_eval.eval("(load-from-path \"tests/rule-engine/bc-deduction-config.scm\")");
+	_eval.eval("(load-from-path \"tests/rule-engine/bc-transitive-closure.scm\")");
+	randGen().seed(0);
 
-// 	// load 1 deduction rule
-// 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
-// 	BackwardChainer bc(_as, top_rbs);
+	// load 1 deduction rule
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	Handle X = an(VARIABLE_NODE, "$X"),
+		D = an(CONCEPT_NODE, "D"),
+		target = al(INHERITANCE_LINK, X, D);
+		
+	BackwardChainer bc(_as, top_rbs, target);
+	bc.get_config().set_maximum_iterations(20);
+	bc.do_chain();
 
-// 	Handle target_var = _eval.eval_h("(Variable \"$X\")"),
-// 		target = _eval.eval_h("(Inheritance"
-// 		                      "   (Concept \"A\")"
-// 		                      "   (Variable \"$X\"))"),
-// 		B = _eval.eval_h("(Concept \"B\")"),
-// 		B1 = _eval.eval_h("(Concept \"B1\")"),
-// 		B2 = _eval.eval_h("(Concept \"B2\")"),
-// 		C = _eval.eval_h("(Concept \"C\")"),
-// 		C1 = _eval.eval_h("(Concept \"C1\")"),
-// 		C2 = _eval.eval_h("(Concept \"C2\")"),
-// 		D = _eval.eval_h("(Concept \"D\")");
+	Handle results = bc.get_results(),
+		A = an(CONCEPT_NODE, "A"),
+		B = an(CONCEPT_NODE, "B"),
+		C = an(CONCEPT_NODE, "C"),
+		CD = al(INHERITANCE_LINK, C, D),
+		BD = al(INHERITANCE_LINK, B, D),
+		AD = al(INHERITANCE_LINK, A, D),
+		expected = al(SET_LINK, CD, BD, AD);
+		
+	logger().debug() << "results = " << results;
+	logger().debug() << "expected = " << expected;
 
-// 	bc.set_target(target);
-// 	bc.get_config().set_maximum_iterations(100);
-// 	bc.do_chain();
+	TS_ASSERT_EQUALS(results, expected);
 
-// 	HandleMultimap results = bc.get_chaining_result();
-
-// 	TS_ASSERT_EQUALS(results[target_var].size(), 7);
-// 	TS_ASSERT_EQUALS(results[target_var].count(B), 1);
-// 	TS_ASSERT_EQUALS(results[target_var].count(B1), 1);
-// 	TS_ASSERT_EQUALS(results[target_var].count(B2), 1);
-// 	TS_ASSERT_EQUALS(results[target_var].count(C), 1);
-// 	TS_ASSERT_EQUALS(results[target_var].count(C1), 1);
-// 	TS_ASSERT_EQUALS(results[target_var].count(C2), 1);
-// 	TS_ASSERT_EQUALS(results[target_var].count(D), 1);
-
-// 	logger().debug("END TEST: %s", __FUNCTION__);
-// }
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
 
 void BackwardChainerUTest::test_bc_deduction_2()
 {
@@ -284,7 +277,7 @@ void BackwardChainerUTest::test_bc_deduction_2()
 	                             "   (Concept \"D\"))");
 
 	BackwardChainer bc(_as, top_rbs, target);
-	bc.get_config().set_maximum_iterations(13);
+	bc.get_config().set_maximum_iterations(20);
 	bc.do_chain();
 
 	TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, 1e-10);
