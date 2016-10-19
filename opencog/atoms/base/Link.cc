@@ -134,6 +134,9 @@ std::string Link::toString(const std::string& indent) const
 
 bool Link::operator==(const Atom& other) const
 {
+    // Rule out obvious mis-matches, based on the hash.
+    if (get_hash() != other.get_hash()) return false;
+
     if (getType() != other.getType()) return false;
     const Link& olink = dynamic_cast<const Link&>(other);
 
@@ -143,6 +146,7 @@ bool Link::operator==(const Atom& other) const
     // If the type is unordered and one of the uuids are invalid we
     // need to reorder by content to be sure that the children are
     // aligned.
+// XXX this is just plain wrong .. its the wrong place to do this fix.
     if (classserver().isA(getType(), UNORDERED_LINK) and
         (_uuid != Handle::INVALID_UUID
          or other.getUUID() != Handle::INVALID_UUID))

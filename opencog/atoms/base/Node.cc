@@ -94,8 +94,11 @@ std::string Node::toString(const std::string& indent) const
 
 bool Node::operator==(const Atom& other) const
 {
-    return (getType() == other.getType()) and
-           (getName() == dynamic_cast<const Node&>(other).getName());
+    // Rule out obvious mis-matches, based on the hash.
+    if (get_hash() != other.get_hash()) return false;
+
+    if (getType() != other.getType()) return false;
+    return getName() == dynamic_cast<const Node&>(other).getName();
 }
 
 bool Node::operator<(const Atom& other) const
