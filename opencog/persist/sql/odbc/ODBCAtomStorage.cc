@@ -724,7 +724,7 @@ void ODBCAtomStorage::flushStoreQueue()
  * thread); this routine merely queues up the atom. If the synchronous
  * flag is set, then the store is done in this thread.
  */
-void ODBCAtomStorage::storeAtom(AtomPtr atom, bool synchronous)
+void ODBCAtomStorage::storeAtom(const AtomPtr& atom, bool synchronous)
 {
     get_ids();
 
@@ -1286,7 +1286,7 @@ AtomPtr ODBCAtomStorage::getAtom(UUID uuid)
 /**
  * Retreive the entire incoming set of the indicated atom.
  */
-HandleSeq ODBCAtomStorage::getIncomingSet(Handle h)
+HandleSeq ODBCAtomStorage::getIncomingSet(const Handle& h)
 {
     HandleSeq iset;
 
@@ -1323,7 +1323,7 @@ HandleSeq ODBCAtomStorage::getIncomingSet(Handle h)
  *
  * This method does *not* register the atom with any atomtable/atomspace
  */
-NodePtr ODBCAtomStorage::getNode(Type t, const char * str)
+Handle ODBCAtomStorage::getNode(Type t, const char * str)
 {
     setup_typemap();
     char buff[40*BUFSZ];
@@ -1337,15 +1337,15 @@ NodePtr ODBCAtomStorage::getNode(Type t, const char * str)
         fprintf(stderr, "Error: ODBCAtomStorage::getNode: buffer overflow!\n");
         buff[40*BUFSZ-1] = 0x0;
         fprintf(stderr, "\tnc=%d buffer=>>%s<<\n", nc, buff);
-        return NULL;
+        return Handle();
     }
 
     PseudoPtr p(getAtom(buff, 0));
-    if (NULL == p) return NULL;
+    if (NULL == p) return Handle();
 
     NodePtr node = createNode(t, str, p->tv);
     setAtomUUID(node, p->uuid);
-    return node;
+    return node->getHandle();
 }
 
 /**
@@ -1356,8 +1356,10 @@ NodePtr ODBCAtomStorage::getNode(Type t, const char * str)
  *
  * This method does *not* register the atom with any atomtable/atomspace
  */
-LinkPtr ODBCAtomStorage::getLink(Type t, const HandleSeq& oset)
+Handle ODBCAtomStorage::getLink(Handle& h)
 {
+    Type t = h->getType();
+    const HandleSeq& oset = h->getOutgoingSet();
     setup_typemap();
 
     char buff[BUFSZ];
@@ -1370,11 +1372,11 @@ LinkPtr ODBCAtomStorage::getLink(Type t, const HandleSeq& oset)
     ostr += ";";
 
     PseudoPtr p = getAtom(ostr.c_str(), 1);
-    if (NULL == p) return NULL;
+    if (NULL == p) return Handle();
 
-    LinkPtr link = createLink(t, oset, p->tv);
-    setAtomUUID(link, p->uuid);
-    return link;
+    h->setTruthValue(p->tv);
+    setAtomUUID(h, p->uuid);
+    return h;
 }
 
 /**

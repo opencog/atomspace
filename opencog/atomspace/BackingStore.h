@@ -52,13 +52,13 @@ class BackingStore
 		 * Return a pointer to a link of the indicated type and outset,
 		 * if it exists; else return NULL.
 		 */
-		virtual LinkPtr getLink(Type, const HandleSeq&) const = 0;
+		virtual Handle getLink(Handle&) const = 0;
 
 		/** 
 		 * Return a pointer to a node of the indicated type and name,
 		 * if it exists; else return NULL.
 		 */
-		virtual NodePtr getNode(Type, const char *) const = 0;
+		virtual Handle getNode(Type, const char *) const = 0;
 
 		/** 
 		 * Return a pointer to an Atom associated with the given
@@ -70,14 +70,14 @@ class BackingStore
 		 * Return a vector containing the handles of the entire incoming
 		 * set of the indicated handle. 
 		 */
-		virtual HandleSeq getIncomingSet(Handle) const = 0;
+		virtual HandleSeq getIncomingSet(const Handle&) const = 0;
 
 		/**
 		 * Recursively store the atom and anything in it's outgoing set.
 		 * If the atom is already in storage, this will update it's 
 		 * truth value, etc. 
 		 */
-		virtual void storeAtom(Handle) = 0;
+		virtual void storeAtom(const Handle&) = 0;
 
 		/**
 		 * Load *all* atoms of the given type, but only if they are not

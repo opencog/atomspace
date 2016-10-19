@@ -164,12 +164,12 @@ class ODBCAtomStorage : public AtomStorage
         void kill_data(void); // destroy DB contents
 
         // AtomStorage interface
-        NodePtr getNode(Type, const char *);
-        LinkPtr getLink(Type, const HandleSeq&);
+        Handle getNode(Type, const char *);
+        Handle getLink(Handle& h);
         AtomPtr getAtom(UUID);
-        HandleSeq getIncomingSet(Handle);
-        void storeAtom(AtomPtr atomPtr, bool synchronous = false);
-        void loadType(AtomTable &, Type);
+        HandleSeq getIncomingSet(const Handle&);
+        void storeAtom(const AtomPtr& atomPtr, bool synchronous = false);
+        void loadType(AtomTable&, Type);
         void flushStoreQueue();
 
         // Store atoms to DB
@@ -177,21 +177,16 @@ class ODBCAtomStorage : public AtomStorage
 
         // Fetch atoms from DB
         bool atomExists(Handle);
-        AtomPtr getAtom(const Handle& h)
+        Handle getAtom(Handle& h)
         {
-            NodePtr n(NodeCast(h));
-            if (n) return getNode(*n);
-            LinkPtr l(LinkCast(h));
-            if (l) return getLink(*l);
-            return NULL;
+				if (nullptr == h) return h;
+            if (h->isNode()) return getNode(h);
+            if (h->isLink()) return getLink(h);
+            return Handle();
         }
-        NodePtr getNode(const Node &n)
+        Handle getNode(const Handle& h)
         {
-            return getNode(n.getType(), n.getName().c_str());
-        }
-        LinkPtr getLink(const Link &l)
-        {
-            return getLink(l.getType(), l.getOutgoingSet());
+            return getNode(h->getType(), h->getName().c_str());
         }
 
         // Large-scale loads and saves
