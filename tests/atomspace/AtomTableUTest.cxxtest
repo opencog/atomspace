@@ -172,6 +172,12 @@ public:
         Handle hll_resolved(table->getHandle(hll));
         TS_ASSERT_EQUALS(hs[1].value(), hll_resolved.value());
 
+        // The remainder of the test assumes an ordered link,
+        // so that atoms get stored in known locations. Can't
+        // run this part if its unordered.
+        if (not classserver().isA(list_type, ORDERED_LINK))
+            return;
+
         Handle hn1_resolved(table->getHandle(hn1));
         TS_ASSERT_EQUALS(hsl[0].value(), hn1_resolved.value());
 
