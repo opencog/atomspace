@@ -49,6 +49,8 @@ protected:
     Node(const Node &l) : Atom(0)
     { OC_ASSERT(false, "Node: bad use of copy ctor"); }
 
+    virtual ContentHash compute_hash() const;
+
 public:
     /**
      * Constructor for this class.

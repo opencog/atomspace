@@ -95,12 +95,15 @@ protected:
     // Place this first, so that is shares a word with Type.
     char _flags;
 
+    // Almost-unique hash of the atom contents. Generically useful
+    // for indexing operations.
+    mutable ContentHash _content_hash;
     UUID _uuid;
     AtomTable *_atomTable;
 
     TruthValuePtr _truthValue;
     AttentionValuePtr _attentionValue;
-    ProtoAtomPtr _value;
+    ProtoAtomPtr _value; // XXX this iw wrong!!! Must remove this!!
 
     // Lock, used to serialize changes.
     // This costs 40 bytes per atom.  Tried using a single, global lock,
@@ -123,6 +126,7 @@ protected:
          ProtoAtomPtr pv = NULL)
       : ProtoAtom(t),
         _flags(0),
+        _content_hash(Handle::INVALID_HASH),
         _uuid(Handle::INVALID_UUID),
         _atomTable(NULL),
         _truthValue(tv),
@@ -156,6 +160,8 @@ protected:
     // Insert and remove links from the incoming set.
     void insert_atom(LinkPtr);
     void remove_atom(LinkPtr);
+
+    virtual ContentHash compute_hash() const = 0;
 
 private:
     /** Returns whether this atom is marked for removal.
@@ -193,6 +199,11 @@ public:
     AtomSpace* getAtomSpace() const;
 
     inline UUID getUUID() const { return _uuid; }
+    inline ContentHash get_hash() const {
+        if (Handle::INVALID_HASH != _content_hash)
+            return _content_hash;
+        return compute_hash();
+    }
 
     virtual const std::string& getName() const {
         throw RuntimeException(TRACE_INFO, "Not a node!");

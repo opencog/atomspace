@@ -27,14 +27,16 @@
 
 #include <iostream>
 #include <climits>
+#include <cstdint>
 #include <functional>
+#include <limits>
+#include <map>
 #include <memory>
 #include <string>
 #include <sstream>
 #include <set>
 #include <unordered_set>
 #include <vector>
-#include <map>
 
 #include <opencog/atoms/base/types.h>
 
@@ -46,6 +48,7 @@ namespace opencog
 
 //! UUID == Universally Unique Identifier
 typedef unsigned long UUID;
+typedef uint64_t ContentHash;
 
 class Atom;
 class Handle;
@@ -79,6 +82,7 @@ private:
 public:
 
     static const UUID INVALID_UUID = ULONG_MAX;
+    static const ContentHash INVALID_HASH = std::numeric_limits<uint64_t>::max();
     static const Handle UNDEFINED;
 
     explicit Handle(const AtomPtr& atom) : _ptr(atom) {}

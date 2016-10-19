@@ -61,6 +61,7 @@ protected:
     //! Should not change during atom lifespan.
     HandleSeq _outgoing;
 
+    virtual ContentHash compute_hash() const;
 public:
     /**
      * Constructor for this class.
