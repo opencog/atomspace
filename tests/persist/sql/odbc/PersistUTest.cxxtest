@@ -183,8 +183,9 @@ void PersistUTest::kill_data(void)
 
 // ============================================================
 
-static void atomCompare(AtomPtr a, AtomPtr b)
+static void atomCompare(AtomPtr a, AtomPtr b, const char *where)
 {
+    printf("Checking %s %s\n", where, a->toString().c_str());
     TSM_ASSERT("No atom found", b != NULL);
     if (NULL == b) return;
 
@@ -277,16 +278,16 @@ void PersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 void PersistUTest::check_space(int idx, AtomSpace *space)
 {
     Handle hb1 = space->get_handle(n1[idx]->getType(), n1[idx]->getName());
-    atomCompare(h1[idx], hb1);
+    atomCompare(h1[idx], hb1, "hb1");
 
     Handle hb2 = space->get_handle(n2[idx]->getType(), n2[idx]->getName());
-    atomCompare(h2[idx], hb2);
+    atomCompare(h2[idx], hb2, "hb2");
 
     Handle hb3 = space->get_handle(n3[idx]->getType(), n3[idx]->getName());
-    atomCompare(h3[idx], hb3);
+    atomCompare(h3[idx], hb3, "hb3");
 
     Handle hb4 = space->get_handle(n4[idx]->getType(), n4[idx]->getName());
-    atomCompare(h4[idx], hb4);
+    atomCompare(h4[idx], hb4, "hb4");
 
     HandleSeq hvec;
     hvec.push_back(hb1);
@@ -295,15 +296,15 @@ void PersistUTest::check_space(int idx, AtomSpace *space)
     hvec.push_back(hb4);
 
     Handle hlb = space->get_handle(hl[idx]->getType(), hvec);
-    atomCompare(hl[idx], hlb);
+    atomCompare(hl[idx], hlb, "hlinkb");
 
     HandleSeq hv2({hlb, hb2});
     Handle hlb2 = space->get_handle(hl2[idx]->getType(), hv2);
-    atomCompare(hl2[idx], hlb2);
+    atomCompare(hl2[idx], hlb2, "hlinkb2");
 
     HandleSeq hv3({hb1, hlb2, hb3});
     Handle hlb3 = space->get_handle(hl3[idx]->getType(), hv3);
-    atomCompare(hl3[idx], hlb3);
+    atomCompare(hl3[idx], hlb3, "hlinkb3");
 }
 
 void PersistUTest::check_empty(int idx, AtomSpace *space)
