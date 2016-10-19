@@ -113,6 +113,7 @@ ContentHash Node::compute_hash() const
 {
 	ContentHash hsh = std::hash<std::string>()(getName());
 	hsh = hsh ^ (getType() << 23);
+	if (Handle::INVALID_HASH == hsh) hsh -= 1;
 	_content_hash = hsh;
 	return _content_hash;
 }
