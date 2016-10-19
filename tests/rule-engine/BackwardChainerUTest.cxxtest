@@ -204,23 +204,25 @@ void BackwardChainerUTest::test_select_rule_3()
 
 // 	// load 1 modus ponens rule
 // 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
-// 	BackwardChainer bc(_as, top_rbs);
 
-// 	Handle target_var = _eval.eval_h("(VariableNode \"$what\")");
-// 	Handle target =
-// 		_eval.eval_h("(InheritanceLink"
-// 		             "   (VariableNode \"$what\")"
-// 		             "   (ConceptNode \"green\"))");
-// 	Handle soln = _eval.eval_h("(ConceptNode \"Fritz\")");
+// 	Handle green = an(CONCEPT_NODE, "green"),
+// 		Fritz = an(CONCEPT_NODE, "Fritz"),
+// 		what = an(VARIABLE_NODE, "$what"),
+// 		target = al(INHERITANCE_LINK, what, green),
+// 		concept = an(TYPE_NODE, "ConceptNode"),
+// 		vardecl = al(TYPED_VARIABLE_LINK, what, concept);
 
-// 	bc.set_target(target);
-// 	bc.get_config().set_maximum_iterations(300);
+// 	BackwardChainer bc(_as, top_rbs, target, vardecl);
+// 	bc.get_config().set_maximum_iterations(20);
 // 	bc.do_chain();
 
-// 	HandleMultimap results = bc.get_chaining_result();
+// 	Handle results = bc.get_results(),
+// 		expected = al(INHERITANCE_LINK, Fritz, green);
 
-// 	TS_ASSERT_EQUALS(results[target_var].size(), 2);
-// 	TS_ASSERT_EQUALS(results[target_var].count(soln), 1);
+// 	logger().debug() << "results = " << results->toString();
+// 	logger().debug() << "expected = " << expected->toString();
+
+// 	TS_ASSERT_EQUALS(results, expected);
 
 // 	logger().debug("END TEST: %s", __FUNCTION__);
 // }
