@@ -150,6 +150,22 @@ public:
 	Handle get_alias() const;
 
 	/**
+	 * Add the rule in AtomSpace as.
+	 *
+	 * Warning: it will only add the pattern and rewrite terms, not
+	 * the scope links themselves. This is a hack to work around the
+	 * alpha conversion that the atomspace may operate when inserting
+	 * scope links so that alpha-equivalent scope links are not
+	 * redundantly added to an atomspace, which turns out to be
+	 * inconvenient for combining multiple scope links, in the way
+	 * that the backward chainer does when building forward chaining
+	 * strategies.
+	 *
+	 * TODO: support backward rule form.
+	 */
+	void add(AtomSpace& as);
+
+	/**
 	 * Return the variable declaration of the forward rule form.
 	 */
 	Handle get_forward_vardecl() const;
@@ -200,19 +216,14 @@ public:
 	 * TODO: we probably want to support a vector of sources for rules
 	 * with multiple premises.
 	 */
-	RuleSeq unify_source(const Handle& source, const Handle& vardecl,
-	                     AtomSpace* as = nullptr) const;
+	RuleSeq unify_source(const Handle& source, const Handle& vardecl) const;
 
 	/**
 	 * Used by the backward chainer. Given a target, generate all rule
 	 * variations that may infer this target. The variables in the
 	 * rules are renamed to almost certainly avoid name collision.
-	 *
-	 * The rule atoms are added to the provided atomspace, or not
-	 * added at all if not provided.
 	 */
-	RuleSeq unify_target(const Handle& target, const Handle& vardecl,
-	                     AtomSpace* as = nullptr) const;
+	RuleSeq unify_target(const Handle& target, const Handle& vardecl) const;
 
 	std::string to_string() const;
 
