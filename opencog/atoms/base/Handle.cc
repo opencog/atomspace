@@ -139,6 +139,26 @@ int Handle::compare(const Handle& h1, const Handle& h2)
 	return 0;
 }
 
+bool Handle::operator< (const Handle& h) const noexcept
+{
+	return hash_value(*this) < hash_value(h);
+}
+
+bool Handle::operator<= (const Handle& h) const noexcept
+{
+	return hash_value(*this) <= hash_value(h);
+}
+
+bool Handle::operator> (const Handle& h) const noexcept
+{
+	return hash_value(*this) > hash_value(h);
+}
+
+bool Handle::operator>= (const Handle& h) const noexcept
+{
+	return hash_value(*this) >= hash_value(h);
+}
+
 
 // The rest of this file is devoted to printing utilities used only
 // during GDB debugging.  Thus, you won't find these anywhere in the
