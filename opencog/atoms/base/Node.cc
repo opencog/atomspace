@@ -113,6 +113,10 @@ ContentHash Node::compute_hash() const
 {
 	ContentHash hsh = std::hash<std::string>()(getName());
 	hsh = hsh ^ (getType() << 23);
+
+	// Nodes will never have the MSB set.
+	hsh &= ~(1 << (8*sizeof(ContentHash) - 1));
+
 	if (Handle::INVALID_HASH == hsh) hsh -= 1;
 	_content_hash = hsh;
 	return _content_hash;

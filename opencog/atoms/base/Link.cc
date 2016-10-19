@@ -206,6 +206,8 @@ bool Link::operator<(const Atom& other) const
         return getType() < other.getType();
 }
 
+/// Returns a Merkle tree hash -- that is, the hash of this link
+/// chains the hash values of the child atoms, as well.
 ContentHash Link::compute_hash() const
 {
 	// djb hash
@@ -216,6 +218,9 @@ ContentHash Link::compute_hash() const
 	{
 		hsh += (hsh <<5) + h->get_hash(); // recursive!
 	}
+
+	// Links will always have the MSB set.
+	hsh |= 1 << (8*sizeof(ContentHash) - 1);
 
 	if (Handle::INVALID_HASH == hsh) hsh -= 1;
 	_content_hash = hsh;

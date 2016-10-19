@@ -95,10 +95,11 @@ protected:
     // Place this first, so that is shares a word with Type.
     char _flags;
 
-    // Almost-unique hash of the atom contents. Generically useful
-    // for indexing operations.
+    /// Merkle-tree hash of the atom contents. Generically useful
+    /// for indexing and comparison operations.
     mutable ContentHash _content_hash;
-    UUID _uuid;
+
+    UUID _uuid; // obsolete -- do not use!
     AtomTable *_atomTable;
 
     TruthValuePtr _truthValue;
@@ -198,7 +199,11 @@ public:
     //! Returns the AtomTable in which this Atom is inserted.
     AtomSpace* getAtomSpace() const;
 
+    // Obsolete! Do not use in new code!
     inline UUID getUUID() const { return _uuid; }
+
+    /// Merkle-tree hash of the atom contents. Generically useful
+    /// for indexing and comparison operations.
     inline ContentHash get_hash() const {
         if (Handle::INVALID_HASH != _content_hash)
             return _content_hash;
