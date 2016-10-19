@@ -153,7 +153,9 @@ void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit,
 	// to it
 	AndBITFCMap::key_type new_leaves(andbit.first);
 	new_leaves.erase(bitleaf.body);
-	new_leaves.insert(premises.begin(), premises.end());
+	for (const Handle& premise : premises)
+		// Make sure that the premise is in _bit_as
+		new_leaves.insert(_bit_as.add_atom(premise));
 	_andbits[new_leaves] = fcs;
 }
 
@@ -175,7 +177,9 @@ Handle BackwardChainer::expand_fcs(const Handle& fcs, const Handle& leaf,
 	Handle nrewrite = expand_fcs_rewrite(fcs_rewrite, leaf, rule_rewrite);
 
 	// Generate new vardecl
-	Handle nvardecl = filter_vardecl(merge_vardecl(fcs_vardecl, rule_vardecl),
+	Handle nvardecl = filter_vardecl(merge_vardecl(fcs_vardecl,
+	                                               // Mkae sure it is in _bit_as
+	                                               _bit_as.add_atom(rule_vardecl)),
 	                                 {npattern, nrewrite});
 
 	// Generate new atomese forward chaining strategy
@@ -214,7 +218,8 @@ Handle BackwardChainer::expand_fcs_rewrite(const Handle& fcs_rewrite,
 
 	// Replace the fcs rewrite atoms by the rule_rewrite if leaf
 	if (fcs_rewrite == leaf)
-		return rule_rewrite;
+		// rule_rewrite might possibly not be in _bit_as yet, add it
+		return _bit_as.add_atom(rule_rewrite);
 	// If node and isn't leaf leave alone
 	if (fcs_rewrite->isNode())
 		return fcs_rewrite;
@@ -290,19 +295,35 @@ RuleSeq BackwardChainer::get_valid_rules(const BITNode& target)
 {
 	RuleSeq valid_rules;
 	for (const Rule& rule : _rules) {
-		RuleSeq unified_rules = rule.unify_target(target.body, target.vardecl,
-		                                          &_bit_as);
+		// Warning: the resulting rules are not added to _bit_as, this
+		// is in order to work around the fact that atomspace would
+		// consider alpha equivalent rules equal and thus rename the
+		// variable names, which is then inconvenient when building
+		// the forward chaining strategy because we have no garanty
+		// that the variable names will be unique.
+		//
+		// It is likely that it is not the right way to do it. Instead
+		// the fcs expansion code should make sure that the variable
+		// names are unique while expanding.
+		//
+		// So this might be a temporary hack.
+		RuleSeq unified_rules = rule.unify_target(target.body,
+		                                          target.vardecl);//, &_bit_as);
 		valid_rules.insert(valid_rules.end(),
 		                   unified_rules.begin(), unified_rules.end());
 	}
 	return valid_rules;
 }
 
-void BackwardChainer::insert_h2b(const Handle& body, const Handle& vardecl,
+void BackwardChainer::insert_h2b(Handle body, Handle vardecl,
                                  const BITFitness& fitness)
 {
 	if (body.is_undefined())
 		return;
+
+	// Make sure they are in the bit atomspace
+	body = _bit_as.add_atom(body);
+	vardecl = _bit_as.add_atom(vardecl);
 
 	_handle2bitnode[body] = BITNode(body, vardecl, fitness);
 }
