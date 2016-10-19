@@ -179,7 +179,9 @@ public:
     /**
      * Returns a negative value, zero or a positive value if the first
      * argument is respectively smaller than, equal to, or larger than
-     * the second argument.
+     * the second argument. The atom hashes are compared, so the
+     * comparison is content-based, and is stable, independent of the
+     * the address space layout.
      *
      * @param The first handle element.
      * @param The second handle element.
@@ -187,12 +189,7 @@ public:
      * argument is respectively smaller than, equal to, or larger then the
      * second argument.
      */
-    static int compare(const Handle& h1, const Handle& h2)
-    {
-        if (h1 < h2) return -1;
-        if (h1 > h2) return 1;
-        return 0;
-    }
+    static int compare(const Handle&, const Handle&);
 };
 
 static inline bool operator== (std::nullptr_t, const Handle& rhs) noexcept
@@ -201,27 +198,24 @@ static inline bool operator== (std::nullptr_t, const Handle& rhs) noexcept
 static inline bool operator!= (std::nullptr_t, const Handle& rhs) noexcept
     { return rhs != nullptr; }
 
+//! Boost needs this function to be called by exactly this name.
+std::size_t hash_value(Handle const&);
+
 //! gcc-4.7.2 needs this, because std::hash<opencog::Handle> no longer works.
 //! (See very bottom of this file).
 struct handle_hash : public std::unary_function<Handle, size_t>
 {
    size_t operator()(const Handle& h) const
    {
-       return static_cast<std::size_t>(h.value());
+       return hash_value(h);
    }
 };
-
-//! Boost needs this function to be called by exactly this name.
-inline std::size_t hash_value(Handle const& h)
-{
-    return static_cast<std::size_t>(h.value());
-}
 
 struct handle_less
 {
    bool operator()(const Handle& hl, const Handle& hr) const
    {
-       return hl < hr;
+       return hash_value(hl) < hash_value(hr);
    }
 };
 
@@ -288,8 +282,11 @@ struct handle_seq_less
         size_t sl = hsl.size();
         size_t sr = hsr.size();
         if (sl != sr) return sl < sr;
-        for (size_t i=0; i<sl; i++) {
-            if (hsl[i] != hsr[i]) return hsl[i] < hsr[i];
+        for (size_t i=0; i<sl; i++)
+        {
+            ContentHash chsl = hash_value(hsl[i]);
+            ContentHash chsr = hash_value(hsr[i]);
+            if (chsl != chsr) return chsl < chsr;
         }
         return false;
     }
@@ -297,17 +294,19 @@ struct handle_seq_less
 
 struct handle_seq_ptr_less
 {
-   bool operator()(const HandleSeq* hsl, const HandleSeq* hsr) const
-   {
-       size_t sl = hsl->size();
-       size_t sr = hsr->size();
-       if (sl != sr) return sl < sr;
-       for (size_t i=0; i<sl; i++) {
-           if (hsl->operator[](i) != hsr->operator[](i))
-               return hsl->operator[](i) < hsr->operator[](i);
-       }
-       return false;
-   }
+    bool operator()(const HandleSeq* hsl, const HandleSeq* hsr) const
+    {
+        size_t sl = hsl->size();
+        size_t sr = hsr->size();
+        if (sl != sr) return sl < sr;
+        for (size_t i=0; i<sl; i++)
+        {
+            ContentHash chsl = hash_value(hsl->operator[](i));
+            ContentHash chsr = hash_value(hsr->operator[](i));
+            if (chsl != chsr) return chsl < chsr;
+        }
+        return false;
+    }
 };
 
 //! append string representation of the Hash to the string
@@ -377,9 +376,9 @@ ostream& operator<<(ostream&, const opencog::UnorderedHandleSet&);
 
 template<>
 inline std::size_t
-std::hash<opencog::Handle>::operator()(opencog::Handle h) const
+std::hash<opencog::Handle>::operator()(const opencog::Handle& h) const
 {
-    return static_cast<std::size_t>(h.value());
+    return hash_value(h);
 }
 
 #else
@@ -391,8 +390,8 @@ struct hash<opencog::Handle>
     typedef std::size_t result_type;
     typedef opencog::Handle argument_type;
     std::size_t
-    operator()(opencog::Handle h) const noexcept
-    { return static_cast<std::size_t>(h.value()); }
+    operator()(const opencog::Handle& h) const noexcept
+    { return hash_value(h); }
 };
 
 #endif // THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472

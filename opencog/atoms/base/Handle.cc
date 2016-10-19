@@ -124,6 +124,22 @@ inline Handle Handle::do_res(UUID uuid)
     return Handle();
 }
 
+std::size_t hash_value(Handle const& h)
+{
+	if (nullptr == h) return 0;
+	return h->get_hash();
+}
+
+int Handle::compare(const Handle& h1, const Handle& h2)
+{
+	ContentHash ch1 = hash_value(h1);
+	ContentHash ch2 = hash_value(h2);
+	if (ch1 < ch2) return -1;
+	if (ch1 > ch2) return 1;
+	return 0;
+}
+
+
 // The rest of this file is devoted to printing utilities used only
 // during GDB debugging.  Thus, you won't find these anywhere in the
 // code base. You may call that directly from gdb
