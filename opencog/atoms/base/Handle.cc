@@ -279,10 +279,6 @@ std::string oc_to_string(const AtomPtr& aptr)
 {
 	return aptr_to_string(aptr);
 }
-std::string oc_to_string(const LinkPtr& lptr)
-{
-	return lptr_to_string(lptr);
-}
 
 } // ~namespace opencog
 
