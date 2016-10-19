@@ -186,8 +186,8 @@ void PersistUTest::kill_data(void)
 static void atomCompare(AtomPtr a, AtomPtr b, const char *where)
 {
     printf("Checking %s %s\n", where, a->toString().c_str());
-    TSM_ASSERT("No atom found", b != NULL);
-    if (NULL == b) return;
+    TSM_ASSERT("No atom found", b != nullptr);
+    if (nullptr == b) return;
 
     TSM_ASSERT_EQUALS("Type mismatch", a->getType(), b->getType());
 
