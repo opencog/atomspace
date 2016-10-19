@@ -133,9 +133,7 @@ public:
      * then new truth value is ignored, and the existing atom is
      * returned.
      */
-    Handle add_atom(AtomPtr a, bool async=false) {
-        return add_atom(Handle(a), async); }
-    Handle add_atom(Handle&, bool async=false);
+    Handle add_atom(AtomPtr a, bool async=false);
 
     /**
      * Add a node to the Atom Table.  If the atom already exists

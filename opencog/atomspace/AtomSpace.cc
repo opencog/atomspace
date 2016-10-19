@@ -264,9 +264,14 @@ void AtomSpace::unregisterBackingStore(BackingStore *bs)
 
 // ====================================================================
 
-Handle AtomSpace::add_atom(Handle& h, bool async)
+Handle AtomSpace::add_atom(AtomPtr a, bool async)
 {
-    if (nullptr == h) return h;
+    if (nullptr == a) return Handle();
+
+    // XXX FIXME -- this API is foobar'ed. Just use handles,
+    // everywhere, consistently. All this casting too and fro
+    // just eats CPU cycles.
+    Handle h(a->getHandle());
 
     // Is this atom already in the atom table?
     Handle hexist(_atom_table.getHandle(h));
