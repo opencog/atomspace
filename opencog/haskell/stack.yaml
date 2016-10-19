@@ -3,4 +3,4 @@ packages:
 - '.'
 extra-deps: []
 resolver: lts-7.3
-extra-lib-dirs: [/usr/local/lib/opencog]
+#extra-lib-dirs: [/usr/local/lib/opencog]
