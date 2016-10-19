@@ -160,6 +160,8 @@ bool Link::operator==(const Atom& other) const
 
 bool Link::outgoings_equal(const HandleSeq& lhs, const HandleSeq& rhs)
 {
+    if (lhs.size() != rhs.size()) return false;
+
     for (Arity i = 0; i < lhs.size(); i++)
     {
         // TODO: may be replace this by
@@ -170,7 +172,7 @@ bool Link::outgoings_equal(const HandleSeq& lhs, const HandleSeq& rhs)
         // once Handle::operator== is fixed when comparing defined and
         // undefined handles.
 
-        if (lhs[i]->operator!=(*(rhs[i].const_atom_ptr())))
+        if (lhs[i]->operator != (*(rhs[i].const_atom_ptr())))
             return false;
     }
     return true;
@@ -198,4 +200,19 @@ bool Link::operator<(const Atom& other) const
             return arity < other_arity;
     } else
         return getType() < other.getType();
+}
+
+ContentHash Link::compute_hash() const
+{
+	// djb hash
+   ContentHash hsh = 5381;
+	hsh += (hsh <<5) + getType();
+
+	for (const Handle& h: _outgoing)
+	{
+		size_t hh = std::hash<const Atom*>()(h.operator->());
+		hsh += (hsh <<5) + hh;
+	}
+   _content_hash = hsh;
+   return _content_hash;
 }

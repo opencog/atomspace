@@ -105,3 +105,11 @@ bool Node::operator<(const Atom& other) const
     else
         return getType() < other.getType();
 }
+
+ContentHash Node::compute_hash() const
+{
+	ContentHash hsh = std::hash<std::string>()(getName());
+	hsh = hsh ^ (getType() << 23);
+	_content_hash = hsh;
+	return _content_hash;
+}

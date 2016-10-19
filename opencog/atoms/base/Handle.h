@@ -48,7 +48,7 @@ namespace opencog
 
 //! UUID == Universally Unique Identifier
 typedef unsigned long UUID;
-typedef uint64_t ContentHash;
+typedef size_t ContentHash;
 
 class Atom;
 class Handle;
@@ -82,7 +82,7 @@ private:
 public:
 
     static const UUID INVALID_UUID = ULONG_MAX;
-    static const ContentHash INVALID_HASH = std::numeric_limits<uint64_t>::max();
+    static const ContentHash INVALID_HASH = std::numeric_limits<size_t>::max();
     static const Handle UNDEFINED;
 
     explicit Handle(const AtomPtr& atom) : _ptr(atom) {}
