@@ -115,8 +115,7 @@ class AttentionBank
     AttentionValue::sti_t STIAtomWage;
     AttentionValue::lti_t LTIAtomWage;
 
-    /** The importance index, and it's lock. */
-    mutable std::mutex _lock_index;
+    /** The importance index */
     ImportanceIndex _importanceIndex;
 
     async_caller<AttentionBank,Handle> _index_insert_queue;
@@ -306,7 +305,6 @@ public:
     UnorderedHandleSet getHandlesByAV(AttentionValue::sti_t lowerBound,
                   AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
     {
-        std::lock_guard<std::mutex> lck(_lock_index);
         return _importanceIndex.getHandleSet(lowerBound, upperBound);
     }
 
@@ -319,7 +317,6 @@ public:
      */
     void updateImportanceIndex(AtomPtr a, int bin)
     {
-        std::lock_guard<std::mutex> lck(_lock_index);
         _importanceIndex.updateImportance(a.operator->(), bin);
     }
 
@@ -335,13 +332,11 @@ public:
 
     void put_atom_into_index(const Handle& h)
     {
-        std::lock_guard<std::mutex> lck(_lock_index);
         _importanceIndex.insertAtom(h.operator->());
     }
 
     void remove_atom_from_index(const AtomPtr& atom)
     {
-        std::lock_guard<std::mutex> lck(_lock_index);
         _importanceIndex.removeAtom(atom.operator->());
     }
 

@@ -10,6 +10,7 @@ ADD_LIBRARY (atomspace
 	AttentionBank.cc
 	BackingStore.cc
 	FixedIntegerIndex.cc
+	ThreadSafeFixedIntegerIndex.cc
 	HandleSeqIndex.cc
 	# HandleSetIndex.cc
 	ImportanceIndex.cc
@@ -45,6 +46,7 @@ INSTALL (FILES
 	AttentionBank.h
 	BackingStore.h
 	FixedIntegerIndex.h
+	ThreadSafeFixedIntegerIndex.h
 	HandleSeqIndex.h
 	ImportanceIndex.h
 	LinkIndex.h
