@@ -220,7 +220,8 @@ ContentHash Link::compute_hash() const
 	}
 
 	// Links will always have the MSB set.
-	hsh |= 1 << (8*sizeof(ContentHash) - 1);
+	ContentHash mask = ((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1);
+	hsh |= mask;
 
 	if (Handle::INVALID_HASH == hsh) hsh -= 1;
 	_content_hash = hsh;
