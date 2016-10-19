@@ -6,7 +6,7 @@ import Foreign.C
 import Foreign.Ptr
 
 foreign export ccall "someFunc"
-    c_func :: Ptr AtomSpaceRef -> UUID -> IO (UUID)
+    c_func :: Ptr AtomSpaceRef -> Handle -> IO (Handle)
 
 c_func = exportFunction someFunc
 

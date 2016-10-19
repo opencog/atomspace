@@ -23,55 +23,59 @@ void AtomSpace_delete( AtomSpace* this_ptr )
 int AtomSpace_addNode( AtomSpace* this_ptr
                      , const char* type
                      , const char* name
-                     , UUID* uuid_out )
+                     , Handle* atom_out)
 {
     Type t = classserver().getType(std::string(type));
     if(t == NOTYPE)
         throw InvalidParamException(TRACE_INFO,
             "Invalid AtomType parameter '%s'.",type);
-    *uuid_out = this_ptr->add_node(t,std::string(name)).value();
+    *atom_out = this_ptr->add_node(t,std::string(name));
     return 0;
 }
 
 int AtomSpace_addLink( AtomSpace* this_ptr
                      , const char* type
-                     , const UUID* outgoing
+                     , const Handle** outgoing
                      , int size
-                     , UUID* uuid_out )
+                     , Handle* atom_out)
 {
     Type t = classserver().getType(std::string(type));
     if(t == NOTYPE)
         throw InvalidParamException(TRACE_INFO,
             "Invalid AtomType parameter '%s'.",type);
+
     HandleSeq oset;
-    for(int i=0;i<size;i++)
-        oset.push_back(Handle(outgoing[i]));
-    for(int i=0;i<size;i++)
+    for(int i=0;i<size;i++) {
+        oset.push_back(*outgoing[i]);
+    }
+    for(int i=0;i<size;i++) {
         if(!oset[i]) // Atom doesn't exist.
             return -1;
-    *uuid_out = this_ptr->add_link(t,oset).value();
+    }
+    *atom_out = this_ptr->add_link(t,oset);
     return 0;
 }
 
 int AtomSpace_getNode( AtomSpace* this_ptr
                      , const char* type
                      , const char* name
-                     , UUID* uuid_out )
+                     , Handle* atom_out)
 {
     Type t = classserver().getType(std::string(type));
     if(t == NOTYPE)
         throw InvalidParamException(TRACE_INFO,
             "Invalid AtomType parameter '%s'.",type);
     Handle h = this_ptr->get_node(t,std::string(name));
-    *uuid_out = h.value();
+    *atom_out = h;
+
     return h == Handle::UNDEFINED;
 }
 
 int AtomSpace_getLink( AtomSpace* this_ptr
                      , const char* type
-                     , const UUID* outgoing
+                     , const Handle** outgoing
                      , int size
-                     , UUID* uuid_out )
+                     , Handle* atom_out)
 {
     Type t = classserver().getType(std::string(type));
     if(t == NOTYPE)
@@ -79,29 +83,30 @@ int AtomSpace_getLink( AtomSpace* this_ptr
             "Invalid AtomType parameter '%s'.",type);
     HandleSeq oset;
     for(int i=0;i<size;i++)
-        oset.push_back(Handle(outgoing[i]));
+        oset.push_back(*outgoing[i]);
     Handle h = this_ptr->get_link(t,oset);
-    *uuid_out = h.value();
+    *atom_out = h;
+
     return h == Handle::UNDEFINED;
 }
 
 int AtomSpace_removeAtom( AtomSpace* this_ptr
-                        , UUID uuid )
+                        , Handle* atom)
 {
-    if(this_ptr->remove_atom(Handle(uuid)))
+    if(this_ptr->remove_atom(*atom))
         return 0;
     return -1;
 }
 
-int AtomSpace_getAtomByUUID( AtomSpace* this_ptr
-                           , UUID uuid
-                           , int* node_or_link
-                           , char** type
-                           , char** name
-                           , UUID** out
-                           , int* out_len)
+int AtomSpace_getAtomByHandle( AtomSpace* this_ptr
+                             , Handle* atom
+                             , int* node_or_link
+                             , char** type
+                             , char** name
+                             , Handle** out
+                             , int* out_len)
 {
-    Handle h(uuid);
+    Handle h = *atom;
     if(!h) // Invalid UUID parameter.
         return -1;
 
@@ -126,12 +131,13 @@ int AtomSpace_getAtomByUUID( AtomSpace* this_ptr
         if(!lnk)
             throw RuntimeException(TRACE_INFO,"Error in cast Link.");
         *out_len = lnk->getArity();
-        *out = (UUID*) malloc(sizeof(UUID) * (*out_len));
+
+        *out = (Handle*)malloc(sizeof(Handle*) * (*out_len));
+
         if(! *out)
             throw RuntimeException(TRACE_INFO,"Failed malloc.");
-        int i;
-        for(i=0;i<(*out_len);i++)
-            (*out)[i]=lnk->getOutgoingAtom(i).value();
+        for(int i=0;i<(*out_len);i++)
+            (*out)[i] = lnk->getOutgoingAtom(i);
         return 0;
     }
 }
@@ -142,12 +148,12 @@ void AtomSpace_debug( AtomSpace* this_ptr )
 }
 
 int AtomSpace_getTruthValue( AtomSpace* this_ptr
-                           , UUID uuid
+                           , Handle* atom
                            , TruthValueType* tv_type
                            , double* parameters )
 {
-    Handle h(uuid);
-    if(!h) // Invalid UUID parameter.
+    Handle h = *atom;
+    if(h == Handle::UNDEFINED)
         return -1;
     TruthValuePtr tv = h->getTruthValue();
     Utils_toRawType(tv,tv_type,parameters);
@@ -155,11 +161,11 @@ int AtomSpace_getTruthValue( AtomSpace* this_ptr
 }
 
 int AtomSpace_setTruthValue( AtomSpace* this_ptr
-                           , UUID uuid
+                           , Handle* atom
                            , TruthValueType type
                            , double* parameters )
 {
-    Handle h(uuid);
+    Handle h = *atom;
     if(!h) // Invalid UUID parameter.
         return -1;
     switch(type)

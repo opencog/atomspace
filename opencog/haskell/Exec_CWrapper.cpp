@@ -7,25 +7,29 @@
 /**
  * See ExecSCM
  */
-UUID Exec_execute(AtomSpace* atomspace, UUID handle)
+int Exec_execute(AtomSpace* atomspace, Handle* handle,Handle* out)
 {
-    Handle h(handle);
+    Handle h = *handle;
 	Instantiator inst(atomspace);
 	Handle rh(inst.execute(h));
-	if (NULL != rh)
+	if (NULL != rh) {
 		rh = atomspace->add_atom(rh);
-	return rh.value();
+        *out = rh;
+        return 0;
+    } else {
+        return 1;
+    }
 }
 
 /**
  * See ExecSCM
  */
 int Exec_evaluate(AtomSpace* atomspace
-                 , UUID handle
+                 , Handle* handle
                  , TruthValueType* tv_type
                  , double* parameters)
 {
-    Handle h(handle);
+    Handle h = *handle;
 	TruthValuePtr tv = EvaluationLink::do_evaluate(atomspace, h);
     return Utils_toRawType(tv,tv_type,parameters);
 }
