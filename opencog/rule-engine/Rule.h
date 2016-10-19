@@ -3,7 +3,8 @@
  *
  * Copyright (C) 2015 OpenCog Foundation
  *
- * Author: Misgana Bayetta <misgana.bayetta@gmail.com>  2015
+ * Authors: Misgana Bayetta <misgana.bayetta@gmail.com>  2015
+ *          Nil Geisweiller 2015-2016
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -28,6 +29,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atoms/core/VariableList.h>
+#include <opencog/atoms/pattern/BindLink.h>
 
 namespace opencog {
 
@@ -124,7 +126,7 @@ public:
 	
 	// Comparison
 	bool operator==(const Rule& r) const {
-		return r._forward_rule_handle == _forward_rule_handle
+		return r._forward_rule == _forward_rule
 			and r._backward_rule_handles == _backward_rule_handles;
 	}
 	bool operator<(const Rule& r) const {
@@ -146,6 +148,10 @@ public:
 	const string& get_category() const;
 	Handle get_forward_rule() const;
 	Handle get_alias() const;
+
+	/**
+	 * Return the variable declaration of the forward rule form.
+	 */
 	Handle get_forward_vardecl() const;
 	HandleSeq get_backward_vardecls() const;
 	Handle get_forward_implicant() const;
@@ -211,15 +217,8 @@ public:
 	std::string to_string() const;
 
 private:
-	// // Rule handle, a BindLink or a ListLink of forward and backward rule
-	// Maybe not useful
-	// Handle _rule_handle;
-
-	// Forward rule handle, typically a BindLink
-	//
-	// TODO: Maybe replace that by ScopeLinkPtr
-	Handle _forward_rule_handle;
-	ScopeLinkPtr _forward_rule_scope_link;
+	// Forward rule
+	BindLinkPtr _forward_rule;
 
 	// Backward rule handles, BindLinks or a GetLinks
 	//
