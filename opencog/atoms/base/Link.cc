@@ -136,47 +136,15 @@ bool Link::operator==(const Atom& other) const
 {
     // Rule out obvious mis-matches, based on the hash.
     if (get_hash() != other.get_hash()) return false;
-
     if (getType() != other.getType()) return false;
-    const Link& olink = dynamic_cast<const Link&>(other);
 
-    Arity arity = getArity();
-    if (arity != olink.getArity()) return false;
+    Arity sz = getArity();
+    if (sz != other.getArity()) return false;
 
-    // If the type is unordered and one of the uuids are invalid we
-    // need to reorder by content to be sure that the children are
-    // aligned.
-// XXX this is just plain wrong .. its the wrong place to do this fix.
-    if (classserver().isA(getType(), UNORDERED_LINK) and
-        (_uuid != Handle::INVALID_UUID
-         or other.getUUID() != Handle::INVALID_UUID))
+    const HandleSeq& rhs = other.getOutgoingSet();
+    for (Arity i = 0; i < sz; i++)
     {
-        HandleSeq sorted_outgoing(_outgoing),
-            other_sorted_outgoing(olink._outgoing);
-        boost::sort(sorted_outgoing, content_based_handle_less());
-        boost::sort(other_sorted_outgoing, content_based_handle_less());
-        return outgoings_equal(sorted_outgoing, other_sorted_outgoing);
-    }
-
-    // No need to reorder, compare the children directly
-    return outgoings_equal(_outgoing, olink._outgoing);
-}
-
-bool Link::outgoings_equal(const HandleSeq& lhs, const HandleSeq& rhs)
-{
-    if (lhs.size() != rhs.size()) return false;
-
-    for (Arity i = 0; i < lhs.size(); i++)
-    {
-        // TODO: may be replace this by
-        //
-        //     if (lhs[i] != rhs[i])
-        //         return false;
-        //
-        // once Handle::operator== is fixed when comparing defined and
-        // undefined handles.
-
-        if (lhs[i]->operator != (*(rhs[i].const_atom_ptr())))
+        if (_outgoing[i] != rhs[i])
             return false;
     }
     return true;

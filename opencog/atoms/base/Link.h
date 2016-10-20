@@ -231,13 +231,6 @@ public:
      * @return true if this atom is less than the given one, false otherwise.
      */
     virtual bool operator<(const Atom&) const;
-
-private:
-    /**
-     * Return true if the content outgoings are equal. It is assumed
-     * that they both have the same size.
-     */
-    static bool outgoings_equal(const HandleSeq& lhs, const HandleSeq& rhs);
 };
 
 static inline LinkPtr LinkCast(const Handle& h)
