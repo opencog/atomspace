@@ -17,7 +17,7 @@
 ;;;;;;;;;;;;;;;;
 ;; Load rules ;;
 ;;;;;;;;;;;;;;;;
-(load-from-path "tests/rule-engine/rules/fc-modus-ponens-rule.scm")
+(load-from-path "tests/rule-engine/rules/crisp-modus-ponens-rule.scm")
 (load-from-path "tests/rule-engine/rules/fc-deduction-rule.scm")
 
 ; Define a new rule base (aka rule-based system)
@@ -30,7 +30,7 @@
 ; Associate the rules to the rule base (with weights, their semantics
 ; is currently undefined, we might settled with probabilities but it's
 ; not sure)
-(define fc-rules (list (list fc-modus-ponens-rule-name 0.4)
+(define fc-rules (list (list crisp-modus-ponens-rule-name 0.4)
                        (list fc-deduction-rule-name 0.6))
 )
 (ure-add-rules fc-rbs fc-rules)

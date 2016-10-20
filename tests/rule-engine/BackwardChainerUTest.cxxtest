@@ -47,7 +47,7 @@ public:
 	void test_select_rule_3();
 	void test_deduction();
 	void test_deduction_tv_query();
-	// TODO: add modus ponens tests
+	void test_modus_ponens_tv_query();
 	// TODO: re-enable the following tests
 	void test_implication_instantiation_1();
 	void test_implication_instantiation_2();
@@ -207,6 +207,32 @@ void BackwardChainerUTest::test_deduction_tv_query()
 
 	TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, 1e-10);
 	TS_ASSERT_DELTA(target->getTruthValue()->getConfidence(), 1, 1e-10);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void BackwardChainerUTest::test_modus_ponens_tv_query()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	_as.clear();
+
+	_eval.eval("(load-from-path \"tests/rule-engine/bc-modus-ponens-config.scm\")");
+	_eval.eval("(load-from-path \"tests/rule-engine/modus-ponens-example.scm\")");
+	randGen().seed(0);
+
+	// load 1 deduction rule
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	Handle target = an(PREDICATE_NODE, "T");
+
+	BackwardChainer bc(_as, top_rbs, target);
+	bc.get_config().set_maximum_iterations(20);
+	// TODO: fixme
+	// bc.do_chain();
+
+	// TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, 1e-10);
+	// TS_ASSERT_DELTA(target->getTruthValue()->getConfidence(), 1, 1e-10);
+	TS_ASSERT(true);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
