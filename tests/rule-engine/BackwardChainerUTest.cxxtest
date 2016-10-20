@@ -2,7 +2,8 @@
  * BackwardChainerUTest.cxxtest
  *
  *  Created on: Oct 20, 2014
- *      Author: misgana
+ *      Authors: misgana
+ ^             : Nil Geisweiller (2015-2016)
  */
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 #include <opencog/rule-engine/backwardchainer/BackwardChainerPMCB.h>
@@ -47,6 +48,7 @@ public:
 	void test_deduction();
 	void test_deduction_tv_query();
 	// TODO: add modus ponens tests
+	// TODO: re-enable the following tests
 	void test_implication_instantiation_1();
 	void test_implication_instantiation_2();
 	void test_implication_instantiation_tv_query();
