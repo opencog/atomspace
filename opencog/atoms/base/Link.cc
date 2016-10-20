@@ -132,6 +132,7 @@ std::string Link::toString(const std::string& indent) const
     return answer;
 }
 
+// Content-based comparison.
 bool Link::operator==(const Atom& other) const
 {
     // Rule out obvious mis-matches, based on the hash.
@@ -150,8 +151,15 @@ bool Link::operator==(const Atom& other) const
     return true;
 }
 
+// Content-based ordering.
 bool Link::operator<(const Atom& other) const
 {
+    if (get_hash() < other.get_hash()) return true;
+    if (other.get_hash() < get_hash()) return false;
+
+    // We get to here only if the hashes are equal.
+    // Compare the contents directly, for this
+    // (hopefully rare) case.
     if (getType() == other.getType()) {
         const HandleSeq& outgoing = getOutgoingSet();
         const HandleSeq& other_outgoing = other.getOutgoingSet();

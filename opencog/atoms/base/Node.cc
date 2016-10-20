@@ -98,11 +98,17 @@ bool Node::operator==(const Atom& other) const
     if (get_hash() != other.get_hash()) return false;
 
     if (getType() != other.getType()) return false;
-    return getName() == dynamic_cast<const Node&>(other).getName();
+    return getName() == other.getName();
 }
 
 bool Node::operator<(const Atom& other) const
 {
+    if (get_hash() < other.get_hash()) return true;
+    if (other.get_hash() < get_hash()) return false;
+
+    // We get to here only if the hashes are equal.
+    // Compare the contents directly, for this
+    // (hopefully rare) case.
     if (getType() == other.getType())
         return getName() < other.getName();
     else
