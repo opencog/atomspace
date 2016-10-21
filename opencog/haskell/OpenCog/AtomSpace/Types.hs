@@ -24,7 +24,7 @@ type AtomType = String
 -- Main general atom representation.
 data Atom = Link AtomType [Atom] TruthVal
           | Node AtomType AtomName TruthVal
-          deriving (Eq,Show)
+          deriving (Eq,Show,Read)
 
 -- | 'TruthVal' represent the different types of TruthValues.
 data TruthVal = SimpleTV { tvMean       :: Double
