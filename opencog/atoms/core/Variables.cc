@@ -615,6 +615,12 @@ Handle Variables::get_vardecl() const
 std::string Variables::to_string() const
 {
 	std::stringstream ss;
+
+	// Varseq
+	ss << "varseq:" << std::endl << oc_to_string(varseq);
+
+	// Simple typemap
+	ss << "_simple_typemap:" << std::endl;
 	ss << "size = " << _simple_typemap.size() << std::endl;
 	unsigned i = 0;
 	for (const auto& v : _simple_typemap)
