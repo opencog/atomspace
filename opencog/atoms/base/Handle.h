@@ -38,6 +38,11 @@
 
 #include <opencog/atoms/base/types.h>
 
+// Comment this out if you want to enforce more determinism in the
+// AtomSpace. For instance atoms are indexed according to content
+// rather address, etc.
+// #define REPRODUCIBLE_ATOMSPACE
+
 /** \addtogroup grp_atomspace
  *  @{
  */
@@ -157,7 +162,11 @@ public:
     inline bool operator!=(const Handle& h) const noexcept {
         return _ptr.get() != h._ptr.get();
     }
+#ifdef REPRODUCIBLE_ATOMSPACE
+#define DEFAULT_ATOMS_LESS content_based_atoms_less
+#else
 #define DEFAULT_ATOMS_LESS atoms_less
+#endif
     inline bool operator< (const Handle& h) const noexcept {
        return DEFAULT_ATOMS_LESS(_ptr.get(), h._ptr.get());
     }
