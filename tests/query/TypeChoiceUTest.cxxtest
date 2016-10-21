@@ -59,6 +59,7 @@ public:
 
 	void test_connected();
 	void test_disconnected();
+	void test_forall();
 };
 
 void TypeChoiceUTest::tearDown(void)
@@ -144,6 +145,105 @@ void TypeChoiceUTest::test_disconnected()
 	logger().debug() << "expected = " << expected->toString();
 	
 	TS_ASSERT_EQUALS(result, expected);
+}
+
+/*
+ * TypeChoice over a ForAll pattern. Specifically
+ *
+ * (define forall-instantiation-vardecl
+ *  (VariableList
+ *      (TypedVariableLink
+ *         (VariableNode "$TyVs")
+ *         (TypeChoice
+ *            (TypeNode "TypedVariableLink")
+ *            (TypeNode "VariableList")))
+ *      (VariableNode "$B")))
+ *
+ * (define forall-instantiation-body
+ *   (ForAllLink
+ *      (VariableNode "$TyVs")
+ *      (VariableNode "$B")))
+ *
+ * (define forall-instantiation-get
+ *   (Get
+ *      forall-instantiation-vardecl
+ *      forall-instantiation-body))
+ *
+ * Over
+ *
+ * (define forall-candidate
+ *   (ForAllLink
+ *      (VariableList
+ *         (TypedVariableLink
+ *            (VariableNode "$X")
+ *            (TypeNode "ConceptNode"))
+ *         (TypedVariableLink
+ *            (VariableNode "$Y")
+ *            (TypeNode "PredicateNode")))
+ *      (EvaluationLink
+ *         (PredicateNode "are-concept-and-predicate")
+ *         (ListLink
+ *            (VariableNode "$X")
+ *            (VariableNode "$Y")))))
+ *
+ * With result
+ *
+ * TyVs =
+ *      (VariableList
+ *         (TypedVariableLink
+ *            (VariableNode "$X")
+ *            (TypeNode "ConceptNode"))
+ *         (TypedVariableLink
+ *            (VariableNode "$Y")
+ *            (TypeNode "PredicateNode")))
+ *
+ * B =
+ *      (EvaluationLink
+ *         (PredicateNode "are-concept-and-predicate")
+ *         (ListLink
+ *            (VariableNode "$X")
+ *            (VariableNode "$Y")))
+ */
+void TypeChoiceUTest::test_forall()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle TyVs = an(VARIABLE_NODE, "$TyVs"),
+		TVLT = an(TYPE_NODE, "TypedVariableLink"),
+		VLT = an(TYPE_NODE, "VariableList"),
+		TyVs_vardecl = al(TYPED_VARIABLE_LINK, TyVs, al(TYPE_CHOICE, TVLT, VLT)),
+		B = an(VARIABLE_NODE, "$B"),
+		forall_instantiation_vardecl = al(VARIABLE_LIST, TyVs_vardecl, B),
+		forall_instantiation_body = al(FORALL_LINK, TyVs, B),
+		forall_instantiation_get = al(GET_LINK,
+		                              forall_instantiation_vardecl,
+		                              forall_instantiation_body),
+		X = an(VARIABLE_NODE, "$X"),
+		CT = an(TYPE_NODE, "ConceptNode"),
+		X_vardecl = al(TYPED_VARIABLE_LINK, X, CT),
+		Y = an(VARIABLE_NODE, "$Y"),
+		PT = an(TYPE_NODE, "PredicateNode"),
+		Y_vardecl = al(TYPED_VARIABLE_LINK, Y, PT),
+		forall_candidate_vardecl = al(VARIABLE_LIST, X_vardecl, Y_vardecl),
+		CNP = an(PREDICATE_NODE, "are-concept-and-predicate"),
+		forall_candidate_body = al(EVALUATION_LINK, CNP, al(LIST_LINK, X, Y)),
+		forall_candidate = al(FORALL_LINK,
+		                      forall_candidate_vardecl,
+		                      forall_candidate_body);
+
+	Handle result = satisfying_set(&as, forall_instantiation_get);
+	Handle expected = al(SET_LINK,
+	                     al(LIST_LINK,
+	                        forall_instantiation_vardecl,
+	                        forall_candidate_body));
+
+	logger().debug() << "result = " << result->toString();
+	logger().debug() << "expected = " << expected->toString();
+
+	// TODO: re-enabled once the pattern matcher is fixed. Hint: when
+	// not use a TypeChoice is works.
+	TS_ASSERT_EQUALS(result, expected);
+	TS_ASSERT(true);
 }
 
 #undef al
