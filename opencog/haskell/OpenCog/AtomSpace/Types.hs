@@ -47,4 +47,4 @@ data TruthVal = SimpleTV { tvMean       :: Double
                          , tvCount      :: Double
                          , tvConfidence :: Double
                          }
-    deriving (Show,Eq)
+    deriving (Show,Read,Eq)
