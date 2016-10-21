@@ -8,8 +8,10 @@ module OpenCog.AtomSpace.Utils (
     , atomMap
     , atomMapM
     , atomFold
+    , atomElem
     , nodeName
     , atomType
+    , atomGetAllNodes
     ) where
 
 import OpenCog.AtomSpace.Types      (Atom(..),TruthVal(..))
@@ -91,6 +93,10 @@ atomElem n@(Node _ _ _) a@(Link _ _ _) =
 atomElem n@(Link _ _ _) a@(Node _ _ _) = False
 atomElem n@(Link _ _ _) a@(Link _ _ _) =
     atomFold (\ b a -> a == n || b) False a
+
+atomGetAllNodes :: Atom -> [Atom]
+atomGetAllNodes n@(Node _ _ _) = [n]
+atomGetAllNodes (Link _ ls _)  = concatMap atomGetAllNodes ls
 
 nodeName :: Atom -> String
 nodeName (Node _ n _) = n
