@@ -1,7 +1,7 @@
 /*
  * opencog/truthvalue/EvidenceCountTruthValue.h
  *
- * Copyright (C) 2016 Novamente LLC
+ * Copyright (C) 2016 OpenCog Foundation
  * All Rights Reserved
  *
  * Written by Nil Geisweiller
@@ -41,57 +41,60 @@ class EvidenceCountTruthValue : public TruthValue
 {
 protected:
 
-    /// Positive evidence count, i.e. number of observations
-    /// corroborating with the atom's truth.
-    count_t _pos_count;
+	/// Positive evidence count, i.e. number of observations
+	/// corroborating with the atom's truth.
+	count_t _pos_count;
 
-    /// Total number of observations. If _total_count < _pos_count
-    /// then _total_count is considered undefined.
-    count_t _total_count;
+	/// Total number of observations.
+	count_t _total_count;
+
+	/// If _pos_count <= _total_count then _total_count is considered
+	/// valid, otherwise it is considered invalid.
+	bool is_total_count_valid() const;
 
 public:
 	EvidenceCountTruthValue(count_t pos_count, count_t total_count = -1);
-    EvidenceCountTruthValue(const TruthValue&);
-    EvidenceCountTruthValue(EvidenceCountTruthValue const&);
+	EvidenceCountTruthValue(const TruthValue&);
+	EvidenceCountTruthValue(EvidenceCountTruthValue const&);
 
-    virtual bool operator==(const TruthValue& rhs) const;
+	virtual bool operator==(const TruthValue& rhs) const;
 
-    std::string toString() const;
-    TruthValueType getType() const;
+	std::string toString() const;
+	TruthValueType getType() const;
 
-    strength_t getMean() const;
-    count_t getCount() const;
-    confidence_t getConfidence() const;
+	strength_t getMean() const;
+	count_t getCount() const;
+	confidence_t getConfidence() const;
 
-    /**
-     * Truth value merge formula, as specified by PLN.
-     *
-     * Currently tv1.merge(tv2) works as follows:
-     * the resulting TV is either tv1 or tv2, the result being the one
-     * with the highest confidence.
-     */
-    TruthValuePtr merge(TruthValuePtr,
-                        const MergeCtrl& mc=MergeCtrl()) const;
+	/**
+	 * Truth value merge formula, as specified by PLN.
+	 *
+	 * Currently tv1.merge(tv2) works as follows:
+	 * the resulting TV is either tv1 or tv2, the result being the one
+	 * with the highest confidence.
+	 */
+	TruthValuePtr merge(TruthValuePtr,
+	                    const MergeCtrl& mc=MergeCtrl()) const;
 
-    static EvidenceCountTruthValuePtr createPETV(count_t pos_count,
-                                                 count_t total_count = -1.0)
-    {
-        return std::make_shared<EvidenceCountTruthValue>(pos_count, total_count);
-    }
-    static TruthValuePtr createTV(count_t pos_count, count_t total_count = -1.0)
-    {
-        return std::static_pointer_cast<TruthValue>(createPETV(pos_count,
-                                                               total_count));
-    }
+	static EvidenceCountTruthValuePtr createPETV(count_t pos_count,
+	                                             count_t total_count = -1.0)
+	{
+		return std::make_shared<EvidenceCountTruthValue>(pos_count, total_count);
+	}
+	static TruthValuePtr createTV(count_t pos_count, count_t total_count = -1.0)
+	{
+		return std::static_pointer_cast<TruthValue>(createPETV(pos_count,
+		                                                       total_count));
+	}
 
-    TruthValuePtr clone() const
-    {
-        return std::make_shared<EvidenceCountTruthValue>(*this);
-    }
-    TruthValue* rawclone() const
-    {
-        return new EvidenceCountTruthValue(*this);
-    }
+	TruthValuePtr clone() const
+	{
+		return std::make_shared<EvidenceCountTruthValue>(*this);
+	}
+	TruthValue* rawclone() const
+	{
+		return new EvidenceCountTruthValue(*this);
+	}
 };
 
 /** @}*/
