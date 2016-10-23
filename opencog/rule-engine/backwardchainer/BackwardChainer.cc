@@ -118,11 +118,13 @@ void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit)
 
 	// Select a valid rule
 	Rule rule = select_rule(bitleaf);
+	rule.add(_bit_as);
 	if (not rule.is_valid()) {
 		bc_logger().warn("No valid rule for the selected BIT-node, abort expansion");
 		return;
 	}
-	LAZY_BC_LOG_DEBUG << "Selected rule for BIT expansion: " << rule.get_name();
+	LAZY_BC_LOG_DEBUG << "Selected rule for BIT expansion:" << std::endl
+	                  << rule.to_string();
 
 	// Expand the back-inference tree from this target
 	expand_bit(andbit, bitleaf, rule);
@@ -183,7 +185,7 @@ Handle BackwardChainer::expand_fcs(const Handle& fcs, const Handle& leaf,
 		noutgoings.insert(noutgoings.begin(), nvardecl);
 	Handle nfcs = _bit_as.add_link(BIND_LINK, noutgoings);
 
-	LAZY_BC_LOG_DEBUG << "Expand forward chainer strategy:" << std::endl << fcs
+	LAZY_BC_LOG_DEBUG << "Expanded forward chainer strategy:" << std::endl << fcs
 	                  << "to:" << std::endl << nfcs;
 
 	return nfcs;
@@ -289,15 +291,14 @@ RuleSeq BackwardChainer::get_valid_rules(const BITNode& target)
 {
 	RuleSeq valid_rules;
 	for (const Rule& rule : _rules) {
-		RuleSeq unified_rules = rule.unify_target(target.body, target.vardecl,
-		                                          &_bit_as);
+		RuleSeq unified_rules = rule.unify_target(target.body, target.vardecl);
 		valid_rules.insert(valid_rules.end(),
 		                   unified_rules.begin(), unified_rules.end());
 	}
 	return valid_rules;
 }
 
-void BackwardChainer::insert_h2b(const Handle& body, const Handle& vardecl,
+void BackwardChainer::insert_h2b(Handle body, Handle vardecl,
                                  const BITFitness& fitness)
 {
 	if (body.is_undefined())

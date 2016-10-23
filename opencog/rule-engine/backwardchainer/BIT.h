@@ -79,6 +79,10 @@ public:
  * The forward chaining strategy is represented according to
  * https://github.com/opencog/atomspace/issues/903. TODO: copy/paste
  * the doc here and in the wiki as well.
+ *
+ * TODO: Maybe we don't need the handle set key because it is likely
+ * equal to the BindLink pattern of the associated forward chaining
+ * strategy.
  */
 typedef std::map<OrderedHandleSet, Handle> AndBITFCMap;
 

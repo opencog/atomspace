@@ -3,7 +3,8 @@
  *
  * Copyright (C) 2015 OpenCog Foundation
  *
- * Author: Misgana Bayetta <misgana.bayetta@gmail.com> 2015
+ * Authors: Misgana Bayetta <misgana.bayetta@gmail.com> 2015
+ *          Nil Geisweiller 2015-2016
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -38,10 +39,9 @@
 namespace opencog {
 
 Rule::Rule()
-	: _forward_rule_handle(Handle::UNDEFINED), _rule_alias(Handle::UNDEFINED) {}
+	: _rule_alias(Handle::UNDEFINED) {}
 
 Rule::Rule(const Handle& rule_ml)
-	: _forward_rule_handle(Handle::UNDEFINED)
 {
 	init(rule_ml);
 }
@@ -68,8 +68,7 @@ void Rule::init(const Handle& rule_ml)
 	{
 		OC_ASSERT(rule->getArity() > 0);
 		// Split the rule into a forward and backward parts
-		_forward_rule_handle = rule->getOutgoingAtom(0);
-		_forward_rule_scope_link = ScopeLinkCast(_forward_rule_handle);
+		_forward_rule = BindLinkCast(rule->getOutgoingAtom(0));
 		for (unsigned i = 1; i < rule->getArity(); i++) {
 			Handle bch = rule->getOutgoingAtom(i);
 			_backward_rule_handles.push_back(bch);
@@ -79,8 +78,7 @@ void Rule::init(const Handle& rule_ml)
 	else
 	{
 		OC_ASSERT(rule->getType() == BIND_LINK);
-		_forward_rule_handle = rule;
-		_forward_rule_scope_link = ScopeLinkCast(rule);
+		_forward_rule = BindLinkCast(rule);
 	}
 	_name = _rule_alias->getName();
 	_category = rbs->getName();
@@ -89,7 +87,7 @@ void Rule::init(const Handle& rule_ml)
 
 bool Rule::is_alpha_equivalent(const Rule& r) const
 {
-	if (not _forward_rule_scope_link->is_equal(r._forward_rule_handle))
+	if (not _forward_rule->is_equal(Handle(r._forward_rule)))
 		return false;
 
 	size_t n_backrules = r._backward_rule_scope_links.size();
@@ -140,8 +138,7 @@ const string& Rule::get_name() const
 
 void Rule::set_forward_handle(const Handle& h)
 {
-	_forward_rule_handle = h;
-	_forward_rule_scope_link = ScopeLinkCast(h);
+	_forward_rule = BindLinkCast(h);
 }
 
 void Rule::set_backward_handles(const HandleSeq& hs)
@@ -154,7 +151,7 @@ void Rule::set_backward_handles(const HandleSeq& hs)
 
 Handle Rule::get_forward_rule() const
 {
-	return _forward_rule_handle;
+	return Handle(_forward_rule);
 }
 
 Handle Rule::get_alias() const
@@ -162,18 +159,24 @@ Handle Rule::get_alias() const
 	return _rule_alias;
 }
 
-/**
- * Get the typed variable list of the Rule.
- *
- * @return the VariableList or the lone VariableNode
- */
+void Rule::add(AtomSpace& as)
+{
+	if (!_forward_rule)
+		return;
+
+	HandleSeq outgoings;
+	for (const Handle& h : _forward_rule->getOutgoingSet())
+		outgoings.push_back(as.add_atom(h));
+	_forward_rule = createBindLink(outgoings);
+
+	// TODO: support backward rule
+}
+
 Handle Rule::get_forward_vardecl() const
 {
-	// if the rule's handle has not been set yet
-	if (_forward_rule_handle == Handle::UNDEFINED)
-		return Handle::UNDEFINED;
-
-	return _forward_rule_handle->getOutgoingAtom(0);
+	if (_forward_rule)
+		return _forward_rule->get_vardecl();
+	return Handle::UNDEFINED;
 }
 
 /**
@@ -196,21 +199,21 @@ HandleSeq Rule::get_backward_vardecls() const
  */
 Handle Rule::get_forward_implicant() const
 {
-	// if the rule's handle has not been set yet
-	if (_forward_rule_handle == Handle::UNDEFINED)
-		return Handle::UNDEFINED;
-
-	return BindLinkCast(_forward_rule_handle)->get_body();
+	if (_forward_rule)
+		return _forward_rule->get_body();
+	return Handle::UNDEFINED;
 }
 
 Handle Rule::get_forward_implicand() const
 {
-	return BindLinkCast(_forward_rule_handle)->get_implicand();
+	if (_forward_rule)
+		return _forward_rule->get_implicand();
+	return Handle::UNDEFINED;
 }
 
 bool Rule::is_valid() const
 {
-	return _forward_rule_handle != Handle::UNDEFINED;
+	return (bool)_forward_rule;
 }
 
 /**
@@ -222,7 +225,7 @@ bool Rule::is_valid() const
 HandleSeq Rule::get_premises(const Handle& conclusion) const
 {
 	// if the rule's handle has not been set yet
-	if (_forward_rule_handle == Handle::UNDEFINED)
+	if (!_forward_rule)
 		return HandleSeq();
 
     Handle implicant = get_forward_implicant();
@@ -241,14 +244,14 @@ HandleSeq Rule::get_premises(const Handle& conclusion) const
  * Get the conclusion (output) of the rule.  defined in a BindLink.
  *
  * @return the Handle of the implicand
+ *
+ * TODO: indentical to get_forward_implicand()
  */
 Handle Rule::get_forward_conclusion() const
 {
-	// if the rule's handle has not been set yet
-	if (_forward_rule_handle == Handle::UNDEFINED)
-		return Handle::UNDEFINED;
-
-	return BindLinkCast(_forward_rule_handle)->get_implicand();
+	if (_forward_rule)
+		return _forward_rule->get_implicand();
+	return Handle::UNDEFINED;
 }
 
 HandlePairSeq Rule::get_conclusions() const
@@ -256,7 +259,7 @@ HandlePairSeq Rule::get_conclusions() const
 	HandlePairSeq results;
 
 	// If the rule's handle has not been set yet
-	if (_forward_rule_handle == Handle::UNDEFINED)
+	if (!_forward_rule)
 		return HandlePairSeq();
 
 	// If no backward rule then extract the conclusions from the
@@ -288,7 +291,7 @@ void Rule::set_weight(float p)
 
 Rule Rule::gen_standardize_apart(AtomSpace* as)
 {
-	if (_forward_rule_handle == Handle::UNDEFINED)
+	if (!_forward_rule)
 		throw InvalidParamException(TRACE_INFO,
 		                            "Attempted standardized-apart on "
 		                            "invalid Rule");
@@ -308,26 +311,24 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
 	for (auto& h : varset)
 		dict[h] = Handle::UNDEFINED;
 
-	Handle st_bindlink = standardize_helper(as, _forward_rule_handle, dict);
+	Handle st_bindlink = standardize_helper(as, Handle(_forward_rule), dict);
 	st_ver.set_forward_handle(st_bindlink);
 
 	return st_ver;
 }
 
 std::vector<Rule> Rule::unify_source(const Handle& source,
-                                     const Handle& vardecl,
-                                     AtomSpace* as) const
+                                     const Handle& vardecl) const
 {
 	// TODO
 	return {};
 }
 
 std::vector<Rule> Rule::unify_target(const Handle& target,
-                                     const Handle& vardecl,
-                                     AtomSpace* as) const
+                                     const Handle& vardecl) const
 {
 	// If the rule's handle has not been set yet
-	if (_forward_rule_handle == Handle::UNDEFINED)
+	if (!_forward_rule)
 		return {};
 
 	Rule alpha_rule = rand_alpha_converted();
@@ -339,7 +340,7 @@ std::vector<Rule> Rule::unify_target(const Handle& target,
 	if (_backward_rule_handles.empty())
 	{
 		Handle alpha_vardecl = alpha_rule.get_forward_vardecl();
-		ScopeLinkPtr alpha_sc = alpha_rule._forward_rule_scope_link;
+		BindLinkPtr alpha_sc = alpha_rule._forward_rule;
 		for (const Handle& alpha_pat : alpha_rule.get_forward_conclusion_bodies())
 		{
 			UnificationSolutionSet sol =
@@ -351,10 +352,6 @@ std::vector<Rule> Rule::unify_target(const Handle& target,
 					// converted, possibly partially substituted rule
 					HandleSeq values = alpha_sc->get_variables().make_values(ts.first);
 					Handle h = alpha_sc->alpha_conversion(values, ts.second);
-
-					// Possibly add the rule in a provided atomspace
-					if (as)
-						h = as->add_atom(h);
 
 					Rule unified_rule(alpha_rule);
 					unified_rule.set_forward_handle(h);
@@ -377,7 +374,7 @@ Rule Rule::rand_alpha_converted() const
 	Rule result = *this;
 
 	// Alpha convert the forward rule
-	result.set_forward_handle(_forward_rule_scope_link->alpha_conversion());
+	result.set_forward_handle(_forward_rule->alpha_conversion());
 
 	// Alpha convert the backward rules
 	HandleSeq bhs;
@@ -478,7 +475,7 @@ std::string Rule::to_string() const
 	std::stringstream ss;
 	ss << "name: " << _name << std::endl
 	   << "forward rule:" << std::endl
-	   << oc_to_string(_forward_rule_handle)
+	   << _forward_rule->toString()
 	   << "backward rules:" << std::endl
 	   << oc_to_string(_backward_rule_handles);
 	return ss.str();

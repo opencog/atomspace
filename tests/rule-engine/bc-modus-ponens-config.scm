@@ -5,13 +5,13 @@
 ; To be loaded first
 
 ; Load the rules (use load for relative path w.r.t. to that file)
-(load "rules/bc-modus-ponens-rule.scm")
+(load "rules/crisp-modus-ponens-rule.scm")
 
 ; Associate the rules to the rule base (with weights, their semantics
 ; is currently undefined, we might settled with probabilities but it's
 ; not sure)
 (MemberLink (stv 1 1)
-   bc-modus-ponens-rule-name
+   crisp-modus-ponens-rule-name
    (ConceptNode "URE")
 )
 
