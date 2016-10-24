@@ -233,18 +233,14 @@ AtomTable::AtomTable(const AtomTable& other)
 Handle AtomTable::getHandle(Type t, const std::string& n) const
 {
     // Special types need validation
-    // Sigh. Need to copy for NumberNode to work...
-    std::string name = n;
+    AtomPtr a;
     try {
-        if (NUMBER_NODE == t) {
-            name = NumberNode::validate(name);
-        } else if (TYPE_NODE == t) {
-            TypeNode::validate(name);
-        }
+        if (NUMBER_NODE == t) a = createNumberNode(n);
+        else if (TYPE_NODE == t) a = createTypeNode(n);
+        else a = createNode(t,n);
     }
     catch (...) { return Handle::UNDEFINED; }
 
-    AtomPtr a(createNode(t, name));
     return getNodeHandle(a);
 }
 
