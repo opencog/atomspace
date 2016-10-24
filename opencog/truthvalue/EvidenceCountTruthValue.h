@@ -48,10 +48,6 @@ protected:
 	/// Total number of observations.
 	count_t _total_count;
 
-	/// If _pos_count <= _total_count then _total_count is considered
-	/// valid, otherwise it is considered invalid.
-	bool is_total_count_valid() const;
-
 public:
 	EvidenceCountTruthValue(count_t pos_count, count_t total_count = -1);
 	EvidenceCountTruthValue(const TruthValue&);
@@ -63,9 +59,15 @@ public:
 	TruthValueType getType() const;
 
 	strength_t getMean() const;
-	count_t getPositiveCount() const;
 	count_t getCount() const;
 	confidence_t getConfidence() const;
+
+	// Return the positive evidence count
+	count_t getPositiveCount() const;
+
+	/// If _pos_count <= _total_count then _total_count is considered
+	/// valid, otherwise it is considered invalid.
+	bool is_count_valid() const;
 
 	/**
 	 * Truth value merge formula, as specified by PLN.

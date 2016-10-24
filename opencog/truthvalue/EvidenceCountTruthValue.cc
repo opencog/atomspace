@@ -55,14 +55,9 @@ EvidenceCountTruthValue::EvidenceCountTruthValue(EvidenceCountTruthValue const& 
 	_total_count = source._total_count;
 }
 
-bool EvidenceCountTruthValue::is_total_count_valid() const
-{
-	return _pos_count <= _total_count;
-}
-
 strength_t EvidenceCountTruthValue::getMean() const
 {
-	if (is_total_count_valid())
+	if (is_count_valid())
 		return _pos_count / _total_count;
 	return NAN;
 }
@@ -79,9 +74,14 @@ count_t EvidenceCountTruthValue::getCount() const
 
 confidence_t EvidenceCountTruthValue::getConfidence() const
 {
-	if (is_total_count_valid())
+	if (is_count_valid())
 		return _total_count / (DEFAULT_K + _total_count);
 	return NAN;
+}
+
+bool EvidenceCountTruthValue::is_count_valid() const
+{
+	return _pos_count <= _total_count;
 }
 
 // This is the merge formula appropriate for PLN.
@@ -144,8 +144,8 @@ bool EvidenceCountTruthValue::operator==(const TruthValue& rhs) const
 #undef FLOAT_ACCEPTABLE_ERROR
 
 	return close_enough(_pos_count, ectv->_pos_count)
-		and is_total_count_valid() == ectv->is_total_count_valid()
-		and (!is_total_count_valid() or
+		and is_count_valid() == ectv->is_count_valid()
+		and (!is_count_valid() or
 		     close_enough(_total_count, ectv->_total_count));
 }
 

@@ -74,7 +74,7 @@ public:
 	void test_mean()
 	{
 		for (int i = 0; i < NUM_TVS; i++) {
-			if (ectvs[i]->getPositiveCount() <= ectvs[i]->getCount()) {
+			if (ectvs[i]->is_count_valid()) {
 				TS_ASSERT_DELTA(ectvs[i]->getMean(),
 				                pos_counts[i] / total_counts[i],
 				                FLOAT_ACCEPTABLE_ERROR);
