@@ -65,6 +65,7 @@ AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient)
     _environ = parent;
     _uuid = TLB::reserve_extent(1);
     _size = 0;
+    _num_nodes = 0;
     size_t ntypes = classserver().getNumberOfClasses();
     _size_by_type.resize(ntypes);
     _transient = transient;
@@ -151,6 +152,7 @@ void AtomTable::clear_all_atoms()
 
     // Reset the size to zero.
     _size = 0;
+    _num_nodes = 0;
 
     // Clear the by-type size cache.
     Type total_types = _size_by_type.size();
@@ -706,6 +708,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     }
     Handle h(atom->getHandle());
     _size++;
+    if (atom->isNode()) _num_nodes++;
     _size_by_type[atom->_type] ++;
     _atom_set.insert({atom->_uuid, h});
     _atom_store.insert({atom->get_hash(), h});
@@ -735,7 +738,6 @@ void AtomTable::put_atom_into_index(const AtomPtr& atom)
 
     std::unique_lock<std::recursive_mutex> lck(_mtx);
     Atom* pat = atom.operator->();
-    nodeIndex.insertAtom(pat);
     linkIndex.insertAtom(atom);
     typeIndex.insertAtom(pat);
 
@@ -761,8 +763,7 @@ size_t AtomTable::getSize() const
 
 size_t AtomTable::getNumNodes() const
 {
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
-    return nodeIndex.size();
+    return _num_nodes;
 }
 
 size_t AtomTable::getNumLinks() const
@@ -954,6 +955,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
 
     // Decrements the size of the table
     _size--;
+    if (atom->isNode()) _num_nodes--;
     _size_by_type[atom->_type] --;
     _atom_set.erase(atom->_uuid);
 
@@ -966,7 +968,6 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     }
 
     Atom* pat = atom.operator->();
-    nodeIndex.removeAtom(pat);
     linkIndex.removeAtom(atom);
     typeIndex.removeAtom(pat);
     LinkPtr lll(LinkCast(atom));
@@ -993,7 +994,6 @@ void AtomTable::typeAdded(Type t)
     //resize all Type-based indexes
     size_t new_size = classserver().getNumberOfClasses();
     _size_by_type.resize(new_size);
-    nodeIndex.resize();
     linkIndex.resize();
     typeIndex.resize();
 }

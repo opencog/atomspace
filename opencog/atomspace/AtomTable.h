@@ -109,8 +109,8 @@ private:
     //!@{
     //! Index for quick retrieval of certain kinds of atoms.
     TypeIndex typeIndex;
-    NodeIndex nodeIndex;
     LinkIndex linkIndex;
+    size_t _num_nodes;
 
     async_caller<AtomTable, AtomPtr> _index_queue;
     void put_atom_into_index(const AtomPtr&);
