@@ -286,28 +286,27 @@ Handle AtomTable::getLinkHandle(AtomPtr& a, int quotelevel) const
         resolved_seq.emplace_back(getHandle(ao, quotelevel));
     }
 
-    // Aiieee! unordered link!
-    if (classserver().isA(t, UNORDERED_LINK)) {
-        // Caution: this comparison function MUST BE EXACTLY THE SAME
-        // as the one in Link.cc, used for sorting unordered links.
-        // Changing this without changing the other one will break things!
-        std::sort(resolved_seq.begin(), resolved_seq.end(), handle_less());
-    }
+    a = createLink(t, resolved_seq);
+    ContentHash ch = a->get_hash();
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
-    // If it is NOT a ScopeLink, then it is easy to find the equivalent
-    // atom --  we pull it out of the linkIndex. But if it is a
-    // ScopeLink, and it is not quoted, then we need to search for
-    // any alpha-converted forms.
-    Handle h(linkIndex.getHandle(t, resolved_seq));
-    if (nullptr != h) return h;
+    // If we have it already, we are done.
+    auto bkt = _atom_store.find(ch);
+    for (; bkt != _atom_store.end(); bkt++) {
+        if (*((AtomPtr) bkt->second) == *a) {
+            return bkt->second;
+        }
+    }
+
+    // If it is NOT a ScopeLink, then we are done.
+    // If it is a ScopeLink, and it is not quoted, then we need to
+    // search for any alpha-converted forms.
 
     if (0 != quotelevel or not classserver().isA(t, SCOPE_LINK)) {
-        if (_environ and nullptr == h) {
+        if (_environ)
             return _environ->getHandle(a, quotelevel);
-        }
-        return h;
+        return Handle::UNDEFINED;
     }
 
     ScopeLinkPtr wanted = ScopeLinkCast(a);
