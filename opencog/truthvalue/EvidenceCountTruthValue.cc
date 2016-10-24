@@ -67,6 +67,11 @@ strength_t EvidenceCountTruthValue::getMean() const
 	return NAN;
 }
 
+count_t EvidenceCountTruthValue::getPositiveCount() const
+{
+	return _pos_count;
+}
+
 count_t EvidenceCountTruthValue::getCount() const
 {
 	return _total_count;

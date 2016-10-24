@@ -63,6 +63,7 @@ public:
 	TruthValueType getType() const;
 
 	strength_t getMean() const;
+	count_t getPositiveCount() const;
 	count_t getCount() const;
 	confidence_t getConfidence() const;
 
