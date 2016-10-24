@@ -89,7 +89,7 @@ AtomTable::~AtomTable()
 
     // No one who shall look at these atoms shall ever again
     // find a reference to this atomtable.
-    for (auto& pr : _atom_set) {
+    for (auto& pr : _atom_store) {
         Handle& atom_to_delete = pr.second;
         atom_to_delete->_atomTable = NULL;
         atom_to_delete->_uuid = Handle::INVALID_UUID;
@@ -158,7 +158,7 @@ void AtomTable::clear_all_atoms()
         _size_by_type[type] = 0;
 
     // Clear the atoms in the set.
-    for (auto& pr : _atom_set) {
+    for (auto& pr : _atom_store) {
         Handle& atom_to_clear = pr.second;
         atom_to_clear->_atomTable = NULL;
         atom_to_clear->_uuid = Handle::INVALID_UUID;
@@ -174,10 +174,11 @@ void AtomTable::clear_all_atoms()
         }
     }
 
-    // Clear the atom set. This will delete all the atoms since this will be
-    // the last shared_ptr referecence, and set the size of the set to 0.
+    // Clear the atom store. This will delete all the atoms since
+    // this will be the last shared_ptr referecence, and set the
+    // size of the set to 0.
     _atom_set.clear();
-
+    _atom_store.clear();
 }
 
 void AtomTable::clear()
