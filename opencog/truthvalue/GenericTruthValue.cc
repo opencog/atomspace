@@ -144,8 +144,6 @@ TruthValuePtr GenericTruthValue::merge(TruthValuePtr tv, const MergeCtrl& mc) co
 
 bool GenericTruthValue::operator==(const TruthValue& rhs) const
 {
-    if (NULL == &rhs) return false;
-
     const GenericTruthValue *gtv = dynamic_cast<const GenericTruthValue *>(&rhs);
     if (NULL == gtv) return false;
 
