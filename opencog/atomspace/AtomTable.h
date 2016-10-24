@@ -43,7 +43,6 @@
 
 #include <opencog/atomspace/FixedIntegerIndex.h>
 #include <opencog/atomspace/LinkIndex.h>
-#include <opencog/atomspace/NodeIndex.h>
 #include <opencog/atomspace/TypeIndex.h>
 
 class AtomTableUTest;

@@ -12,13 +12,13 @@ ADD_LIBRARY (atomspace
 	FixedIntegerIndex.cc
 	ThreadSafeFixedIntegerIndex.cc
 	HandleSeqIndex.cc
-	# HandleSetIndex.cc
 	ImportanceIndex.cc
-	# IncomingIndex.cc
 	LinkIndex.cc
-	NodeIndex.cc
 	TLB.cc
 	TypeIndex.cc
+	# HandleSetIndex.cc
+	# IncomingIndex.cc
+	# NodeIndex.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -50,8 +50,6 @@ INSTALL (FILES
 	HandleSeqIndex.h
 	ImportanceIndex.h
 	LinkIndex.h
-	NameIndex.h
-	NodeIndex.h
 	StringIndex.h
 	TypeIndex.h
 	TLB.h
