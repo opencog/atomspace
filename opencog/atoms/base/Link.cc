@@ -135,6 +135,9 @@ std::string Link::toString(const std::string& indent) const
 // Content-based comparison.
 bool Link::operator==(const Atom& other) const
 {
+    // If other points to this, then have equality.
+    if (this == &other) return true;
+
     // Rule out obvious mis-matches, based on the hash.
     if (get_hash() != other.get_hash()) return false;
     if (getType() != other.getType()) return false;
@@ -142,10 +145,11 @@ bool Link::operator==(const Atom& other) const
     Arity sz = getArity();
     if (sz != other.getArity()) return false;
 
+    // Perform a content-compare on the outgoing set.
     const HandleSeq& rhs = other.getOutgoingSet();
     for (Arity i = 0; i < sz; i++)
     {
-        if (_outgoing[i] != rhs[i])
+        if (*((AtomPtr)_outgoing[i]) != *((AtomPtr)rhs[i]))
             return false;
     }
     return true;
