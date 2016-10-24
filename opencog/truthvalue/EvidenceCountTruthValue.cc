@@ -96,23 +96,24 @@ TruthValuePtr EvidenceCountTruthValue::merge(TruthValuePtr other,
 
 	case MergeCtrl::TVFormula::PLN_BOOK_REVISION:
 	{
-		// Based on Section 5.10.2(A heuristic revision rule for STV)
+		// Based on Section 5.10.2 (A heuristic revision rule for STV)
 		// of the PLN book
-		if (other->getType() != SIMPLE_TRUTH_VALUE)
+		if (other->getType() != EVIDENCE_COUNT_TRUTH_VALUE)
 			throw RuntimeException(TRACE_INFO,
 			                       "Don't know how to merge %s into a "
 			                       "EvidenceCountTruthValue using the default style",
 			                       typeid(*other).name());
 
-		confidence_t cf = std::min(getConfidence(), 0.9999998f);
-		auto count = static_cast<count_t>(DEFAULT_K * cf / (1.0f - cf));
+		auto count = getCount();
 		auto count2 = other->getCount();
 #define CVAL  0.2f
 		auto count_new = count + count2 - std::min(count, count2) * CVAL;
-		auto mean_new = (getMean() * count + other->getMean() * count2)
+#undef CVAL
+		auto other_pos =
+			std::static_pointer_cast<const EvidenceCountTruthValue>(other)->getPositiveCount();
+		auto pos_new = (getPositiveCount() + other_pos) * count_new
 			/ (count + count2);
-		confidence_t confidence_new = static_cast<confidence_t>(count_new / (count_new + DEFAULT_K));
-		return std::make_shared<EvidenceCountTruthValue>(mean_new, confidence_new);
+		return createECTV(count_new, pos_new);
 	}
 	default:
 		throw RuntimeException(TRACE_INFO,

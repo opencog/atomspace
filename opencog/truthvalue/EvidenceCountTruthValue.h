@@ -77,14 +77,14 @@ public:
 	TruthValuePtr merge(TruthValuePtr,
 	                    const MergeCtrl& mc=MergeCtrl()) const;
 
-	static EvidenceCountTruthValuePtr createPETV(count_t pos_count,
+	static EvidenceCountTruthValuePtr createECTV(count_t pos_count,
 	                                             count_t total_count = -1.0)
 	{
 		return std::make_shared<EvidenceCountTruthValue>(pos_count, total_count);
 	}
 	static TruthValuePtr createTV(count_t pos_count, count_t total_count = -1.0)
 	{
-		return std::static_pointer_cast<TruthValue>(createPETV(pos_count,
+		return std::static_pointer_cast<TruthValue>(createECTV(pos_count,
 		                                                       total_count));
 	}
 
