@@ -205,6 +205,7 @@ public:
      * @return The handle of the desired atom if found.
      */
     Handle getHandle(Type, const std::string&) const;
+    Handle getNodeHandle(AtomPtr&) const;
     Handle getHandle(Type, const HandleSeq&) const;
     Handle getLinkHandle(AtomPtr&, int=0) const;
     Handle getHandle(AtomPtr&, int=0) const;

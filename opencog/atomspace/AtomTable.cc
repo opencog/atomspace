@@ -242,11 +242,24 @@ Handle AtomTable::getHandle(Type t, const std::string& n) const
     }
     catch (...) { return Handle::UNDEFINED; }
 
+    AtomPtr a(createNode(t, name));
+    return getNodeHandle(a);
+}
+
+Handle AtomTable::getNodeHandle(AtomPtr& a) const
+{
+    ContentHash ch = a->get_hash();
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    Atom* atom = nodeIndex.getAtom(t, name);
-    if (atom) return atom->getHandle();
-    if (_environ and NULL == atom)
-        return _environ->getHandle(t, name);
+
+    auto bkt = _atom_store.find(ch);
+    for (; bkt != _atom_store.end(); bkt++) {
+        if (*((AtomPtr) bkt->second) == *a) {
+            return bkt->second;
+        }
+    }
+
+    if (_environ)
+        return _environ->getHandle(a);
     return Handle::UNDEFINED;
 }
 
@@ -944,10 +957,10 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     _size_by_type[atom->_type] --;
     _atom_set.erase(atom->_uuid);
 
-    auto loc = _atom_store.find(atom->get_hash());
-    for (; loc != _atom_store.end(); loc++) {
-        if (handle == loc->second) {
-            _atom_store.erase(loc);
+    auto bkt = _atom_store.find(atom->get_hash());
+    for (; bkt != _atom_store.end(); bkt++) {
+        if (handle == bkt->second) {
+            _atom_store.erase(bkt);
             break;
         }
     }
