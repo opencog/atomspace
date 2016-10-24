@@ -694,6 +694,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     _size++;
     _size_by_type[atom->_type] ++;
     _atom_set.insert({atom->_uuid, h});
+    _atom_store.insert({atom->get_hash(), h});
 
     atom->keep_incoming_set();
     atom->setAtomTable(this);
@@ -941,6 +942,14 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     _size--;
     _size_by_type[atom->_type] --;
     _atom_set.erase(atom->_uuid);
+
+    auto loc = _atom_store.find(atom->get_hash());
+    for (; loc != _atom_store.end(); loc++) {
+        if (handle == loc->second) {
+            _atom_store.erase(loc);
+            break;
+        }
+    }
 
     Atom* pat = atom.operator->();
     nodeIndex.removeAtom(pat);

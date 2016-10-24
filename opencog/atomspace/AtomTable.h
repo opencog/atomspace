@@ -98,7 +98,13 @@ private:
     // increments the atom use count in a guaranteed fashion.  This is
     // the one true guaranteee that the atom will not be deleted while
     // it is in the atom table.
+    //
+    // XXX This map will be going away "real soon now", and is deprecated for
+    // new development.  Use the hash map below.
     std::unordered_map<UUID, Handle> _atom_set;
+
+    // Eventual replacement for _atom_set above.
+    std::unordered_multimap<ContentHash, Handle> _atom_store;
 
     //!@{
     //! Index for quick retrieval of certain kinds of atoms.
