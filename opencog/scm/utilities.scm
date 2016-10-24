@@ -72,6 +72,7 @@
 (define-public (ctv mean conf count) (cog-new-ctv mean conf count))
 (define-public (ptv mean conf count) (cog-new-ptv mean conf count))
 (define-public (ftv mean conf) (cog-new-ftv mean conf))
+(define-public (etv pos-count total-count) (cog-new-etv pos-count total-count))
 
 ; Fetch the mean, confidence and count of a TV.
 (define-public (tv-mean tv)
@@ -94,6 +95,14 @@
 "
 	(define cnt (assoc-ref (cog-tv->alist tv) 'count))
 	(if (eq? cnt #f) 0 cnt)
+)
+
+(define-public (tv-positive-count tv)
+"
+  Return the floating-point positive count of a EvidenceCountTruthValue.
+"
+	(define pos-cnt (assoc-ref (cog-tv->alist tv) 'positive-count))
+	(if (eq? pos-cnt #f) 0 pos-cnt)
 )
 
 ; -----------------------------------------------------------------------
@@ -1211,6 +1220,7 @@
 'stv
 'itv
 'ctv
+'etv
 'tv-mean
 'tv-conf
 'tv-count
