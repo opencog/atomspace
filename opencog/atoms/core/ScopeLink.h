@@ -73,7 +73,7 @@ protected:
 	void init_scoped_variables(const Handle& hvar);
 
 	bool skip_init(Type);
-	ContentHash term_hash(const Handle&, UnorderedHandleSet&, bool&, int) const;
+	ContentHash term_hash(const Handle&, UnorderedHandleSet&, int) const;
 	virtual ContentHash compute_hash() const;
 
 public:

@@ -121,7 +121,9 @@ bool Node::operator<(const Atom& other) const
 ContentHash Node::compute_hash() const
 {
 	ContentHash hsh = std::hash<std::string>()(getName());
-	hsh += getType() << 23;
+
+	// 1<<43 - 369 is a prime number.
+	hsh += (hsh<<5) + ((1UL<<43)-369) * getType();
 
 	// Nodes will never have the MSB set.
 	ContentHash mask = ~(((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1));

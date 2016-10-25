@@ -237,34 +237,32 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 ///
 ContentHash ScopeLink::compute_hash() const
 {
-	UnorderedHandleSet hidden;
-
 	// djb hash
-	ContentHash hsh = 5381;
-	hsh += (hsh <<5) + getType();
-	hsh += (hsh <<2) + _varlist.varseq.size();
+	ContentHash hsh = ((1UL<<49) - 339) * getType();
+	hsh += (hsh <<5) + ((1UL<<47) - 649) * _varlist.varseq.size();
+
+	// Hmm This is tricky.
+	ContentHash vth = 0;
+	for (const auto& pr : _varlist._simple_typemap)
+	{
+		for (Type t : pr.second) vth += ((1UL<<17) - 235) * t;
+	}
+
+	for (const auto& pr : _varlist._deep_typemap)
+	{
+	}
+	hsh += (hsh <<5) + ((1UL<<17) - 99) * vth;
 
 	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
 	Arity n_scoped_terms = getArity() - vardecl_offset;
 
-	// Here, and below, we have to hash variables separately from the rest.
-	// The reason for this is that UnorderedLinks sort thier contents,
-	// and the location of a variable depends on the variable name, and
-	// so alpha-equivalent links may have thier variables appearing in
-	// different locations (in unordered links). This problem is solved
-	// by summing, not hashing, a variable count: the sum is important,
-	// as it will always take on the same value, independent of the
-	// variable order. We merge in the count only at the end.
-	ContentHash vsh = 0;
+	UnorderedHandleSet hidden;
 	for (Arity i = 0; i < n_scoped_terms; ++i)
 	{
-		bool isvar = false;
 		const Handle& h(_outgoing[i + vardecl_offset]);
-		ContentHash tsh = term_hash(h, hidden, isvar, 0);
-		if (isvar) vsh  += tsh;
-		else hsh += (hsh <<5) + tsh;
+		hsh += (hsh<<5) + term_hash(h, hidden, 0);
 	}
-	hsh += (hsh <<3) + vsh;
+	hsh %= (1UL << 63) - 409;
 
 	// Links will always have the MSB set.
 	ContentHash mask = ((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1);
@@ -280,7 +278,6 @@ ContentHash ScopeLink::compute_hash() const
 /// used in VarScraper::find_vars(), with obvious alterations.
 ContentHash ScopeLink::term_hash(const Handle& h,
                                  UnorderedHandleSet& bound_vars,
-                                 bool& isvar,
                                  int quote_lvl) const
 {
 	Type t = h->getType();
@@ -291,17 +288,7 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	{
 		// Alpha-convert the variable "name" to its unique position
 		// in the sequence of bound vars.  Thus, the name is unique.
-		// This is a lot more complicated than it looks.  Multiple
-		// remarks apply:
-		// -- Unordered links will shuffle alpha-equivalent variables
-		//    into different locations, so we must return a value that
-		//    can be handled in an order-independent fashion. That is,
-		//    the number returned here must NOT be a hash.
-		// -- We accomplish order-independence by plain addition.
-		// -- We get good hashing by giving each variable a distinct
-		//    slot, by multiplying by some prime. 433 will be adequate.
-		isvar = true;
-		return 433 * (1 + _varlist.index.find(h)->second);
+		return ((1<<24)-77) * (1 + _varlist.index.find(h)->second);
 	}
 
 	// Just the plain old hash for all other nodes.
@@ -326,18 +313,20 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 		for (const Handle& v : vees.varseq) bound_vars.insert(v);
 	}
 
-	// djb hash
-	ContentHash vsh = 0;
-	ContentHash hsh = 5381;
-	hsh += (hsh <<5) + t;
+	// Prevent mixing for UnorderedLinks. The `mixer` var will be zero
+	// for UnorderedLinks. The problem is that two UnorderdLinks might
+	// be alpha-equivalent, but have thier atoms presented in a
+	// different order. Thus, the hash must be computed in a purely
+	// commutative fashion: using only addition, so as never create
+	// any entropy, until the end.
+	bool is_ordered = (false == classserver().isA(t, UNORDERED_LINK));
+	ContentHash mixer = (ContentHash) is_ordered;
+	ContentHash hsh = ((1UL<<8) - 59) * t;
 	for (const Handle& ho: h->getOutgoingSet())
 	{
-		bool isvar = false;
-		ContentHash tsh = term_hash(ho, bound_vars, isvar, quote_lvl);
-		if (isvar) vsh  += tsh;
-		else hsh += (hsh <<5) + tsh;
+		hsh += mixer * (1<<5) + term_hash(ho, bound_vars, quote_lvl);
 	}
-	hsh += (hsh <<3) + vsh;
+	hsh %= (1UL<<63) - 471;
 
 	// Restore saved vars from stack.
 	if (issco) bound_vars = bsave;

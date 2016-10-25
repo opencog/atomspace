@@ -188,10 +188,8 @@ bool Link::operator<(const Atom& other) const
 /// chains the hash values of the child atoms, as well.
 ContentHash Link::compute_hash() const
 {
-	// djb hash
-	ContentHash hsh = 5381;
-	hsh += (hsh <<5) + getType();
-
+	// 1<<44 - 377 is prime
+	ContentHash hsh = ((1UL<<44) - 377) * getType();
 	for (const Handle& h: _outgoing)
 	{
 		hsh += (hsh <<5) + h->get_hash(); // recursive!
