@@ -121,7 +121,7 @@ bool Node::operator<(const Atom& other) const
 ContentHash Node::compute_hash() const
 {
 	ContentHash hsh = std::hash<std::string>()(getName());
-	hsh = hsh ^ (getType() << 23);
+	hsh += getType() << 23;
 
 	// Nodes will never have the MSB set.
 	ContentHash mask = ~(((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1));

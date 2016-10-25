@@ -179,11 +179,14 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 	if (nullptr == scother)
 		scother = createScopeLink(*LinkCast(other));
 
-	// In case we're dealing with a class inheriting from ScopeLink,
-	// like BindLink, that has more than one scoped term, like
-	// implicand, etc, then we need to check the alpha equivalence
-	// over all terms. Before that, let's check that they have the
-	// same number of terms.
+	// If the hashes are not equal, they can't possibly be equivalent.
+	// if (get_hash() != scother->get_hash()) return false;
+
+	// Some derived classes (such as BindLink) have multiple body parts,
+	// so it is not enough to compare this->_body to other->_body.
+	// They tricky bit, below, is skipping over variable decls correctly,
+	// to find the remaining body parts. Start by counting to make sure
+	// that this and other have the same number of body parts.
 	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
 	Arity other_vardecl_offset = scother->_vardecl != Handle::UNDEFINED;
 	Arity n_scoped_terms = getArity() - vardecl_offset;
@@ -199,11 +202,12 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 	if (_varlist.is_identical(scother->_varlist))
 	{
 		// Compare them, they should match.
+		const HandleSeq& otho(other->getOutgoingSet());
 		for (Arity i = 0; i < n_scoped_terms; ++i)
 		{
-			Handle h = getOutgoingAtom(i + vardecl_offset);
-			Handle other_h = other->getOutgoingAtom(i + other_vardecl_offset);
-			if (*((AtomPtr)h) != *((AtomPtr) other_h)) return false;
+			const Handle& h(_outgoing[i + vardecl_offset]);
+			const Handle& other_h(otho[i + other_vardecl_offset]);
+			if (h->operator!=(*((AtomPtr) other_h))) return false;
 		}
 		return true;
 	}
@@ -238,8 +242,13 @@ ContentHash ScopeLink::compute_hash() const
 	// djb hash
 	ContentHash hsh = 5381;
 	hsh += (hsh <<5) + getType();
-	for (const Handle& h: _outgoing)
+
+	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
+	Arity n_scoped_terms = getArity() - vardecl_offset;
+
+	for (Arity i = 0; i < n_scoped_terms; ++i)
 	{
+		const Handle& h(_outgoing[i + vardecl_offset]);
 		hsh += (hsh <<5) + term_hash(h, hidden, 0); // recursive!
 	}
 
