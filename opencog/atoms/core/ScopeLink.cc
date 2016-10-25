@@ -231,14 +231,21 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 /* ================================================================= */
 
 /// A specialized hashing function, designed so that all alpha-
-/// convertable links get exactly the same hash.  To acheive this
+/// convertable links get exactly the same hash.  To acheive this,
 /// the actual variable names have to be excluded from the hash,
 /// and a standardized set used instead.
-///
+//
+// There's a lot of prime-numbers in the code below, but the
+// actual mixing and avalanching is extremely poor. I'm hoping
+// its good enogh for hash buckets, but have not verified.
+//
+// There's also an issue that there are multiple places where the
+// hash must not mix, and must stay abelian, in order to deal with
+// unordered links and alpha-conversion.
+//
 ContentHash ScopeLink::compute_hash() const
 {
-	// djb hash
-	ContentHash hsh = ((1UL<<49) - 339) * getType();
+	ContentHash hsh = ((1UL<<35) - 325) * getType();
 	hsh += (hsh <<5) + ((1UL<<47) - 649) * _varlist.varseq.size();
 
 	// It is not safe to mx here, since the sort order of the
@@ -247,17 +254,14 @@ ContentHash ScopeLink::compute_hash() const
 	ContentHash vth = 0;
 	for (const auto& pr : _varlist._simple_typemap)
 	{
-		for (Type t : pr.second) vth += ((1UL<<41) - 139) * t;
+		for (Type t : pr.second) vth += ((1UL<<19) - 87) * t;
 	}
 
 	for (const auto& pr : _varlist._deep_typemap)
 	{
-		for (const Handle& th : pr.second)
-		{
-			vth += th->get_hash();
-		}
+		for (const Handle& th : pr.second) vth += th->get_hash();
 	}
-	hsh += (hsh <<5) + (vth % ((1<<27) - 235));
+	hsh += (hsh <<5) + (vth % ((1UL<<27) - 235));
 
 	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
 	Arity n_scoped_terms = getArity() - vardecl_offset;
@@ -294,7 +298,7 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	{
 		// Alpha-convert the variable "name" to its unique position
 		// in the sequence of bound vars.  Thus, the name is unique.
-		return ((1<<24)-77) * (1 + _varlist.index.find(h)->second);
+		return ((1UL<<24)-77) * (1 + _varlist.index.find(h)->second);
 	}
 
 	// Just the plain old hash for all other nodes.
@@ -330,7 +334,7 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	ContentHash hsh = ((1UL<<8) - 59) * t;
 	for (const Handle& ho: h->getOutgoingSet())
 	{
-		hsh += mixer * (1<<5) + term_hash(ho, bound_vars, quote_lvl);
+		hsh += mixer * (1UL<<5) + term_hash(ho, bound_vars, quote_lvl);
 	}
 	hsh %= (1UL<<63) - 471;
 
