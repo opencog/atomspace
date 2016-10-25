@@ -11,13 +11,16 @@ ADD_LIBRARY (atomspace
 	BackingStore.cc
 	FixedIntegerIndex.cc
 	ThreadSafeFixedIntegerIndex.cc
-	HandleSeqIndex.cc
 	ImportanceIndex.cc
-	LinkIndex.cc
 	TLB.cc
 	TypeIndex.cc
+
+	# The below are no longer used, but we will
+	# keep them around for a little while longer... just in case!?
+	# HandleSeqIndex.cc
 	# HandleSetIndex.cc
 	# IncomingIndex.cc
+	# LinkIndex.cc
 	# NodeIndex.cc
 )
 
@@ -47,10 +50,7 @@ INSTALL (FILES
 	BackingStore.h
 	FixedIntegerIndex.h
 	ThreadSafeFixedIntegerIndex.h
-	HandleSeqIndex.h
 	ImportanceIndex.h
-	LinkIndex.h
-	StringIndex.h
 	TypeIndex.h
 	TLB.h
 	version.h

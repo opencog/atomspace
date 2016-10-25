@@ -41,8 +41,6 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 
-#include <opencog/atomspace/FixedIntegerIndex.h>
-#include <opencog/atomspace/LinkIndex.h>
 #include <opencog/atomspace/TypeIndex.h>
 
 class AtomTableUTest;
@@ -83,6 +81,8 @@ private:
 
     // Cached count of the number of atoms in the table.
     size_t _size;
+    size_t _num_nodes;
+    size_t _num_links;
 
     // Cached count of the number of atoms of each type.
     std::vector<size_t> _size_by_type;
@@ -108,8 +108,6 @@ private:
     //!@{
     //! Index for quick retrieval of certain kinds of atoms.
     TypeIndex typeIndex;
-    LinkIndex linkIndex;
-    size_t _num_nodes;
 
     async_caller<AtomTable, AtomPtr> _index_queue;
     void put_atom_into_index(const AtomPtr&);
