@@ -164,26 +164,24 @@ bool Link::operator<(const Atom& other) const
     // We get to here only if the hashes are equal.
     // Compare the contents directly, for this
     // (hopefully rare) case.
-    if (getType() == other.getType()) {
-        const HandleSeq& outgoing = getOutgoingSet();
-        const HandleSeq& other_outgoing = other.getOutgoingSet();
-        Arity arity = outgoing.size();
-        Arity other_arity = other_outgoing.size();
-        if (arity == other_arity) {
-            Arity i = 0;
-            while (i < arity) {
-                Handle ll = outgoing[i];
-                Handle rl = other_outgoing[i];
-                if (ll == rl)
-                    i++;
-                else
-                    return ll->operator<(*rl.atom_ptr());
-            }
-            return false;
-        } else
-            return arity < other_arity;
-    } else
+    if (getType() != other.getType())
         return getType() < other.getType();
+
+    const HandleSeq& outgoing = getOutgoingSet();
+    const HandleSeq& other_outgoing = other.getOutgoingSet();
+    Arity arity = outgoing.size();
+    Arity other_arity = other_outgoing.size();
+    if (arity != other_arity)
+        return arity < other_arity;
+
+    for (Arity i=0; i < arity; i++)
+    {
+        const Handle& ll(outgoing[i]);
+        const AtomPtr& rl(other_outgoing[i]);
+        if (ll->operator!=(*rl))
+            return ll->operator<(*rl);
+    }
+    return false;
 }
 
 /// Returns a Merkle tree hash -- that is, the hash of this link
