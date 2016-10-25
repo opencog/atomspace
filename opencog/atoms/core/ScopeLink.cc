@@ -180,7 +180,7 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 		scother = createScopeLink(*LinkCast(other));
 
 	// If the hashes are not equal, they can't possibly be equivalent.
-	// if (get_hash() != scother->get_hash()) return false;
+	if (get_hash() != scother->get_hash()) return false;
 
 	// Some derived classes (such as BindLink) have multiple body parts,
 	// so it is not enough to compare this->_body to other->_body.
@@ -242,15 +242,29 @@ ContentHash ScopeLink::compute_hash() const
 	// djb hash
 	ContentHash hsh = 5381;
 	hsh += (hsh <<5) + getType();
+	hsh += (hsh <<2) + _varlist.varseq.size();
 
 	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
 	Arity n_scoped_terms = getArity() - vardecl_offset;
 
+	// Here, and below, we have to hash variables separately from the rest.
+	// The reason for this is that UnorderedLinks sort thier contents,
+	// and the location of a variable depends on the variable name, and
+	// so alpha-equivalent links may have thier variables appearing in
+	// different locations (in unordered links). This problem is solved
+	// by summing, not hashing, a variable count: the sum is important,
+	// as it will always take on the same value, independent of the
+	// variable order. We merge in the count only at the end.
+	ContentHash vsh = 0;
 	for (Arity i = 0; i < n_scoped_terms; ++i)
 	{
+		bool isvar = false;
 		const Handle& h(_outgoing[i + vardecl_offset]);
-		hsh += (hsh <<5) + term_hash(h, hidden, 0); // recursive!
+		ContentHash tsh = term_hash(h, hidden, isvar, 0);
+		if (isvar) vsh  += tsh;
+		else hsh += (hsh <<5) + tsh;
 	}
+	hsh += (hsh <<3) + vsh;
 
 	// Links will always have the MSB set.
 	ContentHash mask = ((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1);
@@ -266,6 +280,7 @@ ContentHash ScopeLink::compute_hash() const
 /// used in VarScraper::find_vars(), with obvious alterations.
 ContentHash ScopeLink::term_hash(const Handle& h,
                                  UnorderedHandleSet& bound_vars,
+                                 bool& isvar,
                                  int quote_lvl) const
 {
 	Type t = h->getType();
@@ -276,7 +291,17 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	{
 		// Alpha-convert the variable "name" to its unique position
 		// in the sequence of bound vars.  Thus, the name is unique.
-		return 11 + _varlist.index.find(h)->second;
+		// This is a lot more complicated than it looks.  Multiple
+		// remarks apply:
+		// -- Unordered links will shuffle alpha-equivalent variables
+		//    into different locations, so we must return a value that
+		//    can be handled in an order-independent fashion. That is,
+		//    the number returned here must NOT be a hash.
+		// -- We accomplish order-independence by plain addition.
+		// -- We get good hashing by giving each variable a distinct
+		//    slot, by multiplying by some prime. 433 will be adequate.
+		isvar = true;
+		return 433 * (1 + _varlist.index.find(h)->second);
 	}
 
 	// Just the plain old hash for all other nodes.
@@ -302,12 +327,17 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	}
 
 	// djb hash
+	ContentHash vsh = 0;
 	ContentHash hsh = 5381;
 	hsh += (hsh <<5) + t;
 	for (const Handle& ho: h->getOutgoingSet())
 	{
-		hsh += (hsh <<5) + term_hash(ho, bound_vars, quote_lvl); // recursive!
+		bool isvar = false;
+		ContentHash tsh = term_hash(ho, bound_vars, isvar, quote_lvl);
+		if (isvar) vsh  += tsh;
+		else hsh += (hsh <<5) + tsh;
 	}
+	hsh += (hsh <<3) + vsh;
 
 	// Restore saved vars from stack.
 	if (issco) bound_vars = bsave;
