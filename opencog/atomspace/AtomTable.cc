@@ -246,6 +246,13 @@ Handle AtomTable::getHandle(Type t, const std::string& n) const
 
 Handle AtomTable::getNodeHandle(AtomPtr& a) const
 {
+    // The hash function will fail to find NumberNodes unless
+    // they are in the proper format.
+    if (NUMBER_NODE == a->getType()) {
+       if (nullptr == NumberNodeCast(a))
+           a = createNumberNode(a->getName());
+    }
+
     ContentHash ch = a->get_hash();
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
@@ -279,7 +286,10 @@ Handle AtomTable::getLinkHandle(AtomPtr& a, int quotelevel) const
     if (QUOTE_LINK == t) quotelevel++;
     else if (UNQUOTE_LINK == t) quotelevel--;
 
-    // Make sure all the atoms in the outgoing set are resolved :-)
+    // Make sure all the atoms in the outgoing set are in a valid
+    // format. One of the troublemakers here is the NumberNode,
+    // which will hash incorrectly, unless its in proper format.
+    // The other troublemaker is any ScopeLink.
     HandleSeq resolved_seq;
     for (const Handle& ho : seq) {
         AtomPtr ao(ho);
