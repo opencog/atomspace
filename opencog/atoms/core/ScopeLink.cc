@@ -241,17 +241,23 @@ ContentHash ScopeLink::compute_hash() const
 	ContentHash hsh = ((1UL<<49) - 339) * getType();
 	hsh += (hsh <<5) + ((1UL<<47) - 649) * _varlist.varseq.size();
 
-	// Hmm This is tricky.
+	// It is not safe to mx here, since the sort order of the
+	// typemaps will depend on the variable names. So must be
+	// abelian.
 	ContentHash vth = 0;
 	for (const auto& pr : _varlist._simple_typemap)
 	{
-		for (Type t : pr.second) vth += ((1UL<<17) - 235) * t;
+		for (Type t : pr.second) vth += ((1UL<<41) - 139) * t;
 	}
 
 	for (const auto& pr : _varlist._deep_typemap)
 	{
+		for (const Handle& th : pr.second)
+		{
+			vth += th->get_hash();
+		}
 	}
-	hsh += (hsh <<5) + ((1UL<<17) - 99) * vth;
+	hsh += (hsh <<5) + (vth % ((1<<27) - 235));
 
 	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
 	Arity n_scoped_terms = getArity() - vardecl_offset;
