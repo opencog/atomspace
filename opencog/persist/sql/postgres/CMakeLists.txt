@@ -5,6 +5,7 @@ INCLUDE_DIRECTORIES (
 )
 
 ADD_LIBRARY (persist-pgsql
+    odbcxx
     OutgoingHash
     PGAtomStorage
     PGSQLPersistSCM
