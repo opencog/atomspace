@@ -824,23 +824,23 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
 {
     AtomPtrSet result;
 
-    if (nullptr == handle or handle->isMarkedForRemoval()) return result;
+    // Make sure the atom is fully resolved before we go about
+    // deleting it.
+    AtomPtr atom(handle);
+    atom = getHandle(atom);
+
+    if (nullptr == atom or atom->isMarkedForRemoval()) return result;
 
     // Perhaps the atom is not in any table? Or at least, not in this
     // atom table? Its a user-error if the user is trying to extract
     // atoms that are not in this atomspace, but we're going to be
     // silent about this error -- it seems pointless to throw.
-    AtomTable* other = handle->getAtomTable();
+    AtomTable* other = atom->getAtomTable();
     if (other != this)
     {
         if (not in_environ(handle)) return result;
         return other->extract(handle, recursive);
     }
-
-    // Make sure the atom is fully resolved before we go about
-    // deleting it.
-    AtomPtr atom(handle);
-    atom = getHandle(atom);
 
     // Lock before fetching the incoming set. Since getting the
     // incoming set also grabs a lock, we need this mutex to be
