@@ -177,17 +177,6 @@ class ODBCAtomStorage : public AtomStorage
 
         // Fetch atoms from DB
         bool atomExists(Handle);
-        Handle getAtom(Handle& h)
-        {
-				if (nullptr == h) return h;
-            if (h->isNode()) return getNode(h);
-            if (h->isLink()) return getLink(h);
-            return Handle();
-        }
-        Handle getNode(const Handle& h)
-        {
-            return getNode(h->getType(), h->getName().c_str());
-        }
 
         // Large-scale loads and saves
         void load(AtomTable &); // Load entire contents of DB

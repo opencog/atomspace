@@ -906,7 +906,7 @@ void PGAtomStorage::flushStoreQueue()
  * thread); this routine merely queues up the atom. If the synchronous
  * flag is set, then the store is done in this thread.
  */
-void PGAtomStorage::storeAtom(AtomPtr atom, bool synchronous)
+void PGAtomStorage::storeAtom(const AtomPtr& atom, bool synchronous)
 {
     get_ids();
 
@@ -1635,7 +1635,7 @@ AtomPtr PGAtomStorage::getAtom(UUID uuid)
 /**
  * Retreive the entire incoming set of the indicated atom.
  */
-HandleSeq PGAtomStorage::getIncomingSet(Handle h)
+HandleSeq PGAtomStorage::getIncomingSet(const Handle& h)
 {
     Database database(this);
     char statement[BUFFER_SIZE];
@@ -1679,7 +1679,7 @@ HandleSeq PGAtomStorage::getIncomingSet(Handle h)
  *
  * This method does *not* register the atom with any atomtable/atomspace
  */
-NodePtr PGAtomStorage::getNode(Type t, const char * str)
+Handle PGAtomStorage::getNode(Type t, const char * str)
 {
     char statement[40*BUFFER_SIZE];
 
@@ -1692,15 +1692,15 @@ NodePtr PGAtomStorage::getNode(Type t, const char * str)
         fprintf(stderr, "Error: PGAtomStorage::getNode: buffer overflow!\n");
         statement[40*BUFFER_SIZE-1] = 0x0;
         fprintf(stderr, "\tnc=%d buffer=>>%s<<\n", nc, statement);
-        return NULL;
+        return Handle();
     }
 
     PseudoPtr p = load_pseudo_atom(statement, 0);
-    if (NULL == p) return NULL;
+    if (nullptr == p) return Handle();
 
     NodePtr node = createNode(t, str, p->tv);
     setAtomUUID(node, p->uuid);
-    return node;
+    return Handle(node);
 }
 
 bool PGAtomStorage::outgoing_matches_uuids(const HandleSeq& outgoing,
@@ -1737,8 +1737,10 @@ bool PGAtomStorage::outgoing_matches_uuids(const HandleSeq& outgoing,
  *
  * This method does *not* register the atom with any atomtable / atomspace
  */
-LinkPtr PGAtomStorage::getLink(Type type, const HandleSeq& outgoing)
+Handle PGAtomStorage::getLink(Handle& h)
 {
+    Type type = h->getType();
+    const HandleSeq& outgoing = h->getOutgoingSet();
     Database database(this);
     database.uuid = Handle::INVALID_UUID;
     char statement[BUFFER_SIZE];
@@ -1795,7 +1797,7 @@ LinkPtr PGAtomStorage::getLink(Type type, const HandleSeq& outgoing)
     // Did we actually find anything? DO NOT USE IsInvalidHandle() HERE! 
     // It won't work, duhh!
     if (database.uuid == Handle::INVALID_UUID)
-        return NULL;
+        return Handle();
 
     // If we get here, we have the real Atoms column data loaded and the
     // collisions have been handled so the outgoing set matches the
@@ -1806,7 +1808,7 @@ LinkPtr PGAtomStorage::getLink(Type type, const HandleSeq& outgoing)
     // Create the actual link.
     LinkPtr link = createLink(type, outgoing, pseudo_atom->tv);
     setAtomUUID(link, pseudo_atom->uuid);
-    return link;
+    return Handle(link);
 }
 
 /**
