@@ -177,15 +177,12 @@ private:
     //! Unsets removal flag.
     void unsetRemovalFlag();
 
-    /** Returns whether this atom is marked checked.
-     *
-     * @return is atom checked.
-     */
+    /** Returns whether this atom is marked checked. */
     bool isChecked() const;
     void setChecked();
     void setUnchecked();
 
-    /** Change the Very-Long-Term Importance */
+    /** Change the Very-Long-Term Importance. */
     void chgVLTI(int unit);
 
     // Set the UUID
@@ -226,19 +223,12 @@ public:
         throw RuntimeException(TRACE_INFO, "Not a link!");
     }
 
-    /** Returns the handle of the atom.
-     *
-     * @return The handle of the atom.
-     */
+    /** Returns the handle of the atom. */
     inline Handle getHandle() {
         return Handle(std::dynamic_pointer_cast<Atom>(shared_from_this()));
     }
 
-    /** Returns the AttentionValue object of the atom.
-     *
-     * @return The pointer to the AttentionValue object
-     * of the atom.
-     */
+    /** Returns the AttentionValue object of the atom.  */
     AttentionValuePtr getAttentionValue() const;
 
     //! Sets the AttentionValue object of the atom.
@@ -272,7 +262,7 @@ public:
         setAttentionValue(new_av);
     }
 
-    /** Change the Long-Term Importance */
+    /** Change the Long-Term Importance. */
     void setLTI(AttentionValue::lti_t ltiValue)
     {
         AttentionValuePtr old_av = getAttentionValue();
@@ -283,7 +273,7 @@ public:
         setAttentionValue(new_av);
     }
 
-    /** Change the Very-Long-Term Importance */
+    /** Change the Very-Long-Term Importance. */
     void setVLTI(AttentionValue::vlti_t vltiValue)
     {
         AttentionValuePtr old_av = getAttentionValue();
@@ -294,16 +284,13 @@ public:
         setAttentionValue(new_av);
     }
 
-    /** Increase the Very-Long-Term Importance by 1 */
+    /** Increase the Very-Long-Term Importance by 1. */
     void incVLTI() { chgVLTI(+1); }
 
-    /** Decrease the Very-Long-Term Importance by 1 */
+    /** Decrease the Very-Long-Term Importance by 1. */
     void decVLTI() { chgVLTI(-1); }
 
-    /** Returns the TruthValue object of the atom.
-     *
-     * @return The const referent to the TruthValue object of the atom.
-     */
+    /** Returns the TruthValue object of the atom. */
     TruthValuePtr getTruthValue() const;
 
     //! Sets the TruthValue object of the atom.
@@ -410,35 +397,34 @@ public:
         return result;
     }
 
-    /**
-     * Functional version of getIncomingSetByType
-     */
+    /** Functional version of getIncomingSetByType.  */
     IncomingSet getIncomingSetByType(Type type, bool subclass = false);
 
-    /** Returns a string representation of the node.
-     *
-     * @return A string representation of the node.
-     * cannot be const, because observing the TV and AV requires a lock.
-     */
+    /** Returns a string representation of the node. */
     virtual std::string toString(const std::string& indent) const = 0;
     virtual std::string toShortString(const std::string& indent) const = 0;
 
-    // Work around gdb's incapability to build a string on the fly,
+    // Work around gdb's inability to build a string on the fly,
     // see http://stackoverflow.com/questions/16734783 for more
     // explanation.
     std::string toString() const { return toString(""); }
     std::string toShortString() const { return toShortString(""); }
 
-    /** Returns whether two atoms are equal.
+    /**
+     * Perform a content-based comparison of two atoms.
+     * Returns true if the other atom is "semantically" equivalent
+     * to this one. Two atoms are semantically equivalent if they
+     * accomplish the same thing; even if they differ in details.
+     * For example, two ScopeLinks can be semantically equivalent,
+     * even though they use different variable names. As long as
+     * the different names can be alpha-converted, two different
+     * declarations are "the same", and count as the same atom.
      *
-     * @return true if the atoms are equal, false otherwise.
+     * @return true if the atoms are semantically equal, else false.
      */
     virtual bool operator==(const Atom&) const = 0;
 
-    /** Returns whether two atoms are different.
-     *
-     * @return true if the atoms are different, false otherwise.
-     */
+    /** Negation of operator==(). */
     bool operator!=(const Atom& other) const
     { return not operator==(other); }
 
@@ -448,10 +434,7 @@ public:
         return operator==(dynamic_cast<const Atom&>(other));
     }
 
-    /** Returns whether this atom is less than the given atom.
-     *
-     * @return true if this atom is less than the given one, false otherwise.
-     */
+    /** Ordering operator for Atoms. */
     virtual bool operator<(const Atom&) const = 0;
 };
 
