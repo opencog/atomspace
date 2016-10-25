@@ -45,6 +45,10 @@ struct VarScraper
 // The work-horse that does the actual heavy-lifting.
 // See the find_variables() method for the description of what
 // this does, and why.
+//
+// Note: the algo used here is nearly identical to that in
+// ScopeLink::term_hash() -- if you modify this, then modify that
+// one too.
 void VarScraper::find_vars(HandleSeq& varseq, OrderedHandleSet& varset,
                            const HandleSeq& oset)
 {
@@ -72,7 +76,7 @@ void VarScraper::find_vars(HandleSeq& varseq, OrderedHandleSet& varset,
 			_in_quote = false;
 
 		bool issco = classserver().isA(t, SCOPE_LINK);
-		OrderedHandleSet bsave = _bound_vars;
+		OrderedHandleSet bsave;
 		if (issco)
 		{
 			// Save the current set of bound variables...
@@ -83,7 +87,7 @@ void VarScraper::find_vars(HandleSeq& varseq, OrderedHandleSet& varset,
 			// do the bound-variable extraction.
 			ScopeLinkPtr sco(ScopeLinkCast(h));
 			if (nullptr == sco)
-				sco = createScopeLink(h->getOutgoingSet());
+				sco = ScopeLink::factory(t, h->getOutgoingSet());
 			const Variables& vees = sco->get_variables();
 			for (const Handle& v : vees.varseq) _bound_vars.insert(v);
 		}
