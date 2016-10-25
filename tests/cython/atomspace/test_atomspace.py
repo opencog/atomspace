@@ -3,8 +3,8 @@ from unittest import TestCase
 from opencog.atomspace import AtomSpace, TruthValue, Atom
 from opencog.atomspace import types, is_a, get_type, get_type_name
 
-from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.type_constructors import *
+from opencog.utilities import initialize_opencog, finalize_opencog
 
 from time import sleep
 

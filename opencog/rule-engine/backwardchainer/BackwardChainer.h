@@ -193,10 +193,9 @@ private:
 	// possibly be used to infer the target.
 	RuleSeq get_valid_rules(const BITNode& target);
 
-	// Build the corresponding bitnode of a handle and insert it in
-	// _handle2bitnode
-	void insert_h2b(const Handle& body, const Handle& vardecl,
-	                const BITFitness& fitness);
+	// Insert body and vardecl in _bit_as, build the bitnode
+	// associated to body and insert it in _handle2bitnode.
+	void insert_h2b(Handle body, Handle vardecl, const BITFitness& fitness);
 
 	// Initialize the _andbits container with
 	//
@@ -218,6 +217,9 @@ private:
 	Handle _init_target;
 	Handle _init_vardecl;
 	BITFitness _init_fitness;
+
+	// Temporary atomspace for storing the BIT
+	AtomSpace _bit_as;
 
 	int _iteration;
 	AtomSpace _focus_space;

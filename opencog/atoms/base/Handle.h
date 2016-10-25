@@ -40,6 +40,11 @@
 
 #include <opencog/atoms/base/types.h>
 
+// Comment this out if you want to enforce more determinism in the
+// AtomSpace. For instance atoms are indexed according to content
+// rather address, etc.
+// #define REPRODUCIBLE_ATOMSPACE
+
 /** \addtogroup grp_atomspace
  *  @{
  */
@@ -345,7 +350,6 @@ std::string oc_to_string(const HandleMapSet& hms);
 std::string oc_to_string(const HandlePairSeq& hps);
 std::string oc_to_string(Type type);
 std::string oc_to_string(const AtomPtr& aptr);
-std::string oc_to_string(const LinkPtr& lptr);
 
 } // namespace opencog
 

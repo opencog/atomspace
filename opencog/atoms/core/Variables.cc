@@ -597,7 +597,10 @@ Handle Variables::get_vardecl() const
 			HandleSeq types;
 			for (Type t : sit->second)
 				types.push_back(Handle(createTypeNode(t)));
-			vars.push_back(Handle(createLink(TYPE_CHOICE, types)));
+			Handle types_h = types.size() == 1 ? types[0]
+				: Handle(createLink(TYPE_CHOICE, types));
+			vars.push_back(Handle(createLink(TYPED_VARIABLE_LINK,
+			                                 var, types_h)));
 			continue;
 		}
 
@@ -629,6 +632,12 @@ Handle Variables::get_vardecl() const
 std::string Variables::to_string() const
 {
 	std::stringstream ss;
+
+	// Varseq
+	ss << "varseq:" << std::endl << oc_to_string(varseq);
+
+	// Simple typemap
+	ss << "_simple_typemap:" << std::endl;
 	ss << "size = " << _simple_typemap.size() << std::endl;
 	unsigned i = 0;
 	for (const auto& v : _simple_typemap)

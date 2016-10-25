@@ -7,6 +7,7 @@ ADD_LIBRARY (truthvalue
 	NullTruthValue.cc
 	ProbabilisticTruthValue.cc
 	SimpleTruthValue.cc
+	EvidenceCountTruthValue.cc
 	TruthValue.cc
 )
 
@@ -27,6 +28,7 @@ INSTALL (FILES
 	NullTruthValue.h
 	ProbabilisticTruthValue.h
 	SimpleTruthValue.h
+	EvidenceCountTruthValue.h
 	TruthValue.h
 	DESTINATION "include/opencog/truthvalue"
 )

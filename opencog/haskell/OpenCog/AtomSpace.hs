@@ -33,8 +33,17 @@ module OpenCog.AtomSpace
     , module OpenCog.AtomSpace.Sugar
     -- * Function for use in GSN
     , exportFunction
-    , UUID
+    , Handle
+    , HandleSeq
     , AtomSpaceRef
+    -- * Utility Functions for working with Atoms
+    , atomMap
+    , atomMapM
+    , atomFold
+    , atomElem
+    , nodeName
+    , atomType
+    , atomGetAllNodes
     ) where
 
 import OpenCog.AtomSpace.Api
@@ -42,7 +51,7 @@ import OpenCog.AtomSpace.Types
 import OpenCog.AtomSpace.Env         (AtomSpace(..),runOnNewAtomSpace,AtomSpaceObj,
                                       getParent,newAtomSpace,onAtomSpace,(<:),
                                       AtomSpaceRef(..))
-import OpenCog.AtomSpace.Utils       (printAtom,showAtom)
+import OpenCog.AtomSpace.Utils
 import OpenCog.AtomSpace.Sugar
 import OpenCog.AtomSpace.Query
-import OpenCog.AtomSpace.Internal    (UUID)
+import OpenCog.AtomSpace.Internal    (Handle,HandleSeq)

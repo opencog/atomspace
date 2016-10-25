@@ -3,7 +3,8 @@
  *
  * Copyright (C) 2015 OpenCog Foundation
  *
- * Author: Misgana Bayetta <misgana.bayetta@gmail.com>  2015
+ * Authors: Misgana Bayetta <misgana.bayetta@gmail.com>  2015
+ *          Nil Geisweiller 2015-2016
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -28,6 +29,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atoms/core/VariableList.h>
+#include <opencog/atoms/pattern/BindLink.h>
 
 namespace opencog {
 
@@ -124,7 +126,7 @@ public:
 	
 	// Comparison
 	bool operator==(const Rule& r) const {
-		return r._forward_rule_handle == _forward_rule_handle
+		return r._forward_rule == _forward_rule
 			and r._backward_rule_handles == _backward_rule_handles;
 	}
 	bool operator<(const Rule& r) const {
@@ -146,6 +148,26 @@ public:
 	const string& get_category() const;
 	Handle get_forward_rule() const;
 	Handle get_alias() const;
+
+	/**
+	 * Add the rule in AtomSpace as.
+	 *
+	 * Warning: it will only add the pattern and rewrite terms, not
+	 * the scope links themselves. This is a hack to work around the
+	 * alpha conversion that the atomspace may operate when inserting
+	 * scope links so that alpha-equivalent scope links are not
+	 * redundantly added to an atomspace, which turns out to be
+	 * inconvenient for combining multiple scope links, in the way
+	 * that the backward chainer does when building forward chaining
+	 * strategies.
+	 *
+	 * TODO: support backward rule form.
+	 */
+	void add(AtomSpace& as);
+
+	/**
+	 * Return the variable declaration of the forward rule form.
+	 */
 	Handle get_forward_vardecl() const;
 	HandleSeq get_backward_vardecls() const;
 	Handle get_forward_implicant() const;
@@ -197,25 +219,17 @@ public:
 	RuleSeq unify_source(const Handle& source, const Handle& vardecl) const;
 
 	/**
-	 * Used by the backward chainer to select rules. Given a target,
-	 * generate all rule variations that may infer this target. The
-	 * variables in the rules are renamed to almost certainly avoid
-	 * name collision.
+	 * Used by the backward chainer. Given a target, generate all rule
+	 * variations that may infer this target. The variables in the
+	 * rules are renamed to almost certainly avoid name collision.
 	 */
 	RuleSeq unify_target(const Handle& target, const Handle& vardecl) const;
 
 	std::string to_string() const;
 
 private:
-	// // Rule handle, a BindLink or a ListLink of forward and backward rule
-	// Maybe not useful
-	// Handle _rule_handle;
-
-	// Forward rule handle, typically a BindLink
-	//
-	// TODO: Maybe replace that by ScopeLinkPtr
-	Handle _forward_rule_handle;
-	ScopeLinkPtr _forward_rule_scope_link;
+	// Forward rule
+	BindLinkPtr _forward_rule;
 
 	// Backward rule handles, BindLinks or a GetLinks
 	//

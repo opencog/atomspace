@@ -36,3 +36,9 @@ executionOutputTest = do
         Just (Link "ListLink" [Node "ConceptNode" "test" _] _) -> return True
         Just ares -> error $ "ExecutionOutputTest failed and returned: " ++ show ares
         Nothing ->error $ "ExecutionOutputTest failed and retruned Nothing"
+
+myatom p = Link "ExecutionOutputLink"
+                [Node "GroundedSchemaNode" ("lib: " ++ p ++
+                    "/libopencoglib-0.1.0.0.so\\someFunc") noTv
+                ,Link "ListLink" [Node "ConceptNode" "test" noTv] noTv
+                ] noTv

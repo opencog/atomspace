@@ -11,6 +11,7 @@ ADD_LIBRARY(query
 	PatternSCM.cc
 	Recognizer.cc
 	Satisfier.cc
+	PatternTerm.cc
 )
 
 ADD_DEPENDENCIES(query
