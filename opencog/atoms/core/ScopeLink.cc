@@ -194,19 +194,32 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 	if (not _varlist.is_equal(scother->_varlist)) return false;
 
 	// If all of the variable names are identical in this and other,
-	// then no alpha conversion needs to be done.
-	if (_varlist.is_identical(scother->_varlist)) return true;
+	// then no alpha conversion needs to be done; we can do a direct
+	// comparison.
+	if (_varlist.is_identical(scother->_varlist))
+	{
+		// Compare them, they should match.
+		for (Arity i = 0; i < n_scoped_terms; ++i)
+		{
+			Handle h = getOutgoingAtom(i + vardecl_offset);
+			Handle other_h = other->getOutgoingAtom(i + other_vardecl_offset);
+			if (*((AtomPtr)h) != *((AtomPtr) other_h)) return false;
+		}
+		return true;
+	}
 
-	// Other terms, with our variables in place of its variables,
-	// should be same as our terms.
-	for (Arity i = 0; i < n_scoped_terms; ++i) {
+	// If we are here, we need to perform alpha conversion to test
+	// equality.  Other terms, with our variables in place of its
+	// variables, should be same as our terms.
+	for (Arity i = 0; i < n_scoped_terms; ++i)
+	{
 		Handle h = getOutgoingAtom(i + vardecl_offset);
 		Handle other_h = other->getOutgoingAtom(i + other_vardecl_offset);
 		other_h = scother->_varlist.substitute_nocheck(other_h,
 		                                         _varlist.varseq, silent);
- 		// Compare them, they should match.
+		// Compare them, they should match.
 		if (*((AtomPtr)h) != *((AtomPtr) other_h)) return false;
- 	}
+	}
 
 	return true;
 }
