@@ -283,7 +283,9 @@ Handle AtomTable::getLinkHandle(AtomPtr& a, int quotelevel) const
     HandleSeq resolved_seq;
     for (const Handle& ho : seq) {
         AtomPtr ao(ho);
-        resolved_seq.emplace_back(getHandle(ao, quotelevel));
+        Handle rh(getHandle(ao, quotelevel));
+        if (rh == nullptr) return Handle::UNDEFINED;
+        resolved_seq.emplace_back(rh);
     }
 
     a = createLink(t, resolved_seq);
@@ -346,7 +348,7 @@ Handle AtomTable::getHandle(AtomPtr& a, int quotelevel) const
         return a->getHandle();
 
     if (a->isNode())
-        return getHandle(a->getType(), a->getName());
+        return getNodeHandle(a);
     else if (a->isLink())
         return getLinkHandle(a, quotelevel);
 
@@ -812,22 +814,23 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
 {
     AtomPtrSet result;
 
-    // Make sure the atom is fully resolved before we go about
-    // deleting it.
-    AtomPtr atom(handle);
-    atom = getHandle(atom);
-    if (nullptr == atom or atom->isMarkedForRemoval()) return result;
+    if (nullptr == handle or handle->isMarkedForRemoval()) return result;
 
     // Perhaps the atom is not in any table? Or at least, not in this
     // atom table? Its a user-error if the user is trying to extract
     // atoms that are not in this atomspace, but we're going to be
     // silent about this error -- it seems pointless to throw.
-    AtomTable* other = atom->getAtomTable();
+    AtomTable* other = handle->getAtomTable();
     if (other != this)
     {
         if (not in_environ(handle)) return result;
         return other->extract(handle, recursive);
     }
+
+    // Make sure the atom is fully resolved before we go about
+    // deleting it.
+    AtomPtr atom(handle);
+    atom = getHandle(atom);
 
     // Lock before fetching the incoming set. Since getting the
     // incoming set also grabs a lock, we need this mutex to be
@@ -965,6 +968,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     Atom* pat = atom.operator->();
     linkIndex.removeAtom(atom);
     typeIndex.removeAtom(pat);
+
     LinkPtr lll(LinkCast(atom));
     if (lll) {
         for (AtomPtr a : lll->_outgoing) {
