@@ -224,6 +224,97 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 	return true;
 }
 
+/* ================================================================= */
+
+/// A specialized hashing function, designed so that all alpha-
+/// convertable links get exactly the same hash.  To acheive this
+/// the actual variable names have to be excluded from the hash,
+/// and a standardized set used instead.
+///
+ContentHash ScopeLink::compute_hash() const
+{
+	UnorderedHandleSet hidden;
+
+	// djb hash
+	ContentHash hsh = 5381;
+	hsh += (hsh <<5) + getType();
+	for (const Handle& h: _outgoing)
+	{
+		hsh += (hsh <<5) + term_hash(h, hidden, 0); // recursive!
+	}
+
+	// Links will always have the MSB set.
+	ContentHash mask = ((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1);
+	hsh |= mask;
+
+	if (Handle::INVALID_HASH == hsh) hsh -= 1;
+	_content_hash = hsh;
+	return _content_hash;
+}
+
+/// Recursive helper for computing the content hash correctly for
+/// scoped links.  The algorithm here is almost identical to that
+/// used in VarScraper::find_vars(), with obvious alterations.
+ContentHash ScopeLink::term_hash(const Handle& h,
+                                 UnorderedHandleSet& bound_vars,
+                                 int quote_lvl) const
+{
+	Type t = h->getType();
+	if ((VARIABLE_NODE == t or GLOB_NODE == t) and
+	    0 == quote_lvl and
+	    0 != _varlist.varset.count(h) and
+	    0 == bound_vars.count(h))
+	{
+		// Alpha-convert the variable "name" to its unique position
+		// in the sequence of bound vars.  Thus, the name is unique.
+		return 11 + _varlist.index.find(h)->second;
+	}
+
+	// Just the plain old hash for all other nodes.
+	if (h->isNode()) return h->get_hash();
+
+	// quotation
+	if (QUOTE_LINK == t) quote_lvl++;
+	else if (UNQUOTE_LINK == t) quote_lvl--;
+
+	// Other embedded ScopeLinks might be hiding some of our varialbes...
+	bool issco = classserver().isA(t, SCOPE_LINK);
+	UnorderedHandleSet bsave;
+	if (issco)
+	{
+		// Prevent current hidden vars from harm.
+		bsave = bound_vars;
+		// Add the Scope links vars to the hidden set.
+		ScopeLinkPtr sco(ScopeLinkCast(h));
+		if (nullptr == sco)
+			sco = ScopeLink::factory(t, h->getOutgoingSet());
+		const Variables& vees = sco->get_variables();
+		for (const Handle& v : vees.varseq) bound_vars.insert(v);
+	}
+
+	// djb hash
+	ContentHash hsh = 5381;
+	hsh += (hsh <<5) + t;
+	for (const Handle& ho: h->getOutgoingSet())
+	{
+		hsh += (hsh <<5) + term_hash(ho, bound_vars, quote_lvl); // recursive!
+	}
+
+	// Links will always have the MSB set.
+	ContentHash mask = ((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1);
+	hsh |= mask;
+
+	if (Handle::INVALID_HASH == hsh) hsh -= 1;
+	_content_hash = hsh;
+
+	// Restore save vars from stack.
+	if (issco) bound_vars = bsave;
+
+	return _content_hash;
+}
+
+/* ================================================================= */
+
 inline std::string rand_hex_str()
 {
 	int rnd_id = randGen().randint();
@@ -272,6 +363,8 @@ Handle ScopeLink::alpha_conversion(HandleSeq vars, Handle vardecl) const
 	return Handle(factory(getType(), hs));
 }
 
+/* ================================================================= */
+
 bool ScopeLink::operator==(const Atom& ac) const
 {
 	Atom& a = (Atom&) ac; // cast away constness, for smart ptr.
@@ -285,6 +378,8 @@ bool ScopeLink::operator!=(const Atom& a) const
 {
 	return not operator==(a);
 }
+
+/* ================================================================= */
 
 ScopeLinkPtr ScopeLink::factory(const Handle& h)
 {
