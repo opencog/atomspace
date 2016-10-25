@@ -224,12 +224,13 @@ void AlphaConvertUTest::test_atomspace()
 		LA(AND_LINK, NA(VARIABLE_NODE, "$Y")));
 
 	// x and y should be equal
-	// TS_ASSERT(hscox == hscoy);
+	TS_ASSERT(hscox == hscoy);
 
 	printf("Expecting same atom: x=%s vs y=%s\n",
 		hscox->toString().c_str(), hscoy->toString().c_str());
 
-#if 0
+	ScopeLinkPtr scox(ScopeLinkCast(hscox));
+
 	Handle hscoz =
 	LA(SCOPE_LINK,
 		LA(VARIABLE_LIST, NA(VARIABLE_NODE, "$Z")),
@@ -259,7 +260,6 @@ void AlphaConvertUTest::test_atomspace()
 
 	// x and t should be equal
 	TS_ASSERT(scox->is_equal(hscot));
-#endif
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
