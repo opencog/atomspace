@@ -193,6 +193,10 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 	// Variable declarations must match.
 	if (not _varlist.is_equal(scother->_varlist)) return false;
 
+	// If all of the variable names are identical in this and other,
+	// then no alpha conversion needs to be done.
+	if (_varlist.is_identical(scother->_varlist)) return true;
+
 	// Other terms, with our variables in place of its variables,
 	// should be same as our terms.
 	for (Arity i = 0; i < n_scoped_terms; ++i) {
@@ -258,7 +262,10 @@ Handle ScopeLink::alpha_conversion(HandleSeq vars, Handle vardecl) const
 bool ScopeLink::operator==(const Atom& ac) const
 {
 	Atom& a = (Atom&) ac; // cast away constness, for smart ptr.
-	return is_equal(a.getHandle());
+	try {
+		return is_equal(a.getHandle(), true);
+	} catch (const NestingException& ex) {}
+	return false;
 }
 
 bool ScopeLink::operator!=(const Atom& a) const

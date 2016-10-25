@@ -60,6 +60,10 @@ struct FreeVariables
 	typedef std::map<Handle, unsigned int> IndexMap;
 	IndexMap index;
 
+	/// Return true if the variables in this, and other, are the same
+	/// variables (have exactly the same variable names.)
+	bool is_identical(const FreeVariables& other) const;
+
 	/// Return true if variable `var` is in this variableset.
 	bool is_in_varset(const Handle& v) const {
 		return varset.end() != varset.find(v);

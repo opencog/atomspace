@@ -265,6 +265,19 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 
 /* ================================================================= */
 
+bool FreeVariables::is_identical(const FreeVariables& other) const
+{
+	Arity ary = varseq.size();
+	if (ary != other.varseq.size()) return false;
+	for (Arity i=0; i< ary; i++)
+	{
+		if (*((AtomPtr) varseq[i]) != *((AtomPtr) other.varseq[i])) return false;
+	}
+	return true;
+}
+
+/* ================================================================= */
+
 /// Return true if the other Variables struct is equal to this one,
 /// up to alpha-conversion. That is, same number of variables, same
 /// type restrictions, but possibly different variable names.
