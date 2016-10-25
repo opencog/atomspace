@@ -300,17 +300,10 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 		hsh += (hsh <<5) + term_hash(ho, bound_vars, quote_lvl); // recursive!
 	}
 
-	// Links will always have the MSB set.
-	ContentHash mask = ((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1);
-	hsh |= mask;
-
-	if (Handle::INVALID_HASH == hsh) hsh -= 1;
-	_content_hash = hsh;
-
-	// Restore save vars from stack.
+	// Restore saved vars from stack.
 	if (issco) bound_vars = bsave;
 
-	return _content_hash;
+	return hsh;
 }
 
 /* ================================================================= */
