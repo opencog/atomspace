@@ -1,8 +1,8 @@
-;; For NoExceptionUTest. An execution returns and UNDEFINED handle
-;; passed to the ImplicationLink implicant, as a result the
-;; ImplicationLink C++ factory fails. What the pattern matcher should
-;; do it ignore this failure by catching the Exception rather than
-;; crashing (passing the Exception above).
+;; For NoExceptionUTest. An execution returns no atom, which is passed
+;; to the ImplicationLink implicant, as a result the ImplicationLink
+;; C++ factory fails. I believe the pattern matcher should ignore this
+;; failure by catching the Exception rather than crashing (passing the
+;; Exception above).
 
 ;; Failing (before fixing) bind link
 (define bl
@@ -49,7 +49,7 @@
         ) ; [61][45]
       ) ; [62][45]
       (ImplicationLink
-        (ExecutionOutputLink
+        (ExecutionOutputLink ; <-- this call returns no atom
           (GroundedSchemaNode "scm: crisp-modus-ponens-formula") ; [12][1]
           (ListLink
             (VariableNode "$A-648d8b51") ; [56][45]
