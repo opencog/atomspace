@@ -32,29 +32,38 @@ using namespace opencog;
 
 class NoExceptionUTest :  public CxxTest::TestSuite
 {
-	private:
-		AtomSpace *as;
-		SchemeEval* eval;
+private:
+	AtomSpace *as;
+	SchemeEval* eval;
 
-	public:
+public:
 
-		NoExceptionUTest()
-		{
-			logger().set_level(Logger::DEBUG);
-			logger().set_print_to_stdout_flag(true);
-		}
+	NoExceptionUTest()
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
 
-		~NoExceptionUTest()
-		{
-			// Erase the log file if no assertions failed.
-			if (!CxxTest::TestTracker::tracker().suiteFailed())
-				std::remove(logger().get_filename().c_str());
-		}
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
 
-		void setUp();
-		void tearDown();
+		eval->eval("(add-to-load-path \"..\")");
+		eval->eval("(add-to-load-path \"../../..\")");
+		eval->eval("(use-modules (opencog exec) (opencog query))");
+	}
 
-		void test_exception();
+	~NoExceptionUTest()
+	{
+		delete eval;
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
+
+	void setUp();
+	void tearDown();
+
+	void test_exception();
 };
 
 /*
@@ -64,17 +73,13 @@ class NoExceptionUTest :  public CxxTest::TestSuite
 #define al as->add_link
 void NoExceptionUTest::setUp(void)
 {
-	as = new AtomSpace();
-	eval = new SchemeEval(as);
-
-	eval->eval("(add-to-load-path \"..\")");
-	eval->eval("(add-to-load-path \"../../..\")");
+	as->clear();
 	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 }
 
 void NoExceptionUTest::tearDown(void)
 {
-	delete as;
+	as->clear();
 }
 
 /*
@@ -87,15 +92,16 @@ void NoExceptionUTest::test_exception()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/query/exception.scm\")");
-
-	Handle bindlinkh = eval->apply("get-bindlink", Handle::UNDEFINED);
+	std::string result = eval->eval("(load-from-path \"tests/query/no-exception.scm\")");
+	std::cout << "result = " <<  result;
+	
+	Handle bindlinkh = eval->eval_h("bl");
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bindlinkh);
 
 	// We expect NOT to catch an error.
 	TS_ASSERT_THROWS_NOTHING(bindlink(as, bindlinkh));
-
+	
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
