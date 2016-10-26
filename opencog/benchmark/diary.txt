@@ -1270,3 +1270,28 @@ which involves both memory allocations and copies into the new memory.
 The differences between push_back_reserve, emplace_back_reserve, and
 reserve now appear to be smaller than the jitter noise of the benchmark
 timings.
+
+======================================================================
+
+25 Oct 2016
+------------
+New core baseline. Fanny.
+
+                     -A
+   test            AtomSpace
+   name            K-ops/sec
+   ----            ---------
+  noop              1.76e6
+  getType          96.4K
+  getTV             4148
+  setTV             1212
+  getIncomingSet    2191
+  getOutgoingSet   36.1K
+  addNode            202
+  addLink             35.0
+  removeAtom         276
+
+Remarks:
+ * Core Atomspace: unchanged or better, except for addLink
+   addNode 40% faster, getType is 25% faster removeAtom is almost 50% faster
+   addLink is half as fast! Why? What happened?
