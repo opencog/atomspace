@@ -61,6 +61,7 @@ protected:
     //! Should not change during atom lifespan.
     HandleSeq _outgoing;
 
+    virtual ContentHash compute_hash() const;
 public:
     /**
      * Constructor for this class.
@@ -215,28 +216,22 @@ public:
 	using Atom::toShortString;
 	
     /**
-     * Returns whether a given atom is equal to the current link.
+     * Perform a content-based compare of another atom to this one.
+     * Return true if the content is the same for both atoms.
      * @param Atom to be tested.
-     * @return true if they are equal, false otherwise.
+     * @return true if content is equal, false otherwise.
      */
     virtual bool operator==(const Atom&) const;
 
     /**
-     * Returns whether this atom is less than the given atom.
-     *
-     * WARNING: the comparison is based on content, and therefore
-     * potentially expensive.
+     * Provides an ordering operator, based on the atom hash.
+     * performs a simple numeric comparison on the hashes of
+     * this and the other atom. If the hashes are equal, then
+     * it performs a content-based compare.
      *
      * @return true if this atom is less than the given one, false otherwise.
      */
     virtual bool operator<(const Atom&) const;
-
-private:
-    /**
-     * Return true if the content outgoings are equal. It is assumed
-     * that they both have the same size.
-     */
-    static bool outgoings_equal(const HandleSeq& lhs, const HandleSeq& rhs);
 };
 
 static inline LinkPtr LinkCast(const Handle& h)

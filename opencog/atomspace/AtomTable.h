@@ -41,9 +41,6 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 
-#include <opencog/atomspace/FixedIntegerIndex.h>
-#include <opencog/atomspace/LinkIndex.h>
-#include <opencog/atomspace/NodeIndex.h>
 #include <opencog/atomspace/TypeIndex.h>
 
 class AtomTableUTest;
@@ -84,6 +81,8 @@ private:
 
     // Cached count of the number of atoms in the table.
     size_t _size;
+    size_t _num_nodes;
+    size_t _num_links;
 
     // Cached count of the number of atoms of each type.
     std::vector<size_t> _size_by_type;
@@ -98,13 +97,17 @@ private:
     // increments the atom use count in a guaranteed fashion.  This is
     // the one true guaranteee that the atom will not be deleted while
     // it is in the atom table.
+    //
+    // XXX This map will be going away "real soon now", and is deprecated for
+    // new development.  Use the hash map below.
     std::unordered_map<UUID, Handle> _atom_set;
+
+    // Eventual replacement for _atom_set above.
+    std::unordered_multimap<ContentHash, Handle> _atom_store;
 
     //!@{
     //! Index for quick retrieval of certain kinds of atoms.
     TypeIndex typeIndex;
-    NodeIndex nodeIndex;
-    LinkIndex linkIndex;
 
     async_caller<AtomTable, AtomPtr> _index_queue;
     void put_atom_into_index(const AtomPtr&);
@@ -199,6 +202,7 @@ public:
      * @return The handle of the desired atom if found.
      */
     Handle getHandle(Type, const std::string&) const;
+    Handle getNodeHandle(AtomPtr&) const;
     Handle getHandle(Type, const HandleSeq&) const;
     Handle getLinkHandle(AtomPtr&, int=0) const;
     Handle getHandle(AtomPtr&, int=0) const;

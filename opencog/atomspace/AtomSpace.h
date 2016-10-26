@@ -133,7 +133,7 @@ public:
      * then new truth value is ignored, and the existing atom is
      * returned.
      */
-    Handle add_atom(AtomPtr atom, bool async=false);
+    Handle add_atom(AtomPtr a, bool async=false);
 
     /**
      * Add a node to the Atom Table.  If the atom already exists
@@ -349,16 +349,16 @@ public:
     */
     Handle get_link(Type t, const HandleSeq& outgoing);
     inline Handle get_link(Type t, const Handle& ha) {
-	return get_link(t, HandleSeq({ha}));
+        return get_link(t, HandleSeq({ha}));
     }
     Handle get_link(Type t, const Handle& ha, const Handle& hb) {
-	return get_link(t, {ha, hb});
+        return get_link(t, {ha, hb});
     }
     Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc) {
-	return get_link(t, {ha, hb, hc});
+        return get_link(t, {ha, hb, hc});
     }
     Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc, const Handle& hd) {
-	return get_link(t, {ha, hb, hc, hd});
+        return get_link(t, {ha, hb, hc, hd});
     }
     Handle get_handle(Type t, const HandleSeq& outgoing) {
         return get_link(t, outgoing);

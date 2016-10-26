@@ -552,6 +552,7 @@ Type AtomSpaceBenchmark::randomType(Type t)
     } while (!classserver().isA(candidateType, t) or
         classserver().isA(candidateType, FREE_LINK) or
         classserver().isA(candidateType, SCOPE_LINK) or
+        classserver().isA(candidateType, UNIQUE_LINK) or
         candidateType == VARIABLE_LIST or
         candidateType == DEFINE_LINK or
         candidateType == NUMBER_NODE or

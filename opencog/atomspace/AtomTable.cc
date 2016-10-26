@@ -65,6 +65,8 @@ AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient)
     _environ = parent;
     _uuid = TLB::reserve_extent(1);
     _size = 0;
+    _num_nodes = 0;
+    _num_links = 0;
     size_t ntypes = classserver().getNumberOfClasses();
     _size_by_type.resize(ntypes);
     _transient = transient;
@@ -89,7 +91,7 @@ AtomTable::~AtomTable()
 
     // No one who shall look at these atoms shall ever again
     // find a reference to this atomtable.
-    for (auto& pr : _atom_set) {
+    for (auto& pr : _atom_store) {
         Handle& atom_to_delete = pr.second;
         atom_to_delete->_atomTable = NULL;
         atom_to_delete->_uuid = Handle::INVALID_UUID;
@@ -151,6 +153,8 @@ void AtomTable::clear_all_atoms()
 
     // Reset the size to zero.
     _size = 0;
+    _num_nodes = 0;
+    _num_links = 0;
 
     // Clear the by-type size cache.
     Type total_types = _size_by_type.size();
@@ -158,7 +162,7 @@ void AtomTable::clear_all_atoms()
         _size_by_type[type] = 0;
 
     // Clear the atoms in the set.
-    for (auto& pr : _atom_set) {
+    for (auto& pr : _atom_store) {
         Handle& atom_to_clear = pr.second;
         atom_to_clear->_atomTable = NULL;
         atom_to_clear->_uuid = Handle::INVALID_UUID;
@@ -174,10 +178,11 @@ void AtomTable::clear_all_atoms()
         }
     }
 
-    // Clear the atom set. This will delete all the atoms since this will be
-    // the last shared_ptr referecence, and set the size of the set to 0.
+    // Clear the atom store. This will delete all the atoms since
+    // this will be the last shared_ptr referecence, and set the
+    // size of the set to 0.
     _atom_set.clear();
-
+    _atom_store.clear();
 }
 
 void AtomTable::clear()
@@ -230,22 +235,38 @@ AtomTable::AtomTable(const AtomTable& other)
 Handle AtomTable::getHandle(Type t, const std::string& n) const
 {
     // Special types need validation
-    // Sigh. Need to copy for NumberNode to work...
-    std::string name = n;
+    AtomPtr a;
     try {
-        if (NUMBER_NODE == t) {
-            name = NumberNode::validate(name);
-        } else if (TYPE_NODE == t) {
-            TypeNode::validate(name);
-        }
+        if (NUMBER_NODE == t) a = createNumberNode(n);
+        else if (TYPE_NODE == t) a = createTypeNode(n);
+        else a = createNode(t,n);
     }
     catch (...) { return Handle::UNDEFINED; }
 
+    return getNodeHandle(a);
+}
+
+Handle AtomTable::getNodeHandle(AtomPtr& a) const
+{
+    // The hash function will fail to find NumberNodes unless
+    // they are in the proper format.
+    if (NUMBER_NODE == a->getType()) {
+       if (nullptr == NumberNodeCast(a))
+           a = createNumberNode(a->getName());
+    }
+
+    ContentHash ch = a->get_hash();
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    Atom* atom = nodeIndex.getAtom(t, name);
-    if (atom) return atom->getHandle();
-    if (_environ and NULL == atom)
-        return _environ->getHandle(t, name);
+
+    auto bkt = _atom_store.find(ch);
+    for (; bkt != _atom_store.end(); bkt++) {
+        if (*((AtomPtr) bkt->second) == *a) {
+            return bkt->second;
+        }
+    }
+
+    if (_environ)
+        return _environ->getHandle(a);
     return Handle::UNDEFINED;
 }
 
@@ -267,35 +288,42 @@ Handle AtomTable::getLinkHandle(AtomPtr& a, int quotelevel) const
     if (QUOTE_LINK == t) quotelevel++;
     else if (UNQUOTE_LINK == t) quotelevel--;
 
-    // Make sure all the atoms in the outgoing set are resolved :-)
+    // Make sure all the atoms in the outgoing set are in a valid
+    // format. One of the troublemakers here is the NumberNode,
+    // which will hash incorrectly, unless its in proper format.
+    // The other troublemaker is any ScopeLink.
     HandleSeq resolved_seq;
     for (const Handle& ho : seq) {
         AtomPtr ao(ho);
-        resolved_seq.emplace_back(getHandle(ao, quotelevel));
+        Handle rh(getHandle(ao, quotelevel));
+        if (rh == nullptr) return Handle::UNDEFINED;
+        resolved_seq.emplace_back(rh);
     }
 
-    // Aiieee! unordered link!
-    if (classserver().isA(t, UNORDERED_LINK)) {
-        // Caution: this comparison function MUST BE EXACTLY THE SAME
-        // as the one in Link.cc, used for sorting unordered links.
-        // Changing this without changing the other one will break things!
-        std::sort(resolved_seq.begin(), resolved_seq.end(), handle_less());
-    }
+    // Sigh. Proper database support rquires no mangling the UUID.
+    UUID save = a->_uuid;
+    a = createLink(t, resolved_seq);
+    a->_uuid = save;
+    ContentHash ch = a->get_hash();
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
-    // If it is NOT a ScopeLink, then it is easy to find the equivalent
-    // atom --  we pull it out of the linkIndex. But if it is a
-    // ScopeLink, and it is not quoted, then we need to search for
-    // any alpha-converted forms.
-    Handle h(linkIndex.getHandle(t, resolved_seq));
-    if (nullptr != h) return h;
+    // If we have it already, we are done.
+    auto bkt = _atom_store.find(ch);
+    for (; bkt != _atom_store.end(); bkt++) {
+        if (*((AtomPtr) bkt->second) == *a) {
+            return bkt->second;
+        }
+    }
+
+    // If it is NOT a ScopeLink, then we are done.
+    // If it is a ScopeLink, and it is not quoted, then we need to
+    // search for any alpha-converted forms.
 
     if (0 != quotelevel or not classserver().isA(t, SCOPE_LINK)) {
-        if (_environ and nullptr == h) {
+        if (_environ)
             return _environ->getHandle(a, quotelevel);
-        }
-        return h;
+        return Handle::UNDEFINED;
     }
 
     ScopeLinkPtr wanted = ScopeLinkCast(a);
@@ -335,7 +363,7 @@ Handle AtomTable::getHandle(AtomPtr& a, int quotelevel) const
         return a->getHandle();
 
     if (a->isNode())
-        return getHandle(a->getType(), a->getName());
+        return getNodeHandle(a);
     else if (a->isLink())
         return getLinkHandle(a, quotelevel);
 
@@ -587,6 +615,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 
     // Certain DeleteLinks can never be added!
     if (nullptr == atom) return Handle();
+    atom->_uuid = orig->_uuid;
 
     // Is the equivalent of this atom already in the table?
     // If so, then return the existing atom.  (Note that this 'existing'
@@ -692,8 +721,11 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     }
     Handle h(atom->getHandle());
     _size++;
+    if (atom->isNode()) _num_nodes++;
+    if (atom->isLink()) _num_links++;
     _size_by_type[atom->_type] ++;
     _atom_set.insert({atom->_uuid, h});
+    _atom_store.insert({atom->get_hash(), h});
 
     atom->keep_incoming_set();
     atom->setAtomTable(this);
@@ -720,8 +752,6 @@ void AtomTable::put_atom_into_index(const AtomPtr& atom)
 
     std::unique_lock<std::recursive_mutex> lck(_mtx);
     Atom* pat = atom.operator->();
-    nodeIndex.insertAtom(pat);
-    linkIndex.insertAtom(atom);
     typeIndex.insertAtom(pat);
 
     // We can now unlock, since we are done. In particular, the signals
@@ -746,14 +776,12 @@ size_t AtomTable::getSize() const
 
 size_t AtomTable::getNumNodes() const
 {
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
-    return nodeIndex.size();
+    return _num_nodes;
 }
 
 size_t AtomTable::getNumLinks() const
 {
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
-    return linkIndex.size();
+    return _num_links;
 }
 
 size_t AtomTable::getNumAtomsOfType(Type type, bool subclass) const
@@ -805,6 +833,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // deleting it.
     AtomPtr atom(handle);
     atom = getHandle(atom);
+
     if (nullptr == atom or atom->isMarkedForRemoval()) return result;
 
     // Perhaps the atom is not in any table? Or at least, not in this
@@ -939,13 +968,22 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
 
     // Decrements the size of the table
     _size--;
+    if (atom->isNode()) _num_nodes--;
+    if (atom->isLink()) _num_links--;
     _size_by_type[atom->_type] --;
     _atom_set.erase(atom->_uuid);
 
+    auto bkt = _atom_store.find(atom->get_hash());
+    for (; bkt != _atom_store.end(); bkt++) {
+        if (handle == bkt->second) {
+            _atom_store.erase(bkt);
+            break;
+        }
+    }
+
     Atom* pat = atom.operator->();
-    nodeIndex.removeAtom(pat);
-    linkIndex.removeAtom(atom);
     typeIndex.removeAtom(pat);
+
     LinkPtr lll(LinkCast(atom));
     if (lll) {
         for (AtomPtr a : lll->_outgoing) {
@@ -970,8 +1008,6 @@ void AtomTable::typeAdded(Type t)
     //resize all Type-based indexes
     size_t new_size = classserver().getNumberOfClasses();
     _size_by_type.resize(new_size);
-    nodeIndex.resize();
-    linkIndex.resize();
     typeIndex.resize();
 }
 

@@ -132,70 +132,74 @@ std::string Link::toString(const std::string& indent) const
     return answer;
 }
 
+// Content-based comparison.
 bool Link::operator==(const Atom& other) const
 {
+    // If other points to this, then have equality.
+    if (this == &other) return true;
+
+    // Rule out obvious mis-matches, based on the hash.
+    if (get_hash() != other.get_hash()) return false;
     if (getType() != other.getType()) return false;
-    const Link& olink = dynamic_cast<const Link&>(other);
 
-    Arity arity = getArity();
-    if (arity != olink.getArity()) return false;
+    Arity sz = getArity();
+    if (sz != other.getArity()) return false;
 
-    // If the type is unordered and one of the uuids are invalid we
-    // need to reorder by content to be sure that the children are
-    // aligned.
-    if (classserver().isA(getType(), UNORDERED_LINK) and
-        (_uuid != Handle::INVALID_UUID
-         or other.getUUID() != Handle::INVALID_UUID))
+    // Perform a content-compare on the outgoing set.
+    const HandleSeq& rhs = other.getOutgoingSet();
+    for (Arity i = 0; i < sz; i++)
     {
-        HandleSeq sorted_outgoing(_outgoing),
-            other_sorted_outgoing(olink._outgoing);
-        boost::sort(sorted_outgoing, content_based_handle_less());
-        boost::sort(other_sorted_outgoing, content_based_handle_less());
-        return outgoings_equal(sorted_outgoing, other_sorted_outgoing);
-    }
-
-    // No need to reorder, compare the children directly
-    return outgoings_equal(_outgoing, olink._outgoing);
-}
-
-bool Link::outgoings_equal(const HandleSeq& lhs, const HandleSeq& rhs)
-{
-    for (Arity i = 0; i < lhs.size(); i++)
-    {
-        // TODO: may be replace this by
-        //
-        //     if (lhs[i] != rhs[i])
-        //         return false;
-        //
-        // once Handle::operator== is fixed when comparing defined and
-        // undefined handles.
-
-        if (lhs[i]->operator!=(*(rhs[i].const_atom_ptr())))
+        if (*((AtomPtr)_outgoing[i]) != *((AtomPtr)rhs[i]))
             return false;
     }
     return true;
 }
 
+// Content-based ordering.
 bool Link::operator<(const Atom& other) const
 {
-    if (getType() == other.getType()) {
-        const HandleSeq& outgoing = getOutgoingSet();
-        const HandleSeq& other_outgoing = other.getOutgoingSet();
-        Arity arity = outgoing.size();
-        Arity other_arity = other_outgoing.size();
-        if (arity == other_arity) {
-            Arity i = 0;
-            while (i < arity) {
-                Handle ll = outgoing[i];
-                Handle rl = other_outgoing[i];
-                if (ll == rl)
-                    i++;
-                else
-                    return ll->operator<(*rl.atom_ptr());
-            }
-            return false;
-        } else
-            return arity < other_arity;
-    } else
+    if (get_hash() < other.get_hash()) return true;
+    if (other.get_hash() < get_hash()) return false;
+
+    // We get to here only if the hashes are equal.
+    // Compare the contents directly, for this
+    // (hopefully rare) case.
+    if (getType() != other.getType())
         return getType() < other.getType();
+
+    const HandleSeq& outgoing = getOutgoingSet();
+    const HandleSeq& other_outgoing = other.getOutgoingSet();
+    Arity arity = outgoing.size();
+    Arity other_arity = other_outgoing.size();
+    if (arity != other_arity)
+        return arity < other_arity;
+
+    for (Arity i=0; i < arity; i++)
+    {
+        const Handle& ll(outgoing[i]);
+        const AtomPtr& rl(other_outgoing[i]);
+        if (ll->operator!=(*rl))
+            return ll->operator<(*rl);
+    }
+    return false;
+}
+
+/// Returns a Merkle tree hash -- that is, the hash of this link
+/// chains the hash values of the child atoms, as well.
+ContentHash Link::compute_hash() const
+{
+	// 1<<44 - 377 is prime
+	ContentHash hsh = ((1UL<<44) - 377) * getType();
+	for (const Handle& h: _outgoing)
+	{
+		hsh += (hsh <<5) + h->get_hash(); // recursive!
+	}
+
+	// Links will always have the MSB set.
+	ContentHash mask = ((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1);
+	hsh |= mask;
+
+	if (Handle::INVALID_HASH == hsh) hsh -= 1;
+	_content_hash = hsh;
+	return _content_hash;
 }

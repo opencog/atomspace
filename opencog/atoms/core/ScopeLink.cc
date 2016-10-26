@@ -179,11 +179,14 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 	if (nullptr == scother)
 		scother = createScopeLink(*LinkCast(other));
 
-	// In case we're dealing with a class inheriting from ScopeLink,
-	// like BindLink, that has more than one scoped term, like
-	// implicand, etc, then we need to check the alpha equivalence
-	// over all terms. Before that, let's check that they have the
-	// same number of terms.
+	// If the hashes are not equal, they can't possibly be equivalent.
+	if (get_hash() != scother->get_hash()) return false;
+
+	// Some derived classes (such as BindLink) have multiple body parts,
+	// so it is not enough to compare this->_body to other->_body.
+	// They tricky bit, below, is skipping over variable decls correctly,
+	// to find the remaining body parts. Start by counting to make sure
+	// that this and other have the same number of body parts.
 	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
 	Arity other_vardecl_offset = scother->_vardecl != Handle::UNDEFINED;
 	Arity n_scoped_terms = getArity() - vardecl_offset;
@@ -193,19 +196,155 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 	// Variable declarations must match.
 	if (not _varlist.is_equal(scother->_varlist)) return false;
 
-	// Other terms, with our variables in place of its variables,
-	// should be same as our terms.
-	for (Arity i = 0; i < n_scoped_terms; ++i) {
+	// If all of the variable names are identical in this and other,
+	// then no alpha conversion needs to be done; we can do a direct
+	// comparison.
+	if (_varlist.is_identical(scother->_varlist))
+	{
+		// Compare them, they should match.
+		const HandleSeq& otho(other->getOutgoingSet());
+		for (Arity i = 0; i < n_scoped_terms; ++i)
+		{
+			const Handle& h(_outgoing[i + vardecl_offset]);
+			const Handle& other_h(otho[i + other_vardecl_offset]);
+			if (h->operator!=(*((AtomPtr) other_h))) return false;
+		}
+		return true;
+	}
+
+	// If we are here, we need to perform alpha conversion to test
+	// equality.  Other terms, with our variables in place of its
+	// variables, should be same as our terms.
+	for (Arity i = 0; i < n_scoped_terms; ++i)
+	{
 		Handle h = getOutgoingAtom(i + vardecl_offset);
 		Handle other_h = other->getOutgoingAtom(i + other_vardecl_offset);
 		other_h = scother->_varlist.substitute_nocheck(other_h,
 		                                         _varlist.varseq, silent);
- 		// Compare them, they should match.
+		// Compare them, they should match.
 		if (*((AtomPtr)h) != *((AtomPtr) other_h)) return false;
- 	}
+	}
 
 	return true;
 }
+
+/* ================================================================= */
+
+/// A specialized hashing function, designed so that all alpha-
+/// convertable links get exactly the same hash.  To acheive this,
+/// the actual variable names have to be excluded from the hash,
+/// and a standardized set used instead.
+//
+// There's a lot of prime-numbers in the code below, but the
+// actual mixing and avalanching is extremely poor. I'm hoping
+// its good enogh for hash buckets, but have not verified.
+//
+// There's also an issue that there are multiple places where the
+// hash must not mix, and must stay abelian, in order to deal with
+// unordered links and alpha-conversion.
+//
+ContentHash ScopeLink::compute_hash() const
+{
+	ContentHash hsh = ((1UL<<35) - 325) * getType();
+	hsh += (hsh <<5) + ((1UL<<47) - 649) * _varlist.varseq.size();
+
+	// It is not safe to mx here, since the sort order of the
+	// typemaps will depend on the variable names. So must be
+	// abelian.
+	ContentHash vth = 0;
+	for (const auto& pr : _varlist._simple_typemap)
+	{
+		for (Type t : pr.second) vth += ((1UL<<19) - 87) * t;
+	}
+
+	for (const auto& pr : _varlist._deep_typemap)
+	{
+		for (const Handle& th : pr.second) vth += th->get_hash();
+	}
+	hsh += (hsh <<5) + (vth % ((1UL<<27) - 235));
+
+	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
+	Arity n_scoped_terms = getArity() - vardecl_offset;
+
+	UnorderedHandleSet hidden;
+	for (Arity i = 0; i < n_scoped_terms; ++i)
+	{
+		const Handle& h(_outgoing[i + vardecl_offset]);
+		hsh += (hsh<<5) + term_hash(h, hidden, 0);
+	}
+	hsh %= (1UL << 63) - 409;
+
+	// Links will always have the MSB set.
+	ContentHash mask = ((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1);
+	hsh |= mask;
+
+	if (Handle::INVALID_HASH == hsh) hsh -= 1;
+	_content_hash = hsh;
+	return _content_hash;
+}
+
+/// Recursive helper for computing the content hash correctly for
+/// scoped links.  The algorithm here is almost identical to that
+/// used in VarScraper::find_vars(), with obvious alterations.
+ContentHash ScopeLink::term_hash(const Handle& h,
+                                 UnorderedHandleSet& bound_vars,
+                                 int quote_lvl) const
+{
+	Type t = h->getType();
+	if ((VARIABLE_NODE == t or GLOB_NODE == t) and
+	    0 == quote_lvl and
+	    0 != _varlist.varset.count(h) and
+	    0 == bound_vars.count(h))
+	{
+		// Alpha-convert the variable "name" to its unique position
+		// in the sequence of bound vars.  Thus, the name is unique.
+		return ((1UL<<24)-77) * (1 + _varlist.index.find(h)->second);
+	}
+
+	// Just the plain old hash for all other nodes.
+	if (h->isNode()) return h->get_hash();
+
+	// quotation
+	if (QUOTE_LINK == t) quote_lvl++;
+	else if (UNQUOTE_LINK == t) quote_lvl--;
+
+	// Other embedded ScopeLinks might be hiding some of our varialbes...
+	bool issco = classserver().isA(t, SCOPE_LINK);
+	UnorderedHandleSet bsave;
+	if (issco)
+	{
+		// Prevent current hidden vars from harm.
+		bsave = bound_vars;
+		// Add the Scope links vars to the hidden set.
+		ScopeLinkPtr sco(ScopeLinkCast(h));
+		if (nullptr == sco)
+			sco = ScopeLink::factory(t, h->getOutgoingSet());
+		const Variables& vees = sco->get_variables();
+		for (const Handle& v : vees.varseq) bound_vars.insert(v);
+	}
+
+	// Prevent mixing for UnorderedLinks. The `mixer` var will be zero
+	// for UnorderedLinks. The problem is that two UnorderdLinks might
+	// be alpha-equivalent, but have thier atoms presented in a
+	// different order. Thus, the hash must be computed in a purely
+	// commutative fashion: using only addition, so as never create
+	// any entropy, until the end.
+	bool is_ordered = (false == classserver().isA(t, UNORDERED_LINK));
+	ContentHash mixer = (ContentHash) is_ordered;
+	ContentHash hsh = ((1UL<<8) - 59) * t;
+	for (const Handle& ho: h->getOutgoingSet())
+	{
+		hsh += mixer * (1UL<<5) + term_hash(ho, bound_vars, quote_lvl);
+	}
+	hsh %= (1UL<<63) - 471;
+
+	// Restore saved vars from stack.
+	if (issco) bound_vars = bsave;
+
+	return hsh;
+}
+
+/* ================================================================= */
 
 inline std::string rand_hex_str()
 {
@@ -255,16 +394,23 @@ Handle ScopeLink::alpha_conversion(HandleSeq vars, Handle vardecl) const
 	return Handle(factory(getType(), hs));
 }
 
+/* ================================================================= */
+
 bool ScopeLink::operator==(const Atom& ac) const
 {
 	Atom& a = (Atom&) ac; // cast away constness, for smart ptr.
-	return is_equal(a.getHandle());
+	try {
+		return is_equal(a.getHandle(), true);
+	} catch (const NestingException& ex) {}
+	return false;
 }
 
 bool ScopeLink::operator!=(const Atom& a) const
 {
 	return not operator==(a);
 }
+
+/* ================================================================= */
 
 ScopeLinkPtr ScopeLink::factory(const Handle& h)
 {

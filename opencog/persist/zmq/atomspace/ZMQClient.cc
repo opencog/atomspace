@@ -143,7 +143,8 @@ bool ZMQClient::store_cb(AtomPtr atom)
 	return false;
 }
 
-void ZMQClient::store(const AtomTable &table) {
+void ZMQClient::store(const AtomTable &table)
+{
 	store_count = 0;
 	table.foreachHandleByType(
 	    [&](Handle h)->void { store_cb(h); }, ATOM, true);
@@ -160,7 +161,7 @@ void ZMQClient::load(AtomTable &table) {
 /**
  * Retrieve the entire incoming set of the indicated atom.
  */
-HandleSeq ZMQClient::getIncomingSet(Handle h)
+HandleSeq ZMQClient::getIncomingSet(const Handle& h)
 {
 	// TODO: implement
 	HandleSeq handles;
@@ -177,7 +178,7 @@ HandleSeq ZMQClient::getIncomingSet(Handle h)
  * However, it does register with the TLB, as the SQL uuids and the
  * TLB Handles must be kept in sync, or all hell breaks loose.
  */
-NodePtr ZMQClient::getNode(Type t, const char * str)
+Handle ZMQClient::getNode(Type t, const char * str)
 {
     ZMQRequestMessage req;
     ZMQReplyMessage rep;
@@ -192,9 +193,9 @@ NodePtr ZMQClient::getNode(Type t, const char * str)
     ZMQAtomMessage atomMsg = rep.atom(0);
     if (atomMsg.atomtype() == ZMQAtomTypeNode) {
         NodePtr nodePtr = dynamic_pointer_cast<Node>(ProtocolBufferSerializer::deserialize(atomMsg));
-        return nodePtr;
+        return nodePtr->getHandle();
     } else {
-    	return NULL;
+        return Handle();
     }
 }
 
@@ -208,8 +209,11 @@ NodePtr ZMQClient::getNode(Type t, const char * str)
  * However, it does register with the TLB, as the SQL uuids and the
  * TLB Handles must be kept in sync, or all hell breaks loose.
  */
-LinkPtr ZMQClient::getLink(Type t, const HandleSeq&oset)
+Handle ZMQClient::getLink(Handle& h)
 {
+    Type t = h->getType();
+    const HandleSeq& oset = h->getOutgoingSet();
+
     ZMQRequestMessage req;
     ZMQReplyMessage rep;
 
@@ -225,9 +229,9 @@ LinkPtr ZMQClient::getLink(Type t, const HandleSeq&oset)
     ZMQAtomMessage atomMsg = rep.atom(0);
     if (atomMsg.atomtype() == ZMQAtomTypeLink) {
         LinkPtr linkPtr = dynamic_pointer_cast<Link>(ProtocolBufferSerializer::deserialize(atomMsg));
-        return linkPtr;
+        return linkPtr->getHandle();
     } else {
-    	return NULL;
+        return Handle();
     }
 }
 

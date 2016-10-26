@@ -11,14 +11,17 @@ ADD_LIBRARY (atomspace
 	BackingStore.cc
 	FixedIntegerIndex.cc
 	ThreadSafeFixedIntegerIndex.cc
-	HandleSeqIndex.cc
-	# HandleSetIndex.cc
 	ImportanceIndex.cc
-	# IncomingIndex.cc
-	LinkIndex.cc
-	NodeIndex.cc
 	TLB.cc
 	TypeIndex.cc
+
+	# The below are no longer used, but we will
+	# keep them around for a little while longer... just in case!?
+	# HandleSeqIndex.cc
+	# HandleSetIndex.cc
+	# IncomingIndex.cc
+	# LinkIndex.cc
+	# NodeIndex.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -47,12 +50,7 @@ INSTALL (FILES
 	BackingStore.h
 	FixedIntegerIndex.h
 	ThreadSafeFixedIntegerIndex.h
-	HandleSeqIndex.h
 	ImportanceIndex.h
-	LinkIndex.h
-	NameIndex.h
-	NodeIndex.h
-	StringIndex.h
 	TypeIndex.h
 	TLB.h
 	version.h

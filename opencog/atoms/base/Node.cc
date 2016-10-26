@@ -94,14 +94,42 @@ std::string Node::toString(const std::string& indent) const
 
 bool Node::operator==(const Atom& other) const
 {
-    return (getType() == other.getType()) and
-           (getName() == dynamic_cast<const Node&>(other).getName());
+    // If other points to this, then have equality.
+    if (this == &other) return true;
+
+    // Rule out obvious mis-matches, based on the hash.
+    if (get_hash() != other.get_hash()) return false;
+
+    if (getType() != other.getType()) return false;
+    return getName() == other.getName();
 }
 
 bool Node::operator<(const Atom& other) const
 {
+    if (get_hash() < other.get_hash()) return true;
+    if (other.get_hash() < get_hash()) return false;
+
+    // We get to here only if the hashes are equal.
+    // Compare the contents directly, for this
+    // (hopefully rare) case.
     if (getType() == other.getType())
         return getName() < other.getName();
     else
         return getType() < other.getType();
+}
+
+ContentHash Node::compute_hash() const
+{
+	ContentHash hsh = std::hash<std::string>()(getName());
+
+	// 1<<43 - 369 is a prime number.
+	hsh += (hsh<<5) + ((1UL<<43)-369) * getType();
+
+	// Nodes will never have the MSB set.
+	ContentHash mask = ~(((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1));
+	hsh &= mask;
+
+	if (Handle::INVALID_HASH == hsh) hsh -= 1;
+	_content_hash = hsh;
+	return _content_hash;
 }

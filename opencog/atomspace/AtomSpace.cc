@@ -264,25 +264,30 @@ void AtomSpace::unregisterBackingStore(BackingStore *bs)
 
 // ====================================================================
 
-Handle AtomSpace::add_atom(AtomPtr atom, bool async)
+Handle AtomSpace::add_atom(AtomPtr a, bool async)
 {
-    if (nullptr == atom) return Handle();
+    if (nullptr == a) return Handle();
+
+    // XXX FIXME -- this API is foobar'ed. Just use handles,
+    // everywhere, consistently. All this casting too and fro
+    // just eats CPU cycles.
+    Handle h(a->getHandle());
 
     // Is this atom already in the atom table?
-    Handle hexist(_atom_table.getHandle(atom));
+    Handle hexist(_atom_table.getHandle(h));
     if (hexist) return hexist;
 
     // If we are here, the AtomTable does not yet know about this atom.
     // Maybe the backing store knows about this atom.
-    Type t = atom->getType();
+    Type t = h->getType();
     if (_backing_store and not _backing_store->ignoreType(t))
     {
-        AtomPtr ba;
-        if (atom->isNode()) {
-            ba = _backing_store->getNode(t, atom->getName().c_str());
-        } else {
-            if (atom->isLink())
-                 ba = _backing_store->getLink(t, atom->getOutgoingSet());
+        Handle ba;
+        if (h->isNode()) {
+            ba = _backing_store->getNode(t, h->getName().c_str());
+        }
+        else if (h->isLink()) {
+             ba = _backing_store->getLink(h);
         }
         if (ba) {
             return _atom_table.add(ba, async);
@@ -294,7 +299,7 @@ Handle AtomSpace::add_atom(AtomPtr atom, bool async)
     // addition will fail. Deal with it.
     Handle rh;
     try {
-        rh = _atom_table.add(atom, async);
+        rh = _atom_table.add(h, async);
     }
     catch (const DeleteException& ex) {
         // Atom deletion has not been implemented in the backing store
@@ -317,8 +322,8 @@ Handle AtomSpace::add_node(Type t, const string& name,
     // Maybe the backing store knows about this atom.
     if (_backing_store and not _backing_store->ignoreType(t))
     {
-        NodePtr n(_backing_store->getNode(t, name.c_str()));
-        if (n) return _atom_table.add(n, async);
+        Handle h(_backing_store->getNode(t, name.c_str()));
+        if (h) return _atom_table.add(h, async);
     }
 
     // If we are here, neither the AtomTable nor backing store know about
@@ -336,9 +341,9 @@ Handle AtomSpace::get_node(Type t, const string& name)
     // Maybe the backing store knows about this atom.
     if (_backing_store and not _backing_store->ignoreType(t))
     {
-        NodePtr n(_backing_store->getNode(t, name.c_str()));
-        if (n) {
-            return _atom_table.add(n, false);
+        Handle h(_backing_store->getNode(t, name.c_str()));
+        if (h) {
+            return _atom_table.add(h, false);
         }
     }
 
@@ -348,8 +353,10 @@ Handle AtomSpace::get_node(Type t, const string& name)
 
 Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing, bool async)
 {
+    Handle h(createLink(t, outgoing));
+
     // Is this atom already in the atom table?
-    Handle hexist = _atom_table.getHandle(t, outgoing);
+    Handle hexist = _atom_table.getHandle(h);
     if (hexist) return hexist;
 
     // If we are here, the AtomTable does not yet know about this atom.
@@ -361,11 +368,11 @@ Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing, bool async)
         if (not std::any_of(outgoing.begin(), outgoing.end(),
             [this](Handle ho) { return _backing_store->ignoreAtom(ho); }))
         {
-            LinkPtr l(_backing_store->getLink(t, outgoing));
-            if (l) {
+            Handle ba(_backing_store->getLink(h));
+            if (ba) {
                 // Put the atom into the atomtable, so it gets placed
                 // in indices, so we can find it quickly next time.
-                return _atom_table.add(l, async);
+                return _atom_table.add(ba, async);
             }
         }
     }
@@ -389,8 +396,10 @@ Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing, bool async)
 
 Handle AtomSpace::get_link(Type t, const HandleSeq& outgoing)
 {
+    Handle h(createLink(t, outgoing));
+
     // Is this atom already in the atom table?
-    Handle hexist = _atom_table.getHandle(t, outgoing);
+    Handle hexist = _atom_table.getHandle(h);
     if (hexist) return hexist;
 
     // If we are here, the AtomTable does not yet know about this atom.
@@ -402,11 +411,11 @@ Handle AtomSpace::get_link(Type t, const HandleSeq& outgoing)
         if (not std::any_of(outgoing.begin(), outgoing.end(),
             [this](Handle ho) { return _backing_store->ignoreAtom(ho); }))
         {
-            LinkPtr l(_backing_store->getLink(t, outgoing));
-            if (l) {
+            Handle hb(_backing_store->getLink(h));
+            if (hb) {
                 // Register the atom with the atomtable (so it
                 // gets placed in indices)
-                return _atom_table.add(l, false);
+                return _atom_table.add(hb, false);
             }
         }
     }
@@ -457,10 +466,9 @@ Handle AtomSpace::fetch_atom(Handle h)
         if (h->isNode()) {
             ba = _backing_store->getNode(h->getType(),
                                          h->getName().c_str());
-        } else {
-            if (h->isLink())
-                 ba = _backing_store->getLink(h->getType(),
-                                              h->getOutgoingSet());
+        }
+        else if (h->isLink()) {
+            ba = _backing_store->getLink(h);
         }
 
         // If we still don't have an atom, then the requested UUID

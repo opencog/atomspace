@@ -313,16 +313,16 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
 
 void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
 {
-    Handle hb1 = table->getHandle(n1[idx]);
+    Handle hb1 = table->getHandle((Handle) n1[idx]);
     atomCompare(a1[idx], hb1, "check_table hb1");
 
-    Handle hb2 = table->getHandle(n2[idx]);
+    Handle hb2 = table->getHandle((Handle) n2[idx]);
     atomCompare(a2[idx], hb2, "check_table hb2");
 
-    Handle hb3 = table->getHandle(n3[idx]);
+    Handle hb3 = table->getHandle((Handle) n3[idx]);
     atomCompare(a3[idx], hb3, "check_table hb3");
 
-    Handle hb4 = table->getHandle(n4[idx]);
+    Handle hb4 = table->getHandle((Handle) n4[idx]);
     atomCompare(a4[idx], hb4, "check_table hb4");
 
     HandleSeq hvec;
@@ -332,7 +332,7 @@ void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
     hvec.push_back(hb4);
 
     LinkPtr lb(createLink(SET_LINK, hvec));
-    Handle hlb = table->getHandle(lb);
+    Handle hlb = table->getHandle((Handle) lb);
     atomCompare(al[idx], hlb, "check_table hlb");
 }
 
