@@ -75,6 +75,8 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(EinsteinUTest)
 	ADD_CXXTEST(TypeChoiceUTest)
 
+    ADD_CXXTEST(NoExceptionUTest)
+
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
 		${COGUTIL_LIBRARY}
 	)
@@ -165,3 +167,5 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/unordered-exhaust.scm
     ${PROJECT_BINARY_DIR}/tests/query/unordered-exhaust.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/var-type-not.scm
     ${PROJECT_BINARY_DIR}/tests/query/var-type-not.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/no-exception.scm
+    ${PROJECT_BINARY_DIR}/tests/query/no-exception.scm)

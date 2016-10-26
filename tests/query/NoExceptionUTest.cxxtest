@@ -1,0 +1,101 @@
+/*
+ * tests/query/NoExceptionUTest.cxxtest
+ *
+ * Copyright (C) 2016 OpenCog Foundation
+ * All Rights Reserved
+ * Author: Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/Logger.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+class NoExceptionUTest :  public CxxTest::TestSuite
+{
+	private:
+		AtomSpace *as;
+		SchemeEval* eval;
+
+	public:
+
+		NoExceptionUTest()
+		{
+			logger().set_level(Logger::DEBUG);
+			logger().set_print_to_stdout_flag(true);
+		}
+
+		~NoExceptionUTest()
+		{
+			// Erase the log file if no assertions failed.
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+		}
+
+		void setUp();
+		void tearDown();
+
+		void test_exception();
+};
+
+/*
+ * This function sets up an implication link, and some data.
+ */
+#define an as->add_node
+#define al as->add_link
+void NoExceptionUTest::setUp(void)
+{
+	as = new AtomSpace();
+	eval = new SchemeEval(as);
+
+	eval->eval("(add-to-load-path \"..\")");
+	eval->eval("(add-to-load-path \"../../..\")");
+	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
+}
+
+void NoExceptionUTest::tearDown(void)
+{
+	delete as;
+}
+
+/*
+ * Test bindlink consisting of two disconnected componentns
+ */
+#define getlink(hand,pos) as->getOutgoing(hand,pos)
+#define getarity(hand) as->getArity(hand)
+
+void NoExceptionUTest::test_exception()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/exception.scm\")");
+
+	Handle bindlinkh = eval->apply("get-bindlink", Handle::UNDEFINED);
+
+	// Make sure the scheme file actually loaded!
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bindlinkh);
+
+	// We expect NOT to catch an error.
+	TS_ASSERT_THROWS_NOTHING(bindlink(as, bindlinkh));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
