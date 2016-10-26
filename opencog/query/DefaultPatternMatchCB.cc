@@ -369,7 +369,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn, const Handle& grn
 	Type ptype = ptrn->getType();
 	if (ptype == VARIABLE_NODE)
 	{
-		if (_vars->varset.end() != _vars->varset.find(grnd)) return true;
+		if (_vars->varset.end() != _vars->varset.find(grnd))
 	}
 
 	if (not ptrn->isLink()) return false;
@@ -379,7 +379,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn, const Handle& grn
 	const HandleSeq& gset = grnd->getOutgoingSet();
 	size_t pari = pset.size();
 
-	// punt, for now, on glob verification
+	// punt on glob verification
 	if (pari != gset.size()) return false;
 
 	for (size_t i=0; i<pari; i++)
@@ -455,12 +455,15 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
  * clauses are detected.  This is in keeping with the semantics
  * AbsentLink: a match is possible only if the indicated clauses
  * are absent!
+ *
+ * We do "accept" self-groundings: as these are not actually
+ * clauses that are present -- its merely the pattern finding itself.
  */
 bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
                                                   const Handle& grnd)
 {
-	if (nullptr == grnd) return true;
-	_optionals_present = true;
+	if (nullptr == grnd) return true; // XXX can this ever happen?
+	if (not is_self_ground(ptrn, grnd)) _optionals_present = true;
 	return false;
 }
 
