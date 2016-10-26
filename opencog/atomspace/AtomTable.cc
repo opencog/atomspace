@@ -300,7 +300,10 @@ Handle AtomTable::getLinkHandle(AtomPtr& a, int quotelevel) const
         resolved_seq.emplace_back(rh);
     }
 
+    // Sigh. Proper database support rquires no mangling the UUID.
+    UUID save = a->_uuid;
     a = createLink(t, resolved_seq);
+    a->_uuid = save;
     ContentHash ch = a->get_hash();
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
@@ -612,6 +615,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 
     // Certain DeleteLinks can never be added!
     if (nullptr == atom) return Handle();
+    atom->_uuid = orig->_uuid;
 
     // Is the equivalent of this atom already in the table?
     // If so, then return the existing atom.  (Note that this 'existing'

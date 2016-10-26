@@ -100,6 +100,7 @@ class PersistUTest :  public CxxTest::TestSuite
         void add_to_space(int, AtomSpace *, std::string id);
         void check_space(int, AtomSpace *, std::string dbgmsg);
         void check_empty(int, AtomSpace *);
+        void atomCompare(AtomPtr, AtomPtr, std::string);
 
         void test_atomspace(void);
 };
@@ -183,10 +184,11 @@ void PersistUTest::kill_data(void)
 
 // ============================================================
 
-static void atomCompare(AtomPtr a, AtomPtr b, std::string where)
+void PersistUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 {
     printf("Check %s expect %s\n", where.c_str(), a->toString().c_str());
     TSM_ASSERT("No atom found", b != nullptr);
+
     if (nullptr == b) return;
 
     TSM_ASSERT_EQUALS("Type mismatch", a->getType(), b->getType());
@@ -297,7 +299,7 @@ void PersistUTest::check_space(int idx, AtomSpace *space, std::string dbgmsg)
     hvec.push_back(hb4);
 
     Handle hlb = space->get_handle(hl[idx]->getType(), hvec);
-    atomCompare(hl[idx], hlb, dbgmsg + "hlinkb");
+    atomCompare(hl[idx], hlb, dbgmsg + "-hlinkb");
 
     HandleSeq hv2({hlb, hb2});
     Handle hlb2 = space->get_handle(hl2[idx]->getType(), hv2);
@@ -364,7 +366,7 @@ void PersistUTest::test_atomspace(void)
 
     /* Extract atoms from the AtomSpace. This does not delete them from
      * the SQL storage, though; to do that, they must be deleted, not
-     * extractd.
+     * extracted.
      */
     _as->barrier();
     _as->clear();
