@@ -49,8 +49,12 @@ bool Implicator::grounding(const HandleMap &var_soln,
 	if (_result_set.size() >= max_results)
 		return true;
 
-	Handle h = inst.instantiate(implicand, var_soln);
-	insert_result(h);
+	// By wrapping this in a try/catch we can ignore the cases when
+	// executions create ill-formed atoms.
+	try {
+		Handle h = inst.instantiate(implicand, var_soln);
+		insert_result(h);
+	} catch(const InvalidParamException& e) {}
 
 	// If we found as many as we want, then stop looking for more.
 	return (_result_set.size() >= max_results);
