@@ -5,7 +5,7 @@
 ;; crashing (passing the Exception above).
 
 ;; Failing (before fixing) bind link
-(define get-bindlink
+(define bl
 (BindLink
   (VariableList
     (TypedVariableLink
@@ -76,8 +76,7 @@
             (sAB (cog-stv-strength AB))
             (cAB (cog-stv-confidence AB)))
         (if (and (>= sA 0.5) (>= cA 0.5) (>= sAB 0.5) (>= cAB 0.5))
-            (cog-set-tv! B (stv 1 1))
-            (cog-undefined-handle))))
+            (cog-set-tv! B (stv 1 1)))))
 
 ;; Grounds
 (Implication (stv 1 1)
