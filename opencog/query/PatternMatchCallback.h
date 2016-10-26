@@ -258,8 +258,9 @@ class PatternMatchCallback
 		 * solution has been found; thus, in order to force it to search
 		 * for more, a return value of false is needed.)
 		 *
-		 * Note that the callback may be called many times reporting
-		 * the same result.
+		 * Note that this callback may be called multiple times, to report
+		 * the same result.  This can happen, for example, if there are
+		 * mutiple ways for the pattern to match up to the result.
 		 */
 		virtual bool grounding(const HandleMap &var_soln,
 		                       const HandleMap &term_soln) = 0;

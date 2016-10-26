@@ -901,7 +901,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
  * while traversing pattern tree. We need to keep permutation states for
  * each term pointer separately.
  *
- * Next suppose our joining atom repeates in many sub-branches of a single
+ * Next suppose our joining atom repeats in several sub-branches of a single
  * ChoiceLink. For example:
  *
  * ChoiceLink
@@ -912,10 +912,11 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
  *     VariableNode "$x"
  *     ConceptNode "this one"
  *
- * We start pattern exploration for each occurence of joining atom. This is
- * because of pruning being done in explore_choice_branches() when the first
- * match is found. It seems that it may be refactored later. For now we iterate
- * over all pattern terms associated with given atom handle.
+ * We start pattern exploration for each occurence of joining atom. This
+ * is required, due to the pruning done in explore_choice_branches()
+ * when the first match is found. XXX This may need to be refactored.
+ * For now, we iterate over all pattern terms associated with a given
+ * atom handle.
  *
  */
 bool PatternMatchEngine::explore_term_branches(const Handle& term,
