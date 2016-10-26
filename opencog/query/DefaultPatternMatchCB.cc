@@ -364,6 +364,32 @@ void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
 	}
 }
 
+bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn, const Handle& grnd)
+{
+	Type ptype = ptrn->getType();
+	if (ptype == VARIABLE_NODE)
+	{
+		if (_vars->varset.end() != _vars->varset.find(grnd)) return true;
+	}
+
+	if (not ptrn->isLink()) return false;
+	if (not grnd->isLink()) return false;
+
+	const HandleSeq& pset = ptrn->getOutgoingSet();
+	const HandleSeq& gset = grnd->getOutgoingSet();
+	size_t pari = pset.size();
+
+	// punt, for now, on glob verification
+	if (pari != gset.size()) return false;
+
+	for (size_t i=0; i<pari; i++)
+	{
+		if (is_self_ground(pset[i], gset[i])) return true;
+	}
+
+	return false;
+}
+
 /**
  * Called to accept or reject a top-level clause.
  *
@@ -382,7 +408,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 {
 	// Is the pattern same as the ground?
 	// if (ptrn == grnd) return false;
-	// Well, in a "normal" world, it intuitively makes sense to reject
+	// Well, in an ideal world, it intuitively makes sense to reject
 	// clauses that are grounded by themselves. In the real world, this
 	// runs afoul of several unusual situations. The one we care about
 	// is an evaluatable clause which contains no variables.  In this
@@ -420,7 +446,8 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 		bool relation_holds = tvp->getMean() > 0.5;
 		return relation_holds;
 	}
-	return true;
+
+	return not is_self_ground(ptrn, grnd);
 }
 
 /**

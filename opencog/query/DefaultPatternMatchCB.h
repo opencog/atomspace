@@ -101,8 +101,11 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		bool _have_variables;
 		Handle _pattern_body;
 
-		// Variables that should be ignored, bacause they are bound
-		// (scoped) in the current context.
+		bool is_self_ground(const Handle&, const Handle&);
+
+		// Variables that should be ignored, because they are bound
+		// (scoped) in the current context (i.e. appear in a ScopeLink
+		// that is being matched.)
 		const Variables* _pat_bound_vars;
 		const Variables* _gnd_bound_vars;
 
