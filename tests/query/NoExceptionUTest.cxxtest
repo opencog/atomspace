@@ -82,12 +82,7 @@ void NoExceptionUTest::tearDown(void)
 	as->clear();
 }
 
-/*
- * Test bindlink consisting of two disconnected componentns
- */
-#define getlink(hand,pos) as->getOutgoing(hand,pos)
-#define getarity(hand) as->getArity(hand)
-
+// See no-exception.scm for comments
 void NoExceptionUTest::test_exception()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
