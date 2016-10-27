@@ -364,17 +364,34 @@ void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
 	}
 }
 
-bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn, const Handle& grnd)
+bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
+                                           const Handle& grnd,
+                                           int quote_level)
 {
 	Type ptype = ptrn->getType();
-	if (ptype == VARIABLE_NODE)
+
+	// Unwrap quotations, so that they can be compared properly.
+	if (ptype == QUOTE_LINK or ptype == UNQUOTE_LINK)
 	{
-		if (_vars->varset.end() != _vars->varset.find(grnd))
+		if (ptype == QUOTE_LINK) quote_level++;
+		else quote_level--;
+
+		const Handle& qpat = ptrn->getOutgoingAtom(0);
+		return is_self_ground(qpat, grnd, quote_level);
 	}
 
+	// Only unquoted variables...
+	if (0 == quote_level and ptype == VARIABLE_NODE)
+	{
+		return (_vars->varset.end() != _vars->varset.find(grnd));
+	}
+
+	// Just assume matches were carried out corectly.
+	// Do not try to get fancy, here.
 	if (not ptrn->isLink()) return false;
 	if (not grnd->isLink()) return false;
 
+	// Recursive call.
 	const HandleSeq& pset = ptrn->getOutgoingSet();
 	const HandleSeq& gset = grnd->getOutgoingSet();
 	size_t pari = pset.size();
@@ -384,7 +401,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn, const Handle& grn
 
 	for (size_t i=0; i<pari; i++)
 	{
-		if (is_self_ground(pset[i], gset[i])) return true;
+		if (is_self_ground(pset[i], gset[i], quote_level)) return true;
 	}
 
 	return false;
