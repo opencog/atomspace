@@ -373,6 +373,11 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 	// Unwrap quotations, so that they can be compared properly.
 	if (ptype == QUOTE_LINK or ptype == UNQUOTE_LINK)
 	{
+		// Wow, if we are here, and patern==grnd, this must be
+		// a slef-grounding, as I don't beleive tehre is any other
+		// valid way to get to here.
+		if (ptrn == grnd) return true;
+
 		if (ptype == QUOTE_LINK) quote_level++;
 		else quote_level--;
 
