@@ -376,7 +376,8 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 		// Wow, if we are here, and patern==grnd, this must be
 		// a self-grounding, as I don't beleive there is any other
 		// valid way to get to here.
-		if (0 == quote_level and ptrn == grnd) return true;
+		if (ptype == QUOTE_LINK and 0 == quote_level and ptrn == grnd) return true;
+		if (ptype == UNQUOTE_LINK and 1 == quote_level and ptrn == grnd) return true;
 
 		if (ptype == QUOTE_LINK) quote_level++;
 		else quote_level--;
