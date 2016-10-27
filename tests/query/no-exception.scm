@@ -70,7 +70,6 @@
 
 ;; Schema returning undefined handle
 (define (crisp-modus-ponens-formula A AB B)
-  (cog-logger-debug "crisp-modus-ponens-formula A = ~a AB = ~a B = ~a" A AB B)
     (let (  (sA (cog-stv-strength A))
             (cA (cog-stv-confidence A))
             (sAB (cog-stv-strength AB))
