@@ -105,16 +105,15 @@ void AttentionBank::AVChanged(const Handle& h,
     updateLTIFunds(old_av->getLTI() - new_av->getLTI());
 
     // Update MinMax STI values
-    AttentionValue::sti_t maxSTISeen = getMaxSTI();
-    AttentionValue::sti_t minSTISeen = getMinSTI();
-
-   auto minbin = _importanceIndex.getMinBinContents();
-    minSTISeen = (*std::min_element(minbin.begin(),minbin.end(),[](const Handle& h1, const Handle& h2) {
+   UnorderedHandleSet minbin = _importanceIndex.getMinBinContents();
+    AttentionValue::sti_t minSTISeen = (*std::min_element(minbin.begin(),minbin.end(),
+            [](const Handle& h1, const Handle& h2) {
             return h1->getAttentionValue()->getSTI() < h2->getAttentionValue()->getSTI();
             }))->getAttentionValue()->getSTI();
 
-    auto maxbin = _importanceIndex.getMaxBinContents();
-    maxSTISeen = (*std::max_element(maxbin.begin(),maxbin.end(),[](const Handle& h1, const Handle& h2) {
+    UnorderedHandleSet maxbin = _importanceIndex.getMaxBinContents();
+    AttentionValue::sti_t maxSTISeen = (*std::max_element(maxbin.begin(),maxbin.end(),
+            [](const Handle& h1, const Handle& h2) {
             return h1->getAttentionValue()->getSTI() > h2->getAttentionValue()->getSTI();
             }))->getAttentionValue()->getSTI();
 
