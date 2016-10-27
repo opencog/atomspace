@@ -82,7 +82,8 @@ void NoExceptionUTest::tearDown(void)
 	as->clear();
 }
 
-// See no-exception.scm for comments
+// See no-exception.scm for comments. It's not clear though we want
+// that so it is disabled for now.
 void NoExceptionUTest::test_exception()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -96,7 +97,8 @@ void NoExceptionUTest::test_exception()
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bindlinkh);
 
 	// We expect NOT to catch an error.
-	TS_ASSERT_THROWS_NOTHING(bindlink(as, bindlinkh));
+	// TODO: not clear we want that so disabled for now.
+	// TS_ASSERT_THROWS_NOTHING(bindlink(as, bindlinkh));
 	
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
