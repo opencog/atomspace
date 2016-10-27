@@ -41,12 +41,13 @@ private:
 public:
 	UnquoteUTest()
 	{
-		logger().set_level(Logger::FINE);
+		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
 	}
 
 	void setUp();
-    void tearDown();
+	void tearDown();
 
 	void test_list();
 	void test_and_1();
@@ -69,9 +70,8 @@ void UnquoteUTest::setUp(void)
 
 void UnquoteUTest::tearDown(void)
 {
-    as.clear();
+	as.clear();
 }
-
 
 /*
  * Just check if quoting and then unquoting the variable in a list
@@ -120,8 +120,8 @@ void UnquoteUTest::test_and_1(void)
 	Handle result = bindlink(&as, pat);
 	Handle expected = al(SET_LINK, simple_and);
 
-	logger().fine() << "result = " << result;
-	logger().fine() << "expected = " << expected;
+	logger().debug() << "result = " << result;
+	logger().debug() << "expected = " << expected;
 
 	TS_ASSERT_EQUALS(result, expected);
 
