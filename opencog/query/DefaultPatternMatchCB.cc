@@ -392,7 +392,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 		return (_vars->varset.end() != _vars->varset.find(grnd));
 	}
 
-	// Just assume matches were carried out corectly.
+	// Just assume matches were carried out correctly.
 	// Do not try to get fancy, here.
 	if (not ptrn->isLink()) return false;
 	if (not grnd->isLink()) return false;
@@ -404,6 +404,16 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 
 	// punt on glob verification
 	if (pari != gset.size()) return false;
+
+	// Make a lame attempt to handle choice links.
+	if (CHOICE_LINK == ptype)
+	{
+		for (const Handle& ch: pset)
+		{
+			if (is_self_ground(ch, grnd, quote_level)) return true;
+		}
+		return false;
+	}
 
 	for (size_t i=0; i<pari; i++)
 	{
