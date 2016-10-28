@@ -392,6 +392,23 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 		return (_vars->varset.end() != _vars->varset.find(grnd));
 	}
 
+	// Make a lame attempt to handle choice links.
+	// This is complicated, because we are not given enough
+	// information to know which choice was matched. So we
+	// kind-of dance our way into figuring out if we have a
+	// self-grounding in the choice that we're guessing was made.
+	if (CHOICE_LINK == ptype)
+	{
+		Type gtype = grnd->getType();
+		const HandleSeq& pset = ptrn->getOutgoingSet();
+		for (const Handle& ch: pset)
+		{
+			if (ch->getType() != gtype) continue;
+			if (is_self_ground(ch, grnd, quote_level)) return true;
+			return false;
+		}
+		return true;
+	}
 	// Just assume matches were carried out correctly.
 	// Do not try to get fancy, here.
 	if (not ptrn->isLink()) return false;
@@ -404,16 +421,6 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 
 	// punt on glob verification
 	if (pari != gset.size()) return false;
-
-	// Make a lame attempt to handle choice links.
-	if (CHOICE_LINK == ptype)
-	{
-		for (const Handle& ch: pset)
-		{
-			if (is_self_ground(ch, grnd, quote_level)) return true;
-		}
-		return false;
-	}
 
 	for (size_t i=0; i<pari; i++)
 	{
