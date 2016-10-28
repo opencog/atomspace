@@ -1309,12 +1309,12 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 	if (is_optional(clause_root))
 	{
 		clause_accepted = true;
-		match = _pmc.optional_clause_match(clause_root, hg);
+		match = _pmc.optional_clause_match(clause_root, hg, var_grounding);
 		logger().fine("optional clause match callback match=%d", match);
 	}
 	else
 	{
-		match = _pmc.clause_match(clause_root, hg);
+		match = _pmc.clause_match(clause_root, hg, var_grounding);
 		logger().fine("clause match callback match=%d", match);
 	}
 	if (not match) return false;
@@ -1344,9 +1344,9 @@ bool PatternMatchEngine::do_next_clause(void)
 	bool found = false;
 	if (nullptr == curr_root)
 	{
-		logger().fine("==================== FINITO!");
-		log_solution(var_grounding, clause_grounding);
 		found = _pmc.grounding(var_grounding, clause_grounding);
+		logger().fine("==================== FINITO! accepted=%d", found);
+		log_solution(var_grounding, clause_grounding);
 	}
 	else
 	{
@@ -1390,7 +1390,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		       (is_optional(curr_root)))
 		{
 			Handle undef(Handle::UNDEFINED);
-			bool match = _pmc.optional_clause_match(joiner, undef);
+			bool match = _pmc.optional_clause_match(joiner, undef, var_grounding);
 			logger().fine("Exhausted search for optional clause, cb=%d", match);
 			if (not match) {
 				clause_stacks_pop();
@@ -1888,15 +1888,20 @@ void PatternMatchEngine::log_solution(
 	if (!logger().is_fine_enabled())
 		return;
 
-	logger().fine("Variable groundings:");
+	logger().fine() << "There are groundings for " << vars.size() << " terms";
+	int varcnt = 0;
+	for (const auto& j: vars)
+	{
+		Type vtype = j.first->getType();
+		if (VARIABLE_NODE == vtype or GLOB_NODE == vtype) varcnt++;
+	}
+	logger().fine() << "Groundings for " << varcnt << " variables:";
 
 	// Print out the bindings of solutions to variables.
-	HandleMap::const_iterator j = vars.begin();
-	HandleMap::const_iterator jend = vars.end();
-	for (; j != jend; ++j)
+	for (const auto& j: vars)
 	{
-		Handle var(j->first);
-		Handle soln(j->second);
+		Handle var(j.first);
+		Handle soln(j.second);
 
 		// Only print grounding for variables.
 		Type vtype = var->getType();
@@ -1915,7 +1920,7 @@ void PatternMatchEngine::log_solution(
 	}
 
 	// Print out the full binding to all of the clauses.
-	logger().fine("Grounded clauses:");
+	logger().fine() << "Groundings for " << clauses.size() << " clauses:";
 	HandleMap::const_iterator m;
 	int i = 0;
 	for (m = clauses.begin(); m != clauses.end(); ++m, ++i)

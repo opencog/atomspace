@@ -29,7 +29,7 @@
 	)
 )
 
-;;; A pattern with two disconnected groundings.  Two search pases must
+;;; A pattern with two disconnected groundings.  Two search passes must
 ;;; be made.  Should find two of the three trees given above.
 (define (top-disco)
 	(BindLink

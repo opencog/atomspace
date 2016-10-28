@@ -68,14 +68,21 @@ class PMCGroundings : public PatternMatchCallback
 			return _cb.fuzzy_match(h1, h2);
 		}
 		bool evaluate_sentence(const Handle& link_h,
-		                       const HandleMap &gnds) {
+		                       const HandleMap &gnds)
+		{
 			return _cb.evaluate_sentence(link_h,gnds);
 		}
-		bool clause_match(const Handle& pattrn_link_h, const Handle& grnd_link_h) {
-			return _cb.clause_match(pattrn_link_h, grnd_link_h);
+		bool clause_match(const Handle& pattrn_link_h,
+		                  const Handle& grnd_link_h,
+		                  const HandleMap& term_gnds)
+		{
+			return _cb.clause_match(pattrn_link_h, grnd_link_h, term_gnds);
 		}
-		bool optional_clause_match(const Handle& pattrn, const Handle& grnd) {
-			return _cb.optional_clause_match(pattrn, grnd);
+		bool optional_clause_match(const Handle& pattrn,
+		                           const Handle& grnd,
+		                           const HandleMap& term_gnds)
+		{
+			return _cb.optional_clause_match(pattrn, grnd, term_gnds);
 		}
 		IncomingSet get_incoming_set(const Handle& h) {
 			return _cb.get_incoming_set(h);

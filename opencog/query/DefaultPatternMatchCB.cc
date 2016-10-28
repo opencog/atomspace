@@ -366,6 +366,7 @@ void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
 
 bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
                                            const Handle& grnd,
+                                           const HandleMap& term_gnds,
                                            int quote_level)
 {
 	Type ptype = ptrn->getType();
@@ -383,7 +384,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 		else quote_level--;
 
 		const Handle& qpat = ptrn->getOutgoingAtom(0);
-		return is_self_ground(qpat, grnd, quote_level);
+		return is_self_ground(qpat, grnd, term_gnds, quote_level);
 	}
 
 	// Only unquoted variables...
@@ -404,7 +405,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 		for (const Handle& ch: pset)
 		{
 			if (ch->getType() != gtype) continue;
-			if (is_self_ground(ch, grnd, quote_level)) return true;
+			if (is_self_ground(ch, grnd, term_gnds, quote_level)) return true;
 			return false;
 		}
 		return true;
@@ -424,7 +425,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 
 	for (size_t i=0; i<pari; i++)
 	{
-		if (is_self_ground(pset[i], gset[i], quote_level)) return true;
+		if (is_self_ground(pset[i], gset[i], term_gnds, quote_level)) return true;
 	}
 
 	return false;
@@ -444,7 +445,8 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
  * the "normal" path to evaluate_sentence(). So may as well do it here.
  */
 bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
-                                         const Handle& grnd)
+                                         const Handle& grnd,
+                                         const HandleMap& term_gnds)
 {
 	// Is the pattern same as the ground?
 	// if (ptrn == grnd) return false;
@@ -487,7 +489,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 		return relation_holds;
 	}
 
-	return not is_self_ground(ptrn, grnd);
+	return not is_self_ground(ptrn, grnd, term_gnds);
 }
 
 /**
@@ -500,10 +502,11 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
  * clauses that are present -- its merely the pattern finding itself.
  */
 bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
-                                                  const Handle& grnd)
+                                                  const Handle& grnd,
+                                                  const HandleMap& term_gnds)
 {
 	if (nullptr == grnd) return true; // XXX can this ever happen?
-	if (not is_self_ground(ptrn, grnd)) _optionals_present = true;
+	if (not is_self_ground(ptrn, grnd, term_gnds)) _optionals_present = true;
 	return false;
 }
 
