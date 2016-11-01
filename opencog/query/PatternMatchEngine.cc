@@ -91,24 +91,15 @@ static inline void logmsg(const char * msg, const Handle& h)
 
 /// Compare a VariableNode in the pattern to the proposed grounding.
 ///
-/// Handle hp is from the pattern clause.
-//
-// XXX the self-grounding code should maybe move to the callback ??
+/// Handle hp is from the pattern clause.  By default, the code here
+/// allows a variable to be grounded by itself -- this avoids a lot
+/// of second-guessing involving alpha-converted variable names,
+/// which get handled at a higher layer, which has access to the
+/// entire clause. (The clause_match() callback, to be specific).
+///
 bool PatternMatchEngine::variable_compare(const Handle& hp,
                                           const Handle& hg)
 {
-#ifdef NO_SELF_GROUNDING
-	// But... if handle hg happens to also be a bound var,
-	// then its a mismatch.
-	// XXX However, this reasoning is wrong: hg may just happen to have
-	// the same name as a variable bound in this pattern, but may,
-	// in fact, also be bound by a ScopeLink inside the pattern. In
-	// that case, instead of rejecting the match as below, it should be
-	// passed on to the scope_match() callback. In general, this whole
-	// self-grounding code needs to be re-thought, reworked.
-	if (_varlist->varset.end() != _varlist->varset.find(hg)) return false;
-#endif
-
 	// If we already have a grounding for this variable, the new
 	// proposed grounding must match the existing one. Such multiple
 	// groundings can occur when traversing graphs with loops in them.
@@ -126,28 +117,6 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 	           "ERROR: expected variable to be a node, got this: %s\n",
 	           hp->toShortString().c_str());
 
-#ifdef NO_SELF_GROUNDING
-	// Disallow matches where the grounding contains (an unquoted)
-	// variable that is bound by this template.
-	if (hg->isLink() and any_unquoted_unscoped_in_tree(hg, _varlist->varset))
-	{
-		if (not logger().is_fine_enabled()) return false;
-
-		for (Handle vh: _varlist->varset)
-		{
-			// OK, which variable is it?
-			if (is_unquoted_in_tree(hg, vh) and is_unscoped_in_tree(hg, vh))
-			{
-				logmsg("miscompare; found bound variable in grounding tree:",
-				       vh);
-				logmsg("matching  variable  is:", hp);
-				logmsg("proposed grounding is:", hg);
-				return false;
-			}
-		}
-	}
-#endif
-
 	// Else, we have a candidate grounding for this variable.
 	// The variable_match() callback may implement some tighter
 	// variable check, e.g. to make sure that the grounding is
@@ -159,7 +128,7 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 	LAZY_LOG_FINE << "Found grounding of variable:";
 	logmsg("$$ variable:", hp);
 	logmsg("$$ ground term:", hg);
-	if (hp != hg and hp->getType() != GLOB_NODE) var_grounding[hp] = hg;
+	if (hp->getType() != GLOB_NODE) var_grounding[hp] = hg;
 	return true;
 }
 
@@ -174,15 +143,9 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 bool PatternMatchEngine::self_compare(const PatternTermPtr& ptm)
 {
 	const Handle& hp = ptm->getHandle();
-
 	if (not ptm->isQuoted()) var_grounding[hp] = hp;
+
 	logmsg("Compare atom to itself:", hp);
-
-#ifdef NO_SELF_GROUNDING
-
-	return !ptm->hasAnyBoundVariable();
-
-#endif
 	return true;
 }
 
