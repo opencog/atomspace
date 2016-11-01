@@ -388,27 +388,28 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 	}
 
 	// Only unquoted variables...
-	if (0 == quote_level and ptype == VARIABLE_NODE)
+	if (0 == quote_level and
+	    ((ptype == VARIABLE_NODE ) or (ptype == GLOB_NODE)))
 	{
 		return (_vars->varset.end() != _vars->varset.find(grnd));
 	}
 
-	// Make a lame attempt to handle choice links.
-	// This is complicated, because we are not given enough
-	// information to know which choice was matched. So we
-	// kind-of dance our way into figuring out if we have a
-	// self-grounding in the choice that we're guessing was made.
+	// Handle choice-links.
 	if (CHOICE_LINK == ptype)
 	{
-		Type gtype = grnd->getType();
+		if (ptrn == grnd) return true;
+
 		const HandleSeq& pset = ptrn->getOutgoingSet();
 		for (const Handle& ch: pset)
 		{
-			if (ch->getType() != gtype) continue;
-			if (is_self_ground(ch, grnd, term_gnds, quote_level)) return true;
-			return false;
+			const auto pr = term_gnds.find(ch);
+			if (pr != term_gnds.end() or CHOICE_LINK == ch->getType())
+			{
+				if (is_self_ground(ch, grnd, term_gnds, quote_level))
+					return true;
+			}
 		}
-		return true;
+		return false;
 	}
 	// Just assume matches were carried out correctly.
 	// Do not try to get fancy, here.
