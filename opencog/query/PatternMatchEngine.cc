@@ -64,13 +64,6 @@ static inline void logmsg(const char * msg, const Handle& h)
 }
 
 /* ======================================================== */
-
-// At this time, we don't want groundings where variables ground
-// themselves.   However, there is a semi-plausible use-case for
-// this, see https://github.com/opencog/opencog/issues/1092
-// Undefine this to experiment. See also the unit tests.
-#define NO_SELF_GROUNDING 1
-
 /* Reset the current variable grounding to the last grounding pushed
  * onto the stack. */
 #ifdef DEBUG
@@ -231,9 +224,11 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 			Type ptype = ohp->getType();
 			if (GLOB_NODE == ptype)
 			{
-#ifdef NO_SELF_GROUNDING
+				// GlobNodes cannot match themselves -- no self-grounding
+				// is allowed. TODO -- maybe this check should be moved
+				// to the clause_match() callback?
 				if (ohp == osg[jg]) return false;
-#endif
+
 				HandleSeq glob_seq;
 				PatternTermPtr glob(osp[ip]);
 				// Globs at the end are handled differently than globs
