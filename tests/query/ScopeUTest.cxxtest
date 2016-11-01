@@ -248,5 +248,13 @@ void ScopeUTest::test_hide(void)
 	Handle result = eval->eval_h("(cog-satisfying-set getx)");
 	TS_ASSERT_EQUALS(1, result->getArity());
 
+	Handle expected = eval->eval_h(
+		"(SetLink (ListLink"
+				"(VariableNode \"$X\")"
+				"(EvaluationLink (Predicate \"P\") (VariableNode \"$X\"))))"
+	);
+
+	TS_ASSERT_EQUALS(result, expected);
+
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
