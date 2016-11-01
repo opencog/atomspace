@@ -364,6 +364,15 @@ void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
 	}
 }
 
+/// is_self_ground() -- Reject clauses that are grounded by themselves.
+/// This code is neeed in order to handle multiple complex, confusing
+/// situations. The most serious of these is variables that are hidden
+/// due to alpha-renaming -- they mostly look like ordinary variables
+/// to the lower layers of the pattern matcher, but here, from the
+/// top-level view of an entire clause, we can tell if they are alpha-
+/// renamed (i.e. alpha-hidden) or not.  Additional complexities arise
+/// due to a need to handle QuoteLinks, and to handle ChoiceLinks and
+/// nested ChoiceLinks. So, sadly, this code is fairly complex. :-(
 bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
                                            const Handle& grnd,
                                            const HandleMap& term_gnds,

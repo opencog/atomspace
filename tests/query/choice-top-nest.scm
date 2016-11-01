@@ -51,7 +51,6 @@
 	(ConceptNode "ways and means")
 )
 
-;;; the list link serves o purpose other than to "embed"
 (MemberLink
 	(ConceptNode "Tom")
 	(ConceptNode "Senator")
@@ -151,7 +150,7 @@
 	)
 )
 
-;; Simple nesting -- Or within Or 
+;; Simple nesting -- Choice within Choice
 (define (top-nest-bad)
 	(BindLink
 		(AndLink
@@ -168,7 +167,7 @@
 					(VariableNode "$x")
 					(ConceptNode "Representative")
 				)
-				;;  Note this Or within an Or
+				;;  Note this Choice within a Choice
 				(ChoiceLink
 					(MemberLink
 						(VariableNode "$x")
