@@ -104,7 +104,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		Handle _pattern_body;
 
 		bool is_self_ground(const Handle&, const Handle&,
-		                    const HandleMap&, int=0);
+		                    const HandleMap&, const OrderedHandleSet&, int=0);
 
 		// Variables that should be ignored, because they are bound
 		// (scoped) in the current context (i.e. appear in a ScopeLink

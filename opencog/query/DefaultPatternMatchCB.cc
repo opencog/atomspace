@@ -376,6 +376,7 @@ void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
 bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
                                            const Handle& grnd,
                                            const HandleMap& term_gnds,
+                                           const OrderedHandleSet& varset,
                                            int quote_level)
 {
 	Type ptype = ptrn->getType();
@@ -393,14 +394,14 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 		else quote_level--;
 
 		const Handle& qpat = ptrn->getOutgoingAtom(0);
-		return is_self_ground(qpat, grnd, term_gnds, quote_level);
+		return is_self_ground(qpat, grnd, term_gnds, varset, quote_level);
 	}
 
 	// Only unquoted variables...
 	if (0 == quote_level and
 	    ((ptype == VARIABLE_NODE ) or (ptype == GLOB_NODE)))
 	{
-		return (_vars->varset.end() != _vars->varset.find(grnd));
+		return (varset.end() != varset.find(grnd));
 	}
 
 	// Handle choice-links.
@@ -414,12 +415,13 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 			const auto pr = term_gnds.find(ch);
 			if (pr != term_gnds.end() or CHOICE_LINK == ch->getType())
 			{
-				if (is_self_ground(ch, grnd, term_gnds, quote_level))
+				if (is_self_ground(ch, grnd, term_gnds, varset, quote_level))
 					return true;
 			}
 		}
 		return false;
 	}
+
 	// Just assume matches were carried out correctly.
 	// Do not try to get fancy, here.
 	if (not ptrn->isLink()) return false;
@@ -433,9 +435,52 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 	// punt on glob verification
 	if (pari != gset.size()) return false;
 
+	// Special handling for ScopeLinks. Any bound variables in the
+	// ScopeLink that happen to have exactly the same name as a bound
+	// variable in the pattern will hide/obscure the variable in the
+	// pattern. Or rather: here is where we hide it.  Tedious.
+	if (_classserver.isA(grnd->getType(), SCOPE_LINK))
+	{
+		// Step 1: Look to see if the scope link binds any of the
+		// variables that the pattern also binds.
+		OrderedHandleSet hidden;
+		const Variables& slv = ScopeLinkCast(grnd)->get_variables();
+		for (const Handle& hide: slv.varset)
+		{
+			if (varset.end() != varset.find(hide))
+				hidden.insert(hide);
+		}
+
+		// Step 2: If there are hidden variables, then remove them
+		// before recursing dowwards.
+		if (0 < hidden.size())
+		{
+			// Make a copy
+			OrderedHandleSet vcopy = varset;
+
+			// Remove the hidden vars from the copy
+			for (const Handle& hide: hidden)
+			{
+				vcopy.erase(hide);
+			}
+
+			// Recurse using only the visible variables.
+			for (size_t i=0; i<pari; i++)
+			{
+				if (is_self_ground(pset[i], gset[i], term_gnds, vcopy, quote_level))
+					return true;
+			}
+			return false;
+		}
+
+		// Step 3: if we are here, there were no hidden vars.
+		// So just fall through and do the normal recursion below.
+	}
+
 	for (size_t i=0; i<pari; i++)
 	{
-		if (is_self_ground(pset[i], gset[i], term_gnds, quote_level)) return true;
+		if (is_self_ground(pset[i], gset[i], term_gnds, varset, quote_level))
+			return true;
 	}
 
 	return false;
@@ -499,7 +544,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 		return relation_holds;
 	}
 
-	return not is_self_ground(ptrn, grnd, term_gnds);
+	return not is_self_ground(ptrn, grnd, term_gnds, _vars->varset);
 }
 
 /**
@@ -516,7 +561,8 @@ bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
                                                   const HandleMap& term_gnds)
 {
 	if (nullptr == grnd) return true; // XXX can this ever happen?
-	if (not is_self_ground(ptrn, grnd, term_gnds)) _optionals_present = true;
+	if (not is_self_ground(ptrn, grnd, term_gnds, _vars->varset))
+		_optionals_present = true;
 	return false;
 }
 
