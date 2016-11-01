@@ -173,7 +173,10 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 ///
 bool PatternMatchEngine::self_compare(const PatternTermPtr& ptm)
 {
-	logmsg("Compare atom to itself:", ptm->getHandle());
+	const Handle& hp = ptm->getHandle();
+
+	if (not ptm->isQuoted()) var_grounding[hp] = hp;
+	logmsg("Compare atom to itself:", hp);
 
 #ifdef NO_SELF_GROUNDING
 
