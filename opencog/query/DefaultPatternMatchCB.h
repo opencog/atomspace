@@ -66,12 +66,14 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		virtual bool post_link_match(const Handle&, const Handle&);
 		virtual void post_link_mismatch(const Handle&, const Handle&);
 
-		virtual bool clause_match(const Handle&, const Handle&);
+		virtual bool clause_match(const Handle&, const Handle&,
+		                          const HandleMap&);
 		/**
 		 * Typically called for AbsentLink
 		 */
 		virtual bool optional_clause_match(const Handle& pattrn,
-		                                   const Handle& grnd);
+		                                   const Handle& grnd,
+		                                   const HandleMap&);
 
 		virtual IncomingSet get_incoming_set(const Handle&);
 
@@ -101,8 +103,12 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		bool _have_variables;
 		Handle _pattern_body;
 
-		// Variables that should be ignored, bacause they are bound
-		// (scoped) in the current context.
+		bool is_self_ground(const Handle&, const Handle&,
+		                    const HandleMap&, const OrderedHandleSet&, int=0);
+
+		// Variables that should be ignored, because they are bound
+		// (scoped) in the current context (i.e. appear in a ScopeLink
+		// that is being matched.)
 		const Variables* _pat_bound_vars;
 		const Variables* _gnd_bound_vars;
 

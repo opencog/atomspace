@@ -221,11 +221,15 @@ class PatternMatchCallback
 		 * variable_match(), link_match() and post_link_match() in
 		 * that clause have returned true.
 		 *
+		 * The term_gnds map shows which terms in any ChoiceLinks
+		 * were actually grounded.
+		 *
 		 * Return false to reject this clause as a valid grounding,
 		 * return true to accept this grounding.
 		 */
 		virtual bool clause_match(const Handle& pattrn_link_h,
-		                          const Handle& grnd_link_h)
+		                          const Handle& grnd_link_h,
+		                          const HandleMap& term_gnds)
 		{
 			// Reject templates grounded by themselves.
 			if (pattrn_link_h == grnd_link_h) return false;
@@ -247,7 +251,8 @@ class PatternMatchCallback
 		 * any optional clauses are examined.
 		 */
 		virtual bool optional_clause_match(const Handle& pattrn,
-		                                   const Handle& grnd) = 0;
+		                                   const Handle& grnd,
+		                                   const HandleMap& term_gnds) = 0;
 
 		/**
 		 * Called when a complete grounding for all clauses is found.
@@ -258,8 +263,9 @@ class PatternMatchCallback
 		 * solution has been found; thus, in order to force it to search
 		 * for more, a return value of false is needed.)
 		 *
-		 * Note that the callback may be called many times reporting
-		 * the same result.
+		 * Note that this callback may be called multiple times, to report
+		 * the same result.  This can happen, for example, if there are
+		 * mutiple ways for the pattern to match up to the result.
 		 */
 		virtual bool grounding(const HandleMap &var_soln,
 		                       const HandleMap &term_soln) = 0;

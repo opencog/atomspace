@@ -92,7 +92,7 @@ bool Satisfier::search_finished(bool done)
 bool SatisfyingSet::grounding(const HandleMap &var_soln,
                               const HandleMap &term_soln)
 {
-	// PatternMatchEngine::print_solution(var_soln, term_soln);
+	// PatternMatchEngine::log_solution(var_soln, term_soln);
 
 	// Do not accept new solution if maximum number has been already reached
 	if (_satisfying_set.size() >= max_results)

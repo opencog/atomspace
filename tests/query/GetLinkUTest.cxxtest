@@ -41,8 +41,9 @@ private:
 public:
 	GetLinkUTest(void)
 	{
-		logger().set_level(Logger::FINE);
+		// logger().set_level(Logger::FINE);
 		logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);

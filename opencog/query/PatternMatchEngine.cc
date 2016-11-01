@@ -64,13 +64,6 @@ static inline void logmsg(const char * msg, const Handle& h)
 }
 
 /* ======================================================== */
-
-// At this time, we don't want groundings where variables ground
-// themselves.   However, there is a semi-plausible use-case for
-// this, see https://github.com/opencog/opencog/issues/1092
-// Undefine this to experiment. See also the unit tests.
-#define NO_SELF_GROUNDING 1
-
 /* Reset the current variable grounding to the last grounding pushed
  * onto the stack. */
 #ifdef DEBUG
@@ -91,24 +84,15 @@ static inline void logmsg(const char * msg, const Handle& h)
 
 /// Compare a VariableNode in the pattern to the proposed grounding.
 ///
-/// Handle hp is from the pattern clause.
-//
-// XXX the self-grounding code should maybe move to the callback ??
+/// Handle hp is from the pattern clause.  By default, the code here
+/// allows a variable to be grounded by itself -- this avoids a lot
+/// of second-guessing involving alpha-converted variable names,
+/// which get handled at a higher layer, which has access to the
+/// entire clause. (The clause_match() callback, to be specific).
+///
 bool PatternMatchEngine::variable_compare(const Handle& hp,
                                           const Handle& hg)
 {
-#ifdef NO_SELF_GROUNDING
-	// But... if handle hg happens to also be a bound var,
-	// then its a mismatch.
-	// XXX However, this reasoning is wrong: hg may just happen to have
-	// the same name as a variable bound in this pattern, but may,
-	// in fact, also be bound by a ScopeLink inside the pattern. In
-	// that case, instead of rejecting the match as below, it should be
-	// passed on to the scope_match() callback. In general, this whole
-	// self-grounding code needs to be re-thought, reworked.
-	if (_varlist->varset.end() != _varlist->varset.find(hg)) return false;
-#endif
-
 	// If we already have a grounding for this variable, the new
 	// proposed grounding must match the existing one. Such multiple
 	// groundings can occur when traversing graphs with loops in them.
@@ -126,28 +110,6 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 	           "ERROR: expected variable to be a node, got this: %s\n",
 	           hp->toShortString().c_str());
 
-#ifdef NO_SELF_GROUNDING
-	// Disallow matches where the grounding contains (an unquoted)
-	// variable that is bound by this template.
-	if (hg->isLink() and any_unquoted_unscoped_in_tree(hg, _varlist->varset))
-	{
-		if (not logger().is_fine_enabled()) return false;
-
-		for (Handle vh: _varlist->varset)
-		{
-			// OK, which variable is it?
-			if (is_unquoted_in_tree(hg, vh) and is_unscoped_in_tree(hg, vh))
-			{
-				logmsg("miscompare; found bound variable in grounding tree:",
-				       vh);
-				logmsg("matching  variable  is:", hp);
-				logmsg("proposed grounding is:", hg);
-				return false;
-			}
-		}
-	}
-#endif
-
 	// Else, we have a candidate grounding for this variable.
 	// The variable_match() callback may implement some tighter
 	// variable check, e.g. to make sure that the grounding is
@@ -159,7 +121,7 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 	LAZY_LOG_FINE << "Found grounding of variable:";
 	logmsg("$$ variable:", hp);
 	logmsg("$$ ground term:", hg);
-	if (hp != hg and hp->getType() != GLOB_NODE) var_grounding[hp] = hg;
+	if (hp->getType() != GLOB_NODE) var_grounding[hp] = hg;
 	return true;
 }
 
@@ -173,13 +135,10 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 ///
 bool PatternMatchEngine::self_compare(const PatternTermPtr& ptm)
 {
-	logmsg("Compare atom to itself:", ptm->getHandle());
+	const Handle& hp = ptm->getHandle();
+	if (not ptm->isQuoted()) var_grounding[hp] = hp;
 
-#ifdef NO_SELF_GROUNDING
-
-	return !ptm->hasAnyBoundVariable();
-
-#endif
+	logmsg("Compare atom to itself:", hp);
 	return true;
 }
 
@@ -265,9 +224,11 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 			Type ptype = ohp->getType();
 			if (GLOB_NODE == ptype)
 			{
-#ifdef NO_SELF_GROUNDING
+				// GlobNodes cannot match themselves -- no self-grounding
+				// is allowed. TODO -- maybe this check should be moved
+				// to the clause_match() callback?
 				if (ohp == osg[jg]) return false;
-#endif
+
 				HandleSeq glob_seq;
 				PatternTermPtr glob(osp[ip]);
 				// Globs at the end are handled differently than globs
@@ -901,7 +862,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
  * while traversing pattern tree. We need to keep permutation states for
  * each term pointer separately.
  *
- * Next suppose our joining atom repeates in many sub-branches of a single
+ * Next suppose our joining atom repeats in several sub-branches of a single
  * ChoiceLink. For example:
  *
  * ChoiceLink
@@ -912,10 +873,11 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
  *     VariableNode "$x"
  *     ConceptNode "this one"
  *
- * We start pattern exploration for each occurence of joining atom. This is
- * because of pruning being done in explore_choice_branches() when the first
- * match is found. It seems that it may be refactored later. For now we iterate
- * over all pattern terms associated with given atom handle.
+ * We start pattern exploration for each occurence of joining atom. This
+ * is required, due to the pruning done in explore_choice_branches()
+ * when the first match is found. XXX This may need to be refactored.
+ * For now, we iterate over all pattern terms associated with a given
+ * atom handle.
  *
  */
 bool PatternMatchEngine::explore_term_branches(const Handle& term,
@@ -1308,12 +1270,12 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 	if (is_optional(clause_root))
 	{
 		clause_accepted = true;
-		match = _pmc.optional_clause_match(clause_root, hg);
+		match = _pmc.optional_clause_match(clause_root, hg, var_grounding);
 		logger().fine("optional clause match callback match=%d", match);
 	}
 	else
 	{
-		match = _pmc.clause_match(clause_root, hg);
+		match = _pmc.clause_match(clause_root, hg, var_grounding);
 		logger().fine("clause match callback match=%d", match);
 	}
 	if (not match) return false;
@@ -1343,9 +1305,9 @@ bool PatternMatchEngine::do_next_clause(void)
 	bool found = false;
 	if (nullptr == curr_root)
 	{
-		logger().fine("==================== FINITO!");
-		log_solution(var_grounding, clause_grounding);
 		found = _pmc.grounding(var_grounding, clause_grounding);
+		logger().fine("==================== FINITO! accepted=%d", found);
+		log_solution(var_grounding, clause_grounding);
 	}
 	else
 	{
@@ -1389,7 +1351,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		       (is_optional(curr_root)))
 		{
 			Handle undef(Handle::UNDEFINED);
-			bool match = _pmc.optional_clause_match(joiner, undef);
+			bool match = _pmc.optional_clause_match(joiner, undef, var_grounding);
 			logger().fine("Exhausted search for optional clause, cb=%d", match);
 			if (not match) {
 				clause_stacks_pop();
@@ -1887,15 +1849,20 @@ void PatternMatchEngine::log_solution(
 	if (!logger().is_fine_enabled())
 		return;
 
-	logger().fine("Variable groundings:");
+	logger().fine() << "There are groundings for " << vars.size() << " terms";
+	int varcnt = 0;
+	for (const auto& j: vars)
+	{
+		Type vtype = j.first->getType();
+		if (VARIABLE_NODE == vtype or GLOB_NODE == vtype) varcnt++;
+	}
+	logger().fine() << "Groundings for " << varcnt << " variables:";
 
 	// Print out the bindings of solutions to variables.
-	HandleMap::const_iterator j = vars.begin();
-	HandleMap::const_iterator jend = vars.end();
-	for (; j != jend; ++j)
+	for (const auto& j: vars)
 	{
-		Handle var(j->first);
-		Handle soln(j->second);
+		Handle var(j.first);
+		Handle soln(j.second);
 
 		// Only print grounding for variables.
 		Type vtype = var->getType();
@@ -1914,7 +1881,7 @@ void PatternMatchEngine::log_solution(
 	}
 
 	// Print out the full binding to all of the clauses.
-	logger().fine("Grounded clauses:");
+	logger().fine() << "Groundings for " << clauses.size() << " clauses:";
 	HandleMap::const_iterator m;
 	int i = 0;
 	for (m = clauses.begin(); m != clauses.end(); ++m, ++i)

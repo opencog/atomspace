@@ -64,6 +64,7 @@ public:
 	void test_search_alt(void);
 	void test_pushpop(void);
 	void test_quote(void);
+	void test_hide(void);
 };
 
 void ScopeUTest::tearDown(void)
@@ -201,7 +202,7 @@ void ScopeUTest::test_pushpop(void)
 /*
  * Test search of embedded scope links.
  * The search pattern inculdes QuoteLinks that have to be navigated
- * correctly, in order for thins to work.
+ * correctly, in order for things to work.
  */
 void ScopeUTest::test_quote(void)
 {
@@ -217,5 +218,43 @@ void ScopeUTest::test_quote(void)
 
 	TS_ASSERT_EQUALS(list, elist);
 	TS_ASSERT_EQUALS(andl, eandl);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test the hiding of bound variables.
+ */
+void ScopeUTest::test_hide(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/scope-hide.scm\")");
+
+	// Alpha conversion should make for equal.
+	Handle getx = eval->eval_h("getx");
+	Handle getv = eval->eval_h("getv");
+	TS_ASSERT_EQUALS(getx, getv);
+
+	Handle forall = eval->eval_h("forall");
+	Handle varx = forall->getOutgoingAtom(0);
+
+	Handle forpat = getx->getOutgoingAtom(0);
+	Handle patvar = forpat->getOutgoingAtom(0);
+
+	// This unit test doesn't test anything critical if the pattern
+	// and the ground don't happen to have the same variable.
+	TS_ASSERT_EQUALS(varx, patvar);
+
+	Handle result = eval->eval_h("(cog-satisfying-set getx)");
+	TS_ASSERT_EQUALS(1, result->getArity());
+
+	Handle expected = eval->eval_h(
+		"(SetLink (ListLink"
+				"(VariableNode \"$X\")"
+				"(EvaluationLink (Predicate \"P\") (VariableNode \"$X\"))))"
+	);
+
+	TS_ASSERT_EQUALS(result, expected);
+
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
