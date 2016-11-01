@@ -44,6 +44,7 @@ class StackUTest :  public CxxTest::TestSuite
 		{
 			logger().set_level(Logger::DEBUG);
 			logger().set_print_to_stdout_flag(true);
+			logger().set_timestamp_flag(false);
 		}
 
 		~StackUTest()
@@ -78,8 +79,17 @@ class TestPMCB :
 		DefaultPatternMatchCB::set_pattern(vars, pat);
 	}
 
-	virtual bool clause_match(const Handle& pattrn, const Handle& grnd)
+	virtual bool clause_match(const Handle& pattrn,
+	                          const Handle& grnd,
+	                          const HandleMap& term_gnds)
 	{
+		// We need to call DefaultPatternMatchCB::clause_match
+		// to handle the case of self-grounding, else the count
+		// in the unit test is off by one.  (This is the
+		// backwards-compat handling for the unit test.)
+		bool OK = DefaultPatternMatchCB::clause_match(pattrn, grnd, term_gnds);
+		if (not OK) return false;
+
 		lcnt ++;
 		// match the initial anchor clause, but reject the rest.
 		return anch == grnd;
