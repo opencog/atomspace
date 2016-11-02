@@ -160,9 +160,10 @@ void TypeChoiceUTest::test_disconnected()
  *      (VariableNode "$B")))
  *
  * (define forall-instantiation-body
- *   (ForAllLink
- *      (VariableNode "$TyVs")
- *      (VariableNode "$B")))
+ *   (QuoteLink
+ *      (ForAllLink
+ *         (UnquoteLink (VariableNode "$TyVs"))
+ *         (UnquoteLink (VariableNode "$B"))))
  *
  * (define forall-instantiation-get
  *   (Get
@@ -237,7 +238,7 @@ void TypeChoiceUTest::test_forall()
 	Handle result = satisfying_set(&as, forall_instantiation_get);
 	Handle expected = al(SET_LINK,
 	                     al(LIST_LINK,
-	                        forall_instantiation_vardecl,
+	                        forall_candidate_vardecl,
 	                        forall_candidate_body));
 
 	logger().debug() << "candidate = " << forall_candidate->toString();
