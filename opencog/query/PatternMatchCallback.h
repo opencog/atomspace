@@ -29,6 +29,7 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/query/Pattern.h> // for VariableTypeMap
+#include <opencog/query/PatternTerm.h> // for pattern context
 #include <opencog/atoms/core/VariableList.h> // for VariableTypeMap
 
 namespace opencog {
@@ -107,7 +108,7 @@ class PatternMatchCallback
 		 * type, and to proceed with the search, or cut it
 		 * off, based on these values.
 		 */
-		virtual bool link_match(const Handle& patt_link,
+		virtual bool link_match(const PatternTermPtr& patt_link,
 		                        const Handle& grnd_link) = 0;
 
 		/**
