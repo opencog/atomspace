@@ -248,9 +248,11 @@ bool DefaultPatternMatchCB::scope_match(const Handle& npat_h,
  * By default, the search continues if the link
  * arity and the link types match.
  */
-bool DefaultPatternMatchCB::link_match(const Handle& lpat,
+bool DefaultPatternMatchCB::link_match(const PatternTermPtr& ptm,
                                        const Handle& lsoln)
 {
+	const Handle& lpat = ptm->getHandle();
+
 	// If the pattern is exactly the same link as the proposed
 	// grounding, then its a perfect match.
 	if (lpat == lsoln) return true;
@@ -278,6 +280,9 @@ bool DefaultPatternMatchCB::link_match(const Handle& lpat,
 	// alpha-conversion of the bound variables in the scope link.
 	if (_classserver.isA(pattype, SCOPE_LINK))
 	{
+		// Unless it is quoted.
+		if (ptm->isQuoted()) return true;
+
 		// XXX The assert below -- if we hit this, then we have nested
 		// scoped links. The correct fix would be to push these onto a
 		// stack, and then alter scope_match() to walk the stack,

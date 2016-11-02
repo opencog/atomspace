@@ -121,7 +121,7 @@ void PatternLink::setup_components(void)
 void PatternLink::init(void)
 {
 	_pat.redex_name = "anonymous PatternLink";
-	extract_variables(_outgoing);
+	ScopeLink::extract_variables(_outgoing);
 
 	if (2 < _outgoing.size() or
 	   (2 == _outgoing.size() and _outgoing[1] != _body))

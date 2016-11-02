@@ -817,7 +817,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	if (not (hp->isLink() and hg->isLink())) return _pmc.fuzzy_match(hp, hg);
 
 	// Let the callback perform basic checking.
-	bool match = _pmc.link_match(hp, hg);
+	bool match = _pmc.link_match(ptm, hg);
 	if (not match) return false;
 
 	LAZY_LOG_FINE << "depth=" << depth;

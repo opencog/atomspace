@@ -36,7 +36,7 @@ public:
 	bool node_match(const Handle&, const Handle&);
 
 	// Only match links if they are in the attentional focus
-	bool link_match(const Handle&, const Handle&);
+	bool link_match(const PatternTermPtr&, const Handle&);
 
 	// Only get incoming sets that are in the attentional focus
 	IncomingSet get_incoming_set(const Handle&);
