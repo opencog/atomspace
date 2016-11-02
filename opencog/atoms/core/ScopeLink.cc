@@ -112,8 +112,15 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 
 	Type decls = oset.at(0)->getType();
 
+	// If we trip over an unquote immediately, then we can assume that
+	// the whole links appears in some quote context. This cannot be
+	// treated as an ordinary ScopeLink in any way ... halt all further
+	// initialization now.
+	if (UNQUOTE_LINK == decls)
+		return;
+
 	// If the first atom is not explicitly a variable declaration, then
-	// there are no variable declarations. There are two cases that; can
+	// there are no variable declarations. There are two cases that can
 	// apply here: either the body is a lambda, in which case, we copy
 	// the variables from the lambda; else we extract all free variables.
 	if (VARIABLE_LIST != decls and
