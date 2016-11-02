@@ -278,6 +278,9 @@ bool DefaultPatternMatchCB::link_match(const Handle& lpat,
 	// alpha-conversion of the bound variables in the scope link.
 	if (_classserver.isA(pattype, SCOPE_LINK))
 	{
+		// Unless it is quoted.
+		if (UNQUOTE_LINK == lpat->getOutgoingAtom(0)->getType()) return true;
+
 		// XXX The assert below -- if we hit this, then we have nested
 		// scoped links. The correct fix would be to push these onto a
 		// stack, and then alter scope_match() to walk the stack,
