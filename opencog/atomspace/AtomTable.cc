@@ -979,8 +979,8 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     Atom* pat = atom.operator->();
     typeIndex.removeAtom(pat);
 
-    LinkPtr lll(LinkCast(atom));
-    if (lll) {
+    if (atom->isLink()) {
+        LinkPtr lll(LinkCast(atom));
         for (AtomPtr a : lll->_outgoing) {
             a->remove_atom(lll);
         }

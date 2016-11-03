@@ -1288,16 +1288,16 @@ compiler: gcc version 6.2.0
    test            AtomSpace       Feb
    name            K-ops/sec      2016         Comments
    ----            ---------      ----      ----------------------------
-  noop              2.02e6       1.5e6      ?  compiler ?
+  noop              2.11e6       1.5e6      ?  compiler ?
   getType          96.6K        78.0K       +24% faster -- compiler?
-  getTV             4176         4261       -2% slower -- cache effect?
+  getTV             4205         4261       -1% slower -- cache effect?
   setTV             1182         1129       +5% faster -- cache effect?
   pointerCast       7279
-  getIncomingSet    2178         2250       -3% slower -- cache effect?
-  getOutgoingSet   35.9K        38.6K       -7% slower -- ?
+  getIncomingSet    2192         2250       -3% slower -- cache effect?
+  getOutgoingSet   36.2K        38.6K       -6% slower -- ?
   addNode            201          145       +39% faster
-  addLink             79.1         67.5     +17% faster
-  removeAtom         267          186       +44% faster
+  addLink             81.9         67.5     +21% faster
+  removeAtom         279          186       +50% faster
 
 Remarks:
  * Expected that only addNode, addLink, removeAtom would change.
