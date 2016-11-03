@@ -1222,9 +1222,9 @@ before push_back and emplace_back.
 The previous attempt to reserve was sizing the vector using the constructor.
 This still caused push_back and emplace_back to allocate each time. For example,
 sizing to 4 then doing 4 emplace_backs, for example would resize to 5, 6,
-7, then 8. In contrast, the call to vector.reserve(N) changes only the storage 
+7, then 8. In contrast, the call to vector.reserve(N) changes only the storage
 but not the vector size, so vector.reserve(4) followed by 4 emplace_backs or
-push_backs results in only one memory allocation but 4 vector size changes. 
+push_backs results in only one memory allocation but 4 vector size changes.
 It appears that all vectors reserve sufficient space for one element which
 accounts for all five methods having essentially the same timing for a single
 operation.
@@ -1271,27 +1271,37 @@ The differences between push_back_reserve, emplace_back_reserve, and
 reserve now appear to be smaller than the jitter noise of the benchmark
 timings.
 
+Above is for Ubuntu Trusty and the default gcc therein.
+
 ======================================================================
 
-25 Oct 2016
+3 Nov 2016
 ------------
-New core baseline. Fanny.
+New core baseline. Fanny.  This baseline measures perf after converting
+atomtable to use hashes (and then fixing bugs related to that, a week
+later).  The hashes are expected to improve performance of atom
+insertion and deletion.
 
-                     -A
-   test            AtomSpace
-   name            K-ops/sec
-   ----            ---------
-  noop              1.76e6
-  getType          96.4K
-  getTV             4148
-  setTV             1212
-  getIncomingSet    2191
-  getOutgoingSet   36.1K
-  addNode            202
-  addLink             35.0
-  removeAtom         276
+compiler: gcc version 6.2.0
+
+                     -A            -A
+   test            AtomSpace       Feb
+   name            K-ops/sec      2016         Comments
+   ----            ---------      ----      ----------------------------
+  noop              1.98e6       1.5e6      ?  compiler ?
+  getType          93.4K        78.0K       +20% faster -- compiler?
+  getTV             4040         4261       -5% slower -- cache effect?
+  setTV             1182         1129       +5% faster -- cache effect?
+  pointerCast       7022
+  getIncomingSet    2128         2250       -5% slower -- cache effect?
+  getOutgoingSet   35.4K        38.6K       -8% slower -- ?
+  addNode            191          145       +32% faster
+  addLink             76.8         67.5     +14% faster
+  removeAtom         265          186       +42% faster
 
 Remarks:
- * Core Atomspace: unchanged or better, except for addLink
-   addNode 40% faster, getType is 25% faster removeAtom is almost 50% faster
-   addLink is half as fast! Why? What happened?
+ * Expected that only addNode, addLink, removeAtom would change.
+   Other changes are possibly due to compiler differences, or due
+   to cache-alignment effects?
+ * Hashing does seem to improve atomtable performance, though not
+   as much as might be guessed.
