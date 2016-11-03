@@ -145,7 +145,7 @@ void AtomTable::clear_transient()
 void AtomTable::clear_all_atoms()
 {
     // For now, this only works for transient atomspaces which do not
-    // index the atoms. So throw an exception to warn against use in 
+    // index the atoms. So throw an exception to warn against use in
     // normal atomspaces.
     if (not _transient)
         throw opencog::RuntimeException(TRACE_INFO,
@@ -258,8 +258,10 @@ Handle AtomTable::getNodeHandle(AtomPtr& a) const
     ContentHash ch = a->get_hash();
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
-    auto bkt = _atom_store.find(ch);
-    for (; bkt != _atom_store.end(); bkt++) {
+    auto range = _atom_store.equal_range(ch);
+    auto bkt = range.first;
+    auto end = range.second;
+    for (; bkt != end; bkt++) {
         if (*((AtomPtr) bkt->second) == *a) {
             return bkt->second;
         }
@@ -300,54 +302,45 @@ Handle AtomTable::getLinkHandle(AtomPtr& a, int quotelevel) const
         resolved_seq.emplace_back(rh);
     }
 
-    // Sigh. Proper database support rquires no mangling the UUID.
+    // Sigh. Proper database support requires that the UUID not be mangled.
     UUID save = a->_uuid;
     a = createLink(t, resolved_seq);
     a->_uuid = save;
+
+    // Start searching to see if we have this atom.
     ContentHash ch = a->get_hash();
+
+    // Currently, ScopeLinks use a custom hash, and, in order
+    // for it to work, we must have an actual instance of the
+    // class, so that the correct virtual method can be called.
+    //
+    // However, bad quotation nesting means that some things
+    // that look like ScopeLinks are just invalid fragments
+    // of search patterns. Ignore those.
+    if (0 == quotelevel and classserver().isA(t, SCOPE_LINK)) {
+        ScopeLinkPtr wanted = ScopeLinkCast(a);
+        if (nullptr == wanted) {
+            wanted = ScopeLink::factory(Handle(a));
+            wanted->_uuid = a->_uuid;
+        }
+        ch = wanted->get_hash();
+        a = wanted;
+    }
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
-    // If we have it already, we are done.
-    auto bkt = _atom_store.find(ch);
-    for (; bkt != _atom_store.end(); bkt++) {
+    // So ... check to see if we have it or not.
+    auto range = _atom_store.equal_range(ch);
+    auto bkt = range.first;
+    auto end = range.second;
+    for (; bkt != end; bkt++) {
         if (*((AtomPtr) bkt->second) == *a) {
             return bkt->second;
         }
     }
 
-    // If it is NOT a ScopeLink, then we are done.
-    // If it is a ScopeLink, and it is not quoted, then we need to
-    // search for any alpha-converted forms.
-
-    if (0 != quotelevel or not classserver().isA(t, SCOPE_LINK)) {
-        if (_environ)
-            return _environ->getHandle(a, quotelevel);
-        return Handle::UNDEFINED;
-    }
-
-    ScopeLinkPtr wanted = ScopeLinkCast(a);
-    if (nullptr == wanted)
-        wanted = ScopeLink::factory(Handle(a));
-
-    // Look at each and every ScopeLink.  Some of the ScopeLinks
-    // are going to have badly-nested QuoteLinks in them (this is
-    // unavoidable, as they might be parts of more complex
-    // expressions) and so we have to be able to silently ignore
-    // these exceptions.
-    TypeIndex::iterator candidate = typeIndex.begin(t, false);
-    const TypeIndex::iterator end = typeIndex.end();
-    for (; candidate != end; candidate++) {
-        try {
-            if (wanted->is_equal(*candidate, true)) {
-                return Handle(*candidate);
-            }
-        } catch (const NestingException& ex) {}
-    }
-
     if (_environ) {
-        AtomPtr aw(wanted);
-        return _environ->getHandle(aw, quotelevel);
+        return _environ->getHandle(a, quotelevel);
     }
     return Handle::UNDEFINED;
 }
@@ -973,8 +966,10 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     _size_by_type[atom->_type] --;
     _atom_set.erase(atom->_uuid);
 
-    auto bkt = _atom_store.find(atom->get_hash());
-    for (; bkt != _atom_store.end(); bkt++) {
+    auto range = _atom_store.equal_range(atom->get_hash());
+    auto bkt = range.first;
+    auto end = range.second;
+    for (; bkt != end; bkt++) {
         if (handle == bkt->second) {
             _atom_store.erase(bkt);
             break;
