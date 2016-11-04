@@ -386,23 +386,19 @@ size_t PatternMatchEngine::curr_choice(const PatternTermPtr& ptm,
                                        const Handle& hg,
                                        bool& fresh)
 {
-	size_t istart;
-	try { istart = _choice_state.at(GndChoice(ptm, hg)); }
-	catch(...) { istart = 0; fresh = true; }
-	return istart;
+	auto cs = _choice_state.find(GndChoice(ptm, hg));
+	if (_choice_state.end() == cs)
+	{
+		fresh = true;
+		return 0;
+	}
+	return cs->second;
 }
 
 bool PatternMatchEngine::have_choice(const PatternTermPtr& ptm,
                                      const Handle& hg)
 {
-#if USE_AT
-	bool have = true;
-	try { _choice_state.at(GndChoice(ptm, hg)); }
-	catch(...) { have = false;}
-	return have;
-#else
 	return 0 < _choice_state.count(GndChoice(ptm, hg));
-#endif
 }
 
 /* ======================================================== */
@@ -686,17 +682,17 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
                               const Handle& hg,
                               bool& fresh)
 {
-	Permutation perm;
-	try { perm = _perm_state.at(Unorder(ptm, hg)); }
-	catch(...)
+	auto ps = _perm_state.find(Unorder(ptm, hg));
+	if (_perm_state.end() == ps)
 	{
 		LAZY_LOG_FINE << "tree_comp fresh start unordered link term="
 		              << ptm->toString();
-		perm = ptm->getOutgoingSet();
+		Permutation perm = ptm->getOutgoingSet();
 		sort(perm.begin(), perm.end());
 		fresh = true;
+		return perm;
 	}
-	return perm;
+	return ps->second;
 }
 
 /// Return true if there are more permutations to explore.
@@ -704,8 +700,8 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 bool PatternMatchEngine::have_perm(const PatternTermPtr& ptm,
                                    const Handle& hg)
 {
-	try { _perm_state.at(Unorder(ptm, hg)); }
-	catch(...) { return false; }
+	if (_perm_state.end() == _perm_state.find(Unorder(ptm, hg)))
+		return false;
 	return true;
 }
 
