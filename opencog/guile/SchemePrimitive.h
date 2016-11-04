@@ -196,7 +196,6 @@ class SchemePrimitive : public PrimitiveEnviron
 			S_SSS, // return string, take three strings
 			S_V,   // return string, take void
 			P_H,   // return truth value, take Handle
-			U_SSB, // return UUID, take string,string,boolean
 			V_B,   // return void, take bool
 			V_H,   // return void, take Handle
 			V_HS,  // return void, take Handle and short
@@ -637,12 +636,12 @@ class SchemePrimitive : public PrimitiveEnviron
 				}
 				case S_AS:
 				{
-					// First argument is an StomSpace ptr.
+					// First argument is an AtomSpace ptr.
 					AtomSpace* as = SchemeSmob::verify_atomspace(scm_car(args), scheme_name, 1);
 					// Second argument is a string
 					std::string str(SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2));
 
-					const std::string &rs = (that->*method.s_as)(as, str);
+					std::string rs = (that->*method.s_as)(as, str);
 					rc = scm_from_utf8_string(rs.c_str());
 					break;
 				}
@@ -651,7 +650,7 @@ class SchemePrimitive : public PrimitiveEnviron
 					// First argument is a string
 					std::string str(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
 
-					const std::string &rs = (that->*method.s_s)(str);
+					std::string rs = (that->*method.s_s)(str);
 					rc = scm_from_utf8_string(rs.c_str());
 					break;
 				}
@@ -661,7 +660,7 @@ class SchemePrimitive : public PrimitiveEnviron
 					std::string str1(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
 					std::string str2(SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2));
 
-					const std::string &rs = (that->*method.s_ss)(str1, str2);
+					std::string rs = (that->*method.s_ss)(str1, str2);
 					rc = scm_from_utf8_string(rs.c_str());
 					break;
 				}
@@ -672,26 +671,14 @@ class SchemePrimitive : public PrimitiveEnviron
 					std::string str2(SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2));
 					std::string str3(SchemeSmob::verify_string(scm_caddr(args), scheme_name, 3));
 
-					const std::string &rs = (that->*method.s_sss)(str1, str2, str3);
+					std::string rs = (that->*method.s_sss)(str1, str2, str3);
 					rc = scm_from_utf8_string(rs.c_str());
 					break;
 				}
 				case S_V:
 				{
-					const std::string &rs = (that->*method.s_v)();
+					std::string rs = (that->*method.s_v)();
 					rc = scm_from_utf8_string(rs.c_str());
-					break;
-				}
-				case U_SSB:
-				{
-					// First argument is a string
-					std::string str = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
-					std::string str2(SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2));
-					bool b = scm_to_bool(scm_caddr(args));
-
-
-					UUID rh=((that->*method.u_ssb)(str, str2, b));
-					rc = scm_from_ulong(rh);//SchemeSmob::handle_to_scm(rh);
 					break;
 				}
 				case V_B:
@@ -843,6 +830,9 @@ class SchemePrimitive : public PrimitiveEnviron
 		do_register(module, name, 2); /* cb has 2 args */ \
 	}
 
+// XXX FIXME -- WTF!? This is deeply wrong and flawed and broken.
+// There should not be any primitives with 3, 4 and 5 arguments!!
+// Who added this crap?!??
 #define DECLARE_CONSTR_3(SIG, LSIG, RET_TYPE, ARG1_TYPE, ARG2_TYPE, ARG3_TYPE) \
 	SchemePrimitive(const char* module, const char* name, \
 		 RET_TYPE (T::*cb)(ARG1_TYPE, ARG2_TYPE, ARG3_TYPE), T *data) \
@@ -854,6 +844,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		signature = SIG; \
 		do_register(module, name, 3); /* cb has 3 args */ \
 	}
+
 #define DECLARE_CONSTR_4(SIG, LSIG, RET_TYPE, ARG1_TYPE, ARG2_TYPE, ARG3_TYPE, ARG4_TYPE) \
 	SchemePrimitive(const char* module, const char* name, \
 		RET_TYPE (T::*cb)(ARG1_TYPE, ARG2_TYPE, ARG3_TYPE, ARG4_TYPE), T *data) \
@@ -865,6 +856,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		signature = SIG; \
 		do_register(module, name, 4); /* cb has 4 args */ \
 	}
+
 #define DECLARE_CONSTR_5(SIG, LSIG, RET_TYPE, ARG1_TYPE, ARG2_TYPE, ARG3_TYPE, ARG4_TYPE, ARG5_TYPE) \
 		SchemePrimitive(const char* module, const char* name, \
 				RET_TYPE (T::*cb)(ARG1_TYPE, ARG2_TYPE, ARG3_TYPE, ARG4_TYPE, ARG5_TYPE), T *data) \
@@ -879,7 +871,18 @@ class SchemePrimitive : public PrimitiveEnviron
 
 		// Declare and define the constructors for this class. They all have
 		// the same basic form, except for the types.
-		DECLARE_CONSTR_1(B_B,	b_b,  bool, bool)
+// XXX FIXME This is all deeply bad and broken and wrong -- there
+// should only be a few basic types; there should NOT be any wrappers
+// for functions taking 3,4,5 arguments, and pretty much all functions
+// should be taking only Handles as arguments, and pretty much nothing
+// else.  All this other crap- returning doubles, and whatnot, is a
+// gross abuse of the intended use of these wrappers!  The Scheme
+// interfaces ARE NOT MEANT TO BE A GENERAL PURPOSE COMPUTING PLATFORM.
+// YOU ARE DESIGNING YOUR SYSTEM WRONG IF YOU NEED MORE THAN A FEW
+// ARGUMENTS, OR ARGUMENTS THAT ARE NOT HANDLES!!
+// Wtf. Who does this shit, anyway. Fuck me.  This is total crap.
+//
+		DECLARE_CONSTR_1(B_B,    b_b,  bool, bool)
 		DECLARE_CONSTR_2(B_HI,   b_hi, bool, Handle, int)
 		DECLARE_CONSTR_2(B_HH,   b_hh, bool, Handle, Handle)
 		DECLARE_CONSTR_4(B_SDDD, b_sddd,bool,const std::string&,double,double,double)
@@ -888,60 +891,59 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_5(B_SIDDD, b_siddd,bool,const std::string&,int,double,double,double)
 		DECLARE_CONSTR_3(D_HHT,  d_hht, double, Handle, Handle, Type)
 		DECLARE_CONSTR_4(D_HHTB, d_hhtb, double, Handle, Handle, Type, bool)
-		DECLARE_CONSTR_1(D_S,	d_s,  double, const std::string&)
-		DECLARE_CONSTR_4(D_SHHI,   d_shhi,  double, const std::string&,Handle,Handle,int)
-		DECLARE_CONSTR_1(H_H,  h_h,  Handle, Handle)
-		DECLARE_CONSTR_2(H_HI, h_hi, Handle, Handle, int)
-		DECLARE_CONSTR_2(H_HH, h_hh, Handle, Handle, Handle)
-		DECLARE_CONSTR_2(H_HS, h_hs, Handle, Handle, const std::string&)
-		DECLARE_CONSTR_3(H_HTQ, h_htq, Handle, Handle, Type, const HandleSeq&)
+		DECLARE_CONSTR_1(D_S,    d_s,  double, const std::string&)
+		DECLARE_CONSTR_4(D_SHHI, d_shhi,  double, const std::string&,Handle,Handle,int)
+		DECLARE_CONSTR_1(H_H,    h_h,  Handle, Handle)
+		DECLARE_CONSTR_2(H_HI,   h_hi, Handle, Handle, int)
+		DECLARE_CONSTR_2(H_HH,   h_hh, Handle, Handle, Handle)
+		DECLARE_CONSTR_2(H_HS,   h_hs, Handle, Handle, const std::string&)
+		DECLARE_CONSTR_3(H_HTQ,  h_htq, Handle, Handle, Type, const HandleSeq&)
 		DECLARE_CONSTR_4(H_HTQB, h_htqb, Handle, Handle, Type, const HandleSeq&, bool)
-		DECLARE_CONSTR_2(H_HZ,  h_hz, Handle, Handle, size_t)
-		DECLARE_CONSTR_2(H_SH, h_sh,Handle,const std::string&,Handle)
+		DECLARE_CONSTR_3(H_HHH,  h_hhh, Handle, Handle, Handle, Handle)
+		DECLARE_CONSTR_2(H_HZ,   h_hz, Handle, Handle, size_t)
+		DECLARE_CONSTR_2(H_SH,   h_sh,Handle,const std::string&,Handle)
 		DECLARE_CONSTR_4(H_SDDD, h_sddd,Handle,const std::string&,double,double,double)
-		DECLARE_CONSTR_3(H_SHI, h_shi,Handle,const std::string&,Handle,int)
+		DECLARE_CONSTR_3(H_SHI,  h_shi,Handle,const std::string&,Handle,int)
 		DECLARE_CONSTR_5(H_SHDDD, h_shddd,Handle,const std::string&,Handle,double,double,double)
 		DECLARE_CONSTR_5(H_SIDDD, h_siddd,Handle,const std::string&,int,double,double,double)
-		DECLARE_CONSTR_2(H_SQ,  h_sq, Handle, const std::string&, const HandleSeq&)
+		DECLARE_CONSTR_2(H_SQ,   h_sq, Handle, const std::string&, const HandleSeq&)
 		DECLARE_CONSTR_3(H_SQQ,  h_sqq, Handle, const std::string&,
-                                 const HandleSeq&, const HandleSeq&)
-		DECLARE_CONSTR_1(I_S,	i_s, int, const std::string&)
-		DECLARE_CONSTR_5(I_SHHHI,   i_shhhi, int, const std::string&,Handle,Handle,Handle,int)
-		DECLARE_CONSTR_1(Q_H,	q_h, HandleSeq, Handle)
+                                     const HandleSeq&, const HandleSeq&)
+		DECLARE_CONSTR_1(I_S,    i_s, int, const std::string&)
+		DECLARE_CONSTR_5(I_SHHHI,i_shhhi, int, const std::string&,Handle,Handle,Handle,int)
+		DECLARE_CONSTR_1(Q_H,	 q_h, HandleSeq, Handle)
 		DECLARE_CONSTR_3(Q_HTI,  q_hti, HandleSeq, Handle, Type, int)
 		DECLARE_CONSTR_4(Q_HTIB, q_htib, HandleSeq, Handle, Type, int, bool)
-		DECLARE_CONSTR_1(K_H,	k_h,  HandleSeqSeq, Handle)
+		DECLARE_CONSTR_1(K_H,    k_h,  HandleSeqSeq, Handle)
 		DECLARE_CONSTR_2(K_HI,   k_hi, HandleSeqSeq, Handle, int)
-		DECLARE_CONSTR_2(S_AS,   s_as, const std::string&, AtomSpace*,
-                                 const std::string&)
-		DECLARE_CONSTR_1(S_S,	s_s,  const std::string&, const std::string&)
-		DECLARE_CONSTR_2(S_SS,   s_ss, const std::string&, const std::string&,
-                                 const std::string&)
-		DECLARE_CONSTR_3(S_SSS,  s_sss,const std::string&, const std::string&,
-                                 const std::string&, const std::string&)
-		DECLARE_CONSTR_3(H_HHH,  h_hhh, Handle, Handle, Handle, Handle)
-		DECLARE_CONSTR_0(S_V,	s_v,  const std::string&)
-		DECLARE_CONSTR_1(P_H,	p_h,  TruthValuePtr, Handle)
-		DECLARE_CONSTR_3(U_SSB,  u_ssb, UUID,const std::string&,const std::string&, bool)
-		DECLARE_CONSTR_1(V_B,	v_b,  void, bool)
+		DECLARE_CONSTR_2(S_AS,   s_as, std::string, AtomSpace*,
+                                     const std::string&)
+		DECLARE_CONSTR_1(S_S,    s_s,  std::string, const std::string&)
+		DECLARE_CONSTR_2(S_SS,   s_ss, std::string, const std::string&,
+                                     const std::string&)
+		DECLARE_CONSTR_3(S_SSS,  s_sss, std::string, const std::string&,
+                                     const std::string&, const std::string&)
+		DECLARE_CONSTR_0(S_V,   s_v,  std::string)
+		DECLARE_CONSTR_1(P_H,   p_h,  TruthValuePtr, Handle)
+		DECLARE_CONSTR_1(V_B,   v_b,  void, bool)
 		DECLARE_CONSTR_1(V_H,	v_h,  void, Handle)
-		DECLARE_CONSTR_2(V_HS,   v_hs, void, Handle, short)
-		DECLARE_CONSTR_1(V_S,	v_s,  void, const std::string&)
-		DECLARE_CONSTR_2(V_SA,   v_sa, void, const std::string&,
-                                 AtomSpace*)
-		DECLARE_CONSTR_2(V_SH,   v_sh, void, const std::string&,
+		DECLARE_CONSTR_2(V_HS,  v_hs, void, Handle, short)
+		DECLARE_CONSTR_1(V_S,   v_s,  void, const std::string&)
+		DECLARE_CONSTR_2(V_SA,  v_sa, void, const std::string&,
+                                    AtomSpace*)
+		DECLARE_CONSTR_2(V_SH,  v_sh, void, const std::string&,
                                  Handle)
-		DECLARE_CONSTR_3(V_SHI,  v_shi,void, const std::string&,
+		DECLARE_CONSTR_3(V_SHI, v_shi,void, const std::string&,
                                  Handle, int)
-		DECLARE_CONSTR_2(V_SS,   v_ss, void, const std::string&,
+		DECLARE_CONSTR_2(V_SS,  v_ss, void, const std::string&,
                                  const std::string&)
-		DECLARE_CONSTR_3(V_SSS,  v_sss,void, const std::string&,
+		DECLARE_CONSTR_3(V_SSS, v_sss,void, const std::string&,
                                  const std::string&, const std::string&)
 		DECLARE_CONSTR_1(V_T,	v_t,  void, Type)
-		DECLARE_CONSTR_2(V_TI,   v_ti, void, Type, int)
+		DECLARE_CONSTR_2(V_TI,  v_ti, void, Type, int)
 		DECLARE_CONSTR_4(V_TIDI, v_tidi, void, Type, int, double, int)
 
-		DECLARE_CONSTR_0(V_V,	v_v,  void);
+		DECLARE_CONSTR_0(V_V,   v_v,  void);
 };
 
 #define DECLARE_DECLARE_1(RET,ARG) \
@@ -970,6 +972,7 @@ inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2,ARG
 	/* when it is no longer needed. */ \
 	new SchemePrimitive<T>(module, name, cb, data); \
 }
+
 #define DECLARE_DECLARE_4(RET,ARG1,ARG2,ARG3,ARG4) \
 template<class T> \
 inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2,ARG3,ARG4), T *data, const char* module = "extension") \
@@ -978,6 +981,7 @@ inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2,ARG
 	/* when it is no longer needed. */ \
 	new SchemePrimitive<T>(module, name, cb, data); \
 }
+
 #define DECLARE_DECLARE_5(RET,ARG1,ARG2,ARG3,ARG4,ARG5) \
 template<class T> \
 inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2,ARG3,ARG4,ARG5), T *data, const char* module = "extension") \
