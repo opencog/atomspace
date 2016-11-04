@@ -31,10 +31,10 @@ namespace opencog {
 class DistSCM : public ModuleWrap
 {
 private:
-	//friend class DistributedEvalTest;
 
 	void init(void);
 
+	// XXX FIXME -- a single global vairable? This cannot be right!
 	static bool master_mode;
 	void set_master_mode(void);
 	const std::string& slave_mode(const std::string& ip_string,
@@ -43,6 +43,7 @@ private:
 	              const std::string& clientID,
 	              bool truth);
 
+	// XXX FIXME -- a single client and worker? This cannot be right!
 	gearman_client_st client;
 	gearman_worker_st *worker;
 	static gearman_return_t worker_function(gearman_job_st *job, void *context);

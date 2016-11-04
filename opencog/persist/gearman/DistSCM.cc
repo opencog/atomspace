@@ -88,7 +88,7 @@ std::string false_string = "Oh No, Mr. Billlll!";
 const std::string& DistSCM::slave_mode(const std::string& ip_string,
                                        const std::string& workerID)
 {
-	AtomSpace* atoms_ptr = SchemeSmob::ss_get_env_as("set-slave-mode");
+	AtomSpace* atomspace = SchemeSmob::ss_get_env_as("set-slave-mode");
 
 #ifdef DEBUG
 	std::cout << "Dist set slave mode ip=" <<  ip_string
@@ -130,7 +130,7 @@ const std::string& DistSCM::slave_mode(const std::string& ip_string,
 	                                    gearman_literal_param("make_call"),
 	                                    worker_fn,
 	                                    0,
-	                                    atoms_ptr);
+	                                    atomspace);
 
 	if (gearman_failed(rc))
 	{
@@ -139,13 +139,15 @@ const std::string& DistSCM::slave_mode(const std::string& ip_string,
 			"Gearman: %s", gearman_worker_error(worker));
 	}
 
-	gearman_worker_set_timeout(worker, 100);
+	// Timeout is in milliseconds. Set it to 5 seconds.
+	gearman_worker_set_timeout(worker, 5000);
 	master_mode = false;
 	while (not master_mode)
 	{
-		if (gearman_failed(gearman_worker_work(worker)))
+		gearman_return_t rc = gearman_worker_work(worker);
+		if (gearman_failed(rc))
 		{
-			std::cerr << gearman_worker_error(worker) << std::endl;
+			std::cerr << "Dist error: " << gearman_worker_error(worker) << std::endl;
 			gearman_worker_free(worker);
 			return false_string;
 		}
