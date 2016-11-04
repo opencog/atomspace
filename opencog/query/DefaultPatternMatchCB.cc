@@ -742,14 +742,7 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 		// clause is present" is implemented by ChoiceLink.
 		for (const Handle& h : oset)
 		{
-			try
-			{
-				Handle g = gnds.at(h);
-			}
-			catch (...)
-			{
-				return false;
-			}
+			if (gnds.end() == gnds.find(h)) return false;
 		}
 		return true;
 	}
@@ -764,15 +757,9 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 		// AbsentLink is same as NotLink PresentLink.
 		for (const Handle& h : oset)
 		{
-			try
-			{
-				Handle g = gnds.at(h);
-			}
-			catch (...)
-			{
-				// If no grounding, that,s good, try the next one.
-				continue;
-			}
+			// If no grounding, that's good, try the next one.
+			if (gnds.end() == gnds.find(h)) continue;
+
 			// If we are here, a grounding was found; that's bad.
 			return false;
 		}
@@ -794,14 +781,7 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 		// anything about that here? Seems like we can't do anything...
 		for (const Handle& h : oset)
 		{
-			try
-			{
-				Handle g = gnds.at(h);
-			}
-			catch (...)
-			{
-				continue;
-			}
+			if (gnds.end() == gnds.find(h)) continue;
 			return true;
 		}
 		return false;
@@ -820,10 +800,10 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 	// There are several minor issues: 1) we need to check the TV
 	// of the grounded atom, not the TV of the pattern, and 2) if
 	// the atom is executable, we need to execute it.
-	try
+	auto g = gnds.find(top);
+	if (gnds.end() != g)
 	{
-		Handle g = gnds.at(top);
-		TruthValuePtr tvp(g->getTruthValue());
+		TruthValuePtr tvp(g->second->getTruthValue());
 		LAZY_LOG_FINE << "Non-logical atom has tv="
 		              << tvp->toString() << std::endl;
 		// XXX FIXME: we are making a crisp-logic go/no-go decision
@@ -832,7 +812,6 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 		bool relation_holds = tvp->getMean() > 0.5;
 		return relation_holds;
 	}
-	catch (...) {}
 
 	// If it's not grounded, then perhaps its executable.
 	return eval_term(top, gnds);
