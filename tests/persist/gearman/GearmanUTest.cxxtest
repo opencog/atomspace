@@ -84,7 +84,7 @@ void GearmanUTest::create_slave_thread(GearmanUTest* dt)
 	std::string slv = dt->evl->eval(
 		"(set-slave-mode \"localhost\" \"GearmanUTest-worker1\")");
 
-	std::cout << "GearmanUTest slave startup message:\n" << slv << std::endl;
+	std::cout << "GearmanUTest slave got message:\n" << slv << std::endl;
 	TS_ASSERT_EQUALS(slv, "localhost\n");
 }
 
@@ -99,8 +99,7 @@ void GearmanUTest::test_dist()
 		"(dist-run-scm \"(ConceptNode \\\"Hello\\\")\" \"client1\")";
 
 	std::string result = evl2->eval(mast);
-	std::cout << "Master result message:\n" << result << std::endl;
-	std::cout << "Master got: " << result;
+	std::cout << "GearmanUTest master got result:" << result << std::endl;
 
 	evl2->eval("(set-master-mode)");
 	slaveThread.join();

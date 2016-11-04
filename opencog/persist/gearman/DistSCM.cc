@@ -67,19 +67,25 @@ gearman_return_t DistSCM::worker_function(gearman_job_st *job, void *context)
 	std::cout << "Dist worker job string is " << workload << std::endl;
 #endif
 
-	SchemeEval* evl = SchemeEval::get_evaluator((AtomSpace*) context);
+	// XXX FIXME -- this seems really really wrong to me ...
+	// I think we should probably be getting the atomspace for this thread,
+	// and not some random atomspace from who-knows-where...
+	AtomSpace* atomspace = (AtomSpace*) context;
+	SchemeEval* evl = SchemeEval::get_evaluator(atomspace);
 	Handle result = evl->eval_h(workload);
 
 #ifdef DEBUG
 	std::cout << "Dist worker work result is " << result;
 #endif
 
-	UUID vl = result.value();
-	if (gearman_failed(gearman_job_send_data(job, &vl, sizeof(vl))))
+	std::string reply = result->toString();
+	gearman_return_t rc = gearman_job_send_data(job, reply.c_str(), reply.length());
+
+	if (gearman_failed(rc))
 	{
 		// On gearman error return, no result is sent to master and
 		// job request stays in queue.
-		std::cerr << " German worker: Error occured\n";
+		std::cerr << "Error: Gearman worker: Unable to send result\n";
 		return GEARMAN_ERROR;
 	}
 	return GEARMAN_SUCCESS;
@@ -92,10 +98,8 @@ std::string false_string = "Oh No, Mr. Billlll!";
 std::string DistSCM::slave_mode(const std::string& ipaddr_string,
                                 const std::string& workerID)
 {
-	AtomSpace* atomspace = SchemeSmob::ss_get_env_as("set-slave-mode");
-
 #ifdef DEBUG
-	std::cout << "Dist set slave mode ip=" <<  ipaddr_string
+	std::cout << "Dist set-slave-mode ip=" <<  ipaddr_string
 	          << " worker ID=" << workerID << std::endl;
 #endif
 	worker = gearman_worker_create(NULL);
@@ -130,6 +134,10 @@ std::string DistSCM::slave_mode(const std::string& ipaddr_string,
 	}
 
 	gearman_function_t worker_fn = gearman_function_create(worker_function);
+
+	// Get the atomspace for this thread.
+	AtomSpace* atomspace = SchemeSmob::ss_get_env_as("set-slave-mode");
+
 	rc = gearman_worker_define_function(worker,
 	                                    gearman_literal_param("make_call"),
 	                                    worker_fn,
@@ -143,6 +151,9 @@ std::string DistSCM::slave_mode(const std::string& ipaddr_string,
 			"Gearman: %s", gearman_worker_error(worker));
 	}
 
+#ifdef DEBUG
+	std::cout << "Dist set-slave-mode enter main loop\n";
+#endif
 	// Timeout is in milliseconds. Set it to 5 seconds.
 	gearman_worker_set_timeout(worker, 5000);
 	master_mode = false;
