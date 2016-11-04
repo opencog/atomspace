@@ -884,19 +884,19 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 {
 	// The given term may appear in the clause in more than one place.
 	// Each distinct locatation should be explored separately.
-	try
+	auto pl = _pat->connected_terms_map.find({term, clause_root});
+	if (_pat->connected_terms_map.end() == pl)
 	{
-		for (const PatternTermPtr &ptm :
-			_pat->connected_terms_map.at({term, clause_root}))
-		{
-			if (explore_link_branches(ptm, hg, clause_root))
-				return true;
-		}
-	}
-	catch (const std::out_of_range&)
-	{
+		// XXX ???? Isn't this a hard-error ???
 		LAZY_LOG_FINE << "Pattern term not found for " << term->toShortString()
 		              << ", clause=" << clause_root->toShortString();
+		return false;
+	}
+
+	for (const PatternTermPtr &ptm : pl->second)
+	{
+		if (explore_link_branches(ptm, hg, clause_root))
+			return true;
 	}
 	return false;
 }
