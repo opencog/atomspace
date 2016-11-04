@@ -21,10 +21,41 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <string>
+#include <libgearman/gearman.h>
+
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeModule.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
-#include "DistSCM.h"
+
+namespace opencog {
+
+class DistSCM : public ModuleWrap
+{
+private:
+	void init(void);
+
+	/// All threads will heep handling work until this is set to false.
+	static bool keep_working;
+	void exit_all_workers(void);
+
+	std::string start_work_handler(const std::string& ipaddr_string,
+	                               const std::string& workerID);
+	std::string dist_scm(const std::string& work_string,
+	                     const std::string& clientID);
+
+	// XXX FIXME -- a single client and worker? This cannot be right!
+	gearman_client_st client;
+	gearman_worker_st *worker;
+	static gearman_return_t worker_function(gearman_job_st *job, void *context);
+
+public:
+	DistSCM(void);
+	~DistSCM();
+};
+
+} // namespace opencog
 
 #define DEBUG 1
 using namespace opencog;
@@ -255,6 +286,10 @@ std::string DistSCM::dist_scm(const std::string& scm_string,
 DistSCM::~DistSCM()
 {
 }
+
+extern "C" {
+void opencog_dist_init(void);
+};
 
 void opencog_dist_init(void)
 {
