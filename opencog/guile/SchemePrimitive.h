@@ -106,7 +106,7 @@ class PrimitiveEnviron
 // Its complete and total crap.
 // V_TI   -- DimEmbedModule::embedAtomSpace()
 // V_T    -- DimEmbedModule::logAtomEmbedding()
-// D_DDI  -- DimEmbedModule::euclidDist()
+// D_HHTB -- DimEmbedModule::euclidDist()
 // Q_HTIB -- DimEmbedModule::kNearestNeighbors()
 //
 // This API needs to be re-thought, from scratch. Its offensive.
@@ -153,7 +153,6 @@ class SchemePrimitive : public PrimitiveEnviron
 			bool (T::*b_sdii)(const std::string&,double,int,int);
 			bool (T::*b_shddd)(const std::string&,Handle,double,double,double);
 			bool (T::*b_siddd)(const std::string&,int,double,double,double);
-			double (T::*d_hht)(Handle, Handle, Type);
 			double (T::*d_hhtb)(Handle, Handle, Type, bool);
 			double (T::*d_s)(const std::string&);
 			double (T::*d_shhi)(const std::string&, Handle, Handle,int);
@@ -212,7 +211,6 @@ class SchemePrimitive : public PrimitiveEnviron
 			B_SDII,
 			B_SHDDD,
 			B_SIDDD,
-			D_HHT, // return double, take handle, handle, and type
 			D_HHTB,// return double, take handle, handle, and type
 			D_S,
 			D_SHHI,
@@ -343,16 +341,6 @@ class SchemePrimitive : public PrimitiveEnviron
 								rc = SCM_BOOL_F;
 
 						break;
-				}
-				case D_HHT:
-				{
-					Handle h1(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
-					Handle h2(SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2));
-					Type t = SchemeSmob::verify_atom_type(scm_caddr(args), scheme_name, 3);
-
-					double d = (that->*method.d_hht)(h1,h2,t);
-					rc = scm_from_double(d);
-					break;
 				}
 				case D_HHTB:
 				{
@@ -826,7 +814,6 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_4(B_SDII, b_sdii,bool,const std::string&,double,int,int)
 		DECLARE_CONSTR_5(B_SHDDD, b_shddd,bool,const std::string&,Handle,double,double,double)
 		DECLARE_CONSTR_5(B_SIDDD, b_siddd,bool,const std::string&,int,double,double,double)
-		DECLARE_CONSTR_3(D_HHT,  d_hht, double, Handle, Handle, Type)
 		DECLARE_CONSTR_4(D_HHTB, d_hhtb, double, Handle, Handle, Type, bool)
 		DECLARE_CONSTR_1(D_S,    d_s,  double, const std::string&)
 		DECLARE_CONSTR_4(D_SHHI, d_shhi,  double, const std::string&,Handle,Handle,int)
