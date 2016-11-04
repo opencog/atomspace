@@ -81,6 +81,8 @@ void DistSCM::init(void)
 	                        this, "dist-gearman");
 }
 
+/// This method causes all worker threads to return to thier callers
+/// after completing whatever work they are doing.
 void DistSCM::exit_all_workers(void)
 {
 	keep_working = false;
@@ -96,9 +98,8 @@ gearman_return_t DistSCM::worker_function(gearman_job_st *job, void *context)
 	std::cout << "Dist worker job string is " << workload << std::endl;
 #endif
 
-	// XXX FIXME -- this seems really really wrong to me ...
-	// I think we should probably be getting the atomspace for this thread,
-	// and not some random atomspace from who-knows-where...
+	// All worker threads are sharing the same atomspace.
+	// This seems like the right thing to do, I guess.
 	AtomSpace* atomspace = (AtomSpace*) context;
 	SchemeEval* evl = SchemeEval::get_evaluator(atomspace);
 	Handle result = evl->eval_h(workload);
@@ -112,23 +113,28 @@ gearman_return_t DistSCM::worker_function(gearman_job_st *job, void *context)
 
 	if (gearman_failed(rc))
 	{
-		// On gearman error return, no result is sent to master and
-		// job request stays in queue.
+		// On gearman error return, no result is sent to the client,
+		// and the job request stays in queue.
 		std::cerr << "Error: Gearman worker: Unable to send result\n";
 		return GEARMAN_ERROR;
 	}
 	return GEARMAN_SUCCESS;
 }
 
-std::string false_string = "Oh No, Mr. Billlll!";
+std::string false_string = "Oh Noooo, Mr. Bill!";
 
+/// This method causes the current thread to enter an infinite
+/// loop, waiting for job requests from clients.  This method
+/// will not return, unless there is a Gearman error, or unless
+/// the exit_all_handlers() method is called.
+///
 /// `ipaddr_string` is the IP address of the gearmand server to contact.
 /// The default port number will be used.
 std::string DistSCM::start_work_handler(const std::string& ipaddr_string,
                                         const std::string& workerID)
 {
 #ifdef DEBUG
-	std::cout << "Dist set-slave-mode ip=" <<  ipaddr_string
+	std::cout << "Dist start-work-handler ip=" <<  ipaddr_string
 	          << " worker ID=" << workerID << std::endl;
 #endif
 	worker = gearman_worker_create(NULL);
@@ -165,7 +171,7 @@ std::string DistSCM::start_work_handler(const std::string& ipaddr_string,
 	gearman_function_t worker_fn = gearman_function_create(worker_function);
 
 	// Get the atomspace for this thread.
-	AtomSpace* atomspace = SchemeSmob::ss_get_env_as("set-slave-mode");
+	AtomSpace* atomspace = SchemeSmob::ss_get_env_as("start-work-handler");
 
 	rc = gearman_worker_define_function(worker,
 	                                    gearman_literal_param("make_call"),
@@ -181,7 +187,7 @@ std::string DistSCM::start_work_handler(const std::string& ipaddr_string,
 	}
 
 #ifdef DEBUG
-	std::cout << "Dist set-slave-mode enter main loop\n";
+	std::cout << "Dist start-work-handler enter main loop\n";
 #endif
 	// Timeout is in milliseconds. Set it to 1000 millsecs.
 	// As a result, we will poll, once a second, and then

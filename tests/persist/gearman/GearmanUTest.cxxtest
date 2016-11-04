@@ -51,12 +51,11 @@ class GearmanUTest :  public CxxTest::TestSuite
 			delete as;
 		}
 		void setUp(void);
-		static void create_worker_thread(GearmanUTest* dt);
+		static void worker_thread(GearmanUTest* dt);
 
-		// Thread join, after calling set master mode.
 		void tearDown(void){}
 
-		// Call master and get return.
+		// Send work to worker, wait for result.
 		void test_dist();
 };
 
@@ -74,7 +73,8 @@ void GearmanUTest::setUp(void)
 	std::cout << "Finish GearmanUTest setup\n";
 }
 
-void GearmanUTest::create_worker_thread(GearmanUTest* dt)
+// Thread that will handle work requests.
+void GearmanUTest::worker_thread(GearmanUTest* dt)
 {
 	std::cout << "Start GearmanUTest worker thread\n";
 	SchemeEval* evl = SchemeEval::get_evaluator(dt->as);
@@ -88,17 +88,21 @@ void GearmanUTest::create_worker_thread(GearmanUTest* dt)
 
 void GearmanUTest::test_dist()
 {
-	std::thread workThread(create_worker_thread, this);
+	// Start the worker thread.
+	std::thread workThread(worker_thread, this);
 
+	// Wait for the worker to get started.
 	sleep(1);
-	std::cout << "GearmanUTest master thread going to issue work\n";
-	// Call master
-	std::string mast =
+
+	std::cout << "GearmanUTest client thread going to issue work\n";
+
+	// Send work to worker, and wait for result.
+	const char * work =
 		"(dist-eval \"(ConceptNode \\\"Hello\\\")\" \"client1\")";
 
 	SchemeEval* evl = SchemeEval::get_evaluator(as);
-	std::string result = evl->eval(mast);
-	std::cout << "GearmanUTest master got result:" << result;
+	std::string result = evl->eval(work);
+	std::cout << "GearmanUTest client got result:" << result;
 
 	evl->eval("(exit-all-workers)");
 	workThread.join();
