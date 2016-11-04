@@ -147,6 +147,7 @@ Install:
 apt-get install linux-tools
 ```
 
+oprofile
 
 
 ### Using valgrind ###

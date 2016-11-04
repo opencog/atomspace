@@ -35,6 +35,12 @@
 
 using namespace opencog;
 
+#ifdef DEBUG
+#define DO_LOG(STUFF) STUFF
+#else
+#define DO_LOG(STUFF)
+#endif
+
 /* ======================================================== */
 
 InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
@@ -365,11 +371,11 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 		_starter_term = ch.start_term;
 
 		_root = clauses[bestclause];
-		LAZY_LOG_FINE << "Search start node: " << best_start->toShortString();
-		LAZY_LOG_FINE << "Start term is: "
+		DO_LOG({LAZY_LOG_FINE << "Search start node: " << best_start->toShortString();})
+		DO_LOG({LAZY_LOG_FINE << "Start term is: "
 		              << (_starter_term == nullptr ?
-		                  "UNDEFINED" : _starter_term->toShortString());
-		LAZY_LOG_FINE << "Root clause is: " <<  _root->toShortString();
+		                  "UNDEFINED" : _starter_term->toShortString());})
+		DO_LOG({LAZY_LOG_FINE << "Root clause is: " <<  _root->toShortString();})
 
 		// This should be calling the over-loaded virtual method
 		// get_incoming_set(), so that, e.g. it gets sorted by attentional
@@ -379,9 +385,9 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 		for (size_t i = 0; i < sz; i++)
 		{
 			Handle h(iset[i]);
-			LAZY_LOG_FINE << "xxxxxxxxxx neighbor_search xxxxxxxxxx\n"
+			DO_LOG({LAZY_LOG_FINE << "xxxxxxxxxx neighbor_search xxxxxxxxxx\n"
 			              << "Loop candidate (" << i+1 << "/" << sz << "):\n"
-			              << h->toShortString();
+			              << h->toShortString();})
 			bool found = pme->explore_neighborhood(_root, _starter_term, h);
 
 			// Terminate search if satisfied.
@@ -487,7 +493,7 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 {
 	jit_analyze(pme);
 
-	logger().fine("Attempt to use node-neighbor search");
+	DO_LOG({logger().fine("Attempt to use node-neighbor search");})
 	_search_fail = false;
 	bool found = neighbor_search(pme);
 	if (found) return true;
@@ -498,7 +504,7 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// they are all evaluatable. This can happen for sequence links;
 	// we want to quickly rule out this case before moving to more
 	// complex searches, below.
-	logger().fine("Cannot use node-neighbor search, use no-var search");
+	DO_LOG({logger().fine("Cannot use node-neighbor search, use no-var search");})
 	_search_fail = false;
 	found = no_search(pme);
 	if (found) return true;
@@ -509,7 +515,7 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// variables! Which can happen (there is a unit test for this,
 	// the LoopUTest), and so instead, we search based on the link
 	// types that occur in the atomspace.
-	logger().fine("Cannot use no-var search, use link-type search");
+	DO_LOG({logger().fine("Cannot use no-var search, use link-type search");})
 	_search_fail = false;
 	found = link_type_search(pme);
 	if (found) return true;
@@ -521,7 +527,7 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 	// variable, all by itself, and set some type restrictions on it,
 	// and that's all. We deal with this in the variable_search()
 	// method.
-	logger().fine("Cannot use link-type search, use variable-type search");
+	DO_LOG({logger().fine("Cannot use link-type search, use variable-type search");})
 	_search_fail = false;
 	found = variable_search(pme);
 	return found;
@@ -607,10 +613,10 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 		return false;
 	}
 
-	LAZY_LOG_FINE << "Start clause is: " << std::endl
-	              << _root->toShortString();
-	LAZY_LOG_FINE << "Start term is: " << std::endl
-	              << _starter_term->toShortString();
+	DO_LOG({LAZY_LOG_FINE << "Start clause is: " << std::endl
+	              << _root->toShortString();})
+	DO_LOG({LAZY_LOG_FINE << "Start term is: " << std::endl
+	              << _starter_term->toShortString();})
 
 	// Get type of the rarest link
 	Type ptype = _starter_term->getType();
@@ -618,12 +624,14 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 	HandleSeq handle_set;
 	_as->get_handles_by_type(handle_set, ptype);
 
+#ifdef DEBUG
 	size_t i = 0, hsz = handle_set.size();
+#endif
 	for (const Handle& h : handle_set)
 	{
-		LAZY_LOG_FINE << "yyyyyyyyyy link_type_search yyyyyyyyyy\n"
+		DO_LOG({LAZY_LOG_FINE << "yyyyyyyyyy link_type_search yyyyyyyyyy\n"
 		              << "Loop candidate (" << ++i << "/" << hsz << "):\n"
-		              << h->toShortString();
+		              << h->toShortString();})
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;
 	}
@@ -662,12 +670,12 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	size_t count = SIZE_MAX;
 	std::set<Type> ptypes;
 
-	LAZY_LOG_FINE << "_variables = " <<  _variables->to_string();
+	DO_LOG({LAZY_LOG_FINE << "_variables = " <<  _variables->to_string();})
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
 	for (const Handle& var: _variables->varset)
 	{
-		LAZY_LOG_FINE << "Examine variable " << var->toShortString();
+		DO_LOG({LAZY_LOG_FINE << "Examine variable " << var->toShortString();})
 
 #ifdef _IMPLEMENT_ME_LATER
 		// XXX TODO FIXME --- if there is a deep type in the mix, that
@@ -682,16 +690,16 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 		auto tit = _variables->_simple_typemap.find(var);
 		if (_variables->_simple_typemap.end() == tit) continue;
 		const std::set<Type>& typeset = tit->second;
-		LAZY_LOG_FINE << "Type-restriction set size = "
-		              << typeset.size();
+		DO_LOG({LAZY_LOG_FINE << "Type-restriction set size = "
+		              << typeset.size();})
 
 		// Calculate the total number of atoms of typeset
 		size_t num = 0;
 		for (Type t : typeset)
 			num += (size_t) _as->get_num_atoms_of_type(t);
 
-		LAZY_LOG_FINE << var->toString() << "has "
-		              << num << " atoms in the atomspace";
+		DO_LOG({LAZY_LOG_FINE << var->toString() << "has "
+		              << num << " atoms in the atomspace";})
 
 		if (0 < num and num < count)
 		{
@@ -710,7 +718,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 					_starter_term = cl;
 					count = num;
 					ptypes = typeset;
-					LAZY_LOG_FINE << "New minimum count of " << count;
+					DO_LOG({LAZY_LOG_FINE << "New minimum count of " << count;})
 					break;
 				}
 
@@ -724,8 +732,8 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 						_starter_term = var;
 					count = num;
 					ptypes = typeset;
-					LAZY_LOG_FINE << "New minimum count of "
-					              << count << " (nonroot)";
+					DO_LOG({LAZY_LOG_FINE << "New minimum count of "
+					              << count << " (nonroot)";})
 					break;
 				}
 			}
@@ -785,14 +793,16 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 		for (Type ptype : ptypes)
 			_as->get_handles_by_type(handle_set, ptype);
 
-	LAZY_LOG_FINE << "Atomspace reported " << handle_set.size() << " atoms";
+	DO_LOG({LAZY_LOG_FINE << "Atomspace reported " << handle_set.size() << " atoms";})
 
+#ifdef DEBUG
 	size_t i = 0, hsz = handle_set.size();
+#endif
 	for (const Handle& h : handle_set)
 	{
-		LAZY_LOG_FINE << "zzzzzzzzzzz variable_search zzzzzzzzzzz\n"
+		DO_LOG({LAZY_LOG_FINE << "zzzzzzzzzzz variable_search zzzzzzzzzzz\n"
 		              << "Loop candidate (" << ++i << "/" << hsz << "):\n"
-		              << h->toShortString();
+		              << h->toShortString();})
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;
 	}
@@ -830,8 +840,8 @@ bool InitiateSearchCB::no_search(PatternMatchEngine *pme)
 		return false;
 	}
 
-	LAZY_LOG_FINE << "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww\n"
-	              << "Non-search: no variables, no non-evaluatable clauses";
+	DO_LOG({LAZY_LOG_FINE << "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww\n"
+	              << "Non-search: no variables, no non-evaluatable clauses";})
 	_root = _starter_term = clauses[0];
 	bool found = pme->explore_neighborhood(_root, _starter_term, _root);
 	return found;
@@ -906,8 +916,8 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 
 	pme->set_pattern(*_variables, *_pattern);
 	set_pattern(*_variables, *_pattern);
-	logger().fine("JIT expanded!");
-	_pl->debug_log();
+	DO_LOG({logger().fine("JIT expanded!");
+	_pl->debug_log();})
 }
 
 /* ===================== END OF FILE ===================== */

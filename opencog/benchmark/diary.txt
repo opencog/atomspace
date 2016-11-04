@@ -1356,3 +1356,13 @@ PatternMatchEngine.cc line 100
 0m3.712s
 
 Awesome!
+
+Now remove all the pattern matcher print statements...
+
+0m3.444s
+0m3.353s
+0m3.391s
+0m3.388s
+0m3.479s
+
+Less of a hit, but still significant.
