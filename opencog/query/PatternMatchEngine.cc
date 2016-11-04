@@ -99,8 +99,7 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 	try
 	{
 		Handle gnd(var_grounding.at(hp));
-		if (gnd)
-			return (gnd == hg);
+		return (gnd == hg);
 	}
 	catch (...) { }
 
@@ -239,7 +238,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 				if (ip+1 < osp_size)
 				{
 					have_post = true;
-					post_glob = (osp[ip+1]);
+					post_glob = osp[ip+1];
 				}
 
 				// Match at least one.
@@ -769,6 +768,16 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
                                       Caller caller)
 {
 	const Handle& hp = ptm->getHandle();
+
+	// Do we already have a grounding for this? If we do, and the
+	// proposed grounding is the same as before, then there is
+	// nothing more to do.
+	try
+	{
+		Handle gnd(var_grounding.at(hp));
+		return (gnd == hg);
+	}
+	catch (...) { }
 
 	// If the pattern link is executable, then we should execute, and
 	// use the result of that execution. (This isn't implemented yet,
