@@ -98,7 +98,9 @@ Handle InferenceSCM::do_backward_chaining(Handle h,
     return bc.get_results();
 }
 
-HandleSeq InferenceSCM::get_rulebase_rules(Handle rbs)
+// XXX FIXME -- this appears to be dead code, that no one uses.
+// Can this be removed?
+Handle InferenceSCM::get_rulebase_rules(Handle rbs)
 {
     if (Handle::UNDEFINED == rbs)
         throw RuntimeException(TRACE_INFO,
@@ -109,15 +111,12 @@ HandleSeq InferenceSCM::get_rulebase_rules(Handle rbs)
     auto rules = ure_config.get_rules();
     HandleSeq hs;
 
-    // Copy handles from a rule vector to a handle vector as there are no
-    // scheme-primitive signature for rule vector.
-    // TODO: create a rule-vector scheme-primitive signature, if Rule.h isn't
-    // converted to a sub-class of PatternLink.
+    // Copy handles from a rule vector to a handle vector
     for (auto i = rules.begin(); i != rules.end(); i++){
         hs.push_back((*i).get_alias());
     }
 
-    return hs;
+    return Handle(createLink(SET_LINK, hs));
 }
 
 }
