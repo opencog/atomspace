@@ -113,15 +113,19 @@ class PrimitiveEnviron
 // This API needs to be re-thought, from scratch. Its offensive.
 // EVERYTHING IN PointMemorySCM -- total disaster area.
 // This includes:
+// B_SDDD
 // B_SDII
 // B_SHDDD
+// B_SIDDD
 // D_S
+// D_SHHI
 // H_SDDD
 // H_SH
 // H_SHDDD
 // H_SHI
 // H_SIDDD
 // I_S
+// I_SHHHI
 // V_S
 // V_SH
 // V_SHI
