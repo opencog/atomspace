@@ -21,8 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/Handle.h>
-
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
@@ -31,19 +29,19 @@
 #define DEBUG 1
 using namespace opencog;
 
-bool DistSCM::master_mode = true;
+bool DistSCM::keep_working = true;
 
 DistSCM::DistSCM(void) : ModuleWrap("opencog dist-gearman")
 {}
 
 void DistSCM::init(void)
 {
-	// Blocking slave mode
-	define_scheme_primitive("set-slave-mode", &DistSCM::slave_mode,
+	// Enter Blocking slave mode
+	define_scheme_primitive("start-work-handler", &DistSCM::start_work_handler,
 	                        this, "dist-gearman");
 
 	// Exits the slave mode after last request is served
-	define_scheme_primitive("set-master-mode", &DistSCM::set_master_mode,
+	define_scheme_primitive("exit-all-workers", &DistSCM::exit_all_workers,
 	                        this, "dist-gearman");
 
 	// Sends scheme string to slave and blocks till result arrives,
@@ -52,9 +50,9 @@ void DistSCM::init(void)
 	                        this, "dist-gearman");
 }
 
-void DistSCM::set_master_mode(void)
+void DistSCM::exit_all_workers(void)
 {
-	master_mode = true;
+	keep_working = false;
 }
 
 gearman_return_t DistSCM::worker_function(gearman_job_st *job, void *context)
@@ -95,8 +93,8 @@ std::string false_string = "Oh No, Mr. Billlll!";
 
 /// `ipaddr_string` is the IP address of the gearmand server to contact.
 /// The default port number will be used.
-std::string DistSCM::slave_mode(const std::string& ipaddr_string,
-                                const std::string& workerID)
+std::string DistSCM::start_work_handler(const std::string& ipaddr_string,
+                                        const std::string& workerID)
 {
 #ifdef DEBUG
 	std::cout << "Dist set-slave-mode ip=" <<  ipaddr_string
@@ -154,12 +152,16 @@ std::string DistSCM::slave_mode(const std::string& ipaddr_string,
 #ifdef DEBUG
 	std::cout << "Dist set-slave-mode enter main loop\n";
 #endif
-	// Timeout is in milliseconds. Set it to 5 seconds.
-	gearman_worker_set_timeout(worker, 5000);
-	master_mode = false;
-	while (not master_mode)
+	// Timeout is in milliseconds. Set it to 1000 millsecs.
+	// As a result, we will poll, once a second, and then
+	// pop to back to the main loop, to see if we should halt,
+	// or not.
+	gearman_worker_set_timeout(worker, 1000);
+	while (keep_working)
 	{
 		gearman_return_t rc = gearman_worker_work(worker);
+		if (rc == GEARMAN_TIMEOUT) continue;
+
 		if (gearman_failed(rc))
 		{
 			std::cerr << "Dist error: " << gearman_worker_error(worker) << std::endl;

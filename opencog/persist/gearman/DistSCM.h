@@ -34,12 +34,11 @@ private:
 
 	void init(void);
 
-	// XXX FIXME -- a single global vairable? This cannot be right!
-	static bool master_mode;
-	void set_master_mode(void);
+	static bool keep_working;
+	void exit_all_workers(void);
 
-	std::string slave_mode(const std::string& ipaddr_string,
-	                       const std::string& workerID);
+	std::string start_work_handler(const std::string& ipaddr_string,
+	                               const std::string& workerID);
 	std::string dist_scm(const std::string& work_string,
 	                     const std::string& clientID);
 

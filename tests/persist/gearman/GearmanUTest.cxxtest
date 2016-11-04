@@ -82,7 +82,7 @@ void GearmanUTest::create_slave_thread(GearmanUTest* dt)
 {
 	std::cout << "Start GearmanUTest slave thread\n";
 	std::string slv = dt->evl->eval(
-		"(set-slave-mode \"localhost\" \"GearmanUTest-worker1\")");
+		"(start-work-handler \"localhost\" \"GearmanUTest-worker1\")");
 
 	std::cout << "GearmanUTest slave got message:\n" << slv << std::endl;
 	TS_ASSERT_EQUALS(slv, "localhost\n");
@@ -101,7 +101,7 @@ void GearmanUTest::test_dist()
 	std::string result = evl2->eval(mast);
 	std::cout << "GearmanUTest master got result:" << result << std::endl;
 
-	evl2->eval("(set-master-mode)");
+	evl2->eval("(exit-all-workers)");
 	slaveThread.join();
 
 	TS_ASSERT_DIFFERS(atoll(result.c_str()), Handle::INVALID_UUID);
