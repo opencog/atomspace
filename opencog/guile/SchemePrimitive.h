@@ -81,6 +81,7 @@ class PrimitiveEnviron
 // B_B    -- cogutils logger boolean setters/getters.
 // B_HH   -- PatternSCM::value_is_type(), etc.
 //        -- LGDictSCM::do_lg_conn_type_match(), etc.
+// H_HZ   -- cog-bind-first-n
 // S_AS   -- CogServerSCM::start_server()
 // S_S    -- cogutils logger API, see guile/LoggerSCM.h
 // S_SS   -- DistSCM  (Gearman server)
@@ -99,7 +100,7 @@ class PrimitiveEnviron
 //           Should be re-written to use H_H not K_H
 //
 // This API needs to be re-thought, from scratch. Its offensive.
-// H_HTKB -- FuzzySCM::do_nlp_fuzzy_match()
+// H_HTQB -- FuzzySCM::do_nlp_fuzzy_match()
 //
 // This API needs to be re-thought, from scratch. Its offensive.
 // Its complete and total crap.
@@ -161,7 +162,6 @@ class SchemePrimitive : public PrimitiveEnviron
 			Handle (T::*h_hh)(Handle, Handle);
 			Handle (T::*h_hhh)(Handle, Handle, Handle);
 			Handle (T::*h_hs)(Handle, const std::string&);
-			Handle (T::*h_htq)(Handle, Type, const HandleSeq&);
 			Handle (T::*h_htqb)(Handle, Type, const HandleSeq&, bool);
 			Handle (T::*h_hz)(Handle, size_t);
 			Handle (T::*h_sddd)(const std::string&,double,double,double);
@@ -221,7 +221,6 @@ class SchemePrimitive : public PrimitiveEnviron
 			H_HH,  // return handle, take handle and handle
 			H_HS,  // return handle, take handle and string
 			H_HHH, // return handle, take handle, handle and Handle
-			H_HTQ, // return handle, take handle, type, and HandleSeq
 			H_HTQB, // return handle, take handle, type, HandleSeq and boolean
 			H_HZ,  // return handle, take handle and size_t
 			H_SDDD,
@@ -424,19 +423,6 @@ class SchemePrimitive : public PrimitiveEnviron
 					std::string s(SchemeSmob::verify_string(scm_cadr(args),
 															scheme_name, 2));
 					Handle rh((that->*method.h_hs)(h,s));
-					rc = SchemeSmob::handle_to_scm(rh);
-					break;
-				}
-				case H_HTQ:
-				{
-					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
-
-					Type t = SchemeSmob::verify_atom_type(scm_cadr(args), scheme_name, 2);
-
-					SCM list = scm_caddr(args);
-					HandleSeq seq = SchemeSmob::verify_handle_list(list, scheme_name, 3);
-
-					Handle rh((that->*method.h_htq)(h, t, seq));
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
@@ -848,7 +834,6 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_2(H_HI,   h_hi, Handle, Handle, int)
 		DECLARE_CONSTR_2(H_HH,   h_hh, Handle, Handle, Handle)
 		DECLARE_CONSTR_2(H_HS,   h_hs, Handle, Handle, const std::string&)
-		DECLARE_CONSTR_3(H_HTQ,  h_htq, Handle, Handle, Type, const HandleSeq&)
 		DECLARE_CONSTR_4(H_HTQB, h_htqb, Handle, Handle, Type, const HandleSeq&, bool)
 		DECLARE_CONSTR_3(H_HHH,  h_hhh, Handle, Handle, Handle, Handle)
 		DECLARE_CONSTR_2(H_HZ,   h_hz, Handle, Handle, size_t)
