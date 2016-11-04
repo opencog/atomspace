@@ -37,10 +37,10 @@ class LoggerSCM : public ModuleWrap
 protected:
 	virtual void init();
 
-	const std::string& do_logger_set_level(const std::string& level);
-	const std::string& do_logger_get_level(void);
-	const std::string& do_logger_set_filename(const std::string& filename);
-	const std::string& do_logger_get_filename(void);
+	std::string do_logger_set_level(const std::string& level);
+	std::string do_logger_get_level(void);
+	std::string do_logger_set_filename(const std::string& filename);
+	std::string do_logger_get_filename(void);
 	bool do_logger_set_stdout(bool);
 	bool do_logger_set_sync(bool);
 	bool do_logger_set_timestamp(bool);
