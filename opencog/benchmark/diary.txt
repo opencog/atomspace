@@ -1337,3 +1337,22 @@ time ./opencog/benchmark/profile_bindlink
 0m7.287s
 
 That one change almost doubles the performance!!
+
+try again: replace try by find at
+PatternMatchEngine.cc line 1558
+
+0m5.506s
+0m5.638s
+0m5.584s
+0m5.666s
+0m5.717s
+
+PatternMatchEngine.cc line 100
+
+0m3.595s
+0m3.689s
+0m3.498s
+0m3.660s
+0m3.712s
+
+Awesome!

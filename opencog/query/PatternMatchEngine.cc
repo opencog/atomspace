@@ -96,12 +96,9 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 	// If we already have a grounding for this variable, the new
 	// proposed grounding must match the existing one. Such multiple
 	// groundings can occur when traversing graphs with loops in them.
-	try
-	{
-		Handle gnd(var_grounding.at(hp));
-		return (gnd == hg);
-	}
-	catch (...) { }
+	auto gnd = var_grounding.find(hp);
+	if (var_grounding.end() != gnd)
+		return (gnd->second == hg);
 
 	// VariableNode had better be an actual node!
 	// If it's not then we are very very confused ...
@@ -1532,16 +1529,13 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 
 	for (const Handle &v : _varlist->varset)
 	{
-		try {
-			const Handle& gnd = var_grounding.at(v);
-			if (gnd)
-			{
-				std::size_t incoming_set_size = gnd->getIncomingSetSize();
-				thick_vars.insert(std::make_pair(incoming_set_size, v));
-			}
-			else ungrounded_vars.insert(v);
+		auto gnd = var_grounding.find(v);
+		if (gnd != var_grounding.end())
+		{
+			std::size_t incoming_set_size = gnd->second->getIncomingSetSize();
+			thick_vars.insert(std::make_pair(incoming_set_size, v));
 		}
-		catch(...) { ungrounded_vars.insert(v); }
+		else ungrounded_vars.insert(v);
 	}
 
 	// We are looking for a joining atom, one that is shared in common
@@ -1558,8 +1552,10 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 
 		if (pursue_thickness > thinnest_joint) break;
 
-		try { _pat->connectivity_map.at(pursue); }
-		catch(...) { continue; }
+		auto have_con = _pat->connectivity_map.find(pursue);
+		if (have_con == _pat->connectivity_map.end())
+			continue;
+
 		const Pattern::RootList& rl(_pat->connectivity_map.at(pursue));
 
 		for (const Handle& root : rl)
