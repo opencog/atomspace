@@ -106,7 +106,7 @@ class PrimitiveEnviron
 // V_TI   -- DimEmbedModule::embedAtomSpace()
 // V_T    -- DimEmbedModule::logAtomEmbedding()
 // D_DDI  -- DimEmbedModule::euclidDist()
-// K_HTIB -- DimEmbedModule::kNearestNeighbors()
+// Q_HTIB -- DimEmbedModule::kNearestNeighbors()
 //
 // This API needs to be re-thought, from scratch. Its offensive.
 // EVERYTHING IN PointMemorySCM -- total disaster area.
@@ -169,8 +169,6 @@ class SchemePrimitive : public PrimitiveEnviron
 			Handle (T::*h_shddd)(const std::string&,Handle,double,double,double);
 			Handle (T::*h_shi)(const std::string&,Handle,int);
 			Handle (T::*h_siddd)(const std::string&,int,double,double,double);
-			HandleSeq (T::*q_h)(Handle);
-			HandleSeq (T::*q_hti)(Handle, Type, int);
 			HandleSeq (T::*q_htib)(Handle, Type, int, bool);
 			HandleSeqSeq (T::*k_h)(Handle);
 			int (T::*i_s)(const std::string&);
@@ -233,8 +231,6 @@ class SchemePrimitive : public PrimitiveEnviron
 			H_SIDDD,
 			I_S,
 			I_SHHHI,
-			Q_H,   // return HandleSeq, take handle
-			Q_HTI, // return HandleSeq, take handle, type, and int
 			Q_HTIB,// return HandleSeq, take handle, type, and bool
 			K_H,   // return HandleSeqSeq, take Handle
 			S_AS,  // return string, take AtomSpace* and string
@@ -533,42 +529,6 @@ class SchemePrimitive : public PrimitiveEnviron
 					int p = SchemeSmob::verify_int(scm_cadr(scm_cdddr(args)), scheme_name, 5);
 					int i = (that->*method.i_shhhi)(str1,h1,h2,h3,p);
 					rc = scm_from_int(i);
-					break;
-				}
-				case Q_H:
-				{
-					// the only argument is a handle
-					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name));
-					HandleSeq rHS((that->*method.q_h)(h));
-
-					rc = SCM_EOL;
-
-					// Reverse iteration to preserve order when doing cons
-					for (HandleSeq::reverse_iterator rit = rHS.rbegin(); rit != rHS.rend(); ++rit)
-						rc = scm_cons(SchemeSmob::handle_to_scm(*rit), rc);
-
-					break;
-				}
-				case Q_HTI:
-				{
-					// First arg is a handle
-					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
-
-					// Second arg is a type
-					Type t = SchemeSmob::verify_atom_type(scm_cadr(args), scheme_name, 2);
-
-					// Third arg is an int
-					int i = SchemeSmob::verify_int(scm_caddr(args), scheme_name, 3);
-
-					HandleSeq rHS = (that->*method.q_hti)(h,t,i);
-					HandleSeq::iterator it = rHS.begin();
-					if (it != rHS.end())
-						rc = scm_list_1(SchemeSmob::handle_to_scm(*it));
-					++it;
-					for ( ; it != rHS.end(); ++it)
-					{
-						rc = scm_cons(SchemeSmob::handle_to_scm(*it), rc);
-					}
 					break;
 				}
 				case Q_HTIB:
@@ -899,8 +859,6 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_5(H_SIDDD, h_siddd,Handle,const std::string&,int,double,double,double)
 		DECLARE_CONSTR_1(I_S,    i_s, int, const std::string&)
 		DECLARE_CONSTR_5(I_SHHHI,i_shhhi, int, const std::string&,Handle,Handle,Handle,int)
-		DECLARE_CONSTR_1(Q_H,	 q_h, HandleSeq, Handle)
-		DECLARE_CONSTR_3(Q_HTI,  q_hti, HandleSeq, Handle, Type, int)
 		DECLARE_CONSTR_4(Q_HTIB, q_htib, HandleSeq, Handle, Type, int, bool)
 		DECLARE_CONSTR_1(K_H,    k_h,  HandleSeqSeq, Handle)
 		DECLARE_CONSTR_2(S_AS,   s_as, std::string, AtomSpace*,

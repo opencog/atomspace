@@ -185,8 +185,8 @@ ENDIF(105100 EQUAL ${Boost_VERSION})
 MESSAGE(STATUS "Boost version ${Boost_VERSION} found.")
 
 # Optional boost packages; can build without these.
-FIND_PACKAGE(Boost 1.46 COMPONENTS python program_options QUIET)
-FIND_PACKAGE(Boost 1.46 COMPONENTS math_c99 QUIET)
+# FIND_PACKAGE(Boost 1.46 COMPONENTS python program_options QUIET)
+# FIND_PACKAGE(Boost 1.46 COMPONENTS math_c99 QUIET)
 
 # Arghhh. Except cmake is treating above as required, not optional. #$%**&
 IF(Boost_FOUND_SAVE)
