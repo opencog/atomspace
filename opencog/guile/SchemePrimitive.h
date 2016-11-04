@@ -67,6 +67,21 @@ class PrimitiveEnviron
 //! just work from the existing examples; please keep things in
 //! alphabetical order.
 //
+// Users and abusers of this file:
+//
+// There is a whole lot of abuse of this file, by numerous extremely
+// poorly designed scheme bindings. Some are OK and just fine, but 
+// many of these users need to be fixed.  It was never the intent
+// that this would become a free-for-all, anything-goes dumping ground
+// for badly designed API's. But that is what it has become.  Time
+// to reverse the decay.
+//
+// Here is a list of some of the users:
+//
+// S_S  -- cogutils logger API, see guile/LoggerSCM.h
+// V_SA -- PythonSCM::apply_as
+//         That's backwards, should probably be V_AS
+
 template<class T>
 class SchemePrimitive : public PrimitiveEnviron
 {

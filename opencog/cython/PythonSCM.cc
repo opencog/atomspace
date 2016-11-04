@@ -42,7 +42,7 @@ private:
 	void init(void);
 public:
 	PythonSCM();
-	const std::string& eval(const std::string&);
+	std::string eval(const std::string&);
 	void apply_as(const std::string&, AtomSpace*);
 }; // class
 
@@ -100,17 +100,10 @@ void PythonSCM::init(void)
 #endif
 }
 
-const std::string& PythonSCM::eval(const std::string& pystr)
+std::string PythonSCM::eval(const std::string& pystr)
 {
 	static PythonEval& pyev = PythonEval::instance();
-
-	// Because we are returning a reference to string(!!), we need to
-	// keep a thread-local copy of it around, for the caller to fetch.
-	// Note that PythonEval appears to be thread-safe, so we don't
-	// need any locks here.
-	thread_local std::string rv;
-	rv = pyev.eval(pystr);
-	return rv;
+	return pyev.eval(pystr);
 }
 
 void PythonSCM::apply_as(const std::string& pystr, AtomSpace* as)
