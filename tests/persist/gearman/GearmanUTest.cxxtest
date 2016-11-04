@@ -35,27 +35,27 @@ using namespace opencog;
 // on timeout - say if gearman breaks and test blocks forever
 // always use cerr or logger to debug instead of cout
 
-class DistScmUTest :  public CxxTest::TestSuite
+class GearmanUTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *as;
 		SchemeEval *evl,*evl2;
 	public:
-		DistScmUTest(void)
+		GearmanUTest(void)
 		{
 			as = new AtomSpace();
 			evl = new SchemeEval(as);
 			evl2 = new SchemeEval(as);
 		}
 
-		~DistScmUTest()
+		~GearmanUTest()
 		{
 			delete evl;
 			delete evl2;
 			delete as;
 		}
 		void setUp(void);
-		static void create_slave_thread(DistScmUTest* dt);
+		static void create_slave_thread(GearmanUTest* dt);
 
 		// Thread join, after calling set master mode.
 		void tearDown(void){}
@@ -64,7 +64,7 @@ class DistScmUTest :  public CxxTest::TestSuite
 		void test_dist();
 };
 
-void DistScmUTest::setUp(void)
+void GearmanUTest::setUp(void)
 {
 	as->clear();
 	evl->eval("(setenv \"LTDL_LIBRARY_PATH\" \"" PROJECT_BINARY_DIR
@@ -75,7 +75,7 @@ void DistScmUTest::setUp(void)
 	evl->eval("(use-modules (opencog dist-gearman))");
 }
 
-void DistScmUTest::create_slave_thread(DistScmUTest* dt)
+void GearmanUTest::create_slave_thread(GearmanUTest* dt)
 {
 	std::string slv = dt->evl->eval(
 		"(set-slave-mode \"localhost\" \"worker1\")");
@@ -84,7 +84,7 @@ void DistScmUTest::create_slave_thread(DistScmUTest* dt)
 	TS_ASSERT_EQUALS(slv, "localhost\n");
 }
 
-void DistScmUTest::test_dist()
+void GearmanUTest::test_dist()
 {
 	std::thread slaveThread(create_slave_thread, this);
 
