@@ -42,12 +42,9 @@ From the guile shell:
    completed, and the results returned, before that thread's
    loop is exited.
 
-3. `(dist-run-scm “scheme-code-returning-handle” “master-id-name”)`
-    - this makes a cogserver thread send a scheme code to run on slave,
-    assuming the code returns a atom handle on completion. The master
-    gets the handle uuid when slave finishes the processing and pushing
-    the resulting atoms to postgres backing store
-
+3. `(dist-eval “scheme-code” “worker-id-name”)`
+    This sends the indicated block of scheme code to be evaluated on
+    the indicated worker.
 
 == Implenetation status
 Currently working:

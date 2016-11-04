@@ -42,8 +42,8 @@ private:
 
 	std::string start_work_handler(const std::string& ipaddr_string,
 	                               const std::string& workerID);
-	std::string dist_scm(const std::string& work_string,
-	                     const std::string& clientID);
+	std::string dist_eval(const std::string& work_string,
+	                      const std::string& clientID);
 
 	// XXX FIXME -- a single client and worker? This cannot be right!
 	gearman_client_st client;
@@ -75,9 +75,9 @@ void DistSCM::init(void)
 	define_scheme_primitive("exit-all-workers", &DistSCM::exit_all_workers,
 	                        this, "dist-gearman");
 
-	// Sends scheme string to slave and blocks till result arrives,
-	// returns uuid of resulting handle, invalid_uuid on failure.
-	define_scheme_primitive("dist-run-scm", &DistSCM::dist_scm,
+	// Sends scheme string to worker and block until a result arrives.
+	// Returns resulting scheme string.
+	define_scheme_primitive("dist-eval", &DistSCM::dist_eval,
 	                        this, "dist-gearman");
 }
 
@@ -209,7 +209,7 @@ std::string DistSCM::start_work_handler(const std::string& ipaddr_string,
 /// Send the string `scm_string` (assumed to be a valid scheme expression)
 /// to the gearmand server.  Wait for a reply, which will be (should be)
 /// a valid scheme expression.
-std::string DistSCM::dist_scm(const std::string& scm_string,
+std::string DistSCM::dist_eval(const std::string& scm_string,
                               const std::string& clientID)
 {
 	gearman_client_st* clr;
@@ -293,6 +293,6 @@ void opencog_dist_init(void);
 
 void opencog_dist_init(void)
 {
-	static DistSCM dist_scm;
-	dist_scm.module_init();
+	static DistSCM gearman_dist;
+	gearman_dist.module_init();
 }

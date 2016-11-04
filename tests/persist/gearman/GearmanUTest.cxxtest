@@ -44,18 +44,14 @@ class GearmanUTest :  public CxxTest::TestSuite
 		GearmanUTest(void)
 		{
 			as = new AtomSpace();
-			evl = new SchemeEval(as);
-			evl2 = new SchemeEval(as);
 		}
 
 		~GearmanUTest()
 		{
-			delete evl;
-			delete evl2;
 			delete as;
 		}
 		void setUp(void);
-		static void create_slave_thread(GearmanUTest* dt);
+		static void create_worker_thread(GearmanUTest* dt);
 
 		// Thread join, after calling set master mode.
 		void tearDown(void){}
@@ -67,6 +63,7 @@ class GearmanUTest :  public CxxTest::TestSuite
 void GearmanUTest::setUp(void)
 {
 	as->clear();
+	SchemeEval* evl = SchemeEval::get_evaluator(as);
 	evl->eval("(setenv \"LTDL_LIBRARY_PATH\" \"" PROJECT_BINARY_DIR
 	         "/opencog/persist/gearman:/usr/local/lib/opencog\")");
 	evl->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm\")");
@@ -75,34 +72,38 @@ void GearmanUTest::setUp(void)
 	evl->eval("(use-modules (opencog dist-gearman))");
 
 	std::cout << "Finish GearmanUTest setup\n";
-	printf("Finished with setup\n");
 }
 
-void GearmanUTest::create_slave_thread(GearmanUTest* dt)
+void GearmanUTest::create_worker_thread(GearmanUTest* dt)
 {
-	std::cout << "Start GearmanUTest slave thread\n";
-	std::string slv = dt->evl->eval(
+	std::cout << "Start GearmanUTest worker thread\n";
+	SchemeEval* evl = SchemeEval::get_evaluator(dt->as);
+	std::string slv = evl->eval(
 		"(start-work-handler \"localhost\" \"GearmanUTest-worker1\")");
 
-	std::cout << "GearmanUTest slave got message:\n" << slv << std::endl;
+	std::cout << "GearmanUTest worker exiting, received message: "
+	          << slv << std::endl;
 	TS_ASSERT_EQUALS(slv, "localhost\n");
 }
 
 void GearmanUTest::test_dist()
 {
-	std::thread slaveThread(create_slave_thread, this);
+	std::thread workThread(create_worker_thread, this);
 
 	sleep(1);
 	std::cout << "GearmanUTest master thread going to issue work\n";
 	// Call master
 	std::string mast =
-		"(dist-run-scm \"(ConceptNode \\\"Hello\\\")\" \"client1\")";
+		"(dist-eval \"(ConceptNode \\\"Hello\\\")\" \"client1\")";
 
-	std::string result = evl2->eval(mast);
-	std::cout << "GearmanUTest master got result:" << result << std::endl;
+	SchemeEval* evl = SchemeEval::get_evaluator(as);
+	std::string result = evl->eval(mast);
+	std::cout << "GearmanUTest master got result:" << result;
 
-	evl2->eval("(exit-all-workers)");
-	slaveThread.join();
+	evl->eval("(exit-all-workers)");
+	workThread.join();
 
-	TS_ASSERT_DIFFERS(atoll(result.c_str()), Handle::INVALID_UUID);
+	Handle got = evl->eval_h(result.c_str());
+	Handle expected = evl->eval_h("(ConceptNode \"Hello\")");
+	TS_ASSERT_EQUALS(got, expected);
 }
