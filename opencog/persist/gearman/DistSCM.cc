@@ -41,13 +41,15 @@ void DistSCM::init(void)
 	// Blocking slave mode
 	define_scheme_primitive("set-slave-mode", &DistSCM::slave_mode,
 	                        this, "dist-gearman");
+
 	// Exits the slave mode after last request is served
 	define_scheme_primitive("set-master-mode", &DistSCM::set_master_mode,
 	                        this, "dist-gearman");
+
 	// Sends scheme string to slave and blocks till result arrives,
 	// returns uuid of resulting handle, invalid_uuid on failure.
 	define_scheme_primitive("dist-run-scm", &DistSCM::dist_scm,
-							this, "dist-gearman");
+	                        this, "dist-gearman");
 }
 
 void DistSCM::set_master_mode(void)
@@ -85,13 +87,15 @@ gearman_return_t DistSCM::worker_function(gearman_job_st *job, void *context)
 
 std::string false_string = "Oh No, Mr. Billlll!";
 
-const std::string& DistSCM::slave_mode(const std::string& ip_string,
-                                       const std::string& workerID)
+/// `ipaddr_string` is the IP address of the gearmand server to contact.
+/// The default port number will be used.
+std::string DistSCM::slave_mode(const std::string& ipaddr_string,
+                                const std::string& workerID)
 {
 	AtomSpace* atomspace = SchemeSmob::ss_get_env_as("set-slave-mode");
 
 #ifdef DEBUG
-	std::cout << "Dist set slave mode ip=" <<  ip_string
+	std::cout << "Dist set slave mode ip=" <<  ipaddr_string
 	          << " worker ID=" << workerID << std::endl;
 #endif
 	worker = gearman_worker_create(NULL);
@@ -106,7 +110,7 @@ const std::string& DistSCM::slave_mode(const std::string& ip_string,
 
 	gearman_return_t rc;
 	rc = gearman_worker_add_server(worker,
-	                   ip_string.c_str(), GEARMAN_DEFAULT_TCP_PORT);
+	                   ipaddr_string.c_str(), GEARMAN_DEFAULT_TCP_PORT);
 
 	if (gearman_failed(rc))
 	{
@@ -155,11 +159,14 @@ const std::string& DistSCM::slave_mode(const std::string& ip_string,
 
 	gearman_worker_free(worker);
 
-	return ip_string;
+	return ipaddr_string;
 }
 
-UUID DistSCM::dist_scm(const std::string& scm_string,
-                       const std::string& clientID, bool truth)
+/// Send the string `scm_string` (assumed to be a valid scheme expression)
+/// to the gearmand server.  Wait for a reply, which will be (should be)
+/// a valid scheme expression.
+std::string DistSCM::dist_scm(const std::string& scm_string,
+                              const std::string& clientID)
 {
 	gearman_client_st* clr;
 
@@ -196,15 +203,14 @@ UUID DistSCM::dist_scm(const std::string& scm_string,
 	}
 
 	int exit_code = EXIT_SUCCESS;
-	UUID result_uuid;
 	size_t result_size;
 	char* result = (char*) gearman_client_do(&client, "make_call", NULL,
 	                              scm_string.c_str(), scm_string.length()+1,
 	                              &result_size, &rc);
-	if (rc == GEARMAN_WORK_DATA)
+	std::string work_result;
+	if (rc == GEARMAN_WORK_DATA or rc == GEARMAN_SUCCESS)
 	{
-		// XXX FIXME Not wire safe if used on different endian systems
-		memcpy(&result_uuid, result, result_size);
+		work_result = result;
 		free(result);
 	}
 	else if (rc == GEARMAN_WORK_STATUS)
@@ -214,12 +220,6 @@ UUID DistSCM::dist_scm(const std::string& scm_string,
 
 		gearman_client_do_status(&client, &numerator, &denominator);
 		std::clog << "Status: " << numerator << "/" << denominator << std::endl;
-	}
-	else if (rc == GEARMAN_SUCCESS)
-	{
-		// XXX FIXME Not wire safe if used on different endian systems
-		memcpy(&result_uuid,result,result_size);
-		free(result);
 	}
 	else if (rc == GEARMAN_WORK_FAIL)
 	{
@@ -234,10 +234,9 @@ UUID DistSCM::dist_scm(const std::string& scm_string,
 
 	gearman_client_free(&client);
 
-	if (exit_code == EXIT_FAILURE)
-		return Handle::INVALID_UUID;
+	if (exit_code == EXIT_FAILURE) return "";
 
-	return result_uuid;
+	return work_result;
 }
 
 DistSCM::~DistSCM()

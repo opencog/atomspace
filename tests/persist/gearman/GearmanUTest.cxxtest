@@ -96,7 +96,7 @@ void GearmanUTest::test_dist()
 	std::cout << "GearmanUTest master thread going to issue work\n";
 	// Call master
 	std::string mast =
-		"(dist-run-scm \"(ConceptNode \\\"Hello\\\")\" \"client1\" #t)";
+		"(dist-run-scm \"(ConceptNode \\\"Hello\\\")\" \"client1\")";
 
 	std::string result = evl2->eval(mast);
 	std::cout << "Master result message:\n" << result << std::endl;

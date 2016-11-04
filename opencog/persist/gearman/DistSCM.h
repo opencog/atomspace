@@ -37,11 +37,11 @@ private:
 	// XXX FIXME -- a single global vairable? This cannot be right!
 	static bool master_mode;
 	void set_master_mode(void);
-	const std::string& slave_mode(const std::string& ip_string,
-	                              const std::string& workerID);
-	UUID dist_scm(const std::string& scm_string,
-	              const std::string& clientID,
-	              bool truth);
+
+	std::string slave_mode(const std::string& ipaddr_string,
+	                       const std::string& workerID);
+	std::string dist_scm(const std::string& work_string,
+	                     const std::string& clientID);
 
 	// XXX FIXME -- a single client and worker? This cannot be right!
 	gearman_client_st client;
