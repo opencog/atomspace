@@ -22,39 +22,63 @@
  */
 
 #include <opencog/util/Logger.h>
+#include <opencog/guile/SchemeModule.h>
 #include "SchemePrimitive.h"
-#include "LoggerSCM.h"
 
 using namespace opencog;
-
 namespace opencog {
 
-/// Set level, return previous level.
-const std::string& LoggerSCM::do_logger_set_level(const std::string& level)
+/**
+ * Expose the Logger singleton to Scheme
+ */
+
+class LoggerSCM : public ModuleWrap
 {
-	static std::string prev_level;
+protected:
+	virtual void init();
+
+	std::string do_logger_set_level(const std::string& level);
+	std::string do_logger_get_level(void);
+	std::string do_logger_set_filename(const std::string& filename);
+	std::string do_logger_get_filename(void);
+	bool do_logger_set_stdout(bool);
+	bool do_logger_set_sync(bool);
+	bool do_logger_set_timestamp(bool);
+	void do_logger_error(const std::string& msg);
+	void do_logger_warn(const std::string& msg);
+	void do_logger_info(const std::string& msg);
+	void do_logger_debug(const std::string& msg);
+	void do_logger_fine(const std::string& msg);
+
+public:
+	LoggerSCM();
+};
+
+
+/// Set level, return previous level.
+std::string LoggerSCM::do_logger_set_level(const std::string& level)
+{
+	std::string prev_level;
 	prev_level = Logger::get_level_string(logger().get_level());
 	logger().set_level(Logger::get_level_from_string(level));
 	return prev_level;
 }
 
-const std::string& LoggerSCM::do_logger_get_level(void)
+std::string LoggerSCM::do_logger_get_level(void)
 {
-	static std::string level_str;
-	level_str = Logger::get_level_string(logger().get_level());
-	return level_str;
+	return Logger::get_level_string(logger().get_level());
 }
 
 /// Set logfile, return previous file.
-const std::string& LoggerSCM::do_logger_set_filename(const std::string& filename)
+std::string LoggerSCM::do_logger_set_filename(const std::string& filename)
 {
-	static std::string old_file;
+	std::string old_file;
 	old_file = logger().get_filename();
 	logger().set_filename(filename);
 	return old_file;
 }
 
-const std::string& LoggerSCM::do_logger_get_filename()
+std::string LoggerSCM::do_logger_get_filename()
 {
 	return logger().get_filename();
 }
@@ -141,6 +165,10 @@ void LoggerSCM::init(void)
 	define_scheme_primitive("cog-logger-fine-str",
 		&LoggerSCM::do_logger_fine, this, "logger");
 }
+
+extern "C" {
+void opencog_logger_init(void);
+};
 
 void opencog_logger_init(void)
 {
