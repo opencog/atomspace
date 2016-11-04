@@ -78,9 +78,38 @@ class PrimitiveEnviron
 //
 // Here is a list of some of the users:
 //
-// S_S  -- cogutils logger API, see guile/LoggerSCM.h
-// V_SA -- PythonSCM::apply_as
-//         That's backwards, should probably be V_AS
+// B_B    -- cogutils logger boolean setters/getters.
+// B_HH   -- PatternSCM::value_is_type(), etc.
+//        -- LGDictSCM::do_lg_conn_type_match(), etc.
+// S_AS   -- CogServerSCM::start_server()
+// S_S    -- cogutils logger API, see guile/LoggerSCM.h
+// S_SS   -- DistSCM  (Gearman server)
+// S_V    -- CogServerSCM::stop_server()
+//        -- cogutils logger get_level(), etc.
+// V_S    -- cogutils logger setters
+//        -- ZMQPersistSCM::do_open()
+// V_SSS  -- SQLPersistSCM::do_open()
+// V_V    -- SQLPersistSCM::do_close(), do_load(), do_store()
+//        -- WordSenseProcessor::run_wsd()
+//
+// Users that probably should be fixed:
+// V_SA   -- PythonSCM::apply_as
+//           That's backwards, should probably be V_AS
+// K_H    -- SuRealSCM::do_non_cached_sureal_match(), etc.
+//           Should be re-written to use H_H not K_H
+//
+// This API needs to be re-thought, from scratch. Its offensive.
+// H_HTKB -- FuzzySCM::do_nlp_fuzzy_match()
+//
+// This API needs to be re-thought, from scratch. Its offensive.
+// Its complete and total crap.
+// V_TI   -- DimEmbedModule::embedAtomSpace()
+// V_T    -- DimEmbedModule::logAtomEmbedding()
+// D_DDI  -- DimEmbedModule::euclidDist()
+// K_HTIB -- DimEmbedModule::kNearestNeighbors()
+//
+// This API needs to be re-thought, from scratch. Its offensive.
+// EVERYTHING IN PointMemorySCM -- total disaster area.
 
 template<class T>
 class SchemePrimitive : public PrimitiveEnviron
