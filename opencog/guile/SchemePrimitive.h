@@ -169,9 +169,6 @@ class SchemePrimitive : public PrimitiveEnviron
 			Handle (T::*h_shddd)(const std::string&,Handle,double,double,double);
 			Handle (T::*h_shi)(const std::string&,Handle,int);
 			Handle (T::*h_siddd)(const std::string&,int,double,double,double);
-			Handle (T::*h_sq)(const std::string&, const HandleSeq&);
-			Handle (T::*h_sqq)(const std::string&,
-                                           const HandleSeq&, const HandleSeq&);
 			HandleSeq (T::*q_h)(Handle);
 			HandleSeq (T::*q_hti)(Handle, Type, int);
 			HandleSeq (T::*q_htib)(Handle, Type, int, bool);
@@ -234,8 +231,6 @@ class SchemePrimitive : public PrimitiveEnviron
 			H_SHDDD,
 			H_SHI,
 			H_SIDDD,
-			H_SQ,  // return handle, take string and HandleSeq
-			H_SQQ, // return handle, take string, HandleSeq and HandleSeq
 			I_S,
 			I_SHHHI,
 			Q_H,   // return HandleSeq, take handle
@@ -521,36 +516,6 @@ class SchemePrimitive : public PrimitiveEnviron
 						Handle rh = (that->*method.h_siddd)(str1,i,x,y,z);
 						rc = SchemeSmob::handle_to_scm(rh);
 						break;
-				}
-				case H_SQ:
-				{
-					// First argument is a string
-					std::string str = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
-
-					// Second arg is a list of Handles
-					SCM list = scm_cadr(args);
-					HandleSeq seq = SchemeSmob::verify_handle_list(list, scheme_name, 2);
-
-					Handle rh((that->*method.h_sq)(str, seq));
-					rc = SchemeSmob::handle_to_scm(rh);
-					break;
-				}
-				case H_SQQ:
-				{
-					// First argument is a string
-					std::string str = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
-
-					// Second arg is a list of Handles
-					SCM list1 = scm_cadr(args);
-					HandleSeq seq1 = SchemeSmob::verify_handle_list(list1, scheme_name, 2);
-
-					// Third argument is a possibly empty list of Handles
-					SCM list2 = scm_caddr(args);
-					HandleSeq seq2 = SchemeSmob::verify_handle_list(list2, scheme_name, 3);
-
-					Handle rh((that->*method.h_sqq)(str, seq1, seq2));
-					rc = SchemeSmob::handle_to_scm(rh);
-					break;
 				}
 				case I_S:
 				{
@@ -932,9 +897,6 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_3(H_SHI,  h_shi,Handle,const std::string&,Handle,int)
 		DECLARE_CONSTR_5(H_SHDDD, h_shddd,Handle,const std::string&,Handle,double,double,double)
 		DECLARE_CONSTR_5(H_SIDDD, h_siddd,Handle,const std::string&,int,double,double,double)
-		DECLARE_CONSTR_2(H_SQ,   h_sq, Handle, const std::string&, const HandleSeq&)
-		DECLARE_CONSTR_3(H_SQQ,  h_sqq, Handle, const std::string&,
-                                     const HandleSeq&, const HandleSeq&)
 		DECLARE_CONSTR_1(I_S,    i_s, int, const std::string&)
 		DECLARE_CONSTR_5(I_SHHHI,i_shhhi, int, const std::string&,Handle,Handle,Handle,int)
 		DECLARE_CONSTR_1(Q_H,	 q_h, HandleSeq, Handle)
