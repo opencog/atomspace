@@ -152,6 +152,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
 	// what they've got to say about it.
 	if (0 == comp_var_gnds.size())
 	{
+#ifdef DEBUG
 		if (logger().is_fine_enabled())
 		{
 			logger().fine("Explore one possible combinatoric grounding "
@@ -159,6 +160,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
 			              var_gnds.size(), term_gnds.size());
 			PatternMatchEngine::log_solution(var_gnds, term_gnds);
 		}
+#endif
 
 		// Note, FYI, that if there are no virtual clauses at all,
 		// then this loop falls straight-through, and the grounding
@@ -196,7 +198,9 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
 		// pattern! See what the callback thinks of it.
 		return cb.grounding(var_gnds, term_gnds);
 	}
+#ifdef DEBUG
 	LAZY_LOG_FINE << "Component recursion: num comp=" << comp_var_gnds.size();
+#endif
 
 	// Recurse over all components. If component k has N_k groundings,
 	// and there are m components, then we have to explore all
@@ -343,13 +347,17 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	{
 		PatternMatchEngine pme(pmcb);
 
+#ifdef DEBUG
 		debug_log();
+#endif
 
 		pme.set_pattern(_varlist, _pat);
 		pmcb.set_pattern(_varlist, _pat);
 		bool found = pmcb.initiate_search(&pme);
 
+#ifdef DEBUG
 		logger().fine("================= Done with Search =================");
+#endif
 		found = pmcb.search_finished(found);
 
 		return found;
@@ -367,6 +375,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	// grounding combination through the virtual link, for the final
 	// accept/reject determination.
 
+#ifdef DEBUG
 	if (logger().is_fine_enabled())
 	{
 		logger().fine("VIRTUAL PATTERN: ====== "
@@ -380,14 +389,17 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 			iii++;
 		}
 	}
+#endif
 
 	std::vector<HandleMapSeq> comp_term_gnds;
 	std::vector<HandleMapSeq> comp_var_gnds;
 
 	for (size_t i=0; i<_num_comps; i++)
 	{
+#ifdef DEBUG
 		LAZY_LOG_FINE << "BEGIN COMPONENT GROUNDING " << i+1
 		              << " of " << _num_comps << ": ===========\n";
+#endif
 
 		PatternLinkPtr clp(PatternLinkCast(_component_patterns.at(i)));
 		Pattern pat = clp->get_pattern();
@@ -413,8 +425,10 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 			// to try to solve the other components, their product
 			// will have no solution.
 			if (gcb._term_groundings.empty()) {
+#ifdef DEBUG
 				logger().fine("No solution for this component. "
 				              "Abort search as no product solution may exist.");
+#endif
 				return false;
 			}
 
@@ -424,9 +438,11 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	}
 
 	// And now, try grounding each of the virtual clauses.
+#ifdef DEBUG
 	LAZY_LOG_FINE << "BEGIN component recursion: ====================== "
 	              << "num comp=" << comp_var_gnds.size()
 	              << " num virts=" << _virtual.size();
+#endif
 	HandleMap empty_vg;
 	HandleMap empty_pg;
 	HandleSeq optionals; // currently ignored
