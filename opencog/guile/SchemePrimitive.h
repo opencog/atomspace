@@ -124,17 +124,16 @@ class SchemePrimitive : public PrimitiveEnviron
 			HandleSeqSeq (T::*k_hi)(Handle, int);
 			int (T::*i_s)(const std::string&);
 			int (T::*i_shhhi)(const std::string&, Handle, Handle,Handle,int);
-			const std::string& (T::*s_as)(AtomSpace*,
+			std::string (T::*s_as)(AtomSpace*,
                                                       const std::string&);
-			const std::string& (T::*s_s)(const std::string&);
-			const std::string& (T::*s_ss)(const std::string&,
+			std::string (T::*s_s)(const std::string&);
+			std::string (T::*s_ss)(const std::string&,
                                                       const std::string&);
-			const std::string& (T::*s_sss)(const std::string&,
+			std::string (T::*s_sss)(const std::string&,
                                                        const std::string&,
                                                        const std::string&);
-			const std::string& (T::*s_v)(void);
+			std::string (T::*s_v)(void);
 			TruthValuePtr (T::*p_h)(Handle);
-			UUID (T::*u_ssb)(const std::string&, const std::string&, bool);
 			void (T::*v_b)(bool);
 			void (T::*v_h)(Handle);
 			void (T::*v_hs)(Handle, short);
@@ -208,7 +207,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			V_T,   // return void, take Type
 			V_TI,  // return void, take Type and int
 			V_TIDI,// return void, take Type, int, double, and int
-			V_V	// return void, take void
+			V_V    // return void, take void
 		} signature;
 
 		virtual SCM invoke (SCM args)
@@ -997,14 +996,15 @@ DECLARE_DECLARE_1(Handle, Handle)
 DECLARE_DECLARE_1(HandleSeq, Handle)
 DECLARE_DECLARE_1(HandleSeqSeq, Handle)
 DECLARE_DECLARE_1(int, const std::string&)
-DECLARE_DECLARE_1(const std::string&, const std::string&)
-DECLARE_DECLARE_1(const std::string&, void)
+DECLARE_DECLARE_1(std::string, const std::string&)
+DECLARE_DECLARE_1(std::string, void)
 DECLARE_DECLARE_1(TruthValuePtr, Handle)
 DECLARE_DECLARE_1(void, bool)
 DECLARE_DECLARE_1(void, Handle)
 DECLARE_DECLARE_1(void, const std::string&)
 DECLARE_DECLARE_1(void, Type)
 DECLARE_DECLARE_1(void, void)
+
 DECLARE_DECLARE_2(bool, Handle, int)
 DECLARE_DECLARE_2(bool, Handle, Handle)
 DECLARE_DECLARE_2(Handle, Handle, int)
@@ -1014,38 +1014,40 @@ DECLARE_DECLARE_2(Handle, Handle, size_t)
 DECLARE_DECLARE_2(Handle, const std::string&, Handle)
 DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
 DECLARE_DECLARE_2(HandleSeqSeq, Handle, int)
-DECLARE_DECLARE_2(const std::string&, AtomSpace*, const std::string&)
-DECLARE_DECLARE_2(const std::string&, const std::string&, const std::string&)
+DECLARE_DECLARE_2(std::string, AtomSpace*, const std::string&)
+DECLARE_DECLARE_2(std::string, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, const std::string&, AtomSpace*)
 DECLARE_DECLARE_2(void, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, Type, int)
 DECLARE_DECLARE_2(void, Handle, short)
-DECLARE_DECLARE_2(void, const std::string&,Handle)
-DECLARE_DECLARE_3(void, const std::string&,Handle,int)
+DECLARE_DECLARE_2(void, const std::string&, Handle)
+
+DECLARE_DECLARE_3(void, const std::string&, Handle, int)
 DECLARE_DECLARE_3(double, Handle, Handle, Type)
+DECLARE_DECLARE_3(Handle, Handle, Handle, Handle)
 DECLARE_DECLARE_3(Handle, Handle, Type, const HandleSeq&)
 DECLARE_DECLARE_3(Handle, const std::string&, const HandleSeq&, const HandleSeq&)
 DECLARE_DECLARE_3(Handle, const std::string&, Handle, int)
 DECLARE_DECLARE_3(HandleSeq, Handle, Type, int)
-DECLARE_DECLARE_3(const std::string&, const std::string&,
+DECLARE_DECLARE_3(std::string, const std::string&,
                   const std::string&, const std::string&)
-DECLARE_DECLARE_3(UUID, const std::string&,const std::string&, bool)
 DECLARE_DECLARE_3(void, const std::string&,
                   const std::string&, const std::string&)
-DECLARE_DECLARE_3(Handle, Handle, Handle, Handle)
-DECLARE_DECLARE_4(Handle, Handle, Type, const HandleSeq&, bool)
+
 DECLARE_DECLARE_4(bool, const std::string&, double, double, double)
-DECLARE_DECLARE_4(Handle, const std::string&, double, double, double)
 DECLARE_DECLARE_4(bool, const std::string&, double, int, int)
 DECLARE_DECLARE_4(double, const std::string&, Handle, Handle, int)
 DECLARE_DECLARE_4(double, Handle, Handle, Type, bool)
-DECLARE_DECLARE_4(void, Type, int, double, int)
+DECLARE_DECLARE_4(Handle, Handle, Type, const HandleSeq&, bool)
+DECLARE_DECLARE_4(Handle, const std::string&, double, double, double)
 DECLARE_DECLARE_4(HandleSeq, Handle, Type, int, bool)
-DECLARE_DECLARE_5(bool, const std::string&,Handle,double, double, double)
-DECLARE_DECLARE_5(bool, const std::string&,int,double, double, double)
-DECLARE_DECLARE_5(int, const std::string&, Handle, Handle, Handle, int)
+DECLARE_DECLARE_4(void, Type, int, double, int)
+
+DECLARE_DECLARE_5(bool, const std::string&, Handle, double, double, double)
+DECLARE_DECLARE_5(bool, const std::string&, int, double, double, double)
 DECLARE_DECLARE_5(Handle, const std::string&,Handle,double, double, double)
 DECLARE_DECLARE_5(Handle, const std::string&,int,double, double, double)
+DECLARE_DECLARE_5(int, const std::string&, Handle, Handle, Handle, int)
 //** @}*/
 }
 
