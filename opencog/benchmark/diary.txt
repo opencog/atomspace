@@ -1305,3 +1305,35 @@ Remarks:
    to cache-alignment effects?
  * Hashing does seem to improve atomtable performance, though not
    as much as might be guessed.
+
+======================================================================
+
+3 Nov 2016
+----------
+
+HandleMap access time.
+----------------------
+Wow.  I was using try...catch semantics under the assumption that
+this is fast, but it turns out that stack unwinding is very expensive.
+Thus, catch should only be used for those cases tha trigger
+infrequently.
+
+PatternMatchEngine.cc line 777: var_grounding.at(hp)
+time ./opencog/benchmark/profile_bindlink
+
+0m12.820s
+0m12.732s
+0m13.178s
+0m12.872s
+0m13.351s
+
+PatternMatchEngine.cc line 777: var_grounding.find(hp);
+time ./opencog/benchmark/profile_bindlink
+
+0m7.209s
+0m7.240s
+0m7.400s
+0m7.168s
+0m7.287s
+
+That one change almost doubles the performance!!

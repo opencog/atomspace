@@ -74,7 +74,6 @@ Handle get_animals(Handle& animals_query)
 
 int main(void)
 {
-
     // Create the atomspace and scheme evaluator.
     atomspace = new AtomSpace();
     scheme = new SchemeEval(atomspace);

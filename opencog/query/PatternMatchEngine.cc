@@ -772,12 +772,8 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	// Do we already have a grounding for this? If we do, and the
 	// proposed grounding is the same as before, then there is
 	// nothing more to do.
-	try
-	{
-		Handle gnd(var_grounding.at(hp));
-		return (gnd == hg);
-	}
-	catch (...) { }
+	auto gnd = var_grounding.find(hp);
+	if (gnd != var_grounding.end()) return (gnd->second == hg);
 
 	// If the pattern link is executable, then we should execute, and
 	// use the result of that execution. (This isn't implemented yet,
