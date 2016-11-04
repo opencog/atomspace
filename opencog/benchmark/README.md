@@ -37,7 +37,7 @@ Ingnore this: 32619
 Benchmarking AtomSpace's addLink method 10000 times .....
 0.226272 seconds elapsed (110486.44 per second)
 Sum clock() time for all requests: 184614 (0.184614 seconds, 135418 requests per second)
-Per operation stats, in CPU clock ticks: 
+Per operation stats, in CPU clock ticks:
   N: 5
   mean: 36922
   min: 34017
@@ -137,19 +137,41 @@ optional arguments:
 
 ## Profiling ##
 
-The benchmark directory now includes a sample profiling for the bindlink 
-function in `profile_bindlink.cc` This file can be used as a template 
-for profiling other atomspace functions.
+The benchmark directory now includes a sample profiling for the
+bindlink function in `profile_bindlink.cc` This file can be used as a
+template for profiling other atomspace functions.
 
-To use the `gprof` profiler, you will need to build a profile build of AtomSpace. 
+### Using perf_events ###
+Install:
+```
+apt-get install linux-tools
+```
 
-The following commands will create a new profile directory and build the atomspace
-with the compiler options so that gprof will output the appropriate profiling
-function hooks. It will also make the libraries static and not shared which is
-required for gprof to profile functions in the libraries.
 
-From the top level atomspace directory, i.e. the one that already contains the
-build directory, execute:
+
+### Using valgrind ###
+Build as normal, then use
+
+```
+valgrind --tool=callgrind ./opencog/benchmark/profile_bindlink
+```
+after this completes:
+```
+kcachegrind callgrind.out.<pid>
+```
+
+### Using gprof ###
+To use the `gprof` profiler, you will need to build a profile build
+of AtomSpace.
+
+The following commands will create a new profile directory and build
+the atomspace with the compiler options so that gprof will output the
+appropriate profiling function hooks. It will also make the libraries
+static and not shared which is required for gprof to profile functions
+in the libraries.
+
+From the top level atomspace directory, i.e. the one that already
+contains the build directory, execute:
 
 ```
 mkdir profile
@@ -158,8 +180,8 @@ cmake -D CMAKE_BUILD_TYPE=Profile ..
 make
 ```
 
-This will build atomspace using the profile options. After the build finishes
-there will be a program `profile_bindlink` in the directory:
+This will build atomspace using the profile options. After the build
+finishes there will be a program `profile_bindlink` in the directory:
 
 ```
 opencog/benchmark/
@@ -171,8 +193,8 @@ within the profile build directory. Running:
 ./profile_bindlink
 ```
 
-from that directory will run the executable and after few seconds it will
-exit and generate a file:
+from that directory will run the executable and after few seconds it
+will exit and generate a file:
 
 ```
 gmon.out
@@ -184,7 +206,7 @@ Now execute the following command:
 gprof profile_bindlink gmon.out > analysis.txt
 ```
 
-This will take the binary profiling information in gmon.out and format it so 
-that you can read it in a file called `analysis.txt`. Open `analysis.txt` in a 
-text viewer and you will see the results of the profiling.
-
+This will take the binary profiling information in gmon.out and format
+it so that you can read it in a file called `analysis.txt`. Open
+`analysis.txt` in a text viewer and you will see the results of the
+profiling.
