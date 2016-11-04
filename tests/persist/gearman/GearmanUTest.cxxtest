@@ -73,10 +73,14 @@ void GearmanUTest::setUp(void)
 	evl->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
 	evl->eval("(use-modules (opencog))");
 	evl->eval("(use-modules (opencog dist-gearman))");
+
+	std::cout << "Finish GearmanUTest setup\n";
+	printf("Finished with setup\n");
 }
 
 void GearmanUTest::create_slave_thread(GearmanUTest* dt)
 {
+	std::cout << "Start GearmanUTest slave thread\n";
 	std::string slv = dt->evl->eval(
 		"(set-slave-mode \"localhost\" \"worker1\")");
 
@@ -88,6 +92,8 @@ void GearmanUTest::test_dist()
 {
 	std::thread slaveThread(create_slave_thread, this);
 
+	sleep(1);
+	std::cout << "GearmanUTest master thread going to issue work\n";
 	// Call master
 	std::string mast =
 		"(dist-run-scm \"(ConceptNode \\\"Hello\\\")\" \"client1\" #t)";
