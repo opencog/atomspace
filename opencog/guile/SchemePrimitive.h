@@ -148,7 +148,6 @@ class SchemePrimitive : public PrimitiveEnviron
 			// Below is the list of currently supported signatures.
 			// Extend as needed.
 			bool (T::*b_b)(bool);
-			bool (T::*b_hi)(Handle, int);
 			bool (T::*b_hh)(Handle, Handle);
 			bool (T::*b_sddd)(const std::string&,double,double,double);
 			bool (T::*b_sdii)(const std::string&,double,int,int);
@@ -158,7 +157,6 @@ class SchemePrimitive : public PrimitiveEnviron
 			double (T::*d_s)(const std::string&);
 			double (T::*d_shhi)(const std::string&, Handle, Handle,int);
 			Handle (T::*h_h)(Handle);
-			Handle (T::*h_hi)(Handle, int);
 			Handle (T::*h_hh)(Handle, Handle);
 			Handle (T::*h_hhh)(Handle, Handle, Handle);
 			Handle (T::*h_hs)(Handle, const std::string&);
@@ -204,7 +202,6 @@ class SchemePrimitive : public PrimitiveEnviron
 		enum
 		{
 			B_B,   // return boolean, take boolean
-			B_HI,  // return boolean, take handle and int
 			B_HH,  // return boolean, take handle and handle
 			B_SDDD,
 			B_SDII,
@@ -214,7 +211,6 @@ class SchemePrimitive : public PrimitiveEnviron
 			D_S,
 			D_SHHI,
 			H_H,   // return handle, take handle
-			H_HI,  // return handle, take handle and int
 			H_HH,  // return handle, take handle and handle
 			H_HS,  // return handle, take handle and string
 			H_HHH, // return handle, take handle, handle and Handle
@@ -260,14 +256,6 @@ class SchemePrimitive : public PrimitiveEnviron
 					bool b = scm_to_bool(scm_car(args));
 					bool rb = (that->*method.b_b)(b);
 					if (rb) { rc = SCM_BOOL_T; } else { rc = SCM_BOOL_F; }
-					break;
-				}
-				case B_HI:
-				{
-					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name));
-					int i = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
-					bool b = (that->*method.b_hi)(h, i);
-					if (b) { rc = SCM_BOOL_T; } else { rc = SCM_BOOL_F; }
 					break;
 				}
 				case B_HH:
@@ -373,14 +361,6 @@ class SchemePrimitive : public PrimitiveEnviron
 				{
 					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name));
 					Handle rh((that->*method.h_h)(h));
-					rc = SchemeSmob::handle_to_scm(rh);
-					break;
-				}
-				case H_HI:
-				{
-					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name));
-					int i = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
-					Handle rh((that->*method.h_hi)(h,i));
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
@@ -807,7 +787,6 @@ class SchemePrimitive : public PrimitiveEnviron
 // Wtf. Who does this shit, anyway. Fuck me.  This is total crap.
 //
 		DECLARE_CONSTR_1(B_B,    b_b,  bool, bool)
-		DECLARE_CONSTR_2(B_HI,   b_hi, bool, Handle, int)
 		DECLARE_CONSTR_2(B_HH,   b_hh, bool, Handle, Handle)
 		DECLARE_CONSTR_4(B_SDDD, b_sddd,bool,const std::string&,double,double,double)
 		DECLARE_CONSTR_4(B_SDII, b_sdii,bool,const std::string&,double,int,int)
@@ -817,7 +796,6 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_1(D_S,    d_s,  double, const std::string&)
 		DECLARE_CONSTR_4(D_SHHI, d_shhi,  double, const std::string&,Handle,Handle,int)
 		DECLARE_CONSTR_1(H_H,    h_h,  Handle, Handle)
-		DECLARE_CONSTR_2(H_HI,   h_hi, Handle, Handle, int)
 		DECLARE_CONSTR_2(H_HH,   h_hh, Handle, Handle, Handle)
 		DECLARE_CONSTR_2(H_HS,   h_hs, Handle, Handle, const std::string&)
 		DECLARE_CONSTR_4(H_HTQB, h_htqb, Handle, Handle, Type, const HandleSeq&, bool)
