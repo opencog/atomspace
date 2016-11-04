@@ -110,6 +110,17 @@ class PrimitiveEnviron
 //
 // This API needs to be re-thought, from scratch. Its offensive.
 // EVERYTHING IN PointMemorySCM -- total disaster area.
+// This includes:
+// B_SDII
+// B_SHDDD
+// D_S
+// H_SDDD
+// H_SH
+// H_SHDDD
+// H_SHI
+// H_SIDDD
+// I_S
+//
 
 template<class T>
 class SchemePrimitive : public PrimitiveEnviron
@@ -165,7 +176,6 @@ class SchemePrimitive : public PrimitiveEnviron
 			HandleSeq (T::*q_hti)(Handle, Type, int);
 			HandleSeq (T::*q_htib)(Handle, Type, int, bool);
 			HandleSeqSeq (T::*k_h)(Handle);
-			HandleSeqSeq (T::*k_hi)(Handle, int);
 			int (T::*i_s)(const std::string&);
 			int (T::*i_shhhi)(const std::string&, Handle, Handle,Handle,int);
 			std::string (T::*s_as)(AtomSpace*,
@@ -232,7 +242,6 @@ class SchemePrimitive : public PrimitiveEnviron
 			Q_HTI, // return HandleSeq, take handle, type, and int
 			Q_HTIB,// return HandleSeq, take handle, type, and bool
 			K_H,   // return HandleSeqSeq, take Handle
-			K_HI,  // return HandleSeqSeq, take Handle, int
 			S_AS,  // return string, take AtomSpace* and string
 			S_S,   // return string, take string
 			S_SS,  // return string, take two strings
@@ -644,32 +653,6 @@ class SchemePrimitive : public PrimitiveEnviron
 
 					break;
 				}
-				case K_HI:
-				{
-					// First arg is a handle
-					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
-
-					// Second arg is an int
-					int i = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
-
-					HandleSeqSeq rHSS = (that->*method.k_hi)(h, i);
-
-					rc = SCM_EOL;
-
-					// reverse iteration to preserve order when doing cons
-					for (HandleSeqSeq::reverse_iterator rit = rHSS.rbegin(); rit != rHSS.rend(); ++rit)
-					{
-						HandleSeq rHS = *rit;
-						SCM rcTemp = SCM_EOL;
-
-						for (HandleSeq::reverse_iterator rrit = rHS.rbegin(); rrit != rHS.rend(); ++rrit)
-							rcTemp = scm_cons(SchemeSmob::handle_to_scm(*rrit), rcTemp);
-
-						rc = scm_cons(rcTemp, rc);
-					}
-
-					break;
-				}
 				case P_H:
 				{
 					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
@@ -958,7 +941,6 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_3(Q_HTI,  q_hti, HandleSeq, Handle, Type, int)
 		DECLARE_CONSTR_4(Q_HTIB, q_htib, HandleSeq, Handle, Type, int, bool)
 		DECLARE_CONSTR_1(K_H,    k_h,  HandleSeqSeq, Handle)
-		DECLARE_CONSTR_2(K_HI,   k_hi, HandleSeqSeq, Handle, int)
 		DECLARE_CONSTR_2(S_AS,   s_as, std::string, AtomSpace*,
                                      const std::string&)
 		DECLARE_CONSTR_1(S_S,    s_s,  std::string, const std::string&)
