@@ -1,13 +1,17 @@
-﻿=Distributed processing with Gearman
+﻿=Distributed evaluation of Scheme code with Gearman
 
-AtomSpace processing can be distributed across multiple servers.
-This is accomplished by using Gearman under the covers.
+This guile module allows scheme code to be evaluated on
+other (non-local, internet-connected, distrubued) servers.
+It uses Gearman under the covers to accomplish this.
 
 ==Overview
-AtomSpace users can distribute processing across multiple systems
-using the Gearman distributed job contol system.  Jobs are defined
-by writing (short) scheme programs, which are sent to to the Gearman
-workers.  Results are communicated back as scheme strings.
+AtomSpace scheme users can distribute processing across multiple
+systems using the Gearman distributed job contol system.  Jobs are
+defined by writing (short) scheme programs, which are sent to the
+Gearman workers.  Results are communicated back as scheme strings.
+
+==Critique
+This is a half-baked, incompletely implemented idea.
 
 ==Prerequisites
 * The `libgearman-dev` package must be installed before compiling.
@@ -47,23 +51,19 @@ From the guile shell:
     the indicated worker.
 
 == Implenetation status
-Currently working:
-1. A particular thread of cogserver is put in slave mode giving the ip
-   of master (on same machine this will be localhost)
 
-2. From another machine or cogserver thread  we send a scheme program
-   string to the slave. The call blocks until the slave finishes and
-   returns.
+Here's what you can curently do:
 
-3. The slave takes scheme code from master which is supposed to return
-   a handle as a result. [the scheme code should push atom results to
-   backing store if required]
+1. A particular thread can be put into worker mode, giving the IP
+   address of the gearmand job server that should be contacted to
+   get work requests.
 
-4. Slave runs the code in its thread and at completion gets uuid of the
-   resulting handle and sends it back to master
+2. A scheme expression can be sent to a gearmand server, for evalaution.
+   The sender will block until the evaluation is complete, and a
+   result is returned.
 
-5. Master returns the uuid of the handle to the caller. [in case atoms
-   were supposed to be pushed to backing store, retrieve from backing store]
+3. The worker will fetch scheme expressions from the gearmand server,
+   evaluate them, and return the result, as a string.
 
-Note: Current implementation has only been tested on a single machine
-with slave and master threads on same cogserver.
+The current implementation has only been tested on a single machine
+with both worker and master threads within the same process.
