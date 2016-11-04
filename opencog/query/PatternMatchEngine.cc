@@ -775,7 +775,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	try
 	{
 		Handle gnd(var_grounding.at(hp));
-		if (gnd == hg) return true;
+		return (gnd == hg);
 	}
 	catch (...) { }
 
