@@ -11,6 +11,9 @@ system.  Jobs are defined by writing (short) scheme programs, which
 are sent to the Gearman workers.  Results are communicated back as
 scheme strings.
 
+See https://en.wikipedia.org/wiki/Gearman for a description of the
+general framework.
+
 ==Critique
 As currently implemented, this is a half-baked, incomplete, and mostly
 untested idea.
