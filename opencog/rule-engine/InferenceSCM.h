@@ -61,7 +61,7 @@ protected:
 	 * @param rbs rule-based system atom
 	 * @return ???
 	 */
-	HandleSeq get_rulebase_rules(Handle rbs);
+	Handle get_rulebase_rules(Handle rbs);
 
 public:
 	InferenceSCM();
