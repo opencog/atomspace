@@ -1,7 +1,7 @@
 ;; =======================================================================
 ;; Implication Instantiation rule
 ;;
-;; ImplicationLink
+;; ImplicationScopeLink
 ;;    V
 ;;    P
 ;;    Q
@@ -40,7 +40,7 @@
      (VariableNode "$Q")))
 
 (define implication-instantiation-body
-  (ImplicationLink
+  (ImplicationScopeLink
      (VariableNode "$TyVs")
      (VariableNode "$P")
      (VariableNode "$Q")))
@@ -188,7 +188,7 @@
                                         ; left, rebuild the
                                         ; ImplicationLink with the
                                         ; remaining variables
-               (ImplicationLink TyVs-remain P-inst Q-inst)
+               (ImplicationScopeLink TyVs-remain P-inst Q-inst)
                                         ; Otherwise just return the
                                         ; Q instance
                Q-inst))

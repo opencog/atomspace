@@ -54,11 +54,11 @@ void MapLink::init(void)
 	_mvars = &_pattern->get_variables();
 	_varset = &_mvars->varset;
 
-	// ImplicationLinks are a special type of ScopeLink.  They specify
-	// a re-write that should be performed.  Viz, ImplicationLinks are
+	// ImplicationScopeLinks are a special type of ScopeLink.  They specify
+	// a re-write that should be performed.  Viz, ImplicationScopeLinks are
 	// of the form P(x)->Q(x).  Here, the `_rewrite` is the Q(x)
 	_is_impl = false;
-	if (classserver().isA(tscope, IMPLICATION_LINK))
+	if (classserver().isA(tscope, IMPLICATION_SCOPE_LINK))
 	{
 		_is_impl = true;
 		const HandleSeq& impl = _pattern->getOutgoingSet();
@@ -66,7 +66,7 @@ void MapLink::init(void)
 			throw SyntaxException(TRACE_INFO,
 				"Expecting ImplicationLink of at least size 2.");
 
-		// ImplicationLinks have arity 2 only if they have no type
+		// ImplicationScopeLinks have arity 2 only if they have no type
 		// constraints, else they have arity 3.  That is, an
 		// ImplicationLink is either P(x)->Q(x) or its T(x) P(x)->Q(x)
 		// where T(x) is the type constraints on the variables.
@@ -78,7 +78,7 @@ void MapLink::init(void)
 		{
 			if (impl.size() < 3)
 				throw SyntaxException(TRACE_INFO,
-					"Expecting ImplicationLink of at least size 3.");
+					"Expecting ImplicationScopeLink of at least size 3.");
 			_rewrite = impl[2];
 		}
 	}
@@ -341,7 +341,7 @@ Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 			valseq.emplace_back(valpair->second);
 	}
 
-	// Perform substitution, if it's an ImplicationLink
+	// Perform substitution, if it's an ImplicationScopeLink
 	if (_is_impl)
 	{
 		// Beta reduce, and execute. No type-checking during

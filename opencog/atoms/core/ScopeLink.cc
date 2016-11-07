@@ -29,7 +29,7 @@
 #include <opencog/atoms/core/FreeLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/PutLink.h>
-#include <opencog/atoms/core/ImplicationLink.h>
+#include <opencog/atoms/core/ImplicationScopeLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/TypeUtils.h>
 
@@ -70,7 +70,7 @@ bool ScopeLink::skip_init(Type t)
 	// Certain derived classes want to have a different initialization
 	// sequence. We can't use virtual init() in the ctor, so just
 	// do an if-statement here.
-	if (IMPLICATION_LINK == t) return true;
+	if (IMPLICATION_SCOPE_LINK == t) return true;
 	if (PUT_LINK == t) return true;
 	if (classserver().isA(t, PATTERN_LINK)) return true;
 	return false;
@@ -432,8 +432,8 @@ ScopeLinkPtr ScopeLink::factory(Type t, const HandleSeq& seq)
 	if (LAMBDA_LINK == t)
 		return createLambdaLink(seq);
 
-	if (classserver().isA(t, IMPLICATION_LINK))
-		return createImplicationLink(t, seq);
+	if (classserver().isA(t, IMPLICATION_SCOPE_LINK))
+		return createImplicationScopeLink(t, seq);
 
 	if (classserver().isA(t, PATTERN_LINK))
 		return PatternLink::factory(t, seq);

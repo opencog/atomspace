@@ -218,7 +218,7 @@
 
 (define imply-map
 	(MapLink
-		(ExtensionalImplicationLink
+		(ExtensionalImplicationScopeLink
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "ConceptNode")))
@@ -254,7 +254,7 @@
 
 (define imply-eval
 	(MapLink
-		(ExtensionalImplicationLink
+		(ExtensionalImplicationScopeLink
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "NumberNode")))
@@ -290,7 +290,7 @@
 
 (define imply-map-nodecl
 	(MapLink
-		(ExtensionalImplicationLink
+		(ExtensionalImplicationScopeLink
 			(EvaluationLink
 				(Predicate "foo")
 				(ListLink (Variable "$x") (Variable "$y")))
@@ -314,7 +314,7 @@
 
 (define imply-glob-nodecl
 	(MapLink
-		(ExtensionalImplicationLink
+		(ExtensionalImplicationScopeLink
 			(EvaluationLink
 				(Predicate "goo")
 				(ListLink (Concept "bar") (Glob "$y")))

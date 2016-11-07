@@ -5,6 +5,7 @@
 ;
 (use-modules (opencog))
 (use-modules (opencog query))
+(use-modules (opencog exec))
 
 ;;; Assert basic fact
 ;;;  |- likes(Tom, baseball) 
@@ -19,7 +20,7 @@
 ;;; Assert implication
 ;;;   |- likes(Tom,$X) -> likes(Bill, $X) 
 ;;; The ImplicationLink is a declarative form of the above.
-(ImplicationLink
+(ImplicationScopeLink
 	(EvaluationLink
 		(PredicateNode "likes")
 		(ListLink
@@ -144,7 +145,7 @@
 					(VariableNode "$aaa")
 					(VariableNode "$vvv")))))
 
-	;; Search for ImplicationLinks, and disect them.
+	;; Search for ImplicationScopeLinks, and disect them.
 	(GetLink
 		(VariableList
 			(TypedVariableLink (VariableNode "$fpred") (TypeNode "PredicateNode"))
@@ -153,7 +154,7 @@
 			(TypedVariableLink (VariableNode "$B") (TypeNode "ConceptNode"))
 			(TypedVariableLink (VariableNode "$V") (TypeNode "VariableNode"))
 		)
-		(ImplicationLink
+		(ImplicationScopeLink
 			(EvaluationLink
 				(VariableNode "$fpred")
 				(ListLink
@@ -175,17 +176,17 @@
 		(TypedVariableLink (VariableNode "$B") (TypeNode "ConceptNode"))
 		(TypedVariableLink (VariableNode "$V") (TypeNode "VariableNode"))
 	)
-	(ImplicationLink
-		(EvaluationLink
+	(QuoteLink (ImplicationScopeLink
+		(UnquoteLink (EvaluationLink
 			(VariableNode "$fpred")
 			(ListLink
 				(VariableNode "$A")
-				(VariableNode "$V")))
-		(EvaluationLink
+				(VariableNode "$V"))))
+		(UnquoteLink (EvaluationLink
 			(VariableNode "$tpred")
 			(ListLink
 				(VariableNode "$B")
-				(VariableNode "$V"))))
+				(VariableNode "$V"))))))
 
 	; If an ImplicationLink was found, create a matching BindLink
 	(BindLink
@@ -201,4 +202,5 @@
 				(VariableNode "$B")
 				(VariableNode "$V")))))
 
+;; TODO: x is undefined
 (cog-bind (gar (cog-bind x)))

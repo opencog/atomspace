@@ -330,15 +330,23 @@ SATISFYING_SET_LINK <- SCOPE_LINK
 
 // Basic first-order logic operations
 
-// Due to ImplicationLink having a sugar syntax form, an
-// ImplicationLink *may* inherit from a ScopeLink. See
-// http://wiki.opencog.org/wikihome/index.php/ImplicationLink for more
-// explanation.
-IMPLICATION_LINK <- SCOPE_LINK
+// Sugar forms of implication and equivalence links. See
+// http://wiki.opencog.org/wikihome/index.php/ImplicationLink
+// for more information
+IMPLICATION_SCOPE_LINK <- SCOPE_LINK
+INTENSIONAL_IMPLICATION_SCOPE_LINK <- IMPLICATION_SCOPE_LINK
+EXTENSIONAL_IMPLICATION_SCOPE_LINK <- IMPLICATION_SCOPE_LINK
+
+EQUIVALENCE_SCOPE_LINK <- SCOPE_LINK
+INTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
+EXTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
+
+// Standard, non sugar form of implication and equivalence links.
+IMPLICATION_LINK <- ORDERED_LINK
 INTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
 EXTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
 
-EQUIVALENCE_LINK <- SCOPE_LINK
+EQUIVALENCE_LINK <- UNORDERED_LINK
 INTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
 EXTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
 
