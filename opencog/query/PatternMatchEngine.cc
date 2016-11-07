@@ -48,8 +48,8 @@ using namespace opencog;
 // that #define around, although it's not clear why that OC_ASSERT
 // wouldn't be kept no matter what (it's not like it's gonna take up a
 // lot of resources).
-// #define DEBUG
 
+#define DEBUG 1
 #ifdef DEBUG
 #define DO_LOG(STUFF) STUFF
 #else
@@ -61,7 +61,6 @@ using namespace opencog;
 static inline void log(const Handle& h)
 {
 	LAZY_LOG_FINE << h->toShortString();
-	return false;
 }
 
 static inline void logmsg(const char * msg, const Handle& h)
@@ -1321,7 +1320,7 @@ bool PatternMatchEngine::do_next_clause(void)
 	{
 		found = _pmc.grounding(var_grounding, clause_grounding);
 		DO_LOG(logger().fine("==================== FINITO! accepted=%d", found);)
-		DO_LOG(log_solution(var_grounding, clause_grounding);})
+		DO_LOG(log_solution(var_grounding, clause_grounding);)
 	}
 	else
 	{
