@@ -63,3 +63,8 @@ matcher.
 
 * virtual.scm: Using virtual links, and the resulting combinatorial
      explosion.
+
+Unfinished examples:
+
+* deduction-engine.scm: How to create a ProLog-like reasoning engine in
+      Atomese.
