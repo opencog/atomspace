@@ -142,27 +142,8 @@
 ;; A quasi-generic rule implicator.
 ;; Searches for all implication links (of a very specific form)
 ;; and converts them into GetPut imperatives.
-(PutLink
-	(VariableList
-		(VariableNode "$tp")
-		(VariableNode "$fp")
-		(VariableNode "$aaa")
-		(VariableNode "$bbb")
-		(VariableNode "$vvv")
-	)
-	(PutLink
-		(EvaluationLink
-			(VariableNode "$tp")
-			(ListLink
-				(VariableNode "$bbb")
-				(VariableNode "$vvv")))
-		(GetLink
-			(EvaluationLink
-				(VariableNode "$fp")
-				(ListLink
-					(VariableNode "$aaa")
-					(VariableNode "$vvv")))))
 
+(define get-impl
 	;; Search for ImplicationScopeLinks, and disect them.
 	(GetLink
 		(VariableList
@@ -187,7 +168,34 @@
 							(VariableNode "$B")
 							(VariableNode "$V"))))))))
 
+(define pg-impl
+	(PutLink
+		(VariableList
+			(VariableNode "$tp")
+			(VariableNode "$fp")
+			(VariableNode "$aaa")
+			(VariableNode "$bbb")
+			(VariableNode "$vvv")
+		)
+		(QuoteLink
+			(PutLink
+				(UnquoteLink
+					(EvaluationLink
+						(VariableNode "$tp")
+						(ListLink
+							(VariableNode "$bbb")
+							(VariableNode "$vvv"))))
+				(GetLink
+					(UnquoteLink
+						(EvaluationLink
+							(VariableNode "$fp")
+							(ListLink
+								(VariableNode "$aaa")
+								(VariableNode "$vvv")))))))
+		get-impl))
+
 ;; Same as above, but using BindLink, so order is reversed.
+(define b-impl
 (BindLink
 	;; Search for ImplicationLinks, and disect them.
 	(VariableList
@@ -224,7 +232,7 @@
 			(VariableNode "$tpred")
 			(ListLink
 				(VariableNode "$B")
-				(VariableNode "$V")))))
+				(VariableNode "$V"))))))
 
 ;; TODO: x is undefined
 ; (cog-bind (gar (cog-bind x)))
