@@ -1,7 +1,24 @@
 ;
-; Simple goal solving using redex's
+; Simple goal solving using Get/PutLinks.
 ;
-;; XXX under construction and broken. Just junk right now.
+; The point of this example is to show how ProLog-like deductions can
+; be made, and, more precisely, how to write a ProLog-like chainer
+; in Atomese. That is, one can implement ProLog in Atomese, and the
+; goal of this example is to show how to do that.
+;
+;; XXX under construction, incomplete.
+;
+; Critiques:
+; Aside from being unfinished, this example also avoids using the
+; rule engine, and instead, attempts to create it's own home-grown
+; rule engine.
+;
+; This example also avoids the use of the OpenPsi engine. The OpenPsi
+; engine is useful for organizing multiple conflicting rules into
+; classes, and prioritizing the rule selection and application based
+; on those rule classes.  Thus, it allows complex deductive chains to
+; be managed in an economic fashion, avoiding some of the combinatorial
+; explosion associated with backward/forward chaining.
 ;
 (use-modules (opencog))
 (use-modules (opencog query))
@@ -21,6 +38,7 @@
 ;;;   |- likes(Tom,$X) -> likes(Bill, $X) 
 ;;; The ImplicationLink is a declarative form of the above.
 (ImplicationScopeLink
+	; (VariableNode "$X") ; <-- this variable is implicitly scoped!
 	(EvaluationLink
 		(PredicateNode "likes")
 		(ListLink
@@ -46,7 +64,7 @@
 			(ConceptNode "Bill")
 			(VariableNode "$X"))))
 
-;;; Same as above, but in imperative form. it uses the GetLink
+;;; Same as above, but in imperative form. It uses the GetLink
 ;;; to search the atomspace to find everything Tom likes, and then
 ;;; uses the PutLink to perform a beta-reduction, to plug in those
 ;;; answers into a template for the things that Bill likes.
@@ -154,17 +172,20 @@
 			(TypedVariableLink (VariableNode "$B") (TypeNode "ConceptNode"))
 			(TypedVariableLink (VariableNode "$V") (TypeNode "VariableNode"))
 		)
-		(ImplicationScopeLink
-			(EvaluationLink
-				(VariableNode "$fpred")
-				(ListLink
-					(VariableNode "$A")
-					(VariableNode "$V")))
-			(EvaluationLink
-				(VariableNode "$tpred")
-				(ListLink
-					(VariableNode "$B")
-					(VariableNode "$V"))))))
+		(QuoteLink
+			(ImplicationScopeLink
+				(UnquoteLink
+					(EvaluationLink
+						(VariableNode "$fpred")
+						(ListLink
+							(VariableNode "$A")
+							(VariableNode "$V"))))
+				(UnquoteLink
+					(EvaluationLink
+						(VariableNode "$tpred")
+						(ListLink
+							(VariableNode "$B")
+							(VariableNode "$V"))))))))
 
 ;; Same as above, but using BindLink, so order is reversed.
 (BindLink
@@ -176,17 +197,20 @@
 		(TypedVariableLink (VariableNode "$B") (TypeNode "ConceptNode"))
 		(TypedVariableLink (VariableNode "$V") (TypeNode "VariableNode"))
 	)
-	(QuoteLink (ImplicationScopeLink
-		(UnquoteLink (EvaluationLink
-			(VariableNode "$fpred")
-			(ListLink
-				(VariableNode "$A")
-				(VariableNode "$V"))))
-		(UnquoteLink (EvaluationLink
-			(VariableNode "$tpred")
-			(ListLink
-				(VariableNode "$B")
-				(VariableNode "$V"))))))
+	(QuoteLink
+		(ImplicationScopeLink
+			(UnquoteLink
+				(EvaluationLink
+					(VariableNode "$fpred")
+					(ListLink
+						(VariableNode "$A")
+						(VariableNode "$V"))))
+			(UnquoteLink
+				(EvaluationLink
+					(VariableNode "$tpred")
+					(ListLink
+						(VariableNode "$B")
+						(VariableNode "$V"))))))
 
 	; If an ImplicationLink was found, create a matching BindLink
 	(BindLink
@@ -203,4 +227,5 @@
 				(VariableNode "$V")))))
 
 ;; TODO: x is undefined
-(cog-bind (gar (cog-bind x)))
+; (cog-bind (gar (cog-bind x)))
+*unspecified*
