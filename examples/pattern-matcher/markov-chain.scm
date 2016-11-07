@@ -269,13 +269,11 @@
 (define (create-chain-deleter chain-state)
 	(BindLink
 		(VariableNode "$state")
-		(ImplicationLink
-			;; Find the state vector...
-			(ListLink chain-state (VariableNode "$state"))
-			;; Delete the state vector.
-			(DeleteLink
-				(ListLink chain-state (VariableNode "$state"))
-			)
+        ;; Find the state vector...
+        (ListLink chain-state (VariableNode "$state"))
+        ;; Delete the state vector.
+        (DeleteLink
+           (ListLink chain-state (VariableNode "$state"))
 		)
 	)
 )
@@ -291,21 +289,19 @@
 (define (create-chain-copier chain-to chain-from)
 	(BindLink
 		(VariableNode "$state")
-		(ImplicationLink
-			;; Find the copy-from state vector...
-			(ListLink
-				chain-from
-				(VariableNode "$state")
-			)
-			;; Copy it to the copy-to state vector.
-			;; We need to use an execution-output link to copy
-			;; the tv values from one to the other.
-			(ExecutionOutputLink
-				(GroundedSchemaNode "scm:copy-tv")
-				(ListLink
-					(ListLink chain-to (VariableNode "$state"))
-					(ListLink chain-from (VariableNode "$state"))
-				)
+        ;; Find the copy-from state vector...
+        (ListLink
+            chain-from
+            (VariableNode "$state")
+        )
+        ;; Copy it to the copy-to state vector.
+        ;; We need to use an execution-output link to copy
+        ;; the tv values from one to the other.
+        (ExecutionOutputLink
+            (GroundedSchemaNode "scm:copy-tv")
+            (ListLink
+                (ListLink chain-to (VariableNode "$state"))
+                (ListLink chain-from (VariableNode "$state"))
 			)
 		)
 	)
@@ -324,27 +320,25 @@
 			(VariableNode "$state")
 			(TypeNode "ConceptNode")
 		)
-		(ImplicationLink
-			;; Find the copy-from state vector...
-			(ListLink
-				chain-from
-				(VariableNode "$state")
-			)
-			(AndLink
-				;; Copy it to the copy-to state vector.
-				;; We need to use an execution-output link to copy
-				;; the tv values from one to the other.
-				(ExecutionOutputLink
-					(GroundedSchemaNode "scm:copy-tv")
-					(ListLink
-						(ListLink chain-to (VariableNode "$state"))
-						(ListLink chain-from (VariableNode "$state"))
-					)
-				)
-				;; Delete the copy-from state vector
-				(DeleteLink
-					(ListLink chain-from (VariableNode "$state"))
-				)
+        ;; Find the copy-from state vector...
+        (ListLink
+            chain-from
+            (VariableNode "$state")
+		)
+        (AndLink
+            ;; Copy it to the copy-to state vector.
+            ;; We need to use an execution-output link to copy
+            ;; the tv values from one to the other.
+            (ExecutionOutputLink
+                (GroundedSchemaNode "scm:copy-tv")
+                (ListLink
+                    (ListLink chain-to (VariableNode "$state"))
+                    (ListLink chain-from (VariableNode "$state"))
+                )
+            )
+            ;; Delete the copy-from state vector
+            (DeleteLink
+                (ListLink chain-from (VariableNode "$state"))
 			)
 		)
 	)

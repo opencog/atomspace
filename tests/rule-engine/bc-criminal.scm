@@ -6,7 +6,7 @@
 
 ; "... it is a crime for an American to sell weapons to hostile nations":
 ; American(x) ∧ Weapon(y) ∧ Sells(x, y, z) ∧ Hostile(z) ⇒ Criminal (x).
-(ImplicationLink (stv .99 .99)
+(ImplicationScopeLink (stv .99 .99)
     (VariableList
         (TypedVariable
             (Variable "$x")
@@ -52,7 +52,7 @@
 
 ; "All of its missiles were sold to it by Colonel West":
 ; Missile(x) ∧ Owns(Nono, x) ⇒ Sells(West, x, Nono) .
-(ImplicationLink (stv .99 .99)
+(ImplicationScopeLink (stv .99 .99)
     (TypedVariable
         (Variable "$a")
         (Type "ConceptNode"))
@@ -78,7 +78,7 @@
     (ConceptNode "weapon"))
 
 ; An enemy of America is "hostile": Enemy(x,America) ⇒ Hostile(x) .
-(ImplicationLink (stv .99 .99)
+(ImplicationScopeLink (stv .99 .99)
     (TypedVariable
         (Variable "$b")
         (Type "ConceptNode"))
