@@ -107,12 +107,13 @@ public:
 
 	PatternTerm()
 		: _handle(Handle::UNDEFINED), _parent(PatternTerm::UNDEFINED),
-		  _quotation_level(0), _has_any_bound_var(false)
+		  _quotation_level(0), _local_quote(false), _has_any_bound_var(false)
 		{}
 
 	PatternTerm(const PatternTermPtr& parent, const Handle& h)
 		: _handle(h), _parent(parent),
-		  _quotation_level(parent->_quotation_level), _has_any_bound_var(false)
+		  _quotation_level(parent->_quotation_level), _local_quote(false),
+		  _has_any_bound_var(false)
 		{}
 
 	void addOutgoingTerm(const PatternTermPtr& ptm)
