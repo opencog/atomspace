@@ -31,7 +31,7 @@
 #include <vector>
 
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/query/Pattern.h>
+#include <opencog/atoms/pattern/Pattern.h>
 #include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog {
