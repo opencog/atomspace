@@ -1563,13 +1563,11 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 
 		if (pursue_thickness > thinnest_joint) break;
 
-		auto have_con = _pat->connectivity_map.find(pursue);
-		if (have_con == _pat->connectivity_map.end())
+		auto root_list = _pat->connectivity_map.find(pursue);
+		if (root_list == _pat->connectivity_map.end())
 			continue;
 
-		const Pattern::RootList& rl(_pat->connectivity_map.at(pursue));
-
-		for (const Handle& root : rl)
+		for (const Handle& root : root_list->second)
 		{
 			if ((issued.end() == issued.find(root))
 			        and (search_virtual or not is_evaluatable(root))
