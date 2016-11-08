@@ -28,7 +28,7 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/guile/SchemeEval.h>
 
-#include <opencog/persist/gearman/DistSCM.h>
+#include <opencog/persist/gearman/DistSCM.cc>
 
 using namespace opencog;
 // assuming cxxtest times the tests with some time out and fails test
