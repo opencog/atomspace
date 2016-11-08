@@ -37,6 +37,9 @@ class LocalQuoteUTest: public CxxTest::TestSuite
 private:
     AtomSpace as;
 
+	Handle X, P, forall,
+		VT, vardecl_var, body_var, vardecl, forall_pattern, forall_get;
+
 public:
     LocalQuoteUTest(void)
     {
@@ -51,11 +54,22 @@ public:
     void test_local_quote(void);
 };
 
-void LocalQuoteUTest::tearDown(void)
+void LocalQuoteUTest::setUp(void)
 {
+	X = an(VARIABLE_NODE, "$X");
+	P = an(PREDICATE_NODE, "P");
+	forall = al(FORALL_LINK, X, al(EVALUATION_LINK, P, X));
+	VT = an(TYPE_NODE, "VariableNode");
+	vardecl_var = an(VARIABLE_NODE, "$vardecl");
+	body_var = an(VARIABLE_NODE, "$body");
+	vardecl = al(VARIABLE_LIST,
+	             al(TYPED_VARIABLE_LINK, vardecl_var, VT),
+	             body_var);
+	forall_pattern = al(FORALL_LINK, vardecl_var, body_var);
+	forall_get = al(GET_LINK, vardecl, al(LOCAL_QUOTE_LINK, forall_pattern));
 }
 
-void LocalQuoteUTest::setUp(void)
+void LocalQuoteUTest::tearDown(void)
 {
 }
 
@@ -64,12 +78,17 @@ void LocalQuoteUTest::setUp(void)
  */
 void LocalQuoteUTest::test_local_quote(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    // TODO
-    TS_ASSERT(true);
-    
-    logger().debug("END TEST: %s", __FUNCTION__);
+    Handle result = satisfying_set(&as, forall_get),
+	    expected = al(SET_LINK, forall);
+
+    logger().debug() << "result = " << result;
+	logger().debug() << "expected = " << expected;
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 #undef al
