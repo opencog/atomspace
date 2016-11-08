@@ -149,6 +149,11 @@ QUOTE_LINK <- ORDERED_LINK
 // quoting.  Defined to work just like in lisp/scheme.
 UNQUOTE_LINK <- ORDERED_LINK
 
+// Like QuoteLink but only affects the direct child, not its
+// descendent. It has the same effect as wrapping the child with a
+// QuoteLink and each atom of the its outgoing set with an UnquoteLink.
+LOCAL_QUOTE_LINK <- ORDERED_LINK
+
 // Everything under a DontExecLink is not executed. This is typically
 // used during pattern matching, to halt infinite recursion, when the
 // matched pattern is itself executable. Vaguely like QuoteLink, but
