@@ -219,9 +219,10 @@ static bool try_to_load_modules(const char ** config_paths)
         }
     }
 
-    // NOTE: Can't use get_path_as_string() yet because it is defined in a
-    // Cython api which we can't import unless the sys.path is correct. So
-    // we'll write it out before the imports below to aid in debugging.
+    // NOTE: Can't use get_path_as_string() yet, because it is defined
+    // in a Cython api which we can't import, unless the sys.path is
+    // correct. So we'll write it out before the imports below to aid
+    // in debugging.
     if (logger().is_debug_enabled())
     {
         logger().debug("Python 'sys.path' is:");
@@ -251,15 +252,6 @@ static bool try_to_load_modules(const char ** config_paths)
         logger().warn("PythonEval::%s Failed to load the "
                        "opencog.atomspace module", __FUNCTION__);
     }
-
-    // Now we can use get_path_as_string() to get 'sys.path',
-    // but only if import_opencog__atomspace() suceeded without error.
-    // When it fails, it fails silently, leaving get_path_as_string
-    // with a NULL PLT/GOT entry (i.e. calling the subroutine is a
-    // null-pointer deref).
-    if (nullptr != get_path_as_string)
-        logger().info("Python 'sys.path' after OpenCog config adds is: " +
-               get_path_as_string());
 
     // NOTE: PySys_GetObject returns a borrowed reference so don't do this:
     // Py_DECREF(pySysPath);
