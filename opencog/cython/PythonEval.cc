@@ -1293,8 +1293,8 @@ void PythonEval::add_modules_from_path(std::string pathString)
         }
     }
 
-    // Load First directories and then files to properly handle
-    // import dependencies.
+    // First, load directories, and then load files, to properly
+    // handle import dependencies.
     dirs.insert(dirs.end(), files.begin(), files.end());
     for (const auto& abspath : dirs)
         add_modules_from_abspath(abspath);
