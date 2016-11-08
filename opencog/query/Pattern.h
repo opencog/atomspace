@@ -48,10 +48,7 @@ namespace opencog {
 struct Pattern
 {
 	// Private, locally scoped typedefs, not used outside of this class.
-	// XXX TODO Replace by unordered multimap...
-	typedef HandleSeq RootList;
-	typedef std::unordered_map<Handle, RootList> ConnectMap;
-	typedef std::pair<Handle, RootList> ConnectPair;
+	typedef std::unordered_multimap<Handle, Handle> ConnectMap;
 
 	// Each atom of the pattern may appear in many clauses. Moreover, the same
 	// atom may be repeated under the same clause root in several positions.

@@ -786,7 +786,7 @@ void PatternLink::trace_connectives(const std::set<Type>& connectives,
  * how the trees are connected.
  *
  * This is used for only one purpose: to find the next unsolved
- * clause. Perhaps this could be simplied somehow ...
+ * clause. Perhaps this could be simplified somehow ...
  */
 void PatternLink::make_connectivity_map(const HandleSeq& component)
 {
@@ -802,7 +802,7 @@ void PatternLink::make_connectivity_map(const HandleSeq& component)
 	auto end = _pat.connectivity_map.end();
 	while (it != end)
 	{
-		if (it->second.size() == 1)
+		if (1 == _pat.connectivity_map.count(it->first))
 			it = _pat.connectivity_map.erase(it);
 		else
 			it++;
@@ -811,7 +811,7 @@ void PatternLink::make_connectivity_map(const HandleSeq& component)
 
 void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 {
-	_pat.connectivity_map[h].emplace_back(root);
+	_pat.connectivity_map.emplace(h, root);
 
 	if (h->isLink())
 	{
