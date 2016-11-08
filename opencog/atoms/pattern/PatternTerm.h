@@ -35,14 +35,15 @@
 namespace opencog {
 
 /**
- * The PatternTerm class is used to manage the situation where a given
- * non-constant term (atom) may appear in more than one location in a
- * pattern. Such multiple inclusions are usually harmless, but can cause
- * difficulties when they appear inside of UnorderedLinks. In such a
- * case, additional state needs to be maintained to traverse the
- * UnorderedLink correctly.  This class holds that additional state.
+ * The PatternTerm class is used to provide a "context" for an atom.
+ * This context is used to determine if the atom is quoted or not.
+ * That is, whether any atom may be quoted or not quoted depends on
+ * the holders of that atom.  Context is also required if a given
+ * atom appears in multiple locations in a pattern, especially if
+ * those locations are in unordered links. This additional context
+ * is needed to traverse unordered links correctly.
  *
- * Queries are converted to PatternTerm trees during pattern
+ * Pattern trees are converted to PatternTerm trees during pattern
  * pre-processing.  For a given query pattern, specified as an atom, an
  * equivalent PatternTerm tree is constructed.  The PatternTerm tree
  * differs from the original tree in that any atom that appears two or
@@ -51,7 +52,7 @@ namespace opencog {
  * PatternTerm corresponds to one atom in at one fixed location in the
  * pattern.  That is, the relation between instances of PatternTerm and
  * atoms is many-to-one, because a given atom may occur in the pattern
- * in many several positions.
+ * in several positions.
  *
  * For example, given the query
  *    SetLink
@@ -65,15 +66,15 @@ namespace opencog {
  *
  * For a given term in the pattern, the _handle attribute points to the
  * corresponding atom of the query.  Roots of the PatternTerm trees
- * reference the roots of query clauses. Term tree roots have its _parent
- * attributes UNDEFINED.
+ * reference the roots of query clauses. Term tree roots have its
+ * _parent attributes UNDEFINED.
  *
  * Term trees are build in the course of preprocessing stage before
- * pattern matcher starts searching for variable groundings. Each clause
- * is then recursively traversed from the root downwards through outgoing
- * atoms. The _outgoing attribute stores a list of childs created during this
- * traversal. They corresponds one-to-one to outgoing sets of referenced
- * atoms.
+ * pattern matcher starts searching for variable groundings. Each
+ * clause is then recursively traversed from the root downwards,
+ * through outgoing atoms. The _outgoing attribute stores a list of
+ * the children created during this traversal. It corresponds
+ * one-to-one to outgoing sets of the referenced atom.
  */
 
 class PatternTerm;
