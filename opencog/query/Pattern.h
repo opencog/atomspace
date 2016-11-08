@@ -50,7 +50,7 @@ struct Pattern
 	// Private, locally scoped typedefs, not used outside of this class.
 	// XXX TODO Replace by unordered multimap...
 	typedef HandleSeq RootList;
-	typedef std::map<Handle, RootList> ConnectMap;
+	typedef std::unordered_map<Handle, RootList> ConnectMap;
 	typedef std::pair<Handle, RootList> ConnectPair;
 
 	// Each atom of the pattern may appear in many clauses. Moreover, the same
