@@ -94,6 +94,9 @@ protected:
 	// literally.
 	int _quotation_level;
 
+	// True if the atom has been wrapped by a LocalQuoteLink
+	bool _local_quote;
+
 	// True if the pattern subtree rooted in this tree node does not
 	// contain any bound variables. This means that the term is constant
 	// and may be self-grounded.
@@ -146,7 +149,17 @@ public:
 
 	inline bool isQuoted() const
 	{
-		return _quotation_level > 0;
+		return isLocalQuoted() or getQuotationLevel() > 0;
+	}
+
+	inline bool isLocalQuoted() const
+	{
+		return _local_quote;
+	}
+
+	inline void setLocalQuote(bool lq)
+	{
+		_local_quote = lq;
 	}
 
 	inline int getQuotationLevel() const

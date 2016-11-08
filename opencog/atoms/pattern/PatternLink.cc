@@ -875,8 +875,9 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	// (as its not clear what else could possibly be done).
 	//
 	// Ignore quoting and unquoting nodes in the PatternTerm
-	if ((not parent->isQuoted() and QUOTE_LINK == t)
-	    or (parent->getQuotationLevel() == 1 and UNQUOTE_LINK == t)) {
+	if ((not parent->isQuoted() and (QUOTE_LINK == t or LOCAL_QUOTE_LINK == t))
+	    or (parent->getQuotationLevel() == 1
+	        and not parent->isLocalQuoted() and UNQUOTE_LINK == t)) {
 		if (1 != h->getArity())
 			throw InvalidParamException(TRACE_INFO,
 			                            "QuoteLink/UnquoteLink has "
@@ -889,7 +890,9 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
 
 	// Update the PatternTerm quotation level
-	if (QUOTE_LINK == t)
+	if (not parent->isQuoted() and LOCAL_QUOTE_LINK == t)
+		ptm->setLocalQuote(true);
+	else if (QUOTE_LINK == t)
 		ptm->addQuote();
 	else if (UNQUOTE_LINK == t)
 		ptm->remQuote();
