@@ -94,6 +94,9 @@ protected:
 	// literally.
 	int _quotation_level;
 
+	// True if the atom has been wrapped by a LocalQuoteLink
+	bool _local_quote;
+
 	// True if the pattern subtree rooted in this tree node does not
 	// contain any bound variables. This means that the term is constant
 	// and may be self-grounded.
@@ -104,12 +107,13 @@ public:
 
 	PatternTerm()
 		: _handle(Handle::UNDEFINED), _parent(PatternTerm::UNDEFINED),
-		  _quotation_level(0), _has_any_bound_var(false)
+		  _quotation_level(0), _local_quote(false), _has_any_bound_var(false)
 		{}
 
 	PatternTerm(const PatternTermPtr& parent, const Handle& h)
 		: _handle(h), _parent(parent),
-		  _quotation_level(parent->_quotation_level), _has_any_bound_var(false)
+		  _quotation_level(parent->_quotation_level), _local_quote(false),
+		  _has_any_bound_var(false)
 		{}
 
 	void addOutgoingTerm(const PatternTermPtr& ptm)
@@ -146,7 +150,17 @@ public:
 
 	inline bool isQuoted() const
 	{
-		return _quotation_level > 0;
+		return isLocalQuoted() or getQuotationLevel() > 0;
+	}
+
+	inline bool isLocalQuoted() const
+	{
+		return _local_quote;
+	}
+
+	inline void setLocalQuote(bool lq)
+	{
+		_local_quote = lq;
 	}
 
 	inline int getQuotationLevel() const
