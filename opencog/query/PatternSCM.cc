@@ -5,17 +5,35 @@
  * Copyright (c) 2008, 2014, 2015 Linas Vepstas <linas@linas.org>
  */
 
+#include <opencog/guile/SchemeModule.h>
+
+namespace opencog {
+
+class PatternSCM : public ModuleWrap
+{
+	protected:
+		virtual void init(void);
+		static std::vector<FunctionWrap*> _binders;
+		Handle find_approximate_match(Handle);
+		bool value_is_type(Handle, Handle);
+		bool type_match(Handle, Handle);
+		Handle type_compose(Handle, Handle);
+	public:
+		PatternSCM(void);
+		~PatternSCM();
+};
+
+}
+
 #include <opencog/atomutils/FuzzyMatchBasic.h>
 #include <opencog/atomutils/TypeUtils.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/guile/SchemeModule.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
 
 #include "BindLinkAPI.h"
 #include "PatternMatch.h"
-#include "PatternSCM.h"
 
 using namespace opencog;
 
@@ -116,6 +134,10 @@ PatternSCM::~PatternSCM()
 #endif
 }
 
+
+extern "C" {
+void opencog_query_init(void);
+};
 
 void opencog_query_init(void)
 {
