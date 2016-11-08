@@ -1,0 +1,76 @@
+/*
+ * tests/query/LocalQuoteUTest.cxxtest
+ *
+ * Copyright (C) 2016 OpenCog Foundation
+ * All Rights Reserved
+ * Author: Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/Logger.h>
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al as.add_link
+#define an as.add_node
+
+class LocalQuoteUTest: public CxxTest::TestSuite
+{
+private:
+    AtomSpace as;
+
+public:
+    LocalQuoteUTest(void)
+    {
+        logger().set_level(Logger::DEBUG);
+        logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
+    }
+
+    void setUp(void);
+    void tearDown(void);
+
+    void test_local_quote(void);
+};
+
+void LocalQuoteUTest::tearDown(void)
+{
+}
+
+void LocalQuoteUTest::setUp(void)
+{
+}
+
+/*
+ * LocalQuoteLink unit test.
+ */
+void LocalQuoteUTest::test_local_quote(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    // TODO
+    TS_ASSERT(true);
+    
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+#undef al
+#undef an
