@@ -11,7 +11,6 @@ ADD_LIBRARY(query
 	PatternSCM.cc
 	Recognizer.cc
 	Satisfier.cc
-	PatternTerm.cc
 )
 
 ADD_DEPENDENCIES(query
@@ -38,9 +37,6 @@ INSTALL (FILES
 	DefaultPatternMatchCB.h
 	Implicator.h
 	InitiateSearchCB.h
-	Pattern.h
-	PatternTerm.h
-	PatternSCM.h
 	PatternMatchCallback.h
 	PatternMatchEngine.h
 	Satisfier.h

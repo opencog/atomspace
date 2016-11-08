@@ -28,9 +28,9 @@
 #include <set>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Link.h>
-#include <opencog/query/Pattern.h> // for VariableTypeMap
-#include <opencog/query/PatternTerm.h> // for pattern context
 #include <opencog/atoms/core/VariableList.h> // for VariableTypeMap
+#include <opencog/atoms/pattern/Pattern.h> // for VariableTypeMap
+#include <opencog/atoms/pattern/PatternTerm.h> // for pattern context
 
 namespace opencog {
 class PatternMatchEngine;

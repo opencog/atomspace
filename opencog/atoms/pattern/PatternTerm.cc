@@ -1,5 +1,5 @@
 /*
- * PatternTerm.h
+ * PatternTerm.cc
  *
  * Copyright (C) 2016 OpenCog Foundation
  * All Rights Reserved

@@ -32,7 +32,7 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/types.h>  // for typedef Type
-#include <opencog/query/PatternTerm.h>
+#include <opencog/atoms/pattern/PatternTerm.h>
 
 namespace opencog {
 

@@ -25,7 +25,7 @@
 
 #include <unordered_map>
 
-#include <opencog/query/Pattern.h>
+#include <opencog/atoms/pattern/Pattern.h>
 #include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/query/PatternMatchCallback.h>
