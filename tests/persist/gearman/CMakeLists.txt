@@ -10,7 +10,6 @@ LINK_DIRECTORIES (
 LINK_LIBRARIES (
 	smob
 	atomspace
-	dist-gearman
 )
 
 # Make sure that the Gearman job server is running.
