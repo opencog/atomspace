@@ -278,17 +278,24 @@ Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
     return getLinkHandle(a);
 }
 
-Handle AtomTable::getLinkHandle(AtomPtr& a, int quotelevel) const
+Handle AtomTable::getLinkHandle(AtomPtr& a, int quotelevel, bool localquote) const
 {
     Type t = a->getType();
     const HandleSeq &seq = a->getOutgoingSet();
+    bool unquoted = is_unquoted(quotelevel, localquote);
 
     // We need to keep track of the quote nesting, as this affects
     // how embedded ScopeLinks are treated, below.  That is, unquoted
     // ScopeLinks really do have to be atomspace-unique, but if they
     // are quoted, then the checks are not to be performed.
-    if (QUOTE_LINK == t) quotelevel++;
-    else if (UNQUOTE_LINK == t) quotelevel--;
+    if (not localquote) {
+        if (QUOTE_LINK == t) quotelevel++;
+        else if (UNQUOTE_LINK == t) quotelevel--;
+    }
+
+    // Unless the current link is an unquoted LocalQuote, then the
+    // outgoing is not quoted.
+    bool next_localquote = unquoted and LOCAL_QUOTE_LINK == t;
 
     // Make sure all the atoms in the outgoing set are in a valid
     // format. One of the troublemakers here is the NumberNode,
@@ -297,7 +304,7 @@ Handle AtomTable::getLinkHandle(AtomPtr& a, int quotelevel) const
     HandleSeq resolved_seq;
     for (const Handle& ho : seq) {
         AtomPtr ao(ho);
-        Handle rh(getHandle(ao, quotelevel));
+        Handle rh(getHandle(ao, quotelevel, next_localquote));
         if (rh == nullptr) return Handle::UNDEFINED;
         resolved_seq.emplace_back(rh);
     }
@@ -317,7 +324,7 @@ Handle AtomTable::getLinkHandle(AtomPtr& a, int quotelevel) const
     // However, bad quotation nesting means that some things
     // that look like ScopeLinks are just invalid fragments
     // of search patterns. Ignore those.
-    if (0 == quotelevel and classserver().isA(t, SCOPE_LINK)) {
+    if (unquoted and classserver().isA(t, SCOPE_LINK)) {
         ScopeLinkPtr wanted = ScopeLinkCast(a);
         if (nullptr == wanted) {
             wanted = ScopeLink::factory(Handle(a));
@@ -340,15 +347,25 @@ Handle AtomTable::getLinkHandle(AtomPtr& a, int quotelevel) const
     }
 
     if (_environ) {
-        return _environ->getHandle(a, quotelevel);
+        return _environ->getHandle(a, quotelevel, next_localquote);
     }
     return Handle::UNDEFINED;
+}
+
+bool AtomTable::is_quoted(int quotelevel, bool localquote) const
+{
+    return quotelevel != 0 or localquote;
+}
+
+bool AtomTable::is_unquoted(int quotelevel, bool localquote) const
+{
+    return not is_quoted(quotelevel, localquote);
 }
 
 /// Find an equivalent atom that is exactly the same as the arg. If
 /// such an atom is in the table, it is returned, else the return
 /// is the bad handle.
-Handle AtomTable::getHandle(AtomPtr& a, int quotelevel) const
+Handle AtomTable::getHandle(AtomPtr& a, int quotelevel, bool localquote) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
 
@@ -358,7 +375,7 @@ Handle AtomTable::getHandle(AtomPtr& a, int quotelevel) const
     if (a->isNode())
         return getNodeHandle(a);
     else if (a->isLink())
-        return getLinkHandle(a, quotelevel);
+        return getLinkHandle(a, quotelevel, localquote);
 
     return Handle::UNDEFINED;
 }
