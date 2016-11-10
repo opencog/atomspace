@@ -302,7 +302,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			// XXX I don't get it ... something is broken here, because
 			// the ExecutionOutputLink below *also* performs eager
 			// execution of its arguments. So the step below should not
-			// be neeeded -- yet, it is ... Funny thing is, it only
+			// be needed -- yet, it is ... Funny thing is, it only
 			// breaks the BackwardChainerUTest ... why?
 			_avoid_discarding_quotes_level++;
 			args = walk_tree(args);

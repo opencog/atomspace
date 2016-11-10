@@ -150,7 +150,7 @@ QUOTE_LINK <- ORDERED_LINK
 UNQUOTE_LINK <- ORDERED_LINK
 
 // Like QuoteLink but only affects the direct child, not its
-// descendent. It has the same effect as wrapping the child with a
+// descendants. It has the same effect as wrapping the child with a
 // QuoteLink and each atom of the its outgoing set with an UnquoteLink.
 LOCAL_QUOTE_LINK <- ORDERED_LINK
 
