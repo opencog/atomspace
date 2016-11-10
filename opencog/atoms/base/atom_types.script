@@ -149,6 +149,11 @@ QUOTE_LINK <- ORDERED_LINK
 // quoting.  Defined to work just like in lisp/scheme.
 UNQUOTE_LINK <- ORDERED_LINK
 
+// Like QuoteLink but only affects the direct child, not its
+// descendent. It has the same effect as wrapping the child with a
+// QuoteLink and each atom of the its outgoing set with an UnquoteLink.
+LOCAL_QUOTE_LINK <- ORDERED_LINK
+
 // Everything under a DontExecLink is not executed. This is typically
 // used during pattern matching, to halt infinite recursion, when the
 // matched pattern is itself executable. Vaguely like QuoteLink, but
@@ -330,15 +335,23 @@ SATISFYING_SET_LINK <- SCOPE_LINK
 
 // Basic first-order logic operations
 
-// Due to ImplicationLink having a sugar syntax form, an
-// ImplicationLink *may* inherit from a ScopeLink. See
-// http://wiki.opencog.org/wikihome/index.php/ImplicationLink for more
-// explanation.
-IMPLICATION_LINK <- SCOPE_LINK
+// Sugar forms of implication and equivalence links. See
+// http://wiki.opencog.org/wikihome/index.php/ImplicationLink
+// for more information
+IMPLICATION_SCOPE_LINK <- SCOPE_LINK
+INTENSIONAL_IMPLICATION_SCOPE_LINK <- IMPLICATION_SCOPE_LINK
+EXTENSIONAL_IMPLICATION_SCOPE_LINK <- IMPLICATION_SCOPE_LINK
+
+EQUIVALENCE_SCOPE_LINK <- SCOPE_LINK
+INTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
+EXTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
+
+// Standard, non sugar form of implication and equivalence links.
+IMPLICATION_LINK <- ORDERED_LINK
 INTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
 EXTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
 
-EQUIVALENCE_LINK <- SCOPE_LINK
+EQUIVALENCE_LINK <- UNORDERED_LINK
 INTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
 EXTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
 

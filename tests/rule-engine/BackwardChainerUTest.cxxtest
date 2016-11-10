@@ -54,6 +54,7 @@ public:
 	void test_implication_instantiation_tv_query();
 	void test_impossible_criminal();
 	void test_criminal();
+	// TODO: think about fixing or removing the follow tests
 	// void test_focus_set();
 	// void test_virtual_no_grnd();
 };
@@ -226,13 +227,11 @@ void BackwardChainerUTest::test_modus_ponens_tv_query()
 	Handle target = an(PREDICATE_NODE, "T");
 
 	BackwardChainer bc(_as, top_rbs, target);
-	bc.get_config().set_maximum_iterations(20);
-	// TODO: fixme
-	// bc.do_chain();
+	bc.get_config().set_maximum_iterations(100);
+	bc.do_chain();
 
-	// TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, 1e-10);
-	// TS_ASSERT_DELTA(target->getTruthValue()->getConfidence(), 1, 1e-10);
-	TS_ASSERT(true);
+	TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, 1e-10);
+	TS_ASSERT_DELTA(target->getTruthValue()->getConfidence(), 1, 1e-10);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

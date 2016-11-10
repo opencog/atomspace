@@ -25,7 +25,7 @@
 (define (konsekwens x)
 	(display "Taken action on the atom ") (display x) (newline)
 	; Must return an atom, or undefined.
-	(ImplicationLink x)
+	(ImplicationLink x x)
 )
 
 ; Populate the AtomSpace with some data. In this case, two different

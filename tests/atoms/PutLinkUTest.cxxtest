@@ -291,7 +291,7 @@ void PutLinkUTest::test_eval_inheritance()
  *          (VariableNode "$X")
  *          (TypeNode "ConceptNode")
  *       )
- *       (ImplicationLink
+ *       (ImplicationScopeLink
  *          (EvaluationLink
  *             (PredicateNode "P")
  *             (VariableNode "$X")
@@ -315,20 +315,21 @@ void PutLinkUTest::test_eval_implication_1()
 		P = N(PREDICATE_NODE, "P"),
 		P_X = L(EVALUATION_LINK, P, X),
 		P_A = L(EVALUATION_LINK, P, A),
-		body = L(IMPLICATION_LINK, P_X, P_X),
+		body = L(QUOTE_LINK,
+		         L(IMPLICATION_SCOPE_LINK,
+		           L(UNQUOTE_LINK, P_X),
+		           L(UNQUOTE_LINK, P_X))),
 		vardecl = L(TYPED_VARIABLE_LINK, X, CT),
 		put = L(PUT_LINK, L(LAMBDA_LINK, vardecl, body), A);
 
 	Instantiator inst(&_as);
 	Handle putted = inst.execute(put);
-	Handle expected = L(IMPLICATION_LINK, P_A, P_A);
+	Handle expected = L(IMPLICATION_SCOPE_LINK, P_A, P_A);
 
 	printf("Executing %s\n", put->toString().c_str());
 	printf("Expecting %s\n", expected->toString().c_str());
 	printf("Got %s\n", putted->toString().c_str());
-	// TODO: re-enable once ImplicationLink scoping is fixed
-	// TS_ASSERT_EQUALS(putted, expected);
-	TS_ASSERT(true);
+	TS_ASSERT_EQUALS(putted, expected);
 	
 	logger().info("END TEST: %s", __FUNCTION__);
 }

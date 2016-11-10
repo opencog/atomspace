@@ -61,10 +61,9 @@ void FindUtilsUTest::setUp(void)
 		al(EVALUATION_LINK, P, X);
 
 	scoped_implication =
-		al(IMPLICATION_LINK, P,
-		   al(LAMBDA_LINK,
-		      X,
-		      free_evaluation));
+		al(IMPLICATION_LINK,
+		   P,
+		   al(LAMBDA_LINK, X, free_evaluation));
 
 	quotation =
 		al(QUOTE_LINK,

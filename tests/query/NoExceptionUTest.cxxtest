@@ -25,6 +25,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
+#include <opencog/atoms/base/Handle.h>
 
 #include <cxxtest/TestSuite.h>
 
@@ -89,15 +90,16 @@ void NoExceptionUTest::test_exception()
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	std::string result = eval->eval("(load-from-path \"tests/query/no-exception.scm\")");
-	std::cout << "result = " <<  result;
+	std::cout << "result = " << result;
 	
-	Handle bindlinkh = eval->eval_h("bl");
+	Handle bl = eval->eval_h("bl");
+	std::cout << "bl = " << oc_to_string(bl);
 
 	// Make sure the scheme file actually loaded!
-	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bindlinkh);
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bl);
 
 	// We expect NOT to catch an error.
-	TS_ASSERT_THROWS_NOTHING(bindlink(as, bindlinkh));
+	TS_ASSERT_THROWS_NOTHING(bindlink(as, bl));
 	
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

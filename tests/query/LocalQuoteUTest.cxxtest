@@ -1,0 +1,97 @@
+/*
+ * tests/query/LocalQuoteUTest.cxxtest
+ *
+ * Copyright (C) 2016 OpenCog Foundation
+ * All Rights Reserved
+ * Author: Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/Logger.h>
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al as.add_link
+#define an as.add_node
+
+class LocalQuoteUTest: public CxxTest::TestSuite
+{
+private:
+    AtomSpace as;
+
+	Handle X, P, forall,
+		VT, vardecl_var, body_var, vardecl, forall_pattern, forall_get;
+
+public:
+    LocalQuoteUTest(void)
+    {
+        logger().set_level(Logger::DEBUG);
+        logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
+    }
+
+    void setUp(void);
+    void tearDown(void);
+
+    void test_local_quote(void);
+};
+
+void LocalQuoteUTest::setUp(void)
+{
+	X = an(VARIABLE_NODE, "$X");
+	P = an(PREDICATE_NODE, "P");
+	forall = al(FORALL_LINK, X, al(EVALUATION_LINK, P, X));
+	VT = an(TYPE_NODE, "VariableNode");
+	vardecl_var = an(VARIABLE_NODE, "$vardecl");
+	body_var = an(VARIABLE_NODE, "$body");
+	vardecl = al(VARIABLE_LIST,
+	             al(TYPED_VARIABLE_LINK, vardecl_var, VT),
+	             body_var);
+	forall_pattern = al(FORALL_LINK, vardecl_var, body_var);
+	forall_get = al(GET_LINK, vardecl, al(LOCAL_QUOTE_LINK, forall_pattern));
+}
+
+void LocalQuoteUTest::tearDown(void)
+{
+}
+
+/*
+ * LocalQuoteLink unit test.
+ */
+void LocalQuoteUTest::test_local_quote(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    Handle result = satisfying_set(&as, forall_get),
+	    expected = al(SET_LINK, forall);
+
+    logger().debug() << "result = " << result;
+	logger().debug() << "expected = " << expected;
+
+	// Disable till fixed
+	// TS_ASSERT_EQUALS(result, expected);
+	TS_ASSERT(true);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+#undef al
+#undef an

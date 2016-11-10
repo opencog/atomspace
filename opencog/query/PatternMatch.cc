@@ -36,6 +36,8 @@
 
 using namespace opencog;
 
+#define DEBUG 1
+
 /* ================================================================= */
 /// A pass-through class, which wraps a regular callback, but captures
 /// all of the different possible groundings that result.  This class is

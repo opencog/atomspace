@@ -37,7 +37,7 @@ class UnquoteUTest: public CxxTest::TestSuite
 private:
 	AtomSpace as;
 	Handle X, Y, var_decl, A, B;
-	
+
 public:
 	UnquoteUTest()
 	{

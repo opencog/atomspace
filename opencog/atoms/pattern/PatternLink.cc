@@ -786,7 +786,7 @@ void PatternLink::trace_connectives(const std::set<Type>& connectives,
  * how the trees are connected.
  *
  * This is used for only one purpose: to find the next unsolved
- * clause. Perhaps this could be simplied somehow ...
+ * clause. Perhaps this could be simplified somehow ...
  */
 void PatternLink::make_connectivity_map(const HandleSeq& component)
 {
@@ -802,7 +802,7 @@ void PatternLink::make_connectivity_map(const HandleSeq& component)
 	auto end = _pat.connectivity_map.end();
 	while (it != end)
 	{
-		if (it->second.size() == 1)
+		if (1 == _pat.connectivity_map.count(it->first))
 			it = _pat.connectivity_map.erase(it);
 		else
 			it++;
@@ -811,7 +811,7 @@ void PatternLink::make_connectivity_map(const HandleSeq& component)
 
 void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 {
-	_pat.connectivity_map[h].emplace_back(root);
+	_pat.connectivity_map.emplace(h, root);
 
 	if (h->isLink())
 	{
@@ -875,8 +875,9 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	// (as its not clear what else could possibly be done).
 	//
 	// Ignore quoting and unquoting nodes in the PatternTerm
-	if ((not parent->isQuoted() and QUOTE_LINK == t)
-	    or (parent->getQuotationLevel() == 1 and UNQUOTE_LINK == t)) {
+	if ((not parent->isQuoted() and (QUOTE_LINK == t or LOCAL_QUOTE_LINK == t))
+	    or (parent->getQuotationLevel() == 1
+	        and not parent->isLocalQuoted() and UNQUOTE_LINK == t)) {
 		if (1 != h->getArity())
 			throw InvalidParamException(TRACE_INFO,
 			                            "QuoteLink/UnquoteLink has "
@@ -889,7 +890,9 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
 
 	// Update the PatternTerm quotation level
-	if (QUOTE_LINK == t)
+	if (not parent->isQuoted() and LOCAL_QUOTE_LINK == t)
+		ptm->setLocalQuote(true);
+	else if (QUOTE_LINK == t)
 		ptm->addQuote();
 	else if (UNQUOTE_LINK == t)
 		ptm->remQuote();

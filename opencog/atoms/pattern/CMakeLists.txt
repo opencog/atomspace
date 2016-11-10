@@ -6,6 +6,7 @@ ADD_LIBRARY (lambda
 	BindLink.cc
 	DualLink.cc
 	PatternLink.cc
+	PatternTerm.cc
 	PatternUtils.cc
 )
 
@@ -33,6 +34,8 @@ INSTALL (FILES
 	BindLink.h
 	DualLink.h
 	PatternLink.h
+	Pattern.h
+	PatternTerm.h
 	PatternUtils.h
 	DESTINATION "include/opencog/atoms/pattern"
 )

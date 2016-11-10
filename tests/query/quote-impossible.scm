@@ -10,7 +10,7 @@
     (VariableNode "$A")
     (AndLink
       (VariableNode "$A")
-      (ImplicationLink
+      (ImplicationScopeLink
         (VariableNode "$A")
         (QuoteLink
           (InheritanceLink

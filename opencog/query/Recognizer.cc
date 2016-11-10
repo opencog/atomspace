@@ -91,7 +91,7 @@ class Recognizer :
 using namespace opencog;
 
 // Uncomment below to enable debug print
-#define DEBUG
+#define DEBUG 1
 #ifdef DEBUG
 #define dbgprt(f, varargs...) logger().fine(f, ##varargs)
 #else
