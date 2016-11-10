@@ -26,6 +26,119 @@
 
 namespace opencog {
 
+PatternTerm::PatternTerm()
+	: _handle(Handle::UNDEFINED), _parent(PatternTerm::UNDEFINED),
+	  _has_any_bound_var(false)
+{}
+
+PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
+	: _handle(h), _parent(parent),
+	  _quotation(parent->_quotation.quotation_level(),
+	             false /* necessarily false since it is local */),
+	  _has_any_bound_var(false)
+{
+	Type t = h->getType();
+
+	// Possibly consume the quotation
+	if (_quotation.consumable_quotation(t)) {
+		if (1 != h->getArity())
+			throw InvalidParamException(TRACE_INFO,
+			                            "QuoteLink/UnquoteLink/LocalQuoteLink has "
+			                            "unexpected arity!");
+		_handle = h->getOutgoingAtom(0);
+	}
+
+	// Update the quotation state
+	_quotation.update(t);
+}
+
+void PatternTerm::addOutgoingTerm(const PatternTermPtr& ptm)
+{
+	_outgoing.push_back(ptm);
+}
+
+Handle PatternTerm::getHandle()
+{
+	return _handle;
+}
+
+PatternTermPtr PatternTerm::getParent()
+{
+	return _parent;
+}
+
+PatternTermSeq PatternTerm::getOutgoingSet() const
+{
+	PatternTermSeq oset;
+	for (PatternTermWPtr w : _outgoing)
+	{
+		PatternTermPtr s(w.lock());
+		if (s) oset.push_back(s);
+	}
+
+	return oset;
+}
+
+Arity PatternTerm::getArity() const
+{
+	return _outgoing.size();
+}
+
+Quotation& PatternTerm::getQuotation()
+{
+	return _quotation;
+}
+
+const Quotation& PatternTerm::getQuotation() const
+{
+	return _quotation;
+}
+
+bool PatternTerm::isQuoted() const
+{
+	return _quotation.is_quoted();
+}
+
+bool PatternTerm::hasAnyBoundVariable() const
+{
+	return _has_any_bound_var;
+}
+
+PatternTermPtr PatternTerm::getOutgoingTerm(Arity pos) const
+{
+	// Checks for a valid position
+	if (pos < getArity()) {
+		PatternTermPtr s(_outgoing[pos].lock());
+		if (not s)
+			throw RuntimeException(TRACE_INFO,
+			                       "expired outgoing set index %d", pos);
+		return s;
+	} else {
+		throw RuntimeException(TRACE_INFO,
+		                       "invalid outgoing set index %d", pos);
+	}
+}
+
+void PatternTerm::addBoundVariable()
+{
+	if (!_has_any_bound_var)
+	{
+		_has_any_bound_var = true;
+		if (_parent != PatternTerm::UNDEFINED)
+			_parent->addBoundVariable();
+	}
+}
+
+std::string PatternTerm::toString() const { return toString(":"); }
+
+std::string PatternTerm::toString(std::string indent) const
+{
+	if (_handle == nullptr) return "-";
+	std::string str = _parent->toString();
+	str += indent + std::to_string(_handle.value());
+	return str;
+}
+
 std::string oc_to_string(const PatternTerm& pt)
 {
 	return pt.toString();

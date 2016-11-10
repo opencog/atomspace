@@ -867,43 +867,17 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
                                            Handle h,
                                            PatternTermPtr& parent)
 {
-	Type t = h->getType();
-
-	// If the pattern link is a quote, then we compare the quoted
-	// contents. This is done recursively, of course.  The QuoteLink
-	// must have only one child; anything else beyond that is ignored
-	// (as its not clear what else could possibly be done).
-	//
-	// Ignore quoting and unquoting nodes in the PatternTerm
-	if ((not parent->isQuoted() and (QUOTE_LINK == t or LOCAL_QUOTE_LINK == t))
-	    or (parent->getQuotationLevel() == 1
-	        and not parent->isLocalQuoted() and UNQUOTE_LINK == t)) {
-		if (1 != h->getArity())
-			throw InvalidParamException(TRACE_INFO,
-			                            "QuoteLink/UnquoteLink has "
-			                            "unexpected arity!");
-		h = h->getOutgoingAtom(0);
-	}
-
 	PatternTermPtr ptm(std::make_shared<PatternTerm>(parent, h));
 	parent->addOutgoingTerm(ptm);
 	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
-
-	// Update the PatternTerm quotation level
-	if (not parent->isQuoted() and LOCAL_QUOTE_LINK == t)
-		ptm->setLocalQuote(true);
-	else if (QUOTE_LINK == t)
-		ptm->addQuote();
-	else if (UNQUOTE_LINK == t)
-		ptm->remQuote();
 
 	// If the current node is a bound variable store this information for
 	// later checks. The flag telling whether the term subtree contains
 	// any bound variable is set by addBoundVariable() method for all terms
 	// on the path up to the root (unless it has been set already).
-	t = h->getType();
+	Type t = h->getType();
 	if ((VARIABLE_NODE == t or GLOB_NODE == t)
-	    and not ptm->isQuoted()
+	    and not ptm->getQuotation().is_quoted()
 	    and _varlist.varset.end() != _varlist.varset.find(h))
 	{
 		ptm->addBoundVariable();
