@@ -36,7 +36,7 @@
 
 #include <opencog/truthvalue/TruthValue.h>
 
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/base/Quotation.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
@@ -204,22 +204,12 @@ public:
     Handle getHandle(Type, const std::string&) const;
     Handle getNodeHandle(AtomPtr&) const;
     Handle getHandle(Type, const HandleSeq&) const;
-    Handle getLinkHandle(AtomPtr&, int=0, bool=false) const;
-    Handle getHandle(AtomPtr&, int=0, bool=false) const;
-    Handle getHandle(const Handle& h, int quotelevel=0, bool localquote=false) const {
-        AtomPtr a(h); return getHandle(a, quotelevel);
+    Handle getLinkHandle(AtomPtr&, Quotation quotation = Quotation()) const;
+    Handle getHandle(AtomPtr&, Quotation quotation = Quotation()) const;
+    Handle getHandle(const Handle& h) const {
+        AtomPtr a(h); return getHandle(a);
     }
     Handle getHandle(UUID) const;
-
-    /**
-     * Static helper to support Quote, UnQuote and LocalQuote links.
-     *
-     * @param quotelevel  quotation level
-     * @param localquote  whether the atom is locally quoted
-     * @return            true iff quotelevel is not null or localquote is true.
-     */
-    bool is_quoted(int quotelevel, bool localquote) const;
-    bool is_unquoted(int quotelevel, bool localquote) const;
 
     /**
      * Returns the set of atoms of a given type (subclasses optionally).
