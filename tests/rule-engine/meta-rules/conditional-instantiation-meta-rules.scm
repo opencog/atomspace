@@ -1,5 +1,5 @@
 ;; =======================================================================
-;; Conditional Instantiation Meta Rule
+;; Crisp Conditional Instantiation Meta Rule
 ;;
 ;; ImplicationScopeLink
 ;;    V
@@ -25,44 +25,43 @@
 
 (load-from-path "tests/rule-engine/rules/instantiation.scm")
 
-;;;;;;;;;;;;;;;;;;;;;;;
-;; Helper definition ;;
-;;;;;;;;;;;;;;;;;;;;;;;
-
-(define conditional-instantiation-variables
-  (VariableList
-     (TypedVariableLink
-        (VariableNode "$TyVs")
-        (TypeChoice
-           (TypeNode "TypedVariableLink")
-           (TypeNode "VariableList")))
-     (VariableNode "$P")
-     (VariableNode "$Q")))
-
-(define conditional-instantiation-body
-  (Quote (ImplicationScopeLink
-     (Unquote (VariableNode "$TyVs"))
-     (Unquote (VariableNode "$P"))
-     (Unquote (VariableNode "$Q")))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Implication full instantiation rule ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(define conditional-full-instantiation-variables
+  (VariableList
+     (TypedVariable
+        (Variable "$TyVs")
+        (TypeChoice
+           (Type "TypedVariableLink")
+           (Type "VariableList")))
+     (Variable "$P")
+     (Variable "$Q")))
+
+(define conditional-full-instantiation-body
+  (Quote (ImplicationScope
+     (Unquote (Variable "$TyVs"))
+     (Unquote (Variable "$P"))
+     (Unquote (Variable "$Q")))))
+
+;; TODO
+
 ;; Here only the implicant is considered as premise, while the
 ;; variable(s) should as well, but that implies to lay them out
 ;; explicitly so for sake of simplicity it is ignored for now.
-(define conditional-instantiation-rewrite
-  (Quote (Bind
-     (Unquote (VariableNode "$TyVs"))
-     (Unquote (VariableNode "$P"))
-     (Unquote (ExecutionOutputLink
-       (GroundedSchemaNode "scm: conditional-instantiation-formula")
-       (ListLink
-          (VariableNode "$P")
-          (VariableNode "$Q")))))))
-
-;; TODO
+(define conditional-full-instantiation-rewrite
+  (ExecutionOutput
+     (GroundedSchema "scm: conditional-full-instantiation-meta-formula")
+     (List
+        (Quote (Bind
+           (Unquote (Variable "$TyVs"))
+           (Unquote (Variable "$P"))
+           (Unquote (ExecutionOutput
+              (GroundedSchema "scm: conditional-full-instantiation-formula")
+              (ListLink
+                 (Variable "$P")
+                 (Variable "$Q")))))))))
 
 ;; Bind
 ;;   VariableList
@@ -83,31 +82,18 @@
 ;;       Variable "$TyVs"
 ;;       Variable "$P"
 ;;       ExecutionOutput
-;;         GroundedSchema "scm: conditional-instantiation-formula"
+;;         GroundedSchema "scm: conditional-full-instantiation-formula"
 ;;         List
-;;           Variable "$X"
 ;;           Variable "$P"
 ;;           Variable "$Q"
-(define conditional-instantiation-meta-rule
+(define conditional-full-instantiation-meta-rule
   (BindLink
-     implication-full-instantiation-variables
-     implication-instantiation-body
-     implication-full-instantiation-rewrite))
+     conditional-full-instantiation-variables
+     conditional-full-instantiation-body
+     conditional-full-instantiation-rewrite))
 
-;; TODO
-;;
-;; This function
-;;
-;; 1. randomly selects a substitution term (or a tuple of substitution
-;;    terms, if the ImplicationLink has multiple variables in scope)
-;;    that meets the implication's condition (the implicant),
-;;
-;; 2. performs the substitution.
-;;
-;; 3. calculates its TV (just the TV on the ImplicationLink)
-;;
-;; If no substitution is possible it returns the undefined handle
-(define (implication-full-instantiation-formula Impl)
+(define (conditional-full-instantiation-formula P Q)
+  (cog-set-tv! Q (cog-tv
   (let* (
          (Impl-outgoings (cog-outgoing-set Impl))
          (TyVs (car Impl-outgoings))
