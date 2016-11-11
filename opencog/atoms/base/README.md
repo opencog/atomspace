@@ -11,9 +11,9 @@ ProtoAtoms
 ==========
 ProtoAtoms are a partially-implemented, incompletely thought-out
 concept for a way of associating arbitrary generic values with some
-given atom.  ProtoAtoms are like atoms, except that they lack a UUID,
-a TV, an AV, and cannot be stored in the atomspace.  This makes them
-smaller, lighter and more efficient.
+given atom.  ProtoAtoms are like atoms, except that they lack a TV,
+an AV, and cannot be stored in the atomspace.  This makes them smaller,
+lighter and more efficient.
 
 However, because thier design is incomplete, the best way to use them
 is not yet clear.  The current status is tracked in
