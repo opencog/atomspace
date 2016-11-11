@@ -506,7 +506,7 @@ public:
         HandleSeq resolved_oset;
         for (UUID idu : p->oset)
         {
-            Handle h(idu);
+            Handle h(TLB::getAtom(idu));
             h = _atom_table->getHandle(h);
             if (h)
             {
