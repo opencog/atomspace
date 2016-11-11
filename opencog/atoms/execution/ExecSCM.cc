@@ -90,7 +90,7 @@ ExecSCM::ExecSCM(void) :
 void ExecSCM::init(void)
 {
 	_binders.push_back(new FunctionWrap(ss_execute,
-	                    "cog-execute!", "exec"));
+	                   "cog-execute!", "exec"));
 
 	_binders.push_back(new FunctionWrap(ss_evaluate,
 	                   "cog-evaluate!", "exec"));
