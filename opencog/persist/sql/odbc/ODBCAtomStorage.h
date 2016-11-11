@@ -107,6 +107,7 @@ class ODBCAtomStorage : public AtomStorage
         void create_tables(void);
 
         // Track UUID's that are in use.
+        // XXX FIXME -- get rid of this -- the TLB now plays this role.
         std::mutex id_cache_mutex;
         bool local_id_cache_is_inited;
         std::set<UUID> local_id_cache;
@@ -176,7 +177,7 @@ class ODBCAtomStorage : public AtomStorage
         void storeSingleAtom(AtomPtr);
 
         // Fetch atoms from DB
-        bool atomExists(Handle);
+        bool atomExists(const Handle&);
 
         // Large-scale loads and saves
         void load(AtomTable &); // Load entire contents of DB

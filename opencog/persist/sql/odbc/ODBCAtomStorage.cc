@@ -390,8 +390,8 @@ class ODBCAtomStorage::Outgoing
         bool each_handle (Handle h)
         {
             char buff[BUFSZ];
-            UUID src_uuid = src_handle->getUUID();
-            UUID dst_uuid = h->getUUID();
+            UUID src_uuid = TLB::addAtom(src_handle, Handle::INVALID_UUID);
+            UUID dst_uuid = TLB::addAtom(h, Handle::INVALID_UUID);
             snprintf(buff, BUFSZ, "INSERT  INTO Edges "
                     "(src_uuid, dst_uuid, pos) VALUES (%lu, %lu, %u);",
                     src_uuid, dst_uuid, pos);
@@ -703,9 +703,10 @@ std::string ODBCAtomStorage::oset_to_string(const HandleSeq& out,
     str += "\'{";
     for (int i=0; i<arity; i++)
     {
-        Handle h = out[i];
+        const Handle& h = out[i];
+        UUID uuid = TLB::addAtom(h, Handle::INVALID_UUID);
         if (i != 0) str += ", ";
-        str += std::to_string(h->getUUID());
+        str += std::to_string(uuid);
     }
     str += "}\'";
     return str;
@@ -1092,16 +1093,17 @@ void ODBCAtomStorage::set_typemap(int dbval, const char * tname)
  * Return true if the indicated handle exists in the storage.
  * Thread-safe.
  */
-bool ODBCAtomStorage::atomExists(Handle h)
+bool ODBCAtomStorage::atomExists(const Handle& h)
 {
+    UUID uuid = TLB::addAtom(h, Handle::INVALID_UUID);
 #ifdef ASK_SQL_SERVER
     char buff[BUFSZ];
-    snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", h->getUUID());
+    snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", uuid);
     return idExists(buff);
 #else
     std::unique_lock<std::mutex> lock(id_cache_mutex);
     // look at the local cache of id's to see if the atom is in storage or not.
-    return local_id_cache.count(h->getUUID());
+    return local_id_cache.count(uuid);
 #endif
 }
 
@@ -1213,7 +1215,7 @@ void ODBCAtomStorage::get_ids(void)
 void ODBCAtomStorage::getOutgoing(HandleSeq &outv, Handle h)
 {
     char buff[BUFSZ];
-    UUID uuid = h->getUUID();
+    UUID uuid = TLB::addAtom(h, Handle::INVALID_UUID);
     snprintf(buff, BUFSZ, "SELECT * FROM Edges WHERE src_uuid = %lu;", uuid);
 
     ODBCConnection* db_conn = get_conn();
@@ -1299,10 +1301,12 @@ HandleSeq ODBCAtomStorage::getIncomingSet(const Handle& h)
     HandleSeq iset;
 
     setup_typemap();
+
+    UUID uuid = TLB::addAtom(h, Handle::INVALID_UUID);
     char buff[BUFSZ];
     snprintf(buff, BUFSZ,
         "SELECT * FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
-        h->getUUID());
+        uuid);
 
     // Note: "select * from atoms where outgoing@>array[556];" will return
     // all links with atom 556 in the outgoing set -- i.e. the incoming set of 556.
