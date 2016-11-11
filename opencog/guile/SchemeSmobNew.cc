@@ -199,7 +199,7 @@ SCM SchemeSmob::ss_atom (SCM suuid)
 
 	// SCM_RETURN_NEWSMOB (cog_uuid_tag, suuid);
 	UUID uuid = scm_to_ulong(suuid);
-	if (Handle::INVALID_UUID == uuid)
+	if (INVALID_UUID == uuid)
 		scm_wrong_type_arg_msg("cog-atom", 1, suuid, "valid opencog uuid");
 
 	return handle_to_scm(Handle(uuid));
@@ -221,11 +221,11 @@ SCM SchemeSmob::ss_handle (SCM satom)
 
 /* ============================================================== */
 /**
- * Return Handle::UNDEFINED
+ * Return 0 -- WTF what for?? who uses this?
  */
 SCM SchemeSmob::ss_undefined_handle (void)
 {
-	return scm_from_ulong(Handle::INVALID_UUID);
+	return scm_from_ulong(0);
 }
 
 /* ============================================================== */

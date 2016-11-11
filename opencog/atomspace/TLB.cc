@@ -32,7 +32,7 @@ std::unordered_map<Handle, UUID> TLB::_handle_map;
 
 UUID TLB::addAtom(const Handle& h, UUID uuid)
 {
-    if (uuid == Handle::INVALID_UUID)
+    if (uuid == INVALID_UUID)
     {
         std::lock_guard<std::mutex> lck(_mtx);
         auto pr = _handle_map.find(h);
@@ -65,7 +65,7 @@ UUID TLB::addAtom(const Handle& h, UUID uuid)
 
 Handle TLB::getAtom(UUID uuid)
 {
-    if (Handle::INVALID_UUID == uuid) return Handle::UNDEFINED;
+    if (INVALID_UUID == uuid) return Handle::UNDEFINED;
     std::lock_guard<std::mutex> lck(_mtx);
     auto pr = _uuid_map.find(uuid);
 

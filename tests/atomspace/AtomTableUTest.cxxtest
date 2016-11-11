@@ -103,7 +103,7 @@ public:
 
     void testHolds()
     {
-        Handle h(100101);
+        Handle h;
         Handle word = table->add(createNode(NUMBER_NODE, "1"), false);
         TS_ASSERT(table->holds(word));
         TS_ASSERT(!table->holds(h));

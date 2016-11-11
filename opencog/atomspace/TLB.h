@@ -87,6 +87,9 @@ private:
                       std::equal_to<opencog::Handle> > _handle_map;
 
 public:
+
+    static const UUID INVALID_UUID = ULONG_MAX;
+
     /**
      * Adds a new atom to the TLB.
      * If the atom has already be added then an exception is thrown.
@@ -142,7 +145,7 @@ public:
 
 inline bool TLB::isInvalidHandle(const Handle& h)
 {
-    return (h == nullptr) or (h.value() >= _brk_uuid);
+    return (h == nullptr);
 }
 
 inline bool TLB::isValidHandle(const Handle& h)

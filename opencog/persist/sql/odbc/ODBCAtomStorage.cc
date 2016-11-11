@@ -390,8 +390,8 @@ class ODBCAtomStorage::Outgoing
         bool each_handle (Handle h)
         {
             char buff[BUFSZ];
-            UUID src_uuid = TLB::addAtom(src_handle, Handle::INVALID_UUID);
-            UUID dst_uuid = TLB::addAtom(h, Handle::INVALID_UUID);
+            UUID src_uuid = TLB::addAtom(src_handle, TLB::INVALID_UUID);
+            UUID dst_uuid = TLB::addAtom(h, TLB::INVALID_UUID);
             snprintf(buff, BUFSZ, "INSERT  INTO Edges "
                     "(src_uuid, dst_uuid, pos) VALUES (%lu, %lu, %u);",
                     src_uuid, dst_uuid, pos);
@@ -704,7 +704,7 @@ std::string ODBCAtomStorage::oset_to_string(const HandleSeq& out,
     for (int i=0; i<arity; i++)
     {
         const Handle& h = out[i];
-        UUID uuid = TLB::addAtom(h, Handle::INVALID_UUID);
+        UUID uuid = TLB::addAtom(h, TLB::INVALID_UUID);
         if (i != 0) str += ", ";
         str += std::to_string(uuid);
     }
@@ -808,7 +808,7 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 
     // Use the TLB Handle as the UUID.
     Handle h(atom->getHandle());
-    UUID uuid = TLB::addAtom(h, Handle::INVALID_UUID);
+    UUID uuid = TLB::addAtom(h, TLB::INVALID_UUID);
 
     std::string uuidbuff = std::to_string(uuid);
 
@@ -1095,7 +1095,7 @@ void ODBCAtomStorage::set_typemap(int dbval, const char * tname)
  */
 bool ODBCAtomStorage::atomExists(const Handle& h)
 {
-    UUID uuid = TLB::addAtom(h, Handle::INVALID_UUID);
+    UUID uuid = TLB::addAtom(h, TLB::INVALID_UUID);
 #ifdef ASK_SQL_SERVER
     char buff[BUFSZ];
     snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", uuid);
@@ -1215,7 +1215,7 @@ void ODBCAtomStorage::get_ids(void)
 void ODBCAtomStorage::getOutgoing(HandleSeq &outv, Handle h)
 {
     char buff[BUFSZ];
-    UUID uuid = TLB::addAtom(h, Handle::INVALID_UUID);
+    UUID uuid = TLB::addAtom(h, TLB::INVALID_UUID);
     snprintf(buff, BUFSZ, "SELECT * FROM Edges WHERE src_uuid = %lu;", uuid);
 
     ODBCConnection* db_conn = get_conn();
@@ -1235,13 +1235,13 @@ ODBCAtomStorage::PseudoPtr ODBCAtomStorage::getAtom(const char * query, int heig
 {
     ODBCConnection* db_conn = get_conn();
     Response rp;
-    rp.uuid = Handle::INVALID_UUID;
+    rp.uuid = TLB::INVALID_UUID;
     rp.rs = db_conn->exec(query);
     rp.rs->foreach_row(&Response::create_atom_cb, &rp);
 
     // Did we actually find anything?
     // DO NOT USE IsInvalidHandle() HERE! It won't work, duhh!
-    if (rp.uuid == Handle::INVALID_UUID)
+    if (rp.uuid == TLB::INVALID_UUID)
     {
         rp.release();
         put_conn(db_conn);
@@ -1302,7 +1302,7 @@ HandleSeq ODBCAtomStorage::getIncomingSet(const Handle& h)
 
     setup_typemap();
 
-    UUID uuid = TLB::addAtom(h, Handle::INVALID_UUID);
+    UUID uuid = TLB::addAtom(h, TLB::INVALID_UUID);
     char buff[BUFSZ];
     snprintf(buff, BUFSZ,
         "SELECT * FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];",

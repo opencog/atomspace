@@ -84,14 +84,12 @@ private:
     static void clear_resolver(const AtomTable*);
 
     static const AtomPtr NULL_POINTER;
-public:
 
-    static const UUID INVALID_UUID = ULONG_MAX;
+public:
     static const ContentHash INVALID_HASH = std::numeric_limits<size_t>::max();
     static const Handle UNDEFINED;
 
     explicit Handle(const AtomPtr& atom) : _ptr(atom) {}
-    explicit Handle(const UUID);
     explicit Handle() {}
     Handle(const Handle& h) : _ptr(h._ptr) {}
     ~Handle() {}

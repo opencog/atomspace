@@ -210,7 +210,7 @@ SCM SchemeSmob::ss_as_uuid(SCM sas)
 	{
 		// Special care for atom whose atomspace was null
 		if (scm_is_null(sas))
-			return scm_from_ulong(Handle::INVALID_UUID);
+			return scm_from_ulong(ULONG_MAX);
 		scm_wrong_type_arg_msg("cog-atomspace-uuid", 1, sas, "atomspace");
 	}
 

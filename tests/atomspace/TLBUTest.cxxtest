@@ -49,15 +49,15 @@ public:
 
     void testAdd() {
         NodePtr n(createNode(CONCEPT_NODE, "test"));
-        UUID uuid = TLB::addAtom(n, Handle::INVALID_UUID);
-        TS_ASSERT(Handle::INVALID_UUID != uuid);
+        UUID uuid = TLB::addAtom(n, TLB::INVALID_UUID);
+        TS_ASSERT(TLB::INVALID_UUID != uuid);
 
         NodePtr nb(createNode(CONCEPT_NODE, "test"));
 
         // content-compare should work
         TS_ASSERT( *n == *nb);
 
-        UUID uuidb = TLB::addAtom(nb, Handle::INVALID_UUID);
+        UUID uuidb = TLB::addAtom(nb, TLB::INVALID_UUID);
         TS_ASSERT(uuidb == uuid);
     }
 };

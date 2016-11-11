@@ -35,13 +35,9 @@ namespace opencog {
 const Handle Handle::UNDEFINED;
 const AtomPtr Handle::NULL_POINTER;
 
-Handle::Handle(const UUID u)
-{
-	_ptr = TLB::getAtom(u)._ptr;
-}
-
 UUID Handle::value(void) const
 {
+    if (_ptr) return _ptr->get_hash();
     return ULONG_MAX;
 }
 

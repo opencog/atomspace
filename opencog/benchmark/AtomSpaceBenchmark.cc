@@ -980,11 +980,13 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
 
 Handle AtomSpaceBenchmark::getRandomHandle()
 {
-    Handle h(UUID_begin + randomGenerator->randint(UUID_end-1-UUID_begin));
+    UUID ranu = UUID_begin + randomGenerator->randint(UUID_end-1-UUID_begin);
+    Handle h(TLB::getAtom(ranu));
     // operator->() can return NULL when there's no atom for the uuid,
     // because the atom was deleted in a previous pass! Dohh!
     while (NULL == h.operator->()) {
-        h = getRandomHandle();
+        ranu = UUID_begin + randomGenerator->randint(UUID_end-1-UUID_begin);
+        h = TLB::getAtom(ranu);
     }
     return h;
 }
