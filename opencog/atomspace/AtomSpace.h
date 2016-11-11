@@ -242,7 +242,6 @@ public:
      * return Handle::UNDEFINED.
      */
     Handle get_atom(const Handle& h) const { return _atom_table.getHandle(h); }
-    Handle get_atom(UUID uuid) const { return _atom_table.getHandle(uuid); }
 
     /**
      * Load *all* atoms of the given type, but only if they are not
