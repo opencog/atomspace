@@ -868,6 +868,7 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
                                            PatternTermPtr& parent)
 {
 	PatternTermPtr ptm(std::make_shared<PatternTerm>(parent, h));
+	h = ptm->getHandle();
 	parent->addOutgoingTerm(ptm);
 	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
 
