@@ -301,10 +301,7 @@ Handle AtomTable::getLinkHandle(AtomPtr& a, int quotelevel) const
         resolved_seq.emplace_back(rh);
     }
 
-    // Sigh. Proper database support requires that the UUID not be mangled.
-    UUID save = a->_uuid;
     a = createLink(t, resolved_seq);
-    a->_uuid = save;
 
     // Start searching to see if we have this atom.
     ContentHash ch = a->get_hash();
@@ -320,7 +317,6 @@ Handle AtomTable::getLinkHandle(AtomPtr& a, int quotelevel) const
         ScopeLinkPtr wanted = ScopeLinkCast(a);
         if (nullptr == wanted) {
             wanted = ScopeLink::factory(Handle(a));
-            wanted->_uuid = a->_uuid;
         }
         ch = wanted->get_hash();
         a = wanted;
@@ -472,8 +468,12 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
     return atom;
 }
 
-// create a clone
-static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
+/// The purpose of the clone factory is to create a private, unique
+/// copy of the atom, so as to avoid accidental, unintentional
+/// sharing with others. In particular, the atom that we are given
+/// may already exist in some other atomspace; we want our own private
+/// copy, in that case.
+AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
 {
     // Nodes of various kinds -----------
     if (NUMBER_NODE == atom_type)
@@ -519,28 +519,9 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
 
 AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
 {
-	AtomPtr clone(do_factory(atom_type, atom));
-	if (nullptr == clone) return clone;
-	clone->_uuid = atom->_uuid;
-	return clone;
+	return do_factory(atom_type, atom);
 }
 
-/// The purpose of the clone factory is to create a private, unique
-/// copy of the atom, so as to avoid accidental, unintentional
-/// sharing with others. In particular, the atom that we are given
-/// may already exist in some other atomspace; we want our own private
-/// copy, in that case.
-AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
-{
-	AtomPtr clone(do_clone_factory(atom_type, atom));
-	// Copy the UUID ONLY if the atom does not belong to some other
-	// atomspace. This is the situation that applies to atoms being
-	// delivered to us from the backing store: the UUID is set, but
-	// they are otherwise "fresh" atoms.
-	if (nullptr == atom->getAtomTable())
-		clone->_uuid = atom->_uuid;
-	return clone;
-}
 
 #if 0
 static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
@@ -553,8 +534,7 @@ static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
                     << " and arity=" << arity;
     logger().error() << "Failing outset is this:";
     for (unsigned int fk=0; fk<arity; fk++)
-        logger().error() << "outset i=" << fk
-                        << " uuid=" << ogs[fk].value();
+        logger().error() << "outset i=" << fk;
 
     logger().error() << "link is " << atom->toString();
     logger().flush();
@@ -592,7 +572,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 
     // Certain DeleteLinks can never be added!
     if (nullptr == atom) return Handle();
-    atom->_uuid = orig->_uuid;
 
     // Is the equivalent of this atom already in the table?
     // If so, then return the existing atom.  (Note that this 'existing'
@@ -621,13 +600,10 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         // correctly when fetching from backing store. But do this
         // if the atom is actually coming from backing store (i.e.
         // does not yet belong to any table).
-        UUID save = atom->_uuid;
-        if (NULL != atom->getAtomTable()) save = (UUID) -1;
         atom = createLink(atom_type, closet,
                           atom->getTruthValue(),
                           atom->getAttentionValue());
         atom = clone_factory(atom_type, atom);
-        atom->_uuid = save;
     }
 
     // Clone, if we haven't done so already. We MUST maintain our own
@@ -707,7 +683,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (not _transient and async)
         _index_queue.enqueue(atom);
 
-    DPRINTF("Atom added: %ld => %s\n", atom->_uuid, atom->toString().c_str());
+    DPRINTF("Atom added: %s\n", atom->toString().c_str());
     return h;
 }
 
