@@ -16,6 +16,7 @@ ADD_DEPENDENCIES(persist-pgsql opencog_atom_types)
 TARGET_LINK_LIBRARIES(persist-pgsql
     sql-support
     atomspace
+    atomspaceutils
     ${ODBC_LIBRARIES}
     ${PGSQL_LIBRARIES}
 )

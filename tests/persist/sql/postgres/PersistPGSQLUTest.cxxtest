@@ -494,7 +494,7 @@ return;
     HandleSeq loaded_outgoing;
     for (auto& uuid : outgoing_uuds)
     {
-        Handle outgoing_node = _as->fetch_atom(uuid);
+        Handle outgoing_node = _as->fetch_atom(TLB::getAtom(uuid));
         loaded_outgoing.push_back(outgoing_node);
     }
 
@@ -591,7 +591,7 @@ void PersistUTest::test_degenerate_deep_links()
     _pm->resetQueryCount();
     for (auto& uuid : link_uuds)
     {
-        Handle link = _as->fetch_atom(uuid);
+        Handle link = _as->fetch_atom(TLB::getAtom(uuid));
         TSM_ASSERT("Many deep links fetch_atom failed", link);
     }
     fprintf(stderr, "fetch all nodes - query count: %d \n", _pm->queryCount());
@@ -676,7 +676,7 @@ void PersistUTest::test_many_deep_links()
     _pm->resetQueryCount();
     for (auto& uuid : link_uuds)
     {
-        Handle link = _as->fetch_atom(uuid);
+        Handle link = _as->fetch_atom(TLB::getAtom(uuid));
         TSM_ASSERT("Many deep links fetch_atom failed", link);
     }
     fprintf(stderr, "fetch all nodes - query count: %d \n", _pm->queryCount());
