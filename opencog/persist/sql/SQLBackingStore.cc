@@ -68,3 +68,15 @@ void SQLBackingStore::barrier()
 {
 	_store->flushStoreQueue();
 }
+
+void SQLBackingStore::registerWith(AtomSpace* as)
+{
+	_store->registerWith(as);
+	BackingStore::registerWith(as);
+}
+
+void SQLBackingStore::unregisterWith(AtomSpace* as)
+{
+	BackingStore::unregisterWith(as);
+	_store->unregisterWith(as);
+}

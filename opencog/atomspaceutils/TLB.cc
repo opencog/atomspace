@@ -25,17 +25,10 @@
 
 using namespace opencog;
 
-std::atomic<UUID> TLB::_brk_uuid(1);
-
-std::mutex TLB::_mtx;
-std::unordered_map<UUID, Handle> TLB::_uuid_map;
-std::unordered_map<Handle, UUID> TLB::_handle_map;
+TLB::TLB() : _brk_uuid(1) {}
 
 // ===================================================
 // Handle resolution stuff.
-
-// Its a vector, not a set, because its priority ranked.
-std::vector<const AtomTable*> TLB::_resolver;
 
 void TLB::set_resolver(const AtomTable* tab)
 {

@@ -31,7 +31,6 @@
 #include <opencog/atoms/base/types.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspaceutils/TLB.h>
 
 namespace opencog
 {
@@ -66,15 +65,10 @@ class AtomStorage
         void loadAtomSpace(AtomSpace*);
         void clearAndLoadAtomSpace(AtomSpace*);
 
+        virtual void registerWith(AtomSpace*) = 0;
+        virtual void unregisterWith(AtomSpace*) = 0;
+
     protected:
-        // For accessing TLB through friend relationship in subclasses.
-        static bool isInvalidHandle(Handle& handle) 
-            { return TLB::isInvalidHandle(handle); }
-        static void reserveMaxUUID(unsigned long maxUUID)
-            { TLB::reserve_upto(maxUUID); }
-        static unsigned long getMaxUUID()
-            { return TLB::getMaxUUID(); }
-        
         // For accessing Atom through friend relationship in subclasses.
         static AtomTable* getAtomTable(AtomPtr atom)
             { return atom->getAtomTable(); }

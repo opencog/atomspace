@@ -34,7 +34,6 @@
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspaceutils/TLB.h>
 #include <opencog/persist/sql/odbc/ODBCAtomStorage.h>
 
 #include <opencog/util/Logger.h>
@@ -225,7 +224,6 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     AtomPtr a(createNode(SCHEMA_NODE, id + "someNode"));
     TruthValuePtr stv(SimpleTruthValue::createTV(0.55, 0.6));
     a->setTruthValue(stv);
-    TLB::addAtom(a, TLB::INVALID_UUID);
 
     Handle h = a->getHandle();
 
@@ -244,7 +242,6 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     // Create a second atom, connect it to the first
     // with a link. Save it, fetch it ... are they equal?
     AtomPtr a2(createNode(SCHEMA_NODE, id + "otherNode"));
-    TLB::addAtom(a2, TLB::INVALID_UUID);
     store->storeAtom(a2, true);
 
     HandleSeq hvec;
@@ -252,7 +249,6 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     hvec.push_back(a2->getHandle());
 
     LinkPtr l(createLink(SET_LINK, hvec));
-    TLB::addAtom(l, TLB::INVALID_UUID);
     store->storeAtom(l, true);
 
     LinkPtr ll(createLink(SET_LINK, hvec));

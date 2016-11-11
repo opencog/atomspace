@@ -37,7 +37,7 @@
 
 using namespace opencog;
 
-//TODO move this file to the persist directory
+TLB tlbuf;
 
 ProtocolBufferSerializer::ProtocolBufferSerializer()
 {
@@ -233,7 +233,7 @@ NodePtr ProtocolBufferSerializer::deserializeNode(
     	tv = TruthValue::DEFAULT_TV();
     }
 	NodePtr nodePtr(new Node(atomMessage.type(), atomMessage.name(), tv));
-	TLB::addAtom(nodePtr, atomMessage.handle());
+	tlbuf.addAtom(nodePtr, atomMessage.handle());
     deserializeAtom(atomMessage, *nodePtr);
 
     return nodePtr;
@@ -256,7 +256,7 @@ LinkPtr ProtocolBufferSerializer::deserializeLink(
     	tv = TruthValue::DEFAULT_TV();
     }
 	LinkPtr linkPtr(new Link(atomMessage.type(), oset, tv));
-	TLB::addAtom(linkPtr, atomMessage.handle());
+	tlbuf.addAtom(linkPtr, atomMessage.handle());
     deserializeAtom(atomMessage, *linkPtr);
 
     return linkPtr;

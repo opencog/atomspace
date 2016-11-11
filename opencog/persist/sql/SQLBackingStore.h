@@ -59,6 +59,9 @@ class SQLBackingStore : public BackingStore
         virtual void storeAtom(const Handle&);
         virtual void loadType(AtomTable&, Type);
         virtual void barrier();
+
+        void registerWith(AtomSpace*);
+        void unregisterWith(AtomSpace*);
 };
 
 

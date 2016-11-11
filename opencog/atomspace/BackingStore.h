@@ -115,12 +115,12 @@ class BackingStore
 		/**
 		 * Register this backing store with the atomspace.
 		 */
-		void registerWith(AtomSpace* atomspace);
+		void registerWith(AtomSpace*);
 
 		/**
 		 * Unregister this backing store with the atomspace.
 		 */
-		void unregisterWith(AtomSpace* atomspace);
+		void unregisterWith(AtomSpace*);
 };
 
 /** @}*/

@@ -128,7 +128,6 @@ void SQLPersistSCM::do_open(const std::string& dbname,
         as = SchemeSmob::ss_get_env_as("sql-open");
 #endif
     _backing->registerWith(as);
-    TLB::set_resolver(&as->get_atomtable());
 }
 
 void SQLPersistSCM::do_close(void)
@@ -144,7 +143,6 @@ void SQLPersistSCM::do_close(void)
 #endif
     _backing->unregisterWith(as);
     _backing->set_store(NULL);
-    TLB::clear_resolver(&as->get_atomtable());
     delete _store;
     _store = NULL;
 }

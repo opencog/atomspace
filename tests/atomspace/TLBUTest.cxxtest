@@ -48,8 +48,11 @@ public:
     }
 
     void testAdd() {
+
+        TLB tlb;
+
         NodePtr n(createNode(CONCEPT_NODE, "test"));
-        UUID uuid = TLB::addAtom(n, TLB::INVALID_UUID);
+        UUID uuid = tlb.addAtom(n, TLB::INVALID_UUID);
         TS_ASSERT(TLB::INVALID_UUID != uuid);
 
         NodePtr nb(createNode(CONCEPT_NODE, "test"));
@@ -57,7 +60,7 @@ public:
         // content-compare should work
         TS_ASSERT( *n == *nb);
 
-        UUID uuidb = TLB::addAtom(nb, TLB::INVALID_UUID);
+        UUID uuidb = tlb.addAtom(nb, TLB::INVALID_UUID);
         printf("expected: %lu got: %lu\n", uuid, uuidb);
         TS_ASSERT(uuidb == uuid);
     }

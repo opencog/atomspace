@@ -32,13 +32,9 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
 
-class TLBUTest;
-class BasicSaveUTest;
-
 namespace opencog
 {
 
-class AtomSpaceBenchmark;
 class AtomTable;
 
 /**
@@ -61,36 +57,28 @@ class AtomTable;
  */
 class TLB
 {
-    friend class AtomSpaceBenchmark;
-    friend class SQLPersistSCM;
-    friend class PGSQLPersistSCM;
-    friend class ::TLBUTest;
-    friend class ::BasicSaveUTest;
-
 private:
 
-    /**
-     * Private default constructor for this class to make it abstract.
-     */
-    TLB() {}
-
     // Thread-safe atomic
-    static std::atomic<UUID> _brk_uuid;
+    std::atomic<UUID> _brk_uuid;
 
-    static std::mutex _mtx;
-    static std::unordered_map<UUID, Handle> _uuid_map;
-    static std::unordered_map<Handle, UUID,
+    std::mutex _mtx;
+    std::unordered_map<UUID, Handle> _uuid_map;
+    std::unordered_map<Handle, UUID,
                       std::hash<opencog::Handle>,
                       std::equal_to<opencog::Handle> > _handle_map;
 
-    static void set_resolver(const AtomTable*);
-    static void clear_resolver(const AtomTable*);
-    static std::vector<const AtomTable*> _resolver;
-    static Handle do_res(const Handle&);
+    // Its a vector, not a set, because its priority ranked.
+    std::vector<const AtomTable*> _resolver;
+    Handle do_res(const Handle&);
 
 public:
 
     static const UUID INVALID_UUID = ULONG_MAX;
+
+    TLB();
+    void set_resolver(const AtomTable*);
+    void clear_resolver(const AtomTable*);
 
     /**
      * Adds a new atom to the TLB.
@@ -99,20 +87,19 @@ public:
      * @param Atom to be added.
      * @return UUID of the newly added atom.
      */
-    static UUID addAtom(const AtomPtr&, UUID);
-    static UUID addAtom(const Handle&, UUID);
-    static Handle getAtom(UUID);
+    UUID addAtom(const AtomPtr& a, UUID uuid) {
+        return addAtom(a->getHandle(), uuid);
+    }
+    UUID addAtom(const Handle&, UUID);
 
-    static inline bool isInvalidHandle(const Handle&);
+    Handle getAtom(UUID);
 
-    static inline bool isValidHandle(const Handle&);
-
-    static UUID getMaxUUID(void) { return _brk_uuid; }
+    UUID getMaxUUID(void) { return _brk_uuid; }
 
     /// Reserve a range of UUID's.  The range is inclusive; both lo and
     /// hi are reserved.  The range must NOT intersect with the
     /// currently issued UUID's.
-    static inline void reserve_range(UUID lo, UUID hi)
+    inline void reserve_range(UUID lo, UUID hi)
     {
         if (hi <= lo)
             throw InvalidParamException(TRACE_INFO,
@@ -129,7 +116,7 @@ public:
     /// Reserve an extent of UUID's. The lowest reserved ID is returned.
     /// That is, after this call, no one else will be issued UUID's in
     /// the range of [retval, retval+extent-1].
-    static inline UUID reserve_extent(UUID extent)
+    inline UUID reserve_extent(UUID extent)
     {
         return _brk_uuid.fetch_add(extent, std::memory_order_relaxed);
     }
@@ -137,28 +124,13 @@ public:
     /// Make sure that all UUID's up to at least 'hi' have been
     /// reserved.  No error checks are made; its OK if 'hi' has
     /// already been issued.
-    static inline void reserve_upto(UUID hi)
+    inline void reserve_upto(UUID hi)
     {
         if (hi < _brk_uuid) return;
         UUID extent = hi - _brk_uuid + 1;
         _brk_uuid.fetch_add(extent, std::memory_order_relaxed);
     }
 };
-
-inline bool TLB::isInvalidHandle(const Handle& h)
-{
-    return (h == nullptr);
-}
-
-inline bool TLB::isValidHandle(const Handle& h)
-{
-    return not isInvalidHandle(h);
-}
-
-inline UUID TLB::addAtom(const AtomPtr& a, UUID uuid)
-{
-    return addAtom(a->getHandle(), uuid);
-}
 
 } // namespace opencog
 

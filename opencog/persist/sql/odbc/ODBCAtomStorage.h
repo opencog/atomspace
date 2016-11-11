@@ -39,6 +39,7 @@
 #include <opencog/atoms/base/types.h>
 
 #include <opencog/atomspace/AtomTable.h>
+#include <opencog/atomspaceutils/TLB.h>
 #include <opencog/persist/sql/AtomStorage.h>
 
 #include "odbcxx.h"
@@ -118,6 +119,8 @@ class ODBCAtomStorage : public AtomStorage
         std::set<UUID> id_create_cache;
         std::unique_lock<std::mutex> maybe_create_id(UUID);
 
+        TLB _tlbuf;
+
         UUID getMaxObservedUUID(void);
         int getMaxObservedHeight(void);
         bool idExists(const char *);
@@ -163,6 +166,9 @@ class ODBCAtomStorage : public AtomStorage
         bool connected(void); // connection to DB is alive
 
         void kill_data(void); // destroy DB contents
+
+        void registerWith(AtomSpace*);
+        void unregisterWith(AtomSpace*);
 
         // AtomStorage interface
         Handle getNode(Type, const char *);

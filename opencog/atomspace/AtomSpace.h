@@ -62,8 +62,7 @@ class AtomSpace
     friend class Atom;               // Needs to call get_atomtable()
     friend class AtomStorage;
     friend class BackingStore;
-    friend class PGSQLPersistSCM;    // Needs to call get_atomtable()
-    friend class SQLPersistSCM;      // Needs to call get_atomtable()
+    friend class ODBCAtomStorage;   // Needs to call get_atomtable()
     friend class ZMQPersistSCM;
     friend class ::AtomTableUTest;
 
