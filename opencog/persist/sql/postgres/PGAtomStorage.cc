@@ -466,7 +466,7 @@ public:
         // printf ("---- New atom found ----\n");
         _result_set->foreach_column(&Database::create_atom_column_cb, this);
 
-        Handle h(uuid);
+        Handle h(TLB::getAtom(uuid));
         if (nullptr == _atom_table->getHandle(h))
         {
             PseudoPtr p(_atom_storage->make_pseudo_atom(*this, uuid));
