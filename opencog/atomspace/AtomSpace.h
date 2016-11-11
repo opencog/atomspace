@@ -236,7 +236,6 @@ public:
      * get_atom() method instead.
      */
     Handle fetch_atom(Handle);
-    Handle fetch_atom(UUID);
 
     /**
      * Get an atom from the AtomTable. If the atom is not there, then

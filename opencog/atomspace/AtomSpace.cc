@@ -484,41 +484,6 @@ Handle AtomSpace::fetch_atom(Handle h)
     return _atom_table.add(h, false);
 }
 
-Handle AtomSpace::fetch_atom(UUID uuid)
-{
-    if (NULL == _backing_store)
-        throw RuntimeException(TRACE_INFO, "No backing store");
-
-    // OK, we have to handle two distinct cases.
-    // 1) If atom table already knows about this uuid, then this
-    //    function returns the atom-table's version of the atom.
-    //    In particular, no attempt is made to reconcile the possibly
-    //    differing truth values in the atomtable vs. backing store.
-    // 2) Else, get the atom corresponding to the UUID from storage.
-    //    If the atom is a link, then it's outgoing set is fetched as
-    //    well, as currently, a link cannot be added to the atomtable,
-    //    unless all of its outgoing set already is in the atomtable.
-
-    // Case 1:
-    Handle hb(_atom_table.getHandle(uuid));
-    if (_atom_table.holds(hb))
-        return hb;
-
-    // Case 2:
-    // We don't have the atom for this UUID, then go get it.
-    AtomPtr a(_backing_store->getAtom(uuid));
-
-    // If we still don't have an atom, then the requested UUID
-    // was "insane", that is, unknown by either the atom table
-    // (case 1) or the backend.
-    if (NULL == a.operator->())
-        throw RuntimeException(TRACE_INFO,
-            "Asked backend for an unknown handle; UUID=%lu\n",
-            uuid);
-
-    return _atom_table.add(a, false);
-}
-
 Handle AtomSpace::fetch_incoming_set(Handle h, bool recursive)
 {
     if (NULL == _backing_store)
