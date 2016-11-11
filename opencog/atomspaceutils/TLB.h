@@ -86,7 +86,7 @@ private:
     static void set_resolver(const AtomTable*);
     static void clear_resolver(const AtomTable*);
     static std::vector<const AtomTable*> _resolver;
-    static Handle do_res(UUID);
+    static Handle do_res(const Handle&);
 
 public:
 
