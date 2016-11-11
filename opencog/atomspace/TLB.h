@@ -39,7 +39,6 @@ namespace opencog
 {
 
 class AtomSpaceBenchmark;
-class AtomStorage;
 class AtomTable;
 
 /**
@@ -63,8 +62,6 @@ class AtomTable;
 class TLB
 {
     friend class AtomSpaceBenchmark;
-    friend class AtomStorage;
-    friend class AtomTable;
     friend class SQLPersistSCM;
     friend class PGSQLPersistSCM;
     friend class ::TLBUTest;

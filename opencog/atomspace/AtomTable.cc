@@ -27,7 +27,9 @@
 
 #include "AtomTable.h"
 
+#include <atomic>
 #include <iterator>
+#include <mutex>
 #include <set>
 
 #include <stdlib.h>
@@ -58,12 +60,14 @@ using namespace opencog;
 
 std::recursive_mutex AtomTable::_mtx;
 
+static std::atomic<UUID> _id_pool(0);
+
 AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient)
     : _index_queue(this, &AtomTable::put_atom_into_index, transient?0:4)
 {
     _as = holder;
     _environ = parent;
-    _uuid = TLB::reserve_extent(1);
+    _uuid = _id_pool.fetch_add(1, std::memory_order_relaxed);
     _size = 0;
     _num_nodes = 0;
     _num_links = 0;
