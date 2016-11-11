@@ -807,10 +807,8 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 
     // Use the TLB Handle as the UUID.
     Handle h(atom->getHandle());
-    if (isInvalidHandle(h))
-        throw RuntimeException(TRACE_INFO, "Trying to save atom with an invalid handle!");
+    UUID uuid = TLB::addAtom(h, Handle::INVALID_UUID);
 
-    UUID uuid = h->getUUID();
     std::string uuidbuff = std::to_string(uuid);
 
     std::unique_lock<std::mutex> lck = maybe_create_id(uuid);

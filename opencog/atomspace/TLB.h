@@ -82,6 +82,7 @@ private:
 
     static std::mutex _mtx;
     static std::unordered_map<UUID, Handle> _uuid_map;
+    static std::unordered_map<Handle, UUID> _handle_map;
 
 public:
     /**
@@ -154,17 +155,33 @@ inline UUID TLB::addAtom(const AtomPtr& a, UUID uuid)
 
 inline UUID TLB::addAtom(const Handle& h, UUID uuid)
 {
-    if (h->_uuid != Handle::INVALID_UUID)
-        throw InvalidParamException(TRACE_INFO,
-                "Atom is already in the TLB!");
+    if (uuid == Handle::INVALID_UUID)
+    {
+        std::lock_guard<std::mutex> lck(_mtx);
+        auto pr = _handle_map.find(h);
+        if (_handle_map.end() != pr)
+            return pr->second;
 
-    if (uuid != Handle::INVALID_UUID)
-        reserve_upto(uuid);
-    else
         uuid = _brk_uuid.fetch_add(1, std::memory_order_relaxed);
+    }
+    else
+    {
+        std::lock_guard<std::mutex> lck(_mtx);
+        auto pr = _handle_map.find(h);
+        if (_handle_map.end() != pr)
+        {
+            if (uuid != pr->second)
+                throw InvalidParamException(TRACE_INFO,
+                     "Atom is already in the TLB, and UUID's don't match!");
+            return uuid;
+        }
+
+        reserve_upto(uuid);
+    }
 
     std::lock_guard<std::mutex> lck(_mtx);
     _uuid_map.emplace(std::make_pair(uuid, h));
+    _handle_map.emplace(std::make_pair(h, uuid));
 
     h->_uuid = uuid;
     return uuid;
