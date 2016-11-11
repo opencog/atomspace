@@ -25,7 +25,7 @@
  */
 
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atomspace/TLB.h>
+#include <opencog/atomspaceutils/TLB.h>
 
 #include "OutgoingHash.h"
 
