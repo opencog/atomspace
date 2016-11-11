@@ -79,8 +79,6 @@ class Atom
     friend class AtomTable;       // Needs to call MarkedForRemoval()
     friend class AtomSpace;       // Needs to call getAtomTable()
     friend class DeleteLink;      // Needs to call getAtomTable()
-    friend class Handle;          // Needs to view _uuid
-    friend class TLB;             // Needs to view _uuid
     friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
 
 private:
@@ -184,10 +182,6 @@ private:
 
     /** Change the Very-Long-Term Importance. */
     void chgVLTI(int unit);
-
-    // Set the UUID
-    void setUUID(UUID new_UUID)
-        { _uuid = new_UUID; }
 
 public:
 

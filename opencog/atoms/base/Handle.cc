@@ -42,11 +42,6 @@ Handle::Handle(const UUID u)
 
 UUID Handle::value(void) const
 {
-    const Atom* a = operator->();
-    // The is link/node is a low-cost way of checking if the
-    // pointer really is an atom pointer, and not just protoAtom,
-    // which does not have a uuid.
-    if (a and (a->isLink() or a->isNode())) return a->getUUID();
     return ULONG_MAX;
 }
 
@@ -62,25 +57,13 @@ bool content_eq(const Handle& lh, const Handle& rh) noexcept
     return *((AtomPtr) lh) == *((AtomPtr) rh);
 }
 
-bool Handle::atoms_less(const Atom* pa, const Atom* pb)
+bool Handle::atoms_less(const Atom* a, const Atom* b)
 {
-    if (pa == pb) return false;
-    if (NULL == pa) return true;
-    if (NULL == pb) return false;
+    if (a == b) return false;
+    if (nullptr == a) return true;
+    if (nullptr == b) return false;
 
-    const Atom* a(dynamic_cast<const Atom*>(pa));
-    const Atom* b(dynamic_cast<const Atom*>(pb));
-    UUID ua = a->getUUID();
-    UUID ub = b->getUUID();
-    if (INVALID_UUID != ua or INVALID_UUID != ub) return ua < ub;
-
-    // If both UUID's are invalid, we still need to compare
-    // the atoms somehow. The need to compare in some "reasonable"
-    // way, so that OrderedHandleSet works correctly when it uses
-    // the std::less<Handle> operator, which calls this function.
-    // Performing an address-space comparison is all I can think
-    // of...
-    // if (*a == *b) return false; lets not do this cpu-time-waster...
+    // Pointer compare
     return a < b;
 }
 

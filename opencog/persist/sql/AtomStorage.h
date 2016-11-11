@@ -77,8 +77,6 @@ class AtomStorage
             { return TLB::getMaxUUID(); }
         
         // For accessing Atom through friend relationship in subclasses.
-        static void setAtomUUID(AtomPtr atom, UUID newUUID)
-            { atom->setUUID(newUUID); }
         static AtomTable* getAtomTable(AtomPtr atom)
             { return atom->getAtomTable(); }
 

@@ -60,7 +60,6 @@ UUID TLB::addAtom(const Handle& h, UUID uuid)
     _uuid_map.emplace(std::make_pair(uuid, h));
     _handle_map.emplace(std::make_pair(h, uuid));
 
-    h->_uuid = uuid;
     return uuid;
 }
 
