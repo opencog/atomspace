@@ -83,7 +83,7 @@ public:
     Handle(const Handle& h) : _ptr(h._ptr) {}
     ~Handle() {}
 
-    UUID value(void) const;
+    ContentHash value(void) const;
 
     inline Handle& operator=(const Handle& h) {
         this->_ptr = h._ptr;
