@@ -73,6 +73,8 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 	void test_numeric(void);
 
 	void test_dsn(void);
+
+	void test_single_arg(void);
 };
 
 void SCMExecutionOutputUTest::setUp(void)
@@ -555,6 +557,53 @@ void SCMExecutionOutputUTest::test_dsn(void)
 	CHKEV(eval);
 
 	std::cout << "Lambda is " << result->toString() << std::endl;
+	std::cout << "Expected " << expect->toString() << std::endl;
+	TS_ASSERT_EQUALS(result, expect);
+}
+
+// Execute a call with a single argument, by-passing the need for
+// wrapping the arguments in a ListLink.
+void SCMExecutionOutputUTest::test_single_arg(void)
+{
+	// Test scheme execution function taking a single argument
+
+	eval->eval(
+	   "(define (single-arg-fun x)"
+	   "   (And (Concept \"A\") x))"
+	);
+	CHKEV(eval);
+
+	Handle result = eval->eval_h(
+	   "(cog-execute!"
+	   "   (ExecutionOutputLink"
+	   "      (GroundedSchema \"scm: single-arg-fun\")"
+	   "      (Concept \"B\")))"
+	);
+	CHKEV(eval);
+
+	Handle expect =
+		eval->eval_h("(And (Concept \"A\") (Concept \"B\"))");
+	std::cout << "Expression is " << result->toString() << std::endl;
+	std::cout << "Expected " << expect->toString() << std::endl;
+	TS_ASSERT_EQUALS(result, expect);
+
+	// Test scheme execution function taking a single argument that
+	// itself requires to be executed (eagerly by default).
+
+	result = eval->eval_h(
+	   "(cog-execute!"
+	   "   (ExecutionOutputLink"
+	   "      (GroundedSchema \"scm: single-arg-fun\")"
+	   "      (ExecutionOutputLink"
+	   "         (GroundedSchema \"scm: single-arg-fun\")"
+	   "         (Concept \"B\"))))"
+	);
+	CHKEV(eval);
+
+	expect =
+		eval->eval_h("(And (Concept \"A\")"
+		             "     (And (Concept \"A\") (Concept \"B\")))");
+	std::cout << "Expression is " << result->toString() << std::endl;
 	std::cout << "Expected " << expect->toString() << std::endl;
 	TS_ASSERT_EQUALS(result, expect);
 }
