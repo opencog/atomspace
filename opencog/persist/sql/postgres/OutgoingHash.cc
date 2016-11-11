@@ -124,7 +124,7 @@ int64_t opencog::hash_outgoing(const HandleSeq& outgoing, uint64_t seed)
             throw RuntimeException(TRACE_INFO, "Fatal Error: hash_outgoing - "
                     "NULL handle in outgoing set\n");
         }
-        UUID uuid = TLB::addAtom(handle, Handle::INVALID_UUID);
+        UUID uuid = TLB::addAtom(handle, TLB::INVALID_UUID);
         uuids[position++] = uuid;
     }
 
