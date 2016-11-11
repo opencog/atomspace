@@ -87,7 +87,7 @@ std::string Link::toShortString(const std::string& indent) const
             answer << more_indent << "Undefined Atom!\n";
     }
 
-    answer << indent << ") ; [" << _uuid << "]";
+    answer << indent << ") ; [" << get_hash() << "]";
 
     if (_atomTable)
         answer << "[" << _atomTable->get_uuid() << "]\n";
@@ -125,7 +125,7 @@ std::string Link::toString(const std::string& indent) const
     }
 
     answer += indent + ") ; [" +
-            std::to_string(_uuid) + "][" +
+            std::to_string(get_hash()) + "][" +
             std::to_string(_atomTable? _atomTable->get_uuid() : -1) +
             "]\n";
 

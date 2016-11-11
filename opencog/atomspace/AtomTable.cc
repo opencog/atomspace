@@ -94,7 +94,6 @@ AtomTable::~AtomTable()
     for (auto& pr : _atom_store) {
         Handle& atom_to_delete = pr.second;
         atom_to_delete->_atomTable = NULL;
-        atom_to_delete->_uuid = Handle::INVALID_UUID;
 
         // Aiee ... We added this link to every incoming set;
         // thus, it is our responsibility to remove it as well.
@@ -165,7 +164,6 @@ void AtomTable::clear_all_atoms()
     for (auto& pr : _atom_store) {
         Handle& atom_to_clear = pr.second;
         atom_to_clear->_atomTable = NULL;
-        atom_to_clear->_uuid = Handle::INVALID_UUID;
 
         // If this is a link we need to remove this atom from the incoming
         // sets for any atoms in this atom's outgoing set. See note in

@@ -68,8 +68,8 @@ Atom::~Atom()
         // shared pointers are doing. (Or someone explcitly called the
         // destructor! Which they shouldn't do.)
         OC_ASSERT(0 == getIncomingSet().size(),
-             "Atom deletion failure; incoming set not empty for %s h=%d",
-             classserver().getTypeName(_type).c_str(), _uuid);
+             "Atom deletion failure; incoming set not empty for %s h=%x",
+             classserver().getTypeName(_type).c_str(), get_hash());
     }
     drop_incoming_set();
 }
@@ -256,11 +256,6 @@ void Atom::setAtomTable(AtomTable *tb)
     // illegal to just switch membership: one or the other of these two
     // pointers must be null.
     OC_ASSERT (NULL == _atomTable or tb == NULL, "Atom table is not null!");
-    if (NULL != _atomTable) {
-        // Atom is being removed from the atom table.
-        // UUID's belong to the atom table, not the atom. Reclaim it.
-        _uuid = Handle::INVALID_UUID;
-    }
     _atomTable = tb;
 }
 

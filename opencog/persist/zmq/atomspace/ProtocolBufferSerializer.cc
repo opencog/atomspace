@@ -27,6 +27,7 @@
 #include "opencog/atoms/base/Atom.h"
 #include "opencog/atoms/base/Link.h"
 #include "opencog/atoms/base/Node.h"
+#include "opencog/atomspace/TLB.h"
 #include "opencog/truthvalue/AttentionValue.h"
 #include "opencog/truthvalue/TruthValue.h"
 #include "opencog/truthvalue/CountTruthValue.h"
@@ -232,7 +233,7 @@ NodePtr ProtocolBufferSerializer::deserializeNode(
     	tv = TruthValue::DEFAULT_TV();
     }
 	NodePtr nodePtr(new Node(atomMessage.type(), atomMessage.name(), tv));
-	nodePtr->_uuid = atomMessage.handle();
+	TLB::addAtom(nodePtr, atomMessage.handle());
     deserializeAtom(atomMessage, *nodePtr);
 
     return nodePtr;
@@ -255,7 +256,7 @@ LinkPtr ProtocolBufferSerializer::deserializeLink(
     	tv = TruthValue::DEFAULT_TV();
     }
 	LinkPtr linkPtr(new Link(atomMessage.type(), oset, tv));
-	linkPtr->_uuid = atomMessage.handle();
+	TLB::addAtom(linkPtr, atomMessage.handle());
     deserializeAtom(atomMessage, *linkPtr);
 
     return linkPtr;

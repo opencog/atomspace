@@ -47,7 +47,7 @@ std::string Node::toShortString(const std::string& indent) const
 {
     std::string tmpname = _name;
     if (_name == "")
-        tmpname = "#" + std::to_string(_uuid);
+        tmpname = "#" + std::to_string(get_hash());
 
     std::string atname;
     if (_atomTable)
@@ -58,7 +58,7 @@ std::string Node::toShortString(const std::string& indent) const
     std::string nam = indent +
         "(" + classserver().getTypeName(_type) +
         " \"" + tmpname + "\") ; [" +
-        std::to_string(_uuid) + "][" + atname +"]\n";
+        std::to_string(get_hash()) + "][" + atname +"]\n";
     return nam;
 }
 
@@ -66,7 +66,7 @@ std::string Node::toString(const std::string& indent) const
 {
     std::string tmpname = _name;
     if (_name == "")
-        tmpname = "#" + std::to_string(_uuid);
+        tmpname = "#" + std::to_string(get_hash());
 
     std::string answer = indent;
 
@@ -85,7 +85,7 @@ std::string Node::toString(const std::string& indent) const
         answer += " " + getTruthValue()->toString();
 
     answer += ") ; [" +
-            std::to_string(_uuid) + "][" +
+            std::to_string(get_hash()) + "][" +
             std::to_string(_atomTable? _atomTable->get_uuid() : -1) +
             "]\n";
 
