@@ -55,11 +55,13 @@ class SQLBackingStore : public BackingStore
 
         virtual Handle getNode(Type, const char *) const;
         virtual Handle getLink(Handle&) const;
-        virtual AtomPtr getAtom(UUID) const;
         virtual HandleSeq getIncomingSet(const Handle&) const;
         virtual void storeAtom(const Handle&);
         virtual void loadType(AtomTable&, Type);
         virtual void barrier();
+
+        void registerWith(AtomSpace*);
+        void unregisterWith(AtomSpace*);
 };
 
 

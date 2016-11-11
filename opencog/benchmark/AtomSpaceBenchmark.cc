@@ -17,8 +17,8 @@
 #include <opencog/truthvalue/CountTruthValue.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atomspaceutils/TLB.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 
@@ -38,6 +38,8 @@ using std::time;
 
 #define DIVIDER_LINE "------------------------------"
 #define PROGRESS_BAR_LENGTH 10
+
+TLB tlbuf;
 
 AtomSpaceBenchmark::AtomSpaceBenchmark()
 {
@@ -453,8 +455,8 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
     if (showTypeSizes) printTypeSizes();
 
     for (unsigned int i = 0; i < methodNames.size(); i++) {
-        UUID_begin = TLB::getMaxUUID();
-        UUID_end = TLB::getMaxUUID();
+        UUID_begin = tlbuf.getMaxUUID();
+        UUID_end = tlbuf.getMaxUUID();
         if (testKind == BENCH_TABLE) {
             atab = new AtomTable();
         }
@@ -486,7 +488,7 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
         numberOfTypes = classserver().getNumberOfClasses();
 
         if (buildTestData) buildAtomSpace(atomCount, percentLinks, false);
-        UUID_end = TLB::getMaxUUID();
+        UUID_end = tlbuf.getMaxUUID();
 
         doBenchmark(methodNames[i], methodsToTest[i]);
 
@@ -835,7 +837,7 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize,
         makeRandomNodes("");
         if (display && i % diff == 0) cerr << "." << flush;
     }
-    UUID_end = TLB::getMaxUUID();
+    UUID_end = tlbuf.getMaxUUID();
 
     // Add links
     if (display) cout << endl << "Adding " << atomspaceSize - nodeCount << " links " << flush;
@@ -853,7 +855,7 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize,
         cout << DIVIDER_LINE << endl;
     }
 
-    UUID_end = TLB::getMaxUUID();
+    UUID_end = tlbuf.getMaxUUID();
     testKind = saveKind;
 }
 
@@ -980,11 +982,13 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
 
 Handle AtomSpaceBenchmark::getRandomHandle()
 {
-    Handle h(UUID_begin + randomGenerator->randint(UUID_end-1-UUID_begin));
+    UUID ranu = UUID_begin + randomGenerator->randint(UUID_end-1-UUID_begin);
+    Handle h(tlbuf.getAtom(ranu));
     // operator->() can return NULL when there's no atom for the uuid,
     // because the atom was deleted in a previous pass! Dohh!
     while (NULL == h.operator->()) {
-        h = getRandomHandle();
+        ranu = UUID_begin + randomGenerator->randint(UUID_end-1-UUID_begin);
+        h = tlbuf.getAtom(ranu);
     }
     return h;
 }

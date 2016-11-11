@@ -29,12 +29,11 @@
  */
 
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atoms/base/atom_types.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/persist/sql/odbc/ODBCAtomStorage.h>
 
 #include <opencog/util/Logger.h>
@@ -225,8 +224,6 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     AtomPtr a(createNode(SCHEMA_NODE, id + "someNode"));
     TruthValuePtr stv(SimpleTruthValue::createTV(0.55, 0.6));
     a->setTruthValue(stv);
-    TLB::addAtom(a);
-    UUID uuid = a->getUUID();
 
     Handle h = a->getHandle();
 
@@ -236,7 +233,8 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     store->storeAtom(a, true);
 
     // Fetch it back ...
-    AtomPtr b = store->getAtom(uuid);
+    std::string nam = id + "someNode";
+    AtomPtr b = store->getNode(SCHEMA_NODE, nam.c_str());
 
     // Are they equal ??
     atomCompare(a, b, "Single node save-restore");
@@ -244,7 +242,6 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     // Create a second atom, connect it to the first
     // with a link. Save it, fetch it ... are they equal?
     AtomPtr a2(createNode(SCHEMA_NODE, id + "otherNode"));
-    TLB::addAtom(a2);
     store->storeAtom(a2, true);
 
     HandleSeq hvec;
@@ -252,11 +249,11 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     hvec.push_back(a2->getHandle());
 
     LinkPtr l(createLink(SET_LINK, hvec));
-    TLB::addAtom(l);
     store->storeAtom(l, true);
 
-    UUID ul = l->getUUID();
-    AtomPtr lb = store->getAtom(ul);
+    LinkPtr ll(createLink(SET_LINK, hvec));
+    Handle hl(ll->getHandle());
+    AtomPtr lb = store->getLink(hl);
     atomCompare(l, lb, "Single link save-restore");
 
     store->kill_data();

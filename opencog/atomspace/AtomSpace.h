@@ -62,6 +62,7 @@ class AtomSpace
     friend class Atom;               // Needs to call get_atomtable()
     friend class AtomStorage;
     friend class BackingStore;
+    friend class ODBCAtomStorage;   // Needs to call get_atomtable()
     friend class ZMQPersistSCM;
     friend class ::AtomTableUTest;
 
@@ -236,14 +237,12 @@ public:
      * get_atom() method instead.
      */
     Handle fetch_atom(Handle);
-    Handle fetch_atom(UUID);
 
     /**
      * Get an atom from the AtomTable. If the atom is not there, then
      * return Handle::UNDEFINED.
      */
     Handle get_atom(const Handle& h) const { return _atom_table.getHandle(h); }
-    Handle get_atom(UUID uuid) const { return _atom_table.getHandle(uuid); }
 
     /**
      * Load *all* atoms of the given type, but only if they are not

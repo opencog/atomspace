@@ -39,6 +39,7 @@
 #include <opencog/atoms/base/types.h>
 
 #include <opencog/atomspace/AtomTable.h>
+#include <opencog/atomspaceutils/TLB.h>
 #include <opencog/persist/sql/AtomStorage.h>
 
 #include "odbcxx.h"
@@ -107,6 +108,7 @@ class ODBCAtomStorage : public AtomStorage
         void create_tables(void);
 
         // Track UUID's that are in use.
+        // XXX FIXME -- get rid of this -- the TLB now plays this role.
         std::mutex id_cache_mutex;
         bool local_id_cache_is_inited;
         std::set<UUID> local_id_cache;
@@ -116,6 +118,8 @@ class ODBCAtomStorage : public AtomStorage
         std::mutex id_create_mutex;
         std::set<UUID> id_create_cache;
         std::unique_lock<std::mutex> maybe_create_id(UUID);
+
+        TLB _tlbuf;
 
         UUID getMaxObservedUUID(void);
         int getMaxObservedHeight(void);
@@ -163,10 +167,12 @@ class ODBCAtomStorage : public AtomStorage
 
         void kill_data(void); // destroy DB contents
 
+        void registerWith(AtomSpace*);
+        void unregisterWith(AtomSpace*);
+
         // AtomStorage interface
         Handle getNode(Type, const char *);
         Handle getLink(Handle& h);
-        AtomPtr getAtom(UUID);
         HandleSeq getIncomingSet(const Handle&);
         void storeAtom(const AtomPtr& atomPtr, bool synchronous = false);
         void loadType(AtomTable&, Type);
@@ -176,7 +182,7 @@ class ODBCAtomStorage : public AtomStorage
         void storeSingleAtom(AtomPtr);
 
         // Fetch atoms from DB
-        bool atomExists(Handle);
+        bool atomExists(const Handle&);
 
         // Large-scale loads and saves
         void load(AtomTable &); // Load entire contents of DB

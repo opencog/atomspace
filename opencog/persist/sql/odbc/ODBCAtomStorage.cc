@@ -45,6 +45,8 @@
 #include <opencog/truthvalue/ProbabilisticTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspaceutils/TLB.h>
 
 #include "odbcxx.h"
 #include "ODBCAtomStorage.h"
@@ -160,11 +162,16 @@ class ODBCAtomStorage::Response
             // printf ("---- New atom found ----\n");
             rs->foreach_column(&Response::create_atom_column_cb, this);
 
-            if (nullptr == table->getHandle(uuid))
+            if (nullptr == store->_tlbuf.getAtom(uuid))
             {
                 PseudoPtr p(store->makeAtom(*this, uuid));
                 AtomPtr atom(get_recursive_if_not_exists(p));
-                table->add(atom, true);
+                Handle h = table->getHandle(atom);
+                if (nullptr == h)
+                {
+                    store->_tlbuf.addAtom(atom, uuid);
+                    table->add(atom, true);
+                }
             }
             return false;
         }
@@ -193,13 +200,13 @@ class ODBCAtomStorage::Response
             if (classserver().isA(p->type, NODE))
             {
                 NodePtr node(createNode(p->type, p->name, p->tv));
-                setAtomUUID(node, p->uuid);
+                store->_tlbuf.addAtom(node, p->uuid);
                 return node;
             }
             HandleSeq resolved_oset;
             for (UUID idu : p->oset)
             {
-                Handle h = table->getHandle(idu);
+                Handle h = store->_tlbuf.getAtom(idu);
                 if (h)
                 {
                     resolved_oset.emplace_back(h);
@@ -210,7 +217,7 @@ class ODBCAtomStorage::Response
                 resolved_oset.emplace_back(ra->getHandle());
             }
             LinkPtr link(createLink(p->type, resolved_oset, p->tv));
-            setAtomUUID(link, p->uuid);
+            store->_tlbuf.addAtom(link, p->uuid);
             return link;
         }
 
@@ -385,8 +392,8 @@ class ODBCAtomStorage::Outgoing
         bool each_handle (Handle h)
         {
             char buff[BUFSZ];
-            UUID src_uuid = src_handle->getUUID();
-            UUID dst_uuid = h->getUUID();
+            UUID src_uuid = _tlbuf.addAtom(src_handle, TLB::INVALID_UUID);
+            UUID dst_uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
             snprintf(buff, BUFSZ, "INSERT  INTO Edges "
                     "(src_uuid, dst_uuid, pos) VALUES (%lu, %lu, %u);",
                     src_uuid, dst_uuid, pos);
@@ -488,6 +495,16 @@ bool ODBCAtomStorage::connected(void)
     bool have_connection = db_conn->connected();
     put_conn(db_conn);
     return have_connection;
+}
+
+void ODBCAtomStorage::registerWith(AtomSpace* as)
+{
+	_tlbuf.set_resolver(&as->get_atomtable());
+}
+
+void ODBCAtomStorage::unregisterWith(AtomSpace* as)
+{
+	_tlbuf.clear_resolver(&as->get_atomtable());
 }
 
 /* ================================================================== */
@@ -698,9 +715,10 @@ std::string ODBCAtomStorage::oset_to_string(const HandleSeq& out,
     str += "\'{";
     for (int i=0; i<arity; i++)
     {
-        Handle h = out[i];
+        const Handle& h = out[i];
+        UUID uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
         if (i != 0) str += ", ";
-        str += std::to_string(h->getUUID());
+        str += std::to_string(uuid);
     }
     str += "}\'";
     return str;
@@ -802,10 +820,8 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 
     // Use the TLB Handle as the UUID.
     Handle h(atom->getHandle());
-    if (isInvalidHandle(h))
-        throw RuntimeException(TRACE_INFO, "Trying to save atom with an invalid handle!");
+    UUID uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
 
-    UUID uuid = h->getUUID();
     std::string uuidbuff = std::to_string(uuid);
 
     std::unique_lock<std::mutex> lck = maybe_create_id(uuid);
@@ -1089,16 +1105,17 @@ void ODBCAtomStorage::set_typemap(int dbval, const char * tname)
  * Return true if the indicated handle exists in the storage.
  * Thread-safe.
  */
-bool ODBCAtomStorage::atomExists(Handle h)
+bool ODBCAtomStorage::atomExists(const Handle& h)
 {
+    UUID uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
 #ifdef ASK_SQL_SERVER
     char buff[BUFSZ];
-    snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", h->getUUID());
+    snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", uuid);
     return idExists(buff);
 #else
     std::unique_lock<std::mutex> lock(id_cache_mutex);
     // look at the local cache of id's to see if the atom is in storage or not.
-    return local_id_cache.count(h->getUUID());
+    return local_id_cache.count(uuid);
 #endif
 }
 
@@ -1210,7 +1227,7 @@ void ODBCAtomStorage::get_ids(void)
 void ODBCAtomStorage::getOutgoing(HandleSeq &outv, Handle h)
 {
     char buff[BUFSZ];
-    UUID uuid = h->getUUID();
+    UUID uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
     snprintf(buff, BUFSZ, "SELECT * FROM Edges WHERE src_uuid = %lu;", uuid);
 
     ODBCConnection* db_conn = get_conn();
@@ -1230,13 +1247,13 @@ ODBCAtomStorage::PseudoPtr ODBCAtomStorage::getAtom(const char * query, int heig
 {
     ODBCConnection* db_conn = get_conn();
     Response rp;
-    rp.uuid = Handle::INVALID_UUID;
+    rp.uuid = _tlbuf.INVALID_UUID;
     rp.rs = db_conn->exec(query);
     rp.rs->foreach_row(&Response::create_atom_cb, &rp);
 
     // Did we actually find anything?
     // DO NOT USE IsInvalidHandle() HERE! It won't work, duhh!
-    if (rp.uuid == Handle::INVALID_UUID)
+    if (rp.uuid == _tlbuf.INVALID_UUID)
     {
         rp.release();
         put_conn(db_conn);
@@ -1259,34 +1276,6 @@ ODBCAtomStorage::PseudoPtr ODBCAtomStorage::petAtom(UUID uuid)
     return getAtom(buff, -1);
 }
 
-/**
- * Create a new atom, retrieved from storage. This is a recursive-get;
- * if the atom is a link, then the outgoing set will be fetched too.
- * This may not be efficient, if you only wanted to get the latest TV
- * for an existing atom!
- *
- * This method does *not* register the atom with any atomtable.
- */
-AtomPtr ODBCAtomStorage::getAtom(UUID uuid)
-{
-    PseudoPtr p(petAtom(uuid));
-    if (NULL == p) return NULL;
-
-    if (classserver().isA(p->type, NODE))
-    {
-        NodePtr node(createNode(p->type, p->name, p->tv));
-        setAtomUUID( node, p->uuid );
-        return node;
-    }
-
-    HandleSeq oset;
-    for (UUID idu : p->oset)
-        oset.emplace_back(getAtom(idu)->getHandle());
-
-    LinkPtr link(createLink(p->type, oset, p->tv));
-    setAtomUUID( link, p->uuid );
-    return link;
-}
 
 /**
  * Retreive the entire incoming set of the indicated atom.
@@ -1296,10 +1285,12 @@ HandleSeq ODBCAtomStorage::getIncomingSet(const Handle& h)
     HandleSeq iset;
 
     setup_typemap();
+
+    UUID uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
     char buff[BUFSZ];
     snprintf(buff, BUFSZ,
         "SELECT * FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
-        h->getUUID());
+        uuid);
 
     // Note: "select * from atoms where outgoing@>array[556];" will return
     // all links with atom 556 in the outgoing set -- i.e. the incoming set of 556.
@@ -1349,7 +1340,7 @@ Handle ODBCAtomStorage::getNode(Type t, const char * str)
     if (NULL == p) return Handle();
 
     NodePtr node = createNode(t, str, p->tv);
-    setAtomUUID(node, p->uuid);
+    _tlbuf.addAtom(node, p->uuid);
     return node->getHandle();
 }
 
@@ -1380,7 +1371,7 @@ Handle ODBCAtomStorage::getLink(Handle& h)
     if (NULL == p) return Handle();
 
     h->setTruthValue(p->tv);
-    setAtomUUID(h, p->uuid);
+    _tlbuf.addAtom(h, p->uuid);
     return h;
 }
 
@@ -1477,7 +1468,7 @@ ODBCAtomStorage::PseudoPtr ODBCAtomStorage::makeAtom(Response &rp, UUID uuid)
 void ODBCAtomStorage::load(AtomTable &table)
 {
     unsigned long max_nrec = getMaxObservedUUID();
-    reserveMaxUUID(max_nrec);
+    _tlbuf.reserve_upto(max_nrec);
     fprintf(stderr, "Max observed UUID is %lu\n", max_nrec);
     load_count = 0;
     max_height = getMaxObservedHeight();
@@ -1537,7 +1528,7 @@ void ODBCAtomStorage::load(AtomTable &table)
 void ODBCAtomStorage::loadType(AtomTable &table, Type atom_type)
 {
     unsigned long max_nrec = getMaxObservedUUID();
-    reserveMaxUUID(max_nrec);
+    _tlbuf.reserve_upto(max_nrec);
     logger().debug("ODBCAtomStorage::loadType: Max observed UUID is %lu\n", max_nrec);
     load_count = 0;
 
@@ -1625,7 +1616,7 @@ void ODBCAtomStorage::store(const AtomTable &table)
 #endif
 
     get_ids();
-    UUID max_uuid = getMaxUUID();
+    UUID max_uuid = _tlbuf.getMaxUUID();
     fprintf(stderr, "Max UUID is %lu\n", max_uuid);
 
     setup_typemap();
@@ -1818,7 +1809,7 @@ void ODBCAtomStorage::reserve(void)
 {
     UUID max_observed_id = getMaxObservedUUID();
     fprintf(stderr, "Reserving UUID up to %lu\n", max_observed_id);
-    reserveMaxUUID(max_observed_id);
+    _tlbuf.reserve_upto(max_observed_id);
 }
 
 #endif /* HAVE_SQL_STORAGE */

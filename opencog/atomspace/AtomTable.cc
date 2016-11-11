@@ -27,7 +27,9 @@
 
 #include "AtomTable.h"
 
+#include <atomic>
 #include <iterator>
+#include <mutex>
 #include <set>
 
 #include <stdlib.h>
@@ -36,7 +38,6 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/DeleteLink.h>
@@ -58,23 +59,20 @@ using namespace opencog;
 
 std::recursive_mutex AtomTable::_mtx;
 
+static std::atomic<UUID> _id_pool(0);
+
 AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient)
     : _index_queue(this, &AtomTable::put_atom_into_index, transient?0:4)
 {
     _as = holder;
     _environ = parent;
-    _uuid = TLB::reserve_extent(1);
+    _uuid = _id_pool.fetch_add(1, std::memory_order_relaxed);
     _size = 0;
     _num_nodes = 0;
     _num_links = 0;
     size_t ntypes = classserver().getNumberOfClasses();
     _size_by_type.resize(ntypes);
     _transient = transient;
-
-    // Set resolver before doing anything else, such as getting
-    // the atom-added signals.  Just in case some other thread
-    // is busy adding types while we are being created.
-    Handle::set_resolver(this);
 
     // Connect signal to find out about type additions
     addedTypeConnection =
@@ -87,14 +85,12 @@ AtomTable::~AtomTable()
     // Disconnect signals. Only then clear the resolver.
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     addedTypeConnection.disconnect();
-    Handle::clear_resolver(this);
 
     // No one who shall look at these atoms shall ever again
     // find a reference to this atomtable.
     for (auto& pr : _atom_store) {
         Handle& atom_to_delete = pr.second;
         atom_to_delete->_atomTable = NULL;
-        atom_to_delete->_uuid = Handle::INVALID_UUID;
 
         // Aiee ... We added this link to every incoming set;
         // thus, it is our responsibility to remove it as well.
@@ -119,9 +115,6 @@ void AtomTable::ready_transient(AtomTable* parent, AtomSpace* holder)
     // Set the new parent environment and holder atomspace.
     _environ = parent;
     _as = holder;
-
-    // We can now resolve handles.
-    Handle::set_resolver(this);
 }
 
 void AtomTable::clear_transient()
@@ -129,9 +122,6 @@ void AtomTable::clear_transient()
     if (not _transient)
         throw opencog::RuntimeException(TRACE_INFO,
                 "AtomTable - clear_transient called on non-transient atom table.");
-
-    // We are no longer a resolver for handles.
-    Handle::clear_resolver(this);
 
     // Clear all the atoms
     clear_all_atoms();
@@ -165,7 +155,6 @@ void AtomTable::clear_all_atoms()
     for (auto& pr : _atom_store) {
         Handle& atom_to_clear = pr.second;
         atom_to_clear->_atomTable = NULL;
-        atom_to_clear->_uuid = Handle::INVALID_UUID;
 
         // If this is a link we need to remove this atom from the incoming
         // sets for any atoms in this atom's outgoing set. See note in
@@ -181,7 +170,6 @@ void AtomTable::clear_all_atoms()
     // Clear the atom store. This will delete all the atoms since
     // this will be the last shared_ptr referecence, and set the
     // size of the set to 0.
-    _atom_set.clear();
     _atom_store.clear();
 }
 
@@ -302,10 +290,7 @@ Handle AtomTable::getLinkHandle(AtomPtr& a, int quotelevel) const
         resolved_seq.emplace_back(rh);
     }
 
-    // Sigh. Proper database support requires that the UUID not be mangled.
-    UUID save = a->_uuid;
     a = createLink(t, resolved_seq);
-    a->_uuid = save;
 
     // Start searching to see if we have this atom.
     ContentHash ch = a->get_hash();
@@ -321,7 +306,6 @@ Handle AtomTable::getLinkHandle(AtomPtr& a, int quotelevel) const
         ScopeLinkPtr wanted = ScopeLinkCast(a);
         if (nullptr == wanted) {
             wanted = ScopeLink::factory(Handle(a));
-            wanted->_uuid = a->_uuid;
         }
         ch = wanted->get_hash();
         a = wanted;
@@ -360,21 +344,6 @@ Handle AtomTable::getHandle(AtomPtr& a, int quotelevel) const
     else if (a->isLink())
         return getLinkHandle(a, quotelevel);
 
-    return Handle::UNDEFINED;
-}
-
-// If we have a uuid but no atom pointer, find the atom pointer.
-Handle AtomTable::getHandle(UUID uuid) const
-{
-    // Strange, but the find() below can crash, if uuid=-1.
-    if (Handle::INVALID_UUID == uuid) return Handle::UNDEFINED;
-
-    // Read-lock for the _atom_set.
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
-
-    auto hit = _atom_set.find(uuid);
-    if (hit != _atom_set.end())
-        return hit->second;
     return Handle::UNDEFINED;
 }
 
@@ -488,8 +457,12 @@ AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
     return atom;
 }
 
-// create a clone
-static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
+/// The purpose of the clone factory is to create a private, unique
+/// copy of the atom, so as to avoid accidental, unintentional
+/// sharing with others. In particular, the atom that we are given
+/// may already exist in some other atomspace; we want our own private
+/// copy, in that case.
+AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
 {
     // Nodes of various kinds -----------
     if (NUMBER_NODE == atom_type)
@@ -535,28 +508,9 @@ static AtomPtr do_clone_factory(Type atom_type, AtomPtr atom)
 
 AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
 {
-	AtomPtr clone(do_factory(atom_type, atom));
-	if (nullptr == clone) return clone;
-	clone->_uuid = atom->_uuid;
-	return clone;
+	return do_factory(atom_type, atom);
 }
 
-/// The purpose of the clone factory is to create a private, unique
-/// copy of the atom, so as to avoid accidental, unintentional
-/// sharing with others. In particular, the atom that we are given
-/// may already exist in some other atomspace; we want our own private
-/// copy, in that case.
-AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
-{
-	AtomPtr clone(do_clone_factory(atom_type, atom));
-	// Copy the UUID ONLY if the atom does not belong to some other
-	// atomspace. This is the situation that applies to atoms being
-	// delivered to us from the backing store: the UUID is set, but
-	// they are otherwise "fresh" atoms.
-	if (nullptr == atom->getAtomTable())
-		clone->_uuid = atom->_uuid;
-	return clone;
-}
 
 #if 0
 static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
@@ -569,8 +523,7 @@ static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
                     << " and arity=" << arity;
     logger().error() << "Failing outset is this:";
     for (unsigned int fk=0; fk<arity; fk++)
-        logger().error() << "outset i=" << fk
-                        << " uuid=" << ogs[fk].value();
+        logger().error() << "outset i=" << fk;
 
     logger().error() << "link is " << atom->toString();
     logger().flush();
@@ -608,7 +561,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 
     // Certain DeleteLinks can never be added!
     if (nullptr == atom) return Handle();
-    atom->_uuid = orig->_uuid;
 
     // Is the equivalent of this atom already in the table?
     // If so, then return the existing atom.  (Note that this 'existing'
@@ -637,13 +589,10 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         // correctly when fetching from backing store. But do this
         // if the atom is actually coming from backing store (i.e.
         // does not yet belong to any table).
-        UUID save = atom->_uuid;
-        if (NULL != atom->getAtomTable()) save = (UUID) -1;
         atom = createLink(atom_type, closet,
                           atom->getTruthValue(),
                           atom->getAttentionValue());
         atom = clone_factory(atom_type, atom);
-        atom->_uuid = save;
     }
 
     // Clone, if we haven't done so already. We MUST maintain our own
@@ -702,22 +651,12 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         }
     }
 
-    // Its possible that the atom already has a UUID assigned,
-    // e.g. if it was fetched from persistent storage; this
-    // was done to preserve handle consistency.
-    if (atom->_uuid == Handle::INVALID_UUID) {
-       // Atom doesn't yet have a valid uuid assigned to it. Ask the TLB
-       // to issue a valid uuid.  And then memorize it.
-       TLB::addAtom(atom);
-    } else {
-       TLB::reserve_upto(atom->_uuid);
-    }
-    Handle h(atom->getHandle());
     _size++;
     if (atom->isNode()) _num_nodes++;
     if (atom->isLink()) _num_links++;
     _size_by_type[atom->_type] ++;
-    _atom_set.insert({atom->_uuid, h});
+
+    Handle h(atom->getHandle());
     _atom_store.insert({atom->get_hash(), h});
 
     atom->keep_incoming_set();
@@ -733,7 +672,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (not _transient and async)
         _index_queue.enqueue(atom);
 
-    DPRINTF("Atom added: %ld => %s\n", atom->_uuid, atom->toString().c_str());
+    DPRINTF("Atom added: %s\n", atom->toString().c_str());
     return h;
 }
 
@@ -964,7 +903,6 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     if (atom->isNode()) _num_nodes--;
     if (atom->isLink()) _num_links--;
     _size_by_type[atom->_type] --;
-    _atom_set.erase(atom->_uuid);
 
     auto range = _atom_store.equal_range(atom->get_hash());
     auto bkt = range.first;

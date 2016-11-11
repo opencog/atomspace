@@ -25,6 +25,7 @@
  */
 
 #include <opencog/atoms/base/Atom.h>
+#include <opencog/atomspaceutils/TLB.h>
 
 #include "OutgoingHash.h"
 
@@ -124,7 +125,8 @@ int64_t opencog::hash_outgoing(const HandleSeq& outgoing, uint64_t seed)
             throw RuntimeException(TRACE_INFO, "Fatal Error: hash_outgoing - "
                     "NULL handle in outgoing set\n");
         }
-        uuids[position++] = handle->getUUID();
+        UUID uuid = TLB::addAtom(handle, TLB::INVALID_UUID);
+        uuids[position++] = uuid;
     }
 
     // Hash the vector in place.

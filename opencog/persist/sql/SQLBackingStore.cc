@@ -49,11 +49,6 @@ Handle SQLBackingStore::getLink(Handle& h) const
 	return _store->getLink(h);
 }
 
-AtomPtr SQLBackingStore::getAtom(UUID uuid) const
-{
-	return _store->getAtom(uuid);
-}
-
 HandleSeq SQLBackingStore::getIncomingSet(const Handle& h) const
 {
 	return _store->getIncomingSet(h);
@@ -72,4 +67,16 @@ void SQLBackingStore::loadType(AtomTable& at, Type t)
 void SQLBackingStore::barrier()
 {
 	_store->flushStoreQueue();
+}
+
+void SQLBackingStore::registerWith(AtomSpace* as)
+{
+	_store->registerWith(as);
+	BackingStore::registerWith(as);
+}
+
+void SQLBackingStore::unregisterWith(AtomSpace* as)
+{
+	BackingStore::unregisterWith(as);
+	_store->unregisterWith(as);
 }

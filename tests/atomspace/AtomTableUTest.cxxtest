@@ -103,7 +103,7 @@ public:
 
     void testHolds()
     {
-        Handle h(100101);
+        Handle h;
         Handle word = table->add(createNode(NUMBER_NODE, "1"), false);
         TS_ASSERT(table->holds(word));
         TS_ASSERT(!table->holds(h));
@@ -136,41 +136,25 @@ public:
             hll = createLink(list_type, hn4, hn2, hn3, hn1);
         Handle hle(createLink(EVALUATION_LINK, hnp, hll));
 
-        // No UUID should be assigned yet.
-        TS_ASSERT_EQUALS(hn1.value(), Handle::INVALID_UUID);
-        TS_ASSERT_EQUALS(hn2.value(), Handle::INVALID_UUID);
-        TS_ASSERT_EQUALS(hn3.value(), Handle::INVALID_UUID);
-        TS_ASSERT_EQUALS(hn4.value(), Handle::INVALID_UUID);
-        TS_ASSERT_EQUALS(hnp.value(), Handle::INVALID_UUID);
-        TS_ASSERT_EQUALS(hll.value(), Handle::INVALID_UUID);
-        TS_ASSERT_EQUALS(hle.value(), Handle::INVALID_UUID);
-
         // Add the link.  All the outgoing atoms should get added too.
         Handle hlet = table->add(hle, false);
-        TS_ASSERT(hlet.value() != Handle::INVALID_UUID);
         LinkPtr let(LinkCast(hlet));
         const HandleSeq& hs = let->getOutgoingSet();
-        TS_ASSERT(hs[0].value() != Handle::INVALID_UUID);
-        TS_ASSERT(hs[1].value() != Handle::INVALID_UUID);
 
         LinkPtr llt(LinkCast(hs[1]));
         const HandleSeq& hsl = llt->getOutgoingSet();
-        TS_ASSERT(hsl[0].value() != Handle::INVALID_UUID);
-        TS_ASSERT(hsl[1].value() != Handle::INVALID_UUID);
-        TS_ASSERT(hsl[2].value() != Handle::INVALID_UUID);
-        TS_ASSERT(hsl[3].value() != Handle::INVALID_UUID);
 
         // Now test resolution.  Given the version of the atom that is
         // not yet in the atomspace, we should be able to find the one
         // that is in the atomspace.
         Handle hle_resolved(table->getHandle(hle));
-        TS_ASSERT_EQUALS(hlet.value(), hle_resolved.value());
+        TS_ASSERT(*((AtomPtr)hlet) == *((AtomPtr)hle_resolved));
 
         Handle hnp_resolved(table->getHandle(hnp));
-        TS_ASSERT_EQUALS(hs[0].value(), hnp_resolved.value());
+        TS_ASSERT(*((AtomPtr)hs[0]) == *((AtomPtr)hnp_resolved));
 
         Handle hll_resolved(table->getHandle(hll));
-        TS_ASSERT_EQUALS(hs[1].value(), hll_resolved.value());
+        TS_ASSERT(*((AtomPtr)hs[1]) == *((AtomPtr)hll_resolved));
 
         // The remainder of the test assumes an ordered link,
         // so that atoms get stored in known locations. Can't
@@ -179,16 +163,16 @@ public:
             return;
 
         Handle hn1_resolved(table->getHandle(hn1));
-        TS_ASSERT_EQUALS(hsl[0].value(), hn1_resolved.value());
+        TS_ASSERT(*((AtomPtr)hsl[0]) == *((AtomPtr)hn1_resolved));
 
         Handle hn2_resolved(table->getHandle(hn2));
-        TS_ASSERT_EQUALS(hsl[1].value(), hn2_resolved.value());
+        TS_ASSERT(*((AtomPtr)hsl[1]) == *((AtomPtr)hn2_resolved));
 
         Handle hn3_resolved(table->getHandle(hn3));
-        TS_ASSERT_EQUALS(hsl[2].value(), hn3_resolved.value());
+        TS_ASSERT(*((AtomPtr)hsl[2]) == *((AtomPtr)hn3_resolved));
 
         Handle hn4_resolved(table->getHandle(hn4));
-        TS_ASSERT_EQUALS(hsl[3].value(), hn4_resolved.value());
+        TS_ASSERT(*((AtomPtr)hsl[3]) == *((AtomPtr)hn4_resolved));
     }
 
     void testRecursiveAdd()
@@ -253,7 +237,6 @@ public:
         Handle l33 = table->add(createLink(LIST_LINK, os), false);
         LinkPtr lptr33(LinkCast(l33));
         HandleSeq hs = lptr33->getOutgoingSet();
-        printf("hs1 & hs2 uuid's: %lu %lu\n", hs[0].value(), hs[1].value());
         printf("hs1 & hs2 ptr's: %p %p\n", hs[0].operator->(), hs[1].operator->());
         TS_ASSERT_EQUALS(hs[0], hs[1]);
     }

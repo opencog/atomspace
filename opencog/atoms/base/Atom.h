@@ -48,6 +48,7 @@ namespace opencog
  *  @{
  */
 
+class AtomTable;
 class AtomSpace;
 
 //! arity of Links, represented as short integer (16 bits)
@@ -75,12 +76,10 @@ typedef boost::signals2::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
 class Atom
     : public ProtoAtom
 {
-    friend class AtomStorage;     // Needs to set _uuid
+    friend class AtomStorage;     // Needs to set atomtable
     friend class AtomTable;       // Needs to call MarkedForRemoval()
     friend class AtomSpace;       // Needs to call getAtomTable()
     friend class DeleteLink;      // Needs to call getAtomTable()
-    friend class Handle;          // Needs to view _uuid
-    friend class TLB;             // Needs to view _uuid
     friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
 
 private:
@@ -99,7 +98,6 @@ protected:
     /// for indexing and comparison operations.
     mutable ContentHash _content_hash;
 
-    UUID _uuid; // obsolete -- do not use!
     AtomTable *_atomTable;
 
     TruthValuePtr _truthValue;
@@ -128,7 +126,6 @@ protected:
       : ProtoAtom(t),
         _flags(0),
         _content_hash(Handle::INVALID_HASH),
-        _uuid(Handle::INVALID_UUID),
         _atomTable(NULL),
         _truthValue(tv),
         _attentionValue(av),
@@ -185,19 +182,12 @@ private:
     /** Change the Very-Long-Term Importance. */
     void chgVLTI(int unit);
 
-    // Set the UUID
-    void setUUID(UUID new_UUID)
-        { _uuid = new_UUID; }
-
 public:
 
     virtual ~Atom();
 
     //! Returns the AtomTable in which this Atom is inserted.
     AtomSpace* getAtomSpace() const;
-
-    // Obsolete! Do not use in new code!
-    inline UUID getUUID() const { return _uuid; }
 
     /// Merkle-tree hash of the atom contents. Generically useful
     /// for indexing and comparison operations.

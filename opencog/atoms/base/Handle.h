@@ -56,19 +56,13 @@ typedef unsigned long UUID;
 typedef size_t ContentHash;
 
 class Atom;
-class Handle;
 typedef std::shared_ptr<Atom> AtomPtr;
-class AtomTable;
-class Link;
-typedef std::shared_ptr<Link> LinkPtr;
 
 //! contains an unique identificator
 class Handle
 {
 
 friend class Atom;
-friend class AtomTable;
-friend class AtomStorage;         // persistance
 friend class content_based_atom_ptr_less;
 friend class content_based_handle_less;
 
@@ -77,21 +71,14 @@ private:
 
     static bool atoms_less(const Atom*, const Atom*);
     static bool content_based_atoms_less(const Atom*, const Atom*);
-    static Handle do_res(UUID);
-    static std::vector<const AtomTable*> _resolver;
-
-    static void set_resolver(const AtomTable*);
-    static void clear_resolver(const AtomTable*);
 
     static const AtomPtr NULL_POINTER;
-public:
 
-    static const UUID INVALID_UUID = ULONG_MAX;
+public:
     static const ContentHash INVALID_HASH = std::numeric_limits<size_t>::max();
     static const Handle UNDEFINED;
 
     explicit Handle(const AtomPtr& atom) : _ptr(atom) {}
-    explicit Handle(const UUID);
     explicit Handle() {}
     Handle(const Handle& h) : _ptr(h._ptr) {}
     ~Handle() {}
@@ -192,6 +179,9 @@ static inline bool operator== (std::nullptr_t, const Handle& rhs) noexcept
 
 static inline bool operator!= (std::nullptr_t, const Handle& rhs) noexcept
     { return rhs != nullptr; }
+
+bool content_eq(const opencog::Handle& lh,
+                const opencog::Handle& rh) noexcept;
 
 //! Boost needs this function to be called by exactly this name.
 std::size_t hash_value(Handle const&);
@@ -334,6 +324,8 @@ std::string hmapset_to_string(const HandleMapSet& hms);
 std::string hps_to_string(const HandlePairSeq& hps);
 std::string atomtype_to_string(Type type);
 std::string aptr_to_string(const AtomPtr& aptr);
+class Link;
+typedef std::shared_ptr<Link> LinkPtr;
 std::string lptr_to_string(const LinkPtr& lptr);
 
 // In case your gdb supports overloading, see
@@ -386,6 +378,23 @@ struct hash<opencog::Handle>
     std::size_t
     operator()(const opencog::Handle& h) const noexcept
     { return hash_value(h); }
+};
+
+// content-based equality
+template<>
+struct equal_to<opencog::Handle>
+{
+    typedef bool result_type;
+    typedef opencog::Handle first_argument;
+    typedef opencog::Handle second_argument;
+    bool
+    operator()(const opencog::Handle& lh,
+               const opencog::Handle& rh) const noexcept
+    {
+        if (lh == rh) return true;
+        if (nullptr == lh or nullptr == rh) return false;
+        return opencog::content_eq(lh, rh);
+    }
 };
 
 #endif // THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472

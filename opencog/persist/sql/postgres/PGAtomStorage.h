@@ -244,7 +244,6 @@ class PGAtomStorage : public AtomStorage
         // AtomStorage interface
         Handle getNode(Type, const char *);
         Handle getLink(Handle&);
-        AtomPtr getAtom(UUID);
         HandleSeq getIncomingSet(const Handle&);
         void storeAtom(const AtomPtr&, bool synchronous = false);
         void loadType(AtomTable &, Type);

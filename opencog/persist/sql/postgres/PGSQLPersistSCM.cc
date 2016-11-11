@@ -135,6 +135,7 @@ void PGSQLPersistSCM::do_open(const std::string& dbname,
     _store->setDontStoreEdges();
 #endif
     _backing->registerWith(as);
+    TLB::set_resolver(&as->get_atomtable());
 }
 
 void PGSQLPersistSCM::do_close(void)
@@ -149,7 +150,7 @@ void PGSQLPersistSCM::do_close(void)
         as = SchemeSmob::ss_get_env_as("sql-close");
 #endif
     _backing->unregisterWith(as);
-
+    TLB::clear_resolver(&as->get_atomtable());
     _backing->set_store(NULL);
     delete _store;
     _store = NULL;

@@ -27,59 +27,38 @@
 #include <climits>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atomspace/AtomTable.h>
+#include <opencog/atoms/base/Link.h>
 
 namespace opencog {
 
 const Handle Handle::UNDEFINED;
 const AtomPtr Handle::NULL_POINTER;
 
-Handle::Handle(const UUID u)
-{
-	_ptr = do_res(u)._ptr;
-}
-
 UUID Handle::value(void) const
 {
-    const Atom* a = operator->();
-    // The is link/node is a low-cost way of checking if the
-    // pointer really is an atom pointer, and not just protoAtom,
-    // which does not have a uuid.
-    if (a and (a->isLink() or a->isNode())) return a->getUUID();
+    if (_ptr) return _ptr->get_hash();
     return ULONG_MAX;
 }
 
 // ===================================================
 // Atom comparison.
 
-#if 0
-bool Handle::atoms_eq(const AtomPtr& a, const AtomPtr& b)
+bool content_eq(const Handle& lh, const Handle& rh) noexcept
 {
-    if (a == b) return true;
-    if (NULL == a or NULL == b) return false;
-    return *a == *b;
+    if (lh == rh) return true;
+    if (nullptr == lh or nullptr == rh) return false;
+    if (lh->get_hash() != rh->get_hash()) return false;
+
+    return *((AtomPtr) lh) == *((AtomPtr) rh);
 }
-#endif
 
-bool Handle::atoms_less(const Atom* pa, const Atom* pb)
+bool Handle::atoms_less(const Atom* a, const Atom* b)
 {
-    if (pa == pb) return false;
-    if (NULL == pa) return true;
-    if (NULL == pb) return false;
+    if (a == b) return false;
+    if (nullptr == a) return true;
+    if (nullptr == b) return false;
 
-    const Atom* a(dynamic_cast<const Atom*>(pa));
-    const Atom* b(dynamic_cast<const Atom*>(pb));
-    UUID ua = a->getUUID();
-    UUID ub = b->getUUID();
-    if (INVALID_UUID != ua or INVALID_UUID != ub) return ua < ub;
-
-    // If both UUID's are invalid, we still need to compare
-    // the atoms somehow. The need to compare in some "reasonable"
-    // way, so that OrderedHandleSet works correctly when it uses
-    // the std::less<Handle> operator, which calls this function.
-    // Performing an address-space comparison is all I can think
-    // of...
-    // if (*a == *b) return false; lets not do this cpu-time-waster...
+    // Pointer compare
     return a < b;
 }
 
@@ -96,33 +75,6 @@ bool Handle::content_based_atoms_less(const Atom* a, const Atom* b)
 
 // ===================================================
 // Handle resolution stuff.
-
-// Its a vector, not a set, because its priority ranked.
-std::vector<const AtomTable*> Handle::_resolver;
-
-void Handle::set_resolver(const AtomTable* tab)
-{
-    _resolver.push_back(tab);
-}
-
-void Handle::clear_resolver(const AtomTable* tab)
-{
-    auto it = std::find(_resolver.begin(), _resolver.end(), tab);
-    if (it != _resolver.end())
-        _resolver.erase(it);
-}
-
-// Search several atomspaces, in order.  First one to come up with
-// the atom wins.  Seems to work, for now.
-inline Handle Handle::do_res(UUID uuid)
-{
-    if (INVALID_UUID == uuid) return Handle();
-    for (const AtomTable* at : _resolver) {
-        Handle h(at->getHandle(uuid));
-        if (NULL != h) return h;
-    }
-    return Handle();
-}
 
 std::size_t hash_value(Handle const& h)
 {
