@@ -52,7 +52,7 @@ std::string SchemeSmob::av_to_string(const AttentionValue *av)
 #define BUFLEN 120
 	char buff[BUFLEN];
 
-	snprintf(buff, BUFLEN, "(av %.2f %.2f %.2f)",
+	snprintf(buff, BUFLEN, "(av %d %d %u)",
 	         av->getSTI(), av->getLTI(), av->getVLTI());
 
 	return buff;
