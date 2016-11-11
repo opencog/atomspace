@@ -71,11 +71,6 @@ AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient)
     _size_by_type.resize(ntypes);
     _transient = transient;
 
-    // Set resolver before doing anything else, such as getting
-    // the atom-added signals.  Just in case some other thread
-    // is busy adding types while we are being created.
-    TLB::set_resolver(this);
-
     // Connect signal to find out about type additions
     addedTypeConnection =
         classserver().addTypeSignal().connect(
@@ -87,7 +82,6 @@ AtomTable::~AtomTable()
     // Disconnect signals. Only then clear the resolver.
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     addedTypeConnection.disconnect();
-    TLB::clear_resolver(this);
 
     // No one who shall look at these atoms shall ever again
     // find a reference to this atomtable.
@@ -118,9 +112,6 @@ void AtomTable::ready_transient(AtomTable* parent, AtomSpace* holder)
     // Set the new parent environment and holder atomspace.
     _environ = parent;
     _as = holder;
-
-    // We can now resolve handles.
-    // TLB::set_resolver(this);
 }
 
 void AtomTable::clear_transient()
@@ -128,9 +119,6 @@ void AtomTable::clear_transient()
     if (not _transient)
         throw opencog::RuntimeException(TRACE_INFO,
                 "AtomTable - clear_transient called on non-transient atom table.");
-
-    // We are no longer a resolver for handles.
-    // TLB::clear_resolver(this);
 
     // Clear all the atoms
     clear_all_atoms();
