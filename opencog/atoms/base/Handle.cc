@@ -53,14 +53,14 @@ UUID Handle::value(void) const
 // ===================================================
 // Atom comparison.
 
-#if 0
-bool Handle::atoms_eq(const AtomPtr& a, const AtomPtr& b)
+bool content_eq(const Handle& lh, const Handle& rh) noexcept
 {
-    if (a == b) return true;
-    if (NULL == a or NULL == b) return false;
-    return *a == *b;
+    if (lh == rh) return true;
+    if (nullptr == lh or nullptr == rh) return false;
+    if (lh->get_hash() != rh->get_hash()) return false;
+
+    return *((AtomPtr) lh) == *((AtomPtr) rh);
 }
-#endif
 
 bool Handle::atoms_less(const Atom* pa, const Atom* pb)
 {

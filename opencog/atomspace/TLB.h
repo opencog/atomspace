@@ -82,7 +82,9 @@ private:
 
     static std::mutex _mtx;
     static std::unordered_map<UUID, Handle> _uuid_map;
-    static std::unordered_map<Handle, UUID> _handle_map;
+    static std::unordered_map<Handle, UUID,
+                      std::hash<opencog::Handle>,
+                      std::equal_to<opencog::Handle> > _handle_map;
 
 public:
     /**

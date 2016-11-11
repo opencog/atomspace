@@ -57,8 +57,7 @@ public:
         // content-compare should work
         TS_ASSERT( *n == *nb);
 
-        // XXX FIXME TLB should be ontent-based, but its not.
         UUID uuidb = TLB::addAtom(nb, Handle::INVALID_UUID);
-        // TS_ASSERT(uuidb == uuid);
+        TS_ASSERT(uuidb == uuid);
     }
 };

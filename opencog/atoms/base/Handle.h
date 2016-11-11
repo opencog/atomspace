@@ -193,6 +193,9 @@ static inline bool operator== (std::nullptr_t, const Handle& rhs) noexcept
 static inline bool operator!= (std::nullptr_t, const Handle& rhs) noexcept
     { return rhs != nullptr; }
 
+bool content_eq(const opencog::Handle& lh,
+                const opencog::Handle& rh) noexcept;
+
 //! Boost needs this function to be called by exactly this name.
 std::size_t hash_value(Handle const&);
 
@@ -386,6 +389,23 @@ struct hash<opencog::Handle>
     std::size_t
     operator()(const opencog::Handle& h) const noexcept
     { return hash_value(h); }
+};
+
+// content-based equality
+template<>
+struct equal_to<opencog::Handle>
+{
+    typedef bool result_type;
+    typedef opencog::Handle first_argument;
+    typedef opencog::Handle second_argument;
+    bool
+    operator()(const opencog::Handle& lh,
+               const opencog::Handle& rh) const noexcept
+    {
+        if (lh == rh) return true;
+        if (nullptr == lh or nullptr == rh) return false;
+        return opencog::content_eq(lh, rh);
+    }
 };
 
 #endif // THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
