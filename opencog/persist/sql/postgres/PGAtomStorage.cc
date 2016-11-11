@@ -787,6 +787,8 @@ void PGAtomStorage::store_atomtable_id(const AtomTable& at)
         store_atomtable_id(*env);
     }
 
+    if (0 == parent_id and 0 == tab_id) return;
+
     char statement[BUFFER_SIZE];
     snprintf(statement, BUFFER_SIZE,
         "INSERT INTO Spaces (space, parent) VALUES (%ld, %ld);",
