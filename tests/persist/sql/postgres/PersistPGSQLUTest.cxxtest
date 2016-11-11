@@ -346,9 +346,6 @@ void PersistUTest::check_empty(int idx, AtomSpace *space)
     Handle hb4 = space->get_handle(n4[idx]->getType(), n4[idx]->getName());
     TSM_ASSERT("Should not find this atom", hb4 == Handle::UNDEFINED);
 
-#if 0
-    // Can't test this. The UUID's are garbage at this point,
-    // This will just cause a crash.
     HandleSeq hvec;
     hvec.push_back(h1[idx]);
     hvec.push_back(h2[idx]);
@@ -357,7 +354,6 @@ void PersistUTest::check_empty(int idx, AtomSpace *space)
 
     Handle hlb = space->get_handle(hl1[idx]->getType(), hvec);
     TSM_ASSERT("Should not find this atom", hlb == Handle::UNDEFINED);
-#endif
 }
 
 // ============================================================
@@ -392,7 +388,7 @@ void PersistUTest::test_atomspace()
 
     /* Extract atoms from the AtomSpace. This does not delete them from
      * the SQL storage, though; to do that, they must be deleted, not
-     * extractd.
+     * extracted.
      */
     _as->barrier();
     _as->clear();
@@ -466,12 +462,12 @@ return;
     // Make a copy of the uuids.
     std::vector<UUID> outgoing_uuds;
     for (auto& atom : outgoing)
-        outgoing_uuds.push_back(atom->getUUID());
+        outgoing_uuds.push_back(TLB::addAtom(atom, TLB::INVALID_UUID));
 
     // Create the huge list link.
     Handle huge_link = _as->add_link(LINK, outgoing);
     TSM_ASSERT("huge_list_link add failed", huge_link);
-    UUID huge_link_uuid = huge_link->getUUID();
+    TLB::addAtom(huge_link, TLB::INVALID_UUID);
 
     // Push all atoms out to the SQL DB
     _pm->do_store();
@@ -484,7 +480,7 @@ return;
     // Make sure we can reload the large link.
 
     // Verify that the link can be fetched from storage by the uuid.
-    Handle huge_loaded_link = _as->fetch_atom(huge_link_uuid);
+    Handle huge_loaded_link = _as->fetch_atom(huge_link);
     TSM_ASSERT("Huge link didn't load by fetch_atom", huge_loaded_link);
 
     // Purge atoms from the AtomSpace again.
@@ -550,14 +546,12 @@ void PersistUTest::test_degenerate_deep_links()
 
     fprintf(stderr, "after create - query count: %d \n", _pm->queryCount());
 
-    // Get the UUID for the last link we created so we can fetch it
-    // later which will reload all of the atoms.
-    UUID last_link_uuid = first_out->getUUID();
+    TLB::addAtom(first_out, TLB::INVALID_UUID);
 
     // Make a copy of the uuids.
     std::vector<UUID> link_uuds;
     for (auto& atom : links)
-        link_uuds.push_back(atom->getUUID());
+        link_uuds.push_back(TLB::addAtom(atom, TLB::INVALID_UUID));
 
     // Push all atoms out to the SQL DB
     _pm->resetQueryCount();
@@ -582,7 +576,7 @@ void PersistUTest::test_degenerate_deep_links()
     // Now let's try loading all the links recursively by just
     // fetching the last one.
     _pm->resetQueryCount();
-    Handle link = _as->fetch_atom(last_link_uuid);
+    Handle link = _as->fetch_atom(first_out);
     TSM_ASSERT("Many deep links fetch_atom for last link failed", link);
     fprintf(stderr, "fetch last node - query count: %d \n", _pm->queryCount());
 
@@ -637,14 +631,12 @@ void PersistUTest::test_many_deep_links()
 
     fprintf(stderr, "after create - query count: %d \n", _pm->queryCount());
 
-    // Get the UUID for the last link we created so we can fetch it
-    // later which will reload all of the atoms.
-    UUID last_link_uuid = first_out->getUUID();
+    TLB::addAtom(first_out, TLB::INVALID_UUID);
 
     // Make a copy of the uuids.
     std::vector<UUID> link_uuds;
     for (auto& atom : links)
-        link_uuds.push_back(atom->getUUID());
+        link_uuds.push_back(TLB::addAtom(atom, TLB::INVALID_UUID));
 
     // Push all atoms out to the SQL DB
     _pm->resetQueryCount();
@@ -669,7 +661,7 @@ void PersistUTest::test_many_deep_links()
     // Now let's try loading all the links recursively by just
     // fetching the last one.
     _pm->resetQueryCount();
-    Handle link = _as->fetch_atom(last_link_uuid);
+    Handle link = _as->fetch_atom(first_out);
     TSM_ASSERT("Many deep links fetch_atom for last link failed", link);
     fprintf(stderr, "fetch last node - query count: %d \n", _pm->queryCount());
 
