@@ -152,8 +152,8 @@ void AttentionBank::stimulate(Handle& h, double stimulus)
     AttentionValue::lti_t lti   = h->getAttentionValue()->getLTI();
     AttentionValue::vlti_t vlti = h->getAttentionValue()->getVLTI();
 
-    AttentionValue::sti_t stiWage = calculateSTIWage() * stimulus;
-    AttentionValue::lti_t ltiWage = calculateLTIWage() * stimulus;
+    int stiWage = calculateSTIWage() * stimulus;
+    int ltiWage = calculateLTIWage() * stimulus;
 
     AttentionValuePtr new_av = createAV(sti + stiWage, lti + ltiWage, vlti);
     h->setAttentionValue(new_av);
