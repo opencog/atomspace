@@ -27,13 +27,13 @@
 #include "opencog/atoms/base/Atom.h"
 #include "opencog/atoms/base/Link.h"
 #include "opencog/atoms/base/Node.h"
-#include "opencog/atomspace/TLB.h"
 #include "opencog/truthvalue/AttentionValue.h"
 #include "opencog/truthvalue/TruthValue.h"
 #include "opencog/truthvalue/CountTruthValue.h"
 #include "opencog/truthvalue/NullTruthValue.h"
 #include "opencog/truthvalue/IndefiniteTruthValue.h"
 #include "opencog/truthvalue/SimpleTruthValue.h"
+#include "opencog/atomspaceutils/TLB.h"
 
 using namespace opencog;
 

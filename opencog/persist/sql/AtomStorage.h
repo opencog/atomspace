@@ -29,9 +29,9 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/base/types.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspaceutils/TLB.h>
 
 namespace opencog
 {
@@ -50,16 +50,16 @@ class AtomStorage
         virtual Handle getLink(Handle&) = 0;
         virtual HandleSeq getIncomingSet(const Handle&) = 0;
         virtual void storeAtom(const AtomPtr&, bool synchronous = false) = 0;
-        virtual void loadType(AtomTable &, Type) = 0;
+        virtual void loadType(AtomTable&, Type) = 0;
         virtual void flushStoreQueue() = 0;
 
         // Large-scale loads and saves
 
         // Load entire contents of DB
-        virtual void load(AtomTable &) = 0;
+        virtual void load(AtomTable&) = 0;
 
         // Store entire contents of AtomTable
-        virtual void store(const AtomTable &) = 0;
+        virtual void store(const AtomTable&) = 0;
 
         // Helper function so caller can access protected atomspace function.
         void storeAtomSpace(AtomSpace*);

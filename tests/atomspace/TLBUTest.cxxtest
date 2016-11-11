@@ -26,7 +26,7 @@
 #include <stdio.h>
 
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atomspace/TLB.h>
+#include <opencog/atomspaceutils/TLB.h>
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/util/exceptions.h>
 

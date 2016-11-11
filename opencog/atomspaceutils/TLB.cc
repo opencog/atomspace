@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/TLB.cc
+ * opencog/atomspaceutils/TLB.cc
  *
  * Copyright (C) 2011 OpenCog Foundation
  * All Rights Reserved

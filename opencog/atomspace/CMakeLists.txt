@@ -12,7 +12,6 @@ ADD_LIBRARY (atomspace
 	FixedIntegerIndex.cc
 	ThreadSafeFixedIntegerIndex.cc
 	ImportanceIndex.cc
-	TLB.cc
 	TypeIndex.cc
 
 	# The below are no longer used, but we will
@@ -52,7 +51,6 @@ INSTALL (FILES
 	ThreadSafeFixedIntegerIndex.h
 	ImportanceIndex.h
 	TypeIndex.h
-	TLB.h
 	version.h
 	DESTINATION "include/opencog/atomspace"
 )

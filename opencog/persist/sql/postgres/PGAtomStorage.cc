@@ -41,12 +41,13 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atomspace/TypeIndex.h>
 #include <opencog/truthvalue/CountTruthValue.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/truthvalue/ProbabilisticTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atomspace/TypeIndex.h>
+#include <opencog/atomspaceutils/TLB.h>
 #include <opencog/persist/sql/postgres/odbcxx.h>
 #include <opencog/persist/sql/postgres/OutgoingHash.h>
 

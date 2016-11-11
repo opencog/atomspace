@@ -17,8 +17,8 @@
 #include <opencog/truthvalue/CountTruthValue.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atomspaceutils/TLB.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 

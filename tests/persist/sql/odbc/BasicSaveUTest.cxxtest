@@ -29,12 +29,12 @@
  */
 
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atoms/base/atom_types.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspaceutils/TLB.h>
 #include <opencog/persist/sql/odbc/ODBCAtomStorage.h>
 
 #include <opencog/util/Logger.h>
