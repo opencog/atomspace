@@ -533,7 +533,7 @@ static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
 
 Handle AtomTable::add(AtomPtr atom, bool async)
 {
-    // Can be null, if its a PseudoAtom
+    // Can be null, if its a ProtoAtom
     if (nullptr == atom) return Handle::UNDEFINED;
 
     // Is the atom already in this table, or one of its environments?
@@ -585,10 +585,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             if (nullptr == h.operator->()) return Handle::UNDEFINED;
             closet.emplace_back(add(h, async));
         }
-        // Preserve the UUID! This is needed for assigning the UUID
-        // correctly when fetching from backing store. But do this
-        // if the atom is actually coming from backing store (i.e.
-        // does not yet belong to any table).
         atom = createLink(atom_type, closet,
                           atom->getTruthValue(),
                           atom->getAttentionValue());
@@ -605,10 +601,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     atom->unsetRemovalFlag();
 
     // Check for bad outgoing set members; fix them up if needed.
-    // "bad" here means outgoing set members that have UUID's but
-    // no pointers to actual atoms.  We want to have the actual atoms,
-    // because later steps need the pointers to do stuff, in particular,
-    // to make sure the child atoms are in an atomtable, too.
     if (atom->isLink()) {
         const HandleSeq& ogs(atom->getOutgoingSet());
         size_t arity = ogs.size();
