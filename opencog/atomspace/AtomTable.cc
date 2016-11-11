@@ -632,15 +632,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             // Build the incoming set of outgoing atom h.
             llc->_outgoing[i]->insert_atom(llc);
         }
-
-        // OK, so if the above fixed up the outgoing set, and
-        // this is an unordered link, then we have to fix it up
-        // and put it back into the default sort order. That's
-        // because the default sort order uses UUID's, which have
-        // now changed.
-        if (classserver().isA(llc->getType(), UNORDERED_LINK)) {
-            llc->resort();
-        }
     }
 
     _size++;
