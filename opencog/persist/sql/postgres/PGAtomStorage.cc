@@ -779,7 +779,7 @@ void PGAtomStorage::store_atomtable_id(const AtomTable& at)
     table_id_cache.insert(tab_id);
 
     // Get the parent table as well.
-    UUID parent_id = 1;
+    UUID parent_id = 0;
     AtomTable *env = at.get_environ();
     if (env)
     {
