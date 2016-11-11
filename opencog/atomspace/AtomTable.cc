@@ -601,17 +601,15 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     atom->unsetRemovalFlag();
 
     // Check for bad outgoing set members; fix them up if needed.
-    if (atom->isLink()) {
+    if (atom->isLink())
+    {
         const HandleSeq& ogs(atom->getOutgoingSet());
         size_t arity = ogs.size();
 
-        // First, make sure that every member of the outgoing set has
-        // a valid atom pointer. We need this, cause we need to call
-        // methods on those atoms.
+        // The outgoing set must consist entirely of atoms that
+        // are either in this atomtable, or its environment.
         bool need_copy = false;
         for (size_t i = 0; i < arity; i++) {
-            // The outgoing set must consist entirely of atoms that
-            // are either in this atomtable, or its environment.
             if (not in_environ(ogs[i])) need_copy = true;
         }
 
