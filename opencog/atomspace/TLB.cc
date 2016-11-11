@@ -25,3 +25,6 @@
 using namespace opencog;
 
 std::atomic<UUID> TLB::_brk_uuid(1);
+
+std::mutex TLB::_mtx;
+std::unordered_map<UUID, Handle> TLB::_uuid_map;

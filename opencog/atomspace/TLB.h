@@ -26,6 +26,8 @@
 #define _OPENCOG_TLB_H
 
 #include <atomic>
+#include <mutex>
+#include <unordered_map>
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
@@ -78,17 +80,24 @@ private:
     // Thread-safe atomic
     static std::atomic<UUID> _brk_uuid;
 
-    /** Adds a new atom to the TLB.
+    static std::mutex _mtx;
+    static std::unordered_map<UUID, Handle> _uuid_map;
+
+public:
+    /**
+     * Adds a new atom to the TLB.
      * If the atom has already be added then an exception is thrown.
      *
      * @param Atom to be added.
-     * @return Handle of the newly added atom.
+     * @return UUID of the newly added atom.
      */
-    static inline void addAtom(AtomPtr atom);
+    static inline UUID addAtom(const AtomPtr&);
+    static inline UUID addAtom(const Handle&);
+    static inline Handle getAtom(UUID);
 
-    static inline bool isInvalidHandle(const Handle& h);
+    static inline bool isInvalidHandle(const Handle&);
 
-    static inline bool isValidHandle(const Handle& h);
+    static inline bool isValidHandle(const Handle&);
 
     static UUID getMaxUUID(void) { return _brk_uuid; }
 
@@ -138,13 +147,34 @@ inline bool TLB::isValidHandle(const Handle& h)
     return not isInvalidHandle(h);
 }
 
-inline void TLB::addAtom(AtomPtr atom)
+inline UUID TLB::addAtom(const AtomPtr& a)
 {
-    if (atom->_uuid != Handle::INVALID_UUID)
+    return addAtom(a->getHandle());
+}
+
+inline UUID TLB::addAtom(const Handle& h)
+{
+    if (h->_uuid != Handle::INVALID_UUID)
         throw InvalidParamException(TRACE_INFO,
                 "Atom is already in the TLB!");
 
-    atom->_uuid = _brk_uuid.fetch_add(1, std::memory_order_relaxed);
+    UUID newid = _brk_uuid.fetch_add(1, std::memory_order_relaxed);
+
+    std::lock_guard<std::mutex> lck(_mtx);
+    _uuid_map.emplace(std::make_pair(newid, h));
+
+    h->_uuid = newid;
+    return newid;
+}
+
+inline Handle TLB::getAtom(UUID uuid)
+{
+    std::lock_guard<std::mutex> lck(_mtx);
+    auto pr = _uuid_map.find(uuid);
+
+    if (_uuid_map.end() == pr) return Handle();
+
+    return pr->second;
 }
 
 } // namespace opencog
