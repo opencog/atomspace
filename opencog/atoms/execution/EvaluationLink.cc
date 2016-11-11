@@ -510,12 +510,6 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const HandleSeq& sna)
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
                                     const Handle& pn, const Handle& cargs)
 {
-	if (LIST_LINK != cargs->getType())
-	{
-		throw RuntimeException(TRACE_INFO,
-			"Expecting arguments to EvaluationLink!");
-	}
-
 	Type pntype = pn->getType();
 	if (DEFINED_PREDICATE_NODE == pntype)
 	{
@@ -531,7 +525,10 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		// Treat it as if it were a PutLink -- perform the
 		// beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
-		Handle reduct = lam->substitute(cargs->getOutgoingSet());
+		Type atype = cargs->getType();
+		Handle reduct = lam->substitute(atype == LIST_LINK ?
+		                                cargs->getOutgoingSet()
+		                                : HandleSeq(1, cargs));
 		return do_evaluate(as, reduct);
 	}
 

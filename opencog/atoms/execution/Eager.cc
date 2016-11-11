@@ -38,7 +38,7 @@ using namespace opencog;
 ///
 /// When executing, if the results are different, add the new
 /// results to the atomspace. We need to do this, because scheme,
-/// and python expects to find thier arguments in the atomspace.
+/// and python expects to find their arguments in the atomspace.
 /// This is arguably broken, as it pollutes the atomspace with
 /// junk that is never cleaned up.  We punt for now, but something
 /// should be done about this. XXX FIXME ... Well ... except that
@@ -48,7 +48,8 @@ using namespace opencog;
 ///
 Handle opencog::eager_execute(AtomSpace* as, const Handle& cargs)
 {
-	Instantiator inst(as);
+	// Recursive case
+
 	Handle args(cargs);
 	if (LIST_LINK == cargs->getType())
 	{
@@ -56,28 +57,29 @@ Handle opencog::eager_execute(AtomSpace* as, const Handle& cargs)
 		bool changed = false;
 		for (const Handle& ho : cargs->getOutgoingSet())
 		{
-			Handle nh(inst.execute(ho));
-			// nh might be NULL if ho was a DeleteLink
-			if (nullptr == nh)
-			{
-				changed = true;
-				continue;
-			}
-
-			// Unwrap the top-most DontExecLink's.  Lower ones are left
-			// untouched.  We do this as a sop for issue opencog/atomspace#704
-			// but maybe we should not?
-			if (DONT_EXEC_LINK == nh->getType())
-			{
-				nh = nh->getOutgoingAtom(0);
-			}
-			new_oset.emplace_back(nh);
-
+			Handle nh = eager_execute(as, ho);
 			if (nh != ho) changed = true;
+			if (nullptr != nh) new_oset.emplace_back(nh);
 		}
 		if (changed)
 			args = as->add_link(LIST_LINK, new_oset);
+		return args;
 	}
 
-	return args;
+	// Base case
+
+	Instantiator inst(as);
+	Handle nh(inst.execute(cargs));
+	// nh might be NULL if ho was a DeleteLink
+	if (nullptr == nh)
+		return nh;
+
+	// Unwrap the top-most DontExecLink's.  Lower ones are left
+	// untouched.  We do this as a sop for issue opencog/atomspace#704
+	// but maybe we should not?
+	if (DONT_EXEC_LINK == nh->getType())
+	{
+		nh = nh->getOutgoingAtom(0);
+	}
+	return nh;
 }
