@@ -49,7 +49,7 @@ public:
 
     void testAdd() {
         NodePtr n(createNode(CONCEPT_NODE, "test"));
-        TLB::addAtom(n);
-        TS_ASSERT_THROWS(TLB::addAtom(n),InvalidParamException);
+        TLB::addAtom(n, Handle::INVALID_UUID);
+        TS_ASSERT_THROWS(TLB::addAtom(n, Handle::INVALID_UUID), InvalidParamException);
     }
 };

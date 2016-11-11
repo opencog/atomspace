@@ -27,7 +27,8 @@
 #include <climits>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atomspace/AtomTable.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atomspace/TLB.h>
 
 namespace opencog {
 
@@ -36,7 +37,7 @@ const AtomPtr Handle::NULL_POINTER;
 
 Handle::Handle(const UUID u)
 {
-	_ptr = do_res(u)._ptr;
+	_ptr = TLB::getAtom(u)._ptr;
 }
 
 UUID Handle::value(void) const
@@ -112,16 +113,9 @@ void Handle::clear_resolver(const AtomTable* tab)
         _resolver.erase(it);
 }
 
-// Search several atomspaces, in order.  First one to come up with
-// the atom wins.  Seems to work, for now.
 inline Handle Handle::do_res(UUID uuid)
 {
-    if (INVALID_UUID == uuid) return Handle();
-    for (const AtomTable* at : _resolver) {
-        Handle h(at->getHandle(uuid));
-        if (NULL != h) return h;
-    }
-    return Handle();
+    return TLB::getAtom(uuid);
 }
 
 std::size_t hash_value(Handle const& h)

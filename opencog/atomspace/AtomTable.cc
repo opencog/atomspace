@@ -181,7 +181,6 @@ void AtomTable::clear_all_atoms()
     // Clear the atom store. This will delete all the atoms since
     // this will be the last shared_ptr referecence, and set the
     // size of the set to 0.
-    _atom_set.clear();
     _atom_store.clear();
 }
 
@@ -360,21 +359,6 @@ Handle AtomTable::getHandle(AtomPtr& a, int quotelevel) const
     else if (a->isLink())
         return getLinkHandle(a, quotelevel);
 
-    return Handle::UNDEFINED;
-}
-
-// If we have a uuid but no atom pointer, find the atom pointer.
-Handle AtomTable::getHandle(UUID uuid) const
-{
-    // Strange, but the find() below can crash, if uuid=-1.
-    if (Handle::INVALID_UUID == uuid) return Handle::UNDEFINED;
-
-    // Read-lock for the _atom_set.
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
-
-    auto hit = _atom_set.find(uuid);
-    if (hit != _atom_set.end())
-        return hit->second;
     return Handle::UNDEFINED;
 }
 
@@ -702,22 +686,12 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         }
     }
 
-    // Its possible that the atom already has a UUID assigned,
-    // e.g. if it was fetched from persistent storage; this
-    // was done to preserve handle consistency.
-    if (atom->_uuid == Handle::INVALID_UUID) {
-       // Atom doesn't yet have a valid uuid assigned to it. Ask the TLB
-       // to issue a valid uuid.  And then memorize it.
-       TLB::addAtom(atom);
-    } else {
-       TLB::reserve_upto(atom->_uuid);
-    }
-    Handle h(atom->getHandle());
     _size++;
     if (atom->isNode()) _num_nodes++;
     if (atom->isLink()) _num_links++;
     _size_by_type[atom->_type] ++;
-    _atom_set.insert({atom->_uuid, h});
+
+    Handle h(atom->getHandle());
     _atom_store.insert({atom->get_hash(), h});
 
     atom->keep_incoming_set();
@@ -964,7 +938,6 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     if (atom->isNode()) _num_nodes--;
     if (atom->isLink()) _num_links--;
     _size_by_type[atom->_type] --;
-    _atom_set.erase(atom->_uuid);
 
     auto range = _atom_store.equal_range(atom->get_hash());
     auto bkt = range.first;

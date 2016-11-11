@@ -87,21 +87,6 @@ private:
     // Cached count of the number of atoms of each type.
     std::vector<size_t> _size_by_type;
 
-    // Holds all atoms in the table.  Provides lookup between numeric
-    // handle uuid and the actual atom pointer. To some degree, this info
-    // is duplicated in the Node and LinkIndex below; we have this here
-    // for convenience.
-    //
-    // This also plays a critical role for memory management: this is
-    // the only index that actually holds the atom shared_ptr, and thus
-    // increments the atom use count in a guaranteed fashion.  This is
-    // the one true guaranteee that the atom will not be deleted while
-    // it is in the atom table.
-    //
-    // XXX This map will be going away "real soon now", and is deprecated for
-    // new development.  Use the hash map below.
-    std::unordered_map<UUID, Handle> _atom_set;
-
     // Eventual replacement for _atom_set above.
     std::unordered_multimap<ContentHash, Handle> _atom_store;
 
@@ -209,7 +194,6 @@ public:
     Handle getHandle(const Handle& h, int quotelevel=0) const {
         AtomPtr a(h); return getHandle(a, quotelevel);
     }
-    Handle getHandle(UUID) const;
 
     /**
      * Returns the set of atoms of a given type (subclasses optionally).

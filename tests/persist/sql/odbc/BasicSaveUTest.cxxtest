@@ -225,8 +225,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     AtomPtr a(createNode(SCHEMA_NODE, id + "someNode"));
     TruthValuePtr stv(SimpleTruthValue::createTV(0.55, 0.6));
     a->setTruthValue(stv);
-    TLB::addAtom(a);
-    UUID uuid = a->getUUID();
+    UUID uuid = TLB::addAtom(a, Handle::INVALID_UUID);
 
     Handle h = a->getHandle();
 
@@ -244,7 +243,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     // Create a second atom, connect it to the first
     // with a link. Save it, fetch it ... are they equal?
     AtomPtr a2(createNode(SCHEMA_NODE, id + "otherNode"));
-    TLB::addAtom(a2);
+    TLB::addAtom(a2, Handle::INVALID_UUID);
     store->storeAtom(a2, true);
 
     HandleSeq hvec;
@@ -252,10 +251,9 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     hvec.push_back(a2->getHandle());
 
     LinkPtr l(createLink(SET_LINK, hvec));
-    TLB::addAtom(l);
+    UUID ul = TLB::addAtom(l, Handle::INVALID_UUID);
     store->storeAtom(l, true);
 
-    UUID ul = l->getUUID();
     AtomPtr lb = store->getAtom(ul);
     atomCompare(l, lb, "Single link save-restore");
 
