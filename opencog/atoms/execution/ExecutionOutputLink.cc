@@ -61,11 +61,6 @@ ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset,
 			"ExecutionOutputLink must have schema! Got %s",
 			oset[0]->toString().c_str());
 	}
-
-	if (LIST_LINK != oset[1]->getType())
-		throw SyntaxException(TRACE_INFO,
-			"ExecutionOutputLink must have args! Got %s",
-			oset[1]->toString().c_str());
 }
 
 ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
@@ -83,11 +78,6 @@ ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
 			"ExecutionOutputLink expecting schema, got %s",
 			schema->toString().c_str());
 	}
-
-	if (LIST_LINK != args->getType())
-		throw SyntaxException(TRACE_INFO,
-			"ExecutionOutputLink expecting args, got %s",
-			args->toString().c_str());
 }
 
 ExecutionOutputLink::ExecutionOutputLink(Link& l)
