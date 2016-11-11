@@ -1264,34 +1264,6 @@ ODBCAtomStorage::PseudoPtr ODBCAtomStorage::petAtom(UUID uuid)
     return getAtom(buff, -1);
 }
 
-/**
- * Create a new atom, retrieved from storage. This is a recursive-get;
- * if the atom is a link, then the outgoing set will be fetched too.
- * This may not be efficient, if you only wanted to get the latest TV
- * for an existing atom!
- *
- * This method does *not* register the atom with any atomtable.
- */
-AtomPtr ODBCAtomStorage::getAtom(UUID uuid)
-{
-    PseudoPtr p(petAtom(uuid));
-    if (NULL == p) return NULL;
-
-    if (classserver().isA(p->type, NODE))
-    {
-        NodePtr node(createNode(p->type, p->name, p->tv));
-        TLB::addAtom( node, p->uuid );
-        return node;
-    }
-
-    HandleSeq oset;
-    for (UUID idu : p->oset)
-        oset.emplace_back(getAtom(idu)->getHandle());
-
-    LinkPtr link(createLink(p->type, oset, p->tv));
-    TLB::addAtom( link, p->uuid );
-    return link;
-}
 
 /**
  * Retreive the entire incoming set of the indicated atom.

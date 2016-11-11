@@ -49,11 +49,6 @@ Handle SQLBackingStore::getLink(Handle& h) const
 	return _store->getLink(h);
 }
 
-AtomPtr SQLBackingStore::getAtom(UUID uuid) const
-{
-	return _store->getAtom(uuid);
-}
-
 HandleSeq SQLBackingStore::getIncomingSet(const Handle& h) const
 {
 	return _store->getIncomingSet(h);

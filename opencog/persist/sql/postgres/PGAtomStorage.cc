@@ -1571,66 +1571,6 @@ AtomPtr PGAtomStorage::get_cached_atom(UUID uuid)
     return NULL;
 }
 
-/**
- * Create a new atom, retrieved from storage. This is a recursive-get;
- * if the atom is a link, then the outgoing set will be fetched too.
- * This may not be efficient, if you only wanted to get the latest TV
- * for an existing atom!
- *
- * This method does *not* register the atom with any atomtable.
- */
-std::string s_indent("");
-AtomPtr PGAtomStorage::getAtom(UUID uuid)
-{
-    if (_verbose)
-        fprintf(stdout, "%sgetAtom(%lu)\n", s_indent.c_str(), uuid);
-
-    // First check the recent Atom cache.
-    AtomPtr atom = get_cached_atom(uuid);
-    if (atom)
-    {
-        if (_verbose)
-            fprintf(stdout, "%s - cached(%lu)\n", s_indent.c_str(), uuid);
-        return atom;
-    }
-
-    // If not found then load the pseudo-atom SQL.
-    if (_verbose)
-        fprintf(stdout, "%s - NOT cached, loading(%lu)\n", s_indent.c_str(), uuid);
-    PseudoPtr p(load_pseudo_atom_with_uuid(uuid));
-    if (NULL == p) return NULL;
-
-    // If the Atom retrieved is a NODE.
-    if (classserver().isA(p->type, NODE))
-    {
-        // Create the Node...
-        NodePtr node(createNode(p->type, p->name, p->tv));
-        TLB::addAtom(node, uuid);
-
-        // Cache and return it.
-        cache_atom(uuid, node);
-        return node;
-    }
-
-    // Must be a LINK... so build the Link's outgoing set by getting
-    // each of the Atoms using the UUID and putting them into the
-    // outgoing HandleSeq set after retrieving the Handles from the Atoms.
-    if (_verbose)
-        s_indent += "  ";
-    HandleSeq outgoing_set;
-    for (UUID atom_uuid : p->oset)
-        outgoing_set.emplace_back(getAtom(atom_uuid)->getHandle());
-    if (_verbose)
-        s_indent.resize(s_indent.size() - 2);
-
-    // Now create the Link with the outgoing set.
-    LinkPtr link(createLink(p->type, outgoing_set, p->tv));
-    TLB::addAtom( link, uuid );
-
-    // Cache and return it.
-    cache_atom(uuid, link);
-    return link;
-}
 
 /**
  * Retreive the entire incoming set of the indicated atom.
