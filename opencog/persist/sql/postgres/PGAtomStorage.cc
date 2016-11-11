@@ -500,7 +500,7 @@ public:
         if (classserver().isA(p->type, NODE))
         {
             NodePtr node(createNode(p->type, p->name, p->tv));
-            setAtomUUID(node, p->uuid);
+            TLB::addAtom(node, p->uuid);
             return node;
         }
         HandleSeq resolved_oset;
@@ -518,7 +518,7 @@ public:
             resolved_oset.emplace_back(ra->getHandle());
         }
         LinkPtr link(createLink(p->type, resolved_oset, p->tv));
-        setAtomUUID(link, p->uuid);
+        TLB::addAtom(link, p->uuid);
         return link;
     }
 
@@ -1605,7 +1605,7 @@ AtomPtr PGAtomStorage::getAtom(UUID uuid)
     {
         // Create the Node...
         NodePtr node(createNode(p->type, p->name, p->tv));
-        setAtomUUID(node, uuid);
+        TLB::addAtom(node, uuid);
 
         // Cache and return it.
         cache_atom(uuid, node);
@@ -1625,7 +1625,7 @@ AtomPtr PGAtomStorage::getAtom(UUID uuid)
 
     // Now create the Link with the outgoing set.
     LinkPtr link(createLink(p->type, outgoing_set, p->tv));
-    setAtomUUID( link, uuid );
+    TLB::addAtom( link, uuid );
 
     // Cache and return it.
     cache_atom(uuid, link);
@@ -1700,7 +1700,7 @@ Handle PGAtomStorage::getNode(Type t, const char * str)
     if (nullptr == p) return Handle();
 
     NodePtr node = createNode(t, str, p->tv);
-    setAtomUUID(node, p->uuid);
+    TLB::addAtom(node, p->uuid);
     return Handle(node);
 }
 
@@ -1809,7 +1809,7 @@ Handle PGAtomStorage::getLink(Handle& h)
 
     // Create the actual link.
     LinkPtr link = createLink(type, outgoing, pseudo_atom->tv);
-    setAtomUUID(link, pseudo_atom->uuid);
+    TLB::addAtom(link, pseudo_atom->uuid);
     return Handle(link);
 }
 

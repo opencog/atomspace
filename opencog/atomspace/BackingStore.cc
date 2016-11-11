@@ -38,7 +38,7 @@ int s_ignore_count = 0;
 bool BackingStore::ignoreAtom(const Handle& h) const
 {
 #if DEBUG_IGNORE
-	fprintf(stderr, "%signoreAtom(%lu) %d\n", s_indent.c_str(), h->getUUID(),
+	fprintf(stderr, "%signoreAtom(%lu)\n", s_indent.c_str(),
 	        s_ignore_count++);
 #endif
 

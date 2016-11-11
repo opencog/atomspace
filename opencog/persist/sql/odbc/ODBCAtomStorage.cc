@@ -198,7 +198,7 @@ class ODBCAtomStorage::Response
             if (classserver().isA(p->type, NODE))
             {
                 NodePtr node(createNode(p->type, p->name, p->tv));
-                setAtomUUID(node, p->uuid);
+                TLB::addAtom(node, p->uuid);
                 return node;
             }
             HandleSeq resolved_oset;
@@ -215,7 +215,7 @@ class ODBCAtomStorage::Response
                 resolved_oset.emplace_back(ra->getHandle());
             }
             LinkPtr link(createLink(p->type, resolved_oset, p->tv));
-            setAtomUUID(link, p->uuid);
+            TLB::addAtom(link, p->uuid);
             return link;
         }
 
@@ -1280,7 +1280,7 @@ AtomPtr ODBCAtomStorage::getAtom(UUID uuid)
     if (classserver().isA(p->type, NODE))
     {
         NodePtr node(createNode(p->type, p->name, p->tv));
-        setAtomUUID( node, p->uuid );
+        TLB::addAtom( node, p->uuid );
         return node;
     }
 
@@ -1289,7 +1289,7 @@ AtomPtr ODBCAtomStorage::getAtom(UUID uuid)
         oset.emplace_back(getAtom(idu)->getHandle());
 
     LinkPtr link(createLink(p->type, oset, p->tv));
-    setAtomUUID( link, p->uuid );
+    TLB::addAtom( link, p->uuid );
     return link;
 }
 
@@ -1356,7 +1356,7 @@ Handle ODBCAtomStorage::getNode(Type t, const char * str)
     if (NULL == p) return Handle();
 
     NodePtr node = createNode(t, str, p->tv);
-    setAtomUUID(node, p->uuid);
+    TLB::addAtom(node, p->uuid);
     return node->getHandle();
 }
 
@@ -1387,7 +1387,7 @@ Handle ODBCAtomStorage::getLink(Handle& h)
     if (NULL == p) return Handle();
 
     h->setTruthValue(p->tv);
-    setAtomUUID(h, p->uuid);
+    TLB::addAtom(h, p->uuid);
     return h;
 }
 
