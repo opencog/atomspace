@@ -92,9 +92,9 @@ public:
      * @param Atom to be added.
      * @return UUID of the newly added atom.
      */
-    static inline UUID addAtom(const AtomPtr&, UUID);
-    static inline UUID addAtom(const Handle&, UUID);
-    static inline Handle getAtom(UUID);
+    static UUID addAtom(const AtomPtr&, UUID);
+    static UUID addAtom(const Handle&, UUID);
+    static Handle getAtom(UUID);
 
     static inline bool isInvalidHandle(const Handle&);
 
@@ -151,51 +151,6 @@ inline bool TLB::isValidHandle(const Handle& h)
 inline UUID TLB::addAtom(const AtomPtr& a, UUID uuid)
 {
     return addAtom(a->getHandle(), uuid);
-}
-
-inline UUID TLB::addAtom(const Handle& h, UUID uuid)
-{
-    if (uuid == Handle::INVALID_UUID)
-    {
-        std::lock_guard<std::mutex> lck(_mtx);
-        auto pr = _handle_map.find(h);
-        if (_handle_map.end() != pr)
-            return pr->second;
-
-        uuid = _brk_uuid.fetch_add(1, std::memory_order_relaxed);
-    }
-    else
-    {
-        std::lock_guard<std::mutex> lck(_mtx);
-        auto pr = _handle_map.find(h);
-        if (_handle_map.end() != pr)
-        {
-            if (uuid != pr->second)
-                throw InvalidParamException(TRACE_INFO,
-                     "Atom is already in the TLB, and UUID's don't match!");
-            return uuid;
-        }
-
-        reserve_upto(uuid);
-    }
-
-    std::lock_guard<std::mutex> lck(_mtx);
-    _uuid_map.emplace(std::make_pair(uuid, h));
-    _handle_map.emplace(std::make_pair(h, uuid));
-
-    h->_uuid = uuid;
-    return uuid;
-}
-
-inline Handle TLB::getAtom(UUID uuid)
-{
-    if (Handle::INVALID_UUID == uuid) return Handle::UNDEFINED;
-    std::lock_guard<std::mutex> lck(_mtx);
-    auto pr = _uuid_map.find(uuid);
-
-    if (_uuid_map.end() == pr) return Handle::UNDEFINED;
-
-    return pr->second;
 }
 
 } // namespace opencog
