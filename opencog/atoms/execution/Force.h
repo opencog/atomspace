@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/execution/Eager.h
+ * opencog/atoms/execution/Force.h
  *
  * Copyright (C) 2013,2015,2016 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_EXECUTION_EAGER_H
-#define _OPENCOG_EXECUTION_EAGER_H
+#ifndef _OPENCOG_EXECUTION_FORCE_H
+#define _OPENCOG_EXECUTION_FORCE_H
 
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -32,9 +32,9 @@ namespace opencog
  */
 
 // Handy-dandy utility function
-Handle eager_execute(AtomSpace*, const Handle&);
+Handle force_execute(AtomSpace*, const Handle&);
 
 /** @}*/
 }
 
-#endif // _OPENCOG_EXECUTION_EAGER_H
+#endif // _OPENCOG_EXECUTION_FORCE_H

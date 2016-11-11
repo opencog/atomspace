@@ -30,7 +30,7 @@
 #include <opencog/guile/SchemeEval.h>
 
 #include "ExecutionOutputLink.h"
-#include "Eager.h"
+#include "Force.h"
 
 using namespace opencog;
 
@@ -120,12 +120,12 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	LAZY_LOG_FINE << "Execute gsn: " << gsn->toShortString()
 	              << "with arguments: " << cargs->toShortString();
 
-	// Perform eager execution of the arguments. We have to do this,
-	// because the user-defined functions are black-boxes, and cannot
-	// be trusted to do lazy execution correctly. Right now, this is
-	// the policy. I guess we could add "scm-lazy:" and "py-lazy:" URI's
-	// for user-defined functions smart enough to do lazy evaluation.
-	Handle args = eager_execute(as, cargs);
+	// Force execution of the arguments. We have to do this, because
+	// the user-defined functions are black-boxes, and cannot be trusted
+	// to do lazy execution correctly. Right now, forcing is the policy.
+	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
+	// functions smart enough to do lazy evaluation.
+	Handle args = force_execute(as, cargs);
 
 	// Get the schema name.
 	const std::string& schema = gsn->getName();
