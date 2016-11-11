@@ -48,6 +48,7 @@ namespace opencog
  *  @{
  */
 
+class AtomTable;
 class AtomSpace;
 
 //! arity of Links, represented as short integer (16 bits)

@@ -56,19 +56,13 @@ typedef unsigned long UUID;
 typedef size_t ContentHash;
 
 class Atom;
-class Handle;
 typedef std::shared_ptr<Atom> AtomPtr;
-class AtomTable;
-class Link;
-typedef std::shared_ptr<Link> LinkPtr;
 
 //! contains an unique identificator
 class Handle
 {
 
 friend class Atom;
-friend class AtomTable;
-friend class AtomStorage;         // persistance
 friend class content_based_atom_ptr_less;
 friend class content_based_handle_less;
 
@@ -77,11 +71,6 @@ private:
 
     static bool atoms_less(const Atom*, const Atom*);
     static bool content_based_atoms_less(const Atom*, const Atom*);
-    static Handle do_res(UUID);
-    static std::vector<const AtomTable*> _resolver;
-
-    static void set_resolver(const AtomTable*);
-    static void clear_resolver(const AtomTable*);
 
     static const AtomPtr NULL_POINTER;
 
@@ -335,6 +324,8 @@ std::string hmapset_to_string(const HandleMapSet& hms);
 std::string hps_to_string(const HandlePairSeq& hps);
 std::string atomtype_to_string(Type type);
 std::string aptr_to_string(const AtomPtr& aptr);
+class Link;
+typedef std::shared_ptr<Link> LinkPtr;
 std::string lptr_to_string(const LinkPtr& lptr);
 
 // In case your gdb supports overloading, see

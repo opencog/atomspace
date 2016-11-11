@@ -30,6 +30,29 @@ std::mutex TLB::_mtx;
 std::unordered_map<UUID, Handle> TLB::_uuid_map;
 std::unordered_map<Handle, UUID> TLB::_handle_map;
 
+// ===================================================
+// Handle resolution stuff.
+
+// Its a vector, not a set, because its priority ranked.
+std::vector<const AtomTable*> TLB::_resolver;
+
+void TLB::set_resolver(const AtomTable* tab)
+{
+    _resolver.push_back(tab);
+}
+
+void TLB::clear_resolver(const AtomTable* tab)
+{
+    auto it = std::find(_resolver.begin(), _resolver.end(), tab);
+    if (it != _resolver.end())
+        _resolver.erase(it);
+}
+
+inline Handle TLB::do_res(UUID uuid)
+{
+    return TLB::getAtom(uuid);
+}
+
 UUID TLB::addAtom(const Handle& h, UUID uuid)
 {
     if (uuid == INVALID_UUID)

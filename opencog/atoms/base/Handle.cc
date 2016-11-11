@@ -28,7 +28,6 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atomspace/TLB.h>
 
 namespace opencog {
 
@@ -76,26 +75,6 @@ bool Handle::content_based_atoms_less(const Atom* a, const Atom* b)
 
 // ===================================================
 // Handle resolution stuff.
-
-// Its a vector, not a set, because its priority ranked.
-std::vector<const AtomTable*> Handle::_resolver;
-
-void Handle::set_resolver(const AtomTable* tab)
-{
-    _resolver.push_back(tab);
-}
-
-void Handle::clear_resolver(const AtomTable* tab)
-{
-    auto it = std::find(_resolver.begin(), _resolver.end(), tab);
-    if (it != _resolver.end())
-        _resolver.erase(it);
-}
-
-inline Handle Handle::do_res(UUID uuid)
-{
-    return TLB::getAtom(uuid);
-}
 
 std::size_t hash_value(Handle const& h)
 {

@@ -471,7 +471,7 @@ Handle AtomSpace::fetch_atom(Handle h)
             ba = _backing_store->getLink(h);
         }
 
-        // If we still don't have an atom, then the requested UUID
+        // If we still don't have an atom, then the requested atom
         // was "insane", that is, unknown by either the atom table
         // (case 1) or the backend.
         if (NULL == ba)

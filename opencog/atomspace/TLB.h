@@ -86,6 +86,11 @@ private:
                       std::hash<opencog::Handle>,
                       std::equal_to<opencog::Handle> > _handle_map;
 
+    static void set_resolver(const AtomTable*);
+    static void clear_resolver(const AtomTable*);
+    static std::vector<const AtomTable*> _resolver;
+    static Handle do_res(UUID);
+
 public:
 
     static const UUID INVALID_UUID = ULONG_MAX;
