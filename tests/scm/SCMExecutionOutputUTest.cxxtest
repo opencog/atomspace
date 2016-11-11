@@ -74,7 +74,8 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 
 	void test_dsn(void);
 
-	void test_single_arg(void);
+	void test_execute_single_arg(void);
+	void test_evaluate_single_arg(void);
 };
 
 void SCMExecutionOutputUTest::setUp(void)
@@ -563,7 +564,7 @@ void SCMExecutionOutputUTest::test_dsn(void)
 
 // Execute a call with a single argument, by-passing the need for
 // wrapping the arguments in a ListLink.
-void SCMExecutionOutputUTest::test_single_arg(void)
+void SCMExecutionOutputUTest::test_execute_single_arg(void)
 {
 	// Test scheme execution function taking a single argument
 
@@ -606,4 +607,35 @@ void SCMExecutionOutputUTest::test_single_arg(void)
 	std::cout << "Expression is " << result->toString() << std::endl;
 	std::cout << "Expected " << expect->toString() << std::endl;
 	TS_ASSERT_EQUALS(result, expect);
+}
+
+void SCMExecutionOutputUTest::test_evaluate_single_arg(void)
+{
+	// Define a Scheme procedure that return a TV
+	eval->eval("(define (grab-tv x) (cog-tv x))");
+	CHKEV(eval);
+
+	// Wrap the proceedure, returning a TV
+	eval->eval(
+		"(define (single-arg-evl-tv x) "
+		"   (cog-evaluate! "
+		"      (EvaluationLink "
+		"          (GroundedPredicateNode \"scm: grab-tv\") "
+		"          x)))"
+	);
+	CHKEV(eval);
+
+	// Compare the TV's that were obtained in two different ways.
+	eval->eval(
+		"(define (chk-tv x) "
+		"  (if (not (equal? (cog-tv x) (single-arg-evl-tv x))) "
+		"     (throw 'bad-tv-compate \"chk-tv\" \"test case failed\")))"
+	);
+	CHKEV(eval);
+
+	// Perform the actual checks
+	eval->eval("(chk-tv (ConceptNode \"bogus\" (cog-new-stv 0.3 0.42)))");
+	CHKEV(eval);
+	eval->eval("(chk-tv (ConceptNode \"glurg\" (cog-new-ctv 0.123 0.456 789)))");
+	CHKEV(eval);
 }
