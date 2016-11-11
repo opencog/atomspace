@@ -700,7 +700,7 @@ void PGAtomStorage::store_outgoing_edges(AtomPtr atom)
     const char* separator = "";
 
     // Get the UUID for the atom.
-    UUID source_uuid = atom->getUUID();
+    UUID source_uuid = TLB::addAtom(atom, Handle::INVALID_UUID);
 
     // Write the constant insert preamble which we'll append to
     // in the loop below.
@@ -715,7 +715,7 @@ void PGAtomStorage::store_outgoing_edges(AtomPtr atom)
     for (auto h : atom->getOutgoingSet())
     {
         // Write a single atom's Edges VALUES clause.
-        UUID destination_uuid = h->getUUID();
+        UUID destination_uuid = TLB::addAtom(h, Handle::INVALID_UUID);
         snprintf(insert + insert_length, BUFFER_SIZE, 
                  "%s (%lu, %lu, %u)",
                 separator, source_uuid, destination_uuid, position);
@@ -845,7 +845,7 @@ std::string PGAtomStorage::outgoing_set_to_string(const HandleSeq& outgoing)
         }
         
         // Add this atom's UUID.
-        str += std::to_string(atom->getUUID());
+        str += std::to_string(TLB::addAtom(atom, Handle::INVALID_UUID));
 
         // Not the first atom, so next time we'll add a comma.
         first_atom = false;
@@ -1020,7 +1020,7 @@ std::string PGAtomStorage::build_atom_insert(Database& database,
     database.start_insert("Atoms");
 
     // Store the atom's UUID.
-    UUID uuid = atom->getUUID();
+    UUID uuid = TLB::addAtom(atom, Handle::INVALID_UUID);
     database.add_column_bigint("uuid", uuid);
 
     // Store the atomspace UUID. Since we allow storage of atoms that
@@ -1128,7 +1128,7 @@ std::string PGAtomStorage::build_atom_update(Database& database,
     add_truth_value_columns(database, atom);
 
     // Build the statement and return it.
-    UUID uuid = atom->getUUID();
+    UUID uuid = TLB::addAtom(atom, Handle::INVALID_UUID);
     std::string statement = database.build_update_where("uuid", uuid);
     return statement;
 }
@@ -1147,7 +1147,7 @@ void PGAtomStorage::do_store_atom_single(Database& database,
     }
 
     // Check the lock to see if this atom has been inserted or not.
-    UUID uuid = h->getUUID();
+    UUID uuid = TLB::addAtom(h, Handle::INVALID_UUID);
     std::unique_lock<std::mutex> lck = maybe_create_id(uuid);
     bool atom_needs_insert = lck.owns_lock();
 
@@ -1334,7 +1334,7 @@ void PGAtomStorage::map_database_type(int dbval, const char * type_name)
  */
 bool PGAtomStorage::atomExists(Handle h)
 {
-    UUID uuid = h->getUUID();
+    UUID uuid = TLB::addAtom(h, Handle::INVALID_UUID);
 #ifdef ASK_SQL_SERVER
     return query_uuid_exists(uuid);
 #else
@@ -1641,18 +1641,19 @@ HandleSeq PGAtomStorage::getIncomingSet(const Handle& h)
     char statement[BUFFER_SIZE];
     HandleSeq incoming_set;
 
+    UUID uuid = TLB::addAtom(h, Handle::INVALID_UUID);
     if (_store_edges)
     {
         snprintf(statement, BUFFER_SIZE,
                 "SELECT * FROM Atoms WHERE uuid IN"
                 "(SELECT src_uuid FROM Edges WHERE dst_uuid = %lu);",
-                h->getUUID());
+                uuid);
     }
     else
     {
         snprintf(statement, BUFFER_SIZE,
             "SELECT * FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
-            h->getUUID());
+            uuid);
 
         // Note: "select * from atoms where outgoing@>array[556];" will return
         // all links with atom 556 in the outgoing set -- i.e. the incoming set
@@ -1717,7 +1718,8 @@ bool PGAtomStorage::outgoing_matches_uuids(const HandleSeq& outgoing,
         // If the atom's UUID doesn't match the outgoing UUID at
         // the index they are not the same since order matters for
         // the outgoing sets.
-        if (atom->getUUID() != uuids[atom_index])
+        UUID uuid = TLB::addAtom(atom, Handle::INVALID_UUID);
+        if (uuid != uuids[atom_index])
             return false;
 
         // Increment the index.
