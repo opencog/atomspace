@@ -34,10 +34,10 @@ namespace opencog {
 const Handle Handle::UNDEFINED;
 const AtomPtr Handle::NULL_POINTER;
 
-UUID Handle::value(void) const
+ContentHash Handle::value(void) const
 {
     if (_ptr) return _ptr->get_hash();
-    return ULONG_MAX;
+    return INVALID_HASH;
 }
 
 // ===================================================

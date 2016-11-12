@@ -601,17 +601,15 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     atom->unsetRemovalFlag();
 
     // Check for bad outgoing set members; fix them up if needed.
-    if (atom->isLink()) {
+    if (atom->isLink())
+    {
         const HandleSeq& ogs(atom->getOutgoingSet());
         size_t arity = ogs.size();
 
-        // First, make sure that every member of the outgoing set has
-        // a valid atom pointer. We need this, cause we need to call
-        // methods on those atoms.
+        // The outgoing set must consist entirely of atoms that
+        // are either in this atomtable, or its environment.
         bool need_copy = false;
         for (size_t i = 0; i < arity; i++) {
-            // The outgoing set must consist entirely of atoms that
-            // are either in this atomtable, or its environment.
             if (not in_environ(ogs[i])) need_copy = true;
         }
 
@@ -631,15 +629,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             }
             // Build the incoming set of outgoing atom h.
             llc->_outgoing[i]->insert_atom(llc);
-        }
-
-        // OK, so if the above fixed up the outgoing set, and
-        // this is an unordered link, then we have to fix it up
-        // and put it back into the default sort order. That's
-        // because the default sort order uses UUID's, which have
-        // now changed.
-        if (classserver().isA(llc->getType(), UNORDERED_LINK)) {
-            llc->resort();
         }
     }
 
