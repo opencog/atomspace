@@ -1366,3 +1366,37 @@ Now remove all the pattern matcher print statements...
 0m3.479s
 
 Less of a hit, but still significant.
+
+======================================================================
+
+11 Nov 2016
+------------
+New core baseline. Fanny.  This baseline measures perf after removing
+UUID's from the atoms (and thus, removing the UUID index from the
+atomtable.) This should make atom insertion and deletion faster.
+
+compiler: gcc version 6.2.0
+
+                     -A          -A            -A
+   test              today     last week       Feb
+   name            K-ops/sec   K-ops/sec      2016         Comments
+   ----            ---------   ---------      ----      -----------------
+  noop              1.76e6      2.11e6       1.5e6      cache effects
+  getType          79.1K       96.6K        78.0K       back to before
+  getTV             4099        4205         4261
+  setTV             1217        1182         1129
+  pointerCast       7561        7279
+  getIncomingSet    2272        2192         2250       back to before
+  getOutgoingSet   43.6K       36.2K        38.6K       wow. 20% faster.
+  addNode            231         201          145       15% faster
+  addLink             88.3        81.9         67.5      8% faster
+  removeAtom         431         279          186       54% faster !!
+
+Remarks:
+* Removal of the UUID make the atoms slightly smaller - about 5% or 10%
+  depending on the atom.  So cache line alignments will be different.
+* Variation of getType performance indicatie of the caching effect.
+* Variation of getOutgoingSet unexpected: caching effect?
+* Improvement of addNode, addLink and removeAtom probably explainable
+  by the removal of the atom-UUID index.
+* addLink is still slow, due to all the stupid cloning & etc.

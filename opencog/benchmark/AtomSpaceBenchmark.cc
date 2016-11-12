@@ -837,6 +837,14 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize,
         makeRandomNodes("");
         if (display && i % diff == 0) cerr << "." << flush;
     }
+
+    /* Place all the atoms in the TLB too, so that we can later
+     * pick some, randomly, just by picking a random int. */
+    HandleSeq alln;
+    asp->get_all_nodes(alln);
+    for (const Handle& h : alln)
+        tlbuf.addAtom(h, TLB::INVALID_UUID);
+
     UUID_end = tlbuf.getMaxUUID();
 
     // Add links
@@ -854,6 +862,12 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize,
              (double)(clock() - tStart)/CLOCKS_PER_SEC);
         cout << DIVIDER_LINE << endl;
     }
+
+    /* Place all the links into the TLB */
+    HandleSeq alli;
+    asp->get_all_links(alli);
+    for (const Handle& h : alli)
+        tlbuf.addAtom(h, TLB::INVALID_UUID);
 
     UUID_end = tlbuf.getMaxUUID();
     testKind = saveKind;
