@@ -26,6 +26,7 @@
 #define _OPENCOG_INITIATE_SEARCH_H
 
 #include <opencog/atoms/base/types.h>
+#include <opencog/atoms/base/Quotation.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/PatternMatchEngine.h>
@@ -84,7 +85,7 @@ protected:
 	                             const OrderedHandleSet&,
 	                             Handle&, size_t&);
 	virtual void find_rarest(const Handle&, Handle&, size_t&,
-	                         int quotation_level = 0);
+	                         Quotation quotation=Quotation());
 
 	bool _search_fail;
 	virtual bool neighbor_search(PatternMatchEngine *);

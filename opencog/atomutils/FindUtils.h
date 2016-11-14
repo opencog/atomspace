@@ -81,9 +81,10 @@ namespace opencog {
 /// the intersection between the set of given atoms, and the set of all
 /// atoms that occur in the clauses.
 ///
-/// Note that anything occuring below a QUOTE_LINK is not explored.
-/// Thus, a quote acts like a cut, halting recursion until it gets
-/// unquoted later on with an UNQUOTE_LINK.
+/// Note that anything quoted (by the use of
+/// QUOTE_LINK/LOCAL_QUOTE_LINK/UNQUOTE_LINK) is not explored.  Thus,
+/// a quote acts like a cut, halting recursion until it gets unquoted
+/// later on with an UNQUOTE_LINK.
 ///
 class FindAtoms
 {
@@ -277,7 +278,8 @@ bool is_unquoted_in_any_tree(const HandleSeq& trees,
  * Returns true if the clause contains an atom of type atom_type.
  * ... but only if it is not quoted.  Quoted terms are constants (literals).
  */
-bool contains_atomtype(const Handle& clause, Type atom_type);
+bool contains_atomtype(const Handle& clause, Type atom_type,
+                       Quotation quotation=Quotation());
 
 /**
  * Returns true if any of the clauses contain an atom of type atom_type.

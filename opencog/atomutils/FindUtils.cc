@@ -269,18 +269,19 @@ bool is_unquoted_in_any_tree(const HandleSeq& trees,
 	return false;
 }
 
-bool contains_atomtype(const Handle& clause, Type atom_type)
+bool contains_atomtype(const Handle& clause, Type atom_type, Quotation quotation)
 {
 	Type clause_type = clause->getType();
-	if (classserver().isA(clause_type, atom_type)) return true;
-	if (QUOTE_LINK == clause_type) return false;
-	// if (classserver().isA(clause_type, SCOPE_LINK)) return false;
+	if (quotation.is_unquoted() and classserver().isA(clause_type, atom_type))
+		return true;
+
+	quotation.update(clause_type);
 
 	if (not clause->isLink()) return false;
 
 	for (const Handle& subclause: clause->getOutgoingSet())
 	{
-		if (contains_atomtype(subclause, atom_type)) return true;
+		if (contains_atomtype(subclause, atom_type, quotation)) return true;
 	}
 	return false;
 }
