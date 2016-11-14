@@ -26,6 +26,7 @@
 #define _OPENCOG_QUOTATION_H
 
 #include <opencog/atoms/base/atom_types.h>
+#include <string>
 
 namespace opencog
 {
@@ -45,9 +46,10 @@ class Quotation
 public:
 	Quotation(int ql=0, bool lq=false);
 
-	int quotation_level() const;
+	int level() const;
 	bool is_locally_quoted() const;
 	bool is_quoted() const;
+	bool is_unquoted() const;
 
 	/**
 	 * Increment, decrement or change local quote given the type of
@@ -67,10 +69,22 @@ public:
 	 *
 	 * 3. An unquoted LocalQuoteLink would be consumed, passing
 	 * temporarily the quotation state from unquoted to quoted.
-	*/
-	bool consumable_quotation(Type t);
+	 *
+	 * Remark: you must call this function before calling update,
+	 * otherwise the result will not be correct.
+	 *
+	 * TODO: perhaps set _local_quote to false
+	 * TODO: perhaps merge update and consume into a single function
+	 */
+	bool consume(Type t);
+
+	std::string to_string() const;
 };
 
+// For gdb, see
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
+std::string oc_to_string();
+	
 /** @}*/
 } // namespace opencog
 

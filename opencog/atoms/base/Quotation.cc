@@ -23,13 +23,14 @@
  */
 
 #include "Quotation.h"
+#include <sstream>
 
-using namespace opencog;
+namespace opencog {
 
 Quotation::Quotation(int ql, bool lq)
 	: _quotation_level(ql), _local_quote(lq) {}
 
-int Quotation::quotation_level() const
+int Quotation::level() const
 {
 	return _quotation_level;
 }
@@ -42,6 +43,11 @@ bool Quotation::is_locally_quoted() const
 bool Quotation::is_quoted() const
 {
 	return _quotation_level != 0 or is_locally_quoted();
+}
+
+bool Quotation::is_unquoted() const
+{
+	return not is_quoted();
 }
 
 void Quotation::update(Type t)
@@ -59,8 +65,23 @@ void Quotation::update(Type t)
     }
 }
 
-bool Quotation::consumable_quotation(Type t)
+bool Quotation::consume(Type t)
 {
 	return (not is_quoted() and (LOCAL_QUOTE_LINK == t or QUOTE_LINK == t))
-		or (quotation_level() == 1 and UNQUOTE_LINK == t);
+		or (level() == 1 and UNQUOTE_LINK == t);
 }
+
+std::string Quotation::to_string() const
+{
+	std::stringstream ss;
+	ss << "quotation level = " << _quotation_level << std::endl
+	   << "local quote = " << _local_quote << std::endl;
+	return ss.str();
+}
+
+std::string oc_to_string(const Quotation& quotation)
+{
+	return quotation.to_string();
+}
+	
+} // namespace opencog
