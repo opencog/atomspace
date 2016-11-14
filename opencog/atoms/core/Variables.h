@@ -27,6 +27,7 @@
 #include <set>
 
 #include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/Quotation.h>
 
 namespace opencog
 {
@@ -101,7 +102,8 @@ struct FreeVariables
 	Handle substitute_nocheck(const Handle&, const HandleSeq&, bool silent=false) const;
 protected:
 	Handle substitute_scoped(const Handle&, const HandleSeq&, bool,
-	                         const IndexMap&, int) const;
+	                         const IndexMap&,
+	                         Quotation quotation=Quotation()) const;
 };
 
 typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
