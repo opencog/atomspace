@@ -52,31 +52,28 @@ public:
 	bool is_unquoted() const;
 
 	/**
+	 * Check whether the current atom would be consumed as quotation
+	 * operator or not. More specifically:
+	 *
+	 * 1. An unquoted QuoteLink would be consumed, turning the
+	 * quotation state from unquoted to quoted.
+	 *
+	 * 2. An UnquoteLink with quotation level of 1 would be consumed,
+	 * turning the quotation state from quoted to unquoted.
+	 *
+	 * 3. An unquoted LocalQuoteLink would be consumed, turning
+	 * temporarily the quotation state from unquoted to quoted.
+	 *
+	 * Remark: you must call this function before calling update,
+	 * otherwise the result will not be correct on the current atom.
+	 */
+	bool consumable(Type t) const;
+
+	/**
 	 * Increment, decrement or change local quote given the type of
 	 * the current atom before handing the quotation to the outgoing.
 	 */
 	void update(Type t);
-
-	/**
-	 * Check whether the current atom would be consumed as quotation
-	 * operator or not. More specifically:
-	 *
-	 * 1. An unquoted QuoteLink would be consumed, passing the
-	 * quotation state from unquoted to quoted.
-	 *
-	 * 2. An UnquoteLink with quotation level of 1 would be consumed,
-	 * passing the quotation state from quoted to unquoted.
-	 *
-	 * 3. An unquoted LocalQuoteLink would be consumed, passing
-	 * temporarily the quotation state from unquoted to quoted.
-	 *
-	 * Remark: you must call this function before calling update,
-	 * otherwise the result will not be correct.
-	 *
-	 * TODO: perhaps set _local_quote to false
-	 * TODO: perhaps merge update and consume into a single function
-	 */
-	bool consume(Type t);
 
 	std::string to_string() const;
 };

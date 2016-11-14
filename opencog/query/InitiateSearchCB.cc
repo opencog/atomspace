@@ -551,7 +551,7 @@ void InitiateSearchCB::find_rarest(const Handle& clause,
 
 	if (not clause->isLink()) return;
 
-	if (not quotation.consume(t))
+	if (not quotation.consumable(t))
 	{
 		size_t num = (size_t) _as->get_num_atoms_of_type(t);
 		if (num < count)

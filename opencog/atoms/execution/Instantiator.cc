@@ -104,7 +104,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 
 	// Discard the following QuoteLink, UnquoteLink or LocalQuoteLink
 	// as it is serving its quoting or unquoting function.
-	if (_avoid_discarding_quotes_level == 0 and _quotation.consume(t))
+	if (_avoid_discarding_quotes_level == 0 and _quotation.consumable(t))
 	{
 		if (1 != expr->getArity())
 			throw InvalidParamException(TRACE_INFO,

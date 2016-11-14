@@ -399,7 +399,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 		// Wow, if we are here, and patern==grnd, this must be
 		// a self-grounding, as I don't believe there is any other
 		// valid way to get to here.
-		if (quotation.consume(ptype) and ptrn == grnd) return true;
+		if (quotation.consumable(ptype) and ptrn == grnd) return true;
 
 		quotation.update(ptype);
 

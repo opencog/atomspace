@@ -50,6 +50,12 @@ bool Quotation::is_unquoted() const
 	return not is_quoted();
 }
 
+bool Quotation::consumable(Type t) const
+{
+	return (not is_quoted() and (LOCAL_QUOTE_LINK == t or QUOTE_LINK == t))
+		or (level() == 1 and UNQUOTE_LINK == t);
+}
+
 void Quotation::update(Type t)
 {
 	bool is_unquoted = not is_quoted();
@@ -63,12 +69,6 @@ void Quotation::update(Type t)
 		if (QUOTE_LINK == t) _quotation_level++;
 	    else if (UNQUOTE_LINK == t) _quotation_level--;
     }
-}
-
-bool Quotation::consume(Type t)
-{
-	return (not is_quoted() and (LOCAL_QUOTE_LINK == t or QUOTE_LINK == t))
-		or (level() == 1 and UNQUOTE_LINK == t);
 }
 
 std::string Quotation::to_string() const
