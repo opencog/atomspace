@@ -178,7 +178,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 
 	quotation.update(ty);
 
-	if (0 == quotation.is_unquoted() and classserver().isA(ty, SCOPE_LINK))
+	if (quotation.is_unquoted() and classserver().isA(ty, SCOPE_LINK))
 	{
 		// Perform alpha-conversion duck-n-cover.  We don't actually need
 		// to alpha-convert anything, if we happen to encounter a bound
