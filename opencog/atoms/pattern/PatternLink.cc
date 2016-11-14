@@ -756,25 +756,20 @@ bool PatternLink::add_dummies()
 /// evaluatable.
 void PatternLink::trace_connectives(const std::set<Type>& connectives,
                                     const HandleSeq& oset,
-                                    int quotation_level)
+                                    Quotation quotation)
 {
 	for (const Handle& term: oset)
 	{
 		Type t = term->getType();
 
-		// Deal with quote
-		if (t == QUOTE_LINK)
-			quotation_level++;
-		else if (t == UNQUOTE_LINK)
-			quotation_level--;
+		quotation.update(t);
 
-		if (quotation_level > 0
-		    or connectives.find(t) == connectives.end()) continue;
+		if (quotation.is_quoted() or connectives.find(t) == connectives.end())
+			continue;
 		_pat.evaluatable_holders.insert(term);
 		add_to_map(_pat.in_evaluatable, term, term);
 		if (term->isLink())
-			trace_connectives(connectives, term->getOutgoingSet(),
-			                  quotation_level);
+			trace_connectives(connectives, term->getOutgoingSet(), quotation);
 	}
 }
 

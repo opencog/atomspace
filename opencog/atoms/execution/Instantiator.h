@@ -26,6 +26,8 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
+#include <opencog/atoms/base/Quotation.h>
+
 /**
  * class Instantiator -- create grounded expressions from ungrounded ones.
  * Given an ungrounded expression (i.e. an expression containing variables)
@@ -53,7 +55,7 @@ private:
 	 * (e.g. GetLink, BindLink), since these handle QuoteLinks within
 	 * their own scope. We must avoid damaging quotes for these atoms.
 	 */
-	int _quotation_level = 0;
+	Quotation _quotation;
 	int _avoid_discarding_quotes_level = 0;
 
 	/**

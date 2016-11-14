@@ -67,17 +67,17 @@ static Handle beta_reduce(const Handle& expr, const HandleMap vmap)
 bool Instantiator::walk_sequence(HandleSeq& oset_results, const HandleSeq& expr)
 {
 	bool changed = false;
-	int quotation_level = _quotation_level;
+	Quotation quotation = _quotation;
 	for (const Handle& h : expr)
 	{
 		Handle hg(walk_tree(h));
-		_quotation_level = quotation_level;
+		_quotation = quotation;
 		if (hg != h) changed = true;
 
 		// GlobNodes are grounded by a ListLink of everything that
 		// the GlobNode matches. Unwrap the list, and insert each
 		// of the glob elements in sequence.
-		if (_quotation_level == 0 and GLOB_NODE == h->getType() and hg != h)
+		if (_quotation.is_unquoted() and GLOB_NODE == h->getType() and hg != h)
 		{
 			for (const Handle& gloe: hg->getOutgoingSet())
 			{
@@ -102,27 +102,23 @@ Handle Instantiator::walk_tree(const Handle& expr)
 {
 	Type t = expr->getType();
 
-	// Quotation case
-	if (QUOTE_LINK == t)
-		_quotation_level++;
-	else if (UNQUOTE_LINK == t)
-		_quotation_level--;
-
-	// Discard the following QuoteLink or UnquoteLink (as it is
-	// serving its quoting or unquoting function).
-	if (((_avoid_discarding_quotes_level == 0)
-		and (_quotation_level == 1 and QUOTE_LINK == t))
-		or (_quotation_level == 0 and UNQUOTE_LINK == t)) {
+	// Discard the following QuoteLink, UnquoteLink or LocalQuoteLink
+	// as it is serving its quoting or unquoting function.
+	if (_avoid_discarding_quotes_level == 0 and _quotation.consume(t))
+	{
 		if (1 != expr->getArity())
 			throw InvalidParamException(TRACE_INFO,
 			                            "QuoteLink/UnquoteLink has "
 			                            "unexpected arity!");
+		_quotation.update(t);
 		return walk_tree(expr->getOutgoingAtom(0));
 	}
 
+	_quotation.update(t);
+
 	if (expr->isNode())
 	{
-		if (_quotation_level > 0)
+		if (_quotation.is_quoted())
 			return expr;
 
 		// If we are here, we are a Node.
@@ -160,7 +156,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// We must be careful to substitute only for free variables, and
 	// never for bound ones.
 
-	if (_quotation_level > 0)
+	if (_quotation.is_quoted())
 		goto mere_recursive_call;
 
 	// Reduce PutLinks. There are two ways to do this: eager execution
@@ -465,7 +461,7 @@ Handle Instantiator::instantiate(const Handle& expr,
 		throw InvalidParamException(TRACE_INFO,
 			"Asked to ground a null expression");
 
-	_quotation_level = 0;
+	_quotation = Quotation();
 	_avoid_discarding_quotes_level = 0;
 
 	_vmap = &vars;

@@ -33,14 +33,15 @@ PatternTerm::PatternTerm()
 
 PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	: _handle(h), _parent(parent),
-	  _quotation(parent->_quotation.quotation_level(),
+	  _quotation(parent->_quotation.level(),
 	             false /* necessarily false since it is local */),
 	  _has_any_bound_var(false)
 {
 	Type t = h->getType();
 
-	// Possibly consume the quotation
-	if (_quotation.consumable_quotation(t)) {
+	// Discard the following QuoteLink, UnquoteLink or LocalQuoteLink
+	// as it is serving its quoting or unquoting function.
+	if (_quotation.consume(t)) {
 		if (1 != h->getArity())
 			throw InvalidParamException(TRACE_INFO,
 			                            "QuoteLink/UnquoteLink/LocalQuoteLink has "

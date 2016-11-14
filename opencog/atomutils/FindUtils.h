@@ -37,6 +37,7 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/types.h>
+#include <opencog/atoms/base/Quotation.h>
 #include <opencog/atoms/core/ScopeLink.h>
 
 namespace opencog {
@@ -112,7 +113,7 @@ private:
 		IMM    // Contains immediately below.
 	} Loco;
 
-	Loco find_rec(const Handle& h, int quotation_level = 0);
+	Loco find_rec(const Handle& h, Quotation quotation=Quotation());
 
 private:
 	std::set<Type> _target_types;
@@ -151,8 +152,7 @@ bool is_unquoted_in_tree(const Handle& tree, const Handle& atom);
  *
  * @param atom             handle of the atom to check
  *
- * @param quotation_level  quotation level from the root to the handle
- *                         the of tree
+ * @param quotation        quotation state
  *
  * @return                 minimum quotation level. If atom doesn't appear
  *                         in the tree then it returns the maximum integer.
@@ -163,7 +163,7 @@ bool is_unquoted_in_tree(const Handle& tree, const Handle& atom);
  */
 int min_quotation_level(const Handle& tree,
                         const Handle& atom,
-                        int level_from_root = 0);
+                        Quotation quotation=Quotation());
 
 /**
  * Return the maximum quotation level of a given atom. The maximum
@@ -187,7 +187,7 @@ int min_quotation_level(const Handle& tree,
  */
 int max_quotation_level(const Handle& tree,
                         const Handle& atom,
-                        int level_from_root = 0);
+                        Quotation quotation=Quotation());
 
 /**
  * Return true if the atom (variable) occurs unscoped somewhere in the
@@ -301,7 +301,8 @@ bool contains_atomtype(const HandleSeq& clauses, Type atom_type);
  * returns {VariableNode "$X"}, because although $X is scoped by the
  * lambda it is also unscoped in the And.
  */
-OrderedHandleSet get_free_variables(const Handle& h, int quotation_level = 0);
+OrderedHandleSet get_free_variables(const Handle& h,
+                                    Quotation quotation=Quotation());
 
 /**
  * Return true if h has no free variable (unscoped or unquoted) in it,

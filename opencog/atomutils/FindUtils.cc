@@ -70,18 +70,17 @@ void FindAtoms::search_set(const HandleSeq& hlist)
 	for (const Handle& h : hlist) find_rec(h);
 }
 
-FindAtoms::Loco FindAtoms::find_rec(const Handle& h, int quotation_level)
+FindAtoms::Loco FindAtoms::find_rec(const Handle& h, Quotation quotation)
 {
 	Type t = h->getType();
-	if (quotation_level < 1 and
+	if (quotation.is_unquoted() and
 	    (1 == _target_types.count(t) or _target_atoms.count(h) == 1))
 	{
 		varset.insert(h);
 		return IMM; //! Don't explore link-typed vars!
 	}
 
-	if (t == QUOTE_LINK) quotation_level++;
-	else if (t == UNQUOTE_LINK) quotation_level--;
+	quotation.update(t);
 
 	for (Type stopper : stopset)
 	{
@@ -94,7 +93,7 @@ FindAtoms::Loco FindAtoms::find_rec(const Handle& h, int quotation_level)
 		bool imm = false;
 		for (const Handle& oh : h->getOutgoingSet())
 		{
-			Loco where = find_rec(oh, quotation_level);
+			Loco where = find_rec(oh, quotation);
 			if (NOPE != where) held = true;
 			if (IMM == where) imm = true;
 		}
@@ -132,35 +131,33 @@ bool is_unquoted_in_tree(const Handle& tree, const Handle& atom)
 
 int min_quotation_level(const Handle& tree,
                         const Handle& atom,
-                        int level_from_root)
+                        Quotation quotation)
 {
 	// Base case
-	if (tree == atom) return level_from_root;
+	if (tree == atom) return quotation.level();
 	if (not tree->isLink()) return std::numeric_limits<int>::max();
 
 	// Recursive case
-	if (tree->getType() == QUOTE_LINK) level_from_root++;
-	else if (tree->getType() == UNQUOTE_LINK) level_from_root--;
+	quotation.update(tree->getType());
 	int result = std::numeric_limits<int>::max();
 	for (const Handle& h : tree->getOutgoingSet())
-		result = std::min(result, min_quotation_level(h, atom, level_from_root));
+		result = std::min(result, min_quotation_level(h, atom, quotation));
 	return result;
 }
 
 int max_quotation_level(const Handle& tree,
                         const Handle& atom,
-                        int level_from_root)
+                        Quotation quotation)
 {
 	// Base case
-	if (tree == atom) return level_from_root;
+	if (tree == atom) return quotation.level();
 	if (not tree->isLink()) return std::numeric_limits<int>::min();
 
 	// Recursive case
-	if (tree->getType() == QUOTE_LINK) level_from_root++;
-	else if (tree->getType() == UNQUOTE_LINK) level_from_root--;
+	quotation.update(tree->getType());
 	int result = std::numeric_limits<int>::min();
 	for (const Handle& h : tree->getOutgoingSet())
-		result = std::max(result, max_quotation_level(h, atom, level_from_root));
+		result = std::max(result, max_quotation_level(h, atom, quotation));
 	return result;
 }
 
@@ -297,12 +294,12 @@ bool contains_atomtype(const HandleSeq& clauses, Type atom_type)
 	return false;
 }
 
-OrderedHandleSet get_free_variables(const Handle& h, int quotation_level)
+OrderedHandleSet get_free_variables(const Handle& h, Quotation quotation)
 {
 	Type t = h->getType();
 
 	// Base cases
-	if (t == VARIABLE_NODE and quotation_level < 1)
+	if (t == VARIABLE_NODE and quotation.is_unquoted())
 		return {h};
 	if (h->isNode())
 		return {};
@@ -310,10 +307,9 @@ OrderedHandleSet get_free_variables(const Handle& h, int quotation_level)
 	// Recursive cases
 	OrderedHandleSet results;
 	OC_ASSERT(h->isLink());
-	if (t == QUOTE_LINK) quotation_level++;
-	else if (t == UNQUOTE_LINK) quotation_level--;
+	quotation.update(t);
 	for (const Handle& ch : h->getOutgoingSet()) {
-		OrderedHandleSet ch_free_var = get_free_variables(ch, quotation_level);
+		OrderedHandleSet ch_free_var = get_free_variables(ch, quotation);
 		results.insert(ch_free_var.begin(), ch_free_var.end());
 	}
 	// If the link was a scope link then remove the scoped
