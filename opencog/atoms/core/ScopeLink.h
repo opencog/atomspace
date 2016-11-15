@@ -24,6 +24,7 @@
 #define _OPENCOG_SCOPE_LINK_H
 
 #include <opencog/atoms/core/VariableList.h>
+#include <opencog/atoms/base/Quotation.h>
 
 namespace opencog
 {
@@ -73,7 +74,8 @@ protected:
 	void init_scoped_variables(const Handle& hvar);
 
 	bool skip_init(Type);
-	ContentHash term_hash(const Handle&, UnorderedHandleSet&, int) const;
+	ContentHash term_hash(const Handle&, UnorderedHandleSet&,
+	                      Quotation quotation = Quotation()) const;
 	virtual ContentHash compute_hash() const;
 
 public:

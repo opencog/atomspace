@@ -28,6 +28,8 @@
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atomutils/FindUtils.h>
 
+#include <opencog/util/algorithm.h>
+
 #include "DefaultPatternMatchCB.h"
 
 using namespace opencog;
@@ -377,7 +379,7 @@ void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
 }
 
 /// is_self_ground() -- Reject clauses that are grounded by themselves.
-/// This code is neeed in order to handle multiple complex, confusing
+/// This code is needed in order to handle multiple complex, confusing
 /// situations. The most serious of these is variables that are hidden
 /// due to alpha-renaming -- they mostly look like ordinary variables
 /// to the lower layers of the pattern matcher, but here, from the
@@ -389,32 +391,33 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
                                            const Handle& grnd,
                                            const HandleMap& term_gnds,
                                            const OrderedHandleSet& varset,
-                                           int quote_level)
+                                           Quotation quotation)
 {
 	Type ptype = ptrn->getType();
 
 	// Unwrap quotations, so that they can be compared properly.
-	if (ptype == QUOTE_LINK or ptype == UNQUOTE_LINK)
+	if (Quotation::is_quotation_type(ptype))
 	{
 		// Wow, if we are here, and patern==grnd, this must be
-		// a self-grounding, as I don't beleive there is any other
+		// a self-grounding, as I don't believe there is any other
 		// valid way to get to here.
-		if (ptype == QUOTE_LINK and 0 == quote_level and ptrn == grnd) return true;
-		if (ptype == UNQUOTE_LINK and 1 == quote_level and ptrn == grnd) return true;
-
-		if (ptype == QUOTE_LINK) quote_level++;
-		else quote_level--;
+		if (quotation.consumable(ptype) and ptrn == grnd) return true;
 
 		const Handle& qpat = ptrn->getOutgoingAtom(0);
-		return is_self_ground(qpat, grnd, term_gnds, varset, quote_level);
+
+		quotation.update(ptype);
+		return is_self_ground(qpat, grnd, term_gnds, varset, quotation);
 	}
 
 	// Only unquoted variables...
-	if (0 == quote_level and
+	if (quotation.is_unquoted() and
 	    ((ptype == VARIABLE_NODE ) or (ptype == GLOB_NODE)))
 	{
 		return (varset.end() != varset.find(grnd));
 	}
+
+	// To pass an updated quotation to the recursive calls
+	quotation.update(ptype);
 
 	// Handle choice-links.
 	if (CHOICE_LINK == ptype)
@@ -427,7 +430,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 			const auto pr = term_gnds.find(ch);
 			if (pr != term_gnds.end() or CHOICE_LINK == ch->getType())
 			{
-				if (is_self_ground(ch, grnd, term_gnds, varset, quote_level))
+				if (is_self_ground(ch, grnd, term_gnds, varset, quotation))
 					return true;
 			}
 		}
@@ -455,31 +458,20 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 	{
 		// Step 1: Look to see if the scope link binds any of the
 		// variables that the pattern also binds.
-		OrderedHandleSet hidden;
 		const Variables& slv = ScopeLinkCast(grnd)->get_variables();
-		for (const Handle& hide: slv.varset)
-		{
-			if (varset.end() != varset.find(hide))
-				hidden.insert(hide);
-		}
+		OrderedHandleSet hidden = opencog::set_intersection(slv.varset, varset);
 
 		// Step 2: If there are hidden variables, then remove them
-		// before recursing dowwards.
+		// before recursing donwards.
 		if (0 < hidden.size())
 		{
-			// Make a copy
-			OrderedHandleSet vcopy = varset;
-
-			// Remove the hidden vars from the copy
-			for (const Handle& hide: hidden)
-			{
-				vcopy.erase(hide);
-			}
+			// Make a copy with visible variables only
+			OrderedHandleSet vcopy = opencog::set_difference(varset, hidden);
 
 			// Recurse using only the visible variables.
 			for (size_t i=0; i<pari; i++)
 			{
-				if (is_self_ground(pset[i], gset[i], term_gnds, vcopy, quote_level))
+				if (is_self_ground(pset[i], gset[i], term_gnds, vcopy, quotation))
 					return true;
 			}
 			return false;
@@ -491,7 +483,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 
 	for (size_t i=0; i<pari; i++)
 	{
-		if (is_self_ground(pset[i], gset[i], term_gnds, varset, quote_level))
+		if (is_self_ground(pset[i], gset[i], term_gnds, varset, quotation))
 			return true;
 	}
 

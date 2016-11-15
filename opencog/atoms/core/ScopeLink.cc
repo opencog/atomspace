@@ -277,7 +277,7 @@ ContentHash ScopeLink::compute_hash() const
 	for (Arity i = 0; i < n_scoped_terms; ++i)
 	{
 		const Handle& h(_outgoing[i + vardecl_offset]);
-		hsh += (hsh<<5) + term_hash(h, hidden, 0);
+		hsh += (hsh<<5) + term_hash(h, hidden);
 	}
 	hsh %= (1UL << 63) - 409;
 
@@ -295,11 +295,11 @@ ContentHash ScopeLink::compute_hash() const
 /// used in VarScraper::find_vars(), with obvious alterations.
 ContentHash ScopeLink::term_hash(const Handle& h,
                                  UnorderedHandleSet& bound_vars,
-                                 int quote_lvl) const
+                                 Quotation quotation) const
 {
 	Type t = h->getType();
 	if ((VARIABLE_NODE == t or GLOB_NODE == t) and
-	    0 == quote_lvl and
+	    quotation.is_unquoted() and
 	    0 != _varlist.varset.count(h) and
 	    0 == bound_vars.count(h))
 	{
@@ -311,9 +311,8 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	// Just the plain old hash for all other nodes.
 	if (h->isNode()) return h->get_hash();
 
-	// quotation
-	if (QUOTE_LINK == t) quote_lvl++;
-	else if (UNQUOTE_LINK == t) quote_lvl--;
+	// Quotation
+	quotation.update(t);
 
 	// Other embedded ScopeLinks might be hiding some of our varialbes...
 	bool issco = classserver().isA(t, SCOPE_LINK);
@@ -341,7 +340,7 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	ContentHash hsh = ((1UL<<8) - 59) * t;
 	for (const Handle& ho: h->getOutgoingSet())
 	{
-		hsh += mixer * (1UL<<5) + term_hash(ho, bound_vars, quote_lvl);
+		hsh += mixer * (1UL<<5) + term_hash(ho, bound_vars, quotation);
 	}
 	hsh %= (1UL<<63) - 471;
 

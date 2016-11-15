@@ -206,7 +206,7 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 		Handle sbr(h);
 
 		// Blow past the QuoteLinks, since they just screw up the search start.
-		if (QUOTE_LINK == hunt->getType())
+		if (Quotation::is_quotation_type(hunt->getType()))
 			hunt = hunt->getOutgoingAtom(0);
 
 		Handle s(find_starter_recursive(hunt, brdepth, sbr, brwid));
@@ -542,18 +542,16 @@ bool InitiateSearchCB::initiate_search(PatternMatchEngine *pme)
 void InitiateSearchCB::find_rarest(const Handle& clause,
                                    Handle& rarest,
                                    size_t& count,
-                                   int quotation_level)
+                                   Quotation quotation)
 {
 	Type t = clause->getType();
 
 	// Base case
-	if ((quotation_level < 1) and (CHOICE_LINK == t)) return;
+	if (quotation.is_unquoted() and (CHOICE_LINK == t)) return;
 
 	if (not clause->isLink()) return;
 
-	if ((QUOTE_LINK == t and quotation_level > 0)
-	    or (UNQUOTE_LINK == t and quotation_level > 1)
-	    or (QUOTE_LINK != t and UNQUOTE_LINK != t))
+	if (not quotation.consumable(t))
 	{
 		size_t num = (size_t) _as->get_num_atoms_of_type(t);
 		if (num < count)
@@ -564,12 +562,11 @@ void InitiateSearchCB::find_rarest(const Handle& clause,
 	}
 
 	// Recursive case
-	if (QUOTE_LINK == t) quotation_level++;
-	else if (UNQUOTE_LINK == t) quotation_level--;
+	quotation.update(t);
 
 	const HandleSeq& oset = clause->getOutgoingSet();
 	for (const Handle& h : oset)
-		find_rarest(h, rarest, count, quotation_level);
+		find_rarest(h, rarest, count, quotation);
 }
 
 /* ======================================================== */

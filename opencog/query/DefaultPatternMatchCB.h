@@ -26,6 +26,7 @@
 #define _OPENCOG_DEFAULT_PATTERN_MATCH_H
 
 #include <opencog/atoms/base/types.h>
+#include <opencog/atoms/base/Quotation.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/query/PatternMatchCallback.h>
@@ -104,7 +105,8 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		Handle _pattern_body;
 
 		bool is_self_ground(const Handle&, const Handle&,
-		                    const HandleMap&, const OrderedHandleSet&, int=0);
+		                    const HandleMap&, const OrderedHandleSet&,
+		                    Quotation quotation=Quotation());
 
 		// Variables that should be ignored, because they are bound
 		// (scoped) in the current context (i.e. appear in a ScopeLink

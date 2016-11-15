@@ -25,6 +25,7 @@
 
 #include <unordered_map>
 
+#include <opencog/atoms/base/Quotation.h>
 #include <opencog/atoms/pattern/Pattern.h>
 #include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atoms/core/VariableList.h>
@@ -118,7 +119,7 @@ protected:
 
 	void trace_connectives(const std::set<Type>&,
 	                       const HandleSeq& clauses,
-	                       int quotation_level = 0);
+	                       Quotation quotation=Quotation());
 
 	void make_connectivity_map(const HandleSeq&);
 	void make_map_recursive(const Handle&, const Handle&);

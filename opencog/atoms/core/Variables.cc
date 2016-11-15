@@ -159,11 +159,13 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
                                         const HandleSeq& args,
                                         bool silent,
                                         const IndexMap& index_map,
-                                        int quotation_level) const
+                                        Quotation quotation) const
 {
+	bool unquoted = quotation.is_unquoted();
+
 	// If we are not in a quote context, and `term` is a variable,
 	// then just return the corresponding value.
-	if (0 == quotation_level)
+	if (unquoted)
 	{
 		IndexMap::const_iterator idx = index_map.find(term);
 		if (idx != index_map.end())
@@ -174,24 +176,12 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 	// and just return that.
 	if (not term->isLink()) return term;
 
-	// Quotation management
 	Type ty = term->getType();
-	if (QUOTE_LINK == ty)
-	{
-		quotation_level++;
-	}
-	else
-	if (UNQUOTE_LINK == ty)
-	{
-		quotation_level--;
-		if (quotation_level < 0)
-		{
-			if (silent) throw NestingException();
-			throw SyntaxException(TRACE_INFO, "Unbalanced quotes!");
-		}
-	}
-	else
-	if (0 == quotation_level and classserver().isA(ty, SCOPE_LINK))
+
+	// Update for subsequent recursive calls of substitute_scoped
+	quotation.update(ty);
+
+	if (unquoted and classserver().isA(ty, SCOPE_LINK))
 	{
 		// Perform alpha-conversion duck-n-cover.  We don't actually need
 		// to alpha-convert anything, if we happen to encounter a bound
@@ -239,7 +229,8 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 			HandleSeq oset;
 			for (const Handle& h : term->getOutgoingSet())
 			{
-				oset.emplace_back(substitute_scoped(h, args, silent, hidden_map, quotation_level));
+				oset.emplace_back(substitute_scoped(h, args, silent,
+				                                    hidden_map, quotation));
 			}
 			return Handle(createLink(term->getType(), oset));
 		}
@@ -254,7 +245,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		// that wraps them up.  See MapLinkUTest for examples.
 		if (GLOB_NODE == h->getType())
 		{
-			Handle glst(substitute_scoped(h, args, silent, index_map, quotation_level));
+			Handle glst(substitute_scoped(h, args, silent, index_map, quotation));
 			if (glst->isNode())
 				return glst;
 			for (const Handle& gl : glst->getOutgoingSet())
@@ -262,7 +253,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		}
 		else
 			oset.emplace_back(
-				substitute_scoped(h, args, silent, index_map, quotation_level));
+				substitute_scoped(h, args, silent, index_map, quotation));
 	}
 	return Handle(createLink(term->getType(), oset));
 }

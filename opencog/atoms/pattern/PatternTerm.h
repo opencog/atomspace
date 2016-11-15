@@ -31,6 +31,7 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Quotation.h>
 
 namespace opencog {
 
@@ -90,13 +91,8 @@ protected:
 	PatternTermPtr _parent;
 	PatternTermWSeq _outgoing;
 
-	// Number of QuoteLinks on the path up to the root including this
-	// term. Zero means the term is unquoted. Quoted terms are matched
-	// literally.
-	int _quotation_level;
-
-	// True if the atom has been wrapped by a LocalQuoteLink
-	bool _local_quote;
+	// Quotation level and local quotation
+	Quotation _quotation;
 
 	// True if the pattern subtree rooted in this tree node does not
 	// contain any bound variables. This means that the term is constant
@@ -106,115 +102,35 @@ protected:
 public:
 	static const PatternTermPtr UNDEFINED;
 
-	PatternTerm()
-		: _handle(Handle::UNDEFINED), _parent(PatternTerm::UNDEFINED),
-		  _quotation_level(0), _local_quote(false), _has_any_bound_var(false)
-		{}
+	PatternTerm();
 
-	PatternTerm(const PatternTermPtr& parent, const Handle& h)
-		: _handle(h), _parent(parent),
-		  _quotation_level(parent->_quotation_level), _local_quote(false),
-		  _has_any_bound_var(false)
-		{}
+	PatternTerm(const PatternTermPtr& parent, const Handle& h);
 
-	void addOutgoingTerm(const PatternTermPtr& ptm)
-	{
-		_outgoing.push_back(ptm);
-	}
+	void addOutgoingTerm(const PatternTermPtr& ptm);
 
-	inline Handle getHandle()
-	{
-		return _handle;
-	}
+	Handle getHandle();
 
-	inline PatternTermPtr getParent()
-	{
-		return _parent;
-	}
+	PatternTermPtr getParent();
 
-	inline PatternTermSeq getOutgoingSet() const
-	{
-		PatternTermSeq oset;
-		for (PatternTermWPtr w : _outgoing)
-		{
-			PatternTermPtr s(w.lock());
-			if (s) oset.push_back(s);
-		}
-		
-		return oset;
-	}
+	PatternTermSeq getOutgoingSet() const;
 
-	inline Arity getArity() const
-	{
-		return _outgoing.size();
-	}
+	Arity getArity() const;
 
-	inline bool isQuoted() const
-	{
-		return isLocalQuoted() or getQuotationLevel() > 0;
-	}
+	Quotation& getQuotation();
+	const Quotation& getQuotation() const;
+	bool isQuoted() const;
 
-	inline bool isLocalQuoted() const
-	{
-		return _local_quote;
-	}
+	bool hasAnyBoundVariable() const;
 
-	inline void setLocalQuote(bool lq)
-	{
-		_local_quote = lq;
-	}
+	PatternTermPtr getOutgoingTerm(Arity pos) const;
 
-	inline int getQuotationLevel() const
-	{
-		return _quotation_level;
-	}
-
-	inline bool hasAnyBoundVariable() const
-	{
-		return _has_any_bound_var;
-	}
-
-	inline PatternTermPtr getOutgoingTerm(Arity pos) const
-	{
-		// Checks for a valid position
-		if (pos < getArity()) {
-			PatternTermPtr s(_outgoing[pos].lock());
-			if (not s)
-				throw RuntimeException(TRACE_INFO,
-				                       "expired outgoing set index %d", pos);
-			return s;
-		} else {
-			throw RuntimeException(TRACE_INFO,
-			                       "invalid outgoing set index %d", pos);
-		}
-	}
-
-	inline void addQuote() { _quotation_level++; }
-	inline void remQuote() { _quotation_level--; }
-
-	inline void addBoundVariable()
-	{
-		if (!_has_any_bound_var)
-		{
-			_has_any_bound_var = true;
-			if (_parent != PatternTerm::UNDEFINED)
-				_parent->addBoundVariable();
-		}
-	}
+	void addBoundVariable();
 
 	// Work around gdb's incapability to build a string on the fly,
 	// see http://stackoverflow.com/questions/16734783 for more
 	// explanation.
-	std::string toString() const { return toString(":"); }
-
-	inline std::string toString(std::string indent) const
-	{
-		if (_handle == nullptr) return "-";
-		std::string str = _parent->toString();
-		str += indent + std::to_string(_handle.value());
-		return str;
-	}
-
+	std::string toString() const;
+	std::string toString(std::string indent) const;
 };
 
 // For gdb, see
