@@ -685,7 +685,7 @@ bool PatternMatchEngine::clause_compare(const PatternTermPtr& ptm,
                                         const Handle& clause)
 {
 	return ptm->getHandle() == clause
-		or (clause->getType() == QUOTE_LINK
+		or (Quotation::is_quotation_type(clause->getType())
 		    and ptm->getHandle() == clause->getOutgoingAtom(0));
 }
 

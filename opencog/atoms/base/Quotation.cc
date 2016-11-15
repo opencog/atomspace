@@ -50,6 +50,11 @@ bool Quotation::is_unquoted() const
 	return not is_quoted();
 }
 
+bool Quotation::is_quotation_type(Type t)
+{
+	return QUOTE_LINK == t or UNQUOTE_LINK == t or LOCAL_QUOTE_LINK == t;
+}
+
 bool Quotation::consumable(Type t) const
 {
 	return (not is_quoted() and (LOCAL_QUOTE_LINK == t or QUOTE_LINK == t))

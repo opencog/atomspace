@@ -394,7 +394,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 	Type ptype = ptrn->getType();
 
 	// Unwrap quotations, so that they can be compared properly.
-	if (ptype == QUOTE_LINK or ptype == UNQUOTE_LINK)
+	if (Quotation::is_quotation_type(ptype))
 	{
 		// Wow, if we are here, and patern==grnd, this must be
 		// a self-grounding, as I don't believe there is any other

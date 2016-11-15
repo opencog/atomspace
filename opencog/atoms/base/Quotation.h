@@ -52,6 +52,12 @@ public:
 	bool is_unquoted() const;
 
 	/**
+	 * Return true iff the type is QUOTE_LINK, UNQUOTE_LINK or
+	 * LOCAL_QUOTE_LINK.
+	 */
+	static bool is_quotation_type(Type t);
+
+	/**
 	 * Check whether the current atom would be consumed as quotation
 	 * operator or not. More specifically:
 	 *

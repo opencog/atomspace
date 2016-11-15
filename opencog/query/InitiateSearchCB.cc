@@ -206,7 +206,7 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 		Handle sbr(h);
 
 		// Blow past the QuoteLinks, since they just screw up the search start.
-		if (QUOTE_LINK == hunt->getType())
+		if (Quotation::is_quotation_type(hunt->getType()))
 			hunt = hunt->getOutgoingAtom(0);
 
 		Handle s(find_starter_recursive(hunt, brdepth, sbr, brwid));
