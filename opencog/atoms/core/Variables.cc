@@ -161,9 +161,11 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
                                         const IndexMap& index_map,
                                         Quotation quotation) const
 {
+	bool unquoted = quotation.is_unquoted();
+
 	// If we are not in a quote context, and `term` is a variable,
 	// then just return the corresponding value.
-	if (quotation.is_unquoted())
+	if (unquoted)
 	{
 		IndexMap::const_iterator idx = index_map.find(term);
 		if (idx != index_map.end())
@@ -176,9 +178,10 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 
 	Type ty = term->getType();
 
+	// Update for subsequent recursive calls of substitute_scoped
 	quotation.update(ty);
 
-	if (quotation.is_unquoted() and classserver().isA(ty, SCOPE_LINK))
+	if (unquoted and classserver().isA(ty, SCOPE_LINK))
 	{
 		// Perform alpha-conversion duck-n-cover.  We don't actually need
 		// to alpha-convert anything, if we happen to encounter a bound

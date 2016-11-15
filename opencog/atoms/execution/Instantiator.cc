@@ -102,23 +102,25 @@ Handle Instantiator::walk_tree(const Handle& expr)
 {
 	Type t = expr->getType();
 
+	// Keep track of the current quotation so we can update it for
+	// subsequent recursive calls of walk_tree.
+	Quotation cquotation(_quotation);
+	_quotation.update(t);
+
 	// Discard the following QuoteLink, UnquoteLink or LocalQuoteLink
 	// as it is serving its quoting or unquoting function.
-	if (_avoid_discarding_quotes_level == 0 and _quotation.consumable(t))
+	if (_avoid_discarding_quotes_level == 0 and cquotation.consumable(t))
 	{
 		if (1 != expr->getArity())
 			throw InvalidParamException(TRACE_INFO,
 			                            "QuoteLink/UnquoteLink has "
 			                            "unexpected arity!");
-		_quotation.update(t);
 		return walk_tree(expr->getOutgoingAtom(0));
 	}
 
-	_quotation.update(t);
-
 	if (expr->isNode())
 	{
-		if (_quotation.is_quoted())
+		if (cquotation.is_quoted())
 			return expr;
 
 		// If we are here, we are a Node.
@@ -156,7 +158,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// We must be careful to substitute only for free variables, and
 	// never for bound ones.
 
-	if (_quotation.is_quoted())
+	if (cquotation.is_quoted())
 		goto mere_recursive_call;
 
 	// Reduce PutLinks. There are two ways to do this: eager execution
