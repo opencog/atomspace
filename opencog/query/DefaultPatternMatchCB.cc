@@ -28,6 +28,8 @@
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atomutils/FindUtils.h>
 
+#include <opencog/util/algorithm.h>
+
 #include "DefaultPatternMatchCB.h"
 
 using namespace opencog;
@@ -453,26 +455,15 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 	{
 		// Step 1: Look to see if the scope link binds any of the
 		// variables that the pattern also binds.
-		OrderedHandleSet hidden;
 		const Variables& slv = ScopeLinkCast(grnd)->get_variables();
-		for (const Handle& hide: slv.varset)
-		{
-			if (varset.end() != varset.find(hide))
-				hidden.insert(hide);
-		}
+		OrderedHandleSet hidden = opencog::set_intersection(slv.varset, varset);
 
 		// Step 2: If there are hidden variables, then remove them
-		// before recursing dowwards.
+		// before recursing donwards.
 		if (0 < hidden.size())
 		{
-			// Make a copy
-			OrderedHandleSet vcopy = varset;
-
-			// Remove the hidden vars from the copy
-			for (const Handle& hide: hidden)
-			{
-				vcopy.erase(hide);
-			}
+			// Make a copy with visible variables only
+			OrderedHandleSet vcopy = opencog::set_difference(varset, hidden);
 
 			// Recurse using only the visible variables.
 			for (size_t i=0; i<pari; i++)
