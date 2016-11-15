@@ -379,7 +379,7 @@ void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
 }
 
 /// is_self_ground() -- Reject clauses that are grounded by themselves.
-/// This code is neeed in order to handle multiple complex, confusing
+/// This code is needed in order to handle multiple complex, confusing
 /// situations. The most serious of these is variables that are hidden
 /// due to alpha-renaming -- they mostly look like ordinary variables
 /// to the lower layers of the pattern matcher, but here, from the

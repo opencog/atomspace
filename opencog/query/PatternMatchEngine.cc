@@ -898,7 +898,7 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
                                                const Handle& clause_root)
 {
 	// The given term may appear in the clause in more than one place.
-	// Each distinct locatation should be explored separately.
+	// Each distinct location should be explored separately.
 	auto pl = _pat->connected_terms_map.find({term, clause_root});
 	if (_pat->connected_terms_map.end() == pl)
 	{
