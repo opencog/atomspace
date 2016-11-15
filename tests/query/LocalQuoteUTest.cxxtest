@@ -70,11 +70,6 @@ void LocalQuoteUTest::setUp(void)
 	             body_var);
 	forall_pattern = al(FORALL_LINK, vardecl_var, body_var);
 	forall_get = al(GET_LINK, vardecl, al(LOCAL_QUOTE_LINK, forall_pattern));
-	// Version using Quote/Unquote, useful for debugging
-	// forall_pattern = al(FORALL_LINK,
-	//                     al(UNQUOTE_LINK, vardecl_var),
-	//                     al(UNQUOTE_LINK, body_var));
-	// forall_get = al(GET_LINK, vardecl, al(QUOTE_LINK, forall_pattern));
 	A = an(CONCEPT_NODE, "A");
 	CT = an(TYPE_NODE, "ConceptNode");
 	P_A = al(EVALUATION_LINK, P, A);
