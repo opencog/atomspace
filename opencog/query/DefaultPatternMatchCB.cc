@@ -403,9 +403,9 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 		// valid way to get to here.
 		if (quotation.consumable(ptype) and ptrn == grnd) return true;
 
-		quotation.update(ptype);
-
 		const Handle& qpat = ptrn->getOutgoingAtom(0);
+
+		quotation.update(ptype);
 		return is_self_ground(qpat, grnd, term_gnds, varset, quotation);
 	}
 
@@ -415,6 +415,9 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 	{
 		return (varset.end() != varset.find(grnd));
 	}
+
+	// To pass an updated quotation to the recursive calls
+	quotation.update(ptype);
 
 	// Handle choice-links.
 	if (CHOICE_LINK == ptype)
