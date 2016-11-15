@@ -70,6 +70,11 @@ void LocalQuoteUTest::setUp(void)
 	             body_var);
 	forall_pattern = al(FORALL_LINK, vardecl_var, body_var);
 	forall_get = al(GET_LINK, vardecl, al(LOCAL_QUOTE_LINK, forall_pattern));
+	// Version using Quote/Unquote, useful for debugging
+	// forall_pattern = al(FORALL_LINK,
+	//                     al(UNQUOTE_LINK, vardecl_var),
+	//                     al(UNQUOTE_LINK, body_var));
+	// forall_get = al(GET_LINK, vardecl, al(QUOTE_LINK, forall_pattern));
 	A = an(CONCEPT_NODE, "A");
 	CT = an(TYPE_NODE, "ConceptNode");
 	P_A = al(EVALUATION_LINK, P, A);
@@ -86,10 +91,10 @@ void LocalQuoteUTest::test_forall_query(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    Handle result = satisfying_set(&_as, forall_get),
-	    expected = al(SET_LINK, forall);
+	Handle result = satisfying_set(&_as, forall_get),
+	    expected = al(SET_LINK, al(LIST_LINK, X, P_X));
 
-    logger().debug() << "result = " << result;
+	logger().debug() << "result = " << result;
 	logger().debug() << "expected = " << expected;
 
 	TS_ASSERT_EQUALS(result, expected);
