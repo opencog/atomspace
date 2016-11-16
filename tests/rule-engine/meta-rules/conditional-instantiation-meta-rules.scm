@@ -7,7 +7,7 @@
 ;;    Q
 ;; |-
 ;;    T
-;;    P[V->T].tv.s * P[V->T].tv.c > 0
+;;    P
 ;;    |-
 ;;    Q[V->T]
 ;;
@@ -29,7 +29,7 @@
 ;; Implication full instantiation rule ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define conditional-full-instantiation-variables
+(define crisp-conditional-full-instantiation-meta-variables
   (VariableList
      (TypedVariable
         (Variable "$TyVs")
@@ -39,29 +39,26 @@
      (Variable "$P")
      (Variable "$Q")))
 
-(define conditional-full-instantiation-body
-  (Quote (ImplicationScope
-     (Unquote (Variable "$TyVs"))
-     (Unquote (Variable "$P"))
-     (Unquote (Variable "$Q")))))
+(define crisp-conditional-full-instantiation-meta-body
+  (LocalQuote (ImplicationScope
+     (Variable "$TyVs")
+     (Variable "$P")
+     (Variable "$Q"))))
 
-;; TODO
-
-;; Here only the implicant is considered as premise, while the
-;; variable(s) should as well, but that implies to lay them out
-;; explicitly so for sake of simplicity it is ignored for now.
-(define conditional-full-instantiation-rewrite
-  (ExecutionOutput
-     (GroundedSchema "scm: conditional-full-instantiation-meta-formula")
-     (List
-        (Quote (Bind
-           (Unquote (Variable "$TyVs"))
-           (Unquote (Variable "$P"))
-           (Unquote (ExecutionOutput
-              (GroundedSchema "scm: conditional-full-instantiation-formula")
-              (ListLink
-                 (Variable "$P")
-                 (Variable "$Q")))))))))
+;; Here only the implicant is considered as premise. The variable(s)
+;; should as well so the backward chainer can consider them as
+;; targets, however that implies to lay them out explicitly, so for
+;; sake of simplicity they are ignored for now.
+(define crisp-conditional-full-instantiation-meta-rewrite
+  (LocalQuote (Bind
+     (Variable "$TyVs")
+     (Variable "$P")
+     (ExecutionOutput
+        (GroundedSchema "scm: crisp-conditional-full-instantiation-formula")
+        (ListLink
+           crisp-conditional-full-instantiation-meta-body
+           (Variable "$P")
+           (Variable "$Q"))))))
 
 ;; Bind
 ;;   VariableList
@@ -82,35 +79,36 @@
 ;;       Variable "$TyVs"
 ;;       Variable "$P"
 ;;       ExecutionOutput
-;;         GroundedSchema "scm: conditional-full-instantiation-formula"
+;;         GroundedSchema "scm: crisp-conditional-full-instantiation-formula"
 ;;         List
+;;           LocalQuote
+;;             ImplicationScope
+;;               Variable "$TyVs"
+;;               Variable "$P"
+;;               Variable "$Q"
 ;;           Variable "$P"
 ;;           Variable "$Q"
-(define conditional-full-instantiation-meta-rule
+(define crisp-conditional-full-instantiation-meta-rule
   (BindLink
-     conditional-full-instantiation-variables
-     conditional-full-instantiation-body
-     conditional-full-instantiation-rewrite))
+     conditional-full-instantiation-meta-variables
+     conditional-full-instantiation-meta-body
+     conditional-full-instantiation-meta-rewrite))
 
-(define (conditional-full-instantiation-formula P Q)
-  (cog-set-tv! Q (cog-tv
+;; Set (stv 1 1) on Q is Impl and P strength are both above 0.5 and
+;; their confidence is non null.
+(define (crisp-conditional-full-instantiation-formula Impl P Q)
   (let* (
-         (Impl-outgoings (cog-outgoing-set Impl))
-         (TyVs (car Impl-outgoings))
-         (P (cadr Impl-outgoings))
-         (Q (caddr Impl-outgoings))
-         (terms (select-conditioned-substitution-terms TyVs P)))
-    (if (equal? terms (cog-undefined-handle))
-        terms
-        ;; Substitute the variables by the terms in the body
-        (let* ((put (PutLink (LambdaLink TyVs Q) terms))
-               (inst (cog-execute! put)))
-          ;; Remove the PutLink to not pollute the atomspace
-          (extract-hypergraph put)
-          (cog-set-tv! inst (cog-tv Impl))))))
+         (Impl-s (cog-stv-strength Impl))
+         (Impl-c (cog-stv-confidence Impl))
+         (P-s (cog-stv-confidence P))
+         (P-c (cog-stv-confidence P))
+         (strong-enough (and (> Impl-s 0.5) (> Impl-c 0) (> P-s 0.5) (> P-c 0)))
+         (Q-s (if strong-enough 1 0))
+         (Q-c (if strong-enough 1 0)))
+    (cog-set-tv! Q (stv Q-s Q-c))))
 
 ;; Name the meta rule
-(define implication-full-instantiation-rule-name
-  (DefinedSchemaNode "implication-full-instantiation-rule"))
-(DefineLink implication-full-instantiation-rule-name
-  implication-full-instantiation-rule)
+(define crisp-implication-full-instantiation-meta-rule-name
+  (DefinedSchemaNode "crisp-implication-full-instantiation-meta-rule"))
+(DefineLink crisp-implication-full-instantiation-meta-rule-name
+  crisp-implication-full-instantiation-meta-rule)
