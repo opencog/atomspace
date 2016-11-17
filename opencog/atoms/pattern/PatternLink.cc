@@ -75,7 +75,7 @@ void PatternLink::common_init(void)
 	_num_comps = _components.size();
 
 	// Make sure every variable is in some component.
-	check_satisfiability(_varlist.varset, _component_vars);
+	// check_satisfiability(_varlist.varset, _component_vars);
 
 	// If there is only one connected component, then this can be
 	// handled during search by a single PatternLink. The multi-clause
@@ -456,6 +456,9 @@ void PatternLink::validate_clauses(OrderedHandleSet& vars,
 			              __FUNCTION__);
 		}
 	}
+
+	// Ignore the subsequent checks
+	return;
 
 	// Make sure that each declared variable appears in some clause.
 	// We won't (can't) ground variables that don't show up in a
