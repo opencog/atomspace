@@ -54,6 +54,7 @@ public:
 	void test_implication_instantiation_tv_query();
 	void test_impossible_criminal();
 	void test_criminal();
+	void test_induction();
 	// TODO: think about fixing or removing the follow tests
 	// void test_focus_set();
 	// void test_virtual_no_grnd();
@@ -418,6 +419,51 @@ void BackwardChainerUTest::test_criminal()
 
 	// TODO: fixme
 	// TS_ASSERT_EQUALS(results, expected);
+	TS_ASSERT(true);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void BackwardChainerUTest::test_induction()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	_as.clear();
+
+	string load_bc_induction_config_result =
+		_eval.eval("(load-from-path \"tests/rule-engine/bc-induction-config.scm\")");
+
+	std::cout << "load_bc_induction_config_result = "
+	          << load_bc_induction_config_result;
+
+	std::cout << "AtomSpace after loading bc-induction-config: " << _as;
+
+	string load_bc_induction_result =
+		_eval.eval("(load-from-path \"tests/rule-engine/bc-induction.scm\")");
+
+	std::cout << "load_bc_induction_result = "
+	          << load_bc_induction_result;
+
+	std::cout << "AtomSpace after loading bc-induction: " << _as;
+
+	randGen().seed(500);
+
+	// load modus ponens & deduction rules
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+
+	std::cout << "top_rbs = " << oc_to_string(top_rbs);
+
+	Handle target = _eval.eval_h("bc-induction-target");
+
+	BackwardChainer bc(_as, top_rbs, target);
+	bc.get_config().set_maximum_iterations(100);
+	bc.do_chain();
+
+	// TODO: fixme
+	// TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, 1e-10);
+	// TODO: determine the expected confidence, which depends on the
+	// number of instances the induction is based on
+	// TS_ASSERT_DELTA(target->getTruthValue()->getConfidence(), 1, 1e-10);
 	TS_ASSERT(true);
 
 	logger().debug("END TEST: %s", __FUNCTION__);

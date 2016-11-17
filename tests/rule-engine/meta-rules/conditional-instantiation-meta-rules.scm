@@ -23,8 +23,6 @@
 (use-modules (opencog exec))
 (use-modules (opencog logger))
 
-(load-from-path "tests/rule-engine/rules/instantiation.scm")
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Implication full instantiation rule ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
