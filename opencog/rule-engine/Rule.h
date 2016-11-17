@@ -41,67 +41,70 @@ typedef vector<Rule> RuleSeq;
 /**
  * Class for managing rules in the URE.
  *
- * A URE rule has the following formats
+ * A URE rule may have one of the following formats.
  *
- * 1. A single forward only premises to conclusion rule such as
+ * 1. A single, forward-only premises-to-conclusion rule, of the style
  *
- * <premise-1>
- * ...
- * <premise-1>
- * |-
- * <conclusion>
+ *     <premise-1>
+ *     ...
+ *     <premise-1>
+ *     |-
+ *     <conclusion>
  *
  * is represented as
  *
- * BindLink
- *    <variables>
- *    AndLink
- *       <premise-1>
- *       ...
- *       <premise-n>
- *    <conclusion>
+ *     BindLink
+ *        <variables>
+ *        AndLink
+ *           <premise-1>
+ *           ...
+ *           <premise-n>
+ *        <conclusion>
  *
- * <conclusion> may represent explicitly the conclusion pattern, or
- * (most of the cases) it may be obfuscated in a grounded schema
- * node. In the such a case one the following format may be used. Note
- * that if the rule uses a GroundedSchema and no backward form in used
- * (as described below) then the last argument of the GroundedSchema
+ * Here, `<conclusion>` may represent the conclusion pattern explicitly,
+ * or, in most cases, it may be obfuscated in a grounded schema node.
+ * In such a case, the following format may be used. Note that if the
+ * rule uses a `GroundedSchema` and no backward form is used, as
+ * described below, then the last argument of the `GroundedSchema`
  * will represent the rule's conclusion pattern.
  *
- * 2. A list starting with a forward format and optionally 1 or more
- * backward forms. The backward forms allow to easily obtain
- * conclusion patterns and possibly reconstruct premises given a
- * conclusion. In such a case a rule is represented as follows
+ * 2. A list starting with a forward-format and, optionally, one or
+ * more backward-forms. The backward forms allow the conclusion
+ * patterns to be easily obtained, as well as a means to reconstruct
+ * the premises, given a conclusion. In this case, a rule is
+ * represented as follows:
  *
- * ListLink
- *    <forward>
- *    <backward-1>
- *    ...
- *    <backward-n>
+ *     ListLink
+ *        <forward>
+ *        <backward-1>
+ *        ...
+ *        <backward-n>
  *
- * Where <forward> is described as in 1. and backward-i is either
+ * where `<forward>` is the structure described in part 1, above. The
+ * `<backward-k>` terms are either
  *
- *    BindLink
- *       <variables>
- *       <conclusion>
- *       AndLink
- *          <premise-1>
- *          ...
- *          <premise-n>
+ *      BindLink
+ *         <variables>
+ *         <conclusion>
+ *         AndLink
+ *            <premise-1>
+ *            ...
+ *            <premise-n>
  *
- * or if we don't need to translate a certain conclusion into premises
+ * or, if we don't need to translate a certain conclusion into premises,
+ * such terms take the form
  *
- *    GetLink
- *       <variables>
- *       <conclusion>
+ *      GetLink
+ *         <variables>
+ *         <conclusion>
  *
- * That second notation (forward and backward forms) is necessary when
- * the forward rule output(s) is obfuscated by a grounded schema(ta)
- * or can as well be useful when the transformations going from
- * conclusion to premises is non trivial. The reason we have several
- * backward forms is because a forward rule output several conclusions
- * (take for instance the PLN equivalence-to-double-implication rule
- * that given A<->B outputs A-> and B->A).
+ * This second notation (forward and backward forms) is necessary when
+ * the forward rule output(s) is obfuscated by a grounded schema(ta).
+ * It can also be useful when the transformations going from conclusion
+ * to premises are non-trivial. The reason there are several backward
+ * forms is because a forward rule may output several conclusions.
+ * Take, for instance, the PLN equivalence-to-double-implication rule,
+ * that given A<->B, outputs A->B and B->A.
  *
  */
 class Rule : public boost::less_than_comparable<Rule>,
@@ -115,8 +118,8 @@ public:
 	 *    <rule alias>
 	 *    <rbs>
 	 *
-	 * where <rule alias> is a DefinedSchemaNode elsewhere defined via
-	 * a DefineLink.
+	 * where `<rule alias>` is a `DefinedSchemaNode`, defined elsewhere,
+	 * with a `DefineLink`.
 	 */
 	Rule();
 	Rule(const Handle& rule);
@@ -125,21 +128,23 @@ public:
 	void init(const Handle& rule);
 	
 	// Comparison
-	bool operator==(const Rule& r) const {
+	bool operator==(const Rule& r) const
+	{
 		return r._forward_rule == _forward_rule
 			and r._backward_rule_handles == _backward_rule_handles;
 	}
-	bool operator<(const Rule& r) const {
+	bool operator<(const Rule& r) const
+	{
 		return _weight < r._weight;
 	}
-	bool is_alpha_equivalent(const Rule& r) const;
+	bool is_alpha_equivalent(const Rule&) const;
 
 	// Modifiers
-	void set_forward_handle(const Handle& h);
-	void set_backward_handles(const HandleSeq& hs);
-	void set_name(const string& name);
-	void set_category(const string& name);
-	void set_weight(float p);
+	void set_forward_handle(const Handle&);
+	void set_backward_handles(const HandleSeq&);
+	void set_name(const string&);
+	void set_category(const string&);
+	void set_weight(double);
 
 	// Access
 	string& get_name();
@@ -152,18 +157,24 @@ public:
 	/**
 	 * Add the rule in AtomSpace as.
 	 *
-	 * Warning: it will only add the pattern and rewrite terms, not
+	 * Warning: this will only add the pattern and rewrite terms, not
 	 * the scope links themselves. This is a hack to work around the
-	 * alpha conversion that the atomspace may operate when inserting
-	 * scope links so that alpha-equivalent scope links are not
+	 * alpha conversion that the atomspace may perform when inserting
+	 * scope links, so that alpha-equivalent scope links are not
 	 * redundantly added to an atomspace, which turns out to be
 	 * inconvenient for combining multiple scope links, in the way
 	 * that the backward chainer does when building forward chaining
 	 * strategies.
 	 *
+	 * Nil, can you explain what the problem above actually is, and
+	 * open a bug report, illustrating it? No hacks should be required:
+	 * the alpha conversion should already be doing exactly the right
+	 * thing, in every situation.  What is the "inconvenience"? What
+	 * is the problem that you are trying to work around?
+	 *
 	 * TODO: support backward rule form.
 	 */
-	void add(AtomSpace& as);
+	void add(AtomSpace&);
 
 	/**
 	 * Return the variable declaration of the forward rule form.
@@ -177,11 +188,11 @@ public:
 	bool is_valid() const;
 
 	/**
-	 * Return the premises of the rule. Optionally a conclusion can be
-	 * provided in argument. In such a case the premises will be
-	 * computed based on the backward rule.
+	 * Return the premises of the rule. Optionally, a conclusion can
+	 * be provided as the argument. In such a case, the premises will
+	 * be computed, based on the backward rule.
 	 */
-	HandleSeq get_premises(const Handle& conclusion = Handle::UNDEFINED) const;
+	HandleSeq get_premises(const Handle& = Handle::UNDEFINED) const;
 
 	/**
 	 * Return the conclusion on the forward rule. Used for applying a
@@ -195,7 +206,7 @@ public:
 	 * is the rule matches a certain target.
 	 */
 	HandlePairSeq get_conclusions() const;
-	float get_weight() const;
+	double get_weight() const;
 
 	/**
 	 * Create a new rule where all variables are uniquely renamed.
@@ -205,7 +216,7 @@ public:
 	 *
 	 * TODO: support backward rule handles.
 	 */
-	Rule gen_standardize_apart(AtomSpace* as);
+	Rule gen_standardize_apart(AtomSpace*);
 
 	/**
 	 * Used by the forward chainer to select rules. Given a source,
@@ -248,13 +259,13 @@ private:
 
 	// Rule weight (indicated by the TV strength of the membership of
 	// the rule to the RBS)
-	float _weight;
+	double _weight;
 
 	// Return a copy of the rule with the variables alpha-converted
 	// into random variable names.
 	Rule rand_alpha_converted() const;
 
-	Handle standardize_helper(AtomSpace* as, const Handle&, HandleMap&);
+	Handle standardize_helper(AtomSpace*, const Handle&, HandleMap&);
 
 	// Return the conclusions of the forward conclusions. There are
 	// several of them because the conclusions can be wrapped in the

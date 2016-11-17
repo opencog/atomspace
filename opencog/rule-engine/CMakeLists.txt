@@ -36,7 +36,6 @@ TARGET_LINK_LIBRARIES(ruleengine
 INSTALL (TARGETS ruleengine DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
-	InferenceSCM.h
 	UREConfigReader.h
 	URECommons.h
 	Rule.h

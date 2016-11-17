@@ -101,7 +101,7 @@ bool Rule::is_alpha_equivalent(const Rule& r) const
 	return true;
 }
 
-float Rule::get_weight() const
+double Rule::get_weight() const
 {
 	return _weight;
 }
@@ -284,7 +284,7 @@ HandlePairSeq Rule::get_conclusions() const
 	return results;
 }
 
-void Rule::set_weight(float p)
+void Rule::set_weight(double p)
 {
 	_weight = p;
 }
