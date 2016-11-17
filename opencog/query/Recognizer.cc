@@ -70,7 +70,7 @@ class Recognizer :
 			DefaultPatternMatchCB(as) {}
 
 		virtual void set_pattern(const Variables& vars,
-										 const Pattern& pat)
+		                         const Pattern& pat)
 		{
 			_pattern = &pat;
 			DefaultPatternMatchCB::set_pattern(vars, pat);
