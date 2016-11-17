@@ -21,6 +21,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/guile/SchemeModule.h>
+
+namespace opencog {
+
+class InferenceSCM : public ModuleWrap
+{
+protected:
+	virtual void init();
+
+	Handle do_forward_chaining(Handle h,
+	                           Handle rbs,
+	                           Handle hfocus_set);
+
+	Handle do_backward_chaining(Handle h,
+	                            Handle rbs,
+	                            Handle hfocus_set);
+
+	Handle get_rulebase_rules(Handle rbs);
+
+public:
+	InferenceSCM();
+};
+
+} /*end of namespace opencog*/
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>
 
@@ -28,7 +53,6 @@
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 
 #include "UREConfigReader.h"
-#include "InferenceSCM.h"
 using namespace opencog;
 
 InferenceSCM::InferenceSCM() : ModuleWrap("opencog rule-engine") {}
@@ -47,19 +71,17 @@ void InferenceSCM::init(void)
 		&InferenceSCM::get_rulebase_rules, this, "rule-engine");
 }
 
-namespace opencog {
-
 /**
- * A scheme cog-fc call back handler method which invokes the forward
- * chainer with the arguments passed to cog-fc.
+ * The scheme (cog-fc) function calls this, to perform forward-chaining.
  *
- * @param hsource      The source atom to start the forward chaining with.
- * @param rbs          A handle to the rule base ConceptNode.
- * @param hfoucs_set   A handle to a set link containing the set of focus sets.
- *                     if the set link is empty, FC will be invoked on the entire
+ * @param hsource      The source atom with which to start the chaining.
+ * @param rbs          A node, holding the name of the rulebase.
+ * @param hfoucs_set   A SetLink containing the atoms to which forward
+ *                     chaining will be applied.  If the set link is
+ *                     empty, chaining will be invoked on the entire
  *                     atomspace.
  *
- * @return             A ListLink containing the result of FC inference.
+ * @return             A SetLink containing the results of FC inference.
  */
 Handle InferenceSCM::do_forward_chaining(Handle hsource,
                                          Handle rbs,
@@ -119,7 +141,10 @@ Handle InferenceSCM::get_rulebase_rules(Handle rbs)
     return Handle(createLink(SET_LINK, hs));
 }
 
-}
+
+extern "C" {
+void opencog_ruleengine_init(void);
+};
 
 void opencog_ruleengine_init(void)
 {
