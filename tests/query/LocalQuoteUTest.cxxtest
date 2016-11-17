@@ -150,7 +150,17 @@ void LocalQuoteUTest::test_bind()
 
 	// Result
 	Handle result = bindlink(&_as, bl),
-		expected = Q_A;
+		expected = al(SET_LINK,
+		              al(BIND_LINK,
+		                 al(TYPED_VARIABLE_LINK,
+		                    an(VARIABLE_NODE, "$X"),
+		                    an(TYPE_NODE, "ConceptNode")),
+		                 al(EVALUATION_LINK,
+		                    an(PREDICATE_NODE, "P"),
+		                    an(VARIABLE_NODE, "$X")),
+		                 al(EVALUATION_LINK,
+		                    an(PREDICATE_NODE, "Q"),
+		                    an(VARIABLE_NODE, "$X"))));
 
 	printf("Meta-rule %s\n", bl->toString().c_str());
 	printf("Expecting %s\n", expected->toString().c_str());
