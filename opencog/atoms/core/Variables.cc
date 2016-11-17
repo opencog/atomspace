@@ -24,6 +24,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/Quotation.h>
 #include <opencog/atomutils/TypeUtils.h>
 #include <opencog/atoms/TypeNode.h>
 
@@ -35,7 +36,7 @@ namespace opencog {
 
 struct VarScraper
 {
-	bool _in_quote;
+	Quotation _quotation;
 	OrderedHandleSet _bound_vars;
 	void find_vars(HandleSeq&, OrderedHandleSet&, const HandleSeq&);
 };
@@ -57,7 +58,7 @@ void VarScraper::find_vars(HandleSeq& varseq, OrderedHandleSet& varset,
 		Type t = h->getType();
 
 		if ((VARIABLE_NODE == t or GLOB_NODE == t) and
-		    not _in_quote and
+		    _quotation.is_unquoted() and
 		    0 == varset.count(h) and
 		    0 == _bound_vars.count(h))
 		{
@@ -67,15 +68,8 @@ void VarScraper::find_vars(HandleSeq& varseq, OrderedHandleSet& varset,
 
 		if (not h->isLink()) continue;
 
-		// Save the recursive state on stack.
-		bool save_quote = _in_quote;
-		if (QUOTE_LINK == t)
-			_in_quote = true;
-		else
-		if (UNQUOTE_LINK == t)
-			_in_quote = false;
-
-		bool issco = classserver().isA(t, SCOPE_LINK);
+		bool issco = _quotation.is_unquoted()
+			and classserver().isA(t, SCOPE_LINK);
 		OrderedHandleSet bsave;
 		if (issco)
 		{
@@ -92,21 +86,24 @@ void VarScraper::find_vars(HandleSeq& varseq, OrderedHandleSet& varset,
 			for (const Handle& v : vees.varseq) _bound_vars.insert(v);
 		}
 
+		// Save quotation on the stack before updating it for the
+		// recursive call
+		Quotation save_quotation(_quotation);
+		_quotation.update(t);
+
 		find_vars(varseq, varset, h->getOutgoingSet());
 
 		if (issco)
 			_bound_vars = bsave;
 
-		// Restore current state from the stack.
-		if (QUOTE_LINK == t or UNQUOTE_LINK == t)
-			_in_quote = save_quote;
+		// Restore current state from the stack
+		_quotation = save_quotation;
 	}
 }
 
 void FreeVariables::find_variables(const HandleSeq& oset)
 {
 	VarScraper vsc;
-	vsc._in_quote = false;
 	vsc.find_vars(varseq, varset, oset);
 
 	// Build the index from variable name, to its ordinal number.
@@ -117,16 +114,7 @@ void FreeVariables::find_variables(const HandleSeq& oset)
 
 void FreeVariables::find_variables(const Handle& h)
 {
-	if (h->isLink())
-	{
-		find_variables(h->getOutgoingSet());
-	}
-	else
-	{
-		HandleSeq bogus;
-		bogus.push_back(h);
-		find_variables(bogus);
-	}
+	find_variables(HandleSeq{h});
 }
 
 HandleSeq FreeVariables::make_values(const HandleMap& varmap) const

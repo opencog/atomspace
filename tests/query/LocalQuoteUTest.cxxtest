@@ -37,34 +37,39 @@ class LocalQuoteUTest: public CxxTest::TestSuite
 private:
     AtomSpace _as;
 
-	Handle X, P, P_X, forall,
-		VT, vardecl_var, body_var, vardecl, forall_pattern, forall_get,
-		A, P_A, CT;
+	Handle X, P, Q, P_X, Q_X, forall,
+		VT, vardecl_var, body_var, rewrite_var,
+		vardecl, forall_pattern, forall_get,
+		A, P_A, Q_A, CT;
 
 public:
-    LocalQuoteUTest(void)
+    LocalQuoteUTest()
     {
-        logger().set_level(Logger::DEBUG);
-        logger().set_print_to_stdout_flag(true);
-		logger().set_timestamp_flag(false);
+	    logger().set_level(Logger::DEBUG);
+	    logger().set_print_to_stdout_flag(true);
+	    logger().set_timestamp_flag(false);
     }
 
-    void setUp(void);
-    void tearDown(void);
+    void setUp();
+    void tearDown();
 
-    void test_forall_query(void);
-	void test_implication_rewrite();
+	void test_get();
+	void test_put();
+	void test_bind();
 };
 
-void LocalQuoteUTest::setUp(void)
+void LocalQuoteUTest::setUp()
 {
 	X = an(VARIABLE_NODE, "$X");
 	P = an(PREDICATE_NODE, "P");
+	Q = an(PREDICATE_NODE, "Q");
 	P_X = al(EVALUATION_LINK, P, X);
+	Q_X = al(EVALUATION_LINK, Q, X);
 	forall = al(FORALL_LINK, X, P_X);
 	VT = an(TYPE_NODE, "VariableNode");
 	vardecl_var = an(VARIABLE_NODE, "$vardecl");
 	body_var = an(VARIABLE_NODE, "$body");
+	rewrite_var = an(VARIABLE_NODE, "$rewrite");
 	vardecl = al(VARIABLE_LIST,
 	             al(TYPED_VARIABLE_LINK, vardecl_var, VT),
 	             body_var);
@@ -73,16 +78,17 @@ void LocalQuoteUTest::setUp(void)
 	A = an(CONCEPT_NODE, "A");
 	CT = an(TYPE_NODE, "ConceptNode");
 	P_A = al(EVALUATION_LINK, P, A);
+	Q_A = al(EVALUATION_LINK, Q, A);
 }
 
-void LocalQuoteUTest::tearDown(void)
+void LocalQuoteUTest::tearDown()
 {
 }
 
-/*
- * LocalQuoteLink unit test on a ForAll pattern query.
+/**
+ * LocalQuoteLink unit test on a ForAll pattern query using Get
  */
-void LocalQuoteUTest::test_forall_query(void)
+void LocalQuoteUTest::test_get()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -98,9 +104,9 @@ void LocalQuoteUTest::test_forall_query(void)
 }
 
 /**
- * Same as test_eval_implication_1 but using LocalQuoteLink this time.
+ * LocalQuoteLink unit test on a ImplicationScope rewrite using a Put
  */
-void LocalQuoteUTest::test_implication_rewrite()
+void LocalQuoteUTest::test_put()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -117,6 +123,49 @@ void LocalQuoteUTest::test_implication_rewrite()
 	printf("Expecting %s\n", expected->toString().c_str());
 	printf("Got %s\n", putted->toString().c_str());
 	TS_ASSERT_EQUALS(putted, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * LocalQuoteLink unit test on a ImplicationScope rewrite using a Bind
+ */
+void LocalQuoteUTest::test_bind()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Meta rule, given an ImplicationScopeLink creates a
+	// corresponding BindLink
+	Handle bl = al(BIND_LINK,
+	               al(LOCAL_QUOTE_LINK,
+	                  al(IMPLICATION_SCOPE_LINK,
+	                     vardecl_var, body_var, rewrite_var)),
+	               al(LOCAL_QUOTE_LINK,
+	                  al(BIND_LINK,
+	                     vardecl_var, body_var, rewrite_var)));
+
+	// Implication to serve as grounding for the meta rule
+	Handle impl = al(IMPLICATION_SCOPE_LINK,
+	                 al(TYPED_VARIABLE_LINK, X, CT), P_X, Q_X);
+
+	// Result
+	Handle result = bindlink(&_as, bl),
+		expected = al(SET_LINK,
+		              al(BIND_LINK,
+		                 al(TYPED_VARIABLE_LINK,
+		                    an(VARIABLE_NODE, "$X"),
+		                    an(TYPE_NODE, "ConceptNode")),
+		                 al(EVALUATION_LINK,
+		                    an(PREDICATE_NODE, "P"),
+		                    an(VARIABLE_NODE, "$X")),
+		                 al(EVALUATION_LINK,
+		                    an(PREDICATE_NODE, "Q"),
+		                    an(VARIABLE_NODE, "$X"))));
+
+	printf("Meta-rule %s\n", bl->toString().c_str());
+	printf("Expecting %s\n", expected->toString().c_str());
+	printf("Got %s\n", result->toString().c_str());
+	TS_ASSERT_EQUALS(result, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
