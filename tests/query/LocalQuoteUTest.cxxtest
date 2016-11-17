@@ -45,15 +45,15 @@ private:
 public:
     LocalQuoteUTest()
     {
-        logger().set_level(Logger::FINE);
-        logger().set_print_to_stdout_flag(true);
-		logger().set_timestamp_flag(false);
+	    logger().set_level(Logger::DEBUG);
+	    logger().set_print_to_stdout_flag(true);
+	    logger().set_timestamp_flag(false);
     }
 
     void setUp();
     void tearDown();
 
-    void test_get();
+	void test_get();
 	void test_put();
 	void test_bind();
 };
