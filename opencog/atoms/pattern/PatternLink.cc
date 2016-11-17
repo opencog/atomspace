@@ -827,10 +827,7 @@ void PatternLink::check_satisfiability(const OrderedHandleSet& vars,
 	// Compute the set-union of all component vars.
 	OrderedHandleSet vunion;
 	for (const OrderedHandleSet& vset : compvars)
-	{
-		for (const Handle& v : vset)
-			vunion.insert(v);
-	}
+		vunion.insert(vset.begin(), vset.end());
 
 	// Is every variable in some component? If not, then throw.
 	for (const Handle& v : vars)
