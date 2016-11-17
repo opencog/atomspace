@@ -238,7 +238,7 @@ void ScopeUTest::test_hide(void)
 	Handle forall = eval->eval_h("forall");
 	Handle varx = forall->getOutgoingAtom(0);
 
-	Handle forpat = getx->getOutgoingAtom(0);
+	Handle forpat = getx->getOutgoingAtom(0)->getOutgoingAtom(0);
 	Handle patvar = forpat->getOutgoingAtom(0);
 
 	// This unit test doesn't test anything critical if the pattern
