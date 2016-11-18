@@ -330,14 +330,14 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
 	return st_ver;
 }
 
-RuleSeq Rule::unify_source(const Handle& source,
+RuleSet Rule::unify_source(const Handle& source,
                            const Handle& vardecl) const
 {
 	// TODO
 	return {};
 }
 
-RuleSeq Rule::unify_target(const Handle& target,
+RuleSet Rule::unify_target(const Handle& target,
                            const Handle& vardecl) const
 {
 	// If the rule's handle has not been set yet
@@ -346,7 +346,7 @@ RuleSeq Rule::unify_target(const Handle& target,
 
 	Rule alpha_rule = rand_alpha_converted();
 
-	RuleSeq unified_rules;
+	RuleSet unified_rules;
 
 	// If no backward rule then only consider the conclusions from the
 	// forward rule
@@ -368,7 +368,7 @@ RuleSeq Rule::unify_target(const Handle& target,
 
 					Rule unified_rule(alpha_rule);
 					unified_rule.set_forward_handle(h);
-					unified_rules.push_back(unified_rule);
+					unified_rules.insert(unified_rule);
 				}
 			}
 		}
@@ -499,13 +499,14 @@ std::string oc_to_string(const Rule& rule)
 	return rule.to_string();
 }
 
-std::string oc_to_string(const RuleSeq& rules)
+std::string oc_to_string(const RuleSet& rules)
 {
 	std::stringstream ss;
 	ss << "size = " << rules.size() << std::endl;
-	for (size_t i = 0; i < rules.size(); ++i)
-		ss << "rule[" << i << "]:" << std::endl
-		   << oc_to_string(rules[i]) << std::endl;
+	size_t i = 0;
+	for (const Rule& rule : rules)
+		ss << "rule[" << i++ << "]:" << std::endl
+		   << oc_to_string(rule) << std::endl;
 	return ss.str();
 }
 

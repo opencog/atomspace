@@ -105,7 +105,7 @@ private:
     void validate(const Handle& hsource, const HandleSeq& hfocus_set);
 
 protected:
-    RuleSeq _rules; /* loaded rules */
+    RuleSet _rules; /* loaded rules */
     UnorderedHandleSet _potential_sources;
     HandleSeq _focus_set;
 

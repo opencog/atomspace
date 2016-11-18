@@ -42,7 +42,7 @@ UREConfigReader::UREConfigReader(AtomSpace& as, const Handle& rbs) : _as(as)
 
 	// Retrieve the rules (MemberLinks) and instantiate them
 	for (const Handle& rule_name : fetch_rule_names(rbs))
-		_rbparams.rules.emplace_back(rule_name, rbs);
+		_rbparams.rules.emplace(rule_name, rbs);
 
 	// Fetch maximum number of iterations
 	_rbparams.max_iter = fetch_num_param(max_iter_name, rbs);
@@ -51,12 +51,12 @@ UREConfigReader::UREConfigReader(AtomSpace& as, const Handle& rbs) : _as(as)
 	_rbparams.attention_alloc = fetch_bool_param(attention_alloc_name, rbs);
 }
 
-const RuleSeq& UREConfigReader::get_rules() const
+const RuleSet& UREConfigReader::get_rules() const
 {
 	return _rbparams.rules;
 }
 
-RuleSeq& UREConfigReader::get_rules()
+RuleSet& UREConfigReader::get_rules()
 {
 	return _rbparams.rules;
 }

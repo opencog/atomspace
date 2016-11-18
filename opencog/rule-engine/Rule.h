@@ -34,7 +34,7 @@
 namespace opencog {
 
 class Rule;
-class RuleSeq : public std::vector<Rule>
+class RuleSet : public std::set<Rule>
 {
 	// Run all meta rules and insert them back in the rule sequence.
 	void expand_meta_rules() {}
@@ -225,14 +225,14 @@ public:
 	 * TODO: we probably want to support a vector of sources for rules
 	 * with multiple premises.
 	 */
-	RuleSeq unify_source(const Handle& source, const Handle& vardecl) const;
+	RuleSet unify_source(const Handle& source, const Handle& vardecl) const;
 
 	/**
 	 * Used by the backward chainer. Given a target, generate all rule
 	 * variations that may infer this target. The variables in the
 	 * rules are renamed to almost certainly avoid name collision.
 	 */
-	RuleSeq unify_target(const Handle& target, const Handle& vardecl) const;
+	RuleSet unify_target(const Handle& target, const Handle& vardecl) const;
 
 	std::string to_string() const;
 
@@ -278,7 +278,7 @@ private:
 // For Gdb debugging, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const Rule& rule);
-std::string oc_to_string(const RuleSeq& rules);
+std::string oc_to_string(const RuleSet& rules);
 
 } // ~namespace opencog
 

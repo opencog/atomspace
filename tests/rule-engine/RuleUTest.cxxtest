@@ -87,11 +87,11 @@ void RuleUTest::test_unify_target()
 	Rule deduction_rule(deduction_rule_h);
 	Handle target = al(INHERITANCE_LINK, X, A),
 		target_vardecl = al(TYPED_VARIABLE_LINK, X, CT);
-	RuleSeq rules = deduction_rule.unify_target(target, target_vardecl);
+	RuleSet rules = deduction_rule.unify_target(target, target_vardecl);
 
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
-	Handle forward_rule = rules[0].get_forward_rule(),
+	Handle forward_rule = rules.begin()->get_forward_rule(),
 		// expected up to an alpha conversion
 		vardecl = al(VARIABLE_LIST,
 		             al(TYPED_VARIABLE_LINK, X, CT),

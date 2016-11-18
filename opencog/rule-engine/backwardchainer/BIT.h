@@ -67,7 +67,7 @@ public:
 
 	// Or-children at the rule level, as multiple rules, or rule
 	// variations (partially unified, etc) can yield the same target.
-	RuleSeq rules;
+	RuleSet rules;
 
 	std::string to_string() const;
 };
