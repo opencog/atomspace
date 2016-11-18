@@ -28,42 +28,71 @@
 #include <boost/uuid/uuid_generators.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/base/Quotation.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/pattern/BindLink.h>
 
 #include <opencog/atomutils/TypeUtils.h>
 #include <opencog/atomutils/Unify.h>
 
+#include <opencog/query/BindLinkAPI.h>
+
 #include "Rule.h"
 
 namespace opencog {
 
+void RuleSet::expand_meta_rules(AtomSpace& as)
+{
+	for (const Rule& rule : *this) {
+		if (rule.is_meta()) {
+			Handle result = rule.apply(as);
+			for (const Handle& produced_h : result->getOutgoingSet()) {
+				Rule produced(rule.get_alias(), produced_h, rule.get_rbs());
+				this->insert(produced);
+			}
+		}
+	}
+}
+
 Rule::Rule()
 	: _rule_alias(Handle::UNDEFINED) {}
 
-Rule::Rule(const Handle& rule_ml)
+Rule::Rule(const Handle& rule_member)
 {
-	init(rule_ml);
+	init(rule_member);
 }
 
-Rule::Rule(const Handle& rule_name, const Handle& rbs)
+Rule::Rule(const Handle& rule_alias, const Handle& rbs)
 {
-	AtomSpace* as = rule_name->getAtomSpace();
-	init(as->get_link(MEMBER_LINK, rule_name, rbs));
+	init(rule_alias, rbs);
 }
 
-void Rule::init(const Handle& rule_ml)
+Rule::Rule(const Handle& rule_alias, const Handle& rule, const Handle& rbs)
 {
-	OC_ASSERT(rule_ml != Handle::UNDEFINED);
-	if (not classserver().isA(rule_ml->getType(), MEMBER_LINK))
+	init(rule_alias, rule, rbs);
+}
+
+void Rule::init(const Handle& rule_member)
+{
+	OC_ASSERT(rule_member != Handle::UNDEFINED);
+	if (not classserver().isA(rule_member->getType(), MEMBER_LINK))
 		throw InvalidParamException(TRACE_INFO,
 		                            "Rule '%s' is expected to be a MemberLink",
-		                            rule_ml->toString().c_str());
+		                            rule_member->toString().c_str());
 
-	_rule_alias = rule_ml->getOutgoingAtom(0);
-	Handle rbs = rule_ml->getOutgoingAtom(1);
+	Handle rule_alias = rule_member->getOutgoingAtom(0);
+	Handle rbs = rule_member->getOutgoingAtom(1);
+	init(rule_alias, rbs);
+}
 
-	Handle rule = DefineLink::get_definition(_rule_alias);
+void Rule::init(const Handle& rule_alias, const Handle& rbs)
+{
+	Handle rule = DefineLink::get_definition(rule_alias);
+	init(rule_alias, rule, rbs);
+}
+
+void Rule::init(const Handle& rule_alias, const Handle& rule, const Handle& rbs)
+{
 	if (rule->getType() == LIST_LINK)
 	{
 		OC_ASSERT(rule->getArity() > 0);
@@ -80,8 +109,10 @@ void Rule::init(const Handle& rule_ml)
 		OC_ASSERT(rule->getType() == BIND_LINK);
 		_forward_rule = BindLinkCast(rule);
 	}
+
+	_rule_alias = rule_alias;
 	_name = _rule_alias->getName();
-	_category = rbs->getName();
+	_rbs = rbs;
 	_weight = rule->getTruthValue()->getMean();
 }
 
@@ -117,21 +148,6 @@ bool Rule::is_alpha_equivalent(const Rule& r) const
 double Rule::get_weight() const
 {
 	return _weight;
-}
-
-void Rule::set_category(const std::string& name)
-{
-	_category = name;
-}
-
-std::string& Rule::get_category()
-{
-	return _category;
-}
-
-const std::string& Rule::get_category() const
-{
-	return _category;
 }
 
 void Rule::set_name(const std::string& name)
@@ -170,6 +186,11 @@ Handle Rule::get_forward_rule() const
 Handle Rule::get_alias() const
 {
 	return _rule_alias;
+}
+
+Handle Rule::get_rbs() const
+{
+	return _rbs;
 }
 
 void Rule::add(AtomSpace& as)
@@ -227,6 +248,18 @@ Handle Rule::get_forward_implicand() const
 bool Rule::is_valid() const
 {
 	return (bool)_forward_rule;
+}
+
+bool Rule::is_meta() const
+{
+	Handle implicand = get_forward_implicand();
+
+	if (implicand.is_undefined())
+		return false;
+
+	Type itype = implicand->getType();
+	return (Quotation::is_quotation_type(itype) ?
+	        implicand->getOutgoingAtom(0)->getType() : itype) == BIND_LINK;
 }
 
 /**
@@ -379,6 +412,11 @@ RuleSet Rule::unify_target(const Handle& target,
 	}
 
 	return unified_rules;
+}
+
+Handle Rule::apply(AtomSpace& as) const
+{
+	return bindlink(&as, Handle(_forward_rule));
 }
 
 Rule Rule::rand_alpha_converted() const
