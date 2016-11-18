@@ -317,15 +317,15 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
 	return st_ver;
 }
 
-std::vector<Rule> Rule::unify_source(const Handle& source,
-                                     const Handle& vardecl) const
+RuleSeq Rule::unify_source(const Handle& source,
+                           const Handle& vardecl) const
 {
 	// TODO
 	return {};
 }
 
-std::vector<Rule> Rule::unify_target(const Handle& target,
-                                     const Handle& vardecl) const
+RuleSeq Rule::unify_target(const Handle& target,
+                           const Handle& vardecl) const
 {
 	// If the rule's handle has not been set yet
 	if (!_forward_rule)
@@ -333,7 +333,7 @@ std::vector<Rule> Rule::unify_target(const Handle& target,
 
 	Rule alpha_rule = rand_alpha_converted();
 
-	std::vector<Rule> unified_rules;
+	RuleSeq unified_rules;
 
 	// If no backward rule then only consider the conclusions from the
 	// forward rule

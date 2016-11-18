@@ -232,7 +232,7 @@ private:
 	// strategies.
 	AndBITFCMap _andbits;
 
-	const std::vector<Rule>& _rules;
+	const RuleSeq& _rules;
 
 	OrderedHandleSet _results;
 };

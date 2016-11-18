@@ -50,12 +50,12 @@ UREConfigReader::UREConfigReader(AtomSpace& as, const Handle& rbs) : _as(as)
 	_rbparams.attention_alloc = fetch_bool_param(attention_alloc_name, rbs);
 }
 
-const std::vector<Rule>& UREConfigReader::get_rules() const
+const RuleSeq& UREConfigReader::get_rules() const
 {
 	return _rbparams.rules;
 }
 
-std::vector<Rule>& UREConfigReader::get_rules()
+RuleSeq& UREConfigReader::get_rules()
 {
 	return _rbparams.rules;
 }

@@ -50,8 +50,8 @@ public:
 	UREConfigReader(AtomSpace& as, const Handle& rbs);
 
 	// Access methods, return parameters given a rule-based system
-	const std::vector<Rule>& get_rules() const;
-	std::vector<Rule>& get_rules();
+	const RuleSeq& get_rules() const;
+	RuleSeq& get_rules();
 	bool get_attention_allocation() const;
 	int get_maximum_iterations() const;
 
@@ -85,7 +85,7 @@ private:
 	AtomSpace& _as;
 
 	struct RuleBaseParameters {
-		std::vector<Rule> rules;
+		RuleSeq rules;
 		bool attention_alloc;
 		int max_iter;
 	};
