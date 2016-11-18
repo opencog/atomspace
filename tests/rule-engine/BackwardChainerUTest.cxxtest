@@ -279,9 +279,7 @@ void BackwardChainerUTest::test_implication_instantiation_1()
 	logger().debug() << "results = " << results->toString();
 	logger().debug() << "expected = " << expected->toString();
 
-	// TODO: fixme
-	// TS_ASSERT_EQUALS(results, expected);
-	TS_ASSERT(true);
+	TS_ASSERT_EQUALS(results, expected);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
