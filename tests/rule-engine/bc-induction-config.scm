@@ -16,7 +16,7 @@
    (ConceptNode "URE")
 )
 (MemberLink (stv 1 1)
-   crisp-implication-full-instantiation-meta-rule-name
+   conditional-full-instantiation-meta-rule-name
    (ConceptNode "URE")
 )
 

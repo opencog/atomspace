@@ -1,5 +1,5 @@
 ;; =======================================================================
-;; Crisp Conditional Instantiation Meta Rule
+;; Conditional Instantiation Meta Rule
 ;;
 ;; ImplicationScopeLink
 ;;    V
@@ -92,11 +92,11 @@
      conditional-full-instantiation-meta-body
      conditional-full-instantiation-meta-rewrite))
 
-;; And fuzzy eval. Normally this would be handled by a rule but to
-;; simplify the test when hardcore it here
-(define (and-fuzzy-eval a)
-  ;; TODO
-)
+;; ;; And fuzzy eval. Normally this would be handled by a rule but to
+;; ;; simplify the test when hardcore it here
+;; (define (and-fuzzy-eval a)
+;;   ;; TODO
+;; )
 
 ;; Set (stv 1 1) on Q is Impl and P strength are both above 0.5 and
 ;; their confidence is non null.
