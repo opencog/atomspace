@@ -15,12 +15,12 @@
    implication-scope-direct-evaluation-rule-name
    (ConceptNode "URE")
 )
-;; (MemberLink (stv 1 1)
-;;    crisp-implication-full-instantiation-meta-rule-name
-;;    (ConceptNode "URE")
-;; )
+(MemberLink (stv 1 1)
+   crisp-implication-full-instantiation-meta-rule-name
+   (ConceptNode "URE")
+)
 
-;; termination criteria parameters
+;; Termination criteria parameters
 (ExecutionLink
    (SchemaNode "URE:maximum-iterations")
    (ConceptNode "URE")
