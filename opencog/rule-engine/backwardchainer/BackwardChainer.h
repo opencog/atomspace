@@ -232,7 +232,7 @@ private:
 	// strategies.
 	AndBITFCMap _andbits;
 
-	const RuleSet& _rules;
+	RuleSet _rules;
 
 	OrderedHandleSet _results;
 };

@@ -93,6 +93,10 @@ Handle BackwardChainer::get_results() const
 
 void BackwardChainer::expand_bit()
 {
+	// This is kinda of hack before meta rules are fully supported by
+	// the Rule class.
+	_rules.expand_meta_rules(_as);
+
 	if (_handle2bitnode.empty()) {
 		// Initialize the and-BIT of the initial target
 		insert_h2b(_init_target, _init_vardecl, _init_fitness);
