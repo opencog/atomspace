@@ -5,13 +5,13 @@
 ;; To be loaded first
 
 ;; Load the rules (use load for relative path w.r.t. to that file)
-(load-from-path "tests/rule-engine/rules/implication-instantiation-rule.scm")
+(load-from-path "tests/rule-engine/meta-rules/conditional-instantiation-meta-rule.scm")
 
 ;; Associate the rules to the rule base (with weights, their semantics
 ;; is currently undefined, we might settled with probabilities but it's
 ;; not sure)
 (MemberLink (stv 1 1)
-   implication-full-instantiation-rule-name
+   conditional-full-instantiation-meta-rule-name
    (ConceptNode "URE")
 )
 

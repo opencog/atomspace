@@ -6,7 +6,7 @@
 
 ;; Load the rules (use load for relative path w.r.t. to that file)
 (load "rules/implication-scope-direct-evaluation-rule.scm")
-(load "meta-rules/conditional-instantiation-meta-rules.scm")
+(load "meta-rules/conditional-instantiation-meta-rule.scm")
 
 ;; Associate the rules to the rule base (with weights, their semantics
 ;; is currently undefined, we might settled with probabilities but it's
