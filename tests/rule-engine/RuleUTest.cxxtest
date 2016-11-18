@@ -27,6 +27,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/rule-engine/Rule.h>
 
+using namespace std;
 using namespace opencog;
 
 #define al _as.add_link

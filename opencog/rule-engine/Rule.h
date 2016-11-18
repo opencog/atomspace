@@ -33,10 +33,12 @@
 
 namespace opencog {
 
-using namespace std;
-
 class Rule;
-typedef vector<Rule> RuleSeq;
+class RuleSeq : public std::vector<Rule>
+{
+	// Run all meta rules and insert them back in the rule sequence.
+	void expand_meta_rules() {}
+};
 
 /**
  * Class for managing rules in the URE.
@@ -128,29 +130,25 @@ public:
 	void init(const Handle& rule);
 	
 	// Comparison
-	bool operator==(const Rule& r) const
-	{
-		return r._forward_rule == _forward_rule
-			and r._backward_rule_handles == _backward_rule_handles;
-	}
-	bool operator<(const Rule& r) const
-	{
-		return _weight < r._weight;
-	}
+	bool operator==(const Rule& r) const;
+	/**
+	 * Order by weight, or if equal by handle value.
+	 */
+	bool operator<(const Rule& r) const;
 	bool is_alpha_equivalent(const Rule&) const;
 
 	// Modifiers
 	void set_forward_handle(const Handle&);
 	void set_backward_handles(const HandleSeq&);
-	void set_name(const string&);
-	void set_category(const string&);
+	void set_name(const std::string&);
+	void set_category(const std::string&);
 	void set_weight(double);
 
 	// Access
-	string& get_name();
-	const string& get_name() const;
-	string& get_category();
-	const string& get_category() const;
+	std::string& get_name();
+	const std::string& get_name() const;
+	std::string& get_category();
+	const std::string& get_category() const;
 	Handle get_forward_rule() const;
 	Handle get_alias() const;
 
@@ -246,16 +244,16 @@ private:
 	//
 	// TODO: Maybe replace that by vector<ScopeLinkPtr>
 	HandleSeq _backward_rule_handles;
-	vector<ScopeLinkPtr> _backward_rule_scope_links;
+	std::vector<ScopeLinkPtr> _backward_rule_scope_links;
 
 	// Rule alias: (DefineLink rule_alias_ rule_handle_)
 	Handle _rule_alias;
 
 	// Rule name, the name of the node referring to the rule body
-	string _name;
+	std::string _name;
 
 	// Rule-based system name
-	string _category;
+	std::string _category;
 
 	// Rule weight (indicated by the TV strength of the membership of
 	// the rule to the RBS)

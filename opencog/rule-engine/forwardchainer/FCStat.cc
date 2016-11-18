@@ -35,7 +35,7 @@ void FCStat::add_inference_record(unsigned iteration, Handle source,
 	for (const Handle& p : product)
 		_as.add_link(EXECUTION_LINK,
 		             rule->get_alias(),
-		             _as.add_node(NUMBER_NODE, to_string(iteration)),
+		             _as.add_node(NUMBER_NODE, std::to_string(iteration)),
 		             source, p);
 }
 

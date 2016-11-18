@@ -14,7 +14,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+using namespace std;
 using namespace opencog;
+
 //#define DEBUG 1
 
 #define al _as.add_link

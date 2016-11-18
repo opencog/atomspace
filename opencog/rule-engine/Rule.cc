@@ -85,6 +85,19 @@ void Rule::init(const Handle& rule_ml)
 	_weight = rule->getTruthValue()->getMean();
 }
 
+bool Rule::operator==(const Rule& r) const
+{
+	return r._forward_rule == _forward_rule
+		and r._backward_rule_handles == _backward_rule_handles;
+}
+
+bool Rule::operator<(const Rule& r) const
+{
+	return _weight == r._weight ?
+		Handle(_forward_rule).value() < Handle(r._forward_rule).value()
+		: _weight < r._weight;
+}
+
 bool Rule::is_alpha_equivalent(const Rule& r) const
 {
 	if (not _forward_rule->is_equal(Handle(r._forward_rule)))
@@ -106,32 +119,32 @@ double Rule::get_weight() const
 	return _weight;
 }
 
-void Rule::set_category(const string& name)
+void Rule::set_category(const std::string& name)
 {
 	_category = name;
 }
 
-string& Rule::get_category()
+std::string& Rule::get_category()
 {
 	return _category;
 }
 
-const string& Rule::get_category() const
+const std::string& Rule::get_category() const
 {
 	return _category;
 }
 
-void Rule::set_name(const string& name)
+void Rule::set_name(const std::string& name)
 {
 	_name = name;
 }
 
-string& Rule::get_name()
+std::string& Rule::get_name()
 {
 	return _name;
 }
 
-const string& Rule::get_name() const
+const std::string& Rule::get_name() const
 {
 	return _name;
 }

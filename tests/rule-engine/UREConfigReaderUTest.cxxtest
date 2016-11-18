@@ -24,7 +24,7 @@ public:
 		_eval.eval("(use-modules (opencog) (opencog query))");
 
 		// Load the simple crisp system example to test it
-		string eval_output =
+		std::string eval_output =
 			_eval.eval("(load \"" PROJECT_SOURCE_DIR
 			           "/tests/rule-engine/fc.scm\")");
 		std::cout << "eval_output = " << eval_output << std::endl;

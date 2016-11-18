@@ -27,6 +27,7 @@
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/atomspaceutils/AtomSpaceUtils.h>
 
+using namespace std;
 using namespace opencog;
 
 const std::string UREConfigReader::top_rbs_name = "URE";
