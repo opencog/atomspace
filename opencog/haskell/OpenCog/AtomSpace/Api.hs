@@ -8,6 +8,7 @@
 -- creating/removing/modifying atoms.
 module OpenCog.AtomSpace.Api (
       insert
+    , insertAndGetHandle
     , remove
     , get
     , debug
