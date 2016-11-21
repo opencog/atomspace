@@ -34,7 +34,7 @@ private:
 public:
 	BackwardChainerUTest() : _eval(&_as)
 	{
-		logger().set_level(Logger::DEBUG);
+		logger().set_level(Logger::INFO);
 		logger().set_timestamp_flag(false);
 		// logger().set_sync_flag(true);
 		logger().set_print_to_stdout_flag(true);
@@ -53,9 +53,9 @@ public:
 	void test_implication_instantiation_1();
 	void test_implication_instantiation_2();
 	void test_implication_instantiation_tv_query();
-	// TODO: re-enable the following tests
 	void test_impossible_criminal();
 	void test_criminal();
+	// TODO: re-enable the following tests
 	void test_induction();
 	// TODO: think about fixing or removing the follow tests
 	// void test_focus_set();
@@ -355,22 +355,26 @@ void BackwardChainerUTest::test_impossible_criminal()
 
 	_as.clear();
 
-	_eval.eval("(load-from-path \"tests/rule-engine/bc-modus-ponens-config.scm\")");
+	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal-without-deduction-config.scm\")");
 	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal.scm\")");
 	randGen().seed(0);
 
-	// load modus ponens rule
+	// Load modus ponens rule
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 
-	Handle target_var = _eval.eval_h("(VariableNode \"$who\")");
 	Handle target =
 	    _eval.eval_h("(InheritanceLink"
 	                 "   (VariableNode \"$who\")"
 	                 "   (ConceptNode \"criminal\"))");
+	Handle vardecl =
+	    _eval.eval_h("(TypedVariable"
+	                 "   (VariableNode \"$who\")"
+	                 "   (Type \"ConceptNode\"))");
 	Handle soln = _eval.eval_h("(ConceptNode \"West\")");
 
-	// should NOT be possible to find the solution without deduction rule
-	BackwardChainer bc(_as, top_rbs, target);
+	// Should NOT be possible to find the solution without deduction
+	// rule, as it won't be able to tell that missile@123 is a weapon.
+	BackwardChainer bc(_as, top_rbs, target, vardecl);
 	bc.get_config().set_maximum_iterations(100);
 	bc.do_chain();
 
@@ -380,9 +384,7 @@ void BackwardChainerUTest::test_impossible_criminal()
 	logger().debug() << "results = " << results;
 	logger().debug() << "expected = " << expected;
 
-	// TODO: fixme
-	// TS_ASSERT_EQUALS(results, expected);
-	TS_ASSERT(true);
+	TS_ASSERT_EQUALS(results, expected);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -393,9 +395,9 @@ void BackwardChainerUTest::test_criminal()
 
 	_as.clear();
 
-	_eval.eval("(load-from-path \"tests/rule-engine/bc-config.scm\")");
+	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal-config.scm\")");
 	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal.scm\")");
-	randGen().seed(500);
+	randGen().seed(0);
 
 	// load modus ponens & deduction rules
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
@@ -405,18 +407,27 @@ void BackwardChainerUTest::test_criminal()
 		_eval.eval_h("(InheritanceLink"
 		             "   (VariableNode \"$who\")"
 		             "   (ConceptNode \"criminal\"))");
+	Handle vardecl =
+	    _eval.eval_h("(TypedVariable"
+	                 "   (VariableNode \"$who\")"
+	                 "   (Type \"ConceptNode\"))");
 	Handle soln = _eval.eval_h("(ConceptNode \"West\")");
 
-	BackwardChainer bc(_as, top_rbs, target);
-	bc.get_config().set_maximum_iterations(100);
+	BackwardChainer bc(_as, top_rbs, target, vardecl);
+	bc.get_config().set_maximum_iterations(2000);
 	bc.do_chain();
 
 	Handle results = bc.get_results(),
-		expected = Handle::UNDEFINED; // TODO: find the answer
+		expected =
+		_eval.eval_h("(SetLink"
+		             "   (InheritanceLink"
+		             "      (ConceptNode \"West\")"
+		             "      (ConceptNode \"criminal\")))");
 
-	// TODO: fixme
-	// TS_ASSERT_EQUALS(results, expected);
-	TS_ASSERT(true);
+	logger().debug() << "results = " << results;
+	logger().debug() << "expected = " << expected;
+
+	TS_ASSERT_EQUALS(results, expected);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
