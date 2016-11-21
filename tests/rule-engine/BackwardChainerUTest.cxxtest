@@ -52,8 +52,8 @@ public:
 	void test_modus_ponens_tv_query();
 	void test_implication_instantiation_1();
 	void test_implication_instantiation_2();
-	// TODO: re-enable the following tests
 	void test_implication_instantiation_tv_query();
+	// TODO: re-enable the following tests
 	void test_impossible_criminal();
 	void test_criminal();
 	void test_induction();
@@ -335,7 +335,7 @@ void BackwardChainerUTest::test_implication_instantiation_tv_query()
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 
 	Handle target =
-	    _eval.eval_h("(InheritanceLink (stv 0.0 0.0)"
+	    _eval.eval_h("(InheritanceLink"
 	                 "   (ConceptNode \"Fritz\")"
 	                 "   (ConceptNode \"green\"))");
 
@@ -343,10 +343,8 @@ void BackwardChainerUTest::test_implication_instantiation_tv_query()
 	bc.get_config().set_maximum_iterations(20);
 	bc.do_chain();
 
-	// TODO: fixme
-	// TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, .1);
-	// TS_ASSERT_DELTA(target->getTruthValue()->getConfidence(), 1, .1);
-	TS_ASSERT(true);
+	TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, .1);
+	TS_ASSERT_DELTA(target->getTruthValue()->getConfidence(), 1, .1);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
