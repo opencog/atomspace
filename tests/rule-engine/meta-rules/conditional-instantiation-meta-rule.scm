@@ -92,22 +92,33 @@
      conditional-full-instantiation-meta-body
      conditional-full-instantiation-meta-rewrite))
 
-;; ;; And fuzzy eval. Normally this would be handled by a rule but to
-;; ;; simplify the test when hardcore it here
-;; (define (and-fuzzy-eval a)
-;;   ;; TODO
-;; )
+;; Return the TV of the evaluation of `an` assuming that it is an
+;; AndLink, that is return the TV which is the the min over the
+;; strengths and confidences of its outgoings. Normally this would be
+;; handled by a rule but to simplify the unit test it is hardcored
+;; here.
+(define (conjunction-fuzzy-eval an)
+  (let* ((outg (cog-outgoing-set an))
+         (min-s-atom (min-element-by-key outg cog-stv-strength))
+         (min-c-atom (min-element-by-key outg cog-stv-confidence))
+         (min-s (cog-stv-strength min-s-atom))
+         (min-c (cog-stv-confidence min-s-atom)))
+    (stv min-s min-c)))
 
 ;; Set (stv 1 1) on Q is Impl and P strength are both above 0.5 and
 ;; their confidence is non null.
 (define (conditional-full-instantiation-formula Impl P Q)
+  ;; Evaluate P if a conjunction
+  (if (equal? (cog-type P) 'AndLink)
+      (cog-merge-hi-conf-tv! P (conjunction-fuzzy-eval P)))
+  ;; Evaluate Q
   (let* (
          (Impl-s (cog-stv-strength Impl))
          (Impl-c (cog-stv-confidence Impl))
          (P-s (cog-stv-strength P))
          (P-c (cog-stv-confidence P))
          (good-enough (and (> Impl-s 0.5) (> Impl-c 0) (> P-s 0.5) (> P-c 0))))
-    (if (good-enough)
+    (if good-enough
         (cog-merge-hi-conf-tv! Q (stv 1 1))
         (cog-undefined-handle))))
 
