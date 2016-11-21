@@ -51,8 +51,8 @@ public:
 	void test_deduction_tv_query();
 	void test_modus_ponens_tv_query();
 	void test_implication_instantiation_1();
-	// TODO: re-enable the following tests
 	void test_implication_instantiation_2();
+	// TODO: re-enable the following tests
 	void test_implication_instantiation_tv_query();
 	void test_impossible_criminal();
 	void test_criminal();
@@ -311,14 +311,12 @@ void BackwardChainerUTest::test_implication_instantiation_2()
 	bc.do_chain();
 
 	Handle results = bc.get_results(),
-		expected = al(INHERITANCE_LINK, Fritz, green);
+		expected = al(SET_LINK, al(INHERITANCE_LINK, Fritz, green));
 
 	logger().debug() << "results = " << results->toString();
 	logger().debug() << "expected = " << expected->toString();
 
-	// TODO: fixme
-	// TS_ASSERT_EQUALS(results, expected);
-	TS_ASSERT(true);
+	TS_ASSERT_EQUALS(results, expected);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

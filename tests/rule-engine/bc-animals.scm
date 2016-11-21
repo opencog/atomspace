@@ -1,8 +1,8 @@
-(Implication (stv 1.0 1.0)
+(ImplicationScope (stv 1.0 1.0)
    (TypedVariable
       (Variable "$X")
       (Type "ConceptNode"))
-   (And (stv 1.0 1.0)
+   (And
       (Evaluation
          (Predicate "croaks")
          (Variable "$X"))
@@ -13,11 +13,11 @@
       (Variable "$X")
       (Concept "Frog")))
 
-(Implication (stv 1.0 1.0)
+(ImplicationScope (stv 1.0 1.0)
    (TypedVariable
       (Variable "$X")
       (Type "ConceptNode"))
-   (And (stv 1.0 1.0)
+   (And
       (Evaluation
          (Predicate "chirps")
          (Variable "$X"))
@@ -28,7 +28,7 @@
       (Variable "$X")
       (Concept "Canary")))
 
-(Implication (stv 1.0 1.0)
+(ImplicationScope (stv 1.0 1.0)
    (TypedVariable
       (Variable "$X")
       (Type "ConceptNode"))
@@ -39,7 +39,7 @@
       (Variable "$X")
       (Concept "green")))
 
-(Implication (stv 1.0 1.0)
+(ImplicationScope (stv 1.0 1.0)
    (TypedVariable
       (Variable "$X")
       (Type "ConceptNode"))
