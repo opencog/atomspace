@@ -50,8 +50,8 @@ public:
 	void test_deduction();
 	void test_deduction_tv_query();
 	void test_modus_ponens_tv_query();
-	// TODO: re-enable the following tests
 	void test_implication_instantiation_1();
+	// TODO: re-enable the following tests
 	void test_implication_instantiation_2();
 	void test_implication_instantiation_tv_query();
 	void test_impossible_criminal();
@@ -267,14 +267,15 @@ void BackwardChainerUTest::test_implication_instantiation_1()
 		target = friend_with_john(target_var);
 
 	BackwardChainer bc(_as, top_rbs, target);
-	bc.get_config().set_maximum_iterations(30);
+	bc.get_config().set_maximum_iterations(20);
 	bc.do_chain();
 
 	Handle results = bc.get_results(),
 		expected = al(SET_LINK,
 		              friend_with_john(mary),
 		              friend_with_john(edward),
-		              friend_with_john(cyril));
+		              friend_with_john(cyril),
+		              friend_with_john(john));
 
 	logger().debug() << "results = " << results->toString();
 	logger().debug() << "expected = " << expected->toString();
