@@ -117,7 +117,7 @@ void ForwardChainerUTest::test_select_rule(void)
     ForwardChainer fc(_as, rbs, h);
 
     // Full unification
-    Rule* rule = fc.select_rule(h);
+    const Rule* rule = fc.select_rule(h);
     TS_ASSERT_DIFFERS(nullptr, rule);
 }
 
@@ -138,7 +138,7 @@ void ForwardChainerUTest::test_apply_rule(void)
 	Handle rbs = _as.get_node(CONCEPT_NODE, "URE");
 	ForwardChainer fc(_as, rbs, source);
 
-	UnorderedHandleSet derules = fc.derive_rules(source, &rule);
+	UnorderedHandleSet derules = fc.derive_rules(source, rule);
 	TS_ASSERT_EQUALS(2, derules.size());
 
 	HandleSeq hs;
@@ -212,7 +212,7 @@ void ForwardChainerUTest::test_unify_1(void)
 
 	ForwardChainer fc(_as, rbs, source);
 
-	bool result = fc.unify(source, premise_pat, &rule);
+	bool result = fc.unify(source, premise_pat, rule);
 	TS_ASSERT(result);
 }
 
@@ -247,7 +247,7 @@ void ForwardChainerUTest::test_unify_2(void)
 
 	printf("source is %s\n", source->toString().c_str());
 	printf("premise_pat is %s\n", premise_pat->toString().c_str());
-	bool result = fc.unify(source, premise_pat, &rule);
+	bool result = fc.unify(source, premise_pat, rule);
 	TS_ASSERT(result);
 }
 
@@ -269,10 +269,10 @@ void ForwardChainerUTest::test_derive_rules_1(void)
 	ForwardChainer fc(_as, rbs, source);
 
 	// is not unifiable
-	UnorderedHandleSet hrules = fc.derive_rules(source, &rule);
+	UnorderedHandleSet hrules = fc.derive_rules(source, rule);
 	TS_ASSERT_EQUALS(0, hrules.size());
 
-	hrules = fc.derive_rules(source2, &rule);
+	hrules = fc.derive_rules(source2, rule);
 	TS_ASSERT_EQUALS(2, hrules.size());
 }
 
@@ -300,7 +300,7 @@ void ForwardChainerUTest::test_derive_rules_2()
 
 	ForwardChainer fc(_as, rbs, source);
 
-	UnorderedHandleSet hrules = fc.derive_rules(source, &rule);
+	UnorderedHandleSet hrules = fc.derive_rules(source, rule);
 	TS_ASSERT_EQUALS(2, hrules.size());
 }
 

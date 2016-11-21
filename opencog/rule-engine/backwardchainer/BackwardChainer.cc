@@ -93,6 +93,10 @@ Handle BackwardChainer::get_results() const
 
 void BackwardChainer::expand_bit()
 {
+	// This is kinda of hack before meta rules are fully supported by
+	// the Rule class.
+	_rules.expand_meta_rules(_as);
+
 	if (_handle2bitnode.empty()) {
 		// Initialize the and-BIT of the initial target
 		insert_h2b(_init_target, _init_vardecl, _init_fitness);
@@ -140,10 +144,10 @@ void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit,
 	}
 
 	// Expand the leaf
-	// 1. Append the rule to it
+	// 1. Insert the rule to it
 	// 2. Instantiate the premises as BITNodes
 	HandleSeq premises(rule.get_premises());
-	bitleaf.rules.push_back(rule);
+	bitleaf.rules.insert(rule);
 	for (const Handle& premise : premises)
 		insert_h2b(premise, rule.get_forward_vardecl(), BITFitness());
 
@@ -281,19 +285,18 @@ Rule BackwardChainer::select_rule(const BITNode& target)
 {
 	// For now the rule is uniformly randomly selected amongst the
 	// valid ones
-	RuleSeq valid_rules = get_valid_rules(target);
+	const RuleSet valid_rules = get_valid_rules(target);
 	if (valid_rules.empty())
 		return Rule();
 	return rand_element(valid_rules);
 }
 
-RuleSeq BackwardChainer::get_valid_rules(const BITNode& target)
+RuleSet BackwardChainer::get_valid_rules(const BITNode& target)
 {
-	RuleSeq valid_rules;
+	RuleSet valid_rules;
 	for (const Rule& rule : _rules) {
-		RuleSeq unified_rules = rule.unify_target(target.body, target.vardecl);
-		valid_rules.insert(valid_rules.end(),
-		                   unified_rules.begin(), unified_rules.end());
+		RuleSet unified_rules = rule.unify_target(target.body, target.vardecl);
+		valid_rules.insert(unified_rules.begin(), unified_rules.end());
 	}
 	return valid_rules;
 }

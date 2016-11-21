@@ -191,7 +191,7 @@ private:
 
 	// Return all valid rules, in the sense that these rules may
 	// possibly be used to infer the target.
-	RuleSeq get_valid_rules(const BITNode& target);
+	RuleSet get_valid_rules(const BITNode& target);
 
 	// Insert body and vardecl in _bit_as, build the bitnode
 	// associated to body and insert it in _handle2bitnode.
@@ -232,7 +232,7 @@ private:
 	// strategies.
 	AndBITFCMap _andbits;
 
-	const std::vector<Rule>& _rules;
+	RuleSet _rules;
 
 	OrderedHandleSet _results;
 };

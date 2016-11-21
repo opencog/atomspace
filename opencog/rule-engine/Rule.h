@@ -33,10 +33,13 @@
 
 namespace opencog {
 
-using namespace std;
-
 class Rule;
-typedef vector<Rule> RuleSeq;
+class RuleSet : public std::set<Rule>
+{
+public:
+	// Run all meta rules and insert the resulting rules back in the rule set.
+	void expand_meta_rules(AtomSpace& as);
+};
 
 /**
  * Class for managing rules in the URE.
@@ -122,37 +125,35 @@ public:
 	 * with a `DefineLink`.
 	 */
 	Rule();
-	Rule(const Handle& rule);
+	explicit Rule(const Handle& rule);
 	Rule(const Handle& rule_alias, const Handle& rbs);
+	Rule(const Handle& rule_alias, const Handle& rule, const Handle& rbs);
 
-	void init(const Handle& rule);
+	void init(const Handle& rule_member);
+	void init(const Handle& rule_alias, const Handle& rbs);
+	void init(const Handle& rule_alias, const Handle& rule, const Handle& rbs);
 	
 	// Comparison
-	bool operator==(const Rule& r) const
-	{
-		return r._forward_rule == _forward_rule
-			and r._backward_rule_handles == _backward_rule_handles;
-	}
-	bool operator<(const Rule& r) const
-	{
-		return _weight < r._weight;
-	}
+	bool operator==(const Rule& r) const;
+	/**
+	 * Order by weight, or if equal by handle value.
+	 */
+	bool operator<(const Rule& r) const;
 	bool is_alpha_equivalent(const Rule&) const;
 
 	// Modifiers
 	void set_forward_handle(const Handle&);
 	void set_backward_handles(const HandleSeq&);
-	void set_name(const string&);
-	void set_category(const string&);
+	void set_name(const std::string&);
+	void set_category(const std::string&);
 	void set_weight(double);
 
 	// Access
-	string& get_name();
-	const string& get_name() const;
-	string& get_category();
-	const string& get_category() const;
+	std::string& get_name();
+	const std::string& get_name() const;
 	Handle get_forward_rule() const;
 	Handle get_alias() const;
+	Handle get_rbs() const;
 
 	/**
 	 * Add the rule in AtomSpace as.
@@ -186,6 +187,7 @@ public:
 
 	// Properties
 	bool is_valid() const;
+	bool is_meta() const;       // does that rule produces a rule
 
 	/**
 	 * Return the premises of the rule. Optionally, a conclusion can
@@ -227,14 +229,19 @@ public:
 	 * TODO: we probably want to support a vector of sources for rules
 	 * with multiple premises.
 	 */
-	RuleSeq unify_source(const Handle& source, const Handle& vardecl) const;
+	RuleSet unify_source(const Handle& source, const Handle& vardecl) const;
 
 	/**
 	 * Used by the backward chainer. Given a target, generate all rule
 	 * variations that may infer this target. The variables in the
 	 * rules are renamed to almost certainly avoid name collision.
 	 */
-	RuleSeq unify_target(const Handle& target, const Handle& vardecl) const;
+	RuleSet unify_target(const Handle& target, const Handle& vardecl) const;
+
+	/**
+	 * Apply rule (in a forward way) over atomspace as.
+	 */
+	Handle apply(AtomSpace& as) const;
 
 	std::string to_string() const;
 
@@ -246,16 +253,16 @@ private:
 	//
 	// TODO: Maybe replace that by vector<ScopeLinkPtr>
 	HandleSeq _backward_rule_handles;
-	vector<ScopeLinkPtr> _backward_rule_scope_links;
+	std::vector<ScopeLinkPtr> _backward_rule_scope_links;
 
-	// Rule alias: (DefineLink rule_alias_ rule_handle_)
+	// Rule alias: (DefineLink _rule_alias _rule_handle)
 	Handle _rule_alias;
 
 	// Rule name, the name of the node referring to the rule body
-	string _name;
+	std::string _name;
 
 	// Rule-based system name
-	string _category;
+	Handle _rbs;
 
 	// Rule weight (indicated by the TV strength of the membership of
 	// the rule to the RBS)
@@ -280,7 +287,7 @@ private:
 // For Gdb debugging, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const Rule& rule);
-std::string oc_to_string(const RuleSeq& rules);
+std::string oc_to_string(const RuleSet& rules);
 
 } // ~namespace opencog
 

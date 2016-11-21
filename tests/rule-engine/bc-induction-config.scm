@@ -5,21 +5,26 @@
 ;; To be loaded first
 
 ;; Load the rules (use load for relative path w.r.t. to that file)
-(load-from-path "tests/rule-engine/meta-rules/conditional-instantiation-meta-rule.scm")
+(load "rules/implication-scope-direct-evaluation-rule.scm")
+(load "meta-rules/conditional-instantiation-meta-rule.scm")
 
 ;; Associate the rules to the rule base (with weights, their semantics
 ;; is currently undefined, we might settled with probabilities but it's
 ;; not sure)
 (MemberLink (stv 1 1)
+   implication-scope-direct-evaluation-rule-name
+   (ConceptNode "URE")
+)
+(MemberLink (stv 1 1)
    conditional-full-instantiation-meta-rule-name
    (ConceptNode "URE")
 )
 
-;; termination criteria parameters
+;; Termination criteria parameters
 (ExecutionLink
    (SchemaNode "URE:maximum-iterations")
    (ConceptNode "URE")
-   (NumberNode "20")
+   (NumberNode "100")
 )
 
 ;; Attention allocation (set the TV strength to 0 to disable it, 1 to

@@ -34,7 +34,7 @@ BITNode::BITNode(const Handle& bd, const Handle& vd, const BITFitness& fit)
 
 std::string	BITNode::to_string() const
 {
-	stringstream ss;
+	std::stringstream ss;
 	ss << "body:" << std::endl << oc_to_string(body)
 	   << "vardecl:" << std::endl << oc_to_string(vardecl)
 	   << "rules:" << std::endl << oc_to_string(rules);
@@ -48,7 +48,7 @@ std::string oc_to_string(const BITNode& bitnode)
 
 std::string oc_to_string(const AndBITFCMap& abfc)
 {
-	stringstream ss;
+	std::stringstream ss;
 	ss << "size = " << abfc.size() << std::endl;
 	size_t i = 0;
 	for (const auto& el : abfc) {
@@ -62,7 +62,7 @@ std::string oc_to_string(const AndBITFCMap& abfc)
 
 std::string oc_to_string(const HandleBITNodeMap& hbn)
 {
-	stringstream ss;
+	std::stringstream ss;
 	ss << "size = " << hbn.size() << std::endl;
 	size_t i = 0;
 	for (const auto& el : hbn) {

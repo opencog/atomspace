@@ -1,7 +1,7 @@
 ;; KB for testing BC implication instantiation rule
 
 ;; are-friends is symmetric
-(Implication (stv 1 1)
+(ImplicationScope (stv 1 1)
    (VariableList
       (TypedVariable
          (Variable "$X")
@@ -21,7 +21,7 @@
          (Variable "$X"))))
 
 ;; are-friends over musicians is transitive
-(Implication (stv 1 1)
+(ImplicationScope (stv 1 1)
    (VariableList
       (TypedVariable
          (Variable "$X")

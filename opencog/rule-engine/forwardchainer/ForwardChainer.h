@@ -85,9 +85,9 @@ private:
                                    const OrderedHandleSet& vars,
                                    const HandleMapSeq&
                                    var_groundings);
-    bool unify(const Handle& source, const Handle& pattern, const Rule* rule);
+    bool unify(const Handle& source, const Handle& pattern, const Rule& rule);
     UnorderedHandleSet derive_rules(const Handle& source, const Handle& pattern,
-                                    const Rule* rule);
+                                    const Rule& rule);
 
     template<typename HandleContainer>
     void update_potential_sources(const HandleContainer& input)
@@ -105,7 +105,7 @@ private:
     void validate(const Handle& hsource, const HandleSeq& hfocus_set);
 
 protected:
-    vector<Rule*> _rules; /* loaded rules */
+    RuleSet _rules; /* loaded rules */
     UnorderedHandleSet _potential_sources;
     HandleSeq _focus_set;
 
@@ -124,13 +124,13 @@ protected:
      *
      * @return  A rule that in which @param source could ground.
      */
-    virtual Rule* select_rule(const Handle& hsource);
+    virtual const Rule* select_rule(const Handle& hsource);
 
     /**
      * Apply rule on the current source. Create derived rules,
      * if necessary.
      */
-    virtual UnorderedHandleSet apply_rule(const Rule* rule);
+    virtual UnorderedHandleSet apply_rule(const Rule& rule);
 
     /**
      * Apply rule handle (BindLink).
@@ -140,7 +140,7 @@ protected:
      */
     virtual HandleSeq apply_rule(const Handle& rhandle);
 
-    UnorderedHandleSet derive_rules(const Handle& source, const Rule* rule);
+    UnorderedHandleSet derive_rules(const Handle& source, const Rule& rule);
 
 public:
     /**

@@ -85,10 +85,7 @@ void ForwardChainer::init(const Handle& hsource, const HandleSeq& focus_set)
     }
 
     // Set rules.
-    for(Rule& r :_configReader.get_rules())
-    {
-        _rules.push_back(&r);
-    }
+    _rules = _configReader.get_rules();
 
     // Reset the iteration count and max count
     _iteration = 0;
@@ -116,14 +113,14 @@ void ForwardChainer::do_step()
     }
 
     // Apply rule on _cur_source
-    UnorderedHandleSet products = apply_rule(rule);
+    UnorderedHandleSet products = apply_rule(*rule);
 
     // Store results
     update_potential_sources(products);
     _fcstat.add_inference_record(_iteration - 1, // _iteration has
                                                  // already been
                                                  // incremented
-                                 _cur_source, rule, products);
+                                 _cur_source, *rule, products);
 }
 
 void ForwardChainer::do_chain()
@@ -156,9 +153,9 @@ bool ForwardChainer::termination()
  */
 void ForwardChainer::apply_all_rules()
 {
-    for (Rule* rule : _rules) {
-        fc_logger().debug("Apply rule %s", rule->get_name().c_str());
-        HandleSeq hs = apply_rule(rule->get_forward_rule());
+    for (const Rule& rule : _rules) {
+        fc_logger().debug("Apply rule %s", rule.get_name().c_str());
+        HandleSeq hs = apply_rule(rule.get_forward_rule());
 
         // Update
         _fcstat.add_inference_record(_iteration,
@@ -250,27 +247,27 @@ Handle ForwardChainer::select_source()
 	return hchosen;
 }
 
-Rule* ForwardChainer::select_rule(const Handle& hsource)
+const Rule* ForwardChainer::select_rule(const Handle& hsource)
 {
-    std::map<Rule*, float> rule_weight;
-    for (Rule* r : _rules)
-        rule_weight[r] = r->get_weight();
+    std::map<const Rule*, float> rule_weight;
+    for (const Rule& r : _rules)
+        rule_weight[&r] = r.get_weight();
 
     fc_logger().debug("%d rules to be searched as matched against the source",
                       rule_weight.size());
 
     // Select a rule among the admissible rules in the rule-base via stochastic
     // selection, based on the weights of the rules in the current context.
-    Rule* rule = nullptr;
+    const Rule* rule = nullptr;
 
     while (not rule_weight.empty()) {
-        Rule *temp = _rec.tournament_select(rule_weight);
+        const Rule *temp = _rec.tournament_select(rule_weight);
         fc_logger().fine("Selected rule %s to match against the source",
                          temp->get_name().c_str());
 
         bool unified = false;
         for (Handle premise_pat : temp->get_premises()) {
-            if (unify(hsource, premise_pat, temp)) {
+            if (unify(hsource, premise_pat, *temp)) {
                 rule = temp;
                 unified = true;
                 break;
@@ -295,7 +292,7 @@ Rule* ForwardChainer::select_rule(const Handle& hsource)
     return rule;
 };
 
-UnorderedHandleSet ForwardChainer::apply_rule(const Rule* rule)
+UnorderedHandleSet ForwardChainer::apply_rule(const Rule& rule)
 {
     // Derive rules partially applied with the source
     UnorderedHandleSet derived_rhandles = derive_rules(_cur_source, rule);
@@ -428,7 +425,7 @@ HandleSeq ForwardChainer::apply_rule(const Handle& rhandle)
  */
 UnorderedHandleSet ForwardChainer::derive_rules(const Handle& source,
                                                 const Handle& pattern,
-                                                const Rule* rule)
+                                                const Rule& rule)
 {
     // Exceptions
     if (not is_valid_implicant(pattern))
@@ -439,7 +436,7 @@ UnorderedHandleSet ForwardChainer::derive_rules(const Handle& source,
     AtomSpace temp_pm_as;
     Handle hcpy = temp_pm_as.add_atom(pattern);
     Handle implicant_vardecl = temp_pm_as.add_atom(
-        gen_sub_varlist(pattern, rule->get_forward_vardecl()));
+        gen_sub_varlist(pattern, rule.get_forward_vardecl()));
     Handle sourcecpy = temp_pm_as.add_atom(source);
 
     Handle h = temp_pm_as.add_link(BIND_LINK, implicant_vardecl, hcpy, hcpy);
@@ -481,7 +478,7 @@ UnorderedHandleSet ForwardChainer::derive_rules(const Handle& source,
 
             fv.search_set(it.first);
 
-            Handle rhandle = rule->get_forward_rule();
+            Handle rhandle = rule.get_forward_rule();
             HandleSeq new_candidate_rules = substitute_rule_part(
                 temp_pm_as, temp_pm_as.add_atom(rhandle), fv.varset,
                 gcb.var_groundings);
@@ -507,7 +504,7 @@ UnorderedHandleSet ForwardChainer::derive_rules(const Handle& source,
  * @return  A HandleSeq of derived rule handles.
  */
 UnorderedHandleSet ForwardChainer::derive_rules(const Handle& source,
-                                                const Rule* rule)
+                                                const Rule& rule)
 {
     UnorderedHandleSet derived_rules;
 
@@ -515,7 +512,7 @@ UnorderedHandleSet ForwardChainer::derive_rules(const Handle& source,
         derived_rules.insert(result.begin(), result.end());
     };
 
-    for (const Handle& premise_pat : rule->get_premises())
+    for (const Handle& premise_pat : rule.get_premises())
         add_result(derive_rules(source, premise_pat, rule));
 
     return derived_rules;
@@ -662,7 +659,7 @@ HandleSeq ForwardChainer::substitute_rule_part(
  * @return        true on successful unification and false otherwise.
  */
 bool ForwardChainer::unify(const Handle& source, const Handle& pattern,
-                           const Rule* rule)
+                           const Rule& rule)
 {
     // Exceptions
     if (not is_valid_implicant(pattern))
@@ -671,7 +668,7 @@ bool ForwardChainer::unify(const Handle& source, const Handle& pattern,
     AtomSpace tmp_as;
     Handle pattern_cpy = tmp_as.add_atom(pattern);
     Handle pattern_vardecl =
-	    tmp_as.add_atom(gen_sub_varlist(pattern, rule->get_forward_vardecl()));
+	    tmp_as.add_atom(gen_sub_varlist(pattern, rule.get_forward_vardecl()));
     Handle source_cpy = tmp_as.add_atom(source);
 
     Handle bl =

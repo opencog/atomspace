@@ -34,10 +34,10 @@ namespace opencog {
 struct InferenceRecord
 {
 	const Handle hsource;
-	const Rule* rule;
+	const Rule& rule;
 	UnorderedHandleSet product;
 
-	InferenceRecord(Handle h, const Rule* r, const UnorderedHandleSet& p)
+	InferenceRecord(Handle h, const Rule& r, const UnorderedHandleSet& p)
 		: hsource(h), rule(r), product(p) {}
 };
 
@@ -68,7 +68,7 @@ public:
 	 * 4. <product> is a SetLink <p1> ... <pn> where pi are the products
 	 */
 	void add_inference_record(unsigned iteration, Handle source,
-	                          const Rule* rule,
+	                          const Rule& rule,
 	                          const UnorderedHandleSet& product);
 	UnorderedHandleSet get_all_products();
 };
