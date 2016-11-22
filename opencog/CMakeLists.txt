@@ -31,6 +31,4 @@ ENDIF (HAVE_CYTHON)
 
 
 # Haskell bindings.
-IF (HAVE_STACK)
-	ADD_SUBDIRECTORY (haskell)
-ENDIF (HAVE_STACK)
+ADD_SUBDIRECTORY (haskell)
