@@ -408,7 +408,10 @@ RuleSet Rule::unify_target(const Handle& target,
 	}
 	// There are backward rules so return directly their patterns
 	else {
-		OC_ASSERT(false, "TODO: support backward rules");
+		std::stringstream ss;
+		ss << "TODO: support backward rules (offending rule is `"
+		   << get_name() << "')";
+		OC_ASSERT(false, ss.str());
 	}
 
 	return unified_rules;
