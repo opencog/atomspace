@@ -425,8 +425,8 @@ GREATER_THAN_LINK <- VIRTUAL_LINK
 // arguments; it true only if both sides are the same atom.
 // EqualLink tests for semantic equality: the two sides are equal, if,
 // after execution, they evaluate to the same atom.
-IDENTICAL_LINK <- VIRTUAL_LINK
-EQUAL_LINK <- VIRTUAL_LINK
+IDENTICAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
+EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 
 // --------------------------------------------------------------
 // Functions that do NOT bind variables.
