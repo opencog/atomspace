@@ -274,14 +274,20 @@ private:
 
 	Handle standardize_helper(AtomSpace*, const Handle&, HandleMap&);
 
-	// Return the conclusions of the forward conclusions. There are
-	// several of them because the conclusions can be wrapped in the
-	// ListLink. In case each conclusion is an ExecutionOutputLink
-	// then return the last argument of that ExecutionOutputLink.
-	HandleSeq get_forward_conclusion_bodies() const;
+	// Return the conclusion patterns of the forward
+	// conclusions. There are several of them because the conclusions
+	// can be wrapped in the ListLink. In case each conclusion is an
+	// ExecutionOutputLink then return the last argument of that
+	// ExecutionOutputLink.
+	HandleSeq get_forward_conclusion_patterns() const;
+	Handle get_forward_conclusion_pattern(const Handle& h) const;
 
 	// Given an ExecutionOutputLink return its last argument
 	Handle get_execution_output_last_argument(const Handle& h) const;
+
+	// Copy of this rule and split of its conclusions so each
+	// resulting have only one conclusion
+	RuleSet split_conclusions() const;
 };
 
 // For Gdb debugging, see

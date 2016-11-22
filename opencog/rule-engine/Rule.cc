@@ -313,7 +313,7 @@ HandlePairSeq Rule::get_conclusions() const
 	if (_backward_rule_handles.empty())
 	{
 		Handle vardecl = get_forward_vardecl();
-		for (const Handle& c : get_forward_conclusion_bodies())
+		for (const Handle& c : get_forward_conclusion_patterns())
 			results.push_back({filter_vardecl(vardecl, c), c});
 	}
 	// There are backward rules so return directly their patterns
@@ -387,7 +387,7 @@ RuleSet Rule::unify_target(const Handle& target,
 	{
 		Handle alpha_vardecl = alpha_rule.get_forward_vardecl();
 		BindLinkPtr alpha_sc = alpha_rule._forward_rule;
-		for (const Handle& alpha_pat : alpha_rule.get_forward_conclusion_bodies())
+		for (const Handle& alpha_pat : alpha_rule.get_forward_conclusion_patterns())
 		{
 			UnificationSolutionSet sol =
 				unify(target, alpha_pat, vardecl, alpha_vardecl);
@@ -408,7 +408,10 @@ RuleSet Rule::unify_target(const Handle& target,
 	}
 	// There are backward rules so return directly their patterns
 	else {
-		OC_ASSERT(false, "TODO: support backward rules");
+		std::stringstream ss;
+		ss << "TODO: support backward rules (offending rule is `"
+		   << get_name() << "')";
+		OC_ASSERT(false, ss.str());
 	}
 
 	return unified_rules;
@@ -492,25 +495,27 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 	return hcpy;
 }
 
-HandleSeq Rule::get_forward_conclusion_bodies() const
+HandleSeq Rule::get_forward_conclusion_patterns() const
 {
 	HandleSeq results;
 	Handle implicand = get_forward_implicand();
 	Type t = implicand->getType();
-	if (EXECUTION_OUTPUT_LINK == t) {
-		results.push_back(get_execution_output_last_argument(implicand));
-	} else if (LIST_LINK == t) {
-		for (const Handle& h : implicand->getOutgoingSet()) {
-			t = h->getType();
-			if (EXECUTION_OUTPUT_LINK == t)
-				results.push_back(get_execution_output_last_argument(h));
-			else
-				results.push_back(h);
-		}
-	} else {
-		results.push_back(implicand);
-	}
+	if (LIST_LINK == t)
+		for (const Handle& h : implicand->getOutgoingSet())
+			results.push_back(get_forward_conclusion_pattern(h));
+	else
+		results.push_back(get_forward_conclusion_pattern(implicand));
+
 	return results;
+}
+
+Handle Rule::get_forward_conclusion_pattern(const Handle& h) const
+{
+	Type t = h->getType();
+	if (EXECUTION_OUTPUT_LINK == t)
+		return get_execution_output_last_argument(h);
+	else
+		return h;
 }
 
 Handle Rule::get_execution_output_last_argument(const Handle& h) const
