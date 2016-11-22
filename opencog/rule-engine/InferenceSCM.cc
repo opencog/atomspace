@@ -113,7 +113,9 @@ Handle InferenceSCM::do_backward_chaining(Handle h,
             "InferenceSCM::do_backward_chaining - invalid rulebase!");
 
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
-    BackwardChainer bc(*as, rbs, h, focus_link);
+    BackwardChainer bc(*as, rbs, h,
+                       Handle::UNDEFINED /*TODO support vardecl*/,
+                       focus_link);
 
     bc.do_chain();
 
