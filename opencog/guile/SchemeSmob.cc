@@ -275,6 +275,7 @@ void SchemeSmob::register_procs()
 	register_proc("cog-arity",             1, 0, 0, C(ss_arity));
 	register_proc("cog-incoming-set",      1, 0, 0, C(ss_incoming_set));
 	register_proc("cog-outgoing-set",      1, 0, 0, C(ss_outgoing_set));
+	register_proc("cog-outgoing-atom",     2, 0, 0, C(ss_outgoing_atom));
 	register_proc("cog-tv",                1, 0, 0, C(ss_tv));
 	register_proc("cog-av",                1, 0, 0, C(ss_av));
 	register_proc("cog-as",                1, 0, 0, C(ss_as));
