@@ -114,6 +114,7 @@ private:
 	static SCM ss_tv(SCM);
 	static SCM ss_incoming_set(SCM);
 	static SCM ss_outgoing_set(SCM);
+	static SCM ss_outgoing_atom(SCM, SCM);
 
 	// Type query functions
 	static SCM ss_map_type(SCM, SCM);
