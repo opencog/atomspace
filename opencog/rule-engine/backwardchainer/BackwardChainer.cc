@@ -137,14 +137,15 @@ void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit)
 void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit,
                                  BITNode& bitleaf, const Rule& rule)
 {
-	// Make sure that the rule is not a or-child of leaf.
+	// Make sure that the rule is not already an or-child of bitleaf.
 	if (is_in(rule, bitleaf)) {
-		bc_logger().debug() << "An equivalent rule has already expanded that BIT-node, abort expansion";
+		bc_logger().debug() << "An equivalent rule has already expanded "
+		                    << "that BIT-node, abort expansion";
 		return;
 	}
 
 	// Expand the leaf
-	// 1. Insert the rule to it
+	// 1. Insert the rule into it
 	// 2. Instantiate the premises as BITNodes
 	HandleSeq premises(rule.get_premises());
 	bitleaf.rules.insert(rule);
@@ -156,6 +157,13 @@ void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit,
 
 	// Define new and-BIT and associate new forward chaining strategy
 	// to it
+	new_andbit(andbit, bitleaf, premises, fcs);
+}
+
+void BackwardChainer::new_andbit(const AndBITFCMap::value_type& andbit,
+                                 BITNode& bitleaf, const HandleSeq& premises,
+                                 const Handle& fcs)
+{
 	AndBITFCMap::key_type new_leaves(andbit.first);
 	new_leaves.erase(bitleaf.body);
 	new_leaves.insert(premises.begin(), premises.end());

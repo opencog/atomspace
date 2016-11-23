@@ -140,6 +140,14 @@ private:
 	void expand_bit(const AndBITFCMap::value_type& andbit,
 	                BITNode& leaf, const Rule& rule);
 
+	// Given an and-BIT, a BIT-leaf of it, unified rule premises and a
+	// FCS (Forward Chaining Strategy), make a new and-BIT, where the
+	// BIT-leaf has been replaced by the premises, and associate the
+	// FCS to it.
+	void new_andbit(const AndBITFCMap::value_type& andbit,
+	                BITNode& leaf, const HandleSeq& premises,
+	                const Handle& fcs);
+
 	// Given an atomese forward chaining strategy, a leaf of it to
 	// expand, and a rule, return a new forward chaining strategy
 	// where the leaf has been substituted by the rule premises and
