@@ -153,7 +153,7 @@ void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit,
 		insert_h2b(premise, rule.get_forward_vardecl(), BITFitness());
 
 	// Expand the associated atomese forward chaining strategy
-	Handle fcs = expand_fcs(andbit.second, bitleaf.body, rule);
+ 	Handle fcs = expand_fcs(andbit.second, bitleaf.body, rule);
 
 	// Define new and-BIT and associate new forward chaining strategy
 	// to it
@@ -173,29 +173,32 @@ void BackwardChainer::new_andbit(const AndBITFCMap::value_type& andbit,
 Handle BackwardChainer::expand_fcs(const Handle& fcs, const Handle& leaf,
                                    const Rule& rule)
 {
-	BindLinkPtr fcs_bl(BindLinkCast(fcs));
-	Handle fcs_vardecl = fcs_bl->get_vardecl();
-	Handle fcs_pattern = fcs_bl->get_body();
-	Handle fcs_rewrite = fcs_bl->get_implicand();
+	// Unify the rule conclusion with the leaf, and substitute any
+	// variables in it by the associated term.
+	Handle nfcs = substitute_unified_variables(nfcs, leaf, rule);
+
+	BindLinkPtr nfcs_bl(BindLinkCast(nfcs));
+	Handle nfcs_vardecl = nfcs_bl->get_vardecl();
+	Handle nfcs_pattern = nfcs_bl->get_body();
+	Handle nfcs_rewrite = nfcs_bl->get_implicand();
 	Handle rule_vardecl = rule.get_forward_vardecl();
-	HandleSeq premises = rule.get_premises();
-	Handle rule_rewrite = rule.get_forward_implicand();
 
 	// Generate new pattern term
-	Handle npattern = expand_fcs_pattern(fcs_pattern, leaf, premises);
+	Handle npattern = expand_fcs_pattern(nfcs_pattern, rule);
 
 	// Generate new rewrite term
-	Handle nrewrite = expand_fcs_rewrite(fcs_rewrite, leaf, rule_rewrite);
+	Handle nrewrite = expand_fcs_rewrite(nfcs_rewrite, rule);
 
 	// Generate new vardecl
-	Handle nvardecl = filter_vardecl(merge_vardecl(fcs_vardecl, rule_vardecl),
+	// TODO: revisit to which extend this is necessary
+	Handle nvardecl = filter_vardecl(merge_vardecl(nfcs_vardecl, rule_vardecl),
 	                                 {npattern, nrewrite});
 
 	// Generate new atomese forward chaining strategy
 	HandleSeq noutgoings({npattern, nrewrite});
 	if (nvardecl.is_defined())
 		noutgoings.insert(noutgoings.begin(), nvardecl);
-	Handle nfcs = _bit_as.add_link(BIND_LINK, noutgoings);
+	nfcs = _bit_as.add_link(BIND_LINK, noutgoings);
 
 	LAZY_BC_LOG_DEBUG << "Expanded forward chainer strategy:" << std::endl << fcs
 	                  << "to:" << std::endl << nfcs;
@@ -203,16 +206,27 @@ Handle BackwardChainer::expand_fcs(const Handle& fcs, const Handle& leaf,
 	return nfcs;
 }
 
-Handle BackwardChainer::expand_fcs_pattern(const Handle& fcs_pattern,
-                                           const Handle& leaf,
-                                           const HandleSeq& premises)
+Handle BackwardChainer::substitute_unified_variables(const Handle& fcs,
+                                                     const Handle& leaf,
+                                                     const Rule& rule)
 {
-	if (fcs_pattern == leaf)
+	// TODO
+}
+
+Handle BackwardChainer::expand_fcs_pattern(const Handle& fcs_pattern,
+                                           const Rule& rule)
+{
+	HandleSeq premises = rule.get_premises();
+	HandlePairSeq conclusions = rule.get_conclusions();
+	OC_ASSERT(conclusions.size() == 1);
+	Handle conclusion = conclusions[0].second;
+
+	if (fcs_pattern == conclusion)
 		return _bit_as.add_link(AND_LINK, premises);
 
 	OC_ASSERT(fcs_pattern->getType() == AND_LINK);
 	HandleSeq outgoings = fcs_pattern->getOutgoingSet();
-	auto it = std::find(outgoings.begin(), outgoings.end(), leaf);
+	auto it = std::find(outgoings.begin(), outgoings.end(), conclusion);
 	OC_ASSERT(it != outgoings.end());
 	outgoings.erase(it);
 	outgoings.insert(outgoings.end(), premises.begin(), premises.end());
@@ -220,15 +234,19 @@ Handle BackwardChainer::expand_fcs_pattern(const Handle& fcs_pattern,
 }
 
 Handle BackwardChainer::expand_fcs_rewrite(const Handle& fcs_rewrite,
-                                           const Handle& leaf,
-                                           const Handle& rule_rewrite)
+                                           const Rule& rule)
 {
+	HandlePairSeq conclusions = rule.get_conclusions();
+	OC_ASSERT(conclusions.size() == 1);
+	Handle conclusion = conclusions[0].second;
+
 	// Base cases
 
-	// Replace the fcs rewrite atoms by the rule_rewrite if leaf
-	if (fcs_rewrite == leaf)
-		return rule_rewrite;
-	// If node and isn't leaf leave alone
+	// Replace the fcs rewrite atoms by the rule rewrite if equal to
+	// the rule conclusion
+	if (fcs_rewrite == conclusion)
+		return rule.get_forward_implicand();
+	// If node and isn't equal to conclusion leave alone
 	if (fcs_rewrite->isNode())
 		return fcs_rewrite;
 
@@ -237,7 +255,7 @@ Handle BackwardChainer::expand_fcs_rewrite(const Handle& fcs_rewrite,
 	Type t = fcs_rewrite->getType();
 	HandleSeq outgoings;
 	for (const Handle& h : fcs_rewrite->getOutgoingSet())
-		outgoings.push_back(expand_fcs_rewrite(h, leaf, rule_rewrite));
+		outgoings.push_back(expand_fcs_rewrite(h, rule));
 	return _bit_as.add_link(t, outgoings);
 }
 

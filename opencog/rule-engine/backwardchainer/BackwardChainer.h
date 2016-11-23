@@ -148,29 +148,32 @@ private:
 	                BITNode& leaf, const HandleSeq& premises,
 	                const Handle& fcs);
 
-	// Given an atomese forward chaining strategy, a leaf of it to
-	// expand, and a rule, return a new forward chaining strategy
-	// where the leaf has been substituted by the rule premises and
-	// rule application.
+	// Given an FCS, a leaf of it to expand, and a rule, return a new
+	// FCS where the leaf has been substituted by the rule premises
+	// and rule application.
 	//
 	// TODO: give examples.
 	Handle expand_fcs(const Handle& fcs, const Handle& leaf, const Rule& rule);
 
-	// Given the pattern term of an atomese forward chaining strategy,
-	// the leaf from which to expand and premises, replace the leaf by
-	// the premises.
-	//
-	// TODO: give examples.
-	Handle expand_fcs_pattern(const Handle& fcs_pattern,
-	                          const Handle& leaf, const HandleSeq& premises);
+	// Given a FCS, a leaf of it and a rule. Unify the rule conclusion
+	// with the leaf and replace any variables in the FCS by its
+	// corresponding term in the rule.
+	Handle substitute_unified_variables(const Handle& fcs, const Handle& leaf,
+	                                    const Rule& rule);
 
-	// Given the rewrite term of an atomese forward chaining strategy,
-	// the leaf from which to expand and a rule rewrite term, replace
-	// the leaf by the rule rewrite term.
+	// Given the pattern term of an FCS where all variables have been
+	// substituted by the corresponding terms in the rule conclusion,
+	// expand the rule conclusion by its premises.
 	//
 	// TODO: give examples.
-	Handle expand_fcs_rewrite(const Handle& fcs_rewrite,
-	                          const Handle& leaf, const Handle& rule_rewrite);
+	Handle expand_fcs_pattern(const Handle& fcs_pattern, const Rule& rule);
+
+	// Given the rewrite term of an FCS where all variables have been
+	// substituted by the corresponding terms in the rule conclusion,
+	// replace the rule conclusion by the rule rewrite term.
+	//
+	// TODO: give examples.
+	Handle expand_fcs_rewrite(const Handle& fcs_rewrite, const Rule& rule);
 
 	// Fulfill the BIT. That is run some or all its and-BITs
 	void fulfill_bit();
@@ -231,6 +234,9 @@ private:
 
 	int _iteration;
 	AtomSpace _focus_space;
+
+	// TODO: we might want to wrap the BIT data and methods in a BIT
+	// class and move it to BIT.h
 
 	// Mapping from handles to their corresponding BITNode
 	// bodies. Also where the BITNode are actually instantiated.
