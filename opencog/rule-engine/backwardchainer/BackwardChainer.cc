@@ -23,6 +23,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <boost/range/algorithm/find_if.hpp>
+
 #include <opencog/util/random.h>
 
 #include <opencog/atomutils/FindUtils.h>
@@ -137,57 +139,75 @@ void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit)
 void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit,
                                  BITNode& bitleaf, const Rule& rule)
 {
-	// Make sure that the rule is not a or-child of leaf.
+	// Make sure that the rule is not already an or-child of bitleaf.
 	if (is_in(rule, bitleaf)) {
-		bc_logger().debug() << "An equivalent rule has already expanded that BIT-node, abort expansion";
+		bc_logger().debug() << "An equivalent rule has already expanded "
+		                    << "that BIT-node, abort expansion";
 		return;
 	}
 
-	// Expand the leaf
-	// 1. Insert the rule to it
-	// 2. Instantiate the premises as BITNodes
-	HandleSeq premises(rule.get_premises());
-	bitleaf.rules.insert(rule);
-	for (const Handle& premise : premises)
-		insert_h2b(premise, rule.get_forward_vardecl(), BITFitness());
-
 	// Expand the associated atomese forward chaining strategy
-	Handle fcs = expand_fcs(andbit.second, bitleaf.body, rule);
+ 	Handle fcs = expand_fcs(andbit.second, bitleaf.body, rule);
 
-	// Define new and-BIT and associate new forward chaining strategy
-	// to it
-	AndBITFCMap::key_type new_leaves(andbit.first);
-	new_leaves.erase(bitleaf.body);
-	new_leaves.insert(premises.begin(), premises.end());
-	_andbits[new_leaves] = fcs;
+	// Create the new and-BIT, insert it into the BIT and associate it
+	// to fcs
+	expand_bit(fcs);
+}
+
+OrderedHandleSet BackwardChainer::get_fcs_leaves(const Handle& fcs)
+{
+	Handle fcs_pattern = BindLinkCast(fcs)->get_body();
+	OrderedHandleSet leaves;
+	if (fcs_pattern->getType() == AND_LINK) {
+		const HandleSeq& outgoings = fcs_pattern->getOutgoingSet();
+		leaves.insert(outgoings.begin(), outgoings.end());
+	} else {
+		leaves.insert(fcs_pattern);
+	}
+	return leaves;
+}
+
+void BackwardChainer::expand_bit(const Handle& fcs)
+{
+	// Associate the fcs leaves (which defines an and-BIT) to itself
+	OrderedHandleSet leaves = get_fcs_leaves(fcs);
+	_andbits[leaves] = fcs;
+
+	// For each leave associate a corresponding BITNode
+	Handle fcs_vardecl = BindLinkCast(fcs)->get_vardecl();
+	for (const Handle& leaf : leaves)
+		insert_h2b(leaf, fcs_vardecl, BITFitness());
 }
 
 Handle BackwardChainer::expand_fcs(const Handle& fcs, const Handle& leaf,
                                    const Rule& rule)
 {
-	BindLinkPtr fcs_bl(BindLinkCast(fcs));
-	Handle fcs_vardecl = fcs_bl->get_vardecl();
-	Handle fcs_pattern = fcs_bl->get_body();
-	Handle fcs_rewrite = fcs_bl->get_implicand();
+	// Unify the rule conclusion with the leaf, and substitute any
+	// variables in it by the associated term.
+	Handle nfcs = substitute_unified_variables(fcs, leaf, rule);
+
+	BindLinkPtr nfcs_bl(BindLinkCast(nfcs));
+	Handle nfcs_vardecl = nfcs_bl->get_vardecl();
+	Handle nfcs_pattern = nfcs_bl->get_body();
+	Handle nfcs_rewrite = nfcs_bl->get_implicand();
 	Handle rule_vardecl = rule.get_forward_vardecl();
-	HandleSeq premises = rule.get_premises();
-	Handle rule_rewrite = rule.get_forward_implicand();
 
 	// Generate new pattern term
-	Handle npattern = expand_fcs_pattern(fcs_pattern, leaf, premises);
+	Handle npattern = expand_fcs_pattern(nfcs_pattern, rule);
 
 	// Generate new rewrite term
-	Handle nrewrite = expand_fcs_rewrite(fcs_rewrite, leaf, rule_rewrite);
+	Handle nrewrite = expand_fcs_rewrite(nfcs_rewrite, rule);
 
 	// Generate new vardecl
-	Handle nvardecl = filter_vardecl(merge_vardecl(fcs_vardecl, rule_vardecl),
+	// TODO: revisit to which extend this is necessary
+	Handle nvardecl = filter_vardecl(merge_vardecl(nfcs_vardecl, rule_vardecl),
 	                                 {npattern, nrewrite});
 
 	// Generate new atomese forward chaining strategy
 	HandleSeq noutgoings({npattern, nrewrite});
 	if (nvardecl.is_defined())
 		noutgoings.insert(noutgoings.begin(), nvardecl);
-	Handle nfcs = _bit_as.add_link(BIND_LINK, noutgoings);
+	nfcs = _bit_as.add_link(BIND_LINK, noutgoings);
 
 	LAZY_BC_LOG_DEBUG << "Expanded forward chainer strategy:" << std::endl << fcs
 	                  << "to:" << std::endl << nfcs;
@@ -195,16 +215,51 @@ Handle BackwardChainer::expand_fcs(const Handle& fcs, const Handle& leaf,
 	return nfcs;
 }
 
-Handle BackwardChainer::expand_fcs_pattern(const Handle& fcs_pattern,
-                                           const Handle& leaf,
-                                           const HandleSeq& premises)
+Handle BackwardChainer::substitute_unified_variables(const Handle& fcs,
+                                                     const Handle& leaf,
+                                                     const Rule& rule)
 {
-	if (fcs_pattern == leaf)
+	HandlePairSeq conclusions = rule.get_conclusions();
+	OC_ASSERT(conclusions.size() == 1);
+	Handle conclusion = conclusions[0].second;
+
+	// If the conclusion is already equal to leaf no need to unify
+	if (content_eq(conclusion, leaf))
+		return fcs;
+
+	BindLinkPtr fcs_bl(BindLinkCast(fcs));
+	UnificationSolutionSet sol =
+		unify(leaf, conclusion,
+		      fcs_bl->get_vardecl(), rule.get_forward_vardecl());
+
+	OC_ASSERT(sol.satisfiable); // If the rule has been selected it
+                                // has to be satisfiable
+	TypedSubstitutions tss = typed_substitutions(sol, leaf);
+	OC_ASSERT(not tss.empty());
+	auto ts = *tss.begin();
+	HandleSeq values = fcs_bl->get_variables().make_values(ts.first);
+	return fcs_bl->alpha_conversion(values, ts.second);
+}
+
+Handle BackwardChainer::expand_fcs_pattern(const Handle& fcs_pattern,
+                                           const Rule& rule)
+{
+	HandleSeq premises = rule.get_premises();
+	HandlePairSeq conclusions = rule.get_conclusions();
+	OC_ASSERT(conclusions.size() == 1);
+	Handle conclusion = conclusions[0].second;
+
+	if (fcs_pattern == conclusion)
 		return _bit_as.add_link(AND_LINK, premises);
 
 	OC_ASSERT(fcs_pattern->getType() == AND_LINK);
 	HandleSeq outgoings = fcs_pattern->getOutgoingSet();
-	auto it = std::find(outgoings.begin(), outgoings.end(), leaf);
+	auto equal_to_conclusion = [&](const Handle& h) {
+		return content_eq(h, conclusion);
+	};
+	// TODO: since AndLink is ordered, we might speed that up by using
+	// std::lower_bound
+	auto it = boost::find_if(outgoings, equal_to_conclusion);
 	OC_ASSERT(it != outgoings.end());
 	outgoings.erase(it);
 	outgoings.insert(outgoings.end(), premises.begin(), premises.end());
@@ -212,15 +267,19 @@ Handle BackwardChainer::expand_fcs_pattern(const Handle& fcs_pattern,
 }
 
 Handle BackwardChainer::expand_fcs_rewrite(const Handle& fcs_rewrite,
-                                           const Handle& leaf,
-                                           const Handle& rule_rewrite)
+                                           const Rule& rule)
 {
+	HandlePairSeq conclusions = rule.get_conclusions();
+	OC_ASSERT(conclusions.size() == 1);
+	Handle conclusion = conclusions[0].second;
+
 	// Base cases
 
-	// Replace the fcs rewrite atoms by the rule_rewrite if leaf
-	if (fcs_rewrite == leaf)
-		return rule_rewrite;
-	// If node and isn't leaf leave alone
+	// Replace the fcs rewrite atoms by the rule rewrite if equal to
+	// the rule conclusion
+	if (fcs_rewrite == conclusion)
+		return rule.get_forward_implicand();
+	// If node and isn't equal to conclusion leave alone
 	if (fcs_rewrite->isNode())
 		return fcs_rewrite;
 
@@ -229,7 +288,7 @@ Handle BackwardChainer::expand_fcs_rewrite(const Handle& fcs_rewrite,
 	Type t = fcs_rewrite->getType();
 	HandleSeq outgoings;
 	for (const Handle& h : fcs_rewrite->getOutgoingSet())
-		outgoings.push_back(expand_fcs_rewrite(h, leaf, rule_rewrite));
+		outgoings.push_back(expand_fcs_rewrite(h, rule));
 	return _bit_as.add_link(t, outgoings);
 }
 
@@ -265,15 +324,6 @@ BITNode& BackwardChainer::select_bitleaf(const AndBITFCMap::value_type& andbit)
 {
 	// For now selection is uniformly random
 	return _handle2bitnode[rand_element(andbit.first)];
-}
-
-BITNode* BackwardChainer::select_target()
-{
-	if (_handle2bitnode.empty())
-		return nullptr;
-
-	// For now selection is uniformly random
-	return &(rand_element(_handle2bitnode).second);
 }
 
 void BackwardChainer::reduce_bit()

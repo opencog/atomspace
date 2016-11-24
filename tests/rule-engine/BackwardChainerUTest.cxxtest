@@ -414,7 +414,7 @@ void BackwardChainerUTest::test_criminal()
 	Handle soln = _eval.eval_h("(ConceptNode \"West\")");
 
 	BackwardChainer bc(_as, top_rbs, target, vardecl);
-	bc.get_config().set_maximum_iterations(500);
+	bc.get_config().set_maximum_iterations(100);
 	bc.do_chain();
 
 	Handle results = bc.get_results(),

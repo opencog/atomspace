@@ -140,29 +140,36 @@ private:
 	void expand_bit(const AndBITFCMap::value_type& andbit,
 	                BITNode& leaf, const Rule& rule);
 
-	// Given an atomese forward chaining strategy, a leaf of it to
-	// expand, and a rule, return a new forward chaining strategy
-	// where the leaf has been substituted by the rule premises and
-	// rule application.
+	// Given a new FCS (Forward Chaining Strategy), create a new
+	// associated and-BIT and insert it into the BIT
+	void expand_bit(const Handle& fcs);
+
+	// Given an FCS, a leaf of it to expand, and a rule, return a new
+	// FCS where the leaf has been substituted by the rule premises
+	// and rule application.
 	//
 	// TODO: give examples.
 	Handle expand_fcs(const Handle& fcs, const Handle& leaf, const Rule& rule);
 
-	// Given the pattern term of an atomese forward chaining strategy,
-	// the leaf from which to expand and premises, replace the leaf by
-	// the premises.
-	//
-	// TODO: give examples.
-	Handle expand_fcs_pattern(const Handle& fcs_pattern,
-	                          const Handle& leaf, const HandleSeq& premises);
+	// Given a FCS, a leaf of it and a rule. Unify the rule conclusion
+	// with the leaf and replace any variables in the FCS by its
+	// corresponding term in the rule.
+	Handle substitute_unified_variables(const Handle& fcs, const Handle& leaf,
+	                                    const Rule& rule);
 
-	// Given the rewrite term of an atomese forward chaining strategy,
-	// the leaf from which to expand and a rule rewrite term, replace
-	// the leaf by the rule rewrite term.
+	// Given the pattern term of an FCS where all variables have been
+	// substituted by the corresponding terms in the rule conclusion,
+	// expand the rule conclusion by its premises.
 	//
 	// TODO: give examples.
-	Handle expand_fcs_rewrite(const Handle& fcs_rewrite,
-	                          const Handle& leaf, const Handle& rule_rewrite);
+	Handle expand_fcs_pattern(const Handle& fcs_pattern, const Rule& rule);
+
+	// Given the rewrite term of an FCS where all variables have been
+	// substituted by the corresponding terms in the rule conclusion,
+	// replace the rule conclusion by the rule rewrite term.
+	//
+	// TODO: give examples.
+	Handle expand_fcs_rewrite(const Handle& fcs_rewrite, const Rule& rule);
 
 	// Fulfill the BIT. That is run some or all its and-BITs
 	void fulfill_bit();
@@ -180,9 +187,6 @@ private:
 	// Select a leaf of an and-BIT for subsequent expansion
 	BITNode& select_bitleaf(const AndBITFCMap::value_type& andbit);
 
-	// Select the target to expand
-	BITNode* select_target();
-
 	// Select a valid rule given a target. The selected is a new
 	// object because a new rule is created, its variables are
 	// uniquely renamed, possibly some partial substitutions are
@@ -193,8 +197,8 @@ private:
 	// possibly be used to infer the target.
 	RuleSet get_valid_rules(const BITNode& target);
 
-	// Insert body and vardecl in _bit_as, build the bitnode
-	// associated to body and insert it in _handle2bitnode.
+	// Add body and vardecl into _bit_as, build the bitnode associated
+	// to body and insert it in _handle2bitnode.
 	void insert_h2b(Handle body, Handle vardecl, const BITFitness& fitness);
 
 	// Initialize the _andbits container with
@@ -211,6 +215,9 @@ private:
 	// to an alpha conversion.
 	bool is_in(const Rule& rule, const BITNode& bitnode);
 
+	// Return all the leaves of an and-BIT FCS
+	OrderedHandleSet get_fcs_leaves(const Handle& fcs);
+
 	AtomSpace& _as;
 	UREConfigReader _configReader;
 
@@ -223,6 +230,11 @@ private:
 
 	int _iteration;
 	AtomSpace _focus_space;
+
+	// TODO: we might want to wrap the BIT data and methods in a BIT
+	// class and move it to BIT.h
+
+	// TODO: we might want to build a FCS class as well
 
 	// Mapping from handles to their corresponding BITNode
 	// bodies. Also where the BITNode are actually instantiated.
