@@ -140,13 +140,9 @@ private:
 	void expand_bit(const AndBITFCMap::value_type& andbit,
 	                BITNode& leaf, const Rule& rule);
 
-	// Given an and-BIT, a BIT-leaf of it, unified rule premises and a
-	// FCS (Forward Chaining Strategy), make a new and-BIT, where the
-	// BIT-leaf has been replaced by the premises, and associate the
-	// FCS to it.
-	void new_andbit(const AndBITFCMap::value_type& andbit,
-	                BITNode& leaf, const HandleSeq& premises,
-	                const Handle& fcs);
+	// Given a new FCS (Forward Chaining Strategy), create a new
+	// associated and-BIT and insert it into the BIT
+	void expand_bit(const Handle& fcs);
 
 	// Given an FCS, a leaf of it to expand, and a rule, return a new
 	// FCS where the leaf has been substituted by the rule premises
@@ -191,9 +187,6 @@ private:
 	// Select a leaf of an and-BIT for subsequent expansion
 	BITNode& select_bitleaf(const AndBITFCMap::value_type& andbit);
 
-	// Select the target to expand
-	BITNode* select_target();
-
 	// Select a valid rule given a target. The selected is a new
 	// object because a new rule is created, its variables are
 	// uniquely renamed, possibly some partial substitutions are
@@ -204,8 +197,8 @@ private:
 	// possibly be used to infer the target.
 	RuleSet get_valid_rules(const BITNode& target);
 
-	// Insert body and vardecl in _bit_as, build the bitnode
-	// associated to body and insert it in _handle2bitnode.
+	// Add body and vardecl into _bit_as, build the bitnode associated
+	// to body and insert it in _handle2bitnode.
 	void insert_h2b(Handle body, Handle vardecl, const BITFitness& fitness);
 
 	// Initialize the _andbits container with
@@ -222,6 +215,9 @@ private:
 	// to an alpha conversion.
 	bool is_in(const Rule& rule, const BITNode& bitnode);
 
+	// Return all the leaves of an and-BIT FCS
+	OrderedHandleSet get_fcs_leaves(const Handle& fcs);
+
 	AtomSpace& _as;
 	UREConfigReader _configReader;
 
@@ -237,6 +233,8 @@ private:
 
 	// TODO: we might want to wrap the BIT data and methods in a BIT
 	// class and move it to BIT.h
+
+	// TODO: we might want to build a FCS class as well
 
 	// Mapping from handles to their corresponding BITNode
 	// bodies. Also where the BITNode are actually instantiated.
