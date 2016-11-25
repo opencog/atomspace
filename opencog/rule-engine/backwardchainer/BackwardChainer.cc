@@ -23,7 +23,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/range/algorithm/find_if.hpp>
+#include <boost/range/algorithm/remove_if.hpp>
 
 #include <opencog/util/random.h>
 
@@ -146,6 +146,9 @@ void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit,
 		return;
 	}
 
+	// Insert the rule as or-branch of this bitleaf
+	bitleaf.rules.insert(rule);
+
 	// Expand the associated atomese forward chaining strategy
  	Handle fcs = expand_fcs(andbit.second, bitleaf.body, rule);
 
@@ -154,23 +157,46 @@ void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit,
 	expand_bit(fcs);
 }
 
-OrderedHandleSet BackwardChainer::get_fcs_leaves(const Handle& fcs)
+OrderedHandleSet BackwardChainer::get_leaves(const Handle& h) const
 {
-	Handle fcs_pattern = BindLinkCast(fcs)->get_body();
-	OrderedHandleSet leaves;
-	if (fcs_pattern->getType() == AND_LINK) {
-		const HandleSeq& outgoings = fcs_pattern->getOutgoingSet();
-		leaves.insert(outgoings.begin(), outgoings.end());
-	} else {
-		leaves.insert(fcs_pattern);
-	}
-	return leaves;
+	Type t = h->getType();
+	if (t == BIND_LINK) {
+		BindLinkPtr hsc = BindLinkCast(h);
+		Handle rewrite = hsc->get_implicand();
+		if (rewrite->getType() == EXECUTION_OUTPUT_LINK) {
+			return get_leaves(rewrite);
+		} else {
+			// Use the patterns as leaves
+			Handle pattern = hsc->get_body();
+			OrderedHandleSet leaves;
+			if (pattern->getType() == AND_LINK) {
+				const HandleSeq& outgoings = pattern->getOutgoingSet();
+				leaves.insert(outgoings.begin(), outgoings.end());
+			} else {
+				leaves.insert(pattern);
+			}
+			return leaves;
+		}
+	} else if (t == EXECUTION_OUTPUT_LINK) {
+		// All arguments except the last one are possibly thus
+		// potential leaves
+		Handle args = h->getOutgoingAtom(1);
+		OC_ASSERT(args->getType() == LIST_LINK);
+		OrderedHandleSet leaves;
+		for (Arity i = 0; i+1 < args->getArity(); i++) {
+			OrderedHandleSet arg_leaves = get_leaves(args->getOutgoingAtom(i));
+			leaves.insert(arg_leaves.begin(), arg_leaves.end());
+		}
+		return leaves;
+	} else
+		// It is probably a leaf so return it
+		return OrderedHandleSet{h};
 }
 
 void BackwardChainer::expand_bit(const Handle& fcs)
 {
 	// Associate the fcs leaves (which defines an and-BIT) to itself
-	OrderedHandleSet leaves = get_fcs_leaves(fcs);
+	OrderedHandleSet leaves = get_leaves(fcs);
 	_andbits[leaves] = fcs;
 
 	// For each leave associate a corresponding BITNode
@@ -209,7 +235,8 @@ Handle BackwardChainer::expand_fcs(const Handle& fcs, const Handle& leaf,
 		noutgoings.insert(noutgoings.begin(), nvardecl);
 	nfcs = _bit_as.add_link(BIND_LINK, noutgoings);
 
-	LAZY_BC_LOG_DEBUG << "Expanded forward chainer strategy:" << std::endl << fcs
+	LAZY_BC_LOG_DEBUG << "Expanded forward chainer strategy:" << std::endl
+	                  << "from:" << std::endl << fcs
 	                  << "to:" << std::endl << nfcs;
 
 	return nfcs;
@@ -244,26 +271,31 @@ Handle BackwardChainer::substitute_unified_variables(const Handle& fcs,
 Handle BackwardChainer::expand_fcs_pattern(const Handle& fcs_pattern,
                                            const Rule& rule)
 {
-	HandleSeq premises = rule.get_premises();
+	HandleSeq clauses = rule.get_premises();
 	HandlePairSeq conclusions = rule.get_conclusions();
 	OC_ASSERT(conclusions.size() == 1);
 	Handle conclusion = conclusions[0].second;
 
-	if (fcs_pattern == conclusion)
-		return _bit_as.add_link(AND_LINK, premises);
+	// Simple case where the fcs contains the conclusion itself
+	if (content_eq(fcs_pattern, conclusion))
+		return _bit_as.add_link(AND_LINK, HandleSeq(clauses.begin(),
+		                                            clauses.end()));
 
+	// The fcs contains a conjunction of clauses. Remove any clause
+	// that is equal to the rule conclusion, or precondition that uses
+	// that conclusion as argument.
 	OC_ASSERT(fcs_pattern->getType() == AND_LINK);
-	HandleSeq outgoings = fcs_pattern->getOutgoingSet();
-	auto equal_to_conclusion = [&](const Handle& h) {
-		return content_eq(h, conclusion);
+	HandleSeq fcs_clauses = fcs_pattern->getOutgoingSet();
+	auto is_conclusion_in = [&](const Handle& h) {
+		return this->is_atom_in_tree(h, conclusion);
 	};
-	// TODO: since AndLink is ordered, we might speed that up by using
-	// std::lower_bound
-	auto it = boost::find_if(outgoings, equal_to_conclusion);
-	OC_ASSERT(it != outgoings.end());
-	outgoings.erase(it);
-	outgoings.insert(outgoings.end(), premises.begin(), premises.end());
-	return _bit_as.add_link(AND_LINK, outgoings);
+	fcs_clauses.erase(boost::remove_if(fcs_clauses, is_conclusion_in),
+	                  fcs_clauses.end());
+
+	// Add the patterns and preconditions associated to the rule
+	fcs_clauses.insert(fcs_clauses.end(), clauses.begin(), clauses.end());
+
+	return _bit_as.add_link(AND_LINK, fcs_clauses);
 }
 
 Handle BackwardChainer::expand_fcs_rewrite(const Handle& fcs_rewrite,
@@ -357,7 +389,8 @@ void BackwardChainer::insert_h2b(Handle body, Handle vardecl,
 	if (body.is_undefined())
 		return;
 
-	_handle2bitnode[body] = BITNode(body, vardecl, fitness);
+	if (_handle2bitnode.find(body) == _handle2bitnode.end())
+		_handle2bitnode[body] = BITNode(body, vardecl, fitness);
 }
 
 void BackwardChainer::init_andbits()
@@ -377,5 +410,18 @@ bool BackwardChainer::is_in(const Rule& rule, const BITNode& bitnode)
 	for (const Rule& bnr : bitnode.rules)
 		if (rule.is_alpha_equivalent(bnr))
 			return true;
+	return false;
+}
+
+bool BackwardChainer::is_atom_in_tree(const Handle& tree, const Handle& atom)
+{
+	// Base cases
+	if (content_eq(tree, atom)) return true;
+	if (not tree->isLink()) return false;
+
+	// Recursive cases
+	for (const Handle& h: tree->getOutgoingSet()) {
+		if (is_atom_in_tree(h, atom)) return true;
+	}
 	return false;
 }

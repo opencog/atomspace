@@ -216,7 +216,11 @@ private:
 	bool is_in(const Rule& rule, const BITNode& bitnode);
 
 	// Return all the leaves of an and-BIT FCS
-	OrderedHandleSet get_fcs_leaves(const Handle& fcs);
+	OrderedHandleSet get_leaves(const Handle& fcs) const;
+
+	// Rewrite of the FindUtils.cc version till comparison by content
+	// is properly supported by Handle
+	bool is_atom_in_tree(const Handle& tree, const Handle& atom);
 
 	AtomSpace& _as;
 	UREConfigReader _configReader;
