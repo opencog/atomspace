@@ -44,6 +44,8 @@
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
 ; -- cartesian-prod-list-only -- Alternative version of cartesian-prod.
 ; -- approx-eq? -- Test equality of 2 floats up to an epsilon
+; -- bool->tv -- Convert #t to TRUE_TV and #f to FALSE_TV
+; -- tv->bool -- Convert TRUE_TV to #t, anything else to #f
 ; -- cog-equal? -- Test equality of 2 atoms and returns TRUE_TV/FALSE_TV
 ; -- max-element-by-key -- Get maximum element in a list
 ; -- min-element-by-key -- Get maximum element in a list
@@ -1035,16 +1037,31 @@
 	)
 )
 
+(define-public (bool->tv b)
+"
+  Convert #t to TRUE_TV and #f to FALSE_TV
+"
+    (if b
+        (stv 1 1)
+        (stv 0 1)
+    )
+)
+
+(define-public (tv->bool tv)
+"
+  Convert TRUE_TV to #t, anything else to #f
+"
+    (if (equal? (stv 1 1) tv)
+        #t
+        #f))
+
 ; ---------------------------------------------------------------------
 (define-public (cog-equal? atom-1 atom-2)
 "
   Checks whether two nodes are equal. If they are equal then it will return
   TRUE_TV else it returns FALSE_TV.
 "
-    (if (equal? atom-1 atom-2)
-        (stv 1 1)
-        (stv 0 1)
-    )
+    (bool->tv (equal? atom-1 atom-2))
 )
 
 ; ---------------------------------------------------------------------
@@ -1266,6 +1283,8 @@
 'cartesian-prod
 'cartesian-prod-list-only
 'approx-eq?
+'bool->tv
+'tv->bool
 'cog-equal?
 'min-element-by-key
 'max-element-by-key
