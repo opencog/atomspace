@@ -237,6 +237,27 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 }
 
 /* ============================================================== */
+/**
+ * Convert the incoming set of an atom into a list; return the list.
+ */
+SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype)
+{
+	Handle h = verify_handle(satom, "cog-incoming-by-type");
+	Type t = verify_atom_type (stype, "cog-incoming-by-type");
+
+	HandleSeq iset;
+	h->getIncomingSetByType(std::back_inserter(iset), t, false);
+	SCM head = SCM_EOL;
+	for (const Handle& ih : iset)
+	{
+		SCM smob = handle_to_scm(ih);
+		head = scm_cons(smob, head);
+	}
+
+	return head;
+}
+
+/* ============================================================== */
 
 /**
  * Apply proceedure proc to all atoms of type stype

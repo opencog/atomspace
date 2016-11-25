@@ -353,16 +353,13 @@ public:
     }
 
     /**
-     * Returns the set of atoms with a given target handle in their
-     * outgoing set (atom type and its subclasses optionally).
-     * That is, returns the incoming set of Handle h, with some optional
-     * filtering.
+     * Return all atoms of type `type` that contain this atom.
+     * That is, return all atoms that contain this atom, and are
+     * also of the given type. Optionally subclass the type.
      *
-     * @param The handle that must be in the outgoing set of the atom.
-     * @param The optional type of the atom.
+     * @param The iternator where the set of atoms will be returned.
+     * @param The type of the parent atom.
      * @param Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type with the given handle
-     *         in their outgoing set.
      */
     template <typename OutputIterator> OutputIterator
     getIncomingSetByType(OutputIterator result,
