@@ -222,6 +222,9 @@ private:
 	// is properly supported by Handle
 	bool is_atom_in_tree(const Handle& tree, const Handle& atom);
 
+	// Return true if atom is an argument of an evaluation
+	bool is_argument_of(const Handle& eval, const Handle& atom);
+
 	AtomSpace& _as;
 	UREConfigReader _configReader;
 

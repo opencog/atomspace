@@ -201,8 +201,10 @@ void BackwardChainer::expand_bit(const Handle& fcs)
 
 	// For each leave associate a corresponding BITNode
 	Handle fcs_vardecl = BindLinkCast(fcs)->get_vardecl();
-	for (const Handle& leaf : leaves)
-		insert_h2b(leaf, fcs_vardecl, BITFitness());
+	for (const Handle& leaf : leaves) {
+		Handle leaf_vardecl = filter_vardecl(fcs_vardecl, leaf);
+		insert_h2b(leaf, leaf_vardecl, BITFitness());
+	}
 }
 
 Handle BackwardChainer::expand_fcs(const Handle& fcs, const Handle& leaf,
@@ -225,7 +227,6 @@ Handle BackwardChainer::expand_fcs(const Handle& fcs, const Handle& leaf,
 	Handle nrewrite = expand_fcs_rewrite(nfcs_rewrite, rule);
 
 	// Generate new vardecl
-	// TODO: revisit to which extend this is necessary
 	Handle nvardecl = filter_vardecl(merge_vardecl(nfcs_vardecl, rule_vardecl),
 	                                 {npattern, nrewrite});
 
@@ -286,10 +287,10 @@ Handle BackwardChainer::expand_fcs_pattern(const Handle& fcs_pattern,
 	// that conclusion as argument.
 	OC_ASSERT(fcs_pattern->getType() == AND_LINK);
 	HandleSeq fcs_clauses = fcs_pattern->getOutgoingSet();
-	auto is_conclusion_in = [&](const Handle& h) {
-		return this->is_atom_in_tree(h, conclusion);
+	auto to_remove = [&](const Handle& h) {
+		return content_eq(h, conclusion) or is_argument_of(h, conclusion);
 	};
-	fcs_clauses.erase(boost::remove_if(fcs_clauses, is_conclusion_in),
+	fcs_clauses.erase(boost::remove_if(fcs_clauses, to_remove),
 	                  fcs_clauses.end());
 
 	// Add the patterns and preconditions associated to the rule
@@ -422,6 +423,20 @@ bool BackwardChainer::is_atom_in_tree(const Handle& tree, const Handle& atom)
 	// Recursive cases
 	for (const Handle& h: tree->getOutgoingSet()) {
 		if (is_atom_in_tree(h, atom)) return true;
+	}
+	return false;
+}
+
+bool BackwardChainer::is_argument_of(const Handle& eval, const Handle& atom)
+{
+	if (eval->getType() == EVALUATION_LINK) {
+		Handle args = eval->getOutgoingAtom(1);
+		if (content_eq(args, atom))
+			return true;
+		if (args->getType() == LIST_LINK)
+			for (Arity i = 0; i+1 < args->getArity(); i++)
+				if (content_eq(args->getOutgoingAtom(i), atom))
+					return true;
 	}
 	return false;
 }
