@@ -12,6 +12,7 @@ ADD_LIBRARY (atomspace
 	FixedIntegerIndex.cc
 	ThreadSafeFixedIntegerIndex.cc
 	ImportanceIndex.cc
+	StochasticImportanceDiffusion.cc
 	TypeIndex.cc
 
 	# The below are no longer used, but we will
@@ -50,6 +51,7 @@ INSTALL (FILES
 	FixedIntegerIndex.h
 	ThreadSafeFixedIntegerIndex.h
 	ImportanceIndex.h
+	StochasticImportanceDiffusion.h
 	TypeIndex.h
 	version.h
 	DESTINATION "include/opencog/atomspace"
