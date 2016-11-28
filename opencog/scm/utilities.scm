@@ -323,26 +323,18 @@
 "
   cog-prt-atomspace -- Prints all atoms in the atomspace
 
-  This will print all of the atoms in the atomspace: specifically, only those
-  atoms that have no incoming set, and thus are at the top of a hierarchy.
-  All other atoms (those which do have an incoming set) then appear somewhere
-  underneath these top-most atoms.
-
-  Example usage:
-  (display (cog-get-atoms 'ConceptNode))
-  will return and display all atoms of type 'ConceptNode
+  This will print all of the atoms in the atomspace: specifically, only
+  those atoms that have no incoming set, and thus are at the top of a
+  tree.  All other atoms (those which do have an incoming set) will
+  appear somewhere underneath these top-most atoms.
 "
 	(define (prt-atom h)
-		; print only the top-level atoms.
+		; Print only the top-level atoms.
 		(if (null? (cog-incoming-set h))
 			(display h))
-	#f)
-	(define (prt-type type)
-		(cog-map-type prt-atom type)
-		; We have to recurse over sub-types
-		(for-each prt-type (cog-get-subtypes type))
-	)
-	(prt-type 'Atom)
+		#f)
+
+	(for-each (lambda (ty) (cog-map-type prt-atom ty)) (cog-get-types))
 )
 
 ; -----------------------------------------------------------------------
