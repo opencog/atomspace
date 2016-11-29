@@ -52,7 +52,8 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
                                  const BITFitness& fitness)
 	: _as(as), _configReader(as, rbs),
 	  _init_target(htarget), _init_vardecl(vardecl), _init_fitness(fitness),
-	  _bit_as(&as), _iteration(0), _rules(_configReader.get_rules()) {}
+	  _bit_as(&as), _iteration(0), _last_expansion_andbit(nullptr),
+	  _rules(_configReader.get_rules()) {}
 
 UREConfigReader& BackwardChainer::get_config()
 {
@@ -98,6 +99,9 @@ void BackwardChainer::expand_bit()
 	// This is kinda of hack before meta rules are fully supported by
 	// the Rule class.
 	_rules.expand_meta_rules(_as);
+
+	// Keep track of the lastly expanded and-BIT only if sucessful
+	_last_expansion_andbit = nullptr;
 
 	if (_handle2bitnode.empty()) {
 		// Initialize the and-BIT of the initial target
@@ -178,8 +182,7 @@ OrderedHandleSet BackwardChainer::get_leaves(const Handle& h) const
 			return leaves;
 		}
 	} else if (t == EXECUTION_OUTPUT_LINK) {
-		// All arguments except the last one are possibly thus
-		// potential leaves
+		// All arguments except the last one are potential target leaves
 		Handle args = h->getOutgoingAtom(1);
 		OC_ASSERT(args->getType() == LIST_LINK);
 		OrderedHandleSet leaves;
@@ -205,7 +208,7 @@ void BackwardChainer::expand_bit(const Handle& fcs)
 {
 	// Associate the fcs leaves (which defines an and-BIT) to itself
 	OrderedHandleSet leaves = get_leaves(fcs);
-	_andbits[leaves] = fcs;
+	associate_andbit_leaves_to_fcs(leaves, fcs);
 
 	// For each leave associate a corresponding BITNode
 	Handle fcs_vardecl = BindLinkCast(fcs)->get_vardecl();
@@ -357,7 +360,10 @@ void BackwardChainer::fulfill_andbit(const AndBITFCMap::value_type& andbit)
 
 const AndBITFCMap::value_type& BackwardChainer::select_andbit()
 {
-	// For now selection is uniformly random
+	// Select the lastly expanded and-BIT, or a uniformly random one
+	// if the last expansion had failed.
+	if (_last_expansion_andbit)
+		return *_last_expansion_andbit;
 	return rand_element(_andbits);
 }
 
@@ -407,11 +413,12 @@ void BackwardChainer::init_andbits()
 	if (_init_target.is_undefined())
 		return;
 
+	// Create initial and-BIT
 	HandleSeq bl{_init_target, _init_target};
 	if (_init_vardecl.is_defined())
 		bl.insert(bl.begin(), _init_vardecl);
 	Handle fcs = _bit_as.add_link(BIND_LINK, bl);
-	_andbits[{_init_target}] = fcs;
+	associate_andbit_leaves_to_fcs({_init_target}, fcs);
 }
 
 bool BackwardChainer::is_in(const Rule& rule, const BITNode& bitnode)
@@ -447,4 +454,36 @@ bool BackwardChainer::is_argument_of(const Handle& eval, const Handle& atom)
 					return true;
 	}
 	return false;
+}
+
+bool BackwardChainer::is_locally_quoted_eq(const Handle& lhs, const Handle& rhs)
+{
+	if (content_eq(lhs, rhs))
+		return true;
+	Type lhs_t = lhs->getType();
+	Type rhs_t = rhs->getType();
+	if (lhs_t == LOCAL_QUOTE_LINK and rhs_t != LOCAL_QUOTE_LINK)
+		return content_eq(lhs->getOutgoingAtom(0), rhs);
+	if (lhs_t != LOCAL_QUOTE_LINK and rhs_t == LOCAL_QUOTE_LINK)
+		return content_eq(lhs, rhs->getOutgoingAtom(0));
+	return false;
+}
+
+void BackwardChainer::associate_andbit_leaves_to_fcs(const OrderedHandleSet& leaves,
+                                                     const Handle& fcs)
+{
+	AndBITFCMap::value_type t2fcs(leaves, fcs);
+	AndBITFCMap::const_iterator it = _andbits.find(leaves);
+	if (it == _andbits.end()) {
+		auto it_success = _andbits.insert(t2fcs);
+
+		// Keep track of the and-BIT or the last expansion
+		_last_expansion_andbit = &*it_success.first;
+	}
+	else {
+		bc_logger().warn() << "The and-BIT with the following leaves:"
+		                   << std::endl << oc_to_string(leaves) << std::endl
+		                   << "and the following FCS:" << std::endl
+		                   << fcs << "is already in the BIT.";
+	}
 }

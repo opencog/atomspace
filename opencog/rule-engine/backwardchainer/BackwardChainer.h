@@ -225,6 +225,14 @@ private:
 	// Return true if atom is an argument of an evaluation
 	bool is_argument_of(const Handle& eval, const Handle& atom);
 
+	// Equal even if one of them is locally quoted
+	bool is_locally_quoted_eq(const Handle& lhs, const Handle& rhs);
+
+	// Insert a new and-BIT by associating its leaves to a
+	// corresponding FCS
+	void associate_andbit_leaves_to_fcs(const OrderedHandleSet& leaves,
+	                                    const Handle& fcs);
+
 	AtomSpace& _as;
 	UREConfigReader _configReader;
 
@@ -250,6 +258,10 @@ private:
 	// Collection of and-BITs associated with their forward chaining
 	// strategies.
 	AndBITFCMap _andbits;
+
+	// Keep track of the and-BIT of the last expansion. Null if the
+	// last expansion has failed.
+	AndBITFCMap::value_type* _last_expansion_andbit;
 
 	RuleSet _rules;
 
