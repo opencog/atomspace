@@ -220,7 +220,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 				oset.emplace_back(substitute_scoped(h, args, silent,
 				                                    hidden_map, quotation));
 			}
-			return Handle(createLink(term->getType(), oset));
+			return Handle(ScopeLink::factory(term->getType(), oset));
 		}
 	}
 
@@ -243,6 +243,10 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 			oset.emplace_back(
 				substitute_scoped(h, args, silent, index_map, quotation));
 	}
+
+	if (classserver().isA(ty, SCOPE_LINK))
+		return Handle(ScopeLink::factory(term->getType(), oset));
+
 	return Handle(createLink(term->getType(), oset));
 }
 
