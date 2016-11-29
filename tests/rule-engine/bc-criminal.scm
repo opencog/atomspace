@@ -108,3 +108,20 @@
 ;    (InheritanceLink
 ;        (VariableNode "$isCriminal")
 ;        (ConceptNode "criminal")))
+
+;; Cheaping KB, used for debugging
+;;
+;; (Inheritance (stv .99 .99)
+;;   (ConceptNode "missile@123")
+;;   (ConceptNode "weapon"))
+
+;; (Evaluation (stv .99 .99)
+;;   (Predicate "sell")
+;;   (List
+;;     (Concept "West")
+;;     (Concept "missile@123")
+;;     (Concept "Nono")))
+
+;; (Inheritance (stv .99 .99)
+;;   (Concept "Nono")
+;;   (Concept "hostile"))

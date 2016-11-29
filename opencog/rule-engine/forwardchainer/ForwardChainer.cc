@@ -530,9 +530,12 @@ bool ForwardChainer::is_valid_implicant(const Handle& h)
     FindAtoms fv(VARIABLE_NODE);
     fv.search_set(h);
 
+    bool is_virtual = classserver().isA(h->getType(), VIRTUAL_LINK)
+	    or (h->getType() == EVALUATION_LINK
+	        and h->getOutgoingAtom(0)->getType() == GROUNDED_PREDICATE_NODE);
+
     bool is_valid = h->getType() != NOT_LINK
-        and not classserver().isA(h->getType(), VIRTUAL_LINK)
-        and not fv.varset.empty();
+	    and (not is_virtual) and (not fv.varset.empty());
 
     return is_valid;
 }

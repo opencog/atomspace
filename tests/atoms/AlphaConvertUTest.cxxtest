@@ -325,6 +325,10 @@ void AlphaConvertUTest::test_rand_alpha_conversion()
 
 	ScopeLinkPtr sc(ScopeLinkCast(hsc));
 	Handle scac = sc->alpha_conversion();
+
+	std::cout << "sc = " << oc_to_string(sc);
+	std::cout << "scac = " << oc_to_string(scac);
+
 	TS_ASSERT(sc->is_equal(scac));
 
 	logger().info("END TEST: %s", __FUNCTION__);

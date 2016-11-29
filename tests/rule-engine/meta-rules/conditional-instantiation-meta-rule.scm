@@ -38,25 +38,43 @@
      (Variable "$Q")))
 
 (define conditional-full-instantiation-meta-body
-  (LocalQuote (ImplicationScope
-     (Variable "$TyVs")
-     (Variable "$P")
-     (Variable "$Q"))))
+  (let* ((implication (LocalQuote
+                        (ImplicationScope
+                          (Variable "$TyVs")
+                          (Variable "$P")
+                          (Variable "$Q"))))
+         (precondition (Evaluation
+                         (GroundedPredicate "scm: true-enough")
+                         implication)))
+  (And
+    implication
+    precondition)))
 
 ;; Here only the implicant is considered as premise. The variable(s)
 ;; should as well so the backward chainer can consider them as
 ;; targets, however that implies to lay them out explicitly, so for
 ;; sake of simplicity they are ignored for now.
 (define conditional-full-instantiation-meta-rewrite
-  (Quote (Bind
-     (Unquote (Variable "$TyVs"))
-     (Unquote (Variable "$P"))
-     (ExecutionOutput
+  (let* ((TyVs (Variable "$TyVs"))
+         (P (Variable "$P"))
+         (Q (Variable "$Q"))
+         (implication (LocalQuote
+                        (ImplicationScope
+                          TyVs
+                          P
+                          Q))))
+    (Quote (Bind
+      (Unquote TyVs)
+      (And
+        (Unquote (LocalQuote (LocalQuote P)))
+        (Evaluation (GroundedPredicate "scm: true-enough") (Unquote P)))
+      (ExecutionOutput
         (GroundedSchema "scm: conditional-full-instantiation-formula")
-        (ListLink
-           (Unquote conditional-full-instantiation-meta-body)
-           (Unquote (Variable "$P"))
-           (Unquote (Variable "$Q")))))))
+        (Unquote
+          (ListLink
+            implication
+            P
+            Q)))))))
 
 ;; Bind
 ;;   VariableList
@@ -105,12 +123,13 @@
          (min-c (cog-stv-confidence min-s-atom)))
     (stv min-s min-c)))
 
+(define (true-enough a)
+  (let ((s (cog-stv-strength a)) (c (cog-stv-confidence a)))
+    (bool->tv (and (>= s 0.5) (> c 0.5)))))
+
 ;; Set (stv 1 1) on Q is Impl and P strength are both above 0.5 and
 ;; their confidence is non null.
 (define (conditional-full-instantiation-formula Impl P Q)
-  ;; Evaluate P if a conjunction
-  (if (equal? (cog-type P) 'AndLink)
-      (cog-merge-hi-conf-tv! P (conjunction-fuzzy-eval P)))
   ;; Evaluate Q
   (let* (
          (Impl-s (cog-stv-strength Impl))

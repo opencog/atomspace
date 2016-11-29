@@ -23,7 +23,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/range/algorithm/find_if.hpp>
+#include <boost/range/algorithm/remove_if.hpp>
 
 #include <opencog/util/random.h>
 
@@ -52,7 +52,8 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
                                  const BITFitness& fitness)
 	: _as(as), _configReader(as, rbs),
 	  _init_target(htarget), _init_vardecl(vardecl), _init_fitness(fitness),
-	  _bit_as(&as), _iteration(0), _rules(_configReader.get_rules()) {}
+	  _bit_as(&as), _iteration(0), _last_expansion_andbit(nullptr),
+	  _rules(_configReader.get_rules()) {}
 
 UREConfigReader& BackwardChainer::get_config()
 {
@@ -98,6 +99,9 @@ void BackwardChainer::expand_bit()
 	// This is kinda of hack before meta rules are fully supported by
 	// the Rule class.
 	_rules.expand_meta_rules(_as);
+
+	// Keep track of the lastly expanded and-BIT only if sucessful
+	_last_expansion_andbit = nullptr;
 
 	if (_handle2bitnode.empty()) {
 		// Initialize the and-BIT of the initial target
@@ -146,6 +150,9 @@ void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit,
 		return;
 	}
 
+	// Insert the rule as or-branch of this bitleaf
+	bitleaf.rules.insert(rule);
+
 	// Expand the associated atomese forward chaining strategy
  	Handle fcs = expand_fcs(andbit.second, bitleaf.body, rule);
 
@@ -154,29 +161,61 @@ void BackwardChainer::expand_bit(const AndBITFCMap::value_type& andbit,
 	expand_bit(fcs);
 }
 
-OrderedHandleSet BackwardChainer::get_fcs_leaves(const Handle& fcs)
+OrderedHandleSet BackwardChainer::get_leaves(const Handle& h) const
 {
-	Handle fcs_pattern = BindLinkCast(fcs)->get_body();
-	OrderedHandleSet leaves;
-	if (fcs_pattern->getType() == AND_LINK) {
-		const HandleSeq& outgoings = fcs_pattern->getOutgoingSet();
-		leaves.insert(outgoings.begin(), outgoings.end());
-	} else {
-		leaves.insert(fcs_pattern);
-	}
-	return leaves;
+	Type t = h->getType();
+	if (t == BIND_LINK) {
+		BindLinkPtr hsc = BindLinkCast(h);
+		Handle rewrite = hsc->get_implicand();
+		if (rewrite->getType() == EXECUTION_OUTPUT_LINK) {
+			return get_leaves(rewrite);
+		} else {
+			// Use the patterns as leaves
+			Handle pattern = hsc->get_body();
+			OrderedHandleSet leaves;
+			if (pattern->getType() == AND_LINK) {
+				const HandleSeq& outgoings = pattern->getOutgoingSet();
+				leaves.insert(outgoings.begin(), outgoings.end());
+			} else {
+				leaves.insert(pattern);
+			}
+			return leaves;
+		}
+	} else if (t == EXECUTION_OUTPUT_LINK) {
+		// All arguments except the last one are potential target leaves
+		Handle args = h->getOutgoingAtom(1);
+		OC_ASSERT(args->getType() == LIST_LINK);
+		OrderedHandleSet leaves;
+		for (Arity i = 0; i+1 < args->getArity(); i++) {
+			OrderedHandleSet arg_leaves = get_leaves(args->getOutgoingAtom(i));
+			leaves.insert(arg_leaves.begin(), arg_leaves.end());
+		}
+		return leaves;
+	} else if (t == SET_LINK) {
+		// All atoms wrapped in a SetLink are potential target leaves
+		OrderedHandleSet leaves;
+		for (const Handle& el : h->getOutgoingSet()) {
+			OrderedHandleSet el_leaves = get_leaves(el);
+			leaves.insert(el_leaves.begin(), el_leaves.end());
+		}
+		return leaves;
+	} else
+		// It is probably a leaf so return it
+		return OrderedHandleSet{h};
 }
 
 void BackwardChainer::expand_bit(const Handle& fcs)
 {
 	// Associate the fcs leaves (which defines an and-BIT) to itself
-	OrderedHandleSet leaves = get_fcs_leaves(fcs);
-	_andbits[leaves] = fcs;
+	OrderedHandleSet leaves = get_leaves(fcs);
+	associate_andbit_leaves_to_fcs(leaves, fcs);
 
 	// For each leave associate a corresponding BITNode
 	Handle fcs_vardecl = BindLinkCast(fcs)->get_vardecl();
-	for (const Handle& leaf : leaves)
-		insert_h2b(leaf, fcs_vardecl, BITFitness());
+	for (const Handle& leaf : leaves) {
+		Handle leaf_vardecl = filter_vardecl(fcs_vardecl, leaf);
+		insert_h2b(leaf, leaf_vardecl, BITFitness());
+	}
 }
 
 Handle BackwardChainer::expand_fcs(const Handle& fcs, const Handle& leaf,
@@ -199,7 +238,6 @@ Handle BackwardChainer::expand_fcs(const Handle& fcs, const Handle& leaf,
 	Handle nrewrite = expand_fcs_rewrite(nfcs_rewrite, rule);
 
 	// Generate new vardecl
-	// TODO: revisit to which extend this is necessary
 	Handle nvardecl = filter_vardecl(merge_vardecl(nfcs_vardecl, rule_vardecl),
 	                                 {npattern, nrewrite});
 
@@ -209,7 +247,8 @@ Handle BackwardChainer::expand_fcs(const Handle& fcs, const Handle& leaf,
 		noutgoings.insert(noutgoings.begin(), nvardecl);
 	nfcs = _bit_as.add_link(BIND_LINK, noutgoings);
 
-	LAZY_BC_LOG_DEBUG << "Expanded forward chainer strategy:" << std::endl << fcs
+	LAZY_BC_LOG_DEBUG << "Expanded forward chainer strategy:" << std::endl
+	                  << "from:" << std::endl << fcs
 	                  << "to:" << std::endl << nfcs;
 
 	return nfcs;
@@ -244,26 +283,32 @@ Handle BackwardChainer::substitute_unified_variables(const Handle& fcs,
 Handle BackwardChainer::expand_fcs_pattern(const Handle& fcs_pattern,
                                            const Rule& rule)
 {
-	HandleSeq premises = rule.get_premises();
+	HandleSeq clauses = rule.get_premises();
 	HandlePairSeq conclusions = rule.get_conclusions();
 	OC_ASSERT(conclusions.size() == 1);
 	Handle conclusion = conclusions[0].second;
 
-	if (fcs_pattern == conclusion)
-		return _bit_as.add_link(AND_LINK, premises);
+	// Simple case where the fcs contains the conclusion itself
+	if (content_eq(fcs_pattern, conclusion))
+		return _bit_as.add_link(AND_LINK, HandleSeq(clauses.begin(),
+		                                            clauses.end()));
 
+	// The fcs contains a conjunction of clauses. Remove any clause
+	// that is equal to the rule conclusion, or precondition that uses
+	// that conclusion as argument.
 	OC_ASSERT(fcs_pattern->getType() == AND_LINK);
-	HandleSeq outgoings = fcs_pattern->getOutgoingSet();
-	auto equal_to_conclusion = [&](const Handle& h) {
-		return content_eq(h, conclusion);
+	HandleSeq fcs_clauses = fcs_pattern->getOutgoingSet();
+	auto to_remove = [&](const Handle& h) {
+		return (is_locally_quoted_eq(h, conclusion)
+		        or is_argument_of(h, conclusion));
 	};
-	// TODO: since AndLink is ordered, we might speed that up by using
-	// std::lower_bound
-	auto it = boost::find_if(outgoings, equal_to_conclusion);
-	OC_ASSERT(it != outgoings.end());
-	outgoings.erase(it);
-	outgoings.insert(outgoings.end(), premises.begin(), premises.end());
-	return _bit_as.add_link(AND_LINK, outgoings);
+	fcs_clauses.erase(boost::remove_if(fcs_clauses, to_remove),
+	                  fcs_clauses.end());
+
+	// Add the patterns and preconditions associated to the rule
+	fcs_clauses.insert(fcs_clauses.end(), clauses.begin(), clauses.end());
+
+	return _bit_as.add_link(AND_LINK, fcs_clauses);
 }
 
 Handle BackwardChainer::expand_fcs_rewrite(const Handle& fcs_rewrite,
@@ -277,7 +322,7 @@ Handle BackwardChainer::expand_fcs_rewrite(const Handle& fcs_rewrite,
 
 	// Replace the fcs rewrite atoms by the rule rewrite if equal to
 	// the rule conclusion
-	if (fcs_rewrite == conclusion)
+	if (content_eq(fcs_rewrite, conclusion))
 		return rule.get_forward_implicand();
 	// If node and isn't equal to conclusion leave alone
 	if (fcs_rewrite->isNode())
@@ -316,7 +361,10 @@ void BackwardChainer::fulfill_andbit(const AndBITFCMap::value_type& andbit)
 
 const AndBITFCMap::value_type& BackwardChainer::select_andbit()
 {
-	// For now selection is uniformly random
+	// Select the lastly expanded and-BIT, or a uniformly random one
+	// if the last expansion had failed.
+	if (_last_expansion_andbit)
+		return *_last_expansion_andbit;
 	return rand_element(_andbits);
 }
 
@@ -357,7 +405,8 @@ void BackwardChainer::insert_h2b(Handle body, Handle vardecl,
 	if (body.is_undefined())
 		return;
 
-	_handle2bitnode[body] = BITNode(body, vardecl, fitness);
+	if (_handle2bitnode.find(body) == _handle2bitnode.end())
+		_handle2bitnode[body] = BITNode(body, vardecl, fitness);
 }
 
 void BackwardChainer::init_andbits()
@@ -365,11 +414,12 @@ void BackwardChainer::init_andbits()
 	if (_init_target.is_undefined())
 		return;
 
+	// Create initial and-BIT
 	HandleSeq bl{_init_target, _init_target};
 	if (_init_vardecl.is_defined())
 		bl.insert(bl.begin(), _init_vardecl);
 	Handle fcs = _bit_as.add_link(BIND_LINK, bl);
-	_andbits[{_init_target}] = fcs;
+	associate_andbit_leaves_to_fcs({_init_target}, fcs);
 }
 
 bool BackwardChainer::is_in(const Rule& rule, const BITNode& bitnode)
@@ -378,4 +428,63 @@ bool BackwardChainer::is_in(const Rule& rule, const BITNode& bitnode)
 		if (rule.is_alpha_equivalent(bnr))
 			return true;
 	return false;
+}
+
+bool BackwardChainer::is_atom_in_tree(const Handle& tree, const Handle& atom)
+{
+	// Base cases
+	if (content_eq(tree, atom)) return true;
+	if (not tree->isLink()) return false;
+
+	// Recursive cases
+	for (const Handle& h: tree->getOutgoingSet()) {
+		if (is_atom_in_tree(h, atom)) return true;
+	}
+	return false;
+}
+
+bool BackwardChainer::is_argument_of(const Handle& eval, const Handle& atom)
+{
+	if (eval->getType() == EVALUATION_LINK) {
+		Handle args = eval->getOutgoingAtom(1);
+		if (content_eq(args, atom))
+			return true;
+		if (args->getType() == LIST_LINK)
+			for (Arity i = 0; i+1 < args->getArity(); i++)
+				if (content_eq(args->getOutgoingAtom(i), atom))
+					return true;
+	}
+	return false;
+}
+
+bool BackwardChainer::is_locally_quoted_eq(const Handle& lhs, const Handle& rhs)
+{
+	if (content_eq(lhs, rhs))
+		return true;
+	Type lhs_t = lhs->getType();
+	Type rhs_t = rhs->getType();
+	if (lhs_t == LOCAL_QUOTE_LINK and rhs_t != LOCAL_QUOTE_LINK)
+		return content_eq(lhs->getOutgoingAtom(0), rhs);
+	if (lhs_t != LOCAL_QUOTE_LINK and rhs_t == LOCAL_QUOTE_LINK)
+		return content_eq(lhs, rhs->getOutgoingAtom(0));
+	return false;
+}
+
+void BackwardChainer::associate_andbit_leaves_to_fcs(const OrderedHandleSet& leaves,
+                                                     const Handle& fcs)
+{
+	AndBITFCMap::value_type t2fcs(leaves, fcs);
+	AndBITFCMap::const_iterator it = _andbits.find(leaves);
+	if (it == _andbits.end()) {
+		auto it_success = _andbits.insert(t2fcs);
+
+		// Keep track of the and-BIT or the last expansion
+		_last_expansion_andbit = &*it_success.first;
+	}
+	else {
+		bc_logger().warn() << "The and-BIT with the following leaves:"
+		                   << std::endl << oc_to_string(leaves) << std::endl
+		                   << "and the following FCS:" << std::endl
+		                   << fcs << "is already in the BIT.";
+	}
 }

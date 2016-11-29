@@ -33,6 +33,7 @@ public:
 	{
 #undef DEBUG
 		logger().set_level(Logger::DEBUG);
+		logger().set_timestamp_flag(false);
 		logger().set_print_to_stdout_flag(true);
 
 		// Disable the AF mechanism during testing!
