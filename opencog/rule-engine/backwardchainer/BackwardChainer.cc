@@ -322,7 +322,7 @@ Handle BackwardChainer::expand_fcs_rewrite(const Handle& fcs_rewrite,
 
 	// Replace the fcs rewrite atoms by the rule rewrite if equal to
 	// the rule conclusion
-	if (fcs_rewrite == conclusion)
+	if (content_eq(fcs_rewrite, conclusion))
 		return rule.get_forward_implicand();
 	// If node and isn't equal to conclusion leave alone
 	if (fcs_rewrite->isNode())
