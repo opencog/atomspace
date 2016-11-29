@@ -299,7 +299,8 @@ Handle BackwardChainer::expand_fcs_pattern(const Handle& fcs_pattern,
 	OC_ASSERT(fcs_pattern->getType() == AND_LINK);
 	HandleSeq fcs_clauses = fcs_pattern->getOutgoingSet();
 	auto to_remove = [&](const Handle& h) {
-		return content_eq(h, conclusion) or is_argument_of(h, conclusion);
+		return (is_locally_quoted_eq(h, conclusion)
+		        or is_argument_of(h, conclusion));
 	};
 	fcs_clauses.erase(boost::remove_if(fcs_clauses, to_remove),
 	                  fcs_clauses.end());
