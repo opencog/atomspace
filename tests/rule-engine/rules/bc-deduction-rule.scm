@@ -8,24 +8,24 @@
 ;; -----------------------------------------------------------------------------
 
 (define bc-deduction-rule
-  (let* ((A (VariableNode "$A"))
-         (B (VariableNode "$B"))
-         (C (VariableNode "$C"))
+  (let* ((A (Variable "$A"))
+         (B (Variable "$B"))
+         (C (Variable "$C"))
          (AB (Inheritance A B))
          (BC (Inheritance B C))
          (AC (Inheritance A C))
-         (Concept (TypeNode "ConceptNode"))
+         (Concept (Type "ConceptNode"))
          (vardecl (VariableList
-                     (TypedVariableLink A Concept)
-                     (TypedVariableLink B Concept)
-                     (TypedVariableLink C Concept)))
+                     (TypedVariable A Concept)
+                     (TypedVariable B Concept)
+                     (TypedVariable C Concept)))
          (precon1 (Evaluation (GroundedPredicate "scm: true-enough") AB))
          (precon2 (Evaluation (GroundedPredicate "scm: true-enough") BC))
          (precon3 (Not (Identical A C)))
          (pattern (And AB BC precon1 precon2 precon3))
-         (rewrite (ExecutionOutputLink
-                     (GroundedSchemaNode "scm: bc-deduction-formula")
-                     (ListLink AB BC AC))))
+         (rewrite (ExecutionOutput
+                     (GroundedSchema "scm: bc-deduction-formula")
+                     (List AB BC AC))))
     (Bind
        vardecl
        pattern
@@ -37,7 +37,7 @@
 
 (define (true-enough a)
   (let ((s (cog-stv-strength a)) (c (cog-stv-confidence a)))
-    (bool->tv (and (>= s 0.5) (> c 0)))))
+    (bool->tv (and (>= s 0.5) (> c 0.5)))))
 
 (define (bc-deduction-formula AB BC AC)
   ;; We keep this precondition here again just in case
