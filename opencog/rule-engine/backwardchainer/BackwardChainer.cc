@@ -188,6 +188,14 @@ OrderedHandleSet BackwardChainer::get_leaves(const Handle& h) const
 			leaves.insert(arg_leaves.begin(), arg_leaves.end());
 		}
 		return leaves;
+	} else if (t == SET_LINK) {
+		// All atoms wrapped in a SetLink are potential target leaves
+		OrderedHandleSet leaves;
+		for (const Handle& el : h->getOutgoingSet()) {
+			OrderedHandleSet el_leaves = get_leaves(el);
+			leaves.insert(el_leaves.begin(), el_leaves.end());
+		}
+		return leaves;
 	} else
 		// It is probably a leaf so return it
 		return OrderedHandleSet{h};
