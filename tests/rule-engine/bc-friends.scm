@@ -94,3 +94,15 @@
 (Evaluation (stv 1 1)
    (Predicate "is-musician")
    (Concept "Edward"))
+
+;; ;; Cheaping facts (useful for debugging)
+;; (Evaluation (stv 1 1)
+;;    (Predicate "are-friends")
+;;    (List
+;;       (Concept "Edward")
+;;       (Concept "Mary")))
+;; (Evaluation (stv 1 1)
+;;    (Predicate "are-friends")
+;;    (List
+;;       (Concept "Mary")
+;;       (Concept "John")))
