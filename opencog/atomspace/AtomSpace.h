@@ -65,6 +65,7 @@ class AtomSpace
     friend class ODBCAtomStorage;   // Needs to call get_atomtable()
     friend class ZMQPersistSCM;
     friend class ::AtomTableUTest;
+    friend class ecan::StochasticDiffusionAmountCalculator; // needs to access _bank
 
     /**
      * Override and declare copy constructor and equals operator, to

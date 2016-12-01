@@ -184,3 +184,8 @@ UnorderedHandleSet ImportanceIndex::getMinBinContents()
     }
     return ret;
 }
+
+size_t ImportanceIndex::size(int i) const
+{
+      return _index.size(i);
+}

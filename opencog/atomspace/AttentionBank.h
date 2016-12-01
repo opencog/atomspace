@@ -37,6 +37,8 @@
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/atomspace/ImportanceIndex.h>
 
+#include "StochasticImportanceDiffusion.h"
+
 namespace opencog
 {
 /** \addtogroup grp_atomspace
@@ -57,6 +59,8 @@ class AtomSpace;
 
 class AttentionBank
 {
+    friend class ecan::StochasticDiffusionAmountCalculator; //need to access _importanceIndex
+
     AtomSpace* _as;
     /**
      * If true, then this AttentionBank is not being used.

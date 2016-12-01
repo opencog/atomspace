@@ -78,6 +78,11 @@ public:
      * Get the lowest bin which containsAtoms
      */
     UnorderedHandleSet getMinBinContents();
+ 
+    /**
+     * Get the size of the bin at the given index.
+     */
+    size_t size(int) const;
 };
 
 /** @}*/
