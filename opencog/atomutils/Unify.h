@@ -32,6 +32,7 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/base/Quotation.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/atomutils/TypeUtils.h>
 
@@ -163,15 +164,21 @@ TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol,
  */
 UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
                              const Handle& lhs_vardecl = Handle::UNDEFINED,
-                             const Handle& rhs_vardecl = Handle::UNDEFINED);
+                             const Handle& rhs_vardecl = Handle::UNDEFINED,
+                             Quotation lhs_quotation=Quotation(),
+                             Quotation rhs_quotation=Quotation());
 UnificationSolutionSet unordered_unify(const HandleSeq& lhs,
                                        const HandleSeq& rhs,
                                        const Handle& lhs_vardecl,
-                                       const Handle& rhs_vardecl);
+                                       const Handle& rhs_vardecl,
+                                       Quotation lhs_quotation=Quotation(),
+                                       Quotation rhs_quotation=Quotation());
 UnificationSolutionSet ordered_unify(const HandleSeq& lhs,
                                      const HandleSeq& rhs,
                                      const Handle& lhs_vardecl,
-                                     const Handle& rhs_vardecl);
+                                     const Handle& rhs_vardecl,
+                                     Quotation lhs_quotation=Quotation(),
+                                     Quotation rhs_quotation=Quotation());
 
 /**
  * Return if the atom is an unordered link.
@@ -186,6 +193,8 @@ HandleSeq cp_erase(const HandleSeq& hs, Arity i);
 /**
  * Build elementary solution set between 2 atoms given that at least
  * one of them is a variable.
+ *
+ * TODO: support quotation
  */
 UnificationSolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
                                 const Handle& lhs_vardecl,

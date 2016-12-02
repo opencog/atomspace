@@ -75,7 +75,9 @@ TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol,
 
 UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
                              const Handle& lhs_vardecl,
-                             const Handle& rhs_vardecl)
+                             const Handle& rhs_vardecl,
+                             Quotation lhs_quotation,
+                             Quotation rhs_quotation)
 {
 	///////////////////
 	// Base cases    //
@@ -90,11 +92,34 @@ UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
 
 	// If one is a node
 	if (lhs->isNode() or rhs->isNode()) {
-		if (lhs_type == VARIABLE_NODE or rhs_type == VARIABLE_NODE) {
+		// If one is an unquoted variable, then unifies, otherwise
+		// check their equality
+		if ((lhs_quotation.is_unquoted() and lhs_type == VARIABLE_NODE)
+		    or (rhs_quotation.is_unquoted() and rhs_type == VARIABLE_NODE)) {
 			return mkvarsol(lhs, rhs, lhs_vardecl, rhs_vardecl);
 		} else
 			return UnificationSolutionSet(lhs == rhs);
 	}
+
+	////////////////////////
+	// Recursive cases    //
+	////////////////////////
+
+	// Consume quotations
+	if (lhs_quotation.consumable(lhs_type)) {
+		lhs_quotation.update(lhs_type);
+		return unify(lhs->getOutgoingAtom(0), rhs, lhs_vardecl, rhs_vardecl,
+		             lhs_quotation, rhs_quotation);
+	}
+	if (rhs_quotation.consumable(rhs_type)) {
+		rhs_quotation.update(rhs_type);
+		return unify(lhs, rhs->getOutgoingAtom(0), lhs_vardecl, rhs_vardecl,
+		             lhs_quotation, rhs_quotation);
+	}
+
+	// Update quotations
+	lhs_quotation.update(lhs_type);
+	rhs_quotation.update(rhs_type);
 
 	// At least one of them is a link, check if they have the same
 	// type (e.i. do they match so far)
@@ -108,22 +133,22 @@ UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
 	if (lhs_arity != rhs_arity)
 		return UnificationSolutionSet(false);
 
-	////////////////////////
-	// Recursive cases    //
-	////////////////////////
-
 	if (is_unordered(rhs))
 		return unordered_unify(lhs->getOutgoingSet(), rhs->getOutgoingSet(),
-		                       lhs_vardecl, rhs_vardecl);
+		                       lhs_vardecl, rhs_vardecl,
+		                       lhs_quotation, rhs_quotation);
 	else
 		return ordered_unify(lhs->getOutgoingSet(), rhs->getOutgoingSet(),
-		                     lhs_vardecl, rhs_vardecl);
+		                     lhs_vardecl, rhs_vardecl,
+		                     lhs_quotation, rhs_quotation);
 }
 
 UnificationSolutionSet unordered_unify(const HandleSeq& lhs,
                                        const HandleSeq& rhs,
                                        const Handle& lhs_vardecl,
-                                       const Handle& rhs_vardecl)
+                                       const Handle& rhs_vardecl,
+                                       Quotation lhs_quotation,
+                                       Quotation rhs_quotation)
 {
 	Arity lhs_arity(lhs.size());
 	Arity rhs_arity(rhs.size());
@@ -136,12 +161,14 @@ UnificationSolutionSet unordered_unify(const HandleSeq& lhs,
 	// Recursive case
 	UnificationSolutionSet sol(false);
 	for (Arity i = 0; i < lhs_arity; ++i) {
-		auto head_sol = unify(lhs[i], rhs[0], lhs_vardecl, rhs_vardecl);
+		auto head_sol = unify(lhs[i], rhs[0], lhs_vardecl, rhs_vardecl,
+		                      lhs_quotation, rhs_quotation);
 		if (head_sol.satisfiable) {
 			HandleSeq lhs_tail(cp_erase(lhs, i));
 			HandleSeq rhs_tail(cp_erase(rhs, 0));
 			auto tail_sol = unordered_unify(lhs_tail, rhs_tail,
-			                                lhs_vardecl, rhs_vardecl);
+			                                lhs_vardecl, rhs_vardecl,
+			                                lhs_quotation, rhs_quotation);
 			UnificationSolutionSet perm_sol = join(head_sol, tail_sol);
 			// Union merge satisfiable permutations
 			if (perm_sol.satisfiable) {
@@ -157,7 +184,9 @@ UnificationSolutionSet unordered_unify(const HandleSeq& lhs,
 UnificationSolutionSet ordered_unify(const HandleSeq& lhs,
                                      const HandleSeq& rhs,
                                      const Handle& lhs_vardecl,
-                                     const Handle& rhs_vardecl)
+                                     const Handle& rhs_vardecl,
+                                     Quotation lhs_quotation,
+                                     Quotation rhs_quotation)
 {
 	Arity lhs_arity(lhs.size());
 	Arity rhs_arity(rhs.size());
@@ -165,7 +194,8 @@ UnificationSolutionSet ordered_unify(const HandleSeq& lhs,
 
 	UnificationSolutionSet sol;
 	for (Arity i = 0; i < lhs_arity; ++i) {
-		auto rs = unify(lhs[i], rhs[i], lhs_vardecl, rhs_vardecl);
+		auto rs = unify(lhs[i], rhs[i], lhs_vardecl, rhs_vardecl,
+		                lhs_quotation, rhs_quotation);
 		sol = join(sol, rs);
 		if (not sol.satisfiable)     // Stop if unification has failed
 			break;
