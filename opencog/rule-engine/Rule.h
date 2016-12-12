@@ -229,14 +229,16 @@ public:
 	 * TODO: we probably want to support a vector of sources for rules
 	 * with multiple premises.
 	 */
-	RuleSet unify_source(const Handle& source, const Handle& vardecl) const;
+	RuleSet unify_source(const Handle& source,
+	                     const Handle& vardecl=Handle::UNDEFINED) const;
 
 	/**
 	 * Used by the backward chainer. Given a target, generate all rule
 	 * variations that may infer this target. The variables in the
 	 * rules are renamed to almost certainly avoid name collision.
 	 */
-	RuleSet unify_target(const Handle& target, const Handle& vardecl) const;
+	RuleSet unify_target(const Handle& target,
+	                     const Handle& vardecl=Handle::UNDEFINED) const;
 
 	/**
 	 * Apply rule (in a forward way) over atomspace as.
