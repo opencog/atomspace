@@ -38,7 +38,9 @@ class RuleUTest: public CxxTest::TestSuite
 private:
 	AtomSpace _as;
 	SchemeEval _eval;
-	Handle deduction_rule_h, X, A, V, CT;
+	Handle deduction_rule_h, X, A, V, CT, Typed_X,
+		P, Q, Eval_P, Eval_Q,
+		implication_scope_to_implication_rule_h;
 
 public:
 	RuleUTest() : _eval(&_as)
@@ -48,7 +50,8 @@ public:
 	void setUp();
 	void tearDown();
 
-	void test_unify_target();
+	void test_unify_target_deduction();
+	void test_unify_target_implication_scope_to_implication();
 };
 
 void RuleUTest::setUp()
@@ -67,14 +70,26 @@ void RuleUTest::setUp()
 
 	string eval_result =
 		_eval.eval("(load-from-path \"tests/rule-engine/bc-config.scm\")");
+	eval_result =
+		_eval.eval("(load-from-path \"tests/rule-engine/rules/implication-scope-to-implication-rule.scm\")");
 
-	deduction_rule_h = _eval.eval_h("(MemberLink (stv 1 1)"
-	                                "   bc-deduction-rule-name"
-	                                "   (ConceptNode \"URE\"))");
+	deduction_rule_h =
+		_eval.eval_h("(MemberLink (stv 1 1)"
+		             "   bc-deduction-rule-name"
+		             "   (ConceptNode \"URE\"))");
+	implication_scope_to_implication_rule_h =
+		_eval.eval_h("(MemberLink (stv 1 1)"
+		             "   implication-scope-to-implication-rule-name"
+		             "   (ConceptNode \"URE\"))");
 	X = an(VARIABLE_NODE, "$X");
 	A = an(CONCEPT_NODE, "$A");
 	V = an(VARIABLE_NODE, "$V");
 	CT = an(TYPE_NODE, "ConceptNode");
+	Typed_X = al(TYPED_VARIABLE_LINK, X, CT);
+	P = an(PREDICATE_NODE, "P");
+	Q = an(PREDICATE_NODE, "Q");
+	Eval_P = al(EVALUATION_LINK, P, X);
+	Eval_Q = al(EVALUATION_LINK, Q, X);
 }
 
 void RuleUTest::tearDown()
@@ -82,7 +97,7 @@ void RuleUTest::tearDown()
 	_as.clear();
 }
 
-void RuleUTest::test_unify_target()
+void RuleUTest::test_unify_target_deduction()
 {
 	Rule deduction_rule(deduction_rule_h);
 	Handle target = al(INHERITANCE_LINK, X, A),
@@ -109,6 +124,34 @@ void RuleUTest::test_unify_target()
 		             schema,
 		             al(LIST_LINK, XV, VA, XA)),
 		expected = al(BIND_LINK, vardecl, body, rewrite);
+
+	std::cout << "forward_rule = " << oc_to_string(forward_rule);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
+
+	TS_ASSERT(expected_sc->is_equal(forward_rule));
+}
+
+void RuleUTest::test_unify_target_implication_scope_to_implication()
+{
+	Rule implication_scope_to_implication_rule(implication_scope_to_implication_rule_h);
+	Handle target = al(IMPLICATION_LINK,
+	                   al(LAMBDA_LINK, Typed_X, Eval_P),
+	                   al(LAMBDA_LINK, Typed_X, Eval_Q));
+	RuleSet rules = implication_scope_to_implication_rule.unify_target(target);
+
+	TS_ASSERT_EQUALS(rules.size(), 1);
+
+	Handle forward_rule = rules.begin()->get_forward_rule(),
+		// expected up to an alpha conversion
+		body = al(IMPLICATION_SCOPE_LINK, Typed_X, Eval_P, Eval_Q),
+		schema = an(GROUNDED_SCHEMA_NODE,
+		            "scm: implication-scope-to-implication-formula"),
+		rewrite = al(EXECUTION_OUTPUT_LINK,
+		             schema,
+		             al(LIST_LINK, body, target)),
+		expected = al(BIND_LINK, body, rewrite);
 
 	std::cout << "forward_rule = " << oc_to_string(forward_rule);
 	std::cout << "expected = " << oc_to_string(expected);
