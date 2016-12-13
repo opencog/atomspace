@@ -30,6 +30,7 @@
 #include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/pattern/BindLink.h>
+#include <opencog/atomutils/Unify.h>
 
 namespace opencog {
 
@@ -229,14 +230,16 @@ public:
 	 * TODO: we probably want to support a vector of sources for rules
 	 * with multiple premises.
 	 */
-	RuleSet unify_source(const Handle& source, const Handle& vardecl) const;
+	RuleSet unify_source(const Handle& source,
+	                     const Handle& vardecl=Handle::UNDEFINED) const;
 
 	/**
 	 * Used by the backward chainer. Given a target, generate all rule
 	 * variations that may infer this target. The variables in the
 	 * rules are renamed to almost certainly avoid name collision.
 	 */
-	RuleSet unify_target(const Handle& target, const Handle& vardecl) const;
+	RuleSet unify_target(const Handle& target,
+	                     const Handle& vardecl=Handle::UNDEFINED) const;
 
 	/**
 	 * Apply rule (in a forward way) over atomspace as.
@@ -285,9 +288,20 @@ private:
 	// Given an ExecutionOutputLink return its last argument
 	Handle get_execution_output_last_argument(const Handle& h) const;
 
-	// Copy of this rule and split of its conclusions so each
-	// resulting have only one conclusion
-	RuleSet split_conclusions() const;
+	// Given a typed substitution obtained from typed_substitutions
+	// unify function, generate a new partially substituted rule.
+	Rule substituted(const TypedSubstitutions::value_type& ts) const;
+
+	// In some circumstances the quotes of a rule are useless. This is
+	// true for instance when the role of the quotation is to only
+	// prevent that some variable be associated to a scope link
+	// instead of the rule scope. During substitution these variables
+	// (associated to the rule scope) may be replaced by variables
+	// associated to local scopes. If that is the case then the
+	// quotations preventing them from being associated to their local
+	// scopes should be removed.
+	void consume_quotations();
+	static Handle consume_quotations(Handle h, Quotation quotation=Quotation());
 };
 
 // For Gdb debugging, see

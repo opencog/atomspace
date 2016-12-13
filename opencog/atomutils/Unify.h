@@ -52,8 +52,8 @@ struct UnificationSolutionSet :
 		public boost::equality_comparable<UnificationSolutionSet>
 {
 	// Default ctor
-	UnificationSolutionSet(bool s = true,
-	                       const UnificationPartitions& p = UnificationPartitions());
+	UnificationSolutionSet(bool s=true,
+	                       const UnificationPartitions& p=UnificationPartitions());
 
 	// Whether the unification satisfiable. Not that satisfiable is
 	// different than empty. An empty solution set may still be
@@ -163,8 +163,8 @@ TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol,
  * TODO: take care of Un/Quote and Scope links.
  */
 UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
-                             const Handle& lhs_vardecl = Handle::UNDEFINED,
-                             const Handle& rhs_vardecl = Handle::UNDEFINED,
+                             const Handle& lhs_vardecl=Handle::UNDEFINED,
+                             const Handle& rhs_vardecl=Handle::UNDEFINED,
                              Quotation lhs_quotation=Quotation(),
                              Quotation rhs_quotation=Quotation());
 UnificationSolutionSet unordered_unify(const HandleSeq& lhs,
@@ -262,8 +262,8 @@ bool is_satisfiable(const UnificationBlock& block);
  *       instead of Handle, so we don't rebuild it every time.
  */
 Handle type_intersection(const Handle& lhs, const Handle& rhs,
-                         const Handle& lhs_vardecl = Handle::UNDEFINED,
-                         const Handle& rhs_vardecl = Handle::UNDEFINED);
+                         const Handle& lhs_vardecl=Handle::UNDEFINED,
+                         const Handle& rhs_vardecl=Handle::UNDEFINED);
 
 /**
  * Return a simplification of a type union, by eliminating all types

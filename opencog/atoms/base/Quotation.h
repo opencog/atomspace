@@ -86,7 +86,7 @@ public:
 
 // For gdb, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
-std::string oc_to_string();
+std::string oc_to_string(const Quotation& quotation);
 	
 /** @}*/
 } // namespace opencog

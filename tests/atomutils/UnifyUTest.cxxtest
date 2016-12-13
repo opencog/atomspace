@@ -82,6 +82,8 @@ public:
 	void test_unify_unordered_6();
 	void test_unify_unordered_7();
 	void test_unify_unordered_8();
+
+	// TODO: add test about same variable X in different scopes
 };
 
 void UnifyUTest::setUp(void)
