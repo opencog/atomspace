@@ -335,7 +335,7 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	// different order. Thus, the hash must be computed in a purely
 	// commutative fashion: using only addition, so as never create
 	// any entropy, until the end.
-	bool is_ordered = (false == classserver().isA(t, UNORDERED_LINK));
+	bool is_ordered = not classserver().isA(t, UNORDERED_LINK);
 	ContentHash mixer = (ContentHash) is_ordered;
 	ContentHash hsh = ((1UL<<8) - 59) * t;
 	for (const Handle& ho: h->getOutgoingSet())
