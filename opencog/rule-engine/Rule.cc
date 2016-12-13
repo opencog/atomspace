@@ -386,23 +386,17 @@ RuleSet Rule::unify_target(const Handle& target,
 	if (_backward_rule_handles.empty())
 	{
 		Handle alpha_vardecl = alpha_rule.get_forward_vardecl();
-		BindLinkPtr alpha_sc = alpha_rule._forward_rule;
 		for (const Handle& alpha_pat : alpha_rule.get_forward_conclusion_patterns())
 		{
 			UnificationSolutionSet sol =
 				unify(target, alpha_pat, vardecl, alpha_vardecl);
 			if (sol.satisfiable) {
 				TypedSubstitutions tss = typed_substitutions(sol, target);
-				for (const auto& ts : tss) {
-					// For each typed substitution produce an alpha
-					// converted, possibly partially substituted rule
-					HandleSeq values = alpha_sc->get_variables().make_values(ts.first);
-					Handle h = alpha_sc->alpha_conversion(values, ts.second);
-
-					Rule unified_rule(alpha_rule);
-					unified_rule.set_forward_handle(h);
-					unified_rules.insert(unified_rule);
-				}
+				// For each typed substitution produce a new rule by
+				// substituting all variables by their associated
+				// values.
+				for (const auto& ts : tss)
+					unified_rules.insert(alpha_rule.substituted(ts));
 			}
 		}
 	}
@@ -420,6 +414,17 @@ RuleSet Rule::unify_target(const Handle& target,
 Handle Rule::apply(AtomSpace& as) const
 {
 	return bindlink(&as, Handle(_forward_rule));
+}
+
+std::string Rule::to_string() const
+{
+	std::stringstream ss;
+	ss << "name: " << _name << std::endl
+	   << "forward rule:" << std::endl
+	   << _forward_rule->toString()
+	   << "backward rules:" << std::endl
+	   << oc_to_string(_backward_rule_handles);
+	return ss.str();
 }
 
 Rule Rule::rand_alpha_converted() const
@@ -526,15 +531,60 @@ Handle Rule::get_execution_output_last_argument(const Handle& h) const
 	return args->getOutgoingAtom(args->getArity()-1);
 }
 
-std::string Rule::to_string() const
+Rule Rule::substituted(const TypedSubstitutions::value_type& ts) const
 {
-	std::stringstream ss;
-	ss << "name: " << _name << std::endl
-	   << "forward rule:" << std::endl
-	   << _forward_rule->toString()
-	   << "backward rules:" << std::endl
-	   << oc_to_string(_backward_rule_handles);
-	return ss.str();
+	// Get the list of values to stustitute from ts
+	HandleSeq values = _forward_rule->get_variables().make_values(ts.first);
+	// Perform alpha-conversion, this will work over valiues that are
+	// non variables as well
+	Handle h = _forward_rule->alpha_conversion(values, ts.second);
+
+	// Limited hack: if none of the values are variables then consume
+	// all quotations. The right fix would be to associate each
+	// variable to its scope during unification (and start from the
+	// scope links of the rule and the FCS containing the target),
+	// Then we know when a variable substituted by another variable
+	// may actually act as a value according to a sub scope link.
+	auto is_not_var = [](const Handle& v)
+		{ return v->getType() != VARIABLE_NODE; };
+	bool no_variable = all_of(values.begin(), values.end(), is_not_var);
+	if (no_variable) {
+		// Remove rule BindLink variable declaration
+		if (h->getArity() == 3) {
+			HandleSeq out{h->getOutgoingAtom(1), h->getOutgoingAtom(2)};
+			h = Handle(createLink(h->getType(), out));
+		}
+		// Consume consumable quotations
+		h = Rule::consume_quotations(h);
+	}
+
+	Rule new_rule(*this);
+	new_rule.set_forward_handle(h);
+	return new_rule;
+}
+
+Handle Rule::consume_quotations(Handle h, Quotation quotation)
+{
+	// Base case
+	if (h->isNode())
+		return h;
+
+	// Recursive cases
+	Type t = h->getType();
+	if (quotation.consumable(t)) {
+		quotation.update(t);
+		return consume_quotations(h->getOutgoingAtom(0), quotation);
+	}
+
+	quotation.update(t);
+	HandleSeq consumed;
+	for (const Handle outh : h->getOutgoingSet())
+		consumed.push_back(consume_quotations(outh, quotation));
+
+	// TODO: call all factories
+	bool is_scope = classserver().isA(t, SCOPE_LINK);
+	return is_scope ? Handle(ScopeLink::factory(t, consumed))
+		: Handle(createLink(t, consumed));
 }
 
 std::string oc_to_string(const Rule& rule)
