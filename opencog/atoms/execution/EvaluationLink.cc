@@ -514,12 +514,19 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	if (DEFINED_PREDICATE_NODE == pntype)
 	{
 		Handle defn = DefineLink::get_definition(pn);
+		Type dtype = defn->getType();
+
+		// Allow recursive definitions. This can be handy.
+		while (DEFINED_PREDICATE_NODE == dtype)
+		{
+			defn = DefineLink::get_definition(defn);
+			dtype = defn->getType();
+		}
 
 		// If its not a LambdaLink, then I don't know what to do...
-		Type dtype = defn->getType();
 		if (LAMBDA_LINK != dtype)
 			throw RuntimeException(TRACE_INFO,
-				"Expecting defintion to be a LambdaLink, got %s",
+				"Expecting definition to be a LambdaLink, got %s",
 				defn->toString().c_str());
 
 		// Treat it as if it were a PutLink -- perform the
