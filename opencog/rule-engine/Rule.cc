@@ -527,8 +527,11 @@ Handle Rule::get_execution_output_last_argument(const Handle& h) const
 {
 	OC_ASSERT(h->getType() == EXECUTION_OUTPUT_LINK);
 	Handle args = h->getOutgoingAtom(1);
-	OC_ASSERT(args->getType() == LIST_LINK and args->getArity() > 0);
-	return args->getOutgoingAtom(args->getArity()-1);
+	if (args->getType() == LIST_LINK) {
+		OC_ASSERT(args->getArity() > 0);
+		return args->getOutgoingAtom(args->getArity()-1);
+	} else
+		return args;
 }
 
 Rule Rule::substituted(const TypedSubstitutions::value_type& ts) const
