@@ -18,8 +18,8 @@
          (vardecl (VariableList
                      (TypedVariable A (TypeChoice LambdaT PredicateT))
                      (TypedVariable B (TypeChoice LambdaT PredicateT))))
-         (precon1 (Evaluation (GroundedPredicate "scm: true-enough") A))
-         (precon2 (Evaluation (GroundedPredicate "scm: true-enough") AB))
+         (precon1 (Evaluation (GroundedPredicate "scm: true-enough-tv") A))
+         (precon2 (Evaluation (GroundedPredicate "scm: true-enough-tv") AB))
          (pattern (And AB precon1 precon2))
          (rewrite (ExecutionOutput
                      (GroundedSchema "scm: crisp-modus-ponens-formula")
@@ -38,10 +38,13 @@
 
 (define (true-enough a)
   (let ((s (cog-stv-strength a)) (c (cog-stv-confidence a)))
-    (bool->tv (and (>= s 0.5) (> c 0.5)))))
+    (and (> s 0.5) (> c 0.5))))
+
+(define (true-enough-tv a)
+  (bool->tv (true-enough a)))
 
 (define (crisp-modus-ponens-formula A AB B)
-  (if (and (tv->bool (true-enough A)) (tv->bool (true-enough AB)))
+  (if (and (true-enough A) (true-enough AB))
       (cog-set-tv! B (stv 1 1))))
 
 ; Associate a name to the rule
