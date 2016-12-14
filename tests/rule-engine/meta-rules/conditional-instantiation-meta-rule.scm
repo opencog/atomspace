@@ -44,7 +44,7 @@
                           (Variable "$P")
                           (Variable "$Q"))))
          (precondition (Evaluation
-                         (GroundedPredicate "scm: true-enough")
+                         (GroundedPredicate "scm: true-enough-tv")
                          implication)))
   (And
     implication
@@ -67,7 +67,7 @@
       (Unquote TyVs)
       (And
         (Unquote (LocalQuote (LocalQuote P)))
-        (Evaluation (GroundedPredicate "scm: true-enough") (Unquote P)))
+        (Evaluation (GroundedPredicate "scm: true-enough-tv") (Unquote P)))
       (ExecutionOutput
         (GroundedSchema "scm: conditional-full-instantiation-formula")
         (Unquote
@@ -125,21 +125,17 @@
 
 (define (true-enough a)
   (let ((s (cog-stv-strength a)) (c (cog-stv-confidence a)))
-    (bool->tv (and (>= s 0.5) (> c 0.5)))))
+    (and (> s 0.5) (> c 0.5))))
+
+(define (true-enough-tv a)
+  (bool->tv (true-enough a)))
 
 ;; Set (stv 1 1) on Q is Impl and P strength are both above 0.5 and
 ;; their confidence is non null.
 (define (conditional-full-instantiation-formula Impl P Q)
   ;; Evaluate Q
-  (let* (
-         (Impl-s (cog-stv-strength Impl))
-         (Impl-c (cog-stv-confidence Impl))
-         (P-s (cog-stv-strength P))
-         (P-c (cog-stv-confidence P))
-         (good-enough (and (> Impl-s 0.5) (> Impl-c 0) (> P-s 0.5) (> P-c 0))))
-    (if good-enough
-        (cog-merge-hi-conf-tv! Q (stv 1 1))
-        (cog-undefined-handle))))
+  (if (and (true-enough Impl) (true-enough P))
+      (cog-set-tv! Q (stv 1 1))))
 
 ;; Name the meta rule
 (define conditional-full-instantiation-meta-rule-name
