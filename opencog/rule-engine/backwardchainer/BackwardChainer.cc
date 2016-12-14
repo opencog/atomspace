@@ -167,29 +167,19 @@ OrderedHandleSet BackwardChainer::get_leaves(const Handle& h) const
 	if (t == BIND_LINK) {
 		BindLinkPtr hsc = BindLinkCast(h);
 		Handle rewrite = hsc->get_implicand();
-		if (rewrite->getType() == EXECUTION_OUTPUT_LINK) {
-			return get_leaves(rewrite);
-		} else {
-			// Use the patterns as leaves
-			Handle pattern = hsc->get_body();
-			OrderedHandleSet leaves;
-			if (pattern->getType() == AND_LINK) {
-				const HandleSeq& outgoings = pattern->getOutgoingSet();
-				leaves.insert(outgoings.begin(), outgoings.end());
-			} else {
-				leaves.insert(pattern);
-			}
-			return leaves;
-		}
+		return get_leaves(rewrite);
 	} else if (t == EXECUTION_OUTPUT_LINK) {
 		// All arguments except the last one are potential target leaves
 		Handle args = h->getOutgoingAtom(1);
-		OC_ASSERT(args->getType() == LIST_LINK);
 		OrderedHandleSet leaves;
-		for (Arity i = 0; i+1 < args->getArity(); i++) {
-			OrderedHandleSet arg_leaves = get_leaves(args->getOutgoingAtom(i));
-			leaves.insert(arg_leaves.begin(), arg_leaves.end());
-		}
+		if (args->getType() == LIST_LINK) {
+			OC_ASSERT(args->getArity() > 0);
+			for (Arity i = 0; i+1 < args->getArity(); i++) {
+				OrderedHandleSet aleaves = get_leaves(args->getOutgoingAtom(i));
+				leaves.insert(aleaves.begin(), aleaves.end());
+			}
+		} else
+			leaves.insert(args);
 		return leaves;
 	} else if (t == SET_LINK) {
 		// All atoms wrapped in a SetLink are potential target leaves
@@ -483,8 +473,8 @@ void BackwardChainer::associate_andbit_leaves_to_fcs(const OrderedHandleSet& lea
 	}
 	else {
 		bc_logger().warn() << "The and-BIT with the following leaves:"
-		                   << std::endl << oc_to_string(leaves) << std::endl
-		                   << "and the following FCS:" << std::endl
-		                   << fcs << "is already in the BIT.";
+		                   << std::endl << oc_to_string(leaves)
+		                   << "Associated to the following FCS:" << std::endl
+		                   << it->second << "is already in the BIT.";
 	}
 }

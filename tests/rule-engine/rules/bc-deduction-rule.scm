@@ -35,13 +35,16 @@
 ; Deduction Formula
 ; -----------------------------------------------------------------------------
 
-(define (true-enough a)
+(define (true-enough-bool a)
   (let ((s (cog-stv-strength a)) (c (cog-stv-confidence a)))
-    (bool->tv (and (>= s 0.5) (> c 0.5)))))
+    (and (> s 0.5) (> c 0.5))))
+
+(define (true-enough a)
+  (bool->tv (true-enough-bool a)))
 
 (define (bc-deduction-formula AB BC AC)
   ;; We keep this precondition here again just in case
-  (if (and (tv->bool (true-enough AB)) (tv->bool (true-enough BC)))
+  (if (and (true-enough-bool AB) (true-enough-bool BC))
       (cog-set-tv! AC (stv 1 1))))
 
 ; Associate a name to the rule

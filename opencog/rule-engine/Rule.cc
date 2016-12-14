@@ -527,8 +527,11 @@ Handle Rule::get_execution_output_last_argument(const Handle& h) const
 {
 	OC_ASSERT(h->getType() == EXECUTION_OUTPUT_LINK);
 	Handle args = h->getOutgoingAtom(1);
-	OC_ASSERT(args->getType() == LIST_LINK and args->getArity() > 0);
-	return args->getOutgoingAtom(args->getArity()-1);
+	if (args->getType() == LIST_LINK) {
+		OC_ASSERT(args->getArity() > 0);
+		return args->getOutgoingAtom(args->getArity()-1);
+	} else
+		return args;
 }
 
 Rule Rule::substituted(const TypedSubstitutions::value_type& ts) const
@@ -538,6 +541,9 @@ Rule Rule::substituted(const TypedSubstitutions::value_type& ts) const
 	// Perform alpha-conversion, this will work over valiues that are
 	// non variables as well
 	Handle h = _forward_rule->alpha_conversion(values, ts.second);
+
+	Rule new_rule(*this);
+	new_rule.set_forward_handle(h);
 
 	// Limited hack: if none of the values are variables then consume
 	// all quotations. The right fix would be to associate each
@@ -551,16 +557,46 @@ Rule Rule::substituted(const TypedSubstitutions::value_type& ts) const
 	if (no_variable) {
 		// Remove rule BindLink variable declaration
 		if (h->getArity() == 3) {
-			HandleSeq out{h->getOutgoingAtom(1), h->getOutgoingAtom(2)};
-			h = Handle(createLink(h->getType(), out));
+			h = Handle(createBindLink(h->getOutgoingAtom(1), h->getOutgoingAtom(2)));
+			new_rule.set_forward_handle(h);
 		}
 		// Consume consumable quotations
-		h = Rule::consume_quotations(h);
+		new_rule.consume_quotations();
 	}
 
-	Rule new_rule(*this);
-	new_rule.set_forward_handle(h);
 	return new_rule;
+}
+
+bool Rule::is_pm_connector(const Handle& h)
+{
+	return is_pm_connector(h->getType());
+}
+
+bool Rule::is_pm_connector(Type t)
+{
+	return t == AND_LINK or t == OR_LINK or t == NOT_LINK;
+}
+
+void Rule::consume_quotations()
+{
+	OC_ASSERT(_forward_rule->get_vardecl().is_undefined(),
+	          "Should only consume quotations of BindLink without variable")
+	Handle pattern = _forward_rule->get_body();
+	Handle rewrite = _forward_rule->get_implicand();
+
+	// Consume the pattern's quotations
+	if (pattern->getType() == LOCAL_QUOTE_LINK
+	    and is_pm_connector(pattern->getOutgoingAtom(0))) {
+		Handle connector = consume_quotations(pattern->getOutgoingAtom(0));
+		pattern = createLink(LOCAL_QUOTE_LINK, connector);
+	} else
+		pattern = consume_quotations(pattern);
+
+	// Consume the rewrite's quotations
+	rewrite = consume_quotations(rewrite);
+
+	// Recreate the BindLink
+	_forward_rule = createBindLink(pattern, rewrite);
 }
 
 Handle Rule::consume_quotations(Handle h, Quotation quotation)

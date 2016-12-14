@@ -43,15 +43,21 @@ protected:
 	void extract_variables(const HandleSeq& oset);
 
 	BindLink(Type, const HandleSeq&,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	         TruthValuePtr tv=TruthValue::DEFAULT_TV(),
+	         AttentionValuePtr av=AttentionValue::DEFAULT_AV());
 
 public:
 	BindLink(const HandleSeq&,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	         TruthValuePtr tv=TruthValue::DEFAULT_TV(),
+	         AttentionValuePtr av=AttentionValue::DEFAULT_AV());
+	BindLink(const Handle& vardecl, const Handle& body, const Handle& rewrite,
+	         TruthValuePtr tv=TruthValue::DEFAULT_TV(),
+	         AttentionValuePtr av=AttentionValue::DEFAULT_AV());
+	BindLink(const Handle& body, const Handle& rewrite,
+	         TruthValuePtr tv=TruthValue::DEFAULT_TV(),
+	         AttentionValuePtr av=AttentionValue::DEFAULT_AV());
 
-	BindLink(Link &l);
+	explicit BindLink(Link &l);
 
 	bool imply(PatternMatchCallback&, bool check_connectivity=true);
 	const Handle& get_implicand(void) { return _implicand; }

@@ -36,12 +36,15 @@
 ; the TV of B to (stv 1 1)
 ; -----------------------------------------------------------------------------
 
-(define (true-enough a)
+(define (true-enough-bool a)
   (let ((s (cog-stv-strength a)) (c (cog-stv-confidence a)))
-    (bool->tv (and (>= s 0.5) (> c 0.5)))))
+    (and (> s 0.5) (> c 0.5))))
+
+(define (true-enough a)
+  (bool->tv (true-enough-bool a)))
 
 (define (crisp-modus-ponens-formula A AB B)
-  (if (and (tv->bool (true-enough A)) (tv->bool (true-enough AB)))
+  (if (and (true-enough-bool A) (true-enough-bool AB))
       (cog-set-tv! B (stv 1 1))))
 
 ; Associate a name to the rule

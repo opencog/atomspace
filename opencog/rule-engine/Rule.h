@@ -300,6 +300,12 @@ private:
 	// associated to local scopes. If that is the case then the
 	// quotations preventing them from being associated to their local
 	// scopes should be removed.
+	//
+	// Also, local quotes in front of root level And, Or or Not links
+	// on the pattern body are not consumed because they are typically
+	// used to avoid interpreting them as pattern matcher connectors.
+	bool is_pm_connector(const Handle& t);
+	bool is_pm_connector(Type t);
 	void consume_quotations();
 	static Handle consume_quotations(Handle h, Quotation quotation=Quotation());
 };
