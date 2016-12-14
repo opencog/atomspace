@@ -473,8 +473,8 @@ void BackwardChainer::associate_andbit_leaves_to_fcs(const OrderedHandleSet& lea
 	}
 	else {
 		bc_logger().warn() << "The and-BIT with the following leaves:"
-		                   << std::endl << oc_to_string(leaves) << std::endl
-		                   << "and the following FCS:" << std::endl
-		                   << fcs << "is already in the BIT.";
+		                   << std::endl << oc_to_string(leaves)
+		                   << "Associated to the following FCS:" << std::endl
+		                   << it->second << "is already in the BIT.";
 	}
 }

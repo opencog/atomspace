@@ -215,7 +215,9 @@ private:
 	// to an alpha conversion.
 	bool is_in(const Rule& rule, const BITNode& bitnode);
 
-	// Return all the leaves of an and-BIT FCS
+	// Return all the leaves of an and-BIT FCS. Another way is to call
+	// it a blanket, because these target leaves cover the
+	// intermediary targets.
 	OrderedHandleSet get_leaves(const Handle& fcs) const;
 
 	// Rewrite of the FindUtils.cc version till comparison by content
@@ -228,8 +230,8 @@ private:
 	// Equal even if one of them is locally quoted
 	bool is_locally_quoted_eq(const Handle& lhs, const Handle& rhs);
 
-	// Insert a new and-BIT by associating its leaves to a
-	// corresponding FCS
+	// Insert a new and-BIT by associating its target leaves (or
+	// blanket) to a corresponding FCS
 	void associate_andbit_leaves_to_fcs(const OrderedHandleSet& leaves,
 	                                    const Handle& fcs);
 
