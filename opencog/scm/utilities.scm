@@ -88,6 +88,13 @@
   Return the floating-point confidence of a TruthValue.
 "
 	(assoc-ref (cog-tv->alist tv) 'confidence))
+
+(define-public (tv-positive-conf? tv)
+"
+  Return #t if the confidence of tv is non null positive, #f otherwise.
+"
+	(< (tv-conf tv) 0))
+
 ;
 ; Simple truth values won't have a count. Its faster to just check
 ; for #f than to call (cog-ctv? tv)
@@ -1232,6 +1239,7 @@
 'etv
 'tv-mean
 'tv-conf
+'tv-positive-conf?
 'tv-count
 'cog-set-sti!
 'cog-set-lti!
