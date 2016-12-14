@@ -115,7 +115,7 @@ void RuleUTest::test_unify_target_deduction()
 		VA = al(INHERITANCE_LINK, V, A),
 		XA = al(INHERITANCE_LINK, X, A),
 		XnotA = al(NOT_LINK, al(IDENTICAL_LINK, X, A)),
-		true_enough = an(GROUNDED_PREDICATE_NODE, "scm: true-enough"),
+		true_enough = an(GROUNDED_PREDICATE_NODE, "scm: true-enough-tv"),
 		true_enough_XV = al(EVALUATION_LINK, true_enough, XV),
 		true_enough_VA = al(EVALUATION_LINK, true_enough, VA),
 		body = al(AND_LINK, XV, VA, XnotA, true_enough_XV, true_enough_VA),
