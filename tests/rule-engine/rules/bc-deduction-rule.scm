@@ -19,8 +19,8 @@
                      (TypedVariable A Concept)
                      (TypedVariable B Concept)
                      (TypedVariable C Concept)))
-         (precon1 (Evaluation (GroundedPredicate "scm: true-enough-tv") AB))
-         (precon2 (Evaluation (GroundedPredicate "scm: true-enough-tv") BC))
+         (precon1 (Evaluation (GroundedPredicate "scm: true-enough") AB))
+         (precon2 (Evaluation (GroundedPredicate "scm: true-enough") BC))
          (precon3 (Not (Identical A C)))
          (pattern (And AB BC precon1 precon2 precon3))
          (rewrite (ExecutionOutput
@@ -35,16 +35,16 @@
 ; Deduction Formula
 ; -----------------------------------------------------------------------------
 
-(define (true-enough a)
+(define (true-enough-bool a)
   (let ((s (cog-stv-strength a)) (c (cog-stv-confidence a)))
     (and (> s 0.5) (> c 0.5))))
 
-(define (true-enough-tv a)
-  (bool->tv (true-enough a)))
+(define (true-enough a)
+  (bool->tv (true-enough-bool a)))
 
 (define (bc-deduction-formula AB BC AC)
   ;; We keep this precondition here again just in case
-  (if (and (true-enough AB) (true-enough BC))
+  (if (and (true-enough-bool AB) (true-enough-bool BC))
       (cog-set-tv! AC (stv 1 1))))
 
 ; Associate a name to the rule

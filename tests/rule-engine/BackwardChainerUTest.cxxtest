@@ -459,8 +459,8 @@ void BackwardChainerUTest::test_criminal()
 		                                "   (ConceptNode \"criminal\"))"),
 		expected = al(SET_LINK, expected_target);
 
-	logger().debug() << "results = " << results;
-	logger().debug() << "expected = " << expected;
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(results, expected);
 	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->getMean());
