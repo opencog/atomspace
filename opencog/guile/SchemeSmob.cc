@@ -148,7 +148,8 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 /* ============================================================== */
 
 [[ noreturn ]] void SchemeSmob::throw_exception(const std::exception& ex,
-                                                const char *func)
+                                                const char *func,
+                                                SCM args)
 {
 	const char * msg = ex.what();
 	if (msg and msg[0] != 0)
