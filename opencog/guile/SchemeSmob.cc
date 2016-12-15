@@ -148,7 +148,8 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 /* ============================================================== */
 
 [[ noreturn ]] void SchemeSmob::throw_exception(const std::exception& ex,
-                                                const char *func)
+                                                const char *func,
+                                                SCM args)
 {
 	const char * msg = ex.what();
 	if (msg and msg[0] != 0)
@@ -168,7 +169,9 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 				scm_from_utf8_string(func),
 				scm_cons(
 					scm_from_utf8_string(msg),
-					SCM_EOL)));
+					scm_cons(
+						scm_from_utf8_string("Function args:\n"),
+						scm_cons(args, SCM_EOL)))));
 		// Hmm. scm_throw never returns.
 	}
 	else
@@ -179,7 +182,7 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 			scm_from_utf8_symbol("C++ exception"),
 			scm_from_utf8_string(func),
 			scm_from_utf8_string("unknown C++ exception"),
-			SCM_EOL,
+			args,
 			SCM_EOL);
 		// Hmm. scm_error never returns.
 	}

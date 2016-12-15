@@ -142,7 +142,7 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 	// about this, and convert the C++ exception into a scheme
 	// exception. If the exception is an OpenCog exception, then
 	// we can have a stack trace. If its some C++ exception, then
-	// there is no stack trace, and we sould need to overload
+	// there is no stack trace, and we would need to overload
 	// __cxa_throw() to get it to work. Yuck, so we don't do that.
 	// Use gdb if you hit this situation.
 	try
@@ -151,12 +151,12 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 	}
 	catch (const std::exception& ex)
 	{
-		SchemeSmob::throw_exception(ex, fe->get_name());
+		SchemeSmob::throw_exception(ex, fe->get_name(), arglist);
 	}
 	catch (...)
 	{
 		std::exception ex;
-		SchemeSmob::throw_exception(ex, fe->get_name());
+		SchemeSmob::throw_exception(ex, fe->get_name(), arglist);
 	}
 	scm_remember_upto_here_1(sfe);
 	return rc;
