@@ -112,11 +112,11 @@ SCM SchemeSmob::ss_new_as (SCM s)
 
 #define WORK_AROUND_GUILE_20_GC_BUG
 #ifdef WORK_AROUND_GUILE_20_GC_BUG
-	// Below is a wrk-around to a bug.  You can trigger this bug
-	// with the code below;  if will crash, because the initial
+	// Below is a work-around to a bug.  You can trigger this bug
+	// with the code below;  it will crash, because the initial
 	// AS gets erroneously garbage-collected.  Guile is trying
 	// to release the main AS every time through the loop.  I can't
-	// tell why.
+	// figure out why.
 /******
 (use-modules (opencog))
 (use-modules (opencog exec))
