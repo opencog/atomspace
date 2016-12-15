@@ -393,7 +393,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	}
 	catch (const std::exception& ex)
 	{
-		throw_exception(ex, "cog-new-node", kv_pairs);
+		throw_exception(ex, "cog-new-node", SCM_EOL);
 	}
 
 	scm_remember_upto_here_1(kv_pairs);
@@ -524,7 +524,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	}
 	catch (const std::exception& ex)
 	{
-		throw_exception(ex, "cog-new-link", kv_pairs);
+		throw_exception(ex, "cog-new-link", SCM_EOL);
 	}
 	scm_remember_upto_here_1(satom_list);
 	return handle_to_scm (h);
