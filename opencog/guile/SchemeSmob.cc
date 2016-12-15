@@ -162,6 +162,10 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 			logger().error("Guile caught C++ exception: %s", msg);
 		}
 
+		// Hmmm Try real hard to make sure args is printable.
+		SCM sargs = scm_open_output_string();
+		scm_display(args, sargs);
+
 		// scm_misc_error(fe->get_name(), msg, SCM_EOL);
 		scm_throw(
 			scm_from_utf8_symbol("C++-EXCEPTION"),
@@ -171,7 +175,8 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 					scm_from_utf8_string(msg),
 					scm_cons(
 						scm_from_utf8_string("Function args:\n"),
-						scm_cons(args, SCM_EOL)))));
+						scm_cons(
+							scm_get_output_string(sargs), SCM_EOL)))));
 		// Hmm. scm_throw never returns.
 	}
 	else
