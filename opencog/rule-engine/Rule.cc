@@ -545,34 +545,24 @@ Rule Rule::substituted(const TypedSubstitutions::value_type& ts) const
 	Rule new_rule(*this);
 	new_rule.set_forward_handle(h);
 
-	// Limited hack: if none of the values are variables then consume
-	// all quotations. The right fix would be to associate each
-	// variable to its scope during unification (and start from the
-	// scope links of the rule and the FCS containing the target),
-	// Then we know when a variable substituted by another variable
-	// may actually act as a value according to a sub scope link.
-	auto is_not_var = [](const Handle& v)
-		{ return v->getType() != VARIABLE_NODE; };
-	bool no_variable = all_of(values.begin(), values.end(), is_not_var);
-	if (no_variable) {
-		// Remove rule BindLink variable declaration
-		if (h->getArity() == 3) {
-			h = Handle(createBindLink(h->getOutgoingAtom(1), h->getOutgoingAtom(2)));
-			new_rule.set_forward_handle(h);
-		}
-		// Consume consumable quotations
+	// If the quotation are useless or even harmful, then consume them
+	if (is_bad_quotation(BindLinkCast(new_rule.get_forward_rule())))
 		new_rule.consume_quotations();
-	}
 
 	return new_rule;
 }
 
-bool Rule::is_pm_connector(const Handle& h)
+bool Rule::is_bad_quotation(BindLinkPtr bl) const
+{
+	return bl->get_vardecl().is_undefined();
+}
+
+bool Rule::is_pm_connector(const Handle& h) const
 {
 	return is_pm_connector(h->getType());
 }
 
-bool Rule::is_pm_connector(Type t)
+bool Rule::is_pm_connector(Type t) const
 {
 	return t == AND_LINK or t == OR_LINK or t == NOT_LINK;
 }

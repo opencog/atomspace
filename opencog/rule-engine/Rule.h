@@ -304,8 +304,9 @@ private:
 	// Also, local quotes in front of root level And, Or or Not links
 	// on the pattern body are not consumed because they are typically
 	// used to avoid interpreting them as pattern matcher connectors.
-	bool is_pm_connector(const Handle& t);
-	bool is_pm_connector(Type t);
+	bool is_bad_quotation(BindLinkPtr bl) const;
+	bool is_pm_connector(const Handle& h) const;
+	bool is_pm_connector(Type t) const;
 	void consume_quotations();
 	static Handle consume_quotations(Handle h, Quotation quotation=Quotation());
 };
