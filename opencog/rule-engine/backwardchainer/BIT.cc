@@ -56,7 +56,7 @@ bool BIT::empty() const
 	return _handle2bitnode.empty();
 }
 
-void BIT::init()
+Handle BIT::init()
 {
 	// Initialize the BIT with an FCS basedon the initial target
 	init_fcss();
@@ -64,6 +64,7 @@ void BIT::init()
 	LAZY_BC_LOG_DEBUG << "Initialize BIT with:" << std::endl
 	                  << _handle2bitnode[_init_target].to_string();
 
+	return *_fcss.begin();
 }
 
 Handle BIT::expand(const Handle& fcs, BITNode& bitleaf, const Rule& rule)
@@ -126,14 +127,17 @@ void BIT::insert_fcs(const Handle& fcs)
 {
 	auto it = _fcss.find(fcs);
 	if (it == _fcss.end()) {
-		_fcss.insert(fcs);
+		// Check that it is not alpha-equivalent either
+		for (const Handle& efcs : _fcss) {
+			if (ScopeLinkCast(fcs)->is_equal(efcs)) {
+				LAZY_BC_LOG_DEBUG << "The following FCS is alpha-equivalent "
+				                  << "to another one already in the BIT:"
+				                  << std::endl << oc_to_string(fcs);
+				return;
+			}
+		}
 
-		// TODO not sure I need that
-		// // Check that it is not alpha-equivalent either
-		// bool has_alpha_equivalent = false;
-		// for (const Handle& efcs : _fcss) {
-		// 	is_equal(
-		// }
+		_fcss.insert(fcs);
 
 		// For each leave associate a corresponding BITNode
 		Handle fcs_vardecl = BindLinkCast(fcs)->get_vardecl();
@@ -143,9 +147,8 @@ void BIT::insert_fcs(const Handle& fcs)
 		}
 	}
 	else {
-		bc_logger().warn() << "The FCS:"
-		                   << std::endl << oc_to_string(fcs)
-		                   << "is already in the BIT.";
+		LAZY_BC_LOG_DEBUG << "The following FCS is already in the BIT:"
+		                  << std::endl << oc_to_string(fcs);
 	}
 }
 

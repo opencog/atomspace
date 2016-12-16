@@ -97,13 +97,23 @@ void BackwardChainer::expand_bit()
 	// the Rule class.
 	_rules.expand_meta_rules(_as);
 
+	// Reset _last_expansion_fcs
+	_last_expansion_fcs = Handle::UNDEFINED;
+
 	if (_bit.empty()) {
-		_bit.init();
+		_last_expansion_fcs = _bit.init();
 	} else {
 		// Select an FCS (i.e. and-BIT) and expand it
-		Handle fcs = _bit.select_fcs();
+		Handle fcs = select_expansion_fcs();
 		LAZY_BC_LOG_DEBUG << "Selected FCS for expansion:" << std::endl
 		                  << fcs;
+
+		// Hack before we code a proper complexity penalty to avoid
+		// exploring overly complex and-BITs.
+		if (fcs->size() > 1000) {
+			bc_logger().debug() << "The selected FCS size it too big, abort expansion";
+			return;
+		}
 		expand_bit(fcs);
 	}
 }
@@ -120,8 +130,7 @@ void BackwardChainer::expand_bit(const Handle& fcs)
 	// Add the rule in the _bit.bit_as to make comparing atoms more easy
 	rule.add(_bit.bit_as);
 	if (not rule.is_valid()) {
-		bc_logger().warn("No valid rule for the selected BIT-node, abort expansion");
-		_last_expansion_fcs = Handle::UNDEFINED;
+		bc_logger().debug("No valid rule for the selected BIT-node, abort expansion");
 		return;
 	}
 	LAZY_BC_LOG_DEBUG << "Selected rule for BIT expansion:" << std::endl
@@ -134,12 +143,16 @@ void BackwardChainer::expand_bit(const Handle& fcs)
 void BackwardChainer::fulfill_bit()
 {
 	if (_bit.empty()) {
-		bc_logger().warn("Cannot fulfill an empty BIT");
+		bc_logger().warn("Cannot fulfill an empty BIT!");
 		return;
 	}
 
 	// Select an and-BIT for fulfillment
-	Handle fcs = select_fcs();
+	Handle fcs = select_fulfilment_fcs();
+	if (fcs == Handle::UNDEFINED) {
+		bc_logger().debug() << "Cannot fulfill an empty FCS. Abort BIT fulfilment";
+		return;
+	}
 	LAZY_BC_LOG_DEBUG << "Selected FCS for fulfillment:" << std::endl
 	                  << fcs;
 	fulfill_fcs(fcs);
@@ -153,13 +166,20 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 	_results.insert(results.begin(), results.end());
 }
 
-Handle BackwardChainer::select_fcs() const
+Handle BackwardChainer::select_expansion_fcs() const
 {
-	// Select the lastly expanded and-BIT, or a uniformly random one
-	// if the last expansion had failed.
+	return _bit.select_fcs();
+}
+
+Handle BackwardChainer::select_fulfilment_fcs() const
+{
+	// Select the lastly expanded and-BIT
 	if (_last_expansion_fcs.is_defined())
 		return _last_expansion_fcs;
-	return _bit.select_fcs();
+
+	// If the last expansion has failed then don't waste time retry to
+	// fulfill an old and-BIT
+	return Handle::UNDEFINED;
 }
 
 void BackwardChainer::reduce_bit()

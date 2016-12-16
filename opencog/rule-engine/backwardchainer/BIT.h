@@ -114,7 +114,8 @@ public:
 
 	// Modifiers
 
-	void init();
+	// Initialize the BIT and return the initial FCS
+	Handle init();
 
 	/**
 	 * Expand the BIT given a FCS (i.e. and-BIT) as parent, a BITNode
