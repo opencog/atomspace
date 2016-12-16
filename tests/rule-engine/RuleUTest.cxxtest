@@ -107,7 +107,7 @@ void RuleUTest::test_unify_target_deduction()
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
 	Handle forward_rule = rules.begin()->get_forward_rule(),
-		// expected up to an alpha conversion
+		// Expected up to an alpha conversion
 		vardecl = al(VARIABLE_LIST,
 		             al(TYPED_VARIABLE_LINK, X, CT),
 		             al(TYPED_VARIABLE_LINK, V, CT)),
@@ -144,7 +144,7 @@ void RuleUTest::test_unify_target_implication_scope_to_implication()
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
 	Handle forward_rule = rules.begin()->get_forward_rule(),
-		// expected up to an alpha conversion
+		// Expected up to an alpha conversion
 		body = al(IMPLICATION_SCOPE_LINK, Typed_X, Eval_P, Eval_Q),
 		schema = an(GROUNDED_SCHEMA_NODE,
 		            "scm: implication-scope-to-implication-formula"),
