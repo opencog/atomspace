@@ -93,10 +93,10 @@ class BackwardChainer
 
 public:
 	BackwardChainer(AtomSpace& as, const Handle& rbs,
-	                const Handle& htarget,
-	                const Handle& vardecl = Handle::UNDEFINED,
-	                const Handle& hfocus_set = Handle::UNDEFINED,
-	                const BITFitness& fitness = BITFitness());
+	                const Handle& target,
+	                const Handle& vardecl=Handle::UNDEFINED,
+	                const Handle& focus_set=Handle::UNDEFINED,
+	                const BITFitness& fitness=BITFitness());
 
 	/**
 	 * URE configuration accessors
@@ -130,62 +130,21 @@ private:
 	// Expand the BIT
 	void expand_bit();
 
-	// Expand the BIT given a and-BIT as parent
-	void expand_bit(const AndBITFCMap::value_type& andbit);
-
-	// Expand the BIT given a and-BIT as parent, a BITNode as leaf of
-	// that and-BIT and an inference rule.
-	//
-	// TODO: support fitness function.
-	void expand_bit(const AndBITFCMap::value_type& andbit,
-	                BITNode& leaf, const Rule& rule);
-
-	// Given a new FCS (Forward Chaining Strategy), create a new
-	// associated and-BIT and insert it into the BIT
+	// Expand a selected FCS (i.e. and-BIT)
 	void expand_bit(const Handle& fcs);
-
-	// Given an FCS, a leaf of it to expand, and a rule, return a new
-	// FCS where the leaf has been substituted by the rule premises
-	// and rule application.
-	//
-	// TODO: give examples.
-	Handle expand_fcs(const Handle& fcs, const Handle& leaf, const Rule& rule);
-
-	// Given a FCS, a leaf of it and a rule. Unify the rule conclusion
-	// with the leaf and replace any variables in the FCS by its
-	// corresponding term in the rule.
-	Handle substitute_unified_variables(const Handle& fcs, const Handle& leaf,
-	                                    const Rule& rule);
-
-	// Given the pattern term of an FCS where all variables have been
-	// substituted by the corresponding terms in the rule conclusion,
-	// expand the rule conclusion by its premises.
-	//
-	// TODO: give examples.
-	Handle expand_fcs_pattern(const Handle& fcs_pattern, const Rule& rule);
-
-	// Given the rewrite term of an FCS where all variables have been
-	// substituted by the corresponding terms in the rule conclusion,
-	// replace the rule conclusion by the rule rewrite term.
-	//
-	// TODO: give examples.
-	Handle expand_fcs_rewrite(const Handle& fcs_rewrite, const Rule& rule);
 
 	// Fulfill the BIT. That is run some or all its and-BITs
 	void fulfill_bit();
 
-	// Fulfill an and-BIT. That is run its associated forward chaining
+	// Fulfill an FCS (i.e and-BIT). That is run its forward chaining
 	// strategy.
-	void fulfill_andbit(const AndBITFCMap::value_type& andbit);
+	void fulfill_fcs(const Handle& fcs);
 
 	// Reduce the BIT. Remove some and-BITs.
 	void reduce_bit();
 
-	// Select an and-BIT
-	const AndBITFCMap::value_type& select_andbit();
-
-	// Select a leaf of an and-BIT for subsequent expansion
-	BITNode& select_bitleaf(const AndBITFCMap::value_type& andbit);
+	// Select an FCS (or and-BIT).
+	Handle select_fcs() const;
 
 	// Select a valid rule given a target. The selected is a new
 	// object because a new rule is created, its variables are
@@ -197,73 +156,17 @@ private:
 	// possibly be used to infer the target.
 	RuleSet get_valid_rules(const BITNode& target);
 
-	// Add body and vardecl into _bit_as, build the bitnode associated
-	// to body and insert it in _handle2bitnode.
-	void insert_h2b(Handle body, Handle vardecl, const BITFitness& fitness);
-
-	// Initialize the _andbits container with
-	//
-	// {_init_target}
-	// ->
-	// BindLink
-	//   _init_vardecl
-	//   _init_target
-	//   _init_target
-	void init_andbits();
-
-	// Return true if the rule is already an or-children of bitnode up
-	// to an alpha conversion.
-	bool is_in(const Rule& rule, const BITNode& bitnode);
-
-	// Return all the leaves of an and-BIT FCS. Another way is to call
-	// it a blanket, because these target leaves cover the
-	// intermediary targets.
-	OrderedHandleSet get_leaves(const Handle& fcs) const;
-
-	// Rewrite of the FindUtils.cc version till comparison by content
-	// is properly supported by Handle
-	bool is_atom_in_tree(const Handle& tree, const Handle& atom);
-
-	// Return true if atom is an argument of an evaluation
-	bool is_argument_of(const Handle& eval, const Handle& atom);
-
-	// Equal even if one of them is locally quoted
-	bool is_locally_quoted_eq(const Handle& lhs, const Handle& rhs);
-
-	// Insert a new and-BIT by associating its target leaves (or
-	// blanket) to a corresponding FCS
-	void associate_andbit_leaves_to_fcs(const OrderedHandleSet& leaves,
-	                                    const Handle& fcs);
-
 	AtomSpace& _as;
 	UREConfigReader _configReader;
 
-	Handle _init_target;
-	Handle _init_vardecl;
-	BITFitness _init_fitness;
-
-	// Temporary atomspace for storing the BIT
-	AtomSpace _bit_as;
+	// Structure holding the Back Inference Tree
+	BIT _bit;
 
 	int _iteration;
-	AtomSpace _focus_space;
 
-	// TODO: we might want to wrap the BIT data and methods in a BIT
-	// class and move it to BIT.h
-
-	// TODO: we might want to build a FCS class as well
-
-	// Mapping from handles to their corresponding BITNode
-	// bodies. Also where the BITNode are actually instantiated.
-	HandleBITNodeMap _handle2bitnode;
-
-	// Collection of and-BITs associated with their forward chaining
-	// strategies.
-	AndBITFCMap _andbits;
-
-	// Keep track of the and-BIT of the last expansion. Null if the
-	// last expansion has failed.
-	AndBITFCMap::value_type* _last_expansion_andbit;
+	// Keep track of the and-BIT (FCS) of the last
+	// expansion. UNDEFINED if the last expansion has failed.
+	Handle _last_expansion_fcs;
 
 	RuleSet _rules;
 
