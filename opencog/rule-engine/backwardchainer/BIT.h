@@ -120,15 +120,12 @@ public:
 	 * Expand the BIT given a FCS (i.e. and-BIT) as parent, a BITNode
 	 * as leaf of that and-BIT and an inference rule.
 	 *
-	 * The rule is passed non const because it is added to _bit_as as
-	 * well.
-	 *
 	 * Return the FCS created from that expansion, or
 	 * Handle::UNDEFINED if the expansion has failed.
 	 *
 	 * TODO: support fitness function.
 	 */
-	Handle expand(const Handle& fcs, BITNode& leaf, Rule& rule);
+	Handle expand(const Handle& fcs, BITNode& leaf, const Rule& rule);
 
 	// Access
 
@@ -142,6 +139,9 @@ public:
 	 * leave of it as potential target for expansion.
 	 */
 	BITNode& select_bitleaf(const Handle& fcs);
+
+	// Temporary atomspace for storing the BIT
+	AtomSpace bit_as;
 
 private:
 	/**
@@ -226,9 +226,6 @@ private:
 	Handle _init_target;
 	Handle _init_vardecl;
 	BITFitness _init_fitness;
-
-	// Temporary atomspace for storing the BIT
-	AtomSpace _bit_as;
 
 	// Mapping from handles to their corresponding BITNode
 	// bodies. Also where the BITNode are actually instantiated.

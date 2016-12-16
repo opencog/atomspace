@@ -47,8 +47,9 @@ BIT::BIT(AtomSpace& as,
          const Handle& target,
          const Handle& vardecl,
          const BITFitness& fitness)
-	: _init_target(target), _init_vardecl(vardecl), _init_fitness(fitness),
-	  _bit_as(&as) {}
+	: bit_as(&as),
+	  _init_target(target), _init_vardecl(vardecl), _init_fitness(fitness)
+{}
 
 bool BIT::empty() const
 {
@@ -65,12 +66,8 @@ void BIT::init()
 
 }
 
-Handle BIT::expand(const Handle& fcs, BITNode& bitleaf, Rule& rule)
+Handle BIT::expand(const Handle& fcs, BITNode& bitleaf, const Rule& rule)
 {
-	// Add the rule in the _bit_as to make comparing atoms more easily
-	// TODO: might no longer be necessary...
-	rule.add(_bit_as);
-
 	// Make sure that the rule is not already an or-child of bitleaf.
 	if (is_in(rule, bitleaf)) {
 		bc_logger().debug() << "An equivalent rule has already expanded "
@@ -119,7 +116,7 @@ void BIT::init_fcss()
 	HandleSeq bl{_init_target, _init_target};
 	if (_init_vardecl.is_defined())
 		bl.insert(bl.begin(), _init_vardecl);
-	Handle fcs = _bit_as.add_link(BIND_LINK, bl);
+	Handle fcs = bit_as.add_link(BIND_LINK, bl);
 
 	// Insert it into the BIT
 	insert_fcs(fcs);
@@ -130,6 +127,13 @@ void BIT::insert_fcs(const Handle& fcs)
 	auto it = _fcss.find(fcs);
 	if (it == _fcss.end()) {
 		_fcss.insert(fcs);
+
+		// TODO not sure I need that
+		// // Check that it is not alpha-equivalent either
+		// bool has_alpha_equivalent = false;
+		// for (const Handle& efcs : _fcss) {
+		// 	is_equal(
+		// }
 
 		// For each leave associate a corresponding BITNode
 		Handle fcs_vardecl = BindLinkCast(fcs)->get_vardecl();
@@ -212,7 +216,7 @@ Handle BIT::expand_fcs(const Handle& fcs, const Handle& leaf, const Rule& rule)
 	HandleSeq noutgoings({npattern, nrewrite});
 	if (nvardecl.is_defined())
 		noutgoings.insert(noutgoings.begin(), nvardecl);
-	nfcs = _bit_as.add_link(BIND_LINK, noutgoings);
+	nfcs = bit_as.add_link(BIND_LINK, noutgoings);
 
 	LAZY_BC_LOG_DEBUG << "Expanded forward chainer strategy:" << std::endl
 	                  << "from:" << std::endl << fcs
@@ -256,8 +260,8 @@ Handle BIT::expand_fcs_pattern(const Handle& fcs_pattern, const Rule& rule)
 
 	// Simple case where the fcs contains the conclusion itself
 	if (content_eq(fcs_pattern, conclusion))
-		return _bit_as.add_link(AND_LINK, HandleSeq(clauses.begin(),
-		                                            clauses.end()));
+		return bit_as.add_link(AND_LINK, HandleSeq(clauses.begin(),
+		                                           clauses.end()));
 
 	// The fcs contains a conjunction of clauses. Remove any clause
 	// that is equal to the rule conclusion, or precondition that uses
@@ -274,7 +278,7 @@ Handle BIT::expand_fcs_pattern(const Handle& fcs_pattern, const Rule& rule)
 	// Add the patterns and preconditions associated to the rule
 	fcs_clauses.insert(fcs_clauses.end(), clauses.begin(), clauses.end());
 
-	return _bit_as.add_link(AND_LINK, fcs_clauses);
+	return bit_as.add_link(AND_LINK, fcs_clauses);
 }
 
 Handle BIT::expand_fcs_rewrite(const Handle& fcs_rewrite, const Rule& rule)
@@ -299,7 +303,7 @@ Handle BIT::expand_fcs_rewrite(const Handle& fcs_rewrite, const Rule& rule)
 	HandleSeq outgoings;
 	for (const Handle& h : fcs_rewrite->getOutgoingSet())
 		outgoings.push_back(expand_fcs_rewrite(h, rule));
-	return _bit_as.add_link(t, outgoings);
+	return bit_as.add_link(t, outgoings);
 }
 
 bool BIT::is_argument_of(const Handle& eval, const Handle& atom)

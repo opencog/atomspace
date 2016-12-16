@@ -117,6 +117,8 @@ void BackwardChainer::expand_bit(const Handle& fcs)
 
 	// Select a valid rule
 	Rule rule = select_rule(bitleaf);
+	// Add the rule in the _bit.bit_as to make comparing atoms more easy
+	rule.add(_bit.bit_as);
 	if (not rule.is_valid()) {
 		bc_logger().warn("No valid rule for the selected BIT-node, abort expansion");
 		_last_expansion_fcs = Handle::UNDEFINED;
