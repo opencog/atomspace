@@ -148,8 +148,6 @@ void BackwardChainerUTest::test_select_rule_3()
 
 	Rule selected_rule = _bc->select_rule(target);
 
-	std::cout << "selected_rule = " << oc_to_string(selected_rule);
-
 	TS_ASSERT_EQUALS(selected_rule.get_name(), "bc-deduction-rule");
 }
 
@@ -170,7 +168,7 @@ void BackwardChainerUTest::test_deduction()
 		target = al(INHERITANCE_LINK, X, D);
 		
 	BackwardChainer bc(_as, top_rbs, target);
-	bc.get_config().set_maximum_iterations(20);
+	bc.get_config().set_maximum_iterations(10);
 	bc.do_chain();
 
 	Handle results = bc.get_results(),
@@ -303,7 +301,7 @@ void BackwardChainerUTest::test_conditional_instantiation_1()
 		                target_var, an(TYPE_NODE, "ConceptNode")));
 
 	BackwardChainer bc(_as, top_rbs, target, vardecl);
-	bc.get_config().set_maximum_iterations(20);
+	bc.get_config().set_maximum_iterations(50);
 	bc.do_chain();
 
 	Handle results = bc.get_results(),
@@ -450,7 +448,7 @@ void BackwardChainerUTest::test_criminal()
 	Handle soln = _eval.eval_h("(ConceptNode \"West\")");
 
 	BackwardChainer bc(_as, top_rbs, target, vardecl);
-	bc.get_config().set_maximum_iterations(100);
+	bc.get_config().set_maximum_iterations(1000);
 	bc.do_chain();
 
 	Handle results = bc.get_results(),
@@ -478,25 +476,13 @@ void BackwardChainerUTest::test_induction()
 	string load_bc_induction_config_result =
 		_eval.eval("(load-from-path \"tests/rule-engine/bc-induction-config.scm\")");
 
-	std::cout << "load_bc_induction_config_result = "
-	          << load_bc_induction_config_result;
-
-	std::cout << "AtomSpace after loading bc-induction-config: " << _as;
-
 	string load_bc_induction_result =
 		_eval.eval("(load-from-path \"tests/rule-engine/bc-induction.scm\")");
-
-	std::cout << "load_bc_induction_result = "
-	          << load_bc_induction_result;
-
-	std::cout << "AtomSpace after loading bc-induction: " << _as;
 
 	randGen().seed(500);
 
 	// load modus ponens & deduction rules
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
-
-	std::cout << "top_rbs = " << oc_to_string(top_rbs);
 
 	Handle target = _eval.eval_h("bc-induction-target");
 
@@ -504,7 +490,7 @@ void BackwardChainerUTest::test_induction()
 	bc.get_config().set_maximum_iterations(100);
 	bc.do_chain();
 
-	// TODO: fixme
+	// TODO: fixme, for that we need to support BIT expansion over meta rule
 	// TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, 1e-10);
 	// TODO: determine the expected confidence, which depends on the
 	// number of instances the induction is based on
