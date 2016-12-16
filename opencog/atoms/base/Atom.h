@@ -205,6 +205,10 @@ public:
         throw RuntimeException(TRACE_INFO, "Not a link!");
     }
 
+    // Return the size of an atom. 1 if a node, 1 + sizes of its
+    // outgoings if a link.
+    virtual size_t size() const = 0;
+
     virtual const HandleSeq& getOutgoingSet() const {
         throw RuntimeException(TRACE_INFO, "Not a link!");
     }

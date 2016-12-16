@@ -151,6 +151,13 @@ public:
         return _outgoing.size();
     }
 
+    virtual size_t size() const {
+        size_t size = 1;
+        for (const Handle&h : _outgoing)
+            size += h->size();
+        return size;
+    }
+
     /**
      * Returns a const reference to the array containing this
      * atom's outgoing set.

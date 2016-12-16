@@ -89,6 +89,8 @@ public:
      */
     virtual const std::string& getName() const { return _name; }
 
+    virtual size_t size() const { return 1; }
+
     /**
      * Returns a string representation of the node.
      *
