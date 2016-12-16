@@ -536,7 +536,7 @@ Handle Rule::get_execution_output_last_argument(const Handle& h) const
 
 Rule Rule::substituted(const TypedSubstitutions::value_type& ts) const
 {
-	// Get the list of values to stustitute from ts
+	// Get the list of values to substitute from ts
 	HandleSeq values = _forward_rule->get_variables().make_values(ts.first);
 	// Perform alpha-conversion, this will work over valiues that are
 	// non variables as well
@@ -544,10 +544,7 @@ Rule Rule::substituted(const TypedSubstitutions::value_type& ts) const
 
 	Rule new_rule(*this);
 	new_rule.set_forward_handle(h);
-
-	// If the quotation are useless or even harmful, then consume them
-	if (is_bad_quotation(BindLinkCast(new_rule.get_forward_rule())))
-		new_rule.consume_quotations();
+	new_rule.consume_bad_quotations();
 
 	return new_rule;
 }
@@ -567,8 +564,14 @@ bool Rule::is_pm_connector(Type t) const
 	return t == AND_LINK or t == OR_LINK or t == NOT_LINK;
 }
 
-void Rule::consume_quotations()
+void Rule::consume_bad_quotations()
 {
+	// If the quotations are useless or harmful (which might be the
+	// case if they deprive a ScopeLink from hiding supposedly hidden
+	// variables), then consume them.
+	if (not is_bad_quotation(_forward_rule))
+		return;
+
 	OC_ASSERT(_forward_rule->get_vardecl().is_undefined(),
 	          "Should only consume quotations of BindLink without variable")
 	Handle pattern = _forward_rule->get_body();
@@ -577,19 +580,19 @@ void Rule::consume_quotations()
 	// Consume the pattern's quotations
 	if (pattern->getType() == LOCAL_QUOTE_LINK
 	    and is_pm_connector(pattern->getOutgoingAtom(0))) {
-		Handle connector = consume_quotations(pattern->getOutgoingAtom(0));
+		Handle connector = consume_bad_quotations(pattern->getOutgoingAtom(0));
 		pattern = createLink(LOCAL_QUOTE_LINK, connector);
 	} else
-		pattern = consume_quotations(pattern);
+		pattern = consume_bad_quotations(pattern);
 
 	// Consume the rewrite's quotations
-	rewrite = consume_quotations(rewrite);
+	rewrite = consume_bad_quotations(rewrite);
 
 	// Recreate the BindLink
 	_forward_rule = createBindLink(pattern, rewrite);
 }
 
-Handle Rule::consume_quotations(Handle h, Quotation quotation)
+Handle Rule::consume_bad_quotations(Handle h, Quotation quotation)
 {
 	// Base case
 	if (h->isNode())
@@ -599,13 +602,13 @@ Handle Rule::consume_quotations(Handle h, Quotation quotation)
 	Type t = h->getType();
 	if (quotation.consumable(t)) {
 		quotation.update(t);
-		return consume_quotations(h->getOutgoingAtom(0), quotation);
+		return consume_bad_quotations(h->getOutgoingAtom(0), quotation);
 	}
 
 	quotation.update(t);
 	HandleSeq consumed;
 	for (const Handle outh : h->getOutgoingSet())
-		consumed.push_back(consume_quotations(outh, quotation));
+		consumed.push_back(consume_bad_quotations(outh, quotation));
 
 	// TODO: call all factories
 	bool is_scope = classserver().isA(t, SCOPE_LINK);

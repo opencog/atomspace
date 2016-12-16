@@ -307,8 +307,8 @@ private:
 	bool is_bad_quotation(BindLinkPtr bl) const;
 	bool is_pm_connector(const Handle& h) const;
 	bool is_pm_connector(Type t) const;
-	void consume_quotations();
-	static Handle consume_quotations(Handle h, Quotation quotation=Quotation());
+	void consume_bad_quotations();
+	Handle consume_bad_quotations(Handle h, Quotation quotation=Quotation());
 };
 
 // For Gdb debugging, see
