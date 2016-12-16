@@ -292,23 +292,31 @@ private:
 	// unify function, generate a new partially substituted rule.
 	Rule substituted(const TypedSubstitutions::value_type& ts) const;
 
-	// In some circumstances the quotes of a rule are useless. This is
-	// true for instance when the role of the quotation is to only
-	// prevent that some variable be associated to a scope link
-	// instead of the rule scope. During substitution these variables
-	// (associated to the rule scope) may be replaced by variables
-	// associated to local scopes. If that is the case then the
-	// quotations preventing them from being associated to their local
-	// scopes should be removed.
+	// If the quotations are useless or harmful, which might be the
+	// case if they deprive a ScopeLink from hiding supposedly hidden
+	// variables, then consume them.
 	//
-	// Also, local quotes in front of root level And, Or or Not links
-	// on the pattern body are not consumed because they are typically
-	// used to avoid interpreting them as pattern matcher connectors.
+	// Specifically this code makes 2 assumptions
+	//
+	// 1. LocalQuotes in front root level And, Or or Not links on the
+	//    pattern body are not consumed because they are supposedly
+	//    used to avoid interpreting them as pattern matcher
+	//    connectors.
+	//
+	// 2. Quote/Unquote are used to wrap scope links so that their
+	//    variable declaration can pattern match grounded or partially
+	//    grounded scope links.
+	//
+	// No other of quotation is assumed besides the 2 above.
 	bool is_bad_quotation(BindLinkPtr bl) const;
 	bool is_pm_connector(const Handle& h) const;
 	bool is_pm_connector(Type t) const;
+	bool has_bl_variable_in_local_scope(const Handle& h) const;
 	void consume_bad_quotations();
-	Handle consume_bad_quotations(Handle h, Quotation quotation=Quotation());
+	Handle consume_bad_quotations(Handle h, Quotation quotation=Quotation(),
+	                              bool escape=false /* ignore the next
+	                                                 * quotation
+	                                                 * consumption */);
 };
 
 // For Gdb debugging, see

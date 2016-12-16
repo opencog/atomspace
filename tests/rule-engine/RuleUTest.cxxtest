@@ -39,7 +39,7 @@ private:
 	AtomSpace _as;
 	SchemeEval _eval;
 	Handle deduction_rule_h, X, A, V, CT, Typed_X,
-		P, Q, Eval_P, Eval_Q,
+		P_body_var, P, Q, Eval_P, Eval_Q,
 		implication_scope_to_implication_rule_h;
 
 public:
@@ -51,7 +51,9 @@ public:
 	void tearDown();
 
 	void test_unify_target_deduction();
-	void test_unify_target_implication_scope_to_implication();
+	void test_unify_target_implication_scope_to_implication_1();
+	void test_unify_target_implication_scope_to_implication_2();
+	// TODO provide a third unit tests when some quotation should be not consumed
 };
 
 void RuleUTest::setUp()
@@ -87,6 +89,7 @@ void RuleUTest::setUp()
 	CT = an(TYPE_NODE, "ConceptNode");
 	Typed_X = al(TYPED_VARIABLE_LINK, X, CT);
 	P = an(PREDICATE_NODE, "P");
+	P_body_var = an(VARIABLE_NODE, "$P");
 	Q = an(PREDICATE_NODE, "Q");
 	Eval_P = al(EVALUATION_LINK, P, X);
 	Eval_Q = al(EVALUATION_LINK, Q, X);
@@ -133,7 +136,9 @@ void RuleUTest::test_unify_target_deduction()
 	TS_ASSERT(expected_sc->is_equal(forward_rule));
 }
 
-void RuleUTest::test_unify_target_implication_scope_to_implication()
+// Test how useless quotation gets eliminated during
+// Rule::unify_target.
+void RuleUTest::test_unify_target_implication_scope_to_implication_1()
 {
 	Rule implication_scope_to_implication_rule(implication_scope_to_implication_rule_h);
 	Handle target = al(IMPLICATION_LINK,
@@ -153,6 +158,38 @@ void RuleUTest::test_unify_target_implication_scope_to_implication()
 		             al(LIST_LINK, body, target)),
 		expected = al(BIND_LINK, body, rewrite);
 
+	std::cout << "forward_rule = " << oc_to_string(forward_rule);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
+
+	TS_ASSERT(expected_sc->is_equal(forward_rule));
+}
+
+// Like test_unify_target_implication_scope_to_implication_1 but
+// Eval_P is replaced by Variable "$P".
+void RuleUTest::test_unify_target_implication_scope_to_implication_2()
+{
+	Rule implication_scope_to_implication_rule(implication_scope_to_implication_rule_h);
+	Handle target = al(IMPLICATION_LINK,
+	                   al(LAMBDA_LINK, Typed_X, P_body_var),
+	                   al(LAMBDA_LINK, Typed_X, Eval_Q));
+	RuleSet rules = implication_scope_to_implication_rule.unify_target(target);
+
+	TS_ASSERT_EQUALS(rules.size(), 1);
+
+	Handle forward_rule = rules.begin()->get_forward_rule(),
+		// Expected up to an alpha conversion
+		body = al(IMPLICATION_SCOPE_LINK, Typed_X, P_body_var, Eval_Q),
+		schema = an(GROUNDED_SCHEMA_NODE,
+		            "scm: implication-scope-to-implication-formula"),
+		rewrite = al(EXECUTION_OUTPUT_LINK,
+		             schema,
+		             al(LIST_LINK, body, target)),
+		expected = al(BIND_LINK, P_body_var, body, rewrite);
+
+	std::cout << "implication_scope_to_implication_rule = " << oc_to_string(implication_scope_to_implication_rule);
+	std::cout << "target = " << oc_to_string(target);
 	std::cout << "forward_rule = " << oc_to_string(forward_rule);
 	std::cout << "expected = " << oc_to_string(expected);
 
