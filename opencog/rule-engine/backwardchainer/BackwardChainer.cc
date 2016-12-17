@@ -148,9 +148,9 @@ void BackwardChainer::fulfill_bit()
 	}
 
 	// Select an and-BIT for fulfillment
-	Handle fcs = select_fulfilment_fcs();
+	Handle fcs = select_fulfillment_fcs();
 	if (fcs == Handle::UNDEFINED) {
-		bc_logger().debug() << "Cannot fulfill an empty FCS. Abort BIT fulfilment";
+		bc_logger().debug() << "Cannot fulfill an empty FCS. Abort BIT fulfillment";
 		return;
 	}
 	LAZY_BC_LOG_DEBUG << "Selected FCS for fulfillment:" << std::endl
@@ -171,7 +171,7 @@ Handle BackwardChainer::select_expansion_fcs() const
 	return _bit.select_fcs();
 }
 
-Handle BackwardChainer::select_fulfilment_fcs() const
+Handle BackwardChainer::select_fulfillment_fcs() const
 {
 	// Select the lastly expanded and-BIT
 	if (_last_expansion_fcs.is_defined())

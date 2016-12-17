@@ -147,7 +147,7 @@ private:
 	Handle select_expansion_fcs() const;
 
 	// Select an FCS (i.e. and-BIT) for fulfilment
-	Handle select_fulfilment_fcs() const;
+	Handle select_fulfillment_fcs() const;
 
 	// Select a valid rule given a target. The selected is a new
 	// object because a new rule is created, its variables are

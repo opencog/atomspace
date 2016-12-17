@@ -536,7 +536,7 @@ Handle Rule::get_execution_output_last_argument(const Handle& h) const
 
 Rule Rule::substituted(const TypedSubstitutions::value_type& ts) const
 {
-	// Get the list of values to stustitute from ts
+	// Get the list of values to substitute from ts
 	HandleSeq values = _forward_rule->get_variables().make_values(ts.first);
 	// Perform alpha-conversion, this will work over valiues that are
 	// non variables as well
@@ -544,62 +544,50 @@ Rule Rule::substituted(const TypedSubstitutions::value_type& ts) const
 
 	Rule new_rule(*this);
 	new_rule.set_forward_handle(h);
-
-	// Limited hack: if none of the values are variables then consume
-	// all quotations. The right fix would be to associate each
-	// variable to its scope during unification (and start from the
-	// scope links of the rule and the FCS containing the target),
-	// Then we know when a variable substituted by another variable
-	// may actually act as a value according to a sub scope link.
-	auto is_not_var = [](const Handle& v)
-		{ return v->getType() != VARIABLE_NODE; };
-	bool no_variable = all_of(values.begin(), values.end(), is_not_var);
-	if (no_variable) {
-		// Remove rule BindLink variable declaration
-		if (h->getArity() == 3) {
-			h = Handle(createBindLink(h->getOutgoingAtom(1), h->getOutgoingAtom(2)));
-			new_rule.set_forward_handle(h);
-		}
-		// Consume consumable quotations
-		new_rule.consume_quotations();
-	}
+	new_rule.consume_bad_quotations();
 
 	return new_rule;
 }
 
-bool Rule::is_pm_connector(const Handle& h)
+bool Rule::is_bad_quotation(BindLinkPtr bl) const
+{
+	return bl->get_vardecl().is_undefined();
+}
+
+bool Rule::is_pm_connector(const Handle& h) const
 {
 	return is_pm_connector(h->getType());
 }
 
-bool Rule::is_pm_connector(Type t)
+bool Rule::is_pm_connector(Type t) const
 {
 	return t == AND_LINK or t == OR_LINK or t == NOT_LINK;
 }
 
-void Rule::consume_quotations()
+bool Rule::has_bl_variable_in_local_scope(const Handle& h) const
 {
-	OC_ASSERT(_forward_rule->get_vardecl().is_undefined(),
-	          "Should only consume quotations of BindLink without variable")
-	Handle pattern = _forward_rule->get_body();
-	Handle rewrite = _forward_rule->get_implicand();
-
-	// Consume the pattern's quotations
-	if (pattern->getType() == LOCAL_QUOTE_LINK
-	    and is_pm_connector(pattern->getOutgoingAtom(0))) {
-		Handle connector = consume_quotations(pattern->getOutgoingAtom(0));
-		pattern = createLink(LOCAL_QUOTE_LINK, connector);
-	} else
-		pattern = consume_quotations(pattern);
-
-	// Consume the rewrite's quotations
-	rewrite = consume_quotations(rewrite);
-
-	// Recreate the BindLink
-	_forward_rule = createBindLink(pattern, rewrite);
+	return _forward_rule->get_variables().is_in_varset(h->getOutgoingAtom(0));
 }
 
-Handle Rule::consume_quotations(Handle h, Quotation quotation)
+void Rule::consume_bad_quotations()
+{
+	Handle vardecl = _forward_rule->get_vardecl(),
+		pattern = _forward_rule->get_body(),
+		rewrite = _forward_rule->get_implicand();
+
+	// Consume the pattern's quotations
+	pattern = consume_bad_quotations(pattern);
+
+	// Consume the rewrite's quotations
+	rewrite = consume_bad_quotations(rewrite);
+
+	// Recreate the BindLink
+	_forward_rule = vardecl.is_defined() ?
+		createBindLink(vardecl, pattern, rewrite)
+		: createBindLink(pattern, rewrite);
+}
+
+Handle Rule::consume_bad_quotations(Handle h, Quotation quotation, bool escape)
 {
 	// Base case
 	if (h->isNode())
@@ -608,14 +596,32 @@ Handle Rule::consume_quotations(Handle h, Quotation quotation)
 	// Recursive cases
 	Type t = h->getType();
 	if (quotation.consumable(t)) {
-		quotation.update(t);
-		return consume_quotations(h->getOutgoingAtom(0), quotation);
+		if (t == QUOTE_LINK) {
+			Handle scope = h->getOutgoingAtom(0);
+			OC_ASSERT(classserver().isA(scope->getType(), SCOPE_LINK),
+			          "This defaults the assumption, see this function comment");
+			// Check whether a variable of the BindLink is present in
+			// the local scope vardecl, if so escape the consumption.
+			if (not has_bl_variable_in_local_scope(scope)) {
+				quotation.update(t);
+				return consume_bad_quotations(scope, quotation);
+			} else {
+				escape = true;
+			}
+		} else if (t == UNQUOTE_LINK) {
+			if (not escape) {
+				quotation.update(t);
+				return consume_bad_quotations(h->getOutgoingAtom(0), quotation);
+			}
+		}
+		// Ignore LocalQuotes as they supposedly used only to quote
+		// pattern matcher connectors.
 	}
 
 	quotation.update(t);
 	HandleSeq consumed;
 	for (const Handle outh : h->getOutgoingSet())
-		consumed.push_back(consume_quotations(outh, quotation));
+		consumed.push_back(consume_bad_quotations(outh, quotation, escape));
 
 	// TODO: call all factories
 	bool is_scope = classserver().isA(t, SCOPE_LINK);

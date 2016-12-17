@@ -62,17 +62,15 @@
      (VariableNode "$A2")))
 
 (define implication-and-lambda-factorization-body
-  (QuoteLink                        ; Necessary so the AndLink doesn't
-                                    ; count as a connective
+  (LocalQuoteLink                        ; Necessary so the AndLink doesn't
+                                         ; count as a connective
      (AndLink
-        (UnquoteLink
-           (LambdaLink
-              (VariableNode "$TyVs-one")
-              (VariableNode "$A1")))
-        (UnquoteLink
-           (LambdaLink
-              (VariableNode "$TyVs-two")
-              (VariableNode "$A2"))))))
+        (QuoteLink (LambdaLink
+           (Unquote (VariableNode "$TyVs-one"))
+           (Unquote (VariableNode "$A1"))))
+        (QuoteLink (LambdaLink
+           (Unquote (VariableNode "$TyVs-two"))
+           (Unquote (VariableNode "$A2")))))))
 
 (define implication-and-lambda-factorization-rewrite
   (ExecutionOutputLink

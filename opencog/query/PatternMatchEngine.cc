@@ -116,7 +116,7 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 	// VariableNode had better be an actual node!
 	// If it's not then we are very very confused ...
 	OC_ASSERT (hp->isNode(),
-	           "ERROR: expected variable to be a node, got this: %s\n",
+	           "Expected variable to be a node, got this: %s\n",
 	           hp->toShortString().c_str());
 
 	// Else, we have a candidate grounding for this variable.
