@@ -38,11 +38,10 @@
      (Variable "$Q")))
 
 (define conditional-full-instantiation-meta-body
-  (let* ((implication (LocalQuote
-                        (ImplicationScope
-                          (Variable "$TyVs")
-                          (Variable "$P")
-                          (Variable "$Q"))))
+  (let* ((implication (Quote (ImplicationScope
+                         (Unquote (Variable "$TyVs"))
+                         (Unquote (Variable "$P"))
+                         (Unquote (Variable "$Q")))))
          (precondition (Evaluation
                          (GroundedPredicate "scm: true-enough")
                          implication)))
@@ -58,11 +57,10 @@
   (let* ((TyVs (Variable "$TyVs"))
          (P (Variable "$P"))
          (Q (Variable "$Q"))
-         (implication (LocalQuote
-                        (ImplicationScope
-                          TyVs
-                          P
-                          Q))))
+         (implication (Quote (ImplicationScope
+                         (Unquote TyVs)
+                         (Unquote P)
+                         (Unquote Q)))))
     (Quote (Bind
       (Unquote TyVs)
       (And
@@ -76,34 +74,6 @@
             P
             Q)))))))
 
-;; Bind
-;;   VariableList
-;;     TypedVariable
-;;       Variable "$TyVs"
-;;       TypeChoice
-;;         Type "TypedVariableLink"
-;;         Type "VariableLink"
-;;     Variable "$P"
-;;     Variable "$Q"
-;;   LocalQuote
-;;     ImplicationScope
-;;       Variable "$TyVs"
-;;       Variable "$P"
-;;       Variable "$Q"
-;;   LocalQuote
-;;     Bind
-;;       Variable "$TyVs"
-;;       Variable "$P"
-;;       ExecutionOutput
-;;         GroundedSchema "scm: conditional-full-instantiation-formula"
-;;         List
-;;           LocalQuote
-;;             ImplicationScope
-;;               Variable "$TyVs"
-;;               Variable "$P"
-;;               Variable "$Q"
-;;           Variable "$P"
-;;           Variable "$Q"
 (define conditional-full-instantiation-meta-rule
   (BindLink
      conditional-full-instantiation-meta-variables
