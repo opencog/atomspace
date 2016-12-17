@@ -198,7 +198,7 @@ Rule BackwardChainer::select_rule(const BITNode& target)
 	// Log all valid rules
 	if (bc_logger().is_debug_enabled()) {
 		std::stringstream ss;
-		ss << "The following rules unify with the target:";
+		ss << "The following rules are valid:";
 		for (const Rule& r : valid_rules)
 			ss << std::endl << r.get_name();
 		LAZY_BC_LOG_DEBUG << ss.str();
