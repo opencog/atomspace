@@ -194,6 +194,16 @@ Rule BackwardChainer::select_rule(const BITNode& target)
 	const RuleSet valid_rules = get_valid_rules(target);
 	if (valid_rules.empty())
 		return Rule();
+
+	// Log all valid rules
+	if (bc_logger().is_debug_enabled()) {
+		std::stringstream ss;
+		ss << "The following rules unify with the target:";
+		for (const Rule& r : valid_rules)
+			ss << std::endl << r.get_name();
+		LAZY_BC_LOG_DEBUG << ss.str();
+	}
+
 	return rand_element(valid_rules);
 }
 
