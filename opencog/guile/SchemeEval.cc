@@ -38,6 +38,7 @@
 using namespace opencog;
 
 std::mutex init_mtx;
+std::mutex prot_mtx; // temporary hack
 
 /**
  * This init is called once for every time that this class
@@ -57,6 +58,7 @@ void SchemeEval::init(void)
 	_in_eval = false;
 	_eval_thread = SCM_EOL;
 
+	std::unique_lock<std::mutex> protlck(prot_mtx);
 	// User error and crash management
 	_error_string = SCM_EOL;
 	_error_string = scm_gc_protect_object(_error_string);
@@ -113,6 +115,7 @@ void SchemeEval::capture_port(void)
 	// port.  Scheme code will be writing into one end of it, while, in a
 	// different thread, we will be sucking it dry, and displaying the
 	// contents to the user.
+
 	SCM pair = scm_pipe();
 	_pipe = scm_car(pair);
 	_pipe = scm_gc_protect_object(_pipe);
@@ -141,6 +144,7 @@ void SchemeEval::capture_port(void)
 /// per-thread semantics.
 void SchemeEval::redirect_output(void)
 {
+std::unique_lock<std::mutex> protlck(prot_mtx);
 	_in_redirect++;
 	if (1 < _in_redirect) return;
 	capture_port();
@@ -159,6 +163,7 @@ void SchemeEval::restore_output(void)
 	_in_redirect --;
 	if (0 < _in_redirect) return;
 
+std::unique_lock<std::mutex> protlck(prot_mtx);
 	// Restore the previous outport (if its still alive)
 	if (scm_is_false(scm_port_closed_p(_saved_outport)))
 		scm_set_current_output_port(_saved_outport);
@@ -183,6 +188,8 @@ void * SchemeEval::c_wrap_init(void *p)
 
 void SchemeEval::finish(void)
 {
+	std::lock_guard<std::mutex> lck(init_mtx);
+	std::unique_lock<std::mutex> protlck(prot_mtx);
 #ifdef DBG_CRASH
 	_rc_cnt --;
 	if (0 != _rc_cnt)
@@ -193,7 +200,6 @@ void SchemeEval::finish(void)
 #endif // DBG_CRASH
 	scm_gc_unprotect_object(_rc);
 
-	std::lock_guard<std::mutex> lck(init_mtx);
 
 	// If we had once set up the async I/O, the release it.
 	if (_in_server)
@@ -223,6 +229,7 @@ void * SchemeEval::c_wrap_finish(void *p)
 // of anything we've kept in the object.
 void SchemeEval::set_captured_stack(SCM newstack)
 {
+	std::unique_lock<std::mutex> protlck(prot_mtx);
 	// protect before unprotecting, to avoid multi-threaded races.
 	SCM oldstack = _captured_stack;
 	_captured_stack = scm_gc_protect_object(newstack);
@@ -231,6 +238,7 @@ void SchemeEval::set_captured_stack(SCM newstack)
 
 void SchemeEval::set_error_string(SCM newerror)
 {
+	std::unique_lock<std::mutex> protlck(prot_mtx);
 	SCM olderror = _error_string;
 	_error_string = scm_gc_protect_object(newerror);
 	scm_gc_unprotect_object(olderror);
@@ -677,7 +685,9 @@ void SchemeEval::do_eval(const std::string &expr)
 	previn = _input_line;
 	_untid = gettid();
 #endif // DBG_CRASH
+	std::unique_lock<std::mutex> protlck(prot_mtx);
 	scm_gc_unprotect_object(_rc);
+	protlck.unlock();
 #ifdef DBG_CRASH
 try {
 #endif // DBG_CRASH
@@ -704,7 +714,9 @@ logger().error("unknown unexcepted catch! in=%s", _input_line.c_str());
 		logger().flush();
 	}
 #endif // DBG_CRASH
+	protlck.lock();
 	_rc = scm_gc_protect_object(_rc);
+	protlck.unlock();
 #ifdef DBG_CRASH
 	_rc_id ++;
 	_rc_cnt ++;
@@ -817,6 +829,7 @@ std::string SchemeEval::do_poll_result()
 	// Save the result of evaluation, and clear it. Recall that _rc is
 	// typically set in a different thread.  We want it cleared before
 	// we ever get here again, on later evals.
+	std::unique_lock<std::mutex> protlck(prot_mtx);
 	SCM tmp_rc = _rc;
 	scm_gc_unprotect_object(_rc);
 	_rc = SCM_EOL;
