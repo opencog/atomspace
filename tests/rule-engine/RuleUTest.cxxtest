@@ -38,9 +38,10 @@ class RuleUTest: public CxxTest::TestSuite
 private:
 	AtomSpace _as;
 	SchemeEval _eval;
-	Handle deduction_rule_h, X, A, V, CT, Typed_X,
-		P_body_var, P, Q, Eval_P, Eval_Q,
-		implication_scope_to_implication_rule_h;
+	Handle deduction_rule_h,
+		implication_scope_to_implication_rule_h,
+		implication_and_lambda_factorization_rule_h,
+		X, A, V, CT, Typed_X, P_body_var, P, Q, Eval_P, Eval_Q;
 
 public:
 	RuleUTest() : _eval(&_as)
@@ -54,6 +55,7 @@ public:
 	void test_unify_target_implication_scope_to_implication_1();
 	void test_unify_target_implication_scope_to_implication_2();
 	// TODO provide a third unit tests when some quotation should be not consumed
+	void test_unify_target_implication_and_lambda_factorization();
 };
 
 void RuleUTest::setUp()
@@ -74,6 +76,7 @@ void RuleUTest::setUp()
 		_eval.eval("(load-from-path \"tests/rule-engine/bc-config.scm\")");
 	eval_result =
 		_eval.eval("(load-from-path \"tests/rule-engine/rules/implication-scope-to-implication-rule.scm\")");
+		_eval.eval("(load-from-path \"tests/rule-engine/rules/implication-and-lambda-factorization-rule.scm\")");
 
 	deduction_rule_h =
 		_eval.eval_h("(MemberLink (stv 1 1)"
@@ -83,6 +86,11 @@ void RuleUTest::setUp()
 		_eval.eval_h("(MemberLink (stv 1 1)"
 		             "   implication-scope-to-implication-rule-name"
 		             "   (ConceptNode \"URE\"))");
+	implication_and_lambda_factorization_rule_h =
+		_eval.eval_h("(MemberLink (stv 1 1)"
+		             "   implication-and-lambda-factorization-rule-name"
+		             "   (ConceptNode \"URE\"))");
+
 	X = an(VARIABLE_NODE, "$X");
 	A = an(CONCEPT_NODE, "$A");
 	V = an(VARIABLE_NODE, "$V");
@@ -190,6 +198,73 @@ void RuleUTest::test_unify_target_implication_scope_to_implication_2()
 
 	std::cout << "implication_scope_to_implication_rule = " << oc_to_string(implication_scope_to_implication_rule);
 	std::cout << "target = " << oc_to_string(target);
+	std::cout << "forward_rule = " << oc_to_string(forward_rule);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
+
+	TS_ASSERT(expected_sc->is_equal(forward_rule));
+}
+
+void RuleUTest::test_unify_target_implication_and_lambda_factorization()
+{
+	Rule implication_and_lambda_factorization_rule(implication_and_lambda_factorization_rule_h);
+	Handle target =
+		_eval.eval_h("(ImplicationLink"
+		             "  (AndLink"
+		             "    (VariableNode \"$Q-38ea0de8\")"
+		             "    (LambdaLink"
+		             "      (TypedVariableLink"
+		             "        (VariableNode \"$X\")"
+		             "        (TypeNode \"ConceptNode\")"
+		             "      )"
+		             "      (EvaluationLink"
+		             "        (PredicateNode \"take\")"
+		             "        (ListLink"
+		             "          (VariableNode \"$X\")"
+		             "          (ConceptNode \"treatment-1\")"
+		             "        )"
+		             "      )"
+		             "    )"
+		             "  )"
+		             "  (LambdaLink"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$X\")"
+		             "      (TypeNode \"ConceptNode\")"
+		             "    )"
+		             "    (AndLink"
+		             "      (EvaluationLink (stv 1.000000 1.000000)"
+		             "        (PredicateNode \"contain\")"
+		             "        (ListLink"
+		             "          (ConceptNode \"treatment-1\")"
+		             "          (ConceptNode \"compound-A\")"
+		             "        )"
+		             "      )"
+		             "      (EvaluationLink"
+		             "        (PredicateNode \"take\")"
+		             "        (ListLink"
+		             "          (VariableNode \"$X\")"
+		             "          (ConceptNode \"treatment-1\")"
+		             "        )"
+		             "      )"
+		             "    )"
+		             "  )"
+		             ")");
+	Handle vardecl =
+		_eval.eval_h("(TypedVariableLink"
+		             "  (VariableNode \"$Q-38ea0de8\")"
+		             "  (TypeChoice"
+		             "    (TypeNode \"LambdaLink\")"
+		             "    (TypeNode \"PredicateNode\")"
+		             "  )"
+		             ")");
+	RuleSet rules = implication_and_lambda_factorization_rule.unify_target(target);
+
+	TS_ASSERT_EQUALS(rules.size(), 1);
+
+	Handle forward_rule = rules.begin()->get_forward_rule(),
+		expected = _eval.eval_h("TODO");
+
 	std::cout << "forward_rule = " << oc_to_string(forward_rule);
 	std::cout << "expected = " << oc_to_string(expected);
 
