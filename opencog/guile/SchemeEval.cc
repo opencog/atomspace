@@ -67,6 +67,7 @@ void SchemeEval::init(void)
 
 	_rc = SCM_EOL;
 	_rc = scm_gc_protect_object(_rc);
+	_rc_cnt = 1;
 
 	_gc_ctr = 0;
 }
@@ -646,14 +647,45 @@ void SchemeEval::do_eval(const std::string &expr)
 	_pending_input = false;
 	_error_msg.clear();
 	set_captured_stack(SCM_BOOL_F);
+#ifdef DBG_CRASH
+	_rc_cnt --;
+	if (0 != _rc_cnt)
+	{
+		logger().error("unbalanced protection, cnt=%d prev=%s cur=%s", _rc_cnt, previn.c_str(), expr.c_str());
+	}
+	else
+	{
+		previn = _input_line;
+	}
+#endif // DBG_CRASH
 	scm_gc_unprotect_object(_rc);
+#ifdef DBG_CRASH
+try {
+#endif // DBG_CRASH
 	SCM eval_str = scm_from_utf8_string(_input_line.c_str());
 	_rc = scm_c_catch (SCM_BOOL_T,
 	                      (scm_t_catch_body) scm_eval_string,
 	                      (void *) eval_str,
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
+#ifdef DBG_CRASH
+} catch(const std::exception& ex)
+{
+logger().error("unexcepted catch! ex=%s in=%s", ex.what(), _input_line.c_str());
+}
+catch(...)
+{
+logger().error("unknown unexcepted catch! in=%s", _input_line.c_str()); 
+}
+#endif // DBG_CRASH
 	_rc = scm_gc_protect_object(_rc);
+#ifdef DBG_CRASH
+	_rc_cnt ++;
+	if (1 != _rc_cnt)
+	{
+		logger().error("post unbalanced cnt=%d prev=%s cur=%s", _rc_cnt, previn.c_str(), expr.c_str());
+	}
+#endif // DBG_CRASH
 
 	restore_output();
 
