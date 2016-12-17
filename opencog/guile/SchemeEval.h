@@ -82,6 +82,8 @@ class SchemeEval : public GenericEval
 #ifdef DBG_CRASH
 		int _rc_cnt; // debugging only, remove when done.
 		std::string previn;
+		int _rc_id;
+		pid_t _untid;
 #endif // DBG_CRASH
 		bool _eval_done;
 		bool _poll_done;
