@@ -576,12 +576,7 @@ void Rule::consume_bad_quotations()
 		rewrite = _forward_rule->get_implicand();
 
 	// Consume the pattern's quotations
-	if (pattern->getType() == LOCAL_QUOTE_LINK
-	    and is_pm_connector(pattern->getOutgoingAtom(0))) {
-		Handle connector = consume_bad_quotations(pattern->getOutgoingAtom(0));
-		pattern = createLink(LOCAL_QUOTE_LINK, connector);
-	} else
-		pattern = consume_bad_quotations(pattern);
+	pattern = consume_bad_quotations(pattern);
 
 	// Consume the rewrite's quotations
 	rewrite = consume_bad_quotations(rewrite);
@@ -618,13 +613,9 @@ Handle Rule::consume_bad_quotations(Handle h, Quotation quotation, bool escape)
 				quotation.update(t);
 				return consume_bad_quotations(h->getOutgoingAtom(0), quotation);
 			}
-		} else {
-			logger().error() << "No other quotation types should be found here. "
-			                 << "To understand why, see this function comment. "
-			                 << "The culprit is:" << std::endl << oc_to_string(h)
-			                 << "from rule: " << oc_to_string(*this);
-			OC_ASSERT(false);
 		}
+		// Ignore LocalQuotes as they supposedly used only to quote
+		// pattern matcher connectors.
 	}
 
 	quotation.update(t);
