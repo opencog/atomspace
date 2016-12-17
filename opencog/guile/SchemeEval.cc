@@ -8,7 +8,6 @@
  */
 
 #ifdef HAVE_GUILE
-
 #include <atomic>
 
 #include <unistd.h>
@@ -31,6 +30,10 @@
 #include "SchemeEval.h"
 #include "SchemePrimitive.h"
 #include "SchemeSmob.h"
+
+#ifdef DBG_CRASH
+#include <sys/syscall.h>
+#endif
 
 using namespace opencog;
 
@@ -67,10 +70,19 @@ void SchemeEval::init(void)
 
 	_rc = SCM_EOL;
 	_rc = scm_gc_protect_object(_rc);
+#ifdef DBG_CRASH
 	_rc_cnt = 1;
+	_rc_id = 1;
+	_untid = 0;
+#endif
 
 	_gc_ctr = 0;
 }
+#ifdef DBG_CRASH
+static pid_t gettid() {
+	return syscall(SYS_gettid);
+}
+#endif
 
 /// When the user is using the guile shell from within the cogserver,
 /// We need to capture the output port. It is used by the cogserver
@@ -171,6 +183,14 @@ void * SchemeEval::c_wrap_init(void *p)
 
 void SchemeEval::finish(void)
 {
+#ifdef DBG_CRASH
+	_rc_cnt --;
+	if (0 != _rc_cnt)
+	{
+		logger().error("unp fail on finish eval_done=%d id=%d cnt=%d untid=%x thistid=%x prev=%s", _eval_done, _rc_id, _rc_cnt, _untid, gettid(), previn.c_str());
+		logger().flush();
+	}
+#endif // DBG_CRASH
 	scm_gc_unprotect_object(_rc);
 
 	std::lock_guard<std::mutex> lck(init_mtx);
@@ -651,12 +671,11 @@ void SchemeEval::do_eval(const std::string &expr)
 	_rc_cnt --;
 	if (0 != _rc_cnt)
 	{
-		logger().error("unbalanced protection, cnt=%d prev=%s cur=%s", _rc_cnt, previn.c_str(), expr.c_str());
+		logger().error("unbalanced protection, eval_done=%d id=%d cnt=%d untid=%x thistid=%x prev=%s cur=%s", _eval_done, _rc_id, _rc_cnt, _untid, gettid(), previn.c_str(), expr.c_str());
+		logger().flush();
 	}
-	else
-	{
-		previn = _input_line;
-	}
+	previn = _input_line;
+	_untid = gettid();
 #endif // DBG_CRASH
 	scm_gc_unprotect_object(_rc);
 #ifdef DBG_CRASH
@@ -672,18 +691,27 @@ try {
 } catch(const std::exception& ex)
 {
 logger().error("unexcepted catch! ex=%s in=%s", ex.what(), _input_line.c_str());
+		logger().flush();
 }
 catch(...)
 {
 logger().error("unknown unexcepted catch! in=%s", _input_line.c_str()); 
+		logger().flush();
 }
+	if (0 != _rc_cnt)
+	{
+		logger().error("unexpect not yet, eval_done=%d id=%d cnt=%d untid=%x thistid=%x prev=%s cur=%s", _eval_done, _rc_id, _rc_cnt, _untid, gettid(), previn.c_str(), expr.c_str());
+		logger().flush();
+	}
 #endif // DBG_CRASH
 	_rc = scm_gc_protect_object(_rc);
 #ifdef DBG_CRASH
+	_rc_id ++;
 	_rc_cnt ++;
 	if (1 != _rc_cnt)
 	{
-		logger().error("post unbalanced cnt=%d prev=%s cur=%s", _rc_cnt, previn.c_str(), expr.c_str());
+		logger().error("post unbalanced, eval_done=%d id=%d cnt=%d untid=%x thistid=%x prev=%s cur=%s", _eval_done, _rc_id, _rc_cnt, _untid, gettid(), previn.c_str(), expr.c_str());
+		logger().flush();
 	}
 #endif // DBG_CRASH
 
@@ -777,6 +805,15 @@ std::string SchemeEval::do_poll_result()
 	// evalution result flags, etc.
 	_poll_done = true;
 
+#ifdef DBG_CRASH
+	if (1 != _rc_cnt)
+	{
+		logger().error("unexpect not yet eval_done=%d id=%d cnt=%d untid=%x thistid=%x prev=%s", _eval_done, _rc_id, _rc_cnt, _untid, gettid(), previn.c_str());
+		logger().flush();
+	}
+	_rc_id ++;
+	_untid = gettid();
+#endif
 	// Save the result of evaluation, and clear it. Recall that _rc is
 	// typically set in a different thread.  We want it cleared before
 	// we ever get here again, on later evals.
