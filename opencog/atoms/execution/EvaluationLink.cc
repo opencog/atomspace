@@ -1,4 +1,5 @@
 /*
+ *
  * opencog/atoms/execution/EvaluationLink.cc
  *
  * Copyright (C) 2009, 2013, 2014, 2015 Linas Vepstas
@@ -83,9 +84,13 @@ static NumberNodePtr unwrap_set(Handle h)
 	if (SET_LINK == h->getType())
 	{
 		if (1 != h->getArity())
-			throw SyntaxException(TRACE_INFO,
-				"Don't know how to do arithmetic with this: %s",
-				h->toString().c_str());
+{
+		return  createNumberNode(0.0);
+
+//			throw SyntaxException(TRACE_INFO,
+//				"Don't know how to do arithmetic with this: %s",
+//				h->toString().c_str());
+}
 		h = h->getOutgoingAtom(0);
 	}
 

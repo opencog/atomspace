@@ -8,6 +8,7 @@
 
 #ifdef HAVE_GUILE
 
+#include <sys/resource.h>
 #include <cstddef>
 #include <libguile.h>
 
@@ -43,6 +44,25 @@ SCM SchemeSmob::_radix_ten;
 void SchemeSmob::init()
 {
 	if (is_inited.test_and_set()) return;
+
+struct rlimit rl;
+int rc;
+rc = getrlimit(RLIMIT_STACK, &rl);
+if (rc !=0) logger().error("aeiiiiii rc=%d\n", rc);
+logger().info("duuude rlim cur=%d\n", rl.rlim_cur);
+rl.rlim_cur = 256*1024*1024;
+rc = setrlimit(RLIMIT_STACK, &rl);                                              
+if (rc !=0) logger().error("aeiiiiii set rc=%d\n", rc);   
+rc = getrlimit(RLIMIT_STACK, &rl);
+if (rc !=0) logger().error("aeiiiiii 2get rc=%d\n", rc);
+logger().info("duuude new rlim cur=%d\n", rl.rlim_cur);
+
+
+pthread_attr_t attribute;
+pthread_t thread;
+
+pthread_attr_init(&attribute);
+pthread_attr_setstacksize(&attribute,256*1024*1024);
 
 	init_smob_type();
 	scm_c_define_module("opencog", module_init, NULL);
