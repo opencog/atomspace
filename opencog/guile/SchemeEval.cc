@@ -834,6 +834,7 @@ std::string SchemeEval::do_poll_result()
 	scm_gc_unprotect_object(_rc);
 	_rc = SCM_EOL;
 	_rc = scm_gc_protect_object(_rc);
+protlck.unlock();
 
 	/* An error is thrown if the input expression is incomplete,
 	 * in which case the error handler sets the _pending_input flag
@@ -1055,7 +1056,7 @@ TruthValuePtr SchemeEval::eval_tv(const std::string &expr)
 	// In this case, "recursing" means that guile called something
 	// that triggered a GroundedPredicate/SchemaNode that called
 	// guile, again, in this very same thread.  Another possibility
-	// is that someone called cog-execute! explicitly.
+	// is that some scheme code called cog-execute! explicitly.
 	if (_in_eval) {
 		// scm_from_utf8_string is lots faster than scm_from_locale_string
 		SCM expr_str = scm_from_utf8_string(expr.c_str());
