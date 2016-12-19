@@ -96,7 +96,8 @@ UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
 		// check their equality
 		if ((lhs_quotation.is_unquoted() and lhs_type == VARIABLE_NODE)
 		    or (rhs_quotation.is_unquoted() and rhs_type == VARIABLE_NODE)) {
-			return mkvarsol(lhs, rhs, lhs_vardecl, rhs_vardecl);
+			return mkvarsol(lhs, rhs, lhs_vardecl, rhs_vardecl,
+			                lhs_quotation, rhs_quotation);
 		} else
 			return UnificationSolutionSet(lhs == rhs);
 	}
@@ -217,9 +218,12 @@ HandleSeq cp_erase(const HandleSeq& hs, Arity i)
 
 UnificationSolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
                                 const Handle& lhs_vardecl,
-                                const Handle& rhs_vardecl)
+                                const Handle& rhs_vardecl,
+                                Quotation lhs_quotation,
+                                Quotation rhs_quotation)
 {
-	Handle inter = type_intersection(lhs, rhs, lhs_vardecl, rhs_vardecl);
+	Handle inter = type_intersection(lhs, rhs, lhs_vardecl, rhs_vardecl,
+	                                 lhs_quotation, rhs_quotation);
 	if (inter == Handle::UNDEFINED)
 		return UnificationSolutionSet(false);
 	else {
@@ -325,11 +329,14 @@ bool is_satisfiable(const UnificationBlock& block)
 // TODO: very limited type intersection, should support structural
 // types, etc.
 Handle type_intersection(const Handle& lhs, const Handle& rhs,
-                         const Handle& lhs_vardecl, const Handle& rhs_vardecl)
+                         const Handle& lhs_vardecl, const Handle& rhs_vardecl,
+                         Quotation lhs_quotation, Quotation rhs_quotation)
 {
-	if (inherit(lhs, rhs, lhs_vardecl, rhs_vardecl))
+	if (inherit(lhs, rhs, lhs_vardecl, rhs_vardecl,
+	            lhs_quotation, rhs_quotation))
 		return lhs;
-	if (inherit(rhs, lhs, rhs_vardecl, lhs_vardecl))
+	if (inherit(rhs, lhs, rhs_vardecl, lhs_vardecl,
+	            rhs_quotation, lhs_quotation))
 		return rhs;
 	return Handle::UNDEFINED;
 }
@@ -353,15 +360,40 @@ std::set<Type> get_union_type(const Handle& h, const Handle& vardecl)
 }
 
 bool inherit(const Handle& lhs, const Handle& rhs,
-             const Handle& lhs_vardecl, const Handle& rhs_vardecl)
+             const Handle& lhs_vardecl, const Handle& rhs_vardecl,
+             Quotation lhs_quotation, Quotation rhs_quotation)
 {
-	if (VARIABLE_NODE == lhs->getType() and VARIABLE_NODE == rhs->getType())
+	Type lhs_type = lhs->getType();
+	Type rhs_type = rhs->getType();
+
+	// Recursive cases
+
+	// Consume quotations
+	if (lhs_quotation.consumable(lhs_type)) {
+		lhs_quotation.update(lhs_type);
+		return inherit(lhs->getOutgoingAtom(0), rhs, lhs_vardecl, rhs_vardecl,
+		               lhs_quotation, rhs_quotation);
+	}
+	if (rhs_quotation.consumable(rhs_type)) {
+		rhs_quotation.update(rhs_type);
+		return inherit(lhs, rhs->getOutgoingAtom(0), lhs_vardecl, rhs_vardecl,
+		               lhs_quotation, rhs_quotation);
+	}
+
+	// Base cases
+
+	if (lhs == rhs)
+		return true;
+
+	if (lhs_quotation.is_unquoted() and VARIABLE_NODE == lhs_type
+	    and rhs_quotation.is_unquoted() and VARIABLE_NODE == rhs_type)
 		return inherit(get_union_type(lhs, lhs_vardecl),
 		               get_union_type(rhs, rhs_vardecl));
-	else if (lhs == rhs)
-		return true;
-	else
+
+	if (rhs_quotation.is_unquoted())
 		return gen_varlist(rhs, rhs_vardecl)->is_type(rhs, lhs);
+
+	return false;
 }
 
 bool inherit(const Handle& lhs, const Handle& rhs)

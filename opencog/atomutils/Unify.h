@@ -193,12 +193,12 @@ HandleSeq cp_erase(const HandleSeq& hs, Arity i);
 /**
  * Build elementary solution set between 2 atoms given that at least
  * one of them is a variable.
- *
- * TODO: support quotation
  */
 UnificationSolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
                                 const Handle& lhs_vardecl,
-                                const Handle& rhs_vardecl);
+                                const Handle& rhs_vardecl,
+                                Quotation lhs_quotation,
+                                Quotation rhs_quotation);
 
 /**
  * Join 2 solution sets. Generate the product of all consistent
@@ -263,7 +263,9 @@ bool is_satisfiable(const UnificationBlock& block);
  */
 Handle type_intersection(const Handle& lhs, const Handle& rhs,
                          const Handle& lhs_vardecl=Handle::UNDEFINED,
-                         const Handle& rhs_vardecl=Handle::UNDEFINED);
+                         const Handle& rhs_vardecl=Handle::UNDEFINED,
+                         Quotation lhs_quotation=Quotation(),
+                         Quotation rhs_quotation=Quotation());
 
 /**
  * Return a simplification of a type union, by eliminating all types
@@ -294,7 +296,9 @@ std::set<Type> get_union_type(const Handle& h, const Handle& vardecl);
  * declarations are compared.
  */
 bool inherit(const Handle& lhs, const Handle& rhs,
-             const Handle& lhs_vardecl, const Handle& rhs_vardecl);
+             const Handle& lhs_vardecl, const Handle& rhs_vardecl,
+             Quotation lhs_quotation=Quotation(),
+             Quotation rhs_quotation=Quotation());
 
 /**
  * Extreme crude version of the above when we have no variable
