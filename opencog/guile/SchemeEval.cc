@@ -17,9 +17,6 @@
 #include <libguile.h>
 #include <libguile/backtrace.h>
 #include <libguile/debug.h>
-#ifndef HAVE_GUILE2
-  #include <libguile/lang.h>
-#endif
 #include <pthread.h>
 
 #include <opencog/util/Logger.h>
@@ -173,7 +170,6 @@ void SchemeEval::finish(void)
 	std::lock_guard<std::mutex> lck(init_mtx);
 	scm_gc_unprotect_object(_rc);
 
-
 	// If we had once set up the async I/O, the release it.
 	if (_in_server)
 	{
@@ -218,57 +214,6 @@ void SchemeEval::set_error_string(SCM newerror)
 static std::atomic_flag eval_is_inited = ATOMIC_FLAG_INIT;
 static thread_local bool thread_is_inited = false;
 
-#ifndef HAVE_GUILE2
-	#define WORK_AROUND_GUILE_185_BUG
-#endif
-#ifdef WORK_AROUND_GUILE_185_BUG
-/* There's a bug in guile-1.8.5, where the second and subsequent
- * threads run in guile mode with a bogus/broken current-module.
- * This cannot be worked around by anything as simple as saying
- * "(set-current-module the-root-module)" because dynwind undoes
- * any module-setting that we do.
- *
- * So we work around it here, by explicitly setting the module
- * outside of a dynwind context.
- */
-static SCM guile_user_module;
-
-static void * do_bogus_scm(void *p)
-{
-	scm_c_eval_string ("(+ 2 2)\n");
-	return p;
-}
-#endif /* WORK_AROUND_GUILE_185_BUG */
-
-#ifndef HAVE_GUILE2
-	#define WORK_AROUND_GUILE_THREADING_BUG
-#endif
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-/* There are bugs in guile-1.8.6 and earlier that prevent proper
- * multi-threaded operation. Currently, the most serious of these is
- * a parallel-define bug, documented in
- * https://savannah.gnu.org/bugs/index.php?24867
- *
- * Until that bug is fixed and released, this work-around is needed.
- * The work-around serializes all guile-mode thread execution, by
- * means of a mutex lock.
- *
- * As of December 2013, the bug still seems to be there: the test
- * case provided in the bug report crashes, when linked against
- * guile-2.0.5 and gc-7.1 from Ubuntu Precise.
- *
- * Its claimed that the bug only happens for top-level defines.
- * Thus, in principle, threading should be OK after all scripts have
- * been loaded.
- *
- * FWIW, the unit test MultiThreadUTest tests atom creation in multiple
- * threads. As of 29 Nov 2014, it passes, for me, using guile-2.0.9
- * which is the stock version of guile in Mint Qiana 17 aka Ubuntu 14.04
- */
-static pthread_mutex_t serialize_lock;
-static pthread_key_t ser_key = 0;
-#endif /* WORK_AROUND_GUILE_THREADING_BUG */
-
 // This will throw an exception, when it is called.  It is used
 // to interrupt infinite loops or long-running processes, when the
 // user hits control-C at a telnet prompt.
@@ -287,13 +232,8 @@ static SCM throw_thunk = SCM_EOL;
 
 void* c_wrap_init_only_once(void* p)
 {
-#ifdef HAVE_GUILE2
- #define C(X) ((scm_t_subr) X)
-#else
- #define C(X) ((SCM (*) ()) X)
-#endif
 	throw_thunk = scm_c_make_gsubr("cog-throw-user-interrupt",
-		0, 0, 0, C(throw_except));
+		0, 0, 0, ((scm_t_subr) throw_except));
 	return nullptr;
 }
 
@@ -303,63 +243,15 @@ static void init_only_once(void)
 {
 	if (eval_is_inited.test_and_set()) return;
 
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-	pthread_mutex_init(&serialize_lock, NULL);
-	pthread_key_create(&ser_key, NULL);
-	pthread_setspecific(ser_key, (const void *) 0x0);
-#endif /* WORK_AROUND_GUILE_THREADING_BUG */
-#ifdef WORK_AROUND_GUILE_185_BUG
-	scm_with_guile(do_bogus_scm, NULL);
-	guile_user_module = scm_current_module();
-#endif /* WORK_AROUND_GUILE_185_BUG */
-
 	scm_with_guile(c_wrap_init_only_once, NULL);
 }
-
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-
-/**
- * This lock primitive allow nested locks within one thread,
- * but prevents concurrent threads from running.
- */
-void SchemeEval::thread_lock(void)
-{
-	long cnt = (long) pthread_getspecific(ser_key);
-	if (0 >= cnt)
-	{
-		pthread_mutex_lock(&serialize_lock);
-	}
-	cnt ++;
-	pthread_setspecific(ser_key, (const void *) cnt);
-}
-
-void SchemeEval::thread_unlock(void)
-{
-	long cnt = (long) pthread_getspecific(ser_key);
-	cnt --;
-	pthread_setspecific(ser_key, (const void *) cnt);
-	if (0 >= cnt)
-	{
-		pthread_mutex_unlock(&serialize_lock);
-	}
-}
-#endif
 
 SchemeEval::SchemeEval(AtomSpace* as)
 {
 	init_only_once();
-
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-	thread_lock();
-#endif /* WORK_AROUND_GUILE_THREADING_BUG */
 	_atomspace = as;
 
 	scm_with_guile(c_wrap_init, this);
-
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-	thread_unlock();
-#endif /* WORK_AROUND_GUILE_THREADING_BUG */
-
 }
 
 /* This should be called once for every new thread. */
@@ -368,10 +260,6 @@ void SchemeEval::per_thread_init(void)
 	/* Avoid more than one call per thread. */
 	if (thread_is_inited) return;
 	thread_is_inited = true;
-
-#ifdef WORK_AROUND_GUILE_185_BUG
-	scm_set_current_module(guile_user_module);
-#endif /* WORK_AROUND_GUILE_185_BUG */
 
 	// Arghhh!  Avoid ongoing utf8 fruitcake nutiness in guile-2.0
 	scm_c_eval_string ("(setlocale LC_ALL "")\n");
@@ -492,10 +380,8 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 			                                       highlights);
 			scm_newline (port);
 		}
-#ifdef HAVE_GUILE2
 		if (SCM_STACK_LENGTH(_captured_stack))
 			set_captured_stack(scm_stack_ref (_captured_stack, SCM_INUM0));
-#endif
 		scm_display_error(_captured_stack, port, subr, message, parts, rest);
 	}
 	else
@@ -541,20 +427,12 @@ void SchemeEval::eval_expr(const std::string &expr)
 		return;
 	}
 
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-	thread_lock();
-#endif /* WORK_AROUND_GUILE_THREADING_BUG */
-
 	_pexpr = &expr;
 	_in_shell = true;
 	_in_eval = true;
 	scm_with_guile(c_wrap_eval, this);
 	_in_eval = false;
 	_in_shell = false;
-
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-	thread_unlock();
-#endif /* WORK_AROUND_GUILE_THREADING_BUG */
 }
 
 void* SchemeEval::c_wrap_poll(void* p)
@@ -930,18 +808,10 @@ Handle SchemeEval::eval_h(const std::string &expr)
 		return SchemeSmob::scm_to_handle(rc);
 	}
 
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-	thread_lock();
-#endif /* WORK_AROUND_GUILE_THREADING_BUG */
-
 	_pexpr = &expr;
 	_in_eval = true;
 	scm_with_guile(c_wrap_eval_h, this);
 	_in_eval = false;
-
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-	thread_unlock();
-#endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
 	// Convert evaluation errors into C++ exceptions.
 	if (eval_error())
@@ -990,18 +860,10 @@ TruthValuePtr SchemeEval::eval_tv(const std::string &expr)
 		return SchemeSmob::to_tv(rc);
 	}
 
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-	thread_lock();
-#endif /* WORK_AROUND_GUILE_THREADING_BUG */
-
 	_pexpr = &expr;
 	_in_eval = true;
 	scm_with_guile(c_wrap_eval_tv, this);
 	_in_eval = false;
-
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-	thread_unlock();
-#endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
 	// Convert evaluation errors into C++ exceptions.
 	if (eval_error())
@@ -1045,18 +907,10 @@ AtomSpace* SchemeEval::eval_as(const std::string &expr)
 		return SchemeSmob::ss_to_atomspace(rc);
 	}
 
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-	thread_lock();
-#endif /* WORK_AROUND_GUILE_THREADING_BUG */
-
 	_pexpr = &expr;
 	_in_eval = true;
 	scm_with_guile(c_wrap_eval_as, this);
 	_in_eval = false;
-
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-	thread_unlock();
-#endif /* WORK_AROUND_GUILE_THREADING_BUG */
 
 	// Convert evaluation errors into C++ exceptions.
 	if (eval_error())
@@ -1098,19 +952,12 @@ Handle SchemeEval::apply(const std::string &func, Handle varargs)
 		return do_apply(func, varargs);
 	}
 
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-	thread_lock();
-#endif /* WORK_AROUND_GUILE_THREADING_BUG */
-
 	_pexpr = &func;
 	_hargs = varargs;
 	_in_eval = true;
 	scm_with_guile(c_wrap_apply, this);
 	_in_eval = false;
 
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-	thread_unlock();
-#endif /* WORK_AROUND_GUILE_THREADING_BUG */
 	if (eval_error())
 		throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
 
@@ -1209,19 +1056,12 @@ TruthValuePtr SchemeEval::apply_tv(const std::string &func, Handle varargs)
 		return SchemeSmob::to_tv(tv_smob);
 	}
 
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-	thread_lock();
-#endif /* WORK_AROUND_GUILE_THREADING_BUG */
-
 	_pexpr = &func;
 	_hargs = varargs;
 	_in_eval = true;
 	scm_with_guile(c_wrap_apply_tv, this);
 	_in_eval = false;
 
-#ifdef WORK_AROUND_GUILE_THREADING_BUG
-	thread_unlock();
-#endif /* WORK_AROUND_GUILE_THREADING_BUG */
 	if (eval_error())
 		throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
 
