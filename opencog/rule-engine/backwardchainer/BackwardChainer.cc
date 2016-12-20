@@ -126,8 +126,8 @@ void BackwardChainer::expand_bit(const Handle& fcs)
 	                  << bitleaf.to_string();
 
 	// Select a valid rule
-	Rule rule = select_rule(bitleaf);
-	// Add the rule in the _bit.bit_as to make comparing atoms more easy
+	Rule rule = select_rule(bitleaf, fcs);
+	// Add the rule in the _bit.bit_as to make comparing atoms easier
 	rule.add(_bit.bit_as);
 	if (not rule.is_valid()) {
 		bc_logger().debug("No valid rule for the selected BIT-node, abort expansion");
@@ -187,11 +187,11 @@ void BackwardChainer::reduce_bit()
 	// TODO: avoid having the BIT grow arbitrarily large
 }
 
-Rule BackwardChainer::select_rule(const BITNode& target)
+Rule BackwardChainer::select_rule(const BITNode& target, const Handle& fcs)
 {
 	// For now the rule is uniformly randomly selected amongst the
 	// valid ones
-	const RuleSet valid_rules = get_valid_rules(target);
+	const RuleSet valid_rules = get_valid_rules(target, fcs);
 	if (valid_rules.empty())
 		return Rule();
 
@@ -207,11 +207,17 @@ Rule BackwardChainer::select_rule(const BITNode& target)
 	return rand_element(valid_rules);
 }
 
-RuleSet BackwardChainer::get_valid_rules(const BITNode& target)
+RuleSet BackwardChainer::get_valid_rules(const BITNode& target,
+                                         const Handle& fcs)
 {
+	// Build target vardecl from fcs
+	BindLinkPtr fcs_bl(BindLinkCast(fcs));
+	Handle vardecl = filter_vardecl(fcs_bl->get_vardecl(), target.body);;
+
+	// Generate all valid rules
 	RuleSet valid_rules;
 	for (const Rule& rule : _rules) {
-		RuleSet unified_rules = rule.unify_target(target.body, target.vardecl);
+		RuleSet unified_rules = rule.unify_target(target.body, vardecl);
 		valid_rules.insert(unified_rules.begin(), unified_rules.end());
 	}
 	return valid_rules;
