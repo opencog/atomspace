@@ -42,7 +42,17 @@ SCM SchemeSmob::_radix_ten;
 
 void SchemeSmob::init()
 {
-	if (is_inited.test_and_set()) return;
+	static bool done_with_init = false;
+	if (done_with_init) return;
+
+	// Allow only one thread, ever to initialize. Hold off all other
+	// threads until initialization is complete.  This could be done
+	// with mutexes, but atomic test-n-set is easier and faster.
+	if (is_inited.test_and_set())
+	{
+		while (not done_with_init) { usleep(5000); }
+		return;
+	}
 
 	init_smob_type();
 	scm_c_define_module("opencog", module_init, NULL);
@@ -51,6 +61,11 @@ void SchemeSmob::init()
 	atomspace_fluid = scm_make_fluid();
 	atomspace_fluid = scm_permanent_object(atomspace_fluid);
 	_radix_ten = scm_from_int8(10);
+
+	// Tell the compiler to set the flag dead-last, after above has
+	// executed.
+	asm volatile("": : :"memory");
+	done_with_init = true;
 }
 
 SchemeSmob::SchemeSmob()
