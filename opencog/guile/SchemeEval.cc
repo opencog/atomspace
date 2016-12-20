@@ -249,7 +249,7 @@ void* c_wrap_init_only_once(void* p)
 // process.
 static void init_only_once(void)
 {
-	static bool done_with_init = false;
+	static volatile bool done_with_init = false;
 	if (done_with_init) return;
 
 	// Enter initalization only once. All other threads spin, until

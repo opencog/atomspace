@@ -42,7 +42,7 @@ SCM SchemeSmob::_radix_ten;
 
 void SchemeSmob::init()
 {
-	static bool done_with_init = false;
+	static volatile bool done_with_init = false;
 	if (done_with_init) return;
 
 	// Allow only one thread, ever to initialize. Hold off all other
