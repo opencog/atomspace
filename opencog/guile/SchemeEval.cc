@@ -263,8 +263,8 @@ static void init_only_once(void)
 	scm_with_guile(c_wrap_init_only_once, NULL);
 
 	// Tell compiler to set flag dead-last, after above has executed.
-   asm volatile("": : :"memory");
-   done_with_init = true;
+	asm volatile("": : :"memory");
+	done_with_init = true;
 }
 
 SchemeEval::SchemeEval(AtomSpace* as)

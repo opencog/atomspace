@@ -67,8 +67,6 @@ class SchemeEval : public GenericEval
 		void init(void);
 		static void * c_wrap_init(void *);
 		void per_thread_init(void);
-		void thread_lock(void);
-		void thread_unlock(void);
 
 		// Destructor stuff
 		void finish(void);
