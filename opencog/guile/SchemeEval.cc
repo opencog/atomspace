@@ -31,10 +31,6 @@
 #include "SchemePrimitive.h"
 #include "SchemeSmob.h"
 
-#ifdef DBG_CRASH
-#include <sys/syscall.h>
-#endif
-
 using namespace opencog;
 
 static std::mutex init_mtx;
@@ -70,19 +66,9 @@ void SchemeEval::init(void)
 
 	_rc = SCM_EOL;
 	_rc = scm_gc_protect_object(_rc);
-#ifdef DBG_CRASH
-	_rc_cnt = 1;
-	_rc_id = 1;
-	_untid = 0;
-#endif
 
 	_gc_ctr = 0;
 }
-#ifdef DBG_CRASH
-static pid_t gettid() {
-	return syscall(SYS_gettid);
-}
-#endif
 
 /// When the user is using the guile shell from within the cogserver,
 /// We need to capture the output port. It is used by the cogserver
