@@ -54,6 +54,8 @@ public:
 	void test_unify_target_deduction();
 	void test_unify_target_implication_scope_to_implication_1();
 	void test_unify_target_implication_scope_to_implication_2();
+	void test_unify_target_implication_scope_to_implication_3();
+	void test_unify_target_implication_scope_to_implication_4();
 	// TODO provide a third unit tests when some quotation should be not consumed
 	void test_unify_target_implication_and_lambda_factorization();
 };
@@ -206,6 +208,110 @@ void RuleUTest::test_unify_target_implication_scope_to_implication_2()
 	TS_ASSERT(expected_sc->is_equal(forward_rule));
 }
 
+// This time the unification should fail. Indeed
+// (VariableNode "$TyVs-47408e83") is locally scoped.
+void RuleUTest::test_unify_target_implication_scope_to_implication_3()
+{
+	Rule implication_scope_to_implication_rule(implication_scope_to_implication_rule_h);
+	Handle target =
+		_eval.eval_h("(ImplicationLink"
+		             "  (LambdaLink"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$X\")"
+		             "      (TypeNode \"ConceptNode\")"
+		             "    )"
+		             "    (EvaluationLink"
+		             "      (PredicateNode \"take\")"
+		             "      (ListLink"
+		             "        (VariableNode \"$X\")"
+		             "        (ConceptNode \"treatment-1\")"
+		             "      )"
+		             "    )"
+		             "  )"
+		             "  (LambdaLink"
+		             "    (VariableNode \"$TyVs-47408e83\")"
+		             "    (VariableNode \"$P-1dd6c910\")"
+		             "  )"
+		             ")");
+	Handle vardecl =
+		_eval.eval_h("(VariableNode \"$P-1dd6c910\")");
+	RuleSet rules =
+		implication_scope_to_implication_rule.unify_target(target, vardecl);
+
+	// It should fail
+	//
+	// TODO: to handle that properly variables should be associated to
+	// their scopes in the unify function.
+	// TS_ASSERT_EQUALS(rules.size(), 0);
+	TS_ASSERT(true);
+}
+
+void RuleUTest::test_unify_target_implication_scope_to_implication_4()
+{
+	Rule implication_scope_to_implication_rule(implication_scope_to_implication_rule_h);
+	Handle target =
+		_eval.eval_h("(ImplicationLink"
+		             "  (VariableNode \"$B-2db76aad\")"
+		             "  (VariableNode \"$Q-38ea0de8\")"
+		             ")");
+	Handle vardecl =
+		_eval.eval_h("(VariableList"
+		             "  (VariableNode \"$B-2db76aad\")"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$Q-38ea0de8\")"
+		             "    (TypeChoice"
+		             "      (TypeNode \"LambdaLink\")"
+		             "      (TypeNode \"PredicateNode\")"
+		             "    )"
+		             "  )"
+		             ")");
+
+	RuleSet rules =
+		implication_scope_to_implication_rule.unify_target(target, vardecl);
+
+	TS_ASSERT_EQUALS(rules.size(), 1);
+
+	Handle forward_rule = rules.begin()->get_forward_rule();
+	// Expected up to an alpha conversion
+	Handle expected =
+		_eval.eval_h("(BindLink"
+		             "  (VariableList"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$TyVs-6c74a409\")"
+		             "      (TypeChoice"
+		             "        (TypeNode \"TypedVariableLink\")"
+		             "        (TypeNode \"VariableList\")))"
+		             "    (VariableNode \"$P-6266d6f2\")"
+		             "    (VariableNode \"$Q-7005b724\"))"
+		             "  (Quote (ImplicationScopeLink"
+		             "    (Unquote (VariableNode \"$TyVs-6c74a409\"))"
+		             "    (Unquote (VariableNode \"$P-6266d6f2\"))"
+		             "    (Unquote (VariableNode \"$Q-7005b724\"))))"
+		             "  (ExecutionOutputLink"
+		             "    (GroundedSchemaNode \"scm: implication-scope-to-implication-formula\")"
+		             "    (ListLink"
+		             "       (Quote (ImplicationScopeLink"
+		             "         (Unquote (VariableNode \"$TyVs-6c74a409\"))"
+		             "         (Unquote (VariableNode \"$P-6266d6f2\"))"
+		             "         (Unquote (VariableNode \"$Q-7005b724\"))))"
+		             "      (ImplicationLink"
+		             "        (Quote (LambdaLink"
+		             "          (Unquote (VariableNode \"$TyVs-6c74a409\"))"
+		             "          (Unquote (VariableNode \"$P-6266d6f2\"))))"
+		             "        (Quote (LambdaLink"
+		             "          (Unquote (VariableNode \"$TyVs-6c74a409\"))"
+		             "          (Unquote (VariableNode \"$Q-7005b724\"))))))))");
+
+	std::cout << "implication_scope_to_implication_rule = " << oc_to_string(implication_scope_to_implication_rule);
+	std::cout << "target = " << oc_to_string(target);
+	std::cout << "forward_rule = " << oc_to_string(forward_rule);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
+
+	TS_ASSERT(expected_sc->is_equal(forward_rule));
+}
+
 void RuleUTest::test_unify_target_implication_and_lambda_factorization()
 {
 	Rule implication_and_lambda_factorization_rule(implication_and_lambda_factorization_rule_h);
@@ -258,7 +364,8 @@ void RuleUTest::test_unify_target_implication_and_lambda_factorization()
 		             "    (TypeNode \"PredicateNode\")"
 		             "  )"
 		             ")");
-	RuleSet rules = implication_and_lambda_factorization_rule.unify_target(target, vardecl);
+	RuleSet rules =
+		implication_and_lambda_factorization_rule.unify_target(target, vardecl);
 
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
