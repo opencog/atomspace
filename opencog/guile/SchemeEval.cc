@@ -37,8 +37,7 @@
 
 using namespace opencog;
 
-std::mutex init_mtx;
-std::mutex prot_mtx; // temporary hack
+static std::mutex init_mtx;
 
 /**
  * This init is called once for every time that this class
@@ -58,7 +57,6 @@ void SchemeEval::init(void)
 	_in_eval = false;
 	_eval_thread = SCM_EOL;
 
-	std::unique_lock<std::mutex> protlck(prot_mtx);
 	// User error and crash management
 	_error_string = SCM_EOL;
 	_error_string = scm_gc_protect_object(_error_string);
@@ -144,7 +142,6 @@ void SchemeEval::capture_port(void)
 /// per-thread semantics.
 void SchemeEval::redirect_output(void)
 {
-std::unique_lock<std::mutex> protlck(prot_mtx);
 	_in_redirect++;
 	if (1 < _in_redirect) return;
 	capture_port();
@@ -163,7 +160,6 @@ void SchemeEval::restore_output(void)
 	_in_redirect --;
 	if (0 < _in_redirect) return;
 
-std::unique_lock<std::mutex> protlck(prot_mtx);
 	// Restore the previous outport (if its still alive)
 	if (scm_is_false(scm_port_closed_p(_saved_outport)))
 		scm_set_current_output_port(_saved_outport);
@@ -189,15 +185,6 @@ void * SchemeEval::c_wrap_init(void *p)
 void SchemeEval::finish(void)
 {
 	std::lock_guard<std::mutex> lck(init_mtx);
-	std::unique_lock<std::mutex> protlck(prot_mtx);
-#ifdef DBG_CRASH
-	_rc_cnt --;
-	if (0 != _rc_cnt)
-	{
-		logger().error("unp fail on finish eval_done=%d id=%d cnt=%d untid=%x thistid=%x prev=%s", _eval_done, _rc_id, _rc_cnt, _untid, gettid(), previn.c_str());
-		logger().flush();
-	}
-#endif // DBG_CRASH
 	scm_gc_unprotect_object(_rc);
 
 
@@ -229,7 +216,6 @@ void * SchemeEval::c_wrap_finish(void *p)
 // of anything we've kept in the object.
 void SchemeEval::set_captured_stack(SCM newstack)
 {
-	std::unique_lock<std::mutex> protlck(prot_mtx);
 	// protect before unprotecting, to avoid multi-threaded races.
 	SCM oldstack = _captured_stack;
 	_captured_stack = scm_gc_protect_object(newstack);
@@ -238,7 +224,6 @@ void SchemeEval::set_captured_stack(SCM newstack)
 
 void SchemeEval::set_error_string(SCM newerror)
 {
-	std::unique_lock<std::mutex> protlck(prot_mtx);
 	SCM olderror = _error_string;
 	_error_string = scm_gc_protect_object(newerror);
 	scm_gc_unprotect_object(olderror);
@@ -675,57 +660,14 @@ void SchemeEval::do_eval(const std::string &expr)
 	_pending_input = false;
 	_error_msg.clear();
 	set_captured_stack(SCM_BOOL_F);
-#ifdef DBG_CRASH
-	_rc_cnt --;
-	if (0 != _rc_cnt)
-	{
-		logger().error("unbalanced protection, eval_done=%d id=%d cnt=%d untid=%x thistid=%x prev=%s cur=%s", _eval_done, _rc_id, _rc_cnt, _untid, gettid(), previn.c_str(), expr.c_str());
-		logger().flush();
-	}
-	previn = _input_line;
-	_untid = gettid();
-#endif // DBG_CRASH
-	std::unique_lock<std::mutex> protlck(prot_mtx);
 	scm_gc_unprotect_object(_rc);
-	protlck.unlock();
-#ifdef DBG_CRASH
-try {
-#endif // DBG_CRASH
 	SCM eval_str = scm_from_utf8_string(_input_line.c_str());
 	_rc = scm_c_catch (SCM_BOOL_T,
 	                      (scm_t_catch_body) scm_eval_string,
 	                      (void *) eval_str,
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
-#ifdef DBG_CRASH
-} catch(const std::exception& ex)
-{
-logger().error("unexcepted catch! ex=%s in=%s", ex.what(), _input_line.c_str());
-		logger().flush();
-}
-catch(...)
-{
-logger().error("unknown unexcepted catch! in=%s", _input_line.c_str()); 
-		logger().flush();
-}
-	if (0 != _rc_cnt)
-	{
-		logger().error("unexpect not yet, eval_done=%d id=%d cnt=%d untid=%x thistid=%x prev=%s cur=%s", _eval_done, _rc_id, _rc_cnt, _untid, gettid(), previn.c_str(), expr.c_str());
-		logger().flush();
-	}
-#endif // DBG_CRASH
-	protlck.lock();
 	_rc = scm_gc_protect_object(_rc);
-	protlck.unlock();
-#ifdef DBG_CRASH
-	_rc_id ++;
-	_rc_cnt ++;
-	if (1 != _rc_cnt)
-	{
-		logger().error("post unbalanced, eval_done=%d id=%d cnt=%d untid=%x thistid=%x prev=%s cur=%s", _eval_done, _rc_id, _rc_cnt, _untid, gettid(), previn.c_str(), expr.c_str());
-		logger().flush();
-	}
-#endif // DBG_CRASH
 
 	restore_output();
 
@@ -817,24 +759,13 @@ std::string SchemeEval::do_poll_result()
 	// evalution result flags, etc.
 	_poll_done = true;
 
-#ifdef DBG_CRASH
-	if (1 != _rc_cnt)
-	{
-		logger().error("unexpect not yet eval_done=%d id=%d cnt=%d untid=%x thistid=%x prev=%s", _eval_done, _rc_id, _rc_cnt, _untid, gettid(), previn.c_str());
-		logger().flush();
-	}
-	_rc_id ++;
-	_untid = gettid();
-#endif
 	// Save the result of evaluation, and clear it. Recall that _rc is
 	// typically set in a different thread.  We want it cleared before
 	// we ever get here again, on later evals.
-	std::unique_lock<std::mutex> protlck(prot_mtx);
 	SCM tmp_rc = _rc;
 	scm_gc_unprotect_object(_rc);
 	_rc = SCM_EOL;
 	_rc = scm_gc_protect_object(_rc);
-protlck.unlock();
 
 	/* An error is thrown if the input expression is incomplete,
 	 * in which case the error handler sets the _pending_input flag
