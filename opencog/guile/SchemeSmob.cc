@@ -50,7 +50,7 @@ void SchemeSmob::init()
 	// with mutexes, but atomic test-n-set is easier and faster.
 	if (is_inited.test_and_set())
 	{
-		while (not done_with_init) { usleep(5000); }
+		while (not done_with_init) { usleep(1000); }
 		return;
 	}
 
@@ -62,8 +62,7 @@ void SchemeSmob::init()
 	atomspace_fluid = scm_permanent_object(atomspace_fluid);
 	_radix_ten = scm_from_int8(10);
 
-	// Tell the compiler to set the flag dead-last, after above has
-	// executed.
+	// Tell compiler to set flag dead-last, after above has executed.
 	asm volatile("": : :"memory");
 	done_with_init = true;
 }

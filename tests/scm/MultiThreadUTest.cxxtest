@@ -19,6 +19,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <sys/syscall.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
@@ -49,16 +50,21 @@ class MultiThreadUTest :  public CxxTest::TestSuite
 		void setUp(void);
 		void tearDown(void);
 
+		void test_init_race(void);
+		void threadedInit(int thread_id);
 		void test_three_evals_one_thread(void);
 		void test_multi_threads(void);
 		void threadedAdd(int thread_id, int N);
 };
 
-/*
- * This function sets up .. whatever.
- */
 #define an as->add_node
 #define al as->add_link
+#define CHKEV(ev) \
+	TSM_ASSERT("Caught scm error during eval", \
+		(false == ev->eval_error()));
+
+// static pid_t gettid() { return syscall(SYS_gettid); }
+
 void MultiThreadUTest::setUp(void)
 {
 }
@@ -68,12 +74,54 @@ void MultiThreadUTest::tearDown(void)
 }
 
 /*
+ * Test multiple threads, all performing intialization at the same
+ * time.  Initialization should happen once, and there should be no
+ * corruption.
+ */
+static volatile bool hold = true;
+static std::atomic_int start_cnt(0);
+
+void MultiThreadUTest::test_init_race(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	as = new AtomSpace();
+	std::vector<std::thread> thread_pool;
+
+	int n_threads = 120;
+	start_cnt = 0;
+	hold = true;
+	for (int i=0; i < n_threads; i++) {
+		thread_pool.push_back(
+			std::thread(&MultiThreadUTest::threadedInit, this, i));
+	}
+	while (start_cnt != n_threads) {}  // spin
+	printf("Done creating %d threads\n", n_threads);
+	hold = false;
+
+	for (std::thread& t : thread_pool) t.join();
+
+	printf("Done joining %d threads\n", n_threads);
+	delete as;
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void MultiThreadUTest::threadedInit(int thread_id)
+{
+	start_cnt ++;
+	while (hold) {} // spin
+
+	SchemeEval* ev = new SchemeEval(as);
+
+	Handle h1 = ev->eval_h("(cog-new-node 'ConceptNode \"stuff\")");
+	CHKEV(ev);
+	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h1);
+
+	delete ev;
+}
+
+/*
  * Test three evaluators writing to a single atomspace, in the same thread.
  */
-
-#define CHKEV(ev) \
-	TSM_ASSERT("Caught scm error during eval", \
-		(false == ev->eval_error()));
 void MultiThreadUTest::test_three_evals_one_thread(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
