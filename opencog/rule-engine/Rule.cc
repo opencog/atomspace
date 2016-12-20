@@ -564,9 +564,10 @@ bool Rule::is_pm_connector(Type t) const
 	return t == AND_LINK or t == OR_LINK or t == NOT_LINK;
 }
 
-bool Rule::has_bl_variable_in_local_scope(const Handle& h) const
+bool Rule::has_bl_variable_in_local_scope(const Handle& scope) const
 {
-	return _forward_rule->get_variables().is_in_varset(h->getOutgoingAtom(0));
+	Handle var = scope->getOutgoingAtom(0)->getOutgoingAtom(0);
+	return _forward_rule->get_variables().is_in_varset(var);
 }
 
 void Rule::consume_bad_quotations()
