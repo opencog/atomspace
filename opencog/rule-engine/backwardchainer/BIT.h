@@ -73,20 +73,6 @@ public:
 };
 
 /**
- * Mappings from and-tree to forward chaining strategy. The and-tree is
- * represented by its set of leaves.
- *
- * The forward chaining strategy is represented according to
- * https://github.com/opencog/atomspace/issues/903. TODO: copy/paste
- * the doc here and in the wiki as well.
- *
- * TODO: Maybe we don't need the handle set key because it is likely
- * equal to the BindLink pattern of the associated forward chaining
- * strategy.
- */
-typedef std::map<OrderedHandleSet, Handle> AndBITFCMap;
-
-/**
  * Mapping from Handle to BITNodePtr in order to quickly access the
  * BITNode of a certain body. This is useful because the premises of a
  * rule are returned in terms of Handle, not BITNode.
@@ -184,6 +170,10 @@ private:
 	 * FCS where the leaf has been substituted by the rule premises
 	 * and rule application.
 	 *
+	 * A forward chaining strategy is represented according to
+	 * https://github.com/opencog/atomspace/issues/903. TODO:
+	 * copy/paste the doc here and in the wiki as well.
+	 *
 	 * TODO: give examples.
 	 */
 	Handle expand_fcs(const Handle& fcs, const Handle& leaf, const Rule& rule);
@@ -240,7 +230,6 @@ private:
 // Gdb debugging, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const BITNode& bitnode);
-std::string oc_to_string(const AndBITFCMap& abfc);
 std::string oc_to_string(const HandleBITNodeMap& hbn);
 
 } // ~namespace opencog
