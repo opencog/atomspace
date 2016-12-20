@@ -241,9 +241,22 @@ void* c_wrap_init_only_once(void* p)
 // process.
 static void init_only_once(void)
 {
-	if (eval_is_inited.test_and_set()) return;
+	static bool done_with_init = false;
+	if (done_with_init) return;
+
+	// Enter initalization only once. All other threads spin, until
+	// it is completed.
+	if (eval_is_inited.test_and_set())
+	{
+		while (not done_with_init) { usleep(1000); }
+		return;
+	}
 
 	scm_with_guile(c_wrap_init_only_once, NULL);
+
+	// Tell compiler to set flag dead-last, after above has executed.
+   asm volatile("": : :"memory");
+   done_with_init = true;
 }
 
 SchemeEval::SchemeEval(AtomSpace* as)
