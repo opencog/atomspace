@@ -125,8 +125,13 @@ void BackwardChainer::expand_bit(const Handle& fcs)
 	LAZY_BC_LOG_DEBUG << "Selected BIT-node for expansion:" << std::endl
 	                  << bitleaf.to_string();
 
+	// Build the leaf vardecl from fcs
+	Handle vardecl = fcs.is_defined() ?
+		filter_vardecl(BindLinkCast(fcs)->get_vardecl(), bitleaf.body)
+		: Handle::UNDEFINED;
+
 	// Select a valid rule
-	Rule rule = select_rule(bitleaf, fcs);
+	Rule rule = select_rule(bitleaf, vardecl);
 	// Add the rule in the _bit.bit_as to make comparing atoms easier
 	rule.add(_bit.bit_as);
 	if (not rule.is_valid()) {
@@ -187,11 +192,11 @@ void BackwardChainer::reduce_bit()
 	// TODO: avoid having the BIT grow arbitrarily large
 }
 
-Rule BackwardChainer::select_rule(const BITNode& target, const Handle& fcs)
+Rule BackwardChainer::select_rule(const BITNode& target, const Handle& vardecl)
 {
 	// For now the rule is uniformly randomly selected amongst the
 	// valid ones
-	const RuleSet valid_rules = get_valid_rules(target, fcs);
+	const RuleSet valid_rules = get_valid_rules(target, vardecl);
 	if (valid_rules.empty())
 		return Rule();
 
@@ -208,12 +213,8 @@ Rule BackwardChainer::select_rule(const BITNode& target, const Handle& fcs)
 }
 
 RuleSet BackwardChainer::get_valid_rules(const BITNode& target,
-                                         const Handle& fcs)
+                                         const Handle& vardecl)
 {
-	// Build target vardecl from fcs
-	BindLinkPtr fcs_bl(BindLinkCast(fcs));
-	Handle vardecl = filter_vardecl(fcs_bl->get_vardecl(), target.body);;
-
 	// Generate all valid rules
 	RuleSet valid_rules;
 	for (const Rule& rule : _rules) {

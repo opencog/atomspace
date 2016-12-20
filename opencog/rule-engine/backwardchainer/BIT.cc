@@ -31,14 +31,13 @@
 
 namespace opencog {
 
-BITNode::BITNode(const Handle& bd, const Handle& vd, const BITFitness& fit)
-	: body(bd), vardecl(vd), fitness(fit) {}
+BITNode::BITNode(const Handle& bd, const BITFitness& fit)
+	: body(bd), fitness(fit) {}
 
 std::string	BITNode::to_string() const
 {
 	std::stringstream ss;
 	ss << "body:" << std::endl << oc_to_string(body)
-	   << "vardecl:" << std::endl << oc_to_string(vardecl)
 	   << "rules:" << std::endl << oc_to_string(rules);
 	return ss.str();
 }
@@ -105,7 +104,7 @@ void BIT::insert_bitnode(Handle body, Handle vardecl, const BITFitness& fitness)
 		return;
 
 	if (_handle2bitnode.find(body) == _handle2bitnode.end())
-		_handle2bitnode[body] = BITNode(body, vardecl, fitness);
+		_handle2bitnode[body] = BITNode(body, fitness);
 }
 
 void BIT::init_fcss()

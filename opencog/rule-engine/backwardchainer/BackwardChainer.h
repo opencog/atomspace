@@ -153,11 +153,12 @@ private:
 	// object because a new rule is created, its variables are
 	// uniquely renamed, possibly some partial substitutions are
 	// applied.
-	Rule select_rule(const BITNode& target, const Handle& fcs);
+	Rule select_rule(const BITNode& target,
+	                 const Handle& vardecl=Handle::UNDEFINED);
 
 	// Return all valid rules, in the sense that these rules may
 	// possibly be used to infer the target.
-	RuleSet get_valid_rules(const BITNode& target, const Handle& fcs);
+	RuleSet get_valid_rules(const BITNode& target, const Handle& vardecl);
 
 	AtomSpace& _as;
 	UREConfigReader _configReader;

@@ -144,9 +144,9 @@ void BackwardChainerUTest::test_select_rule_3()
 		vardecl_h = _eval.eval_h("(TypedVariable"
 		                         "   (Variable \"$C\")"
 		                         "   (Type \"InheritanceLink\"))");
-	BITNode target(target_h, vardecl_h);
+	BITNode target(target_h);
 
-	Rule selected_rule = _bc->select_rule(target);
+	Rule selected_rule = _bc->select_rule(target, vardecl_h);
 
 	TS_ASSERT_EQUALS(selected_rule.get_name(), "bc-deduction-rule");
 }

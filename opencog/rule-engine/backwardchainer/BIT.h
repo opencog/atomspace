@@ -52,15 +52,11 @@ class BITFitness
 class BITNode
 {
 public:
-	BITNode(const Handle& body = Handle::UNDEFINED,
-	        const Handle& vardecl = Handle::UNDEFINED,
-	        const BITFitness& fitness = BITFitness());
+	BITNode(const Handle& body=Handle::UNDEFINED,
+	        const BITFitness& fitness=BITFitness());
 
 	// BITNode handle
 	Handle body;
-
-	// BITNode variable declaration
-	Handle vardecl;
 
 	// BITNode fitness
 	BITFitness fitness;
