@@ -17,7 +17,6 @@
 #include <libguile.h>
 #include <libguile/backtrace.h>
 #include <libguile/debug.h>
-#include <pthread.h>
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
@@ -38,8 +37,17 @@ static std::mutex init_mtx;
  */
 void SchemeEval::init(void)
 {
+#define WORK_AROUND_BUG_25238
+#ifdef WORK_AROUND_BUG_25238
+	// See https://debbugs.gnu.org/cgi/bugreport.cgi?bug=25238
+	std::lock_guard<std::mutex> lck(init_mtx);
+#endif // WORK_AROUND_BUG_25238
+
+#define WORK_AROUND_GUILE_UTF8_BUGS
+#ifdef WORK_AROUND_GUILE_UTF8_BUGS
 	// Arghhh!  Avoid ongoing utf8 fruitcake nutiness in guile-2.0
-	scm_c_eval_string ("(setlocale LC_ALL "")\n");
+	scm_c_eval_string ("(setlocale LC_ALL \"\")\n");
+#endif // WORK_AROUND_GUILE_UTF8_BUGS
 
 	SchemeSmob::init();
 	PrimitiveEnviron::init();
@@ -274,8 +282,10 @@ void SchemeEval::per_thread_init(void)
 	if (thread_is_inited) return;
 	thread_is_inited = true;
 
+#ifdef WORK_AROUND_GUILE_UTF8_BUGS
 	// Arghhh!  Avoid ongoing utf8 fruitcake nutiness in guile-2.0
-	scm_c_eval_string ("(setlocale LC_ALL "")\n");
+	scm_c_eval_string ("(setlocale LC_ALL \"\")\n");
+#endif // WORK_AROUND_GUILE_UTF8_BUGS
 }
 
 SchemeEval::~SchemeEval()
