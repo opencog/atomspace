@@ -218,6 +218,11 @@ RuleSet BackwardChainer::get_valid_rules(const BITNode& target,
 	// Generate all valid rules
 	RuleSet valid_rules;
 	for (const Rule& rule : _rules) {
+		// For now ignore meta rules as they are forwardly applied in
+		// expand_bit()
+		if (rule.is_meta())
+			continue;
+
 		RuleSet unified_rules = rule.unify_target(target.body, vardecl);
 		valid_rules.insert(unified_rules.begin(), unified_rules.end());
 	}
