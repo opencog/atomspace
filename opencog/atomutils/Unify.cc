@@ -107,6 +107,14 @@ UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
 	////////////////////////
 
 	// Consume quotations
+	if (lhs_quotation.consumable(lhs_type)
+	    and rhs_quotation.consumable(rhs_type)) {
+		lhs_quotation.update(lhs_type);
+		rhs_quotation.update(rhs_type);
+		return unify(lhs->getOutgoingAtom(0), rhs->getOutgoingAtom(0),
+		             lhs_vardecl, rhs_vardecl,
+		             lhs_quotation, rhs_quotation);
+	}
 	if (lhs_quotation.consumable(lhs_type)) {
 		lhs_quotation.update(lhs_type);
 		return unify(lhs->getOutgoingAtom(0), rhs, lhs_vardecl, rhs_vardecl,
