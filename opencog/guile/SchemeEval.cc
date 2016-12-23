@@ -790,6 +790,15 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 
 /* ============================================================== */
 
+/**
+ * interrupt() - convert user's control-C at keyboard into exception.
+ *
+ * Calling this will interrupt whatever guile processing this evaluator
+ * is doing -- it calls the guile routine `cog-throw-user-interrupt`
+ * which calls the `SchemeEval::throw_except()` method.  The resulting
+ * exception should halt whatever might be running in the _eval_thread
+ * associated with this evaluator.
+ */
 void SchemeEval::interrupt(void)
 {
 	if (SCM_EOL == _eval_thread) return;
