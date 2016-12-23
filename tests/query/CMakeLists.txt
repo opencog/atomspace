@@ -12,9 +12,9 @@ LINK_DIRECTORIES (
 
 LINK_LIBRARIES (
 	query
-	atomspace
 	clearbox
 	execution
+	atomspace
 )
 
 # We want to run the tests in the order below;
@@ -76,7 +76,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(EinsteinUTest)
 	ADD_CXXTEST(TypeChoiceUTest)
 
-    ADD_CXXTEST(NoExceptionUTest)
+	ADD_CXXTEST(NoExceptionUTest)
 
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
 		${COGUTIL_LIBRARY}
