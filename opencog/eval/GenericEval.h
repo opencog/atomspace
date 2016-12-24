@@ -104,6 +104,13 @@ class GenericEval
 		virtual void begin_eval(void) = 0;
 		virtual void eval_expr(const std::string&) = 0;
 		virtual std::string poll_result(void) = 0;
+
+		/**
+		 * Implement a user-interrupt (ctrl-C at the keyboard) that
+		 * will interrupt (kill, throw exception) whatever the eval
+		 * above is currently running.  Typically, the interrupt is
+		 * issued from a different thread than what is running eval.
+		 */
 		virtual void interrupt(void) = 0;
 };
 

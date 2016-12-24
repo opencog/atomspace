@@ -88,10 +88,10 @@ void SchemeEval::capture_port(void)
 	if (_in_server) return;
 
 	// Lock to prevent racey setting of the output port.
-	// XXX FIXME This lock is not needed, because in guile 2.2,
+	// XXX FIXME This lock is not needed, because in guile-2.2,
 	// at least, every thread has its own output port, and so its
 	// impossible for two different threads to compete to set the
-	// same outport.  Not to sure about guile-2.0, though... so
+	// same outport.  Not too sure about guile-2.0, though... so
 	// I'm leaving the lock in, for now. Its harmless.
 	std::lock_guard<std::mutex> lck(init_mtx);
 
@@ -129,8 +129,8 @@ void SchemeEval::capture_port(void)
 /// Use the async I/O mechanism, if we are in the cogserver.
 ///
 /// Note, by the way, that Guile implements the current port as a fluid
-/// on each thread. So this save and restore gives us exactly the right
-/// per-thread semantics.
+/// on each thread. So the save and restore implemented here gives us
+/// exactly the right per-thread semantics.
 void SchemeEval::redirect_output(void)
 {
 	_in_redirect++;
@@ -428,14 +428,14 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
  * different ways:
  *
  * 1) It buffers up incomplete, line-by-line input, until there's
- *	been enough input received to evaluate without error.
+ *    been enough input received to evaluate without error.
  * 2) It catches errors, and prints the catch in a reasonably nicely
- *	formatted way.
+ *    formatted way.
  * 3) It converts any returned scheme expressions to a string, for easy
- *	printing.
+ *    printing.
  * 4) It concatenates any data sent to the scheme output port (e.g.
- *	printed output from the scheme (display) function) to the returned
- *	string.
+ *    printed output from the scheme (display) function) to the returned
+ *    string.
  *
  * An "unforgiving" evaluator, with none of these amenities, can be
  * found in eval_h(), below.
