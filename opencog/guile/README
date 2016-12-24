@@ -690,29 +690,6 @@ some simple multi-threading.
 =Notes, examples, utilities=
 Various related notes.
 
-=== Load scheme data from a file ===
-There are two ways to load scheme from a file: automatically, at server
-startup, or manually.
-
-To load automatically, edit ''[[opencog.conf]]'', and append the
-filename to the line ''SCM_PRELOAD'', for example:
-
-   SCM_PRELOAD = atomspace/core_type.scm, scm/utilities.scm
-
-The [[cogserver]] is then started with the -c flag:
-
-   cogserver -c ../lib/opencog.conf
-
-To manually load scheme code, simply make sure the first 3 characters
-of the file are "scm" followed by a carraige return. Then, at the shell
-prompt, simply execute the command:
-
-   cat filename | telnet localhost 17001
-
-This assumes the scheme code is in "filename", that the cogserver is
-running on "localhost", and is listening on port 17001 (which is the
-default port for the cogserver).
-
 ====Delete a list of atoms ====
 Below is a simple example of scheme code for deleting all of the atoms
 in a list.
