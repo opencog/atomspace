@@ -5,6 +5,8 @@
  * Copyright (c) 2008, 2014, 2015 Linas Vepstas <linas@linas.org>
  */
 
+#ifdef HAVE_GUILE
+
 #include <opencog/guile/SchemeModule.h>
 
 namespace opencog {
@@ -144,3 +146,4 @@ void opencog_query_init(void)
 	static PatternSCM patty;
 	patty.module_init();
 }
+#endif // HAVE_GUILE

@@ -22,8 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifdef HAVE_GUILE
-
 #include <cstddef>
 #include <libguile.h>
 
@@ -76,5 +74,3 @@ SCM SchemeSmob::ss_af (void)
 
 	return head;
 }
-
-#endif /* HAVE_GUILE */

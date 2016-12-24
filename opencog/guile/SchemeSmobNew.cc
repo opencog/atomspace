@@ -6,8 +6,6 @@
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 
-#ifdef HAVE_GUILE
-
 #include <vector>
 
 #include <cstddef>
@@ -673,5 +671,4 @@ SCM SchemeSmob::ss_extract_recursive (SCM satom, SCM kv_pairs)
 	return SCM_BOOL_F;
 }
 
-#endif
 /* ===================== END OF FILE ============================ */

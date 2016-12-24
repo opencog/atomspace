@@ -7,7 +7,6 @@
  * Copyright (c) 2008, 2014, 2015 Linas Vepstas
  */
 
-#ifdef HAVE_GUILE
 #include <atomic>
 
 #include <unistd.h>
@@ -1218,7 +1217,5 @@ void SchemeEval::init_scheme(void)
 	// XXX FIXME only a subset is needed.
 	SchemeEval sch;
 }
-
-#endif
 
 /* ===================== END OF FILE ============================ */

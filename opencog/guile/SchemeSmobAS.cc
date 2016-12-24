@@ -6,8 +6,6 @@
  * Copyright (c) 2008,2009,2014 Linas Vepstas <linas@linas.org>
  */
 
-#ifdef HAVE_GUILE
-
 #include <cstddef>
 #include <libguile.h>
 
@@ -373,6 +371,4 @@ AtomSpace* SchemeSmob::get_as_from_list(SCM slist)
 	return NULL;
 }
 
-
-#endif /* HAVE_GUILE */
 /* ===================== END OF FILE ============================ */

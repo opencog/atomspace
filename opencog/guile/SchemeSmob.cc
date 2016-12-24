@@ -6,8 +6,6 @@
  * Copyright (c) 2008, 2013, 2014, 2015 Linas Vepstas <linas@linas.org>
  */
 
-#ifdef HAVE_GUILE
-
 #include <cstddef>
 #include <libguile.h>
 
@@ -373,5 +371,4 @@ void SchemeSmob::register_proc(const char* name, int req, int opt, int rst, scm_
 	scm_c_export(name, NULL);
 }
 
-#endif
 /* ===================== END OF FILE ============================ */

@@ -6,8 +6,6 @@
  * Copyright (c) 2008,2009 Linas Vepstas <linas@linas.org>
  */
 
-#ifdef HAVE_GUILE
-
 #include <cstddef>
 #include <libguile.h>
 
@@ -166,5 +164,4 @@ SCM SchemeSmob::ss_av_get_value (SCM s)
 	return rc;
 }
 
-#endif /* HAVE_GUILE */
 /* ===================== END OF FILE ============================ */

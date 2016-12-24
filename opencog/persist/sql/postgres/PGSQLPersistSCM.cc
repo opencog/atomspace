@@ -20,6 +20,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#ifdef HAVE_GUILE
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/BackingStore.h>
@@ -67,20 +68,16 @@ PGSQLPersistSCM::PGSQLPersistSCM(AtomSpace *as)
     _backing->_ignored_types.insert(WORD_INSTANCE_LINK);
 #endif // NLP_HACK
 
-#ifdef HAVE_GUILE
     static bool is_init = false;
     if (is_init) return;
     is_init = true;
     scm_with_guile(init_in_guile, this);
-#endif
 }
 
 void* PGSQLPersistSCM::init_in_guile(void* self)
 {
-#ifdef HAVE_GUILE
     scm_c_define_module("opencog persist-pgsql", init_in_module, self);
     scm_c_use_module("opencog persist-pgsql");
-#endif
     return NULL;
 }
 
@@ -92,12 +89,10 @@ void PGSQLPersistSCM::init_in_module(void* data)
 
 void PGSQLPersistSCM::init(void)
 {
-#ifdef HAVE_GUILE
     define_scheme_primitive("pgsql-open", &PGSQLPersistSCM::do_open, this, "persist-pgsql");
     define_scheme_primitive("pgsql-close", &PGSQLPersistSCM::do_close, this, "persist-pgsql");
     define_scheme_primitive("pgsql-load", &PGSQLPersistSCM::do_load, this, "persist-pgsql");
     define_scheme_primitive("pgsql-store", &PGSQLPersistSCM::do_store, this, "persist-pgsql");
-#endif
 }
 
 PGSQLPersistSCM::~PGSQLPersistSCM()
@@ -124,10 +119,8 @@ void PGSQLPersistSCM::do_open(const std::string& dbname,
 
     _backing->set_store(_store);
     AtomSpace *as = _as;
-#ifdef HAVE_GUILE
     if (NULL == as)
         as = SchemeSmob::ss_get_env_as("sql-open");
-#endif
 
 #if DEBUG_SQL_STATEMENTS
     _store->setVerbose();
@@ -145,10 +138,8 @@ void PGSQLPersistSCM::do_close(void)
              "sql-close: Error: Database not open");
 
     AtomSpace *as = _as;
-#ifdef HAVE_GUILE
     if (NULL == as)
         as = SchemeSmob::ss_get_env_as("sql-close");
-#endif
     _backing->unregisterWith(as);
     TLB::clear_resolver(&as->get_atomtable());
     _backing->set_store(NULL);
@@ -163,10 +154,8 @@ void PGSQLPersistSCM::do_load(void)
             "sql-load: Error: Database not open");
 
     AtomSpace *as = _as;
-#ifdef HAVE_GUILE
     if (NULL == as)
         as = SchemeSmob::ss_get_env_as("sql-load");
-#endif
     // XXX TODO: this should probably be done in a separate thread.
     _store->loadAtomSpace(as);
 }
@@ -178,10 +167,8 @@ void PGSQLPersistSCM::do_store(void)
             "sql-store: Error: Database not open");
 
     AtomSpace *as = _as;
-#ifdef HAVE_GUILE
     if (NULL == as)
         as = SchemeSmob::ss_get_env_as("sql-store");
-#endif
     // XXX TODO This should really be started in a new thread ...
     _store->storeAtomSpace(as);
 }
@@ -201,3 +188,4 @@ void opencog_persist_pgsql_init(void)
    static PGSQLPersistSCM patty(NULL);
 }
 
+#endif // HAVE_GUILE

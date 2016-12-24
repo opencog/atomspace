@@ -6,8 +6,6 @@
  * Copyright (c) 2008,2009 Linas Vepstas <linas@linas.org>
  */
 
-#ifdef HAVE_GUILE
-
 #include <vector>
 
 #include <cstddef>
@@ -513,7 +511,5 @@ SCM SchemeSmob::ss_is_closed(SCM satom)
 	Handle h = verify_handle(satom, "cog-closed?");
 	return is_closed(h) ? SCM_BOOL_T : SCM_BOOL_F;
 }
-
-#endif
 
 /* ===================== END OF FILE ============================ */
