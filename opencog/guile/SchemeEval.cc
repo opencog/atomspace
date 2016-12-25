@@ -11,6 +11,7 @@
 
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
 
 #include <cstddef>
 #include <libguile.h>
@@ -586,7 +587,11 @@ std::string SchemeEval::poll_port()
 	// drain_output() calls us, and not always in server mode.
 	if (not _in_server) return rv;
 
-#define BUFSZ 1000
+	// int pipe_size;
+	// ioctl(_pipeno, FIONREAD, &pipe_size);
+	// printf("Size of the pipe (bytes): %d\n", pipe_size);
+
+#define BUFSZ 65000
 	char buff[BUFSZ];
 	while (1)
 	{
