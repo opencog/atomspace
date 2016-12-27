@@ -66,7 +66,8 @@ public:
 	}
 	~ForwardChainerUTest()
 	{
-_exit(0); // XXX hack to avoid double-free in __run_exit_handlers
+int rc = CxxTest::TestTracker::tracker().suiteFailed();
+_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	}
 	void test_do_chain();
 	void test_select_rule();
