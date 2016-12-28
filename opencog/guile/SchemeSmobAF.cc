@@ -35,7 +35,8 @@ using namespace opencog;
  */
 SCM SchemeSmob::ss_af_boundary (void)
 {
-	return scm_from_short(attentionbank().getAttentionalFocusBoundary());
+	AtomSpace* atomspace = ss_get_env_as("cog-af-boundary");
+	return scm_from_short(attentionbank(atomspace).getAttentionalFocusBoundary());
 }
 
 /**
@@ -43,12 +44,13 @@ SCM SchemeSmob::ss_af_boundary (void)
  */
 SCM SchemeSmob::ss_set_af_boundary (SCM sboundary)
 {
+	AtomSpace* atomspace = ss_get_env_as("cog-set-af-boundary!");
 	if (scm_is_false(scm_integer_p(sboundary)))
 		scm_wrong_type_arg_msg("cog-set-af-boundary", 1, sboundary,
 			"integer opencog AttentionalFocus Boundary");
 
 	short bdy = scm_to_short(sboundary);
-	return scm_from_short(attentionbank().setAttentionalFocusBoundary(bdy));
+	return scm_from_short(attentionbank(atomspace).setAttentionalFocusBoundary(bdy));
 }
 
 /**
@@ -56,17 +58,18 @@ SCM SchemeSmob::ss_set_af_boundary (SCM sboundary)
  */
 SCM SchemeSmob::ss_af (void)
 {
-    HandleSeq attentionalFocus;
-    attentionbank().get_handle_set_in_attentional_focus(back_inserter(attentionalFocus));
-    size_t isz = attentionalFocus.size();
+	AtomSpace* atomspace = ss_get_env_as("cog-af");
+	HandleSeq attentionalFocus;
+	attentionbank(atomspace).get_handle_set_in_attentional_focus(back_inserter(attentionalFocus));
+	size_t isz = attentionalFocus.size();
 	if (0 == isz) return SCM_EOL;
 
-    SCM head = SCM_EOL;
-    for (size_t i = 0; i < isz; i++) {
-        Handle hi = attentionalFocus[i];
-        SCM smob = handle_to_scm(hi);
-        head = scm_cons(smob, head);
-    }
+	SCM head = SCM_EOL;
+	for (size_t i = 0; i < isz; i++) {
+		Handle hi = attentionalFocus[i];
+		SCM smob = handle_to_scm(hi);
+		head = scm_cons(smob, head);
+	}
 
 	return head;
 }

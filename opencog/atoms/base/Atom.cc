@@ -196,11 +196,11 @@ void Atom::setAttentionValue(AttentionValuePtr av)
     // If the atom importance has changed its bin,
     // update the importance index.
     if (oldBin != newBin) {
-        attentionbank().updateImportanceIndex(getHandle(), oldBin);
+        attentionbank(_atomTable->getAtomSpace()).updateImportanceIndex(getHandle(), oldBin);
     }
 
     // Notify any interested parties that the AV changed.
-    AVCHSigl& avch = attentionbank().getAVChangedSignal();
+    AVCHSigl& avch = attentionbank(_atomTable->getAtomSpace()).getAVChangedSignal();
     avch(getHandle(), local, av);
 }
 

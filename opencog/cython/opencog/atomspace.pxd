@@ -211,7 +211,7 @@ cdef extern from "opencog/attentionbank/AttentionBank.h" namespace "opencog":
         # get from AttentionalFocus
         output_iterator get_handle_set_in_attentional_focus(output_iterator)
 
-    cdef cAttentionBank attentionbank()
+    cdef cAttentionBank attentionbank(cAtomSpace*)
 
 
 cdef extern from "opencog/atomutils/AtomUtils.h" namespace "opencog":

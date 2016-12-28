@@ -101,7 +101,8 @@ SCM SchemeSmob::ss_stimulate (SCM satom, SCM sstimulus)
 {
 	Handle h(scm_to_handle(satom));
 	double stimulus = scm_to_double(sstimulus);
-	attentionbank().stimulate(h, stimulus);
+	AtomSpace* atomspace = ss_get_env_as("cog-stimulate");
+	attentionbank(atomspace).stimulate(h, stimulus);
 	return satom;
 }
 
