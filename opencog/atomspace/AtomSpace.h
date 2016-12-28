@@ -551,33 +551,8 @@ public:
      * If you need this function, just cut and paste the code below into
      * whatever you are doing!
      */
-    template <typename OutputIterator> OutputIterator
-    get_handles_by_name(OutputIterator result,
-                        const std::string& name,
-                        Type type = NODE,
-                        bool subclass = true)
-    {
-        if (name.c_str()[0] == 0)
-            return get_handles_by_type(result, type, subclass);
-
-        if (false == subclass) {
-            Handle h(get_handle(type, name));
-            if (h) *(result++) = h;
-            return result;
-        }
-
-        classserver().foreachRecursive(
-            [&](Type t)->void {
-                Handle h(get_handle(t, name));
-                if (h) *(result++) = h; }, type);
-
-        return result;
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    bool is_node(Handle h) const { return NodeCast(h) != NULL; }
-    bool is_link(Handle h) const { return LinkCast(h) != NULL; }
+    bool is_node(Handle h) const { return h != nullptr and h->isNode(); }
+    bool is_link(Handle h) const { return h != nullptr and h->isLink(); }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
@@ -586,7 +561,7 @@ public:
         return h->toString();
     }
 
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
+    /** DEPRECATED! Do NOT USE IN NEW CODE! (in use by pattern miner)
      * If you need this, just copy the code below into your app! */
     const std::string& get_name(Handle h) const {
         static std::string noname;
@@ -595,25 +570,13 @@ public:
         return noname;
     }
 
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    void set_STI(Handle h, AttentionValue::sti_t stiValue) const {
-        h->setSTI(stiValue);
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    AttentionValue::sti_t get_STI(Handle h) const {
-        return h->getAttentionValue()->getSTI();
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
+    /** DEPRECATED! Do NOT USE IN NEW CODE! (in use by pattern miner)
      * If you need this, just copy the code below into your app! */
     Type get_type(Handle h) const {
         return h->getType();
     }
 
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
+    /** DEPRECATED! Do NOT USE IN NEW CODE! (in use by pattern miner)
      * If you need this, just copy the code below into your app! */
     TruthValuePtr get_TV(Handle h) const
     {
